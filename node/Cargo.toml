@@ -1,11 +1,11 @@
 [package]
 name = "egg-collator"
-authors = ["Webb tools"]
-description = "A new Cumulus FRAME-based Substrate node, ready for hacking."
+authors = ["Webb Developers"]
+description = "Webb Protocol Egg Network Collator"
 license = "Unlicense"
 version = "3.0.0"
 homepage = "https://webb.tools"
-repository = "https://github.com/webb-tools/dkg-substrate"
+repository = "https://github.com/webb-tools/egg-net"
 edition = "2018"
 build = "build.rs"
 
