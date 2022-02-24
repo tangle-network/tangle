@@ -32,10 +32,20 @@ on a local Rococo development network, then move to the testnet, and finally lau
 Clone and build [Polkadot](https://github.com/paritytech/polkadot) (be aware of the version tag we used):
 
 ```bash
-# Get a fresh clone, or `cd` to where you have polkadot already:
-git clone -b v0.9.7 --depth 1 https://github.com/paritytech/polkadot.git
+# Clone the Polkadot Repository
+git clone https://github.com/paritytech/polkadot.git
+
+# Switch into the Polkadot directory
 cd polkadot
+
+# Checkout the proper commit
+git checkout v0.9.16
+
+# Build the relay chain Node
 cargo build --release
+
+# Check if the help page prints to ensure the node is built correctly
+./target/release/polkadot --help
 ```
 
 ### Generate the Relay Chain Chainspec
@@ -69,9 +79,12 @@ From the Polkadot working directory:
 --validator \
 --alice \
 --port 50555
+--ws-port 9944
 ```
 
 Open a new terminal, same directory:
+
+**Note:** You will have to specify `--bootnodes /ip4/<Alice IP>/tcp/30333/p2p/<Alice Peer ID>` is necessary when operating over the network.  
 
 ```bash
 # Start Relay `Bob` node
@@ -81,10 +94,24 @@ Open a new terminal, same directory:
 --validator \
 --bob \
 --port 50556
+--ws-port 9945
+```
+
+Open a new terminal, same directory:
+
+```bash
+# Start Relay `Charlie` node
+./target/release/polkadot \
+--chain ./rococo_local.json \
+-d /tmp/relay/charlie \
+--validator \
+--charlie \
+--port 50557
+--ws-port 9946
 ```
 
 Add more nodes as needed, with non-conflicting ports, DB directories, and validator keys
-(`--charlie`, `--dave`, etc.).
+(`--dave`, etc.).
 
 ### Reserve a ParaID
 
@@ -166,8 +193,8 @@ From the dkg-substrate working directory:
 --collator \
 --alice \
 --force-authoring \
---ws-port 9945 \
---parachain-id 2000 \
+--ws-port 9948 \
+--chain ./resources/template-local-raw.json \
 -- \
 --execution wasm \
 --chain ../polkadot/rococo_local.json

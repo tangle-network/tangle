@@ -113,12 +113,12 @@ pub type Executive = frame_executive::Executive<
 pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("dkg-parachain"),
 	impl_name: create_runtime_str!("dkg-parachain"),
-	authoring_version: 1,
-	spec_version: 14,
+	authoring_version: 0,
+	spec_version: 1,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
-	transaction_version: 1,
-	state_version: 1,
+	transaction_version: 0,
+	state_version: 0,
 };
 
 /// This determines the average expected block time that we are targeting.
