@@ -38,7 +38,6 @@ egg-runtime = { path = "../runtime" }
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
 dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
 dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git" }
-parachain-staking = { package = "pallet-parachain-staking", git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
 
 # Substrate Dependencies
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16" }

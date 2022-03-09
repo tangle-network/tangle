@@ -21,9 +21,7 @@ scale-info = { version = "1.0", default-features = false, features = ["derive"] 
 hex-literal = { version = "0.3", optional = true }
 
 # Local Dependencies
-parachain-staking = { package = "pallet-parachain-staking", git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
 pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
-pallet-dkg-mmr = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
 pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
 pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
@@ -61,7 +59,6 @@ pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", 
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
 pallet-authorship = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
 pallet-session = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
-pallet-mmr = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
 
 
 # Cumulus Dependencies
@@ -142,11 +139,8 @@ std = [
 	"sp-consensus-aura/std",
 	"pallet-authorship/std",
 	"pallet-session/std",
-	"parachain-staking/std",
 	"pallet-dkg-metadata/std",
 	"dkg-runtime-primitives/std",
 	"pallet-dkg-proposals/std",
 	"pallet-dkg-proposal-handler/std",
-	"pallet-dkg-mmr/std",
-	"pallet-mmr/std"
 ]
