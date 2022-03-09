@@ -299,7 +299,6 @@ where
 			backend: backend.clone(),
 			key_store: Some(params.keystore_container.sync_keystore()),
 			network: network.clone(),
-			min_block_delta: 4,
 			prometheus_registry: prometheus_registry.clone(),
 			base_path,
 			local_keystore: params.keystore_container.local_keystore(),
