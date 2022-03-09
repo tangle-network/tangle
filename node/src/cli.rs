@@ -15,6 +15,10 @@ pub enum Subcommand {
 	#[clap(name = "export-genesis-wasm")]
 	ExportGenesisWasm(ExportGenesisWasmCommand),
 
+	/// Key management cli utilities
+	#[clap(subcommand)]
+	Key(KeySubcommand),
+
 	/// Build a chain specification.
 	BuildSpec(sc_cli::BuildSpecCmd),
 
