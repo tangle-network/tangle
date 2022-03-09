@@ -11,6 +11,24 @@
 ## Overview
 The Egg Network is the first parachain specific node featuring Webb's DKG and privacy pallet protocols. It is meant to run with a relay chain.
 
+## Egg Testnet Setup
+These steps were taken to generate the Rococo setup for the Egg testnet.
+```
+# Build the chainspec
+./target/release/egg-collator build-spec \
+--disable-default-bootnode > ./node/resources/rococo/egg-testnet.json
+
+# Build the raw chainspec file
+./target/release/egg-collator build-spec \
+--chain=./node/resources/rococo/egg-testnet.json \
+--raw --disable-default-bootnode > ./node/resources/rococo/egg-testnet-raw.json
+
+# Export genesis state to `./node/resources/rococo`, using 2074 as the ParaId
+./target/release/egg-collator export-genesis-state --parachain-id 2074 > ./node/resources/rococo/para-2074-genesis
+
+# Export the genesis wasm
+./target/release/egg-collator export-genesis-wasm > ./node/resources/rococo/egg-testnet-2074-wasm
+```
 
 ## Relay Chain
 
