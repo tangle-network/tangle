@@ -1934,7 +1934,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#b9ee81d0818b2e25b2d883d8d83dc4ace4b62330"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#93b0f1a493a08cd13d1c4924249fc6387a8b08a4"
 dependencies = [
  "curv-kzen",
  "dkg-primitives",
@@ -1974,7 +1974,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#b9ee81d0818b2e25b2d883d8d83dc4ace4b62330"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#93b0f1a493a08cd13d1c4924249fc6387a8b08a4"
 dependencies = [
  "chacha20poly1305 0.9.0",
  "curv-kzen",
@@ -2005,7 +2005,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#b9ee81d0818b2e25b2d883d8d83dc4ace4b62330"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#93b0f1a493a08cd13d1c4924249fc6387a8b08a4"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -4829,9 +4829,9 @@ dependencies = [
 
 [[package]]
 name = "mick-jaeger"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd2c2cc134e57461f0898b0e921f0a7819b5e3f3a4335b9aa390ce81a5f36fb9"
+checksum = "69672161530e8aeca1d1400fbf3f1a1747ff60ea604265a4e906c2442df20532"
 dependencies = [
  "futures 0.3.21",
  "rand 0.8.5",
@@ -5517,7 +5517,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#b9ee81d0818b2e25b2d883d8d83dc4ace4b62330"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#93b0f1a493a08cd13d1c4924249fc6387a8b08a4"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -5534,7 +5534,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#b9ee81d0818b2e25b2d883d8d83dc4ace4b62330"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#93b0f1a493a08cd13d1c4924249fc6387a8b08a4"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -5553,7 +5553,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#b9ee81d0818b2e25b2d883d8d83dc4ace4b62330"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#93b0f1a493a08cd13d1c4924249fc6387a8b08a4"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
