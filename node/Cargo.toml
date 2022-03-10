@@ -21,6 +21,9 @@ name = "egg-collator"
 [features]
 default = []
 runtime-benchmarks = ["egg-runtime/runtime-benchmarks"]
+rococo-native = [
+	"polkadot-cli/rococo-native"
+]
 
 [dependencies]
 derive_more = "0.99.2"
