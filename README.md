@@ -11,39 +11,29 @@
 ## Overview
 The Egg Network is the first parachain specific node featuring Webb's DKG and privacy pallet protocols. It is meant to run with a relay chain.
 
-## Egg Testnet Setup
+## Local Egg Testnet Setup
+
 These steps were taken to generate the Rococo setup for the Egg testnet.
-```
-# Build the chainspec
-./target/release/egg-collator build-spec \
---disable-default-bootnode > ./node/resources/rococo/egg-testnet.json
 
-# Build the raw chainspec file
-./target/release/egg-collator build-spec \
---chain=./node/resources/rococo/egg-testnet.json \
---raw --disable-default-bootnode > ./node/resources/rococo/egg-testnet-raw.json
+### Chainspecs
 
-# Export genesis state to `./node/resources/rococo`, using 2074 as the ParaId
-./target/release/egg-collator export-genesis-state --parachain-id 2074 > ./node/resources/rococo/para-2074-genesis
+The following chainspecs are provided for your convenience in `/resources`:
 
-# Export the genesis wasm
-./target/release/egg-collator export-genesis-wasm > ./node/resources/rococo/egg-testnet-2074-wasm
-```
+| Chainspecs | Use |
+|---|---|
+| template-local-plain.json | Used for local testnet development with paraId 2000 |
+| egg-testnet.json | Used for Rococo testnet with paraId 2074 |
+
+Keep in mind each of the above mentioned specs are in plain json form and can be arbitrarily updated. 
 
 ## Relay Chain
-
-> **NOTE**: In the following two sections, we document how to manually start a few relay chain
-> nodes, start a parachain node (collator), and register the parachain with the relay chain.
->
-> We also have the [**`polkadot-launch`**](https://www.npmjs.com/package/polkadot-launch) CLI tool
-> that automate the following steps and help you easily launch relay chains and parachains. However
-> it is still good to go through the following procedures once to understand the mechanism for running
-> and registering a parachain.
 
 To operate a parathread or parachain, you _must_ connect to a relay chain. Typically you would test
 on a local Rococo development network, then move to the testnet, and finally launch on the mainnet.
 **Keep in mind you need to configure the specific relay chain you will connect to in your collator
 `chain_spec.rs`**. In the following examples, we will use `rococo-local` as the relay network.
+
+**Note:** You may also use `polkadot-launch` in `./polkadot-launch`. Instructions to get started are included there in a `README.md`
 
 ### Build Relay Chain
 
@@ -159,25 +149,26 @@ Extensions {
 },
 ```
 
-> You can choose from any pre-set runtime chainspec in the Polkadot repo, by referring to the
-> `cli/src/command.rs` and `node/service/src/chain_spec.rs` files or generate your own and use
-> that. See the [Cumulus Workshop](https://substrate.dev/cumulus-workshop/) for how.
-
 In the following examples, we will use the `rococo-local` relay network we setup in the last section.
 
 ### Export the DKG Genesis and Runtime
 
 We first generate the **genesis state** and **genesis wasm** needed for the parachain registration.
 
+> **NOTE**: we have set the `para_ID` to be **2000** here for local testnets. This _must_ be unique for all parathreads/chains
+> on the relay chain you register with. You _must_ reserve this first on the relay chain for the
+> testnet or mainnet.
+
 ```bash
 # Build the dkg node (from it's top level dir)
-cd egg-net
-cargo build --release
+cargo build --release -p egg-collator
 
-# Folder to store resource files needed for parachain registration
-mkdir -p resources
+# The following instructions outline how to build chain spec,
+# wasm and genesis state for local setup. These files will be used
+# during start up.
 
-# Build the chainspec
+# Build local chainspec
+# You may also use the chainspec provided in ./resources  
 ./target/release/egg-collator build-spec \
 --disable-default-bootnode > ./resources/template-local-plain.json
 
@@ -187,15 +178,18 @@ mkdir -p resources
 --raw --disable-default-bootnode > ./resources/template-local-raw.json
 
 # Export genesis state to `./resources`, using 2000 as the ParaId
-./target/release/egg-collator export-genesis-state --parachain-id 2000 > ./resources/para-2000-genesis
+./target/release/egg-collator export-genesis-state --chain=./resources/template-local-raw.json > ./resources/para-2000-genesis
 
 # Export the genesis wasm
 ./target/release/egg-collator export-genesis-wasm > ./resources/para-2000-wasm
 ```
 
-> **NOTE**: we have set the `para_ID` to be **2000** here. This _must_ be unique for all parathreads/chains
-> on the relay chain you register with. You _must_ reserve this first on the relay chain for the
-> testnet or mainnet.
+For building chainspec for Rococo Egg Testnet you need to pass the chain argument during the intial build spec.
+
+```
+# Note: This uses paraId 2074 and target Rococo relay chain
+./target/release/egg-collator build-spec --disable-default-bootnode --chain=egg-rococo > ./resources/rococo-local-plain.json
+```
 
 ### Start a Egg Collator Node
 
@@ -207,7 +201,7 @@ From the dkg-substrate working directory:
 #
 # It also assumes a ParaId of 2000. Change as needed.
 ./target/release/egg-collator \
--d /tmp/parachain/alice \
+--base-path /tmp/parachain/alice \
 --collator \
 --alice \
 --force-authoring \
@@ -231,17 +225,12 @@ steps (for detail, refer to the [Substrate Cumulus Worship](https://substrate.de
 -   Pick `paraSudoWrapper` -> `sudoScheduleParaInitialize(id, genesis)` as the extrinsic type,
     shown below.
 
-        ![Polkadot Apps UI](docs/assets/ss01.png)
-
 -   Set the `id: ParaId` to 2,000 (or whatever ParaId you used above), and set the `parachain: Bool`
     option to **Yes**.
 
 -   For the `genesisHead`, drag the genesis state file exported above, `para-2000-genesis`, in.
 
 -   For the `validationCode`, drag the genesis wasm file exported above, `para-2000-wasm`, in.
-
-> **Note**: When registering to the public Rococo testnet, ensure you set a **unique** `paraId`
-> larger than 1,000. Values below 1,000 are reserved _exclusively_ for system parachains.
 
 ### Restart the Collator
 

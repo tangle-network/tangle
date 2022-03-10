@@ -1,0 +1,103 @@
+{
+	"relaychain": {
+		"bin": "../../../polkadot/target/release/polkadot",
+		"chain": "rococo-local",
+		"nodes": [
+			{
+				"name": "alice",
+				"wsPort": 9944,
+				"rpcPort": 9911,
+				"basePath": "/tmp/polkadot-launch/relaychains/alice",
+				"port": 30444
+			},
+			{
+				"name": "bob",
+				"wsPort": 9955,
+				"rpcPort": 9912,
+				"basePath": "/tmp/polkadot-launch/relaychains/bob",
+				"port": 30555
+			},
+			{
+				"name": "charlie",
+				"wsPort": 9966,
+				"rpcPort": 9913,
+				"basePath": "/tmp/polkadot-launch/relaychains/charlie",
+				"port": 30666
+			}
+		]
+	},
+	"parachains": [
+		{
+			"bin": "../../target/release/egg-collator",
+			"chain": "../../resources/template-local-raw.json",
+			"nodes": [
+				{
+					"name": "alice",
+					"wsPort": 9988,
+					"rpcPort": 9914,
+					"basePath": "/tmp/polkadot-launch/parachains/alice",
+					"port": 31100,
+					"flags": [
+						"--unsafe-ws-external",
+						"--unsafe-rpc-external",
+						"--rpc-external",
+						"--ws-external",
+						"--rpc-cors=all",
+						"--rpc-methods=Unsafe",
+						"-ldkg=debug",
+						"-ldkg_metadata=debug",
+						"-lruntime::offchain=debug",
+						"-ldkg_proposal_handler=debug",
+						"--",
+						"--execution=wasm"
+					]
+				},
+				{
+					"name": "bob",
+					"wsPort": 9997,
+					"rpcPort": 9915,
+					"basePath": "/tmp/polkadot-launch/parachains/bob",
+					"port": 31200,
+					"flags": [
+						"--unsafe-ws-external",
+						"--unsafe-rpc-external",
+						"--rpc-external",
+						"--ws-external",
+						"--rpc-cors=all",
+						"--rpc-methods=Unsafe",
+						"-ldkg=debug",
+						"-ldkg_metadata=debug",
+						"-lruntime::offchain=debug",
+						"-ldkg_proposal_handler=debug",
+						"--",
+						"--execution=wasm"
+					]
+				},
+				{
+					"name": "charlie",
+					"wsPort": 9996,
+					"rpcPort": 9916,
+					"basePath": "/tmp/polkadot-launch/parachains/charlie",
+					"port": 31300,
+					"flags": [
+						"--unsafe-ws-external",
+						"--unsafe-rpc-external",
+						"--rpc-external",
+						"--ws-external",
+						"--rpc-cors=all",
+						"--rpc-methods=Unsafe",
+						"-ldkg=debug",
+						"-ldkg_metadata=debug",
+						"-lruntime::offchain=debug",
+						"-ldkg_proposal_handler=debug",
+						"--",
+						"--execution=wasm"
+					]
+				}
+			]
+		}
+	],
+	"types": {},
+	"finalization": false,
+	"simpleParachains": []
+}

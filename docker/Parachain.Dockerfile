@@ -1,29 +1,42 @@
-FROM rust:1 as builder
-WORKDIR /parachain
+FROM rust:buster as builder
+WORKDIR /app
+
+RUN rustup default nightly-2021-11-07 && \
+	rustup target add wasm32-unknown-unknown --toolchain nightly-2021-11-07
 
 # Install Required Packages
 RUN apt-get update && apt-get install -y git clang curl libssl-dev llvm libudev-dev libgmp3-dev && rm -rf /var/lib/apt/lists/*
 
+ARG GIT_COMMIT=
+ENV GIT_COMMIT=$GIT_COMMIT
+ARG BUILD_ARGS
+
 COPY . .
-# Build Standalone Node
-RUN cargo build --release
+# Build DKG Parachain Node
+RUN cargo build --release -p dkg-node
 
-# This is the 2nd stage: a very small image where we copy the DKG binary."
+# =============
 
-FROM ubuntu:20.04
+FROM phusion/baseimage:bionic-1.0.0
 
-COPY --from=builder /parachain/target/release/egg-collator /usr/local/bin
+RUN useradd -m -u 1000 -U -s /bin/sh -d /dkg dkg
 
-RUN apt-get update && apt-get install -y clang libssl-dev llvm libudev-dev libgmp3-dev && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/target/release/dkg-node /usr/local/bin
 
-RUN useradd -m -u 1000 -U -s /bin/sh -d /parachain parachain && \
-  mkdir -p /data /parachain/.local/share/parachain && \
-  chown -R parachain:parachain /data && \
-  ln -s /data /parachain/.local/share/parachain && \
-  # Sanity checks
-  ldd /usr/local/bin/egg-collator && \
-  /usr/local/bin/egg-collator --version
+# checks
+RUN ldd /usr/local/bin/dkg-node && \
+  /usr/local/bin/dkg-node --version
 
-USER parachain
+# Shrinking
+RUN rm -rf /usr/lib/python* && \
+	rm -rf /usr/bin /usr/sbin /usr/share/man
+
+USER dkg
 EXPOSE 30333 9933 9944 9615
-VOLUME ["/data"]
+
+RUN mkdir /dkg/data
+RUN chown -R dkg:dkg /dkg/data
+
+VOLUME ["/dkg/data"]
+
+ENTRYPOINT [ "/usr/local/bin/dkg-node" ]
