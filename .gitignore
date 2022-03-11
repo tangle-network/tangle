@@ -17,5 +17,5 @@ local-test
 
 # NodeJS
 **/node_modules/
-resources/para-2074-genesis
-resources/egg-testnet-2074-wasm
+resources/para-2076-genesis
+resources/para-2076-wasm

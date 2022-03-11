@@ -22,7 +22,7 @@ The following chainspecs are provided for your convenience in `/resources`:
 | Chainspecs | Use |
 |---|---|
 | template-local-plain.json | Used for local testnet development with paraId 2000 |
-| egg-testnet.json | Used for Rococo testnet with paraId 2074 |
+| rococo-plain.json | Used for Rococo testnet with paraId 2076 |
 
 Keep in mind each of the above mentioned specs are in plain json form and can be arbitrarily updated. 
 
@@ -187,8 +187,8 @@ cargo build --release -p egg-collator
 For building chainspec for Rococo Egg Testnet you need to pass the chain argument during the intial build spec.
 
 ```
-# Note: This uses paraId 2074 and target Rococo relay chain
-./target/release/egg-collator build-spec --disable-default-bootnode --chain=egg-rococo > ./resources/rococo-local-plain.json
+# Note: This uses paraId 2076 and target Rococo relay chain
+./target/release/egg-collator build-spec --disable-default-bootnode --chain=egg-rococo > ./resources/rococo-plain.json
 ```
 
 ### Start a Egg Collator Node
