@@ -7,17 +7,16 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod xcm_config;
-use xcm_config::{XcmOriginToTransactDispatchOrigin, XcmConfig};
+use xcm_config::{XcmConfig, XcmOriginToTransactDispatchOrigin};
 
-use codec::{Encode};
+use codec::Encode;
 use dkg_runtime_primitives::{ChainId, ChainIdType, DKGPayloadKey, Proposal};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
-		self, AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount,
-		StaticLookup, Verify,
+		self, AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, StaticLookup, Verify,
 	},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature, SaturatedConversion,
@@ -28,9 +27,9 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
-use frame_support::weights::WeightToFeeCoefficients;
-use frame_support::weights::WeightToFeePolynomial;
-use frame_support::weights::WeightToFeeCoefficient;
+use frame_support::weights::{
+	WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
+};
 
 // A few exports that help ease life for downstream crates.
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
@@ -56,9 +55,9 @@ pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 
 // XCM Imports
+use smallvec::smallvec;
 use xcm::latest::prelude::*;
 use xcm_executor::{Config, XcmExecutor};
-use smallvec::smallvec;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -279,7 +278,6 @@ impl pallet_timestamp::Config for Runtime {
 	type MinimumPeriod = MinimumPeriod;
 	type WeightInfo = ();
 }
-
 
 pub const EXISTENTIAL_DEPOSIT: u128 = 1 * MILLIUNIT;
 parameter_types! {

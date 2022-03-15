@@ -1,15 +1,16 @@
 use cumulus_primitives_core::ParaId;
-use egg_runtime::{AccountId, AuraId, Balance, DKGId, Signature, MICROUNIT, MILLIUNIT, EXISTENTIAL_DEPOSIT};
+use egg_runtime::{
+	AccountId, AuraId, Balance, DKGId, Signature, EXISTENTIAL_DEPOSIT, MICROUNIT, MILLIUNIT,
+};
 use hex_literal::hex;
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	Perbill,
 };
-use sp_core::crypto::UncheckedInto;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<egg_runtime::GenesisConfig, Extensions>;
@@ -87,13 +88,11 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 		move || {
 			testnet_genesis(
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				vec![
-					(
-						get_account_id_from_seed::<sr25519::Public>("Alice"),
-						get_collator_keys_from_seed("Alice"),
-						get_dkg_keys_from_seed("Alice"),
-					),
-				],
+				vec![(
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_collator_keys_from_seed("Alice"),
+					get_dkg_keys_from_seed("Alice"),
+				)],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -130,13 +129,11 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 		move || {
 			testnet_genesis(
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				vec![
-					(
-						get_account_id_from_seed::<sr25519::Public>("Alice"),
-						get_collator_keys_from_seed("Alice"),
-						get_dkg_keys_from_seed("Alice"),
-					),
-				],
+				vec![(
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_collator_keys_from_seed("Alice"),
+					get_dkg_keys_from_seed("Alice"),
+				)],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -223,7 +220,11 @@ pub fn latest_egg_testnet_config(id: ParaId) -> ChainSpec {
 				id,
 			)
 		},
-		Vec::new(),
+		vec![
+			"/dns/testnet.webb.tools/tcp/30333/p2p/12D3KooWRazFqUMAGSaTYfj9C7WGhxPzmgu422ZHRDS5J41y6b7o".parse().unwrap(),
+			"/dns/testnet1.webb.tools/tcp/30333/p2p/12D3KooWE7TRKmNotiqXh38muaymNrT6iMduB1yCM9F9mFwdNcG3".parse().unwrap(),
+			"/dns/testnet2.webb.tools/tcp/30333/p2p/12D3KooWGDWxDj62vEwuJbtUXqytqDVYfVsgNw1RyNuVpXUD2Yg7".parse().unwrap(),
+		],
 		None,
 		None,
 		None,
@@ -234,10 +235,6 @@ pub fn latest_egg_testnet_config(id: ParaId) -> ChainSpec {
 		},
 	)
 }
-
-// pub fn egg_testnet_config() -> Result<ChainSpec, String> {
-// 	ChainSpec::from_json_bytes(&include_bytes!("../../resources/egg-testnet.json")[..])
-// }
 
 fn testnet_genesis(
 	root_key: AccountId,
