@@ -34,13 +34,14 @@ async-trait = "0.1.42"
 rand = "0.7.2"
 itertools = "0.10.0"
 
+# Protocol Substrate
 common = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mt-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 
-# Standalone runtimes
+# DKG dependencies
 egg-runtime = { package = "egg-standalone-runtime", path = "../runtime" }
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
 dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
