@@ -6,7 +6,7 @@ license = "Unlicense"
 version = "3.0.0"
 homepage = "https://webb.tools"
 repository = "https://github.com/webb-tools/egg-net"
-edition = "2018"
+edition = "2021"
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
@@ -21,11 +21,32 @@ scale-info = { version = "1.0", default-features = false, features = ["derive"] 
 hex-literal = { version = "0.3", optional = true }
 smallvec = "1.6.1"
 
-# Local Dependencies
+# DKG Substrate Dependencies
 pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
 pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
 pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
+
+# Protocol Substrate Dependencies
+common = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+
+pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-parachain-staking = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+
+orml-currencies = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+orml-tokens = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+orml-traits = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-anchor = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-anchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies
@@ -141,8 +162,29 @@ std = [
 	"sp-consensus-aura/std",
 	"pallet-authorship/std",
 	"pallet-session/std",
+
+	# DKG
 	"pallet-dkg-metadata/std",
 	"dkg-runtime-primitives/std",
 	"pallet-dkg-proposals/std",
 	"pallet-dkg-proposal-handler/std",
+
+	# Protocol Substrate
+	"common/std",
+	"webb-primitives/std",
+	"pallet-hasher/std",
+	"pallet-mt/std",
+	"pallet-linkable-tree/std",
+	"pallet-mt-rpc-runtime-api/std",
+	"pallet-verifier/std",
+	"pallet-parachain-staking/std",
+	"orml-currencies/std",
+	"orml-tokens/std",
+	"orml-traits/std",
+	"pallet-anchor/std",
+	"pallet-anchor-handler/std",
+	"pallet-asset-registry/std",
+	"pallet-signature-bridge/std",
+	"pallet-mixer/std",
+	"pallet-token-wrapper/std",
 ]

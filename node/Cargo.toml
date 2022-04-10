@@ -6,7 +6,7 @@ license = "Unlicense"
 version = "3.0.0"
 homepage = "https://webb.tools"
 repository = "https://github.com/webb-tools/egg-net"
-edition = "2018"
+edition = "2021"
 build = "build.rs"
 
 [package.metadata.docs.rs]
@@ -42,6 +42,12 @@ egg-runtime = { path = "../runtime" }
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
 dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
 dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git" }
+
+# Arkworks
+arkworks-setups = { version = "1.0.0", features = ["r1cs"], default-features = false }
+ark-std = { version = "^0.3.0", default-features = false }
+ark-serialize = { version = "^0.3.0", default-features = false }
+ark-bn254 = { version = "^0.3.0", default-features = false, features = [ "curve" ] }
 
 # Substrate Dependencies
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.17" }
