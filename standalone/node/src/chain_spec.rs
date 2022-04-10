@@ -21,14 +21,13 @@ use egg_runtime::{
 	MAX_NOMINATIONS, UNIT, WASM_BINARY,
 };
 use hex_literal::hex;
-use webb_primitives::ResourceId;
-use sp_core::crypto::UncheckedInto;
 use sc_network::config::MultiaddrWithPeerId;
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use webb_primitives::ResourceId;
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -294,7 +293,6 @@ pub fn get_arana_initial_authorities() -> Vec<(AccountId, AccountId, AuraId, Gra
 	]
 }
 
-
 pub fn arana_testnet_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Arana wasm not available".to_string())?;
 	let boot_nodes = get_arana_bootnodes();
@@ -323,10 +321,7 @@ pub fn arana_testnet_config() -> Result<ChainSpec, String> {
 				],
 				vec![],
 				vec![],
-				get_arana_initial_authorities()
-					.iter()
-					.map(|a| a.0.clone())
-					.collect(),
+				get_arana_initial_authorities().iter().map(|a| a.0.clone()).collect(),
 				true,
 			)
 		},

@@ -20,7 +20,7 @@ use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_finality_grandpa::SharedVoterState;
 use sc_keystore::LocalKeystore;
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BasePath};
+use sc_service::{error::Error as ServiceError, BasePath, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_consensus::SlotData;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
@@ -159,47 +159,47 @@ pub fn new_partial(
 			telemetry: telemetry.as_ref().map(|x| x.handle()),
 		})?;
 
-		let import_setup = (grandpa_block_import, grandpa_link);
+	let import_setup = (grandpa_block_import, grandpa_link);
 
-		let (rpc_extensions_builder, rpc_setup) = {
-			let (_, grandpa_link) = &import_setup;
-			let justification_stream = grandpa_link.justification_stream();
-			let shared_authority_set = grandpa_link.shared_authority_set().clone();
-			let shared_voter_state = sc_finality_grandpa::SharedVoterState::empty();
-			let rpc_setup = shared_voter_state.clone();
-	
-			let finality_proof_provider = sc_finality_grandpa::FinalityProofProvider::new_for_service(
-				backend.clone(),
-				Some(shared_authority_set.clone()),
-			);
-		
-			let client = client.clone();
-			let pool = transaction_pool.clone();
-			let select_chain = select_chain.clone();
-			let chain_spec = config.chain_spec.cloned_box();
-	
-			let rpc_backend = backend.clone();
-			let rpc_extensions_builder = move |deny_unsafe, subscription_executor| {
-				let deps = crate::rpc::FullDeps {
-					client: client.clone(),
-					pool: pool.clone(),
-					select_chain: select_chain.clone(),
-					chain_spec: chain_spec.cloned_box(),
-					deny_unsafe,
-					grandpa: crate::rpc::GrandpaDeps {
-						shared_voter_state: shared_voter_state.clone(),
-						shared_authority_set: shared_authority_set.clone(),
-						justification_stream: justification_stream.clone(),
-						subscription_executor,
-						finality_provider: finality_proof_provider.clone(),
-					},
-				};
-	
-				crate::rpc::create_full(deps, rpc_backend.clone()).map_err(Into::into)
+	let (rpc_extensions_builder, rpc_setup) = {
+		let (_, grandpa_link) = &import_setup;
+		let justification_stream = grandpa_link.justification_stream();
+		let shared_authority_set = grandpa_link.shared_authority_set().clone();
+		let shared_voter_state = sc_finality_grandpa::SharedVoterState::empty();
+		let rpc_setup = shared_voter_state.clone();
+
+		let finality_proof_provider = sc_finality_grandpa::FinalityProofProvider::new_for_service(
+			backend.clone(),
+			Some(shared_authority_set.clone()),
+		);
+
+		let client = client.clone();
+		let pool = transaction_pool.clone();
+		let select_chain = select_chain.clone();
+		let chain_spec = config.chain_spec.cloned_box();
+
+		let rpc_backend = backend.clone();
+		let rpc_extensions_builder = move |deny_unsafe, subscription_executor| {
+			let deps = crate::rpc::FullDeps {
+				client: client.clone(),
+				pool: pool.clone(),
+				select_chain: select_chain.clone(),
+				chain_spec: chain_spec.cloned_box(),
+				deny_unsafe,
+				grandpa: crate::rpc::GrandpaDeps {
+					shared_voter_state: shared_voter_state.clone(),
+					shared_authority_set: shared_authority_set.clone(),
+					justification_stream: justification_stream.clone(),
+					subscription_executor,
+					finality_provider: finality_proof_provider.clone(),
+				},
 			};
-	
-			(rpc_extensions_builder, rpc_setup)
+
+			crate::rpc::create_full(deps, rpc_backend.clone()).map_err(Into::into)
 		};
+
+		(rpc_extensions_builder, rpc_setup)
+	};
 
 	Ok(sc_service::PartialComponents {
 		client,
