@@ -1,32 +1,210 @@
-<h1 align="center">Webb Protocol Egg Network</h1>
-
+<h1 align="center">Webb Protocol Egg Network 🕸️ </h1>
+<div align="center">
+<a href="https://www.webb.tools/">
+    <img alt="Webb Logo" src="./assets/webb-icon.svg" width="15%" height="30%" />
+  </a>
+  </div>
 <p align="center">
-    <strong>🕸️  Webb Protocol Egg Network  🧑‍✈️</strong>
+    <strong>🚀 Threshold ECDSA Distributed Key Generation Protocol 🔑 </strong>
     <br />
     <sub> ⚠️ Beta Software ⚠️ </sub>
 </p>
 
-<br />
+<div align="center" >
 
-## Overview
-The Egg Network is the first parachain specific node featuring Webb's DKG and privacy pallet protocols. It is meant to run with a relay chain.
+[![License Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
+[![Twitter](https://img.shields.io/twitter/follow/webbprotocol.svg?style=flat-square&label=Twitter&color=1DA1F2)](https://twitter.com/webbprotocol)
+[![Telegram](https://img.shields.io/badge/Telegram-gray?logo=telegram)](https://t.me/webbprotocol)
+[![Discord](https://img.shields.io/discord/833784453251596298.svg?style=flat-square&label=Discord&logo=discord)](https://discord.gg/cv8EfJu3Tn)
 
-## Local Egg Testnet Setup
+</div>
 
-These steps were taken to generate the Rococo setup for the Egg testnet.
+<!-- TABLE OF CONTENTS -->
+<h2 id="table-of-contents"> 📖 Table of Contents</h2>
 
-### Chainspecs
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ul>
+    <li><a href="#start"> Getting Started</a></li>
+    <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#install">Installation</a></li>
+        <ul>
+          <li><a href="#trouble">Troubleshooting Apple Silicon</a>
+          </li>
+        </ul>
+    </ul>
+    <li><a href="#usage">Usage</a></li>
+    <ul>
+        <li><a href="#chainspec">Chainspecs</a></li>
+        <li><a href="#launch">Run local testnet with polkadot-launch</a></li>
+        <li><a href="#standalone">Standalone Testnet</a></li>
+    </ul>
+    <li><a href="#manual">Manual Local Parachain Setup</a></li>
+        <ul>
+        <li><a href="#relay">Relay Chain</a></li>
+        <li><a href="#parachain">Parachain</a></li>
+    </ul>
+    <li><a href="#contribute">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+  </ul>  
+</details>
+
+<h1 id="start"> Getting Started  🎉 </h1>
+
+The Egg Network contains runtimes for both standalone and parachain nodes featuring Webb's DKG and privacy pallet protocols. 
+
+## Prerequisites
+
+This guide uses <https://rustup.rs> installer and the `rustup` tool to manage the Rust toolchain.
+
+First install and configure `rustup`:
+
+```bash
+# Install
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Configure
+source ~/.cargo/env
+```
+
+Configure the Rust toolchain to default to the latest stable version, add nightly and the nightly wasm target:
+
+```bash
+rustup default nightly
+rustup update
+rustup update nightly
+rustup target add wasm32-unknown-unknown --toolchain nightly
+```
+
+Great! Now your Rust environment is ready! 🚀🚀
+
+**Note:** You may need additional dependencies, checkout [substrate.io](https://docs.substrate.io/v3/getting-started/installation) for more information.
+
+## Installation 💻
+
+Once the development environment is set up, build the DKG. This command will build the [Wasm Runtime](https://docs.substrate.io/v3/advanced/executor/#wasm-execution) and [native](https://docs.substrate.io/v3/advanced/executor/#native-execution) code:
+
+```bash
+cargo build --release
+```
+
+> NOTE: You _must_ use the release builds! The optimizations here are required
+> as in debug mode, it is expected that nodes are not able to run fast enough to produce blocks.
+
+You will now have two runtimes built in `target/release/` dir:
+
+1. `egg-collator`: Parachain node.
+2. `egg-standalone-node`: Standalone node, used in the current standalone Egg network.
+### Troubleshooting for Apple Silicon users
+
+Install Homebrew if you have not already. You can check if you have it installed with the following command:
+
+```bash
+brew help
+```
+
+If you do not have it installed open the Terminal application and execute the following commands:
+
+```bash
+# Install Homebrew if necessary https://brew.sh/
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+
+# Make sure Homebrew is up-to-date, install openssl
+brew update
+brew install openssl
+```
+
+❗ **Note:** Native ARM Homebrew installations are only going to be supported at `/opt/homebrew`. After Homebrew installs, make sure to add `/opt/homebrew/bin` to your PATH.
+
+```bash
+echo 'export PATH=/opt/homebrew/bin:$PATH' >> ~/.bash_profile
+```
+
+In order to build **dkg-substrate** in `--release` mode using `aarch64-apple-darwin` Rust toolchain you need to set the following environment variables:
+
+```bash
+echo 'export RUSTFLAGS="-L /opt/homebrew/lib"' >> ~/.bash_profile
+```
+
+Ensure `gmp` dependency is installed correctly.
+
+```
+brew install gmp
+```
+
+<h1 id="usage"> Usage </h1>
+
+<h3 id="chainspec"> Chainspecs </h3>
 
 The following chainspecs are provided for your convenience in `/resources`:
 
-| Chainspecs | Use |
-|---|---|
-| template-local-plain.json | Used for local testnet development with paraId 2000 |
-| rococo-plain.json | Used for Rococo testnet with paraId 2076 |
+| Chainspecs | Use | Target
+|---|---|---|
+| template-local-plain.json | Used for local testnet development with paraId 2000 | `--chain=template-rococo`
+| rococo-plain.json | Used for Rococo testnet with paraId 2003 | `--chain=egg-rococo`
+| arana-standalone-plain.json | Used for standalone egg network | `--chain=testnet-conf`
 
-Keep in mind each of the above mentioned specs are in plain json form and can be arbitrarily updated. 
+Keep in mind each of the above mentioned specs are in plain json form and can be arbitrarily updated. The raw spec versions are included in `resources/` for your convenience. To learn more about chainspecs checkout the [docs](https://docs.substrate.io/v3/runtime/chain-specs/) 🎓.
 
-## Relay Chain
+<h2 style="border-bottom:none"> Quick Start ⚡ </h2>
+
+<h3 id="launch"> Run local testnet with <a href="https://github.com/paritytech/polkadot-launch">polkadot-launch</a> ☄️</h3>
+
+The fastest way to set up the DKG to run as a parachain is to make use of [polkadot-launch](https://github.com/paritytech/polkadot-launch). Follow the below steps to get up and running! 🏃
+
+**Install polkadot-launch:**
+
+```
+npm install -g polkadot-launch
+```
+
+**Update configuration script:**
+
+1. Run: `cd scripts/polkadot-launch`
+2. Update the `bin` field for `relaychain` and `parachains` to point to appropriate paths. **Note:** You will need to have a built Polkadot binary. For Polkadot installation instructions follow the steps outlined [here](https://github.com/paritytech/polkadot).
+3. Update ports and debug logs as you see fit.
+
+**Launch Polkadot relay chain and DKG parachain:**
+
+```bash
+polkadot-launch dkg-launch.json
+```
+
+If everything went well you should see `POLKADOT LAUNCHED SUCCESSFULLY 🚀`. To follow the DKG parachain logs:
+
+```bash
+tail -f 9988.log
+```
+
+<h3 id="standalone"> Standalone Local Testnet </h3>
+
+Currently the easiest way to run the DKG is to use a 3-node local testnet using `egg-standalone-node`. We will call those nodes `Alice`, `Bob` and `Charlie`. Each node will use the built-in development account with the same name, i.e. node `Alice` will use the `Alice` development account and so on. Each of the three accounts has been configured as an initial authority at genesis. So, we are using three validators for our testnet.
+
+`Alice` is our bootnode and is started like so:
+
+```
+RUST_LOG=dkg=trace ./target/release/egg-standalone-node  --base-path /tmp/standalone/alice --alice
+```
+
+`Bob` is started like so:
+
+```
+RUST_LOG=dkg=trace ./target/release/egg-standalone-node  --base-path /tmp/standalone/bob --bob
+```
+
+`Charlie` is started like so:
+
+```
+RUST_LOG=dkg=trace ./target/release/egg-standalone-node --base-path /tmp/standalone/charlie --charlie
+```
+
+Great you are now running a 3-node standalone test network!
+
+<h2 id="manual"> Manual Local Parachain Setup </h2>
+
+The below instructions outline the steps required to setup a local test network with a 2-validator relay chain, registered DKG parachain, and 3-collator nodes.
+ 
+<h3 id="relay"> Relay Chain </h3>
 
 To operate a parathread or parachain, you _must_ connect to a relay chain. Typically you would test
 on a local Rococo development network, then move to the testnet, and finally launch on the mainnet.
@@ -105,21 +283,8 @@ Open a new terminal, same directory:
 --ws-port 9945
 ```
 
-Open a new terminal, same directory:
-
-```bash
-# Start Relay `Charlie` node
-./target/release/polkadot \
---chain ./rococo_local.json \
--d /tmp/relay/charlie \
---validator \
---charlie \
---port 50557
---ws-port 9946
-```
-
 Add more nodes as needed, with non-conflicting ports, DB directories, and validator keys
-(`--dave`, etc.).
+(`--charlie`, etc.).
 
 ### Reserve a ParaID
 
@@ -134,7 +299,7 @@ The easiest way to reserve your `ParaId` is via
 [Polkadot Apps UI](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/parachains/parathreads)
 under the `Parachains` -> `Parathreads` tab and use the `+ ParaID` button.
 
-## Parachain
+<h2 id="parachain"> Parachain </h2>
 
 ### Select the Correct Relay Chain
 
@@ -240,3 +405,15 @@ your parachain will come online. Once this happens, you should see the collator 
 reporting _parachain_ blocks:
 
 **Note the delay here!** It may take some time for your relay chain to enter a new epoch.
+
+<h2 id="contribute"> Contributing </h2>
+
+Interested in contributing to the Webb Relayer Network? Thank you so much for your interest! We are always appreciative for contributions from the open-source community!
+
+If you have a contribution in mind, please check out our [Contribution Guide](./.github/CONTRIBUTING.md) for information on how to do so. We are excited for your first contribution!
+
+<h2 id="license"> License </h2>
+
+Licensed under <a href="LICENSE">Apache 2.0 license</a>.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, as defined in the Apache 2.0 license, shall be licensed as above, without any additional terms or conditions.
