@@ -1,0 +1,99 @@
+name: Container Image Release
+
+on:
+  push:
+    # Publish `master` as Container `edge` image.
+    branches:
+      - master
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+jobs:
+  substrate-protocol-push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+          
+      - uses: actions/checkout@v2
+      - name: Build Image
+        run: ./scripts/build-standalone-docker.sh
+      
+      - name: Install docker-slim
+        run: curl -sL https://raw.githubusercontent.com/docker-slim/docker-slim/master/scripts/install-dockerslim.sh | sudo -E bash -
+      
+      - name: Slim down the Image
+        run: docker-slim build --target webb-tools/protocol-substrate-standalone-node --http-probe-off --entrypoint webb-standalone-node
+      
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+     
+      - name: Push image
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/protocol-substrate-standalone-node
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `edge` tag convention
+          [ "$VERSION" == "main" ] && VERSION=edge
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag webb-tools/protocol-substrate-standalone-node.slim $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+
+  dkg-standalone-push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v2
+      
+      - name: Build Image
+        run: ./scripts/build-standalone-docker.sh
+      
+      - name: Install docker-slim
+        run: curl -sL https://raw.githubusercontent.com/docker-slim/docker-slim/master/scripts/install-dockerslim.sh | sudo -E bash -
+      
+      - name: Slim down the Image
+        run: docker-slim build --target webb-tools/dkg-standalone-node --http-probe-off --entrypoint dkg-standalone-node
+      
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      
+      - name: Push image
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/dkg-standalone-node
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `edge` tag convention
+          [ "$VERSION" == "master" ] && VERSION=edge
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag webb-tools/dkg-standalone-node.slim $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
