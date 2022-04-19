@@ -245,10 +245,10 @@ pub fn get_testnet_root_key() -> AccountId {
 /// Arana bootnodes
 pub fn get_arana_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	return vec![
-		"/ip4/45.76.21.37/tcp/30333/p2p/12D3KooWELWpiG9EmREfr9BZ4CcoPMdvAqCN2HiiMzKUDDWxRpp1",
+		"/ip4/45.76.21.37/tcp/30333/p2p/12D3KooWELWpiG9EmREfr9BZ4CcoPMdvAqCN2HiiMzKUDDWxRpp1"
 			.parse()
 			.unwrap(),
-		"/ip4/107.191.49.61/tcp/30333/p2p/12D3KooWQYwbqoyPCvWbr7rCJgqVD9LaK1wBHuPAizQ3MtAZoZXR",
+		"/ip4/107.191.49.61/tcp/30333/p2p/12D3KooWQYwbqoyPCvWbr7rCJgqVD9LaK1wBHuPAizQ3MtAZoZXR"
 			.parse()
 			.unwrap(),
 		"/ip4/144.202.60.7/tcp/30333/p2p/12D3KooWRXZLpQjD92EdxFB6RQMqSDepKSy6AWhxmVv8USTHZSkH"
