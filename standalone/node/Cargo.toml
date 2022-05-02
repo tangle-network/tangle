@@ -43,9 +43,9 @@ pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-subs
 
 # DKG dependencies
 egg-runtime = { package = "egg-standalone-runtime", path = "../runtime" }
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
 
 # Substrate dependencies
 sc-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.17", features = ["wasmtime"] }

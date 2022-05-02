@@ -39,9 +39,9 @@ jsonrpc-core = "18.0.0"
 
 # Local Dependencies
 egg-runtime = { path = "../runtime" }
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
 
 # Arkworks
 arkworks-setups = { version = "1.0.0", features = ["r1cs"], default-features = false }
