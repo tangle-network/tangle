@@ -2760,7 +2760,6 @@ dependencies = [
  "pallet-mixer",
  "pallet-mt",
  "pallet-mt-rpc-runtime-api",
- "pallet-parachain-staking",
  "pallet-randomness-collective-flip",
  "pallet-session",
  "pallet-signature-bridge",

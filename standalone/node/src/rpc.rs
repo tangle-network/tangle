@@ -35,7 +35,7 @@ use std::sync::Arc;
 use common::{AccountId, Balance, Block, BlockNumber, Hash, Index};
 use egg_runtime::protocol_substrate_config::Element;
 
-use pallet_mt_rpc::{MerkleApi, MerkleClient};
+use pallet_mt_rpc::{MerkleTreeRpcApi, MerkleTreeClient};
 use sc_client_api::AuxStore;
 use sc_finality_grandpa::{
 	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState,
@@ -129,6 +129,6 @@ where
 		finality_provider,
 	)));
 
-	io.extend_with(MerkleApi::to_delegate(MerkleClient::new(client)));
+	io.extend_with(MerkleTreeRpcApi::to_delegate(MerkleTreeClient::new(client)));
 	Ok(io)
 }

@@ -36,7 +36,6 @@ pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git", defa
 pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
-pallet-parachain-staking = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 
 orml-currencies = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 orml-tokens = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
@@ -177,7 +176,6 @@ std = [
 	"pallet-linkable-tree/std",
 	"pallet-mt-rpc-runtime-api/std",
 	"pallet-verifier/std",
-	"pallet-parachain-staking/std",
 	"orml-currencies/std",
 	"orml-tokens/std",
 	"orml-traits/std",
