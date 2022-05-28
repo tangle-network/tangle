@@ -61,7 +61,9 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-use webb_primitives::AccountIndex;
+use webb_primitives::{AccountIndex, ChainId, LeafIndex};
+use protocol_substrate_config::Element;
+use pallet_linkable_tree::types::EdgeMetadata;
 
 // A few exports that help ease life for downstream crates.
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
@@ -1353,6 +1355,16 @@ impl_runtime_apis! {
 			} else {
 				Some(v)
 			}
+		}
+	}
+
+	impl pallet_linkable_tree_rpc_runtime_api::LinkableTreeApi<Block, ChainId, Element, LeafIndex> for Runtime {
+		fn get_neighbor_roots(tree_id: u32) -> Vec<Element> {
+			LinkableTreeBn254::get_neighbor_roots(tree_id).ok().unwrap_or_default()
+		}
+
+		fn get_neighbor_edges(tree_id: u32) -> Vec<EdgeMetadata<ChainId, Element, LeafIndex>> {
+			LinkableTreeBn254::get_neighbor_edges(tree_id).ok().unwrap_or_default()
 		}
 	}
 

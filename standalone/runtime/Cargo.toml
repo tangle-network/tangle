@@ -35,6 +35,7 @@ pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git", 
 pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
