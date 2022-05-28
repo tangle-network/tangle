@@ -292,6 +292,7 @@ fn testnet_genesis(
 		balances: egg_runtime::BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, MILLIUNIT * 4096_000)).collect(),
 		},
+		indices: Default::default(),
 		parachain_info: egg_runtime::ParachainInfoConfig { parachain_id: id },
 		collator_selection: egg_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _, _)| acc).collect(),

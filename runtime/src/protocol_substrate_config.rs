@@ -1,7 +1,7 @@
 use crate::*;
 use codec::{Decode, Encode};
-use frame_support::traits::Nothing;
-use orml_currencies::BasicCurrencyAdapter;
+use frame_support::{pallet_prelude::ConstU32, traits::Nothing};
+use orml_currencies::{BasicCurrencyAdapter, NativeCurrencyOf};
 use webb_primitives::{
 	hashing::{ethereum::Keccak256HasherBn254, ArkworksPoseidonHasherBn254},
 	verifying::ArkworksVerifierBn254,
@@ -109,12 +109,13 @@ impl pallet_asset_registry::Config for Runtime {
 	type AssetNativeLocation = ();
 	type Balance = Balance;
 	type Event = Event;
-	type NativeAssetId = NativeCurrencyId;
+	type NativeAssetId = GetNativeCurrencyId;
 	type RegistryOrigin = frame_system::EnsureRoot<AccountId>;
 	type StringLimit = RegistryStringLimit;
 	type WeightInfo = ();
 }
 
+pub type ReserveIdentifier = [u8; 8];
 impl orml_tokens::Config for Runtime {
 	type Amount = Amount;
 	type Balance = Balance;
@@ -122,29 +123,35 @@ impl orml_tokens::Config for Runtime {
 	type DustRemovalWhitelist = Nothing;
 	type Event = Event;
 	type ExistentialDeposits = AssetRegistry;
-	type MaxLocks = ();
 	type OnDust = ();
 	type WeightInfo = ();
+	type MaxLocks = ConstU32<2>;
+	type MaxReserves = ConstU32<2>;
+	type ReserveIdentifier = ReserveIdentifier;
 }
 
+parameter_types! {
+	pub const GetNativeCurrencyId: webb_primitives::AssetId = 0;
+}
+
+pub type NativeCurrency = NativeCurrencyOf<Runtime>;
+pub type AdaptedBasicCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, Balance>;
 impl orml_currencies::Config for Runtime {
-	type Event = Event;
-	type GetNativeCurrencyId = NativeCurrencyId;
 	type MultiCurrency = Tokens;
-	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	type NativeCurrency = AdaptedBasicCurrency;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
 	type WeightInfo = ();
 }
 
 parameter_types! {
 	pub const MixerPalletId: PalletId = PalletId(*b"py/mixer");
-	pub const NativeCurrencyId: u32 = 0;
 	pub const RegistryStringLimit: u32 = 10;
 }
 
 impl pallet_mixer::Config<pallet_mixer::Instance1> for Runtime {
 	type Currency = Currencies;
 	type Event = Event;
-	type NativeCurrencyId = NativeCurrencyId;
+	type NativeCurrencyId = GetNativeCurrencyId;
 	type PalletId = MixerPalletId;
 	type Tree = MerkleTreeBn254;
 	type Verifier = MixerVerifierBn254;
@@ -174,7 +181,7 @@ impl pallet_anchor::Config<pallet_anchor::Instance1> for Runtime {
 	type Currency = Currencies;
 	type Event = Event;
 	type LinkableTree = LinkableTreeBn254;
-	type NativeCurrencyId = NativeCurrencyId;
+	type NativeCurrencyId = GetNativeCurrencyId;
 	type PalletId = AnchorPalletId;
 	type PostDepositHook = ();
 	type Verifier = AnchorVerifierBn254;
