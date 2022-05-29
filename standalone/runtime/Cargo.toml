@@ -190,6 +190,7 @@ std = [
 	"pallet-mt/std",
 	"pallet-linkable-tree/std",
 	"pallet-mt-rpc-runtime-api/std",
+  "pallet-linkable-tree-rpc-runtime-api/std",
 	"pallet-verifier/std",
 	"orml-currencies/std",
 	"orml-tokens/std",

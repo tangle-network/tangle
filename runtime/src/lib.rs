@@ -49,13 +49,13 @@ use sp_version::RuntimeVersion;
 use frame_support::weights::{
 	ConstantMultiplier, WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 };
+use pallet_linkable_tree::types::EdgeMetadata;
 use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use polkadot_runtime_common::impls::DealWithFees;
 use sp_runtime::{FixedPointNumber, Perquintill};
 use webb_primitives::{AccountIndex, ChainId, LeafIndex};
-use pallet_linkable_tree::types::EdgeMetadata;
 
 // A few exports that help ease life for downstream crates.
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
@@ -68,6 +68,8 @@ pub use frame_support::{
 	},
 	PalletId, StorageValue,
 };
+#[cfg(any(feature = "std", test))]
+pub use frame_system::Call as SystemCall;
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
 	EnsureRoot,
@@ -793,27 +795,6 @@ impl_runtime_apis! {
 			TransactionPayment::query_fee_details(uxt, len)
 		}
 	}
-
-	// impl pallet_mt_rpc_runtime_api::MerkleTreeApi<Block, Element> for Runtime {
-	// 	fn get_leaf(tree_id: u32, index: u32) -> Option<Element> {
-	// 		let v = MerkleTreeBn254::leaves(tree_id, index);
-	// 		if v == Element::default() {
-	// 			None
-	// 		} else {
-	// 			Some(v)
-	// 		}
-	// 	}
-	// }
-
-	// impl pallet_linkable_tree_rpc_runtime_api::LinkableTreeApi<Block, ChainId, Element, LeafIndex> for Runtime {
-	// 	fn get_neighbor_roots(tree_id: u32) -> Vec<Element> {
-	// 		LinkableTreeBn254::get_neighbor_roots(tree_id).ok().unwrap_or_default()
-	// 	}
-
-	// 	fn get_neighbor_edges(tree_id: u32) -> Vec<EdgeMetadata<ChainId, Element, LeafIndex>> {
-	// 		LinkableTreeBn254::get_neighbor_edges(tree_id).ok().unwrap_or_default()
-	// 	}
-	// }
 
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {

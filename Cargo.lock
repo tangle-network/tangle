@@ -690,6 +690,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
+name = "backoff"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b62ddb9cb1ec0a098ad4bbf9344d0713fa193ae1a80af55febcff2627b6a00c1"
+dependencies = [
+ "futures-core",
+ "getrandom 0.2.6",
+ "instant",
+ "pin-project-lite 0.2.9",
+ "rand 0.8.5",
+ "tokio",
+]
+
+[[package]]
 name = "backtrace"
 version = "0.3.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1415,9 +1429,9 @@ dependencies = [
 
 [[package]]
 name = "clang-sys"
-version = "1.3.2"
+version = "1.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf6b561dcf059c85bbe388e0a7b0a1469acb3934cc0cfa148613a830629e3049"
+checksum = "5a050e2153c5be08febd6734e29298e844fdb0fa21aeddd63b4eb7baa106c69b"
 dependencies = [
  "glob",
  "libc",
@@ -2211,6 +2225,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "cumulus-relay-chain-inprocess-interface"
+version = "0.1.0"
+source = "git+https://github.com/paritytech/cumulus?branch=polkadot-v0.9.22#ebdfbea0029dd3349ce0e9c758acc73acce04d18"
+dependencies = [
+ "async-trait",
+ "cumulus-primitives-core",
+ "cumulus-relay-chain-interface",
+ "futures 0.3.21",
+ "futures-timer",
+ "parking_lot 0.12.0",
+ "polkadot-client",
+ "polkadot-service",
+ "sc-client-api",
+ "sc-consensus-babe",
+ "sc-network",
+ "sc-service",
+ "sc-sysinfo",
+ "sc-telemetry",
+ "sc-tracing",
+ "sp-api",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-core",
+ "sp-runtime",
+ "sp-state-machine",
+ "tracing",
+]
+
+[[package]]
 name = "cumulus-relay-chain-interface"
 version = "0.1.0"
 source = "git+https://github.com/paritytech/cumulus?branch=polkadot-v0.9.22#ebdfbea0029dd3349ce0e9c758acc73acce04d18"
@@ -2232,6 +2275,32 @@ dependencies = [
  "sp-runtime",
  "sp-state-machine",
  "thiserror",
+]
+
+[[package]]
+name = "cumulus-relay-chain-rpc-interface"
+version = "0.1.0"
+source = "git+https://github.com/paritytech/cumulus?branch=polkadot-v0.9.22#ebdfbea0029dd3349ce0e9c758acc73acce04d18"
+dependencies = [
+ "async-trait",
+ "backoff",
+ "cumulus-primitives-core",
+ "cumulus-relay-chain-interface",
+ "futures 0.3.21",
+ "futures-timer",
+ "jsonrpsee",
+ "parity-scale-codec",
+ "parking_lot 0.12.0",
+ "polkadot-service",
+ "sc-client-api",
+ "sc-rpc-api",
+ "sp-api",
+ "sp-core",
+ "sp-runtime",
+ "sp-state-machine",
+ "sp-storage",
+ "tracing",
+ "url",
 ]
 
 [[package]]
@@ -2683,7 +2752,9 @@ dependencies = [
  "cumulus-client-service",
  "cumulus-primitives-core",
  "cumulus-primitives-parachain-inherent",
+ "cumulus-relay-chain-inprocess-interface",
  "cumulus-relay-chain-interface",
+ "cumulus-relay-chain-rpc-interface",
  "derive_more",
  "dkg-gadget",
  "dkg-primitives",
@@ -2692,7 +2763,7 @@ dependencies = [
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "hex-literal 0.3.4",
- "jsonrpc-core",
+ "jsonrpsee",
  "log",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
@@ -2716,6 +2787,7 @@ dependencies = [
  "sc-telemetry",
  "sc-tracing",
  "sc-transaction-pool",
+ "sc-transaction-pool-api",
  "serde",
  "sp-api",
  "sp-block-builder",
@@ -2831,10 +2903,11 @@ dependencies = [
  "egg-standalone-runtime",
  "frame-benchmarking",
  "frame-benchmarking-cli",
+ "frame-system",
  "futures 0.3.21",
  "hex-literal 0.2.2",
  "itertools 0.10.3",
- "jsonrpc-core",
+ "jsonrpsee",
  "log",
  "pallet-im-online",
  "pallet-linkable-tree-rpc",
@@ -2842,6 +2915,7 @@ dependencies = [
  "pallet-mt",
  "pallet-mt-rpc",
  "pallet-mt-rpc-runtime-api",
+ "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
  "rand 0.7.3",
@@ -2880,6 +2954,7 @@ dependencies = [
  "sp-finality-grandpa",
  "sp-inherents",
  "sp-io",
+ "sp-keyring",
  "sp-keystore",
  "sp-offchain",
  "sp-runtime",
@@ -2890,6 +2965,7 @@ dependencies = [
  "substrate-build-script-utils 3.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "substrate-frame-rpc-system",
  "substrate-prometheus-endpoint",
+ "substrate-state-trie-migration-rpc",
  "webb-primitives",
 ]
 
@@ -3378,13 +3454,11 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 
 [[package]]
 name = "flate2"
-version = "1.0.23"
+version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b39522e96686d38f4bc984b9198e3a0613264abaebaff2c5c918bfa6b6da09af"
+checksum = "f82b0f4c27ad9f8bfd1f3208d882da2b09c301bc1c828fd3a00d0216d2fbbff6"
 dependencies = [
- "cfg-if 1.0.0",
  "crc32fast",
- "libc",
  "libz-sys",
  "miniz_oxide",
 ]
@@ -4413,21 +4487,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "jsonrpc-core"
-version = "18.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14f7f76aef2d054868398427f6c54943cf3d1caa9a7ec7d0c38d69df97a965eb"
-dependencies = [
- "futures 0.3.21",
- "futures-executor",
- "futures-util",
- "log",
- "serde",
- "serde_derive",
- "serde_json",
-]
-
-[[package]]
 name = "jsonrpsee"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5372,9 +5431,9 @@ dependencies = [
 
 [[package]]
 name = "libz-sys"
-version = "1.1.7"
+version = "1.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "174c5e7b8fecdcbf27c63fc1d70c22a53f64bbd81c92c17b2b5723f52a3a24cf"
+checksum = "9702761c3935f8cc2f101793272e202c72b99da8f4224a19ddcf1279a6450bbf"
 dependencies = [
  "cc",
  "pkg-config",
@@ -6161,7 +6220,7 @@ dependencies = [
 [[package]]
 name = "pallet-anchor"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6183,7 +6242,7 @@ dependencies = [
 [[package]]
 name = "pallet-anchor-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6209,7 +6268,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-registry"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6418,7 +6477,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6703,7 +6762,7 @@ dependencies = [
 [[package]]
 name = "pallet-hasher"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6769,7 +6828,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6789,7 +6848,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "jsonrpsee",
  "pallet-linkable-tree",
@@ -6807,7 +6866,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "pallet-linkable-tree",
  "parity-scale-codec",
@@ -6836,7 +6895,7 @@ dependencies = [
 [[package]]
 name = "pallet-mixer"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6892,7 +6951,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6908,7 +6967,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "jsonrpsee",
  "pallet-mt",
@@ -6926,7 +6985,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "pallet-mt",
  "sp-api",
@@ -7092,7 +7151,7 @@ dependencies = [
 [[package]]
 name = "pallet-signature-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7215,7 +7274,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7307,7 +7366,7 @@ dependencies = [
 [[package]]
 name = "pallet-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7592,9 +7651,9 @@ dependencies = [
 
 [[package]]
 name = "petgraph"
-version = "0.6.0"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a13a2fa9d0b63e5f22328828741e523766fff0ee9e779316902290dff3f824f"
+checksum = "e6d5014253a1331579ce62aa67443b4a658c5e7dd03d4bc6d302b94474888143"
 dependencies = [
  "fixedbitset",
  "indexmap",
@@ -13097,9 +13156,9 @@ version = "1.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
- "cfg-if 0.1.10",
+ "cfg-if 1.0.0",
  "digest 0.10.3",
- "rand 0.4.6",
+ "rand 0.8.5",
  "static_assertions",
 ]
 
@@ -13634,7 +13693,7 @@ dependencies = [
 [[package]]
 name = "webb-primitives"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#8d3a0bca62f43f667ad258760dc7b272d7d98931"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-381",

@@ -22,7 +22,7 @@ use jsonrpsee::RpcModule;
 
 use cumulus_client_cli::CollatorOptions;
 // Local Runtime Types
-use egg_runtime::{opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
+use egg_runtime::{AccountId, Balance, Block, Hash, Index as Nonce, RuntimeApi};
 
 // Cumulus Imports
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
@@ -40,7 +40,10 @@ use cumulus_relay_chain_rpc_interface::RelayChainRPCInterface;
 use sc_client_api::ExecutorProvider;
 use sc_executor::NativeElseWasmExecutor;
 use sc_network::NetworkService;
-use sc_service::{Configuration, PartialComponents, Role, TFullBackend, TFullClient, TaskManager};
+use sc_service::{
+	config::BasePath, Configuration, PartialComponents, Role, TFullBackend, TFullClient,
+	TaskManager,
+};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 use sp_api::ConstructRuntimeApi;
 use sp_keystore::SyncCryptoStorePtr;
@@ -56,11 +59,11 @@ impl sc_executor::NativeExecutionDispatch for TemplateRuntimeExecutor {
 	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		parachain_template_runtime::api::dispatch(method, data)
+		egg_runtime::api::dispatch(method, data)
 	}
 
 	fn native_version() -> sc_executor::NativeVersion {
-		parachain_template_runtime::native_version()
+		egg_runtime::native_version()
 	}
 }
 
@@ -315,6 +318,15 @@ where
 			})),
 			warp_sync: None,
 		})?;
+
+	let base_path = if parachain_config.base_path.is_some() {
+		match parachain_config.base_path.as_ref() {
+			Some(BasePath::Permanenent(path_buf)) => Some(path_buf.clone()),
+			_ => None,
+		}
+	} else {
+		None
+	};
 
 	let rpc_builder = {
 		let client = client.clone();

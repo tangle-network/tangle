@@ -1,167 +1,57 @@
-// This file is part of Substrate.
-
-// Copyright (C) 2019-2022 Parity Technologies (UK) Ltd.
-// SPDX-License-Identifier: Apache-2.0
-
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// 	http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 //! A collection of node-specific RPC methods.
-//!
-//! Since `substrate` core functionality makes no assumptions
-//! about the modules used inside the runtime, so do
-//! RPC methods defined in `sc-rpc` crate.
-//! It means that `client/rpc` can't have any methods that
-//! need some strong assumptions about the particular runtime.
-//!
-//! The RPCs available in this crate however can make some assumptions
-//! about how the runtime is constructed and what FRAME pallets
-//! are part of it. Therefore all node-runtime-specific RPCs can
-//! be placed here or imported from corresponding FRAME RPC definitions.
+//! Substrate provides the `sc-rpc` crate, which defines the core RPC layer
+//! used by Substrate nodes. This file extends those RPC definitions with
+//! capabilities that are specific to this project's runtime configuration.
 
 #![warn(missing_docs)]
-#![warn(unused_crate_dependencies)]
 
 use std::sync::Arc;
 
-use egg_runtime::Element;
+use egg_runtime::{opaque::Block, AccountId, Balance, Index};
 use jsonrpsee::RpcModule;
-use sc_client_api::AuxStore;
-use sc_consensus_epochs::SharedEpochChanges;
-use sc_finality_grandpa::{
-	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState,
-};
-use sc_finality_grandpa_rpc::GrandpaRpc;
-use sc_rpc::SubscriptionTaskExecutor;
-pub use sc_rpc_api::DenyUnsafe;
 use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
-use sp_consensus::SelectChain;
-use sp_keystore::SyncCryptoStorePtr;
-use webb_primitives::{
-	opaque::Block, AccountId, Balance, BlockNumber, ChainId, Hash, Index, LeafIndex,
-};
 
-pub use jsonrpc_core::IoHandler;
-
-use pallet_linkable_tree_rpc::LinkableTreeClient;
-use pallet_mt_rpc::MerkleTreeClient;
-
-/// Extra dependencies for GRANDPA
-pub struct GrandpaDeps<B> {
-	/// Voting round info.
-	pub shared_voter_state: SharedVoterState,
-	/// Authority set info.
-	pub shared_authority_set: SharedAuthoritySet<Hash, BlockNumber>,
-	/// Receives notifications about justification events from Grandpa.
-	pub justification_stream: GrandpaJustificationStream<Block>,
-	/// Executor to drive the subscription manager in the Grandpa RPC handler.
-	pub subscription_executor: SubscriptionTaskExecutor,
-	/// Finality proof provider.
-	pub finality_provider: Arc<FinalityProofProvider<B, Block>>,
-}
+pub use sc_rpc_api::DenyUnsafe;
 
 /// Full client dependencies.
-pub struct FullDeps<C, P, SC, B> {
+pub struct FullDeps<C, P> {
 	/// The client instance to use.
 	pub client: Arc<C>,
 	/// Transaction pool instance.
 	pub pool: Arc<P>,
-	/// The SelectChain Strategy
-	pub select_chain: SC,
-	/// A copy of the chain spec.
-	pub chain_spec: Box<dyn sc_chain_spec::ChainSpec>,
 	/// Whether to deny unsafe calls
 	pub deny_unsafe: DenyUnsafe,
-	/// GRANDPA specific dependencies.
-	pub grandpa: GrandpaDeps<B>,
 }
 
-/// Instantiate all Full RPC extensions.
-pub fn create_full<C, P, SC, B>(
-	deps: FullDeps<C, P, SC, B>,
-	backend: Arc<B>,
+/// Instantiate all full RPC extensions.
+pub fn create_full<C, P>(
+	deps: FullDeps<C, P>,
 ) -> Result<RpcModule<()>, Box<dyn std::error::Error + Send + Sync>>
 where
-	C: ProvideRuntimeApi<Block>
-		+ sc_client_api::BlockBackend<Block>
-		+ HeaderBackend<Block>
-		+ AuxStore
-		+ HeaderMetadata<Block, Error = BlockChainError>
-		+ Sync
-		+ Send
-		+ 'static,
+	C: ProvideRuntimeApi<Block>,
+	C: HeaderBackend<Block> + HeaderMetadata<Block, Error = BlockChainError> + 'static,
+	C: Send + Sync + 'static,
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: BlockBuilder<Block>,
-	C::Api: pallet_mt_rpc_runtime_api::MerkleTreeApi<Block, Element>,
-	C::Api:
-		pallet_linkable_tree_rpc_runtime_api::LinkableTreeApi<Block, ChainId, Element, LeafIndex>,
 	P: TransactionPool + 'static,
-	SC: SelectChain<Block> + 'static,
-	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
-	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::HashFor<Block>>,
 {
-	use pallet_linkable_tree_rpc::LinkableTreeRpcApiServer;
-	use pallet_mt_rpc::MerkleTreeRpcApiServer;
 	use pallet_transaction_payment_rpc::{TransactionPaymentApiServer, TransactionPaymentRpc};
-	use sc_consensus_babe_rpc::BabeApiServer;
-	use sc_finality_grandpa_rpc::GrandpaApiServer;
-	use sc_rpc::dev::{Dev, DevApiServer};
-	use sc_sync_state_rpc::{SyncStateRpc, SyncStateRpcApiServer};
 	use substrate_frame_rpc_system::{SystemApiServer, SystemRpc};
-	use substrate_state_trie_migration_rpc::StateMigrationApiServer;
 
-	let mut io = RpcModule::new(());
-	let FullDeps { client, pool, select_chain, chain_spec, deny_unsafe, babe, grandpa } = deps;
+	let mut module = RpcModule::new(());
+	let FullDeps { client, pool, deny_unsafe } = deps;
 
-	let GrandpaDeps {
-		shared_voter_state,
-		shared_authority_set,
-		justification_stream,
-		subscription_executor,
-		finality_provider,
-	} = grandpa;
+	module.merge(SystemRpc::new(client.clone(), pool.clone(), deny_unsafe).into_rpc())?;
+	module.merge(TransactionPaymentRpc::new(client).into_rpc())?;
 
-	io.merge(SystemRpc::new(client.clone(), pool, deny_unsafe).into_rpc())?;
-	// Making synchronous calls in light client freezes the browser currently,
-	// more context: https://github.com/paritytech/substrate/pull/3480
-	// These RPCs should use an asynchronous caller instead.
-	io.merge(TransactionPaymentRpc::new(client.clone()).into_rpc())?;
-	io.merge(
-		GrandpaRpc::new(
-			subscription_executor,
-			shared_authority_set.clone(),
-			shared_voter_state,
-			justification_stream,
-			finality_provider,
-		)
-		.into_rpc(),
-	)?;
+	// Extend this RPC with a custom API by using the following syntax.
+	// `YourRpcStruct` should have a reference to a client, which is needed
+	// to call into the runtime.
+	// `module.merge(YourRpcTrait::into_rpc(YourRpcStruct::new(ReferenceToClient, ...)))?;`
 
-	io.merge(
-		SyncStateRpc::new(chain_spec, client.clone(), shared_authority_set, shared_epoch_changes)?
-			.into_rpc(),
-	)?;
-
-	io.merge(
-		substrate_state_trie_migration_rpc::MigrationRpc::new(client.clone(), backend, deny_unsafe)
-			.into_rpc(),
-	)?;
-	io.merge(Dev::new(client.clone(), deny_unsafe).into_rpc())?;
-
-	io.merge(MerkleTreeClient::new(client.clone(), deny_unsafe).into_rpc())?;
-	io.merge(LinkableTreeClient::new(client, deny_unsafe).into_rpc())?;
-	Ok(io)
+	Ok(module)
 }

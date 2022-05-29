@@ -20,7 +20,6 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-pub mod impls;
 pub mod protocol_substrate_config;
 pub mod voter_bags;
 
@@ -30,13 +29,12 @@ use frame_election_provider_support::{onchain, ExtendedBalance, SequentialPhragm
 use frame_support::weights::{
 	ConstantMultiplier, WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 };
-use impls::*;
 use pallet_dkg_proposals::DKGEcdsaToEthereum;
 use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
-use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use pallet_linkable_tree::types::EdgeMetadata;
 use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking::StakerStatus;
 use pallet_transaction_payment::{
@@ -50,8 +48,8 @@ use sp_runtime::{
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
 	traits::{
-		self, AccountIdLookup, BlakeTwo256, Block as BlockT, Convert, IdentifyAccount, NumberFor,
-		OpaqueKeys, StaticLookup, Verify,
+		self, BlakeTwo256, Block as BlockT, Convert, IdentifyAccount, NumberFor, OpaqueKeys,
+		StaticLookup, Verify,
 	},
 	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, FixedPointNumber, MultiSignature, Perquintill, SaturatedConversion,
@@ -61,14 +59,15 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-use webb_primitives::{AccountIndex, ChainId, LeafIndex};
-use protocol_substrate_config::Element;
-use pallet_linkable_tree::types::EdgeMetadata;
+use webb_primitives::{linkable_tree::LinkableTreeInspector, AccountIndex, ChainId, LeafIndex};
+
+#[cfg(any(feature = "std", test))]
+pub use frame_system::Call as SystemCall;
 
 // A few exports that help ease life for downstream crates.
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 pub use frame_support::{
-	construct_runtime, match_type,
+	construct_runtime,
 	pallet_prelude::Get,
 	parameter_types,
 	traits::{
@@ -347,8 +346,6 @@ parameter_types! {
 	pub const MaxLocks: u32 = 50;
 	pub const MaxReserves: u32 = 50;
 }
-
-type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 
 impl pallet_balances::Config for Runtime {
 	/// The type for recording an account's balance.
