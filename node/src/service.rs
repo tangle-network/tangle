@@ -22,7 +22,7 @@ use jsonrpsee::RpcModule;
 
 use cumulus_client_cli::CollatorOptions;
 // Local Runtime Types
-use egg_runtime::{AccountId, Balance, Block, Hash, Index as Nonce, RuntimeApi};
+use egg_runtime::{opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
 
 // Cumulus Imports
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
@@ -47,7 +47,7 @@ use sc_service::{
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 use sp_api::ConstructRuntimeApi;
 use sp_keystore::SyncCryptoStorePtr;
-use sp_runtime::traits::BlakeTwo256;
+use sp_runtime::traits::{BlakeTwo256, NumberFor};
 use substrate_prometheus_endpoint::Registry;
 
 use polkadot_service::CollatorPair;
@@ -235,7 +235,12 @@ where
 		+ sp_block_builder::BlockBuilder<Block>
 		+ cumulus_primitives_core::CollectCollationInfo<Block>
 		+ pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>
-		+ substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
+		+ substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>
+		+ dkg_runtime_primitives::DKGApi<
+			Block,
+			dkg_runtime_primitives::crypto::AuthorityId,
+			NumberFor<Block>,
+		>,
 	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,
 	RB: Fn(
@@ -328,6 +333,13 @@ where
 		None
 	};
 
+	if validator {
+		dkg_primitives::utils::insert_controller_account_keys_into_keystore(
+			&parachain_config,
+			Some(params.keystore_container.sync_keystore()),
+		);
+	}
+
 	let rpc_builder = {
 		let client = client.clone();
 		let transaction_pool = transaction_pool.clone();
@@ -377,11 +389,6 @@ where
 	let relay_chain_slot_duration = Duration::from_secs(6);
 
 	if validator {
-		dkg_primitives::utils::insert_controller_account_keys_into_keystore(
-			&parachain_config,
-			Some(params.keystore_container.sync_keystore()),
-		);
-
 		let dkg_params = dkg_gadget::DKGParams {
 			client: client.clone(),
 			backend: backend.clone(),
