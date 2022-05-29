@@ -14,12 +14,10 @@
 
 use crate::chain_spec;
 use clap::Parser;
-use cumulus_client_cli;
-use sc_cli::{self, KeySubcommand};
 use std::path::PathBuf;
 
 /// Sub-commands supported by the collator.
-#[derive(Debug, clap::Parser)]
+#[derive(Debug, clap::Subcommand)]
 pub enum Subcommand {
 	/// Export the genesis state of the parachain.
 	#[clap(name = "export-genesis-state")]
@@ -28,10 +26,6 @@ pub enum Subcommand {
 	/// Export the genesis wasm of the parachain.
 	#[clap(name = "export-genesis-wasm")]
 	ExportGenesisWasm(ExportGenesisWasmCommand),
-
-	/// Key management cli utilities
-	#[clap(subcommand)]
-	Key(KeySubcommand),
 
 	/// Build a chain specification.
 	BuildSpec(sc_cli::BuildSpecCmd),
@@ -54,35 +48,33 @@ pub enum Subcommand {
 	/// Revert the chain to a previous state.
 	Revert(sc_cli::RevertCmd),
 
-	/// The custom benchmark subcommmand benchmarking runtime pallets.
-	#[clap(name = "benchmark", about = "Benchmark runtime pallets.")]
+	/// Sub-commands concerned with benchmarking.
+	/// The pallet benchmarking moved to the `pallet` sub-command.
+	#[clap(subcommand)]
 	Benchmark(frame_benchmarking_cli::BenchmarkCmd),
+
+	/// Try some testing command against a specified runtime state.
+	TryRuntime(try_runtime_cli::TryRuntimeCmd),
 }
 
 /// Command for exporting the genesis state of the parachain
-#[derive(Debug, clap::Parser)]
+#[derive(Debug, Parser)]
 pub struct ExportGenesisStateCommand {
 	/// Output file name or stdout if unspecified.
 	#[clap(parse(from_os_str))]
 	pub output: Option<PathBuf>,
-
-	/// Id of the parachain this state is for.
-	///
-	/// Default: 100
-	#[clap(long, conflicts_with = "chain")]
-	pub parachain_id: Option<u32>,
 
 	/// Write output in binary. Default is to write in hex.
 	#[clap(short, long)]
 	pub raw: bool,
 
 	/// The name of the chain for that the genesis state should be exported.
-	#[clap(long, conflicts_with = "parachain-id")]
+	#[clap(long)]
 	pub chain: Option<String>,
 }
 
 /// Command for exporting the genesis wasm file.
-#[derive(Debug, clap::Parser)]
+#[derive(Debug, Parser)]
 pub struct ExportGenesisWasmCommand {
 	/// Output file name or stdout if unspecified.
 	#[clap(parse(from_os_str))]
@@ -97,18 +89,28 @@ pub struct ExportGenesisWasmCommand {
 	pub chain: Option<String>,
 }
 
-#[derive(Debug, clap::Parser)]
-#[clap(settings = &[
-	clap::AppSettings::GlobalVersion,
-	clap::AppSettings::ArgsNegateSubcommands,
-	clap::AppSettings::SubcommandsNegateReqs,
-])]
+#[derive(Debug, Parser)]
+#[clap(
+	propagate_version = true,
+	args_conflicts_with_subcommands = true,
+	subcommand_negates_reqs = true
+)]
 pub struct Cli {
 	#[clap(subcommand)]
 	pub subcommand: Option<Subcommand>,
 
 	#[clap(flatten)]
 	pub run: cumulus_client_cli::RunCmd,
+
+	/// Disable automatic hardware benchmarks.
+	///
+	/// By default these benchmarks are automatically ran at startup and measure
+	/// the CPU speed, the memory bandwidth and the disk speed.
+	///
+	/// The results are then printed out in the logs, and also sent as part of
+	/// telemetry, if telemetry is enabled.
+	#[clap(long)]
+	pub no_hardware_benchmarks: bool,
 
 	/// Relay chain arguments
 	#[clap(raw = true)]
