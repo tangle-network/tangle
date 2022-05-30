@@ -16,9 +16,9 @@ use arkworks_setups::{common::setup_params, Curve};
 use egg_runtime::{
 	AccountId, AnchorBn254Config, AnchorVerifierBn254Config, AssetRegistryConfig, Balance,
 	BalancesConfig, DKGConfig, DKGId, DKGProposalsConfig, ElectionsConfig, GenesisConfig,
-	HasherBn254Config, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill,
-	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-	MAX_NOMINATIONS, UNIT, WASM_BINARY,
+	HasherBn254Config, MaxNominations, MerkleTreeBn254Config, MixerBn254Config,
+	MixerVerifierBn254Config, Perbill, SessionConfig, Signature, StakerStatus, StakingConfig,
+	SudoConfig, SystemConfig, UNIT, WASM_BINARY,
 };
 use hex_literal::hex;
 use sc_network::config::MultiaddrWithPeerId;
@@ -380,7 +380,7 @@ fn testnet_genesis(
 		.map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
 		.chain(initial_nominators.iter().map(|x| {
 			use rand::{seq::SliceRandom, Rng};
-			let limit = (MAX_NOMINATIONS as usize).min(initial_authorities.len());
+			let limit = (MaxNominations::get() as usize).min(initial_authorities.len());
 			let count = rng.gen::<usize>() % limit;
 			let nominations = initial_authorities
 				.as_slice()
@@ -403,6 +403,7 @@ fn testnet_genesis(
 			// Configure endowed accounts with initial balance of 1 << 60.
 			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect(),
 		},
+		indices: Default::default(),
 		session: SessionConfig {
 			keys: initial_authorities
 				.iter()
