@@ -106,7 +106,7 @@ impl pallet_token_wrapper::Config for Runtime {
 
 impl pallet_asset_registry::Config for Runtime {
 	type AssetId = webb_primitives::AssetId;
-	type AssetNativeLocation = ();
+	type AssetNativeLocation = u32;
 	type Balance = Balance;
 	type Event = Event;
 	type NativeAssetId = GetNativeCurrencyId;
