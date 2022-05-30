@@ -485,17 +485,16 @@ dependencies = [
 
 [[package]]
 name = "async-global-executor"
-version = "2.0.4"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c290043c9a95b05d45e952fb6383c67bcb61471f60cfa21e890dba6654234f43"
+checksum = "fd8b508d585e01084059b60f06ade4cb7415cd2e4084b71dd1cb44e7d3fb9880"
 dependencies = [
  "async-channel",
  "async-executor",
  "async-io",
- "async-mutex",
+ "async-lock",
  "blocking",
  "futures-lite",
- "num_cpus",
  "once_cell",
 ]
 
@@ -523,15 +522,6 @@ name = "async-lock"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e97a171d191782fba31bb902b14ad94e24a68145032b7eedf871ab0bc0d077b6"
-dependencies = [
- "event-listener",
-]
-
-[[package]]
-name = "async-mutex"
-version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "479db852db25d9dbf6204e6cb6253698f175c15726470f78af0d918e99d6156e"
 dependencies = [
  "event-listener",
 ]
@@ -2636,7 +2626,7 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "tiny-keccak",
- "webb-proposals",
+ "webb-proposals 0.4.0",
 ]
 
 [[package]]
@@ -6221,7 +6211,7 @@ dependencies = [
 [[package]]
 name = "pallet-anchor"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6243,7 +6233,7 @@ dependencies = [
 [[package]]
 name = "pallet-anchor-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6269,7 +6259,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-registry"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6478,7 +6468,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6763,7 +6753,7 @@ dependencies = [
 [[package]]
 name = "pallet-hasher"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6829,7 +6819,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6849,7 +6839,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "jsonrpsee",
  "pallet-linkable-tree",
@@ -6867,7 +6857,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "pallet-linkable-tree",
  "parity-scale-codec",
@@ -6896,7 +6886,7 @@ dependencies = [
 [[package]]
 name = "pallet-mixer"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6952,7 +6942,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6968,7 +6958,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "jsonrpsee",
  "pallet-mt",
@@ -6986,7 +6976,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "pallet-mt",
  "sp-api",
@@ -7152,7 +7142,7 @@ dependencies = [
 [[package]]
 name = "pallet-signature-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7275,7 +7265,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7367,7 +7357,7 @@ dependencies = [
 [[package]]
 name = "pallet-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -13694,7 +13684,7 @@ dependencies = [
 [[package]]
 name = "webb-primitives"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#25c78fd4f8f40618401f971dfe93c05973a116a2"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#47581fd3602c0cd8b78d2293aecfb66259e75384"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-381",
@@ -13721,7 +13711,19 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-proposals",
+ "webb-proposals 0.3.2",
+]
+
+[[package]]
+name = "webb-proposals"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1cf0d38b6b699e619b27df4422f3fe4adfe5e42f4f15f34159aacdfad4b45075"
+dependencies = [
+ "num-traits",
+ "parity-scale-codec",
+ "scale-info",
+ "typed-builder 0.10.0",
 ]
 
 [[package]]
