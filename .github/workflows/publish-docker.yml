@@ -24,9 +24,9 @@ jobs:
       matrix:
         include:
           - dockerfile: ./docker/Standalone.Dockerfile
-            image: $REGISTRY / $IMAGE_NAME_1
+            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_1 }}
           - dockerfile: ./docker/Parachain.Dockerfile
-            image: $REGISTRY / $IMAGE_NAME_2
+            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_2 }}
     permissions:
       contents: read
       packages: write
