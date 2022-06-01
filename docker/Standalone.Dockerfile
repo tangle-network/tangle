@@ -1,5 +1,5 @@
 FROM rust:buster as builder
-WORKDIR /app
+WORKDIR /network
 
 RUN rustup default nightly-2022-02-01 && \
 	rustup target add wasm32-unknown-unknown --toolchain nightly-2022-02-01
@@ -14,19 +14,19 @@ ARG BUILD_ARGS
 COPY . .
 # Build Standalone Node.
 RUN git submodule update --init && \
-  cargo build --release -p egg-standalone-node
+  cargo build --release --locked -p egg-standalone-node
 
 
 # ===============
 
 FROM phusion/baseimage:bionic-1.0.0
 
-COPY --from=builder /app/target/release/egg-standalone-node /usr/local/bin
+COPY --from=builder /network/target/release/egg-standalone-node /usr/local/bin
 
-RUN useradd -m -u 1000 -U -s /bin/sh -d /app webb && \
-  mkdir -p /data /app/.local/share/webb && \
+RUN useradd -m -u 1000 -U -s /bin/sh -d /network webb && \
+  mkdir -p /data /network/.local/share/webb && \
   chown -R webb:webb /data && \
-  ln -s /data /app/.local/share/webb && \
+  ln -s /data /network/.local/share/webb && \
   # Sanity checks
   ldd /usr/local/bin/egg-standalone-node && \
   /usr/local/bin/egg-standalone-node --version

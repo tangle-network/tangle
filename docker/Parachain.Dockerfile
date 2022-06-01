@@ -1,5 +1,5 @@
 FROM rust:buster as builder
-WORKDIR /app
+WORKDIR /network
 
 RUN rustup default nightly-2022-02-01 && \
 	rustup target add wasm32-unknown-unknown --toolchain nightly-2022-02-01
@@ -13,7 +13,7 @@ ARG BUILD_ARGS
 
 COPY . .
 # Build DKG Parachain Node
-RUN cargo build --release -p egg-collator
+RUN cargo build --release --locked -p egg-collator
 
 # =============
 
@@ -21,7 +21,7 @@ FROM phusion/baseimage:bionic-1.0.0
 
 RUN useradd -m -u 1000 -U -s /bin/sh -d /dkg dkg
 
-COPY --from=builder /app/target/release/egg-collator /usr/local/bin
+COPY --from=builder /network/target/release/egg-collator /usr/local/bin
 
 # checks
 RUN ldd /usr/local/bin/egg-collator && \
