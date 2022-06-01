@@ -25,7 +25,7 @@ jobs:
       matrix:
         include:
           - dockerfile: ./docker/Standalone.Dockerfile
-            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_1 }}
+            image: ghcr.io/${{ env.IMAGE_NAME_1 }}
           - dockerfile: ./docker/Parachain.Dockerfile
             image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_2 }}
     permissions:
