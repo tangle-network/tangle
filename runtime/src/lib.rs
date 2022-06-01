@@ -26,20 +26,15 @@ pub mod xcm_config;
 
 use codec::Encode;
 use dkg_runtime_primitives::{TypedChainId, UnsignedProposal};
-use impls::*;
 use pallet_dkg_proposals::DKGEcdsaToEthereum;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{
-		self, AccountIdLookup, BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount,
-		StaticLookup, Verify,
-	},
+	traits::{self, BlakeTwo256, Block as BlockT, IdentifyAccount, StaticLookup, Verify},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature, SaturatedConversion,
 };
-use xcm_config::{XcmConfig, XcmOriginToTransactDispatchOrigin};
 
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -49,18 +44,14 @@ use sp_version::RuntimeVersion;
 use frame_support::weights::{
 	ConstantMultiplier, WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 };
-use pallet_linkable_tree::types::EdgeMetadata;
-use pallet_transaction_payment::{
-	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
-};
-use polkadot_runtime_common::impls::DealWithFees;
+use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use sp_runtime::{FixedPointNumber, Perquintill};
-use webb_primitives::{AccountIndex, ChainId, LeafIndex};
+use webb_primitives::AccountIndex;
 
 // A few exports that help ease life for downstream crates.
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 pub use frame_support::{
-	construct_runtime, match_type, parameter_types,
+	construct_runtime, match_types, parameter_types,
 	traits::{Currency, EnsureOneOf, Everything, IsInVec, Randomness},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -85,7 +76,6 @@ pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 // XCM Imports
 use smallvec::smallvec;
 use xcm::latest::prelude::*;
-use xcm_executor::XcmExecutor;
 
 /// Reputation type
 pub type Reputation = u128;
@@ -324,11 +314,11 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = ();
 }
 
-pub const EXISTENTIAL_DEPOSIT: u128 = 1 * MILLIUNIT;
+pub const EXISTENTIAL_DEPOSIT: u128 = MILLIUNIT;
 parameter_types! {
 	pub const ExistentialDeposit: u128 = EXISTENTIAL_DEPOSIT;
-	pub const TransferFee: u128 = 1 * MILLIUNIT;
-	pub const CreationFee: u128 = 1 * MILLIUNIT;
+	pub const TransferFee: u128 = MILLIUNIT;
+	pub const CreationFee: u128 = MILLIUNIT;
 	pub const MaxLocks: u32 = 50;
 	pub const MaxReserves: u32 = 50;
 }
