@@ -21,7 +21,7 @@ FROM phusion/baseimage:bionic-1.0.0
 
 RUN useradd -m -u 1000 -U -s /bin/sh -d /dkg dkg
 
-COPY --from=builder /network/target/release/dkg-node /usr/local/bin
+COPY --from=builder /network/target/release/egg-standalone-node /usr/local/bin
 
 # checks
 RUN ldd /usr/local/bin/egg-standalone-node && \
