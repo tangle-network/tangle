@@ -24,9 +24,9 @@ jobs:
       matrix:
         include:
           - dockerfile: ./docker/Standalone.Dockerfile
-            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_1 }}
+            image: ghcr.io/${{ github.repository }}/egg-standalone-node
           - dockerfile: ./docker/Parachain.Dockerfile
-            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_2 }}
+            image: ghcr.io/${{ github.repository }}/egg-collator
     permissions:
       contents: read
       packages: write
