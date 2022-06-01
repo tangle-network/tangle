@@ -19,13 +19,22 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}/egg-standalone-node
+  IMAGE_NAME_1: ${{ github.repository }}/egg-standalone-node
+  IMAGE_NAME_2: ${{ github.repository }}/egg-collator
 
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: ./docker/Standalone.Dockerfile
+            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_1 }}
+          - dockerfile: ./docker/Parachain.Dockerfile
+            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_2 }}
     permissions:
       contents: read
       packages: write
@@ -34,6 +43,11 @@ jobs:
       id-token: write
 
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+          
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -66,7 +80,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ matrix.image }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
