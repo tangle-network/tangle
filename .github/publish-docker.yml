@@ -1,5 +1,5 @@
 name: build-push
-      
+
 on:
   push:
     branches: [ main ]
