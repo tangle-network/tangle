@@ -9,6 +9,8 @@ on:
   pull_request:
     branches: [ main ]
 
+  workflow_dispatch:
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME_1: ${{ github.repository }}/egg-standalone-node
