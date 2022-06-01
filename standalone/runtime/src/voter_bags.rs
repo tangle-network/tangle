@@ -31,6 +31,7 @@ pub const EXISTENTIAL_WEIGHT: u64 = 100_000_000_000_000;
 pub const CONSTANT_RATIO: f64 = 1.0628253590743408;
 
 /// Upper thresholds delimiting the bag list.
+#[allow(clippy::inconsistent_digit_grouping)]
 pub const THRESHOLDS: [u64; 200] = [
 	100_000_000_000_000,
 	106_282_535_907_434,

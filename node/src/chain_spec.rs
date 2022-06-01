@@ -290,8 +290,13 @@ fn testnet_genesis(
 		},
 		sudo: egg_runtime::SudoConfig { key: Some(root_key) },
 		balances: egg_runtime::BalancesConfig {
-			balances: endowed_accounts.iter().cloned().map(|k| (k, MILLIUNIT * 4096_000)).collect(),
+			balances: endowed_accounts
+				.iter()
+				.cloned()
+				.map(|k| (k, MILLIUNIT * 4_096_000))
+				.collect(),
 		},
+		indices: Default::default(),
 		parachain_info: egg_runtime::ParachainInfoConfig { parachain_id: id },
 		collator_selection: egg_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _, _)| acc).collect(),
@@ -305,7 +310,7 @@ fn testnet_genesis(
 				.map(|(acc, aura, dkg)| {
 					(
 						acc.clone(),                 // account id
-						acc.clone(),                 // validator id
+						acc,                         // validator id
 						dkg_session_keys(aura, dkg), // session keys
 					)
 				})

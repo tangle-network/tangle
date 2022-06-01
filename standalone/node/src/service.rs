@@ -1,3 +1,4 @@
+#![allow(clippy::all)]
 // Copyright 2022 Webb Technologies Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,9 +21,8 @@ use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_finality_grandpa::SharedVoterState;
 use sc_keystore::LocalKeystore;
-use sc_service::{error::Error as ServiceError, BasePath, Configuration, TaskManager};
+use sc_service::{config::BasePath, error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
-use sp_consensus::SlotData;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use std::{sync::Arc, time::Duration};
 
@@ -61,20 +61,13 @@ pub fn new_partial(
 		sc_consensus::DefaultImportQueue<Block, FullClient>,
 		sc_transaction_pool::FullPool<Block, FullClient>,
 		(
-			impl Fn(
-				crate::rpc::DenyUnsafe,
-				sc_rpc::SubscriptionTaskExecutor,
-			) -> Result<crate::rpc::IoHandler, sc_service::Error>,
-			(
-				sc_finality_grandpa::GrandpaBlockImport<
-					FullBackend,
-					Block,
-					FullClient,
-					FullSelectChain,
-				>,
-				sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
-			),
-			sc_finality_grandpa::SharedVoterState,
+			sc_finality_grandpa::GrandpaBlockImport<
+				FullBackend,
+				Block,
+				FullClient,
+				FullSelectChain,
+			>,
+			sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
 			Option<Telemetry>,
 		),
 	>,
@@ -104,7 +97,7 @@ pub fn new_partial(
 
 	let (client, backend, keystore_container, task_manager) =
 		sc_service::new_full_parts::<Block, RuntimeApi, _>(
-			&config,
+			config,
 			telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
 			executor,
 		)?;
@@ -143,9 +136,9 @@ pub fn new_partial(
 				let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
 
 				let slot =
-					sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_duration(
+					sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
 						*timestamp,
-						slot_duration.slot_duration(),
+						slot_duration,
 					);
 
 				Ok((timestamp, slot))
@@ -159,48 +152,6 @@ pub fn new_partial(
 			telemetry: telemetry.as_ref().map(|x| x.handle()),
 		})?;
 
-	let import_setup = (grandpa_block_import, grandpa_link);
-
-	let (rpc_extensions_builder, rpc_setup) = {
-		let (_, grandpa_link) = &import_setup;
-		let justification_stream = grandpa_link.justification_stream();
-		let shared_authority_set = grandpa_link.shared_authority_set().clone();
-		let shared_voter_state = sc_finality_grandpa::SharedVoterState::empty();
-		let rpc_setup = shared_voter_state.clone();
-
-		let finality_proof_provider = sc_finality_grandpa::FinalityProofProvider::new_for_service(
-			backend.clone(),
-			Some(shared_authority_set.clone()),
-		);
-
-		let client = client.clone();
-		let pool = transaction_pool.clone();
-		let select_chain = select_chain.clone();
-		let chain_spec = config.chain_spec.cloned_box();
-
-		let rpc_backend = backend.clone();
-		let rpc_extensions_builder = move |deny_unsafe, subscription_executor| {
-			let deps = crate::rpc::FullDeps {
-				client: client.clone(),
-				pool: pool.clone(),
-				select_chain: select_chain.clone(),
-				chain_spec: chain_spec.cloned_box(),
-				deny_unsafe,
-				grandpa: crate::rpc::GrandpaDeps {
-					shared_voter_state: shared_voter_state.clone(),
-					shared_authority_set: shared_authority_set.clone(),
-					justification_stream: justification_stream.clone(),
-					subscription_executor,
-					finality_provider: finality_proof_provider.clone(),
-				},
-			};
-
-			crate::rpc::create_full(deps, rpc_backend.clone()).map_err(Into::into)
-		};
-
-		(rpc_extensions_builder, rpc_setup)
-	};
-
 	Ok(sc_service::PartialComponents {
 		client,
 		backend,
@@ -209,7 +160,7 @@ pub fn new_partial(
 		keystore_container,
 		select_chain,
 		transaction_pool,
-		other: (rpc_extensions_builder, import_setup, rpc_setup, telemetry),
+		other: (grandpa_block_import, grandpa_link, telemetry),
 	})
 }
 
@@ -230,9 +181,9 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		mut keystore_container,
 		select_chain,
 		transaction_pool,
-		other: (rpc_extensions_builder, import_setup, _rpc_setup, mut telemetry),
+		other: (block_import, grandpa_link, mut telemetry),
 	} = new_partial(&config)?;
-	let (block_import, grandpa_link) = import_setup;
+
 	if let Some(url) = &config.keystore_remote {
 		match remote_keystore(url) {
 			Ok(k) => keystore_container.set_remote_keystore(k),
@@ -295,23 +246,27 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		None
 	};
 
-	if role.is_authority() {
-		dkg_primitives::utils::insert_controller_account_keys_into_keystore(
-			&config,
-			Some(keystore_container.sync_keystore()),
-		);
-	}
+	let rpc_extensions_builder = {
+		let client = client.clone();
+		let pool = transaction_pool.clone();
+
+		Box::new(move |deny_unsafe, _| {
+			let deps =
+				crate::rpc::FullDeps { client: client.clone(), pool: pool.clone(), deny_unsafe };
+			crate::rpc::create_full(deps).map_err(Into::into)
+		})
+	};
 
 	let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
-		config,
-		backend: backend.clone(),
+		network: network.clone(),
 		client: client.clone(),
 		keystore: keystore_container.sync_keystore(),
-		network: network.clone(),
-		rpc_extensions_builder: Box::new(rpc_extensions_builder),
-		transaction_pool: transaction_pool.clone(),
 		task_manager: &mut task_manager,
+		transaction_pool: transaction_pool.clone(),
+		rpc_builder: rpc_extensions_builder,
+		backend: backend.clone(),
 		system_rpc_tx,
+		config,
 		telemetry: telemetry.as_mut(),
 	})?;
 
@@ -331,9 +286,11 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		task_manager.spawn_essential_handle().spawn_blocking(
 			"dkg-gadget",
 			None,
-			dkg_gadget::start_dkg_gadget::<_, _, _, _>(dkg_params),
+			dkg_gadget::start_dkg_gadget::<_, _, _>(dkg_params),
 		);
+	}
 
+	if role.is_authority() {
 		let proposer_factory = sc_basic_authorship::ProposerFactory::new(
 			task_manager.spawn_handle(),
 			client.clone(),
@@ -350,7 +307,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		let aura = sc_consensus_aura::start_aura::<AuraPair, _, _, _, _, _, _, _, _, _, _, _>(
 			StartAuraParams {
 				slot_duration,
-				client: client.clone(),
+				client,
 				select_chain,
 				block_import,
 				proposer_factory,
@@ -358,9 +315,9 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 					let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
 
 					let slot =
-						sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_duration(
+						sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
 							*timestamp,
-							slot_duration.slot_duration(),
+							slot_duration,
 						);
 
 					Ok((timestamp, slot))
