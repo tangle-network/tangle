@@ -1,18 +1,18 @@
 name: build-push
-
+      
 on:
   push:
-    # Publish `master` as Container `edge` image.
-    branches:
-      - master
-    # Publish `v1.2.3` tags as releases.
-    tags:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  tags:
       - v*
+
+  workflow_dispatch:
 
 jobs:
   egg-standalone-node:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     permissions:
       packages: write
       contents: read
@@ -58,7 +58,6 @@ jobs:
 
   egg-parachain-node:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     permissions:
       packages: write
       contents: read
