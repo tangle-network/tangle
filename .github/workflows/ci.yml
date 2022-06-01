@@ -52,6 +52,9 @@ jobs:
       - name: Check Format
         run: |
           cargo fmt --all -- --check
+      - name: Clippy
+        run: |
+          cargo clippy --all-targets --workspace -- --deny warnings
       - name: Check Build
         run: |
           cargo check --release
