@@ -13,7 +13,7 @@ ARG BUILD_ARGS
 
 COPY . .
 # Build DKG Parachain Node
-RUN cargo build --release --locked -p egg-collator
+RUN cargo build --release --locked -p egg-standalone-node
 
 # =============
 
@@ -21,11 +21,11 @@ FROM phusion/baseimage:bionic-1.0.0
 
 RUN useradd -m -u 1000 -U -s /bin/sh -d /dkg dkg
 
-COPY --from=builder /network/target/release/egg-collator /usr/local/bin
+COPY --from=builder /network/target/release/egg-standalone-node /usr/local/bin
 
 # checks
-RUN ldd /usr/local/bin/egg-collator && \
-  /usr/local/bin/egg-collator --version
+RUN ldd /usr/local/bin/egg-standalone-node && \
+  /usr/local/bin/egg-standalone-node --version
 
 # Shrinking
 RUN rm -rf /usr/lib/python* && \
@@ -39,4 +39,4 @@ RUN chown -R dkg:dkg /dkg/data
 
 VOLUME ["/dkg/data"]
 
-ENTRYPOINT [ "/usr/local/bin/egg-collator" ]
+ENTRYPOINT [ "/usr/local/bin/egg-standalone-node" ]
