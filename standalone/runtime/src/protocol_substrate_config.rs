@@ -30,12 +30,12 @@ parameter_types! {
 	pub const MaxTreeDepth: u8 = 30;
 	pub const RootHistorySize: u32 = 1096;
 	// 21663839004416932945382355908790599225266501822907911457504978515578255421292
-	pub const DefaultZeroElement: Element = Element([
-		108, 175, 153, 072, 237, 133, 150, 036,
-		226, 065, 231, 118, 015, 052, 027, 130,
-		180, 093, 161, 235, 182, 053, 058, 052,
-		243, 171, 172, 211, 096, 076, 229, 047,
-	]);
+	// pub const DefaultZeroElement: Element = Element([
+	// 	108, 175, 153, 072, 237, 133, 150, 036,
+	// 	226, 065, 231, 118, 015, 052, 027, 130,
+	// 	180, 093, 161, 235, 182, 053, 058, 052,
+	// 	243, 171, 172, 211, 096, 076, 229, 047,
+	// ]);
 	pub const NewDefaultZeroElement: Element = Element([0u8; 32]);
 }
 
