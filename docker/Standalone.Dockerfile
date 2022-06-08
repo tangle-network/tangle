@@ -17,7 +17,7 @@ RUN cargo build --release --locked -p egg-standalone-node
 
 # =============
 
-FROM phusion/baseimage:bionic-1.0.0
+FROM ubuntu:20.04
 
 RUN useradd -m -u 1000 -U -s /bin/sh -d /dkg dkg
 
