@@ -36,16 +36,18 @@ pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate
 pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
-
-orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
-orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
-orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
 pallet-anchor = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-anchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+
+# Orml depedencies
+orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
+orml-benchmarking = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false, optional = true }
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies
@@ -105,19 +107,6 @@ pallet-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release
 
 [features]
 default = ["std"]
-runtime-benchmarks = [
-	"sp-runtime/runtime-benchmarks",
-	"frame-benchmarking",
-	"frame-support/runtime-benchmarks",
-	"frame-system-benchmarking",
-	"frame-system/runtime-benchmarks",
-	"pallet-balances/runtime-benchmarks",
-	"pallet-timestamp/runtime-benchmarks",
-	"pallet-dkg-proposal-handler/runtime-benchmarks",
-	"hex-literal",
-	"pallet-dkg-proposals/runtime-benchmarks",
-	"pallet-dkg-metadata/runtime-benchmarks"
-]
 std = [
 	"codec/std",
 	"serde",
@@ -189,4 +178,22 @@ std = [
 	"pallet-signature-bridge/std",
 	"pallet-mixer/std",
 	"pallet-token-wrapper/std",
+	"orml-benchmarking/std",
+]
+runtime-benchmarks = [
+	"sp-runtime/runtime-benchmarks",
+	"frame-benchmarking",
+	"frame-support/runtime-benchmarks",
+	"frame-system-benchmarking",
+	"frame-system/runtime-benchmarks",
+	"pallet-balances/runtime-benchmarks",
+	"pallet-timestamp/runtime-benchmarks",
+	"pallet-dkg-proposal-handler/runtime-benchmarks",
+	"hex-literal",
+	"pallet-dkg-proposals/runtime-benchmarks",
+	#"pallet-dkg-metadata/runtime-benchmarks",
+	"orml-benchmarking",
+	"orml-tokens/runtime-benchmarks",
+	"pallet-xcm/runtime-benchmarks",
+	"xcm-builder/runtime-benchmarks",
 ]
