@@ -17,9 +17,9 @@ RUN cargo build --release --locked -p egg-collator
 
 # =============
 
-FROM phusion/baseimage:bionic-1.0.0
+FROM ubuntu:20.04
 
-RUN useradd -m -u 1000 -U -s /bin/sh -d /dkg dkg
+RUN useradd -m -u 1000 -U -s /bin/sh -d /network dkg
 
 COPY --from=builder /network/target/release/egg-collator /usr/local/bin
 
@@ -34,8 +34,8 @@ RUN rm -rf /usr/lib/python* && \
 USER dkg
 EXPOSE 30333 9933 9944 9615
 
-RUN mkdir /dkg/data
-RUN chown -R dkg:dkg /dkg/data
+RUN mkdir /network/data
+RUN chown -R dkg:dkg /network/data
 
 VOLUME ["/dkg/data"]
 
