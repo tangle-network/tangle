@@ -1,4 +1,4 @@
-<h1 align="center">Webb Protocol Egg Network 🕸️ </h1>
+<h1 align="center">The Egg Network 🕸️ </h1>
 <div align="center">
 <a href="https://www.webb.tools/">
     <img alt="Webb Logo" src="./assets/webb-icon.svg" width="15%" height="30%" />
@@ -52,7 +52,10 @@
 
 <h1 id="start"> Getting Started  🎉 </h1>
 
-The Egg Network contains runtimes for both standalone and parachain nodes featuring Webb's DKG and privacy pallet protocols. 
+The Egg Network contains runtimes for both standalone and parachain nodes featuring Webb's DKG and privacy pallet protocols. If you would like to familiarize yourself with our DKG and anchor protocol check out these repos:
+
+- [dkg-substrate](https://github.com/webb-tools/dkg-substrate)
+- [protocol-solidity](https://github.com/webb-tools/protocol-solidity)
 
 ## Prerequisites
 
@@ -225,7 +228,7 @@ git clone https://github.com/paritytech/polkadot.git
 cd polkadot
 
 # Checkout the proper commit
-git checkout v0.9.22
+git checkout v0.9.23
 
 # Build the relay chain Node
 cargo build --release
