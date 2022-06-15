@@ -23,6 +23,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 pub mod impls;
 pub mod protocol_substrate_config;
 pub mod xcm_config;
+pub mod weights;
 
 use codec::Encode;
 use dkg_runtime_primitives::{TypedChainId, UnsignedProposal};
@@ -57,7 +58,7 @@ pub use frame_support::{
 	construct_runtime, match_types, parameter_types,
 	traits::{Currency, EnsureOneOf, Everything, IsInVec, Randomness},
 	weights::{
-		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
+		constants::{RocksDbWeight, WEIGHT_PER_SECOND},
 		DispatchClass, IdentityFee, Weight,
 	},
 	PalletId, StorageValue,
@@ -75,6 +76,7 @@ use sp_runtime::generic::Era;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
+use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 
 // XCM Imports
 use smallvec::smallvec;

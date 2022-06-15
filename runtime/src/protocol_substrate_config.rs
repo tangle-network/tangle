@@ -215,4 +215,5 @@ impl pallet_signature_bridge::Config<SignatureBridgeInstance> for Runtime {
 	type ProposalNonce = u32;
 	type MaintainerNonce = u32;
 	type SignatureVerifier = webb_primitives::signing::SignatureVerifier;
+	type WeightInfo = ();
 }
