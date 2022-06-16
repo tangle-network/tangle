@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-use crate::{AccountId, Balance, Runtime, Tokens};
+use crate::{AccountId, Runtime, Tokens};
 use frame_benchmarking::{account, whitelisted_caller};
 use frame_system::RawOrigin;
 use orml_benchmarking::runtime_benchmarks;

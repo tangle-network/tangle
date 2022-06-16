@@ -32,7 +32,7 @@ impl<T: frame_system::Config> orml_currencies::WeightInfo for WeightInfo<T> {
 	// Storage: Tokens Accounts (r:2 w:2)
 	// Storage: AssetRegistry Assets (r:1 w:0)
 	// Storage: System Account (r:1 w:1)
-	fn transfer() -> Weight {
+	fn transfer_non_native_currency() -> Weight {
 		(45_000_000 as Weight)
 			.saturating_add(T::DbWeight::get().reads(4 as Weight))
 			.saturating_add(T::DbWeight::get().writes(3 as Weight))
@@ -44,13 +44,30 @@ impl<T: frame_system::Config> orml_currencies::WeightInfo for WeightInfo<T> {
 		(40_619_000 as Weight)
 			.saturating_add(T::DbWeight::get().reads(3 as Weight))
 			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+	}
 	// Storage: Tokens Accounts (r:1 w:1)
 	// Storage: AssetRegistry Assets (r:1 w:0)
 	// Storage: Tokens TotalIssuance (r:1 w:1)
 	// Storage: System Account (r:1 w:1)
-	fn update_balance() -> Weight {
+	fn update_balance_non_native_currency() -> Weight {
 		(32_000_000 as Weight)
 			.saturating_add(T::DbWeight::get().reads(4 as Weight))
+			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+	}
+	// Storage: Tokens Accounts (r:1 w:1)
+	// Storage: AssetRegistry Assets (r:1 w:0)
+	// Storage: System Account (r:1 w:1)
+	fn update_balance_native_currency_creating() -> Weight {
+		(24_748_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(2 as Weight))
+			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+	}
+	// Storage: Tokens Accounts (r:1 w:1)
+	// Storage: AssetRegistry Assets (r:1 w:0)
+	// Storage: System Account (r:1 w:1)
+	fn update_balance_native_currency_killing() -> Weight {
+		(30_170_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(3 as Weight))
 			.saturating_add(T::DbWeight::get().writes(3 as Weight))
 	}
 }

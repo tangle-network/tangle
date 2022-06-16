@@ -1,16 +1,12 @@
 use crate::*;
-use codec::{Decode, Encode};
 use frame_support::{pallet_prelude::ConstU32, traits::Nothing};
 use orml_currencies::{BasicCurrencyAdapter, NativeCurrencyOf};
 use webb_primitives::{
 	hashing::{ethereum::Keccak256HasherBn254, ArkworksPoseidonHasherBn254},
 	runtime::Element,
 	verifying::ArkworksVerifierBn254,
-	Amount, ChainId, ElementTrait,
+	Amount, ChainId,
 };
-
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
 
 parameter_types! {
 	pub const StringLimit: u32 = 50;

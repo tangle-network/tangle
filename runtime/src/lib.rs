@@ -818,12 +818,11 @@ impl_runtime_apis! {
 			Vec<frame_benchmarking::BenchmarkList>,
 			Vec<frame_support::traits::StorageInfo>,
 		) {
-			use frame_benchmarking::{list_benchmark, baseline, Benchmarking, BenchmarkList};
+			use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
 			use orml_benchmarking::list_benchmark as list_orml_benchmark;
 			use frame_support::traits::StorageInfoTrait;
 
 			use frame_system_benchmarking::Pallet as SystemBench;
-			use baseline::Pallet as BaselineBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
 
@@ -831,6 +830,12 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
 			list_benchmark!(list, extra, pallet_dkg_proposal_handler, DKGProposalHandler);
+			list_benchmark!(list, extra, pallet_anchor, AnchorBn254);
+			list_benchmark!(list, extra, pallet_signature_bridge, SignatureBridge);
+			list_benchmark!(list, extra, pallet_hasher, HasherBn254);
+			list_benchmark!(list, extra, pallet_mt, MerkleTreeBn254);
+			list_benchmark!(list, extra, pallet_asset_registry, AssetRegistry);
+			list_benchmark!(list, extra, pallet_mixer, MixerBn254);
 			list_orml_benchmark!(list, extra, orml_tokens, benchmarking::orml_tokens);
 			list_orml_benchmark!(list, extra, orml_currencies, benchmarking::orml_currencies);
 
@@ -867,6 +872,12 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
 			add_benchmark!(params, batches, pallet_dkg_proposal_handler, DKGProposalHandler);
+			add_benchmark!(params, batches, pallet_anchor, AnchorBn254);
+			add_benchmark!(params, batches, pallet_signature_bridge, SignatureBridge);
+			add_benchmark!(params, batches, pallet_hasher, HasherBn254);
+			add_benchmark!(params, batches, pallet_mt, MerkleTreeBn254);
+			add_benchmark!(params, batches, pallet_asset_registry, AssetRegistry);
+			add_benchmark!(params, batches, pallet_mixer, MixerBn254);
 			add_orml_benchmark!(params, batches, orml_tokens, benchmarking::orml_tokens);
 			add_orml_benchmark!(params, batches, orml_currencies, benchmarking::orml_currencies);
 
