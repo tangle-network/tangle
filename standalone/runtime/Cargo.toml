@@ -33,8 +33,8 @@ webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git"
 pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-anchor-benchmarks", default-features = false }
 pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-anchor-benchmarks", default-features = false }
 pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-anchor-benchmarks", default-features = false }
-pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-anchor-benchmarks", default-features = false, optional = true }
-pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-anchor-benchmarks", default-features = false, optional = true }
+pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-anchor-benchmarks", default-features = false }
+pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-anchor-benchmarks", default-features = false }
 pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-anchor-benchmarks", default-features = false }
 pallet-anchor = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-anchor-benchmarks", default-features = false }
 pallet-anchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-anchor-benchmarks", default-features = false }
@@ -126,11 +126,16 @@ runtime-benchmarks = [
 
   # protocol-substrate deps
   "pallet-signature-bridge/runtime-benchmarks",
-  "pallet-anchor-handler/runtime-benchmarks",
   "pallet-bridge/runtime-benchmarks",
-  "pallet-linkable-tree/runtime-benchmarks",
   "pallet-mt/runtime-benchmarks",
+  "pallet-mixer/runtime-benchmarks",
   "pallet-linkable-tree/runtime-benchmarks",
+  "pallet-hasher/runtime-benchmarks",
+  "pallet-verifier/runtime-benchmarks",
+  "pallet-anchor/runtime-benchmarks",
+  "pallet-anchor-handler/runtime-benchmarks",
+  "pallet-asset-registry/runtime-benchmarks",
+  "pallet-token-wrapper/runtime-benchmarks",
 	
   # dkg deps
   "pallet-dkg-metadata/runtime-benchmarks",

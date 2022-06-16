@@ -22,8 +22,8 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod impls;
 pub mod protocol_substrate_config;
-pub mod xcm_config;
 pub mod weights;
+pub mod xcm_config;
 
 use codec::Encode;
 use dkg_runtime_primitives::{TypedChainId, UnsignedProposal};
@@ -57,10 +57,7 @@ pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 pub use frame_support::{
 	construct_runtime, match_types, parameter_types,
 	traits::{Currency, EnsureOneOf, Everything, IsInVec, Randomness},
-	weights::{
-		constants::{RocksDbWeight, WEIGHT_PER_SECOND},
-		DispatchClass, IdentityFee, Weight,
-	},
+	weights::{constants::WEIGHT_PER_SECOND, DispatchClass, IdentityFee, Weight},
 	PalletId, StorageValue,
 };
 #[cfg(any(feature = "std", test))]
@@ -822,6 +819,7 @@ impl_runtime_apis! {
 			Vec<frame_support::traits::StorageInfo>,
 		) {
 			use frame_benchmarking::{list_benchmark, baseline, Benchmarking, BenchmarkList};
+			use orml_benchmarking::list_benchmark as list_orml_benchmark;
 			use frame_support::traits::StorageInfoTrait;
 
 			use frame_system_benchmarking::Pallet as SystemBench;
@@ -834,7 +832,7 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
 			list_benchmark!(list, extra, pallet_dkg_proposal_handler, DKGProposalHandler);
 			list_orml_benchmark!(list, extra, orml_tokens, benchmarking::orml_tokens);
-
+			list_orml_benchmark!(list, extra, orml_currencies, benchmarking::orml_currencies);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -845,7 +843,7 @@ impl_runtime_apis! {
 			config: frame_benchmarking::BenchmarkConfig
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
-
+			use orml_benchmarking::{add_benchmark as add_orml_benchmark};
 			use frame_system_benchmarking::Pallet as SystemBench;
 			impl frame_system_benchmarking::Config for Runtime {}
 
@@ -870,6 +868,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
 			add_benchmark!(params, batches, pallet_dkg_proposal_handler, DKGProposalHandler);
 			add_orml_benchmark!(params, batches, orml_tokens, benchmarking::orml_tokens);
+			add_orml_benchmark!(params, batches, orml_currencies, benchmarking::orml_currencies);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

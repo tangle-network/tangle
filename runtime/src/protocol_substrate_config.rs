@@ -4,6 +4,7 @@ use frame_support::{pallet_prelude::ConstU32, traits::Nothing};
 use orml_currencies::{BasicCurrencyAdapter, NativeCurrencyOf};
 use webb_primitives::{
 	hashing::{ethereum::Keccak256HasherBn254, ArkworksPoseidonHasherBn254},
+	runtime::Element,
 	verifying::ArkworksVerifierBn254,
 	Amount, ChainId, ElementTrait,
 };
@@ -37,22 +38,6 @@ parameter_types! {
 	// 	243, 171, 172, 211, 096, 076, 229, 047,
 	// ]);
 	pub const NewDefaultZeroElement: Element = Element([0u8; 32]);
-}
-
-#[derive(Debug, Encode, Decode, Default, Copy, Clone, PartialEq, Eq, scale_info::TypeInfo)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct Element([u8; 32]);
-
-impl ElementTrait for Element {
-	fn to_bytes(&self) -> &[u8] {
-		&self.0
-	}
-
-	fn from_bytes(input: &[u8]) -> Self {
-		let mut buf = [0u8; 32];
-		buf.copy_from_slice(input);
-		Self(buf)
-	}
 }
 
 impl pallet_mt::Config<pallet_mt::Instance1> for Runtime {
@@ -124,7 +109,7 @@ impl orml_tokens::Config for Runtime {
 	type Event = Event;
 	type ExistentialDeposits = AssetRegistry;
 	type OnDust = ();
-	type WeightInfo = ();
+	type WeightInfo = weights::orml_tokens::WeightInfo<Runtime>;
 	type MaxLocks = ConstU32<2>;
 	type MaxReserves = ConstU32<2>;
 	type OnNewTokenAccount = ();
@@ -142,7 +127,7 @@ impl orml_currencies::Config for Runtime {
 	type MultiCurrency = Tokens;
 	type NativeCurrency = AdaptedBasicCurrency;
 	type GetNativeCurrencyId = GetNativeCurrencyId;
-	type WeightInfo = ();
+	type WeightInfo = weights::orml_currencies::WeightInfo<Runtime>;
 }
 
 parameter_types! {

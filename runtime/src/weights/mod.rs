@@ -19,6 +19,7 @@
 
 pub mod block_weights;
 pub mod extrinsic_weights;
+pub mod orml_tokens;
 pub mod rocksdb_weights;
 
 pub use block_weights::constants::BlockExecutionWeight;

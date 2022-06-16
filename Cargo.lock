@@ -2795,33 +2795,36 @@ dependencies = [
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
- "pallet-anchor 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-anchor-handler 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-asset-registry 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "pallet-anchor",
+ "pallet-anchor-handler",
+ "pallet-asset-registry",
  "pallet-asset-tx-payment",
  "pallet-aura",
  "pallet-authorship",
  "pallet-balances",
+ "pallet-bridge",
  "pallet-collator-selection",
+ "pallet-collective",
  "pallet-dkg-metadata",
  "pallet-dkg-proposal-handler",
  "pallet-dkg-proposals",
- "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
  "pallet-indices",
- "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-linkable-tree-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-mixer 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-mt-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-linkable-tree-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-mixer",
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-mt-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
  "pallet-randomness-collective-flip",
  "pallet-session",
- "pallet-signature-bridge 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "pallet-signature-bridge",
+ "pallet-society",
  "pallet-sudo",
  "pallet-timestamp",
- "pallet-token-wrapper 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "pallet-token-wrapper",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
- "pallet-verifier 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "pallet-verifier",
  "pallet-xcm",
  "parachain-info",
  "parity-scale-codec",
@@ -2843,7 +2846,7 @@ dependencies = [
  "sp-transaction-pool",
  "sp-version",
  "substrate-wasm-builder",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
  "xcm",
  "xcm-builder",
  "xcm-executor",
@@ -2873,10 +2876,8 @@ dependencies = [
  "jsonrpsee",
  "log",
  "pallet-im-online",
- "pallet-linkable-tree-rpc",
  "pallet-linkable-tree-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
  "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-mt-rpc",
  "pallet-mt-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
@@ -2949,9 +2950,9 @@ dependencies = [
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
- "pallet-anchor 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
- "pallet-anchor-handler 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
- "pallet-asset-registry 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-anchor",
+ "pallet-anchor-handler",
+ "pallet-asset-registry",
  "pallet-asset-tx-payment",
  "pallet-assets",
  "pallet-aura",
@@ -2960,7 +2961,7 @@ dependencies = [
  "pallet-bags-list",
  "pallet-balances",
  "pallet-bounties",
- "pallet-bridge 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-bridge",
  "pallet-child-bounties",
  "pallet-collective",
  "pallet-democracy",
@@ -2975,7 +2976,7 @@ dependencies = [
  "pallet-indices",
  "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
  "pallet-linkable-tree-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
- "pallet-mixer 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-mixer",
  "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
  "pallet-mt-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
  "pallet-multisig",
@@ -2986,17 +2987,17 @@ dependencies = [
  "pallet-randomness-collective-flip",
  "pallet-scheduler",
  "pallet-session",
- "pallet-signature-bridge 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-signature-bridge",
  "pallet-staking",
  "pallet-staking-reward-curve",
  "pallet-sudo",
  "pallet-timestamp",
- "pallet-token-wrapper 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-token-wrapper",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",
  "pallet-utility",
- "pallet-verifier 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-verifier",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -6226,39 +6227,17 @@ dependencies = [
  "frame-support",
  "frame-system",
  "orml-traits",
- "pallet-asset-registry 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-asset-registry",
  "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
  "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
  "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
- "pallet-verifier 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-verifier",
  "parity-scale-codec",
  "scale-info",
  "sp-io",
  "sp-runtime",
  "sp-std",
  "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
-]
-
-[[package]]
-name = "pallet-anchor"
-version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "orml-traits",
- "pallet-asset-registry 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-verifier 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "parity-scale-codec",
- "scale-info",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -6271,12 +6250,12 @@ dependencies = [
  "frame-system",
  "hex-literal 0.3.4",
  "orml-traits",
- "pallet-anchor 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
- "pallet-asset-registry 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
- "pallet-bridge 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-anchor",
+ "pallet-asset-registry",
+ "pallet-bridge",
  "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
  "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
- "pallet-signature-bridge 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-signature-bridge",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -6286,32 +6265,6 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
-]
-
-[[package]]
-name = "pallet-anchor-handler"
-version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
-dependencies = [
- "frame-support",
- "frame-system",
- "hex-literal 0.3.4",
- "orml-traits",
- "pallet-anchor 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-asset-registry 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-bridge 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-signature-bridge 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-arithmetic",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -6333,27 +6286,6 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
-]
-
-[[package]]
-name = "pallet-asset-registry"
-version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "orml-traits",
- "parity-scale-codec",
- "primitive-types 0.8.0",
- "scale-info",
- "serde",
- "sp-api",
- "sp-arithmetic",
- "sp-core",
- "sp-runtime",
- "sp-std",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -6560,23 +6492,6 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
-]
-
-[[package]]
-name = "pallet-bridge"
-version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
-dependencies = [
- "frame-support",
- "frame-system",
- "pallet-balances",
- "parity-scale-codec",
- "scale-info",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -6867,7 +6782,6 @@ name = "pallet-hasher"
 version = "1.0.0"
 source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "parity-scale-codec",
@@ -6953,7 +6867,6 @@ name = "pallet-linkable-tree"
 version = "1.0.0"
 source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "orml-traits",
@@ -6961,28 +6874,9 @@ dependencies = [
  "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
  "parity-scale-codec",
  "scale-info",
- "serde",
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
-]
-
-[[package]]
-name = "pallet-linkable-tree-rpc"
-version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
-dependencies = [
- "jsonrpsee",
- "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-linkable-tree-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "parity-scale-codec",
- "sc-rpc",
- "sp-api",
- "sp-blockchain",
- "sp-core",
- "sp-runtime",
- "thiserror",
  "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
@@ -7039,38 +6933,15 @@ dependencies = [
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
- "pallet-asset-registry 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-asset-registry",
  "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
  "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
- "pallet-verifier 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-verifier",
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
  "sp-std",
  "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
-]
-
-[[package]]
-name = "pallet-mixer"
-version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "log",
- "orml-currencies",
- "orml-tokens",
- "orml-traits",
- "pallet-asset-registry 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-verifier 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "parity-scale-codec",
- "scale-info",
- "sp-runtime",
- "sp-std",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -7129,7 +7000,6 @@ name = "pallet-mt"
 version = "1.0.0"
 source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
@@ -7137,24 +7007,6 @@ dependencies = [
  "scale-info",
  "sp-runtime",
  "sp-std",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
-]
-
-[[package]]
-name = "pallet-mt-rpc"
-version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
-dependencies = [
- "jsonrpsee",
- "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "pallet-mt-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "parity-scale-codec",
- "sc-rpc",
- "sp-api",
- "sp-blockchain",
- "sp-core",
- "sp-runtime",
- "thiserror",
  "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
@@ -7356,24 +7208,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-signature-bridge"
-version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
-dependencies = [
- "frame-support",
- "frame-system",
- "hex-literal 0.3.4",
- "pallet-balances",
- "parity-scale-codec",
- "scale-info",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
-]
-
-[[package]]
 name = "pallet-society"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.23#76522d7937ba94ff1becef4e4e3ca78e3e1de341"
@@ -7487,31 +7321,13 @@ dependencies = [
  "frame-support",
  "frame-system",
  "orml-traits",
- "pallet-asset-registry 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
+ "pallet-asset-registry",
  "parity-scale-codec",
  "scale-info",
  "sp-arithmetic",
  "sp-runtime",
  "sp-std",
  "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
-]
-
-[[package]]
-name = "pallet-token-wrapper"
-version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "orml-traits",
- "pallet-asset-registry 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
- "parity-scale-codec",
- "scale-info",
- "sp-arithmetic",
- "sp-runtime",
- "sp-std",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -7592,6 +7408,7 @@ name = "pallet-verifier"
 version = "1.0.0"
 source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks#c136b32e4024badb80ea83afca824e41b46b7b88"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "log",
@@ -7600,21 +7417,6 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-anchor-benchmarks)",
-]
-
-[[package]]
-name = "pallet-verifier"
-version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
-dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "parity-scale-codec",
- "scale-info",
- "sp-runtime",
- "sp-std",
- "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -13888,9 +13690,6 @@ name = "webb-primitives"
 version = "0.1.0"
 source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
 dependencies = [
- "ark-bls12-377",
- "ark-bls12-381",
- "ark-bn254",
  "ark-crypto-primitives",
  "ark-ec",
  "ark-ff",
@@ -13898,7 +13697,6 @@ dependencies = [
  "ark-relations",
  "ark-serialize",
  "ark-std",
- "arkworks-native-gadgets",
  "blake2 0.9.2",
  "digest 0.9.0",
  "ethabi",

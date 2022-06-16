@@ -1399,8 +1399,6 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
 			list_benchmark!(list, extra, pallet_dkg_proposal_handler, DKGProposalHandler);
 
-
-
 			let storage_info = AllPalletsWithSystem::storage_info();
 
 			return (list, storage_info)

@@ -37,9 +37,7 @@ itertools = "0.10.0"
 # Protocol Substrate
 webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
-pallet-mt-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
-pallet-linkable-tree-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 
 # DKG dependencies

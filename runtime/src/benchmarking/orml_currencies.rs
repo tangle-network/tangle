@@ -21,10 +21,11 @@ use sp_runtime::traits::StaticLookup;
 use sp_std::prelude::*;
 
 const SEED: u32 = 0;
+pub const NATIVE_CURRENCYID: webb_primitives::AssetId = 0;
 const CURRENCYID: webb_primitives::AssetId = 1;
 
 runtime_benchmarks! {
-	{ Runtime, orml_tokens }
+	{ Runtime, orml_currencies }
 
 	transfer {
 		let from: AccountId = whitelisted_caller();
@@ -36,44 +37,21 @@ runtime_benchmarks! {
 		assert_eq!(<Tokens as MultiCurrency<_>>::total_balance(CURRENCYID, &to), 90);
 	}
 
-	transfer_all {
+	transfer_native_currency {
 		let from: AccountId = whitelisted_caller();
-		let _ = Tokens::deposit(CURRENCYID, &from, 100);
+		let _ = Tokens::deposit(NATIVE_CURRENCYID, &from, 1_000_000_000_000);
 
 		let to: AccountId = account("to", 0, SEED);
 		let to_lookup = <Runtime as frame_system::Config>::Lookup::unlookup(to.clone());
-	}: _(RawOrigin::Signed(from.clone()), to_lookup, CURRENCYID, false)
+	}: _(RawOrigin::Signed(from.clone()), to_lookup, 1_000_000)
 	verify {
-		assert_eq!(<Tokens as MultiCurrency<_>>::total_balance(CURRENCYID, &from), 0);
+		assert_eq!(<Tokens as MultiCurrency<_>>::total_balance(NATIVE_CURRENCYID, &to), 1_000_000);
 	}
 
-	transfer_keep_alive {
-		let from: AccountId = whitelisted_caller();
-		let _ = Tokens::deposit(CURRENCYID, &from, 100);
-
-		let to: AccountId = account("to", 0, SEED);
-		let to_lookup = <Runtime as frame_system::Config>::Lookup::unlookup(to.clone());
-	}: _(RawOrigin::Signed(from), to_lookup, CURRENCYID, 90)
-	verify {
-		assert_eq!(<Tokens as MultiCurrency<_>>::total_balance(CURRENCYID, &to), 90);
-	}
-
-	force_transfer {
-		let from: AccountId = account("from", 0, SEED);
-		let from_lookup = <Runtime as frame_system::Config>::Lookup::unlookup(from.clone());
-		let _ = Tokens::deposit(CURRENCYID, &from, 100);
-
-		let to: AccountId = account("to", 0, SEED);
-		let to_lookup = <Runtime as frame_system::Config>::Lookup::unlookup(to.clone());
-	}: _(RawOrigin::Root, from_lookup, to_lookup, CURRENCYID, 100)
-	verify {
-		assert_eq!(<Tokens as MultiCurrency<_>>::total_balance(CURRENCYID, &to), 100);
-	}
-
-	set_balance {
+	update_balance {
 		let who: AccountId = account("who", 0, SEED);
 		let who_lookup = <Runtime as frame_system::Config>::Lookup::unlookup(who.clone());
-	}: _(RawOrigin::Root, who_lookup, CURRENCYID, 100, 0)
+	}: _(RawOrigin::Root, who_lookup, CURRENCYID, 100)
 	verify {
 		assert_eq!(<Tokens as MultiCurrency<_>>::total_balance(CURRENCYID, &who), 100);
 	}
