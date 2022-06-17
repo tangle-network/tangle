@@ -2808,13 +2808,13 @@ dependencies = [
  "pallet-dkg-metadata",
  "pallet-dkg-proposal-handler",
  "pallet-dkg-proposals",
- "pallet-hasher",
+ "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "pallet-indices",
- "pallet-linkable-tree",
- "pallet-linkable-tree-rpc-runtime-api",
+ "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "pallet-linkable-tree-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "pallet-mixer",
- "pallet-mt",
- "pallet-mt-rpc-runtime-api",
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "pallet-mt-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "pallet-randomness-collective-flip",
  "pallet-session",
  "pallet-signature-bridge",
@@ -2846,7 +2846,7 @@ dependencies = [
  "sp-transaction-pool",
  "sp-version",
  "substrate-wasm-builder",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "xcm",
  "xcm-builder",
  "xcm-executor",
@@ -2876,9 +2876,9 @@ dependencies = [
  "jsonrpsee",
  "log",
  "pallet-im-online",
- "pallet-linkable-tree-rpc-runtime-api",
- "pallet-mt",
- "pallet-mt-rpc-runtime-api",
+ "pallet-linkable-tree-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "pallet-mt-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
@@ -2930,7 +2930,7 @@ dependencies = [
  "substrate-frame-rpc-system",
  "substrate-prometheus-endpoint",
  "substrate-state-trie-migration-rpc",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -2971,14 +2971,14 @@ dependencies = [
  "pallet-election-provider-multi-phase",
  "pallet-elections-phragmen",
  "pallet-grandpa",
- "pallet-hasher",
+ "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "pallet-im-online",
  "pallet-indices",
- "pallet-linkable-tree",
- "pallet-linkable-tree-rpc-runtime-api",
+ "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "pallet-linkable-tree-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "pallet-mixer",
- "pallet-mt",
- "pallet-mt-rpc-runtime-api",
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "pallet-mt-rpc-runtime-api 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "pallet-multisig",
  "pallet-nomination-pools",
  "pallet-offences",
@@ -3019,7 +3019,7 @@ dependencies = [
  "sp-version",
  "static_assertions",
  "substrate-wasm-builder",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
@@ -6219,7 +6219,7 @@ dependencies = [
 [[package]]
 name = "pallet-anchor"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#f04f1494e10df2592b1078335ec12b26d18a908d"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -6228,22 +6228,22 @@ dependencies = [
  "frame-system",
  "orml-traits",
  "pallet-asset-registry",
- "pallet-hasher",
- "pallet-linkable-tree",
- "pallet-mt",
+ "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "pallet-verifier",
  "parity-scale-codec",
  "scale-info",
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
 name = "pallet-anchor-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#f04f1494e10df2592b1078335ec12b26d18a908d"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6253,8 +6253,8 @@ dependencies = [
  "pallet-anchor",
  "pallet-asset-registry",
  "pallet-bridge",
- "pallet-linkable-tree",
- "pallet-mt",
+ "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "pallet-signature-bridge",
  "parity-scale-codec",
  "scale-info",
@@ -6264,13 +6264,13 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
 name = "pallet-asset-registry"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#f04f1494e10df2592b1078335ec12b26d18a908d"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6285,7 +6285,7 @@ dependencies = [
  "sp-core",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
@@ -6479,7 +6479,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#f04f1494e10df2592b1078335ec12b26d18a908d"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6491,7 +6491,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
@@ -6765,7 +6765,7 @@ dependencies = [
 [[package]]
 name = "pallet-hasher"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6774,7 +6774,21 @@ dependencies = [
  "scale-info",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+]
+
+[[package]]
+name = "pallet-hasher"
+version = "1.0.0"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
+ "sp-std",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -6831,21 +6845,51 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
  "orml-traits",
- "pallet-hasher",
- "pallet-mt",
+ "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "parity-scale-codec",
  "scale-info",
  "serde",
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+]
+
+[[package]]
+name = "pallet-linkable-tree"
+version = "1.0.0"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "orml-traits",
+ "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+]
+
+[[package]]
+name = "pallet-linkable-tree-rpc-runtime-api"
+version = "1.0.0"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
+dependencies = [
+ "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "parity-scale-codec",
+ "sp-api",
+ "sp-std",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
@@ -6853,11 +6897,11 @@ name = "pallet-linkable-tree-rpc-runtime-api"
 version = "1.0.0"
 source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
 dependencies = [
- "pallet-linkable-tree",
+ "pallet-linkable-tree 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
  "parity-scale-codec",
  "sp-api",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -6880,7 +6924,7 @@ dependencies = [
 [[package]]
 name = "pallet-mixer"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#f04f1494e10df2592b1078335ec12b26d18a908d"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6890,14 +6934,14 @@ dependencies = [
  "orml-tokens",
  "orml-traits",
  "pallet-asset-registry",
- "pallet-hasher",
- "pallet-mt",
+ "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "pallet-verifier",
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
@@ -6936,17 +6980,44 @@ dependencies = [
 [[package]]
 name = "pallet-mt"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
+ "ark-bn254",
+ "arkworks-setups",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "pallet-hasher",
+ "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+]
+
+[[package]]
+name = "pallet-mt"
+version = "1.0.0"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-hasher 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
+ "sp-std",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
+]
+
+[[package]]
+name = "pallet-mt-rpc-runtime-api"
+version = "1.0.0"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
+dependencies = [
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
+ "sp-api",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
@@ -6954,9 +7025,9 @@ name = "pallet-mt-rpc-runtime-api"
 version = "1.0.0"
 source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
 dependencies = [
- "pallet-mt",
+ "pallet-mt 1.0.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
  "sp-api",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git)",
 ]
 
 [[package]]
@@ -7119,7 +7190,7 @@ dependencies = [
 [[package]]
 name = "pallet-signature-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#f04f1494e10df2592b1078335ec12b26d18a908d"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7133,7 +7204,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
@@ -7244,7 +7315,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#f04f1494e10df2592b1078335ec12b26d18a908d"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7256,7 +7327,7 @@ dependencies = [
  "sp-arithmetic",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
@@ -7335,7 +7406,7 @@ dependencies = [
 [[package]]
 name = "pallet-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#f04f1494e10df2592b1078335ec12b26d18a908d"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7345,7 +7416,7 @@ dependencies = [
  "scale-info",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
+ "webb-primitives 0.1.0 (git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import)",
 ]
 
 [[package]]
@@ -13583,7 +13654,7 @@ dependencies = [
 [[package]]
 name = "webb-primitives"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=stj/fix-serde-import#e3739288aff331c95c81b1593668bd5e9c191266"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-381",
@@ -13596,6 +13667,36 @@ dependencies = [
  "ark-serialize",
  "ark-std",
  "arkworks-native-gadgets",
+ "blake2 0.9.2",
+ "digest 0.9.0",
+ "ethabi",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.3.4",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-consensus-aura",
+ "sp-consensus-babe",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "webb-proposals",
+]
+
+[[package]]
+name = "webb-primitives"
+version = "0.1.0"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#6b039fbbd652f09f9337e8087cb65615d59cacdc"
+dependencies = [
+ "ark-crypto-primitives",
+ "ark-ec",
+ "ark-ff",
+ "ark-groth16",
+ "ark-relations",
+ "ark-serialize",
+ "ark-std",
  "blake2 0.9.2",
  "digest 0.9.0",
  "ethabi",
