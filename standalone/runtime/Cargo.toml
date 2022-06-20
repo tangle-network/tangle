@@ -29,20 +29,20 @@ pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git"
 pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async", default-features = false }
 
 # Protocol Substrate Dependencies
-webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "stj/fix-serde-import",  default-features = false, features = ["hashing", "verifying"] }
-pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "stj/fix-serde-import", default-features = false }
-pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-serde-import", default-features = false }
-pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-serde-import", default-features = false }
-pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-serde-import", default-features = false }
-pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-serde-import", default-features = false }
-pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-serde-import", default-features = false }
-pallet-anchor = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-serde-import", default-features = false }
-pallet-anchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "stj/fix-serde-import",default-features = false }
-pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-serde-import", default-features = false }
-pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "stj/fix-serde-import",default-features = false }
-pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-serde-import", default-features = false }
-pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git",branch = "stj/fix-serde-import", default-features = false }
-pallet-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "stj/fix-serde-import",default-features = false }
+webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git",   default-features = false, features = ["hashing", "verifying"] }
+pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false }
+pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-anchor = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-anchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 
 # Orml dependencies
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
