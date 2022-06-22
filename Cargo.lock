@@ -2720,7 +2720,7 @@ dependencies = [
  "dkg-gadget",
  "dkg-primitives",
  "dkg-runtime-primitives",
- "egg-runtime",
+ "egg-rococo-runtime",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "hex-literal 0.3.4",
@@ -2771,7 +2771,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "egg-runtime"
+name = "egg-rococo-runtime"
 version = "3.0.0"
 dependencies = [
  "cumulus-pallet-aura-ext",

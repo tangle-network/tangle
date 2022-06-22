@@ -22,7 +22,7 @@ use jsonrpsee::RpcModule;
 
 use cumulus_client_cli::CollatorOptions;
 // Local Runtime Types
-use egg_runtime::{opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
+use egg_rococo_runtime::{opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
 
 // Cumulus Imports
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
@@ -59,11 +59,11 @@ impl sc_executor::NativeExecutionDispatch for TemplateRuntimeExecutor {
 	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		egg_runtime::api::dispatch(method, data)
+		egg_rococo_runtime::api::dispatch(method, data)
 	}
 
 	fn native_version() -> sc_executor::NativeVersion {
-		egg_runtime::native_version()
+		egg_rococo_runtime::native_version()
 	}
 }
 

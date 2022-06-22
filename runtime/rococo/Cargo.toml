@@ -1,5 +1,5 @@
 [package]
-name = "egg-runtime"
+name = "egg-rococo-runtime"
 authors = ["Webb tools"]
 description = "Webb Protocol Egg Network runtime"
 license = "Unlicense"

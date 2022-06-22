@@ -14,7 +14,7 @@
 
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
-use egg_runtime::{
+use egg_rococo_runtime::{
 	AccountId, AnchorBn254Config, AnchorVerifierBn254Config, AssetRegistryConfig, AuraId, DKGId,
 	HasherBn254Config, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
 	Signature, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
@@ -27,7 +27,7 @@ use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
-pub type ChainSpec = sc_service::GenericChainSpec<egg_runtime::GenesisConfig, Extensions>;
+pub type ChainSpec = sc_service::GenericChainSpec<egg_rococo_runtime::GenesisConfig, Extensions>;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -56,8 +56,8 @@ pub fn get_dkg_keys_from_seed(seed: &str) -> DKGId {
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
-pub fn dkg_session_keys(keys: AuraId, dkg_keys: DKGId) -> egg_runtime::SessionKeys {
-	egg_runtime::SessionKeys { aura: keys, dkg: dkg_keys }
+pub fn dkg_session_keys(keys: AuraId, dkg_keys: DKGId) -> egg_rococo_runtime::SessionKeys {
+	egg_rococo_runtime::SessionKeys { aura: keys, dkg: dkg_keys }
 }
 
 /// The extensions for the [`ChainSpec`].
@@ -264,7 +264,7 @@ fn testnet_genesis(
 	invulnerables: Vec<(AccountId, AuraId, DKGId)>,
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
-) -> egg_runtime::GenesisConfig {
+) -> egg_rococo_runtime::GenesisConfig {
 	let curve_bn254 = Curve::Bn254;
 
 	log::info!("Bn254 x5 w3 params");
@@ -282,14 +282,14 @@ fn testnet_genesis(
 		vk_bytes.to_vec()
 	};
 
-	egg_runtime::GenesisConfig {
-		system: egg_runtime::SystemConfig {
-			code: egg_runtime::WASM_BINARY
+	egg_rococo_runtime::GenesisConfig {
+		system: egg_rococo_runtime::SystemConfig {
+			code: egg_rococo_runtime::WASM_BINARY
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
 		},
-		sudo: egg_runtime::SudoConfig { key: Some(root_key) },
-		balances: egg_runtime::BalancesConfig {
+		sudo: egg_rococo_runtime::SudoConfig { key: Some(root_key) },
+		balances: egg_rococo_runtime::BalancesConfig {
 			balances: endowed_accounts
 				.iter()
 				.cloned()
@@ -297,13 +297,13 @@ fn testnet_genesis(
 				.collect(),
 		},
 		indices: Default::default(),
-		parachain_info: egg_runtime::ParachainInfoConfig { parachain_id: id },
-		collator_selection: egg_runtime::CollatorSelectionConfig {
+		parachain_info: egg_rococo_runtime::ParachainInfoConfig { parachain_id: id },
+		collator_selection: egg_rococo_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _, _)| acc).collect(),
 			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
 			..Default::default()
 		},
-		session: egg_runtime::SessionConfig {
+		session: egg_rococo_runtime::SessionConfig {
 			keys: invulnerables
 				.iter()
 				.cloned()
@@ -319,7 +319,7 @@ fn testnet_genesis(
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
-		dkg: egg_runtime::DKGConfig {
+		dkg: egg_rococo_runtime::DKGConfig {
 			authorities: invulnerables.iter().map(|x| x.2.clone()).collect::<_>(),
 			threshold: Default::default(),
 			authority_ids: invulnerables.iter().map(|x| x.0.clone()).collect::<_>(),
@@ -328,7 +328,7 @@ fn testnet_genesis(
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
 			native_asset_name: b"WEBB".to_vec(),
-			native_existential_deposit: egg_runtime::EXISTENTIAL_DEPOSIT,
+			native_existential_deposit: egg_rococo_runtime::EXISTENTIAL_DEPOSIT,
 		},
 		hasher_bn_254: HasherBn254Config {
 			parameters: Some(bn254_x5_3_params.to_bytes()),
