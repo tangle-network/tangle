@@ -19,12 +19,13 @@ use egg_rococo_runtime::{
 	HasherBn254Config, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
 	Signature, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
 };
-use hex_literal::hex;
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
+use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
+
+pub mod rococo;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<egg_rococo_runtime::GenesisConfig, Extensions>;
@@ -177,88 +178,6 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 	)
 }
 
-pub fn latest_egg_testnet_config(id: ParaId) -> ChainSpec {
-	// Give your base currency a unit name and decimal places
-	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "tEGG".into());
-	properties.insert("tokenDecimals".into(), 12u32.into());
-
-	ChainSpec::from_genesis(
-		// Name
-		"Egg Testnet",
-		// ID
-		"egg_testnet",
-		ChainType::Live,
-		move || {
-			testnet_genesis(
-				// root
-				hex!["64fb440cf326ff4d47c2d98107f3533dbbdd8b3d3d2bafb27d141cb435d2f37d"].into(),
-				vec![
-					(
-						//1//account
-						hex!["e44c85670c9a5cea588c2533613d130d8b3a81dc9ea1d47a54f289206c86d676"]
-							.into(),
-						//1//aura
-						hex!["40d082fea20451b92da758234b0fd3e26f2f7e87a7e65b83f3c47f23bce29153"]
-							.unchecked_into(),
-						//1//dkg (--scheme Ecdsa)
-						hex!["03ffb24275fd6ed90ac86e3b7a18a3ea8e96ff0aac63f301df1e3145c0d388368a"]
-							.unchecked_into(),
-					),
-					(
-						//2//account
-						hex!["f2d1c2eb434926d1b6e8e894f3e2021edc88c33afe6266e423ff3da2a93dca5e"]
-							.into(),
-						//2//aura
-						hex!["880ecc41a19a9afe55fd029c568ff138d3e74773eae482117077f672f30ac241"]
-							.unchecked_into(),
-						//2//dkg (--scheme Ecdsa)
-						hex!["02e1e595807c8bd71e4d124fe1a20e2fa68f53452410fed0320961933ff97296f3"]
-							.unchecked_into(),
-					),
-					(
-						//3//account
-						hex!["a68bb44b8d70f12d392b0e2a9f91608c4f136c9aba144beb1ad558e9f6a51a6d"]
-							.into(),
-						//3//aura
-						hex!["c6469a84e9325507b881c52e0f1f833bed005e3514ff23b675a1008017ee4709"]
-							.unchecked_into(),
-						//3//dkg (--scheme Ecdsa)
-						hex!["03ade18f4f4b5096cb2daf3cddba6fd53d0d701478c397b2ead1c96409c2b6bf1b"]
-							.unchecked_into(),
-					),
-				],
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					hex!["64fb440cf326ff4d47c2d98107f3533dbbdd8b3d3d2bafb27d141cb435d2f37d"].into(),
-					hex!["e44c85670c9a5cea588c2533613d130d8b3a81dc9ea1d47a54f289206c86d676"].into(),
-					hex!["f2d1c2eb434926d1b6e8e894f3e2021edc88c33afe6266e423ff3da2a93dca5e"].into(),
-					hex!["a68bb44b8d70f12d392b0e2a9f91608c4f136c9aba144beb1ad558e9f6a51a6d"].into(),
-				],
-				id,
-			)
-		},
-		vec![
-			"/dns/testnet.webb.tools/tcp/30333/p2p/12D3KooWRazFqUMAGSaTYfj9C7WGhxPzmgu422ZHRDS5J41y6b7o".parse().unwrap(),
-			"/dns/testnet1.webb.tools/tcp/30333/p2p/12D3KooWE7TRKmNotiqXh38muaymNrT6iMduB1yCM9F9mFwdNcG3".parse().unwrap(),
-			"/dns/testnet2.webb.tools/tcp/30333/p2p/12D3KooWGDWxDj62vEwuJbtUXqytqDVYfVsgNw1RyNuVpXUD2Yg7".parse().unwrap(),
-		],
-		None,
-		None,
-		None,
-		None,
-		Extensions {
-			relay_chain: "rococo".into(), // You MUST set this to the correct network!
-			para_id: id.into(),
-		},
-	)
-}
-
 fn testnet_genesis(
 	root_key: AccountId,
 	invulnerables: Vec<(AccountId, AuraId, DKGId)>,
@@ -272,13 +191,13 @@ fn testnet_genesis(
 
 	log::info!("Verifier params for mixer");
 	let mixer_verifier_bn254_params = {
-		let vk_bytes = include_bytes!("../../verifying_keys/mixer/bn254/verifying_key.bin");
+		let vk_bytes = include_bytes!("../../../verifying_keys/mixer/bn254/verifying_key.bin");
 		vk_bytes.to_vec()
 	};
 
 	log::info!("Verifier params for anchor");
 	let anchor_verifier_bn254_params = {
-		let vk_bytes = include_bytes!("../../verifying_keys/anchor/bn254/2/verifying_key.bin");
+		let vk_bytes = include_bytes!("../../../verifying_keys/anchor/bn254/2/verifying_key.bin");
 		vk_bytes.to_vec()
 	};
 

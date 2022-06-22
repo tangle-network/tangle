@@ -16,7 +16,7 @@
 use crate::{
 	chain_spec,
 	cli::{Cli, RelayChainCli, Subcommand},
-	service::{new_partial, TemplateRuntimeExecutor},
+	service::{new_partial, rococo::Executor as RococoExecutor},
 };
 use codec::Encode;
 use cumulus_client_service::genesis::generate_genesis_block;
@@ -36,11 +36,29 @@ use sp_core::hexdisplay::HexDisplay;
 use sp_runtime::traits::{AccountIdConversion, Block as BlockT};
 use std::{io::Write, net::SocketAddr};
 
+pub enum Runtime {
+	Rococo,
+}
+
+trait ChainType {
+	fn runtime(&self) -> Runtime;
+}
+
+impl ChainType for dyn ChainSpec {
+	fn runtime(&self) -> Runtime {
+		runtime(self.id())
+	}
+}
+
+fn runtime(_id: &str) -> Runtime {
+	Runtime::Rococo
+}
+
 fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
 		"dev" => Box::new(chain_spec::development_config(2000.into())),
 		"template-rococo" => Box::new(chain_spec::local_testnet_config(2000.into())),
-		"egg-rococo" => Box::new(chain_spec::latest_egg_testnet_config(2003.into())),
+		"egg-rococo" => Box::new(chain_spec::rococo::egg_rococo_config(2003.into())),
 		"" | "local" => Box::new(chain_spec::local_testnet_config(2000.into())),
 		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})
@@ -79,8 +97,10 @@ impl SubstrateCli for Cli {
 		load_spec(id)
 	}
 
-	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-		&egg_rococo_runtime::VERSION
+	fn native_runtime_version(chain_spec: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
+		match chain_spec.runtime() {
+			Runtime::Rococo => &egg_rococo_runtime::VERSION,
+		}
 	}
 }
 
@@ -138,7 +158,7 @@ macro_rules! construct_async_run {
 		runner.async_run(|$config| {
 			let $components = new_partial::<
 				RuntimeApi,
-				TemplateRuntimeExecutor,
+				RococoExecutor,
 				_
 			>(
 				&$config,
@@ -253,21 +273,21 @@ pub fn run() -> Result<()> {
 			match cmd {
 				BenchmarkCmd::Pallet(cmd) =>
 					if cfg!(feature = "runtime-benchmarks") {
-						runner.sync_run(|config| cmd.run::<Block, TemplateRuntimeExecutor>(config))
+						runner.sync_run(|config| cmd.run::<Block, RococoExecutor>(config))
 					} else {
 						Err("Benchmarking wasn't enabled when building the node. \
 					You can enable it with `--features runtime-benchmarks`."
 							.into())
 					},
 				BenchmarkCmd::Block(cmd) => runner.sync_run(|config| {
-					let partials = new_partial::<RuntimeApi, TemplateRuntimeExecutor, _>(
+					let partials = new_partial::<RuntimeApi, RococoExecutor, _>(
 						&config,
 						crate::service::parachain_build_import_queue,
 					)?;
 					cmd.run(partials.client)
 				}),
 				BenchmarkCmd::Storage(cmd) => runner.sync_run(|config| {
-					let partials = new_partial::<RuntimeApi, TemplateRuntimeExecutor, _>(
+					let partials = new_partial::<RuntimeApi, RococoExecutor, _>(
 						&config,
 						crate::service::parachain_build_import_queue,
 					)?;
@@ -292,7 +312,7 @@ pub fn run() -> Result<()> {
 						.map_err(|e| format!("Error: {:?}", e))?;
 
 				runner.async_run(|config| {
-					Ok((cmd.run::<Block, TemplateRuntimeExecutor>(config), task_manager))
+					Ok((cmd.run::<Block, RococoExecutor>(config), task_manager))
 				})
 			} else {
 				Err("Try-runtime must be enabled by `--features try-runtime`.".into())

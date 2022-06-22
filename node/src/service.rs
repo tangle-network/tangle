@@ -52,18 +52,21 @@ use substrate_prometheus_endpoint::Registry;
 
 use polkadot_service::CollatorPair;
 
-/// Native executor instance.
-pub struct TemplateRuntimeExecutor;
+/// Rococo runtime executor
+pub mod rococo {
+	pub use egg_rococo_runtime::RuntimeApi;
 
-impl sc_executor::NativeExecutionDispatch for TemplateRuntimeExecutor {
-	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
+	pub struct Executor;
+	impl sc_executor::NativeExecutionDispatch for Executor {
+		type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 
-	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		egg_rococo_runtime::api::dispatch(method, data)
-	}
+		fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
+			egg_rococo_runtime::api::dispatch(method, data)
+		}
 
-	fn native_version() -> sc_executor::NativeVersion {
-		egg_rococo_runtime::native_version()
+		fn native_version() -> sc_executor::NativeVersion {
+			egg_rococo_runtime::native_version()
+		}
 	}
 }
 
@@ -462,14 +465,14 @@ where
 /// Build the import queue for the parachain runtime.
 #[allow(clippy::type_complexity)]
 pub fn parachain_build_import_queue(
-	client: Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<TemplateRuntimeExecutor>>>,
+	client: Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<rococo::Executor>>>,
 	config: &Configuration,
 	telemetry: Option<TelemetryHandle>,
 	task_manager: &TaskManager,
 ) -> Result<
 	sc_consensus::DefaultImportQueue<
 		Block,
-		TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<TemplateRuntimeExecutor>>,
+		TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<rococo::Executor>>,
 	>,
 	sc_service::Error,
 > {
@@ -514,9 +517,9 @@ pub async fn start_parachain_node(
 	hwbench: Option<sc_sysinfo::HwBench>,
 ) -> sc_service::error::Result<(
 	TaskManager,
-	Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<TemplateRuntimeExecutor>>>,
+	Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<rococo::Executor>>>,
 )> {
-	start_node_impl::<RuntimeApi, TemplateRuntimeExecutor, _, _, _>(
+	start_node_impl::<RuntimeApi, rococo::Executor, _, _, _>(
 		parachain_config,
 		polkadot_config,
 		collator_options,
