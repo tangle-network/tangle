@@ -558,11 +558,6 @@ parameter_types! {
 	pub const MaxProposals: u32 = 100;
 }
 
-type EnsureRootOrHalfCouncil = EnsureOneOf<
-	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
->;
-
 impl pallet_democracy::Config for Runtime {
 	type BlacklistOrigin = EnsureRoot<AccountId>;
 	// To cancel a proposal before it has been passed, the technical committee must
@@ -738,7 +733,7 @@ impl pallet_election_provider_multi_phase::MinerConfig for WebbMinerConfig {
 	type MaxVotesPerVoter = MaxNominations;
 	type Solution = NposSolution16;
 
-	fn solution_weight(v: u32, t: u32, a: u32, d: u32) -> Weight {
+	fn solution_weight(_v: u32, _t: u32, _a: u32, _d: u32) -> Weight {
 		0
 	}
 }
@@ -1398,8 +1393,6 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
 			list_benchmark!(list, extra, pallet_dkg_proposal_handler, DKGProposalHandler);
-
-
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
