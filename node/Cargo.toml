@@ -20,7 +20,7 @@ name = "egg-collator"
 
 [features]
 default = []
-runtime-benchmarks = ["egg-runtime/runtime-benchmarks"]
+runtime-benchmarks = ["egg-rococo-runtime/runtime-benchmarks"]
 rococo-native = [
 	"polkadot-cli/rococo-native"
 ]
@@ -38,7 +38,7 @@ clap = { version = "3.1", features = ["derive"] }
 jsonrpsee = { version = "0.13.0", features = ["server"] }
 
 # Local Dependencies
-egg-runtime = { path = "../runtime" }
+egg-rococo-runtime = { path = "../runtime/rococo" }
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
 dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
 dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
