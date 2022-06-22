@@ -55,7 +55,7 @@
 The Egg Network contains runtimes for both standalone and parachain nodes featuring Webb's DKG and privacy pallet protocols. If you would like to familiarize yourself with our DKG and anchor protocol check out these repos:
 
 - [dkg-substrate](https://github.com/webb-tools/dkg-substrate)
-- [protocol-solidity](https://github.com/webb-tools/protocol-solidity)
+- [protocol-substrate](https://github.com/webb-tools/protocol-substrate)
 
 ## Prerequisites
 
