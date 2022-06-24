@@ -271,5 +271,6 @@ fn testnet_genesis(
 		anchor_bn_254: AnchorBn254Config {
 			anchors: vec![(0, 10 * UNIT, 2), (0, 100 * UNIT, 2), (0, 1000 * UNIT, 2)],
 		},
+		treasury: Default::default(),
 	}
 }
