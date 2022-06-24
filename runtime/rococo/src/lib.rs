@@ -22,6 +22,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod impls;
 pub mod protocol_substrate_config;
+pub mod weights;
 pub mod xcm_config;
 
 use codec::Encode;
@@ -41,6 +42,9 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
+#[cfg(feature = "runtime-benchmarks")]
+pub mod benchmarking;
+
 use frame_support::weights::{
 	ConstantMultiplier, WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 };
@@ -53,10 +57,7 @@ pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 pub use frame_support::{
 	construct_runtime, match_types, parameter_types,
 	traits::{Currency, EnsureOneOf, Everything, IsInVec, Randomness},
-	weights::{
-		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-		DispatchClass, IdentityFee, Weight,
-	},
+	weights::{constants::WEIGHT_PER_SECOND, DispatchClass, IdentityFee, Weight},
 	PalletId, StorageValue,
 };
 #[cfg(any(feature = "std", test))]
@@ -72,6 +73,7 @@ use sp_runtime::generic::Era;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
+use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 
 // XCM Imports
 use smallvec::smallvec;
@@ -816,11 +818,11 @@ impl_runtime_apis! {
 			Vec<frame_benchmarking::BenchmarkList>,
 			Vec<frame_support::traits::StorageInfo>,
 		) {
-			use frame_benchmarking::{list_benchmark, baseline, Benchmarking, BenchmarkList};
+			use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
+			use orml_benchmarking::list_benchmark as list_orml_benchmark;
 			use frame_support::traits::StorageInfoTrait;
 
 			use frame_system_benchmarking::Pallet as SystemBench;
-			use baseline::Pallet as BaselineBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
 
@@ -828,8 +830,14 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
 			list_benchmark!(list, extra, pallet_dkg_proposal_handler, DKGProposalHandler);
-
-
+			list_benchmark!(list, extra, pallet_anchor, AnchorBn254);
+			list_benchmark!(list, extra, pallet_signature_bridge, SignatureBridge);
+			list_benchmark!(list, extra, pallet_hasher, HasherBn254);
+			list_benchmark!(list, extra, pallet_mt, MerkleTreeBn254);
+			list_benchmark!(list, extra, pallet_asset_registry, AssetRegistry);
+			list_benchmark!(list, extra, pallet_mixer, MixerBn254);
+			list_orml_benchmark!(list, extra, orml_tokens, benchmarking::orml_tokens);
+			list_orml_benchmark!(list, extra, orml_currencies, benchmarking::orml_currencies);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -840,7 +848,7 @@ impl_runtime_apis! {
 			config: frame_benchmarking::BenchmarkConfig
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
-
+			use orml_benchmarking::{add_benchmark as add_orml_benchmark};
 			use frame_system_benchmarking::Pallet as SystemBench;
 			impl frame_system_benchmarking::Config for Runtime {}
 
@@ -864,6 +872,14 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
 			add_benchmark!(params, batches, pallet_dkg_proposal_handler, DKGProposalHandler);
+			add_benchmark!(params, batches, pallet_anchor, AnchorBn254);
+			add_benchmark!(params, batches, pallet_signature_bridge, SignatureBridge);
+			add_benchmark!(params, batches, pallet_hasher, HasherBn254);
+			add_benchmark!(params, batches, pallet_mt, MerkleTreeBn254);
+			add_benchmark!(params, batches, pallet_asset_registry, AssetRegistry);
+			add_benchmark!(params, batches, pallet_mixer, MixerBn254);
+			add_orml_benchmark!(params, batches, orml_tokens, benchmarking::orml_tokens);
+			add_orml_benchmark!(params, batches, orml_currencies, benchmarking::orml_currencies);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
