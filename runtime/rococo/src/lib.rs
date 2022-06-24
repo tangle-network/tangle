@@ -325,7 +325,9 @@ parameter_types! {
 	pub const MaxReserves: u32 = 50;
 }
 
-type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
+pub type NegativeImbalance<T> = <pallet_balances::Pallet<T> as Currency<
+	<T as frame_system::Config>::AccountId,
+>>::NegativeImbalance;
 
 impl pallet_balances::Config for Runtime {
 	/// The type for recording an account's balance.
@@ -342,6 +344,40 @@ impl pallet_balances::Config for Runtime {
 }
 
 parameter_types! {
+	pub const TreasuryPalletId: PalletId = PalletId(*b"eg/trsry");
+	pub const MaxApprovals: u32 = 100;
+}
+
+impl pallet_treasury::Config for Runtime {
+	type Currency = Balances;
+	type ApproveOrigin = frame_system::EnsureRoot<AccountId>;
+	type RejectOrigin = frame_system::EnsureRoot<AccountId>;
+	type Event = Event;
+	type OnSlash = ();
+	type ProposalBond = ();
+	type ProposalBondMinimum = ();
+	type ProposalBondMaximum = ();
+	type SpendPeriod = ();
+	type Burn = ();
+	type BurnDestination = ();
+	type PalletId = TreasuryPalletId;
+	type SpendFunds = ();
+	type MaxApprovals = MaxApprovals;
+	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub const CollatorRewardsId: PalletId = PalletId(*b"egg/clrw");
+}
+
+impl pallet_collator_rewards::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type PalletId = CollatorRewardsId;
+}
+
+parameter_types! {
 	pub const TransactionByteFee: Balance = 10 * MILLIUNIT;
 	pub const OperationalFeeMultiplier: u8 = 5;
 	pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
@@ -350,7 +386,7 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
-	type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
+	type OnChargeTransaction = CurrencyAdapter<Balances, crate::impls::DealWithFees<Runtime>>;
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 	type WeightToFee = IdentityFee<Balance>;
 	type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
@@ -557,6 +593,7 @@ construct_runtime!(
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage},
 
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
+		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage},
 		Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>},
 
@@ -609,6 +646,9 @@ construct_runtime!(
 
 		// Bridge
 		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>},
+
+		// Bridge
+		CollatorRewards: pallet_collator_rewards::{Pallet, Call, Storage, Event<T>},
 
 	}
 );
