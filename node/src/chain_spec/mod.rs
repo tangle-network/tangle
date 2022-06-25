@@ -19,7 +19,6 @@ use egg_rococo_runtime::{
 	HasherBn254Config, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
 	Signature, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
 };
-use hex_literal::hex;
 use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
