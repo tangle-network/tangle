@@ -2803,6 +2803,7 @@ dependencies = [
  "pallet-authorship",
  "pallet-balances",
  "pallet-bridge",
+ "pallet-collator-rewards",
  "pallet-collator-selection",
  "pallet-collective",
  "pallet-dkg-metadata",
@@ -2824,6 +2825,7 @@ dependencies = [
  "pallet-token-wrapper",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
+ "pallet-treasury",
  "pallet-verifier",
  "pallet-xcm",
  "parachain-info",
@@ -6566,6 +6568,22 @@ dependencies = [
  "pallet-treasury",
  "parity-scale-codec",
  "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-collator-rewards"
+version = "1.0.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
  "sp-core",
  "sp-io",
  "sp-runtime",
