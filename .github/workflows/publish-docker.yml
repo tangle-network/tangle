@@ -22,9 +22,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - dockerfile: ./docker/Standalone.Dockerfile
+          - dockerfile: ./docker/eggnet-standalone.Dockerfile
             image: ghcr.io/${{ github.repository }}/egg-standalone-node
-          - dockerfile: ./docker/Parachain.Dockerfile
+          - dockerfile: ./docker/eggnet-collator.Dockerfile
             image: ghcr.io/${{ github.repository }}/egg-collator
     permissions:
       contents: read

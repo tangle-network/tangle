@@ -244,7 +244,7 @@ pub fn get_testnet_root_key() -> AccountId {
 
 /// Arana bootnodes
 pub fn get_arana_bootnodes() -> Vec<MultiaddrWithPeerId> {
-	return vec![
+	vec![
 		"/ip4/45.76.21.37/tcp/30333/p2p/12D3KooWELWpiG9EmREfr9BZ4CcoPMdvAqCN2HiiMzKUDDWxRpp1"
 			.parse()
 			.unwrap(),
@@ -259,7 +259,7 @@ pub fn get_arana_bootnodes() -> Vec<MultiaddrWithPeerId> {
 
 /// Arana initial authorities
 pub fn get_arana_initial_authorities() -> Vec<(AccountId, AccountId, AuraId, GrandpaId, DKGId)> {
-	return vec![
+	vec![
 		(
 			hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"].into(),
 			hex!["804808fb75d16340dc250871138a1a6f1dfa3cab9cc1fbd6f42960f1c39a950d"].into(),
