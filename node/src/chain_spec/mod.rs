@@ -240,7 +240,8 @@ fn testnet_genesis(
 		parachain_system: Default::default(),
 		dkg: egg_rococo_runtime::DKGConfig {
 			authorities: invulnerables.iter().map(|x| x.2.clone()).collect::<_>(),
-			threshold: Default::default(),
+			keygen_threshold: 2,
+			signature_threshold: 1,
 			authority_ids: invulnerables.iter().map(|x| x.0.clone()).collect::<_>(),
 		},
 		dkg_proposals: Default::default(),
