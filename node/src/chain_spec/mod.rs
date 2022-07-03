@@ -93,6 +93,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tEGG".into());
 	properties.insert("tokenDecimals".into(), 12u32.into());
+	properties.insert("ss58Format".into(), 42.into());
 
 	ChainSpec::from_genesis(
 		// Name
@@ -107,6 +108,11 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_collator_keys_from_seed("Alice"),
 					get_dkg_keys_from_seed("Alice"),
+				),
+				(
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_collator_keys_from_seed("Bob"),
+					get_dkg_keys_from_seed("Bob"),
 				)],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -117,11 +123,17 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 				id,
 			)
 		},
-		vec![],
+		// Bootnodes
+		Vec::new(),
+		// Telemetry
 		None,
+		// Protocol ID
+		Some("egg-dev"),
+		// Fork ID
 		None,
-		None,
-		None,
+		// Properties
+		Some(properties),
+		// Extensions
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
@@ -134,6 +146,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tEGG".into());
 	properties.insert("tokenDecimals".into(), 12u32.into());
+	properties.insert("ss58Format".into(), 42.into());
 
 	ChainSpec::from_genesis(
 		// Name
@@ -148,6 +161,11 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_collator_keys_from_seed("Alice"),
 					get_dkg_keys_from_seed("Alice"),
+				),
+				(
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_collator_keys_from_seed("Bob"),
+					get_dkg_keys_from_seed("Bob"),
 				)],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -166,11 +184,17 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 				id,
 			)
 		},
+		// Bootnodes
 		Vec::new(),
+		// Telemetry
 		None,
+		// Protocol ID
+		Some("egg-template-local"),
+		// Fork ID
 		None,
-		None,
-		None,
+		// Properties
+		Some(properties),
+		// Extensions
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),

@@ -29,6 +29,7 @@ pub fn egg_rococo_config(id: ParaId) -> ChainSpec {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tEGG".into());
 	properties.insert("tokenDecimals".into(), 12u32.into());
+	properties.insert("ss58Format".into(), 42.into());
 
 	ChainSpec::from_genesis(
 		// Name
@@ -90,15 +91,21 @@ pub fn egg_rococo_config(id: ParaId) -> ChainSpec {
 				id,
 			)
 		},
+		// Bootnodes
 		vec![
 			"/dns/testnet.webb.tools/tcp/30333/p2p/12D3KooWRazFqUMAGSaTYfj9C7WGhxPzmgu422ZHRDS5J41y6b7o".parse().unwrap(),
 			"/dns/testnet1.webb.tools/tcp/30333/p2p/12D3KooWE7TRKmNotiqXh38muaymNrT6iMduB1yCM9F9mFwdNcG3".parse().unwrap(),
 			"/dns/testnet2.webb.tools/tcp/30333/p2p/12D3KooWGDWxDj62vEwuJbtUXqytqDVYfVsgNw1RyNuVpXUD2Yg7".parse().unwrap(),
 		],
+		// Telemetry
 		None,
+		// Protocol ID
+		Some("egg-rococo"),
+		// Fork ID
 		None,
-		None,
-		None,
+		// Properties
+		Some(properties),
+		// Extensions
 		Extensions {
 			relay_chain: "rococo".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
