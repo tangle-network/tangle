@@ -9,7 +9,7 @@ RUN rustup default nightly-2022-06-22 && \
 	rustup target add wasm32-unknown-unknown --toolchain nightly-2022-06-22
 
 # Install deps
-RUN apt-get update && apt-get install -y clang curl libssl-dev llvm libudev-dev libgmp3-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y clang curl libssl-dev llvm libudev-dev libgmp3-dev protobuf-compiler && rm -rf /var/lib/apt/lists/*
 RUN apt-get install -y ca-certificates && update-ca-certificates
 
 COPY . .
