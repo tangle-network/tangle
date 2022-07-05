@@ -18,7 +18,7 @@ use egg_runtime::{
 	BalancesConfig, DKGConfig, DKGId, DKGProposalsConfig, ElectionsConfig, GenesisConfig,
 	HasherBn254Config, MaxNominations, MerkleTreeBn254Config, MixerBn254Config,
 	MixerVerifierBn254Config, Perbill, SessionConfig, Signature, StakerStatus, StakingConfig,
-	SudoConfig, SystemConfig, UNIT, WASM_BINARY,
+	SudoConfig, SystemConfig, VAnchorBn254Config, VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
 };
 use hex_literal::hex;
 use sc_network::config::MultiaddrWithPeerId;
@@ -370,6 +370,13 @@ fn testnet_genesis(
 		vk_bytes.to_vec()
 	};
 
+	log::info!("Verifier params for vanchor");
+	let vanchor_verifier_bn254_params = {
+		let vk_bytes =
+			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
+		vk_bytes.to_vec()
+	};
+
 	const ENDOWMENT: Balance = 10_000_000 * UNIT;
 	const STASH: Balance = ENDOWMENT / 1000;
 
@@ -439,7 +446,8 @@ fn testnet_genesis(
 		grandpa: Default::default(),
 		dkg: DKGConfig {
 			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
-			threshold: Default::default(),
+			keygen_threshold: 2,
+			signature_threshold: 1,
 			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
@@ -469,6 +477,16 @@ fn testnet_genesis(
 		},
 		anchor_bn_254: AnchorBn254Config {
 			anchors: vec![(0, 10 * UNIT, 2), (0, 100 * UNIT, 2), (0, 1000 * UNIT, 2)],
+		},
+		v_anchor_verifier_2x_2_bn_254: VAnchorVerifier2x2Bn254Config {
+			parameters: Some(vanchor_verifier_bn254_params),
+			phantom: Default::default(),
+		},
+		v_anchor_bn_254: VAnchorBn254Config {
+			max_deposit_amount: 1_000_000 * UNIT,
+			min_withdraw_amount: 0,
+			vanchors: vec![(0, 2)],
+			phantom: Default::default(),
 		},
 	}
 }

@@ -3,6 +3,7 @@ use codec::{Decode, Encode};
 use frame_support::{pallet_prelude::ConstU32, traits::Nothing};
 use orml_currencies::{BasicCurrencyAdapter, NativeCurrencyOf};
 use webb_primitives::{
+	field_ops::ArkworksIntoFieldBn254,
 	hashing::{ethereum::Keccak256HasherBn254, ArkworksPoseidonHasherBn254},
 	verifying::ArkworksVerifierBn254,
 	Amount, ChainId, ElementTrait,
@@ -197,11 +198,6 @@ impl pallet_anchor_handler::Config<pallet_anchor_handler::Instance1> for Runtime
 	type Event = Event;
 }
 
-parameter_types! {
-	pub const BridgeProposalLifetime: BlockNumber = 50;
-	pub const BridgeAccountId: PalletId = PalletId(*b"dw/bridg");
-}
-
 type SignatureBridgeInstance = pallet_signature_bridge::Instance1;
 impl pallet_signature_bridge::Config<SignatureBridgeInstance> for Runtime {
 	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
@@ -211,9 +207,59 @@ impl pallet_signature_bridge::Config<SignatureBridgeInstance> for Runtime {
 	type ChainType = ChainType;
 	type Event = Event;
 	type Proposal = Call;
-	type ProposalLifetime = BridgeProposalLifetime;
+	type ProposalLifetime = ProposalLifetime;
 	type ProposalNonce = u32;
 	type MaintainerNonce = u32;
 	type SignatureVerifier = webb_primitives::signing::SignatureVerifier;
 	type WeightInfo = ();
+}
+
+impl pallet_verifier::Config<pallet_verifier::Instance3> for Runtime {
+	type Event = Event;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type Verifier = ArkworksVerifierBn254;
+	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
+}
+
+parameter_types! {
+	pub const VAnchorPalletId: PalletId = PalletId(*b"py/vanch");
+	pub const MaxFee: Balance = Balance::MAX - 1;
+	pub const MaxExtAmount: Balance = Balance::MAX - 1;
+}
+
+impl pallet_vanchor::Config<pallet_vanchor::Instance1> for Runtime {
+	type Event = Event;
+	type PalletId = VAnchorPalletId;
+	type LinkableTree = LinkableTreeBn254;
+	type Verifier2x2 = VAnchorVerifier2x2Bn254;
+	type EthereumHasher = Keccak256HasherBn254;
+	type IntoField = ArkworksIntoFieldBn254;
+	type Currency = Currencies;
+	type MaxFee = MaxFee;
+	type MaxExtAmount = MaxExtAmount;
+	type PostDepositHook = ();
+	type NativeCurrencyId = GetNativeCurrencyId;
+}
+
+parameter_types! {
+	pub const ProposalLifetime: BlockNumber = 50;
+	pub const BridgeAccountId: PalletId = PalletId(*b"dw/bridg");
+}
+
+type BridgeInstance = pallet_bridge::Instance1;
+impl pallet_bridge::Config<BridgeInstance> for Runtime {
+	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type BridgeAccountId = BridgeAccountId;
+	type ChainId = ChainId;
+	type ChainIdentifier = ChainIdentifier;
+	type ChainType = ChainType;
+	type Event = Event;
+	type Proposal = Call;
+	type ProposalLifetime = ProposalLifetime;
+}
+
+impl pallet_vanchor_handler::Config<pallet_vanchor_handler::Instance1> for Runtime {
+	type VAnchor = VAnchorBn254;
+	type BridgeOrigin = pallet_bridge::EnsureBridge<Runtime, BridgeInstance>;
+	type Event = Event;
 }
