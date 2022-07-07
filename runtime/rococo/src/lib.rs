@@ -982,8 +982,8 @@ cumulus_pallet_parachain_system::register_validate_block! {
 #[cfg(test)]
 mod tests {
 	use super::{
-		currency::{MILLIUNIT, DOLLAR},
-		WeightToFee, MAXIMUM_BLOCK_WEIGHT
+		currency::{DOLLAR, MILLIUNIT},
+		WeightToFee, MAXIMUM_BLOCK_WEIGHT,
 	};
 	use crate::weights::ExtrinsicBaseWeight;
 	use frame_support::weights::WeightToFee as WeightToFeeT;
@@ -991,10 +991,10 @@ mod tests {
 	#[test]
 	// Test that the fee for `MAXIMUM_BLOCK_WEIGHT` of weight has sane bounds.
 	fn full_block_fee_is_correct() {
-		// A full block should cost between 10 and 100 DOLLARS.
+		// A full block should cost between 0.5 and 2 DOLLARS.
 		let full_block = WeightToFee::weight_to_fee(&MAXIMUM_BLOCK_WEIGHT);
 		println!("{:?}", full_block);
-		assert!(full_block >= (1/2) * DOLLAR);
+		assert!(full_block >= (1 / 2) * DOLLAR);
 		assert!(full_block <= 2 * DOLLAR);
 	}
 
