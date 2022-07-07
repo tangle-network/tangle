@@ -43,6 +43,8 @@ pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substr
 pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-vanchor = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-vanchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 
 # Orml dependencies
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
@@ -223,4 +225,6 @@ std = [
 	"pallet-mixer/std",
 	"pallet-token-wrapper/std",
   "pallet-bridge/std",
+  "pallet-vanchor/std",
+  "pallet-vanchor-handler/std"
 ]

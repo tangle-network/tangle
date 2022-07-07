@@ -1123,7 +1123,19 @@ construct_runtime!(
 		AnchorHandlerBn254: pallet_anchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>},
 
 		// Signature Bridge
-		Bridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>},
+		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>},
+
+		// VAnchor Verifier 2x2
+		VAnchorVerifier2x2Bn254: pallet_verifier::<Instance3>::{Pallet, Call, Storage, Event<T>, Config<T>},
+
+		// Bridge
+		Bridge: pallet_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>},
+
+		// VAnchor
+		VAnchorBn254: pallet_vanchor::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
+
+		// VAnchor Handler
+		VAnchorHandlerBn254: pallet_vanchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>},
 
 	}
 );
