@@ -146,6 +146,7 @@ The following chainspecs are provided for your convenience in `/resources`:
 | template-local-plain.json | Used for local testnet development with paraId 2000 | `--chain=template-rococo`
 | rococo-plain.json | Used for Rococo testnet with paraId 2003 | `--chain=egg-rococo`
 | arana-standalone-plain.json | Used for standalone egg network | `--chain=eggnet`
+| webb_rococo_raw.json | Used for rococo parachain with paraId 4006 | `--chain=egg-rococo`
 
 Keep in mind each of the above mentioned specs are in plain json form and can be arbitrarily updated. The raw spec versions are included in `resources/` for your convenience. To learn more about chainspecs checkout the [docs](https://docs.substrate.io/v3/runtime/chain-specs/) 🎓.
 

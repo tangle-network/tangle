@@ -58,7 +58,7 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
 	Ok(match id {
 		"dev" => Box::new(chain_spec::development_config(2000.into())),
 		"template-rococo" => Box::new(chain_spec::local_testnet_config(2000.into())),
-		"egg-rococo" => Box::new(chain_spec::rococo::egg_rococo_config(4006.into())), // Rococo para-id 4006
+		"egg-rococo" => Box::new(chain_spec::rococo::egg_rococo_config(4006.into())), /* Rococo para-id 4006 */
 		"" | "local" => Box::new(chain_spec::local_testnet_config(2000.into())),
 		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})
