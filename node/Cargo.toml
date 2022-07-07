@@ -24,6 +24,7 @@ runtime-benchmarks = ["egg-rococo-runtime/runtime-benchmarks"]
 rococo-native = [
 	"polkadot-cli/rococo-native"
 ]
+try-runtime = ["egg-rococo-runtime/try-runtime"]
 
 [dependencies]
 derive_more = "0.99.2"
