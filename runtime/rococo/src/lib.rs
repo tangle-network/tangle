@@ -978,33 +978,3 @@ cumulus_pallet_parachain_system::register_validate_block! {
 	BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::<Runtime, Executive>,
 	CheckInherents = CheckInherents,
 }
-
-#[cfg(test)]
-mod tests {
-	use super::{
-		currency::{DOLLAR, MILLIUNIT},
-		WeightToFee, MAXIMUM_BLOCK_WEIGHT,
-	};
-	use crate::weights::ExtrinsicBaseWeight;
-	use frame_support::weights::WeightToFee as WeightToFeeT;
-
-	#[test]
-	// Test that the fee for `MAXIMUM_BLOCK_WEIGHT` of weight has sane bounds.
-	fn full_block_fee_is_correct() {
-		// A full block should cost between 0.5 and 2 DOLLARS.
-		let full_block = WeightToFee::weight_to_fee(&MAXIMUM_BLOCK_WEIGHT);
-		println!("{:?}", full_block);
-		assert!(full_block >= (1 / 2) * DOLLAR);
-		assert!(full_block <= 2 * DOLLAR);
-	}
-
-	#[test]
-	// This function tests that the fee for `ExtrinsicBaseWeight` of weight is correct
-	fn extrinsic_base_fee_is_correct() {
-		// `ExtrinsicBaseWeight` should cost 1/10 of a MILLIUNIT
-		println!("Base: {}", ExtrinsicBaseWeight::get());
-		let x = WeightToFee::weight_to_fee(&ExtrinsicBaseWeight::get());
-		let y = MILLIUNIT / 10;
-		assert!(x.max(y) - x.min(y) < MILLIUNIT);
-	}
-}
