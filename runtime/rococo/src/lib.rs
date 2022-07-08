@@ -557,7 +557,7 @@ parameter_types! {
 	pub const MaxRegistrars: u32 = 20;
 }
 
-impl pallet_identity::Config for Test {
+impl pallet_identity::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type BasicDeposit = BasicDeposit;
@@ -567,15 +567,15 @@ impl pallet_identity::Config for Test {
 	type MaxAdditionalFields = MaxAdditionalFields;
 	type MaxRegistrars = MaxRegistrars;
 	type Slashed = Treasury;
-	type ForceOrigin = Sudo;
-	type RegistrarOrigin = Sudo;
+	type ForceOrigin = EnsureRoot<Self::AccountId>;
+	type RegistrarOrigin = EnsureRoot<Self::AccountId>;
 	type WeightInfo = ();
 }
 
 impl pallet_utility::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
-	type PalletsOrigin = Sudo;
+	type PalletsOrigin = OriginCaller;
 	type WeightInfo = ();
 }
 
@@ -586,7 +586,7 @@ parameter_types! {
 impl pallet_vesting::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
-	type BlockNumberToBalance = ConvertInto;
+	type BlockNumberToBalance = sp_runtime::traits::ConvertInto;
 	type MinVestedTransfer = MinVestedTransfer;
 	type WeightInfo = ();
 	const MAX_VESTING_SCHEDULES: u32 = 28;
