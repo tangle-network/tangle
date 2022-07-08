@@ -315,6 +315,6 @@ fn testnet_genesis(
 			anchors: vec![(0, 10 * UNIT, 2), (0, 100 * UNIT, 2), (0, 1000 * UNIT, 2)],
 		},
 		treasury: Default::default(),
-		vesting: Default::default()
+		vesting: Default::default(),
 	}
 }
