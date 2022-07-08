@@ -580,7 +580,7 @@ impl pallet_utility::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MinVestedTransfer: Balance = 1 * DOLLAR;
+	pub const MinVestedTransfer: Balance = DOLLAR;
 }
 
 impl pallet_vesting::Config for Runtime {
