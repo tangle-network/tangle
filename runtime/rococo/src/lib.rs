@@ -155,33 +155,6 @@ pub mod opaque {
 	pub type BlockId = generic::BlockId<Block>;
 }
 
-/// Handles converting a weight scalar to a fee value, based on the scale and granularity of the
-/// node's balance type.
-///
-/// This should typically create a mapping between the following ranges:
-///   - `[0, MAXIMUM_BLOCK_WEIGHT]`
-///   - `[Balance::min, Balance::max]`
-///
-/// Yet, it can be used for any other sort of change to weight-fee. Some examples being:
-///   - Setting it to `0` will essentially disable the weight fee.
-///   - Setting it to `1` will cause the literal `#[weight = x]` values to be charged.
-pub struct WeightToFee;
-impl WeightToFeePolynomial for WeightToFee {
-	type Balance = Balance;
-	fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
-		// in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1 MILLIUNIT:
-		// in our template, we map to 1/10 of that, or 1/10 MILLIUNIT
-		let p = MILLIUNIT / 10;
-		let q = 100 * Balance::from(ExtrinsicBaseWeight::get());
-		smallvec![WeightToFeeCoefficient {
-			degree: 1,
-			negative: false,
-			coeff_frac: Perbill::from_rational(p % q, q),
-			coeff_integer: p / q,
-		}]
-	}
-}
-
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
@@ -212,10 +185,59 @@ pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
 
-// Unit = the base number of indivisible units for balances
-pub const UNIT: Balance = 1_000_000_000_000;
-pub const MILLIUNIT: Balance = 1_000_000_000;
-pub const MICROUNIT: Balance = 1_000_000;
+/// Money matters.
+pub mod currency {
+	use crate::Balance;
+
+	// Supply units
+	// =============
+	/// The base unit, since we use 18 decimal places (10^18)
+	pub const UNIT: Balance = 1_000_000_000_000_000_000;
+	pub const MILLIUNIT: Balance = UNIT / 1000;
+	pub const MICROUNIT: Balance = MILLIUNIT / 1000;
+
+	// Monetary value
+	// =============
+	/// Lets assume 10 EGG = 1USD
+	/// This assumption forms the base of all fee calculations, revisit this
+	/// if the assumption is no longer true.
+	pub const DOLLAR: Balance = UNIT * 10;
+	pub const CENT: Balance = DOLLAR / 100;
+	pub const MILLICENT: Balance = CENT / 1000;
+	/// The existential deposit.
+	pub const EXISTENTIAL_DEPOSIT: Balance = 100 * CENT;
+	/// Return the cost to add an item to storage based on size
+	pub const fn deposit(items: u32, bytes: u32) -> Balance {
+		items as Balance * 20 * DOLLAR + (bytes as Balance) * 100 * MILLICENT
+	}
+}
+
+/// Handles converting a weight scalar to a fee value, based on the scale and granularity of the
+/// node's balance type.
+///
+/// This should typically create a mapping between the following ranges:
+///   - `[0, MAXIMUM_BLOCK_WEIGHT]`
+///   - `[Balance::min, Balance::max]`
+///
+/// Yet, it can be used for any other sort of change to weight-fee. Some examples being:
+///   - Setting it to `0` will essentially disable the weight fee.
+///   - Setting it to `1` will cause the literal `#[weight = x]` values to be charged.
+pub struct WeightToFee;
+impl WeightToFeePolynomial for WeightToFee {
+	type Balance = Balance;
+	fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
+		// in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1 MILLIUNIT:
+		// in our template, we map to 1/10 of that, or 1/10 MILLIUNIT
+		let p = CENT;
+		let q = 100 * Balance::from(ExtrinsicBaseWeight::get());
+		smallvec![WeightToFeeCoefficient {
+			degree: 1,
+			negative: false,
+			coeff_frac: Perbill::from_rational(p % q, q),
+			coeff_integer: p / q,
+		}]
+	}
+}
 
 /// The version information used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
@@ -264,6 +286,8 @@ impl_opaque_keys! {
 		pub dkg: DKG,
 	}
 }
+
+pub use currency::*;
 
 impl frame_system::Config for Runtime {
 	type AccountData = pallet_balances::AccountData<Balance>;
@@ -316,7 +340,6 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = ();
 }
 
-pub const EXISTENTIAL_DEPOSIT: u128 = MILLIUNIT;
 parameter_types! {
 	pub const ExistentialDeposit: u128 = EXISTENTIAL_DEPOSIT;
 	pub const TransferFee: u128 = MILLIUNIT;
