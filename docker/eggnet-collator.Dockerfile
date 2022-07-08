@@ -14,7 +14,7 @@ RUN apt-get install -y ca-certificates && update-ca-certificates
 
 COPY . .
 # Build DKG Parachain Node
-RUN cargo build --release --locked -p egg-collator
+RUN cargo build --release -p egg-collator
 
 FROM debian:buster-slim
 LABEL maintainer="Webb Developers <dev@webb.tools>"

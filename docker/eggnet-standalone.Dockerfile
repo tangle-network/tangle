@@ -14,7 +14,7 @@ RUN apt-get install -y ca-certificates && update-ca-certificates
 
 COPY . .
 # Build DKG Standalone Node
-RUN cargo build --release --locked -p egg-standalone-node
+RUN cargo build --release -p egg-standalone-node
 
 FROM debian:buster-slim
 LABEL maintainer="Webb Developers <dev@webb.tools>"
