@@ -19,10 +19,11 @@ use egg_rococo_runtime::{
 	HasherBn254Config, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
 	Signature, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
 };
+use hex_literal::hex;
 use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 pub mod rococo;
@@ -93,6 +94,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tEGG".into());
 	properties.insert("tokenDecimals".into(), 12u32.into());
+	properties.insert("ss58Format".into(), 42.into());
 
 	ChainSpec::from_genesis(
 		// Name
@@ -103,11 +105,18 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 		move || {
 			testnet_genesis(
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				vec![(
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_collator_keys_from_seed("Alice"),
-					get_dkg_keys_from_seed("Alice"),
-				)],
+				vec![
+					(
+						get_account_id_from_seed::<sr25519::Public>("Alice"),
+						get_collator_keys_from_seed("Alice"),
+						get_dkg_keys_from_seed("Alice"),
+					),
+					(
+						get_account_id_from_seed::<sr25519::Public>("Bob"),
+						get_collator_keys_from_seed("Bob"),
+						get_dkg_keys_from_seed("Bob"),
+					),
+				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -117,11 +126,17 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 				id,
 			)
 		},
-		vec![],
+		// Bootnodes
+		Vec::new(),
+		// Telemetry
 		None,
+		// Protocol ID
+		Some("egg-dev"),
+		// Fork ID
 		None,
-		None,
-		None,
+		// Properties
+		Some(properties),
+		// Extensions
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
@@ -134,6 +149,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tEGG".into());
 	properties.insert("tokenDecimals".into(), 12u32.into());
+	properties.insert("ss58Format".into(), 42.into());
 
 	ChainSpec::from_genesis(
 		// Name
@@ -143,12 +159,32 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 		ChainType::Local,
 		move || {
 			testnet_genesis(
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				vec![(
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_collator_keys_from_seed("Alice"),
-					get_dkg_keys_from_seed("Alice"),
-				)],
+				// root
+				hex!["5ebd99141e19db88cd2c4b778d3cc43e3678d40168aaea56f33d2ea31f67463f"].into(),
+				vec![
+					(
+						//1//account
+						hex!["28714d0740d6b321ad67b8e1a4edd0b53376f735bd10e4904a2c49167bcb7841"]
+							.into(),
+						//1//aura
+						hex!["28714d0740d6b321ad67b8e1a4edd0b53376f735bd10e4904a2c49167bcb7841"]
+							.unchecked_into(),
+						//1//dkg (--scheme Ecdsa)
+						hex!["03568538f7152c4ee734ad74983e1d86e2329ec100bb06b1c2af0bada2f72ffa28"]
+							.unchecked_into(),
+					),
+					(
+						//1//account
+						hex!["f2ca12f1d3e0cba599b9f17f5675a1dd2d5d781d7a97d241312acc39e0b6f112"]
+							.into(),
+						//1//aura
+						hex!["f2ca12f1d3e0cba599b9f17f5675a1dd2d5d781d7a97d241312acc39e0b6f112"]
+							.unchecked_into(),
+						//1//dkg (--scheme Ecdsa)
+						hex!["03e620a6e19d236bdfe40ef95b9601483629d0e0097e9a7cfb97e7c99e63da609d"]
+							.unchecked_into(),
+					),
+				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -166,11 +202,17 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 				id,
 			)
 		},
+		// Bootnodes
 		Vec::new(),
+		// Telemetry
 		None,
+		// Protocol ID
+		Some("egg-template-local"),
+		// Fork ID
 		None,
-		None,
-		None,
+		// Properties
+		Some(properties),
+		// Extensions
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),

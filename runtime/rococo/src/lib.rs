@@ -345,7 +345,10 @@ impl pallet_balances::Config for Runtime {
 
 parameter_types! {
 	pub const TreasuryPalletId: PalletId = PalletId(*b"eg/trsry");
+	pub const ProposalBond: Permill = Permill::from_percent(5);
+	pub const ProposalBondMinimum: Balance = 100;
 	pub const MaxApprovals: u32 = 100;
+	pub const SpendPeriod: BlockNumber = 100;
 }
 
 impl pallet_treasury::Config for Runtime {
@@ -354,10 +357,10 @@ impl pallet_treasury::Config for Runtime {
 	type RejectOrigin = frame_system::EnsureRoot<AccountId>;
 	type Event = Event;
 	type OnSlash = ();
-	type ProposalBond = ();
-	type ProposalBondMinimum = ();
+	type ProposalBond = ProposalBond;
+	type ProposalBondMinimum = ProposalBondMinimum;
 	type ProposalBondMaximum = ();
-	type SpendPeriod = ();
+	type SpendPeriod = SpendPeriod;
 	type Burn = ();
 	type BurnDestination = ();
 	type PalletId = TreasuryPalletId;
@@ -584,72 +587,57 @@ construct_runtime!(
 		NodeBlock = opaque::Block,
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
-		System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
-		ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned},
-		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
-		ParachainInfo: parachain_info::{Pallet, Storage, Config},
+		// System support stuff
+		System: frame_system::{Pallet, Call, Storage, Config, Event<T>} = 0,
+		ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned} = 1,
+		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 2,
+		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 3,
 
-		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>},
-		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage},
+		// DKG / offchain worker - the order and position of these pallet should not change
+		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>} = 10,
+		DKGProposals: pallet_dkg_proposals = 11,
+		DKGProposalHandler: pallet_dkg_proposal_handler = 12,
 
-		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
-		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
-		TransactionPayment: pallet_transaction_payment::{Pallet, Storage},
-		Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>},
+		// Monetary stuff
+		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 20,
+		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 21,
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 22,
+		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>} = 23,
+		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 24,
+		Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>} = 25,
 
 		// Collator support. the order of these 4 are important and shall not change.
-		Authorship: pallet_authorship::{Pallet, Call, Storage},
-		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>},
-		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
-		Aura: pallet_aura::{Pallet, Storage, Config<T>},
-		AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config},
+		Authorship: pallet_authorship::{Pallet, Call, Storage} = 30,
+		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>} = 31,
+		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 32,
+		Aura: pallet_aura::{Pallet, Storage, Config<T>} = 33,
+		AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config} = 34,
 
 		// XCM helpers.
-		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>},
-		PolkadotXcm: pallet_xcm::{Pallet, Call, Event<T>, Origin},
-		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin},
-		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>},
+		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 40,
+		PolkadotXcm: pallet_xcm::{Pallet, Call, Event<T>, Origin} = 41,
+		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 42,
+		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 43,
 
-		// DKG / offchain worker
-		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>},
-		DKGProposals: pallet_dkg_proposals,
-		DKGProposalHandler: pallet_dkg_proposal_handler,
+		// Asset helpers
+		AssetRegistry: pallet_asset_registry::{Pallet, Call, Storage, Event<T>, Config<T>} = 50,
+		Currencies: orml_currencies::{Pallet, Call} = 51,
+		Tokens: orml_tokens::{Pallet, Storage, Call, Event<T>} = 52,
+		TokenWrapper: pallet_token_wrapper::{Pallet, Storage, Call, Event<T>} = 53,
+		CollatorRewards: pallet_collator_rewards::{Pallet, Call, Storage, Event<T>} = 54,
 
-		// Hasher pallet
-		HasherBn254: pallet_hasher::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
-		AssetRegistry: pallet_asset_registry::{Pallet, Call, Storage, Event<T>, Config<T>},
-		Currencies: orml_currencies::{Pallet, Call},
-		Tokens: orml_tokens::{Pallet, Storage, Call, Event<T>},
-		TokenWrapper: pallet_token_wrapper::{Pallet, Storage, Call, Event<T>},
-
-		// Mixer Verifier
-		MixerVerifierBn254: pallet_verifier::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
-		// Anchor Verifier
-		AnchorVerifierBn254: pallet_verifier::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
-		// Merkle Tree
-		MerkleTreeBn254: pallet_mt::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
-		// Linkable Merkle Tree
-		LinkableTreeBn254: pallet_linkable_tree::<Instance1>::{Pallet, Call, Storage, Event<T>},
-
-		// Mixer
-		MixerBn254: pallet_mixer::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
-		// Anchor
-		AnchorBn254: pallet_anchor::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
-		// Anchor Handler
-		AnchorHandlerBn254: pallet_anchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>},
+		// Anchor and mixer pallets
+		HasherBn254: pallet_hasher::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 60,
+		MixerVerifierBn254: pallet_verifier::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 61,
+		AnchorVerifierBn254: pallet_verifier::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 62,
+		MerkleTreeBn254: pallet_mt::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 63,
+		LinkableTreeBn254: pallet_linkable_tree::<Instance1>::{Pallet, Call, Storage, Event<T>} = 64,
+		MixerBn254: pallet_mixer::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 65,
+		AnchorBn254: pallet_anchor::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 66,
+		AnchorHandlerBn254: pallet_anchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>} = 67,
 
 		// Bridge
-		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>},
-
-		// Bridge
-		CollatorRewards: pallet_collator_rewards::{Pallet, Call, Storage, Event<T>},
-
+		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>} = 70,
 	}
 );
 
