@@ -525,6 +525,50 @@ impl pallet_dkg_proposals::Config for Runtime {
 	type WeightInfo = pallet_dkg_proposals::WebbWeight<Runtime>;
 }
 
+parameter_types! {
+	pub const BasicDeposit: Balance = deposit(1, 258);
+	pub const FieldDeposit: Balance = deposit(0, 66);
+	pub const SubAccountDeposit: Balance = deposit(1, 53);
+	pub const MaxSubAccounts: u32 = 100;
+	pub const MaxAdditionalFields: u32 = 100;
+	pub const MaxRegistrars: u32 = 20;
+}
+
+impl pallet_identity::Config for Test {
+	type Event = Event;
+	type Currency = Balances;
+	type BasicDeposit = BasicDeposit;
+	type FieldDeposit = FieldDeposit;
+	type SubAccountDeposit = SubAccountDeposit;
+	type MaxSubAccounts = MaxSubAccounts;
+	type MaxAdditionalFields = MaxAdditionalFields;
+	type MaxRegistrars = MaxRegistrars;
+	type Slashed = Treasury;
+	type ForceOrigin = Sudo;
+	type RegistrarOrigin = Sudo;
+	type WeightInfo = ();
+}
+
+impl pallet_utility::Config for Runtime {
+	type Event = Event;
+	type Call = Call;
+	type PalletsOrigin = Sudo;
+	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub const MinVestedTransfer: Balance = 1 * DOLLAR;
+}
+
+impl pallet_vesting::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type BlockNumberToBalance = ConvertInto;
+	type MinVestedTransfer = MinVestedTransfer;
+	type WeightInfo = ();
+	const MAX_VESTING_SCHEDULES: u32 = 28;
+}
+
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
 where
 	Call: From<LocalCall>,
@@ -638,6 +682,11 @@ construct_runtime!(
 
 		// Bridge
 		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>} = 70,
+
+		// Substrate utility pallets
+		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 80,
+		Utility: pallet_utility::{Pallet, Call, Event} = 81,
+		Vesting: pallet_vesting::{Pallet, Call, Storage, Event<T>, Config<T>} = 82,
 	}
 );
 
