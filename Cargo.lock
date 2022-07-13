@@ -610,9 +610,9 @@ dependencies = [
 
 [[package]]
 name = "async-task"
-version = "4.2.0"
+version = "4.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30696a84d817107fc028e049980e09d5e140e8da8f1caeb17e8e950658a3cea9"
+checksum = "7a40729d2133846d9ed0ea60a8b9541bccddab49cd30f0715a1da672fe9a2524"
 
 [[package]]
 name = "async-trait"
@@ -707,16 +707,16 @@ dependencies = [
 
 [[package]]
 name = "backtrace"
-version = "0.3.65"
+version = "0.3.66"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11a17d453482a265fd5f8479f2a3f405566e6ca627837aaddb85af8b1ab8ef61"
+checksum = "cab84319d616cfb654d03394f38ab7e6f0919e181b1b57e1fd15e7fb4077d9a7"
 dependencies = [
  "addr2line",
  "cc",
  "cfg-if 1.0.0",
  "libc",
  "miniz_oxide",
- "object 0.28.4",
+ "object 0.29.0",
  "rustc-demangle",
 ]
 
@@ -880,9 +880,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitvec"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1489fcb93a5bb47da0462ca93ad252ad6af2145cce58d10d46a83931ba9f016b"
+checksum = "1bc2832c24239b0141d5674bb9174f9d68a8b5b3f2753311927c172ca46f7e9c"
 dependencies = [
  "funty",
  "radium",
@@ -1348,9 +1348,9 @@ checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
 
 [[package]]
 name = "chacha20"
-version = "0.8.1"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01b72a433d0cf2aef113ba70f62634c56fddb0f244e6377185c56a7cadbd8f91"
+checksum = "5c80e5460aa66fe3b91d40bcbdab953a597b60053e34d684ac6903f863b680a6"
 dependencies = [
  "cfg-if 1.0.0",
  "cipher",
@@ -1360,9 +1360,9 @@ dependencies = [
 
 [[package]]
 name = "chacha20poly1305"
-version = "0.9.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b84ed6d1d5f7aa9bdde921a5090e0ca4d934d250ea3b402a5fab3a994e28a2a"
+checksum = "a18446b09be63d457bbec447509e85f662f32952b035ce892290396bc0b0cff5"
 dependencies = [
  "aead",
  "chacha20",
@@ -1443,9 +1443,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.8"
+version = "3.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "190814073e85d238f31ff738fcb0bf6910cedeb73376c87cd69291028966fd83"
+checksum = "69c5a7f9997be616e47f0577ee38c91decb33392c5be4866494f34cdf329a9aa"
 dependencies = [
  "atty",
  "bitflags",
@@ -1782,9 +1782,9 @@ dependencies = [
 
 [[package]]
 name = "crypto-common"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5999502d32b9c48d492abe66392408144895020ec4709e549e840799f3bb74c0"
+checksum = "2ccfd8c0ee4cce11e45b3fd6f9d5e69e0cc62912aa6a0cb1bf4617b0eba5a12f"
 dependencies = [
  "generic-array 0.14.5",
  "typenum",
@@ -1861,7 +1861,7 @@ name = "cumulus-client-cli"
 version = "0.1.0"
 source = "git+https://github.com/paritytech/cumulus?branch=polkadot-v0.9.24#95ca5a085727c1494ddeeae4a2b2e69c4ee1933b"
 dependencies = [
- "clap 3.2.8",
+ "clap 3.2.10",
  "sc-cli",
  "sc-service",
  "url",
@@ -2509,7 +2509,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=async#63e9a2599e388371215b733be182517eac32713b"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#7d0589f20fd08f7898f951eaae483c3fa70c69e1"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2558,7 +2558,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=async#63e9a2599e388371215b733be182517eac32713b"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#7d0589f20fd08f7898f951eaae483c3fa70c69e1"
 dependencies = [
  "chacha20poly1305",
  "curv-kzen",
@@ -2589,7 +2589,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=async#63e9a2599e388371215b733be182517eac32713b"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#7d0589f20fd08f7898f951eaae483c3fa70c69e1"
 dependencies = [
  "ethereum",
  "ethereum-types 0.13.1",
@@ -2713,7 +2713,7 @@ dependencies = [
  "ark-serialize",
  "ark-std",
  "arkworks-setups",
- "clap 3.2.8",
+ "clap 3.2.10",
  "cumulus-client-cli",
  "cumulus-client-collator",
  "cumulus-client-consensus-aura",
@@ -2874,7 +2874,7 @@ dependencies = [
  "ark-std",
  "arkworks-setups",
  "async-trait",
- "clap 3.2.8",
+ "clap 3.2.10",
  "dkg-gadget",
  "dkg-primitives",
  "dkg-runtime-primitives",
@@ -3489,7 +3489,7 @@ source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.24#81
 dependencies = [
  "Inflector",
  "chrono",
- "clap 3.2.8",
+ "clap 3.2.10",
  "comfy-table",
  "frame-benchmarking",
  "frame-support",
@@ -4054,9 +4054,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.12.1"
+version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db0d4cf898abf0081f964436dc980e96670a0f36863e4b83aaacdb65c9d7ccc3"
+checksum = "607c8a29735385251a339424dd462993c0fed8fa09d378f259377df08c126022"
 dependencies = [
  "ahash",
 ]
@@ -4230,9 +4230,9 @@ checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "hyper"
-version = "0.14.19"
+version = "0.14.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42dc3c131584288d375f2d07f822b0cb012d8c6fb899a5b9fdb3cb7eb9b6004f"
+checksum = "02c929dc5c39e335a03c405292728118860721b10190d98c2a0f0efd5baafbac"
 dependencies = [
  "bytes",
  "futures-channel",
@@ -4351,7 +4351,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "10a35a97730320ffe8e2d410b5d3b69279b98d2c14bdb8b70ea89ecf7888d41e"
 dependencies = [
  "autocfg 1.1.0",
- "hashbrown 0.12.1",
+ "hashbrown 0.12.2",
  "serde",
 ]
 
@@ -5619,9 +5619,9 @@ dependencies = [
 
 [[package]]
 name = "memmap2"
-version = "0.5.4"
+version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5172b50c23043ff43dd53e51392f36519d9b35a8f3a410d30ece5d1aedd58ae"
+checksum = "3a79b39c93a7a5a27eeaf9a23b5ff43f1b9e0ad6b1cdd441140ae53c35613fc7"
 dependencies = [
  "libc",
 ]
@@ -5642,7 +5642,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6566c70c1016f525ced45d7b7f97730a2bafb037c788211d0c186ef5b2189f0a"
 dependencies = [
  "hash-db",
- "hashbrown 0.12.1",
+ "hashbrown 0.12.2",
  "parity-util-mem",
 ]
 
@@ -6074,9 +6074,9 @@ dependencies = [
 
 [[package]]
 name = "object"
-version = "0.28.4"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e42c982f2d955fac81dd7e1d0e1426a7d702acd9c98d19ab01083a6a0328c424"
+checksum = "21158b2c33aa6d4561f1c0a6ea283ca92bc54802a93b263e910746d679a7eb53"
 dependencies = [
  "memchr",
 ]
@@ -6146,7 +6146,7 @@ dependencies = [
 [[package]]
 name = "orml-benchmarking"
 version = "0.4.1-dev"
-source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#5792fd2bb3e6623e44ce56d18048a382f9f13b42"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6166,7 +6166,7 @@ dependencies = [
 [[package]]
 name = "orml-currencies"
 version = "0.4.1-dev"
-source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#5792fd2bb3e6623e44ce56d18048a382f9f13b42"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6183,7 +6183,7 @@ dependencies = [
 [[package]]
 name = "orml-tokens"
 version = "0.4.1-dev"
-source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#5792fd2bb3e6623e44ce56d18048a382f9f13b42"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6198,7 +6198,7 @@ dependencies = [
 [[package]]
 name = "orml-traits"
 version = "0.4.1-dev"
-source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#5792fd2bb3e6623e44ce56d18048a382f9f13b42"
 dependencies = [
  "frame-support",
  "impl-trait-for-tuples",
@@ -6216,7 +6216,7 @@ dependencies = [
 [[package]]
 name = "orml-utilities"
 version = "0.4.1-dev"
-source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#5792fd2bb3e6623e44ce56d18048a382f9f13b42"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -6271,7 +6271,7 @@ dependencies = [
 [[package]]
 name = "pallet-anchor"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -6295,7 +6295,7 @@ dependencies = [
 [[package]]
 name = "pallet-anchor-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6322,7 +6322,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-registry"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6531,7 +6531,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6696,7 +6696,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=async#63e9a2599e388371215b733be182517eac32713b"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#7d0589f20fd08f7898f951eaae483c3fa70c69e1"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6715,7 +6715,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=async#63e9a2599e388371215b733be182517eac32713b"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#7d0589f20fd08f7898f951eaae483c3fa70c69e1"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6734,7 +6734,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=async#63e9a2599e388371215b733be182517eac32713b"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#7d0589f20fd08f7898f951eaae483c3fa70c69e1"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6833,7 +6833,7 @@ dependencies = [
 [[package]]
 name = "pallet-hasher"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6899,7 +6899,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6919,7 +6919,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "pallet-linkable-tree",
  "parity-scale-codec",
@@ -6948,7 +6948,7 @@ dependencies = [
 [[package]]
 name = "pallet-mixer"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7004,7 +7004,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -7022,7 +7022,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "pallet-mt",
  "sp-api",
@@ -7189,7 +7189,7 @@ dependencies = [
 [[package]]
 name = "pallet-signature-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7314,7 +7314,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7394,6 +7394,43 @@ source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.24#81
 dependencies = [
  "frame-support",
  "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-vanchor"
+version = "1.0.0"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "orml-traits",
+ "pallet-asset-registry",
+ "pallet-hasher",
+ "pallet-linkable-tree",
+ "pallet-mt",
+ "pallet-verifier",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "webb-primitives",
+]
+
+[[package]]
+name = "pallet-vanchor-handler"
+version = "1.0.0"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
+dependencies = [
+ "frame-support",
+ "frame-system",
  "hex-literal 0.3.4",
  "orml-traits",
  "pallet-asset-registry",
@@ -7416,7 +7453,7 @@ dependencies = [
 [[package]]
 name = "pallet-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7532,7 +7569,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c32561d248d352148124f036cac253a644685a21dc9fea383eb4907d7bd35a8f"
 dependencies = [
  "cfg-if 1.0.0",
- "hashbrown 0.12.1",
+ "hashbrown 0.12.2",
  "impl-trait-for-tuples",
  "parity-util-mem-derive",
  "parking_lot 0.12.1",
@@ -7885,7 +7922,7 @@ name = "polkadot-cli"
 version = "0.9.24"
 source = "git+https://github.com/paritytech/polkadot?branch=release-v0.9.24#22836e55d41eef24ed5917fd654ee82a683a7cfe"
 dependencies = [
- "clap 3.2.8",
+ "clap 3.2.10",
  "frame-benchmarking-cli",
  "futures 0.3.21",
  "log",
@@ -9695,9 +9732,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.5.6"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d83f127d94bdbcda4c8cc2e50f6f84f4b611f69c902699ca385a39c3a75f9ff1"
+checksum = "4c4eb3267174b8c6c2f654116623910a0fef09c4753f8dd83db29c48a0df988b"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -9715,9 +9752,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.6.26"
+version = "0.6.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49b3de9ec5dc0a3417da371aab17d729997c15010e7fd24ff707773a33bddb64"
+checksum = "a3f87b73ce11b1619a3c6332f45341e0047173771e8b8b73f87bfeefb7b56244"
 
 [[package]]
 name = "region"
@@ -10202,7 +10239,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.24#814752f60ab8cce7e2ece3ce0c1b10799b4eab28"
 dependencies = [
  "impl-trait-for-tuples",
- "memmap2 0.5.4",
+ "memmap2 0.5.5",
  "parity-scale-codec",
  "sc-chain-spec-derive",
  "sc-network",
@@ -10230,7 +10267,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.24#814752f60ab8cce7e2ece3ce0c1b10799b4eab28"
 dependencies = [
  "chrono",
- "clap 3.2.8",
+ "clap 3.2.10",
  "fdlimit",
  "futures 0.3.21",
  "hex",
@@ -11327,9 +11364,9 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.138"
+version = "1.0.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1578c6245786b9d168c5447eeacfb96856573ca56c9d68fdcf394be134882a47"
+checksum = "0171ebb889e45aa68b44aee0859b3eede84c6f5f5c228e6f140c0b2a0a46cad6"
 dependencies = [
  "serde_derive",
 ]
@@ -11345,9 +11382,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.138"
+version = "1.0.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "023e9b1467aef8a10fb88f25611870ada9800ef7e22afce356bb0d2387b6f27c"
+checksum = "dc1d3230c1de7932af58ad8ffbe1d784bd55efd5a9d84ac24f69c72d83543dfb"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -13071,7 +13108,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d32d034c0d3db64b43c31de38e945f15b40cd4ca6d2dcfc26d4798ce8de4ab83"
 dependencies = [
  "hash-db",
- "hashbrown 0.12.1",
+ "hashbrown 0.12.2",
  "log",
  "rustc-hex",
  "smallvec",
@@ -13150,7 +13187,7 @@ name = "try-runtime-cli"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.24#814752f60ab8cce7e2ece3ce0c1b10799b4eab28"
 dependencies = [
- "clap 3.2.8",
+ "clap 3.2.10",
  "jsonrpsee",
  "log",
  "parity-scale-codec",
@@ -13720,7 +13757,7 @@ dependencies = [
 [[package]]
 name = "webb-primitives"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#046e26a26303aa55def995e4c554b5bcffc5f8e3"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dda54e348ba5fe3d1a81be2585337262bb324836"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-381",
@@ -13753,9 +13790,9 @@ dependencies = [
 
 [[package]]
 name = "webb-proposals"
-version = "0.3.6"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4244d4a8178f5a3906f11845c37c8acdad5f07526d578110d840e71991e2a14"
+checksum = "cf68d775c25b9b31e4b83e12971b7bcacaec28541a8944b7d7e4fc987f8691e2"
 dependencies = [
  "num-traits",
  "parity-scale-codec",
@@ -13775,9 +13812,9 @@ dependencies = [
 
 [[package]]
 name = "webpki-roots"
-version = "0.22.3"
+version = "0.22.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44d8de8415c823c8abd270ad483c6feeac771fad964890779f9a8cb24fbbc1bf"
+checksum = "f1c760f0d366a6c24a02ed7816e23e691f5d92291f94d15e836006fd11b04daf"
 dependencies = [
  "webpki",
 ]
