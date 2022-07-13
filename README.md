@@ -5,7 +5,7 @@
   </a>
   </div>
 <p align="center">
-    <strong>🚀 Threshold ECDSA Distributed Key Generation Protocol 🔑 </strong>
+    <strong>🚀 An MPC based bridging system for privacy-preserving applications. 🔑 </strong>
     <br />
     <sub> ⚠️ Beta Software ⚠️ </sub>
 </p>
