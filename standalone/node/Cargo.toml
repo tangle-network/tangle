@@ -42,9 +42,9 @@ pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/pr
 
 # DKG dependencies
 egg-runtime = { package = "egg-standalone-runtime", path = "../runtime" }
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "async" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git" }
 
 # Substrate dependencies
 sc-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", features = ["wasmtime"] }
