@@ -28,7 +28,6 @@ jobs:
       - name: Rustfmt check
         run: cargo +nightly fmt --all -- --check
 
-  # This job builds and runs tests for the contracts
   test:
     concurrency:
       group: test-${{ github.ref }}
