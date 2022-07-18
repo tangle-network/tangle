@@ -1,4 +1,4 @@
-# Loki Logs CONFIGURATION
+# LOKI LOG CONFIGURATION
 #
 # The below configuration outlines a simple Loki setup that will spin up a server on localhost:3100 and scrape the logs which can then 
 # be viewed, queried and visualized using Grafana. 

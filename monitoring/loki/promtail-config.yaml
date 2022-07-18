@@ -1,4 +1,4 @@
-# Promtail CONFIGURATION
+# PROMTAIL CONFIGURATION
 #
 # The below configuration outlines a simple setup for sending logs to Loki to be visualized and queryable. 
 # 
