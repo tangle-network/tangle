@@ -160,24 +160,6 @@ impl pallet_linkable_tree::Config<pallet_linkable_tree::Instance1> for Runtime {
 	type WeightInfo = ();
 }
 
-impl pallet_anchor::Config<pallet_anchor::Instance1> for Runtime {
-	type Currency = Currencies;
-	type Event = Event;
-	type LinkableTree = LinkableTreeBn254;
-	type NativeCurrencyId = GetNativeCurrencyId;
-	type PalletId = AnchorPalletId;
-	type PostDepositHook = ();
-	type Verifier = AnchorVerifierBn254;
-	type ArbitraryHasher = Keccak256HasherBn254;
-	type WeightInfo = pallet_anchor::weights::WebbWeight<Runtime>;
-}
-
-impl pallet_anchor_handler::Config<pallet_anchor_handler::Instance1> for Runtime {
-	type Anchor = AnchorBn254;
-	type BridgeOrigin = pallet_signature_bridge::EnsureBridge<Runtime, SignatureBridgeInstance>;
-	type Event = Event;
-}
-
 parameter_types! {
 	pub const BridgeProposalLifetime: BlockNumber = 50;
 	pub const BridgeAccountId: PalletId = PalletId(*b"dw/bridg");
