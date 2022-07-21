@@ -1116,12 +1116,6 @@ construct_runtime!(
 		// Mixer
 		MixerBn254: pallet_mixer::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
 
-		// Anchor
-		AnchorBn254: pallet_anchor::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
-		// Anchor Handler
-		AnchorHandlerBn254: pallet_anchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>},
-
 		// Signature Bridge
 		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>},
 

@@ -700,8 +700,6 @@ construct_runtime!(
 		MerkleTreeBn254: pallet_mt::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 63,
 		LinkableTreeBn254: pallet_linkable_tree::<Instance1>::{Pallet, Call, Storage, Event<T>} = 64,
 		MixerBn254: pallet_mixer::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 65,
-		AnchorBn254: pallet_anchor::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 66,
-		AnchorHandlerBn254: pallet_anchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>} = 67,
 
 		// Bridge
 		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>} = 70,
