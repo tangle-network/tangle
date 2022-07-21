@@ -166,7 +166,7 @@ parameter_types! {
 	pub const AnchorPalletId: PalletId = PalletId(*b"py/anchr");
 	pub const HistoryLength: u32 = 30;
 	// Substrate parachain chain ID type
-	pub const ChainType: [u8; 2] = [2, 1];
+	pub const ChainType: [u8; 2] = [2, 0];
 	pub const ChainIdentifier: ChainId = 1080;
 }
 
