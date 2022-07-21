@@ -15,9 +15,9 @@
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
 use egg_rococo_runtime::{
-	AccountId, AnchorBn254Config, AnchorVerifierBn254Config, AssetRegistryConfig, AuraId, DKGId,
-	HasherBn254Config, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
-	Signature, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
+	AccountId, AnchorVerifierBn254Config, AssetRegistryConfig, AuraId, DKGId, HasherBn254Config,
+	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Signature,
+	EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
 };
 use hex_literal::hex;
 use sc_chain_spec::ChainSpecExtension;
@@ -310,9 +310,6 @@ fn testnet_genesis(
 		},
 		mixer_bn_254: MixerBn254Config {
 			mixers: vec![(0, 10 * UNIT), (0, 100 * UNIT), (0, 1000 * UNIT)],
-		},
-		anchor_bn_254: AnchorBn254Config {
-			anchors: vec![(0, 10 * UNIT, 2), (0, 100 * UNIT, 2), (0, 1000 * UNIT, 2)],
 		},
 		treasury: Default::default(),
 		vesting: Default::default(),
