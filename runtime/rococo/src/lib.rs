@@ -382,6 +382,7 @@ impl pallet_treasury::Config for Runtime {
 	type OnSlash = ();
 	type ProposalBond = ProposalBond;
 	type ProposalBondMinimum = ProposalBondMinimum;
+	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 	type ProposalBondMaximum = ();
 	type SpendPeriod = SpendPeriod;
 	type Burn = ();
@@ -412,6 +413,7 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
+	type Event = Event;
 	type OnChargeTransaction = CurrencyAdapter<Balances, crate::impls::DealWithFees<Runtime>>;
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 	type WeightToFee = IdentityFee<Balance>;
@@ -670,7 +672,7 @@ construct_runtime!(
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 21,
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 22,
 		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>} = 23,
-		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 24,
+		TransactionPayment: pallet_transaction_payment::{Pallet, Storage, Event<T>} = 24,
 		Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>} = 25,
 
 		// Collator support. the order of these 4 are important and shall not change.
