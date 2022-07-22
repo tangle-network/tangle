@@ -14,6 +14,7 @@
 
 use crate::chain_spec;
 use clap::Parser;
+use sc_cli::KeySubcommand;
 use std::path::PathBuf;
 
 /// Sub-commands supported by the collator.
@@ -26,6 +27,10 @@ pub enum Subcommand {
 	/// Export the genesis wasm of the parachain.
 	#[clap(name = "export-genesis-wasm")]
 	ExportGenesisWasm(ExportGenesisWasmCommand),
+
+	/// Key management cli utilities
+	#[clap(subcommand)]
+	Key(KeySubcommand),
 
 	/// Build a chain specification.
 	BuildSpec(sc_cli::BuildSpecCmd),
