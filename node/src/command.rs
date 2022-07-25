@@ -228,6 +228,7 @@ pub fn run() -> Result<()> {
 				cmd.run(&*spec)
 			})
 		},
+		Some(Subcommand::Key(cmd)) => cmd.run(&cli),
 		Some(Subcommand::Benchmark(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			// Switch on the concrete benchmark sub-command-

@@ -20,17 +20,18 @@ FROM debian:buster-slim
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Binary for Standalone Eggnet Node"
 
-RUN useradd -m -u 1000 -U -s /bin/sh -d /eggnet eggnet && \
+RUN useradd -m -u 1000 -U -s /bin/sh -d /eggnet admin && \
 	mkdir -p /eggnet/.local/share && \
 	mkdir /data && \
-	chown -R eggnet:eggnet /data && \
+	chown -R admin:admin /data && \
+	chown -R admin:admin /eggnet && \
 	ln -s /data /eggnet/.local/share/standalone && \
 	rm -rf /usr/bin /usr/sbin
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt 
-COPY --from=builder --chown=eggnet /app/target/release/egg-standalone-node /eggnet
+COPY --from=builder --chown=admin /app/target/release/egg-standalone-node /eggnet
 
-USER eggnet
+USER admin
 
 RUN chmod uog+x /eggnet/egg-standalone-node*
 
