@@ -56,7 +56,7 @@ use webb_primitives::AccountIndex;
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 pub use frame_support::{
 	construct_runtime, match_types, parameter_types,
-	traits::{Currency, EnsureOneOf, Everything, IsInVec, Randomness},
+	traits::{Currency, EitherOfDiverse, Everything, IsInVec, Randomness},
 	weights::{constants::WEIGHT_PER_SECOND, DispatchClass, IdentityFee, Weight},
 	PalletId, StorageValue,
 };
