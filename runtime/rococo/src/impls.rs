@@ -159,6 +159,7 @@ mod tests {
 
 	impl pallet_treasury::Config for Test {
 		type Currency = pallet_balances::Pallet<Test>;
+		type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u64>;
 		type ApproveOrigin = frame_system::EnsureRoot<AccountId>;
 		type RejectOrigin = frame_system::EnsureRoot<AccountId>;
 		type Event = Event;

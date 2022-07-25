@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::chain_spec;
-use clap::Parser;
 use sc_cli::KeySubcommand;
 use std::path::PathBuf;
 
