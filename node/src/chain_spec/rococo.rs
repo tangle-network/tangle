@@ -42,27 +42,24 @@ pub fn egg_rococo_config(id: ParaId) -> ChainSpec {
 				// root
 				hex!["a62a5c2e22ebd14273f1e6552ba0ee07937ff3d859f53475296bbcbb8af1752e"].into(),
 				// invulnerables
-				generate_invulnerables::<[u8; 32]>(&vec![
+				generate_invulnerables::<[u8; 32]>(&[
 					(
 						// publickey
-						hex!["a62a5c2e22ebd14273f1e6552ba0ee07937ff3d859f53475296bbcbb8af1752e"]
-							.into(),
+						hex!["a62a5c2e22ebd14273f1e6552ba0ee07937ff3d859f53475296bbcbb8af1752e"],
 						// DKG key --scheme Ecdsa
 						hex!["03fd0f9d6e4ef6eeb0718866a43c04764177f3fc03203e9ff7ed4dd2885cb52943"]
 							.unchecked_into(),
 					),
 					(
 						// publickey
-						hex!["6850cc5d0369d11f93c820b91f7bfed4f6fc8b3a5f70a80171183129face154b"]
-							.into(),
+						hex!["6850cc5d0369d11f93c820b91f7bfed4f6fc8b3a5f70a80171183129face154b"],
 						// DKG key --scheme Ecdsa
 						hex!["03ae1a02a91d59ff20ece458640afbbb672b9335f7da4c9f7d699129d431680ae9"]
 							.unchecked_into(),
 					),
 					(
 						// publickey
-						hex!["1469f5f6719beaa0a7364259e5fb10846a4457f181807a0c00a6a9cdf14a260d"]
-							.into(),
+						hex!["1469f5f6719beaa0a7364259e5fb10846a4457f181807a0c00a6a9cdf14a260d"],
 						// DKG key --scheme Ecdsa
 						hex!["0252abf0dd2ed408700de539fd65dfc2f6d201e76a4c2e19b875d7b3176a468b0f"]
 							.unchecked_into(),
