@@ -167,7 +167,7 @@ parameter_types! {
 	pub const HistoryLength: u32 = 30;
 	// Substrate parachain chain ID type
 	pub const ChainType: [u8; 2] = [2, 0];
-	pub const ChainIdentifier: ChainId = 1080;
+	pub const ChainIdentifier: ChainId = 1081;
 }
 
 impl pallet_linkable_tree::Config<pallet_linkable_tree::Instance1> for Runtime {
