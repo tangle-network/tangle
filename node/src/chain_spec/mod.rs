@@ -23,7 +23,7 @@ use hex_literal::hex;
 use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
+use sp_core::{crypto::UncheckedInto, sr25519, ByteArray, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 pub mod rococo;
@@ -87,6 +87,20 @@ where
 	AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
 	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
+}
+
+/// Convert public keys to Acco, Aura and DKG keys
+fn generate_invulnerables<PK: Clone + Into<AccountId>>(
+	public_keys: &[(PK, DKGId)],
+) -> Vec<(AccountId, AuraId, DKGId)> {
+	public_keys
+		.iter()
+		.map(|pk| {
+			let account: AccountId = pk.0.clone().into();
+			let aura_id = AuraId::from_slice(account.as_ref()).unwrap();
+			(account, aura_id, pk.clone().1)
+		})
+		.collect()
 }
 
 pub fn development_config(id: ParaId) -> ChainSpec {
@@ -160,31 +174,31 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 		move || {
 			testnet_genesis(
 				// root
-				hex!["5ebd99141e19db88cd2c4b778d3cc43e3678d40168aaea56f33d2ea31f67463f"].into(),
-				vec![
+				hex!["a62a5c2e22ebd14273f1e6552ba0ee07937ff3d859f53475296bbcbb8af1752e"].into(),
+				// invulnerables
+				generate_invulnerables::<[u8; 32]>(&[
 					(
-						//1//account
-						hex!["28714d0740d6b321ad67b8e1a4edd0b53376f735bd10e4904a2c49167bcb7841"]
-							.into(),
-						//1//aura
-						hex!["28714d0740d6b321ad67b8e1a4edd0b53376f735bd10e4904a2c49167bcb7841"]
-							.unchecked_into(),
-						//1//dkg (--scheme Ecdsa)
-						hex!["03568538f7152c4ee734ad74983e1d86e2329ec100bb06b1c2af0bada2f72ffa28"]
+						// publickey
+						hex!["a62a5c2e22ebd14273f1e6552ba0ee07937ff3d859f53475296bbcbb8af1752e"],
+						// DKG key --scheme Ecdsa
+						hex!["03fd0f9d6e4ef6eeb0718866a43c04764177f3fc03203e9ff7ed4dd2885cb52943"]
 							.unchecked_into(),
 					),
 					(
-						//1//account
-						hex!["f2ca12f1d3e0cba599b9f17f5675a1dd2d5d781d7a97d241312acc39e0b6f112"]
-							.into(),
-						//1//aura
-						hex!["f2ca12f1d3e0cba599b9f17f5675a1dd2d5d781d7a97d241312acc39e0b6f112"]
-							.unchecked_into(),
-						//1//dkg (--scheme Ecdsa)
-						hex!["03e620a6e19d236bdfe40ef95b9601483629d0e0097e9a7cfb97e7c99e63da609d"]
+						// publickey
+						hex!["6850cc5d0369d11f93c820b91f7bfed4f6fc8b3a5f70a80171183129face154b"],
+						// DKG key --scheme Ecdsa
+						hex!["03ae1a02a91d59ff20ece458640afbbb672b9335f7da4c9f7d699129d431680ae9"]
 							.unchecked_into(),
 					),
-				],
+					(
+						// publickey
+						hex!["1469f5f6719beaa0a7364259e5fb10846a4457f181807a0c00a6a9cdf14a260d"],
+						// DKG key --scheme Ecdsa
+						hex!["0252abf0dd2ed408700de539fd65dfc2f6d201e76a4c2e19b875d7b3176a468b0f"]
+							.unchecked_into(),
+					),
+				]),
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
