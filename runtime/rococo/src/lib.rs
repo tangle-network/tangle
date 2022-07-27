@@ -56,7 +56,7 @@ use webb_primitives::AccountIndex;
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 pub use frame_support::{
 	construct_runtime, match_types, parameter_types,
-	traits::{Currency, EnsureOneOf, Everything, IsInVec, Randomness},
+	traits::{Currency, EitherOfDiverse, Everything, IsInVec, Randomness},
 	weights::{constants::WEIGHT_PER_SECOND, DispatchClass, IdentityFee, Weight},
 	PalletId, StorageValue,
 };
@@ -382,6 +382,7 @@ impl pallet_treasury::Config for Runtime {
 	type OnSlash = ();
 	type ProposalBond = ProposalBond;
 	type ProposalBondMinimum = ProposalBondMinimum;
+	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 	type ProposalBondMaximum = ();
 	type SpendPeriod = SpendPeriod;
 	type Burn = ();
@@ -412,6 +413,7 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
+	type Event = Event;
 	type OnChargeTransaction = CurrencyAdapter<Balances, crate::impls::DealWithFees<Runtime>>;
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 	type WeightToFee = IdentityFee<Balance>;
@@ -670,7 +672,7 @@ construct_runtime!(
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 21,
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 22,
 		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>} = 23,
-		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 24,
+		TransactionPayment: pallet_transaction_payment::{Pallet, Storage, Event<T>} = 24,
 		Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>} = 25,
 
 		// Collator support. the order of these 4 are important and shall not change.
@@ -700,8 +702,6 @@ construct_runtime!(
 		MerkleTreeBn254: pallet_mt::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 63,
 		LinkableTreeBn254: pallet_linkable_tree::<Instance1>::{Pallet, Call, Storage, Event<T>} = 64,
 		MixerBn254: pallet_mixer::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 65,
-		AnchorBn254: pallet_anchor::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 66,
-		AnchorHandlerBn254: pallet_anchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>} = 67,
 
 		// Bridge
 		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>} = 70,

@@ -21,12 +21,23 @@ use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
 pub struct ToAuthor<R>(sp_std::marker::PhantomData<R>);
 impl<R> OnUnbalanced<NegativeImbalance<R>> for ToAuthor<R>
 where
-	R: pallet_balances::Config + pallet_authorship::Config,
+	R: pallet_balances::Config + pallet_authorship::Config + pallet_collator_rewards::Config,
 	<R as frame_system::Config>::Event: From<pallet_balances::Event<R>>,
+	<R as frame_system::Config>::Event: From<pallet_collator_rewards::Event<R>>,
+	<<R as pallet_collator_rewards::Config>::Currency as Currency<
+		<R as frame_system::Config>::AccountId,
+	>>::Balance: From<<R as pallet_balances::Config>::Balance>,
 {
 	fn on_nonzero_unbalanced(amount: NegativeImbalance<R>) {
 		if let Some(author) = <pallet_authorship::Pallet<R>>::author() {
+			let numeric_amount = amount.peek();
 			<pallet_balances::Pallet<R>>::resolve_creating(&author, amount);
+			<frame_system::Pallet<R>>::deposit_event(
+				pallet_collator_rewards::Event::CollatorRewarded {
+					amount: numeric_amount.into(),
+					account: author,
+				},
+			);
 		}
 	}
 }
@@ -45,6 +56,10 @@ where
 		>>::NegativeImbalance,
 	>,
 	<R as frame_system::Config>::Event: From<pallet_balances::Event<R>>,
+	<R as frame_system::Config>::Event: From<pallet_collator_rewards::Event<R>>,
+	<<R as pallet_collator_rewards::Config>::Currency as Currency<
+		<R as frame_system::Config>::AccountId,
+	>>::Balance: From<<R as pallet_balances::Config>::Balance>,
 {
 	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance<R>>) {
 		if let Some(fees) = fees_then_tips.next() {
@@ -159,6 +174,7 @@ mod tests {
 
 	impl pallet_treasury::Config for Test {
 		type Currency = pallet_balances::Pallet<Test>;
+		type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u64>;
 		type ApproveOrigin = frame_system::EnsureRoot<AccountId>;
 		type RejectOrigin = frame_system::EnsureRoot<AccountId>;
 		type Event = Event;

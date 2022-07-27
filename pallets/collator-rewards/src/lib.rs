@@ -86,6 +86,8 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// Reward Amount set to value
 		RewardAmountSet(BalanceOf<T>),
+		/// Reward paid to AccountId
+		CollatorRewarded { amount: BalanceOf<T>, account: T::AccountId },
 	}
 
 	#[pallet::pallet]

@@ -14,11 +14,11 @@
 
 use arkworks_setups::{common::setup_params, Curve};
 use egg_runtime::{
-	AccountId, AnchorBn254Config, AnchorVerifierBn254Config, AssetRegistryConfig, Balance,
-	BalancesConfig, DKGConfig, DKGId, DKGProposalsConfig, ElectionsConfig, GenesisConfig,
-	HasherBn254Config, MaxNominations, MerkleTreeBn254Config, MixerBn254Config,
-	MixerVerifierBn254Config, Perbill, SessionConfig, Signature, StakerStatus, StakingConfig,
-	SudoConfig, SystemConfig, VAnchorBn254Config, VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
+	AccountId, AnchorVerifierBn254Config, AssetRegistryConfig, Balance, BalancesConfig, DKGConfig,
+	DKGId, DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, MaxNominations,
+	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill, SessionConfig,
+	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
+	VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
 };
 use hex_literal::hex;
 use sc_network::config::MultiaddrWithPeerId;
@@ -474,9 +474,6 @@ fn testnet_genesis(
 		},
 		mixer_bn_254: MixerBn254Config {
 			mixers: vec![(0, 10 * UNIT), (0, 100 * UNIT), (0, 1000 * UNIT)],
-		},
-		anchor_bn_254: AnchorBn254Config {
-			anchors: vec![(0, 10 * UNIT, 2), (0, 100 * UNIT, 2), (0, 1000 * UNIT, 2)],
 		},
 		v_anchor_verifier_2x_2_bn_254: VAnchorVerifier2x2Bn254Config {
 			parameters: Some(vanchor_verifier_bn254_params),
