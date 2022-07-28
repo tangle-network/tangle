@@ -14,8 +14,8 @@
 
 use arkworks_setups::{common::setup_params, Curve};
 use egg_runtime::{
-	AccountId, AnchorVerifierBn254Config, AssetRegistryConfig, Balance, BalancesConfig, DKGConfig,
-	DKGId, DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, MaxNominations,
+	AccountId, AssetRegistryConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
+	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, MaxNominations,
 	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill, SessionConfig,
 	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
 	VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
@@ -364,12 +364,6 @@ fn testnet_genesis(
 		vk_bytes.to_vec()
 	};
 
-	log::info!("Verifier params for anchor");
-	let anchor_verifier_bn254_params = {
-		let vk_bytes = include_bytes!("../../../verifying_keys/anchor/bn254/2/verifying_key.bin");
-		vk_bytes.to_vec()
-	};
-
 	log::info!("Verifier params for vanchor");
 	let vanchor_verifier_bn254_params = {
 		let vk_bytes =
@@ -405,11 +399,13 @@ fn testnet_genesis(
 			// Add Wasm runtime to storage.
 			code: wasm_binary.to_vec(),
 		},
+		claims: ClaimsConfig { claims: vec![], vesting: vec![] },
 		sudo: SudoConfig { key: Some(root_key) },
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
 			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect(),
 		},
+		vesting: Default::default(),
 		indices: Default::default(),
 		session: SessionConfig {
 			keys: initial_authorities
@@ -462,10 +458,6 @@ fn testnet_genesis(
 		},
 		mixer_verifier_bn_254: MixerVerifierBn254Config {
 			parameters: Some(mixer_verifier_bn254_params),
-			phantom: Default::default(),
-		},
-		anchor_verifier_bn_254: AnchorVerifierBn254Config {
-			parameters: Some(anchor_verifier_bn254_params),
 			phantom: Default::default(),
 		},
 		merkle_tree_bn_254: MerkleTreeBn254Config {

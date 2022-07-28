@@ -585,6 +585,18 @@ impl pallet_utility::Config for Runtime {
 }
 
 parameter_types! {
+	pub Prefix: &'static [u8] = b"Pay EGGs to the Polkadot account:";
+}
+
+impl pallet_ecdsa_claims::Config for Runtime {
+	type Event = Event;
+	type VestingSchedule = Vesting;
+	type Prefix = Prefix;
+	type MoveClaimOrigin = EnsureRoot<Self::AccountId>;
+	type WeightInfo = pallet_ecdsa_claims::TestWeightInfo;
+}
+
+parameter_types! {
 	pub const MinVestedTransfer: Balance = DOLLAR;
 }
 
@@ -677,6 +689,8 @@ construct_runtime!(
 		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>} = 23,
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage, Event<T>} = 24,
 		Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>} = 25,
+		// Claims. Usable initially.
+		Claims: pallet_ecdsa_claims::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned} = 26,
 
 		// Collator support. the order of these 4 are important and shall not change.
 		Authorship: pallet_authorship::{Pallet, Call, Storage} = 30,
@@ -698,10 +712,9 @@ construct_runtime!(
 		TokenWrapper: pallet_token_wrapper::{Pallet, Storage, Call, Event<T>} = 53,
 		CollatorRewards: pallet_collator_rewards::{Pallet, Call, Storage, Event<T>} = 54,
 
-		// Anchor and mixer pallets
+		// Privacy pallets
 		HasherBn254: pallet_hasher::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 60,
 		MixerVerifierBn254: pallet_verifier::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 61,
-		AnchorVerifierBn254: pallet_verifier::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 62,
 		MerkleTreeBn254: pallet_mt::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 63,
 		LinkableTreeBn254: pallet_linkable_tree::<Instance1>::{Pallet, Call, Storage, Event<T>} = 64,
 		MixerBn254: pallet_mixer::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 65,
@@ -954,7 +967,6 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
 			list_benchmark!(list, extra, pallet_dkg_proposal_handler, DKGProposalHandler);
-			list_benchmark!(list, extra, pallet_anchor, AnchorBn254);
 			list_benchmark!(list, extra, pallet_signature_bridge, SignatureBridge);
 			list_benchmark!(list, extra, pallet_hasher, HasherBn254);
 			list_benchmark!(list, extra, pallet_mt, MerkleTreeBn254);
@@ -996,7 +1008,6 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
 			add_benchmark!(params, batches, pallet_dkg_proposal_handler, DKGProposalHandler);
-			add_benchmark!(params, batches, pallet_anchor, AnchorBn254);
 			add_benchmark!(params, batches, pallet_signature_bridge, SignatureBridge);
 			add_benchmark!(params, batches, pallet_hasher, HasherBn254);
 			add_benchmark!(params, batches, pallet_mt, MerkleTreeBn254);

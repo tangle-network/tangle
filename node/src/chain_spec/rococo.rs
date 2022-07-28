@@ -16,7 +16,7 @@ use crate::chain_spec::*;
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
 use egg_rococo_runtime::{
-	AccountId, AnchorVerifierBn254Config, AssetRegistryConfig, AuraId, DKGId, HasherBn254Config,
+	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
 	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, EXISTENTIAL_DEPOSIT,
 	MILLIUNIT, UNIT,
 };
@@ -111,18 +111,13 @@ fn rococo_genesis(
 		vk_bytes.to_vec()
 	};
 
-	log::info!("Verifier params for anchor");
-	let anchor_verifier_bn254_params = {
-		let vk_bytes = include_bytes!("../../../verifying_keys/anchor/bn254/2/verifying_key.bin");
-		vk_bytes.to_vec()
-	};
-
 	egg_rococo_runtime::GenesisConfig {
 		system: egg_rococo_runtime::SystemConfig {
 			code: egg_rococo_runtime::WASM_BINARY
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
 		},
+		claims: ClaimsConfig { claims: vec![], vesting: vec![] },
 		sudo: egg_rococo_runtime::SudoConfig { key: Some(root_key) },
 		balances: egg_rococo_runtime::BalancesConfig {
 			balances: endowed_accounts
@@ -172,10 +167,6 @@ fn rococo_genesis(
 		},
 		mixer_verifier_bn_254: MixerVerifierBn254Config {
 			parameters: Some(mixer_verifier_bn254_params),
-			phantom: Default::default(),
-		},
-		anchor_verifier_bn_254: AnchorVerifierBn254Config {
-			parameters: Some(anchor_verifier_bn254_params),
 			phantom: Default::default(),
 		},
 		merkle_tree_bn_254: MerkleTreeBn254Config {

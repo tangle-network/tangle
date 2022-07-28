@@ -2676,6 +2676,7 @@ dependencies = [
  "pallet-dkg-metadata",
  "pallet-dkg-proposal-handler",
  "pallet-dkg-proposals",
+ "pallet-ecdsa-claims",
  "pallet-hasher",
  "pallet-identity",
  "pallet-indices",
@@ -2842,6 +2843,7 @@ dependencies = [
  "pallet-dkg-metadata",
  "pallet-dkg-proposal-handler",
  "pallet-dkg-proposals",
+ "pallet-ecdsa-claims",
  "pallet-election-provider-multi-phase",
  "pallet-elections-phragmen",
  "pallet-grandpa",
@@ -2874,6 +2876,7 @@ dependencies = [
  "pallet-vanchor",
  "pallet-vanchor-handler",
  "pallet-verifier",
+ "pallet-vesting",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -6561,6 +6564,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-ecdsa-claims"
+version = "1.0.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "libsecp256k1 0.7.1",
+ "pallet-balances",
+ "pallet-vesting",
+ "parity-scale-codec",
+ "rustc-hex",
+ "scale-info",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-election-provider-multi-phase"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.26#e8a7d161f39db70cb27fdad6c6e215cf493ebc3b"
@@ -7302,6 +7326,7 @@ name = "pallet-vesting"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.26#e8a7d161f39db70cb27fdad6c6e215cf493ebc3b"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "log",
@@ -12984,9 +13009,9 @@ version = "1.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
- "cfg-if 0.1.10",
+ "cfg-if 1.0.0",
  "digest 0.10.3",
- "rand 0.4.6",
+ "rand 0.6.5",
  "static_assertions",
 ]
 

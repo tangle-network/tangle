@@ -45,6 +45,7 @@ pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate
 pallet-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-vanchor = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-vanchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-ecdsa-claims = { path = "../../pallets/claims", default-features = false }
 
 # Orml dependencies
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
@@ -103,6 +104,7 @@ pallet-treasury = { git = "https://github.com/paritytech/substrate.git", branch 
 
 pallet-authorship = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.26", default-features = false }
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.26", default-features = false }
+pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.26", default-features = false }
 pallet-multisig = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.26", default-features = false }
 pallet-proxy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.26", default-features = false }
 pallet-randomness-collective-flip = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.26", default-features = false }
@@ -122,6 +124,7 @@ runtime-benchmarks = [
   "frame-support/runtime-benchmarks",
   "frame-system/runtime-benchmarks",
   "pallet-balances/runtime-benchmarks",
+  "pallet-vesting/runtime-benchmarks",
   "pallet-collective/runtime-benchmarks",
   "pallet-timestamp/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
@@ -177,6 +180,7 @@ std = [
   "pallet-bounties/std",
   "pallet-child-bounties/std",
   "pallet-balances/std",
+  "pallet-vesting/std",
   "pallet-grandpa/std",
   "pallet-multisig/std",
   "pallet-indices/std",
@@ -200,6 +204,7 @@ std = [
   "pallet-preimage/std",
   "pallet-nomination-pools/std",
   "pallet-treasury/std",
+  "pallet-ecdsa-claims/std",
 
 	# DKG
 	"pallet-dkg-metadata/std",
