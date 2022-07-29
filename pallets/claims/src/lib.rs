@@ -16,6 +16,7 @@
 
 //! Pallet to process claims from Ethereum addresses.
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(clippy::all)]
 
 use codec::{Decode, Encode};
 use frame_support::{
@@ -38,7 +39,7 @@ use sp_runtime::{
 	RuntimeDebug,
 };
 use sp_std::{
-	convert::{TryFrom, TryInto},
+	convert::{TryInto},
 	fmt::Debug,
 	prelude::*,
 	vec,
@@ -733,7 +734,7 @@ mod tests {
 	use super::*;
 	use hex_literal::hex;
 	use secp_utils::*;
-
+	use sp_std::convert::TryFrom;
 	use codec::Encode;
 	use sp_core::H256;
 	// The testing primitives are very useful for avoiding having to work with signatures
