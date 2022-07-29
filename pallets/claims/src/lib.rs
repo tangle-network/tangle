@@ -37,7 +37,12 @@ use sp_runtime::{
 	},
 	RuntimeDebug,
 };
-use sp_std::{convert::{TryInto, TryFrom}, fmt::Debug, prelude::*, vec};
+use sp_std::{
+	convert::{TryFrom, TryInto},
+	fmt::Debug,
+	prelude::*,
+	vec,
+};
 
 /// Custom validity errors used in Polkadot while validating transactions.
 #[repr(u8)]
@@ -733,8 +738,7 @@ mod tests {
 	use sp_core::H256;
 	// The testing primitives are very useful for avoiding having to work with signatures
 	// or public keys. `u64` is used as the `AccountId` and no `Signature`s are required.
-	use crate::pallet as pallet_ecdsa_claims;
-	use crate::pallet::Call as ClaimsCall;
+	use crate::{pallet as pallet_ecdsa_claims, pallet::Call as ClaimsCall};
 	use frame_support::{
 		assert_err, assert_noop, assert_ok,
 		dispatch::DispatchError::BadOrigin,
