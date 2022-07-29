@@ -24,6 +24,7 @@ sp-io = { default-features = false, git = "https://github.com/paritytech/substra
 libsecp256k1 = { version = "0.7.0", default-features = false }
 
 [dev-dependencies]
+hex-literal = "0.3.4"
 sp-core = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }

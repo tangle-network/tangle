@@ -37,7 +37,7 @@ use sp_runtime::{
 	},
 	RuntimeDebug,
 };
-use sp_std::{convert::TryInto, fmt::Debug, prelude::*, vec};
+use sp_std::{convert::{TryInto, TryFrom}, fmt::Debug, prelude::*, vec};
 
 /// Custom validity errors used in Polkadot while validating transactions.
 #[repr(u8)]
@@ -729,12 +729,12 @@ mod tests {
 	use hex_literal::hex;
 	use secp_utils::*;
 
-	use parity_scale_codec::Encode;
+	use codec::Encode;
 	use sp_core::H256;
 	// The testing primitives are very useful for avoiding having to work with signatures
 	// or public keys. `u64` is used as the `AccountId` and no `Signature`s are required.
-	use crate::claims;
-	use claims::Call as ClaimsCall;
+	use crate::pallet as pallet_ecdsa_claims;
+	use crate::pallet::Call as ClaimsCall;
 	use frame_support::{
 		assert_err, assert_noop, assert_ok,
 		dispatch::DispatchError::BadOrigin,
@@ -761,7 +761,7 @@ mod tests {
 			System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
 			Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 			Vesting: pallet_vesting::{Pallet, Call, Storage, Config<T>, Event<T>},
-			Claims: claims::{Pallet, Call, Storage, Config<T>, Event<T>, ValidateUnsigned},
+			Claims: pallet_ecdsa_claims::{Pallet, Call, Storage, Config<T>, Event<T>, ValidateUnsigned},
 		}
 	);
 
@@ -863,7 +863,7 @@ mod tests {
 		pallet_balances::GenesisConfig::<Test>::default()
 			.assimilate_storage(&mut t)
 			.unwrap();
-		claims::GenesisConfig::<Test> {
+		pallet_ecdsa_claims::GenesisConfig::<Test> {
 			claims: vec![
 				(eth(&alice()), 100, None, None),
 				(eth(&dave()), 200, None, Some(StatementKind::Regular)),
