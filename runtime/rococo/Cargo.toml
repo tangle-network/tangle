@@ -42,6 +42,7 @@ pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substr
 pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
 pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
 pallet-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-ecdsa-claims = { path = "../../pallets/claims", default-features = false }
 
 # Orml depedencies
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
@@ -168,6 +169,7 @@ std = [
 	"pallet-identity/std",
 	"pallet-vesting/std",
 	"pallet-utility/std",
+	"pallet-ecdsa-claims/std",
 
 	# DKG
 	"pallet-dkg-metadata/std",
@@ -210,7 +212,7 @@ runtime-benchmarks = [
 	"xcm-builder/runtime-benchmarks",
 	"pallet-society/runtime-benchmarks",
 	"pallet-collective/runtime-benchmarks",
-
+	
 	# protocol-substrate deps
 	"pallet-signature-bridge/runtime-benchmarks",
 	"pallet-mt/runtime-benchmarks",

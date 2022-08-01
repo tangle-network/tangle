@@ -83,12 +83,12 @@ impl pallet_verifier::Config<pallet_verifier::Instance1> for Runtime {
 	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
 }
 
-impl pallet_verifier::Config<pallet_verifier::Instance2> for Runtime {
-	type Event = Event;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type Verifier = ArkworksVerifierBn254;
-	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
-}
+// impl pallet_verifier::Config<pallet_verifier::Instance2> for Runtime {
+// 	type Event = Event;
+// 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+// 	type Verifier = ArkworksVerifierBn254;
+// 	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
+// }
 
 parameter_types! {
 	pub const TokenWrapperPalletId: PalletId = PalletId(*b"dw/tkwrp");

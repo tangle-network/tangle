@@ -933,6 +933,31 @@ where
 	type OverarchingCall = Call;
 }
 
+parameter_types! {
+	pub Prefix: &'static [u8] = b"Pay EGGs to the Polkadot account:";
+}
+
+impl pallet_ecdsa_claims::Config for Runtime {
+	type Event = Event;
+	type VestingSchedule = Vesting;
+	type Prefix = Prefix;
+	type MoveClaimOrigin = EnsureRoot<Self::AccountId>;
+	type WeightInfo = pallet_ecdsa_claims::TestWeightInfo;
+}
+
+parameter_types! {
+	pub const MinVestedTransfer: Balance = UNIT;
+}
+
+impl pallet_vesting::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type BlockNumberToBalance = sp_runtime::traits::ConvertInto;
+	type MinVestedTransfer = MinVestedTransfer;
+	type WeightInfo = ();
+	const MAX_VESTING_SCHEDULES: u32 = 28;
+}
+
 impl pallet_offences::Config for Runtime {
 	type Event = Event;
 	type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
@@ -1074,6 +1099,8 @@ construct_runtime!(
 		Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		Vesting: pallet_vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
+		Claims: pallet_ecdsa_claims::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
 
 		Elections: pallet_elections_phragmen::{Pallet, Call, Storage, Event<T>, Config<T>},
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase::{Pallet, Call, Storage, Event<T>, ValidateUnsigned},
@@ -1105,9 +1132,6 @@ construct_runtime!(
 
 		// Mixer Verifier
 		MixerVerifierBn254: pallet_verifier::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
-		// Anchor Verifier
-		AnchorVerifierBn254: pallet_verifier::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>},
 
 		// Merkle Tree
 		MerkleTreeBn254: pallet_mt::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
