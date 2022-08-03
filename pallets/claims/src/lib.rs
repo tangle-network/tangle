@@ -197,6 +197,8 @@ pub mod pallet {
 		#[pallet::constant]
 		type Prefix: Get<&'static [u8]>;
 		type MoveClaimOrigin: EnsureOrigin<Self::Origin>;
+		/// Origin permitted to call force_ extrinsics
+		type ForceOrigin: EnsureOrigin<Self::Origin>;
 		type WeightInfo: WeightInfo;
 	}
 
@@ -232,6 +234,11 @@ pub mod pallet {
 	#[pallet::getter(fn total)]
 	pub(super) type Total<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
+	/// Expiry block and account to deposit expired funds
+	#[pallet::storage]
+	#[pallet::getter(fn expiry_time)]
+	pub(super) type ExpiryConfig<T: Config> = StorageValue<_, (T::BlockNumber, T::AccountId)>;
+
 	/// Vesting schedule for a claim.
 	/// First balance is the total amount that should be held for vesting.
 	/// Second balance is how much should be unlocked per block.
@@ -254,12 +261,13 @@ pub mod pallet {
 		pub claims:
 			Vec<(EthereumAddress, BalanceOf<T>, Option<T::AccountId>, Option<StatementKind>)>,
 		pub vesting: Vec<(EthereumAddress, (BalanceOf<T>, BalanceOf<T>, T::BlockNumber))>,
+		pub expiry: Option<(T::BlockNumber, T::AccountId)>,
 	}
 
 	#[cfg(feature = "std")]
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
-			GenesisConfig { claims: Default::default(), vesting: Default::default() }
+			GenesisConfig { claims: Default::default(), vesting: Default::default(), expiry: None }
 		}
 	}
 
@@ -297,11 +305,27 @@ pub mod pallet {
 				.for_each(|(i, a)| {
 					Preclaims::<T>::insert(i, a);
 				});
+			// build expiryConfig
+			ExpiryConfig::<T>::set(self.expiry.clone())
 		}
 	}
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn on_finalize(current_block: BlockNumberFor<T>) {
+			// check if we have an expiry time set and have we crossed the limit
+			let expiry_config = ExpiryConfig::<T>::get();
+			if let Some(expiry_config) = expiry_config {
+				if current_block > expiry_config.0 {
+					let unclaimed_amount = Total::<T>::take();
+					frame_support::log::info!("Claims : Expiry block passed, sweeping remaining amount of {:?} to destination", unclaimed_amount);
+					CurrencyOf::<T>::deposit_creating(&expiry_config.1, unclaimed_amount);
+					// clear the expiry detail
+					ExpiryConfig::<T>::take();
+				}
+			}
+		}
+	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -483,6 +507,19 @@ pub mod pallet {
 				})
 			});
 			Ok(Pays::No.into())
+		}
+
+		/// Set the value for expiryconfig
+		/// Can only be called by ForceOrigin
+		#[pallet::weight(T::WeightInfo::move_claim())]
+		pub fn force_set_expiry_config(
+			origin: OriginFor<T>,
+			expiry_block: T::BlockNumber,
+			dest: T::AccountId,
+		) -> DispatchResult {
+			T::ForceOrigin::ensure_origin(origin)?;
+			ExpiryConfig::<T>::set(Some((expiry_block, dest)));
+			Ok(())
 		}
 	}
 
@@ -739,7 +776,7 @@ mod tests {
 		assert_err, assert_noop, assert_ok,
 		dispatch::DispatchError::BadOrigin,
 		ord_parameter_types, parameter_types,
-		traits::{ExistenceRequirement, GenesisBuild},
+		traits::{ExistenceRequirement, GenesisBuild, OnFinalize, OnInitialize},
 		weights::{GetDispatchInfo, Pays},
 	};
 	use pallet_balances;
@@ -834,9 +871,20 @@ mod tests {
 	impl Config for Test {
 		type Event = Event;
 		type VestingSchedule = Vesting;
+		type ForceOrigin = frame_system::EnsureRoot<u64>;
 		type Prefix = Prefix;
 		type MoveClaimOrigin = frame_system::EnsureSignedBy<Six, u64>;
 		type WeightInfo = TestWeightInfo;
+	}
+
+	pub fn run_to_block(n: u64) {
+		while System::block_number() < n {
+			Claims::on_finalize(System::block_number());
+			Balances::on_finalize(System::block_number());
+			System::on_finalize(System::block_number());
+			System::set_block_number(System::block_number() + 1);
+			System::on_initialize(System::block_number());
+		}
 	}
 
 	fn alice() -> libsecp256k1::SecretKey {
@@ -871,6 +919,7 @@ mod tests {
 				(eth(&frank()), 400, Some(43), None),
 			],
 			vesting: vec![(eth(&alice()), (50, 10, 1))],
+			expiry: None,
 		}
 		.assimilate_storage(&mut t)
 		.unwrap();
@@ -1417,6 +1466,29 @@ mod tests {
 				<Pallet<Test>>::validate_unsigned(source, &call),
 				InvalidTransaction::Custom(ValidityError::InvalidStatement.into()).into(),
 			);
+		});
+	}
+
+	#[test]
+	fn test_unclaimed_returned_to_destination() {
+		new_test_ext().execute_with(|| {
+			let original_total_claims = Total::<Test>::get();
+			let claim_of_alice = 100;
+			assert_ok!(Claims::claim(
+				Origin::none(),
+				42,
+				sig::<Test>(&alice(), &42u64.encode(), &[][..])
+			));
+			assert_eq!(Total::<Test>::get(), original_total_claims - claim_of_alice);
+
+			// force set the expiry config
+			assert_ok!(Claims::force_set_expiry_config(Origin::root(), 5, 100));
+
+			// run to after expiry block
+			run_to_block(7);
+			assert_eq!(Total::<Test>::get(), 0);
+			// the dest account should receive the remaining pot balance
+			assert_eq!(Balances::free_balance(100), original_total_claims - claim_of_alice);
 		});
 	}
 }
