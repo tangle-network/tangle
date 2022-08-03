@@ -399,7 +399,7 @@ fn testnet_genesis(
 			// Add Wasm runtime to storage.
 			code: wasm_binary.to_vec(),
 		},
-		claims: ClaimsConfig { claims: vec![], vesting: vec![] },
+		claims: ClaimsConfig { claims: vec![], vesting: vec![], expiry: None },
 		sudo: SudoConfig { key: Some(root_key) },
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
