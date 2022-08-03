@@ -1490,12 +1490,12 @@ mod tests {
 			// the dest account should receive the remaining pot balance
 			assert_eq!(Balances::free_balance(100), original_total_claims - claim_of_alice);
 
-			// all further claims should fail with PotUnderflow error since the funds have been emptied
-			assert_noop!(Claims::claim(
-				Origin::none(),
-				42,
-				sig::<Test>(&frank(), &42u64.encode(), &[][..])
-			), Error::<Test>::PotUnderflow);
+			// all further claims should fail with PotUnderflow error since the funds have been
+			// emptied
+			assert_noop!(
+				Claims::claim(Origin::none(), 42, sig::<Test>(&frank(), &42u64.encode(), &[][..])),
+				Error::<Test>::PotUnderflow
+			);
 		});
 	}
 }
