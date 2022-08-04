@@ -117,7 +117,7 @@ fn rococo_genesis(
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
 		},
-		claims: ClaimsConfig { claims: vec![], vesting: vec![] },
+		claims: ClaimsConfig { claims: vec![], vesting: vec![], expiry: None },
 		sudo: egg_rococo_runtime::SudoConfig { key: Some(root_key) },
 		balances: egg_rococo_runtime::BalancesConfig {
 			balances: endowed_accounts
