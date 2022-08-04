@@ -1,4 +1,4 @@
-<h1 align="center">The Egg Network 🕸️ </h1>
+<h1 align="center"> :knot: 🕸️ The Tangle Network 🕸️ :knot: </h1>
 <div align="center">
 <a href="https://www.webb.tools/">
     <img alt="Webb Logo" src="./assets/webb-icon.svg" width="15%" height="30%" />
@@ -52,7 +52,7 @@
 
 <h1 id="start"> Getting Started  🎉 </h1>
 
-The Egg Network contains runtimes for both standalone and parachain nodes featuring Webb's DKG and privacy pallet protocols. If you would like to familiarize yourself with our DKG and anchor protocol check out these repos:
+The Tangle Network contains runtimes for both standalone and parachain nodes featuring Webb's DKG and privacy pallet protocols. If you would like to familiarize yourself with our DKG and anchor protocol check out these repos:
 
 - [dkg-substrate](https://github.com/webb-tools/dkg-substrate)
 - [protocol-substrate](https://github.com/webb-tools/protocol-substrate)
