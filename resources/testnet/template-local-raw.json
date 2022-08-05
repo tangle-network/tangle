@@ -2,7 +2,11 @@
   "name": "Local Testnet",
   "id": "local_testnet",
   "chainType": "Local",
-  "bootNodes": [],
+  "bootNodes": [
+    "/ip4/45.32.85.173/tcp/30334/p2p/12D3KooWFoZRHGV27rPtP1WusDKMtiwcSt7uPzLcYnDVn3DhcDrC",
+    "/ip4/45.77.223.184/tcp/30334/p2p/12D3KooWKLqLfRCskai6hkrNpXMk116k3v96Wd64VTQtGsExcyRb",
+    "/ip4/149.28.73.239/tcp/30334/p2p/12D3KooWFKFK3PCFSKm2WRkvqdJLtgC8wtXLCfNjqDH4SVVJw1BJ"
+  ],
   "telemetryEndpoints": null,
   "protocolId": "egg-template-local",
   "properties": {
