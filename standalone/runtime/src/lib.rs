@@ -940,6 +940,7 @@ parameter_types! {
 impl pallet_ecdsa_claims::Config for Runtime {
 	type Event = Event;
 	type VestingSchedule = Vesting;
+	type ForceOrigin = EnsureRoot<Self::AccountId>;
 	type Prefix = Prefix;
 	type MoveClaimOrigin = EnsureRoot<Self::AccountId>;
 	type WeightInfo = pallet_ecdsa_claims::TestWeightInfo;

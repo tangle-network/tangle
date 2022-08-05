@@ -21,14 +21,15 @@ frame-system = { default-features = false, git = "https://github.com/paritytech/
 sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 sp-std = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 sp-io = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
+pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
+pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 libsecp256k1 = { version = "0.7.0", default-features = false }
 
 [dev-dependencies]
 hex-literal = "0.3.4"
 sp-core = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
-pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
-pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
+
 serde_json = "1.0.81"
 
 [features]
@@ -45,5 +46,7 @@ std = [
     "sp-std/std",
     "sp-io/std",
     "libsecp256k1/std",
+    "pallet-vesting/std",
+    "pallet-balances/std"
 ]
 try-runtime = [ "frame-support/try-runtime" ]

@@ -117,8 +117,6 @@ fn rococo_genesis(
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
 		},
-		democracy: Default::default(),
-		council: Default::default(),
 		claims: ClaimsConfig { claims: vec![], vesting: vec![] },
 		sudo: egg_rococo_runtime::SudoConfig { key: Some(root_key) },
 		balances: egg_rococo_runtime::BalancesConfig {
