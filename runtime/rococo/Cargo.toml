@@ -92,6 +92,9 @@ pallet-treasury = { git = "https://github.com/paritytech/substrate", branch = "p
 pallet-identity = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26", default-features = false }
 pallet-vesting = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26", default-features = false }
 pallet-utility = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26", default-features = false }
+pallet-democracy = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26", default-features = false }
+pallet-scheduler = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26", default-features = false }
+pallet-preimage = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26", default-features = false }
 
 # Cumulus Dependencies
 cumulus-pallet-aura-ext = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.26", default-features = false }
@@ -170,6 +173,9 @@ std = [
 	"pallet-vesting/std",
 	"pallet-utility/std",
 	"pallet-ecdsa-claims/std",
+	"pallet-democracy/std",
+	"pallet-scheduler/std",
+	"pallet-preimage/std",
 
 	# DKG
 	"pallet-dkg-metadata/std",
