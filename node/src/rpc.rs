@@ -7,7 +7,7 @@
 
 use std::sync::Arc;
 
-use egg_rococo_runtime::{opaque::Block, AccountId, Balance, Index as Nonce};
+use tangle_rococo_runtime::{opaque::Block, AccountId, Balance, Index as Nonce};
 
 use sc_client_api::AuxStore;
 pub use sc_rpc::{DenyUnsafe, SubscriptionTaskExecutor};

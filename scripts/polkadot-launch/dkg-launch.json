@@ -28,7 +28,7 @@
 	},
 	"parachains": [
 		{
-			"bin": "target/release/egg-collator",
+			"bin": "target/release/tangle-collator",
 			"chain": "./resources/template-local-raw.json",
 			"nodes": [
 				{
