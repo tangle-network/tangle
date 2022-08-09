@@ -183,8 +183,8 @@ impl WeightToFeePolynomial for WeightToFee {
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("egg-standalone"),
-	impl_name: create_runtime_str!("egg-standalone"),
+	spec_name: create_runtime_str!("tangle-standalone"),
+	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
 	spec_version: 2,
 	impl_version: 2,
@@ -934,7 +934,7 @@ where
 }
 
 parameter_types! {
-	pub Prefix: &'static [u8] = b"Pay EGGs to the Polkadot account:";
+	pub Prefix: &'static [u8] = b"Pay TNTs to the Tangle account:";
 }
 
 impl pallet_ecdsa_claims::Config for Runtime {

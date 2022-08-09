@@ -7,15 +7,15 @@
 
 use std::sync::Arc;
 
-use egg_runtime::{opaque::Block, AccountId, Balance, Index};
 use jsonrpsee::RpcModule;
 use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
+use tangle_runtime::{opaque::Block, AccountId, Balance, Index};
 
-use egg_runtime::protocol_substrate_config::Element;
 pub use sc_rpc_api::DenyUnsafe;
+use tangle_runtime::protocol_substrate_config::Element;
 use webb_primitives::{ChainId, LeafIndex};
 
 use pallet_linkable_tree_rpc::LinkableTreeClient;

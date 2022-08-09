@@ -26,7 +26,7 @@
 //! ## Overview
 //!
 //! The collator rewards pallet provides function to handle distribution of rewards for collators of
-//! EGG network
+//! Tangle network
 //!
 //! The supported dispatchable functions are documented in the [`Call`] enum.
 //!

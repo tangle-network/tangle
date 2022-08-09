@@ -21,7 +21,6 @@ use crate::{
 use codec::Encode;
 use cumulus_client_cli::generate_genesis_block;
 use cumulus_primitives_core::ParaId;
-use egg_rococo_runtime::{Block, RuntimeApi};
 use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use log::info;
 use sc_cli::{
@@ -35,6 +34,7 @@ use sc_service::{
 use sp_core::hexdisplay::HexDisplay;
 use sp_runtime::traits::{AccountIdConversion, Block as BlockT};
 use std::net::SocketAddr;
+use tangle_rococo_runtime::{Block, RuntimeApi};
 
 pub enum Runtime {
 	Rococo,
@@ -58,7 +58,7 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
 	Ok(match id {
 		"dev" => Box::new(chain_spec::development_config(2000.into())),
 		"template-rococo" => Box::new(chain_spec::local_testnet_config(2000.into())),
-		"egg-rococo" => Box::new(chain_spec::rococo::egg_rococo_config(4006.into())), /* Rococo para-id 4006 */
+		"tangle-rococo" => Box::new(chain_spec::rococo::tangle_rococo_config(4006.into())), /* Rococo para-id 4006 */
 		"" | "local" => Box::new(chain_spec::local_testnet_config(2000.into())),
 		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})
@@ -66,7 +66,7 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"EGG Collator".into()
+		"Tangle Collator".into()
 	}
 
 	fn impl_version() -> String {
@@ -74,7 +74,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn description() -> String {
-		"EGG Collator\n\nThe command-line arguments provided first will be \
+		"Tangle Collator\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relay chain node.\n\n\
 		parachain-collator <parachain-args> -- <relay-chain-args>"
@@ -99,14 +99,14 @@ impl SubstrateCli for Cli {
 
 	fn native_runtime_version(chain_spec: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
 		match chain_spec.runtime() {
-			Runtime::Rococo => &egg_rococo_runtime::VERSION,
+			Runtime::Rococo => &tangle_rococo_runtime::VERSION,
 		}
 	}
 }
 
 impl SubstrateCli for RelayChainCli {
 	fn impl_name() -> String {
-		"EGG Collator".into()
+		"Tangle Collator".into()
 	}
 
 	fn impl_version() -> String {
@@ -114,7 +114,7 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn description() -> String {
-		"EGG Collator\n\nThe command-line arguments provided first will be \
+		"Tangle Collator\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relay chain node.\n\n\
 		parachain-collator <parachain-args> -- <relay-chain-args>"

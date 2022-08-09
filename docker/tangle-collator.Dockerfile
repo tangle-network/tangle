@@ -1,4 +1,4 @@
-# Node for Standalone Eggnet.
+# Node for Tangle Collator.
 #
 # Requires to run from repository root and to copy the binary in the build folder (part of the release workflow)
 
@@ -13,27 +13,27 @@ RUN apt-get update && apt-get install -y clang curl libssl-dev llvm libudev-dev 
 RUN apt-get install -y ca-certificates && update-ca-certificates
 
 COPY . .
-# Build DKG Standalone Node
-RUN cargo build --release -p egg-standalone-node
+# Build DKG Parachain Node
+RUN cargo build --release -p tangle-collator
 
 FROM debian:buster-slim
 LABEL maintainer="Webb Developers <dev@webb.tools>"
-LABEL description="Binary for Standalone Eggnet Node"
+LABEL description="Binary for Tangle Collator Node"
 
-RUN useradd -m -u 1000 -U -s /bin/sh -d /eggnet admin && \
-	mkdir -p /eggnet/.local/share && \
+RUN useradd -m -u 1000 -U -s /bin/sh -d /tangle admin && \
+	mkdir -p /tangle/.local/share && \
 	mkdir /data && \
 	chown -R admin:admin /data && \
-	chown -R admin:admin /eggnet && \
-	ln -s /data /eggnet/.local/share/standalone && \
+	chown -R admin:admin /tangle && \
+	ln -s /data /tangle/.local/share/collator && \
 	rm -rf /usr/bin /usr/sbin
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt 
-COPY --from=builder --chown=admin /app/target/release/egg-standalone-node /eggnet
+COPY --from=builder --chown=admin /app/target/release/tangle-collator /tangle
 
 USER admin
 
-RUN chmod uog+x /eggnet/egg-standalone-node*
+RUN chmod uog+x /tangle/tangle-collator*
 
 # 30333 for parachain p2p
 # 9933 for RPC call
@@ -43,4 +43,4 @@ EXPOSE 30333 30334 9933 9944 9615
 
 VOLUME ["/data"]
 
-ENTRYPOINT ["/eggnet/egg-standalone-node"]
+ENTRYPOINT ["/tangle/tangle-collator"]

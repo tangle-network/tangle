@@ -13,13 +13,6 @@
 // limitations under the License.
 
 use arkworks_setups::{common::setup_params, Curve};
-use egg_runtime::{
-	AccountId, AssetRegistryConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
-	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, MaxNominations,
-	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill, SessionConfig,
-	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
-	VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
-};
 use hex_literal::hex;
 use sc_network::config::MultiaddrWithPeerId;
 use sc_service::ChainType;
@@ -27,6 +20,13 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use tangle_runtime::{
+	AccountId, AssetRegistryConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
+	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, MaxNominations,
+	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill, SessionConfig,
+	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
+	VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
+};
 use webb_primitives::ResourceId;
 
 // The URL for the telemetry server.
@@ -74,8 +74,8 @@ fn dkg_session_keys(
 	grandpa: GrandpaId,
 	aura: AuraId,
 	dkg: DKGId,
-) -> egg_runtime::opaque::SessionKeys {
-	egg_runtime::opaque::SessionKeys { grandpa, aura, dkg }
+) -> tangle_runtime::opaque::SessionKeys {
+	tangle_runtime::opaque::SessionKeys { grandpa, aura, dkg }
 }
 
 pub fn development_config() -> Result<ChainSpec, String> {
@@ -450,7 +450,7 @@ fn testnet_genesis(
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
 			native_asset_name: b"WEBB".to_vec(),
-			native_existential_deposit: egg_runtime::EXISTENTIAL_DEPOSIT,
+			native_existential_deposit: tangle_runtime::EXISTENTIAL_DEPOSIT,
 		},
 		hasher_bn_254: HasherBn254Config {
 			parameters: Some(bn254_x5_3_params.to_bytes()),

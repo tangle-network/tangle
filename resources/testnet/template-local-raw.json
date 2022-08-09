@@ -8,11 +8,11 @@
     "/ip4/149.28.73.239/tcp/30334/p2p/12D3KooWFKFK3PCFSKm2WRkvqdJLtgC8wtXLCfNjqDH4SVVJw1BJ"
   ],
   "telemetryEndpoints": null,
-  "protocolId": "egg-template-local",
+  "protocolId": "tangle-template-local",
   "properties": {
     "ss58Format": 42,
     "tokenDecimals": 12,
-    "tokenSymbol": "tEGG"
+    "tokenSymbol": "tTNT"
   },
   "relay_chain": "rococo-local",
   "para_id": 2000,

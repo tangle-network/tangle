@@ -92,7 +92,7 @@ impl pallet_balances::Config for Test {
 }
 
 parameter_types! {
-	pub const CollatorRewardsId: PalletId = PalletId(*b"egg/clrw");
+	pub const CollatorRewardsId: PalletId = PalletId(*b"tnt/clrw");
 }
 
 impl pallet_collator_rewards::Config for Test {
