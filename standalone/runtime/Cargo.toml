@@ -36,8 +36,6 @@ pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate
 pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
-pallet-anchor = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
-pallet-anchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
@@ -137,8 +135,6 @@ runtime-benchmarks = [
   "pallet-linkable-tree/runtime-benchmarks",
   "pallet-hasher/runtime-benchmarks",
   "pallet-verifier/runtime-benchmarks",
-  "pallet-anchor/runtime-benchmarks",
-  "pallet-anchor-handler/runtime-benchmarks",
   "pallet-asset-registry/runtime-benchmarks",
   "pallet-token-wrapper/runtime-benchmarks",
 	
@@ -223,8 +219,6 @@ std = [
 	"orml-currencies/std",
 	"orml-tokens/std",
 	"orml-traits/std",
-	"pallet-anchor/std",
-	"pallet-anchor-handler/std",
 	"pallet-asset-registry/std",
 	"pallet-signature-bridge/std",
 	"pallet-mixer/std",
