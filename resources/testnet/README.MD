@@ -24,13 +24,13 @@
 1. Build the latest parachain (we are not passing the argument `--chain` since the default is `local-testnet`)
 
     ```
-    cargo b -p egg-collator -r
+    cargo b -p tangle-collator -r
     ```
 
 2. Generate raw chainspec and artifacts (we are not passing the argument `--chain` since the default is `local-testnet`). Remember to generate this on the same machine you will be running the initial collator on.
 
     ```
-    ./target/release/egg-collator build-spec --disable-default-bootnode --raw > template-local-raw.json
-    ./target/release/egg-collator export-genesis-state > genesis-state-local
-    ./target/release/egg-collator export-genesis-wasm > genesis-wasm-local
+    ./target/release/tangle-collator build-spec --disable-default-bootnode --raw > template-local-raw.json
+    ./target/release/tangle-collator export-genesis-state > genesis-state-local
+    ./target/release/tangle-collator export-genesis-wasm > genesis-wasm-local
     ```
