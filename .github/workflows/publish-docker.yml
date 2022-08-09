@@ -11,8 +11,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME_1: ${{ github.repository }}/egg-standalone-node
-  IMAGE_NAME_2: ${{ github.repository }}/egg-collator
+  IMAGE_NAME_1: ${{ github.repository }}/tangle-standalone-node
+  IMAGE_NAME_2: ${{ github.repository }}/tangle-collator
 
 jobs:
   build:
@@ -22,10 +22,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - dockerfile: ./docker/eggnet-standalone.Dockerfile
-            image: ghcr.io/${{ github.repository }}/egg-standalone-node
-          - dockerfile: ./docker/eggnet-collator.Dockerfile
-            image: ghcr.io/${{ github.repository }}/egg-collator
+          - dockerfile: ./docker/tangle-standalone.Dockerfile
+            image: ghcr.io/${{ github.repository }}/tangle-standalone-node
+          - dockerfile: ./docker/tangle-collator.Dockerfile
+            image: ghcr.io/${{ github.repository }}/tangle-collator
     permissions:
       contents: read
       packages: write

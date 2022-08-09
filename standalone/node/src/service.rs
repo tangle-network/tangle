@@ -15,7 +15,6 @@
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-use egg_runtime::{self, opaque::Block, RuntimeApi};
 use sc_client_api::{BlockBackend, ExecutorProvider};
 use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
 pub use sc_executor::NativeElseWasmExecutor;
@@ -25,6 +24,7 @@ use sc_service::{config::BasePath, error::Error as ServiceError, Configuration, 
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use std::{sync::Arc, time::Duration};
+use tangle_runtime::{self, opaque::Block, RuntimeApi};
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -38,11 +38,11 @@ impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 	type ExtendHostFunctions = ();
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		egg_runtime::api::dispatch(method, data)
+		tangle_runtime::api::dispatch(method, data)
 	}
 
 	fn native_version() -> sc_executor::NativeVersion {
-		egg_runtime::native_version()
+		tangle_runtime::native_version()
 	}
 }
 

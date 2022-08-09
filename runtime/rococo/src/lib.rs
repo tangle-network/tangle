@@ -161,8 +161,8 @@ pub mod opaque {
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("egg-parachain"),
-	impl_name: create_runtime_str!("egg-parachain"),
+	spec_name: create_runtime_str!("tangle-parachain"),
+	impl_name: create_runtime_str!("tangle-parachain"),
 	authoring_version: 1,
 	spec_version: 1,
 	impl_version: 0,
@@ -201,7 +201,7 @@ pub mod currency {
 
 	// Monetary value
 	// =============
-	/// Lets assume 10 EGG = 1USD
+	/// Lets assume 10 TNT = 1USD
 	/// This assumption forms the base of all fee calculations, revisit this
 	/// if the assumption is no longer true.
 	pub const DOLLAR: Balance = UNIT * 10;
@@ -397,7 +397,7 @@ impl pallet_treasury::Config for Runtime {
 }
 
 parameter_types! {
-	pub const CollatorRewardsId: PalletId = PalletId(*b"egg/clrw");
+	pub const CollatorRewardsId: PalletId = PalletId(*b"tnt/clrw");
 }
 
 impl pallet_collator_rewards::Config for Runtime {
@@ -585,7 +585,7 @@ impl pallet_utility::Config for Runtime {
 }
 
 parameter_types! {
-	pub Prefix: &'static [u8] = b"Pay EGGs to the Polkadot account:";
+	pub Prefix: &'static [u8] = b"Pay TNTs to the Tangle account:";
 }
 
 impl pallet_ecdsa_claims::Config for Runtime {

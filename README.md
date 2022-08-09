@@ -96,8 +96,8 @@ cargo build --release
 
 You will now have two runtimes built in `target/release/` dir:
 
-1. `egg-collator`: Parachain node.
-2. `egg-standalone-node`: Standalone node, used in the current standalone Egg network.
+1. `tangle-collator`: Parachain node.
+2. `tangle-standalone-node`: Standalone node, used in the current standalone Tangle network.
 ### Troubleshooting for Apple Silicon users
 
 Install Homebrew if you have not already. You can check if you have it installed with the following command:
@@ -144,9 +144,9 @@ The following chainspecs are provided for your convenience in `/resources`:
 | Chainspecs | Use | Target
 |---|---|---|
 | template-local-plain.json | Used for local testnet development with paraId 2000 | `--chain=template-rococo`
-| rococo-plain.json | Used for Rococo testnet with paraId 2003 | `--chain=egg-rococo`
-| arana-standalone-plain.json | Used for standalone egg network | `--chain=eggnet`
-| webb_rococo_raw.json | Used for rococo parachain with paraId 4006 | `--chain=egg-rococo`
+| rococo-plain.json | Used for Rococo testnet with paraId 2003 | `--chain=tangle-rococo`
+| arana-standalone-plain.json | Used for standalone tangle network | `--chain=tangle-standalone`
+| webb_rococo_raw.json | Used for rococo parachain with paraId 4006 | `--chain=tangle-rococo`
 
 Keep in mind each of the above mentioned specs are in plain json form and can be arbitrarily updated. The raw spec versions are included in `resources/` for your convenience. To learn more about chainspecs checkout the [docs](https://docs.substrate.io/v3/runtime/chain-specs/) 🎓.
 
@@ -182,24 +182,24 @@ tail -f 9988.log
 
 <h3 id="standalone"> Standalone Local Testnet </h3>
 
-Currently the easiest way to run the DKG is to use a 3-node local testnet using `egg-standalone-node`. We will call those nodes `Alice`, `Bob` and `Charlie`. Each node will use the built-in development account with the same name, i.e. node `Alice` will use the `Alice` development account and so on. Each of the three accounts has been configured as an initial authority at genesis. So, we are using three validators for our testnet.
+Currently the easiest way to run the DKG is to use a 3-node local testnet using `tangle-standalone-node`. We will call those nodes `Alice`, `Bob` and `Charlie`. Each node will use the built-in development account with the same name, i.e. node `Alice` will use the `Alice` development account and so on. Each of the three accounts has been configured as an initial authority at genesis. So, we are using three validators for our testnet.
 
 `Alice` is our bootnode and is started like so:
 
 ```
-RUST_LOG=dkg=trace ./target/release/egg-standalone-node  --base-path /tmp/standalone/alice --alice
+RUST_LOG=dkg=trace ./target/release/tangle-standalone-node  --base-path /tmp/standalone/alice --alice
 ```
 
 `Bob` is started like so:
 
 ```
-RUST_LOG=dkg=trace ./target/release/egg-standalone-node  --base-path /tmp/standalone/bob --bob
+RUST_LOG=dkg=trace ./target/release/tangle-standalone-node  --base-path /tmp/standalone/bob --bob
 ```
 
 `Charlie` is started like so:
 
 ```
-RUST_LOG=dkg=trace ./target/release/egg-standalone-node --base-path /tmp/standalone/charlie --charlie
+RUST_LOG=dkg=trace ./target/release/tangle-standalone-node --base-path /tmp/standalone/charlie --charlie
 ```
 
 Great you are now running a 3-node standalone test network!
@@ -330,7 +330,7 @@ We first generate the **genesis state** and **genesis wasm** needed for the para
 
 ```bash
 # Build the dkg node (from it's top level dir)
-cargo build --release -p egg-collator
+cargo build --release -p tangle-collator
 
 # The following instructions outline how to build chain spec,
 # wasm and genesis state for local setup. These files will be used
@@ -338,29 +338,29 @@ cargo build --release -p egg-collator
 
 # Build local chainspec
 # You may also use the chainspec provided in ./resources  
-./target/release/egg-collator build-spec \
+./target/release/tangle-collator build-spec \
 --disable-default-bootnode > ./resources/template-local-plain.json
 
 # Build the raw chainspec file
-./target/release/egg-collator build-spec \
+./target/release/tangle-collator build-spec \
 --chain=./resources/template-local-plain.json \
 --raw --disable-default-bootnode > ./resources/template-local-raw.json
 
 # Export genesis state to `./resources`, using 2000 as the ParaId
-./target/release/egg-collator export-genesis-state --chain=./resources/template-local-raw.json > ./resources/para-2000-genesis
+./target/release/tangle-collator export-genesis-state --chain=./resources/template-local-raw.json > ./resources/para-2000-genesis
 
 # Export the genesis wasm
-./target/release/egg-collator export-genesis-wasm > ./resources/para-2000-wasm
+./target/release/tangle-collator export-genesis-wasm > ./resources/para-2000-wasm
 ```
 
-For building chainspec for Rococo Egg Testnet you need to pass the chain argument during the intial build spec.
+For building chainspec for Rococo Tangle Testnet you need to pass the chain argument during the intial build spec.
 
 ```
 # Note: This uses paraId 2076 and target Rococo relay chain
-./target/release/egg-collator build-spec --disable-default-bootnode --chain=egg-rococo > ./resources/rococo-plain.json
+./target/release/tangle-collator build-spec --disable-default-bootnode --chain=tangle-rococo > ./resources/rococo-plain.json
 ```
 
-### Start a Egg Collator Node
+### Start a Tangle Collator Node
 
 From the dkg-substrate working directory:
 
@@ -369,7 +369,7 @@ From the dkg-substrate working directory:
 # that is at the same level of the template working directory. Change as needed.
 #
 # It also assumes a ParaId of 2000. Change as needed.
-./target/release/egg-collator \
+./target/release/tangle-collator \
 --base-path /tmp/parachain/alice \
 --collator \
 --alice \

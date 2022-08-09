@@ -1,11 +1,11 @@
 [package]
-name = "egg-rococo-runtime"
+name = "tangle-rococo-runtime"
 authors = ["Webb tools"]
-description = "Webb Protocol Egg Network runtime"
+description = "Webb Protocol Tangle Network runtime"
 license = "Unlicense"
 version = "3.0.0"
 homepage = "https://webb.tools"
-repository = "https://github.com/webb-tools/egg-net"
+repository = "https://github.com/webb-tools/tangle"
 edition = "2021"
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

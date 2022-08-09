@@ -4,11 +4,11 @@
   "chainType": "Local",
   "bootNodes": [],
   "telemetryEndpoints": null,
-  "protocolId": "egg-template-local",
+  "protocolId": "tangle-template-local",
   "properties": {
     "ss58Format": 42,
     "tokenDecimals": 12,
-    "tokenSymbol": "tEGG"
+    "tokenSymbol": "tTNT"
   },
   "relay_chain": "rococo-local",
   "para_id": 2000,
