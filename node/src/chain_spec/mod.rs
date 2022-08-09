@@ -14,22 +14,22 @@
 
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
-use egg_rococo_runtime::{
-	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
-	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Signature,
-	EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
-};
 use hex_literal::hex;
 use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{crypto::UncheckedInto, sr25519, ByteArray, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use tangle_rococo_runtime::{
+	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
+	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Signature,
+	EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
+};
 
 pub mod rococo;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
-pub type ChainSpec = sc_service::GenericChainSpec<egg_rococo_runtime::GenesisConfig, Extensions>;
+pub type ChainSpec = sc_service::GenericChainSpec<tangle_rococo_runtime::GenesisConfig, Extensions>;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -58,8 +58,8 @@ pub fn get_dkg_keys_from_seed(seed: &str) -> DKGId {
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
-pub fn dkg_session_keys(keys: AuraId, dkg_keys: DKGId) -> egg_rococo_runtime::SessionKeys {
-	egg_rococo_runtime::SessionKeys { aura: keys, dkg: dkg_keys }
+pub fn dkg_session_keys(keys: AuraId, dkg_keys: DKGId) -> tangle_rococo_runtime::SessionKeys {
+	tangle_rococo_runtime::SessionKeys { aura: keys, dkg: dkg_keys }
 }
 
 /// The extensions for the [`ChainSpec`].
@@ -106,7 +106,7 @@ fn generate_invulnerables<PK: Clone + Into<AccountId>>(
 pub fn development_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "tEGG".into());
+	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 12u32.into());
 	properties.insert("ss58Format".into(), 42.into());
 
@@ -145,7 +145,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 		// Telemetry
 		None,
 		// Protocol ID
-		Some("egg-dev"),
+		Some("tangle-dev"),
 		// Fork ID
 		None,
 		// Properties
@@ -161,7 +161,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "tEGG".into());
+	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 12u32.into());
 	properties.insert("ss58Format".into(), 42.into());
 
@@ -221,7 +221,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 		// Telemetry
 		None,
 		// Protocol ID
-		Some("egg-template-local"),
+		Some("tangle-template-local"),
 		// Fork ID
 		None,
 		// Properties
@@ -239,7 +239,7 @@ fn testnet_genesis(
 	invulnerables: Vec<(AccountId, AuraId, DKGId)>,
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
-) -> egg_rococo_runtime::GenesisConfig {
+) -> tangle_rococo_runtime::GenesisConfig {
 	let curve_bn254 = Curve::Bn254;
 
 	log::info!("Bn254 x5 w3 params");
@@ -251,15 +251,15 @@ fn testnet_genesis(
 		vk_bytes.to_vec()
 	};
 
-	egg_rococo_runtime::GenesisConfig {
-		system: egg_rococo_runtime::SystemConfig {
-			code: egg_rococo_runtime::WASM_BINARY
+	tangle_rococo_runtime::GenesisConfig {
+		system: tangle_rococo_runtime::SystemConfig {
+			code: tangle_rococo_runtime::WASM_BINARY
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
 		},
 		claims: ClaimsConfig { claims: vec![], vesting: vec![], expiry: None },
-		sudo: egg_rococo_runtime::SudoConfig { key: Some(root_key) },
-		balances: egg_rococo_runtime::BalancesConfig {
+		sudo: tangle_rococo_runtime::SudoConfig { key: Some(root_key) },
+		balances: tangle_rococo_runtime::BalancesConfig {
 			balances: endowed_accounts
 				.iter()
 				.cloned()
@@ -267,13 +267,13 @@ fn testnet_genesis(
 				.collect(),
 		},
 		indices: Default::default(),
-		parachain_info: egg_rococo_runtime::ParachainInfoConfig { parachain_id: id },
-		collator_selection: egg_rococo_runtime::CollatorSelectionConfig {
+		parachain_info: tangle_rococo_runtime::ParachainInfoConfig { parachain_id: id },
+		collator_selection: tangle_rococo_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _, _)| acc).collect(),
 			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
 			..Default::default()
 		},
-		session: egg_rococo_runtime::SessionConfig {
+		session: tangle_rococo_runtime::SessionConfig {
 			keys: invulnerables
 				.iter()
 				.cloned()
@@ -289,7 +289,7 @@ fn testnet_genesis(
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
-		dkg: egg_rococo_runtime::DKGConfig {
+		dkg: tangle_rococo_runtime::DKGConfig {
 			authorities: invulnerables.iter().map(|x| x.2.clone()).collect::<_>(),
 			keygen_threshold: 2,
 			signature_threshold: 1,
@@ -299,7 +299,7 @@ fn testnet_genesis(
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
 			native_asset_name: b"WEBB".to_vec(),
-			native_existential_deposit: egg_rococo_runtime::EXISTENTIAL_DEPOSIT,
+			native_existential_deposit: tangle_rococo_runtime::EXISTENTIAL_DEPOSIT,
 		},
 		hasher_bn_254: HasherBn254Config {
 			parameters: Some(bn254_x5_3_params.to_bytes()),

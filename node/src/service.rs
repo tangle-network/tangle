@@ -22,7 +22,7 @@ use jsonrpsee::RpcModule;
 
 use cumulus_client_cli::CollatorOptions;
 // Local Runtime Types
-use egg_rococo_runtime::{opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
+use tangle_rococo_runtime::{opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
 
 // Cumulus Imports
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
@@ -54,18 +54,18 @@ use polkadot_service::CollatorPair;
 
 /// Rococo runtime executor
 pub mod rococo {
-	pub use egg_rococo_runtime::RuntimeApi;
+	pub use tangle_rococo_runtime::RuntimeApi;
 
 	pub struct Executor;
 	impl sc_executor::NativeExecutionDispatch for Executor {
 		type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 
 		fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-			egg_rococo_runtime::api::dispatch(method, data)
+			tangle_rococo_runtime::api::dispatch(method, data)
 		}
 
 		fn native_version() -> sc_executor::NativeVersion {
-			egg_rococo_runtime::native_version()
+			tangle_rococo_runtime::native_version()
 		}
 	}
 }

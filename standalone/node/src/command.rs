@@ -4,15 +4,15 @@ use crate::{
 	command_helper::{inherent_benchmark_data, BenchmarkExtrinsicBuilder},
 	service,
 };
-use egg_runtime::Block;
 use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use sc_cli::{ChainSpec, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 use std::sync::Arc;
+use tangle_runtime::Block;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Egg Standalone Substrate Node".into()
+		"Tangle Standalone Substrate Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -39,14 +39,14 @@ impl SubstrateCli for Cli {
 		Ok(match id {
 			"dev" => Box::new(chain_spec::development_config()?),
 			"" | "local" => Box::new(chain_spec::local_testnet_config()?),
-			"eggnet" => Box::new(chain_spec::arana_testnet_config()?),
+			"tangle-standalone" => Box::new(chain_spec::arana_testnet_config()?),
 			path =>
 				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 		})
 	}
 
 	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-		&egg_runtime::VERSION
+		&tangle_runtime::VERSION
 	}
 }
 

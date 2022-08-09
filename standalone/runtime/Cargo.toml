@@ -3,7 +3,7 @@ authors = ["Webb Technologies Inc."]
 edition = "2021"
 homepage = "https://substrate.dev"
 license = "Unlicense"
-name = "egg-standalone-runtime"
+name = "tangle-standalone-runtime"
 repository = "https://github.com/webb-tools/protocol-substrate/"
 version = "0.1.0"
 

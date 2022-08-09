@@ -1,14 +1,14 @@
 {
-  "name": "Egg Rococo",
-  "id": "egg-rococo",
+  "name": "Tangle Rococo",
+  "id": "tangle-rococo",
   "chainType": "Live",
   "bootNodes": [],
   "telemetryEndpoints": null,
-  "protocolId": "egg-rococo",
+  "protocolId": "tangle-rococo",
   "properties": {
     "ss58Format": 42,
     "tokenDecimals": 12,
-    "tokenSymbol": "tEGG"
+    "tokenSymbol": "tTNT"
   },
   "relay_chain": "rococo",
   "para_id": 4006,

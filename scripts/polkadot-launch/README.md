@@ -14,10 +14,10 @@ git checkout v0.9.26
 cargo build --release
 ```
 
-Build Egg-net parachain:
+Build Tangle parachain:
 
 ```bash
-cargo build --release --p egg-collator
+cargo build --release --p tangle-collator
 ```
 
 Update `dkg-launch.json` to relevant paths for Polkadot and Parachain binary.
@@ -26,7 +26,7 @@ Update `dkg-launch.json` to relevant paths for Polkadot and Parachain binary.
 "bin": "<YOUR-PATH>"
 ```
 
-Launch local Polkadot relay chain and Egg-net parachain:
+Launch local Polkadot relay chain and Tangle parachain:
 
 ```bash
 polkadot-launch dkg-launch.json
