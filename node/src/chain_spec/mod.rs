@@ -266,6 +266,8 @@ fn testnet_genesis(
 				.map(|k| (k, MILLIUNIT * 4_096_000))
 				.collect(),
 		},
+		democracy: Default::default(),
+		council: Default::default(),
 		indices: Default::default(),
 		parachain_info: tangle_rococo_runtime::ParachainInfoConfig { parachain_id: id },
 		collator_selection: tangle_rococo_runtime::CollatorSelectionConfig {

@@ -27,7 +27,7 @@ use tangle_runtime::{
 	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
 	VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
 };
-use webb_primitives::ResourceId;
+pub type ResourceId = [u8; 32];
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
