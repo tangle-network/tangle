@@ -40,9 +40,9 @@ jsonrpsee = { version = "0.14.0", features = ["server"] }
 
 # Local Dependencies
 tangle-rococo-runtime = { path = "../runtime/rococo" }
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "group/logs"  }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "group/logs" }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "group/logs" }
 
 # Arkworks
 arkworks-setups = { version = "1.0.0", features = ["r1cs"], default-features = false }

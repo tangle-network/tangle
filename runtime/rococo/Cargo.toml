@@ -22,10 +22,10 @@ hex-literal = { version = "0.3", optional = true }
 smallvec = "1.6.1"
 
 # DKG Substrate Dependencies
-pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
-pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
-pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
+pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "group/logs",  default-features = false }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "group/logs",  default-features = false }
+pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "group/logs",  default-features = false }
+pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "group/logs",  default-features = false }
 
 # Protocol Substrate Dependencies
 webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, features = ["hashing", "verifying"] }
@@ -194,6 +194,7 @@ std = [
 	"orml-traits/std",
 	"pallet-asset-registry/std",
 	"pallet-signature-bridge/std",
+	"pallet-bridge/std",
 	"pallet-mixer/std",
 	"pallet-token-wrapper/std",
 	"orml-benchmarking/std",
