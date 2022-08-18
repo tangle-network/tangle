@@ -275,6 +275,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		config,
 		telemetry: telemetry.as_mut(),
 	})?;
+
 	if role.is_authority() {
 		let dkg_params = dkg_gadget::DKGParams {
 			client: client.clone(),

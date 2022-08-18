@@ -54,15 +54,15 @@ where
 
 /// Generate an Aura authority key.
 pub fn authority_keys_from_seed(
-	stash: &str,
 	controller: &str,
+	stash: &str,
 ) -> (AccountId, AccountId, AuraId, GrandpaId, DKGId) {
 	(
-		get_account_id_from_seed::<sr25519::Public>(stash),
 		get_account_id_from_seed::<sr25519::Public>(controller),
-		get_from_seed::<AuraId>(stash),
-		get_from_seed::<GrandpaId>(stash),
-		get_from_seed::<DKGId>(stash),
+		get_account_id_from_seed::<sr25519::Public>(stash),
+		get_from_seed::<AuraId>(controller),
+		get_from_seed::<GrandpaId>(controller),
+		get_from_seed::<DKGId>(controller),
 	)
 }
 
@@ -115,6 +115,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 				vec![
 					hex_literal::hex!("010000001389"), // Hermis (Evm, 5001)
 					hex_literal::hex!("01000000138a"), // Athena (Evm, 5002)
+					hex_literal::hex!("01000000138b"), // Demeter (Evm, 5003)
 				],
 				// Initial resource Ids
 				vec![
