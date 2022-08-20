@@ -39,7 +39,6 @@ pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrat
 pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
 pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
-pallet-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-ecdsa-claims = { path = "../../pallets/claims", default-features = false }
 
 # Orml depedencies
@@ -222,7 +221,6 @@ runtime-benchmarks = [
 	"pallet-linkable-tree/runtime-benchmarks",
 	"pallet-hasher/runtime-benchmarks",
 	"pallet-verifier/runtime-benchmarks",
-	"pallet-bridge/runtime-benchmarks",
 	"pallet-asset-registry/runtime-benchmarks",
 	"pallet-token-wrapper/runtime-benchmarks",
 		

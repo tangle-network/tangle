@@ -6033,7 +6033,6 @@ name = "pallet-bridge"
 version = "1.0.0"
 source = "git+https://github.com/webb-tools/protocol-substrate.git#a8ef0d0fcbf060fd62ab4ad683cb7c810885a3ea"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "pallet-balances",
@@ -12282,7 +12281,6 @@ dependencies = [
  "pallet-aura",
  "pallet-authorship",
  "pallet-balances",
- "pallet-bridge",
  "pallet-collator-rewards",
  "pallet-collator-selection",
  "pallet-collective",
@@ -12450,7 +12448,6 @@ dependencies = [
  "pallet-bags-list",
  "pallet-balances",
  "pallet-bounties",
- "pallet-bridge",
  "pallet-child-bounties",
  "pallet-collective",
  "pallet-democracy",
