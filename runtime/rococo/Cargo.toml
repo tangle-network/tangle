@@ -194,7 +194,6 @@ std = [
 	"orml-traits/std",
 	"pallet-asset-registry/std",
 	"pallet-signature-bridge/std",
-	"pallet-bridge/std",
 	"pallet-mixer/std",
 	"pallet-token-wrapper/std",
 	"pallet-token-wrapper-handler/std",
