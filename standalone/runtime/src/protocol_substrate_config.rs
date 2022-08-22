@@ -185,6 +185,7 @@ impl pallet_linkable_tree::Config<pallet_linkable_tree::Instance1> for Runtime {
 }
 
 pub struct SetResourceProposalFilter;
+#[allow(clippy::collapsible_match, clippy::match_single_binding, clippy::match_like_matches_macro)]
 impl Contains<Call> for SetResourceProposalFilter {
 	fn contains(c: &Call) -> bool {
 		match c {
@@ -201,6 +202,7 @@ impl Contains<Call> for SetResourceProposalFilter {
 }
 
 pub struct ExecuteProposalFilter;
+#[allow(clippy::collapsible_match, clippy::match_single_binding, clippy::match_like_matches_macro)]
 impl Contains<Call> for ExecuteProposalFilter {
 	fn contains(c: &Call) -> bool {
 		match c {
