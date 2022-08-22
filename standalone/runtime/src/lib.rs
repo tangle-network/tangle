@@ -783,9 +783,9 @@ impl pallet_bags_list::Config for Runtime {
 }
 
 parameter_types! {
-	pub const PostUnbondPoolsWindow: u32 = 4;
-	pub const NominationPoolsPalletId: PalletId = PalletId(*b"py/nopls");
-	pub const MinPointsToBalance: u32 = 10;
+  pub const PostUnbondPoolsWindow: u32 = 4;
+  pub const NominationPoolsPalletId: PalletId = PalletId(*b"py/nopls");
+  pub const MaxPointsToBalance: u8 = 10;
 }
 
 pub struct BalanceToU256;
@@ -805,14 +805,16 @@ impl pallet_nomination_pools::Config for Runtime {
 	type WeightInfo = ();
 	type Event = Event;
 	type Currency = Balances;
+	type CurrencyBalance = Balance;
+	type RewardCounter = sp_runtime::FixedU128;
 	type BalanceToU256 = BalanceToU256;
 	type U256ToBalance = U256ToBalance;
 	type StakingInterface = pallet_staking::Pallet<Self>;
 	type PostUnbondingPoolsWindow = PostUnbondPoolsWindow;
 	type MaxMetadataLen = ConstU32<256>;
 	type MaxUnbonding = ConstU32<8>;
-	type MinPointsToBalance = MinPointsToBalance;
 	type PalletId = NominationPoolsPalletId;
+	type MaxPointsToBalance = MaxPointsToBalance;
 }
 
 parameter_types! {
@@ -1155,6 +1157,8 @@ construct_runtime!(
 
 		// VAnchor Handler
 		VAnchorHandlerBn254: pallet_vanchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>},
+
+		TokenWrapperHandler: pallet_token_wrapper_handler::{Pallet, Storage, Call, Event<T>},
 
 	}
 );

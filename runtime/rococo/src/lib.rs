@@ -846,6 +846,7 @@ construct_runtime!(
 
 		// Bridge
 		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>} = 70,
+		TokenWrapperHandler: pallet_token_wrapper_handler::{Pallet, Storage, Call, Event<T>} = 71,
 
 		// Substrate utility pallets
 		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 80,

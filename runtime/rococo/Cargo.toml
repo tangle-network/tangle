@@ -39,13 +39,14 @@ pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrat
 pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
 pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
+pallet-token-wrapper-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
 pallet-ecdsa-claims = { path = "../../pallets/claims", default-features = false }
 
 # Orml depedencies
-orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
-orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
-orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
-orml-benchmarking = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false, optional = true }
+orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false, branch = "polkadot-v0.9.27"}
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false, branch = "polkadot-v0.9.27" }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false, branch = "polkadot-v0.9.27" }
+orml-benchmarking = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false, optional = true, branch = "polkadot-v0.9.27" }
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies
@@ -195,6 +196,7 @@ std = [
 	"pallet-signature-bridge/std",
 	"pallet-mixer/std",
 	"pallet-token-wrapper/std",
+	"pallet-token-wrapper-handler/std",
 	"orml-benchmarking/std",
 	"pallet-society/std",
 
