@@ -228,20 +228,8 @@ parameter_types! {
 	pub const BridgeAccountId: PalletId = PalletId(*b"dw/bridg");
 }
 
-type BridgeInstance = pallet_bridge::Instance1;
-impl pallet_bridge::Config<BridgeInstance> for Runtime {
-	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
-	type BridgeAccountId = BridgeAccountId;
-	type ChainId = ChainId;
-	type ChainIdentifier = ChainIdentifier;
-	type ChainType = ChainType;
-	type Event = Event;
-	type Proposal = Call;
-	type ProposalLifetime = ProposalLifetime;
-}
-
 impl pallet_vanchor_handler::Config<pallet_vanchor_handler::Instance1> for Runtime {
 	type VAnchor = VAnchorBn254;
-	type BridgeOrigin = pallet_bridge::EnsureBridge<Runtime, BridgeInstance>;
+	type BridgeOrigin = pallet_signature_bridge::EnsureBridge<Runtime, SignatureBridgeInstance>;
 	type Event = Event;
 }
