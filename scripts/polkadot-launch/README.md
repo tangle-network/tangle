@@ -10,7 +10,7 @@ Build Polkadot for relay chain:
 
 ```bash
 git clone -n https://github.com/paritytech/polkadot.git
-git checkout v0.9.26
+git checkout v0.9.27
 cargo build --release
 ```
 
