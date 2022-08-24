@@ -332,7 +332,7 @@ fn testnet_genesis(
 		v_anchor_bn_254: VAnchorBn254Config {
 			max_deposit_amount: 1_000_000 * UNIT,
 			min_withdraw_amount: 0,
-			vanchors: vec![(0, 2)],
+			vanchors: vec![(0, 1)],
 			phantom: Default::default(),
 		},
 		treasury: Default::default(),
