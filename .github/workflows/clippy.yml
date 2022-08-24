@@ -1,0 +1,34 @@
+name: clippy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+  
+  workflow_dispatch:
+
+jobs:      
+  clippy:
+    concurrency:
+      group: clippy-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install toolchain
+        id: toolchain
+        uses: actions-rs/toolchain@master
+        with:
+          profile: minimal
+          toolchain: nightly
+          target: wasm32-unknown-unknown
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1.3.0
+
+      - name: Run clippy
+        run: cargo clippy --all-targets --workspace -- --deny warnings

@@ -1,0 +1,29 @@
+name: lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+  
+  workflow_dispatch:
+
+jobs:
+  rustfmt:
+    concurrency:
+      group: rustfmt-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: rustfmt
+
+      - name: Rustfmt check
+        run: cargo +nightly fmt --all -- --check

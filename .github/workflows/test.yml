@@ -1,0 +1,41 @@
+name: test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+  
+  workflow_dispatch:
+
+jobs:
+  test:
+    concurrency:
+      group: test-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install toolchain
+        id: toolchain
+        uses: actions-rs/toolchain@master
+        with:
+          profile: minimal
+          toolchain: nightly
+          target: wasm32-unknown-unknown
+
+      - name: Install cargo-nextest
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cargo-nextest
+          version: latest
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1.3.0
+
+      - name: Run test suite
+        run: cargo nextest run --release --workspace
+    
