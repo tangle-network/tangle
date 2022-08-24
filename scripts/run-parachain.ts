@@ -7,7 +7,6 @@ import {
   Keyring,
   WsProvider,
 } from "https://esm.sh/@polkadot/api@9.2.3?bundle";
-import { u8aToHex } from "https://esm.sh/@polkadot/util@10.1.3?bundle";
 import { Input } from "https://deno.land/x/cliffy@v0.24.3/prompt/mod.ts";
 import { assert } from "https://deno.land/std@0.152.0/testing/asserts.ts";
 import {
@@ -27,7 +26,8 @@ type ScrtipState = {
 
 const defaultState: ScrtipState = {
   relayChainPath: Deno.realPathSync(
-    "../../paritytech/polkadot/target/release/polkadot",
+    localStorage.getItem("relayChainPath") ??
+      "../../paritytech/polkadot/target/release/polkadot",
   ),
   tmpDir: Deno.makeTempDirSync({ prefix: "tangle-" }),
   rootDir: new TextDecoder().decode(
@@ -40,6 +40,8 @@ const defaultState: ScrtipState = {
 };
 
 let state: ScrtipState = defaultState;
+
+localStorage.setItem("relayChainPath", state.relayChainPath);
 
 const parachainPath = await Deno.realPath(
   `${state.rootDir}/target/release/tangle-collator`,
@@ -256,6 +258,13 @@ await Promise.any([
   state.relayChain.alice?.status(),
   state.relayChain.bob?.status(),
 ]);
+
+Deno.addSignalListener("SIGINT", () => {
+  console.log("interrupted!");
+  state.relayChain.alice?.kill("SIGINT");
+  state.relayChain.bob?.kill("SIGINT");
+  Deno.exit();
+});
 
 async function deployParachain() {
   console.log("Deploying parachains...");
