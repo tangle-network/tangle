@@ -12329,6 +12329,8 @@ dependencies = [
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",
  "pallet-utility",
+ "pallet-vanchor",
+ "pallet-vanchor-handler",
  "pallet-verifier",
  "pallet-vesting",
  "pallet-xcm",

@@ -5,6 +5,7 @@ use frame_support::{
 };
 use orml_currencies::{BasicCurrencyAdapter, NativeCurrencyOf};
 use webb_primitives::{
+	field_ops::ArkworksIntoFieldBn254,
 	hashing::{ethereum::Keccak256HasherBn254, ArkworksPoseidonHasherBn254},
 	runtime::Element,
 	verifying::ArkworksVerifierBn254,
@@ -174,10 +175,10 @@ pub struct SetResourceProposalFilter;
 impl Contains<Call> for SetResourceProposalFilter {
 	fn contains(c: &Call) -> bool {
 		match c {
-			// Call::VAnchorHandlerBn254(method) => match method {
-			// 	pallet_vanchor_handler::Call::execute_set_resource_proposal { .. } => true,
-			// 	_ => false,
-			// },
+			Call::VAnchorHandlerBn254(method) => match method {
+				pallet_vanchor_handler::Call::execute_set_resource_proposal { .. } => true,
+				_ => false,
+			},
 			Call::TokenWrapperHandler(method) => match method {
 				_ => false,
 			},
@@ -191,11 +192,11 @@ pub struct ExecuteProposalFilter;
 impl Contains<Call> for ExecuteProposalFilter {
 	fn contains(c: &Call) -> bool {
 		match c {
-			// Call::VAnchorHandlerBn254(method) => match method {
-			// 	pallet_vanchor_handler::Call::execute_vanchor_create_proposal { .. } => true,
-			// 	pallet_vanchor_handler::Call::execute_vanchor_update_proposal { .. } => true,
-			// 	_ => false,
-			// },
+			Call::VAnchorHandlerBn254(method) => match method {
+				pallet_vanchor_handler::Call::execute_vanchor_create_proposal { .. } => true,
+				pallet_vanchor_handler::Call::execute_vanchor_update_proposal { .. } => true,
+				_ => false,
+			},
 			Call::TokenWrapperHandler(method) => match method {
 				pallet_token_wrapper_handler::Call::execute_add_token_to_pool_share { .. } => true,
 				pallet_token_wrapper_handler::Call::execute_remove_token_from_pool_share {
@@ -225,6 +226,44 @@ impl pallet_signature_bridge::Config<SignatureBridgeInstance> for Runtime {
 	type ExecuteProposalFilter = ExecuteProposalFilter;
 	type SignatureVerifier = webb_primitives::signing::SignatureVerifier;
 	type WeightInfo = ();
+}
+
+impl pallet_verifier::Config<pallet_verifier::Instance2> for Runtime {
+	type Event = Event;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type Verifier = ArkworksVerifierBn254;
+	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
+}
+
+parameter_types! {
+	pub const VAnchorPalletId: PalletId = PalletId(*b"py/vanch");
+	pub const MaxFee: Balance = Balance::MAX - 1;
+	pub const MaxExtAmount: Balance = Balance::MAX - 1;
+}
+
+impl pallet_vanchor::Config<pallet_vanchor::Instance1> for Runtime {
+	type Event = Event;
+	type PalletId = VAnchorPalletId;
+	type ProposalNonce = u32;
+	type LinkableTree = LinkableTreeBn254;
+	type Verifier2x2 = VAnchorVerifier2x2Bn254;
+	type EthereumHasher = Keccak256HasherBn254;
+	type IntoField = ArkworksIntoFieldBn254;
+	type Currency = Currencies;
+	type MaxFee = MaxFee;
+	type MaxExtAmount = MaxExtAmount;
+	type PostDepositHook = ();
+	type NativeCurrencyId = GetNativeCurrencyId;
+}
+
+parameter_types! {
+	pub const ProposalLifetime: BlockNumber = 50;
+}
+
+impl pallet_vanchor_handler::Config<pallet_vanchor_handler::Instance1> for Runtime {
+	type VAnchor = VAnchorBn254;
+	type BridgeOrigin = pallet_signature_bridge::EnsureBridge<Runtime, SignatureBridgeInstance>;
+	type Event = Event;
 }
 
 impl pallet_token_wrapper_handler::Config for Runtime {

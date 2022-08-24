@@ -40,6 +40,8 @@ pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substr
 pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
 pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
 pallet-token-wrapper-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
+pallet-vanchor = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-vanchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-ecdsa-claims = { path = "../../pallets/claims", default-features = false }
 
 # Orml depedencies
@@ -170,10 +172,11 @@ std = [
 	"pallet-identity/std",
 	"pallet-vesting/std",
 	"pallet-utility/std",
-	"pallet-ecdsa-claims/std",
 	"pallet-democracy/std",
 	"pallet-scheduler/std",
 	"pallet-preimage/std",
+	"orml-benchmarking/std",
+	"pallet-society/std",
 
 	# DKG
 	"pallet-dkg-metadata/std",
@@ -197,9 +200,11 @@ std = [
 	"pallet-mixer/std",
 	"pallet-token-wrapper/std",
 	"pallet-token-wrapper-handler/std",
-	"orml-benchmarking/std",
-	"pallet-society/std",
-
+	"pallet-vanchor/std",
+	"pallet-vanchor-handler/std",
+	
+	# local
+	"pallet-ecdsa-claims/std",
 	"pallet-collator-rewards/std"
 ]
 runtime-benchmarks = [
