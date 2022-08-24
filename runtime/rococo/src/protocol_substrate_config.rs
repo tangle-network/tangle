@@ -1,5 +1,8 @@
 use crate::*;
-use frame_support::{pallet_prelude::ConstU32, traits::Nothing};
+use frame_support::{
+	pallet_prelude::ConstU32,
+	traits::{Contains, Nothing},
+};
 use orml_currencies::{BasicCurrencyAdapter, NativeCurrencyOf};
 use webb_primitives::{
 	hashing::{ethereum::Keccak256HasherBn254, ArkworksPoseidonHasherBn254},
@@ -81,6 +84,7 @@ impl pallet_token_wrapper::Config for Runtime {
 	type Event = Event;
 	type PalletId = TokenWrapperPalletId;
 	type TreasuryId = DKGAccountId;
+	type ProposalNonce = u32;
 	type WeightInfo = pallet_token_wrapper::weights::WebbWeight<Runtime>;
 	type WrappingFeeDivider = WrappingFeeDivider;
 }
@@ -165,6 +169,46 @@ parameter_types! {
 	pub const BridgeAccountId: PalletId = PalletId(*b"dw/bridg");
 }
 
+pub struct SetResourceProposalFilter;
+#[allow(clippy::collapsible_match, clippy::match_single_binding, clippy::match_like_matches_macro)]
+impl Contains<Call> for SetResourceProposalFilter {
+	fn contains(c: &Call) -> bool {
+		match c {
+			// Call::VAnchorHandlerBn254(method) => match method {
+			// 	pallet_vanchor_handler::Call::execute_set_resource_proposal { .. } => true,
+			// 	_ => false,
+			// },
+			Call::TokenWrapperHandler(method) => match method {
+				_ => false,
+			},
+			_ => false,
+		}
+	}
+}
+
+pub struct ExecuteProposalFilter;
+#[allow(clippy::collapsible_match, clippy::match_single_binding, clippy::match_like_matches_macro)]
+impl Contains<Call> for ExecuteProposalFilter {
+	fn contains(c: &Call) -> bool {
+		match c {
+			// Call::VAnchorHandlerBn254(method) => match method {
+			// 	pallet_vanchor_handler::Call::execute_vanchor_create_proposal { .. } => true,
+			// 	pallet_vanchor_handler::Call::execute_vanchor_update_proposal { .. } => true,
+			// 	_ => false,
+			// },
+			Call::TokenWrapperHandler(method) => match method {
+				pallet_token_wrapper_handler::Call::execute_add_token_to_pool_share { .. } => true,
+				pallet_token_wrapper_handler::Call::execute_remove_token_from_pool_share {
+					..
+				} => true,
+				pallet_token_wrapper_handler::Call::execute_wrapping_fee_proposal { .. } => true,
+				_ => false,
+			},
+			_ => false,
+		}
+	}
+}
+
 type SignatureBridgeInstance = pallet_signature_bridge::Instance1;
 impl pallet_signature_bridge::Config<SignatureBridgeInstance> for Runtime {
 	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
@@ -174,9 +218,17 @@ impl pallet_signature_bridge::Config<SignatureBridgeInstance> for Runtime {
 	type ChainType = ChainType;
 	type Event = Event;
 	type Proposal = Call;
-	type ProposalLifetime = BridgeProposalLifetime;
+	type ProposalLifetime = ProposalLifetime;
 	type ProposalNonce = u32;
 	type MaintainerNonce = u32;
+	type SetResourceProposalFilter = SetResourceProposalFilter;
+	type ExecuteProposalFilter = ExecuteProposalFilter;
 	type SignatureVerifier = webb_primitives::signing::SignatureVerifier;
 	type WeightInfo = ();
+}
+
+impl pallet_token_wrapper_handler::Config for Runtime {
+	type BridgeOrigin = pallet_signature_bridge::EnsureBridge<Runtime, SignatureBridgeInstance>;
+	type Event = Event;
+	type TokenWrapper = TokenWrapper;
 }
