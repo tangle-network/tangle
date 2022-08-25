@@ -279,7 +279,14 @@ async function deployParachain() {
     validationCode: genesisWASM,
     parachain: true,
   });
-  await api.tx.sudo.sudo(call).signAndSend(alice, (result) => {
-    console.log(result.toHuman());
+
+  const unsub = await api.tx.sudo.sudo(call).signAndSend(alice, (result) => {
+    console.log(result.status.toHuman());
+    if (result.isFinalized || result.isError) {
+      console.log(
+        "Keep the script running to allow the relay chain to continue.",
+      );
+      unsub();
+    }
   });
 }
