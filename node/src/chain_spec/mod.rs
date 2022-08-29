@@ -23,7 +23,7 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_rococo_runtime::{
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
 	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Signature,
-	EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
+	VAnchorBn254Config, VAnchorVerifier2x2Bn254Config, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
 };
 
 pub mod rococo;
@@ -247,6 +247,13 @@ fn testnet_genesis(
 		vk_bytes.to_vec()
 	};
 
+	log::info!("Verifier params for vanchor");
+	let vanchor_verifier_bn254_params = {
+		let vk_bytes =
+			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
+		vk_bytes.to_vec()
+	};
+
 	tangle_rococo_runtime::GenesisConfig {
 		system: tangle_rococo_runtime::SystemConfig {
 			code: tangle_rococo_runtime::WASM_BINARY
@@ -313,6 +320,16 @@ fn testnet_genesis(
 		},
 		mixer_bn_254: MixerBn254Config {
 			mixers: vec![(0, 10 * UNIT), (0, 100 * UNIT), (0, 1000 * UNIT)],
+		},
+		v_anchor_verifier_2x_2_bn_254: VAnchorVerifier2x2Bn254Config {
+			parameters: Some(vanchor_verifier_bn254_params),
+			phantom: Default::default(),
+		},
+		v_anchor_bn_254: VAnchorBn254Config {
+			max_deposit_amount: 1_000_000 * UNIT,
+			min_withdraw_amount: 0,
+			vanchors: vec![(0, 1)],
+			phantom: Default::default(),
 		},
 		treasury: Default::default(),
 		vesting: Default::default(),

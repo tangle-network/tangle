@@ -1453,9 +1453,9 @@ dependencies = [
 
 [[package]]
 name = "cpufeatures"
-version = "0.2.4"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc948ebb96241bb40ab73effeb80d9f93afaad49359d159a5e61be51619fe813"
+checksum = "59a6001667ab124aebae2a495118e11d30984c3a653e99d86d58971708cf5e4b"
 dependencies = [
  "libc",
 ]
@@ -2382,7 +2382,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=group/logs#1801198eb5c51905db07752d260c286adff5dd9f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#1e7d1acd33711fb398c2798e4b4e2163f2563c7d"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2426,63 +2426,13 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "wasm-timer",
- "webb-proposals 0.4.4",
-]
-
-[[package]]
-name = "dkg-gadget"
-version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#f08e6efe4a7899d711c762397553c8b6125971f4"
-dependencies = [
- "async-trait",
- "atomic",
- "auto_impl",
- "curv-kzen",
- "dkg-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git)",
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git)",
- "fnv",
- "futures",
- "hex",
- "itertools 0.10.3",
- "libsecp256k1 0.3.5",
- "linked-hash-map",
- "log",
- "lru 0.7.8",
- "multi-party-ecdsa",
- "parity-scale-codec",
- "parking_lot 0.11.2",
- "rand 0.8.5",
- "round-based",
- "sc-client-api",
- "sc-keystore",
- "sc-network",
- "sc-peerset",
- "sc-service",
- "scale-info",
- "serde",
- "serde_json",
- "sha3 0.9.1",
- "sp-api",
- "sp-application-crypto",
- "sp-arithmetic",
- "sp-blockchain",
- "sp-core",
- "sp-io",
- "sp-keystore",
- "sp-runtime",
- "strum 0.21.0",
- "substrate-prometheus-endpoint",
- "thiserror",
- "tokio",
- "tokio-stream",
- "wasm-timer",
- "webb-proposals 0.4.4",
+ "webb-proposals",
 ]
 
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=group/logs#1801198eb5c51905db07752d260c286adff5dd9f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#1e7d1acd33711fb398c2798e4b4e2163f2563c7d"
 dependencies = [
  "chacha20poly1305",
  "curv-kzen",
@@ -6228,7 +6178,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=group/logs#1801198eb5c51905db07752d260c286adff5dd9f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#1e7d1acd33711fb398c2798e4b4e2163f2563c7d"
 dependencies = [
  "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?branch=group/logs)",
  "frame-benchmarking",
@@ -6266,7 +6216,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=group/logs#1801198eb5c51905db07752d260c286adff5dd9f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#1e7d1acd33711fb398c2798e4b4e2163f2563c7d"
 dependencies = [
  "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?branch=group/logs)",
  "frame-benchmarking",
@@ -6309,28 +6259,7 @@ name = "pallet-dkg-proposals"
 version = "1.0.0"
 source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=group/logs#1801198eb5c51905db07752d260c286adff5dd9f"
 dependencies = [
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?branch=group/logs)",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "k256",
- "log",
- "pallet-balances",
- "pallet-timestamp",
- "parity-scale-codec",
- "scale-info",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-dkg-proposals"
-version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#f08e6efe4a7899d711c762397553c8b6125971f4"
-dependencies = [
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git)",
+ "dkg-runtime-primitives",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -11354,7 +11283,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.27#8eff668a42325aeb4433eace1604f4d286a6ec05"
 dependencies = [
  "parity-scale-codec",
- "scale-info",
+ ,"scale-info",
  "sp-api",
  "sp-application-crypto",
  "sp-runtime",
@@ -12494,6 +12423,8 @@ dependencies = [
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",
  "pallet-utility",
+ "pallet-vanchor",
+ "pallet-vanchor-handler",
  "pallet-verifier",
  "pallet-vesting",
  "pallet-xcm",
@@ -12533,10 +12464,10 @@ dependencies = [
  "ark-std",
  "arkworks-setups",
  "async-trait",
- "clap 3.2.17",
- "dkg-gadget 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git)",
- "dkg-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git)",
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git)",
+ "clap 3.2.16",
+ "dkg-gadget",
+ "dkg-primitives",
+ "dkg-runtime-primitives",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "frame-system",
