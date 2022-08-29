@@ -280,10 +280,6 @@ where
 		bool,
 	) -> Result<Box<dyn ParachainConsensus<Block>>, sc_service::Error>,
 {
-	// if matches!(parachain_config.role, Role::Light) {
-	// 	return Err("Light client not supported!".into())
-	// }
-
 	let mut parachain_config = prepare_node_config(parachain_config);
 	parachain_config.network.extra_sets.push(dkg_gadget::dkg_peers_set_config());
 

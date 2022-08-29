@@ -12,7 +12,6 @@
 # The cache for chain data in container
 .local
 tmp
-para
 
 local-test
 
