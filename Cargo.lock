@@ -108,9 +108,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.62"
+version = "1.0.63"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1485d4d2cc45e7b201ee3767015c96faa5904387c9d87c6efdd0fb511f12d305"
+checksum = "a26fa4d7e3f2eebadf743988fc8aec9fa9a9e82611acafd77c1462ed6262440a"
 
 [[package]]
 name = "approx"
@@ -509,9 +509,9 @@ dependencies = [
 
 [[package]]
 name = "async-io"
-version = "1.8.0"
+version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ab006897723d9352f63e2b13047177c3982d8d79709d713ce7747a8f19fd1b0"
+checksum = "83e21f3a490c72b3b0cf44962180e60045de2925d8dff97918f7ee43c8f637c7"
 dependencies = [
  "autocfg 1.1.0",
  "concurrent-queue",
@@ -1305,9 +1305,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.18"
+version = "3.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b15f2ea93df33549dbe2e8eecd1ca55269d63ae0b3ba1f55db030817d1c2867f"
+checksum = "68d43934757334b5c0519ff882e1ab9647ac0258b47c24c4f490d78e42697fd5"
 dependencies = [
  "atty",
  "bitflags",
@@ -1730,7 +1730,7 @@ name = "cumulus-client-cli"
 version = "0.1.0"
 source = "git+https://github.com/paritytech/cumulus?branch=polkadot-v0.9.27#66b684f88eba6c755651b8c47dccad2c2d9ac3db"
 dependencies = [
- "clap 3.2.18",
+ "clap 3.2.19",
  "parity-scale-codec",
  "sc-chain-spec",
  "sc-cli",
@@ -3043,7 +3043,7 @@ source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.27#8e
 dependencies = [
  "Inflector",
  "chrono",
- "clap 3.2.18",
+ "clap 3.2.19",
  "comfy-table",
  "frame-benchmarking",
  "frame-support",
@@ -3779,9 +3779,9 @@ dependencies = [
 
 [[package]]
 name = "httparse"
-version = "1.7.1"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "496ce29bb5a52785b44e0f7ca2847ae0bb839c9bd28f69acac9b99d461c0c04c"
+checksum = "d897f394bad6a705d5f4104762e116a75639e470d80901eed05a860a95cb1904"
 
 [[package]]
 name = "httpdate"
@@ -5727,8 +5727,25 @@ source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git
 dependencies = [
  "frame-support",
  "frame-system",
- "orml-traits",
- "orml-utilities",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27)",
+ "orml-utilities 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27)",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "orml-currencies"
+version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#27115ac7745662c2134862fdd8fc77edf6c9ad04"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
+ "orml-utilities 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -5744,7 +5761,22 @@ source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git
 dependencies = [
  "frame-support",
  "frame-system",
- "orml-traits",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27)",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "orml-tokens"
+version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#27115ac7745662c2134862fdd8fc77edf6c9ad04"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -5760,7 +5792,25 @@ dependencies = [
  "frame-support",
  "impl-trait-for-tuples",
  "num-traits",
- "orml-utilities",
+ "orml-utilities 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27)",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "xcm",
+]
+
+[[package]]
+name = "orml-traits"
+version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#27115ac7745662c2134862fdd8fc77edf6c9ad04"
+dependencies = [
+ "frame-support",
+ "impl-trait-for-tuples",
+ "num-traits",
+ "orml-utilities 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -5774,6 +5824,20 @@ dependencies = [
 name = "orml-utilities"
 version = "0.4.1-dev"
 source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27#377213f750755cc48e80a3131eaae63b5eda8362"
+dependencies = [
+ "frame-support",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "orml-utilities"
+version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git#27115ac7745662c2134862fdd8fc77edf6c9ad04"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -5828,12 +5892,12 @@ dependencies = [
 [[package]]
 name = "pallet-asset-registry"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "orml-traits",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
  "parity-scale-codec",
  "primitive-types 0.8.0",
  "scale-info",
@@ -6284,7 +6348,7 @@ dependencies = [
 [[package]]
 name = "pallet-hasher"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6350,12 +6414,12 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "orml-traits",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
  "pallet-hasher",
  "pallet-mt",
  "parity-scale-codec",
@@ -6370,7 +6434,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "jsonrpsee",
  "pallet-linkable-tree",
@@ -6388,7 +6452,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "pallet-linkable-tree",
  "parity-scale-codec",
@@ -6417,15 +6481,15 @@ dependencies = [
 [[package]]
 name = "pallet-mixer"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
  "log",
- "orml-currencies",
- "orml-tokens",
- "orml-traits",
+ "orml-currencies 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
+ "orml-tokens 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
  "pallet-asset-registry",
  "pallet-hasher",
  "pallet-mt",
@@ -6473,7 +6537,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -6491,7 +6555,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "jsonrpsee",
  "pallet-mt",
@@ -6509,7 +6573,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "pallet-mt",
  "sp-api",
@@ -6673,7 +6737,7 @@ dependencies = [
 [[package]]
 name = "pallet-signature-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6801,12 +6865,12 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "orml-traits",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
  "pallet-asset-registry",
  "parity-scale-codec",
  "scale-info",
@@ -6819,13 +6883,13 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
  "hex-literal 0.3.4",
- "orml-traits",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
  "pallet-asset-registry",
  "pallet-token-wrapper",
  "parity-scale-codec",
@@ -6912,12 +6976,12 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "orml-traits",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
  "pallet-asset-registry",
  "pallet-hasher",
  "pallet-linkable-tree",
@@ -6934,12 +6998,12 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "frame-support",
  "frame-system",
  "hex-literal 0.3.4",
- "orml-traits",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git)",
  "pallet-asset-registry",
  "pallet-linkable-tree",
  "pallet-mt",
@@ -6958,7 +7022,7 @@ dependencies = [
 [[package]]
 name = "pallet-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7166,9 +7230,9 @@ dependencies = [
 
 [[package]]
 name = "paste"
-version = "1.0.8"
+version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9423e2b32f7a043629287a536f21951e8c6a82482d0acb1eeebfc90bc2225b22"
+checksum = "b1de2e551fb905ac83f73f7aedf2f0cb4a0da7e35efa24a202a936269f1f18e1"
 
 [[package]]
 name = "pbkdf2"
@@ -7409,7 +7473,7 @@ name = "polkadot-cli"
 version = "0.9.27"
 source = "git+https://github.com/paritytech/polkadot?branch=release-v0.9.27#b017bad50d360a1c6e3cdf9652bdb85e5f479fea"
 dependencies = [
- "clap 3.2.18",
+ "clap 3.2.19",
  "frame-benchmarking-cli",
  "futures",
  "log",
@@ -9704,7 +9768,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.27#8eff668a42325aeb4433eace1604f4d286a6ec05"
 dependencies = [
  "chrono",
- "clap 3.2.18",
+ "clap 3.2.19",
  "fdlimit",
  "futures",
  "hex",
@@ -11102,9 +11166,9 @@ dependencies = [
 
 [[package]]
 name = "socket2"
-version = "0.4.6"
+version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10c98bba371b9b22a71a9414e420f92ddeb2369239af08200816169d5e2dd7aa"
+checksum = "02e2d2db9033d13a1567121ddd7a095ee144db4e1ca1b1bda3419bc0da294ebd"
 dependencies = [
  "libc",
  "winapi",
@@ -12202,7 +12266,7 @@ dependencies = [
  "ark-serialize",
  "ark-std",
  "arkworks-setups",
- "clap 3.2.18",
+ "clap 3.2.19",
  "cumulus-client-cli",
  "cumulus-client-collator",
  "cumulus-client-consensus-aura",
@@ -12291,9 +12355,9 @@ dependencies = [
  "hex-literal 0.3.4",
  "log",
  "orml-benchmarking",
- "orml-currencies",
- "orml-tokens",
- "orml-traits",
+ "orml-currencies 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27)",
+ "orml-tokens 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27)",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27)",
  "pallet-asset-registry",
  "pallet-asset-tx-payment",
  "pallet-aura",
@@ -12370,7 +12434,7 @@ dependencies = [
  "ark-std",
  "arkworks-setups",
  "async-trait",
- "clap 3.2.18",
+ "clap 3.2.19",
  "dkg-gadget",
  "dkg-primitives",
  "dkg-runtime-primitives",
@@ -12457,9 +12521,9 @@ dependencies = [
  "frame-system-rpc-runtime-api",
  "hex-literal 0.3.4",
  "log",
- "orml-currencies",
- "orml-tokens",
- "orml-traits",
+ "orml-currencies 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27)",
+ "orml-tokens 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27)",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library.git?branch=polkadot-v0.9.27)",
  "pallet-asset-registry",
  "pallet-asset-tx-payment",
  "pallet-assets",
@@ -12598,18 +12662,18 @@ checksum = "b1141d4d61095b28419e22cb0bbf02755f5e54e0526f97f1e3d1d160e60885fb"
 
 [[package]]
 name = "thiserror"
-version = "1.0.32"
+version = "1.0.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5f6586b7f764adc0231f4c79be7b920e766bb2f3e51b3661cdb263828f19994"
+checksum = "3d0a539a918745651435ac7db7a18761589a94cd7e94cd56999f828bf73c8a57"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.32"
+version = "1.0.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12bafc5b54507e0149cdf1b145a5d80ab80a90bcd9275df43d4fff68460f6c21"
+checksum = "c251e90f708e16c49a16f4917dc2131e75222b72edfa9cb7f7c58ae56aae0c09"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -12999,7 +13063,7 @@ name = "try-runtime-cli"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.27#8eff668a42325aeb4433eace1604f4d286a6ec05"
 dependencies = [
- "clap 3.2.18",
+ "clap 3.2.19",
  "jsonrpsee",
  "log",
  "parity-scale-codec",
@@ -13572,7 +13636,7 @@ dependencies = [
 [[package]]
 name = "webb-primitives"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#c3fa65eea2ca0d2ca7f09d81f3314f6c169be0bd"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#1e4a4785a300a119c3ff9954bdd076852df7ce89"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-381",
@@ -13648,13 +13712,13 @@ dependencies = [
 
 [[package]]
 name = "which"
-version = "4.2.5"
+version = "4.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c4fb54e6113b6a8772ee41c3404fb0301ac79604489467e0a9ce1f3e97c24ae"
+checksum = "1c831fbbee9e129a8cf93e7747a82da9d95ba8e16621cae60ec2cdc849bacb7b"
 dependencies = [
  "either",
- "lazy_static",
  "libc",
+ "once_cell",
 ]
 
 [[package]]
