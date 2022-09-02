@@ -370,6 +370,12 @@ fn testnet_genesis(
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
 		vk_bytes.to_vec()
 	};
+	let vanchor_verifier_16x2_bn254_params = {
+		let vk_bytes = include_bytes!(
+			"../../../protocol-substrate-fixtures/vanchor/bn254/x5/2-16-2/verifying_key.bin"
+		);
+		vk_bytes.to_vec()
+	};
 
 	const ENDOWMENT: Balance = 10_000_000 * UNIT;
 	const STASH: Balance = ENDOWMENT / 1000;
@@ -469,6 +475,10 @@ fn testnet_genesis(
 		},
 		v_anchor_verifier_2x_2_bn_254: VAnchorVerifier2x2Bn254Config {
 			parameters: Some(vanchor_verifier_bn254_params),
+			phantom: Default::default(),
+		},
+		v_anchor_verifier_1_6x_2_bn_254: VAnchorVerifier16x2Bn254Config {
+			parameters: Some(vanchor_verifier_16x2_bn254_params),
 			phantom: Default::default(),
 		},
 		v_anchor_bn_254: VAnchorBn254Config {
