@@ -25,7 +25,7 @@ use tangle_runtime::{
 	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, MaxNominations,
 	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill, SessionConfig,
 	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
-	VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
+	VAnchorVerifier16x2Bn254Config, VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
 };
 pub type ResourceId = [u8; 32];
 

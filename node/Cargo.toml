@@ -36,7 +36,7 @@ hex-literal = "0.3.1"
 clap = { version = "3.1", features = ["derive"] }
 
 # RPC related Dependencies
-jsonrpsee = { version = "0.14.0", features = ["server"] }
+jsonrpsee = { version = "0.15.0", features = ["server"] }
 
 # Local Dependencies
 tangle-rococo-runtime = { path = "../runtime/rococo" }
