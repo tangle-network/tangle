@@ -25,7 +25,7 @@ use tangle_runtime::{
 	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, MaxNominations,
 	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill, SessionConfig,
 	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
-	VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
+	VAnchorVerifier2x2Bn254Config, VAnchorVerifier16x2Bn254Config, UNIT, WASM_BINARY,
 };
 pub type ResourceId = [u8; 32];
 
@@ -370,9 +370,10 @@ fn testnet_genesis(
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
 		vk_bytes.to_vec()
 	};
+	// TODO: Add proper verifying keys for 16-2
 	let vanchor_verifier_16x2_bn254_params = {
 		let vk_bytes = include_bytes!(
-			"../../../protocol-substrate-fixtures/vanchor/bn254/x5/2-16-2/verifying_key.bin"
+			"../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin"
 		);
 		vk_bytes.to_vec()
 	};
