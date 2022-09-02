@@ -370,9 +370,10 @@ fn testnet_genesis(
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
 		vk_bytes.to_vec()
 	};
+	// TODO: Add proper verifying keys for 16-2
 	let vanchor_verifier_16x2_bn254_params = {
 		let vk_bytes = include_bytes!(
-			"../../../protocol-substrate-fixtures/vanchor/bn254/x5/2-16-2/verifying_key.bin"
+			"../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin"
 		);
 		vk_bytes.to_vec()
 	};
