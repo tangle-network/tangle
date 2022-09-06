@@ -86,13 +86,6 @@ impl pallet_verifier::Config<pallet_verifier::Instance1> for Runtime {
 	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
 }
 
-// impl pallet_verifier::Config<pallet_verifier::Instance2> for Runtime {
-// 	type Event = Event;
-// 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-// 	type Verifier = ArkworksVerifierBn254;
-// 	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
-// }
-
 parameter_types! {
 	pub const TokenWrapperPalletId: PalletId = PalletId(*b"dw/tkwrp");
 	pub const WrappingFeeDivider: Balance = 100;
@@ -242,6 +235,13 @@ impl pallet_signature_bridge::Config<SignatureBridgeInstance> for Runtime {
 	type WeightInfo = ();
 }
 
+impl pallet_verifier::Config<pallet_verifier::Instance2> for Runtime {
+	type Event = Event;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type Verifier = ArkworksVerifierBn254;
+	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
+}
+
 impl pallet_verifier::Config<pallet_verifier::Instance3> for Runtime {
 	type Event = Event;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -261,6 +261,7 @@ impl pallet_vanchor::Config<pallet_vanchor::Instance1> for Runtime {
 	type ProposalNonce = u32;
 	type LinkableTree = LinkableTreeBn254;
 	type Verifier2x2 = VAnchorVerifier2x2Bn254;
+	type Verifier16x2 = VAnchorVerifier16x2Bn254;
 	type EthereumHasher = Keccak256HasherBn254;
 	type IntoField = ArkworksIntoFieldBn254;
 	type Currency = Currencies;

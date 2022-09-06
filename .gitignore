@@ -15,6 +15,12 @@ tmp
 
 local-test
 
+# Parachain fixtures
+genesis-state-local
+genesis-wasm-local
+para/
+template-local-raw.json
+
 # NodeJS
 **/node_modules/
 resources/para-2076-genesis

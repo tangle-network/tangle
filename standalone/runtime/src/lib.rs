@@ -977,6 +977,8 @@ parameter_types! {
 	pub const TermDuration: BlockNumber = 7 * DAYS;
 	pub const DesiredMembers: u32 = 13;
 	pub const DesiredRunnersUp: u32 = 7;
+	pub const MaxCandidates: u32 = 10;
+	pub const MaxVoters: u32 = 5;
 	pub const ElectionsPhragmenPalletId: LockIdentifier = *b"phrelect";
 }
 
@@ -999,6 +1001,8 @@ impl pallet_elections_phragmen::Config for Runtime {
 	type LoserCandidate = ();
 	type PalletId = ElectionsPhragmenPalletId;
 	type TermDuration = TermDuration;
+	type MaxCandidates = MaxCandidates;
+	type MaxVoters = MaxVoters;
 	type VotingBondBase = VotingBondBase;
 	type VotingBondFactor = VotingBondFactor;
 	type WeightInfo = pallet_elections_phragmen::weights::SubstrateWeight<Runtime>;
@@ -1150,7 +1154,8 @@ construct_runtime!(
 		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>},
 
 		// VAnchor Verifier 2x2
-		VAnchorVerifier2x2Bn254: pallet_verifier::<Instance3>::{Pallet, Call, Storage, Event<T>, Config<T>},
+		VAnchorVerifier2x2Bn254: pallet_verifier::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>},
+		VAnchorVerifier16x2Bn254: pallet_verifier::<Instance3>::{Pallet, Call, Storage, Event<T>, Config<T>},
 
 		// VAnchor
 		VAnchorBn254: pallet_vanchor::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
