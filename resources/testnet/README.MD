@@ -30,7 +30,7 @@
 2. Generate raw chainspec and artifacts (we are not passing the argument `--chain` since the default is `local-testnet`). Remember to generate this on the same machine you will be running the initial collator on.
 
     ```
-    /usr/local/bin/tangle-collator build-spec --disable-default-bootnode --raw > template-local-raw.json
-    /usr/local/bin/tangle-collator export-genesis-state > genesis-state-local
-    /usr/local/bin/tangle-collator export-genesis-wasm > genesis-wasm-local
+    ./target/release/tangle-collator build-spec --disable-default-bootnode --raw > template-local-raw.json
+    ./target/release/tangle-collator export-genesis-state > genesis-state-local
+    ./target/release/tangle-collator export-genesis-wasm > genesis-wasm-local
     ```

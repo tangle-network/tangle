@@ -25,7 +25,7 @@ use tangle_runtime::{
 	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, MaxNominations,
 	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill, SessionConfig,
 	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
-	VAnchorVerifier16x2Bn254Config, VAnchorVerifier2x2Bn254Config, UNIT, WASM_BINARY,
+	VAnchorVerifierConfig, UNIT, WASM_BINARY,
 };
 pub type ResourceId = [u8; 32];
 
@@ -54,15 +54,15 @@ where
 
 /// Generate an Aura authority key.
 pub fn authority_keys_from_seed(
-	stash: &str,
 	controller: &str,
+	stash: &str,
 ) -> (AccountId, AccountId, AuraId, GrandpaId, DKGId) {
 	(
-		get_account_id_from_seed::<sr25519::Public>(stash),
 		get_account_id_from_seed::<sr25519::Public>(controller),
-		get_from_seed::<AuraId>(stash),
-		get_from_seed::<GrandpaId>(stash),
-		get_from_seed::<DKGId>(stash),
+		get_account_id_from_seed::<sr25519::Public>(stash),
+		get_from_seed::<AuraId>(controller),
+		get_from_seed::<GrandpaId>(controller),
+		get_from_seed::<DKGId>(controller),
 	)
 }
 
@@ -115,6 +115,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 				vec![
 					hex_literal::hex!("010000001389"), // Hermis (Evm, 5001)
 					hex_literal::hex!("01000000138a"), // Athena (Evm, 5002)
+					hex_literal::hex!("01000000138b"), // Demeter (Evm, 5003)
 				],
 				// Initial resource Ids
 				vec![
@@ -473,12 +474,11 @@ fn testnet_genesis(
 		mixer_bn_254: MixerBn254Config {
 			mixers: vec![(0, 10 * UNIT), (0, 100 * UNIT), (0, 1000 * UNIT)],
 		},
-		v_anchor_verifier_2x_2_bn_254: VAnchorVerifier2x2Bn254Config {
-			parameters: Some(vanchor_verifier_bn254_params),
-			phantom: Default::default(),
-		},
-		v_anchor_verifier_1_6x_2_bn_254: VAnchorVerifier16x2Bn254Config {
-			parameters: Some(vanchor_verifier_16x2_bn254_params),
+		v_anchor_verifier: VAnchorVerifierConfig {
+			parameters: Some(vec![
+				(2, 2, vanchor_verifier_bn254_params),
+				(2, 16, vanchor_verifier_16x2_bn254_params),
+			]),
 			phantom: Default::default(),
 		},
 		v_anchor_bn_254: VAnchorBn254Config {

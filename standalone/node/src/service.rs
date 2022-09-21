@@ -203,7 +203,20 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		.network
 		.extra_sets
 		.push(sc_finality_grandpa::grandpa_peers_set_config(grandpa_protocol_name.clone()));
-	config.network.extra_sets.push(dkg_gadget::dkg_peers_set_config());
+
+	let keygen_network_protocol_name = dkg_gadget::DKG_KEYGEN_PROTOCOL_NAME;
+	let signing_network_protocol_name = dkg_gadget::DKG_SIGNING_PROTOCOL_NAME;
+
+	config
+		.network
+		.extra_sets
+		.push(dkg_gadget::dkg_peers_set_config(keygen_network_protocol_name.into()));
+
+	config
+		.network
+		.extra_sets
+		.push(dkg_gadget::dkg_peers_set_config(signing_network_protocol_name.into()));
+
 	let warp_sync = Arc::new(sc_finality_grandpa::warp_proof::NetworkProvider::new(
 		backend.clone(),
 		grandpa_link.shared_authority_set().clone(),
@@ -257,6 +270,12 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		})
 	};
 
+	if role.is_authority() {
+		dkg_primitives::utils::insert_controller_account_keys_into_keystore(
+			&config,
+			Some(keystore_container.sync_keystore()),
+		);
+	}
 	let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),

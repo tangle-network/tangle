@@ -1104,6 +1104,11 @@ construct_runtime!(
 		Aura: pallet_aura::{Pallet, Storage, Config<T>},
 		Grandpa: pallet_grandpa::{Pallet, Call, Storage, Config, Event, ValidateUnsigned},
 
+		// DKG / offchain worker
+		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>},
+		DKGProposals: pallet_dkg_proposals,
+		DKGProposalHandler: pallet_dkg_proposal_handler,
+
 		Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
@@ -1124,11 +1129,6 @@ construct_runtime!(
 		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>},
 		Offences: pallet_offences::{Pallet, Storage, Event},
-
-		// DKG / offchain worker
-		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>},
-		DKGProposals: pallet_dkg_proposals,
-		DKGProposalHandler: pallet_dkg_proposal_handler,
 
 		// Hasher pallet
 		HasherBn254: pallet_hasher::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
@@ -1153,10 +1153,6 @@ construct_runtime!(
 		// Signature Bridge
 		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>},
 
-		// VAnchor Verifier 2x2
-		VAnchorVerifier2x2Bn254: pallet_verifier::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>},
-		VAnchorVerifier16x2Bn254: pallet_verifier::<Instance3>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
 		// VAnchor
 		VAnchorBn254: pallet_vanchor::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
 
@@ -1164,6 +1160,9 @@ construct_runtime!(
 		VAnchorHandlerBn254: pallet_vanchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>},
 
 		TokenWrapperHandler: pallet_token_wrapper_handler::{Pallet, Storage, Call, Event<T>},
+
+		KeyStorage: pallet_key_storage::<Instance1>::{Pallet, Call, Storage, Event<T>},
+		VAnchorVerifier: pallet_vanchor_verifier::{Pallet, Call, Storage, Event<T>, Config<T>},
 
 	}
 );

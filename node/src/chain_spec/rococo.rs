@@ -21,8 +21,7 @@ use sp_core::{crypto::UncheckedInto, sr25519};
 use tangle_rococo_runtime::{
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
 	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, VAnchorBn254Config,
-	VAnchorVerifier16x2Bn254Config, VAnchorVerifier2x2Bn254Config, EXISTENTIAL_DEPOSIT, MILLIUNIT,
-	UNIT,
+	VAnchorVerifierConfig, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
 };
 
 pub fn tangle_rococo_config(id: ParaId) -> ChainSpec {
@@ -168,7 +167,7 @@ fn rococo_genesis(
 		parachain_system: Default::default(),
 		dkg: tangle_rococo_runtime::DKGConfig {
 			authorities: invulnerables.iter().map(|x| x.2.clone()).collect::<_>(),
-			keygen_threshold: 2,
+			keygen_threshold: 3,
 			signature_threshold: 1,
 			authority_ids: invulnerables.iter().map(|x| x.0.clone()).collect::<_>(),
 		},
@@ -193,18 +192,17 @@ fn rococo_genesis(
 		mixer_bn_254: MixerBn254Config {
 			mixers: vec![(0, 10 * UNIT), (0, 100 * UNIT), (0, 1000 * UNIT)],
 		},
-		v_anchor_verifier_2x_2_bn_254: VAnchorVerifier2x2Bn254Config {
-			parameters: Some(vanchor_verifier_bn254_params),
-			phantom: Default::default(),
-		},
 		v_anchor_bn_254: VAnchorBn254Config {
 			max_deposit_amount: 1_000_000 * UNIT,
 			min_withdraw_amount: 0,
 			vanchors: vec![(0, 2)],
 			phantom: Default::default(),
 		},
-		v_anchor_verifier_1_6x_2_bn_254: VAnchorVerifier16x2Bn254Config {
-			parameters: Some(vanchor_verifier_16x2_bn254_params),
+		v_anchor_verifier: VAnchorVerifierConfig {
+			parameters: Some(vec![
+				(2, 2, vanchor_verifier_bn254_params),
+				(2, 16, vanchor_verifier_16x2_bn254_params),
+			]),
 			phantom: Default::default(),
 		},
 		treasury: Default::default(),

@@ -23,8 +23,7 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_rococo_runtime::{
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
 	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Signature,
-	VAnchorBn254Config, VAnchorVerifier16x2Bn254Config, VAnchorVerifier2x2Bn254Config,
-	EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
+	VAnchorBn254Config, VAnchorVerifierConfig, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
 };
 
 pub mod rococo;
@@ -201,18 +200,14 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 					),
 				]),
 				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+					// aura accounts
+					hex!["a62a5c2e22ebd14273f1e6552ba0ee07937ff3d859f53475296bbcbb8af1752e"].into(),
+					hex!["6850cc5d0369d11f93c820b91f7bfed4f6fc8b3a5f70a80171183129face154b"].into(),
+					hex!["1469f5f6719beaa0a7364259e5fb10846a4457f181807a0c00a6a9cdf14a260d"].into(),
+					// acco accounts
+					hex!["703ba5a042652271121c13137a4b1f3bc237c79e44beb1cad069d194f66e1131"].into(),
+					hex!["c0005f98dec97a11a8537735c4dfc9edc253cc4914b86830af11b2a9b132897b"].into(),
+					hex!["a43f0787f3156b00b30ccc19462146b8a3481e85dcdfc2a9ccb4b16347b65e69"].into(),
 				],
 				id,
 			)
@@ -308,7 +303,7 @@ fn testnet_genesis(
 		parachain_system: Default::default(),
 		dkg: tangle_rococo_runtime::DKGConfig {
 			authorities: invulnerables.iter().map(|x| x.2.clone()).collect::<_>(),
-			keygen_threshold: 2,
+			keygen_threshold: 3,
 			signature_threshold: 1,
 			authority_ids: invulnerables.iter().map(|x| x.0.clone()).collect::<_>(),
 		},
@@ -333,18 +328,17 @@ fn testnet_genesis(
 		mixer_bn_254: MixerBn254Config {
 			mixers: vec![(0, 10 * UNIT), (0, 100 * UNIT), (0, 1000 * UNIT)],
 		},
-		v_anchor_verifier_2x_2_bn_254: VAnchorVerifier2x2Bn254Config {
-			parameters: Some(vanchor_verifier_bn254_params),
-			phantom: Default::default(),
-		},
 		v_anchor_bn_254: VAnchorBn254Config {
 			max_deposit_amount: 1_000_000 * UNIT,
 			min_withdraw_amount: 0,
 			vanchors: vec![(0, 1)],
 			phantom: Default::default(),
 		},
-		v_anchor_verifier_1_6x_2_bn_254: VAnchorVerifier16x2Bn254Config {
-			parameters: Some(vanchor_verifier_16x2_bn254_params),
+		v_anchor_verifier: VAnchorVerifierConfig {
+			parameters: Some(vec![
+				(2, 2, vanchor_verifier_bn254_params),
+				(2, 16, vanchor_verifier_16x2_bn254_params),
+			]),
 			phantom: Default::default(),
 		},
 		treasury: Default::default(),
