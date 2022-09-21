@@ -42,6 +42,8 @@ pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate
 pallet-token-wrapper-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",default-features = false }
 pallet-vanchor = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-vanchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-vanchor-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
+pallet-key-storage = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 pallet-ecdsa-claims = { path = "../../pallets/claims", default-features = false }
 
 # Orml depedencies

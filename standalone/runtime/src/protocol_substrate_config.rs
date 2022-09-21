@@ -235,24 +235,11 @@ impl pallet_signature_bridge::Config<SignatureBridgeInstance> for Runtime {
 	type WeightInfo = ();
 }
 
-impl pallet_verifier::Config<pallet_verifier::Instance2> for Runtime {
-	type Event = Event;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type Verifier = ArkworksVerifierBn254;
-	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
-}
-
-impl pallet_verifier::Config<pallet_verifier::Instance3> for Runtime {
-	type Event = Event;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type Verifier = ArkworksVerifierBn254;
-	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
-}
-
 parameter_types! {
 	pub const VAnchorPalletId: PalletId = PalletId(*b"py/vanch");
 	pub const MaxFee: Balance = Balance::MAX - 1;
 	pub const MaxExtAmount: Balance = Balance::MAX - 1;
+	pub const MaxCurrencyId: webb_primitives::AssetId = webb_primitives::AssetId::MAX - 1;
 }
 
 impl pallet_vanchor::Config<pallet_vanchor::Instance1> for Runtime {
@@ -260,15 +247,18 @@ impl pallet_vanchor::Config<pallet_vanchor::Instance1> for Runtime {
 	type PalletId = VAnchorPalletId;
 	type ProposalNonce = u32;
 	type LinkableTree = LinkableTreeBn254;
-	type Verifier2x2 = VAnchorVerifier2x2Bn254;
-	type Verifier16x2 = VAnchorVerifier16x2Bn254;
+	type KeyStorage = KeyStorage;
 	type EthereumHasher = Keccak256HasherBn254;
+	type VAnchorVerifier = VAnchorVerifier;
 	type IntoField = ArkworksIntoFieldBn254;
 	type Currency = Currencies;
 	type MaxFee = MaxFee;
 	type MaxExtAmount = MaxExtAmount;
 	type PostDepositHook = ();
 	type NativeCurrencyId = GetNativeCurrencyId;
+	type MaxCurrencyId = MaxCurrencyId;
+	type TokenWrapper = TokenWrapper;
+	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -286,4 +276,16 @@ impl pallet_token_wrapper_handler::Config for Runtime {
 	type BridgeOrigin = pallet_signature_bridge::EnsureBridge<Runtime, SignatureBridgeInstance>;
 	type Event = Event;
 	type TokenWrapper = TokenWrapper;
+}
+
+impl pallet_key_storage::Config<pallet_key_storage::Instance1> for Runtime {
+	type Event = Event;
+	type WeightInfo = pallet_key_storage::weights::WebbWeight<Runtime>;
+}
+
+impl pallet_vanchor_verifier::Config for Runtime {
+	type Event = Event;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type Verifier = ArkworksVerifierBn254;
+	type WeightInfo = pallet_vanchor_verifier::weights::WebbWeight<Runtime>;
 }
