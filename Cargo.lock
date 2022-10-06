@@ -5839,7 +5839,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-registry"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6297,7 +6297,7 @@ dependencies = [
 [[package]]
 name = "pallet-hasher"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6363,7 +6363,7 @@ dependencies = [
 [[package]]
 name = "pallet-key-storage"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6378,7 +6378,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6398,7 +6398,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "jsonrpsee",
  "pallet-linkable-tree",
@@ -6416,7 +6416,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "pallet-linkable-tree",
  "parity-scale-codec",
@@ -6445,7 +6445,7 @@ dependencies = [
 [[package]]
 name = "pallet-mixer"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6501,7 +6501,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -6519,7 +6519,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "jsonrpsee",
  "pallet-mt",
@@ -6537,7 +6537,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "pallet-mt",
  "sp-api",
@@ -6701,7 +6701,7 @@ dependencies = [
 [[package]]
 name = "pallet-signature-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6829,7 +6829,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6847,7 +6847,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6940,7 +6940,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "ark-bn254",
  "ark-ff",
@@ -6970,7 +6970,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6994,7 +6994,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7009,7 +7009,7 @@ dependencies = [
 [[package]]
 name = "pallet-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -13622,7 +13622,7 @@ dependencies = [
 [[package]]
 name = "webb-primitives"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#9c2cd318b4a3e6ad10caed50c3db1003b3b63e66"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#dabcdcd2eaac6ba8e1498449add30c82727b6d40"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-381",
