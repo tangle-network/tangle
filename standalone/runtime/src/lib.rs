@@ -1260,6 +1260,11 @@ impl_runtime_apis! {
 			DKG::next_public_key_signature()
 		}
 
+		fn get_current_session_progress(block_number: BlockNumber) -> Option<Permill> {
+			use frame_support::traits::EstimateNextSessionRotation;
+			<pallet_session::PeriodicSessions<Period, Offset> as EstimateNextSessionRotation<BlockNumber>>::estimate_current_session_progress(block_number).0
+		}
+
 		fn dkg_pub_key() -> (dkg_runtime_primitives::AuthoritySetId, Vec<u8>) {
 			DKG::dkg_public_key()
 		}

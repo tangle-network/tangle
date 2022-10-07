@@ -454,7 +454,7 @@ impl pallet_authorship::Config for Runtime {
 }
 
 parameter_types! {
-	pub const Period: u32 = 4 * MINUTES;
+	pub const Period: u32 = 15 * MINUTES;
 	pub const Offset: u32 = 0;
 }
 
@@ -966,6 +966,11 @@ impl_runtime_apis! {
 
 		fn get_next_best_authorities() -> Vec<(u16, DKGId)> {
 			DKG::next_best_authorities()
+		}
+
+		fn get_current_session_progress(block_number: BlockNumber) -> Option<Permill> {
+			use frame_support::traits::EstimateNextSessionRotation;
+			<pallet_session::PeriodicSessions<Period, Offset> as EstimateNextSessionRotation<BlockNumber>>::estimate_current_session_progress(block_number).0
 		}
 
 		fn get_unsigned_proposals() -> Vec<UnsignedProposal> {
