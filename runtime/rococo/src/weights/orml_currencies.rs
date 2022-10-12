@@ -34,16 +34,16 @@ impl<T: frame_system::Config> orml_currencies::WeightInfo for WeightInfo<T> {
 	// Storage: System Account (r:1 w:1)
 	fn transfer_non_native_currency() -> Weight {
 		Weight::from_ref_time(45_000_000)
-			.saturating_add(T::DbWeight::get().reads(4 as u64))
-			.saturating_add(T::DbWeight::get().writes(3 as u64))
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
 	// Storage: Tokens Accounts (r:2 w:2)
 	// Storage: AssetRegistry Assets (r:1 w:0)
 	// Storage: System Account (r:1 w:1)
 	fn transfer_native_currency() -> Weight {
 		Weight::from_ref_time(40_619_000)
-			.saturating_add(T::DbWeight::get().reads(3 as u64))
-			.saturating_add(T::DbWeight::get().writes(3 as u64))
+			.saturating_add(T::DbWeight::get().reads(3_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
 	// Storage: Tokens Accounts (r:1 w:1)
 	// Storage: AssetRegistry Assets (r:1 w:0)
@@ -51,23 +51,23 @@ impl<T: frame_system::Config> orml_currencies::WeightInfo for WeightInfo<T> {
 	// Storage: System Account (r:1 w:1)
 	fn update_balance_non_native_currency() -> Weight {
 		Weight::from_ref_time(32_000_000)
-			.saturating_add(T::DbWeight::get().reads(4 as u64))
-			.saturating_add(T::DbWeight::get().writes(3 as u64))
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
 	// Storage: Tokens Accounts (r:1 w:1)
 	// Storage: AssetRegistry Assets (r:1 w:0)
 	// Storage: System Account (r:1 w:1)
 	fn update_balance_native_currency_creating() -> Weight {
 		Weight::from_ref_time(24_748_000)
-			.saturating_add(T::DbWeight::get().reads(2 as u64))
-			.saturating_add(T::DbWeight::get().writes(3 as u64))
+			.saturating_add(T::DbWeight::get().reads(2_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
 	// Storage: Tokens Accounts (r:1 w:1)
 	// Storage: AssetRegistry Assets (r:1 w:0)
 	// Storage: System Account (r:1 w:1)
 	fn update_balance_native_currency_killing() -> Weight {
 		Weight::from_ref_time(30_170_000)
-			.saturating_add(T::DbWeight::get().reads(3 as u64))
-			.saturating_add(T::DbWeight::get().writes(3 as u64))
+			.saturating_add(T::DbWeight::get().reads(3_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
 }
