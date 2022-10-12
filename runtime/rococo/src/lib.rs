@@ -136,8 +136,8 @@ pub type Executive = frame_executive::Executive<
 
 pub struct OnRuntimeUpgrade;
 impl frame_support::traits::OnRuntimeUpgrade for OnRuntimeUpgrade {
-	fn on_runtime_upgrade() -> u64 {
-		0u64
+	fn on_runtime_upgrade() -> Weight {
+		Weight::from_ref_time(0u64)
 	}
 }
 
@@ -232,7 +232,7 @@ impl WeightToFeePolynomial for WeightToFee {
 		// in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1 MILLIUNIT:
 		// in our template, we map to 1/10 of that, or 1/10 MILLIUNIT
 		let p = CENT;
-		let q = 100 * Balance::from(ExtrinsicBaseWeight::get());
+		let q = 100 * Balance::from(ExtrinsicBaseWeight::get().ref_time());
 		smallvec![WeightToFeeCoefficient {
 			degree: 1,
 			negative: false,
@@ -255,7 +255,7 @@ const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 /// by  Operational  extrinsics.
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 /// We allow for 0.5 of a second of compute with a 12 second average block time.
-const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND / 2;
+pub const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND.saturating_div(2);
 
 parameter_types! {
 	pub const BlockHashCount: BlockNumber = 250;
