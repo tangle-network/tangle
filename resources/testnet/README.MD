@@ -5,7 +5,7 @@
 1. Build the latest relaychain 
     ```
     # Clone the Polkadot Repository, with correct version
-    git clone --depth 1 --branch release-v0.9.28
+    git clone --depth 1 --branch release-v0.9.29
     cd polkadot
     cargo b -r
     ```
