@@ -118,8 +118,13 @@ xcm-builder = { git = "https://github.com/paritytech/polkadot", branch = "releas
 xcm-executor = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.29", default-features = false }
 pallet-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.29", default-features = false }
 
-# Local Dependencies
-pallet-collator-rewards = { path = "../../pallets/collator-rewards", default-features = false }
+# Nimbus Dependencies
+nimbus-primitives = { git = "https://github.com/purestake/nimbus", branch = "moonbeam-polkadot-v0.9.29", default-features = false }
+pallet-aura-style-filter = { git = "https://github.com/purestake/nimbus", branch = "moonbeam-polkadot-v0.9.29", default-features = false }
+pallet-author-inherent = { git = "https://github.com/purestake/nimbus", branch = "moonbeam-polkadot-v0.9.29", default-features = false }
+
+# Local dependencies
+pallet-parachain-staking = { path = '../../pallets/parachain-staking', default-features = false }
 
 [features]
 default = ["std"]
@@ -206,10 +211,14 @@ std = [
 	"pallet-society/std",
 	"pallet-vanchor/std",
 	"pallet-vanchor-handler/std",
+
+	'nimbus-primitives/runtime-benchmarks',
+  	'pallet-aura-style-filter/runtime-benchmarks',
+  	'pallet-author-inherent/runtime-benchmarks',
 	
 	# local
 	"pallet-ecdsa-claims/std",
-	"pallet-collator-rewards/std"
+	"pallet-parachain-staking/std"
 ]
 runtime-benchmarks = [
 	"hex-literal",

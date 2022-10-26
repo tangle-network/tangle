@@ -740,6 +740,76 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 }
 
+impl pallet_aura_style_filter::Config for Runtime {
+    /// Nimbus filter pipeline (final) step 3:
+    /// Choose 1 collator from PotentialAuthors as eligible
+    /// for each slot in round-robin fashion
+    type PotentialAuthors = ParachainStaking;
+}
+parameter_types! {
+    /// Fixed percentage a collator takes off the top of due rewards
+    pub const DefaultCollatorCommission: Perbill = Perbill::from_percent(10);
+    /// Default percent of inflation set aside for parachain bond every round
+    pub const DefaultParachainBondReservePercent: Percent = Percent::zero();
+    pub DefaultBlocksPerRound: BlockNumber = prod_or_fast!(6 * HOURS,15,"CALAMARI_DEFAULTBLOCKSPERROUND");
+    pub LeaveDelayRounds: BlockNumber = prod_or_fast!(28,1,"CALAMARI_LEAVEDELAYROUNDS"); // == 7 * DAYS / 6 * HOURS
+}
+impl pallet_parachain_staking::Config for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type BlockAuthor = AuthorInherent;
+    type MonetaryGovernanceOrigin = EnsureRoot<AccountId>;
+    /// Minimum round length is 2 minutes (10 * 12 second block times)
+    type MinBlocksPerRound = ConstU32<10>;
+    /// Blocks per round
+    type DefaultBlocksPerRound = DefaultBlocksPerRound;
+    /// Rounds before the collator leaving the candidates request can be executed
+    type LeaveCandidatesDelay = LeaveDelayRounds;
+    /// Rounds before the candidate bond increase/decrease can be executed
+    type CandidateBondLessDelay = LeaveDelayRounds;
+    /// Rounds before the delegator exit can be executed
+    type LeaveDelegatorsDelay = LeaveDelayRounds;
+    /// Rounds before the delegator revocation can be executed
+    type RevokeDelegationDelay = LeaveDelayRounds;
+    /// Rounds before the delegator bond increase/decrease can be executed
+    type DelegationBondLessDelay = LeaveDelayRounds;
+    /// Rounds before the reward is paid
+    type RewardPaymentDelay = ConstU32<2>;
+    /// Minimum collators selected per round, default at genesis and minimum forever after
+    type MinSelectedCandidates = ConstU32<5>;
+    /// Maximum top delegations per candidate
+    type MaxTopDelegationsPerCandidate = ConstU32<100>;
+    /// Maximum bottom delegations per candidate
+    type MaxBottomDelegationsPerCandidate = ConstU32<50>;
+    /// Maximum delegations per delegator
+    type MaxDelegationsPerDelegator = ConstU32<25>;
+    type DefaultCollatorCommission = DefaultCollatorCommission;
+    type DefaultParachainBondReservePercent = DefaultParachainBondReservePercent;
+    /// Minimum stake on a collator to be considered for block production
+    type MinCollatorStk = ConstU128<{ crate::staking::MIN_BOND_TO_BE_CONSIDERED_COLLATOR }>;
+    /// Minimum stake the collator runner must bond to register as collator candidate
+    type MinCandidateStk = ConstU128<{ crate::staking::NORMAL_COLLATOR_MINIMUM_STAKE }>;
+    /// WHITELIST: Minimum stake required for *a whitelisted* account to be a collator candidate
+    type MinWhitelistCandidateStk = ConstU128<{ crate::staking::EARLY_COLLATOR_MINIMUM_STAKE }>;
+    /// Smallest amount that can be delegated
+    type MinDelegation = ConstU128<{ 5_000 * KMA }>;
+    /// Minimum stake required to be reserved to be a delegator
+    type MinDelegatorStk = ConstU128<{ 5_000 * KMA }>;
+    type OnCollatorPayout = ();
+    type OnNewRound = ();
+    type WeightInfo = weights::pallet_parachain_staking::SubstrateWeight<Runtime>;
+}
+
+impl pallet_author_inherent::Config for Runtime {
+    // We start a new slot each time we see a new relay block.
+    type SlotBeacon = cumulus_pallet_parachain_system::RelaychainBlockNumberProvider<Self>;
+    type AccountLookup = CollatorSelection;
+    type WeightInfo = weights::pallet_author_inherent::SubstrateWeight<Runtime>;
+    /// Nimbus filter pipeline step 1:
+    /// Filters out NimbusIds not registered as SessionKeys of some AccountId
+    type CanAuthor = AuraAuthorFilter;
+}
+
 parameter_types! {
 	pub const PreimageMaxSize: u32 = 4096 * 1024;
 	pub const PreimageBaseDeposit: Balance = UNIT;
@@ -835,7 +905,6 @@ construct_runtime!(
 		Currencies: orml_currencies::{Pallet, Call} = 51,
 		Tokens: orml_tokens::{Pallet, Storage, Call, Event<T>} = 52,
 		TokenWrapper: pallet_token_wrapper::{Pallet, Storage, Call, Event<T>} = 53,
-		CollatorRewards: pallet_collator_rewards::{Pallet, Call, Storage, Event<T>} = 54,
 
 		// Privacy pallets
 		HasherBn254: pallet_hasher::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 60,
