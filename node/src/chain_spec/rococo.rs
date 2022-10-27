@@ -20,8 +20,8 @@ use sc_service::ChainType;
 use sp_core::{crypto::UncheckedInto, sr25519};
 use tangle_rococo_runtime::{
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
-	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, VAnchorBn254Config,
-	VAnchorVerifierConfig, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
+	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, ParachainStakingConfig,
+	VAnchorBn254Config, VAnchorVerifierConfig, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
 };
 
 pub fn tangle_rococo_config(id: ParaId) -> ChainSpec {
@@ -144,11 +144,6 @@ fn rococo_genesis(
 		council: Default::default(),
 		indices: Default::default(),
 		parachain_info: tangle_rococo_runtime::ParachainInfoConfig { parachain_id: id },
-		collator_selection: tangle_rococo_runtime::CollatorSelectionConfig {
-			invulnerables: invulnerables.iter().cloned().map(|(acc, _, _)| acc).collect(),
-			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
-			..Default::default()
-		},
 		session: tangle_rococo_runtime::SessionConfig {
 			keys: invulnerables
 				.iter()
@@ -207,5 +202,21 @@ fn rococo_genesis(
 		},
 		treasury: Default::default(),
 		vesting: Default::default(),
+		parachain_staking: ParachainStakingConfig {
+			candidates: invulnerables
+				.iter()
+				.cloned()
+				.map(|(account, _, _)| {
+					(account, tangle_rococo_runtime::staking::NORMAL_COLLATOR_MINIMUM_STAKE)
+				})
+				.collect(),
+			delegations: vec![], //delegations
+			inflation_config: tangle_rococo_runtime::staking::inflation_config::<
+				tangle_rococo_runtime::Runtime,
+			>(),
+			collator_commission: COLLATOR_COMMISSION,
+			parachain_bond_reserve_percent: PARACHAIN_BOND_RESERVE_PERCENT,
+			blocks_per_round: BLOCKS_PER_ROUND,
+		},
 	}
 }

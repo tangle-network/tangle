@@ -22,9 +22,9 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod impls;
 pub mod protocol_substrate_config;
+pub mod staking;
 pub mod weights;
 pub mod xcm_config;
-pub mod staking;
 
 use codec::Encode;
 use dkg_runtime_primitives::{TypedChainId, UnsignedProposal};
@@ -60,7 +60,10 @@ use webb_primitives::{
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 pub use frame_support::{
 	construct_runtime, match_types, parameter_types,
-	traits::{Currency, EitherOfDiverse, EqualPrivilegeOnly, Everything, IsInVec, Randomness, ConstU32, ConstU128},
+	traits::{
+		ConstU128, ConstU32, Currency, EitherOfDiverse, EqualPrivilegeOnly, Everything, IsInVec,
+		Randomness,
+	},
 	weights::{constants::WEIGHT_PER_SECOND, DispatchClass, IdentityFee, Weight},
 	PalletId, StorageValue,
 };
@@ -73,9 +76,9 @@ use frame_system::{
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_runtime::generic::Era;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
-use sp_runtime::{generic::Era, traits::ConstU32};
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 
@@ -83,7 +86,7 @@ use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 use smallvec::smallvec;
 use xcm::latest::prelude::*;
 
-pub const SESSION_PERIOD_BLOCKS : BlockNumber = 15 * MINUTES;
+pub const SESSION_PERIOD_BLOCKS: BlockNumber = 15 * MINUTES;
 
 /// Reputation type
 pub type Reputation = u128;
@@ -439,7 +442,7 @@ parameter_types! {
 }
 
 impl pallet_authorship::Config for Runtime {
-	type EventHandler = (CollatorSelection,);
+	type EventHandler = ();
 	type FilterUncle = ();
 	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
 	type UncleGenerations = UncleGenerations;
@@ -456,11 +459,11 @@ impl pallet_session::Config for Runtime {
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
 	// Essentially just Aura, but lets be pedantic.
 	type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
-	type SessionManager = CollatorSelection;
+	type SessionManager = ParachainStaking;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type ValidatorId = <Self as frame_system::Config>::AccountId;
 	// we don't have stash and controller, thus we don't need the convert as well.
-	type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
+	type ValidatorIdOf = IdentityCollator;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
@@ -471,25 +474,6 @@ parameter_types! {
 	pub const SessionLength: BlockNumber = 6 * HOURS;
 	pub const MaxInvulnerables: u32 = 100;
 	pub const ExecutiveBody: BodyId = BodyId::Executive;
-}
-
-// We allow root only to execute privileged collator selection operations.
-pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
-
-impl pallet_collator_selection::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type UpdateOrigin = CollatorSelectionUpdateOrigin;
-	type PotId = PotId;
-	type MaxCandidates = MaxCandidates;
-	type MinCandidates = MinCandidates;
-	type MaxInvulnerables = MaxInvulnerables;
-	// should be a multiple of session or things will get inconsistent
-	type KickThreshold = Period;
-	type ValidatorId = <Self as frame_system::Config>::AccountId;
-	type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
-	type ValidatorRegistration = Session;
-	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -733,66 +717,84 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 }
 
 impl pallet_aura_style_filter::Config for Runtime {
-    /// Nimbus filter pipeline (final) step 3:
-    /// Choose 1 collator from PotentialAuthors as eligible
-    /// for each slot in round-robin fashion
-    type PotentialAuthors = ParachainStaking;
+	/// Nimbus filter pipeline (final) step 3:
+	/// Choose 1 collator from PotentialAuthors as eligible
+	/// for each slot in round-robin fashion
+	type PotentialAuthors = ParachainStaking;
 }
 
 parameter_types! {
-    pub LeaveDelayRounds: BlockNumber = SESSION_PERIOD_BLOCKS;
+	pub LeaveDelayRounds: BlockNumber = SESSION_PERIOD_BLOCKS;
+}
+
+/// A convertor from collators id. Since this pallet does not have stash/controller, this is
+/// just identity.
+pub struct IdentityCollator;
+impl<T> sp_runtime::traits::Convert<T, Option<T>> for IdentityCollator {
+	fn convert(t: T) -> Option<T> {
+		Some(t)
+	}
+}
+impl<T> sp_runtime::traits::Convert<T, T> for IdentityCollator {
+	fn convert(t: T) -> T {
+		t
+	}
 }
 
 impl pallet_parachain_staking::Config for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type BlockAuthor = AuthorInherent;
-    type MonetaryGovernanceOrigin = EnsureRoot<AccountId>;
-    /// Minimum round length is 2 minutes (10 * 12 second block times)
-    type MinBlocksPerRound = ConstU32<10>;
-    /// Blocks per round
-    type MinBlocksPerRound = ConstU32<10>;
-    /// Rounds before the collator leaving the candidates request can be executed
-    type LeaveCandidatesDelay = LeaveDelayRounds;
-    /// Rounds before the candidate bond increase/decrease can be executed
-    type CandidateBondLessDelay = LeaveDelayRounds;
-    /// Rounds before the delegator exit can be executed
-    type LeaveDelegatorsDelay = LeaveDelayRounds;
-    /// Rounds before the delegator revocation can be executed
-    type RevokeDelegationDelay = LeaveDelayRounds;
-    /// Rounds before the delegator bond increase/decrease can be executed
-    type DelegationBondLessDelay = LeaveDelayRounds;
-    /// Rounds before the reward is paid
-    type RewardPaymentDelay = ConstU32<2>;
-    /// Minimum collators selected per round, default at genesis and minimum forever after
-    type MinSelectedCandidates = ConstU32<5>;
-    /// Maximum top delegations per candidate
-    type MaxTopDelegationsPerCandidate = ConstU32<100>;
-    /// Maximum bottom delegations per candidate
-    type MaxBottomDelegationsPerCandidate = ConstU32<50>;
-    /// Maximum delegations per delegator
-    type MaxDelegationsPerDelegator = ConstU32<25>;
-    /// Minimum stake on a collator to be considered for block production
-    type MinCollatorStk = ConstU128<{ crate::staking::MIN_BOND_TO_BE_CONSIDERED_COLLATOR }>;
-    /// Minimum stake the collator runner must bond to register as collator candidate
-    type MinCandidateStk = ConstU128<{ crate::staking::NORMAL_COLLATOR_MINIMUM_STAKE }>;
-    /// Smallest amount that can be delegated
-    type MinDelegation = ConstU128<{ 5_000 * KMA }>;
-    /// Minimum stake required to be reserved to be a delegator
-    type MinDelegatorStk = ConstU128<{ 5_000 * KMA }>;
-    type OnCollatorPayout = ();
-    type OnNewRound = ();
-    type WeightInfo = ();
+	type Event = Event;
+	type Currency = Balances;
+	type BlockAuthor = AuthorInherent;
+	type MonetaryGovernanceOrigin = EnsureRoot<AccountId>;
+	/// Minimum round length is 2 minutes (10 * 12 second block times)
+	type MinBlocksPerRound = ConstU32<10>;
+	/// Rounds before the collator leaving the candidates request can be executed
+	type LeaveCandidatesDelay = LeaveDelayRounds;
+	/// Rounds before the candidate bond increase/decrease can be executed
+	type CandidateBondLessDelay = LeaveDelayRounds;
+	/// Rounds before the delegator exit can be executed
+	type LeaveDelegatorsDelay = LeaveDelayRounds;
+	/// Rounds before the delegator revocation can be executed
+	type RevokeDelegationDelay = LeaveDelayRounds;
+	/// Rounds before the delegator bond increase/decrease can be executed
+	type DelegationBondLessDelay = LeaveDelayRounds;
+	/// Rounds before the reward is paid
+	type RewardPaymentDelay = ConstU32<2>;
+	/// Minimum collators selected per round, default at genesis and minimum forever after
+	type MinSelectedCandidates = ConstU32<5>;
+	/// Maximum top delegations per candidate
+	type MaxTopDelegationsPerCandidate = ConstU32<100>;
+	/// Maximum bottom delegations per candidate
+	type MaxBottomDelegationsPerCandidate = ConstU32<50>;
+	/// Maximum delegations per delegator
+	type MaxDelegationsPerDelegator = ConstU32<25>;
+	/// Minimum stake on a collator to be considered for block production
+	type MinCollatorStk = ConstU128<{ crate::staking::MIN_BOND_TO_BE_CONSIDERED_COLLATOR }>;
+	/// Minimum stake the collator runner must bond to register as collator candidate
+	type MinCandidateStk = ConstU128<{ crate::staking::NORMAL_COLLATOR_MINIMUM_STAKE }>;
+	/// Smallest amount that can be delegated
+	type MinDelegation = ConstU128<{ 5 * DOLLAR }>;
+	/// Minimum stake required to be reserved to be a delegator
+	type MinDelegatorStk = ConstU128<{ 5 * DOLLAR }>;
+	type ValidatorId = <Self as frame_system::Config>::AccountId;
+	type ValidatorIdOf = IdentityCollator;
+	type AccountIdOf = IdentityCollator;
+	type MaxInvulnerables = ConstU32<10>;
+	type ValidatorRegistration = Session;
+	type UpdateOrigin = EnsureRoot<AccountId>;
+	type OnCollatorPayout = ();
+	type OnNewRound = ();
+	type WeightInfo = ();
 }
 
 impl pallet_author_inherent::Config for Runtime {
-    // We start a new slot each time we see a new relay block.
-    type SlotBeacon = cumulus_pallet_parachain_system::RelaychainBlockNumberProvider<Self>;
-    type AccountLookup = CollatorSelection;
-    type WeightInfo = ();
-    /// Nimbus filter pipeline step 1:
-    /// Filters out NimbusIds not registered as SessionKeys of some AccountId
-    type CanAuthor = AuraAuthorFilter;
+	// We start a new slot each time we see a new relay block.
+	type SlotBeacon = cumulus_pallet_parachain_system::RelaychainBlockNumberProvider<Self>;
+	type AccountLookup = ParachainStaking;
+	type WeightInfo = ();
+	/// Nimbus filter pipeline step 1:
+	/// Filters out NimbusIds not registered as SessionKeys of some AccountId
+	type CanAuthor = AuraAuthorFilter;
 }
 
 parameter_types! {
@@ -873,12 +875,11 @@ construct_runtime!(
 		Claims: pallet_ecdsa_claims::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned} = 26,
 
 		ParachainStaking: pallet_parachain_staking::{Pallet, Call, Storage, Event<T>, Config<T>} = 27,
-        // Collator support.
-        AuthorInherent: pallet_author_inherent::{Pallet, Call, Storage, Inherent} = 28,
-        AuraAuthorFilter: pallet_aura_style_filter::{Pallet, Storage} = 29,
+		// Collator support.
+		AuthorInherent: pallet_author_inherent::{Pallet, Call, Storage, Inherent} = 28,
+		AuraAuthorFilter: pallet_aura_style_filter::{Pallet, Storage} = 29,
 		// Collator support. the order of these 4 are important and shall not change.
 		Authorship: pallet_authorship::{Pallet, Call, Storage} = 30,
-		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>} = 31,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 32,
 		Aura: pallet_aura::{Pallet, Storage, Config<T>} = 33,
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config} = 34,

@@ -19,17 +19,24 @@ use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{crypto::UncheckedInto, sr25519, ByteArray, Pair, Public};
-use sp_runtime::traits::{IdentifyAccount, Verify};
+use sp_runtime::{
+	traits::{IdentifyAccount, Verify},
+	Perbill, Percent,
+};
 use tangle_rococo_runtime::{
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
-	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Signature,
-	VAnchorBn254Config, VAnchorVerifierConfig, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
+	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, ParachainStakingConfig,
+	Signature, VAnchorBn254Config, VAnchorVerifierConfig, EXISTENTIAL_DEPOSIT, HOURS, MILLIUNIT,
+	UNIT,
 };
 
 pub mod rococo;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<tangle_rococo_runtime::GenesisConfig, Extensions>;
+const COLLATOR_COMMISSION: Perbill = Perbill::from_percent(20);
+const PARACHAIN_BOND_RESERVE_PERCENT: Percent = Percent::from_percent(30);
+const BLOCKS_PER_ROUND: u32 = 1 * HOURS;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -280,11 +287,6 @@ fn testnet_genesis(
 		council: Default::default(),
 		indices: Default::default(),
 		parachain_info: tangle_rococo_runtime::ParachainInfoConfig { parachain_id: id },
-		collator_selection: tangle_rococo_runtime::CollatorSelectionConfig {
-			invulnerables: invulnerables.iter().cloned().map(|(acc, _, _)| acc).collect(),
-			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
-			..Default::default()
-		},
 		session: tangle_rococo_runtime::SessionConfig {
 			keys: invulnerables
 				.iter()
@@ -343,5 +345,21 @@ fn testnet_genesis(
 		},
 		treasury: Default::default(),
 		vesting: Default::default(),
+		parachain_staking: ParachainStakingConfig {
+			candidates: invulnerables
+				.iter()
+				.cloned()
+				.map(|(account, _, _)| {
+					(account, tangle_rococo_runtime::staking::NORMAL_COLLATOR_MINIMUM_STAKE)
+				})
+				.collect(),
+			delegations: vec![], //delegations
+			inflation_config: tangle_rococo_runtime::staking::inflation_config::<
+				tangle_rococo_runtime::Runtime,
+			>(),
+			collator_commission: COLLATOR_COMMISSION,
+			parachain_bond_reserve_percent: PARACHAIN_BOND_RESERVE_PERCENT,
+			blocks_per_round: BLOCKS_PER_ROUND,
+		},
 	}
 }

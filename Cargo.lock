@@ -1408,9 +1408,9 @@ dependencies = [
 
 [[package]]
 name = "comfy-table"
-version = "6.1.1"
+version = "6.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b3d16bb3da60be2f7c7acfc438f2ae6f3496897ce68c291d0509bb67b4e248e"
+checksum = "1090f39f45786ec6dc6286f8ea9c75d0a7ef0a0d3cda674cef0c3af7b307fbc2"
 dependencies = [
  "strum 0.24.1",
  "strum_macros 0.24.3",
@@ -2471,7 +2471,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#083ccfa644e91247677aef30446c98587e0d5145"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#aacdc7c4ceb311bab6451385f7b6dedd13029a72"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2522,7 +2522,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#083ccfa644e91247677aef30446c98587e0d5145"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#aacdc7c4ceb311bab6451385f7b6dedd13029a72"
 dependencies = [
  "chacha20poly1305",
  "curv-kzen",
@@ -2553,7 +2553,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#083ccfa644e91247677aef30446c98587e0d5145"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#aacdc7c4ceb311bab6451385f7b6dedd13029a72"
 dependencies = [
  "ethereum",
  "ethereum-types 0.13.1",
@@ -6306,7 +6306,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#083ccfa644e91247677aef30446c98587e0d5145"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#aacdc7c4ceb311bab6451385f7b6dedd13029a72"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6326,7 +6326,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#083ccfa644e91247677aef30446c98587e0d5145"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#aacdc7c4ceb311bab6451385f7b6dedd13029a72"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6347,7 +6347,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#083ccfa644e91247677aef30446c98587e0d5145"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#aacdc7c4ceb311bab6451385f7b6dedd13029a72"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6783,6 +6783,7 @@ dependencies = [
  "log",
  "nimbus-primitives",
  "pallet-balances",
+ "pallet-session",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -6790,6 +6791,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
+ "sp-staking",
  "sp-std",
  "substrate-fixed",
 ]
@@ -12558,6 +12560,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tangle-primitives"
+version = "1.0.0"
+dependencies = [
+ "frame-support",
+ "smallvec",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
 name = "tangle-rococo-runtime"
 version = "3.0.0"
 dependencies = [
@@ -12636,6 +12649,7 @@ dependencies = [
  "serde",
  "smallvec",
  "sp-api",
+ "sp-arithmetic",
  "sp-block-builder",
  "sp-consensus-aura",
  "sp-core",

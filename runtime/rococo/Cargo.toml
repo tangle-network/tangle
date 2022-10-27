@@ -126,6 +126,7 @@ pallet-author-inherent = { git = "https://github.com/webb-tools/nimbus", branch 
 
 # Local dependencies
 pallet-parachain-staking = { path = '../../pallets/parachain-staking', default-features = false }
+# tangle-primitives = { path = '../../primitives', default-features = false }
 
 [features]
 default = ["std"]
@@ -220,7 +221,7 @@ std = [
 	
 	# local
 	"pallet-ecdsa-claims/std",
-	"pallet-parachain-staking/std"
+	"pallet-parachain-staking/std",
 ]
 runtime-benchmarks = [
 	"hex-literal",

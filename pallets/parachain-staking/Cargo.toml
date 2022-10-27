@@ -17,6 +17,8 @@ frame-support = { git = "https://github.com/paritytech/substrate.git", branch = 
 frame-system = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
+pallet-session = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
+sp-staking = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
 substrate-fixed = { git = "https://github.com/encointer/substrate-fixed", default-features = false }
 
 # Nimbus
@@ -40,6 +42,8 @@ std = [
 	"serde",
 	"sp-runtime/std",
 	"sp-std/std",
+	"sp-staking/std",
+	"pallet-session/std",
 ]
 runtime-benchmarks = [ "frame-benchmarking" ]
 try-runtime = [ "frame-support/try-runtime" ]
