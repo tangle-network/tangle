@@ -47,10 +47,10 @@ pallet-key-storage = { git = "https://github.com/webb-tools/protocol-substrate.g
 pallet-ecdsa-claims = { path = "../../pallets/claims", default-features = false }
 
 # Orml depedencies
-orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false}
-orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
-orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
-orml-benchmarking = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false, optional = true }
+orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.29", default-features = false }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.29", default-features = false }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.29", default-features = false }
+orml-benchmarking = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.29", default-features = false, optional = true }
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies
@@ -66,6 +66,7 @@ sp-session = { git = "https://github.com/paritytech/substrate", branch = "polkad
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.29", default-features = false }
 sp-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.29", default-features = false }
 sp-version = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.29", default-features = false }
+sp-arithmetic = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.29", default-features = false }
 
 ## Substrate FRAME Dependencies
 frame-executive = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.29", default-features = false }
@@ -119,9 +120,9 @@ xcm-executor = { git = "https://github.com/paritytech/polkadot", branch = "relea
 pallet-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.29", default-features = false }
 
 # Nimbus Dependencies
-nimbus-primitives = { git = "https://github.com/purestake/nimbus", branch = "moonbeam-polkadot-v0.9.29", default-features = false }
-pallet-aura-style-filter = { git = "https://github.com/purestake/nimbus", branch = "moonbeam-polkadot-v0.9.29", default-features = false }
-pallet-author-inherent = { git = "https://github.com/purestake/nimbus", branch = "moonbeam-polkadot-v0.9.29", default-features = false }
+nimbus-primitives = { git = "https://github.com/webb-tools/nimbus", branch = "polkadot-v0.9.29", default-features = false }
+pallet-aura-style-filter = { git = "https://github.com/webb-tools/nimbus", branch = "polkadot-v0.9.29", default-features = false }
+pallet-author-inherent = { git = "https://github.com/webb-tools/nimbus", branch = "polkadot-v0.9.29", default-features = false }
 
 # Local dependencies
 pallet-parachain-staking = { path = '../../pallets/parachain-staking', default-features = false }
@@ -184,6 +185,7 @@ std = [
 	"pallet-preimage/std",
 	"orml-benchmarking/std",
 	"pallet-society/std",
+	"sp-arithmetic/std",
 
 	# DKG
 	"pallet-dkg-metadata/std",
@@ -212,9 +214,9 @@ std = [
 	"pallet-vanchor/std",
 	"pallet-vanchor-handler/std",
 
-	'nimbus-primitives/runtime-benchmarks',
-  	'pallet-aura-style-filter/runtime-benchmarks',
-  	'pallet-author-inherent/runtime-benchmarks',
+	'nimbus-primitives/std',
+  	'pallet-aura-style-filter/std',
+  	'pallet-author-inherent/std',
 	
 	# local
 	"pallet-ecdsa-claims/std",
@@ -248,8 +250,12 @@ runtime-benchmarks = [
 	"pallet-dkg-metadata/runtime-benchmarks",
 	"pallet-dkg-proposals/runtime-benchmarks",
 	"pallet-dkg-proposal-handler/runtime-benchmarks",
+
+	# local deps
+	"pallet-parachain-staking/runtime-benchmarks",
 ]
 try-runtime = [
 	"frame-executive/try-runtime",
 	"frame-try-runtime",
+	"pallet-parachain-staking/try-runtime",
 ]

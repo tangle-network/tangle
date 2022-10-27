@@ -21,23 +21,13 @@ use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
 pub struct ToAuthor<R>(sp_std::marker::PhantomData<R>);
 impl<R> OnUnbalanced<NegativeImbalance<R>> for ToAuthor<R>
 where
-	R: pallet_balances::Config + pallet_authorship::Config + pallet_collator_rewards::Config,
+	R: pallet_balances::Config + pallet_authorship::Config,
 	<R as frame_system::Config>::Event: From<pallet_balances::Event<R>>,
-	<R as frame_system::Config>::Event: From<pallet_collator_rewards::Event<R>>,
-	<<R as pallet_collator_rewards::Config>::Currency as Currency<
-		<R as frame_system::Config>::AccountId,
-	>>::Balance: From<<R as pallet_balances::Config>::Balance>,
 {
 	fn on_nonzero_unbalanced(amount: NegativeImbalance<R>) {
 		if let Some(author) = <pallet_authorship::Pallet<R>>::author() {
 			let numeric_amount = amount.peek();
 			<pallet_balances::Pallet<R>>::resolve_creating(&author, amount);
-			<frame_system::Pallet<R>>::deposit_event(
-				pallet_collator_rewards::Event::CollatorRewarded {
-					amount: numeric_amount.into(),
-					account: author,
-				},
-			);
 		}
 	}
 }
@@ -45,21 +35,9 @@ where
 pub struct DealWithFees<R>(sp_std::marker::PhantomData<R>);
 impl<R> OnUnbalanced<NegativeImbalance<R>> for DealWithFees<R>
 where
-	R: pallet_balances::Config
-		+ pallet_treasury::Config
-		+ pallet_authorship::Config
-		+ pallet_collator_rewards::Config,
+	R: pallet_balances::Config + pallet_treasury::Config + pallet_authorship::Config,
 	pallet_treasury::Pallet<R>: OnUnbalanced<NegativeImbalance<R>>,
-	pallet_balances::NegativeImbalance<R>: From<
-		<<R as pallet_collator_rewards::Config>::Currency as frame_support::traits::Currency<
-			<R as frame_system::Config>::AccountId,
-		>>::NegativeImbalance,
-	>,
 	<R as frame_system::Config>::Event: From<pallet_balances::Event<R>>,
-	<R as frame_system::Config>::Event: From<pallet_collator_rewards::Event<R>>,
-	<<R as pallet_collator_rewards::Config>::Currency as Currency<
-		<R as frame_system::Config>::AccountId,
-	>>::Balance: From<<R as pallet_balances::Config>::Balance>,
 {
 	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance<R>>) {
 		if let Some(fees) = fees_then_tips.next() {
@@ -70,14 +48,8 @@ where
 				tips.merge_into(&mut split.1);
 			}
 
-			// add collator reward amount to author payout
-			let author_reward = match <pallet_collator_rewards::Pallet<R>>::withdraw_reward() {
-				Ok(reward) => split.1.merge(reward.into()),
-				Err(_) => split.1,
-			};
-
 			<pallet_treasury::Pallet<R> as OnUnbalanced<_>>::on_unbalanced(split.0);
-			<ToAuthor<R> as OnUnbalanced<_>>::on_unbalanced(author_reward);
+			//<ToAuthor<R> as OnUnbalanced<_>>::on_unbalanced(author_reward);
 		}
 	}
 }
@@ -112,7 +84,6 @@ mod tests {
 			Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent},
 			Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 			Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
-			CollatorRewards: pallet_collator_rewards::{Pallet, Call, Storage, Event<T>},
 		}
 	);
 
@@ -196,13 +167,6 @@ mod tests {
 
 	parameter_types! {
 		pub const CollatorRewardsId: PalletId = PalletId(*b"tnt/clrw");
-	}
-
-	impl pallet_collator_rewards::Config for Test {
-		type Event = Event;
-		type Currency = Balances;
-		type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-		type PalletId = CollatorRewardsId;
 	}
 
 	pub struct OneAuthor;

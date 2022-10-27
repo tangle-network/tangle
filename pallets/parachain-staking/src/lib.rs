@@ -91,12 +91,12 @@ pub mod pallet {
 		},
 	};
 	use frame_system::pallet_prelude::*;
-	use pallet_session::SessionManager;
+	//use pallet_session::SessionManager;
 	use sp_runtime::{
 		traits::{Convert, Saturating, Zero},
 		Perbill, Percent,
 	};
-	use sp_staking::SessionIndex;
+	//use sp_staking::SessionIndex;
 	use sp_std::{collections::btree_map::BTreeMap, prelude::*};
 
 	/// Pallet for parachain staking
@@ -1795,49 +1795,49 @@ pub mod pallet {
 		}
 	}
 
-	/// Play the role of the session manager.
-	impl<T: Config> SessionManager<T::AccountId> for Pallet<T> {
-		fn new_session(index: SessionIndex) -> Option<Vec<T::AccountId>> {
-			let current_block_number = <frame_system::Pallet<T>>::block_number();
+	// Play the role of the session manager.
+	// impl<T: Config> SessionManager<T::AccountId> for Pallet<T> {
+	// 	fn new_session(index: SessionIndex) -> Option<Vec<T::AccountId>> {
+	// 		let current_block_number = <frame_system::Pallet<T>>::block_number();
 
-			log::info!(
-				"assembling new collators for new session {} at #{:?}",
-				index,
-				current_block_number,
-			);
+	// 		log::info!(
+	// 			"assembling new collators for new session {} at #{:?}",
+	// 			index,
+	// 			current_block_number,
+	// 		);
 
-			let mut round = <Round<T>>::get();
-			// mutate round
-			round.update(current_block_number);
+	// 		let mut round = <Round<T>>::get();
+	// 		// mutate round
+	// 		round.update(current_block_number);
 
-			// pay all stakers for T::RewardPaymentDelay rounds ago
-			Self::prepare_staking_payouts(round.current);
+	// 		// pay all stakers for T::RewardPaymentDelay rounds ago
+	// 		Self::prepare_staking_payouts(round.current);
 
-			// select top collator candidates for next round
-			let (collator_count, _, total_staked, collators) =
-				Self::select_top_candidates(round.current);
-			// start next round
-			<Round<T>>::put(round);
-			// snapshot total stake
-			<Staked<T>>::insert(round.current, <Total<T>>::get());
+	// 		// select top collator candidates for next round
+	// 		let (collator_count, _, total_staked, collators) =
+	// 			Self::select_top_candidates(round.current);
+	// 		// start next round
+	// 		<Round<T>>::put(round);
+	// 		// snapshot total stake
+	// 		<Staked<T>>::insert(round.current, <Total<T>>::get());
 
-			Self::handle_delayed_payouts(round.current);
+	// 		Self::handle_delayed_payouts(round.current);
 
-			Self::deposit_event(Event::NewRound {
-				starting_block: round.first,
-				round: round.current,
-				selected_collators_number: collator_count,
-				total_balance: total_staked,
-			});
+	// 		Self::deposit_event(Event::NewRound {
+	// 			starting_block: round.first,
+	// 			round: round.current,
+	// 			selected_collators_number: collator_count,
+	// 			total_balance: total_staked,
+	// 		});
 
-			Some(collators)
-		}
+	// 		Some(collators)
+	// 	}
 
-		fn start_session(_: SessionIndex) {
-			// we don't care.
-		}
-		fn end_session(_: SessionIndex) {
-			// we don't care.
-		}
-	}
+	// 	fn start_session(_: SessionIndex) {
+	// 		// we don't care.
+	// 	}
+	// 	fn end_session(_: SessionIndex) {
+	// 		// we don't care.
+	// 	}
+	// }
 }

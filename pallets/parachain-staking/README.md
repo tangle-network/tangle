@@ -25,6 +25,7 @@ Webb forked it in Oct 2022 and implemented the following functional changes:
     - Implement SessionManager to set authorities
     - Rounds are assigned from SessionId
     - Add invulnerable candidates to allow collators without staking
+    - Invulnerable candidates are selected every round
 
 Since January 2021, Moonbeam's team has maintained this Delegated Proof of Stake (DPoS) pallet designed specifically for parachains.
 
