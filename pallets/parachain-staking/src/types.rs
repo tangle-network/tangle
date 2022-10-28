@@ -413,12 +413,7 @@ impl<
 		let new_total = <Total<T>>::get().saturating_add(more.into());
 		<Total<T>>::put(new_total);
 		self.bond = self.bond.saturating_add(more);
-		T::Currency::set_lock(
-			COLLATOR_LOCK_ID,
-			&who,
-			self.bond.into(),
-			WithdrawReasons::all(),
-		);
+		T::Currency::set_lock(COLLATOR_LOCK_ID, &who, self.bond.into(), WithdrawReasons::all());
 		self.total_counted = self.total_counted.saturating_add(more);
 		<Pallet<T>>::deposit_event(Event::CandidateBondedMore {
 			candidate: who,
@@ -464,12 +459,7 @@ impl<
 		// Arithmetic assumptions are self.bond > less && self.bond - less > CollatorMinBond
 		// (assumptions enforced by `schedule_bond_less`; if storage corrupts, must re-verify)
 		self.bond = self.bond.saturating_sub(request.amount);
-		T::Currency::set_lock(
-			COLLATOR_LOCK_ID,
-			&who,
-			self.bond.into(),
-			WithdrawReasons::all(),
-		);
+		T::Currency::set_lock(COLLATOR_LOCK_ID, &who, self.bond.into(), WithdrawReasons::all());
 		self.total_counted = self.total_counted.saturating_sub(request.amount);
 		let event = Event::CandidateBondedLess {
 			candidate: who.clone(),

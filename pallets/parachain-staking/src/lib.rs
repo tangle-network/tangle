@@ -51,12 +51,12 @@
 mod auto_compound;
 mod delegation_requests;
 pub mod inflation;
+#[cfg(test)]
+pub mod mock;
 pub mod set;
 pub mod traits;
 pub mod types;
 pub mod weights;
-#[cfg(test)]
-pub mod mock;
 
 use frame_support::pallet;
 pub use inflation::{InflationInfo, Range};
@@ -1732,9 +1732,7 @@ pub mod pallet {
 			candidate: T::AccountId,
 			delegator: T::AccountId,
 		) {
-			if let Ok(amount_transferred) =
-				T::Currency::deposit_into_existing(&delegator, amt)
-			{
+			if let Ok(amount_transferred) = T::Currency::deposit_into_existing(&delegator, amt) {
 				Self::deposit_event(Event::Rewarded {
 					account: delegator.clone(),
 					rewards: amount_transferred.peek(),
