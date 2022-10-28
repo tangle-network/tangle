@@ -55,6 +55,7 @@ pub mod set;
 pub mod traits;
 pub mod types;
 pub mod weights;
+pub mod mock;
 
 use frame_support::pallet;
 pub use inflation::{InflationInfo, Range};
@@ -84,7 +85,7 @@ pub mod pallet {
 		},
 	};
 	use frame_system::pallet_prelude::*;
-	use nimbus_primitives::{AccountLookup, CanAuthor, NimbusId};
+	use nimbus_primitives::{AccountLookup, NimbusId};
 	use pallet_session::SessionManager;
 	use sp_runtime::{
 		traits::{Convert, Saturating, Zero},
@@ -1220,7 +1221,7 @@ pub mod pallet {
 			let in_top = Self::delegation_bond_more_without_event(
 				delegator.clone(),
 				candidate.clone(),
-				more.clone(),
+				more,
 			)?;
 			Pallet::<T>::deposit_event(Event::DelegationIncreased {
 				delegator,
@@ -1526,7 +1527,7 @@ pub mod pallet {
 						if !due.is_zero() {
 							Self::mint_and_compound(
 								due,
-								auto_compound.clone(),
+								auto_compound,
 								collator.clone(),
 								owner.clone(),
 							);
@@ -1542,7 +1543,7 @@ pub mod pallet {
 			} else {
 				// Note that we don't clean up storage here; it is cleaned up in
 				// handle_delayed_payouts()
-				(None, Weight::from_ref_time(0u64.into()))
+				(None, Weight::from_ref_time(0u64))
 			}
 		}
 
@@ -1608,7 +1609,7 @@ pub mod pallet {
 				delegation_count = delegation_count.saturating_add(state.delegation_count);
 				total = total.saturating_add(state.total_counted);
 				let CountedDelegations { uncounted_stake, rewardable_delegations } =
-					Self::get_rewardable_delegators(&account);
+					Self::get_rewardable_delegators(account);
 				let total_counted = state.total_counted.saturating_sub(uncounted_stake);
 
 				let auto_compounding_delegations = <AutoCompoundingDelegations<T>>::get(&account)
@@ -1623,7 +1624,7 @@ pub mod pallet {
 						auto_compound: auto_compounding_delegations
 							.get(&d.owner)
 							.cloned()
-							.unwrap_or_else(|| Percent::zero()),
+							.unwrap_or_else(Percent::zero),
 					})
 					.collect();
 
@@ -1707,7 +1708,7 @@ pub mod pallet {
 				Error::<T>::PendingDelegationRevoke
 			);
 			let mut state = <DelegatorState<T>>::get(&delegator).ok_or(Error::<T>::DelegatorDNE)?;
-			state.increase_delegation::<T>(candidate.clone(), more)
+			state.increase_delegation::<T>(candidate, more)
 		}
 
 		/// Mint a specified reward amount to the beneficiary account. Emits the [Rewarded] event.
@@ -1731,7 +1732,7 @@ pub mod pallet {
 			delegator: T::AccountId,
 		) {
 			if let Ok(amount_transferred) =
-				T::Currency::deposit_into_existing(&delegator, amt.clone())
+				T::Currency::deposit_into_existing(&delegator, amt)
 			{
 				Self::deposit_event(Event::Rewarded {
 					account: delegator.clone(),
@@ -1746,7 +1747,7 @@ pub mod pallet {
 				if let Err(err) = Self::delegation_bond_more_without_event(
 					delegator.clone(),
 					candidate.clone(),
-					compound_amount.clone(),
+					compound_amount,
 				) {
 					log::error!(
 								"Error compounding staking reward towards candidate '{:?}' for delegator '{:?}': {:?}",
@@ -1760,7 +1761,7 @@ pub mod pallet {
 				Pallet::<T>::deposit_event(Event::Compounded {
 					delegator,
 					candidate,
-					amount: compound_amount.clone(),
+					amount: compound_amount,
 				});
 			};
 		}
