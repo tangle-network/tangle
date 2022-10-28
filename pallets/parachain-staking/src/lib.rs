@@ -55,6 +55,7 @@ pub mod set;
 pub mod traits;
 pub mod types;
 pub mod weights;
+#[cfg(test)]
 pub mod mock;
 
 use frame_support::pallet;
