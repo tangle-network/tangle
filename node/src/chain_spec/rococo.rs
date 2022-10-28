@@ -21,7 +21,7 @@ use sp_core::{crypto::UncheckedInto, sr25519};
 use tangle_rococo_runtime::{
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
 	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, ParachainStakingConfig,
-	VAnchorBn254Config, VAnchorVerifierConfig, EXISTENTIAL_DEPOSIT, MILLIUNIT, UNIT,
+	VAnchorBn254Config, VAnchorVerifierConfig, MILLIUNIT, UNIT,
 };
 
 pub fn tangle_rococo_config(id: ParaId) -> ChainSpec {
