@@ -12560,17 +12560,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tangle-primitives"
-version = "1.0.0"
-dependencies = [
- "frame-support",
- "smallvec",
- "sp-core",
- "sp-io",
- "sp-runtime",
-]
-
-[[package]]
 name = "tangle-rococo-runtime"
 version = "3.0.0"
 dependencies = [
@@ -12649,6 +12638,7 @@ dependencies = [
  "serde",
  "smallvec",
  "sp-api",
+ "sp-application-crypto",
  "sp-arithmetic",
  "sp-block-builder",
  "sp-consensus-aura",

@@ -21,6 +21,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod impls;
+pub mod nimbus_session_adapter;
 pub mod protocol_substrate_config;
 pub mod staking;
 pub mod weights;
@@ -289,10 +290,13 @@ parameter_types! {
 	pub const SS58Prefix: u8 = 42;
 }
 
+use nimbus_session_adapter::{AuthorInherentWithNoOpSession, VrfWithNoOpSession};
 impl_opaque_keys! {
 	pub struct SessionKeys {
 		pub aura: Aura,
 		pub dkg: DKG,
+		pub nimbus: AuthorInherentWithNoOpSession<Runtime>,
+		pub vrf: VrfWithNoOpSession,
 	}
 }
 
@@ -882,7 +886,7 @@ construct_runtime!(
 		Authorship: pallet_authorship::{Pallet, Call, Storage} = 30,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 32,
 		Aura: pallet_aura::{Pallet, Storage, Config<T>} = 33,
-		AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config} = 34,
+		//AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config} = 34,
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 40,
@@ -1245,6 +1249,6 @@ impl cumulus_pallet_parachain_system::CheckInherents<Block> for CheckInherents {
 
 cumulus_pallet_parachain_system::register_validate_block! {
 	Runtime = Runtime,
-	BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::<Runtime, Executive>,
+	BlockExecutor = pallet_author_inherent::BlockExecutor::<Runtime, Executive>,
 	CheckInherents = CheckInherents,
 }

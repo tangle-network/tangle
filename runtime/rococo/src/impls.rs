@@ -26,7 +26,7 @@ where
 {
 	fn on_nonzero_unbalanced(amount: NegativeImbalance<R>) {
 		if let Some(author) = <pallet_authorship::Pallet<R>>::author() {
-			let numeric_amount = amount.peek();
+			let _numeric_amount = amount.peek();
 			<pallet_balances::Pallet<R>>::resolve_creating(&author, amount);
 		}
 	}
@@ -49,7 +49,7 @@ where
 			}
 
 			<pallet_treasury::Pallet<R> as OnUnbalanced<_>>::on_unbalanced(split.0);
-			//<ToAuthor<R> as OnUnbalanced<_>>::on_unbalanced(author_reward);
+			<ToAuthor<R> as OnUnbalanced<_>>::on_unbalanced(split.1);
 		}
 	}
 }

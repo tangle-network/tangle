@@ -8,5 +8,4 @@ members = [
 	"standalone/node",
 	"standalone/runtime",
 	"pallets/*",
-	"primitives"
 ]

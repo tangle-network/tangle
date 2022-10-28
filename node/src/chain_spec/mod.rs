@@ -18,16 +18,19 @@ use hex_literal::hex;
 use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{crypto::UncheckedInto, sr25519, ByteArray, Pair, Public};
+use sp_core::{
+	crypto::{UncheckedFrom, UncheckedInto},
+	sr25519, ByteArray, Pair, Public,
+};
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	Perbill, Percent,
 };
 use tangle_rococo_runtime::{
+	nimbus_session_adapter::{NimbusId, VrfId},
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
 	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, ParachainStakingConfig,
-	Signature, VAnchorBn254Config, VAnchorVerifierConfig, EXISTENTIAL_DEPOSIT, HOURS, MILLIUNIT,
-	UNIT,
+	Signature, VAnchorBn254Config, VAnchorVerifierConfig, HOURS, MILLIUNIT, UNIT,
 };
 
 pub mod rococo;
@@ -61,12 +64,38 @@ pub fn get_dkg_keys_from_seed(seed: &str) -> DKGId {
 	get_from_seed::<DKGId>(seed)
 }
 
+/// Generate NimbusId keys from seed.
+///
+/// This function's return type must always match the session keys of the chain
+/// in tuple format.
+pub fn get_nimbus_keys_from_seed(seed: &str) -> NimbusId {
+	get_from_seed::<NimbusId>(seed)
+}
+
+/// Generate VrfId keys from seed.
+///
+/// This function's return type must always match the session keys of the chain
+/// in tuple format.
+pub fn get_vrf_keys_from_seed(seed: &str) -> VrfId {
+	get_from_seed::<VrfId>(seed)
+}
+
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
-pub fn dkg_session_keys(keys: AuraId, dkg_keys: DKGId) -> tangle_rococo_runtime::SessionKeys {
-	tangle_rococo_runtime::SessionKeys { aura: keys, dkg: dkg_keys }
+pub fn dkg_session_keys(
+	keys: AuraId,
+	dkg_keys: DKGId,
+	nimbus_key: NimbusId,
+	vrf_key: VrfId,
+) -> tangle_rococo_runtime::SessionKeys {
+	tangle_rococo_runtime::SessionKeys {
+		aura: keys,
+		dkg: dkg_keys,
+		nimbus: nimbus_key,
+		vrf: vrf_key,
+	}
 }
 
 /// The extensions for the [`ChainSpec`].
@@ -99,13 +128,20 @@ where
 /// Convert public keys to Acco, Aura and DKG keys
 fn generate_invulnerables<PK: Clone + Into<AccountId>>(
 	public_keys: &[(PK, DKGId)],
-) -> Vec<(AccountId, AuraId, DKGId)> {
+) -> Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId)> {
 	public_keys
 		.iter()
 		.map(|pk| {
 			let account: AccountId = pk.0.clone().into();
 			let aura_id = AuraId::from_slice(account.as_ref()).unwrap();
-			(account, aura_id, pk.clone().1)
+
+			// generate nimbus key from aura_id
+			let aura_as_sr25519: sr25519::Public = aura_id.clone().into();
+			let sr25519_as_bytes: [u8; 32] = aura_as_sr25519.into();
+			let vrf_id: VrfId = sr25519::Public::unchecked_from(sr25519_as_bytes).into();
+			let nimbus_id: NimbusId = sr25519::Public::unchecked_from(sr25519_as_bytes).into();
+
+			(account, aura_id, pk.clone().1, nimbus_id, vrf_id)
 		})
 		.collect()
 }
@@ -131,11 +167,15 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 						get_account_id_from_seed::<sr25519::Public>("Alice"),
 						get_collator_keys_from_seed("Alice"),
 						get_dkg_keys_from_seed("Alice"),
+						get_nimbus_keys_from_seed("Alice"),
+						get_vrf_keys_from_seed("Alice"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Bob"),
 						get_collator_keys_from_seed("Bob"),
 						get_dkg_keys_from_seed("Bob"),
+						get_nimbus_keys_from_seed("Bob"),
+						get_vrf_keys_from_seed("Bob"),
 					),
 				],
 				vec![
@@ -239,7 +279,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 
 fn testnet_genesis(
 	root_key: AccountId,
-	invulnerables: Vec<(AccountId, AuraId, DKGId)>,
+	invulnerables: Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId)>,
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
 ) -> tangle_rococo_runtime::GenesisConfig {
@@ -291,17 +331,16 @@ fn testnet_genesis(
 			keys: invulnerables
 				.iter()
 				.cloned()
-				.map(|(acc, aura, dkg)| {
+				.map(|(acc, aura, dkg, nimbus, vrf)| {
 					(
-						acc.clone(),                 // account id
-						acc,                         // validator id
-						dkg_session_keys(aura, dkg), // session keys
+						acc.clone(),                              // account id
+						acc,                                      // validator id
+						dkg_session_keys(aura, dkg, nimbus, vrf), // session keys
 					)
 				})
 				.collect(),
 		},
 		aura: Default::default(),
-		aura_ext: Default::default(),
 		parachain_system: Default::default(),
 		dkg: tangle_rococo_runtime::DKGConfig {
 			authorities: invulnerables.iter().map(|x| x.2.clone()).collect::<_>(),
@@ -349,7 +388,7 @@ fn testnet_genesis(
 			candidates: invulnerables
 				.iter()
 				.cloned()
-				.map(|(account, _, _)| {
+				.map(|(account, _, _, _, _)| {
 					(account, tangle_rococo_runtime::staking::NORMAL_COLLATOR_MINIMUM_STAKE)
 				})
 				.collect(),

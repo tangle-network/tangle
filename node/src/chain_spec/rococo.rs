@@ -96,7 +96,7 @@ pub fn tangle_rococo_config(id: ParaId) -> ChainSpec {
 
 fn rococo_genesis(
 	root_key: AccountId,
-	invulnerables: Vec<(AccountId, AuraId, DKGId)>,
+	invulnerables: Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId)>,
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
 ) -> tangle_rococo_runtime::GenesisConfig {
@@ -148,17 +148,16 @@ fn rococo_genesis(
 			keys: invulnerables
 				.iter()
 				.cloned()
-				.map(|(acc, aura, dkg)| {
+				.map(|(acc, aura, dkg, nimbus, vrf)| {
 					(
-						acc.clone(),                 // account id
-						acc,                         // validator id
-						dkg_session_keys(aura, dkg), // session keys
+						acc.clone(),                              // account id
+						acc,                                      // validator id
+						dkg_session_keys(aura, dkg, nimbus, vrf), // session keys
 					)
 				})
 				.collect(),
 		},
 		aura: Default::default(),
-		aura_ext: Default::default(),
 		parachain_system: Default::default(),
 		dkg: tangle_rococo_runtime::DKGConfig {
 			authorities: invulnerables.iter().map(|x| x.2.clone()).collect::<_>(),
@@ -206,7 +205,7 @@ fn rococo_genesis(
 			candidates: invulnerables
 				.iter()
 				.cloned()
-				.map(|(account, _, _)| {
+				.map(|(account, _, _, _, _)| {
 					(account, tangle_rococo_runtime::staking::NORMAL_COLLATOR_MINIMUM_STAKE)
 				})
 				.collect(),
