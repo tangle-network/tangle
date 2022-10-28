@@ -24,11 +24,12 @@ use frame_support::{
 	traits::{Everything, GenesisBuild, LockIdentifier, OnFinalize, OnInitialize},
 	weights::Weight,
 };
+use frame_system::EnsureRoot;
 use sp_core::H256;
 use sp_io;
 use sp_runtime::{
-	traits::{BlakeTwo256, IdentityLookup},
-	Perbill, Percent,
+	traits::{BlakeTwo256, ConstU32, IdentityLookup, OpaqueKeys},
+	Perbill, Percent, RuntimeAppPublic,
 };
 
 pub type AccountId = u64;
@@ -49,8 +50,23 @@ construct_runtime!(
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 		ParachainStaking: pallet_parachain_staking::{Pallet, Call, Storage, Config<T>, Event<T>},
 		BlockAuthor: block_author::{Pallet, Storage},
+		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 	}
 );
+
+/// A convertor from collators id. Since this pallet does not have stash/controller, this is
+/// just identity.
+pub struct IdentityCollator;
+impl<T> sp_runtime::traits::Convert<T, Option<T>> for IdentityCollator {
+	fn convert(t: T) -> Option<T> {
+		Some(t)
+	}
+}
+impl<T> sp_runtime::traits::Convert<T, T> for IdentityCollator {
+	fn convert(t: T) -> T {
+		t
+	}
+}
 
 parameter_types! {
 	pub const BlockHashCount: u32 = 250;
@@ -99,6 +115,47 @@ impl pallet_balances::Config for Test {
 	type AccountStore = System;
 	type WeightInfo = ();
 }
+
+sp_runtime::impl_opaque_keys! {
+	pub struct MockSessionKeys {
+		// a key for aura authoring
+		pub aura: UintAuthorityId,
+	}
+}
+use sp_runtime::testing::UintAuthorityId;
+impl From<UintAuthorityId> for MockSessionKeys {
+	fn from(aura: sp_runtime::testing::UintAuthorityId) -> Self {
+		Self { aura }
+	}
+}
+
+pub struct TestSessionHandler;
+impl pallet_session::SessionHandler<u64> for TestSessionHandler {
+	const KEY_TYPE_IDS: &'static [sp_runtime::KeyTypeId] = &[UintAuthorityId::ID];
+	fn on_genesis_session<Ks: OpaqueKeys>(keys: &[(u64, Ks)]) {}
+	fn on_new_session<Ks: OpaqueKeys>(_: bool, keys: &[(u64, Ks)], _: &[(u64, Ks)]) {}
+	fn on_before_session_ending() {}
+	fn on_disabled(_: u32) {}
+}
+
+parameter_types! {
+	pub const Offset: BlockNumber = 0;
+	pub const Period: BlockNumber = 10;
+}
+
+impl pallet_session::Config for Test {
+	type Event = Event;
+	type ValidatorId = <Self as frame_system::Config>::AccountId;
+	// we don't have stash and controller, thus we don't need the convert as well.
+	type ValidatorIdOf = IdentityCollator;
+	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type SessionManager = ParachainStaking;
+	type SessionHandler = TestSessionHandler;
+	type Keys = MockSessionKeys;
+	type WeightInfo = ();
+}
+
 impl block_author::Config for Test {}
 parameter_types! {
 	pub const MinBlocksPerRound: u32 = 3;
@@ -119,6 +176,7 @@ parameter_types! {
 	pub const MinDelegatorStk: u128 = 5;
 	pub const MinDelegation: u128 = 3;
 }
+
 impl Config for Test {
 	type Event = Event;
 	type Currency = Balances;
@@ -139,6 +197,12 @@ impl Config for Test {
 	type MinDelegatorStk = MinDelegatorStk;
 	type MinDelegation = MinDelegation;
 	type BlockAuthor = BlockAuthor;
+	type ValidatorIdOf = IdentityCollator;
+	type AccountIdOf = IdentityCollator;
+	type ValidatorId = <Self as frame_system::Config>::AccountId;
+	type MaxInvulnerables = ConstU32<10>;
+	type ValidatorRegistration = Session;
+	type UpdateOrigin = EnsureRoot<AccountId>;
 	type OnCollatorPayout = ();
 	type OnNewRound = ();
 	type WeightInfo = ();

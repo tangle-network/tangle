@@ -51,17 +51,10 @@
 mod auto_compound;
 mod delegation_requests;
 pub mod inflation;
+pub mod set;
 pub mod traits;
 pub mod types;
 pub mod weights;
-
-#[cfg(any(test, feature = "runtime-benchmarks"))]
-mod benchmarks;
-#[cfg(test)]
-mod mock;
-mod set;
-#[cfg(test)]
-mod tests;
 
 use frame_support::pallet;
 pub use inflation::{InflationInfo, Range};
