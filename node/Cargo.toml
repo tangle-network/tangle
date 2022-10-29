@@ -31,7 +31,7 @@ derive_more = "0.99.2"
 log = "0.4.14"
 codec = { package = "parity-scale-codec", version = "3" }
 structopt = "0.3.8"
-serde = { version = "1.0.119", features = ["derive"] }
+serde = { version = "1.0.101", features = ["derive"]}
 hex-literal = "0.3.1"
 clap = { version = "3.1", features = ["derive"] }
 

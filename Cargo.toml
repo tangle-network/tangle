@@ -7,5 +7,5 @@ members = [
 	"runtime/rococo",
 	"standalone/node",
 	"standalone/runtime",
-	"pallets/*"
+	"pallets/*",
 ]

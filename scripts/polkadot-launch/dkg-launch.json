@@ -1,6 +1,6 @@
 {
 	"relaychain": {
-		"bin": "/target/release/polkadot",
+		"bin": "../../../../polkadot/target/release/polkadot",
 		"chain": "rococo-local",
 		"nodes": [
 			{
@@ -28,8 +28,8 @@
 	},
 	"parachains": [
 		{
-			"bin": "target/release/tangle-collator",
-			"chain": "./resources/template-local-raw.json",
+			"bin": "../../target/release/tangle-collator",
+			"chain": "dev",
 			"nodes": [
 				{
 					"name": "alice",

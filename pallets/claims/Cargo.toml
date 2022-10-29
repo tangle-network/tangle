@@ -1,6 +1,6 @@
 [package]
 authors = ["Webb Technologies Inc."]
-edition = "2018"
+edition = "2021"
 homepage = "https://substrate.dev"
 license = "Unlicense"
 name = "pallet-ecdsa-claims"
@@ -14,7 +14,7 @@ codec = { package = "parity-scale-codec", version = "3", default-features = fals
 scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
 rustc-hex = { version = "2.1.0", optional = true, default-features = false }
 serde_derive = { version = "1.0.117", optional = true, default-features = false}
-serde = { version = "1.0.119", optional = true, default-features = false}
+serde = { version = "1.0.101", optional = true, features = ["derive"]}
 
 frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29" }
 frame-system = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29" }

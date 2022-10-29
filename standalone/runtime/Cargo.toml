@@ -48,9 +48,9 @@ pallet-key-storage = { git = "https://github.com/webb-tools/protocol-substrate.g
 pallet-ecdsa-claims = { path = "../../pallets/claims", default-features = false }
 
 # Orml dependencies
-orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
-orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
-orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", default-features = false }
+orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.29", default-features = false }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.29", default-features = false }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.29", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.29", default-features = false }
