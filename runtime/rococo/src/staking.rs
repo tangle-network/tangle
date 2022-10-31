@@ -1,5 +1,5 @@
-use crate::{currency::DOLLAR, Balance};
 use pallet_parachain_staking::{BalanceOf, InflationInfo};
+use tangle_primitives::{currency::DOLLAR, Balance};
 
 pub const NORMAL_COLLATOR_MINIMUM_STAKE: Balance = 400 * DOLLAR;
 pub const EARLY_COLLATOR_MINIMUM_STAKE: Balance = 400 * DOLLAR;

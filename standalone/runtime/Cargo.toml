@@ -115,6 +115,8 @@ pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", 
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.29", default-features = false }
 pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.29", default-features = false }
 
+tangle-primitives = { path = '../../primitives', default-features = false }
+
 [features]
 default = ["std"]
 runtime-benchmarks = [
@@ -226,5 +228,6 @@ std = [
 	"pallet-token-wrapper/std",
   "pallet-token-wrapper-handler/std",
   "pallet-vanchor/std",
-  "pallet-vanchor-handler/std"
+  "pallet-vanchor-handler/std",
+  "tangle-primitives/std"
 ]
