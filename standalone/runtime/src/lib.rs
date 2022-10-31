@@ -26,9 +26,7 @@ pub mod voter_bags;
 use codec::{Decode, Encode};
 use dkg_runtime_primitives::{TypedChainId, UnsignedProposal};
 use frame_election_provider_support::{onchain, ExtendedBalance, SequentialPhragmen, VoteWeight};
-use frame_support::weights::{
-	ConstantMultiplier, WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
-};
+use frame_support::weights::ConstantMultiplier;
 use pallet_dkg_proposals::DKGEcdsaToEthereum;
 use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use pallet_grandpa::{
@@ -47,12 +45,9 @@ use sp_runtime::{
 	create_runtime_str,
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
-	traits::{
-		self, BlakeTwo256, Block as BlockT, Convert, IdentifyAccount, NumberFor, OpaqueKeys,
-		StaticLookup, Verify,
-	},
+	traits::{self, BlakeTwo256, Block as BlockT, Convert, NumberFor, OpaqueKeys, StaticLookup},
 	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, FixedPointNumber, MultiSignature, Perquintill, SaturatedConversion,
+	ApplyExtrinsicResult, FixedPointNumber, Perquintill, SaturatedConversion,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -97,8 +92,6 @@ pub use tangle_primitives::{
 	Moment, Reputation, Signature, AVERAGE_ON_INITIALIZE_RATIO, EPOCH_DURATION_IN_BLOCKS,
 	MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS,
 };
-
-use smallvec::smallvec;
 
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;

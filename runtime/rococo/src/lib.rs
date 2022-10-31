@@ -32,9 +32,9 @@ use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{self, BlakeTwo256, Block as BlockT, IdentifyAccount, StaticLookup, Verify},
+	traits::{self, BlakeTwo256, Block as BlockT, StaticLookup},
 	transaction_validity::{TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, MultiSignature, SaturatedConversion,
+	ApplyExtrinsicResult, SaturatedConversion,
 };
 
 use sp_std::prelude::*;
@@ -45,9 +45,7 @@ use sp_version::RuntimeVersion;
 #[cfg(feature = "runtime-benchmarks")]
 pub mod benchmarking;
 
-use frame_support::weights::{
-	ConstantMultiplier, WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
-};
+use frame_support::weights::ConstantMultiplier;
 use pallet_linkable_tree::types::EdgeMetadata;
 use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use sp_runtime::{FixedPointNumber, Perquintill};
@@ -90,7 +88,7 @@ pub mod nimbus_session_adapter;
 pub mod staking;
 
 // XCM Imports
-use smallvec::smallvec;
+
 use xcm::latest::prelude::*;
 
 /// Block type as expected by this runtime.
