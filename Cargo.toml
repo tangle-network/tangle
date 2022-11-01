@@ -3,10 +3,10 @@ panic = "unwind"
 
 [workspace]
 members = [
-	"primitives",
-	"node",
-	"runtime/rococo",
-	"standalone/node",
-	"standalone/runtime",
-	"pallets/*",
+  "primitives",
+  "node",
+  "runtime/rococo",
+  "standalone/node",
+  "standalone/runtime",
+  "pallets/*",
 ]
