@@ -15,6 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Test utilities
+#![allow(clippy::all, dead_code)]
 use crate as pallet_parachain_staking;
 use crate::{
 	pallet, AwardedPts, Config, InflationInfo, Points, Range, COLLATOR_LOCK_ID, DELEGATOR_LOCK_ID,
@@ -264,13 +265,13 @@ impl ExtBuilder {
 		self
 	}
 
-	pub(crate) fn with_auto_compounding_delegations(
-		mut self,
-		delegations: Vec<(AccountId, AccountId, Balance, Percent)>,
-	) -> Self {
-		self.delegations = delegations;
-		self
-	}
+	// pub(crate) fn with_auto_compounding_delegations(
+	// 	mut self,
+	// 	delegations: Vec<(AccountId, AccountId, Balance, Percent)>,
+	// ) -> Self {
+	// 	self.delegations = delegations;
+	// 	self
+	// }
 
 	#[allow(dead_code)]
 	pub(crate) fn with_inflation(mut self, inflation: InflationInfo<Balance>) -> Self {
