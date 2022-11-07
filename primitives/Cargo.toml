@@ -1,0 +1,22 @@
+[package]
+name = "tangle-primitives"
+version = "1.0.0"
+authors = ["Webb Technologies Inc."]
+edition = "2021"
+license = "Unlicense"
+
+[dependencies]
+frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29" }
+smallvec = "1.6.1"
+sp-core = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29" }
+sp-io = { git = 'https://github.com/paritytech/substrate.git', default-features = false, branch = "polkadot-v0.9.29" }
+sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29" }
+
+[features]
+default = ["std"]
+std = [
+  "frame-support/std",
+  "sp-runtime/std",
+  "sp-core/std",
+  "sp-io/std",
+]

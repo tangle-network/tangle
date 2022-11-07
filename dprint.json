@@ -1,0 +1,12 @@
+{
+  "incremental": true,
+  "includes": ["**/*.*"],
+  "excludes": [
+    "**/node_modules",
+    "**/*-lock.json"
+  ],
+  "plugins": [
+    // specify plugin urls here
+    "https://plugins.dprint.dev/toml-0.5.3.wasm"
+  ]
+}
