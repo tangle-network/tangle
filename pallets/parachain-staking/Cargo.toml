@@ -12,23 +12,23 @@ scale-info = { version = "2.1.1", default-features = false, features = ["derive"
 serde = { version = "1.0.101", optional = true }
 
 # Substrate
-frame-benchmarking = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", optional = true, default-features = false }
-frame-support = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
-frame-system = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
-pallet-session = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
-sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
-sp-staking = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
-sp-std = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29", default-features = false }
+frame-benchmarking = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", optional = true, default-features = false }
+frame-support = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
+frame-system = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
+pallet-session = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
+sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
+sp-staking = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
+sp-std = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
 substrate-fixed = { git = "https://github.com/encointer/substrate-fixed", default-features = false }
 
 # Nimbus
-nimbus-primitives = { git = "https://github.com/webb-tools/nimbus", branch = "polkadot-v0.9.29", default-features = false }
+nimbus-primitives = { git = "https://github.com/webb-tools/nimbus", branch = "polkadot-v0.9.30", default-features = false }
 
 [dev-dependencies]
-pallet-balances = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29" }
+pallet-balances = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
 similar-asserts = "1.1.0"
-sp-core = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29" }
-sp-io = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.29" }
+sp-core = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
+sp-io = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
 
 [features]
 default = ["std"]

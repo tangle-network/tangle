@@ -192,13 +192,13 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		/// The overarching event type.
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		type VestingSchedule: VestingSchedule<Self::AccountId, Moment = Self::BlockNumber>;
 		#[pallet::constant]
 		type Prefix: Get<&'static [u8]>;
-		type MoveClaimOrigin: EnsureOrigin<Self::Origin>;
-		/// Origin permitted to call force_ extrinsics
-		type ForceOrigin: EnsureOrigin<Self::Origin>;
+		type MoveClaimOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+		/// RuntimeOrigin permitted to call force_ extrinsics
+		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		type WeightInfo: WeightInfo;
 	}
 
@@ -657,11 +657,11 @@ impl<T: Config> Pallet<T> {
 #[scale_info(skip_type_params(T))]
 pub struct PrevalidateAttests<T: Config + Send + Sync>(sp_std::marker::PhantomData<T>)
 where
-	<T as frame_system::Config>::Call: IsSubType<Call<T>>;
+	<T as frame_system::Config>::RuntimeCall: IsSubType<Call<T>>;
 
 impl<T: Config + Send + Sync> Debug for PrevalidateAttests<T>
 where
-	<T as frame_system::Config>::Call: IsSubType<Call<T>>,
+	<T as frame_system::Config>::RuntimeCall: IsSubType<Call<T>>,
 {
 	#[cfg(feature = "std")]
 	fn fmt(&self, f: &mut sp_std::fmt::Formatter) -> sp_std::fmt::Result {
@@ -676,7 +676,7 @@ where
 
 impl<T: Config + Send + Sync> PrevalidateAttests<T>
 where
-	<T as frame_system::Config>::Call: IsSubType<Call<T>>,
+	<T as frame_system::Config>::RuntimeCall: IsSubType<Call<T>>,
 {
 	/// Create new `SignedExtension` to check runtime version.
 	pub fn new() -> Self {
@@ -686,10 +686,10 @@ where
 
 impl<T: Config + Send + Sync> SignedExtension for PrevalidateAttests<T>
 where
-	<T as frame_system::Config>::Call: IsSubType<Call<T>>,
+	<T as frame_system::Config>::RuntimeCall: IsSubType<Call<T>>,
 {
 	type AccountId = T::AccountId;
-	type Call = <T as frame_system::Config>::Call;
+	type Call = <T as frame_system::Config>::RuntimeCall;
 	type AdditionalSigned = ();
 	type Pre = ();
 	const IDENTIFIER: &'static str = "PrevalidateAttests";
@@ -810,8 +810,8 @@ mod tests {
 		type BlockWeights = ();
 		type BlockLength = ();
 		type DbWeight = ();
-		type Origin = Origin;
-		type Call = Call;
+		type RuntimeOrigin = RuntimeOrigin;
+		type RuntimeCall = RuntimeCall;
 		type Index = u64;
 		type BlockNumber = u64;
 		type Hash = H256;
@@ -819,7 +819,7 @@ mod tests {
 		type AccountId = u64;
 		type Lookup = IdentityLookup<u64>;
 		type Header = Header;
-		type Event = Event;
+		type RuntimeEvent = RuntimeEvent;
 		type BlockHashCount = BlockHashCount;
 		type Version = ();
 		type PalletInfo = PalletInfo;
@@ -838,7 +838,7 @@ mod tests {
 
 	impl pallet_balances::Config for Test {
 		type Balance = u64;
-		type Event = Event;
+		type RuntimeEvent = RuntimeEvent;
 		type DustRemoval = ();
 		type ExistentialDeposit = ExistentialDeposit;
 		type AccountStore = System;
@@ -853,7 +853,7 @@ mod tests {
 	}
 
 	impl pallet_vesting::Config for Test {
-		type Event = Event;
+		type RuntimeEvent = RuntimeEvent;
 		type Currency = Balances;
 		type BlockNumberToBalance = Identity;
 		type MinVestedTransfer = MinVestedTransfer;
@@ -869,7 +869,7 @@ mod tests {
 	}
 
 	impl Config for Test {
-		type Event = Event;
+		type RuntimeEvent = RuntimeEvent;
 		type VestingSchedule = Vesting;
 		type ForceOrigin = frame_system::EnsureRoot<u64>;
 		type Prefix = Prefix;

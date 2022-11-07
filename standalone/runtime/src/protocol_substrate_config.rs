@@ -20,7 +20,7 @@ parameter_types! {
 }
 
 impl pallet_hasher::Config<pallet_hasher::Instance1> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Hasher = ArkworksPoseidonHasherBn254;
 	type WeightInfo = pallet_hasher::weights::WebbWeight<Runtime>;
@@ -65,7 +65,7 @@ impl pallet_mt::Config<pallet_mt::Instance1> for Runtime {
 	type DataDepositPerByte = LeafDepositPerByte;
 	type DefaultZeroElement = NewDefaultZeroElement;
 	type Element = Element;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Hasher = HasherBn254;
 	type LeafIndex = u32;
@@ -80,7 +80,7 @@ impl pallet_mt::Config<pallet_mt::Instance1> for Runtime {
 }
 
 impl pallet_verifier::Config<pallet_verifier::Instance1> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Verifier = ArkworksVerifierBn254;
 	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
@@ -94,7 +94,7 @@ parameter_types! {
 impl pallet_token_wrapper::Config for Runtime {
 	type AssetRegistry = AssetRegistry;
 	type Currency = Currencies;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type PalletId = TokenWrapperPalletId;
 	type TreasuryId = DKGAccountId;
 	type ProposalNonce = u32;
@@ -106,7 +106,7 @@ impl pallet_asset_registry::Config for Runtime {
 	type AssetId = webb_primitives::AssetId;
 	type AssetNativeLocation = u32;
 	type Balance = Balance;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type NativeAssetId = GetNativeCurrencyId;
 	type RegistryOrigin = frame_system::EnsureRoot<AccountId>;
 	type StringLimit = RegistryStringLimit;
@@ -119,7 +119,7 @@ impl orml_tokens::Config for Runtime {
 	type Balance = Balance;
 	type CurrencyId = webb_primitives::AssetId;
 	type DustRemovalWhitelist = Nothing;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type ExistentialDeposits = AssetRegistry;
 	type OnDust = ();
 	type WeightInfo = ();
@@ -150,7 +150,7 @@ parameter_types! {
 
 impl pallet_mixer::Config<pallet_mixer::Instance1> for Runtime {
 	type Currency = Currencies;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type NativeCurrencyId = GetNativeCurrencyId;
 	type PalletId = MixerPalletId;
 	type Tree = MerkleTreeBn254;
@@ -171,7 +171,7 @@ impl pallet_linkable_tree::Config<pallet_linkable_tree::Instance1> for Runtime {
 	type ChainId = ChainId;
 	type ChainType = ChainType;
 	type ChainIdentifier = ChainIdentifier;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type HistoryLength = HistoryLength;
 	type Tree = MerkleTreeBn254;
 	type WeightInfo = ();
@@ -179,14 +179,14 @@ impl pallet_linkable_tree::Config<pallet_linkable_tree::Instance1> for Runtime {
 
 pub struct SetResourceProposalFilter;
 #[allow(clippy::collapsible_match, clippy::match_single_binding, clippy::match_like_matches_macro)]
-impl Contains<Call> for SetResourceProposalFilter {
-	fn contains(c: &Call) -> bool {
+impl Contains<RuntimeCall> for SetResourceProposalFilter {
+	fn contains(c: &RuntimeCall) -> bool {
 		match c {
-			Call::VAnchorHandlerBn254(method) => match method {
+			RuntimeCall::VAnchorHandlerBn254(method) => match method {
 				pallet_vanchor_handler::Call::execute_set_resource_proposal { .. } => true,
 				_ => false,
 			},
-			Call::TokenWrapperHandler(method) => match method {
+			RuntimeCall::TokenWrapperHandler(method) => match method {
 				_ => false,
 			},
 			_ => false,
@@ -196,15 +196,15 @@ impl Contains<Call> for SetResourceProposalFilter {
 
 pub struct ExecuteProposalFilter;
 #[allow(clippy::collapsible_match, clippy::match_single_binding, clippy::match_like_matches_macro)]
-impl Contains<Call> for ExecuteProposalFilter {
-	fn contains(c: &Call) -> bool {
+impl Contains<RuntimeCall> for ExecuteProposalFilter {
+	fn contains(c: &RuntimeCall) -> bool {
 		match c {
-			Call::VAnchorHandlerBn254(method) => match method {
+			RuntimeCall::VAnchorHandlerBn254(method) => match method {
 				pallet_vanchor_handler::Call::execute_vanchor_create_proposal { .. } => true,
 				pallet_vanchor_handler::Call::execute_vanchor_update_proposal { .. } => true,
 				_ => false,
 			},
-			Call::TokenWrapperHandler(method) => match method {
+			RuntimeCall::TokenWrapperHandler(method) => match method {
 				pallet_token_wrapper_handler::Call::execute_add_token_to_pool_share { .. } => true,
 				pallet_token_wrapper_handler::Call::execute_remove_token_from_pool_share {
 					..
@@ -224,8 +224,8 @@ impl pallet_signature_bridge::Config<SignatureBridgeInstance> for Runtime {
 	type ChainId = ChainId;
 	type ChainIdentifier = ChainIdentifier;
 	type ChainType = ChainType;
-	type Event = Event;
-	type Proposal = Call;
+	type RuntimeEvent = RuntimeEvent;
+	type Proposal = RuntimeCall;
 	type ProposalLifetime = ProposalLifetime;
 	type ProposalNonce = u32;
 	type MaintainerNonce = u32;
@@ -243,7 +243,7 @@ parameter_types! {
 }
 
 impl pallet_vanchor::Config<pallet_vanchor::Instance1> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type PalletId = VAnchorPalletId;
 	type ProposalNonce = u32;
 	type LinkableTree = LinkableTreeBn254;
@@ -269,22 +269,22 @@ parameter_types! {
 impl pallet_vanchor_handler::Config<pallet_vanchor_handler::Instance1> for Runtime {
 	type VAnchor = VAnchorBn254;
 	type BridgeOrigin = pallet_signature_bridge::EnsureBridge<Runtime, SignatureBridgeInstance>;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 }
 
 impl pallet_token_wrapper_handler::Config for Runtime {
 	type BridgeOrigin = pallet_signature_bridge::EnsureBridge<Runtime, SignatureBridgeInstance>;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type TokenWrapper = TokenWrapper;
 }
 
 impl pallet_key_storage::Config<pallet_key_storage::Instance1> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = pallet_key_storage::weights::WebbWeight<Runtime>;
 }
 
 impl pallet_vanchor_verifier::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Verifier = ArkworksVerifierBn254;
 	type WeightInfo = pallet_vanchor_verifier::weights::WebbWeight<Runtime>;
