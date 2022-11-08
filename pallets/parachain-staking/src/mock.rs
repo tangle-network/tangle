@@ -341,7 +341,7 @@ pub(crate) fn roll_to_round_end(round: BlockNumber) -> BlockNumber {
 	roll_to(block)
 }
 
-pub(crate) fn last_event() -> Event {
+pub(crate) fn last_event() -> RuntimeEvent {
 	System::events().pop().expect("Event expected").event
 }
 
@@ -349,7 +349,9 @@ pub(crate) fn events() -> Vec<pallet::Event<Test>> {
 	System::events()
 		.into_iter()
 		.map(|r| r.event)
-		.filter_map(|e| if let Event::ParachainStaking(inner) = e { Some(inner) } else { None })
+		.filter_map(
+			|e| if let RuntimeEvent::ParachainStaking(inner) = e { Some(inner) } else { None },
+		)
 		.collect::<Vec<_>>()
 }
 
