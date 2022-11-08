@@ -112,13 +112,13 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		/// Overarching event type
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		/// The currency type
 		type Currency: Currency<Self::AccountId>
 			+ ReservableCurrency<Self::AccountId>
 			+ LockableCurrency<Self::AccountId>;
 		/// The origin for monetary governance
-		type MonetaryGovernanceOrigin: EnsureOrigin<Self::Origin>;
+		type MonetaryGovernanceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// Minimum number of blocks per round
 		#[pallet::constant]
 		type MinBlocksPerRound: Get<u32>;
@@ -172,7 +172,7 @@ pub mod pallet {
 		/// A stable ID for a validator.
 		type ValidatorId: Member + Parameter;
 		/// Origin that can dictate updating parameters of this pallet.
-		type UpdateOrigin: EnsureOrigin<Self::Origin>;
+		type UpdateOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// Maximum number of invulnerables. This is enforced in code.
 		type MaxInvulnerables: Get<u32>;
 		/// Handler to notify the runtime when a new round begin.
@@ -664,7 +664,7 @@ pub mod pallet {
 				);
 				candidate_count = candidate_count.saturating_add(1u32);
 				if let Err(error) = <Pallet<T>>::join_candidates(
-					T::Origin::from(Some(candidate.clone()).into()),
+					T::RuntimeOrigin::from(Some(candidate.clone()).into()),
 					balance,
 					candidate_count,
 				) {
@@ -691,7 +691,7 @@ pub mod pallet {
 				let cd_auto_compound_count =
 					col_auto_compound_delegator_count.get(target).cloned().unwrap_or_default();
 				if let Err(error) = <Pallet<T>>::delegate_with_auto_compound(
-					T::Origin::from(Some(delegator.clone()).into()),
+					T::RuntimeOrigin::from(Some(delegator.clone()).into()),
 					target.clone(),
 					balance,
 					auto_compound,
