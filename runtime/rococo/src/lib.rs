@@ -56,12 +56,14 @@ use webb_primitives::{
 // A few exports that help ease life for downstream crates.
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 pub use frame_support::{
-	construct_runtime, match_types, parameter_types,
+	construct_runtime,
+	dispatch::DispatchClass,
+	match_types, parameter_types,
 	traits::{
 		ConstU128, ConstU32, Currency, EitherOfDiverse, EqualPrivilegeOnly, Everything, IsInVec,
 		Randomness,
 	},
-	weights::{constants::WEIGHT_PER_SECOND, DispatchClass, IdentityFee, Weight},
+	weights::{constants::WEIGHT_PER_SECOND, IdentityFee, Weight},
 	PalletId, StorageValue,
 };
 #[cfg(any(feature = "std", test))]
@@ -109,11 +111,12 @@ pub type SignedExtra = (
 	pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
-pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
+pub type UncheckedExtrinsic =
+	generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
 /// Extrinsic type that has already been checked.
-pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
+pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 /// Signed payload
-pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
+pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
 	Runtime,
@@ -383,6 +386,8 @@ parameter_types! {
 
 parameter_types! {
 	pub const DecayPercentage: Percent = Percent::from_percent(50);
+	pub const UnsignedPriority: u64 = 1 << 20;
+	pub const UnsignedInterval: BlockNumber = 3;
 }
 
 impl pallet_dkg_metadata::Config for Runtime {
@@ -397,6 +402,8 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type SigningJailSentence = Period;
 	type DecayPercentage = DecayPercentage;
 	type Reputation = Reputation;
+	type UnsignedPriority = UnsignedPriority;
+	type UnsignedInterval = UnsignedInterval;
 	type AuthorityIdOf = pallet_dkg_metadata::AuthorityIdOf<Self>;
 	type ProposalHandler = DKGProposalHandler;
 	type WeightInfo = pallet_dkg_metadata::weights::WebbWeight<Runtime>;
@@ -963,6 +970,10 @@ impl_runtime_apis! {
 
 		fn refresh_nonce() -> u32 {
 			DKG::refresh_nonce()
+		}
+
+		fn should_execute_emergency_keygen() -> bool {
+			DKG::should_execute_emergency_keygen()
 		}
 	}
 

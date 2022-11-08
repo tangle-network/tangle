@@ -63,6 +63,7 @@ pub use frame_system::Call as SystemCall;
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 pub use frame_support::{
 	construct_runtime,
+	dispatch::DispatchClass,
 	pallet_prelude::Get,
 	parameter_types,
 	traits::{
@@ -72,7 +73,7 @@ pub use frame_support::{
 	},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-		DispatchClass, IdentityFee, Weight,
+		IdentityFee, Weight,
 	},
 	PalletId, StorageValue,
 };
@@ -433,6 +434,7 @@ parameter_types! {
 	pub const MaxNominatorRewardedPerValidator: u32 = 256;
 	pub const OffendingValidatorsThreshold: Perbill = Perbill::from_percent(17);
 	pub OffchainRepeat: BlockNumber = 5;
+	pub const HistoryDepth: u32 = 80;
 }
 
 pub struct StakingBenchmarkingConfig;
@@ -460,6 +462,7 @@ impl pallet_staking::Config for Runtime {
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 4>,
 	>;
 	type SessionInterface = Self;
+	type TargetList = pallet_staking::UseValidatorsMap<Runtime>;
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type NextNewSession = Session;
 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
@@ -468,6 +471,7 @@ impl pallet_staking::Config for Runtime {
 	type GenesisElectionProvider = onchain::UnboundedExecution<OnChainSeqPhragmen>;
 	type VoterList = BagsList;
 	type MaxUnlockingChunks = ConstU32<32>;
+	type HistoryDepth = HistoryDepth;
 	type OnStakerSlash = NominationPools;
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
@@ -747,6 +751,8 @@ impl pallet_nomination_pools::Config for Runtime {
 
 parameter_types! {
 	pub const DecayPercentage: Percent = Percent::from_percent(50);
+	pub const UnsignedPriority: u64 = 1 << 20;
+	 pub const UnsignedInterval: BlockNumber = 3;
 }
 
 impl pallet_dkg_metadata::Config for Runtime {
@@ -761,6 +767,8 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type SigningJailSentence = Period;
 	type DecayPercentage = DecayPercentage;
 	type Reputation = Reputation;
+	type UnsignedPriority = UnsignedPriority;
+	type UnsignedInterval = UnsignedInterval;
 	type AuthorityIdOf = pallet_dkg_metadata::AuthorityIdOf<Self>;
 	type ProposalHandler = DKGProposalHandler;
 	type WeightInfo = pallet_dkg_metadata::weights::WebbWeight<Runtime>;
@@ -811,14 +819,14 @@ parameter_types! {
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
 where
-	Call: From<LocalCall>,
+	RuntimeCall: From<LocalCall>,
 {
 	fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
-		call: Call,
+		call: RuntimeCall,
 		public: <Signature as traits::Verify>::Signer,
 		account: AccountId,
 		nonce: Index,
-	) -> Option<(Call, <UncheckedExtrinsic as traits::Extrinsic>::SignaturePayload)> {
+	) -> Option<(RuntimeCall, <UncheckedExtrinsic as traits::Extrinsic>::SignaturePayload)> {
 		let tip = 0;
 		// take the biggest period possible.
 		let period =
@@ -858,7 +866,7 @@ impl frame_system::offchain::SigningTypes for Runtime {
 
 impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
 where
-	Call: From<C>,
+	RuntimeCall: From<C>,
 {
 	type Extrinsic = UncheckedExtrinsic;
 	type OverarchingCall = RuntimeCall;
@@ -1231,6 +1239,10 @@ impl_runtime_apis! {
 
 		fn refresh_nonce() -> u32 {
 			DKG::refresh_nonce()
+		}
+
+		fn should_execute_emergency_keygen() -> bool {
+			DKG::should_execute_emergency_keygen()
 		}
 	}
 

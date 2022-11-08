@@ -43,9 +43,9 @@ pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-subs
 webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
 
 # DKG dependencies
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git" }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git",branch = "polkadot-v0.9.30" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.30" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.30" }
 tangle-runtime = { package = "tangle-standalone-runtime", path = "../runtime" }
 
 # Substrate dependencies
