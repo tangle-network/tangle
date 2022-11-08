@@ -53,6 +53,9 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v1.3.0
 
+      - name: Install Protobuf
+        uses: sudo apt-get install protobuf-compiler
+
       - name: Run test suite
         run: cargo nextest run --release --workspace
       
@@ -74,6 +77,9 @@ jobs:
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v1.3.0
+      
+      - name: Install Protobuf
+        uses: sudo apt-get install protobuf-compiler
 
       - name: Run clippy
         run: cargo clippy --all-targets --workspace -- --deny warnings
@@ -96,6 +102,9 @@ jobs:
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v1.3.0
+
+      - name: Install Protobuf
+        uses: sudo apt-get install protobuf-compiler
 
       - name: Check
         run: cargo check --release
