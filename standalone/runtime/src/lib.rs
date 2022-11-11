@@ -1075,6 +1075,18 @@ impl pallet_utility::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub const StoragePricePerByte: u128 = 1;
+	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
+}
+
+impl pallet_eth2_light_client::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type StoragePricePerByte = StoragePricePerByte;
+	type PalletId = Eth2ClientPalletId;
+	type Currency = Balances;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -1158,7 +1170,9 @@ construct_runtime!(
 		TransactionPause: pallet_transaction_pause::{Pallet, Call, Storage, Event<T>},
 		ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
 		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>},
-		Utility: pallet_utility::{Pallet, Call, Event}
+		Utility: pallet_utility::{Pallet, Call, Event},
+
+		Eth2Client: pallet_eth2_light_client::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
