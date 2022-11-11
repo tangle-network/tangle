@@ -18,7 +18,9 @@
 use cumulus_client_cli::CollatorOptions;
 use std::{sync::Arc, time::Duration};
 // Local Runtime Types
-use tangle_rococo_runtime::{opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
+use tangle_rococo_runtime::{
+	opaque::Block, AccountId, AuraId, Balance, Hash, Index as Nonce, RuntimeApi,
+};
 
 // Cumulus Imports
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
@@ -32,6 +34,7 @@ use cumulus_relay_chain_inprocess_interface::build_inprocess_relay_chain;
 use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface, RelayChainResult};
 use cumulus_relay_chain_rpc_interface::{create_client_and_start_worker, RelayChainRpcInterface};
 use jsonrpsee::RpcModule;
+use nimbus_consensus::{BuildNimbusConsensusParams, NimbusConsensus};
 use std::path::PathBuf;
 
 // Substrate Imports
@@ -101,7 +104,8 @@ where
 			Block,
 			StateBackend = sc_client_api::StateBackendFor<TFullBackend<Block>, Block>,
 		> + sp_offchain::OffchainWorkerApi<Block>
-		+ sp_block_builder::BlockBuilder<Block>,
+		+ sp_block_builder::BlockBuilder<Block>
+		+ sp_consensus_aura::AuraApi<Block, AuraId>,
 	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,
 	BIQ: FnOnce(
@@ -158,11 +162,13 @@ where
 		client.clone(),
 	);
 
-	let import_queue = build_import_queue(
+	let import_queue = crate::aura_or_nimbus_consensus::import_queue(
+		// single step block import pipeline, after nimbus/aura seal, import block into client
 		client.clone(),
-		config,
+		client.clone(),
+		&task_manager.spawn_essential_handle(),
+		config.prometheus_registry(),
 		telemetry.as_ref().map(|telemetry| telemetry.handle()),
-		&task_manager,
 	)?;
 
 	let params = PartialComponents {
@@ -235,12 +241,12 @@ where
 		+ sp_block_builder::BlockBuilder<Block>
 		+ cumulus_primitives_core::CollectCollationInfo<Block>
 		+ pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>
-		+ substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>
+		+ frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>
 		+ dkg_runtime_primitives::DKGApi<
 			Block,
 			dkg_runtime_primitives::crypto::AuthorityId,
 			NumberFor<Block>,
-		>,
+		> + sp_consensus_aura::AuraApi<Block, AuraId>,
 	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,
 	RB: Fn(
@@ -553,49 +559,43 @@ pub async fn start_parachain_node(
 				telemetry.clone(),
 			);
 
-			Ok(AuraConsensus::build::<sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _>(
-				BuildAuraConsensusParams {
-					proposer_factory,
-					create_inherent_data_providers: move |_, (relay_parent, validation_data)| {
-						let relay_chain_interface = relay_chain_interface.clone();
-						async move {
-							let parachain_inherent =
-							cumulus_primitives_parachain_inherent::ParachainInherentData::create_at(
-								relay_parent,
-								&relay_chain_interface,
-								&validation_data,
-								id,
-							).await;
-							let time = sp_timestamp::InherentDataProvider::from_system_time();
+			// NOTE: In nimbus, author_id is unused as it is the RuntimeAPI that identifies the
+			// block author
+			let provider = move |_, (relay_parent, validation_data, _author_id)| {
+				let relay_chain_interface = relay_chain_interface.clone();
+				async move {
+					let parachain_inherent =
+						cumulus_primitives_parachain_inherent::ParachainInherentData::create_at(
+							relay_parent,
+							&relay_chain_interface,
+							&validation_data,
+							id,
+						)
+						.await;
 
-							let slot =
-						sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
-							*time,
-							slot_duration,
-						);
+					let time = sp_timestamp::InherentDataProvider::from_system_time();
 
-							let parachain_inherent = parachain_inherent.ok_or_else(|| {
-								Box::<dyn std::error::Error + Send + Sync>::from(
-									"Failed to create parachain inherent",
-								)
-							})?;
-							Ok((slot, time, parachain_inherent))
-						}
-					},
-					block_import: client.clone(),
-					para_client: client,
-					backoff_authoring_blocks: Option::<()>::None,
-					sync_oracle,
-					keystore,
-					force_authoring,
-					slot_duration,
-					// We got around 500ms for proposing
-					block_proposal_slot_portion: SlotProportion::new(1f32 / 24f32),
-					// And a maximum of 750ms if slots are skipped
-					max_block_proposal_slot_portion: Some(SlotProportion::new(1f32 / 16f32)),
-					telemetry,
-				},
-			))
+					let parachain_inherent = parachain_inherent.ok_or_else(|| {
+						Box::<dyn std::error::Error + Send + Sync>::from(
+							"Failed to create parachain inherent",
+						)
+					})?;
+
+					let nimbus_inherent = nimbus_primitives::InherentDataProvider;
+					Ok((time, parachain_inherent, nimbus_inherent))
+				}
+			};
+
+			Ok(NimbusConsensus::build(BuildNimbusConsensusParams {
+				additional_digests_provider: (),
+				para_id: id,
+				proposer_factory,
+				block_import: client.clone(),
+				parachain_client: client,
+				keystore,
+				skip_prediction: force_authoring,
+				create_inherent_data_providers: provider,
+			}))
 		},
 		hwbench,
 	)

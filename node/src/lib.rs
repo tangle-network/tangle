@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod aura_or_nimbus_consensus;
 pub mod chain_spec;
 pub mod rpc;
 pub mod service;
+pub mod service_aura;

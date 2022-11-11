@@ -21,12 +21,12 @@ jobs:
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: nightly-2022-06-22
           override: true
           components: rustfmt
 
       - name: Rustfmt check
-        run: cargo +nightly fmt --all -- --check
+        run: cargo fmt --all -- --check
 
   test:
     concurrency:

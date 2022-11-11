@@ -19,9 +19,11 @@
 mod chain_spec;
 #[macro_use]
 mod service;
+mod aura_or_nimbus_consensus;
 mod cli;
 mod command;
 mod rpc;
+mod service_aura;
 
 fn main() -> sc_cli::Result<()> {
 	command::run()
