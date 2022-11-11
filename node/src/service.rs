@@ -18,7 +18,9 @@
 use cumulus_client_cli::CollatorOptions;
 use std::{sync::Arc, time::Duration};
 // Local Runtime Types
-use tangle_rococo_runtime::{opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi, AuraId};
+use tangle_rococo_runtime::{
+	opaque::Block, AccountId, AuraId, Balance, Hash, Index as Nonce, RuntimeApi,
+};
 
 // Cumulus Imports
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
@@ -102,7 +104,8 @@ where
 			Block,
 			StateBackend = sc_client_api::StateBackendFor<TFullBackend<Block>, Block>,
 		> + sp_offchain::OffchainWorkerApi<Block>
-		+ sp_block_builder::BlockBuilder<Block> + sp_consensus_aura::AuraApi<Block, AuraId>,
+		+ sp_block_builder::BlockBuilder<Block>
+		+ sp_consensus_aura::AuraApi<Block, AuraId>,
 	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,
 	BIQ: FnOnce(
@@ -243,8 +246,7 @@ where
 			Block,
 			dkg_runtime_primitives::crypto::AuthorityId,
 			NumberFor<Block>,
-		>
-		+ sp_consensus_aura::AuraApi<Block, AuraId>,
+		> + sp_consensus_aura::AuraApi<Block, AuraId>,
 	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,
 	RB: Fn(

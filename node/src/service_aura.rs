@@ -37,6 +37,7 @@ use jsonrpsee::RpcModule;
 use polkadot_service::CollatorPair;
 use sc_network::NetworkBlock;
 
+use cumulus_relay_chain_rpc_interface::{create_client_and_start_worker, RelayChainRpcInterface};
 use futures::lock::Mutex;
 use sc_consensus::{
 	import_queue::{BasicQueue, Verifier as VerifierT},
@@ -63,7 +64,6 @@ use sp_transaction_pool::runtime_api::TaggedTransactionQueue;
 use std::sync::Arc;
 use substrate_prometheus_endpoint::Registry;
 pub use tangle_rococo_runtime::{opaque::Block, AccountId, Balance, Hash, Header, Index as Nonce};
-use cumulus_relay_chain_rpc_interface::{create_client_and_start_worker, RelayChainRpcInterface};
 
 #[cfg(not(feature = "runtime-benchmarks"))]
 type HostFunctions = sp_io::SubstrateHostFunctions;
