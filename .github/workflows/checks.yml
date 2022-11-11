@@ -26,7 +26,7 @@ jobs:
           components: rustfmt
 
       - name: Rustfmt check
-        run: cargo +nightly fmt --all -- --check
+        run: cargo fmt --all -- --check
 
   test:
     concurrency:
