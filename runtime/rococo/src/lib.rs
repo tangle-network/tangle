@@ -88,7 +88,7 @@ use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 
 pub mod nimbus_session_adapter;
 pub mod staking;
-
+use nimbus_session_adapter::NimbusId;
 // XCM Imports
 
 use xcm::latest::prelude::*;
@@ -1060,6 +1060,24 @@ impl_runtime_apis! {
 			} else {
 				Some(v)
 			}
+		}
+	}
+
+	impl nimbus_primitives::NimbusApi<Block> for Runtime {
+		fn can_author(author: NimbusId, relay_parent: u32, parent_header: &<Block as BlockT>::Header) -> bool {
+			use nimbus_primitives::CanAuthor;
+			use nimbus_primitives::AccountLookup;
+			let next_block_number = parent_header.number + 1;
+			let slot = relay_parent;
+
+			let account = match pallet_parachain_staking::Pallet::<Self>::lookup_account(&author) {
+				Some(account) => account,
+				// Authors whose account lookups fail will not be eligible
+				None => {
+					return false;
+				}
+			};
+			pallet_parachain_staking::Pallet::<Self>::can_author(&account, &slot)
 		}
 	}
 

@@ -22,6 +22,8 @@ mod service;
 mod cli;
 mod command;
 mod rpc;
+mod aura_or_nimbus_consensus;
+mod service_aura;
 
 fn main() -> sc_cli::Result<()> {
 	command::run()

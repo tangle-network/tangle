@@ -23,10 +23,10 @@ serde = { version = "1.0.101", optional = true, features = ["derive"] }
 smallvec = "1.6.1"
 
 # DKG Substrate Dependencies
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.30", default-features = false }
-pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.30", default-features = false }
-pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.30", default-features = false }
-pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.30", default-features = false }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
+pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
+pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
+pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", default-features = false }
 
 # Protocol Substrate Dependencies
 pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false }
