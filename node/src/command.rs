@@ -56,10 +56,14 @@ fn runtime(_id: &str) -> Runtime {
 
 fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
-		"dev" => Box::new(chain_spec::development_config(2000.into())),
-		"template-rococo" => Box::new(chain_spec::local_testnet_config(2000.into())),
-		"tangle-rococo" => Box::new(chain_spec::rococo::tangle_rococo_config(4006.into())), /* Rococo para-id 4006 */
-		"" | "local" => Box::new(chain_spec::local_testnet_config(2000.into())),
+		"tangle-dev" => Box::new(chain_spec::development_config(2000.into())),
+		// Independency relay chain config
+		"tangle-alpha" => Box::new(chain_spec::rococo::tangle_alpha_config(2000.into())),
+		/* Rococo para-id 4006 */
+		"tangle-rococo" => Box::new(chain_spec::rococo::tangle_rococo_config(4006.into())),
+		// TODO : Switch to kusama runtime once we have it
+		"tangle" => Box::new(chain_spec::rococo::tangle_rococo_config(4006.into())),
+		"" | "tangle-local" => Box::new(chain_spec::local_testnet_config(2000.into())),
 		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})
 }

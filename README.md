@@ -182,27 +182,14 @@ tail -f 9988.log
 
 <h3 id="standalone"> Standalone Local Testnet </h3>
 
-Currently the easiest way to run the DKG is to use a 3-node local testnet using `tangle-standalone-node`. We will call those nodes `Alice`, `Bob` and `Charlie`. Each node will use the built-in development account with the same name, i.e. node `Alice` will use the `Alice` development account and so on. Each of the three accounts has been configured as an initial authority at genesis. So, we are using three validators for our testnet.
+The easiest way to run the tangle network is in a standalone environment, in this case it operates as an independent chain without the need to connect to a relaychain. To run the tangle network as standalone, first create a release build
 
-`Alice` is our bootnode and is started like so:
+`cargo b --release -p tangle-standalone-node`
 
-```
-RUST_LOG=dkg=trace ./target/release/tangle-standalone-node  --base-path /tmp/standalone/alice --alice
-```
+Once the build is completed, you can run the setup script to launch a five node dkg chain with
 
-`Bob` is started like so:
+`./scripts/run-arana-local.sh --clean`
 
-```
-RUST_LOG=dkg=trace ./target/release/tangle-standalone-node  --base-path /tmp/standalone/bob --bob
-```
-
-`Charlie` is started like so:
-
-```
-RUST_LOG=dkg=trace ./target/release/tangle-standalone-node --base-path /tmp/standalone/charlie --charlie
-```
-
-Great you are now running a 3-node standalone test network!
 
 <h2 id="manual"> Manual Local Parachain Setup </h2>
 
@@ -339,25 +326,25 @@ cargo build --release -p tangle-collator
 # Build local chainspec
 # You may also use the chainspec provided in ./resources  
 ./target/release/tangle-collator build-spec \
---disable-default-bootnode > ./resources/template-local-plain.json
+--disable-default-bootnode > ./chainspecs/template-local-plain.json
 
 # Build the raw chainspec file
 ./target/release/tangle-collator build-spec \
---chain=./resources/template-local-plain.json \
---raw --disable-default-bootnode > ./resources/template-local-raw.json
+--chain=./chainspecs/template-local-plain.json \
+--raw --disable-default-bootnode > ./chainspecs/template-local-raw.json
 
-# Export genesis state to `./resources`, using 2000 as the ParaId
-./target/release/tangle-collator export-genesis-state --chain=./resources/template-local-raw.json > ./resources/para-2000-genesis
+# Export genesis state to `./chainspecs`, using 2000 as the ParaId
+./target/release/tangle-collator export-genesis-state --chain=./chainspecs/template-local-raw.json > ./chainspecs/para-2000-genesis
 
 # Export the genesis wasm
-./target/release/tangle-collator export-genesis-wasm > ./resources/para-2000-wasm
+./target/release/tangle-collator export-genesis-wasm > ./chainspecs/para-2000-wasm
 ```
 
 For building chainspec for Rococo Tangle Testnet you need to pass the chain argument during the intial build spec.
 
 ```
 # Note: This uses paraId 2076 and target Rococo relay chain
-./target/release/tangle-collator build-spec --disable-default-bootnode --chain=tangle-rococo > ./resources/rococo-plain.json
+./target/release/tangle-collator build-spec --disable-default-bootnode --chain=tangle-rococo > ./chainspecs/rococo-plain.json
 ```
 
 ### Start a Tangle Collator Node
@@ -375,7 +362,7 @@ From the dkg-substrate working directory:
 --alice \
 --force-authoring \
 --ws-port 9948 \
---chain ./resources/template-local-raw.json \
+--chain ./chainspecs/template-local-raw.json \
 -- \
 --execution wasm \
 --chain ../polkadot/rococo_local.json

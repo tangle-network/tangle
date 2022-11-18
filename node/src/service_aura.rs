@@ -46,7 +46,7 @@ use sc_consensus::{
 use sc_executor::{NativeExecutionDispatch, WasmExecutor};
 use sc_network::NetworkService;
 pub use sc_rpc::{DenyUnsafe, SubscriptionTaskExecutor};
-use sc_service::{Configuration, Error, Role, TFullBackend, TFullClient, TaskManager};
+use sc_service::{Configuration, Error, TFullBackend, TFullClient, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 use sp_api::{ApiExt, ConstructRuntimeApi};
 use sp_consensus::CacheKeyId;

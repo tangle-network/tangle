@@ -12955,6 +12955,7 @@ dependencies = [
  "pallet-ecdsa-claims",
  "pallet-hasher",
  "pallet-identity",
+ "pallet-im-online",
  "pallet-indices",
  "pallet-key-storage",
  "pallet-linkable-tree",

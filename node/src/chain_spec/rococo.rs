@@ -24,6 +24,76 @@ use tangle_rococo_runtime::{
 	VAnchorBn254Config, VAnchorVerifierConfig, MILLIUNIT, UNIT,
 };
 
+pub fn tangle_alpha_config(id: ParaId) -> ChainSpec {
+	// Give your base currency a unit name and decimal places
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "TNT".into());
+	properties.insert("tokenDecimals".into(), 12u32.into());
+	properties.insert("ss58Format".into(), 42.into());
+
+	ChainSpec::from_genesis(
+		// Name
+		"Tangle Alpha",
+		// ID
+		"tangle-alpha",
+		ChainType::Development,
+		move || {
+			rococo_genesis(
+				// root
+				hex!["a62a5c2e22ebd14273f1e6552ba0ee07937ff3d859f53475296bbcbb8af1752e"].into(),
+				// invulnerables
+				generate_invulnerables::<[u8; 32]>(&[
+					(
+						// publickey
+						hex!["a62a5c2e22ebd14273f1e6552ba0ee07937ff3d859f53475296bbcbb8af1752e"],
+						// DKG key --scheme Ecdsa
+						hex!["03fd0f9d6e4ef6eeb0718866a43c04764177f3fc03203e9ff7ed4dd2885cb52943"]
+							.unchecked_into(),
+					),
+					(
+						// publickey
+						hex!["6850cc5d0369d11f93c820b91f7bfed4f6fc8b3a5f70a80171183129face154b"],
+						// DKG key --scheme Ecdsa
+						hex!["03ae1a02a91d59ff20ece458640afbbb672b9335f7da4c9f7d699129d431680ae9"]
+							.unchecked_into(),
+					),
+					(
+						// publickey
+						hex!["1469f5f6719beaa0a7364259e5fb10846a4457f181807a0c00a6a9cdf14a260d"],
+						// DKG key --scheme Ecdsa
+						hex!["0252abf0dd2ed408700de539fd65dfc2f6d201e76a4c2e19b875d7b3176a468b0f"]
+							.unchecked_into(),
+					),
+				]),
+				vec![
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+					hex!["5ebd99141e19db88cd2c4b778d3cc43e3678d40168aaea56f33d2ea31f67463f"].into(),
+					hex!["28714d0740d6b321ad67b8e1a4edd0b53376f735bd10e4904a2c49167bcb7841"].into(),
+				],
+				id,
+			)
+		},
+		// Bootnodes
+		vec![],
+		// Telemetry
+		None,
+		// Protocol ID
+		Some("tangle-alpha"),
+		// Fork ID
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		Extensions {
+			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
+			para_id: id.into(),
+		},
+	)
+}
+
 pub fn tangle_rococo_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
