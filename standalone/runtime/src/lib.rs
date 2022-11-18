@@ -1036,8 +1036,8 @@ impl pallet_im_online::Config for Runtime {
 	type MaxKeys = MaxKeys;
 	type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
 	type MaxPeerDataEncodingSize = MaxPeerDataEncodingSize;
+}
 
-	
 impl pallet_transaction_pause::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type UpdateOrigin = EnsureRoot<AccountId>;
