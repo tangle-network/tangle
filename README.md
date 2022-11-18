@@ -326,25 +326,25 @@ cargo build --release -p tangle-collator
 # Build local chainspec
 # You may also use the chainspec provided in ./resources  
 ./target/release/tangle-collator build-spec \
---disable-default-bootnode > ./chainspects/template-local-plain.json
+--disable-default-bootnode > ./chainspecs/template-local-plain.json
 
 # Build the raw chainspec file
 ./target/release/tangle-collator build-spec \
---chain=./chainspects/template-local-plain.json \
---raw --disable-default-bootnode > ./chainspects/template-local-raw.json
+--chain=./chainspecs/template-local-plain.json \
+--raw --disable-default-bootnode > ./chainspecs/template-local-raw.json
 
-# Export genesis state to `./chainspects`, using 2000 as the ParaId
-./target/release/tangle-collator export-genesis-state --chain=./chainspects/template-local-raw.json > ./chainspects/para-2000-genesis
+# Export genesis state to `./chainspecs`, using 2000 as the ParaId
+./target/release/tangle-collator export-genesis-state --chain=./chainspecs/template-local-raw.json > ./chainspecs/para-2000-genesis
 
 # Export the genesis wasm
-./target/release/tangle-collator export-genesis-wasm > ./chainspects/para-2000-wasm
+./target/release/tangle-collator export-genesis-wasm > ./chainspecs/para-2000-wasm
 ```
 
 For building chainspec for Rococo Tangle Testnet you need to pass the chain argument during the intial build spec.
 
 ```
 # Note: This uses paraId 2076 and target Rococo relay chain
-./target/release/tangle-collator build-spec --disable-default-bootnode --chain=tangle-rococo > ./chainspects/rococo-plain.json
+./target/release/tangle-collator build-spec --disable-default-bootnode --chain=tangle-rococo > ./chainspecs/rococo-plain.json
 ```
 
 ### Start a Tangle Collator Node
