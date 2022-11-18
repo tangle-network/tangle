@@ -1064,10 +1064,9 @@ impl_runtime_apis! {
 	}
 
 	impl nimbus_primitives::NimbusApi<Block> for Runtime {
-		fn can_author(author: NimbusId, relay_parent: u32, parent_header: &<Block as BlockT>::Header) -> bool {
+		fn can_author(author: NimbusId, relay_parent: u32, _parent_header: &<Block as BlockT>::Header) -> bool {
 			use nimbus_primitives::CanAuthor;
 			use nimbus_primitives::AccountLookup;
-			let next_block_number = parent_header.number + 1;
 			let slot = relay_parent;
 
 			let account = match pallet_parachain_staking::Pallet::<Self>::lookup_account(&author) {
