@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::testnet_fixtures::{
+	get_arana_bootnodes, get_arana_initial_authorities, get_testnet_root_key,
+};
 use arkworks_setups::{common::setup_params, Curve};
 use hex_literal::hex;
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_network_common::config::MultiaddrWithPeerId;
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -22,10 +26,10 @@ use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_runtime::{
 	AccountId, AssetRegistryConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
-	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, MaxNominations,
-	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill, SessionConfig,
-	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
-	VAnchorVerifierConfig, UNIT, WASM_BINARY,
+	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, ImOnlineConfig,
+	MaxNominations, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill,
+	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
+	VAnchorBn254Config, VAnchorVerifierConfig, UNIT, WASM_BINARY,
 };
 pub type ResourceId = [u8; 32];
 
@@ -56,12 +60,13 @@ where
 pub fn authority_keys_from_seed(
 	controller: &str,
 	stash: &str,
-) -> (AccountId, AccountId, AuraId, GrandpaId, DKGId) {
+) -> (AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId) {
 	(
 		get_account_id_from_seed::<sr25519::Public>(controller),
 		get_account_id_from_seed::<sr25519::Public>(stash),
 		get_from_seed::<AuraId>(controller),
 		get_from_seed::<GrandpaId>(controller),
+		get_from_seed::<ImOnlineId>(stash),
 		get_from_seed::<DKGId>(controller),
 	)
 }
@@ -73,9 +78,10 @@ pub fn authority_keys_from_seed(
 fn dkg_session_keys(
 	grandpa: GrandpaId,
 	aura: AuraId,
+	im_online: ImOnlineId,
 	dkg: DKGId,
 ) -> tangle_runtime::opaque::SessionKeys {
-	tangle_runtime::opaque::SessionKeys { grandpa, aura, dkg }
+	tangle_runtime::opaque::SessionKeys { grandpa, aura, dkg, im_online }
 }
 
 pub fn development_config() -> Result<ChainSpec, String> {
@@ -238,63 +244,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn get_testnet_root_key() -> AccountId {
-	// Arana sudo key: 5F9jS22zsSzmWNXKt4kknBsrhVAokEQ9e3UcuBeg21hkzqWz
-	hex!["888a3ab33eea2b827f15302cb26af0e007b067ccfbf693faff3aa7ffcfa25925"].into()
-}
-
-/// Arana bootnodes
-pub fn get_arana_bootnodes() -> Vec<MultiaddrWithPeerId> {
-	vec![
-		"/ip4/45.76.21.37/tcp/30333/p2p/12D3KooWELWpiG9EmREfr9BZ4CcoPMdvAqCN2HiiMzKUDDWxRpp1"
-			.parse()
-			.unwrap(),
-		"/ip4/107.191.49.61/tcp/30333/p2p/12D3KooWQYwbqoyPCvWbr7rCJgqVD9LaK1wBHuPAizQ3MtAZoZXR"
-			.parse()
-			.unwrap(),
-		"/ip4/144.202.60.7/tcp/30333/p2p/12D3KooWRXZLpQjD92EdxFB6RQMqSDepKSy6AWhxmVv8USTHZSkH"
-			.parse()
-			.unwrap(),
-	]
-}
-
-/// Arana initial authorities
-pub fn get_arana_initial_authorities() -> Vec<(AccountId, AccountId, AuraId, GrandpaId, DKGId)> {
-	vec![
-		(
-			hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"].into(),
-			hex!["804808fb75d16340dc250871138a1a6f1dfa3cab9cc1fbd6f42960f1c39a950d"].into(),
-			hex!["16be9647f91aa5441e300acb8f0d6ccc63e72850202a7947df6a646c1bb4071a"]
-				.unchecked_into(),
-			hex!["71bf01524c555f1e0f6b7dc7243caf00851d3afc543422f98d3eb6bca78acd8c"]
-				.unchecked_into(),
-			hex!["028a4c0781f8369fdd873f8531491f24e2e806fd11a13d828cb4099e6c1045103e"]
-				.unchecked_into(),
-		),
-		(
-			hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"].into(),
-			hex!["cc195602a63bbdcf2ef4773c86fdbfefe042cb9aa8e3059d02e59a062d9c3138"].into(),
-			hex!["f4e206607ffffcd389c4c60523de5dda5a411d1435f8540b6b6bc181553bd65a"]
-				.unchecked_into(),
-			hex!["61f771ebfdb0a6de08b8e0ca7a39a01f24e7eaa3d1e7f1001e6503490c25c044"]
-				.unchecked_into(),
-			hex!["02427a6cf7f1d7538d9e3e4df834e27db337fd6ef0f530aab4e9799ff865e843fc"]
-				.unchecked_into(),
-		),
-		(
-			hex!["368ea402dbd9c9888ae999d6a799cf36e08673ee53c001dfb4529c149fc2c13b"].into(),
-			hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"].into(),
-			hex!["8e92157e55a72fe0ee78c251a7553af341635bec0aafee1e4189cf8ce52cdd71"]
-				.unchecked_into(),
-			hex!["a41a815db90b9bd3d9ec462f90ba77ba1d627a9fccc9f7847e34c9e9e9b57c90"]
-				.unchecked_into(),
-			hex!["036aec5853fba2662f31ba89e859ac100daa6c58dc8fdaf0555565663f2b99f8f2"]
-				.unchecked_into(),
-		),
-	]
-}
-
-pub fn arana_testnet_config() -> Result<ChainSpec, String> {
+pub fn arana_live_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Arana wasm not available".to_string())?;
 	let boot_nodes = get_arana_bootnodes();
 
@@ -307,6 +257,7 @@ pub fn arana_testnet_config() -> Result<ChainSpec, String> {
 				wasm_binary,
 				// Initial PoA authorities
 				get_arana_initial_authorities(),
+				// initial nominators
 				vec![],
 				// Sudo account
 				get_testnet_root_key(),
@@ -319,6 +270,10 @@ pub fn arana_testnet_config() -> Result<ChainSpec, String> {
 					hex!["cc195602a63bbdcf2ef4773c86fdbfefe042cb9aa8e3059d02e59a062d9c3138"].into(),
 					hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"].into(),
 					hex!["368ea402dbd9c9888ae999d6a799cf36e08673ee53c001dfb4529c149fc2c13b"].into(),
+					hex!["2c7f3cc085da9175414d1a9d40aa3aa161c8584a9ca62a938684dfbe90ae9d74"].into(),
+					hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
+					hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
+					hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
 				],
 				vec![],
 				vec![],
@@ -341,11 +296,113 @@ pub fn arana_testnet_config() -> Result<ChainSpec, String> {
 	))
 }
 
+pub fn arana_testnet_config() -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "Arana wasm not available".to_string())?;
+	let boot_nodes = get_arana_bootnodes();
+
+	Ok(ChainSpec::from_genesis(
+		"Arana Alpha",
+		"arana-alpha",
+		ChainType::Development,
+		move || {
+			testnet_genesis(
+				wasm_binary,
+				// Initial PoA authorities
+				get_arana_initial_authorities(),
+				// initial nominators
+				vec![],
+				// Sudo account
+				get_testnet_root_key(),
+				// Pre-funded accounts
+				vec![
+					get_testnet_root_key(),
+					hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"].into(),
+					hex!["804808fb75d16340dc250871138a1a6f1dfa3cab9cc1fbd6f42960f1c39a950d"].into(),
+					hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"].into(),
+					hex!["cc195602a63bbdcf2ef4773c86fdbfefe042cb9aa8e3059d02e59a062d9c3138"].into(),
+					hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"].into(),
+					hex!["368ea402dbd9c9888ae999d6a799cf36e08673ee53c001dfb4529c149fc2c13b"].into(),
+					hex!["2c7f3cc085da9175414d1a9d40aa3aa161c8584a9ca62a938684dfbe90ae9d74"].into(),
+					hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
+					hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
+					hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
+				],
+				vec![],
+				vec![],
+				get_arana_initial_authorities().iter().map(|a| a.0.clone()).collect(),
+				true,
+			)
+		},
+		// Bootnodes
+		boot_nodes,
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// Fork id
+		None,
+		// Properties
+		None,
+		// Extensions
+		None,
+	))
+}
+
+// same as arana_testnet but without bootnodes so that we can spinup same network locally
+pub fn arana_local_config() -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "Arana wasm not available".to_string())?;
+	Ok(ChainSpec::from_genesis(
+		"Arana Local",
+		"arana-local",
+		ChainType::Development,
+		move || {
+			testnet_genesis(
+				wasm_binary,
+				// Initial PoA authorities
+				get_arana_initial_authorities(),
+				vec![],
+				// Sudo account
+				get_testnet_root_key(),
+				// Pre-funded accounts
+				vec![
+					get_testnet_root_key(),
+					hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"].into(),
+					hex!["804808fb75d16340dc250871138a1a6f1dfa3cab9cc1fbd6f42960f1c39a950d"].into(),
+					hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"].into(),
+					hex!["cc195602a63bbdcf2ef4773c86fdbfefe042cb9aa8e3059d02e59a062d9c3138"].into(),
+					hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"].into(),
+					hex!["368ea402dbd9c9888ae999d6a799cf36e08673ee53c001dfb4529c149fc2c13b"].into(),
+					hex!["2c7f3cc085da9175414d1a9d40aa3aa161c8584a9ca62a938684dfbe90ae9d74"].into(),
+					hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
+					hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
+					hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
+				],
+				vec![],
+				vec![],
+				get_arana_initial_authorities().iter().map(|a| a.0.clone()).collect(),
+				true,
+			)
+		},
+		// Bootnodes
+		vec![],
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// Fork id
+		None,
+		// Properties
+		None,
+		// Extensions
+		None,
+	))
+}
+
 /// Configure initial storage state for FRAME modules.
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, DKGId)>,
+	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)>,
 	initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
@@ -421,7 +478,7 @@ fn testnet_genesis(
 					(
 						x.1.clone(),
 						x.0.clone(),
-						dkg_session_keys(x.3.clone(), x.2.clone(), x.4.clone()),
+						dkg_session_keys(x.3.clone(), x.2.clone(), x.4.clone(), x.5.clone()),
 					)
 				})
 				.collect::<Vec<_>>(),
@@ -449,8 +506,8 @@ fn testnet_genesis(
 		grandpa: Default::default(),
 		dkg: DKGConfig {
 			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
-			keygen_threshold: 2,
-			signature_threshold: 1,
+			keygen_threshold: 5,
+			signature_threshold: 3,
 			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
@@ -487,5 +544,6 @@ fn testnet_genesis(
 			vanchors: vec![(0, 2)],
 			phantom: Default::default(),
 		},
+		im_online: ImOnlineConfig { keys: vec![] },
 	}
 }
