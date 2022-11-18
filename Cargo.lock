@@ -7181,6 +7181,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-transaction-pause"
+version = "0.0.1"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "orml-tokens",
+ "orml-traits",
+ "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "smallvec",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-transaction-payment"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.30#a3ed0119c45cdd0d571ad34e5b3ee7518c8cef8d"
@@ -12955,6 +12973,7 @@ dependencies = [
  "pallet-timestamp",
  "pallet-token-wrapper",
  "pallet-token-wrapper-handler",
+ "pallet-transaction-pause",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",
@@ -13138,6 +13157,7 @@ dependencies = [
  "pallet-timestamp",
  "pallet-token-wrapper",
  "pallet-token-wrapper-handler",
+ "pallet-transaction-pause",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",

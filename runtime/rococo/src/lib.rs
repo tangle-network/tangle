@@ -758,6 +758,12 @@ where
 	type Extrinsic = UncheckedExtrinsic;
 }
 
+impl pallet_transaction_pause::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type UpdateOrigin = EnsureRoot<AccountId>;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -831,6 +837,7 @@ construct_runtime!(
 		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 84,
 		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 85,
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 86,
+		TransactionPause: pallet_transaction_pause::{Pallet, Call, Storage, Event<T>} = 87,
 	}
 );
 
