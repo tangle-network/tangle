@@ -116,6 +116,7 @@ pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "po
 pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30", default-features = false }
 
 tangle-primitives = { path = '../../primitives', default-features = false }
+pallet-transaction-pause = { path = '../../pallets/transaction-pause', default-features = false }
 
 [features]
 default = ["std"]
@@ -230,4 +231,5 @@ std = [
   "pallet-vanchor/std",
   "pallet-vanchor-handler/std",
   "tangle-primitives/std",
+  "pallet-transaction-pause/std"
 ]

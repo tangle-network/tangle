@@ -1020,6 +1020,12 @@ impl pallet_child_bounties::Config for Runtime {
 	type WeightInfo = pallet_child_bounties::weights::SubstrateWeight<Runtime>;
 }
 
+impl pallet_transaction_pause::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type UpdateOrigin = EnsureRoot<AccountId>;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -1099,6 +1105,8 @@ construct_runtime!(
 
 		KeyStorage: pallet_key_storage::<Instance1>::{Pallet, Call, Storage, Event<T>},
 		VAnchorVerifier: pallet_vanchor_verifier::{Pallet, Call, Storage, Event<T>, Config<T>},
+
+		TransactionPause: pallet_transaction_pause::{Pallet, Call, Storage, Event<T>},
 
 	}
 );
