@@ -23,7 +23,7 @@ use tangle_rococo_runtime::{
 };
 
 // Cumulus Imports
-use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
+
 use cumulus_client_consensus_common::ParachainConsensus;
 use cumulus_client_network::BlockAnnounceValidator;
 use cumulus_client_service::{
@@ -74,7 +74,7 @@ pub mod rococo {
 #[allow(clippy::type_complexity)]
 pub fn new_partial<RuntimeApi, Executor, BIQ>(
 	config: &Configuration,
-	build_import_queue: BIQ,
+	_build_import_queue: BIQ,
 ) -> Result<
 	PartialComponents<
 		TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<Executor>>,
@@ -546,17 +546,17 @@ pub async fn start_parachain_node(
 		 task_manager,
 		 relay_chain_interface,
 		 transaction_pool,
-		 sync_oracle,
+		 _sync_oracle,
 		 keystore,
 		 force_authoring| {
-			let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
+			let _slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
 
 			let proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
 				task_manager.spawn_handle(),
 				client.clone(),
 				transaction_pool,
 				prometheus_registry,
-				telemetry.clone(),
+				telemetry,
 			);
 
 			// NOTE: In nimbus, author_id is unused as it is the RuntimeAPI that identifies the
