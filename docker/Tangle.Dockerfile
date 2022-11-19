@@ -38,7 +38,7 @@ COPY . .
 RUN cargo build --release -p ${BINARY}
 
 # This is the 2nd stage: a very small image where we copy the tangle binary."
-FROM debian:buster-slim
+FROM ubuntu:20.04
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Binary for ${BINARY}"
 ARG BINARY
