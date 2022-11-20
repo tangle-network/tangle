@@ -20,10 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - dockerfile: ./docker/Tangle.Dockerfile
-            binary: tangle-standalone-node
-          - dockerfile: ./docker/Tangle.Dockerfile
-            binary: tangle-collator
+          - binary: tangle-standalone-node
+          - binary: tangle-collator
     permissions:
       contents: read
       packages: write
@@ -63,7 +61,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ${{ matrix.dockerfile }}
+          file: ./docker/Tangle.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
