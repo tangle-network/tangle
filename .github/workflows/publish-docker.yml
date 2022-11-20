@@ -22,10 +22,8 @@ jobs:
         include:
           - dockerfile: ./docker/Tangle.Dockerfile
             binary: tangle-standalone-node
-            image: ${{ env.REGISTRY }}/${{ github.repository }}/tangle-standalone-node
           - dockerfile: ./docker/Tangle.Dockerfile
             binary: tangle-collator
-            image: ${{ env.REGISTRY }}/${{ github.repository }}/tangle-collator
     permissions:
       contents: read
       packages: write
@@ -56,7 +54,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ matrix.image }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.binary }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
