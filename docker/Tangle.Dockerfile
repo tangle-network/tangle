@@ -38,22 +38,15 @@ COPY . .
 RUN cargo build --release -p ${BINARY}
 
 # This is the 2nd stage: a very small image where we copy the tangle binary."
-FROM ubuntu:20.04
+FROM gcr.io/distroless/cc
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Binary for ${BINARY}"
 ARG BINARY
 
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt 
-COPY --from=builder /tangle/target/release/${BINARY} /usr/local/bin
+COPY --from=builder /tangle/target/release/${BINARY} /
 
-RUN useradd -m -u 1000 -U -s /bin/sh -d /tangle tangle && \
-  mkdir -p /data /tangle/.local/share/tangle && \
-  chown -R tangle:tangle /data && \
-  ln -s /data /tangle/.local/share/tangle && \
-  # Sanity checks
-  ldd /usr/local/bin/$BINARY && \
-  /usr/local/bin/$BINARY --version
+RUN mkdir -p /data && /$BINARY --version
 
-USER tangle
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
+CMD ["${BINARY}", "-d", "/data"]
