@@ -35,10 +35,6 @@ jobs:
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Install docker-slim
-        run: curl -sL https://raw.githubusercontent.com/docker-slim/docker-slim/master/scripts/install-dockerslim.sh | sudo -E bash -
-      - name: Slim down the Image
-        run: docker-slim build --target webb-tools/dkg-standalone-node --http-probe-off --entrypoint dkg-standalone-node
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
