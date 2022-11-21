@@ -45,7 +45,8 @@ ARG BINARY
 
 COPY --from=builder /tangle/target/release/${BINARY} /
 
-RUN mkdir -p /data && /$BINARY --version
+# Sainity check to make sure the binary is in the image.
+RUN /$BINARY --version
 
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
