@@ -13,6 +13,8 @@
 // limitations under the License.
 
 //! Parachain Node Service
+#![allow(dead_code)]
+
 use crate::rpc;
 use codec::Codec;
 use core::marker::PhantomData;
