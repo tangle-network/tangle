@@ -49,4 +49,5 @@ COPY --from=builder /tangle/target/release/${BINARY} /
 
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
-CMD ./${BINARY} -d /data
+ENTRYPOINT ./${BINARY} -d /data
+CMD ./${BINARY}
