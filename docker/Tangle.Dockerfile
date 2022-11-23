@@ -33,18 +33,21 @@ COPY --from=planner /tangle/recipe.json recipe.json
 COPY rust-toolchain.toml .
 # Build dependencies - this is the caching Docker layer!
 RUN cargo chef cook --release --recipe-path recipe.json
+ARG BINARY
 COPY . .
 # Build application
 RUN cargo build --release -p ${BINARY}
 
 # This is the 2nd stage: a very small image where we copy the tangle binary."
-FROM gcr.io/distroless/cc
+FROM ubuntu:20.04
 LABEL maintainer="Webb Developers <dev@webb.tools>"
-LABEL description="Binary for ${BINARY}"
+LABEL description="Tangle Network Node"
 ARG BINARY
+ENV BINARY=${BINARY}
 
 COPY --from=builder /tangle/target/release/${BINARY} /
 
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
-CMD ["${BINARY}", "-d", "/data"]
+ENTRYPOINT ./${BINARY} -d /data
+CMD ./${BINARY}
