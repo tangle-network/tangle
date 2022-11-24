@@ -246,6 +246,10 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 pub fn arana_live_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Arana wasm not available".to_string())?;
 	let boot_nodes = get_arana_bootnodes();
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "tTNT".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42.into());
 
 	Ok(ChainSpec::from_genesis(
 		"Arana",
@@ -289,7 +293,7 @@ pub fn arana_live_config() -> Result<ChainSpec, String> {
 		// Fork id
 		None,
 		// Properties
-		None,
+		Some(properties),
 		// Extensions
 		None,
 	))
@@ -298,6 +302,10 @@ pub fn arana_live_config() -> Result<ChainSpec, String> {
 pub fn arana_testnet_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Arana wasm not available".to_string())?;
 	let boot_nodes = get_arana_bootnodes();
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "tTNT".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42.into());
 
 	Ok(ChainSpec::from_genesis(
 		"Arana Alpha",
@@ -341,7 +349,7 @@ pub fn arana_testnet_config() -> Result<ChainSpec, String> {
 		// Fork id
 		None,
 		// Properties
-		None,
+		Some(properties),
 		// Extensions
 		None,
 	))
@@ -350,6 +358,11 @@ pub fn arana_testnet_config() -> Result<ChainSpec, String> {
 // same as arana_testnet but without bootnodes so that we can spinup same network locally
 pub fn arana_local_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Arana wasm not available".to_string())?;
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "tTNT".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42.into());
+
 	Ok(ChainSpec::from_genesis(
 		"Arana Local",
 		"arana-local",
@@ -391,7 +404,7 @@ pub fn arana_local_config() -> Result<ChainSpec, String> {
 		// Fork id
 		None,
 		// Properties
-		None,
+		Some(properties),
 		// Extensions
 		None,
 	))

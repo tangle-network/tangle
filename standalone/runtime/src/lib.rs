@@ -141,8 +141,8 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-standalone"),
 	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
-	spec_version: 2,
-	impl_version: 2,
+	spec_version: 1,
+	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
 	state_version: 0,
@@ -395,7 +395,7 @@ impl pallet_authorship::Config for Runtime {
 }
 
 parameter_types! {
-	pub const Period: BlockNumber = 6 * HOURS;
+	pub const Period: BlockNumber = HOURS;
 	pub const Offset: BlockNumber = 0;
 }
 
@@ -1065,7 +1065,7 @@ construct_runtime!(
 		Grandpa: pallet_grandpa::{Pallet, Call, Storage, Config, Event, ValidateUnsigned},
 
 		// DKG / offchain worker
-		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>},
+		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>, ValidateUnsigned},
 		DKGProposals: pallet_dkg_proposals,
 		DKGProposalHandler: pallet_dkg_proposal_handler,
 
@@ -1089,7 +1089,6 @@ construct_runtime!(
 		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>},
 		Offences: pallet_offences::{Pallet, Storage, Event},
-		ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, Config<T>},
 
 		// Hasher pallet
 		HasherBn254: pallet_hasher::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
@@ -1126,6 +1125,7 @@ construct_runtime!(
 		VAnchorVerifier: pallet_vanchor_verifier::{Pallet, Call, Storage, Event<T>, Config<T>},
 
 		TransactionPause: pallet_transaction_pause::{Pallet, Call, Storage, Event<T>},
+		ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
 
 	}
 );
