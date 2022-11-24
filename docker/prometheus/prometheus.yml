@@ -1,7 +1,0 @@
-# A scrape configuration containing exactly one endpoint to scrape:
-# Here it's Prometheus itself.
-scrape_configs:
-  - job_name: "substrate_node"
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['host.docker.internal:9615']
