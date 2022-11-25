@@ -17,16 +17,16 @@ server:
   grpc_listen_port: 0
 
 positions:
-  filename: /data/loki/positions.yaml
+  filename: /tmp/positions.yaml
 
 clients:
-  - url: http://localhost:3100/loki/api/v1/push
+  - url: http://127.0.0.1:3100/loki/api/v1/push
 
 scrape_configs:
 - job_name: system
   static_configs:
   - targets:
-      - localhost
+      - 127.0.0.1
     labels:
       job: varlogs
-      __path__: /var/log/tangle/*log
+      __path__: /var/log/*log

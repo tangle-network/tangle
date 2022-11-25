@@ -3,6 +3,7 @@ version: '3.7'
 services:
   prometheus:
     image: prom/prometheus
+    network_mode: host
     restart: always
     volumes:
       - ./prometheus:/etc/prometheus/
@@ -17,6 +18,7 @@ services:
 
   grafana:
     image: grafana/grafana
+    network_mode: host
     restart: always
     environment:
       GF_INSTALL_PLUGINS: 'grafana-clock-panel,grafana-simple-json-datasource'
@@ -32,6 +34,7 @@ services:
 
   alertmanager:
     image: prom/alertmanager:v0.23.0
+    network_mode: host
     restart: unless-stopped
     ports:
       - "9093:9093"
@@ -42,6 +45,7 @@ services:
 
   loki:
     image: grafana/loki:2.5.0
+    network_mode: host
     ports:
       - "3100:3100"
     volumes:
@@ -50,11 +54,11 @@ services:
   
   promtail:
     image: grafana/promtail:2.5.0
+    network_mode: host
     volumes:
-      - /var/log:/var/log
+      - /root/collator_logs:/var/log
       - ./loki/promtail-config.yaml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
-
 
 volumes:
   prometheus_data: {}
