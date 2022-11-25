@@ -25,10 +25,9 @@ scrape_configs:
     static_configs:
       - targets: ['host.docker.internal:9615']
   
-  # # Job to get system metrics
-  # - job_name: 'node_exporter'
-  #   scrape_interval: 5s
-  #   static_configs:
-  #     - targets:
-  #       - node-exporter:9100
+  # Job to get system metrics
+  - job_name: 'node_exporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:9100']
   
