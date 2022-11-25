@@ -113,6 +113,7 @@ pallet-timestamp = { git = "https://github.com/paritytech/substrate", branch = "
 pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30", default-features = false }
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30", default-features = false }
 pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30", default-features = false }
+pallet-identity = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30", default-features = false }
 pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30", default-features = false }
 
 pallet-transaction-pause = { path = '../../pallets/transaction-pause', default-features = false }
@@ -205,6 +206,7 @@ std = [
   "pallet-nomination-pools/std",
   "pallet-treasury/std",
   "pallet-ecdsa-claims/std",
+  "pallet-identity/std",
 
   # DKG
   "pallet-dkg-metadata/std",
