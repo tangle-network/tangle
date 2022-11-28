@@ -1,9 +1,11 @@
 {
-  "name": "Arana Local",
-  "id": "arana-local",
+  "name": "Arana Alpha",
+  "id": "arana-alpha",
   "chainType": "Development",
   "bootNodes": [
-    "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWK3J8wN15AYxNMmT3hUAEYjhENmkET3Qk9oYcoWHWZzPy"
+    "/ip4/140.82.21.142/tcp/30333/p2p/12D3KooWPU2eWyZrDMVtNBiKYKLGPJw8EDjbkYeXMyotmdVBKNnx",
+    "/ip4/149.28.81.60/tcp/30333/p2p/12D3KooWHXiHVg1YX9PHsa8NrS5ZWEoaKBydqZvLoegw2bcTiCtf",
+    "/ip4/45.32.66.129/tcp/30333/p2p/12D3KooWPEpgPPBArgEa1v7X7YR5UiZ6BLxmCsNqC8F6fJ6cULLc"
   ],
   "telemetryEndpoints": null,
   "protocolId": null,

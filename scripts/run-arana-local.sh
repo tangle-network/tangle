@@ -69,5 +69,6 @@ echo "*** Start Webb DKG Standalone | Arana Local Config ***"
     -ldkg_metadata=debug \
     -lruntime::dkg_proposal_handler=debug \
     -lruntime::offchain=debug \
-    -ldkg_proposal_handler=debug
+    -ldkg_proposal_handler=debug \
+    -lruntime::im-online=debug
 popd
