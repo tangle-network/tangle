@@ -23,7 +23,7 @@ ghcr.io/webb-tools/tangle/tangle-standalone:main \
 --execution wasm \
 --wasm-execution compiled \
 --state-pruning archive \
---trie-cache-size 0 \
+--trie-cache-size 0
 ```
 
 ## Run via Docker Compose :
