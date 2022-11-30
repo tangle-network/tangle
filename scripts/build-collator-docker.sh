@@ -10,7 +10,7 @@ cd "$PROJECT_ROOT"
 # Find the current version from Cargo.toml
 VERSION=$(grep "^version" ./standalone/node/Cargo.toml | grep -E -o "([0-9\.]+)")
 GITUSER=webb-tools
-IMAGE_NAME=tangle-collator
+IMAGE_NAME=tangle-parachain
 
 # Build the image
 echo "Building ${GITUSER}/${IMAGE_NAME}:latest docker image, hang on!"

@@ -6,7 +6,7 @@
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 1024
 
 // Executed Command:
-// ./target/release/tangle-collator
+// ./target/release/tangle-parachain
 // benchmark
 // pallet
 // --chain=dev

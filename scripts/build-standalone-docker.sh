@@ -10,7 +10,7 @@ cd "$PROJECT_ROOT"
 # Find the current version from Cargo.toml
 VERSION=$(grep "^version" ./standalone/node/Cargo.toml | grep -E -o "([0-9\.]+)")
 GITUSER=webb-tools
-IMAGE_NAME=tangle-standalone-node
+IMAGE_NAME=tangle-standalone
 
 # Build the image
 echo "Building ${GITUSER}/${IMAGE_NAME}:latest docker image, hang on!"

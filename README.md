@@ -96,8 +96,8 @@ cargo build --release
 
 You will now have two runtimes built in `target/release/` dir:
 
-1. `tangle-collator`: Parachain node.
-2. `tangle-standalone-node`: Standalone node, used in the current standalone Tangle network.
+1. `tangle-parachain`: Parachain node.
+2. `tangle-standalone`: Standalone node, used in the current standalone Tangle network.
 ### Troubleshooting for Apple Silicon users
 
 Install Homebrew if you have not already. You can check if you have it installed with the following command:
@@ -184,7 +184,7 @@ tail -f 9988.log
 
 The easiest way to run the tangle network is in a standalone environment, in this case it operates as an independent chain without the need to connect to a relaychain. To run the tangle network as standalone, first create a release build
 
-`cargo b --release -p tangle-standalone-node`
+`cargo b --release -p tangle-standalone`
 
 Once the build is completed, you can run the setup script to launch a five node dkg chain with
 
@@ -317,7 +317,7 @@ We first generate the **genesis state** and **genesis wasm** needed for the para
 
 ```bash
 # Build the dkg node (from it's top level dir)
-cargo build --release -p tangle-collator
+cargo build --release -p tangle-parachain
 
 # The following instructions outline how to build chain spec,
 # wasm and genesis state for local setup. These files will be used
@@ -325,26 +325,26 @@ cargo build --release -p tangle-collator
 
 # Build local chainspec
 # You may also use the chainspec provided in ./resources  
-./target/release/tangle-collator build-spec \
+./target/release/tangle-parachain build-spec \
 --disable-default-bootnode > ./chainspecs/template-local-plain.json
 
 # Build the raw chainspec file
-./target/release/tangle-collator build-spec \
+./target/release/tangle-parachain build-spec \
 --chain=./chainspecs/template-local-plain.json \
 --raw --disable-default-bootnode > ./chainspecs/template-local-raw.json
 
 # Export genesis state to `./chainspecs`, using 2000 as the ParaId
-./target/release/tangle-collator export-genesis-state --chain=./chainspecs/template-local-raw.json > ./chainspecs/para-2000-genesis
+./target/release/tangle-parachain export-genesis-state --chain=./chainspecs/template-local-raw.json > ./chainspecs/para-2000-genesis
 
 # Export the genesis wasm
-./target/release/tangle-collator export-genesis-wasm > ./chainspecs/para-2000-wasm
+./target/release/tangle-parachain export-genesis-wasm > ./chainspecs/para-2000-wasm
 ```
 
 For building chainspec for Rococo Tangle Testnet you need to pass the chain argument during the intial build spec.
 
 ```
 # Note: This uses paraId 2076 and target Rococo relay chain
-./target/release/tangle-collator build-spec --disable-default-bootnode --chain=tangle-rococo > ./chainspecs/rococo-plain.json
+./target/release/tangle-parachain build-spec --disable-default-bootnode --chain=tangle-rococo > ./chainspecs/rococo-plain.json
 ```
 
 ### Start a Tangle Collator Node
@@ -356,7 +356,7 @@ From the dkg-substrate working directory:
 # that is at the same level of the template working directory. Change as needed.
 #
 # It also assumes a ParaId of 2000. Change as needed.
-./target/release/tangle-collator \
+./target/release/tangle-parachain \
 --base-path /tmp/parachain/alice \
 --collator \
 --alice \

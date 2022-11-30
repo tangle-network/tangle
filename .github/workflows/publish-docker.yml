@@ -19,8 +19,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - binary: tangle-standalone-node
-          - binary: tangle-collator
+          - binary: tangle-standalone
+          - binary: tangle-parachain
     permissions:
       contents: read
       packages: write

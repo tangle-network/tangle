@@ -1,0 +1,33 @@
+# Docker compose file to start tangle parachain collator that connects to tangle testnet
+
+version: "3.7"
+services:
+
+  tangle:
+    image: ghcr.io/webb-tools/tangle/tangle-standalone:${RELEASE_VERSION}
+    command:
+      - "--node-key"
+      - ${NODE_KEY}
+      - "--base-path"
+      - ${BASE_PATH}
+      - "--chain"
+      - ${CHAINSPEC_PATH}
+      - "--port"
+      - "30333"
+      - "--validator"
+      - "--bootnodes"
+      - "--unsafe-ws-external"
+      - "--unsafe-rpc-external"
+      - "--rpc-cors"
+      - "--prometheus-external"
+    ports:
+      - "9944:9944"
+      - "9615:9615"
+      - "9933:9933"
+    volumes:
+      - ${BASE_PATH}
+      - ${CHAINSPEC_PATH}
+
+networks:
+  network-a:
+  internet:
