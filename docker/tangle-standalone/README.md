@@ -10,6 +10,12 @@ Create a local directory to store the chain data:
 mkdir /var/lib/tangle/
 ```
 
+Download the latest chainspec for standalone testnet
+
+```bash
+https://github.com/webb-tools/tangle/blob/main/chainspecs/arana-alpha.json
+```
+
 ## Run via CLI :
 
 You can use the following command to pull the latest image and run from your CLI, remember to set `YOUR-NODE-NAME`

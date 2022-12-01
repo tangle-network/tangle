@@ -10,6 +10,11 @@ Create a local directory to store the chain data:
 mkdir /var/lib/tangle/
 ```
 
+Download the latest chainspec for parachain testnet
+
+```bash
+https://github.com/webb-tools/tangle/blob/main/chainspecs/tangle-parachain.json
+```
 
 ## Run via CLI :
 
