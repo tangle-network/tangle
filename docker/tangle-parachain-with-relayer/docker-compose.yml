@@ -21,14 +21,14 @@ services:
     restart: always
     command: /webb-relayer -vvv -c /config
 
-  tangle_collator:
+  tangle_parachain:
     # Here you should checkout
-    # https://github.com/webb-tools/tangle/pkgs/container/tangle-collator/versions?filters%5Bversion_type%5D=tagged
+    # https://github.com/webb-tools/tangle/pkgs/container/tangle-parachain/versions?filters%5Bversion_type%5D=tagged
     # For the latest stable version. Only use "main" if
     # you know what you are doing, it will use the latest and maybe
     # unstable version of the node.
     image: ghcr.io/webb-tools/tangle/tangle-parachain:${TANGLE_RELEASE_VERSION}
-    container_name: tangle_collator
+    container_name: tangle_parachain
     env_file: .env
     ports:
       - "30333:30333"
@@ -38,7 +38,7 @@ services:
     volumes:
       - tangle_data:/data
     restart: always
-    entrypoint: /tangle-collator
+    entrypoint: /tangle-parachain
     command:
       [
         "--base-path=/data",

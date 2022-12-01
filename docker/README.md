@@ -16,5 +16,5 @@ Execute the following script:
 Execute the following script:
 
 ```sh
-./scripts/build-collator-docker.sh
+./scripts/build-parachain-docker.sh
 ```

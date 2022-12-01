@@ -7,7 +7,7 @@ edition = "2021"
 homepage = "https://webb.tools"
 license = "Unlicense"
 repository = "https://github.com/webb-tools/tangle"
-description = "Webb Protocol Tangle Network parachain"
+description = "Webb Protocol Tangle Parachain Network"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
