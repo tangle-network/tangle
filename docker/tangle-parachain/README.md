@@ -16,7 +16,7 @@ mkdir /var/lib/tangle/
 You can use the following command to pull the latest image and run from your CLI, remember to set `YOUR-NODE-NAME` in two different places
 
 ```bash
-docker run --network="host" -v "/var/lib/data" \
+docker run --platform linux/amd64 --network="host" -v "/var/lib/data" --entrypoint ./tangle-parachain \
 ghcr.io/webb-tools/tangle/tangle-parachain:main \
 --base-path=/data \
 --chain dev \
@@ -37,11 +37,8 @@ Remember to customize your the values depending on your environment and then cop
 
 ```bash
 RELEASE_VERSION=main
-NODE_KEY=0000000000000000000000000000000000000000000000000000000000000001
 BASE_PATH=/var/lib/tangle/
 CHAINSPEC_PATH=/tmp/chainspec/
-LIBP2P_PORT=30334
-WS_PORT=9944
 ```
 
 After that run :

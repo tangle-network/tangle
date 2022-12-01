@@ -6,8 +6,6 @@ services:
   tangle:
     image: ghcr.io/webb-tools/tangle/tangle-standalone:${RELEASE_VERSION}
     command:
-      - "--node-key"
-      - ${NODE_KEY}
       - "--base-path"
       - ${BASE_PATH}
       - "--chain"
