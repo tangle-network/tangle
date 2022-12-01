@@ -5,27 +5,19 @@ services:
 
   tangle:
     image: ghcr.io/webb-tools/tangle/tangle-standalone:${RELEASE_VERSION}
+    network_mode: host
+    entrypoint: /tangle-standalone
     command:
-      - "--base-path"
-      - ${BASE_PATH}
       - "--chain"
-      - ${CHAINSPEC_PATH}
-      - "--port"
-      - "30333"
+      - "/var/lib/data/arana-alpha.json"
       - "--validator"
-      - "--bootnodes"
       - "--unsafe-ws-external"
       - "--unsafe-rpc-external"
-      - "--rpc-cors"
       - "--prometheus-external"
     ports:
       - "9944:9944"
       - "9615:9615"
       - "9933:9933"
+      - "30333:30333"
     volumes:
-      - ${BASE_PATH}
-      - ${CHAINSPEC_PATH}
-
-networks:
-  network-a:
-  internet:
+      - ${CHAINSPEC_PATH}:/var/lib/data/arana-alpha.json

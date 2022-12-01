@@ -37,7 +37,6 @@ Remember to customize your the values depending on your environment and then cop
 
 ```bash
 RELEASE_VERSION=main
-BASE_PATH=/var/lib/tangle/
 CHAINSPEC_PATH=/tmp/chainspec/
 ```
 

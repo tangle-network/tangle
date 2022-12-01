@@ -18,7 +18,7 @@ You can use the following command to pull the latest image and run from your CLI
 docker run --platform linux/amd64 --network="host" -v "/var/lib/data" --entrypoint ./tangle-standalone \
 ghcr.io/webb-tools/tangle/tangle-standalone:main \
 --base-path=/var/lib/tangle/ \
---chain arana-alpha \
+--chain <PATH_TO_CHAINSPEC> \
 --name="YOUR-NODE-NAME" \
 --execution wasm \
 --wasm-execution compiled \
@@ -32,11 +32,8 @@ The docker-compose file will spin up a container running tangle standalone node,
 Remember to customize your the values depending on your environment and then copy paste this to CLI.
 
 ```bash
-RELEASE_VERSION=main
-BASE_PATH=/var/lib/tangle/
-CHAINSPEC_PATH=/tmp/chainspec/
-LIBP2P_PORT=30334
-WS_PORT=9944
+export RELEASE_VERSION=main
+export CHAINSPEC_PATH=/tmp/chainspec
 ```
 
 After that run :
