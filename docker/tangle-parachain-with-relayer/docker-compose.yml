@@ -8,7 +8,7 @@ services:
     # For the latest stable version. Only use "edge" if
     # you know what you are doing, it will use the latest and maybe
     # unstable version of the relayer.
-    image: ghcr.io/webb-tools/relayer:0.5.0-rc1
+    image: ghcr.io/webb-tools/relayer:${RELAYER_RELEASE_VERSION}
     container_name: webb_relayer
     env_file: .env
     depends_on:
@@ -27,7 +27,7 @@ services:
     # For the latest stable version. Only use "main" if
     # you know what you are doing, it will use the latest and maybe
     # unstable version of the node.
-    image: ghcr.io/webb-tools/tangle/tangle-collator:main
+    image: ghcr.io/webb-tools/tangle/tangle-parachain:${TANGLE_RELEASE_VERSION}
     container_name: tangle_collator
     env_file: .env
     ports:
