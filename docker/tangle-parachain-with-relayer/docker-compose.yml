@@ -43,16 +43,9 @@ services:
       [
         "--base-path=/data",
         "--collator",
-        "--force-authoring",
         "--chain=/data/chainspecs/parachain.json",
-        "--ws-external",
-        "--rpc-external",
-        "--unsafe-rpc-external",
-        "--rpc-methods=unsafe",
-        "--rpc-cors=all",
         "--",
         "--execution=wasm",
-        "--chain=/data/chainspecs/relaychain.json",
       ]
 
 volumes:

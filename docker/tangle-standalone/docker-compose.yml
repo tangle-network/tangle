@@ -11,8 +11,6 @@ services:
       - "--chain"
       - "/var/lib/data/arana-alpha.json"
       - "--validator"
-      - "--unsafe-ws-external"
-      - "--unsafe-rpc-external"
       - "--prometheus-external"
     ports:
       - "9944:9944"

@@ -28,7 +28,6 @@ ghcr.io/webb-tools/tangle/tangle-parachain:main \
 --name="YOUR-NODE-NAME" \
 --execution wasm \
 --wasm-execution compiled \
---state-pruning archive \
 --trie-cache-size 0 \
 -- \
 --execution wasm \

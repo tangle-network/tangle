@@ -26,9 +26,6 @@ ghcr.io/webb-tools/tangle/tangle-standalone:main \
 --base-path=/var/lib/tangle/ \
 --chain <PATH_TO_CHAINSPEC> \
 --name="YOUR-NODE-NAME" \
---execution wasm \
---wasm-execution compiled \
---state-pruning archive \
 --trie-cache-size 0
 ```
 
