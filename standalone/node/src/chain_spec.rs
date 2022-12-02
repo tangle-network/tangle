@@ -100,6 +100,8 @@ pub fn development_config() -> Result<ChainSpec, String> {
 					authority_keys_from_seed("Alice", "Alice//stash"),
 					authority_keys_from_seed("Bob", "Bob//stash"),
 					authority_keys_from_seed("Charlie", "Charlie//stash"),
+					authority_keys_from_seed("Dave", "Dave//stash"),
+					authority_keys_from_seed("Eve", "Eve//stash"),
 				],
 				vec![],
 				// Sudo account
@@ -179,6 +181,8 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					authority_keys_from_seed("Alice", "Alice//stash"),
 					authority_keys_from_seed("Bob", "Bob//stash"),
 					authority_keys_from_seed("Charlie", "Charlie//stash"),
+					authority_keys_from_seed("Dave", "Dave//stash"),
+					authority_keys_from_seed("Eve", "Eve//stash"),
 				],
 				vec![],
 				// Sudo account

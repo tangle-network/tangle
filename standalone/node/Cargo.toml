@@ -1,5 +1,5 @@
 [package]
-name = "tangle-standalone-node"
+name = "tangle-standalone"
 version = "1.0.0"
 authors = ["Webb Technologies Inc."]
 build = "build.rs"
@@ -15,7 +15,7 @@ description = "A fresh FRAME-based Substrate node, ready for hacking."
 wasm-opt = false
 
 [[bin]]
-name = "tangle-standalone-node"
+name = "tangle-standalone"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

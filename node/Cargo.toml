@@ -1,5 +1,5 @@
 [package]
-name = "tangle-collator"
+name = "tangle-parachain"
 version = "3.0.0"
 authors = ["Webb Developers"]
 build = "build.rs"
@@ -7,7 +7,7 @@ edition = "2021"
 homepage = "https://webb.tools"
 license = "Unlicense"
 repository = "https://github.com/webb-tools/tangle"
-description = "Webb Protocol Tangle Network Collator"
+description = "Webb Protocol Tangle Parachain Network"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -16,7 +16,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 substrate-build-script-utils = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30" }
 
 [[bin]]
-name = "tangle-collator"
+name = "tangle-parachain"
 
 [features]
 default = []

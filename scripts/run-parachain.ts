@@ -44,7 +44,7 @@ let state: ScrtipState = defaultState;
 localStorage.setItem("relayChainPath", state.relayChainPath);
 
 const parachainPath = await Deno.realPath(
-  `${state.rootDir}/target/release/tangle-collator`,
+  `${state.rootDir}/target/release/tangle-parachain`,
 );
 const relayChainPath: string = await Input.prompt({
   message: "Relay chain path?",

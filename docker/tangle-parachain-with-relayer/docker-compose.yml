@@ -1,0 +1,63 @@
+# This an example of a docker compose file which contains both Relayer and Tangle Node.
+version: "3"
+
+services:
+  webb_relayer:
+    # Here you should checkout
+    # https://github.com/webb-tools/relayer/pkgs/container/relayer/versions?filters%5Bversion_type%5D=tagged
+    # For the latest stable version. Only use "edge" if
+    # you know what you are doing, it will use the latest and maybe
+    # unstable version of the relayer.
+    image: ghcr.io/webb-tools/relayer:${RELAYER_RELEASE_VERSION}
+    container_name: webb_relayer
+    env_file: .env
+    depends_on:
+      - caddy
+    ports:
+      - "$WEBB_PORT:$WEBB_PORT"
+    volumes:
+      - $PWD/config:/config
+      - relayer_data:/store
+    restart: always
+    command: /webb-relayer -vvv -c /config
+
+  tangle_parachain:
+    # Here you should checkout
+    # https://github.com/webb-tools/tangle/pkgs/container/tangle-parachain/versions?filters%5Bversion_type%5D=tagged
+    # For the latest stable version. Only use "main" if
+    # you know what you are doing, it will use the latest and maybe
+    # unstable version of the node.
+    image: ghcr.io/webb-tools/tangle/tangle-parachain:${TANGLE_RELEASE_VERSION}
+    container_name: tangle_parachain
+    env_file: .env
+    ports:
+      - "30333:30333"
+      - "9933:9933"
+      - "9944:9944"
+      - "9615:9615"
+    volumes:
+      - tangle_data:/data
+    restart: always
+    entrypoint: /tangle-parachain
+    command:
+      [
+        "--base-path=/data",
+        "--collator",
+        "--chain=/data/chainspecs/parachain.json",
+        "--",
+        "--execution=wasm",
+      ]
+
+volumes:
+  relayer_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $PWD/relayer/data
+  tangle_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $PWD/tangle/collator

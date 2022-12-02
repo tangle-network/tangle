@@ -1,0 +1,21 @@
+# Docker compose file to start tangle parachain collator that connects to tangle testnet
+
+version: "3.7"
+services:
+
+  tangle:
+    image: ghcr.io/webb-tools/tangle/tangle-standalone:${RELEASE_VERSION}
+    network_mode: host
+    entrypoint: /tangle-standalone
+    command:
+      - "--chain"
+      - "/var/lib/data/arana-alpha.json"
+      - "--validator"
+      - "--prometheus-external"
+    ports:
+      - "9944:9944"
+      - "9615:9615"
+      - "9933:9933"
+      - "30333:30333"
+    volumes:
+      - ${CHAINSPEC_PATH}:/var/lib/data/arana-alpha.json

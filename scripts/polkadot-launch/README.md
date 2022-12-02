@@ -17,7 +17,7 @@ cargo build --release
 Build Tangle parachain:
 
 ```bash
-cargo build --release --p tangle-collator
+cargo build --release --p tangle-parachain
 ```
 
 Update `dkg-launch.json` to relevant paths for Polkadot and Parachain binary.
