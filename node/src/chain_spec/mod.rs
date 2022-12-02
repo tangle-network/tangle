@@ -320,38 +320,20 @@ pub fn tangle_minerva_config(id: ParaId) -> ChainSpec {
 				// root
 				minerva::get_testnet_root_key(),
 				// invulnerables
-				generate_invulnerables::<[u8; 32]>(&[
-					(
-						// publickey
-						hex!["a62a5c2e22ebd14273f1e6552ba0ee07937ff3d859f53475296bbcbb8af1752e"],
-						// DKG key --scheme Ecdsa
-						hex!["03fd0f9d6e4ef6eeb0718866a43c04764177f3fc03203e9ff7ed4dd2885cb52943"]
-							.unchecked_into(),
-					),
-					(
-						// publickey
-						hex!["6850cc5d0369d11f93c820b91f7bfed4f6fc8b3a5f70a80171183129face154b"],
-						// DKG key --scheme Ecdsa
-						hex!["03ae1a02a91d59ff20ece458640afbbb672b9335f7da4c9f7d699129d431680ae9"]
-							.unchecked_into(),
-					),
-					(
-						// publickey
-						hex!["1469f5f6719beaa0a7364259e5fb10846a4457f181807a0c00a6a9cdf14a260d"],
-						// DKG key --scheme Ecdsa
-						hex!["0252abf0dd2ed408700de539fd65dfc2f6d201e76a4c2e19b875d7b3176a468b0f"]
-							.unchecked_into(),
-					),
-				]),
+				minerva::get_testnet_initial_authorities(),
 				vec![
-					// aura accounts
-					hex!["a62a5c2e22ebd14273f1e6552ba0ee07937ff3d859f53475296bbcbb8af1752e"].into(),
-					hex!["6850cc5d0369d11f93c820b91f7bfed4f6fc8b3a5f70a80171183129face154b"].into(),
-					hex!["1469f5f6719beaa0a7364259e5fb10846a4457f181807a0c00a6a9cdf14a260d"].into(),
-					// acco accounts
-					hex!["703ba5a042652271121c13137a4b1f3bc237c79e44beb1cad069d194f66e1131"].into(),
-					hex!["c0005f98dec97a11a8537735c4dfc9edc253cc4914b86830af11b2a9b132897b"].into(),
-					hex!["a43f0787f3156b00b30ccc19462146b8a3481e85dcdfc2a9ccb4b16347b65e69"].into(),
+					// collator accounts
+					hex!["66f07ce0432d73995e3c37afb65aed10d72c872400282d87e23c7cbbf7be5a4e"].into(),
+					hex!["0cffebaeb8ba50c523ec6a8ed518d534c1e27cd6f692d4d28618e3256a880412"].into(),
+					hex!["3c845c875a53061c8efbe6b149966a105f95097b49280256f65fd994686ed341"].into(),
+					hex!["a80afbb2600998b2858e011a1a74e9aa92d8b8edc31ec54253c43d7eafef0675"].into(),
+					hex!["3874c16c9855de4791f363d5779dab4cd8e71f21b62494288344002e3a031265"].into(),
+					// relayer accounts
+					hex!["b6806626f5e4490c27a4ccffed4fed513539b6a455b14b32f58878cf7c5c4e68"].into(),
+					hex!["22203dbd79c7ef6ce6bd7ec9b1f4d87425b1db0ab827543d3c7ce3f6a0749005"].into(),
+					hex!["6a682aa89827a4028c9f1c2612fb1caa63957a892c7b05659b4e4f46b669b10d"].into(),
+					hex!["6abe9075d17ca10075c1f8c11169009334f567e12047c80712fdc499cad8e026"].into(),
+					hex!["d85cbc2e3242d5264a020cef8d577b4022e08fa3295423604d4cc2d12bfc906f"].into(),
 				],
 				id,
 			)
