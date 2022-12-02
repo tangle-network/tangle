@@ -12818,7 +12818,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tangle-collator"
+name = "tangle-parachain"
 version = "3.0.0"
 dependencies = [
  "ark-bn254",
@@ -13015,7 +13015,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tangle-standalone-node"
+name = "tangle-standalone"
 version = "1.0.0"
 dependencies = [
  "ark-bls12-381",

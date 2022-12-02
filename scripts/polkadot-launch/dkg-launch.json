@@ -28,7 +28,7 @@
 	},
 	"parachains": [
 		{
-			"bin": "../../target/release/tangle-collator",
+			"bin": "../../target/release/tangle-parachain",
 			"chain": "dev",
 			"nodes": [
 				{

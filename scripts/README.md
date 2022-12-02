@@ -9,7 +9,7 @@ For running a standalone tangle network, Here are the steps that you need to fol
 
 1. Compile the standalone in the `release` mode:
 ```sh
-cargo b -rp tangle-standalone-node
+cargo b -rp tangle-standalone
 ```
 2. Execute the `run-standalone.sh` script:
 ```sh
@@ -42,7 +42,7 @@ cargo build --release
 ```
 2. Compile the Parachain collator binary:
 ```sh
-cargo b -rp tangle-collator
+cargo b -rp tangle-parachain
 ```
 3. Install [Deno](https://deno.land) (if it is not installed):
   * Mac: `brew install deno`

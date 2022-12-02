@@ -67,8 +67,8 @@ services:
       expose:
         - ${PORT_RELAY_BOB_LIBP2P}
 
-  tangle-collator:  
-    image: "ghcr.io/webb-tools/tangle/tangle-collator:main"
+  tangle-parachain:  
+    image: "ghcr.io/webb-tools/tangle/tangle-parachain:main"
     volumes:
       - ./specs:/data/spec/
       - /data
