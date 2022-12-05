@@ -75,6 +75,7 @@ sc-service = { git = "https://github.com/paritytech/substrate", branch = "polkad
 sc-sysinfo = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30" }
 sc-telemetry = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30" }
 sc-tracing = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30" }
+sc-network-common = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30" }
 sc-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30" }
 sc-transaction-pool-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30" }
 sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.30" }

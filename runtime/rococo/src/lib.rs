@@ -205,7 +205,6 @@ impl_opaque_keys! {
 		pub dkg: DKG,
 		pub nimbus: AuthorInherentWithNoOpSession<Runtime>,
 		pub vrf: VrfWithNoOpSession,
-		pub im_online: ImOnline,
 	}
 }
 

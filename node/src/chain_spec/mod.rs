@@ -14,7 +14,6 @@
 
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
-use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use hex_literal::hex;
 use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
@@ -35,7 +34,7 @@ use tangle_rococo_runtime::{
 };
 
 pub mod rococo;
-mod minerva;
+pub mod minerva_testnet_fixtures;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<tangle_rococo_runtime::GenesisConfig, Extensions>;
@@ -86,9 +85,9 @@ pub fn get_vrf_keys_from_seed(seed: &str) -> VrfId {
 ///
 /// This function's return type must always match the session keys of the chain
 /// in tuple format.
-pub fn get_im_online_keys_from_seed(seed: &str) -> ImOnlineId {
-	get_from_seed::<ImOnlineId>(seed)
-}
+// pub fn get_im_online_keys_from_seed(seed: &str) -> ImOnlineId {
+// 	get_from_seed::<ImOnlineId>(seed)
+// }
 
 
 /// Generate the session keys from individual elements.
@@ -100,14 +99,12 @@ pub fn dkg_session_keys(
 	dkg_keys: DKGId,
 	nimbus_key: NimbusId,
 	vrf_key: VrfId,
-	im_online_key: ImOnlineId,
 ) -> tangle_rococo_runtime::SessionKeys {
 	tangle_rococo_runtime::SessionKeys {
 		aura: keys,
 		dkg: dkg_keys,
 		nimbus: nimbus_key,
 		vrf: vrf_key,
-		im_online: im_online_key,
 	}
 }
 
@@ -182,7 +179,6 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 						get_dkg_keys_from_seed("Alice"),
 						get_nimbus_keys_from_seed("Alice"),
 						get_vrf_keys_from_seed("Alice"),
-						get_im_online_keys_from_seed("Alice"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -190,7 +186,6 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 						get_dkg_keys_from_seed("Bob"),
 						get_nimbus_keys_from_seed("Bob"),
 						get_vrf_keys_from_seed("Bob"),
-						get_im_online_keys_from_seed("Bob"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Charlie"),
@@ -198,7 +193,6 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 						get_dkg_keys_from_seed("Charlie"),
 						get_nimbus_keys_from_seed("Charlie"),
 						get_vrf_keys_from_seed("Charlie"),
-						get_im_online_keys_from_seed("Charlie"),
 					),
 				],
 				vec![
@@ -318,9 +312,9 @@ pub fn tangle_minerva_config(id: ParaId) -> ChainSpec {
 		move || {
 			testnet_genesis(
 				// root
-				minerva::get_testnet_root_key(),
+				minerva_testnet_fixtures::get_testnet_root_key(),
 				// invulnerables
-				minerva::get_testnet_initial_authorities(),
+				minerva_testnet_fixtures::get_testnet_initial_authorities(),
 				vec![
 					// collator accounts
 					hex!["66f07ce0432d73995e3c37afb65aed10d72c872400282d87e23c7cbbf7be5a4e"].into(),
@@ -339,7 +333,7 @@ pub fn tangle_minerva_config(id: ParaId) -> ChainSpec {
 			)
 		},
 		// Bootnodes
-		minerva::get_testnet_bootnodes(),
+		minerva_testnet_fixtures::get_testnet_bootnodes(),
 		// Telemetry
 		None,
 		// Protocol ID
@@ -410,11 +404,11 @@ fn testnet_genesis(
 			keys: invulnerables
 				.iter()
 				.cloned()
-				.map(|(acc, aura, dkg, nimbus, vrf, im_online)| {
+				.map(|(acc, aura, dkg, nimbus, vrf)| {
 					(
 						acc.clone(),                              // account id
 						acc,                                      // validator id
-						dkg_session_keys(aura, dkg, nimbus, vrf, im_online), // session keys
+						dkg_session_keys(aura, dkg, nimbus, vrf), // session keys
 					)
 				})
 				.collect(),

@@ -63,7 +63,7 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
 		"tangle-rococo" => Box::new(chain_spec::rococo::tangle_rococo_config(4006.into())),
 		// Currently tangle-minerva testnet
 		// TODO : Switch to kusama runtime once we have it
-		"tangle" => Box::new(chain_spec::rococo::tangle_minerva_config(2000.into())),
+		"tangle" => Box::new(chain_spec::tangle_minerva_config(2000.into())),
 		"" | "tangle-local" => Box::new(chain_spec::local_testnet_config(2000.into())),
 		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})

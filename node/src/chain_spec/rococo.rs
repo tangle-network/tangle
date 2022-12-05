@@ -218,11 +218,11 @@ fn rococo_genesis(
 			keys: invulnerables
 				.iter()
 				.cloned()
-				.map(|(acc, aura, dkg, nimbus, vrf, im_online)| {
+				.map(|(acc, aura, dkg, nimbus, vrf)| {
 					(
 						acc.clone(),                              // account id
 						acc,                                      // validator id
-						dkg_session_keys(aura, dkg, nimbus, vrf, im_online), // session keys
+						dkg_session_keys(aura, dkg, nimbus, vrf), // session keys
 					)
 				})
 				.collect(),
