@@ -33,8 +33,8 @@ use tangle_rococo_runtime::{
 	Signature, VAnchorBn254Config, VAnchorVerifierConfig, HOURS, MILLIUNIT, UNIT,
 };
 
-pub mod rococo;
 pub mod minerva_testnet_fixtures;
+pub mod rococo;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<tangle_rococo_runtime::GenesisConfig, Extensions>;
@@ -88,7 +88,6 @@ pub fn get_vrf_keys_from_seed(seed: &str) -> VrfId {
 // pub fn get_im_online_keys_from_seed(seed: &str) -> ImOnlineId {
 // 	get_from_seed::<ImOnlineId>(seed)
 // }
-
 
 /// Generate the session keys from individual elements.
 ///

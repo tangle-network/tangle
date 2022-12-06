@@ -15,12 +15,11 @@
 //! Testnet fixtures
 use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 use hex_literal::hex;
+use nimbus_primitives::NimbusId;
 use sc_network_common::config::MultiaddrWithPeerId;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::crypto::UncheckedInto;
-use tangle_rococo_runtime::AccountId;
-use nimbus_primitives::NimbusId;
-use tangle_rococo_runtime::nimbus_session_adapter::VrfId;
+use tangle_rococo_runtime::{nimbus_session_adapter::VrfId, AccountId};
 
 /// Testnet root key
 pub fn get_testnet_root_key() -> AccountId {
@@ -44,14 +43,14 @@ pub fn get_testnet_bootnodes() -> Vec<MultiaddrWithPeerId> {
 }
 
 /// Arana initial authorities
-pub fn get_testnet_initial_authorities(
-) -> Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId)> {
+pub fn get_testnet_initial_authorities() -> Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId)> {
 	vec![
 		(
 			// AccountId
 			hex!["66f07ce0432d73995e3c37afb65aed10d72c872400282d87e23c7cbbf7be5a4e"].into(),
 			// AuraId
-			hex!["b01fc4d7a9f4af40f92329e5fb6e26cda9cb279058d4e21db4234f61fd4e3667"].unchecked_into(),
+			hex!["b01fc4d7a9f4af40f92329e5fb6e26cda9cb279058d4e21db4234f61fd4e3667"]
+				.unchecked_into(),
 			// DKGId
 			hex!["03ca5523f8d8193e7689afaef8f3eda11f489c3e2bfbeed662bb1e9fb42a426720"]
 				.unchecked_into(),
@@ -68,7 +67,8 @@ pub fn get_testnet_initial_authorities(
 			// AccountId
 			hex!["0cffebaeb8ba50c523ec6a8ed518d534c1e27cd6f692d4d28618e3256a880412"].into(),
 			// AuraId
-			hex!["e2b50d14718d578abdbf3ea05498faf6caca79f426556bc10c49a946adc2da24"].unchecked_into(),
+			hex!["e2b50d14718d578abdbf3ea05498faf6caca79f426556bc10c49a946adc2da24"]
+				.unchecked_into(),
 			// DKGId
 			hex!["02d4df6225d731c367c788c64329d8c2cf0a4d675cf197025cb7be5e6ef32ffce1"]
 				.unchecked_into(),
@@ -85,7 +85,8 @@ pub fn get_testnet_initial_authorities(
 			// AccountId
 			hex!["3c845c875a53061c8efbe6b149966a105f95097b49280256f65fd994686ed341"].into(),
 			// AuraId
-			hex!["3e57249065e9f8b10ef781bc33d7664d1c774b1a4113bd28219fd0e85fb0b300"].unchecked_into(),
+			hex!["3e57249065e9f8b10ef781bc33d7664d1c774b1a4113bd28219fd0e85fb0b300"]
+				.unchecked_into(),
 			// DKGId
 			hex!["02e09de80f861c948a89b3f5b03b6bb681b19937a70ef5e51c63443d1d382bef8e"]
 				.unchecked_into(),
@@ -102,7 +103,8 @@ pub fn get_testnet_initial_authorities(
 			// AccountId
 			hex!["a80afbb2600998b2858e011a1a74e9aa92d8b8edc31ec54253c43d7eafef0675"].into(),
 			// AuraId
-			hex!["58ccb55e6bbb006b6c038e9c8a3ae44207557513b60cc23a9bbc7d4a43aee66a"].unchecked_into(),
+			hex!["58ccb55e6bbb006b6c038e9c8a3ae44207557513b60cc23a9bbc7d4a43aee66a"]
+				.unchecked_into(),
 			// DKGId
 			hex!["027626be18e28dc3122755b3361d48dc7d934f069cef37fc57cc7d0e15d7bf4eaa"]
 				.unchecked_into(),
@@ -119,7 +121,8 @@ pub fn get_testnet_initial_authorities(
 			// AccountId
 			hex!["3874c16c9855de4791f363d5779dab4cd8e71f21b62494288344002e3a031265"].into(),
 			// AuraId
-			hex!["406c44535d620b5c029f8cf4f5754e9108c56c325d985858311346ebbad8fe05"].unchecked_into(),
+			hex!["406c44535d620b5c029f8cf4f5754e9108c56c325d985858311346ebbad8fe05"]
+				.unchecked_into(),
 			// DKGId
 			hex!["02607f79f4f15b54065d08b2b028708e8963bf95895d3efebea17c79d284e8b609"]
 				.unchecked_into(),
