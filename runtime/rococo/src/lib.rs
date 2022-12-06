@@ -1100,21 +1100,37 @@ impl_runtime_apis! {
 	}
 
 	impl nimbus_primitives::NimbusApi<Block> for Runtime {
-		fn can_author(author: NimbusId, relay_parent: u32, _parent_header: &<Block as BlockT>::Header) -> bool {
-			use nimbus_primitives::CanAuthor;
-			use nimbus_primitives::AccountLookup;
-			let slot = relay_parent;
-
-			let account = match pallet_parachain_staking::Pallet::<Self>::lookup_account(&author) {
-				Some(account) => account,
-				// Authors whose account lookups fail will not be eligible
-				None => {
-					return false;
-				}
-			};
-			pallet_parachain_staking::Pallet::<Self>::can_author(&account, &slot)
-		}
-	}
+        fn can_author(author: NimbusId, relay_parent: u32, parent_header: &<Block as BlockT>::Header) -> bool {
+			use pallet_session::ShouldEndSession;
+            let next_block_number = parent_header.number + 1;
+            let slot = relay_parent;
+            // Because the staking solution calculates the next staking set at the beginning
+            // of the first block in the new round, the only way to accurately predict the
+            // authors is to compute the selection during prediction.
+            // NOTE: This logic must manually be kept in sync with the nimbus filter pipeline
+            if pallet_dkg_metadata::DKGPeriodicSessions::<Period, Offset, Runtime>::should_end_session(next_block_number)
+            {
+                // lookup account from nimbusId
+                // mirrors logic in `pallet_author_inherent`
+                use nimbus_primitives::AccountLookup;
+                let account = match pallet_parachain_staking::Pallet::<Self>::lookup_account(&author) {
+                    Some(account) => account,
+                    // Authors whose account lookups fail will not be eligible
+                    None => {
+                        return false;
+                    }
+                };
+                // manually check aura eligibility (in the new round)
+                // mirrors logic in `aura_style_filter`
+                let truncated_half_slot = (slot >> 1) as usize;
+                let active: Vec<AccountId> = pallet_parachain_staking::Pallet::<Self>::compute_top_candidates();
+                account == active[truncated_half_slot % active.len()]
+            } else {
+                // We're not changing rounds, `PotentialAuthors` is not changing, just use can_author
+                <AuthorInherent as nimbus_primitives::CanAuthor<_>>::can_author(&author, &relay_parent)
+            }
+        }
+    }
 
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
