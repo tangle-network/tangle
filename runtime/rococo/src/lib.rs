@@ -808,7 +808,7 @@ construct_runtime!(
 		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 3,
 
 		// DKG / offchain worker - the order and position of these pallet should not change
-		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>} = 10,
+		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>, ValidateUnsigned} = 10,
 		DKGProposals: pallet_dkg_proposals = 11,
 		DKGProposalHandler: pallet_dkg_proposal_handler = 12,
 
