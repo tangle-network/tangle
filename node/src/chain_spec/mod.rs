@@ -28,11 +28,13 @@ use sp_runtime::{
 };
 use tangle_rococo_runtime::{
 	nimbus_session_adapter::{NimbusId, VrfId},
-	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
-	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, ParachainStakingConfig,
-	Signature, VAnchorBn254Config, VAnchorVerifierConfig, HOURS, MILLIUNIT, UNIT,
+	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
+	ImOnlineId, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
+	ParachainStakingConfig, Signature, VAnchorBn254Config, VAnchorVerifierConfig, HOURS, MILLIUNIT,
+	UNIT,
 };
 
+pub mod minerva_testnet_fixtures;
 pub mod rococo;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -80,6 +82,14 @@ pub fn get_vrf_keys_from_seed(seed: &str) -> VrfId {
 	get_from_seed::<VrfId>(seed)
 }
 
+/// Generate ImOnline keys from seed.
+///
+/// This function's return type must always match the session keys of the chain
+/// in tuple format.
+pub fn get_im_online_keys_from_seed(seed: &str) -> ImOnlineId {
+	get_from_seed::<ImOnlineId>(seed)
+}
+
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
@@ -89,12 +99,14 @@ pub fn dkg_session_keys(
 	dkg_keys: DKGId,
 	nimbus_key: NimbusId,
 	vrf_key: VrfId,
+	im_online: ImOnlineId,
 ) -> tangle_rococo_runtime::SessionKeys {
 	tangle_rococo_runtime::SessionKeys {
 		aura: keys,
 		dkg: dkg_keys,
 		nimbus: nimbus_key,
 		vrf: vrf_key,
+		im_online,
 	}
 }
 
@@ -128,7 +140,7 @@ where
 /// Convert public keys to Acco, Aura and DKG keys
 fn generate_invulnerables<PK: Clone + Into<AccountId>>(
 	public_keys: &[(PK, DKGId)],
-) -> Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId)> {
+) -> Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId, ImOnlineId)> {
 	public_keys
 		.iter()
 		.map(|pk| {
@@ -140,8 +152,9 @@ fn generate_invulnerables<PK: Clone + Into<AccountId>>(
 			let sr25519_as_bytes: [u8; 32] = aura_as_sr25519.into();
 			let vrf_id: VrfId = sr25519::Public::unchecked_from(sr25519_as_bytes).into();
 			let nimbus_id: NimbusId = sr25519::Public::unchecked_from(sr25519_as_bytes).into();
+			let im_online: ImOnlineId = sr25519::Public::unchecked_from(sr25519_as_bytes).into();
 
-			(account, aura_id, pk.clone().1, nimbus_id, vrf_id)
+			(account, aura_id, pk.clone().1, nimbus_id, vrf_id, im_online)
 		})
 		.collect()
 }
@@ -169,6 +182,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 						get_dkg_keys_from_seed("Alice"),
 						get_nimbus_keys_from_seed("Alice"),
 						get_vrf_keys_from_seed("Alice"),
+						get_im_online_keys_from_seed("Alice"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -176,6 +190,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 						get_dkg_keys_from_seed("Bob"),
 						get_nimbus_keys_from_seed("Bob"),
 						get_vrf_keys_from_seed("Bob"),
+						get_im_online_keys_from_seed("Bob"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Charlie"),
@@ -183,6 +198,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 						get_dkg_keys_from_seed("Charlie"),
 						get_nimbus_keys_from_seed("Charlie"),
 						get_vrf_keys_from_seed("Charlie"),
+						get_im_online_keys_from_seed("Charlie"),
 					),
 				],
 				vec![
@@ -286,9 +302,63 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 	)
 }
 
+pub fn tangle_minerva_config(id: ParaId) -> ChainSpec {
+	// Give your base currency a unit name and decimal places
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "tTNT".into());
+	properties.insert("tokenDecimals".into(), 12u32.into());
+	properties.insert("ss58Format".into(), 42.into());
+
+	ChainSpec::from_genesis(
+		// Name
+		"Tangle",
+		// ID
+		"tangle",
+		ChainType::Local,
+		move || {
+			testnet_genesis(
+				// root
+				minerva_testnet_fixtures::get_testnet_root_key(),
+				// invulnerables
+				minerva_testnet_fixtures::get_testnet_initial_authorities(),
+				vec![
+					// collator accounts
+					hex!["66f07ce0432d73995e3c37afb65aed10d72c872400282d87e23c7cbbf7be5a4e"].into(),
+					hex!["0cffebaeb8ba50c523ec6a8ed518d534c1e27cd6f692d4d28618e3256a880412"].into(),
+					hex!["3c845c875a53061c8efbe6b149966a105f95097b49280256f65fd994686ed341"].into(),
+					hex!["a80afbb2600998b2858e011a1a74e9aa92d8b8edc31ec54253c43d7eafef0675"].into(),
+					hex!["3874c16c9855de4791f363d5779dab4cd8e71f21b62494288344002e3a031265"].into(),
+					// relayer accounts
+					hex!["b6806626f5e4490c27a4ccffed4fed513539b6a455b14b32f58878cf7c5c4e68"].into(),
+					hex!["22203dbd79c7ef6ce6bd7ec9b1f4d87425b1db0ab827543d3c7ce3f6a0749005"].into(),
+					hex!["6a682aa89827a4028c9f1c2612fb1caa63957a892c7b05659b4e4f46b669b10d"].into(),
+					hex!["6abe9075d17ca10075c1f8c11169009334f567e12047c80712fdc499cad8e026"].into(),
+					hex!["d85cbc2e3242d5264a020cef8d577b4022e08fa3295423604d4cc2d12bfc906f"].into(),
+				],
+				id,
+			)
+		},
+		// Bootnodes
+		minerva_testnet_fixtures::get_testnet_bootnodes(),
+		// Telemetry
+		None,
+		// Protocol ID
+		Some("tangle"),
+		// Fork ID
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		Extensions {
+			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
+			para_id: id.into(),
+		},
+	)
+}
+
 fn testnet_genesis(
 	root_key: AccountId,
-	invulnerables: Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId)>,
+	invulnerables: Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId, ImOnlineId)>,
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
 ) -> tangle_rococo_runtime::GenesisConfig {
@@ -340,11 +410,11 @@ fn testnet_genesis(
 			keys: invulnerables
 				.iter()
 				.cloned()
-				.map(|(acc, aura, dkg, nimbus, vrf)| {
+				.map(|(acc, aura, dkg, nimbus, vrf, im_online)| {
 					(
-						acc.clone(),                              // account id
-						acc,                                      // validator id
-						dkg_session_keys(aura, dkg, nimbus, vrf), // session keys
+						acc.clone(),                                         // account id
+						acc,                                                 // validator id
+						dkg_session_keys(aura, dkg, nimbus, vrf, im_online), // session keys
 					)
 				})
 				.collect(),
@@ -397,7 +467,7 @@ fn testnet_genesis(
 			candidates: invulnerables
 				.iter()
 				.cloned()
-				.map(|(account, _, _, _, _)| {
+				.map(|(account, _, _, _, _, _)| {
 					(account, tangle_rococo_runtime::staking::NORMAL_COLLATOR_MINIMUM_STAKE)
 				})
 				.collect(),
@@ -409,5 +479,6 @@ fn testnet_genesis(
 			parachain_bond_reserve_percent: PARACHAIN_BOND_RESERVE_PERCENT,
 			blocks_per_round: BLOCKS_PER_ROUND,
 		},
+		im_online: ImOnlineConfig { keys: vec![] },
 	}
 }

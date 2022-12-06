@@ -61,8 +61,9 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
 		"tangle-alpha" => Box::new(chain_spec::rococo::tangle_alpha_config(2000.into())),
 		/* Rococo para-id 4006 */
 		"tangle-rococo" => Box::new(chain_spec::rococo::tangle_rococo_config(4006.into())),
+		// Currently tangle-minerva testnet
 		// TODO : Switch to kusama runtime once we have it
-		"tangle" => Box::new(chain_spec::rococo::tangle_rococo_config(4006.into())),
+		"tangle" => Box::new(chain_spec::tangle_minerva_config(2000.into())),
 		"" | "tangle-local" => Box::new(chain_spec::local_testnet_config(2000.into())),
 		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})
@@ -70,7 +71,7 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Tangle Collator".into()
+		"Tangle Parachain".into()
 	}
 
 	fn impl_version() -> String {
@@ -78,7 +79,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn description() -> String {
-		"Tangle Collator\n\nThe command-line arguments provided first will be \
+		"Tangle Parachain\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relay chain node.\n\n\
 		parachain-collator <parachain-args> -- <relay-chain-args>"
@@ -110,7 +111,7 @@ impl SubstrateCli for Cli {
 
 impl SubstrateCli for RelayChainCli {
 	fn impl_name() -> String {
-		"Tangle Collator".into()
+		"Tangle Parachain".into()
 	}
 
 	fn impl_version() -> String {
@@ -118,7 +119,7 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn description() -> String {
-		"Tangle Collator\n\nThe command-line arguments provided first will be \
+		"Tangle Parachain\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relay chain node.\n\n\
 		parachain-collator <parachain-args> -- <relay-chain-args>"

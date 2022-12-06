@@ -568,8 +568,8 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 
 parameter_types! {
 	// phase durations. 1/4 of the last session for each.
-	pub const SignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS as u32 / 4;
-	pub const UnsignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS as u32 / 4;
+	pub const SignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS / 4;
+	pub const UnsignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS / 4;
 
 	// signed config
 	pub const SignedRewardBase: Balance = UNIT;

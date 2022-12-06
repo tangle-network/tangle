@@ -27,6 +27,7 @@ pub mod xcm_config;
 
 use codec::Encode;
 use dkg_runtime_primitives::{TypedChainId, UnsignedProposal};
+use frame_support::pallet_prelude::TransactionPriority;
 use pallet_dkg_proposals::DKGEcdsaToEthereum;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
@@ -46,7 +47,10 @@ use sp_version::RuntimeVersion;
 pub mod benchmarking;
 
 use frame_support::weights::ConstantMultiplier;
+
+pub use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_linkable_tree::types::EdgeMetadata;
+use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use sp_runtime::{FixedPointNumber, Perquintill};
 use webb_primitives::{
@@ -203,6 +207,7 @@ impl_opaque_keys! {
 		pub dkg: DKG,
 		pub nimbus: AuthorInherentWithNoOpSession<Runtime>,
 		pub vrf: VrfWithNoOpSession,
+		pub im_online: ImOnline,
 	}
 }
 
@@ -364,15 +369,20 @@ parameter_types! {
 impl pallet_session::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Keys = SessionKeys;
-	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
 	// Essentially just Aura, but lets be pedantic.
 	type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
 	type SessionManager = ParachainStaking;
-	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
+	type ShouldEndSession = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
 	type ValidatorId = <Self as frame_system::Config>::AccountId;
 	// we don't have stash and controller, thus we don't need the convert as well.
 	type ValidatorIdOf = IdentityCollator;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_session::historical::Config for Runtime {
+	type FullIdentification = <Self as frame_system::Config>::AccountId;
+	type FullIdentificationOf = IdentityCollator;
 }
 
 parameter_types! {
@@ -396,7 +406,7 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type OnAuthoritySetChangeHandler = DKGProposals;
 	type OnDKGPublicKeyChangeHandler = ();
 	type OffChainAuthId = dkg_runtime_primitives::offchain::crypto::OffchainAuthId;
-	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
 	type RefreshDelay = RefreshDelay;
 	type KeygenJailSentence = Period;
 	type SigningJailSentence = Period;
@@ -434,7 +444,7 @@ impl pallet_dkg_proposals::Config for Runtime {
 	type DKGId = DKGId;
 	type ChainIdentifier = ChainIdentifier;
 	type RuntimeEvent = RuntimeEvent;
-	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
 	type Proposal = Vec<u8>;
 	type ProposalLifetime = ProposalLifetime;
 	type ProposalHandler = DKGProposalHandler;
@@ -764,6 +774,26 @@ impl pallet_transaction_pause::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
+	pub const MaxKeys: u32 = 10_000;
+	pub const MaxPeerInHeartbeats: u32 = 10_000;
+	pub const MaxPeerDataEncodingSize: u32 = 1_000;
+}
+
+impl pallet_im_online::Config for Runtime {
+	type AuthorityId = ImOnlineId;
+	type RuntimeEvent = RuntimeEvent;
+	type NextSessionRotation = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
+	type ValidatorSet = Historical;
+	type ReportUnresponsiveness = ();
+	type UnsignedPriority = ImOnlineUnsignedPriority;
+	type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
+	type MaxKeys = MaxKeys;
+	type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
+	type MaxPeerDataEncodingSize = MaxPeerDataEncodingSize;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -778,7 +808,7 @@ construct_runtime!(
 		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 3,
 
 		// DKG / offchain worker - the order and position of these pallet should not change
-		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>} = 10,
+		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>, ValidateUnsigned} = 10,
 		DKGProposals: pallet_dkg_proposals = 11,
 		DKGProposalHandler: pallet_dkg_proposal_handler = 12,
 
@@ -801,6 +831,7 @@ construct_runtime!(
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 32,
 		Aura: pallet_aura::{Pallet, Storage, Config<T>} = 33,
 		//AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config} = 34,
+		Historical: pallet_session_historical::{Pallet} = 35,
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 40,
@@ -838,6 +869,7 @@ construct_runtime!(
 		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 85,
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 86,
 		TransactionPause: pallet_transaction_pause::{Pallet, Call, Storage, Event<T>} = 87,
+		ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned} = 88,
 	}
 );
 
@@ -948,7 +980,7 @@ impl_runtime_apis! {
 
 		fn get_current_session_progress(block_number: BlockNumber) -> Option<Permill> {
 			use frame_support::traits::EstimateNextSessionRotation;
-			<pallet_session::PeriodicSessions<Period, Offset> as EstimateNextSessionRotation<BlockNumber>>::estimate_current_session_progress(block_number).0
+			<pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime> as EstimateNextSessionRotation<BlockNumber>>::estimate_current_session_progress(block_number).0
 		}
 
 		fn get_unsigned_proposals() -> Vec<UnsignedProposal> {
@@ -1071,19 +1103,35 @@ impl_runtime_apis! {
 	}
 
 	impl nimbus_primitives::NimbusApi<Block> for Runtime {
-		fn can_author(author: NimbusId, relay_parent: u32, _parent_header: &<Block as BlockT>::Header) -> bool {
-			use nimbus_primitives::CanAuthor;
-			use nimbus_primitives::AccountLookup;
+		fn can_author(author: NimbusId, relay_parent: u32, parent_header: &<Block as BlockT>::Header) -> bool {
+			use pallet_session::ShouldEndSession;
+			let next_block_number = parent_header.number + 1;
 			let slot = relay_parent;
-
-			let account = match pallet_parachain_staking::Pallet::<Self>::lookup_account(&author) {
-				Some(account) => account,
-				// Authors whose account lookups fail will not be eligible
-				None => {
-					return false;
-				}
-			};
-			pallet_parachain_staking::Pallet::<Self>::can_author(&account, &slot)
+			// Because the staking solution calculates the next staking set at the beginning
+			// of the first block in the new round, the only way to accurately predict the
+			// authors is to compute the selection during prediction.
+			// NOTE: This logic must manually be kept in sync with the nimbus filter pipeline
+			if pallet_dkg_metadata::DKGPeriodicSessions::<Period, Offset, Runtime>::should_end_session(next_block_number)
+			{
+				// lookup account from nimbusId
+				// mirrors logic in `pallet_author_inherent`
+				use nimbus_primitives::AccountLookup;
+				let account = match pallet_parachain_staking::Pallet::<Self>::lookup_account(&author) {
+					Some(account) => account,
+					// Authors whose account lookups fail will not be eligible
+					None => {
+						return false;
+					}
+				};
+				// manually check aura eligibility (in the new round)
+				// mirrors logic in `aura_style_filter`
+				let truncated_half_slot = (slot >> 1) as usize;
+				let active: Vec<AccountId> = pallet_parachain_staking::Pallet::<Self>::compute_top_candidates();
+				account == active[truncated_half_slot % active.len()]
+			} else {
+				// We're not changing rounds, `PotentialAuthors` is not changing, just use can_author
+				<AuthorInherent as nimbus_primitives::CanAuthor<_>>::can_author(&author, &relay_parent)
+			}
 		}
 	}
 
