@@ -27,6 +27,7 @@ pub mod xcm_config;
 
 use codec::Encode;
 use dkg_runtime_primitives::{TypedChainId, UnsignedProposal};
+use frame_support::pallet_prelude::TransactionPriority;
 use pallet_dkg_proposals::DKGEcdsaToEthereum;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
@@ -47,8 +48,9 @@ pub mod benchmarking;
 
 use frame_support::weights::ConstantMultiplier;
 
+pub use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_linkable_tree::types::EdgeMetadata;
-
+use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use sp_runtime::{FixedPointNumber, Perquintill};
 use webb_primitives::{
@@ -205,6 +207,7 @@ impl_opaque_keys! {
 		pub dkg: DKG,
 		pub nimbus: AuthorInherentWithNoOpSession<Runtime>,
 		pub vrf: VrfWithNoOpSession,
+		pub im_online: ImOnline,
 	}
 }
 
@@ -377,10 +380,10 @@ impl pallet_session::Config for Runtime {
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
-// impl pallet_session::historical::Config for Runtime {
-// 	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
-// 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
-// }
+impl pallet_session::historical::Config for Runtime {
+	type FullIdentification = <Self as frame_system::Config>::AccountId;
+	type FullIdentificationOf = IdentityCollator;
+}
 
 parameter_types! {
 	pub const PotId: PalletId = PalletId(*b"PotStake");
@@ -771,25 +774,25 @@ impl pallet_transaction_pause::Config for Runtime {
 	type WeightInfo = ();
 }
 
-// parameter_types! {
-// 	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
-// 	pub const MaxKeys: u32 = 10_000;
-// 	pub const MaxPeerInHeartbeats: u32 = 10_000;
-// 	pub const MaxPeerDataEncodingSize: u32 = 1_000;
-// }
+parameter_types! {
+	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
+	pub const MaxKeys: u32 = 10_000;
+	pub const MaxPeerInHeartbeats: u32 = 10_000;
+	pub const MaxPeerDataEncodingSize: u32 = 1_000;
+}
 
-// impl pallet_im_online::Config for Runtime {
-// 	type AuthorityId = ImOnlineId;
-// 	type RuntimeEvent = RuntimeEvent;
-// 	type NextSessionRotation = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
-// 	type ValidatorSet = Historical;
-// 	type ReportUnresponsiveness = ();
-// 	type UnsignedPriority = ImOnlineUnsignedPriority;
-// 	type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
-// 	type MaxKeys = MaxKeys;
-// 	type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
-// 	type MaxPeerDataEncodingSize = MaxPeerDataEncodingSize;
-// }
+impl pallet_im_online::Config for Runtime {
+	type AuthorityId = ImOnlineId;
+	type RuntimeEvent = RuntimeEvent;
+	type NextSessionRotation = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
+	type ValidatorSet = Historical;
+	type ReportUnresponsiveness = ();
+	type UnsignedPriority = ImOnlineUnsignedPriority;
+	type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
+	type MaxKeys = MaxKeys;
+	type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
+	type MaxPeerDataEncodingSize = MaxPeerDataEncodingSize;
+}
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -828,7 +831,7 @@ construct_runtime!(
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 32,
 		Aura: pallet_aura::{Pallet, Storage, Config<T>} = 33,
 		//AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config} = 34,
-		//Historical: pallet_session_historical::{Pallet} = 35,
+		Historical: pallet_session_historical::{Pallet} = 35,
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 40,
@@ -866,7 +869,7 @@ construct_runtime!(
 		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 85,
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 86,
 		TransactionPause: pallet_transaction_pause::{Pallet, Call, Storage, Event<T>} = 87,
-		//ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned} = 88,
+		ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned} = 88,
 	}
 );
 

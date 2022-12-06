@@ -19,9 +19,9 @@ use hex_literal::hex;
 use sc_service::ChainType;
 use sp_core::{crypto::UncheckedInto, sr25519};
 use tangle_rococo_runtime::{
-	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config,
-	MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, ParachainStakingConfig,
-	VAnchorBn254Config, VAnchorVerifierConfig, MILLIUNIT, UNIT,
+	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
+	ImOnlineId, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
+	ParachainStakingConfig, VAnchorBn254Config, VAnchorVerifierConfig, MILLIUNIT, UNIT,
 };
 
 pub fn tangle_alpha_config(id: ParaId) -> ChainSpec {
@@ -166,7 +166,7 @@ pub fn tangle_rococo_config(id: ParaId) -> ChainSpec {
 
 fn rococo_genesis(
 	root_key: AccountId,
-	invulnerables: Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId)>,
+	invulnerables: Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId, ImOnlineId)>,
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
 ) -> tangle_rococo_runtime::GenesisConfig {
@@ -218,11 +218,11 @@ fn rococo_genesis(
 			keys: invulnerables
 				.iter()
 				.cloned()
-				.map(|(acc, aura, dkg, nimbus, vrf)| {
+				.map(|(acc, aura, dkg, nimbus, vrf, im_online)| {
 					(
-						acc.clone(),                              // account id
-						acc,                                      // validator id
-						dkg_session_keys(aura, dkg, nimbus, vrf), // session keys
+						acc.clone(),                                         // account id
+						acc,                                                 // validator id
+						dkg_session_keys(aura, dkg, nimbus, vrf, im_online), // session keys
 					)
 				})
 				.collect(),
@@ -275,7 +275,7 @@ fn rococo_genesis(
 			candidates: invulnerables
 				.iter()
 				.cloned()
-				.map(|(account, _, _, _, _)| {
+				.map(|(account, _, _, _, _, _)| {
 					(account, tangle_rococo_runtime::staking::NORMAL_COLLATOR_MINIMUM_STAKE)
 				})
 				.collect(),
@@ -287,5 +287,6 @@ fn rococo_genesis(
 			parachain_bond_reserve_percent: PARACHAIN_BOND_RESERVE_PERCENT,
 			blocks_per_round: BLOCKS_PER_ROUND,
 		},
+		im_online: ImOnlineConfig { keys: vec![] },
 	}
 }
