@@ -30,13 +30,13 @@ pub fn get_testnet_root_key() -> AccountId {
 /// Arana alpha bootnodes
 pub fn get_testnet_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
+		"/ip4/18.118.130.41/tcp/30333/p2p/12D3KooWKpvw51KPvNx86jv6jLnkmnpiZubeT77LZDFyDTs7NAGW"
+			.parse()
+			.unwrap(),
 		"/ip4/18.119.156.80/tcp/30333/p2p/12D3KooWAca3kpZUpk5is9jSBjfz56CSq3azd8utRvtRE4DsDh3u"
 			.parse()
 			.unwrap(),
 		"/ip4/18.191.138.127/tcp/30333/p2p/12D3KooWJLQLRhrff3E3vSCjGDoNNUzBk1HvdXGCgs2gayjcqWTY"
-			.parse()
-			.unwrap(),
-		"/ip4/3.16.148.103/tcp/30333/p2p/12D3KooWHRxSkwuqtqsvMpkfXt9PHdn8s4G9h2r8TwTeYwUFaUun"
 			.parse()
 			.unwrap(),
 	]
