@@ -395,7 +395,30 @@ The DKG node may need to be restarted to get it functioning as expected. After a
 your parachain will come online. Once this happens, you should see the collator start
 reporting _parachain_ blocks:
 
-**Note the delay here!** It may take some time for your relay chain to enter a new epoch.
+<h2 id="parachain-launch"> Using parachain-launch </h2>
+
+[parachain-launch](https://github.com/open-web3-stack/parachain-launch) allows to setup a relaychain/parachain testnet environment for testing. To use parachain-launch with tangle, execute the following steps
+
+  1. Setup parachain launch
+
+  ```bash
+      yarn add @open-web3/parachain-launch
+  ```
+
+  2. Build chain artifacts
+
+  ```bash
+  ./node_modules/.bin/parachain-launch generate --config=./scripts/parachain-launch/config.yml --yes --output=./output
+  ```
+
+  3. Run testnet
+
+  ```bash
+  cd ./output # OR custom output directory
+  docker-compose up -d --build
+  ```
+
+  Use polkadotjs explorer and navigate to `ws://127.0.0.1:9947` to view tangle collator explorer
 
 <h2 id="contribute"> Contributing </h2>
 
