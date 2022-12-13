@@ -10,3 +10,9 @@ members = [
   "standalone/runtime",
   "pallets/*",
 ]
+
+[patch.'https://github.com/open-web3-stack/open-runtime-module-library.git']
+orml-benchmarking = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34"}
+orml-currencies = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34"}
+orml-tokens = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34"}
+orml-traits = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34"}

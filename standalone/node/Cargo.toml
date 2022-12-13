@@ -24,7 +24,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 substrate-build-script-utils = "3.0.0"
 
 [dependencies]
-async-trait = "0.1.42"
+async-trait = "0.1.59"
 clap = { version = "3.0", features = ["derive"] }
 codec = { package = "parity-scale-codec", version = "3" }
 futures = { version = "0.3.16" }
@@ -49,10 +49,10 @@ dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.gi
 tangle-runtime = { package = "tangle-standalone-runtime", path = "../runtime" }
 
 # Substrate dependencies
-sc-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34", features = ["wasmtime"] }
-sc-executor = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34", features = ["wasmtime"] }
+sc-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
+sc-executor = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
 sc-keystore = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
-sc-service = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34", features = ["wasmtime"] }
+sc-service = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
 
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }

@@ -48,10 +48,11 @@ pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git"
 webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, features = ["hashing", "verifying"] }
 
 # Orml depedencies
-orml-benchmarking = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.34", default-features = false, optional = true }
-orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.34", default-features = false }
-orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.34", default-features = false }
-orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.34", default-features = false }
+# revert the orml* deps git repos to { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.34"}
+orml-benchmarking = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34", default-features = false, optional = true }
+orml-currencies = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34", default-features = false }
+orml-tokens = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34", default-features = false }
+orml-traits = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34", default-features = false }
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies
@@ -103,16 +104,17 @@ pallet-utility = { git = "https://github.com/paritytech/substrate.git", branch =
 pallet-vesting = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.34", default-features = false }
 
 # Cumulus Dependencies
-cumulus-pallet-aura-ext = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.34", default-features = false }
-cumulus-pallet-dmp-queue = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.34", default-features = false }
-cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.34", default-features = false }
-cumulus-pallet-xcm = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.34", default-features = false }
-cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.34", default-features = false }
-cumulus-primitives-core = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.34", default-features = false }
-cumulus-primitives-timestamp = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.34", default-features = false }
-cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.34", default-features = false }
-pallet-collator-selection = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.34", default-features = false }
-parachain-info = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.34", default-features = false }
+# revert cumulus* git branches back to polkadot-v0.9.34 once the draft is merged
+cumulus-pallet-aura-ext = { git = "https://github.com/paritytech/cumulus", branch = "draft-polkadot-v0.9.34", default-features = false }
+cumulus-pallet-dmp-queue = { git = "https://github.com/paritytech/cumulus", branch = "draft-polkadot-v0.9.34", default-features = false }
+cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/cumulus", branch = "draft-polkadot-v0.9.34", default-features = false }
+cumulus-pallet-xcm = { git = "https://github.com/paritytech/cumulus", branch = "draft-polkadot-v0.9.34", default-features = false }
+cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/cumulus", branch = "draft-polkadot-v0.9.34", default-features = false }
+cumulus-primitives-core = { git = "https://github.com/paritytech/cumulus", branch = "draft-polkadot-v0.9.34", default-features = false }
+cumulus-primitives-timestamp = { git = "https://github.com/paritytech/cumulus", branch = "draft-polkadot-v0.9.34", default-features = false }
+cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus", branch = "draft-polkadot-v0.9.34", default-features = false }
+pallet-collator-selection = { git = "https://github.com/paritytech/cumulus", branch = "draft-polkadot-v0.9.34", default-features = false }
+parachain-info = { git = "https://github.com/paritytech/cumulus", branch = "draft-polkadot-v0.9.34", default-features = false }
 
 # Polkadot Dependencies
 pallet-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.34", default-features = false }

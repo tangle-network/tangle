@@ -27,7 +27,7 @@ rococo-native = [
 try-runtime = ["tangle-rococo-runtime/try-runtime"]
 
 [dependencies]
-async-trait = "0.1.52"
+async-trait = "0.1.59"
 cfg-if = "1.0.0"
 clap = { version = "3.1", features = ["derive"] }
 codec = { package = "parity-scale-codec", version = "3" }
@@ -71,7 +71,7 @@ sc-keystore = { git = "https://github.com/paritytech/substrate", branch = "polka
 sc-network = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
 sc-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
 sc-rpc-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
-sc-service = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34", features = ["wasmtime"] }
+sc-service = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
 sc-sysinfo = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
 sc-telemetry = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
 sc-tracing = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.34" }
