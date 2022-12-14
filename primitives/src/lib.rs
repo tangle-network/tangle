@@ -109,7 +109,7 @@ pub mod fee {
 }
 
 /// The number of blocks in one session
-pub const SESSION_PERIOD_BLOCKS: BlockNumber = crate::time::HOURS;
+pub const SESSION_PERIOD_BLOCKS: BlockNumber = 6 * crate::time::HOURS;
 
 /// We assume that ~10% of the block weight is consumed by `on_initialize` handlers.
 /// This is used to limit the maximal weight of a single extrinsic.
