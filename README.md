@@ -1,16 +1,16 @@
-<h1 align="center"> :knot: 🕸️ The Tangle Network 🕸️ :knot: </h1>
 <div align="center">
 <a href="https://www.webb.tools/">
-    <img alt="Webb Logo" src="./assets/webb-icon.svg" width="15%" height="30%" />
+    
+![Webb Logo](./assets/webb_banner_light.png#gh-light-mode-only)
+![Webb Logo](./assets/webb_banner_dark.png#gh-dark-mode-only)
   </a>
   </div>
-<p align="center">
+<h1 align="left"> 🪢 🕸️ The Tangle Network 🕸️ 🪢 </h1>
+<p align="left">
     <strong>🚀 An MPC based bridging system for privacy-preserving applications. 🔑 </strong>
-    <br />
-    <sub> ⚠️ Beta Software ⚠️ </sub>
 </p>
 
-<div align="center" >
+<div align="left" >
 
 [![License Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
 [![Twitter](https://img.shields.io/twitter/follow/webbprotocol.svg?style=flat-square&label=Twitter&color=1DA1F2)](https://twitter.com/webbprotocol)
