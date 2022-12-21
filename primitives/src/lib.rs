@@ -109,6 +109,7 @@ pub mod fee {
 }
 
 /// The number of blocks in one session
+#[allow(clippy::identity_op)]
 pub const SESSION_PERIOD_BLOCKS: BlockNumber = 1 * crate::time::HOURS;
 
 /// We assume that ~10% of the block weight is consumed by `on_initialize` handlers.
