@@ -102,15 +102,9 @@ impl orml_tokens::Config for Runtime {
 	type DustRemovalWhitelist = Nothing;
 	type RuntimeEvent = RuntimeEvent;
 	type ExistentialDeposits = AssetRegistry;
-	type OnDust = ();
 	type WeightInfo = weights::orml_tokens::WeightInfo<Runtime>;
 	type MaxLocks = ConstU32<2>;
 	type MaxReserves = ConstU32<2>;
-	type OnNewTokenAccount = ();
-	type OnKilledTokenAccount = ();
-	type OnSlash = ();
-	type OnDeposit = ();
-	type OnTransfer = ();
 	type ReserveIdentifier = ReserveIdentifier;
 }
 
