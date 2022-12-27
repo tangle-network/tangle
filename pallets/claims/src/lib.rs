@@ -857,8 +857,17 @@ mod tests {
 		type BlockNumberToBalance = Identity;
 		type MinVestedTransfer = MinVestedTransfer;
 		type WeightInfo = ();
-		type UnvestedFundsAllowedWithdrawReasons = Identity;
+		type UnvestedFundsAllowedWithdrawReasons = UnvestedFundsAllowedWithdrawReasons;
 		const MAX_VESTING_SCHEDULES: u32 = 28;
+	}
+
+	use frame_support::traits::WithdrawReasons;
+	pub struct UnvestedFundsAllowedWithdrawReasons;
+
+	impl sp_core::Get<WithdrawReasons> for UnvestedFundsAllowedWithdrawReasons {
+		fn get() -> WithdrawReasons {
+			WithdrawReasons::all()
+		}
 	}
 
 	parameter_types! {

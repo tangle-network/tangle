@@ -507,7 +507,17 @@ impl pallet_vesting::Config for Runtime {
 	type BlockNumberToBalance = sp_runtime::traits::ConvertInto;
 	type MinVestedTransfer = MinVestedTransfer;
 	type WeightInfo = ();
+	type UnvestedFundsAllowedWithdrawReasons = UnvestedFundsAllowedWithdrawReasons;
 	const MAX_VESTING_SCHEDULES: u32 = 28;
+}
+
+use frame_support::traits::WithdrawReasons;
+pub struct UnvestedFundsAllowedWithdrawReasons;
+
+impl sp_core::Get<WithdrawReasons> for UnvestedFundsAllowedWithdrawReasons {
+	fn get() -> WithdrawReasons {
+		WithdrawReasons::all()
+	}
 }
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
@@ -616,6 +626,9 @@ impl pallet_democracy::Config for Runtime {
 	type VoteLockingPeriod = EnactmentPeriod;
 	type VotingPeriod = VotingPeriod;
 	type WeightInfo = pallet_democracy::weights::SubstrateWeight<Runtime>;
+	type Preimages = ();
+	type MaxDeposits = ();
+	type MaxBlacklisted = ();
 }
 
 parameter_types! {
@@ -748,6 +761,7 @@ impl pallet_scheduler::Config for Runtime {
 	type PalletsOrigin = OriginCaller;
 	type ScheduleOrigin = EnsureRoot<AccountId>;
 	type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
+	type Preimages = ();
 }
 
 impl frame_system::offchain::SigningTypes for Runtime {
