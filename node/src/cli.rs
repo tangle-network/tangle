@@ -22,6 +22,10 @@ pub enum Subcommand {
 	#[clap(subcommand)]
 	Key(KeySubcommand),
 
+	/// DKG key management cli utilities
+	#[clap(subcommand)]
+	DKGKey(dkg_primitives::dkg_key_cli::DKGKeySubcommand),
+
 	/// Build a chain specification.
 	BuildSpec(sc_cli::BuildSpecCmd),
 
