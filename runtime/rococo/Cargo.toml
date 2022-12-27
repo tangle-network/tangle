@@ -21,6 +21,7 @@ log = { version = "0.4.14", default-features = false }
 scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
 serde = { version = "1.0.101", optional = true, features = ["derive"] }
 smallvec = "1.6.1"
+getrandom = { version = "0.2.8", features = ["js"] }
 
 # DKG Substrate Dependencies
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.36", default-features = false }
