@@ -44,7 +44,7 @@ pub mod constants {
 			);
 			// At most 50 ms.
 			assert!(
-				w.ref_time() <= 50u64 * constants::WEIGH_REF_TIME_PER_MILLIS,
+				w.ref_time() <= 50u64 * constants::WEIGHT_REF_TIME_PER_MILLIS,
 				"Weight should be at most 50 ms."
 			);
 		}

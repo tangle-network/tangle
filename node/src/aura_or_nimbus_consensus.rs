@@ -46,11 +46,11 @@ use sc_consensus_aura::CompatibleDigestItem as AuraDigestItem;
 
 const LOG_TARGET: &str = "aura-nimbus-consensus";
 
-struct AuraOrNimbusVerifier<Client, Block: BlockT, AuraCIDP, NimbusCIDP> {
-	aura_verifier: sc_consensus_aura::AuraVerifier<Client, <AuraId as AppKey>::Pair, AuraCIDP>,
+struct AuraOrNimbusVerifier<Client, Block: BlockT, AuraCIDP, NimbusCIDP, N> {
+	aura_verifier: sc_consensus_aura::AuraVerifier<Client, <AuraId as AppKey>::Pair, AuraCIDP, N>,
 	nimbus_verifier: nimbus_consensus::Verifier<Client, Block, NimbusCIDP>,
 }
-impl<Client, Block, AuraCIDP, NimbusCIDP> AuraOrNimbusVerifier<Client, Block, AuraCIDP, NimbusCIDP>
+impl<Client, Block, AuraCIDP, NimbusCIDP, N> AuraOrNimbusVerifier<Client, Block, AuraCIDP, NimbusCIDP, N>
 where
 	Block: BlockT,
 {
@@ -82,8 +82,8 @@ where
 }
 
 #[async_trait::async_trait]
-impl<Client, Block, AuraCIDP, NimbusCIDP> VerifierT<Block>
-	for AuraOrNimbusVerifier<Client, Block, AuraCIDP, NimbusCIDP>
+impl<Client, Block, AuraCIDP, NimbusCIDP, N> VerifierT<Block>
+	for AuraOrNimbusVerifier<Client, Block, AuraCIDP, NimbusCIDP, N>
 where
 	Block: BlockT,
 	Client: ProvideRuntimeApi<Block> + Send + Sync,
