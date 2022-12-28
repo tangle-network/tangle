@@ -801,7 +801,7 @@ source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.3
 dependencies = [
  "beefy-gadget",
  "futures 0.3.25",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -1409,15 +1409,14 @@ dependencies = [
 
 [[package]]
 name = "console"
-version = "0.15.2"
+version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c050367d967ced717c04b65d8c619d863ef9292ce0c5760028655a2fb298718c"
+checksum = "5556015fe3aad8b968e5d4124980fbe2f6aaee7aeec6b749de1faaa2ca5d0a4c"
 dependencies = [
  "encode_unicode",
  "lazy_static",
  "libc",
- "terminal_size",
- "winapi",
+ "windows-sys 0.42.0",
 ]
 
 [[package]]
@@ -2133,7 +2132,7 @@ dependencies = [
  "async-trait",
  "cumulus-primitives-core",
  "futures 0.3.25",
- "jsonrpsee-core 0.16.2",
+ "jsonrpsee-core",
  "parity-scale-codec",
  "polkadot-overseer",
  "polkadot-service",
@@ -2195,7 +2194,7 @@ dependencies = [
  "cumulus-relay-chain-interface",
  "futures 0.3.25",
  "futures-timer",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "lru 0.8.1",
  "parity-scale-codec",
  "polkadot-service",
@@ -4333,26 +4332,14 @@ dependencies = [
 
 [[package]]
 name = "jsonrpsee"
-version = "0.15.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bd0d559d5e679b1ab2f869b486a11182923863b1b3ee8b421763cdd707b783a"
-dependencies = [
- "jsonrpsee-core 0.15.1",
- "jsonrpsee-http-server",
- "jsonrpsee-types 0.15.1",
- "jsonrpsee-ws-server",
-]
-
-[[package]]
-name = "jsonrpsee"
 version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d291e3a5818a2384645fd9756362e6d89cf0541b0b916fa7702ea4a9833608e"
 dependencies = [
- "jsonrpsee-core 0.16.2",
+ "jsonrpsee-core",
  "jsonrpsee-proc-macros",
  "jsonrpsee-server",
- "jsonrpsee-types 0.16.2",
+ "jsonrpsee-types",
  "jsonrpsee-ws-client",
  "tracing",
 ]
@@ -4365,8 +4352,8 @@ checksum = "965de52763f2004bc91ac5bcec504192440f0b568a5d621c59d9dbd6f886c3fb"
 dependencies = [
  "futures-util",
  "http",
- "jsonrpsee-core 0.16.2",
- "jsonrpsee-types 0.16.2",
+ "jsonrpsee-core",
+ "jsonrpsee-types",
  "pin-project",
  "rustls-native-certs",
  "soketto",
@@ -4376,35 +4363,6 @@ dependencies = [
  "tokio-util",
  "tracing",
  "webpki-roots",
-]
-
-[[package]]
-name = "jsonrpsee-core"
-version = "0.15.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3dc3e9cf2ba50b7b1d7d76a667619f82846caa39e8e8daa8a4962d74acaddca"
-dependencies = [
- "anyhow",
- "arrayvec 0.7.2",
- "async-trait",
- "beef",
- "futures-channel",
- "futures-util",
- "globset",
- "http",
- "hyper",
- "jsonrpsee-types 0.15.1",
- "lazy_static",
- "parking_lot 0.12.1",
- "rand 0.8.5",
- "rustc-hash",
- "serde",
- "serde_json",
- "soketto",
- "thiserror",
- "tokio",
- "tracing",
- "unicase",
 ]
 
 [[package]]
@@ -4423,7 +4381,7 @@ dependencies = [
  "futures-util",
  "globset",
  "hyper",
- "jsonrpsee-types 0.16.2",
+ "jsonrpsee-types",
  "parking_lot 0.12.1",
  "rand 0.8.5",
  "rustc-hash",
@@ -4433,24 +4391,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
-]
-
-[[package]]
-name = "jsonrpsee-http-server"
-version = "0.15.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03802f0373a38c2420c70b5144742d800b509e2937edc4afb116434f07120117"
-dependencies = [
- "futures-channel",
- "futures-util",
- "hyper",
- "jsonrpsee-core 0.15.1",
- "jsonrpsee-types 0.15.1",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "tracing-futures",
 ]
 
 [[package]]
@@ -4476,8 +4416,8 @@ dependencies = [
  "futures-util",
  "http",
  "hyper",
- "jsonrpsee-core 0.16.2",
- "jsonrpsee-types 0.16.2",
+ "jsonrpsee-core",
+ "jsonrpsee-types",
  "serde",
  "serde_json",
  "soketto",
@@ -4485,20 +4425,6 @@ dependencies = [
  "tokio-stream",
  "tokio-util",
  "tower",
- "tracing",
-]
-
-[[package]]
-name = "jsonrpsee-types"
-version = "0.15.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e290bba767401b646812f608c099b922d8142603c9e73a50fb192d3ac86f4a0d"
-dependencies = [
- "anyhow",
- "beef",
- "serde",
- "serde_json",
- "thiserror",
  "tracing",
 ]
 
@@ -4524,28 +4450,8 @@ checksum = "0b83daeecfc6517cfe210df24e570fb06213533dfb990318fae781f4c7119dd9"
 dependencies = [
  "http",
  "jsonrpsee-client-transport",
- "jsonrpsee-core 0.16.2",
- "jsonrpsee-types 0.16.2",
-]
-
-[[package]]
-name = "jsonrpsee-ws-server"
-version = "0.15.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d488ba74fb369e5ab68926feb75a483458b88e768d44319f37e4ecad283c7325"
-dependencies = [
- "futures-channel",
- "futures-util",
- "http",
- "jsonrpsee-core 0.15.1",
- "jsonrpsee-types 0.15.1",
- "serde_json",
- "soketto",
- "tokio",
- "tokio-stream",
- "tokio-util",
- "tracing",
- "tracing-futures",
+ "jsonrpsee-core",
+ "jsonrpsee-types",
 ]
 
 [[package]]
@@ -5507,7 +5413,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.36#cb4f2491b00af7d7817f3a54209c26b20faa1f51"
 dependencies = [
  "anyhow",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "parity-scale-codec",
  "serde",
  "sp-api",
@@ -6131,7 +6037,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-registry"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6685,7 +6591,7 @@ dependencies = [
 [[package]]
 name = "pallet-hasher"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6753,7 +6659,7 @@ dependencies = [
 [[package]]
 name = "pallet-key-storage"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6768,7 +6674,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6788,9 +6694,9 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "pallet-linkable-tree",
  "pallet-linkable-tree-rpc-runtime-api",
  "parity-scale-codec",
@@ -6806,7 +6712,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "pallet-linkable-tree",
  "parity-scale-codec",
@@ -6835,7 +6741,7 @@ dependencies = [
 [[package]]
 name = "pallet-mixer"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6875,7 +6781,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -6893,9 +6799,9 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "pallet-mt",
  "pallet-mt-rpc-runtime-api",
  "parity-scale-codec",
@@ -6911,7 +6817,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "pallet-mt",
  "sp-api",
@@ -7156,7 +7062,7 @@ dependencies = [
 [[package]]
 name = "pallet-signature-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7303,7 +7209,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7321,7 +7227,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7378,7 +7284,7 @@ name = "pallet-transaction-payment-rpc"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.36#cb4f2491b00af7d7817f3a54209c26b20faa1f51"
 dependencies = [
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "pallet-transaction-payment-rpc-runtime-api",
  "parity-scale-codec",
  "sp-api",
@@ -7437,7 +7343,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "ark-bn254",
  "ark-ff",
@@ -7467,7 +7373,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7491,7 +7397,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7506,7 +7412,7 @@ dependencies = [
 [[package]]
 name = "pallet-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -8618,7 +8524,7 @@ source = "git+https://github.com/paritytech/polkadot?branch=release-v0.9.36#dc25
 dependencies = [
  "beefy-gadget",
  "beefy-gadget-rpc",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "mmr-rpc",
  "pallet-transaction-payment-rpc",
  "polkadot-primitives",
@@ -10458,7 +10364,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.36#cb4f2491b00af7d7817f3a54209c26b20faa1f51"
 dependencies = [
  "futures 0.3.25",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "sc-consensus-babe",
  "sc-consensus-epochs",
  "sc-rpc-api",
@@ -10495,7 +10401,7 @@ dependencies = [
  "assert_matches",
  "async-trait",
  "futures 0.3.25",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "log",
  "parity-scale-codec",
  "sc-client-api",
@@ -10671,7 +10577,7 @@ source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.3
 dependencies = [
  "finality-grandpa",
  "futures 0.3.25",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "log",
  "parity-scale-codec",
  "sc-client-api",
@@ -10958,7 +10864,7 @@ source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.3
 dependencies = [
  "futures 0.3.25",
  "hash-db",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -10987,7 +10893,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.36#cb4f2491b00af7d7817f3a54209c26b20faa1f51"
 dependencies = [
  "futures 0.3.25",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -11011,7 +10917,7 @@ source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.3
 dependencies = [
  "futures 0.3.25",
  "http",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "log",
  "serde_json",
  "substrate-prometheus-endpoint",
@@ -11027,7 +10933,7 @@ source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.3
 dependencies = [
  "futures 0.3.25",
  "hex",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "parity-scale-codec",
  "sc-chain-spec",
  "sc-transaction-pool-api",
@@ -11050,7 +10956,7 @@ dependencies = [
  "futures 0.3.25",
  "futures-timer",
  "hash-db",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -11126,7 +11032,7 @@ name = "sc-sync-state-rpc"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.36#cb4f2491b00af7d7817f3a54209c26b20faa1f51"
 dependencies = [
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "parity-scale-codec",
  "sc-chain-spec",
  "sc-client-api",
@@ -12778,7 +12684,7 @@ source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.3
 dependencies = [
  "frame-system-rpc-runtime-api",
  "futures 0.3.25",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "log",
  "parity-scale-codec",
  "sc-client-api",
@@ -12811,7 +12717,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.36#cb4f2491b00af7d7817f3a54209c26b20faa1f51"
 dependencies = [
  "async-trait",
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "log",
  "sc-rpc-api",
  "serde",
@@ -12823,7 +12729,7 @@ name = "substrate-state-trie-migration-rpc"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.36#cb4f2491b00af7d7817f3a54209c26b20faa1f51"
 dependencies = [
- "jsonrpsee 0.16.2",
+ "jsonrpsee",
  "log",
  "parity-scale-codec",
  "sc-client-api",
@@ -12970,7 +12876,7 @@ dependencies = [
  "futures 0.3.25",
  "getrandom 0.2.8",
  "hex-literal 0.3.4",
- "jsonrpsee 0.15.1",
+ "jsonrpsee",
  "log",
  "nimbus-consensus",
  "nimbus-primitives",
@@ -13160,7 +13066,7 @@ dependencies = [
  "getrandom 0.2.8",
  "hex-literal 0.2.2",
  "itertools 0.10.5",
- "jsonrpsee 0.15.1",
+ "jsonrpsee",
  "log",
  "pallet-im-online",
  "pallet-linkable-tree-rpc",
@@ -13354,16 +13260,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bab24d30b911b2376f3a13cc2cd443142f0c81dda04c118693e35b3835757755"
 dependencies = [
  "winapi-util",
-]
-
-[[package]]
-name = "terminal_size"
-version = "0.1.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "633c1a546cee861a1a6d0dc69ebeca693bf4296661ba7852b9d21d159e0506df"
-dependencies = [
- "libc",
- "winapi",
 ]
 
 [[package]]
@@ -13971,15 +13867,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "unicase"
-version = "2.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50f37be617794602aabbeee0be4f259dc1778fabe05e2d67ee8f79326d5cb4f6"
-dependencies = [
- "version_check",
-]
-
-[[package]]
 name = "unicode-bidi"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -14498,7 +14385,7 @@ dependencies = [
 [[package]]
 name = "webb-primitives"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#e5467be352e3c3158c6ecc0f84ffb36e86b266af"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#cb68766ac436bf907eef19a445ff76f1f184cfb3"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-381",

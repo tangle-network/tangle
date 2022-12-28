@@ -26,7 +26,7 @@ use cumulus_client_consensus_common::{
 use cumulus_client_consensus_relay_chain::Verifier as RelayChainVerifier;
 use cumulus_client_network::BlockAnnounceValidator;
 use cumulus_client_service::{
-	prepare_node_config, start_collator, start_full_node, SharedImportQueue, StartCollatorParams,
+	prepare_node_config, start_collator, start_full_node, StartCollatorParams,
 	StartFullNodeParams,
 };
 use cumulus_primitives_core::{
@@ -199,19 +199,9 @@ async fn build_relay_chain_interface(
 	collator_options: CollatorOptions,
 	hwbench: Option<sc_sysinfo::HwBench>,
 ) -> RelayChainResult<(Arc<(dyn RelayChainInterface + 'static)>, Option<CollatorPair>)> {
-	match collator_options.relay_chain_rpc_url {
-		Some(relay_chain_url) => {
-			let client = create_client_and_start_worker(relay_chain_url, task_manager).await?;
-			Ok((Arc::new(RelayChainRpcInterface::new(client)) as Arc<_>, None))
-		},
-		None => build_inprocess_relay_chain(
-			polkadot_config,
-			parachain_config,
-			telemetry_worker_handle,
-			task_manager,
-			hwbench,
-		),
-	}
+	let urls = collator_options.relay_chain_rpc_urls;
+	let client = create_client_and_start_worker(urls, task_manager).await?;
+	Ok((Arc::new(RelayChainRpcInterface::new(client)) as Arc<_>, None))
 }
 
 /// Start a node with the given parachain `Configuration` and relay chain `Configuration`.
@@ -518,7 +508,7 @@ where
 
 	let aura_verifier = move || {
 		let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client2).unwrap();
-		Box::new(cumulus_client_consensus_aura::build_verifier::<<AuraId as AppKey>::Pair, _, _>(
+		Box::new(cumulus_client_consensus_aura::build_verifier::<<AuraId as AppKey>::Pair, _, _, _>(
 			cumulus_client_consensus_aura::BuildVerifierParams {
 				client: client2.clone(),
 				create_inherent_data_providers: move |_, _| async move {
