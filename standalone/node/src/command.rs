@@ -61,6 +61,7 @@ pub fn run() -> sc_cli::Result<()> {
 
 	match &cli.subcommand {
 		Some(Subcommand::Key(cmd)) => cmd.run(&cli),
+		Some(Subcommand::DKGKey(cmd)) => cmd.run(&cli),
 		Some(Subcommand::BuildSpec(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
