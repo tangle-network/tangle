@@ -50,7 +50,7 @@ struct AuraOrNimbusVerifier<Client, Block: BlockT, AuraCIDP, NimbusCIDP, N> {
 	aura_verifier: sc_consensus_aura::AuraVerifier<Client, <AuraId as AppKey>::Pair, AuraCIDP, N>,
 	nimbus_verifier: nimbus_consensus::Verifier<Client, Block, NimbusCIDP>,
 }
-impl<Client, Block, AuraCIDP, NimbusCIDP, N> AuraOrNimbusVerifier<Client, Block, AuraCIDP, NimbusCIDP, N>
+impl<Client, Block, AuraCIDP, NimbusCIDP, N: Send + Sync> AuraOrNimbusVerifier<Client, Block, AuraCIDP, NimbusCIDP, N>
 where
 	Block: BlockT,
 {
@@ -82,7 +82,7 @@ where
 }
 
 #[async_trait::async_trait]
-impl<Client, Block, AuraCIDP, NimbusCIDP, N> VerifierT<Block>
+impl<Client, Block, AuraCIDP, NimbusCIDP, N: Send + Sync> VerifierT<Block>
 	for AuraOrNimbusVerifier<Client, Block, AuraCIDP, NimbusCIDP, N>
 where
 	Block: BlockT,
