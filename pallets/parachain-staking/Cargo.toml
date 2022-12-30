@@ -9,7 +9,7 @@ description = "parachain staking pallet for collator selection and reward distri
 log = "0.4"
 parity-scale-codec = { version = "3.0.0", default-features = false, features = ["derive"] }
 scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
-serde = { version = "1.0.101", optional = true }
+serde = { version = "1.0.101", default-features = false, optional = true }
 getrandom = { version = "0.2.8", features = ["js"] }
 
 # Substrate

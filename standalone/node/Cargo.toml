@@ -32,7 +32,7 @@ hex-literal = "0.2.1"
 itertools = "0.10.0"
 log = "0.4.8"
 rand = "0.7.2"
-serde = { version = "1.0.101", features = ["derive"] }
+serde = { version = "1.0.101", default-features = false, features = ["derive"] }
 getrandom = { version = "0.2.8", features = ["js"] }
 
 # Protocol Substrate

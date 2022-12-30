@@ -18,7 +18,7 @@ codec = { package = "parity-scale-codec", version = "3", default-features = fals
 hex-literal = { version = '0.3.1', optional = true }
 log = { version = "0.4.14", default-features = false }
 scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
-serde = { version = "1.0.101", optional = true, features = ["derive"] }
+serde = { version = "1.0.101", default-features = false, optional = true, features = ["derive"] }
 smallvec = "1.6.1"
 static_assertions = "1.1.0"
 
@@ -118,7 +118,7 @@ pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "po
 pallet-transaction-pause = { path = '../../pallets/transaction-pause', default-features = false }
 
 # Webb dependencies
-#pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", branch = "thomas/relay" }
+pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", branch = "thomas/relay", default-features = false }
 
 tangle-primitives = { path = '../../primitives', default-features = false }
 
@@ -212,7 +212,7 @@ std = [
   "pallet-identity/std",
 
   # Light client deps
-  #"pallet-eth2-light-client/std",
+  "pallet-eth2-light-client/std",
 
   # DKG
   "pallet-dkg-metadata/std",
