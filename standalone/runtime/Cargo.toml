@@ -118,7 +118,7 @@ pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "po
 pallet-transaction-pause = { path = '../../pallets/transaction-pause', default-features = false }
 
 # Webb dependencies
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", branch = "thomas/relay" }
+#pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", branch = "thomas/relay" }
 
 tangle-primitives = { path = '../../primitives', default-features = false }
 
@@ -212,7 +212,7 @@ std = [
   "pallet-identity/std",
 
   # Light client deps
-  "pallet-eth2-light-client/std",
+  #"pallet-eth2-light-client/std",
 
   # DKG
   "pallet-dkg-metadata/std",

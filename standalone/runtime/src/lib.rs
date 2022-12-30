@@ -73,7 +73,7 @@ pub use frame_support::{
 		U128CurrencyToVote,
 	},
 	weights::{
-		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
+		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND},
 		IdentityFee, Weight,
 	},
 	PalletId, StorageValue,
@@ -323,11 +323,9 @@ impl pallet_scheduler::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type MaxScheduledPerBlock = ConstU32<50>;
 	type MaximumWeight = MaximumSchedulerWeight;
-	type NoPreimagePostponement = NoPreimagePostponement;
 	type RuntimeOrigin = RuntimeOrigin;
 	type OriginPrivilegeCmp = EqualPrivilegeOnly;
 	type PalletsOrigin = OriginCaller;
-	type PreimageProvider = Preimage;
 	type ScheduleOrigin = EnsureRoot<AccountId>;
 	type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
 }
@@ -343,7 +341,6 @@ impl pallet_preimage::Config for Runtime {
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
 	type ManagerOrigin = EnsureRoot<AccountId>;
-	type MaxSize = PreimageMaxSize;
 	type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
 }
 
@@ -470,7 +467,7 @@ impl pallet_staking::Config for Runtime {
 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
 	type ElectionProvider = ElectionProviderMultiPhase;
-	type GenesisElectionProvider = onchain::UnboundedExecution<OnChainSeqPhragmen>;
+	type GenesisElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type VoterList = BagsList;
 	type MaxUnlockingChunks = ConstU32<32>;
 	type HistoryDepth = HistoryDepth;
@@ -534,10 +531,7 @@ impl pallet_democracy::Config for Runtime {
 	type MaxVotes = MaxVotes;
 	// Same as EnactmentPeriod
 	type MinimumDeposit = MinimumDeposit;
-	type OperationalPreimageOrigin = pallet_collective::EnsureMember<AccountId, CouncilCollective>;
 	type PalletsOrigin = OriginCaller;
-	type PreimageByteDeposit = PreimageByteDeposit;
-	type Proposal = RuntimeCall;
 	type Scheduler = Scheduler;
 	type Slash = Treasury;
 	// Any single technical committee member may veto a coming council proposal,
@@ -655,10 +649,11 @@ impl onchain::Config for OnChainSeqPhragmen {
 	type WeightInfo = frame_election_provider_support::weights::SubstrateWeight<Runtime>;
 }
 
+/*
 impl onchain::BoundedConfig for OnChainSeqPhragmen {
 	type VotersBound = MaxElectingVoters;
 	type TargetsBound = ConstU32<2_000>;
-}
+}*/
 
 pub struct WebbMinerConfig;
 impl pallet_election_provider_multi_phase::MinerConfig for WebbMinerConfig {
@@ -694,8 +689,8 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type SlashHandler = (); // burn slashes
 	type RewardHandler = (); // nothing to do upon rewards
 	type DataProvider = Staking;
-	type Fallback = onchain::BoundedExecution<OnChainSeqPhragmen>;
-	type GovernanceFallback = onchain::BoundedExecution<OnChainSeqPhragmen>;
+	type Fallback = onchain::OnChainExecution<OnChainSeqPhragmen>;
+	type GovernanceFallback = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type Solver = SequentialPhragmen<AccountId, SolutionAccuracyOf<Self>, ()>;
 	type ForceOrigin = EnsureRoot<AccountId>;
 	type MaxElectableTargets = ConstU16<{ u16::MAX }>;
@@ -739,11 +734,9 @@ impl pallet_nomination_pools::Config for Runtime {
 	type WeightInfo = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
-	type CurrencyBalance = Balance;
 	type RewardCounter = sp_runtime::FixedU128;
 	type BalanceToU256 = BalanceToU256;
 	type U256ToBalance = U256ToBalance;
-	type StakingInterface = pallet_staking::Pallet<Self>;
 	type PostUnbondingPoolsWindow = PostUnbondPoolsWindow;
 	type MaxMetadataLen = ConstU32<256>;
 	type MaxUnbonding = ConstU32<8>;

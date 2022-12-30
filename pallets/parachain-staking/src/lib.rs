@@ -749,7 +749,8 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(<T as Config>::WeightInfo::set_staking_expectations())]
+		#[pallet::weight(0)]
+		#[pallet::call_index(0)]
 		/// Set the expectations for total staked. These expectations determine the issuance for
 		/// the round according to logic in `fn compute_issuance`
 		pub fn set_staking_expectations(
@@ -769,7 +770,8 @@ pub mod pallet {
 			<InflationConfig<T>>::put(config);
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::set_inflation())]
+		#[pallet::weight(1)]
+		#[pallet::call_index(1)]
 		/// Set the annual inflation rate to derive per-round inflation
 		pub fn set_inflation(
 			origin: OriginFor<T>,
@@ -792,7 +794,8 @@ pub mod pallet {
 			<InflationConfig<T>>::put(config);
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::set_parachain_bond_account())]
+		#[pallet::weight(2)]
+		#[pallet::call_index(2)]
 		/// Set the account that will hold funds set aside for parachain bond
 		pub fn set_parachain_bond_account(
 			origin: OriginFor<T>,
@@ -805,7 +808,8 @@ pub mod pallet {
 			Self::deposit_event(Event::ParachainBondAccountSet { old, new });
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::set_parachain_bond_reserve_percent())]
+		#[pallet::weight(3)]
+		#[pallet::call_index(3)]
 		/// Set the percent of inflation set aside for parachain bond
 		pub fn set_parachain_bond_reserve_percent(
 			origin: OriginFor<T>,
@@ -818,7 +822,8 @@ pub mod pallet {
 			Self::deposit_event(Event::ParachainBondReservePercentSet { old, new });
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::set_total_selected())]
+		#[pallet::weight(4)]
+		#[pallet::call_index(4)]
 		/// Set the total number of collator candidates selected per round
 		/// - changes are not applied until the start of the next round
 		pub fn set_total_selected(origin: OriginFor<T>, new: u32) -> DispatchResultWithPostInfo {
@@ -834,7 +839,8 @@ pub mod pallet {
 			Self::deposit_event(Event::TotalSelectedSet { old, new });
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::set_collator_commission())]
+		#[pallet::weight(5)]
+		#[pallet::call_index(5)]
 		/// Set the commission for all collators
 		pub fn set_collator_commission(
 			origin: OriginFor<T>,
@@ -847,7 +853,8 @@ pub mod pallet {
 			Self::deposit_event(Event::CollatorCommissionSet { old, new });
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::set_blocks_per_round())]
+		#[pallet::weight(6)]
+		#[pallet::call_index(6)]
 		/// Set blocks per round
 		/// - if called with `new` less than length of current round, will transition immediately
 		/// in the next block
@@ -879,7 +886,8 @@ pub mod pallet {
 			<InflationConfig<T>>::put(inflation_config);
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::join_candidates(*candidate_count))]
+		#[pallet::weight(7)]
+		#[pallet::call_index(7)]
 		/// Join the set of collator candidates
 		pub fn join_candidates(
 			origin: OriginFor<T>,
@@ -922,7 +930,8 @@ pub mod pallet {
 			});
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::schedule_leave_candidates(*candidate_count))]
+		#[pallet::weight(8)]
+		#[pallet::call_index(8)]
 		/// Request to leave the set of candidates. If successful, the account is immediately
 		/// removed from the candidate pool to prevent selection as a collator.
 		pub fn schedule_leave_candidates(
@@ -949,9 +958,8 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(
-			<T as Config>::WeightInfo::execute_leave_candidates(*candidate_delegation_count)
-		)]
+		#[pallet::weight(9)]
+		#[pallet::call_index(9)]
 		/// Execute leave candidates request
 		pub fn execute_leave_candidates(
 			origin: OriginFor<T>,
@@ -1029,7 +1037,8 @@ pub mod pallet {
 			});
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::cancel_leave_candidates(*candidate_count))]
+		#[pallet::weight(10)]
+		#[pallet::call_index(10)]
 		/// Cancel open request to leave candidates
 		/// - only callable by collator account
 		/// - result upon successful call is the candidate is active in the candidate pool
@@ -1055,7 +1064,8 @@ pub mod pallet {
 			Self::deposit_event(Event::CancelledCandidateExit { candidate: collator });
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::go_offline())]
+		#[pallet::weight(11)]
+		#[pallet::call_index(11)]
 		/// Temporarily leave the set of collator candidates without unbonding
 		pub fn go_offline(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let collator = ensure_signed(origin)?;
@@ -1070,7 +1080,8 @@ pub mod pallet {
 			Self::deposit_event(Event::CandidateWentOffline { candidate: collator });
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::go_online())]
+		#[pallet::weight(12)]
+		#[pallet::call_index(12)]
 		/// Rejoin the set of collator candidates if previously had called `go_offline`
 		pub fn go_online(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let collator = ensure_signed(origin)?;
@@ -1088,7 +1099,8 @@ pub mod pallet {
 			Self::deposit_event(Event::CandidateBackOnline { candidate: collator });
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::candidate_bond_more())]
+		#[pallet::weight(13)]
+		#[pallet::call_index(13)]
 		/// Increase collator candidate self bond by `more`
 		pub fn candidate_bond_more(
 			origin: OriginFor<T>,
@@ -1104,7 +1116,8 @@ pub mod pallet {
 			}
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::schedule_candidate_bond_less())]
+		#[pallet::weight(14)]
+		#[pallet::call_index(14)]
 		/// Request by collator candidate to decrease self bond by `less`
 		pub fn schedule_candidate_bond_less(
 			origin: OriginFor<T>,
@@ -1121,7 +1134,8 @@ pub mod pallet {
 			});
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::execute_candidate_bond_less())]
+		#[pallet::weight(15)]
+		#[pallet::call_index(15)]
 		/// Execute pending request to adjust the collator candidate self bond
 		pub fn execute_candidate_bond_less(
 			origin: OriginFor<T>,
@@ -1133,7 +1147,8 @@ pub mod pallet {
 			<CandidateInfo<T>>::insert(&candidate, state);
 			Ok(().into())
 		}
-		#[pallet::weight(<T as Config>::WeightInfo::cancel_candidate_bond_less())]
+		#[pallet::weight(16)]
+		#[pallet::call_index(16)]
 		/// Cancel pending request to adjust the collator candidate self bond
 		pub fn cancel_candidate_bond_less(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let collator = ensure_signed(origin)?;
@@ -1142,12 +1157,8 @@ pub mod pallet {
 			<CandidateInfo<T>>::insert(&collator, state);
 			Ok(().into())
 		}
-		#[pallet::weight(
-			<T as Config>::WeightInfo::delegate(
-				*candidate_delegation_count,
-				*delegation_count
-			)
-		)]
+		#[pallet::weight(17)]
+		#[pallet::call_index(17)]
 		/// If caller is not a delegator and not a collator, then join the set of delegators
 		/// If caller is a delegator, then makes delegation to change their delegation state
 		pub fn delegate(
@@ -1172,13 +1183,8 @@ pub mod pallet {
 		/// If caller is not a delegator and not a collator, then join the set of delegators
 		/// If caller is a delegator, then makes delegation to change their delegation state
 		/// Sets the auto-compound config for the delegation
-		#[pallet::weight(
-			<T as Config>::WeightInfo::delegate_with_auto_compound(
-				*candidate_delegation_count,
-				*candidate_auto_compounding_delegation_count,
-				*delegation_count,
-			)
-		)]
+		#[pallet::weight(18)]
+		#[pallet::call_index(18)]
 		pub fn delegate_with_auto_compound(
 			origin: OriginFor<T>,
 			candidate: T::AccountId,
@@ -1200,7 +1206,8 @@ pub mod pallet {
 			)
 		}
 
-		#[pallet::weight(<T as Config>::WeightInfo::schedule_revoke_delegation())]
+		#[pallet::weight(19)]
+		#[pallet::call_index(19)]
 		/// Request to revoke an existing delegation. If successful, the delegation is scheduled
 		/// to be allowed to be revoked via the `execute_delegation_request` extrinsic.
 		pub fn schedule_revoke_delegation(
@@ -1211,7 +1218,8 @@ pub mod pallet {
 			Self::delegation_schedule_revoke(collator, delegator)
 		}
 
-		#[pallet::weight(<T as Config>::WeightInfo::delegator_bond_more())]
+		#[pallet::weight(20)]
+		#[pallet::call_index(20)]
 		/// Bond more for delegators wrt a specific collator candidate.
 		pub fn delegator_bond_more(
 			origin: OriginFor<T>,
@@ -1234,7 +1242,8 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(<T as Config>::WeightInfo::schedule_delegator_bond_less())]
+		#[pallet::weight(21)]
+		#[pallet::call_index(21)]
 		/// Request bond less for delegators wrt a specific collator candidate.
 		pub fn schedule_delegator_bond_less(
 			origin: OriginFor<T>,
@@ -1245,7 +1254,8 @@ pub mod pallet {
 			Self::delegation_schedule_bond_decrease(candidate, delegator, less)
 		}
 
-		#[pallet::weight(<T as Config>::WeightInfo::execute_delegator_bond_less())]
+		#[pallet::weight(22)]
+		#[pallet::call_index(22)]
 		/// Execute pending request to change an existing delegation
 		pub fn execute_delegation_request(
 			origin: OriginFor<T>,
@@ -1256,7 +1266,8 @@ pub mod pallet {
 			Self::delegation_execute_scheduled_request(candidate, delegator)
 		}
 
-		#[pallet::weight(<T as Config>::WeightInfo::cancel_delegator_bond_less())]
+		#[pallet::weight(23)]
+		#[pallet::call_index(23)]
 		/// Cancel request to change an existing delegation.
 		pub fn cancel_delegation_request(
 			origin: OriginFor<T>,
@@ -1267,10 +1278,8 @@ pub mod pallet {
 		}
 
 		/// Sets the auto-compounding reward percentage for a delegation.
-		#[pallet::weight(<T as Config>::WeightInfo::set_auto_compound(
-			*candidate_auto_compounding_delegation_count_hint,
-			*delegation_count_hint,
-		))]
+		#[pallet::weight(24)]
+		#[pallet::call_index(24)]
 		pub fn set_auto_compound(
 			origin: OriginFor<T>,
 			candidate: T::AccountId,
@@ -1289,7 +1298,8 @@ pub mod pallet {
 		}
 
 		/// Set the list of invulnerable (fixed) collators.
-		#[pallet::weight(<T as Config>::WeightInfo::schedule_delegator_bond_less())]
+		#[pallet::weight(25)]
+		#[pallet::call_index(25)]
 		pub fn set_invulnerables(
 			origin: OriginFor<T>,
 			new: Vec<T::AccountId>,

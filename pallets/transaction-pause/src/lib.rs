@@ -82,7 +82,8 @@ pub mod module {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(T::WeightInfo::pause_transaction())]
+		#[pallet::call_index(0)]
+		#[pallet::weight(0)]
 		#[transactional]
 		pub fn pause_transaction(
 			origin: OriginFor<T>,
@@ -114,7 +115,8 @@ pub mod module {
 			Ok(())
 		}
 
-		#[pallet::weight(T::WeightInfo::unpause_transaction())]
+		#[pallet::call_index(1)]
+		#[pallet::weight(1)]
 		#[transactional]
 		pub fn unpause_transaction(
 			origin: OriginFor<T>,
