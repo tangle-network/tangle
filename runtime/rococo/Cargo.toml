@@ -1,6 +1,6 @@
 [package]
 name = "tangle-rococo-runtime"
-version = "3.0.0"
+version = "0.1.0"
 authors = ["Webb tools"]
 edition = "2021"
 homepage = "https://webb.tools"

@@ -1,6 +1,6 @@
 [package]
 name = "pallet-parachain-staking"
-version = "3.0.0"
+version = "0.1.0"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 description = "parachain staking pallet for collator selection and reward distribution"
