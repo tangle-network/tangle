@@ -1,6 +1,6 @@
 [package]
 name = "tangle-parachain"
-version = "3.0.0"
+version = "0.1.0"
 authors = ["Webb Developers"]
 build = "build.rs"
 edition = "2021"

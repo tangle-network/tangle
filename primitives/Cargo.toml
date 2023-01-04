@@ -1,6 +1,6 @@
 [package]
 name = "tangle-primitives"
-version = "1.0.0"
+version = "0.1.0"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
