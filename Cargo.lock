@@ -68,7 +68,7 @@ dependencies = [
  "cipher",
  "ctr",
  "ghash",
- "subtle 2.4.1",
+ "subtle",
 ]
 
 [[package]]
@@ -96,11 +96,6 @@ name = "always-assert"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbf688625d06217d5b1bb0ea9d9c44a1635fd0ee3534466388d18203174f4d11"
-
-[[package]]
-name = "amcl"
-version = "0.3.0"
-source = "git+https://github.com/webb-tools/milagro_bls#583bdf821befbee4e09161ff92398f1e75372456"
 
 [[package]]
 name = "android_system_properties"
@@ -714,7 +709,7 @@ dependencies = [
  "cfg-if",
  "libc",
  "miniz_oxide",
- "object 0.30.0",
+ "object 0.30.1",
  "rustc-demangle",
 ]
 
@@ -995,17 +990,14 @@ dependencies = [
 [[package]]
 name = "bls"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#25cde1e817aa58f6f6f10ddd480812efa9fdd0ab"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
 dependencies = [
  "eth2_hashing",
- "eth2_serde_utils",
  "eth2_ssz",
- "ethereum-types 0.14.1",
+ "ethereum-types 0.13.1",
  "hex",
- "milagro_bls",
  "rand 0.7.3",
  "rand_chacha 0.3.1",
- "serde",
  "tree_hash",
  "zeroize",
 ]
@@ -1048,7 +1040,7 @@ dependencies = [
 [[package]]
 name = "bulletproof-kzen"
 version = "1.2.0"
-source = "git+https://github.com/webb-tools/bulletproofs-kzen.git#df49bfc8d48d2252177defe4114612e2b147f6bf"
+source = "git+https://github.com/webb-tools/bulletproofs-kzen.git#841bb9f07ad82d1391a476355cfc078af5f9ceb6"
 dependencies = [
  "curv-kzen",
  "generic-array 0.14.6",
@@ -1142,7 +1134,7 @@ dependencies = [
 [[package]]
 name = "centipede"
 version = "0.3.0"
-source = "git+https://github.com/webb-tools/centipede.git#397a180d07cc567367c65e7400df1bc7a2ddd0ca"
+source = "git+https://github.com/webb-tools/centipede.git#6395a9b32ad67108f2a311e95d8115f0c3a6cf51"
 dependencies = [
  "bulletproof-kzen",
  "curv-kzen",
@@ -1389,9 +1381,9 @@ dependencies = [
 
 [[package]]
 name = "comfy-table"
-version = "6.1.3"
+version = "6.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e621e7e86c46fd8a14c32c6ae3cb95656621b4743a27d0cffedb831d46e7ad21"
+checksum = "6e7b787b0dc42e8111badfdbe4c3059158ccb2db8780352fa1b01e8ccf45cc4d"
 dependencies = [
  "strum 0.24.1",
  "strum_macros 0.24.3",
@@ -1409,9 +1401,9 @@ dependencies = [
 
 [[package]]
 name = "console"
-version = "0.15.3"
+version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5556015fe3aad8b968e5d4124980fbe2f6aaee7aeec6b749de1faaa2ca5d0a4c"
+checksum = "c9b6515d269224923b26b5febea2ed42b2d5f2ce37284a4dd670fedd6cb8347a"
 dependencies = [
  "encode_unicode",
  "lazy_static",
@@ -1670,7 +1662,7 @@ checksum = "ef2b4b23cddf68b89b8f8069890e8c270d54e2d5fe1b143820234805e4cb17ef"
 dependencies = [
  "generic-array 0.14.6",
  "rand_core 0.6.4",
- "subtle 2.4.1",
+ "subtle",
  "zeroize",
 ]
 
@@ -1686,22 +1678,12 @@ dependencies = [
 
 [[package]]
 name = "crypto-mac"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4434400df11d95d556bac068ddfedd482915eb18fe8bea89bc80b6e4b1c179e5"
-dependencies = [
- "generic-array 0.12.4",
- "subtle 1.0.0",
-]
-
-[[package]]
-name = "crypto-mac"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b584a330336237c1eecd3e94266efb216c56ed91225d634cb2991c5f3fd1aeab"
 dependencies = [
  "generic-array 0.14.6",
- "subtle 2.4.1",
+ "subtle",
 ]
 
 [[package]]
@@ -1711,7 +1693,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b1d1a86f49236c215f271d40892d5fc950490551400b02ef360692c29815c714"
 dependencies = [
  "generic-array 0.14.6",
- "subtle 2.4.1",
+ "subtle",
 ]
 
 [[package]]
@@ -2269,7 +2251,7 @@ dependencies = [
  "byteorder",
  "digest 0.8.1",
  "rand_core 0.5.1",
- "subtle 2.4.1",
+ "subtle",
  "zeroize",
 ]
 
@@ -2282,7 +2264,7 @@ dependencies = [
  "byteorder",
  "digest 0.9.0",
  "rand_core 0.5.1",
- "subtle 2.4.1",
+ "subtle",
  "zeroize",
 ]
 
@@ -2296,7 +2278,7 @@ dependencies = [
  "fiat-crypto",
  "packed_simd_2",
  "platforms 3.0.2",
- "subtle 2.4.1",
+ "subtle",
  "zeroize",
 ]
 
@@ -2471,7 +2453,7 @@ checksum = "8168378f4e5023e7218c89c891c0fd8ecdb5e5e4f18cb78f38cf245dd021e76f"
 dependencies = [
  "block-buffer 0.10.3",
  "crypto-common",
- "subtle 2.4.1",
+ "subtle",
 ]
 
 [[package]]
@@ -2518,7 +2500,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#24f132e9a7685043c7dc44d45eca2bf270555632"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#768473e233513f30b8fd76b4b1b6f9bec60787d7"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2530,7 +2512,7 @@ dependencies = [
  "futures 0.3.25",
  "hex",
  "itertools 0.10.5",
- "libsecp256k1 0.3.5",
+ "libsecp256k1",
  "linked-hash-map",
  "log",
  "lru 0.7.8",
@@ -2569,7 +2551,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#24f132e9a7685043c7dc44d45eca2bf270555632"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#768473e233513f30b8fd76b4b1b6f9bec60787d7"
 dependencies = [
  "chacha20poly1305",
  "curv-kzen",
@@ -2577,7 +2559,7 @@ dependencies = [
  "fnv",
  "futures 0.3.25",
  "hex",
- "libsecp256k1 0.3.5",
+ "libsecp256k1",
  "log",
  "multi-party-ecdsa",
  "parity-scale-codec",
@@ -2600,7 +2582,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#24f132e9a7685043c7dc44d45eca2bf270555632"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#768473e233513f30b8fd76b4b1b6f9bec60787d7"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -2746,7 +2728,7 @@ dependencies = [
  "pkcs8",
  "rand_core 0.6.4",
  "sec1",
- "subtle 2.4.1",
+ "subtle",
  "zeroize",
 ]
 
@@ -2842,10 +2824,9 @@ dependencies = [
 [[package]]
 name = "eth-types"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#25cde1e817aa58f6f6f10ddd480812efa9fdd0ab"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
 dependencies = [
  "derive_more",
- "eth2_serde_utils",
  "eth2_ssz",
  "ethereum-types 0.14.1",
  "hex",
@@ -2853,7 +2834,6 @@ dependencies = [
  "rlp",
  "rlp-derive",
  "scale-info",
- "serde",
  "tiny-keccak",
  "tree_hash",
  "tree_hash_derive",
@@ -2862,28 +2842,16 @@ dependencies = [
 [[package]]
 name = "eth2_hashing"
 version = "0.3.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#25cde1e817aa58f6f6f10ddd480812efa9fdd0ab"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
 dependencies = [
  "lazy_static",
- "ring",
  "sha2 0.10.6",
-]
-
-[[package]]
-name = "eth2_serde_utils"
-version = "0.1.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#25cde1e817aa58f6f6f10ddd480812efa9fdd0ab"
-dependencies = [
- "ethereum-types 0.14.1",
- "hex",
- "serde",
- "serde_json",
 ]
 
 [[package]]
 name = "eth2_ssz"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#25cde1e817aa58f6f6f10ddd480812efa9fdd0ab"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
 dependencies = [
  "ethereum-types 0.14.1",
  "itertools 0.10.5",
@@ -2914,6 +2882,17 @@ dependencies = [
 
 [[package]]
 name = "ethbloom"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11da94e443c60508eb62cf256243a64da87304c2802ac2528847f79d750007ef"
+dependencies = [
+ "crunchy",
+ "fixed-hash 0.7.0",
+ "tiny-keccak",
+]
+
+[[package]]
+name = "ethbloom"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c22d4b5885b6aa2fe5e8b9329fb8d232bf739e434e6b87347c63bdd00c120f60"
@@ -2922,7 +2901,6 @@ dependencies = [
  "fixed-hash 0.8.0",
  "impl-codec",
  "impl-rlp",
- "impl-serde",
  "scale-info",
  "tiny-keccak",
 ]
@@ -2958,6 +2936,18 @@ dependencies = [
 
 [[package]]
 name = "ethereum-types"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b2827b94c556145446fcce834ca86b7abf0c39a805883fe20e72c5bfdb5a0dc6"
+dependencies = [
+ "ethbloom 0.12.1",
+ "fixed-hash 0.7.0",
+ "primitive-types 0.11.1",
+ "uint",
+]
+
+[[package]]
+name = "ethereum-types"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02d215cbf040552efcbe99a38372fe80ab9d00268e20012b79fcd0f073edd8ee"
@@ -2966,7 +2956,6 @@ dependencies = [
  "fixed-hash 0.8.0",
  "impl-codec",
  "impl-rlp",
- "impl-serde",
  "primitive-types 0.12.1",
  "scale-info",
  "uint",
@@ -3074,7 +3063,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d013fc25338cc558c5c2cfbad646908fb23591e2404481826742b651c9af7160"
 dependencies = [
  "rand_core 0.6.4",
- "subtle 2.4.1",
+ "subtle",
 ]
 
 [[package]]
@@ -3791,7 +3780,7 @@ checksum = "5dfbfb3a6cfbd390d5c9564ab283a0349b9b9fcd46a706c1eb10e0db70bfbac7"
 dependencies = [
  "ff",
  "rand_core 0.6.4",
- "subtle 2.4.1",
+ "subtle",
 ]
 
 [[package]]
@@ -3929,16 +3918,6 @@ dependencies = [
 
 [[package]]
 name = "hmac"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5dcb5e64cda4c23119ab41ba960d1e170a774c8e4b9d9e6a9bc18aabf5e59695"
-dependencies = [
- "crypto-mac 0.7.0",
- "digest 0.8.1",
-]
-
-[[package]]
-name = "hmac"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "126888268dcc288495a26bf004b38c5fdbb31682f992c84ceb046a1f0fe38840"
@@ -3964,17 +3943,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c49c37c09c17a53d937dfbb742eb3a961d65a994e6bcdcf37e7399d0cc8ab5e"
 dependencies = [
  "digest 0.10.6",
-]
-
-[[package]]
-name = "hmac-drbg"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6e570451493f10f6581b48cdd530413b63ea9e780f544bfd3bdcaa0d89d1a7b"
-dependencies = [
- "digest 0.8.1",
- "generic-array 0.12.4",
- "hmac 0.7.1",
 ]
 
 [[package]]
@@ -5022,22 +4990,6 @@ dependencies = [
 
 [[package]]
 name = "libsecp256k1"
-version = "0.3.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fc1e2c808481a63dc6da2074752fdd4336a3c8fcc68b83db6f1fd5224ae7962"
-dependencies = [
- "arrayref",
- "crunchy",
- "digest 0.8.1",
- "hmac-drbg 0.2.0",
- "rand 0.7.3",
- "sha2 0.8.2",
- "subtle 2.4.1",
- "typenum 1.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "libsecp256k1"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95b09eff1b35ed3b33b877ced3a691fc7a481919c7e29c53c906226fcf55e2a1"
@@ -5045,7 +4997,7 @@ dependencies = [
  "arrayref",
  "base64",
  "digest 0.9.0",
- "hmac-drbg 0.3.0",
+ "hmac-drbg",
  "libsecp256k1-core",
  "libsecp256k1-gen-ecmult",
  "libsecp256k1-gen-genmult",
@@ -5063,7 +5015,7 @@ checksum = "5be9b9bb642d8522a44d533eab56c16c738301965504753b03ad1de3425d5451"
 dependencies = [
  "crunchy",
  "digest 0.9.0",
- "subtle 2.4.1",
+ "subtle",
 ]
 
 [[package]]
@@ -5317,7 +5269,7 @@ dependencies = [
 [[package]]
 name = "merkle_proof"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#25cde1e817aa58f6f6f10ddd480812efa9fdd0ab"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
 dependencies = [
  "eth2_hashing",
  "ethereum-types 0.14.1",
@@ -5346,18 +5298,6 @@ dependencies = [
  "futures 0.3.25",
  "rand 0.8.5",
  "thrift",
-]
-
-[[package]]
-name = "milagro_bls"
-version = "1.5.0"
-source = "git+https://github.com/webb-tools/milagro_bls#583bdf821befbee4e09161ff92398f1e75372456"
-dependencies = [
- "amcl",
- "hex",
- "lazy_static",
- "rand 0.8.5",
- "zeroize",
 ]
 
 [[package]]
@@ -5453,7 +5393,7 @@ dependencies = [
 [[package]]
 name = "multi-party-ecdsa"
 version = "0.8.2"
-source = "git+https://github.com/webb-tools/multi-party-ecdsa.git?branch=thomas/fix-dependencies#77df1f789c1f643d02ff899368bbb4372fbcf86c"
+source = "git+https://github.com/webb-tools/multi-party-ecdsa.git?branch=thomas/fix-dependencies#a464d96d6fdada6892b86b74d4068a620cff6fd8"
 dependencies = [
  "centipede",
  "curv-kzen",
@@ -5462,7 +5402,7 @@ dependencies = [
  "round-based",
  "serde",
  "sha2 0.9.9",
- "subtle 2.4.1",
+ "subtle",
  "thiserror",
  "zeroize",
  "zk-paillier",
@@ -5725,9 +5665,9 @@ checksum = "2bf50223579dc7cdcfb3bfcacf7069ff68243f8c363f62ffa99cf000a6b9c451"
 
 [[package]]
 name = "nom"
-version = "7.1.1"
+version = "7.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8903e5a29a317527874d0402f867152a3d21c908bb0b933e416c65e301d4c36"
+checksum = "e5507769c4919c998e69e49c839d9dc6e693ede4cc4290d6ad8b41d4f09c548c"
 dependencies = [
  "memchr",
  "minimal-lexical",
@@ -5836,18 +5776,18 @@ dependencies = [
 
 [[package]]
 name = "object"
-version = "0.30.0"
+version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "239da7f290cfa979f43f85a8efeee9a8a76d0827c356d37f9d3d7254d6b537fb"
+checksum = "8d864c91689fdc196779b98dba0aceac6118594c2df6ee5d943eb6a8df4d107a"
 dependencies = [
  "memchr",
 ]
 
 [[package]]
 name = "once_cell"
-version = "1.16.0"
+version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86f0b0d4bf799edbc74508c1e8bf170ff5f41238e5f8225603ca7caaae2b7860"
+checksum = "6f61fba1741ea2b3d6a1e3178721804bb716a68a6aeba1149b5d52e3d464ea66"
 
 [[package]]
 name = "opaque-debug"
@@ -6380,14 +6320,14 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#24f132e9a7685043c7dc44d45eca2bf270555632"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#768473e233513f30b8fd76b4b1b6f9bec60787d7"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
  "hex",
- "libsecp256k1 0.7.1",
+ "libsecp256k1",
  "log",
  "pallet-session",
  "parity-scale-codec",
@@ -6400,7 +6340,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#24f132e9a7685043c7dc44d45eca2bf270555632"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#768473e233513f30b8fd76b4b1b6f9bec60787d7"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6421,7 +6361,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#24f132e9a7685043c7dc44d45eca2bf270555632"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#768473e233513f30b8fd76b4b1b6f9bec60787d7"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6447,7 +6387,7 @@ dependencies = [
  "frame-system",
  "getrandom 0.2.8",
  "hex-literal 0.3.4",
- "libsecp256k1 0.7.1",
+ "libsecp256k1",
  "pallet-balances",
  "pallet-vesting",
  "parity-scale-codec",
@@ -6520,7 +6460,7 @@ dependencies = [
 [[package]]
 name = "pallet-eth2-light-client"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#25cde1e817aa58f6f6f10ddd480812efa9fdd0ab"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
 dependencies = [
  "bitvec",
  "bls",
@@ -6537,7 +6477,6 @@ dependencies = [
  "rlp",
  "rlp-derive",
  "scale-info",
- "serde",
  "sp-core",
  "sp-runtime",
  "sp-std",
@@ -7069,7 +7008,7 @@ dependencies = [
  "frame-system",
  "hex-literal 0.3.4",
  "impl-trait-for-tuples",
- "libsecp256k1 0.7.1",
+ "libsecp256k1",
  "pallet-balances",
  "pallet-token-wrapper-handler",
  "pallet-vanchor-handler",
@@ -8641,7 +8580,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "impl-trait-for-tuples",
- "libsecp256k1 0.7.1",
+ "libsecp256k1",
  "log",
  "pallet-authorship",
  "pallet-bags-list",
@@ -9039,9 +8978,9 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "predicates"
-version = "2.1.4"
+version = "2.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f54fc5dc63ed3bbf19494623db4f3af16842c0d975818e469022d09e53f0aa05"
+checksum = "59230a63c37f3e18569bdb90e4a89cbf5bf8b06fea0b84e65ea10cc4df47addd"
 dependencies = [
  "difflib",
  "float-cmp",
@@ -9092,6 +9031,16 @@ name = "primitive-types"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05e4722c697a58a99d5d06a08c30821d7c082a4632198de1eaa5a6c22ef42373"
+dependencies = [
+ "fixed-hash 0.7.0",
+ "uint",
+]
+
+[[package]]
+name = "primitive-types"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e28720988bff275df1f51b171e1b2a18c30d194c4d2b61defdacecd625a5d94a"
 dependencies = [
  "fixed-hash 0.7.0",
  "uint",
@@ -10054,7 +10003,7 @@ dependencies = [
 [[package]]
 name = "safe_arith"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#25cde1e817aa58f6f6f10ddd480812efa9fdd0ab"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
 
 [[package]]
 name = "same-file"
@@ -11252,7 +11201,7 @@ dependencies = [
  "rand 0.7.3",
  "rand_core 0.5.1",
  "sha2 0.8.2",
- "subtle 2.4.1",
+ "subtle",
  "zeroize",
 ]
 
@@ -11288,7 +11237,7 @@ dependencies = [
  "der",
  "generic-array 0.14.6",
  "pkcs8",
- "subtle 2.4.1",
+ "subtle",
  "zeroize",
 ]
 
@@ -11693,7 +11642,7 @@ dependencies = [
  "ring",
  "rustc_version 0.4.0",
  "sha2 0.10.6",
- "subtle 2.4.1",
+ "subtle",
 ]
 
 [[package]]
@@ -11957,7 +11906,7 @@ dependencies = [
  "hash256-std-hasher",
  "impl-serde",
  "lazy_static",
- "libsecp256k1 0.7.1",
+ "libsecp256k1",
  "log",
  "merlin",
  "num-traits",
@@ -12081,7 +12030,7 @@ dependencies = [
  "ed25519-dalek",
  "futures 0.3.25",
  "hash-db",
- "libsecp256k1 0.7.1",
+ "libsecp256k1",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -12787,12 +12736,6 @@ dependencies = [
  "walkdir",
  "wasm-opt",
 ]
-
-[[package]]
-name = "subtle"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d67a5a62ba6e01cb2192ff309324cb4875d0c451d55fe2319433abe7a05a8ee"
 
 [[package]]
 name = "subtle"
@@ -13663,7 +13606,7 @@ dependencies = [
 [[package]]
 name = "tree_hash"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#25cde1e817aa58f6f6f10ddd480812efa9fdd0ab"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
 dependencies = [
  "eth2_hashing",
  "ethereum-types 0.14.1",
@@ -13673,7 +13616,7 @@ dependencies = [
 [[package]]
 name = "tree_hash_derive"
 version = "0.4.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#25cde1e817aa58f6f6f10ddd480812efa9fdd0ab"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
 dependencies = [
  "darling",
  "quote",
@@ -13912,7 +13855,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f214e8f697e925001e66ec2c6e37a4ef93f0f78c2eed7814394e10c62025b05"
 dependencies = [
  "generic-array 0.14.6",
- "subtle 2.4.1",
+ "subtle",
 ]
 
 [[package]]
@@ -14779,7 +14722,7 @@ dependencies = [
 [[package]]
 name = "zk-paillier"
 version = "0.4.3"
-source = "git+https://github.com/webb-tools/zk-paillier.git#ade9fa93423a62a92f29d047a83a6186cd923a05"
+source = "git+https://github.com/webb-tools/zk-paillier.git#0ca2d32e041c7102cdd2e61b55bcbc6cb4bf5114"
 dependencies = [
  "bit-vec",
  "curv-kzen",

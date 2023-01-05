@@ -119,7 +119,6 @@ pallet-transaction-pause = { path = '../../pallets/transaction-pause', default-f
 
 # Webb dependencies
 pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", branch = "thomas/relay", default-features = false }
-
 tangle-primitives = { path = '../../primitives', default-features = false }
 
 [features]
@@ -212,7 +211,7 @@ std = [
   "pallet-identity/std",
 
   # Light client deps
-  "pallet-eth2-light-client/std",
+  #"pallet-eth2-light-client/std",
 
   # DKG
   "pallet-dkg-metadata/std",

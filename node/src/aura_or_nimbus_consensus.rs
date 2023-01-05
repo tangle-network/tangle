@@ -72,6 +72,7 @@ where
 				create_inherent_data_providers: create_inherent_data_providers_aura,
 				check_for_equivocation: sc_consensus_aura::CheckForEquivocation::Yes,
 				telemetry,
+				compatibility_mode: Default::default()
 			}),
 			nimbus_verifier: nimbus_consensus::Verifier::new(
 				client,
