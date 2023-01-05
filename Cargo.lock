@@ -98,6 +98,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbf688625d06217d5b1bb0ea9d9c44a1635fd0ee3534466388d18203174f4d11"
 
 [[package]]
+name = "amcl"
+version = "0.3.0"
+source = "git+https://github.com/webb-tools/milagro_bls#583bdf821befbee4e09161ff92398f1e75372456"
+
+[[package]]
 name = "android_system_properties"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -990,12 +995,13 @@ dependencies = [
 [[package]]
 name = "bls"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#f2879696d9fb14a48796c46bae7adaa6571aa3c6"
 dependencies = [
  "eth2_hashing",
  "eth2_ssz",
  "ethereum-types 0.13.1",
  "hex",
+ "milagro_bls",
  "rand 0.7.3",
  "rand_chacha 0.3.1",
  "tree_hash",
@@ -2824,7 +2830,7 @@ dependencies = [
 [[package]]
 name = "eth-types"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#f2879696d9fb14a48796c46bae7adaa6571aa3c6"
 dependencies = [
  "derive_more",
  "eth2_ssz",
@@ -2842,7 +2848,7 @@ dependencies = [
 [[package]]
 name = "eth2_hashing"
 version = "0.3.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#f2879696d9fb14a48796c46bae7adaa6571aa3c6"
 dependencies = [
  "lazy_static",
  "sha2 0.10.6",
@@ -2851,7 +2857,7 @@ dependencies = [
 [[package]]
 name = "eth2_ssz"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#f2879696d9fb14a48796c46bae7adaa6571aa3c6"
 dependencies = [
  "ethereum-types 0.14.1",
  "itertools 0.10.5",
@@ -5269,7 +5275,7 @@ dependencies = [
 [[package]]
 name = "merkle_proof"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#f2879696d9fb14a48796c46bae7adaa6571aa3c6"
 dependencies = [
  "eth2_hashing",
  "ethereum-types 0.14.1",
@@ -5298,6 +5304,16 @@ dependencies = [
  "futures 0.3.25",
  "rand 0.8.5",
  "thrift",
+]
+
+[[package]]
+name = "milagro_bls"
+version = "1.5.0"
+source = "git+https://github.com/webb-tools/milagro_bls#583bdf821befbee4e09161ff92398f1e75372456"
+dependencies = [
+ "amcl",
+ "rand 0.8.5",
+ "zeroize",
 ]
 
 [[package]]
@@ -6460,7 +6476,7 @@ dependencies = [
 [[package]]
 name = "pallet-eth2-light-client"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#f2879696d9fb14a48796c46bae7adaa6571aa3c6"
 dependencies = [
  "bitvec",
  "bls",
@@ -10003,7 +10019,7 @@ dependencies = [
 [[package]]
 name = "safe_arith"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#f2879696d9fb14a48796c46bae7adaa6571aa3c6"
 
 [[package]]
 name = "same-file"
@@ -13375,9 +13391,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.23.0"
+version = "1.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eab6d665857cc6ca78d6e80303a02cea7a7851e85dfbd77cbdc09bd129f1ef46"
+checksum = "38a54aca0c15d014013256222ba0ebed095673f89345dd79119d912eb561b7a8"
 dependencies = [
  "autocfg 1.1.0",
  "bytes",
@@ -13606,7 +13622,7 @@ dependencies = [
 [[package]]
 name = "tree_hash"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#f2879696d9fb14a48796c46bae7adaa6571aa3c6"
 dependencies = [
  "eth2_hashing",
  "ethereum-types 0.14.1",
@@ -13616,7 +13632,7 @@ dependencies = [
 [[package]]
 name = "tree_hash_derive"
 version = "0.4.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#b728336b26d5e79dd618789cecd6fa63fb610df1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/relay#f2879696d9fb14a48796c46bae7adaa6571aa3c6"
 dependencies = [
  "darling",
  "quote",
