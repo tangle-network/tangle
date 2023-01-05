@@ -7,8 +7,8 @@ PROJECT_ROOT=$(git rev-parse --show-toplevel)
 cd "$PROJECT_ROOT"
 
 echo "****************** GENERATE RAW CHAINSPEC ******************"
-./target/release/tangle-parachain build-spec --disable-default-bootnode --chain tangle --raw > ./chainspecs/tangle-parachain.json
-./target/release/tangle-parachain export-genesis-state --chain ./chainspecs/tangle-parachain.json > ./chainspecs/tangle-parachain-genesis-state
-./target/release/tangle-parachain export-genesis-wasm --chain ./chainspecs/tangle-parachain.json > ./chainspecs/tangle-parachain-genesis-wasm
+./target/release/tangle-parachain build-spec --disable-default-bootnode --chain tangle-rococo --raw > ./chainspecs/tangle-parachain-rococo.json
+./target/release/tangle-parachain export-genesis-state --chain ./chainspecs/tangle-parachain-rococo.json > ./chainspecs/tangle-rococo-genesis-state
+./target/release/tangle-parachain export-genesis-wasm --chain ./chainspecs/tangle-parachain-rococo.json > ./chainspecs/tangle-rococo-genesis-wasm
 
 popd
