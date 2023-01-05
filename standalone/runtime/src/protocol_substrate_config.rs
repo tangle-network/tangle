@@ -125,6 +125,7 @@ impl orml_tokens::Config for Runtime {
 	type MaxLocks = ConstU32<2>;
 	type MaxReserves = ConstU32<2>;
 	type ReserveIdentifier = ReserveIdentifier;
+	type CurrencyHooks = ();
 }
 
 parameter_types! {

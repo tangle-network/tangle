@@ -47,7 +47,12 @@ use sc_consensus_aura::CompatibleDigestItem as AuraDigestItem;
 const LOG_TARGET: &str = "aura-nimbus-consensus";
 
 struct AuraOrNimbusVerifier<Client, Block: BlockT, AuraCIDP, NimbusCIDP> {
-	aura_verifier: sc_consensus_aura::AuraVerifier<Client, <AuraId as AppKey>::Pair, AuraCIDP, <<Block as BlockT>::Header as HeaderT>::Number>,
+	aura_verifier: sc_consensus_aura::AuraVerifier<
+		Client,
+		<AuraId as AppKey>::Pair,
+		AuraCIDP,
+		<<Block as BlockT>::Header as HeaderT>::Number,
+	>,
 	nimbus_verifier: nimbus_consensus::Verifier<Client, Block, NimbusCIDP>,
 }
 impl<Client, Block, AuraCIDP, NimbusCIDP> AuraOrNimbusVerifier<Client, Block, AuraCIDP, NimbusCIDP>
@@ -72,7 +77,7 @@ where
 				create_inherent_data_providers: create_inherent_data_providers_aura,
 				check_for_equivocation: sc_consensus_aura::CheckForEquivocation::Yes,
 				telemetry,
-				compatibility_mode: Default::default()
+				compatibility_mode: Default::default(),
 			}),
 			nimbus_verifier: nimbus_consensus::Verifier::new(
 				client,
