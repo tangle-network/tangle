@@ -23,7 +23,7 @@ use sc_keystore::LocalKeystore;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
-use std::{path::PathBuf, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 use tangle_runtime::{self, opaque::Block, RuntimeApi};
 
 // Our native executor instance.
@@ -247,12 +247,6 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
 
-	let base_path = if config.base_path.is_some() {
-		config.base_path.as_ref().map(|path| PathBuf::from(path.path()))
-	} else {
-		None
-	};
-
 	let rpc_extensions_builder = {
 		let client = client.clone();
 		let pool = transaction_pool.clone();
@@ -291,7 +285,6 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 			key_store: Some(keystore_container.sync_keystore()),
 			network: network.clone(),
 			prometheus_registry: prometheus_registry.clone(),
-			base_path,
 			local_keystore: keystore_container.local_keystore(),
 			_block: std::marker::PhantomData::<Block>,
 		};

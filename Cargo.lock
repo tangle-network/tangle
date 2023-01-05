@@ -6450,7 +6450,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "1.0.0"
+version = "0.1.0"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6897,7 +6897,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-parachain-staking"
-version = "3.0.0"
+version = "0.1.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7185,7 +7185,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -12822,7 +12822,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-parachain"
-version = "3.0.0"
+version = "0.1.0"
 dependencies = [
  "ark-bn254",
  "ark-serialize",
@@ -12907,7 +12907,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "1.0.0"
+version = "0.1.0"
 dependencies = [
  "frame-support",
  "smallvec",
@@ -12918,7 +12918,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-rococo-runtime"
-version = "3.0.0"
+version = "0.1.0"
 dependencies = [
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
@@ -13020,7 +13020,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "1.0.0"
+version = "0.1.0"
 dependencies = [
  "ark-bls12-381",
  "ark-bn254",
