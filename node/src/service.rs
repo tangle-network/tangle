@@ -35,7 +35,6 @@ use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface, RelayC
 use cumulus_relay_chain_rpc_interface::{create_client_and_start_worker, RelayChainRpcInterface};
 use jsonrpsee::RpcModule;
 use nimbus_consensus::{BuildNimbusConsensusParams, NimbusConsensus};
-use std::path::PathBuf;
 
 // Substrate Imports
 use sc_executor::NativeElseWasmExecutor;
@@ -337,12 +336,6 @@ where
 			warp_sync: None,
 		})?;
 
-	let base_path = if parachain_config.base_path.is_some() {
-		parachain_config.base_path.as_ref().map(|path| PathBuf::from(path.path()))
-	} else {
-		None
-	};
-
 	if validator {
 		dkg_primitives::utils::insert_controller_account_keys_into_keystore(
 			&parachain_config,
@@ -415,7 +408,6 @@ where
 			key_store: Some(params.keystore_container.sync_keystore()),
 			network: network.clone(),
 			prometheus_registry: prometheus_registry.clone(),
-			base_path,
 			local_keystore: params.keystore_container.local_keystore(),
 			_block: std::marker::PhantomData::<Block>,
 		};
