@@ -48,12 +48,10 @@ pallet-vanchor-verifier = { git = "https://github.com/webb-tools/protocol-substr
 pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "polkadot-v0.9.36", default-features = false }
 webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "polkadot-v0.9.36", default-features = false, features = ["hashing", "verifying"] }
 
-# Orml depedencies
-# revert the orml* deps git repos to { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36"}
-orml-benchmarking = { git = "https://github.com/webb-tools/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false, optional = true }
-orml-currencies = { git = "https://github.com/webb-tools/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
-orml-tokens = { git = "https://github.com/webb-tools/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
-orml-traits = { git = "https://github.com/webb-tools/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
+orml-benchmarking = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false, optional = true }
+orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies

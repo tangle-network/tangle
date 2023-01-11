@@ -14,7 +14,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive", "max-encoded-len"] }
+codec = { package = "parity-scale-codec", version = "3", default-features = false }
 hex-literal = { version = '0.3.1', optional = true }
 log = { version = "0.4.14", default-features = false }
 scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
@@ -48,9 +48,9 @@ pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git"
 webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "polkadot-v0.9.36", default-features = false, features = ["hashing", "verifying"] }
 
 # Orml dependencies
-orml-currencies = { git = "https://github.com/webb-tools/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
-orml-tokens = { git = "https://github.com/webb-tools/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
-orml-traits = { git = "https://github.com/webb-tools/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
+orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
@@ -118,9 +118,7 @@ pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "po
 pallet-transaction-pause = { path = '../../pallets/transaction-pause', default-features = false }
 
 # Webb dependencies
-# pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", branch = "thomas/relay", default-features = false }
-# pallet-eth2-light-client = { path = "../../../pallet-eth2-light-client/pallet", default-features = false }
-bug-hunt = { path = "../../../pallet-eth2-light-client/bug-hunt", default-features = false }
+pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client.git", branch = "thomas/relay2", default-features = false }
 tangle-primitives = { path = '../../primitives', default-features = false }
 
 [features]
@@ -155,7 +153,7 @@ runtime-benchmarks = [
 
 std = [
   "serde",
-  "codec/std",
+  #"codec/std",
   "scale-info/std",
   "log/std",
   "sp-api/std",
@@ -211,10 +209,6 @@ std = [
   "pallet-treasury/std",
   "pallet-ecdsa-claims/std",
   "pallet-identity/std",
-
-  # Light client deps
-  # "pallet-eth2-light-client/std",
-  "bug-hunt/std",
 
   # DKG
   "pallet-dkg-metadata/std",
