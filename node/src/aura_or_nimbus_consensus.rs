@@ -20,7 +20,7 @@
 
 use futures::TryFutureExt;
 use log::debug;
-use sc_client_api::HeaderBackend;
+use sc_client_api::{HeaderBackend, Backend};
 use sc_consensus::{
 	import_queue::{BasicQueue, Verifier as VerifierT},
 	BlockImport, BlockImportParams,
@@ -125,9 +125,10 @@ where
 	}
 }
 
-pub fn import_queue<Client, Block: BlockT, InnerBI>(
+pub fn import_queue<Client, Block: BlockT, InnerBI, BE: Backend<Block>>(
 	client: Arc<Client>,
 	block_import: InnerBI,
+	backend: Arc<BE>,
 	spawner: &impl sp_core::traits::SpawnEssentialNamed,
 	registry: Option<&substrate_prometheus_endpoint::Registry>,
 	telemetry: Option<TelemetryHandle>,
@@ -169,7 +170,7 @@ where
 		//       If in the future either of them diverge from this,
 		//       we'll have to adapt to the change here and in
 		//       node/src/service.rs:L467 aka. BuildNimbusConsensusParams
-		Box::new(cumulus_client_consensus_common::ParachainBlockImport::new(block_import)),
+		Box::new(cumulus_client_consensus_common::ParachainBlockImport::new(block_import, backend)),
 		None,
 		spawner,
 		registry,

@@ -191,7 +191,7 @@ async fn start_node_impl(
 	let transaction_pool = params.transaction_pool.clone();
 	let import_queue_service = params.import_queue.service();
 
-	let spawner = task_manager.spawn_essential_handle();
+	let spawner = task_manager.spawn_handle();
 	const PARACHAIN: bool = true;
 	let cidp = move |_, ()| async move {
 		let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
@@ -203,12 +203,12 @@ async fn start_node_impl(
 			);
 
 		let uncles =
-			sp_authorship::InherentDataProvider::<<Block as BlockT>::Header>::check_inherents();
+			sp_authorship::InherentDataProvider::check_inherents();
 
 		Ok((slot, timestamp, uncles))
 	};
 
-	let import_queue_test = nimbus_consensus::import_queue(client, block_import, cidp, &spawner, Some(&prometheus_registry), PARACHAIN)?;
+	let import_queue_test = nimbus_consensus::import_queue(client, block_import, cidp, &spawner, prometheus_registry.as_ref(), PARACHAIN)?;
 
 	let (network, system_rpc_tx, tx_handler_controller, start_network) =
 		sc_service::build_network(sc_service::BuildNetworkParams {
