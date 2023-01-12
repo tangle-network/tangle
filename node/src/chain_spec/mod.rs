@@ -30,8 +30,7 @@ use tangle_rococo_runtime::{
 	nimbus_session_adapter::{NimbusId, VrfId},
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
 	ImOnlineId, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
-	ParachainStakingConfig, Signature, VAnchorBn254Config, VAnchorVerifierConfig, HOURS, MILLIUNIT,
-	UNIT,
+	ParachainStakingConfig, Signature, VAnchorBn254Config, VAnchorVerifierConfig, HOURS, UNIT,
 };
 
 pub mod minerva_testnet_fixtures;
@@ -396,11 +395,7 @@ fn testnet_genesis(
 		claims: ClaimsConfig { claims: vec![], vesting: vec![], expiry: None },
 		sudo: tangle_rococo_runtime::SudoConfig { key: Some(root_key) },
 		balances: tangle_rococo_runtime::BalancesConfig {
-			balances: endowed_accounts
-				.iter()
-				.cloned()
-				.map(|k| (k, MILLIUNIT * 4_096_000))
-				.collect(),
+			balances: endowed_accounts.iter().cloned().map(|k| (k, 1_000_000_000 * UNIT)).collect(),
 		},
 		democracy: Default::default(),
 		council: Default::default(),
