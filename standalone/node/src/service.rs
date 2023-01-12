@@ -23,7 +23,11 @@ use sc_keystore::LocalKeystore;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
-use std::{sync::Arc, time::Duration};
+use std::{path::PathBuf, sync::Arc, time::Duration};
+use sp_core::Pair;
+use codec::Encode;
+use sp_runtime::generic::Era;
+use sp_runtime::SaturatedConversion;
 use tangle_runtime::{self, opaque::Block, RuntimeApi};
 
 // Our native executor instance.
@@ -50,6 +54,69 @@ pub(crate) type FullClient =
 	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
+
+/// Create a transaction using the given `call`.
+///
+/// The transaction will be signed by `sender`. If `nonce` is `None` it will be fetched from the
+/// state of the best block.
+///
+/// Note: Should only be used for tests.
+pub fn create_extrinsic(
+	client: &FullClient,
+	sender: sp_core::sr25519::Pair,
+	function: impl Into<tangle_runtime::RuntimeCall>,
+	nonce: Option<u32>,
+) -> tangle_runtime::UncheckedExtrinsic {
+	let function = function.into();
+	let genesis_hash = client.block_hash(0).ok().flatten().expect("Genesis block exists; qed");
+	let best_hash = client.chain_info().best_hash;
+	let best_block = client.chain_info().best_number;
+	let nonce = nonce.unwrap_or_else(|| fetch_nonce(client, sender.clone()));
+
+	let period = tangle_runtime::BlockHashCount::get()
+		.checked_next_power_of_two()
+		.map(|c| c / 2)
+		.unwrap_or(2) as u64;
+	let tip = 0;
+	let extra: tangle_runtime::SignedExtra = (
+		frame_system::CheckNonZeroSender::<tangle_runtime::Runtime>::new(),
+		frame_system::CheckSpecVersion::<tangle_runtime::Runtime>::new(),
+		frame_system::CheckTxVersion::<tangle_runtime::Runtime>::new(),
+		frame_system::CheckGenesis::<tangle_runtime::Runtime>::new(),
+		frame_system::CheckEra::<tangle_runtime::Runtime>::from(generic::Era::mortal(
+			period,
+			best_block.saturated_into(),
+		)),
+		frame_system::CheckNonce::<tangle_runtime::Runtime>::from(nonce),
+		frame_system::CheckWeight::<tangle_runtime::Runtime>::new(),
+		pallet_asset_tx_payment::ChargeAssetTxPayment::<tangle_runtime::Runtime>::from(
+			tip, None,
+		),
+	);
+
+	let raw_payload = tangle_runtime::SignedPayload::from_raw(
+		function.clone(),
+		extra.clone(),
+		(
+			(),
+			tangle_runtime::VERSION.spec_version,
+			tangle_runtime::VERSION.transaction_version,
+			genesis_hash,
+			best_hash,
+			(),
+			(),
+			(),
+		),
+	);
+	let signature = raw_payload.using_encoded(|e| sender.sign(e));
+
+	tangle_runtime::UncheckedExtrinsic::new_signed(
+		function,
+		sp_runtime::AccountId32::from(sender.public()).into(),
+		tangle_runtime::Signature::Sr25519(signature),
+		extra,
+	)
+}
 
 pub fn new_partial(
 	config: &Configuration,

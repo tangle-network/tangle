@@ -104,6 +104,7 @@ jsonrpsee = { version = "0.16.2", features = ["server"] }
 pallet-im-online = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 pallet-transaction-payment = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 pallet-transaction-payment-rpc = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
+pallet-asset-tx-payment = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 sc-authority-discovery = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 sc-transaction-pool-api = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 sp-authority-discovery = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
