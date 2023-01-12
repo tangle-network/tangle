@@ -99,8 +99,8 @@ pub fn create_extrinsic(
 		)),
 		frame_system::CheckNonce::<tangle_runtime::Runtime>::from(nonce),
 		frame_system::CheckWeight::<tangle_runtime::Runtime>::new(),
-		pallet_asset_tx_payment::ChargeTransactionPayment::<tangle_runtime::Runtime>::from(
-			tip, None,
+		pallet_transaction_payment::ChargeTransactionPayment::<tangle_runtime::Runtime>::from(
+			tip
 		),
 	);
 
