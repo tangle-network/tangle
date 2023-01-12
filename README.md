@@ -225,6 +225,17 @@ cargo build --release
 ./target/release/polkadot --help
 ```
 
+### Building on mac M1
+The linking phase may fail due to not finding libgmp (i.e., "could not find library -lgmp") when building on a mac M1. To fix this problem, run:
+
+```bash
+xcode-select --reset && xcode-select --install
+brew install gmp
+# make sure to run the commands below each time when starting a new env, or, append them to .zshrc
+export LIBRARY_PATH=$LIBRARY_PATH:/opt/homebrew/lib
+export INCLUDE_PATH=$INCLUDE_PATH:/opt/homebrew/include
+```
+
 ### Generate the Relay Chain Chainspec
 
 First, we create the chain specification file (chainspec). Note the chainspec file _must_ be generated on a
