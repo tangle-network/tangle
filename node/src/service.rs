@@ -34,7 +34,6 @@ use cumulus_client_service::{
 };
 use cumulus_primitives_core::ParaId;
 use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface};
-use nimbus_consensus::{BuildNimbusConsensusParams, NimbusConsensus};
 // Substrate Imports
 use sc_consensus::ImportQueue;
 use sc_executor::NativeElseWasmExecutor;
@@ -192,23 +191,22 @@ async fn start_node_impl(
 	let import_queue_service = params.import_queue.service();
 
 	let spawner = task_manager.spawn_handle();
+	let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
 	const PARACHAIN: bool = true;
 	let cidp = move |_, ()| async move {
 		let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
 
 		let slot =
-			sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+			sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
 				*timestamp,
 				slot_duration,
 			);
 
-		let uncles =
-			sp_authorship::InherentDataProvider::check_inherents();
-
-		Ok((slot, timestamp, uncles))
+		Ok((slot, timestamp))
 	};
 
-	let import_queue_test = nimbus_consensus::import_queue(client, block_import, cidp, &spawner, prometheus_registry.as_ref(), PARACHAIN)?;
+	let import_spawner = task_manager.spawn_essential_handle();
+	let import_queue_test = nimbus_consensus::import_queue(client.clone(), block_import.clone(), cidp, &import_spawner, prometheus_registry.as_ref(), PARACHAIN)?;
 
 	let (network, system_rpc_tx, tx_handler_controller, start_network) =
 		sc_service::build_network(sc_service::BuildNetworkParams {

@@ -125,7 +125,7 @@ where
 	}
 }
 
-pub fn import_queue<Client, Block: BlockT, InnerBI, BE: Backend<Block>>(
+pub fn import_queue<Client, Block: BlockT, InnerBI, BE: Backend<Block> + 'static>(
 	client: Arc<Client>,
 	block_import: InnerBI,
 	backend: Arc<BE>,

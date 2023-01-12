@@ -12797,7 +12797,7 @@ dependencies = [
  "arkworks-setups",
  "async-trait",
  "cfg-if",
- "clap 3.2.23",
+ "clap 4.0.32",
  "cumulus-client-cli",
  "cumulus-client-collator",
  "cumulus-client-consensus-aura",
