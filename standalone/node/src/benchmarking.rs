@@ -22,12 +22,12 @@
 
 use crate::service::{create_extrinsic, FullClient};
 
-use tangle_runtime::{BalancesCall, SystemCall};
-use webb_primitives::{AccountId, Balance};
 use sc_cli::Result;
 use sp_inherents::{InherentData, InherentDataProvider};
 use sp_keyring::Sr25519Keyring;
 use sp_runtime::OpaqueExtrinsic;
+use tangle_runtime::{BalancesCall, SystemCall};
+use webb_primitives::{AccountId, Balance};
 
 use std::{sync::Arc, time::Duration};
 

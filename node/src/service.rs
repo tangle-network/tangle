@@ -206,7 +206,14 @@ async fn start_node_impl(
 	};
 
 	let import_spawner = task_manager.spawn_essential_handle();
-	let import_queue_test = nimbus_consensus::import_queue(client.clone(), block_import.clone(), cidp, &import_spawner, prometheus_registry.as_ref(), PARACHAIN)?;
+	let import_queue_test = nimbus_consensus::import_queue(
+		client.clone(),
+		block_import.clone(),
+		cidp,
+		&import_spawner,
+		prometheus_registry.as_ref(),
+		PARACHAIN,
+	)?;
 
 	let (network, system_rpc_tx, tx_handler_controller, start_network) =
 		sc_service::build_network(sc_service::BuildNetworkParams {
@@ -322,7 +329,6 @@ async fn start_node_impl(
 			para_id,
 		)?;
 
-		
 		let params = StartCollatorParams {
 			para_id,
 			block_status: client.clone(),
