@@ -14,8 +14,8 @@ sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkad
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 
 [dev-dependencies]
-orml-tokens = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34", default-features = false }
-orml-traits = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34", default-features = false }
+orml-tokens = { git = "https://github.com/webb-tools/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
+orml-traits = { git = "https://github.com/webb-tools/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 smallvec = "1.4.1"
 sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }

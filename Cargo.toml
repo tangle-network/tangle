@@ -11,17 +11,18 @@ members = [
   "pallets/*",
 ]
 
-[patch.'https://github.com/open-web3-stack/open-runtime-module-library.git']
-orml-benchmarking = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34"}
-orml-currencies = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34"}
-orml-tokens = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34"}
-orml-traits = { git = "https://github.com/wangjj9219/open-runtime-module-library.git", branch = "upgrade-polkadot-v0.9.34"}
-
 [patch.'https://github.com/paritytech/substrate']
-sp-core = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
-sp-runtime = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
-frame-benchmarking = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
-frame-system = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
-frame-support = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
-sc-rpc = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
-sp-api = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sp-core = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sp-runtime = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#frame-benchmarking = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#frame-system = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#frame-support = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sc-rpc = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sp-api = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sp-trie = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sp-std = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sp-debug-derive = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sp-panic-handler = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sp-runtime-interface-proc-macro = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sp-wasm-interface = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
+#sp-tracing = { git = "https://github.com/paritytech//substrate", branch = "polkadot-v0.9.36" }
