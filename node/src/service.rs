@@ -229,11 +229,10 @@ async fn start_node_impl(
 		})?;
 
 	if validator {
+		// TODO: Do not use None for 2nd parameter, we need a KS
 		dkg_primitives::utils::insert_controller_account_keys_into_keystore(
 			&parachain_config,
-			task_manager.spawn_handle(),
-			client.clone(),
-			network.clone(),
+			None
 		);
 	}
 
@@ -268,7 +267,7 @@ async fn start_node_impl(
 		task_manager: &mut task_manager,
 		config: parachain_config,
 		keystore: params.keystore_container.sync_keystore(),
-		backend,
+		backend: backend.clone(),
 		network: network.clone(),
 		system_rpc_tx,
 		tx_handler_controller,
@@ -313,7 +312,6 @@ async fn start_node_impl(
 			None,
 			dkg_gadget::start_dkg_gadget::<_, _, _>(dkg_params),
 		);
-	}
 
 		let parachain_consensus = build_consensus(
 			client.clone(),

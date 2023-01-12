@@ -27,7 +27,7 @@ use sp_api::ProvideRuntimeApi;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sp_core::Pair;
 use sp_runtime::{generic, generic::Era, SaturatedConversion};
-use std::{path::PathBuf, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 use substrate_frame_rpc_system::AccountNonceApi;
 use tangle_runtime::{self, opaque::Block, RuntimeApi};
 
