@@ -232,7 +232,7 @@ async fn start_node_impl(
 		// TODO: Do not use None for 2nd parameter, we need a KS
 		dkg_primitives::utils::insert_controller_account_keys_into_keystore(
 			&parachain_config,
-			None
+			None,
 		);
 	}
 
@@ -295,7 +295,6 @@ async fn start_node_impl(
 	let relay_chain_slot_duration = Duration::from_secs(6);
 
 	if validator {
-
 		let dkg_params = dkg_gadget::DKGParams {
 			client: client.clone(),
 			backend: backend.clone(),
