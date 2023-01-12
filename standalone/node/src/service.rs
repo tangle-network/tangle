@@ -26,9 +26,19 @@ use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use std::{path::PathBuf, sync::Arc, time::Duration};
 use sp_core::Pair;
 use codec::Encode;
+use sp_api::ProvideRuntimeApi;
 use sp_runtime::generic::Era;
-use sp_runtime::SaturatedConversion;
+use sp_runtime::{generic, SaturatedConversion};
 use tangle_runtime::{self, opaque::Block, RuntimeApi};
+use substrate_frame_rpc_system::AccountNonceApi;
+
+pub fn fetch_nonce(client: &FullClient, account: sp_core::sr25519::Pair) -> u32 {
+    let best_hash = client.chain_info().best_hash;
+    client
+        .runtime_api()
+        .account_nonce(&generic::BlockId::Hash(best_hash), account.public().into())
+        .expect("Fetching account nonce works; qed")
+}
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -83,13 +93,13 @@ pub fn create_extrinsic(
 		frame_system::CheckSpecVersion::<tangle_runtime::Runtime>::new(),
 		frame_system::CheckTxVersion::<tangle_runtime::Runtime>::new(),
 		frame_system::CheckGenesis::<tangle_runtime::Runtime>::new(),
-		frame_system::CheckEra::<tangle_runtime::Runtime>::from(generic::Era::mortal(
+		frame_system::CheckEra::<tangle_runtime::Runtime>::from(Era::Mortal(
 			period,
 			best_block.saturated_into(),
 		)),
 		frame_system::CheckNonce::<tangle_runtime::Runtime>::from(nonce),
 		frame_system::CheckWeight::<tangle_runtime::Runtime>::new(),
-		pallet_asset_tx_payment::ChargeAssetTxPayment::<tangle_runtime::Runtime>::from(
+		pallet_asset_tx_payment::ChargeTransactionPayment::<tangle_runtime::Runtime>::from(
 			tip, None,
 		),
 	);

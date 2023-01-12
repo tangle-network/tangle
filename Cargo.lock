@@ -1001,7 +1001,7 @@ dependencies = [
 [[package]]
 name = "bls"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#10ee670b32f3508b01ed6d0334ad0be0f0947ea7"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#6b11d5cf793c06eab810300e08a7ace757ef033f"
 dependencies = [
  "eth2_hashing",
  "eth2_ssz",
@@ -2859,7 +2859,7 @@ dependencies = [
 [[package]]
 name = "eth-types"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#10ee670b32f3508b01ed6d0334ad0be0f0947ea7"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#6b11d5cf793c06eab810300e08a7ace757ef033f"
 dependencies = [
  "derive_more",
  "eth2_ssz",
@@ -2877,7 +2877,7 @@ dependencies = [
 [[package]]
 name = "eth2_hashing"
 version = "0.3.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#10ee670b32f3508b01ed6d0334ad0be0f0947ea7"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#6b11d5cf793c06eab810300e08a7ace757ef033f"
 dependencies = [
  "lazy_static",
  "sha2 0.10.6",
@@ -2886,7 +2886,7 @@ dependencies = [
 [[package]]
 name = "eth2_ssz"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#10ee670b32f3508b01ed6d0334ad0be0f0947ea7"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#6b11d5cf793c06eab810300e08a7ace757ef033f"
 dependencies = [
  "ethereum-types 0.14.1",
  "itertools 0.10.5",
@@ -5281,7 +5281,7 @@ dependencies = [
 [[package]]
 name = "merkle_proof"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#10ee670b32f3508b01ed6d0334ad0be0f0947ea7"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#6b11d5cf793c06eab810300e08a7ace757ef033f"
 dependencies = [
  "eth2_hashing",
  "ethereum-types 0.14.1",
@@ -6482,7 +6482,7 @@ dependencies = [
 [[package]]
 name = "pallet-eth2-light-client"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#10ee670b32f3508b01ed6d0334ad0be0f0947ea7"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#6b11d5cf793c06eab810300e08a7ace757ef033f"
 dependencies = [
  "bitvec",
  "bls",
@@ -10015,7 +10015,7 @@ dependencies = [
 [[package]]
 name = "safe_arith"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#10ee670b32f3508b01ed6d0334ad0be0f0947ea7"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#6b11d5cf793c06eab810300e08a7ace757ef033f"
 
 [[package]]
 name = "same-file"
@@ -12837,8 +12837,10 @@ dependencies = [
  "sc-client-api",
  "sc-consensus",
  "sc-consensus-aura",
+ "sc-consensus-babe",
  "sc-consensus-slots",
  "sc-executor",
+ "sc-finality-grandpa",
  "sc-keystore",
  "sc-network",
  "sc-network-common",
@@ -12852,10 +12854,12 @@ dependencies = [
  "sc-transaction-pool-api",
  "serde",
  "sp-api",
+ "sp-authorship",
  "sp-block-builder",
  "sp-blockchain",
  "sp-consensus",
  "sp-consensus-aura",
+ "sp-consensus-babe",
  "sp-core",
  "sp-inherents",
  "sp-io",
@@ -13607,7 +13611,7 @@ dependencies = [
 [[package]]
 name = "tree_hash"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#10ee670b32f3508b01ed6d0334ad0be0f0947ea7"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#6b11d5cf793c06eab810300e08a7ace757ef033f"
 dependencies = [
  "eth2_hashing",
  "ethereum-types 0.14.1",
@@ -13617,7 +13621,7 @@ dependencies = [
 [[package]]
 name = "tree_hash_derive"
 version = "0.4.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#10ee670b32f3508b01ed6d0334ad0be0f0947ea7"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client.git?branch=thomas/relay2#6b11d5cf793c06eab810300e08a7ace757ef033f"
 dependencies = [
  "darling",
  "quote",
