@@ -29,11 +29,11 @@
 	"parachains": [
 		{
 			"bin": "../../target/release/tangle-parachain",
-			"chain": "dev",
+			"chain": "tangle-dev",
 			"nodes": [
 				{
 					"name": "alice",
-					"wsPort": 9988,
+					"wsPort": 9946,
 					"rpcPort": 9914,
 					"basePath": "/tmp/polkadot-launch/parachains/alice",
 					"port": 31100,
@@ -54,7 +54,7 @@
 				},
 				{
 					"name": "bob",
-					"wsPort": 9997,
+					"wsPort": 9948,
 					"rpcPort": 9915,
 					"basePath": "/tmp/polkadot-launch/parachains/bob",
 					"port": 31200,
@@ -75,10 +75,52 @@
 				},
 				{
 					"name": "charlie",
-					"wsPort": 9996,
+					"wsPort": 9947,
 					"rpcPort": 9916,
 					"basePath": "/tmp/polkadot-launch/parachains/charlie",
 					"port": 31300,
+					"flags": [
+						"--unsafe-ws-external",
+						"--unsafe-rpc-external",
+						"--rpc-external",
+						"--ws-external",
+						"--rpc-cors=all",
+						"--rpc-methods=Unsafe",
+						"-ldkg=debug",
+						"-ldkg_metadata=debug",
+						"-lruntime::offchain=debug",
+						"-ldkg_proposal_handler=debug",
+						"--",
+						"--execution=wasm"
+					]
+				},
+				{
+					"name": "dave",
+					"wsPort": 9948,
+					"rpcPort": 9917,
+					"basePath": "/tmp/polkadot-launch/parachains/dave",
+					"port": 31400,
+					"flags": [
+						"--unsafe-ws-external",
+						"--unsafe-rpc-external",
+						"--rpc-external",
+						"--ws-external",
+						"--rpc-cors=all",
+						"--rpc-methods=Unsafe",
+						"-ldkg=debug",
+						"-ldkg_metadata=debug",
+						"-lruntime::offchain=debug",
+						"-ldkg_proposal_handler=debug",
+						"--",
+						"--execution=wasm"
+					]
+				},
+				{
+					"name": "eve",
+					"wsPort": 9949,
+					"rpcPort": 9918,
+					"basePath": "/tmp/polkadot-launch/parachains/eve",
+					"port": 31500,
 					"flags": [
 						"--unsafe-ws-external",
 						"--unsafe-rpc-external",
