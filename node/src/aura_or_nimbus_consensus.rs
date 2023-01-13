@@ -59,6 +59,7 @@ impl<Client, Block, AuraCIDP, NimbusCIDP> AuraOrNimbusVerifier<Client, Block, Au
 where
 	Block: BlockT,
 {
+	#[allow(dead_code)]
 	pub fn new(
 		client: Arc<Client>,
 		create_inherent_data_providers_aura: AuraCIDP,
@@ -125,6 +126,7 @@ where
 	}
 }
 
+#[allow(dead_code)]
 pub fn import_queue<Client, Block: BlockT, InnerBI, BE: Backend<Block> + 'static>(
 	client: Arc<Client>,
 	block_import: InnerBI,
