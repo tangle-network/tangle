@@ -110,7 +110,7 @@ pub mod fee {
 
 /// The number of blocks in one session
 #[allow(clippy::identity_op)]
-pub const SESSION_PERIOD_BLOCKS: BlockNumber = 10 * crate::time::MINUTES;
+pub const SESSION_PERIOD_BLOCKS: BlockNumber = 3 * crate::time::MINUTES;
 
 /// We assume that ~10% of the block weight is consumed by `on_initialize` handlers.
 /// This is used to limit the maximal weight of a single extrinsic.
