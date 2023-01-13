@@ -98,10 +98,7 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for TransferKeepAliveBuilder {
 		let extrinsic: OpaqueExtrinsic = create_extrinsic(
 			self.client.as_ref(),
 			acc,
-			BalancesCall::transfer_keep_alive {
-				dest: self.dest.clone().into(),
-				value: self.value,
-			},
+			BalancesCall::transfer_keep_alive { dest: self.dest.clone().into(), value: self.value },
 			Some(nonce),
 		)
 		.into();
