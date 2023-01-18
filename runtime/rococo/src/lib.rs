@@ -27,7 +27,7 @@ pub mod xcm_config;
 
 use codec::Encode;
 use dkg_runtime_primitives::{TypedChainId, UnsignedProposal};
-use frame_support::pallet_prelude::TransactionPriority;
+use frame_support::{pallet_prelude::TransactionPriority, traits::WithdrawReasons};
 use pallet_dkg_proposals::DKGEcdsaToEthereum;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
@@ -37,7 +37,6 @@ use sp_runtime::{
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, SaturatedConversion,
 };
-
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -47,11 +46,12 @@ use sp_version::RuntimeVersion;
 pub mod benchmarking;
 
 use frame_support::weights::ConstantMultiplier;
-
+// Polkadot imports
 pub use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_linkable_tree::types::EdgeMetadata;
 use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
+use polkadot_runtime_common::SlowAdjustingFeeUpdate;
 use sp_runtime::{FixedPointNumber, Perquintill};
 use webb_primitives::{
 	linkable_tree::LinkableTreeInspector, runtime::Element, AccountIndex, ChainId, LeafIndex,
@@ -179,7 +179,7 @@ parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
 	pub RuntimeBlockLength: BlockLength =
 		BlockLength::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
-	pub RuntimeBlockWeights: BlockWeights = BlockWeights::builder()
+		pub RuntimeBlockWeights: BlockWeights = BlockWeights::builder()
 		.base_block(BlockExecutionWeight::get())
 		.for_class(DispatchClass::all(), |weights| {
 			weights.base_extrinsic = ExtrinsicBaseWeight::get();
@@ -329,9 +329,7 @@ impl pallet_transaction_payment::Config for Runtime {
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 	type WeightToFee = IdentityFee<Balance>;
 	type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
-	// TODO: add real type parameter
-	type FeeMultiplierUpdate =
-		TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier, ()>;
+	type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
 }
 
 impl pallet_randomness_collective_flip::Config for Runtime {}
@@ -499,6 +497,8 @@ impl pallet_ecdsa_claims::Config for Runtime {
 
 parameter_types! {
 	pub const MinVestedTransfer: Balance = DOLLAR;
+	pub UnvestedFundsAllowedWithdrawReasons: WithdrawReasons =
+		WithdrawReasons::except(WithdrawReasons::TRANSFER | WithdrawReasons::RESERVE);
 }
 
 impl pallet_vesting::Config for Runtime {
@@ -509,15 +509,6 @@ impl pallet_vesting::Config for Runtime {
 	type WeightInfo = ();
 	type UnvestedFundsAllowedWithdrawReasons = UnvestedFundsAllowedWithdrawReasons;
 	const MAX_VESTING_SCHEDULES: u32 = 28;
-}
-
-use frame_support::traits::WithdrawReasons;
-pub struct UnvestedFundsAllowedWithdrawReasons;
-
-impl sp_core::Get<WithdrawReasons> for UnvestedFundsAllowedWithdrawReasons {
-	fn get() -> WithdrawReasons {
-		WithdrawReasons::all()
-	}
 }
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
