@@ -1061,8 +1061,9 @@ dependencies = [
 
 [[package]]
 name = "bulletproof-kzen"
-version = "1.2.0"
-source = "git+https://github.com/webb-tools/bulletproofs-kzen.git#841bb9f07ad82d1391a476355cfc078af5f9ceb6"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e1ad3c6d12dfa84b0f3d33d3aafccd81a8a493c449216cb5246b66c846900f3"
 dependencies = [
  "curv-kzen",
  "generic-array 0.14.6",
@@ -1155,8 +1156,8 @@ dependencies = [
 
 [[package]]
 name = "centipede"
-version = "0.3.0"
-source = "git+https://github.com/webb-tools/centipede.git#6395a9b32ad67108f2a311e95d8115f0c3a6cf51"
+version = "0.3.1"
+source = "git+https://github.com/zengo-x/centipede.git#491836c78b73a2d5c8a898b43be1762500006015"
 dependencies = [
  "bulletproof-kzen",
  "curv-kzen",
@@ -2483,7 +2484,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#b00979bf210ee05d3474e1aa0cf955968678c90a"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2534,7 +2535,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#b00979bf210ee05d3474e1aa0cf955968678c90a"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
 dependencies = [
  "chacha20poly1305",
  "clap 4.1.1",
@@ -2567,7 +2568,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#b00979bf210ee05d3474e1aa0cf955968678c90a"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -4233,7 +4234,7 @@ checksum = "28dfb6c8100ccc63462345b67d1bbc3679177c75ee4bf59bf29c8b1d110b8189"
 dependencies = [
  "hermit-abi 0.2.6",
  "io-lifetimes 1.0.4",
- "rustix 0.36.6",
+ "rustix 0.36.7",
  "windows-sys 0.42.0",
 ]
 
@@ -4666,8 +4667,9 @@ dependencies = [
 
 [[package]]
 name = "kzen-paillier"
-version = "0.4.2"
-source = "git+https://github.com/webb-tools/rust-paillier#9ed9071c53fcba28d35d89379d03519884068458"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "90b7e469348f203838b2ed1d46f068ba63162e7a1e63be868763a80bbd5d046f"
 dependencies = [
  "curv-kzen",
  "rayon",
@@ -5287,7 +5289,7 @@ version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b20a59d985586e4a5aef64564ac77299f8586d8be6cf9106a5a40207e8908efb"
 dependencies = [
- "rustix 0.36.6",
+ "rustix 0.36.7",
 ]
 
 [[package]]
@@ -5479,12 +5481,13 @@ dependencies = [
 [[package]]
 name = "multi-party-ecdsa"
 version = "0.8.2"
-source = "git+https://github.com/webb-tools/multi-party-ecdsa.git?branch=thomas/fix-dependencies#a464d96d6fdada6892b86b74d4068a620cff6fd8"
+source = "git+https://github.com/webb-tools/multi-party-ecdsa.git#c4dbc0709094b2febe8727bf4a537a5d2066c7ba"
 dependencies = [
  "centipede",
  "curv-kzen",
  "derivative",
  "kzen-paillier",
+ "log",
  "round-based",
  "serde",
  "sha2 0.9.9",
@@ -6506,7 +6509,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#b00979bf210ee05d3474e1aa0cf955968678c90a"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6526,7 +6529,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#b00979bf210ee05d3474e1aa0cf955968678c90a"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6547,7 +6550,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#b00979bf210ee05d3474e1aa0cf955968678c90a"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -10258,9 +10261,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.36.6"
+version = "0.36.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4feacf7db682c6c329c4ede12649cd36ecab0f3be5b7d74e6a20304725db4549"
+checksum = "d4fdebc4b395b7fbb9ab11e462e20ed9051e7b16e42d24042c776eca0ac81b03"
 dependencies = [
  "bitflags",
  "errno",
@@ -15098,8 +15101,8 @@ dependencies = [
 
 [[package]]
 name = "zk-paillier"
-version = "0.4.3"
-source = "git+https://github.com/webb-tools/zk-paillier.git#0ca2d32e041c7102cdd2e61b55bcbc6cb4bf5114"
+version = "0.4.4"
+source = "git+https://github.com/zengo-x/zk-paillier.git#6ffbef0debd67f4c09d1732d409efd8a084a46bd"
 dependencies = [
  "bit-vec",
  "curv-kzen",
