@@ -23,6 +23,7 @@ impl pallet_hasher::Config<pallet_hasher::Instance1> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Hasher = ArkworksPoseidonHasherBn254;
+	type MaxParameterLength = ConstU32<10000>;
 	type WeightInfo = pallet_hasher::weights::WebbWeight<Runtime>;
 }
 
@@ -40,10 +41,14 @@ parameter_types! {
 	// 	180, 093, 161, 235, 182, 053, 058, 052,
 	// 	243, 171, 172, 211, 096, 076, 229, 047,
 	// ]);
+	#[derive(Debug, scale_info::TypeInfo)]
+	pub const MaxEdges: u32 = 1000;
+	#[derive(Debug, scale_info::TypeInfo)]
+	pub const MaxDefaultHashes: u32 = 1000;
 	pub const NewDefaultZeroElement: Element = Element([0u8; 32]);
 }
 
-#[derive(Debug, Encode, Decode, Default, Copy, Clone, PartialEq, Eq, scale_info::TypeInfo)]
+#[derive(Debug, Encode, Decode, Default, Copy, Clone, PartialEq, Eq, scale_info::TypeInfo, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Element([u8; 32]);
 
@@ -74,6 +79,8 @@ impl pallet_mt::Config<pallet_mt::Instance1> for Runtime {
 	type RootIndex = u32;
 	type StringLimit = StringLimit;
 	type TreeDeposit = TreeDeposit;
+	type MaxEdges = MaxEdges;
+	type MaxDefaultHashes = MaxDefaultHashes;
 	type TreeId = u32;
 	type Two = Two;
 	type WeightInfo = pallet_mt::weights::WebbWeight<Runtime>;
@@ -102,12 +109,18 @@ impl pallet_token_wrapper::Config for Runtime {
 	type WrappingFeeDivider = WrappingFeeDivider;
 }
 
+parameter_types! {
+	#[derive(Copy, Clone, Debug, PartialEq, Eq, scale_info::TypeInfo)]
+	pub const MaxAssetIdInPool: u32 = 100;
+}
+
 impl pallet_asset_registry::Config for Runtime {
 	type AssetId = webb_primitives::AssetId;
 	type AssetNativeLocation = u32;
 	type Balance = Balance;
 	type RuntimeEvent = RuntimeEvent;
 	type NativeAssetId = GetNativeCurrencyId;
+	type MaxAssetIdInPool = MaxAssetIdInPool;
 	type RegistryOrigin = frame_system::EnsureRoot<AccountId>;
 	type StringLimit = RegistryStringLimit;
 	type WeightInfo = ();
@@ -228,6 +241,7 @@ impl pallet_signature_bridge::Config<SignatureBridgeInstance> for Runtime {
 	type ProposalNonce = u32;
 	type MaintainerNonce = u32;
 	type SetResourceProposalFilter = SetResourceProposalFilter;
+	type MaxStringLength = MaxStringLength;
 	type ExecuteProposalFilter = ExecuteProposalFilter;
 	type SignatureVerifier = webb_primitives::signing::SignatureVerifier;
 	type WeightInfo = ();
@@ -278,6 +292,8 @@ impl pallet_token_wrapper_handler::Config for Runtime {
 
 impl pallet_key_storage::Config<pallet_key_storage::Instance1> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type MaxPubkeyLength = ConstU32<1000>;
+	type MaxPubKeyOwners = ConstU32<100>;
 	type WeightInfo = pallet_key_storage::weights::WebbWeight<Runtime>;
 }
 
@@ -285,5 +301,6 @@ impl pallet_vanchor_verifier::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Verifier = ArkworksVerifierBn254;
+	type MaxParameterLength = MaxParameterLength;
 	type WeightInfo = pallet_vanchor_verifier::weights::WebbWeight<Runtime>;
 }
