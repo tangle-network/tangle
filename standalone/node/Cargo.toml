@@ -109,6 +109,8 @@ sc-authority-discovery = { git = "https://github.com/paritytech/substrate", bran
 sc-transaction-pool-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 sp-authority-discovery = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 
+polkadot-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.36" }
+
 ark-bls12-381 = { version = "^0.3.0", features = ["curve"] }
 ark-bn254 = { version = "^0.3.0", features = ["curve"] }
 ark-serialize = { version = "^0.3.0", default-features = false }

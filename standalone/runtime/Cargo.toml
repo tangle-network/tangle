@@ -236,4 +236,5 @@ std = [
   "pallet-vanchor-handler/std",
   "tangle-primitives/std",
   "pallet-transaction-pause/std",
+  "pallet-vanchor-verifier/std",
 ]
