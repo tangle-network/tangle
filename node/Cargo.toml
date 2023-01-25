@@ -44,9 +44,9 @@ getrandom = { version = "0.2.8", features = ["js"] }
 jsonrpsee = { version = "0.16.2", features = ["server"] }
 
 # Local Dependencies
-dkg-gadget = { default-features = false, git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.36" }
-dkg-primitives = { default-features = false, git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.36" }
-dkg-runtime-primitives = { default-features = false, git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.36" }
+dkg-gadget = { default-features = false, git = "https://github.com/webb-tools/dkg-substrate.git" }
+dkg-primitives = { default-features = false, git = "https://github.com/webb-tools/dkg-substrate.git" }
+dkg-runtime-primitives = { default-features = false, git = "https://github.com/webb-tools/dkg-substrate.git" }
 tangle-rococo-runtime = { path = "../runtime/rococo" }
 
 # Arkworks
