@@ -36,12 +36,12 @@ serde = { version = "1.0.101", features = ["derive"] }
 getrandom = { version = "0.2.8", features = ["js"] }
 
 # Protocol Substrate
-pallet-linkable-tree-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "polkadot-v0.9.36" }
-pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "polkadot-v0.9.36" }
-pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "polkadot-v0.9.36" }
-pallet-mt-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "polkadot-v0.9.36"}
-pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "polkadot-v0.9.36" }
-webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git", branch = "polkadot-v0.9.36" }
+pallet-linkable-tree-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git" }
+pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git" }
+pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git" }
+pallet-mt-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git"}
+pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git" }
+webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git" }
 
 # DKG dependencies
 dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git" }

@@ -27,7 +27,7 @@ version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a76fd60b23679b7d19bd066031410fb7e458ccc5e958eb5c325888ce4baedc97"
 dependencies = [
- "gimli 0.27.0",
+ "gimli 0.27.1",
 ]
 
 [[package]]
@@ -133,18 +133,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cab112f0a86d568ea0e627cc1d6be74a1e9cd55214684db5561995f6dad897c6"
 dependencies = [
  "num-traits",
-]
-
-[[package]]
-name = "ark-bls12-377"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc41c02c0d18a226947ee9ee023b1d957bdb6a68fc22ac296722935a9fef423c"
-dependencies = [
- "ark-ec",
- "ark-ff",
- "ark-r1cs-std",
- "ark-std",
 ]
 
 [[package]]
@@ -628,9 +616,9 @@ checksum = "7a40729d2133846d9ed0ea60a8b9541bccddab49cd30f0715a1da672fe9a2524"
 
 [[package]]
 name = "async-trait"
-version = "0.1.61"
+version = "0.1.63"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "705339e0e4a9690e2908d2b3d049d85682cf19fbd5782494498fbf7003a6a282"
+checksum = "eff18d764974428cf3a9328e23fc5c986f5fbed46e6cd4cdf42544df5d297ec1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -714,7 +702,7 @@ dependencies = [
  "cfg-if",
  "libc",
  "miniz_oxide",
- "object 0.30.2",
+ "object 0.30.3",
  "rustc-demangle",
 ]
 
@@ -1297,9 +1285,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.1.1"
+version = "4.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ec7a4128863c188deefe750ac1d1dfe66c236909f845af04beed823638dc1b2"
+checksum = "f13b9c79b5d1dd500d20ef541215a6423c75829ef43117e1b4d17fd8af0b5d76"
 dependencies = [
  "bitflags",
  "clap_derive",
@@ -1710,7 +1698,7 @@ name = "cumulus-client-cli"
 version = "0.1.0"
 source = "git+https://github.com/paritytech/cumulus.git?branch=polkadot-v0.9.36#afe528af891f464b318293f183f6d3eefbc979b0"
 dependencies = [
- "clap 4.1.1",
+ "clap 4.1.4",
  "parity-scale-codec",
  "sc-chain-spec",
  "sc-cli",
@@ -2268,9 +2256,9 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.86"
+version = "1.0.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51d1075c37807dcf850c379432f0df05ba52cc30f279c5cfc43cc221ce7f8579"
+checksum = "b61a7545f753a88bcbe0a70de1fcc0221e10bfc752f576754fa91e663db1622e"
 dependencies = [
  "cc",
  "cxxbridge-flags",
@@ -2280,9 +2268,9 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "1.0.86"
+version = "1.0.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5044281f61b27bc598f2f6647d480aed48d2bf52d6eb0b627d84c0361b17aa70"
+checksum = "f464457d494b5ed6905c63b0c4704842aba319084a0a3561cdc1359536b53200"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -2295,15 +2283,15 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "1.0.86"
+version = "1.0.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61b50bc93ba22c27b0d31128d2d130a0a6b3d267ae27ef7e4fae2167dfe8781c"
+checksum = "43c7119ce3a3701ed81aca8410b9acf6fc399d2629d057b87e2efa4e63a3aaea"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.86"
+version = "1.0.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39e61fda7e62115119469c7b3591fd913ecca96fb766cfd3f2e2502ab7bc87a5"
+checksum = "65e07508b90551e610910fa648a1878991d367064997a596135b86df30daf07e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2484,7 +2472,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2535,10 +2523,10 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
 dependencies = [
  "chacha20poly1305",
- "clap 4.1.1",
+ "clap 4.1.4",
  "curv-kzen",
  "dkg-runtime-primitives",
  "fnv",
@@ -2568,7 +2556,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -3221,7 +3209,7 @@ dependencies = [
  "Inflector",
  "array-bytes 4.2.0",
  "chrono",
- "clap 4.1.1",
+ "clap 4.1.4",
  "comfy-table",
  "frame-benchmarking",
  "frame-support",
@@ -3713,9 +3701,9 @@ dependencies = [
 
 [[package]]
 name = "gimli"
-version = "0.27.0"
+version = "0.27.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dec7af912d60cdbd3677c1af9352ebae6fb8394d165568a2234df0fa00f87793"
+checksum = "221996f774192f0f718773def8201c4ae31f02616a54ccfc2d358bb0e5cefdec"
 
 [[package]]
 name = "glob"
@@ -3738,9 +3726,9 @@ dependencies = [
 
 [[package]]
 name = "gloo-timers"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98c4a8d6391675c6b2ee1a6c8d06e8e2d03605c44cec1270675985a4c2a5500b"
+checksum = "9b995a66bb87bebce9a0f4a95aed01daca4872c050bfcb21653361c03bc35e5c"
 dependencies = [
  "futures-channel",
  "futures-core",
@@ -5264,9 +5252,9 @@ dependencies = [
 
 [[package]]
 name = "matches"
-version = "0.1.9"
+version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
+checksum = "2532096657941c2fea9c289d370a250971c689d4f143798ff67113ec042024a5"
 
 [[package]]
 name = "matrixmultiply"
@@ -5676,9 +5664,9 @@ dependencies = [
 
 [[package]]
 name = "netlink-sys"
-version = "0.8.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92b654097027250401127914afb37cb1f311df6610a9891ff07a757e94199027"
+checksum = "260e21fbb6f3d253a14df90eb0000a6066780a15dd901a7519ce02d77a94985b"
 dependencies = [
  "async-io",
  "bytes",
@@ -5794,6 +5782,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "nom8"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae01545c9c7fc4486ab7debaf2aad7003ac19431791868fb2e8066df97fad2f8"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "normalize-line-endings"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5823,9 +5820,9 @@ dependencies = [
 
 [[package]]
 name = "num-complex"
-version = "0.4.2"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ae39348c8bc5fbd7f40c727a9925f03517afd2ab27d46702108b6a7e5414c19"
+checksum = "02e0d21255c828d6f128a1e41534206671e8c3ea0c62f32291e808dc82cff17d"
 dependencies = [
  "num-traits",
 ]
@@ -5896,9 +5893,9 @@ dependencies = [
 
 [[package]]
 name = "object"
-version = "0.30.2"
+version = "0.30.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b8c786513eb403643f2a88c244c2aaa270ef2153f55094587d0c48a3cf22a83"
+checksum = "ea86265d3d3dcb6a27fc51bd29a4bf387fae9d2986b823079d4986af253eb439"
 dependencies = [
  "memchr",
 ]
@@ -6116,9 +6113,8 @@ dependencies = [
 [[package]]
 name = "pallet-asset-registry"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "orml-traits",
@@ -6131,7 +6127,6 @@ dependencies = [
  "sp-core",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
 ]
 
 [[package]]
@@ -6509,7 +6504,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6529,7 +6524,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6550,7 +6545,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.36#63d9493647bdf1bcd2be563a7821e23fb5b00f44"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6719,9 +6714,8 @@ dependencies = [
 [[package]]
 name = "pallet-hasher"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "parity-scale-codec",
@@ -6787,7 +6781,7 @@ dependencies = [
 [[package]]
 name = "pallet-key-storage"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6802,13 +6796,10 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
- "orml-traits",
- "pallet-hasher",
  "pallet-mt",
  "parity-scale-codec",
  "scale-info",
@@ -6822,7 +6813,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
  "jsonrpsee",
  "pallet-linkable-tree",
@@ -6840,7 +6831,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
  "pallet-linkable-tree",
  "parity-scale-codec",
@@ -6902,19 +6893,13 @@ dependencies = [
 [[package]]
 name = "pallet-mixer"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "log",
- "orml-currencies",
- "orml-tokens",
  "orml-traits",
- "pallet-asset-registry",
- "pallet-hasher",
  "pallet-mt",
- "pallet-verifier",
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
@@ -6942,14 +6927,11 @@ dependencies = [
 [[package]]
 name = "pallet-mt"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
  "ark-bn254",
- "arkworks-setups",
- "frame-benchmarking",
  "frame-support",
  "frame-system",
- "pallet-hasher",
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
@@ -6960,10 +6942,9 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
  "jsonrpsee",
- "pallet-mt",
  "pallet-mt-rpc-runtime-api",
  "parity-scale-codec",
  "sc-rpc",
@@ -6978,9 +6959,8 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
- "pallet-mt",
  "sp-api",
  "webb-primitives",
 ]
@@ -7314,17 +7294,13 @@ dependencies = [
 [[package]]
 name = "pallet-signature-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
  "impl-trait-for-tuples",
  "libsecp256k1",
- "pallet-balances",
- "pallet-token-wrapper-handler",
- "pallet-vanchor-handler",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
@@ -7461,9 +7437,8 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "orml-traits",
@@ -7473,18 +7448,15 @@ dependencies = [
  "sp-arithmetic",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
 ]
 
 [[package]]
 name = "pallet-token-wrapper-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
  "orml-traits",
  "pallet-asset-registry",
  "pallet-token-wrapper",
@@ -7493,7 +7465,6 @@ dependencies = [
  "sp-arithmetic",
  "sp-runtime",
  "sp-std",
- "webb-primitives",
 ]
 
 [[package]]
@@ -7630,25 +7601,19 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
  "ark-bn254",
  "ark-ff",
  "ark-std",
  "arkworks-native-gadgets",
- "arkworks-setups",
- "frame-benchmarking",
  "frame-support",
  "frame-system",
- "orml-currencies",
- "orml-tokens",
  "orml-traits",
  "pallet-asset-registry",
- "pallet-hasher",
  "pallet-linkable-tree",
  "pallet-mt",
  "pallet-token-wrapper",
- "pallet-vanchor-verifier",
  "parity-scale-codec",
  "scale-info",
  "sp-io",
@@ -7660,11 +7625,10 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
  "orml-traits",
  "pallet-asset-registry",
  "pallet-linkable-tree",
@@ -7684,7 +7648,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7699,7 +7663,7 @@ dependencies = [
 [[package]]
 name = "pallet-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7774,9 +7738,9 @@ dependencies = [
 
 [[package]]
 name = "parity-db"
-version = "0.4.2"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a7511a0bec4a336b5929999d02b560d2439c993cccf98c26481484e811adc43"
+checksum = "dd684a725651d9588ef21f140a328b6b4f64e646b2e931f3e6f14f75eedf9980"
 dependencies = [
  "blake2 0.10.6",
  "crc32fast",
@@ -7793,9 +7757,9 @@ dependencies = [
 
 [[package]]
 name = "parity-scale-codec"
-version = "3.2.1"
+version = "3.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "366e44391a8af4cfd6002ef6ba072bae071a96aafca98d7d448a34c5dca38b6a"
+checksum = "e7ab01d0f889e957861bc65888d5ccbe82c158d0270136ba46820d43837cdf72"
 dependencies = [
  "arrayvec 0.7.2",
  "bitvec",
@@ -7808,9 +7772,9 @@ dependencies = [
 
 [[package]]
 name = "parity-scale-codec-derive"
-version = "3.1.3"
+version = "3.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9299338969a3d2f491d65f140b00ddec470858402f888af98e8642fb5e8965cd"
+checksum = "86b26a931f824dd4eca30b3e43bb4f31cd5f0d3a403c5f5ff27106b805bfde7b"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -7922,9 +7886,9 @@ checksum = "478c572c3d73181ff3c2539045f6eb99e5491218eae919370993b890cdbdd98e"
 
 [[package]]
 name = "pest"
-version = "2.5.3"
+version = "2.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4257b4a04d91f7e9e6290be5d3da4804dd5784fafde3a497d73eb2b4a158c30a"
+checksum = "4ab62d2fa33726dbe6321cc97ef96d8cde531e3eeaf858a058de53a8a6d40d8f"
 dependencies = [
  "thiserror",
  "ucd-trie",
@@ -7932,9 +7896,9 @@ dependencies = [
 
 [[package]]
 name = "pest_derive"
-version = "2.5.3"
+version = "2.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "241cda393b0cdd65e62e07e12454f1f25d57017dcc514b1514cd3c4645e3a0a6"
+checksum = "8bf026e2d0581559db66d837fe5242320f525d85c76283c61f4d51a1238d65ea"
 dependencies = [
  "pest",
  "pest_generator",
@@ -7942,9 +7906,9 @@ dependencies = [
 
 [[package]]
 name = "pest_generator"
-version = "2.5.3"
+version = "2.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46b53634d8c8196302953c74d5352f33d0c512a9499bd2ce468fc9f4128fa27c"
+checksum = "2b27bd18aa01d91c8ed2b61ea23406a676b42d82609c6e2581fba42f0c15f17f"
 dependencies = [
  "pest",
  "pest_meta",
@@ -7955,9 +7919,9 @@ dependencies = [
 
 [[package]]
 name = "pest_meta"
-version = "2.5.3"
+version = "2.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ef4f1332a8d4678b41966bb4cc1d0676880e84183a1ecc3f4b69f03e99c7a51"
+checksum = "9f02b677c1859756359fc9983c2e56a0237f18624a3789528804406b7e915e5d"
 dependencies = [
  "once_cell",
  "pest",
@@ -8124,7 +8088,7 @@ name = "polkadot-cli"
 version = "0.9.36"
 source = "git+https://github.com/paritytech/polkadot?branch=release-v0.9.36#dc25abc712e42b9b51d87ad1168e453a42b5f0bc"
 dependencies = [
- "clap 4.1.1",
+ "clap 4.1.4",
  "frame-benchmarking-cli",
  "futures 0.3.25",
  "log",
@@ -9416,13 +9380,12 @@ dependencies = [
 
 [[package]]
 name = "proc-macro-crate"
-version = "1.2.1"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eda0fc3b0fb7c975631757e14d9049da17374063edb6ebbcbc54d880d4fe94e9"
+checksum = "66618389e4ec1c7afe67d51a9bf34ff9236480f8d51e7489b7d5ab0303c13f34"
 dependencies = [
  "once_cell",
- "thiserror",
- "toml",
+ "toml_edit",
 ]
 
 [[package]]
@@ -9856,9 +9819,9 @@ dependencies = [
 
 [[package]]
 name = "rayon-core"
-version = "1.10.1"
+version = "1.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cac410af5d00ab6884528b4ab69d1e8e146e8d471201800fa1b4524126de6ad3"
+checksum = "356a0625f1954f730c0201cdab48611198dc6ce21f4acff55089b5a78e6e835b"
 dependencies = [
  "crossbeam-channel",
  "crossbeam-deque",
@@ -10464,7 +10427,7 @@ source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.3
 dependencies = [
  "array-bytes 4.2.0",
  "chrono",
- "clap 4.1.1",
+ "clap 4.1.4",
  "fdlimit",
  "futures 0.3.25",
  "libp2p",
@@ -11627,9 +11590,9 @@ dependencies = [
 
 [[package]]
 name = "security-framework"
-version = "2.7.0"
+version = "2.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bc1bb97804af6631813c55739f771071e0f2ed33ee20b68c86ec505d906356c"
+checksum = "7c4437699b6d34972de58652c68b98cb5b53a4199ab126db8e20ec8ded29a721"
 dependencies = [
  "bitflags",
  "core-foundation",
@@ -11640,9 +11603,9 @@ dependencies = [
 
 [[package]]
 name = "security-framework-sys"
-version = "2.6.1"
+version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0160a13a177a45bfb43ce71c01580998474f556ad854dcbca936dd2841a5c556"
+checksum = "31c9bb296072e961fcbd8853511dd39c2d8be2deb1e17c6860b1d30732b323b4"
 dependencies = [
  "core-foundation-sys",
  "libc",
@@ -12748,9 +12711,9 @@ dependencies = [
 
 [[package]]
 name = "ss58-registry"
-version = "1.37.0"
+version = "1.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d44528162f980c0e03c71e005d334332c8da0aec9f2b0b4bdc557ed4a9f24776"
+checksum = "e40c020d72bc0a9c5660bb71e4a6fdef081493583062c474740a7d59f55f0e7b"
 dependencies = [
  "Inflector",
  "num-format",
@@ -13129,7 +13092,7 @@ dependencies = [
  "arkworks-setups",
  "async-trait",
  "cfg-if",
- "clap 4.1.1",
+ "clap 4.1.4",
  "cumulus-client-cli",
  "cumulus-client-collator",
  "cumulus-client-consensus-aura",
@@ -13336,7 +13299,7 @@ dependencies = [
  "ark-std",
  "arkworks-setups",
  "async-trait",
- "clap 4.1.1",
+ "clap 4.1.4",
  "dkg-gadget",
  "dkg-primitives",
  "dkg-runtime-primitives",
@@ -13777,11 +13740,28 @@ dependencies = [
 
 [[package]]
 name = "toml"
-version = "0.5.10"
+version = "0.5.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1333c76748e868a4d9d1017b5ab53171dfd095f70c712fdb4653a406547f598f"
+checksum = "f4f7f0dd8d50a853a531c426359045b1998f04219d88799810762cd4ad314234"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "toml_datetime"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4553f467ac8e3d374bc9a177a26801e5d0f9b211aa1673fb137a403afd1c9cf5"
+
+[[package]]
+name = "toml_edit"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "729bfd096e40da9c001f778f5cdecbd2957929a24e10e5883d9392220a751581"
+dependencies = [
+ "indexmap",
+ "nom8",
+ "toml_datetime",
 ]
 
 [[package]]
@@ -14044,7 +14024,7 @@ name = "try-runtime-cli"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.36#cb4f2491b00af7d7817f3a54209c26b20faa1f51"
 dependencies = [
- "clap 4.1.1",
+ "clap 4.1.4",
  "frame-remote-externalities",
  "hex",
  "log",
@@ -14144,9 +14124,9 @@ dependencies = [
 
 [[package]]
 name = "unicode-bidi"
-version = "0.3.8"
+version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "099b7128301d285f79ddd55b9a83d5e6b9e97c92e0ea0daebee7263e932de992"
+checksum = "d54675592c1dbefd78cbd98db9bacd89886e1ca50692a0692baefffdeb92dd58"
 
 [[package]]
 name = "unicode-ident"
@@ -14708,9 +14688,8 @@ dependencies = [
 [[package]]
 name = "webb-primitives"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.36#4d04272ae905355df54e7a008d83c526e80c6a50"
+source = "git+https://github.com/webb-tools/protocol-substrate.git#b5ca20ec10398a51e40fbaedbc0028b5d55b3a7d"
 dependencies = [
- "ark-bls12-377",
  "ark-bls12-381",
  "ark-bn254",
  "ark-crypto-primitives",
@@ -14725,8 +14704,6 @@ dependencies = [
  "digest 0.9.0",
  "ethabi",
  "frame-support",
- "frame-system",
- "hex-literal 0.3.4",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -14784,9 +14761,9 @@ dependencies = [
 
 [[package]]
 name = "which"
-version = "4.3.0"
+version = "4.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c831fbbee9e129a8cf93e7747a82da9d95ba8e16621cae60ec2cdc849bacb7b"
+checksum = "2441c784c52b289a054b7201fc93253e288f094e2f4be9058343127c4226a269"
 dependencies = [
  "either",
  "libc",
