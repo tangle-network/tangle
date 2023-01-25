@@ -50,7 +50,7 @@ use frame_support::weights::ConstantMultiplier;
 pub use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_linkable_tree::types::EdgeMetadata;
 use pallet_session::historical as pallet_session_historical;
-use pallet_transaction_payment::{CurrencyAdapter, Multiplier };
+use pallet_transaction_payment::{CurrencyAdapter, Multiplier};
 use polkadot_runtime_common::SlowAdjustingFeeUpdate;
 use sp_runtime::{FixedPointNumber, Perquintill};
 use webb_primitives::{

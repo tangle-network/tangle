@@ -1,5 +1,5 @@
 use crate::*;
-use codec::{Decode, Encode};
+use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
 	pallet_prelude::ConstU32,
 	traits::{Contains, Nothing},
@@ -48,7 +48,9 @@ parameter_types! {
 	pub const NewDefaultZeroElement: Element = Element([0u8; 32]);
 }
 
-#[derive(Debug, Encode, Decode, Default, Copy, Clone, PartialEq, Eq, scale_info::TypeInfo, MaxEncodedLen)]
+#[derive(
+	Debug, Encode, Decode, Default, Copy, Clone, PartialEq, Eq, scale_info::TypeInfo, MaxEncodedLen,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Element([u8; 32]);
 
@@ -90,6 +92,7 @@ impl pallet_verifier::Config<pallet_verifier::Instance1> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Verifier = ArkworksVerifierBn254;
+	type MaxParameterLength = MaxParameterLength;
 	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
 }
 
@@ -226,6 +229,11 @@ impl Contains<RuntimeCall> for ExecuteProposalFilter {
 			_ => false,
 		}
 	}
+}
+
+parameter_types! {
+	pub const MaxParameterLength : u32 = 1000;
+	pub const MaxStringLength : u32 = 10000;
 }
 
 type SignatureBridgeInstance = pallet_signature_bridge::Instance1;

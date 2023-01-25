@@ -221,6 +221,7 @@ std = [
   "pallet-society/std",
   "pallet-vanchor/std",
   "pallet-vanchor-handler/std",
+  "pallet-vanchor-verifier/std",
 
   'nimbus-primitives/std',
   'pallet-aura-style-filter/std',

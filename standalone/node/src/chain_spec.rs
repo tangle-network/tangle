@@ -442,13 +442,13 @@ fn testnet_genesis(
 	let vanchor_verifier_bn254_params = {
 		let vk_bytes =
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
-		vk_bytes.to_vec()
+		vk_bytes.to_vec().try_into().unwrap()
 	};
 	// TODO: Add proper verifying keys for 16-2
 	let vanchor_verifier_16x2_bn254_params = {
 		let vk_bytes =
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
-		vk_bytes.to_vec()
+		vk_bytes.to_vec().try_into().unwrap()
 	};
 
 	const ENDOWMENT: Balance = 10_000_000 * UNIT;
@@ -529,15 +529,15 @@ fn testnet_genesis(
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
-			native_asset_name: b"WEBB".to_vec(),
+			native_asset_name: b"WEBB".to_vec().try_into().unwrap(),
 			native_existential_deposit: tangle_runtime::EXISTENTIAL_DEPOSIT,
 		},
 		hasher_bn_254: HasherBn254Config {
-			parameters: Some(bn254_x5_3_params.to_bytes()),
+			parameters: Some(bn254_x5_3_params.to_bytes().try_into().unwrap()),
 			phantom: Default::default(),
 		},
 		mixer_verifier_bn_254: MixerVerifierBn254Config {
-			parameters: Some(mixer_verifier_bn254_params),
+			parameters: Some(mixer_verifier_bn254_params.try_into().unwrap()),
 			phantom: Default::default(),
 		},
 		merkle_tree_bn_254: MerkleTreeBn254Config {

@@ -21,7 +21,7 @@
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
-	traits::{Currency, Get, IsSubType, VestingSchedule, WithdrawReasons},
+	traits::{Currency, Get, IsSubType, VestingSchedule},
 	weights::Weight,
 };
 pub use pallet::*;
