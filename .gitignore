@@ -26,3 +26,5 @@ template-local-raw.json
 resources/para-2076-genesis
 resources/para-2076-wasm
 .env
+
+.idea

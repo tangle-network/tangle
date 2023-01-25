@@ -44,7 +44,7 @@ const BLOCKS_PER_ROUND: u32 = HOURS;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
-	TPublic::Pair::from_string(&format!("//{}", seed), None)
+	TPublic::Pair::from_string(&format!("//{seed}"), None)
 		.expect("static values are valid; qed")
 		.public()
 }
@@ -376,14 +376,14 @@ fn testnet_genesis(
 	let vanchor_verifier_bn254_params = {
 		let vk_bytes =
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
-		vk_bytes.to_vec()
+		vk_bytes.to_vec().try_into().unwrap()
 	};
 
 	// TODO: Add proper verifying keys for 16-2
 	let vanchor_verifier_16x2_bn254_params = {
 		let vk_bytes =
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
-		vk_bytes.to_vec()
+		vk_bytes.to_vec().try_into().unwrap()
 	};
 
 	tangle_rococo_runtime::GenesisConfig {
@@ -425,15 +425,15 @@ fn testnet_genesis(
 		dkg_proposals: Default::default(),
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
-			native_asset_name: b"WEBB".to_vec(),
+			native_asset_name: b"WEBB".to_vec().try_into().unwrap(),
 			native_existential_deposit: tangle_rococo_runtime::EXISTENTIAL_DEPOSIT,
 		},
 		hasher_bn_254: HasherBn254Config {
-			parameters: Some(bn254_x5_3_params.to_bytes()),
+			parameters: Some(bn254_x5_3_params.to_bytes().try_into().unwrap()),
 			phantom: Default::default(),
 		},
 		mixer_verifier_bn_254: MixerVerifierBn254Config {
-			parameters: Some(mixer_verifier_bn254_params),
+			parameters: Some(mixer_verifier_bn254_params.try_into().unwrap()),
 			phantom: Default::default(),
 		},
 		merkle_tree_bn_254: MerkleTreeBn254Config {

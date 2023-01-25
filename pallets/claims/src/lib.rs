@@ -353,7 +353,8 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight(T::WeightInfo::claim())]
+		#[pallet::weight(0)]
+		#[pallet::call_index(0)]
 		pub fn claim(
 			origin: OriginFor<T>,
 			dest: T::AccountId,
@@ -385,7 +386,8 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight(T::WeightInfo::mint_claim())]
+		#[pallet::weight(1)]
+		#[pallet::call_index(1)]
 		pub fn mint_claim(
 			origin: OriginFor<T>,
 			who: EthereumAddress,
@@ -433,7 +435,8 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight(T::WeightInfo::claim_attest())]
+		#[pallet::weight(2)]
+		#[pallet::call_index(2)]
 		pub fn claim_attest(
 			origin: OriginFor<T>,
 			dest: T::AccountId,
@@ -472,10 +475,11 @@ pub mod pallet {
 		/// Total Complexity: O(1)
 		/// </weight>
 		#[pallet::weight((
-			T::WeightInfo::attest(),
+			3,
 			DispatchClass::Normal,
 			Pays::No
 		))]
+		#[pallet::call_index(3)]
 		pub fn attest(origin: OriginFor<T>, statement: Vec<u8>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let signer = Preclaims::<T>::get(&who).ok_or(Error::<T>::SenderHasNoClaim)?;
@@ -487,7 +491,8 @@ pub mod pallet {
 			Ok(())
 		}
 
-		#[pallet::weight(T::WeightInfo::move_claim())]
+		#[pallet::weight(4)]
+		#[pallet::call_index(4)]
 		pub fn move_claim(
 			origin: OriginFor<T>,
 			old: EthereumAddress,
@@ -511,7 +516,8 @@ pub mod pallet {
 
 		/// Set the value for expiryconfig
 		/// Can only be called by ForceOrigin
-		#[pallet::weight(T::WeightInfo::move_claim())]
+		#[pallet::weight(5)]
+		#[pallet::call_index(5)]
 		pub fn force_set_expiry_config(
 			origin: OriginFor<T>,
 			expiry_block: T::BlockNumber,
@@ -776,7 +782,7 @@ mod tests {
 		assert_err, assert_noop, assert_ok,
 		dispatch::{DispatchError::BadOrigin, GetDispatchInfo, Pays},
 		ord_parameter_types, parameter_types,
-		traits::{ExistenceRequirement, GenesisBuild, OnFinalize, OnInitialize},
+		traits::{ExistenceRequirement, GenesisBuild, OnFinalize, OnInitialize, WithdrawReasons},
 	};
 	use pallet_balances;
 	use sp_runtime::{
@@ -849,6 +855,8 @@ mod tests {
 
 	parameter_types! {
 		pub const MinVestedTransfer: u64 = 1;
+		pub UnvestedFundsAllowedWithdrawReasons: WithdrawReasons =
+			WithdrawReasons::except(WithdrawReasons::TRANSFER | WithdrawReasons::RESERVE);
 	}
 
 	impl pallet_vesting::Config for Test {
@@ -857,6 +865,7 @@ mod tests {
 		type BlockNumberToBalance = Identity;
 		type MinVestedTransfer = MinVestedTransfer;
 		type WeightInfo = ();
+		type UnvestedFundsAllowedWithdrawReasons = UnvestedFundsAllowedWithdrawReasons;
 		const MAX_VESTING_SCHEDULES: u32 = 28;
 	}
 

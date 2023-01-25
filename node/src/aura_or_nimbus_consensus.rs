@@ -20,7 +20,7 @@
 
 use futures::TryFutureExt;
 use log::debug;
-use sc_client_api::HeaderBackend;
+use sc_client_api::{Backend, HeaderBackend};
 use sc_consensus::{
 	import_queue::{BasicQueue, Verifier as VerifierT},
 	BlockImport, BlockImportParams,
@@ -47,13 +47,19 @@ use sc_consensus_aura::CompatibleDigestItem as AuraDigestItem;
 const LOG_TARGET: &str = "aura-nimbus-consensus";
 
 struct AuraOrNimbusVerifier<Client, Block: BlockT, AuraCIDP, NimbusCIDP> {
-	aura_verifier: sc_consensus_aura::AuraVerifier<Client, <AuraId as AppKey>::Pair, AuraCIDP>,
+	aura_verifier: sc_consensus_aura::AuraVerifier<
+		Client,
+		<AuraId as AppKey>::Pair,
+		AuraCIDP,
+		<<Block as BlockT>::Header as HeaderT>::Number,
+	>,
 	nimbus_verifier: nimbus_consensus::Verifier<Client, Block, NimbusCIDP>,
 }
 impl<Client, Block, AuraCIDP, NimbusCIDP> AuraOrNimbusVerifier<Client, Block, AuraCIDP, NimbusCIDP>
 where
 	Block: BlockT,
 {
+	#[allow(dead_code)]
 	pub fn new(
 		client: Arc<Client>,
 		create_inherent_data_providers_aura: AuraCIDP,
@@ -72,6 +78,7 @@ where
 				create_inherent_data_providers: create_inherent_data_providers_aura,
 				check_for_equivocation: sc_consensus_aura::CheckForEquivocation::Yes,
 				telemetry,
+				compatibility_mode: Default::default(),
 			}),
 			nimbus_verifier: nimbus_consensus::Verifier::new(
 				client,
@@ -119,9 +126,11 @@ where
 	}
 }
 
-pub fn import_queue<Client, Block: BlockT, InnerBI>(
+#[allow(dead_code)]
+pub fn import_queue<Client, Block: BlockT, InnerBI, BE: Backend<Block> + 'static>(
 	client: Arc<Client>,
 	block_import: InnerBI,
+	backend: Arc<BE>,
 	spawner: &impl sp_core::traits::SpawnEssentialNamed,
 	registry: Option<&substrate_prometheus_endpoint::Registry>,
 	telemetry: Option<TelemetryHandle>,
@@ -163,7 +172,7 @@ where
 		//       If in the future either of them diverge from this,
 		//       we'll have to adapt to the change here and in
 		//       node/src/service.rs:L467 aka. BuildNimbusConsensusParams
-		Box::new(cumulus_client_consensus_common::ParachainBlockImport::new(block_import)),
+		Box::new(cumulus_client_consensus_common::ParachainBlockImport::new(block_import, backend)),
 		None,
 		spawner,
 		registry,

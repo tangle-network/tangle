@@ -24,5 +24,5 @@ pub mod orml_tokens;
 pub mod rocksdb_weights;
 
 pub use block_weights::constants::BlockExecutionWeight;
-pub use extrinsic_weights::constants::ExtrinsicBaseWeight;
+pub use frame_support::weights::constants::ExtrinsicBaseWeight;
 pub use rocksdb_weights::constants::RocksDbWeight;
