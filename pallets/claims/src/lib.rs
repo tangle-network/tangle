@@ -782,7 +782,7 @@ mod tests {
 		assert_err, assert_noop, assert_ok,
 		dispatch::{DispatchError::BadOrigin, GetDispatchInfo, Pays},
 		ord_parameter_types, parameter_types,
-		traits::{ExistenceRequirement, GenesisBuild, OnFinalize, OnInitialize},
+		traits::{ExistenceRequirement, GenesisBuild, OnFinalize, OnInitialize, WithdrawReasons},
 	};
 	use pallet_balances;
 	use sp_runtime::{
