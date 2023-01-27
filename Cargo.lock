@@ -2472,7 +2472,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#b54aab528574b447625fa1b18d63b24d4cfed273"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2523,7 +2523,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#b54aab528574b447625fa1b18d63b24d4cfed273"
 dependencies = [
  "chacha20poly1305",
  "clap 4.1.4",
@@ -2556,7 +2556,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#b54aab528574b447625fa1b18d63b24d4cfed273"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -5678,7 +5678,7 @@ dependencies = [
 [[package]]
 name = "nimbus-consensus"
 version = "0.9.0"
-source = "git+https://github.com/webb-tools/nimbus?branch=polkadot-v0.9.36#7fb3786529da597e9e6cf50a8f1af2b61c16fd75"
+source = "git+https://github.com/webb-tools/nimbus?branch=polkadot-v0.9.36#8c4353ec5e0cc4392f61c9f8b3f7290546e44727"
 dependencies = [
  "async-trait",
  "cumulus-client-consensus-common",
@@ -5709,7 +5709,7 @@ dependencies = [
 [[package]]
 name = "nimbus-primitives"
 version = "0.9.0"
-source = "git+https://github.com/webb-tools/nimbus?branch=polkadot-v0.9.36#7fb3786529da597e9e6cf50a8f1af2b61c16fd75"
+source = "git+https://github.com/webb-tools/nimbus?branch=polkadot-v0.9.36#8c4353ec5e0cc4392f61c9f8b3f7290546e44727"
 dependencies = [
  "async-trait",
  "frame-support",
@@ -6181,7 +6181,7 @@ dependencies = [
 [[package]]
 name = "pallet-aura-style-filter"
 version = "0.9.0"
-source = "git+https://github.com/webb-tools/nimbus?branch=polkadot-v0.9.36#7fb3786529da597e9e6cf50a8f1af2b61c16fd75"
+source = "git+https://github.com/webb-tools/nimbus?branch=polkadot-v0.9.36#8c4353ec5e0cc4392f61c9f8b3f7290546e44727"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6197,7 +6197,7 @@ dependencies = [
 [[package]]
 name = "pallet-author-inherent"
 version = "0.9.0"
-source = "git+https://github.com/webb-tools/nimbus?branch=polkadot-v0.9.36#7fb3786529da597e9e6cf50a8f1af2b61c16fd75"
+source = "git+https://github.com/webb-tools/nimbus?branch=polkadot-v0.9.36#8c4353ec5e0cc4392f61c9f8b3f7290546e44727"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6504,7 +6504,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#b54aab528574b447625fa1b18d63b24d4cfed273"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6524,7 +6524,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#b54aab528574b447625fa1b18d63b24d4cfed273"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6545,7 +6545,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git#f39b85de07e2ebb731a1e517387fb43a5fab2a91"
+source = "git+https://github.com/webb-tools/dkg-substrate.git#b54aab528574b447625fa1b18d63b24d4cfed273"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -13131,6 +13131,7 @@ dependencies = [
  "sc-chain-spec",
  "sc-cli",
  "sc-client-api",
+ "sc-client-db",
  "sc-consensus",
  "sc-consensus-aura",
  "sc-consensus-babe",
