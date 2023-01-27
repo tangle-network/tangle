@@ -23,19 +23,24 @@ use tangle_rococo_runtime::{
 };
 
 // Cumulus Imports
-use sc_consensus::ImportQueue;
 use cumulus_client_network::BlockAnnounceValidator;
 use cumulus_client_service::{
-	prepare_node_config, start_collator, start_full_node, StartCollatorParams, StartFullNodeParams, build_relay_chain_interface,
+	build_relay_chain_interface, prepare_node_config, start_collator, start_full_node,
+	StartCollatorParams, StartFullNodeParams,
 };
 use cumulus_primitives_core::ParaId;
-use cumulus_relay_chain_inprocess_interface::build_inprocess_relay_chain;
-use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface, RelayChainResult};
-use cumulus_relay_chain_rpc_interface::{create_client_and_start_worker, RelayChainRpcInterface};
+
+use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface};
+
 use jsonrpsee::RpcModule;
 use nimbus_consensus::{BuildNimbusConsensusParams, NimbusConsensus};
+use sc_consensus::ImportQueue;
 
 // Substrate Imports
+use cumulus_client_consensus_common::{
+	ParachainBlockImport as TParachainBlockImport, ParachainConsensus,
+};
+
 use sc_executor::NativeElseWasmExecutor;
 use sc_network::{NetworkBlock, NetworkService};
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
@@ -44,10 +49,6 @@ use sp_api::ConstructRuntimeApi;
 use sp_keystore::SyncCryptoStorePtr;
 use sp_runtime::traits::{BlakeTwo256, NumberFor};
 use substrate_prometheus_endpoint::Registry;
-use cumulus_client_consensus_common::{
-	ParachainBlockImport as TParachainBlockImport, ParachainConsensus,
-};
-use polkadot_service::CollatorPair;
 
 type ParachainExecutor = NativeElseWasmExecutor<rococo::Executor>;
 
@@ -182,7 +183,7 @@ where
 	)?;
 
 	let params = PartialComponents {
-		backend : backend.clone(),
+		backend,
 		client,
 		import_queue,
 		keystore_container,
