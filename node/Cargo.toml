@@ -65,6 +65,7 @@ substrate-prometheus-endpoint = { default-features = false, git = "https://githu
 ## Substrate Client Dependencies
 sc-basic-authorship = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 sc-chain-spec = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
+sc-client-db = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 sc-cli = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 sc-client-api = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
 sc-consensus = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36" }
