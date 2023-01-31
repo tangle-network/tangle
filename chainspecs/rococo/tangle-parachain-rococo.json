@@ -3,9 +3,9 @@
   "id": "tangle_rococo",
   "chainType": "Live",
   "bootNodes": [
-    "/ip4/18.118.130.41/tcp/30333/p2p/12D3KooWKpvw51KPvNx86jv6jLnkmnpiZubeT77LZDFyDTs7NAGW",
-    "/ip4/18.119.156.80/tcp/30333/p2p/12D3KooWAca3kpZUpk5is9jSBjfz56CSq3azd8utRvtRE4DsDh3u",
-    "/ip4/18.191.138.127/tcp/30333/p2p/12D3KooWJLQLRhrff3E3vSCjGDoNNUzBk1HvdXGCgs2gayjcqWTY"
+    "/ip4/140.82.21.142/tcp/30333/p2p/12D3KooWKpvw51KPvNx86jv6jLnkmnpiZubeT77LZDFyDTs7NAGW",
+    "/ip4/149.28.81.60/tcp/30333/p2p/12D3KooWAca3kpZUpk5is9jSBjfz56CSq3azd8utRvtRE4DsDh3u",
+    "/ip4/45.32.66.129/tcp/30333/p2p/12D3KooWJLQLRhrff3E3vSCjGDoNNUzBk1HvdXGCgs2gayjcqWTY"
   ],
   "telemetryEndpoints": null,
   "protocolId": "tangle_rococo",

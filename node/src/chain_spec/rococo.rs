@@ -23,6 +23,22 @@ use tangle_rococo_runtime::{
 	ImOnlineId, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
 	ParachainStakingConfig, VAnchorBn254Config, VAnchorVerifierConfig, UNIT,
 };
+use sc_network_common::config::MultiaddrWithPeerId;
+
+/// Arana alpha bootnodes
+pub fn get_rococo_bootnodes() -> Vec<MultiaddrWithPeerId> {
+	vec![
+		"/ip4/140.82.21.142/tcp/30333/p2p/12D3KooWKpvw51KPvNx86jv6jLnkmnpiZubeT77LZDFyDTs7NAGW"
+			.parse()
+			.unwrap(),
+		"/ip4/149.28.81.60/tcp/30333/p2p/12D3KooWAca3kpZUpk5is9jSBjfz56CSq3azd8utRvtRE4DsDh3u"
+			.parse()
+			.unwrap(),
+		"/ip4/45.32.66.129/tcp/30333/p2p/12D3KooWJLQLRhrff3E3vSCjGDoNNUzBk1HvdXGCgs2gayjcqWTY"
+			.parse()
+			.unwrap(),
+	]
+}
 
 pub fn tangle_alpha_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
@@ -97,7 +113,7 @@ pub fn tangle_alpha_config(id: ParaId) -> ChainSpec {
 pub fn tangle_rococo_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "tTNT".into());
+	properties.insert("tokenSymbol".into(), "rTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
 
@@ -131,7 +147,7 @@ pub fn tangle_rococo_config(id: ParaId) -> ChainSpec {
 			)
 		},
 		// Bootnodes
-		minerva_testnet_fixtures::get_testnet_bootnodes(),
+		get_rococo_bootnodes(),
 		// Telemetry
 		None,
 		// Protocol ID
