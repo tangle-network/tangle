@@ -16,6 +16,7 @@ use crate::chain_spec::*;
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
 use hex_literal::hex;
+use sc_network_common::config::MultiaddrWithPeerId;
 use sc_service::ChainType;
 use sp_core::{crypto::UncheckedInto, sr25519};
 use tangle_rococo_runtime::{
@@ -23,7 +24,6 @@ use tangle_rococo_runtime::{
 	ImOnlineId, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
 	ParachainStakingConfig, VAnchorBn254Config, VAnchorVerifierConfig, UNIT,
 };
-use sc_network_common::config::MultiaddrWithPeerId;
 
 /// Arana alpha bootnodes
 pub fn get_rococo_bootnodes() -> Vec<MultiaddrWithPeerId> {
