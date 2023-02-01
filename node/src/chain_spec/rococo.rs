@@ -28,13 +28,13 @@ use sc_network_common::config::MultiaddrWithPeerId;
 /// Arana alpha bootnodes
 pub fn get_rococo_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
-		"/ip4/140.82.21.142/tcp/30333/p2p/12D3KooWKpvw51KPvNx86jv6jLnkmnpiZubeT77LZDFyDTs7NAGW"
+		"/ip4/140.82.21.142/tcp/30333/p2p/12D3KooWPa2aP9fASpyzq2zunUYQYRmc47kwER5NDjEac1ugxDGp"
 			.parse()
 			.unwrap(),
-		"/ip4/149.28.81.60/tcp/30333/p2p/12D3KooWAca3kpZUpk5is9jSBjfz56CSq3azd8utRvtRE4DsDh3u"
+		"/ip4/149.28.81.60/tcp/30333/p2p/12D3KooWDnXf4qokuVvBGUrvGfpCjsxEBjrnF6fdB2h4Y8t9BD2x"
 			.parse()
 			.unwrap(),
-		"/ip4/45.32.66.129/tcp/30333/p2p/12D3KooWJLQLRhrff3E3vSCjGDoNNUzBk1HvdXGCgs2gayjcqWTY"
+		"/ip4/45.32.66.129/tcp/30333/p2p/12D3KooWLerJ2wzwmS9hSVxh1QkzwMNeTuquYrA1D9urPcssEFHf"
 			.parse()
 			.unwrap(),
 	]
