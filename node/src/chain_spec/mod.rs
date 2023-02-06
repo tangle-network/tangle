@@ -327,6 +327,7 @@ pub fn tangle_minerva_config(id: ParaId) -> ChainSpec {
 					hex!["3c845c875a53061c8efbe6b149966a105f95097b49280256f65fd994686ed341"].into(),
 					hex!["a80afbb2600998b2858e011a1a74e9aa92d8b8edc31ec54253c43d7eafef0675"].into(),
 					hex!["3874c16c9855de4791f363d5779dab4cd8e71f21b62494288344002e3a031265"].into(),
+					hex!["e80eedfc994899efdda25ef2ec89ca55dd748a92cc49da84bd6abc5d2dfa8e03"].into(),
 					// relayer accounts
 					hex!["b6806626f5e4490c27a4ccffed4fed513539b6a455b14b32f58878cf7c5c4e68"].into(),
 					hex!["22203dbd79c7ef6ce6bd7ec9b1f4d87425b1db0ab827543d3c7ce3f6a0749005"].into(),
