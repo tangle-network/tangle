@@ -327,6 +327,7 @@ pub fn tangle_minerva_config(id: ParaId) -> ChainSpec {
 					hex!["3c845c875a53061c8efbe6b149966a105f95097b49280256f65fd994686ed341"].into(),
 					hex!["a80afbb2600998b2858e011a1a74e9aa92d8b8edc31ec54253c43d7eafef0675"].into(),
 					hex!["3874c16c9855de4791f363d5779dab4cd8e71f21b62494288344002e3a031265"].into(),
+					hex!["a665b4996fd4cdd949354473a5e044f2c1df3ce4dd650e3a85160cb44936743c"].into(),
 					// relayer accounts
 					hex!["b6806626f5e4490c27a4ccffed4fed513539b6a455b14b32f58878cf7c5c4e68"].into(),
 					hex!["22203dbd79c7ef6ce6bd7ec9b1f4d87425b1db0ab827543d3c7ce3f6a0749005"].into(),
@@ -395,7 +396,7 @@ fn testnet_genesis(
 		claims: ClaimsConfig { claims: vec![], vesting: vec![], expiry: None },
 		sudo: tangle_rococo_runtime::SudoConfig { key: Some(root_key) },
 		balances: tangle_rococo_runtime::BalancesConfig {
-			balances: endowed_accounts.iter().cloned().map(|k| (k, 1_000_000_000 * UNIT)).collect(),
+			balances: endowed_accounts.iter().cloned().map(|k| (k, 100_000_000 * UNIT)).collect(),
 		},
 		democracy: Default::default(),
 		council: Default::default(),
@@ -418,7 +419,7 @@ fn testnet_genesis(
 		parachain_system: Default::default(),
 		dkg: tangle_rococo_runtime::DKGConfig {
 			authorities: invulnerables.iter().map(|x| x.2.clone()).collect::<_>(),
-			keygen_threshold: 5,
+			keygen_threshold: 6,
 			signature_threshold: 3,
 			authority_ids: invulnerables.iter().map(|x| x.0.clone()).collect::<_>(),
 		},

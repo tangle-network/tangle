@@ -204,7 +204,7 @@ fn rococo_genesis(
 		claims: ClaimsConfig { claims: vec![], vesting: vec![], expiry: None },
 		sudo: tangle_rococo_runtime::SudoConfig { key: Some(root_key) },
 		balances: tangle_rococo_runtime::BalancesConfig {
-			balances: endowed_accounts.iter().cloned().map(|k| (k, 1_000_000_000 * UNIT)).collect(),
+			balances: endowed_accounts.iter().cloned().map(|k| (k, 100_000_000 * UNIT)).collect(),
 		},
 		democracy: Default::default(),
 		council: Default::default(),

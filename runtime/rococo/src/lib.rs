@@ -684,7 +684,7 @@ impl pallet_parachain_staking::Config for Runtime {
 	/// Rounds before the reward is paid
 	type RewardPaymentDelay = ConstU32<2>;
 	/// Minimum collators selected per round, default at genesis and minimum forever after
-	type MinSelectedCandidates = ConstU32<5>;
+	type MinSelectedCandidates = ConstU32<6>;
 	/// Maximum top delegations per candidate
 	type MaxTopDelegationsPerCandidate = ConstU32<100>;
 	/// Maximum bottom delegations per candidate

@@ -151,5 +151,26 @@ pub fn get_testnet_initial_authorities(
 			// relayer address
 			// 0xd85cbc2e3242d5264a020cef8d577b4022e08fa3295423604d4cc2d12bfc906f
 		),
+		(
+			// AccountId
+			hex!["a665b4996fd4cdd949354473a5e044f2c1df3ce4dd650e3a85160cb44936743c"].into(),
+			// AuraId
+			hex!["2660ea6453e7c87c804b0faf53d4441e0ec179221c64d130235eddc52e12ad40"]
+				.unchecked_into(),
+			// DKGId
+			hex!["0316ac930798489a8a8cb2c362147e1712efb868b1fd59effa6c64c97dba185607"]
+				.unchecked_into(),
+			// NimbusId
+			hex!["402b26fa8f8de64ded9e0b82ea970552a28e97b4435090d25b001ad972d91f3c"]
+				.unchecked_into(),
+			// VrfId
+			hex!["94bd36b855d3e677f2181c4b254205a3643e628b9d9f4ef1a7f5b1af4b7c6c3e"]
+				.unchecked_into(),
+			// ImOnlineId
+			hex!["f88004944dca79f80058177581c96d152bdbff9f869450e84d020d8b211b5254"]
+				.unchecked_into(),
+			// relayer address
+			// 0xd85cbc2e3242d5264a020cef8d577b4022e08fa3295423604d4cc2d12bfc906f
+		),
 	]
 }
