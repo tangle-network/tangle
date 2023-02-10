@@ -148,7 +148,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-standalone"),
 	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
-	spec_version: 100, // v0.1.0
+	spec_version: 102, // v0.1.2
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -406,7 +406,7 @@ impl pallet_authorship::Config for Runtime {
 }
 
 parameter_types! {
-	pub const Period: BlockNumber = HOURS;
+	pub const Period: BlockNumber = SESSION_PERIOD_BLOCKS;
 	pub const Offset: BlockNumber = 0;
 }
 
