@@ -161,7 +161,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-parachain"),
 	impl_name: create_runtime_str!("tangle-parachain"),
 	authoring_version: 1,
-	spec_version: 102, // v0.1.2
+	spec_version: 103, // v0.1.3
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -397,6 +397,7 @@ parameter_types! {
 	pub const DecayPercentage: Percent = Percent::from_percent(50);
 	pub const UnsignedPriority: u64 = 1 << 20;
 	pub const UnsignedInterval: BlockNumber = 3;
+	pub const SessionPeriod : BlockNumber = SESSION_PERIOD_BLOCKS;
 }
 
 impl pallet_dkg_metadata::Config for Runtime {
@@ -409,6 +410,7 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type RefreshDelay = RefreshDelay;
 	type KeygenJailSentence = Period;
 	type SigningJailSentence = Period;
+	type SessionPeriod = SessionPeriod;
 	type DecayPercentage = DecayPercentage;
 	type Reputation = Reputation;
 	type UnsignedPriority = UnsignedPriority;
