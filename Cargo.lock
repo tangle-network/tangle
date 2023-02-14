@@ -2478,9 +2478,61 @@ dependencies = [
  "atomic",
  "auto_impl",
  "curv-kzen",
- "dkg-logging",
- "dkg-primitives",
- "dkg-runtime-primitives",
+ "dkg-logging 0.1.0 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2)",
+ "dkg-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2)",
+ "fnv",
+ "futures 0.3.25",
+ "hex",
+ "itertools 0.10.5",
+ "libsecp256k1",
+ "linked-hash-map",
+ "lru 0.7.8",
+ "multi-party-ecdsa",
+ "parity-scale-codec",
+ "parking_lot 0.11.2",
+ "rand 0.8.5",
+ "round-based",
+ "sc-client-api",
+ "sc-keystore",
+ "sc-network",
+ "sc-network-common",
+ "sc-peerset",
+ "sc-service",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sha3 0.9.1",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-arithmetic",
+ "sp-blockchain",
+ "sp-core",
+ "sp-io",
+ "sp-keystore",
+ "sp-runtime",
+ "strum 0.21.0",
+ "substrate-prometheus-endpoint",
+ "thiserror",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+ "wasm-timer",
+ "webb-proposals",
+]
+
+[[package]]
+name = "dkg-gadget"
+version = "0.0.1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3#92e77204170dcd2ec7857fb02ccb16005be7cb2a"
+dependencies = [
+ "async-trait",
+ "atomic",
+ "auto_impl",
+ "curv-kzen",
+ "dkg-logging 0.1.0 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
+ "dkg-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
  "fnv",
  "futures 0.3.25",
  "hex",
@@ -2532,6 +2584,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dkg-logging"
+version = "0.1.0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3#92e77204170dcd2ec7857fb02ccb16005be7cb2a"
+dependencies = [
+ "log",
+ "tracing",
+ "tracing-subscriber 0.3.16",
+]
+
+[[package]]
 name = "dkg-primitives"
 version = "0.0.1"
 source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2#f01a7df6bffe7dae2012b7b6aa37006866732b75"
@@ -2539,7 +2601,40 @@ dependencies = [
  "chacha20poly1305",
  "clap 4.1.4",
  "curv-kzen",
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2)",
+ "fnv",
+ "futures 0.3.25",
+ "hex",
+ "libsecp256k1",
+ "log",
+ "multi-party-ecdsa",
+ "parity-scale-codec",
+ "parking_lot 0.11.2",
+ "rand 0.8.5",
+ "round-based",
+ "sc-cli",
+ "sc-keystore",
+ "sc-service",
+ "serde",
+ "serde_json",
+ "sha3 0.9.1",
+ "sp-core",
+ "sp-keystore",
+ "sp-runtime",
+ "thiserror",
+ "typed-builder 0.9.1",
+ "wasm-timer",
+]
+
+[[package]]
+name = "dkg-primitives"
+version = "0.0.1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3#92e77204170dcd2ec7857fb02ccb16005be7cb2a"
+dependencies = [
+ "chacha20poly1305",
+ "clap 4.1.4",
+ "curv-kzen",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
  "fnv",
  "futures 0.3.25",
  "hex",
@@ -2568,6 +2663,29 @@ dependencies = [
 name = "dkg-runtime-primitives"
 version = "0.0.1"
 source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2#f01a7df6bffe7dae2012b7b6aa37006866732b75"
+dependencies = [
+ "ethereum",
+ "ethereum-types 0.14.1",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "impl-trait-for-tuples",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "tiny-keccak",
+ "webb-proposals",
+]
+
+[[package]]
+name = "dkg-runtime-primitives"
+version = "0.0.1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3#92e77204170dcd2ec7857fb02ccb16005be7cb2a"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -6540,9 +6658,9 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2#f01a7df6bffe7dae2012b7b6aa37006866732b75"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3#92e77204170dcd2ec7857fb02ccb16005be7cb2a"
 dependencies = [
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -6560,9 +6678,9 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2#f01a7df6bffe7dae2012b7b6aa37006866732b75"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3#92e77204170dcd2ec7857fb02ccb16005be7cb2a"
 dependencies = [
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -6581,9 +6699,9 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2#f01a7df6bffe7dae2012b7b6aa37006866732b75"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3#92e77204170dcd2ec7857fb02ccb16005be7cb2a"
 dependencies = [
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -13142,9 +13260,9 @@ dependencies = [
  "cumulus-relay-chain-interface",
  "cumulus-relay-chain-rpc-interface",
  "derive_more",
- "dkg-gadget",
- "dkg-primitives",
- "dkg-runtime-primitives",
+ "dkg-gadget 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
+ "dkg-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "futures 0.3.25",
@@ -13235,7 +13353,7 @@ dependencies = [
  "cumulus-primitives-core",
  "cumulus-primitives-timestamp",
  "cumulus-primitives-utility",
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
  "frame-benchmarking",
  "frame-executive",
  "frame-support",
@@ -13337,9 +13455,9 @@ dependencies = [
  "arkworks-setups",
  "async-trait",
  "clap 4.1.4",
- "dkg-gadget",
- "dkg-primitives",
- "dkg-runtime-primitives",
+ "dkg-gadget 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2)",
+ "dkg-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.2)",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "frame-system",
@@ -13417,7 +13535,7 @@ dependencies = [
 name = "tangle-standalone-runtime"
 version = "0.1.0"
 dependencies = [
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.3)",
  "frame-benchmarking",
  "frame-election-provider-support",
  "frame-executive",
