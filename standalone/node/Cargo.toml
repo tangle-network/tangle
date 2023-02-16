@@ -1,6 +1,6 @@
 [package]
 name = "tangle-standalone"
-version = "0.1.0"
+version = "0.1.4"
 authors = ["Webb Technologies Inc."]
 build = "build.rs"
 edition = "2021"
