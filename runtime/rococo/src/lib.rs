@@ -161,7 +161,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-parachain"),
 	impl_name: create_runtime_str!("tangle-parachain"),
 	authoring_version: 1,
-	spec_version: 105, // v0.1.5
+	spec_version: 109, // v0.1.9
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
