@@ -1,9 +1,12 @@
 [package]
 name = "pallet-parachain-staking"
-version = "0.1.10"
-authors = ["Webb Technologies Inc."]
-edition = "2021"
 description = "parachain staking pallet for collator selection and reward distribution"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 
 [dependencies]
 log = "0.4"

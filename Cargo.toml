@@ -1,5 +1,10 @@
-[profile.release]
-panic = "unwind"
+[workspace.package]
+version = "0.1.10"
+authors = ["Webb Technologies Inc."]
+edition = "2021"
+license = "Unlicense"
+homepage = "https://webb.tools"
+repository = "https://github.com/webb-tools/tangle"
 
 [workspace]
 members = [
@@ -10,3 +15,6 @@ members = [
   "standalone/runtime",
   "pallets/*",
 ]
+
+[profile.release]
+panic = "unwind"

@@ -1,8 +1,11 @@
 [package]
 name = "pallet-transaction-pause"
-version = "0.1.10"
-authors = ["Webb Technologies Inc."]
-edition = "2021"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false }

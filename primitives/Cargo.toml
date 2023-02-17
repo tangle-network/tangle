@@ -1,9 +1,11 @@
 [package]
 name = "tangle-primitives"
-version = "0.1.10"
-authors = ["Webb Technologies Inc."]
-edition = "2021"
-license = "Unlicense"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 
 [dependencies]
 frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }

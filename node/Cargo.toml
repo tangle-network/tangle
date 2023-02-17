@@ -1,13 +1,13 @@
 [package]
 name = "tangle-parachain"
-version = "0.1.10"
-authors = ["Webb Developers"]
 build = "build.rs"
-edition = "2021"
-homepage = "https://webb.tools"
-license = "Unlicense"
-repository = "https://github.com/webb-tools/tangle"
 description = "Webb Protocol Tangle Parachain Network"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

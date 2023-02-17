@@ -1,13 +1,13 @@
 [package]
 name = "tangle-standalone"
-version = "0.1.10"
-authors = ["Webb Technologies Inc."]
 build = "build.rs"
-edition = "2021"
-homepage = "https://substrate.dev"
-license = "Unlicense"
-repository = "https://github.com/webb-tools/protocol-substrate/"
 description = "A fresh FRAME-based Substrate node, ready for hacking."
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 
 [package.metadata.wasm-pack.profile.release]
 # `wasm-opt` has some problems on linux, see
