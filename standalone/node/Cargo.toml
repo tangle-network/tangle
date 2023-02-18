@@ -1,6 +1,6 @@
 [package]
 name = "tangle-standalone"
-version = "0.1.9"
+version = "0.1.10"
 authors = ["Webb Technologies Inc."]
 build = "build.rs"
 edition = "2021"
@@ -44,9 +44,9 @@ pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-subs
 webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git" }
 
 # DKG dependencies
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.6" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.6" }
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.6" }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.10" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.10" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.10" }
 tangle-runtime = { package = "tangle-standalone-runtime", path = "../runtime" }
 
 # Substrate dependencies
