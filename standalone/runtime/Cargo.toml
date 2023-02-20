@@ -19,7 +19,6 @@ hex-literal = { version = '0.3.1', optional = true }
 log = { version = "0.4.14", default-features = false }
 scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
 serde = { version = "1.0.101", default-features = false, optional = true, features = ["derive"] }
-smallvec = "1.6.1"
 static_assertions = "1.1.0"
 
 # DKG Substrate Dependencies
@@ -50,17 +49,14 @@ webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git"
 # Orml dependencies
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
 orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
-orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.36", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
-sp-authority-discovery = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 sp-block-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 sp-consensus-aura = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 sp-inherents = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
-sp-npos-elections = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 sp-offchain = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 sp-session = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
@@ -81,8 +77,6 @@ pallet-aura = { git = "https://github.com/paritytech/substrate", branch = "polka
 pallet-bags-list = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 pallet-session = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 
-pallet-assets = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
-pallet-authority-discovery = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 pallet-bounties = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 pallet-child-bounties = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 
@@ -102,11 +96,8 @@ pallet-staking = { git = "https://github.com/paritytech/substrate.git", branch =
 pallet-staking-reward-curve = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36", default-features = false }
 pallet-treasury = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36", default-features = false }
 
-pallet-asset-tx-payment = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 pallet-authorship = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
-pallet-multisig = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
-pallet-proxy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 pallet-randomness-collective-flip = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 pallet-sudo = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.36", default-features = false }
@@ -118,7 +109,6 @@ pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "po
 pallet-transaction-pause = { path = '../../pallets/transaction-pause', default-features = false }
 
 # Webb dependencies
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client.git", branch = "thomas/relay2", default-features = false }
 tangle-primitives = { path = '../../primitives', default-features = false }
 
 [features]
@@ -169,14 +159,10 @@ std = [
   "sp-transaction-pool/std",
   "sp-inherents/std",
   "sp-consensus-aura/std",
-  "sp-npos-elections/std",
   "frame-support/std",
   "frame-executive/std",
   "frame-system/std",
   "frame-system-rpc-runtime-api/std",
-  "sp-authority-discovery/std",
-  "pallet-assets/std",
-  "pallet-authority-discovery/std",
   "pallet-authorship/std",
   "pallet-aura/std",
   "pallet-bags-list/std",
@@ -185,15 +171,12 @@ std = [
   "pallet-balances/std",
   "pallet-vesting/std",
   "pallet-grandpa/std",
-  "pallet-multisig/std",
   "pallet-indices/std",
-  "pallet-proxy/std",
   "pallet-randomness-collective-flip/std",
   "pallet-session/std",
   "pallet-sudo/std",
   "pallet-timestamp/std",
   "pallet-transaction-payment/std",
-  "pallet-asset-tx-payment/std",
   "pallet-transaction-payment-rpc-runtime-api/std",
   "pallet-utility/std",
   "pallet-collective/std",
@@ -226,7 +209,6 @@ std = [
   "pallet-verifier/std",
   "orml-currencies/std",
   "orml-tokens/std",
-  "orml-traits/std",
   "pallet-asset-registry/std",
   "pallet-signature-bridge/std",
   "pallet-mixer/std",
