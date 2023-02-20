@@ -12,25 +12,25 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive", "max-encoded-len"] }
-rustc-hex = { version = "2.1.0", optional = true, default-features = false }
-scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
-serde = { version = "1.0.101", default-features = false, optional = true, features = ["derive"] }
+rustc-hex = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true, optional = true }
 
-frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
-frame-system = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
-libsecp256k1 = { version = "0.7.0", default-features = false }
-pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
-pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
-sp-io = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
-sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
-sp-std = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+libsecp256k1 = { workspace = true }
+pallet-balances = { workspace = true }
+pallet-vesting = { workspace = true }
+sp-io = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
 
 [dev-dependencies]
-hex-literal = "0.3.4"
-sp-core = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
-sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
+hex-literal = { workspace = true }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
 
-serde_json = "1.0.81"
+serde_json = { workspace = true }
 
 [features]
 default = ["std"]
