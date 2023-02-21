@@ -24,20 +24,20 @@ use tangle_runtime::AccountId;
 
 /// Testnet root key
 pub fn get_testnet_root_key() -> AccountId {
-	// Arana sudo key: 5F9jS22zsSzmWNXKt4kknBsrhVAokEQ9e3UcuBeg21hkzqWz
-	hex!["888a3ab33eea2b827f15302cb26af0e007b067ccfbf693faff3aa7ffcfa25925"].into()
+	// Arana sudo key: 5CDZpRSZ14TmXorHTsTeksY7223FzsaLXPbpTPBUV6NaZSr1
+	hex!["06c225d97d596c57e620aba15e1a8a69c7b334ffdab175788c6553f7dd181a56"].into()
 }
 
 /// Arana alpha bootnodes
 pub fn get_arana_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
-		"/ip4/140.82.21.142/tcp/30333/p2p/12D3KooWPU2eWyZrDMVtNBiKYKLGPJw8EDjbkYeXMyotmdVBKNnx"
+		"/ip4/18.191.185.238/tcp/30333/p2p/12D3KooWPfrrLpP7rzHdkQ1bpPebq62TaUaEoA4qmGbyGUNySD8h"
 			.parse()
 			.unwrap(),
-		"/ip4/149.28.81.60/tcp/30333/p2p/12D3KooWHXiHVg1YX9PHsa8NrS5ZWEoaKBydqZvLoegw2bcTiCtf"
+		"/ip4/3.16.148.122/tcp/30333/p2p/12D3KooWA1EpUAKGHsgJc4ZfZnXS9wHzESMDDq8T7WzeHzP7pcj8"
 			.parse()
 			.unwrap(),
-		"/ip4/45.32.66.129/tcp/30333/p2p/12D3KooWPEpgPPBArgEa1v7X7YR5UiZ6BLxmCsNqC8F6fJ6cULLc"
+		"/ip4/3.143.253.232/tcp/30333/p2p/12D3KooWLGKC7vivZiSw8k82ANH5yzYvWcLJRa2n1u3Ym3WMg3K9"
 			.parse()
 			.unwrap(),
 	]
@@ -83,29 +83,29 @@ pub fn get_arana_initial_authorities(
 			hex!["036aec5853fba2662f31ba89e859ac100daa6c58dc8fdaf0555565663f2b99f8f2"]
 				.unchecked_into(),
 		),
-		(
-			hex!["2c7f3cc085da9175414d1a9d40aa3aa161c8584a9ca62a938684dfbe90ae9d74"].into(),
-			hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
-			hex!["9a457869037b3e7643db0b71e7340d5f319ec5b53be0bffbc8280fe9a6d6bd68"]
-				.unchecked_into(),
-			hex!["b0f002333f4fd657155dfcb4ac5c6ce04d0b2c68b64befa178d4357ceb05fe2d"]
-				.unchecked_into(),
-			hex!["9a457869037b3e7643db0b71e7340d5f319ec5b53be0bffbc8280fe9a6d6bd68"]
-				.unchecked_into(),
-			hex!["0297579c2b3896c65bf556e710ba361d76bff80827e30d70bc8f1d39049005c509"]
-				.unchecked_into(),
-		),
-		(
-			hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
-			hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
-			hex!["4eddfb7cdb385617475a383929a3f129acad452d5789f27ca94373a1fa877b15"]
-				.unchecked_into(),
-			hex!["d2eb206f8c7a64ce47828b33314806ac6cb915d464990eaff9f6435880c6e54f"]
-				.unchecked_into(),
-			hex!["4eddfb7cdb385617475a383929a3f129acad452d5789f27ca94373a1fa877b15"]
-				.unchecked_into(),
-			hex!["020d672a9e42b74d47f6280f8a5ea04f11f8ef53d9bcfba8a7c652ad0131a4d2f3"]
-				.unchecked_into(),
-		),
+		// (
+		// 	hex!["2c7f3cc085da9175414d1a9d40aa3aa161c8584a9ca62a938684dfbe90ae9d74"].into(),
+		// 	hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
+		// 	hex!["9a457869037b3e7643db0b71e7340d5f319ec5b53be0bffbc8280fe9a6d6bd68"]
+		// 		.unchecked_into(),
+		// 	hex!["b0f002333f4fd657155dfcb4ac5c6ce04d0b2c68b64befa178d4357ceb05fe2d"]
+		// 		.unchecked_into(),
+		// 	hex!["9a457869037b3e7643db0b71e7340d5f319ec5b53be0bffbc8280fe9a6d6bd68"]
+		// 		.unchecked_into(),
+		// 	hex!["0297579c2b3896c65bf556e710ba361d76bff80827e30d70bc8f1d39049005c509"]
+		// 		.unchecked_into(),
+		// ),
+		// (
+		// 	hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
+		// 	hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
+		// 	hex!["4eddfb7cdb385617475a383929a3f129acad452d5789f27ca94373a1fa877b15"]
+		// 		.unchecked_into(),
+		// 	hex!["d2eb206f8c7a64ce47828b33314806ac6cb915d464990eaff9f6435880c6e54f"]
+		// 		.unchecked_into(),
+		// 	hex!["4eddfb7cdb385617475a383929a3f129acad452d5789f27ca94373a1fa877b15"]
+		// 		.unchecked_into(),
+		// 	hex!["020d672a9e42b74d47f6280f8a5ea04f11f8ef53d9bcfba8a7c652ad0131a4d2f3"]
+		// 		.unchecked_into(),
+		// ),
 	]
 }
