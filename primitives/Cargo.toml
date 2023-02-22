@@ -20,4 +20,5 @@ std = [
   "frame-support/std",
   "sp-runtime/std",
   "sp-core/std",
+  "cumulus-primitives-core/std",
 ]
