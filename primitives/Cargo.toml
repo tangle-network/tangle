@@ -1,18 +1,18 @@
 [package]
 name = "tangle-primitives"
-version = "0.1.10"
-authors = ["Webb Technologies Inc."]
-edition = "2021"
-license = "Unlicense"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 
 [dependencies]
-frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
-smallvec = "1.6.1"
-sp-core = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
-sp-io = { git = 'https://github.com/paritytech/substrate.git', default-features = false, branch = "polkadot-v0.9.36" }
-sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.36" }
-cumulus-primitives-core = { default-features = false, git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v0.9.36" }
-getrandom = { version = "0.2.8", features = ["js"] }
+frame-support = { workspace = true }
+smallvec = { workspace = true }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+cumulus-primitives-core = { workspace = true }
 
 [features]
 default = ["std"]
@@ -20,5 +20,5 @@ std = [
   "frame-support/std",
   "sp-runtime/std",
   "sp-core/std",
-  "sp-io/std",
+  "cumulus-primitives-core/std",
 ]
