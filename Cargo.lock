@@ -2029,7 +2029,7 @@ dependencies = [
  "cumulus-relay-chain-interface",
  "cumulus-relay-chain-rpc-interface",
  "futures 0.3.26",
- "lru 0.8.1",
+ "lru",
  "polkadot-core-primitives",
  "polkadot-network-bridge",
  "polkadot-node-network-protocol",
@@ -2069,7 +2069,7 @@ dependencies = [
  "futures 0.3.26",
  "futures-timer",
  "jsonrpsee",
- "lru 0.8.1",
+ "lru",
  "parity-scale-codec",
  "polkadot-service",
  "sc-client-api",
@@ -2357,7 +2357,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.10#4b981453571e74bd8c9bcc375191a6f2d6a095b9"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2366,13 +2366,10 @@ dependencies = [
  "dkg-logging",
  "dkg-primitives",
  "dkg-runtime-primitives",
- "fnv",
  "futures 0.3.26",
  "hex",
  "itertools 0.10.5",
- "libsecp256k1",
  "linked-hash-map",
- "lru 0.7.8",
  "multi-party-ecdsa",
  "parity-scale-codec",
  "parking_lot 0.11.2",
@@ -2383,17 +2380,13 @@ dependencies = [
  "sc-network",
  "sc-network-common",
  "sc-peerset",
- "sc-service",
- "scale-info",
  "serde",
  "serde_json",
- "sha3 0.9.1",
  "sp-api",
  "sp-application-crypto",
  "sp-arithmetic",
  "sp-blockchain",
  "sp-core",
- "sp-io",
  "sp-keystore",
  "sp-runtime",
  "strum 0.21.0",
@@ -2401,17 +2394,14 @@ dependencies = [
  "thiserror",
  "tokio",
  "tokio-stream",
- "tracing",
- "wasm-timer",
  "webb-proposals",
 ]
 
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.10#4b981453571e74bd8c9bcc375191a6f2d6a095b9"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
 dependencies = [
- "log",
  "tracing",
  "tracing-subscriber 0.3.16",
 ]
@@ -2419,46 +2409,36 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.10#4b981453571e74bd8c9bcc375191a6f2d6a095b9"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
 dependencies = [
  "chacha20poly1305",
  "clap",
  "curv-kzen",
  "dkg-runtime-primitives",
- "fnv",
- "futures 0.3.26",
  "hex",
  "libsecp256k1",
  "log",
  "multi-party-ecdsa",
  "parity-scale-codec",
- "parking_lot 0.11.2",
  "rand 0.8.5",
- "round-based",
  "sc-cli",
- "sc-keystore",
  "sc-service",
- "serde",
  "serde_json",
  "sha3 0.9.1",
  "sp-core",
  "sp-keystore",
  "sp-runtime",
- "thiserror",
- "typed-builder 0.9.1",
- "wasm-timer",
 ]
 
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.10#4b981453571e74bd8c9bcc375191a6f2d6a095b9"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
  "frame-support",
  "frame-system",
- "hex",
  "impl-trait-for-tuples",
  "parity-scale-codec",
  "scale-info",
@@ -4528,7 +4508,7 @@ dependencies = [
  "libp2p-core",
  "libp2p-swarm",
  "log",
- "lru 0.8.1",
+ "lru",
  "prost",
  "prost-build",
  "prost-codec",
@@ -4905,15 +4885,6 @@ checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
  "cfg-if",
  "value-bag",
-]
-
-[[package]]
-name = "lru"
-version = "0.7.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e999beba7b6e8345721bd280141ed958096a2e4abdf74f67ff4ce49b4b54e47a"
-dependencies = [
- "hashbrown 0.12.3",
 ]
 
 [[package]]
@@ -6084,7 +6055,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.10#4b981453571e74bd8c9bcc375191a6f2d6a095b9"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6104,13 +6075,12 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.10#4b981453571e74bd8c9bcc375191a6f2d6a095b9"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "hex-literal",
  "log",
  "pallet-dkg-metadata",
  "parity-scale-codec",
@@ -6125,7 +6095,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.10#4b981453571e74bd8c9bcc375191a6f2d6a095b9"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -7435,7 +7405,7 @@ dependencies = [
  "derive_more",
  "fatality",
  "futures 0.3.26",
- "lru 0.8.1",
+ "lru",
  "parity-scale-codec",
  "polkadot-erasure-coding",
  "polkadot-node-network-protocol",
@@ -7457,7 +7427,7 @@ source = "git+https://github.com/paritytech/polkadot?branch=release-v0.9.36#dc25
 dependencies = [
  "fatality",
  "futures 0.3.26",
- "lru 0.8.1",
+ "lru",
  "parity-scale-codec",
  "polkadot-erasure-coding",
  "polkadot-node-network-protocol",
@@ -7585,7 +7555,7 @@ dependencies = [
  "futures 0.3.26",
  "futures-timer",
  "indexmap",
- "lru 0.8.1",
+ "lru",
  "parity-scale-codec",
  "polkadot-erasure-coding",
  "polkadot-node-network-protocol",
@@ -7686,7 +7656,7 @@ dependencies = [
  "futures 0.3.26",
  "futures-timer",
  "kvdb",
- "lru 0.8.1",
+ "lru",
  "merlin",
  "parity-scale-codec",
  "polkadot-node-jaeger",
@@ -7818,7 +7788,7 @@ dependencies = [
  "fatality",
  "futures 0.3.26",
  "kvdb",
- "lru 0.8.1",
+ "lru",
  "parity-scale-codec",
  "polkadot-node-primitives",
  "polkadot-node-subsystem",
@@ -7920,7 +7890,7 @@ version = "0.9.36"
 source = "git+https://github.com/paritytech/polkadot?branch=release-v0.9.36#dc25abc712e42b9b51d87ad1168e453a42b5f0bc"
 dependencies = [
  "futures 0.3.26",
- "lru 0.8.1",
+ "lru",
  "polkadot-node-subsystem",
  "polkadot-node-subsystem-types",
  "polkadot-node-subsystem-util",
@@ -8055,7 +8025,7 @@ dependencies = [
  "futures 0.3.26",
  "itertools 0.10.5",
  "kvdb",
- "lru 0.8.1",
+ "lru",
  "parity-db",
  "parity-scale-codec",
  "parking_lot 0.11.2",
@@ -8084,7 +8054,7 @@ dependencies = [
  "async-trait",
  "futures 0.3.26",
  "futures-timer",
- "lru 0.8.1",
+ "lru",
  "orchestra",
  "parking_lot 0.12.1",
  "polkadot-node-metrics",
@@ -8395,7 +8365,7 @@ dependencies = [
  "hex-literal",
  "kvdb",
  "kvdb-rocksdb",
- "lru 0.8.1",
+ "lru",
  "mmr-gadget",
  "pallet-babe",
  "pallet-im-online",
@@ -9968,7 +9938,7 @@ name = "sc-executor"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.36#cb4f2491b00af7d7817f3a54209c26b20faa1f51"
 dependencies = [
- "lru 0.8.1",
+ "lru",
  "parity-scale-codec",
  "parking_lot 0.12.1",
  "sc-executor-common",
@@ -10144,7 +10114,7 @@ dependencies = [
  "linked-hash-map",
  "linked_hash_set",
  "log",
- "lru 0.8.1",
+ "lru",
  "parity-scale-codec",
  "parking_lot 0.12.1",
  "pin-project",
@@ -10226,7 +10196,7 @@ dependencies = [
  "futures-timer",
  "libp2p",
  "log",
- "lru 0.8.1",
+ "lru",
  "sc-network-common",
  "sc-peerset",
  "sp-runtime",
@@ -10266,7 +10236,7 @@ dependencies = [
  "futures 0.3.26",
  "libp2p",
  "log",
- "lru 0.8.1",
+ "lru",
  "mockall",
  "parity-scale-codec",
  "prost",
@@ -11331,7 +11301,7 @@ source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.36#cb
 dependencies = [
  "futures 0.3.26",
  "log",
- "lru 0.8.1",
+ "lru",
  "parity-scale-codec",
  "parking_lot 0.12.1",
  "sp-api",
@@ -11867,7 +11837,7 @@ dependencies = [
  "hash-db",
  "hashbrown 0.12.3",
  "lazy_static",
- "lru 0.8.1",
+ "lru",
  "memory-db",
  "nohash-hasher",
  "parity-scale-codec",
@@ -13163,17 +13133,6 @@ dependencies = [
 
 [[package]]
 name = "typed-builder"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a46ee5bd706ff79131be9c94e7edcb82b703c487766a114434e5790361cf08c5"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "typed-builder"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "89851716b67b937e393b3daa8423e67ddfc4bbbf1654bcf05488e95e0828db0c"
@@ -13769,7 +13728,7 @@ dependencies = [
  "schemars",
  "serde",
  "tiny-keccak",
- "typed-builder 0.10.0",
+ "typed-builder",
 ]
 
 [[package]]
