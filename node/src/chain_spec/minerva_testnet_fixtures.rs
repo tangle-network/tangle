@@ -23,11 +23,11 @@ use tangle_rococo_runtime::{nimbus_session_adapter::VrfId, AccountId, ImOnlineId
 
 /// Testnet root key
 pub fn get_testnet_root_key() -> AccountId {
-	// Arana sudo key: 5F9jS22zsSzmWNXKt4kknBsrhVAokEQ9e3UcuBeg21hkzqWz
+	// Standalone sudo key: 5F9jS22zsSzmWNXKt4kknBsrhVAokEQ9e3UcuBeg21hkzqWz
 	hex!["888a3ab33eea2b827f15302cb26af0e007b067ccfbf693faff3aa7ffcfa25925"].into()
 }
 
-/// Arana alpha bootnodes
+/// Standalone alpha bootnodes
 pub fn get_testnet_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
 		"/ip4/18.118.130.41/tcp/30333/p2p/12D3KooWKpvw51KPvNx86jv6jLnkmnpiZubeT77LZDFyDTs7NAGW"
@@ -42,7 +42,7 @@ pub fn get_testnet_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	]
 }
 
-/// Arana initial authorities
+/// Standalone initial authorities
 pub fn get_testnet_initial_authorities(
 ) -> Vec<(AccountId, AuraId, DKGId, NimbusId, VrfId, ImOnlineId)> {
 	vec![

@@ -25,7 +25,7 @@ use tangle_rococo_runtime::{
 	ParachainStakingConfig, VAnchorBn254Config, VAnchorVerifierConfig, UNIT,
 };
 
-/// Arana alpha bootnodes
+/// Tangle rococo bootnodes
 pub fn get_rococo_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
 		"/ip4/140.82.21.142/tcp/30333/p2p/12D3KooWPa2aP9fASpyzq2zunUYQYRmc47kwER5NDjEac1ugxDGp"

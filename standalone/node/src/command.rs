@@ -39,12 +39,12 @@ impl SubstrateCli for Cli {
 		Ok(match id {
 			"dev" => Box::new(chain_spec::development_config()?),
 			"" | "local" => Box::new(chain_spec::local_testnet_config()?),
-			// generates the arana spec for testing locally
-			"arana-local" => Box::new(chain_spec::arana_local_config()?),
-			// generates the arana spec for testnet
-			"arana-alpha" => Box::new(chain_spec::arana_testnet_config()?),
-			// generates the arana spec for longterm testnet
-			"arana" => Box::new(chain_spec::arana_live_config()?),
+			// generates the standalone spec for testing locally
+			"standalone-local" => Box::new(chain_spec::standalone_local_config()?),
+			// generates the standalone spec for testnet
+			"standalone-alpha" => Box::new(chain_spec::standalone_testnet_config()?),
+			// generates the standalone spec for longterm testnet
+			"standalone" => Box::new(chain_spec::standalone_live_config()?),
 			path =>
 				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 		})

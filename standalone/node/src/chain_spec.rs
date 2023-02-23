@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use crate::testnet_fixtures::{
-	get_arana_bootnodes, get_arana_initial_authorities, get_testnet_root_key,
+	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
 use arkworks_setups::{common::setup_params, Curve};
 use hex_literal::hex;
@@ -247,23 +247,23 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn arana_live_config() -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "Arana wasm not available".to_string())?;
-	let boot_nodes = get_arana_bootnodes();
+pub fn standalone_live_config() -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
+	let boot_nodes = get_standalone_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
 
 	Ok(ChainSpec::from_genesis(
-		"Arana",
-		"arana",
+		"Tangle Standalone",
+		"tangle-standalone",
 		ChainType::Development,
 		move || {
 			testnet_genesis(
 				wasm_binary,
 				// Initial PoA authorities
-				get_arana_initial_authorities(),
+				get_standalone_initial_authorities(),
 				// initial nominators
 				vec![],
 				// Sudo account
@@ -284,7 +284,7 @@ pub fn arana_live_config() -> Result<ChainSpec, String> {
 				],
 				vec![],
 				vec![],
-				get_arana_initial_authorities().iter().map(|a| a.0.clone()).collect(),
+				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
 				true,
 			)
 		},
@@ -303,23 +303,23 @@ pub fn arana_live_config() -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn arana_testnet_config() -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "Arana wasm not available".to_string())?;
-	let boot_nodes = get_arana_bootnodes();
+pub fn standalone_testnet_config() -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
+	let boot_nodes = get_standalone_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
 
 	Ok(ChainSpec::from_genesis(
-		"Arana Alpha",
-		"arana-alpha",
+		"Tangle Standalone Testnet",
+		"tangle-standalone-testnet",
 		ChainType::Development,
 		move || {
 			testnet_genesis(
 				wasm_binary,
 				// Initial PoA authorities
-				get_arana_initial_authorities(),
+				get_standalone_initial_authorities(),
 				// initial nominators
 				vec![],
 				// Sudo account
@@ -340,7 +340,7 @@ pub fn arana_testnet_config() -> Result<ChainSpec, String> {
 				],
 				vec![],
 				vec![],
-				get_arana_initial_authorities().iter().map(|a| a.0.clone()).collect(),
+				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
 				true,
 			)
 		},
@@ -359,23 +359,23 @@ pub fn arana_testnet_config() -> Result<ChainSpec, String> {
 	))
 }
 
-// same as arana_testnet but without bootnodes so that we can spinup same network locally
-pub fn arana_local_config() -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "Arana wasm not available".to_string())?;
+// same as tangle_testnet but without bootnodes so that we can spinup same network locally
+pub fn standalone_local_config() -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
 
 	Ok(ChainSpec::from_genesis(
-		"Arana Local",
-		"arana-local",
+		"Tangle Standalone Local",
+		"tangle-standalone-local",
 		ChainType::Development,
 		move || {
 			testnet_genesis(
 				wasm_binary,
 				// Initial PoA authorities
-				get_arana_initial_authorities(),
+				get_standalone_initial_authorities(),
 				vec![],
 				// Sudo account
 				get_testnet_root_key(),
@@ -395,7 +395,7 @@ pub fn arana_local_config() -> Result<ChainSpec, String> {
 				],
 				vec![],
 				vec![],
-				get_arana_initial_authorities().iter().map(|a| a.0.clone()).collect(),
+				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
 				true,
 			)
 		},

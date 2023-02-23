@@ -24,12 +24,12 @@ use tangle_runtime::AccountId;
 
 /// Testnet root key
 pub fn get_testnet_root_key() -> AccountId {
-	// Arana sudo key: 5CDZpRSZ14TmXorHTsTeksY7223FzsaLXPbpTPBUV6NaZSr1
+	// Standalone sudo key: 5CDZpRSZ14TmXorHTsTeksY7223FzsaLXPbpTPBUV6NaZSr1
 	hex!["06c225d97d596c57e620aba15e1a8a69c7b334ffdab175788c6553f7dd181a56"].into()
 }
 
-/// Arana alpha bootnodes
-pub fn get_arana_bootnodes() -> Vec<MultiaddrWithPeerId> {
+/// Standalone alpha bootnodes
+pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
 		"/ip4/18.191.185.238/tcp/30333/p2p/12D3KooWPfrrLpP7rzHdkQ1bpPebq62TaUaEoA4qmGbyGUNySD8h"
 			.parse()
@@ -43,8 +43,8 @@ pub fn get_arana_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	]
 }
 
-/// Arana initial authorities
-pub fn get_arana_initial_authorities(
+/// Standalone initial authorities
+pub fn get_standalone_initial_authorities(
 ) -> Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)> {
 	vec![
 		(
