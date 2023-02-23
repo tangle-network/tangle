@@ -2357,7 +2357,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2400,7 +2400,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
 dependencies = [
  "tracing",
  "tracing-subscriber 0.3.16",
@@ -2409,7 +2409,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2433,7 +2433,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -5156,7 +5156,7 @@ dependencies = [
 [[package]]
 name = "multi-party-ecdsa"
 version = "0.8.2"
-source = "git+https://github.com/webb-tools/multi-party-ecdsa.git#fafc0dc4c9236d2bf1d907a0e233ce2de1cd61e2"
+source = "git+https://github.com/webb-tools/multi-party-ecdsa.git#34502f817d281e06fb0e68252387a2d08b59930f"
 dependencies = [
  "centipede",
  "curv-kzen",
@@ -6055,7 +6055,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6075,7 +6075,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6095,7 +6095,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.11#60f1e200f99ca10358c619d9a443fe67ebbdf00d"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6115,7 +6115,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "0.1.10"
+version = "0.1.12"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6529,7 +6529,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-parachain-staking"
-version = "0.1.10"
+version = "0.1.12"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6863,7 +6863,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.1.10"
+version = "0.1.12"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -12243,7 +12243,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-parachain"
-version = "0.1.10"
+version = "0.1.12"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -12314,7 +12314,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.1.10"
+version = "0.1.12"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -12325,7 +12325,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-rococo-runtime"
-version = "0.1.10"
+version = "0.1.12"
 dependencies = [
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
@@ -12419,7 +12419,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "0.1.10"
+version = "0.1.12"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -12476,7 +12476,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone-runtime"
-version = "0.1.10"
+version = "0.1.12"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
