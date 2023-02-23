@@ -98,6 +98,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbf688625d06217d5b1bb0ea9d9c44a1635fd0ee3534466388d18203174f4d11"
 
 [[package]]
+name = "amcl"
+version = "0.3.0"
+source = "git+https://github.com/Snowfork/milagro_bls#2c9e8b383981308a8b4cbbc19e0b897dcf14534b"
+
+[[package]]
 name = "android_system_properties"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -980,6 +985,22 @@ dependencies = [
  "atomic-waker",
  "fastrand",
  "futures-lite",
+]
+
+[[package]]
+name = "bls"
+version = "0.2.0"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+dependencies = [
+ "eth2_hashing",
+ "eth2_ssz",
+ "ethereum-types 0.14.1",
+ "hex",
+ "milagro_bls",
+ "rand 0.7.3",
+ "rand_chacha 0.3.1",
+ "tree_hash",
+ "zeroize",
 ]
 
 [[package]]
@@ -2219,6 +2240,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "darling"
+version = "0.13.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a01d95850c592940db9b8194bc39f4bc0e89dee5c4265e4b1807c34a9aba453c"
+dependencies = [
+ "darling_core",
+ "darling_macro",
+]
+
+[[package]]
+name = "darling_core"
+version = "0.13.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "859d65a907b6852c9361e3185c862aae7fafd2887876799fa55f5f99dc40d610"
+dependencies = [
+ "fnv",
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "strsim",
+ "syn",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.13.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9c972679f83bdf9c42bd905396b6c3588a843a17f0f16dfcfa3e2c5d57441835"
+dependencies = [
+ "darling_core",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "data-encoding"
 version = "2.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2394,7 +2450,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tokio-stream",
- "webb-proposals",
+ "webb-proposals 0.5.4",
 ]
 
 [[package]]
@@ -2449,7 +2505,7 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "tiny-keccak",
- "webb-proposals",
+ "webb-proposals 0.5.4",
 ]
 
 [[package]]
@@ -2682,6 +2738,43 @@ checksum = "aa68f1b12764fab894d2755d2518754e71b4fd80ecfb822714a1206c2aab39bf"
 dependencies = [
  "cc",
  "libc",
+]
+
+[[package]]
+name = "eth-types"
+version = "0.1.0"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+dependencies = [
+ "derive_more",
+ "eth2_ssz",
+ "ethereum-types 0.14.1",
+ "hex",
+ "parity-scale-codec",
+ "rlp",
+ "rlp-derive",
+ "scale-info",
+ "tiny-keccak",
+ "tree_hash",
+ "tree_hash_derive",
+]
+
+[[package]]
+name = "eth2_hashing"
+version = "0.3.0"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+dependencies = [
+ "lazy_static",
+ "sha2 0.10.6",
+]
+
+[[package]]
+name = "eth2_ssz"
+version = "0.4.1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+dependencies = [
+ "ethereum-types 0.14.1",
+ "itertools 0.10.5",
+ "smallvec",
 ]
 
 [[package]]
@@ -3859,6 +3952,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ident_case"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
+
+[[package]]
 name = "idna"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4380,6 +4479,9 @@ name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
+dependencies = [
+ "spin",
+]
 
 [[package]]
 name = "lazycell"
@@ -5041,6 +5143,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "merkle_proof"
+version = "0.2.0"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+dependencies = [
+ "eth2_hashing",
+ "ethereum-types 0.14.1",
+ "lazy_static",
+ "safe_arith",
+]
+
+[[package]]
 name = "merlin"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5061,6 +5174,16 @@ dependencies = [
  "futures 0.3.26",
  "rand 0.8.5",
  "thrift",
+]
+
+[[package]]
+name = "milagro_bls"
+version = "1.5.0"
+source = "git+https://github.com/Snowfork/milagro_bls#2c9e8b383981308a8b4cbbc19e0b897dcf14534b"
+dependencies = [
+ "amcl",
+ "rand 0.8.5",
+ "zeroize",
 ]
 
 [[package]]
@@ -6089,7 +6212,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-proposals",
+ "webb-proposals 0.5.4",
 ]
 
 [[package]]
@@ -6187,6 +6310,35 @@ dependencies = [
  "sp-npos-elections",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "pallet-eth2-light-client"
+version = "0.1.0"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+dependencies = [
+ "bitvec",
+ "bls",
+ "derive_more",
+ "eth-types",
+ "eth2_ssz",
+ "ethereum-types 0.14.1",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "merkle_proof",
+ "pallet-balances",
+ "parity-scale-codec",
+ "rlp",
+ "rlp-derive",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+ "tiny-keccak",
+ "tree_hash",
+ "tree_hash_derive",
+ "webb-proposals 0.5.5",
 ]
 
 [[package]]
@@ -9539,6 +9691,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "safe_arith"
+version = "0.1.0"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+
+[[package]]
 name = "same-file"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12505,6 +12662,7 @@ dependencies = [
  "pallet-ecdsa-claims",
  "pallet-election-provider-multi-phase",
  "pallet-elections-phragmen",
+ "pallet-eth2-light-client",
  "pallet-grandpa",
  "pallet-hasher",
  "pallet-identity",
@@ -12998,6 +13156,26 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
+]
+
+[[package]]
+name = "tree_hash"
+version = "0.4.1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+dependencies = [
+ "eth2_hashing",
+ "ethereum-types 0.14.1",
+ "smallvec",
+]
+
+[[package]]
+name = "tree_hash_derive"
+version = "0.4.0"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+dependencies = [
+ "darling",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -13713,7 +13891,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-proposals",
+ "webb-proposals 0.5.4",
 ]
 
 [[package]]
@@ -13727,6 +13905,19 @@ dependencies = [
  "scale-info",
  "schemars",
  "serde",
+ "tiny-keccak",
+ "typed-builder",
+]
+
+[[package]]
+name = "webb-proposals"
+version = "0.5.5"
+source = "git+https://github.com/webb-tools/webb-rs.git#ee6cd26cd4171af68963d5429ab3c150bb176526"
+dependencies = [
+ "num-traits",
+ "parity-scale-codec",
+ "scale-info",
+ "schemars",
  "tiny-keccak",
  "typed-builder",
 ]
