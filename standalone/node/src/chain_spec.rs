@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::marker::PhantomData;
+
 use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
 use arkworks_setups::{common::setup_params, Curve};
+use dkg_primitives::TypedChainId;
+use finality_update_verify::network_config::{Network, NetworkConfig};
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
@@ -23,13 +27,15 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use std::str::FromStr;
 use tangle_runtime::{
 	AccountId, AssetRegistryConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
-	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, ImOnlineConfig,
-	MaxNominations, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill,
-	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-	VAnchorBn254Config, VAnchorVerifierConfig, UNIT, WASM_BINARY,
+	DKGProposalsConfig, ElectionsConfig, Eth2ClientConfig, GenesisConfig, HasherBn254Config,
+	ImOnlineConfig, MaxNominations, MerkleTreeBn254Config, MixerBn254Config,
+	MixerVerifierBn254Config, Perbill, SessionConfig, Signature, StakerStatus, StakingConfig,
+	SudoConfig, SystemConfig, VAnchorBn254Config, VAnchorVerifierConfig, UNIT, WASM_BINARY,
 };
+
 pub type ResourceId = [u8; 32];
 
 // The URL for the telemetry server.
@@ -474,6 +480,23 @@ fn testnet_genesis(
 		.collect::<Vec<_>>();
 
 	let num_endowed_accounts = endowed_accounts.len();
+	let eth2_mainnet_network_config: NetworkConfig =
+		NetworkConfig::new(&Network::from_str(&"mainnet".to_string()).unwrap());
+	let eth2_goerli_network_config: NetworkConfig =
+		NetworkConfig::new(&Network::from_str(&"goerli".to_string()).unwrap());
+	// (TypedChainId, [u8; 32], ForkVersion, u64)
+	let eth2_mainnet_genesis_config = (
+		TypedChainId::Evm(1),
+		eth2_mainnet_network_config.genesis_validators_root,
+		eth2_mainnet_network_config.bellatrix_fork_version,
+		eth2_mainnet_network_config.bellatrix_fork_epoch,
+	);
+	let eth2_goerli_genesis_config = (
+		TypedChainId::Evm(5),
+		eth2_goerli_network_config.genesis_validators_root,
+		eth2_goerli_network_config.bellatrix_fork_version,
+		eth2_goerli_network_config.bellatrix_fork_epoch,
+	);
 	GenesisConfig {
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
@@ -561,5 +584,10 @@ fn testnet_genesis(
 			phantom: Default::default(),
 		},
 		im_online: ImOnlineConfig { keys: vec![] },
+		eth_2_client: Eth2ClientConfig {
+			// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
+			networks: vec![eth2_mainnet_genesis_config, eth2_goerli_genesis_config],
+			phantom: PhantomData,
+		},
 	}
 }

@@ -990,15 +990,17 @@ dependencies = [
 [[package]]
 name = "bls"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
 dependencies = [
  "eth2_hashing",
+ "eth2_serde_utils",
  "eth2_ssz",
  "ethereum-types 0.14.1",
  "hex",
  "milagro_bls",
  "rand 0.7.3",
  "rand_chacha 0.3.1",
+ "serde",
  "tree_hash",
  "zeroize",
 ]
@@ -1355,6 +1357,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c278839b831783b70278b14df4d45e1beb1aad306c07bb796637de9a0e323e8e"
 dependencies = [
  "crossbeam-utils",
+]
+
+[[package]]
+name = "consensus_types"
+version = "0.1.0"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
+dependencies = [
+ "bitvec",
+ "derive_more",
+ "eth-types",
+ "ethereum-types 0.14.1",
+ "hex",
+ "merkle_proof",
+ "parity-scale-codec",
+ "rlp",
+ "rlp-derive",
+ "scale-info",
+ "serde",
+ "tiny-keccak",
+ "tree_hash",
 ]
 
 [[package]]
@@ -2743,9 +2765,10 @@ dependencies = [
 [[package]]
 name = "eth-types"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
 dependencies = [
  "derive_more",
+ "eth2_serde_utils",
  "eth2_ssz",
  "ethereum-types 0.14.1",
  "hex",
@@ -2753,6 +2776,7 @@ dependencies = [
  "rlp",
  "rlp-derive",
  "scale-info",
+ "serde",
  "tiny-keccak",
  "tree_hash",
  "tree_hash_derive",
@@ -2761,16 +2785,28 @@ dependencies = [
 [[package]]
 name = "eth2_hashing"
 version = "0.3.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
 dependencies = [
  "lazy_static",
+ "ring",
  "sha2 0.10.6",
+]
+
+[[package]]
+name = "eth2_serde_utils"
+version = "0.1.1"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
+dependencies = [
+ "ethereum-types 0.14.1",
+ "hex",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
 name = "eth2_ssz"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
 dependencies = [
  "ethereum-types 0.14.1",
  "itertools 0.10.5",
@@ -2809,6 +2845,7 @@ dependencies = [
  "fixed-hash 0.8.0",
  "impl-codec",
  "impl-rlp",
+ "impl-serde",
  "scale-info",
  "tiny-keccak",
 ]
@@ -2852,6 +2889,7 @@ dependencies = [
  "fixed-hash 0.8.0",
  "impl-codec",
  "impl-rlp",
+ "impl-serde",
  "primitive-types 0.12.1",
  "scale-info",
  "uint",
@@ -3030,6 +3068,19 @@ dependencies = [
  "parity-scale-codec",
  "parking_lot 0.12.1",
  "scale-info",
+]
+
+[[package]]
+name = "finality-update-verify"
+version = "0.1.0"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
+dependencies = [
+ "bitvec",
+ "bls",
+ "consensus_types",
+ "eth-types",
+ "serde",
+ "tree_hash",
 ]
 
 [[package]]
@@ -5145,7 +5196,7 @@ dependencies = [
 [[package]]
 name = "merkle_proof"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
 dependencies = [
  "eth2_hashing",
  "ethereum-types 0.14.1",
@@ -5182,6 +5233,8 @@ version = "1.5.0"
 source = "git+https://github.com/Snowfork/milagro_bls#2c9e8b383981308a8b4cbbc19e0b897dcf14534b"
 dependencies = [
  "amcl",
+ "hex",
+ "lazy_static",
  "rand 0.8.5",
  "zeroize",
 ]
@@ -6315,7 +6368,7 @@ dependencies = [
 [[package]]
 name = "pallet-eth2-light-client"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
 dependencies = [
  "bitvec",
  "bls",
@@ -6332,6 +6385,7 @@ dependencies = [
  "rlp",
  "rlp-derive",
  "scale-info",
+ "serde",
  "sp-core",
  "sp-runtime",
  "sp-std",
@@ -9693,7 +9747,7 @@ dependencies = [
 [[package]]
 name = "safe_arith"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
 
 [[package]]
 name = "same-file"
@@ -12584,6 +12638,7 @@ dependencies = [
  "dkg-gadget",
  "dkg-primitives",
  "dkg-runtime-primitives",
+ "finality-update-verify",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "frame-system",
@@ -13161,7 +13216,7 @@ dependencies = [
 [[package]]
 name = "tree_hash"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
 dependencies = [
  "eth2_hashing",
  "ethereum-types 0.14.1",
@@ -13171,7 +13226,7 @@ dependencies = [
 [[package]]
 name = "tree_hash_derive"
 version = "0.4.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#f818f8dcb1843fc13ae41ed5ff99422c73d27f8f"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#6b32ebc8d725244962e5735eede38ce5532ab1b3"
 dependencies = [
  "darling",
  "quote",
@@ -13305,7 +13360,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.6",
- "rand 0.8.5",
+ "rand 0.4.6",
  "static_assertions",
 ]
 
@@ -13918,6 +13973,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "schemars",
+ "serde",
  "tiny-keccak",
  "typed-builder",
 ]

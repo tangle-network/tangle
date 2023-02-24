@@ -212,6 +212,7 @@ pallet-parachain-staking = { path = 'pallets/parachain-staking', default-feature
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
 pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", branch = "thomas/prepare_eth2_substrate_relayer", default-features=false }
+finality-update-verify = { git = "https://github.com/webb-tools/pallet-eth2-light-client", branch = "thomas/prepare_eth2_substrate_relayer", default-features=false }
 
 [profile.release]
 panic = "unwind"

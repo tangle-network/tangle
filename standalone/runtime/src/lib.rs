@@ -1108,10 +1108,10 @@ parameter_types! {
 }
 
 impl pallet_eth2_light_client::Config for Runtime {
- 	type RuntimeEvent = RuntimeEvent;
- 	type StoragePricePerByte = StoragePricePerByte;
- 	type PalletId = Eth2ClientPalletId;
- 	type Currency = Balances;
+	type RuntimeEvent = RuntimeEvent;
+	type StoragePricePerByte = StoragePricePerByte;
+	type PalletId = Eth2ClientPalletId;
+	type Currency = Balances;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -1199,7 +1199,7 @@ construct_runtime!(
 		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>},
 		Utility: pallet_utility::{Pallet, Call, Event},
 
-		Eth2Client: pallet_eth2_light_client::{Pallet, Call, Storage, Event<T>},
+		Eth2Client: pallet_eth2_light_client::{Pallet, Call, Storage, Event<T>, Config<T>},
 	}
 );
 

@@ -31,6 +31,9 @@ hex-literal = { workspace = true }
 log = { workspace = true }
 rand = { workspace = true }
 
+# Light client dependencies
+finality-update-verify = { workspace = true }
+
 # Protocol Substrate
 pallet-linkable-tree-rpc = { workspace = true }
 pallet-linkable-tree-rpc-runtime-api = { workspace = true }
