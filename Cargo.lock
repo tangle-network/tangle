@@ -2435,7 +2435,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/upgrade-proposals-0.5.5#ec3d2815dbdf75f55d42cce37e149b6825d89af0"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2472,13 +2472,13 @@ dependencies = [
  "thiserror",
  "tokio",
  "tokio-stream",
- "webb-proposals 0.5.4",
+ "webb-proposals",
 ]
 
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/upgrade-proposals-0.5.5#ec3d2815dbdf75f55d42cce37e149b6825d89af0"
 dependencies = [
  "tracing",
  "tracing-subscriber 0.3.16",
@@ -2487,7 +2487,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/upgrade-proposals-0.5.5#ec3d2815dbdf75f55d42cce37e149b6825d89af0"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2511,7 +2511,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/upgrade-proposals-0.5.5#ec3d2815dbdf75f55d42cce37e149b6825d89af0"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -2527,7 +2527,7 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "tiny-keccak",
- "webb-proposals 0.5.4",
+ "webb-proposals",
 ]
 
 [[package]]
@@ -3649,8 +3649,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c05aeb6a22b8f62540c194aac980f2115af067bfe15a0734d7277a768d396b31"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -5942,8 +5944,9 @@ dependencies = [
 [[package]]
 name = "pallet-asset-registry"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "orml-traits",
@@ -6231,7 +6234,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/upgrade-proposals-0.5.5#ec3d2815dbdf75f55d42cce37e149b6825d89af0"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6251,7 +6254,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/upgrade-proposals-0.5.5#ec3d2815dbdf75f55d42cce37e149b6825d89af0"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6265,13 +6268,13 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-proposals 0.5.4",
+ "webb-proposals",
 ]
 
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/upgrade-proposals-0.5.5#ec3d2815dbdf75f55d42cce37e149b6825d89af0"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6392,7 +6395,7 @@ dependencies = [
  "tiny-keccak",
  "tree_hash",
  "tree_hash_derive",
- "webb-proposals 0.5.5",
+ "webb-proposals",
 ]
 
 [[package]]
@@ -6439,8 +6442,9 @@ dependencies = [
 [[package]]
 name = "pallet-hasher"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "parity-scale-codec",
@@ -6506,7 +6510,7 @@ dependencies = [
 [[package]]
 name = "pallet-key-storage"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6521,8 +6525,9 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "pallet-mt",
@@ -6538,7 +6543,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "jsonrpsee",
  "pallet-linkable-tree",
@@ -6556,7 +6561,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "pallet-linkable-tree",
  "parity-scale-codec",
@@ -6585,8 +6590,9 @@ dependencies = [
 [[package]]
 name = "pallet-mixer"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "log",
@@ -6619,11 +6625,14 @@ dependencies = [
 [[package]]
 name = "pallet-mt"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "ark-bn254",
+ "arkworks-setups",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "pallet-hasher",
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
@@ -6634,7 +6643,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "jsonrpsee",
  "pallet-mt-rpc-runtime-api",
@@ -6651,7 +6660,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "sp-api",
  "webb-primitives",
@@ -6894,7 +6903,7 @@ dependencies = [
 [[package]]
 name = "pallet-signature-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7037,8 +7046,9 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "orml-traits",
@@ -7053,7 +7063,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7165,19 +7175,26 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "ark-bn254",
  "ark-ff",
  "ark-std",
  "arkworks-native-gadgets",
+ "arkworks-setups",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "getrandom 0.2.8",
+ "orml-currencies",
+ "orml-tokens",
  "orml-traits",
  "pallet-asset-registry",
+ "pallet-hasher",
  "pallet-linkable-tree",
  "pallet-mt",
  "pallet-token-wrapper",
+ "pallet-vanchor-verifier",
  "parity-scale-codec",
  "scale-info",
  "sp-io",
@@ -7189,7 +7206,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7212,7 +7229,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7227,7 +7244,7 @@ dependencies = [
 [[package]]
 name = "pallet-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -13921,7 +13938,7 @@ dependencies = [
 [[package]]
 name = "webb-primitives"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git#ce314ef98d2806cb7f2b85333569759386b9ecc9"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=thomas/update-webb-proposals-0.5.5#bb20e2bc5ea41da72d42e0ade4cabff967de1234"
 dependencies = [
  "ark-bls12-381",
  "ark-bn254",
@@ -13946,22 +13963,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-proposals 0.5.4",
-]
-
-[[package]]
-name = "webb-proposals"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea2ab97c42b53720c745a0a87eb734c3cb90a979ef0ddaae52c83bddb4bd858a"
-dependencies = [
- "num-traits",
- "parity-scale-codec",
- "scale-info",
- "schemars",
- "serde",
- "tiny-keccak",
- "typed-builder",
+ "webb-proposals",
 ]
 
 [[package]]
