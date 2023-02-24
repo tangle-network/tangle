@@ -278,6 +278,7 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 pub const EXISTENTIAL_DEPOSIT: u128 = MILLIUNIT;
+
 parameter_types! {
 	pub const ExistentialDeposit: u128 = EXISTENTIAL_DEPOSIT;
 	pub const TransferFee: u128 = MILLIUNIT;
@@ -1102,7 +1103,7 @@ impl pallet_utility::Config for Runtime {
 }
 
 parameter_types! {
-	pub const StoragePricePerByte: u128 = 1;
+	pub const StoragePricePerByte: u128 = 1 * MILLIUNIT;
 	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
 }
 
