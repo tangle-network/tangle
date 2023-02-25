@@ -2357,7 +2357,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=debug-dkg-test#a77a7fcac8272d35738c763da29244e9af73b435"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2400,7 +2400,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=debug-dkg-test#a77a7fcac8272d35738c763da29244e9af73b435"
 dependencies = [
  "tracing",
  "tracing-subscriber 0.3.16",
@@ -2409,7 +2409,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=debug-dkg-test#a77a7fcac8272d35738c763da29244e9af73b435"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2433,7 +2433,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=debug-dkg-test#a77a7fcac8272d35738c763da29244e9af73b435"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -6055,7 +6055,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=debug-dkg-test#a77a7fcac8272d35738c763da29244e9af73b435"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6075,7 +6075,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=debug-dkg-test#a77a7fcac8272d35738c763da29244e9af73b435"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6095,7 +6095,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=debug-dkg-test#a77a7fcac8272d35738c763da29244e9af73b435"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6115,7 +6115,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6529,7 +6529,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-parachain-staking"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6863,7 +6863,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -12243,7 +12243,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-parachain"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -12314,7 +12314,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -12325,7 +12325,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-rococo-runtime"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
@@ -12419,7 +12419,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -12476,7 +12476,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone-runtime"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
