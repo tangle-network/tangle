@@ -337,6 +337,7 @@ pub fn standalone_testnet_config() -> Result<ChainSpec, String> {
 					hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
 					hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
 					hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
+					hex!["607e948bad733780eda6c0bd9b084243276332823ca8481fc20cd01e1a2ef36f"].into(),
 				],
 				vec![],
 				vec![],
@@ -522,8 +523,8 @@ fn testnet_genesis(
 		grandpa: Default::default(),
 		dkg: DKGConfig {
 			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
-			keygen_threshold: 3,
-			signature_threshold: 2,
+			keygen_threshold: 6,
+			signature_threshold: 3,
 			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },

@@ -1343,6 +1343,10 @@ impl_runtime_apis! {
 		fn should_execute_emergency_keygen() -> bool {
 			DKG::should_execute_emergency_keygen()
 		}
+
+		fn should_execute_new_keygen() -> bool {
+			DKG::should_execute_new_keygen()
+		}
 	}
 
 	impl sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block> for Runtime {
