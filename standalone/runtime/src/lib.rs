@@ -1103,7 +1103,7 @@ impl pallet_utility::Config for Runtime {
 }
 
 parameter_types! {
-	pub const StoragePricePerByte: u128 = 1 * MILLIUNIT;
+	pub const StoragePricePerByte: u128 = MILLIUNIT;
 	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
 }
 
