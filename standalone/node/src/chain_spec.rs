@@ -481,9 +481,9 @@ fn testnet_genesis(
 
 	let num_endowed_accounts = endowed_accounts.len();
 	let eth2_mainnet_network_config: NetworkConfig =
-		NetworkConfig::new(&Network::from_str(&"mainnet".to_string()).unwrap());
+		NetworkConfig::new(&Network::from_str("mainnet").unwrap());
 	let eth2_goerli_network_config: NetworkConfig =
-		NetworkConfig::new(&Network::from_str(&"goerli".to_string()).unwrap());
+		NetworkConfig::new(&Network::from_str("goerli").unwrap());
 	// (TypedChainId, [u8; 32], ForkVersion, u64)
 	let eth2_mainnet_genesis_config = (
 		TypedChainId::Evm(1),

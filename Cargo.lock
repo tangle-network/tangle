@@ -991,7 +991,7 @@ dependencies = [
 [[package]]
 name = "bls"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "eth2_hashing",
  "eth2_serde_utils",
@@ -1363,7 +1363,7 @@ dependencies = [
 [[package]]
 name = "consensus_types"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "bitvec",
  "derive_more",
@@ -2766,7 +2766,7 @@ dependencies = [
 [[package]]
 name = "eth-types"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "derive_more",
  "eth2_serde_utils",
@@ -2786,7 +2786,7 @@ dependencies = [
 [[package]]
 name = "eth2_hashing"
 version = "0.3.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "lazy_static",
  "ring",
@@ -2796,7 +2796,7 @@ dependencies = [
 [[package]]
 name = "eth2_serde_utils"
 version = "0.1.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "ethereum-types 0.14.1",
  "hex",
@@ -2807,7 +2807,7 @@ dependencies = [
 [[package]]
 name = "eth2_ssz"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "ethereum-types 0.14.1",
  "itertools 0.10.5",
@@ -3074,7 +3074,7 @@ dependencies = [
 [[package]]
 name = "finality-update-verify"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "bitvec",
  "bls",
@@ -5199,7 +5199,7 @@ dependencies = [
 [[package]]
 name = "merkle_proof"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "eth2_hashing",
  "ethereum-types 0.14.1",
@@ -6363,7 +6363,7 @@ dependencies = [
 [[package]]
 name = "pallet-eth2-light-client"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "bitvec",
  "bls",
@@ -9746,7 +9746,7 @@ dependencies = [
 [[package]]
 name = "safe_arith"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 
 [[package]]
 name = "same-file"
@@ -13214,7 +13214,7 @@ dependencies = [
 [[package]]
 name = "tree_hash"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "eth2_hashing",
  "ethereum-types 0.14.1",
@@ -13224,7 +13224,7 @@ dependencies = [
 [[package]]
 name = "tree_hash_derive"
 version = "0.4.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#810c1ed4761c9587d99b43348fe68255ba09bd0b"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?branch=thomas/prepare_eth2_substrate_relayer#7bce8b687ad4f4fbc3f81c9874559e7045d36487"
 dependencies = [
  "darling",
  "quote",
