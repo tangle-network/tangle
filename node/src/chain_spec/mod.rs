@@ -419,8 +419,8 @@ fn testnet_genesis(
 		parachain_system: Default::default(),
 		dkg: tangle_rococo_runtime::DKGConfig {
 			authorities: invulnerables.iter().map(|x| x.2.clone()).collect::<_>(),
-			keygen_threshold: 6,
-			signature_threshold: 3,
+			keygen_threshold: 3,
+			signature_threshold: 2,
 			authority_ids: invulnerables.iter().map(|x| x.0.clone()).collect::<_>(),
 		},
 		dkg_proposals: Default::default(),
