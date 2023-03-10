@@ -15,6 +15,7 @@
 use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
+use sp_core::bounded_vec;
 use dkg_runtime_primitives::ResourceId;
 use pallet_bridge_registry::types::{BridgeInfo, BridgeMetadata};
 use arkworks_setups::{common::setup_params, Curve};
