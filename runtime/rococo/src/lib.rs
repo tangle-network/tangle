@@ -438,6 +438,17 @@ impl pallet_dkg_proposal_handler::Config for Runtime {
 	type WeightInfo = pallet_dkg_proposal_handler::weights::WebbWeight<Runtime>;
 }
 
+type BridgeRegistryInstance = pallet_bridge_registry::Instance1;
+impl pallet_bridge_registry::Config<BridgeRegistryInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type BridgeIndex = u32;
+	type MaxAdditionalFields = MaxAdditionalFields;
+	type MaxResources = MaxResources;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	
+	type WeightInfo = ();
+}
+
 impl pallet_dkg_proposals::Config for Runtime {
 	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type DKGAuthorityToMerkleLeaf = DKGEcdsaToEthereum;
@@ -812,6 +823,7 @@ construct_runtime!(
 		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>, ValidateUnsigned} = 10,
 		DKGProposals: pallet_dkg_proposals = 11,
 		DKGProposalHandler: pallet_dkg_proposal_handler = 12,
+		BridgeRegistry: pallet_bridge_registry::<Instance1> = 13,
 
 		// Monetary stuff
 		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 20,

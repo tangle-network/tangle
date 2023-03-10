@@ -43,6 +43,7 @@ jsonrpsee = { workspace = true }
 dkg-gadget = { workspace = true }
 dkg-primitives = { workspace = true }
 dkg-runtime-primitives = { workspace = true }
+pallet-bridge-registry = { workspace = true }
 tangle-rococo-runtime = { workspace = true }
 
 # Arkworks

@@ -15,6 +15,8 @@
 use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
+use dkg_runtime_primitives::ResourceId;
+use pallet_bridge_registry::types::{BridgeInfo, BridgeMetadata};
 use arkworks_setups::{common::setup_params, Curve};
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -28,12 +30,23 @@ use tangle_runtime::{
 	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, ImOnlineConfig,
 	MaxNominations, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill,
 	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-	VAnchorBn254Config, VAnchorVerifierConfig, UNIT, WASM_BINARY,
+	VAnchorBn254Config, VAnchorVerifierConfig, UNIT, WASM_BINARY, BridgeRegistryConfig
 };
-pub type ResourceId = [u8; 32];
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
+
+/// Hermes (Evm, 5001)
+const CHAIN_ID_HERMES: [u8; 6] = hex_literal::hex!("010000001389");
+/// Athena (Evm, 5002)
+const CHAIN_ID_ATHENA: [u8; 6] = hex_literal::hex!("01000000138a");
+
+const RESOURCE_ID_HERMES_ATHENA: ResourceId = ResourceId(hex_literal::hex!(
+	"0000000000000000e69a847cd5bc0c9480ada0b339d7f0a8cac2b6670000138a"
+));
+const RESOURCE_ID_ATHENA_HERMES: ResourceId = ResourceId(hex_literal::hex!(
+	"000000000000d30c8839c1145609e564b986f667b273ddcb8496010000001389"
+));
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
@@ -527,6 +540,16 @@ fn testnet_genesis(
 			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
+		bridge_registry: BridgeRegistryConfig {
+			bridges: bounded_vec![BridgeMetadata {
+				resource_ids: bounded_vec![RESOURCE_ID_HERMES_ATHENA, RESOURCE_ID_ATHENA_HERMES],
+				info: BridgeInfo {
+					additional: Default::default(),
+					display: SerdeData::from_str("hermes-athena").unwrap()
+				}
+			}],
+			..Default::default()
+		},
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
 			native_asset_name: b"WEBB".to_vec().try_into().unwrap(),

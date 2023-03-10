@@ -26,6 +26,7 @@ dkg-runtime-primitives = { workspace = true }
 pallet-dkg-metadata = { workspace = true }
 pallet-dkg-proposal-handler = { workspace = true }
 pallet-dkg-proposals = { workspace = true }
+pallet-bridge-registry = { workspace = true }
 
 # Protocol Substrate Dependencies
 pallet-asset-registry = { workspace = true }
@@ -192,6 +193,7 @@ std = [
   "pallet-treasury/std",
   "pallet-ecdsa-claims/std",
   "pallet-identity/std",
+  "pallet-bridge-registry/std",
 
   # DKG
   "pallet-dkg-metadata/std",

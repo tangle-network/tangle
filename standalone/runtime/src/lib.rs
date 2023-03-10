@@ -831,6 +831,21 @@ impl pallet_dkg_proposals::Config for Runtime {
 }
 
 parameter_types! {
+	pub const MaxResources : u32 = 1000;
+}
+
+type BridgeRegistryInstance = pallet_bridge_registry::Instance1;
+impl pallet_bridge_registry::Config<BridgeRegistryInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type BridgeIndex = u32;
+	type MaxAdditionalFields = MaxAdditionalFields;
+	type MaxResources = MaxResources;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	
+	type WeightInfo = ();
+}
+
+parameter_types! {
 	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 	/// We prioritize im-online heartbeats over election solution submission.
 	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::max_value() / 2;
@@ -1137,6 +1152,7 @@ construct_runtime!(
 		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>, ValidateUnsigned},
 		DKGProposals: pallet_dkg_proposals,
 		DKGProposalHandler: pallet_dkg_proposal_handler,
+		BridgeRegistry: pallet_bridge_registry::<Instance1>,
 
 		Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},

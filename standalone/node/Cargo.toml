@@ -43,6 +43,7 @@ dkg-gadget = { workspace = true }
 dkg-primitives = { workspace = true }
 dkg-runtime-primitives = { workspace = true }
 tangle-runtime = { workspace = true }
+pallet-bridge-registry = { workspace = true }
 
 # Substrate dependencies
 sc-cli = { workspace = true }

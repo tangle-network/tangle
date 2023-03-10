@@ -1125,7 +1125,8 @@ dependencies = [
 [[package]]
 name = "centipede"
 version = "0.3.1"
-source = "git+https://github.com/zengo-x/centipede.git#491836c78b73a2d5c8a898b43be1762500006015"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c30db9451346358a37cbabe951e4dfdfb34b0c0804df4bfdfc2978cb790a512"
 dependencies = [
  "bulletproof-kzen",
  "curv-kzen",
@@ -5156,7 +5157,7 @@ dependencies = [
 [[package]]
 name = "multi-party-ecdsa"
 version = "0.8.2"
-source = "git+https://github.com/webb-tools/multi-party-ecdsa.git#34502f817d281e06fb0e68252387a2d08b59930f"
+source = "git+https://github.com/webb-tools/multi-party-ecdsa.git#facf26da1bee74f6bf10ebfba58bc8828d74c6a9"
 dependencies = [
  "centipede",
  "curv-kzen",
@@ -5979,6 +5980,21 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "pallet-bridge-registry"
+version = "1.0.0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.12#ff1184bf2b398c889ac33358078a315f96fe2b7f"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-identity",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
+ "sp-std",
+ "webb-proposals",
 ]
 
 [[package]]
@@ -12268,6 +12284,7 @@ dependencies = [
  "log",
  "nimbus-consensus",
  "nimbus-primitives",
+ "pallet-bridge-registry",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
  "polkadot-cli",
@@ -12354,6 +12371,7 @@ dependencies = [
  "pallet-author-inherent",
  "pallet-authorship",
  "pallet-balances",
+ "pallet-bridge-registry",
  "pallet-collective",
  "pallet-democracy",
  "pallet-dkg-metadata",
@@ -12434,6 +12452,7 @@ dependencies = [
  "hex-literal",
  "jsonrpsee",
  "log",
+ "pallet-bridge-registry",
  "pallet-im-online",
  "pallet-linkable-tree-rpc",
  "pallet-linkable-tree-rpc-runtime-api",
@@ -12496,6 +12515,7 @@ dependencies = [
  "pallet-bags-list",
  "pallet-balances",
  "pallet-bounties",
+ "pallet-bridge-registry",
  "pallet-child-bounties",
  "pallet-collective",
  "pallet-democracy",
@@ -14103,7 +14123,8 @@ dependencies = [
 [[package]]
 name = "zk-paillier"
 version = "0.4.4"
-source = "git+https://github.com/zengo-x/zk-paillier.git#6ffbef0debd67f4c09d1732d409efd8a084a46bd"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "072972ea8d7c9829c9d87492ac021cf4b665b90c6c9b58fbeb6f71d036e66a04"
 dependencies = [
  "bit-vec",
  "curv-kzen",
