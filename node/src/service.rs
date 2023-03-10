@@ -234,6 +234,8 @@ where
 			Block,
 			dkg_runtime_primitives::crypto::AuthorityId,
 			NumberFor<Block>,
+			dkg_runtime_primitives::MaxProposalLength,
+			dkg_runtime_primitives::MaxAuthorities,
 		> + sp_consensus_aura::AuraApi<Block, AuraId>,
 	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,

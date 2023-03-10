@@ -15,23 +15,23 @@
 use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
-use sp_core::bounded_vec;
-use dkg_runtime_primitives::ResourceId;
-use pallet_bridge_registry::types::{BridgeInfo, BridgeMetadata};
 use arkworks_setups::{common::setup_params, Curve};
+use dkg_runtime_primitives::ResourceId;
 use hex_literal::hex;
+use pallet_bridge_registry::types::{BridgeInfo, BridgeMetadata, SerdeData};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{bounded_vec, sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use std::str::FromStr;
 use tangle_runtime::{
-	AccountId, AssetRegistryConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
-	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, ImOnlineConfig,
-	MaxNominations, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config, Perbill,
-	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-	VAnchorBn254Config, VAnchorVerifierConfig, UNIT, WASM_BINARY, BridgeRegistryConfig
+	AccountId, AssetRegistryConfig, Balance, BalancesConfig, BridgeRegistryConfig, ClaimsConfig,
+	DKGConfig, DKGId, DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config,
+	ImOnlineConfig, MaxNominations, MerkleTreeBn254Config, MixerBn254Config,
+	MixerVerifierBn254Config, Perbill, SessionConfig, Signature, StakerStatus, StakingConfig,
+	SudoConfig, SystemConfig, VAnchorBn254Config, VAnchorVerifierConfig, UNIT, WASM_BINARY,
 };
 
 // The URL for the telemetry server.
@@ -133,27 +133,11 @@ pub fn development_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
 				// Initial Chain Ids
-				vec![
-					hex_literal::hex!("010000001389"), // Hermis (Evm, 5001)
-					hex_literal::hex!("01000000138a"), // Athena (Evm, 5002)
-					hex_literal::hex!("01000000138b"), // Demeter (Evm, 5003)
-				],
+				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA],
 				// Initial resource Ids
 				vec![
-					// Resource ID for Chain Hermis => Athena
-					(
-						hex_literal::hex!(
-							"000000000000e69a847cd5bc0c9480ada0b339d7f0a8cac2b66701000000138a"
-						),
-						Default::default(),
-					),
-					// Resource ID for Chain Athena => Hermis
-					(
-						hex_literal::hex!(
-							"000000000000d30c8839c1145609e564b986f667b273ddcb8496100000001389"
-						),
-						Default::default(),
-					),
+					(RESOURCE_ID_HERMES_ATHENA, Default::default()),
+					(RESOURCE_ID_ATHENA_HERMES, Default::default()),
 				],
 				// Initial proposers
 				vec![
@@ -217,26 +201,11 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
 				// Initial Chain Ids
-				vec![
-					hex_literal::hex!("010000001389"), // Hermis (Evm, 5001)
-					hex_literal::hex!("01000000138a"), // Athena (Evm, 5002)
-				],
+				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA],
 				// Initial resource Ids
 				vec![
-					// Resource ID for Chain Hermis => Athena
-					(
-						hex_literal::hex!(
-							"0000000000000000e69a847cd5bc0c9480ada0b339d7f0a8cac2b6670000138a"
-						),
-						Default::default(),
-					),
-					// Resource ID for Chain Athena => Hermis
-					(
-						hex_literal::hex!(
-							"0000000000000000d30c8839c1145609e564b986f667b273ddcb849600001389"
-						),
-						Default::default(),
-					),
+					(RESOURCE_ID_HERMES_ATHENA, Default::default()),
+					(RESOURCE_ID_ATHENA_HERMES, Default::default()),
 				],
 				// Initial proposers
 				vec![

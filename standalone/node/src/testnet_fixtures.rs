@@ -120,7 +120,7 @@ pub fn get_standalone_initial_authorities(
 			hex!["0278f0bd16e3ff51540b044844fcc0dba9a374bc9824305ec4d6687dcf7058d220"]
 				.unchecked_into(),
 		),
-	    // standalone 7
+		// standalone 7
 		(
 			hex!["b2c09cb1b78c3afd2b1ea4316dfb1be9065e070db948477248e4f3e0f1a2d850"].into(),
 			hex!["fc156f082d789f94149f8b52b191672fbf202ef1b92b487c3cec9bca2d1fbe72"].into(),

@@ -11,14 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
+use dkg_primitives::ResourceId;
 use hex_literal::hex;
+use pallet_bridge_registry::types::{BridgeInfo, BridgeMetadata, SerdeData};
 use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{
+	bounded_vec,
 	crypto::{UncheckedFrom, UncheckedInto},
 	sr25519, ByteArray, Pair, Public,
 };
@@ -26,6 +28,7 @@ use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	Perbill, Percent,
 };
+use std::str::FromStr;
 use tangle_rococo_runtime::{
 	nimbus_session_adapter::{NimbusId, VrfId},
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
@@ -47,7 +50,6 @@ const RESOURCE_ID_HERMES_ATHENA: ResourceId = ResourceId(hex_literal::hex!(
 const RESOURCE_ID_ATHENA_HERMES: ResourceId = ResourceId(hex_literal::hex!(
 	"000000000000d30c8839c1145609e564b986f667b273ddcb8496010000001389"
 ));
-
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<tangle_rococo_runtime::GenesisConfig, Extensions>;

@@ -11,18 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 use crate::chain_spec::*;
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
+
 use hex_literal::hex;
 use sc_network_common::config::MultiaddrWithPeerId;
 use sc_service::ChainType;
-use sp_core::{crypto::UncheckedInto, sr25519};
+use sp_core::{bounded_vec, crypto::UncheckedInto, sr25519};
+use std::str::FromStr;
 use tangle_rococo_runtime::{
-	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
-	ImOnlineId, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
-	ParachainStakingConfig, VAnchorBn254Config, VAnchorVerifierConfig, UNIT,
+	AccountId, AssetRegistryConfig, AuraId, BridgeRegistryConfig, ClaimsConfig, DKGId,
+	HasherBn254Config, ImOnlineConfig, ImOnlineId, MerkleTreeBn254Config, MixerBn254Config,
+	MixerVerifierBn254Config, ParachainStakingConfig, VAnchorBn254Config, VAnchorVerifierConfig,
+	UNIT,
 };
 
 /// Tangle rococo bootnodes
@@ -232,6 +234,16 @@ fn rococo_genesis(
 			authority_ids: invulnerables.iter().map(|x| x.0.clone()).collect::<_>(),
 		},
 		dkg_proposals: Default::default(),
+		bridge_registry: BridgeRegistryConfig {
+			bridges: bounded_vec![BridgeMetadata {
+				resource_ids: bounded_vec![RESOURCE_ID_HERMES_ATHENA, RESOURCE_ID_ATHENA_HERMES],
+				info: BridgeInfo {
+					additional: Default::default(),
+					display: SerdeData::from_str("hermes-athena").unwrap()
+				}
+			}],
+			..Default::default()
+		},
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
 			native_asset_name: b"TNT".to_vec().try_into().unwrap(),
