@@ -25,6 +25,7 @@ dkg-runtime-primitives = { workspace = true }
 pallet-dkg-metadata = { workspace = true }
 pallet-dkg-proposal-handler = { workspace = true }
 pallet-dkg-proposals = { workspace = true }
+pallet-bridge-registry = { workspace = true }
 
 # Protocol Substrate Dependencies
 pallet-asset-registry = { workspace = true }
@@ -184,6 +185,7 @@ std = [
   "dkg-runtime-primitives/std",
   "pallet-dkg-proposals/std",
   "pallet-dkg-proposal-handler/std",
+  "pallet-bridge-registry/std",
 
   # Protocol Substrate
   "webb-primitives/std",

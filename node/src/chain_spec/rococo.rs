@@ -11,14 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 use crate::chain_spec::*;
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
+
 use hex_literal::hex;
 use sc_network_common::config::MultiaddrWithPeerId;
 use sc_service::ChainType;
 use sp_core::{crypto::UncheckedInto, sr25519};
+
 use tangle_rococo_runtime::{
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
 	ImOnlineId, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
@@ -232,6 +233,7 @@ fn rococo_genesis(
 			authority_ids: invulnerables.iter().map(|x| x.0.clone()).collect::<_>(),
 		},
 		dkg_proposals: Default::default(),
+		bridge_registry: Default::default(),
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
 			native_asset_name: b"TNT".to_vec().try_into().unwrap(),

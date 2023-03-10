@@ -16,13 +16,16 @@ use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
 use arkworks_setups::{common::setup_params, Curve};
+use dkg_runtime_primitives::ResourceId;
 use hex_literal::hex;
+
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
+
 use tangle_runtime::{
 	AccountId, AssetRegistryConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
 	DKGProposalsConfig, ElectionsConfig, GenesisConfig, HasherBn254Config, ImOnlineConfig,
@@ -30,7 +33,6 @@ use tangle_runtime::{
 	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
 	VAnchorBn254Config, VAnchorVerifierConfig, UNIT, WASM_BINARY,
 };
-pub type ResourceId = [u8; 32];
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -119,28 +121,9 @@ pub fn development_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
 				// Initial Chain Ids
-				vec![
-					hex_literal::hex!("010000001389"), // Hermis (Evm, 5001)
-					hex_literal::hex!("01000000138a"), // Athena (Evm, 5002)
-					hex_literal::hex!("01000000138b"), // Demeter (Evm, 5003)
-				],
+				vec![],
 				// Initial resource Ids
-				vec![
-					// Resource ID for Chain Hermis => Athena
-					(
-						hex_literal::hex!(
-							"000000000000e69a847cd5bc0c9480ada0b339d7f0a8cac2b66701000000138a"
-						),
-						Default::default(),
-					),
-					// Resource ID for Chain Athena => Hermis
-					(
-						hex_literal::hex!(
-							"000000000000d30c8839c1145609e564b986f667b273ddcb8496100000001389"
-						),
-						Default::default(),
-					),
-				],
+				vec![],
 				// Initial proposers
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Dave"),
@@ -203,27 +186,9 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
 				// Initial Chain Ids
-				vec![
-					hex_literal::hex!("010000001389"), // Hermis (Evm, 5001)
-					hex_literal::hex!("01000000138a"), // Athena (Evm, 5002)
-				],
+				vec![],
 				// Initial resource Ids
-				vec![
-					// Resource ID for Chain Hermis => Athena
-					(
-						hex_literal::hex!(
-							"0000000000000000e69a847cd5bc0c9480ada0b339d7f0a8cac2b6670000138a"
-						),
-						Default::default(),
-					),
-					// Resource ID for Chain Athena => Hermis
-					(
-						hex_literal::hex!(
-							"0000000000000000d30c8839c1145609e564b986f667b273ddcb849600001389"
-						),
-						Default::default(),
-					),
-				],
+				vec![],
 				// Initial proposers
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Dave"),
@@ -337,6 +302,16 @@ pub fn standalone_testnet_config() -> Result<ChainSpec, String> {
 					hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
 					hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
 					hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
+					hex!["541dc9dd9cd9b47ff19c77c3b14fab50ab0774e19abe438719cd09e4f4861166"].into(),
+					hex!["607e948bad733780eda6c0bd9b084243276332823ca8481fc20cd01e1a2ef36f"].into(),
+					hex!["b2c09cb1b78c3afd2b1ea4316dfb1be9065e070db948477248e4f3e0f1a2d850"].into(),
+					hex!["fc156f082d789f94149f8b52b191672fbf202ef1b92b487c3cec9bca2d1fbe72"].into(),
+					hex!["0e87759b6eeb6891743900cba17b8b5f31b2fa9c28536d9bcf76468d6e455b23"].into(),
+					hex!["48cea44ac6dd245572272dc6d4d33908586fb80886bf3207344388eac279cc25"].into(),
+					hex!["fa2c711c82661a761cf200421b9a5ef3257aa977a3a33acad0722d7d6993f03b"].into(),
+					hex!["daf7985bfa22b5060a4eb212fbeddb7c47f7c29db5a356ed9500b34d2944eb3d"].into(),
+					hex!["4ec0389ae623884a68234fd84d85af833633668aa382007e6515020e8cc29532"].into(),
+					hex!["48bb70f924e7362ee55817a6628a79e522a08a31735b0129e47ac435215d6c4e"].into(),
 				],
 				vec![],
 				vec![],
@@ -522,11 +497,12 @@ fn testnet_genesis(
 		grandpa: Default::default(),
 		dkg: DKGConfig {
 			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
-			keygen_threshold: 3,
-			signature_threshold: 2,
+			keygen_threshold: 10,
+			signature_threshold: 4,
 			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
+		bridge_registry: Default::default(),
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
 			native_asset_name: b"WEBB".to_vec().try_into().unwrap(),

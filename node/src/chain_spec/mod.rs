@@ -11,10 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
+
 use hex_literal::hex;
+
 use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -26,6 +27,7 @@ use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	Perbill, Percent,
 };
+
 use tangle_rococo_runtime::{
 	nimbus_session_adapter::{NimbusId, VrfId},
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
@@ -419,11 +421,12 @@ fn testnet_genesis(
 		parachain_system: Default::default(),
 		dkg: tangle_rococo_runtime::DKGConfig {
 			authorities: invulnerables.iter().map(|x| x.2.clone()).collect::<_>(),
-			keygen_threshold: 6,
-			signature_threshold: 3,
+			keygen_threshold: 3,
+			signature_threshold: 2,
 			authority_ids: invulnerables.iter().map(|x| x.0.clone()).collect::<_>(),
 		},
 		dkg_proposals: Default::default(),
+		bridge_registry: Default::default(),
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
 			native_asset_name: b"WEBB".to_vec().try_into().unwrap(),

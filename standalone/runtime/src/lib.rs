@@ -24,7 +24,6 @@ pub mod protocol_substrate_config;
 pub mod voter_bags;
 
 use codec::{Decode, Encode};
-use dkg_runtime_primitives::{TypedChainId, UnsignedProposal};
 use frame_election_provider_support::{
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
@@ -67,6 +66,10 @@ pub use frame_system::Call as SystemCall;
 
 // A few exports that help ease life for downstream crates.
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
+use dkg_runtime_primitives::{
+	MaxAuthorities, MaxKeyLength, MaxProposalLength, MaxReporters, MaxSignatureLength,
+	TypedChainId, UnsignedProposal,
+};
 pub use frame_support::{
 	construct_runtime,
 	dispatch::DispatchClass,
@@ -148,7 +151,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-standalone"),
 	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
-	spec_version: 113, // v0.1.13
+	spec_version: 115, // v0.1.15
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -795,6 +798,10 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type UnsignedInterval = UnsignedInterval;
 	type AuthorityIdOf = pallet_dkg_metadata::AuthorityIdOf<Self>;
 	type ProposalHandler = DKGProposalHandler;
+	type MaxKeyLength = MaxKeyLength;
+	type MaxSignatureLength = MaxSignatureLength;
+	type MaxReporters = MaxReporters;
+	type MaxAuthorities = MaxAuthorities;
 	type WeightInfo = pallet_dkg_metadata::weights::WebbWeight<Runtime>;
 }
 
@@ -812,8 +819,20 @@ impl pallet_dkg_proposal_handler::Config for Runtime {
 	type OffChainAuthId = dkg_runtime_primitives::offchain::crypto::OffchainAuthId;
 	type MaxSubmissionsPerBatch = frame_support::traits::ConstU16<100>;
 	type UnsignedProposalExpiry = UnsignedProposalExpiry;
-	type SignedProposalHandler = ();
+	type SignedProposalHandler = BridgeRegistry;
+	type MaxProposalLength = MaxProposalLength;
 	type WeightInfo = pallet_dkg_proposal_handler::weights::WebbWeight<Runtime>;
+}
+
+parameter_types! {
+	#[derive(Clone, Encode, Decode, Debug, Eq, PartialEq, scale_info::TypeInfo, Ord, PartialOrd)]
+	pub const MaxVotes : u32 = 100;
+	#[derive(Clone, Encode, Decode, Debug, Eq, PartialEq, scale_info::TypeInfo, Ord, PartialOrd)]
+	pub const MaxResources : u32 = 1000;
+	#[derive(Clone, Encode, Decode, Debug, Eq, PartialEq, scale_info::TypeInfo, Ord, PartialOrd)]
+	pub const MaxAuthorityProposers : u32 = 100;
+	#[derive(Clone, Encode, Decode, Debug, Eq, PartialEq, scale_info::TypeInfo, Ord, PartialOrd)]
+	pub const MaxExternalProposerAccounts : u32 = 100;
 }
 
 impl pallet_dkg_proposals::Config for Runtime {
@@ -823,18 +842,32 @@ impl pallet_dkg_proposals::Config for Runtime {
 	type ChainIdentifier = ChainIdentifier;
 	type RuntimeEvent = RuntimeEvent;
 	type NextSessionRotation = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
-	type Proposal = Vec<u8>;
+	type Proposal = frame_support::BoundedVec<u8, MaxProposalLength>;
 	type ProposalLifetime = ProposalLifetime;
 	type ProposalHandler = DKGProposalHandler;
 	type Period = Period;
+	type MaxVotes = MaxVotes;
+	type MaxResources = MaxResources;
+	type MaxAuthorityProposers = MaxAuthorityProposers;
+	type MaxExternalProposerAccounts = MaxExternalProposerAccounts;
 	type WeightInfo = pallet_dkg_proposals::WebbWeight<Runtime>;
+}
+
+type BridgeRegistryInstance = pallet_bridge_registry::Instance1;
+impl pallet_bridge_registry::Config<BridgeRegistryInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type BridgeIndex = u32;
+	type MaxAdditionalFields = MaxAdditionalFields;
+	type MaxResources = MaxResources;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxProposalLength = MaxProposalLength;
+	type WeightInfo = ();
 }
 
 parameter_types! {
 	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 	/// We prioritize im-online heartbeats over election solution submission.
 	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::max_value() / 2;
-	pub const MaxAuthorities: u32 = 100;
 }
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
@@ -1137,6 +1170,7 @@ construct_runtime!(
 		DKG: pallet_dkg_metadata::{Pallet, Storage, Call, Event<T>, Config<T>, ValidateUnsigned},
 		DKGProposals: pallet_dkg_proposals,
 		DKGProposalHandler: pallet_dkg_proposal_handler,
+		BridgeRegistry: pallet_bridge_registry::<Instance1>,
 
 		Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
@@ -1246,8 +1280,8 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl dkg_runtime_primitives::DKGApi<Block, dkg_runtime_primitives::crypto::AuthorityId, BlockNumber> for Runtime {
-		fn authority_set() -> dkg_runtime_primitives::AuthoritySet<dkg_runtime_primitives::crypto::AuthorityId> {
+	impl dkg_runtime_primitives::DKGApi<Block, dkg_runtime_primitives::crypto::AuthorityId, BlockNumber, MaxProposalLength, MaxAuthorities> for Runtime {
+		fn authority_set() -> dkg_runtime_primitives::AuthoritySet<dkg_runtime_primitives::crypto::AuthorityId, MaxAuthorities> {
 			let authorities = DKG::authorities();
 			let authority_set_id = DKG::authority_set_id();
 
@@ -1257,7 +1291,7 @@ impl_runtime_apis! {
 			}
 		}
 
-		fn queued_authority_set() -> dkg_runtime_primitives::AuthoritySet<dkg_runtime_primitives::crypto::AuthorityId> {
+		fn queued_authority_set() -> dkg_runtime_primitives::AuthoritySet<dkg_runtime_primitives::crypto::AuthorityId, MaxAuthorities> {
 			let queued_authorities = DKG::next_authorities();
 			let queued_authority_set_id = DKG::authority_set_id() + 1u64;
 
@@ -1288,31 +1322,31 @@ impl_runtime_apis! {
 		}
 
 		fn next_dkg_pub_key() -> Option<(dkg_runtime_primitives::AuthoritySetId, Vec<u8>)> {
-			DKG::next_dkg_public_key()
-		}
+			DKG::next_dkg_public_key().map(|pub_key| (pub_key.0, pub_key.1.into()))
+		  }
 
-		fn next_pub_key_sig() -> Option<Vec<u8>> {
-			DKG::next_public_key_signature()
-		}
+		  fn next_pub_key_sig() -> Option<Vec<u8>> {
+			DKG::next_public_key_signature().map(|pub_key_sig| pub_key_sig.into())
+		  }
 
 		fn get_current_session_progress(block_number: BlockNumber) -> Option<Permill> {
 			use frame_support::traits::EstimateNextSessionRotation;
-			<pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime> as EstimateNextSessionRotation<BlockNumber>>::estimate_current_session_progress(block_number).0
+			<pallet_session::PeriodicSessions<Period, Offset> as EstimateNextSessionRotation<BlockNumber>>::estimate_current_session_progress(block_number).0
 		}
 
 		fn dkg_pub_key() -> (dkg_runtime_primitives::AuthoritySetId, Vec<u8>) {
-			DKG::dkg_public_key()
-		}
+			(DKG::dkg_public_key().0, DKG::dkg_public_key().1.into())
+		  }
 
-		fn get_best_authorities() -> Vec<(u16, DKGId)> {
-			DKG::best_authorities()
-		}
+		  fn get_best_authorities() -> Vec<(u16, DKGId)> {
+			DKG::best_authorities().into()
+		  }
 
-		fn get_next_best_authorities() -> Vec<(u16, DKGId)> {
-			DKG::next_best_authorities()
-		}
+		  fn get_next_best_authorities() -> Vec<(u16, DKGId)> {
+			DKG::next_best_authorities().into()
+		  }
 
-		fn get_unsigned_proposals() -> Vec<UnsignedProposal> {
+		fn get_unsigned_proposals() -> Vec<UnsignedProposal<MaxProposalLength>> {
 			DKGProposalHandler::get_unsigned_proposals()
 		}
 
@@ -1321,7 +1355,7 @@ impl_runtime_apis! {
 		}
 
 		fn get_authority_accounts() -> (Vec<AccountId>, Vec<AccountId>) {
-			(DKG::current_authorities_accounts(), DKG::next_authorities_accounts())
+			(DKG::current_authorities_accounts().into(), DKG::next_authorities_accounts().into())
 		}
 
 		fn get_reputations(authorities: Vec<DKGId>) -> Vec<(DKGId, Reputation)> {
@@ -1340,8 +1374,8 @@ impl_runtime_apis! {
 			DKG::refresh_nonce()
 		}
 
-		fn should_execute_emergency_keygen() -> bool {
-			DKG::should_execute_emergency_keygen()
+		fn should_execute_new_keygen() -> bool {
+			DKG::should_execute_new_keygen()
 		}
 	}
 
