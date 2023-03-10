@@ -109,68 +109,68 @@ pub fn get_testnet_initial_authorities(
 			// relayer address
 			// 0x6a682aa89827a4028c9f1c2612fb1caa63957a892c7b05659b4e4f46b669b10d
 		),
-		(
-			// AccountId
-			hex!["a80afbb2600998b2858e011a1a74e9aa92d8b8edc31ec54253c43d7eafef0675"].into(),
-			// AuraId
-			hex!["58ccb55e6bbb006b6c038e9c8a3ae44207557513b60cc23a9bbc7d4a43aee66a"]
-				.unchecked_into(),
-			// DKGId
-			hex!["027626be18e28dc3122755b3361d48dc7d934f069cef37fc57cc7d0e15d7bf4eaa"]
-				.unchecked_into(),
-			// NimbusId
-			hex!["1c026b74c3369aef561313f6f1468257e088685f98d870d7fb0fe5168653da42"]
-				.unchecked_into(),
-			// VrfId
-			hex!["1cde385be609e795347e7f7b5345bfa1e597fca219ef17e6eaf303b7d6912a63"]
-				.unchecked_into(),
-			// ImOnlineId
-			hex!["bcd6aa871b888808360bf51b84e7d90a0d0ef859a9a7a96576246d0f8f913607"]
-				.unchecked_into(),
-			// relayer address
-			// 0x6abe9075d17ca10075c1f8c11169009334f567e12047c80712fdc499cad8e026
-		),
-		(
-			// AccountId
-			hex!["3874c16c9855de4791f363d5779dab4cd8e71f21b62494288344002e3a031265"].into(),
-			// AuraId
-			hex!["406c44535d620b5c029f8cf4f5754e9108c56c325d985858311346ebbad8fe05"]
-				.unchecked_into(),
-			// DKGId
-			hex!["02607f79f4f15b54065d08b2b028708e8963bf95895d3efebea17c79d284e8b609"]
-				.unchecked_into(),
-			// NimbusId
-			hex!["84db76f3f4ed202c7091ae77d9947e29580c396ae70d72b240ee6ff0e56a355a"]
-				.unchecked_into(),
-			// VrfId
-			hex!["f2121bfd55136904893edffed25b68585a2754c5062c0d3a39db7963e66fa116"]
-				.unchecked_into(),
-			// ImOnlineId
-			hex!["6c767199b70a637613a0ae26ee2a5475d8b745218c0a00367f6d3c6a4939354d"]
-				.unchecked_into(),
-			// relayer address
-			// 0xd85cbc2e3242d5264a020cef8d577b4022e08fa3295423604d4cc2d12bfc906f
-		),
-		(
-			// AccountId
-			hex!["a665b4996fd4cdd949354473a5e044f2c1df3ce4dd650e3a85160cb44936743c"].into(),
-			// AuraId
-			hex!["2660ea6453e7c87c804b0faf53d4441e0ec179221c64d130235eddc52e12ad40"]
-				.unchecked_into(),
-			// DKGId
-			hex!["0316ac930798489a8a8cb2c362147e1712efb868b1fd59effa6c64c97dba185607"]
-				.unchecked_into(),
-			// NimbusId
-			hex!["402b26fa8f8de64ded9e0b82ea970552a28e97b4435090d25b001ad972d91f3c"]
-				.unchecked_into(),
-			// VrfId
-			hex!["94bd36b855d3e677f2181c4b254205a3643e628b9d9f4ef1a7f5b1af4b7c6c3e"]
-				.unchecked_into(),
-			// ImOnlineId
-			hex!["f88004944dca79f80058177581c96d152bdbff9f869450e84d020d8b211b5254"]
-				.unchecked_into(),
-			// relayer address
-			// 0xd85cbc2e3242d5264a020cef8d577b4022e08fa3295423604d4cc2d12bfc906f
-		),
+		// (
+		// 	// AccountId
+		// 	hex!["a80afbb2600998b2858e011a1a74e9aa92d8b8edc31ec54253c43d7eafef0675"].into(),
+		// 	// AuraId
+		// 	hex!["58ccb55e6bbb006b6c038e9c8a3ae44207557513b60cc23a9bbc7d4a43aee66a"]
+		// 		.unchecked_into(),
+		// 	// DKGId
+		// 	hex!["027626be18e28dc3122755b3361d48dc7d934f069cef37fc57cc7d0e15d7bf4eaa"]
+		// 		.unchecked_into(),
+		// 	// NimbusId
+		// 	hex!["1c026b74c3369aef561313f6f1468257e088685f98d870d7fb0fe5168653da42"]
+		// 		.unchecked_into(),
+		// 	// VrfId
+		// 	hex!["1cde385be609e795347e7f7b5345bfa1e597fca219ef17e6eaf303b7d6912a63"]
+		// 		.unchecked_into(),
+		// 	// ImOnlineId
+		// 	hex!["bcd6aa871b888808360bf51b84e7d90a0d0ef859a9a7a96576246d0f8f913607"]
+		// 		.unchecked_into(),
+		// 	// relayer address
+		// 	// 0x6abe9075d17ca10075c1f8c11169009334f567e12047c80712fdc499cad8e026
+		// ),
+		// (
+		// 	// AccountId
+		// 	hex!["3874c16c9855de4791f363d5779dab4cd8e71f21b62494288344002e3a031265"].into(),
+		// 	// AuraId
+		// 	hex!["406c44535d620b5c029f8cf4f5754e9108c56c325d985858311346ebbad8fe05"]
+		// 		.unchecked_into(),
+		// 	// DKGId
+		// 	hex!["02607f79f4f15b54065d08b2b028708e8963bf95895d3efebea17c79d284e8b609"]
+		// 		.unchecked_into(),
+		// 	// NimbusId
+		// 	hex!["84db76f3f4ed202c7091ae77d9947e29580c396ae70d72b240ee6ff0e56a355a"]
+		// 		.unchecked_into(),
+		// 	// VrfId
+		// 	hex!["f2121bfd55136904893edffed25b68585a2754c5062c0d3a39db7963e66fa116"]
+		// 		.unchecked_into(),
+		// 	// ImOnlineId
+		// 	hex!["6c767199b70a637613a0ae26ee2a5475d8b745218c0a00367f6d3c6a4939354d"]
+		// 		.unchecked_into(),
+		// 	// relayer address
+		// 	// 0xd85cbc2e3242d5264a020cef8d577b4022e08fa3295423604d4cc2d12bfc906f
+		// ),
+		// (
+		// 	// AccountId
+		// 	hex!["a665b4996fd4cdd949354473a5e044f2c1df3ce4dd650e3a85160cb44936743c"].into(),
+		// 	// AuraId
+		// 	hex!["2660ea6453e7c87c804b0faf53d4441e0ec179221c64d130235eddc52e12ad40"]
+		// 		.unchecked_into(),
+		// 	// DKGId
+		// 	hex!["0316ac930798489a8a8cb2c362147e1712efb868b1fd59effa6c64c97dba185607"]
+		// 		.unchecked_into(),
+		// 	// NimbusId
+		// 	hex!["402b26fa8f8de64ded9e0b82ea970552a28e97b4435090d25b001ad972d91f3c"]
+		// 		.unchecked_into(),
+		// 	// VrfId
+		// 	hex!["94bd36b855d3e677f2181c4b254205a3643e628b9d9f4ef1a7f5b1af4b7c6c3e"]
+		// 		.unchecked_into(),
+		// 	// ImOnlineId
+		// 	hex!["f88004944dca79f80058177581c96d152bdbff9f869450e84d020d8b211b5254"]
+		// 		.unchecked_into(),
+		// 	// relayer address
+		// 	// 0xd85cbc2e3242d5264a020cef8d577b4022e08fa3295423604d4cc2d12bfc906f
+		// ),
 	]
 }
