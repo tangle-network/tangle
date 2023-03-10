@@ -6135,7 +6135,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "0.1.13"
+version = "0.1.15"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6549,7 +6549,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-parachain-staking"
-version = "0.1.13"
+version = "0.1.15"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6883,7 +6883,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.1.13"
+version = "0.1.15"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -12263,7 +12263,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-parachain"
-version = "0.1.13"
+version = "0.1.15"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -12335,7 +12335,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.1.13"
+version = "0.1.15"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -12346,7 +12346,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-rococo-runtime"
-version = "0.1.13"
+version = "0.1.15"
 dependencies = [
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
@@ -12441,7 +12441,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "0.1.13"
+version = "0.1.15"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -12499,7 +12499,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone-runtime"
-version = "0.1.13"
+version = "0.1.15"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",

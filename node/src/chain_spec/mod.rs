@@ -13,14 +13,13 @@
 // limitations under the License.
 use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
-use dkg_primitives::ResourceId;
+
 use hex_literal::hex;
-use pallet_bridge_registry::types::{BridgeInfo, BridgeMetadata, SerdeData};
+
 use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{
-	bounded_vec,
 	crypto::{UncheckedFrom, UncheckedInto},
 	sr25519, ByteArray, Pair, Public,
 };
@@ -28,7 +27,7 @@ use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	Perbill, Percent,
 };
-use std::str::FromStr;
+
 use tangle_rococo_runtime::{
 	nimbus_session_adapter::{NimbusId, VrfId},
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
@@ -38,18 +37,6 @@ use tangle_rococo_runtime::{
 
 pub mod minerva_testnet_fixtures;
 pub mod rococo;
-
-/// Hermes (Evm, 5001)
-const CHAIN_ID_HERMES: [u8; 6] = hex_literal::hex!("010000001389");
-/// Athena (Evm, 5002)
-const CHAIN_ID_ATHENA: [u8; 6] = hex_literal::hex!("01000000138a");
-
-const RESOURCE_ID_HERMES_ATHENA: ResourceId = ResourceId(hex_literal::hex!(
-	"0000000000000000e69a847cd5bc0c9480ada0b339d7f0a8cac2b6670000138a"
-));
-const RESOURCE_ID_ATHENA_HERMES: ResourceId = ResourceId(hex_literal::hex!(
-	"000000000000d30c8839c1145609e564b986f667b273ddcb8496010000001389"
-));
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<tangle_rococo_runtime::GenesisConfig, Extensions>;
@@ -439,16 +426,7 @@ fn testnet_genesis(
 			authority_ids: invulnerables.iter().map(|x| x.0.clone()).collect::<_>(),
 		},
 		dkg_proposals: Default::default(),
-		bridge_registry: tangle_rococo_runtime::BridgeRegistryConfig {
-			bridges: bounded_vec![BridgeMetadata {
-				resource_ids: bounded_vec![RESOURCE_ID_HERMES_ATHENA, RESOURCE_ID_ATHENA_HERMES],
-				info: BridgeInfo {
-					additional: Default::default(),
-					display: SerdeData::from_str("hermes-athena").unwrap()
-				}
-			}],
-			..Default::default()
-		},
+		bridge_registry: Default::default(),
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
 			native_asset_name: b"WEBB".to_vec().try_into().unwrap(),
