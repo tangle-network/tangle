@@ -212,8 +212,8 @@ tangle-rococo-runtime = { path = "runtime/rococo" }
 pallet-parachain-staking = { path = 'pallets/parachain-staking', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features=false, branch = "update-webb-proposals" }
-finality-update-verify = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features=false, branch = "update-webb-proposals"  }
+pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features=false, tag = "v0.1.1" }
+finality-update-verify = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features=false, tag = "v0.1.1"  }
 
 [profile.release]
 panic = "unwind"
