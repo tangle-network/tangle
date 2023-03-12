@@ -21,6 +21,9 @@ genesis-wasm-local
 para/
 template-local-raw.json
 
+# Chainspec fixtures
+chainspecs/standalone-local.json
+
 # NodeJS
 **/node_modules/
 resources/para-2076-genesis
