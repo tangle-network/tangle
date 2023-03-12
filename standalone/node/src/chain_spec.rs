@@ -18,9 +18,8 @@ use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
 use arkworks_setups::{common::setup_params, Curve};
-use dkg_primitives::TypedChainId;
+use dkg_runtime_primitives::{ResourceId, TypedChainId};
 use finality_update_verify::network_config::{Network, NetworkConfig};
-use dkg_runtime_primitives::ResourceId;
 use hex_literal::hex;
 
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
