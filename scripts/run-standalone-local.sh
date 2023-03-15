@@ -50,7 +50,7 @@ echo "** Generating Standalone local chainspec"
 echo "** Inserting keys **"
 ./scripts/insert_keys.sh
 
-echo "*** Start Webb DKG Standalone | Standalone Local Config ***"
+echo "*** Start Tangle Standalone | Standalone Local Config ***"
 # Node 1
 ./target/release/tangle-standalone --base-path=./tmp/standalone1 -lerror --chain ./chainspecs/standalone-local.json --validator \
   --rpc-cors all --unsafe-rpc-external --unsafe-ws-external \
