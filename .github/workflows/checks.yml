@@ -132,7 +132,7 @@ jobs:
         run: sudo apt-get install protobuf-compiler
 
       - name: Build
-        run: cargo build --release -p tangle-standalone
+        run: cargo build --release -p tangle-standalone --features integration-tests
 
       - name: DKG Liveness
         run: sh ./scripts/ci-dkg-test.sh

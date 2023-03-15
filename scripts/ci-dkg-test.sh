@@ -9,6 +9,9 @@ echo "** Starting standalone network **"
 sleep 10
 
 echo "** Starting test suite **"
+
 cd dkg-liveness-test
 npm install
 node index.js
+
+echo "** Liveness testing completed **"

@@ -28,11 +28,15 @@ async function main() {
     api.query.dkg.jailedSigningAuthorities.entries(),
   ]);
 
-  assert(current_block > 0);
-  console.log("Network produces blocks : ", current_block);
+  if (current_block > 0) {
+    console.log("Network produces blocks : ", current_block);
+    if (lastSessionRotationBlock > 0) {
+      console.log("DKG has rotated : ", lastSessionRotationBlock);
+      process.exit(0);
+    }
+  }
 
-  assert(lastSessionRotationBlock > 0);
-  console.log("Last session rotation block : ", lastSessionRotationBlock);
+  process.exit(1);
 }
 
 main().catch(console.error);

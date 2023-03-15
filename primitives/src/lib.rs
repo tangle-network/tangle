@@ -110,6 +110,10 @@ pub mod fee {
 
 /// The number of blocks in one session
 #[allow(clippy::identity_op)]
+#[cfg(feature = "integration-tests")]
+pub const SESSION_PERIOD_BLOCKS: BlockNumber = 2 * crate::time::MINUTES;
+
+#[cfg(not(feature = "integration-tests"))]
 pub const SESSION_PERIOD_BLOCKS: BlockNumber = 6 * crate::time::HOURS;
 
 /// We assume that ~5% of the block weight is consumed by `on_initialize` handlers. This is

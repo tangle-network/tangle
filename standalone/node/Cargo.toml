@@ -93,3 +93,4 @@ arkworks-setups = { workspace = true }
 [features]
 default = []
 runtime-benchmarks = ["tangle-runtime/runtime-benchmarks"]
+integration-tests = ["tangle-runtime/integration-tests"]
