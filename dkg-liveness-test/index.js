@@ -32,6 +32,10 @@ async function main() {
     console.log("Network produces blocks : ", current_block);
     if (lastSessionRotationBlock > 0) {
       console.log("DKG has rotated : ", lastSessionRotationBlock);
+      // ensure all params are normal
+      assert(jailedKeygenAuthorities.entries().length == 0);
+      assert(jailedSigningAuthorities.entries().length == 0);
+      assert(current_session != 0);
       process.exit(0);
     }
   }
