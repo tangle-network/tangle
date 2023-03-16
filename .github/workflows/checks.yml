@@ -135,4 +135,4 @@ jobs:
         run: cargo build --release -p tangle-standalone --features integration-tests
 
       - name: DKG Liveness
-        run: sh ./scripts/ci-dkg-test.sh
+        run: bash ./scripts/ci-dkg-test.sh
