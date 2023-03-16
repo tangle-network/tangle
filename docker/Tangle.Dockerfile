@@ -36,7 +36,7 @@ COPY rust-toolchain.toml .
 ARG BINARY
 COPY . .
 # Build application
-RUN cargo build --release -p ${BINARY}
+RUN cargo build --release -p ${BINARY} -Z sparse-registry
 
 # This is the 2nd stage: a very small image where we copy the tangle binary."
 FROM ubuntu:20.04
