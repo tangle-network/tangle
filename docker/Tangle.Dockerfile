@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y git \
 COPY --from=planner /tangle/recipe.json recipe.json
 COPY rust-toolchain.toml .
 # Build dependencies - this is the caching Docker layer!
-RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json -Z sparse-registry
 ARG BINARY
 COPY . .
 # Build application

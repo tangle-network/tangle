@@ -1,6 +1,4 @@
 #!/bin/sh
-
-#!/usr/bin/env bash
 set -e
 
 CLEAN=${CLEAN:-false}
@@ -9,12 +7,12 @@ CLEAN=${CLEAN:-false}
 wstangleports=(9944 9945 9946 9947 9948)
 
 # check to see process is not orphaned or already running
-for port in ${wstangleports[@]}; do
-    if [[ $(lsof -i -P -n | grep LISTEN | grep :$port) ]]; then
-      echo "Port $port has a running process. Exiting"
-      exit -1
-    fi
-done
+# for port in ${wstangleports[@]}; do
+#     if [[ $(lsof -i -P -n | grep LISTEN | grep :$port) ]]; then
+#       echo "Port $port has a running process. Exiting"
+#       exit -1
+#     fi
+# done
 
 # Parse arguments for the script
 
