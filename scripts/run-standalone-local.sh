@@ -29,7 +29,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-pushd .
+# pushd .
 
 # Check if we should clean the tmp directory
 if [ "$CLEAN" = true ]; then
@@ -82,4 +82,4 @@ echo "*** Start Tangle Standalone | Standalone Local Config ***"
     -lruntime::offchain=debug \
     -ldkg_proposal_handler=debug \
     -lruntime::im-online=debug
-popd
+# popd
