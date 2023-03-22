@@ -60,5 +60,4 @@ echo "** Liveness testing completed **"
 trap "exit" INT TERM
 trap "kill 0" EXIT
 
-sleep 20
 exit 0
