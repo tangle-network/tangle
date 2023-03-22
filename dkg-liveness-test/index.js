@@ -40,6 +40,7 @@ async function main() {
         assert(current_session != 0);
         process.exit(0);
       }
+      process.exit(0);
     }
   } catch (err) {
     console.log("exiting due to error : ", err);

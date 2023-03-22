@@ -43,15 +43,7 @@ echo "*** Start Tangle Standalone | Standalone Local Config ***"
 ./target/release/tangle-standalone --base-path=./tmp/standalone5 -linfo --validator --chain ./chainspecs/standalone-local.json \
     --rpc-cors all --unsafe-rpc-external --unsafe-ws-external \
     --ws-port 9948 \
-    --port 30308 \
-    -ldkg=debug \
-    -ldkg_gadget::worker=debug \
-    -lruntime::dkg_metadata=debug \
-    -ldkg_metadata=debug \
-    -lruntime::dkg_proposal_handler=debug \
-    -lruntime::offchain=debug \
-    -ldkg_proposal_handler=debug \
-    -lruntime::im-online=debug &
+    --port 30308 &
 
 # wait for sometime for the network to be ready
 echo "** Waiting for testnet to start producing blocks **"
@@ -64,4 +56,6 @@ npm install
 node index.js
 
 echo "** Liveness testing completed **"
-done
+
+trap "exit" INT TERM
+trap "kill 0" EXIT
