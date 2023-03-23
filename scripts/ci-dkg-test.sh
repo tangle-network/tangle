@@ -57,7 +57,6 @@ node index.js
 
 echo "** Liveness testing completed **"
 
-trap "exit" INT TERM
-trap "kill 0" EXIT
+trap 'trap - SIGTERM && kill 0' SIGINT SIGTERM EXIT
 
 exit 0
