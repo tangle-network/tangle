@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set +e
 
 # launch the standalone network
 echo "** Starting standalone network **"
@@ -53,7 +53,8 @@ echo "** Starting test suite **"
 
 cd dkg-liveness-test
 npm install
-node index.js
+
+if ! node index.js ; then exit 1 ; fi
 
 echo "** Liveness testing completed **"
 
