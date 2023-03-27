@@ -1,42 +1,12 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set +e
 
-CLEAN=${CLEAN:-false}
+# launch the standalone network
+echo "** Starting standalone network **"
 
-define default ports
-wstangleports=(9944 9945 9946 9947 9948)
-
-check to see process is not orphaned or already running
-for port in ${wstangleports[@]}; do
-    if [[ $(lsof -i -P -n | grep LISTEN | grep :$port) ]]; then
-      echo "Port $port has a running process. Exiting"
-      exit -1
-    fi
-done
-
-# Parse arguments for the script
-
-while [[ $# -gt 0 ]]; do
-    key="$1"
-    case $key in
-        -c|--clean)
-            CLEAN=true
-            shift # past argument
-            ;;
-        *)    # unknown option
-            shift # past argument
-            ;;
-    esac
-done
-
-# pushd .
-
-# Check if we should clean the tmp directory
-if [ "$CLEAN" = true ]; then
-  echo "Cleaning tmp directory"
-  rm -rf ./tmp
-  rm -rf ./chainspecs/standalone-local.json
-fi
+echo "Cleaning tmp directory"
+rm -rf ./tmp
+rm -rf ./chainspecs/standalone-local.json
 
 # The following line ensure we run from the project root
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
@@ -53,33 +23,41 @@ echo "*** Start Tangle Standalone | Standalone Local Config ***"
 ./target/release/tangle-standalone --base-path=./tmp/standalone1 -lerror --chain ./chainspecs/standalone-local.json --validator \
   --rpc-cors all --unsafe-rpc-external --unsafe-ws-external \
   --port 30304 \
-  --ws-port ${wstangleports[0]} &
+  --ws-port 9944  > ~/1.log 2>&1 &
 # Node 2
 ./target/release/tangle-standalone --base-path=./tmp/standalone2 -lerror --chain ./chainspecs/standalone-local.json --validator \
   --rpc-cors all --unsafe-rpc-external --unsafe-ws-external \
   --port 30305 \
-  --ws-port ${wstangleports[1]} &
+  --ws-port 9945  > ~/2.log 2>&1 &
 # Node 3
 ./target/release/tangle-standalone --base-path=./tmp/standalone3 -lerror --chain ./chainspecs/standalone-local.json --validator \
   --rpc-cors all --unsafe-rpc-external --unsafe-ws-external \
   --port 30306 \
-  --ws-port ${wstangleports[2]} &
+  --ws-port 9946  > ~/3.log 2>&1 &
 # Node 4
 ./target/release/tangle-standalone --base-path=./tmp/standalone4 -lerror --chain ./chainspecs/standalone-local.json --validator \
   --rpc-cors all --unsafe-rpc-external --unsafe-ws-external \
   --port 30307 \
-  --ws-port ${wstangleports[3]} &
+  --ws-port 9947 > ~/4.log 2>&1 &
 # Node 5
 ./target/release/tangle-standalone --base-path=./tmp/standalone5 -linfo --validator --chain ./chainspecs/standalone-local.json \
     --rpc-cors all --unsafe-rpc-external --unsafe-ws-external \
-    --ws-port ${wstangleports[4]} \
-    --port 30308 \
-    -ldkg=debug \
-    -ldkg_gadget::worker=debug \
-    -lruntime::dkg_metadata=debug \
-    -ldkg_metadata=debug \
-    -lruntime::dkg_proposal_handler=debug \
-    -lruntime::offchain=debug \
-    -ldkg_proposal_handler=debug \
-    -lruntime::im-online=debug
-popd
+    --ws-port 9948 \
+    --port 30308 > ~/5.log 2>&1 &
+
+# wait for sometime for the network to be ready
+echo "** Waiting for testnet to start producing blocks **"
+sleep 120
+
+echo "** Starting test suite **"
+
+cd dkg-liveness-test
+npm install
+
+if ! node index.js ; then exit 1 ; fi
+
+echo "** Liveness testing completed **"
+
+# trap 'trap - SIGTERM && kill 0' SIGINT SIGTERM EXIT
+
+exit 0

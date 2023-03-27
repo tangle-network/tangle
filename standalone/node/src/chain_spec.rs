@@ -444,7 +444,6 @@ fn testnet_genesis(
 			let nominations = initial_authorities
 				.as_slice()
 				.choose_multiple(&mut rng, count)
-				.into_iter()
 				.map(|choice| choice.0.clone())
 				.collect::<Vec<_>>();
 			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
@@ -517,8 +516,8 @@ fn testnet_genesis(
 		grandpa: Default::default(),
 		dkg: DKGConfig {
 			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
-			keygen_threshold: 10,
-			signature_threshold: 4,
+			keygen_threshold: 5,
+			signature_threshold: 3,
 			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },

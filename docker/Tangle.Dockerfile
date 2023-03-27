@@ -32,11 +32,11 @@ RUN apt-get update && apt-get install -y git \
 COPY --from=planner /tangle/recipe.json recipe.json
 COPY rust-toolchain.toml .
 # Build dependencies - this is the caching Docker layer!
-RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo chef cook -Z sparse-registry --release --recipe-path recipe.json
 ARG BINARY
 COPY . .
 # Build application
-RUN cargo build --release -p ${BINARY}
+RUN cargo build -Z sparse-registry --release -p ${BINARY}
 
 # This is the 2nd stage: a very small image where we copy the tangle binary."
 FROM ubuntu:20.04
