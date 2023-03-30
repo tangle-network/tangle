@@ -3,10 +3,10 @@ set -e
 
 CLEAN=${CLEAN:-false}
 
-define default ports
+#define default ports
 wstangleports=(9944 9945 9946 9947 9948)
 
-check to see process is not orphaned or already running
+#check to see process is not orphaned or already running
 for port in ${wstangleports[@]}; do
     if [[ $(lsof -i -P -n | grep LISTEN | grep :$port) ]]; then
       echo "Port $port has a running process. Exiting"
