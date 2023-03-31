@@ -36,35 +36,35 @@ libsecp256k1 = { version = "0.7.0", default-features = false }
 rustc-hex = { version = "2.1.0", default-features = false }
 
 # DKG Substrate Dependencies
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.39", default-features = false }
-pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.39", default-features = false }
-pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.39", default-features = false }
-pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.39", default-features = false }
-pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.39", default-features = false }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.39" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "polkadot-v0.9.39" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.16", default-features = false }
+pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.16", default-features = false }
+pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.16", default-features = false }
+pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.16", default-features = false }
+pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.16", default-features = false }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.16" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.16" }
 tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
 
 # Protocol Substrate Dependencies
-pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
+pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
 pallet-ecdsa-claims = { path = "pallets/claims", default-features = false }
-pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-key-storage = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-token-wrapper-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-vanchor = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-vanchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-vanchor-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39" }
-webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, branch = "polkadot-v0.9.39", features = ["hashing", "verifying"] }
-pallet-linkable-tree-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, branch = "polkadot-v0.9.39" }
-pallet-mt-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, branch = "polkadot-v0.9.39" }
+pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-key-storage = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-token-wrapper-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-vanchor = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-vanchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-vanchor-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4", features = ["hashing", "verifying"] }
+pallet-linkable-tree-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, tag = "v0.1.4" }
+pallet-mt-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, tag = "v0.1.4" }
 substrate-fixed = { git = "https://github.com/encointer/substrate-fixed", default-features = false }
 
 # Orml dependencies

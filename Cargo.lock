@@ -2744,7 +2744,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.39#1916a0aadd28c434d280d57b1a13a98a50be3faf"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.16#99a0264d892f9a2fb8489e5ecd12437f97608e75"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2783,13 +2783,13 @@ dependencies = [
  "thiserror",
  "tokio",
  "tokio-stream",
- "webb-proposals",
+ "webb-proposals 0.5.21 (git+https://github.com/webb-tools/webb-rs?branch=polkadot-v0.9.39)",
 ]
 
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.39#1916a0aadd28c434d280d57b1a13a98a50be3faf"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.16#99a0264d892f9a2fb8489e5ecd12437f97608e75"
 dependencies = [
  "tracing",
  "tracing-subscriber 0.3.16",
@@ -2798,7 +2798,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.39#1916a0aadd28c434d280d57b1a13a98a50be3faf"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.16#99a0264d892f9a2fb8489e5ecd12437f97608e75"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2822,7 +2822,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.39#1916a0aadd28c434d280d57b1a13a98a50be3faf"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.16#99a0264d892f9a2fb8489e5ecd12437f97608e75"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -2838,7 +2838,7 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "tiny-keccak",
- "webb-proposals",
+ "webb-proposals 0.5.21 (git+https://github.com/webb-tools/webb-rs?branch=polkadot-v0.9.39)",
 ]
 
 [[package]]
@@ -6368,7 +6368,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-registry"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6589,7 +6589,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.39#1916a0aadd28c434d280d57b1a13a98a50be3faf"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.16#99a0264d892f9a2fb8489e5ecd12437f97608e75"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6600,7 +6600,7 @@ dependencies = [
  "serde",
  "sp-runtime",
  "sp-std",
- "webb-proposals",
+ "webb-proposals 0.5.21 (git+https://github.com/webb-tools/webb-rs?branch=polkadot-v0.9.39)",
 ]
 
 [[package]]
@@ -6660,7 +6660,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.39#1916a0aadd28c434d280d57b1a13a98a50be3faf"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.16#99a0264d892f9a2fb8489e5ecd12437f97608e75"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6680,7 +6680,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.39#1916a0aadd28c434d280d57b1a13a98a50be3faf"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.16#99a0264d892f9a2fb8489e5ecd12437f97608e75"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6694,13 +6694,13 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-proposals",
+ "webb-proposals 0.5.21 (git+https://github.com/webb-tools/webb-rs?branch=polkadot-v0.9.39)",
 ]
 
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=polkadot-v0.9.39#1916a0aadd28c434d280d57b1a13a98a50be3faf"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.16#99a0264d892f9a2fb8489e5ecd12437f97608e75"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6820,7 +6820,7 @@ dependencies = [
  "tiny-keccak",
  "tree_hash",
  "tree_hash_derive",
- "webb-proposals",
+ "webb-proposals 0.5.21 (git+https://github.com/webb-tools/webb-rs?branch=polkadot-v0.9.39)",
 ]
 
 [[package]]
@@ -6867,7 +6867,7 @@ dependencies = [
 [[package]]
 name = "pallet-hasher"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6949,7 +6949,7 @@ dependencies = [
 [[package]]
 name = "pallet-key-storage"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6964,7 +6964,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6982,7 +6982,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "jsonrpsee",
  "pallet-linkable-tree",
@@ -7000,7 +7000,7 @@ dependencies = [
 [[package]]
 name = "pallet-linkable-tree-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "pallet-linkable-tree",
  "parity-scale-codec",
@@ -7029,7 +7029,7 @@ dependencies = [
 [[package]]
 name = "pallet-mixer"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7064,7 +7064,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -7082,7 +7082,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "jsonrpsee",
  "pallet-mt-rpc-runtime-api",
@@ -7099,7 +7099,7 @@ dependencies = [
 [[package]]
 name = "pallet-mt-rpc-runtime-api"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "sp-api",
  "webb-primitives",
@@ -7293,7 +7293,7 @@ dependencies = [
 [[package]]
 name = "pallet-signature-bridge"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7445,7 +7445,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7462,7 +7462,7 @@ dependencies = [
 [[package]]
 name = "pallet-token-wrapper-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7574,7 +7574,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "ark-bn254",
  "ark-ff",
@@ -7598,7 +7598,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-handler"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7621,7 +7621,7 @@ dependencies = [
 [[package]]
 name = "pallet-vanchor-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7636,7 +7636,7 @@ dependencies = [
 [[package]]
 name = "pallet-verifier"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -14582,7 +14582,7 @@ dependencies = [
 [[package]]
 name = "webb-primitives"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?branch=polkadot-v0.9.39#57b7711ae28861c8a48c2c63dfd7a59433f4eba8"
+source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
  "ark-bls12-381",
  "ark-bn254",
@@ -14608,13 +14608,29 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-proposals",
+ "webb-proposals 0.5.21 (git+https://github.com/webb-tools/webb-rs)",
 ]
 
 [[package]]
 name = "webb-proposals"
 version = "0.5.21"
 source = "git+https://github.com/webb-tools/webb-rs?branch=polkadot-v0.9.39#46f15e781fc9a175d874dcc846277c0fe42cbf82"
+dependencies = [
+ "frame-support",
+ "hex",
+ "num-traits",
+ "parity-scale-codec",
+ "scale-info",
+ "schemars",
+ "serde",
+ "tiny-keccak",
+ "typed-builder",
+]
+
+[[package]]
+name = "webb-proposals"
+version = "0.5.21"
+source = "git+https://github.com/webb-tools/webb-rs#1ed2db6eaf930f94774af0293ac751707af825b0"
 dependencies = [
  "frame-support",
  "hex",
