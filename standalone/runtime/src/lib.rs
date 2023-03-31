@@ -382,6 +382,7 @@ parameter_types! {
 
 impl pallet_grandpa::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type MaxSetIdSessionEntries = frame_support::traits::ConstU64<0>;
 	type HandleEquivocation = pallet_grandpa::EquivocationHandler<
 		Self::KeyOwnerIdentification,
 		Offences,
@@ -404,9 +405,7 @@ parameter_types! {
 
 impl pallet_authorship::Config for Runtime {
 	type EventHandler = Staking;
-	type FilterUncle = ();
 	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
-	type UncleGenerations = UncleGenerations;
 }
 
 parameter_types! {
@@ -464,6 +463,7 @@ impl pallet_staking::Config for Runtime {
 	type MaxNominations = MaxNominations;
 	type Currency = Balances;
 	type CurrencyBalance = Balance;
+	type AdminOrigin = EnsureRoot<AccountId>;
 	type UnixTime = Timestamp;
 	type CurrencyToVote = U128CurrencyToVote;
 	type RewardRemainder = Treasury;
@@ -473,11 +473,6 @@ impl pallet_staking::Config for Runtime {
 	type SessionsPerEra = SessionsPerEra;
 	type BondingDuration = BondingDuration;
 	type SlashDeferDuration = SlashDeferDuration;
-	/// A super-majority of the council can cancel the slash.
-	type SlashCancelOrigin = EitherOfDiverse<
-		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 4>,
-	>;
 	type SessionInterface = Self;
 	type TargetList = pallet_staking::UseValidatorsMap<Runtime>;
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
@@ -512,6 +507,7 @@ type EnsureRootOrHalfCouncil = EitherOfDiverse<
 impl pallet_democracy::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
+	type SubmitOrigin = frame_system::EnsureSigned<AccountId>;
 	type EnactmentPeriod = EnactmentPeriod;
 	type LaunchPeriod = LaunchPeriod;
 	type VotingPeriod = VotingPeriod;
@@ -573,6 +569,7 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type MotionDuration = CouncilMotionDuration;
 	type MaxProposals = CouncilMaxProposals;
+	type SetMembersOrigin = EnsureRoot<AccountId>;
 	type MaxMembers = CouncilMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
@@ -794,6 +791,7 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type SigningJailSentence = Period;
 	type DecayPercentage = DecayPercentage;
 	type Reputation = Reputation;
+	type ForceOrigin = EnsureRoot<AccountId>;
 	type UnsignedPriority = UnsignedPriority;
 	type SessionPeriod = SessionPeriod;
 	type UnsignedInterval = UnsignedInterval;
@@ -817,6 +815,7 @@ parameter_types! {
 
 impl pallet_dkg_proposal_handler::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type ForceOrigin = EnsureRoot<AccountId>;
 	type OffChainAuthId = dkg_runtime_primitives::offchain::crypto::OffchainAuthId;
 	type MaxSubmissionsPerBatch = frame_support::traits::ConstU16<100>;
 	type UnsignedProposalExpiry = UnsignedProposalExpiry;
@@ -989,6 +988,7 @@ impl pallet_elections_phragmen::Config for Runtime {
 	type DesiredMembers = DesiredMembers;
 	type DesiredRunnersUp = DesiredRunnersUp;
 	type RuntimeEvent = RuntimeEvent;
+	type MaxVotesPerVoter = ConstU32<100>;
 	// NOTE: this implies that council's genesis members cannot be set directly and
 	// must come from this module.
 	type InitializeMembers = Council;
@@ -1163,7 +1163,7 @@ construct_runtime!(
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage, Event<T>},
 
-		Authorship: pallet_authorship::{Pallet, Call, Storage},
+		Authorship: pallet_authorship::{Pallet, Storage},
 		Aura: pallet_aura::{Pallet, Storage, Config<T>},
 		Grandpa: pallet_grandpa::{Pallet, Call, Storage, Config, Event, ValidateUnsigned},
 
@@ -1433,6 +1433,12 @@ impl_runtime_apis! {
 		}
 		fn query_fee_details(uxt: <Block as BlockT>::Extrinsic, len: u32) -> FeeDetails<Balance> {
 			TransactionPayment::query_fee_details(uxt, len)
+		}
+		fn query_weight_to_fee(weight: Weight) -> Balance {
+			TransactionPayment::weight_to_fee(weight)
+		}
+		fn query_length_to_fee(length: u32) -> Balance {
+			TransactionPayment::length_to_fee(length)
 		}
 	}
 

@@ -354,9 +354,7 @@ parameter_types! {
 
 impl pallet_authorship::Config for Runtime {
 	type EventHandler = ();
-	type FilterUncle = ();
 	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
-	type UncleGenerations = UncleGenerations;
 }
 
 parameter_types! {
@@ -411,6 +409,7 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type SigningJailSentence = Period;
 	type SessionPeriod = SessionPeriod;
 	type DecayPercentage = DecayPercentage;
+	type ForceOrigin = EnsureRoot<AccountId>;
 	type Reputation = Reputation;
 	type UnsignedPriority = UnsignedPriority;
 	type UnsignedInterval = UnsignedInterval;
@@ -434,6 +433,7 @@ parameter_types! {
 
 impl pallet_dkg_proposal_handler::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type ForceOrigin = EnsureRoot<AccountId>;
 	type OffChainAuthId = dkg_runtime_primitives::offchain::crypto::OffchainAuthId;
 	type MaxSubmissionsPerBatch = frame_support::traits::ConstU16<100>;
 	type UnsignedProposalExpiry = UnsignedProposalExpiry;
@@ -599,6 +599,7 @@ parameter_types! {
 
 impl pallet_democracy::Config for Runtime {
 	type BlacklistOrigin = EnsureRoot<AccountId>;
+	type SubmitOrigin = frame_system::EnsureSigned<AccountId>;
 	// To cancel a proposal before it has been passed, the technical committee must
 	// be unanimous or Root must agree.
 	type CancelProposalOrigin = EitherOfDiverse<
@@ -663,6 +664,7 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type RuntimeEvent = RuntimeEvent;
 	type MaxMembers = CouncilMaxMembers;
+	type SetMembersOrigin = EnsureRoot<AccountId>;
 	type MaxProposals = CouncilMaxProposals;
 	type MotionDuration = CouncilMotionDuration;
 	type RuntimeOrigin = RuntimeOrigin;
@@ -858,7 +860,7 @@ construct_runtime!(
 		AuthorInherent: pallet_author_inherent::{Pallet, Call, Storage, Inherent} = 28,
 		AuraAuthorFilter: pallet_aura_style_filter::{Pallet, Storage} = 29,
 		// Collator support. the order of these 4 are important and shall not change.
-		Authorship: pallet_authorship::{Pallet, Call, Storage} = 30,
+		Authorship: pallet_authorship::{Pallet, Storage} = 30,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 32,
 		Aura: pallet_aura::{Pallet, Storage, Config<T>} = 33,
 		//AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config} = 34,
@@ -1109,6 +1111,12 @@ impl_runtime_apis! {
 			len: u32,
 		) -> pallet_transaction_payment::FeeDetails<Balance> {
 			TransactionPayment::query_fee_details(uxt, len)
+		}
+		fn query_weight_to_fee(weight: Weight) -> Balance {
+			TransactionPayment::weight_to_fee(weight)
+		}
+		fn query_length_to_fee(length: u32) -> Balance {
+			TransactionPayment::length_to_fee(length)
 		}
 	}
 
