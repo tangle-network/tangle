@@ -26,7 +26,7 @@ use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_api::ProvideRuntimeApi;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sp_core::Pair;
-use sp_runtime::{generic, generic::Era, SaturatedConversion};
+use sp_runtime::{generic::Era, SaturatedConversion};
 use std::{sync::Arc, time::Duration};
 use substrate_frame_rpc_system::AccountNonceApi;
 use tangle_runtime::{self, opaque::Block, RuntimeApi};
@@ -35,7 +35,7 @@ pub fn fetch_nonce(client: &FullClient, account: sp_core::sr25519::Pair) -> u32 
 	let best_hash = client.chain_info().best_hash;
 	client
 		.runtime_api()
-		.account_nonce(&generic::BlockId::Hash(best_hash), account.public().into())
+		.account_nonce(best_hash, account.public().into())
 		.expect("Fetching account nonce works; qed")
 }
 
@@ -303,7 +303,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 			spawn_handle: task_manager.spawn_handle(),
 			import_queue,
 			block_announce_validator_builder: None,
-			warp_sync: Some(warp_sync),
+			warp_sync_params: Some(sc_service::WarpSyncParams::WithProvider(warp_sync)),
 		})?;
 
 	if config.offchain_worker.enabled {
