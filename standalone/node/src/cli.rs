@@ -13,7 +13,7 @@
 
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
-
+#![allow(clippy::all)]
 use sc_cli::RunCmd;
 
 #[derive(Debug, clap::Parser)]
