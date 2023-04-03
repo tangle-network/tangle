@@ -521,7 +521,7 @@ fn testnet_genesis(
 		dkg: DKGConfig {
 			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
 			keygen_threshold: 12,
-			signature_threshold: 6,
+			signature_threshold: 5,
 			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
