@@ -91,6 +91,11 @@ fn dkg_session_keys(
 pub fn development_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "dTNT".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42.into());
+
 	Ok(ChainSpec::from_genesis(
 		// Name
 		"Development",
@@ -144,7 +149,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		// Fork id
 		None,
 		// Properties
-		None,
+		Some(properties),
 		// Extensions
 		None,
 	))
@@ -152,6 +157,10 @@ pub fn development_config() -> Result<ChainSpec, String> {
 
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "tTNT".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42.into());
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -167,8 +176,6 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					authority_keys_from_seed("Alice", "Alice//stash"),
 					authority_keys_from_seed("Bob", "Bob//stash"),
 					authority_keys_from_seed("Charlie", "Charlie//stash"),
-					authority_keys_from_seed("Dave", "Dave//stash"),
-					authority_keys_from_seed("Eve", "Eve//stash"),
 				],
 				vec![],
 				// Sudo account
@@ -209,7 +216,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		// Fork id
 		None,
 		// Properties
-		None,
+		Some(properties),
 		// Extensions
 		None,
 	))
@@ -528,7 +535,7 @@ fn testnet_genesis(
 		bridge_registry: Default::default(),
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
-			native_asset_name: b"WEBB".to_vec().try_into().unwrap(),
+			native_asset_name: b"tTNT".to_vec().try_into().unwrap(),
 			native_existential_deposit: tangle_runtime::EXISTENTIAL_DEPOSIT,
 		},
 		hasher_bn_254: HasherBn254Config {
