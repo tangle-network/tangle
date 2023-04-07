@@ -520,8 +520,8 @@ fn testnet_genesis(
 		grandpa: Default::default(),
 		dkg: DKGConfig {
 			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
-			keygen_threshold: 12,
-			signature_threshold: 5,
+			keygen_threshold: 8,
+			signature_threshold: 3,
 			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
