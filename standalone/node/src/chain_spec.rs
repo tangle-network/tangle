@@ -523,15 +523,16 @@ fn testnet_genesis(
 		grandpa: Default::default(),
 		dkg: DKGConfig {
 			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
-			keygen_threshold: 5,
-			signature_threshold: 3,
+			keygen_threshold: initial_authorities.len() as u16,
+			// 2/3 of the authorities to the nearest integer.
+			signature_threshold: core::cmp::max((initial_authorities.len() as u16 * 2) / 3, 1),
 			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
 		bridge_registry: Default::default(),
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
-			native_asset_name: b"WEBB".to_vec().try_into().unwrap(),
+			native_asset_name: b"tTNT".to_vec().try_into().unwrap(),
 			native_existential_deposit: tangle_runtime::EXISTENTIAL_DEPOSIT,
 		},
 		hasher_bn_254: HasherBn254Config {
