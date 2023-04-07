@@ -113,16 +113,20 @@ impl pallet_token_wrapper::Config for Runtime {
 }
 
 parameter_types! {
+	pub const NativeCurrencyId: webb_primitives::AssetId = 0;
+}
+
+parameter_types! {
 	#[derive(Copy, Clone, Debug, PartialEq, Eq, scale_info::TypeInfo)]
 	pub const MaxAssetIdInPool: u32 = 100;
 }
 
 impl pallet_asset_registry::Config for Runtime {
 	type AssetId = webb_primitives::AssetId;
-	type AssetNativeLocation = u32;
+	type AssetNativeLocation = ();
 	type Balance = Balance;
 	type RuntimeEvent = RuntimeEvent;
-	type NativeAssetId = GetNativeCurrencyId;
+	type NativeAssetId = NativeCurrencyId;
 	type MaxAssetIdInPool = MaxAssetIdInPool;
 	type RegistryOrigin = frame_system::EnsureRoot<AccountId>;
 	type StringLimit = RegistryStringLimit;
@@ -130,6 +134,7 @@ impl pallet_asset_registry::Config for Runtime {
 }
 
 pub type ReserveIdentifier = [u8; 8];
+
 impl orml_tokens::Config for Runtime {
 	type Amount = Amount;
 	type Balance = Balance;
@@ -144,16 +149,13 @@ impl orml_tokens::Config for Runtime {
 	type CurrencyHooks = ();
 }
 
-parameter_types! {
-	pub const GetNativeCurrencyId: webb_primitives::AssetId = 0;
-}
-
 pub type NativeCurrency = NativeCurrencyOf<Runtime>;
-pub type AdaptedBasicCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, Balance>;
+pub type AdaptedBasicCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, Moment>;
+
 impl orml_currencies::Config for Runtime {
 	type MultiCurrency = Tokens;
 	type NativeCurrency = AdaptedBasicCurrency;
-	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type GetNativeCurrencyId = NativeCurrencyId;
 	type WeightInfo = ();
 }
 
@@ -165,7 +167,7 @@ parameter_types! {
 impl pallet_mixer::Config<pallet_mixer::Instance1> for Runtime {
 	type Currency = Currencies;
 	type RuntimeEvent = RuntimeEvent;
-	type NativeCurrencyId = GetNativeCurrencyId;
+	type NativeCurrencyId = NativeCurrencyId;
 	type PalletId = MixerPalletId;
 	type Tree = MerkleTreeBn254;
 	type Verifier = MixerVerifierBn254;
@@ -275,7 +277,7 @@ impl pallet_vanchor::Config<pallet_vanchor::Instance1> for Runtime {
 	type MaxFee = MaxFee;
 	type MaxExtAmount = MaxExtAmount;
 	type PostDepositHook = ();
-	type NativeCurrencyId = GetNativeCurrencyId;
+	type NativeCurrencyId = NativeCurrencyId;
 	type MaxCurrencyId = MaxCurrencyId;
 	type TokenWrapper = TokenWrapper;
 	type WeightInfo = ();
