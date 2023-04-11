@@ -2744,7 +2744,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.17#58add6a24aa0e8943bd2a109615f3c769eca0b5f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=testnet-launch#cc32a0125eb639f25f94812552c85dd6adf199b7"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2790,7 +2790,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.17#58add6a24aa0e8943bd2a109615f3c769eca0b5f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=testnet-launch#cc32a0125eb639f25f94812552c85dd6adf199b7"
 dependencies = [
  "tracing",
  "tracing-subscriber 0.3.16",
@@ -2799,7 +2799,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.17#58add6a24aa0e8943bd2a109615f3c769eca0b5f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=testnet-launch#cc32a0125eb639f25f94812552c85dd6adf199b7"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2823,7 +2823,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.17#58add6a24aa0e8943bd2a109615f3c769eca0b5f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=testnet-launch#cc32a0125eb639f25f94812552c85dd6adf199b7"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -6590,7 +6590,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.17#58add6a24aa0e8943bd2a109615f3c769eca0b5f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=testnet-launch#cc32a0125eb639f25f94812552c85dd6adf199b7"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6661,7 +6661,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.17#58add6a24aa0e8943bd2a109615f3c769eca0b5f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=testnet-launch#cc32a0125eb639f25f94812552c85dd6adf199b7"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6681,7 +6681,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.17#58add6a24aa0e8943bd2a109615f3c769eca0b5f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=testnet-launch#cc32a0125eb639f25f94812552c85dd6adf199b7"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6701,7 +6701,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.1.17#58add6a24aa0e8943bd2a109615f3c769eca0b5f"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=testnet-launch#cc32a0125eb639f25f94812552c85dd6adf199b7"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6710,6 +6710,7 @@ dependencies = [
  "k256",
  "log",
  "pallet-balances",
+ "pallet-dkg-metadata",
  "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",

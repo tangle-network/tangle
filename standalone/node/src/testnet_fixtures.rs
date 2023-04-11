@@ -31,13 +31,16 @@ pub fn get_testnet_root_key() -> AccountId {
 /// Standalone alpha bootnodes
 pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
-		"/ip4/18.191.185.238/tcp/30333/p2p/12D3KooWPfrrLpP7rzHdkQ1bpPebq62TaUaEoA4qmGbyGUNySD8h"
+		"/ip4/18.217.252.78/tcp/30333/p2p/12D3KooWPfrrLpP7rzHdkQ1bpPebq62TaUaEoA4qmGbyGUNySD8h"
 			.parse()
 			.unwrap(),
-		"/ip4/3.16.148.122/tcp/30333/p2p/12D3KooWA1EpUAKGHsgJc4ZfZnXS9wHzESMDDq8T7WzeHzP7pcj8"
+		"/ip4/18.219.226.61/tcp/30333/p2p/12D3KooWA1EpUAKGHsgJc4ZfZnXS9wHzESMDDq8T7WzeHzP7pcj8"
 			.parse()
 			.unwrap(),
-		"/ip4/3.143.253.232/tcp/30333/p2p/12D3KooWLGKC7vivZiSw8k82ANH5yzYvWcLJRa2n1u3Ym3WMg3K9"
+		"/ip4/18.191.202.99/tcp/30333/p2p/12D3KooWLGKC7vivZiSw8k82ANH5yzYvWcLJRa2n1u3Ym3WMg3K9"
+			.parse()
+			.unwrap(),
+		"/ip4/3.145.85.235/tcp/30333/p2p/12D3KooWLGKC7vivZiSw8k82ANH5yzYvWcLJRa2n1u3Ym3WMg3K9"
 			.parse()
 			.unwrap(),
 	]
@@ -47,6 +50,7 @@ pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 pub fn get_standalone_initial_authorities(
 ) -> Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)> {
 	vec![
+		// standalone 1
 		(
 			hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"].into(),
 			hex!["804808fb75d16340dc250871138a1a6f1dfa3cab9cc1fbd6f42960f1c39a950d"].into(),
@@ -59,6 +63,7 @@ pub fn get_standalone_initial_authorities(
 			hex!["028a4c0781f8369fdd873f8531491f24e2e806fd11a13d828cb4099e6c1045103e"]
 				.unchecked_into(),
 		),
+		// standalone 2
 		(
 			hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"].into(),
 			hex!["cc195602a63bbdcf2ef4773c86fdbfefe042cb9aa8e3059d02e59a062d9c3138"].into(),
@@ -71,6 +76,7 @@ pub fn get_standalone_initial_authorities(
 			hex!["02427a6cf7f1d7538d9e3e4df834e27db337fd6ef0f530aab4e9799ff865e843fc"]
 				.unchecked_into(),
 		),
+		// standalone 3
 		(
 			hex!["368ea402dbd9c9888ae999d6a799cf36e08673ee53c001dfb4529c149fc2c13b"].into(),
 			hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"].into(),
@@ -83,6 +89,7 @@ pub fn get_standalone_initial_authorities(
 			hex!["036aec5853fba2662f31ba89e859ac100daa6c58dc8fdaf0555565663f2b99f8f2"]
 				.unchecked_into(),
 		),
+		// standalone 4
 		(
 			hex!["2c7f3cc085da9175414d1a9d40aa3aa161c8584a9ca62a938684dfbe90ae9d74"].into(),
 			hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
@@ -95,6 +102,7 @@ pub fn get_standalone_initial_authorities(
 			hex!["0297579c2b3896c65bf556e710ba361d76bff80827e30d70bc8f1d39049005c509"]
 				.unchecked_into(),
 		),
+		// standalone 5
 		(
 			hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
 			hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
@@ -108,44 +116,44 @@ pub fn get_standalone_initial_authorities(
 				.unchecked_into(),
 		),
 		// standalone 6
-		(
-			hex!["541dc9dd9cd9b47ff19c77c3b14fab50ab0774e19abe438719cd09e4f4861166"].into(),
-			hex!["607e948bad733780eda6c0bd9b084243276332823ca8481fc20cd01e1a2ef36f"].into(),
-			hex!["c09ca0a13acb3bca703195c5c452d64f9ead47dec540f601e9db42bf97ec8025"]
-				.unchecked_into(),
-			hex!["bb9b1375992318bd2171bb22766129855864881cf79689440bf1da4f35964e06"]
-				.unchecked_into(),
-			hex!["c09ca0a13acb3bca703195c5c452d64f9ead47dec540f601e9db42bf97ec8025"]
-				.unchecked_into(),
-			hex!["0278f0bd16e3ff51540b044844fcc0dba9a374bc9824305ec4d6687dcf7058d220"]
-				.unchecked_into(),
-		),
-		// standalone 7
-		(
-			hex!["b2c09cb1b78c3afd2b1ea4316dfb1be9065e070db948477248e4f3e0f1a2d850"].into(),
-			hex!["fc156f082d789f94149f8b52b191672fbf202ef1b92b487c3cec9bca2d1fbe72"].into(),
-			hex!["c8243df041c48137e16b5152bad01ce99441b3f2907915d569fa3b58ad83495f"]
-				.unchecked_into(),
-			hex!["142635c658c9fd7685ef466e41948557ecedaec76587307bdc939467781f9d58"]
-				.unchecked_into(),
-			hex!["c8243df041c48137e16b5152bad01ce99441b3f2907915d569fa3b58ad83495f"]
-				.unchecked_into(),
-			hex!["03f41e4f76c2abe5e28fd16eaee36153c953759689712eb3dd2c666b62484b2567"]
-				.unchecked_into(),
-		),
+		// (
+		// 	hex!["541dc9dd9cd9b47ff19c77c3b14fab50ab0774e19abe438719cd09e4f4861166"].into(),
+		// 	hex!["607e948bad733780eda6c0bd9b084243276332823ca8481fc20cd01e1a2ef36f"].into(),
+		// 	hex!["c09ca0a13acb3bca703195c5c452d64f9ead47dec540f601e9db42bf97ec8025"]
+		// 		.unchecked_into(),
+		// 	hex!["bb9b1375992318bd2171bb22766129855864881cf79689440bf1da4f35964e06"]
+		// 		.unchecked_into(),
+		// 	hex!["c09ca0a13acb3bca703195c5c452d64f9ead47dec540f601e9db42bf97ec8025"]
+		// 		.unchecked_into(),
+		// 	hex!["0278f0bd16e3ff51540b044844fcc0dba9a374bc9824305ec4d6687dcf7058d220"]
+		// 		.unchecked_into(),
+		// ),
+		// // standalone 7
+		// (
+		// 	hex!["b2c09cb1b78c3afd2b1ea4316dfb1be9065e070db948477248e4f3e0f1a2d850"].into(),
+		// 	hex!["fc156f082d789f94149f8b52b191672fbf202ef1b92b487c3cec9bca2d1fbe72"].into(),
+		// 	hex!["c8243df041c48137e16b5152bad01ce99441b3f2907915d569fa3b58ad83495f"]
+		// 		.unchecked_into(),
+		// 	hex!["142635c658c9fd7685ef466e41948557ecedaec76587307bdc939467781f9d58"]
+		// 		.unchecked_into(),
+		// 	hex!["c8243df041c48137e16b5152bad01ce99441b3f2907915d569fa3b58ad83495f"]
+		// 		.unchecked_into(),
+		// 	hex!["03f41e4f76c2abe5e28fd16eaee36153c953759689712eb3dd2c666b62484b2567"]
+		// 		.unchecked_into(),
+		// ),
 		// standalone 8
-		(
-			hex!["0e87759b6eeb6891743900cba17b8b5f31b2fa9c28536d9bcf76468d6e455b23"].into(),
-			hex!["48cea44ac6dd245572272dc6d4d33908586fb80886bf3207344388eac279cc25"].into(),
-			hex!["52edde82f4e7af3c9c526b8a8eea08f9d70eec0da9246f6c34708ca1bde52904"]
-				.unchecked_into(),
-			hex!["c167d6596d3406a92efe10cad755073dd835caaf982b07ef8e5f8217b59721a9"]
-				.unchecked_into(),
-			hex!["52edde82f4e7af3c9c526b8a8eea08f9d70eec0da9246f6c34708ca1bde52904"]
-				.unchecked_into(),
-			hex!["02d1f1d1c6b02514cbb345d98bab19be55a42345573b24c7c1ac8b8da0955f0efd"]
-				.unchecked_into(),
-		),
+		// (
+		// 	hex!["0e87759b6eeb6891743900cba17b8b5f31b2fa9c28536d9bcf76468d6e455b23"].into(),
+		// 	hex!["48cea44ac6dd245572272dc6d4d33908586fb80886bf3207344388eac279cc25"].into(),
+		// 	hex!["52edde82f4e7af3c9c526b8a8eea08f9d70eec0da9246f6c34708ca1bde52904"]
+		// 		.unchecked_into(),
+		// 	hex!["c167d6596d3406a92efe10cad755073dd835caaf982b07ef8e5f8217b59721a9"]
+		// 		.unchecked_into(),
+		// 	hex!["52edde82f4e7af3c9c526b8a8eea08f9d70eec0da9246f6c34708ca1bde52904"]
+		// 		.unchecked_into(),
+		// 	hex!["02d1f1d1c6b02514cbb345d98bab19be55a42345573b24c7c1ac8b8da0955f0efd"]
+		// 		.unchecked_into(),
+		// ),
 		// // standalone 9
 		// (
 		// 	hex!["fa2c711c82661a761cf200421b9a5ef3257aa977a3a33acad0722d7d6993f03b"].into(),
