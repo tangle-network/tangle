@@ -35,13 +35,13 @@ COPY rust-toolchain.toml .
 RUN cargo chef cook -Z sparse-registry --release --recipe-path recipe.json
 ARG BINARY
 COPY . .
-# Build application
-RUN cargo build -Z sparse-registry --release -p ${BINARY}
+# Build application.
+RUN cargo build -Z sparse-registry --release --features integration-tests -p ${BINARY}
 
 # This is the 2nd stage: a very small image where we copy the tangle binary."
 FROM ubuntu:20.04
 LABEL maintainer="Webb Developers <dev@webb.tools>"
-LABEL description="Tangle Network Node"
+LABEL description="Tangle Network node for integration tests"
 ARG BINARY
 ENV BINARY=${BINARY}
 
