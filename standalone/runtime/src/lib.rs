@@ -775,7 +775,7 @@ impl pallet_nomination_pools::Config for Runtime {
 parameter_types! {
 	pub const DecayPercentage: Percent = Percent::from_percent(50);
 	pub const UnsignedPriority: u64 = 1 << 20;
-	 pub const UnsignedInterval: BlockNumber = 3;
+	 pub const UnsignedInterval: BlockNumber = 1;
 	 pub const SessionPeriod : BlockNumber = SESSION_PERIOD_BLOCKS;
 }
 
