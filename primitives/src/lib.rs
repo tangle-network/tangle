@@ -75,7 +75,13 @@ pub mod currency {
 	pub const CENT: Balance = DOLLAR / 100;
 	pub const MILLICENT: Balance = CENT / 1000;
 	/// The existential deposit.
+	#[allow(clippy::identity_op)]
+	#[cfg(feature = "integration-tests")]
+	pub const EXISTENTIAL_DEPOSIT: Balance = 1000;
+
+	#[cfg(not(feature = "integration-tests"))]
 	pub const EXISTENTIAL_DEPOSIT: Balance = 100 * CENT;
+
 	/// Return the cost to add an item to storage based on size
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
 		items as Balance * 20 * DOLLAR + (bytes as Balance) * 100 * MILLICENT

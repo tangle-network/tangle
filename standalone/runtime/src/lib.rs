@@ -280,6 +280,11 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = ();
 }
 
+#[allow(clippy::identity_op)]
+#[cfg(feature = "integration-tests")]
+pub const EXISTENTIAL_DEPOSIT: u128 = 1000;
+
+#[cfg(not(feature = "integration-tests"))]
 pub const EXISTENTIAL_DEPOSIT: u128 = MILLIUNIT;
 
 parameter_types! {

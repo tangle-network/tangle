@@ -772,7 +772,7 @@ fn relayer_testnet_genesis(
 		asset_registry: AssetRegistryConfig {
 			asset_names: vec![],
 			native_asset_name: b"tTNT".to_vec().try_into().unwrap(),
-			native_existential_deposit: 0,
+			native_existential_deposit: tangle_runtime::EXISTENTIAL_DEPOSIT,
 		},
 		hasher_bn_254: HasherBn254Config {
 			parameters: Some(bn254_x5_3_params.to_bytes().try_into().unwrap()),
