@@ -40,6 +40,20 @@ use tangle_runtime::{
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
+/// Hermes (Evm, 5001)
+const CHAIN_ID_HERMES: [u8; 6] = hex_literal::hex!("010000001389");
+/// Athena (Evm, 5002)
+const CHAIN_ID_ATHENA: [u8; 6] = hex_literal::hex!("01000000138a");
+/// Demeter (Evm, 5003)
+const CHAIN_ID_DEMETER: [u8; 6] = hex_literal::hex!("01000000138b");
+
+const RESOURCE_ID_HERMES_ATHENA: ResourceId = ResourceId(hex_literal::hex!(
+	"0000000000000000e69a847cd5bc0c9480ada0b339d7f0a8cac2b6670000138a"
+));
+const RESOURCE_ID_ATHENA_HERMES: ResourceId = ResourceId(hex_literal::hex!(
+	"000000000000d30c8839c1145609e564b986f667b273ddcb8496010000001389"
+));
+
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
 
@@ -196,75 +210,12 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
 				// Initial Chain Ids
-				vec![],
+				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA],
 				// Initial resource Ids
-				vec![],
-				// Initial proposers
 				vec![
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
+					(RESOURCE_ID_HERMES_ATHENA, Default::default()),
+					(RESOURCE_ID_ATHENA_HERMES, Default::default()),
 				],
-				true,
-			)
-		},
-		// Bootnodes
-		vec![],
-		// Telemetry
-		None,
-		// Protocol ID
-		None,
-		// Fork id
-		None,
-		// Properties
-		Some(properties),
-		// Extensions
-		None,
-	))
-}
-
-pub fn relayer_testnet_config() -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
-	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "tTNT".into());
-	properties.insert("tokenDecimals".into(), 18u32.into());
-	properties.insert("ss58Format".into(), 42.into());
-
-	Ok(ChainSpec::from_genesis(
-		// Name
-		"Local Testnet",
-		// ID
-		"local_testnet",
-		ChainType::Local,
-		move || {
-			relayer_testnet_genesis(
-				wasm_binary,
-				// Initial PoA authorities
-				vec![
-					authority_keys_from_seed("Alice", "Alice//stash"),
-					authority_keys_from_seed("Charlie", "Charlie//stash"),
-				],
-				vec![],
-				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				// Pre-funded accounts
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-				],
-				// Initial Chain Ids
-				vec![],
-				// Initial resource Ids
-				vec![],
 				// Initial proposers
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Dave"),
@@ -468,179 +419,6 @@ pub fn standalone_local_config() -> Result<ChainSpec, String> {
 /// Configure initial storage state for FRAME modules.
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
-	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)>,
-	initial_nominators: Vec<AccountId>,
-	root_key: AccountId,
-	endowed_accounts: Vec<AccountId>,
-	initial_chain_ids: Vec<[u8; 6]>,
-	initial_r_ids: Vec<(ResourceId, Vec<u8>)>,
-	initial_proposers: Vec<AccountId>,
-	_enable_println: bool,
-) -> GenesisConfig {
-	let curve_bn254 = Curve::Bn254;
-
-	log::info!("Bn254 x5 w3 params");
-	let bn254_x5_3_params = setup_params::<ark_bn254::Fr>(curve_bn254, 5, 3);
-
-	log::info!("Verifier params for mixer");
-	let mixer_verifier_bn254_params = {
-		let vk_bytes = include_bytes!("../../../verifying_keys/mixer/bn254/verifying_key.bin");
-		vk_bytes.to_vec()
-	};
-
-	log::info!("Verifier params for vanchor");
-	let vanchor_verifier_bn254_params = {
-		let vk_bytes =
-			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
-		vk_bytes.to_vec().try_into().unwrap()
-	};
-	// TODO: Add proper verifying keys for 16-2
-	let vanchor_verifier_16x2_bn254_params = {
-		let vk_bytes =
-			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
-		vk_bytes.to_vec().try_into().unwrap()
-	};
-
-	const ENDOWMENT: Balance = 10_000_000 * UNIT;
-	const STASH: Balance = ENDOWMENT / 1000;
-
-	// stakers: all validators and nominators.
-	let mut rng = rand::thread_rng();
-	let stakers = initial_authorities
-		.iter()
-		.map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
-		.chain(initial_nominators.iter().map(|x| {
-			use rand::{seq::SliceRandom, Rng};
-			let limit = (MaxNominations::get() as usize).min(initial_authorities.len());
-			let count = rng.gen::<usize>() % limit;
-			let nominations = initial_authorities
-				.as_slice()
-				.choose_multiple(&mut rng, count)
-				.map(|choice| choice.0.clone())
-				.collect::<Vec<_>>();
-			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
-		}))
-		.collect::<Vec<_>>();
-
-	let num_endowed_accounts = endowed_accounts.len();
-	let eth2_mainnet_network_config: NetworkConfig =
-		NetworkConfig::new(&Network::from_str("mainnet").unwrap());
-	let eth2_goerli_network_config: NetworkConfig =
-		NetworkConfig::new(&Network::from_str("goerli").unwrap());
-	// (TypedChainId, [u8; 32], ForkVersion, u64)
-	let eth2_mainnet_genesis_config = (
-		TypedChainId::Evm(1),
-		eth2_mainnet_network_config.genesis_validators_root,
-		eth2_mainnet_network_config.bellatrix_fork_version,
-		eth2_mainnet_network_config.bellatrix_fork_epoch,
-	);
-	let eth2_goerli_genesis_config = (
-		TypedChainId::Evm(5),
-		eth2_goerli_network_config.genesis_validators_root,
-		eth2_goerli_network_config.bellatrix_fork_version,
-		eth2_goerli_network_config.bellatrix_fork_epoch,
-	);
-	GenesisConfig {
-		system: SystemConfig {
-			// Add Wasm runtime to storage.
-			code: wasm_binary.to_vec(),
-		},
-		claims: ClaimsConfig { claims: vec![], vesting: vec![], expiry: None },
-		sudo: SudoConfig { key: Some(root_key) },
-		balances: BalancesConfig {
-			// Configure endowed accounts with initial balance of 1 << 60.
-			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect(),
-		},
-		vesting: Default::default(),
-		indices: Default::default(),
-		session: SessionConfig {
-			keys: initial_authorities
-				.iter()
-				.map(|x| {
-					(
-						x.1.clone(),
-						x.0.clone(),
-						dkg_session_keys(x.3.clone(), x.2.clone(), x.4.clone(), x.5.clone()),
-					)
-				})
-				.collect::<Vec<_>>(),
-		},
-		staking: StakingConfig {
-			validator_count: initial_authorities.len() as u32,
-			minimum_validator_count: initial_authorities.len() as u32 - 1,
-			invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-			slash_reward_fraction: Perbill::from_percent(10),
-			stakers,
-			..Default::default()
-		},
-		democracy: Default::default(),
-		council: Default::default(),
-		elections: ElectionsConfig {
-			members: endowed_accounts
-				.iter()
-				.take((num_endowed_accounts + 1) / 2)
-				.cloned()
-				.map(|member| (member, STASH))
-				.collect(),
-		},
-		treasury: Default::default(),
-		aura: Default::default(),
-		grandpa: Default::default(),
-		dkg: DKGConfig {
-			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
-			keygen_threshold: initial_authorities.len() as u16,
-			// 2/3 of the authorities to the nearest integer.
-			signature_threshold: core::cmp::max((initial_authorities.len() as u16 * 2) / 3, 1),
-			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
-		},
-		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
-		bridge_registry: Default::default(),
-		asset_registry: AssetRegistryConfig {
-			asset_names: vec![],
-			native_asset_name: b"tTNT".to_vec().try_into().unwrap(),
-			native_existential_deposit: tangle_runtime::EXISTENTIAL_DEPOSIT,
-		},
-		hasher_bn_254: HasherBn254Config {
-			parameters: Some(bn254_x5_3_params.to_bytes().try_into().unwrap()),
-			phantom: Default::default(),
-		},
-		mixer_verifier_bn_254: MixerVerifierBn254Config {
-			parameters: Some(mixer_verifier_bn254_params.try_into().unwrap()),
-			phantom: Default::default(),
-		},
-		merkle_tree_bn_254: MerkleTreeBn254Config {
-			phantom: Default::default(),
-			default_hashes: None,
-		},
-		mixer_bn_254: MixerBn254Config {
-			mixers: vec![(0, 10 * UNIT), (0, 100 * UNIT), (0, 1000 * UNIT)],
-		},
-		v_anchor_verifier: VAnchorVerifierConfig {
-			parameters: Some(vec![
-				(2, 2, vanchor_verifier_bn254_params),
-				(2, 16, vanchor_verifier_16x2_bn254_params),
-			]),
-			phantom: Default::default(),
-		},
-		v_anchor_bn_254: VAnchorBn254Config {
-			max_deposit_amount: 1_000_000 * UNIT,
-			min_withdraw_amount: 0,
-			vanchors: vec![(0, 2)],
-			phantom: Default::default(),
-		},
-		im_online: ImOnlineConfig { keys: vec![] },
-		eth_2_client: Eth2ClientConfig {
-			// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
-			networks: vec![eth2_mainnet_genesis_config, eth2_goerli_genesis_config],
-			phantom: PhantomData,
-		},
-	}
-}
-
-/// Configure initial storage state for FRAME modules.
-#[allow(clippy::too_many_arguments)]
-fn relayer_testnet_genesis(
 	wasm_binary: &[u8],
 	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)>,
 	initial_nominators: Vec<AccountId>,
