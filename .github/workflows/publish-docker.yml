@@ -71,7 +71,7 @@ jobs:
   build-tangle-integration-test:
     runs-on: ubuntu-latest
     env:
-      BINARY: tangle-integration-test
+      BINARY: tangle-standalone
     permissions:
       contents: read
       packages: write
@@ -102,7 +102,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.BINARY }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/tangle-integration-test
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
