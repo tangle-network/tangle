@@ -40,6 +40,20 @@ use tangle_runtime::{
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
+/// Hermes (Evm, 5001)
+const CHAIN_ID_HERMES: [u8; 6] = hex_literal::hex!("010000001389");
+/// Athena (Evm, 5002)
+const CHAIN_ID_ATHENA: [u8; 6] = hex_literal::hex!("01000000138a");
+/// Demeter (Evm, 5003)
+const CHAIN_ID_DEMETER: [u8; 6] = hex_literal::hex!("01000000138b");
+
+const RESOURCE_ID_HERMES_ATHENA: ResourceId = ResourceId(hex_literal::hex!(
+	"0000000000000000e69a847cd5bc0c9480ada0b339d7f0a8cac2b6670000138a"
+));
+const RESOURCE_ID_ATHENA_HERMES: ResourceId = ResourceId(hex_literal::hex!(
+	"000000000000d30c8839c1145609e564b986f667b273ddcb8496010000001389"
+));
+
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
 
@@ -196,9 +210,81 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
 				// Initial Chain Ids
-				vec![],
+				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA, CHAIN_ID_DEMETER],
 				// Initial resource Ids
+				vec![
+					(RESOURCE_ID_HERMES_ATHENA, Default::default()),
+					(RESOURCE_ID_ATHENA_HERMES, Default::default()),
+				],
+				// Initial proposers
+				vec![
+					get_account_id_from_seed::<sr25519::Public>("Dave"),
+					get_account_id_from_seed::<sr25519::Public>("Eve"),
+				],
+				true,
+			)
+		},
+		// Bootnodes
+		vec![],
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// Fork id
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		None,
+	))
+}
+
+pub fn relayer_testnet_config() -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "tTNT".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42.into());
+
+	Ok(ChainSpec::from_genesis(
+		// Name
+		"Local Testnet",
+		// ID
+		"local_testnet",
+		ChainType::Local,
+		move || {
+			testnet_genesis(
+				wasm_binary,
+				// Initial PoA authorities
+				vec![
+					authority_keys_from_seed("Alice", "Alice//stash"),
+					authority_keys_from_seed("Charlie", "Charlie//stash"),
+				],
 				vec![],
+				// Sudo account
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				// Pre-funded accounts
+				vec![
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie"),
+					get_account_id_from_seed::<sr25519::Public>("Dave"),
+					get_account_id_from_seed::<sr25519::Public>("Eve"),
+					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+				],
+				// Initial Chain Ids
+				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA, CHAIN_ID_DEMETER],
+				// Initial resource Ids
+				vec![
+					(RESOURCE_ID_HERMES_ATHENA, Default::default()),
+					(RESOURCE_ID_ATHENA_HERMES, Default::default()),
+				],
 				// Initial proposers
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Dave"),

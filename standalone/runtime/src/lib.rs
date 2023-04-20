@@ -280,8 +280,6 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = ();
 }
 
-pub const EXISTENTIAL_DEPOSIT: u128 = MILLIUNIT;
-
 parameter_types! {
 	pub const ExistentialDeposit: u128 = EXISTENTIAL_DEPOSIT;
 	pub const TransferFee: u128 = MILLIUNIT;
