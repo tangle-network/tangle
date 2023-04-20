@@ -222,7 +222,6 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	))
 }
 
-
 pub fn relayer_testnet_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
@@ -639,7 +638,7 @@ fn testnet_genesis(
 	}
 }
 
-	/// Configure initial storage state for FRAME modules.
+/// Configure initial storage state for FRAME modules.
 #[allow(clippy::too_many_arguments)]
 fn relayer_testnet_genesis(
 	wasm_binary: &[u8],
