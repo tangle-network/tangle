@@ -210,7 +210,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
 				// Initial Chain Ids
-				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA],
+				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA, CHAIN_ID_DEMETER],
 				// Initial resource Ids
 				vec![
 					(RESOURCE_ID_HERMES_ATHENA, Default::default()),
@@ -279,7 +279,7 @@ pub fn relayer_testnet_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
 				// Initial Chain Ids
-				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA],
+				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA, CHAIN_ID_DEMETER],
 				// Initial resource Ids
 				vec![
 					(RESOURCE_ID_HERMES_ATHENA, Default::default()),
