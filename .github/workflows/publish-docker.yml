@@ -20,7 +20,14 @@ jobs:
       matrix:
         include:
           - binary: tangle-standalone
+            features: default
+            image_name: tangle-standalone
+          - binary: tangle-standalone
+            features: integration-tests
+            image_name: tangle-standalone-integration-tests
           - binary: tangle-parachain
+            features: default
+            image_name: tangle-parachain
     permissions:
       contents: read
       packages: write
@@ -51,7 +58,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.binary }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.image_name }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -64,6 +71,8 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: BINARY=${{ matrix.binary }}
+          build-args: |
+            BINARY=${{ matrix.binary }}
+            FEATURES=${{ matrix.features }}
           cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
           cache-to: type=inline

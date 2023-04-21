@@ -34,9 +34,10 @@ COPY rust-toolchain.toml .
 # Build dependencies - this is the caching Docker layer!
 RUN cargo chef cook -Z sparse-registry --release --recipe-path recipe.json
 ARG BINARY
+ARG FEATURES=default
 COPY . .
 # Build application
-RUN cargo build -Z sparse-registry --release -p ${BINARY}
+RUN cargo build -Z sparse-registry --release --features ${FEATURES} -p ${BINARY}
 
 # This is the 2nd stage: a very small image where we copy the tangle binary."
 FROM ubuntu:20.04
