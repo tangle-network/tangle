@@ -88,10 +88,7 @@ pub use frame_support::{
 	},
 	PalletId, StorageValue,
 };
-use frame_system::{
-	limits::{BlockLength, BlockWeights},
-	EnsureRoot,
-};
+use frame_system::EnsureRoot;
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -102,7 +99,7 @@ pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 pub use tangle_primitives::{
 	currency::*, fee::*, time::*, AccountId, Address, Balance, BlockNumber, Hash, Header, Index,
 	Moment, Reputation, Signature, AVERAGE_ON_INITIALIZE_RATIO, EPOCH_DURATION_IN_BLOCKS,
-	MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS,
+	NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS,
 };
 
 /// Block type as expected by this runtime.
@@ -151,20 +148,12 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-standalone"),
 	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
-	spec_version: 115, // v0.1.15
+	spec_version: 118, // v0.1.18
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
 	state_version: 0,
 };
-
-/// This determines the average expected block time that we are targeting.
-/// Blocks will be produced at a minimum duration defined by `SLOT_DURATION`.
-/// `SLOT_DURATION` is picked up by `pallet_timestamp` which is in turn picked
-/// up by `pallet_aura` to implement `fn slot_duration()`.
-///
-/// Change this to adjust the block time.
-pub const MILLISECS_PER_BLOCK: u64 = 12000;
 
 pub const fn deposit(items: u32, bytes: u32) -> Balance {
 	// map to 1/10 of what the kusama relay chain charges (v9020)
@@ -178,28 +167,16 @@ pub fn native_version() -> NativeVersion {
 }
 
 parameter_types! {
-	pub const BlockHashCount: BlockNumber = 250;
+	pub const BlockHashCount: BlockNumber = 2400;
 	pub const Version: RuntimeVersion = VERSION;
-	pub RuntimeBlockLength: BlockLength =
-		BlockLength::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
-	pub RuntimeBlockWeights: BlockWeights = BlockWeights::builder()
-		.base_block(BlockExecutionWeight::get())
-		.for_class(DispatchClass::all(), |weights| {
-			weights.base_extrinsic = ExtrinsicBaseWeight::get();
-		})
-		.for_class(DispatchClass::Normal, |weights| {
-			weights.max_total = Some(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT);
-		})
-		.for_class(DispatchClass::Operational, |weights| {
-			weights.max_total = Some(MAXIMUM_BLOCK_WEIGHT);
-			// Operational transactions have some extra reserved space, so that they
-			// are included even if block reached `MAXIMUM_BLOCK_WEIGHT`.
-			weights.reserved = Some(
-				MAXIMUM_BLOCK_WEIGHT - NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT
-			);
-		})
-		.avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
-		.build_or_panic();
+	/// We allow for 2 seconds of compute with a 6 second average block time.
+	pub BlockWeights: frame_system::limits::BlockWeights =
+		frame_system::limits::BlockWeights::with_sensible_defaults(
+			Weight::from_parts(2u64 * WEIGHT_REF_TIME_PER_SECOND, u64::MAX),
+			NORMAL_DISPATCH_RATIO,
+		);
+	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
+		::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
 	pub const SS58Prefix: u8 = 42;
 }
 
@@ -234,9 +211,9 @@ impl frame_system::Config for Runtime {
 	type AccountId = AccountId;
 	type BaseCallFilter = Everything;
 	type BlockHashCount = BlockHashCount;
-	type BlockLength = RuntimeBlockLength;
+	type BlockLength = BlockLength;
 	type BlockNumber = BlockNumber;
-	type BlockWeights = RuntimeBlockWeights;
+	type BlockWeights = BlockWeights;
 	type RuntimeCall = RuntimeCall;
 	type DbWeight = RocksDbWeight;
 	type RuntimeEvent = RuntimeEvent;
@@ -328,7 +305,7 @@ impl pallet_transaction_payment::Config for Runtime {
 
 parameter_types! {
 	pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
-		RuntimeBlockWeights::get().max_block;
+		BlockWeights::get().max_block;
 }
 
 impl pallet_scheduler::Config for Runtime {
@@ -587,13 +564,13 @@ parameter_types! {
 
 	// miner configs
 	pub const MultiPhaseUnsignedPriority: TransactionPriority = StakingUnsignedPriority::get() - 1u64;
-	pub MinerMaxWeight: Weight = RuntimeBlockWeights::get()
+	pub MinerMaxWeight: Weight = BlockWeights::get()
 		.get(DispatchClass::Normal)
 		.max_extrinsic.expect("Normal extrinsics have a weight limit configured; qed")
 		.saturating_sub(BlockExecutionWeight::get());
 	// Solution can occupy 90% of normal block size
 	pub MinerMaxLength: u32 = Perbill::from_rational(9u32, 10) *
-		*RuntimeBlockLength::get()
+		*BlockLength::get()
 		.max
 		.get(DispatchClass::Normal);
 }
