@@ -46,7 +46,7 @@ LABEL description="Tangle Network Node"
 ARG BINARY
 ENV BINARY=${BINARY}
 
-COPY --from=builder /tangle/target/release/${BINARY} /
+COPY --from=builder /tangle/target/release/${BINARY} /usr/local/bin
 
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
