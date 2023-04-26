@@ -9,8 +9,8 @@ repository = "https://github.com/webb-tools/tangle"
 [workspace]
 members = [
   "primitives",
-  "node",
-  "runtime/rococo",
+  "parachain/node",
+  "parachain/runtime/rococo",
   "standalone/node",
   "standalone/runtime",
   "pallets/*",
@@ -208,7 +208,7 @@ arkworks-setups = { version = "1.0.0", features = ["r1cs"] }
 
 # Webb dependencies
 tangle-primitives = { path = 'primitives', default-features = false }
-tangle-rococo-runtime = { path = "runtime/rococo" }
+tangle-rococo-runtime = { path = "parachain/runtime/rococo" }
 pallet-parachain-staking = { path = 'pallets/parachain-staking', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
