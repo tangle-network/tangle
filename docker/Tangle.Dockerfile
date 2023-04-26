@@ -34,9 +34,10 @@ COPY rust-toolchain.toml .
 # Build dependencies - this is the caching Docker layer!
 RUN cargo chef cook -Z sparse-registry --release --recipe-path recipe.json
 ARG BINARY
+ARG FEATURES=default
 COPY . .
 # Build application
-RUN cargo build -Z sparse-registry --release -p ${BINARY}
+RUN cargo build -Z sparse-registry --release --features ${FEATURES} -p ${BINARY}
 
 # This is the 2nd stage: a very small image where we copy the tangle binary."
 FROM ubuntu:20.04
@@ -45,9 +46,7 @@ LABEL description="Tangle Network Node"
 ARG BINARY
 ENV BINARY=${BINARY}
 
-COPY --from=builder /tangle/target/release/${BINARY} /
+COPY --from=builder /tangle/target/release/${BINARY} /usr/local/bin
 
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
-ENTRYPOINT ./${BINARY} -d /data
-CMD ./${BINARY}
