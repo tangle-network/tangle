@@ -26,6 +26,9 @@ chainspecs/standalone-local.json
 
 # NodeJS
 **/node_modules/
+types/build
+types/ts-types
+
 resources/para-2076-genesis
 resources/para-2076-wasm
 .env
