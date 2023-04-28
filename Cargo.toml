@@ -9,8 +9,8 @@ repository = "https://github.com/webb-tools/tangle"
 [workspace]
 members = [
   "primitives",
-  "parachain/node",
-  "parachain/runtime/rococo",
+  # "parachain/node",
+  # "parachain/runtime/rococo",
   "standalone/node",
   "standalone/runtime",
   "pallets/*",
