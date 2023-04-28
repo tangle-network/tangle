@@ -460,7 +460,7 @@ impl pallet_dkg_proposals::Config for Runtime {
 	type ChainIdentifier = ChainIdentifier;
 	type RuntimeEvent = RuntimeEvent;
 	type NextSessionRotation = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
-	type Proposal = frame_support::BoundedVec<u8, MaxProposalLength>;
+	type MaxProposalLength = MaxProposalLength;
 	type ProposalLifetime = ProposalLifetime;
 	type ProposalHandler = DKGProposalHandler;
 	type Period = Period;
