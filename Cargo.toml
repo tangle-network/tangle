@@ -9,8 +9,8 @@ repository = "https://github.com/webb-tools/tangle"
 [workspace]
 members = [
   "primitives",
-  "parachain/node",
-  "parachain/runtime/rococo",
+  # "parachain/node",
+  # "parachain/runtime/rococo",
   "standalone/node",
   "standalone/runtime",
   "pallets/*",
@@ -36,13 +36,13 @@ libsecp256k1 = { version = "0.7.0", default-features = false }
 rustc-hex = { version = "2.1.0", default-features = false }
 
 # DKG Substrate Dependencies
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.17", default-features = false }
-pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.17", default-features = false }
-pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.17", default-features = false }
-pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.17", default-features = false }
-pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.17", default-features = false }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.17" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.17" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20", default-features = false }
+pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20", default-features = false }
+pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20", default-features = false }
+pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20", default-features = false }
+pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20", default-features = false }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20" }
 tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
 
 # Protocol Substrate Dependencies
