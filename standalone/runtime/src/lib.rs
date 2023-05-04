@@ -99,7 +99,7 @@ pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 pub use tangle_primitives::{
 	currency::*, fee::*, time::*, AccountId, Address, Balance, BlockNumber, Hash, Header, Index,
 	Moment, Reputation, Signature, AVERAGE_ON_INITIALIZE_RATIO, EPOCH_DURATION_IN_BLOCKS,
-	NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS,
+	NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS, UNSIGNED_PROPOSAL_EXPIRY,
 };
 
 /// Block type as expected by this runtime.
@@ -148,7 +148,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-standalone"),
 	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
-	spec_version: 118, // v0.1.18
+	spec_version: 121, // v0.1.21
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -785,7 +785,7 @@ parameter_types! {
 	pub const DKGAccountId: PalletId = PalletId(*b"dw/dkgac");
 	pub const RefreshDelay: Permill = Permill::from_percent(90);
 	pub const TimeToRestart: BlockNumber = 3;
-	pub const UnsignedProposalExpiry: BlockNumber = Period::get() / 4;
+	pub const UnsignedProposalExpiry: BlockNumber = UNSIGNED_PROPOSAL_EXPIRY;
 }
 
 impl pallet_dkg_proposal_handler::Config for Runtime {
