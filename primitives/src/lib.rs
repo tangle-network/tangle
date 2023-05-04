@@ -39,11 +39,6 @@ pub mod time {
 	/// slot_duration()`.
 	///
 	/// Change this to adjust the block time.
-	#[allow(clippy::identity_op)]
-	#[cfg(feature = "integration-tests")]
-	pub const SECONDS_PER_BLOCK: Moment = 3;
-
-	#[cfg(not(feature = "integration-tests"))]
 	pub const SECONDS_PER_BLOCK: Moment = 6;
 
 	pub const MILLISECS_PER_BLOCK: Moment = SECONDS_PER_BLOCK * 1000;
@@ -127,6 +122,12 @@ pub const SESSION_PERIOD_BLOCKS: BlockNumber = 2 * crate::time::MINUTES;
 
 #[cfg(not(feature = "integration-tests"))]
 pub const SESSION_PERIOD_BLOCKS: BlockNumber = 6 * crate::time::HOURS;
+
+#[cfg(not(feature = "integration-tests"))]
+pub const UNSIGNED_PROPOSAL_EXPIRY: BlockNumber = SESSION_PERIOD_BLOCKS / 4;
+
+#[cfg(feature = "integration-tests")]
+pub const UNSIGNED_PROPOSAL_EXPIRY: BlockNumber = SESSION_PERIOD_BLOCKS;
 
 /// We assume that ~5% of the block weight is consumed by `on_initialize` handlers. This is
 /// used to limit the maximal weight of a single extrinsic.

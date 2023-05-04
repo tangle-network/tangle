@@ -36,13 +36,13 @@ libsecp256k1 = { version = "0.7.0", default-features = false }
 rustc-hex = { version = "2.1.0", default-features = false }
 
 # DKG Substrate Dependencies
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20", default-features = false }
-pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20", default-features = false }
-pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20", default-features = false }
-pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20", default-features = false }
-pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20", default-features = false }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.20" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.21", default-features = false }
+pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.21", default-features = false }
+pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.21", default-features = false }
+pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.21", default-features = false }
+pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.21", default-features = false }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.21" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.21" }
 tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
 
 # Protocol Substrate Dependencies
@@ -212,8 +212,8 @@ tangle-rococo-runtime = { path = "parachain/runtime/rococo" }
 pallet-parachain-staking = { path = 'pallets/parachain-staking', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features=false, branch = "polkadot-v0.9.39" }
-finality-update-verify = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features=false, branch = "polkadot-v0.9.39" }
+pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features=false }
+finality-update-verify = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features=false }
 
 [profile.release]
 panic = "unwind"
