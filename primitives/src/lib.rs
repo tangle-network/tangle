@@ -39,7 +39,12 @@ pub mod time {
 	/// slot_duration()`.
 	///
 	/// Change this to adjust the block time.
+	#[cfg(not(feature = "integration-tests"))]
 	pub const SECONDS_PER_BLOCK: Moment = 6;
+
+	#[allow(clippy::identity_op)]
+	#[cfg(feature = "integration-tests")]
+	pub const SECONDS_PER_BLOCK: Moment = 3;
 
 	pub const MILLISECS_PER_BLOCK: Moment = SECONDS_PER_BLOCK * 1000;
 	pub const SLOT_DURATION: Moment = MILLISECS_PER_BLOCK;
@@ -118,7 +123,7 @@ pub mod fee {
 /// The number of blocks in one session
 #[allow(clippy::identity_op)]
 #[cfg(feature = "integration-tests")]
-pub const SESSION_PERIOD_BLOCKS: BlockNumber = 2 * crate::time::MINUTES;
+pub const SESSION_PERIOD_BLOCKS: BlockNumber = crate::time::MINUTES;
 
 #[cfg(not(feature = "integration-tests"))]
 pub const SESSION_PERIOD_BLOCKS: BlockNumber = 6 * crate::time::HOURS;
