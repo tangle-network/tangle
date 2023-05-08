@@ -145,8 +145,8 @@ impl frame_support::traits::OnRuntimeUpgrade for OnRuntimeUpgrade {
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("tangle-standalone"),
-	impl_name: create_runtime_str!("tangle-standalone"),
+	spec_name: create_runtime_str!("tangle"),
+	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
 	spec_version: 121, // v0.1.21
 	impl_version: 1,

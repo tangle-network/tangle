@@ -9,10 +9,8 @@ repository = "https://github.com/webb-tools/tangle"
 [workspace]
 members = [
   "primitives",
-  # "parachain/node",
-  # "parachain/runtime/rococo",
   "standalone/node",
-  "standalone/runtime",
+  "standalone/runtime/*",
   "pallets/*",
 ]
 
@@ -43,7 +41,8 @@ pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git"
 pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.21", default-features = false }
 dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.21" }
 dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.1.21" }
-tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
+tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "standalone/runtime/testnet" }
+tangle-runtime = { package = "tangle-runtime", path = "standalone/runtime/tangle" }
 
 # Protocol Substrate Dependencies
 pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
