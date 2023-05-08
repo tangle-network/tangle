@@ -39,12 +39,12 @@ pub mod time {
 	/// slot_duration()`.
 	///
 	/// Change this to adjust the block time.
+	#[cfg(not(feature = "integration-tests"))]
+	pub const SECONDS_PER_BLOCK: Moment = 6;
+
 	#[allow(clippy::identity_op)]
 	#[cfg(feature = "integration-tests")]
 	pub const SECONDS_PER_BLOCK: Moment = 3;
-
-	#[cfg(not(feature = "integration-tests"))]
-	pub const SECONDS_PER_BLOCK: Moment = 6;
 
 	pub const MILLISECS_PER_BLOCK: Moment = SECONDS_PER_BLOCK * 1000;
 	pub const SLOT_DURATION: Moment = MILLISECS_PER_BLOCK;
@@ -80,7 +80,7 @@ pub mod currency {
 	pub const EXISTENTIAL_DEPOSIT: Balance = 1000;
 
 	#[cfg(not(feature = "integration-tests"))]
-	pub const EXISTENTIAL_DEPOSIT: Balance = 100 * CENT;
+	pub const EXISTENTIAL_DEPOSIT: Balance = 10 * CENT;
 
 	/// Return the cost to add an item to storage based on size
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
@@ -123,10 +123,16 @@ pub mod fee {
 /// The number of blocks in one session
 #[allow(clippy::identity_op)]
 #[cfg(feature = "integration-tests")]
-pub const SESSION_PERIOD_BLOCKS: BlockNumber = 2 * crate::time::MINUTES;
+pub const SESSION_PERIOD_BLOCKS: BlockNumber = 10;
 
 #[cfg(not(feature = "integration-tests"))]
 pub const SESSION_PERIOD_BLOCKS: BlockNumber = 6 * crate::time::HOURS;
+
+#[cfg(not(feature = "integration-tests"))]
+pub const UNSIGNED_PROPOSAL_EXPIRY: BlockNumber = SESSION_PERIOD_BLOCKS / 4;
+
+#[cfg(feature = "integration-tests")]
+pub const UNSIGNED_PROPOSAL_EXPIRY: BlockNumber = SESSION_PERIOD_BLOCKS;
 
 /// We assume that ~5% of the block weight is consumed by `on_initialize` handlers. This is
 /// used to limit the maximal weight of a single extrinsic.
