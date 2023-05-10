@@ -48,8 +48,9 @@
             toolchain
           ];
           packages = [ ];
+          # Environment variables
+          RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
+          LD_LIBRARY_PATH = "${pkgs.gmp}/lib";
         };
-        # Environment variables
-        RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
       });
 }
