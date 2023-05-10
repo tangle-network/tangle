@@ -23,6 +23,9 @@ pub struct Cli {
 
 	#[clap(flatten)]
 	pub run: RunCmd,
+
+	#[arg(long, short = 'o')]
+	pub output_path: Option<std::path::PathBuf>,
 }
 
 #[derive(Debug, clap::Subcommand)]
