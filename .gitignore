@@ -34,3 +34,4 @@ resources/para-2076-wasm
 .env
 
 .idea
+.direnv
