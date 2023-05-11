@@ -29,6 +29,7 @@
     <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#install">Installation</a></li>
+        <li><a href="#install-nix">Installation Using Nix</a></li>
         <ul>
           <li><a href="#trouble">Troubleshooting Apple Silicon</a>
           </li>
@@ -98,6 +99,16 @@ You will now have two runtimes built in `target/release/` dir:
 
 1. `tangle-parachain`: Parachain node.
 2. `tangle-standalone`: Standalone node, used in the current standalone Tangle network.
+
+
+## Installation Using Nix 💻
+
+1. Install [Nix](https://nixos.org/download.html)
+2. Enable Flakes (if you are not already see here: [Flakes](https://nixos.wiki/wiki/Flakes))
+3. If you have [`direnv`](https://github.com/nix-community/nix-direnv#installation) installed, everything should work out of the box.
+4. Alternatively, you can run `nix flake develop` in the root of this repo to get a shell with all the dependencies installed.
+5. Happy hacking!
+
 ### Troubleshooting for Apple Silicon users
 
 Install Homebrew if you have not already. You can check if you have it installed with the following command:
