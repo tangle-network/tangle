@@ -2787,7 +2787,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#804f762e07f4d4615c986d1cfc29d4aee72f6a05"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#ddb91f256e18d490f4e0d72cbccfc1ffaf4da8f9"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2838,7 +2838,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#804f762e07f4d4615c986d1cfc29d4aee72f6a05"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#ddb91f256e18d490f4e0d72cbccfc1ffaf4da8f9"
 dependencies = [
  "tracing",
  "tracing-filter",
@@ -2848,7 +2848,7 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#804f762e07f4d4615c986d1cfc29d4aee72f6a05"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#ddb91f256e18d490f4e0d72cbccfc1ffaf4da8f9"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2874,7 +2874,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#804f762e07f4d4615c986d1cfc29d4aee72f6a05"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#ddb91f256e18d490f4e0d72cbccfc1ffaf4da8f9"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2898,7 +2898,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#804f762e07f4d4615c986d1cfc29d4aee72f6a05"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#ddb91f256e18d490f4e0d72cbccfc1ffaf4da8f9"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -6716,7 +6716,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#804f762e07f4d4615c986d1cfc29d4aee72f6a05"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#ddb91f256e18d490f4e0d72cbccfc1ffaf4da8f9"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6787,7 +6787,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#804f762e07f4d4615c986d1cfc29d4aee72f6a05"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#ddb91f256e18d490f4e0d72cbccfc1ffaf4da8f9"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6807,7 +6807,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#804f762e07f4d4615c986d1cfc29d4aee72f6a05"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#ddb91f256e18d490f4e0d72cbccfc1ffaf4da8f9"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6827,7 +6827,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#804f762e07f4d4615c986d1cfc29d4aee72f6a05"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#ddb91f256e18d490f4e0d72cbccfc1ffaf4da8f9"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
