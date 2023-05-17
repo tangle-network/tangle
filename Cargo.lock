@@ -2784,7 +2784,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#55e39cf1dc06931b2c2b221aafd69381fa823c16"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2835,7 +2835,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#55e39cf1dc06931b2c2b221aafd69381fa823c16"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
 dependencies = [
  "hex",
  "lazy_static",
@@ -2852,7 +2852,7 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#55e39cf1dc06931b2c2b221aafd69381fa823c16"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2878,7 +2878,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#55e39cf1dc06931b2c2b221aafd69381fa823c16"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2902,7 +2902,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#55e39cf1dc06931b2c2b221aafd69381fa823c16"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -6720,7 +6720,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#55e39cf1dc06931b2c2b221aafd69381fa823c16"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6791,7 +6791,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#55e39cf1dc06931b2c2b221aafd69381fa823c16"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6811,7 +6811,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#55e39cf1dc06931b2c2b221aafd69381fa823c16"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6831,7 +6831,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#55e39cf1dc06931b2c2b221aafd69381fa823c16"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -9421,9 +9421,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.57"
+version = "1.0.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4ec6d5fe0b140acb27c9a0444118cf55bfbb4e0b259739429abb4521dd67c16"
+checksum = "fa1fb82fc0c281dd9671101b66b771ebbe1eaf967b96ac8740dcba4b70005ca8"
 dependencies = [
  "unicode-ident",
 ]
