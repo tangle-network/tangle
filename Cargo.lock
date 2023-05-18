@@ -2784,7 +2784,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#68466c09f6688f287f7b6defe460a7ffb357c924"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2835,15 +2835,8 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#68466c09f6688f287f7b6defe460a7ffb357c924"
 dependencies = [
- "hex",
- "lazy_static",
- "parking_lot 0.12.1",
- "serde",
- "serde_json",
- "sha3 0.10.8",
- "tokio",
  "tracing",
  "tracing-filter",
  "tracing-subscriber 0.3.17",
@@ -2852,7 +2845,7 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#68466c09f6688f287f7b6defe460a7ffb357c924"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2878,7 +2871,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#68466c09f6688f287f7b6defe460a7ffb357c924"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2902,7 +2895,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#68466c09f6688f287f7b6defe460a7ffb357c924"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -6720,7 +6713,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#68466c09f6688f287f7b6defe460a7ffb357c924"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6791,7 +6784,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#68466c09f6688f287f7b6defe460a7ffb357c924"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6811,7 +6804,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#68466c09f6688f287f7b6defe460a7ffb357c924"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6831,7 +6824,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#eb591c472ecbcc75b2255028a26638488ceff6aa"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#68466c09f6688f287f7b6defe460a7ffb357c924"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -14869,8 +14862,8 @@ dependencies = [
 
 [[package]]
 name = "webb-proposals"
-version = "0.5.22"
-source = "git+https://github.com/webb-tools/webb-rs#ce757c52c404c4ebe1499712429ca858bff200f0"
+version = "0.5.23"
+source = "git+https://github.com/webb-tools/webb-rs#7855e64d61f1ac2a0145f9b6207216f11bd46dd4"
 dependencies = [
  "frame-support",
  "hex",
