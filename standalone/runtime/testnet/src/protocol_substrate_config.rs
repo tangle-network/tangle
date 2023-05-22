@@ -45,7 +45,10 @@ parameter_types! {
 	pub const MaxEdges: u32 = 1000;
 	#[derive(Debug, scale_info::TypeInfo)]
 	pub const MaxDefaultHashes: u32 = 1000;
-	pub const NewDefaultZeroElement: Element = Element([0u8; 32]);
+	pub const NewDefaultZeroElement: Element = Element([
+		47, 229, 76, 96, 211, 172, 171, 243, 52, 58, 53, 182, 235, 161, 93, 180, 130, 27, 52,
+		15, 118, 231, 65, 226, 36, 150, 133, 237, 72, 153, 175, 108,
+	]);
 }
 
 #[derive(
