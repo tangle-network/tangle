@@ -1322,7 +1322,7 @@ impl_runtime_apis! {
 			DKG::next_best_authorities().into()
 		  }
 
-		fn get_unsigned_proposals() -> Vec<UnsignedProposal<MaxProposalLength>> {
+		fn get_unsigned_proposals() -> Vec<(UnsignedProposal<MaxProposalLength>, u32)> {
 			DKGProposalHandler::get_unsigned_proposals()
 		}
 
