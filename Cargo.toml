@@ -1,5 +1,5 @@
 [workspace.package]
-version = "0.1.28"
+version = "0.1.29"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
