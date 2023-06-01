@@ -2784,7 +2784,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#66edf071b6d17d66bf80ecbb7f901e1513dd4db2"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2835,8 +2835,15 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#66edf071b6d17d66bf80ecbb7f901e1513dd4db2"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
 dependencies = [
+ "hex",
+ "lazy_static",
+ "parking_lot 0.12.1",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "tokio",
  "tracing",
  "tracing-filter",
  "tracing-subscriber 0.3.17",
@@ -2845,12 +2852,13 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#66edf071b6d17d66bf80ecbb7f901e1513dd4db2"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
 dependencies = [
  "async-trait",
  "atomic",
  "bincode2",
  "bytes",
+ "dkg-logging",
  "dkg-runtime-primitives",
  "futures 0.3.28",
  "humantime-serde",
@@ -2871,7 +2879,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#66edf071b6d17d66bf80ecbb7f901e1513dd4db2"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2895,7 +2903,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#66edf071b6d17d66bf80ecbb7f901e1513dd4db2"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -6713,7 +6721,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#66edf071b6d17d66bf80ecbb7f901e1513dd4db2"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6784,7 +6792,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#66edf071b6d17d66bf80ecbb7f901e1513dd4db2"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6804,7 +6812,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#66edf071b6d17d66bf80ecbb7f901e1513dd4db2"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6824,7 +6832,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2#66edf071b6d17d66bf80ecbb7f901e1513dd4db2"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6845,7 +6853,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "0.1.28"
+version = "0.1.30"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7309,7 +7317,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-parachain-staking"
-version = "0.1.28"
+version = "0.1.30"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7603,7 +7611,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.1.28"
+version = "0.1.30"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -13195,7 +13203,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-parachain"
-version = "0.1.28"
+version = "0.1.30"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -13267,7 +13275,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.1.28"
+version = "0.1.30"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -13278,7 +13286,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-rococo-runtime"
-version = "0.1.28"
+version = "0.1.30"
 dependencies = [
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
@@ -13373,7 +13381,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "0.1.28"
+version = "0.1.30"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -13432,7 +13440,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone-runtime"
-version = "0.1.28"
+version = "0.1.30"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
