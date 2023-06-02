@@ -2784,7 +2784,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#f77b4567977afd523f045cbda03f87febddfdffe"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2835,7 +2835,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#f77b4567977afd523f045cbda03f87febddfdffe"
 dependencies = [
  "hex",
  "lazy_static",
@@ -2852,7 +2852,7 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#f77b4567977afd523f045cbda03f87febddfdffe"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2879,7 +2879,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#f77b4567977afd523f045cbda03f87febddfdffe"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2903,7 +2903,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#f77b4567977afd523f045cbda03f87febddfdffe"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -6721,7 +6721,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#f77b4567977afd523f045cbda03f87febddfdffe"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6792,7 +6792,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#f77b4567977afd523f045cbda03f87febddfdffe"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6812,7 +6812,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#f77b4567977afd523f045cbda03f87febddfdffe"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6832,7 +6832,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#5a7e602675498b9216090037795ccc97498c59c1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/signing-manager-v2-debug#f77b4567977afd523f045cbda03f87febddfdffe"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -14871,7 +14871,7 @@ dependencies = [
 [[package]]
 name = "webb-proposals"
 version = "0.5.23"
-source = "git+https://github.com/webb-tools/webb-rs#19a8d4c4bd5b24e68e2838ed43b8f26f13e91e28"
+source = "git+https://github.com/webb-tools/webb-rs#13390b931834e6890676ee9605f064a893cb6eb5"
 dependencies = [
  "frame-support",
  "hex",
