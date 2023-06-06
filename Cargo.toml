@@ -52,7 +52,6 @@ pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git", 
 pallet-key-storage = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
 pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
 pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-mixer = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
 pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
 pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
 pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
@@ -61,7 +60,6 @@ pallet-token-wrapper-handler = { git = "https://github.com/webb-tools/protocol-s
 pallet-vanchor = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
 pallet-vanchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
 pallet-vanchor-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
 webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4", features = ["hashing", "verifying"] }
 pallet-linkable-tree-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, tag = "v0.1.4" }
 pallet-mt-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, tag = "v0.1.4" }

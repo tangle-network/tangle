@@ -32,9 +32,9 @@ use std::str::FromStr;
 use tangle_runtime::{
 	AccountId, AssetRegistryConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
 	DKGProposalsConfig, ElectionsConfig, Eth2ClientConfig, GenesisConfig, HasherBn254Config,
-	ImOnlineConfig, MaxNominations, MerkleTreeBn254Config, MixerBn254Config,
-	MixerVerifierBn254Config, Perbill, SessionConfig, Signature, StakerStatus, StakingConfig,
-	SudoConfig, SystemConfig, VAnchorBn254Config, VAnchorVerifierConfig, UNIT, WASM_BINARY,
+	ImOnlineConfig, MaxNominations, MerkleTreeBn254Config, Perbill, SessionConfig, Signature,
+	StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
+	VAnchorVerifierConfig, UNIT, WASM_BINARY,
 };
 
 // The URL for the telemetry server.

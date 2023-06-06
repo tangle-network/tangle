@@ -91,14 +91,6 @@ impl pallet_mt::Config<pallet_mt::Instance1> for Runtime {
 	type WeightInfo = pallet_mt::weights::WebbWeight<Runtime>;
 }
 
-impl pallet_verifier::Config<pallet_verifier::Instance1> for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type Verifier = ArkworksVerifierBn254;
-	type MaxParameterLength = MaxParameterLength;
-	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
-}
-
 parameter_types! {
 	pub const TokenWrapperPalletId: PalletId = PalletId(*b"dw/tkwrp");
 	pub const WrappingFeeDivider: Balance = 100;
@@ -163,19 +155,7 @@ impl orml_currencies::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MixerPalletId: PalletId = PalletId(*b"py/mixer");
 	pub const RegistryStringLimit: u32 = 10;
-}
-
-impl pallet_mixer::Config<pallet_mixer::Instance1> for Runtime {
-	type Currency = Currencies;
-	type RuntimeEvent = RuntimeEvent;
-	type NativeCurrencyId = NativeCurrencyId;
-	type PalletId = MixerPalletId;
-	type Tree = MerkleTreeBn254;
-	type Verifier = MixerVerifierBn254;
-	type ArbitraryHasher = Keccak256HasherBn254;
-	type WeightInfo = pallet_mixer::weights::WebbWeight<Runtime>;
 }
 
 parameter_types! {

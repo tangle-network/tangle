@@ -22,7 +22,7 @@ use sp_core::{crypto::UncheckedInto, sr25519};
 
 use tangle_rococo_runtime::{
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
-	ImOnlineId, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
+	ImOnlineId, MerkleTreeBn254Config,
 	ParachainStakingConfig, VAnchorBn254Config, VAnchorVerifierConfig, UNIT,
 };
 

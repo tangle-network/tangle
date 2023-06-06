@@ -31,7 +31,7 @@ use sp_runtime::{
 use tangle_rococo_runtime::{
 	nimbus_session_adapter::{NimbusId, VrfId},
 	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
-	ImOnlineId, MerkleTreeBn254Config, MixerBn254Config, MixerVerifierBn254Config,
+	ImOnlineId, MerkleTreeBn254Config,
 	ParachainStakingConfig, Signature, VAnchorBn254Config, VAnchorVerifierConfig, HOURS, UNIT,
 };
 

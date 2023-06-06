@@ -6111,24 +6111,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-mixer"
-version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "log",
- "orml-traits",
- "pallet-mt",
- "parity-scale-codec",
- "scale-info",
- "sp-runtime",
- "sp-std",
- "webb-primitives",
-]
-
-[[package]]
 name = "pallet-mt"
 version = "1.0.0"
 source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
@@ -6549,22 +6531,6 @@ name = "pallet-vanchor-verifier"
 version = "1.0.0"
 source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
 dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "parity-scale-codec",
- "scale-info",
- "sp-runtime",
- "sp-std",
- "webb-primitives",
-]
-
-[[package]]
-name = "pallet-verifier"
-version = "1.0.0"
-source = "git+https://github.com/webb-tools/protocol-substrate.git?tag=v0.1.4#05a69fea5f2ab1018689faa76d4c1b08524e7e4b"
-dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "log",
@@ -10572,7 +10538,6 @@ dependencies = [
  "pallet-key-storage",
  "pallet-linkable-tree",
  "pallet-linkable-tree-rpc-runtime-api",
- "pallet-mixer",
  "pallet-mt",
  "pallet-mt-rpc-runtime-api",
  "pallet-nomination-pools",
@@ -10595,7 +10560,6 @@ dependencies = [
  "pallet-vanchor",
  "pallet-vanchor-handler",
  "pallet-vanchor-verifier",
- "pallet-verifier",
  "pallet-vesting",
  "parity-scale-codec",
  "scale-info",
