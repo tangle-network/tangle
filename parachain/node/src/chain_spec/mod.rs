@@ -369,20 +369,12 @@ fn testnet_genesis(
 	log::info!("Bn254 x5 w3 params");
 	let bn254_x5_3_params = setup_params::<ark_bn254::Fr>(curve_bn254, 5, 3);
 
-	log::info!("Verifier params for mixer");
-	let mixer_verifier_bn254_params = {
-		let vk_bytes = include_bytes!("../../../verifying_keys/mixer/bn254/verifying_key.bin");
-		vk_bytes.to_vec()
-	};
-
 	log::info!("Verifier params for vanchor");
 	let vanchor_verifier_bn254_params = {
 		let vk_bytes =
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
 		vk_bytes.to_vec().try_into().unwrap()
 	};
-
-	// TODO: Add proper verifying keys for 16-2
 	let vanchor_verifier_16x2_bn254_params = {
 		let vk_bytes =
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
@@ -436,16 +428,9 @@ fn testnet_genesis(
 			parameters: Some(bn254_x5_3_params.to_bytes().try_into().unwrap()),
 			phantom: Default::default(),
 		},
-		mixer_verifier_bn_254: MixerVerifierBn254Config {
-			parameters: Some(mixer_verifier_bn254_params.try_into().unwrap()),
-			phantom: Default::default(),
-		},
 		merkle_tree_bn_254: MerkleTreeBn254Config {
 			phantom: Default::default(),
 			default_hashes: None,
-		},
-		mixer_bn_254: MixerBn254Config {
-			mixers: vec![(0, 10 * UNIT), (0, 100 * UNIT), (0, 1000 * UNIT)],
 		},
 		v_anchor_bn_254: VAnchorBn254Config {
 			max_deposit_amount: 1_000_000 * UNIT,
