@@ -2784,7 +2784,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#f4c97ee59e4035aef53bee662a279acfdcd67955"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#d17707a47584b29b4f9d8be2a2037002b57701ab"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2835,7 +2835,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#f4c97ee59e4035aef53bee662a279acfdcd67955"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#d17707a47584b29b4f9d8be2a2037002b57701ab"
 dependencies = [
  "hex",
  "lazy_static",
@@ -2852,7 +2852,7 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#f4c97ee59e4035aef53bee662a279acfdcd67955"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#d17707a47584b29b4f9d8be2a2037002b57701ab"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2879,7 +2879,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#f4c97ee59e4035aef53bee662a279acfdcd67955"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#d17707a47584b29b4f9d8be2a2037002b57701ab"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2903,7 +2903,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#f4c97ee59e4035aef53bee662a279acfdcd67955"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#d17707a47584b29b4f9d8be2a2037002b57701ab"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -6721,7 +6721,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#f4c97ee59e4035aef53bee662a279acfdcd67955"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#d17707a47584b29b4f9d8be2a2037002b57701ab"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6792,7 +6792,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#f4c97ee59e4035aef53bee662a279acfdcd67955"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#d17707a47584b29b4f9d8be2a2037002b57701ab"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6812,7 +6812,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#f4c97ee59e4035aef53bee662a279acfdcd67955"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#d17707a47584b29b4f9d8be2a2037002b57701ab"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6832,7 +6832,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#f4c97ee59e4035aef53bee662a279acfdcd67955"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/adjust-tolerance-block#d17707a47584b29b4f9d8be2a2037002b57701ab"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
