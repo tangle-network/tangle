@@ -37,7 +37,7 @@ pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 		"/ip4/3.144.125.208/tcp/30333/p2p/12D3KooWJP5NbEjEK1YihofJm3MMSJWrbRWjeEkRf3LtKvkj6mr9"
 			.parse()
 			.unwrap(),
-		"/ip4/18.191.202.99/tcp/30333/p2p/12D3KooWDL3KiR6CpnEbgUgheje1cMGQtwH4euxGMPQBkwU5cZdu"
+		"/ip4/18.221.179.248/tcp/30333/p2p/12D3KooWDL3KiR6CpnEbgUgheje1cMGQtwH4euxGMPQBkwU5cZdu"
 			.parse()
 			.unwrap(),
 		"/ip4/3.145.85.235/tcp/30333/p2p/12D3KooWS4aniCJTz2RiNfNUka8TTa3gXak63FJgdAgfAWLCnsAi"
