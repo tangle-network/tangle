@@ -2784,7 +2784,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.1#1391ef7e8f7b83234926da29c5092ebd5a1ca6d8"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/patch-acceptable-block-range#fd5db6050a3a623c36fb1c757f864aee8e8f9ff7"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2835,7 +2835,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.1#1391ef7e8f7b83234926da29c5092ebd5a1ca6d8"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/patch-acceptable-block-range#fd5db6050a3a623c36fb1c757f864aee8e8f9ff7"
 dependencies = [
  "hex",
  "lazy_static",
@@ -2852,7 +2852,7 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.1#1391ef7e8f7b83234926da29c5092ebd5a1ca6d8"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/patch-acceptable-block-range#fd5db6050a3a623c36fb1c757f864aee8e8f9ff7"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2879,7 +2879,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.1#1391ef7e8f7b83234926da29c5092ebd5a1ca6d8"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/patch-acceptable-block-range#fd5db6050a3a623c36fb1c757f864aee8e8f9ff7"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2903,7 +2903,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.1#1391ef7e8f7b83234926da29c5092ebd5a1ca6d8"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/patch-acceptable-block-range#fd5db6050a3a623c36fb1c757f864aee8e8f9ff7"
 dependencies = [
  "ethereum",
  "ethereum-types 0.14.1",
@@ -6721,7 +6721,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.1#1391ef7e8f7b83234926da29c5092ebd5a1ca6d8"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/patch-acceptable-block-range#fd5db6050a3a623c36fb1c757f864aee8e8f9ff7"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6792,7 +6792,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.1#1391ef7e8f7b83234926da29c5092ebd5a1ca6d8"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/patch-acceptable-block-range#fd5db6050a3a623c36fb1c757f864aee8e8f9ff7"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6812,7 +6812,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.1#1391ef7e8f7b83234926da29c5092ebd5a1ca6d8"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/patch-acceptable-block-range#fd5db6050a3a623c36fb1c757f864aee8e8f9ff7"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6832,7 +6832,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.1#1391ef7e8f7b83234926da29c5092ebd5a1ca6d8"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/patch-acceptable-block-range#fd5db6050a3a623c36fb1c757f864aee8e8f9ff7"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6853,7 +6853,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "0.1.36"
+version = "0.2.1"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7317,7 +7317,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-parachain-staking"
-version = "0.1.36"
+version = "0.2.1"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7611,7 +7611,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.1.36"
+version = "0.2.1"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -13203,7 +13203,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-parachain"
-version = "0.1.36"
+version = "0.2.1"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -13275,7 +13275,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.1.36"
+version = "0.2.1"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -13286,7 +13286,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-rococo-runtime"
-version = "0.1.36"
+version = "0.2.1"
 dependencies = [
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
@@ -13381,7 +13381,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "0.1.36"
+version = "0.2.1"
 dependencies = [
  "ark-bn254",
  "arkworks-setups",
@@ -13440,7 +13440,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone-runtime"
-version = "0.1.36"
+version = "0.2.1"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
