@@ -126,7 +126,7 @@ pub mod fee {
 pub const SESSION_PERIOD_BLOCKS: BlockNumber = 20 * crate::time::MINUTES;
 
 #[cfg(not(feature = "integration-tests"))]
-pub const SESSION_PERIOD_BLOCKS: BlockNumber = 30 * crate::time::MINUTES;
+pub const SESSION_PERIOD_BLOCKS: BlockNumber = 10 * crate::time::MINUTES;
 
 /// We assume that ~5% of the block weight is consumed by `on_initialize` handlers. This is
 /// used to limit the maximal weight of a single extrinsic.
