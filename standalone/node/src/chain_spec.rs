@@ -32,9 +32,9 @@ use std::str::FromStr;
 use tangle_runtime::{
 	AccountId, AssetRegistryConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
 	DKGProposalsConfig, ElectionsConfig, Eth2ClientConfig, GenesisConfig, HasherBn254Config,
-	ImOnlineConfig, MaxNominations, MerkleTreeBn254Config, MixerBn254Config,
-	MixerVerifierBn254Config, Perbill, SessionConfig, Signature, StakerStatus, StakingConfig,
-	SudoConfig, SystemConfig, VAnchorBn254Config, VAnchorVerifierConfig, UNIT, WASM_BINARY,
+	ImOnlineConfig, MaxNominations, MerkleTreeBn254Config, Perbill, SessionConfig, Signature,
+	StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
+	VAnchorVerifierConfig, UNIT, WASM_BINARY,
 };
 
 // The URL for the telemetry server.
@@ -506,19 +506,12 @@ fn testnet_genesis(
 	log::info!("Bn254 x5 w3 params");
 	let bn254_x5_3_params = setup_params::<ark_bn254::Fr>(curve_bn254, 5, 3);
 
-	log::info!("Verifier params for mixer");
-	let mixer_verifier_bn254_params = {
-		let vk_bytes = include_bytes!("../../../verifying_keys/mixer/bn254/verifying_key.bin");
-		vk_bytes.to_vec()
-	};
-
 	log::info!("Verifier params for vanchor");
 	let vanchor_verifier_bn254_params = {
 		let vk_bytes =
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
 		vk_bytes.to_vec().try_into().unwrap()
 	};
-
 	let vanchor_verifier_16x2_bn254_params = {
 		let vk_bytes =
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-16-2/verifying_key.bin");
@@ -628,16 +621,9 @@ fn testnet_genesis(
 			parameters: Some(bn254_x5_3_params.to_bytes().try_into().unwrap()),
 			phantom: Default::default(),
 		},
-		mixer_verifier_bn_254: MixerVerifierBn254Config {
-			parameters: Some(mixer_verifier_bn254_params.try_into().unwrap()),
-			phantom: Default::default(),
-		},
 		merkle_tree_bn_254: MerkleTreeBn254Config {
 			phantom: Default::default(),
 			default_hashes: None,
-		},
-		mixer_bn_254: MixerBn254Config {
-			mixers: vec![(0, 10 * UNIT), (0, 100 * UNIT), (0, 1000 * UNIT)],
 		},
 		v_anchor_verifier: VAnchorVerifierConfig {
 			parameters: Some(vec![

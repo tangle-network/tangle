@@ -1177,17 +1177,11 @@ construct_runtime!(
 		Tokens: orml_tokens::{Pallet, Storage, Call, Event<T>},
 		TokenWrapper: pallet_token_wrapper::{Pallet, Storage, Call, Event<T>},
 
-		// Mixer Verifier
-		MixerVerifierBn254: pallet_verifier::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
 		// Merkle Tree
 		MerkleTreeBn254: pallet_mt::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
 
 		// Linkable Merkle Tree
 		LinkableTreeBn254: pallet_linkable_tree::<Instance1>::{Pallet, Call, Storage, Event<T>},
-
-		// Mixer
-		MixerBn254: pallet_mixer::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
 
 		// Signature Bridge
 		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>},
