@@ -59,7 +59,10 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-use webb_primitives::{linkable_tree::LinkableTreeInspector, AccountIndex, ChainId, LeafIndex};
+use webb_primitives::{
+	linkable_tree::LinkableTreeInspector, merkle_tree::TreeInspector, AccountIndex, ChainId,
+	LeafIndex,
+};
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -1455,6 +1458,9 @@ impl_runtime_apis! {
 			} else {
 				Some(v)
 			}
+		}
+		fn is_known_root(tree_id: u32, target_root: Element) -> bool {
+			MerkleTreeBn254::is_known_root(tree_id, target_root).ok().unwrap_or_default()
 		}
 	}
 

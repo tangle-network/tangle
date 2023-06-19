@@ -221,3 +221,5 @@ std = [
   "pallet-eth2-light-client/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests",]
+arkworks-backend = []
+circom-backend = []
