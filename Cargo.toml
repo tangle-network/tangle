@@ -46,23 +46,23 @@ dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag 
 tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
 
 # Protocol Substrate Dependencies
-pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
+pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
 pallet-ecdsa-claims = { path = "pallets/claims", default-features = false }
-pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-key-storage = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-token-wrapper-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-vanchor = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-vanchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-pallet-vanchor-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4" }
-webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.1.4", features = ["hashing", "verifying"] }
-pallet-linkable-tree-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, tag = "v0.1.4" }
-pallet-mt-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, tag = "v0.1.4" }
+pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-key-storage = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-token-wrapper-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-vanchor = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-vanchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+pallet-vanchor-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, features = ["hashing", "verifying"], tag = "v0.2.0" }
+pallet-linkable-tree-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, tag = "v0.2.0" }
+pallet-mt-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, tag = "v0.2.0" }
 substrate-fixed = { git = "https://github.com/encointer/substrate-fixed", default-features = false }
 
 # Orml dependencies
@@ -203,6 +203,8 @@ sc-transaction-pool-api = { git = "https://github.com/paritytech/substrate", bra
 
 ark-bn254 = { version = "^0.3.0", features = ["curve"] }
 arkworks-setups = { version = "1.0.0", features = ["r1cs"] }
+ark-circom = { git = "https://github.com/vacp2p/ark-circom", branch = "wasm", default-features = false, features = ["circom-2"] }
+ark-serialize = { version = "^0.3.0", default-features = false }
 
 # Webb dependencies
 tangle-primitives = { path = 'primitives', default-features = false }

@@ -8,8 +8,7 @@ use orml_currencies::{BasicCurrencyAdapter, NativeCurrencyOf};
 use webb_primitives::{
 	field_ops::ArkworksIntoFieldBn254,
 	hashing::{ethereum::Keccak256HasherBn254, ArkworksPoseidonHasherBn254},
-	verifying::ArkworksVerifierBn254,
-	Amount, ChainId, ElementTrait,
+	verifying, Amount, ChainId, ElementTrait,
 };
 
 #[cfg(feature = "std")]
@@ -293,7 +292,13 @@ impl pallet_key_storage::Config<pallet_key_storage::Instance1> for Runtime {
 impl pallet_vanchor_verifier::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type Verifier = ArkworksVerifierBn254;
-	type MaxParameterLength = MaxParameterLength;
+	#[cfg(feature = "arkworks-backend")]
+	type Verifier = verifying::ArkworksVerifierBn254;
+	#[cfg(feature = "arkworks-backend")]
+	type MaxParameterLength = ConstU32<1000>;
+	#[cfg(feature = "circom-backend")]
+	type Verifier = verifying::CircomVerifierBn254;
+	#[cfg(feature = "circom-backend")]
+	type MaxParameterLength = ConstU32<2000>;
 	type WeightInfo = pallet_vanchor_verifier::weights::WebbWeight<Runtime>;
 }

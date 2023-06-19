@@ -506,18 +506,96 @@ fn testnet_genesis(
 	log::info!("Bn254 x5 w3 params");
 	let bn254_x5_3_params = setup_params::<ark_bn254::Fr>(curve_bn254, 5, 3);
 
+	#[cfg(feature = "arkworks-backend")]
 	log::info!("Verifier params for vanchor");
+	#[cfg(feature = "arkworks-backend")]
 	let vanchor_verifier_bn254_params = {
 		let vk_bytes =
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
 		vk_bytes.to_vec().try_into().unwrap()
 	};
+	#[cfg(feature = "arkworks-backend")]
 	let vanchor_verifier_16x2_bn254_params = {
 		let vk_bytes =
 			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-16-2/verifying_key.bin");
 		vk_bytes.to_vec().try_into().unwrap()
 	};
+	#[cfg(feature = "circom-backend")]
+	log::info!("Verifier params for circom vanchor");
+	#[cfg(feature = "circom-backend")]
+	let vanchor_circom_verifier_2_2_bn254_params = {
+		log::info!("Reading circom vk for 2-2");
+		let zk_bytes = include_bytes!("../../../verifying_keys/vanchor_2/2/circuit_final.zkey");
+		// wrap the bytes in a Cursor and read the params
+		let mut zk_reader = std::io::Cursor::new(zk_bytes);
+		let params_2_2 = ark_circom::read_zkey(&mut zk_reader).expect("reading zkey for 2-2");
+		let mut vk_2_2_bytes = Vec::new();
+		ark_serialize::CanonicalSerialize::serialize(&params_2_2.0.vk, &mut vk_2_2_bytes)
+			.expect("serializing vk for 2-2");
+		vk_2_2_bytes
+	};
 
+	#[cfg(feature = "circom-backend")]
+	let vanchor_circom_verifier_2_8_bn254_params = {
+		log::info!("Reading circom vk for 2-8");
+		let zk_bytes = include_bytes!("../../../verifying_keys/vanchor_2/8/circuit_final.zkey");
+		// wrap the bytes in a Cursor and read the params
+		let mut zk_reader = std::io::Cursor::new(zk_bytes);
+		let params_2_8 = ark_circom::read_zkey(&mut zk_reader).expect("reading zkey for 2-8");
+		let mut vk_2_8_bytes = Vec::new();
+		ark_serialize::CanonicalSerialize::serialize(&params_2_8.0.vk, &mut vk_2_8_bytes)
+			.expect("serializing vk for 2-8");
+		vk_2_8_bytes
+	};
+
+	#[cfg(feature = "circom-backend")]
+	let vanchor_circom_verifier_16_2_bn254_params = {
+		log::info!("Reading circom vk for 16-2");
+		let zk_bytes = include_bytes!("../../../verifying_keys/vanchor_16/2/circuit_final.zkey");
+		// wrap the bytes in a Cursor and read the params
+		let mut zk_reader = std::io::Cursor::new(zk_bytes);
+		let params_16_2 = ark_circom::read_zkey(&mut zk_reader).expect("reading zkey for 16-2");
+		let mut vk_16_2_bytes = Vec::new();
+		ark_serialize::CanonicalSerialize::serialize(&params_16_2.0.vk, &mut vk_16_2_bytes)
+			.expect("serializing vk for 16-2");
+		vk_16_2_bytes
+	};
+
+	#[cfg(feature = "circom-backend")]
+	let vanchor_circom_verifier_16_8_bn254_params = {
+		log::info!("Reading circom vk for 16-8");
+		let zk_bytes = include_bytes!("../../../verifying_keys/vanchor_16/8/circuit_final.zkey");
+		// wrap the bytes in a Cursor and read the params
+		let mut zk_reader = std::io::Cursor::new(zk_bytes);
+		let params_16_8 = ark_circom::read_zkey(&mut zk_reader).expect("reading zkey for 16-8");
+		let mut vk_16_8_bytes = Vec::new();
+		ark_serialize::CanonicalSerialize::serialize(&params_16_8.0.vk, &mut vk_16_8_bytes)
+			.expect("serializing vk for 16-8");
+		vk_16_8_bytes
+	};
+
+	#[cfg(feature = "arkworks-backend")]
+	let v_anchor_verifier_config = VAnchorVerifierConfig {
+		parameters: Some(vec![
+			(2, 2, vanchor_verifier_bn254_params),
+			(2, 16, vanchor_verifier_16x2_bn254_params),
+		]),
+		phantom: Default::default(),
+	};
+
+	#[cfg(feature = "circom-backend")]
+	let v_anchor_verifier_config = VAnchorVerifierConfig {
+		phantom: Default::default(),
+		parameters: Some(vec![
+			(2, 2, vanchor_circom_verifier_2_2_bn254_params.try_into().unwrap()),
+			(2, 8, vanchor_circom_verifier_2_8_bn254_params.try_into().unwrap()),
+			(16, 2, vanchor_circom_verifier_16_2_bn254_params.try_into().unwrap()),
+			(16, 8, vanchor_circom_verifier_16_8_bn254_params.try_into().unwrap()),
+		]),
+	};
+	#[cfg(not(any(feature = "arkworks-backend", feature = "circom-backend")))]
+	let v_anchor_verifier_config =
+		VAnchorVerifierConfig { phantom: Default::default(), parameters: None };
 	const ENDOWMENT: Balance = 10_000_000 * UNIT;
 	const STASH: Balance = ENDOWMENT / 100;
 
@@ -625,13 +703,7 @@ fn testnet_genesis(
 			phantom: Default::default(),
 			default_hashes: None,
 		},
-		v_anchor_verifier: VAnchorVerifierConfig {
-			parameters: Some(vec![
-				(2, 2, vanchor_verifier_bn254_params),
-				(2, 16, vanchor_verifier_16x2_bn254_params),
-			]),
-			phantom: Default::default(),
-		},
+		v_anchor_verifier: v_anchor_verifier_config,
 		v_anchor_bn_254: VAnchorBn254Config {
 			max_deposit_amount: 1_000_000 * UNIT,
 			min_withdraw_amount: 0,
