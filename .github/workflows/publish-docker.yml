@@ -25,9 +25,9 @@ jobs:
           - binary: tangle-standalone
             features: integration-tests
             image_name: tangle-standalone-integration-tests
-          - binary: tangle-parachain
-            features: default
-            image_name: tangle-parachain
+          # - binary: tangle-parachain
+          #   features: default
+          #   image_name: tangle-parachain
     permissions:
       contents: read
       packages: write

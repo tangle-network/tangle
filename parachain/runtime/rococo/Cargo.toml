@@ -34,7 +34,6 @@ pallet-hasher = { workspace = true }
 pallet-key-storage = { workspace = true }
 pallet-linkable-tree = { workspace = true }
 pallet-linkable-tree-rpc-runtime-api = { workspace = true }
-pallet-mixer = { workspace = true }
 pallet-mt = { workspace = true }
 pallet-mt-rpc-runtime-api = { workspace = true }
 pallet-signature-bridge = { workspace = true }
@@ -43,7 +42,6 @@ pallet-token-wrapper-handler = { workspace = true }
 pallet-vanchor = { workspace = true }
 pallet-vanchor-handler = { workspace = true }
 pallet-vanchor-verifier = { workspace = true }
-pallet-verifier = { workspace = true }
 webb-primitives = { workspace = true }
 
 orml-benchmarking = { workspace = true, optional = true }
@@ -194,13 +192,11 @@ std = [
   "pallet-linkable-tree/std",
   "pallet-mt-rpc-runtime-api/std",
   "pallet-linkable-tree-rpc-runtime-api/std",
-  "pallet-verifier/std",
   "orml-currencies/std",
   "orml-tokens/std",
   "orml-traits/std",
   "pallet-asset-registry/std",
   "pallet-signature-bridge/std",
-  "pallet-mixer/std",
   "pallet-token-wrapper/std",
   "pallet-token-wrapper-handler/std",
   "orml-benchmarking/std",
@@ -234,10 +230,8 @@ runtime-benchmarks = [
   # protocol-substrate deps
   "pallet-signature-bridge/runtime-benchmarks",
   "pallet-mt/runtime-benchmarks",
-  "pallet-mixer/runtime-benchmarks",
   "pallet-linkable-tree/runtime-benchmarks",
   "pallet-hasher/runtime-benchmarks",
-  "pallet-verifier/runtime-benchmarks",
   "pallet-asset-registry/runtime-benchmarks",
   "pallet-token-wrapper/runtime-benchmarks",
 

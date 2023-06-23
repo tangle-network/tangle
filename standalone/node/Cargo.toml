@@ -89,8 +89,13 @@ sc-transaction-pool-api = { workspace = true }
 
 ark-bn254 = { workspace = true }
 arkworks-setups = { workspace = true }
+ark-circom = { workspace = true }
+ark-serialize = { workspace = true }
+wasmer = { version = "2.3" }
 
 [features]
-default = []
+default = ["circom-backend"]
 runtime-benchmarks = ["tangle-runtime/runtime-benchmarks"]
 integration-tests = ["tangle-runtime/integration-tests"]
+arkworks-backend = ["tangle-runtime/arkworks-backend"]
+circom-backend = ["tangle-runtime/circom-backend"]

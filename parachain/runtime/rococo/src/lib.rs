@@ -460,7 +460,7 @@ impl pallet_dkg_proposals::Config for Runtime {
 	type ChainIdentifier = ChainIdentifier;
 	type RuntimeEvent = RuntimeEvent;
 	type NextSessionRotation = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
-	type Proposal = frame_support::BoundedVec<u8, MaxProposalLength>;
+	type MaxProposalLength = MaxProposalLength;
 	type ProposalLifetime = ProposalLifetime;
 	type ProposalHandler = DKGProposalHandler;
 	type Period = Period;
@@ -880,18 +880,18 @@ construct_runtime!(
 
 		// Privacy pallets
 		HasherBn254: pallet_hasher::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 60,
-		MixerVerifierBn254: pallet_verifier::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 61,
-		MerkleTreeBn254: pallet_mt::<Instance1>::{Pallet, Storage, Event<T>, Config<T>} = 63,
-		LinkableTreeBn254: pallet_linkable_tree::<Instance1>::{Pallet, Storage, Event<T>} = 64,
-		MixerBn254: pallet_mixer::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 65,
-		VAnchorBn254: pallet_vanchor::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 66,
-		VAnchorHandlerBn254: pallet_vanchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>} = 67,
-		KeyStorage: pallet_key_storage::<Instance1>::{Pallet, Call, Storage, Event<T>} = 68,
-		VAnchorVerifier: pallet_vanchor_verifier::{Pallet, Call, Storage, Event<T>, Config<T>} = 69,
+
+		MerkleTreeBn254: pallet_mt::<Instance1>::{Pallet, Storage, Event<T>, Config<T>} = 61,
+		LinkableTreeBn254: pallet_linkable_tree::<Instance1>::{Pallet, Storage, Event<T>} = 62,
+
+		VAnchorBn254: pallet_vanchor::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 63,
+		VAnchorHandlerBn254: pallet_vanchor_handler::<Instance1>::{Pallet, Call, Storage, Event<T>} = 64,
+		KeyStorage: pallet_key_storage::<Instance1>::{Pallet, Call, Storage, Event<T>} = 65,
+		VAnchorVerifier: pallet_vanchor_verifier::{Pallet, Call, Storage, Event<T>, Config<T>} = 66,
 
 		// Bridge
-		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>} = 70,
-		TokenWrapperHandler: pallet_token_wrapper_handler::{Pallet, Storage, Call, Event<T>} = 71,
+		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>} = 67,
+		TokenWrapperHandler: pallet_token_wrapper_handler::{Pallet, Storage, Call, Event<T>} = 68,
 
 		// Substrate utility pallets
 		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 80,

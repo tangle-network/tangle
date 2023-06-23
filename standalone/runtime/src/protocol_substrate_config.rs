@@ -8,8 +8,7 @@ use orml_currencies::{BasicCurrencyAdapter, NativeCurrencyOf};
 use webb_primitives::{
 	field_ops::ArkworksIntoFieldBn254,
 	hashing::{ethereum::Keccak256HasherBn254, ArkworksPoseidonHasherBn254},
-	verifying::ArkworksVerifierBn254,
-	Amount, ChainId, ElementTrait,
+	verifying, Amount, ChainId, ElementTrait,
 };
 
 #[cfg(feature = "std")]
@@ -45,7 +44,10 @@ parameter_types! {
 	pub const MaxEdges: u32 = 1000;
 	#[derive(Debug, scale_info::TypeInfo)]
 	pub const MaxDefaultHashes: u32 = 1000;
-	pub const NewDefaultZeroElement: Element = Element([0u8; 32]);
+	pub const NewDefaultZeroElement: Element = Element([
+		47, 229, 76, 96, 211, 172, 171, 243, 52, 58, 53, 182, 235, 161, 93, 180, 130, 27, 52,
+		15, 118, 231, 65, 226, 36, 150, 133, 237, 72, 153, 175, 108,
+	]);
 }
 
 #[derive(
@@ -86,14 +88,6 @@ impl pallet_mt::Config<pallet_mt::Instance1> for Runtime {
 	type TreeId = u32;
 	type Two = Two;
 	type WeightInfo = pallet_mt::weights::WebbWeight<Runtime>;
-}
-
-impl pallet_verifier::Config<pallet_verifier::Instance1> for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type Verifier = ArkworksVerifierBn254;
-	type MaxParameterLength = MaxParameterLength;
-	type WeightInfo = pallet_verifier::weights::WebbWeight<Runtime>;
 }
 
 parameter_types! {
@@ -160,19 +154,7 @@ impl orml_currencies::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MixerPalletId: PalletId = PalletId(*b"py/mixer");
 	pub const RegistryStringLimit: u32 = 10;
-}
-
-impl pallet_mixer::Config<pallet_mixer::Instance1> for Runtime {
-	type Currency = Currencies;
-	type RuntimeEvent = RuntimeEvent;
-	type NativeCurrencyId = NativeCurrencyId;
-	type PalletId = MixerPalletId;
-	type Tree = MerkleTreeBn254;
-	type Verifier = MixerVerifierBn254;
-	type ArbitraryHasher = Keccak256HasherBn254;
-	type WeightInfo = pallet_mixer::weights::WebbWeight<Runtime>;
 }
 
 parameter_types! {
@@ -310,7 +292,13 @@ impl pallet_key_storage::Config<pallet_key_storage::Instance1> for Runtime {
 impl pallet_vanchor_verifier::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type Verifier = ArkworksVerifierBn254;
-	type MaxParameterLength = MaxParameterLength;
+	#[cfg(feature = "arkworks-backend")]
+	type Verifier = verifying::ArkworksVerifierBn254;
+	#[cfg(feature = "arkworks-backend")]
+	type MaxParameterLength = ConstU32<1000>;
+	#[cfg(feature = "circom-backend")]
+	type Verifier = verifying::CircomVerifierBn254;
+	#[cfg(feature = "circom-backend")]
+	type MaxParameterLength = ConstU32<2000>;
 	type WeightInfo = pallet_vanchor_verifier::weights::WebbWeight<Runtime>;
 }

@@ -59,7 +59,10 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-use webb_primitives::{linkable_tree::LinkableTreeInspector, AccountIndex, ChainId, LeafIndex};
+use webb_primitives::{
+	linkable_tree::LinkableTreeInspector, merkle_tree::TreeInspector, AccountIndex, ChainId,
+	LeafIndex,
+};
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -99,7 +102,7 @@ pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 pub use tangle_primitives::{
 	currency::*, fee::*, time::*, AccountId, Address, Balance, BlockNumber, Hash, Header, Index,
 	Moment, Reputation, Signature, AVERAGE_ON_INITIALIZE_RATIO, EPOCH_DURATION_IN_BLOCKS,
-	NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS,
+	NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS, UNSIGNED_PROPOSAL_EXPIRY,
 };
 
 /// Block type as expected by this runtime.
@@ -785,7 +788,7 @@ parameter_types! {
 	pub const DKGAccountId: PalletId = PalletId(*b"dw/dkgac");
 	pub const RefreshDelay: Permill = Permill::from_percent(90);
 	pub const TimeToRestart: BlockNumber = 3;
-	pub const UnsignedProposalExpiry: BlockNumber = Period::get() / 4;
+	pub const UnsignedProposalExpiry: BlockNumber = UNSIGNED_PROPOSAL_EXPIRY;
 }
 
 impl pallet_dkg_proposal_handler::Config for Runtime {
@@ -1177,17 +1180,11 @@ construct_runtime!(
 		Tokens: orml_tokens::{Pallet, Storage, Call, Event<T>},
 		TokenWrapper: pallet_token_wrapper::{Pallet, Storage, Call, Event<T>},
 
-		// Mixer Verifier
-		MixerVerifierBn254: pallet_verifier::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
-
 		// Merkle Tree
 		MerkleTreeBn254: pallet_mt::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
 
 		// Linkable Merkle Tree
 		LinkableTreeBn254: pallet_linkable_tree::<Instance1>::{Pallet, Call, Storage, Event<T>},
-
-		// Mixer
-		MixerBn254: pallet_mixer::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
 
 		// Signature Bridge
 		SignatureBridge: pallet_signature_bridge::<Instance1>::{Pallet, Call, Storage, Event<T>},
@@ -1461,6 +1458,9 @@ impl_runtime_apis! {
 			} else {
 				Some(v)
 			}
+		}
+		fn is_known_root(tree_id: u32, target_root: Element) -> bool {
+			MerkleTreeBn254::is_known_root(tree_id, target_root).ok().unwrap_or_default()
 		}
 	}
 
