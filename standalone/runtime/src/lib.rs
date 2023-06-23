@@ -1347,7 +1347,7 @@ impl_runtime_apis! {
 			DKG::refresh_nonce()
 		}
 
-		fn should_execute_new_keygen() -> bool {
+		fn should_execute_new_keygen() -> (bool, bool) {
 			DKG::should_execute_new_keygen()
 		}
 	}
