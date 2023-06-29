@@ -1,5 +1,5 @@
 [workspace.package]
-version = "0.2.1"
+version = "0.2.3"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
@@ -36,13 +36,13 @@ libsecp256k1 = { version = "0.7.0", default-features = false }
 rustc-hex = { version = "2.1.0", default-features = false }
 
 # DKG Substrate Dependencies
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "fix-misbehaviour-reports-test", default-features = false }
-pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "fix-misbehaviour-reports-test", default-features = false }
-pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "fix-misbehaviour-reports-test", default-features = false }
-pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "fix-misbehaviour-reports-test", default-features = false }
-pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "fix-misbehaviour-reports-test", default-features = false }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "fix-misbehaviour-reports-test" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "fix-misbehaviour-reports-test" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "thomas/upgrade-keygen-message-delivery", default-features = false }
+pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "thomas/upgrade-keygen-message-delivery", default-features = false }
+pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "thomas/upgrade-keygen-message-delivery", default-features = false }
+pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "thomas/upgrade-keygen-message-delivery", default-features = false }
+pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "thomas/upgrade-keygen-message-delivery", default-features = false }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "thomas/upgrade-keygen-message-delivery" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "thomas/upgrade-keygen-message-delivery" }
 tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
 
 # Protocol Substrate Dependencies
