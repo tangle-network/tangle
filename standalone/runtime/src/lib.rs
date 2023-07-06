@@ -151,7 +151,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-standalone"),
 	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
-	spec_version: 121, // v0.1.21
+	spec_version: 204, // v0.2.4
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -753,7 +753,7 @@ impl pallet_nomination_pools::Config for Runtime {
 parameter_types! {
 	pub const DecayPercentage: Percent = Percent::from_percent(50);
 	pub const UnsignedPriority: u64 = 1 << 20;
-	 pub const UnsignedInterval: BlockNumber = 3;
+	 pub const UnsignedInterval: BlockNumber = 1;
 	 pub const SessionPeriod : BlockNumber = SESSION_PERIOD_BLOCKS;
 }
 
@@ -1319,7 +1319,7 @@ impl_runtime_apis! {
 			DKG::next_best_authorities().into()
 		  }
 
-		fn get_unsigned_proposals() -> Vec<UnsignedProposal<MaxProposalLength>> {
+		fn get_unsigned_proposals() -> Vec<(UnsignedProposal<MaxProposalLength>, u32)> {
 			DKGProposalHandler::get_unsigned_proposals()
 		}
 
@@ -1347,7 +1347,7 @@ impl_runtime_apis! {
 			DKG::refresh_nonce()
 		}
 
-		fn should_execute_new_keygen() -> bool {
+		fn should_execute_new_keygen() -> (bool, bool) {
 			DKG::should_execute_new_keygen()
 		}
 	}
