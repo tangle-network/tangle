@@ -2519,7 +2519,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.4#7cc8fa788d592b8b4b3cfd42b000ad12e7161ea1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2570,7 +2570,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.4#7cc8fa788d592b8b4b3cfd42b000ad12e7161ea1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
 dependencies = [
  "hex",
  "lazy_static",
@@ -2587,7 +2587,7 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.4#7cc8fa788d592b8b4b3cfd42b000ad12e7161ea1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2614,7 +2614,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.4#7cc8fa788d592b8b4b3cfd42b000ad12e7161ea1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
 dependencies = [
  "chacha20poly1305",
  "clap 4.3.10",
@@ -2638,8 +2638,9 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.4#7cc8fa788d592b8b4b3cfd42b000ad12e7161ea1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
 dependencies = [
+ "ethabi 18.0.0",
  "ethereum",
  "ethereum-types 0.14.1",
  "frame-support",
@@ -6348,8 +6349,9 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.4#7cc8fa788d592b8b4b3cfd42b000ad12e7161ea1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
 dependencies = [
+ "dkg-runtime-primitives",
  "frame-support",
  "frame-system",
  "hex",
@@ -6419,7 +6421,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.4#7cc8fa788d592b8b4b3cfd42b000ad12e7161ea1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6429,17 +6431,19 @@ dependencies = [
  "libsecp256k1",
  "log",
  "pallet-session",
+ "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
  "sp-io",
  "sp-runtime",
  "sp-std",
+ "webb-proposals",
 ]
 
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.4#7cc8fa788d592b8b4b3cfd42b000ad12e7161ea1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6459,7 +6463,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.4#7cc8fa788d592b8b4b3cfd42b000ad12e7161ea1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6480,7 +6484,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6831,7 +6835,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-parachain-staking"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7027,7 +7031,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -11305,7 +11309,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -11316,7 +11320,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "ark-bn254",
  "ark-circom",
@@ -11378,7 +11382,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone-runtime"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
