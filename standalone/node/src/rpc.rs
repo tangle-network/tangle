@@ -15,14 +15,7 @@ use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use tangle_runtime::{opaque::Block, AccountId, Balance, Index};
 
 pub use sc_rpc_api::DenyUnsafe;
-use tangle_runtime::protocol_substrate_config::Element;
-use webb_primitives::{ChainId, LeafIndex};
 
-use pallet_linkable_tree_rpc::LinkableTreeClient;
-use pallet_mt_rpc::MerkleTreeClient;
-
-use pallet_linkable_tree_rpc::LinkableTreeRpcApiServer;
-use pallet_mt_rpc::MerkleTreeRpcApiServer;
 /// Full client dependencies.
 pub struct FullDeps<C, P> {
 	/// The client instance to use.
@@ -44,9 +37,6 @@ where
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: BlockBuilder<Block>,
-	C::Api: pallet_mt_rpc_runtime_api::MerkleTreeApi<Block, Element>,
-	C::Api:
-		pallet_linkable_tree_rpc_runtime_api::LinkableTreeApi<Block, ChainId, Element, LeafIndex>,
 	P: TransactionPool + 'static,
 {
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
@@ -58,11 +48,5 @@ where
 	module.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	module.merge(TransactionPayment::new(client.clone()).into_rpc())?;
 
-	// Extend this RPC with a custom API by using the following syntax.
-	// `YourRpcStruct` should have a reference to a client, which is needed
-	// to call into the runtime.
-	// `module.merge(YourRpcTrait::into_rpc(YourRpcStruct::new(ReferenceToClient, ...)))?;`
-	module.merge(MerkleTreeClient::new(client.clone(), deny_unsafe).into_rpc())?;
-	module.merge(LinkableTreeClient::new(client, deny_unsafe).into_rpc())?;
 	Ok(module)
 }

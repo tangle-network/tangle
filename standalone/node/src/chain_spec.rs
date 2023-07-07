@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::marker::PhantomData;
+use std::{collections::BTreeMap, marker::PhantomData};
 
 use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
-use arkworks_setups::{common::setup_params, Curve};
 use dkg_runtime_primitives::{ResourceId, TypedChainId};
 use finality_update_verify::network_config::{Network, NetworkConfig};
 use hex_literal::hex;
@@ -25,16 +24,15 @@ use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{sr25519, Pair, Public, H160, U256};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use std::str::FromStr;
 use tangle_runtime::{
-	AccountId, AssetRegistryConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
-	DKGProposalsConfig, ElectionsConfig, Eth2ClientConfig, GenesisConfig, HasherBn254Config,
-	ImOnlineConfig, MaxNominations, MerkleTreeBn254Config, Perbill, SessionConfig, Signature,
-	StakerStatus, StakingConfig, SudoConfig, SystemConfig, VAnchorBn254Config,
-	VAnchorVerifierConfig, UNIT, WASM_BINARY,
+	AccountId, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId, DKGProposalsConfig,
+	EVMChainIdConfig, EVMConfig, ElectionsConfig, Eth2ClientConfig, GenesisConfig, ImOnlineConfig,
+	MaxNominations, Perbill, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
+	SystemConfig, UNIT, WASM_BINARY,
 };
 
 // The URL for the telemetry server.
@@ -102,7 +100,7 @@ fn dkg_session_keys(
 	tangle_runtime::opaque::SessionKeys { grandpa, aura, dkg, im_online }
 }
 
-pub fn development_config() -> Result<ChainSpec, String> {
+pub fn development_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 
 	let mut properties = sc_chain_spec::Properties::new();
@@ -154,6 +152,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Dave"),
 					get_account_id_from_seed::<sr25519::Public>("Eve"),
 				],
+				chain_id,
 				true,
 			)
 		},
@@ -172,7 +171,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn local_testnet_config() -> Result<ChainSpec, String> {
+pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
@@ -224,6 +223,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Dave"),
 					get_account_id_from_seed::<sr25519::Public>("Eve"),
 				],
+				chain_id,
 				true,
 			)
 		},
@@ -242,7 +242,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn relayer_testnet_config() -> Result<ChainSpec, String> {
+pub fn relayer_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
@@ -293,6 +293,7 @@ pub fn relayer_testnet_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Dave"),
 					get_account_id_from_seed::<sr25519::Public>("Eve"),
 				],
+				chain_id,
 				true,
 			)
 		},
@@ -311,7 +312,7 @@ pub fn relayer_testnet_config() -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn standalone_live_config() -> Result<ChainSpec, String> {
+pub fn standalone_live_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
 	let boot_nodes = get_standalone_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
@@ -349,6 +350,7 @@ pub fn standalone_live_config() -> Result<ChainSpec, String> {
 				vec![],
 				vec![],
 				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
+				chain_id,
 				true,
 			)
 		},
@@ -367,7 +369,7 @@ pub fn standalone_live_config() -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn standalone_testnet_config() -> Result<ChainSpec, String> {
+pub fn standalone_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
 	let boot_nodes = get_standalone_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
@@ -419,6 +421,7 @@ pub fn standalone_testnet_config() -> Result<ChainSpec, String> {
 				vec![],
 				vec![],
 				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
+				chain_id,
 				true,
 			)
 		},
@@ -438,7 +441,7 @@ pub fn standalone_testnet_config() -> Result<ChainSpec, String> {
 }
 
 // same as tangle_testnet but without bootnodes so that we can spinup same network locally
-pub fn standalone_local_config() -> Result<ChainSpec, String> {
+pub fn standalone_local_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
@@ -474,6 +477,7 @@ pub fn standalone_local_config() -> Result<ChainSpec, String> {
 				vec![],
 				vec![],
 				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
+				chain_id,
 				true,
 			)
 		},
@@ -503,103 +507,9 @@ fn testnet_genesis(
 	initial_chain_ids: Vec<[u8; 6]>,
 	initial_r_ids: Vec<(ResourceId, Vec<u8>)>,
 	initial_proposers: Vec<AccountId>,
+	chain_id: u64,
 	_enable_println: bool,
 ) -> GenesisConfig {
-	let curve_bn254 = Curve::Bn254;
-
-	log::info!("Bn254 x5 w3 params");
-	let bn254_x5_3_params = setup_params::<ark_bn254::Fr>(curve_bn254, 5, 3);
-
-	#[cfg(feature = "arkworks-backend")]
-	log::info!("Verifier params for vanchor");
-	#[cfg(feature = "arkworks-backend")]
-	let vanchor_verifier_bn254_params = {
-		let vk_bytes =
-			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
-		vk_bytes.to_vec().try_into().unwrap()
-	};
-	#[cfg(feature = "arkworks-backend")]
-	let vanchor_verifier_16x2_bn254_params = {
-		let vk_bytes =
-			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-16-2/verifying_key.bin");
-		vk_bytes.to_vec().try_into().unwrap()
-	};
-	#[cfg(feature = "circom-backend")]
-	log::info!("Verifier params for circom vanchor");
-	#[cfg(feature = "circom-backend")]
-	let vanchor_circom_verifier_2_2_bn254_params = {
-		log::info!("Reading circom vk for 2-2");
-		let zk_bytes = include_bytes!("../../../verifying_keys/vanchor_2/2/circuit_final.zkey");
-		// wrap the bytes in a Cursor and read the params
-		let mut zk_reader = std::io::Cursor::new(zk_bytes);
-		let params_2_2 = ark_circom::read_zkey(&mut zk_reader).expect("reading zkey for 2-2");
-		let mut vk_2_2_bytes = Vec::new();
-		ark_serialize::CanonicalSerialize::serialize(&params_2_2.0.vk, &mut vk_2_2_bytes)
-			.expect("serializing vk for 2-2");
-		vk_2_2_bytes
-	};
-
-	#[cfg(feature = "circom-backend")]
-	let vanchor_circom_verifier_2_8_bn254_params = {
-		log::info!("Reading circom vk for 2-8");
-		let zk_bytes = include_bytes!("../../../verifying_keys/vanchor_2/8/circuit_final.zkey");
-		// wrap the bytes in a Cursor and read the params
-		let mut zk_reader = std::io::Cursor::new(zk_bytes);
-		let params_2_8 = ark_circom::read_zkey(&mut zk_reader).expect("reading zkey for 2-8");
-		let mut vk_2_8_bytes = Vec::new();
-		ark_serialize::CanonicalSerialize::serialize(&params_2_8.0.vk, &mut vk_2_8_bytes)
-			.expect("serializing vk for 2-8");
-		vk_2_8_bytes
-	};
-
-	#[cfg(feature = "circom-backend")]
-	let vanchor_circom_verifier_16_2_bn254_params = {
-		log::info!("Reading circom vk for 16-2");
-		let zk_bytes = include_bytes!("../../../verifying_keys/vanchor_16/2/circuit_final.zkey");
-		// wrap the bytes in a Cursor and read the params
-		let mut zk_reader = std::io::Cursor::new(zk_bytes);
-		let params_16_2 = ark_circom::read_zkey(&mut zk_reader).expect("reading zkey for 16-2");
-		let mut vk_16_2_bytes = Vec::new();
-		ark_serialize::CanonicalSerialize::serialize(&params_16_2.0.vk, &mut vk_16_2_bytes)
-			.expect("serializing vk for 16-2");
-		vk_16_2_bytes
-	};
-
-	#[cfg(feature = "circom-backend")]
-	let vanchor_circom_verifier_16_8_bn254_params = {
-		log::info!("Reading circom vk for 16-8");
-		let zk_bytes = include_bytes!("../../../verifying_keys/vanchor_16/8/circuit_final.zkey");
-		// wrap the bytes in a Cursor and read the params
-		let mut zk_reader = std::io::Cursor::new(zk_bytes);
-		let params_16_8 = ark_circom::read_zkey(&mut zk_reader).expect("reading zkey for 16-8");
-		let mut vk_16_8_bytes = Vec::new();
-		ark_serialize::CanonicalSerialize::serialize(&params_16_8.0.vk, &mut vk_16_8_bytes)
-			.expect("serializing vk for 16-8");
-		vk_16_8_bytes
-	};
-
-	#[cfg(feature = "arkworks-backend")]
-	let v_anchor_verifier_config = VAnchorVerifierConfig {
-		parameters: Some(vec![
-			(2, 2, vanchor_verifier_bn254_params),
-			(2, 16, vanchor_verifier_16x2_bn254_params),
-		]),
-		phantom: Default::default(),
-	};
-
-	#[cfg(feature = "circom-backend")]
-	let v_anchor_verifier_config = VAnchorVerifierConfig {
-		phantom: Default::default(),
-		parameters: Some(vec![
-			(2, 2, vanchor_circom_verifier_2_2_bn254_params.try_into().unwrap()),
-			(2, 8, vanchor_circom_verifier_2_8_bn254_params.try_into().unwrap()),
-			(16, 2, vanchor_circom_verifier_16_2_bn254_params.try_into().unwrap()),
-			(16, 8, vanchor_circom_verifier_16_8_bn254_params.try_into().unwrap()),
-		]),
-	};
-	#[cfg(not(any(feature = "arkworks-backend", feature = "circom-backend")))]
-	let v_anchor_verifier_config =
-		VAnchorVerifierConfig { phantom: Default::default(), parameters: None };
 	const ENDOWMENT: Balance = 10_000_000 * UNIT;
 	const STASH: Balance = ENDOWMENT / 100;
 
@@ -693,31 +603,64 @@ fn testnet_genesis(
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
 		bridge_registry: Default::default(),
-		asset_registry: AssetRegistryConfig {
-			asset_names: vec![],
-			native_asset_name: b"tTNT".to_vec().try_into().unwrap(),
-			native_existential_deposit: tangle_runtime::EXISTENTIAL_DEPOSIT,
-		},
-		hasher_bn_254: HasherBn254Config {
-			parameters: Some(bn254_x5_3_params.to_bytes().try_into().unwrap()),
-			phantom: Default::default(),
-		},
-		merkle_tree_bn_254: MerkleTreeBn254Config {
-			phantom: Default::default(),
-			default_hashes: None,
-		},
-		v_anchor_verifier: v_anchor_verifier_config,
-		v_anchor_bn_254: VAnchorBn254Config {
-			max_deposit_amount: 1_000_000 * UNIT,
-			min_withdraw_amount: 0,
-			vanchors: vec![(0, 2)],
-			phantom: Default::default(),
-		},
 		im_online: ImOnlineConfig { keys: vec![] },
 		eth_2_client: Eth2ClientConfig {
 			// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
 			networks: vec![eth2_mainnet_genesis_config, eth2_goerli_genesis_config],
 			phantom: PhantomData,
 		},
+		nomination_pools: Default::default(),
+		transaction_payment: Default::default(),
+		// EVM compatibility
+		evm_chain_id: EVMChainIdConfig { chain_id },
+		evm: EVMConfig {
+			accounts: {
+				let mut map = BTreeMap::new();
+				map.insert(
+					// H160 address of Alice dev account
+					// Derived from SS58 (42 prefix) address
+					// SS58: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+					// hex: 0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d
+					// Using the full hex key, truncating to the first 20 bytes (the first 40 hex
+					// chars)
+					H160::from_str("d43593c715fdd31c61141abd04a99fd6822c8558")
+						.expect("internal H160 is valid; qed"),
+					fp_evm::GenesisAccount {
+						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
+							.expect("internal U256 is valid; qed"),
+						code: Default::default(),
+						nonce: Default::default(),
+						storage: Default::default(),
+					},
+				);
+				map.insert(
+					// H160 address of CI test runner account
+					H160::from_str("6be02d1d3665660d22ff9624b7be0551ee1ac91b")
+						.expect("internal H160 is valid; qed"),
+					fp_evm::GenesisAccount {
+						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
+							.expect("internal U256 is valid; qed"),
+						code: Default::default(),
+						nonce: Default::default(),
+						storage: Default::default(),
+					},
+				);
+				map.insert(
+					// H160 address for benchmark usage
+					H160::from_str("1000000000000000000000000000000000000001")
+						.expect("internal H160 is valid; qed"),
+					fp_evm::GenesisAccount {
+						nonce: U256::from(1),
+						balance: U256::from(1_000_000_000_000_000_000_000_000u128),
+						storage: Default::default(),
+						code: vec![0x00],
+					},
+				);
+				map
+			},
+		},
+		ethereum: Default::default(),
+		dynamic_fee: Default::default(),
+		base_fee: Default::default(),
 	}
 }

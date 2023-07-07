@@ -21,7 +21,6 @@ use frame_support::{
 	traits::{ConstU128, ConstU32, ConstU64, Everything, Nothing},
 };
 use frame_system::EnsureSignedBy;
-use orml_traits::parameter_type_with_key;
 use sp_core::H256;
 use sp_runtime::{testing::Header, traits::IdentityLookup};
 
@@ -75,26 +74,6 @@ impl pallet_balances::Config for Runtime {
 	type WeightInfo = ();
 }
 
-parameter_type_with_key! {
-	pub ExistentialDeposits: |_currency_id: CurrencyId| -> Balance {
-		Default::default()
-	};
-}
-
-impl orml_tokens::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Balance = Balance;
-	type Amount = Amount;
-	type CurrencyId = CurrencyId;
-	type WeightInfo = ();
-	type ExistentialDeposits = ExistentialDeposits;
-	type MaxLocks = ();
-	type MaxReserves = ();
-	type ReserveIdentifier = [u8; 8];
-	type DustRemovalWhitelist = Nothing;
-	type CurrencyHooks = ();
-}
-
 ord_parameter_types! {
 	pub const One: AccountId = 1;
 }
@@ -117,7 +96,6 @@ construct_runtime!(
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
 		TransactionPause: transaction_pause::{Pallet, Storage, Call, Event<T>},
 		Balances: pallet_balances::{Pallet, Storage, Call, Event<T>},
-		Tokens: orml_tokens::{Pallet, Storage, Call, Event<T>},
 	}
 );
 

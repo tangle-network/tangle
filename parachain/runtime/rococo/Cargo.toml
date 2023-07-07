@@ -27,27 +27,8 @@ pallet-dkg-proposal-handler = { workspace = true }
 pallet-dkg-proposals = { workspace = true }
 pallet-bridge-registry = { workspace = true }
 
-# Protocol Substrate Dependencies
-pallet-asset-registry = { workspace = true }
+# Webb Substrate Dependencies
 pallet-ecdsa-claims = { workspace = true }
-pallet-hasher = { workspace = true }
-pallet-key-storage = { workspace = true }
-pallet-linkable-tree = { workspace = true }
-pallet-linkable-tree-rpc-runtime-api = { workspace = true }
-pallet-mt = { workspace = true }
-pallet-mt-rpc-runtime-api = { workspace = true }
-pallet-signature-bridge = { workspace = true }
-pallet-token-wrapper = { workspace = true }
-pallet-token-wrapper-handler = { workspace = true }
-pallet-vanchor = { workspace = true }
-pallet-vanchor-handler = { workspace = true }
-pallet-vanchor-verifier = { workspace = true }
-webb-primitives = { workspace = true }
-
-orml-benchmarking = { workspace = true, optional = true }
-orml-currencies = { workspace = true }
-orml-tokens = { workspace = true }
-orml-traits = { workspace = true }
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies
@@ -123,7 +104,7 @@ pallet-transaction-pause = { workspace = true }
 tangle-primitives = { workspace = true }
 
 [features]
-default = ["std"]
+default = ["std", "with-rocksdb-weights"]
 std = [
   "codec/std",
   "scale-info/std",
@@ -185,25 +166,6 @@ std = [
   "pallet-dkg-proposal-handler/std",
   "pallet-bridge-registry/std",
 
-  # Protocol Substrate
-  "webb-primitives/std",
-  "pallet-hasher/std",
-  "pallet-mt/std",
-  "pallet-linkable-tree/std",
-  "pallet-mt-rpc-runtime-api/std",
-  "pallet-linkable-tree-rpc-runtime-api/std",
-  "orml-currencies/std",
-  "orml-tokens/std",
-  "orml-traits/std",
-  "pallet-asset-registry/std",
-  "pallet-signature-bridge/std",
-  "pallet-token-wrapper/std",
-  "pallet-token-wrapper-handler/std",
-  "orml-benchmarking/std",
-  "pallet-vanchor/std",
-  "pallet-vanchor-handler/std",
-  "pallet-vanchor-verifier/std",
-
   'nimbus-primitives/std',
   'pallet-aura-style-filter/std',
   'pallet-author-inherent/std',
@@ -213,6 +175,23 @@ std = [
   "pallet-parachain-staking/std",
   "tangle-primitives/std",
   "pallet-transaction-pause/std",
+
+	# Frontier
+	"fp-account/std",
+	"fp-evm/std",
+	"fp-rpc/std",
+	"fp-self-contained/std",
+
+	# Frontier FRAME
+	"pallet-base-fee/std",
+	"pallet-dynamic-fee/std",
+	"pallet-ethereum/std",
+	"pallet-evm/std",
+	"pallet-evm-chain-id/std",
+	"pallet-evm-precompile-modexp/std",
+	"pallet-evm-precompile-sha3fips/std",
+	"pallet-evm-precompile-simple/std",
+	"pallet-hotfix-sufficients/std",
 ]
 runtime-benchmarks = [
   "hex-literal",
@@ -227,14 +206,6 @@ runtime-benchmarks = [
   "xcm-builder/runtime-benchmarks",
   "pallet-collective/runtime-benchmarks",
 
-  # protocol-substrate deps
-  "pallet-signature-bridge/runtime-benchmarks",
-  "pallet-mt/runtime-benchmarks",
-  "pallet-linkable-tree/runtime-benchmarks",
-  "pallet-hasher/runtime-benchmarks",
-  "pallet-asset-registry/runtime-benchmarks",
-  "pallet-token-wrapper/runtime-benchmarks",
-
   # dkg deps
   "pallet-dkg-metadata/runtime-benchmarks",
   "pallet-dkg-proposals/runtime-benchmarks",
@@ -242,8 +213,15 @@ runtime-benchmarks = [
 
   # local deps
   "pallet-parachain-staking/runtime-benchmarks",
+
+  # Frontier
+	"pallet-ethereum/runtime-benchmarks",
+	"pallet-evm/runtime-benchmarks",
+	"pallet-hotfix-sufficients/runtime-benchmarks",
 ]
 try-runtime = [
   "frame-executive/try-runtime",
   "pallet-parachain-staking/try-runtime",
 ]
+with-rocksdb-weights = []
+with-paritydb-weights = []

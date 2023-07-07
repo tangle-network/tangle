@@ -21,6 +21,8 @@ pub type Signature = MultiSignature;
 /// Some way of identifying an account on the chain. We intentionally make it equivalent
 /// to the public key of our transaction signing scheme.
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+/// The type for looking up accounts.
+pub type AccountIndex = u32;
 /// Balance of an account.
 pub type Balance = u128;
 /// Index of a transaction in the chain.

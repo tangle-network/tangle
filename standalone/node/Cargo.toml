@@ -34,13 +34,6 @@ rand = { workspace = true }
 # Light client dependencies
 finality-update-verify = { workspace = true }
 
-# Protocol Substrate
-pallet-linkable-tree-rpc = { workspace = true }
-pallet-linkable-tree-rpc-runtime-api = { workspace = true }
-pallet-mt-rpc = { workspace = true }
-pallet-mt-rpc-runtime-api = { workspace = true }
-webb-primitives = { workspace = true }
-
 # DKG dependencies
 dkg-gadget = { workspace = true }
 dkg-primitives = { workspace = true }
@@ -86,12 +79,20 @@ pallet-im-online = { workspace = true }
 pallet-transaction-payment = { workspace = true }
 pallet-transaction-payment-rpc = { workspace = true }
 sc-transaction-pool-api = { workspace = true }
-
-ark-bn254 = { workspace = true }
-arkworks-setups = { workspace = true }
-ark-circom = { workspace = true }
-ark-serialize = { workspace = true }
 wasmer = { version = "2.3" }
+
+# Frontier
+fc-cli = { workspace = true }
+fc-consensus = { workspace = true }
+fc-db = { workspace = true }
+fc-mapping-sync = { workspace = true }
+fc-rpc = { workspace = true }
+fc-rpc-core = { workspace = true }
+fc-storage = { workspace = true }
+fp-account = { workspace = true }
+fp-dynamic-fee = { workspace = true, features = ["default"] }
+fp-evm = { workspace = true, features = ["default"] }
+fp-rpc = { workspace = true, features = ["default"] }
 
 [features]
 default = ["circom-backend"]

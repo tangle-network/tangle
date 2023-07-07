@@ -43,25 +43,8 @@ dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v
 dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.2.4" }
 tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
 
-# Protocol Substrate Dependencies
-pallet-asset-registry = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
+# Tangle Dependencies
 pallet-ecdsa-claims = { path = "pallets/claims", default-features = false }
-pallet-hasher = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-key-storage = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-linkable-tree = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-linkable-tree-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-mt = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-mt-rpc-runtime-api = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-signature-bridge = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-token-wrapper = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-token-wrapper-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-vanchor = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-vanchor-handler = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-pallet-vanchor-verifier = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, tag = "v0.2.0" }
-webb-primitives = { git = "https://github.com/webb-tools/protocol-substrate.git",  default-features = false, features = ["hashing", "verifying"], tag = "v0.2.0" }
-pallet-linkable-tree-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, tag = "v0.2.0" }
-pallet-mt-rpc = { git = "https://github.com/webb-tools/protocol-substrate.git", default-features = false, tag = "v0.2.0" }
-substrate-fixed = { git = "https://github.com/encointer/substrate-fixed", default-features = false }
 
 # Orml dependencies
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.39", default-features = false }
@@ -159,6 +142,39 @@ pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "po
 pallet-identity = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.39", default-features = false }
 pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.39", default-features = false }
 
+# Frontier Client
+fc-cli = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fc-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39" }
+fc-db = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fc-mapping-sync = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fc-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fc-rpc-core = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39" }
+fc-storage = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39" }
+
+# Frontier Primitive
+fp-account = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fp-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fp-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fp-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fp-evm = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fp-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fp-self-contained = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+fp-storage = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+
+# Frontier FRAME
+pallet-base-fee = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+pallet-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+pallet-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+pallet-evm = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+pallet-evm-chain-id = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+pallet-evm-precompile-modexp = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+pallet-evm-precompile-sha3fips = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+pallet-evm-precompile-simple = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+pallet-evm-test-vector-support = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39" }
+pallet-hotfix-sufficients = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.39", default-features = false }
+
+# Parachain dependencies
+substrate-fixed = { git = "https://github.com/encointer/substrate-fixed", default-features = false }
 pallet-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.39", default-features = false }
 polkadot-parachain = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.39", default-features = false }
 polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.39" }
@@ -198,11 +214,6 @@ pallet-author-inherent = { git = "https://github.com/webb-tools/nimbus", branch 
 jsonrpsee = { version = "0.16.2", features = ["server"] }
 pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.39" }
 sc-transaction-pool-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.39" }
-
-ark-bn254 = { version = "^0.3.0", features = ["curve"] }
-arkworks-setups = { version = "1.0.0", features = ["r1cs"] }
-ark-circom = { git = "https://github.com/vacp2p/ark-circom", branch = "wasm", default-features = false, features = ["circom-2"] }
-ark-serialize = { version = "^0.3.0", default-features = false }
 
 # Webb dependencies
 tangle-primitives = { path = 'primitives', default-features = false }
