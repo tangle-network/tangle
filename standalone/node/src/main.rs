@@ -7,6 +7,7 @@ mod service;
 mod benchmarking;
 mod cli;
 mod command;
+mod eth;
 mod rpc;
 mod testnet_fixtures;
 

@@ -1,45 +1,30 @@
+// This file is part of Webb.
+
+// Copyright (C) 2021 Webb Technologies Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use crate::{precompiles::FrontierPrecompiles, *};
 
-use codec::{Decode, Encode};
-use sp_api::impl_runtime_apis;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{
-	crypto::{ByteArray, KeyTypeId},
-	OpaqueMetadata, H160, H256, U256,
-};
-use sp_runtime::{
-	create_runtime_str, generic, impl_opaque_keys,
-	traits::{
-		AccountIdLookup, BlakeTwo256, Block as BlockT, DispatchInfoOf, Dispatchable, Get,
-		IdentifyAccount, NumberFor, PostDispatchInfoOf, UniqueSaturatedInto, Verify,
-	},
-	transaction_validity::{TransactionSource, TransactionValidity, TransactionValidityError},
-	ApplyExtrinsicResult, ConsensusEngineId, Perbill, Permill,
-};
+use frame_support::{parameter_types, traits::FindAuthor, weights::Weight};
+use sp_core::{crypto::ByteArray, H160, U256};
+use sp_runtime::{traits::BlakeTwo256, ConsensusEngineId, Permill};
 use sp_std::{marker::PhantomData, prelude::*};
-use sp_version::RuntimeVersion;
-// Substrate FRAME
-#[cfg(feature = "with-paritydb-weights")]
-use frame_support::weights::constants::ParityDbWeight as RuntimeDbWeight;
-#[cfg(feature = "with-rocksdb-weights")]
-use frame_support::weights::constants::RocksDbWeight as RuntimeDbWeight;
-use frame_support::{
-	construct_runtime, parameter_types,
-	traits::{ConstU32, ConstU8, FindAuthor, KeyOwnerProofSystem, OnTimestampSet},
-	weights::{constants::WEIGHT_REF_TIME_PER_MILLIS, ConstantMultiplier, IdentityFee, Weight},
-};
-use pallet_grandpa::{
-	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
-};
-use pallet_transaction_payment::CurrencyAdapter;
 // Frontier
-use fp_account::EthereumSignature;
 use fp_evm::weight_per_gas;
-use fp_rpc::TransactionStatus;
-use pallet_ethereum::{Call::transact, PostLogContent, Transaction as EthereumTransaction};
-use pallet_evm::{
-	Account as EVMAccount, EnsureAccountId20, FeeCalculator, HashedAddressMapping, Runner,
-};
+use pallet_ethereum::PostLogContent;
+use pallet_evm::HashedAddressMapping;
 
 impl pallet_evm_chain_id::Config for Runtime {}
 
