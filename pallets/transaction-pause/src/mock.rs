@@ -18,7 +18,7 @@
 use super::*;
 use frame_support::{
 	construct_runtime, ord_parameter_types,
-	traits::{ ConstU128, ConstU32, ConstU64, Everything },
+	traits::{ConstU128, ConstU32, ConstU64, Everything},
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
