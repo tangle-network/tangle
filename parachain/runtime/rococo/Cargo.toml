@@ -176,22 +176,22 @@ std = [
   "tangle-primitives/std",
   "pallet-transaction-pause/std",
 
-	# Frontier
-	"fp-account/std",
-	"fp-evm/std",
-	"fp-rpc/std",
-	"fp-self-contained/std",
+  # Frontier
+  "fp-account/std",
+  "fp-evm/std",
+  "fp-rpc/std",
+  "fp-self-contained/std",
 
-	# Frontier FRAME
-	"pallet-base-fee/std",
-	"pallet-dynamic-fee/std",
-	"pallet-ethereum/std",
-	"pallet-evm/std",
-	"pallet-evm-chain-id/std",
-	"pallet-evm-precompile-modexp/std",
-	"pallet-evm-precompile-sha3fips/std",
-	"pallet-evm-precompile-simple/std",
-	"pallet-hotfix-sufficients/std",
+  # Frontier FRAME
+  "pallet-base-fee/std",
+  "pallet-dynamic-fee/std",
+  "pallet-ethereum/std",
+  "pallet-evm/std",
+  "pallet-evm-chain-id/std",
+  "pallet-evm-precompile-modexp/std",
+  "pallet-evm-precompile-sha3fips/std",
+  "pallet-evm-precompile-simple/std",
+  "pallet-hotfix-sufficients/std",
 ]
 runtime-benchmarks = [
   "hex-literal",
@@ -215,9 +215,9 @@ runtime-benchmarks = [
   "pallet-parachain-staking/runtime-benchmarks",
 
   # Frontier
-	"pallet-ethereum/runtime-benchmarks",
-	"pallet-evm/runtime-benchmarks",
-	"pallet-hotfix-sufficients/runtime-benchmarks",
+  "pallet-ethereum/runtime-benchmarks",
+  "pallet-evm/runtime-benchmarks",
+  "pallet-hotfix-sufficients/runtime-benchmarks",
 ]
 try-runtime = [
   "frame-executive/try-runtime",

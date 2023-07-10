@@ -215,23 +215,21 @@ std = [
 	"fp-self-contained/std",
 
 	# Frontier FRAME
-	"pallet-base-fee/std",
-	"pallet-dynamic-fee/std",
-	"pallet-ethereum/std",
-	"pallet-evm/std",
-	"pallet-evm-chain-id/std",
-	"pallet-evm-precompile-modexp/std",
-	"pallet-evm-precompile-sha3fips/std",
-	"pallet-evm-precompile-simple/std",
+  "pallet-base-fee/std",
+  "pallet-dynamic-fee/std",
+  "pallet-ethereum/std",
+  "pallet-evm/std",
+  "pallet-evm-chain-id/std",
+  "pallet-evm-precompile-modexp/std",
+  "pallet-evm-precompile-sha3fips/std",
+  "pallet-evm-precompile-simple/std",
   "pallet-evm-precompile-blake2/std",
   "pallet-evm-precompile-bn128/std",
   "pallet-evm-precompile-curve25519/std",
   "pallet-evm-precompile-dispatch/std",
   "pallet-evm-precompile-ed25519/std",
-	"pallet-hotfix-sufficients/std",
+  "pallet-hotfix-sufficients/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests",]
-arkworks-backend = []
-circom-backend = []
 with-rocksdb-weights = []
 with-paritydb-weights = []

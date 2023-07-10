@@ -98,10 +98,8 @@ fp-evm = { workspace = true, features = ["default"] }
 fp-rpc = { workspace = true, features = ["default"] }
 
 [features]
-default = ["circom-backend", "with-rocksdb-weights"]
+default = ["with-rocksdb-weights"]
 runtime-benchmarks = ["tangle-runtime/runtime-benchmarks"]
 integration-tests = ["tangle-runtime/integration-tests"]
-arkworks-backend = ["tangle-runtime/arkworks-backend"]
-circom-backend = ["tangle-runtime/circom-backend"]
 with-rocksdb-weights = ["tangle-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-runtime/with-paritydb-weights"]
