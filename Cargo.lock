@@ -6484,7 +6484,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6835,7 +6835,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-parachain-staking"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7031,7 +7031,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -11309,7 +11309,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -11320,7 +11320,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "ark-bn254",
  "ark-circom",
@@ -11382,7 +11382,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone-runtime"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
