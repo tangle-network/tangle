@@ -108,6 +108,12 @@ pallet-evm-chain-id = { workspace = true }
 pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
+pallet-evm-precompile-blake2 = { workspace = true }
+pallet-evm-precompile-bn128 = { workspace = true }
+pallet-evm-precompile-curve25519 = { workspace = true }
+pallet-evm-precompile-dispatch = { workspace = true }
+pallet-evm-precompile-ed25519 = { workspace = true }
+
 pallet-hotfix-sufficients = { workspace = true }
 
 [features]
@@ -212,6 +218,11 @@ std = [
 	"pallet-evm-precompile-modexp/std",
 	"pallet-evm-precompile-sha3fips/std",
 	"pallet-evm-precompile-simple/std",
+  "pallet-evm-precompile-blake2/std",
+  "pallet-evm-precompile-bn128/std",
+  "pallet-evm-precompile-curve25519/std",
+  "pallet-evm-precompile-dispatch/std",
+  "pallet-evm-precompile-ed25519/std",
 	"pallet-hotfix-sufficients/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests",]
