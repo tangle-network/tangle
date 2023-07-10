@@ -46,10 +46,6 @@ dkg-runtime-primitives = { workspace = true }
 pallet-bridge-registry = { workspace = true }
 tangle-rococo-runtime = { workspace = true }
 
-# Arkworks
-ark-bn254 = { workspace = true }
-arkworks-setups = { workspace = true }
-
 # Substrate Dependencies
 frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }

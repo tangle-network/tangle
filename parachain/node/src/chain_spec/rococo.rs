@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::chain_spec::*;
-use arkworks_setups::{common::setup_params, Curve};
 use cumulus_primitives_core::ParaId;
 
 use hex_literal::hex;
@@ -21,9 +20,9 @@ use sc_service::ChainType;
 use sp_core::{crypto::UncheckedInto, sr25519};
 
 use tangle_rococo_runtime::{
-	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, HasherBn254Config, ImOnlineConfig,
-	ImOnlineId, MerkleTreeBn254Config,
-	ParachainStakingConfig, VAnchorBn254Config, VAnchorVerifierConfig, UNIT,
+	AccountId, AssetRegistryConfig, AuraId, ClaimsConfig, DKGId, ImOnlineConfig,
+	ImOnlineId,
+	ParachainStakingConfig, UNIT,
 };
 
 /// Tangle rococo bootnodes
@@ -171,23 +170,6 @@ fn rococo_genesis(
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
 ) -> tangle_rococo_runtime::GenesisConfig {
-	let curve_bn254 = Curve::Bn254;
-
-	log::info!("Bn254 x5 w3 params");
-	let bn254_x5_3_params = setup_params::<ark_bn254::Fr>(curve_bn254, 5, 3);
-
-	log::info!("Verifier params for vanchor");
-	let vanchor_verifier_bn254_params = {
-		let vk_bytes =
-			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
-		vk_bytes.to_vec().try_into().unwrap()
-	};
-	let vanchor_verifier_16x2_bn254_params = {
-		let vk_bytes =
-			include_bytes!("../../../verifying_keys/vanchor/bn254/x5/2-2-2/verifying_key.bin");
-		vk_bytes.to_vec().try_into().unwrap()
-	};
-
 	tangle_rococo_runtime::GenesisConfig {
 		system: tangle_rococo_runtime::SystemConfig {
 			code: tangle_rococo_runtime::WASM_BINARY
@@ -226,32 +208,6 @@ fn rococo_genesis(
 		},
 		dkg_proposals: Default::default(),
 		bridge_registry: Default::default(),
-		asset_registry: AssetRegistryConfig {
-			asset_names: vec![],
-			native_asset_name: b"TNT".to_vec().try_into().unwrap(),
-			native_existential_deposit: tangle_rococo_runtime::EXISTENTIAL_DEPOSIT,
-		},
-		hasher_bn_254: HasherBn254Config {
-			parameters: Some(bn254_x5_3_params.to_bytes().try_into().unwrap()),
-			phantom: Default::default(),
-		},
-		merkle_tree_bn_254: MerkleTreeBn254Config {
-			phantom: Default::default(),
-			default_hashes: None,
-		},
-		v_anchor_bn_254: VAnchorBn254Config {
-			max_deposit_amount: 1_000_000 * UNIT,
-			min_withdraw_amount: 0,
-			vanchors: vec![(0, 2)],
-			phantom: Default::default(),
-		},
-		v_anchor_verifier: VAnchorVerifierConfig {
-			parameters: Some(vec![
-				(2, 2, vanchor_verifier_bn254_params),
-				(2, 16, vanchor_verifier_16x2_bn254_params),
-			]),
-			phantom: Default::default(),
-		},
 		treasury: Default::default(),
 		vesting: Default::default(),
 		parachain_staking: ParachainStakingConfig {

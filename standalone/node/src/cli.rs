@@ -16,26 +16,32 @@
 #![allow(clippy::all)]
 use sc_cli::RunCmd;
 
+use crate::service::EthConfiguration;
+
 #[derive(Debug, clap::Parser)]
 pub struct Cli {
-	#[clap(subcommand)]
+	#[command(subcommand)]
 	pub subcommand: Option<Subcommand>,
 
-	#[clap(flatten)]
+	#[allow(missing_docs)]
+	#[command(flatten)]
 	pub run: RunCmd,
 
 	#[arg(long, short = 'o')]
 	pub output_path: Option<std::path::PathBuf>,
+
+	#[command(flatten)]
+	pub eth: EthConfiguration,
 }
 
 #[derive(Debug, clap::Subcommand)]
 pub enum Subcommand {
 	/// Key management cli utilities
-	#[clap(subcommand)]
+	#[command(subcommand)]
 	Key(sc_cli::KeySubcommand),
 
 	/// DKG key management cli utilities
-	#[clap(subcommand)]
+	#[command(subcommand)]
 	DKGKey(dkg_primitives::dkg_key_cli::DKGKeySubcommand),
 
 	/// Build a chain specification.
@@ -60,7 +66,7 @@ pub enum Subcommand {
 	Revert(sc_cli::RevertCmd),
 
 	/// Sub-commands concerned with benchmarking.
-	#[clap(subcommand)]
+	#[command(subcommand)]
 	Benchmark(frame_benchmarking_cli::BenchmarkCmd),
 
 	/// Try some command against runtime state.
@@ -73,4 +79,7 @@ pub enum Subcommand {
 
 	/// Db meta columns information.
 	ChainInfo(sc_cli::ChainInfoCmd),
+
+	/// Db meta columns information.
+	FrontierDb(fc_cli::FrontierDbCmd),
 }

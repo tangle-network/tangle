@@ -15,9 +15,15 @@
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
+pub use crate::eth::{db_config_dir, EthConfiguration};
+use crate::eth::{
+	new_frontier_partial, spawn_frontier_tasks, FrontierBackend, FrontierBlockImport,
+	FrontierPartialComponents,
+};
 use codec::Encode;
 use dkg_gadget::debug_logger::DebugLogger;
 use sc_client_api::BlockBackend;
+use sc_consensus::BasicQueue;
 use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_finality_grandpa::SharedVoterState;
@@ -25,13 +31,14 @@ use sc_keystore::LocalKeystore;
 use sc_network_common::service::NetworkStateInfo;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
-use sp_api::ProvideRuntimeApi;
+use sp_api::{ProvideRuntimeApi, TransactionFor};
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
-use sp_core::Pair;
-use sp_runtime::{generic::Era, SaturatedConversion};
+use sp_core::{Pair, U256};
+use sp_runtime::{generic::Era, traits::BlakeTwo256, SaturatedConversion};
+use sp_trie::PrefixedMemoryDB;
 use std::{sync::Arc, time::Duration};
 use substrate_frame_rpc_system::AccountNonceApi;
-use tangle_runtime::{self, opaque::Block, RuntimeApi};
+use tangle_runtime::{self, opaque::Block, RuntimeApi, TransactionConverter};
 
 pub fn fetch_nonce(client: &FullClient, account: sp_core::sr25519::Pair) -> u32 {
 	let best_hash = client.chain_info().best_hash;
@@ -63,8 +70,11 @@ impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 
 pub(crate) type FullClient =
 	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
-type FullBackend = sc_service::TFullBackend<Block>;
+pub(crate) type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
+
+type GrandpaLinkHalf<Client> = sc_finality_grandpa::LinkHalf<Block, Client, FullSelectChain>;
+type BoxBlockImport<Client> = sc_consensus::BoxBlockImport<Block, TransactionFor<Client, Block>>;
 
 /// Create a transaction using the given `call`.
 ///
@@ -129,6 +139,7 @@ pub fn create_extrinsic(
 
 pub fn new_partial(
 	config: &Configuration,
+	eth_config: &EthConfiguration,
 ) -> Result<
 	sc_service::PartialComponents<
 		FullClient,
@@ -137,14 +148,10 @@ pub fn new_partial(
 		sc_consensus::DefaultImportQueue<Block, FullClient>,
 		sc_transaction_pool::FullPool<Block, FullClient>,
 		(
-			sc_finality_grandpa::GrandpaBlockImport<
-				FullBackend,
-				Block,
-				FullClient,
-				FullSelectChain,
-			>,
-			sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
+			BoxBlockImport<FullClient>,
+			GrandpaLinkHalf<FullClient>,
 			Option<Telemetry>,
+			Arc<FrontierBackend>,
 		),
 	>,
 	ServiceError,
@@ -201,24 +208,34 @@ pub fn new_partial(
 		telemetry.as_ref().map(|x| x.handle()),
 	)?;
 
+	let frontier_backend =
+		Arc::new(FrontierBackend::open(client.clone(), &config.database, &db_config_dir(config))?);
+
+	let frontier_block_import = FrontierBlockImport::new(
+		grandpa_block_import.clone(),
+		client.clone(),
+		frontier_backend.clone(),
+	);
+
 	let slot_duration = sc_consensus_aura::slot_duration(&*client)?;
+	let target_gas_price = eth_config.target_gas_price;
+	let create_inherent_data_providers = move |_, ()| async move {
+		let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
+		let slot =
+			sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+				*timestamp,
+				slot_duration,
+			);
+		let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
+		Ok((slot, timestamp, dynamic_fee))
+	};
 
 	let import_queue =
 		sc_consensus_aura::import_queue::<AuraPair, _, _, _, _, _>(ImportQueueParams {
-			block_import: grandpa_block_import.clone(),
+			block_import: frontier_block_import.clone(),
 			justification_import: Some(Box::new(grandpa_block_import.clone())),
 			client: client.clone(),
-			create_inherent_data_providers: move |_, ()| async move {
-				let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
-
-				let slot =
-					sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
-						*timestamp,
-						slot_duration,
-					);
-
-				Ok((slot, timestamp))
-			},
+			create_inherent_data_providers,
 			spawner: &task_manager.spawn_essential_handle(),
 			registry: config.prometheus_registry(),
 			check_for_equivocation: Default::default(),
@@ -234,7 +251,7 @@ pub fn new_partial(
 		keystore_container,
 		select_chain,
 		transaction_pool,
-		other: (grandpa_block_import, grandpa_link, telemetry),
+		other: (Box::new(frontier_block_import), grandpa_link, telemetry, frontier_backend),
 	})
 }
 
@@ -248,6 +265,7 @@ fn remote_keystore(_url: &String) -> Result<Arc<LocalKeystore>, &'static str> {
 /// Builds a new service for a full client.
 pub fn new_full(
 	mut config: Configuration,
+	eth_config: EthConfiguration,
 	debug_output: Option<std::path::PathBuf>,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
@@ -258,8 +276,11 @@ pub fn new_full(
 		mut keystore_container,
 		select_chain,
 		transaction_pool,
-		other: (block_import, grandpa_link, mut telemetry),
-	} = new_partial(&config)?;
+		other: (block_import, grandpa_link, mut telemetry, frontier_backend),
+	} = new_partial(&config, &eth_config)?;
+
+	let FrontierPartialComponents { filter_pool, fee_history_cache, fee_history_cache_limit } =
+		new_frontier_partial(&eth_config)?;
 
 	if let Some(url) = &config.keystore_remote {
 		match remote_keystore(url) {
@@ -327,16 +348,58 @@ pub fn new_full(
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
 
+	// for ethereum-compatibility rpc.
+	config.rpc_id_provider = Some(Box::new(fc_rpc::EthereumSubIdProvider));
+	let overrides = crate::rpc::overrides_handle(client.clone());
+	let eth_rpc_params = crate::rpc::eth::EthDeps {
+		client: client.clone(),
+		pool: transaction_pool.clone(),
+		graph: transaction_pool.pool().clone(),
+		converter: Some(TransactionConverter),
+		is_authority: config.role.is_authority(),
+		enable_dev_signer: eth_config.enable_dev_signer,
+		network: network.clone(),
+		frontier_backend: frontier_backend.clone(),
+		overrides: overrides.clone(),
+		block_data_cache: Arc::new(fc_rpc::EthBlockDataCacheTask::new(
+			task_manager.spawn_handle(),
+			overrides.clone(),
+			eth_config.eth_log_block_cache,
+			eth_config.eth_statuses_cache,
+			prometheus_registry.clone(),
+		)),
+		filter_pool: filter_pool.clone(),
+		max_past_logs: eth_config.max_past_logs,
+		fee_history_cache: fee_history_cache.clone(),
+		fee_history_cache_limit,
+		execute_gas_limit_multiplier: eth_config.execute_gas_limit_multiplier,
+	};
+
 	let rpc_extensions_builder = {
 		let client = client.clone();
 		let pool = transaction_pool.clone();
 
-		Box::new(move |deny_unsafe, _| {
-			let deps =
-				crate::rpc::FullDeps { client: client.clone(), pool: pool.clone(), deny_unsafe };
-			crate::rpc::create_full(deps).map_err(Into::into)
+		Box::new(move |deny_unsafe, subscription_task_executor| {
+			let deps = crate::rpc::FullDeps {
+				client: client.clone(),
+				pool: pool.clone(),
+				deny_unsafe,
+				eth: eth_rpc_params.clone(),
+			};
+			crate::rpc::create_full(deps, subscription_task_executor).map_err(Into::into)
 		})
 	};
+
+	spawn_frontier_tasks(
+		&task_manager,
+		client.clone(),
+		backend.clone(),
+		frontier_backend.clone(),
+		filter_pool,
+		overrides,
+		fee_history_cache,
+		fee_history_cache_limit,
+	);
 
 	if role.is_authority() {
 		dkg_primitives::utils::insert_controller_account_keys_into_keystore(
@@ -475,4 +538,24 @@ pub fn new_full(
 
 	network_starter.start_network();
 	Ok(task_manager)
+}
+
+pub fn new_chain_ops(
+	config: &mut Configuration,
+	eth_config: &EthConfiguration,
+) -> Result<
+	(
+		Arc<FullClient>,
+		Arc<FullBackend>,
+		BasicQueue<Block, PrefixedMemoryDB<BlakeTwo256>>,
+		TaskManager,
+		Arc<FrontierBackend>,
+	),
+	ServiceError,
+> {
+	config.keystore = sc_service::config::KeystoreConfig::InMemory;
+	let sc_service::PartialComponents {
+		client, backend, import_queue, task_manager, other, ..
+	} = new_partial(config, eth_config)?;
+	Ok((client, backend, import_queue, task_manager, other.3))
 }
