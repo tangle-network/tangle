@@ -18,7 +18,7 @@
 use super::*;
 use frame_support::{
 	construct_runtime, ord_parameter_types,
-	traits::{ConstU128, ConstU32, ConstU64, Everything, Nothing},
+	traits::{ ConstU128, ConstU32, ConstU64, Everything },
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
@@ -26,10 +26,7 @@ use sp_runtime::{testing::Header, traits::IdentityLookup};
 
 pub type AccountId = u128;
 pub const ALICE: AccountId = 1;
-pub const STABLE: CurrencyId = 1;
-pub type Amount = i128;
 pub type Balance = u128;
-pub type CurrencyId = u32;
 
 mod transaction_pause {
 	pub use super::super::*;

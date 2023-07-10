@@ -101,7 +101,7 @@ where
 	<Self as sp_api::ApiExt<Block>>::StateBackend: sp_api::StateBackend<BlakeTwo256>,
 {
 }
-
+#[allow(clippy::too_many_arguments)]
 pub fn spawn_frontier_tasks(
 	task_manager: &TaskManager,
 	client: Arc<FullClient>,

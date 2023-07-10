@@ -21,7 +21,7 @@
 
 use std::sync::Arc;
 
-use crate::rpc::eth::EthDeps;
+pub use crate::rpc::eth::EthDeps;
 use jsonrpsee::RpcModule;
 use sc_client_api::{
 	backend::{Backend, StorageProvider},
