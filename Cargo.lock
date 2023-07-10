@@ -2519,7 +2519,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.6#5baaaf7bf01b4ecde5e273e16fec4ee94157b336"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2570,7 +2570,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.6#5baaaf7bf01b4ecde5e273e16fec4ee94157b336"
 dependencies = [
  "hex",
  "lazy_static",
@@ -2587,7 +2587,7 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.6#5baaaf7bf01b4ecde5e273e16fec4ee94157b336"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2614,7 +2614,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.6#5baaaf7bf01b4ecde5e273e16fec4ee94157b336"
 dependencies = [
  "chacha20poly1305",
  "clap 4.3.10",
@@ -2638,7 +2638,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.6#5baaaf7bf01b4ecde5e273e16fec4ee94157b336"
 dependencies = [
  "ethabi 18.0.0",
  "ethereum",
@@ -6349,7 +6349,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.6#5baaaf7bf01b4ecde5e273e16fec4ee94157b336"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-support",
@@ -6421,7 +6421,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.6#5baaaf7bf01b4ecde5e273e16fec4ee94157b336"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6443,7 +6443,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.6#5baaaf7bf01b4ecde5e273e16fec4ee94157b336"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6463,7 +6463,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=thomas/job-manager-caps-and-priorities#8dec5e601c3f20a6f3acdb08d155f37c23f7c630"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.6#5baaaf7bf01b4ecde5e273e16fec4ee94157b336"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
