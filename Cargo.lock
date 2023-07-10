@@ -10765,7 +10765,6 @@ dependencies = [
  "pallet-utility",
  "pallet-vesting",
  "parity-scale-codec",
- "polkadot-primitives",
  "scale-info",
  "serde",
  "sp-api",
