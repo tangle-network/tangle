@@ -32,7 +32,6 @@ use dkg_runtime_primitives::{
 	TypedChainId, UnsignedProposal,
 };
 use frame_support::{pallet_prelude::TransactionPriority, traits::WithdrawReasons};
-use pallet_dkg_proposals::DKGEcdsaToEthereum;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
@@ -404,7 +403,6 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type OnDKGPublicKeyChangeHandler = ();
 	type OffChainAuthId = dkg_runtime_primitives::offchain::crypto::OffchainAuthId;
 	type NextSessionRotation = pallet_dkg_metadata::DKGPeriodicSessions<Period, Offset, Runtime>;
-	type RefreshDelay = RefreshDelay;
 	type KeygenJailSentence = Period;
 	type SigningJailSentence = Period;
 	type SessionPeriod = SessionPeriod;

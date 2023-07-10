@@ -129,7 +129,7 @@ pub const SESSION_PERIOD_BLOCKS: BlockNumber = 20 * crate::time::MINUTES;
 pub const SESSION_PERIOD_BLOCKS: BlockNumber = 10 * crate::time::MINUTES;
 
 #[cfg(not(feature = "integration-tests"))]
-pub const UNSIGNED_PROPOSAL_EXPIRY: BlockNumber = SESSION_PERIOD_BLOCKS / 4;
+pub const UNSIGNED_PROPOSAL_EXPIRY: BlockNumber = SESSION_PERIOD_BLOCKS;
 
 #[cfg(feature = "integration-tests")]
 pub const UNSIGNED_PROPOSAL_EXPIRY: BlockNumber = SESSION_PERIOD_BLOCKS;
