@@ -36,6 +36,8 @@
             pkgs.rustPlatform.bindgenHook
             # Mold Linker for faster builds (only on Linux)
             (lib.optionals pkgs.stdenv.isLinux pkgs.mold)
+            (lib.optionals pkgs.stdenv.isDarwin pkgs.darwin.apple_sdk.frameworks.Security)
+            (lib.optionals pkgs.stdenv.isDarwin pkgs.darwin.apple_sdk.frameworks.SystemConfiguration)
           ];
           buildInputs = [
             # We want the unwrapped version, wrapped comes with nixpkgs' toolchain
@@ -50,7 +52,8 @@
           packages = [ ];
           # Environment variables
           RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
-          LD_LIBRARY_PATH = "${pkgs.gmp}/lib";
+          # Needed for running DKG Node.
+          LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.gmp ];
         };
       });
 }
