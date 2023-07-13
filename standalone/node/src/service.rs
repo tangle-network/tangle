@@ -26,9 +26,8 @@ use sc_client_api::BlockBackend;
 use sc_consensus::BasicQueue;
 use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
 pub use sc_executor::NativeElseWasmExecutor;
-use sc_finality_grandpa::SharedVoterState;
-use sc_keystore::LocalKeystore;
-use sc_network_common::service::NetworkStateInfo;
+use sc_consensus_grandpa::SharedVoterState;
+use sc_network::NetworkStateInfo;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_api::{ProvideRuntimeApi, TransactionFor};
@@ -73,7 +72,7 @@ pub(crate) type FullClient =
 pub(crate) type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
-type GrandpaLinkHalf<Client> = sc_finality_grandpa::LinkHalf<Block, Client, FullSelectChain>;
+type GrandpaLinkHalf<Client> = sc_consensus_grandpa::LinkHalf<Block, Client, FullSelectChain>;
 type BoxBlockImport<Client> = sc_consensus::BoxBlockImport<Block, TransactionFor<Client, Block>>;
 
 /// Create a transaction using the given `call`.
@@ -156,10 +155,6 @@ pub fn new_partial(
 	>,
 	ServiceError,
 > {
-	if config.keystore_remote.is_some() {
-		return Err(ServiceError::Other("Remote Keystores are not supported.".into()))
-	}
-
 	let telemetry = config
 		.telemetry_endpoints
 		.clone()
@@ -171,12 +166,7 @@ pub fn new_partial(
 		})
 		.transpose()?;
 
-	let executor = NativeElseWasmExecutor::<ExecutorDispatch>::new(
-		config.wasm_method,
-		config.default_heap_pages,
-		config.max_runtime_instances,
-		config.runtime_cache_size,
-	);
+	let executor = sc_service::new_native_or_wasm_executor(config);
 
 	let (client, backend, keystore_container, task_manager) =
 		sc_service::new_full_parts::<Block, RuntimeApi, _>(
@@ -201,7 +191,7 @@ pub fn new_partial(
 		client.clone(),
 	);
 
-	let (grandpa_block_import, grandpa_link) = sc_finality_grandpa::block_import(
+	let (grandpa_block_import, grandpa_link) = sc_consensus_grandpa::block_import(
 		client.clone(),
 		&(client.clone() as Arc<_>),
 		select_chain.clone(),
@@ -255,16 +245,9 @@ pub fn new_partial(
 	})
 }
 
-fn remote_keystore(_url: &String) -> Result<Arc<LocalKeystore>, &'static str> {
-	// FIXME: here would the concrete keystore be built,
-	//        must return a concrete type (NOT `LocalKeystore`) that
-	//        implements `CryptoStore` and `SyncCryptoStore`
-	Err("Remote Keystore not supported.")
-}
-
 /// Builds a new service for a full client.
 pub fn new_full(
-	mut config: Configuration,
+	config: Configuration,
 	eth_config: EthConfiguration,
 	debug_output: Option<std::path::PathBuf>,
 ) -> Result<TaskManager, ServiceError> {
@@ -273,7 +256,7 @@ pub fn new_full(
 		backend,
 		mut task_manager,
 		import_queue,
-		mut keystore_container,
+		keystore_container,
 		select_chain,
 		transaction_pool,
 		other: (block_import, grandpa_link, mut telemetry, frontier_backend),
@@ -282,48 +265,38 @@ pub fn new_full(
 	let FrontierPartialComponents { filter_pool, fee_history_cache, fee_history_cache_limit } =
 		new_frontier_partial(&eth_config)?;
 
-	if let Some(url) = &config.keystore_remote {
-		match remote_keystore(url) {
-			Ok(k) => keystore_container.set_remote_keystore(k),
-			Err(e) =>
-				return Err(ServiceError::Other(format!(
-					"Error hooking up remote keystore for {}: {}",
-					url, e
-				))),
-		};
-	}
-	let grandpa_protocol_name = sc_finality_grandpa::protocol_standard_name(
+	let mut net_config = sc_network::config::FullNetworkConfiguration::new(&config.network);
+
+	let grandpa_protocol_name = sc_consensus_grandpa::protocol_standard_name(
 		&client.block_hash(0).ok().flatten().expect("Genesis block exists; qed"),
 		&config.chain_spec,
 	);
 
-	config
-		.network
-		.extra_sets
-		.push(sc_finality_grandpa::grandpa_peers_set_config(grandpa_protocol_name.clone()));
+	net_config.add_notification_protocol(sc_consensus_grandpa::grandpa_peers_set_config(
+		grandpa_protocol_name.clone(),
+	));
 
 	let keygen_network_protocol_name = dkg_gadget::DKG_KEYGEN_PROTOCOL_NAME;
 	let signing_network_protocol_name = dkg_gadget::DKG_SIGNING_PROTOCOL_NAME;
 
-	config
-		.network
-		.extra_sets
-		.push(dkg_gadget::dkg_peers_set_config(keygen_network_protocol_name.into()));
+	net_config.add_notification_protocol(dkg_gadget::dkg_peers_set_config(
+		keygen_network_protocol_name.into(),
+	));
 
-	config
-		.network
-		.extra_sets
-		.push(dkg_gadget::dkg_peers_set_config(signing_network_protocol_name.into()));
+	net_config.add_notification_protocol(dkg_gadget::dkg_peers_set_config(
+		signing_network_protocol_name.into(),
+	));
 
-	let warp_sync = Arc::new(sc_finality_grandpa::warp_proof::NetworkProvider::new(
+	let warp_sync = Arc::new(sc_consensus_grandpa::warp_proof::NetworkProvider::new(
 		backend.clone(),
 		grandpa_link.shared_authority_set().clone(),
 		Vec::default(),
 	));
 
-	let (network, system_rpc_tx, tx_handler_controller, network_starter) =
+	let (network, system_rpc_tx, tx_handler_controller, network_starter, sync_service) =
 		sc_service::build_network(sc_service::BuildNetworkParams {
 			config: &config,
+			net_config,
 			client: client.clone(),
 			transaction_pool: transaction_pool.clone(),
 			spawn_handle: task_manager.spawn_handle(),
@@ -410,13 +383,14 @@ pub fn new_full(
 	let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),
-		keystore: keystore_container.sync_keystore(),
+		keystore: keystore_container.keystore(),
 		task_manager: &mut task_manager,
 		transaction_pool: transaction_pool.clone(),
 		rpc_builder: rpc_extensions_builder,
 		backend: backend.clone(),
 		system_rpc_tx,
 		tx_handler_controller,
+		sync_service: sync_service.clone(),
 		config,
 		telemetry: telemetry.as_mut(),
 	})?;
@@ -429,10 +403,10 @@ pub fn new_full(
 		let dkg_params = dkg_gadget::DKGParams {
 			client: client.clone(),
 			backend: backend.clone(),
-			key_store: Some(keystore_container.sync_keystore()),
+			key_store: Some(keystore_container.keystore()),
 			network: network.clone(),
 			prometheus_registry: prometheus_registry.clone(),
-			local_keystore: keystore_container.local_keystore(),
+			local_keystore: Some(keystore_container.local_keystore()),
 			_block: std::marker::PhantomData::<Block>,
 			debug_logger,
 		};
@@ -498,7 +472,7 @@ pub fn new_full(
 	let keystore =
 		if role.is_authority() { Some(keystore_container.sync_keystore()) } else { None };
 
-	let grandpa_config = sc_finality_grandpa::Config {
+	let grandpa_config = sc_consensus_grandpa::Config {
 		// FIXME #1578 make this available through chainspec
 		gossip_duration: Duration::from_millis(333),
 		justification_period: 512,
@@ -517,11 +491,11 @@ pub fn new_full(
 		// and vote data availability than the observer. The observer has not
 		// been tested extensively yet and having most nodes in a network run it
 		// could lead to finality stalls.
-		let grandpa_config = sc_finality_grandpa::GrandpaParams {
+		let grandpa_config = sc_consensus_grandpa::GrandpaParams {
 			config: grandpa_config,
 			link: grandpa_link,
 			network,
-			voting_rule: sc_finality_grandpa::VotingRulesBuilder::default().build(),
+			voting_rule: sc_consensus_grandpa::VotingRulesBuilder::default().build(),
 			prometheus_registry,
 			shared_voter_state: SharedVoterState::empty(),
 			telemetry: telemetry.as_ref().map(|x| x.handle()),
@@ -532,7 +506,7 @@ pub fn new_full(
 		task_manager.spawn_essential_handle().spawn_blocking(
 			"grandpa-voter",
 			None,
-			sc_finality_grandpa::run_grandpa_voter(grandpa_config)?,
+			sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?,
 		);
 	}
 
