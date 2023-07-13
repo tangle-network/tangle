@@ -2169,7 +2169,7 @@ name = "dkg-runtime-primitives"
 version = "0.0.1"
 source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.2.6#5baaaf7bf01b4ecde5e273e16fec4ee94157b336"
 dependencies = [
- "ethabi 18.0.0",
+ "ethabi",
  "ethereum",
  "ethereum-types",
  "frame-support",
@@ -2483,6 +2483,17 @@ dependencies = [
  "ethereum-types",
  "itertools 0.10.5",
  "smallvec",
+]
+
+[[package]]
+name = "ethabi"
+version = "18.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7413c5f74cc903ea37386a8965a936cbeb334bd270862fdece542c1b2dcbc898"
+dependencies = [
+ "ethereum-types",
+ "hex",
+ "sha3 0.10.8",
 ]
 
 [[package]]
