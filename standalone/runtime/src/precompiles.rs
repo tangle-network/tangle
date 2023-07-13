@@ -1,4 +1,6 @@
-use pallet_evm::{Precompile, PrecompileHandle, PrecompileResult, PrecompileSet};
+use pallet_evm::{
+	IsPrecompileResult, Precompile, PrecompileHandle, PrecompileResult, PrecompileSet,
+};
 use sp_core::H160;
 use sp_std::marker::PhantomData;
 
@@ -8,12 +10,6 @@ use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripe
 
 pub struct FrontierPrecompiles<R>(PhantomData<R>);
 
-impl<R> Default for FrontierPrecompiles<R> {
-	fn default() -> Self {
-		Self(Default::default())
-	}
-}
-
 impl<R> FrontierPrecompiles<R>
 where
 	R: pallet_evm::Config,
@@ -22,7 +18,15 @@ where
 		Self(Default::default())
 	}
 	pub fn used_addresses() -> [H160; 7] {
-		[hash(1), hash(2), hash(3), hash(4), hash(5), hash(1024), hash(1025)]
+		[
+			hash(1),
+			hash(2),
+			hash(3),
+			hash(4),
+			hash(5),
+			hash(1024),
+			hash(1025),
+		]
 	}
 }
 impl<R> PrecompileSet for FrontierPrecompiles<R>
@@ -44,8 +48,11 @@ where
 		}
 	}
 
-	fn is_precompile(&self, address: H160) -> bool {
-		Self::used_addresses().contains(&address)
+	fn is_precompile(&self, address: H160, _gas: u64) -> IsPrecompileResult {
+		IsPrecompileResult::Answer {
+			is_precompile: Self::used_addresses().contains(&address),
+			extra_cost: 0,
+		}
 	}
 }
 

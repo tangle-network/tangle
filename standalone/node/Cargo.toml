@@ -55,7 +55,6 @@ sc-basic-authorship = { workspace = true }
 sc-client-api = { workspace = true }
 sc-consensus = { workspace = true }
 sc-consensus-aura = { workspace = true }
-sc-finality-grandpa = { workspace = true }
 sc-network = { workspace = true }
 sc-network-common = { workspace = true }
 sc-telemetry = { workspace = true }
@@ -72,7 +71,6 @@ sc-rpc-api = { workspace = true }
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
-sp-finality-grandpa = { workspace = true }
 sp-timestamp = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
 
