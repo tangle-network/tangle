@@ -74,6 +74,7 @@ sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
 sp-timestamp = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
+sc-consensus-manual-seal = { workspace = true }
 
 # RPC related dependencies
 jsonrpsee = { workspace = true }

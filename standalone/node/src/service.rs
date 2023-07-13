@@ -18,8 +18,10 @@
 pub use crate::eth::{db_config_dir, EthConfiguration};
 use crate::eth::{
 	new_frontier_partial, spawn_frontier_tasks, FrontierBackend, FrontierBlockImport,
-	FrontierPartialComponents,
+	FrontierPartialComponents, BackendType
 };
+use std::path::Path;
+use futures::{channel::mpsc, prelude::*};
 use codec::Encode;
 use dkg_gadget::debug_logger::DebugLogger;
 use sc_client_api::BlockBackend;
@@ -198,8 +200,35 @@ pub fn new_partial(
 		telemetry.as_ref().map(|x| x.handle()),
 	)?;
 
-	let frontier_backend =
-		Arc::new(FrontierBackend::open(client.clone(), &config.database, &db_config_dir(config))?);
+	let overrides = crate::rpc::overrides_handle(client.clone());
+	let frontier_backend = match eth_config.frontier_backend_type {
+		BackendType::KeyValue => FrontierBackend::KeyValue(fc_db::kv::Backend::open(
+			Arc::clone(&client),
+			&config.database,
+			&db_config_dir(config),
+		)?),
+		BackendType::Sql => {
+			let db_path = db_config_dir(config).join("sql");
+			std::fs::create_dir_all(&db_path).expect("failed creating sql db directory");
+			let backend = futures::executor::block_on(fc_db::sql::Backend::new(
+				fc_db::sql::BackendConfig::Sqlite(fc_db::sql::SqliteBackendConfig {
+					path: Path::new("sqlite:///")
+						.join(db_path)
+						.join("frontier.db3")
+						.to_str()
+						.unwrap(),
+					create_if_missing: true,
+					thread_count: eth_config.frontier_sql_backend_thread_count,
+					cache_size: eth_config.frontier_sql_backend_cache_size,
+				}),
+				eth_config.frontier_sql_backend_pool_size,
+				std::num::NonZeroU32::new(eth_config.frontier_sql_backend_num_ops_timeout),
+				overrides.clone(),
+			))
+			.unwrap_or_else(|err| panic!("failed creating sql backend: {:?}", err));
+			FrontierBackend::Sql(backend)
+		}
+	};
 
 	let frontier_block_import = FrontierBlockImport::new(
 		grandpa_block_import.clone(),
@@ -246,7 +275,7 @@ pub fn new_partial(
 }
 
 /// Builds a new service for a full client.
-pub fn new_full(
+pub async fn new_full(
 	config: Configuration,
 	eth_config: EthConfiguration,
 	debug_output: Option<std::path::PathBuf>,
@@ -321,6 +350,18 @@ pub fn new_full(
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
 
+	// Channel for the rpc handler to communicate with the authorship task.
+	let (command_sink, commands_stream) = mpsc::channel(1000);
+
+	// Sinks for pubsub notifications.
+	// Everytime a new subscription is created, a new mpsc channel is added to the sink pool.
+	// The MappingSyncWorker sends through the channel on block import and the subscription emits a notification to the subscriber on receiving a message through this channel.
+	// This way we avoid race conditions when using native substrate block import notification stream.
+	let pubsub_notification_sinks: fc_mapping_sync::EthereumBlockNotificationSinks<
+		fc_mapping_sync::EthereumBlockNotification<Block>,
+	> = Default::default();
+	let pubsub_notification_sinks = Arc::new(pubsub_notification_sinks);
+
 	// for ethereum-compatibility rpc.
 	config.rpc_id_provider = Some(Box::new(fc_rpc::EthereumSubIdProvider));
 	let overrides = crate::rpc::overrides_handle(client.clone());
@@ -351,6 +392,7 @@ pub fn new_full(
 	let rpc_extensions_builder = {
 		let client = client.clone();
 		let pool = transaction_pool.clone();
+		let pubsub_notification_sinks = pubsub_notification_sinks.clone();
 
 		Box::new(move |deny_unsafe, subscription_task_executor| {
 			let deps = crate::rpc::FullDeps {
@@ -359,25 +401,28 @@ pub fn new_full(
 				deny_unsafe,
 				eth: eth_rpc_params.clone(),
 			};
-			crate::rpc::create_full(deps, subscription_task_executor).map_err(Into::into)
+			crate::rpc::create_full(deps, subscription_task_executor, pubsub_notification_sinks.clone(),).map_err(Into::into)
 		})
 	};
 
 	spawn_frontier_tasks(
 		&task_manager,
 		client.clone(),
-		backend.clone(),
-		frontier_backend.clone(),
+		backend,
+		frontier_backend,
 		filter_pool,
 		overrides,
 		fee_history_cache,
 		fee_history_cache_limit,
-	);
+		sync_service.clone(),
+		pubsub_notification_sinks,
+	)
+	.await;
 
 	if role.is_authority() {
 		dkg_primitives::utils::insert_controller_account_keys_into_keystore(
 			&config,
-			Some(keystore_container.sync_keystore()),
+			Some(keystore_container.keystore()),
 		);
 	}
 	let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
@@ -450,7 +495,7 @@ pub fn new_full(
 				},
 				force_authoring,
 				backoff_authoring_blocks,
-				keystore: keystore_container.sync_keystore(),
+				keystore: keystore_container.keystore(),
 				sync_oracle: network.clone(),
 				justification_sync_link: network.clone(),
 				block_proposal_slot_portion: SlotProportion::new(2f32 / 3f32),
@@ -470,7 +515,7 @@ pub fn new_full(
 	// if the node isn't actively participating in consensus then it doesn't
 	// need a keystore, regardless of which protocol we use below.
 	let keystore =
-		if role.is_authority() { Some(keystore_container.sync_keystore()) } else { None };
+		if role.is_authority() { Some(keystore_container.keystore()) } else { None };
 
 	let grandpa_config = sc_consensus_grandpa::Config {
 		// FIXME #1578 make this available through chainspec
@@ -495,6 +540,7 @@ pub fn new_full(
 			config: grandpa_config,
 			link: grandpa_link,
 			network,
+			sync: Arc::new(sync_service),
 			voting_rule: sc_consensus_grandpa::VotingRulesBuilder::default().build(),
 			prometheus_registry,
 			shared_voter_state: SharedVoterState::empty(),

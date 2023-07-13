@@ -380,6 +380,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "assert_matches"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
+
+[[package]]
 name = "async-channel"
 version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2077,7 +2083,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.0#5a5642ce3d2465169e08144c4df4e40f4964eac0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.1#ca057cd821c5a2599c1e649e3f432fe62d966bbc"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2123,13 +2129,13 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "uuid",
- "webb-proposals 0.5.24 (git+https://github.com/webb-tools/webb-rs?rev=bb0ab9e)",
+ "webb-proposals",
 ]
 
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.0#5a5642ce3d2465169e08144c4df4e40f4964eac0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.1#ca057cd821c5a2599c1e649e3f432fe62d966bbc"
 dependencies = [
  "hex",
  "lazy_static",
@@ -2146,7 +2152,7 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.0#5a5642ce3d2465169e08144c4df4e40f4964eac0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.1#ca057cd821c5a2599c1e649e3f432fe62d966bbc"
 dependencies = [
  "async-trait",
  "atomic",
@@ -2173,7 +2179,7 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.0#5a5642ce3d2465169e08144c4df4e40f4964eac0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.1#ca057cd821c5a2599c1e649e3f432fe62d966bbc"
 dependencies = [
  "chacha20poly1305",
  "clap",
@@ -2197,7 +2203,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.0#5a5642ce3d2465169e08144c4df4e40f4964eac0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.1#ca057cd821c5a2599c1e649e3f432fe62d966bbc"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -2214,7 +2220,7 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "tiny-keccak",
- "webb-proposals 0.5.24 (git+https://github.com/webb-tools/webb-rs?rev=bb0ab9e)",
+ "webb-proposals",
 ]
 
 [[package]]
@@ -6184,7 +6190,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.0#5a5642ce3d2465169e08144c4df4e40f4964eac0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.1#ca057cd821c5a2599c1e649e3f432fe62d966bbc"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-support",
@@ -6196,7 +6202,7 @@ dependencies = [
  "serde",
  "sp-runtime",
  "sp-std",
- "webb-proposals 0.5.24 (git+https://github.com/webb-tools/webb-rs?rev=bb0ab9e)",
+ "webb-proposals",
 ]
 
 [[package]]
@@ -6256,7 +6262,7 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.0#5a5642ce3d2465169e08144c4df4e40f4964eac0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.1#ca057cd821c5a2599c1e649e3f432fe62d966bbc"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6272,13 +6278,13 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-proposals 0.5.24 (git+https://github.com/webb-tools/webb-rs?rev=bb0ab9e)",
+ "webb-proposals",
 ]
 
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.0#5a5642ce3d2465169e08144c4df4e40f4964eac0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.1#ca057cd821c5a2599c1e649e3f432fe62d966bbc"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6292,13 +6298,13 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "webb-proposals 0.5.24 (git+https://github.com/webb-tools/webb-rs?rev=bb0ab9e)",
+ "webb-proposals",
 ]
 
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.0#5a5642ce3d2465169e08144c4df4e40f4964eac0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.3.1#ca057cd821c5a2599c1e649e3f432fe62d966bbc"
 dependencies = [
  "dkg-runtime-primitives",
  "frame-benchmarking",
@@ -6435,7 +6441,7 @@ dependencies = [
  "tiny-keccak",
  "tree_hash",
  "tree_hash_derive",
- "webb-proposals 0.5.24 (git+https://github.com/webb-tools/webb-rs)",
+ "webb-proposals",
 ]
 
 [[package]]
@@ -8688,6 +8694,55 @@ dependencies = [
 ]
 
 [[package]]
+name = "sc-consensus-babe"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.43#5e49f6e44820affccaf517fd22af564f4b495d40"
+dependencies = [
+ "async-trait",
+ "fork-tree",
+ "futures",
+ "log",
+ "num-bigint 0.4.3",
+ "num-rational",
+ "num-traits",
+ "parity-scale-codec",
+ "parking_lot 0.12.1",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-consensus-epochs",
+ "sc-consensus-slots",
+ "sc-keystore",
+ "sc-telemetry",
+ "scale-info",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-consensus-babe",
+ "sp-consensus-slots",
+ "sp-core",
+ "sp-inherents",
+ "sp-keystore",
+ "sp-runtime",
+ "substrate-prometheus-endpoint",
+ "thiserror",
+]
+
+[[package]]
+name = "sc-consensus-epochs"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.43#5e49f6e44820affccaf517fd22af564f4b495d40"
+dependencies = [
+ "fork-tree",
+ "parity-scale-codec",
+ "sc-client-api",
+ "sc-consensus",
+ "sp-blockchain",
+ "sp-runtime",
+]
+
+[[package]]
 name = "sc-consensus-grandpa"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.43#5e49f6e44820affccaf517fd22af564f4b495d40"
@@ -8723,6 +8778,41 @@ dependencies = [
  "sp-core",
  "sp-keystore",
  "sp-runtime",
+ "substrate-prometheus-endpoint",
+ "thiserror",
+]
+
+[[package]]
+name = "sc-consensus-manual-seal"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.43#5e49f6e44820affccaf517fd22af564f4b495d40"
+dependencies = [
+ "assert_matches",
+ "async-trait",
+ "futures",
+ "futures-timer",
+ "jsonrpsee",
+ "log",
+ "parity-scale-codec",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-consensus-aura",
+ "sc-consensus-babe",
+ "sc-consensus-epochs",
+ "sc-transaction-pool",
+ "sc-transaction-pool-api",
+ "serde",
+ "sp-api",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-consensus-aura",
+ "sp-consensus-babe",
+ "sp-consensus-slots",
+ "sp-core",
+ "sp-inherents",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-timestamp",
  "substrate-prometheus-endpoint",
  "thiserror",
 ]
@@ -10104,6 +10194,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp-consensus-babe"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.43#5e49f6e44820affccaf517fd22af564f4b495d40"
+dependencies = [
+ "async-trait",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-consensus",
+ "sp-consensus-slots",
+ "sp-core",
+ "sp-inherents",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-std",
+ "sp-timestamp",
+]
+
+[[package]]
 name = "sp-consensus-grandpa"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.43#5e49f6e44820affccaf517fd22af564f4b495d40"
@@ -11146,6 +11257,7 @@ dependencies = [
  "sc-consensus",
  "sc-consensus-aura",
  "sc-consensus-grandpa",
+ "sc-consensus-manual-seal",
  "sc-executor",
  "sc-keystore",
  "sc-network",
@@ -11886,7 +11998,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.7",
- "rand 0.4.6",
+ "rand 0.6.5",
  "static_assertions",
 ]
 
@@ -12764,22 +12876,6 @@ checksum = "9b85cbef8c220a6abc02aefd892dfc0fc23afb1c6a426316ec33253a3877249b"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "webb-proposals"
-version = "0.5.24"
-source = "git+https://github.com/webb-tools/webb-rs?rev=bb0ab9e#bb0ab9e94b242a6c56fb9f594f9d3a4219e4cbc8"
-dependencies = [
- "frame-support",
- "hex",
- "num-traits",
- "parity-scale-codec",
- "scale-info",
- "schemars",
- "serde",
- "tiny-keccak",
- "typed-builder",
 ]
 
 [[package]]
