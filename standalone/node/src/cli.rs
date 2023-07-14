@@ -30,6 +30,9 @@ pub struct Cli {
 
 	#[command(flatten)]
 	pub eth: EthConfiguration,
+
+	#[clap(flatten)]
+	pub relayer_cmd: webb_relayer_gadget_cli::WebbRelayerCmd,
 }
 
 #[derive(Debug, clap::Subcommand)]

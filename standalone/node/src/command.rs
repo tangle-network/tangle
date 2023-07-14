@@ -237,7 +237,14 @@ pub fn run() -> sc_cli::Result<()> {
 			let runner = cli.create_runner(&cli.run)?;
 
 			runner.run_node_until_exit(|config| async move {
-				service::new_full(config, cli.eth, cli.output_path).map_err(Into::into).await
+				service::new_full(service::RunFullParams {
+					config,
+					eth_config: cli.eth,
+					debug_output: cli.output_path,
+					relayer_cmd: cli.relayer_cmd,
+				})
+				.map_err(Into::into)
+				.await
 			})
 		},
 	}

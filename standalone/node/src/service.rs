@@ -276,12 +276,15 @@ pub fn new_partial(
 		),
 	})
 }
-
+pub struct RunFullParams {
+	pub config: Configuration,
+	pub eth_config: EthConfiguration,
+	pub debug_output: Option<std::path::PathBuf>,
+	pub relayer_cmd: webb_relayer_gadget_cli::WebbRelayerCmd,
+}
 /// Builds a new service for a full client.
 pub async fn new_full(
-	mut config: Configuration,
-	eth_config: EthConfiguration,
-	debug_output: Option<std::path::PathBuf>,
+	RunFullParams { mut config, eth_config, debug_output, relayer_cmd }: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -440,21 +443,6 @@ pub async fn new_full(
 			Some(keystore_container.keystore()),
 		);
 	}
-	let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
-		network: network.clone(),
-		client: client.clone(),
-		keystore: keystore_container.keystore(),
-		task_manager: &mut task_manager,
-		transaction_pool: transaction_pool.clone(),
-		rpc_builder,
-		backend: backend.clone(),
-		system_rpc_tx,
-		tx_handler_controller,
-		sync_service: sync_service.clone(),
-		config,
-		telemetry: telemetry.as_mut(),
-	})?;
-
 	if role.is_authority() {
 		// setup debug logging
 		let local_peer_id = network.local_peer_id();
@@ -478,7 +466,39 @@ pub async fn new_full(
 			None,
 			dkg_gadget::start_dkg_gadget::<_, _, _>(dkg_params),
 		);
+
+		let relayer_params = webb_relayer_gadget::WebbRelayerParams {
+			local_keystore: keystore_container.local_keystore(),
+			config_dir: relayer_cmd.relayer_config_dir,
+			database_path: config
+				.database
+				.path()
+				.and_then(|path| path.parent())
+				.map(|p| p.to_path_buf()),
+			rpc_addr: config.rpc_addr,
+		};
+		// Start Webb Relayer Gadget as non-essential task.
+		task_manager.spawn_handle().spawn(
+			"relayer-gadget",
+			None,
+			webb_relayer_gadget::start_relayer_gadget(relayer_params),
+		);
 	}
+
+	let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
+		network: network.clone(),
+		client: client.clone(),
+		keystore: keystore_container.keystore(),
+		task_manager: &mut task_manager,
+		transaction_pool: transaction_pool.clone(),
+		rpc_builder,
+		backend: backend.clone(),
+		system_rpc_tx,
+		tx_handler_controller,
+		sync_service: sync_service.clone(),
+		config,
+		telemetry: telemetry.as_mut(),
+	})?;
 
 	if role.is_authority() {
 		let proposer_factory = sc_basic_authorship::ProposerFactory::new(
