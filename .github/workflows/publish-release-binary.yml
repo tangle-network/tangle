@@ -12,8 +12,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Install toolchain
+      id: toolchain
+      uses: actions-rs/toolchain@master
+      with:
+        profile: minimal
+        toolchain: nightly
+        target: wasm32-unknown-unknown
+
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v1.3.0
+
+    - name: Install Protobuf
+      run: sudo apt-get install protobuf-compiler
+
     - name: Build
       run: cargo build --release -p tangle-standalone --locked
+    
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v2
       with:
