@@ -4,27 +4,17 @@
 // import type lookup before we augment - in some environments
 // this is required to allow for ambient/previous definitions
 import '@polkadot/api-base/types/consts';
-import '@polkadot/types/lookup';
+
 import type { ApiTypes, AugmentedConst } from '@polkadot/api-base/types';
 import type { Bytes, Option, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { Codec } from '@polkadot/types-codec/types';
 import type { Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import { FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, SpWeightsRuntimeDbWeight, SpWeightsWeightV2Weight, WebbProposalsHeaderTypedChainId } from '@polkadot/types/lookup';
+import { SpWeightsWeightV2Weight, WebbProposalsHeaderTypedChainId, FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpWeightsRuntimeDbWeight, SpVersionRuntimeVersion } from '@polkadot/types/lookup';
 
 export type __AugmentedConst<ApiType extends ApiTypes> = AugmentedConst<ApiType>;
 
 declare module '@polkadot/api-base/types/consts' {
   interface AugmentedConsts<ApiType extends ApiTypes> {
-    assetRegistry: {
-      /**
-       * Native Asset Id
-       **/
-      nativeAssetId: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
     bagsList: {
       /**
        * The list of thresholds separating the various bags.
@@ -79,9 +69,24 @@ declare module '@polkadot/api-base/types/consts' {
     };
     balances: {
       /**
-       * The minimum amount required to keep an account open.
+       * The minimum amount required to keep an account open. MUST BE GREATER THAN ZERO!
+       * 
+       * If you *really* need it to be zero, you can enable the feature `insecure_zero_ed` for
+       * this pallet. However, you do so at your own risk: this will open up a major DoS vector.
+       * In case you have multiple sources of provider references, you may also get unexpected
+       * behaviour if you set this to zero.
+       * 
+       * Bottom line: Do yourself a favour and make it at least one!
        **/
       existentialDeposit: u128 & AugmentedConst<ApiType>;
+      /**
+       * The maximum number of individual freeze locks that can exist on an account at any time.
+       **/
+      maxFreezes: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum number of holds that can exist on an account at any time.
+       **/
+      maxHolds: u32 & AugmentedConst<ApiType>;
       /**
        * The maximum number of locks that should exist on an account.
        * Not strictly enforced, but used for weight estimation.
@@ -185,8 +190,11 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
-    currencies: {
-      getNativeCurrencyId: u32 & AugmentedConst<ApiType>;
+    council: {
+      /**
+       * The maximum weight of a dispatch call that can be proposed and executed.
+       **/
+      maxProposalWeight: SpWeightsWeightV2Weight & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -268,6 +276,10 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       maxKeyLength: u32 & AugmentedConst<ApiType>;
       /**
+       * Max length of a proposal
+       **/
+      maxProposalLength: u32 & AugmentedConst<ApiType>;
+      /**
        * Max reporters to store
        **/
       maxReporters: u32 & AugmentedConst<ApiType>;
@@ -275,10 +287,6 @@ declare module '@polkadot/api-base/types/consts' {
        * MaxLength for signature
        **/
       maxSignatureLength: u32 & AugmentedConst<ApiType>;
-      /**
-       * Percentage session should have progressed for refresh to begin
-       **/
-      refreshDelay: Permill & AugmentedConst<ApiType>;
       /**
        * Session length helper allowing to query session length across runtime upgrades.
        **/
@@ -298,19 +306,19 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       unsignedPriority: u64 & AugmentedConst<ApiType>;
       /**
+       * Length of encoded proposer vote
+       **/
+      voteLength: u32 & AugmentedConst<ApiType>;
+      /**
        * Generic const
        **/
       [key: string]: Codec;
     };
     dkgProposalHandler: {
       /**
-       * Max length of a proposal
-       **/
-      maxProposalLength: u32 & AugmentedConst<ApiType>;
-      /**
        * Max number of signed proposal submissions per batch;
        **/
-      maxSubmissionsPerBatch: u16 & AugmentedConst<ApiType>;
+      maxProposalsPerBatch: u32 & AugmentedConst<ApiType>;
       /**
        * Max blocks to store an unsigned proposal
        **/
@@ -328,13 +336,13 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       chainIdentifier: WebbProposalsHeaderTypedChainId & AugmentedConst<ApiType>;
       /**
-       * The max authority proposers that can be stored in storage
+       * Max length of a proposal
        **/
-      maxAuthorityProposers: u32 & AugmentedConst<ApiType>;
+      maxProposalLength: u32 & AugmentedConst<ApiType>;
       /**
-       * The max external proposer accounts that can be stored in storage
+       * The max proposers that can be stored in storage
        **/
-      maxExternalProposerAccounts: u32 & AugmentedConst<ApiType>;
+      maxProposers: u32 & AugmentedConst<ApiType>;
       /**
        * The max resources that can be stored in storage
        **/
@@ -348,6 +356,10 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       period: u32 & AugmentedConst<ApiType>;
       proposalLifetime: u32 & AugmentedConst<ApiType>;
+      /**
+       * The size of an external proposer account (i.e. 64-byte Ethereum public key)
+       **/
+      votingKeySize: u32 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -384,6 +396,7 @@ declare module '@polkadot/api-base/types/consts' {
       minerMaxLength: u32 & AugmentedConst<ApiType>;
       minerMaxVotesPerVoter: u32 & AugmentedConst<ApiType>;
       minerMaxWeight: SpWeightsWeightV2Weight & AugmentedConst<ApiType>;
+      minerMaxWinners: u32 & AugmentedConst<ApiType>;
       /**
        * The priority of the unsigned transaction submitted in the unsigned-phase
        **/
@@ -593,32 +606,6 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
-    linkableTreeBn254: {
-      chainIdentifier: u64 & AugmentedConst<ApiType>;
-      /**
-       * ChainID type for this chain
-       **/
-      chainType: U8aFixed & AugmentedConst<ApiType>;
-      /**
-       * The pruning length for neighbor root histories
-       **/
-      historyLength: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
-    mixerBn254: {
-      /**
-       * Native currency id
-       **/
-      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
-      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
     nominationPools: {
       /**
        * The maximum pool points-to-balance ratio that an `open` pool can have.
@@ -651,27 +638,12 @@ declare module '@polkadot/api-base/types/consts' {
       maximumWeight: SpWeightsWeightV2Weight & AugmentedConst<ApiType>;
       /**
        * The maximum number of scheduled calls in the queue for a single block.
+       * 
+       * NOTE:
+       * + Dependent pallets' benchmarks might require a higher limit for the setting. Set a
+       * higher limit under `runtime-benchmarks` feature.
        **/
       maxScheduledPerBlock: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
-    signatureBridge: {
-      bridgeAccountId: FrameSupportPalletId & AugmentedConst<ApiType>;
-      /**
-       * The identifier for this chain.
-       * This must be unique and must not collide with existing IDs within a
-       * set of bridged chains.
-       **/
-      chainIdentifier: u64 & AugmentedConst<ApiType>;
-      /**
-       * The chain type for this chain.
-       * This is either a standalone Substrate chain, relay chain, or parachain
-       **/
-      chainType: U8aFixed & AugmentedConst<ApiType>;
-      proposalLifetime: u32 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -792,26 +764,6 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
-    tokens: {
-      maxLocks: u32 & AugmentedConst<ApiType>;
-      /**
-       * The maximum number of named reserves that can exist on an account.
-       **/
-      maxReserves: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
-    tokenWrapper: {
-      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
-      treasuryId: FrameSupportPalletId & AugmentedConst<ApiType>;
-      wrappingFeeDivider: u128 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
     transactionPayment: {
       /**
        * A fee mulitplier for `Operational` extrinsics to compute "virtual tip" to boost their
@@ -884,17 +836,6 @@ declare module '@polkadot/api-base/types/consts' {
        * The limit on the number of batched calls.
        **/
       batchedCallsLimit: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
-    vAnchorBn254: {
-      /**
-       * Native currency id
-       **/
-      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
-      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
