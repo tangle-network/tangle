@@ -17,18 +17,17 @@
 
 pub use crate::eth::{db_config_dir, EthConfiguration};
 use crate::eth::{
-	new_frontier_partial, spawn_frontier_tasks, FrontierBackend, FrontierBlockImport,
-	FrontierPartialComponents, BackendType
+	new_frontier_partial, spawn_frontier_tasks, BackendType, FrontierBackend, FrontierBlockImport,
+	FrontierPartialComponents,
 };
-use std::path::Path;
-use futures::{channel::mpsc, prelude::*};
 use codec::Encode;
 use dkg_gadget::debug_logger::DebugLogger;
+use futures::{channel::mpsc, prelude::*};
 use sc_client_api::BlockBackend;
 use sc_consensus::BasicQueue;
-use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
-pub use sc_executor::NativeElseWasmExecutor;
+use sc_consensus_aura::ImportQueueParams;
 use sc_consensus_grandpa::SharedVoterState;
+pub use sc_executor::NativeElseWasmExecutor;
 use sc_network::NetworkStateInfo;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
@@ -37,7 +36,7 @@ use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sp_core::{Pair, U256};
 use sp_runtime::{generic::Era, traits::BlakeTwo256, SaturatedConversion};
 use sp_trie::PrefixedMemoryDB;
-use std::{sync::Arc, time::Duration};
+use std::{path::Path, sync::Arc, time::Duration};
 use substrate_frame_rpc_system::AccountNonceApi;
 use tangle_runtime::{self, opaque::Block, RuntimeApi, TransactionConverter};
 
@@ -149,10 +148,11 @@ pub fn new_partial(
 		sc_consensus::DefaultImportQueue<Block, FullClient>,
 		sc_transaction_pool::FullPool<Block, FullClient>,
 		(
+			Option<Telemetry>,
 			BoxBlockImport<FullClient>,
 			GrandpaLinkHalf<FullClient>,
-			Option<Telemetry>,
-			Arc<FrontierBackend>,
+			FrontierBackend,
+			Arc<fc_rpc::OverrideHandle<Block>>,
 		),
 	>,
 	ServiceError,
@@ -227,14 +227,11 @@ pub fn new_partial(
 			))
 			.unwrap_or_else(|err| panic!("failed creating sql backend: {:?}", err));
 			FrontierBackend::Sql(backend)
-		}
+		},
 	};
 
-	let frontier_block_import = FrontierBlockImport::new(
-		grandpa_block_import.clone(),
-		client.clone(),
-		frontier_backend.clone(),
-	);
+	let frontier_block_import =
+		FrontierBlockImport::new(grandpa_block_import.clone(), client.clone());
 
 	let slot_duration = sc_consensus_aura::slot_duration(&*client)?;
 	let target_gas_price = eth_config.target_gas_price;
@@ -265,18 +262,24 @@ pub fn new_partial(
 	Ok(sc_service::PartialComponents {
 		client,
 		backend,
-		task_manager,
-		import_queue,
 		keystore_container,
+		task_manager,
 		select_chain,
+		import_queue,
 		transaction_pool,
-		other: (Box::new(frontier_block_import), grandpa_link, telemetry, frontier_backend),
+		other: (
+			telemetry,
+			Box::new(frontier_block_import),
+			grandpa_link,
+			frontier_backend,
+			overrides,
+		),
 	})
 }
 
 /// Builds a new service for a full client.
 pub async fn new_full(
-	config: Configuration,
+	mut config: Configuration,
 	eth_config: EthConfiguration,
 	debug_output: Option<std::path::PathBuf>,
 ) -> Result<TaskManager, ServiceError> {
@@ -288,7 +291,7 @@ pub async fn new_full(
 		keystore_container,
 		select_chain,
 		transaction_pool,
-		other: (block_import, grandpa_link, mut telemetry, frontier_backend),
+		other: (mut telemetry, block_import, grandpa_link, frontier_backend, overrides),
 	} = new_partial(&config, &eth_config)?;
 
 	let FrontierPartialComponents { filter_pool, fee_history_cache, fee_history_cache_limit } =
@@ -345,18 +348,19 @@ pub async fn new_full(
 
 	let role = config.role.clone();
 	let force_authoring = config.force_authoring;
-	let backoff_authoring_blocks: Option<()> = None;
+	let _backoff_authoring_blocks: Option<()> = None;
 	let name = config.network.node_name.clone();
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
 
 	// Channel for the rpc handler to communicate with the authorship task.
-	let (command_sink, commands_stream) = mpsc::channel(1000);
+	let (command_sink, _commands_stream) = mpsc::channel(1000);
 
 	// Sinks for pubsub notifications.
 	// Everytime a new subscription is created, a new mpsc channel is added to the sink pool.
-	// The MappingSyncWorker sends through the channel on block import and the subscription emits a notification to the subscriber on receiving a message through this channel.
-	// This way we avoid race conditions when using native substrate block import notification stream.
+	// The MappingSyncWorker sends through the channel on block import and the subscription emits a
+	// notification to the subscriber on receiving a message through this channel. This way we avoid
+	// race conditions when using native substrate block import notification stream.
 	let pubsub_notification_sinks: fc_mapping_sync::EthereumBlockNotificationSinks<
 		fc_mapping_sync::EthereumBlockNotification<Block>,
 	> = Default::default();
@@ -364,8 +368,7 @@ pub async fn new_full(
 
 	// for ethereum-compatibility rpc.
 	config.rpc_id_provider = Some(Box::new(fc_rpc::EthereumSubIdProvider));
-	let overrides = crate::rpc::overrides_handle(client.clone());
-	let eth_rpc_params = crate::rpc::eth::EthDeps {
+	let eth_rpc_params = crate::rpc::EthDeps {
 		client: client.clone(),
 		pool: transaction_pool.clone(),
 		graph: transaction_pool.pool().clone(),
@@ -373,7 +376,11 @@ pub async fn new_full(
 		is_authority: config.role.is_authority(),
 		enable_dev_signer: eth_config.enable_dev_signer,
 		network: network.clone(),
-		frontier_backend: frontier_backend.clone(),
+		sync: sync_service.clone(),
+		frontier_backend: match frontier_backend.clone() {
+			fc_db::Backend::KeyValue(b) => Arc::new(b),
+			fc_db::Backend::Sql(b) => Arc::new(b),
+		},
 		overrides: overrides.clone(),
 		block_data_cache: Arc::new(fc_rpc::EthBlockDataCacheTask::new(
 			task_manager.spawn_handle(),
@@ -387,9 +394,10 @@ pub async fn new_full(
 		fee_history_cache: fee_history_cache.clone(),
 		fee_history_cache_limit,
 		execute_gas_limit_multiplier: eth_config.execute_gas_limit_multiplier,
+		forced_parent_hashes: None,
 	};
 
-	let rpc_extensions_builder = {
+	let rpc_builder = {
 		let client = client.clone();
 		let pool = transaction_pool.clone();
 		let pubsub_notification_sinks = pubsub_notification_sinks.clone();
@@ -399,16 +407,23 @@ pub async fn new_full(
 				client: client.clone(),
 				pool: pool.clone(),
 				deny_unsafe,
+				command_sink: Some(command_sink.clone()),
 				eth: eth_rpc_params.clone(),
 			};
-			crate::rpc::create_full(deps, subscription_task_executor, pubsub_notification_sinks.clone(),).map_err(Into::into)
+
+			crate::rpc::create_full(
+				deps,
+				subscription_task_executor,
+				pubsub_notification_sinks.clone(),
+			)
+			.map_err(Into::into)
 		})
 	};
 
-	spawn_frontier_tasks(
+	spawn_frontier_tasks::<tangle_runtime::RuntimeApi, ExecutorDispatch>(
 		&task_manager,
 		client.clone(),
-		backend,
+		backend.clone(),
 		frontier_backend,
 		filter_pool,
 		overrides,
@@ -431,7 +446,7 @@ pub async fn new_full(
 		keystore: keystore_container.keystore(),
 		task_manager: &mut task_manager,
 		transaction_pool: transaction_pool.clone(),
-		rpc_builder: rpc_extensions_builder,
+		rpc_builder,
 		backend: backend.clone(),
 		system_rpc_tx,
 		tx_handler_controller,
@@ -450,6 +465,7 @@ pub async fn new_full(
 			backend: backend.clone(),
 			key_store: Some(keystore_container.keystore()),
 			network: network.clone(),
+			sync_service: sync_service.clone(),
 			prometheus_registry: prometheus_registry.clone(),
 			local_keystore: Some(keystore_container.local_keystore()),
 			_block: std::marker::PhantomData::<Block>,
@@ -474,34 +490,34 @@ pub async fn new_full(
 		);
 
 		let slot_duration = sc_consensus_aura::slot_duration(&*client)?;
+		let target_gas_price = eth_config.target_gas_price;
+		let create_inherent_data_providers = move |_, ()| async move {
+			let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
+			let slot = sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+				*timestamp,
+				slot_duration,
+			);
+			let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
+			Ok((slot, timestamp, dynamic_fee))
+		};
 
 		let aura = sc_consensus_aura::start_aura::<AuraPair, _, _, _, _, _, _, _, _, _, _>(
-			StartAuraParams {
+			sc_consensus_aura::StartAuraParams {
 				slot_duration,
 				client,
 				select_chain,
 				block_import,
 				proposer_factory,
-				create_inherent_data_providers: move |_, ()| async move {
-					let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
-
-					let slot =
-						sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
-							*timestamp,
-							slot_duration,
-						);
-
-					Ok((slot, timestamp))
-				},
+				sync_oracle: sync_service.clone(),
+				justification_sync_link: sync_service.clone(),
+				create_inherent_data_providers,
 				force_authoring,
-				backoff_authoring_blocks,
+				backoff_authoring_blocks: Option::<()>::None,
 				keystore: keystore_container.keystore(),
-				sync_oracle: network.clone(),
-				justification_sync_link: network.clone(),
-				block_proposal_slot_portion: SlotProportion::new(2f32 / 3f32),
+				block_proposal_slot_portion: sc_consensus_aura::SlotProportion::new(2f32 / 3f32),
 				max_block_proposal_slot_portion: None,
 				telemetry: telemetry.as_ref().map(|x| x.handle()),
-				compatibility_mode: Default::default(),
+				compatibility_mode: sc_consensus_aura::CompatibilityMode::None,
 			},
 		)?;
 
@@ -514,8 +530,7 @@ pub async fn new_full(
 
 	// if the node isn't actively participating in consensus then it doesn't
 	// need a keystore, regardless of which protocol we use below.
-	let keystore =
-		if role.is_authority() { Some(keystore_container.keystore()) } else { None };
+	let keystore = if role.is_authority() { Some(keystore_container.keystore()) } else { None };
 
 	let grandpa_config = sc_consensus_grandpa::Config {
 		// FIXME #1578 make this available through chainspec
@@ -569,7 +584,7 @@ pub fn new_chain_ops(
 		Arc<FullBackend>,
 		BasicQueue<Block, PrefixedMemoryDB<BlakeTwo256>>,
 		TaskManager,
-		Arc<FrontierBackend>,
+		FrontierBackend,
 	),
 	ServiceError,
 > {

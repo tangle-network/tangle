@@ -20,8 +20,8 @@ use crate::testnet_fixtures::{
 use dkg_runtime_primitives::{ResourceId, TypedChainId};
 use finality_update_verify::network_config::{Network, NetworkConfig};
 use hex_literal::hex;
-use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public, H160, U256};

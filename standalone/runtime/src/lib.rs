@@ -29,7 +29,10 @@ use codec::{Decode, Encode};
 use frame_election_provider_support::{
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
-use frame_support::{traits::{OnFinalize, WithdrawReasons}, weights::ConstantMultiplier};
+use frame_support::{
+	traits::{OnFinalize, WithdrawReasons},
+	weights::ConstantMultiplier,
+};
 use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
@@ -67,8 +70,7 @@ pub use frame_system::Call as SystemCall;
 // A few exports that help ease life for downstream crates.
 pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 use dkg_runtime_primitives::{
-	MaxAuthorities, MaxKeyLength, MaxProposalLength, MaxReporters, MaxSignatureLength,
-	TypedChainId, UnsignedProposal,
+	MaxAuthorities, MaxKeyLength, MaxProposalLength, MaxReporters, MaxSignatureLength, TypedChainId,
 };
 pub use frame_support::{
 	construct_runtime,

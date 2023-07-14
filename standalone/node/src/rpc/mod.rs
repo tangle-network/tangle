@@ -1,8 +1,8 @@
 //! A collection of node-specific RPC methods.
 
-use std::sync::Arc;
 use futures::channel::mpsc;
 use jsonrpsee::RpcModule;
+use std::sync::Arc;
 // Substrate
 use sc_client_api::{
 	backend::{Backend, StorageProvider},
@@ -79,13 +79,7 @@ where
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
-	let FullDeps {
-		client,
-		pool,
-		deny_unsafe,
-		command_sink,
-		eth,
-	} = deps;
+	let FullDeps { client, pool, deny_unsafe, command_sink, eth } = deps;
 
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	io.merge(TransactionPayment::new(client).into_rpc())?;

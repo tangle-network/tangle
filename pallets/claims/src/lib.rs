@@ -851,6 +851,10 @@ mod tests {
 		type MaxReserves = ();
 		type ReserveIdentifier = [u8; 8];
 		type WeightInfo = ();
+		type HoldIdentifier = ();
+		type MaxHolds = ();
+		type FreezeIdentifier = ();
+		type MaxFreezes = ();
 	}
 
 	parameter_types! {

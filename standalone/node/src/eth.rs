@@ -170,7 +170,7 @@ pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
 				)
 				.for_each(|()| future::ready(())),
 			);
-		}
+		},
 		fc_db::Backend::Sql(b) => {
 			task_manager.spawn_essential_handle().spawn_blocking(
 				"frontier-mapping-sync-worker",
@@ -189,7 +189,7 @@ pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
 					pubsub_notification_sinks,
 				),
 			);
-		}
+		},
 	}
 
 	// Spawn Frontier EthFilterApi maintenance task.
@@ -207,11 +207,6 @@ pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
 	task_manager.spawn_essential_handle().spawn(
 		"frontier-fee-history",
 		Some("frontier"),
-		EthTask::fee_history_task(
-			client,
-			overrides,
-			fee_history_cache,
-			fee_history_cache_limit,
-		),
+		EthTask::fee_history_task(client, overrides, fee_history_cache, fee_history_cache_limit),
 	);
 }

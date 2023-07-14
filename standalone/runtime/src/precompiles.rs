@@ -18,15 +18,7 @@ where
 		Self(Default::default())
 	}
 	pub fn used_addresses() -> [H160; 7] {
-		[
-			hash(1),
-			hash(2),
-			hash(3),
-			hash(4),
-			hash(5),
-			hash(1024),
-			hash(1025),
-		]
+		[hash(1), hash(2), hash(3), hash(4), hash(5), hash(1024), hash(1025)]
 	}
 }
 impl<R> PrecompileSet for FrontierPrecompiles<R>
