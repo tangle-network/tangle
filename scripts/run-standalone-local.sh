@@ -38,35 +38,36 @@ if [ "$CLEAN" = true ]; then
   rm -rf ./tmp
 fi
 
+mkdir ./tmp
+
 # The following line ensure we run from the project root
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
 cd "$PROJECT_ROOT"
 
 echo "*** Start Webb DKG Node ***"
-# Alice
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --alice --output-path=./tmp/alice/output.log \
-  --rpc-cors all --ws-external --rpc-methods=unsafe \
+# Alice 
+./target/release/tangle-standalone --tmp --chain local --validator -lerror --alice \
+  --rpc-cors all --rpc-methods=unsafe \
   --port ${ports[0]} \
-  --ws-port 9944 --node-key 0000000000000000000000000000000000000000000000000000000000000001 &
+  --node-key 0000000000000000000000000000000000000000000000000000000000000001 &
 # Bob
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --bob --output-path=./tmp/bob/output.log \
-  --rpc-cors all --ws-external --rpc-methods=unsafe \
+./target/release/tangle-standalone --tmp --chain local --validator -lerror --bob \
+  --rpc-cors all --rpc-methods=unsafe \
   --port ${ports[1]} \
-  --ws-port 9945 --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
+   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Charlie
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --charlie --output-path=./tmp/charlie/output.log \
-  --rpc-cors all --ws-external --rpc-methods=unsafe \
+./target/release/tangle-standalone --tmp --chain local --validator -lerror --charlie \
+  --rpc-cors all --rpc-methods=unsafe \
   --port ${ports[1]} \
-  --ws-port 9945 --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
+   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Dave
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --dave --output-path=./tmp/dave/output.log \
-  --rpc-cors all --ws-external --rpc-methods=unsafe \
+./target/release/tangle-standalone --tmp --chain local --validator -lerror --dave \
+  --rpc-cors all --rpc-methods=unsafe \
   --port ${ports[1]} \
-  --ws-port 9945 --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
+   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Eve
-./target/release/tangle-standalone --tmp --chain local --validator -linfo --eve --output-path=./tmp/eve/output.log \
-    --rpc-cors all --ws-external \
-    --ws-port 9948 \
+./target/release/tangle-standalone --tmp --chain local --validator -linfo --eve \
+    --rpc-cors all \
     --port ${ports[2]} \
     -ldkg=debug \
     -ldkg_gadget::worker=debug \

@@ -293,7 +293,7 @@ Open a new terminal, same directory:
 --validator \
 --bob \
 --port 50556
---ws-port 9945
+
 ```
 
 Add more nodes as needed, with non-conflicting ports, DB directories, and validator keys

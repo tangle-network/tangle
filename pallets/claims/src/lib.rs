@@ -75,19 +75,19 @@ pub trait WeightInfo {
 pub struct TestWeightInfo;
 impl WeightInfo for TestWeightInfo {
 	fn claim() -> Weight {
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	}
 	fn mint_claim() -> Weight {
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	}
 	fn claim_attest() -> Weight {
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	}
 	fn attest() -> Weight {
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	}
 	fn move_claim() -> Weight {
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	}
 }
 
@@ -184,7 +184,6 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::pallet]
-	#[pallet::generate_store(pub(super) trait Store)]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
@@ -353,7 +352,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight(0)]
+		#[pallet::weight({0})]
 		#[pallet::call_index(0)]
 		pub fn claim(
 			origin: OriginFor<T>,
@@ -386,7 +385,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight(1)]
+		#[pallet::weight({1})]
 		#[pallet::call_index(1)]
 		pub fn mint_claim(
 			origin: OriginFor<T>,
@@ -435,7 +434,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight(2)]
+		#[pallet::weight({2})]
 		#[pallet::call_index(2)]
 		pub fn claim_attest(
 			origin: OriginFor<T>,
@@ -491,7 +490,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		#[pallet::weight(4)]
+		#[pallet::weight({4})]
 		#[pallet::call_index(4)]
 		pub fn move_claim(
 			origin: OriginFor<T>,
@@ -516,7 +515,7 @@ pub mod pallet {
 
 		/// Set the value for expiryconfig
 		/// Can only be called by ForceOrigin
-		#[pallet::weight(5)]
+		#[pallet::weight({5})]
 		#[pallet::call_index(5)]
 		pub fn force_set_expiry_config(
 			origin: OriginFor<T>,

@@ -22,7 +22,7 @@ use crate::eth::{
 };
 use codec::Encode;
 use dkg_gadget::debug_logger::DebugLogger;
-use futures::{channel::mpsc, prelude::*};
+use futures::channel::mpsc;
 use sc_client_api::BlockBackend;
 use sc_consensus::BasicQueue;
 use sc_consensus_aura::ImportQueueParams;

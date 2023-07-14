@@ -1220,7 +1220,7 @@ pub type Executive = frame_executive::Executive<
 pub struct OnRuntimeUpgrade;
 impl frame_support::traits::OnRuntimeUpgrade for OnRuntimeUpgrade {
 	fn on_runtime_upgrade() -> Weight {
-		Weight::from_ref_time(0u64)
+		Weight::from_parts(0u64, 0u64)
 	}
 }
 

@@ -220,7 +220,7 @@ const cmds = [1, 2, 3].map((n) =>
   --port ${30334 + n} \\
   --force-authoring \\
   --ws-port ${9945 + n} \\
-  --ws-external --rpc-port ${9979 + n} \\
+  --rpc-port ${9979 + n} \\
   --rpc-cors all --rpc-external \\
   --unsafe-ws-external --unsafe-rpc-external \\
   -ldkg=debug \\

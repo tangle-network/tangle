@@ -52,12 +52,12 @@ pub trait WeightInfo {
 pub struct AcalaWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for AcalaWeight<T> {
 	fn pause_transaction() -> Weight {
-		Weight::from_ref_time(32_778_000)
+		Weight::from_parts(32_778_000, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	fn unpause_transaction() -> Weight {
-		Weight::from_ref_time(29_335_000)
+		Weight::from_parts(29_335_000, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
@@ -66,12 +66,12 @@ impl<T: frame_system::Config> WeightInfo for AcalaWeight<T> {
 // For backwards compatibility and tests
 impl WeightInfo for () {
 	fn pause_transaction() -> Weight {
-		Weight::from_ref_time(32_778_000)
+		Weight::from_parts(32_778_000, 0)
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
 	fn unpause_transaction() -> Weight {
-		Weight::from_ref_time(29_335_000)
+		Weight::from_parts(29_335_000, 0)
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
