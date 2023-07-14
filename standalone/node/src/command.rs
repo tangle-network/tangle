@@ -1,3 +1,16 @@
+// Copyright 2022 Webb Technologies Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 use crate::{
 	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder},
 	chain_spec,
@@ -5,6 +18,7 @@ use crate::{
 	service,
 };
 use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
+use futures::TryFutureExt;
 use sc_cli::{ChainSpec, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
@@ -109,7 +123,7 @@ pub fn run() -> sc_cli::Result<()> {
 				let PartialComponents { client, task_manager, backend, .. } =
 					service::new_partial(&config, &cli.eth)?;
 				let aux_revert = Box::new(|client, _, blocks| {
-					sc_finality_grandpa::revert(client, blocks)?;
+					sc_consensus_grandpa::revert(client, blocks)?;
 					Ok(())
 				});
 				Ok((cmd.run(client, backend, Some(aux_revert)), task_manager))
@@ -191,6 +205,10 @@ pub fn run() -> sc_cli::Result<()> {
 			runner.sync_run(|mut config| {
 				let (client, _, _, _, frontier_backend) =
 					service::new_chain_ops(&mut config, &cli.eth)?;
+				let frontier_backend = match frontier_backend {
+					fc_db::Backend::KeyValue(kv) => std::sync::Arc::new(kv),
+					_ => panic!("Only fc_db::Backend::KeyValue supported"),
+				};
 				cmd.run(client, frontier_backend)
 			})
 		},
@@ -217,16 +235,9 @@ pub fn run() -> sc_cli::Result<()> {
 		},
 		None => {
 			let runner = cli.create_runner(&cli.run)?;
-			if let Some(output_path) = &cli.output_path {
-				let mut dir = output_path.clone();
-				dir.pop(); // get the dir
-				if !dir.exists() {
-					std::fs::create_dir_all(dir)?;
-				}
-			}
 
 			runner.run_node_until_exit(|config| async move {
-				service::new_full(config, cli.eth, cli.output_path).map_err(sc_cli::Error::Service)
+				service::new_full(config, cli.eth, cli.output_path).map_err(Into::into).await
 			})
 		},
 	}

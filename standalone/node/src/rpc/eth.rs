@@ -1,20 +1,4 @@
-// Copyright 2022 Webb Technologies Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-//! ETH specific RPC utilities.
-
-use std::sync::Arc;
+use std::{collections::BTreeMap, sync::Arc};
 
 use jsonrpsee::RpcModule;
 // Substrate
@@ -23,16 +7,17 @@ use sc_client_api::{
 	client::BlockchainEvents,
 };
 use sc_network::NetworkService;
+use sc_network_sync::SyncingService;
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_transaction_pool::{ChainApi, Pool};
 use sc_transaction_pool_api::TransactionPool;
-use sp_api::ProvideRuntimeApi;
+use sp_api::{CallApiAt, ProvideRuntimeApi};
 use sp_block_builder::BlockBuilder as BlockBuilderApi;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
+use sp_core::H256;
 use sp_runtime::traits::Block as BlockT;
 // Frontier
-use fc_db::Backend as FrontierBackend;
-pub use fc_rpc::{EthBlockDataCacheTask, OverrideHandle, StorageOverride};
+pub use fc_rpc::{EthBlockDataCacheTask, EthConfig, OverrideHandle, StorageOverride, TxPool};
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 pub use fc_storage::overrides_handle;
 use fp_rpc::{ConvertTransaction, ConvertTransactionRuntimeApi, EthereumRuntimeRPCApi};
@@ -53,8 +38,10 @@ pub struct EthDeps<C, P, A: ChainApi, CT, B: BlockT> {
 	pub enable_dev_signer: bool,
 	/// Network service
 	pub network: Arc<NetworkService<B, B::Hash>>,
+	/// Chain syncing service
+	pub sync: Arc<SyncingService<B>>,
 	/// Frontier Backend.
-	pub frontier_backend: Arc<FrontierBackend<B>>,
+	pub frontier_backend: Arc<dyn fc_db::BackendReader<B> + Send + Sync>,
 	/// Ethereum data access overrides.
 	pub overrides: Arc<OverrideHandle<B>>,
 	/// Cache for Ethereum block data.
@@ -70,6 +57,8 @@ pub struct EthDeps<C, P, A: ChainApi, CT, B: BlockT> {
 	/// Maximum allowed gas limit will be ` block.gas_limit * execute_gas_limit_multiplier` when
 	/// using eth_call/eth_estimateGas.
 	pub execute_gas_limit_multiplier: u64,
+	/// Mandated parent hashes for a given block hash.
+	pub forced_parent_hashes: Option<BTreeMap<H256, H256>>,
 }
 
 impl<C, P, A: ChainApi, CT: Clone, B: BlockT> Clone for EthDeps<C, P, A, CT, B> {
@@ -82,6 +71,7 @@ impl<C, P, A: ChainApi, CT: Clone, B: BlockT> Clone for EthDeps<C, P, A, CT, B> 
 			is_authority: self.is_authority,
 			enable_dev_signer: self.enable_dev_signer,
 			network: self.network.clone(),
+			sync: self.sync.clone(),
 			frontier_backend: self.frontier_backend.clone(),
 			overrides: self.overrides.clone(),
 			block_data_cache: self.block_data_cache.clone(),
@@ -90,20 +80,26 @@ impl<C, P, A: ChainApi, CT: Clone, B: BlockT> Clone for EthDeps<C, P, A, CT, B> 
 			fee_history_cache: self.fee_history_cache.clone(),
 			fee_history_cache_limit: self.fee_history_cache_limit,
 			execute_gas_limit_multiplier: self.execute_gas_limit_multiplier,
+			forced_parent_hashes: self.forced_parent_hashes.clone(),
 		}
 	}
 }
 
 /// Instantiate Ethereum-compatible RPC extensions.
-pub fn create_eth<C, BE, P, A, CT, B>(
+pub fn create_eth<C, BE, P, A, CT, B, EC: EthConfig<B, C>>(
 	mut io: RpcModule<()>,
 	deps: EthDeps<C, P, A, CT, B>,
 	subscription_task_executor: SubscriptionTaskExecutor,
+	pubsub_notification_sinks: Arc<
+		fc_mapping_sync::EthereumBlockNotificationSinks<
+			fc_mapping_sync::EthereumBlockNotification<B>,
+		>,
+	>,
 ) -> Result<RpcModule<()>, Box<dyn std::error::Error + Send + Sync>>
 where
-	B: BlockT,
-	C: ProvideRuntimeApi<B>,
-	C::Api: BlockBuilderApi<B> + EthereumRuntimeRPCApi<B> + ConvertTransactionRuntimeApi<B>,
+	B: BlockT<Hash = sp_core::H256>,
+	C: CallApiAt<B> + ProvideRuntimeApi<B>,
+	C::Api: BlockBuilderApi<B> + ConvertTransactionRuntimeApi<B> + EthereumRuntimeRPCApi<B>,
 	C: BlockchainEvents<B> + 'static,
 	C: HeaderBackend<B> + HeaderMetadata<B, Error = BlockChainError> + StorageProvider<B, BE>,
 	BE: Backend<B> + 'static,
@@ -113,7 +109,7 @@ where
 {
 	use fc_rpc::{
 		Eth, EthApiServer, EthDevSigner, EthFilter, EthFilterApiServer, EthPubSub,
-		EthPubSubApiServer, EthSigner, Net, NetApiServer, Web3, Web3ApiServer,
+		EthPubSubApiServer, EthSigner, Net, NetApiServer, TxPoolApiServer, Web3, Web3ApiServer,
 	};
 
 	let EthDeps {
@@ -124,6 +120,7 @@ where
 		is_authority,
 		enable_dev_signer,
 		network,
+		sync,
 		frontier_backend,
 		overrides,
 		block_data_cache,
@@ -132,6 +129,7 @@ where
 		fee_history_cache,
 		fee_history_cache_limit,
 		execute_gas_limit_multiplier,
+		forced_parent_hashes,
 	} = deps;
 
 	let mut signers = Vec::new();
@@ -143,10 +141,10 @@ where
 		Eth::new(
 			client.clone(),
 			pool.clone(),
-			graph,
+			graph.clone(),
 			converter,
-			network.clone(),
-			vec![],
+			sync.clone(),
+			signers,
 			overrides.clone(),
 			frontier_backend.clone(),
 			is_authority,
@@ -154,15 +152,19 @@ where
 			fee_history_cache,
 			fee_history_cache_limit,
 			execute_gas_limit_multiplier,
+			forced_parent_hashes,
 		)
+		.replace_config::<EC>()
 		.into_rpc(),
 	)?;
 
+	let tx_pool = TxPool::new(client.clone(), graph);
 	if let Some(filter_pool) = filter_pool {
 		io.merge(
 			EthFilter::new(
 				client.clone(),
 				frontier_backend,
+				tx_pool.clone(),
 				filter_pool,
 				500_usize, // max stored filters
 				max_past_logs,
@@ -176,9 +178,10 @@ where
 		EthPubSub::new(
 			pool,
 			client.clone(),
-			network.clone(),
+			sync,
 			subscription_task_executor,
 			overrides,
+			pubsub_notification_sinks,
 		)
 		.into_rpc(),
 	)?;
@@ -194,6 +197,7 @@ where
 	)?;
 
 	io.merge(Web3::new(client).into_rpc())?;
+	io.merge(tx_pool.into_rpc())?;
 
 	Ok(io)
 }

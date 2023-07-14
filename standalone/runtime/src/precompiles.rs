@@ -1,4 +1,19 @@
-use pallet_evm::{Precompile, PrecompileHandle, PrecompileResult, PrecompileSet};
+// Copyright 2022 Webb Technologies Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+use pallet_evm::{
+	IsPrecompileResult, Precompile, PrecompileHandle, PrecompileResult, PrecompileSet,
+};
 use sp_core::H160;
 use sp_std::marker::PhantomData;
 
@@ -6,13 +21,8 @@ use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 
+#[derive(Default)]
 pub struct FrontierPrecompiles<R>(PhantomData<R>);
-
-impl<R> Default for FrontierPrecompiles<R> {
-	fn default() -> Self {
-		Self(Default::default())
-	}
-}
 
 impl<R> FrontierPrecompiles<R>
 where
@@ -44,8 +54,11 @@ where
 		}
 	}
 
-	fn is_precompile(&self, address: H160) -> bool {
-		Self::used_addresses().contains(&address)
+	fn is_precompile(&self, address: H160, _gas: u64) -> IsPrecompileResult {
+		IsPrecompileResult::Answer {
+			is_precompile: Self::used_addresses().contains(&address),
+			extra_cost: 0,
+		}
 	}
 }
 

@@ -25,12 +25,5 @@ sp-io = { workspace = true }
 
 [features]
 default = ["std"]
-std = [
-  "scale-info/std",
-  "sp-runtime/std",
-  "frame-support/std",
-  "frame-system/std",
-  "sp-core/std",
-  "sp-std/std",
-]
+std = ["scale-info/std", "sp-runtime/std", "frame-support/std", "frame-system/std", "sp-core/std", "sp-std/std"]
 try-runtime = ["frame-support/try-runtime"]

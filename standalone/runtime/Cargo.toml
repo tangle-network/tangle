@@ -136,9 +136,9 @@ runtime-benchmarks = [
   "pallet-dkg-proposal-handler/runtime-benchmarks",
 
   # Frontier
-	"pallet-ethereum/runtime-benchmarks",
-	"pallet-evm/runtime-benchmarks",
-	"pallet-hotfix-sufficients/runtime-benchmarks",
+  "pallet-ethereum/runtime-benchmarks",
+  "pallet-evm/runtime-benchmarks",
+  "pallet-hotfix-sufficients/runtime-benchmarks",
 ]
 
 std = [
@@ -208,13 +208,13 @@ std = [
   # ETH2 light-client
   "pallet-eth2-light-client/std",
 
-	# Frontier
-	"fp-account/std",
-	"fp-evm/std",
-	"fp-rpc/std",
-	"fp-self-contained/std",
+  # Frontier
+  "fp-account/std",
+  "fp-evm/std",
+  "fp-rpc/std",
+  "fp-self-contained/std",
 
-	# Frontier FRAME
+  # Frontier FRAME
   "pallet-base-fee/std",
   "pallet-dynamic-fee/std",
   "pallet-ethereum/std",
@@ -230,6 +230,6 @@ std = [
   "pallet-evm-precompile-ed25519/std",
   "pallet-hotfix-sufficients/std",
 ]
-integration-tests = ["tangle-primitives/integration-tests",]
+integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
 with-paritydb-weights = []

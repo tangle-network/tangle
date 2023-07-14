@@ -75,19 +75,19 @@ pub trait WeightInfo {
 pub struct TestWeightInfo;
 impl WeightInfo for TestWeightInfo {
 	fn claim() -> Weight {
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	}
 	fn mint_claim() -> Weight {
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	}
 	fn claim_attest() -> Weight {
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	}
 	fn attest() -> Weight {
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	}
 	fn move_claim() -> Weight {
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	}
 }
 
@@ -184,7 +184,6 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::pallet]
-	#[pallet::generate_store(pub(super) trait Store)]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
@@ -353,7 +352,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight(0)]
+		#[pallet::weight({0})]
 		#[pallet::call_index(0)]
 		pub fn claim(
 			origin: OriginFor<T>,
@@ -386,7 +385,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight(1)]
+		#[pallet::weight({1})]
 		#[pallet::call_index(1)]
 		pub fn mint_claim(
 			origin: OriginFor<T>,
@@ -435,7 +434,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight(2)]
+		#[pallet::weight({2})]
 		#[pallet::call_index(2)]
 		pub fn claim_attest(
 			origin: OriginFor<T>,
@@ -491,7 +490,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		#[pallet::weight(4)]
+		#[pallet::weight({4})]
 		#[pallet::call_index(4)]
 		pub fn move_claim(
 			origin: OriginFor<T>,
@@ -516,7 +515,7 @@ pub mod pallet {
 
 		/// Set the value for expiryconfig
 		/// Can only be called by ForceOrigin
-		#[pallet::weight(5)]
+		#[pallet::weight({5})]
 		#[pallet::call_index(5)]
 		pub fn force_set_expiry_config(
 			origin: OriginFor<T>,
@@ -771,9 +770,11 @@ mod secp_utils {
 mod tests {
 	use super::*;
 	use codec::Encode;
+	use frame_support::pallet_prelude::DispatchError;
 	use hex_literal::hex;
 	use secp_utils::*;
 	use sp_core::H256;
+	use sp_runtime::TokenError::Frozen;
 	use sp_std::convert::TryFrom;
 	// The testing primitives are very useful for avoiding having to work with signatures
 	// or public keys. `u64` is used as the `AccountId` and no `Signature`s are required.
@@ -851,6 +852,10 @@ mod tests {
 		type MaxReserves = ();
 		type ReserveIdentifier = [u8; 8];
 		type WeightInfo = ();
+		type HoldIdentifier = ();
+		type MaxHolds = ();
+		type FreezeIdentifier = ();
+		type MaxFreezes = ();
 	}
 
 	parameter_types! {
@@ -1283,7 +1288,7 @@ mod tests {
 					180,
 					ExistenceRequirement::AllowDeath
 				),
-				pallet_balances::Error::<Test, _>::LiquidityRestrictions,
+				DispatchError::Token(Frozen),
 			);
 		});
 	}
@@ -1371,6 +1376,8 @@ mod tests {
 	#[test]
 	fn claiming_while_vested_doesnt_work() {
 		new_test_ext().execute_with(|| {
+			CurrencyOf::<Test>::make_free_balance_be(&69, total_claims());
+			assert_eq!(Balances::free_balance(69), total_claims());
 			// A user is already vested
 			assert_ok!(<Test as Config>::VestingSchedule::add_vesting_schedule(
 				&69,
@@ -1378,8 +1385,6 @@ mod tests {
 				100,
 				10
 			));
-			CurrencyOf::<Test>::make_free_balance_be(&69, total_claims());
-			assert_eq!(Balances::free_balance(69), total_claims());
 			assert_ok!(Claims::mint_claim(
 				RuntimeOrigin::root(),
 				eth(&bob()),

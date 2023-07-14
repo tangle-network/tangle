@@ -55,9 +55,7 @@ sc-basic-authorship = { workspace = true }
 sc-client-api = { workspace = true }
 sc-consensus = { workspace = true }
 sc-consensus-aura = { workspace = true }
-sc-finality-grandpa = { workspace = true }
 sc-network = { workspace = true }
-sc-network-common = { workspace = true }
 sc-telemetry = { workspace = true }
 sc-transaction-pool = { workspace = true }
 sp-consensus-aura = { workspace = true }
@@ -65,6 +63,8 @@ sp-inherents = { workspace = true }
 sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }
 sp-trie = { workspace = true }
+sc-consensus-grandpa = { workspace = true }
+sc-network-sync = { workspace = true }
 
 sc-chain-spec = { workspace = true }
 sc-rpc = { workspace = true }
@@ -72,9 +72,9 @@ sc-rpc-api = { workspace = true }
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
-sp-finality-grandpa = { workspace = true }
 sp-timestamp = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
+sc-consensus-manual-seal = { workspace = true }
 
 # RPC related dependencies
 jsonrpsee = { workspace = true }
@@ -98,8 +98,17 @@ fp-evm = { workspace = true, features = ["default"] }
 fp-rpc = { workspace = true, features = ["default"] }
 
 [features]
-default = ["with-rocksdb-weights"]
+default = ["with-rocksdb-weights", "rocksdb", "sql"]
 runtime-benchmarks = ["tangle-runtime/runtime-benchmarks"]
 integration-tests = ["tangle-runtime/integration-tests"]
 with-rocksdb-weights = ["tangle-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-runtime/with-paritydb-weights"]
+rocksdb = [
+  "sc-cli/rocksdb",
+  "sc-service/rocksdb",
+  "fc-cli/rocksdb",
+  "fc-db/rocksdb",
+  "fc-mapping-sync/rocksdb",
+  "fc-rpc/rocksdb",
+]
+sql = ["fc-db/sql", "fc-mapping-sync/sql"]

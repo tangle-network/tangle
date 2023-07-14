@@ -32,24 +32,23 @@ cd "$PROJECT_ROOT"
 echo "*** Start Tangle Standalone node ***"
 ./target/release/tangle-standalone --base-path=./tmp/alice --chain local -lerror --alice \
   --rpc-cors all \
-  --ws-external \
+  \
   --rpc-external \
   --rpc-methods=unsafe \
   --unsafe-rpc-external \
   --port 30304 \
-  --ws-port 9944 &
+  &
 ./target/release/tangle-standalone --base-path=./tmp/bob --chain local -lerror --bob \
   --rpc-cors all \
-  --ws-external \
+  \
   --rpc-external \
   --rpc-methods=unsafe \
   --unsafe-rpc-external \
   --port 30305 \
-  --ws-port 9945 &
+   &
 ./target/release/tangle-standalone --base-path=./tmp/charlie --chain local -linfo \
-    --ws-port 9946 \
     --rpc-cors all \
-    --ws-external \
+    \
     --rpc-external \
     --rpc-methods=unsafe \
     --unsafe-rpc-external \

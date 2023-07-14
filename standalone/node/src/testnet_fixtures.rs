@@ -16,10 +16,10 @@
 use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
-use sc_network_common::config::MultiaddrWithPeerId;
+use sc_consensus_grandpa::AuthorityId as GrandpaId;
+use sc_network::config::MultiaddrWithPeerId;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::crypto::UncheckedInto;
-use sp_finality_grandpa::AuthorityId as GrandpaId;
 use tangle_runtime::AccountId;
 
 /// Testnet root key
