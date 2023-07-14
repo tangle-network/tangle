@@ -770,9 +770,11 @@ mod secp_utils {
 mod tests {
 	use super::*;
 	use codec::Encode;
+	use frame_support::pallet_prelude::DispatchError;
 	use hex_literal::hex;
 	use secp_utils::*;
 	use sp_core::H256;
+	use sp_runtime::TokenError::Frozen;
 	use sp_std::convert::TryFrom;
 	// The testing primitives are very useful for avoiding having to work with signatures
 	// or public keys. `u64` is used as the `AccountId` and no `Signature`s are required.
@@ -1286,7 +1288,7 @@ mod tests {
 					180,
 					ExistenceRequirement::AllowDeath
 				),
-				pallet_balances::Error::<Test, _>::LiquidityRestrictions,
+				DispatchError::Token(Frozen),
 			);
 		});
 	}
@@ -1374,6 +1376,8 @@ mod tests {
 	#[test]
 	fn claiming_while_vested_doesnt_work() {
 		new_test_ext().execute_with(|| {
+			CurrencyOf::<Test>::make_free_balance_be(&69, total_claims());
+			assert_eq!(Balances::free_balance(69), total_claims());
 			// A user is already vested
 			assert_ok!(<Test as Config>::VestingSchedule::add_vesting_schedule(
 				&69,
@@ -1381,8 +1385,6 @@ mod tests {
 				100,
 				10
 			));
-			CurrencyOf::<Test>::make_free_balance_be(&69, total_claims());
-			assert_eq!(Balances::free_balance(69), total_claims());
 			assert_ok!(Claims::mint_claim(
 				RuntimeOrigin::root(),
 				eth(&bob()),
