@@ -30,6 +30,7 @@
             pkgs.gmp
             pkgs.protobuf
             pkgs.pkg-config
+            pkgs.openssl
             # Needed for rocksdb-sys
             pkgs.clang
             pkgs.libclang.lib
@@ -53,7 +54,7 @@
           # Environment variables
           RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
           # Needed for running DKG Node.
-          LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.gmp ];
+          LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.gmp pkgs.openssl ];
         };
       });
 }
