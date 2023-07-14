@@ -36,6 +36,9 @@ pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git"
 pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1", default-features = false }
 dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1" }
 dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1" }
+webb-relayer-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1" }
+webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1" }
+
 tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
 
 # Tangle Dependencies

@@ -38,8 +38,9 @@ finality-update-verify = { workspace = true }
 dkg-gadget = { workspace = true }
 dkg-primitives = { workspace = true }
 dkg-runtime-primitives = { workspace = true }
-tangle-runtime = { workspace = true }
 pallet-bridge-registry = { workspace = true }
+webb-relayer-gadget = { workspace = true }
+webb-relayer-gadget-cli = { workspace = true }
 
 # Substrate dependencies
 sc-cli = { workspace = true }
@@ -96,6 +97,8 @@ fp-account = { workspace = true }
 fp-dynamic-fee = { workspace = true, features = ["default"] }
 fp-evm = { workspace = true, features = ["default"] }
 fp-rpc = { workspace = true, features = ["default"] }
+
+tangle-runtime = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
