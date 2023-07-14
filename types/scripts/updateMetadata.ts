@@ -14,7 +14,7 @@ const fs = require('fs');
 const { w3cwebsocket: WS } = pkg;
 
 const main = (): void => {
-  const endpoint = 'ws://localhost:9944';
+  const endpoint = 'ws://127.0.0.1:9944';
 
   console.log('Connecting to ', endpoint);
   const ws = new WS(endpoint);
@@ -22,12 +22,12 @@ const main = (): void => {
   ws.onerror = (error: any) => {
     console.error('WebSocket error:', error);
   };
-  
+
   ws.onopen = (): void => {
     ws.send('{"id":"1","jsonrpc":"2.0","method":"state_getMetadata","params":[]}');
     console.log("data send");
   };
-  
+
   ws.onmessage = (msg: any): void => {
     const fullData = JSON.parse(msg.data);
     const metadata = fullData.result;
