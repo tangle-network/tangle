@@ -7,13 +7,7 @@ homepage = "https://webb.tools"
 repository = "https://github.com/webb-tools/tangle"
 
 [workspace]
-members = [
-  "primitives",
-  "standalone/node",
-  "standalone/runtime",
-  "pallets/claims",
-  "pallets/transaction-pause",
-]
+members = ["primitives", "standalone/node", "standalone/runtime", "pallets/claims", "pallets/transaction-pause"]
 
 [workspace.dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
@@ -97,7 +91,7 @@ sc-network-common = { git = "https://github.com/paritytech/substrate", branch = 
 sc-telemetry = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
 sc-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
 sp-keyring = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
-frame-rpc-system = { default-features = false,package = "substrate-frame-rpc-system", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
+frame-rpc-system = { default-features = false, package = "substrate-frame-rpc-system", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
 substrate-prometheus-endpoint = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
 sc-network = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
 sc-rpc = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
@@ -221,8 +215,8 @@ tangle-primitives = { path = 'primitives', default-features = false }
 # pallet-parachain-staking = { path = 'pallets/parachain-staking', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features=false, tag = "v0.3.0" }
-finality-update-verify = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features=false, tag = "v0.3.0" }
+pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.3.0" }
+finality-update-verify = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.3.0" }
 
 [profile.release]
 panic = "unwind"
