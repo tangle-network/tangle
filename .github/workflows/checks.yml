@@ -111,7 +111,7 @@ jobs:
 
   dkg-liveness:
     concurrency:
-      group: build-${{ github.ref }}
+      group: dkg-liveness-${{ github.ref }}
       cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
