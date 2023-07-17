@@ -20,9 +20,9 @@ use crate::eth::{
 	new_frontier_partial, spawn_frontier_tasks, BackendType, FrontierBackend, FrontierBlockImport,
 	FrontierPartialComponents,
 };
-use codec::Encode;
 use dkg_gadget::debug_logger::DebugLogger;
 use futures::channel::mpsc;
+use parity_scale_codec::Encode;
 use sc_client_api::BlockBackend;
 use sc_consensus::BasicQueue;
 use sc_consensus_aura::ImportQueueParams;

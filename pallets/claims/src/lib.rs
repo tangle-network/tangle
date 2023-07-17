@@ -18,13 +18,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::all)]
 
-use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
 	traits::{Currency, Get, IsSubType, VestingSchedule},
 	weights::Weight,
 };
 pub use pallet::*;
+use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 #[cfg(feature = "std")]
 use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
@@ -105,14 +105,16 @@ impl StatementKind {
 	/// Convert this to the (English) statement it represents.
 	fn to_text(self) -> &'static [u8] {
 		match self {
-			StatementKind::Regular =>
+			StatementKind::Regular => {
 				&b"I hereby agree to the terms of the statement whose SHA-256 multihash is \
 				Qmc1XYqT6S39WNp2UeiRUrZichUWUPpGEThDE6dAb3f6Ny. (This may be found at the URL: \
-				https://statement.polkadot.network/regular.html)"[..],
-			StatementKind::Saft =>
+				https://statement.polkadot.network/regular.html)"[..]
+			},
+			StatementKind::Saft => {
 				&b"I hereby agree to the terms of the statement whose SHA-256 multihash is \
 				QmXEkMahfhHJPzT3RjkXiZVFi77ZeVeuxtAjhojGRNYckz. (This may be found at the URL: \
-				https://statement.polkadot.network/saft.html)"[..],
+				https://statement.polkadot.network/saft.html)"[..]
+			},
 		}
 	}
 }
@@ -626,7 +628,7 @@ impl<T: Config> Pallet<T> {
 
 		let vesting = Vesting::<T>::get(&signer);
 		if vesting.is_some() && T::VestingSchedule::vesting_balance(&dest).is_some() {
-			return Err(Error::<T>::VestedBalanceExists.into())
+			return Err(Error::<T>::VestedBalanceExists.into());
 		}
 
 		// We first need to deposit the balance to ensure that the account exists.
@@ -769,9 +771,9 @@ mod secp_utils {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use codec::Encode;
 	use frame_support::pallet_prelude::DispatchError;
 	use hex_literal::hex;
+	use parity_scale_codec::Encode;
 	use secp_utils::*;
 	use sp_core::H256;
 	use sp_runtime::TokenError::Frozen;
