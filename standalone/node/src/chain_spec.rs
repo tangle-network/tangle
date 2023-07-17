@@ -51,6 +51,12 @@ const RESOURCE_ID_ATHENA_HERMES: ResourceId = ResourceId(hex_literal::hex!(
 	"000000000000d30c8839c1145609e564b986f667b273ddcb8496010000001389"
 ));
 
+/// The default value for keygen threshold
+const DEFAULT_DKG_KEYGEN_THRESHOLD: u16 = 5;
+
+/// The default value for signature threshold
+const DEFAULT_DKG_SIGNATURE_THRESHOLD: u16 = 3;
+
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
 
@@ -152,6 +158,8 @@ pub fn development_config(chain_id: u64) -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Eve"),
 				],
 				chain_id,
+				DEFAULT_DKG_KEYGEN_THRESHOLD,
+				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				true,
 			)
 		},
@@ -223,6 +231,8 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Eve"),
 				],
 				chain_id,
+				DEFAULT_DKG_KEYGEN_THRESHOLD,
+				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				true,
 			)
 		},
@@ -247,6 +257,9 @@ pub fn relayer_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
+
+	let relayer_testnet_dkg_keygen_threshold = 2;
+	let relayer_testnet_dkg_signature_threshold = 1;
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -293,6 +306,8 @@ pub fn relayer_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Eve"),
 				],
 				chain_id,
+				relayer_testnet_dkg_keygen_threshold,
+				relayer_testnet_dkg_signature_threshold,
 				true,
 			)
 		},
@@ -350,6 +365,8 @@ pub fn standalone_live_config(chain_id: u64) -> Result<ChainSpec, String> {
 				vec![],
 				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
 				chain_id,
+				DEFAULT_DKG_KEYGEN_THRESHOLD,
+				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				true,
 			)
 		},
@@ -421,6 +438,8 @@ pub fn standalone_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				vec![],
 				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
 				chain_id,
+				DEFAULT_DKG_KEYGEN_THRESHOLD,
+				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				true,
 			)
 		},
@@ -477,6 +496,8 @@ pub fn standalone_local_config(chain_id: u64) -> Result<ChainSpec, String> {
 				vec![],
 				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
 				chain_id,
+				DEFAULT_DKG_KEYGEN_THRESHOLD,
+				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				true,
 			)
 		},
@@ -507,6 +528,8 @@ fn testnet_genesis(
 	initial_r_ids: Vec<(ResourceId, Vec<u8>)>,
 	initial_proposers: Vec<AccountId>,
 	chain_id: u64,
+	dkg_keygen_threshold: u16,
+	dkg_signature_threshold: u16,
 	_enable_println: bool,
 ) -> GenesisConfig {
 	const ENDOWMENT: Balance = 10_000_000 * UNIT;
@@ -596,8 +619,8 @@ fn testnet_genesis(
 		grandpa: Default::default(),
 		dkg: DKGConfig {
 			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
-			keygen_threshold: 5,
-			signature_threshold: 3,
+			keygen_threshold: dkg_keygen_threshold,
+			signature_threshold: dkg_signature_threshold,
 			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
 		},
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
