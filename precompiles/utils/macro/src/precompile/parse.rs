@@ -270,9 +270,7 @@ impl Precompile {
 
 					pat.ident.clone()
 				},
-				_ => {
-					return Err(syn::Error::new(input.pat.span(), msg))
-				},
+				_ => return Err(syn::Error::new(input.pat.span(), msg)),
 			};
 			let ty = input.ty.as_ref().clone();
 			self.check_type_parameter_usage(&ty)?;
