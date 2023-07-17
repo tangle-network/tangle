@@ -35,3 +35,12 @@ docker compose up -d
 
 You can then navigate to http://localhost:3000 to access the grafana dashboard
 
+## Setting up logrotate
+
+(Optional) You can setup [logrotate](https://linux.die.net/man/8/logrotate) to ensure the log output files do not exceed certain size. An example config has been provided [here](./tangle_logrotate.conf). Make sure you modify the path to the location of your log out put directory.
+
+Once the file is setup correctly, ensure to add this file to `/etc/logrotate.conf` as below
+```
+include <tangle_logrotate.conf>
+```
+
