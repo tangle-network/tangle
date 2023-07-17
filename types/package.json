@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/tangle-substrate-types",
-  "version": "0.0.1",
+  "version": "0.3.2",
   "description": "Polkadot.js type definitions required for interacting with Webb's tangle network",
   "main": "./build/index.js",
   "author": "Webb Developers <drew@webb.tools>",
@@ -33,15 +33,15 @@
     "@babel/preset-typescript": "^7.18.6",
     "@babel/register": "^7.18.9",
     "@babel/runtime": "^7.20.13",
-    "babel-jest": "^29.4.1",
-    "babel-plugin-module-extension-resolver": "^1.0.0",
-    "babel-plugin-module-resolver": "^5.0.0",
-    "babel-plugin-styled-components": "^2.0.7",
     "@open-web3/orml-types": "^1.1.3",
     "@polkadot/api-derive": "10.3.2",
     "@polkadot/dev": "^0.72.42",
     "@polkadot/typegen": "10.3.2",
     "@polkadot/types": "10.3.2",
+    "babel-jest": "^29.4.1",
+    "babel-plugin-module-extension-resolver": "^1.0.0",
+    "babel-plugin-module-resolver": "^5.0.0",
+    "babel-plugin-styled-components": "^2.0.7",
     "fs-extra": "^11.1.1",
     "glob2base": "^0.0.12",
     "minimatch": "^7.4.2",
@@ -53,7 +53,7 @@
     "ts-node": "10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "5.0.4",
-    "websocket": "^1.0.31"
+    "websocket": "^1.0.34"
   },
   "scripts": {
     "build": "node ./scripts/build.js",

@@ -12,6 +12,7 @@ import type { OpaqueKeyOwnershipProof } from '@polkadot/types/interfaces/babe';
 import type { CheckInherentsResult, InherentData } from '@polkadot/types/interfaces/blockbuilder';
 import type { BlockHash } from '@polkadot/types/interfaces/chain';
 import type { AuthorityId } from '@polkadot/types/interfaces/consensus';
+import type { TransactionV2 } from '@polkadot/types/interfaces/eth';
 import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
 import type { AuthorityList, GrandpaEquivocationProof, SetId } from '@polkadot/types/interfaces/grandpa';
 import type { OpaqueMetadata } from '@polkadot/types/interfaces/metadata';
@@ -76,6 +77,17 @@ declare module '@polkadot/api-base/types/calls' {
        **/
       [key: string]: DecoratedCallBase<ApiType>;
     };
+    /** 0xe65b00e46cedd0aa/2 */
+    convertTransactionRuntimeApi: {
+      /**
+       * Converts an Ethereum-style transaction to Extrinsic
+       **/
+      convertTransaction: AugmentedCall<ApiType, (transaction: TransactionV2 | { Legacy: any } | { EIP2930: any } | { EIP1559: any } | string | Uint8Array) => Observable<Extrinsic>>;
+      /**
+       * Generic call
+       **/
+      [key: string]: DecoratedCallBase<ApiType>;
+    };
     /** 0xdf6acb689907609b/4 */
     core: {
       /**
@@ -118,12 +130,20 @@ declare module '@polkadot/api-base/types/calls' {
        **/
       [key: string]: DecoratedCallBase<ApiType>;
     };
-    /** 0x37e397fc7c91f5e4/1 */
+    /** 0x37e397fc7c91f5e4/2 */
     metadata: {
       /**
        * Returns the metadata of a runtime
        **/
       metadata: AugmentedCall<ApiType, () => Observable<OpaqueMetadata>>;
+      /**
+       * Returns the metadata at a given version.
+       **/
+      metadataAtVersion: AugmentedCall<ApiType, (version: u32 | AnyNumber | Uint8Array) => Observable<Option<OpaqueMetadata>>>;
+      /**
+       * Returns the supported metadata versions.
+       **/
+      metadataVersions: AugmentedCall<ApiType, () => Observable<Vec<u32>>>;
       /**
        * Generic call
        **/
@@ -166,7 +186,7 @@ declare module '@polkadot/api-base/types/calls' {
        **/
       [key: string]: DecoratedCallBase<ApiType>;
     };
-    /** 0x37c8bb1350a9a2a8/3 */
+    /** 0x37c8bb1350a9a2a8/4 */
     transactionPaymentApi: {
       /**
        * The transaction fee details
