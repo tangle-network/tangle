@@ -16,17 +16,15 @@
 
 //! Encoding of XCM types for solidity
 
-use {
-	crate::solidity::{
-		codec::{bytes::*, Codec, Reader, Writer},
-		revert::{BacktraceExt, InjectBacktrace, MayRevert, RevertReason},
-	},
-	alloc::string::String,
-	frame_support::{ensure, traits::ConstU32},
-	sp_core::H256,
-	sp_std::vec::Vec,
-	xcm::latest::{Junction, Junctions, MultiLocation, NetworkId},
+use crate::solidity::{
+	codec::{bytes::*, Codec, Reader, Writer},
+	revert::{BacktraceExt, InjectBacktrace, MayRevert, RevertReason},
 };
+use alloc::string::String;
+use frame_support::{ensure, traits::ConstU32};
+use sp_core::H256;
+use sp_std::vec::Vec;
+use xcm::latest::{Junction, Junctions, MultiLocation, NetworkId};
 
 pub const JUNCTION_SIZE_LIMIT: u32 = 2u32.pow(16);
 
@@ -186,7 +184,8 @@ impl Codec for Junction {
 				Ok(Junction::AccountId32 { network: network_id_from_bytes(network)?, id: account })
 			},
 			2 => {
-				// In the case of Junction::AccountIndex64, we need 8 additional bytes plus NetworkId
+				// In the case of Junction::AccountIndex64, we need 8 additional bytes plus
+				// NetworkId
 				let mut index: [u8; 8] = Default::default();
 				index.copy_from_slice(&encoded_junction.read_raw_bytes(8)?);
 				// Now we read the network

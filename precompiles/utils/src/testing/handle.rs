@@ -14,13 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
-use {
-	crate::testing::PrettyLog,
-	fp_evm::{Context, ExitError, ExitReason, Log, PrecompileHandle, Transfer},
-	fp_evm::{ExitRevert, ExitSucceed},
-	sp_core::{H160, H256},
-	sp_std::boxed::Box,
+use crate::testing::PrettyLog;
+use fp_evm::{
+	Context, ExitError, ExitReason, ExitRevert, ExitSucceed, Log, PrecompileHandle, Transfer,
 };
+use sp_core::{H160, H256};
+use sp_std::boxed::Box;
 
 #[derive(Debug, Clone)]
 pub struct Subcall {
@@ -121,7 +120,7 @@ impl PrecompileHandle for MockHandle {
 			))
 			.is_err()
 		{
-			return (ExitReason::Error(ExitError::OutOfGas), vec![]);
+			return (ExitReason::Error(ExitError::OutOfGas), vec![])
 		}
 
 		match &mut self.subcall_handle {
@@ -136,7 +135,7 @@ impl PrecompileHandle for MockHandle {
 				});
 
 				if self.record_cost(cost).is_err() {
-					return (ExitReason::Error(ExitError::OutOfGas), vec![]);
+					return (ExitReason::Error(ExitError::OutOfGas), vec![])
 				}
 
 				for log in logs {

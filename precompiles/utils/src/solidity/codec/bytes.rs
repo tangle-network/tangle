@@ -93,7 +93,7 @@ impl<K: Kind, S: Get<u32>> Codec for BoundedBytesString<K, S> {
 			.map_err(|_| RevertReason::value_is_too_large("length"))?;
 
 		if array_size > S::get() as usize {
-			return Err(RevertReason::value_is_too_large("length").into());
+			return Err(RevertReason::value_is_too_large("length").into())
 		}
 
 		// Get valid range over the bytes data.

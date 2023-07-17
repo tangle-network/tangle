@@ -25,7 +25,7 @@ use syn::{
 pub fn main(input: TokenStream) -> TokenStream {
 	let DeriveInput { ident, mut generics, data, .. } = parse_macro_input!(input as DeriveInput);
 
-	let syn::Data::Struct (syn::DataStruct {fields: syn::Fields::Named(fields), ..}) = data else {
+	let syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(fields), .. }) = data else {
 		return quote_spanned! { ident.span() =>
 			compile_error!("Codec can only be derived for structs with named fields");
 		}
@@ -37,14 +37,14 @@ pub fn main(input: TokenStream) -> TokenStream {
 		return quote_spanned! { ident.span() =>
 			compile_error!("Codec can only be derived for structs with at least one field");
 		}
-		.into();
+		.into()
 	}
 
 	if let Some(unamed_field) = fields.iter().find(|f| f.ident.is_none()) {
 		return quote_spanned! { unamed_field.ty.span() =>
 			compile_error!("Codec can only be derived for structs with named fields");
 		}
-		.into();
+		.into()
 	}
 
 	let fields_ty: Vec<_> = fields.iter().map(|f| &f.ty).collect();

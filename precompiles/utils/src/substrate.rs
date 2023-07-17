@@ -18,17 +18,15 @@
 //! - Substrate call dispatch.
 //! - Substrate DB read and write costs
 
-use {
-	crate::{evm::handle::using_precompile_handle, solidity::revert::revert},
-	core::marker::PhantomData,
-	fp_evm::{ExitError, PrecompileFailure, PrecompileHandle},
-	frame_support::{
-		dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo},
-		pallet_prelude::*,
-		traits::Get,
-	},
-	pallet_evm::GasWeightMapping,
+use crate::{evm::handle::using_precompile_handle, solidity::revert::revert};
+use core::marker::PhantomData;
+use fp_evm::{ExitError, PrecompileFailure, PrecompileHandle};
+use frame_support::{
+	dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo},
+	pallet_prelude::*,
+	traits::Get,
 };
+use pallet_evm::GasWeightMapping;
 
 #[derive(Debug)]
 pub enum TryDispatchError {
@@ -40,9 +38,8 @@ impl From<TryDispatchError> for PrecompileFailure {
 	fn from(f: TryDispatchError) -> PrecompileFailure {
 		match f {
 			TryDispatchError::Evm(e) => PrecompileFailure::Error { exit_status: e },
-			TryDispatchError::Substrate(e) => {
-				revert(alloc::format!("Dispatched call failed with error: {e:?}"))
-			},
+			TryDispatchError::Substrate(e) =>
+				revert(alloc::format!("Dispatched call failed with error: {e:?}")),
 		}
 	}
 }
@@ -66,7 +63,7 @@ where
 		let remaining_gas = handle.remaining_gas();
 		let required_gas = Runtime::GasWeightMapping::weight_to_gas(weight);
 		if required_gas > remaining_gas {
-			return Err(ExitError::OutOfGas);
+			return Err(ExitError::OutOfGas)
 		}
 
 		// Make sure there is enough remaining weight

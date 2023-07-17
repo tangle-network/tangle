@@ -64,8 +64,7 @@ pub fn encode_arguments<T: Codec>(value: T) -> Vec<u8> {
 	}
 }
 
-pub use self::encode_arguments as encode_return_value;
-pub use self::encode_arguments as encode_event_data;
+pub use self::{encode_arguments as encode_return_value, encode_arguments as encode_event_data};
 
 /// Encode the value as the arguments of a Solidity function with given selector.
 /// If `T` is a tuple each member represents an argument of the function.
@@ -96,8 +95,7 @@ pub fn decode_arguments<T: Codec>(input: &[u8]) -> MayRevert<T> {
 	}
 }
 
-pub use self::decode_arguments as decode_return_value;
-pub use self::decode_arguments as decode_event_data;
+pub use self::{decode_arguments as decode_return_value, decode_arguments as decode_event_data};
 
 /// Extracts the selector from the start of the input, or returns `None` if the input is too short.
 pub fn selector(input: &[u8]) -> Option<u32> {
@@ -124,13 +122,14 @@ impl<'inner> Reader<'inner> {
 	/// Create a Reader while skipping an initial selector.
 	pub fn new_skip_selector(input: &'inner [u8]) -> MayRevert<Self> {
 		if input.len() < 4 {
-			return Err(RevertReason::read_out_of_bounds("selector").into());
+			return Err(RevertReason::read_out_of_bounds("selector").into())
 		}
 
 		Ok(Self::new(&input[4..]))
 	}
 
-	/// Check the input has at least the correct amount of arguments before the end (32 bytes values).
+	/// Check the input has at least the correct amount of arguments before the end (32 bytes
+	/// values).
 	pub fn expect_arguments(&self, args: usize) -> MayRevert {
 		if self.input.len() >= self.cursor + args * 32 {
 			Ok(())
@@ -167,7 +166,7 @@ impl<'inner> Reader<'inner> {
 			.map_err(|_| RevertReason::value_is_too_large("pointer"))?;
 
 		if offset >= self.input.len() {
-			return Err(RevertReason::PointerToOutofBound.into());
+			return Err(RevertReason::PointerToOutofBound.into())
 		}
 
 		Ok(Self { input: &self.input[offset..], cursor: 0 })
@@ -217,8 +216,8 @@ struct OffsetChunk {
 	offset_position: usize,
 	// Data pointed by the offset that must be inserted at the end of container data.
 	data: Vec<u8>,
-	// Inside of arrays, the offset is not from the start of array data (length), but from the start
-	// of the item. This shift allow to correct this.
+	// Inside of arrays, the offset is not from the start of array data (length), but from the
+	// start of the item. This shift allow to correct this.
 	offset_shift: usize,
 }
 
@@ -288,7 +287,8 @@ impl Writer {
 	/// Initially write a dummy value as offset in this writer's data, which will be replaced by
 	/// the correct offset once the pointed data is appended.
 	///
-	/// Takes `&mut self` since its goal is to be used inside `solidity::Codec` impl and not in chains.
+	/// Takes `&mut self` since its goal is to be used inside `solidity::Codec` impl and not in
+	/// chains.
 	pub fn write_pointer(&mut self, data: Vec<u8>) {
 		let offset_position = self.data.len();
 		H256::write(self, H256::repeat_byte(0xff));

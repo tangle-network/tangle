@@ -14,25 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
-use {
-	crate::{
-		prelude::*,
-		solidity::{
-			codec::{
-				xcm::{network_id_from_bytes, network_id_to_bytes},
-				Reader, Writer,
-			},
-			modifier::{check_function_modifier, FunctionModifier},
-			revert::Backtrace,
+use crate::{
+	prelude::*,
+	solidity::{
+		codec::{
+			xcm::{network_id_from_bytes, network_id_to_bytes},
+			Reader, Writer,
 		},
+		modifier::{check_function_modifier, FunctionModifier},
+		revert::Backtrace,
 	},
-	frame_support::traits::ConstU32,
-	hex_literal::hex,
-	pallet_fp_evm::ExitError,
-	sp_core::{H160, H256, U256},
-	sp_std::convert::TryInto,
-	xcm::latest::{Junction, Junctions, NetworkId},
 };
+use frame_support::traits::ConstU32;
+use hex_literal::hex;
+use pallet_fp_evm::ExitError;
+use sp_core::{H160, H256, U256};
+use sp_std::convert::TryInto;
+use xcm::latest::{Junction, Junctions, NetworkId};
 
 fn u256_repeat_byte(byte: u8) -> U256 {
 	let value = H256::repeat_byte(byte);

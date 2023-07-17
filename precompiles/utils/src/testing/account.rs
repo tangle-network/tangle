@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
-use {
-	pallet_evm::AddressMapping,
-	scale_info::TypeInfo,
-	serde::{Deserialize, Serialize},
-	sp_core::{Decode, Encode, MaxEncodedLen, H160, H256},
-};
+use pallet_evm::AddressMapping;
+use scale_info::TypeInfo;
+use serde::{Deserialize, Serialize};
+use sp_core::{Decode, Encode, MaxEncodedLen, H160, H256};
 
 #[derive(
 	Eq,
