@@ -7,7 +7,7 @@
   </div>
 <h1 align="left"> The Tangle Network </h1>
 <p align="left">
-    <strong>An MPC based bridging system for privacy-preserving applications. </strong>
+    <strong>An MPC based bridging system for cross-chain zero-knowledge applications. </strong>
 </p>
 
 <div align="left" >
