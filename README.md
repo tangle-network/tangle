@@ -92,3 +92,12 @@ If you have a contribution in mind, please check out our [Contribution Guide](./
 Licensed under <a href="LICENSE">GNU General Public License v3.0</a>.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, as defined in the GNU General Public License v3.0 license, shall be licensed as above, without any additional terms or conditions.
+
+## Troubleshooting
+The linking phase may fail due to not finding libgmp (i.e., "could not find library -lgmp") when building on a mac M1. To fix this problem, run:
+
+```bash
+brew install gmp
+# make sure to run the commands below each time when starting a new env, or, append them to .zshrc
+export LIBRARY_PATH=$LIBRARY_PATH:/opt/homebrew/lib
+export INCLUDE_PATH=$INCLUDE_PATH:/opt/homebrew/include
