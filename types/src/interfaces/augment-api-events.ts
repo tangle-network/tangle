@@ -336,7 +336,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Next public key signature submitted
        **/
-      NextPublicKeySignatureSubmitted: AugmentedEvent<ApiType, [signature: Bytes, refreshProposal: DkgRuntimePrimitivesProposalRefreshProposal], { signature: Bytes, refreshProposal: DkgRuntimePrimitivesProposalRefreshProposal }>;
+      NextPublicKeySignatureSubmitted: AugmentedEvent<ApiType, [voterMerkleRoot: U8aFixed, sessionLength: u64, voterCount: u32, nonce: u32, pubKey: Bytes, signature: Bytes], { voterMerkleRoot: U8aFixed, sessionLength: u64, voterCount: u32, nonce: u32, pubKey: Bytes, signature: Bytes }>;
       /**
        * Next public key submitted
        **/
@@ -364,7 +364,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Current Public Key Signature Changed.
        **/
-      PublicKeySignatureChanged: AugmentedEvent<ApiType, [signature: Bytes, refreshProposal: DkgRuntimePrimitivesProposalRefreshProposal], { signature: Bytes, refreshProposal: DkgRuntimePrimitivesProposalRefreshProposal }>;
+      PublicKeySignatureChanged: AugmentedEvent<ApiType, [voterMerkleRoot: U8aFixed, sessionLength: u64, voterCount: u32, nonce: u32, pubKey: Bytes, signature: Bytes], { voterMerkleRoot: U8aFixed, sessionLength: u64, voterCount: u32, nonce: u32, pubKey: Bytes, signature: Bytes }>;
       /**
        * Current public key submitted
        **/

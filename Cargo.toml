@@ -1,5 +1,5 @@
 [workspace.package]
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
@@ -29,15 +29,15 @@ libsecp256k1 = { version = "0.7.0", default-features = false }
 rustc-hex = { version = "2.1.0", default-features = false }
 
 # DKG Substrate Dependencies
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1", default-features = false }
-pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1", default-features = false }
-pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1", default-features = false }
-pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1", default-features = false }
-pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1", default-features = false }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1" }
-webb-relayer-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1" }
-webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.1" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.2", default-features = false }
+pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.2", default-features = false }
+pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.2", default-features = false }
+pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.2", default-features = false }
+pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.2", default-features = false }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.2" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.2" }
+webb-relayer-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.2" }
+webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.2" }
 
 tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
 
