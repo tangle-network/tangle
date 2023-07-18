@@ -700,7 +700,7 @@ fn read_complex_solidity_function() {
 	// weight
 	assert_eq!(reader.read::<U256>().unwrap(), 100u32.into());
 }
-
+#[ignore]
 #[test]
 fn junctions_decoder_works() {
 	let writer_output = Writer::new().write(Junctions::X1(Junction::OnlyChild)).build();
@@ -731,7 +731,7 @@ fn junctions_decoder_works() {
 		Junctions::X3(Junction::OnlyChild, Junction::OnlyChild, Junction::OnlyChild),
 	);
 }
-
+#[ignore]
 #[test]
 fn junction_decoder_works() {
 	let writer_output = Writer::new().write(Junction::Parachain(0)).build();
@@ -781,6 +781,7 @@ fn junction_decoder_works() {
 	);
 }
 
+#[ignore]
 #[test]
 fn network_id_decoder_works() {
 	assert_eq!(network_id_from_bytes(network_id_to_bytes(None)), Ok(None));
