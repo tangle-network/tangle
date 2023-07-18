@@ -27,6 +27,7 @@
   <ul>
     <li><a href="#start"> Getting Started</a></li>
     <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#nix">Installation using Nix</a></li>
     <li><a href="#standalone">Run Standalone Testnet</a></li>
     <li><a href="#contribute">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -35,11 +36,14 @@
 
 <h1 id="start"> Getting Started </h1>
 
-The Tangle Network contains runtimes for standalone node featuring Webb's DKG and privacy pallet protocols. If you would like to familiarize yourself with our DKG protocol check out following repo:
+The Tangle Network contains runtimes for standalone node featuring Webb's DKG and privacy pallet protocols.If you would like to familiarize yourself with Tangle and DKG protocol check out following repo and docs:
 
-- [dkg-substrate](https://github.com/webb-tools/dkg-substrate)
+- [Dkg Substrate Protocol](https://github.com/webb-tools/dkg-substrate)
+- [Tangle Docs](https://docs.webb.tools/docs/projects/tangle-network/overview/)
+- [Tangle Website](https://tangle.webb.tools/)
 
-<h1 id="prerequisites"> Prerequisites</h1>
+
+<h2 id="prerequisites"> Prerequisites</h2>
 
 This guide uses <https://rustup.rs> installer and the `rustup` tool to manage the Rust toolchain.
 
@@ -55,8 +59,16 @@ Great! Now your Rust environment is ready!
 
 **Note:** You may need additional dependencies, checkout [substrate.io](https://docs.substrate.io/v3/getting-started/installation) for more information.
 
+<h2 id="nix"> Installation using Nix </h2>
+If you want to use Nix for development, please follow following instructions
 
-<h3 id="standalone"> Run Standalone Local Testnet </h3>
+1. Install [Nix](https://nixos.org/download.html)
+2. Enable Flakes (if you are not already see here: [Flakes](https://nixos.wiki/wiki/Flakes))
+3. If you have [`direnv`](https://github.com/nix-community/nix-direnv#installation) installed, everything should work out of the box.
+4. Alternatively, you can run `nix flake develop` in the root of this repo to get a shell with all the dependencies installed.
+
+
+<h2 id="standalone"> Run Standalone Local Testnet </h2>
 
 1. Build `tangle-standalone` node.
 ```bash
@@ -77,6 +89,6 @@ If you have a contribution in mind, please check out our [Contribution Guide](./
 
 <h2 id="license"> License </h2>
 
-Licensed under <a href="LICENSE">Apache 2.0 license</a>.
+Licensed under <a href="LICENSE">GNU General Public License v3.0</a>.
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, as defined in the Apache 2.0 license, shall be licensed as above, without any additional terms or conditions.
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, as defined in the GNU General Public License v3.0 license, shall be licensed as above, without any additional terms or conditions.
