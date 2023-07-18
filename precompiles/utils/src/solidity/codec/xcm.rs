@@ -42,7 +42,7 @@ pub const JUNCTION_SIZE_LIMIT: u32 = 2u32.pow(16);
 
 pub(crate) fn network_id_to_bytes(network_id: Option<NetworkId>) -> Vec<u8> {
 	let mut encoded: Vec<u8> = Vec::new();
-	match network_id.clone() {
+	match network_id {
 		None => {
 			encoded.push(0u8);
 			encoded
@@ -105,7 +105,7 @@ pub(crate) fn network_id_to_bytes(network_id: Option<NetworkId>) -> Vec<u8> {
 
 // Function to convert bytes to networkId
 pub(crate) fn network_id_from_bytes(encoded_bytes: Vec<u8>) -> MayRevert<Option<NetworkId>> {
-	ensure!(encoded_bytes.len() > 0, RevertReason::custom("Junctions cannot be empty"));
+	ensure!(encoded_bytes.is_empty(), RevertReason::custom("Junctions cannot be empty"));
 	let mut encoded_network_id = Reader::new(&encoded_bytes);
 
 	let network_selector = encoded_network_id
@@ -128,10 +128,10 @@ pub(crate) fn network_id_from_bytes(encoded_bytes: Vec<u8>) -> MayRevert<Option<
 		3 => Ok(Some(NetworkId::Kusama)),
 		4 => {
 			let mut block_number: [u8; 8] = Default::default();
-			block_number.copy_from_slice(&encoded_network_id.read_raw_bytes(8)?);
+			block_number.copy_from_slice(encoded_network_id.read_raw_bytes(8)?);
 
 			let mut block_hash: [u8; 32] = Default::default();
-			block_hash.copy_from_slice(&encoded_network_id.read_raw_bytes(32)?);
+			block_hash.copy_from_slice(encoded_network_id.read_raw_bytes(32)?);
 			Ok(Some(NetworkId::ByFork {
 				block_number: u64::from_be_bytes(block_number),
 				block_hash,
@@ -142,7 +142,7 @@ pub(crate) fn network_id_from_bytes(encoded_bytes: Vec<u8>) -> MayRevert<Option<
 		7 => Ok(Some(NetworkId::Wococo)),
 		8 => {
 			let mut chain_id: [u8; 8] = Default::default();
-			chain_id.copy_from_slice(&encoded_network_id.read_raw_bytes(8)?);
+			chain_id.copy_from_slice(encoded_network_id.read_raw_bytes(8)?);
 			Ok(Some(NetworkId::Ethereum { chain_id: u64::from_be_bytes(chain_id) }))
 		},
 		9 => Ok(Some(NetworkId::BitcoinCore)),
@@ -156,7 +156,7 @@ impl Codec for Junction {
 		let junction = reader.read::<BoundedBytes<ConstU32<JUNCTION_SIZE_LIMIT>>>()?;
 		let junction_bytes: Vec<_> = junction.into();
 
-		ensure!(junction_bytes.len() > 0, RevertReason::custom("Junctions cannot be empty"));
+		ensure!(junction_bytes.is_empty(), RevertReason::custom("Junctions cannot be empty"));
 
 		// For simplicity we use an EvmReader here
 		let mut encoded_junction = Reader::new(&junction_bytes);
@@ -171,14 +171,14 @@ impl Codec for Junction {
 			0 => {
 				// In the case of Junction::Parachain, we need 4 additional bytes
 				let mut data: [u8; 4] = Default::default();
-				data.copy_from_slice(&encoded_junction.read_raw_bytes(4)?);
+				data.copy_from_slice(encoded_junction.read_raw_bytes(4)?);
 				let para_id = u32::from_be_bytes(data);
 				Ok(Junction::Parachain(para_id))
 			},
 			1 => {
 				// In the case of Junction::AccountId32, we need 32 additional bytes plus NetworkId
 				let mut account: [u8; 32] = Default::default();
-				account.copy_from_slice(&encoded_junction.read_raw_bytes(32)?);
+				account.copy_from_slice(encoded_junction.read_raw_bytes(32)?);
 
 				let network = encoded_junction.read_till_end()?.to_vec();
 				Ok(Junction::AccountId32 { network: network_id_from_bytes(network)?, id: account })
@@ -187,7 +187,7 @@ impl Codec for Junction {
 				// In the case of Junction::AccountIndex64, we need 8 additional bytes plus
 				// NetworkId
 				let mut index: [u8; 8] = Default::default();
-				index.copy_from_slice(&encoded_junction.read_raw_bytes(8)?);
+				index.copy_from_slice(encoded_junction.read_raw_bytes(8)?);
 				// Now we read the network
 				let network = encoded_junction.read_till_end()?.to_vec();
 				Ok(Junction::AccountIndex64 {
@@ -198,7 +198,7 @@ impl Codec for Junction {
 			3 => {
 				// In the case of Junction::AccountKey20, we need 20 additional bytes plus NetworkId
 				let mut account: [u8; 20] = Default::default();
-				account.copy_from_slice(&encoded_junction.read_raw_bytes(20)?);
+				account.copy_from_slice(encoded_junction.read_raw_bytes(20)?);
 
 				let network = encoded_junction.read_till_end()?.to_vec();
 				Ok(Junction::AccountKey20 {
@@ -210,7 +210,7 @@ impl Codec for Junction {
 			5 => {
 				// In the case of Junction::GeneralIndex, we need 16 additional bytes
 				let mut general_index: [u8; 16] = Default::default();
-				general_index.copy_from_slice(&encoded_junction.read_raw_bytes(16)?);
+				general_index.copy_from_slice(encoded_junction.read_raw_bytes(16)?);
 				Ok(Junction::GeneralIndex(u128::from_be_bytes(general_index)))
 			},
 			6 => {
@@ -317,7 +317,7 @@ impl Codec for Junctions {
 	}
 
 	fn write(writer: &mut Writer, value: Self) {
-		let encoded: Vec<Junction> = value.iter().map(|junction| junction.clone()).collect();
+		let encoded: Vec<Junction> = value.iter().copied().collect();
 		Codec::write(writer, encoded);
 	}
 

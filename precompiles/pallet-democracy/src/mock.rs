@@ -83,7 +83,7 @@ impl frame_system::Config for Runtime {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 parameter_types! {
-	pub const ExistentialDeposit: u128 = 0;
+	pub const ExistentialDeposit: u128 = 1;
 }
 impl pallet_balances::Config for Runtime {
 	type MaxReserves = ();
@@ -95,6 +95,10 @@ impl pallet_balances::Config for Runtime {
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = System;
 	type WeightInfo = ();
+	type HoldIdentifier = ();
+	type MaxHolds = ();
+	type FreezeIdentifier = ();
+	type MaxFreezes = ();
 }
 
 const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
@@ -220,20 +224,12 @@ impl pallet_preimage::Config for Runtime {
 }
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles
+#[derive(Default)]
 pub(crate) struct ExtBuilder {
 	/// Endowed accounts with balances
 	balances: Vec<(AccountId, Balance)>,
 	/// Referenda that already exist (don't need a proposal and launch period delay)
 	referenda: Vec<(Bounded<RuntimeCall>, VoteThreshold, BlockNumber)>,
-}
-
-impl Default for ExtBuilder {
-	fn default() -> ExtBuilder {
-		ExtBuilder {
-			balances: vec![],
-			referenda: vec![],
-		}
-	}
 }
 
 impl ExtBuilder {
@@ -258,11 +254,9 @@ impl ExtBuilder {
 			.build_storage::<Runtime>()
 			.expect("Frame system builds valid default genesis config");
 
-		pallet_balances::GenesisConfig::<Runtime> {
-			balances: self.balances.clone(),
-		}
-		.assimilate_storage(&mut t)
-		.expect("Pallet balances storage can be assimilated");
+		pallet_balances::GenesisConfig::<Runtime> { balances: self.balances.clone() }
+			.assimilate_storage(&mut t)
+			.expect("Pallet balances storage can be assimilated");
 
 		let mut ext = sp_io::TestExternalities::new(t);
 		ext.execute_with(|| {
@@ -302,10 +296,7 @@ pub(crate) fn roll_to(n: BlockNumber) {
 }
 
 pub(crate) fn events() -> Vec<RuntimeEvent> {
-	System::events()
-		.into_iter()
-		.map(|r| r.event)
-		.collect::<Vec<_>>()
+	System::events().into_iter().map(|r| r.event).collect::<Vec<_>>()
 }
 
 pub(crate) fn set_balance_proposal(
@@ -313,11 +304,7 @@ pub(crate) fn set_balance_proposal(
 	value: u128,
 ) -> BoundedCallOf<Runtime> {
 	let who = who.into();
-	let inner = pallet_balances::Call::set_balance {
-		who,
-		new_free: value,
-		new_reserved: 0,
-	};
+	let inner = pallet_balances::Call::force_set_balance { who, new_free: value };
 	let outer = RuntimeCall::Balances(inner);
 	Preimage::bound(outer).unwrap()
 }

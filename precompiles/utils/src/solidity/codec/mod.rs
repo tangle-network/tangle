@@ -91,7 +91,7 @@ pub fn decode_arguments<T: Codec>(input: &[u8]) -> MayRevert<T> {
 		let input = writer.build();
 		decode(&input)
 	} else {
-		decode(&input)
+		decode(input)
 	}
 }
 
@@ -189,7 +189,7 @@ impl<'inner> Reader<'inner> {
 	/// Checks cursor overflows.
 	fn move_cursor(&mut self, len: usize) -> MayRevert<Range<usize>> {
 		let start = self.cursor;
-		let end = self.cursor.checked_add(len).ok_or_else(|| RevertReason::CursorOverflow)?;
+		let end = self.cursor.checked_add(len).ok_or(RevertReason::CursorOverflow)?;
 
 		self.cursor = end;
 
@@ -203,7 +203,7 @@ impl<'inner> Reader<'inner> {
 /// `Writer::new().write(...).write(...).build()`.
 /// While it could be more ergonomic to take &mut self, this would
 /// prevent to have a `build` function that don't clone the output.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Writer {
 	pub(crate) data: Vec<u8>,
 	offset_data: Vec<OffsetChunk>,

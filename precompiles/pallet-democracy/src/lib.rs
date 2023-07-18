@@ -19,8 +19,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use fp_evm::PrecompileHandle;
-use frame_support::dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo};
-use frame_support::traits::{Bounded, ConstU32, Currency, QueryPreimage};
+use frame_support::{
+	dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo},
+	traits::{Bounded, ConstU32, Currency, QueryPreimage},
+};
 use pallet_democracy::{
 	AccountVote, Call as DemocracyCall, Conviction, ReferendumInfo, Vote, VoteThreshold,
 };
@@ -172,8 +174,8 @@ where
 
 		Ok((
 			ref_status.end.into(),
-			ref_status.proposal.hash().into(),
-			threshold_u8.into(),
+			ref_status.proposal.hash(),
+			threshold_u8,
 			ref_status.delay.into(),
 			ref_status.tally.ayes.into(),
 			ref_status.tally.nays.into(),
@@ -226,16 +228,11 @@ where
 			RevertReason::custom("Failure in preimage fetch").in_field("proposal_hash")
 		})?;
 
-		let bounded = Bounded::Lookup::<pallet_democracy::CallOf<Runtime>> {
-			hash: proposal_hash,
-			len,
-		};
+		let bounded =
+			Bounded::Lookup::<pallet_democracy::CallOf<Runtime>> { hash: proposal_hash, len };
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = DemocracyCall::<Runtime>::propose {
-			proposal: bounded,
-			value,
-		};
+		let call = DemocracyCall::<Runtime>::propose { proposal: bounded, value };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -266,9 +263,7 @@ where
 		);
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = DemocracyCall::<Runtime>::second {
-			proposal: prop_index,
-		};
+		let call = DemocracyCall::<Runtime>::second { proposal: prop_index };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -296,17 +291,13 @@ where
 		let ref_index = ref_index.converted();
 		let vote_amount_balance = Self::u256_to_amount(vote_amount).in_field("voteAmount")?;
 
-		let conviction_enum: Conviction =
-			conviction.clone().converted().try_into().map_err(|_| {
-				RevertReason::custom("Must be an integer between 0 and 6 included")
-					.in_field("conviction")
-			})?;
+		let conviction_enum: Conviction = conviction.converted().try_into().map_err(|_| {
+			RevertReason::custom("Must be an integer between 0 and 6 included")
+				.in_field("conviction")
+		})?;
 
 		let vote = AccountVote::Standard {
-			vote: Vote {
-				aye,
-				conviction: conviction_enum,
-			},
+			vote: Vote { aye, conviction: conviction_enum },
 			balance: vote_amount_balance,
 		};
 
@@ -377,11 +368,7 @@ where
 		let to = Runtime::AddressMapping::into_account_id(representative.into());
 		let to: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(to.clone());
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = DemocracyCall::<Runtime>::delegate {
-			to,
-			conviction,
-			balance: amount,
-		};
+		let call = DemocracyCall::<Runtime>::delegate { to, conviction, balance: amount };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -405,13 +392,8 @@ where
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
-		log2(
-			handle.context().address,
-			SELECTOR_LOG_UNDELEGATED,
-			handle.context().caller,
-			[],
-		)
-		.record(handle)?;
+		log2(handle.context().address, SELECTOR_LOG_UNDELEGATED, handle.context().caller, [])
+			.record(handle)?;
 
 		Ok(())
 	}
@@ -450,9 +432,7 @@ where
 		);
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = PreimageCall::<Runtime>::note_preimage {
-			bytes: encoded_proposal.into(),
-		};
+		let call = PreimageCall::<Runtime>::note_preimage { bytes: encoded_proposal };
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())
@@ -481,13 +461,11 @@ where
 		if !<<Runtime as pallet_democracy::Config>::Preimages as QueryPreimage>::is_requested(
 			&proposal_hash.into(),
 		) {
-			return Err(revert("not imminent preimage (preimage not requested)"));
+			return Err(revert("not imminent preimage (preimage not requested)"))
 		};
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = PreimageCall::<Runtime>::note_preimage {
-			bytes: encoded_proposal.into(),
-		};
+		let call = PreimageCall::<Runtime>::note_preimage { bytes: encoded_proposal };
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())

@@ -25,9 +25,9 @@ use crate::{
 		revert::Backtrace,
 	},
 };
+use fp_evm::Context;
 use frame_support::traits::ConstU32;
 use hex_literal::hex;
-use pallet_fp_evm::ExitError;
 use sp_core::{H160, H256, U256};
 use sp_std::convert::TryInto;
 use xcm::latest::{Junction, Junctions, NetworkId};
@@ -43,7 +43,7 @@ fn u256_repeat_byte(byte: u8) -> U256 {
 fn display_bytes(bytes: &[u8]) {
 	bytes
 		.chunks_exact(32)
-		.map(|chunk| H256::from_slice(chunk))
+		.map(H256::from_slice)
 		.for_each(|hash| println!("{:?}", hash));
 }
 
@@ -553,7 +553,7 @@ fn write_vec_bytes() {
 
 	writer_output
 		.chunks_exact(32)
-		.map(|chunk| H256::from_slice(chunk))
+		.map(H256::from_slice)
 		.for_each(|hash| println!("{:?}", hash));
 
 	// We pad data to a multiple of 32 bytes.
@@ -606,7 +606,7 @@ fn read_vec_of_bytes() {
 
 	writer_output
 		.chunks_exact(32)
-		.map(|chunk| H256::from_slice(chunk))
+		.map(H256::from_slice)
 		.for_each(|hash| println!("{:?}", hash));
 
 	let mut reader = Reader::new(&writer_output);

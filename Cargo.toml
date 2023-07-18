@@ -7,7 +7,18 @@ homepage = "https://webb.tools"
 repository = "https://github.com/webb-tools/tangle"
 
 [workspace]
-members = ["primitives", "standalone/node", "standalone/runtime", "pallets/claims", "pallets/transaction-pause"]
+members = [
+	"primitives",
+	"standalone/node",
+	"standalone/runtime",
+	"pallets/claims",
+	"pallets/transaction-pause",
+	"precompiles/utils",
+	"precompiles/utils/macro",
+	"precompiles/utils/tests-external",
+	"precompiles/pallet-democracy",
+	]
+resolver = "2"
 
 [workspace.dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }

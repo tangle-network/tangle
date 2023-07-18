@@ -110,7 +110,8 @@ macro_rules! mock_account {
 	(# $name:ident, $convert:expr) => {
 		impl From<$name> for MockAccount {
 			fn from(value: $name) -> MockAccount {
-				$convert(value)
+				let conversion = $convert;
+        		conversion(value)
 			}
 		}
 

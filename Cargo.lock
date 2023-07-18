@@ -3556,8 +3556,10 @@ dependencies = [
  "evm-gasometer 0.39.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "evm-runtime 0.39.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log",
+ "parity-scale-codec",
  "primitive-types",
  "rlp",
+ "scale-info",
  "sha3 0.10.8",
 ]
 
@@ -3587,7 +3589,9 @@ version = "0.39.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4f1f13264b044cb66f0602180f0bc781c29accb41ff560669a3ec15858d5b606"
 dependencies = [
+ "parity-scale-codec",
  "primitive-types",
+ "scale-info",
 ]
 
 [[package]]
@@ -7755,6 +7759,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-evm-precompile-democracy"
+version = "0.2.0"
+dependencies = [
+ "derive_more",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.3.4",
+ "log",
+ "num_enum 0.5.11",
+ "pallet-balances",
+ "pallet-democracy",
+ "pallet-evm",
+ "pallet-preimage",
+ "pallet-scheduler",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sp-core 7.0.0",
+ "sp-io 7.0.0",
+ "sp-runtime 7.0.0",
+ "sp-std 5.0.0",
+]
+
+[[package]]
 name = "pallet-evm-precompile-dispatch"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier.git?branch=polkadot-v0.9.43#adf7117f373b68d4128385ad08c28a9f7c597cd0"
@@ -8745,6 +8776,30 @@ dependencies = [
  "sp-std 5.0.0",
  "syn 1.0.109",
  "trybuild",
+]
+
+[[package]]
+name = "precompile-utils-tests-external"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "evm 0.39.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.3.4",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3 0.10.8",
+ "sp-core 7.0.0",
+ "sp-io 7.0.0",
+ "sp-runtime 7.0.0",
+ "sp-std 5.0.0",
 ]
 
 [[package]]

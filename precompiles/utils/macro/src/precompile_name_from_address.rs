@@ -55,7 +55,7 @@ pub fn main(_: TokenStream, input: TokenStream) -> TokenStream {
 		})
 		.into()
 	} else {
-		return quote_spanned! {
+		quote_spanned! {
 			ty.span() => compile_error!("Expected tuple");
 		}
 		.into()
@@ -97,7 +97,7 @@ fn extract_precompile_name_and_prefix_for_precompile_at(
 							if let Ok(precompile_id) = int.base10_parse() {
 								if &path_segment_2.ident.to_string() == "CollectivePrecompile" {
 									if let Some(instance_ident) =
-										precompile_instance_ident(&path_segment_2)
+										precompile_instance_ident(path_segment_2)
 									{
 										return Some((instance_ident, precompile_id))
 									}
