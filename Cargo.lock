@@ -7422,7 +7422,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7921,7 +7921,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -13174,7 +13174,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -13185,7 +13185,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "clap 4.3.11",
  "dkg-gadget",
@@ -13254,7 +13254,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone-runtime"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "dkg-runtime-primitives",
  "fp-account",
