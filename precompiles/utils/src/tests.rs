@@ -1,26 +1,24 @@
-// Copyright 2019-2022 PureStake Inc.
-// This file is part of Moonbeam.
+// Copyright 2022 Webb Technologies Inc.
+//
+// This file is part of Utils package, originally developed by Purestake Inc.
+// Utils package used in Tangle Network in terms of GPLv3.
 
-// Moonbeam is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// Moonbeam is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 use crate::{
 	prelude::*,
 	solidity::{
-		codec::{
-			xcm::{network_id_from_bytes, network_id_to_bytes},
-			Reader, Writer,
-		},
+		codec::{Reader, Writer},
 		modifier::{check_function_modifier, FunctionModifier},
 		revert::Backtrace,
 	},
@@ -29,8 +27,6 @@ use fp_evm::Context;
 use frame_support::traits::ConstU32;
 use hex_literal::hex;
 use sp_core::{H160, H256, U256};
-use sp_std::convert::TryInto;
-use xcm::latest::{Junction, Junctions, NetworkId};
 
 fn u256_repeat_byte(byte: u8) -> U256 {
 	let value = H256::repeat_byte(byte);
@@ -699,109 +695,6 @@ fn read_complex_solidity_function() {
 
 	// weight
 	assert_eq!(reader.read::<U256>().unwrap(), 100u32.into());
-}
-#[ignore]
-#[test]
-fn junctions_decoder_works() {
-	let writer_output = Writer::new().write(Junctions::X1(Junction::OnlyChild)).build();
-
-	let mut reader = Reader::new(&writer_output);
-	let parsed: Junctions = reader.read::<Junctions>().expect("to correctly parse Junctions");
-
-	assert_eq!(parsed, Junctions::X1(Junction::OnlyChild));
-
-	let writer_output = Writer::new()
-		.write(Junctions::X2(Junction::OnlyChild, Junction::OnlyChild))
-		.build();
-
-	let mut reader = Reader::new(&writer_output);
-	let parsed: Junctions = reader.read::<Junctions>().expect("to correctly parse Junctions");
-
-	assert_eq!(parsed, Junctions::X2(Junction::OnlyChild, Junction::OnlyChild));
-
-	let writer_output = Writer::new()
-		.write(Junctions::X3(Junction::OnlyChild, Junction::OnlyChild, Junction::OnlyChild))
-		.build();
-
-	let mut reader = Reader::new(&writer_output);
-	let parsed: Junctions = reader.read::<Junctions>().expect("to correctly parse Junctions");
-
-	assert_eq!(
-		parsed,
-		Junctions::X3(Junction::OnlyChild, Junction::OnlyChild, Junction::OnlyChild),
-	);
-}
-#[ignore]
-#[test]
-fn junction_decoder_works() {
-	let writer_output = Writer::new().write(Junction::Parachain(0)).build();
-
-	let mut reader = Reader::new(&writer_output);
-	let parsed: Junction = reader.read::<Junction>().expect("to correctly parse Junctions");
-
-	assert_eq!(parsed, Junction::Parachain(0));
-
-	let writer_output = Writer::new()
-		.write(Junction::AccountId32 { network: None, id: [1u8; 32] })
-		.build();
-
-	let mut reader = Reader::new(&writer_output);
-	let parsed: Junction = reader.read::<Junction>().expect("to correctly parse Junctions");
-
-	assert_eq!(parsed, Junction::AccountId32 { network: None, id: [1u8; 32] });
-
-	let writer_output = Writer::new()
-		.write(Junction::AccountIndex64 { network: None, index: u64::from_be_bytes([1u8; 8]) })
-		.build();
-
-	let mut reader = Reader::new(&writer_output);
-	let parsed: Junction = reader.read::<Junction>().expect("to correctly parse Junctions");
-
-	assert_eq!(
-		parsed,
-		Junction::AccountIndex64 { network: None, index: u64::from_be_bytes([1u8; 8]) }
-	);
-
-	let writer_output = Writer::new()
-		.write(Junction::AccountKey20 {
-			network: None,
-			key: H160::repeat_byte(0xAA).as_bytes().try_into().unwrap(),
-		})
-		.build();
-
-	let mut reader = Reader::new(&writer_output);
-	let parsed: Junction = reader.read::<Junction>().expect("to correctly parse Junctions");
-
-	assert_eq!(
-		parsed,
-		Junction::AccountKey20 {
-			network: None,
-			key: H160::repeat_byte(0xAA).as_bytes().try_into().unwrap(),
-		}
-	);
-}
-
-#[ignore]
-#[test]
-fn network_id_decoder_works() {
-	assert_eq!(network_id_from_bytes(network_id_to_bytes(None)), Ok(None));
-
-	let mut name = [0u8; 32];
-	name[0..6].copy_from_slice(b"myname");
-	assert_eq!(
-		network_id_from_bytes(network_id_to_bytes(Some(NetworkId::ByGenesis(name)))),
-		Ok(Some(NetworkId::ByGenesis(name)))
-	);
-
-	assert_eq!(
-		network_id_from_bytes(network_id_to_bytes(Some(NetworkId::Kusama))),
-		Ok(Some(NetworkId::Kusama))
-	);
-
-	assert_eq!(
-		network_id_from_bytes(network_id_to_bytes(Some(NetworkId::Polkadot))),
-		Ok(Some(NetworkId::Polkadot))
-	);
 }
 
 #[test]
