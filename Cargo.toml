@@ -18,7 +18,8 @@ members = [
 	"precompiles/utils/tests-external",
 	"precompiles/pallet-democracy",
 	"precompiles/batch",
-	"precompiles/call-permit"
+	"precompiles/call-permit",
+	"precompiles/proxy"
 	]
 resolver = "2"
 
@@ -170,6 +171,7 @@ pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/parityt
 pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-identity = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
+pallet-proxy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 
 # Frontier Client
 fc-cli = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
@@ -212,6 +214,7 @@ pallet-evm-precompile-democracy = { path = "precompiles/pallet-democracy", defau
 precompile-utils = { path = "precompiles/utils", default-features = false }
 pallet-evm-precompile-batch = { path = "precompiles/batch", default-features = false }
 pallet-evm-precompile-call-permit = { path = "precompiles/call-permit", default-features = false }
+pallet-evm-precompile-proxy = { path = "precompiles/call-permit", default-features = false }
 
 # EVM & Ethereum
 # (wasm)

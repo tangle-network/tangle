@@ -66,16 +66,17 @@ impl core::fmt::Debug for PrettyLog {
 }
 
 /// Panics if an event is not found in the system log of events
+#[allow(clippy::crate_in_macro_def)]
 #[macro_export]
 macro_rules! assert_event_emitted {
 	($event:expr) => {
 		match &$event {
 			e => {
 				assert!(
-					$crate::mock::events().iter().find(|x| *x == e).is_some(),
+					crate::mock::events().iter().find(|x| *x == e).is_some(),
 					"Event {:?} was not found in events: \n {:?}",
 					e,
-					$crate::mock::events()
+					crate::mock::events()
 				);
 			},
 		}
@@ -83,16 +84,17 @@ macro_rules! assert_event_emitted {
 }
 
 // Panics if an event is found in the system log of events
+#[allow(clippy::crate_in_macro_def)]
 #[macro_export]
 macro_rules! assert_event_not_emitted {
 	($event:expr) => {
 		match &$event {
 			e => {
 				assert!(
-					$crate::mock::events().iter().find(|x| *x == e).is_none(),
+					crate::mock::events().iter().find(|x| *x == e).is_none(),
 					"Event {:?} was found in events: \n {:?}",
 					e,
-					$crate::mock::events()
+					crate::mock::events()
 				);
 			},
 		}
