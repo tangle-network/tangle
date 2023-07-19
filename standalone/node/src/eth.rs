@@ -141,6 +141,7 @@ where
 }
 
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::extra_unused_type_parameters)]
 pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
 	task_manager: &TaskManager,
 	client: Arc<FullClient>,
