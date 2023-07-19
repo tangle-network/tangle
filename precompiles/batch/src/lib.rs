@@ -146,9 +146,7 @@ where
 				(Some(remaining), _) => remaining,
 				(None, Mode::BatchAll) =>
 					return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas }),
-				(None, _) => {
-					return Ok(())
-				},
+				(None, _) => return Ok(()),
 			};
 
 			// Cost of the call itself that the batch precompile must pay.

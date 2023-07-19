@@ -18,6 +18,7 @@ members = [
 	"precompiles/utils/tests-external",
 	"precompiles/pallet-democracy",
 	"precompiles/batch",
+	"precompiles/call-permit"
 	]
 resolver = "2"
 
@@ -210,6 +211,7 @@ pallet-hotfix-sufficients = { git = "https://github.com/paritytech/frontier.git"
 pallet-evm-precompile-democracy = { path = "precompiles/pallet-democracy", default-features = false}
 precompile-utils = { path = "precompiles/utils", default-features = false }
 pallet-evm-precompile-batch = { path = "precompiles/batch", default-features = false }
+pallet-evm-precompile-call-permit = { path = "precompiles/call-permit", default-features = false }
 
 # EVM & Ethereum
 # (wasm)
