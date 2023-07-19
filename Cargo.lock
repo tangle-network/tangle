@@ -7846,6 +7846,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-evm-precompile-preimage"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.3.4",
+ "log",
+ "num_enum 0.5.11",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-preimage",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "precompile-utils",
+ "rustc-hex",
+ "scale-info",
+ "serde",
+ "sha3 0.10.8",
+ "sp-core 7.0.0",
+ "sp-io 7.0.0",
+ "sp-runtime 7.0.0",
+ "sp-std 5.0.0",
+]
+
+[[package]]
 name = "pallet-evm-precompile-proxy"
 version = "0.1.0"
 dependencies = [
