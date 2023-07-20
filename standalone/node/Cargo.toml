@@ -25,7 +25,7 @@ substrate-build-script-utils = { workspace = true }
 
 [dependencies]
 clap = { workspace = true }
-codec = { workspace = true }
+parity-scale-codec = { workspace = true }
 futures = { workspace = true }
 hex-literal = { workspace = true }
 log = { workspace = true }

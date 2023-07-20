@@ -18,13 +18,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::all)]
 
-use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
 	traits::{Currency, Get, IsSubType, VestingSchedule},
 	weights::Weight,
 };
 pub use pallet::*;
+use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 #[cfg(feature = "std")]
 use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
@@ -769,9 +769,9 @@ mod secp_utils {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use codec::Encode;
 	use frame_support::pallet_prelude::DispatchError;
 	use hex_literal::hex;
+	use parity_scale_codec::Encode;
 	use secp_utils::*;
 	use sp_core::H256;
 	use sp_runtime::TokenError::Frozen;
