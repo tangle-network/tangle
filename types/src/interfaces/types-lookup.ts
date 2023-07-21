@@ -544,11 +544,15 @@ declare module '@polkadot/types/lookup' {
       readonly targetChain: WebbProposalsHeaderTypedChainId;
       readonly data: Bytes;
     } & Struct;
-    readonly isProposalRemoved: boolean;
-    readonly asProposalRemoved: {
-      readonly key: DkgRuntimePrimitivesProposalDkgPayloadKey;
+    readonly isProposalBatchRemoved: boolean;
+    readonly asProposalBatchRemoved: {
       readonly targetChain: WebbProposalsHeaderTypedChainId;
-      readonly expired: bool;
+      readonly batchId: u32;
+    } & Struct;
+    readonly isProposalBatchExpired: boolean;
+    readonly asProposalBatchExpired: {
+      readonly targetChain: WebbProposalsHeaderTypedChainId;
+      readonly batchId: u32;
     } & Struct;
     readonly isProposalBatchSigned: boolean;
     readonly asProposalBatchSigned: {
@@ -557,7 +561,7 @@ declare module '@polkadot/types/lookup' {
       readonly proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>;
       readonly signature: Bytes;
     } & Struct;
-    readonly type: 'InvalidProposalBatchSignature' | 'ProposalAdded' | 'ProposalRemoved' | 'ProposalBatchSigned';
+    readonly type: 'InvalidProposalBatchSignature' | 'ProposalAdded' | 'ProposalBatchRemoved' | 'ProposalBatchExpired' | 'ProposalBatchSigned';
   }
 
   /** @name DkgRuntimePrimitivesProposalSignedProposalBatch (56) */
@@ -619,16 +623,16 @@ declare module '@polkadot/types/lookup' {
     readonly type: 'EvmProposal' | 'RefreshProposal' | 'AnchorCreateProposal' | 'AnchorUpdateProposal' | 'TokenAddProposal' | 'TokenRemoveProposal' | 'WrappingFeeUpdateProposal' | 'ResourceIdUpdateProposal' | 'RescueTokensProposal' | 'MaxDepositLimitUpdateProposal' | 'MinWithdrawalLimitUpdateProposal' | 'SetVerifierProposal' | 'SetTreasuryHandlerProposal' | 'FeeRecipientUpdateProposal';
   }
 
-  /** @name PalletDkgProposalHandlerSignedProposalEventData (69) */
+  /** @name PalletDkgProposalHandlerSignedProposalEventData (68) */
   interface PalletDkgProposalHandlerSignedProposalEventData extends Struct {
     readonly kind: WebbProposalsProposalProposalKind;
     readonly data: Bytes;
   }
 
-  /** @name PalletBridgeRegistryEvent (70) */
+  /** @name PalletBridgeRegistryEvent (69) */
   type PalletBridgeRegistryEvent = Null;
 
-  /** @name PalletIndicesEvent (71) */
+  /** @name PalletIndicesEvent (70) */
   interface PalletIndicesEvent extends Enum {
     readonly isIndexAssigned: boolean;
     readonly asIndexAssigned: {
@@ -647,7 +651,7 @@ declare module '@polkadot/types/lookup' {
     readonly type: 'IndexAssigned' | 'IndexFreed' | 'IndexFrozen';
   }
 
-  /** @name PalletDemocracyEvent (72) */
+  /** @name PalletDemocracyEvent (71) */
   interface PalletDemocracyEvent extends Enum {
     readonly isProposed: boolean;
     readonly asProposed: {
@@ -730,7 +734,7 @@ declare module '@polkadot/types/lookup' {
     readonly type: 'Proposed' | 'Tabled' | 'ExternalTabled' | 'Started' | 'Passed' | 'NotPassed' | 'Cancelled' | 'Delegated' | 'Undelegated' | 'Vetoed' | 'Blacklisted' | 'Voted' | 'Seconded' | 'ProposalCanceled' | 'MetadataSet' | 'MetadataCleared' | 'MetadataTransferred';
   }
 
-  /** @name PalletDemocracyVoteThreshold (73) */
+  /** @name PalletDemocracyVoteThreshold (72) */
   interface PalletDemocracyVoteThreshold extends Enum {
     readonly isSuperMajorityApprove: boolean;
     readonly isSuperMajorityAgainst: boolean;
@@ -738,7 +742,7 @@ declare module '@polkadot/types/lookup' {
     readonly type: 'SuperMajorityApprove' | 'SuperMajorityAgainst' | 'SimpleMajority';
   }
 
-  /** @name PalletDemocracyVoteAccountVote (74) */
+  /** @name PalletDemocracyVoteAccountVote (73) */
   interface PalletDemocracyVoteAccountVote extends Enum {
     readonly isStandard: boolean;
     readonly asStandard: {
@@ -753,7 +757,7 @@ declare module '@polkadot/types/lookup' {
     readonly type: 'Standard' | 'Split';
   }
 
-  /** @name PalletDemocracyMetadataOwner (76) */
+  /** @name PalletDemocracyMetadataOwner (75) */
   interface PalletDemocracyMetadataOwner extends Enum {
     readonly isExternal: boolean;
     readonly isProposal: boolean;
@@ -763,7 +767,7 @@ declare module '@polkadot/types/lookup' {
     readonly type: 'External' | 'Proposal' | 'Referendum';
   }
 
-  /** @name PalletCollectiveEvent (77) */
+  /** @name PalletCollectiveEvent (76) */
   interface PalletCollectiveEvent extends Enum {
     readonly isProposed: boolean;
     readonly asProposed: {
@@ -1979,7 +1983,12 @@ declare module '@polkadot/types/lookup' {
     readonly asForceSubmitUnsignedProposal: {
       readonly prop: WebbProposalsProposal;
     } & Struct;
-    readonly type: 'SubmitSignedProposals' | 'ForceSubmitUnsignedProposal';
+    readonly isForceRemoveUnsignedProposalBatch: boolean;
+    readonly asForceRemoveUnsignedProposalBatch: {
+      readonly typedChainId: WebbProposalsHeaderTypedChainId;
+      readonly batchId: u32;
+    } & Struct;
+    readonly type: 'SubmitSignedProposals' | 'ForceSubmitUnsignedProposal' | 'ForceRemoveUnsignedProposalBatch';
   }
 
   /** @name PalletBridgeRegistryCall (193) */
@@ -3642,7 +3651,8 @@ declare module '@polkadot/types/lookup' {
     readonly isUnsignedProposalQueueOverflow: boolean;
     readonly isArithmeticOverflow: boolean;
     readonly isEmptyBatch: boolean;
-    readonly type: 'NoneValue' | 'StorageOverflow' | 'ProposalFormatInvalid' | 'ProposalMustBeUnsigned' | 'InvalidProposalBytesLength' | 'ProposalSignatureInvalid' | 'ProposalDoesNotExists' | 'ProposalAlreadyExists' | 'ChainIdInvalid' | 'ProposalsLengthOverflow' | 'ProposalOutOfBounds' | 'CannotOverwriteSignedProposal' | 'UnsignedProposalQueueOverflow' | 'ArithmeticOverflow' | 'EmptyBatch';
+    readonly isProposalBatchNotFound: boolean;
+    readonly type: 'NoneValue' | 'StorageOverflow' | 'ProposalFormatInvalid' | 'ProposalMustBeUnsigned' | 'InvalidProposalBytesLength' | 'ProposalSignatureInvalid' | 'ProposalDoesNotExists' | 'ProposalAlreadyExists' | 'ChainIdInvalid' | 'ProposalsLengthOverflow' | 'ProposalOutOfBounds' | 'CannotOverwriteSignedProposal' | 'UnsignedProposalQueueOverflow' | 'ArithmeticOverflow' | 'EmptyBatch' | 'ProposalBatchNotFound';
   }
 
   /** @name PalletBridgeRegistryBridgeMetadata (455) */

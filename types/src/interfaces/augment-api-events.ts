@@ -388,13 +388,17 @@ declare module '@polkadot/api-base/types/events' {
        **/
       ProposalAdded: AugmentedEvent<ApiType, [key: DkgRuntimePrimitivesProposalDkgPayloadKey, targetChain: WebbProposalsHeaderTypedChainId, data: Bytes], { key: DkgRuntimePrimitivesProposalDkgPayloadKey, targetChain: WebbProposalsHeaderTypedChainId, data: Bytes }>;
       /**
-       * RuntimeEvent When a Proposal Gets Signed by DKG.
+       * RuntimeEvent When a Proposal is expired and removed from UnsignedProposalQueue.
        **/
-      ProposalBatchSigned: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32, proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>, signature: Bytes], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32, proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>, signature: Bytes }>;
+      ProposalBatchExpired: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32 }>;
       /**
        * RuntimeEvent When a Proposal is removed from UnsignedProposalQueue.
        **/
-      ProposalRemoved: AugmentedEvent<ApiType, [key: DkgRuntimePrimitivesProposalDkgPayloadKey, targetChain: WebbProposalsHeaderTypedChainId, expired: bool], { key: DkgRuntimePrimitivesProposalDkgPayloadKey, targetChain: WebbProposalsHeaderTypedChainId, expired: bool }>;
+      ProposalBatchRemoved: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32 }>;
+      /**
+       * RuntimeEvent When a Proposal Gets Signed by DKG.
+       **/
+      ProposalBatchSigned: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32, proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>, signature: Bytes], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32, proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>, signature: Bytes }>;
       /**
        * Generic event
        **/
