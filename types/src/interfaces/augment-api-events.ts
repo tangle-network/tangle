@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import { FrameSupportTokensMiscBalanceStatus, PalletEcdsaClaimsEthereumAddress, SpRuntimeDispatchError, PalletDemocracyMetadataOwner, PalletDemocracyVoteThreshold, PalletDemocracyVoteAccountVote, DkgRuntimePrimitivesMisbehaviourType, DkgRuntimePrimitivesCryptoPublic, DkgRuntimePrimitivesProposalRefreshProposal, DkgRuntimePrimitivesProposalSignedProposalBatch, DkgRuntimePrimitivesProposalDkgPayloadKey, WebbProposalsHeaderTypedChainId, PalletDkgProposalHandlerSignedProposalEventData, WebbProposalsProposalProposalKind, PalletElectionProviderMultiPhaseElectionCompute, SpNposElectionsElectionScore, PalletElectionProviderMultiPhasePhase, EthTypesExecutionHeaderInfo, EthTypesEth2BeaconBlockHeader, EvmCoreErrorExitReason, EthereumLog, SpConsensusGrandpaAppPublic, PalletImOnlineSr25519AppSr25519Public, PalletStakingExposure, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsPoolState, PalletStakingForcing, PalletStakingValidatorPrefs, FrameSupportDispatchDispatchInfo } from '@polkadot/types/lookup';
+import { DkgRuntimePrimitivesCryptoPublic, DkgRuntimePrimitivesMisbehaviourType, DkgRuntimePrimitivesProposalDkgPayloadKey, DkgRuntimePrimitivesProposalSignedProposalBatch, EthTypesEth2BeaconBlockHeader, EthTypesExecutionHeaderInfo, EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletDkgProposalHandlerSignedProposalEventData, PalletEcdsaClaimsEthereumAddress, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsPoolState, PalletStakingExposure, PalletStakingForcing, PalletStakingValidatorPrefs, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, WebbProposalsHeaderTypedChainId, WebbProposalsProposalProposalKind } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -388,13 +388,17 @@ declare module '@polkadot/api-base/types/events' {
        **/
       ProposalAdded: AugmentedEvent<ApiType, [key: DkgRuntimePrimitivesProposalDkgPayloadKey, targetChain: WebbProposalsHeaderTypedChainId, data: Bytes], { key: DkgRuntimePrimitivesProposalDkgPayloadKey, targetChain: WebbProposalsHeaderTypedChainId, data: Bytes }>;
       /**
-       * RuntimeEvent When a Proposal Gets Signed by DKG.
+       * RuntimeEvent When a Proposal is expired and removed from UnsignedProposalQueue.
        **/
-      ProposalBatchSigned: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32, proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>, signature: Bytes], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32, proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>, signature: Bytes }>;
+      ProposalBatchExpired: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32 }>;
       /**
        * RuntimeEvent When a Proposal is removed from UnsignedProposalQueue.
        **/
-      ProposalRemoved: AugmentedEvent<ApiType, [key: DkgRuntimePrimitivesProposalDkgPayloadKey, targetChain: WebbProposalsHeaderTypedChainId, expired: bool], { key: DkgRuntimePrimitivesProposalDkgPayloadKey, targetChain: WebbProposalsHeaderTypedChainId, expired: bool }>;
+      ProposalBatchRemoved: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32 }>;
+      /**
+       * RuntimeEvent When a Proposal Gets Signed by DKG.
+       **/
+      ProposalBatchSigned: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32, proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>, signature: Bytes], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32, proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>, signature: Bytes }>;
       /**
        * Generic event
        **/
@@ -445,7 +449,7 @@ declare module '@polkadot/api-base/types/events' {
     electionProviderMultiPhase: {
       /**
        * An election failed.
-       * 
+       *
        * Not much can be said about which computes failed in the process.
        **/
       ElectionFailed: AugmentedEvent<ApiType, []>;
@@ -467,7 +471,7 @@ declare module '@polkadot/api-base/types/events' {
       Slashed: AugmentedEvent<ApiType, [account: AccountId32, value: u128], { account: AccountId32, value: u128 }>;
       /**
        * A solution was stored with the given compute.
-       * 
+       *
        * The `origin` indicates the origin of the solution. If `origin` is `Some(AccountId)`,
        * the stored solution was submited in the signed phase by a miner with the `AccountId`.
        * Otherwise, the solution was stored either during the unsigned phase or by
@@ -484,7 +488,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * A candidate was slashed by amount due to failing to obtain a seat as member or
        * runner-up.
-       * 
+       *
        * Note that old members and runners-up are also candidates.
        **/
       CandidateSlashed: AugmentedEvent<ApiType, [candidate: AccountId32, amount: u128], { candidate: AccountId32, amount: u128 }>;
@@ -687,7 +691,7 @@ declare module '@polkadot/api-base/types/events' {
       Destroyed: AugmentedEvent<ApiType, [poolId: u32], { poolId: u32 }>;
       /**
        * A member has been removed from a pool.
-       * 
+       *
        * The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked).
        **/
       MemberRemoved: AugmentedEvent<ApiType, [poolId: u32, member: AccountId32], { poolId: u32, member: AccountId32 }>;
@@ -726,7 +730,7 @@ declare module '@polkadot/api-base/types/events' {
       StateChanged: AugmentedEvent<ApiType, [poolId: u32, newState: PalletNominationPoolsPoolState], { poolId: u32, newState: PalletNominationPoolsPoolState }>;
       /**
        * A member has unbonded from their pool.
-       * 
+       *
        * - `balance` is the corresponding balance of the number of points that has been
        * requested to be unbonded (the argument of the `unbond` transaction) from the bonded
        * pool.
@@ -744,9 +748,9 @@ declare module '@polkadot/api-base/types/events' {
       UnbondingPoolSlashed: AugmentedEvent<ApiType, [poolId: u32, era: u32, balance: u128], { poolId: u32, era: u32, balance: u128 }>;
       /**
        * A member has withdrawn from their pool.
-       * 
+       *
        * The given number of `points` have been dissolved in return of `balance`.
-       * 
+       *
        * Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance
        * will be 1.
        **/
@@ -830,7 +834,7 @@ declare module '@polkadot/api-base/types/events' {
     staking: {
       /**
        * An account has bonded this amount. \[stash, amount\]
-       * 
+       *
        * NOTE: This event is only emitted when funds are bonded via a dispatchable. Notably,
        * it will not be emitted for staking rewards when they are added to stake.
        **/
