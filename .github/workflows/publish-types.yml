@@ -1,0 +1,37 @@
+name: Publish Types
+
+# If changes are made to the types package.json,
+# Issue a new release to npm for the types package.
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "types/package.json"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install npm dependencies
+        run: cd types && yarn install
+      - name: Configure Github Actions user
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "Github Actions"
+      - name: Run a build
+        run: cd types && yarn build
+      - name: Publish the package
+        run: cd types && yarn publish-types
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
