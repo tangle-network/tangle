@@ -478,6 +478,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ProposalAlreadyExists: AugmentedError<ApiType>;
       /**
+       * Proposal batch does not exist
+       **/
+      ProposalBatchNotFound: AugmentedError<ApiType>;
+      /**
        * No proposal with the ID was found
        **/
       ProposalDoesNotExists: AugmentedError<ApiType>;

@@ -29,6 +29,7 @@
     <li><a href="#prerequisites">Prerequisites</a></li>
     <li><a href="#nix">Installation using Nix</a></li>
     <li><a href="#standalone">Run Standalone Testnet</a></li>
+    <li><a href="#relayer">Running Standalone Node with Webb Relayer</a></li>
     <li><a href="#contribute">Contributing</a></li>
     <li><a href="#license">License</a></li>
   </ul>  
@@ -81,6 +82,11 @@ If you want to use Nix for development, please follow following instructions
 This should start the local testnet, you can view the logs in /tmp directory for all the authorities and use [polkadotJS](https://polkadot.js.org/apps/#/explorer) to view the running testnet.
 
 
+<h2 id="relayer"> Run Standalone Node with Webb Relayer</h2>
+
+Tangle standalone node ships with [Webb Relayer](https://github.com/webb-tools/relayer) in the node itself, which is useful to run them together.
+For instructions on how to run Tangle Standalone Node with Webb Relayer, Please refer to [this document](./RELAYER.md).
+
 <h2 id="contribute"> Contributing </h2>
 
 Interested in contributing to the Webb Relayer Network? Thank you so much for your interest! We are always appreciative for contributions from the open-source community!
@@ -101,3 +107,5 @@ brew install gmp
 # make sure to run the commands below each time when starting a new env, or, append them to .zshrc
 export LIBRARY_PATH=$LIBRARY_PATH:/opt/homebrew/lib
 export INCLUDE_PATH=$INCLUDE_PATH:/opt/homebrew/include
+```
+

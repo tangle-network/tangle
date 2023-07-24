@@ -473,10 +473,13 @@ export default {
         targetChain: 'WebbProposalsHeaderTypedChainId',
         data: 'Bytes',
       },
-      ProposalRemoved: {
-        key: 'DkgRuntimePrimitivesProposalDkgPayloadKey',
+      ProposalBatchRemoved: {
         targetChain: 'WebbProposalsHeaderTypedChainId',
-        expired: 'bool',
+        batchId: 'u32',
+      },
+      ProposalBatchExpired: {
+        targetChain: 'WebbProposalsHeaderTypedChainId',
+        batchId: 'u32',
       },
       ProposalBatchSigned: {
         targetChain: 'WebbProposalsHeaderTypedChainId',
@@ -536,18 +539,18 @@ export default {
     }
   },
   /**
-   * Lookup69: pallet_dkg_proposal_handler::pallet::SignedProposalEventData
+   * Lookup68: pallet_dkg_proposal_handler::pallet::SignedProposalEventData
    **/
   PalletDkgProposalHandlerSignedProposalEventData: {
     kind: 'WebbProposalsProposalProposalKind',
     data: 'Bytes'
   },
   /**
-   * Lookup70: pallet_bridge_registry::pallet::Event<T>
+   * Lookup69: pallet_bridge_registry::pallet::Event<T>
    **/
   PalletBridgeRegistryEvent: 'Null',
   /**
-   * Lookup71: pallet_indices::pallet::Event<T>
+   * Lookup70: pallet_indices::pallet::Event<T>
    **/
   PalletIndicesEvent: {
     _enum: {
@@ -565,7 +568,7 @@ export default {
     }
   },
   /**
-   * Lookup72: pallet_democracy::pallet::Event<T>
+   * Lookup71: pallet_democracy::pallet::Event<T>
    **/
   PalletDemocracyEvent: {
     _enum: {
@@ -643,13 +646,13 @@ export default {
     }
   },
   /**
-   * Lookup73: pallet_democracy::vote_threshold::VoteThreshold
+   * Lookup72: pallet_democracy::vote_threshold::VoteThreshold
    **/
   PalletDemocracyVoteThreshold: {
     _enum: ['SuperMajorityApprove', 'SuperMajorityAgainst', 'SimpleMajority']
   },
   /**
-   * Lookup74: pallet_democracy::vote::AccountVote<Balance>
+   * Lookup73: pallet_democracy::vote::AccountVote<Balance>
    **/
   PalletDemocracyVoteAccountVote: {
     _enum: {
@@ -664,7 +667,7 @@ export default {
     }
   },
   /**
-   * Lookup76: pallet_democracy::types::MetadataOwner
+   * Lookup75: pallet_democracy::types::MetadataOwner
    **/
   PalletDemocracyMetadataOwner: {
     _enum: {
@@ -674,7 +677,7 @@ export default {
     }
   },
   /**
-   * Lookup77: pallet_collective::pallet::Event<T, I>
+   * Lookup76: pallet_collective::pallet::Event<T, I>
    **/
   PalletCollectiveEvent: {
     _enum: {
@@ -1827,7 +1830,11 @@ export default {
         props: 'Vec<DkgRuntimePrimitivesProposalSignedProposalBatch>',
       },
       force_submit_unsigned_proposal: {
-        prop: 'WebbProposalsProposal'
+        prop: 'WebbProposalsProposal',
+      },
+      force_remove_unsigned_proposal_batch: {
+        typedChainId: 'WebbProposalsHeaderTypedChainId',
+        batchId: 'u32'
       }
     }
   },
@@ -3426,7 +3433,7 @@ export default {
    * Lookup454: pallet_dkg_proposal_handler::pallet::Error<T>
    **/
   PalletDkgProposalHandlerError: {
-    _enum: ['NoneValue', 'StorageOverflow', 'ProposalFormatInvalid', 'ProposalMustBeUnsigned', 'InvalidProposalBytesLength', 'ProposalSignatureInvalid', 'ProposalDoesNotExists', 'ProposalAlreadyExists', 'ChainIdInvalid', 'ProposalsLengthOverflow', 'ProposalOutOfBounds', 'CannotOverwriteSignedProposal', 'UnsignedProposalQueueOverflow', 'ArithmeticOverflow', 'EmptyBatch']
+    _enum: ['NoneValue', 'StorageOverflow', 'ProposalFormatInvalid', 'ProposalMustBeUnsigned', 'InvalidProposalBytesLength', 'ProposalSignatureInvalid', 'ProposalDoesNotExists', 'ProposalAlreadyExists', 'ChainIdInvalid', 'ProposalsLengthOverflow', 'ProposalOutOfBounds', 'CannotOverwriteSignedProposal', 'UnsignedProposalQueueOverflow', 'ArithmeticOverflow', 'EmptyBatch', 'ProposalBatchNotFound']
   },
   /**
    * Lookup455: pallet_bridge_registry::types::BridgeMetadata<MaxResources, MaxAdditionalFields>
