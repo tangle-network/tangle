@@ -215,7 +215,7 @@ pallet-evm-precompile-democracy = { path = "precompiles/pallet-democracy", defau
 precompile-utils = { path = "precompiles/utils", default-features = false }
 pallet-evm-precompile-batch = { path = "precompiles/batch", default-features = false }
 pallet-evm-precompile-call-permit = { path = "precompiles/call-permit", default-features = false }
-pallet-evm-precompile-proxy = { path = "precompiles/call-permit", default-features = false }
+pallet-evm-precompile-proxy = { path = "precompiles/proxy", default-features = false }
 pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-features = false }
 
 # EVM & Ethereum

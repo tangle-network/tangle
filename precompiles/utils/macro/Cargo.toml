@@ -14,7 +14,7 @@ path = "tests/tests.rs"
 
 [dependencies]
 case = "1.0"
-num_enum = { version = "0.5.3", default-features = false }
+num_enum = { workspace = true }
 prettyplease = "0.1.18"
 proc-macro2 = "1.0"
 quote = "1.0"
