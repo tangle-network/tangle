@@ -17,6 +17,10 @@ members = [
 	"precompiles/utils/macro",
 	"precompiles/utils/tests-external",
 	"precompiles/pallet-democracy",
+	"precompiles/batch",
+	"precompiles/call-permit",
+	"precompiles/proxy",
+	"precompiles/preimage"
 	]
 resolver = "2"
 
@@ -53,6 +57,7 @@ quote = "1.0"
 syn = { version = "1.0" }
 hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
+slices = "0.2.0"
 
 
 # DKG Substrate Dependencies
@@ -167,6 +172,7 @@ pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/parityt
 pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-identity = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
+pallet-proxy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 
 # Frontier Client
 fc-cli = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
@@ -207,11 +213,15 @@ pallet-hotfix-sufficients = { git = "https://github.com/paritytech/frontier.git"
 # Local precompiles
 pallet-evm-precompile-democracy = { path = "precompiles/pallet-democracy", default-features = false}
 precompile-utils = { path = "precompiles/utils", default-features = false }
+pallet-evm-precompile-batch = { path = "precompiles/batch", default-features = false }
+pallet-evm-precompile-call-permit = { path = "precompiles/call-permit", default-features = false }
+pallet-evm-precompile-proxy = { path = "precompiles/proxy", default-features = false }
+pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-features = false }
 
 # EVM & Ethereum
 # (wasm)
-evm = { version = "0.39.0", default-features = false }
-ethereum-types = { version = "0.14", default-features = false }
+evm = { git = "https://github.com/rust-blockchain/evm", rev = "b7b82c7e1fc57b7449d6dfa6826600de37cc1e65", default-features = false }
+ethereum-types = { version = "0.14.1", default-features = false }
 ethereum = { version = "0.14.0", default-features = false }
 evm-gasometer = { version = "0.39.0", default-features = false }
 evm-runtime = { version = "0.39.0", default-features = false }
