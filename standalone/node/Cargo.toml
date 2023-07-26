@@ -32,7 +32,7 @@ log = { workspace = true }
 rand = { workspace = true }
 
 # Light client dependencies
-finality-update-verify = { workspace = true }
+consensus-types = { workspace = true }
 
 # DKG dependencies
 dkg-gadget = { workspace = true }

@@ -267,8 +267,8 @@ tangle-primitives = { path = 'primitives', default-features = false }
 # pallet-parachain-staking = { path = 'pallets/parachain-staking', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.3.0" }
-finality-update-verify = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.3.0" }
+pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.0" }
+consensus-types = { package = "webb-consensus-types", git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.0" }
 
 [profile.release]
 panic = "unwind"
