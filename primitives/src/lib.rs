@@ -82,6 +82,12 @@ pub mod currency {
 	#[cfg(not(feature = "integration-tests"))]
 	pub const EXISTENTIAL_DEPOSIT: Balance = 10 * CENT;
 
+	pub const WEI: Balance = 1;
+	pub const KILOWEI: Balance = 1_000;
+	pub const MEGAWEI: Balance = 1_000_000;
+	pub const GIGAWEI: Balance = 1_000_000_000;
+	// 0.1 GWei
+	pub const WEIGHT_FEE: Balance = 100 * MEGAWEI;
 	/// Return the cost to add an item to storage based on size
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
 		items as Balance * 20 * DOLLAR + (bytes as Balance) * 100 * MILLICENT
