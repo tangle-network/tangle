@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use pallet_evm_precompile_batch::BatchPrecompile;
+use pallet_evm_precompile_blake2::Blake2F;
+use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
 use pallet_evm_precompile_call_permit::CallPermitPrecompile;
 use pallet_evm_precompile_democracy::DemocracyPrecompile;
 use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_preimage::PreimagePrecompile;
+use pallet_evm_precompile_registry::PrecompileRegistry;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use precompile_utils::precompile_set::{
@@ -27,14 +30,19 @@ type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, Callab
 
 #[precompile_utils::precompile_name_from_address]
 pub type WebbPrecompilesAt<R> = (
+	// Ethereum precompiles:
 	PrecompileAt<AddressU64<1>, ECRecover, EthereumPrecompilesChecks>,
 	PrecompileAt<AddressU64<2>, Sha256, EthereumPrecompilesChecks>,
 	PrecompileAt<AddressU64<3>, Ripemd160, EthereumPrecompilesChecks>,
 	PrecompileAt<AddressU64<4>, Identity, EthereumPrecompilesChecks>,
 	PrecompileAt<AddressU64<5>, Modexp, EthereumPrecompilesChecks>,
-	// Moonbeam precompiles
+	PrecompileAt<AddressU64<6>, Bn128Add, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<7>, Bn128Mul, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<8>, Bn128Pairing, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<9>, Blake2F, EthereumPrecompilesChecks>,
 	PrecompileAt<AddressU64<1024>, Sha3FIPS256, (CallableByContract, CallableByPrecompile)>,
 	PrecompileAt<AddressU64<1026>, ECRecoverPublicKey, (CallableByContract, CallableByPrecompile)>,
+	// Moonbeam precompiles
 	PrecompileAt<
 		AddressU64<2051>,
 		DemocracyPrecompile<R>,
@@ -57,6 +65,11 @@ pub type WebbPrecompilesAt<R> = (
 	PrecompileAt<
 		AddressU64<2067>,
 		PreimagePrecompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	PrecompileAt<
+		AddressU64<2069>,
+		PrecompileRegistry<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
 );
