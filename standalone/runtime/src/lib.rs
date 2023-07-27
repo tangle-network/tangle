@@ -116,7 +116,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-standalone"),
 	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
-	spec_version: 303, // v0.3.3
+	spec_version: 307, // v0.3.7
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -771,6 +771,8 @@ impl pallet_dkg_proposal_handler::Config for Runtime {
 	type SignedProposalHandler = (BridgeRegistry, DKG);
 	type MaxProposalsPerBatch = dkg_runtime_primitives::CustomU32Getter<10>;
 	type BatchId = u32;
+	type ValidatorSet = Historical;
+	type ReportOffences = Offences;
 	type WeightInfo = pallet_dkg_proposal_handler::weights::WebbWeight<Runtime>;
 }
 
