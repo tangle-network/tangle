@@ -116,7 +116,7 @@ pub const GAS_PER_SECOND: u64 = 400_000_000;
 /// u64 works for approximations because Weight is a very small unit compared to gas.
 pub const WEIGHT_PER_GAS: u64 = WEIGHT_REF_TIME_PER_SECOND / GAS_PER_SECOND;
 
-const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(85);
+const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 // Here we assume Ethereum's base fee of 21000 gas and convert to weight, but we
 // subtract roughly the cost of a balance transfer from it (about 1/3 the cost)
 // and some cost to account for per-byte-fee.
