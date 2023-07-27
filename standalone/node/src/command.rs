@@ -51,15 +51,15 @@ impl SubstrateCli for Cli {
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
 		Ok(match id {
-			"dev" => Box::new(chain_spec::development_config(3884533460)?),
-			"relayer" => Box::new(chain_spec::relayer_testnet_config(3884533460)?),
-			"" | "local" => Box::new(chain_spec::local_testnet_config(3884533460)?),
+			"dev" => Box::new(chain_spec::development_config(4006)?),
+			"relayer" => Box::new(chain_spec::relayer_testnet_config(4006)?),
+			"" | "local" => Box::new(chain_spec::local_testnet_config(4006)?),
 			// generates the standalone spec for testing locally
-			"standalone-local" => Box::new(chain_spec::standalone_local_config(3884533460)?),
+			"standalone-local" => Box::new(chain_spec::standalone_local_config(4006)?),
 			// generates the standalone spec for testnet
-			"standalone-alpha" => Box::new(chain_spec::standalone_testnet_config(3884533460)?),
+			"standalone-alpha" => Box::new(chain_spec::standalone_testnet_config(4006)?),
 			// generates the standalone spec for longterm testnet
-			"standalone" => Box::new(chain_spec::standalone_live_config(3884533460)?),
+			"standalone" => Box::new(chain_spec::standalone_live_config(4006)?),
 			path =>
 				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 		})

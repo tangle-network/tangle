@@ -116,7 +116,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-standalone"),
 	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
-	spec_version: 303, // v0.3.3
+	spec_version: 304, // v0.3.4
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -134,8 +134,8 @@ pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-/// We allow for 2000ms of compute with a 6 second average block time.
-pub const WEIGHT_MILLISECS_PER_BLOCK: u64 = 2000;
+/// We allow for 2500ms of compute with a 6 second average block time.
+pub const WEIGHT_MILLISECS_PER_BLOCK: u64 = 2500;
 pub const MAXIMUM_BLOCK_WEIGHT: Weight =
 	Weight::from_parts(WEIGHT_MILLISECS_PER_BLOCK * WEIGHT_REF_TIME_PER_MILLIS, u64::MAX);
 pub const MAXIMUM_BLOCK_LENGTH: u32 = 5 * 1024 * 1024;
