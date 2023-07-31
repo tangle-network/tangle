@@ -674,7 +674,7 @@ fn testnet_genesis(
 						nonce: U256::from(1),
 						balance: U256::from(1_000_000_000_000_000_000_000_000u128),
 						storage: Default::default(),
-						code: vec![0x00],
+						code: Default::default(),
 					},
 				);
 				map.insert(
@@ -684,7 +684,7 @@ fn testnet_genesis(
 						nonce: U256::from(1),
 						balance: U256::from(1_000_000_000_000_000_000_000_000u128),
 						storage: Default::default(),
-						code: vec![0x00],
+						code: Default::default(),
 					},
 				);
 				map.insert(
@@ -694,7 +694,7 @@ fn testnet_genesis(
 						nonce: U256::from(1),
 						balance: U256::from(1_000_000_000_000_000_000_000_000u128),
 						storage: Default::default(),
-						code: vec![0x00],
+						code: Default::default(),
 					},
 				);
 				map.insert(
@@ -704,7 +704,7 @@ fn testnet_genesis(
 						nonce: U256::from(1),
 						balance: U256::from(1_000_000_000_000_000_000_000_000u128),
 						storage: Default::default(),
-						code: vec![0x00],
+						code: Default::default(),
 					},
 				);
 				map.insert(
@@ -714,7 +714,7 @@ fn testnet_genesis(
 						nonce: U256::from(1),
 						balance: U256::from(1_000_000_000_000_000_000_000_000u128),
 						storage: Default::default(),
-						code: vec![0x00],
+						code: Default::default(),
 					},
 				);
 				map.insert(
@@ -724,7 +724,7 @@ fn testnet_genesis(
 						nonce: U256::from(1),
 						balance: U256::from(1_000_000_000_000_000_000_000_000u128),
 						storage: Default::default(),
-						code: vec![0x00],
+						code: Default::default(),
 					},
 				);
 				map.insert(
@@ -734,7 +734,7 @@ fn testnet_genesis(
 						nonce: U256::from(1),
 						balance: U256::from(1_000_000_000_000_000_000_000_000u128),
 						storage: Default::default(),
-						code: vec![0x00],
+						code: Default::default(),
 					},
 				);
 				map.insert(
@@ -744,7 +744,7 @@ fn testnet_genesis(
 						nonce: U256::from(1),
 						balance: U256::from(1_000_000_000_000_000_000_000_000u128),
 						storage: Default::default(),
-						code: vec![0x00],
+						code: Default::default(),
 					},
 				);
 				map.insert(
@@ -754,7 +754,7 @@ fn testnet_genesis(
 						nonce: U256::from(1),
 						balance: U256::from(1_000_000_000_000_000_000_000_000u128),
 						storage: Default::default(),
-						code: vec![0x00],
+						code: Default::default(),
 					},
 				);
 				map
