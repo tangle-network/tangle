@@ -126,6 +126,7 @@ pallet-evm-precompile-call-permit = { workspace = true }
 pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-preimage = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
+pallet-evm-precompile-staking = { workspace = true }
 
 [features]
 default = ["std", "with-rocksdb-weights"]
@@ -249,6 +250,7 @@ std = [
   "pallet-evm-precompile-proxy/std",
   "pallet-evm-precompile-democracy/std",
   "pallet-evm-precompile-registry/std",
+  "pallet-evm-precompile-staking/std"
 
 
 
