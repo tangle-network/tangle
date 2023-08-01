@@ -82,6 +82,12 @@ pub mod currency {
 	#[cfg(not(feature = "integration-tests"))]
 	pub const EXISTENTIAL_DEPOSIT: Balance = 10 * CENT;
 
+	pub const WEI: Balance = 1;
+	pub const KILOWEI: Balance = 1_000;
+	pub const MEGAWEI: Balance = 1_000_000;
+	pub const GIGAWEI: Balance = 1_000_000_000;
+	// 0.1 GWei
+	pub const WEIGHT_FEE: Balance = 100 * MEGAWEI;
 	/// Return the cost to add an item to storage based on size
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
 		items as Balance * 20 * DOLLAR + (bytes as Balance) * 100 * MILLICENT
@@ -126,23 +132,23 @@ pub mod fee {
 pub const SESSION_PERIOD_BLOCKS: BlockNumber = 20 * crate::time::MINUTES;
 
 #[cfg(not(feature = "integration-tests"))]
-pub const SESSION_PERIOD_BLOCKS: BlockNumber = 10 * crate::time::MINUTES;
+pub const SESSION_PERIOD_BLOCKS: BlockNumber = 6 * crate::time::HOURS;
 
 #[cfg(not(feature = "integration-tests"))]
-pub const UNSIGNED_PROPOSAL_EXPIRY: BlockNumber = SESSION_PERIOD_BLOCKS;
+pub const UNSIGNED_PROPOSAL_EXPIRY: BlockNumber = SESSION_PERIOD_BLOCKS / 4;
 
 #[cfg(feature = "integration-tests")]
 pub const UNSIGNED_PROPOSAL_EXPIRY: BlockNumber = SESSION_PERIOD_BLOCKS;
 
-/// We assume that ~5% of the block weight is consumed by `on_initialize` handlers. This is
+/// We assume that ~10% of the block weight is consumed by `on_initialize` handlers. This is
 /// used to limit the maximal weight of a single extrinsic.
-pub const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(5);
+pub const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 
 /// We allow `Normal` extrinsics to fill up the block up to 75%, the rest can be used by
 /// `Operational` extrinsics.
 pub const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 
-/// We allow for 0.5 of a second of compute with a 12 second average block time.
+/// We allow for 0.5 of a second of compute with a 6 second average block time.
 pub const MAXIMUM_BLOCK_WEIGHT: Weight = Weight::from_parts(
 	WEIGHT_REF_TIME_PER_SECOND.saturating_div(2),
 	cumulus_primitives_core::relay_chain::MAX_POV_SIZE as u64,

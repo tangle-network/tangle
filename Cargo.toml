@@ -1,5 +1,5 @@
 [workspace.package]
-version = "0.3.3"
+version = "0.3.8"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
@@ -61,15 +61,15 @@ slices = "0.2.0"
 
 
 # DKG Substrate Dependencies
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.5", default-features = false }
-pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.5", default-features = false }
-pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.5", default-features = false }
-pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.5", default-features = false }
-pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.5", default-features = false }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.5" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.5" }
-webb-relayer-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.5" }
-webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.5" }
+dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.7", default-features = false }
+pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.7", default-features = false }
+pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.7", default-features = false }
+pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.7", default-features = false }
+pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.7", default-features = false }
+dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.7" }
+dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.7" }
+webb-relayer-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.7" }
+webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.3.7" }
 
 tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
 
@@ -179,7 +179,7 @@ fc-cli = { git = "https://github.com/paritytech/frontier.git", branch = "polkado
 fc-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43" }
 fc-db = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 fc-mapping-sync = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
-fc-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
+fc-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = ["rpc-binary-search-estimate"] }
 fc-rpc-core = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43" }
 fc-storage = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43" }
 
@@ -196,8 +196,8 @@ fp-storage = { git = "https://github.com/paritytech/frontier.git", branch = "pol
 # Frontier FRAME
 pallet-base-fee = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 pallet-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
-pallet-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
-pallet-evm = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
+pallet-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = ["forbid-evm-reentrancy"] }
+pallet-evm = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = ["forbid-evm-reentrancy"] }
 pallet-evm-chain-id = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 pallet-evm-precompile-blake2 = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 pallet-evm-precompile-bn128 = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
