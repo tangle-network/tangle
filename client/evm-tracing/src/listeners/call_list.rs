@@ -637,7 +637,7 @@ mod tests {
 		SStore,
 	}
 
-    #[allow(clippy::enum_variant_names)]
+	#[allow(clippy::enum_variant_names)]
 	enum TestGasometerEvent {
 		RecordCost,
 		RecordRefund,

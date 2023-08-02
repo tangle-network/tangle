@@ -403,8 +403,7 @@ where
 	fn unlock(handle: &mut impl PrecompileHandle, target: Address) -> EvmResult {
 		let target: H160 = target.into();
 		let target = Runtime::AddressMapping::into_account_id(target);
-		let target: <Runtime::Lookup as StaticLookup>::Source =
-			Runtime::Lookup::unlookup(target);
+		let target: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(target);
 
 		log::trace!(
 			target: "democracy-precompile",

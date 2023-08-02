@@ -126,9 +126,7 @@ where
 			let block_hash = self
 				.client
 				.hash(block_height)
-				.map_err(|e| {
-					format!("Error when fetching block {block_height} header : {e:?}")
-				})?
+				.map_err(|e| format!("Error when fetching block {block_height} header : {e:?}"))?
 				.ok_or_else(|| format!("Block with height {block_height} don't exist"))?;
 
 			block_hashes.push(block_hash);
@@ -311,9 +309,9 @@ impl CacheRequester {
 
 		// Here we don't care if the request has been accepted or refused, the caller can't
 		// do anything with it.
-		let _ = sender.unbounded_send(CacheRequest::StopBatch { batch_id }).map_err(|e| {
-			format!("Failed to send request to the trace cache task. Error : {e:?}")
-		});
+		let _ = sender
+			.unbounded_send(CacheRequest::StopBatch { batch_id })
+			.map_err(|e| format!("Failed to send request to the trace cache task. Error : {e:?}"));
 	}
 }
 
@@ -780,8 +778,7 @@ where
 			api.initialize_block(substrate_parent_hash, &block_header)
 				.map_err(|e| format!("Runtime api access error: {e:?}"))?;
 
-			api
-				.trace_block(substrate_parent_hash, extrinsics, eth_tx_hashes)
+			api.trace_block(substrate_parent_hash, extrinsics, eth_tx_hashes)
 				.map_err(|e| format!("Blockchain error when replaying block {height} : {e:?}"))?
 				.map_err(|e| {
 					tracing::warn!(
