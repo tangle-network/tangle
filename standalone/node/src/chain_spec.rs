@@ -27,9 +27,8 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{sr25519, Pair, Public, H160, U256};
+use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use std::str::FromStr;
 use tangle_runtime::{
 	AccountId, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId, DKGProposalsConfig,
 	EVMChainIdConfig, EVMConfig, ElectionsConfig, Eth2ClientConfig, GenesisConfig, ImOnlineConfig,
