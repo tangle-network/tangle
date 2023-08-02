@@ -49,26 +49,31 @@ echo "*** Start Webb DKG Node ***"
 ./target/release/tangle-standalone --tmp --chain local --validator -lerror --alice \
   --rpc-cors all --rpc-methods=unsafe \
   --port ${ports[0]} \
+  --ethapi trace,debug \
   --node-key 0000000000000000000000000000000000000000000000000000000000000001 &
 # Bob
 ./target/release/tangle-standalone --tmp --chain local --validator -lerror --bob \
   --rpc-cors all --rpc-methods=unsafe \
   --port ${ports[1]} \
-   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
+  --ethapi trace,debug \
+  --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Charlie
 ./target/release/tangle-standalone --tmp --chain local --validator -lerror --charlie \
   --rpc-cors all --rpc-methods=unsafe \
   --port ${ports[1]} \
+    --ethapi trace,debug \
    --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Dave
 ./target/release/tangle-standalone --tmp --chain local --validator -lerror --dave \
   --rpc-cors all --rpc-methods=unsafe \
   --port ${ports[1]} \
+    --ethapi trace,debug \
    --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Eve
 ./target/release/tangle-standalone --tmp --chain local --validator -linfo --eve \
     --rpc-cors all \
     --port ${ports[2]} \
+    --ethapi trace,debug \
     -ldkg=debug \
     -ldkg_gadget::worker=debug \
     -lruntime::dkg_metadata=debug \

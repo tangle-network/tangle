@@ -293,7 +293,7 @@ rpc-core-types = { path = "client/rpc-core/types" }
 rpc-debug = { path = "client/rpc/debug" }
 rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
-evm-tracer = { path = "runtime/evm_tracer", default-features = false }
+evm-tracer = { path = "standalone/runtime/evm_tracer", default-features = false }
 
 
 pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.0" }

@@ -136,7 +136,7 @@ where
 	pub fn task(
 		client: Arc<C>,
 		backend: Arc<BE>,
-		frontier_backend: Arc<fc_db::Backend<B>>,
+		frontier_backend: fc_db::Backend<B>,
 		permit_pool: Arc<Semaphore>,
 		overrides: Arc<OverrideHandle<B>>,
 		raw_max_memory_usage: usize,
@@ -255,7 +255,7 @@ where
 	async fn handle_block_request(
 		client: Arc<C>,
 		backend: Arc<BE>,
-		frontier_backend: Arc<fc_db::Backend<B>>,
+		frontier_backend: fc_db::Backend<B>,
 		request_block_id: RequestBlockId,
 		params: Option<TraceParams>,
 		overrides: Arc<OverrideHandle<B>>,
@@ -272,7 +272,7 @@ where
 				Err(internal_err("'pending' blocks are not supported")),
 			RequestBlockId::Hash(eth_hash) => match frontier_backend_client::load_hash::<B, C>(
 				client.as_ref(),
-				match frontier_backend.as_ref() {
+				match &frontier_backend {
 					fc_db::Backend::KeyValue(db) => db,
 					fc_db::Backend::Sql(db) => db,
 				},
@@ -377,7 +377,7 @@ where
 	async fn handle_transaction_request(
 		client: Arc<C>,
 		backend: Arc<BE>,
-		frontier_backend: Arc<fc_db::Backend<B>>,
+		frontier_backend: fc_db::Backend<B>,
 		transaction_hash: H256,
 		params: Option<TraceParams>,
 		overrides: Arc<OverrideHandle<B>>,
@@ -387,7 +387,7 @@ where
 
 		let (hash, index) = match frontier_backend_client::load_transactions::<B, C>(
 			client.as_ref(),
-			match frontier_backend.as_ref() {
+			match &frontier_backend {
 				fc_db::Backend::KeyValue(db) => db,
 				fc_db::Backend::Sql(db) => db,
 			},
@@ -403,7 +403,7 @@ where
 
 		let reference_id = match frontier_backend_client::load_hash::<B, C>(
 			client.as_ref(),
-			match frontier_backend.as_ref() {
+			match &frontier_backend {
 				fc_db::Backend::KeyValue(db) => db,
 				fc_db::Backend::Sql(db) => db,
 			},

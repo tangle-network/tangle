@@ -24,6 +24,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 substrate-build-script-utils = { workspace = true }
 
 [dependencies]
+tokio = { workspace = true }
 clap = { workspace = true }
 parity-scale-codec = { workspace = true }
 futures = { workspace = true }
@@ -74,6 +75,7 @@ sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
 sp-timestamp = { workspace = true }
+substrate-prometheus-endpoint = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
 sc-consensus-manual-seal = { workspace = true }
 
@@ -97,6 +99,13 @@ fp-account = { workspace = true }
 fp-dynamic-fee = { workspace = true, features = ["default"] }
 fp-evm = { workspace = true, features = ["default"] }
 fp-rpc = { workspace = true, features = ["default"] }
+
+rpc-trace = { workspace = true }
+rpc-debug = { workspace = true }
+rpc-txpool = { workspace = true }
+rpc-primitives-debug = { workspace = true }
+rpc-primitives-txpool = { workspace = true }
+primitives-ext = { workspace = true }
 
 tangle-runtime = { workspace = true }
 

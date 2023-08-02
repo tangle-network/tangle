@@ -22,6 +22,12 @@ pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 pub use fc_storage::overrides_handle;
 use fp_rpc::{ConvertTransaction, ConvertTransactionRuntimeApi, EthereumRuntimeRPCApi};
 
+#[derive(Clone)]
+pub struct TracingConfig {
+	pub tracing_requesters: crate::rpc::tracing::RpcRequesters,
+	pub trace_filter_max_count: u32,
+}
+
 /// Extra dependencies for Ethereum compatibility.
 pub struct EthDeps<C, P, A: ChainApi, CT, B: BlockT> {
 	/// The client instance to use.
@@ -59,6 +65,8 @@ pub struct EthDeps<C, P, A: ChainApi, CT, B: BlockT> {
 	pub execute_gas_limit_multiplier: u64,
 	/// Mandated parent hashes for a given block hash.
 	pub forced_parent_hashes: Option<BTreeMap<H256, H256>>,
+	/// Optional tracing config.
+	pub tracing_config: Option<TracingConfig>,
 }
 
 impl<C, P, A: ChainApi, CT: Clone, B: BlockT> Clone for EthDeps<C, P, A, CT, B> {
@@ -81,6 +89,7 @@ impl<C, P, A: ChainApi, CT: Clone, B: BlockT> Clone for EthDeps<C, P, A, CT, B> 
 			fee_history_cache_limit: self.fee_history_cache_limit,
 			execute_gas_limit_multiplier: self.execute_gas_limit_multiplier,
 			forced_parent_hashes: self.forced_parent_hashes.clone(),
+			tracing_config: self.tracing_config.clone(),
 		}
 	}
 }
@@ -100,6 +109,8 @@ where
 	B: BlockT<Hash = sp_core::H256>,
 	C: CallApiAt<B> + ProvideRuntimeApi<B>,
 	C::Api: BlockBuilderApi<B> + ConvertTransactionRuntimeApi<B> + EthereumRuntimeRPCApi<B>,
+	C::Api: rpc_primitives_debug::DebugRuntimeApi<B>,
+	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<B>,
 	C: BlockchainEvents<B> + 'static,
 	C: HeaderBackend<B> + HeaderMetadata<B, Error = BlockChainError> + StorageProvider<B, BE>,
 	BE: Backend<B> + 'static,
@@ -111,6 +122,8 @@ where
 		Eth, EthApiServer, EthDevSigner, EthFilter, EthFilterApiServer, EthPubSub,
 		EthPubSubApiServer, EthSigner, Net, NetApiServer, TxPoolApiServer, Web3, Web3ApiServer,
 	};
+	use rpc_debug::{Debug, DebugServer};
+	use rpc_trace::{Trace, TraceServer};
 
 	let EthDeps {
 		client,
@@ -130,6 +143,7 @@ where
 		fee_history_cache_limit,
 		execute_gas_limit_multiplier,
 		forced_parent_hashes,
+		tracing_config,
 	} = deps;
 
 	let mut signers = Vec::new();
@@ -196,8 +210,21 @@ where
 		.into_rpc(),
 	)?;
 
-	io.merge(Web3::new(client).into_rpc())?;
+	io.merge(Web3::new(client.clone()).into_rpc())?;
 	io.merge(tx_pool.into_rpc())?;
+	// Moonbeam's TxPool
+	// io.merge(rpc_txpool::TxPool::new(Arc::clone(&client), eth_graph).into_rpc())?;
+	if let Some(tracing_config) = tracing_config {
+		if let Some(trace_filter_requester) = tracing_config.tracing_requesters.trace {
+			io.merge(
+				Trace::new(client, trace_filter_requester, tracing_config.trace_filter_max_count)
+					.into_rpc(),
+			)?;
+		}
 
+		if let Some(debug_requester) = tracing_config.tracing_requesters.debug {
+			io.merge(Debug::new(debug_requester).into_rpc())?;
+		}
+	}
 	Ok(io)
 }

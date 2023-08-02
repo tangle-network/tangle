@@ -55,10 +55,6 @@ pub enum BackendType {
 /// The ethereum-compatibility configuration used to run a node.
 #[derive(Clone, Debug, clap::Parser)]
 pub struct EthConfiguration {
-	/// Maximum number of logs in a query.
-	#[arg(long, default_value = "10000")]
-	pub max_past_logs: u32,
-
 	/// Maximum fee history cache size.
 	#[arg(long, default_value = "2048")]
 	pub fee_history_limit: u64,
@@ -74,14 +70,6 @@ pub struct EthConfiguration {
 	/// when using eth_call/eth_estimateGas.
 	#[arg(long, default_value = "10")]
 	pub execute_gas_limit_multiplier: u64,
-
-	/// Size in bytes of the LRU cache for block data.
-	#[arg(long, default_value = "50")]
-	pub eth_log_block_cache: usize,
-
-	/// Size in bytes of the LRU cache for transactions statuses data.
-	#[arg(long, default_value = "50")]
-	pub eth_statuses_cache: usize,
 
 	/// Sets the frontier backend type (KeyValue or Sql)
 	#[arg(long, value_enum, ignore_case = true, default_value_t = BackendType::default())]
@@ -103,6 +91,74 @@ pub struct EthConfiguration {
 	/// Default value is 200MB.
 	#[arg(long, default_value = "209715200")]
 	pub frontier_sql_backend_cache_size: u64,
+
+	/// Enable EVM tracing module on a non-authority node.
+	#[arg(long, value_delimiter = ',')]
+	pub ethapi: Vec<EthApi>,
+
+	/// Number of concurrent tracing tasks. Meant to be shared by both "debug" and "trace" modules.
+	#[arg(long, default_value = "10")]
+	pub ethapi_max_permits: u32,
+
+	/// Maximum number of trace entries a single request of `trace_filter` is allowed to return.
+	/// A request asking for more or an unbounded one going over this limit will both return an
+	/// error.
+	#[arg(long, default_value = "500")]
+	pub ethapi_trace_max_count: u32,
+
+	/// Duration (in seconds) after which the cache of `trace_filter` for a given block will be
+	/// discarded.
+	#[arg(long, default_value = "300")]
+	pub ethapi_trace_cache_duration: u64,
+
+	/// Size in bytes of the LRU cache for block data.
+	#[arg(long, default_value = "300000000")]
+	pub eth_log_block_cache: usize,
+
+	/// Size in bytes of the LRU cache for transactions statuses data.
+	#[arg(long, default_value = "300000000")]
+	pub eth_statuses_cache: usize,
+
+	/// Size in bytes of data a raw tracing request is allowed to use.
+	/// Bound the size of memory, stack and storage data.
+	#[arg(long, default_value = "20000000")]
+	pub tracing_raw_max_memory_usage: usize,
+
+	/// Maximum number of logs in a query.
+	#[arg(long, default_value = "10000")]
+	pub max_past_logs: u32,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum EthApi {
+	Txpool,
+	Debug,
+	Trace,
+}
+
+impl std::str::FromStr for EthApi {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		Ok(match s {
+			"txpool" => Self::Txpool,
+			"debug" => Self::Debug,
+			"trace" => Self::Trace,
+			_ => return Err(format!("`{s}` is not recognized as a supported Ethereum Api",)),
+		})
+	}
+}
+
+pub struct RpcConfig {
+	pub ethapi: Vec<EthApi>,
+	pub ethapi_max_permits: u32,
+	pub ethapi_trace_max_count: u32,
+	pub ethapi_trace_cache_duration: u64,
+	pub eth_log_block_cache: usize,
+	pub eth_statuses_cache: usize,
+	pub fee_history_limit: u64,
+	pub max_past_logs: u32,
+	pub tracing_raw_max_memory_usage: usize,
 }
 
 pub struct FrontierPartialComponents {
@@ -141,7 +197,6 @@ where
 }
 
 #[allow(clippy::too_many_arguments)]
-#[allow(clippy::extra_unused_type_parameters)]
 pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
 	task_manager: &TaskManager,
 	client: Arc<FullClient>,

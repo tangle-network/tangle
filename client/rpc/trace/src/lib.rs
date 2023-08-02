@@ -80,7 +80,6 @@ impl<B, C> Clone for Trace<B, C> {
 impl<B, C> Trace<B, C>
 where
 	B: BlockT<Hash = H256> + Send + Sync + 'static,
-	B::Header: HeaderT<Number = u32>,
 	C: HeaderMetadata<B, Error = BlockChainError> + HeaderBackend<B>,
 	C: Send + Sync + 'static,
 {
@@ -93,8 +92,12 @@ where
 	fn block_id(&self, id: Option<RequestBlockId>) -> Result<u32, &'static str> {
 		match id {
 			Some(RequestBlockId::Number(n)) => Ok(n),
-			None | Some(RequestBlockId::Tag(RequestBlockTag::Latest)) =>
-				Ok(self.client.info().best_number),
+			None | Some(RequestBlockId::Tag(RequestBlockTag::Latest)) => Ok(self
+				.client
+				.info()
+				.best_number
+				.try_into()
+				.map_err(|_| "Block number overflow")?),
 			Some(RequestBlockId::Tag(RequestBlockTag::Earliest)) => Ok(0),
 			Some(RequestBlockId::Tag(RequestBlockTag::Pending)) =>
 				Err("'pending' is not supported"),
@@ -125,7 +128,7 @@ where
 
 			let block_hash = self
 				.client
-				.hash(block_height)
+				.hash(block_height.into())
 				.map_err(|e| format!("Error when fetching block {block_height} header : {e:?}"))?
 				.ok_or_else(|| format!("Block with height {block_height} don't exist"))?;
 
@@ -218,7 +221,6 @@ where
 impl<B, C> TraceServer for Trace<B, C>
 where
 	B: BlockT<Hash = H256> + Send + Sync + 'static,
-	B::Header: HeaderT<Number = u32>,
 	C: HeaderMetadata<B, Error = BlockChainError> + HeaderBackend<B>,
 	C: Send + Sync + 'static,
 {

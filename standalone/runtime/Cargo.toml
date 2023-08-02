@@ -127,8 +127,12 @@ pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-preimage = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
 
+evm-tracer = { workspace = true }
+rpc-primitives-debug = { workspace = true }
+rpc-primitives-txpool = { workspace = true }
+
 [features]
-default = ["std", "with-rocksdb-weights"]
+default = ["std", "with-rocksdb-weights", "evm-tracing"]
 runtime-benchmarks = [
   "hex-literal",
   "frame-benchmarking",
@@ -241,6 +245,9 @@ std = [
   "pallet-evm-precompile-ed25519/std",
   "pallet-hotfix-sufficients/std",
   "precompile-utils/std",
+  "evm-tracer/std",
+  "rpc-primitives-debug/std",
+  "rpc-primitives-txpool/std",
 
   # Moonbeam precompiles
   "pallet-evm-precompile-preimage/std",
@@ -249,11 +256,8 @@ std = [
   "pallet-evm-precompile-proxy/std",
   "pallet-evm-precompile-democracy/std",
   "pallet-evm-precompile-registry/std",
-
-
-
-
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
 with-paritydb-weights = []
+evm-tracing = []
