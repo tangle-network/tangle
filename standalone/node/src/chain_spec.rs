@@ -14,9 +14,12 @@
 
 use std::{collections::BTreeMap, marker::PhantomData};
 
-use crate::{testnet_fixtures::{
-	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
-}, distributions::develop};
+use crate::{
+	distributions::develop,
+	testnet_fixtures::{
+		get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
+	},
+};
 use consensus_types::network_config::{Network, NetworkConfig};
 use dkg_runtime_primitives::{ResourceId, TypedChainId};
 use hex_literal::hex;
