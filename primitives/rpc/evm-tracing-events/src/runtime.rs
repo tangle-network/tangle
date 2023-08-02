@@ -87,8 +87,8 @@ pub enum RuntimeEvent {
 
 #[cfg(feature = "evm-tracing")]
 impl RuntimeEvent {
-	pub fn from_evm_event<'a>(
-		i: evm_runtime::tracing::Event<'a>,
+	pub fn from_evm_event(
+		i: evm_runtime::tracing::Event<'_>,
 		filter: crate::StepEventFilter,
 	) -> Self {
 		match i {
@@ -281,7 +281,7 @@ pub fn opcodes_string(opcode: Opcode) -> Vec<u8> {
 		Opcode(254) => "Invalid",
 		Opcode(255) => "SelfDestruct",
 		Opcode(n) => {
-			tmp = alloc::format!("Unknown({})", n);
+			tmp = alloc::format!("Unknown({n})");
 			&tmp
 		},
 	};

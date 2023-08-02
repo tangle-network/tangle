@@ -189,7 +189,7 @@ where
 		}
 
 		let delegate: <Runtime::Lookup as StaticLookup>::Source =
-			Runtime::Lookup::unlookup(delegate.clone());
+			Runtime::Lookup::unlookup(delegate);
 		let call: ProxyCall<Runtime> =
 			ProxyCall::<Runtime>::add_proxy { delegate, proxy_type, delay };
 
@@ -220,7 +220,7 @@ where
 		let delay = delay.into();
 
 		let delegate: <Runtime::Lookup as StaticLookup>::Source =
-			Runtime::Lookup::unlookup(delegate.clone());
+			Runtime::Lookup::unlookup(delegate);
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call: ProxyCall<Runtime> =
 			ProxyCall::<Runtime>::remove_proxy { delegate, proxy_type, delay };

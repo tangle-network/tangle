@@ -164,7 +164,7 @@ impl Listener {
 								return
 							}
 
-							Some(memory.data.clone())
+							Some(memory.data)
 						},
 						stack: if self.disable_stack {
 							None
@@ -179,7 +179,7 @@ impl Listener {
 								return
 							}
 
-							Some(stack.data.clone())
+							Some(stack.data)
 						},
 					});
 				}

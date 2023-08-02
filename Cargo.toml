@@ -10,11 +10,13 @@ repository = "https://github.com/webb-tools/tangle"
 members = [
 	"primitives",
   "primitives/rpc/*",
+  "primitives/ext",
   "client/evm-tracing",
   "client/rpc/*",
   "client/rpc-core/*",
 	"standalone/node",
 	"standalone/runtime",
+  "standalone/runtime/evm_tracer",
 	"pallets/claims",
 	"pallets/transaction-pause",
 	"precompiles/utils",
@@ -99,6 +101,7 @@ sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0
 sp-offchain = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 sp-runtime-interface = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
+sp-externalities = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 sp-session = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 sp-staking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
@@ -233,8 +236,8 @@ pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", def
 evm = { git = "https://github.com/rust-blockchain/evm", rev = "b7b82c7e1fc57b7449d6dfa6826600de37cc1e65", default-features = false }
 ethereum-types = { version = "0.14.1", default-features = false }
 ethereum = { version = "0.14.0", default-features = false }
-evm-gasometer = { version = "0.39.0", default-features = false }
-evm-runtime = { version = "0.39.0", default-features = false }
+evm-gasometer = { git = "https://github.com/rust-blockchain/evm", rev = "b7b82c7e1fc57b7449d6dfa6826600de37cc1e65", default-features = false }
+evm-runtime = { git = "https://github.com/rust-blockchain/evm", rev = "b7b82c7e1fc57b7449d6dfa6826600de37cc1e65", default-features = false }
 
 # Parachain dependencies
 substrate-fixed = { git = "https://github.com/encointer/substrate-fixed", default-features = false }
@@ -277,6 +280,7 @@ tangle-primitives = { path = 'primitives', default-features = false }
 # pallet-parachain-staking = { path = 'pallets/parachain-staking', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
+primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }
 rpc-primitives-debug = { path = "primitives/rpc/debug", default-features = false }
 rpc-primitives-txpool = { path = "primitives/rpc/txpool", default-features = false }
@@ -289,7 +293,7 @@ rpc-core-types = { path = "client/rpc-core/types" }
 rpc-debug = { path = "client/rpc/debug" }
 rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
-# evm-tracer = { path = "runtime/evm_tracer", default-features = false }
+evm-tracer = { path = "runtime/evm_tracer", default-features = false }
 
 
 pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.0" }

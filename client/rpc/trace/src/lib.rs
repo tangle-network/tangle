@@ -127,9 +127,9 @@ where
 				.client
 				.hash(block_height)
 				.map_err(|e| {
-					format!("Error when fetching block {} header : {:?}", block_height, e)
+					format!("Error when fetching block {block_height} header : {e:?}")
 				})?
-				.ok_or_else(|| format!("Block with height {} don't exist", block_height))?;
+				.ok_or_else(|| format!("Block with height {block_height} don't exist"))?;
 
 			block_hashes.push(block_hash);
 		}
@@ -228,7 +228,7 @@ where
 		&self,
 		filter: FilterRequest,
 	) -> jsonrpsee::core::RpcResult<Vec<TransactionTrace>> {
-		self.clone().filter(filter).await.map_err(|e| fc_rpc::internal_err(e))
+		self.clone().filter(filter).await.map_err(fc_rpc::internal_err)
 	}
 }
 
@@ -274,12 +274,12 @@ impl CacheRequester {
 		sender
 			.unbounded_send(CacheRequest::StartBatch { sender: response_tx, blocks })
 			.map_err(|e| {
-				format!("Failed to send request to the trace cache task. Error : {:?}", e)
+				format!("Failed to send request to the trace cache task. Error : {e:?}")
 			})?;
 
 		response_rx
 			.await
-			.map_err(|e| format!("Trace cache task closed the response channel. Error : {:?}", e))
+			.map_err(|e| format!("Trace cache task closed the response channel. Error : {e:?}"))
 	}
 
 	/// Fetch the traces for given block hash.
@@ -294,13 +294,13 @@ impl CacheRequester {
 		sender
 			.unbounded_send(CacheRequest::GetTraces { sender: response_tx, block })
 			.map_err(|e| {
-				format!("Failed to send request to the trace cache task. Error : {:?}", e)
+				format!("Failed to send request to the trace cache task. Error : {e:?}")
 			})?;
 
 		response_rx
 			.await
-			.map_err(|e| format!("Trace cache task closed the response channel. Error : {:?}", e))?
-			.map_err(|e| format!("Failed to replay block. Error : {:?}", e))
+			.map_err(|e| format!("Trace cache task closed the response channel. Error : {e:?}"))?
+			.map_err(|e| format!("Failed to replay block. Error : {e:?}"))
 	}
 
 	/// Notify the cache that it can stop the batch with that ID. Any block contained only in
@@ -312,7 +312,7 @@ impl CacheRequester {
 		// Here we don't care if the request has been accepted or refused, the caller can't
 		// do anything with it.
 		let _ = sender.unbounded_send(CacheRequest::StopBatch { batch_id }).map_err(|e| {
-			format!("Failed to send request to the trace cache task. Error : {:?}", e)
+			format!("Failed to send request to the trace cache task. Error : {e:?}")
 		});
 	}
 }
@@ -543,15 +543,14 @@ where
 						// Perform block tracing in a tokio blocking task.
 						let result = async {
 							tokio::task::spawn_blocking(move || {
-								Self::cache_block(client, backend, block, overrides.clone())
+								Self::cache_block(client, backend, block, overrides)
 							})
 							.await
 							.map_err(|e| {
-								format!("Tracing Substrate block {} panicked : {:?}", block, e)
+								format!("Tracing Substrate block {block} panicked : {e:?}")
 							})?
 						}
-						.await
-						.map_err(|e| e.to_string());
+						.await;
 
 						tracing::trace!("Block tracing finished, sending result to main task.");
 
@@ -624,7 +623,7 @@ where
 				block
 			);
 			let _ = sender
-				.send(Err(format!("RPC request asked a block ({}) that was not batched", block)));
+				.send(Err(format!("RPC request asked a block ({block}) that was not batched")));
 		}
 	}
 
@@ -657,7 +656,7 @@ where
 					tracing::trace!("Pooled block {} is no longer requested.", block);
 					// Remove block from the cache. Drops the value,
 					// closing all the channels contained in it.
-					let _ = self.cached_blocks.remove(&block);
+					let _ = self.cached_blocks.remove(block);
 				}
 			}
 		}
@@ -739,9 +738,9 @@ where
 		let block_header = client
 			.header(substrate_hash)
 			.map_err(|e| {
-				format!("Error when fetching substrate block {} header : {:?}", substrate_hash, e)
+				format!("Error when fetching substrate block {substrate_hash} header : {e:?}")
 			})?
-			.ok_or_else(|| format!("Subtrate block {} don't exist", substrate_hash))?;
+			.ok_or_else(|| format!("Subtrate block {substrate_hash} don't exist"))?;
 
 		let height = *block_header.number();
 		let substrate_parent_hash = *block_header.parent_hash();
@@ -758,11 +757,10 @@ where
 				(Some(a), Some(b)) => (a, b),
 				_ =>
 					return Err(format!(
-						"Failed to get Ethereum block data for Substrate block {}",
-						substrate_hash
+						"Failed to get Ethereum block data for Substrate block {substrate_hash}"
 					)),
 			},
-			_ => return Err(format!("No storage override at {:?}", substrate_hash)),
+			_ => return Err(format!("No storage override at {substrate_hash:?}")),
 		};
 
 		let eth_block_hash = eth_block.header.hash();
@@ -773,25 +771,25 @@ where
 			.blockchain()
 			.body(substrate_hash)
 			.map_err(|e| {
-				format!("Blockchain error when fetching extrinsics of block {} : {:?}", height, e)
+				format!("Blockchain error when fetching extrinsics of block {height} : {e:?}")
 			})?
-			.ok_or_else(|| format!("Could not find block {} when fetching extrinsics.", height))?;
+			.ok_or_else(|| format!("Could not find block {height} when fetching extrinsics."))?;
 
 		// Trace the block.
 		let f = || -> Result<_, String> {
 			api.initialize_block(substrate_parent_hash, &block_header)
-				.map_err(|e| format!("Runtime api access error: {:?}", e))?;
+				.map_err(|e| format!("Runtime api access error: {e:?}"))?;
 
-			let _result = api
+			api
 				.trace_block(substrate_parent_hash, extrinsics, eth_tx_hashes)
-				.map_err(|e| format!("Blockchain error when replaying block {} : {:?}", height, e))?
+				.map_err(|e| format!("Blockchain error when replaying block {height} : {e:?}"))?
 				.map_err(|e| {
 					tracing::warn!(
 						"Internal runtime error when replaying block {} : {:?}",
 						height,
 						e
 					);
-					format!("Internal runtime error when replaying block {} : {:?}", height, e)
+					format!("Internal runtime error when replaying block {height} : {e:?}")
 				})?;
 			Ok(rpc_primitives_debug::Response::Block)
 		};
@@ -813,8 +811,7 @@ where
 					);
 
 					format!(
-						"Bug: A transaction has been replayed while it shouldn't (in block {}).",
-						height
+						"Bug: A transaction has been replayed while it shouldn't (in block {height})."
 					)
 				})?
 				.transaction_hash;

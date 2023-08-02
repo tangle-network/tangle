@@ -80,7 +80,7 @@ where
 			#[allow(deprecated)]
 			let res = api.extrinsic_filter_before_version_2(best_block, txs_ready, txs_future)
 				.map_err(|err| {
-					internal_err(format!("fetch runtime extrinsic filter failed: {:?}", err))
+					internal_err(format!("fetch runtime extrinsic filter failed: {err:?}"))
 				})?;
 			TxPoolResponse {
 				ready: res.ready.iter().map(|t| TransactionV2::Legacy(t.clone())).collect(),
@@ -88,7 +88,7 @@ where
 			}
 		} else {
 			api.extrinsic_filter(best_block, txs_ready, txs_future).map_err(|err| {
-				internal_err(format!("fetch runtime extrinsic filter failed: {:?}", err))
+				internal_err(format!("fetch runtime extrinsic filter failed: {err:?}"))
 			})?
 		};
 		// Build the T response.
@@ -101,7 +101,7 @@ where
 				TransactionV2::EIP1559(t) => t.nonce,
 			};
 			let from_address = match public_key(txn) {
-				Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(&pk).as_slice())),
+				Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(pk).as_slice())),
 				Err(_e) => H160::default(),
 			};
 			pending
@@ -118,7 +118,7 @@ where
 				TransactionV2::EIP1559(t) => t.nonce,
 			};
 			let from_address = match public_key(txn) {
-				Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(&pk).as_slice())),
+				Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(pk).as_slice())),
 				Err(_e) => H160::default(),
 			};
 			queued

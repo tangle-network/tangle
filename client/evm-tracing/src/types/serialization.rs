@@ -29,7 +29,7 @@ where
 	if let Some(vec) = data {
 		let mut seq = serializer.serialize_seq(Some(vec.len()))?;
 		for hash in vec {
-			seq.serialize_element(&format!("{:x}", hash))?;
+			seq.serialize_element(&format!("{hash:x}"))?;
 		}
 		seq.end()
 	} else {
@@ -102,12 +102,12 @@ pub fn h256_serialize<S>(data: &H256, serializer: S) -> Result<S::Ok, S::Error>
 where
 	S: Serializer,
 {
-	serializer.serialize_str(&format!("{:x}", data))
+	serializer.serialize_str(&format!("{data:x}"))
 }
 
 pub fn h256_0x_serialize<S>(data: &H256, serializer: S) -> Result<S::Ok, S::Error>
 where
 	S: Serializer,
 {
-	serializer.serialize_str(&format!("0x{:x}", data))
+	serializer.serialize_str(&format!("0x{data:x}"))
 }

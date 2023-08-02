@@ -363,7 +363,7 @@ impl Listener {
 					// instead of `context.caller`, since the latter will not have the correct
 					// value inside a DelegateCall.
 					let from = if let Some(parent_context) = self.context_stack.last() {
-						parent_context.to.clone()
+						parent_context.to
 					} else {
 						context.caller
 					};
@@ -637,6 +637,7 @@ mod tests {
 		SStore,
 	}
 
+    #[allow(clippy::enum_variant_names)]
 	enum TestGasometerEvent {
 		RecordCost,
 		RecordRefund,

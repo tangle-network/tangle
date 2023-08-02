@@ -40,9 +40,9 @@ where
 	let buf = String::deserialize(deserializer)?;
 
 	let parsed = match buf.strip_prefix("0x") {
-		Some(buf) => u32::from_str_radix(&buf, 16),
-		None => u32::from_str_radix(&buf, 10),
+		Some(buf) => u32::from_str_radix(buf, 16),
+		None => buf.parse::<u32>(),
 	};
 
-	parsed.map_err(|e| Error::custom(format!("parsing error: {:?} from '{}'", e, buf)))
+	parsed.map_err(|e| Error::custom(format!("parsing error: {e:?} from '{buf}'")))
 }
