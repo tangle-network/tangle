@@ -9,6 +9,10 @@ repository = "https://github.com/webb-tools/tangle"
 [workspace]
 members = [
 	"primitives",
+  "primitives/rpc/*",
+  "client/evm-tracing",
+  "client/rpc/*",
+  "client/rpc-core/*",
 	"standalone/node",
 	"standalone/runtime",
 	"pallets/claims",
@@ -38,6 +42,9 @@ clap = { version = "4.0.32", features = ["derive"] }
 parity-scale-codec = { version = "3.2.2", default-features = false, features = [
 	"derive",
 ] }
+rlp = { version = "0.5", default-features = false }
+tracing = "0.1.34"
+tokio = { version = "1.13" }
 futures = { version = "0.3.16" }
 rand = "0.7.2"
 smallvec = "1.6.1"
@@ -91,6 +98,7 @@ sp-inherents = { git = "https://github.com/paritytech/substrate", branch = "polk
 sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 sp-offchain = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
+sp-runtime-interface = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 sp-session = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 sp-staking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
@@ -102,6 +110,7 @@ sc-keystore = { git = "https://github.com/paritytech/substrate", branch = "polka
 sc-service = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
 sc-chain-spec = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
 sc-rpc-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
+sc-utils = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
 sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
 sp-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
 substrate-frame-rpc-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43" }
@@ -267,6 +276,21 @@ sc-consensus-manual-seal = { git = "https://github.com/paritytech/substrate", br
 tangle-primitives = { path = 'primitives', default-features = false }
 # pallet-parachain-staking = { path = 'pallets/parachain-staking', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
+
+evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }
+rpc-primitives-debug = { path = "primitives/rpc/debug", default-features = false }
+rpc-primitives-txpool = { path = "primitives/rpc/txpool", default-features = false }
+
+client-evm-tracing = { path = "client/evm-tracing" }
+rpc-core-debug = { path = "client/rpc-core/debug" }
+rpc-core-trace = { path = "client/rpc-core/trace" }
+rpc-core-txpool = { path = "client/rpc-core/txpool" }
+rpc-core-types = { path = "client/rpc-core/types" }
+rpc-debug = { path = "client/rpc/debug" }
+rpc-trace = { path = "client/rpc/trace" }
+rpc-txpool = { path = "client/rpc/txpool" }
+# evm-tracer = { path = "runtime/evm_tracer", default-features = false }
+
 
 pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.0" }
 consensus-types = { package = "webb-consensus-types", git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.0" }
