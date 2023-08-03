@@ -17,6 +17,11 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(test)]
+mod mock;
+#[cfg(test)]
+mod tests;
+
 use fp_evm::PrecompileHandle;
 use frame_support::{
 	dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo},
@@ -37,7 +42,6 @@ pub struct StakingPrecompile<Runtime>(PhantomData<Runtime>);
 impl<Runtime> StakingPrecompile<Runtime>
 where
 	Runtime: pallet_staking::Config + pallet_evm::Config,
-	Runtime::AccountId: Into<H160>,
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_staking::Call<Runtime>>,

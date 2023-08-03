@@ -7952,13 +7952,17 @@ name = "pallet-evm-precompile-staking"
 version = "1.0.0"
 dependencies = [
  "derive_more",
+ "dkg-runtime-primitives",
  "fp-evm",
+ "frame-election-provider-support",
  "frame-support",
  "frame-system",
  "log",
  "num_enum 0.5.11",
  "pallet-balances",
+ "pallet-dkg-metadata",
  "pallet-evm",
+ "pallet-session",
  "pallet-staking",
  "pallet-staking-reward-curve",
  "pallet-timestamp",
@@ -7970,7 +7974,9 @@ dependencies = [
  "sha3 0.10.8",
  "sp-core 7.0.0",
  "sp-io 7.0.0",
+ "sp-keystore 0.13.0",
  "sp-runtime 7.0.0",
+ "sp-staking",
  "sp-std 5.0.0",
 ]
 

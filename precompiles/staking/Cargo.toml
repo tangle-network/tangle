@@ -41,7 +41,12 @@ scale-info = { workspace = true, features = [ "derive", "std" ] }
 sp-runtime = { workspace = true, features = [ "std" ] }
 pallet-staking = { workspace = true, features = [ "std" ]  }
 pallet-staking-reward-curve = { workspace = true }
-
+frame-election-provider-support = { workspace = true, features = [ "std" ] }
+pallet-session = { workspace = true, features = [ "std" ] }
+pallet-dkg-metadata = { workspace = true, features = [ "std" ] }
+dkg-runtime-primitives = { workspace = true, features = [ "std" ] }
+sp-staking = { workspace = true, features = [ "std" ] }
+sp-keystore = { workspace = true, features = [ "std" ] }
 [features]
 default = [ "std" ]
 std = [
