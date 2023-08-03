@@ -20,6 +20,7 @@ use sp_runtime::traits::Block as BlockT;
 use tangle_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
 
 pub mod eth;
+pub mod tracing;
 pub use self::eth::{create_eth, overrides_handle, EthDeps};
 
 /// Full client dependencies.
@@ -65,6 +66,8 @@ where
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
+	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
+	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
 	C: BlockchainEvents<Block> + 'static,
 	C: HeaderBackend<Block>
 		+ HeaderMetadata<Block, Error = BlockChainError>
@@ -99,6 +102,5 @@ where
 		subscription_task_executor,
 		pubsub_notification_sinks,
 	)?;
-
 	Ok(io)
 }

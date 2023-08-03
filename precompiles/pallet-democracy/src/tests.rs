@@ -1177,7 +1177,7 @@ fn cannot_note_imminent_preimage_before_it_is_actually_imminent() {
 		.execute_with(|| {
 			// Construct our dummy proposal and associated data
 			let dummy_preimage: Vec<u8> = vec![1, 2, 3, 4];
-			let dummy_bytes = dummy_preimage.clone();
+			let dummy_bytes = dummy_preimage;
 
 			// Construct input data to note preimage
 			let input =

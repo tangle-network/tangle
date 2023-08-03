@@ -50,7 +50,9 @@
             # Finally the toolchain
             toolchain
           ];
-          packages = [ ];
+          packages = [
+            pkgs.taplo
+          ];
           # Environment variables
           RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
           # Needed for running DKG Node.

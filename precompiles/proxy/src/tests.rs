@@ -756,7 +756,7 @@ fn proxy_proxy_should_fail_if_called_by_smart_contract_for_a_non_eoa_account() {
 			.dispatch(RuntimeOrigin::signed(Bob.into())));
 
 			let inside = Rc::new(Cell::new(false));
-			let inside2 = inside.clone();
+			let inside2 = inside;
 
 			// The smart contract calls proxy.proxy to call address Charlie as if it was Bob
 			PrecompilesValue::get()

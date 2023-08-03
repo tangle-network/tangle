@@ -44,7 +44,7 @@ where
 	#[precompile::view]
 	fn is_precompile(handle: &mut impl PrecompileHandle, address: Address) -> EvmResult<bool> {
 		// We consider the precompile set is optimized to do at most one storage read.
-		// In the case of moonbeam, the storage item that can be read is pallet_asset::Asset
+		// In the case of , the storage item that can be read is pallet_asset::Asset
 		// (TODO make it more generic, maybe add a const generic on PrecompileRegistry type)
 		// Storage item: Asset:
 		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
@@ -59,7 +59,7 @@ where
 		address: Address,
 	) -> EvmResult<bool> {
 		// We consider the precompile set is optimized to do at most one storage read.
-		// In the case of moonbeam, the storage item that can be read is pallet_asset::Asset
+		// In the case of , the storage item that can be read is pallet_asset::Asset
 		// (TODO make it more generic, maybe add a const generic on PrecompileRegistry type)
 		// Storage item: Asset:
 		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
@@ -78,7 +78,7 @@ where
 		// Prevent touching addresses that are not precompiles.
 		//
 		// We consider the precompile set is optimized to do at most one storage read.
-		// In the case of moonbeam, the storage item that can be read is pallet_asset::Asset
+		// In the case of , the storage item that can be read is pallet_asset::Asset
 		// (TODO make it more generic, maybe add a const generic on PrecompileRegistry type)
 		// Storage item: Asset:
 		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)

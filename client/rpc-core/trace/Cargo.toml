@@ -1,0 +1,16 @@
+[package]
+name = "rpc-core-trace"
+authors = { workspace = true }
+edition = "2021"
+license = "GPL-3.0-only"
+repository = { workspace = true }
+version = "0.6.0"
+
+[dependencies]
+ethereum-types = { workspace = true, features = ["std"] }
+futures = { workspace = true, features = ["compat"] }
+jsonrpsee = { workspace = true, features = ["macros", "server"] }
+client-evm-tracing = { workspace = true }
+rpc-core-types = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
