@@ -10,8 +10,8 @@ version = "0.1.0"
 environmental = { workspace = true }
 ethereum = { workspace = true }
 ethereum-types = { workspace = true }
-hex = { workspace = true, optional = true, features = [ "serde" ] }
-serde = { workspace = true, optional = true, features = [ "derive" ] }
+hex = { workspace = true, optional = true, features = ["serde"] }
+serde = { workspace = true, optional = true, features = ["derive"] }
 
 # Substrate
 parity-scale-codec = { workspace = true }
@@ -22,17 +22,17 @@ sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 
 [features]
-default = [ "std" ]
+default = ["std"]
 std = [
-	"environmental/std",
-	"ethereum-types/std",
-	"ethereum/std",
-	"hex",
-	"parity-scale-codec/std",
-	"serde",
-	"sp-api/std",
-	"sp-core/std",
-	"sp-io/std",
-	"sp-runtime/std",
-	"sp-std/std",
+ "environmental/std",
+ "ethereum-types/std",
+ "ethereum/std",
+ "hex",
+ "parity-scale-codec/std",
+ "serde",
+ "sp-api/std",
+ "sp-core/std",
+ "sp-io/std",
+ "sp-runtime/std",
+ "sp-std/std",
 ]

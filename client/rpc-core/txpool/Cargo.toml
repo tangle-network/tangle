@@ -7,10 +7,10 @@ repository = { workspace = true }
 version = "0.6.0"
 
 [dependencies]
-ethereum = { workspace = true, features = [ "std", "with-codec" ] }
-ethereum-types = { workspace = true, features = [ "std" ] }
-jsonrpsee = { workspace = true, features = [ "macros", "server" ] }
-serde = { workspace = true, features = [ "derive" ] }
+ethereum = { workspace = true, features = ["std", "with-codec"] }
+ethereum-types = { workspace = true, features = ["std"] }
+jsonrpsee = { workspace = true, features = ["macros", "server"] }
+serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 
 fc-rpc-core = { workspace = true }

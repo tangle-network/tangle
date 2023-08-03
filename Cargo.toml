@@ -8,26 +8,26 @@ repository = "https://github.com/webb-tools/tangle"
 
 [workspace]
 members = [
-	"primitives",
-  "primitives/rpc/*",
-  "primitives/ext",
-  "client/evm-tracing",
-  "client/rpc/*",
-  "client/rpc-core/*",
-	"standalone/node",
-	"standalone/runtime",
-  "standalone/runtime/evm_tracer",
-	"pallets/claims",
-	"pallets/transaction-pause",
-	"precompiles/utils",
-	"precompiles/utils/macro",
-	"precompiles/utils/tests-external",
-	"precompiles/pallet-democracy",
-	"precompiles/batch",
-	"precompiles/call-permit",
-	"precompiles/proxy",
-	"precompiles/preimage"
-	]
+ "primitives",
+ "primitives/rpc/*",
+ "primitives/ext",
+ "client/evm-tracing",
+ "client/rpc/*",
+ "client/rpc-core/*",
+ "standalone/node",
+ "standalone/runtime",
+ "standalone/runtime/evm_tracer",
+ "pallets/claims",
+ "pallets/transaction-pause",
+ "precompiles/utils",
+ "precompiles/utils/macro",
+ "precompiles/utils/tests-external",
+ "precompiles/pallet-democracy",
+ "precompiles/batch",
+ "precompiles/call-permit",
+ "precompiles/proxy",
+ "precompiles/preimage",
+]
 resolver = "2"
 
 [workspace.dependencies]
@@ -41,9 +41,7 @@ serde = { version = "1.0.101", default-features = false, features = ["derive"] }
 serde_json = "1.0.81"
 static_assertions = "1.1.0"
 clap = { version = "4.0.32", features = ["derive"] }
-parity-scale-codec = { version = "3.2.2", default-features = false, features = [
-	"derive",
-] }
+parity-scale-codec = { version = "3.2.2", default-features = false, features = ["derive"] }
 rlp = { version = "0.5", default-features = false }
 tracing = "0.1.34"
 tokio = { version = "1.13" }
@@ -191,7 +189,9 @@ fc-cli = { git = "https://github.com/paritytech/frontier.git", branch = "polkado
 fc-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43" }
 fc-db = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 fc-mapping-sync = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
-fc-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = ["rpc-binary-search-estimate"] }
+fc-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = [
+ "rpc-binary-search-estimate",
+] }
 fc-rpc-core = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43" }
 fc-storage = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43" }
 
@@ -208,8 +208,12 @@ fp-storage = { git = "https://github.com/paritytech/frontier.git", branch = "pol
 # Frontier FRAME
 pallet-base-fee = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 pallet-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
-pallet-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = ["forbid-evm-reentrancy"] }
-pallet-evm = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = ["forbid-evm-reentrancy"] }
+pallet-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = [
+ "forbid-evm-reentrancy",
+] }
+pallet-evm = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = [
+ "forbid-evm-reentrancy",
+] }
 pallet-evm-chain-id = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 pallet-evm-precompile-blake2 = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 pallet-evm-precompile-bn128 = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
@@ -223,7 +227,7 @@ pallet-evm-test-vector-support = { git = "https://github.com/paritytech/frontier
 pallet-hotfix-sufficients = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 
 # Local precompiles
-pallet-evm-precompile-democracy = { path = "precompiles/pallet-democracy", default-features = false}
+pallet-evm-precompile-democracy = { path = "precompiles/pallet-democracy", default-features = false }
 precompile-utils = { path = "precompiles/utils", default-features = false }
 pallet-evm-precompile-batch = { path = "precompiles/batch", default-features = false }
 pallet-evm-precompile-call-permit = { path = "precompiles/call-permit", default-features = false }

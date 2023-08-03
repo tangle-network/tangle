@@ -14,22 +14,22 @@ parity-scale-codec = { workspace = true }
 sp-runtime-interface = { workspace = true }
 
 # Ethereum
-ethereum = { workspace = true, features = [ "with-codec" ] }
+ethereum = { workspace = true, features = ["with-codec"] }
 ethereum-types = { workspace = true }
-evm = { workspace = true, features = [ "with-codec" ] }
+evm = { workspace = true, features = ["with-codec"] }
 evm-gasometer = { workspace = true }
 evm-runtime = { workspace = true }
 
 [features]
-default = [ "std" ]
+default = ["std"]
 std = [
-	"environmental/std",
-	"ethereum-types/std",
-	"ethereum/std",
-	"evm-gasometer/std",
-	"evm-runtime/std",
-	"evm/std",
-	"parity-scale-codec/std",
-	"sp-runtime-interface/std",
+ "environmental/std",
+ "ethereum-types/std",
+ "ethereum/std",
+ "evm-gasometer/std",
+ "evm-runtime/std",
+ "evm/std",
+ "parity-scale-codec/std",
+ "sp-runtime-interface/std",
 ]
-evm-tracing = [ "evm-gasometer/tracing", "evm-runtime/tracing", "evm/tracing" ]
+evm-tracing = ["evm-gasometer/tracing", "evm-runtime/tracing", "evm/tracing"]
