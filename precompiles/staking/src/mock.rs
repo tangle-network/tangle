@@ -1,18 +1,19 @@
-// Copyright 2019-2022 PureStake Inc.
-// This file is part of Moonbeam.
+// Copyright 2022 Webb Technologies Inc.
+//
+// This file is part of pallet-evm-precompile-staking package, originally developed by Purestake
+// Inc. Pallet-evm-precompile-staking package used in Tangle Network in terms of GPLv3.
 
-// Moonbeam is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// Moonbeam is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 //! Test utilities
 use super::*;
@@ -31,7 +32,7 @@ use sp_core::{
 	self,
 	ecdsa::Public,
 	sr25519::{self, Public as sr25519Public, Signature},
-	ConstU32, H256, U256,
+	ConstU32, H160, H256, U256,
 };
 
 use serde::{Deserialize, Serialize};
@@ -74,9 +75,9 @@ type Block = frame_system::mocking::MockBlock<Runtime>;
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
-
-const PRECOMPILE_ADDRESS_BYTES: [u8;32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5];
-
+const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
+];
 
 #[derive(
 	Eq,
@@ -124,7 +125,6 @@ impl AddressMapping<AccountId32> for TestAccount {
 
 impl AddressMapping<sp_core::sr25519::Public> for TestAccount {
 	fn into_account_id(h160_account: H160) -> sp_core::sr25519::Public {
-		
 		match h160_account {
 			a if a == H160::repeat_byte(0x01) => sr25519Public::from_raw([1u8; 32]),
 			a if a == H160::repeat_byte(0x02) => sr25519Public::from_raw([2u8; 32]),
@@ -178,7 +178,8 @@ impl From<sp_core::sr25519::Public> for TestAccount {
 			x if x == sr25519Public::from_raw([1u8; 32]) => TestAccount::Alex,
 			x if x == sr25519Public::from_raw([2u8; 32]) => TestAccount::Bobo,
 			x if x == sr25519Public::from_raw([3u8; 32]) => TestAccount::Dino,
-			x if x == sr25519Public::from_raw(PRECOMPILE_ADDRESS_BYTES) => TestAccount::PrecompileAddress,
+			x if x == sr25519Public::from_raw(PRECOMPILE_ADDRESS_BYTES) =>
+				TestAccount::PrecompileAddress,
 			_ => TestAccount::Empty,
 		}
 	}
@@ -526,6 +527,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<(AccountId, DKGId)>) -> Tes
 		force_era: pallet_staking::Forcing::ForceNew,
 		minimum_validator_count: 0,
 		max_validator_count: Some(5),
+		max_nominator_count: Some(5),
 		invulnerables: vec![],
 		..Default::default()
 	};
@@ -564,6 +566,8 @@ pub fn run_for_blocks(n: u64) {
 ///
 /// Function has no effect if era is already passed.
 pub fn advance_to_era(n: EraIndex) {
+	println!("advance_to_era({})", n);
+	println!("{}", Staking::current_era().unwrap_or_default());
 	while Staking::current_era().unwrap_or_default() < n {
 		run_for_blocks(1);
 	}

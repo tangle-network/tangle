@@ -29,7 +29,7 @@ use frame_support::{
 };
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
-use sp_core::{H160, U256};
+use sp_core::U256;
 use sp_std::{convert::TryInto, marker::PhantomData};
 
 type BalanceOf<Runtime> = <<Runtime as pallet_staking::Config>::Currency as Currency<
@@ -105,7 +105,7 @@ where
 
 	#[precompile::public("isValidator(address)")]
 	#[precompile::view]
-	fn is_validators(handle: &mut impl PrecompileHandle, validator: Address) -> EvmResult<bool> {
+	fn is_validator(handle: &mut impl PrecompileHandle, validator: Address) -> EvmResult<bool> {
 		let validator_account = Runtime::AddressMapping::into_account_id(validator.0);
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let is_validator = pallet_staking::Validators::<Runtime>::contains_key(validator_account);
