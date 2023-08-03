@@ -69,7 +69,7 @@ pub struct Trace<B, C> {
 impl<B, C> Clone for Trace<B, C> {
 	fn clone(&self) -> Self {
 		Self {
-			_phantom: PhantomData::default(),
+			_phantom: PhantomData,
 			client: Arc::clone(&self.client),
 			requester: self.requester.clone(),
 			max_count: self.max_count,
@@ -85,7 +85,7 @@ where
 {
 	/// Create a new RPC handler.
 	pub fn new(client: Arc<C>, requester: CacheRequester, max_count: u32) -> Self {
-		Self { client, requester, max_count, _phantom: PhantomData::default() }
+		Self { client, requester, max_count, _phantom: PhantomData }
 	}
 
 	/// Convert an optional block ID (number or tag) to a block height.
