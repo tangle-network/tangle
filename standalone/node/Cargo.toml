@@ -25,6 +25,7 @@ substrate-build-script-utils = { workspace = true }
 
 [dependencies]
 serde_json = { workspace = true }
+tokio = { workspace = true }
 clap = { workspace = true }
 parity-scale-codec = { workspace = true }
 futures = { workspace = true }
@@ -75,6 +76,7 @@ sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
 sp-timestamp = { workspace = true }
+substrate-prometheus-endpoint = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
 sc-consensus-manual-seal = { workspace = true }
 
@@ -99,6 +101,13 @@ fp-dynamic-fee = { workspace = true, features = ["default"] }
 fp-evm = { workspace = true, features = ["default"] }
 fp-rpc = { workspace = true, features = ["default"] }
 
+rpc-trace = { workspace = true }
+rpc-debug = { workspace = true }
+rpc-txpool = { workspace = true }
+rpc-primitives-debug = { workspace = true }
+rpc-primitives-txpool = { workspace = true }
+primitives-ext = { workspace = true }
+
 tangle-runtime = { workspace = true }
 
 [features]
@@ -108,11 +117,11 @@ integration-tests = ["tangle-runtime/integration-tests"]
 with-rocksdb-weights = ["tangle-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-runtime/with-paritydb-weights"]
 rocksdb = [
-  "sc-cli/rocksdb",
-  "sc-service/rocksdb",
-  "fc-cli/rocksdb",
-  "fc-db/rocksdb",
-  "fc-mapping-sync/rocksdb",
-  "fc-rpc/rocksdb",
+ "sc-cli/rocksdb",
+ "sc-service/rocksdb",
+ "fc-cli/rocksdb",
+ "fc-db/rocksdb",
+ "fc-mapping-sync/rocksdb",
+ "fc-rpc/rocksdb",
 ]
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]

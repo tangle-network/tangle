@@ -15,7 +15,7 @@ impl-trait-for-tuples = { workspace = true }
 log = { workspace = true }
 num_enum = { workspace = true }
 paste = { workspace = true }
-scale-info = { workspace = true, optional = true, features = [ "derive" ] }
+scale-info = { workspace = true, optional = true, features = ["derive"] }
 serde = { workspace = true, optional = true }
 sha3 = { workspace = true }
 similar-asserts = { workspace = true, optional = true }
@@ -44,17 +44,17 @@ hex-literal = { workspace = true }
 xcm = { workspace = true }
 
 [features]
-default = [ "std" ]
+default = ["std"]
 std = [
-	"environmental/std",
-	"fp-evm/std",
-	"frame-support/std",
-	"frame-system/std",
-	"pallet-evm/std",
-	"parity-scale-codec/std",
-	"sp-core/std",
-	"sp-io/std",
-	"sp-std/std",
+ "environmental/std",
+ "fp-evm/std",
+ "frame-support/std",
+ "frame-system/std",
+ "pallet-evm/std",
+ "parity-scale-codec/std",
+ "sp-core/std",
+ "sp-io/std",
+ "sp-std/std",
 ]
-codec-xcm = [ "xcm" ]
-testing = [ "derive_more", "hex-literal", "scale-info", "serde", "similar-asserts", "std" ]
+codec-xcm = ["xcm"]
+testing = ["derive_more", "hex-literal", "scale-info", "serde", "similar-asserts", "std"]

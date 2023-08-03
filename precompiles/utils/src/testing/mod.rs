@@ -46,13 +46,8 @@ pub struct PrettyLog(Log);
 
 impl core::fmt::Debug for PrettyLog {
 	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
-		let bytes = self
-			.0
-			.data
-			.iter()
-			.map(|b| format!("{:02X}", b))
-			.collect::<Vec<String>>()
-			.join("");
+		let bytes =
+			self.0.data.iter().map(|b| format!("{b:02X}")).collect::<Vec<String>>().join("");
 
 		let message = String::from_utf8(self.0.data.clone()).ok();
 
