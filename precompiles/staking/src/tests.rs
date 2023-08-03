@@ -13,7 +13,7 @@ fn precompiles() -> Precompiles<Runtime> {
 fn evm_call(source: impl Into<H160>, input: Vec<u8>) -> EvmCall<Runtime> {
 	EvmCall::call {
 		source: source.into(),
-		target: Precompile1.into(),
+		target: TestAccount::PrecompileAddress.into(),
 		input,
 		value: U256::zero(), // No value sent in EVM
 		gas_limit: u64::max_value(),
@@ -22,12 +22,6 @@ fn evm_call(source: impl Into<H160>, input: Vec<u8>) -> EvmCall<Runtime> {
 		nonce: None, // Use the next nonce
 		access_list: Vec::new(),
 	}
-}
-
-#[test]
-fn selectors() {
-	print!(" Hello this is selector {:?}", PCall::is_nominator_selectors());
-	assert_eq!(true, false);
 }
 
 #[test]
