@@ -25,16 +25,16 @@ fn evm_call(source: impl Into<H160>, input: Vec<u8>) -> EvmCall<Runtime> {
 }
 
 #[test]
-fn minimum_validator_count_works() {
-	new_test_ext(vec![1, 2, 3, 4, 5]).execute_with(|| {
+fn max_validator_count_works() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		precompiles()
 			.prepare_test(
 				TestAccount::Alex,
-				TestAccount::PrecompileAddress,
+				H160::from_low_u64_be(5),
 				PCall::max_validator_count {},
 			)
 			.expect_cost(0) // TODO: Test db read/write costs
 			.expect_no_logs()
-			.execute_returns(3u32)
+			.execute_returns(5u32)
 	});
 }

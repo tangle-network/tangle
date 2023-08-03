@@ -74,6 +74,10 @@ type Block = frame_system::mocking::MockBlock<Runtime>;
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
+
+const PRECOMPILE_ADDRESS_BYTES: [u8;32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5];
+
+
 #[derive(
 	Eq,
 	PartialEq,
@@ -89,12 +93,12 @@ pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::Account
 	derive_more::Display,
 	scale_info::TypeInfo,
 )]
-
 pub enum TestAccount {
 	Empty,
 	Alex,
 	Bobo,
 	Dino,
+	Charlie,
 	PrecompileAddress,
 }
 
@@ -111,7 +115,8 @@ impl AddressMapping<AccountId32> for TestAccount {
 			a if a == H160::repeat_byte(0x01) => TestAccount::Alex.into(),
 			a if a == H160::repeat_byte(0x02) => TestAccount::Bobo.into(),
 			a if a == H160::repeat_byte(0x03) => TestAccount::Dino.into(),
-			a if a == H160::repeat_byte(0x04) => TestAccount::PrecompileAddress.into(),
+			a if a == H160::repeat_byte(0x04) => TestAccount::Dino.into(),
+			a if a == H160::from_low_u64_be(5) => TestAccount::PrecompileAddress.into(),
 			_ => TestAccount::Empty.into(),
 		}
 	}
@@ -119,11 +124,13 @@ impl AddressMapping<AccountId32> for TestAccount {
 
 impl AddressMapping<sp_core::sr25519::Public> for TestAccount {
 	fn into_account_id(h160_account: H160) -> sp_core::sr25519::Public {
+		
 		match h160_account {
 			a if a == H160::repeat_byte(0x01) => sr25519Public::from_raw([1u8; 32]),
 			a if a == H160::repeat_byte(0x02) => sr25519Public::from_raw([2u8; 32]),
 			a if a == H160::repeat_byte(0x03) => sr25519Public::from_raw([3u8; 32]),
 			a if a == H160::repeat_byte(0x04) => sr25519Public::from_raw([4u8; 32]),
+			a if a == H160::from_low_u64_be(5) => sr25519Public::from_raw(PRECOMPILE_ADDRESS_BYTES),
 			_ => sr25519Public::from_raw([0u8; 32]),
 		}
 	}
@@ -135,7 +142,8 @@ impl From<TestAccount> for H160 {
 			TestAccount::Alex => H160::repeat_byte(0x01),
 			TestAccount::Bobo => H160::repeat_byte(0x02),
 			TestAccount::Dino => H160::repeat_byte(0x03),
-			TestAccount::PrecompileAddress => H160::repeat_byte(0x04),
+			TestAccount::Charlie => H160::repeat_byte(0x04),
+			TestAccount::PrecompileAddress => H160::from_low_u64_be(5),
 			_ => Default::default(),
 		}
 	}
@@ -158,7 +166,7 @@ impl From<TestAccount> for AccountId32 {
 			TestAccount::Alex => AccountId32::from([1u8; 32]),
 			TestAccount::Bobo => AccountId32::from([2u8; 32]),
 			TestAccount::Dino => AccountId32::from([3u8; 32]),
-			TestAccount::PrecompileAddress => AccountId32::from([4u8; 32]),
+			TestAccount::PrecompileAddress => AccountId32::from(PRECOMPILE_ADDRESS_BYTES),
 			_ => AccountId32::from([0u8; 32]),
 		}
 	}
@@ -170,7 +178,7 @@ impl From<sp_core::sr25519::Public> for TestAccount {
 			x if x == sr25519Public::from_raw([1u8; 32]) => TestAccount::Alex,
 			x if x == sr25519Public::from_raw([2u8; 32]) => TestAccount::Bobo,
 			x if x == sr25519Public::from_raw([3u8; 32]) => TestAccount::Dino,
-			x if x == sr25519Public::from_raw([4u8; 32]) => TestAccount::PrecompileAddress,
+			x if x == sr25519Public::from_raw(PRECOMPILE_ADDRESS_BYTES) => TestAccount::PrecompileAddress,
 			_ => TestAccount::Empty,
 		}
 	}
@@ -347,7 +355,7 @@ parameter_types! {
 }
 
 pub type Precompiles<R> =
-	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<4>, StakingPrecompile<R>>,)>;
+	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<5>, StakingPrecompile<R>>,)>;
 
 pub type PCall = StakingPrecompileCall<Runtime>;
 
@@ -517,6 +525,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<(AccountId, DKGId)>) -> Tes
 		validator_count: 2,
 		force_era: pallet_staking::Forcing::ForceNew,
 		minimum_validator_count: 0,
+		max_validator_count: Some(5),
 		invulnerables: vec![],
 		..Default::default()
 	};
