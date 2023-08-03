@@ -3,7 +3,7 @@ use std::str::FromStr;
 use fp_evm::GenesisAccount;
 use sp_core::{H160, U256};
 
-pub fn get_distribution() -> Vec<(H160, GenesisAccount)> {
+pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 	vec![
 		// H160 address of Alice dev account
 		// Derived from SS58 (42 prefix) address

@@ -163,9 +163,10 @@ pub fn development_config(chain_id: u64) -> Result<ChainSpec, String> {
 				DEFAULT_DKG_KEYGEN_THRESHOLD,
 				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				combine_distributions(vec![
-					develop::get_distribution(),
-					testnet::get_distribution(),
+					develop::get_evm_balance_distribution(),
+					testnet::get_evm_balance_distribution(),
 				]),
+				testnet::get_substrate_balance_distribution(),
 				true,
 			)
 		},
@@ -240,9 +241,10 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				DEFAULT_DKG_KEYGEN_THRESHOLD,
 				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				combine_distributions(vec![
-					develop::get_distribution(),
-					testnet::get_distribution(),
+					develop::get_evm_balance_distribution(),
+					testnet::get_evm_balance_distribution(),
 				]),
+				testnet::get_substrate_balance_distribution(),
 				true,
 			)
 		},
@@ -319,9 +321,10 @@ pub fn relayer_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				relayer_testnet_dkg_keygen_threshold,
 				relayer_testnet_dkg_signature_threshold,
 				combine_distributions(vec![
-					develop::get_distribution(),
-					testnet::get_distribution(),
+					develop::get_evm_balance_distribution(),
+					testnet::get_evm_balance_distribution(),
 				]),
+				testnet::get_substrate_balance_distribution(),
 				true,
 			)
 		},
@@ -382,9 +385,10 @@ pub fn standalone_live_config(chain_id: u64) -> Result<ChainSpec, String> {
 				DEFAULT_DKG_KEYGEN_THRESHOLD,
 				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				combine_distributions(vec![
-					develop::get_distribution(),
-					testnet::get_distribution(),
+					develop::get_evm_balance_distribution(),
+					testnet::get_evm_balance_distribution(),
 				]),
+				testnet::get_substrate_balance_distribution(),
 				true,
 			)
 		},
@@ -459,9 +463,10 @@ pub fn standalone_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				DEFAULT_DKG_KEYGEN_THRESHOLD,
 				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				combine_distributions(vec![
-					develop::get_distribution(),
-					testnet::get_distribution(),
+					develop::get_evm_balance_distribution(),
+					testnet::get_evm_balance_distribution(),
 				]),
+				testnet::get_substrate_balance_distribution(),
 				true,
 			)
 		},
@@ -521,9 +526,10 @@ pub fn standalone_local_config(chain_id: u64) -> Result<ChainSpec, String> {
 				DEFAULT_DKG_KEYGEN_THRESHOLD,
 				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				combine_distributions(vec![
-					develop::get_distribution(),
-					testnet::get_distribution(),
+					develop::get_evm_balance_distribution(),
+					testnet::get_evm_balance_distribution(),
 				]),
+				testnet::get_substrate_balance_distribution(),
 				true,
 			)
 		},
@@ -556,7 +562,8 @@ fn testnet_genesis(
 	chain_id: u64,
 	dkg_keygen_threshold: u16,
 	dkg_signature_threshold: u16,
-	genesis_distribution: Vec<(H160, fp_evm::GenesisAccount)>,
+	genesis_evm_distribution: Vec<(H160, fp_evm::GenesisAccount)>,
+	genesis_substrate_distribution: Vec<(AccountId, Balance)>,
 	_enable_println: bool,
 ) -> GenesisConfig {
 	const ENDOWMENT: Balance = 10_000_000 * UNIT;
@@ -590,7 +597,12 @@ fn testnet_genesis(
 		sudo: SudoConfig { key: Some(root_key) },
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
-			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect(),
+			balances: endowed_accounts
+				.iter()
+				.cloned()
+				.map(|k| (k, ENDOWMENT))
+				.chain(genesis_substrate_distribution.iter().cloned().map(|(k, v)| (k, v)))
+				.collect(),
 		},
 		vesting: Default::default(),
 		indices: Default::default(),
@@ -651,7 +663,7 @@ fn testnet_genesis(
 		evm: EVMConfig {
 			accounts: {
 				let mut map = BTreeMap::new();
-				for (address, account) in genesis_distribution {
+				for (address, account) in genesis_evm_distribution {
 					map.insert(address, account);
 				}
 				map
