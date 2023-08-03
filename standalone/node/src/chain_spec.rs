@@ -17,8 +17,8 @@ use std::{collections::BTreeMap, marker::PhantomData};
 use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
+use consensus_types::network_config::{Network, NetworkConfig};
 use dkg_runtime_primitives::{ResourceId, TypedChainId};
-use finality_update_verify::network_config::{Network, NetworkConfig};
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
@@ -554,23 +554,6 @@ fn testnet_genesis(
 		.collect::<Vec<_>>();
 
 	let num_endowed_accounts = endowed_accounts.len();
-	let eth2_mainnet_network_config: NetworkConfig =
-		NetworkConfig::new(&Network::from_str("mainnet").unwrap());
-	let eth2_goerli_network_config: NetworkConfig =
-		NetworkConfig::new(&Network::from_str("goerli").unwrap());
-	// (TypedChainId, [u8; 32], ForkVersion, u64)
-	let eth2_mainnet_genesis_config = (
-		TypedChainId::Evm(1),
-		eth2_mainnet_network_config.genesis_validators_root,
-		eth2_mainnet_network_config.bellatrix_fork_version,
-		eth2_mainnet_network_config.bellatrix_fork_epoch,
-	);
-	let eth2_goerli_genesis_config = (
-		TypedChainId::Evm(5),
-		eth2_goerli_network_config.genesis_validators_root,
-		eth2_goerli_network_config.bellatrix_fork_version,
-		eth2_goerli_network_config.bellatrix_fork_epoch,
-	);
 	GenesisConfig {
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
@@ -628,7 +611,10 @@ fn testnet_genesis(
 		im_online: ImOnlineConfig { keys: vec![] },
 		eth_2_client: Eth2ClientConfig {
 			// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
-			networks: vec![eth2_mainnet_genesis_config, eth2_goerli_genesis_config],
+			networks: vec![
+				(TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+				(TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+			],
 			phantom: PhantomData,
 		},
 		nomination_pools: Default::default(),

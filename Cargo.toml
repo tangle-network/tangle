@@ -179,7 +179,7 @@ fc-cli = { git = "https://github.com/paritytech/frontier.git", branch = "polkado
 fc-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43" }
 fc-db = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 fc-mapping-sync = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
-fc-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
+fc-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = ["rpc-binary-search-estimate"] }
 fc-rpc-core = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43" }
 fc-storage = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43" }
 
@@ -196,8 +196,8 @@ fp-storage = { git = "https://github.com/paritytech/frontier.git", branch = "pol
 # Frontier FRAME
 pallet-base-fee = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 pallet-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
-pallet-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
-pallet-evm = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
+pallet-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = ["forbid-evm-reentrancy"] }
+pallet-evm = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false, features = ["forbid-evm-reentrancy"] }
 pallet-evm-chain-id = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 pallet-evm-precompile-blake2 = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
 pallet-evm-precompile-bn128 = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.43", default-features = false }
@@ -269,8 +269,8 @@ sc-consensus-manual-seal = { git = "https://github.com/paritytech/substrate", br
 tangle-primitives = { path = 'primitives', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.3.0" }
-finality-update-verify = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.3.0" }
+pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.0" }
+consensus-types = { package = "webb-consensus-types", git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.0" }
 
 [profile.release]
 panic = "unwind"
