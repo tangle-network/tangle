@@ -15,7 +15,7 @@
 use std::{collections::BTreeMap, marker::PhantomData};
 
 use crate::{
-	distributions::develop,
+	distributions::{combine_distributions, develop, testnet},
 	testnet_fixtures::{
 		get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 	},
@@ -162,7 +162,10 @@ pub fn development_config(chain_id: u64) -> Result<ChainSpec, String> {
 				chain_id,
 				DEFAULT_DKG_KEYGEN_THRESHOLD,
 				DEFAULT_DKG_SIGNATURE_THRESHOLD,
-				develop::get_distribution(),
+				combine_distributions(vec![
+					develop::get_distribution(),
+					testnet::get_distribution(),
+				]),
 				true,
 			)
 		},
@@ -236,7 +239,10 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				chain_id,
 				DEFAULT_DKG_KEYGEN_THRESHOLD,
 				DEFAULT_DKG_SIGNATURE_THRESHOLD,
-				develop::get_distribution(),
+				combine_distributions(vec![
+					develop::get_distribution(),
+					testnet::get_distribution(),
+				]),
 				true,
 			)
 		},
@@ -312,7 +318,10 @@ pub fn relayer_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				chain_id,
 				relayer_testnet_dkg_keygen_threshold,
 				relayer_testnet_dkg_signature_threshold,
-				develop::get_distribution(),
+				combine_distributions(vec![
+					develop::get_distribution(),
+					testnet::get_distribution(),
+				]),
 				true,
 			)
 		},
@@ -372,7 +381,10 @@ pub fn standalone_live_config(chain_id: u64) -> Result<ChainSpec, String> {
 				chain_id,
 				DEFAULT_DKG_KEYGEN_THRESHOLD,
 				DEFAULT_DKG_SIGNATURE_THRESHOLD,
-				develop::get_distribution(),
+				combine_distributions(vec![
+					develop::get_distribution(),
+					testnet::get_distribution(),
+				]),
 				true,
 			)
 		},
@@ -446,7 +458,10 @@ pub fn standalone_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				chain_id,
 				DEFAULT_DKG_KEYGEN_THRESHOLD,
 				DEFAULT_DKG_SIGNATURE_THRESHOLD,
-				develop::get_distribution(),
+				combine_distributions(vec![
+					develop::get_distribution(),
+					testnet::get_distribution(),
+				]),
 				true,
 			)
 		},
@@ -505,7 +520,10 @@ pub fn standalone_local_config(chain_id: u64) -> Result<ChainSpec, String> {
 				chain_id,
 				DEFAULT_DKG_KEYGEN_THRESHOLD,
 				DEFAULT_DKG_SIGNATURE_THRESHOLD,
-				develop::get_distribution(),
+				combine_distributions(vec![
+					develop::get_distribution(),
+					testnet::get_distribution(),
+				]),
 				true,
 			)
 		},
