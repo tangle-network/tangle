@@ -452,7 +452,7 @@ pub async fn new_full(
 		})
 	};
 
-	spawn_frontier_tasks::<tangle_runtime::RuntimeApi, ExecutorDispatch>(
+	spawn_frontier_tasks(
 		&task_manager,
 		client.clone(),
 		backend.clone(),

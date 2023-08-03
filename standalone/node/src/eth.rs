@@ -20,11 +20,9 @@ use std::{
 
 use futures::{future, prelude::*};
 // Substrate
-use sc_client_api::{BlockchainEvents, StateBackendFor};
-use sc_executor::NativeExecutionDispatch;
+use sc_client_api::BlockchainEvents;
 use sc_network_sync::SyncingService;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
-use sp_api::ConstructRuntimeApi;
 use sp_runtime::traits::BlakeTwo256;
 // Frontier
 pub use fc_consensus::FrontierBlockImport;
@@ -197,7 +195,7 @@ where
 }
 
 #[allow(clippy::too_many_arguments)]
-pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
+pub async fn spawn_frontier_tasks(
 	task_manager: &TaskManager,
 	client: Arc<FullClient>,
 	backend: Arc<FullBackend>,
@@ -212,13 +210,7 @@ pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
 			fc_mapping_sync::EthereumBlockNotification<Block>,
 		>,
 	>,
-) where
-	RuntimeApi: ConstructRuntimeApi<Block, FullClient>,
-	RuntimeApi: Send + Sync + 'static,
-	RuntimeApi::RuntimeApi:
-		EthCompatRuntimeApiCollection<StateBackend = StateBackendFor<FullBackend, Block>>,
-	Executor: NativeExecutionDispatch + 'static,
-{
+) {
 	// Spawn main mapping sync worker background task.
 	match frontier_backend {
 		fc_db::Backend::KeyValue(b) => {
