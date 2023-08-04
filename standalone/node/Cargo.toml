@@ -124,3 +124,4 @@ rocksdb = [
  "fc-rpc/rocksdb",
 ]
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]
+txpool = ["fc-rpc/txpool"]
