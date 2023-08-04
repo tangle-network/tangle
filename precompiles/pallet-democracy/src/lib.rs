@@ -24,6 +24,7 @@ use frame_support::{
 	dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo},
 	traits::{Bounded, ConstU32, Currency, QueryPreimage},
 };
+use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_democracy::{
 	AccountVote, Call as DemocracyCall, Conviction, ReferendumInfo, Vote, VoteThreshold,
 };
@@ -91,7 +92,7 @@ where
 	Runtime::RuntimeCall: From<DemocracyCall<Runtime>>,
 	Runtime::RuntimeCall: From<PreimageCall<Runtime>>,
 	Runtime::Hash: From<H256> + Into<H256>,
-	Runtime::BlockNumber: Into<U256>,
+	BlockNumberFor<Runtime>: Into<U256>,
 {
 	// The accessors are first. They directly return their result.
 	#[precompile::public("publicPropCount()")]

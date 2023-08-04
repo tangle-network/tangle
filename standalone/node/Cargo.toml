@@ -33,7 +33,7 @@ log = { workspace = true }
 rand = { workspace = true }
 
 # Light client dependencies
-consensus-types = { workspace = true }
+webb-consensus-types = {workspace = true}
 
 # DKG dependencies
 dkg-gadget = { workspace = true }
@@ -46,10 +46,10 @@ webb-relayer-gadget-cli = { workspace = true }
 # Substrate dependencies
 sc-cli = { workspace = true }
 sc-executor = { workspace = true }
+sc-offchain = { workspace = true }
 sc-keystore = { workspace = true }
 sc-service = { workspace = true }
 sp-core = { workspace = true }
-
 frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 frame-system = { workspace = true }
@@ -124,3 +124,4 @@ rocksdb = [
  "fc-rpc/rocksdb",
 ]
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]
+txpool = ["fc-rpc/txpool"]

@@ -17,7 +17,6 @@ use std::{collections::BTreeMap, marker::PhantomData};
 use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
-use consensus_types::network_config::{Network, NetworkConfig};
 use dkg_runtime_primitives::{ResourceId, TypedChainId};
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -29,10 +28,11 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 use std::str::FromStr;
 use tangle_runtime::{
 	AccountId, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId, DKGProposalsConfig,
-	EVMChainIdConfig, EVMConfig, ElectionsConfig, Eth2ClientConfig, GenesisConfig, ImOnlineConfig,
-	MaxNominations, Perbill, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
-	SystemConfig, UNIT, WASM_BINARY,
+	EVMChainIdConfig, EVMConfig, ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxNominations,
+	Perbill, RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig,
+	SudoConfig, SystemConfig, UNIT, WASM_BINARY,
 };
+use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -58,7 +58,7 @@ const DEFAULT_DKG_KEYGEN_THRESHOLD: u16 = 5;
 const DEFAULT_DKG_SIGNATURE_THRESHOLD: u16 = 3;
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
-pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
+pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
 
 /// Generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -531,7 +531,7 @@ fn testnet_genesis(
 	dkg_keygen_threshold: u16,
 	dkg_signature_threshold: u16,
 	_enable_println: bool,
-) -> GenesisConfig {
+) -> RuntimeGenesisConfig {
 	const ENDOWMENT: Balance = 10_000_000 * UNIT;
 	const STASH: Balance = ENDOWMENT / 100;
 
@@ -554,10 +554,11 @@ fn testnet_genesis(
 		.collect::<Vec<_>>();
 
 	let num_endowed_accounts = endowed_accounts.len();
-	GenesisConfig {
+	RuntimeGenesisConfig {
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
 			code: wasm_binary.to_vec(),
+			..Default::default()
 		},
 		claims: ClaimsConfig { claims: vec![], vesting: vec![], expiry: None },
 		sudo: SudoConfig { key: Some(root_key) },
@@ -620,7 +621,7 @@ fn testnet_genesis(
 		nomination_pools: Default::default(),
 		transaction_payment: Default::default(),
 		// EVM compatibility
-		evm_chain_id: EVMChainIdConfig { chain_id },
+		evm_chain_id: EVMChainIdConfig { chain_id, ..Default::default() },
 		evm: EVMConfig {
 			accounts: {
 				let mut map = BTreeMap::new();
@@ -745,6 +746,7 @@ fn testnet_genesis(
 				);
 				map
 			},
+			..Default::default()
 		},
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
