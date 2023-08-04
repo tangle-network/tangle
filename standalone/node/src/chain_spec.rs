@@ -554,13 +554,6 @@ fn testnet_genesis(
 		.collect::<Vec<_>>();
 
 	let num_endowed_accounts = endowed_accounts.len();
-	let eth2_mainnet_network_config: NetworkConfig =
-		NetworkConfig::new(&Network::from_str("mainnet").unwrap());
-	let eth2_goerli_network_config: NetworkConfig =
-		NetworkConfig::new(&Network::from_str("goerli").unwrap());
-	// (TypedChainId, [u8; 32], ForkVersion, u64)
-	let _eth2_mainnet_genesis_config = (TypedChainId::Evm(1), eth2_mainnet_network_config);
-	let _eth2_goerli_genesis_config = (TypedChainId::Evm(5), eth2_goerli_network_config);
 	RuntimeGenesisConfig {
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
