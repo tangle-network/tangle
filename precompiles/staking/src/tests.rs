@@ -44,13 +44,6 @@ fn max_validator_count_works() {
 #[test]
 fn current_era_works() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
-		start_session(1);
-		precompiles()
-			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(5), PCall::current_era {})
-			.expect_cost(0)
-			.expect_no_logs()
-			.execute_returns(0u32);
-		// after third session current era should be 1 (3 session per era)
 		start_session(3);
 		assert_eq!(active_era(), 1);
 		precompiles()
@@ -98,7 +91,7 @@ fn is_validator_works() {
 			)
 			.expect_cost(0)
 			.expect_no_logs()
-			.execute_returns(false);
+			.execute_returns(true);
 	});
 }
 

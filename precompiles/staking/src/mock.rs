@@ -20,13 +20,14 @@
 use super::*;
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{Everything, GenesisBuild, OnFinalize, OnInitialize, U128CurrencyToVote},
+	traits::{Everything, OnFinalize, OnInitialize},
 	weights::Weight,
 	BasicExternalities,
 };
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use precompile_utils::precompile_set::*;
+use sp_staking::currency_to_vote::U128CurrencyToVote;
 use std::{sync::Arc, vec};
 
 use pallet_session::historical as pallet_session_historical;
@@ -53,7 +54,7 @@ use sp_runtime::{
 		self, BlakeTwo256, ConvertInto, Extrinsic as ExtrinsicT, IdentifyAccount, IdentityLookup,
 		OpaqueKeys, Verify, Zero,
 	},
-	AccountId32, Perbill, Percent,
+	AccountId32, BuildStorage, Perbill, Percent,
 };
 
 pub use dkg_runtime_primitives::{
@@ -74,7 +75,6 @@ pub type SessionIndex = u32;
 
 pub const BLOCK_TIME: u64 = 1000;
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Runtime>;
 type Block = frame_system::mocking::MockBlock<Runtime>;
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
@@ -191,18 +191,14 @@ impl From<TestAccount> for sp_core::sr25519::Public {
 }
 
 construct_runtime!(
-	pub enum Runtime where
-		Block = Block,
-		NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic,
-	{
-		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
-		Evm: pallet_evm::{Pallet, Call, Storage, Event<T>},
-		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
-		DKGMetadata: pallet_dkg_metadata::{Pallet, Call, Config<T>, Event<T>, Storage},
-		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
-		Staking: pallet_staking::{Pallet, Call, Storage, Config<T>, Event<T>},
+	pub enum Runtime {
+		System: frame_system,
+		Balances: pallet_balances,
+		Evm: pallet_evm,
+		Timestamp: pallet_timestamp,
+		DKGMetadata: pallet_dkg_metadata,
+		Session: pallet_session,
+		Staking: pallet_staking,
 		Historical: pallet_session_historical,
 	}
 );
@@ -269,14 +265,13 @@ impl frame_system::Config for Runtime {
 	type BaseCallFilter = Everything;
 	type DbWeight = ();
 	type RuntimeOrigin = RuntimeOrigin;
-	type Index = u64;
-	type BlockNumber = BlockNumber;
+	type Nonce = u64;
+	type Block = Block;
 	type RuntimeCall = RuntimeCall;
 	type Hash = H256;
 	type Hashing = BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = IdentityLookup<AccountId>;
-	type Header = sp_runtime::generic::Header<BlockNumber, BlakeTwo256>;
 	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
@@ -302,7 +297,7 @@ impl pallet_balances::Config for Runtime {
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = System;
 	type WeightInfo = ();
-	type HoldIdentifier = ();
+	type RuntimeHoldReason = RuntimeHoldReason;
 	type MaxHolds = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
@@ -432,7 +427,7 @@ impl pallet_staking::Config for Runtime {
 	type MaxUnlockingChunks = MaxUnlockingChunks;
 	type HistoryDepth = HistoryDepth;
 	type BenchmarkingConfig = TestBenchmarkingConfig;
-	type OnStakerSlash = ();
+	type EventListeners = ();
 	type WeightInfo = ();
 }
 
@@ -485,7 +480,9 @@ pub fn new_test_ext(ids: Vec<u8>) -> TestExternalities {
 }
 
 pub fn new_test_ext_raw_authorities(authorities: Vec<(AccountId, DKGId)>) -> TestExternalities {
-	let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
+	let mut t = frame_system::GenesisConfig::<Runtime>::default()
+		.build_storage()
+		.expect("Frame system builds valid default genesis config");
 
 	let balances: Vec<_> = authorities.iter().map(|i| (i.0, 10_000_000_000)).collect();
 
