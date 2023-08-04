@@ -15,7 +15,7 @@ parity-scale-codec = { workspace = true, features = ["derive", "max-encoded-len"
 
 rustc-hex = { workspace = true }
 scale-info = { workspace = true }
-serde = { workspace = true, optional = true }
+serde = { workspace = true }
 
 frame-support = { workspace = true }
 frame-system = { workspace = true }
@@ -36,17 +36,17 @@ serde_json = { workspace = true }
 [features]
 default = ["std"]
 std = [
- "serde",
- "rustc-hex/std",
- "parity-scale-codec/std",
- "scale-info/std",
- "frame-support/std",
- "frame-system/std",
- "sp-runtime/std",
- "sp-std/std",
- "sp-io/std",
- "libsecp256k1/std",
- "pallet-vesting/std",
- "pallet-balances/std",
+  "serde/std",
+  "rustc-hex/std",
+  "parity-scale-codec/std",
+  "scale-info/std",
+  "frame-support/std",
+  "frame-system/std",
+  "sp-runtime/std",
+  "sp-std/std",
+  "sp-io/std",
+  "libsecp256k1/std",
+  "pallet-vesting/std",
+  "pallet-balances/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
