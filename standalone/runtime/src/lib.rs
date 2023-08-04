@@ -102,7 +102,7 @@ pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 pub use tangle_primitives::{
 	currency::*, fee::*, time::*, AccountId, AccountIndex, Address, Balance, BlockNumber, Hash,
 	Header, Index, Moment, Reputation, Signature, AVERAGE_ON_INITIALIZE_RATIO,
-	EPOCH_DURATION_IN_BLOCKS, NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS,
+	EPOCH_DURATION_IN_BLOCKS, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS,
 	UNSIGNED_PROPOSAL_EXPIRY,
 };
 
@@ -119,7 +119,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-standalone"),
 	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
-	spec_version: 308, // v0.3.8
+	spec_version: 309, // v0.3.9
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -137,10 +137,6 @@ pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-/// We allow for 2500ms of compute with a 6 second average block time.
-pub const WEIGHT_MILLISECS_PER_BLOCK: u64 = 2500;
-pub const MAXIMUM_BLOCK_WEIGHT: Weight =
-	Weight::from_parts(WEIGHT_MILLISECS_PER_BLOCK * WEIGHT_REF_TIME_PER_MILLIS, u64::MAX);
 pub const MAXIMUM_BLOCK_LENGTH: u32 = 5 * 1024 * 1024;
 
 parameter_types! {
@@ -1701,6 +1697,104 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl rpc_primitives_debug::DebugRuntimeApi<Block> for Runtime {
+		fn trace_transaction(
+			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
+			traced_transaction: &EthereumTransaction,
+		) -> Result<
+			(),
+			sp_runtime::DispatchError,
+		> {
+			#[cfg(feature = "evm-tracing")]
+			{
+				use evm_tracer::tracer::EvmTracer;
+				// Apply the a subset of extrinsics: all the substrate-specific or ethereum
+				// transactions that preceded the requested transaction.
+				for ext in extrinsics.into_iter() {
+					let _ = match &ext.0.function {
+						RuntimeCall::Ethereum(transact { transaction }) => {
+							if transaction == traced_transaction {
+								EvmTracer::new().trace(|| Executive::apply_extrinsic(ext));
+								return Ok(());
+							} else {
+								Executive::apply_extrinsic(ext)
+							}
+						}
+						_ => Executive::apply_extrinsic(ext),
+					};
+				}
+				Ok(())
+			}
+			#[cfg(not(feature = "evm-tracing"))]
+			Err(sp_runtime::DispatchError::Other(
+				"Missing `evm-tracing` compile time feature flag.",
+			))
+		}
+
+		fn trace_block(
+			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
+			known_transactions: Vec<H256>,
+		) -> Result<
+			(),
+			sp_runtime::DispatchError,
+		> {
+			#[cfg(feature = "evm-tracing")]
+			{
+				use evm_tracer::tracer::EvmTracer;
+
+				let mut config = <Runtime as pallet_evm::Config>::config().clone();
+				config.estimate = true;
+
+				// Apply all extrinsics. Ethereum extrinsics are traced.
+				for ext in extrinsics.into_iter() {
+					match &ext.0.function {
+						RuntimeCall::Ethereum(transact { transaction }) => {
+							if known_transactions.contains(&transaction.hash()) {
+								// Each known extrinsic is a new call stack.
+								EvmTracer::emit_new();
+								EvmTracer::new().trace(|| Executive::apply_extrinsic(ext));
+							} else {
+								let _ = Executive::apply_extrinsic(ext);
+							}
+						}
+						_ => {
+							let _ = Executive::apply_extrinsic(ext);
+						}
+					};
+				}
+
+				Ok(())
+			}
+			#[cfg(not(feature = "evm-tracing"))]
+			Err(sp_runtime::DispatchError::Other(
+				"Missing `evm-tracing` compile time feature flag.",
+			))
+		}
+	}
+
+	impl rpc_primitives_txpool::TxPoolRuntimeApi<Block> for Runtime {
+		fn extrinsic_filter(
+			xts_ready: Vec<<Block as BlockT>::Extrinsic>,
+			xts_future: Vec<<Block as BlockT>::Extrinsic>,
+		) -> rpc_primitives_txpool::TxPoolResponse {
+			rpc_primitives_txpool::TxPoolResponse {
+				ready: xts_ready
+					.into_iter()
+					.filter_map(|xt| match xt.0.function {
+						RuntimeCall::Ethereum(transact { transaction }) => Some(transaction),
+						_ => None,
+					})
+					.collect(),
+				future: xts_future
+					.into_iter()
+					.filter_map(|xt| match xt.0.function {
+						RuntimeCall::Ethereum(transact { transaction }) => Some(transaction),
+						_ => None,
+					})
+					.collect(),
+			}
+		}
+	}
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
 		fn benchmark_metadata(extra: bool) -> (

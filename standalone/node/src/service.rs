@@ -17,8 +17,8 @@
 
 pub use crate::eth::{db_config_dir, EthConfiguration};
 use crate::eth::{
-	new_frontier_partial, spawn_frontier_tasks, BackendType, FrontierBackend, FrontierBlockImport,
-	FrontierPartialComponents,
+	new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, FrontierBackend,
+	FrontierBlockImport, FrontierPartialComponents, RpcConfig,
 };
 use dkg_gadget::debug_logger::DebugLogger;
 use futures::{channel::mpsc, FutureExt};
@@ -55,10 +55,11 @@ pub struct ExecutorDispatch;
 impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 	/// Only enable the benchmarking host functions when we actually want to benchmark.
 	#[cfg(feature = "runtime-benchmarks")]
-	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
+	type ExtendHostFunctions =
+		(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
 	/// Otherwise we only use the default Substrate host functions.
 	#[cfg(not(feature = "runtime-benchmarks"))]
-	type ExtendHostFunctions = ();
+	type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
 		tangle_runtime::api::dispatch(method, data)
@@ -280,12 +281,13 @@ pub fn new_partial(
 pub struct RunFullParams {
 	pub config: Configuration,
 	pub eth_config: EthConfiguration,
+	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
 	pub relayer_cmd: webb_relayer_gadget_cli::WebbRelayerCmd,
 }
 /// Builds a new service for a full client.
 pub async fn new_full(
-	RunFullParams { mut config, eth_config, debug_output, relayer_cmd }: RunFullParams,
+	RunFullParams { mut config, eth_config, rpc_config, debug_output, relayer_cmd }: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -384,6 +386,22 @@ pub async fn new_full(
 
 	// for ethereum-compatibility rpc.
 	config.rpc_id_provider = Some(Box::new(fc_rpc::EthereumSubIdProvider));
+
+	let ethapi_cmd = rpc_config.ethapi.clone();
+	let tracing_requesters =
+		if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
+			crate::rpc::tracing::spawn_tracing_tasks(
+				&task_manager,
+				client.clone(),
+				backend.clone(),
+				frontier_backend.clone(),
+				overrides.clone(),
+				&rpc_config,
+				prometheus_registry.clone(),
+			)
+		} else {
+			crate::rpc::tracing::RpcRequesters { debug: None, trace: None }
+		};
 	let eth_rpc_params = crate::rpc::EthDeps {
 		client: client.clone(),
 		pool: transaction_pool.clone(),
@@ -411,13 +429,16 @@ pub async fn new_full(
 		fee_history_cache_limit,
 		execute_gas_limit_multiplier: eth_config.execute_gas_limit_multiplier,
 		forced_parent_hashes: None,
+		tracing_config: Some(crate::rpc::eth::TracingConfig {
+			tracing_requesters: tracing_requesters.clone(),
+			trace_filter_max_count: rpc_config.ethapi_trace_max_count,
+		}),
 	};
 
 	let rpc_builder = {
 		let client = client.clone();
 		let pool = transaction_pool.clone();
 		let pubsub_notification_sinks = pubsub_notification_sinks.clone();
-
 		Box::new(move |deny_unsafe, subscription_task_executor| {
 			let deps = crate::rpc::FullDeps {
 				client: client.clone(),
@@ -426,17 +447,25 @@ pub async fn new_full(
 				command_sink: Some(command_sink.clone()),
 				eth: eth_rpc_params.clone(),
 			};
-
-			crate::rpc::create_full(
-				deps,
-				subscription_task_executor,
-				pubsub_notification_sinks.clone(),
-			)
-			.map_err(Into::into)
+			if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
+				crate::rpc::create_full(
+					deps,
+					subscription_task_executor,
+					pubsub_notification_sinks.clone(),
+				)
+				.map_err(Into::into)
+			} else {
+				crate::rpc::create_full(
+					deps,
+					subscription_task_executor,
+					pubsub_notification_sinks.clone(),
+				)
+				.map_err(Into::into)
+			}
 		})
 	};
 
-	spawn_frontier_tasks::<tangle_runtime::RuntimeApi, ExecutorDispatch>(
+	spawn_frontier_tasks(
 		&task_manager,
 		client.clone(),
 		backend.clone(),
@@ -497,8 +526,7 @@ pub async fn new_full(
 			webb_relayer_gadget::start_relayer_gadget(relayer_params),
 		);
 	}
-
-	let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
+	let params = sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),
 		keystore: keystore_container.keystore(),
@@ -511,7 +539,8 @@ pub async fn new_full(
 		sync_service: sync_service.clone(),
 		config,
 		telemetry: telemetry.as_mut(),
-	})?;
+	};
+	let _rpc_handlers = sc_service::spawn_tasks(params)?;
 
 	if role.is_authority() {
 		let proposer_factory = sc_basic_authorship::ProposerFactory::new(

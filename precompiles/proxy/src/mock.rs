@@ -274,7 +274,7 @@ impl ExtBuilder {
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
 
-		pallet_balances::GenesisConfig::<Runtime> { balances: self.balances.clone() }
+		pallet_balances::GenesisConfig::<Runtime> { balances: self.balances }
 			.assimilate_storage(&mut t)
 			.expect("Pallet balances storage can be assimilated");
 

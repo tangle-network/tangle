@@ -127,29 +127,33 @@ pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-preimage = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
 
+evm-tracer = { workspace = true }
+rpc-primitives-debug = { workspace = true }
+rpc-primitives-txpool = { workspace = true }
+
 [features]
-default = ["std", "with-rocksdb-weights"]
+default = ["std", "with-rocksdb-weights", "evm-tracing"]
 runtime-benchmarks = [
-  "hex-literal",
-  "frame-benchmarking",
-  "frame-system-benchmarking",
-  "frame-support/runtime-benchmarks",
-  "frame-system/runtime-benchmarks",
-  "pallet-balances/runtime-benchmarks",
-  "pallet-vesting/runtime-benchmarks",
-  "pallet-collective/runtime-benchmarks",
-  "pallet-timestamp/runtime-benchmarks",
-  "sp-runtime/runtime-benchmarks",
+ "hex-literal",
+ "frame-benchmarking",
+ "frame-system-benchmarking",
+ "frame-support/runtime-benchmarks",
+ "frame-system/runtime-benchmarks",
+ "pallet-balances/runtime-benchmarks",
+ "pallet-vesting/runtime-benchmarks",
+ "pallet-collective/runtime-benchmarks",
+ "pallet-timestamp/runtime-benchmarks",
+ "sp-runtime/runtime-benchmarks",
 
-  # dkg deps
-  "pallet-dkg-metadata/runtime-benchmarks",
-  "pallet-dkg-proposals/runtime-benchmarks",
-  "pallet-dkg-proposal-handler/runtime-benchmarks",
+ # dkg deps
+ "pallet-dkg-metadata/runtime-benchmarks",
+ "pallet-dkg-proposals/runtime-benchmarks",
+ "pallet-dkg-proposal-handler/runtime-benchmarks",
 
-  # Frontier
-  "pallet-ethereum/runtime-benchmarks",
-  "pallet-evm/runtime-benchmarks",
-  "pallet-hotfix-sufficients/runtime-benchmarks",
+ # Frontier
+ "pallet-ethereum/runtime-benchmarks",
+ "pallet-evm/runtime-benchmarks",
+ "pallet-hotfix-sufficients/runtime-benchmarks",
 ]
 
 std = [
@@ -207,53 +211,53 @@ std = [
   "pallet-identity/std",
   "pallet-bridge-registry/std",
 
-  # DKG
-  "pallet-dkg-metadata/std",
-  "dkg-runtime-primitives/std",
-  "pallet-dkg-proposals/std",
-  "pallet-dkg-proposal-handler/std",
+ # DKG
+ "pallet-dkg-metadata/std",
+ "dkg-runtime-primitives/std",
+ "pallet-dkg-proposals/std",
+ "pallet-dkg-proposal-handler/std",
 
-  # Webb dependencies
-  "tangle-primitives/std",
+ # Webb dependencies
+ "tangle-primitives/std",
 
-  # ETH2 light-client
-  "pallet-eth2-light-client/std",
+ # ETH2 light-client
+ "pallet-eth2-light-client/std",
 
-  # Frontier
-  "fp-account/std",
-  "fp-evm/std",
-  "fp-rpc/std",
-  "fp-self-contained/std",
+ # Frontier
+ "fp-account/std",
+ "fp-evm/std",
+ "fp-rpc/std",
+ "fp-self-contained/std",
 
-  # Frontier FRAME
-  "pallet-base-fee/std",
-  "pallet-dynamic-fee/std",
-  "pallet-ethereum/std",
-  "pallet-evm/std",
-  "pallet-evm-chain-id/std",
-  "pallet-evm-precompile-modexp/std",
-  "pallet-evm-precompile-sha3fips/std",
-  "pallet-evm-precompile-simple/std",
-  "pallet-evm-precompile-blake2/std",
-  "pallet-evm-precompile-bn128/std",
-  "pallet-evm-precompile-curve25519/std",
-  "pallet-evm-precompile-dispatch/std",
-  "pallet-evm-precompile-ed25519/std",
-  "pallet-hotfix-sufficients/std",
-  "precompile-utils/std",
+ # Frontier FRAME
+ "pallet-base-fee/std",
+ "pallet-dynamic-fee/std",
+ "pallet-ethereum/std",
+ "pallet-evm/std",
+ "pallet-evm-chain-id/std",
+ "pallet-evm-precompile-modexp/std",
+ "pallet-evm-precompile-sha3fips/std",
+ "pallet-evm-precompile-simple/std",
+ "pallet-evm-precompile-blake2/std",
+ "pallet-evm-precompile-bn128/std",
+ "pallet-evm-precompile-curve25519/std",
+ "pallet-evm-precompile-dispatch/std",
+ "pallet-evm-precompile-ed25519/std",
+ "pallet-hotfix-sufficients/std",
+ "precompile-utils/std",
+ "evm-tracer/std",
+ "rpc-primitives-debug/std",
+ "rpc-primitives-txpool/std",
 
-  # Moonbeam precompiles
-  "pallet-evm-precompile-preimage/std",
-  "pallet-evm-precompile-batch/std",
-  "pallet-evm-precompile-call-permit/std",
-  "pallet-evm-precompile-proxy/std",
-  "pallet-evm-precompile-democracy/std",
-  "pallet-evm-precompile-registry/std",
-
-
-
-
+ # Moonbeam precompiles
+ "pallet-evm-precompile-preimage/std",
+ "pallet-evm-precompile-batch/std",
+ "pallet-evm-precompile-call-permit/std",
+ "pallet-evm-precompile-proxy/std",
+ "pallet-evm-precompile-democracy/std",
+ "pallet-evm-precompile-registry/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
 with-paritydb-weights = []
+evm-tracing = []

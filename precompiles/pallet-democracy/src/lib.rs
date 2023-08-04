@@ -368,7 +368,7 @@ where
 		);
 
 		let to = Runtime::AddressMapping::into_account_id(representative.into());
-		let to: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(to.clone());
+		let to: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(to);
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = DemocracyCall::<Runtime>::delegate { to, conviction, balance: amount };
 
@@ -404,8 +404,7 @@ where
 	fn unlock(handle: &mut impl PrecompileHandle, target: Address) -> EvmResult {
 		let target: H160 = target.into();
 		let target = Runtime::AddressMapping::into_account_id(target);
-		let target: <Runtime::Lookup as StaticLookup>::Source =
-			Runtime::Lookup::unlookup(target.clone());
+		let target: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(target);
 
 		log::trace!(
 			target: "democracy-precompile",

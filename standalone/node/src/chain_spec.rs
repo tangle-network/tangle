@@ -17,6 +17,7 @@ use std::{collections::BTreeMap, marker::PhantomData};
 use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
+use consensus_types::network_config::{Network, NetworkConfig};
 use dkg_runtime_primitives::{ResourceId, TypedChainId};
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -619,7 +620,10 @@ fn testnet_genesis(
 		im_online: ImOnlineConfig { keys: vec![] },
 		eth_2_client: Eth2ClientConfig {
 			// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
-			networks: vec![eth2_mainnet_genesis_config, eth2_goerli_genesis_config],
+			networks: vec![
+				(TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+				(TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+			],
 			phantom: PhantomData,
 		},
 		nomination_pools: Default::default(),

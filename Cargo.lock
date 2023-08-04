@@ -778,7 +778,7 @@ version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6d7b9decdf35d8908a7e3ef02f64c5e9b1695e230154c0e8de3969142d9b94c"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "pharos",
  "rustc_version 0.4.0",
 ]
@@ -1622,6 +1622,20 @@ name = "clap_lex"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2da6da31387c7e4ef160ffab6d5e7f00c42626fe39aea70a7b0f1773f7dd6c1b"
+
+[[package]]
+name = "client-evm-tracing"
+version = "0.1.0"
+dependencies = [
+ "ethereum-types",
+ "evm-tracing-events",
+ "hex",
+ "parity-scale-codec",
+ "rpc-primitives-debug",
+ "serde",
+ "serde_json",
+ "sp-std 5.0.0",
+]
 
 [[package]]
 name = "cloudabi"
@@ -2695,7 +2709,7 @@ dependencies = [
  "dkg-mock-blockchain",
  "dkg-primitives",
  "dkg-runtime-primitives",
- "futures",
+ "futures 0.3.28",
  "hex",
  "itertools 0.10.5",
  "lazy_static",
@@ -2759,7 +2773,7 @@ dependencies = [
  "bytes",
  "dkg-logging",
  "dkg-runtime-primitives",
- "futures",
+ "futures 0.3.28",
  "humantime-serde",
  "log",
  "parity-scale-codec",
@@ -3518,9 +3532,9 @@ dependencies = [
  "auto_impl",
  "environmental",
  "ethereum",
- "evm-core 0.39.0 (git+https://github.com/rust-blockchain/evm?rev=b7b82c7e1fc57b7449d6dfa6826600de37cc1e65)",
+ "evm-core",
  "evm-gasometer",
- "evm-runtime 0.39.0 (git+https://github.com/rust-blockchain/evm?rev=b7b82c7e1fc57b7449d6dfa6826600de37cc1e65)",
+ "evm-runtime",
  "log",
  "parity-scale-codec",
  "primitive-types",
@@ -3528,15 +3542,6 @@ dependencies = [
  "scale-info",
  "serde",
  "sha3 0.10.8",
-]
-
-[[package]]
-name = "evm-core"
-version = "0.39.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f1f13264b044cb66f0602180f0bc781c29accb41ff560669a3ec15858d5b606"
-dependencies = [
- "primitive-types",
 ]
 
 [[package]]
@@ -3556,21 +3561,9 @@ version = "0.39.0"
 source = "git+https://github.com/rust-blockchain/evm?rev=b7b82c7e1fc57b7449d6dfa6826600de37cc1e65#b7b82c7e1fc57b7449d6dfa6826600de37cc1e65"
 dependencies = [
  "environmental",
- "evm-core 0.39.0 (git+https://github.com/rust-blockchain/evm?rev=b7b82c7e1fc57b7449d6dfa6826600de37cc1e65)",
- "evm-runtime 0.39.0 (git+https://github.com/rust-blockchain/evm?rev=b7b82c7e1fc57b7449d6dfa6826600de37cc1e65)",
+ "evm-core",
+ "evm-runtime",
  "primitive-types",
-]
-
-[[package]]
-name = "evm-runtime"
-version = "0.39.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2aa5b32f59ec582a5651978004e5c784920291263b7dcb6de418047438e37f4f"
-dependencies = [
- "auto_impl",
- "evm-core 0.39.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "primitive-types",
- "sha3 0.10.8",
 ]
 
 [[package]]
@@ -3580,9 +3573,42 @@ source = "git+https://github.com/rust-blockchain/evm?rev=b7b82c7e1fc57b7449d6dfa
 dependencies = [
  "auto_impl",
  "environmental",
- "evm-core 0.39.0 (git+https://github.com/rust-blockchain/evm?rev=b7b82c7e1fc57b7449d6dfa6826600de37cc1e65)",
+ "evm-core",
  "primitive-types",
  "sha3 0.10.8",
+]
+
+[[package]]
+name = "evm-tracer"
+version = "0.1.0"
+dependencies = [
+ "ethereum-types",
+ "evm",
+ "evm-gasometer",
+ "evm-runtime",
+ "evm-tracing-events",
+ "fp-evm",
+ "pallet-evm",
+ "parity-scale-codec",
+ "primitives-ext",
+ "sp-core 7.0.0",
+ "sp-io 7.0.0",
+ "sp-runtime 7.0.0",
+ "sp-std 5.0.0",
+]
+
+[[package]]
+name = "evm-tracing-events"
+version = "0.1.0"
+dependencies = [
+ "environmental",
+ "ethereum",
+ "ethereum-types",
+ "evm",
+ "evm-gasometer",
+ "evm-runtime",
+ "parity-scale-codec",
+ "sp-runtime-interface 7.0.0",
 ]
 
 [[package]]
@@ -3591,7 +3617,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e43f2f1833d64e33f15592464d6fdd70f349dda7b1a53088eb83cd94014008c5"
 dependencies = [
- "futures",
+ "futures 0.3.28",
 ]
 
 [[package]]
@@ -3695,7 +3721,7 @@ dependencies = [
  "fp-consensus",
  "fp-rpc",
  "fp-storage",
- "futures",
+ "futures 0.3.28",
  "kvdb-rocksdb",
  "log",
  "parity-db",
@@ -3723,7 +3749,7 @@ dependencies = [
  "fc-storage",
  "fp-consensus",
  "fp-rpc",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "log",
  "parking_lot 0.12.1",
@@ -3753,7 +3779,7 @@ dependencies = [
  "fp-evm",
  "fp-rpc",
  "fp-storage",
- "futures",
+ "futures 0.3.28",
  "hex",
  "jsonrpsee",
  "libsecp256k1",
@@ -3908,7 +3934,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "36530797b9bf31cd4ff126dcfee8170f86b00cfdcea3269d73133cc0415945c3"
 dependencies = [
  "either",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "log",
  "num-traits",
@@ -4431,6 +4457,12 @@ checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
 
 [[package]]
 name = "futures"
+version = "0.1.31"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a471a38ef8ed83cd6e40aa59c1ffe17db6855c18e3604d9c4ed8c08ebc28678"
+
+[[package]]
+name = "futures"
 version = "0.3.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23342abe12aba583913b2e62f22225ff9c950774065e4bfb61a19cd9770fec40"
@@ -4564,6 +4596,7 @@ version = "0.3.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26b01e40b772d54cf6c6d721c1d1abd0647a0106a12ecaa1c186273392a69533"
 dependencies = [
+ "futures 0.1.31",
  "futures-channel",
  "futures-core",
  "futures-io",
@@ -5147,7 +5180,7 @@ dependencies = [
  "async-io",
  "core-foundation",
  "fnv",
- "futures",
+ "futures 0.3.28",
  "if-addrs",
  "ipnet",
  "log",
@@ -5651,7 +5684,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f210d259724eae82005b5c48078619b7745edb7b76de370b03f8ba59ea103097"
 dependencies = [
  "bytes",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "getrandom 0.2.10",
  "instant",
@@ -5710,7 +5743,7 @@ checksum = "3c1df63c0b582aa434fb09b2d86897fa2b419ffeccf934b36f87fcedc8e835c2"
 dependencies = [
  "either",
  "fnv",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "instant",
  "libp2p-identity",
@@ -5736,7 +5769,7 @@ version = "0.39.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "146ff7034daae62077c415c2376b8057368042df6ab95f5432ad5e88568b1554"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "libp2p-core",
  "log",
  "parking_lot 0.12.1",
@@ -5752,7 +5785,7 @@ checksum = "5455f472243e63b9c497ff320ded0314254a9eb751799a39c283c6f20b793f3c"
 dependencies = [
  "asynchronous-codec",
  "either",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "libp2p-core",
  "libp2p-identity",
@@ -5795,7 +5828,7 @@ dependencies = [
  "bytes",
  "either",
  "fnv",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -5819,7 +5852,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19983e1f949f979a928f2c603de1cf180cc0dc23e4ac93a62651ccb18341460b"
 dependencies = [
  "data-encoding",
- "futures",
+ "futures 0.3.28",
  "if-watch",
  "libp2p-core",
  "libp2p-identity",
@@ -5855,7 +5888,7 @@ checksum = "9c3673da89d29936bc6435bafc638e2f184180d554ce844db65915113f86ec5e"
 dependencies = [
  "bytes",
  "curve25519-dalek 3.2.0",
- "futures",
+ "futures 0.3.28",
  "libp2p-core",
  "libp2p-identity",
  "log",
@@ -5877,7 +5910,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e57759c19c28a73ef1eb3585ca410cefb72c1a709fcf6de1612a378e4219202"
 dependencies = [
  "either",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -5894,7 +5927,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c6b26abd81cd2398382a1edfe739b539775be8a90fa6914f39b2ab49571ec735"
 dependencies = [
  "bytes",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "if-watch",
  "libp2p-core",
@@ -5916,7 +5949,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ffdb374267d42dc5ed5bc53f6e601d4a64ac5964779c6e40bb9e4f14c1e30d5"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.28",
  "instant",
  "libp2p-core",
  "libp2p-identity",
@@ -5933,7 +5966,7 @@ checksum = "903b3d592d7694e56204d211f29d31bc004be99386644ba8731fc3e3ef27b296"
 dependencies = [
  "either",
  "fnv",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -5963,7 +5996,7 @@ version = "0.39.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33d33698596d7722d85d3ab0c86c2c322254fce1241e91208e3679b4eb3026cf"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "if-watch",
  "libc",
@@ -5979,7 +6012,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ff08d13d0dc66e5e9ba6279c1de417b84fa0d0adc3b03e5732928c180ec02781"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "futures-rustls",
  "libp2p-core",
  "libp2p-identity",
@@ -5998,7 +6031,7 @@ version = "0.39.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77dff9d32353a5887adb86c8afc1de1a94d9e8c3bc6df8b2201d7cdf5c848f43"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "js-sys",
  "libp2p-core",
  "parity-send-wrapper",
@@ -6015,7 +6048,7 @@ dependencies = [
  "async-trait",
  "asynchronous-codec",
  "bytes",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "hex",
  "if-watch",
@@ -6044,7 +6077,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "111273f7b3d3510524c752e8b7a5314b7f7a1fee7e68161c01a7d72cbb06db9f"
 dependencies = [
  "either",
- "futures",
+ "futures 0.3.28",
  "futures-rustls",
  "libp2p-core",
  "log",
@@ -6062,7 +6095,7 @@ version = "0.43.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4dcd21d950662700a385d4c6d68e2f5f54d778e97068cdd718522222ef513bda"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "libp2p-core",
  "log",
  "thiserror",
@@ -6691,7 +6724,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c8552ab875c1313b97b8d20cb857b9fd63e2d1d6a0a1b53ce9821e575405f27a"
 dependencies = [
  "bytes",
- "futures",
+ "futures 0.3.28",
  "log",
  "pin-project",
  "smallvec",
@@ -6797,7 +6830,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "65b4b14489ab424703c092062176d52ba55485a89c076b4f9db05092b7223aa6"
 dependencies = [
  "bytes",
- "futures",
+ "futures 0.3.28",
  "log",
  "netlink-packet-core",
  "netlink-sys",
@@ -6812,7 +6845,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6471bf08e7ac0135876a9581bf3217ef0333c191c128d34878079f42ee150411"
 dependencies = [
  "bytes",
- "futures",
+ "futures 0.3.28",
  "libc",
  "log",
  "tokio",
@@ -7655,7 +7688,7 @@ version = "0.1.0"
 dependencies = [
  "derive_more",
  "evm",
- "evm-runtime 0.39.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "evm-runtime",
  "fp-evm",
  "frame-support",
  "frame-system",
@@ -8553,7 +8586,7 @@ version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e9567389417feee6ce15dd6527a8a1ecac205ef62c2932bcf3d9f6fc5b78b414"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "rustc_version 0.4.0",
 ]
 
@@ -8938,6 +8971,18 @@ dependencies = [
  "impl-serde",
  "scale-info",
  "uint",
+]
+
+[[package]]
+name = "primitives-ext"
+version = "0.1.0"
+dependencies = [
+ "ethereum-types",
+ "evm-tracing-events",
+ "parity-scale-codec",
+ "sp-externalities 0.13.0",
+ "sp-runtime-interface 7.0.0",
+ "sp-std 5.0.0",
 ]
 
 [[package]]
@@ -9765,7 +9810,7 @@ version = "0.1.7"
 source = "git+https://github.com/webb-tools/round-based-protocol#959126f9f6edce16d4ee95954091b93e33a83140"
 dependencies = [
  "async-stream",
- "futures",
+ "futures 0.3.28",
  "log",
  "serde",
  "thiserror",
@@ -9781,6 +9826,170 @@ dependencies = [
  "libc",
  "rtoolbox",
  "winapi",
+]
+
+[[package]]
+name = "rpc-core-debug"
+version = "0.1.0"
+dependencies = [
+ "client-evm-tracing",
+ "ethereum-types",
+ "futures 0.3.28",
+ "jsonrpsee",
+ "rpc-core-types",
+ "serde",
+ "serde_json",
+ "sp-core 7.0.0",
+]
+
+[[package]]
+name = "rpc-core-trace"
+version = "0.6.0"
+dependencies = [
+ "client-evm-tracing",
+ "ethereum-types",
+ "futures 0.3.28",
+ "jsonrpsee",
+ "rpc-core-types",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "rpc-core-txpool"
+version = "0.6.0"
+dependencies = [
+ "ethereum",
+ "ethereum-types",
+ "fc-rpc-core",
+ "jsonrpsee",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "rpc-core-types"
+version = "0.1.0"
+dependencies = [
+ "ethereum-types",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "rpc-debug"
+version = "0.1.0"
+dependencies = [
+ "client-evm-tracing",
+ "ethereum",
+ "ethereum-types",
+ "fc-consensus",
+ "fc-db",
+ "fc-rpc",
+ "fc-storage",
+ "fp-rpc",
+ "futures 0.3.28",
+ "hex-literal 0.3.4",
+ "jsonrpsee",
+ "rpc-core-debug",
+ "rpc-core-types",
+ "rpc-primitives-debug",
+ "sc-client-api",
+ "sc-utils",
+ "sp-api",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-core 7.0.0",
+ "sp-io 7.0.0",
+ "sp-runtime 7.0.0",
+ "tokio",
+]
+
+[[package]]
+name = "rpc-primitives-debug"
+version = "0.1.0"
+dependencies = [
+ "environmental",
+ "ethereum",
+ "ethereum-types",
+ "hex",
+ "parity-scale-codec",
+ "serde",
+ "sp-api",
+ "sp-core 7.0.0",
+ "sp-io 7.0.0",
+ "sp-runtime 7.0.0",
+ "sp-std 5.0.0",
+]
+
+[[package]]
+name = "rpc-primitives-txpool"
+version = "0.6.0"
+dependencies = [
+ "ethereum",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-api",
+ "sp-io 7.0.0",
+ "sp-runtime 7.0.0",
+ "sp-std 5.0.0",
+]
+
+[[package]]
+name = "rpc-trace"
+version = "0.6.0"
+dependencies = [
+ "client-evm-tracing",
+ "ethereum",
+ "ethereum-types",
+ "fc-consensus",
+ "fc-rpc",
+ "fc-rpc-core",
+ "fc-storage",
+ "fp-rpc",
+ "futures 0.3.28",
+ "jsonrpsee",
+ "log",
+ "rpc-core-trace",
+ "rpc-core-types",
+ "rpc-primitives-debug",
+ "sc-client-api",
+ "sc-network",
+ "sc-utils",
+ "serde",
+ "sha3 0.10.8",
+ "sp-api",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-io 7.0.0",
+ "sp-runtime 7.0.0",
+ "sp-std 5.0.0",
+ "sp-transaction-pool",
+ "substrate-prometheus-endpoint",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "rpc-txpool"
+version = "0.6.0"
+dependencies = [
+ "ethereum-types",
+ "fc-rpc",
+ "frame-system",
+ "jsonrpsee",
+ "rlp",
+ "rpc-core-txpool",
+ "rpc-primitives-txpool",
+ "sc-transaction-pool",
+ "sc-transaction-pool-api",
+ "serde",
+ "sha3 0.10.8",
+ "sp-api",
+ "sp-blockchain",
+ "sp-io 7.0.0",
+ "sp-runtime 7.0.0",
+ "sp-std 5.0.0",
 ]
 
 [[package]]
@@ -9800,7 +10009,7 @@ version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "322c53fd76a18698f1c27381d58091de3a043d356aa5bd0d510608b565f469a0"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "log",
  "netlink-packet-route",
  "netlink-proto",
@@ -10019,7 +10228,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26338f5e09bb721b85b135ea05af7767c90b52f6de4f087d4f4a3a9d64e7dc04"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "pin-project",
  "static_assertions",
 ]
@@ -10135,7 +10344,7 @@ name = "sc-basic-authorship"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "log",
  "parity-scale-codec",
@@ -10207,7 +10416,7 @@ dependencies = [
  "chrono",
  "clap 4.3.19",
  "fdlimit",
- "futures",
+ "futures 0.3.28",
  "libp2p-identity",
  "log",
  "names",
@@ -10243,7 +10452,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "fnv",
- "futures",
+ "futures 0.3.28",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -10295,7 +10504,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "libp2p-identity",
  "log",
@@ -10320,7 +10529,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.28",
  "log",
  "parity-scale-codec",
  "sc-block-builder",
@@ -10350,7 +10559,7 @@ source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948
 dependencies = [
  "async-trait",
  "fork-tree",
- "futures",
+ "futures 0.3.28",
  "log",
  "num-bigint 0.4.3",
  "num-rational",
@@ -10403,7 +10612,7 @@ dependencies = [
  "dyn-clone",
  "finality-grandpa",
  "fork-tree",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "log",
  "parity-scale-codec",
@@ -10440,7 +10649,7 @@ source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948
 dependencies = [
  "assert_matches",
  "async-trait",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "jsonrpsee",
  "log",
@@ -10474,7 +10683,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "log",
  "parity-scale-codec",
@@ -10548,7 +10757,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "ansi_term",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "log",
  "sc-client-api",
@@ -10584,7 +10793,7 @@ dependencies = [
  "bytes",
  "either",
  "fnv",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "ip_network",
  "libp2p",
@@ -10620,7 +10829,7 @@ source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948
 dependencies = [
  "async-channel",
  "cid",
- "futures",
+ "futures 0.3.28",
  "libp2p-identity",
  "log",
  "prost",
@@ -10656,7 +10865,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "ahash 0.8.3",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "libp2p",
  "log",
@@ -10675,7 +10884,7 @@ source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948
 dependencies = [
  "array-bytes 6.1.0",
  "async-channel",
- "futures",
+ "futures 0.3.28",
  "libp2p-identity",
  "log",
  "parity-scale-codec",
@@ -10698,7 +10907,7 @@ dependencies = [
  "async-channel",
  "async-trait",
  "fork-tree",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "libp2p",
  "log",
@@ -10749,7 +10958,7 @@ dependencies = [
  "array-bytes 6.1.0",
  "bytes",
  "fnv",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "hyper",
  "hyper-rustls 0.24.1",
@@ -10789,7 +10998,7 @@ name = "sc-rpc"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "jsonrpsee",
  "log",
  "parity-scale-codec",
@@ -10883,7 +11092,7 @@ dependencies = [
  "async-trait",
  "directories",
  "exit-future",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "jsonrpsee",
  "log",
@@ -10955,7 +11164,7 @@ name = "sc-sysinfo"
 version = "6.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "libc",
  "log",
  "rand 0.8.5",
@@ -10975,7 +11184,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "chrono",
- "futures",
+ "futures 0.3.28",
  "libp2p",
  "log",
  "parking_lot 0.12.1",
@@ -11034,7 +11243,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "linked-hash-map",
  "log",
@@ -11060,7 +11269,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.28",
  "log",
  "parity-scale-codec",
  "serde",
@@ -11076,7 +11285,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "async-channel",
- "futures",
+ "futures 0.3.28",
  "futures-timer",
  "lazy_static",
  "log",
@@ -11843,7 +12052,7 @@ dependencies = [
  "base64 0.13.1",
  "bytes",
  "flate2",
- "futures",
+ "futures 0.3.28",
  "http",
  "httparse",
  "log",
@@ -11985,7 +12194,7 @@ name = "sp-blockchain"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -12004,7 +12213,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.28",
  "log",
  "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-inherents",
@@ -12092,7 +12301,7 @@ dependencies = [
  "bs58",
  "dyn-clonable",
  "ed25519-zebra",
- "futures",
+ "futures 0.3.28",
  "hash-db 0.16.0",
  "hash256-std-hasher",
  "impl-serde",
@@ -12136,7 +12345,7 @@ dependencies = [
  "bs58",
  "dyn-clonable",
  "ed25519-zebra",
- "futures",
+ "futures 0.3.28",
  "hash-db 0.16.0",
  "hash256-std-hasher",
  "impl-serde",
@@ -12283,7 +12492,7 @@ dependencies = [
  "bytes",
  "ed25519",
  "ed25519-dalek",
- "futures",
+ "futures 0.3.28",
  "libsecp256k1",
  "log",
  "parity-scale-codec",
@@ -12343,7 +12552,7 @@ version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9be3cdd67cc1d9c1db17c5cbc4ec4924054a8437009d167f21f6590797e4aa45"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "parity-scale-codec",
  "parking_lot 0.12.1",
  "sp-core 21.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -13252,7 +13461,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
 dependencies = [
  "frame-system-rpc-runtime-api",
- "futures",
+ "futures 0.3.28",
  "jsonrpsee",
  "log",
  "parity-scale-codec",
@@ -13511,7 +13720,7 @@ dependencies = [
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "frame-system",
- "futures",
+ "futures 0.3.28",
  "hex-literal 0.3.4",
  "jsonrpsee",
  "log",
@@ -13520,7 +13729,13 @@ dependencies = [
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
+ "primitives-ext",
  "rand 0.7.3",
+ "rpc-debug",
+ "rpc-primitives-debug",
+ "rpc-primitives-txpool",
+ "rpc-trace",
+ "rpc-txpool",
  "sc-basic-authorship",
  "sc-chain-spec",
  "sc-cli",
@@ -13552,7 +13767,9 @@ dependencies = [
  "sp-trie 22.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "substrate-build-script-utils",
  "substrate-frame-rpc-system",
+ "substrate-prometheus-endpoint",
  "tangle-standalone-runtime",
+ "tokio",
  "wasmer",
  "webb-consensus-types",
  "webb-finality-update-verify",
@@ -13565,6 +13782,7 @@ name = "tangle-standalone-runtime"
 version = "0.4.0"
 dependencies = [
  "dkg-runtime-primitives",
+ "evm-tracer",
  "fp-account",
  "fp-evm",
  "fp-rpc",
@@ -13638,6 +13856,8 @@ dependencies = [
  "pallet-vesting",
  "parity-scale-codec",
  "precompile-utils",
+ "rpc-primitives-debug",
+ "rpc-primitives-txpool",
  "scale-info",
  "serde",
  "sp-api",
@@ -14368,7 +14588,7 @@ checksum = "4712ee30d123ec7ae26d1e1b218395a16c87cdbaf4b3925d170d684af62ea5e8"
 dependencies = [
  "async-trait",
  "base64 0.13.1",
- "futures",
+ "futures 0.3.28",
  "log",
  "md-5",
  "rand 0.8.5",
@@ -14803,7 +15023,7 @@ version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be0ecb0db480561e9a7642b5d3e4187c128914e58aa84330b9493e3eb68c5e7f"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "js-sys",
  "parking_lot 0.11.2",
  "pin-utils",
@@ -15330,7 +15550,7 @@ source = "git+https://github.com/webb-tools/relayer?tag=v0.5.7-dev#2dd33881eb5ce
 dependencies = [
  "async-trait",
  "ethereum-types",
- "futures",
+ "futures 0.3.28",
  "hex",
  "hex-literal 0.3.4",
  "sp-core 21.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -15430,7 +15650,7 @@ source = "git+https://github.com/webb-tools/relayer?tag=v0.5.7-dev#2dd33881eb5ce
 dependencies = [
  "async-trait",
  "backoff",
- "futures",
+ "futures 0.3.28",
  "native-tls",
  "sled",
  "sp-core 21.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -15526,7 +15746,7 @@ source = "git+https://github.com/webb-tools/relayer?tag=v0.5.7-dev#2dd33881eb5ce
 dependencies = [
  "async-trait",
  "chrono",
- "futures",
+ "futures 0.3.28",
  "reqwest",
  "serde",
  "typed-builder 0.15.2",
@@ -15543,7 +15763,7 @@ source = "git+https://github.com/webb-tools/relayer?tag=v0.5.7-dev#2dd33881eb5ce
 dependencies = [
  "async-trait",
  "ethereum-types",
- "futures",
+ "futures 0.3.28",
  "hex",
  "impl-trait-for-tuples",
  "parking_lot 0.12.1",
@@ -15713,7 +15933,7 @@ dependencies = [
  "axum-client-ip",
  "build-data",
  "ethereum-types",
- "futures",
+ "futures 0.3.28",
  "native-tls",
  "serde",
  "serde_json",
@@ -15755,7 +15975,7 @@ source = "git+https://github.com/webb-tools/relayer?tag=v0.5.7-dev#2dd33881eb5ce
 dependencies = [
  "backoff",
  "ethereum-types",
- "futures",
+ "futures 0.3.28",
  "hex",
  "rand 0.8.5",
  "sled",
@@ -15777,7 +15997,7 @@ source = "git+https://github.com/webb-tools/relayer?tag=v0.5.7-dev#2dd33881eb5ce
 dependencies = [
  "chrono",
  "ethereum-types",
- "futures",
+ "futures 0.3.28",
  "once_cell",
  "serde",
  "sp-core 21.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -15828,7 +16048,7 @@ dependencies = [
  "backoff",
  "config",
  "derive_more",
- "futures",
+ "futures 0.3.28",
  "glob",
  "hex",
  "hyper",
@@ -16429,7 +16649,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7999f5f4217fe3818726b66257a4475f71e74ffd190776ad053fa159e50737f5"
 dependencies = [
  "async_io_stream",
- "futures",
+ "futures 0.3.28",
  "js-sys",
  "log",
  "pharos",
@@ -16542,7 +16762,7 @@ version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5d9ba232399af1783a58d8eb26f6b5006fbefe2dc9ef36bd283324792d03ea5"
 dependencies = [
- "futures",
+ "futures 0.3.28",
  "log",
  "nohash-hasher",
  "parking_lot 0.12.1",

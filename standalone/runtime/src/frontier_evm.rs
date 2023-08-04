@@ -110,22 +110,19 @@ impl pallet_evm_precompile_proxy::EvmProxyCallFilter for ProxyType {
 
 /// Current approximation of the gas/s consumption considering
 /// EVM execution over compiled WASM (on 4.4Ghz CPU).
-pub const GAS_PER_SECOND: u64 = 400_000_000;
+/// Given the 500ms Weight, from which 75% only are used for transactions,
+/// the total EVM execution gas limit is: GAS_PER_SECOND * 0.500 * 0.75 ~= 15_000_000.
+pub const GAS_PER_SECOND: u64 = 40_000_000;
 
 /// Approximate ratio of the amount of Weight per Gas.
 /// u64 works for approximations because Weight is a very small unit compared to gas.
-pub const WEIGHT_PER_GAS: u64 = WEIGHT_REF_TIME_PER_SECOND / GAS_PER_SECOND;
-
-const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
-// Here we assume Ethereum's base fee of 21000 gas and convert to weight, but we
-// subtract roughly the cost of a balance transfer from it (about 1/3 the cost)
-// and some cost to account for per-byte-fee.
-// TODO: we should use benchmarking's overhead feature to measure this
-pub const EXTRINSIC_BASE_WEIGHT: Weight = Weight::from_parts(10000 * WEIGHT_PER_GAS, 0);
+pub const WEIGHT_PER_GAS: u64 = WEIGHT_REF_TIME_PER_SECOND.saturating_div(GAS_PER_SECOND);
 
 parameter_types! {
-	pub BlockGasLimit: U256
-		= U256::from(NORMAL_DISPATCH_RATIO.int_mul(4) * MAXIMUM_BLOCK_WEIGHT.ref_time() / WEIGHT_PER_GAS);
+	/// EVM gas limit
+	pub BlockGasLimit: U256 = U256::from(
+		NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT.ref_time() / WEIGHT_PER_GAS
+	);
 	/// The amount of gas per pov. A ratio of 4 if we convert ref_time to gas and we compare
 	/// it with the pov_size for a block. E.g.
 	/// ceil(
@@ -180,9 +177,9 @@ impl pallet_dynamic_fee::Config for Runtime {
 }
 
 parameter_types! {
-	pub DefaultBaseFeePerGas: U256 = U256::from(WEIGHT_FEE);
-	// No Elasticity, so the base fee will be constant.
-	pub DefaultElasticity: Permill = Permill::from_parts(0);
+	pub DefaultBaseFeePerGas: U256 = (MILLIUNIT / 1_000_000).into();
+	// At the moment, we don't use dynamic fee calculation by default.
+	pub DefaultElasticity: Permill = Permill::zero();
 }
 
 pub struct BaseFeeThreshold;
@@ -191,10 +188,10 @@ impl pallet_base_fee::BaseFeeThreshold for BaseFeeThreshold {
 		Permill::zero()
 	}
 	fn ideal() -> Permill {
-		Permill::zero()
+		Permill::from_parts(500_000)
 	}
 	fn upper() -> Permill {
-		Permill::zero()
+		Permill::from_parts(1_000_000)
 	}
 }
 
