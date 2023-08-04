@@ -257,7 +257,7 @@ std = [
  "pallet-evm-precompile-proxy/std",
  "pallet-evm-precompile-democracy/std",
  "pallet-evm-precompile-registry/std",
-  "pallet-evm-precompile-staking/std"
+ "pallet-evm-precompile-staking/std"
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
