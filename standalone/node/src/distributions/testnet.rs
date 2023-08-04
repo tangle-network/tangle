@@ -10,7 +10,7 @@ use tangle_runtime::{AccountId, Balance};
 fn get_edgeware_participation_list() -> Vec<H160> {
 	// Print the current directory
 	println!("Current directory: {}", std::env::current_dir().unwrap().display());
-	let mut file = File::open("./src/distributions/data/edgeware_participants.json")
+	let mut file = File::open("./src/distributions/data/edgeware_genesis_participants.json")
 		.expect("file should open read only");
 	let mut contents = String::new();
 	file.read_to_string(&mut contents).expect("file should be readable");
@@ -29,7 +29,7 @@ fn get_edgeware_participation_list() -> Vec<H160> {
 /// Read in the list of Kabocha public keys, convert them to `AccountId`,
 /// and return the list.
 fn get_kabocha_participation_list() -> Vec<AccountId> {
-	let mut file = File::open("./src/distributions/data/kabocha_participants.json")
+	let mut file = File::open("./src/distributions/data/edgeware_snapshot_participants.json")
 		.expect("file should open read only");
 	let mut contents = String::new();
 	file.read_to_string(&mut contents).expect("file should be readable");
