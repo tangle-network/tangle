@@ -112,6 +112,9 @@ sc-chain-spec = { git = "https://github.com/paritytech/substrate", branch = "pol
 sc-rpc-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sp-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
+sp-runtime-interface = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
+sp-externalities = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
+sc-utils = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 substrate-frame-rpc-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sc-consensus-grandpa = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sc-network-sync = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
