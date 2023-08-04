@@ -101,3 +101,23 @@ fn is_validator_works() {
 			.execute_returns(false);
 	});
 }
+
+#[test]
+fn eras_total_rewards_should_work() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		start_session(4);
+		let era_index = active_era();
+		crate::mock::Staking::reward_by_ids(vec![(TestAccount::Alex.into(), 50)]);
+		crate::mock::Staking::reward_by_ids(vec![(TestAccount::Bobo.into(), 50)]);
+		crate::mock::Staking::reward_by_ids(vec![(TestAccount::Dino.into(), 50)]);
+		precompiles()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(5),
+				PCall::eras_total_reward_points { era_index },
+			)
+			.expect_cost(0)
+			.expect_no_logs()
+			.execute_returns(150u32);
+	});
+}

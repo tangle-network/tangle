@@ -16,6 +16,7 @@
 // limitations under the License.
 
 //! Test utilities
+#![allow(dead_code)]
 use super::*;
 use frame_support::{
 	construct_runtime, parameter_types,
@@ -336,10 +337,6 @@ parameter_types! {
 	pub const OffendingValidatorsThreshold: Perbill = Perbill::from_percent(17);
 }
 
-parameter_types! {
-	pub static RewardRemainderUnbalanced: u128 = 0;
-}
-
 pub type Precompiles<R> =
 	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<5>, StakingPrecompile<R>>,)>;
 
@@ -592,7 +589,7 @@ pub(crate) fn advance_session() {
 
 /// Progress until the given era.
 pub(crate) fn start_active_era(era_index: EraIndex) {
-	start_session((era_index * <SessionsPerEra as Get<u32>>::get()).into());
+	start_session(era_index * <SessionsPerEra as Get<u32>>::get());
 	assert_eq!(active_era(), era_index);
 	// One way or another, current_era must have changed before the active era, so they must match
 	// at this point.

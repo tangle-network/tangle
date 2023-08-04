@@ -107,8 +107,6 @@ where
 	#[precompile::view]
 	fn is_validator(handle: &mut impl PrecompileHandle, validator: Address) -> EvmResult<bool> {
 		let validator_account = Runtime::AddressMapping::into_account_id(validator.0);
-		println!("validator_account: {:?}", validator_account);
-		println!("validator : {:?}", validator);
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let is_validator = pallet_staking::Validators::<Runtime>::contains_key(validator_account);
 		Ok(is_validator)
@@ -141,5 +139,17 @@ where
 			.map_err(|_| revert("Amount is too large for provided balance type"))?;
 
 		Ok(total_stake)
+	}
+
+	#[precompile::public("erasTotalRewardPoints(uint32)")]
+	#[precompile::view]
+	fn eras_total_reward_points(
+		handle: &mut impl PrecompileHandle,
+		era_index: u32,
+	) -> EvmResult<u32> {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let total_reward_points: u32 =
+			<pallet_staking::Pallet<Runtime>>::eras_reward_points(era_index).total;
+		Ok(total_reward_points)
 	}
 }
