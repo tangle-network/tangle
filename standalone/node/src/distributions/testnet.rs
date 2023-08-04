@@ -9,7 +9,6 @@ use tangle_runtime::{AccountId, Balance};
 /// and return the list.
 fn get_edgeware_participation_list() -> Vec<H160> {
 	// Print the current directory
-	println!("Current directory: {}", std::env::current_dir().unwrap().display());
 	let mut file = File::open("./src/distributions/data/edgeware_genesis_participants.json")
 		.expect("file should open read only");
 	let mut contents = String::new();
@@ -73,6 +72,6 @@ pub fn get_substrate_balance_distribution() -> Vec<(AccountId32, Balance)> {
 	const ENDOWMENT: u128 = 100 * ONE_TOKEN;
 	get_kabocha_participation_list()
 		.into_iter()
-		.map(|address| (address.into(), Balance::from(ENDOWMENT)))
+		.map(|address| (address, Balance::from(ENDOWMENT)))
 		.collect()
 }
