@@ -117,11 +117,6 @@ pub const GAS_PER_SECOND: u64 = 40_000_000;
 /// Approximate ratio of the amount of Weight per Gas.
 /// u64 works for approximations because Weight is a very small unit compared to gas.
 pub const WEIGHT_PER_GAS: u64 = WEIGHT_REF_TIME_PER_SECOND.saturating_div(GAS_PER_SECOND);
-// Here we assume Ethereum's base fee of 21000 gas and convert to weight, but we
-// subtract roughly the cost of a balance transfer from it (about 1/3 the cost)
-// and some cost to account for per-byte-fee.
-// TODO: we should use benchmarking's overhead feature to measure this
-pub const EXTRINSIC_BASE_WEIGHT: Weight = Weight::from_parts(10000 * WEIGHT_PER_GAS, 0);
 
 parameter_types! {
 	/// EVM gas limit

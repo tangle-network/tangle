@@ -1,0 +1,30 @@
+[package]
+name = "primitives-ext"
+authors = { workspace = true }
+edition = "2021"
+license = "GPL-3.0-only"
+repository = { workspace = true }
+version = "0.1.0"
+
+[dependencies]
+ethereum-types = { workspace = true }
+
+# Moonbeam
+evm-tracing-events = { workspace = true }
+
+# Substrate
+parity-scale-codec = { workspace = true }
+sp-externalities = { workspace = true }
+sp-runtime-interface = { workspace = true }
+sp-std = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+ "ethereum-types/std",
+ "evm-tracing-events/std",
+ "parity-scale-codec/std",
+ "sp-externalities/std",
+ "sp-runtime-interface/std",
+ "sp-std/std",
+]

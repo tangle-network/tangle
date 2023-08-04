@@ -1,0 +1,22 @@
+[package]
+name = "rpc-primitives-txpool"
+authors = { workspace = true }
+edition = "2021"
+license = "GPL-3.0-only"
+repository = { workspace = true }
+version = "0.6.0"
+
+[dependencies]
+ethereum = { workspace = true, features = ["with-codec"] }
+
+# Substrate
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+sp-api = { workspace = true }
+sp-io = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+
+[features]
+default = ["std"]
+std = ["ethereum/std", "sp-api/std", "sp-io/std", "sp-runtime/std", "sp-std/std"]

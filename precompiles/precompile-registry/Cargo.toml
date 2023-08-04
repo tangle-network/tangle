@@ -21,7 +21,7 @@ sp-std = { workspace = true }
 
 # Frontier
 fp-evm = { workspace = true }
-pallet-evm = { workspace = true, features = [ "forbid-evm-reentrancy" ] }
+pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
 
 [dev-dependencies]
 derive_more = { workspace = true }
@@ -29,25 +29,25 @@ hex-literal = { workspace = true }
 serde = { workspace = true }
 
 # Moonbeam
-precompile-utils = { workspace = true, features = [ "std", "testing" ] }
+precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate
-pallet-balances = { workspace = true, features = [ "std" ] }
+pallet-balances = { workspace = true, features = ["std"] }
 pallet-scheduler = { workspace = true }
 pallet-timestamp = { workspace = true }
-scale-info = { workspace = true, features = [ "derive" ] }
+scale-info = { workspace = true, features = ["derive"] }
 sp-runtime = { workspace = true }
 
 [features]
-default = [ "std" ]
+default = ["std"]
 std = [
-	"fp-evm/std",
-	"frame-support/std",
-	"frame-system/std",
-	"pallet-evm/std",
-	"parity-scale-codec/std",
-	"precompile-utils/std",
-	"sp-core/std",
-	"sp-io/std",
-	"sp-std/std",
+ "fp-evm/std",
+ "frame-support/std",
+ "frame-system/std",
+ "pallet-evm/std",
+ "parity-scale-codec/std",
+ "precompile-utils/std",
+ "sp-core/std",
+ "sp-io/std",
+ "sp-std/std",
 ]

@@ -19,7 +19,7 @@ use crate::{
 };
 use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
 use futures::TryFutureExt;
-use sc_cli::{ChainSpec, RuntimeVersion, SubstrateCli};
+use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
 use tangle_runtime::{Block, EXISTENTIAL_DEPOSIT};
@@ -63,10 +63,6 @@ impl SubstrateCli for Cli {
 			path =>
 				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 		})
-	}
-
-	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-		&tangle_runtime::VERSION
 	}
 }
 
@@ -145,7 +141,7 @@ pub fn run() -> sc_cli::Result<()> {
 							)
 						}
 
-						cmd.run::<Block, service::ExecutorDispatch>(config)
+						cmd.run::<Block, ()>(config)
 					},
 					BenchmarkCmd::Block(cmd) => {
 						let PartialComponents { client, .. } =
@@ -234,11 +230,23 @@ pub fn run() -> sc_cli::Result<()> {
 			runner.sync_run(|config| cmd.run::<Block>(&config))
 		},
 		None => {
+			let rpc_config = crate::eth::RpcConfig {
+				ethapi: cli.eth.ethapi.clone(),
+				ethapi_max_permits: cli.eth.ethapi_max_permits,
+				ethapi_trace_max_count: cli.eth.ethapi_trace_max_count,
+				ethapi_trace_cache_duration: cli.eth.ethapi_trace_cache_duration,
+				eth_log_block_cache: cli.eth.eth_log_block_cache,
+				eth_statuses_cache: cli.eth.eth_statuses_cache,
+				fee_history_limit: cli.eth.fee_history_limit,
+				max_past_logs: cli.eth.max_past_logs,
+				tracing_raw_max_memory_usage: cli.eth.tracing_raw_max_memory_usage,
+			};
 			let runner = cli.create_runner(&cli.run)?;
 
 			runner.run_node_until_exit(|config| async move {
 				service::new_full(service::RunFullParams {
 					config,
+					rpc_config,
 					eth_config: cli.eth,
 					debug_output: cli.output_path,
 					relayer_cmd: cli.relayer_cmd,
