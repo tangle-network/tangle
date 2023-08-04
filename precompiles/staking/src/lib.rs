@@ -107,6 +107,8 @@ where
 	#[precompile::view]
 	fn is_validator(handle: &mut impl PrecompileHandle, validator: Address) -> EvmResult<bool> {
 		let validator_account = Runtime::AddressMapping::into_account_id(validator.0);
+		println!("validator_account: {:?}", validator_account);
+		println!("validator : {:?}", validator);
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let is_validator = pallet_staking::Validators::<Runtime>::contains_key(validator_account);
 		Ok(is_validator)

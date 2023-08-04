@@ -15,7 +15,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::mock::{new_test_ext, PCall, Precompiles, PrecompilesValue, Runtime, TestAccount};
+use crate::mock::{
+	active_era, new_test_ext, start_session, PCall, Precompiles, PrecompilesValue, Runtime,
+	TestAccount,
+};
 use precompile_utils::testing::*;
 use sp_core::H160;
 
@@ -32,7 +35,7 @@ fn max_validator_count_works() {
 				H160::from_low_u64_be(5),
 				PCall::max_validator_count {},
 			)
-			.expect_cost(0) // TODO: Test db read/write costs
+			.expect_cost(0)
 			.expect_no_logs()
 			.execute_returns(5u32)
 	});
@@ -41,11 +44,20 @@ fn max_validator_count_works() {
 #[test]
 fn current_era_works() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		start_session(1);
 		precompiles()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(5), PCall::current_era {})
-			.expect_cost(0) // TODO: Test db read/write costs
+			.expect_cost(0)
 			.expect_no_logs()
 			.execute_returns(0u32);
+		// after third session current era should be 1 (3 session per era)
+		start_session(3);
+		assert_eq!(active_era(), 1);
+		precompiles()
+			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(5), PCall::current_era {})
+			.expect_cost(0)
+			.expect_no_logs()
+			.execute_returns(1u32);
 	});
 }
 
@@ -54,7 +66,7 @@ fn validator_count_works() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		precompiles()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(5), PCall::validator_count {})
-			.expect_cost(0) // TODO: Test db read/write costs
+			.expect_cost(0)
 			.expect_no_logs()
 			.execute_returns(2u32);
 	});
@@ -69,7 +81,7 @@ fn max_nominator_count_works() {
 				H160::from_low_u64_be(5),
 				PCall::max_nominator_count {},
 			)
-			.expect_cost(0) // TODO: Test db read/write costs
+			.expect_cost(0)
 			.expect_no_logs()
 			.execute_returns(5u32);
 	});
@@ -84,8 +96,8 @@ fn is_validator_works() {
 				H160::from_low_u64_be(5),
 				PCall::is_validator { validator: H160::from(TestAccount::Alex).into() },
 			)
-			.expect_cost(0) // TODO: Test db read/write costs
+			.expect_cost(0)
 			.expect_no_logs()
-			.execute_returns(true);
+			.execute_returns(false);
 	});
 }

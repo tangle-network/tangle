@@ -19,7 +19,7 @@
 use super::*;
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{Everything, GenesisBuild, OnFinalize, OnIdle, OnInitialize, U128CurrencyToVote},
+	traits::{Everything, GenesisBuild, OnFinalize, OnInitialize, U128CurrencyToVote},
 	weights::Weight,
 	BasicExternalities,
 };
@@ -28,18 +28,19 @@ use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use precompile_utils::precompile_set::*;
 use std::{sync::Arc, vec};
 
+use pallet_session::historical as pallet_session_historical;
+use pallet_staking::EraPayout;
+use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
 	ecdsa::Public,
 	sr25519::{self, Public as sr25519Public, Signature},
-	ConstU32, H160, H256, U256,
+	ConstU32, Get, H160, H256, U256,
 };
 
-use serde::{Deserialize, Serialize};
-
-use frame_election_provider_support::NoElection;
+use frame_election_provider_support::{onchain, SequentialPhragmen};
 use pallet_staking::{
-	ConvertCurve, TestBenchmarkingConfig, UseNominatorsAndValidatorsMap, UseValidatorsMap,
+	Config, ConvertCurve, TestBenchmarkingConfig, UseNominatorsAndValidatorsMap, UseValidatorsMap,
 };
 use sp_io::TestExternalities;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
@@ -48,10 +49,10 @@ use sp_runtime::{
 	impl_opaque_keys,
 	testing::TestXt,
 	traits::{
-		self, BlakeTwo256, Bounded, ConvertInto, Extrinsic as ExtrinsicT, IdentifyAccount,
-		IdentityLookup, OpaqueKeys, Verify,
+		self, BlakeTwo256, ConvertInto, Extrinsic as ExtrinsicT, IdentifyAccount, IdentityLookup,
+		OpaqueKeys, Verify, Zero,
 	},
-	AccountId32, Perbill, Percent, Permill,
+	AccountId32, Perbill, Percent,
 };
 
 pub use dkg_runtime_primitives::{
@@ -69,6 +70,8 @@ pub type Balance = u128;
 pub type BlockNumber = u64;
 pub type EraIndex = u32;
 pub type SessionIndex = u32;
+
+pub const BLOCK_TIME: u64 = 1000;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Runtime>;
 type Block = frame_system::mocking::MockBlock<Runtime>;
@@ -166,21 +169,22 @@ impl From<TestAccount> for AccountId32 {
 			TestAccount::Alex => AccountId32::from([1u8; 32]),
 			TestAccount::Bobo => AccountId32::from([2u8; 32]),
 			TestAccount::Dino => AccountId32::from([3u8; 32]),
+			TestAccount::Charlie => AccountId32::from([4u8; 32]),
 			TestAccount::PrecompileAddress => AccountId32::from(PRECOMPILE_ADDRESS_BYTES),
 			_ => AccountId32::from([0u8; 32]),
 		}
 	}
 }
 
-impl From<sp_core::sr25519::Public> for TestAccount {
-	fn from(x: sp_core::sr25519::Public) -> Self {
+impl From<TestAccount> for sp_core::sr25519::Public {
+	fn from(x: TestAccount) -> Self {
 		match x {
-			x if x == sr25519Public::from_raw([1u8; 32]) => TestAccount::Alex,
-			x if x == sr25519Public::from_raw([2u8; 32]) => TestAccount::Bobo,
-			x if x == sr25519Public::from_raw([3u8; 32]) => TestAccount::Dino,
-			x if x == sr25519Public::from_raw(PRECOMPILE_ADDRESS_BYTES) =>
-				TestAccount::PrecompileAddress,
-			_ => TestAccount::Empty,
+			TestAccount::Alex => sr25519Public::from_raw([1u8; 32]),
+			TestAccount::Bobo => sr25519Public::from_raw([2u8; 32]),
+			TestAccount::Dino => sr25519Public::from_raw([3u8; 32]),
+			TestAccount::Charlie => sr25519Public::from_raw([4u8; 32]),
+			TestAccount::PrecompileAddress => sr25519Public::from_raw(PRECOMPILE_ADDRESS_BYTES),
+			_ => sr25519Public::from_raw([0u8; 32]),
 		}
 	}
 }
@@ -198,20 +202,13 @@ construct_runtime!(
 		DKGMetadata: pallet_dkg_metadata::{Pallet, Call, Config<T>, Event<T>, Storage},
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 		Staking: pallet_staking::{Pallet, Call, Storage, Config<T>, Event<T>},
+		Historical: pallet_session_historical,
 	}
 );
 
 parameter_types! {
 	pub const BlockHashCount: u32 = 250;
-	pub const MaximumBlockWeight: Weight = Weight::from_parts(1024, 1);
-	pub const MaximumBlockLength: u32 = 2 * 1024;
-	pub const AvailableBlockRatio: Perbill = Perbill::one();
 	pub const SS58Prefix: u8 = 42;
-}
-
-parameter_types! {
-	#[derive(Default, Clone, Encode, Decode, Debug, Eq, PartialEq, scale_info::TypeInfo, Ord, PartialOrd, MaxEncodedLen)]
-	pub const VoteLength: u32 = 64;
 }
 
 impl pallet_dkg_metadata::Config for Runtime {
@@ -242,9 +239,8 @@ impl pallet_dkg_metadata::Config for Runtime {
 
 parameter_types! {
 	pub const DecayPercentage: Percent = Percent::from_percent(50);
-	pub const Offset: u64 = 0;
-	pub const RefreshDelay: Permill = Permill::from_percent(90);
-	pub const TimeToRestart: u64 = 3;
+	#[derive(Default, Clone, Encode, Decode, Debug, Eq, PartialEq, scale_info::TypeInfo, Ord, PartialOrd, MaxEncodedLen)]
+	pub const VoteLength: u32 = 64;
 }
 
 impl pallet_session::Config for Runtime {
@@ -257,6 +253,15 @@ impl pallet_session::Config for Runtime {
 	type ValidatorIdOf = ConvertInto;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
 	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub static SessionsPerEra: SessionIndex = 3;
+	pub static ExistentialDeposit: Balance = 1;
+	pub static SlashDeferDuration: EraIndex = 0;
+	pub static Period: BlockNumber = 5;
+	pub static Offset: BlockNumber = 0;
+
 }
 
 impl frame_system::Config for Runtime {
@@ -300,26 +305,6 @@ impl pallet_balances::Config for Runtime {
 	type MaxHolds = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
-}
-
-const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
-
-parameter_types! {
-	pub BlockGasLimit: U256 = U256::from(u64::MAX);
-	pub PrecompilesValue: Precompiles<Runtime> = Precompiles::new();
-	pub const WeightPerGas: Weight = Weight::from_parts(1, 0);
-	pub GasLimitPovSizeRatio: u64 = {
-		let block_gas_limit = BlockGasLimit::get().min(u64::MAX.into()).low_u64();
-		block_gas_limit.saturating_div(MAX_POV_SIZE)
-	};
-
-}
-
-parameter_types! {
-	pub static SessionsPerEra: SessionIndex = 3;
-	pub static ExistentialDeposit: Balance = 1;
-	pub static SlashDeferDuration: EraIndex = 0;
-	pub static Period: BlockNumber = 5;
 }
 
 parameter_types! {
@@ -383,8 +368,17 @@ impl pallet_evm::Config for Runtime {
 	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
 }
 
+const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
+
 parameter_types! {
-	pub const MinimumPeriod: u64 = 5;
+	pub BlockGasLimit: U256 = U256::from(u64::MAX);
+	pub PrecompilesValue: Precompiles<Runtime> = Precompiles::new();
+	pub const WeightPerGas: Weight = Weight::from_parts(1, 0);
+	pub GasLimitPovSizeRatio: u64 = {
+		let block_gas_limit = BlockGasLimit::get().min(u64::MAX.into()).low_u64();
+		block_gas_limit.saturating_div(MAX_POV_SIZE)
+	};
+
 }
 
 impl pallet_timestamp::Config for Runtime {
@@ -394,10 +388,25 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub const MinimumPeriod: u64 = 5;
+}
+
 pub struct StakingBenchmarkingConfig;
 impl pallet_staking::BenchmarkingConfig for StakingBenchmarkingConfig {
 	type MaxValidators = ConstU32<1000>;
 	type MaxNominators = ConstU32<1000>;
+}
+
+pub struct OnChainSeqPhragmen;
+impl onchain::Config for OnChainSeqPhragmen {
+	type System = Runtime;
+	type Solver = SequentialPhragmen<AccountId, Perbill>;
+	type DataProvider = Staking;
+	type WeightInfo = ();
+	type MaxWinners = ConstU32<100>;
+	type VotersBound = ConstU32<{ u32::MAX }>;
+	type TargetsBound = ConstU32<{ u32::MAX }>;
 }
 
 impl pallet_staking::Config for Runtime {
@@ -419,12 +428,7 @@ impl pallet_staking::Config for Runtime {
 	type NextNewSession = Session;
 	type MaxNominatorRewardedPerValidator = ConstU32<64>;
 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
-	type ElectionProvider = NoElection<(
-		AccountId,
-		BlockNumber,
-		Staking,
-		<StakingBenchmarkingConfig as pallet_staking::BenchmarkingConfig>::MaxValidators,
-	)>;
+	type ElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type GenesisElectionProvider = Self::ElectionProvider;
 	type VoterList = UseNominatorsAndValidatorsMap<Runtime>;
 	type TargetList = UseValidatorsMap<Self>;
@@ -544,35 +548,113 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<(AccountId, DKGId)>) -> Tes
 /// Used to run to the specified block number
 pub(crate) fn run_to_block(n: BlockNumber) {
 	while System::block_number() < n {
-		Staking::on_finalize(System::block_number());
-		Balances::on_finalize(System::block_number());
+		println!("System nlock number : {}", System::block_number());
 		System::on_finalize(System::block_number());
+		Session::on_finalize(System::block_number());
+		Balances::on_finalize(System::block_number());
+		Staking::on_finalize(System::block_number());
+		DKGMetadata::on_finalize(System::block_number());
+
 		System::set_block_number(System::block_number() + 1);
-		System::on_initialize(System::block_number());
-		Balances::on_initialize(System::block_number());
+		Session::on_initialize(System::block_number());
 		Staking::on_initialize(System::block_number());
 		DKGMetadata::on_initialize(System::block_number());
-		DKGMetadata::on_idle(System::block_number(), Weight::max_value());
-		DKGMetadata::on_finalize(System::block_number());
+
+		let current_era = Staking::current_era().unwrap_or(0);
+		println!("current_era : {}", current_era);
 	}
 }
 
-/// Used to run the specified number of blocks
-pub fn run_for_blocks(n: u64) {
-	run_to_block(System::block_number() + n);
+/// Progresses from the current block number (whatever that may be) to the `P * session_index + 1`.
+pub(crate) fn start_session(session_index: SessionIndex) {
+	let end: u64 = if Offset::get().is_zero() {
+		(session_index as u64) * Period::get()
+	} else {
+		Offset::get() + (session_index.saturating_sub(1) as u64) * Period::get()
+	};
+	println!("RUNTOBLOCK: {}", end);
+	run_to_block(end);
+	// session must have progressed properly.
+	assert_eq!(
+		Session::current_index(),
+		session_index,
+		"current session index = {}, expected = {}",
+		Session::current_index(),
+		session_index,
+	);
 }
 
-/// Advance blocks to the beginning of an era.
+/// Go one session forward.
+pub(crate) fn advance_session() {
+	let current_index = Session::current_index();
+	start_session(current_index + 1);
+}
+
+/// Progress until the given era.
+pub(crate) fn start_active_era(era_index: EraIndex) {
+	start_session((era_index * <SessionsPerEra as Get<u32>>::get()).into());
+	assert_eq!(active_era(), era_index);
+	// One way or another, current_era must have changed before the active era, so they must match
+	// at this point.
+	assert_eq!(current_era(), active_era());
+}
+
+pub(crate) fn current_total_payout_for_duration(duration: u64) -> Balance {
+	let (payout, _rest) = <Runtime as Config>::EraPayout::era_payout(
+		Staking::eras_total_stake(active_era()),
+		Balances::total_issuance(),
+		duration,
+	);
+	assert!(payout > 0);
+	payout
+}
+
+pub(crate) fn maximum_payout_for_duration(duration: u64) -> Balance {
+	let (payout, rest) = <Runtime as Config>::EraPayout::era_payout(
+		Staking::eras_total_stake(active_era()),
+		Balances::total_issuance(),
+		duration,
+	);
+	payout + rest
+}
+
+pub(crate) fn active_era() -> EraIndex {
+	Staking::active_era().unwrap().index
+}
+
+/// Time it takes to finish a session.
 ///
-/// Function has no effect if era is already passed.
-pub fn advance_to_era(n: EraIndex) {
-	println!("advance_to_era({})", n);
-	println!("{}", Staking::current_era().unwrap_or_default());
-	while Staking::current_era().unwrap_or_default() < n {
-		run_for_blocks(1);
-	}
+/// Note, if you see `time_per_session() - BLOCK_TIME`, it is fine. This is because we set the
+/// timestamp after on_initialize, so the timestamp is always one block old.
+pub(crate) fn time_per_session() -> u64 {
+	Period::get() * BLOCK_TIME
+}
+
+/// Time it takes to finish an era.
+///
+/// Note, if you see `time_per_era() - BLOCK_TIME`, it is fine. This is because we set the
+/// timestamp after on_initialize, so the timestamp is always one block old.
+pub(crate) fn time_per_era() -> u64 {
+	time_per_session() * SessionsPerEra::get() as u64
+}
+
+/// Time that will be calculated for the reward per era.
+pub(crate) fn reward_time_per_era() -> u64 {
+	time_per_era() - BLOCK_TIME
 }
 
 pub(crate) fn events() -> Vec<RuntimeEvent> {
 	System::events().into_iter().map(|r| r.event).collect::<Vec<_>>()
+}
+
+pub(crate) fn current_era() -> EraIndex {
+	Staking::current_era().unwrap()
+}
+
+pub(crate) fn staking_events() -> Vec<pallet_staking::Event<Runtime>> {
+	System::events()
+		.into_iter()
+		.map(|r| r.event)
+		.filter_map(|e| if let RuntimeEvent::Staking(inner) = e { Some(inner) } else { None })
+		.collect()
 }
