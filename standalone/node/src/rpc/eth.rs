@@ -211,10 +211,10 @@ where
 		.into_rpc(),
 	)?;
 
-	io.merge(Web3::new(client).into_rpc())?;
+	io.merge(Web3::new(client.clone()).into_rpc())?;
 
 	#[cfg(feature = "txpool")]
-	io.merge(TxPool::new(client, graph).into_rpc())?;
+	io.merge(TxPool::new(client.clone(), graph).into_rpc())?;
 
 	if let Some(tracing_config) = tracing_config {
 		if let Some(trace_filter_requester) = tracing_config.tracing_requesters.trace {

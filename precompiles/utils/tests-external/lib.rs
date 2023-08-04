@@ -35,9 +35,7 @@ mod tests {
 	};
 	pub type AccountId = MockAccount;
 	pub type Balance = u128;
-	pub type BlockNumber = u32;
 
-	type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Runtime>;
 	type Block = frame_system::mocking::MockBlock<Runtime>;
 
 	construct_runtime!(

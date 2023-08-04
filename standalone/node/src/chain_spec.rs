@@ -17,7 +17,6 @@ use std::{collections::BTreeMap, marker::PhantomData};
 use crate::testnet_fixtures::{
 	get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 };
-use consensus_types::network_config::{Network, NetworkConfig};
 use dkg_runtime_primitives::{ResourceId, TypedChainId};
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -560,8 +559,8 @@ fn testnet_genesis(
 	let eth2_goerli_network_config: NetworkConfig =
 		NetworkConfig::new(&Network::from_str("goerli").unwrap());
 	// (TypedChainId, [u8; 32], ForkVersion, u64)
-	let eth2_mainnet_genesis_config = (TypedChainId::Evm(1), eth2_mainnet_network_config);
-	let eth2_goerli_genesis_config = (TypedChainId::Evm(5), eth2_goerli_network_config);
+	let _eth2_mainnet_genesis_config = (TypedChainId::Evm(1), eth2_mainnet_network_config);
+	let _eth2_goerli_genesis_config = (TypedChainId::Evm(5), eth2_goerli_network_config);
 	RuntimeGenesisConfig {
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
