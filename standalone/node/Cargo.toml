@@ -45,9 +45,11 @@ webb-relayer-gadget-cli = { workspace = true }
 # Substrate dependencies
 sc-cli = { workspace = true }
 sc-executor = { workspace = true }
+sc-offchain = { workspace = true }
 sc-keystore = { workspace = true }
 sc-service = { workspace = true }
 sp-core = { workspace = true }
+webb-consensus-types = {workspace = true}
 
 frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
