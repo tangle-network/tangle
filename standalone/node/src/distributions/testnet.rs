@@ -81,7 +81,7 @@ pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 	const ENDOWMENT: u128 = 100 * ONE_TOKEN;
 	get_edgeware_genesis_list()
 		.into_iter()
-		.chain(get_discord_list().into_iter())
+		.chain(get_discord_list())
 		.map(|address| {
 			(
 				address,
