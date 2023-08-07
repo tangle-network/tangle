@@ -13,7 +13,7 @@ use tangle_runtime::{AccountId, Balance};
 
 fn get_git_root() -> PathBuf {
 	let git_root = std::process::Command::new("git")
-		.args(&["rev-parse", "--show-toplevel"])
+		.args(["rev-parse", "--show-toplevel"])
 		.output()
 		.expect("Failed to get git root")
 		.stdout;
@@ -81,6 +81,7 @@ pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 	const ENDOWMENT: u128 = 100 * ONE_TOKEN;
 	get_edgeware_genesis_list()
 		.into_iter()
+		.chain(get_discord_list().into_iter())
 		.map(|address| {
 			(
 				address,
