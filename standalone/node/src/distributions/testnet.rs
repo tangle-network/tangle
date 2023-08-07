@@ -1,41 +1,55 @@
-use std::{fs::File, io::Read, str::FromStr};
+use std::{
+	fs::File,
+	io::Read,
+	path::{Path, PathBuf},
+	str::FromStr,
+};
 
 use fp_evm::GenesisAccount;
+use serde_json::Value;
 use sp_core::{crypto::Ss58Codec, H160, U256};
 use sp_runtime::AccountId32;
 use tangle_runtime::{AccountId, Balance};
 
-/// Read in the list of Ethereum addresses from  `edgeware_participation.json`
-/// and return the list.
-fn get_edgeware_participation_list() -> Vec<H160> {
-	// Print the current directory
-	let mut file = File::open("./src/distributions/data/edgeware_genesis_participants.json")
-		.expect("file should open read only");
+fn get_git_root() -> PathBuf {
+	let git_root = std::process::Command::new("git")
+		.args(&["rev-parse", "--show-toplevel"])
+		.output()
+		.expect("Failed to get git root")
+		.stdout;
+	let git_root_str = String::from_utf8(git_root).expect("Invalid UTF-8 sequence");
+	PathBuf::from(git_root_str.trim())
+}
+
+fn read_contents(path: &Path) -> Value {
+	let mut file = File::open(path).expect("file should open read only");
 	let mut contents = String::new();
 	file.read_to_string(&mut contents).expect("file should be readable");
 	let json: serde_json::Value =
 		serde_json::from_str(&contents).expect("file should be proper JSON");
-	let mut addresses = Vec::new();
-	for address in json.as_array().expect("should be an array") {
-		addresses.push(
+	json
+}
+
+fn read_contents_to_evm_accounts(path_str: &str) -> Vec<H160> {
+	let mut path = get_git_root();
+	path.push(path_str);
+	let json = read_contents(&path);
+	let mut accounts = Vec::new();
+	for address in json.as_array().expect("should be an object") {
+		accounts.push(
 			H160::from_str(address.as_str().expect("should be a string"))
 				.expect("should be a valid address"),
 		);
 	}
-	addresses
+	accounts
 }
 
-/// Read in the list of Kabocha public keys, convert them to `AccountId`,
-/// and return the list.
-fn get_kabocha_participation_list() -> Vec<AccountId> {
-	let mut file = File::open("./src/distributions/data/edgeware_snapshot_participants.json")
-		.expect("file should open read only");
-	let mut contents = String::new();
-	file.read_to_string(&mut contents).expect("file should be readable");
-	let json: serde_json::Value =
-		serde_json::from_str(&contents).expect("file should be proper JSON");
+fn read_contents_to_substrate_accounts(path_str: &str) -> Vec<AccountId> {
+	let mut path = get_git_root();
+	path.push(path_str);
+	let json = read_contents(&path);
 	let mut accounts = Vec::new();
-	for address in json.as_array().expect("should be an array") {
+	for address in json.as_array().expect("should be an object") {
 		accounts.push(
 			AccountId::from_ss58check(address.as_str().expect("should be a string"))
 				.expect("should be a valid address"),
@@ -44,12 +58,28 @@ fn get_kabocha_participation_list() -> Vec<AccountId> {
 	accounts
 }
 
-/// Read in the list of Ethereum addresses from  `edgeware_genesis.json`
-/// and return the list, giving each address a balance.
+fn get_edgeware_genesis_list() -> Vec<H160> {
+	read_contents_to_evm_accounts(
+		"standalone/node/src/distributions/data/edgeware_genesis_participants.json",
+	)
+}
+
+fn get_edgeware_snapshot_list() -> Vec<AccountId> {
+	read_contents_to_substrate_accounts(
+		"standalone/node/src/distributions/data/edgeware_snapshot_participants.json",
+	)
+}
+
+fn get_discord_list() -> Vec<H160> {
+	read_contents_to_evm_accounts(
+		"standalone/node/src/distributions/data/discord_evm_addresses.json",
+	)
+}
+
 pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 	const ONE_TOKEN: u128 = 1_000_000_000_000_000_000;
 	const ENDOWMENT: u128 = 100 * ONE_TOKEN;
-	get_edgeware_participation_list()
+	get_edgeware_genesis_list()
 		.into_iter()
 		.map(|address| {
 			(
@@ -65,12 +95,10 @@ pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 		.collect()
 }
 
-/// Read in the list of Kabocha public keys from `kabocha_genesis.json`
-/// and return the list, giving each address a balance.
 pub fn get_substrate_balance_distribution() -> Vec<(AccountId32, Balance)> {
 	const ONE_TOKEN: u128 = 1_000_000_000_000_000_000;
 	const ENDOWMENT: u128 = 100 * ONE_TOKEN;
-	get_kabocha_participation_list()
+	get_edgeware_snapshot_list()
 		.into_iter()
 		.map(|address| (address, Balance::from(ENDOWMENT)))
 		.collect()
