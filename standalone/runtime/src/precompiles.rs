@@ -21,6 +21,7 @@ use pallet_evm_precompile_preimage::PreimagePrecompile;
 use pallet_evm_precompile_registry::PrecompileRegistry;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
+use pallet_evm_precompile_staking::StakingPrecompile;
 use precompile_utils::precompile_set::{
 	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, OnlyFrom,
 	PrecompileAt, PrecompileSetBuilder, SubcallWithMaxNesting,
@@ -42,6 +43,11 @@ pub type WebbPrecompilesAt<R> = (
 	PrecompileAt<AddressU64<9>, Blake2F, EthereumPrecompilesChecks>,
 	PrecompileAt<AddressU64<1024>, Sha3FIPS256, (CallableByContract, CallableByPrecompile)>,
 	PrecompileAt<AddressU64<1026>, ECRecoverPublicKey, (CallableByContract, CallableByPrecompile)>,
+	PrecompileAt<
+		AddressU64<2048>,
+		StakingPrecompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
 	// Moonbeam precompiles
 	PrecompileAt<
 		AddressU64<2051>,

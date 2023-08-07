@@ -1,5 +1,5 @@
 [workspace.package]
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
@@ -229,6 +229,8 @@ pallet-evm-precompile-call-permit = { path = "precompiles/call-permit", default-
 pallet-evm-precompile-proxy = { path = "precompiles/proxy", default-features = false }
 pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-features = false }
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
+pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
+
 
 # EVM & Ethereum
 # (wasm)
@@ -276,7 +278,6 @@ sc-transaction-pool-api = { git = "https://github.com/paritytech/substrate", bra
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 # Webb dependencies
 tangle-primitives = { path = 'primitives', default-features = false }
-# pallet-parachain-staking = { path = 'pallets/parachain-staking', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
 pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.0.0-fixes" }
