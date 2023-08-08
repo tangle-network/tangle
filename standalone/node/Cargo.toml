@@ -24,6 +24,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 substrate-build-script-utils = { workspace = true }
 
 [dependencies]
+serde_json = { workspace = true }
 tokio = { workspace = true }
 clap = { workspace = true }
 parity-scale-codec = { workspace = true }
