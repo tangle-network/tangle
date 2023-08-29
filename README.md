@@ -39,7 +39,7 @@
 The Tangle Network contains runtimes for standalone node featuring Webb's DKG and privacy pallet protocols.If you would like to familiarize yourself with Tangle and DKG protocol check out following repo and docs:
 
 - [Dkg Substrate Protocol](https://github.com/webb-tools/dkg-substrate)
-- [Tangle Docs](https://docs.webb.tools/docs/projects/tangle-network/overview/)
+- [Tangle Docs](https://docs.webb.tools/docs/tangle-network/overview/) 
 - [Tangle Website](https://tangle.webb.tools/)
 
 
