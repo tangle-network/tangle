@@ -1,5 +1,5 @@
 [workspace.package]
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
@@ -92,7 +92,7 @@ orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-li
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 sp-block-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
-sp-consensus-aura = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sp-consensus-babe = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 sp-inherents = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
@@ -132,7 +132,9 @@ frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", bran
 sc-basic-authorship = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sc-client-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sc-consensus = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
+sc-consensus-babe = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sc-consensus-aura = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
+sp-consensus-aura = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sc-network-common = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sc-telemetry = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sc-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
@@ -150,7 +152,7 @@ sp-keystore = { default-features = false, git = "https://github.com/paritytech/s
 sc-client-db = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sp-application-crypto = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 
-pallet-aura = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+pallet-babe = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 pallet-bags-list = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 pallet-session = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 
@@ -252,7 +254,7 @@ xcm-executor = { git = "https://github.com/paritytech/polkadot", branch = "relea
 # Cumulus dependencies
 cumulus-primitives-core = { default-features = false, git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v1.0.0" }
 cumulus-client-cli = { default-features = false, git = "https://github.com/paritytech/cumulus", branch = "polkadot-v1.0.0" }
-cumulus-client-consensus-aura = { default-features = false, git = "https://github.com/paritytech/cumulus", branch = "polkadot-v1.0.0" }
+cumulus-client-consensus-babe = { default-features = false, git = "https://github.com/paritytech/cumulus", branch = "polkadot-v1.0.0" }
 cumulus-client-consensus-common = { default-features = false, git = "https://github.com/paritytech/cumulus", branch = "polkadot-v1.0.0" }
 cumulus-client-network = { default-features = false, git = "https://github.com/paritytech/cumulus", branch = "polkadot-v1.0.0" }
 cumulus-client-service = { default-features = false, git = "https://github.com/paritytech/cumulus", branch = "polkadot-v1.0.0" }
