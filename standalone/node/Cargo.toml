@@ -109,8 +109,15 @@ rpc-primitives-txpool = { workspace = true }
 primitives-ext = { workspace = true }
 sp-transaction-storage-proof = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 sc-statement-store = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sp-statement-store = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 sc-consensus-slots = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
-
+sp-consensus = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sp-keystore = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sc-consensus-babe-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sc-consensus-grandpa-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+mmr-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sc-rpc-spec-v2 = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+substrate-state-trie-migration-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 tangle-runtime = { workspace = true }
 
 [features]
