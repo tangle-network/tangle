@@ -6,20 +6,20 @@
 import '@polkadot/api-base/types/calls';
 
 import type { ApiTypes, AugmentedCall, DecoratedCallBase } from '@polkadot/api-base/types';
-import type { Bytes, Null, Option, Vec, u32 } from '@polkadot/types-codec';
+import type { Bytes, Null, Option, Result, Vec, u32 } from '@polkadot/types-codec';
 import type { AnyNumber, ITuple } from '@polkadot/types-codec/types';
 import type { OpaqueKeyOwnershipProof } from '@polkadot/types/interfaces/babe';
 import type { CheckInherentsResult, InherentData } from '@polkadot/types/interfaces/blockbuilder';
 import type { BlockHash } from '@polkadot/types/interfaces/chain';
 import type { AuthorityId } from '@polkadot/types/interfaces/consensus';
-import type { TransactionV2 } from '@polkadot/types/interfaces/eth';
+import type { EthTransaction, TransactionV2 } from '@polkadot/types/interfaces/eth';
 import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
 import type { AuthorityList, GrandpaEquivocationProof, SetId } from '@polkadot/types/interfaces/grandpa';
 import type { OpaqueMetadata } from '@polkadot/types/interfaces/metadata';
 import type { FeeDetails, RuntimeDispatchInfo } from '@polkadot/types/interfaces/payment';
-import type { AccountId, Balance, Block, Header, Index, KeyTypeId, SlotDuration, Weight } from '@polkadot/types/interfaces/runtime';
+import type { AccountId, Balance, Block, H256, Header, Index, KeyTypeId, SlotDuration, Weight } from '@polkadot/types/interfaces/runtime';
 import type { RuntimeVersion } from '@polkadot/types/interfaces/state';
-import type { ApplyExtrinsicResult } from '@polkadot/types/interfaces/system';
+import type { ApplyExtrinsicResult, DispatchError } from '@polkadot/types/interfaces/system';
 import type { TransactionSource, TransactionValidity } from '@polkadot/types/interfaces/txqueue';
 import type { IExtrinsic, Observable } from '@polkadot/types/types';
 
@@ -102,6 +102,21 @@ declare module '@polkadot/api-base/types/calls' {
        * Returns the version of the runtime.
        **/
       version: AugmentedCall<ApiType, () => Observable<RuntimeVersion>>;
+      /**
+       * Generic call
+       **/
+      [key: string]: DecoratedCallBase<ApiType>;
+    };
+    /** 0xbd78255d4feeea1f/4 */
+    debugRuntimeApi: {
+      /**
+       * Trace all block extrinsics
+       **/
+      traceBlock: AugmentedCall<ApiType, (extrinsics: Vec<Extrinsic> | (Extrinsic | IExtrinsic | string | Uint8Array)[], knownTransactions: Vec<H256> | (H256 | string | Uint8Array)[]) => Observable<Result<ITuple<[]>, DispatchError>>>;
+      /**
+       * Trace transaction extrinsics
+       **/
+      traceTransaction: AugmentedCall<ApiType, (extrinsics: Vec<Extrinsic> | (Extrinsic | IExtrinsic | string | Uint8Array)[], transaction: EthTransaction | { hash?: any; nonce?: any; blockHash?: any; blockNumber?: any; transactionIndex?: any; from?: any; to?: any; value?: any; gasPrice?: any; maxFeePerGas?: any; maxPriorityFeePerGas?: any; gas?: any; input?: any; creates?: any; raw?: any; publicKey?: any; chainId?: any; standardV?: any; v?: any; r?: any; s?: any; accessList?: any; transactionType?: any } | string | Uint8Array) => Observable<Result<ITuple<[]>, DispatchError>>>;
       /**
        * Generic call
        **/
