@@ -470,9 +470,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidProposalBytesLength: AugmentedError<ApiType>;
       /**
+       * the signed data is invalid
+       **/
+      InvalidSignedData: AugmentedError<ApiType>;
+      /**
        * Error names should be descriptive.
        **/
       NoneValue: AugmentedError<ApiType>;
+      /**
+       * The signature does not match current active key
+       **/
+      NotSignedByCurrentDKG: AugmentedError<ApiType>;
       /**
        * Proposal with the ID has already been submitted
        **/
@@ -485,6 +493,10 @@ declare module '@polkadot/api-base/types/errors' {
        * No proposal with the ID was found
        **/
       ProposalDoesNotExists: AugmentedError<ApiType>;
+      /**
+       * the prposal exists on runtime and is valid
+       **/
+      ProposalExistsAndIsValid: AugmentedError<ApiType>;
       /**
        * Proposal format is invalid
        **/
@@ -737,7 +749,10 @@ declare module '@polkadot/api-base/types/errors' {
       [key: string]: AugmentedError<ApiType>;
     };
     eth2Client: {
-      ActiveHeaderSlotNumberLessThanFinalizedSlot: AugmentedError<ApiType>;
+      /**
+       * The active header slot number should be higher than the finalized slot
+       **/
+      ActiveHeaderSlotLessThanFinalizedSlot: AugmentedError<ApiType>;
       /**
        * The light client is already initialized for the typed chain ID
        **/
@@ -746,21 +761,46 @@ declare module '@polkadot/api-base/types/errors' {
        * Block already submitted
        **/
       BlockAlreadySubmitted: AugmentedError<ApiType>;
+      /**
+       * The block hash does not match the expected block hash
+       **/
       BlockHashesDoNotMatch: AugmentedError<ApiType>;
+      /**
+       * The chain cannot be closed
+       **/
+      ChainCannotBeClosed: AugmentedError<ApiType>;
       CurrentSyncCommitteeNotSet: AugmentedError<ApiType>;
       FinalizedBeaconHeaderNotPresent: AugmentedError<ApiType>;
       FinalizedExecutionHeaderNotPresent: AugmentedError<ApiType>;
-      ForkEpochNotFound: AugmentedError<ApiType>;
-      ForkVersionNotFound: AugmentedError<ApiType>;
-      GenesisValidatorsRootNotFound: AugmentedError<ApiType>;
+      /**
+       * "The `hashes_gc_threshold` is not enough to be able to apply gc correctly"
+       **/
+      HashesGcThresholdInsufficient: AugmentedError<ApiType>;
       HeaderHashDoesNotExist: AugmentedError<ApiType>;
+      /**
+       * Failed to verify the bls signature
+       **/
       InvalidBlsSignature: AugmentedError<ApiType>;
+      /**
+       * The current client mode is invalid for the action.
+       **/
+      InvalidClientMode: AugmentedError<ApiType>;
       InvalidExecutionBlock: AugmentedError<ApiType>;
+      /**
+       * Invalid execution block hash proof
+       **/
       InvalidExecutionBlockHashProof: AugmentedError<ApiType>;
+      /**
+       * Invalid finality proof
+       **/
       InvalidFinalityProof: AugmentedError<ApiType>;
+      InvalidNetworkConfig: AugmentedError<ApiType>;
       InvalidNextSyncCommitteeProof: AugmentedError<ApiType>;
       InvalidSignaturePeriod: AugmentedError<ApiType>;
       InvalidSyncCommitteeBitsSum: AugmentedError<ApiType>;
+      /**
+       * The acceptable update periods are not met.
+       **/
       InvalidUpdatePeriod: AugmentedError<ApiType>;
       /**
        * For attempting to update the light client
@@ -772,19 +812,6 @@ declare module '@polkadot/api-base/types/errors' {
        * Self-explanatory
        **/
       NotTrustedSigner: AugmentedError<ApiType>;
-      /**
-       * For attempting to register
-       **/
-      SubmitterAlreadyRegistered: AugmentedError<ApiType>;
-      SubmitterExhaustedLimit: AugmentedError<ApiType>;
-      /**
-       * For attempting to unregister
-       **/
-      SubmitterHasUsedStorage: AugmentedError<ApiType>;
-      /**
-       * For attempting to unregister
-       **/
-      SubmitterNotRegistered: AugmentedError<ApiType>;
       SyncCommitteeBitsSumLessThanThreshold: AugmentedError<ApiType>;
       SyncCommitteeUpdateNotPresent: AugmentedError<ApiType>;
       /**
@@ -797,6 +824,14 @@ declare module '@polkadot/api-base/types/errors' {
        * Unknown parent block header hash
        **/
       UnknownParentHeader: AugmentedError<ApiType>;
+      /**
+       * The attested header slot should be equal to or higher than the finalized header slot
+       **/
+      UpdateHeaderSlotLessThanFinalizedHeaderSlot: AugmentedError<ApiType>;
+      /**
+       * The signature slot should be higher than the attested header slot
+       **/
+      UpdateSignatureSlotLessThanAttestedHeaderSlot: AugmentedError<ApiType>;
       /**
        * The updates validation can't be disabled for mainnet
        **/
@@ -1060,6 +1095,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Not enough blocks have surpassed since the last commission update.
        **/
       CommissionChangeThrottled: AugmentedError<ApiType>;
+      /**
+       * The supplied commission exceeds global maximum commission.
+       **/
+      CommissionExceedsGlobalMaximum: AugmentedError<ApiType>;
       /**
        * The supplied commission exceeds the max allowed commission.
        **/
