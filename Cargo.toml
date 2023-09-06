@@ -280,8 +280,8 @@ sc-consensus-manual-seal = { git = "https://github.com/paritytech/substrate", br
 tangle-primitives = { path = 'primitives', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.0.0-fixes" }
-webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.0.0-fixes" }
+pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "main" }
+webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "main" }
 
 primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }
