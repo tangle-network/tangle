@@ -43,6 +43,7 @@ dkg-runtime-primitives = { workspace = true }
 pallet-bridge-registry = { workspace = true }
 webb-relayer-gadget = { workspace = true }
 webb-relayer-gadget-cli = { workspace = true }
+webb-proposals = { workspace = true }
 
 # Substrate dependencies
 sc-cli = { workspace = true }
