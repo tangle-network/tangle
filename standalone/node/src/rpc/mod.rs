@@ -14,6 +14,10 @@
 #![warn(missing_docs)]
 #![warn(unused_crate_dependencies)]
 
+pub mod tracing;
+pub mod eth;
+pub use tracing::*;
+pub use eth::*;
 use std::sync::Arc;
 
 use jsonrpsee::RpcModule;
@@ -101,7 +105,6 @@ where
 		+ Send
 		+ 'static,
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
-	C::Api: mmr_rpc::MmrRuntimeApi<Block, <Block as sp_runtime::traits::Block>::Hash, BlockNumber>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: BabeApi<Block>,
 	C::Api: BlockBuilder<Block>,
@@ -140,18 +143,6 @@ where
 	io.merge(ChainSpec::new(chain_name, genesis_hash, properties).into_rpc())?;
 
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
-	// Making synchronous calls in light client freezes the browser currently,
-	// more context: https://github.com/paritytech/substrate/pull/3480
-	// These RPCs should use an asynchronous caller instead.
-	io.merge(
-		Mmr::new(
-			client.clone(),
-			backend
-				.offchain_storage()
-				.ok_or_else(|| "Backend doesn't provide an offchain storage")?,
-		)
-		.into_rpc(),
-	)?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
 	io.merge(
 		Babe::new(client.clone(), babe_worker_handle.clone(), keystore, select_chain, deny_unsafe)

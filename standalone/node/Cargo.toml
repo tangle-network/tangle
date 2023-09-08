@@ -118,6 +118,13 @@ sc-consensus-grandpa-rpc = { git = "https://github.com/paritytech/substrate", br
 mmr-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 sc-rpc-spec-v2 = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 substrate-state-trie-migration-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sc-sync-state-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sc-sysinfo = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sc-authority-discovery = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sc-storage-monitor = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sc-network-statement = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sc-network-common = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+frame-system-rpc-runtime-api = { workspace = true }
 tangle-runtime = { workspace = true }
 
 [features]

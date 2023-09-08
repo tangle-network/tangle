@@ -59,6 +59,7 @@ use sp_runtime::{
 	},
 	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, SaturatedConversion,
 };
+use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -177,6 +178,7 @@ pub mod opaque {
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
 			pub dkg: DKG,
+			pub authority_discovery: AuthorityDiscovery,
 		}
 	}
 }
@@ -840,6 +842,10 @@ impl pallet_bridge_registry::Config for Runtime {
 	type WeightInfo = ();
 }
 
+impl pallet_authority_discovery::Config for Runtime {
+	type MaxAuthorities = MaxAuthorities;
+}
+
 parameter_types! {
 	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 	/// We prioritize im-online heartbeats over election solution submission.
@@ -1167,6 +1173,7 @@ construct_runtime!(
 
 		TransactionPause: pallet_transaction_pause,
 		ImOnline: pallet_im_online,
+		AuthorityDiscovery: pallet_authority_discovery,
 		Identity: pallet_identity,
 		Utility: pallet_utility,
 
@@ -1706,6 +1713,42 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl sp_consensus_grandpa::GrandpaApi<Block> for Runtime {
+		fn grandpa_authorities() -> sp_consensus_grandpa::AuthorityList {
+			Grandpa::grandpa_authorities()
+		}
+
+		fn current_set_id() -> sp_consensus_grandpa::SetId {
+			Grandpa::current_set_id()
+		}
+
+		fn submit_report_equivocation_unsigned_extrinsic(
+			equivocation_proof: sp_consensus_grandpa::EquivocationProof<
+				<Block as BlockT>::Hash,
+				NumberFor<Block>,
+			>,
+			key_owner_proof: sp_consensus_grandpa::OpaqueKeyOwnershipProof,
+		) -> Option<()> {
+			let key_owner_proof = key_owner_proof.decode()?;
+
+			Grandpa::submit_unsigned_equivocation_report(
+				equivocation_proof,
+				key_owner_proof,
+			)
+		}
+
+		fn generate_key_ownership_proof(
+			_set_id: sp_consensus_grandpa::SetId,
+			authority_id: GrandpaId,
+		) -> Option<sp_consensus_grandpa::OpaqueKeyOwnershipProof> {
+			use parity_scale_codec::Encode;
+
+			Historical::prove((sp_consensus_grandpa::KEY_TYPE, authority_id))
+				.map(|p| p.encode())
+				.map(sp_consensus_grandpa::OpaqueKeyOwnershipProof::new)
+		}
+	}
+
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn decode_session_keys(
 			encoded: Vec<u8>,
@@ -1767,6 +1810,12 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl sp_authority_discovery::AuthorityDiscoveryApi<Block> for Runtime {
+		fn authorities() -> Vec<AuthorityDiscoveryId> {
+			AuthorityDiscovery::authorities()
+		}
+	}
+
 	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce> for Runtime {
 		fn account_nonce(account: AccountId) -> Nonce {
 			System::account_nonce(account)
@@ -1788,42 +1837,6 @@ impl_runtime_apis! {
 		}
 		fn query_length_to_fee(length: u32) -> Balance {
 			TransactionPayment::length_to_fee(length)
-		}
-	}
-
-	impl fg_primitives::GrandpaApi<Block> for Runtime {
-		fn grandpa_authorities() -> GrandpaAuthorityList {
-			Grandpa::grandpa_authorities()
-		}
-
-		fn current_set_id() -> fg_primitives::SetId {
-			Grandpa::current_set_id()
-		}
-
-		fn submit_report_equivocation_unsigned_extrinsic(
-			equivocation_proof: fg_primitives::EquivocationProof<
-				<Block as BlockT>::Hash,
-				NumberFor<Block>,
-			>,
-			key_owner_proof: fg_primitives::OpaqueKeyOwnershipProof,
-		) -> Option<()> {
-			let key_owner_proof = key_owner_proof.decode()?;
-
-			Grandpa::submit_unsigned_equivocation_report(
-				equivocation_proof,
-				key_owner_proof,
-			)
-		}
-
-		fn generate_key_ownership_proof(
-			_set_id: fg_primitives::SetId,
-			authority_id: GrandpaId,
-		) -> Option<fg_primitives::OpaqueKeyOwnershipProof> {
-			use parity_scale_codec::Encode;
-
-			Historical::prove((fg_primitives::KEY_TYPE, authority_id))
-				.map(|p| p.encode())
-				.map(fg_primitives::OpaqueKeyOwnershipProof::new)
 		}
 	}
 

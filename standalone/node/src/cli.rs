@@ -14,7 +14,7 @@
 #![allow(clippy::all)]
 use sc_cli::RunCmd;
 
-use crate::service::EthConfiguration;
+// use crate::service::EthConfiguration;
 
 #[derive(Debug, clap::Parser)]
 pub struct Cli {
@@ -28,8 +28,8 @@ pub struct Cli {
 	#[arg(long, short = 'o')]
 	pub output_path: Option<std::path::PathBuf>,
 
-	#[command(flatten)]
-	pub eth: EthConfiguration,
+	// #[command(flatten)]
+	// pub eth: EthConfiguration,
 
 	#[clap(flatten)]
 	pub relayer_cmd: webb_relayer_gadget_cli::WebbRelayerCmd,
