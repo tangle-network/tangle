@@ -11,7 +11,7 @@ import type { Bytes, Null, Option, Struct, U256, U8aFixed, Vec, bool, u128, u16,
 import type { AnyNumber, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
 import type { Observable } from '@polkadot/types/types';
-import { DkgRuntimePrimitivesAggregatedMisbehaviourReports, DkgRuntimePrimitivesCryptoPublic, DkgRuntimePrimitivesMisbehaviourType, DkgRuntimePrimitivesProposalRefreshProposal, DkgRuntimePrimitivesProposalSignedProposalBatch, DkgRuntimePrimitivesProposalStoredUnsignedProposalBatch, DkgRuntimePrimitivesUnsignedProposal, EthTypesEth2ExtendedBeaconBlockHeader, EthTypesEth2SyncCommittee, EthTypesExecutionHeaderInfo, EthereumBlock, EthereumReceiptReceiptV3, EthereumTransactionTransactionV2, FpRpcTransactionStatus, FrameSupportDispatchPerDispatchClassWeight, FrameSupportPreimagesBounded, FrameSystemAccountInfo, FrameSystemEventRecord, FrameSystemLastRuntimeUpgradeInfo, FrameSystemPhase, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesBalanceLock, PalletBalancesIdAmount, PalletBalancesReserveData, PalletBountiesBounty, PalletBridgeRegistryBridgeMetadata, PalletChildBountiesChildBounty, PalletCollectiveVotes, PalletDemocracyMetadataOwner, PalletDemocracyReferendumInfo, PalletDemocracyVoteThreshold, PalletDemocracyVoteVoting, PalletDkgMetadataRoundMetadata, EthTypesClientMode, PalletDkgProposalsProposalVotes, PalletEcdsaClaimsEthereumAddress, PalletEcdsaClaimsStatementKind, PalletElectionProviderMultiPhasePhase, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, PalletEvmCodeMetadata, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletIdentityRegistrarInfo, PalletIdentityRegistration, TangleStandaloneRuntimeRuntimeHoldReason, WebbConsensusTypesNetworkConfig, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, PalletPreimageRequestStatus, PalletSchedulerScheduled, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingForcing, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingStakingLedger, PalletStakingUnappliedSlash, PalletStakingValidatorPrefs, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletVestingReleases, PalletVestingVestingInfo, SpConsensusAuraSr25519AppSr25519Public, SpCoreCryptoKeyTypeId, SpNposElectionsElectionScore, SpRuntimeDigest, SpStakingOffenceOffenceDetails, TangleStandaloneRuntimeOpaqueSessionKeys, WebbProposalsHeaderResourceId, WebbProposalsHeaderTypedChainId, WebbProposalsProposal } from '@polkadot/types/lookup';
+import { DkgRuntimePrimitivesAggregatedMisbehaviourReports, DkgRuntimePrimitivesCryptoPublic, DkgRuntimePrimitivesMisbehaviourType, DkgRuntimePrimitivesProposalRefreshProposal, DkgRuntimePrimitivesProposalSignedProposalBatch, DkgRuntimePrimitivesProposalStoredUnsignedProposalBatch, DkgRuntimePrimitivesUnsignedProposal, EthTypesEth2ExtendedBeaconBlockHeader, EthTypesEth2SyncCommittee, EthTypesExecutionHeaderInfo, EthereumBlock, EthereumReceiptReceiptV3, EthereumTransactionTransactionV2, FpRpcTransactionStatus, FrameSupportDispatchPerDispatchClassWeight, FrameSupportPreimagesBounded, FrameSystemAccountInfo, FrameSystemEventRecord, FrameSystemLastRuntimeUpgradeInfo, FrameSystemPhase, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesBalanceLock, PalletBalancesIdAmount, PalletBalancesReserveData, PalletBountiesBounty, PalletBridgeRegistryBridgeMetadata, PalletChildBountiesChildBounty, PalletCollectiveVotes, PalletDemocracyMetadataOwner, PalletDemocracyReferendumInfo, PalletDemocracyVoteThreshold, PalletDemocracyVoteVoting, PalletDkgMetadataRoundMetadata, EthTypesClientMode, PalletDkgProposalsProposalVotes, PalletElectionProviderMultiPhasePhase, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, PalletEvmCodeMetadata, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletIdentityRegistrarInfo, PalletIdentityRegistration, TangleStandaloneRuntimeRuntimeHoldReason, WebbConsensusTypesNetworkConfig, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, PalletPreimageRequestStatus, PalletSchedulerScheduled, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingForcing, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingStakingLedger, PalletStakingUnappliedSlash, PalletStakingValidatorPrefs, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletVestingReleases, PalletVestingVestingInfo, SpConsensusAuraSr25519AppSr25519Public, SpCoreCryptoKeyTypeId, SpNposElectionsElectionScore, SpRuntimeDigest, SpStakingOffenceOffenceDetails, TangleStandaloneRuntimeOpaqueSessionKeys, WebbProposalsHeaderResourceId, WebbProposalsHeaderTypedChainId, WebbProposalsProposal } from '@polkadot/types/lookup';
 
 export type __AugmentedQuery<ApiType extends ApiTypes> = AugmentedQuery<ApiType, () => unknown>;
 export type __QueryableStorageEntry<ApiType extends ApiTypes> = QueryableStorageEntry<ApiType>;
@@ -197,33 +197,6 @@ declare module '@polkadot/api-base/types/storage' {
        * Map of parent bounty index to number of child bounties.
        **/
       parentChildBounties: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<u32>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
-      /**
-       * Generic query
-       **/
-      [key: string]: QueryableStorageEntry<ApiType>;
-    };
-    claims: {
-      claims: AugmentedQuery<ApiType, (arg: PalletEcdsaClaimsEthereumAddress | string | Uint8Array) => Observable<Option<u128>>, [PalletEcdsaClaimsEthereumAddress]> & QueryableStorageEntry<ApiType, [PalletEcdsaClaimsEthereumAddress]>;
-      /**
-       * Expiry block and account to deposit expired funds
-       **/
-      expiryConfig: AugmentedQuery<ApiType, () => Observable<Option<ITuple<[u32, AccountId32]>>>, []> & QueryableStorageEntry<ApiType, []>;
-      /**
-       * Pre-claimed Ethereum accounts, by the Account ID that they are claimed to.
-       **/
-      preclaims: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Option<PalletEcdsaClaimsEthereumAddress>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
-      /**
-       * The statement kind that must be signed, if any.
-       **/
-      signing: AugmentedQuery<ApiType, (arg: PalletEcdsaClaimsEthereumAddress | string | Uint8Array) => Observable<Option<PalletEcdsaClaimsStatementKind>>, [PalletEcdsaClaimsEthereumAddress]> & QueryableStorageEntry<ApiType, [PalletEcdsaClaimsEthereumAddress]>;
-      total: AugmentedQuery<ApiType, () => Observable<u128>, []> & QueryableStorageEntry<ApiType, []>;
-      /**
-       * Vesting schedule for a claim.
-       * First balance is the total amount that should be held for vesting.
-       * Second balance is how much should be unlocked per block.
-       * The block number is when the vesting should start.
-       **/
-      vesting: AugmentedQuery<ApiType, (arg: PalletEcdsaClaimsEthereumAddress | string | Uint8Array) => Observable<Option<ITuple<[u128, u128, u32]>>>, [PalletEcdsaClaimsEthereumAddress]> & QueryableStorageEntry<ApiType, [PalletEcdsaClaimsEthereumAddress]>;
       /**
        * Generic query
        **/

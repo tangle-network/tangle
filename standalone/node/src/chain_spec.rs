@@ -29,10 +29,10 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_runtime::{
-	AccountId, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId, DKGProposalsConfig,
-	EVMChainIdConfig, EVMConfig, ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxNominations,
-	Perbill, RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig,
-	SudoConfig, SystemConfig, UNIT, WASM_BINARY,
+	AccountId, Balance, BalancesConfig, DKGConfig, DKGId, DKGProposalsConfig, EVMChainIdConfig,
+	EVMConfig, ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill,
+	RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
+	SystemConfig, UNIT, WASM_BINARY,
 };
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
@@ -594,7 +594,6 @@ fn testnet_genesis(
 			code: wasm_binary.to_vec(),
 			..Default::default()
 		},
-		claims: ClaimsConfig { claims: vec![], vesting: vec![], expiry: None },
 		sudo: SudoConfig { key: Some(root_key) },
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.

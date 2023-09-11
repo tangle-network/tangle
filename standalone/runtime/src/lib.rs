@@ -29,7 +29,7 @@ use frame_election_provider_support::{
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
 use frame_support::{
-	traits::{OnFinalize, WithdrawReasons},
+	traits::{Contains, OnFinalize, WithdrawReasons},
 	weights::ConstantMultiplier,
 };
 use pallet_election_provider_multi_phase::SolutionAccuracyOf;
@@ -178,7 +178,7 @@ pub mod opaque {
 impl frame_system::Config for Runtime {
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type AccountId = AccountId;
-	type BaseCallFilter = Everything;
+	type BaseCallFilter = BaseFilter;
 	type BlockHashCount = BlockHashCount;
 	type BlockLength = BlockLength;
 	type Block = Block;
@@ -874,19 +874,6 @@ where
 }
 
 parameter_types! {
-	pub Prefix: &'static [u8] = b"Pay TNTs to the Tangle account:";
-}
-
-impl pallet_ecdsa_claims::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type VestingSchedule = Vesting;
-	type ForceOrigin = EnsureRoot<Self::AccountId>;
-	type Prefix = Prefix;
-	type MoveClaimOrigin = EnsureRoot<Self::AccountId>;
-	type WeightInfo = pallet_ecdsa_claims::TestWeightInfo;
-}
-
-parameter_types! {
 	pub const MinVestedTransfer: Balance = 100 * UNIT;
 	pub UnvestedFundsAllowedWithdrawReasons: WithdrawReasons =
 		WithdrawReasons::except(WithdrawReasons::TRANSFER | WithdrawReasons::RESERVE);
@@ -1094,6 +1081,39 @@ impl pallet_eth2_light_client::Config for Runtime {
 	type Currency = Balances;
 }
 
+pub struct BaseFilter;
+impl Contains<RuntimeCall> for BaseFilter {
+	fn contains(call: &RuntimeCall) -> bool {
+		let is_core_call = matches!(call, RuntimeCall::System(_) | RuntimeCall::Timestamp(_));
+		if is_core_call {
+			// always allow core call
+			return true
+		}
+
+		let is_paused =
+			pallet_transaction_pause::PausedTransactionFilter::<Runtime>::contains(call);
+		if is_paused {
+			// no paused call
+			return false
+		}
+
+		let democracy_related = matches!(
+			call,
+			// Filter democracy proposals creation
+			RuntimeCall::Democracy(_) |
+			// disallow council
+			RuntimeCall::Council(_)
+		);
+
+		if democracy_related {
+			// no democracy call
+			return false
+		}
+
+		true
+	}
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1120,7 +1140,6 @@ construct_runtime!(
 		Democracy: pallet_democracy,
 		Council: pallet_collective::<Instance1>,
 		Vesting: pallet_vesting,
-		Claims: pallet_ecdsa_claims,
 
 		Elections: pallet_elections_phragmen,
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase,
