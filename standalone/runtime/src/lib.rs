@@ -874,19 +874,6 @@ where
 }
 
 parameter_types! {
-	pub Prefix: &'static [u8] = b"Pay TNTs to the Tangle account:";
-}
-
-impl pallet_ecdsa_claims::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type VestingSchedule = Vesting;
-	type ForceOrigin = EnsureRoot<Self::AccountId>;
-	type Prefix = Prefix;
-	type MoveClaimOrigin = EnsureRoot<Self::AccountId>;
-	type WeightInfo = pallet_ecdsa_claims::TestWeightInfo;
-}
-
-parameter_types! {
 	pub const MinVestedTransfer: Balance = 100 * UNIT;
 	pub UnvestedFundsAllowedWithdrawReasons: WithdrawReasons =
 		WithdrawReasons::except(WithdrawReasons::TRANSFER | WithdrawReasons::RESERVE);
@@ -1120,7 +1107,6 @@ construct_runtime!(
 		Democracy: pallet_democracy,
 		Council: pallet_collective::<Instance1>,
 		Vesting: pallet_vesting,
-		Claims: pallet_ecdsa_claims,
 
 		Elections: pallet_elections_phragmen,
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase,
