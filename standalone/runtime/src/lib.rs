@@ -29,7 +29,7 @@ use frame_election_provider_support::{
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
 use frame_support::{
-	traits::{OnFinalize, WithdrawReasons},
+	traits::{Contains, OnFinalize, WithdrawReasons},
 	weights::ConstantMultiplier,
 };
 use pallet_election_provider_multi_phase::SolutionAccuracyOf;
@@ -178,7 +178,7 @@ pub mod opaque {
 impl frame_system::Config for Runtime {
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type AccountId = AccountId;
-	type BaseCallFilter = Everything;
+	type BaseCallFilter = BaseFilter;
 	type BlockHashCount = BlockHashCount;
 	type BlockLength = BlockLength;
 	type Block = Block;
@@ -1079,6 +1079,36 @@ impl pallet_eth2_light_client::Config for Runtime {
 	type StoragePricePerByte = StoragePricePerByte;
 	type PalletId = Eth2ClientPalletId;
 	type Currency = Balances;
+}
+
+pub struct BaseFilter;
+impl Contains<RuntimeCall> for BaseFilter {
+	fn contains(call: &RuntimeCall) -> bool {
+		let is_core_call = matches!(call, RuntimeCall::System(_) | RuntimeCall::Timestamp(_));
+		if is_core_call {
+			// always allow core call
+			return true
+		}
+
+		let is_paused =
+			pallet_transaction_pause::PausedTransactionFilter::<Runtime>::contains(call);
+		if is_paused {
+			// no paused call
+			return false
+		}
+
+		match call {
+			// Filter democracy proposals creation
+			RuntimeCall::Democracy(method) => match method {
+				pallet_democracy::Call::propose { .. } => false,
+				_ => true,
+			},
+			// disallow council
+			RuntimeCall::Council(_) => false,
+
+			_ => true,
+		}
+	}
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
