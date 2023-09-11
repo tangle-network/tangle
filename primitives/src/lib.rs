@@ -129,7 +129,7 @@ pub mod fee {
 /// The number of blocks in one session
 #[allow(clippy::identity_op)]
 #[cfg(feature = "integration-tests")]
-pub const SESSION_PERIOD_BLOCKS: BlockNumber = 20 * crate::time::MINUTES;
+pub const SESSION_PERIOD_BLOCKS: BlockNumber = 5 * crate::time::MINUTES;
 
 #[cfg(not(feature = "integration-tests"))]
 pub const SESSION_PERIOD_BLOCKS: BlockNumber = 6 * crate::time::HOURS;

@@ -46,7 +46,7 @@ cd "$PROJECT_ROOT"
 
 echo "*** Start Webb DKG Node ***"
 # Alice 
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --alice \
+./target/release/tangle-standalone --tmp --chain local --validator -lwarn --alice \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[0]} \
   --rpc-port 9944 \
@@ -55,21 +55,21 @@ echo "*** Start Webb DKG Node ***"
   --ethapi trace,debug \
   --node-key 0000000000000000000000000000000000000000000000000000000000000001 &
 # Bob
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --bob \
+./target/release/tangle-standalone --tmp --chain local --validator -lwarn --bob \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[1]} \
   --rpc-port 9945 \
   --ethapi trace,debug \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Charlie
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --charlie \
+./target/release/tangle-standalone --tmp --chain local --validator -lwarn --charlie \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[1]} \
   --rpc-port 9946 \
   --ethapi trace,debug \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Dave
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --dave \
+./target/release/tangle-standalone --tmp --chain local --validator -lwarn --dave \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[1]} \
   --rpc-port 9947 \

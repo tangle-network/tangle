@@ -9,6 +9,9 @@ use sc_client_api::{
 	client::BlockchainEvents,
 };
 use sc_consensus_babe::BabeWorkerHandle;
+use sc_consensus_grandpa::{
+	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState,
+};
 use sc_consensus_manual_seal::rpc::EngineCommand;
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_rpc_api::DenyUnsafe;
@@ -20,6 +23,7 @@ use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
 use sp_keystore::KeystorePtr;
 use sp_runtime::traits::Block as BlockT;
+use tangle_runtime::BlockNumber;
 
 // Runtime
 use tangle_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
@@ -36,8 +40,22 @@ pub struct BabeDeps {
 	pub keystore: KeystorePtr,
 }
 
+/// Extra dependencies for GRANDPA
+pub struct GrandpaDeps<B> {
+	/// Voting round info.
+	pub shared_voter_state: SharedVoterState,
+	/// Authority set info.
+	pub shared_authority_set: SharedAuthoritySet<Hash, BlockNumber>,
+	/// Receives notifications about justification events from Grandpa.
+	pub justification_stream: GrandpaJustificationStream<Block>,
+	/// Executor to drive the subscription manager in the Grandpa RPC handler.
+	pub subscription_executor: SubscriptionTaskExecutor,
+	/// Finality proof provider.
+	pub finality_provider: Arc<FinalityProofProvider<B, Block>>,
+}
+
 /// Full client dependencies.
-pub struct FullDeps<C, P, A: ChainApi, CT, SC> {
+pub struct FullDeps<C, P, A: ChainApi, CT, SC, B> {
 	/// The client instance to use.
 	pub client: Arc<C>,
 	/// Transaction pool instance.
@@ -52,6 +70,8 @@ pub struct FullDeps<C, P, A: ChainApi, CT, SC> {
 	pub babe: BabeDeps,
 	/// The SelectChain Strategy
 	pub select_chain: SC,
+	/// GRANDPA specific dependencies.
+	pub grandpa: GrandpaDeps<B>,
 }
 
 pub struct DefaultEthConfig<C, BE>(std::marker::PhantomData<(C, BE)>);
@@ -67,8 +87,8 @@ where
 }
 
 /// Instantiate all Full RPC extensions.
-pub fn create_full<C, P, BE, A, CT, SC>(
-	deps: FullDeps<C, P, A, CT, SC>,
+pub fn create_full<C, P, BE, A, CT, SC, B>(
+	deps: FullDeps<C, P, A, CT, SC, B>,
 	subscription_task_executor: SubscriptionTaskExecutor,
 	pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
@@ -95,16 +115,32 @@ where
 	A: ChainApi<Block = Block> + 'static,
 	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
 	SC: SelectChain<Block> + 'static,
+	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
+	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::HashFor<Block>>,
 {
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
+	use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
 	use sc_consensus_manual_seal::rpc::{ManualSeal, ManualSealApiServer};
+	use sc_rpc::{
+		dev::{Dev, DevApiServer},
+		statement::StatementApiServer,
+	};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
-	let FullDeps { client, pool, deny_unsafe, command_sink, eth, babe, select_chain } = deps;
+	let FullDeps { client, pool, deny_unsafe, command_sink, eth, babe, select_chain, grandpa } =
+		deps;
 
 	let BabeDeps { keystore, babe_worker_handle } = babe;
+
+	let GrandpaDeps {
+		shared_voter_state,
+		shared_authority_set,
+		justification_stream,
+		subscription_executor,
+		finality_provider,
+	} = grandpa;
 
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
@@ -121,6 +157,17 @@ where
 			ManualSeal::new(command_sink).into_rpc(),
 		)?;
 	}
+
+	io.merge(
+		Grandpa::new(
+			subscription_executor,
+			shared_authority_set.clone(),
+			shared_voter_state,
+			justification_stream,
+			finality_provider,
+		)
+		.into_rpc(),
+	)?;
 
 	// Ethereum compatibility RPCs
 	let io = create_eth::<_, _, _, _, _, _, DefaultEthConfig<C, BE>>(

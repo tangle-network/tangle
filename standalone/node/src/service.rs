@@ -232,9 +232,6 @@ pub fn new_partial(
 		},
 	};
 
-	let frontier_block_import =
-		FrontierBlockImport::new(grandpa_block_import.clone(), client.clone());
-
 	let (block_import, babe_link) = sc_consensus_babe::block_import(
 		sc_consensus_babe::configuration(&*client)?,
 		grandpa_block_import.clone(),
@@ -245,10 +242,12 @@ pub fn new_partial(
 
 	let target_gas_price = eth_config.target_gas_price;
 
+	let frontier_block_import = FrontierBlockImport::new(block_import.clone(), client.clone());
+
 	let (import_queue, babe_worker_handle) =
 		sc_consensus_babe::import_queue(sc_consensus_babe::ImportQueueParams {
 			link: babe_link.clone(),
-			block_import: block_import.clone(),
+			block_import: frontier_block_import.clone(),
 			justification_import: Some(Box::new(grandpa_block_import.clone())),
 			client: client.clone(),
 			select_chain: select_chain.clone(),
@@ -263,7 +262,7 @@ pub fn new_partial(
 
 				let dynamic_fee =
 					fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
-				Ok((slot, timestamp, dynamic_fee))
+				Ok((slot, timestamp))
 			},
 			spawner: &task_manager.spawn_essential_handle(),
 			registry: config.prometheus_registry(),
@@ -366,7 +365,6 @@ pub async fn new_full(
 
 	let role = config.role.clone();
 	let force_authoring = config.force_authoring;
-	let _backoff_authoring_blocks: Option<()> = None;
 	let name = config.network.node_name.clone();
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
@@ -463,35 +461,54 @@ pub async fn new_full(
 		let client = client.clone();
 		let pool = transaction_pool.clone();
 		let pubsub_notification_sinks = pubsub_notification_sinks.clone();
-		Box::new(move |deny_unsafe, subscription_task_executor| {
-			let deps = crate::rpc::FullDeps {
-				client: client.clone(),
-				pool: pool.clone(),
-				deny_unsafe,
-				command_sink: Some(command_sink.clone()),
-				eth: eth_rpc_params.clone(),
-				babe: crate::rpc::BabeDeps {
-					keystore: keystore.clone(),
-					babe_worker_handle: babe_worker_handle.clone(),
-				},
-				select_chain: select_chain_clone.clone(),
-			};
-			if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
-				crate::rpc::create_full(
-					deps,
-					subscription_task_executor,
-					pubsub_notification_sinks.clone(),
-				)
-				.map_err(Into::into)
-			} else {
-				crate::rpc::create_full(
-					deps,
-					subscription_task_executor,
-					pubsub_notification_sinks.clone(),
-				)
-				.map_err(Into::into)
-			}
-		})
+		let justification_stream = grandpa_link.justification_stream();
+		let shared_authority_set = grandpa_link.shared_authority_set().clone();
+		let shared_voter_state = sc_consensus_grandpa::SharedVoterState::empty();
+		let shared_voter_state2 = shared_voter_state.clone();
+
+		let finality_proof_provider = sc_consensus_grandpa::FinalityProofProvider::new_for_service(
+			backend.clone(),
+			Some(shared_authority_set.clone()),
+		);
+
+		Box::new(
+			move |deny_unsafe, subscription_task_executor: sc_rpc::SubscriptionTaskExecutor| {
+				let deps = crate::rpc::FullDeps {
+					client: client.clone(),
+					pool: pool.clone(),
+					deny_unsafe,
+					command_sink: Some(command_sink.clone()),
+					eth: eth_rpc_params.clone(),
+					babe: crate::rpc::BabeDeps {
+						keystore: keystore.clone(),
+						babe_worker_handle: babe_worker_handle.clone(),
+					},
+					select_chain: select_chain_clone.clone(),
+					grandpa: crate::rpc::GrandpaDeps {
+						shared_voter_state: shared_voter_state.clone(),
+						shared_authority_set: shared_authority_set.clone(),
+						justification_stream: justification_stream.clone(),
+						subscription_executor: subscription_task_executor.clone(),
+						finality_provider: finality_proof_provider.clone(),
+					},
+				};
+				if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
+					crate::rpc::create_full(
+						deps,
+						subscription_task_executor,
+						pubsub_notification_sinks.clone(),
+					)
+					.map_err(Into::into)
+				} else {
+					crate::rpc::create_full(
+						deps,
+						subscription_task_executor,
+						pubsub_notification_sinks.clone(),
+					)
+					.map_err(Into::into)
+				}
+			},
+		)
 	};
 
 	spawn_frontier_tasks(
