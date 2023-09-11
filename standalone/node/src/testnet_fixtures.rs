@@ -18,7 +18,7 @@ use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_network::config::MultiaddrWithPeerId;
-use sp_consensus_babe::AuthorityId as BabeId;
+use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::crypto::UncheckedInto;
 use tangle_runtime::AccountId;
 
@@ -51,7 +51,7 @@ pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 
 /// Standalone initial authorities
 pub fn get_standalone_initial_authorities(
-) -> Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId, DKGId)> {
+) -> Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)> {
 	vec![
 		// standalone 1
 		(
