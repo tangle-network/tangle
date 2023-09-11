@@ -18,7 +18,7 @@ use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_network::config::MultiaddrWithPeerId;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::crypto::UncheckedInto;
 use tangle_runtime::AccountId;
 
@@ -51,163 +51,72 @@ pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 
 /// Standalone initial authorities
 pub fn get_standalone_initial_authorities(
-) -> Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)> {
+) -> Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId, DKGId)> {
 	vec![
 		// standalone 1
 		(
-			hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"].into(),
-			hex!["804808fb75d16340dc250871138a1a6f1dfa3cab9cc1fbd6f42960f1c39a950d"].into(),
-			hex!["16be9647f91aa5441e300acb8f0d6ccc63e72850202a7947df6a646c1bb4071a"]
+			hex!["d4c197403bae729fd0f219a0925c4f9274d432c7bfce5f94f2e0dae605dde407"].into(),
+			hex!["6c99e8e4ae3fe7e3328d7e9d85eb98e86bdc6410695797349fa536ebb9bb0a4a"].into(),
+			hex!["d8a00a2454cd7455c040e363e6e76f4abd9e4d3876253964d9f40a66ad79694b"]
 				.unchecked_into(),
-			hex!["71bf01524c555f1e0f6b7dc7243caf00851d3afc543422f98d3eb6bca78acd8c"]
+			hex!["5bcf983a969f8de7628b271a5bf523924856c3935b15eb3e03f20146ced2c57f"]
 				.unchecked_into(),
-			hex!["16be9647f91aa5441e300acb8f0d6ccc63e72850202a7947df6a646c1bb4071a"]
+			hex!["0297bc051d94b25787482e60fa4eba19f15af30fa244240ae4439d219ee00e78"]
 				.unchecked_into(),
-			hex!["028a4c0781f8369fdd873f8531491f24e2e806fd11a13d828cb4099e6c1045103e"]
+			hex!["030c1b7bacd7682a4caab29361499a3cb26fe1a3bc70c157015b947f695f895c48"]
 				.unchecked_into(),
 		),
 		// standalone 2
 		(
-			hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"].into(),
-			hex!["cc195602a63bbdcf2ef4773c86fdbfefe042cb9aa8e3059d02e59a062d9c3138"].into(),
-			hex!["f4e206607ffffcd389c4c60523de5dda5a411d1435f8540b6b6bc181553bd65a"]
+			hex!["48a705897c103ddeda7e38bdadb42dc4c429e1b542287dfb07a9837982e04d14"].into(),
+			hex!["444dbfd0220eb1a993a7a2b9e1530aee1d17388ba3db34a0ee2b8ff971bfd073"].into(),
+			hex!["f02ee9baa32c490cf06eabe3580a90be704618f04636b321ee599c8912392c7a"]
 				.unchecked_into(),
-			hex!["61f771ebfdb0a6de08b8e0ca7a39a01f24e7eaa3d1e7f1001e6503490c25c044"]
+			hex!["2d6ac10cde791863771847c035c36e13ad60e6129465e1aefad8f5fee8dff5c7"]
 				.unchecked_into(),
-			hex!["f4e206607ffffcd389c4c60523de5dda5a411d1435f8540b6b6bc181553bd65a"]
+			hex!["de6d5010678fd2175fe70c857d3eba80838e3735b1051f4aed98671800ec483f"]
 				.unchecked_into(),
-			hex!["02427a6cf7f1d7538d9e3e4df834e27db337fd6ef0f530aab4e9799ff865e843fc"]
+			hex!["02c4cf6433b93cf5383653dd89a832cf1f59269b6edac186be4ca37141536e3644"]
 				.unchecked_into(),
 		),
 		// standalone 3
 		(
-			hex!["368ea402dbd9c9888ae999d6a799cf36e08673ee53c001dfb4529c149fc2c13b"].into(),
-			hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"].into(),
-			hex!["8e92157e55a72fe0ee78c251a7553af341635bec0aafee1e4189cf8ce52cdd71"]
+			hex!["e2629eedccc6887f78d62d4ed15becd1b791ba0c38a5c72ccd416367097d7c3c"].into(),
+			hex!["2c4e648b0fbbb88ff6b92b208273eb144383b2b19edc992e91448a4371d4d97d"].into(),
+			hex!["a41b35f75e5509ce96e62bc27bb9a1b5587cc3d596f8afa867962b0e03230513"]
 				.unchecked_into(),
-			hex!["a41a815db90b9bd3d9ec462f90ba77ba1d627a9fccc9f7847e34c9e9e9b57c90"]
+			hex!["340e5969c8dd40ff77184fa73fbdcda77dcc90dd9b68b8b28eef5f01ce42339c"]
 				.unchecked_into(),
-			hex!["8e92157e55a72fe0ee78c251a7553af341635bec0aafee1e4189cf8ce52cdd71"]
+			hex!["8472336050c4e4a51ac69865a4a31c6dd0e5c2f79555d8646cafb3bd8f12d75c"]
 				.unchecked_into(),
-			hex!["036aec5853fba2662f31ba89e859ac100daa6c58dc8fdaf0555565663f2b99f8f2"]
+			hex!["02b78be44eb40286dff6ffc1d83c93dc1cd8c17003c25a94a13433fd0117d146a9"]
 				.unchecked_into(),
 		),
 		// standalone 4
 		(
-			hex!["2c7f3cc085da9175414d1a9d40aa3aa161c8584a9ca62a938684dfbe90ae9d74"].into(),
-			hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
-			hex!["9a457869037b3e7643db0b71e7340d5f319ec5b53be0bffbc8280fe9a6d6bd68"]
+			hex!["3281b9311756ee35e8bd53bc05e38af78ea4211c72db0ffcd8dd317785fa1327"].into(),
+			hex!["c884c8eb280327221a3ae6a45fe6c8805f09bcfc11b409c8e2daa621c0d99608"].into(),
+			hex!["06e0a0d39503a101ca9c36f84b3ccf53015ee625a546bc570e550af963d13164"]
 				.unchecked_into(),
-			hex!["b0f002333f4fd657155dfcb4ac5c6ce04d0b2c68b64befa178d4357ceb05fe2d"]
+			hex!["57eda010788108257f4c148cf0c3112d620b9067546777dc393a65dd34732079"]
 				.unchecked_into(),
-			hex!["9a457869037b3e7643db0b71e7340d5f319ec5b53be0bffbc8280fe9a6d6bd68"]
+			hex!["029cb182ddb9c5560aaa299f7b445e575007b8295bd85a80a7b2eb7baa3e2b7c"]
 				.unchecked_into(),
-			hex!["0297579c2b3896c65bf556e710ba361d76bff80827e30d70bc8f1d39049005c509"]
+			hex!["03a5c16cb6ebb2fb956861bd4bf7e9fe3950c2709e24e99355780f3f52a59dcaaf"]
 				.unchecked_into(),
 		),
 		// standalone 5
 		(
-			hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
-			hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
-			hex!["4eddfb7cdb385617475a383929a3f129acad452d5789f27ca94373a1fa877b15"]
+			hex!["34d06ae4117b82a936b81d5219a438fa7b4093a6b67ebb0899686fb4e3b79b55"].into(),
+			hex!["483e0b8d6801c51115fd4b124c91e2d5dcd642b30335f6c5a1738ea18f66c251"].into(),
+			hex!["ce80df4851003f6ffd4ee88d9be85966f1de8b2e494c009dbf336177485f023f"]
 				.unchecked_into(),
-			hex!["d2eb206f8c7a64ce47828b33314806ac6cb915d464990eaff9f6435880c6e54f"]
+			hex!["9027284e6cad3f73eee950695c56f87330311331139616640c9168934dba82df"]
 				.unchecked_into(),
-			hex!["4eddfb7cdb385617475a383929a3f129acad452d5789f27ca94373a1fa877b15"]
+			hex!["1ea007d87f91f96c31b1062548eb77c40d47a43f1c84c36caa8586fc7c359729"]
 				.unchecked_into(),
-			hex!["020d672a9e42b74d47f6280f8a5ea04f11f8ef53d9bcfba8a7c652ad0131a4d2f3"]
+			hex!["0363a2753450cd6f651be8e0ac9ee582e5e5d8fda408e0531a5d8051c5983ff953"]
 				.unchecked_into(),
 		),
-		// standalone 6
-		// (
-		// 	hex!["541dc9dd9cd9b47ff19c77c3b14fab50ab0774e19abe438719cd09e4f4861166"].into(),
-		// 	hex!["607e948bad733780eda6c0bd9b084243276332823ca8481fc20cd01e1a2ef36f"].into(),
-		// 	hex!["c09ca0a13acb3bca703195c5c452d64f9ead47dec540f601e9db42bf97ec8025"]
-		// 		.unchecked_into(),
-		// 	hex!["bb9b1375992318bd2171bb22766129855864881cf79689440bf1da4f35964e06"]
-		// 		.unchecked_into(),
-		// 	hex!["c09ca0a13acb3bca703195c5c452d64f9ead47dec540f601e9db42bf97ec8025"]
-		// 		.unchecked_into(),
-		// 	hex!["0278f0bd16e3ff51540b044844fcc0dba9a374bc9824305ec4d6687dcf7058d220"]
-		// 		.unchecked_into(),
-		// ),
-		// // standalone 7
-		// (
-		// 	hex!["b2c09cb1b78c3afd2b1ea4316dfb1be9065e070db948477248e4f3e0f1a2d850"].into(),
-		// 	hex!["fc156f082d789f94149f8b52b191672fbf202ef1b92b487c3cec9bca2d1fbe72"].into(),
-		// 	hex!["c8243df041c48137e16b5152bad01ce99441b3f2907915d569fa3b58ad83495f"]
-		// 		.unchecked_into(),
-		// 	hex!["142635c658c9fd7685ef466e41948557ecedaec76587307bdc939467781f9d58"]
-		// 		.unchecked_into(),
-		// 	hex!["c8243df041c48137e16b5152bad01ce99441b3f2907915d569fa3b58ad83495f"]
-		// 		.unchecked_into(),
-		// 	hex!["03f41e4f76c2abe5e28fd16eaee36153c953759689712eb3dd2c666b62484b2567"]
-		// 		.unchecked_into(),
-		// ),
-		// standalone 8
-		// (
-		// 	hex!["0e87759b6eeb6891743900cba17b8b5f31b2fa9c28536d9bcf76468d6e455b23"].into(),
-		// 	hex!["48cea44ac6dd245572272dc6d4d33908586fb80886bf3207344388eac279cc25"].into(),
-		// 	hex!["52edde82f4e7af3c9c526b8a8eea08f9d70eec0da9246f6c34708ca1bde52904"]
-		// 		.unchecked_into(),
-		// 	hex!["c167d6596d3406a92efe10cad755073dd835caaf982b07ef8e5f8217b59721a9"]
-		// 		.unchecked_into(),
-		// 	hex!["52edde82f4e7af3c9c526b8a8eea08f9d70eec0da9246f6c34708ca1bde52904"]
-		// 		.unchecked_into(),
-		// 	hex!["02d1f1d1c6b02514cbb345d98bab19be55a42345573b24c7c1ac8b8da0955f0efd"]
-		// 		.unchecked_into(),
-		// ),
-		// // standalone 9
-		// (
-		// 	hex!["fa2c711c82661a761cf200421b9a5ef3257aa977a3a33acad0722d7d6993f03b"].into(),
-		// 	hex!["daf7985bfa22b5060a4eb212fbeddb7c47f7c29db5a356ed9500b34d2944eb3d"].into(),
-		// 	hex!["bc95a464f528a8450b2a7c6d6aa8177c9a61c2f0b5c853a39f36818a6a811b00"]
-		// 		.unchecked_into(),
-		// 	hex!["e04d7783447a6b3c825d346bb0ed0365251f05ac339710b03191320539bc988c"]
-		// 		.unchecked_into(),
-		// 	hex!["bc95a464f528a8450b2a7c6d6aa8177c9a61c2f0b5c853a39f36818a6a811b00"]
-		// 		.unchecked_into(),
-		// 	hex!["025fdcd9601c99675868f742ffdec4aebf894951a41e2002b6f7c484dee3392aad"]
-		// 		.unchecked_into(),
-		// ),
-		// // standalone 10
-		// (
-		// 	hex!["4ec0389ae623884a68234fd84d85af833633668aa382007e6515020e8cc29532"].into(),
-		// 	hex!["48bb70f924e7362ee55817a6628a79e522a08a31735b0129e47ac435215d6c4e"].into(),
-		// 	hex!["f0be719939c8f1b68f2aa21bcc38cc51befecd9d35db5cf2581a297877cb1530"]
-		// 		.unchecked_into(),
-		// 	hex!["d521e36ab465ca96408685cded42592867600a30ae18284675b00dad525461fe"]
-		// 		.unchecked_into(),
-		// 	hex!["f0be719939c8f1b68f2aa21bcc38cc51befecd9d35db5cf2581a297877cb1530"]
-		// 		.unchecked_into(),
-		// 	hex!["03f1f37c1c54dde71a0a122de2326c0d74c6c84bc415bcb7020ea0c6772b8d8650"]
-		// 		.unchecked_into(),
-		// ),
-		// // standalone 11
-		// (
-		// 	hex!["d6a033ee1790ef28fffe1b1ffec19b8921690632d073d955b9057e701eced352"].into(),
-		// 	hex!["14ecdcc058ee431166402eefb682c276cc16a5d1083409b28076fda4c4d5352f"].into(),
-		// 	hex!["de9f55a07aadab7390b30f206deafbbfc4799793744fc2e541dceed70b6f616a"]
-		// 		.unchecked_into(),
-		// 	hex!["d4bfc77c2d8bf755c71b0cfd16e4030be87c0d492da6a34b8824dad2c7f5701a"]
-		// 		.unchecked_into(),
-		// 	hex!["de9f55a07aadab7390b30f206deafbbfc4799793744fc2e541dceed70b6f616a"]
-		// 		.unchecked_into(),
-		// 	hex!["036723d55bf47cc450e152d3ce2379f53b7e9da3c8a735d3c19927544b817867df"]
-		// 		.unchecked_into(),
-		// ),
-		// // standalone 12
-		// (
-		// 	hex!["400d597fe03f1031a9b4e1983b7c42eeed29ef3f9da6715667d06b367bdb897f"].into(),
-		// 	hex!["668cf048845804f31759decbec11cb41bf316b1901d2142a35ad3a8eb7420326"].into(),
-		// 	hex!["ce5ddea4528095744e7e3703d13d6d4f02d8272df428b042ea669dcbfbfa2302"]
-		// 		.unchecked_into(),
-		// 	hex!["12f3b631bba08353289cb7a8d6c84329346f77034135656d0fb9cbaf44ec99d9"]
-		// 		.unchecked_into(),
-		// 	hex!["ce5ddea4528095744e7e3703d13d6d4f02d8272df428b042ea669dcbfbfa2302"]
-		// 		.unchecked_into(),
-		// 	hex!["03080481d6c15f4197093938d8492ddf33f622ec4ba3e59108cfb2c6f32ef4b942"]
-		// 		.unchecked_into(),
-		// ),
 	]
 }
