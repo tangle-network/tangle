@@ -21,13 +21,13 @@ echo "****************** NODE-1 KEY INSERTION ******************"
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone1 \
 --chain ./chainspecs/standalone-local.json \
 --scheme Sr25519 \
---suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//0//aura" \
---key-type aura
+--suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//0//babe" \
+--key-type babe
 
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone1 \
 --chain ./chainspecs/standalone-local.json \
 --scheme Sr25519 \
---suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//0//aura" \
+--suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//0//babe" \
 --key-type imon
 
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone1 \
@@ -61,13 +61,13 @@ echo "\n ****************** NODE-2 KEY INSERTION ******************"
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone2 \
 --chain ./chainspecs/standalone-local.json \
 --scheme Sr25519 \
---suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//1//aura" \
---key-type aura
+--suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//1//babe" \
+--key-type babe
 
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone2 \
 --chain ./chainspecs/standalone-local.json \
 --scheme Sr25519 \
---suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//1//aura" \
+--suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//1//babe" \
 --key-type imon
 
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone2 \
@@ -102,13 +102,13 @@ echo "\n ****************** NODE-3 KEY INSERTION ******************"
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone3 \
 --chain ./chainspecs/standalone-local.json \
 --scheme Sr25519 \
---suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//2//aura" \
---key-type aura
+--suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//2//babe" \
+--key-type babe
 
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone3 \
 --chain ./chainspecs/standalone-local.json \
 --scheme Sr25519 \
---suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//2//aura" \
+--suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//2//babe" \
 --key-type imon
 
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone3 \
@@ -141,13 +141,13 @@ echo "\n ****************** NODE-4 KEY INSERTION ******************"
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone4 \
 --chain ./chainspecs/standalone-local.json \
 --scheme Sr25519 \
---suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//3//aura" \
---key-type aura
+--suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//3//babe" \
+--key-type babe
 
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone4 \
 --chain ./chainspecs/standalone-local.json \
 --scheme Sr25519 \
---suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//3//aura" \
+--suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//3//babe" \
 --key-type imon
 
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone4 \
@@ -179,13 +179,13 @@ echo "\n ****************** NODE-5 KEY INSERTION ******************"
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone5 \
 --chain ./chainspecs/standalone-local.json \
 --scheme Sr25519 \
---suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//4//aura" \
---key-type aura
+--suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//4//babe" \
+--key-type babe
 
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone5 \
 --chain ./chainspecs/standalone-local.json \
 --scheme Sr25519 \
---suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//4//aura" \
+--suri "gown surprise mirror hotel cash alarm raccoon you frog rose midnight enter//webb//4//babe" \
 --key-type imon
 
 ./target/release/tangle-standalone key insert --base-path ./tmp/standalone5 \

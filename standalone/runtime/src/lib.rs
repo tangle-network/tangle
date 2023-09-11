@@ -59,7 +59,6 @@ use sp_runtime::{
 	},
 	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, SaturatedConversion,
 };
-use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -102,8 +101,7 @@ pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 pub use tangle_primitives::{
 	currency::*, fee::*, time::*, AccountId, AccountIndex, Address, Balance, BlockNumber, Hash,
 	Header, Index, Moment, Reputation, Signature, AVERAGE_ON_INITIALIZE_RATIO,
-	MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS,
-	UNSIGNED_PROPOSAL_EXPIRY,
+	MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS, UNSIGNED_PROPOSAL_EXPIRY,
 };
 
 // Frontier
@@ -178,7 +176,6 @@ pub mod opaque {
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
 			pub dkg: DKG,
-			pub authority_discovery: AuthorityDiscovery,
 		}
 	}
 }
@@ -329,17 +326,17 @@ impl pallet_sudo::Config for Runtime {
 	type WeightInfo = ();
 }
 
-	// 1 in 4 blocks (on average, not counting collisions) will be primary BABE blocks.
-	pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
+// 1 in 4 blocks (on average, not counting collisions) will be primary BABE blocks.
+pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
 
-	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
-	//       Attempting to do so will brick block production.
-	pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 10 * MINUTES;
-	pub const EPOCH_DURATION_IN_SLOTS: u64 = {
-		const SLOT_FILL_RATE: f64 = MILLISECS_PER_BLOCK as f64 / SLOT_DURATION as f64;
+// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
+//       Attempting to do so will brick block production.
+pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 10 * MINUTES;
+pub const EPOCH_DURATION_IN_SLOTS: u64 = {
+	const SLOT_FILL_RATE: f64 = MILLISECS_PER_BLOCK as f64 / SLOT_DURATION as f64;
 
-		(EPOCH_DURATION_IN_BLOCKS as f64 * SLOT_FILL_RATE) as u64
-	};
+	(EPOCH_DURATION_IN_BLOCKS as f64 * SLOT_FILL_RATE) as u64
+};
 
 parameter_types! {
 	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
@@ -842,10 +839,6 @@ impl pallet_bridge_registry::Config for Runtime {
 	type WeightInfo = ();
 }
 
-impl pallet_authority_discovery::Config for Runtime {
-	type MaxAuthorities = MaxAuthorities;
-}
-
 parameter_types! {
 	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 	/// We prioritize im-online heartbeats over election solution submission.
@@ -1173,7 +1166,6 @@ construct_runtime!(
 
 		TransactionPause: pallet_transaction_pause,
 		ImOnline: pallet_im_online,
-		AuthorityDiscovery: pallet_authority_discovery,
 		Identity: pallet_identity,
 		Utility: pallet_utility,
 
@@ -1807,12 +1799,6 @@ impl_runtime_apis! {
 				equivocation_proof,
 				key_owner_proof,
 			)
-		}
-	}
-
-	impl sp_authority_discovery::AuthorityDiscoveryApi<Block> for Runtime {
-		fn authorities() -> Vec<AuthorityDiscoveryId> {
-			AuthorityDiscovery::authorities()
 		}
 	}
 

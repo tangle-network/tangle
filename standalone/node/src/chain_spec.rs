@@ -29,10 +29,10 @@ use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_runtime::{
-	AccountId, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId, DKGProposalsConfig,
-	EVMChainIdConfig, EVMConfig, ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxNominations,
-	Perbill, RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig,
-	SudoConfig, SystemConfig, UNIT, WASM_BINARY,
+	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, DKGConfig, DKGId,
+	DKGProposalsConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig, Eth2ClientConfig,
+	ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig, Signature,
+	StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
 };
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
@@ -638,7 +638,10 @@ fn testnet_genesis(
 				.collect(),
 		},
 		treasury: Default::default(),
-		babe: Default::default(),
+		babe: BabeConfig {
+			epoch_config: Some(tangle_runtime::BABE_GENESIS_EPOCH_CONFIG),
+			..Default::default()
+		},
 		grandpa: Default::default(),
 		dkg: DKGConfig {
 			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
