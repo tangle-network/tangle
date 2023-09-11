@@ -1097,17 +1097,20 @@ impl Contains<RuntimeCall> for BaseFilter {
 			return false
 		}
 
-		match call {
+		let democracy_related = matches!(
+			call,
 			// Filter democracy proposals creation
-			RuntimeCall::Democracy(method) => match method {
-				pallet_democracy::Call::propose { .. } => false,
-				_ => true,
-			},
+			RuntimeCall::Democracy(_) |
 			// disallow council
-			RuntimeCall::Council(_) => false,
+			RuntimeCall::Council(_)
+		);
 
-			_ => true,
+		if democracy_related {
+			// no democracy call
+			return false
 		}
+
+		true
 	}
 }
 
