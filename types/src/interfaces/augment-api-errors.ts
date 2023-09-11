@@ -174,37 +174,6 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
-    claims: {
-      /**
-       * Invalid Ethereum signature.
-       **/
-      InvalidEthereumSignature: AugmentedError<ApiType>;
-      /**
-       * A needed statement was not included.
-       **/
-      InvalidStatement: AugmentedError<ApiType>;
-      /**
-       * There's not enough in the pot to pay out some unvested amount. Generally implies a
-       * logic error.
-       **/
-      PotUnderflow: AugmentedError<ApiType>;
-      /**
-       * Account ID sending transaction has no claim.
-       **/
-      SenderHasNoClaim: AugmentedError<ApiType>;
-      /**
-       * Ethereum address has no claim.
-       **/
-      SignerHasNoClaim: AugmentedError<ApiType>;
-      /**
-       * The account already has a vested balance.
-       **/
-      VestedBalanceExists: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
     council: {
       /**
        * Members are already initialized!
