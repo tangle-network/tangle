@@ -284,11 +284,19 @@ pub struct RunFullParams {
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
 	pub relayer_cmd: webb_relayer_gadget_cli::WebbRelayerCmd,
-	pub light_client_relayer_cmd: pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
+	pub light_client_relayer_cmd:
+		pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
 }
 /// Builds a new service for a full client.
 pub async fn new_full(
-	RunFullParams { mut config, eth_config, rpc_config, debug_output, relayer_cmd, light_client_relayer_cmd }: RunFullParams,
+	RunFullParams {
+		mut config,
+		eth_config,
+		rpc_config,
+		debug_output,
+		relayer_cmd,
+		light_client_relayer_cmd,
+	}: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -533,8 +541,12 @@ pub async fn new_full(
 			None,
 			pallet_eth2_light_client_relayer_gadget::start_gadget(
 				pallet_eth2_light_client_relayer_gadget::Eth2LightClientParams {
-					lc_relay_config_path: light_client_relayer_cmd.light_client_relay_config_path.clone(),
-					lc_init_config_path: light_client_relayer_cmd.light_client_init_pallet_config_path.clone(),
+					lc_relay_config_path: light_client_relayer_cmd
+						.light_client_relay_config_path
+						.clone(),
+					lc_init_config_path: light_client_relayer_cmd
+						.light_client_init_pallet_config_path
+						.clone(),
 					eth2_chain_id: webb_proposals::TypedChainId::Evm(1),
 				},
 			),

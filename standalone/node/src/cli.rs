@@ -35,7 +35,8 @@ pub struct Cli {
 	pub relayer_cmd: webb_relayer_gadget_cli::WebbRelayerCmd,
 
 	#[clap(flatten)]
-	pub light_client_relayer_cmd: pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
+	pub light_client_relayer_cmd:
+		pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
 }
 
 #[derive(Debug, clap::Subcommand)]
