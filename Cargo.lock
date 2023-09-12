@@ -3478,26 +3478,6 @@ dependencies = [
 [[package]]
 name = "eth-types"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-dependencies = [
- "derive_more",
- "ethereum-types",
- "hex",
- "parity-scale-codec",
- "rlp",
- "rlp-derive",
- "scale-info",
- "serde",
- "tiny-keccak",
- "webb-eth2-serde-utils 0.1.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-eth2-ssz 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-tree-hash 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-tree-hash-derive 0.4.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
-]
-
-[[package]]
-name = "eth-types"
-version = "0.1.0"
 source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#cb2c939005126ee62e832860f09bb8c14409d2bd"
 dependencies = [
  "derive_more",
@@ -3509,10 +3489,10 @@ dependencies = [
  "scale-info",
  "serde",
  "tiny-keccak",
- "webb-eth2-serde-utils 0.1.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-eth2-ssz 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-tree-hash 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-tree-hash-derive 0.4.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "webb-eth2-serde-utils",
+ "webb-eth2-ssz",
+ "webb-tree-hash",
+ "webb-tree-hash-derive",
 ]
 
 [[package]]
@@ -3528,7 +3508,7 @@ dependencies = [
  "clap 3.2.25",
  "dotenvy",
  "env_logger 0.9.3",
- "eth-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "eth-types",
  "ethereum-types",
  "ethereum_hashing",
  "ethereum_ssz",
@@ -3551,14 +3531,14 @@ dependencies = [
  "types",
  "warp",
  "webb 0.5.25",
- "webb-consensus-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "webb-consensus-types",
  "webb-eth-rpc-client",
  "webb-eth2-pallet-init",
  "webb-finality-update-verify",
- "webb-merkle-proof 0.2.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "webb-merkle-proof",
  "webb-proposals 0.6.0",
  "webb-relayer-utils 0.5.12-dev (git+https://github.com/webb-tools/relayer.git)",
- "webb-tree-hash 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "webb-tree-hash",
 ]
 
 [[package]]
@@ -8390,11 +8370,11 @@ dependencies = [
 [[package]]
 name = "pallet-eth2-light-client"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
+source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#cb2c939005126ee62e832860f09bb8c14409d2bd"
 dependencies = [
  "bitvec",
  "derive_more",
- "eth-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
+ "eth-types",
  "ethereum-types",
  "frame-support",
  "frame-system",
@@ -8410,13 +8390,13 @@ dependencies = [
  "sp-runtime 24.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-std 8.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "tiny-keccak",
- "webb-bls 0.2.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-consensus-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-eth2-ssz 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-merkle-proof 0.2.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
+ "webb-bls",
+ "webb-consensus-types",
+ "webb-eth2-ssz",
+ "webb-merkle-proof",
  "webb-proposals 0.6.0",
- "webb-tree-hash 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-tree-hash-derive 0.4.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
+ "webb-tree-hash",
+ "webb-tree-hash-derive",
 ]
 
 [[package]]
@@ -15350,7 +15330,7 @@ dependencies = [
  "tangle-standalone-runtime",
  "tokio 1.32.0",
  "wasmer",
- "webb-consensus-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
+ "webb-consensus-types",
  "webb-proposals 0.6.0",
  "webb-relayer-gadget",
  "webb-relayer-gadget-cli",
@@ -17529,25 +17509,6 @@ dependencies = [
 [[package]]
 name = "webb-bls"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-dependencies = [
- "ethereum-types",
- "hex",
- "log",
- "milagro_bls",
- "rand 0.7.3",
- "rand_chacha 0.3.1",
- "serde",
- "webb-eth2-hashing 0.3.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-eth2-serde-utils 0.1.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-eth2-ssz 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-tree-hash 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "zeroize",
-]
-
-[[package]]
-name = "webb-bls"
-version = "0.2.0"
 source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#cb2c939005126ee62e832860f09bb8c14409d2bd"
 dependencies = [
  "ethereum-types",
@@ -17557,10 +17518,10 @@ dependencies = [
  "rand 0.7.3",
  "rand_chacha 0.3.1",
  "serde",
- "webb-eth2-hashing 0.3.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-eth2-serde-utils 0.1.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-eth2-ssz 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-tree-hash 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "webb-eth2-hashing",
+ "webb-eth2-serde-utils",
+ "webb-eth2-ssz",
+ "webb-tree-hash",
  "zeroize",
 ]
 
@@ -17635,35 +17596,11 @@ dependencies = [
 [[package]]
 name = "webb-consensus-types"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-dependencies = [
- "bitvec",
- "derive_more",
- "eth-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "ethereum-types",
- "hex",
- "parity-scale-codec",
- "rlp",
- "rlp-derive",
- "scale-info",
- "serde",
- "tiny-keccak",
- "webb-eth2-serde-utils 0.1.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-eth2-ssz 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-eth2-ssz-derive 0.3.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-merkle-proof 0.2.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-tree-hash 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-tree-hash-derive 0.4.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
-]
-
-[[package]]
-name = "webb-consensus-types"
-version = "0.1.0"
 source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#cb2c939005126ee62e832860f09bb8c14409d2bd"
 dependencies = [
  "bitvec",
  "derive_more",
- "eth-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "eth-types",
  "ethereum-types",
  "hex",
  "parity-scale-codec",
@@ -17672,12 +17609,12 @@ dependencies = [
  "scale-info",
  "serde",
  "tiny-keccak",
- "webb-eth2-serde-utils 0.1.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-eth2-ssz 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-eth2-ssz-derive 0.3.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-merkle-proof 0.2.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-tree-hash 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-tree-hash-derive 0.4.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "webb-eth2-serde-utils",
+ "webb-eth2-ssz",
+ "webb-eth2-ssz-derive",
+ "webb-merkle-proof",
+ "webb-tree-hash",
+ "webb-tree-hash-derive",
 ]
 
 [[package]]
@@ -17692,7 +17629,7 @@ dependencies = [
  "clap 3.2.25",
  "dotenv",
  "env_logger 0.9.3",
- "eth-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "eth-types",
  "ethereum-types",
  "ethereum_hashing",
  "ethereum_ssz",
@@ -17718,16 +17655,6 @@ dependencies = [
 [[package]]
 name = "webb-eth2-hashing"
 version = "0.3.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-dependencies = [
- "lazy_static",
- "ring",
- "sha2 0.10.7",
-]
-
-[[package]]
-name = "webb-eth2-hashing"
-version = "0.3.0"
 source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#cb2c939005126ee62e832860f09bb8c14409d2bd"
 dependencies = [
  "lazy_static",
@@ -17744,7 +17671,7 @@ dependencies = [
  "async-trait",
  "clap 3.2.25",
  "dotenvy",
- "eth-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "eth-types",
  "log",
  "parity-scale-codec",
  "reqwest",
@@ -17757,24 +17684,13 @@ dependencies = [
  "toml 0.5.11",
  "types",
  "webb 0.7.4",
- "webb-consensus-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "webb-consensus-types",
  "webb-eth-rpc-client",
- "webb-merkle-proof 0.2.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "webb-merkle-proof",
  "webb-proposals 0.6.0",
  "webb-relayer-types 0.5.12-dev (git+https://github.com/webb-tools/relayer.git)",
  "webb-relayer-utils 0.5.12-dev (git+https://github.com/webb-tools/relayer.git)",
- "webb-tree-hash 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
-]
-
-[[package]]
-name = "webb-eth2-serde-utils"
-version = "0.1.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-dependencies = [
- "ethereum-types",
- "hex",
- "serde",
- "serde_json",
+ "webb-tree-hash",
 ]
 
 [[package]]
@@ -17791,32 +17707,11 @@ dependencies = [
 [[package]]
 name = "webb-eth2-ssz"
 version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-dependencies = [
- "ethereum-types",
- "itertools 0.10.5",
- "smallvec 1.11.0",
-]
-
-[[package]]
-name = "webb-eth2-ssz"
-version = "0.4.1"
 source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#cb2c939005126ee62e832860f09bb8c14409d2bd"
 dependencies = [
  "ethereum-types",
  "itertools 0.10.5",
  "smallvec 1.11.0",
-]
-
-[[package]]
-name = "webb-eth2-ssz-derive"
-version = "0.3.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-dependencies = [
- "darling 0.13.4",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
@@ -17981,22 +17876,11 @@ source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#
 dependencies = [
  "anyhow",
  "bitvec",
- "eth-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "eth-types",
  "serde",
- "webb-bls 0.2.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-consensus-types 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-tree-hash 0.4.1 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
-]
-
-[[package]]
-name = "webb-merkle-proof"
-version = "0.2.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-dependencies = [
- "ethereum-types",
- "lazy_static",
- "webb-eth2-hashing 0.3.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
- "webb-safe-arith 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
+ "webb-bls",
+ "webb-consensus-types",
+ "webb-tree-hash",
 ]
 
 [[package]]
@@ -18006,8 +17890,8 @@ source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#
 dependencies = [
  "ethereum-types",
  "lazy_static",
- "webb-eth2-hashing 0.3.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
- "webb-safe-arith 0.1.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
+ "webb-eth2-hashing",
+ "webb-safe-arith",
 ]
 
 [[package]]
@@ -18656,22 +18540,7 @@ dependencies = [
 [[package]]
 name = "webb-safe-arith"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-
-[[package]]
-name = "webb-safe-arith"
-version = "0.1.0"
 source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#cb2c939005126ee62e832860f09bb8c14409d2bd"
-
-[[package]]
-name = "webb-tree-hash"
-version = "0.4.1"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-dependencies = [
- "ethereum-types",
- "smallvec 1.11.0",
- "webb-eth2-hashing 0.3.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3)",
-]
 
 [[package]]
 name = "webb-tree-hash"
@@ -18680,17 +18549,7 @@ source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#
 dependencies = [
  "ethereum-types",
  "smallvec 1.11.0",
- "webb-eth2-hashing 0.3.0 (git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5)",
-]
-
-[[package]]
-name = "webb-tree-hash-derive"
-version = "0.4.0"
-source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.3#c089a76d6743ead12f0e0ea83a477ade794d87c7"
-dependencies = [
- "darling 0.13.4",
- "quote",
- "syn 1.0.109",
+ "webb-eth2-hashing",
 ]
 
 [[package]]
