@@ -1,0 +1,19 @@
+# Eth2substrate block relay configuration
+
+beacon_endpoint = "https://lodestar-mainnet.chainsafe.io"
+eth1_endpoint = "https://mainnet.infura.io/v3/ETH1_INFURA_API_KEY"
+network_name = "Mainnet"
+headers_batch_size = 33
+substrate_endpoint = "ws://127.0.0.1:9944"
+path_to_signer_secret_key = "/tmp/empty/secret_key"
+ethereum_network = "Mainnet"
+interval_between_light_client_updates_submission_in_epochs = 1
+max_blocks_for_finalization = 5000
+include_next_sync_committee_to_light_client = false
+eth_requests_timeout_seconds = 30
+state_requests_timeout_seconds = 1000
+substrate_requests_timeout_seconds = 30
+sleep_time_on_sync_secs = 20
+sleep_time_after_submission_secs = 5
+hashes_gc_threshold = 51000
+beacon_rpc_version = "V1_5"
