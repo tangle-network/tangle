@@ -60,7 +60,7 @@ impl SubstrateCli for Cli {
 			"standalone-alpha" => Box::new(chain_spec::standalone_testnet_config(4006)?),
 			// generates the standalone spec for longterm testnet
 			"standalone" => Box::new(chain_spec::standalone_live_config(4006)?),
-			"tangle" => Box::new(chain_spec::ChainSpec::from_json_bytes(
+			"tangle-testnet" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 				&include_bytes!("../../../chainspecs/testnet/tangle-standalone.json")[..]
 			)?),
 			path =>
