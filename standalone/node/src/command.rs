@@ -46,7 +46,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn copyright_start_year() -> i32 {
-		2017
+		2021
 	}
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
@@ -60,6 +60,9 @@ impl SubstrateCli for Cli {
 			"standalone-alpha" => Box::new(chain_spec::standalone_testnet_config(4006)?),
 			// generates the standalone spec for longterm testnet
 			"standalone" => Box::new(chain_spec::standalone_live_config(4006)?),
+			"tangle-testnet" => Box::new(chain_spec::ChainSpec::from_json_bytes(
+				&include_bytes!("../../../chainspecs/testnet/tangle-standalone.json")[..],
+			)?),
 			path =>
 				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 		})
