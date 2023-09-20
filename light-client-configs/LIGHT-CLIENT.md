@@ -3,9 +3,9 @@
 Following these steps will allow you to run Tangle Standalone Node with Webb Light Client Relayer included.
 
 
-1. Compile the tangle standalone node
+1. Compile the tangle standalone node with light client feature
 ```sh
-cargo build --release -p tangle-standalone
+cargo build --release -p tangle-standalone --features light-client
 ```
 2. Set you Infura API Key
 

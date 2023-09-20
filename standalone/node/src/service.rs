@@ -283,7 +283,9 @@ pub struct RunFullParams {
 	pub eth_config: EthConfiguration,
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
+	#[cfg(feature = "relayer")]
 	pub relayer_cmd: webb_relayer_gadget_cli::WebbRelayerCmd,
+	#[cfg(feature = "light-client")]
 	pub light_client_relayer_cmd:
 		pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
 }
@@ -294,7 +296,9 @@ pub async fn new_full(
 		eth_config,
 		rpc_config,
 		debug_output,
+		#[cfg(feature = "relayer")]
 		relayer_cmd,
+		#[cfg(feature = "light-client")]
 		light_client_relayer_cmd,
 	}: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
@@ -518,6 +522,8 @@ pub async fn new_full(
 			dkg_gadget::start_dkg_gadget::<_, _, _>(dkg_params),
 		);
 
+		// setup relayer gadget params
+		#[cfg(feature = "relayer")]
 		let relayer_params = webb_relayer_gadget::WebbRelayerParams {
 			local_keystore: keystore_container.local_keystore(),
 			config_dir: relayer_cmd.relayer_config_dir,
@@ -528,7 +534,9 @@ pub async fn new_full(
 				.map(|p| p.to_path_buf()),
 			rpc_addr: config.rpc_addr,
 		};
+
 		// Start Webb Relayer Gadget as non-essential task.
+		#[cfg(feature = "relayer")]
 		task_manager.spawn_handle().spawn(
 			"relayer-gadget",
 			None,
@@ -536,6 +544,7 @@ pub async fn new_full(
 		);
 
 		// Start Eth2 Light client Relayer Gadget - (MAINNET RELAYER)
+		#[cfg(feature = "light-client")]
 		task_manager.spawn_handle().spawn(
 			"mainnet-relayer-gadget",
 			None,
