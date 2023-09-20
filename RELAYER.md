@@ -6,9 +6,9 @@ Following these steps will allow you to run Tangle Standalone Node with Webb Rel
 something like the Following: `Error: Not Starting Webb Relayer Gadget. No Config Directory Specified`
 which is totally OK if you are not looking into running the webb relayer gadget.
 
-1. Compile the tangle standalone node
+1. Compile the tangle standalone node with relayer feature
 ```sh
-cargo build --release -p tangle-standalone
+cargo build --release -p tangle-standalone --features relayer
 ```
 2. Create your .env file to store your secrets (during the development)
 

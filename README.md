@@ -86,6 +86,11 @@ This should start the local testnet, you can view the logs in /tmp directory for
 Tangle standalone node ships with [Webb Relayer](https://github.com/webb-tools/relayer) in the node itself, which is useful to run them together.
 For instructions on how to run Tangle Standalone Node with Webb Relayer, Please refer to [this document](./RELAYER.md).
 
+<h2 id="relayer"> Run Standalone Node with Light Client</h2>
+
+Tangle standalone node ships with [Webb Light Client](https://github.com/webb-tools/pallet-eth2-light-client) in the node itself, which is useful to run them together.
+For instructions on how to run Tangle Standalone Node with Webb Light Client, Please refer to [this document](./light-client-configs/LIGHT-CLIENT.md).
+
 <h2 id="contribute"> Contributing </h2>
 
 Interested in contributing to the Webb Tangle Network? Thank you so much for your interest! We are always appreciative for contributions from the open-source community!

@@ -252,7 +252,9 @@ pub fn run() -> sc_cli::Result<()> {
 					rpc_config,
 					eth_config: cli.eth,
 					debug_output: cli.output_path,
+					#[cfg(feature = "relayer")]
 					relayer_cmd: cli.relayer_cmd,
+					#[cfg(feature = "light-client")]
 					light_client_relayer_cmd: cli.light_client_relayer_cmd,
 				})
 				.map_err(Into::into)
