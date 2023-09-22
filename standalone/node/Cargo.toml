@@ -34,6 +34,8 @@ log = { workspace = true }
 rand = { workspace = true }
 
 # Light client dependencies
+pallet-eth2-light-client-relayer-gadget = { workspace = true, optional = true }
+pallet-eth2-light-client-relayer-gadget-cli = { workspace = true, optional = true }
 webb-consensus-types = {workspace = true}
 
 # DKG dependencies
@@ -41,8 +43,8 @@ dkg-gadget = { workspace = true }
 dkg-primitives = { workspace = true }
 dkg-runtime-primitives = { workspace = true }
 pallet-bridge-registry = { workspace = true }
-webb-relayer-gadget = { workspace = true }
-webb-relayer-gadget-cli = { workspace = true }
+webb-relayer-gadget = { workspace = true, optional = true }
+webb-relayer-gadget-cli = { workspace = true, optional = true }
 webb-proposals = { workspace = true }
 
 # Substrate dependencies
@@ -127,3 +129,11 @@ rocksdb = [
 ]
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]
 txpool = ["fc-rpc/txpool"]
+light-client = [
+    "pallet-eth2-light-client-relayer-gadget",
+    "pallet-eth2-light-client-relayer-gadget-cli"
+]
+relayer = [
+    "webb-relayer-gadget",
+    "webb-relayer-gadget-cli"
+]

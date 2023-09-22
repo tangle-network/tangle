@@ -283,11 +283,24 @@ pub struct RunFullParams {
 	pub eth_config: EthConfiguration,
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
+	#[cfg(feature = "relayer")]
 	pub relayer_cmd: webb_relayer_gadget_cli::WebbRelayerCmd,
+	#[cfg(feature = "light-client")]
+	pub light_client_relayer_cmd:
+		pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
 }
 /// Builds a new service for a full client.
 pub async fn new_full(
-	RunFullParams { mut config, eth_config, rpc_config, debug_output, relayer_cmd }: RunFullParams,
+	RunFullParams {
+		mut config,
+		eth_config,
+		rpc_config,
+		debug_output,
+		#[cfg(feature = "relayer")]
+		relayer_cmd,
+		#[cfg(feature = "light-client")]
+		light_client_relayer_cmd,
+	}: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -509,6 +522,8 @@ pub async fn new_full(
 			dkg_gadget::start_dkg_gadget::<_, _, _>(dkg_params),
 		);
 
+		// setup relayer gadget params
+		#[cfg(feature = "relayer")]
 		let relayer_params = webb_relayer_gadget::WebbRelayerParams {
 			local_keystore: keystore_container.local_keystore(),
 			config_dir: relayer_cmd.relayer_config_dir,
@@ -519,11 +534,31 @@ pub async fn new_full(
 				.map(|p| p.to_path_buf()),
 			rpc_addr: config.rpc_addr,
 		};
+
 		// Start Webb Relayer Gadget as non-essential task.
+		#[cfg(feature = "relayer")]
 		task_manager.spawn_handle().spawn(
 			"relayer-gadget",
 			None,
 			webb_relayer_gadget::start_relayer_gadget(relayer_params),
+		);
+
+		// Start Eth2 Light client Relayer Gadget - (MAINNET RELAYER)
+		#[cfg(feature = "light-client")]
+		task_manager.spawn_handle().spawn(
+			"mainnet-relayer-gadget",
+			None,
+			pallet_eth2_light_client_relayer_gadget::start_gadget(
+				pallet_eth2_light_client_relayer_gadget::Eth2LightClientParams {
+					lc_relay_config_path: light_client_relayer_cmd
+						.light_client_relay_config_path
+						.clone(),
+					lc_init_config_path: light_client_relayer_cmd
+						.light_client_init_pallet_config_path
+						.clone(),
+					eth2_chain_id: webb_proposals::TypedChainId::Evm(1),
+				},
+			),
 		);
 	}
 	let params = sc_service::SpawnTasksParams {

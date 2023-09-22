@@ -1,0 +1,12 @@
+ethereum_network = "Mainnet"
+beacon_endpoint = "https://lodestar-mainnet.chainsafe.io"
+eth1_endpoint = "https://mainnet.infura.io/v3/ETH1_INFURA_API_KEY"
+eth_requests_timeout_seconds = 30
+validate_updates = true
+verify_bls_signature = true
+hashes_gc_threshold = 51000
+beacon_rpc_version = "V1_5"
+
+substrate_network_name = "Tangle"
+substrate_endpoint = "ws://127.0.0.1:9944"
+path_to_signer_secret_key = "/tmp/empty/secret_key"

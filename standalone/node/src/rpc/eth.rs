@@ -21,6 +21,8 @@ pub use fc_rpc::{EthBlockDataCacheTask, EthConfig, OverrideHandle, StorageOverri
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 pub use fc_storage::overrides_handle;
 use fp_rpc::{ConvertTransaction, ConvertTransactionRuntimeApi, EthereumRuntimeRPCApi};
+#[cfg(feature = "txpool")]
+use rpc_txpool::TxPoolServer;
 
 #[derive(Clone)]
 pub struct TracingConfig {
