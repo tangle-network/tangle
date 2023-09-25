@@ -112,7 +112,6 @@ fn eras_total_rewards_should_work() {
 			.expect_no_logs()
 			.execute_returns(150u32);
 	});
-
 }
 
 // #[test]

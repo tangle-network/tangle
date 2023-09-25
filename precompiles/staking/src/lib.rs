@@ -365,7 +365,8 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let validator_stash: Runtime::AccountId = Self::parse_input_address(validator_stash.0.to_vec())?;
+		let validator_stash: Runtime::AccountId =
+			Self::parse_input_address(validator_stash.0.to_vec())?;
 
 		let call = pallet_staking::Call::<Runtime>::payout_stakers { validator_stash, era };
 
