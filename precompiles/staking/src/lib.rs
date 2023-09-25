@@ -15,6 +15,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! This file contains the implementation of the StakingPrecompile struct which provides an
+//! interface between the EVM and the native staking pallet of the runtime. It allows EVM contracts
+//! to call functions of the staking pallet, and to query its state.
+//!
+//! The StakingPrecompile struct implements several methods that correspond to the functions of the
+//! staking pallet. These methods can be called from EVM contracts. They include functions to get
+//! the current era, the minimum bond for nominators and validators, the number of validators,
+//! whether a given account is a validator or nominator, and others.
+//!
+//! Each method records the gas cost for the operation, performs the requested operation, and
+//! returns the result in a format that can be used by the EVM.
+//!
+//! The StakingPrecompile struct is generic over the Runtime type, which is the type of the runtime
+//! that includes the staking pallet. This allows the precompile to work with any runtime that
+//! includes the staking pallet and meets the other trait bounds required by the precompile.
+
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(test)]
@@ -29,14 +45,21 @@ use frame_support::{
 };
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
-use sp_core::U256;
+use sp_core::{H256, U256};
+use sp_runtime::{
+	traits::{AccountIdLookup, StaticLookup},
+	MultiAddress,
+};
 use sp_std::{convert::TryInto, marker::PhantomData};
+use tangle_primitives::AccountIndex;
 
 type BalanceOf<Runtime> = <<Runtime as pallet_staking::Config>::Currency as Currency<
 	<Runtime as frame_system::Config>::AccountId,
 >>::Balance;
 
 pub struct StakingPrecompile<Runtime>(PhantomData<Runtime>);
+
+type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup>::Source;
 
 #[precompile_utils::precompile]
 impl<Runtime> StakingPrecompile<Runtime>
@@ -48,6 +71,7 @@ where
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
 {
 	#[precompile::public("currentEra()")]
+	#[precompile::public("current_era()")]
 	#[precompile::view]
 	fn current_era(handle: &mut impl PrecompileHandle) -> EvmResult<u32> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
@@ -57,6 +81,7 @@ where
 	}
 
 	#[precompile::public("minNominatorBond()")]
+	#[precompile::public("min_nominator_bond()")]
 	#[precompile::view]
 	fn min_nominator_bond(handle: &mut impl PrecompileHandle) -> EvmResult<u128> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
@@ -67,6 +92,7 @@ where
 	}
 
 	#[precompile::public("minValidatorBond()")]
+	#[precompile::public("min_validator_bond()")]
 	#[precompile::view]
 	fn min_validator_bond(handle: &mut impl PrecompileHandle) -> EvmResult<u128> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
@@ -77,6 +103,7 @@ where
 	}
 
 	#[precompile::public("minActiveStake()")]
+	#[precompile::public("min_active_stake()")]
 	#[precompile::view]
 	fn min_active_stake(handle: &mut impl PrecompileHandle) -> EvmResult<u128> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
@@ -87,6 +114,7 @@ where
 	}
 
 	#[precompile::public("validatorCount()")]
+	#[precompile::public("validator_count()")]
 	#[precompile::view]
 	fn validator_count(handle: &mut impl PrecompileHandle) -> EvmResult<u32> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
@@ -95,6 +123,7 @@ where
 	}
 
 	#[precompile::public("maxValidatorCount()")]
+	#[precompile::public("max_validator_count()")]
 	#[precompile::view]
 	fn max_validator_count(handle: &mut impl PrecompileHandle) -> EvmResult<u32> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
@@ -104,6 +133,7 @@ where
 	}
 
 	#[precompile::public("isValidator(address)")]
+	#[precompile::public("is_validator(address)")]
 	#[precompile::view]
 	fn is_validator(handle: &mut impl PrecompileHandle, validator: Address) -> EvmResult<bool> {
 		let validator_account = Runtime::AddressMapping::into_account_id(validator.0);
@@ -113,6 +143,7 @@ where
 	}
 
 	#[precompile::public("maxNominatorCount()")]
+	#[precompile::public("max_nominator_count()")]
 	#[precompile::view]
 	fn max_nominator_count(handle: &mut impl PrecompileHandle) -> EvmResult<u32> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
@@ -122,6 +153,7 @@ where
 	}
 
 	#[precompile::public("isNominator(address)")]
+	#[precompile::public("is_nominator(address)")]
 	#[precompile::view]
 	fn is_nominator(handle: &mut impl PrecompileHandle, nominator: Address) -> EvmResult<bool> {
 		let nominator_account = Runtime::AddressMapping::into_account_id(nominator.0);
@@ -131,6 +163,7 @@ where
 	}
 
 	#[precompile::public("erasTotalStake(uint32)")]
+	#[precompile::public("eras_total_stake(uint32)")]
 	#[precompile::view]
 	fn eras_total_stake(handle: &mut impl PrecompileHandle, era_index: u32) -> EvmResult<u128> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
@@ -142,6 +175,7 @@ where
 	}
 
 	#[precompile::public("erasTotalRewardPoints(uint32)")]
+	#[precompile::public("eras_total_reward_points(uint32)")]
 	#[precompile::view]
 	fn eras_total_reward_points(
 		handle: &mut impl PrecompileHandle,
@@ -151,5 +185,23 @@ where
 		let total_reward_points: u32 =
 			<pallet_staking::Pallet<Runtime>>::eras_reward_points(era_index).total;
 		Ok(total_reward_points)
+	}
+
+	#[precompile::public("nominate(address[])")]
+	fn nominate(handle: &mut impl PrecompileHandle, targets: Vec<H256>) -> EvmResult {
+		handle.record_log_costs_manual(2, 32 * targets.len());
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let converted_targets = targets
+			.into_iter()
+			.map(|target| {
+				AccountIdLookup::<MultiAddress<Runtime::AccountId, AccountIndex>, AccountIndex>::unlookup(MultiAddress::Address32(target.0))
+			})
+			.collect::<Vec<_>>();
+		let call = pallet_staking::Call::<Runtime>::nominate { targets: converted_targets };
+
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
 	}
 }
