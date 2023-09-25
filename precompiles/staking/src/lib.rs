@@ -218,7 +218,7 @@ where
 		Ok(total_reward_points)
 	}
 
-	#[precompile::public("nominate(address[])")]
+	#[precompile::public("nominate(bytes32[])")]
 	fn nominate(handle: &mut impl PrecompileHandle, targets: Vec<H256>) -> EvmResult {
 		handle.record_log_costs_manual(2, 32 * targets.len())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -229,6 +229,161 @@ where
 			converted_targets.push(converted_target);
 		}
 		let call = pallet_staking::Call::<Runtime>::nominate { targets: converted_targets };
+
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("bond(uint256,uint8)")]
+	fn bond(handle: &mut impl PrecompileHandle, value: U256, payee: u8) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let value: BalanceOf<Runtime> = value
+			.try_into()
+			.map_err(|_| revert("Value is too large for provided balance type"))?;
+		let payee = match payee {
+			0 => pallet_staking::RewardDestination::Staked,
+			1 => pallet_staking::RewardDestination::Stash,
+			2 => pallet_staking::RewardDestination::Controller,
+			_ => return Err(revert("Invalid payee")),
+		};
+
+		let call = pallet_staking::Call::<Runtime>::bond { value, payee };
+
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("bondExtra(uint256)")]
+	#[precompile::public("bond_extra(uint256)")]
+	fn bond_extra(handle: &mut impl PrecompileHandle, max_additional: U256) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let max_additional: BalanceOf<Runtime> = max_additional
+			.try_into()
+			.map_err(|_| revert("Value is too large for provided balance type"))?;
+
+		let call = pallet_staking::Call::<Runtime>::bond_extra { max_additional };
+
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("unbond(uint256)")]
+	fn unbond(handle: &mut impl PrecompileHandle, value: U256) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let value: BalanceOf<Runtime> = value
+			.try_into()
+			.map_err(|_| revert("Value is too large for provided balance type"))?;
+
+		let call = pallet_staking::Call::<Runtime>::unbond { value };
+
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("withdrawUnbonded(uint32)")]
+	#[precompile::public("withdraw_unbonded(uint32)")]
+	fn withdraw_unbonded(handle: &mut impl PrecompileHandle, num_slashing_spans: u32) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+
+		let call = pallet_staking::Call::<Runtime>::withdraw_unbonded { num_slashing_spans };
+
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("chill()")]
+	fn chill(handle: &mut impl PrecompileHandle) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+
+		let call = pallet_staking::Call::<Runtime>::chill {};
+
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("setPayee(uint8)")]
+	#[precompile::public("set_payee(uint8)")]
+	fn set_payee(handle: &mut impl PrecompileHandle, payee: u8) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let payee = match payee {
+			0 => pallet_staking::RewardDestination::Staked,
+			1 => pallet_staking::RewardDestination::Stash,
+			2 => pallet_staking::RewardDestination::Controller,
+			_ => return Err(revert("Invalid payee")),
+		};
+
+		let call = pallet_staking::Call::<Runtime>::set_payee { payee };
+
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	/// (Re-)sets the controller of a stash to the stash itself. This function previously
+	/// accepted a `controller` argument to set the controller to an account other than the
+	/// stash itself. This functionality has now been removed, now only setting the controller
+	/// to the stash, if it is not already.
+	#[precompile::public("setController()")]
+	#[precompile::public("set_controller()")]
+	fn set_controller(handle: &mut impl PrecompileHandle) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+
+		let call = pallet_staking::Call::<Runtime>::set_controller {};
+
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("payoutStakers(bytes32,uint32)")]
+	#[precompile::public("payout_stakers(bytes32,uint32)")]
+	fn payout_stakers(
+		handle: &mut impl PrecompileHandle,
+		validator_stash: H256,
+		era: u32,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let validator_stash: Runtime::AccountId = Self::parse_input_address(validator_stash.0.to_vec())?;
+
+		let call = pallet_staking::Call::<Runtime>::payout_stakers { validator_stash, era };
+
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("rebond(uint256)")]
+	fn rebond(handle: &mut impl PrecompileHandle, value: U256) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let value: BalanceOf<Runtime> = value
+			.try_into()
+			.map_err(|_| revert("Value is too large for provided balance type"))?;
+
+		let call = pallet_staking::Call::<Runtime>::rebond { value };
 
 		// Dispatch call (if enough gas).
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;

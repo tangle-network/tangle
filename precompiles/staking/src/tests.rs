@@ -19,8 +19,7 @@ use crate::mock::{
 	active_era, new_test_ext, start_session, PCall, Precompiles, PrecompilesValue, Runtime,
 	TestAccount,
 };
-use precompile_utils::testing::*;
-use sp_core::H160;
+use sp_core::{H160, H256};
 
 fn precompiles() -> Precompiles<Runtime> {
 	PrecompilesValue::get()
@@ -113,4 +112,23 @@ fn eras_total_rewards_should_work() {
 			.expect_no_logs()
 			.execute_returns(150u32);
 	});
+
 }
+
+// #[test]
+// fn nominate_should_work() {
+// 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+// 		precompiles()
+// 			.prepare_test(
+// 				TestAccount::Alex,
+// 				H160::from_low_u64_be(5),
+// 				PCall::nominate {
+// 					nominator: H160::from(TestAccount::Alex).into(),
+// 					targets: vec![H256::from(TestAccount::Bobo).into()],
+// 				},
+// 			)
+// 			.expect_cost(0)
+// 			.expect_no_logs()
+// 			.execute_returns(());
+// 	});
+// }
