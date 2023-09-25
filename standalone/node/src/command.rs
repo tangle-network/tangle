@@ -26,7 +26,7 @@ use tangle_runtime::{Block, EXISTENTIAL_DEPOSIT};
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Tangle Standalone Substrate Node".into()
+		 "Tangle Standalone Substrate Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -42,11 +42,11 @@ impl SubstrateCli for Cli {
 	}
 
 	fn support_url() -> String {
-		"support.anonymous.an".into()
+		"https://github.com/webb-tools/tangle/issues".into()
 	}
 
 	fn copyright_start_year() -> i32 {
-		2021
+		2023
 	}
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
