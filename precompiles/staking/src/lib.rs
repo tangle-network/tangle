@@ -47,7 +47,7 @@ use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
 use sp_core::{H256, U256};
 use sp_runtime::traits::StaticLookup;
-use sp_std::{convert::TryInto, marker::PhantomData};
+use sp_std::{convert::TryInto, marker::PhantomData, vec, vec::Vec};
 
 type BalanceOf<Runtime> = <<Runtime as pallet_staking::Config>::Currency as Currency<
 	<Runtime as frame_system::Config>::AccountId,
@@ -64,7 +64,7 @@ where
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
 	Runtime::AccountId: From<[u8; 32]>,
 {
-	/// Helper method to parse H160 or SS58 address
+	/// Helper method to parse SS58 address
 	fn parse_input_address(staker_vec: Vec<u8>) -> EvmResult<Runtime::AccountId> {
 		let staker: Runtime::AccountId = match staker_vec.len() {
 			// public address of the ss58 account has 32 bytes
@@ -73,13 +73,6 @@ where
 				staker_bytes[..].clone_from_slice(&staker_vec[0..32]);
 
 				staker_bytes.into()
-			},
-			// public address of the H160 account has 20 bytes
-			20 => {
-				let mut staker_bytes = [0_u8; 20];
-				staker_bytes[..].clone_from_slice(&staker_vec[0..20]);
-
-				Runtime::AddressMapping::into_account_id(staker_bytes.into())
 			},
 			_ => {
 				// Return err if account length is wrong
