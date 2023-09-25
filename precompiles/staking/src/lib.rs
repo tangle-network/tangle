@@ -46,12 +46,8 @@ use frame_support::{
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
 use sp_core::{H256, U256};
-use sp_runtime::{
-	traits::{AccountIdLookup, StaticLookup},
-	MultiAddress,
-};
+use sp_runtime::traits::StaticLookup;
 use sp_std::{convert::TryInto, marker::PhantomData};
-use tangle_primitives::AccountIndex;
 
 type BalanceOf<Runtime> = <<Runtime as pallet_staking::Config>::Currency as Currency<
 	<Runtime as frame_system::Config>::AccountId,
@@ -59,7 +55,41 @@ type BalanceOf<Runtime> = <<Runtime as pallet_staking::Config>::Currency as Curr
 
 pub struct StakingPrecompile<Runtime>(PhantomData<Runtime>);
 
-type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup>::Source;
+impl<Runtime> StakingPrecompile<Runtime>
+where
+	Runtime: pallet_staking::Config + pallet_evm::Config,
+	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
+	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+	Runtime::RuntimeCall: From<pallet_staking::Call<Runtime>>,
+	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+	Runtime::AccountId: From<[u8; 32]>,
+{
+	/// Helper method to parse H160 or SS58 address
+	fn parse_input_address(staker_vec: Vec<u8>) -> EvmResult<Runtime::AccountId> {
+		let staker: Runtime::AccountId = match staker_vec.len() {
+			// public address of the ss58 account has 32 bytes
+			32 => {
+				let mut staker_bytes = [0_u8; 32];
+				staker_bytes[..].clone_from_slice(&staker_vec[0..32]);
+
+				staker_bytes.into()
+			},
+			// public address of the H160 account has 20 bytes
+			20 => {
+				let mut staker_bytes = [0_u8; 20];
+				staker_bytes[..].clone_from_slice(&staker_vec[0..20]);
+
+				Runtime::AddressMapping::into_account_id(staker_bytes.into())
+			},
+			_ => {
+				// Return err if account length is wrong
+				return Err(revert("Error while parsing staker's address"))
+			},
+		};
+
+		Ok(staker)
+	}
+}
 
 #[precompile_utils::precompile]
 impl<Runtime> StakingPrecompile<Runtime>
@@ -69,6 +99,7 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_staking::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+	Runtime::AccountId: From<[u8; 32]>,
 {
 	#[precompile::public("currentEra()")]
 	#[precompile::public("current_era()")]
@@ -189,14 +220,14 @@ where
 
 	#[precompile::public("nominate(address[])")]
 	fn nominate(handle: &mut impl PrecompileHandle, targets: Vec<H256>) -> EvmResult {
-		handle.record_log_costs_manual(2, 32 * targets.len());
+		handle.record_log_costs_manual(2, 32 * targets.len())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let converted_targets = targets
-			.into_iter()
-			.map(|target| {
-				AccountIdLookup::<MultiAddress<Runtime::AccountId, AccountIndex>, AccountIndex>::unlookup(MultiAddress::Address32(target.0))
-			})
-			.collect::<Vec<_>>();
+		let mut converted_targets: Vec<<Runtime::Lookup as StaticLookup>::Source> = vec![];
+		for i in 0..targets.len() {
+			let target: Runtime::AccountId = Self::parse_input_address(targets[i].0.to_vec())?;
+			let converted_target = <Runtime::Lookup as StaticLookup>::unlookup(target);
+			converted_targets.push(converted_target);
+		}
 		let call = pallet_staking::Call::<Runtime>::nominate { targets: converted_targets };
 
 		// Dispatch call (if enough gas).
