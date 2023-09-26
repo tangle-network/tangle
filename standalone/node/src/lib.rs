@@ -5,3 +5,4 @@ pub mod eth;
 pub mod rpc;
 pub mod service;
 pub mod testnet_fixtures;
+pub mod utils;

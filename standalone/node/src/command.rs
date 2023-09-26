@@ -26,7 +26,7 @@ use tangle_runtime::{Block, EXISTENTIAL_DEPOSIT};
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		 "Tangle Standalone Substrate Node".into()
+		"Tangle Standalone Substrate Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -256,6 +256,7 @@ pub fn run() -> sc_cli::Result<()> {
 					relayer_cmd: cli.relayer_cmd,
 					#[cfg(feature = "light-client")]
 					light_client_relayer_cmd: cli.light_client_relayer_cmd,
+					auto_insert_keys: cli.auto_insert_keys,
 				})
 				.map_err(Into::into)
 				.await
