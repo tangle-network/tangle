@@ -11,6 +11,7 @@ mod distributions;
 mod eth;
 mod rpc;
 mod testnet_fixtures;
+mod utils;
 
 fn main() -> sc_cli::Result<()> {
 	command::run()

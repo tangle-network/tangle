@@ -42,11 +42,11 @@ impl SubstrateCli for Cli {
 	}
 
 	fn support_url() -> String {
-		"support.anonymous.an".into()
+		"https://github.com/webb-tools/tangle/issues".into()
 	}
 
 	fn copyright_start_year() -> i32 {
-		2021
+		2023
 	}
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
@@ -256,6 +256,7 @@ pub fn run() -> sc_cli::Result<()> {
 					relayer_cmd: cli.relayer_cmd,
 					#[cfg(feature = "light-client")]
 					light_client_relayer_cmd: cli.light_client_relayer_cmd,
+					auto_insert_keys: cli.auto_insert_keys,
 				})
 				.map_err(Into::into)
 				.await
