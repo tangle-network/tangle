@@ -15,11 +15,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::mock::{
-	active_era, new_test_ext, start_session, PCall, Precompiles, PrecompilesValue, Runtime,
-	TestAccount,
+use crate::{
+	mock::{
+		active_era, mock_pub_key, new_test_ext, start_session, PCall, Precompiles,
+		PrecompilesValue, Runtime, TestAccount,
+	},
+	StakingPrecompile,
 };
-use sp_core::{H160, H256};
+use pallet_evm::AddressMapping;
+use pallet_staking::Nominators;
+use precompile_utils::testing::PrecompileTesterExt;
+use sp_core::{H160, H256, U256};
 
 fn precompiles() -> Precompiles<Runtime> {
 	PrecompilesValue::get()
@@ -114,20 +120,50 @@ fn eras_total_rewards_should_work() {
 	});
 }
 
-// #[test]
-// fn nominate_should_work() {
-// 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
-// 		precompiles()
-// 			.prepare_test(
-// 				TestAccount::Alex,
-// 				H160::from_low_u64_be(5),
-// 				PCall::nominate {
-// 					nominator: H160::from(TestAccount::Alex).into(),
-// 					targets: vec![H256::from(TestAccount::Bobo).into()],
-// 				},
-// 			)
-// 			.expect_cost(0)
-// 			.expect_no_logs()
-// 			.execute_returns(());
-// 	});
-// }
+#[test]
+fn nominate_should_work() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		assert_eq!(
+			Nominators::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)),
+			None
+		);
+		precompiles()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(5),
+				PCall::nominate { targets: vec![H256::from(mock_pub_key(1)).into()] },
+			)
+			.expect_no_logs()
+			.execute_returns(());
+
+		let nominator =
+			Nominators::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
+		assert_eq!(nominator.targets.len(), 1);
+		assert_eq!(nominator.targets[0], mock_pub_key(1));
+	});
+}
+
+#[test]
+fn bond_should_work() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		precompiles()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(5),
+				PCall::bond {
+					value: U256::from(100),
+					payee: H256([
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 1,
+					]),
+				},
+			)
+			.expect_no_logs()
+			.execute_returns(());
+
+		let nominator =
+			Nominators::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
+		assert_eq!(nominator.targets.len(), 1);
+		assert_eq!(nominator.targets[0], mock_pub_key(1));
+	});
+}

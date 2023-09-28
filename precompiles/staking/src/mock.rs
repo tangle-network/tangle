@@ -152,7 +152,6 @@ impl From<TestAccount> for H160 {
 		}
 	}
 }
-
 trait H160Conversion {
 	fn to_h160(&self) -> H160;
 }

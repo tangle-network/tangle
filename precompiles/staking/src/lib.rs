@@ -45,9 +45,10 @@ use frame_support::{
 };
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
-use sp_core::{H256, U256};
+use sp_core::{H160, H256, U256};
 use sp_runtime::traits::StaticLookup;
 use sp_std::{convert::TryInto, marker::PhantomData, vec, vec::Vec};
+use tangle_primitives::WrappedAccountId32;
 
 type BalanceOf<Runtime> = <<Runtime as pallet_staking::Config>::Currency as Currency<
 	<Runtime as frame_system::Config>::AccountId,
@@ -62,17 +63,17 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_staking::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<[u8; 32]>,
+	Runtime::AccountId: From<WrappedAccountId32>,
 {
 	/// Helper method to parse SS58 address
-	fn parse_input_address(staker_vec: Vec<u8>) -> EvmResult<Runtime::AccountId> {
-		let staker: Runtime::AccountId = match staker_vec.len() {
+	fn parse_32byte_address(addr: Vec<u8>) -> EvmResult<Runtime::AccountId> {
+		let addr: Runtime::AccountId = match addr.len() {
 			// public address of the ss58 account has 32 bytes
 			32 => {
-				let mut staker_bytes = [0_u8; 32];
-				staker_bytes[..].clone_from_slice(&staker_vec[0..32]);
+				let mut addr_bytes = [0_u8; 32];
+				addr_bytes[..].clone_from_slice(&addr[0..32]);
 
-				staker_bytes.into()
+				WrappedAccountId32(addr_bytes).into()
 			},
 			_ => {
 				// Return err if account length is wrong
@@ -80,7 +81,37 @@ where
 			},
 		};
 
-		Ok(staker)
+		Ok(addr)
+	}
+
+	/// Helper for converting from u8 to RewardDestination
+	fn convert_to_reward_destination(
+		payee: H256,
+	) -> EvmResult<pallet_staking::RewardDestination<Runtime::AccountId>> {
+		let payee = match payee {
+			H256(
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+			) => pallet_staking::RewardDestination::Staked,
+			H256(
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+			) => pallet_staking::RewardDestination::Stash,
+			H256(
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+			) => pallet_staking::RewardDestination::Controller,
+			H256(
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
+			) => {
+				let ethereum_address = Address(H160::from_slice(&payee.0[10..]));
+				pallet_staking::RewardDestination::Account(
+					Runtime::AddressMapping::into_account_id(ethereum_address.0),
+				)
+			},
+			H256(account) => pallet_staking::RewardDestination::Account(
+				Self::parse_32byte_address(account.to_vec())?,
+			),
+		};
+
+		Ok(payee)
 	}
 }
 
@@ -92,7 +123,7 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_staking::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<[u8; 32]>,
+	Runtime::AccountId: From<WrappedAccountId32>,
 {
 	#[precompile::public("currentEra()")]
 	#[precompile::public("current_era()")]
@@ -217,7 +248,7 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let mut converted_targets: Vec<<Runtime::Lookup as StaticLookup>::Source> = vec![];
 		for i in 0..targets.len() {
-			let target: Runtime::AccountId = Self::parse_input_address(targets[i].0.to_vec())?;
+			let target: Runtime::AccountId = Self::parse_32byte_address(targets[i].0.to_vec())?;
 			let converted_target = <Runtime::Lookup as StaticLookup>::unlookup(target);
 			converted_targets.push(converted_target);
 		}
@@ -229,19 +260,14 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("bond(uint256,uint8)")]
-	fn bond(handle: &mut impl PrecompileHandle, value: U256, payee: u8) -> EvmResult {
+	#[precompile::public("bond(uint256,bytes32)")]
+	fn bond(handle: &mut impl PrecompileHandle, value: U256, payee: H256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let value: BalanceOf<Runtime> = value
 			.try_into()
 			.map_err(|_| revert("Value is too large for provided balance type"))?;
-		let payee = match payee {
-			0 => pallet_staking::RewardDestination::Staked,
-			1 => pallet_staking::RewardDestination::Stash,
-			2 => pallet_staking::RewardDestination::Controller,
-			_ => return Err(revert("Invalid payee")),
-		};
+		let payee = Self::convert_to_reward_destination(payee)?;
 
 		let call = pallet_staking::Call::<Runtime>::bond { value, payee };
 
@@ -359,7 +385,7 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let validator_stash: Runtime::AccountId =
-			Self::parse_input_address(validator_stash.0.to_vec())?;
+			Self::parse_32byte_address(validator_stash.0.to_vec())?;
 
 		let call = pallet_staking::Call::<Runtime>::payout_stakers { validator_stash, era };
 
