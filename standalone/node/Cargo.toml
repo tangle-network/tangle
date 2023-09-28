@@ -93,11 +93,13 @@ wasmer = { version = "2.3" }
 
 # Frontier
 fc-cli = { workspace = true }
+hex = {workspace = true }
 fc-consensus = { workspace = true }
 fc-db = { workspace = true }
 fc-mapping-sync = { workspace = true }
 fc-rpc = { workspace = true, features = ["rpc-binary-search-estimate"] }
 fc-rpc-core = { workspace = true }
+sp-keystore = { workspace = true }
 fc-storage = { workspace = true }
 fp-account = { workspace = true }
 fp-dynamic-fee = { workspace = true, features = ["default"] }
