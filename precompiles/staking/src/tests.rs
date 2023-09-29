@@ -15,11 +15,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{
-	mock::{
-		active_era, mock_pub_key, new_test_ext, start_session, Balances, PCall, Precompiles,
-		PrecompilesValue, Runtime, TestAccount,
-	},
+use crate::mock::{
+	active_era, mock_pub_key, new_test_ext, start_session, Balances, PCall, Precompiles,
+	PrecompilesValue, Runtime, TestAccount,
 };
 use frame_support::traits::Currency;
 use pallet_staking::Nominators;
