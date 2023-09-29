@@ -20,14 +20,11 @@ use crate::{
 		active_era, mock_pub_key, new_test_ext, start_session, Balances, PCall, Precompiles,
 		PrecompilesValue, Runtime, TestAccount,
 	},
-	StakingPrecompile,
 };
-use dkg_runtime_primitives::Address;
 use frame_support::traits::Currency;
-use pallet_evm::AddressMapping;
 use pallet_staking::Nominators;
 use precompile_utils::testing::PrecompileTesterExt;
-use sp_core::{sr25519, H160, H256, U256};
+use sp_core::{H160, H256, U256};
 
 fn precompiles() -> Precompiles<Runtime> {
 	PrecompilesValue::get()
@@ -133,7 +130,7 @@ fn nominate_should_work() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(5),
-				PCall::nominate { targets: vec![H256::from(mock_pub_key(1)).into()] },
+				PCall::nominate { targets: vec![H256::from(mock_pub_key(1))] },
 			)
 			.expect_no_logs()
 			.execute_returns(());
