@@ -247,8 +247,8 @@ where
 		handle.record_log_costs_manual(2, 32 * targets.len())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let mut converted_targets: Vec<<Runtime::Lookup as StaticLookup>::Source> = vec![];
-		for i in 0..targets.len() {
-			let target: Runtime::AccountId = Self::parse_32byte_address(targets[i].0.to_vec())?;
+		for tgt in targets {
+			let target: Runtime::AccountId = Self::parse_32byte_address(tgt.0.to_vec())?;
 			let converted_target = <Runtime::Lookup as StaticLookup>::unlookup(target);
 			converted_targets.push(converted_target);
 		}
