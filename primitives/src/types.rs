@@ -1,3 +1,5 @@
+use sp_runtime::AccountId32;
+
 // Copyright 2022 Webb Technologies Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +23,10 @@ pub type Signature = MultiSignature;
 /// Some way of identifying an account on the chain. We intentionally make it equivalent
 /// to the public key of our transaction signing scheme.
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+
+/// A custom AccountId32 type that exposes the underlying 32-byte array.
+pub struct WrappedAccountId32(pub [u8; 32]);
+
 /// The type for looking up accounts.
 pub type AccountIndex = u32;
 /// Balance of an account.
@@ -39,3 +45,15 @@ pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 pub type Moment = u64;
 
 pub const EPOCH_DURATION_IN_BLOCKS: u32 = 10 * crate::time::MINUTES;
+
+impl From<WrappedAccountId32> for AccountId32 {
+	fn from(x: WrappedAccountId32) -> Self {
+		AccountId32::new(x.0)
+	}
+}
+
+impl From<WrappedAccountId32> for sp_core::sr25519::Public {
+	fn from(x: WrappedAccountId32) -> Self {
+		sp_core::sr25519::Public::from_raw(x.0)
+	}
+}

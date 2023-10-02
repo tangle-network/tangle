@@ -80,7 +80,7 @@ type Block = frame_system::mocking::MockBlock<Runtime>;
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
 ];
 
 #[derive(
@@ -102,8 +102,9 @@ pub enum TestAccount {
 	Empty,
 	Alex,
 	Bobo,
-	Dino,
+	Dave,
 	Charlie,
+	Eve,
 	PrecompileAddress,
 }
 
@@ -119,9 +120,10 @@ impl AddressMapping<AccountId32> for TestAccount {
 		match h160_account {
 			a if a == H160::repeat_byte(0x01) => TestAccount::Alex.into(),
 			a if a == H160::repeat_byte(0x02) => TestAccount::Bobo.into(),
-			a if a == H160::repeat_byte(0x03) => TestAccount::Dino.into(),
-			a if a == H160::repeat_byte(0x04) => TestAccount::Dino.into(),
-			a if a == H160::from_low_u64_be(5) => TestAccount::PrecompileAddress.into(),
+			a if a == H160::repeat_byte(0x03) => TestAccount::Charlie.into(),
+			a if a == H160::repeat_byte(0x04) => TestAccount::Dave.into(),
+			a if a == H160::repeat_byte(0x05) => TestAccount::Eve.into(),
+			a if a == H160::from_low_u64_be(6) => TestAccount::PrecompileAddress.into(),
 			_ => TestAccount::Empty.into(),
 		}
 	}
@@ -134,7 +136,8 @@ impl AddressMapping<sp_core::sr25519::Public> for TestAccount {
 			a if a == H160::repeat_byte(0x02) => sr25519Public::from_raw([2u8; 32]),
 			a if a == H160::repeat_byte(0x03) => sr25519Public::from_raw([3u8; 32]),
 			a if a == H160::repeat_byte(0x04) => sr25519Public::from_raw([4u8; 32]),
-			a if a == H160::from_low_u64_be(5) => sr25519Public::from_raw(PRECOMPILE_ADDRESS_BYTES),
+			a if a == H160::repeat_byte(0x05) => sr25519Public::from_raw([5u8; 32]),
+			a if a == H160::from_low_u64_be(6) => sr25519Public::from_raw(PRECOMPILE_ADDRESS_BYTES),
 			_ => sr25519Public::from_raw([0u8; 32]),
 		}
 	}
@@ -145,14 +148,14 @@ impl From<TestAccount> for H160 {
 		match x {
 			TestAccount::Alex => H160::repeat_byte(0x01),
 			TestAccount::Bobo => H160::repeat_byte(0x02),
-			TestAccount::Dino => H160::repeat_byte(0x03),
-			TestAccount::Charlie => H160::repeat_byte(0x04),
-			TestAccount::PrecompileAddress => H160::from_low_u64_be(5),
+			TestAccount::Charlie => H160::repeat_byte(0x03),
+			TestAccount::Dave => H160::repeat_byte(0x04),
+			TestAccount::Eve => H160::repeat_byte(0x05),
+			TestAccount::PrecompileAddress => H160::from_low_u64_be(6),
 			_ => Default::default(),
 		}
 	}
 }
-
 trait H160Conversion {
 	fn to_h160(&self) -> H160;
 }
@@ -169,8 +172,9 @@ impl From<TestAccount> for AccountId32 {
 		match x {
 			TestAccount::Alex => AccountId32::from([1u8; 32]),
 			TestAccount::Bobo => AccountId32::from([2u8; 32]),
-			TestAccount::Dino => AccountId32::from([3u8; 32]),
-			TestAccount::Charlie => AccountId32::from([4u8; 32]),
+			TestAccount::Charlie => AccountId32::from([3u8; 32]),
+			TestAccount::Dave => AccountId32::from([4u8; 32]),
+			TestAccount::Eve => AccountId32::from([5u8; 32]),
 			TestAccount::PrecompileAddress => AccountId32::from(PRECOMPILE_ADDRESS_BYTES),
 			_ => AccountId32::from([0u8; 32]),
 		}
@@ -182,8 +186,9 @@ impl From<TestAccount> for sp_core::sr25519::Public {
 		match x {
 			TestAccount::Alex => sr25519Public::from_raw([1u8; 32]),
 			TestAccount::Bobo => sr25519Public::from_raw([2u8; 32]),
-			TestAccount::Dino => sr25519Public::from_raw([3u8; 32]),
-			TestAccount::Charlie => sr25519Public::from_raw([4u8; 32]),
+			TestAccount::Charlie => sr25519Public::from_raw([3u8; 32]),
+			TestAccount::Dave => sr25519Public::from_raw([4u8; 32]),
+			TestAccount::Eve => sr25519Public::from_raw([5u8; 32]),
 			TestAccount::PrecompileAddress => sr25519Public::from_raw(PRECOMPILE_ADDRESS_BYTES),
 			_ => sr25519Public::from_raw([0u8; 32]),
 		}

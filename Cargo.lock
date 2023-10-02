@@ -8762,6 +8762,7 @@ dependencies = [
  "sp-runtime 24.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-staking",
  "sp-std 8.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "tangle-primitives",
 ]
 
 [[package]]

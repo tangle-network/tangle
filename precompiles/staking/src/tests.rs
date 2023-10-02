@@ -16,11 +16,13 @@
 // limitations under the License.
 
 use crate::mock::{
-	active_era, new_test_ext, start_session, PCall, Precompiles, PrecompilesValue, Runtime,
-	TestAccount,
+	active_era, mock_pub_key, new_test_ext, start_session, Balances, PCall, Precompiles,
+	PrecompilesValue, Runtime, TestAccount,
 };
-use precompile_utils::testing::*;
-use sp_core::H160;
+use frame_support::traits::Currency;
+use pallet_staking::Nominators;
+use precompile_utils::testing::PrecompileTesterExt;
+use sp_core::{H160, H256, U256};
 
 fn precompiles() -> Precompiles<Runtime> {
 	PrecompilesValue::get()
@@ -102,7 +104,7 @@ fn eras_total_rewards_should_work() {
 		let era_index = active_era();
 		crate::mock::Staking::reward_by_ids(vec![(TestAccount::Alex.into(), 50)]);
 		crate::mock::Staking::reward_by_ids(vec![(TestAccount::Bobo.into(), 50)]);
-		crate::mock::Staking::reward_by_ids(vec![(TestAccount::Dino.into(), 50)]);
+		crate::mock::Staking::reward_by_ids(vec![(TestAccount::Charlie.into(), 50)]);
 		precompiles()
 			.prepare_test(
 				TestAccount::Alex,
@@ -112,5 +114,50 @@ fn eras_total_rewards_should_work() {
 			.expect_cost(0)
 			.expect_no_logs()
 			.execute_returns(150u32);
+	});
+}
+
+#[test]
+fn nominate_should_work() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		assert_eq!(
+			Nominators::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)),
+			None
+		);
+		precompiles()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(5),
+				PCall::nominate { targets: vec![H256::from(mock_pub_key(1))] },
+			)
+			.expect_no_logs()
+			.execute_returns(());
+
+		let nominator =
+			Nominators::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
+		assert_eq!(nominator.targets.len(), 1);
+		assert_eq!(nominator.targets[0], mock_pub_key(1));
+	});
+}
+
+#[test]
+fn bond_should_work() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		Balances::make_free_balance_be(&TestAccount::Eve.into(), 1000);
+
+		precompiles()
+			.prepare_test(
+				TestAccount::Eve,
+				H160::from_low_u64_be(5),
+				PCall::bond {
+					value: U256::from(100),
+					payee: H256([
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 1,
+					]),
+				},
+			)
+			.expect_no_logs()
+			.execute_returns(());
 	});
 }
