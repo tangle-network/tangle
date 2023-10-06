@@ -14,6 +14,7 @@ members = [
  "client/evm-tracing",
  "client/rpc/*",
  "client/rpc-core/*",
+ "client/voter",
  "standalone/node",
  "standalone/runtime",
  "standalone/runtime/evm_tracer",
@@ -286,6 +287,7 @@ pallet-eth2-light-client-relayer-gadget = { git = "https://github.com/webb-tools
 pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.5" }
 webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.5" }
 
+webb = { version = "0.8", default-features = false }
 webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", rev="a960eaf", default-features = false, features = ["scale", "evm"] }
 
 primitives-ext = { path = "primitives/ext", default-features = false }

@@ -15442,6 +15442,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "tangle-voter"
+version = "0.4.5"
+dependencies = [
+ "anyhow",
+ "clap 4.4.2",
+ "hex",
+ "serde",
+ "serde_json",
+ "tokio 1.32.0",
+ "tracing",
+ "webb 0.8.0",
+ "webb-proposals 0.6.0",
+]
+
+[[package]]
 name = "tap"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17505,6 +17520,23 @@ dependencies = [
  "serde",
  "serde_json",
  "subxt 0.29.0",
+ "tempfile",
+ "thiserror",
+]
+
+[[package]]
+name = "webb"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1305e4206aeeaf4f6cecabb9ea88260480bc9ced7645502f8f2ab32889faf32a"
+dependencies = [
+ "async-trait",
+ "ethers",
+ "hex",
+ "prettyplease 0.2.14",
+ "rand 0.8.5",
+ "serde",
+ "serde_json",
  "tempfile",
  "thiserror",
 ]
