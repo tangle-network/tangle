@@ -19,17 +19,11 @@ use sc_cli::{
 	utils, with_crypto_scheme, CryptoScheme, Error, KeystoreParams, Result as CliResult,
 	SharedParams, SubstrateCli,
 };
-use sc_client_api::{backend::Backend as BackendT, blockchain::HeaderBackend};
 use sc_keystore::LocalKeystore;
-use sc_network::config::Secret;
 use sc_service::{config::KeystoreConfig, BasePath};
-use sp_blockchain::Info;
 use sp_keystore::KeystorePtr;
 use sp_runtime::traits::{Block as BlockT, Header as HeaderT};
-use std::{fmt::Debug, io};
-
-use serde_json::to_vec;
-use sp_core::crypto::KeyTypeId;
+use std::fmt::Debug;
 
 /// The `chain-info` subcommand used to output db meta columns information.
 #[derive(Debug, Clone, clap::Parser)]
@@ -71,9 +65,11 @@ impl DKGSignerCmd {
 		let maybe_public = keystore.ecdsa_public_keys(key_type);
 		let public = maybe_public.first().unwrap();
 
-		keystore
+		let signature = keystore
 			.ecdsa_sign(key_type, &public, &self.data.as_bytes())
 			.map_err(|_| Error::KeystoreOperation)?;
+
+		println!("Signature : {:?}", signature);
 
 		Ok(())
 	}
