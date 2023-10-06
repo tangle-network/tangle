@@ -2,7 +2,7 @@ use anyhow::Result;
 use webb::evm::{
 	contract::protocol_solidity,
 	ethers::{
-		abi::AbiEncode,
+		abi::{AbiDecode, AbiEncode},
 		types::{Address, Bytes, H256},
 	},
 };
@@ -75,6 +75,13 @@ pub enum Commands {
 		/// The public key
 		public_key: Bytes,
 	},
+	/// Cast votes to change the governor
+	Cast {
+		#[arg(long, action = clap::ArgAction::Append, required = true)]
+		vote: Vec<Bytes>,
+		#[arg(long, action = clap::ArgAction::Append, required = true)]
+		signature: Vec<Bytes>,
+	},
 }
 
 fn main() -> Result<()> {
@@ -105,6 +112,18 @@ fn main() -> Result<()> {
 			let hash = webb::evm::ethers::utils::keccak256(&public_key);
 			let address = Address::from_slice(&hash[12..]);
 			println!("Address: {:?}", address);
+		},
+		Commands::Cast { vote, signature: sigs } => {
+			let votes = vote
+				.into_iter()
+				.map(|v| protocol_solidity::signature_bridge::Vote::decode(&v).map_err(Into::into))
+				.collect::<Result<Vec<_>>>()?;
+			let call =
+				protocol_solidity::signature_bridge::VoteInFavorForceSetGovernorWithSigCall {
+					votes,
+					sigs,
+				};
+			println!("{}", serde_json::to_string_pretty(&call)?);
 		},
 	}
 	Ok(())
