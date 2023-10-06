@@ -2,7 +2,6 @@
 
 A simple CLI tool for voting for changing the current Signature Bridge governor.
 
-
 ### Build
 
 ```
@@ -11,7 +10,22 @@ cargo build --release -p tangle-voter
 
 ### How to use the CLI
 
-1. Create a vote by inspecting the refresh proposal:
+```bash
+Usage: tangle-voter <COMMAND>
+
+Commands:
+  vote                   Vote for a candidate
+  decode                 Decode DKG Refresh Proposal
+  public-key-to-address  Convert a public key to an EVM address
+  cast                   Cast votes to change the governor
+  help                   Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+```
+
+#### Create a vote by inspecting the refresh proposal:
 
 ```bash
 Decode DKG Refresh Proposal
@@ -43,7 +57,7 @@ Decoded Refresh Proposal:
   "public_key": "0x3aceb11481f6467fd856079bd7c978401003f15aa55974807e138d58ac929df7599933fd36121dd6d419faa80ef8f6d32898e3df88f32b6e10d82e4434a00f80"
 }
 ```
-2. Get the new governor's address from the public key:
+#### Get the new governor's address from the public key:
 
 ```bash
 Convert a public key to an EVM address
@@ -69,7 +83,7 @@ Which will result in the following output:
 Address: 0x64cfb1fa0fa7da3da0097fee9d9ab546b9bcd029
 ```
 
-3. Vote for the new governor:
+#### Vote for the new governor:
 
 ```bash
 Vote for a candidate
@@ -100,74 +114,8 @@ You should see the following output:
   "leaf_index": 1,
   "proposed_governor": "0x64cfb1fa0fa7da3da0097fee9d9ab546b9bcd029",
   "sibling_path_nodes": [
-    [
-      58,
-      206,
-      177,
-      20,
-      129,
-      246,
-      70,
-      127,
-      216,
-      86,
-      7,
-      155,
-      215,
-      201,
-      120,
-      64,
-      16,
-      3,
-      241,
-      90,
-      165,
-      89,
-      116,
-      128,
-      126,
-      19,
-      141,
-      88,
-      172,
-      146,
-      157,
-      247
-    ],
-    [
-      153,
-      51,
-      253,
-      54,
-      18,
-      29,
-      214,
-      212,
-      25,
-      250,
-      168,
-      14,
-      248,
-      246,
-      211,
-      40,
-      152,
-      227,
-      223,
-      136,
-      243,
-      43,
-      110,
-      16,
-      216,
-      46,
-      68,
-      52,
-      160,
-      15,
-      128,
-      0
-    ]
+    [ ... ],
+    [ ... ]
   ]
 }
 Please Sign the following using your `wdkg` ECDSA key:
@@ -208,148 +156,16 @@ Finally it will print the transaction that you can use [`cast`](https://book.get
       "leaf_index": 1,
       "proposed_governor": "0x64cfb1fa0fa7da3da0097fee9d9ab546b9bcd029",
       "sibling_path_nodes": [
-        [
-          58,
-          206,
-          177,
-          20,
-          129,
-          246,
-          70,
-          127,
-          216,
-          86,
-          7,
-          155,
-          215,
-          201,
-          120,
-          64,
-          16,
-          3,
-          241,
-          90,
-          165,
-          89,
-          116,
-          128,
-          126,
-          19,
-          141,
-          88,
-          172,
-          146,
-          157,
-          247
-        ],
-        [
-          153,
-          51,
-          253,
-          54,
-          18,
-          29,
-          214,
-          212,
-          25,
-          250,
-          168,
-          14,
-          248,
-          246,
-          211,
-          40,
-          152,
-          227,
-          223,
-          136,
-          243,
-          43,
-          110,
-          16,
-          216,
-          46,
-          68,
-          52,
-          160,
-          15,
-          128,
-          0
-        ]
+        [ ... ],
+        [ ... ]
       ]
     },
     {
       "leaf_index": 1,
       "proposed_governor": "0x64cfb1fa0fa7da3da0097fee9d9ab546b9bcd029",
       "sibling_path_nodes": [
-        [
-          58,
-          206,
-          177,
-          20,
-          129,
-          246,
-          70,
-          127,
-          216,
-          86,
-          7,
-          155,
-          215,
-          201,
-          120,
-          64,
-          16,
-          3,
-          241,
-          90,
-          165,
-          89,
-          116,
-          128,
-          126,
-          19,
-          141,
-          88,
-          172,
-          146,
-          157,
-          247
-        ],
-        [
-          153,
-          51,
-          253,
-          54,
-          18,
-          29,
-          214,
-          212,
-          25,
-          250,
-          168,
-          14,
-          248,
-          246,
-          211,
-          40,
-          152,
-          227,
-          223,
-          136,
-          243,
-          43,
-          110,
-          16,
-          216,
-          46,
-          68,
-          52,
-          160,
-          15,
-          128,
-          0
-        ]
+        [ ... ],
+        [ ... ]
       ]
     }
   ],
@@ -363,6 +179,6 @@ Call: 0x957b49a10000000000000000000000000000000000000000000000000000000000000040
 ```
 Then using `cast`
 
-```
+```bash
 cast send 0x... --rpc <RPC_URL> -i 0x957b49a100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000220000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000100000000000000000000000064cfb1fa0fa7da3da0097fee9d9ab546b9bcd029000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000023aceb11481f6467fd856079bd7c978401003f15aa55974807e138d58ac929df79933fd36121dd6d419faa80ef8f6d32898e3df88f32b6e10d82e4434a00f8000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000064cfb1fa0fa7da3da0097fee9d9ab546b9bcd029000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000023aceb11481f6467fd856079bd7c978401003f15aa55974807e138d58ac929df79933fd36121dd6d419faa80ef8f6d32898e3df88f32b6e10d82e4434a00f80000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000403aceb11481f6467fd856079bd7c978401003f15aa55974807e138d58ac929df7599933fd36121dd6d419faa80ef8f6d32898e3df88f32b6e10d82e4434a00f8000000000000000000000000000000000000000000000000000000000000000403aceb11481f6467fd856079bd7c978401003f15aa55974807e138d58ac929df7599933fd36121dd6d419faa80ef8f6d32898e3df88f32b6e10d82e4434a00f80
 ```
