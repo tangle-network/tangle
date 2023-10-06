@@ -124,7 +124,7 @@ fn main() -> Result<()> {
 					sigs,
 				};
 			println!("{}", serde_json::to_string_pretty(&call)?);
-			println!("Please use `cast tx` to send this tx to the signature bridge:");
+			println!("Please use `cast send` to send this tx to the signature bridge:");
 			let call_bytes = call.encode_hex();
 			println!("Call: {call_bytes}");
 		},
