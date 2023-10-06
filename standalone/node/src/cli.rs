@@ -92,4 +92,7 @@ pub enum Subcommand {
 
 	/// Db meta columns information.
 	FrontierDb(fc_cli::FrontierDbCmd),
+
+	/// DKG signer
+	DKGSigner(crate::signer_cli::DKGSignerCmd),
 }
