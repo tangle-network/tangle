@@ -1,0 +1,19 @@
+[package]
+name = "tangle-voter"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+clap = { workspace = true }
+tracing = { workspace = true }
+hex = { workspace = true }
+webb = { workspace = true, features = ["evm-runtime"] }
+webb-proposals = { workspace = true, features = ["evm", "std"] }
+anyhow = { version = "1" }
