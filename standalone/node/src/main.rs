@@ -10,6 +10,7 @@ mod command;
 mod distributions;
 mod eth;
 mod rpc;
+mod signer_cli;
 mod testnet_fixtures;
 mod utils;
 
