@@ -1078,6 +1078,28 @@ dependencies = [
 
 [[package]]
 name = "bindgen"
+version = "0.64.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c4243e6031260db77ede97ad86c27e501d646a27ab57b59a574f725d98ab1fb4"
+dependencies = [
+ "bitflags 1.3.2",
+ "cexpr",
+ "clang-sys",
+ "lazy_static",
+ "lazycell",
+ "log",
+ "peeking_take_while",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "rustc-hash",
+ "shlex",
+ "syn 1.0.109",
+ "which",
+]
+
+[[package]]
+name = "bindgen"
 version = "0.65.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfdf7b466f9a4903edc73f95d6d2bcd5baf8ae620638762244d3f60143643cc5"
@@ -2934,7 +2956,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2945,7 +2967,7 @@ dependencies = [
  "dkg-logging",
  "dkg-mock-blockchain",
  "dkg-primitives",
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "futures 0.3.28",
  "hex",
  "itertools 0.10.5",
@@ -2980,12 +3002,13 @@ dependencies = [
  "tokio-stream",
  "uuid 1.4.1",
  "webb-proposals 0.6.0",
+ "wsts",
 ]
 
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
  "hex",
  "lazy_static",
@@ -3002,14 +3025,14 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
  "async-trait",
  "atomic",
  "bincode2",
  "bytes 1.4.0",
  "dkg-logging",
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "futures 0.3.28",
  "humantime-serde",
  "log",
@@ -3029,12 +3052,12 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
  "chacha20poly1305",
  "clap 4.4.2",
  "curv-kzen",
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "hex",
  "libsecp256k1",
  "log",
@@ -3054,6 +3077,29 @@ dependencies = [
 name = "dkg-runtime-primitives"
 version = "0.0.1"
 source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+dependencies = [
+ "ethabi",
+ "ethereum",
+ "ethereum-types",
+ "frame-support",
+ "frame-system",
+ "impl-trait-for-tuples",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-api",
+ "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-io 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-runtime 24.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-std 8.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "tiny-keccak",
+ "webb-proposals 0.6.0",
+]
+
+[[package]]
+name = "dkg-runtime-primitives"
+version = "0.0.1"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -5300,6 +5346,7 @@ checksum = "2c6201b9ff9fd90a5a3bac2e56a830d0caa509576f0e503818ee82c181b3437a"
 dependencies = [
  "ahash 0.8.3",
  "allocator-api2",
+ "serde",
 ]
 
 [[package]]
@@ -6699,7 +6746,7 @@ version = "0.11.0+8.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3386f101bcb4bd252d8e9d2fb41ec3b0862a15a62b478c355b2982efa469e3e"
 dependencies = [
- "bindgen",
+ "bindgen 0.65.1",
  "bzip2-sys",
  "cc",
  "glob",
@@ -8013,6 +8060,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "p256k1"
+version = "5.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22e81c2cb5a1936d3f26278f9d698932239d03ddf0d5818392d91cd5f98ffc79"
+dependencies = [
+ "bindgen 0.64.0",
+ "bitvec",
+ "bs58 0.4.0",
+ "cc",
+ "hex",
+ "itertools 0.10.5",
+ "num-traits",
+ "primitive-types",
+ "proc-macro2",
+ "quote",
+ "rand_core 0.6.4",
+ "rustfmt-wrapper",
+ "serde",
+ "sha2 0.10.7",
+ "syn 2.0.31",
+]
+
+[[package]]
 name = "p384"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8138,9 +8208,9 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "frame-support",
  "frame-system",
  "hex",
@@ -8209,10 +8279,10 @@ dependencies = [
 
 [[package]]
 name = "pallet-dkg-metadata"
-version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+version = "0.2.0"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -8232,9 +8302,9 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "ethabi",
  "frame-benchmarking",
  "frame-support",
@@ -8254,9 +8324,9 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -8293,7 +8363,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "0.4.5"
+version = "0.4.9"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -8405,7 +8475,7 @@ version = "0.0.1"
 source = "git+https://github.com/webb-tools/pallet-eth2-light-client?tag=v0.4.5#cb2c939005126ee62e832860f09bb8c14409d2bd"
 dependencies = [
  "anyhow",
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4)",
  "eth2-to-substrate-relay",
  "ethereum-types",
  "pallet-eth2-light-client-relayer-gadget-cli",
@@ -8736,7 +8806,7 @@ name = "pallet-evm-precompile-staking"
 version = "1.0.0"
 dependencies = [
  "derive_more",
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "fp-evm",
  "frame-election-provider-support",
  "frame-support",
@@ -9043,7 +9113,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.4.5"
+version = "0.4.9"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -9669,6 +9739,16 @@ dependencies = [
  "cpufeatures",
  "opaque-debug 0.3.0",
  "universal-hash 0.4.1",
+]
+
+[[package]]
+name = "polynomial"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27abb6e4638dcecc65a92b50d7f1d87dd6dea987ba71db987b6bf881f4877e9d"
+dependencies = [
+ "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -11030,6 +11110,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfa0f585226d2e68097d4f95d113b15b83a82e819ab25717ec0590d9584ef366"
 dependencies = [
  "semver 1.0.18",
+]
+
+[[package]]
+name = "rustfmt-wrapper"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed729e3bee08ec2befd593c27e90ca9fdd25efdc83c94c3b82eaef16e4f7406e"
+dependencies = [
+ "serde",
+ "tempfile",
+ "thiserror",
+ "toml 0.5.11",
+ "toolchain_find",
 ]
 
 [[package]]
@@ -15246,7 +15339,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.4.5"
+version = "0.4.9"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -15257,12 +15350,12 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "0.4.5"
+version = "0.4.9"
 dependencies = [
  "clap 4.4.2",
  "dkg-gadget",
  "dkg-primitives",
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "fc-cli",
  "fc-consensus",
  "fc-db",
@@ -15341,9 +15434,9 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone-runtime"
-version = "0.4.5"
+version = "0.4.9"
 dependencies = [
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "evm-tracer",
  "fp-account",
  "fp-evm",
@@ -15443,7 +15536,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-voter"
-version = "0.4.5"
+version = "0.4.9"
 dependencies = [
  "anyhow",
  "clap 4.4.2",
@@ -15879,6 +15972,19 @@ dependencies = [
  "serde_spanned",
  "toml_datetime",
  "winnow",
+]
+
+[[package]]
+name = "toolchain_find"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e85654a10e7a07a47c6f19d93818f3f343e22927f2fa280c84f7c8042743413"
+dependencies = [
+ "home",
+ "lazy_static",
+ "regex",
+ "semver 0.11.0",
+ "walkdir",
 ]
 
 [[package]]
@@ -18195,9 +18301,9 @@ dependencies = [
 [[package]]
 name = "webb-relayer-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
- "dkg-runtime-primitives",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
  "ethereum-types",
  "sc-keystore",
  "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
@@ -18213,7 +18319,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-gadget-cli"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.4#43761d96bdcbee283deeda93ce074422d7cf4bca"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
 dependencies = [
  "clap 4.4.2",
 ]
@@ -19208,6 +19314,25 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "wsts"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08b241e8440197fcd6e214a26fcaac82d7cdfde3ae964586f4b1a7c41a21ba6f"
+dependencies = [
+ "bs58 0.5.0",
+ "hashbrown 0.14.0",
+ "hex",
+ "num-traits",
+ "p256k1",
+ "polynomial",
+ "primitive-types",
+ "rand_core 0.6.4",
+ "serde",
+ "sha2 0.10.7",
+ "thiserror",
 ]
 
 [[package]]

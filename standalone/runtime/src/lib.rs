@@ -746,6 +746,7 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type ProposalHandler = DKGProposalHandler;
 	type MaxKeyLength = MaxKeyLength;
 	type MaxSignatureLength = MaxSignatureLength;
+	type DKGAuthorityToMerkleLeaf = pallet_dkg_proposals::DKGEcdsaToEthereumAddress;
 	type MaxReporters = MaxReporters;
 	type MaxAuthorities = MaxAuthorities;
 	type VoteLength = VoteLength;
