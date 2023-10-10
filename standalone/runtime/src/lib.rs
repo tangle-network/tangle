@@ -119,7 +119,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-standalone"),
 	impl_name: create_runtime_str!("tangle-standalone"),
 	authoring_version: 1,
-	spec_version: 402, // v0.4.2
+	spec_version: 409, // v0.4.9
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -746,6 +746,7 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type ProposalHandler = DKGProposalHandler;
 	type MaxKeyLength = MaxKeyLength;
 	type MaxSignatureLength = MaxSignatureLength;
+	type DKGAuthorityToMerkleLeaf = pallet_dkg_proposals::DKGEcdsaToEthereumAddress;
 	type MaxReporters = MaxReporters;
 	type MaxAuthorities = MaxAuthorities;
 	type VoteLength = VoteLength;
