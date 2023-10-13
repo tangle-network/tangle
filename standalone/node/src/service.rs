@@ -29,7 +29,7 @@ use sc_consensus_aura::ImportQueueParams;
 use sc_consensus_grandpa::SharedVoterState;
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_network::NetworkStateInfo;
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
+use sc_service::{error::Error as ServiceError, ChainType, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_api::{ProvideRuntimeApi, TransactionFor};
@@ -343,15 +343,19 @@ pub async fn new_full(
 		}
 
 		// finally check if keys are inserted correctly
-		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore()).is_err() {
-			println!("   
+		if config.chain_spec.chain_type() != ChainType::Development {
+			if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore())
+				.is_err()
+			{
+				println!("   
 			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
 				Validator keys not found, validator keys are essential to run a validator on
 				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
 				how to generate and insert keys. OR start the node with --auto-insert-keys to automatically generate the keys.
 			++++++++++++++++++++++++++++++++++++++++++++++++   							
 			\n");
-			panic!("Keys not detected!")
+				panic!("Keys not detected!")
+			}
 		}
 	}
 
