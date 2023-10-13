@@ -14,15 +14,10 @@
 // limitations under the License.
 
 //! Signer module to sign data with wdkg keytype in keystore
-use parity_scale_codec::{Decode, Encode};
-use sc_cli::{
-	utils, with_crypto_scheme, CryptoScheme, Error, KeystoreParams, Result as CliResult,
-	SharedParams, SubstrateCli,
-};
+use sc_cli::{Error, KeystoreParams, SharedParams, SubstrateCli};
 use sc_keystore::LocalKeystore;
 use sc_service::{config::KeystoreConfig, BasePath};
 use sp_keystore::KeystorePtr;
-use sp_runtime::traits::{Block as BlockT, Header as HeaderT};
 use std::fmt::Debug;
 
 /// The `chain-info` subcommand used to output db meta columns information.
