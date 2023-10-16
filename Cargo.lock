@@ -2956,7 +2956,7 @@ dependencies = [
 [[package]]
 name = "dkg-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2967,7 +2967,7 @@ dependencies = [
  "dkg-logging",
  "dkg-mock-blockchain",
  "dkg-primitives",
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "futures 0.3.28",
  "hex",
  "itertools 0.10.5",
@@ -3008,7 +3008,7 @@ dependencies = [
 [[package]]
 name = "dkg-logging"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
  "hex",
  "lazy_static",
@@ -3025,14 +3025,14 @@ dependencies = [
 [[package]]
 name = "dkg-mock-blockchain"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
  "async-trait",
  "atomic",
  "bincode2",
  "bytes 1.4.0",
  "dkg-logging",
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "futures 0.3.28",
  "humantime-serde",
  "log",
@@ -3052,12 +3052,12 @@ dependencies = [
 [[package]]
 name = "dkg-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
  "chacha20poly1305",
  "clap 4.4.2",
  "curv-kzen",
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "hex",
  "libsecp256k1",
  "log",
@@ -3099,7 +3099,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -8208,9 +8208,9 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-registry"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "frame-support",
  "frame-system",
  "hex",
@@ -8280,9 +8280,9 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-metadata"
 version = "0.2.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -8302,9 +8302,9 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposal-handler"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "ethabi",
  "frame-benchmarking",
  "frame-support",
@@ -8324,9 +8324,9 @@ dependencies = [
 [[package]]
 name = "pallet-dkg-proposals"
 version = "1.0.0"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -8363,7 +8363,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-ecdsa-claims"
-version = "0.4.9"
+version = "0.5.0"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -8806,7 +8806,7 @@ name = "pallet-evm-precompile-staking"
 version = "1.0.0"
 dependencies = [
  "derive_more",
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "fp-evm",
  "frame-election-provider-support",
  "frame-support",
@@ -9113,7 +9113,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.4.9"
+version = "0.5.0"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -15339,7 +15339,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.4.9"
+version = "0.5.0"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -15350,12 +15350,12 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone"
-version = "0.4.9"
+version = "0.5.0"
 dependencies = [
  "clap 4.4.2",
  "dkg-gadget",
  "dkg-primitives",
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "fc-cli",
  "fc-consensus",
  "fc-db",
@@ -15434,9 +15434,9 @@ dependencies = [
 
 [[package]]
 name = "tangle-standalone-runtime"
-version = "0.4.9"
+version = "0.5.0"
 dependencies = [
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "evm-tracer",
  "fp-account",
  "fp-evm",
@@ -15536,7 +15536,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-voter"
-version = "0.4.9"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "clap 4.4.2",
@@ -18301,9 +18301,9 @@ dependencies = [
 [[package]]
 name = "webb-relayer-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
- "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5)",
+ "dkg-runtime-primitives 0.0.1 (git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6)",
  "ethereum-types",
  "sc-keystore",
  "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
@@ -18319,7 +18319,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-gadget-cli"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.5#af579a3f20122b096ce2b63959cab4b740a49e9c"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?tag=v0.4.6#d5512ea0516ce87415ef561a4f586406c41fcffa"
 dependencies = [
  "clap 4.4.2",
 ]
