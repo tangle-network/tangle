@@ -18,8 +18,7 @@ members = [
  "standalone/node",
  "standalone/runtime",
  "standalone/runtime/evm_tracer",
- "pallets/claims",
- "pallets/transaction-pause",
+ "pallets/*",
  "precompiles/utils",
  "precompiles/utils/macro",
  "precompiles/utils/tests-external",
@@ -83,6 +82,7 @@ tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/run
 
 # Tangle Dependencies
 pallet-ecdsa-claims = { path = "pallets/claims", default-features = false }
+pallet-jobs = { path = "pallets/jobs", default-features = false }
 
 # Orml dependencies
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v1.0.0", default-features = false }
