@@ -15,6 +15,7 @@ use sp_runtime::AccountId32;
 // limitations under the License.
 //
 use super::*;
+pub mod jobs;
 
 /// Reputation type
 pub type Reputation = u128;
