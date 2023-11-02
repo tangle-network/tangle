@@ -61,7 +61,7 @@ impl pallet_balances::Config for Runtime {
 	type Balance = Balance;
 	type DustRemoval = ();
 	type RuntimeEvent = RuntimeEvent;
-	type ExistentialDeposit = ConstU128<10>;
+	type ExistentialDeposit = ConstU128<1>;
 	type AccountStore = System;
 	type MaxLocks = ();
 	type MaxReserves = ConstU32<50>;
@@ -76,7 +76,11 @@ impl pallet_balances::Config for Runtime {
 pub struct MockDKGPallet;
 impl MockDKGPallet {
 	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
-		Default::default()
+		if job.job_type.is_phase_one() {
+			job.job_type.clone().get_participants().unwrap().len().try_into().unwrap()
+		} else {
+			20
+		}
 	}
 
 	fn verify(
@@ -109,7 +113,12 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 	type Balance = Balance;
 
 	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
-		Default::default()
+		match job.job_type {
+			JobType::DKG(_) => MockDKGPallet::job_to_fee(job),
+			JobType::DKGSignature(_) => MockDKGPallet::job_to_fee(job),
+			JobType::ZkSaasPhaseOne(_) => MockZkSaasPallet::job_to_fee(job),
+			JobType::ZkSaasPhaseTwo(_) => MockZkSaasPallet::job_to_fee(job),
+		}
 	}
 }
 
@@ -130,7 +139,12 @@ impl JobResultVerifier<AccountId, BlockNumber, Balance> for MockJobResultVerifie
 		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
 		result: Vec<u8>,
 	) -> DispatchResult {
-		Ok(())
+		match job.job_type {
+			JobType::DKG(_) => MockDKGPallet::verify(job, phase_one_data, result),
+			JobType::DKGSignature(_) => MockDKGPallet::verify(job, phase_one_data, result),
+			JobType::ZkSaasPhaseOne(_) => MockZkSaasPallet::verify(job, phase_one_data, result),
+			JobType::ZkSaasPhaseTwo(_) => MockZkSaasPallet::verify(job, phase_one_data, result),
+		}
 	}
 }
 
@@ -173,8 +187,9 @@ impl Default for ExtBuilder {
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	pallet_balances::GenesisConfig::<Runtime>::default()
+	pallet_balances::GenesisConfig::<Runtime> { balances: vec![(10, 100), (20, 100)] }
 		.assimilate_storage(&mut t)
 		.unwrap();
+
 	t.into()
 }

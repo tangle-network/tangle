@@ -98,6 +98,15 @@ impl <AccountId> JobType<AccountId> {
         }
     }
 
+        /// Gets the job key associated with the previous phase job type.
+        pub fn get_previous_phase_job_key(&self) -> Option<JobKey> {
+            match self {
+                JobType::DKGSignature(_) => Some(JobKey::DKG),
+                JobType::ZkSaasPhaseTwo(_) => Some(JobKey::ZkSaasPhaseOne),
+                _ => None
+            }
+        }
+
     /// Performs a basic sanity check on the job type.
     ///
     /// This function is intended for simple checks and may need improvement in the future.

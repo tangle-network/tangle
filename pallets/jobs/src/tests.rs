@@ -18,7 +18,7 @@ use super::*;
 use frame_support::{assert_noop, assert_ok};
 use mock::{RuntimeEvent, *};
 use sp_runtime::traits::BadOrigin;
-use tangle_primitives::jobs::{DKGJobType, JobSubmission, JobType};
+use tangle_primitives::jobs::{DKGJobType, DKGSignatureJobType, JobSubmission, JobType};
 
 #[test]
 fn jobs_submission_works_for_dkg() {
@@ -50,13 +50,69 @@ fn jobs_submission_works_for_dkg() {
 			Error::<Runtime>::InvalidJobParams
 		);
 
-		// should save and store correctly
+		// should fail when caller has no balance
 		let submission = JobSubmission {
 			expiry: 100,
 			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 3 }),
 		};
+		assert_noop!(
+			Jobs::submit_job(RuntimeOrigin::signed(1), submission),
+			sp_runtime::TokenError::FundsUnavailable
+		);
 
-		// should fail with invalid threshold
-		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(1), submission),);
+		let submission = JobSubmission {
+			expiry: 100,
+			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 3 }),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(10), submission));
+
+		assert_eq!(Balances::free_balance(10), 100 - 5);
+
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(RuntimeOrigin::signed(10), JobKey::DKG, 0, vec![]));
+
+		// ensure the job reward is distributed correctly
+		for validator in vec![1, 2, 3, 4, 5] {
+			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(1));
+		}
+
+		// ensure storage is correctly setup
+		assert!(KnownResults::<Runtime>::get(JobKey::DKG, 0).is_some());
+		assert!(SubmittedJobs::<Runtime>::get(JobKey::DKG, 0).is_none());
+
+		// ---- use phase one solution in phase 2 signinig -------
+
+		// another account cannot use solution
+		let submission = JobSubmission {
+			expiry: 100,
+			job_type: JobType::DKGSignature(DKGSignatureJobType {
+				phase_one_id: 0,
+				submission: vec![],
+			}),
+		};
+		assert_noop!(
+			Jobs::submit_job(RuntimeOrigin::signed(20), submission),
+			Error::<Runtime>::InvalidJobParams
+		);
+
+		let submission = JobSubmission {
+			expiry: 100,
+			job_type: JobType::DKGSignature(DKGSignatureJobType {
+				phase_one_id: 0,
+				submission: vec![],
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(10), submission));
+
+		assert_eq!(Balances::free_balance(10), 100 - 25);
+
+		// ensure the job reward is distributed correctly
+		for validator in vec![1, 2, 3, 4, 5] {
+			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(1));
+		}
+
+		// ensure storage is correctly setup
+		assert!(KnownResults::<Runtime>::get(JobKey::DKG, 0).is_some());
+		assert!(SubmittedJobs::<Runtime>::get(JobKey::DKG, 0).is_none());
 	});
 }

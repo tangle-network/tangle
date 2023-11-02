@@ -185,8 +185,11 @@ pub mod module {
 				let existing_result_id =
 					job.job_type.clone().get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?;
 				// ensure the result exists
-				let result = KnownResults::<T>::get(job_key.clone(), existing_result_id)
-					.ok_or(Error::<T>::PreviousResultNotFound)?;
+				let result = KnownResults::<T>::get(
+					job.job_type.clone().get_previous_phase_job_key().unwrap(),
+					existing_result_id,
+				)
+				.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 				// validate existing result
 				ensure!(result.expiry >= now, Error::<T>::ResultExpired);
@@ -288,6 +291,8 @@ pub mod module {
 					reward: fee_per_participant,
 				});
 			}
+
+			SubmittedJobs::<T>::remove(job_key.clone(), job_id);
 
 			Self::deposit_event(Event::JobResultSubmitted { job_id, job_key });
 
