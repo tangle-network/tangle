@@ -13,17 +13,25 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use super::*;
-use tangle_primitives::jobs::*;
 
-pub type JobSubmissionOf<T> =
-	JobSubmission<<T as frame_system::Config>::AccountId, BlockNumberFor<T>>;
+use crate::jobs::JobSubmission;
+use crate::jobs::JobKey;
+use sp_arithmetic::{
+	traits::{BaseArithmetic, SaturatedConversion, Unsigned},
+	Perbill,
+};
 
-pub type JobInfoOf<T> =
-	JobInfo<<T as frame_system::Config>::AccountId, BlockNumberFor<T>, BalanceOf<T>>;
-
-pub type BalanceOf<T> =
-	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-
-pub type PhaseOneResultOf<T> =
-	PhaseOneResult<<T as frame_system::Config>::AccountId, BlockNumberFor<T>>;
+/// A trait that handles roles associated with job types.
+pub trait RolesHandler<AccountId> {
+    /// Returns true if the validator is permitted to work with this job type.
+    ///
+    /// # Parameters
+    ///
+    /// - `address`: The account ID of the validator.
+    /// - `job_key`: The key representing the type of job.
+    ///
+    /// # Returns
+    ///
+    /// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
+    fn is_validator(address: AccountId, job_key: JobKey) -> bool;
+}

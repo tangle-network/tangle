@@ -12,7 +12,10 @@ frame-support = { workspace = true }
 smallvec = { workspace = true }
 sp-core = { workspace = true }
 sp-runtime = { workspace = true }
+sp-arithmetic = { workspace = true }
 cumulus-primitives-core = { workspace = true }
+parity-scale-codec = { workspace = true }
+scale-info = {workspace = true}
 
 [features]
 default = ["std"]
