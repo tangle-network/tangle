@@ -36,6 +36,7 @@ use tangle_primitives::{
 };
 
 mod functions;
+mod impls;
 mod mock;
 mod tests;
 mod types;

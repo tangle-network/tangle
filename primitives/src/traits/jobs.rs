@@ -59,7 +59,7 @@ pub trait JobResultVerifier<AccountId, BlockNumber, Balance> {
 }
 
 /// A trait that handles various aspects of jobs for a validator.
-pub trait JobsHandler<AccountId, BlockNumber> {
+pub trait JobsHandler<AccountId> {
     /// Returns a list of active jobs associated with a validator.
     ///
     /// # Parameters

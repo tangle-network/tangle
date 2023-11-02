@@ -18,127 +18,45 @@ use super::*;
 use frame_support::{assert_noop, assert_ok};
 use mock::{RuntimeEvent, *};
 use sp_runtime::traits::BadOrigin;
-
-const BALANCE_TRANSFER: &<Runtime as frame_system::Config>::RuntimeCall =
-	&mock::RuntimeCall::Balances(pallet_balances::Call::transfer { dest: ALICE, value: 10 });
+use tangle_primitives::jobs::{DKGJobType, JobSubmission, JobType};
 
 #[test]
-fn pause_transaction_work() {
-	ExtBuilder.build().execute_with(|| {
+fn jobs_submission_works_for_dkg() {
+	new_test_ext().execute_with(|| {
 		System::set_block_number(1);
 
+		let submission = JobSubmission {
+			expiry: 100,
+			job_type: JobType::DKG(DKGJobType {
+				participants: vec![100, 2, 3, 4, 5],
+				threshold: 3,
+			}),
+		};
+
+		// should fail with invalid validator
 		assert_noop!(
-			TransactionPause::pause_transaction(
-				RuntimeOrigin::signed(5),
-				b"Balances".to_vec(),
-				b"transfer".to_vec()
-			),
-			BadOrigin
+			Jobs::submit_job(RuntimeOrigin::signed(1), submission),
+			Error::<Runtime>::InvalidValidator
 		);
 
-		assert_eq!(
-			TransactionPause::paused_transactions((b"Balances".to_vec(), b"transfer".to_vec())),
-			None
-		);
-		assert_ok!(TransactionPause::pause_transaction(
-			RuntimeOrigin::signed(1),
-			b"Balances".to_vec(),
-			b"transfer".to_vec()
-		));
-		System::assert_last_event(RuntimeEvent::TransactionPause(
-			crate::Event::TransactionPaused {
-				pallet_name_bytes: b"Balances".to_vec(),
-				function_name_bytes: b"transfer".to_vec(),
-			},
-		));
-		assert_eq!(
-			TransactionPause::paused_transactions((b"Balances".to_vec(), b"transfer".to_vec())),
-			Some(())
-		);
+		let submission = JobSubmission {
+			expiry: 100,
+			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 5 }),
+		};
 
+		// should fail with invalid threshold
 		assert_noop!(
-			TransactionPause::pause_transaction(
-				RuntimeOrigin::signed(1),
-				b"TransactionPause".to_vec(),
-				b"pause_transaction".to_vec()
-			),
-			Error::<Runtime>::CannotPause
-		);
-		assert_noop!(
-			TransactionPause::pause_transaction(
-				RuntimeOrigin::signed(1),
-				b"TransactionPause".to_vec(),
-				b"some_other_call".to_vec()
-			),
-			Error::<Runtime>::CannotPause
-		);
-		assert_ok!(TransactionPause::pause_transaction(
-			RuntimeOrigin::signed(1),
-			b"OtherPallet".to_vec(),
-			b"pause_transaction".to_vec()
-		));
-	});
-}
-
-#[test]
-fn unpause_transaction_work() {
-	ExtBuilder.build().execute_with(|| {
-		System::set_block_number(1);
-
-		assert_ok!(TransactionPause::pause_transaction(
-			RuntimeOrigin::signed(1),
-			b"Balances".to_vec(),
-			b"transfer".to_vec()
-		));
-		assert_eq!(
-			TransactionPause::paused_transactions((b"Balances".to_vec(), b"transfer".to_vec())),
-			Some(())
+			Jobs::submit_job(RuntimeOrigin::signed(1), submission),
+			Error::<Runtime>::InvalidJobParams
 		);
 
-		assert_noop!(
-			TransactionPause::unpause_transaction(
-				RuntimeOrigin::signed(5),
-				b"Balances".to_vec(),
-				b"transfer".to_vec()
-			),
-			BadOrigin
-		);
+		// should save and store correctly
+		let submission = JobSubmission {
+			expiry: 100,
+			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 3 }),
+		};
 
-		assert_ok!(TransactionPause::unpause_transaction(
-			RuntimeOrigin::signed(1),
-			b"Balances".to_vec(),
-			b"transfer".to_vec()
-		));
-		System::assert_last_event(RuntimeEvent::TransactionPause(
-			crate::Event::TransactionUnpaused {
-				pallet_name_bytes: b"Balances".to_vec(),
-				function_name_bytes: b"transfer".to_vec(),
-			},
-		));
-		assert_eq!(
-			TransactionPause::paused_transactions((b"Balances".to_vec(), b"transfer".to_vec())),
-			None
-		);
-	});
-}
-
-#[test]
-fn paused_transaction_filter_work() {
-	ExtBuilder.build().execute_with(|| {
-		assert!(!PausedTransactionFilter::<Runtime>::contains(BALANCE_TRANSFER));
-
-		assert_ok!(TransactionPause::pause_transaction(
-			RuntimeOrigin::signed(1),
-			b"Balances".to_vec(),
-			b"transfer".to_vec()
-		));
-		assert!(PausedTransactionFilter::<Runtime>::contains(BALANCE_TRANSFER));
-
-		assert_ok!(TransactionPause::unpause_transaction(
-			RuntimeOrigin::signed(1),
-			b"Balances".to_vec(),
-			b"transfer".to_vec()
-		));
-		assert!(!PausedTransactionFilter::<Runtime>::contains(BALANCE_TRANSFER));
+		// should fail with invalid threshold
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(1), submission),);
 	});
 }

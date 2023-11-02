@@ -16,21 +16,20 @@
 #![cfg(test)]
 
 use super::*;
+use crate as pallet_jobs;
 use frame_support::{
-	construct_runtime, ord_parameter_types,
+	construct_runtime, ord_parameter_types, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Everything},
 };
-use frame_system::EnsureSignedBy;
+use frame_system::{EnsureSigned, EnsureSignedBy};
 use sp_core::H256;
 use sp_runtime::{traits::IdentityLookup, BuildStorage};
-
 pub type AccountId = u128;
 pub const ALICE: AccountId = 1;
 pub type Balance = u128;
+pub type BlockNumber = u64;
 
-mod transaction_pause {
-	pub use super::super::*;
-}
+use tangle_primitives::jobs::*;
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
@@ -74,13 +73,79 @@ impl pallet_balances::Config for Runtime {
 	type MaxFreezes = ();
 }
 
-ord_parameter_types! {
-	pub const One: AccountId = 1;
+pub struct MockDKGPallet;
+impl MockDKGPallet {
+	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		Default::default()
+	}
+
+	fn verify(
+		job: &JobInfo<AccountId, BlockNumber, Balance>,
+		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
+		result: Vec<u8>,
+	) -> DispatchResult {
+		Ok(())
+	}
+}
+
+pub struct MockZkSaasPallet;
+impl MockZkSaasPallet {
+	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		Default::default()
+	}
+
+	fn verify(
+		job: &JobInfo<AccountId, BlockNumber, Balance>,
+		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
+		result: Vec<u8>,
+	) -> DispatchResult {
+		Ok(())
+	}
+}
+
+pub struct MockJobToFeeHandler;
+
+impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+	type Balance = Balance;
+
+	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		Default::default()
+	}
+}
+
+pub struct MockRolesHandler;
+
+impl RolesHandler<AccountId> for MockRolesHandler {
+	fn is_validator(address: AccountId, job_key: JobKey) -> bool {
+		let validators = vec![1, 2, 3, 4, 5];
+		validators.contains(&address)
+	}
+}
+
+pub struct MockJobResultVerifier;
+
+impl JobResultVerifier<AccountId, BlockNumber, Balance> for MockJobResultVerifier {
+	fn verify(
+		job: &JobInfo<AccountId, BlockNumber, Balance>,
+		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
+		result: Vec<u8>,
+	) -> DispatchResult {
+		Ok(())
+	}
+}
+
+parameter_types! {
+	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
 }
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type UpdateOrigin = EnsureSignedBy<One, AccountId>;
+	type ForceOrigin = EnsureSigned<AccountId>;
+	type Currency = Balances;
+	type JobToFee = MockJobToFeeHandler;
+	type RolesHandler = MockRolesHandler;
+	type JobResultVerifier = MockJobResultVerifier;
+	type PalletId = JobsPalletId;
 	type WeightInfo = ();
 }
 
@@ -90,8 +155,8 @@ construct_runtime!(
 	pub enum Runtime
 	{
 		System: frame_system,
-		TransactionPause: transaction_pause,
 		Balances: pallet_balances,
+		Jobs: pallet_jobs,
 	}
 );
 
@@ -103,10 +168,13 @@ impl Default for ExtBuilder {
 	}
 }
 
-impl ExtBuilder {
-	pub fn build(self) -> sp_io::TestExternalities {
-		let t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
-
-		t.into()
-	}
+// This function basically just builds a genesis storage key/value store according to
+// our desired mockup.
+pub fn new_test_ext() -> sp_io::TestExternalities {
+	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
+	// We use default for brevity, but you can configure as desired if needed.
+	pallet_balances::GenesisConfig::<Runtime>::default()
+		.assimilate_storage(&mut t)
+		.unwrap();
+	t.into()
 }
