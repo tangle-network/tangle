@@ -16,8 +16,8 @@
 #![cfg(test)]
 use super::*;
 use frame_support::{assert_noop, assert_ok};
-use mock::{RuntimeEvent, *};
-use sp_runtime::traits::BadOrigin;
+use mock::*;
+
 use tangle_primitives::jobs::{DKGJobType, DKGSignatureJobType, JobSubmission, JobType};
 
 #[test]
@@ -72,7 +72,7 @@ fn jobs_submission_works_for_dkg() {
 		assert_ok!(Jobs::submit_job_result(RuntimeOrigin::signed(10), JobKey::DKG, 0, vec![]));
 
 		// ensure the job reward is distributed correctly
-		for validator in vec![1, 2, 3, 4, 5] {
+		for validator in [1, 2, 3, 4, 5] {
 			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(1));
 		}
 
@@ -107,7 +107,7 @@ fn jobs_submission_works_for_dkg() {
 		assert_eq!(Balances::free_balance(10), 100 - 25);
 
 		// ensure the job reward is distributed correctly
-		for validator in vec![1, 2, 3, 4, 5] {
+		for validator in [1, 2, 3, 4, 5] {
 			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(1));
 		}
 

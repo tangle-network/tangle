@@ -19,10 +19,9 @@
 
 use crate::types::{JobInfoOf, JobSubmissionOf, PhaseOneResultOf};
 use frame_support::{
-	dispatch::{CallMetadata, GetCallMetadata},
 	pallet_prelude::*,
 	traits::{Currency, ExistenceRequirement, ReservableCurrency},
-	transactional, PalletId,
+	PalletId,
 };
 use frame_system::pallet_prelude::*;
 use sp_runtime::{traits::AccountIdConversion, DispatchResult};
@@ -43,7 +42,7 @@ mod types;
 
 pub mod weights;
 use crate::types::BalanceOf;
-use functions::*;
+
 pub use module::*;
 pub use weights::WeightInfo;
 
@@ -243,7 +242,7 @@ pub mod module {
 			job_id: JobId,
 			result: Vec<u8>,
 		) -> DispatchResult {
-			let caller = ensure_signed(origin)?;
+			let _caller = ensure_signed(origin)?;
 
 			// ensure the job exists
 			let job_info =

@@ -18,14 +18,13 @@
 use super::*;
 use crate as pallet_jobs;
 use frame_support::{
-	construct_runtime, ord_parameter_types, parameter_types,
+	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Everything},
 };
-use frame_system::{EnsureSigned, EnsureSignedBy};
+use frame_system::EnsureSigned;
 use sp_core::H256;
 use sp_runtime::{traits::IdentityLookup, BuildStorage};
 pub type AccountId = u128;
-pub const ALICE: AccountId = 1;
 pub type Balance = u128;
 pub type BlockNumber = u64;
 
@@ -84,9 +83,9 @@ impl MockDKGPallet {
 	}
 
 	fn verify(
-		job: &JobInfo<AccountId, BlockNumber, Balance>,
-		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
-		result: Vec<u8>,
+		_job: &JobInfo<AccountId, BlockNumber, Balance>,
+		_phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
+		_result: Vec<u8>,
 	) -> DispatchResult {
 		Ok(())
 	}
@@ -94,14 +93,14 @@ impl MockDKGPallet {
 
 pub struct MockZkSaasPallet;
 impl MockZkSaasPallet {
-	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+	fn job_to_fee(_job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
 		Default::default()
 	}
 
 	fn verify(
-		job: &JobInfo<AccountId, BlockNumber, Balance>,
-		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
-		result: Vec<u8>,
+		_job: &JobInfo<AccountId, BlockNumber, Balance>,
+		_phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
+		_result: Vec<u8>,
 	) -> DispatchResult {
 		Ok(())
 	}
@@ -125,8 +124,8 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 pub struct MockRolesHandler;
 
 impl RolesHandler<AccountId> for MockRolesHandler {
-	fn is_validator(address: AccountId, job_key: JobKey) -> bool {
-		let validators = vec![1, 2, 3, 4, 5];
+	fn is_validator(address: AccountId, _job_key: JobKey) -> bool {
+		let validators = [1, 2, 3, 4, 5];
 		validators.contains(&address)
 	}
 }

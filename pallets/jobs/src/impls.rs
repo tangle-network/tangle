@@ -29,7 +29,7 @@ impl<T: Config> JobsHandler<T::AccountId> for Pallet<T> {
 	/// # Errors
 	///
 	/// Returns a `DispatchResult` indicating success or an error if the operation fails.
-	fn exit_from_known_set(validator: T::AccountId, job_id: JobId) -> DispatchResult {
+	fn exit_from_known_set(_validator: T::AccountId, _job_id: JobId) -> DispatchResult {
 		todo!()
 	}
 }
