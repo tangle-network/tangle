@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use frame_support::{dispatch::Vec, pallet_prelude::*, RuntimeDebug};
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 
 pub type JobId = u32;
 
@@ -45,6 +47,7 @@ pub struct JobInfo<AccountId, BlockNumber, Balance> {
 
 /// Enum representing different types of jobs.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum JobType<AccountId> {
 	/// Distributed Key Generation (DKG) job type.
 	DKG(DKGJobType<AccountId>),
@@ -60,11 +63,10 @@ impl<AccountId> JobType<AccountId> {
 	/// Checks if the job type is a phase one job.
 	pub fn is_phase_one(&self) -> bool {
 		use crate::jobs::JobType::*;
-		match self {
-			DKG(_) => true,
-			ZkSaasPhaseOne(_) => true,
-			_ => false,
+		if matches!(self, DKG(_) | ZkSaasPhaseOne(_)) {
+			return true
 		}
+		false
 	}
 
 	/// Gets the participants for the job type, if applicable.
@@ -133,6 +135,7 @@ impl<AccountId> JobType<AccountId> {
 
 /// Represents the Distributed Key Generation (DKG) job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
@@ -143,6 +146,7 @@ pub struct DKGJobType<AccountId> {
 
 /// Represents the DKG Signature job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGSignatureJobType {
 	/// The phase one ID.
 	pub phase_one_id: u32,
@@ -153,6 +157,7 @@ pub struct DKGSignatureJobType {
 
 /// Represents the (zk-SNARK) Phase One job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ZkSaasPhaseOneJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
@@ -160,6 +165,7 @@ pub struct ZkSaasPhaseOneJobType<AccountId> {
 
 /// Represents the (zk-SNARK) Phase Two job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ZkSaasPhaseTwoJobType {
 	/// The phase one ID.
 	pub phase_one_id: u32,
@@ -170,6 +176,7 @@ pub struct ZkSaasPhaseTwoJobType {
 
 /// Enum representing different states of a job.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum JobState {
 	/// The job is active.
 	Active,
@@ -219,4 +226,23 @@ pub enum ValidatorOffence {
 
 	/// The validator has committed duplicate signing.
 	Equivocation,
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct RpcResponseJobsData<AccountId> {
+	/// The job id of the job
+	pub job_id: JobId,
+
+	/// The type of the job submission.
+	pub job_type: JobType<AccountId>,
+
+	/// (Optional) List of participants' account IDs.
+	pub participants: Option<Vec<AccountId>>,
+
+	/// threshold if any for the original set
+	pub threshold: Option<u8>,
+
+	/// previous phase key if any
+	pub key: Option<Vec<u8>>,
 }

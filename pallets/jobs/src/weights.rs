@@ -42,35 +42,57 @@ use sp_std::marker::PhantomData;
 
 /// Weight functions needed for module_transaction_pause.
 pub trait WeightInfo {
-	fn pause_transaction() -> Weight;
-	fn unpause_transaction() -> Weight;
+	fn submit_job() -> Weight;
+	fn submit_job_result() -> Weight;
+	fn withdraw_rewards() -> Weight;
+	fn report_inactive_validator() -> Weight;
 }
 
 /// Weights for module_transaction_pause using the Acala node and recommended hardware.
 pub struct AcalaWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for AcalaWeight<T> {
-	fn pause_transaction() -> Weight {
+	fn submit_job() -> Weight {
+		Weight::from_parts(32_778_000, 0)
+			.saturating_add(T::DbWeight::get().reads(3_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
+	fn submit_job_result() -> Weight {
+		Weight::from_parts(29_335_000, 0)
+			.saturating_add(T::DbWeight::get().reads(3_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
+	fn withdraw_rewards() -> Weight {
 		Weight::from_parts(32_778_000, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
-	fn unpause_transaction() -> Weight {
+	fn report_inactive_validator() -> Weight {
 		Weight::from_parts(29_335_000, 0)
-			.saturating_add(T::DbWeight::get().reads(1_u64))
-			.saturating_add(T::DbWeight::get().writes(1_u64))
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-	fn pause_transaction() -> Weight {
+	fn submit_job() -> Weight {
+		Weight::from_parts(32_778_000, 0)
+			.saturating_add(RocksDbWeight::get().reads(3_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
+	fn submit_job_result() -> Weight {
+		Weight::from_parts(29_335_000, 0)
+			.saturating_add(RocksDbWeight::get().reads(3_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
+	fn withdraw_rewards() -> Weight {
 		Weight::from_parts(32_778_000, 0)
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
-	fn unpause_transaction() -> Weight {
+	fn report_inactive_validator() -> Weight {
 		Weight::from_parts(29_335_000, 0)
-			.saturating_add(RocksDbWeight::get().reads(1_u64))
-			.saturating_add(RocksDbWeight::get().writes(1_u64))
+		.saturating_add(RocksDbWeight::get().reads(4_u64))
+		.saturating_add(RocksDbWeight::get().writes(4_u64))
 	}
 }

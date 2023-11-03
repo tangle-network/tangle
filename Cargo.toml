@@ -19,6 +19,8 @@ members = [
  "standalone/runtime",
  "standalone/runtime/evm_tracer",
  "pallets/*",
+ "pallets/jobs/rpc",
+ "pallets/jobs/rpc/runtime-api",
  "precompiles/utils",
  "precompiles/utils/macro",
  "precompiles/utils/tests-external",
@@ -121,6 +123,8 @@ sc-consensus-grandpa = { git = "https://github.com/paritytech/substrate", branch
 sc-network-sync = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sp-arithmetic = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 sp-trie = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sp-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
+sp-weights = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 frame-election-provider-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }

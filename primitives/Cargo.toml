@@ -9,6 +9,7 @@ repository = { workspace = true }
 
 [dependencies]
 frame-support = { workspace = true }
+serde = { workspace = true }
 smallvec = { workspace = true }
 sp-core = { workspace = true }
 sp-runtime = { workspace = true }

@@ -40,6 +40,7 @@ use tangle_primitives::{
 mod functions;
 mod impls;
 mod mock;
+mod rpc;
 mod tests;
 mod types;
 
@@ -187,7 +188,7 @@ pub mod module {
 		/// one result, as well as the validity of phase one participants. It also verifies that the
 		/// caller generated the phase one result. The user is charged a fee based on job params.
 		#[pallet::call_index(0)]
-		#[pallet::weight(T::WeightInfo::pause_transaction())]
+		#[pallet::weight(T::WeightInfo::submit_job())]
 		pub fn submit_job(origin: OriginFor<T>, job: JobSubmissionOf<T>) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			let now = <frame_system::Pallet<T>>::block_number();
@@ -298,7 +299,7 @@ pub mod module {
 		/// participants and records rewards for each participant. Finally, it removes the job from
 		/// the submitted jobs storage.
 		#[pallet::call_index(1)]
-		#[pallet::weight(T::WeightInfo::pause_transaction())]
+		#[pallet::weight(T::WeightInfo::submit_job_result())]
 		pub fn submit_job_result(
 			origin: OriginFor<T>,
 			job_key: JobKey,
@@ -394,7 +395,7 @@ pub mod module {
 		/// This function allows a caller to withdraw rewards that have been accumulated in their
 		/// account.
 		#[pallet::call_index(2)]
-		#[pallet::weight(T::WeightInfo::pause_transaction())]
+		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
 		pub fn withdraw_rewards(origin: OriginFor<T>) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 
@@ -443,7 +444,7 @@ pub mod module {
 		/// then validates the report using the Result verifier config. If the report is valid, it
 		/// will slash the validator.
 		#[pallet::call_index(3)]
-		#[pallet::weight(T::WeightInfo::pause_transaction())]
+		#[pallet::weight(T::WeightInfo::report_inactive_validator())]
 		pub fn report_inactive_validator(
 			origin: OriginFor<T>,
 			job_key: JobKey,

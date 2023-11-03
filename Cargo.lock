@@ -8961,6 +8961,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-jobs-rpc"
+version = "0.5.0"
+dependencies = [
+ "jsonrpsee",
+ "pallet-jobs-rpc-runtime-api",
+ "parity-scale-codec",
+ "sp-api",
+ "sp-blockchain",
+ "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-rpc",
+ "sp-runtime 24.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-weights 20.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "tangle-primitives",
+]
+
+[[package]]
+name = "pallet-jobs-rpc-runtime-api"
+version = "0.5.0"
+dependencies = [
+ "pallet-jobs",
+ "parity-scale-codec",
+ "sp-api",
+ "sp-runtime 24.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-weights 20.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-nomination-pools"
 version = "1.0.0"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
@@ -15364,6 +15392,7 @@ dependencies = [
  "frame-support",
  "parity-scale-codec",
  "scale-info",
+ "serde",
  "smallvec 1.11.0",
  "sp-arithmetic 16.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
