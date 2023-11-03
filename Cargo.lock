@@ -8946,6 +8946,7 @@ dependencies = [
 name = "pallet-jobs"
 version = "0.5.0"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "pallet-balances",

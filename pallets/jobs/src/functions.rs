@@ -78,7 +78,32 @@ impl<T: Config> Pallet<T> {
 		T::PalletId::get().into_sub_account_truncating(0)
 	}
 
-	/// Trigger removal of validator from a DKG set
+	/// Try to remove a validator from a submitted job.
+	///
+	/// # Parameters
+	///
+	/// - `job_key`: A unique identifier for the job category.
+	/// - `job_id`: A unique identifier for the job within the category.
+	/// - `validator`: The account ID of the validator to be removed.
+	///
+	/// # Errors
+	///
+	/// This function can return an error if:
+	///
+	/// - The specified job is not found.
+	/// - The phase one result is not found (for phase two jobs).
+	/// - There are not enough validators after removal.
+	/// - The threshold is zero.
+	/// - The next job ID cannot be generated.
+	/// - The fee transfer fails.
+	///
+	/// # Details
+	///
+	/// This function attempts to remove a validator from a submitted job. If the job is in phase
+	/// two, it fetches the phase one result. It then adjusts the participants and threshold based
+	/// on the removal of the validator. If there are not enough validators after removal, an error
+	/// is returned. If the job is in phase two, a new job is generated with updated parameters and
+	/// the fee is charged from validator. The original job's result is removed.
 	pub fn try_validator_removal_from_job(
 		job_key: JobKey,
 		job_id: JobId,
@@ -87,14 +112,14 @@ impl<T: Config> Pallet<T> {
 		SubmittedJobs::<T>::try_mutate(job_key.clone(), job_id, |job_info| -> DispatchResult {
 			let job_info = job_info.as_mut().ok_or(Error::<T>::JobNotFound)?;
 
-			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
-
-			// if phase2, fetch phase1 result
-			if !job_info.job_type.is_phase_one() {
-				let result = KnownResults::<T>::get(job_key.clone(), job_id)
-					.ok_or(Error::<T>::PhaseOneResultNotFound)?;
-				phase1_result = Some(result);
-			}
+			let phase1_result = if !job_info.job_type.is_phase_one() {
+				Some(
+					KnownResults::<T>::get(job_key.clone(), job_id)
+						.ok_or(Error::<T>::PhaseOneResultNotFound)?,
+				)
+			} else {
+				None
+			};
 
 			if job_info.job_type.is_phase_one() {
 				let participants = job_info.job_type.clone().get_participants().unwrap();
@@ -110,15 +135,19 @@ impl<T: Config> Pallet<T> {
 				ensure!(!threshold.is_zero(), Error::<T>::NotEnoughValidators);
 			} else {
 				// this phase1 result cannot be used
-				let phase1 = phase1_result.unwrap();
+				let phase1 = phase1_result.as_ref().ok_or(Error::<T>::PhaseOneResultNotFound)?;
 
 				// generate a job to generate new key
 				let job_id = Self::get_next_job_id()?;
 
 				match job_key {
 					JobKey::DKGSignature => {
-						let new_participants =
-							phase1.participants.into_iter().filter(|x| x != &validator).collect();
+						let new_participants = phase1
+							.participants
+							.clone()
+							.into_iter()
+							.filter(|x| x != &validator)
+							.collect();
 						let new_threshold = phase1.threshold.unwrap().saturating_sub(1);
 						ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
 
@@ -150,8 +179,12 @@ impl<T: Config> Pallet<T> {
 						SubmittedJobs::<T>::insert(job_key.clone(), job_id, job_info);
 					},
 					JobKey::ZkSaasPhaseTwo => {
-						let new_participants =
-							phase1.participants.into_iter().filter(|x| x != &validator).collect();
+						let new_participants = phase1
+							.participants
+							.clone()
+							.into_iter()
+							.filter(|x| x != &validator)
+							.collect();
 
 						let job_type = JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
 							participants: new_participants,

@@ -24,7 +24,10 @@ use frame_support::{
 	PalletId,
 };
 use frame_system::pallet_prelude::*;
-use sp_runtime::{traits::AccountIdConversion, DispatchResult};
+use sp_runtime::{
+	traits::{AccountIdConversion, Zero},
+	DispatchResult,
+};
 use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
 	jobs::{JobId, JobInfo, JobKey, PhaseOneResult, ValidatorOffence},
@@ -39,6 +42,9 @@ mod impls;
 mod mock;
 mod tests;
 mod types;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
 
 pub mod weights;
 use crate::types::BalanceOf;
@@ -153,6 +159,33 @@ pub mod module {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+		/// Submit a job for processing.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: The origin of the call (typically a signed account).
+		/// - `job`: The details of the job to be submitted.
+		///
+		/// # Errors
+		///
+		/// This function can return an error if:
+		///
+		/// - The caller is not authorized.
+		/// - The job type is invalid or has invalid participants.
+		/// - The threshold or parameters for phase one jobs are invalid.
+		/// - The result for phase two jobs does not exist or is expired.
+		/// - The phase one participants are not valid validators.
+		/// - The caller did not generate the phase one result for phase two jobs.
+		/// - The job has already expired.
+		/// - The fee transfer fails.
+		///
+		/// # Details
+		///
+		/// This function allows a caller to submit a job for processing. For phase one jobs, it
+		/// ensures that all participants have valid roles and performs a sanity check on the
+		/// threshold. For phase two jobs, it validates the existence and expiration of the phase
+		/// one result, as well as the validity of phase one participants. It also verifies that the
+		/// caller generated the phase one result. The user is charged a fee based on job params.
 		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::pause_transaction())]
 		pub fn submit_job(origin: OriginFor<T>, job: JobSubmissionOf<T>) -> DispatchResult {
@@ -167,6 +200,8 @@ pub mod module {
 				// ensure all the participants have valid roles
 				let participants =
 					job.job_type.clone().get_participants().ok_or(Error::<T>::InvalidJobPhase)?;
+
+				ensure!(!participants.len().is_zero(), Error::<T>::InvalidJobPhase);
 
 				for participant in participants {
 					ensure!(
@@ -236,6 +271,32 @@ pub mod module {
 			Ok(())
 		}
 
+		/// Submit the result of a job
+		///
+		/// # Parameters
+		///
+		/// - `origin`: The origin of the call (typically a signed account).
+		/// - `job_key`: A unique identifier for the job category.
+		/// - `job_id`: A unique identifier for the job within the category.
+		/// - `result`: A vector containing the result of the job.
+		///
+		/// # Errors
+		///
+		/// This function can return an error if:
+		///
+		/// - The caller is not authorized.
+		/// - The specified job is not found.
+		/// - The phase one result is not found (for phase two jobs).
+		/// - The result fails verification.
+		/// - The fee distribution or reward recording fails.
+		///
+		/// # Details
+		///
+		/// This function allows a caller to submit the result of a job. The function validates the
+		/// result using the result verifier config. If the result is valid, it proceeds to store
+		/// the result in known results for phase one jobs. It distributes the fee among the
+		/// participants and records rewards for each participant. Finally, it removes the job from
+		/// the submitted jobs storage.
 		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::pause_transaction())]
 		pub fn submit_job_result(
@@ -250,14 +311,24 @@ pub mod module {
 			let job_info =
 				SubmittedJobs::<T>::get(job_key.clone(), job_id).ok_or(Error::<T>::JobNotFound)?;
 
-			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
-
-			// if phase2, fetch phase1 result
-			if !job_info.job_type.is_phase_one() {
-				let result = KnownResults::<T>::get(job_key.clone(), job_id)
-					.ok_or(Error::<T>::PhaseOneResultNotFound)?;
-				phase1_result = Some(result);
-			}
+			let phase1_result = if !job_info.job_type.is_phase_one() {
+				Some(
+					KnownResults::<T>::get(
+						job_info
+							.job_type
+							.get_previous_phase_job_key()
+							.ok_or(Error::<T>::InvalidJobPhase)?,
+						job_info
+							.job_type
+							.clone()
+							.get_phase_one_id()
+							.ok_or(Error::<T>::InvalidJobPhase)?,
+					)
+					.ok_or(Error::<T>::PhaseOneResultNotFound)?,
+				)
+			} else {
+				None
+			};
 
 			// validate the result
 			T::JobResultVerifier::verify(&job_info, phase1_result.clone(), result.clone())?;
@@ -268,7 +339,11 @@ pub mod module {
 					owner: job_info.owner,
 					expiry: job_info.expiry,
 					result,
-					participants: job_info.job_type.clone().get_participants().unwrap(),
+					participants: job_info
+						.job_type
+						.clone()
+						.get_participants()
+						.ok_or(Error::<T>::InvalidJobPhase)?,
 					threshold: job_info.job_type.clone().get_threshold(),
 				};
 
@@ -300,6 +375,24 @@ pub mod module {
 			Ok(())
 		}
 
+		/// Withdraw rewards accumulated by the caller.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: The origin of the call (typically a signed account).
+		///
+		/// # Errors
+		///
+		/// This function can return an error if:
+		///
+		/// - The caller is not authorized.
+		/// - No rewards are available for the caller.
+		/// - The reward transfer operation fails.
+		///
+		/// # Details
+		///
+		/// This function allows a caller to withdraw rewards that have been accumulated in their
+		/// account.
 		#[pallet::call_index(2)]
 		#[pallet::weight(T::WeightInfo::pause_transaction())]
 		pub fn withdraw_rewards(origin: OriginFor<T>) -> DispatchResult {
@@ -320,6 +413,35 @@ pub mod module {
 			Ok(())
 		}
 
+		/// Report an inactive validator and take appropriate actions.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: The origin of the call (typically a signed account).
+		/// - `job_key`: A unique identifier for the job category.
+		/// - `job_id`: A unique identifier for the job within the category.
+		/// - `validator`: The account ID of the inactive validator.
+		/// - `offence`: The type of offence committed by the validator.
+		/// - `signatures`: A vector of signatures related to the report.
+		///
+		/// # Errors
+		///
+		/// This function can return an error if:
+		///
+		/// - The caller is not authorized.
+		/// - The specified job is not found.
+		/// - The phase one result is not found (for phase two jobs).
+		/// - The specified validator is not part of the job participants.
+		/// - The validator report is not valid or fails verification.
+		/// - Slashing the validator fails.
+		/// - Trying to remove the validator from the job fails.
+		///
+		/// # Details
+		///
+		/// This function allows a caller to report an inactive validator.
+		/// It ensures that the specified validator is part of the job participants. The function
+		/// then validates the report using the Result verifier config. If the report is valid, it
+		/// will slash the validator.
 		#[pallet::call_index(3)]
 		#[pallet::weight(T::WeightInfo::pause_transaction())]
 		pub fn report_inactive_validator(

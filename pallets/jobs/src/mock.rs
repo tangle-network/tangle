@@ -93,8 +93,12 @@ impl MockDKGPallet {
 
 pub struct MockZkSaasPallet;
 impl MockZkSaasPallet {
-	fn job_to_fee(_job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
-		Default::default()
+	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		if job.job_type.is_phase_one() {
+			10
+		} else {
+			20
+		}
 	}
 
 	fn verify(
