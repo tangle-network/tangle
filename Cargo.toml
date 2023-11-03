@@ -20,6 +20,7 @@ members = [
  "standalone/runtime/evm_tracer",
  "pallets/claims",
  "pallets/transaction-pause",
+ "pallets/roles",
  "precompiles/utils",
  "precompiles/utils/macro",
  "precompiles/utils/tests-external",
