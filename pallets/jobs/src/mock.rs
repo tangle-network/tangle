@@ -128,6 +128,10 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		let validators = [1, 2, 3, 4, 5];
 		validators.contains(&address)
 	}
+
+	fn slash_validator(address: AccountId, _offence: ValidatorOffence) -> DispatchResult {
+		Ok(())
+	}
 }
 
 pub struct MockJobResultVerifier;

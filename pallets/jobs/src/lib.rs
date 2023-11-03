@@ -315,5 +315,17 @@ pub mod module {
 
 			Ok(())
 		}
+
+		#[pallet::call_index(3)]
+		#[pallet::weight(T::WeightInfo::pause_transaction())]
+		pub fn report_inactive_validator(
+			origin: OriginFor<T>,
+			job_id: JobId,
+			validator: T::AccountId,
+		) -> DispatchResult {
+			let caller = ensure_signed(origin)?;
+
+			Ok(())
+		}
 	}
 }

@@ -212,3 +212,13 @@ pub struct PhaseOneResult<AccountId, BlockNumber> {
 	/// threshold if any for the original set
 	pub threshold: Option<u8>,
 }
+
+/// Represents different types of validator offences.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+pub enum ValidatorOffence {
+    /// The validator has been inactive.
+    Inactivity,
+
+    /// The validator has committed duplicate signing.
+    Equivocation,
+}
