@@ -116,3 +116,36 @@ fn jobs_submission_works_for_dkg() {
 		assert!(SubmittedJobs::<Runtime>::get(JobKey::DKG, 0).is_none());
 	});
 }
+
+#[test]
+fn withdraw_validator_rewards_works() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+
+		let submission = JobSubmission {
+			expiry: 100,
+			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 3 }),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(10), submission));
+
+		assert_eq!(Balances::free_balance(10), 100 - 5);
+
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(RuntimeOrigin::signed(10), JobKey::DKG, 0, vec![]));
+
+		// ensure the job reward is distributed correctly
+		for validator in [1, 2, 3, 4, 5] {
+			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(1));
+		}
+
+		// ensure storage is correctly setup
+		assert!(KnownResults::<Runtime>::get(JobKey::DKG, 0).is_some());
+		assert!(SubmittedJobs::<Runtime>::get(JobKey::DKG, 0).is_none());
+
+		// can withdraw the reward by validator
+		for validator in [1, 2, 3] {
+			assert_ok!(Jobs::withdraw_rewards(RuntimeOrigin::signed(validator)));
+			assert_eq!(ValidatorRewards::<Runtime>::get(validator), None);
+		}
+	});
+}

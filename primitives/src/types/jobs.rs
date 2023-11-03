@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use frame_support::{pallet_prelude::*, RuntimeDebug};
+use frame_support::dispatch::Vec;
 
 pub type JobId = u32;
 
@@ -114,12 +115,10 @@ impl<AccountId> JobType<AccountId> {
 				if info.participants.len() > info.threshold.into() {
 					return true
 				},
-			_ => {
-				return true
-			},
+			_ => return true,
 		}
 
-		return false
+		false
 	}
 
 	/// Gets the phase one ID for phase two jobs, if applicable.
@@ -216,9 +215,9 @@ pub struct PhaseOneResult<AccountId, BlockNumber> {
 /// Represents different types of validator offences.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub enum ValidatorOffence {
-    /// The validator has been inactive.
-    Inactivity,
+	/// The validator has been inactive.
+	Inactivity,
 
-    /// The validator has committed duplicate signing.
-    Equivocation,
+	/// The validator has committed duplicate signing.
+	Equivocation,
 }

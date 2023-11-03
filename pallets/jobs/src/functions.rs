@@ -1,4 +1,6 @@
 use super::*;
+use sp_runtime::traits::Zero;
+use tangle_primitives::jobs::{DKGJobType, JobKey, JobType, ZkSaasPhaseOneJobType};
 
 impl<T: Config> Pallet<T> {
 	/// Add a job ID to the validator lookup.
@@ -13,13 +15,14 @@ impl<T: Config> Pallet<T> {
 	/// # Errors
 	///
 	/// Returns a `DispatchError` if the operation fails.
-	pub(crate) fn add_job_id_to_validator_lookup(
+	pub(crate) fn add_job_to_validator_lookup(
 		validator: T::AccountId,
+		job_key: JobKey,
 		job_id: JobId,
 	) -> DispatchResult {
-		ValidatorJobIdLookup::<T>::try_mutate(validator, |job_ids| -> DispatchResult {
-			let job_ids = job_ids.get_or_insert_with(Default::default);
-			job_ids.push(job_id);
+		ValidatorJobIdLookup::<T>::try_mutate(validator, |jobs| -> DispatchResult {
+			let jobs = jobs.get_or_insert_with(Default::default);
+			jobs.push((job_key, job_id));
 			Ok(())
 		})
 	}
@@ -73,5 +76,115 @@ impl<T: Config> Pallet<T> {
 	/// This function returns the account ID associated with the rewards pot.
 	pub fn rewards_account_id() -> T::AccountId {
 		T::PalletId::get().into_sub_account_truncating(0)
+	}
+
+	/// Trigger removal of validator from a DKG set
+	pub fn try_validator_removal_from_job(
+		job_key: JobKey,
+		job_id: JobId,
+		validator: T::AccountId,
+	) -> DispatchResult {
+		SubmittedJobs::<T>::try_mutate(job_key.clone(), job_id, |job_info| -> DispatchResult {
+			let job_info = job_info.as_mut().ok_or(Error::<T>::JobNotFound)?;
+
+			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
+
+			// if phase2, fetch phase1 result
+			if !job_info.job_type.is_phase_one() {
+				let result = KnownResults::<T>::get(job_key.clone(), job_id)
+					.ok_or(Error::<T>::PhaseOneResultNotFound)?;
+				phase1_result = Some(result);
+			}
+
+			if job_info.job_type.is_phase_one() {
+				let participants = job_info.job_type.clone().get_participants().unwrap();
+				let mut threshold = job_info.job_type.clone().get_threshold().unwrap();
+
+				let participants: Vec<T::AccountId> =
+					participants.into_iter().filter(|x| x != &validator).collect();
+
+				if participants.len() <= threshold.into() {
+					threshold = threshold.saturating_sub(1);
+				}
+
+				ensure!(!threshold.is_zero(), Error::<T>::NotEnoughValidators);
+			} else {
+				// this phase1 result cannot be used
+				let phase1 = phase1_result.unwrap();
+
+				// generate a job to generate new key
+				let job_id = Self::get_next_job_id()?;
+
+				match job_key {
+					JobKey::DKGSignature => {
+						let new_participants =
+							phase1.participants.into_iter().filter(|x| x != &validator).collect();
+						let new_threshold = phase1.threshold.unwrap().saturating_sub(1);
+						ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
+
+						let job_type = JobType::DKG(DKGJobType {
+							participants: new_participants,
+							threshold: new_threshold,
+						});
+
+						// charge the validator fee for job submission
+						let job = JobSubmissionOf::<T> {
+							expiry: phase1.expiry,
+							job_type: job_type.clone(),
+						};
+
+						let fee = T::JobToFee::job_to_fee(&job);
+						T::Currency::transfer(
+							&validator,
+							&Self::rewards_account_id(),
+							fee,
+							ExistenceRequirement::KeepAlive,
+						)?;
+
+						let job_info = JobInfo {
+							owner: phase1.owner.clone(),
+							expiry: phase1.expiry,
+							job_type,
+							fee,
+						};
+						SubmittedJobs::<T>::insert(job_key.clone(), job_id, job_info);
+					},
+					JobKey::ZkSaasPhaseTwo => {
+						let new_participants =
+							phase1.participants.into_iter().filter(|x| x != &validator).collect();
+
+						let job_type = JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
+							participants: new_participants,
+						});
+
+						// charge the validator fee for job submission
+						let job = JobSubmissionOf::<T> {
+							expiry: phase1.expiry,
+							job_type: job_type.clone(),
+						};
+
+						let fee = T::JobToFee::job_to_fee(&job);
+						T::Currency::transfer(
+							&validator,
+							&Self::rewards_account_id(),
+							fee,
+							ExistenceRequirement::KeepAlive,
+						)?;
+
+						let job_info = JobInfo {
+							owner: phase1.owner.clone(),
+							expiry: phase1.expiry,
+							job_type,
+							fee,
+						};
+						SubmittedJobs::<T>::insert(job_key.clone(), job_id, job_info);
+					},
+					_ => {},
+				};
+
+				KnownResults::<T>::remove(job_key, job_id);
+			}
+			Ok(())
+		})
 	}
 }

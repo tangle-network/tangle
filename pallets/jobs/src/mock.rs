@@ -129,7 +129,7 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		validators.contains(&address)
 	}
 
-	fn slash_validator(address: AccountId, _offence: ValidatorOffence) -> DispatchResult {
+	fn slash_validator(_address: AccountId, _offence: ValidatorOffence) -> DispatchResult {
 		Ok(())
 	}
 }
@@ -148,6 +148,14 @@ impl JobResultVerifier<AccountId, BlockNumber, Balance> for MockJobResultVerifie
 			JobType::ZkSaasPhaseOne(_) => MockZkSaasPallet::verify(job, phase_one_data, result),
 			JobType::ZkSaasPhaseTwo(_) => MockZkSaasPallet::verify(job, phase_one_data, result),
 		}
+	}
+
+	fn verify_validator_report(
+		_validator: AccountId,
+		_offence: ValidatorOffence,
+		_report: Vec<u8>,
+	) -> DispatchResult {
+		Ok(())
 	}
 }
 

@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::{JobId, JobInfo, JobSubmission, PhaseOneResult};
+use crate::jobs::{JobId, JobInfo, JobKey, JobSubmission, PhaseOneResult, ValidatorOffence};
 use sp_arithmetic::traits::{BaseArithmetic, Unsigned};
 use sp_runtime::DispatchResult;
+use frame_support::dispatch::Vec;
 
 /// A trait that describes the job to fee calculation.
 pub trait JobToFee<AccountId, BlockNumber> {
@@ -55,6 +56,12 @@ pub trait JobResultVerifier<AccountId, BlockNumber, Balance> {
 		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
 		result: Vec<u8>,
 	) -> DispatchResult;
+
+	fn verify_validator_report(
+		validator: AccountId,
+		offence: ValidatorOffence,
+		report: Vec<u8>,
+	) -> DispatchResult;
 }
 
 /// A trait that handles various aspects of jobs for a validator.
@@ -68,7 +75,7 @@ pub trait JobsHandler<AccountId> {
 	/// # Returns
 	///
 	/// Returns a vector of `JobId` representing the active jobs of the validator.
-	fn get_active_jobs(validator: AccountId) -> Vec<JobId>;
+	fn get_active_jobs(validator: AccountId) -> Vec<(JobKey, JobId)>;
 
 	/// Exits a job from the known set of a validator.
 	///
@@ -80,5 +87,5 @@ pub trait JobsHandler<AccountId> {
 	/// # Errors
 	///
 	/// Returns a `DispatchResult` indicating success or an error if the operation fails.
-	fn exit_from_known_set(validator: AccountId, job_id: JobId) -> DispatchResult;
+	fn exit_from_known_set(validator: AccountId, job_key: JobKey, job_id: JobId) -> DispatchResult;
 }

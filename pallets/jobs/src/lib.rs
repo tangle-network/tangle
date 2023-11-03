@@ -27,7 +27,7 @@ use frame_system::pallet_prelude::*;
 use sp_runtime::{traits::AccountIdConversion, DispatchResult};
 use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
-	jobs::{JobId, JobInfo, JobKey, PhaseOneResult},
+	jobs::{JobId, JobInfo, JobKey, PhaseOneResult, ValidatorOffence},
 	traits::{
 		jobs::{JobResultVerifier, JobToFee},
 		roles::RolesHandler,
@@ -101,6 +101,8 @@ pub mod module {
 		PhaseOneResultNotFound,
 		/// no rewards found for validator
 		NoRewards,
+		/// Not enough validators to exit
+		NotEnoughValidators,
 	}
 
 	#[pallet::event]
@@ -134,7 +136,7 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn validator_job_id_lookup)]
 	pub type ValidatorJobIdLookup<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, Vec<JobId>>;
+		StorageMap<_, Twox64Concat, T::AccountId, Vec<(JobKey, JobId)>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn validator_rewards)]
@@ -173,7 +175,7 @@ pub mod module {
 					);
 
 					// add record for easy lookup
-					Self::add_job_id_to_validator_lookup(participant, job_id)?;
+					Self::add_job_to_validator_lookup(participant, job_key.clone(), job_id)?;
 				}
 
 				// sanity check ensure threshold is valid
@@ -201,7 +203,7 @@ pub mod module {
 					);
 
 					// add record for easy lookup
-					Self::add_job_id_to_validator_lookup(participant, job_id)?;
+					Self::add_job_to_validator_lookup(participant, job_key.clone(), job_id)?;
 				}
 
 				// ensure the caller generated the phase one result
@@ -313,6 +315,8 @@ pub mod module {
 				ExistenceRequirement::KeepAlive,
 			)?;
 
+			ValidatorRewards::<T>::remove(caller);
+
 			Ok(())
 		}
 
@@ -320,10 +324,47 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::pause_transaction())]
 		pub fn report_inactive_validator(
 			origin: OriginFor<T>,
+			job_key: JobKey,
 			job_id: JobId,
 			validator: T::AccountId,
+			offence: ValidatorOffence,
+			signatures: Vec<u8>,
 		) -> DispatchResult {
-			let caller = ensure_signed(origin)?;
+			let _caller = ensure_signed(origin)?;
+
+			// remove the validator from the job
+			let job_info =
+				SubmittedJobs::<T>::get(job_key.clone(), job_id).ok_or(Error::<T>::JobNotFound)?;
+
+			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
+
+			// if phase2, fetch phase1 result
+			if !job_info.job_type.is_phase_one() {
+				let result = KnownResults::<T>::get(job_key.clone(), job_id)
+					.ok_or(Error::<T>::PhaseOneResultNotFound)?;
+				phase1_result = Some(result);
+			}
+
+			let participants = if job_info.job_type.is_phase_one() {
+				job_info.job_type.clone().get_participants().unwrap()
+			} else {
+				phase1_result.unwrap().participants
+			};
+
+			ensure!(participants.contains(&validator), Error::<T>::JobNotFound);
+
+			// validate the result
+			T::JobResultVerifier::verify_validator_report(
+				validator.clone(),
+				offence.clone(),
+				signatures,
+			)?;
+
+			// slash the validator
+			T::RolesHandler::slash_validator(validator.clone(), offence)?;
+
+			// trigger validator removal
+			Self::try_validator_removal_from_job(job_key, job_id, validator)?;
 
 			Ok(())
 		}

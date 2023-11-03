@@ -12,7 +12,7 @@ impl<T: Config> JobsHandler<T::AccountId> for Pallet<T> {
 	/// # Returns
 	///
 	/// Returns a vector of `JobId` representing the active jobs of the validator.
-	fn get_active_jobs(validator: T::AccountId) -> Vec<JobId> {
+	fn get_active_jobs(validator: T::AccountId) -> Vec<(JobKey, JobId)> {
 		if let Some(jobs) = ValidatorJobIdLookup::<T>::get(validator) {
 			return jobs
 		}
@@ -29,7 +29,11 @@ impl<T: Config> JobsHandler<T::AccountId> for Pallet<T> {
 	/// # Errors
 	///
 	/// Returns a `DispatchResult` indicating success or an error if the operation fails.
-	fn exit_from_known_set(_validator: T::AccountId, _job_id: JobId) -> DispatchResult {
-		todo!()
+	fn exit_from_known_set(
+		validator: T::AccountId,
+		job_key: JobKey,
+		job_id: JobId,
+	) -> DispatchResult {
+		Self::try_validator_removal_from_job(job_key, job_id, validator)
 	}
 }
