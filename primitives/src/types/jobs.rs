@@ -13,8 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use frame_support::{pallet_prelude::*, RuntimeDebug};
-use frame_support::dispatch::Vec;
+use frame_support::{dispatch::Vec, pallet_prelude::*, RuntimeDebug};
 
 pub type JobId = u32;
 
