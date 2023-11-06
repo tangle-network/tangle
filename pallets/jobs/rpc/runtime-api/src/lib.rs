@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-//! Runtime API definition for transaction payment pallet.
+//! Runtime API definition for jobs pallet.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
