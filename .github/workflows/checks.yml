@@ -21,7 +21,7 @@ jobs:
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-12-26
+          toolchain: nightly-2023-07-16
           override: true
           components: rustfmt
 
