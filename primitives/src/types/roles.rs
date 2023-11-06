@@ -1,4 +1,3 @@
-
 // This file is part of Webb.
 // Copyright (C) 2022 Webb Technologies Inc.
 //
@@ -15,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use frame_support::{pallet_prelude::*};
+use frame_support::pallet_prelude::*;
 
 /// Role type to be used in the system.
 #[derive(Encode, Decode, Clone, Copy, Debug, PartialEq, Eq, TypeInfo)]
@@ -25,14 +24,13 @@ pub enum RoleType {
 }
 
 impl RoleType {
-    /// Checks if the role type is a TSS role.
-    pub fn is_tss(self) -> bool {
-        self == RoleType::Tss
-    }
+	/// Checks if the role type is a TSS role.
+	pub fn is_tss(self) -> bool {
+		self == RoleType::Tss
+	}
 
-    /// Checks if the role type is a Zk-Saas role.
-    pub fn is_zksaas(self) -> bool {
-        self == RoleType::ZkSaas
-    }
+	/// Checks if the role type is a Zk-Saas role.
+	pub fn is_zksaas(self) -> bool {
+		self == RoleType::ZkSaas
+	}
 }
-
