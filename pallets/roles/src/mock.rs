@@ -26,7 +26,6 @@ use sp_core::H256;
 use sp_runtime::{traits::IdentityLookup, BuildStorage};
 pub type AccountId = u128;
 pub type Balance = u128;
-pub type BlockNumber = u64;
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
@@ -78,6 +77,7 @@ impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
+	type Slash = ();
 	type PalletId = RolesPalletId;
 	type WeightInfo = ();
 }
@@ -101,14 +101,29 @@ impl Default for ExtBuilder {
 	}
 }
 
+// Checks events against the latest. A contiguous set of events must be
+// provided. They must include the most recent RuntimeEvent, but do not have to include
+// every past RuntimeEvent.
+pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
+	let mut actual: Vec<RuntimeEvent> = System::events().iter().map(|e| e.event.clone()).collect();
+
+	expected.reverse();
+	for evt in expected {
+		let next = actual.pop().expect("RuntimeEvent expected");
+		assert_eq!(next, evt, "Events don't match (actual,expected)");
+	}
+}
+
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	pallet_balances::GenesisConfig::<Runtime> { balances: vec![(10, 100), (20, 100)] }
+	pallet_balances::GenesisConfig::<Runtime> { balances: vec![(10, 10000), (20, 10000)] }
 		.assimilate_storage(&mut t)
 		.unwrap();
 
-	t.into()
+	let mut ext = sp_io::TestExternalities::new(t);
+	ext.execute_with(|| System::set_block_number(1));
+	ext
 }

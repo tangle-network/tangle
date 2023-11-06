@@ -21,7 +21,7 @@
 use codec::MaxEncodedLen;
 use frame_support::{
 	ensure,
-	traits::{Currency, Get, LockIdentifier, LockableCurrency},
+	traits::{Currency, Get, LockIdentifier, LockableCurrency, OnUnbalanced},
 	CloneNoBound, EqNoBound, PalletId, PartialEqNoBound, RuntimeDebugNoBound,
 };
 pub use pallet::*;
@@ -73,6 +73,10 @@ impl<T: Config> RoleStakingLedger<T> {
 pub type CurrencyOf<T> = <T as pallet::Config>::Currency;
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
+	<T as frame_system::Config>::AccountId,
+>>::NegativeImbalance;
+
 const ROLES_STAKING_ID: LockIdentifier = *b"rstaking";
 
 #[frame_support::pallet]
@@ -108,6 +112,9 @@ pub mod pallet {
 			+ TypeInfo
 			+ MaxEncodedLen;
 
+		/// Handler for the unbalanced reduction when slashing a staker.
+		type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
+
 		type WeightInfo: WeightInfo;
 
 		#[pallet::constant]
@@ -125,6 +132,8 @@ pub mod pallet {
 		Bonded { account: T::AccountId, amount: BalanceOf<T> },
 		/// Funds unbonded to stop being a validator.
 		Unbonded { account: T::AccountId, amount: BalanceOf<T> },
+		/// Slashed validator.
+		Slashed { account: T::AccountId, amount: BalanceOf<T> },
 	}
 
 	#[pallet::error]
@@ -148,7 +157,7 @@ pub mod pallet {
 		StorageMap<_, Blake2_128Concat, T::AccountId, RoleStakingLedger<T>>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn resource_to_bridge_index)]
+	#[pallet::getter(fn account_role)]
 	/// Mapping of resource to bridge index
 	pub type AccountRolesMapping<T: Config> = StorageMap<_, Blake2_256, T::AccountId, RoleType>;
 
@@ -181,17 +190,18 @@ pub mod pallet {
 			if bond_value < min_active_bond.into() {
 				return Err(Error::<T>::InsufficientBond.into())
 			}
-			// Bond the stash account.
+			// Bond with stash account.
 			let stash_balance = T::Currency::free_balance(&stash_account);
 			let value = bond_value.min(stash_balance);
-			Self::deposit_event(Event::<T>::Bonded {
-				account: stash_account.clone(),
-				amount: value,
-			});
 
 			// update ledger.
 			let item = RoleStakingLedger { stash: stash_account.clone(), total_locked: value };
 			Self::update_ledger(&stash_account, &item);
+
+			Self::deposit_event(Event::<T>::Bonded {
+				account: stash_account.clone(),
+				amount: value,
+			});
 
 			// Add role mapping for the stash account.
 			AccountRolesMapping::<T>::insert(&stash_account, role);
@@ -211,9 +221,9 @@ pub mod pallet {
 			// TODO: Call jobs manager to remove the services.
 
 			// On successful removal of services, remove the role from the mapping.
-			// unbound and withdraw.
+			// unbound locked funds.
 			let ledger = Self::ledger(&stash_account).ok_or(Error::<T>::InvalidStashController)?;
-			Self::unbond_and_withdraw(&ledger)?;
+			Self::unbond(&ledger)?;
 			Self::deposit_event(Event::<T>::Unbonded {
 				account: ledger.stash,
 				amount: ledger.total_locked,
@@ -221,6 +231,7 @@ pub mod pallet {
 
 			// Remove role from the mapping.
 			AccountRolesMapping::<T>::remove(&stash_account);
+			Self::deposit_event(Event::<T>::RoleRemoved { account: stash_account, role });
 
 			Ok(())
 		}

@@ -1,9 +1,6 @@
 use super::*;
-use frame_support::{
-	pallet_prelude::DispatchResult,
-	traits::{ExistenceRequirement, WithdrawReasons},
-};
-use sp_runtime::{traits::AccountIdConversion, Saturating};
+use frame_support::{pallet_prelude::DispatchResult, traits::WithdrawReasons};
+use sp_runtime::Saturating;
 use tangle_primitives::{roles::RoleType, traits::roles::RolesHandler};
 
 /// Implements RolesHandler for the pallet.
@@ -24,11 +21,8 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		address: T::AccountId,
 		_offence: tangle_primitives::jobs::ValidatorOffence,
 	) -> sp_runtime::DispatchResult {
-		let mut ledger = Self::ledger(&address).ok_or(Error::<T>::InvalidStashController)?;
 		let slash_amount = 1000u64;
-		let (_imbalance, _missing) = T::Currency::slash(&address, slash_amount.into());
-		ledger.total_locked = ledger.total_locked.saturating_sub(slash_amount.into());
-		Self::update_ledger(&address, &ledger);
+		Self::slash(address, slash_amount.into())?;
 		Ok(())
 	}
 }
@@ -41,9 +35,17 @@ impl<T: Config> Pallet<T> {
 		Self::ledger(&stash).map(|l| l.total_locked).unwrap_or_default()
 	}
 
-	/// Get AccountId assigned to the pallet.
-	pub(crate) fn account_id() -> T::AccountId {
-		T::PalletId::get().into_account_truncating()
+	/// Slash staker's balance by the given amount.
+	pub(crate) fn slash(
+		address: T::AccountId,
+		slash_amount: T::CurrencyBalance,
+	) -> sp_runtime::DispatchResult {
+		let mut ledger = Self::ledger(&address).ok_or(Error::<T>::InvalidStashController)?;
+		let (_imbalance, _missing) = T::Currency::slash(&address, slash_amount.into());
+		ledger.total_locked = ledger.total_locked.saturating_sub(slash_amount.into());
+		Self::update_ledger(&address, &ledger);
+		Self::deposit_event(Event::Slashed { account: address, amount: slash_amount });
+		Ok(())
 	}
 
 	/// Update the ledger for the staker.
@@ -65,18 +67,11 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Unbond the full amount of the stash.
-	pub(super) fn unbond_and_withdraw(ledger: &RoleStakingLedger<T>) -> DispatchResult {
+	pub(super) fn unbond(ledger: &RoleStakingLedger<T>) -> DispatchResult {
 		let stash = ledger.stash.clone();
 		if ledger.total_locked > T::Currency::minimum_balance() {
 			// Remove the lock.
 			T::Currency::remove_lock(ROLES_STAKING_ID, &stash);
-			// Withdraw amount held in storage.
-			T::Currency::withdraw(
-				&Self::account_id(),
-				ledger.total_locked,
-				WithdrawReasons::TRANSFER,
-				ExistenceRequirement::AllowDeath,
-			)?;
 			// Kill the stash and related information
 			Self::kill_stash(&stash)?;
 		}
