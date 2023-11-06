@@ -8815,6 +8815,7 @@ dependencies = [
  "num_enum 0.5.11",
  "pallet-balances",
  "pallet-dkg-metadata",
+ "pallet-dkg-proposals",
  "pallet-evm",
  "pallet-session",
  "pallet-staking",
