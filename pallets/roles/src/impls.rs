@@ -21,8 +21,9 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		address: T::AccountId,
 		_offence: tangle_primitives::jobs::ValidatorOffence,
 	) -> sp_runtime::DispatchResult {
+		// TODO: implement calculation of slash amount.
 		let slash_amount = 1000u64;
-		Self::slash(address, slash_amount.into())?;
+		Self::do_slash(address, slash_amount.into())?;
 		Ok(())
 	}
 }
@@ -36,7 +37,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Slash staker's balance by the given amount.
-	pub(crate) fn slash(
+	pub(crate) fn do_slash(
 		address: T::AccountId,
 		slash_amount: T::CurrencyBalance,
 	) -> sp_runtime::DispatchResult {
