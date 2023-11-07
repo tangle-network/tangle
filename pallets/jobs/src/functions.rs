@@ -122,9 +122,9 @@ impl<T: Config> Pallet<T> {
 				None
 			};
 
-			/// If the job type is in the phase one.
-			/// If it is, adjusts the participants and threshold accordingly.
-			/// Ensures that the threshold is not zero after adjustment.
+			// If the job type is in the phase one.
+			// If it is, adjusts the participants and threshold accordingly.
+			// Ensures that the threshold is not zero after adjustment.
 			if job_info.job_type.is_phase_one() {
 				let participants = job_info.job_type.clone().get_participants().unwrap();
 				let mut threshold = job_info.job_type.clone().get_threshold().unwrap();
