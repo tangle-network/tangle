@@ -1,9 +1,9 @@
 [package]
 name = "pallet-evm-precompile-staking"
-authors = { workspace = true }
-description = "A Precompile to make staking accessible to pallet-evm"
-edition = "2021"
 version = "1.0.0"
+authors = { workspace = true }
+edition = "2021"
+description = "A Precompile to make staking accessible to pallet-evm"
 
 [dependencies]
 log = { workspace = true }
@@ -14,12 +14,11 @@ tangle-primitives = { workspace = true }
 # Moonbeam
 precompile-utils = { workspace = true }
 
-
 # Substrate
 frame-support = { workspace = true }
 frame-system = { workspace = true }
 pallet-staking = { workspace = true }
-parity-scale-codec = { workspace = true, features = [ "max-encoded-len" ] }
+parity-scale-codec = { workspace = true, features = ["max-encoded-len"] }
 sp-core = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
@@ -27,7 +26,7 @@ sp-std = { workspace = true }
 
 # Frontier
 fp-evm = { workspace = true }
-pallet-evm = { workspace = true, features = [ "forbid-evm-reentrancy" ] }
+pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
 
 [dev-dependencies]
 derive_more = { workspace = true }
@@ -35,35 +34,35 @@ serde = { workspace = true }
 sha3 = { workspace = true }
 
 # Moonbeam
-precompile-utils = { workspace = true, features = [ "std", "testing" ] }
+precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate
-pallet-balances = { workspace = true, features = [ "std" ] }
-pallet-dkg-proposals = { workspace = true, features = [ "std" ] }
-pallet-timestamp = { workspace = true, features = [ "std" ] }
-scale-info = { workspace = true, features = [ "derive", "std" ] }
-sp-runtime = { workspace = true, features = [ "std" ] }
-pallet-staking = { workspace = true, features = [ "std" ]  }
+dkg-runtime-primitives = { workspace = true, features = ["std"] }
+frame-election-provider-support = { workspace = true, features = ["std"] }
+pallet-balances = { workspace = true, features = ["std"] }
+pallet-dkg-metadata = { workspace = true, features = ["std"] }
+pallet-dkg-proposals = { workspace = true, features = ["std"] }
+pallet-session = { workspace = true, features = ["std"] }
+pallet-staking = { workspace = true, features = ["std"] }
 pallet-staking-reward-curve = { workspace = true }
-frame-election-provider-support = { workspace = true, features = [ "std" ] }
-pallet-session = { workspace = true, features = [ "std" ] }
-pallet-dkg-metadata = { workspace = true, features = [ "std" ] }
-dkg-runtime-primitives = { workspace = true, features = [ "std" ] }
-sp-staking = { workspace = true, features = [ "std" ] }
-sp-keystore = { workspace = true, features = [ "std" ] }
+pallet-timestamp = { workspace = true, features = ["std"] }
+scale-info = { workspace = true, features = ["derive", "std"] }
+sp-keystore = { workspace = true, features = ["std"] }
+sp-runtime = { workspace = true, features = ["std"] }
+sp-staking = { workspace = true, features = ["std"] }
 
 [features]
-default = [ "std" ]
+default = ["std"]
 std = [
-	"fp-evm/std",
-	"frame-support/std",
-	"frame-system/std",
-	"pallet-evm/std",
-	"pallet-staking/std",
-	"parity-scale-codec/std",
-	"precompile-utils/std",
-	"sp-core/std",
-	"sp-runtime/std",
-	"sp-std/std",
-	"tangle-primitives/std",
+  "fp-evm/std",
+  "frame-support/std",
+  "frame-system/std",
+  "pallet-evm/std",
+  "pallet-staking/std",
+  "parity-scale-codec/std",
+  "precompile-utils/std",
+  "sp-core/std",
+  "sp-runtime/std",
+  "sp-std/std",
+  "tangle-primitives/std",
 ]

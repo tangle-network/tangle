@@ -1,9 +1,9 @@
 [package]
 name = "precompile-utils-macro"
-authors = { workspace = true }
-description = ""
-edition = "2021"
 version = "0.1.0"
+authors = { workspace = true }
+edition = "2021"
+description = ""
 
 [lib]
 proc-macro = true

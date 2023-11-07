@@ -1,6 +1,6 @@
-// This file is part of Webb.
+// This file is part of Tangle.
 
-// Copyright (C) 2022 Webb Technologies Inc.
+// Copyright (C) 2022-2023 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");

@@ -1,10 +1,10 @@
 [package]
 name = "rpc-primitives-debug"
+version = "0.1.0"
 authors = { workspace = true }
 edition = "2021"
 license = "GPL-3.0-only"
 repository = { workspace = true }
-version = "0.1.0"
 
 [dependencies]
 environmental = { workspace = true }
@@ -24,15 +24,15 @@ sp-std = { workspace = true }
 [features]
 default = ["std"]
 std = [
- "environmental/std",
- "ethereum-types/std",
- "ethereum/std",
- "hex",
- "parity-scale-codec/std",
- "serde",
- "sp-api/std",
- "sp-core/std",
- "sp-io/std",
- "sp-runtime/std",
- "sp-std/std",
+  "environmental/std",
+  "ethereum-types/std",
+  "ethereum/std",
+  "hex",
+  "parity-scale-codec/std",
+  "serde",
+  "sp-api/std",
+  "sp-core/std",
+  "sp-io/std",
+  "sp-runtime/std",
+  "sp-std/std",
 ]
