@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::{JobKey, ValidatorOffence};
+use crate::jobs::{ValidatorOffence};
+use crate::roles::RoleType;
 use sp_runtime::DispatchResult;
 
 /// A trait that handles roles associated with job types.
@@ -24,12 +25,12 @@ pub trait RolesHandler<AccountId> {
 	/// # Parameters
 	///
 	/// - `address`: The account ID of the validator.
-	/// - `job_key`: The key representing the type of job.
+	/// - `role_type`: The type of role
 	///
 	/// # Returns
 	///
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	fn is_validator(address: AccountId, job_key: JobKey) -> bool;
+	fn is_validator(address: AccountId, role_type: RoleType) -> bool;
 
 	/// Slash validator stake for the reported offence. The function should be a best effort
 	/// slashing, slash upto max possible by the offence type.

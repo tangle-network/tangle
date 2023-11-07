@@ -29,7 +29,7 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	///
 	/// # Returns
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	fn validate_role(address: T::AccountId, role: RoleType) -> bool {
+	fn is_validator(address: T::AccountId, role: RoleType) -> bool {
 		let assigned_role = AccountRolesMapping::<T>::get(address);
 		match assigned_role {
 			Some(r) =>

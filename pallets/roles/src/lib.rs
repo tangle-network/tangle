@@ -235,7 +235,7 @@ pub mod pallet {
 			let stash_account = ensure_signed(origin)?;
 			// check if role is assigned.
 			ensure!(
-				Self::validate_role(stash_account.clone(), role.clone()),
+				Self::is_validator(stash_account.clone(), role.clone()),
 				Error::<T>::RoleNotAssigned
 			);
 			// TODO: Call jobs manager to remove the services.
