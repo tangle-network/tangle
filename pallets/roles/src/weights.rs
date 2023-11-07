@@ -1,5 +1,5 @@
-// This file is part of Webb.
-// Copyright (C) 2022 Webb Technologies Inc.
+// This file is part of Tangle.
+// Copyright (C) 2022-2023 Webb Technologies Inc.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,13 +40,13 @@
 use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
 use sp_std::marker::PhantomData;
 
-/// Weight functions needed for module_transaction_pause.
+/// Weight functions needed for roles pallet.
 pub trait WeightInfo {
 	fn assign_role() -> Weight;
 	fn clear_role() -> Weight;
 }
 
-/// Weights for module_transaction_pause using the Acala node and recommended hardware.
+/// Weights for roles pallet.
 pub struct TestWeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for TestWeightInfo<T> {
 	fn assign_role() -> Weight {

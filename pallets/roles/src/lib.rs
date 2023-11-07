@@ -1,18 +1,18 @@
-// Copyright 2017-2020 Parity Technologies (UK) Ltd.
-// This file is part of Polkadot.
-
-// Substrate is free software: you can redistribute it and/or modify
+// This file is part of Tangle.
+// Copyright (C) 2022-2023 Webb Technologies Inc.
+//
+// Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-
-// Substrate is distributed in the hope that it will be useful,
+//
+// Tangle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
+//
 // You should have received a copy of the GNU General Public License
-// along with Substrate.  If not, see <http://www.gnu.org/licenses/>.
+// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Pallet to process claims from Ethereum addresses.
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -30,6 +30,8 @@ use scale_info::TypeInfo;
 use sp_runtime::{codec, traits::Zero};
 use sp_std::{convert::TryInto, prelude::*, vec};
 use tangle_primitives::{roles::RoleType, traits::roles::RolesHandler};
+#[cfg(feature = "runtime-benchmarks")]
+pub mod benchmarking;
 mod impls;
 #[cfg(test)]
 pub(crate) mod mock;
@@ -65,6 +67,7 @@ impl<T: Config> RoleStakingLedger<T> {
 		Self { stash, total_locked: Zero::zero() }
 	}
 
+	/// Returns `true` if the stash account has no funds at all.
 	pub fn is_empty(&self) -> bool {
 		self.total_locked.is_zero()
 	}
@@ -166,6 +169,17 @@ pub mod pallet {
 	#[pallet::getter(fn min_active_bond)]
 	pub(super) type MinActiveBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
+	/// Assigns a role to the validator.
+	///
+	/// # Parameters
+	///
+	/// - `origin`: Origin of the transaction.
+	/// - `bond_value`: Amount of funds to bond.
+	/// - `role`: Role to assign to the validator.
+	///
+	/// This function will return error if
+	/// - Role is already assigned to the validator.
+	/// - Min active bond is not met.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight({0})]
@@ -176,16 +190,16 @@ pub mod pallet {
 			role: RoleType,
 		) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
-			// check if role is already assigned.
+			// Check if role is already assigned.
 			ensure!(
 				!AccountRolesMapping::<T>::contains_key(&stash_account),
 				Error::<T>::RoleAlreadyAssigned
 			);
-			// check if stash account is already paired.
+			// Check if stash account is already paired.
 			if <Ledger<T>>::contains_key(&stash_account) {
 				return Err(Error::<T>::AlreadyPaired.into())
 			}
-			// check if min active bond is met.
+			// Check if min active bond is met.
 			let min_active_bond = MinActiveBond::<T>::get();
 			if bond_value < min_active_bond.into() {
 				return Err(Error::<T>::InsufficientBond.into())
@@ -194,7 +208,7 @@ pub mod pallet {
 			let stash_balance = T::Currency::free_balance(&stash_account);
 			let value = bond_value.min(stash_balance);
 
-			// update ledger.
+			// Update ledger.
 			let item = RoleStakingLedger { stash: stash_account.clone(), total_locked: value };
 			Self::update_ledger(&stash_account, &item);
 
@@ -209,6 +223,15 @@ pub mod pallet {
 			Ok(())
 		}
 
+		/// Removes the role from the validator.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: Origin of the transaction.
+		/// - `role`: Role to remove from the validator.
+		///
+		/// This function will return error if
+		/// - Role is not assigned to the validator.
 		#[pallet::weight({0})]
 		#[pallet::call_index(1)]
 		pub fn clear_role(origin: OriginFor<T>, role: RoleType) -> DispatchResult {
@@ -219,9 +242,9 @@ pub mod pallet {
 				Error::<T>::RoleNotAssigned
 			);
 			// TODO: Call jobs manager to remove the services.
-
 			// On successful removal of services, remove the role from the mapping.
-			// unbound locked funds.
+
+			// Unbound locked funds.
 			let ledger = Self::ledger(&stash_account).ok_or(Error::<T>::InvalidStashController)?;
 			Self::unbond(&ledger)?;
 			Self::deposit_event(Event::<T>::Unbonded {
