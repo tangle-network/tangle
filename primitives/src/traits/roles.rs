@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::{ValidatorOffence};
-use crate::roles::RoleType;
+use crate::{jobs::ValidatorOffence, roles::RoleType};
 use sp_runtime::DispatchResult;
 
 /// A trait that handles roles associated with job types.

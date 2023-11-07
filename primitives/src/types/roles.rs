@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use frame_support::pallet_prelude::*;
 use crate::jobs::JobKey;
+use frame_support::pallet_prelude::*;
 
 /// Role type to be used in the system.
 #[derive(Encode, Decode, Clone, Copy, Debug, PartialEq, Eq, TypeInfo)]
@@ -38,11 +38,11 @@ impl RoleType {
 
 impl From<JobKey> for RoleType {
 	fn from(job_key: JobKey) -> Self {
-        match job_key {
+		match job_key {
 			JobKey::DKG => RoleType::Tss,
 			JobKey::DKGSignature => RoleType::Tss,
 			JobKey::ZkSaasPhaseOne => RoleType::ZkSaas,
 			JobKey::ZkSaasPhaseTwo => RoleType::ZkSaas,
 		}
-    }
+	}
 }
