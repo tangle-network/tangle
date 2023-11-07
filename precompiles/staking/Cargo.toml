@@ -44,10 +44,7 @@ scale-info = { workspace = true, features = [ "derive", "std" ] }
 sp-runtime = { workspace = true, features = [ "std" ] }
 pallet-staking = { workspace = true, features = [ "std" ]  }
 pallet-staking-reward-curve = { workspace = true }
-pallet-timestamp = { workspace = true, features = ["std"] }
-scale-info = { workspace = true, features = ["derive", "std"] }
 sp-keystore = { workspace = true, features = ["std"] }
-sp-runtime = { workspace = true, features = ["std"] }
 sp-staking = { workspace = true, features = ["std"] }
 
 [features]

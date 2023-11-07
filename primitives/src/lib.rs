@@ -31,8 +31,6 @@ pub mod types;
 pub use types::*;
 pub mod traits;
 
-pub mod traits;
-
 /// Tangle parachain time-related
 pub mod time {
 	use crate::types::{BlockNumber, Moment};
