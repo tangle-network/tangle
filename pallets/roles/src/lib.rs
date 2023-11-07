@@ -195,15 +195,14 @@ pub mod pallet {
 				!AccountRolesMapping::<T>::contains_key(&stash_account),
 				Error::<T>::RoleAlreadyAssigned
 			);
+
 			// Check if stash account is already paired.
-			if <Ledger<T>>::contains_key(&stash_account) {
-				return Err(Error::<T>::AlreadyPaired.into())
-			}
+			ensure!(!<Ledger<T>>::contains_key(&stash_account), Error::<T>::AlreadyPaired);
+
 			// Check if min active bond is met.
 			let min_active_bond = MinActiveBond::<T>::get();
-			if bond_value < min_active_bond.into() {
-				return Err(Error::<T>::InsufficientBond.into())
-			}
+			ensure!(bond_value > min_active_bond.into(), Error::<T>::InsufficientBond);
+
 			// Bond with stash account.
 			let stash_balance = T::Currency::free_balance(&stash_account);
 			let value = bond_value.min(stash_balance);
