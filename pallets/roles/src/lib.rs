@@ -242,6 +242,7 @@ pub mod pallet {
 			);
 			// TODO: Call jobs manager to remove the services.
 			// On successful removal of services, remove the role from the mapping.
+			// Issue link for reference : https://github.com/webb-tools/tangle/issues/292
 
 			// Unbound locked funds.
 			let ledger = Self::ledger(&stash_account).ok_or(Error::<T>::InvalidStashController)?;
