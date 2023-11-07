@@ -30,8 +30,6 @@ use scale_info::TypeInfo;
 use sp_runtime::{codec, traits::Zero};
 use sp_std::{convert::TryInto, prelude::*, vec};
 use tangle_primitives::{roles::RoleType, traits::roles::RolesHandler};
-#[cfg(feature = "runtime-benchmarks")]
-pub mod benchmarking;
 mod impls;
 #[cfg(test)]
 pub(crate) mod mock;
