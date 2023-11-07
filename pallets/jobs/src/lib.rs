@@ -110,6 +110,10 @@ pub mod module {
 		NoRewards,
 		/// Not enough validators to exit
 		NotEnoughValidators,
+		/// empty result
+		EmptyResult,
+		/// empty job
+		EmptyJob,
 	}
 
 	#[pallet::event]
@@ -307,6 +311,9 @@ pub mod module {
 			result: Vec<u8>,
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;
+
+			// sanity check
+			ensure!(result.is_empty(), Error::<T>::EmptyResult);
 
 			// Ensure the job exists
 			let job_info =
