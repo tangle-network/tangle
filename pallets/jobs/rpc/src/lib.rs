@@ -30,7 +30,7 @@ use sp_runtime::{
 use std::sync::Arc;
 use tangle_primitives::jobs::RpcResponseJobsData;
 
-/// Merkle RPC methods.
+/// JobsClient RPC methods.
 #[rpc(client, server)]
 pub trait JobsApi<BlockHash, AccountId> {
 	#[method(name = "jobs_queryJobsByValidator")]
@@ -48,7 +48,7 @@ pub struct JobsClient<C, M, P> {
 }
 
 impl<C, M, P> JobsClient<C, M, P> {
-	/// Create new `Merkle` instance with the given reference to the client.
+	/// Create new `JobsClient` instance with the given reference to the client.
 	pub fn new(client: Arc<C>) -> Self {
 		Self { client, _marker: Default::default() }
 	}

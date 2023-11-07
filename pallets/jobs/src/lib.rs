@@ -196,9 +196,9 @@ pub mod module {
 			let job_id = Self::get_next_job_id()?;
 			let job_key = job.job_type.get_job_key();
 
-			// ensure the job can be processed
+			// Ensure the job can be processed
 			if job.job_type.is_phase_one() {
-				// ensure all the participants have valid roles
+				// Ensure all the participants have valid roles
 				let participants =
 					job.job_type.clone().get_participants().ok_or(Error::<T>::InvalidJobPhase)?;
 
@@ -210,28 +210,28 @@ pub mod module {
 						Error::<T>::InvalidValidator
 					);
 
-					// add record for easy lookup
+					// Add record for easy lookup
 					Self::add_job_to_validator_lookup(participant, job_key.clone(), job_id)?;
 				}
 
-				// sanity check ensure threshold is valid
+				// Sanity check ensure threshold is valid
 				ensure!(job.job_type.sanity_check(), Error::<T>::InvalidJobParams);
 			}
 			// phase two validations
 			else {
 				let existing_result_id =
 					job.job_type.clone().get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?;
-				// ensure the result exists
+				// Ensure the result exists
 				let result = KnownResults::<T>::get(
 					job.job_type.clone().get_previous_phase_job_key().unwrap(),
 					existing_result_id,
 				)
 				.ok_or(Error::<T>::PreviousResultNotFound)?;
 
-				// validate existing result
+				// Validate existing result
 				ensure!(result.expiry >= now, Error::<T>::ResultExpired);
 
-				// ensure the phase one participants are still validators
+				// Ensure the phase one participants are still validators
 				for participant in result.participants {
 					ensure!(
 						T::RolesHandler::is_validator(participant.clone(), job_key.clone()),
@@ -242,11 +242,11 @@ pub mod module {
 					Self::add_job_to_validator_lookup(participant, job_key.clone(), job_id)?;
 				}
 
-				// ensure the caller generated the phase one result
+				// Ensure the caller generated the phase one result
 				ensure!(result.owner == caller, Error::<T>::InvalidJobParams);
 			}
 
-			// basic sanity checks
+			// Basic sanity checks
 			ensure!(job.expiry > now, Error::<T>::JobAlreadyExpired);
 
 			// charge the user fee for job submission
@@ -308,7 +308,7 @@ pub mod module {
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;
 
-			// ensure the job exists
+			// Ensure the job exists
 			let job_info =
 				SubmittedJobs::<T>::get(job_key.clone(), job_id).ok_or(Error::<T>::JobNotFound)?;
 
@@ -331,10 +331,10 @@ pub mod module {
 				None
 			};
 
-			// validate the result
+			// Validate the result
 			T::JobResultVerifier::verify(&job_info, phase1_result.clone(), result.clone())?;
 
-			// if phase 1, store in known result
+			// If phase 1, store in known result
 			if job_info.job_type.is_phase_one() {
 				let result = PhaseOneResult {
 					owner: job_info.owner,
@@ -351,7 +351,7 @@ pub mod module {
 				KnownResults::<T>::insert(job_key.clone(), job_id, result);
 			}
 
-			// distribute fee to all participants
+			// Record fee rewards for all job participants
 			let participants = if job_info.job_type.is_phase_one() {
 				job_info.job_type.clone().get_participants().unwrap()
 			} else {
@@ -360,7 +360,6 @@ pub mod module {
 
 			let fee_per_participant = job_info.fee / (participants.len() as u32).into();
 
-			// record reward to all participants
 			for participant in participants {
 				Self::record_reward_to_validator(participant.clone(), fee_per_participant)?;
 				Self::deposit_event(Event::ValidatorRewarded {
@@ -455,13 +454,13 @@ pub mod module {
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;
 
-			// remove the validator from the job
+			// Remove the validator from the job
 			let job_info =
 				SubmittedJobs::<T>::get(job_key.clone(), job_id).ok_or(Error::<T>::JobNotFound)?;
 
 			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
 
-			// if phase2, fetch phase1 result
+			// If phase2, fetch phase1 result
 			if !job_info.job_type.is_phase_one() {
 				let result = KnownResults::<T>::get(job_key.clone(), job_id)
 					.ok_or(Error::<T>::PhaseOneResultNotFound)?;
@@ -476,17 +475,17 @@ pub mod module {
 
 			ensure!(participants.contains(&validator), Error::<T>::JobNotFound);
 
-			// validate the result
+			// Validate the result
 			T::JobResultVerifier::verify_validator_report(
 				validator.clone(),
 				offence.clone(),
 				signatures,
 			)?;
 
-			// slash the validator
+			// Slash the validator
 			T::RolesHandler::slash_validator(validator.clone(), offence)?;
 
-			// trigger validator removal
+			// Trigger validator removal
 			Self::try_validator_removal_from_job(job_key, job_id, validator)?;
 
 			Ok(())

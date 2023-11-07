@@ -11,6 +11,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// - `validator`: The account ID of the validator.
 	/// - `job_id`: The ID of the job to associate with the validator.
+	/// - `job_key`: The job key of the job
 	///
 	/// # Errors
 	///
@@ -121,6 +122,9 @@ impl<T: Config> Pallet<T> {
 				None
 			};
 
+			/// If the job type is in the phase one.
+			/// If it is, adjusts the participants and threshold accordingly.
+			/// Ensures that the threshold is not zero after adjustment.
 			if job_info.job_type.is_phase_one() {
 				let participants = job_info.job_type.clone().get_participants().unwrap();
 				let mut threshold = job_info.job_type.clone().get_threshold().unwrap();
@@ -141,6 +145,12 @@ impl<T: Config> Pallet<T> {
 				let job_id = Self::get_next_job_id()?;
 
 				match job_key {
+					// Case for JobKey::DKGSignature
+					// - Extract information from 'phase1'
+					// - Create a new 'job_type' of DKGJobType with adjusted parameters (remove the
+					//   reported validator and reduce threshold)
+					// - Charge the validator fee for job submission
+					// - Store information about the submitted job in 'SubmittedJobs'
 					JobKey::DKGSignature => {
 						let new_participants = phase1
 							.participants
@@ -178,6 +188,12 @@ impl<T: Config> Pallet<T> {
 						};
 						SubmittedJobs::<T>::insert(job_key.clone(), job_id, job_info);
 					},
+					// Case for JobKey::ZkSaasPhaseTwo
+					// - Extract information from 'phase1'
+					// - Create a new 'job_type' of ZkSaasPhaseOneJobType with adjusted parameters
+					//   (remove the reported validator)
+					// - Charge the validator fee for job submission
+					// - Store information about the submitted job in 'SubmittedJobs'
 					JobKey::ZkSaasPhaseTwo => {
 						let new_participants = phase1
 							.participants
@@ -212,9 +228,12 @@ impl<T: Config> Pallet<T> {
 						};
 						SubmittedJobs::<T>::insert(job_key.clone(), job_id, job_info);
 					},
-					_ => {},
+					_ => {
+						// The phase one cases are handled above
+					},
 				};
 
+				// the old results are not useful since a participant has left, remove from storage
 				KnownResults::<T>::remove(job_key, job_id);
 			}
 			Ok(())
