@@ -20,6 +20,7 @@ members = [
  "standalone/runtime/evm_tracer",
  "pallets/claims",
  "pallets/transaction-pause",
+ "pallets/roles",
  "precompiles/utils",
  "precompiles/utils/macro",
  "precompiles/utils/tests-external",
@@ -83,6 +84,7 @@ tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/run
 
 # Tangle Dependencies
 pallet-ecdsa-claims = { path = "pallets/claims", default-features = false }
+pallet-roles = { path = "pallets/roles", default-features = false }
 
 # Orml dependencies
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v1.0.0", default-features = false }
@@ -121,6 +123,8 @@ sc-consensus-grandpa = { git = "https://github.com/paritytech/substrate", branch
 sc-network-sync = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sp-arithmetic = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 sp-trie = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sp-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
+sp-weights = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 frame-election-provider-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }

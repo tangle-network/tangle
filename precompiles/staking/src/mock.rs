@@ -220,6 +220,7 @@ impl pallet_dkg_metadata::Config for Runtime {
 	type OnDKGPublicKeyChangeHandler = ();
 	type OffChainAuthId = dkg_runtime_primitives::offchain::crypto::OffchainAuthId;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type DKGAuthorityToMerkleLeaf = pallet_dkg_proposals::DKGEcdsaToEthereumAddress;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type KeygenJailSentence = Period;
 	type SigningJailSentence = Period;

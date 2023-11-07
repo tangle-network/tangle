@@ -29,6 +29,7 @@ use sp_runtime::{
 
 pub mod types;
 pub use types::*;
+pub mod traits;
 
 /// Tangle parachain time-related
 pub mod time {

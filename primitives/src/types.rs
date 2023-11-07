@@ -15,7 +15,8 @@ use sp_runtime::AccountId32;
 // limitations under the License.
 //
 use super::*;
-
+pub mod jobs;
+pub mod roles;
 /// Reputation type
 pub type Reputation = u128;
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
