@@ -31,9 +31,6 @@ jobs:
           - binary: tangle-standalone
             features: relayer
             image_name: tangle-standalone-relayer
-          - binary: tangle-standalone
-            features: light-client
-            image_name: tangle-standalone-light-client
     permissions:
       contents: read
       packages: write
