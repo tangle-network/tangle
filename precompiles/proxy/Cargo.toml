@@ -1,9 +1,9 @@
 [package]
 name = "pallet-evm-precompile-proxy"
-authors = { workspace = true }
-description = "A Precompile to make proxy calls encoding accessible to pallet-evm"
-edition = "2021"
 version = "0.1.0"
+authors = { workspace = true }
+edition = "2021"
+description = "A Precompile to make proxy calls encoding accessible to pallet-evm"
 
 [dependencies]
 log = { workspace = true }
@@ -46,15 +46,15 @@ sp-io = { workspace = true, features = ["std"] }
 [features]
 default = ["std"]
 std = [
- "fp-evm/std",
- "frame-support/std",
- "frame-system/std",
- "pallet-balances/std",
- "pallet-evm/std",
- "pallet-proxy/std",
- "parity-scale-codec/std",
- "precompile-utils/std",
- "sp-core/std",
- "sp-runtime/std",
- "sp-std/std",
+  "fp-evm/std",
+  "frame-support/std",
+  "frame-system/std",
+  "pallet-balances/std",
+  "pallet-evm/std",
+  "pallet-proxy/std",
+  "parity-scale-codec/std",
+  "precompile-utils/std",
+  "sp-core/std",
+  "sp-runtime/std",
+  "sp-std/std",
 ]

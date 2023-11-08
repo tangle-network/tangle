@@ -1,10 +1,10 @@
 [package]
 name = "client-evm-tracing"
+version = "0.1.0"
 authors = { workspace = true }
 edition = "2021"
 license = "GPL-3.0-only"
 repository = { workspace = true }
-version = "0.1.0"
 
 [dependencies]
 ethereum-types = { workspace = true, features = ["std"] }

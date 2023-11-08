@@ -1,0 +1,30 @@
+[package]
+name = "pallet-jobs-rpc-runtime-api"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+pallet-jobs = { default-features = false, path = "../../../jobs" }
+parity-scale-codec = { workspace = true }
+sp-api = { workspace = true }
+sp-runtime = { workspace = true }
+sp-weights = { workspace = true }
+tangle-primitives = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+  "parity-scale-codec/std",
+  "pallet-jobs/std",
+  "sp-api/std",
+  "sp-runtime/std",
+  "sp-weights/std",
+  "tangle-primitives/std",
+]

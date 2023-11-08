@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::jobs::JobKey;
 use frame_support::pallet_prelude::*;
 
 /// Role type to be used in the system.
@@ -32,5 +33,16 @@ impl RoleType {
 	/// Checks if the role type is a Zk-Saas role.
 	pub fn is_zksaas(self) -> bool {
 		self == RoleType::ZkSaas
+	}
+}
+
+impl From<JobKey> for RoleType {
+	fn from(job_key: JobKey) -> Self {
+		match job_key {
+			JobKey::DKG => RoleType::Tss,
+			JobKey::DKGSignature => RoleType::Tss,
+			JobKey::ZkSaasPhaseOne => RoleType::ZkSaas,
+			JobKey::ZkSaasPhaseTwo => RoleType::ZkSaas,
+		}
 	}
 }

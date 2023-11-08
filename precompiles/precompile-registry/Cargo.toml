@@ -1,9 +1,9 @@
 [package]
 name = "pallet-evm-precompile-registry"
-authors = { workspace = true }
-description = "Registry of active precompiles"
-edition = "2021"
 version = "0.1.0"
+authors = { workspace = true }
+edition = "2021"
+description = "Registry of active precompiles"
 
 [dependencies]
 log = { workspace = true }
@@ -41,13 +41,13 @@ sp-runtime = { workspace = true }
 [features]
 default = ["std"]
 std = [
- "fp-evm/std",
- "frame-support/std",
- "frame-system/std",
- "pallet-evm/std",
- "parity-scale-codec/std",
- "precompile-utils/std",
- "sp-core/std",
- "sp-io/std",
- "sp-std/std",
+  "fp-evm/std",
+  "frame-support/std",
+  "frame-system/std",
+  "pallet-evm/std",
+  "parity-scale-codec/std",
+  "precompile-utils/std",
+  "sp-core/std",
+  "sp-io/std",
+  "sp-std/std",
 ]

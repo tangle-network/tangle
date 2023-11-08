@@ -1,9 +1,9 @@
 [package]
 name = "pallet-evm-precompile-democracy"
-authors = { workspace = true }
-description = "A Precompile to make Substrate's pallet-democracy accessible to pallet-evm"
-edition = "2021"
 version = "0.2.0"
+authors = { workspace = true }
+edition = "2021"
+description = "A Precompile to make Substrate's pallet-democracy accessible to pallet-evm"
 
 [dependencies]
 log = { workspace = true }
@@ -45,14 +45,14 @@ sp-runtime = { workspace = true, features = ["std"] }
 [features]
 default = ["std"]
 std = [
- "fp-evm/std",
- "frame-support/std",
- "frame-system/std",
- "pallet-democracy/std",
- "pallet-evm/std",
- "parity-scale-codec/std",
- "precompile-utils/std",
- "sp-core/std",
- "sp-io/std",
- "sp-std/std",
+  "fp-evm/std",
+  "frame-support/std",
+  "frame-system/std",
+  "pallet-democracy/std",
+  "pallet-evm/std",
+  "parity-scale-codec/std",
+  "precompile-utils/std",
+  "sp-core/std",
+  "sp-io/std",
+  "sp-std/std",
 ]

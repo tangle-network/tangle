@@ -1,9 +1,9 @@
 [package]
 name = "pallet-evm-precompile-preimage"
-authors = { workspace = true }
-description = "A Precompile to make pallet-preimage calls encoding accessible to pallet-evm"
-edition = "2021"
 version = "0.1.0"
+authors = { workspace = true }
+edition = "2021"
+description = "A Precompile to make pallet-preimage calls encoding accessible to pallet-evm"
 
 [dependencies]
 log = { workspace = true }
@@ -44,14 +44,14 @@ sp-io = { workspace = true }
 [features]
 default = ["std"]
 std = [
- "fp-evm/std",
- "frame-support/std",
- "frame-system/std",
- "pallet-evm/std",
- "pallet-preimage/std",
- "parity-scale-codec/std",
- "parity-scale-codec/std",
- "precompile-utils/std",
- "sp-runtime/std",
- "sp-std/std",
+  "fp-evm/std",
+  "frame-support/std",
+  "frame-system/std",
+  "pallet-evm/std",
+  "pallet-preimage/std",
+  "parity-scale-codec/std",
+  "parity-scale-codec/std",
+  "precompile-utils/std",
+  "sp-runtime/std",
+  "sp-std/std",
 ]

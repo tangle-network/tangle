@@ -1,5 +1,5 @@
-// This file is part of Webb.
-// Copyright (C) 2022 Webb Technologies Inc.
+// This file is part of Tangle.
+// Copyright (C) 2022-2023 Webb Technologies Inc.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,12 +24,12 @@ pub trait RolesHandler<AccountId> {
 	/// # Parameters
 	///
 	/// - `address`: The account ID of the validator.
-	/// - `role_type`: The key representing the type of job.
+	/// - `role_type`: The type of role
 	///
 	/// # Returns
 	///
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	fn validate_role(address: AccountId, role_type: RoleType) -> bool;
+	fn is_validator(address: AccountId, role_type: RoleType) -> bool;
 
 	/// Slash validator stake for the reported offence. The function should be a best effort
 	/// slashing, slash upto max possible by the offence type.

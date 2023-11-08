@@ -8,27 +8,28 @@ repository = "https://github.com/webb-tools/tangle"
 
 [workspace]
 members = [
- "primitives",
- "primitives/rpc/*",
- "primitives/ext",
- "client/evm-tracing",
- "client/rpc/*",
- "client/rpc-core/*",
- "client/voter",
- "standalone/node",
- "standalone/runtime",
- "standalone/runtime/evm_tracer",
- "pallets/claims",
- "pallets/transaction-pause",
- "pallets/roles",
- "precompiles/utils",
- "precompiles/utils/macro",
- "precompiles/utils/tests-external",
- "precompiles/pallet-democracy",
- "precompiles/batch",
- "precompiles/call-permit",
- "precompiles/proxy",
- "precompiles/preimage",
+  "primitives",
+  "primitives/rpc/*",
+  "primitives/ext",
+  "client/evm-tracing",
+  "client/rpc/*",
+  "client/rpc-core/*",
+  "client/voter",
+  "standalone/node",
+  "standalone/runtime",
+  "standalone/runtime/evm_tracer",
+  "pallets/*",
+   "pallets/roles",
+  "pallets/jobs/rpc",
+  "pallets/jobs/rpc/runtime-api",
+  "precompiles/utils",
+  "precompiles/utils/macro",
+  "precompiles/utils/tests-external",
+  "precompiles/pallet-democracy",
+  "precompiles/batch",
+  "precompiles/call-permit",
+  "precompiles/proxy",
+  "precompiles/preimage",
 ]
 resolver = "2"
 
@@ -68,7 +69,6 @@ hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
 slices = "0.2.0"
 
-
 # DKG Substrate Dependencies
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.4.7", default-features = false }
 pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.4.7", default-features = false }
@@ -84,6 +84,7 @@ tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/run
 
 # Tangle Dependencies
 pallet-ecdsa-claims = { path = "pallets/claims", default-features = false }
+pallet-jobs = { path = "pallets/jobs", default-features = false }
 pallet-roles = { path = "pallets/roles", default-features = false }
 
 # Orml dependencies
@@ -115,8 +116,8 @@ sc-chain-spec = { git = "https://github.com/paritytech/substrate", branch = "pol
 sc-rpc-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sp-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
-sp-runtime-interface = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0",default-features = false }
-sp-externalities = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0",default-features = false }
+sp-runtime-interface = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+sp-externalities = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 sc-utils = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 substrate-frame-rpc-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 sc-consensus-grandpa = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
@@ -236,7 +237,6 @@ pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-featur
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
 
-
 # EVM & Ethereum
 # (wasm)
 evm = { git = "https://github.com/rust-blockchain/evm", rev = "b7b82c7e1fc57b7449d6dfa6826600de37cc1e65", default-features = false }
@@ -292,7 +292,7 @@ pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-t
 webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.5" }
 
 webb = { version = "0.8", default-features = false }
-webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", rev="a960eaf", default-features = false, features = ["scale", "evm"] }
+webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", rev = "a960eaf", default-features = false, features = ["scale", "evm"] }
 
 primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }

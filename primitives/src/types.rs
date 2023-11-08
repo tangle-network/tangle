@@ -1,5 +1,3 @@
-use sp_runtime::AccountId32;
-
 // Copyright 2022 Webb Technologies Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +14,8 @@ use sp_runtime::AccountId32;
 //
 use super::*;
 pub mod jobs;
+use sp_runtime::AccountId32;
+
 pub mod roles;
 /// Reputation type
 pub type Reputation = u128;
