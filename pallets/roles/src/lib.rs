@@ -21,9 +21,10 @@
 use codec::MaxEncodedLen;
 use frame_support::{
 	ensure,
-	traits::{Currency, Get, LockIdentifier, LockableCurrency, OnUnbalanced},
+	traits::{Currency, Get, LockIdentifier, LockableCurrency},
 	CloneNoBound, EqNoBound, PalletId, PartialEqNoBound, RuntimeDebugNoBound,
 };
+
 pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
@@ -71,12 +72,9 @@ impl<T: Config> RoleStakingLedger<T> {
 	}
 }
 
-pub type CurrencyOf<T> = <T as pallet::Config>::Currency;
+pub type CurrencyOf<T> = <T as pallet_staking::Config>::Currency;
 pub type BalanceOf<T> =
-	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
-	<T as frame_system::Config>::AccountId,
->>::NegativeImbalance;
+	<CurrencyOf<T> as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 const ROLES_STAKING_ID: LockIdentifier = *b"rstaking";
 
@@ -92,29 +90,9 @@ pub mod pallet {
 
 	/// Configuration trait.
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+	pub trait Config: frame_system::Config + pallet_staking::Config {
 		/// The overarching event type.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-
-		type Currency: LockableCurrency<
-			Self::AccountId,
-			Moment = BlockNumberFor<Self>,
-			Balance = Self::CurrencyBalance,
-		>;
-		/// Just the `Currency::Balance` type; we have this item to allow us to constrain it to
-		/// `From<u64>`.
-		type CurrencyBalance: sp_runtime::traits::AtLeast32BitUnsigned
-			+ codec::FullCodec
-			+ Copy
-			+ MaybeSerializeDeserialize
-			+ sp_std::fmt::Debug
-			+ Default
-			+ From<u64>
-			+ TypeInfo
-			+ MaxEncodedLen;
-
-		/// Handler for the unbalanced reduction when slashing a staker.
-		type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
 
 		type WeightInfo: WeightInfo;
 
@@ -139,6 +117,8 @@ pub mod pallet {
 
 	#[pallet::error]
 	pub enum Error<T> {
+		/// Not a validator.
+		NotValidator,
 		/// Role has already been assigned to provided validator.
 		RoleAlreadyAssigned,
 		/// No role assigned to provided validator.
@@ -188,6 +168,12 @@ pub mod pallet {
 			role: RoleType,
 		) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
+			// Ensure stash account is a validator.
+			ensure!(
+				pallet_staking::Validators::<T>::contains_key(&stash_account),
+				Error::<T>::NotValidator
+			);
+
 			// Check if role is already assigned.
 			ensure!(
 				!AccountRolesMapping::<T>::contains_key(&stash_account),
@@ -233,6 +219,12 @@ pub mod pallet {
 		#[pallet::call_index(1)]
 		pub fn clear_role(origin: OriginFor<T>, role: RoleType) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
+			// Ensure stash account is a validator.
+			ensure!(
+				pallet_staking::Validators::<T>::contains_key(&stash_account),
+				Error::<T>::NotValidator
+			);
+
 			// check if role is assigned.
 			ensure!(
 				Self::is_validator(stash_account.clone(), role.clone()),
