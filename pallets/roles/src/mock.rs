@@ -97,6 +97,19 @@ impl Contains<RuntimeCall> for BaseFilter {
 			return false
 		}
 
+		// no chill call
+		if matches!(call, RuntimeCall::Staking(pallet_staking::Call::chill { .. })) {
+			return false
+		}
+
+		// no withdraw_unbonded call
+		let is_stake_withdraw_call =
+			matches!(call, RuntimeCall::Staking(pallet_staking::Call::withdraw_unbonded { .. }));
+
+		if is_stake_withdraw_call {
+			return false
+		}
+
 		true
 	}
 }

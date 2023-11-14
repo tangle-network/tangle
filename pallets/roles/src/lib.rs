@@ -120,7 +120,7 @@ pub mod pallet {
 	pub enum Error<T> {
 		/// Not a validator.
 		NotValidator,
-		/// Role has already been assigned to provided validator.
+		/// Validator has active role assigned
 		HasRoleAssigned,
 		/// No role assigned to provided validator.
 		NoRoleAssigned,
@@ -251,6 +251,30 @@ pub mod pallet {
 			Ok(())
 		}
 
+		/// Declare no desire to either validate or nominate.
+		///
+		/// If you have opted for any of the roles, please submit `clear_role` extrinsic to opt out
+		/// of all the services. Once your role is cleared, your request will be processed.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: Origin of the transaction.
+		///
+		/// This function will return error if
+		/// - Account is not a validator account.
+		/// - Role is assigned to the validator.
+		#[pallet::weight({0})]
+		#[pallet::call_index(2)]
+		pub fn chill(origin: OriginFor<T>) -> DispatchResult {
+			let account = ensure_signed(origin.clone())?;
+			// Ensure no role is assigned to the account before chilling.
+			ensure!(!AccountRolesMapping::<T>::contains_key(&account), Error::<T>::HasRoleAssigned);
+
+			// chill
+			let _ = pallet_staking::Pallet::<T>::chill(origin);
+			Ok(())
+		}
+
 		/// Unbound funds from the stash account.
 		/// This will allow user to unbound and later withdraw funds.
 		/// If you have opted for any of the roles, please submit `clear_role` extrinsic to opt out
@@ -266,7 +290,7 @@ pub mod pallet {
 		/// - If there is any active role assigned to the user.
 		///  
 		#[pallet::weight({0})]
-		#[pallet::call_index(2)]
+		#[pallet::call_index(3)]
 		pub fn unbound_funds(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
@@ -277,6 +301,30 @@ pub mod pallet {
 
 			// Unbound funds.
 			let _ = pallet_staking::Pallet::<T>::unbond(origin, amount);
+
+			Ok(())
+		}
+
+		/// Withdraw unbound funds after un-bonding period has passed.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: Origin of the transaction.
+		///
+		/// This function will return error if
+		/// - If there is any active role assigned to the user.
+		#[pallet::weight({0})]
+		#[pallet::call_index(4)]
+		pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResult {
+			let stash_account = ensure_signed(origin.clone())?;
+			// Ensure no role is assigned to the account and is eligible to withdraw.
+			ensure!(
+				!AccountRolesMapping::<T>::contains_key(&stash_account),
+				Error::<T>::HasRoleAssigned
+			);
+
+			// Withdraw unbound funds.
+			let _ = pallet_staking::Pallet::<T>::withdraw_unbonded(origin, 0);
 
 			Ok(())
 		}
