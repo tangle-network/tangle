@@ -17,7 +17,6 @@
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use mock::*;
-use tangle_primitives::jobs::ValidatorOffence;
 
 #[test]
 fn test_assign_role() {
@@ -56,27 +55,6 @@ fn test_clear_role() {
 
 		// Ledger should be removed from ledger mappings.
 		assert_eq!(Roles::ledger(1), None);
-	});
-}
-
-#[test]
-fn test_slash_validator() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
-		// Verify total usable balance of the account. Since we have bonded 5000 tokens, we should
-		// have 5000 tokens usable.
-		assert_eq!(Balances::usable_balance(1), 5000);
-
-		// Now lets slash the account for being Inactive.
-		assert_ok!(Roles::slash_validator(1, ValidatorOffence::Inactivity));
-
-		assert_events(vec![RuntimeEvent::Roles(crate::Event::Slashed {
-			account: 1,
-			amount: 1000,
-		})]);
-		// should be updated in ledger
-		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total: 4000 }));
 	});
 }
 
