@@ -25,18 +25,15 @@ fn test_assign_role() {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
 		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
 
-		assert_events(vec![
-			RuntimeEvent::Roles(crate::Event::Bonded { account: 1, amount: 5000 }),
-			RuntimeEvent::Roles(crate::Event::RoleAssigned { account: 1, role: RoleType::Tss }),
-		]);
+		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleAssigned {
+			account: 1,
+			role: RoleType::Tss,
+		})]);
 
 		// Lets verify role assigned to account.
 		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
 		// Verify ledger mapping
 		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total: 5000 }));
-		// Verify total usable balance of the account. Since we have bonded 5000 tokens, we should
-		// have 5000 tokens usable.
-		assert_eq!(Balances::usable_balance(1), 5000);
 	});
 }
 
@@ -45,27 +42,20 @@ fn test_clear_role() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
 		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
-		// Verify total usable balance of the account. Since we have bonded 5000 tokens, we should
-		// have 5000 tokens usable.
-		assert_eq!(Balances::usable_balance(1), 5000);
 
 		// Now lets clear the role
 		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(1), RoleType::Tss));
 
-		assert_events(vec![
-			RuntimeEvent::Roles(crate::Event::Unbonded { account: 1, amount: 5000 }),
-			RuntimeEvent::Roles(crate::Event::RoleRemoved { account: 1, role: RoleType::Tss }),
-		]);
+		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleRemoved {
+			account: 1,
+			role: RoleType::Tss,
+		})]);
 
 		// Role should be removed from  account role mappings.
 		assert_eq!(Roles::account_role(1), None);
 
 		// Ledger should be removed from ledger mappings.
 		assert_eq!(Roles::ledger(1), None);
-
-		// Verify total usable balance of the account. Since we have cleared the role, we should
-		// have 10000 tokens usable.
-		assert_eq!(Balances::usable_balance(1), 10000);
 	});
 }
 
@@ -98,5 +88,71 @@ fn test_assign_role_should_fail_if_not_validator() {
 			Roles::assign_role(RuntimeOrigin::signed(5), RoleType::Tss, 5000),
 			Error::<Runtime>::NotValidator
 		);
+	});
+}
+
+#[test]
+fn test_unbound_funds_should_work() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		// Initially validator account has staked 10_000 tokens and wants to re-stake 5000 tokens
+		// for providing TSS services.
+		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
+
+		// Lets verify role is assigned to account.
+		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
+
+		// Lets clear the role.
+		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(1), RoleType::Tss));
+
+		// Role should be removed from  account role mappings.
+		assert_eq!(Roles::account_role(1), None);
+
+		// unbound funds.
+		assert_ok!(Roles::unbound_funds(RuntimeOrigin::signed(1), 5000));
+
+		assert_events(vec![RuntimeEvent::Staking(pallet_staking::Event::Unbonded {
+			stash: 1,
+			amount: 5000,
+		})]);
+
+		// Get  pallet staking ledger mapping.
+		let staking_ledger = pallet_staking::Ledger::<Runtime>::get(1).unwrap();
+		// Since we we have unbounded 5000 tokens, we should have 5000 tokens in staking ledger.
+		assert_eq!(staking_ledger.active, 5000);
+	});
+}
+
+// Test unbound should fail if role is assigned to account.
+#[test]
+fn test_unbound_funds_should_fail_if_role_assigned() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		// Initially validator account has staked 10_000 tokens and wants to re-stake 5000 tokens
+		// for providing TSS services.
+		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
+
+		// Lets verify role is assigned to account.
+		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
+
+		// Lets try to unbound funds.
+		assert_err!(
+			Roles::unbound_funds(RuntimeOrigin::signed(1), 5000),
+			Error::<Runtime>::HasRoleAssigned
+		);
+	});
+}
+
+// Test unbound should work if no role assigned to account.
+#[test]
+fn test_unbound_funds_should_work_if_no_role_assigned() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		// Initially validator account has staked 10_000 tokens.
+
+		// Since validator has not opted for any roles, he should be able to unbound his funds.
+		assert_ok!(Roles::unbound_funds(RuntimeOrigin::signed(1), 5000));
+
+		assert_events(vec![RuntimeEvent::Staking(pallet_staking::Event::Unbonded {
+			stash: 1,
+			amount: 5000,
+		})]);
 	});
 }

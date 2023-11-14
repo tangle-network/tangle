@@ -20,7 +20,7 @@ use crate as pallet_roles;
 use frame_election_provider_support::{onchain, SequentialPhragmen};
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU128, ConstU32, ConstU64, Everything, Hooks},
+	traits::{ConstU128, ConstU32, ConstU64, Contains, Hooks},
 };
 use pallet_session::TestSessionHandler;
 use sp_core::H256;
@@ -51,7 +51,7 @@ impl frame_system::Config for Runtime {
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type DbWeight = ();
-	type BaseCallFilter = Everything;
+	type BaseCallFilter = BaseFilter;
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
@@ -84,6 +84,21 @@ impl pallet_timestamp::Config for Runtime {
 impl pallet_session::historical::Config for Runtime {
 	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
+}
+
+pub struct BaseFilter;
+impl Contains<RuntimeCall> for BaseFilter {
+	fn contains(call: &RuntimeCall) -> bool {
+		let is_stake_unbound_call =
+			matches!(call, RuntimeCall::Staking(pallet_staking::Call::unbond { .. }));
+
+		if is_stake_unbound_call {
+			// no unbond call
+			return false
+		}
+
+		true
+	}
 }
 
 sp_runtime::impl_opaque_keys! {
