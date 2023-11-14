@@ -108,10 +108,6 @@ pub mod pallet {
 		RoleAssigned { account: T::AccountId, role: RoleType },
 		/// Removed validator from role.
 		RoleRemoved { account: T::AccountId, role: RoleType },
-		/// Funds bonded to become a validator.
-		Bonded { account: T::AccountId, amount: BalanceOf<T> },
-		/// Funds unbonded to stop being a validator.
-		Unbonded { account: T::AccountId, amount: BalanceOf<T> },
 		/// Slashed validator.
 		Slashed { account: T::AccountId, amount: BalanceOf<T> },
 	}
