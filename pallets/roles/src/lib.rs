@@ -30,7 +30,10 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::{codec, traits::Zero};
 use sp_std::{convert::TryInto, prelude::*, vec};
-use tangle_primitives::{roles::RoleType, traits::roles::RolesHandler};
+use tangle_primitives::{
+	roles::{ReStakingOption, RoleType},
+	traits::roles::RolesHandler,
+};
 mod impls;
 #[cfg(test)]
 pub(crate) mod mock;
@@ -166,7 +169,7 @@ pub mod pallet {
 		pub fn assign_role(
 			origin: OriginFor<T>,
 			role: RoleType,
-			#[pallet::compact] re_stake: BalanceOf<T>,
+			re_stake: ReStakingOption,
 		) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
@@ -184,16 +187,21 @@ pub mod pallet {
 			// Check if stash account is already paired/ re-staked.
 			ensure!(!<Ledger<T>>::contains_key(&stash_account), Error::<T>::AccountAlreadyPaired);
 
+			let staking_ledger = pallet_staking::Ledger::<T>::get(&stash_account).unwrap();
+			let re_stake_amount = match re_stake {
+				ReStakingOption::Full => staking_ledger.active,
+				ReStakingOption::Custom(x) => x.into(),
+			};
+
 			// Validate re-staking bond, should be greater than min re-staking bond requirement.
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
-			ensure!(re_stake >= min_re_staking_bond, Error::<T>::InsufficientReStakingBond);
+			ensure!(re_stake_amount >= min_re_staking_bond, Error::<T>::InsufficientReStakingBond);
 
 			// Validate re-staking bond, should not exceed active staked bond.
-			let staking_ledger = pallet_staking::Ledger::<T>::get(&stash_account).unwrap();
-			ensure!(staking_ledger.active > re_stake, Error::<T>::InvalidReStakingBond);
+			ensure!(staking_ledger.active >= re_stake_amount, Error::<T>::InvalidReStakingBond);
 
 			// Update ledger.
-			let item = RoleStakingLedger { stash: stash_account.clone(), total: re_stake };
+			let item = RoleStakingLedger { stash: stash_account.clone(), total: re_stake_amount };
 			Self::update_ledger(&stash_account, &item);
 
 			// Add role mapping for the stash account.

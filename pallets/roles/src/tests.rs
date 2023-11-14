@@ -22,7 +22,11 @@ use mock::*;
 fn test_assign_role() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
+		assert_ok!(Roles::assign_role(
+			RuntimeOrigin::signed(1),
+			RoleType::Tss,
+			ReStakingOption::Custom(5000)
+		));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleAssigned {
 			account: 1,
@@ -36,11 +40,38 @@ fn test_assign_role() {
 	});
 }
 
+// Test that we can assign role with full staking option.
+#[test]
+fn test_assign_role_with_full_staking_option() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
+		assert_ok!(Roles::assign_role(
+			RuntimeOrigin::signed(1),
+			RoleType::Tss,
+			ReStakingOption::Full
+		));
+
+		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleAssigned {
+			account: 1,
+			role: RoleType::Tss,
+		})]);
+
+		// Lets verify role assigned to account.
+		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
+		// Verify ledger mapping
+		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total: 10000 }));
+	});
+}
+
 #[test]
 fn test_clear_role() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
+		assert_ok!(Roles::assign_role(
+			RuntimeOrigin::signed(1),
+			RoleType::Tss,
+			ReStakingOption::Custom(5000)
+		));
 
 		// Now lets clear the role
 		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(1), RoleType::Tss));
@@ -63,7 +94,11 @@ fn test_assign_role_should_fail_if_not_validator() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		// we will use account 5 which is not a validator
 		assert_err!(
-			Roles::assign_role(RuntimeOrigin::signed(5), RoleType::Tss, 5000),
+			Roles::assign_role(
+				RuntimeOrigin::signed(5),
+				RoleType::Tss,
+				ReStakingOption::Custom(5000)
+			),
 			Error::<Runtime>::NotValidator
 		);
 	});
@@ -74,7 +109,11 @@ fn test_unbound_funds_should_work() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		// Initially validator account has staked 10_000 tokens and wants to re-stake 5000 tokens
 		// for providing TSS services.
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
+		assert_ok!(Roles::assign_role(
+			RuntimeOrigin::signed(1),
+			RoleType::Tss,
+			ReStakingOption::Custom(5000)
+		));
 
 		// Lets verify role is assigned to account.
 		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
@@ -106,7 +145,11 @@ fn test_unbound_funds_should_fail_if_role_assigned() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		// Initially validator account has staked 10_000 tokens and wants to re-stake 5000 tokens
 		// for providing TSS services.
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
+		assert_ok!(Roles::assign_role(
+			RuntimeOrigin::signed(1),
+			RoleType::Tss,
+			ReStakingOption::Custom(5000)
+		));
 
 		// Lets verify role is assigned to account.
 		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
