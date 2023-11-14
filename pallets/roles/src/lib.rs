@@ -187,7 +187,8 @@ pub mod pallet {
 			// Check if stash account is already paired/ re-staked.
 			ensure!(!<Ledger<T>>::contains_key(&stash_account), Error::<T>::AccountAlreadyPaired);
 
-			let staking_ledger = pallet_staking::Ledger::<T>::get(&stash_account).unwrap();
+			let staking_ledger =
+				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
 			let re_stake_amount = match re_stake {
 				ReStakingOption::Full => staking_ledger.active,
 				ReStakingOption::Custom(x) => x.into(),
