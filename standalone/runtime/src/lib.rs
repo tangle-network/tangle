@@ -1098,6 +1098,14 @@ impl Contains<RuntimeCall> for BaseFilter {
 			return false
 		}
 
+		let is_stake_unbound_call =
+			matches!(call, RuntimeCall::Staking(pallet_staking::Call::unbond{..}));
+
+		if is_stake_unbound_call {
+			// no unbond call
+			return false
+		}
+
 		let democracy_related = matches!(
 			call,
 			// Filter democracy proposals creation

@@ -21,7 +21,7 @@
 use codec::MaxEncodedLen;
 use frame_support::{
 	ensure,
-	traits::{Currency, Get, LockIdentifier, LockableCurrency},
+	traits::{Currency, Get},
 	CloneNoBound, EqNoBound, PalletId, PartialEqNoBound, RuntimeDebugNoBound,
 };
 
@@ -54,29 +54,27 @@ pub use weights::WeightInfo;
 pub struct RoleStakingLedger<T: Config> {
 	/// The stash account whose balance is actually locked and at stake.
 	pub stash: T::AccountId,
-	/// The total amount of the stash's balance that we are currently accounting for.
-	/// It's just `active` plus all the `unlocking` balances.
+	/// The total amount of the stash's balance that is re-staked for selected services
+	/// This re-staked balance we are currently accounting for new slashing conditions.
 	#[codec(compact)]
-	pub total_locked: BalanceOf<T>,
+	pub total: BalanceOf<T>,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
 	/// Initializes the default object using the given `validator`.
 	pub fn default_from(stash: T::AccountId) -> Self {
-		Self { stash, total_locked: Zero::zero() }
+		Self { stash, total: Zero::zero() }
 	}
 
 	/// Returns `true` if the stash account has no funds at all.
 	pub fn is_empty(&self) -> bool {
-		self.total_locked.is_zero()
+		self.total.is_zero()
 	}
 }
 
 pub type CurrencyOf<T> = <T as pallet_staking::Config>::Currency;
 pub type BalanceOf<T> =
 	<CurrencyOf<T> as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-
-const ROLES_STAKING_ID: LockIdentifier = *b"rstaking";
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -125,10 +123,12 @@ pub mod pallet {
 		RoleNotAssigned,
 		/// Insufficient bond to become a validator.
 		InsufficientBond,
-		/// Stash controller account already added to Ledger
-		AlreadyPaired,
-		/// Stash controller account not found in ledger
-		InvalidStashController,
+		/// Insufficient bond to re stake.
+		InsufficientReStakingBond,
+		/// Stash controller account already added to Roles Ledger
+		AccountAlreadyPaired,
+		/// Stash controller account not found in Roles Ledger.
+		AccountNotPaired,
 	}
 
 	/// Map from all "controller" accounts to the info regarding the staking.
@@ -142,10 +142,10 @@ pub mod pallet {
 	/// Mapping of resource to bridge index
 	pub type AccountRolesMapping<T: Config> = StorageMap<_, Blake2_256, T::AccountId, RoleType>;
 
-	/// The minimum active bond to become and maintain the role.
+	/// The minimum re staking bond to become and maintain the role.
 	#[pallet::storage]
 	#[pallet::getter(fn min_active_bond)]
-	pub(super) type MinActiveBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+	pub(super) type MinReStakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
 	/// Assigns a role to the validator.
 	///
@@ -164,8 +164,8 @@ pub mod pallet {
 		#[pallet::call_index(0)]
 		pub fn assign_role(
 			origin: OriginFor<T>,
-			#[pallet::compact] bond_value: BalanceOf<T>,
 			role: RoleType,
+			#[pallet::compact] re_stake: BalanceOf<T>,
 		) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
@@ -180,25 +180,20 @@ pub mod pallet {
 				Error::<T>::RoleAlreadyAssigned
 			);
 
-			// Check if stash account is already paired.
-			ensure!(!<Ledger<T>>::contains_key(&stash_account), Error::<T>::AlreadyPaired);
+			// Check if stash account is already paired/ re-staked.
+			ensure!(!<Ledger<T>>::contains_key(&stash_account), Error::<T>::AccountAlreadyPaired);
 
-			// Check if min active bond is met.
-			let min_active_bond = MinActiveBond::<T>::get();
-			ensure!(bond_value > min_active_bond.into(), Error::<T>::InsufficientBond);
+			// Validate re-staking bond, should be greater than min re-staking bond requirement.
+			let min_re_staking_bond = MinReStakingBond::<T>::get();
+			ensure!(re_stake >= min_re_staking_bond, Error::<T>::InsufficientReStakingBond);
 
-			// Bond with stash account.
-			let stash_balance = T::Currency::free_balance(&stash_account);
-			let value = bond_value.min(stash_balance);
+			// Validate re-staking bond, should be less than active staked bond.
+			let staking_ledger = pallet_staking::Ledger::<T>::get(&stash_account).unwrap();
+			ensure!(staking_ledger.active > re_stake, Error::<T>::InsufficientBond);
 
 			// Update ledger.
-			let item = RoleStakingLedger { stash: stash_account.clone(), total_locked: value };
+			let item = RoleStakingLedger { stash: stash_account.clone(), total: re_stake };
 			Self::update_ledger(&stash_account, &item);
-
-			Self::deposit_event(Event::<T>::Bonded {
-				account: stash_account.clone(),
-				amount: value,
-			});
 
 			// Add role mapping for the stash account.
 			AccountRolesMapping::<T>::insert(&stash_account, role);
@@ -234,17 +229,52 @@ pub mod pallet {
 			// On successful removal of services, remove the role from the mapping.
 			// Issue link for reference : https://github.com/webb-tools/tangle/issues/292
 
-			// Unbound locked funds.
-			let ledger = Self::ledger(&stash_account).ok_or(Error::<T>::InvalidStashController)?;
-			Self::unbond(&ledger)?;
-			Self::deposit_event(Event::<T>::Unbonded {
-				account: ledger.stash,
-				amount: ledger.total_locked,
-			});
-
 			// Remove role from the mapping.
 			AccountRolesMapping::<T>::remove(&stash_account);
+			// Remove stash account related info.
+			Self::kill_stash(&stash_account);
+
 			Self::deposit_event(Event::<T>::RoleRemoved { account: stash_account, role });
+
+			Ok(())
+		}
+
+		/// Unbound funds from the stash account.
+		/// This will allow validator to unbound and later withdraw funds.
+		/// If you have opted for any of the roles, please submit `clear_role` extrinsic to opt out
+		/// Once opted out of all services and your role is cleared, you can unbound and withdraw
+		/// funds.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: Origin of the transaction.
+		/// - `amount`: Amount of funds to unbound.
+		///
+		/// This function will return error if
+		/// - Stash account is not a validator.
+		/// - Insufficient funds to unbound.
+		///  
+		#[pallet::weight({0})]
+		#[pallet::call_index(2)]
+		pub fn unbound_funds(
+			origin: OriginFor<T>,
+			#[pallet::compact] amount: BalanceOf<T>,
+		) -> DispatchResult {
+			let stash_account = ensure_signed(origin.clone())?;
+			// Ensure stash account is a validator.
+			ensure!(
+				pallet_staking::Validators::<T>::contains_key(&stash_account),
+				Error::<T>::NotValidator
+			);
+
+			// Ensure no role is assigned to the validator and is eligible to unbound.
+			ensure!(
+				!AccountRolesMapping::<T>::contains_key(&stash_account),
+				Error::<T>::RoleAlreadyAssigned
+			);
+
+			// Unbound funds.
+			let _ = pallet_staking::Pallet::<T>::unbond(origin, amount);
 
 			Ok(())
 		}

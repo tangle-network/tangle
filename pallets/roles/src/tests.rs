@@ -23,7 +23,7 @@ use tangle_primitives::jobs::ValidatorOffence;
 fn test_assign_role() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), 5000, RoleType::Tss));
+		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
 
 		assert_events(vec![
 			RuntimeEvent::Roles(crate::Event::Bonded { account: 1, amount: 5000 }),
@@ -33,7 +33,7 @@ fn test_assign_role() {
 		// Lets verify role assigned to account.
 		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
 		// Verify ledger mapping
-		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total_locked: 5000 }));
+		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total: 5000 }));
 		// Verify total usable balance of the account. Since we have bonded 5000 tokens, we should
 		// have 5000 tokens usable.
 		assert_eq!(Balances::usable_balance(1), 5000);
@@ -44,7 +44,7 @@ fn test_assign_role() {
 fn test_clear_role() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), 5000, RoleType::Tss));
+		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
 		// Verify total usable balance of the account. Since we have bonded 5000 tokens, we should
 		// have 5000 tokens usable.
 		assert_eq!(Balances::usable_balance(1), 5000);
@@ -73,7 +73,7 @@ fn test_clear_role() {
 fn test_slash_validator() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), 5000, RoleType::Tss));
+		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(1), RoleType::Tss, 5000));
 		// Verify total usable balance of the account. Since we have bonded 5000 tokens, we should
 		// have 5000 tokens usable.
 		assert_eq!(Balances::usable_balance(1), 5000);
@@ -86,7 +86,7 @@ fn test_slash_validator() {
 			amount: 1000,
 		})]);
 		// should be updated in ledger
-		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total_locked: 4000 }));
+		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total: 4000 }));
 	});
 }
 
@@ -95,7 +95,7 @@ fn test_assign_role_should_fail_if_not_validator() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		// we will use account 5 which is not a validator
 		assert_err!(
-			Roles::assign_role(RuntimeOrigin::signed(5), 5000, RoleType::Tss),
+			Roles::assign_role(RuntimeOrigin::signed(5), RoleType::Tss, 5000),
 			Error::<Runtime>::NotValidator
 		);
 	});

@@ -15,7 +15,6 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::{pallet_prelude::DispatchResult, traits::WithdrawReasons};
 use sp_runtime::Saturating;
 use tangle_primitives::{roles::RoleType, traits::roles::RolesHandler};
 
@@ -73,7 +72,7 @@ impl<T: Config> Pallet<T> {
 	/// The total amount of the balance that can be slashed.
 	pub fn slashable_balance_of(stash: &T::AccountId) -> BalanceOf<T> {
 		// Weight note: consider making the stake accessible through stash.
-		Self::ledger(&stash).map(|l| l.total_locked).unwrap_or_default()
+		Self::ledger(&stash).map(|l| l.total).unwrap_or_default()
 	}
 
 	/// Slash the given amount from the stash account.
@@ -85,9 +84,9 @@ impl<T: Config> Pallet<T> {
 		address: T::AccountId,
 		slash_amount: T::CurrencyBalance,
 	) -> sp_runtime::DispatchResult {
-		let mut ledger = Self::ledger(&address).ok_or(Error::<T>::InvalidStashController)?;
+		let mut ledger = Self::ledger(&address).ok_or(Error::<T>::AccountNotPaired)?;
 		let (_imbalance, _missing) = T::Currency::slash(&address, slash_amount.into());
-		ledger.total_locked = ledger.total_locked.saturating_sub(slash_amount.into());
+		ledger.total = ledger.total.saturating_sub(slash_amount.into());
 		Self::update_ledger(&address, &ledger);
 		Self::deposit_event(Event::Slashed { account: address, amount: slash_amount });
 		Ok(())
@@ -102,36 +101,11 @@ impl<T: Config> Pallet<T> {
 	/// # Note
 	/// This function will set a lock on the stash account.
 	pub(crate) fn update_ledger(staker: &T::AccountId, ledger: &RoleStakingLedger<T>) {
-		T::Currency::set_lock(
-			ROLES_STAKING_ID,
-			&ledger.stash,
-			ledger.total_locked,
-			WithdrawReasons::all(),
-		);
 		<Ledger<T>>::insert(staker, ledger);
 	}
 
 	/// Kill the stash account and remove all related information.
-	pub(crate) fn kill_stash(stash: &T::AccountId) -> DispatchResult {
+	pub(crate) fn kill_stash(stash: &T::AccountId) {
 		<Ledger<T>>::remove(&stash);
-		Ok(())
-	}
-
-	/// Unbond the stash account.
-	///
-	/// # Parameters
-	/// - `ledger`: The ledger of the stash account.
-	///
-	/// # Note
-	/// This function will remove the lock on the stash account.
-	pub(super) fn unbond(ledger: &RoleStakingLedger<T>) -> DispatchResult {
-		let stash = ledger.stash.clone();
-		if ledger.total_locked > T::Currency::minimum_balance() {
-			// Remove the lock.
-			T::Currency::remove_lock(ROLES_STAKING_ID, &stash);
-			// Kill the stash and related information.
-			Self::kill_stash(&stash)?;
-		}
-		Ok(())
 	}
 }
