@@ -1099,7 +1099,7 @@ impl Contains<RuntimeCall> for BaseFilter {
 		}
 
 		let is_stake_unbound_call =
-			matches!(call, RuntimeCall::Staking(pallet_staking::Call::unbond{..}));
+			matches!(call, RuntimeCall::Staking(pallet_staking::Call::unbond { .. }));
 
 		if is_stake_unbound_call {
 			// no unbond call

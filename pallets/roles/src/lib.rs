@@ -123,7 +123,7 @@ pub mod pallet {
 		NoRoleAssigned,
 		/// Invalid Re-staking amount, should not exceed total staked amount.
 		InvalidReStakingBond,
-		/// Re staking amount should be greater than minimum re-staking bond to become and maintain the role.
+		/// Re staking amount should be greater than minimum re-staking bond requirement.
 		InsufficientReStakingBond,
 		/// Stash controller account already added to Roles Ledger
 		AccountAlreadyPaired,
@@ -152,12 +152,13 @@ pub mod pallet {
 	/// # Parameters
 	///
 	/// - `origin`: Origin of the transaction.
-	/// - `bond_value`: Amount of funds to bond.
 	/// - `role`: Role to assign to the validator.
+	/// - `re_stake`: Amount of funds you want to re-stake.
 	///
 	/// This function will return error if
+	/// - Account is not a validator account.
 	/// - Role is already assigned to the validator.
-	/// - Min active bond is not met.
+	/// - Min re-staking bond is not met.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight({0})]
@@ -209,7 +210,9 @@ pub mod pallet {
 		/// - `role`: Role to remove from the validator.
 		///
 		/// This function will return error if
+		/// - Account is not a validator account.
 		/// - Role is not assigned to the validator.
+		/// - All the jobs are not completed.
 		#[pallet::weight({0})]
 		#[pallet::call_index(1)]
 		pub fn clear_role(origin: OriginFor<T>, role: RoleType) -> DispatchResult {
@@ -240,10 +243,10 @@ pub mod pallet {
 		}
 
 		/// Unbound funds from the stash account.
-		/// This will allow validator to unbound and later withdraw funds.
+		/// This will allow user to unbound and later withdraw funds.
 		/// If you have opted for any of the roles, please submit `clear_role` extrinsic to opt out
-		/// Once opted out of all services and your role is cleared, you can unbound and withdraw
-		/// funds.
+		/// of all the services. Once your role is cleared, you can unbound
+		/// and withdraw funds.
 		///
 		/// # Parameters
 		///
@@ -251,8 +254,7 @@ pub mod pallet {
 		/// - `amount`: Amount of funds to unbound.
 		///
 		/// This function will return error if
-		/// - Stash account is not a validator.
-		/// - If there is any role assigned to the validator.
+		/// - If there is any active role assigned to the user.
 		///  
 		#[pallet::weight({0})]
 		#[pallet::call_index(2)]
@@ -260,18 +262,9 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
 		) -> DispatchResult {
-			let stash_account = ensure_signed(origin.clone())?;
-			// Ensure stash account is a validator.
-			ensure!(
-				pallet_staking::Validators::<T>::contains_key(&stash_account),
-				Error::<T>::NotValidator
-			);
-
-			// Ensure no role is assigned to the validator and is eligible to unbound.
-			ensure!(
-				!AccountRolesMapping::<T>::contains_key(&stash_account),
-				Error::<T>::HasRoleAssigned
-			);
+			let account = ensure_signed(origin.clone())?;
+			// Ensure no role is assigned to the account and is eligible to unbound.
+			ensure!(!AccountRolesMapping::<T>::contains_key(&account), Error::<T>::HasRoleAssigned);
 
 			// Unbound funds.
 			let _ = pallet_staking::Pallet::<T>::unbond(origin, amount);
