@@ -118,12 +118,12 @@ pub mod pallet {
 		/// Not a validator.
 		NotValidator,
 		/// Role has already been assigned to provided validator.
-		RoleAlreadyAssigned,
+		HasRoleAssigned,
 		/// No role assigned to provided validator.
-		RoleNotAssigned,
-		/// Insufficient bond to become a validator.
-		InsufficientBond,
-		/// Insufficient bond to re stake.
+		NoRoleAssigned,
+		/// Invalid Re-staking amount, should not exceed total staked amount.
+		InvalidReStakingBond,
+		/// Re staking amount should be greater than minimum re-staking bond to become and maintain the role.
 		InsufficientReStakingBond,
 		/// Stash controller account already added to Roles Ledger
 		AccountAlreadyPaired,
@@ -177,7 +177,7 @@ pub mod pallet {
 			// Check if role is already assigned.
 			ensure!(
 				!AccountRolesMapping::<T>::contains_key(&stash_account),
-				Error::<T>::RoleAlreadyAssigned
+				Error::<T>::HasRoleAssigned
 			);
 
 			// Check if stash account is already paired/ re-staked.
@@ -187,9 +187,9 @@ pub mod pallet {
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
 			ensure!(re_stake >= min_re_staking_bond, Error::<T>::InsufficientReStakingBond);
 
-			// Validate re-staking bond, should be less than active staked bond.
+			// Validate re-staking bond, should not exceed active staked bond.
 			let staking_ledger = pallet_staking::Ledger::<T>::get(&stash_account).unwrap();
-			ensure!(staking_ledger.active > re_stake, Error::<T>::InsufficientBond);
+			ensure!(staking_ledger.active > re_stake, Error::<T>::InvalidReStakingBond);
 
 			// Update ledger.
 			let item = RoleStakingLedger { stash: stash_account.clone(), total: re_stake };
@@ -223,7 +223,7 @@ pub mod pallet {
 			// check if role is assigned.
 			ensure!(
 				Self::is_validator(stash_account.clone(), role.clone()),
-				Error::<T>::RoleNotAssigned
+				Error::<T>::NoRoleAssigned
 			);
 			// TODO: Call jobs manager to remove the services.
 			// On successful removal of services, remove the role from the mapping.
@@ -252,7 +252,7 @@ pub mod pallet {
 		///
 		/// This function will return error if
 		/// - Stash account is not a validator.
-		/// - Insufficient funds to unbound.
+		/// - If there is any role assigned to the validator.
 		///  
 		#[pallet::weight({0})]
 		#[pallet::call_index(2)]
@@ -270,7 +270,7 @@ pub mod pallet {
 			// Ensure no role is assigned to the validator and is eligible to unbound.
 			ensure!(
 				!AccountRolesMapping::<T>::contains_key(&stash_account),
-				Error::<T>::RoleAlreadyAssigned
+				Error::<T>::HasRoleAssigned
 			);
 
 			// Unbound funds.
