@@ -1113,12 +1113,10 @@ impl Contains<RuntimeCall> for BaseFilter {
 		}
 
 		// no withdraw_unbonded call
-		let is_stake_withdraw_call =  matches!(
-			call,
-			RuntimeCall::Staking(pallet_staking::Call::withdraw_unbonded { .. })
-		);
+		let is_stake_withdraw_call =
+			matches!(call, RuntimeCall::Staking(pallet_staking::Call::withdraw_unbonded { .. }));
 
-		if is_stake_withdraw_call{
+		if is_stake_withdraw_call {
 			return false
 		}
 
