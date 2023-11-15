@@ -33,6 +33,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			job_type: JobType::DKG(DKGJobType {
 				participants: vec![100, 2, 3, 4, 5],
 				threshold: 3,
+				permitted_caller: None,
 			}),
 		};
 
@@ -44,7 +45,11 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 5 }),
+			job_type: JobType::DKG(DKGJobType {
+				participants: vec![1, 2, 3, 4, 5],
+				threshold: 5,
+				permitted_caller: None,
+			}),
 		};
 
 		// should fail with invalid threshold
@@ -56,7 +61,11 @@ fn jobs_submission_e2e_works_for_dkg() {
 		// should fail when caller has no balance
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 3 }),
+			job_type: JobType::DKG(DKGJobType {
+				participants: vec![1, 2, 3, 4, 5],
+				threshold: 3,
+				permitted_caller: None,
+			}),
 		};
 		assert_noop!(
 			Jobs::submit_job(RuntimeOrigin::signed(1), submission),
@@ -65,7 +74,11 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 3 }),
+			job_type: JobType::DKG(DKGJobType {
+				participants: vec![1, 2, 3, 4, 5],
+				threshold: 3,
+				permitted_caller: Some(10),
+			}),
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(10), submission));
 
@@ -137,6 +150,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 			expiry: 100,
 			job_type: JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
 				participants: vec![100, 2, 3, 4, 5],
+				permitted_caller: None,
 			}),
 		};
 
@@ -151,6 +165,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 			expiry: 100,
 			job_type: JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
 				participants: vec![1, 2, 3, 4, 5],
+				permitted_caller: None,
 			}),
 		};
 		assert_noop!(
@@ -162,6 +177,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 			expiry: 100,
 			job_type: JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
 				participants: vec![1, 2, 3, 4, 5],
+				permitted_caller: Some(10),
 			}),
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(10), submission));
@@ -195,6 +211,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 				submission: vec![],
 			}),
 		};
+
 		assert_noop!(
 			Jobs::submit_job(RuntimeOrigin::signed(20), submission),
 			Error::<Runtime>::InvalidJobParams
@@ -229,7 +246,11 @@ fn withdraw_validator_rewards_works() {
 
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 3 }),
+			job_type: JobType::DKG(DKGJobType {
+				participants: vec![1, 2, 3, 4, 5],
+				threshold: 3,
+				permitted_caller: None,
+			}),
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(10), submission));
 

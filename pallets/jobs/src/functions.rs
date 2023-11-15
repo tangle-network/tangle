@@ -164,6 +164,7 @@ impl<T: Config> Pallet<T> {
 						let job_type = JobType::DKG(DKGJobType {
 							participants: new_participants,
 							threshold: new_threshold,
+							permitted_caller: phase1.clone().permitted_caller,
 						});
 
 						// charge the validator fee for job submission
@@ -204,6 +205,7 @@ impl<T: Config> Pallet<T> {
 
 						let job_type = JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
 							participants: new_participants,
+							permitted_caller: phase1.clone().permitted_caller,
 						});
 
 						// charge the validator fee for job submission

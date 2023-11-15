@@ -246,8 +246,10 @@ pub mod module {
 					Self::add_job_to_validator_lookup(participant, job_key.clone(), job_id)?;
 				}
 
-				// Ensure the caller generated the phase one result
-				ensure!(result.owner == caller, Error::<T>::InvalidJobParams);
+				// ensure the account can use the result
+				if let Some(permitted_caller) = result.permitted_caller {
+					ensure!(permitted_caller == caller, Error::<T>::InvalidJobParams);
+				}
 			}
 
 			// Basic sanity checks
@@ -353,6 +355,7 @@ pub mod module {
 						.get_participants()
 						.ok_or(Error::<T>::InvalidJobPhase)?,
 					threshold: job_info.job_type.clone().get_threshold(),
+					permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 				};
 
 				KnownResults::<T>::insert(job_key.clone(), job_id, result);
