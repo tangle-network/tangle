@@ -267,8 +267,7 @@ pub mod pallet {
 			ensure!(!AccountRolesMapping::<T>::contains_key(&account), Error::<T>::HasRoleAssigned);
 
 			// chill
-			let _ = pallet_staking::Pallet::<T>::chill(origin);
-			Ok(())
+			pallet_staking::Pallet::<T>::chill(origin)
 		}
 
 		/// Unbound funds from the stash account.
@@ -296,9 +295,11 @@ pub mod pallet {
 			ensure!(!AccountRolesMapping::<T>::contains_key(&account), Error::<T>::HasRoleAssigned);
 
 			// Unbound funds.
-			let _ = pallet_staking::Pallet::<T>::unbond(origin, amount);
-
-			Ok(())
+			let res = pallet_staking::Pallet::<T>::unbond(origin, amount);
+			match res {
+				Ok(_) => Ok(()),
+				Err(dispatch_post_info) => Err(dispatch_post_info.error),
+			}
 		}
 
 		/// Withdraw unbound funds after un-bonding period has passed.
@@ -320,9 +321,11 @@ pub mod pallet {
 			);
 
 			// Withdraw unbound funds.
-			let _ = pallet_staking::Pallet::<T>::withdraw_unbonded(origin, 0);
-
-			Ok(())
+			let res = pallet_staking::Pallet::<T>::withdraw_unbonded(origin, 0);
+			match res {
+				Ok(_) => Ok(()),
+				Err(dispatch_post_info) => Err(dispatch_post_info.error),
+			}
 		}
 	}
 }
