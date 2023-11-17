@@ -34,7 +34,7 @@ fn test_assign_role() {
 		})]);
 
 		// Lets verify role assigned to account.
-		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
+		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
 		// Verify ledger mapping
 		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total: 5000 }));
 	});
@@ -57,9 +57,35 @@ fn test_assign_role_with_full_staking_option() {
 		})]);
 
 		// Lets verify role assigned to account.
-		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
+		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
 		// Verify ledger mapping
 		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total: 10000 }));
+	});
+}
+
+// test assign multiple roles to an account.
+#[test]
+fn test_assign_multiple_roles() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
+		assert_ok!(Roles::assign_role(
+			RuntimeOrigin::signed(1),
+			RoleType::Tss,
+			ReStakingOption::Full
+		));
+
+		// Lets verify role assigned to account.
+		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
+
+		// Now lets assign another role to the same account.
+		assert_ok!(Roles::assign_role(
+			RuntimeOrigin::signed(1),
+			RoleType::ZkSaas,
+			ReStakingOption::Full
+		));
+
+		// Lets verify role assigned to account.
+		assert_eq!(Roles::has_role(1, RoleType::ZkSaas), true);
 	});
 }
 
@@ -82,7 +108,7 @@ fn test_clear_role() {
 		})]);
 
 		// Role should be removed from  account role mappings.
-		assert_eq!(Roles::account_role(1), None);
+		assert_eq!(Roles::has_role(1, RoleType::Tss), false);
 
 		// Ledger should be removed from ledger mappings.
 		assert_eq!(Roles::ledger(1), None);
@@ -116,13 +142,13 @@ fn test_unbound_funds_should_work() {
 		));
 
 		// Lets verify role is assigned to account.
-		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
+		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
 
 		// Lets clear the role.
 		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(1), RoleType::Tss));
 
 		// Role should be removed from  account role mappings.
-		assert_eq!(Roles::account_role(1), None);
+		assert_eq!(Roles::has_role(1, RoleType::Tss), false);
 
 		// unbound funds.
 		assert_ok!(Roles::unbound_funds(RuntimeOrigin::signed(1), 5000));
@@ -152,7 +178,7 @@ fn test_unbound_funds_should_fail_if_role_assigned() {
 		));
 
 		// Lets verify role is assigned to account.
-		assert_eq!(Roles::account_role(1), Some(RoleType::Tss));
+		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
 
 		// Lets try to unbound funds.
 		assert_err!(

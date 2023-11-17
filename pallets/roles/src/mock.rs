@@ -200,13 +200,9 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = ();
 }
 
-parameter_types! {
-	pub const RolesPalletId: PalletId = PalletId(*b"py/roles");
-}
-
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type PalletId = RolesPalletId;
+	type MaxRolesPerAccount = ConstU32<2>;
 	type WeightInfo = ();
 }
 
