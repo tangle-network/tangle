@@ -54,16 +54,29 @@ pub use weights::WeightInfo;
 pub struct RoleStakingLedger<T: Config> {
 	/// The stash account whose balance is actually locked and at stake.
 	pub stash: T::AccountId,
-	/// The total amount of the stash's balance that is re-staked for selected services
+	/// The total amount of the stash's balance that is re-staked for all selected roles.
 	/// This re-staked balance we are currently accounting for new slashing conditions.
 	#[codec(compact)]
 	pub total: BalanceOf<T>,
+	/// The list of roles and their re-staked amounts.
+	pub roles: Vec<RoleStakeInfo<T>>,
+}
+
+/// The information regarding the re-staked amount for a particular role.
+#[derive(PartialEqNoBound, EqNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo, Clone)]
+#[scale_info(skip_type_params(T))]
+pub struct RoleStakeInfo<T: Config> {
+	/// Role type
+	pub role: RoleType,
+	/// The total amount of the stash's balance that is re-staked for selected role.
+	#[codec(compact)]
+	pub re_staked: BalanceOf<T>,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
 	/// Initializes the default object using the given `validator`.
 	pub fn default_from(stash: T::AccountId) -> Self {
-		Self { stash, total: Zero::zero() }
+		Self { stash, total: Zero::zero(), roles: vec![] }
 	}
 
 	/// Returns `true` if the stash account has no funds at all.
@@ -196,9 +209,25 @@ pub mod pallet {
 			// Validate re-staking bond, should not exceed active staked bond.
 			ensure!(staking_ledger.active >= re_stake_amount, Error::<T>::InvalidReStakingBond);
 
-			// Update ledger.
-			let item = RoleStakingLedger { stash: stash_account.clone(), total: re_stake_amount };
-			Self::update_ledger(&stash_account, &item);
+			// Check if account is already paired with ledger
+			let maybe_ledger = Ledger::<T>::get(&stash_account);
+			if maybe_ledger.is_none() {
+				// Add stash account to ledger.
+				let role_info = RoleStakeInfo { role, re_staked: re_stake_amount };
+				let item = RoleStakingLedger {
+					stash: stash_account.clone(),
+					total: re_stake_amount,
+					roles: vec![role_info],
+				};
+				Self::update_ledger(&stash_account, &item);
+			} else {
+				// Update ledger and add role info.
+				let mut ledger = maybe_ledger.unwrap();
+				ledger.total += re_stake_amount;
+				let role_info = RoleStakeInfo { role, re_staked: re_stake_amount };
+				ledger.roles.push(role_info);
+				Self::update_ledger(&stash_account, &ledger);
+			}
 
 			// Add role mapping for the stash account.
 			Self::add_role(stash_account.clone(), role)?;

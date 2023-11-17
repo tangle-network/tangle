@@ -36,7 +36,14 @@ fn test_assign_role() {
 		// Lets verify role assigned to account.
 		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
 		// Verify ledger mapping
-		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total: 5000 }));
+		assert_eq!(
+			Roles::ledger(1),
+			Some(RoleStakingLedger {
+				stash: 1,
+				total: 5000,
+				roles: vec![RoleStakeInfo { role: RoleType::Tss, re_staked: 5000 }]
+			})
+		);
 	});
 }
 
@@ -59,7 +66,14 @@ fn test_assign_role_with_full_staking_option() {
 		// Lets verify role assigned to account.
 		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
 		// Verify ledger mapping
-		assert_eq!(Roles::ledger(1), Some(RoleStakingLedger { stash: 1, total: 10000 }));
+		assert_eq!(
+			Roles::ledger(1),
+			Some(RoleStakingLedger {
+				stash: 1,
+				total: 10000,
+				roles: vec![RoleStakeInfo { role: RoleType::Tss, re_staked: 10000 }]
+			})
+		);
 	});
 }
 
@@ -86,6 +100,18 @@ fn test_assign_multiple_roles() {
 
 		// Lets verify role assigned to account.
 		assert_eq!(Roles::has_role(1, RoleType::ZkSaas), true);
+
+		assert_eq!(
+			Roles::ledger(1),
+			Some(RoleStakingLedger {
+				stash: 1,
+				total: 20000,
+				roles: vec![
+					RoleStakeInfo { role: RoleType::Tss, re_staked: 10000 },
+					RoleStakeInfo { role: RoleType::ZkSaas, re_staked: 10000 },
+				]
+			})
+		);
 	});
 }
 
