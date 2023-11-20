@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use sp_runtime::{DispatchResult, Saturating};
+use sp_runtime::{DispatchResult, Percent, Saturating};
 use tangle_primitives::{roles::RoleType, traits::roles::RolesHandler};
 
 /// Implements RolesHandler for the pallet.
@@ -118,6 +118,18 @@ impl<T: Config> Pallet<T> {
 			return true
 		}
 		false
+	}
+
+	/// Calculate max re-stake amount for the given account.
+	///
+	/// # Parameters
+	/// - `total_stake`: Total stake of the validator
+	///
+	/// # Returns
+	/// Returns the max re-stake amount.
+	pub fn calculate_max_re_stake_amount(total_stake: BalanceOf<T>) -> BalanceOf<T> {
+		// User can re-stake max 50% of the total stake
+		Percent::from_percent(50) * total_stake
 	}
 
 	/// Get the total amount of the balance that is locked for the given stash.

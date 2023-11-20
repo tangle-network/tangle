@@ -28,9 +28,9 @@ use frame_support::{
 pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
-use sp_runtime::{codec, traits::Zero};
+use sp_runtime::{codec, traits::Zero, Saturating};
 use sp_std::{convert::TryInto, prelude::*, vec};
-use tangle_primitives::roles::{ReStakingOption, RoleType};
+use tangle_primitives::roles::RoleType;
 mod impls;
 #[cfg(test)]
 pub(crate) mod mock;
@@ -59,13 +59,13 @@ pub struct RoleStakingLedger<T: Config> {
 	#[codec(compact)]
 	pub total: BalanceOf<T>,
 	/// The list of roles and their re-staked amounts.
-	pub roles: Vec<RoleStakeInfo<T>>,
+	pub roles: Vec<RoleStakingRecord<T>>,
 }
 
 /// The information regarding the re-staked amount for a particular role.
 #[derive(PartialEqNoBound, EqNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo, Clone)]
 #[scale_info(skip_type_params(T))]
-pub struct RoleStakeInfo<T: Config> {
+pub struct RoleStakingRecord<T: Config> {
 	/// Role type
 	pub role: RoleType,
 	/// The total amount of the stash's balance that is re-staked for selected role.
@@ -133,7 +133,7 @@ pub mod pallet {
 		/// Max role limit reached for the account.
 		MaxRoles,
 		/// Invalid Re-staking amount, should not exceed total staked amount.
-		InvalidReStakingBond,
+		ExceedsMaxReStakeValue,
 		/// Re staking amount should be greater than minimum re-staking bond requirement.
 		InsufficientReStakingBond,
 		/// Stash controller account already added to Roles Ledger
@@ -164,13 +164,12 @@ pub mod pallet {
 	#[pallet::getter(fn min_active_bond)]
 	pub(super) type MinReStakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
-	/// Assigns a role to the validator.
+	/// Assigns roles to the validator.
 	///
 	/// # Parameters
 	///
 	/// - `origin`: Origin of the transaction.
-	/// - `role`: Role to assign to the validator.
-	/// - `re_stake`: Amount of funds you want to re-stake.
+	/// - `records`: List of roles user is interested to re-stake.
 	///
 	/// This function will return error if
 	/// - Account is not a validator account.
@@ -180,10 +179,9 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight({0})]
 		#[pallet::call_index(0)]
-		pub fn assign_role(
+		pub fn assign_roles(
 			origin: OriginFor<T>,
-			role: RoleType,
-			re_stake: ReStakingOption,
+			records: Vec<RoleStakingRecord<T>>,
 		) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
@@ -192,46 +190,49 @@ pub mod pallet {
 				Error::<T>::NotValidator
 			);
 
-			// Check if role is already assigned.
-			ensure!(!Self::has_role(stash_account.clone(), role), Error::<T>::HasRoleAssigned);
+			let mut ledger = Ledger::<T>::get(&stash_account)
+				.unwrap_or(RoleStakingLedger::<T>::default_from(stash_account.clone()));
 
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
-			let re_stake_amount = match re_stake {
-				ReStakingOption::Full => staking_ledger.active,
-				ReStakingOption::Custom(x) => x.into(),
-			};
 
-			// Validate re-staking bond, should be greater than min re-staking bond requirement.
-			let min_re_staking_bond = MinReStakingBond::<T>::get();
-			ensure!(re_stake_amount >= min_re_staking_bond, Error::<T>::InsufficientReStakingBond);
+			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
 
-			// Validate re-staking bond, should not exceed active staked bond.
-			ensure!(staking_ledger.active >= re_stake_amount, Error::<T>::InvalidReStakingBond);
+			// Validate role staking records.
+			for record in records.clone() {
+				let role = record.role;
+				let re_stake_amount = record.re_staked;
+				// Check if role is already assigned.
+				ensure!(!Self::has_role(stash_account.clone(), role), Error::<T>::HasRoleAssigned);
 
-			// Check if account is already paired with ledger
-			let maybe_ledger = Ledger::<T>::get(&stash_account);
-			if maybe_ledger.is_none() {
-				// Add stash account to ledger.
-				let role_info = RoleStakeInfo { role, re_staked: re_stake_amount };
-				let item = RoleStakingLedger {
-					stash: stash_account.clone(),
-					total: re_stake_amount,
-					roles: vec![role_info],
-				};
-				Self::update_ledger(&stash_account, &item);
-			} else {
-				// Update ledger and add role info.
-				let mut ledger = maybe_ledger.unwrap();
-				ledger.total += re_stake_amount;
-				let role_info = RoleStakeInfo { role, re_staked: re_stake_amount };
+				// Re-staking amount of record should meet min re-staking amount requirement.
+				let min_re_staking_bond = MinReStakingBond::<T>::get();
+				ensure!(
+					re_stake_amount >= min_re_staking_bond,
+					Error::<T>::InsufficientReStakingBond
+				);
+
+				// Total re_staking amount should not exceed  max_re_staking_amount.
+				ensure!(
+					ledger.total.saturating_add(re_stake_amount) <= max_re_staking_bond,
+					Error::<T>::ExceedsMaxReStakeValue
+				);
+
+				ledger.total = ledger.total.saturating_add(re_stake_amount);
+				let role_info = RoleStakingRecord { role, re_staked: re_stake_amount };
 				ledger.roles.push(role_info);
-				Self::update_ledger(&stash_account, &ledger);
 			}
 
-			// Add role mapping for the stash account.
-			Self::add_role(stash_account.clone(), role)?;
-			Self::deposit_event(Event::<T>::RoleAssigned { account: stash_account.clone(), role });
+			// Now that records are validated we can add them and update ledger
+			for record in records {
+				Self::add_role(stash_account.clone(), record.role)?;
+				Self::deposit_event(Event::<T>::RoleAssigned {
+					account: stash_account.clone(),
+					role: record.role,
+				});
+			}
+			Self::update_ledger(&stash_account, &ledger);
+
 			Ok(())
 		}
 
@@ -257,7 +258,7 @@ pub mod pallet {
 			);
 
 			// check if role is assigned.
-			ensure!(Self::has_role(stash_account.clone(), role), Error::<T>::HasRoleAssigned);
+			ensure!(Self::has_role(stash_account.clone(), role), Error::<T>::NoRoleAssigned);
 
 			// TODO: Call jobs manager to remove the services.
 			// On successful removal of services, remove the role from the mapping.
