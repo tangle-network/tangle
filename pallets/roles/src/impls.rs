@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use sp_runtime::Saturating;
+use sp_runtime::{DispatchResult, Percent, Saturating};
 use tangle_primitives::{roles::RoleType, traits::roles::RolesHandler};
 
 /// Implements RolesHandler for the pallet.
@@ -29,16 +29,7 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	/// # Returns
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
 	fn is_validator(address: T::AccountId, role: RoleType) -> bool {
-		let assigned_role = AccountRolesMapping::<T>::get(address);
-		match assigned_role {
-			Some(r) =>
-				if r == role {
-					return true
-				},
-			None => return false,
-		}
-
-		false
+		Self::has_role(address, role)
 	}
 
 	/// Slash validator stake for the reported offence. The function should be a best effort
@@ -63,6 +54,84 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 
 /// Functions for the pallet.
 impl<T: Config> Pallet<T> {
+	/// Add new role to the given account.
+	///
+	/// # Parameters
+	/// - `account`: The account ID of the validator.
+	/// - `role`: Selected role type.
+	pub fn add_role(account: T::AccountId, role: RoleType) -> DispatchResult {
+		AccountRolesMapping::<T>::try_mutate(&account, |roles| {
+			if !roles.contains(&role) {
+				roles.try_push(role.clone()).map_err(|_| Error::<T>::MaxRoles)?;
+
+				Ok(())
+			} else {
+				Err(Error::<T>::HasRoleAssigned.into())
+			}
+		})
+	}
+
+	/// Remove role from the given account.
+	///
+	/// # Parameters
+	/// - `account`: The account ID of the validator.
+	/// - `role`: Selected role type.
+	pub fn remove_role(account: T::AccountId, role: RoleType) -> DispatchResult {
+		AccountRolesMapping::<T>::try_mutate(&account, |roles| {
+			if roles.contains(&role) {
+				roles.retain(|r| r != &role);
+
+				Ok(())
+			} else {
+				Err(Error::<T>::NoRoleAssigned.into())
+			}
+		})
+	}
+
+	/// Check if the given account has the given role.
+	///
+	/// # Parameters
+	/// - `account`: The account ID of the validator.
+	/// - `role`: Selected role type.
+	///
+	/// # Returns
+	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
+	pub fn has_role(account: T::AccountId, role: RoleType) -> bool {
+		let assigned_roles = AccountRolesMapping::<T>::get(account);
+		match assigned_roles.iter().find(|r| **r == role) {
+			Some(_) => true,
+			None => false,
+		}
+	}
+
+	/// Check if account can chill, unbound and withdraw funds.
+	///
+	/// # Parameters
+	/// - `account`: The account ID of the validator.
+	///
+	/// # Returns
+	/// Returns boolean value.
+	pub fn can_exit(account: T::AccountId) -> bool {
+		let assigned_roles = AccountRolesMapping::<T>::get(account);
+		if assigned_roles.is_empty() {
+			// Role is cleared, account can chill, unbound and withdraw funds.
+			return true
+		}
+		false
+	}
+
+	/// Calculate max re-stake amount for the given account.
+	///
+	/// # Parameters
+	/// - `total_stake`: Total stake of the validator
+	///
+	/// # Returns
+	/// Returns the max re-stake amount.
+	pub fn calculate_max_re_stake_amount(total_stake: BalanceOf<T>) -> BalanceOf<T> {
+		// User can re-stake max 50% of the total stake
+		Percent::from_percent(50) * total_stake
+	}
+
 	/// Get the total amount of the balance that is locked for the given stash.
 	///
 	/// # Parameters

@@ -22,18 +22,15 @@ use codec::MaxEncodedLen;
 use frame_support::{
 	ensure,
 	traits::{Currency, Get},
-	CloneNoBound, EqNoBound, PalletId, PartialEqNoBound, RuntimeDebugNoBound,
+	CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
 };
 
 pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
-use sp_runtime::{codec, traits::Zero};
+use sp_runtime::{codec, traits::Zero, Saturating};
 use sp_std::{convert::TryInto, prelude::*, vec};
-use tangle_primitives::{
-	roles::{ReStakingOption, RoleType},
-	traits::roles::RolesHandler,
-};
+use tangle_primitives::roles::RoleType;
 mod impls;
 #[cfg(test)]
 pub(crate) mod mock;
@@ -57,16 +54,29 @@ pub use weights::WeightInfo;
 pub struct RoleStakingLedger<T: Config> {
 	/// The stash account whose balance is actually locked and at stake.
 	pub stash: T::AccountId,
-	/// The total amount of the stash's balance that is re-staked for selected services
+	/// The total amount of the stash's balance that is re-staked for all selected roles.
 	/// This re-staked balance we are currently accounting for new slashing conditions.
 	#[codec(compact)]
 	pub total: BalanceOf<T>,
+	/// The list of roles and their re-staked amounts.
+	pub roles: Vec<RoleStakingRecord<T>>,
+}
+
+/// The information regarding the re-staked amount for a particular role.
+#[derive(PartialEqNoBound, EqNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo, Clone)]
+#[scale_info(skip_type_params(T))]
+pub struct RoleStakingRecord<T: Config> {
+	/// Role type
+	pub role: RoleType,
+	/// The total amount of the stash's balance that is re-staked for selected role.
+	#[codec(compact)]
+	pub re_staked: BalanceOf<T>,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
 	/// Initializes the default object using the given `validator`.
 	pub fn default_from(stash: T::AccountId) -> Self {
-		Self { stash, total: Zero::zero() }
+		Self { stash, total: Zero::zero(), roles: vec![] }
 	}
 
 	/// Returns `true` if the stash account has no funds at all.
@@ -95,10 +105,10 @@ pub mod pallet {
 		/// The overarching event type.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
-		type WeightInfo: WeightInfo;
-
 		#[pallet::constant]
-		type PalletId: Get<PalletId>;
+		type MaxRolesPerAccount: Get<u32>;
+
+		type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::event]
@@ -120,8 +130,10 @@ pub mod pallet {
 		HasRoleAssigned,
 		/// No role assigned to provided validator.
 		NoRoleAssigned,
+		/// Max role limit reached for the account.
+		MaxRoles,
 		/// Invalid Re-staking amount, should not exceed total staked amount.
-		InvalidReStakingBond,
+		ExceedsMaxReStakeValue,
 		/// Re staking amount should be greater than minimum re-staking bond requirement.
 		InsufficientReStakingBond,
 		/// Stash controller account already added to Roles Ledger
@@ -137,22 +149,27 @@ pub mod pallet {
 		StorageMap<_, Blake2_128Concat, T::AccountId, RoleStakingLedger<T>>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn account_role)]
+	#[pallet::getter(fn account_roles)]
 	/// Mapping of resource to bridge index
-	pub type AccountRolesMapping<T: Config> = StorageMap<_, Blake2_256, T::AccountId, RoleType>;
+	pub type AccountRolesMapping<T: Config> = StorageMap<
+		_,
+		Blake2_256,
+		T::AccountId,
+		BoundedVec<RoleType, T::MaxRolesPerAccount>,
+		ValueQuery,
+	>;
 
 	/// The minimum re staking bond to become and maintain the role.
 	#[pallet::storage]
 	#[pallet::getter(fn min_active_bond)]
 	pub(super) type MinReStakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
-	/// Assigns a role to the validator.
+	/// Assigns roles to the validator.
 	///
 	/// # Parameters
 	///
 	/// - `origin`: Origin of the transaction.
-	/// - `role`: Role to assign to the validator.
-	/// - `re_stake`: Amount of funds you want to re-stake.
+	/// - `records`: List of roles user is interested to re-stake.
 	///
 	/// This function will return error if
 	/// - Account is not a validator account.
@@ -162,10 +179,9 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight({0})]
 		#[pallet::call_index(0)]
-		pub fn assign_role(
+		pub fn assign_roles(
 			origin: OriginFor<T>,
-			role: RoleType,
-			re_stake: ReStakingOption,
+			records: Vec<RoleStakingRecord<T>>,
 		) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
@@ -174,36 +190,49 @@ pub mod pallet {
 				Error::<T>::NotValidator
 			);
 
-			// Check if role is already assigned.
-			ensure!(
-				!AccountRolesMapping::<T>::contains_key(&stash_account),
-				Error::<T>::HasRoleAssigned
-			);
-
-			// Check if stash account is already paired/ re-staked.
-			ensure!(!<Ledger<T>>::contains_key(&stash_account), Error::<T>::AccountAlreadyPaired);
+			let mut ledger = Ledger::<T>::get(&stash_account)
+				.unwrap_or(RoleStakingLedger::<T>::default_from(stash_account.clone()));
 
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
-			let re_stake_amount = match re_stake {
-				ReStakingOption::Full => staking_ledger.active,
-				ReStakingOption::Custom(x) => x.into(),
-			};
 
-			// Validate re-staking bond, should be greater than min re-staking bond requirement.
-			let min_re_staking_bond = MinReStakingBond::<T>::get();
-			ensure!(re_stake_amount >= min_re_staking_bond, Error::<T>::InsufficientReStakingBond);
+			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
 
-			// Validate re-staking bond, should not exceed active staked bond.
-			ensure!(staking_ledger.active >= re_stake_amount, Error::<T>::InvalidReStakingBond);
+			// Validate role staking records.
+			for record in records.clone() {
+				let role = record.role;
+				let re_stake_amount = record.re_staked;
+				// Check if role is already assigned.
+				ensure!(!Self::has_role(stash_account.clone(), role), Error::<T>::HasRoleAssigned);
 
-			// Update ledger.
-			let item = RoleStakingLedger { stash: stash_account.clone(), total: re_stake_amount };
-			Self::update_ledger(&stash_account, &item);
+				// Re-staking amount of record should meet min re-staking amount requirement.
+				let min_re_staking_bond = MinReStakingBond::<T>::get();
+				ensure!(
+					re_stake_amount >= min_re_staking_bond,
+					Error::<T>::InsufficientReStakingBond
+				);
 
-			// Add role mapping for the stash account.
-			AccountRolesMapping::<T>::insert(&stash_account, role);
-			Self::deposit_event(Event::<T>::RoleAssigned { account: stash_account.clone(), role });
+				// Total re_staking amount should not exceed  max_re_staking_amount.
+				ensure!(
+					ledger.total.saturating_add(re_stake_amount) <= max_re_staking_bond,
+					Error::<T>::ExceedsMaxReStakeValue
+				);
+
+				ledger.total = ledger.total.saturating_add(re_stake_amount);
+				let role_info = RoleStakingRecord { role, re_staked: re_stake_amount };
+				ledger.roles.push(role_info);
+			}
+
+			// Now that records are validated we can add them and update ledger
+			for record in records {
+				Self::add_role(stash_account.clone(), record.role)?;
+				Self::deposit_event(Event::<T>::RoleAssigned {
+					account: stash_account.clone(),
+					role: record.role,
+				});
+			}
+			Self::update_ledger(&stash_account, &ledger);
+
 			Ok(())
 		}
 
@@ -229,16 +258,14 @@ pub mod pallet {
 			);
 
 			// check if role is assigned.
-			ensure!(
-				Self::is_validator(stash_account.clone(), role.clone()),
-				Error::<T>::NoRoleAssigned
-			);
+			ensure!(Self::has_role(stash_account.clone(), role), Error::<T>::NoRoleAssigned);
+
 			// TODO: Call jobs manager to remove the services.
 			// On successful removal of services, remove the role from the mapping.
 			// Issue link for reference : https://github.com/webb-tools/tangle/issues/292
 
 			// Remove role from the mapping.
-			AccountRolesMapping::<T>::remove(&stash_account);
+			Self::remove_role(stash_account.clone(), role)?;
 			// Remove stash account related info.
 			Self::kill_stash(&stash_account);
 
@@ -264,7 +291,7 @@ pub mod pallet {
 		pub fn chill(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the account before chilling.
-			ensure!(!AccountRolesMapping::<T>::contains_key(&account), Error::<T>::HasRoleAssigned);
+			ensure!(Self::can_exit(account), Error::<T>::HasRoleAssigned);
 
 			// chill
 			pallet_staking::Pallet::<T>::chill(origin)
@@ -292,7 +319,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the account and is eligible to unbound.
-			ensure!(!AccountRolesMapping::<T>::contains_key(&account), Error::<T>::HasRoleAssigned);
+			ensure!(Self::can_exit(account), Error::<T>::HasRoleAssigned);
 
 			// Unbound funds.
 			let res = pallet_staking::Pallet::<T>::unbond(origin, amount);
@@ -313,12 +340,9 @@ pub mod pallet {
 		#[pallet::weight({0})]
 		#[pallet::call_index(4)]
 		pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResult {
-			let stash_account = ensure_signed(origin.clone())?;
+			let account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the account and is eligible to withdraw.
-			ensure!(
-				!AccountRolesMapping::<T>::contains_key(&stash_account),
-				Error::<T>::HasRoleAssigned
-			);
+			ensure!(Self::can_exit(account), Error::<T>::HasRoleAssigned);
 
 			// Withdraw unbound funds.
 			let res = pallet_staking::Pallet::<T>::withdraw_unbonded(origin, 0);
