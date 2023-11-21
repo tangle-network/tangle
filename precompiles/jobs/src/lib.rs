@@ -61,8 +61,8 @@ where
 	///
 	/// Parameters:
 	/// * encoded_proposal: The preimage registered on-chain
-	#[precompile::public("notePreimage(bytes)")]
-	fn note_preimage(
+	#[precompile::public("submitJob(bytes)")]
+	fn submit_job(
 		handle: &mut impl PrecompileHandle,
 		encoded_proposal: BoundedBytes<GetEncodedProposalSizeLimit>,
 	) -> EvmResult<H256> {
