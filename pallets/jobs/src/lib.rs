@@ -206,7 +206,7 @@ pub mod module {
 
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), job_key.clone().into()),
+						T::RolesHandler::is_validator(participant.clone(), job_key.clone()),
 						Error::<T>::InvalidValidator
 					);
 
@@ -234,7 +234,7 @@ pub mod module {
 				// Ensure the phase one participants are still validators
 				for participant in result.participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), job_key.clone().into()),
+						T::RolesHandler::is_validator(participant.clone(), job_key.clone()),
 						Error::<T>::InvalidValidator
 					);
 

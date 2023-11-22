@@ -28,7 +28,7 @@ pub type AccountId = u128;
 pub type Balance = u128;
 pub type BlockNumber = u64;
 
-use tangle_primitives::{jobs::*, roles::RoleType};
+use tangle_primitives::{jobs::*};
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
@@ -128,7 +128,7 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 pub struct MockRolesHandler;
 
 impl RolesHandler<AccountId> for MockRolesHandler {
-	fn is_validator(address: AccountId, _role_type: RoleType) -> bool {
+	fn is_validator(address: AccountId, _role_type: JobKey) -> bool {
 		let validators = [1, 2, 3, 4, 5];
 		validators.contains(&address)
 	}
