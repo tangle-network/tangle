@@ -29,7 +29,7 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::{codec, traits::Zero};
 use sp_std::{convert::TryInto, prelude::*, vec};
-use tangle_primitives::{roles::RoleType, traits::roles::RolesHandler};
+use tangle_primitives::roles::RoleType;
 mod impls;
 #[cfg(test)]
 pub(crate) mod mock;
@@ -85,6 +85,7 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use tangle_primitives::traits::jobs::MPCHandler;
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
@@ -115,6 +116,9 @@ pub mod pallet {
 
 		/// Handler for the unbalanced reduction when slashing a staker.
 		type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
+
+		/// The config that verifies MPC related functions
+		type MPCHandler: MPCHandler<Self::AccountId, BlockNumberFor<Self>, BalanceOf<Self>>;
 
 		type WeightInfo: WeightInfo;
 
@@ -201,6 +205,12 @@ pub mod pallet {
 			let min_active_bond = MinActiveBond::<T>::get();
 			ensure!(bond_value > min_active_bond.into(), Error::<T>::InsufficientBond);
 
+			// validate the metadata
+			T::MPCHandler::validate_authority_key(
+				stash_account.clone(),
+				role.clone().get_authority_key(),
+			)?;
+
 			// Bond with stash account.
 			let stash_balance = T::Currency::free_balance(&stash_account);
 			let value = bond_value.min(stash_balance);
@@ -215,7 +225,7 @@ pub mod pallet {
 			});
 
 			// Add role mapping for the stash account.
-			AccountRolesMapping::<T>::insert(&stash_account, role);
+			AccountRolesMapping::<T>::insert(&stash_account, role.clone());
 			Self::deposit_event(Event::<T>::RoleAssigned { account: stash_account.clone(), role });
 			Ok(())
 		}
@@ -235,7 +245,7 @@ pub mod pallet {
 			let stash_account = ensure_signed(origin)?;
 			// check if role is assigned.
 			ensure!(
-				Self::is_validator(stash_account.clone(), role.clone()),
+				AccountRolesMapping::<T>::get(stash_account.clone()).is_some(),
 				Error::<T>::RoleNotAssigned
 			);
 			// TODO: Call jobs manager to remove the services.

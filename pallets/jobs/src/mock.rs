@@ -138,9 +138,9 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 	}
 }
 
-pub struct MockJobResultVerifier;
+pub struct MockMPCHandler;
 
-impl JobResultVerifier<AccountId, BlockNumber, Balance> for MockJobResultVerifier {
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 	fn verify(
 		job: &JobInfo<AccountId, BlockNumber, Balance>,
 		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
@@ -161,6 +161,10 @@ impl JobResultVerifier<AccountId, BlockNumber, Balance> for MockJobResultVerifie
 	) -> DispatchResult {
 		Ok(())
 	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
 }
 
 parameter_types! {
@@ -173,7 +177,7 @@ impl Config for Runtime {
 	type Currency = Balances;
 	type JobToFee = MockJobToFeeHandler;
 	type RolesHandler = MockRolesHandler;
-	type JobResultVerifier = MockJobResultVerifier;
+	type MPCHandler = MockMPCHandler;
 	type PalletId = JobsPalletId;
 	type WeightInfo = ();
 }

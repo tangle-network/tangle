@@ -21,11 +21,15 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Everything},
 };
+use sp_runtime::DispatchResult;
+use tangle_primitives::jobs::*;
 
 use sp_core::H256;
 use sp_runtime::{traits::IdentityLookup, BuildStorage};
+use tangle_primitives::traits::jobs::MPCHandler;
 pub type AccountId = u128;
 pub type Balance = u128;
+pub type BlockNumber = u64;
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
@@ -69,6 +73,30 @@ impl pallet_balances::Config for Runtime {
 	type MaxFreezes = ();
 }
 
+pub struct MockMPCHandler;
+
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
+	fn verify(
+		_job: &JobInfo<AccountId, BlockNumber, Balance>,
+		_phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
+		_result: Vec<u8>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn verify_validator_report(
+		_validator: AccountId,
+		_offence: ValidatorOffence,
+		_report: Vec<u8>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
+}
+
 parameter_types! {
 	pub const RolesPalletId: PalletId = PalletId(*b"py/roles");
 }
@@ -77,6 +105,7 @@ impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
+	type MPCHandler = MockMPCHandler;
 	type Slash = ();
 	type PalletId = RolesPalletId;
 	type WeightInfo = ();

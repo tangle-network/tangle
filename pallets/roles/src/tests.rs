@@ -17,21 +17,28 @@
 use super::*;
 use frame_support::assert_ok;
 use mock::*;
-use tangle_primitives::jobs::ValidatorOffence;
+use tangle_primitives::{jobs::ValidatorOffence, traits::roles::RolesHandler};
 
 #[test]
 fn test_assign_role() {
 	new_test_ext().execute_with(|| {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(10), 5000, RoleType::Tss));
+		assert_ok!(Roles::assign_role(
+			RuntimeOrigin::signed(10),
+			5000,
+			RoleType::Tss(Default::default())
+		));
 
 		assert_events(vec![
 			RuntimeEvent::Roles(crate::Event::Bonded { account: 10, amount: 5000 }),
-			RuntimeEvent::Roles(crate::Event::RoleAssigned { account: 10, role: RoleType::Tss }),
+			RuntimeEvent::Roles(crate::Event::RoleAssigned {
+				account: 10,
+				role: RoleType::Tss(Default::default()),
+			}),
 		]);
 
 		// Lets verify role assigned to account.
-		assert_eq!(Roles::account_role(10), Some(RoleType::Tss));
+		assert_eq!(Roles::account_role(10), Some(RoleType::Tss(Default::default())));
 		// Verify ledger mapping
 		assert_eq!(Roles::ledger(10), Some(RoleStakingLedger { stash: 10, total_locked: 5000 }));
 		// Verify total usable balance of the account. Since we have bonded 5000 tokens, we should
@@ -44,17 +51,24 @@ fn test_assign_role() {
 fn test_clear_role() {
 	new_test_ext().execute_with(|| {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(10), 5000, RoleType::Tss));
+		assert_ok!(Roles::assign_role(
+			RuntimeOrigin::signed(10),
+			5000,
+			RoleType::Tss(Default::default())
+		));
 		// Verify total usable balance of the account. Since we have bonded 5000 tokens, we should
 		// have 5000 tokens usable.
 		assert_eq!(Balances::usable_balance(10), 5000);
 
 		// Now lets clear the role
-		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(10), RoleType::Tss));
+		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(10), RoleType::Tss(Default::default())));
 
 		assert_events(vec![
 			RuntimeEvent::Roles(crate::Event::Unbonded { account: 10, amount: 5000 }),
-			RuntimeEvent::Roles(crate::Event::RoleRemoved { account: 10, role: RoleType::Tss }),
+			RuntimeEvent::Roles(crate::Event::RoleRemoved {
+				account: 10,
+				role: RoleType::Tss(Default::default()),
+			}),
 		]);
 
 		// Role should be removed from  account role mappings.
@@ -74,7 +88,11 @@ fn test_clear_role() {
 fn test_slash_validator() {
 	new_test_ext().execute_with(|| {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-		assert_ok!(Roles::assign_role(RuntimeOrigin::signed(10), 5000, RoleType::Tss));
+		assert_ok!(Roles::assign_role(
+			RuntimeOrigin::signed(10),
+			5000,
+			RoleType::Tss(Default::default())
+		));
 		// Verify total usable balance of the account. Since we have bonded 5000 tokens, we should
 		// have 5000 tokens usable.
 		assert_eq!(Balances::usable_balance(10), 5000);
