@@ -246,3 +246,7 @@ pub struct RpcResponseJobsData<AccountId> {
 	/// previous phase key if any
 	pub key: Option<Vec<u8>>,
 }
+
+pub type PublicKeyAndSignature = (Vec<u8>, Vec<u8>);
+pub type AggregatedPublicKeys = Vec<PublicKeyAndSignature>;
+
