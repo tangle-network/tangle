@@ -17,11 +17,16 @@ serde = { workspace = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
 pallet-balances = { workspace = true }
+pallet-staking = { workspace = true }
+pallet-session = { workspace = true }
+pallet-timestamp = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
+sp-staking = { workspace = true }
 tangle-primitives = {workspace = true, default-features = false }
 frame-benchmarking = { workspace = true, optional = true }
+frame-election-provider-support = { workspace = true }
 
 [dev-dependencies]
 hex-literal = { workspace = true }
@@ -40,8 +45,13 @@ std = [
   "sp-runtime/std",
   "sp-std/std",
   "sp-io/std",
+  "sp-staking/std",
   "pallet-balances/std",
-  "tangle-primitives/std"
+  "pallet-staking/std",
+  "pallet-session/std",
+  "pallet-timestamp/std",
+  "tangle-primitives/std",
+  "frame-election-provider-support/std",
 ]
 
 try-runtime = ["frame-support/try-runtime"]
@@ -50,5 +60,9 @@ runtime-benchmarks = [
   "frame-support/runtime-benchmarks",
   "frame-system/runtime-benchmarks",
   "sp-runtime/runtime-benchmarks",
-  "pallet-balances/runtime-benchmarks"
+  "sp-staking/runtime-benchmarks",
+  "pallet-balances/runtime-benchmarks",
+  "pallet-staking/runtime-benchmarks",
+  "pallet-timestamp/runtime-benchmarks",
+  "frame-election-provider-support/runtime-benchmarks",
 ]

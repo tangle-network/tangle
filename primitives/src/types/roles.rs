@@ -46,3 +46,12 @@ impl From<JobKey> for RoleType {
 		}
 	}
 }
+
+/// Role type to be used in the system.
+#[derive(Encode, Decode, Clone, Copy, Debug, PartialEq, Eq, TypeInfo)]
+pub enum ReStakingOption {
+	// Re-stake all the staked funds for selected role.
+	Full,
+	// Re-stake only the given amount of funds for selected role.
+	Custom(u64),
+}
