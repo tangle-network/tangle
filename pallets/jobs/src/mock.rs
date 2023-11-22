@@ -28,7 +28,7 @@ pub type AccountId = u128;
 pub type Balance = u128;
 pub type BlockNumber = u64;
 
-use tangle_primitives::{jobs::*};
+use tangle_primitives::jobs::*;
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;

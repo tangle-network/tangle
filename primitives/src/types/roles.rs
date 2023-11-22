@@ -13,8 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use frame_support::pallet_prelude::*;
-use frame_support::dispatch::Vec;
+use frame_support::{dispatch::Vec, pallet_prelude::*};
 
 /// Role type to be used in the system.
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
