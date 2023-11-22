@@ -200,15 +200,6 @@ pub mod pallet {
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
 
-			// validate the metadata
-			T::MPCHandler::validate_authority_key(
-				stash_account.clone(),
-				role.clone().get_authority_key(),
-			)?;
-
-			// Bond with stash account.
-			let stash_balance = T::Currency::free_balance(&stash_account);
-			let value = bond_value.min(stash_balance);
 			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
 
 			// Validate role staking records.
@@ -216,7 +207,16 @@ pub mod pallet {
 				let role = record.role;
 				let re_stake_amount = record.re_staked;
 				// Check if role is already assigned.
-				ensure!(!Self::has_role(stash_account.clone(), role), Error::<T>::HasRoleAssigned);
+				ensure!(
+					!Self::has_role(stash_account.clone(), role.clone()),
+					Error::<T>::HasRoleAssigned
+				);
+
+				// validate the metadata
+				T::MPCHandler::validate_authority_key(
+					stash_account.clone(),
+					role.clone().get_authority_key(),
+				)?;
 
 				// Re-staking amount of record should meet min re-staking amount requirement.
 				let min_re_staking_bond = MinReStakingBond::<T>::get();
@@ -238,7 +238,7 @@ pub mod pallet {
 
 			// Now that records are validated we can add them and update ledger
 			for record in records {
-				Self::add_role(stash_account.clone(), record.role)?;
+				Self::add_role(stash_account.clone(), record.role.clone())?;
 				Self::deposit_event(Event::<T>::RoleAssigned {
 					account: stash_account.clone(),
 					role: record.role,
@@ -271,14 +271,17 @@ pub mod pallet {
 			);
 
 			// check if role is assigned.
-			ensure!(Self::has_role(stash_account.clone(), role), Error::<T>::NoRoleAssigned);
+			ensure!(
+				Self::has_role(stash_account.clone(), role.clone()),
+				Error::<T>::NoRoleAssigned
+			);
 
 			// TODO: Call jobs manager to remove the services.
 			// On successful removal of services, remove the role from the mapping.
 			// Issue link for reference : https://github.com/webb-tools/tangle/issues/292
 
 			// Remove role from the mapping.
-			Self::remove_role(stash_account.clone(), role)?;
+			Self::remove_role(stash_account.clone(), role.clone())?;
 			// Remove stash account related info.
 			Self::kill_stash(&stash_account);
 

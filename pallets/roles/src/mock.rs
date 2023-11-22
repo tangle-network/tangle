@@ -27,10 +27,9 @@ use sp_core::H256;
 use sp_runtime::{
 	testing::{Header, UintAuthorityId},
 	traits::IdentityLookup,
-	BuildStorage, Perbill,
+	BuildStorage, DispatchResult, Perbill,
 };
-use tangle_primitives::traits::jobs::MPCHandler;
-use tangle_primitives::jobs::*;
+use tangle_primitives::{jobs::*, traits::jobs::MPCHandler};
 
 pub type AccountId = u64;
 pub type Balance = u128;

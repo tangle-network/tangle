@@ -15,8 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::{pallet_prelude::DispatchResult, traits::WithdrawReasons};
-use sp_runtime::Saturating;
+use frame_support::pallet_prelude::DispatchResult;
+use sp_runtime::{Percent, Saturating};
 use tangle_primitives::{jobs::JobKey, traits::roles::RolesHandler};
 
 /// Implements RolesHandler for the pallet.
@@ -30,16 +30,24 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	/// # Returns
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
 	fn is_validator(address: T::AccountId, job_key: JobKey) -> bool {
-		let assigned_role = AccountRolesMapping::<T>::get(address);
+		let assigned_roles = AccountRolesMapping::<T>::get(address);
 
-		if let Some(assigned_role) = assigned_role {
+		let mut found_role = false;
+
+		for assigned_role in assigned_roles {
 			match job_key {
-				JobKey::DKG | JobKey::DKGSignature => assigned_role.is_tss(),
-				JobKey::ZkSaasPhaseOne | JobKey::ZkSaasPhaseTwo => assigned_role.is_zksaas(),
+				JobKey::DKG | JobKey::DKGSignature =>
+					if assigned_role.is_tss() {
+						found_role = true;
+					},
+				JobKey::ZkSaasPhaseOne | JobKey::ZkSaasPhaseTwo =>
+					if assigned_role.is_zksaas() {
+						found_role = true;
+					},
 			}
-		} else {
-			return false
 		}
+
+		return found_role
 	}
 
 	/// Slash validator stake for the reported offence. The function should be a best effort
