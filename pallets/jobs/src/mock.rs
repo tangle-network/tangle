@@ -28,7 +28,7 @@ pub type AccountId = u128;
 pub type Balance = u128;
 pub type BlockNumber = u64;
 
-use tangle_primitives::{jobs::*, roles::RoleType};
+use tangle_primitives::jobs::*;
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
@@ -128,7 +128,7 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 pub struct MockRolesHandler;
 
 impl RolesHandler<AccountId> for MockRolesHandler {
-	fn is_validator(address: AccountId, _role_type: RoleType) -> bool {
+	fn is_validator(address: AccountId, _role_type: JobKey) -> bool {
 		let validators = [1, 2, 3, 4, 5];
 		validators.contains(&address)
 	}
@@ -138,9 +138,9 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 	}
 }
 
-pub struct MockJobResultVerifier;
+pub struct MockMPCHandler;
 
-impl JobResultVerifier<AccountId, BlockNumber, Balance> for MockJobResultVerifier {
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 	fn verify(
 		job: &JobInfo<AccountId, BlockNumber, Balance>,
 		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
@@ -161,6 +161,10 @@ impl JobResultVerifier<AccountId, BlockNumber, Balance> for MockJobResultVerifie
 	) -> DispatchResult {
 		Ok(())
 	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
 }
 
 parameter_types! {
@@ -173,7 +177,7 @@ impl Config for Runtime {
 	type Currency = Balances;
 	type JobToFee = MockJobToFeeHandler;
 	type RolesHandler = MockRolesHandler;
-	type JobResultVerifier = MockJobResultVerifier;
+	type MPCHandler = MockMPCHandler;
 	type PalletId = JobsPalletId;
 	type WeightInfo = ();
 }

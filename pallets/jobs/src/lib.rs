@@ -32,7 +32,7 @@ use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
 	jobs::{JobId, JobInfo, JobKey, PhaseOneResult, ValidatorOffence},
 	traits::{
-		jobs::{JobResultVerifier, JobToFee},
+		jobs::{JobToFee, MPCHandler},
 		roles::RolesHandler,
 	},
 };
@@ -71,11 +71,7 @@ pub mod module {
 		type RolesHandler: RolesHandler<Self::AccountId>;
 
 		/// The job result verifying mechanism
-		type JobResultVerifier: JobResultVerifier<
-			Self::AccountId,
-			BlockNumberFor<Self>,
-			BalanceOf<Self>,
-		>;
+		type MPCHandler: MPCHandler<Self::AccountId, BlockNumberFor<Self>, BalanceOf<Self>>;
 
 		/// The origin which may set filter.
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
@@ -210,7 +206,7 @@ pub mod module {
 
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), job_key.clone().into()),
+						T::RolesHandler::is_validator(participant.clone(), job_key.clone()),
 						Error::<T>::InvalidValidator
 					);
 
@@ -238,7 +234,7 @@ pub mod module {
 				// Ensure the phase one participants are still validators
 				for participant in result.participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), job_key.clone().into()),
+						T::RolesHandler::is_validator(participant.clone(), job_key.clone()),
 						Error::<T>::InvalidValidator
 					);
 
@@ -339,7 +335,7 @@ pub mod module {
 			};
 
 			// Validate the result
-			T::JobResultVerifier::verify(&job_info, phase1_result.clone(), result.clone())?;
+			T::MPCHandler::verify(&job_info, phase1_result.clone(), result.clone())?;
 
 			// If phase 1, store in known result
 			if job_info.job_type.is_phase_one() {
@@ -483,11 +479,7 @@ pub mod module {
 			ensure!(participants.contains(&validator), Error::<T>::JobNotFound);
 
 			// Validate the result
-			T::JobResultVerifier::verify_validator_report(
-				validator.clone(),
-				offence.clone(),
-				signatures,
-			)?;
+			T::MPCHandler::verify_validator_report(validator.clone(), offence.clone(), signatures)?;
 
 			// Slash the validator
 			T::RolesHandler::slash_validator(validator.clone(), offence)?;
