@@ -30,7 +30,7 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::{codec, traits::Zero, Saturating};
 use sp_std::{convert::TryInto, prelude::*, vec};
-use tangle_primitives::roles::RoleType;
+use tangle_primitives::{roles::RoleType, traits::jobs::JobsHandler};
 mod impls;
 #[cfg(test)]
 pub(crate) mod mock;
@@ -105,6 +105,10 @@ pub mod pallet {
 		/// The overarching event type.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
+		/// The job manager mechanism.
+		type JobsHandler: JobsHandler<Self::AccountId>;
+
+		/// Max roles per account.
 		#[pallet::constant]
 		type MaxRolesPerAccount: Get<u32>;
 
@@ -257,12 +261,15 @@ pub mod pallet {
 				Error::<T>::NotValidator
 			);
 
-			// check if role is assigned.
+			// Check if role is assigned.
 			ensure!(Self::has_role(stash_account.clone(), role), Error::<T>::NoRoleAssigned);
 
-			// TODO: Call jobs manager to remove the services.
-			// On successful removal of services, remove the role from the mapping.
-			// Issue link for reference : https://github.com/webb-tools/tangle/issues/292
+			// Get active jobs for the role.
+			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
+			for job in active_jobs {
+				// Submit request to exit from the known set.
+				T::JobsHandler::exit_from_known_set(stash_account.clone(), job.0, job.1)?;
+			}
 
 			// Remove role from the mapping.
 			Self::remove_role(stash_account.clone(), role)?;
