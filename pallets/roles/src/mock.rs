@@ -17,17 +17,22 @@
 
 use super::*;
 use crate as pallet_roles;
+use frame_election_provider_support::{onchain, SequentialPhragmen};
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU128, ConstU32, ConstU64, Everything},
+	traits::{ConstU128, ConstU32, ConstU64, Contains, Hooks},
 };
-use sp_runtime::DispatchResult;
+use pallet_session::TestSessionHandler;
+use sp_core::H256;
+use sp_runtime::{
+	testing::{Header, UintAuthorityId},
+	traits::IdentityLookup,
+	BuildStorage, Perbill,
+};
+use tangle_primitives::traits::jobs::MPCHandler;
 use tangle_primitives::jobs::*;
 
-use sp_core::H256;
-use sp_runtime::{traits::IdentityLookup, BuildStorage};
-use tangle_primitives::traits::jobs::MPCHandler;
-pub type AccountId = u128;
+pub type AccountId = u64;
 pub type Balance = u128;
 pub type BlockNumber = u64;
 
@@ -50,7 +55,7 @@ impl frame_system::Config for Runtime {
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type DbWeight = ();
-	type BaseCallFilter = Everything;
+	type BaseCallFilter = BaseFilter;
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
@@ -97,21 +102,141 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 	}
 }
 
+impl pallet_timestamp::Config for Runtime {
+	type Moment = u64;
+	type OnTimestampSet = ();
+	type MinimumPeriod = ConstU64<5>;
+	type WeightInfo = ();
+}
+
+impl pallet_session::historical::Config for Runtime {
+	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
+	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
+}
+
+pub struct BaseFilter;
+impl Contains<RuntimeCall> for BaseFilter {
+	fn contains(call: &RuntimeCall) -> bool {
+		let is_stake_unbound_call =
+			matches!(call, RuntimeCall::Staking(pallet_staking::Call::unbond { .. }));
+
+		if is_stake_unbound_call {
+			// no unbond call
+			return false
+		}
+
+		// no chill call
+		if matches!(call, RuntimeCall::Staking(pallet_staking::Call::chill { .. })) {
+			return false
+		}
+
+		// no withdraw_unbonded call
+		let is_stake_withdraw_call =
+			matches!(call, RuntimeCall::Staking(pallet_staking::Call::withdraw_unbonded { .. }));
+
+		if is_stake_withdraw_call {
+			return false
+		}
+
+		true
+	}
+}
+
+sp_runtime::impl_opaque_keys! {
+	pub struct MockSessionKeys {
+		pub dummy: UintAuthorityId,
+	}
+}
+
+impl From<UintAuthorityId> for MockSessionKeys {
+	fn from(dummy: UintAuthorityId) -> Self {
+		Self { dummy }
+	}
+}
+
+pub struct MockSessionManager;
+
+impl pallet_session::SessionManager<AccountId> for MockSessionManager {
+	fn end_session(_: sp_staking::SessionIndex) {}
+	fn start_session(_: sp_staking::SessionIndex) {}
+	fn new_session(idx: sp_staking::SessionIndex) -> Option<Vec<AccountId>> {
+		if idx == 0 || idx == 1 {
+			Some(vec![1, 2, 3, 4])
+		} else if idx == 2 {
+			Some(vec![1, 2, 3, 4])
+		} else {
+			None
+		}
+	}
+}
+
 parameter_types! {
-	pub const RolesPalletId: PalletId = PalletId(*b"py/roles");
+	pub const Period: u64 = 1;
+	pub const Offset: u64 = 0;
+}
+
+impl pallet_session::Config for Runtime {
+	type SessionManager = MockSessionManager;
+	type Keys = MockSessionKeys;
+	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type SessionHandler = TestSessionHandler;
+	type RuntimeEvent = RuntimeEvent;
+	type ValidatorId = AccountId;
+	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
+	type WeightInfo = ();
+}
+
+pub struct OnChainSeqPhragmen;
+impl onchain::Config for OnChainSeqPhragmen {
+	type System = Runtime;
+	type Solver = SequentialPhragmen<AccountId, Perbill>;
+	type DataProvider = Staking;
+	type WeightInfo = ();
+	type MaxWinners = ConstU32<100>;
+	type VotersBound = ConstU32<{ u32::MAX }>;
+	type TargetsBound = ConstU32<{ u32::MAX }>;
+}
+
+impl pallet_staking::Config for Runtime {
+	type MaxNominations = ConstU32<16>;
+	type Currency = Balances;
+	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
+	type UnixTime = pallet_timestamp::Pallet<Self>;
+	type CurrencyToVote = ();
+	type RewardRemainder = ();
+	type RuntimeEvent = RuntimeEvent;
+	type Slash = ();
+	type Reward = ();
+	type SessionsPerEra = ();
+	type SlashDeferDuration = ();
+	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type BondingDuration = ();
+	type SessionInterface = Self;
+	type EraPayout = ();
+	type NextNewSession = Session;
+	type MaxNominatorRewardedPerValidator = ConstU32<64>;
+	type OffendingValidatorsThreshold = ();
+	type ElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
+	type GenesisElectionProvider = Self::ElectionProvider;
+	type VoterList = pallet_staking::UseNominatorsAndValidatorsMap<Self>;
+	type TargetList = pallet_staking::UseValidatorsMap<Self>;
+	type MaxUnlockingChunks = ConstU32<32>;
+	type HistoryDepth = ConstU32<84>;
+	type EventListeners = ();
+	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
+	type WeightInfo = ();
 }
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type Currency = Balances;
-	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
+	type MaxRolesPerAccount = ConstU32<2>;
 	type MPCHandler = MockMPCHandler;
-	type Slash = ();
-	type PalletId = RolesPalletId;
 	type WeightInfo = ();
 }
 
-type Block = frame_system::mocking::MockBlock<Runtime>;
+pub type Block = sp_runtime::generic::Block<Header, UncheckedExtrinsic>;
+pub type UncheckedExtrinsic = sp_runtime::generic::UncheckedExtrinsic<u32, RuntimeCall, u64, ()>;
 
 construct_runtime!(
 	pub enum Runtime
@@ -119,6 +244,8 @@ construct_runtime!(
 		System: frame_system,
 		Balances: pallet_balances,
 		Roles: pallet_roles,
+		Session: pallet_session,
+		Staking: pallet_staking,
 	}
 );
 
@@ -145,14 +272,56 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
-pub fn new_test_ext() -> sp_io::TestExternalities {
+pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	pallet_balances::GenesisConfig::<Runtime> { balances: vec![(10, 10000), (20, 10000)] }
+	let balances: Vec<_> = authorities.iter().map(|i| (*i, 20_000_u128)).collect();
+
+	pallet_balances::GenesisConfig::<Runtime> { balances }
 		.assimilate_storage(&mut t)
 		.unwrap();
 
+	let session_keys: Vec<_> = authorities
+		.iter()
+		.map(|id| (*id, *id, MockSessionKeys { dummy: UintAuthorityId(*id) }))
+		.collect();
+
+	pallet_session::GenesisConfig::<Runtime> { keys: session_keys }
+		.assimilate_storage(&mut t)
+		.unwrap();
+
+	let stakers: Vec<_> = authorities
+		.iter()
+		.map(|authority| {
+			(
+				*authority,
+				*authority,
+				10_000_u128,
+				pallet_staking::StakerStatus::<AccountId>::Validator,
+			)
+		})
+		.collect();
+
+	let staking_config = pallet_staking::GenesisConfig::<Runtime> {
+		stakers,
+		validator_count: 4,
+		force_era: pallet_staking::Forcing::ForceNew,
+		minimum_validator_count: 0,
+		max_validator_count: Some(5),
+		max_nominator_count: Some(5),
+		invulnerables: vec![],
+		..Default::default()
+	};
+
+	staking_config.assimilate_storage(&mut t).unwrap();
+
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.execute_with(|| System::set_block_number(1));
+	ext.execute_with(|| {
+		System::set_block_number(1);
+		Session::on_initialize(1);
+		<Staking as Hooks<u64>>::on_initialize(1);
+	});
+
 	ext
 }
