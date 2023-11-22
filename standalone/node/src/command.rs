@@ -55,9 +55,11 @@ impl SubstrateCli for Cli {
 			"relayer" => Box::new(chain_spec::relayer_testnet_config(4006)?),
 			"" | "local" => Box::new(chain_spec::local_testnet_config(4006)?),
 			// generates the standalone spec for testing locally
-			"standalone-local" => Box::new(chain_spec::standalone_local_config(4006)?),
+			"local" => Box::new(chain_spec::tangle_local_config(4006)?),
 			// generates the standalone spec for testnet
-			"standalone-alpha" => Box::new(chain_spec::standalone_testnet_config(4006)?),
+			"testnet-alpha" => Box::new(chain_spec::tangle_testnet_config(4006)?),
+			// generates the spec for mainnet
+			"mainnet" => Box::new(chain_spec::tangle_mainnet_config(4006)?),
 			// generates the standalone spec for longterm testnet
 			"standalone" => Box::new(chain_spec::standalone_live_config(4006)?),
 			"tangle-testnet" => Box::new(chain_spec::ChainSpec::from_json_bytes(

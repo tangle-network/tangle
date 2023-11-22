@@ -15,7 +15,7 @@
 use std::{collections::BTreeMap, marker::PhantomData};
 
 use crate::{
-	distributions::{combine_distributions, develop, testnet},
+	distributions::{combine_distributions, develop, mainnet, testnet},
 	testnet_fixtures::{
 		get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 	},
@@ -407,7 +407,7 @@ pub fn standalone_live_config(chain_id: u64) -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn standalone_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
+pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
 	let boot_nodes = get_standalone_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
@@ -486,7 +486,7 @@ pub fn standalone_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 }
 
 // same as tangle_testnet but without bootnodes so that we can spinup same network locally
-pub fn standalone_local_config(chain_id: u64) -> Result<ChainSpec, String> {
+pub fn tangle_local_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
@@ -494,8 +494,8 @@ pub fn standalone_local_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("ss58Format".into(), 42.into());
 
 	Ok(ChainSpec::from_genesis(
-		"Tangle Standalone Local",
-		"tangle-standalone-local",
+		"Tangle Local",
+		"tangle-local",
 		ChainType::Development,
 		move || {
 			testnet_genesis(
@@ -535,6 +535,70 @@ pub fn standalone_local_config(chain_id: u64) -> Result<ChainSpec, String> {
 		},
 		// Bootnodes
 		vec![],
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// Fork id
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		None,
+	))
+}
+
+pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
+	let boot_nodes = get_standalone_bootnodes();
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "tTNT".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42.into());
+
+	Ok(ChainSpec::from_genesis(
+		"Tangle Mainnet",
+		"tangle-mainnet",
+		ChainType::Live,
+		move || {
+			testnet_genesis(
+				wasm_binary,
+				// Initial PoA authorities
+				get_standalone_initial_authorities(),
+				// initial nominators
+				vec![],
+				// Sudo account
+				get_testnet_root_key(),
+				// Pre-funded accounts
+				vec![
+					get_testnet_root_key(),
+					hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"].into(),
+					hex!["804808fb75d16340dc250871138a1a6f1dfa3cab9cc1fbd6f42960f1c39a950d"].into(),
+					hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"].into(),
+					hex!["cc195602a63bbdcf2ef4773c86fdbfefe042cb9aa8e3059d02e59a062d9c3138"].into(),
+					hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"].into(),
+					hex!["368ea402dbd9c9888ae999d6a799cf36e08673ee53c001dfb4529c149fc2c13b"].into(),
+					hex!["2c7f3cc085da9175414d1a9d40aa3aa161c8584a9ca62a938684dfbe90ae9d74"].into(),
+					hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
+					hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
+					hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
+				],
+				vec![],
+				vec![],
+				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
+				chain_id,
+				DEFAULT_DKG_KEYGEN_THRESHOLD,
+				DEFAULT_DKG_SIGNATURE_THRESHOLD,
+				combine_distributions(vec![
+					mainnet::get_edgeware_genesis_balance_distribution(),
+					mainnet::get_leaderboard_balance_distribution(),
+				]),
+				mainnet::get_substrate_balance_distribution(),
+				true,
+			)
+		},
+		// Bootnodes
+		boot_nodes,
 		// Telemetry
 		None,
 		// Protocol ID
@@ -673,5 +737,109 @@ fn testnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
+	}
+}
+
+/// Configure initial storage state for FRAME modules.
+#[allow(clippy::too_many_arguments)]
+fn mainnet_genesis(
+	wasm_binary: &[u8],
+	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)>,
+	initial_nominators: Vec<AccountId>,
+	root_key: AccountId,
+	chain_id: u64,
+	genesis_evm_distribution: Vec<(H160, fp_evm::GenesisAccount)>,
+	genesis_substrate_distribution: Vec<(AccountId, Balance)>,
+	_enable_println: bool,
+) -> RuntimeGenesisConfig {
+	const ENDOWMENT: Balance = 10_000_000 * UNIT;
+	const STASH: Balance = ENDOWMENT / 100;
+
+	// stakers: all validators and nominators.
+	let mut rng = rand::thread_rng();
+	let stakers = initial_authorities
+		.iter()
+		.map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
+		.chain(initial_nominators.iter().map(|x| {
+			use rand::{seq::SliceRandom, Rng};
+			let limit = (MaxNominations::get() as usize).min(initial_authorities.len());
+			let count = rng.gen::<usize>() % limit;
+			let nominations = initial_authorities
+				.as_slice()
+				.choose_multiple(&mut rng, count)
+				.map(|choice| choice.0.clone())
+				.collect::<Vec<_>>();
+			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
+		}))
+		.collect::<Vec<_>>();
+
+	RuntimeGenesisConfig {
+		system: SystemConfig {
+			// Add Wasm runtime to storage.
+			code: wasm_binary.to_vec(),
+			..Default::default()
+		},
+		sudo: SudoConfig { key: Some(root_key) },
+		balances: BalancesConfig {
+			balances: genesis_substrate_distribution.iter().cloned().collect(),
+		},
+		vesting: Default::default(),
+		indices: Default::default(),
+		session: SessionConfig {
+			keys: initial_authorities
+				.iter()
+				.map(|x| {
+					(
+						x.1.clone(),
+						x.0.clone(),
+						dkg_session_keys(x.3.clone(), x.2.clone(), x.4.clone(), x.5.clone()),
+					)
+				})
+				.collect::<Vec<_>>(),
+		},
+		staking: StakingConfig {
+			validator_count: initial_authorities.len() as u32,
+			minimum_validator_count: initial_authorities.len() as u32 - 1,
+			invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
+			slash_reward_fraction: Perbill::from_percent(10),
+			stakers,
+			..Default::default()
+		},
+		democracy: Default::default(),
+		council: Default::default(),
+		elections: Default::default(),
+		treasury: Default::default(),
+		aura: Default::default(),
+		grandpa: Default::default(),
+		im_online: ImOnlineConfig { keys: vec![] },
+		nomination_pools: Default::default(),
+		transaction_payment: Default::default(),
+		// EVM compatibility
+		evm_chain_id: EVMChainIdConfig { chain_id, ..Default::default() },
+		evm: EVMConfig {
+			accounts: {
+				let mut map = BTreeMap::new();
+				for (address, account) in genesis_evm_distribution {
+					map.insert(address, account);
+				}
+				map
+			},
+			..Default::default()
+		},
+		ethereum: Default::default(),
+		dynamic_fee: Default::default(),
+		base_fee: Default::default(),
+		// ETH2 light client
+		eth_2_client: Eth2ClientConfig {
+			networks: vec![
+				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+			],
+			phantom: PhantomData,
+		},
+		// TODO: Remove these pallets and re-architect for mainnet
+		dkg: Default::default(),
+		dkg_proposals: Default::default(),
+		bridge_registry: Default::default(),
 	}
 }
