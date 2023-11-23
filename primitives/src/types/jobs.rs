@@ -17,6 +17,8 @@ use frame_support::{dispatch::Vec, pallet_prelude::*, RuntimeDebug};
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 
+use crate::roles::RoleType;
+
 pub type JobId = u32;
 
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
@@ -197,6 +199,18 @@ pub enum JobKey {
 	ZkSaasPhaseOne,
 	/// (zk-SNARK) Phase Two job type.
 	ZkSaasPhaseTwo,
+}
+
+impl JobKey {
+	/// Returns role assigned with the job.
+	pub fn get_role_type(&self) -> RoleType {
+		match self {
+			JobKey::DKG => RoleType::Tss,
+			JobKey::DKGSignature => RoleType::Tss,
+			JobKey::ZkSaasPhaseOne => RoleType::ZkSaas,
+			JobKey::ZkSaasPhaseTwo => RoleType::ZkSaas,
+		}
+	}
 }
 
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.

@@ -30,7 +30,10 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::{codec, traits::Zero, Saturating};
 use sp_std::{convert::TryInto, prelude::*, vec};
-use tangle_primitives::{roles::RoleType, traits::jobs::JobsHandler};
+use tangle_primitives::{
+	roles::{RoleType, RoleTypeMetadata},
+	traits::jobs::JobsHandler,
+};
 mod impls;
 #[cfg(test)]
 pub(crate) mod mock;
@@ -66,8 +69,8 @@ pub struct RoleStakingLedger<T: Config> {
 #[derive(PartialEqNoBound, EqNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo, Clone)]
 #[scale_info(skip_type_params(T))]
 pub struct RoleStakingRecord<T: Config> {
-	/// Role type
-	pub role: RoleType,
+	/// Metadata associated with the role.
+	pub metadata: RoleTypeMetadata,
 	/// The total amount of the stash's balance that is re-staked for selected role.
 	#[codec(compact)]
 	pub re_staked: BalanceOf<T>,
@@ -208,7 +211,7 @@ pub mod pallet {
 
 			// Validate role staking records.
 			for record in records.clone() {
-				let role = record.role;
+				let role = record.metadata.get_role_type();
 				let re_stake_amount = record.re_staked;
 				// Check if role is already assigned.
 				ensure!(
@@ -219,7 +222,7 @@ pub mod pallet {
 				// validate the metadata
 				T::MPCHandler::validate_authority_key(
 					stash_account.clone(),
-					role.clone().get_authority_key(),
+					record.metadata.get_authority_key(),
 				)?;
 
 				// Re-staking amount of record should meet min re-staking amount requirement.
@@ -236,16 +239,16 @@ pub mod pallet {
 				);
 
 				ledger.total = ledger.total.saturating_add(re_stake_amount);
-				let role_info = RoleStakingRecord { role, re_staked: re_stake_amount };
-				ledger.roles.push(role_info);
+				ledger.roles.push(record);
 			}
 
 			// Now that records are validated we can add them and update ledger
 			for record in records {
-				Self::add_role(stash_account.clone(), record.role.clone())?;
+				let role = record.metadata.get_role_type();
+				Self::add_role(stash_account.clone(), role.clone())?;
 				Self::deposit_event(Event::<T>::RoleAssigned {
 					account: stash_account.clone(),
-					role: record.role,
+					role,
 				});
 			}
 			Self::update_ledger(&stash_account, &ledger);
@@ -283,8 +286,11 @@ pub mod pallet {
 			// Get active jobs for the role.
 			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
 			for job in active_jobs {
-				// Submit request to exit from the known set.
-				T::JobsHandler::exit_from_known_set(stash_account.clone(), job.0, job.1)?;
+				let job_key = job.0;
+				if job_key.get_role_type() == role {
+					// Submit request to exit from the known set.
+					T::JobsHandler::exit_from_known_set(stash_account.clone(), job_key, job.1)?;
+				}
 			}
 
 			// Remove role from the mapping.
