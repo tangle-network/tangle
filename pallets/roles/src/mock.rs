@@ -27,11 +27,13 @@ use sp_core::H256;
 use sp_runtime::{
 	testing::{Header, UintAuthorityId},
 	traits::IdentityLookup,
-	BuildStorage, Perbill,
+	BuildStorage, DispatchResult, Perbill,
 };
-use tangle_primitives::jobs::{JobId, JobKey};
+use tangle_primitives::{jobs::*, traits::jobs::MPCHandler};
+
 pub type AccountId = u64;
 pub type Balance = u128;
+pub type BlockNumber = u64;
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
@@ -73,6 +75,30 @@ impl pallet_balances::Config for Runtime {
 	type MaxHolds = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
+}
+
+pub struct MockMPCHandler;
+
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
+	fn verify(
+		_job: &JobInfo<AccountId, BlockNumber, Balance>,
+		_phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
+		_result: Vec<u8>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn verify_validator_report(
+		_validator: AccountId,
+		_offence: ValidatorOffence,
+		_report: Vec<u8>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
 }
 
 impl pallet_timestamp::Config for Runtime {
@@ -221,6 +247,7 @@ impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type JobsHandler = MockJobsHandler;
 	type MaxRolesPerAccount = ConstU32<2>;
+	type MPCHandler = MockMPCHandler;
 	type WeightInfo = ();
 }
 

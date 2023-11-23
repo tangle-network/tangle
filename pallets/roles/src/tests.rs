@@ -24,24 +24,28 @@ fn test_assign_roles() {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }];
+		let role_records =
+			vec![RoleStakingRecord { role: RoleType::Tss(Default::default()), re_staked: 5000 }];
 
 		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleAssigned {
 			account: 1,
-			role: RoleType::Tss,
+			role: RoleType::Tss(Default::default()),
 		})]);
 
 		// Lets verify role assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
+		assert_eq!(Roles::has_role(1, RoleType::Tss(Default::default())), true);
 		// Verify ledger mapping
 		assert_eq!(
 			Roles::ledger(1),
 			Some(RoleStakingLedger {
 				stash: 1,
 				total: 5000,
-				roles: vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }]
+				roles: vec![RoleStakingRecord {
+					role: RoleType::Tss(Default::default()),
+					re_staked: 5000
+				}]
 			})
 		);
 	});
@@ -55,17 +59,17 @@ fn test_assign_multiple_roles() {
 
 		// Roles user is interested in re-staking.
 		let role_records = vec![
-			RoleStakingRecord { role: RoleType::Tss, re_staked: 2500 },
-			RoleStakingRecord { role: RoleType::ZkSaas, re_staked: 2500 },
+			RoleStakingRecord { role: RoleType::Tss(Default::default()), re_staked: 2500 },
+			RoleStakingRecord { role: RoleType::ZkSaas(Default::default()), re_staked: 2500 },
 		];
 
 		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
 
 		// Lets verify role assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
+		assert_eq!(Roles::has_role(1, RoleType::Tss(Default::default())), true);
 
 		// Lets verify role assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::ZkSaas), true);
+		assert_eq!(Roles::has_role(1, RoleType::ZkSaas(Default::default())), true);
 
 		assert_eq!(
 			Roles::ledger(1),
@@ -73,8 +77,11 @@ fn test_assign_multiple_roles() {
 				stash: 1,
 				total: 5000,
 				roles: vec![
-					RoleStakingRecord { role: RoleType::Tss, re_staked: 2500 },
-					RoleStakingRecord { role: RoleType::ZkSaas, re_staked: 2500 },
+					RoleStakingRecord { role: RoleType::Tss(Default::default()), re_staked: 2500 },
+					RoleStakingRecord {
+						role: RoleType::ZkSaas(Default::default()),
+						re_staked: 2500
+					},
 				]
 			})
 		);
@@ -90,8 +97,8 @@ fn test_assign_roles_should_fail_if_total_re_stake_value_exceeds_max_re_stake_va
 
 		// Roles user is interested in re-staking.
 		let role_records = vec![
-			RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 },
-			RoleStakingRecord { role: RoleType::ZkSaas, re_staked: 5000 },
+			RoleStakingRecord { role: RoleType::Tss(Default::default()), re_staked: 5000 },
+			RoleStakingRecord { role: RoleType::ZkSaas(Default::default()), re_staked: 5000 },
 		];
 		// Since max re_stake limit is 5000 it should fail with `ExceedsMaxReStakeValue` error.
 		assert_err!(
@@ -107,20 +114,21 @@ fn test_clear_role() {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }];
+		let role_records =
+			vec![RoleStakingRecord { role: RoleType::Tss(Default::default()), re_staked: 5000 }];
 
 		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
 
 		// Now lets clear the role
-		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(1), RoleType::Tss));
+		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(1), RoleType::Tss(Default::default())));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleRemoved {
 			account: 1,
-			role: RoleType::Tss,
+			role: RoleType::Tss(Default::default()),
 		})]);
 
 		// Role should be removed from  account role mappings.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), false);
+		assert_eq!(Roles::has_role(1, RoleType::Tss(Default::default())), false);
 
 		// Ledger should be removed from ledger mappings.
 		assert_eq!(Roles::ledger(1), None);
@@ -133,7 +141,8 @@ fn test_assign_roles_should_fail_if_not_validator() {
 		// we will use account 5 which is not a validator
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }];
+		let role_records =
+			vec![RoleStakingRecord { role: RoleType::Tss(Default::default()), re_staked: 5000 }];
 
 		assert_err!(
 			Roles::assign_roles(RuntimeOrigin::signed(5), role_records),
@@ -149,18 +158,19 @@ fn test_unbound_funds_should_work() {
 		// for providing TSS services.
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }];
+		let role_records =
+			vec![RoleStakingRecord { role: RoleType::Tss(Default::default()), re_staked: 5000 }];
 
 		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
 
 		// Lets verify role is assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
+		assert_eq!(Roles::has_role(1, RoleType::Tss(Default::default())), true);
 
 		// Lets clear the role.
-		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(1), RoleType::Tss));
+		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(1), RoleType::Tss(Default::default())));
 
 		// Role should be removed from  account role mappings.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), false);
+		assert_eq!(Roles::has_role(1, RoleType::Tss(Default::default())), false);
 
 		// unbound funds.
 		assert_ok!(Roles::unbound_funds(RuntimeOrigin::signed(1), 5000));
@@ -185,12 +195,13 @@ fn test_unbound_funds_should_fail_if_role_assigned() {
 		// for providing TSS services.
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }];
+		let role_records =
+			vec![RoleStakingRecord { role: RoleType::Tss(Default::default()), re_staked: 5000 }];
 
 		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
 
 		// Lets verify role is assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
+		assert_eq!(Roles::has_role(1, RoleType::Tss(Default::default())), true);
 
 		// Lets try to unbound funds.
 		assert_err!(

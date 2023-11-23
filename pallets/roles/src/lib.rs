@@ -94,6 +94,7 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use tangle_primitives::traits::jobs::MPCHandler;
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
@@ -111,6 +112,9 @@ pub mod pallet {
 		/// Max roles per account.
 		#[pallet::constant]
 		type MaxRolesPerAccount: Get<u32>;
+
+		/// The config that verifies MPC related functions
+		type MPCHandler: MPCHandler<Self::AccountId, BlockNumberFor<Self>, BalanceOf<Self>>;
 
 		type WeightInfo: WeightInfo;
 	}
@@ -207,7 +211,16 @@ pub mod pallet {
 				let role = record.role;
 				let re_stake_amount = record.re_staked;
 				// Check if role is already assigned.
-				ensure!(!Self::has_role(stash_account.clone(), role), Error::<T>::HasRoleAssigned);
+				ensure!(
+					!Self::has_role(stash_account.clone(), role.clone()),
+					Error::<T>::HasRoleAssigned
+				);
+
+				// validate the metadata
+				T::MPCHandler::validate_authority_key(
+					stash_account.clone(),
+					role.clone().get_authority_key(),
+				)?;
 
 				// Re-staking amount of record should meet min re-staking amount requirement.
 				let min_re_staking_bond = MinReStakingBond::<T>::get();
@@ -229,7 +242,7 @@ pub mod pallet {
 
 			// Now that records are validated we can add them and update ledger
 			for record in records {
-				Self::add_role(stash_account.clone(), record.role)?;
+				Self::add_role(stash_account.clone(), record.role.clone())?;
 				Self::deposit_event(Event::<T>::RoleAssigned {
 					account: stash_account.clone(),
 					role: record.role,
@@ -261,8 +274,11 @@ pub mod pallet {
 				Error::<T>::NotValidator
 			);
 
-			// Check if role is assigned.
-			ensure!(Self::has_role(stash_account.clone(), role), Error::<T>::NoRoleAssigned);
+			// check if role is assigned.
+			ensure!(
+				Self::has_role(stash_account.clone(), role.clone()),
+				Error::<T>::NoRoleAssigned
+			);
 
 			// Get active jobs for the role.
 			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
@@ -272,7 +288,7 @@ pub mod pallet {
 			}
 
 			// Remove role from the mapping.
-			Self::remove_role(stash_account.clone(), role)?;
+			Self::remove_role(stash_account.clone(), role.clone())?;
 			// Remove stash account related info.
 			Self::kill_stash(&stash_account);
 
