@@ -10,7 +10,7 @@ use serde_json::Value;
 use sp_core::{crypto::Ss58Codec, H160, U256};
 use sp_runtime::AccountId32;
 use std::collections::BTreeMap;
-use tangle_runtime::{AccountId, Balance};
+use tangle_runtime::{AccountId, Balance, ExistentialDeposit};
 
 use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts};
 
@@ -91,12 +91,16 @@ pub fn get_leaderboard_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 
 pub fn get_substrate_balance_distribution() -> Vec<(AccountId32, Balance)> {
 	const ONE_TOKEN: u128 = 1_000_000_000_000_000_000;
-	const ENDOWMENT: u128 = 1_000_000 * ONE_TOKEN;
+	const ENDOWMENT: u128 = 10_000_000 * ONE_TOKEN;
 
 	let convert_to_u128 = |value: f64| -> u128 { (ENDOWMENT as f64 * value) as u128 };
 
-	get_edgeware_snapshot_list()
+	let balances: Vec<(AccountId32, Balance)> = get_edgeware_snapshot_list()
 		.into_iter()
+		.filter(|(_, value)| *value > 0.0)
 		.map(|(address, value)| (address, Balance::from(convert_to_u128(value))))
-		.collect()
+		.filter(|(_, value)| *value > ExistentialDeposit::get())
+		.collect();
+
+	balances
 }
