@@ -97,7 +97,10 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
-	use tangle_primitives::traits::jobs::MPCHandler;
+	use tangle_primitives::{
+		jobs::{JobId, JobKey},
+		traits::jobs::MPCHandler,
+	};
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
@@ -131,6 +134,8 @@ pub mod pallet {
 		RoleRemoved { account: T::AccountId, role: RoleType },
 		/// Slashed validator.
 		Slashed { account: T::AccountId, amount: BalanceOf<T> },
+		/// Pending jobs,that cannot be opted out at the moment.
+		PendingJobs { pending_jobs: Vec<(JobKey, JobId)> },
 	}
 
 	#[pallet::error]
@@ -151,6 +156,8 @@ pub mod pallet {
 		AccountAlreadyPaired,
 		/// Stash controller account not found in Roles Ledger.
 		AccountNotPaired,
+		/// Role clear request failed due to pending jobs, which can't be opted out at the moment.
+		RoleClearRequestFailed,
 	}
 
 	/// Map from all "controller" accounts to the info regarding the staking.
@@ -285,13 +292,31 @@ pub mod pallet {
 
 			// Get active jobs for the role.
 			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
+			let mut role_cleared = true;
+			let mut pending_jobs = Vec::new();
 			for job in active_jobs {
 				let job_key = job.0;
 				if job_key.get_role_type() == role {
 					// Submit request to exit from the known set.
-					T::JobsHandler::exit_from_known_set(stash_account.clone(), job_key, job.1)?;
+					let res = T::JobsHandler::exit_from_known_set(
+						stash_account.clone(),
+						job_key.clone(),
+						job.1,
+					);
+
+					if res.is_err() {
+						role_cleared = false;
+						pending_jobs.push((job_key.clone(), job.1));
+					}
 				}
 			}
+
+			if !role_cleared {
+				// Role clear request failed due to pending jobs, which can't be opted out at the
+				// moment.
+				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
+				return Err(Error::<T>::RoleClearRequestFailed.into())
+			};
 
 			// Remove role from the mapping.
 			Self::remove_role(stash_account.clone(), role.clone())?;
