@@ -1,13 +1,8 @@
-use std::{
-	fs::File,
-	io::Read,
-	path::{Path, PathBuf},
-	str::FromStr,
-};
+use std::str::FromStr;
 
 use fp_evm::GenesisAccount;
-use serde_json::Value;
-use sp_core::{crypto::Ss58Codec, H160, U256};
+
+use sp_core::{H160, U256};
 use sp_runtime::AccountId32;
 use std::collections::BTreeMap;
 use tangle_runtime::{AccountId, Balance, ExistentialDeposit};
@@ -72,7 +67,7 @@ pub fn get_edgeware_genesis_balance_distribution() -> Vec<(H160, GenesisAccount)
 
 pub fn get_leaderboard_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 	const ONE_TOKEN: u128 = 1_000_000_000_000_000_000;
-	const ENDOWMENT: u128 = 1 * ONE_TOKEN;
+	const ENDOWMENT: u128 = ONE_TOKEN;
 	get_discord_list()
 		.into_iter()
 		.map(|address| {
