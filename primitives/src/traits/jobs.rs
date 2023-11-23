@@ -38,7 +38,7 @@ pub trait JobToFee<AccountId, BlockNumber> {
 }
 
 /// A trait that describes the job result verification.
-pub trait JobResultVerifier<AccountId, BlockNumber, Balance> {
+pub trait MPCHandler<AccountId, BlockNumber, Balance> {
 	/// Verifies the result of a job.
 	///
 	/// # Parameters
@@ -57,11 +57,32 @@ pub trait JobResultVerifier<AccountId, BlockNumber, Balance> {
 		result: Vec<u8>,
 	) -> DispatchResult;
 
+	// Verify a validator report
+	///
+	/// This function is responsible for verifying a report against a specific validator's
+	/// offence and taking appropriate actions based on the report.
+	///
+	/// # Arguments
+	///
+	/// - `validator`: The account ID of the validator being reported.
+	/// - `offence`: Details of the offence reported against the validator.
+	/// - `report`: The report data provided by the reporting entity.
 	fn verify_validator_report(
 		validator: AccountId,
 		offence: ValidatorOffence,
 		report: Vec<u8>,
 	) -> DispatchResult;
+
+	/// Validate the authority key associated with a specific validator.
+	///
+	/// This function is responsible for validating the authority key associated with a given
+	/// validator.
+	///
+	/// # Arguments
+	///
+	/// - `validator`: The account ID of the validator whose authority key is to be validated.
+	/// - `authority_key`: The authority key to be validated.
+	fn validate_authority_key(validator: AccountId, authority_key: Vec<u8>) -> DispatchResult;
 }
 
 /// A trait that handles various aspects of jobs for a validator.
