@@ -18,25 +18,42 @@ use frame_support::{dispatch::Vec, pallet_prelude::*};
 /// Role type to be used in the system.
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
 pub enum RoleType {
-	Tss(TssRoleMetadata),
-	ZkSaas(ZkSaasRoleMetadata),
+	Tss,
+	ZkSaas,
 }
 
 impl RoleType {
 	/// Checks if the role type is a TSS role.
-	pub fn is_tss(self) -> bool {
-		matches!(self, RoleType::Tss(_))
+	pub fn is_tss(&self) -> bool {
+		matches!(self, RoleType::Tss)
 	}
 
 	/// Checks if the role type is a Zk-Saas role.
-	pub fn is_zksaas(self) -> bool {
-		matches!(self, RoleType::ZkSaas(_))
+	pub fn is_zksaas(&self) -> bool {
+		matches!(self, RoleType::ZkSaas)
+	}
+}
+
+/// Metadata associated with a role type.
+#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
+pub enum RoleTypeMetadata {
+	Tss(TssRoleMetadata),
+	ZkSaas(ZkSaasRoleMetadata),
+}
+
+impl RoleTypeMetadata {
+	/// Return type of role.
+	pub fn get_role_type(&self) -> RoleType {
+		match self {
+			RoleTypeMetadata::Tss(_) => RoleType::Tss,
+			RoleTypeMetadata::ZkSaas(_) => RoleType::ZkSaas,
+		}
 	}
 
-	pub fn get_authority_key(self) -> Vec<u8> {
+	pub fn get_authority_key(&self) -> Vec<u8> {
 		match self {
-			RoleType::Tss(metadata) => metadata.authority_key,
-			RoleType::ZkSaas(metadata) => metadata.authority_key,
+			RoleTypeMetadata::Tss(metadata) => metadata.authority_key.clone(),
+			RoleTypeMetadata::ZkSaas(metadata) => metadata.authority_key.clone(),
 		}
 	}
 }

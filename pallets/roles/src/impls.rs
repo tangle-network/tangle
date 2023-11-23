@@ -31,23 +31,8 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
 	fn is_validator(address: T::AccountId, job_key: JobKey) -> bool {
 		let assigned_roles = AccountRolesMapping::<T>::get(address);
-
-		let mut found_role = false;
-
-		for assigned_role in assigned_roles {
-			match job_key {
-				JobKey::DKG | JobKey::DKGSignature =>
-					if assigned_role.is_tss() {
-						found_role = true;
-					},
-				JobKey::ZkSaasPhaseOne | JobKey::ZkSaasPhaseTwo =>
-					if assigned_role.is_zksaas() {
-						found_role = true;
-					},
-			}
-		}
-
-		return found_role
+		let job_role = job_key.get_role_type();
+		assigned_roles.contains(&job_role)
 	}
 
 	/// Slash validator stake for the reported offence. The function should be a best effort
