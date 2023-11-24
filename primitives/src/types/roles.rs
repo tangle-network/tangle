@@ -87,23 +87,21 @@ pub enum ReStakingOption {
 /// Represents the reward distribution percentages for validators in a key generation process.
 pub struct ValidatorRewardDistribution {
 	/// The percentage share of the reward allocated for TSS
-	tss_share : Percent,
+	tss_share: Percent,
 	/// The percentage share of the reward allocated for the ZK-SaaS
-	zksaas_share : Percent
+	zksaas_share: Percent,
 }
 
 impl ValidatorRewardDistribution {
-	pub fn try_new(tss_share : Percent, zksaas_share: Percent) -> Result<Self, String> {
+	pub fn try_new(tss_share: Percent, zksaas_share: Percent) -> Result<Self, String> {
 		if !tss_share.add(zksaas_share).is_one() {
 			return Err("Shares must add to One".to_string())
 		}
 
-		Ok(Self { tss_share , zksaas_share})
+		Ok(Self { tss_share, zksaas_share })
 	}
 
 	pub fn get_reward_distribution(self) -> (Percent, Percent) {
 		(self.tss_share, self.zksaas_share)
 	}
 }
-
-
