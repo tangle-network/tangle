@@ -2,6 +2,7 @@ pub mod benchmarking;
 pub mod chain_spec;
 pub mod distributions;
 pub mod eth;
+pub mod mainnet_fixtures;
 pub mod rpc;
 pub mod service;
 pub mod signer_cli;
