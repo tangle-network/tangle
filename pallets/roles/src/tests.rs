@@ -17,6 +17,7 @@
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use mock::*;
+use sp_std::default::Default;
 
 #[test]
 fn test_assign_roles() {
@@ -24,12 +25,22 @@ fn test_assign_roles() {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord {
-			metadata: RoleTypeMetadata::Tss(Default::default()),
-			re_staked: 5000,
-		}];
+		let mut role_records: BTreeMap<_, _> = Default::default();
+		role_records.insert(
+			RoleType::Tss,
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::Tss(Default::default()),
+				re_staked: 5000,
+			},
+		);
 
-		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records.clone()));
+		assert_ok!(Roles::assign_roles(
+			RuntimeOrigin::signed(1),
+			vec![RoleStakingRecord {
+				metadata: RoleTypeMetadata::Tss(Default::default()),
+				re_staked: 5000,
+			}]
+		));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleAssigned {
 			account: 1,
@@ -64,6 +75,23 @@ fn test_assign_multiple_roles() {
 			},
 		];
 
+		// Roles user is interested in re-staking.
+		let mut role_records_map: BTreeMap<_, _> = Default::default();
+		role_records_map.insert(
+			RoleType::Tss,
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::Tss(Default::default()),
+				re_staked: 2500,
+			},
+		);
+		role_records_map.insert(
+			RoleType::ZkSaas,
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::ZkSaas(Default::default()),
+				re_staked: 2500,
+			},
+		);
+
 		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records.clone()));
 
 		// Lets verify role assigned to account.
@@ -74,7 +102,7 @@ fn test_assign_multiple_roles() {
 
 		assert_eq!(
 			Roles::ledger(1),
-			Some(RoleStakingLedger { stash: 1, total: 5000, roles: role_records })
+			Some(RoleStakingLedger { stash: 1, total: 5000, roles: role_records_map })
 		);
 	});
 }

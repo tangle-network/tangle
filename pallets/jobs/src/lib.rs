@@ -24,13 +24,14 @@ use frame_support::{
 	PalletId,
 };
 use frame_system::pallet_prelude::*;
+use sp_core::ByteArray;
 use sp_runtime::{
 	traits::{AccountIdConversion, Zero},
 	DispatchResult,
 };
 use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
-	jobs::{JobId, JobInfo, JobKey, PhaseOneResult, ValidatorOffence},
+	jobs::{DKGResult, JobId, JobInfo, JobKey, JobResult, PhaseOneResult, ValidatorOffence},
 	traits::{
 		jobs::{JobToFee, MPCHandler},
 		roles::RolesHandler,
@@ -56,6 +57,7 @@ pub use weights::WeightInfo;
 #[frame_support::pallet]
 pub mod module {
 	use super::*;
+	use tangle_primitives::jobs::DKGSignatureResult;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -110,6 +112,10 @@ pub mod module {
 		EmptyResult,
 		/// empty job
 		EmptyJob,
+		/// Validator metadata not found
+		ValidatorMetadataNotFound,
+		/// Unexpected result provided
+		ResultNotExpectedType,
 	}
 
 	#[pallet::event]
@@ -304,61 +310,109 @@ pub mod module {
 			origin: OriginFor<T>,
 			job_key: JobKey,
 			job_id: JobId,
-			result: Vec<u8>,
+			result: JobResult,
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;
-
-			// sanity check
-			ensure!(result.is_empty(), Error::<T>::EmptyResult);
 
 			// Ensure the job exists
 			let job_info =
 				SubmittedJobs::<T>::get(job_key.clone(), job_id).ok_or(Error::<T>::JobNotFound)?;
 
-			let phase1_result = if !job_info.job_type.is_phase_one() {
-				Some(
-					KnownResults::<T>::get(
-						job_info
-							.job_type
-							.get_previous_phase_job_key()
-							.ok_or(Error::<T>::InvalidJobPhase)?,
-						job_info
+			let participants: Vec<T::AccountId>;
+
+			// Handle based on job result
+			match result {
+				JobResult::DKG(info) => {
+					// sanity check, does job and result type match
+					ensure!(job_key == JobKey::DKG, Error::<T>::ResultNotExpectedType);
+
+					// ensure the participants are the expected participants from job
+					participants =
+						job_info.job_type.clone().get_participants().expect("checked above");
+					let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
+
+					for participant in participants.clone() {
+						let key =
+							T::RolesHandler::get_validator_metadata(participant, job_key.clone());
+						ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
+						let pub_key = sp_core::ecdsa::Public::from_slice(
+							&key.expect("checked above").get_authority_key()[0..33],
+						)
+						.map_err(|_| Error::<T>::InvalidValidator)?;
+						participant_keys.push(pub_key);
+					}
+
+					let job_result = JobResult::DKG(DKGResult {
+						key: info.key.clone(),
+						keys_and_signatures: info.keys_and_signatures,
+						participants: participant_keys,
+						threshold: job_info
 							.job_type
 							.clone()
-							.get_phase_one_id()
+							.get_threshold()
+							.expect("Checked before"),
+					});
+
+					T::MPCHandler::verify(job_result)?;
+
+					let result = PhaseOneResult {
+						owner: job_info.owner,
+						expiry: job_info.expiry,
+						result: info.key,
+						participants: job_info
+							.job_type
+							.clone()
+							.get_participants()
 							.ok_or(Error::<T>::InvalidJobPhase)?,
-					)
-					.ok_or(Error::<T>::PhaseOneResultNotFound)?,
-				)
-			} else {
-				None
-			};
+						threshold: job_info.job_type.clone().get_threshold(),
+					};
 
-			// Validate the result
-			T::MPCHandler::verify(&job_info, phase1_result.clone(), result.clone())?;
+					KnownResults::<T>::insert(job_key.clone(), job_id, result);
+				},
+				JobResult::DKGSignature(info) => {
+					let now = <frame_system::Pallet<T>>::block_number();
+					// sanity check, does job and result type match
+					ensure!(job_key == JobKey::DKGSignature, Error::<T>::ResultNotExpectedType);
 
-			// If phase 1, store in known result
-			if job_info.job_type.is_phase_one() {
-				let result = PhaseOneResult {
-					owner: job_info.owner,
-					expiry: job_info.expiry,
-					result,
-					participants: job_info
+					let existing_result_id = job_info
 						.job_type
 						.clone()
-						.get_participants()
-						.ok_or(Error::<T>::InvalidJobPhase)?,
-					threshold: job_info.job_type.clone().get_threshold(),
-				};
+						.get_phase_one_id()
+						.ok_or(Error::<T>::InvalidJobPhase)?;
+					// Ensure the result exists
+					let phase_one_result = KnownResults::<T>::get(
+						job_info.job_type.clone().get_previous_phase_job_key().unwrap(),
+						existing_result_id,
+					)
+					.ok_or(Error::<T>::PreviousResultNotFound)?;
 
-				KnownResults::<T>::insert(job_key.clone(), job_id, result);
-			}
+					// Validate existing result
+					ensure!(phase_one_result.expiry >= now, Error::<T>::ResultExpired);
 
-			// Record fee rewards for all job participants
-			let participants = if job_info.job_type.is_phase_one() {
-				job_info.job_type.clone().get_participants().unwrap()
-			} else {
-				phase1_result.unwrap().participants
+					// ensure the participants are the expected participants from job
+					participants = phase_one_result.participants.clone();
+					let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
+
+					for participant in phase_one_result.participants {
+						let key =
+							T::RolesHandler::get_validator_metadata(participant, job_key.clone());
+						ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
+						let pub_key = sp_core::ecdsa::Public::from_slice(
+							&key.expect("checked above").get_authority_key()[0..33],
+						)
+						.map_err(|_| Error::<T>::InvalidValidator)?;
+						participant_keys.push(pub_key);
+					}
+
+					let job_result = JobResult::DKGSignature(DKGSignatureResult {
+						signature: info.signature,
+						data: info.data,
+						signing_key: phase_one_result.result,
+					});
+
+					T::MPCHandler::verify(job_result)?;
+				},
+				_ => todo!(),
 			};
 
 			let fee_per_participant = job_info.fee / (participants.len() as u32).into();
@@ -453,7 +507,7 @@ pub mod module {
 			job_id: JobId,
 			validator: T::AccountId,
 			offence: ValidatorOffence,
-			signatures: Vec<u8>,
+			signatures: Vec<Vec<u8>>,
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;
 
