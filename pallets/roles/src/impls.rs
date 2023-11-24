@@ -18,10 +18,10 @@ use super::*;
 use frame_support::{
 	log,
 	pallet_prelude::DispatchResult,
-	traits::{Currency, ExistenceRequirement::KeepAlive, OneSessionHandler},
+	traits::{Currency, OneSessionHandler},
 };
-use sp_runtime::{Percent, Saturating};
-use sp_std::ops::Div;
+use sp_runtime::{traits::CheckedDiv, Percent, Saturating};
+
 use tangle_primitives::{jobs::JobKey, traits::roles::RolesHandler};
 
 /// Implements RolesHandler for the pallet.
@@ -208,10 +208,17 @@ impl<T: Config> Pallet<T> {
 		let reward_distribution = T::ValidatorRewardDistribution::get();
 
 		let dist = reward_distribution.get_reward_distribution();
-		let tss_validator_reward =
-			dist.0.mul_floor(total_rewards).div((tss_validators.len() as u32).into());
-		let zksaas_validators_reward =
-			dist.1.mul_floor(total_rewards).div((zksaas_validators.len() as u32).into());
+
+		let tss_validator_reward = dist
+			.0
+			.mul_floor(total_rewards)
+			.checked_div(&(tss_validators.len() as u32).into())
+			.unwrap_or(Zero::zero());
+		let zksaas_validators_reward = dist
+			.1
+			.mul_floor(total_rewards)
+			.checked_div(&(zksaas_validators.len() as u32).into())
+			.unwrap_or(Zero::zero());
 
 		log::debug!("Reward for tss validator : {:?}", tss_validator_reward);
 		log::debug!("Reward for zksaas validator : {:?}", zksaas_validators_reward);
