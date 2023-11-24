@@ -155,7 +155,7 @@ pub struct DKGJobType<AccountId> {
 	pub threshold: u8,
 
 	/// the caller permitted to use this result later
-	pub permitted_caller: Option<AccountId>
+	pub permitted_caller: Option<AccountId>,
 }
 
 /// Represents the DKG Signature job type.
@@ -176,7 +176,7 @@ pub struct ZkSaasPhaseOneJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
 	/// the caller permitted to use this result later
-	pub permitted_caller: Option<AccountId>
+	pub permitted_caller: Option<AccountId>,
 }
 
 /// Represents the (zk-SNARK) Phase Two job type.
@@ -246,7 +246,7 @@ pub struct PhaseOneResult<AccountId, BlockNumber> {
 	pub threshold: Option<u8>,
 
 	/// permitted caller to use this result
-	pub permitted_caller : Option<AccountId>
+	pub permitted_caller: Option<AccountId>,
 }
 
 /// Represents different types of validator offences.
