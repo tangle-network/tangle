@@ -203,7 +203,7 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// Someone claimed some WEBBs.
+		/// Someone claimed some native tokens.
 		Claimed { who: T::AccountId, ethereum_address: EthereumAddress, amount: BalanceOf<T> },
 	}
 
@@ -326,7 +326,7 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Make a claim to collect your WEBBs.
+		/// Make a claim to collect your native tokens.
 		///
 		/// The dispatch origin for this call must be _None_.
 		///
@@ -368,14 +368,14 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Mint a new claim to collect WEBBs.
+		/// Mint a new claim to collect native tokens.
 		///
 		/// The dispatch origin for this call must be _Root_.
 		///
 		/// Parameters:
 		/// - `who`: The Ethereum address allowed to collect this claim.
-		/// - `value`: The number of WEBBs that will be claimed.
-		/// - `vesting_schedule`: An optional vesting schedule for these WEBBs.
+		/// - `value`: The number of native tokens that will be claimed.
+		/// - `vesting_schedule`: An optional vesting schedule for these native tokens.
 		///
 		/// <weight>
 		/// The weight of this call is invariant over the input parameters.
@@ -405,7 +405,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Make a claim to collect your WEBBs by signing a statement.
+		/// Make a claim to collect your native tokens by signing a statement.
 		///
 		/// The dispatch origin for this call must be _None_.
 		///
