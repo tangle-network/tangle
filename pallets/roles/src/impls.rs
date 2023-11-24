@@ -61,7 +61,7 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	/// DispatchResult emitting `Slashed` event if validator is slashed
 	fn slash_validator(
 		address: T::AccountId,
-		_offence: tangle_primitives::jobs::ValidatorOffence,
+		_offence: tangle_primitives::jobs::ValidatorOffenceType,
 	) -> sp_runtime::DispatchResult {
 		// TODO: implement calculation of slash amount.
 		let slash_amount = 1000u64;

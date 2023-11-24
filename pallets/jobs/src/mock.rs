@@ -133,7 +133,7 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		validators.contains(&address)
 	}
 
-	fn slash_validator(_address: AccountId, _offence: ValidatorOffence) -> DispatchResult {
+	fn slash_validator(_address: AccountId, _offence: ValidatorOffenceType) -> DispatchResult {
 		Ok(())
 	}
 }
@@ -156,7 +156,7 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 
 	fn verify_validator_report(
 		_validator: AccountId,
-		_offence: ValidatorOffence,
+		_offence: ValidatorOffenceType,
 		_report: Vec<u8>,
 	) -> DispatchResult {
 		Ok(())

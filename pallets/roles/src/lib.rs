@@ -34,6 +34,7 @@ use tangle_primitives::roles::RoleType;
 mod impls;
 #[cfg(test)]
 pub(crate) mod mock;
+mod offences;
 #[cfg(test)]
 mod tests;
 mod weights;

@@ -30,7 +30,7 @@ use sp_runtime::{
 };
 use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
-	jobs::{JobId, JobInfo, JobKey, PhaseOneResult, ValidatorOffence},
+	jobs::{JobId, JobInfo, JobKey, PhaseOneResult, ValidatorOffenceType},
 	traits::{
 		jobs::{JobToFee, MPCHandler},
 		roles::RolesHandler,
@@ -452,7 +452,7 @@ pub mod module {
 			job_key: JobKey,
 			job_id: JobId,
 			validator: T::AccountId,
-			offence: ValidatorOffence,
+			offence: ValidatorOffenceType,
 			signatures: Vec<u8>,
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;

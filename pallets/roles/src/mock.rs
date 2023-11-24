@@ -90,7 +90,7 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 
 	fn verify_validator_report(
 		_validator: AccountId,
-		_offence: ValidatorOffence,
+		_offence: ValidatorOffenceType,
 		_report: Vec<u8>,
 	) -> DispatchResult {
 		Ok(())
