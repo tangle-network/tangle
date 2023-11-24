@@ -20,7 +20,7 @@ pub struct ValidatorOffence<Offender> {
 }
 
 impl<Offender: Clone> Offence<Offender> for ValidatorOffence<Offender> {
-	const ID: Kind = *b"validator:offence";
+	const ID: Kind = *b"validator:offenc";
 	type TimeSlot = SessionIndex;
 
 	fn offenders(&self) -> Vec<Offender> {
