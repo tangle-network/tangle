@@ -24,9 +24,12 @@ fn test_assign_roles() {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }];
+		let role_records = vec![RoleStakingRecord {
+			metadata: RoleTypeMetadata::Tss(Default::default()),
+			re_staked: 5000,
+		}];
 
-		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
+		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records.clone()));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleAssigned {
 			account: 1,
@@ -38,11 +41,7 @@ fn test_assign_roles() {
 		// Verify ledger mapping
 		assert_eq!(
 			Roles::ledger(1),
-			Some(RoleStakingLedger {
-				stash: 1,
-				total: 5000,
-				roles: vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }]
-			})
+			Some(RoleStakingLedger { stash: 1, total: 5000, roles: role_records })
 		);
 	});
 }
@@ -55,11 +54,17 @@ fn test_assign_multiple_roles() {
 
 		// Roles user is interested in re-staking.
 		let role_records = vec![
-			RoleStakingRecord { role: RoleType::Tss, re_staked: 2500 },
-			RoleStakingRecord { role: RoleType::ZkSaas, re_staked: 2500 },
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::Tss(Default::default()),
+				re_staked: 2500,
+			},
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::ZkSaas(Default::default()),
+				re_staked: 2500,
+			},
 		];
 
-		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
+		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records.clone()));
 
 		// Lets verify role assigned to account.
 		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
@@ -69,14 +74,7 @@ fn test_assign_multiple_roles() {
 
 		assert_eq!(
 			Roles::ledger(1),
-			Some(RoleStakingLedger {
-				stash: 1,
-				total: 5000,
-				roles: vec![
-					RoleStakingRecord { role: RoleType::Tss, re_staked: 2500 },
-					RoleStakingRecord { role: RoleType::ZkSaas, re_staked: 2500 },
-				]
-			})
+			Some(RoleStakingLedger { stash: 1, total: 5000, roles: role_records })
 		);
 	});
 }
@@ -90,8 +88,14 @@ fn test_assign_roles_should_fail_if_total_re_stake_value_exceeds_max_re_stake_va
 
 		// Roles user is interested in re-staking.
 		let role_records = vec![
-			RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 },
-			RoleStakingRecord { role: RoleType::ZkSaas, re_staked: 5000 },
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::Tss(Default::default()),
+				re_staked: 5000,
+			},
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::ZkSaas(Default::default()),
+				re_staked: 5000,
+			},
 		];
 		// Since max re_stake limit is 5000 it should fail with `ExceedsMaxReStakeValue` error.
 		assert_err!(
@@ -107,7 +111,10 @@ fn test_clear_role() {
 		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }];
+		let role_records = vec![RoleStakingRecord {
+			metadata: RoleTypeMetadata::Tss(Default::default()),
+			re_staked: 5000,
+		}];
 
 		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
 
@@ -133,7 +140,10 @@ fn test_assign_roles_should_fail_if_not_validator() {
 		// we will use account 5 which is not a validator
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }];
+		let role_records = vec![RoleStakingRecord {
+			metadata: RoleTypeMetadata::Tss(Default::default()),
+			re_staked: 5000,
+		}];
 
 		assert_err!(
 			Roles::assign_roles(RuntimeOrigin::signed(5), role_records),
@@ -149,7 +159,10 @@ fn test_unbound_funds_should_work() {
 		// for providing TSS services.
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }];
+		let role_records = vec![RoleStakingRecord {
+			metadata: RoleTypeMetadata::Tss(Default::default()),
+			re_staked: 5000,
+		}];
 
 		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
 
@@ -185,7 +198,10 @@ fn test_unbound_funds_should_fail_if_role_assigned() {
 		// for providing TSS services.
 
 		// Roles user is interested in re-staking.
-		let role_records = vec![RoleStakingRecord { role: RoleType::Tss, re_staked: 5000 }];
+		let role_records = vec![RoleStakingRecord {
+			metadata: RoleTypeMetadata::Tss(Default::default()),
+			re_staked: 5000,
+		}];
 
 		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
 

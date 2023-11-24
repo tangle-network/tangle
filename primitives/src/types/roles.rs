@@ -13,12 +13,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-
-use crate::jobs::JobKey;
-use frame_support::pallet_prelude::*;
+use frame_support::{dispatch::Vec, pallet_prelude::*};
 
 /// Role type to be used in the system.
-#[derive(Encode, Decode, Clone, Copy, Debug, PartialEq, Eq, TypeInfo)]
+#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
 pub enum RoleType {
 	Tss,
 	ZkSaas,
@@ -26,25 +24,53 @@ pub enum RoleType {
 
 impl RoleType {
 	/// Checks if the role type is a TSS role.
-	pub fn is_tss(self) -> bool {
-		self == RoleType::Tss
+	pub fn is_tss(&self) -> bool {
+		matches!(self, RoleType::Tss)
 	}
 
 	/// Checks if the role type is a Zk-Saas role.
-	pub fn is_zksaas(self) -> bool {
-		self == RoleType::ZkSaas
+	pub fn is_zksaas(&self) -> bool {
+		matches!(self, RoleType::ZkSaas)
 	}
 }
 
-impl From<JobKey> for RoleType {
-	fn from(job_key: JobKey) -> Self {
-		match job_key {
-			JobKey::DKG => RoleType::Tss,
-			JobKey::DKGSignature => RoleType::Tss,
-			JobKey::ZkSaasPhaseOne => RoleType::ZkSaas,
-			JobKey::ZkSaasPhaseTwo => RoleType::ZkSaas,
+/// Metadata associated with a role type.
+#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
+pub enum RoleTypeMetadata {
+	Tss(TssRoleMetadata),
+	ZkSaas(ZkSaasRoleMetadata),
+}
+
+impl RoleTypeMetadata {
+	/// Return type of role.
+	pub fn get_role_type(&self) -> RoleType {
+		match self {
+			RoleTypeMetadata::Tss(_) => RoleType::Tss,
+			RoleTypeMetadata::ZkSaas(_) => RoleType::ZkSaas,
 		}
 	}
+
+	pub fn get_authority_key(&self) -> Vec<u8> {
+		match self {
+			RoleTypeMetadata::Tss(metadata) => metadata.authority_key.clone(),
+			RoleTypeMetadata::ZkSaas(metadata) => metadata.authority_key.clone(),
+		}
+	}
+}
+
+/// Associated metadata needed for a DKG role
+#[derive(Encode, Decode, Clone, Debug, PartialEq, Default, Eq, TypeInfo)]
+pub struct TssRoleMetadata {
+	/// The authority key associated with the role.
+	authority_key: Vec<u8>,
+}
+
+/// Associated metadata needed for a zkSaas role
+#[derive(Encode, Decode, Clone, Debug, PartialEq, Default, Eq, TypeInfo)]
+pub struct ZkSaasRoleMetadata {
+	/// The authority key associated with the role.
+	// TODO : Expand this
+	authority_key: Vec<u8>,
 }
 
 /// Role type to be used in the system.

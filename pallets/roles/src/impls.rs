@@ -15,8 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use sp_runtime::{DispatchResult, Percent, Saturating};
-use tangle_primitives::{roles::RoleType, traits::roles::RolesHandler};
+use frame_support::pallet_prelude::DispatchResult;
+use sp_runtime::{Percent, Saturating};
+use tangle_primitives::{jobs::JobKey, traits::roles::RolesHandler};
 
 /// Implements RolesHandler for the pallet.
 impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
@@ -24,12 +25,14 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	///
 	/// # Parameters
 	/// - `address`: The account ID of the validator.
-	/// - `role`: The key representing the type of job.
+	/// - `job`: The key representing the type of job.
 	///
 	/// # Returns
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	fn is_validator(address: T::AccountId, role: RoleType) -> bool {
-		Self::has_role(address, role)
+	fn is_validator(address: T::AccountId, job_key: JobKey) -> bool {
+		let assigned_roles = AccountRolesMapping::<T>::get(address);
+		let job_role = job_key.get_role_type();
+		assigned_roles.contains(&job_role)
 	}
 
 	/// Slash validator stake for the reported offence. The function should be a best effort
