@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use frame_support::{dispatch::Vec, pallet_prelude::*};
+use scale_info::prelude::string::String;
 use sp_arithmetic::Percent;
 use sp_std::ops::Add;
 
