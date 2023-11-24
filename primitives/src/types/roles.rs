@@ -17,6 +17,7 @@ use frame_support::{dispatch::Vec, pallet_prelude::*};
 use scale_info::prelude::string::String;
 use sp_arithmetic::Percent;
 use sp_std::ops::Add;
+use parity_scale_codec::alloc::string::ToString;
 
 /// Role type to be used in the system.
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
