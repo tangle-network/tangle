@@ -14,9 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::{JobKey, ValidatorOffence};
+use crate::{
+	jobs::{JobKey, ValidatorOffence},
+	roles::RoleTypeMetadata,
+};
 use sp_runtime::DispatchResult;
-use crate::roles::RoleTypeMetadata;
 
 /// A trait that handles roles associated with job types.
 pub trait RolesHandler<AccountId> {
@@ -54,7 +56,7 @@ pub trait RolesHandler<AccountId> {
 	///
 	/// # Returns
 	///
-	/// Returns an `Option<RoleTypeMetadata>` containing metadata information for the specified validator,
-	/// or `None` if no metadata is found.
+	/// Returns an `Option<RoleTypeMetadata>` containing metadata information for the specified
+	/// validator, or `None` if no metadata is found.
 	fn get_validator_metadata(address: AccountId, job_key: JobKey) -> Option<RoleTypeMetadata>;
 }

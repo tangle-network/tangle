@@ -13,11 +13,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+use crate::roles::RoleType;
 use frame_support::{dispatch::Vec, pallet_prelude::*, RuntimeDebug};
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::ecdsa;
-use crate::roles::RoleType;
 
 pub type JobId = u32;
 
@@ -275,13 +275,12 @@ pub enum JobResult {
 
 pub type KeysAndSignatures = Vec<(Vec<u8>, Vec<u8>)>;
 
-
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGResult {
 	/// Submitted key
 	pub key: Vec<u8>,
-	
+
 	/// List of participants' public keys
 	pub participants: Vec<ecdsa::Public>,
 
@@ -302,7 +301,7 @@ pub struct DKGSignatureResult {
 	pub signature: Vec<u8>,
 
 	/// The expected key for the signature
-	pub signing_key : Vec<u8>
+	pub signing_key: Vec<u8>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
@@ -315,9 +314,8 @@ pub struct ZkSaasPhaseOneResult {
 	pub participants: Vec<Vec<u8>>,
 
 	/// The data to verify
-	pub data: Vec<u8>
+	pub data: Vec<u8>,
 }
-
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
@@ -326,5 +324,5 @@ pub struct ZkSaasPhaseTwoResult {
 	pub data: Vec<u8>,
 
 	/// The expected key for the signature
-	pub signing_key : Vec<u8>
+	pub signing_key: Vec<u8>,
 }

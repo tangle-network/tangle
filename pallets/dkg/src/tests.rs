@@ -57,8 +57,12 @@ fn set_fees_works() {
 #[test]
 fn dkg_key_verifcation_works() {
 	new_test_ext().execute_with(|| {
-		let job_to_verify =
-			DKGResult { key: vec![], participants: vec![], keys_and_signatures: vec![], threshold: 2 };
+		let job_to_verify = DKGResult {
+			key: vec![],
+			participants: vec![],
+			keys_and_signatures: vec![],
+			threshold: 2,
+		};
 
 		// should fail for empty participants
 		assert_noop!(
