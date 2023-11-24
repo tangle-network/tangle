@@ -15,7 +15,7 @@
 use std::{collections::BTreeMap, marker::PhantomData};
 
 use crate::{
-	distributions::{combine_distributions, develop, testnet},
+	distributions::{combine_distributions, develop, mainnet, testnet},
 	testnet_fixtures::{
 		get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 	},
@@ -107,84 +107,6 @@ fn dkg_session_keys(
 	tangle_runtime::opaque::SessionKeys { grandpa, aura, dkg, im_online }
 }
 
-pub fn development_config(chain_id: u64) -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
-
-	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "dTNT".into());
-	properties.insert("tokenDecimals".into(), 18u32.into());
-	properties.insert("ss58Format".into(), 42.into());
-
-	Ok(ChainSpec::from_genesis(
-		// Name
-		"Development",
-		// ID
-		"dev",
-		ChainType::Development,
-		move || {
-			testnet_genesis(
-				wasm_binary,
-				// Initial PoA authorities
-				vec![
-					authority_keys_from_seed("Alice", "Alice//stash"),
-					authority_keys_from_seed("Bob", "Bob//stash"),
-					authority_keys_from_seed("Charlie", "Charlie//stash"),
-					authority_keys_from_seed("Dave", "Dave//stash"),
-					authority_keys_from_seed("Eve", "Eve//stash"),
-				],
-				vec![],
-				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				// Pre-funded accounts
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-				],
-				// Initial Chain Ids
-				vec![],
-				// Initial resource Ids
-				vec![],
-				// Initial proposers
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-				],
-				chain_id,
-				DEFAULT_DKG_KEYGEN_THRESHOLD,
-				DEFAULT_DKG_SIGNATURE_THRESHOLD,
-				combine_distributions(vec![
-					develop::get_evm_balance_distribution(),
-					testnet::get_evm_balance_distribution(),
-				]),
-				testnet::get_substrate_balance_distribution(),
-				true,
-			)
-		},
-		// Bootnodes
-		vec![],
-		// Telemetry
-		None,
-		// Protocol ID
-		None,
-		// Fork id
-		None,
-		// Properties
-		Some(properties),
-		// Extensions
-		None,
-	))
-}
-
 pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
@@ -263,151 +185,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn relayer_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
-	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "tTNT".into());
-	properties.insert("tokenDecimals".into(), 18u32.into());
-	properties.insert("ss58Format".into(), 42.into());
-
-	let relayer_testnet_dkg_keygen_threshold = 2;
-	let relayer_testnet_dkg_signature_threshold = 1;
-
-	Ok(ChainSpec::from_genesis(
-		// Name
-		"Local Testnet",
-		// ID
-		"local_testnet",
-		ChainType::Local,
-		move || {
-			testnet_genesis(
-				wasm_binary,
-				// Initial PoA authorities
-				vec![
-					authority_keys_from_seed("Alice", "Alice//stash"),
-					authority_keys_from_seed("Charlie", "Charlie//stash"),
-				],
-				vec![],
-				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				// Pre-funded accounts
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-				],
-				// Initial Chain Ids
-				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA, CHAIN_ID_DEMETER],
-				// Initial resource Ids
-				vec![
-					(RESOURCE_ID_HERMES_ATHENA, Default::default()),
-					(RESOURCE_ID_ATHENA_HERMES, Default::default()),
-				],
-				// Initial proposers
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-				],
-				chain_id,
-				relayer_testnet_dkg_keygen_threshold,
-				relayer_testnet_dkg_signature_threshold,
-				combine_distributions(vec![
-					develop::get_evm_balance_distribution(),
-					testnet::get_evm_balance_distribution(),
-				]),
-				testnet::get_substrate_balance_distribution(),
-				true,
-			)
-		},
-		// Bootnodes
-		vec![],
-		// Telemetry
-		None,
-		// Protocol ID
-		None,
-		// Fork id
-		None,
-		// Properties
-		Some(properties),
-		// Extensions
-		None,
-	))
-}
-
-pub fn standalone_live_config(chain_id: u64) -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
-	let boot_nodes = get_standalone_bootnodes();
-	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "tTNT".into());
-	properties.insert("tokenDecimals".into(), 18u32.into());
-	properties.insert("ss58Format".into(), 42.into());
-
-	Ok(ChainSpec::from_genesis(
-		"Tangle Standalone",
-		"tangle-standalone",
-		ChainType::Development,
-		move || {
-			testnet_genesis(
-				wasm_binary,
-				// Initial PoA authorities
-				get_standalone_initial_authorities(),
-				// initial nominators
-				vec![],
-				// Sudo account
-				get_testnet_root_key(),
-				// Pre-funded accounts
-				vec![
-					get_testnet_root_key(),
-					hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"].into(),
-					hex!["804808fb75d16340dc250871138a1a6f1dfa3cab9cc1fbd6f42960f1c39a950d"].into(),
-					hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"].into(),
-					hex!["cc195602a63bbdcf2ef4773c86fdbfefe042cb9aa8e3059d02e59a062d9c3138"].into(),
-					hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"].into(),
-					hex!["368ea402dbd9c9888ae999d6a799cf36e08673ee53c001dfb4529c149fc2c13b"].into(),
-					hex!["2c7f3cc085da9175414d1a9d40aa3aa161c8584a9ca62a938684dfbe90ae9d74"].into(),
-					hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
-					hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
-					hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
-				],
-				vec![],
-				vec![],
-				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
-				chain_id,
-				DEFAULT_DKG_KEYGEN_THRESHOLD,
-				DEFAULT_DKG_SIGNATURE_THRESHOLD,
-				combine_distributions(vec![
-					develop::get_evm_balance_distribution(),
-					testnet::get_evm_balance_distribution(),
-				]),
-				testnet::get_substrate_balance_distribution(),
-				true,
-			)
-		},
-		// Bootnodes
-		boot_nodes,
-		// Telemetry
-		None,
-		// Protocol ID
-		None,
-		// Fork id
-		None,
-		// Properties
-		Some(properties),
-		// Extensions
-		None,
-	))
-}
-
-pub fn standalone_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
+pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
 	let boot_nodes = get_standalone_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
@@ -485,56 +263,58 @@ pub fn standalone_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	))
 }
 
-// same as tangle_testnet but without bootnodes so that we can spinup same network locally
-pub fn standalone_local_config(chain_id: u64) -> Result<ChainSpec, String> {
+pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
+	let boot_nodes = get_standalone_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
 
 	Ok(ChainSpec::from_genesis(
-		"Tangle Standalone Local",
-		"tangle-standalone-local",
-		ChainType::Development,
+		"Tangle Mainnet",
+		"tangle-mainnet",
+		ChainType::Live,
 		move || {
-			testnet_genesis(
+			mainnet_genesis(
 				wasm_binary,
 				// Initial PoA authorities
-				get_standalone_initial_authorities(),
-				vec![],
+				vec![
+					authority_keys_from_seed("Alice", "Alice//stash"),
+					authority_keys_from_seed("Bob", "Bob//stash"),
+					authority_keys_from_seed("Charlie", "Charlie//stash"),
+					authority_keys_from_seed("Dave", "Dave//stash"),
+					authority_keys_from_seed("Eve", "Eve//stash"),
+				],
 				// Sudo account
 				get_testnet_root_key(),
 				// Pre-funded accounts
 				vec![
 					get_testnet_root_key(),
-					hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"].into(),
-					hex!["804808fb75d16340dc250871138a1a6f1dfa3cab9cc1fbd6f42960f1c39a950d"].into(),
-					hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"].into(),
-					hex!["cc195602a63bbdcf2ef4773c86fdbfefe042cb9aa8e3059d02e59a062d9c3138"].into(),
-					hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"].into(),
-					hex!["368ea402dbd9c9888ae999d6a799cf36e08673ee53c001dfb4529c149fc2c13b"].into(),
-					hex!["2c7f3cc085da9175414d1a9d40aa3aa161c8584a9ca62a938684dfbe90ae9d74"].into(),
-					hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
-					hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
-					hex!["6c73e5ee9f8614e7c9f23fd8f7257d12e061e75fcbeb3b50ed70eb87ba91f500"].into(),
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie"),
+					get_account_id_from_seed::<sr25519::Public>("Dave"),
+					get_account_id_from_seed::<sr25519::Public>("Eve"),
+					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
-				vec![],
-				vec![],
-				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
 				chain_id,
-				DEFAULT_DKG_KEYGEN_THRESHOLD,
-				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				combine_distributions(vec![
-					develop::get_evm_balance_distribution(),
-					testnet::get_evm_balance_distribution(),
+					mainnet::get_edgeware_genesis_balance_distribution(),
+					mainnet::get_leaderboard_balance_distribution(),
 				]),
-				testnet::get_substrate_balance_distribution(),
+				mainnet::get_substrate_balance_distribution(),
 				true,
 			)
 		},
 		// Bootnodes
-		vec![],
+		boot_nodes,
 		// Telemetry
 		None,
 		// Protocol ID
@@ -673,5 +453,99 @@ fn testnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
+	}
+}
+
+/// Configure initial storage state for FRAME modules.
+#[allow(clippy::too_many_arguments)]
+fn mainnet_genesis(
+	wasm_binary: &[u8],
+	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)>,
+	root_key: AccountId,
+	endowed_accounts: Vec<AccountId>,
+	chain_id: u64,
+	_genesis_evm_distribution: Vec<(H160, fp_evm::GenesisAccount)>,
+	genesis_substrate_distribution: Vec<(AccountId, Balance)>,
+	_enable_println: bool,
+) -> RuntimeGenesisConfig {
+	const ENDOWMENT: Balance = 100 * UNIT;
+	const STASH: Balance = ENDOWMENT / 100;
+
+	// stakers: all validators and nominators.
+	let _rng = rand::thread_rng();
+	let stakers = initial_authorities
+		.iter()
+		.map(|x| (x.0.clone(), x.0.clone(), STASH, StakerStatus::Validator))
+		.collect();
+
+	RuntimeGenesisConfig {
+		system: SystemConfig {
+			// Add Wasm runtime to storage.
+			code: wasm_binary.to_vec(),
+			..Default::default()
+		},
+		sudo: SudoConfig { key: Some(root_key) },
+		balances: BalancesConfig {
+			balances: endowed_accounts
+				.iter()
+				.cloned()
+				.map(|k| (k, ENDOWMENT))
+				.chain(genesis_substrate_distribution.iter().cloned().map(|(k, v)| (k, v)))
+				.collect(),
+		},
+		vesting: Default::default(),
+		indices: Default::default(),
+		session: SessionConfig {
+			keys: initial_authorities
+				.iter()
+				.map(|x| {
+					(
+						x.1.clone(),
+						x.0.clone(),
+						dkg_session_keys(x.3.clone(), x.2.clone(), x.4.clone(), x.5.clone()),
+					)
+				})
+				.collect::<Vec<_>>(),
+		},
+		staking: StakingConfig {
+			validator_count: initial_authorities.len() as u32,
+			minimum_validator_count: initial_authorities.len() as u32 - 1,
+			invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
+			slash_reward_fraction: Perbill::from_percent(10),
+			stakers,
+			..Default::default()
+		},
+		democracy: Default::default(),
+		council: Default::default(),
+		elections: Default::default(),
+		treasury: Default::default(),
+		aura: Default::default(),
+		grandpa: Default::default(),
+		im_online: ImOnlineConfig { keys: vec![] },
+		nomination_pools: Default::default(),
+		transaction_payment: Default::default(),
+		// EVM compatibility
+		evm_chain_id: EVMChainIdConfig { chain_id, ..Default::default() },
+		evm: Default::default(),
+		ethereum: Default::default(),
+		dynamic_fee: Default::default(),
+		base_fee: Default::default(),
+		// ETH2 light client
+		eth_2_client: Eth2ClientConfig {
+			networks: vec![(
+				webb_proposals::TypedChainId::Evm(1),
+				NetworkConfig::new(&Network::Mainnet),
+			)],
+			phantom: PhantomData,
+		},
+		// TODO: Remove these pallets and re-architect for mainnet
+		dkg: DKGConfig {
+			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
+			keygen_threshold: 2,
+			signature_threshold: 1,
+			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
+		},
+		dkg_proposals: Default::default(),
+		bridge_registry: Default::default(),
 	}
 }

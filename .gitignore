@@ -37,3 +37,4 @@ resources/para-2076-wasm
 .direnv
 .vscode
 
+scripts/edg-balances-new.json

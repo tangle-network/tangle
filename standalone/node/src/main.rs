@@ -9,6 +9,7 @@ mod cli;
 mod command;
 mod distributions;
 mod eth;
+pub mod mainnet_fixtures;
 mod rpc;
 mod signer_cli;
 mod testnet_fixtures;
