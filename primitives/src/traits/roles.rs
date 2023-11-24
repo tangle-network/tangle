@@ -16,6 +16,7 @@
 
 use crate::jobs::{JobKey, ValidatorOffence};
 use sp_runtime::DispatchResult;
+use crate::roles::RoleTypeMetadata;
 
 /// A trait that handles roles associated with job types.
 pub trait RolesHandler<AccountId> {
@@ -44,16 +45,16 @@ pub trait RolesHandler<AccountId> {
 	/// Returns Ok() if the address is a validator and was slashed
 	fn slash_validator(address: AccountId, offence: ValidatorOffence) -> DispatchResult;
 
-	/// Slash validator stake for the reported offence. The function should be a best effort
-	/// slashing, slash upto max possible by the offence type.
+	/// Retrieves metadata information for a validator associated with a specific job key.
 	///
-	/// # Parameters
+	/// # Arguments
 	///
-	/// - `address`: The account ID of the validator.
-	/// - `offence`: The offence reported against the validator
+	/// * `address` - The account ID of the validator for which metadata is to be retrieved.
+	/// * `job_key` - The unique identifier for the job associated with the validator.
 	///
 	/// # Returns
 	///
-	/// Returns Ok() if the address is a validator and was slashed
-	fn get_validator_metadata(address: AccountId, job_key: JobKey) -> DispatchResult;
+	/// Returns an `Option<RoleTypeMetadata>` containing metadata information for the specified validator,
+	/// or `None` if no metadata is found.
+	fn get_validator_metadata(address: AccountId, job_key: JobKey) -> Option<RoleTypeMetadata>;
 }

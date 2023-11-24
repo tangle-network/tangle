@@ -18,11 +18,13 @@ sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 tangle-primitives = { workspace = true, default-features = false }
 serde = { workspace = true }
+sp-io = { workspace = true }
 
 [dev-dependencies]
 pallet-balances = { workspace = true }
 smallvec = { workspace = true }
-sp-io = { workspace = true }
+sp-application-crypto = { workspace = true }
+sp-keystore = { workspace = true }
 
 [features]
 default = ["std"]
