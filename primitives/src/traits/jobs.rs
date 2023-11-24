@@ -55,6 +55,7 @@ pub trait MPCHandler<AccountId, BlockNumber, Balance> {
 		job: &JobInfo<AccountId, BlockNumber, Balance>,
 		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
 		result: Vec<u8>,
+		signatures: Vec<Vec<u8>>
 	) -> DispatchResult;
 
 	// Verify a validator report
@@ -71,6 +72,7 @@ pub trait MPCHandler<AccountId, BlockNumber, Balance> {
 		validator: AccountId,
 		offence: ValidatorOffence,
 		report: Vec<u8>,
+		signatures: Vec<Vec<u8>>
 	) -> DispatchResult;
 
 	/// Validate the authority key associated with a specific validator.

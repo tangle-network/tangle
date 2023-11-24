@@ -23,12 +23,15 @@ impl<T: Config> Pallet<T> {
 		job: &JobInfo<T::AccountId, BlockNumberFor<T>, tangle_primitives::Balance>,
 		phase_one_data: Option<PhaseOneResult<T::AccountId, BlockNumberFor<T>>>,
 		result: Vec<u8>,
+		signatures: Vec<Vec<u8>>
 	) -> DispatchResult {
+
 		if job.job_type.is_phase_one() {
 			return Self::verify_generated_dkg_key(
 				result,
-				job.job_type.get_participants().expect("already verified above"),
-				job.job_type.get_threshold().expect("already verified above"),
+				signatures,
+				job.job_type.clone().get_participants().expect("already verified above"),
+				job.job_type.clone().get_threshold().expect("already verified above"),
 			)
 		}
 
@@ -37,11 +40,15 @@ impl<T: Config> Pallet<T> {
 
 	fn verify_generated_dkg_key(
 		result: Vec<u8>,
+		signatures: Vec<Vec<u8>>,
 		authorities: Vec<T::AccountId>,
 		threshold: u8,
 	) -> DispatchResult {
 
 		// try to decode the result
+		
+
+		// 
 
 
 		Ok(())

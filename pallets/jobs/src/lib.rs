@@ -453,7 +453,7 @@ pub mod module {
 			job_id: JobId,
 			validator: T::AccountId,
 			offence: ValidatorOffence,
-			signatures: Vec<u8>,
+			signatures: Vec<Vec<u8>>,
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;
 

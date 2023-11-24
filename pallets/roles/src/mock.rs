@@ -84,6 +84,7 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 		_job: &JobInfo<AccountId, BlockNumber, Balance>,
 		_phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
 		_result: Vec<u8>,
+		_signatures: Vec<Vec<u8>>
 	) -> DispatchResult {
 		Ok(())
 	}
@@ -92,6 +93,7 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 		_validator: AccountId,
 		_offence: ValidatorOffence,
 		_report: Vec<u8>,
+		_signatures: Vec<Vec<u8>>,
 	) -> DispatchResult {
 		Ok(())
 	}

@@ -145,6 +145,7 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 		job: &JobInfo<AccountId, BlockNumber, Balance>,
 		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
 		result: Vec<u8>,
+		signatures: Vec<Vec<u8>>
 	) -> DispatchResult {
 		match job.job_type {
 			JobType::DKG(_) => MockDKGPallet::verify(job, phase_one_data, result),

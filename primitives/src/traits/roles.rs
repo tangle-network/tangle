@@ -43,4 +43,17 @@ pub trait RolesHandler<AccountId> {
 	///
 	/// Returns Ok() if the address is a validator and was slashed
 	fn slash_validator(address: AccountId, offence: ValidatorOffence) -> DispatchResult;
+
+	/// Slash validator stake for the reported offence. The function should be a best effort
+	/// slashing, slash upto max possible by the offence type.
+	///
+	/// # Parameters
+	///
+	/// - `address`: The account ID of the validator.
+	/// - `offence`: The offence reported against the validator
+	///
+	/// # Returns
+	///
+	/// Returns Ok() if the address is a validator and was slashed
+	fn get_validator_metadata(address: AccountId, job_key: JobKey) -> DispatchResult;
 }
