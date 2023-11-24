@@ -30,7 +30,10 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::{codec, traits::Zero, Saturating};
 use sp_std::{convert::TryInto, prelude::*, vec};
-use tangle_primitives::roles::RoleType;
+use tangle_primitives::{
+	roles::{RoleType, RoleTypeMetadata},
+	traits::jobs::JobsHandler,
+};
 mod impls;
 #[cfg(test)]
 pub(crate) mod mock;
@@ -67,8 +70,8 @@ pub struct RoleStakingLedger<T: Config> {
 #[derive(PartialEqNoBound, EqNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo, Clone)]
 #[scale_info(skip_type_params(T))]
 pub struct RoleStakingRecord<T: Config> {
-	/// Role type
-	pub role: RoleType,
+	/// Metadata associated with the role.
+	pub metadata: RoleTypeMetadata,
 	/// The total amount of the stash's balance that is re-staked for selected role.
 	#[codec(compact)]
 	pub re_staked: BalanceOf<T>,
@@ -95,7 +98,10 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
-	use tangle_primitives::traits::jobs::MPCHandler;
+	use tangle_primitives::{
+		jobs::{JobId, JobKey},
+		traits::jobs::MPCHandler,
+	};
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
@@ -107,6 +113,10 @@ pub mod pallet {
 		/// The overarching event type.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
+		/// The job manager mechanism.
+		type JobsHandler: JobsHandler<Self::AccountId>;
+
+		/// Max roles per account.
 		#[pallet::constant]
 		type MaxRolesPerAccount: Get<u32>;
 
@@ -125,6 +135,8 @@ pub mod pallet {
 		RoleRemoved { account: T::AccountId, role: RoleType },
 		/// Slashed validator.
 		Slashed { account: T::AccountId, amount: BalanceOf<T> },
+		/// Pending jobs,that cannot be opted out at the moment.
+		PendingJobs { pending_jobs: Vec<(JobKey, JobId)> },
 	}
 
 	#[pallet::error]
@@ -145,6 +157,8 @@ pub mod pallet {
 		AccountAlreadyPaired,
 		/// Stash controller account not found in Roles Ledger.
 		AccountNotPaired,
+		/// Role clear request failed due to pending jobs, which can't be opted out at the moment.
+		RoleClearRequestFailed,
 	}
 
 	/// Map from all "controller" accounts to the info regarding the staking.
@@ -205,7 +219,7 @@ pub mod pallet {
 
 			// Validate role staking records.
 			for record in records.clone() {
-				let role = record.role;
+				let role = record.metadata.get_role_type();
 				let re_stake_amount = record.re_staked;
 				// Check if role is already assigned.
 				ensure!(
@@ -216,7 +230,7 @@ pub mod pallet {
 				// validate the metadata
 				T::MPCHandler::validate_authority_key(
 					stash_account.clone(),
-					role.clone().get_authority_key(),
+					record.metadata.get_authority_key(),
 				)?;
 
 				// Re-staking amount of record should meet min re-staking amount requirement.
@@ -233,16 +247,16 @@ pub mod pallet {
 				);
 
 				ledger.total = ledger.total.saturating_add(re_stake_amount);
-				let role_info = RoleStakingRecord { role, re_staked: re_stake_amount };
-				ledger.roles.push(role_info);
+				ledger.roles.push(record);
 			}
 
 			// Now that records are validated we can add them and update ledger
 			for record in records {
-				Self::add_role(stash_account.clone(), record.role.clone())?;
+				let role = record.metadata.get_role_type();
+				Self::add_role(stash_account.clone(), role.clone())?;
 				Self::deposit_event(Event::<T>::RoleAssigned {
 					account: stash_account.clone(),
-					role: record.role,
+					role,
 				});
 			}
 			Self::update_ledger(&stash_account, &ledger);
@@ -277,9 +291,33 @@ pub mod pallet {
 				Error::<T>::NoRoleAssigned
 			);
 
-			// TODO: Call jobs manager to remove the services.
-			// On successful removal of services, remove the role from the mapping.
-			// Issue link for reference : https://github.com/webb-tools/tangle/issues/292
+			// Get active jobs for the role.
+			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
+			let mut role_cleared = true;
+			let mut pending_jobs = Vec::new();
+			for job in active_jobs {
+				let job_key = job.0;
+				if job_key.get_role_type() == role {
+					// Submit request to exit from the known set.
+					let res = T::JobsHandler::exit_from_known_set(
+						stash_account.clone(),
+						job_key.clone(),
+						job.1,
+					);
+
+					if res.is_err() {
+						role_cleared = false;
+						pending_jobs.push((job_key.clone(), job.1));
+					}
+				}
+			}
+
+			if !role_cleared {
+				// Role clear request failed due to pending jobs, which can't be opted out at the
+				// moment.
+				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
+				return Err(Error::<T>::RoleClearRequestFailed.into())
+			};
 
 			// Remove role from the mapping.
 			Self::remove_role(stash_account.clone(), role.clone())?;

@@ -11,7 +11,7 @@ use sp_core::{crypto::Ss58Codec, H160, U256};
 use sp_runtime::AccountId32;
 use tangle_runtime::{AccountId, Balance};
 
-fn get_git_root() -> PathBuf {
+pub fn get_git_root() -> PathBuf {
 	let git_root = std::process::Command::new("git")
 		.args(["rev-parse", "--show-toplevel"])
 		.output()
@@ -21,7 +21,7 @@ fn get_git_root() -> PathBuf {
 	PathBuf::from(git_root_str.trim())
 }
 
-fn read_contents(path: &Path) -> Value {
+pub fn read_contents(path: &Path) -> Value {
 	let mut file = File::open(path).expect("file should open read only");
 	let mut contents = String::new();
 	file.read_to_string(&mut contents).expect("file should be readable");
@@ -30,7 +30,7 @@ fn read_contents(path: &Path) -> Value {
 	json
 }
 
-fn read_contents_to_evm_accounts(path_str: &str) -> Vec<H160> {
+pub fn read_contents_to_evm_accounts(path_str: &str) -> Vec<H160> {
 	let mut path = get_git_root();
 	path.push(path_str);
 	let json = read_contents(&path);

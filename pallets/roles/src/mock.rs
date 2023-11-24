@@ -227,8 +227,25 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = ();
 }
 
+pub struct MockJobsHandler;
+
+impl JobsHandler<AccountId> for MockJobsHandler {
+	fn get_active_jobs(_validator: AccountId) -> Vec<(JobKey, JobId)> {
+		Default::default()
+	}
+
+	fn exit_from_known_set(
+		_validator: AccountId,
+		_job_key: JobKey,
+		_job_id: JobId,
+	) -> sp_runtime::DispatchResult {
+		Ok(())
+	}
+}
+
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type JobsHandler = MockJobsHandler;
 	type MaxRolesPerAccount = ConstU32<2>;
 	type MPCHandler = MockMPCHandler;
 	type WeightInfo = ();
