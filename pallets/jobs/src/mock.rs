@@ -28,7 +28,17 @@ pub type AccountId = u128;
 pub type Balance = u128;
 pub type BlockNumber = u64;
 
-use tangle_primitives::jobs::*;
+use sp_core::ecdsa;
+use sp_io::crypto::ecdsa_generate;
+use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
+use sp_std::sync::Arc;
+use tangle_primitives::{
+	jobs::*,
+	roles::{RoleTypeMetadata, TssRoleMetadata},
+};
+
+/// Key type for DKG keys
+pub const KEY_TYPE: sp_application_crypto::KeyTypeId = sp_application_crypto::KeyTypeId(*b"wdkg");
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
@@ -81,14 +91,6 @@ impl MockDKGPallet {
 			20
 		}
 	}
-
-	fn verify(
-		_job: &JobInfo<AccountId, BlockNumber, Balance>,
-		_phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
-		_result: Vec<u8>,
-	) -> DispatchResult {
-		Ok(())
-	}
 }
 
 pub struct MockZkSaasPallet;
@@ -99,14 +101,6 @@ impl MockZkSaasPallet {
 		} else {
 			20
 		}
-	}
-
-	fn verify(
-		_job: &JobInfo<AccountId, BlockNumber, Balance>,
-		_phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
-		_result: Vec<u8>,
-	) -> DispatchResult {
-		Ok(())
 	}
 }
 
@@ -136,28 +130,28 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 	fn slash_validator(_address: AccountId, _offence: ValidatorOffence) -> DispatchResult {
 		Ok(())
 	}
+
+	fn get_validator_metadata(address: AccountId, _job_key: JobKey) -> Option<RoleTypeMetadata> {
+		match address {
+			100 => None, // to simulate error
+			_ => Some(RoleTypeMetadata::Tss(TssRoleMetadata {
+				authority_key: mock_pub_key().to_raw_vec(),
+			})),
+		}
+	}
 }
 
 pub struct MockMPCHandler;
 
 impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(
-		job: &JobInfo<AccountId, BlockNumber, Balance>,
-		phase_one_data: Option<PhaseOneResult<AccountId, BlockNumber>>,
-		result: Vec<u8>,
-	) -> DispatchResult {
-		match job.job_type {
-			JobType::DKG(_) => MockDKGPallet::verify(job, phase_one_data, result),
-			JobType::DKGSignature(_) => MockDKGPallet::verify(job, phase_one_data, result),
-			JobType::ZkSaasPhaseOne(_) => MockZkSaasPallet::verify(job, phase_one_data, result),
-			JobType::ZkSaasPhaseTwo(_) => MockZkSaasPallet::verify(job, phase_one_data, result),
-		}
+	fn verify(_data: JobResult) -> DispatchResult {
+		Ok(())
 	}
 
 	fn verify_validator_report(
 		_validator: AccountId,
 		_offence: ValidatorOffence,
-		_report: Vec<u8>,
+		_signatures: Vec<Vec<u8>>,
 	) -> DispatchResult {
 		Ok(())
 	}
@@ -210,5 +204,13 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 		.assimilate_storage(&mut t)
 		.unwrap();
 
-	t.into()
+	// set to block 1 to test events
+	let mut ext = sp_io::TestExternalities::new(t);
+	ext.execute_with(|| System::set_block_number(1));
+	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
+	ext
+}
+
+fn mock_pub_key() -> ecdsa::Public {
+	ecdsa_generate(KEY_TYPE, None)
 }

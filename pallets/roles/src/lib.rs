@@ -35,6 +35,7 @@ use tangle_primitives::{
 	traits::jobs::JobsHandler,
 };
 mod impls;
+use sp_std::collections::btree_map::BTreeMap;
 #[cfg(test)]
 pub(crate) mod mock;
 #[cfg(test)]
@@ -62,7 +63,7 @@ pub struct RoleStakingLedger<T: Config> {
 	#[codec(compact)]
 	pub total: BalanceOf<T>,
 	/// The list of roles and their re-staked amounts.
-	pub roles: Vec<RoleStakingRecord<T>>,
+	pub roles: BTreeMap<RoleType, RoleStakingRecord<T>>,
 }
 
 /// The information regarding the re-staked amount for a particular role.
@@ -79,7 +80,7 @@ pub struct RoleStakingRecord<T: Config> {
 impl<T: Config> RoleStakingLedger<T> {
 	/// Initializes the default object using the given `validator`.
 	pub fn default_from(stash: T::AccountId) -> Self {
-		Self { stash, total: Zero::zero(), roles: vec![] }
+		Self { stash, total: Zero::zero(), roles: Default::default() }
 	}
 
 	/// Returns `true` if the stash account has no funds at all.
@@ -246,7 +247,7 @@ pub mod pallet {
 				);
 
 				ledger.total = ledger.total.saturating_add(re_stake_amount);
-				ledger.roles.push(record);
+				ledger.roles.insert(record.metadata.get_role_type(), record);
 			}
 
 			// Now that records are validated we can add them and update ledger
