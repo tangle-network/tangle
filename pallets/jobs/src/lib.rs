@@ -40,10 +40,15 @@ use tangle_primitives::{
 
 mod functions;
 mod impls;
-mod mock;
 mod rpc;
-mod tests;
 mod types;
+
+#[cfg(test)]
+mod mock;
+#[cfg(test)]
+mod mock_evm;
+#[cfg(test)]
+mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -336,6 +341,7 @@ pub mod module {
 					for participant in participants.clone() {
 						let key =
 							T::RolesHandler::get_validator_metadata(participant, job_key.clone());
+
 						ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
 						let pub_key = sp_core::ecdsa::Public::from_slice(
 							&key.expect("checked above").get_authority_key()[0..33],
