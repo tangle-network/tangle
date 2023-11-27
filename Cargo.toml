@@ -19,7 +19,7 @@ members = [
   "standalone/runtime",
   "standalone/runtime/evm_tracer",
   "pallets/*",
-   "pallets/roles",
+  "pallets/roles",
   "pallets/jobs/rpc",
   "pallets/jobs/rpc/runtime-api",
   "precompiles/utils",
@@ -30,6 +30,7 @@ members = [
   "precompiles/call-permit",
   "precompiles/proxy",
   "precompiles/preimage",
+  "precompiles/jobs",
 ]
 resolver = "2"
 
