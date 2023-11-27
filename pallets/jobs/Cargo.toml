@@ -19,6 +19,10 @@ sp-std = { workspace = true }
 tangle-primitives = { workspace = true, default-features = false }
 
 [dev-dependencies]
+ethers = "2.0"
+
+serde = { workspace = true }
+serde_json = { workspace = true }
 libsecp256k1 = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-timestamp = { workspace = true }
@@ -26,7 +30,9 @@ smallvec = { workspace = true }
 sp-io = { workspace = true }
 sp-application-crypto = { workspace = true }
 sp-keystore = { workspace = true }
-
+ethereum = { workspace = true, features = ["with-codec"] }
+hex-literal = { workspace = true }
+hex = { workspace = true }
 
 # Frontier Primitive
 fp-account = { workspace = true }

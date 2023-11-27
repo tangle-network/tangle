@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use crate as pallet_jobs;
+use crate::{self as pallet_jobs, mock_evm::address_build};
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Everything},
@@ -31,6 +31,7 @@ use sp_io::crypto::ecdsa_generate;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_std::sync::Arc;
 use tangle_primitives::{
+	currency::UNIT,
 	jobs::*,
 	roles::{RoleTypeMetadata, TssRoleMetadata},
 };
@@ -212,9 +213,20 @@ pub fn to_account_id32(id: u8) -> AccountId32 {
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
+
+	let pairs = (0..10).map(|i| address_build(i as u8)).collect::<Vec<_>>();
+
+	let initial_balance: u128 = 10 * UNIT;
+	let balances: Vec<(AccountId32, u128)> =
+		(0..10).map(|i| (pairs[i].account_id.clone(), initial_balance)).collect();
+
 	// We use default for brevity, but you can configure as desired if needed.
 	pallet_balances::GenesisConfig::<Runtime> {
-		balances: vec![(to_account_id32(10), 100), (to_account_id32(20), 100)],
+		balances: vec![(to_account_id32(10), 100u128), (to_account_id32(20), 100u128)]
+			.iter()
+			.cloned()
+			.chain(balances.iter().cloned())
+			.collect::<Vec<(AccountId32, u128)>>(),
 	}
 	.assimilate_storage(&mut t)
 	.unwrap();
