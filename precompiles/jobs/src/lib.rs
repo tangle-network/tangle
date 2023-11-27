@@ -84,31 +84,4 @@ where
 		event.record(handle)?;
 		Ok(hash)
 	}
-
-	/// Clear an unrequested preimage from the runtime storage.
-	///
-	/// Parameters:
-	/// * hash: The preimage cleared from storage
-	#[precompile::public("unnotePreimage(bytes32)")]
-	fn unnote_preimage(handle: &mut impl PrecompileHandle, hash: H256) -> EvmResult {
-		let event = log1(
-			handle.context().address,
-			SELECTOR_LOG_PREIMAGE_UNNOTED,
-			solidity::encode_arguments(hash),
-		);
-		handle.record_log_costs(&[&event])?;
-
-		let hash: Runtime::Hash = hash
-			.try_into()
-			.map_err(|_| RevertReason::custom("H256 is Runtime::Hash").in_field("hash"))?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		let call = PreimageCall::<Runtime>::unnote_preimage { hash };
-
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		event.record(handle)?;
-
-		Ok(())
-	}
 }

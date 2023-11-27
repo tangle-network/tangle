@@ -121,6 +121,8 @@ pub mod module {
 		ValidatorMetadataNotFound,
 		/// Unexpected result provided
 		ResultNotExpectedType,
+		/// No permission to change permitted caller
+		NoPermission,
 	}
 
 	#[pallet::event]
@@ -551,6 +553,46 @@ pub mod module {
 			Self::try_validator_removal_from_job(job_key, job_id, validator)?;
 
 			Ok(())
+		}
+
+		/// Withdraw rewards accumulated by the caller.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: The origin of the call (typically a signed account).
+		///
+		/// # Errors
+		///
+		/// This function can return an error if:
+		///
+		/// - The caller is not authorized.
+		/// - No rewards are available for the caller.
+		/// - The reward transfer operation fails.
+		///
+		/// # Details
+		///
+		/// This function allows a caller to withdraw rewards that have been accumulated in their
+		/// account.
+		#[pallet::call_index(4)]
+		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
+		pub fn set_permitted_caller(
+			origin: OriginFor<T>,
+			job_key: JobKey,
+			job_id: JobId,
+			new_permitted_caller: T::AccountId,
+		) -> DispatchResult {
+			let caller = ensure_signed(origin)?;
+
+			KnownResults::<T>::try_mutate(job_key, job_id, |job| -> DispatchResult {
+				let job = job.as_mut().ok_or(Error::<T>::JobNotFound)?;
+
+				// ensure the caller is the current permitted caller
+				ensure!(job.permitted_caller == Some(caller), Error::<T>::NoPermission);
+
+				job.permitted_caller = Some(new_permitted_caller);
+
+				Ok(())
+			})
 		}
 	}
 }
