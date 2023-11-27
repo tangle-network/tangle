@@ -16,7 +16,7 @@
 use frame_support::{dispatch::Vec, pallet_prelude::*};
 
 /// Role type to be used in the system.
-#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
+#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
 pub enum RoleType {
 	Tss,
 	ZkSaas,
@@ -62,7 +62,7 @@ impl RoleTypeMetadata {
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Default, Eq, TypeInfo)]
 pub struct TssRoleMetadata {
 	/// The authority key associated with the role.
-	authority_key: Vec<u8>,
+	pub authority_key: Vec<u8>,
 }
 
 /// Associated metadata needed for a zkSaas role
