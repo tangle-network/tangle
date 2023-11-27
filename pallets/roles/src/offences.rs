@@ -8,12 +8,11 @@ use tangle_primitives::jobs::ValidatorOffenceType;
 
 #[derive(PartialEq, Clone, Debug, Encode, Decode)]
 pub struct ValidatorOffence<Offender> {
-	/// The current session index in which we report the validators that submitted an invalid
-	/// ethereum log.
+	/// The current session index in which we report the validators.
 	pub session_index: SessionIndex,
 	/// The size of the validator set in current session/era.
 	pub validator_set_count: u32,
-	/// Authorities that validated the invalid log.
+	/// Authorities that committed an offence.
 	pub offenders: Vec<Offender>,
 	/// The different types of the offence.
 	pub offence_type: ValidatorOffenceType,
