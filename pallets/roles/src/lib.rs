@@ -126,7 +126,7 @@ pub mod pallet {
 		type MPCHandler: MPCHandler<Self::AccountId, BlockNumberFor<Self>, BalanceOf<Self>>;
 
 		/// The inflation reward to distribute per era
-		type InflationRewardPerEra: Get<BalanceOf<Self>>;
+		type InflationRewardPerSession: Get<BalanceOf<Self>>;
 
 		/// The inflation distribution based on validator type
 		type ValidatorRewardDistribution: Get<ValidatorRewardDistribution>;

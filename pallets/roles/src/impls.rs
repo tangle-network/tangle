@@ -187,7 +187,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	pub fn distribute_rewards() -> DispatchResult {
-		let total_rewards = T::InflationRewardPerEra::get();
+		let total_rewards = T::InflationRewardPerSession::get();
 
 		let mut tss_validators: Vec<T::AccountId> = Default::default();
 		let mut zksaas_validators: Vec<T::AccountId> = Default::default();
