@@ -53,6 +53,22 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		Self::do_slash(address, slash_amount.into())?;
 		Ok(())
 	}
+
+	fn get_validator_metadata(address: T::AccountId, job_key: JobKey) -> Option<RoleTypeMetadata> {
+		if Self::is_validator(address.clone(), job_key.clone()) {
+			let ledger = Self::ledger(&address);
+			if let Some(ledger) = ledger {
+				return match ledger.roles.get(&job_key.get_role_type()) {
+					Some(stake) => Some(stake.metadata.clone()),
+					None => None,
+				}
+			} else {
+				return None
+			}
+		} else {
+			return None
+		}
+	}
 }
 
 /// Functions for the pallet.
