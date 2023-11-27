@@ -1461,6 +1461,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bzip2"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bdb116a6ef3f6c3698828873ad02c3014b3c85cadb88496095628e3ef1e347f8"
+dependencies = [
+ "bzip2-sys",
+ "libc",
+]
+
+[[package]]
 name = "bzip2-sys"
 version = "0.1.11+1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2007,6 +2017,12 @@ dependencies = [
  "proc-macro-hack",
  "tiny-keccak",
 ]
+
+[[package]]
+name = "constant_time_eq"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "245097e9a4535ee1e3e3931fcfcd55a796a44c643e8596ff6566d68f09b87bbc"
 
 [[package]]
 name = "constant_time_eq"
@@ -3773,11 +3789,13 @@ dependencies = [
  "const-hex",
  "dunce",
  "ethers-core",
+ "ethers-etherscan",
  "eyre",
  "prettyplease 0.2.14",
  "proc-macro2",
  "quote",
  "regex",
+ "reqwest",
  "serde",
  "serde_json",
  "syn 2.0.31",
@@ -3901,6 +3919,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokio 1.32.0",
+ "tokio-tungstenite 0.20.0",
  "tracing",
  "tracing-futures",
  "url",
@@ -3952,6 +3971,7 @@ dependencies = [
  "serde",
  "serde_json",
  "solang-parser",
+ "svm-rs",
  "thiserror",
  "tiny-keccak",
  "tokio 1.32.0",
@@ -8967,12 +8987,33 @@ dependencies = [
 name = "pallet-jobs"
 version = "0.5.0"
 dependencies = [
+ "ethereum",
+ "ethers",
+ "fp-account",
+ "fp-consensus",
+ "fp-dynamic-fee",
+ "fp-ethereum",
+ "fp-evm",
+ "fp-rpc",
+ "fp-self-contained",
+ "fp-storage",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "hex",
+ "hex-literal 0.3.4",
+ "libsecp256k1",
  "pallet-balances",
+ "pallet-base-fee",
+ "pallet-dynamic-fee",
+ "pallet-ethereum",
+ "pallet-evm",
+ "pallet-evm-chain-id",
+ "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
+ "serde",
+ "serde_json",
  "smallvec 1.11.0",
  "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
@@ -9441,6 +9482,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7924d1d0ad836f665c9065e26d016c673ece3993f30d340068b16f282afc1156"
 
 [[package]]
+name = "password-hash"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7676374caaee8a325c9e7a2ae557f216c5563a171d6997b0ef8a65af35147700"
+dependencies = [
+ "base64ct",
+ "rand_core 0.6.4",
+ "subtle",
+]
+
+[[package]]
 name = "paste"
 version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9501,6 +9553,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "83a0692ec44e4cf1ef28ca317f14f8f07da2d95ec3fa01f86e4467b725e60917"
 dependencies = [
  "digest 0.10.7",
+ "hmac 0.12.1",
+ "password-hash",
+ "sha2 0.10.7",
 ]
 
 [[package]]
@@ -15364,6 +15419,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "svm-rs"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "20689c7d03b6461b502d0b95d6c24874c7d24dea2688af80486a130a06af3b07"
+dependencies = [
+ "dirs",
+ "fs2",
+ "hex",
+ "once_cell",
+ "reqwest",
+ "semver 1.0.18",
+ "serde",
+ "serde_json",
+ "sha2 0.10.7",
+ "thiserror",
+ "url",
+ "zip",
+]
+
+[[package]]
 name = "swap_or_not_shuffle"
 version = "0.2.0"
 source = "git+https://github.com/webb-tools/lighthouse.git?rev=ef72e752eaf45f4b7eb64dd8dbb0fe088f955df8#ef72e752eaf45f4b7eb64dd8dbb0fe088f955df8"
@@ -15998,8 +16073,11 @@ checksum = "2b2dbec703c26b00d74844519606ef15d09a7d6857860f84ad223dec002ddea2"
 dependencies = [
  "futures-util",
  "log",
+ "rustls 0.21.7",
  "tokio 1.32.0",
+ "tokio-rustls",
  "tungstenite 0.20.0",
+ "webpki-roots 0.23.1",
 ]
 
 [[package]]
@@ -16484,6 +16562,7 @@ dependencies = [
  "httparse",
  "log",
  "rand 0.8.5",
+ "rustls 0.21.7",
  "sha1",
  "thiserror",
  "url",
@@ -19599,6 +19678,26 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.31",
+]
+
+[[package]]
+name = "zip"
+version = "0.6.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "760394e246e4c28189f19d488c058bf16f564016aefac5d32bb1f3b51d5e9261"
+dependencies = [
+ "aes 0.8.3",
+ "byteorder",
+ "bzip2",
+ "constant_time_eq 0.1.5",
+ "crc32fast",
+ "crossbeam-utils",
+ "flate2",
+ "hmac 0.12.1",
+ "pbkdf2 0.11.0",
+ "sha1",
+ "time 0.3.28",
+ "zstd 0.11.2+zstd.1.5.2",
 ]
 
 [[package]]

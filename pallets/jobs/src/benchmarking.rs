@@ -3,6 +3,7 @@ use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
 use frame_support::traits::Currency;
 use frame_system::RawOrigin;
 use sp_runtime::traits::{Bounded, Zero};
+use sp_std::vec;
 use tangle_primitives::jobs::{DKGJobType, JobId, JobKey, JobType};
 
 benchmarks! {
@@ -12,8 +13,8 @@ benchmarks! {
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
-			job_type: JobType::DKG(DKGJobType { participants: vec![caller.clone(), caller.clone()], threshold: 1 }),
-			};
+			job_type: JobType::DKG(DKGJobType { participants: vec![caller.clone(), caller.clone()], threshold: 1, permitted_caller: None }),
+		};
 
 	}: _(RawOrigin::Signed(caller.clone()), job.clone())
 
@@ -24,8 +25,8 @@ benchmarks! {
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
-			job_type: JobType::DKG(DKGJobType { participants: vec![caller.clone(), validator2], threshold: 1 }),
-			};
+			job_type: JobType::DKG(DKGJobType { participants: vec![caller.clone(), validator2], threshold: 1, permitted_caller: None }),
+		};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
 		let job_key: JobKey = JobKey::DKG;
 		let job_id: JobId = 0;
@@ -48,7 +49,7 @@ benchmarks! {
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
-			job_type: JobType::DKG(DKGJobType { participants: vec![caller.clone(), validator2, validator3], threshold: 2 }),
+			job_type: JobType::DKG(DKGJobType { participants: vec![caller.clone(), validator2, validator3], threshold: 2, permitted_caller: None }),
 			};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
 		let job_key: JobKey = JobKey::DKG;
