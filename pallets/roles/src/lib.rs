@@ -24,6 +24,7 @@ use frame_support::{
 	traits::{Currency, Get},
 	CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
 };
+use tangle_primitives::roles::ValidatorRewardDistribution;
 
 pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
@@ -42,6 +43,8 @@ pub(crate) mod mock;
 mod tests;
 mod weights;
 pub use weights::WeightInfo;
+
+use sp_runtime::RuntimeAppPublic;
 
 /// The ledger of a (bonded) stash.
 #[derive(
@@ -123,6 +126,15 @@ pub mod pallet {
 		/// The config that verifies MPC related functions
 		type MPCHandler: MPCHandler<Self::AccountId, BlockNumberFor<Self>, BalanceOf<Self>>;
 
+		/// The inflation reward to distribute per era
+		type InflationRewardPerSession: Get<BalanceOf<Self>>;
+
+		/// The inflation distribution based on validator type
+		type ValidatorRewardDistribution: Get<ValidatorRewardDistribution>;
+
+		/// The type used to identify an authority
+		type AuthorityId: RuntimeAppPublic + Decode;
+
 		type WeightInfo: WeightInfo;
 	}
 
@@ -172,7 +184,7 @@ pub mod pallet {
 	/// Mapping of resource to bridge index
 	pub type AccountRolesMapping<T: Config> = StorageMap<
 		_,
-		Blake2_256,
+		Blake2_128Concat,
 		T::AccountId,
 		BoundedVec<RoleType, T::MaxRolesPerAccount>,
 		ValueQuery,

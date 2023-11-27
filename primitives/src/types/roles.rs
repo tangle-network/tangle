@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use frame_support::{dispatch::Vec, pallet_prelude::*};
+use parity_scale_codec::alloc::string::ToString;
+use scale_info::prelude::string::String;
+use sp_arithmetic::Percent;
+use sp_std::ops::Add;
 
 /// Role type to be used in the system.
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
@@ -80,4 +84,26 @@ pub enum ReStakingOption {
 	Full,
 	// Re-stake only the given amount of funds for selected role.
 	Custom(u64),
+}
+
+/// Represents the reward distribution percentages for validators in a key generation process.
+pub struct ValidatorRewardDistribution {
+	/// The percentage share of the reward allocated for TSS
+	tss_share: Percent,
+	/// The percentage share of the reward allocated for the ZK-SaaS
+	zksaas_share: Percent,
+}
+
+impl ValidatorRewardDistribution {
+	pub fn try_new(tss_share: Percent, zksaas_share: Percent) -> Result<Self, String> {
+		if !tss_share.add(zksaas_share).is_one() {
+			return Err("Shares must add to One".to_string())
+		}
+
+		Ok(Self { tss_share, zksaas_share })
+	}
+
+	pub fn get_reward_distribution(self) -> (Percent, Percent) {
+		(self.tss_share, self.zksaas_share)
+	}
 }
