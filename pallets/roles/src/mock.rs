@@ -27,10 +27,9 @@ use sp_core::H256;
 use sp_runtime::{
 	testing::{Header, UintAuthorityId},
 	traits::IdentityLookup,
-	BuildStorage, DispatchResult, Perbill,
+	BuildStorage, DispatchResult, Perbill, Percent,
 };
-use tangle_primitives::{jobs::*, traits::jobs::MPCHandler};
-
+use tangle_primitives::{jobs::*, roles::ValidatorRewardDistribution, traits::jobs::MPCHandler};
 pub type AccountId = u64;
 pub type Balance = u128;
 pub type BlockNumber = u64;
@@ -239,11 +238,19 @@ impl JobsHandler<AccountId> for MockJobsHandler {
 	}
 }
 
+parameter_types! {
+	pub InflationRewardPerSession: Balance = 10_000;
+	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
+}
+
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type JobsHandler = MockJobsHandler;
 	type MaxRolesPerAccount = ConstU32<2>;
 	type MPCHandler = MockMPCHandler;
+	type InflationRewardPerSession = InflationRewardPerSession;
+	type AuthorityId = UintAuthorityId;
+	type ValidatorRewardDistribution = Reward;
 	type WeightInfo = ();
 }
 
