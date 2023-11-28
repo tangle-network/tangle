@@ -22,7 +22,10 @@ use frame_support::{
 	pallet_prelude::DispatchResult,
 	traits::{Currency, OneSessionHandler},
 };
-use sp_runtime::{traits::CheckedDiv, traits::Convert, Percent};
+use sp_runtime::{
+	traits::{CheckedDiv, Convert},
+	Percent,
+};
 
 use tangle_primitives::{
 	jobs::{JobKey, ReportValidatorOffence},
