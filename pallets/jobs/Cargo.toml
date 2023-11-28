@@ -20,7 +20,6 @@ tangle-primitives = { workspace = true, default-features = false }
 
 [dev-dependencies]
 ethers = "2.0"
-
 serde = { workspace = true }
 serde_json = { workspace = true }
 libsecp256k1 = { workspace = true }
