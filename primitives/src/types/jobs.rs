@@ -330,15 +330,15 @@ pub enum ValidatorOffenceType {
 	ApprovedInvalidAction,
 }
 
-/// An offence that is filed if a validator misbehaves.
+/// An offence report that is filed if a validator misbehaves.
 #[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq)]
-pub struct ValidatorOffence<Offender> {
+pub struct ReportValidatorOffence<Offender> {
 	/// The current session index in which offence is reported.
 	pub session_index: u32,
 	/// The size of the validator set in current session/era.
 	pub validator_set_count: u32,
 	/// The type of offence
-	pub offence: ValidatorOffenceType,
+	pub offence_type: ValidatorOffenceType,
 	/// Offenders
 	pub offenders: Vec<Offender>,
 }

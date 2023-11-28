@@ -127,7 +127,7 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		validators.contains(&address)
 	}
 
-	fn slash_validator(_address: AccountId, _offence: ValidatorOffenceType) -> DispatchResult {
+	fn report_offence(_offence_report: ReportValidatorOffence<AccountId>) -> DispatchResult {
 		Ok(())
 	}
 

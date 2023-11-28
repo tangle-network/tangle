@@ -14,10 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::offences::ValidatorOffence;
+
 use super::*;
 use frame_support::pallet_prelude::DispatchResult;
-use sp_runtime::{Percent, Saturating};
-use tangle_primitives::{jobs::JobKey, traits::roles::RolesHandler};
+use sp_runtime::{traits::Convert, Percent};
+use tangle_primitives::{
+	jobs::{JobKey, ReportValidatorOffence},
+	traits::roles::RolesHandler,
+};
 
 /// Implements RolesHandler for the pallet.
 impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
@@ -35,23 +40,19 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		assigned_roles.contains(&job_role)
 	}
 
-	/// Slash validator stake for the reported offence. The function should be a best effort
-	/// slashing, slash upto max possible by the offence type.
+	/// Report offence for the given validator.
+	/// This function will report validators for committing offence.
 	///
 	/// # Parameters
-	/// - `address`: The account ID of the validator.
-	/// - `offence`: The offence reported against the validator
+	/// - `offence_report`: The offence report.
 	///
 	/// # Returns
-	/// DispatchResult emitting `Slashed` event if validator is slashed
-	fn slash_validator(
-		address: T::AccountId,
-		_offence: tangle_primitives::jobs::ValidatorOffenceType,
+	///
+	/// Returns Ok() if validator offence report is submitted successfully.
+	fn report_offence(
+		offence_report: ReportValidatorOffence<T::AccountId>,
 	) -> sp_runtime::DispatchResult {
-		// TODO: implement calculation of slash amount.
-		let slash_amount = 1000u64;
-		Self::do_slash(address, slash_amount.into())?;
-		Ok(())
+		Self::report_offence(offence_report)
 	}
 
 	fn get_validator_metadata(address: T::AccountId, job_key: JobKey) -> Option<RoleTypeMetadata> {
@@ -78,7 +79,7 @@ impl<T: Config> Pallet<T> {
 	/// # Parameters
 	/// - `account`: The account ID of the validator.
 	/// - `role`: Selected role type.
-	pub fn add_role(account: T::AccountId, role: RoleType) -> DispatchResult {
+	pub(crate) fn add_role(account: T::AccountId, role: RoleType) -> DispatchResult {
 		AccountRolesMapping::<T>::try_mutate(&account, |roles| {
 			if !roles.contains(&role) {
 				roles.try_push(role.clone()).map_err(|_| Error::<T>::MaxRoles)?;
@@ -95,7 +96,7 @@ impl<T: Config> Pallet<T> {
 	/// # Parameters
 	/// - `account`: The account ID of the validator.
 	/// - `role`: Selected role type.
-	pub fn remove_role(account: T::AccountId, role: RoleType) -> DispatchResult {
+	pub(crate) fn remove_role(account: T::AccountId, role: RoleType) -> DispatchResult {
 		AccountRolesMapping::<T>::try_mutate(&account, |roles| {
 			if roles.contains(&role) {
 				roles.retain(|r| r != &role);
@@ -115,7 +116,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Returns
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	pub fn has_role(account: T::AccountId, role: RoleType) -> bool {
+	pub(crate) fn has_role(account: T::AccountId, role: RoleType) -> bool {
 		let assigned_roles = AccountRolesMapping::<T>::get(account);
 		match assigned_roles.iter().find(|r| **r == role) {
 			Some(_) => true,
@@ -130,7 +131,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Returns
 	/// Returns boolean value.
-	pub fn can_exit(account: T::AccountId) -> bool {
+	pub(crate) fn can_exit(account: T::AccountId) -> bool {
 		let assigned_roles = AccountRolesMapping::<T>::get(account);
 		if assigned_roles.is_empty() {
 			// Role is cleared, account can chill, unbound and withdraw funds.
@@ -146,37 +147,45 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Returns
 	/// Returns the max re-stake amount.
-	pub fn calculate_max_re_stake_amount(total_stake: BalanceOf<T>) -> BalanceOf<T> {
+	pub(crate) fn calculate_max_re_stake_amount(total_stake: BalanceOf<T>) -> BalanceOf<T> {
 		// User can re-stake max 50% of the total stake
 		Percent::from_percent(50) * total_stake
 	}
 
-	/// Get the total amount of the balance that is locked for the given stash.
+	/// Report offence for the given validator.
+	/// This function will report validators for committing offence.
 	///
 	/// # Parameters
-	/// - `stash`: The stash account ID.
+	/// - `offence_report`: The offence report.
 	///
 	/// # Returns
-	/// The total amount of the balance that can be slashed.
-	pub fn slashable_balance_of(stash: &T::AccountId) -> BalanceOf<T> {
-		// Weight note: consider making the stake accessible through stash.
-		Self::ledger(&stash).map(|l| l.total).unwrap_or_default()
-	}
-
-	/// Slash the given amount from the stash account.
 	///
-	/// # Parameters
-	/// - `address`: The stash account ID.
-	/// - `slash_amount`: The amount to be slashed.
-	pub(crate) fn do_slash(
-		address: T::AccountId,
-		slash_amount: T::CurrencyBalance,
+	/// Returns Ok() if validator offence report is submitted successfully.
+	pub(crate) fn report_offence(
+		offence_report: ReportValidatorOffence<T::AccountId>,
 	) -> sp_runtime::DispatchResult {
-		let mut ledger = Self::ledger(&address).ok_or(Error::<T>::AccountNotPaired)?;
-		let (_imbalance, _missing) = T::Currency::slash(&address, slash_amount.into());
-		ledger.total = ledger.total.saturating_sub(slash_amount.into());
-		Self::update_ledger(&address, &ledger);
-		Self::deposit_event(Event::Slashed { account: address, amount: slash_amount });
+		let offenders = offence_report
+			.offenders
+			.into_iter()
+			.enumerate()
+			.filter_map(|(_, id)| {
+				// Get validator id from account id.
+				let id = <<T as Config>::ValidatorSet as ValidatorSet<
+					<T as frame_system::Config>::AccountId,
+				>>::ValidatorIdOf::convert(id)?;
+				<T::ValidatorSet as ValidatorSetWithIdentification<T::AccountId>>::IdentificationOf::convert(
+					id.clone(),
+				).map(|full_id| (id, full_id))
+			})
+			.collect::<Vec<IdentificationTuple<T>>>();
+
+		let offence = ValidatorOffence {
+			session_index: offence_report.session_index,
+			validator_set_count: offence_report.validator_set_count,
+			offenders,
+			offence_type: offence_report.offence_type,
+		};
+		let _ = T::ReportOffences::report_offence(sp_std::vec![], offence.clone());
 		Ok(())
 	}
 
