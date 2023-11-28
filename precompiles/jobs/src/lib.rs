@@ -73,7 +73,7 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submit_dkg_phase_one_job(uint64,address[],uint8,address)")]
+	#[precompile::public("submitDkgPhaseOneJob(uint64,address[],uint8,address)")]
 	fn submit_dkg_phase_one_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: u64,
@@ -126,7 +126,7 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submit_dkg_phase_two_job(uint64,uint32,bytes)")]
+	#[precompile::public("submitDkgPhaseTwoJob(uint64,uint32,bytes)")]
 	fn submit_dkg_phase_two_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: u64,
@@ -170,7 +170,7 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submit_zksaas_phase_one_job(uint64,address[],address)")]
+	#[precompile::public("submitDkgzkSaasPhaseOneJob(uint64,address[],address)")]
 	fn submit_zksaas_phase_one_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: u64,
@@ -222,7 +222,7 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submit_zksaas_phase_two_job(uint64,uint32,bytes)")]
+	#[precompile::public("submitzkSaasPhaseTwoJob(uint64,uint32,bytes)")]
 	fn submit_zksaas_phase_two_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: u64,
@@ -263,7 +263,7 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("withdraw_rewards()")]
+	#[precompile::public("withdrawRewards()")]
 	fn withdraw_rewards(handle: &mut impl PrecompileHandle) -> EvmResult {
 		// Convert caller's Ethereum address to Substrate account ID
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -291,7 +291,7 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("set_permitted_caller(uint8,uint32,address)")]
+	#[precompile::public("setPermittedCaller(uint8,uint32,address)")]
 	fn set_permitted_caller(
 		handle: &mut impl PrecompileHandle,
 		job_key: u8,
