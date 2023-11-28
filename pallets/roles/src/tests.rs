@@ -261,6 +261,63 @@ fn test_unbound_funds_should_work_if_no_role_assigned() {
 	});
 }
 
+#[test]
+fn test_reward_dist_works_as_expected_with_one_validator() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		assert_eq!(Balances::free_balance(1), 20_000);
+
+		// Roles user is interested in re-staking.
+		let role_records = vec![
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::Tss(Default::default()),
+				re_staked: 2500,
+			},
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::ZkSaas(Default::default()),
+				re_staked: 2500,
+			},
+		];
+
+		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
+
+		// The reward is 100, we have 5 authorities
+		assert_ok!(Roles::distribute_rewards());
+
+		// ensure the distribution is correct
+		assert_eq!(Balances::free_balance(1), 20_000 + 10_000);
+	});
+}
+
+#[test]
+fn test_reward_dist_works_as_expected_with_multiple_validator() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		let _reward_amount = 10_000;
+		assert_eq!(Balances::free_balance(1), 20_000);
+
+		// Roles user is interested in re-staking.
+		let role_records = vec![
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::Tss(Default::default()),
+				re_staked: 2500,
+			},
+			RoleStakingRecord {
+				metadata: RoleTypeMetadata::ZkSaas(Default::default()),
+				re_staked: 2500,
+			},
+		];
+
+		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records.clone()));
+		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(2), role_records));
+
+		// The reward is 100, we have 5 authorities
+		assert_ok!(Roles::distribute_rewards());
+
+		// ensure the distribution is correct
+		assert_eq!(Balances::free_balance(1), 20_000 + 5000);
+		assert_eq!(Balances::free_balance(2), 20_000 + 5000);
+	});
+}
+
 // Test report offence should work.
 #[test]
 fn test_report_offence_should_work() {

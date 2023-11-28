@@ -17,8 +17,13 @@
 use crate::offences::ValidatorOffence;
 
 use super::*;
-use frame_support::pallet_prelude::DispatchResult;
-use sp_runtime::{traits::Convert, Percent};
+use frame_support::{
+	log,
+	pallet_prelude::DispatchResult,
+	traits::{Currency, OneSessionHandler},
+};
+use sp_runtime::{traits::CheckedDiv, traits::Convert, Percent};
+
 use tangle_primitives::{
 	jobs::{JobKey, ReportValidatorOffence},
 	traits::roles::RolesHandler,
@@ -204,5 +209,84 @@ impl<T: Config> Pallet<T> {
 	/// Kill the stash account and remove all related information.
 	pub(crate) fn kill_stash(stash: &T::AccountId) {
 		<Ledger<T>>::remove(&stash);
+	}
+
+	pub fn distribute_rewards() -> DispatchResult {
+		let total_rewards = T::InflationRewardPerSession::get();
+
+		let mut tss_validators: Vec<T::AccountId> = Default::default();
+		let mut zksaas_validators: Vec<T::AccountId> = Default::default();
+
+		for (acc, role_types) in AccountRolesMapping::<T>::iter() {
+			if role_types.contains(&RoleType::Tss) {
+				tss_validators.push(acc.clone())
+			}
+
+			if role_types.contains(&RoleType::ZkSaas) {
+				zksaas_validators.push(acc)
+			}
+		}
+
+		log::debug!("Found {:?} tss validators", tss_validators.len());
+		log::debug!("Found {:?} zksaas validators", zksaas_validators.len());
+
+		let reward_distribution = T::ValidatorRewardDistribution::get();
+
+		let dist = reward_distribution.get_reward_distribution();
+
+		let tss_validator_reward = dist
+			.0
+			.mul_floor(total_rewards)
+			.checked_div(&(tss_validators.len() as u32).into())
+			.unwrap_or(Zero::zero());
+		let zksaas_validators_reward = dist
+			.1
+			.mul_floor(total_rewards)
+			.checked_div(&(zksaas_validators.len() as u32).into())
+			.unwrap_or(Zero::zero());
+
+		log::debug!("Reward for tss validator : {:?}", tss_validator_reward);
+		log::debug!("Reward for zksaas validator : {:?}", zksaas_validators_reward);
+
+		for validator in tss_validators {
+			T::Currency::deposit_creating(&validator, tss_validator_reward);
+		}
+
+		for validator in zksaas_validators {
+			T::Currency::deposit_creating(&validator, zksaas_validators_reward);
+		}
+
+		Ok(())
+	}
+}
+
+impl<T: Config> sp_runtime::BoundToRuntimeAppPublic for Pallet<T> {
+	type Public = T::AuthorityId;
+}
+
+impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
+	type Key = T::AuthorityId;
+
+	fn on_genesis_session<'a, I: 'a>(_validators: I)
+	where
+		I: Iterator<Item = (&'a T::AccountId, T::AuthorityId)>,
+	{
+		// nothing to be done
+	}
+
+	fn on_new_session<'a, I: 'a>(_changed: bool, _validators: I, _queued_validators: I)
+	where
+		I: Iterator<Item = (&'a T::AccountId, T::AuthorityId)>,
+	{
+		// nothing to be done
+	}
+
+	fn on_disabled(_i: u32) {
+		// ignore
+	}
+
+	// Distribute the inflation rewards
+	fn on_before_session_ending() {
+		let _ = Self::distribute_rewards();
 	}
 }
