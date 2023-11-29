@@ -349,5 +349,8 @@ fn test_report_offence_should_work() {
 
 		// Lets report offence.
 		assert_ok!(Roles::report_offence(offence_report));
+		// Should slash 700 tokens
+		let ledger = Roles::ledger(1).unwrap();
+		assert_eq!(ledger.total, 4300);
 	});
 }

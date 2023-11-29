@@ -24,9 +24,10 @@ use frame_support::{
 };
 use sp_runtime::{
 	traits::{CheckedDiv, Convert},
-	Percent,
+	Perbill, Percent,
 };
 
+use sp_staking::offence::Offence;
 use tangle_primitives::{
 	jobs::{JobKey, ReportValidatorOffence},
 	traits::roles::RolesHandler,
@@ -159,6 +160,39 @@ impl<T: Config> Pallet<T> {
 		// User can re-stake max 50% of the total stake
 		Percent::from_percent(50) * total_stake
 	}
+	/// Calculate slash value for re-staked amount
+	///
+	/// # Parameters
+	/// - slash_fraction: Slash fraction of total-stake
+	/// - `total_stake`: Total stake of the validator
+	///
+	/// # Returns
+	/// Returns the slash value
+	pub(crate) fn calculate_re_stake_slash_value(
+		slash_fraction: Perbill,
+		total_stake: BalanceOf<T>,
+	) -> BalanceOf<T> {
+		// Slash value for given slash fraction
+		slash_fraction * total_stake
+	}
+
+	/// Apply slash on re-staked amount.
+	/// This function will apply slash on re-staked amount and update ledger.
+	///
+	/// # Parameters
+	/// - `account`: The account ID of the validator.
+	/// - `slash_value`: Slash value.
+	pub(crate) fn apply_slash_on_re_stake(account: T::AccountId, slash_value: BalanceOf<T>) {
+		// Get ledger for the validator account
+		let mut ledger = Ledger::<T>::get(&account)
+			.unwrap_or(RoleStakingLedger::<T>::default_from(account.clone()));
+
+		// apply slash
+		ledger.total = ledger.total.saturating_sub(slash_value);
+		println!("ledger.total: {:?}", ledger.total);
+		// Update ledger
+		Self::update_ledger(&account, &ledger);
+	}
 
 	/// Report offence for the given validator.
 	/// This function will report validators for committing offence.
@@ -173,6 +207,7 @@ impl<T: Config> Pallet<T> {
 		offence_report: ReportValidatorOffence<T::AccountId>,
 	) -> sp_runtime::DispatchResult {
 		let offenders = offence_report
+			.clone()
 			.offenders
 			.into_iter()
 			.enumerate()
@@ -194,6 +229,18 @@ impl<T: Config> Pallet<T> {
 			offence_type: offence_report.offence_type,
 		};
 		let _ = T::ReportOffences::report_offence(sp_std::vec![], offence.clone());
+		// Update and apply slash on ledger for all offenders
+		let slash_fraction = offence.slash_fraction(offence.validator_set_count);
+		println!("Slash fraction: {:?}", slash_fraction);
+		for offender in offence_report.offenders {
+			let staking_ledger =
+				pallet_staking::Ledger::<T>::get(&offender).ok_or(Error::<T>::NotValidator)?;
+			let re_stake_slash_value =
+				Self::calculate_re_stake_slash_value(slash_fraction, staking_ledger.total);
+			println!("Re-stake slash value: {:?}", re_stake_slash_value);
+			Self::apply_slash_on_re_stake(offender, re_stake_slash_value);
+		}
+
 		Ok(())
 	}
 
