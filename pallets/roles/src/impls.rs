@@ -231,13 +231,11 @@ impl<T: Config> Pallet<T> {
 		let _ = T::ReportOffences::report_offence(sp_std::vec![], offence.clone());
 		// Update and apply slash on ledger for all offenders
 		let slash_fraction = offence.slash_fraction(offence.validator_set_count);
-		println!("Slash fraction: {:?}", slash_fraction);
 		for offender in offence_report.offenders {
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&offender).ok_or(Error::<T>::NotValidator)?;
 			let re_stake_slash_value =
 				Self::calculate_re_stake_slash_value(slash_fraction, staking_ledger.total);
-			println!("Re-stake slash value: {:?}", re_stake_slash_value);
 			Self::apply_slash_on_re_stake(offender, re_stake_slash_value);
 		}
 

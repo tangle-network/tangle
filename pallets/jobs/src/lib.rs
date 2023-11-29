@@ -536,7 +536,7 @@ pub mod module {
 			T::MPCHandler::verify_validator_report(validator.clone(), offence.clone(), signatures)?;
 
 			// TODO: Report validator offence.
-			// T::RolesHandler::repor_offence(validator.clone(), offence)?;
+			// T::RolesHandler::report_offence(validator.clone(), offence)?;
 
 			// Trigger validator removal
 			Self::try_validator_removal_from_job(job_key, job_id, validator)?;
