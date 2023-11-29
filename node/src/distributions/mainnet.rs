@@ -5,7 +5,7 @@ use fp_evm::GenesisAccount;
 use sp_core::{H160, U256};
 use sp_runtime::AccountId32;
 use std::collections::BTreeMap;
-use tangle_runtime::{AccountId, Balance, ExistentialDeposit};
+use tangle_testnet_runtime::{AccountId, Balance, ExistentialDeposit};
 
 use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts};
 

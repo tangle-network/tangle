@@ -1,5 +1,5 @@
 [package]
-name = "tangle-standalone-runtime"
+name = "tangle-mainnet-runtime"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }

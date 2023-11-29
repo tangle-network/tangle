@@ -113,14 +113,14 @@ rpc-primitives-txpool = { workspace = true }
 rpc-trace = { workspace = true }
 rpc-txpool = { workspace = true }
 
-tangle-runtime = { workspace = true }
+tangle-testnet-runtime = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
-runtime-benchmarks = ["tangle-runtime/runtime-benchmarks"]
-integration-tests = ["tangle-runtime/integration-tests"]
-with-rocksdb-weights = ["tangle-runtime/with-rocksdb-weights"]
-with-paritydb-weights = ["tangle-runtime/with-paritydb-weights"]
+runtime-benchmarks = ["tangle-testnet-runtime/runtime-benchmarks"]
+integration-tests = ["tangle-testnet-runtime/integration-tests"]
+with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]
+with-paritydb-weights = ["tangle-testnet-runtime/with-paritydb-weights"]
 rocksdb = [
   "sc-cli/rocksdb",
   "sc-service/rocksdb",

@@ -29,7 +29,7 @@ pub use fc_consensus::FrontierBlockImport;
 use fc_rpc::{EthTask, OverrideHandle};
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 // Local
-use tangle_runtime::opaque::Block;
+use tangle_testnet_runtime::opaque::Block;
 
 use crate::service::{FullBackend, FullClient};
 

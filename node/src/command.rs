@@ -22,7 +22,7 @@ use futures::TryFutureExt;
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
-use tangle_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use tangle_testnet_runtime::{Block, EXISTENTIAL_DEPOSIT};
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {

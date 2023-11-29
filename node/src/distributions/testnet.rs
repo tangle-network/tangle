@@ -9,7 +9,7 @@ use fp_evm::GenesisAccount;
 use serde_json::Value;
 use sp_core::{crypto::Ss58Codec, H160, U256};
 use sp_runtime::AccountId32;
-use tangle_runtime::{AccountId, Balance};
+use tangle_testnet_runtime::{AccountId, Balance};
 
 pub fn get_git_root() -> PathBuf {
 	let git_root = std::process::Command::new("git")

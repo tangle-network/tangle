@@ -17,7 +17,7 @@ use sp_api::{CallApiAt, ProvideRuntimeApi};
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_runtime::traits::Block as BlockT;
 // Runtime
-use tangle_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
+use tangle_testnet_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
 
 pub mod eth;
 pub mod tracing;

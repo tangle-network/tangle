@@ -28,7 +28,7 @@ use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use tangle_runtime::{
+use tangle_testnet_runtime::{
 	AccountId, Balance, BalancesConfig, DKGConfig, DKGId, DKGProposalsConfig, EVMChainIdConfig,
 	EVMConfig, ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill,
 	RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
@@ -103,8 +103,8 @@ fn dkg_session_keys(
 	aura: AuraId,
 	im_online: ImOnlineId,
 	dkg: DKGId,
-) -> tangle_runtime::opaque::SessionKeys {
-	tangle_runtime::opaque::SessionKeys { grandpa, aura, dkg, im_online }
+) -> tangle_testnet_runtime::opaque::SessionKeys {
+	tangle_testnet_runtime::opaque::SessionKeys { grandpa, aura, dkg, im_online }
 }
 
 pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
