@@ -83,7 +83,7 @@ webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.g
 tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/runtime" }
 
 # Tangle Dependencies
-pallet-ecdsa-claims = { path = "pallets/claims", default-features = false }
+pallet-airdrop-claims = { path = "pallets/claims", default-features = false }
 pallet-jobs = { path = "pallets/jobs", default-features = false }
 pallet-roles = { path = "pallets/roles", default-features = false }
 

@@ -8109,6 +8109,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-airdrop-claims"
+version = "0.5.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.3.4",
+ "libsecp256k1",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-vesting",
+ "parity-scale-codec",
+ "rustc-hex",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-io 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-runtime 24.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-std 8.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+]
+
+[[package]]
 name = "pallet-aura"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
@@ -8378,27 +8400,6 @@ dependencies = [
  "scale-info",
  "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-inherents",
- "sp-runtime 24.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
- "sp-std 8.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
-]
-
-[[package]]
-name = "pallet-ecdsa-claims"
-version = "0.5.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "hex-literal 0.3.4",
- "libsecp256k1",
- "pallet-balances",
- "pallet-vesting",
- "parity-scale-codec",
- "rustc-hex",
- "scale-info",
- "serde",
- "serde_json",
- "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
- "sp-io 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-runtime 24.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-std 8.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
 ]
@@ -15553,6 +15554,7 @@ dependencies = [
  "hex-literal 0.3.4",
  "log",
  "num_enum 0.5.11",
+ "pallet-airdrop-claims",
  "pallet-aura",
  "pallet-authorship",
  "pallet-bags-list",
@@ -15567,7 +15569,6 @@ dependencies = [
  "pallet-dkg-proposal-handler",
  "pallet-dkg-proposals",
  "pallet-dynamic-fee",
- "pallet-ecdsa-claims",
  "pallet-election-provider-multi-phase",
  "pallet-elections-phragmen",
  "pallet-eth2-light-client",
