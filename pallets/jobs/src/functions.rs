@@ -188,7 +188,7 @@ impl<T: Config> Pallet<T> {
 						};
 						SubmittedJobs::<T>::insert(job_key.clone(), job_id, job_info);
 					},
-					// Case for JobKey::ZkSaasPhaseTwo
+					// Case for JobKey::ZkSaasProve
 					// - Extract information from 'phase1'
 					// - Create a new 'job_type' of ZkSaasPhaseOneJobType with adjusted parameters
 					//   (remove the reported validator)
@@ -201,9 +201,21 @@ impl<T: Config> Pallet<T> {
 							.into_iter()
 							.filter(|x| x != &validator)
 							.collect();
+						let phase_one_id = job_info
+							.job_type
+							.get_phase_one_id()
+							.ok_or(Error::<T>::PhaseOneResultNotFound)?;
+						let phase_one =
+							SubmittedJobs::<T>::get(JobKey::ZkSaasCircuit, phase_one_id)
+								.ok_or(Error::<T>::JobNotFound)?;
+						let system = match phase_one.job_type {
+							JobType::ZkSaasCircuit(ref info) => info.system.clone(),
+							_ => return Err(Error::<T>::JobNotFound.into()),
+						};
 
 						let job_type = JobType::ZkSaasCircuit(ZkSaasCircuitJobType {
 							participants: new_participants,
+							system,
 						});
 
 						// charge the validator fee for job submission

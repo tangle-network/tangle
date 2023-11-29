@@ -61,6 +61,90 @@ pub enum JobType<AccountId> {
 	ZkSaasProve(ZkSaasProveJobType),
 }
 
+/// Enum representing different types of data sources.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum HyperData {
+	/// Raw data, stored on-chain.
+	///
+	/// Only use this for small files.
+	Raw(Vec<u8>),
+	/// IPFS CID. The CID is stored on-chain.
+	/// The actual data is stored off-chain.
+	IPFS(Vec<u8>),
+	/// HTTP URL. The URL is stored on-chain.
+	/// The actual data is stored off-chain.
+	/// The URL is expected to be accessible via HTTP GET.
+	HTTP(Vec<u8>),
+}
+
+/// Enum representing different types of circuits and snark schemes.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum ZkSaasSystem {
+	Groth16(Groth16System),
+	Plonk(PlonkSystem),
+}
+
+/// Represents the Groth16 system for zk-SNARKs.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct Groth16System {
+	/// R1CS circuit file.
+	pub circuit: HyperData,
+	/// Proving key file.
+	pub proving_key: HyperData,
+	/// Circom WASM file.
+	pub wasm: HyperData,
+}
+
+/// TODO: Add Plonk system
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct PlonkSystem {}
+
+/// Represents ZK-SNARK proving request
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum ZkSaasProveRequest {
+	/// Groth16 proving request
+	Groth16(Groth16ProveRequest),
+	/// Plonk proving request
+	Plonk(PlonkProveRequest),
+}
+
+/// Represents Groth16 proving request
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct Groth16ProveRequest {
+	/// Public input that are used during the verification
+	pub public_input: Vec<HyperData>,
+	/// `a` is the full assignment (full_assginment[0] is 1)
+	/// a = full_assginment[1..]
+	/// Each element contains a PSS of the witness
+	pub a_shares: Vec<HyperData>,
+	/// `ax` is the auxiliary input
+	/// ax = full_assginment[num_inputs..]
+	/// Each element contains a PSS of the auxiliary input
+	pub ax: Vec<HyperData>,
+	/// PSS of the QAP polynomials
+	pub qap_shares: Vec<QAPShare>,
+}
+
+/// Represents QAP share
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct QAPShare {
+	pub a: HyperData,
+	pub b: HyperData,
+	pub c: HyperData,
+}
+
+/// TODO: Add Plonk proving request
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct PlonkProveRequest {}
+
 impl<AccountId> JobType<AccountId> {
 	/// Checks if the job type is a phase one job.
 	pub fn is_phase_one(&self) -> bool {
@@ -114,18 +198,14 @@ impl<AccountId> JobType<AccountId> {
 	/// This function is intended for simple checks and may need improvement in the future.
 	pub fn sanity_check(&self) -> bool {
 		match self {
-			JobType::DKG(info) =>
-				if info.participants.len() > info.threshold.into() {
-					return true
-				},
-			_ => return true,
+			JobType::DKG(info) => info.participants.len() > info.threshold.into(),
+			JobType::ZkSaasCircuit(info) => !info.participants.is_empty(),
+			_ => true,
 		}
-
-		false
 	}
 
 	/// Gets the phase one ID for phase two jobs, if applicable.
-	pub fn get_phase_one_id(self) -> Option<u32> {
+	pub fn get_phase_one_id(&self) -> Option<u32> {
 		use crate::jobs::JobType::*;
 		match self {
 			DKGSignature(info) => Some(info.phase_one_id),
@@ -163,6 +243,8 @@ pub struct DKGSignatureJobType {
 pub struct ZkSaasCircuitJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
+	/// ZK-SNARK Proving system
+	pub system: ZkSaasSystem,
 }
 
 /// Represents the (zk-SNARK) Phase Two job type.
@@ -172,8 +254,8 @@ pub struct ZkSaasProveJobType {
 	/// The phase one ID.
 	pub phase_one_id: u32,
 
-	/// The submission data as a vector of bytes.
-	pub submission: Vec<u8>,
+	/// ZK-SNARK Proving request
+	pub request: ZkSaasProveRequest,
 }
 
 /// Enum representing different states of a job.
@@ -312,17 +394,12 @@ pub struct ZkSaasCircuitResult {
 
 	/// List of participants' public keys
 	pub participants: Vec<Vec<u8>>,
-
-	/// The data to verify
-	pub data: Vec<u8>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ZkSaasProofResult {
-	/// The data to verify
-	pub data: Vec<u8>,
-
-	/// The expected key for the signature
-	pub signing_key: Vec<u8>,
+	pub a: Vec<u8>,
+	pub b: Vec<u8>,
+	pub c: Vec<u8>,
 }
