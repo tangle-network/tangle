@@ -1,6 +1,6 @@
 use super::*;
 use sp_runtime::traits::Zero;
-use tangle_primitives::jobs::{DKGJobType, JobKey, JobType, ZkSaasPhaseOneJobType};
+use tangle_primitives::jobs::{DKGJobType, JobKey, JobType, ZkSaasCircuitJobType};
 
 impl<T: Config> Pallet<T> {
 	/// Add a job ID to the validator lookup.
@@ -194,7 +194,7 @@ impl<T: Config> Pallet<T> {
 					//   (remove the reported validator)
 					// - Charge the validator fee for job submission
 					// - Store information about the submitted job in 'SubmittedJobs'
-					JobKey::ZkSaasPhaseTwo => {
+					JobKey::ZkSaasProve => {
 						let new_participants = phase1
 							.participants
 							.clone()
@@ -202,7 +202,7 @@ impl<T: Config> Pallet<T> {
 							.filter(|x| x != &validator)
 							.collect();
 
-						let job_type = JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
+						let job_type = JobType::ZkSaasCircuit(ZkSaasCircuitJobType {
 							participants: new_participants,
 						});
 

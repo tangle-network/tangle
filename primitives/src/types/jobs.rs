@@ -55,17 +55,17 @@ pub enum JobType<AccountId> {
 	DKG(DKGJobType<AccountId>),
 	/// DKG Signature job type.
 	DKGSignature(DKGSignatureJobType),
-	/// (zk-SNARK) Phase One job type.
-	ZkSaasPhaseOne(ZkSaasPhaseOneJobType<AccountId>),
-	/// (zk-SNARK) Phase Two job type.
-	ZkSaasPhaseTwo(ZkSaasPhaseTwoJobType),
+	/// (zk-SNARK) Create Circuit job type.
+	ZkSaasCircuit(ZkSaasCircuitJobType<AccountId>),
+	/// (zk-SNARK) Create Proof job type.
+	ZkSaasProve(ZkSaasProveJobType),
 }
 
 impl<AccountId> JobType<AccountId> {
 	/// Checks if the job type is a phase one job.
 	pub fn is_phase_one(&self) -> bool {
 		use crate::jobs::JobType::*;
-		if matches!(self, DKG(_) | ZkSaasPhaseOne(_)) {
+		if matches!(self, DKG(_) | ZkSaasCircuit(_)) {
 			return true
 		}
 		false
@@ -76,7 +76,7 @@ impl<AccountId> JobType<AccountId> {
 		use crate::jobs::JobType::*;
 		match self {
 			DKG(info) => Some(info.participants),
-			ZkSaasPhaseOne(info) => Some(info.participants),
+			ZkSaasCircuit(info) => Some(info.participants),
 			_ => None,
 		}
 	}
@@ -94,9 +94,9 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_job_key(&self) -> JobKey {
 		match self {
 			JobType::DKG(_) => JobKey::DKG,
-			JobType::ZkSaasPhaseOne(_) => JobKey::ZkSaasPhaseOne,
+			JobType::ZkSaasCircuit(_) => JobKey::ZkSaasCircuit,
 			JobType::DKGSignature(_) => JobKey::DKGSignature,
-			JobType::ZkSaasPhaseTwo(_) => JobKey::ZkSaasPhaseTwo,
+			JobType::ZkSaasProve(_) => JobKey::ZkSaasProve,
 		}
 	}
 
@@ -104,7 +104,7 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_previous_phase_job_key(&self) -> Option<JobKey> {
 		match self {
 			JobType::DKGSignature(_) => Some(JobKey::DKG),
-			JobType::ZkSaasPhaseTwo(_) => Some(JobKey::ZkSaasPhaseOne),
+			JobType::ZkSaasProve(_) => Some(JobKey::ZkSaasCircuit),
 			_ => None,
 		}
 	}
@@ -129,7 +129,7 @@ impl<AccountId> JobType<AccountId> {
 		use crate::jobs::JobType::*;
 		match self {
 			DKGSignature(info) => Some(info.phase_one_id),
-			ZkSaasPhaseTwo(info) => Some(info.phase_one_id),
+			ZkSaasProve(info) => Some(info.phase_one_id),
 			_ => None,
 		}
 	}
@@ -160,7 +160,7 @@ pub struct DKGSignatureJobType {
 /// Represents the (zk-SNARK) Phase One job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasPhaseOneJobType<AccountId> {
+pub struct ZkSaasCircuitJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
 }
@@ -168,7 +168,7 @@ pub struct ZkSaasPhaseOneJobType<AccountId> {
 /// Represents the (zk-SNARK) Phase Two job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasPhaseTwoJobType {
+pub struct ZkSaasProveJobType {
 	/// The phase one ID.
 	pub phase_one_id: u32,
 
@@ -195,10 +195,10 @@ pub enum JobKey {
 	DKG,
 	/// DKG Signature job type.
 	DKGSignature,
-	/// (zk-SNARK) Phase One job type.
-	ZkSaasPhaseOne,
-	/// (zk-SNARK) Phase Two job type.
-	ZkSaasPhaseTwo,
+	/// (zk-SNARK) Create Circuit job type.
+	ZkSaasCircuit,
+	/// (zk-SNARK) Create Proof job type.
+	ZkSaasProve,
 }
 
 impl JobKey {
@@ -207,8 +207,8 @@ impl JobKey {
 		match self {
 			JobKey::DKG => RoleType::Tss,
 			JobKey::DKGSignature => RoleType::Tss,
-			JobKey::ZkSaasPhaseOne => RoleType::ZkSaas,
-			JobKey::ZkSaasPhaseTwo => RoleType::ZkSaas,
+			JobKey::ZkSaasCircuit => RoleType::ZkSaas,
+			JobKey::ZkSaasProve => RoleType::ZkSaas,
 		}
 	}
 }
@@ -268,9 +268,9 @@ pub enum JobResult {
 
 	DKGSignature(DKGSignatureResult),
 
-	ZkSaasPhaseOne(ZkSaasPhaseOneResult),
+	ZkSaasCircuit(ZkSaasCircuitResult),
 
-	ZkSaasPhaseTwo(ZkSaasPhaseTwoResult),
+	ZkSaasProve(ZkSaasProofResult),
 }
 
 pub type KeysAndSignatures = Vec<(Vec<u8>, Vec<u8>)>;
@@ -306,7 +306,7 @@ pub struct DKGSignatureResult {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasPhaseOneResult {
+pub struct ZkSaasCircuitResult {
 	/// The job id of the job
 	pub job_id: JobId,
 
@@ -319,7 +319,7 @@ pub struct ZkSaasPhaseOneResult {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasPhaseTwoResult {
+pub struct ZkSaasProofResult {
 	/// The data to verify
 	pub data: Vec<u8>,
 

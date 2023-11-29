@@ -113,8 +113,8 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 		match job.job_type {
 			JobType::DKG(_) => MockDKGPallet::job_to_fee(job),
 			JobType::DKGSignature(_) => MockDKGPallet::job_to_fee(job),
-			JobType::ZkSaasPhaseOne(_) => MockZkSaasPallet::job_to_fee(job),
-			JobType::ZkSaasPhaseTwo(_) => MockZkSaasPallet::job_to_fee(job),
+			JobType::ZkSaasCircuit(_) => MockZkSaasPallet::job_to_fee(job),
+			JobType::ZkSaasProve(_) => MockZkSaasPallet::job_to_fee(job),
 		}
 	}
 }
