@@ -87,6 +87,7 @@ tangle-runtime = { package = "tangle-standalone-runtime", path = "standalone/run
 pallet-ecdsa-claims = { path = "pallets/claims", default-features = false }
 pallet-jobs = { path = "pallets/jobs", default-features = false }
 pallet-roles = { path = "pallets/roles", default-features = false }
+pallet-dkg = { path = "pallets/dkg", default-features = false }
 
 # Orml dependencies
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v1.0.0", default-features = false }
@@ -237,6 +238,7 @@ pallet-evm-precompile-proxy = { path = "precompiles/proxy", default-features = f
 pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-features = false }
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
+pallet-evm-precompile-jobs = { path = "precompiles/jobs", default-features = false }
 
 # EVM & Ethereum
 # (wasm)

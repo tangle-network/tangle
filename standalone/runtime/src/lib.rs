@@ -66,6 +66,13 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 
+use sp_runtime::DispatchResult;
+use tangle_primitives::{
+	jobs::{JobResult, JobSubmission, JobType, ValidatorOffence},
+	roles::ValidatorRewardDistribution,
+	traits::jobs::{JobToFee, MPCHandler},
+};
+
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
 
@@ -522,8 +529,8 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 
 parameter_types! {
 	// phase durations. 1/4 of the last session for each.
-	pub const SignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS / 4;
-	pub const UnsignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS / 4;
+	pub const SignedPhase: u64 = EPOCH_DURATION_IN_BLOCKS / 4;
+	pub const UnsignedPhase: u64 = EPOCH_DURATION_IN_BLOCKS / 4;
 
 	// signed config
 	pub const SignedRewardBase: Balance = UNIT;
@@ -1082,6 +1089,84 @@ impl pallet_eth2_light_client::Config for Runtime {
 	type Currency = Balances;
 }
 
+parameter_types! {
+	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+}
+
+pub struct MockJobToFeeHandler;
+
+impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+	type Balance = Balance;
+
+	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		match job.job_type {
+			JobType::DKG(_) => Dkg::job_to_fee(job),
+			JobType::DKGSignature(_) => Dkg::job_to_fee(job),
+			JobType::ZkSaasPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobType::ZkSaasPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
+		}
+	}
+}
+
+pub struct MockMPCHandler;
+
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
+	fn verify(data: JobResult) -> DispatchResult {
+		match data {
+			JobResult::DKG(_) => Dkg::verify(data),
+			JobResult::DKGSignature(_) => Dkg::verify(data),
+			JobResult::ZkSaasPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobResult::ZkSaasPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
+		}
+	}
+
+	fn verify_validator_report(
+		_validator: AccountId,
+		_offence: ValidatorOffence,
+		_signatures: Vec<Vec<u8>>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
+}
+
+impl pallet_jobs::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
+	type Currency = Balances;
+	type JobToFee = MockJobToFeeHandler;
+	type RolesHandler = Roles;
+	type MPCHandler = MockMPCHandler;
+	type PalletId = JobsPalletId;
+	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub InflationRewardPerSession: Balance = 10_000;
+	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
+}
+
+impl pallet_roles::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type JobsHandler = Jobs;
+	type MaxRolesPerAccount = ConstU32<2>;
+	type MPCHandler = MockMPCHandler;
+	type InflationRewardPerSession = InflationRewardPerSession;
+	type AuthorityId = AuraId;
+	type ValidatorRewardDistribution = Reward;
+	type WeightInfo = ();
+}
+
+impl pallet_dkg::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type UpdateOrigin = EnsureRootOrHalfCouncil;
+	type WeightInfo = ();
+}
+
 pub struct BaseFilter;
 impl Contains<RuntimeCall> for BaseFilter {
 	fn contains(call: &RuntimeCall) -> bool {
@@ -1192,6 +1277,10 @@ construct_runtime!(
 		HotfixSufficients: pallet_hotfix_sufficients,
 
 		Eth2Client: pallet_eth2_light_client,
+
+		Roles: pallet_roles,
+		Jobs: pallet_jobs,
+		Dkg: pallet_dkg
 	}
 );
 

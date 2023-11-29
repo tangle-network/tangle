@@ -24,7 +24,7 @@ use frame_support::{
 	PalletId,
 };
 use frame_system::pallet_prelude::*;
-use sp_core::ByteArray;
+use sp_core::crypto::ByteArray;
 use sp_runtime::{
 	traits::{AccountIdConversion, Zero},
 	DispatchResult,
@@ -122,7 +122,7 @@ pub mod module {
 		/// Unexpected result provided
 		ResultNotExpectedType,
 		/// No permission to change permitted caller
-		NoPermission
+		NoPermission,
 	}
 
 	#[pallet::event]
@@ -579,7 +579,7 @@ pub mod module {
 			origin: OriginFor<T>,
 			job_key: JobKey,
 			job_id: JobId,
-			new_permitted_caller: T::AccountId
+			new_permitted_caller: T::AccountId,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 

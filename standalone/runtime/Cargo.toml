@@ -94,6 +94,9 @@ pallet-vesting = { workspace = true }
 
 # Webb dependencies
 tangle-primitives = { workspace = true }
+pallet-jobs = { workspace = true }
+pallet-roles = { workspace = true }
+pallet-dkg = { workspace = true }
 
 # Frontier dependencies
 fp-account = { workspace = true }
@@ -115,7 +118,6 @@ pallet-evm-precompile-ed25519 = { workspace = true }
 pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
-
 pallet-hotfix-sufficients = { workspace = true }
 
 ## Moonbeam precompiles
@@ -127,6 +129,9 @@ pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
 pallet-evm-precompile-staking = { workspace = true }
 precompile-utils = { workspace = true }
+
+## Tangle precompiles
+pallet-evm-precompile-jobs = { workspace = true }
 
 evm-tracer = { workspace = true }
 rpc-primitives-debug = { workspace = true }
@@ -220,6 +225,9 @@ std = [
 
   # Webb dependencies
   "tangle-primitives/std",
+  "pallet-jobs/std",
+  "pallet-roles/std",
+  "pallet-dkg/std",
 
   # ETH2 light-client
   "pallet-eth2-light-client/std",
@@ -258,6 +266,8 @@ std = [
   "pallet-evm-precompile-democracy/std",
   "pallet-evm-precompile-registry/std",
   "pallet-evm-precompile-staking/std",
+
+  "pallet-evm-precompile-jobs/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
