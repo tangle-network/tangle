@@ -16,7 +16,7 @@
 // limitations under the License.
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use fp_evm::{Context, ExitRevert, PrecompileFailure, PrecompileHandle};
+use fp_evm::{ExitRevert, PrecompileFailure, PrecompileHandle};
 use frame_support::{
 	dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo},
 	traits::ConstU32,
@@ -25,14 +25,11 @@ use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_evm::AddressMapping;
 use pallet_jobs::Call as JobsCall;
 use precompile_utils::{prelude::*, solidity::revert::revert_as_bytes};
-use sp_core::{Bytes, Hasher, H256, U256};
+use sp_core::H256;
 use sp_std::{marker::PhantomData, vec::Vec};
-use tangle_primitives::{
-	jobs::{
-		DKGJobType, DKGSignatureJobType, DKGSignatureResult, JobId, JobKey, JobSubmission, JobType,
-		ZkSaasPhaseOneJobType, ZkSaasPhaseTwoJobType,
-	},
-	AccountId, BlockNumber,
+use tangle_primitives::jobs::{
+	DKGJobType, DKGSignatureJobType, JobKey, JobSubmission, JobType, ZkSaasPhaseOneJobType,
+	ZkSaasPhaseTwoJobType,
 };
 
 #[cfg(test)]

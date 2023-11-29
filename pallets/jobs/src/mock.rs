@@ -20,7 +20,7 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Everything},
 };
-use frame_system::{Account, EnsureSigned};
+use frame_system::EnsureSigned;
 use sp_core::H256;
 use sp_runtime::{traits::IdentityLookup, AccountId32, BuildStorage};
 pub type Balance = u128;
@@ -139,9 +139,9 @@ impl RolesHandler<AccountId32> for MockRolesHandler {
 	fn get_validator_metadata(address: AccountId32, _job_key: JobKey) -> Option<RoleTypeMetadata> {
 		let mock_err_account = AccountId32::new([100u8; 32]);
 		if address == mock_err_account {
-			return None
+			None
 		} else {
-			return Some(RoleTypeMetadata::Tss(TssRoleMetadata {
+			Some(RoleTypeMetadata::Tss(TssRoleMetadata {
 				authority_key: mock_pub_key().to_raw_vec(),
 			}))
 		}
@@ -222,7 +222,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 
 	// We use default for brevity, but you can configure as desired if needed.
 	pallet_balances::GenesisConfig::<Runtime> {
-		balances: vec![(to_account_id32(10), 100u128), (to_account_id32(20), 100u128)]
+		balances: [(to_account_id32(10), 100u128), (to_account_id32(20), 100u128)]
 			.iter()
 			.cloned()
 			.chain(balances.iter().cloned())

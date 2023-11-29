@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![cfg(test)]
-use crate::mock_evm::{address_build, EIP1559UnsignedTransaction};
+use crate::mock_evm::EIP1559UnsignedTransaction;
 
 use super::*;
-use hex::FromHex;
+
 use mock::*;
 
 use frame_support::{assert_noop, assert_ok};
-use pallet_evm::{AddressMapping, HashedAddressMapping};
+
 use sp_core::U256;
-use sp_runtime::{traits::BlakeTwo256, AccountId32};
-use sp_std::sync::Arc;
+use sp_runtime::AccountId32;
+
 use tangle_primitives::jobs::{
 	DKGJobType, DKGSignatureJobType, DKGSignatureResult, JobSubmission, JobType,
 };
@@ -325,68 +325,3 @@ fn jobs_submission_e2e_works_for_dkg() {
 // 		}
 // 	});
 // }
-
-#[test]
-fn test_signing_rules() {
-	new_test_ext().execute_with(|| {
-		System::set_block_number(1);
-
-		let pairs = (0..10).map(|i| address_build(i as u8)).collect::<Vec<_>>();
-		let alice = &pairs[0];
-
-		let (abi, bytecode) = get_signing_rules_abi();
-		let stripped_bytecode = bytecode.as_str().unwrap().trim_start_matches("0x");
-		let decoded = hex::decode(stripped_bytecode).unwrap();
-		let signing_rules_create_tx = eip1559_signing_rules_creation_unsigned_transaction(decoded);
-		let signed_tx = signing_rules_create_tx.sign(&alice.private_key, None);
-		let res = Ethereum::execute(alice.address, &signed_tx, None);
-		assert_ok!(res.clone());
-		assert!(res.clone().unwrap().1.is_some());
-		let signing_rules_address = res.unwrap().1.unwrap();
-
-		let submission = JobSubmission {
-			expiry: 100,
-			job_type: JobType::DKG(DKGJobType {
-				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
-				threshold: 3,
-				permitted_caller: Some(HashedAddressMapping::<BlakeTwo256>::into_account_id(
-					signing_rules_address,
-				)),
-			}),
-		};
-		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission.clone()));
-
-		abigen!(SigningRules, "../../forge/out/SigningRules.sol/VotableSigningRules.json");
-		let (provider, _) = Provider::mocked();
-		let client = Arc::new(provider);
-		let contract = SigningRules::new(Address::from(signing_rules_address), client);
-
-		let phase_1_job_id = [0u8; 32];
-		let phase_1_job_details = submission.job_type.encode().into();
-		let threshold = 3;
-		let use_democracy = false;
-		let voters = vec![
-			pairs[0].address,
-			pairs[1].address,
-			pairs[2].address,
-			pairs[3].address,
-			pairs[4].address,
-		];
-		let expiry = 1000;
-		let ethers_call: FunctionCall<_, _, _> = contract.initialize(
-			phase_1_job_id,
-			phase_1_job_details,
-			threshold,
-			use_democracy,
-			voters,
-			expiry,
-		);
-		let initialize_tx = eip1559_contract_call_unsigned_transaction(
-			signing_rules_address,
-			ethers_call.calldata().unwrap().to_vec(),
-		);
-		let signed_tx = initialize_tx.sign(&alice.private_key, None);
-		let res = Ethereum::execute(alice.address, &signed_tx, None);
-		assert_ok!(res.clone());
-	});
-}

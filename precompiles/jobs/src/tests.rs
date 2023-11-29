@@ -14,10 +14,9 @@
 use crate::{mock::*, *};
 use precompile_utils::testing::*;
 
-use frame_support::{assert_ok, dispatch::Dispatchable};
-use pallet_evm::{Call as EvmCall, Event as EvmEvent};
+use pallet_evm::Call as EvmCall;
 
-use sp_core::{Hasher, U256};
+use sp_core::U256;
 
 fn evm_call(input: Vec<u8>) -> EvmCall<Runtime> {
 	EvmCall::call {

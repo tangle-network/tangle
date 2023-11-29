@@ -16,7 +16,7 @@ use super::*;
 use frame_support::{
 	construct_runtime, parameter_types, traits::Everything, weights::Weight, PalletId,
 };
-use frame_system::{EnsureRoot, EnsureSigned};
+use frame_system::EnsureSigned;
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
 use precompile_utils::{precompile_set::*, testing::MockAccount};
 use sp_core::{H256, U256};
@@ -25,9 +25,8 @@ use sp_runtime::{
 	BuildStorage, DispatchResult, Perbill,
 };
 use tangle_primitives::{
-	currency::UNIT,
 	jobs::*,
-	roles::{RoleTypeMetadata, TssRoleMetadata},
+	roles::RoleTypeMetadata,
 	traits::{
 		jobs::{JobToFee, MPCHandler},
 		roles::RolesHandler,
@@ -208,7 +207,7 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		Ok(())
 	}
 
-	fn get_validator_metadata(address: AccountId, _job_key: JobKey) -> Option<RoleTypeMetadata> {
+	fn get_validator_metadata(_address: AccountId, _job_key: JobKey) -> Option<RoleTypeMetadata> {
 		None
 	}
 }
