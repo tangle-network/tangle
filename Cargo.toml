@@ -16,8 +16,9 @@ members = [
   "client/rpc-core/*",
   "client/voter",
   "node",
-  "runtime",
-  "runtime/evm_tracer",
+  "runtime/testnet",
+  "runtime/testnet/evm_tracer",
+  "runtime/mainnet",
   "pallets/*",
   "pallets/roles",
   "pallets/jobs/rpc",
@@ -80,7 +81,8 @@ dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag 
 webb-relayer-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.4.7" }
 webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.4.7" }
 
-tangle-runtime = { package = "tangle-standalone-runtime", path = "runtime" }
+tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
+tangle-mainnet-runtime = { package = "tangle-mainnet-runtime", path = "runtime/mainnet" }
 
 # Tangle Dependencies
 pallet-ecdsa-claims = { path = "pallets/claims", default-features = false }
@@ -307,7 +309,7 @@ rpc-core-types = { path = "client/rpc-core/types" }
 rpc-debug = { path = "client/rpc/debug" }
 rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
-evm-tracer = { path = "runtime/evm_tracer", default-features = false }
+evm-tracer = { path = "runtime/testnet/evm_tracer", default-features = false }
 
 [profile.release]
 panic = "unwind"

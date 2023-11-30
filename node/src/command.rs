@@ -13,7 +13,7 @@
 // limitations under the License.
 use crate::{
 	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder},
-	chain_spec,
+	chainspec,
 	cli::{Cli, Subcommand},
 	service,
 };
@@ -22,7 +22,30 @@ use futures::TryFutureExt;
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
-use tangle_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use tangle_testnet_runtime::{Block, EXISTENTIAL_DEPOSIT};
+
+trait IdentifyChain {
+	fn is_mainnet(&self) -> bool;
+	fn is_testnet(&self) -> bool;
+}
+
+impl IdentifyChain for dyn sc_service::ChainSpec {
+	fn is_mainnet(&self) -> bool {
+		!self.id().starts_with("testnet")
+	}
+	fn is_testnet(&self) -> bool {
+		self.id().starts_with("testnet")
+	}
+}
+
+impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
+	fn is_mainnet(&self) -> bool {
+		<dyn sc_service::ChainSpec>::is_mainnet(self)
+	}
+	fn is_testnet(&self) -> bool {
+		<dyn sc_service::ChainSpec>::is_testnet(self)
+	}
+}
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
@@ -51,16 +74,18 @@ impl SubstrateCli for Cli {
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
 		Ok(match id {
-			"" | "local" => Box::new(chain_spec::local_testnet_config(4006)?),
+			"" | "local" => Box::new(chainspec::testnet::local_testnet_config(4006)?),
 			// generates the spec for testnet
-			"testnet" => Box::new(chain_spec::tangle_testnet_config(4006)?),
+			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(4006)?),
 			// generates the spec for mainnet
-			"mainnet" => Box::new(chain_spec::tangle_mainnet_config(4006)?),
-			"tangle-testnet" => Box::new(chain_spec::ChainSpec::from_json_bytes(
+			"mainnet-local" => Box::new(chainspec::mainnet::local_testnet_config(4006)?),
+			"mainnet" => Box::new(chainspec::mainnet::tangle_mainnet_config(4006)?),
+			"tangle-testnet" => Box::new(chainspec::testnet::ChainSpec::from_json_bytes(
 				&include_bytes!("../../chainspecs/testnet/tangle-standalone.json")[..],
 			)?),
-			path =>
-				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
+			path => Box::new(chainspec::testnet::ChainSpec::from_json_file(
+				std::path::PathBuf::from(path),
+			)?),
 		})
 	}
 }

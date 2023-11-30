@@ -27,7 +27,7 @@ use sp_inherents::{InherentData, InherentDataProvider};
 use sp_keyring::Sr25519Keyring;
 use sp_runtime::OpaqueExtrinsic;
 use std::{sync::Arc, time::Duration};
-use tangle_runtime::{AccountId, Balance, BalancesCall, SystemCall};
+use tangle_testnet_runtime::{AccountId, Balance, BalancesCall, SystemCall};
 
 /// Generates `System::Remark` extrinsics for the benchmarks.
 ///

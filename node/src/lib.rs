@@ -1,5 +1,5 @@
 pub mod benchmarking;
-pub mod chain_spec;
+pub mod chainspec;
 pub mod distributions;
 pub mod eth;
 pub mod mainnet_fixtures;
