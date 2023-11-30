@@ -35,6 +35,21 @@ fn basic_setup_works() {
 }
 
 #[test]
+fn eth_signature_works() {
+	new_test_ext().execute_with(|| {
+		let data = Some(get_multi_address_account_id(42)).encode();
+		let s = sig::<Test>(&alice(), &data, &[][..]);
+		let sig = match s {
+			MultiAddressSignature::EVM(s) => s,
+			_ => panic!("should be evm signature"),
+		};
+
+		assert_eq!(ClaimsPallet::eth_recover(&sig, &to_ascii_hex(&data), &[][..]), Some(eth(&alice())));
+		assert!(ClaimsPallet::eth_recover(&sig, &Some(get_multi_address_account_id(43)).encode(), &[][..]) != Some(eth(&alice())));
+	});
+}
+
+#[test]
 fn serde_works() {
 	let x = EthereumAddress(hex!["0123456789abcdef0123456789abcdef01234567"]);
 	let y = serde_json::to_string(&x).unwrap();
@@ -153,9 +168,10 @@ fn claiming_does_not_bypass_signing() {
 fn attest_claiming_works() {
 	new_test_ext().execute_with(|| {
 		assert_eq!(Balances::free_balance(get_multi_address_account_id(42).to_account_id_32()), 0);
+		let data = Some(get_multi_address_account_id(42)).encode();
 		let s = sig::<Test>(
 			&dave(),
-			&Some(get_multi_address_account_id(42)).encode(),
+			&data,
 			StatementKind::Safe.to_text(),
 		);
 		let r = ClaimsPallet::claim_attest(

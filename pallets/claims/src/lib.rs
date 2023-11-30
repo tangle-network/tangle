@@ -402,6 +402,7 @@ pub mod pallet {
 			let data = dest.using_encoded(to_ascii_hex);
 			println!("claim_attest: data: {:?}", data);
 			let signer = Self::get_signer_multi_address(dest.clone(), signature, data)?;
+			println!("claim_attest: signer: {:?}", signer);
 			if let Some(s) = Signing::<T>::get(signer.clone()) {
 				ensure!(s.to_text() == &statement[..], Error::<T>::InvalidStatement);
 			}
