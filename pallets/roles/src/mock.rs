@@ -22,12 +22,16 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Contains, Hooks},
 };
-use pallet_session::TestSessionHandler;
+use pallet_session::{historical as pallet_session_historical, TestSessionHandler};
 use sp_core::H256;
 use sp_runtime::{
 	testing::{Header, UintAuthorityId},
-	traits::IdentityLookup,
+	traits::{ConvertInto, IdentityLookup},
 	BuildStorage, DispatchResult, Perbill, Percent,
+};
+use sp_staking::{
+	offence::{OffenceError, ReportOffence},
+	SessionIndex,
 };
 use tangle_primitives::{jobs::*, roles::ValidatorRewardDistribution, traits::jobs::MPCHandler};
 pub type AccountId = u64;
@@ -85,7 +89,7 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 
 	fn verify_validator_report(
 		_validator: AccountId,
-		_offence: ValidatorOffence,
+		_offence: ValidatorOffenceType,
 		_signatures: Vec<Vec<u8>>,
 	) -> DispatchResult {
 		Ok(())
@@ -93,6 +97,26 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 
 	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
 		Ok(())
+	}
+}
+
+type IdentificationTuple = (AccountId, AccountId);
+type Offence = crate::offences::ValidatorOffence<IdentificationTuple>;
+
+parameter_types! {
+	pub static Offences: Vec<(Vec<AccountId>, Offence)> = vec![];
+}
+
+/// A mock offence report handler.
+pub struct OffenceHandler;
+impl ReportOffence<AccountId, IdentificationTuple, Offence> for OffenceHandler {
+	fn report_offence(reporters: Vec<AccountId>, offence: Offence) -> Result<(), OffenceError> {
+		Offences::mutate(|l| l.push((reporters, offence)));
+		Ok(())
+	}
+
+	fn is_known_offence(_offenders: &[IdentificationTuple], _time_slot: &SessionIndex) -> bool {
+		false
 	}
 }
 
@@ -104,8 +128,8 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 impl pallet_session::historical::Config for Runtime {
-	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
-	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
+	type FullIdentification = AccountId;
+	type FullIdentificationOf = ConvertInto;
 }
 
 pub struct BaseFilter;
@@ -206,7 +230,7 @@ impl pallet_staking::Config for Runtime {
 	type SlashDeferDuration = ();
 	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type BondingDuration = ();
-	type SessionInterface = Self;
+	type SessionInterface = ();
 	type EraPayout = ();
 	type NextNewSession = Session;
 	type MaxNominatorRewardedPerValidator = ConstU32<64>;
@@ -251,6 +275,8 @@ impl Config for Runtime {
 	type InflationRewardPerSession = InflationRewardPerSession;
 	type AuthorityId = UintAuthorityId;
 	type ValidatorRewardDistribution = Reward;
+	type ValidatorSet = Historical;
+	type ReportOffences = OffenceHandler;
 	type WeightInfo = ();
 }
 
@@ -265,6 +291,7 @@ construct_runtime!(
 		Roles: pallet_roles,
 		Session: pallet_session,
 		Staking: pallet_staking,
+		Historical: pallet_session_historical,
 	}
 );
 
