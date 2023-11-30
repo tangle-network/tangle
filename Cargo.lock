@@ -8122,6 +8122,7 @@ dependencies = [
  "parity-scale-codec",
  "rustc-hex",
  "scale-info",
+ "schnorrkel",
  "serde",
  "serde_json",
  "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",

@@ -16,6 +16,7 @@ pallet-evm = { workspace = true }
 rustc-hex = { workspace = true }
 scale-info = { workspace = true }
 serde = { workspace = true }
+schnorrkel = { workspace = true }
 
 frame-support = { workspace = true }
 frame-system = { workspace = true }
@@ -51,5 +52,6 @@ std = [
   "pallet-vesting/std",
   "pallet-balances/std",
   "pallet-evm/std",
+  "schnorrkel/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
