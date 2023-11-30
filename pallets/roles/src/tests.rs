@@ -18,6 +18,7 @@ use super::*;
 use frame_support::{assert_err, assert_ok};
 use mock::*;
 use sp_std::default::Default;
+use tangle_primitives::jobs::ReportValidatorOffence;
 
 #[test]
 fn test_assign_roles() {
@@ -314,5 +315,42 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		// ensure the distribution is correct
 		assert_eq!(Balances::free_balance(1), 20_000 + 5000);
 		assert_eq!(Balances::free_balance(2), 20_000 + 5000);
+	});
+}
+
+// Test report offence should work.
+#[test]
+fn test_report_offence_should_work() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		// Initially validator account has staked 10_000 tokens and wants to re-stake 5000 tokens
+		// for providing TSS services.
+
+		// Roles user is interested in re-staking.
+		let role_records = vec![RoleStakingRecord {
+			metadata: RoleTypeMetadata::Tss(Default::default()),
+			re_staked: 5000,
+		}];
+
+		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records));
+
+		// Lets verify role is assigned to account.
+		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
+
+		// get current session index.
+		let session_index = pallet_session::CurrentIndex::<Runtime>::get();
+
+		// Create offence report.
+		let offence_report = ReportValidatorOffence {
+			session_index,
+			validator_set_count: 4,
+			offence_type: tangle_primitives::jobs::ValidatorOffenceType::Inactivity,
+			offenders: vec![1],
+		};
+
+		// Lets report offence.
+		assert_ok!(Roles::report_offence(offence_report));
+		// Should slash 700 tokens
+		let ledger = Roles::ledger(1).unwrap();
+		assert_eq!(ledger.total, 4300);
 	});
 }

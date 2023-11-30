@@ -232,16 +232,6 @@ pub struct PhaseOneResult<AccountId, BlockNumber> {
 	pub threshold: Option<u8>,
 }
 
-/// Represents different types of validator offences.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum ValidatorOffence {
-	/// The validator has been inactive.
-	Inactivity,
-
-	/// The validator has committed duplicate signing.
-	Equivocation,
-}
-
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct RpcResponseJobsData<AccountId> {
@@ -325,4 +315,30 @@ pub struct ZkSaasPhaseTwoResult {
 
 	/// The expected key for the signature
 	pub signing_key: Vec<u8>,
+}
+
+/// Represents different types of validator offences.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+pub enum ValidatorOffenceType {
+	/// The validator has been inactive.
+	Inactivity,
+	/// Submitted invalid signature.
+	InvalidSignatureSubmitted,
+	/// Rejected valid action.
+	RejectedValidAction,
+	/// Approved invalid action.
+	ApprovedInvalidAction,
+}
+
+/// An offence report that is filed if a validator misbehaves.
+#[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq)]
+pub struct ReportValidatorOffence<Offender> {
+	/// The current session index in which offence is reported.
+	pub session_index: u32,
+	/// The size of the validator set in current session/era.
+	pub validator_set_count: u32,
+	/// The type of offence
+	pub offence_type: ValidatorOffenceType,
+	/// Offenders
+	pub offenders: Vec<Offender>,
 }
