@@ -15,14 +15,19 @@ use sp_api::{CallApiAt, ProvideRuntimeApi};
 use sp_block_builder::BlockBuilder as BlockBuilderApi;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_core::H256;
+use sp_inherents::CreateInherentDataProviders;
 use sp_runtime::traits::Block as BlockT;
 // Frontier
+use fc_rpc::pending::AuraConsensusDataProvider;
 pub use fc_rpc::{EthBlockDataCacheTask, EthConfig, OverrideHandle, StorageOverride};
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 pub use fc_storage::overrides_handle;
 use fp_rpc::{ConvertTransaction, ConvertTransactionRuntimeApi, EthereumRuntimeRPCApi};
 #[cfg(feature = "txpool")]
 use rpc_txpool::TxPoolServer;
+use sc_client_api::{AuxStore, UsageProvider};
+use sp_consensus_aura::AuraApi;
+use tangle_testnet_runtime::AuraId;
 
 #[derive(Clone)]
 pub struct TracingConfig {
@@ -31,7 +36,7 @@ pub struct TracingConfig {
 }
 
 /// Extra dependencies for Ethereum compatibility.
-pub struct EthDeps<C, P, A: ChainApi, CT, B: BlockT> {
+pub struct EthDeps<C, P, A: ChainApi, CT, B: BlockT, CIDP> {
 	/// The client instance to use.
 	pub client: Arc<C>,
 	/// Transaction pool instance.
@@ -69,9 +74,11 @@ pub struct EthDeps<C, P, A: ChainApi, CT, B: BlockT> {
 	pub forced_parent_hashes: Option<BTreeMap<H256, H256>>,
 	/// Optional tracing config.
 	pub tracing_config: Option<TracingConfig>,
+	/// Something that can create the inherent data providers for pending state
+	pub pending_create_inherent_data_providers: CIDP,
 }
 
-impl<C, P, A: ChainApi, CT: Clone, B: BlockT> Clone for EthDeps<C, P, A, CT, B> {
+impl<C, P, A: ChainApi, CT: Clone, B: BlockT, CIDP: Clone> Clone for EthDeps<C, P, A, CT, B, CIDP> {
 	fn clone(&self) -> Self {
 		Self {
 			client: self.client.clone(),
@@ -92,14 +99,17 @@ impl<C, P, A: ChainApi, CT: Clone, B: BlockT> Clone for EthDeps<C, P, A, CT, B> 
 			execute_gas_limit_multiplier: self.execute_gas_limit_multiplier,
 			forced_parent_hashes: self.forced_parent_hashes.clone(),
 			tracing_config: self.tracing_config.clone(),
+			pending_create_inherent_data_providers: self
+				.pending_create_inherent_data_providers
+				.clone(),
 		}
 	}
 }
 
 /// Instantiate Ethereum-compatible RPC extensions.
-pub fn create_eth<C, BE, P, A, CT, B, EC: EthConfig<B, C>>(
+pub fn create_eth<C, BE, P, A, CT, B, CIDP, EC: EthConfig<B, C>>(
 	mut io: RpcModule<()>,
-	deps: EthDeps<C, P, A, CT, B>,
+	deps: EthDeps<C, P, A, CT, B, CIDP>,
 	subscription_task_executor: SubscriptionTaskExecutor,
 	pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
@@ -110,15 +120,19 @@ pub fn create_eth<C, BE, P, A, CT, B, EC: EthConfig<B, C>>(
 where
 	B: BlockT<Hash = sp_core::H256>,
 	C: CallApiAt<B> + ProvideRuntimeApi<B>,
-	C::Api: BlockBuilderApi<B> + ConvertTransactionRuntimeApi<B> + EthereumRuntimeRPCApi<B>,
+	C::Api: AuraApi<B, AuraId>
+		+ BlockBuilderApi<B>
+		+ ConvertTransactionRuntimeApi<B>
+		+ EthereumRuntimeRPCApi<B>,
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<B>,
 	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<B>,
-	C: BlockchainEvents<B> + 'static,
+	C: BlockchainEvents<B> + AuxStore + UsageProvider<B> + StorageProvider<B, BE> + 'static,
 	C: HeaderBackend<B> + HeaderMetadata<B, Error = BlockChainError> + StorageProvider<B, BE>,
 	BE: Backend<B> + 'static,
 	P: TransactionPool<Block = B> + 'static,
 	A: ChainApi<Block = B> + 'static,
 	CT: ConvertTransaction<<B as BlockT>::Extrinsic> + Send + Sync + 'static,
+	CIDP: CreateInherentDataProviders<B, ()> + Send + 'static,
 {
 	use fc_rpc::{
 		Eth, EthApiServer, EthDevSigner, EthFilter, EthFilterApiServer, EthPubSub,
@@ -148,6 +162,7 @@ where
 		execute_gas_limit_multiplier,
 		forced_parent_hashes,
 		tracing_config,
+		pending_create_inherent_data_providers,
 	} = deps;
 
 	let mut signers = Vec::new();
@@ -171,6 +186,8 @@ where
 			fee_history_cache_limit,
 			execute_gas_limit_multiplier,
 			forced_parent_hashes,
+			pending_create_inherent_data_providers,
+			Some(Box::new(AuraConsensusDataProvider::new(client.clone()))),
 		)
 		.replace_config::<EC>()
 		.into_rpc(),
