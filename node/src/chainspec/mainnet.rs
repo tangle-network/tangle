@@ -18,7 +18,6 @@ use crate::{
 	distributions::{combine_distributions, develop, mainnet, testnet},
 	mainnet_fixtures::{get_root_key, get_standalone_bootnodes},
 };
-
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
@@ -26,7 +25,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_mainnet_runtime::{
-	AccountId, Balance, BalancesConfig, DKGId, EVMChainIdConfig, EVMConfig, ElectionsConfig,
+	AccountId, Balance, BalancesConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
 	Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig,
 	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
 };
@@ -56,14 +55,13 @@ where
 pub fn authority_keys_from_seed(
 	controller: &str,
 	stash: &str,
-) -> (AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId) {
+) -> (AccountId, AccountId, AuraId, GrandpaId, ImOnlineId) {
 	(
 		get_account_id_from_seed::<sr25519::Public>(controller),
 		get_account_id_from_seed::<sr25519::Public>(stash),
 		get_from_seed::<AuraId>(controller),
 		get_from_seed::<GrandpaId>(controller),
 		get_from_seed::<ImOnlineId>(stash),
-		get_from_seed::<DKGId>(controller),
 	)
 }
 
@@ -212,7 +210,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)>,
+	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId)>,
 	initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
@@ -328,7 +326,7 @@ fn testnet_genesis(
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)>,
+	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId)>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
 	chain_id: u64,

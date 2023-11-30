@@ -69,8 +69,6 @@ use static_assertions::const_assert;
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
 
-// A few exports that help ease life for downstream crates.
-pub use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 use dkg_runtime_primitives::{MaxAuthorities, MaxProposalLength};
 pub use frame_support::{
 	construct_runtime,
