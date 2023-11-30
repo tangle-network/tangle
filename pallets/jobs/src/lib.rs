@@ -31,7 +31,7 @@ use sp_runtime::{
 };
 use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
-	jobs::{DKGResult, JobId, JobInfo, JobKey, JobResult, PhaseOneResult, ValidatorOffence},
+	jobs::{DKGResult, JobId, JobInfo, JobKey, JobResult, PhaseOneResult, ValidatorOffenceType},
 	traits::{
 		jobs::{JobToFee, MPCHandler},
 		roles::RolesHandler,
@@ -517,7 +517,7 @@ pub mod module {
 			job_key: JobKey,
 			job_id: JobId,
 			validator: T::AccountId,
-			offence: ValidatorOffence,
+			offence: ValidatorOffenceType,
 			signatures: Vec<Vec<u8>>,
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;
@@ -546,8 +546,8 @@ pub mod module {
 			// Validate the result
 			T::MPCHandler::verify_validator_report(validator.clone(), offence.clone(), signatures)?;
 
-			// Slash the validator
-			T::RolesHandler::slash_validator(validator.clone(), offence)?;
+			// TODO: Report validator offence.
+			// T::RolesHandler::report_offence(validator.clone(), offence)?;
 
 			// Trigger validator removal
 			Self::try_validator_removal_from_job(job_key, job_id, validator)?;
