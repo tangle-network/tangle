@@ -57,18 +57,21 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, SaturatedConversion,
+	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill,
+	SaturatedConversion,
 };
-use sp_staking::currency_to_vote::U128CurrencyToVote;
+use sp_staking::{
+	currency_to_vote::U128CurrencyToVote,
+	offence::{OffenceError, ReportOffence},
+	SessionIndex,
+};
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-
-use sp_runtime::DispatchResult;
 use tangle_primitives::{
-	jobs::{JobResult, JobSubmission, JobType, ValidatorOffence},
+	jobs::{JobResult, JobSubmission, JobType, ValidatorOffenceType},
 	roles::ValidatorRewardDistribution,
 	traits::jobs::{JobToFee, MPCHandler},
 };
@@ -1121,7 +1124,7 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 
 	fn verify_validator_report(
 		_validator: AccountId,
-		_offence: ValidatorOffence,
+		_offence: ValidatorOffenceType,
 		_signatures: Vec<Vec<u8>>,
 	) -> DispatchResult {
 		Ok(())
@@ -1143,6 +1146,20 @@ impl pallet_jobs::Config for Runtime {
 	type WeightInfo = ();
 }
 
+type IdTuple = pallet_session::historical::IdentificationTuple<Runtime>;
+type Offence = pallet_roles::offences::ValidatorOffence<IdTuple>;
+/// A mock offence report handler.
+pub struct OffenceHandler;
+impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
+	fn report_offence(_reporters: Vec<AccountId>, _offence: Offence) -> Result<(), OffenceError> {
+		Ok(())
+	}
+
+	fn is_known_offence(_offenders: &[IdTuple], _time_slot: &SessionIndex) -> bool {
+		false
+	}
+}
+
 parameter_types! {
 	pub InflationRewardPerSession: Balance = 10_000;
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
@@ -1155,6 +1172,8 @@ impl pallet_roles::Config for Runtime {
 	type MPCHandler = MockMPCHandler;
 	type InflationRewardPerSession = InflationRewardPerSession;
 	type AuthorityId = AuraId;
+	type ValidatorSet = Historical;
+	type ReportOffences = OffenceHandler;
 	type ValidatorRewardDistribution = Reward;
 	type WeightInfo = ();
 }
@@ -1274,7 +1293,6 @@ construct_runtime!(
 		DynamicFee: pallet_dynamic_fee,
 		BaseFee: pallet_base_fee,
 		HotfixSufficients: pallet_hotfix_sufficients,
-
 		Eth2Client: pallet_eth2_light_client,
 
 		Roles: pallet_roles,

@@ -203,12 +203,12 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		validators.contains(&address)
 	}
 
-	fn slash_validator(_address: AccountId, _offence: ValidatorOffence) -> DispatchResult {
-		Ok(())
-	}
-
 	fn get_validator_metadata(_address: AccountId, _job_key: JobKey) -> Option<RoleTypeMetadata> {
 		None
+	}
+
+	fn report_offence(_offence_report: ReportValidatorOffence<AccountId>) -> DispatchResult {
+		Ok(())
 	}
 }
 
@@ -221,7 +221,7 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 
 	fn verify_validator_report(
 		_validator: AccountId,
-		_offence: ValidatorOffence,
+		_offence: ValidatorOffenceType,
 		_signatures: Vec<Vec<u8>>,
 	) -> DispatchResult {
 		Ok(())
@@ -272,8 +272,4 @@ impl ExtBuilder {
 		ext.execute_with(|| System::set_block_number(1));
 		ext
 	}
-}
-
-pub(crate) fn events() -> Vec<RuntimeEvent> {
-	System::events().into_iter().map(|r| r.event).collect::<Vec<_>>()
 }

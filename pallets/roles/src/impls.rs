@@ -189,7 +189,6 @@ impl<T: Config> Pallet<T> {
 
 		// apply slash
 		ledger.total = ledger.total.saturating_sub(slash_value);
-		println!("ledger.total: {:?}", ledger.total);
 		// Update ledger
 		Self::update_ledger(&account, &ledger);
 	}

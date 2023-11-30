@@ -14,24 +14,6 @@
 use crate::{mock::*, *};
 use precompile_utils::testing::*;
 
-use pallet_evm::Call as EvmCall;
-
-use sp_core::U256;
-
-fn evm_call(input: Vec<u8>) -> EvmCall<Runtime> {
-	EvmCall::call {
-		source: Alice.into(),
-		target: Precompile1.into(),
-		input,
-		value: U256::zero(),
-		gas_limit: u64::max_value(),
-		max_fee_per_gas: 0.into(),
-		max_priority_fee_per_gas: Some(U256::zero()),
-		nonce: None,
-		access_list: Vec::new(),
-	}
-}
-
 fn precompiles() -> Precompiles<Runtime> {
 	PrecompilesValue::get()
 }
@@ -42,7 +24,7 @@ fn submit_dkg_phase_one_job() {
 		.with_balances(vec![(Alice.into(), 40)])
 		.build()
 		.execute_with(|| {
-			precompiles().prepare_test(
+			let _ = precompiles().prepare_test(
 				Address(CryptoAlith.into()),
 				Precompile1,
 				PCall::submit_dkg_phase_one_job {
@@ -61,7 +43,7 @@ fn submit_dkg_phase_two_job() {
 		.with_balances(vec![(Alice.into(), 40)])
 		.build()
 		.execute_with(|| {
-			precompiles().prepare_test(
+			let _ = precompiles().prepare_test(
 				Address(CryptoAlith.into()),
 				Precompile1,
 				PCall::submit_dkg_phase_two_job {
@@ -79,7 +61,7 @@ fn submit_zksaas_phase_one_job() {
 		.with_balances(vec![(Alice.into(), 40)])
 		.build()
 		.execute_with(|| {
-			precompiles().prepare_test(
+			let _ = precompiles().prepare_test(
 				Address(CryptoAlith.into()),
 				Precompile1,
 				PCall::submit_zksaas_phase_one_job {
@@ -97,7 +79,7 @@ fn submit_zksaas_phase_two_job() {
 		.with_balances(vec![(Alice.into(), 40)])
 		.build()
 		.execute_with(|| {
-			precompiles().prepare_test(
+			let _ = precompiles().prepare_test(
 				Address(CryptoAlith.into()),
 				Precompile1,
 				PCall::submit_zksaas_phase_two_job {

@@ -1,4 +1,6 @@
-use crate::{BalanceOf, Call, Config, JobSubmissionOf, Pallet, ValidatorOffence, ValidatorRewards};
+use crate::{
+	BalanceOf, Call, Config, JobSubmissionOf, Pallet, ValidatorOffenceType, ValidatorRewards,
+};
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
 use frame_support::traits::Currency;
 use frame_system::RawOrigin;
@@ -54,7 +56,7 @@ benchmarks! {
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
 		let job_key: JobKey = JobKey::DKG;
 		let job_id: JobId = 0;
-	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), caller.clone(), ValidatorOffence::Inactivity, vec![])
+	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), caller.clone(), ValidatorOffenceType::Inactivity, vec![])
 }
 
 // Define the module and associated types for the benchmarks

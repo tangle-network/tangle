@@ -14,15 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![cfg(test)]
-use crate::mock_evm::EIP1559UnsignedTransaction;
-
 use super::*;
-
+use frame_support::{assert_noop, assert_ok};
 use mock::*;
 
-use frame_support::{assert_noop, assert_ok};
-
-use sp_core::U256;
 use sp_runtime::AccountId32;
 
 use tangle_primitives::jobs::{
@@ -38,49 +33,6 @@ const EVE: AccountId32 = AccountId32::new([5u8; 32]);
 const TEN: AccountId32 = AccountId32::new([10u8; 32]);
 const TWENTY: AccountId32 = AccountId32::new([20u8; 32]);
 const HUNDRED: AccountId32 = AccountId32::new([100u8; 32]);
-
-use ethers::prelude::*;
-use serde_json::Value;
-use std::fs;
-
-fn get_signing_rules_abi() -> (Value, Value) {
-	let mut data: Value = serde_json::from_str(
-		&fs::read_to_string("../../forge/out/SigningRules.sol/VotableSigningRules.json").unwrap(),
-	)
-	.unwrap();
-	let abi = data["abi"].take();
-	let bytecode = data["bytecode"]["object"].take();
-	(abi, bytecode)
-}
-
-fn eip1559_signing_rules_creation_unsigned_transaction(
-	bytecode: Vec<u8>,
-) -> EIP1559UnsignedTransaction {
-	EIP1559UnsignedTransaction {
-		nonce: U256::zero(),
-		max_priority_fee_per_gas: U256::from(1),
-		max_fee_per_gas: U256::from(1),
-		gas_limit: U256::from(0x100000),
-		action: pallet_ethereum::TransactionAction::Create,
-		value: U256::zero(),
-		input: bytecode,
-	}
-}
-
-fn eip1559_contract_call_unsigned_transaction(
-	address: Address,
-	data: Vec<u8>,
-) -> EIP1559UnsignedTransaction {
-	EIP1559UnsignedTransaction {
-		nonce: U256::zero(),
-		max_priority_fee_per_gas: U256::from(1),
-		max_fee_per_gas: U256::from(1),
-		gas_limit: U256::from(0x100000),
-		action: pallet_ethereum::TransactionAction::Call(address),
-		value: U256::zero(),
-		input: data,
-	}
-}
 
 #[test]
 fn jobs_submission_e2e_works_for_dkg() {
