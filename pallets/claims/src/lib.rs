@@ -318,7 +318,7 @@ pub mod pallet {
 			ensure_none(origin)?;
 
 			let data = dest.using_encoded(to_ascii_hex);
-			let signer = Self::get_signer_multi_address(dest.clone(), signature, data)?;
+			let signer = Self::get_signer_multi_address(dest.clone(), signature, data, vec![])?;
 			ensure!(Signing::<T>::get(&signer).is_none(), Error::<T>::InvalidStatement);
 			Self::process_claim(signer, dest)?;
 			Ok(())
@@ -401,7 +401,7 @@ pub mod pallet {
 
 			let data = dest.using_encoded(to_ascii_hex);
 			println!("claim_attest: data: {:?}", data);
-			let signer = Self::get_signer_multi_address(dest.clone(), signature, data)?;
+			let signer = Self::get_signer_multi_address(dest.clone(), signature, data, statement.clone())?;
 			println!("claim_attest: signer: {:?}", signer);
 			if let Some(s) = Signing::<T>::get(signer.clone()) {
 				ensure!(s.to_text() == &statement[..], Error::<T>::InvalidStatement);
@@ -467,11 +467,11 @@ pub mod pallet {
 					let data = account.using_encoded(to_ascii_hex);
 					match signature {
 						MultiAddressSignature::EVM(ethereum_signature) => (
-							Self::eth_recover(&ethereum_signature, &data, &[][..]),
+							Self::eth_recover(&ethereum_signature, &data, &statement[..]),
 							Some(statement.as_slice()),
 						),
 						MultiAddressSignature::Native(sr25519_signature) => (
-							Self::sr25519_recover(&sr25519_signature, &data, &[][..]),
+							Self::sr25519_recover(&sr25519_signature, &data, &statement[..]),
 							Some(statement.as_slice()),
 						),
 					}
@@ -597,13 +597,14 @@ impl<T: Config> Pallet<T> {
 		_dest: Option<MultiAddress>,
 		signature: MultiAddressSignature,
 		data: Vec<u8>,
+		statement: Vec<u8>,
 	) -> Result<MultiAddress, Error<T>> {
 		let signer = match signature {
 			MultiAddressSignature::EVM(ethereum_signature) =>
-				Self::eth_recover(&ethereum_signature, &data, &[][..])
+				Self::eth_recover(&ethereum_signature, &data, &statement[..])
 					.ok_or(Error::<T>::InvalidEthereumSignature)?,
 			MultiAddressSignature::Native(sr25519_signature) =>
-				Self::sr25519_recover(&sr25519_signature, &data, &[][..])
+				Self::sr25519_recover(&sr25519_signature, &data, &statement[..])
 					.ok_or(Error::<T>::InvalidNativeSignature)?,
 		};
 
