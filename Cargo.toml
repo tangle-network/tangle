@@ -309,5 +309,7 @@ rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
 evm-tracer = { path = "standalone/runtime/evm_tracer", default-features = false }
 
+schnorrkel = { verison = "11.4", default-features = false }
+
 [profile.release]
 panic = "unwind"

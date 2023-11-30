@@ -97,7 +97,7 @@ parameter_types! {
 	pub Prefix: &'static [u8] = b"Pay RUSTs to the TEST account:";
 }
 ord_parameter_types! {
-	pub const Six: AccountId32 = get_account_id(6);
+	pub const Six: AccountId32 = get_multi_address_account_id(6).to_account_id_32();
 }
 
 impl Config for Test {
@@ -136,8 +136,8 @@ pub fn frank() -> libsecp256k1::SecretKey {
 	libsecp256k1::SecretKey::parse(&keccak_256(b"Frank")).unwrap()
 }
 
-pub fn get_account_id(id: u8) -> AccountId32 {
-	AccountId32::new([id; 32])
+pub fn get_multi_address_account_id(id: u8) -> MultiAddress {
+	MultiAddress::Native(AccountId32::new([id; 32]))
 }
 
 // This function basically just builds a genesis storage key/value store according to
@@ -150,10 +150,10 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 		.unwrap();
 	pallet_airdrop_claims::GenesisConfig::<Test> {
 		claims: vec![
-			(eth(&alice()), 100, None, None),
-			(eth(&dave()), 200, None, Some(StatementKind::Regular)),
-			(eth(&eve()), 300, Some(get_account_id(42)), Some(StatementKind::Safe)),
-			(eth(&frank()), 400, Some(get_account_id(43)), None),
+			(eth(&alice()), 100, None),
+			(eth(&dave()), 200, Some(StatementKind::Regular)),
+			(eth(&eve()), 300, Some(StatementKind::Safe)),
+			(eth(&frank()), 400, None),
 		],
 		vesting: vec![(eth(&alice()), (50, 10, 1))],
 		expiry: None,
