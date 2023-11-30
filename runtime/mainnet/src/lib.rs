@@ -94,11 +94,11 @@ pub use frame_support::{
 use frame_system::EnsureRoot;
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
-pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::generic::Era;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
+use tangle_primitives::AuraId;
 pub use tangle_primitives::{
 	currency::*, fee::*, time::*, AccountId, AccountIndex, Address, Balance, BlockNumber, Hash,
 	Header, Index, Moment, Reputation, Signature, AVERAGE_ON_INITIALIZE_RATIO,
@@ -116,10 +116,10 @@ pub type Nonce = u32;
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("tangle-standalone"),
-	impl_name: create_runtime_str!("tangle-standalone"),
+	spec_name: create_runtime_str!("tangle"),
+	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
-	spec_version: 501, // v0.5.1
+	spec_version: 1000, // v1.0.00
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,

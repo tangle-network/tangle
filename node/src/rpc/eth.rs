@@ -27,7 +27,7 @@ use fp_rpc::{ConvertTransaction, ConvertTransactionRuntimeApi, EthereumRuntimeRP
 use rpc_txpool::TxPoolServer;
 use sc_client_api::{AuxStore, UsageProvider};
 use sp_consensus_aura::AuraApi;
-use tangle_testnet_runtime::AuraId;
+use tangle_primitives::AuraId;
 
 #[derive(Clone)]
 pub struct TracingConfig {

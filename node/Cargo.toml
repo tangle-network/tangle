@@ -113,7 +113,9 @@ rpc-primitives-txpool = { workspace = true }
 rpc-trace = { workspace = true }
 rpc-txpool = { workspace = true }
 
+tangle-primitives = { workspace = true }
 tangle-testnet-runtime = { workspace = true }
+tangle-mainnet-runtime = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]

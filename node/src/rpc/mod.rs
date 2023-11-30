@@ -16,7 +16,7 @@ use sc_transaction_pool::ChainApi;
 use sp_api::{CallApiAt, ProvideRuntimeApi};
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_runtime::traits::Block as BlockT;
-use tangle_testnet_runtime::AuraId;
+use tangle_primitives::AuraId;
 // Runtime
 use sc_client_api::{AuxStore, UsageProvider};
 use sp_inherents::CreateInherentDataProviders;
