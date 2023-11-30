@@ -118,7 +118,7 @@ pub enum ZkSaasProveRequest {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Groth16ProveRequest {
 	/// Public input that are used during the verification
-	pub public_input: Vec<HyperData>,
+	pub public_input: Vec<Vec<u8>>,
 	/// `a` is the full assignment (full_assginment[0] is 1)
 	/// a = full_assginment[1..]
 	/// Each element contains a PSS of the witness
@@ -389,17 +389,29 @@ pub struct DKGSignatureResult {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ZkSaasCircuitResult {
-	/// The job id of the job
+	/// The job id of the job (circuit)
 	pub job_id: JobId,
 
 	/// List of participants' public keys
-	pub participants: Vec<Vec<u8>>,
+	pub participants: Vec<ecdsa::Public>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasProofResult {
+pub enum ZkSaasProofResult {
+    Circom(CircomProofResult),
+    Plonk(PlonkProofResult),
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct CircomProofResult {
 	pub a: Vec<u8>,
 	pub b: Vec<u8>,
 	pub c: Vec<u8>,
 }
+
+/// TODO: Add Plonk proof result
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct PlonkProofResult {}
