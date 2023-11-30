@@ -14,7 +14,7 @@
 use std::{collections::BTreeMap, marker::PhantomData};
 
 use crate::{
-	distributions::{combine_distributions, develop, mainnet, testnet},
+	distributions::{combine_distributions, develop, testnet},
 	testnet_fixtures::{
 		get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 	},

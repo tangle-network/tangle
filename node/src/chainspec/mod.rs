@@ -11,9 +11,5 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-use sc_chain_spec::ChainSpecExtension;
-use sp_core::{Pair, Public};
-
 pub mod mainnet;
 pub mod testnet;
