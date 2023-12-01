@@ -6,7 +6,7 @@ use scale_info::{
 };
 #[cfg(feature = "std")]
 use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
-use sp_core::{H160};
+use sp_core::{sr25519::Signature, H160};
 use sp_runtime::{traits::BlakeTwo256, AccountId32, RuntimeDebug};
 use sp_std::prelude::*;
 
@@ -39,23 +39,11 @@ impl MultiAddress {
 	}
 }
 
-#[derive(Encode, Decode, Clone, Copy, Eq, PartialEq, RuntimeDebug, TypeInfo)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub enum MultiAddressSignature {
 	EVM(EcdsaSignature),
 	Native(Sr25519Signature),
 }
 
-#[derive(Clone, Copy, Eq, Encode, Decode, TypeInfo)]
-pub struct Sr25519Signature(pub [u8; 65]);
-
-impl PartialEq for Sr25519Signature {
-	fn eq(&self, other: &Self) -> bool {
-		&self.0[..] == &other.0[..]
-	}
-}
-
-impl sp_std::fmt::Debug for Sr25519Signature {
-	fn fmt(&self, f: &mut sp_std::fmt::Formatter<'_>) -> sp_std::fmt::Result {
-		write!(f, "Sr25519Signature({:?})", &self.0[..])
-	}
-}
+#[derive(Clone, Eq, Encode, PartialEq, Decode, TypeInfo, RuntimeDebug)]
+pub struct Sr25519Signature(pub Signature);

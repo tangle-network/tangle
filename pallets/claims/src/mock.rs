@@ -1,11 +1,11 @@
 use super::*;
 use pallet_evm::HashedAddressMapping;
 use secp_utils::*;
-use sp_core::H256;
+use sp_core::{sr25519, Pair, H256};
 use sp_std::convert::TryFrom;
 // The testing primitives are very useful for avoiding having to work with signatures
 // or public keys. `u64` is used as the `AccountId` and no `Signature`s are required.
-use crate::pallet as pallet_airdrop_claims;
+use crate::{pallet as pallet_airdrop_claims, sr25519_utils::sub};
 use frame_support::{
 	ord_parameter_types, parameter_types,
 	traits::{OnFinalize, OnInitialize, WithdrawReasons},
@@ -140,6 +140,14 @@ pub fn get_multi_address_account_id(id: u8) -> MultiAddress {
 	MultiAddress::Native(AccountId32::new([id; 32]))
 }
 
+pub fn alice_sr25519() -> sr25519::Pair {
+	sr25519::Pair::from_string(&format!("//Alice"), None).expect("static values are valid; qed")
+}
+
+pub fn bob_sr25519() -> sr25519::Pair {
+	sr25519::Pair::from_string(&format!("//Bob"), None).expect("static values are valid; qed")
+}
+
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
@@ -154,6 +162,8 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			(eth(&dave()), 200, Some(StatementKind::Regular)),
 			(eth(&eve()), 300, Some(StatementKind::Safe)),
 			(eth(&frank()), 400, None),
+			(sub(&alice_sr25519()), 500, None),
+			(sub(&bob_sr25519()), 600, None),
 		],
 		vesting: vec![(eth(&alice()), (50, 10, 1))],
 		expiry: None,

@@ -35,26 +35,22 @@ use crate::utils::{
 };
 use frame_support::{
 	ensure,
-	traits::{Currency, Defensive, Get, IsSubType, VestingSchedule},
+	traits::{Currency, Get, VestingSchedule},
 	weights::Weight,
 };
 pub use pallet::*;
 use pallet_evm::AddressMapping;
 use parity_scale_codec::{Decode, Encode};
-use scale_info::{
-	TypeInfo,
-};
-use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
+use scale_info::TypeInfo;
+use serde::{self, Deserialize, Serialize};
 use sp_core::H160;
 use sp_io::{crypto::secp256k1_ecdsa_recover, hashing::keccak_256};
 use sp_runtime::{
 	traits::{CheckedSub, SignedExtension, Zero},
-	transaction_validity::{
-		InvalidTransaction, TransactionValidity, ValidTransaction,
-	},
+	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
 	AccountId32, RuntimeDebug,
 };
-use sp_std::{convert::TryInto, fmt::Debug, prelude::*, vec};
+use sp_std::{convert::TryInto, prelude::*, vec};
 use utils::Sr25519Signature;
 /// Custom validity errors used in Polkadot while validating transactions.
 #[repr(u8)]
@@ -313,12 +309,13 @@ pub mod pallet {
 		pub fn claim(
 			origin: OriginFor<T>,
 			dest: Option<MultiAddress>,
+			signer: Option<MultiAddress>,
 			signature: MultiAddressSignature,
 		) -> DispatchResult {
 			ensure_none(origin)?;
 
 			let data = dest.using_encoded(to_ascii_hex);
-			let signer = Self::get_signer_multi_address(dest.clone(), signature, data, vec![])?;
+			let signer = Self::get_signer_multi_address(signer.clone(), signature, data, vec![])?;
 			ensure!(Signing::<T>::get(&signer).is_none(), Error::<T>::InvalidStatement);
 			Self::process_claim(signer, dest)?;
 			Ok(())
@@ -351,7 +348,6 @@ pub mod pallet {
 			ensure_root(origin)?;
 
 			<Total<T>>::mutate(|t| *t += value);
-			println!("mint_claim: who: {:?}, value: {:?}", who, value);
 			<Claims<T>>::insert(who.clone(), value);
 			if let Some(vs) = vesting_schedule {
 				<Vesting<T>>::insert(who.clone(), vs);
@@ -394,15 +390,15 @@ pub mod pallet {
 		pub fn claim_attest(
 			origin: OriginFor<T>,
 			dest: Option<MultiAddress>,
+			signer: Option<MultiAddress>,
 			signature: MultiAddressSignature,
 			statement: Vec<u8>,
 		) -> DispatchResult {
 			ensure_none(origin)?;
 
 			let data = dest.using_encoded(to_ascii_hex);
-			println!("claim_attest: data: {:?}", data);
-			let signer = Self::get_signer_multi_address(dest.clone(), signature, data, statement.clone())?;
-			println!("claim_attest: signer: {:?}", signer);
+			let signer =
+				Self::get_signer_multi_address(signer.clone(), signature, data, statement.clone())?;
 			if let Some(s) = Signing::<T>::get(signer.clone()) {
 				ensure!(s.to_text() == &statement[..], Error::<T>::InvalidStatement);
 			}
@@ -451,29 +447,31 @@ pub mod pallet {
 				// <weight>
 				// The weight of this logic is included in the `claim` dispatchable.
 				// </weight>
-				Call::claim { dest: account, signature } => {
+				Call::claim { dest: account, signer, signature } => {
 					let data = account.using_encoded(to_ascii_hex);
-					match signature {
-						MultiAddressSignature::EVM(ethereum_signature) =>
-							(Self::eth_recover(&ethereum_signature, &data, &[][..]), None),
-						MultiAddressSignature::Native(sr25519_signature) =>
-							(Self::sr25519_recover(&sr25519_signature, &data, &[][..]), None),
+					match Self::get_signer_multi_address(
+						signer.clone(),
+						signature.clone(),
+						data,
+						vec![],
+					) {
+						Ok(signer) => (Some(signer), None),
+						Err(_) => (None, None),
 					}
 				},
 				// <weight>
 				// The weight of this logic is included in the `claim_attest` dispatchable.
 				// </weight>
-				Call::claim_attest { dest: account, signature, statement } => {
+				Call::claim_attest { dest: account, signer, signature, statement } => {
 					let data = account.using_encoded(to_ascii_hex);
-					match signature {
-						MultiAddressSignature::EVM(ethereum_signature) => (
-							Self::eth_recover(&ethereum_signature, &data, &statement[..]),
-							Some(statement.as_slice()),
-						),
-						MultiAddressSignature::Native(sr25519_signature) => (
-							Self::sr25519_recover(&sr25519_signature, &data, &statement[..]),
-							Some(statement.as_slice()),
-						),
+					match Self::get_signer_multi_address(
+						signer.clone(),
+						signature.clone(),
+						data,
+						statement.clone(),
+					) {
+						Ok(signer) => (Some(signer), Some(statement.as_slice())),
+						Err(_) => (None, None),
 					}
 				},
 				_ => return Err(InvalidTransaction::Call.into()),
@@ -542,10 +540,24 @@ impl<T: Config> Pallet<T> {
 		Some(MultiAddress::EVM(res))
 	}
 
+	// Constructs the message that PolkadotJS would sign.
+	fn polkadotjs_signable_message(what: &[u8], extra: &[u8]) -> Vec<u8> {
+		let prefix = T::Prefix::get();
+		let mut v = prefix.to_vec();
+		v.extend_from_slice(what);
+		v.extend_from_slice(extra);
+		v
+	}
+
 	// Attempts to recover the Substrate address from a message signature signed by using
 	// the Substrate RPC's `sign`.
-	fn sr25519_recover(_s: &Sr25519Signature, what: &[u8], extra: &[u8]) -> Option<MultiAddress> {
-		let _msg = keccak_256(&Self::ethereum_signable_message(what, extra));
+	fn sr25519_recover(
+		addr: MultiAddress,
+		s: &Sr25519Signature,
+		what: &[u8],
+		extra: &[u8],
+	) -> Option<MultiAddress> {
+		let msg = keccak_256(&Self::polkadotjs_signable_message(what, extra));
 		let res = AccountId32::new([0; 32]);
 		Some(MultiAddress::Native(res))
 	}
@@ -558,12 +570,12 @@ impl<T: Config> Pallet<T> {
 		let balance_due = <Claims<T>>::get(&signer).ok_or(Error::<T>::SignerHasNoClaim)?;
 
 		let new_total = Self::total().checked_sub(&balance_due).ok_or(Error::<T>::PotUnderflow)?;
-
+		// If there is a destination, then we need to transfer the balance to it.
 		let recipient = match dest {
 			Some(d) => d,
 			None => signer.clone(),
 		};
-
+		// Convert the destination recipient to an account ID.
 		let recipient = Self::convert_multi_address_to_account_id(recipient)?;
 
 		let vesting = Vesting::<T>::get(&signer);
@@ -594,7 +606,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn get_signer_multi_address(
-		_dest: Option<MultiAddress>,
+		signer: Option<MultiAddress>,
 		signature: MultiAddressSignature,
 		data: Vec<u8>,
 		statement: Vec<u8>,
@@ -603,14 +615,17 @@ impl<T: Config> Pallet<T> {
 			MultiAddressSignature::EVM(ethereum_signature) =>
 				Self::eth_recover(&ethereum_signature, &data, &statement[..])
 					.ok_or(Error::<T>::InvalidEthereumSignature)?,
-			MultiAddressSignature::Native(sr25519_signature) =>
-				Self::sr25519_recover(&sr25519_signature, &data, &statement[..])
-					.ok_or(Error::<T>::InvalidNativeSignature)?,
+			MultiAddressSignature::Native(sr25519_signature) => {
+				ensure!(signer.is_none(), Error::<T>::InvalidNativeAccount);
+				Self::sr25519_recover(signer.unwrap(), &sr25519_signature, &data, &statement[..])
+					.ok_or(Error::<T>::InvalidNativeSignature)?
+			},
 		};
 
 		Ok(signer)
 	}
 
+	/// Convert a MultiAddress to an AccountId
 	fn convert_multi_address_to_account_id(dest: MultiAddress) -> Result<T::AccountId, Error<T>> {
 		let account = match dest {
 			MultiAddress::EVM(a) => T::AddressMapping::into_account_id(H160::from(a)),
@@ -650,5 +665,29 @@ mod secp_utils {
 		r[0..64].copy_from_slice(&sig.serialize()[..]);
 		r[64] = recovery_id.serialize();
 		MultiAddressSignature::EVM(EcdsaSignature(r))
+	}
+}
+
+#[cfg(any(test, feature = "runtime-benchmarks"))]
+mod sr25519_utils {
+	use super::*;
+	use sp_core::{sr25519, Pair};
+
+	pub fn public(pair: &sr25519::Pair) -> sr25519::Public {
+		pair.public()
+	}
+
+	pub fn sub(pair: &sr25519::Pair) -> MultiAddress {
+		MultiAddress::Native(pair.public().into())
+	}
+
+	pub fn sig<T: Config>(
+		pair: &sr25519::Pair,
+		what: &[u8],
+		extra: &[u8],
+	) -> MultiAddressSignature {
+		let sig = pair
+			.sign(&<super::Pallet<T>>::polkadotjs_signable_message(&to_ascii_hex(what)[..], extra));
+		MultiAddressSignature::Native(Sr25519Signature(sig))
 	}
 }
