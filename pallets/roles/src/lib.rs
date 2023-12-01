@@ -18,7 +18,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::all)]
 
-use codec::MaxEncodedLen;
 use frame_support::{
 	ensure,
 	traits::{Currency, Get, ValidatorSet, ValidatorSetWithIdentification},
@@ -29,7 +28,7 @@ use tangle_primitives::roles::ValidatorRewardDistribution;
 pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
-use sp_runtime::{codec, traits::Zero, Saturating};
+use sp_runtime::{traits::Zero, Saturating};
 use sp_staking::offence::ReportOffence;
 use sp_std::{convert::TryInto, prelude::*, vec};
 use tangle_primitives::{
@@ -50,14 +49,7 @@ use sp_runtime::RuntimeAppPublic;
 
 /// The ledger of a (bonded) stash.
 #[derive(
-	PartialEqNoBound,
-	EqNoBound,
-	CloneNoBound,
-	Encode,
-	Decode,
-	RuntimeDebugNoBound,
-	TypeInfo,
-	MaxEncodedLen,
+	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
 )]
 #[scale_info(skip_type_params(T))]
 pub struct RoleStakingLedger<T: Config> {
@@ -67,19 +59,16 @@ pub struct RoleStakingLedger<T: Config> {
 	/// This re-staked balance we are currently accounting for new slashing conditions.
 	#[codec(compact)]
 	pub total: BalanceOf<T>,
-	/// The list of roles and their re-staked amounts.
-	pub roles: BTreeMap<RoleType, RoleStakingRecord<T>>,
+	/// The list of roles and metadata associated with them.
+	pub roles: BTreeMap<RoleType, RoleStakingRecord>,
 }
 
-/// The information regarding the re-staked amount for a particular role.
+/// The information regarding selected role.
 #[derive(PartialEqNoBound, EqNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo, Clone)]
 #[scale_info(skip_type_params(T))]
-pub struct RoleStakingRecord<T: Config> {
+pub struct RoleStakingRecord {
 	/// Metadata associated with the role.
 	pub metadata: RoleTypeMetadata,
-	/// The total amount of the stash's balance that is re-staked for selected role.
-	#[codec(compact)]
-	pub re_staked: BalanceOf<T>,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
@@ -229,6 +218,7 @@ pub mod pallet {
 	///
 	/// - `origin`: Origin of the transaction.
 	/// - `records`: List of roles user is interested to re-stake.
+	/// - `re_stake`: Amount to re-stake.
 	///
 	/// This function will return error if
 	/// - Account is not a validator account.
@@ -240,7 +230,8 @@ pub mod pallet {
 		#[pallet::call_index(0)]
 		pub fn assign_roles(
 			origin: OriginFor<T>,
-			records: Vec<RoleStakingRecord<T>>,
+			records: Vec<RoleStakingRecord>,
+			re_stake: BalanceOf<T>,
 		) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
@@ -257,10 +248,21 @@ pub mod pallet {
 
 			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
 
+			// Total re_staking amount should not exceed  max_re_staking_amount.
+			ensure!(
+				ledger.total.saturating_add(re_stake) <= max_re_staking_bond,
+				Error::<T>::ExceedsMaxReStakeValue
+			);
+
+			ledger.total = ledger.total.saturating_add(re_stake);
+
+			// Re-staking amount of record should meet min re-staking amount requirement.
+			let min_re_staking_bond = MinReStakingBond::<T>::get();
+			ensure!(ledger.total >= min_re_staking_bond, Error::<T>::InsufficientReStakingBond);
+
 			// Validate role staking records.
 			for record in records.clone() {
 				let role = record.metadata.get_role_type();
-				let re_stake_amount = record.re_staked;
 				// Check if role is already assigned.
 				ensure!(
 					!Self::has_role(stash_account.clone(), role.clone()),
@@ -273,20 +275,6 @@ pub mod pallet {
 					record.metadata.get_authority_key(),
 				)?;
 
-				// Re-staking amount of record should meet min re-staking amount requirement.
-				let min_re_staking_bond = MinReStakingBond::<T>::get();
-				ensure!(
-					re_stake_amount >= min_re_staking_bond,
-					Error::<T>::InsufficientReStakingBond
-				);
-
-				// Total re_staking amount should not exceed  max_re_staking_amount.
-				ensure!(
-					ledger.total.saturating_add(re_stake_amount) <= max_re_staking_bond,
-					Error::<T>::ExceedsMaxReStakeValue
-				);
-
-				ledger.total = ledger.total.saturating_add(re_stake_amount);
 				ledger.roles.insert(record.metadata.get_role_type(), record);
 			}
 

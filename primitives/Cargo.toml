@@ -22,5 +22,11 @@ sp-consensus-aura = { workspace = true }
 
 [features]
 default = ["std"]
-std = ["frame-support/std", "sp-runtime/std", "sp-core/std", "cumulus-primitives-core/std"]
+std = [
+    "frame-support/std",
+    "sp-runtime/std",
+    "sp-core/std",
+    "cumulus-primitives-core/std",
+    "sp-consensus-aura/std",
+]
 integration-tests = []
