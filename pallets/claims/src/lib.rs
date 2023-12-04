@@ -563,7 +563,9 @@ impl<T: Config> Pallet<T> {
 			MultiAddress::EVM(_) => return None,
 			MultiAddress::Native(a) => PublicKey::from_bytes(&a.encode()).ok()?,
 		};
+		println!("pk: {:?}", pk);
 		let signature: Signature = Signature::from_bytes(&s.0.encode()).ok()?;
+		println!("signature: {:?}", signature);
 		const SIGNING_CTX: &'static [u8] = b"substrate";
 		match pk.verify_simple(SIGNING_CTX, &msg, &signature) {
 			Ok(_) => Some(addr),

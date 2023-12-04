@@ -19,7 +19,7 @@ members = [
   "standalone/runtime",
   "standalone/runtime/evm_tracer",
   "pallets/*",
-   "pallets/roles",
+  "pallets/roles",
   "pallets/jobs/rpc",
   "pallets/jobs/rpc/runtime-api",
   "precompiles/utils",
@@ -68,6 +68,7 @@ syn = { version = "1.0" }
 hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
 slices = "0.2.0"
+schnorrkel = { verison = "11.4", default-features = false }
 
 # DKG Substrate Dependencies
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.4.7", default-features = false }
@@ -308,8 +309,6 @@ rpc-debug = { path = "client/rpc/debug" }
 rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
 evm-tracer = { path = "standalone/runtime/evm_tracer", default-features = false }
-
-schnorrkel = { verison = "11.4", default-features = false }
 
 [profile.release]
 panic = "unwind"
