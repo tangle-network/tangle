@@ -16,7 +16,7 @@
 #![cfg(test)]
 
 use super::*;
-use crate as pallet_dkg;
+use crate as pallet_zksaas;
 use frame_support::{
 	construct_runtime,
 	traits::{ConstU128, ConstU32, ConstU64, Everything},
@@ -91,7 +91,7 @@ construct_runtime!(
 	{
 		System: frame_system,
 		Balances: pallet_balances,
-		DKG: pallet_dkg,
+		ZKSaaS: pallet_zksaas,
 	}
 );
 

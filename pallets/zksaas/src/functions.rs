@@ -19,11 +19,6 @@ use frame_support::{ensure, pallet_prelude::DispatchResult, sp_runtime::Saturati
 use frame_system::pallet_prelude::BlockNumberFor;
 use tangle_primitives::jobs::*;
 
-/// Expected signature length
-pub const SIGNATURE_LENGTH: usize = 65;
-/// Expected key length for ecdsa
-const ECDSA_KEY_LENGTH: usize = 33;
-
 impl<T: Config> Pallet<T> {
 	/// Calculates the fee for a given job submission based on the provided fee information.
 	///
@@ -63,24 +58,27 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the verification was successful or encountered
 	/// an error.
-	pub fn verify(data: JobResult) -> DispatchResult {
-		match data {
-			JobResult::ZkSaasCircuit(_) => Ok(()),
-			JobResult::ZkSaasProve(info) => Self::verify_proof(info),
+	pub fn verify(data: JobWithResult<T::AccountId>) -> DispatchResult {
+		match (data.result, data.phase_one_job_type) {
+			(JobResult::ZkSaasCircuit(_), None) => Ok(()),
+			(JobResult::ZkSaasProve(info), Some(JobType::ZkSaasCircuit(circuit))) =>
+				Self::verify_proof(circuit, info),
 			_ => Err(Error::<T>::InvalidJobType.into()), // this should never happen
 		}
 	}
 
 	/// Verifies a given proof submission.
-	pub fn verify_proof(proof: ZkSaasProofResult) -> DispatchResult {
+	pub fn verify_proof(
+		ZkSaasCircuitJobType { system, .. }: ZkSaasCircuitJobType<T::AccountId>,
+		proof: ZkSaasProofResult,
+	) -> DispatchResult {
 		match proof {
-			ZkSaasProofResult::Circom(info) => Self::verify_circom_proof(info),
-			ZkSaasProofResult::Plonk(_) => Err(Error::<T>::InvalidProof.into()),
+			ZkSaasProofResult::Circom(info) => Self::verify_circom_proof(system, info),
 		}
 	}
 
 	/// Verifies a given circom proof submission.
-	pub fn verify_circom_proof(proof: CircomProofResult) -> DispatchResult {
+	pub fn verify_circom_proof(system: ZkSaasSystem, proof: CircomProofResult) -> DispatchResult {
 		Ok(())
 	}
 }

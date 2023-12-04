@@ -144,7 +144,7 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 pub struct MockMPCHandler;
 
 impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(_data: JobResult) -> DispatchResult {
+	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
 		Ok(())
 	}
 

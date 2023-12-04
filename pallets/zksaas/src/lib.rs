@@ -19,8 +19,8 @@
 //! A Substrate pallet for verifying submitted results of Zero Knowledge Proving as a Service
 //! protocols.
 //!
-//! This pallet provides functionality to verify the results of a ZK-SaaS process. It includes methods
-//! to verify ZK Proofs.
+//! This pallet provides functionality to verify the results of a ZK-SaaS process. It includes
+//! methods to verify ZK Proofs.
 pub use pallet::*;
 
 #[cfg(test)]
@@ -77,8 +77,8 @@ pub mod pallet {
 	pub enum Error<T> {
 		/// Unexpected job type
 		InvalidJobType,
-        /// Invalid proof
-        InvalidProof,
+		/// Invalid proof
+		InvalidProof,
 	}
 
 	#[pallet::call]

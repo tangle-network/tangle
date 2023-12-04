@@ -57,7 +57,7 @@ pub use weights::WeightInfo;
 #[frame_support::pallet]
 pub mod module {
 	use super::*;
-	use tangle_primitives::jobs::DKGSignatureResult;
+	use tangle_primitives::jobs::{DKGSignatureResult, JobWithResult};
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -353,7 +353,11 @@ pub mod module {
 							.expect("Checked before"),
 					});
 
-					T::MPCHandler::verify(job_result)?;
+					T::MPCHandler::verify(JobWithResult {
+						job_type: job_info.job_type.clone(),
+						phase_one_job_type: None,
+						result: job_result,
+					})?;
 
 					let result = PhaseOneResult {
 						owner: job_info.owner,
@@ -410,7 +414,19 @@ pub mod module {
 						signing_key: phase_one_result.result,
 					});
 
-					T::MPCHandler::verify(job_result)?;
+					let phase_one_job_info = SubmittedJobs::<T>::get(
+						job_info
+							.job_type
+							.get_previous_phase_job_key()
+							.ok_or(Error::<T>::InvalidJobPhase)?,
+						job_info.job_type.get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?,
+					)
+					.ok_or(Error::<T>::JobNotFound)?;
+					T::MPCHandler::verify(JobWithResult {
+						job_type: job_info.job_type,
+						phase_one_job_type: Some(phase_one_job_info.job_type),
+						result: job_result,
+					})?;
 				},
 				_ => todo!(),
 			};

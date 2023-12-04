@@ -47,6 +47,19 @@ pub struct JobInfo<AccountId, BlockNumber, Balance> {
 	pub fee: Balance,
 }
 
+/// Represents a job with its result.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+pub struct JobWithResult<AccountId> {
+	/// Current Job type
+	pub job_type: JobType<AccountId>,
+	/// Phase one job type if any.
+	///
+	/// None if this job is a phase one job.
+	pub phase_one_job_type: Option<JobType<AccountId>>,
+	/// Current job result
+	pub result: JobResult,
+}
+
 /// Enum representing different types of jobs.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
@@ -83,7 +96,6 @@ pub enum HyperData {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ZkSaasSystem {
 	Groth16(Groth16System),
-	Plonk(PlonkSystem),
 }
 
 /// Represents the Groth16 system for zk-SNARKs.
@@ -94,14 +106,11 @@ pub struct Groth16System {
 	pub circuit: HyperData,
 	/// Proving key file.
 	pub proving_key: HyperData,
+	/// Verifying key bytes
+	pub verifying_key: Vec<u8>,
 	/// Circom WASM file.
 	pub wasm: HyperData,
 }
-
-/// TODO: Add Plonk system
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct PlonkSystem {}
 
 /// Represents ZK-SNARK proving request
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
@@ -109,8 +118,6 @@ pub struct PlonkSystem {}
 pub enum ZkSaasProveRequest {
 	/// Groth16 proving request
 	Groth16(Groth16ProveRequest),
-	/// Plonk proving request
-	Plonk(PlonkProveRequest),
 }
 
 /// Represents Groth16 proving request
@@ -139,11 +146,6 @@ pub struct QAPShare {
 	pub b: HyperData,
 	pub c: HyperData,
 }
-
-/// TODO: Add Plonk proving request
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct PlonkProveRequest {}
 
 impl<AccountId> JobType<AccountId> {
 	/// Checks if the job type is a phase one job.
@@ -399,19 +401,11 @@ pub struct ZkSaasCircuitResult {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ZkSaasProofResult {
-    Circom(CircomProofResult),
-    Plonk(PlonkProofResult),
+	Circom(CircomProofResult),
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct CircomProofResult {
-	pub a: Vec<u8>,
-	pub b: Vec<u8>,
-	pub c: Vec<u8>,
+	pub proof: Vec<u8>,
 }
-
-/// TODO: Add Plonk proof result
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct PlonkProofResult {}
