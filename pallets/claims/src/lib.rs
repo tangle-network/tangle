@@ -42,6 +42,7 @@ pub use pallet::*;
 use pallet_evm::AddressMapping;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
+use schnorrkel::{signing_context, PublicKey, Signature};
 use serde::{self, Deserialize, Serialize};
 use sp_core::H160;
 use sp_io::{crypto::secp256k1_ecdsa_recover, hashing::keccak_256};
@@ -558,8 +559,16 @@ impl<T: Config> Pallet<T> {
 		extra: &[u8],
 	) -> Option<MultiAddress> {
 		let msg = keccak_256(&Self::polkadotjs_signable_message(what, extra));
-		let res = AccountId32::new([0; 32]);
-		Some(MultiAddress::Native(res))
+		let pk: PublicKey = match addr.clone() {
+			MultiAddress::EVM(_) => return None,
+			MultiAddress::Native(a) => PublicKey::from_bytes(&a.encode()).ok()?,
+		};
+		let signature: Signature = Signature::from_bytes(&s.0.encode()).ok()?;
+		const SIGNING_CTX: &'static [u8] = b"substrate";
+		match pk.verify_simple(SIGNING_CTX, &msg, &signature) {
+			Ok(_) => Some(addr),
+			Err(_) => None,
+		}
 	}
 
 	fn process_claim(
@@ -616,7 +625,7 @@ impl<T: Config> Pallet<T> {
 				Self::eth_recover(&ethereum_signature, &data, &statement[..])
 					.ok_or(Error::<T>::InvalidEthereumSignature)?,
 			MultiAddressSignature::Native(sr25519_signature) => {
-				ensure!(signer.is_none(), Error::<T>::InvalidNativeAccount);
+				ensure!(!signer.is_none(), Error::<T>::InvalidNativeAccount);
 				Self::sr25519_recover(signer.unwrap(), &sr25519_signature, &data, &statement[..])
 					.ok_or(Error::<T>::InvalidNativeSignature)?
 			},

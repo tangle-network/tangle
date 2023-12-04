@@ -1,5 +1,7 @@
 use super::*;
 
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
 /// An Ethereum address (i.e. 20 bytes, used to represent an Ethereum account).
 ///
 /// This gets serialized to the 0x-prefixed hex representation.
