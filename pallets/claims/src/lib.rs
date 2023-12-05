@@ -698,6 +698,7 @@ mod sr25519_utils {
 	use schnorrkel::Signature;
 	use sp_core::{sr25519, Pair};
 
+	#[allow(dead_code)]
 	pub fn public(pair: &sr25519::Pair) -> sr25519::Public {
 		pair.public()
 	}
