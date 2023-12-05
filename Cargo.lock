@@ -2214,12 +2214,6 @@ checksum = "245097e9a4535ee1e3e3931fcfcd55a796a44c643e8596ff6566d68f09b87bbc"
 
 [[package]]
 name = "constant_time_eq"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "245097e9a4535ee1e3e3931fcfcd55a796a44c643e8596ff6566d68f09b87bbc"
-
-[[package]]
-name = "constant_time_eq"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7144d30dcf0fafbce74250a3963025d8d52177934239851c917d29f1df280c2"
@@ -4059,6 +4053,7 @@ dependencies = [
  "auto_impl",
  "ethers-contract",
  "ethers-core",
+ "ethers-etherscan",
  "ethers-providers",
  "ethers-signers",
  "futures-channel",
@@ -4101,8 +4096,8 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "tokio 1.32.0",
- "tokio-tungstenite 0.20.0",
+ "tokio 1.34.0",
+ "tokio-tungstenite 0.20.1",
  "tracing",
  "tracing-futures",
  "url",
@@ -9058,7 +9053,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha3 0.10.8",
- "smallvec 1.11.0",
+ "smallvec",
  "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-io 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
@@ -9347,7 +9342,7 @@ dependencies = [
  "scale-info",
  "serde",
  "serde_json",
- "smallvec 1.11.0",
+ "smallvec",
  "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-io 23.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
@@ -9888,7 +9883,7 @@ dependencies = [
  "digest 0.10.7",
  "hmac 0.12.1",
  "password-hash",
- "sha2 0.10.7",
+ "sha2 0.10.8",
 ]
 
 [[package]]
@@ -16174,10 +16169,10 @@ dependencies = [
  "hex",
  "once_cell",
  "reqwest",
- "semver 1.0.18",
+ "semver 1.0.20",
  "serde",
  "serde_json",
- "sha2 0.10.7",
+ "sha2 0.10.8",
  "thiserror",
  "url",
  "zip",
@@ -16935,11 +16930,11 @@ checksum = "212d5dcb2a1ce06d81107c3d0ffa3121fe974b73f068c8282cb1c32328113b6c"
 dependencies = [
  "futures-util",
  "log",
- "rustls 0.21.7",
- "tokio 1.32.0",
+ "rustls 0.21.9",
+ "tokio 1.34.0",
  "tokio-rustls",
- "tungstenite 0.20.0",
- "webpki-roots 0.23.1",
+ "tungstenite 0.20.1",
+ "webpki-roots 0.25.3",
 ]
 
 [[package]]
@@ -17470,7 +17465,7 @@ dependencies = [
  "httparse",
  "log",
  "rand 0.8.5",
- "rustls 0.21.7",
+ "rustls 0.21.9",
  "sha1",
  "thiserror",
  "url",
@@ -20707,7 +20702,7 @@ dependencies = [
  "hmac 0.12.1",
  "pbkdf2 0.11.0",
  "sha1",
- "time 0.3.28",
+ "time",
  "zstd 0.11.2+zstd.1.5.2",
 ]
 
