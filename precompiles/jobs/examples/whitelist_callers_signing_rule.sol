@@ -4,12 +4,11 @@
 pragma solidity >=0.8.3;
 
 // Import the Jobs interface
-import "./Jobs.sol";
+import "../Jobs.sol";
 
 /// @title JobsCallerContract
 /// @dev A contract that interacts with the Jobs contract and checks for whitelisted callers before submitting a job.
 contract JobsCallerContract {
-
     // Mapping to store whitelisted callers
     mapping(address => bool) public whitelistedCallers;
 
@@ -30,7 +29,10 @@ contract JobsCallerContract {
 
     // Modifier to check if the caller is whitelisted
     modifier onlyWhitelisted() {
-        require(this.isCallerWhitelisted(msg.sender), "Caller is not whitelisted");
+        require(
+            this.isCallerWhitelisted(msg.sender),
+            "Caller is not whitelisted"
+        );
         _;
     }
 
@@ -43,5 +45,4 @@ contract JobsCallerContract {
         // Call the submitDkgPhaseTwoJob function from the Jobs contract
         JOBS_CONTRACT.submitDkgPhaseTwoJob(expiry, phase_one_id, submission);
     }
-
 }

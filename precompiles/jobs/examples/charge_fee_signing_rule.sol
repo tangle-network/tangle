@@ -4,12 +4,11 @@
 pragma solidity >=0.8.3;
 
 // Import the Jobs interface
-import "./Jobs.sol";
+import "../Jobs.sol";
 
 /// @title JobsWithFeeContract
 /// @dev A contract that allows submitting a job after charging a fee.
 contract JobsWithFeeContract {
-
     // Fee amount required to submit a job
     uint256 public jobSubmissionFee;
 
@@ -29,14 +28,15 @@ contract JobsWithFeeContract {
     }
 
     /// @dev Submit a job after charging the required fee.
-    function submitJob(uint64 expiry,
+    function submitJob(
+        uint64 expiry,
         uint32 phase_one_id,
-        bytes memory submission) external payable requireFee {
+        bytes memory submission
+    ) external payable requireFee {
         // Forward the fee to the designated wallet
         feeRecipient.transfer(msg.value);
 
         // Call the submitDkgPhaseOneJob function from the Jobs contract
         JOBS_CONTRACT.submitDkgPhaseTwoJob(expiry, phase_one_id, submission);
     }
-
 }
