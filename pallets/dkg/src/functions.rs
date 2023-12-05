@@ -18,9 +18,9 @@ use crate::types::BalanceOf;
 use frame_support::{ensure, pallet_prelude::DispatchResult, sp_runtime::Saturating};
 use frame_system::pallet_prelude::BlockNumberFor;
 use parity_scale_codec::Encode;
-use sp_core::{ecdsa, keccak_256};
-use sp_io::EcdsaVerifyError;
-use sp_std::default::Default;
+use sp_core::ecdsa;
+use sp_io::{hashing::keccak_256, EcdsaVerifyError};
+use sp_std::{default::Default, vec::Vec};
 use tangle_primitives::jobs::*;
 
 /// Expected signature length
@@ -210,7 +210,6 @@ impl<T: Config> Pallet<T> {
 		signature: &[u8],
 	) -> (Option<ecdsa::Public>, bool) {
 		let mut signer = None;
-		println!("Maybe signers {:?}", maybe_signers);
 		let res = maybe_signers.iter().any(|x| {
 			if let Ok(data) = Self::recover_ecdsa_pub_key(msg, signature) {
 				let recovered = &data[..32];

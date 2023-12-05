@@ -15,7 +15,7 @@ parity-scale-codec = { workspace = true, features = ["derive", "max-encoded-len"
 pallet-evm = { workspace = true }
 rustc-hex = { workspace = true }
 scale-info = { workspace = true }
-serde = { workspace = true }
+serde = { workspace = true, features = ["alloc"] }
 schnorrkel = { workspace = true }
 
 frame-support = { workspace = true }

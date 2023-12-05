@@ -21,7 +21,7 @@
 use codec::MaxEncodedLen;
 use frame_support::{
 	ensure,
-	traits::{Currency, Get},
+	traits::{Currency, Get, ValidatorSet, ValidatorSetWithIdentification},
 	CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
 };
 use tangle_primitives::roles::ValidatorRewardDistribution;
@@ -30,6 +30,7 @@ pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::{codec, traits::Zero, Saturating};
+use sp_staking::offence::ReportOffence;
 use sp_std::{convert::TryInto, prelude::*, vec};
 use tangle_primitives::{
 	roles::{RoleType, RoleTypeMetadata},
@@ -39,6 +40,7 @@ mod impls;
 use sp_std::collections::btree_map::BTreeMap;
 #[cfg(test)]
 pub(crate) mod mock;
+pub mod offences;
 #[cfg(test)]
 mod tests;
 mod weights;
@@ -98,6 +100,8 @@ pub type BalanceOf<T> =
 
 #[frame_support::pallet]
 pub mod pallet {
+	use crate::offences::ValidatorOffence;
+
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
@@ -105,6 +109,20 @@ pub mod pallet {
 		jobs::{JobId, JobKey},
 		traits::jobs::MPCHandler,
 	};
+
+	/// A type for representing the validator id in a session.
+	pub type ValidatorId<T> = <<T as Config>::ValidatorSet as ValidatorSet<
+		<T as frame_system::Config>::AccountId,
+	>>::ValidatorId;
+
+	/// A tuple of (ValidatorId, Identification) where `Identification` is the full identification
+	/// of `ValidatorId`.
+	pub type IdentificationTuple<T> = (
+		ValidatorId<T>,
+		<<T as Config>::ValidatorSet as ValidatorSetWithIdentification<
+			<T as frame_system::Config>::AccountId,
+		>>::Identification,
+	);
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
@@ -134,6 +152,16 @@ pub mod pallet {
 
 		/// The type used to identify an authority
 		type AuthorityId: RuntimeAppPublic + Decode;
+
+		/// A type for retrieving the validators supposed to be online in a session.
+		type ValidatorSet: ValidatorSetWithIdentification<Self::AccountId>;
+
+		/// A type to submit offence reports against the validators.
+		type ReportOffences: ReportOffence<
+			Self::AccountId,
+			IdentificationTuple<Self>,
+			ValidatorOffence<IdentificationTuple<Self>>,
+		>;
 
 		type WeightInfo: WeightInfo;
 	}

@@ -695,6 +695,7 @@ mod secp_utils {
 mod sr25519_utils {
 	use super::*;
 	use frame_support::assert_ok;
+	use schnorrkel::Signature;
 	use sp_core::{sr25519, Pair};
 
 	pub fn public(pair: &sr25519::Pair) -> sr25519::Public {

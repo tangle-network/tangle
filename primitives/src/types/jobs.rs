@@ -133,6 +133,15 @@ impl<AccountId> JobType<AccountId> {
 			_ => None,
 		}
 	}
+
+	pub fn get_permitted_caller(self) -> Option<AccountId> {
+		use crate::jobs::JobType::*;
+		match self {
+			DKG(info) => info.permitted_caller,
+			ZkSaasPhaseOne(info) => info.permitted_caller,
+			_ => None,
+		}
+	}
 }
 
 /// Represents the Distributed Key Generation (DKG) job type.
@@ -144,6 +153,9 @@ pub struct DKGJobType<AccountId> {
 
 	/// The threshold value for the DKG.
 	pub threshold: u8,
+
+	/// the caller permitted to use this result later
+	pub permitted_caller: Option<AccountId>,
 }
 
 /// Represents the DKG Signature job type.
@@ -163,6 +175,8 @@ pub struct DKGSignatureJobType {
 pub struct ZkSaasPhaseOneJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
+	/// the caller permitted to use this result later
+	pub permitted_caller: Option<AccountId>,
 }
 
 /// Represents the (zk-SNARK) Phase Two job type.
@@ -230,16 +244,9 @@ pub struct PhaseOneResult<AccountId, BlockNumber> {
 
 	/// threshold if any for the original set
 	pub threshold: Option<u8>,
-}
 
-/// Represents different types of validator offences.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum ValidatorOffence {
-	/// The validator has been inactive.
-	Inactivity,
-
-	/// The validator has committed duplicate signing.
-	Equivocation,
+	/// permitted caller to use this result
+	pub permitted_caller: Option<AccountId>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
@@ -325,4 +332,30 @@ pub struct ZkSaasPhaseTwoResult {
 
 	/// The expected key for the signature
 	pub signing_key: Vec<u8>,
+}
+
+/// Represents different types of validator offences.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+pub enum ValidatorOffenceType {
+	/// The validator has been inactive.
+	Inactivity,
+	/// Submitted invalid signature.
+	InvalidSignatureSubmitted,
+	/// Rejected valid action.
+	RejectedValidAction,
+	/// Approved invalid action.
+	ApprovedInvalidAction,
+}
+
+/// An offence report that is filed if a validator misbehaves.
+#[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq)]
+pub struct ReportValidatorOffence<Offender> {
+	/// The current session index in which offence is reported.
+	pub session_index: u32,
+	/// The size of the validator set in current session/era.
+	pub validator_set_count: u32,
+	/// The type of offence
+	pub offence_type: ValidatorOffenceType,
+	/// Offenders
+	pub offenders: Vec<Offender>,
 }
