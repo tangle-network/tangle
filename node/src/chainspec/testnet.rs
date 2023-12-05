@@ -29,11 +29,11 @@ use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_testnet_runtime::{
 	AccountId, Balance, BalancesConfig, DKGConfig, DKGId, DKGProposalsConfig, EVMChainIdConfig,
-	EVMConfig, ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill,
-	RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
-	SystemConfig, UNIT, WASM_BINARY,
+	EVMConfig, ElectionsConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig,
+	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT,
+	WASM_BINARY,
 };
-use webb_consensus_types::network_config::{Network, NetworkConfig};
+//use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -362,14 +362,14 @@ fn testnet_genesis(
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
 		bridge_registry: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
-		eth_2_client: Eth2ClientConfig {
-			// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
-			networks: vec![
-				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
-				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
-			],
-			phantom: PhantomData,
-		},
+		// eth_2_client: Eth2ClientConfig {
+		// 	// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
+		// 	networks: vec![
+		// 		(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+		// 		(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+		// 	],
+		// 	phantom: PhantomData,
+		// },
 		nomination_pools: Default::default(),
 		transaction_payment: Default::default(),
 		// EVM compatibility

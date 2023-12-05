@@ -24,7 +24,7 @@ use frame_support::{
 	PalletId,
 };
 use frame_system::pallet_prelude::*;
-use sp_core::ByteArray;
+use sp_core::crypto::ByteArray;
 use sp_runtime::{
 	traits::{AccountIdConversion, Zero},
 	DispatchResult,
@@ -40,10 +40,15 @@ use tangle_primitives::{
 
 mod functions;
 mod impls;
-mod mock;
 mod rpc;
-mod tests;
 mod types;
+
+#[cfg(test)]
+mod mock;
+#[cfg(test)]
+mod mock_evm;
+#[cfg(test)]
+mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -116,6 +121,8 @@ pub mod module {
 		ValidatorMetadataNotFound,
 		/// Unexpected result provided
 		ResultNotExpectedType,
+		/// No permission to change permitted caller
+		NoPermission,
 	}
 
 	#[pallet::event]
@@ -248,8 +255,10 @@ pub mod module {
 					Self::add_job_to_validator_lookup(participant, job_key.clone(), job_id)?;
 				}
 
-				// Ensure the caller generated the phase one result
-				ensure!(result.owner == caller, Error::<T>::InvalidJobParams);
+				// ensure the account can use the result
+				if let Some(permitted_caller) = result.permitted_caller {
+					ensure!(permitted_caller == caller, Error::<T>::InvalidJobParams);
+				}
 			}
 
 			// Basic sanity checks
@@ -334,6 +343,7 @@ pub mod module {
 					for participant in participants.clone() {
 						let key =
 							T::RolesHandler::get_validator_metadata(participant, job_key.clone());
+
 						ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
 						let pub_key = sp_core::ecdsa::Public::from_slice(
 							&key.expect("checked above").get_authority_key()[0..33],
@@ -365,6 +375,7 @@ pub mod module {
 							.get_participants()
 							.ok_or(Error::<T>::InvalidJobPhase)?,
 						threshold: job_info.job_type.clone().get_threshold(),
+						permitted_caller: job_info.job_type.get_permitted_caller(),
 					};
 
 					KnownResults::<T>::insert(job_key.clone(), job_id, result);
@@ -542,6 +553,46 @@ pub mod module {
 			Self::try_validator_removal_from_job(job_key, job_id, validator)?;
 
 			Ok(())
+		}
+
+		/// Withdraw rewards accumulated by the caller.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: The origin of the call (typically a signed account).
+		///
+		/// # Errors
+		///
+		/// This function can return an error if:
+		///
+		/// - The caller is not authorized.
+		/// - No rewards are available for the caller.
+		/// - The reward transfer operation fails.
+		///
+		/// # Details
+		///
+		/// This function allows a caller to withdraw rewards that have been accumulated in their
+		/// account.
+		#[pallet::call_index(4)]
+		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
+		pub fn set_permitted_caller(
+			origin: OriginFor<T>,
+			job_key: JobKey,
+			job_id: JobId,
+			new_permitted_caller: T::AccountId,
+		) -> DispatchResult {
+			let caller = ensure_signed(origin)?;
+
+			KnownResults::<T>::try_mutate(job_key, job_id, |job| -> DispatchResult {
+				let job = job.as_mut().ok_or(Error::<T>::JobNotFound)?;
+
+				// ensure the caller is the current permitted caller
+				ensure!(job.permitted_caller == Some(caller), Error::<T>::NoPermission);
+
+				job.permitted_caller = Some(new_permitted_caller);
+
+				Ok(())
+			})
 		}
 	}
 }

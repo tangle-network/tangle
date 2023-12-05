@@ -16,6 +16,7 @@ use pallet_evm_precompile_blake2::Blake2F;
 use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
 use pallet_evm_precompile_call_permit::CallPermitPrecompile;
 use pallet_evm_precompile_democracy::DemocracyPrecompile;
+use pallet_evm_precompile_jobs::JobsPrecompile;
 use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_preimage::PreimagePrecompile;
 use pallet_evm_precompile_registry::PrecompileRegistry;
@@ -73,6 +74,7 @@ pub type WebbPrecompilesAt<R> = (
 		PreimagePrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
+	PrecompileAt<AddressU64<2068>, JobsPrecompile<R>, (CallableByContract, CallableByPrecompile)>,
 	PrecompileAt<
 		AddressU64<2069>,
 		PrecompileRegistry<R>,
