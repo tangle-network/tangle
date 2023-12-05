@@ -16,15 +16,18 @@ use sc_transaction_pool::ChainApi;
 use sp_api::{CallApiAt, ProvideRuntimeApi};
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_runtime::traits::Block as BlockT;
+use tangle_primitives::AuraId;
 // Runtime
-use tangle_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
+use sc_client_api::{AuxStore, UsageProvider};
+use sp_inherents::CreateInherentDataProviders;
+use tangle_testnet_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
 
 pub mod eth;
 pub mod tracing;
 pub use self::eth::{create_eth, overrides_handle, EthDeps};
 
 /// Full client dependencies.
-pub struct FullDeps<C, P, A: ChainApi, CT> {
+pub struct FullDeps<C, P, A: ChainApi, CT, CIDP> {
 	/// The client instance to use.
 	pub client: Arc<C>,
 	/// Transaction pool instance.
@@ -34,7 +37,7 @@ pub struct FullDeps<C, P, A: ChainApi, CT> {
 	/// Manual seal command sink
 	pub command_sink: Option<mpsc::Sender<EngineCommand<Hash>>>,
 	/// Ethereum-compatibility specific dependencies.
-	pub eth: EthDeps<C, P, A, CT, Block>,
+	pub eth: EthDeps<C, P, A, CT, Block, CIDP>,
 }
 
 pub struct DefaultEthConfig<C, BE>(std::marker::PhantomData<(C, BE)>);
@@ -50,8 +53,8 @@ where
 }
 
 /// Instantiate all Full RPC extensions.
-pub fn create_full<C, P, BE, A, CT>(
-	deps: FullDeps<C, P, A, CT>,
+pub fn create_full<C, P, BE, A, CT, CIDP>(
+	deps: FullDeps<C, P, A, CT, CIDP>,
 	subscription_task_executor: SubscriptionTaskExecutor,
 	pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
@@ -63,18 +66,21 @@ where
 	C: CallApiAt<Block> + ProvideRuntimeApi<Block>,
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
 	C::Api: sp_block_builder::BlockBuilder<Block>,
+	C::Api: sp_consensus_aura::AuraApi<Block, AuraId>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
 	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
-	C: BlockchainEvents<Block> + 'static,
+	C: BlockchainEvents<Block> + AuxStore + UsageProvider<Block> + StorageProvider<Block, BE>,
 	C: HeaderBackend<Block>
 		+ HeaderMetadata<Block, Error = BlockChainError>
-		+ StorageProvider<Block, BE>,
+		+ StorageProvider<Block, BE>
+		+ 'static,
 	BE: Backend<Block> + 'static,
 	P: TransactionPool<Block = Block> + 'static,
 	A: ChainApi<Block = Block> + 'static,
+	CIDP: CreateInherentDataProviders<Block, ()> + Send + 'static,
 	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
 {
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
@@ -96,7 +102,7 @@ where
 	}
 
 	// Ethereum compatibility RPCs
-	let io = create_eth::<_, _, _, _, _, _, DefaultEthConfig<C, BE>>(
+	let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
 		io,
 		eth,
 		subscription_task_executor,

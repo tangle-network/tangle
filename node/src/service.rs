@@ -39,7 +39,7 @@ use sp_runtime::{generic::Era, traits::BlakeTwo256, SaturatedConversion};
 use sp_trie::PrefixedMemoryDB;
 use std::{path::Path, sync::Arc, time::Duration};
 use substrate_frame_rpc_system::AccountNonceApi;
-use tangle_runtime::{self, opaque::Block, RuntimeApi, TransactionConverter};
+use tangle_testnet_runtime::{self, opaque::Block, RuntimeApi, TransactionConverter};
 
 pub fn fetch_nonce(client: &FullClient, account: sp_core::sr25519::Pair) -> u32 {
 	let best_hash = client.chain_info().best_hash;
@@ -62,11 +62,11 @@ impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 	type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		tangle_runtime::api::dispatch(method, data)
+		tangle_testnet_runtime::api::dispatch(method, data)
 	}
 
 	fn native_version() -> sc_executor::NativeVersion {
-		tangle_runtime::native_version()
+		tangle_testnet_runtime::native_version()
 	}
 }
 
@@ -87,41 +87,41 @@ type BoxBlockImport<Client> = sc_consensus::BoxBlockImport<Block, TransactionFor
 pub fn create_extrinsic(
 	client: &FullClient,
 	sender: sp_core::sr25519::Pair,
-	function: impl Into<tangle_runtime::RuntimeCall>,
+	function: impl Into<tangle_testnet_runtime::RuntimeCall>,
 	nonce: Option<u32>,
-) -> tangle_runtime::UncheckedExtrinsic {
+) -> tangle_testnet_runtime::UncheckedExtrinsic {
 	let function = function.into();
 	let genesis_hash = client.block_hash(0).ok().flatten().expect("Genesis block exists; qed");
 	let best_hash = client.chain_info().best_hash;
 	let best_block = client.chain_info().best_number;
 	let nonce = nonce.unwrap_or_else(|| fetch_nonce(client, sender.clone()));
 
-	let period = tangle_runtime::BlockHashCount::get()
+	let period = tangle_testnet_runtime::BlockHashCount::get()
 		.checked_next_power_of_two()
 		.map(|c| c / 2)
 		.unwrap_or(2) as u64;
 	let tip = 0;
-	let extra: tangle_runtime::SignedExtra = (
-		frame_system::CheckNonZeroSender::<tangle_runtime::Runtime>::new(),
-		frame_system::CheckSpecVersion::<tangle_runtime::Runtime>::new(),
-		frame_system::CheckTxVersion::<tangle_runtime::Runtime>::new(),
-		frame_system::CheckGenesis::<tangle_runtime::Runtime>::new(),
-		frame_system::CheckEra::<tangle_runtime::Runtime>::from(Era::Mortal(
+	let extra: tangle_testnet_runtime::SignedExtra = (
+		frame_system::CheckNonZeroSender::<tangle_testnet_runtime::Runtime>::new(),
+		frame_system::CheckSpecVersion::<tangle_testnet_runtime::Runtime>::new(),
+		frame_system::CheckTxVersion::<tangle_testnet_runtime::Runtime>::new(),
+		frame_system::CheckGenesis::<tangle_testnet_runtime::Runtime>::new(),
+		frame_system::CheckEra::<tangle_testnet_runtime::Runtime>::from(Era::Mortal(
 			period,
 			best_block.saturated_into(),
 		)),
-		frame_system::CheckNonce::<tangle_runtime::Runtime>::from(nonce),
-		frame_system::CheckWeight::<tangle_runtime::Runtime>::new(),
-		pallet_transaction_payment::ChargeTransactionPayment::<tangle_runtime::Runtime>::from(tip),
+		frame_system::CheckNonce::<tangle_testnet_runtime::Runtime>::from(nonce),
+		frame_system::CheckWeight::<tangle_testnet_runtime::Runtime>::new(),
+		pallet_transaction_payment::ChargeTransactionPayment::<tangle_testnet_runtime::Runtime>::from(tip),
 	);
 
-	let raw_payload = tangle_runtime::SignedPayload::from_raw(
+	let raw_payload = tangle_testnet_runtime::SignedPayload::from_raw(
 		function.clone(),
 		extra.clone(),
 		(
 			(),
-			tangle_runtime::VERSION.spec_version,
-			tangle_runtime::VERSION.transaction_version,
+			tangle_testnet_runtime::VERSION.spec_version,
+			tangle_testnet_runtime::VERSION.transaction_version,
 			genesis_hash,
 			best_hash,
 			(),
@@ -131,10 +131,10 @@ pub fn create_extrinsic(
 	);
 	let signature = raw_payload.using_encoded(|e| sender.sign(e));
 
-	tangle_runtime::UncheckedExtrinsic::new_signed(
+	tangle_testnet_runtime::UncheckedExtrinsic::new_signed(
 		function,
 		sp_runtime::AccountId32::from(sender.public()).into(),
-		tangle_runtime::Signature::Sr25519(signature),
+		tangle_testnet_runtime::Signature::Sr25519(signature),
 		extra,
 	)
 }
@@ -446,6 +446,21 @@ pub async fn new_full(
 	// for ethereum-compatibility rpc.
 	config.rpc_id_provider = Some(Box::new(fc_rpc::EthereumSubIdProvider));
 
+	let slot_duration = sc_consensus_aura::slot_duration(&*client)?;
+	let target_gas_price = eth_config.target_gas_price;
+	let pending_create_inherent_data_providers = move |_, ()| async move {
+		let current = sp_timestamp::InherentDataProvider::from_system_time();
+		let next_slot = current.timestamp().as_millis() + slot_duration.as_millis();
+		let timestamp = sp_timestamp::InherentDataProvider::new(next_slot.into());
+		let slot =
+			sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+				*timestamp,
+				slot_duration,
+			);
+		let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
+		Ok((slot, timestamp, dynamic_fee))
+	};
+
 	let ethapi_cmd = rpc_config.ethapi.clone();
 	let tracing_requesters =
 		if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
@@ -492,6 +507,7 @@ pub async fn new_full(
 			tracing_requesters: tracing_requesters.clone(),
 			trace_filter_max_count: rpc_config.ethapi_trace_max_count,
 		}),
+		pending_create_inherent_data_providers,
 	};
 
 	let rpc_builder = {

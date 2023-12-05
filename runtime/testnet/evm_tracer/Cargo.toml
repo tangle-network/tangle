@@ -1,0 +1,45 @@
+[package]
+name = "evm-tracer"
+version = "0.1.0"
+authors = { workspace = true }
+edition = "2021"
+license = "GPL-3.0-only"
+repository = { workspace = true }
+
+[dependencies]
+# Moonbeam
+evm-tracing-events = { workspace = true, features = ["evm-tracing"] }
+primitives-ext = { workspace = true }
+
+# Substrate
+parity-scale-codec = { workspace = true }
+sp-core = { workspace = true }
+sp-io = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+
+# Frontier
+ethereum-types = { workspace = true }
+evm = { workspace = true }
+evm-gasometer = { workspace = true }
+evm-runtime = { workspace = true }
+fp-evm = { workspace = true }
+pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
+
+[features]
+default = ["std"]
+std = [
+  "ethereum-types/std",
+  "evm-gasometer/std",
+  "evm-runtime/std",
+  "evm-tracing-events/std",
+  "evm/std",
+  "evm/with-serde",
+  "fp-evm/std",
+  "primitives-ext/std",
+  "pallet-evm/std",
+  "parity-scale-codec/std",
+  "sp-core/std",
+  "sp-runtime/std",
+  "sp-std/std",
+]
