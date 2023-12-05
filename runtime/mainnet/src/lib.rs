@@ -102,11 +102,12 @@ pub use tangle_primitives::{
 	UNSIGNED_PROPOSAL_EXPIRY,
 };
 
+use pallet_airdrop_claims::TestWeightInfo;
+
 // Frontier
 use fp_rpc::TransactionStatus;
 use pallet_ethereum::{Call::transact, Transaction as EthereumTransaction};
-use pallet_evm::{Account as EVMAccount, FeeCalculator, Runner};
-
+use pallet_evm::{Account as EVMAccount, FeeCalculator, HashedAddressMapping, Runner};
 pub type Nonce = u32;
 
 /// This runtime version.
@@ -996,6 +997,20 @@ impl pallet_utility::Config for Runtime {
 // 	type Currency = Balances;
 // }
 
+parameter_types! {
+	pub Prefix: &'static [u8] = b"Claim TNTs to the account:";
+}
+
+impl pallet_airdrop_claims::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type VestingSchedule = Vesting;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+	type Prefix = Prefix;
+	type MoveClaimOrigin = frame_system::EnsureRoot<AccountId>;
+	type WeightInfo = TestWeightInfo;
+}
+
 pub struct BaseFilter;
 impl Contains<RuntimeCall> for BaseFilter {
 	fn contains(call: &RuntimeCall) -> bool {
@@ -1100,6 +1115,7 @@ construct_runtime!(
 		BaseFee: pallet_base_fee,
 		HotfixSufficients: pallet_hotfix_sufficients,
 
+		Claims: pallet_airdrop_claims,
 		//Eth2Client: pallet_eth2_light_client,
 	}
 );

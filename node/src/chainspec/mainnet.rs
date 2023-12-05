@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::BTreeMap, marker::PhantomData};
+use std::collections::BTreeMap;
 
 use crate::{
 	distributions::{combine_distributions, develop, mainnet, testnet},
@@ -319,6 +319,7 @@ fn testnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
+		claims: Default::default(),
 	}
 }
 
@@ -405,5 +406,6 @@ fn mainnet_genesis(
 		// 	phantom: PhantomData,
 		// },
 		bridge_registry: Default::default(),
+		claims: Default::default(),
 	}
 }
