@@ -42,7 +42,6 @@ pub use pallet::*;
 use pallet_evm::AddressMapping;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
-use schnorrkel::{signing_context, PublicKey, Signature};
 use serde::{self, Deserialize, Serialize};
 use sp_core::{sr25519::Public, H160};
 use sp_io::{
@@ -50,9 +49,9 @@ use sp_io::{
 	hashing::keccak_256,
 };
 use sp_runtime::{
-	traits::{CheckedSub, SignedExtension, Zero},
+	traits::{CheckedSub, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
-	AccountId32, RuntimeDebug,
+	RuntimeDebug,
 };
 use sp_std::{convert::TryInto, prelude::*, vec};
 use utils::Sr25519Signature;
@@ -565,7 +564,7 @@ impl<T: Config> Pallet<T> {
 			MultiAddress::EVM(_) => return None,
 			MultiAddress::Native(a) => {
 				let mut bytes = [0u8; 32];
-				bytes.copy_from_slice(&addr.to_account_id_32().encode());
+				bytes.copy_from_slice(&a.encode());
 				Public(bytes)
 			},
 		};
