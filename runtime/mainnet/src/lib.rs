@@ -746,8 +746,7 @@ where
 	) -> Option<(RuntimeCall, <UncheckedExtrinsic as traits::Extrinsic>::SignaturePayload)> {
 		let tip = 0;
 		// take the biggest period possible.
-		let period =
-			BlockHashCount::get().checked_next_power_of_two().map(|c| c / 2).unwrap_or(2);
+		let period = BlockHashCount::get().checked_next_power_of_two().map(|c| c / 2).unwrap_or(2);
 		let current_block = System::block_number()
 			.saturated_into::<u64>()
 			// The `System::block_number` is initialized with `n+1`,
@@ -985,17 +984,17 @@ impl pallet_utility::Config for Runtime {
 	type WeightInfo = ();
 }
 
-parameter_types! {
-	pub const StoragePricePerByte: u128 = MILLIUNIT;
-	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
-}
+// parameter_types! {
+// 	pub const StoragePricePerByte: u128 = MILLIUNIT;
+// 	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
+// }
 
-impl pallet_eth2_light_client::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type StoragePricePerByte = StoragePricePerByte;
-	type PalletId = Eth2ClientPalletId;
-	type Currency = Balances;
-}
+// impl pallet_eth2_light_client::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type StoragePricePerByte = StoragePricePerByte;
+// 	type PalletId = Eth2ClientPalletId;
+// 	type Currency = Balances;
+// }
 
 pub struct BaseFilter;
 impl Contains<RuntimeCall> for BaseFilter {
@@ -1101,7 +1100,7 @@ construct_runtime!(
 		BaseFee: pallet_base_fee,
 		HotfixSufficients: pallet_hotfix_sufficients,
 
-		Eth2Client: pallet_eth2_light_client,
+		//Eth2Client: pallet_eth2_light_client,
 	}
 );
 

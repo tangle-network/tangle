@@ -291,12 +291,12 @@ tangle-primitives = { path = 'primitives', default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
 # Light client dependencies
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.5" }
-pallet-eth2-light-client-relayer-gadget = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.5" }
-pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.5" }
-webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.5" }
+#pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.6" }
+#pallet-eth2-light-client-relayer-gadget = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.6" }
+#pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.6" }
+#webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.6" }
 
-webb = { version = "0.8", default-features = false }
+webb = { version = "0.7", default-features = false }
 webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", rev = "a960eaf", default-features = false, features = ["scale", "evm"] }
 
 primitives-ext = { path = "primitives/ext", default-features = false }
