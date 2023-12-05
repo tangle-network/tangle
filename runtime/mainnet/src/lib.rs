@@ -325,7 +325,7 @@ impl pallet_aura::Config for Runtime {
 
 parameter_types! {
 	pub const ReportLongevity: u64 =
-		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * Period::get() as u64;
+		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * Period::get();
 }
 
 impl pallet_grandpa::Config for Runtime {
@@ -517,8 +517,8 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 
 parameter_types! {
 	// phase durations. 1/4 of the last session for each.
-	pub const SignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS / 4;
-	pub const UnsignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS / 4;
+	pub const SignedPhase: u64 = EPOCH_DURATION_IN_BLOCKS / 4;
+	pub const UnsignedPhase: u64 = EPOCH_DURATION_IN_BLOCKS / 4;
 
 	// signed config
 	pub const SignedRewardBase: Balance = UNIT;
@@ -747,7 +747,7 @@ where
 		let tip = 0;
 		// take the biggest period possible.
 		let period =
-			BlockHashCount::get().checked_next_power_of_two().map(|c| c / 2).unwrap_or(2) as u64;
+			BlockHashCount::get().checked_next_power_of_two().map(|c| c / 2).unwrap_or(2);
 		let current_block = System::block_number()
 			.saturated_into::<u64>()
 			// The `System::block_number` is initialized with `n+1`,
