@@ -19,6 +19,7 @@ members = [
   "standalone/runtime",
   "standalone/runtime/evm_tracer",
   "pallets/*",
+  "pallets/claims",
   "pallets/roles",
   "pallets/jobs/rpc",
   "pallets/jobs/rpc/runtime-api",

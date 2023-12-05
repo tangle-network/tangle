@@ -44,8 +44,11 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use schnorrkel::{signing_context, PublicKey, Signature};
 use serde::{self, Deserialize, Serialize};
-use sp_core::H160;
-use sp_io::{crypto::secp256k1_ecdsa_recover, hashing::keccak_256};
+use sp_core::{sr25519::Public, H160};
+use sp_io::{
+	crypto::{secp256k1_ecdsa_recover, sr25519_verify},
+	hashing::keccak_256,
+};
 use sp_runtime::{
 	traits::{CheckedSub, SignedExtension, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
@@ -234,7 +237,6 @@ pub mod pallet {
 		fn build(&self) {
 			// build `Claims`
 			self.claims.iter().map(|(a, b, _)| (a.clone(), b.clone())).for_each(|(a, b)| {
-				println!("a: {:?}, b: {:?}", a, b);
 				Claims::<T>::insert(a, b);
 			});
 			// build `Total`
@@ -559,25 +561,36 @@ impl<T: Config> Pallet<T> {
 		extra: &[u8],
 	) -> Option<MultiAddress> {
 		let msg = keccak_256(&Self::polkadotjs_signable_message(what, extra));
-		let pk: PublicKey = match addr.clone() {
+		let public: Public = match addr.clone() {
 			MultiAddress::EVM(_) => return None,
-			MultiAddress::Native(a) => PublicKey::from_bytes(&a.encode()).ok()?,
+			MultiAddress::Native(a) => {
+				let mut bytes = [0u8; 32];
+				bytes.copy_from_slice(&addr.to_account_id_32().encode());
+				Public(bytes)
+			},
 		};
-		println!("pk: {:?}", pk);
-		let signature: Signature = Signature::from_bytes(&s.0.encode()).ok()?;
-		println!("signature: {:?}", signature);
-		const SIGNING_CTX: &'static [u8] = b"substrate";
-		match pk.verify_simple(SIGNING_CTX, &msg, &signature) {
-			Ok(_) => Some(addr),
-			Err(_) => None,
+		match sr25519_verify(&s.0, &msg, &public) {
+			true => Some(addr),
+			false => None,
 		}
+		// let pk: PublicKey = match addr.clone() {
+		// 	MultiAddress::EVM(_) => return None,
+		// 	MultiAddress::Native(a) => PublicKey::from_bytes(&a.encode()).ok()?,
+		// };
+		// println!("pk: {:?}", pk);
+		// let signature: Signature = Signature::from_bytes(&s.0.encode()).ok()?;
+		// println!("signature: {:?}", signature);
+		// const SIGNING_CTX: &'static [u8] = b"substrate";
+		// match pk.verify_simple(SIGNING_CTX, &msg, &signature) {
+		// 	Ok(_) => Some(addr),
+		// 	Err(_) => None,
+		// }
 	}
 
 	fn process_claim(
 		signer: MultiAddress,
 		dest: Option<MultiAddress>,
 	) -> sp_runtime::DispatchResult {
-		println!("process_claim: signer: {:?}, dest: {:?}", signer, dest);
 		let balance_due = <Claims<T>>::get(&signer).ok_or(Error::<T>::SignerHasNoClaim)?;
 
 		let new_total = Self::total().checked_sub(&balance_due).ok_or(Error::<T>::PotUnderflow)?;
@@ -682,6 +695,7 @@ mod secp_utils {
 #[cfg(any(test, feature = "runtime-benchmarks"))]
 mod sr25519_utils {
 	use super::*;
+	use frame_support::assert_ok;
 	use sp_core::{sr25519, Pair};
 
 	pub fn public(pair: &sr25519::Pair) -> sr25519::Public {
@@ -697,8 +711,15 @@ mod sr25519_utils {
 		what: &[u8],
 		extra: &[u8],
 	) -> MultiAddressSignature {
-		let sig = pair
-			.sign(&<super::Pallet<T>>::polkadotjs_signable_message(&to_ascii_hex(what)[..], extra));
+		let msg = keccak_256(&<super::Pallet<T>>::polkadotjs_signable_message(
+			&to_ascii_hex(what)[..],
+			extra,
+		));
+		let sig = pair.sign(&msg);
+		let pk = schnorrkel::PublicKey::from_bytes(&pair.public().0).unwrap();
+		let signature = Signature::from_bytes(&sig.0).unwrap();
+		let res = pk.verify_simple(b"substrate", &msg, &signature);
+		assert_ok!(res);
 		MultiAddressSignature::Native(Sr25519Signature(sig))
 	}
 }

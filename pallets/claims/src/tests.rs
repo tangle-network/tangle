@@ -751,7 +751,24 @@ fn test_claim_from_substrate_address_to_evm() {
 			)
 		));
 		assert_eq!(Total::<Test>::get(), original_total_claims - claim_of_sub_alice);
-
+		assert_eq!(
+			Balances::free_balance(get_multi_address_account_id(42).to_account_id_32()),
+			500
+		);
+		// Claim bob without providing signer value (needed for sr25519 signatures)
+		assert_noop!(
+			ClaimsPallet::claim(
+				RuntimeOrigin::none(),
+				Some(get_multi_address_account_id(42)),
+				None,
+				sr25519_utils::sig::<Test>(
+					&bob_sr25519(),
+					&Some(get_multi_address_account_id(42)).encode(),
+					&[][..]
+				)
+			),
+			Error::<Test>::InvalidNativeAccount
+		);
 		// force set the expiry config
 		assert_ok!(ClaimsPallet::force_set_expiry_config(
 			RuntimeOrigin::root(),
@@ -774,7 +791,7 @@ fn test_claim_from_substrate_address_to_evm() {
 			ClaimsPallet::claim(
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(42)),
-				None,
+				Some(sr25519_utils::sub(&bob_sr25519())),
 				sr25519_utils::sig::<Test>(
 					&bob_sr25519(),
 					&Some(get_multi_address_account_id(42)).encode(),
@@ -782,6 +799,43 @@ fn test_claim_from_substrate_address_to_evm() {
 				)
 			),
 			Error::<Test>::PotUnderflow
+		);
+	});
+}
+
+#[test]
+fn test_double_claim_fails_for_substrate_account() {
+	new_test_ext().execute_with(|| {
+		let original_total_claims = Total::<Test>::get();
+		let claim_of_sub_alice = 500;
+		assert_ok!(ClaimsPallet::claim(
+			RuntimeOrigin::none(),
+			Some(get_multi_address_account_id(42)),
+			Some(sr25519_utils::sub(&alice_sr25519())),
+			sr25519_utils::sig::<Test>(
+				&alice_sr25519(),
+				&Some(get_multi_address_account_id(42)).encode(),
+				&[][..]
+			)
+		));
+		assert_eq!(Total::<Test>::get(), original_total_claims - claim_of_sub_alice);
+		assert_eq!(
+			Balances::free_balance(get_multi_address_account_id(42).to_account_id_32()),
+			500
+		);
+		// Claim for Alice again and expect the proper error
+		assert_noop!(
+			ClaimsPallet::claim(
+				RuntimeOrigin::none(),
+				Some(get_multi_address_account_id(42)),
+				Some(sr25519_utils::sub(&alice_sr25519())),
+				sr25519_utils::sig::<Test>(
+					&alice_sr25519(),
+					&Some(get_multi_address_account_id(42)).encode(),
+					&[][..]
+				)
+			),
+			Error::<Test>::SignerHasNoClaim
 		);
 	});
 }

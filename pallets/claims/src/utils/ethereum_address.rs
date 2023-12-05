@@ -1,5 +1,6 @@
 use super::*;
 
+#[cfg(feature = "std")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 /// An Ethereum address (i.e. 20 bytes, used to represent an Ethereum account).
@@ -8,6 +9,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 #[derive(Clone, Copy, PartialEq, Eq, Encode, Decode, Default, RuntimeDebug, TypeInfo)]
 pub struct EthereumAddress(pub [u8; 20]);
 
+#[cfg(feature = "std")]
 impl Serialize for EthereumAddress {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 	where
@@ -18,6 +20,7 @@ impl Serialize for EthereumAddress {
 	}
 }
 
+#[cfg(feature = "std")]
 impl<'de> Deserialize<'de> for EthereumAddress {
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
 	where

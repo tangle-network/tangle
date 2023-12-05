@@ -1082,6 +1082,20 @@ impl pallet_eth2_light_client::Config for Runtime {
 	type Currency = Balances;
 }
 
+parameter_types! {
+	pub Prefix: &'static [u8] = b"Claim TNTs to the account:";
+}
+
+impl pallet_airdrop_claims::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type VestingSchedule = Vesting;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId32>;
+	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+	type Prefix = Prefix;
+	type MoveClaimOrigin = frame_system::EnsureRoot<AccountId32>;
+	type WeightInfo = ();
+}
+
 pub struct BaseFilter;
 impl Contains<RuntimeCall> for BaseFilter {
 	fn contains(call: &RuntimeCall) -> bool {
@@ -1192,6 +1206,7 @@ construct_runtime!(
 		HotfixSufficients: pallet_hotfix_sufficients,
 
 		Eth2Client: pallet_eth2_light_client,
+		Claims: pallet_airdrop_claims,
 	}
 );
 

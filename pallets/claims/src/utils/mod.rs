@@ -5,7 +5,7 @@ use scale_info::{
 	TypeInfo,
 };
 #[cfg(feature = "std")]
-use serde::{self, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{self, Deserialize, Serialize};
 use sp_core::{sr25519::Signature, H160};
 use sp_runtime::{traits::BlakeTwo256, AccountId32, RuntimeDebug};
 use sp_std::prelude::*;
@@ -14,7 +14,8 @@ pub mod ethereum_address;
 
 use ethereum_address::{EcdsaSignature, EthereumAddress};
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo, Serialize, Deserialize)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum MultiAddress {
 	/// Claimer is Ethereum address
 	EVM(EthereumAddress),
