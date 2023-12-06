@@ -20,6 +20,7 @@ members = [
   "runtime/testnet/evm_tracer",
   "runtime/mainnet",
   "pallets/*",
+  "pallets/claims",
   "pallets/roles",
   "pallets/jobs/rpc",
   "pallets/jobs/rpc/runtime-api",
@@ -70,6 +71,7 @@ syn = { version = "1.0" }
 hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
 slices = "0.2.0"
+schnorrkel = { verison = "11.4", default-features = false }
 
 # DKG Substrate Dependencies
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", tag = "v0.4.7", default-features = false }
@@ -86,7 +88,7 @@ tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/t
 tangle-mainnet-runtime = { package = "tangle-mainnet-runtime", path = "runtime/mainnet" }
 
 # Tangle Dependencies
-pallet-ecdsa-claims = { path = "pallets/claims", default-features = false }
+pallet-airdrop-claims = { path = "pallets/claims", default-features = false }
 pallet-jobs = { path = "pallets/jobs", default-features = false }
 pallet-roles = { path = "pallets/roles", default-features = false }
 pallet-dkg = { path = "pallets/dkg", default-features = false }

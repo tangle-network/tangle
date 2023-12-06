@@ -30,7 +30,7 @@ pallet-dkg-proposal-handler = { workspace = true }
 pallet-dkg-proposals = { workspace = true }
 
 # Webb Substrate Dependencies
-pallet-ecdsa-claims = { workspace = true }
+pallet-airdrop-claims = { workspace = true }
 
 # Substrate dependencies
 sp-api = { workspace = true }
@@ -213,7 +213,7 @@ std = [
   "pallet-preimage/std",
   "pallet-nomination-pools/std",
   "pallet-treasury/std",
-  "pallet-ecdsa-claims/std",
+  "pallet-airdrop-claims/std",
   "pallet-identity/std",
   "pallet-bridge-registry/std",
 
