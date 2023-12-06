@@ -26,6 +26,7 @@ use sp_core::H256;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{testing::Header, traits::IdentityLookup, BuildStorage};
 use std::{sync::Arc, vec};
+use tangle_primitives::verifier::arkworks::ArkworksVerifierGroth16Bn254;
 
 pub type AccountId = u64;
 pub type Balance = u128;
@@ -80,6 +81,7 @@ impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type UpdateOrigin = EnsureSignedBy<One, AccountId>;
+	type Verifier = ArkworksVerifierGroth16Bn254;
 	type WeightInfo = ();
 }
 

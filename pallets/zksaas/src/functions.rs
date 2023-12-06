@@ -15,9 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::types::BalanceOf;
-use frame_support::{ensure, pallet_prelude::DispatchResult, sp_runtime::Saturating};
+use frame_support::{pallet_prelude::DispatchResult, sp_runtime::Saturating};
 use frame_system::pallet_prelude::BlockNumberFor;
-use tangle_primitives::jobs::*;
+use tangle_primitives::{jobs::*, verifier::*};
 
 impl<T: Config> Pallet<T> {
 	/// Calculates the fee for a given job submission based on the provided fee information.
@@ -59,10 +59,13 @@ impl<T: Config> Pallet<T> {
 	/// Returns a `DispatchResult` indicating whether the verification was successful or encountered
 	/// an error.
 	pub fn verify(data: JobWithResult<T::AccountId>) -> DispatchResult {
-		match (data.result, data.phase_one_job_type) {
-			(JobResult::ZkSaasCircuit(_), None) => Ok(()),
-			(JobResult::ZkSaasProve(info), Some(JobType::ZkSaasCircuit(circuit))) =>
-				Self::verify_proof(circuit, info),
+		match (data.phase_one_job_type, data.job_type, data.result) {
+			(None, _, JobResult::ZkSaasCircuit(_)) => Ok(()),
+			(
+				Some(JobType::ZkSaasCircuit(circuit)),
+				JobType::ZkSaasProve(req),
+				JobResult::ZkSaasProve(res),
+			) => Self::verify_proof(circuit, req, res),
 			_ => Err(Error::<T>::InvalidJobType.into()), // this should never happen
 		}
 	}
@@ -70,15 +73,33 @@ impl<T: Config> Pallet<T> {
 	/// Verifies a given proof submission.
 	pub fn verify_proof(
 		ZkSaasCircuitJobType { system, .. }: ZkSaasCircuitJobType<T::AccountId>,
-		proof: ZkSaasProofResult,
+		ZkSaasProveJobType { request, .. }: ZkSaasProveJobType,
+		res: ZkSaasProofResult,
 	) -> DispatchResult {
-		match proof {
-			ZkSaasProofResult::Circom(info) => Self::verify_circom_proof(system, info),
+		match (system, request, res) {
+			(
+				ZkSaasSystem::Groth16(sys),
+				ZkSaasProveRequest::Groth16(req),
+				ZkSaasProofResult::Circom(res),
+			) => Self::verify_circom_proof(sys, req, res),
 		}
 	}
 
 	/// Verifies a given circom proof submission.
-	pub fn verify_circom_proof(system: ZkSaasSystem, proof: CircomProofResult) -> DispatchResult {
-		Ok(())
+	pub fn verify_circom_proof(
+		system: Groth16System,
+		req: Groth16ProveRequest,
+		res: CircomProofResult,
+	) -> DispatchResult {
+		let maybe_verified =
+			T::Verifier::verify(&req.public_input, &res.proof, &system.verifying_key);
+		match maybe_verified {
+			Ok(true) => Ok(()),
+			Ok(false) => Err(Error::<T>::InvalidProof.into()),
+			Err(e) => {
+				frame_support::log::warn!(target: "zksaas::verify_circom_proof", "Invalid Circom Proof: {}", e);
+				Err(Error::<T>::MalformedProof.into())
+			},
+		}
 	}
 }

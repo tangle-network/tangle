@@ -1,9 +1,8 @@
-use ark_crypto_primitives::{Error, snark::SNARK};
+use ark_crypto_primitives::{snark::SNARK, Error};
 use ark_ec::pairing::Pairing;
 use ark_groth16::{Groth16, Proof, VerifyingKey};
 use ark_serialize::CanonicalDeserialize;
 use sp_std::marker::PhantomData;
-
 
 pub fn verify_groth16<E: Pairing>(
 	vk: &VerifyingKey<E>,
@@ -28,4 +27,4 @@ impl<E: Pairing> super::InstanceVerifier for ArkworksVerifierGroth16<E> {
 }
 
 use ark_bn254::Bn254;
-pub type ArkworksVerifierBn254 = ArkworksVerifierGroth16<Bn254>;
+pub type ArkworksVerifierGroth16Bn254 = ArkworksVerifierGroth16<Bn254>;

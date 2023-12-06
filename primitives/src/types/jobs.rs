@@ -125,7 +125,7 @@ pub enum ZkSaasProveRequest {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Groth16ProveRequest {
 	/// Public input that are used during the verification
-	pub public_input: Vec<Vec<u8>>,
+	pub public_input: Vec<u8>,
 	/// `a` is the full assignment (full_assginment[0] is 1)
 	/// a = full_assginment[1..]
 	/// Each element contains a PSS of the witness
@@ -273,7 +273,7 @@ pub enum JobState {
 }
 
 /// Enum representing different types of job keys.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy)]
 pub enum JobKey {
 	/// Distributed Key Generation (DKG) job type.
 	DKG,
@@ -302,18 +302,32 @@ impl JobKey {
 pub struct PhaseOneResult<AccountId, BlockNumber> {
 	/// The owner's account ID.
 	pub owner: AccountId,
-
 	/// The expiry block number.
 	pub expiry: BlockNumber,
-
 	/// The type of the job submission.
 	pub result: Vec<u8>,
+	/// The type of the job submission.
+	pub job_type: JobType<AccountId>,
+}
 
-	/// List of participants' account IDs.
-	pub participants: Vec<AccountId>,
+impl<AccountId, BlockNumber> PhaseOneResult<AccountId, BlockNumber>
+where
+	AccountId: Clone,
+{
+	pub fn participants(&self) -> Option<Vec<AccountId>> {
+		match &self.job_type {
+			JobType::DKG(x) => Some(x.participants.clone()),
+			JobType::ZkSaasCircuit(x) => Some(x.participants.clone()),
+			_ => None,
+		}
+	}
 
-	/// threshold if any for the original set
-	pub threshold: Option<u8>,
+	pub fn threshold(&self) -> Option<u8> {
+		match &self.job_type {
+			JobType::DKG(x) => Some(x.threshold),
+			_ => None,
+		}
+	}
 }
 
 /// Represents different types of validator offences.

@@ -41,6 +41,7 @@ pub mod pallet {
 		traits::{Get, ReservableCurrency},
 	};
 	use frame_system::pallet_prelude::*;
+	use tangle_primitives::verifier::InstanceVerifier;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
@@ -53,6 +54,9 @@ pub mod pallet {
 
 		/// The origin which may set filter.
 		type UpdateOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+
+		/// The verifier instance trait
+		type Verifier: InstanceVerifier;
 
 		/// Weight info for pallet
 		type WeightInfo: WeightInfo;
@@ -79,6 +83,9 @@ pub mod pallet {
 		InvalidJobType,
 		/// Invalid proof
 		InvalidProof,
+		/// Malformed Proof
+		/// if the proof bytes is not correct.
+		MalformedProof,
 	}
 
 	#[pallet::call]
