@@ -170,6 +170,7 @@ impl<T: Config> Pallet<T> {
 						let job_type = JobType::DKG(DKGJobType {
 							participants: new_participants,
 							threshold: new_threshold,
+							permitted_caller: phase1.clone().permitted_caller,
 						});
 
 						// charge the validator fee for job submission
@@ -222,6 +223,7 @@ impl<T: Config> Pallet<T> {
 						let job_type = JobType::ZkSaasCircuit(ZkSaasCircuitJobType {
 							participants: new_participants,
 							system,
+							permitted_caller: phase1.clone().permitted_caller,
 						});
 
 						// charge the validator fee for job submission
@@ -301,6 +303,7 @@ impl<T: Config> Pallet<T> {
 			owner: job_info.owner.clone(),
 			expiry: job_info.expiry,
 			job_type: job_info.job_type.clone(),
+			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 			result: info.key,
 		};
 		Ok(result)
@@ -410,6 +413,7 @@ impl<T: Config> Pallet<T> {
 			job_type: job_info.job_type.clone(),
 			// No data in the result
 			result: Vec::new(),
+			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 		};
 		Ok(result)
 	}

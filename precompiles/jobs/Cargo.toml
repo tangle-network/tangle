@@ -1,0 +1,96 @@
+[package]
+name = "pallet-evm-precompile-jobs"
+version = "0.1.0"
+authors = { workspace = true }
+edition = "2021"
+description = "A Precompile to make pallet-jobs calls encoding accessible to pallet-evm"
+
+[dependencies]
+log = { workspace = true }
+num_enum = { workspace = true }
+rustc-hex = { workspace = true }
+
+# Moonbeam
+precompile-utils = { workspace = true }
+
+# Substrate
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+pallet-jobs = { workspace = true }
+parity-scale-codec = { workspace = true, features = ["derive"] }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+tangle-primitives = { workspace = true }
+
+# Frontier
+fp-evm = { workspace = true }
+pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
+
+[dev-dependencies]
+derive_more = { workspace = true }
+hex-literal = { workspace = true }
+serde = { workspace = true }
+sha3 = { workspace = true }
+
+# Moonbeam
+precompile-utils = { workspace = true, features = ["std", "testing"] }
+
+# Substrate
+pallet-balances = { workspace = true, features = ["std"] }
+pallet-timestamp = { workspace = true, features = ["std"] }
+scale-info = { workspace = true, features = ["derive", "std"] }
+sp-io = { workspace = true }
+ethers = "2.0"
+serde_json = { workspace = true }
+libsecp256k1 = { workspace = true }
+smallvec = { workspace = true }
+sp-application-crypto = { workspace = true }
+sp-keystore = { workspace = true }
+ethereum = { workspace = true, features = ["with-codec"] }
+hex = { workspace = true }
+
+# Frontier Primitive
+fp-account = { workspace = true }
+fp-consensus = { workspace = true }
+fp-dynamic-fee = { workspace = true }
+fp-ethereum = { workspace = true }
+fp-evm = { workspace = true }
+fp-rpc = { workspace = true }
+fp-self-contained = { workspace = true }
+fp-storage = { workspace = true }
+
+# Frontier FRAME
+pallet-base-fee = { workspace = true }
+pallet-dynamic-fee = { workspace = true }
+pallet-ethereum = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-evm-chain-id = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+  "scale-info/std",
+  "sp-runtime/std",
+  "frame-support/std",
+  "frame-system/std",
+  "sp-core/std",
+  "sp-std/std",
+  "tangle-primitives/std",
+  "pallet-balances/std",
+  "pallet-timestamp/std",
+  "fp-account/std",
+  "fp-consensus/std",
+  "fp-dynamic-fee/std",
+  "fp-ethereum/std",
+  "fp-evm/std",
+  "fp-rpc/std",
+  "fp-self-contained/std",
+  "fp-storage/std",
+  "pallet-base-fee/std",
+  "pallet-dynamic-fee/std",
+  "pallet-ethereum/std",
+  "pallet-evm/std",
+  "pallet-evm-chain-id/std",
+  "pallet-jobs/std"
+]

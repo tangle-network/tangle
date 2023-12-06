@@ -24,14 +24,14 @@ use frame_support::{
 	PalletId,
 };
 use frame_system::pallet_prelude::*;
-use sp_core::ByteArray;
+use sp_core::crypto::ByteArray;
 use sp_runtime::{
 	traits::{AccountIdConversion, Zero},
 	DispatchResult,
 };
 use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
-	jobs::{DKGResult, JobId, JobInfo, JobKey, JobResult, PhaseOneResult, ValidatorOffence},
+	jobs::{DKGResult, JobId, JobInfo, JobKey, JobResult, PhaseOneResult, ValidatorOffenceType},
 	traits::{
 		jobs::{JobToFee, MPCHandler},
 		roles::RolesHandler,
@@ -40,10 +40,15 @@ use tangle_primitives::{
 
 mod functions;
 mod impls;
-mod mock;
 mod rpc;
-mod tests;
 mod types;
+
+#[cfg(test)]
+mod mock;
+#[cfg(test)]
+mod mock_evm;
+#[cfg(test)]
+mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -115,6 +120,8 @@ pub mod module {
 		ValidatorMetadataNotFound,
 		/// Unexpected result provided
 		ResultNotExpectedType,
+		/// No permission to change permitted caller
+		NoPermission,
 	}
 
 	#[pallet::event]
@@ -248,8 +255,10 @@ pub mod module {
 					Self::add_job_to_validator_lookup(participant, job_key, job_id)?;
 				}
 
-				// Ensure the caller generated the phase one result
-				ensure!(result.owner == caller, Error::<T>::InvalidJobParams);
+				// ensure the account can use the result
+				if let Some(permitted_caller) = result.permitted_caller {
+					ensure!(permitted_caller == caller, Error::<T>::InvalidJobParams);
+				}
 			}
 
 			// Basic sanity checks
@@ -317,7 +326,6 @@ pub mod module {
 			// Ensure the job exists
 			let job_info =
 				SubmittedJobs::<T>::get(job_key, job_id).ok_or(Error::<T>::JobNotFound)?;
-
 			let participants = match &result {
 				JobResult::DKG(_) | JobResult::ZkSaasCircuit(_) => job_info
 					.job_type
@@ -339,6 +347,7 @@ pub mod module {
 					phase_one_result.participants().ok_or(Error::<T>::InvalidJobPhase)?
 				},
 			};
+
 			// Handle based on job result
 			match result {
 				JobResult::DKG(info) => {
@@ -450,7 +459,7 @@ pub mod module {
 			job_key: JobKey,
 			job_id: JobId,
 			validator: T::AccountId,
-			offence: ValidatorOffence,
+			offence: ValidatorOffenceType,
 			signatures: Vec<Vec<u8>>,
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;
@@ -479,13 +488,53 @@ pub mod module {
 			// Validate the result
 			T::MPCHandler::verify_validator_report(validator.clone(), offence.clone(), signatures)?;
 
-			// Slash the validator
-			T::RolesHandler::slash_validator(validator.clone(), offence)?;
+			// TODO: Report validator offence.
+			// T::RolesHandler::report_offence(validator.clone(), offence)?;
 
 			// Trigger validator removal
 			Self::try_validator_removal_from_job(job_key, job_id, validator)?;
 
 			Ok(())
+		}
+
+		/// Withdraw rewards accumulated by the caller.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: The origin of the call (typically a signed account).
+		///
+		/// # Errors
+		///
+		/// This function can return an error if:
+		///
+		/// - The caller is not authorized.
+		/// - No rewards are available for the caller.
+		/// - The reward transfer operation fails.
+		///
+		/// # Details
+		///
+		/// This function allows a caller to withdraw rewards that have been accumulated in their
+		/// account.
+		#[pallet::call_index(4)]
+		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
+		pub fn set_permitted_caller(
+			origin: OriginFor<T>,
+			job_key: JobKey,
+			job_id: JobId,
+			new_permitted_caller: T::AccountId,
+		) -> DispatchResult {
+			let caller = ensure_signed(origin)?;
+
+			KnownResults::<T>::try_mutate(job_key, job_id, |job| -> DispatchResult {
+				let job = job.as_mut().ok_or(Error::<T>::JobNotFound)?;
+
+				// ensure the caller is the current permitted caller
+				ensure!(job.permitted_caller == Some(caller), Error::<T>::NoPermission);
+
+				job.permitted_caller = Some(new_permitted_caller);
+
+				Ok(())
+			})
 		}
 	}
 }

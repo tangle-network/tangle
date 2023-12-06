@@ -18,9 +18,21 @@ use super::*;
 use frame_support::{assert_noop, assert_ok};
 use mock::*;
 
+use sp_runtime::AccountId32;
+
 use tangle_primitives::jobs::{
 	DKGJobType, DKGSignatureJobType, DKGSignatureResult, JobSubmission, JobType,
 };
+
+const ALICE: AccountId32 = AccountId32::new([1u8; 32]);
+const BOB: AccountId32 = AccountId32::new([2u8; 32]);
+const CHARLIE: AccountId32 = AccountId32::new([3u8; 32]);
+const DAVE: AccountId32 = AccountId32::new([4u8; 32]);
+const EVE: AccountId32 = AccountId32::new([5u8; 32]);
+
+const TEN: AccountId32 = AccountId32::new([10u8; 32]);
+const TWENTY: AccountId32 = AccountId32::new([20u8; 32]);
+const HUNDRED: AccountId32 = AccountId32::new([100u8; 32]);
 
 #[test]
 fn jobs_submission_e2e_works_for_dkg() {
@@ -30,49 +42,62 @@ fn jobs_submission_e2e_works_for_dkg() {
 		let submission = JobSubmission {
 			expiry: 100,
 			job_type: JobType::DKG(DKGJobType {
-				participants: vec![100, 2, 3, 4, 5],
+				participants: vec![HUNDRED, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
+				permitted_caller: None,
 			}),
 		};
 
 		// should fail with invalid validator
 		assert_noop!(
-			Jobs::submit_job(RuntimeOrigin::signed(1), submission),
+			Jobs::submit_job(RuntimeOrigin::signed(ALICE), submission),
 			Error::<Runtime>::InvalidValidator
 		);
 
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 5 }),
+			job_type: JobType::DKG(DKGJobType {
+				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
+				threshold: 5,
+				permitted_caller: None,
+			}),
 		};
 
 		// should fail with invalid threshold
 		assert_noop!(
-			Jobs::submit_job(RuntimeOrigin::signed(1), submission),
+			Jobs::submit_job(RuntimeOrigin::signed(ALICE), submission),
 			Error::<Runtime>::InvalidJobParams
 		);
 
 		// should fail when caller has no balance
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 3 }),
+			job_type: JobType::DKG(DKGJobType {
+				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
+				threshold: 3,
+				permitted_caller: None,
+			}),
 		};
 		assert_noop!(
-			Jobs::submit_job(RuntimeOrigin::signed(1), submission),
+			Jobs::submit_job(RuntimeOrigin::signed(ALICE), submission),
 			sp_runtime::TokenError::FundsUnavailable
 		);
 
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType { participants: vec![1, 2, 3, 4, 5], threshold: 3 }),
+			job_type: JobType::DKG(DKGJobType {
+				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
+				threshold: 3,
+				permitted_caller: Some(TEN),
+			}),
 		};
-		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(10), submission));
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
 
-		assert_eq!(Balances::free_balance(10), 100 - 5);
+		assert_eq!(Balances::free_balance(TEN), 100 - 5);
 
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
-			RuntimeOrigin::signed(10),
+			RuntimeOrigin::signed(TEN),
 			JobKey::DKG,
 			0,
 			JobResult::DKG(DKGResult {
@@ -84,7 +109,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 		));
 
 		// ensure the job reward is distributed correctly
-		for validator in [1, 2, 3, 4, 5] {
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
 			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(1));
 		}
 
@@ -103,7 +128,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			}),
 		};
 		assert_noop!(
-			Jobs::submit_job(RuntimeOrigin::signed(20), submission),
+			Jobs::submit_job(RuntimeOrigin::signed(TWENTY), submission),
 			Error::<Runtime>::InvalidJobParams
 		);
 
@@ -114,13 +139,13 @@ fn jobs_submission_e2e_works_for_dkg() {
 				submission: vec![],
 			}),
 		};
-		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(10), submission));
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
 
-		assert_eq!(Balances::free_balance(10), 100 - 25);
+		assert_eq!(Balances::free_balance(TEN), 100 - 25);
 
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
-			RuntimeOrigin::signed(10),
+			RuntimeOrigin::signed(TEN),
 			JobKey::DKGSignature,
 			1,
 			JobResult::DKGSignature(DKGSignatureResult {
@@ -131,7 +156,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 		));
 
 		// ensure the job reward is distributed correctly
-		for validator in [1, 2, 3, 4, 5] {
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
 			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(5));
 		}
 
@@ -156,7 +181,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 //
 // 		// should fail with invalid validator
 // 		assert_noop!(
-// 			Jobs::submit_job(RuntimeOrigin::signed(1), submission),
+// 			Jobs::submit_job(RuntimeOrigin::signed(ALICE), submission),
 // 			Error::<Runtime>::InvalidValidator
 // 		);
 //
@@ -164,27 +189,27 @@ fn jobs_submission_e2e_works_for_dkg() {
 // 		let submission = JobSubmission {
 // 			expiry: 100,
 // 			job_type: JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
-// 				participants: vec![1, 2, 3, 4, 5],
+// 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 // 			}),
 // 		};
 // 		assert_noop!(
-// 			Jobs::submit_job(RuntimeOrigin::signed(1), submission),
+// 			Jobs::submit_job(RuntimeOrigin::signed(ALICE), submission),
 // 			sp_runtime::TokenError::FundsUnavailable
 // 		);
 //
 // 		let submission = JobSubmission {
 // 			expiry: 100,
 // 			job_type: JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
-// 				participants: vec![1, 2, 3, 4, 5],
+// 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 // 			}),
 // 		};
-// 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(10), submission));
+// 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
 //
-// 		assert_eq!(Balances::free_balance(10), 100 - 10);
+// 		assert_eq!(Balances::free_balance(TEN), 100 - 10);
 //
 // 		// submit a solution for this job
 // 		assert_ok!(Jobs::submit_job_result(
-// 			RuntimeOrigin::signed(10),
+// 			RuntimeOrigin::signed(TEN),
 // 			JobKey::ZkSaasPhaseOne,
 // 			0,
 // 			vec![]
@@ -210,7 +235,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 // 			}),
 // 		};
 // 		assert_noop!(
-// 			Jobs::submit_job(RuntimeOrigin::signed(20), submission),
+// 			Jobs::submit_job(RuntimeOrigin::signed(TWENTY), submission),
 // 			Error::<Runtime>::InvalidJobParams
 // 		);
 //
@@ -221,9 +246,9 @@ fn jobs_submission_e2e_works_for_dkg() {
 // 				submission: vec![],
 // 			}),
 // 		};
-// 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(10), submission));
+// 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
 //
-// 		assert_eq!(Balances::free_balance(10), 100 - 30);
+// 		assert_eq!(Balances::free_balance(TEN), 100 - 30);
 //
 // 		// ensure the job reward is distributed correctly
 // 		for validator in [1, 2, 3, 4, 5] {

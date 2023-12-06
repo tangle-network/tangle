@@ -102,6 +102,7 @@ fn proof_verification_works() {
 				verifying_key: vk_bytes,
 				wasm: HyperData::Raw(vec![]),
 			}),
+			permitted_caller: None,
 		});
 
 		let phase_two = JobType::<AccountId>::ZkSaasProve(ZkSaasProveJobType {

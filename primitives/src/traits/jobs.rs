@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::{JobId, JobKey, JobSubmission, JobWithResult, ValidatorOffence};
+use crate::jobs::{
+	JobId, JobKey, JobResult, JobSubmission, JobWithResult, ValidatorOffence, ValidatorOffenceType,
+};
 use frame_support::dispatch::Vec;
 use sp_arithmetic::traits::{BaseArithmetic, Unsigned};
 use sp_runtime::DispatchResult;
@@ -62,7 +64,7 @@ pub trait MPCHandler<AccountId, BlockNumber, Balance> {
 	/// - `report`: The report data provided by the reporting entity.
 	fn verify_validator_report(
 		validator: AccountId,
-		offence: ValidatorOffence,
+		offence: ValidatorOffenceType,
 		signatures: Vec<Vec<u8>>,
 	) -> DispatchResult;
 

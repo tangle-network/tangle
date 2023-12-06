@@ -66,4 +66,5 @@ std = [
 	"sp-runtime/std",
 	"sp-std/std",
 	"tangle-primitives/std",
+	"pallet-session/std"
 ]
