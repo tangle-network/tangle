@@ -415,11 +415,18 @@ pub struct ZkSaasCircuitResult {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ZkSaasProofResult {
+	Arkworks(ArkworksProofResult),
 	Circom(CircomProofResult),
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct CircomProofResult {
+	pub proof: Vec<u8>,
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct ArkworksProofResult {
 	pub proof: Vec<u8>,
 }

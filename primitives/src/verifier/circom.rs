@@ -9,7 +9,7 @@ use ark_serialize::CanonicalDeserialize;
 use ethabi::{ethereum_types::U256, ParamType};
 use sp_std::prelude::*;
 
-pub struct CircomVerifierBn254;
+pub struct CircomVerifierGroth16Bn254;
 
 #[derive(Debug)]
 pub enum CircomError {
@@ -45,7 +45,7 @@ pub fn verify_groth16<E: Pairing>(
 	Ok(res)
 }
 
-impl super::InstanceVerifier for CircomVerifierBn254 {
+impl super::InstanceVerifier for CircomVerifierGroth16Bn254 {
 	fn verify(public_inp_bytes: &[u8], proof_bytes: &[u8], vk_bytes: &[u8]) -> Result<bool, Error> {
 		let public_input_field_elts = match super::to_field_elements::<Fr>(public_inp_bytes) {
 			Ok(v) => v,

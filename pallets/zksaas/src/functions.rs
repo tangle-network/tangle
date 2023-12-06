@@ -82,6 +82,11 @@ impl<T: Config> Pallet<T> {
 				ZkSaasProveRequest::Groth16(req),
 				ZkSaasProofResult::Circom(res),
 			) => Self::verify_circom_proof(sys, req, res),
+			(
+				ZkSaasSystem::Groth16(sys),
+				ZkSaasProveRequest::Groth16(req),
+				ZkSaasProofResult::Arkworks(res),
+			) => Self::verify_arkworks_proof(sys, req, res),
 		}
 	}
 
@@ -98,6 +103,24 @@ impl<T: Config> Pallet<T> {
 			Ok(false) => Err(Error::<T>::InvalidProof.into()),
 			Err(e) => {
 				frame_support::log::warn!(target: "zksaas::verify_circom_proof", "Invalid Circom Proof: {}", e);
+				Err(Error::<T>::MalformedProof.into())
+			},
+		}
+	}
+
+	/// Verifies a given arkworks proof submission.
+	pub fn verify_arkworks_proof(
+		system: Groth16System,
+		req: Groth16ProveRequest,
+		res: ArkworksProofResult,
+	) -> DispatchResult {
+		let maybe_verified =
+			T::Verifier::verify(&req.public_input, &res.proof, &system.verifying_key);
+		match maybe_verified {
+			Ok(true) => Ok(()),
+			Ok(false) => Err(Error::<T>::InvalidProof.into()),
+			Err(e) => {
+				frame_support::log::warn!(target: "zksaas::verify_arkworks_proof", "Invalid Arkworks Proof: {}", e);
 				Err(Error::<T>::MalformedProof.into())
 			},
 		}

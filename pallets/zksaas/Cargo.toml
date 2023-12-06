@@ -26,6 +26,19 @@ smallvec = { workspace = true }
 sp-application-crypto = { workspace = true }
 sp-keystore = { workspace = true }
 
+# Arkworks
+ark-crypto-primitives = { workspace = true, default-features = false }
+ark-ff = { workspace = true, default-features = false }
+ark-ec = { workspace = true, default-features = false }
+ark-std = { workspace = true, default-features = false }
+ark-relations = { workspace = true, default-features = false }
+ark-groth16 = { workspace = true, default-features = false }
+ark-serialize = { workspace = true, default-features = false }
+ark-bn254 = { workspace = true }
+
+ethabi = { workspace = true }
+hex = { workspace = true }
+
 [features]
 default = ["std"]
 std = [

@@ -44,6 +44,18 @@ pub trait InstanceVerifier {
 	fn verify(pub_inps: &[u8], proof: &[u8], params: &[u8]) -> Result<bool, Error>;
 }
 
+impl<V1, V2> InstanceVerifier for (V1, V2)
+where
+	V1: InstanceVerifier,
+	V2: InstanceVerifier,
+{
+	fn verify(pub_inps: &[u8], proof: &[u8], params: &[u8]) -> Result<bool, Error> {
+		// Sequance flow,
+		// if the first failed, we will try the other verifier.
+		V1::verify(pub_inps, proof, params).or_else(|_| V2::verify(pub_inps, proof, params))
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
