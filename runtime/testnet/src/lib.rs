@@ -57,14 +57,24 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, SaturatedConversion,
+	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill,
+	SaturatedConversion,
 };
-use sp_staking::currency_to_vote::U128CurrencyToVote;
+use sp_staking::{
+	currency_to_vote::U128CurrencyToVote,
+	offence::{OffenceError, ReportOffence},
+	SessionIndex,
+};
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
+use tangle_primitives::{
+	jobs::{JobResult, JobSubmission, JobType, ValidatorOffenceType},
+	roles::ValidatorRewardDistribution,
+	traits::jobs::{JobToFee, MPCHandler},
+};
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -330,7 +340,7 @@ impl pallet_aura::Config for Runtime {
 
 parameter_types! {
 	pub const ReportLongevity: u64 =
-		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * Period::get() as u64;
+		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * Period::get();
 }
 
 impl pallet_grandpa::Config for Runtime {
@@ -522,8 +532,8 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 
 parameter_types! {
 	// phase durations. 1/4 of the last session for each.
-	pub const SignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS / 4;
-	pub const UnsignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS / 4;
+	pub const SignedPhase: u64 = EPOCH_DURATION_IN_BLOCKS / 4;
+	pub const UnsignedPhase: u64 = EPOCH_DURATION_IN_BLOCKS / 4;
 
 	// signed config
 	pub const SignedRewardBase: Balance = UNIT;
@@ -831,8 +841,7 @@ where
 	) -> Option<(RuntimeCall, <UncheckedExtrinsic as traits::Extrinsic>::SignaturePayload)> {
 		let tip = 0;
 		// take the biggest period possible.
-		let period =
-			BlockHashCount::get().checked_next_power_of_two().map(|c| c / 2).unwrap_or(2) as u64;
+		let period = BlockHashCount::get().checked_next_power_of_two().map(|c| c / 2).unwrap_or(2);
 		let current_block = System::block_number()
 			.saturated_into::<u64>()
 			// The `System::block_number` is initialized with `n+1`,
@@ -1070,16 +1079,110 @@ impl pallet_utility::Config for Runtime {
 	type WeightInfo = ();
 }
 
+// parameter_types! {
+// 	pub const StoragePricePerByte: u128 = MILLIUNIT;
+// 	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
+// }
+
+// impl pallet_eth2_light_client::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type StoragePricePerByte = StoragePricePerByte;
+// 	type PalletId = Eth2ClientPalletId;
+// 	type Currency = Balances;
+// }
+
 parameter_types! {
-	pub const StoragePricePerByte: u128 = MILLIUNIT;
-	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
+	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
 }
 
-impl pallet_eth2_light_client::Config for Runtime {
+pub struct MockJobToFeeHandler;
+
+impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+	type Balance = Balance;
+
+	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		match job.job_type {
+			JobType::DKG(_) => Dkg::job_to_fee(job),
+			JobType::DKGSignature(_) => Dkg::job_to_fee(job),
+			JobType::ZkSaasPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobType::ZkSaasPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
+		}
+	}
+}
+
+pub struct MockMPCHandler;
+
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
+	fn verify(data: JobResult) -> DispatchResult {
+		match data {
+			JobResult::DKG(_) => Dkg::verify(data),
+			JobResult::DKGSignature(_) => Dkg::verify(data),
+			JobResult::ZkSaasPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobResult::ZkSaasPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
+		}
+	}
+
+	fn verify_validator_report(
+		_validator: AccountId,
+		_offence: ValidatorOffenceType,
+		_signatures: Vec<Vec<u8>>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
+}
+
+impl pallet_jobs::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type StoragePricePerByte = StoragePricePerByte;
-	type PalletId = Eth2ClientPalletId;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
+	type JobToFee = MockJobToFeeHandler;
+	type RolesHandler = Roles;
+	type MPCHandler = MockMPCHandler;
+	type PalletId = JobsPalletId;
+	type WeightInfo = ();
+}
+
+type IdTuple = pallet_session::historical::IdentificationTuple<Runtime>;
+type Offence = pallet_roles::offences::ValidatorOffence<IdTuple>;
+/// A mock offence report handler.
+pub struct OffenceHandler;
+impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
+	fn report_offence(_reporters: Vec<AccountId>, _offence: Offence) -> Result<(), OffenceError> {
+		Ok(())
+	}
+
+	fn is_known_offence(_offenders: &[IdTuple], _time_slot: &SessionIndex) -> bool {
+		false
+	}
+}
+
+parameter_types! {
+	pub InflationRewardPerSession: Balance = 10_000;
+	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
+}
+
+impl pallet_roles::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type JobsHandler = Jobs;
+	type MaxRolesPerAccount = ConstU32<2>;
+	type MPCHandler = MockMPCHandler;
+	type InflationRewardPerSession = InflationRewardPerSession;
+	type AuthorityId = AuraId;
+	type ValidatorSet = Historical;
+	type ReportOffences = OffenceHandler;
+	type ValidatorRewardDistribution = Reward;
+	type WeightInfo = ();
+}
+
+impl pallet_dkg::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type UpdateOrigin = EnsureRootOrHalfCouncil;
+	type WeightInfo = ();
 }
 
 pub struct BaseFilter;
@@ -1190,8 +1293,11 @@ construct_runtime!(
 		DynamicFee: pallet_dynamic_fee,
 		BaseFee: pallet_base_fee,
 		HotfixSufficients: pallet_hotfix_sufficients,
+		//Eth2Client: pallet_eth2_light_client,
 
-		Eth2Client: pallet_eth2_light_client,
+		Roles: pallet_roles,
+		Jobs: pallet_jobs,
+		Dkg: pallet_dkg
 	}
 );
 

@@ -30,7 +30,7 @@ pub struct TransactionTrace {
 	pub action: TransactionTraceAction,
 	#[serde(serialize_with = "h256_0x_serialize")]
 	pub block_hash: H256,
-	pub block_number: u32,
+	pub block_number: u64,
 	#[serde(flatten)]
 	pub output: TransactionTraceOutput,
 	pub subtraces: u32,

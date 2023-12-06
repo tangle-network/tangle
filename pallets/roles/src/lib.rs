@@ -39,7 +39,7 @@ mod impls;
 use sp_std::collections::btree_map::BTreeMap;
 #[cfg(test)]
 pub(crate) mod mock;
-mod offences;
+pub mod offences;
 #[cfg(test)]
 mod tests;
 mod weights;

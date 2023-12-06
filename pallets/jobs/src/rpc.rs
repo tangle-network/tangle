@@ -1,4 +1,5 @@
 use super::*;
+use scale_info::prelude::string::String;
 pub use tangle_primitives::jobs::RpcResponseJobsData;
 
 impl<T: Config> Pallet<T> {

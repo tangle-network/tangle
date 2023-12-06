@@ -1,36 +1,53 @@
 [package]
-name = "pallet-jobs"
-version = { workspace = true }
+name = "pallet-evm-precompile-jobs"
+version = "0.1.0"
 authors = { workspace = true }
-edition = { workspace = true }
-homepage = { workspace = true }
-license = { workspace = true }
-repository = { workspace = true }
+edition = "2021"
+description = "A Precompile to make pallet-jobs calls encoding accessible to pallet-evm"
 
 [dependencies]
-frame-benchmarking = { workspace = true, optional = true }
+log = { workspace = true }
+num_enum = { workspace = true }
+rustc-hex = { workspace = true }
+
+# Moonbeam
+precompile-utils = { workspace = true }
+
+# Substrate
 frame-support = { workspace = true }
 frame-system = { workspace = true }
-parity-scale-codec = { workspace = true }
-scale-info = { workspace = true }
+pallet-jobs = { workspace = true }
+parity-scale-codec = { workspace = true, features = ["derive"] }
 sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
-tangle-primitives = { workspace = true, default-features = false }
+tangle-primitives = { workspace = true }
+
+# Frontier
+fp-evm = { workspace = true }
+pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
 
 [dev-dependencies]
-ethers = "2.0"
+derive_more = { workspace = true }
+hex-literal = { workspace = true }
 serde = { workspace = true }
+sha3 = { workspace = true }
+
+# Moonbeam
+precompile-utils = { workspace = true, features = ["std", "testing"] }
+
+# Substrate
+pallet-balances = { workspace = true, features = ["std"] }
+pallet-timestamp = { workspace = true, features = ["std"] }
+scale-info = { workspace = true, features = ["derive", "std"] }
+sp-io = { workspace = true }
+ethers = "2.0"
 serde_json = { workspace = true }
 libsecp256k1 = { workspace = true }
-pallet-balances = { workspace = true }
-pallet-timestamp = { workspace = true }
 smallvec = { workspace = true }
-sp-io = { workspace = true }
 sp-application-crypto = { workspace = true }
 sp-keystore = { workspace = true }
 ethereum = { workspace = true, features = ["with-codec"] }
-hex-literal = { workspace = true }
 hex = { workspace = true }
 
 # Frontier Primitive
@@ -55,7 +72,6 @@ default = ["std"]
 std = [
   "scale-info/std",
   "sp-runtime/std",
-  "frame-benchmarking?/std",
   "frame-support/std",
   "frame-system/std",
   "sp-core/std",
@@ -75,13 +91,6 @@ std = [
   "pallet-dynamic-fee/std",
   "pallet-ethereum/std",
   "pallet-evm/std",
-  "pallet-evm-chain-id/std"
-]
-try-runtime = ["frame-support/try-runtime"]
-runtime-benchmarks = [
-  "frame-benchmarking/runtime-benchmarks",
-  "frame-support/runtime-benchmarks",
-  "frame-system/runtime-benchmarks",
-  "sp-runtime/runtime-benchmarks",
-  "pallet-balances/runtime-benchmarks",
+  "pallet-evm-chain-id/std",
+  "pallet-jobs/std"
 ]

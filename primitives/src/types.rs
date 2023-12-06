@@ -37,7 +37,7 @@ pub type Index = u32;
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
 /// An index to a block.
-pub type BlockNumber = u32;
+pub type BlockNumber = u64;
 /// The address format for describing accounts.
 pub type Address = MultiAddress<AccountId, Index>;
 /// Block header type as expected by this runtime.
@@ -45,7 +45,7 @@ pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 // Moment
 pub type Moment = u64;
 
-pub const EPOCH_DURATION_IN_BLOCKS: u32 = 10 * crate::time::MINUTES;
+pub const EPOCH_DURATION_IN_BLOCKS: u64 = 10 * crate::time::MINUTES;
 
 impl From<WrappedAccountId32> for AccountId32 {
 	fn from(x: WrappedAccountId32) -> Self {
