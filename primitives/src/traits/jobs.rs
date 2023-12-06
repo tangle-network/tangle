@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::{
-	JobId, JobKey, JobResult, JobSubmission, JobWithResult, ValidatorOffence, ValidatorOffenceType,
-};
+use crate::jobs::{JobId, JobKey, JobSubmission, JobWithResult, ValidatorOffenceType};
 use frame_support::dispatch::Vec;
 use sp_arithmetic::traits::{BaseArithmetic, Unsigned};
 use sp_runtime::DispatchResult;

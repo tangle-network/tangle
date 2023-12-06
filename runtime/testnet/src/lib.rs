@@ -71,7 +71,7 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 use tangle_primitives::{
-	jobs::{JobResult, JobSubmission, JobType, ValidatorOffenceType, JobWithResult},
+	jobs::{JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType},
 	roles::ValidatorRewardDistribution,
 	traits::jobs::{JobToFee, MPCHandler},
 };
@@ -1105,7 +1105,7 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 			JobType::DKG(_) => Dkg::job_to_fee(job),
 			JobType::DKGSignature(_) => Dkg::job_to_fee(job),
 			JobType::ZkSaasCircuit(_) => todo!(), // TODO : Replace with zksaas pallet
-			JobType::ZkSaasProve(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobType::ZkSaasProve(_) => todo!(),   // TODO : Replace with zksaas pallet
 		}
 	}
 }
@@ -1118,7 +1118,7 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 			JobResult::DKG(_) => Dkg::verify(data.result),
 			JobResult::DKGSignature(_) => Dkg::verify(data.result),
 			JobResult::ZkSaasCircuit(_) => todo!(), // TODO : Replace with zksaas pallet
-			JobResult::ZkSaasProve(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobResult::ZkSaasProve(_) => todo!(),   // TODO : Replace with zksaas pallet
 		}
 	}
 
