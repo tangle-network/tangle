@@ -75,6 +75,13 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
+	fn verify_generated_dkg_key(data: DKGResult) -> DispatchResult {
+		match data.key_type {
+			DkgKeyType::Ecdsa => Self::verify_generated_dkg_key_ecdsa(data),
+			_ => todo!(),
+		}
+	}
+
 	/// Verifies the generated DKG key based on the provided DKG verification information.
 	///
 	/// The verification process includes generating required signers, validating signatures, and
@@ -88,14 +95,14 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 	/// encountered an error.
-	fn verify_generated_dkg_key(data: DKGResult) -> DispatchResult {
+	fn verify_generated_dkg_key_ecdsa(data: DKGResult) -> DispatchResult {
 		// generate the required signers
 		let maybe_signers = data
 			.participants
 			.iter()
 			.map(|x| {
 				ecdsa::Public(
-					Self::to_slice_33(&x.encode())
+					Self::to_slice_33(&x)
 						.unwrap_or_else(|| panic!("Failed to convert input to ecdsa public key")),
 				)
 			})
@@ -235,7 +242,6 @@ impl<T: Config> Pallet<T> {
 
 			return Some(key)
 		}
-
 		None
 	}
 }

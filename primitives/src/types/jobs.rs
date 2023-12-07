@@ -285,11 +285,14 @@ pub type KeysAndSignatures = Vec<(Vec<u8>, Vec<u8>)>;
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGResult {
+	/// Key type to use for DKG
+	pub key_type : DkgKeyType,
+
 	/// Submitted key
 	pub key: Vec<u8>,
 
 	/// List of participants' public keys
-	pub participants: Vec<ecdsa::Public>,
+	pub participants: Vec<Vec<u8>>,
 
 	/// List of participants' keys and signatures
 	pub keys_and_signatures: KeysAndSignatures,
@@ -301,6 +304,9 @@ pub struct DKGResult {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGSignatureResult {
+	/// Key type to use for DKG
+	pub key_type : DkgKeyType,
+
 	/// The input data
 	pub data: Vec<u8>,
 
@@ -358,4 +364,15 @@ pub struct ReportValidatorOffence<Offender> {
 	pub offence_type: ValidatorOffenceType,
 	/// Offenders
 	pub offenders: Vec<Offender>,
+}
+
+/// Possible key types for DKG
+#[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq, Encode, Decode)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum DkgKeyType {
+    /// Elliptic Curve Digital Signature Algorithm (ECDSA) key type.
+    Ecdsa,
+
+    /// Schnorr signature key type.
+    Schnorr,
 }
