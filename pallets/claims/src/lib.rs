@@ -266,7 +266,7 @@ pub mod pallet {
 			if let Some(expiry_config) = expiry_config {
 				if current_block > expiry_config.0 {
 					let unclaimed_amount = Total::<T>::take();
-					frame_support::log::info!("Claims : Expiry block passed, sweeping remaining amount of {:?} to destination", unclaimed_amount);
+					log::info!("Claims : Expiry block passed, sweeping remaining amount of {:?} to destination", unclaimed_amount);
 					let expiry_destination =
 						match Self::convert_multi_address_to_account_id(expiry_config.1) {
 							Ok(a) => a,

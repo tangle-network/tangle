@@ -715,21 +715,6 @@ impl pallet_nomination_pools::Config for Runtime {
 }
 
 parameter_types! {
-	#[derive(Clone, Encode, Decode, Debug, Eq, PartialEq, scale_info::TypeInfo, Ord, PartialOrd, Serialize, Deserialize)]
-	pub const MaxResources : u32 = 1000;
-}
-
-impl pallet_bridge_registry::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type BridgeIndex = u32;
-	type MaxAdditionalFields = MaxAdditionalFields;
-	type MaxResources = MaxResources;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type MaxProposalLength = MaxProposalLength;
-	type WeightInfo = ();
-}
-
-parameter_types! {
 	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 	/// We prioritize im-online heartbeats over election solution submission.
 	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::max_value() / 2;
@@ -1081,7 +1066,6 @@ construct_runtime!(
 		Authorship: pallet_authorship,
 		Aura: pallet_aura,
 		Grandpa: pallet_grandpa,
-		BridgeRegistry: pallet_bridge_registry,
 
 		Indices: pallet_indices,
 		Democracy: pallet_democracy,

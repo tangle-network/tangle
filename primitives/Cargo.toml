@@ -8,7 +8,6 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-cumulus-primitives-core = { workspace = true }
 frame-support = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
@@ -22,5 +21,5 @@ sp-consensus-aura = { workspace = true }
 
 [features]
 default = ["std"]
-std = ["frame-support/std", "sp-runtime/std", "sp-core/std", "cumulus-primitives-core/std"]
+std = ["frame-support/std", "sp-runtime/std", "sp-core/std"]
 integration-tests = []
