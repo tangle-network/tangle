@@ -60,11 +60,11 @@ impl<T: Config> Pallet<T> {
 	/// an error.
 	pub fn verify(data: JobWithResult<T::AccountId>) -> DispatchResult {
 		match (data.phase_one_job_type, data.job_type, data.result) {
-			(None, _, JobResult::ZkSaasCircuit(_)) => Ok(()),
+			(None, _, JobResult::ZkSaaSPhaseOne(_)) => Ok(()),
 			(
-				Some(JobType::ZkSaasCircuit(circuit)),
-				JobType::ZkSaasProve(req),
-				JobResult::ZkSaasProve(res),
+				Some(JobType::ZkSaaSPhaseOne(circuit)),
+				JobType::ZkSaaSPhaseTwo(req),
+				JobResult::ZkSaaSPhaseTwo(res),
 			) => Self::verify_proof(circuit, req, res),
 			_ => Err(Error::<T>::InvalidJobType.into()), // this should never happen
 		}
@@ -72,20 +72,20 @@ impl<T: Config> Pallet<T> {
 
 	/// Verifies a given proof submission.
 	pub fn verify_proof(
-		ZkSaasCircuitJobType { system, .. }: ZkSaasCircuitJobType<T::AccountId>,
-		ZkSaasProveJobType { request, .. }: ZkSaasProveJobType,
-		res: ZkSaasProofResult,
+		ZkSaaSPhaseOneJobType { system, .. }: ZkSaaSPhaseOneJobType<T::AccountId>,
+		ZkSaaSPhaseTwoJobType { request, .. }: ZkSaaSPhaseTwoJobType,
+		res: ZkSaaSProofResult,
 	) -> DispatchResult {
 		match (system, request, res) {
 			(
-				ZkSaasSystem::Groth16(sys),
-				ZkSaasProveRequest::Groth16(req),
-				ZkSaasProofResult::Circom(res),
+				ZkSaaSSystem::Groth16(sys),
+				ZkSaaSPhaseTwoRequest::Groth16(req),
+				ZkSaaSProofResult::Circom(res),
 			) => Self::verify_circom_proof(sys, req, res),
 			(
-				ZkSaasSystem::Groth16(sys),
-				ZkSaasProveRequest::Groth16(req),
-				ZkSaasProofResult::Arkworks(res),
+				ZkSaaSSystem::Groth16(sys),
+				ZkSaaSPhaseTwoRequest::Groth16(req),
+				ZkSaaSProofResult::Arkworks(res),
 			) => Self::verify_arkworks_proof(sys, req, res),
 		}
 	}

@@ -1102,10 +1102,10 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 
 	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
 		match job.job_type {
-			JobType::DKG(_) => Dkg::job_to_fee(job),
-			JobType::DKGSignature(_) => Dkg::job_to_fee(job),
-			JobType::ZkSaasCircuit(_) => todo!(), // TODO : Replace with zksaas pallet
-			JobType::ZkSaasProve(_) => todo!(),   // TODO : Replace with zksaas pallet
+			JobType::DKGPhaseOne(_) => Dkg::job_to_fee(job),
+			JobType::DKGPhaseTwo(_) => Dkg::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobType::ZkSaaSPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
 		}
 	}
 }
@@ -1115,10 +1115,10 @@ pub struct MockMPCHandler;
 impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 	fn verify(data: JobWithResult<AccountId>) -> DispatchResult {
 		match data.result {
-			JobResult::DKG(_) => Dkg::verify(data.result),
-			JobResult::DKGSignature(_) => Dkg::verify(data.result),
-			JobResult::ZkSaasCircuit(_) => todo!(), // TODO : Replace with zksaas pallet
-			JobResult::ZkSaasProve(_) => todo!(),   // TODO : Replace with zksaas pallet
+			JobResult::DKGPhaseOne(_) => Dkg::verify(data.result),
+			JobResult::DKGPhaseTwo(_) => Dkg::verify(data.result),
+			JobResult::ZkSaaSPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobResult::ZkSaaSPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
 		}
 	}
 

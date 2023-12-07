@@ -327,12 +327,12 @@ pub mod module {
 			let job_info =
 				SubmittedJobs::<T>::get(job_key, job_id).ok_or(Error::<T>::JobNotFound)?;
 			let participants = match &result {
-				JobResult::DKG(_) | JobResult::ZkSaasCircuit(_) => job_info
+				JobResult::DKGPhaseOne(_) | JobResult::ZkSaaSPhaseOne(_) => job_info
 					.job_type
 					.clone()
 					.get_participants()
 					.ok_or(Error::<T>::InvalidJobParams)?,
-				JobResult::DKGSignature(_) | JobResult::ZkSaasProve(_) => {
+				JobResult::DKGPhaseTwo(_) | JobResult::ZkSaaSPhaseTwo(_) => {
 					let existing_result_id = job_info
 						.job_type
 						.clone()
@@ -350,19 +350,19 @@ pub mod module {
 
 			// Handle based on job result
 			match result {
-				JobResult::DKG(info) => {
+				JobResult::DKGPhaseOne(info) => {
 					let result = Self::verify_dkg_job_result(job_key, &job_info, info)?;
 					KnownResults::<T>::insert(job_key, job_id, result);
 				},
-				JobResult::DKGSignature(info) => {
+				JobResult::DKGPhaseTwo(info) => {
 					Self::verify_dkg_signature_job_result(job_key, &job_info, info)?;
 				},
-				JobResult::ZkSaasCircuit(info) => {
+				JobResult::ZkSaaSPhaseOne(info) => {
 					let result =
 						Self::verify_zksaas_circuit_job_result(job_key, job_id, &job_info, info)?;
 					KnownResults::<T>::insert(job_key, job_id, result);
 				},
-				JobResult::ZkSaasProve(info) => {
+				JobResult::ZkSaaSPhaseTwo(info) => {
 					Self::verify_zksaas_prove_job_result(job_key, &job_info, info)?;
 				},
 			};

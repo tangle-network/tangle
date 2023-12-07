@@ -65,13 +65,13 @@ pub struct JobWithResult<AccountId> {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum JobType<AccountId> {
 	/// Distributed Key Generation (DKG) job type.
-	DKG(DKGJobType<AccountId>),
+	DKGPhaseOne(DKGPhaseOneJobType<AccountId>),
 	/// DKG Signature job type.
-	DKGSignature(DKGSignatureJobType),
+	DKGPhaseTwo(DKGPhaseTwoJobType),
 	/// (zk-SNARK) Create Circuit job type.
-	ZkSaasCircuit(ZkSaasCircuitJobType<AccountId>),
+	ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType<AccountId>),
 	/// (zk-SNARK) Create Proof job type.
-	ZkSaasProve(ZkSaasProveJobType),
+	ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType),
 }
 
 /// Enum representing different types of data sources.
@@ -94,7 +94,7 @@ pub enum HyperData {
 /// Enum representing different types of circuits and snark schemes.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum ZkSaasSystem {
+pub enum ZkSaaSSystem {
 	Groth16(Groth16System),
 }
 
@@ -115,7 +115,7 @@ pub struct Groth16System {
 /// Represents ZK-SNARK proving request
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum ZkSaasProveRequest {
+pub enum ZkSaaSPhaseTwoRequest {
 	/// Groth16 proving request
 	Groth16(Groth16ProveRequest),
 }
@@ -151,7 +151,7 @@ impl<AccountId> JobType<AccountId> {
 	/// Checks if the job type is a phase one job.
 	pub fn is_phase_one(&self) -> bool {
 		use crate::jobs::JobType::*;
-		if matches!(self, DKG(_) | ZkSaasCircuit(_)) {
+		if matches!(self, DKGPhaseOne(_) | ZkSaaSPhaseOne(_)) {
 			return true
 		}
 		false
@@ -161,8 +161,8 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_participants(self) -> Option<Vec<AccountId>> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKG(info) => Some(info.participants),
-			ZkSaasCircuit(info) => Some(info.participants),
+			DKGPhaseOne(info) => Some(info.participants),
+			ZkSaaSPhaseOne(info) => Some(info.participants),
 			_ => None,
 		}
 	}
@@ -171,7 +171,7 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_threshold(self) -> Option<u8> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKG(info) => Some(info.threshold),
+			DKGPhaseOne(info) => Some(info.threshold),
 			_ => None,
 		}
 	}
@@ -179,18 +179,18 @@ impl<AccountId> JobType<AccountId> {
 	/// Gets the job key associated with the job type.
 	pub fn get_job_key(&self) -> JobKey {
 		match self {
-			JobType::DKG(_) => JobKey::DKG,
-			JobType::ZkSaasCircuit(_) => JobKey::ZkSaasCircuit,
-			JobType::DKGSignature(_) => JobKey::DKGSignature,
-			JobType::ZkSaasProve(_) => JobKey::ZkSaasProve,
+			JobType::DKGPhaseOne(_) => JobKey::DKG,
+			JobType::ZkSaaSPhaseOne(_) => JobKey::ZkSaaSCircuit,
+			JobType::DKGPhaseTwo(_) => JobKey::DKGSignature,
+			JobType::ZkSaaSPhaseTwo(_) => JobKey::ZkSaaSProve,
 		}
 	}
 
 	/// Gets the job key associated with the previous phase job type.
 	pub fn get_previous_phase_job_key(&self) -> Option<JobKey> {
 		match self {
-			JobType::DKGSignature(_) => Some(JobKey::DKG),
-			JobType::ZkSaasProve(_) => Some(JobKey::ZkSaasCircuit),
+			JobType::DKGPhaseTwo(_) => Some(JobKey::DKG),
+			JobType::ZkSaaSPhaseTwo(_) => Some(JobKey::ZkSaaSCircuit),
 			_ => None,
 		}
 	}
@@ -200,8 +200,8 @@ impl<AccountId> JobType<AccountId> {
 	/// This function is intended for simple checks and may need improvement in the future.
 	pub fn sanity_check(&self) -> bool {
 		match self {
-			JobType::DKG(info) => info.participants.len() > info.threshold.into(),
-			JobType::ZkSaasCircuit(info) => !info.participants.is_empty(),
+			JobType::DKGPhaseOne(info) => info.participants.len() > info.threshold.into(),
+			JobType::ZkSaaSPhaseOne(info) => !info.participants.is_empty(),
 			_ => true,
 		}
 	}
@@ -210,8 +210,8 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_phase_one_id(&self) -> Option<u32> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKGSignature(info) => Some(info.phase_one_id),
-			ZkSaasProve(info) => Some(info.phase_one_id),
+			DKGPhaseTwo(info) => Some(info.phase_one_id),
+			ZkSaaSPhaseTwo(info) => Some(info.phase_one_id),
 			_ => None,
 		}
 	}
@@ -219,8 +219,8 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_permitted_caller(self) -> Option<AccountId> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKG(info) => info.permitted_caller,
-			ZkSaasCircuit(info) => info.permitted_caller,
+			DKGPhaseOne(info) => info.permitted_caller,
+			ZkSaaSPhaseOne(info) => info.permitted_caller,
 			_ => None,
 		}
 	}
@@ -229,7 +229,7 @@ impl<AccountId> JobType<AccountId> {
 /// Represents the Distributed Key Generation (DKG) job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGJobType<AccountId> {
+pub struct DKGPhaseOneJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
 
@@ -243,7 +243,7 @@ pub struct DKGJobType<AccountId> {
 /// Represents the DKG Signature job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGSignatureJobType {
+pub struct DKGPhaseTwoJobType {
 	/// The phase one ID.
 	pub phase_one_id: u32,
 
@@ -254,24 +254,24 @@ pub struct DKGSignatureJobType {
 /// Represents the (zk-SNARK) Phase One job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasCircuitJobType<AccountId> {
+pub struct ZkSaaSPhaseOneJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
 	/// the caller permitted to use this result later
 	pub permitted_caller: Option<AccountId>,
 	/// ZK-SNARK Proving system
-	pub system: ZkSaasSystem,
+	pub system: ZkSaaSSystem,
 }
 
 /// Represents the (zk-SNARK) Phase Two job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasProveJobType {
+pub struct ZkSaaSPhaseTwoJobType {
 	/// The phase one ID.
 	pub phase_one_id: u32,
 
 	/// ZK-SNARK Proving request
-	pub request: ZkSaasProveRequest,
+	pub request: ZkSaaSPhaseTwoRequest,
 }
 
 /// Enum representing different states of a job.
@@ -294,9 +294,9 @@ pub enum JobKey {
 	/// DKG Signature job type.
 	DKGSignature,
 	/// (zk-SNARK) Create Circuit job type.
-	ZkSaasCircuit,
+	ZkSaaSCircuit,
 	/// (zk-SNARK) Create Proof job type.
-	ZkSaasProve,
+	ZkSaaSProve,
 }
 
 impl JobKey {
@@ -305,8 +305,8 @@ impl JobKey {
 		match self {
 			JobKey::DKG => RoleType::Tss,
 			JobKey::DKGSignature => RoleType::Tss,
-			JobKey::ZkSaasCircuit => RoleType::ZkSaas,
-			JobKey::ZkSaasProve => RoleType::ZkSaas,
+			JobKey::ZkSaaSCircuit => RoleType::ZkSaaS,
+			JobKey::ZkSaaSProve => RoleType::ZkSaaS,
 		}
 	}
 }
@@ -332,15 +332,15 @@ where
 {
 	pub fn participants(&self) -> Option<Vec<AccountId>> {
 		match &self.job_type {
-			JobType::DKG(x) => Some(x.participants.clone()),
-			JobType::ZkSaasCircuit(x) => Some(x.participants.clone()),
+			JobType::DKGPhaseOne(x) => Some(x.participants.clone()),
+			JobType::ZkSaaSPhaseOne(x) => Some(x.participants.clone()),
 			_ => None,
 		}
 	}
 
 	pub fn threshold(&self) -> Option<u8> {
 		match &self.job_type {
-			JobType::DKG(x) => Some(x.threshold),
+			JobType::DKGPhaseOne(x) => Some(x.threshold),
 			_ => None,
 		}
 	}
@@ -378,13 +378,13 @@ pub struct RpcResponseJobsData<AccountId> {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum JobResult {
-	DKG(DKGResult),
+	DKGPhaseOne(DKGResult),
 
-	DKGSignature(DKGSignatureResult),
+	DKGPhaseTwo(DKGSignatureResult),
 
-	ZkSaasCircuit(ZkSaasCircuitResult),
+	ZkSaaSPhaseOne(ZkSaaSCircuitResult),
 
-	ZkSaasProve(ZkSaasProofResult),
+	ZkSaaSPhaseTwo(ZkSaaSProofResult),
 }
 
 pub type KeysAndSignatures = Vec<(Vec<u8>, Vec<u8>)>;
@@ -420,7 +420,7 @@ pub struct DKGSignatureResult {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasCircuitResult {
+pub struct ZkSaaSCircuitResult {
 	/// The job id of the job (circuit)
 	pub job_id: JobId,
 
@@ -430,7 +430,7 @@ pub struct ZkSaasCircuitResult {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum ZkSaasProofResult {
+pub enum ZkSaaSProofResult {
 	Arkworks(ArkworksProofResult),
 	Circom(CircomProofResult),
 }

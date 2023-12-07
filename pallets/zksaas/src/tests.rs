@@ -25,8 +25,8 @@ use frame_support::{assert_noop, assert_ok, error::BadOrigin};
 use tangle_primitives::{
 	jobs::{
 		ArkworksProofResult, CircomProofResult, Groth16ProveRequest, Groth16System, HyperData,
-		JobResult, JobType, JobWithResult, ZkSaasCircuitJobType, ZkSaasProofResult,
-		ZkSaasProveJobType, ZkSaasProveRequest, ZkSaasSystem,
+		JobResult, JobType, JobWithResult, ZkSaaSPhaseOneJobType, ZkSaaSPhaseTwoJobType,
+		ZkSaaSPhaseTwoRequest, ZkSaaSProofResult, ZkSaaSSystem,
 	},
 	verifier::{self, from_field_elements},
 };
@@ -94,9 +94,9 @@ fn proof_verification_works() {
 		proof.serialize_compressed(&mut proof_bytes).unwrap();
 
 		// Phase1
-		let phase_one = JobType::<AccountId>::ZkSaasCircuit(ZkSaasCircuitJobType {
+		let phase_one = JobType::<AccountId>::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
 			participants: vec![1, 2, 3, 4, 5, 6, 7, 8],
-			system: ZkSaasSystem::Groth16(Groth16System {
+			system: ZkSaaSSystem::Groth16(Groth16System {
 				circuit: HyperData::Raw(vec![]),
 				proving_key: HyperData::Raw(pk_bytes),
 				verifying_key: vk_bytes,
@@ -105,9 +105,9 @@ fn proof_verification_works() {
 			permitted_caller: None,
 		});
 
-		let phase_two = JobType::<AccountId>::ZkSaasProve(ZkSaasProveJobType {
+		let phase_two = JobType::<AccountId>::ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType {
 			phase_one_id: 0,
-			request: ZkSaasProveRequest::Groth16(Groth16ProveRequest {
+			request: ZkSaaSPhaseTwoRequest::Groth16(Groth16ProveRequest {
 				public_input: from_field_elements(&[image]).unwrap(),
 				a_shares: Default::default(),
 				ax: Default::default(),
@@ -116,7 +116,7 @@ fn proof_verification_works() {
 		});
 
 		// Arkworks
-		let result = JobResult::ZkSaasProve(ZkSaasProofResult::Arkworks(ArkworksProofResult {
+		let result = JobResult::ZkSaaSPhaseTwo(ZkSaaSProofResult::Arkworks(ArkworksProofResult {
 			proof: proof_bytes,
 		}));
 
@@ -131,7 +131,7 @@ fn proof_verification_works() {
 		// Circom
 		let circom_proof = verifier::circom::Proof::try_from(proof).unwrap();
 
-		let result = JobResult::ZkSaasProve(ZkSaasProofResult::Circom(CircomProofResult {
+		let result = JobResult::ZkSaaSPhaseTwo(ZkSaaSProofResult::Circom(CircomProofResult {
 			proof: circom_proof.encode().unwrap(),
 		}));
 

@@ -28,8 +28,8 @@ use precompile_utils::{prelude::*, solidity::revert::revert_as_bytes};
 use sp_core::H256;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::jobs::{
-	DKGJobType, DKGSignatureJobType, JobKey, JobSubmission, JobType, ZkSaasCircuitJobType,
-	ZkSaasProveJobType,
+	DKGPhaseOneJobType, DKGPhaseTwoJobType, JobKey, JobSubmission, JobType, ZkSaaSPhaseOneJobType,
+	ZkSaaSPhaseTwoJobType,
 };
 
 #[cfg(test)]
@@ -88,14 +88,17 @@ where
 			.collect();
 
 		// Create DKG job type with the provided parameters
-		let job_type =
-			DKGJobType { participants, threshold, permitted_caller: Some(permitted_caller) };
+		let job_type = DKGPhaseOneJobType {
+			participants,
+			threshold,
+			permitted_caller: Some(permitted_caller),
+		};
 
 		// Convert expiration period to Substrate block number
 		let expiry_block: BlockNumberFor<Runtime> = expiry.into();
 
 		// Create job submission object
-		let job = JobSubmission { expiry: expiry_block, job_type: JobType::DKG(job_type) };
+		let job = JobSubmission { expiry: expiry_block, job_type: JobType::DKGPhaseOne(job_type) };
 
 		// Convert caller's Ethereum address to Substrate account ID
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -140,10 +143,10 @@ where
 		let expiry_block: BlockNumberFor<Runtime> = expiry.into();
 
 		// Create DKG signature job type with the provided parameters
-		let job_type = DKGSignatureJobType { phase_one_id, submission };
+		let job_type = DKGPhaseTwoJobType { phase_one_id, submission };
 
 		// Create job submission object
-		let job = JobSubmission { expiry: expiry_block, job_type: JobType::DKGSignature(job_type) };
+		let job = JobSubmission { expiry: expiry_block, job_type: JobType::DKGPhaseTwo(job_type) };
 
 		// Create the call to the Jobs module's submit_job function
 		let call = JobsCall::<Runtime>::submit_job { job };
@@ -185,7 +188,7 @@ where
 
 		// Create ZkSaas phase one job type with the provided parameters
 		let job_type =
-			ZkSaasCircuitJobType {
+			ZkSaaSPhaseOneJobType {
             participants,
             permitted_caller: Some(permitted_caller),
             system: todo!("@shekohex: need to come up with a way to pass the required circuit information to substrate")
@@ -196,7 +199,7 @@ where
 
 		// Create job submission object
 		let job =
-			JobSubmission { expiry: expiry_block, job_type: JobType::ZkSaasCircuit(job_type) };
+			JobSubmission { expiry: expiry_block, job_type: JobType::ZkSaaSPhaseOne(job_type) };
 
 		// Convert caller's Ethereum address to Substrate account ID
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -240,13 +243,14 @@ where
 		let expiry_block: BlockNumberFor<Runtime> = expiry.into();
 
 		// Create ZkSaas phase two job type with the provided parameters
-		let job_type = ZkSaasProveJobType {
+		let job_type = ZkSaaSPhaseTwoJobType {
             phase_one_id,
             request: todo!("@shekohex: we need to figure out a way to pass the request data from evm to substrate"),
         };
 
 		// Create job submission object
-		let job = JobSubmission { expiry: expiry_block, job_type: JobType::ZkSaasProve(job_type) };
+		let job =
+			JobSubmission { expiry: expiry_block, job_type: JobType::ZkSaaSPhaseTwo(job_type) };
 
 		// Create the call to the Jobs module's submit_job function
 		let call = JobsCall::<Runtime>::submit_job { job };
@@ -305,8 +309,8 @@ where
 		let job_key = match job_key {
 			0 => Some(JobKey::DKG),
 			1 => Some(JobKey::DKGSignature),
-			2 => Some(JobKey::ZkSaasCircuit),
-			3 => Some(JobKey::ZkSaasProve),
+			2 => Some(JobKey::ZkSaaSCircuit),
+			3 => Some(JobKey::ZkSaaSProve),
 			_ => None,
 		};
 

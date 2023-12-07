@@ -1,8 +1,8 @@
 use super::*;
 use sp_runtime::traits::Zero;
 use tangle_primitives::jobs::{
-	DKGJobType, DKGSignatureResult, JobKey, JobType, JobWithResult, ZkSaasCircuitJobType,
-	ZkSaasCircuitResult, ZkSaasProofResult,
+	DKGPhaseOneJobType, DKGSignatureResult, JobKey, JobType, JobWithResult, ZkSaaSCircuitResult,
+	ZkSaaSPhaseOneJobType, ZkSaaSProofResult,
 };
 
 impl<T: Config> Pallet<T> {
@@ -167,7 +167,7 @@ impl<T: Config> Pallet<T> {
 							.saturating_sub(1);
 						ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
 
-						let job_type = JobType::DKG(DKGJobType {
+						let job_type = JobType::DKGPhaseOne(DKGPhaseOneJobType {
 							participants: new_participants,
 							threshold: new_threshold,
 							permitted_caller: phase1.clone().permitted_caller,
@@ -201,7 +201,7 @@ impl<T: Config> Pallet<T> {
 					//   (remove the reported validator)
 					// - Charge the validator fee for job submission
 					// - Store information about the submitted job in 'SubmittedJobs'
-					JobKey::ZkSaasProve => {
+					JobKey::ZkSaaSProve => {
 						let new_participants = phase1
 							.participants()
 							.ok_or(Error::<T>::InvalidJobPhase)?
@@ -213,14 +213,14 @@ impl<T: Config> Pallet<T> {
 							.get_phase_one_id()
 							.ok_or(Error::<T>::PhaseOneResultNotFound)?;
 						let phase_one =
-							SubmittedJobs::<T>::get(JobKey::ZkSaasCircuit, phase_one_id)
+							SubmittedJobs::<T>::get(JobKey::ZkSaaSCircuit, phase_one_id)
 								.ok_or(Error::<T>::JobNotFound)?;
 						let system = match phase_one.job_type {
-							JobType::ZkSaasCircuit(ref info) => info.system.clone(),
+							JobType::ZkSaaSPhaseOne(ref info) => info.system.clone(),
 							_ => return Err(Error::<T>::JobNotFound.into()),
 						};
 
-						let job_type = JobType::ZkSaasCircuit(ZkSaasCircuitJobType {
+						let job_type = JobType::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
 							participants: new_participants,
 							system,
 							permitted_caller: phase1.clone().permitted_caller,
@@ -286,7 +286,7 @@ impl<T: Config> Pallet<T> {
 			participant_keys.push(pub_key);
 		}
 
-		let job_result = JobResult::DKG(DKGResult {
+		let job_result = JobResult::DKGPhaseOne(DKGResult {
 			key: info.key.clone(),
 			keys_and_signatures: info.keys_and_signatures,
 			participants: participant_keys,
@@ -347,7 +347,7 @@ impl<T: Config> Pallet<T> {
 			participant_keys.push(pub_key);
 		}
 
-		let job_result = JobResult::DKGSignature(DKGSignatureResult {
+		let job_result = JobResult::DKGPhaseTwo(DKGSignatureResult {
 			signature: info.signature,
 			data: info.data,
 			signing_key: phase_one_result.result,
@@ -373,10 +373,10 @@ impl<T: Config> Pallet<T> {
 		job_key: JobKey,
 		job_id: JobId,
 		job_info: &JobInfoOf<T>,
-		_info: ZkSaasCircuitResult,
+		_info: ZkSaaSCircuitResult,
 	) -> Result<PhaseOneResultOf<T>, DispatchError> {
 		// sanity check, does job and result type match
-		ensure!(job_key == JobKey::ZkSaasCircuit, Error::<T>::ResultNotExpectedType);
+		ensure!(job_key == JobKey::ZkSaaSCircuit, Error::<T>::ResultNotExpectedType);
 		// ensure the participants are the expected participants from job
 
 		let participants = job_info
@@ -396,7 +396,7 @@ impl<T: Config> Pallet<T> {
 			participant_keys.push(pub_key);
 		}
 
-		let job_result = JobResult::ZkSaasCircuit(ZkSaasCircuitResult {
+		let job_result = JobResult::ZkSaaSPhaseOne(ZkSaaSCircuitResult {
 			job_id,
 			participants: participant_keys,
 		});
@@ -421,7 +421,7 @@ impl<T: Config> Pallet<T> {
 	pub fn verify_zksaas_prove_job_result(
 		job_key: JobKey,
 		job_info: &JobInfoOf<T>,
-		info: ZkSaasProofResult,
+		info: ZkSaaSProofResult,
 	) -> DispatchResult {
 		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
@@ -442,7 +442,7 @@ impl<T: Config> Pallet<T> {
 		// Validate existing result
 		ensure!(phase_one_result.expiry >= now, Error::<T>::ResultExpired);
 
-		let job_result = JobResult::ZkSaasProve(info);
+		let job_result = JobResult::ZkSaaSPhaseTwo(info);
 
 		let phase_one_job_info = SubmittedJobs::<T>::get(
 			job_info
