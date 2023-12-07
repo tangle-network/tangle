@@ -36,7 +36,8 @@ use tangle_primitives::{
 	traits::jobs::JobsHandler,
 };
 mod impls;
-use sp_std::collections::btree_map::BTreeMap;
+use tangle_primitives::roles::{Profile, Record};
+
 #[cfg(test)]
 pub(crate) mod mock;
 pub mod offences;
@@ -59,27 +60,20 @@ pub struct RoleStakingLedger<T: Config> {
 	/// This re-staked balance we are currently accounting for new slashing conditions.
 	#[codec(compact)]
 	pub total: BalanceOf<T>,
-	/// The list of roles and metadata associated with them.
-	pub roles: BTreeMap<RoleType, RoleStakingRecord>,
-}
-
-/// The information regarding selected role.
-#[derive(PartialEqNoBound, EqNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo, Clone)]
-#[scale_info(skip_type_params(T))]
-pub struct RoleStakingRecord {
-	/// Metadata associated with the role.
-	pub metadata: RoleTypeMetadata,
+	/// Re staking Profile
+	pub profile: Profile,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
-	/// Initializes the default object using the given `validator`.
-	pub fn default_from(stash: T::AccountId) -> Self {
-		Self { stash, total: Zero::zero(), roles: Default::default() }
+	/// New staking ledger for a stash account.
+	pub fn new(stash: T::AccountId, profile: Profile) -> Self {
+		let total_re_stake = profile.get_total_profile_stake();
+		Self { stash, total: total_re_stake.into(), profile }
 	}
 
-	/// Returns `true` if the stash account has no funds at all.
-	pub fn is_empty(&self) -> bool {
-		self.total.is_zero()
+	/// Returns the total amount of the stash's balance that is re-staked for all selected roles.
+	pub fn total_re_stake(&self) -> BalanceOf<T> {
+		self.total
 	}
 }
 
@@ -96,6 +90,7 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use tangle_primitives::{
 		jobs::{JobId, JobKey},
+		roles::Profile,
 		traits::jobs::MPCHandler,
 	};
 
@@ -164,6 +159,8 @@ pub mod pallet {
 		RoleRemoved { account: T::AccountId, role: RoleType },
 		/// Slashed validator.
 		Slashed { account: T::AccountId, amount: BalanceOf<T> },
+		/// Profile updated.
+		ProfileUpdated { account: T::AccountId, total_re_stake: BalanceOf<T>, roles: Vec<RoleType> },
 		/// Pending jobs,that cannot be opted out at the moment.
 		PendingJobs { pending_jobs: Vec<(JobKey, JobId)> },
 	}
@@ -178,6 +175,10 @@ pub mod pallet {
 		NoRoleAssigned,
 		/// Max role limit reached for the account.
 		MaxRoles,
+		/// Role cannot be removed.
+		RoleCannotBeRemoved,
+		/// Profile Update failed.
+		ProfileUpdateFailed,
 		/// Invalid Re-staking amount, should not exceed total staked amount.
 		ExceedsMaxReStakeValue,
 		/// Re staking amount should be greater than minimum re-staking bond requirement.
@@ -188,6 +189,9 @@ pub mod pallet {
 		AccountNotPaired,
 		/// Role clear request failed due to pending jobs, which can't be opted out at the moment.
 		RoleClearRequestFailed,
+		/// Profile delete request failed due to pending jobs, which can't be opted out at the
+		/// moment.
+		ProfileDeleteRequestFailed,
 	}
 
 	/// Map from all "controller" accounts to the info regarding the staking.
@@ -228,11 +232,7 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight({0})]
 		#[pallet::call_index(0)]
-		pub fn assign_roles(
-			origin: OriginFor<T>,
-			records: Vec<RoleStakingRecord>,
-			re_stake: BalanceOf<T>,
-		) -> DispatchResult {
+		pub fn create_profile(origin: OriginFor<T>, profile: Profile) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
 			ensure!(
@@ -240,28 +240,26 @@ pub mod pallet {
 				Error::<T>::NotValidator
 			);
 
-			let mut ledger = Ledger::<T>::get(&stash_account)
-				.unwrap_or(RoleStakingLedger::<T>::default_from(stash_account.clone()));
+			// Ensure no profile is assigned to the validator.
+			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::AccountAlreadyPaired);
 
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
 
 			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
 
-			// Total re_staking amount should not exceed  max_re_staking_amount.
-			ensure!(
-				ledger.total.saturating_add(re_stake) <= max_re_staking_bond,
-				Error::<T>::ExceedsMaxReStakeValue
-			);
+			let ledger = RoleStakingLedger::<T>::new(stash_account.clone(), profile);
 
-			ledger.total = ledger.total.saturating_add(re_stake);
+			// Total re_staking amount should not exceed  max_re_staking_amount.
+			ensure!(ledger.total <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
 
 			// Re-staking amount of record should meet min re-staking amount requirement.
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
 			ensure!(ledger.total >= min_re_staking_bond, Error::<T>::InsufficientReStakingBond);
 
 			// Validate role staking records.
-			for record in records.clone() {
+			let records = profile.get_records();
+			for record in records {
 				let role = record.metadata.get_role_type();
 				// Check if role is already assigned.
 				ensure!(
@@ -274,8 +272,6 @@ pub mod pallet {
 					stash_account.clone(),
 					record.metadata.get_authority_key(),
 				)?;
-
-				ledger.roles.insert(record.metadata.get_role_type(), record);
 			}
 
 			// Now that records are validated we can add them and update ledger
@@ -292,6 +288,115 @@ pub mod pallet {
 			Ok(())
 		}
 
+		/// Update profile of the validator.
+		/// This function will update the profile of the validator.
+		/// # Parameters
+		/// - `origin`: Origin of the transaction.
+		/// - `profile`: Profile to update.
+		/// This function will return error if
+		/// - Account is not a validator account.
+		/// - Profile is not assigned to the validator.
+		/// - All the jobs are not completed.
+		#[pallet::weight({0})]
+		#[pallet::call_index(1)]
+		pub fn update_profile(origin: OriginFor<T>, updated_profile: Profile) -> DispatchResult {
+			let stash_account = ensure_signed(origin)?;
+			// Ensure stash account is a validator.
+			ensure!(
+				pallet_staking::Validators::<T>::contains_key(&stash_account),
+				Error::<T>::NotValidator
+			);
+			let mut ledger =
+				Ledger::<T>::get(&stash_account).ok_or(Error::<T>::AccountNotPaired)?;
+
+			let total_profile_re_stake = updated_profile.get_total_profile_stake();
+			// Re-staking amount of record should meet min re-staking amount requirement.
+			let min_re_staking_bond = MinReStakingBond::<T>::get();
+			ensure!(
+				total_profile_re_stake >= min_re_staking_bond,
+				Error::<T>::InsufficientReStakingBond
+			);
+
+			let staking_ledger =
+				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
+
+			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
+			// Total re_staking amount should not exceed  max_re_staking_amount.
+			ensure!(
+				total_profile_re_stake <= max_re_staking_bond,
+				Error::<T>::ExceedsMaxReStakeValue
+			);
+
+			Self::validate_updated_profile(&stash_account, &updated_profile)?;
+			ledger.profile = profile;
+			ledger.total = total_profile_re_stake;
+			Self::update_ledger(&stash_account, &ledger);
+			Self::deposit_event(Event::<T>::ProfileUpdated {
+				account: stash_account.clone(),
+				total_re_stake: total_profile_re_stake,
+				roles: updated_profile.get_roles(),
+			});
+
+			Ok(())
+		}
+
+		/// Delete profile of the validator.
+		/// This function will delete the profile of the validator.
+		///
+		/// # Parameters
+		/// - `origin`: Origin of the transaction.
+		///
+		/// This function will return error if
+		/// - Account is not a validator account.
+		/// - Profile is not assigned to the validator.
+		/// - All the jobs are not completed.
+		#[pallet::weight({0})]
+		#[pallet::call_index(2)]
+		pub fn delete_profile(origin: OriginFor<T>) -> DispatchResult {
+			let stash_account = ensure_signed(origin)?;
+			// Ensure stash account is a validator.
+			ensure!(
+				pallet_staking::Validators::<T>::contains_key(&stash_account),
+				Error::<T>::NotValidator
+			);
+			let mut ledger =
+				Ledger::<T>::get(&stash_account).ok_or(Error::<T>::AccountNotPaired)?;
+
+			// Submit request to exit from all the services.
+			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
+			let mut pending_jobs = Vec::new();
+			for job in active_jobs {
+				let job_key = job.0;
+				// Submit request to exit from the known set.
+				let res = T::JobsHandler::exit_from_known_set(
+					stash_account.clone(),
+					job_key.clone(),
+					job.1,
+				);
+
+				if res.is_err() {
+					pending_jobs.push((job_key.clone(), job.1));
+				} else {
+					// Remove role from the profile.
+					ledger.profile.remove_role(job_key.get_role_type());
+				}
+			}
+
+			if !pending_jobs.is_empty() {
+				// Profile delete request failed due to pending jobs, which can't be opted out at
+				// the moment.
+				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
+				return Err(Error::<T>::ProfileDeleteRequestFailed.into())
+			};
+
+			Self::deposit_event(Event::<T>::ProfileDeleted { account: stash_account.clone() });
+
+			// Remove entry from ledger.
+			Ledger::<T>::remove(&stash_account);
+
+			Ok(())
+		}
+
 		/// Removes the role from the validator.
 		///
 		/// # Parameters
@@ -304,8 +409,8 @@ pub mod pallet {
 		/// - Role is not assigned to the validator.
 		/// - All the jobs are not completed.
 		#[pallet::weight({0})]
-		#[pallet::call_index(1)]
-		pub fn clear_role(origin: OriginFor<T>, role: RoleType) -> DispatchResult {
+		#[pallet::call_index(3)]
+		pub fn remove_role(origin: OriginFor<T>, role: RoleType) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
 			ensure!(
@@ -313,15 +418,13 @@ pub mod pallet {
 				Error::<T>::NotValidator
 			);
 
-			// check if role is assigned.
-			ensure!(
-				Self::has_role(stash_account.clone(), role.clone()),
-				Error::<T>::NoRoleAssigned
-			);
+			let mut ledger = Self::ledger(&stash_account).ok_or(Error::<T>::AccountNotPaired)?;
+
+			// Check if role is assigned.
+			ensure!(ledger.profile.has_role(role), Error::<T>::NoRoleAssigned);
 
 			// Get active jobs for the role.
 			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
-			let mut role_cleared = true;
 			let mut pending_jobs = Vec::new();
 			for job in active_jobs {
 				let job_key = job.0;
@@ -334,23 +437,20 @@ pub mod pallet {
 					);
 
 					if res.is_err() {
-						role_cleared = false;
 						pending_jobs.push((job_key.clone(), job.1));
+					} else {
+						// Remove role from the profile.
+						ledger.profile.remove_role(role);
 					}
 				}
 			}
 
-			if !role_cleared {
+			if !pending_jobs.is_empty() {
 				// Role clear request failed due to pending jobs, which can't be opted out at the
 				// moment.
 				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
 				return Err(Error::<T>::RoleClearRequestFailed.into())
 			};
-
-			// Remove role from the mapping.
-			Self::remove_role(stash_account.clone(), role.clone())?;
-			// Remove stash account related info.
-			Self::kill_stash(&stash_account);
 
 			Self::deposit_event(Event::<T>::RoleRemoved { account: stash_account, role });
 
@@ -370,7 +470,7 @@ pub mod pallet {
 		/// - Account is not a validator account.
 		/// - Role is assigned to the validator.
 		#[pallet::weight({0})]
-		#[pallet::call_index(2)]
+		#[pallet::call_index(4)]
 		pub fn chill(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the account before chilling.
@@ -395,7 +495,7 @@ pub mod pallet {
 		/// - If there is any active role assigned to the user.
 		///  
 		#[pallet::weight({0})]
-		#[pallet::call_index(3)]
+		#[pallet::call_index(5)]
 		pub fn unbound_funds(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
@@ -421,7 +521,7 @@ pub mod pallet {
 		/// This function will return error if
 		/// - If there is any active role assigned to the user.
 		#[pallet::weight({0})]
-		#[pallet::call_index(4)]
+		#[pallet::call_index(6)]
 		pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the account and is eligible to withdraw.

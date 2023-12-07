@@ -83,6 +83,54 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 
 /// Functions for the pallet.
 impl<T: Config> Pallet<T> {
+	/// Validate updated profile for the given account.
+	/// This function will validate the updated profile for the given account.
+	///
+	/// # Parameters
+	/// - `account`: The account ID of the validator.
+	/// - `updated_profile`: The updated profile.
+	pub(crate) fn validate_updated_profile(
+		account: T::AccountId,
+		updated_profile: Profile,
+	) -> DispatchResult {
+		let ledger = Self::ledger(&account).ok_or(Error::<T>::AccountNotPaired)?;
+
+		let removed_records = ledger.profile.get_removed_records(&updated_profile);
+		if !removed_records.is_empty() {
+			let active_jobs = T::JobsHandler::get_active_jobs(account.clone());
+			// Check removed roles has any active jobs.
+			for record in removed_records {
+				let role = record.metadata.get_role_type();
+				for job in active_jobs {
+					let job_key = job.0;
+					if job_key.get_role_type() == role {
+						return Err(Error::<T>::RoleCannotBeRemoved.into())
+					}
+				}
+			}
+		};
+
+		let records = updated_profile.get_records();
+		let min_re_staking_bond = MinReStakingBond::<T>::get();
+
+		for record in records {
+			if updated_profile.is_independent() {
+				// Re-staking amount of record should meet min re-staking amount requirement.
+				let record_re_stake: BalanceOf<T> = record.amount.unwrap_or_default().into();
+				ensure!(
+					record_re_stake >= min_re_staking_bond,
+					Error::<T>::InsufficientReStakingBond
+				);
+			}
+			// validate the metadata
+			T::MPCHandler::validate_authority_key(
+				account.clone(),
+				record.metadata.get_authority_key(),
+			)?;
+		}
+		Ok(())
+	}
+
 	/// Add new role to the given account.
 	///
 	/// # Parameters
