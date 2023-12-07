@@ -1,7 +1,7 @@
 use super::*;
 use sp_runtime::traits::Zero;
 use tangle_primitives::jobs::{
-	DKGPhaseOneJobType, DKGSignatureResult, JobKey, JobType, JobWithResult, ZkSaaSCircuitResult,
+	DKGSignatureResult, DKGTSSPhaseOneJobType, JobKey, JobType, JobWithResult, ZkSaaSCircuitResult,
 	ZkSaaSPhaseOneJobType, ZkSaaSProofResult,
 };
 
@@ -167,7 +167,7 @@ impl<T: Config> Pallet<T> {
 							.saturating_sub(1);
 						ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
 
-						let job_type = JobType::DKGPhaseOne(DKGPhaseOneJobType {
+						let job_type = JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 							participants: new_participants,
 							threshold: new_threshold,
 							permitted_caller: phase1.clone().permitted_caller,

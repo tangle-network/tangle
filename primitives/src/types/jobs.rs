@@ -65,9 +65,9 @@ pub struct JobWithResult<AccountId> {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum JobType<AccountId> {
 	/// Distributed Key Generation (DKG) job type.
-	DKGPhaseOne(DKGPhaseOneJobType<AccountId>),
+	DKGTSSPhaseOne(DKGTSSPhaseOneJobType<AccountId>),
 	/// DKG Signature job type.
-	DKGPhaseTwo(DKGPhaseTwoJobType),
+	DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType),
 	/// (zk-SNARK) Create Circuit job type.
 	ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType<AccountId>),
 	/// (zk-SNARK) Create Proof job type.
@@ -151,7 +151,7 @@ impl<AccountId> JobType<AccountId> {
 	/// Checks if the job type is a phase one job.
 	pub fn is_phase_one(&self) -> bool {
 		use crate::jobs::JobType::*;
-		if matches!(self, DKGPhaseOne(_) | ZkSaaSPhaseOne(_)) {
+		if matches!(self, DKGTSSPhaseOne(_) | ZkSaaSPhaseOne(_)) {
 			return true
 		}
 		false
@@ -161,7 +161,7 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_participants(self) -> Option<Vec<AccountId>> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKGPhaseOne(info) => Some(info.participants),
+			DKGTSSPhaseOne(info) => Some(info.participants),
 			ZkSaaSPhaseOne(info) => Some(info.participants),
 			_ => None,
 		}
@@ -171,7 +171,7 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_threshold(self) -> Option<u8> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKGPhaseOne(info) => Some(info.threshold),
+			DKGTSSPhaseOne(info) => Some(info.threshold),
 			_ => None,
 		}
 	}
@@ -179,9 +179,9 @@ impl<AccountId> JobType<AccountId> {
 	/// Gets the job key associated with the job type.
 	pub fn get_job_key(&self) -> JobKey {
 		match self {
-			JobType::DKGPhaseOne(_) => JobKey::DKG,
+			JobType::DKGTSSPhaseOne(_) => JobKey::DKG,
 			JobType::ZkSaaSPhaseOne(_) => JobKey::ZkSaaSCircuit,
-			JobType::DKGPhaseTwo(_) => JobKey::DKGSignature,
+			JobType::DKGTSSPhaseTwo(_) => JobKey::DKGSignature,
 			JobType::ZkSaaSPhaseTwo(_) => JobKey::ZkSaaSProve,
 		}
 	}
@@ -189,7 +189,7 @@ impl<AccountId> JobType<AccountId> {
 	/// Gets the job key associated with the previous phase job type.
 	pub fn get_previous_phase_job_key(&self) -> Option<JobKey> {
 		match self {
-			JobType::DKGPhaseTwo(_) => Some(JobKey::DKG),
+			JobType::DKGTSSPhaseTwo(_) => Some(JobKey::DKG),
 			JobType::ZkSaaSPhaseTwo(_) => Some(JobKey::ZkSaaSCircuit),
 			_ => None,
 		}
@@ -200,7 +200,7 @@ impl<AccountId> JobType<AccountId> {
 	/// This function is intended for simple checks and may need improvement in the future.
 	pub fn sanity_check(&self) -> bool {
 		match self {
-			JobType::DKGPhaseOne(info) => info.participants.len() > info.threshold.into(),
+			JobType::DKGTSSPhaseOne(info) => info.participants.len() > info.threshold.into(),
 			JobType::ZkSaaSPhaseOne(info) => !info.participants.is_empty(),
 			_ => true,
 		}
@@ -210,7 +210,7 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_phase_one_id(&self) -> Option<u32> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKGPhaseTwo(info) => Some(info.phase_one_id),
+			DKGTSSPhaseTwo(info) => Some(info.phase_one_id),
 			ZkSaaSPhaseTwo(info) => Some(info.phase_one_id),
 			_ => None,
 		}
@@ -219,7 +219,7 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_permitted_caller(self) -> Option<AccountId> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKGPhaseOne(info) => info.permitted_caller,
+			DKGTSSPhaseOne(info) => info.permitted_caller,
 			ZkSaaSPhaseOne(info) => info.permitted_caller,
 			_ => None,
 		}
@@ -229,7 +229,7 @@ impl<AccountId> JobType<AccountId> {
 /// Represents the Distributed Key Generation (DKG) job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGPhaseOneJobType<AccountId> {
+pub struct DKGTSSPhaseOneJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
 
@@ -243,7 +243,7 @@ pub struct DKGPhaseOneJobType<AccountId> {
 /// Represents the DKG Signature job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGPhaseTwoJobType {
+pub struct DKGTSSPhaseTwoJobType {
 	/// The phase one ID.
 	pub phase_one_id: u32,
 
@@ -332,7 +332,7 @@ where
 {
 	pub fn participants(&self) -> Option<Vec<AccountId>> {
 		match &self.job_type {
-			JobType::DKGPhaseOne(x) => Some(x.participants.clone()),
+			JobType::DKGTSSPhaseOne(x) => Some(x.participants.clone()),
 			JobType::ZkSaaSPhaseOne(x) => Some(x.participants.clone()),
 			_ => None,
 		}
@@ -340,7 +340,7 @@ where
 
 	pub fn threshold(&self) -> Option<u8> {
 		match &self.job_type {
-			JobType::DKGPhaseOne(x) => Some(x.threshold),
+			JobType::DKGTSSPhaseOne(x) => Some(x.threshold),
 			_ => None,
 		}
 	}

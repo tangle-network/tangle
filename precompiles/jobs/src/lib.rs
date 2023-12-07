@@ -28,7 +28,7 @@ use precompile_utils::{prelude::*, solidity::revert::revert_as_bytes};
 use sp_core::H256;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::jobs::{
-	DKGPhaseOneJobType, DKGPhaseTwoJobType, JobKey, JobSubmission, JobType,
+	DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, JobKey, JobSubmission, JobType,
 };
 
 #[cfg(test)]
@@ -87,7 +87,7 @@ where
 			.collect();
 
 		// Create DKG job type with the provided parameters
-		let job_type = DKGPhaseOneJobType {
+		let job_type = DKGTSSPhaseOneJobType {
 			participants,
 			threshold,
 			permitted_caller: Some(permitted_caller),
@@ -97,7 +97,8 @@ where
 		let expiry_block: BlockNumberFor<Runtime> = expiry.into();
 
 		// Create job submission object
-		let job = JobSubmission { expiry: expiry_block, job_type: JobType::DKGPhaseOne(job_type) };
+		let job =
+			JobSubmission { expiry: expiry_block, job_type: JobType::DKGTSSPhaseOne(job_type) };
 
 		// Convert caller's Ethereum address to Substrate account ID
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -142,10 +143,11 @@ where
 		let expiry_block: BlockNumberFor<Runtime> = expiry.into();
 
 		// Create DKG signature job type with the provided parameters
-		let job_type = DKGPhaseTwoJobType { phase_one_id, submission };
+		let job_type = DKGTSSPhaseTwoJobType { phase_one_id, submission };
 
 		// Create job submission object
-		let job = JobSubmission { expiry: expiry_block, job_type: JobType::DKGPhaseTwo(job_type) };
+		let job =
+			JobSubmission { expiry: expiry_block, job_type: JobType::DKGTSSPhaseTwo(job_type) };
 
 		// Create the call to the Jobs module's submit_job function
 		let call = JobsCall::<Runtime>::submit_job { job };

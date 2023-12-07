@@ -110,8 +110,8 @@ impl JobToFee<AccountId32, BlockNumber> for MockJobToFeeHandler {
 
 	fn job_to_fee(job: &JobSubmission<AccountId32, BlockNumber>) -> Balance {
 		match job.job_type {
-			JobType::DKGPhaseOne(_) => MockDKGPallet::job_to_fee(job),
-			JobType::DKGPhaseTwo(_) => MockDKGPallet::job_to_fee(job),
+			JobType::DKGTSSPhaseOne(_) => MockDKGPallet::job_to_fee(job),
+			JobType::DKGTSSPhaseTwo(_) => MockDKGPallet::job_to_fee(job),
 			JobType::ZkSaaSPhaseOne(_) => MockZkSaasPallet::job_to_fee(job),
 			JobType::ZkSaaSPhaseTwo(_) => MockZkSaasPallet::job_to_fee(job),
 		}
