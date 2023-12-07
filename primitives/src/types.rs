@@ -16,6 +16,7 @@ use super::*;
 pub mod jobs;
 use sp_runtime::AccountId32;
 
+pub mod profile;
 pub mod roles;
 /// Reputation type
 pub type Reputation = u128;

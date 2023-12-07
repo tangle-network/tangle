@@ -30,7 +30,7 @@ use sp_runtime::{
 use sp_staking::offence::Offence;
 use tangle_primitives::{
 	jobs::{JobKey, ReportValidatorOffence},
-	traits::roles::RolesHandler,
+	traits::{jobs::MPCHandler, roles::RolesHandler},
 };
 
 /// Implements RolesHandler for the pallet.
@@ -68,10 +68,7 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		if Self::is_validator(address.clone(), job_key.clone()) {
 			let ledger = Self::ledger(&address);
 			if let Some(ledger) = ledger {
-				return match ledger.roles.get(&job_key.get_role_type()) {
-					Some(stake) => Some(stake.metadata.clone()),
-					None => None,
-				}
+				return ledger.profile.get_role_metadata(job_key.get_role_type())
 			} else {
 				return None
 			}
@@ -93,14 +90,13 @@ impl<T: Config> Pallet<T> {
 		account: T::AccountId,
 		updated_profile: Profile,
 	) -> DispatchResult {
-		let ledger = Self::ledger(&account).ok_or(Error::<T>::AccountNotPaired)?;
-
+		let ledger = Self::ledger(&account).ok_or(Error::<T>::NoProfileFound)?;
 		let removed_roles = ledger.profile.get_removed_roles(&updated_profile);
 		if !removed_roles.is_empty() {
 			let active_jobs = T::JobsHandler::get_active_jobs(account.clone());
 			// Check removed roles has any active jobs.
 			for role in removed_roles {
-				for job in active_jobs {
+				for job in active_jobs.clone() {
 					let job_key = job.0;
 					if job_key.get_role_type() == role {
 						return Err(Error::<T>::RoleCannotBeRemoved.into())
@@ -128,56 +124,6 @@ impl<T: Config> Pallet<T> {
 			)?;
 		}
 		Ok(())
-	}
-
-	/// Add new role to the given account.
-	///
-	/// # Parameters
-	/// - `account`: The account ID of the validator.
-	/// - `role`: Selected role type.
-	pub(crate) fn add_role(account: T::AccountId, role: RoleType) -> DispatchResult {
-		AccountRolesMapping::<T>::try_mutate(&account, |roles| {
-			if !roles.contains(&role) {
-				roles.try_push(role.clone()).map_err(|_| Error::<T>::MaxRoles)?;
-
-				Ok(())
-			} else {
-				Err(Error::<T>::HasRoleAssigned.into())
-			}
-		})
-	}
-
-	/// Remove role from the given account.
-	///
-	/// # Parameters
-	/// - `account`: The account ID of the validator.
-	/// - `role`: Selected role type.
-	pub(crate) fn remove_role(account: T::AccountId, role: RoleType) -> DispatchResult {
-		AccountRolesMapping::<T>::try_mutate(&account, |roles| {
-			if roles.contains(&role) {
-				roles.retain(|r| r != &role);
-
-				Ok(())
-			} else {
-				Err(Error::<T>::NoRoleAssigned.into())
-			}
-		})
-	}
-
-	/// Check if the given account has the given role.
-	///
-	/// # Parameters
-	/// - `account`: The account ID of the validator.
-	/// - `role`: Selected role type.
-	///
-	/// # Returns
-	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	pub(crate) fn has_role(account: T::AccountId, role: RoleType) -> bool {
-		let assigned_roles = AccountRolesMapping::<T>::get(account);
-		match assigned_roles.iter().find(|r| **r == role) {
-			Some(_) => true,
-			None => false,
-		}
 	}
 
 	/// Check if account can chill, unbound and withdraw funds.
@@ -223,23 +169,6 @@ impl<T: Config> Pallet<T> {
 		slash_fraction * total_stake
 	}
 
-	/// Apply slash on re-staked amount.
-	/// This function will apply slash on re-staked amount and update ledger.
-	///
-	/// # Parameters
-	/// - `account`: The account ID of the validator.
-	/// - `slash_value`: Slash value.
-	pub(crate) fn apply_slash_on_re_stake(account: T::AccountId, slash_value: BalanceOf<T>) {
-		// Get ledger for the validator account
-		let mut ledger = Ledger::<T>::get(&account)
-			.unwrap_or(RoleStakingLedger::<T>::default_from(account.clone()));
-
-		// apply slash
-		ledger.total = ledger.total.saturating_sub(slash_value);
-		// Update ledger
-		Self::update_ledger(&account, &ledger);
-	}
-
 	/// Report offence for the given validator.
 	/// This function will report validators for committing offence.
 	///
@@ -278,11 +207,14 @@ impl<T: Config> Pallet<T> {
 		// Update and apply slash on ledger for all offenders
 		let slash_fraction = offence.slash_fraction(offence.validator_set_count);
 		for offender in offence_report.offenders {
+			let mut profile_ledger =
+				<Ledger<T>>::get(&offender).ok_or(Error::<T>::NoProfileFound)?;
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&offender).ok_or(Error::<T>::NotValidator)?;
-			let re_stake_slash_value =
+			let slash_value =
 				Self::calculate_re_stake_slash_value(slash_fraction, staking_ledger.total);
-			Self::apply_slash_on_re_stake(offender, re_stake_slash_value);
+			// apply slash
+			profile_ledger.total = profile_ledger.total.saturating_sub(slash_value);
 		}
 
 		Ok(())
@@ -293,16 +225,8 @@ impl<T: Config> Pallet<T> {
 	/// # Parameters
 	/// - `staker`: The stash account ID.
 	/// - `ledger`: The new ledger.
-	///
-	/// # Note
-	/// This function will set a lock on the stash account.
 	pub(crate) fn update_ledger(staker: &T::AccountId, ledger: &RoleStakingLedger<T>) {
 		<Ledger<T>>::insert(staker, ledger);
-	}
-
-	/// Kill the stash account and remove all related information.
-	pub(crate) fn kill_stash(stash: &T::AccountId) {
-		<Ledger<T>>::remove(&stash);
 	}
 
 	pub fn distribute_rewards() -> DispatchResult {

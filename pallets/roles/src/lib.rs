@@ -36,7 +36,7 @@ use tangle_primitives::{
 	traits::jobs::JobsHandler,
 };
 mod impls;
-use tangle_primitives::profile::{Profile, Record};
+use tangle_primitives::profile::Profile;
 
 #[cfg(test)]
 pub(crate) mod mock;
@@ -90,7 +90,6 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use tangle_primitives::{
 		jobs::{JobId, JobKey},
-		roles::Profile,
 		traits::jobs::MPCHandler,
 	};
 
@@ -171,6 +170,8 @@ pub mod pallet {
 			total_profile_stake: BalanceOf<T>,
 			roles: Vec<RoleType>,
 		},
+		/// Profile deleted.
+		ProfileDeleted { account: T::AccountId },
 		/// Pending jobs,that cannot be opted out at the moment.
 		PendingJobs { pending_jobs: Vec<(JobKey, JobId)> },
 	}
@@ -252,8 +253,8 @@ pub mod pallet {
 
 			// Ensure no profile is assigned to the validator.
 			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::ProfileAlreadyExists);
-			let ledger = RoleStakingLedger::<T>::new(stash_account.clone(), profile);
-			let total_profile_stake = profile.get_total_profile_stake();
+			let ledger = RoleStakingLedger::<T>::new(stash_account.clone(), profile.clone());
+			let total_profile_stake: BalanceOf<T> = profile.get_total_profile_stake().into();
 
 			// Re-staking amount of profile should meet min re-staking amount requirement.
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
@@ -271,7 +272,6 @@ pub mod pallet {
 			// Validate role staking records.
 			let records = profile.get_records();
 			for record in records {
-				let role = record.metadata.get_role_type();
 				if profile.is_independent() {
 					// Re-staking amount of record should meet min re-staking amount requirement.
 					let record_re_stake: BalanceOf<T> = record.amount.unwrap_or_default().into();
@@ -325,11 +325,12 @@ pub mod pallet {
 			);
 			let mut ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
-			let total_profile_re_stake = updated_profile.get_total_profile_stake();
+			let total_profile_stake: BalanceOf<T> =
+				updated_profile.get_total_profile_stake().into();
 			// Re-staking amount of record should meet min re-staking amount requirement.
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
 			ensure!(
-				total_profile_re_stake >= min_re_staking_bond,
+				total_profile_stake >= min_re_staking_bond,
 				Error::<T>::InsufficientReStakingBond
 			);
 
@@ -338,14 +339,11 @@ pub mod pallet {
 
 			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
 			// Total re_staking amount should not exceed  max_re_staking_amount.
-			ensure!(
-				total_profile_re_stake <= max_re_staking_bond,
-				Error::<T>::ExceedsMaxReStakeValue
-			);
+			ensure!(total_profile_stake <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
 
-			Self::validate_updated_profile(&stash_account, &updated_profile)?;
-			ledger.profile = profile;
-			ledger.total = total_profile_re_stake;
+			Self::validate_updated_profile(stash_account.clone(), updated_profile.clone())?;
+			ledger.profile = updated_profile.clone();
+			ledger.total = total_profile_stake;
 			Self::update_ledger(&stash_account, &ledger);
 			Self::deposit_event(Event::<T>::ProfileUpdated {
 				account: stash_account.clone(),
@@ -395,7 +393,7 @@ pub mod pallet {
 					pending_jobs.push((job_key.clone(), job.1));
 				} else {
 					// Remove role from the profile.
-					ledger.profile.remove_role(job_key.get_role_type());
+					ledger.profile.remove_role_from_profile(job_key.get_role_type());
 				}
 			}
 
@@ -438,7 +436,7 @@ pub mod pallet {
 			let mut ledger = Self::ledger(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
 			// Check if role is assigned.
-			ensure!(ledger.profile.has_role(role), Error::<T>::NoRoleAssigned);
+			ensure!(ledger.profile.has_role(role.clone()), Error::<T>::RoleNotAssigned);
 
 			// Get active jobs for the role.
 			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
@@ -457,7 +455,7 @@ pub mod pallet {
 						pending_jobs.push((job_key.clone(), job.1));
 					} else {
 						// Remove role from the profile.
-						ledger.profile.remove_role(role);
+						ledger.profile.remove_role_from_profile(role.clone());
 					}
 				}
 			}

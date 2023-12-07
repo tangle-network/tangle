@@ -13,12 +13,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+use crate::roles::{RoleType, RoleTypeMetadata};
 use frame_support::{dispatch::Vec, pallet_prelude::*};
-use parity_scale_codec::alloc::string::ToString;
-use scale_info::prelude::string::String;
-use sp_arithmetic::Percent;
-use sp_std::ops::Add;
-use role::{RoleType, RoleTypeMetadata};
 
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
 pub struct Record {
@@ -44,17 +40,17 @@ pub enum Profile {
 }
 
 impl Profile {
-    /// Checks if the profile is an independent profile.
+	/// Checks if the profile is an independent profile.
 	pub fn is_independent(&self) -> bool {
 		matches!(self, Profile::Independent(_))
 	}
 
-    /// Checks if the profile is a shared profile.
+	/// Checks if the profile is a shared profile.
 	pub fn is_shared(&self) -> bool {
 		matches!(self, Profile::Shared(_))
 	}
 
-    /// Returns the total profile stake.
+	/// Returns the total profile stake.
 	pub fn get_total_profile_stake(&self) -> u64 {
 		match self {
 			Profile::Independent(profile) =>
@@ -63,7 +59,7 @@ impl Profile {
 		}
 	}
 
-    /// Returns staking record details containing role metadata and stake amount.
+	/// Returns staking record details containing role metadata and stake amount.
 	pub fn get_records(&self) -> Vec<Record> {
 		match self {
 			Profile::Independent(profile) => profile.records.clone(),
@@ -71,7 +67,23 @@ impl Profile {
 		}
 	}
 
-    /// Returns roles in the profile.
+	/// Returns staking role metadata for given role.
+	pub fn get_role_metadata(&self, role_type: RoleType) -> Option<RoleTypeMetadata> {
+		match self {
+			Profile::Independent(profile) => profile
+				.records
+				.iter()
+				.find(|record| record.metadata.get_role_type() == role_type)
+				.map(|record| record.metadata.clone()),
+			Profile::Shared(profile) => profile
+				.records
+				.iter()
+				.find(|record| record.metadata.get_role_type() == role_type)
+				.map(|record| record.metadata.clone()),
+		}
+	}
+
+	/// Returns roles in the profile.
 	pub fn get_roles(&self) -> Vec<RoleType> {
 		match self {
 			Profile::Independent(profile) =>
@@ -81,7 +93,7 @@ impl Profile {
 		}
 	}
 
-    /// Checks if the profile contains given role.
+	/// Checks if the profile contains given role.
 	pub fn has_role(&self, role_type: RoleType) -> bool {
 		match self {
 			Profile::Independent(profile) => profile
@@ -95,7 +107,7 @@ impl Profile {
 		}
 	}
 
-    /// Removes given role from the profile.
+	/// Removes given role from the profile.
 	pub fn remove_role_from_profile(&mut self, role_type: RoleType) {
 		match self {
 			Profile::Independent(profile) => {
@@ -107,7 +119,7 @@ impl Profile {
 		}
 	}
 
-    /// Checks if the profile contains duplicate roles.
+	/// Checks if the profile contains duplicate roles.
 	pub fn has_duplicate_roles(&self) -> bool {
 		let records = self.get_records();
 		let mut role_types = Vec::new();
@@ -120,25 +132,22 @@ impl Profile {
 		false
 	}
 
-    /// Return roles from current profile removed in updated profile.
-    pub fn get_removed_roles(&self, updated_profile: &Profile) -> Vec<RoleType> {
-        // Get the roles from the current profile.
-        let roles = self.get_roles();
-        let updated_roles = updated_profile.get_roles();
-        // Returns roles in current profile that have been removed in updated profile.
-        roles
-            .iter()
-            .filter_map(|role| {
-                let updated_role = updated_roles.iter().find(|updated_role| {
-                    updated_role == role
-                });
-                if updated_role.is_none() {
-                    Some(role.clone())
-                } else {
-                    None
-                }
-            })
-            .collect()
-    }
-
+	/// Return roles from current profile removed in updated profile.
+	pub fn get_removed_roles(&self, updated_profile: &Profile) -> Vec<RoleType> {
+		// Get the roles from the current profile.
+		let roles = self.get_roles();
+		let updated_roles = updated_profile.get_roles();
+		// Returns roles in current profile that have been removed in updated profile.
+		roles
+			.iter()
+			.filter_map(|role| {
+				let updated_role = updated_roles.iter().find(|updated_role| *updated_role == role);
+				if updated_role.is_none() {
+					Some(role.clone())
+				} else {
+					None
+				}
+			})
+			.collect()
+	}
 }
