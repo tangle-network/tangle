@@ -36,7 +36,7 @@ use tangle_primitives::{
 	traits::jobs::JobsHandler,
 };
 mod impls;
-use tangle_primitives::roles::{Profile, Record};
+use tangle_primitives::profile::{Profile, Record};
 
 #[cfg(test)]
 pub(crate) mod mock;

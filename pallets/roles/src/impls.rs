@@ -95,12 +95,11 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		let ledger = Self::ledger(&account).ok_or(Error::<T>::AccountNotPaired)?;
 
-		let removed_records = ledger.profile.get_removed_records(&updated_profile);
-		if !removed_records.is_empty() {
+		let removed_roles = ledger.profile.get_removed_roles(&updated_profile);
+		if !removed_roles.is_empty() {
 			let active_jobs = T::JobsHandler::get_active_jobs(account.clone());
 			// Check removed roles has any active jobs.
-			for record in removed_records {
-				let role = record.metadata.get_role_type();
+			for role in removed_roles {
 				for job in active_jobs {
 					let job_key = job.0;
 					if job_key.get_role_type() == role {
