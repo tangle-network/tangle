@@ -171,24 +171,22 @@ pub mod pallet {
 		NotValidator,
 		/// Validator has active role assigned
 		HasRoleAssigned,
-		/// No role assigned to provided validator.
-		NoRoleAssigned,
+		/// Given role is not assigned to the validator.
+		RoleNotAssigned,
 		/// Max role limit reached for the account.
 		MaxRoles,
-		/// Role cannot be removed.
+		/// Role cannot due to pending jobs, which can't be opted out at the moment.
 		RoleCannotBeRemoved,
-		/// Profile Update failed.
-		ProfileUpdateFailed,
 		/// Invalid Re-staking amount, should not exceed total staked amount.
 		ExceedsMaxReStakeValue,
 		/// Re staking amount should be greater than minimum re-staking bond requirement.
 		InsufficientReStakingBond,
-		/// Stash controller account already added to Roles Ledger
-		AccountAlreadyPaired,
+		/// Profile Update failed.
+		ProfileUpdateFailed,
+		/// Profile already exists for given validator account.
+		ProfileAlreadyExists,
 		/// Stash controller account not found in Roles Ledger.
-		AccountNotPaired,
-		/// Role clear request failed due to pending jobs, which can't be opted out at the moment.
-		RoleClearRequestFailed,
+		NoProfileFound,
 		/// Profile delete request failed due to pending jobs, which can't be opted out at the
 		/// moment.
 		ProfileDeleteRequestFailed,
@@ -241,32 +239,35 @@ pub mod pallet {
 			);
 
 			// Ensure no profile is assigned to the validator.
-			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::AccountAlreadyPaired);
-
-			let staking_ledger =
-				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
-
-			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
-
+			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::ProfileAlreadyExists);
 			let ledger = RoleStakingLedger::<T>::new(stash_account.clone(), profile);
+			let total_profile_stake = profile.get_total_profile_stake();
+
+			// Re-staking amount of profile should meet min re-staking amount requirement.
+			let min_re_staking_bond = MinReStakingBond::<T>::get();
+			ensure!(
+				total_profile_stake >= min_re_staking_bond,
+				Error::<T>::InsufficientReStakingBond
+			);
 
 			// Total re_staking amount should not exceed  max_re_staking_amount.
-			ensure!(ledger.total <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
-
-			// Re-staking amount of record should meet min re-staking amount requirement.
-			let min_re_staking_bond = MinReStakingBond::<T>::get();
-			ensure!(ledger.total >= min_re_staking_bond, Error::<T>::InsufficientReStakingBond);
+			let staking_ledger =
+				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
+			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
+			ensure!(total_profile_stake <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
 
 			// Validate role staking records.
 			let records = profile.get_records();
 			for record in records {
 				let role = record.metadata.get_role_type();
-				// Check if role is already assigned.
-				ensure!(
-					!Self::has_role(stash_account.clone(), role.clone()),
-					Error::<T>::HasRoleAssigned
-				);
-
+				if profile.is_independent() {
+					// Re-staking amount of record should meet min re-staking amount requirement.
+					let record_re_stake: BalanceOf<T> = record.amount.unwrap_or_default().into();
+					ensure!(
+						record_re_stake >= min_re_staking_bond,
+						Error::<T>::InsufficientReStakingBond
+					);
+				}
 				// validate the metadata
 				T::MPCHandler::validate_authority_key(
 					stash_account.clone(),
@@ -274,15 +275,6 @@ pub mod pallet {
 				)?;
 			}
 
-			// Now that records are validated we can add them and update ledger
-			for record in records {
-				let role = record.metadata.get_role_type();
-				Self::add_role(stash_account.clone(), role.clone())?;
-				Self::deposit_event(Event::<T>::RoleAssigned {
-					account: stash_account.clone(),
-					role,
-				});
-			}
 			Self::update_ledger(&stash_account, &ledger);
 
 			Ok(())
@@ -306,8 +298,7 @@ pub mod pallet {
 				pallet_staking::Validators::<T>::contains_key(&stash_account),
 				Error::<T>::NotValidator
 			);
-			let mut ledger =
-				Ledger::<T>::get(&stash_account).ok_or(Error::<T>::AccountNotPaired)?;
+			let mut ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
 			let total_profile_re_stake = updated_profile.get_total_profile_stake();
 			// Re-staking amount of record should meet min re-staking amount requirement.
@@ -359,8 +350,7 @@ pub mod pallet {
 				pallet_staking::Validators::<T>::contains_key(&stash_account),
 				Error::<T>::NotValidator
 			);
-			let mut ledger =
-				Ledger::<T>::get(&stash_account).ok_or(Error::<T>::AccountNotPaired)?;
+			let mut ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
 			// Submit request to exit from all the services.
 			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
@@ -418,7 +408,7 @@ pub mod pallet {
 				Error::<T>::NotValidator
 			);
 
-			let mut ledger = Self::ledger(&stash_account).ok_or(Error::<T>::AccountNotPaired)?;
+			let mut ledger = Self::ledger(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
 			// Check if role is assigned.
 			ensure!(ledger.profile.has_role(role), Error::<T>::NoRoleAssigned);
@@ -449,7 +439,7 @@ pub mod pallet {
 				// Role clear request failed due to pending jobs, which can't be opted out at the
 				// moment.
 				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
-				return Err(Error::<T>::RoleClearRequestFailed.into())
+				return Err(Error::<T>::RoleCannotBeRemoved.into())
 			};
 
 			Self::deposit_event(Event::<T>::RoleRemoved { account: stash_account, role });
