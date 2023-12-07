@@ -159,8 +159,18 @@ pub mod pallet {
 		RoleRemoved { account: T::AccountId, role: RoleType },
 		/// Slashed validator.
 		Slashed { account: T::AccountId, amount: BalanceOf<T> },
+		/// New profile created.
+		ProfileCreated {
+			account: T::AccountId,
+			total_profile_stake: BalanceOf<T>,
+			roles: Vec<RoleType>,
+		},
 		/// Profile updated.
-		ProfileUpdated { account: T::AccountId, total_re_stake: BalanceOf<T>, roles: Vec<RoleType> },
+		ProfileUpdated {
+			account: T::AccountId,
+			total_profile_stake: BalanceOf<T>,
+			roles: Vec<RoleType>,
+		},
 		/// Pending jobs,that cannot be opted out at the moment.
 		PendingJobs { pending_jobs: Vec<(JobKey, JobId)> },
 	}
@@ -169,7 +179,7 @@ pub mod pallet {
 	pub enum Error<T> {
 		/// Not a validator.
 		NotValidator,
-		/// Validator has active role assigned
+		/// Validator has active role assigned.
 		HasRoleAssigned,
 		/// Given role is not assigned to the validator.
 		RoleNotAssigned,
@@ -214,18 +224,20 @@ pub mod pallet {
 	#[pallet::getter(fn min_active_bond)]
 	pub(super) type MinReStakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
-	/// Assigns roles to the validator.
+	/// Create profile for the validator.
+	/// Validator can choose roles he is interested to opt-in and stake tokens for it.
+	/// Staking can be done shared or independently for each role.
 	///
 	/// # Parameters
 	///
 	/// - `origin`: Origin of the transaction.
-	/// - `records`: List of roles user is interested to re-stake.
-	/// - `re_stake`: Amount to re-stake.
+	/// - `profile`: Profile to be created
 	///
 	/// This function will return error if
 	/// - Account is not a validator account.
-	/// - Role is already assigned to the validator.
+	/// - Profile already exists for the validator.
 	/// - Min re-staking bond is not met.
+	/// - Re-staking amount is exceeds max re-staking value.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight({0})]
@@ -276,19 +288,32 @@ pub mod pallet {
 			}
 
 			Self::update_ledger(&stash_account, &ledger);
+			Self::deposit_event(Event::<T>::ProfileCreated {
+				account: stash_account.clone(),
+				total_profile_stake,
+				roles: profile.get_roles(),
+			});
 
 			Ok(())
 		}
 
 		/// Update profile of the validator.
 		/// This function will update the profile of the validator.
+		/// If user wants to remove any role, please ensure that all the jobs associated with the
+		/// role are completed else this tx will fail.
+		/// If user wants to add any role, please ensure that the re-staking amount is greater than
+		/// required min re-staking bond.
+		///
 		/// # Parameters
 		/// - `origin`: Origin of the transaction.
-		/// - `profile`: Profile to update.
+		/// - `profile`: Updated profile.
+		///
 		/// This function will return error if
 		/// - Account is not a validator account.
 		/// - Profile is not assigned to the validator.
-		/// - All the jobs are not completed.
+		/// - If there are any pending jobs for the role which user wants to remove.
+		/// - Re-staking amount is exceeds max re-staking value.
+		/// - Re-staking amount is less than min re-staking bond.
 		#[pallet::weight({0})]
 		#[pallet::call_index(1)]
 		pub fn update_profile(origin: OriginFor<T>, updated_profile: Profile) -> DispatchResult {
@@ -324,7 +349,7 @@ pub mod pallet {
 			Self::update_ledger(&stash_account, &ledger);
 			Self::deposit_event(Event::<T>::ProfileUpdated {
 				account: stash_account.clone(),
-				total_re_stake: total_profile_re_stake,
+				total_profile_stake,
 				roles: updated_profile.get_roles(),
 			});
 
@@ -332,7 +357,9 @@ pub mod pallet {
 		}
 
 		/// Delete profile of the validator.
-		/// This function will delete the profile of the validator.
+		/// This function will submit the request to exit from all the services and will fails if
+		/// all the job are not completed.
+		///
 		///
 		/// # Parameters
 		/// - `origin`: Origin of the transaction.
