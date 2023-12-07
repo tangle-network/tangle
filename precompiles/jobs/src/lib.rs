@@ -28,8 +28,7 @@ use precompile_utils::{prelude::*, solidity::revert::revert_as_bytes};
 use sp_core::H256;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::jobs::{
-	DKGPhaseOneJobType, DKGPhaseTwoJobType, JobKey, JobSubmission, JobType, ZkSaaSPhaseOneJobType,
-	ZkSaaSPhaseTwoJobType,
+	DKGPhaseOneJobType, DKGPhaseTwoJobType, JobKey, JobSubmission, JobType,
 };
 
 #[cfg(test)]
@@ -147,110 +146,6 @@ where
 
 		// Create job submission object
 		let job = JobSubmission { expiry: expiry_block, job_type: JobType::DKGPhaseTwo(job_type) };
-
-		// Create the call to the Jobs module's submit_job function
-		let call = JobsCall::<Runtime>::submit_job { job };
-
-		// Dispatch the call using the RuntimeHelper
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Submits a job for the first phase of the zksaas protocol.
-	///
-	/// # Parameters
-	///
-	/// - `handle`: A mutable reference to the `PrecompileHandle` implementation.
-	/// - `expiry`: The expiration period for the submitted job
-	/// - `participants`: A vector containing Ethereum addresses of the participants in the ZkSaas
-	///   phase one.
-	/// - `permitted_caller`: The Ethereum address of the permitted caller.
-	///
-	/// # Returns
-	///
-	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submitzkSaaSCircuitJob(uint64,address[],address)")]
-	fn submit_zksaas_circuit_job(
-		handle: &mut impl PrecompileHandle,
-		expiry: u64,
-		participants: Vec<Address>,
-		permitted_caller: Address,
-	) -> EvmResult {
-		// Convert Ethereum address to Substrate account ID
-		let permitted_caller = Runtime::AddressMapping::into_account_id(permitted_caller.0);
-
-		// Convert Ethereum addresses of participants to Substrate account IDs
-		let participants = participants
-			.iter()
-			.map(|x| Runtime::AddressMapping::into_account_id(x.0))
-			.collect();
-
-		// Create ZkSaas phase one job type with the provided parameters
-		let job_type =
-			ZkSaaSPhaseOneJobType {
-            participants,
-            permitted_caller: Some(permitted_caller),
-            system: todo!("@shekohex: need to come up with a way to pass the required circuit information to substrate")
-        };
-
-		// Convert expiration period to Substrate block number
-		let expiry_block: BlockNumberFor<Runtime> = expiry.into();
-
-		// Create job submission object
-		let job =
-			JobSubmission { expiry: expiry_block, job_type: JobType::ZkSaaSPhaseOne(job_type) };
-
-		// Convert caller's Ethereum address to Substrate account ID
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		// Create the call to the Jobs module's submit_job function
-		let call = JobsCall::<Runtime>::submit_job { job };
-
-		// Dispatch the call using the RuntimeHelper
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Submits a job for the second phase of the zksaas protocol,
-	/// including the submission of data from the first phase.
-	///
-	/// # Parameters
-	///
-	/// - `handle`: A mutable reference to the `PrecompileHandle` implementation.
-	/// - `expiry`: The expiration period for the submitted job
-	/// - `phase_one_id`: The identifier of the corresponding phase one ZkSaas job (u32).
-	/// - `submission`: The data submission for the ZkSaas phase two, represented as `BoundedBytes`.
-	///
-	/// # Returns
-	///
-	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submitzkSaaSProveJob(uint64,uint32,bytes)")]
-	fn submit_zksaas_prove_job(
-		handle: &mut impl PrecompileHandle,
-		expiry: u64,
-		phase_one_id: u32,
-		submission: BoundedBytes<GetJobSubmissionSizeLimit>,
-	) -> EvmResult {
-		// Convert BoundedBytes to Vec<u8>
-		let submission: Vec<u8> = submission.into();
-
-		// Convert caller's Ethereum address to Substrate account ID
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		// Convert expiration period to Substrate block number
-		let expiry_block: BlockNumberFor<Runtime> = expiry.into();
-
-		// Create ZkSaas phase two job type with the provided parameters
-		let job_type = ZkSaaSPhaseTwoJobType {
-            phase_one_id,
-            request: todo!("@shekohex: we need to figure out a way to pass the request data from evm to substrate"),
-        };
-
-		// Create job submission object
-		let job =
-			JobSubmission { expiry: expiry_block, job_type: JobType::ZkSaaSPhaseTwo(job_type) };
 
 		// Create the call to the Jobs module's submit_job function
 		let call = JobsCall::<Runtime>::submit_job { job };

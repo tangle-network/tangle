@@ -54,39 +54,3 @@ fn submit_dkg_phase_two_job() {
 			);
 		})
 }
-
-#[test]
-fn submit_zksaas_circuit_job() {
-	ExtBuilder::default()
-		.with_balances(vec![(Alice.into(), 40)])
-		.build()
-		.execute_with(|| {
-			let _ = precompiles().prepare_test(
-				Address(CryptoAlith.into()),
-				Precompile1,
-				PCall::submit_zksaas_circuit_job {
-					expiry: 100,
-					participants: vec![],
-					permitted_caller: Address(CryptoAlith.into()),
-				},
-			);
-		})
-}
-
-#[test]
-fn submit_zksaas_prove_job() {
-	ExtBuilder::default()
-		.with_balances(vec![(Alice.into(), 40)])
-		.build()
-		.execute_with(|| {
-			let _ = precompiles().prepare_test(
-				Address(CryptoAlith.into()),
-				Precompile1,
-				PCall::submit_zksaas_prove_job {
-					expiry: 100,
-					phase_one_id: 1,
-					submission: vec![].into(),
-				},
-			);
-		})
-}
