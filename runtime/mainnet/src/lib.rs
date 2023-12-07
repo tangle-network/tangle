@@ -26,6 +26,7 @@ pub mod precompiles;
 pub mod voter_bags;
 
 use frame_election_provider_support::{
+	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
 use frame_support::{
@@ -69,7 +70,6 @@ use static_assertions::const_assert;
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
 
-use dkg_runtime_primitives::{MaxAuthorities, MaxProposalLength};
 pub use frame_support::{
 	construct_runtime,
 	dispatch::DispatchClass,
@@ -317,6 +317,13 @@ impl pallet_sudo::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	#[derive(Serialize, Deserialize)]
+	pub const MaxAuthorities: u32 = 1000;
+	#[derive(Serialize, Deserialize)]
+	pub const MaxProposalLength: u32 = 1000;
+}
+
 impl pallet_aura::Config for Runtime {
 	type AuthorityId = AuraId;
 	type DisabledValidators = ();
@@ -335,6 +342,7 @@ impl pallet_grandpa::Config for Runtime {
 	type MaxAuthorities = MaxAuthorities;
 	type EquivocationReportSystem = ();
 	type KeyOwnerProof = sp_core::Void;
+	type MaxNominators = MaxNominatorRewardedPerValidator;
 	type WeightInfo = ();
 }
 
@@ -398,8 +406,10 @@ impl pallet_staking::BenchmarkingConfig for StakingBenchmarkingConfig {
 	type MaxValidators = ConstU32<1000>;
 }
 
+/// Upper limit on the number of NPOS nominations.
+const MAX_QUOTA_NOMINATIONS: u32 = 16;
+
 impl pallet_staking::Config for Runtime {
-	type MaxNominations = MaxNominations;
 	type Currency = Balances;
 	type CurrencyBalance = Balance;
 	type AdminOrigin = EnsureRoot<AccountId>;
@@ -425,6 +435,7 @@ impl pallet_staking::Config for Runtime {
 	type HistoryDepth = HistoryDepth;
 	type EventListeners = NominationPools;
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
+	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
 }
 
@@ -561,6 +572,10 @@ parameter_types! {
 	// The maximum winners that can be elected by the Election pallet which is equivalent to the
 	// maximum active validators the staking pallet can have.
 	pub MaxActiveValidators: u32 = 1000;
+	pub ElectionBoundsOnChain: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(5_000.into()).targets_count(1_250.into()).build();
+	pub ElectionBoundsMultiPhase: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(10_000.into()).targets_count(1_500.into()).build();
 }
 
 /// The numbers configured here could always be more than the the maximum limits of staking pallet
@@ -612,8 +627,7 @@ impl onchain::Config for OnChainSeqPhragmen {
 	type DataProvider = <Runtime as pallet_election_provider_multi_phase::Config>::DataProvider;
 	type WeightInfo = frame_election_provider_support::weights::SubstrateWeight<Runtime>;
 	type MaxWinners = <Runtime as pallet_election_provider_multi_phase::Config>::MaxWinners;
-	type VotersBound = MaxOnChainElectingVoters;
-	type TargetsBound = MaxOnChainElectableTargets;
+	type Bounds = ElectionBoundsOnChain;
 }
 
 impl pallet_election_provider_multi_phase::MinerConfig for Runtime {
@@ -661,10 +675,9 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type GovernanceFallback = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type Solver = SequentialPhragmen<AccountId, SolutionAccuracyOf<Self>, OffchainRandomBalancing>;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
-	type MaxElectableTargets = MaxElectableTargets;
 	type MaxWinners = MaxActiveValidators;
-	type MaxElectingVoters = MaxElectingVoters;
 	type BenchmarkingConfig = ElectionProviderBenchmarkConfig;
+	type ElectionBounds = ElectionBoundsMultiPhase;
 	type WeightInfo = pallet_election_provider_multi_phase::weights::SubstrateWeight<Self>;
 }
 

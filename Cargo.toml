@@ -71,7 +71,7 @@ syn = { version = "1.0" }
 hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
 slices = "0.2.0"
-schnorrkel = { verison = "11.4", default-features = false }
+schnorrkel = { version = "0.9.1", default-features = false }
 
 # DKG Substrate Dependencies
 dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
@@ -199,6 +199,7 @@ fc-mapping-sync = { git = "https://github.com/paritytech/frontier.git", branch =
 fc-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false }
 fc-rpc-core = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0" }
 fc-storage = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0" }
+fc-api = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0" }
 
 # Frontier Primitive
 fp-account = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false, features = ["serde"] }
@@ -247,7 +248,7 @@ evm-gasometer = { git = "https://github.com/rust-blockchain/evm", rev = "b7b82c7
 evm-runtime = { git = "https://github.com/rust-blockchain/evm", rev = "b7b82c7e1fc57b7449d6dfa6826600de37cc1e65", default-features = false }
 
 # XCM dependencies
-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0", default-features = false }
+xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
 
 
 # RPC related dependencies
@@ -266,7 +267,7 @@ pallet-transaction-pause = { path = 'pallets/transaction-pause', default-feature
 #webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.6" }
 
 webb = { version = "0.7", default-features = false }
-webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", rev = "a960eaf", default-features = false, features = ["scale", "evm"] }
+webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", branch = "polkadot-sdk-v1.0.0", default-features = false, features = ["scale", "evm"] }
 
 primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }

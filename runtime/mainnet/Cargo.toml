@@ -23,7 +23,6 @@ serde = { workspace = true }
 static_assertions = { workspace = true }
 
 # DKG Substrate Dependencies
-dkg-runtime-primitives = { workspace = true }
 pallet-bridge-registry = { workspace = true }
 
 # Webb Substrate Dependencies
@@ -203,9 +202,6 @@ std = [
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
   "pallet-bridge-registry/std",
-
-  # DKG
-  "dkg-runtime-primitives/std",
 
   # Webb dependencies
   "tangle-primitives/std",

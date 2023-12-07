@@ -105,6 +105,10 @@ type Offence = crate::offences::ValidatorOffence<IdentificationTuple>;
 
 parameter_types! {
 	pub static Offences: Vec<(Vec<AccountId>, Offence)> = vec![];
+	pub ElectionBoundsOnChain: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(5_000.into()).targets_count(1_250.into()).build();
+	pub ElectionBoundsMultiPhase: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(10_000.into()).targets_count(1_500.into()).build();
 }
 
 /// A mock offence report handler.
@@ -214,7 +218,11 @@ impl onchain::Config for OnChainSeqPhragmen {
 	type MaxWinners = ConstU32<100>;
 	type VotersBound = ConstU32<{ u32::MAX }>;
 	type TargetsBound = ConstU32<{ u32::MAX }>;
+	type Bounds = ElectionBoundsOnChain;
 }
+
+/// Upper limit on the number of NPOS nominations.
+const MAX_QUOTA_NOMINATIONS: u32 = 16;
 
 impl pallet_staking::Config for Runtime {
 	type MaxNominations = ConstU32<16>;
@@ -243,6 +251,7 @@ impl pallet_staking::Config for Runtime {
 	type HistoryDepth = ConstU32<84>;
 	type EventListeners = ();
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
+	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
 }
 
