@@ -23,7 +23,7 @@ use sp_std::ops::Add;
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
 pub enum RoleType {
 	Tss,
-	ZkSaas,
+	ZkSaaS,
 }
 
 impl RoleType {
@@ -34,7 +34,7 @@ impl RoleType {
 
 	/// Checks if the role type is a Zk-Saas role.
 	pub fn is_zksaas(&self) -> bool {
-		matches!(self, RoleType::ZkSaas)
+		matches!(self, RoleType::ZkSaaS)
 	}
 }
 
@@ -50,7 +50,7 @@ impl RoleTypeMetadata {
 	pub fn get_role_type(&self) -> RoleType {
 		match self {
 			RoleTypeMetadata::Tss(_) => RoleType::Tss,
-			RoleTypeMetadata::ZkSaas(_) => RoleType::ZkSaas,
+			RoleTypeMetadata::ZkSaas(_) => RoleType::ZkSaaS,
 		}
 	}
 

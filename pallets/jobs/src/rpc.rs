@@ -25,7 +25,7 @@ impl<T: Config> Pallet<T> {
 			let mut jobs: Vec<RpcResponseJobsData<T::AccountId>> = vec![];
 
 			for (job_key, job_id) in jobs_list.iter() {
-				if let Some(job_info) = SubmittedJobs::<T>::get(job_key.clone(), job_id) {
+				if let Some(job_info) = SubmittedJobs::<T>::get(job_key, job_id) {
 					if !job_info.job_type.is_phase_one() {
 						let result = KnownResults::<T>::get(
 							job_info.job_type.get_previous_phase_job_key().unwrap(),
@@ -36,8 +36,8 @@ impl<T: Config> Pallet<T> {
 						let info = RpcResponseJobsData::<T::AccountId> {
 							job_id: *job_id,
 							job_type: job_info.job_type,
-							participants: Some(result.participants),
-							threshold: result.threshold,
+							participants: result.participants(),
+							threshold: result.threshold(),
 							key: Some(result.result),
 						};
 

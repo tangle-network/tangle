@@ -38,7 +38,7 @@ if [ "$CLEAN" = true ]; then
   rm -rf ./tmp
 fi
 
-mkdir ./tmp
+mkdir -p ./tmp
 
 # The following line ensure we run from the project root
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
@@ -53,6 +53,7 @@ echo "*** Start Webb DKG Node ***"
   --rpc-max-request-size 3000 \
   --rpc-max-response-size 3000 \
   --ethapi trace,debug \
+  --auto-insert-keys \
   --node-key 0000000000000000000000000000000000000000000000000000000000000001 &
 # Bob
 ./target/release/tangle-standalone --tmp --chain local --validator -lerror --bob \
@@ -60,6 +61,7 @@ echo "*** Start Webb DKG Node ***"
   --port ${ports[1]} \
   --rpc-port 9945 \
   --ethapi trace,debug \
+  --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Charlie
 ./target/release/tangle-standalone --tmp --chain local --validator -lerror --charlie \
@@ -67,6 +69,7 @@ echo "*** Start Webb DKG Node ***"
   --port ${ports[1]} \
   --rpc-port 9946 \
   --ethapi trace,debug \
+  --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Dave
 ./target/release/tangle-standalone --tmp --chain local --validator -lerror --dave \
@@ -74,6 +77,7 @@ echo "*** Start Webb DKG Node ***"
   --port ${ports[1]} \
   --rpc-port 9947 \
   --ethapi trace,debug \
+  --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Eve
 ./target/release/tangle-standalone --tmp --chain local --validator -linfo --eve \
@@ -89,5 +93,6 @@ echo "*** Start Webb DKG Node ***"
     -lruntime::dkg_proposal_handler=debug \
     -lruntime::offchain=debug \
     -ldkg_proposal_handler=debug \
+    --auto-insert-keys \
     --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
 popd
