@@ -51,6 +51,7 @@ pallet-dkg-metadata = { workspace = true, features = [ "std" ] }
 dkg-runtime-primitives = { workspace = true, features = [ "std" ] }
 sp-staking = { workspace = true, features = [ "std" ] }
 sp-keystore = { workspace = true, features = [ "std" ] }
+sp-state-machine = { workspace = true, features = [ "std" ] }
 
 [features]
 default = [ "std" ]
@@ -66,5 +67,6 @@ std = [
 	"sp-runtime/std",
 	"sp-std/std",
 	"tangle-primitives/std",
-	"pallet-session/std"
+	"pallet-session/std",
+	"sp-state-machine/std"
 ]

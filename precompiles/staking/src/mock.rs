@@ -18,20 +18,17 @@
 //! Test utilities
 #![allow(dead_code)]
 use super::*;
+use frame_election_provider_support::bounds::{ElectionBounds, ElectionBoundsBuilder};
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{Everything, OnFinalize, OnInitialize},
 	weights::Weight,
-	BasicExternalities,
 };
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use precompile_utils::precompile_set::*;
-use sp_staking::currency_to_vote::U128CurrencyToVote;
-use std::{sync::Arc, vec};
-
 use pallet_session::historical as pallet_session_historical;
 use pallet_staking::EraPayout;
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use precompile_utils::precompile_set::*;
 use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
@@ -39,6 +36,9 @@ use sp_core::{
 	sr25519::{self, Public as sr25519Public, Signature},
 	ConstU32, Get, H160, H256, U256,
 };
+use sp_staking::currency_to_vote::U128CurrencyToVote;
+use sp_state_machine::BasicExternalities;
+use std::{sync::Arc, vec};
 
 use frame_election_provider_support::{onchain, SequentialPhragmen};
 use pallet_staking::{
@@ -407,8 +407,6 @@ impl onchain::Config for OnChainSeqPhragmen {
 	type DataProvider = Staking;
 	type WeightInfo = ();
 	type MaxWinners = ConstU32<100>;
-	type VotersBound = ConstU32<{ u32::MAX }>;
-	type TargetsBound = ConstU32<{ u32::MAX }>;
 	type Bounds = ElectionBoundsOnChain;
 }
 
