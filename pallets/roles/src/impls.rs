@@ -111,9 +111,9 @@ impl<T: Config> Pallet<T> {
 		for record in records {
 			if updated_profile.is_independent() {
 				// Re-staking amount of record should meet min re-staking amount requirement.
-				let record_re_stake = record.amount.unwrap_or_default();
+				let record_restake = record.amount.unwrap_or_default();
 				ensure!(
-					record_re_stake >= min_re_staking_bond,
+					record_restake >= min_re_staking_bond,
 					Error::<T>::InsufficientReStakingBond
 				);
 			}
@@ -148,12 +148,12 @@ impl<T: Config> Pallet<T> {
 	/// - `total_stake`: Total stake of the validator
 	///
 	/// # Returns
-	/// Returns the max re-stake amount.
-	pub(crate) fn calculate_max_re_stake_amount(total_stake: BalanceOf<T>) -> BalanceOf<T> {
+	/// Returns the max restake amount.
+	pub(crate) fn calculate_max_restake_amount(total_stake: BalanceOf<T>) -> BalanceOf<T> {
 		// User can restake max 50% of the total stake
 		Percent::from_percent(50) * total_stake
 	}
-	/// Calculate slash value for re-staked amount
+	/// Calculate slash value for restaked amount
 	///
 	/// # Parameters
 	/// - slash_fraction: Slash fraction of total-stake
@@ -161,7 +161,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Returns
 	/// Returns the slash value
-	pub(crate) fn calculate_re_stake_slash_value(
+	pub(crate) fn calculate_restake_slash_value(
 		slash_fraction: Perbill,
 		total_stake: BalanceOf<T>,
 	) -> BalanceOf<T> {
@@ -213,7 +213,7 @@ impl<T: Config> Pallet<T> {
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&offender).ok_or(Error::<T>::NotValidator)?;
 			let slash_value =
-				Self::calculate_re_stake_slash_value(slash_fraction, staking_ledger.total);
+				Self::calculate_restake_slash_value(slash_fraction, staking_ledger.total);
 			// apply slash
 			profile_ledger.total = profile_ledger.total.saturating_sub(slash_value);
 			Self::update_ledger(&offender, &profile_ledger);

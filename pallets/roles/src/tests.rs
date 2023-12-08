@@ -170,7 +170,7 @@ fn test_update_profile_from_independent_to_shared() {
 		// Get the ledger to check if the profile is created.
 		let ledger = Roles::ledger(1).unwrap();
 		assert!(ledger.profile.is_independent());
-		assert_eq!(ledger.total_re_stake(), 5000);
+		assert_eq!(ledger.total_restake(), 5000);
 
 		let updated_profile = shared_profile();
 
@@ -199,7 +199,7 @@ fn test_update_profile_from_shared_to_independent() {
 		// Get the ledger to check if the profile is created.
 		let ledger = Roles::ledger(1).unwrap();
 		assert!(ledger.profile.is_shared());
-		assert_eq!(ledger.total_re_stake(), 5000);
+		assert_eq!(ledger.total_restake(), 5000);
 
 		let updated_profile = independent_profile();
 		assert_ok!(Roles::update_profile(RuntimeOrigin::signed(1), updated_profile.clone()));
@@ -213,7 +213,7 @@ fn test_update_profile_from_shared_to_independent() {
 		let ledger = Roles::ledger(1).unwrap();
 		assert_eq!(ledger.profile, updated_profile);
 		assert!(ledger.profile.is_independent());
-		assert_eq!(ledger.total_re_stake(), 5000);
+		assert_eq!(ledger.total_restake(), 5000);
 	});
 }
 
@@ -228,7 +228,7 @@ fn test_delete_profile() {
 		// Get the ledger to check if the profile is created.
 		let ledger = Roles::ledger(1).unwrap();
 		assert!(ledger.profile.is_shared());
-		assert_eq!(ledger.total_re_stake(), 5000);
+		assert_eq!(ledger.total_restake(), 5000);
 
 		assert_ok!(Roles::delete_profile(RuntimeOrigin::signed(1)));
 
@@ -248,7 +248,7 @@ fn test_remove_role_from_profile() {
 		// Get the ledger to check if the profile is created.
 		let ledger = Roles::ledger(1).unwrap();
 		assert!(ledger.profile.is_shared());
-		assert_eq!(ledger.total_re_stake(), 5000);
+		assert_eq!(ledger.total_restake(), 5000);
 		assert!(ledger.profile.has_role(RoleType::Tss));
 
 		// Lets remove Tss role from the profile.

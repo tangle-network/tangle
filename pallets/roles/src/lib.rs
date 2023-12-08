@@ -57,8 +57,8 @@ use sp_runtime::RuntimeAppPublic;
 pub struct RoleStakingLedger<T: Config> {
 	/// The stash account whose balance is actually locked and at stake.
 	pub stash: T::AccountId,
-	/// The total amount of the stash's balance that is re-staked for all selected roles.
-	/// This re-staked balance we are currently accounting for new slashing conditions.
+	/// The total amount of the stash's balance that is restaked for all selected roles.
+	/// This restaked balance we are currently accounting for new slashing conditions.
 	#[codec(compact)]
 	pub total: BalanceOf<T>,
 	/// Restaking Profile
@@ -68,12 +68,12 @@ pub struct RoleStakingLedger<T: Config> {
 impl<T: Config> RoleStakingLedger<T> {
 	/// New staking ledger for a stash account.
 	pub fn new(stash: T::AccountId, profile: Profile<T>) -> Self {
-		let total_re_stake = profile.get_total_profile_restake();
-		Self { stash, total: total_re_stake.into(), profile }
+		let total_restake = profile.get_total_profile_restake();
+		Self { stash, total: total_restake.into(), profile }
 	}
 
-	/// Returns the total amount of the stash's balance that is re-staked for all selected roles.
-	pub fn total_re_stake(&self) -> BalanceOf<T> {
+	/// Returns the total amount of the stash's balance that is restaked for all selected roles.
+	pub fn total_restake(&self) -> BalanceOf<T> {
 		self.total
 	}
 }
@@ -267,7 +267,7 @@ pub mod pallet {
 			// Total re_staking amount should not exceed  max_re_staking_amount.
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
-			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
+			let max_re_staking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
 			ensure!(total_profile_stake <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
 
 			// Validate role staking records.
@@ -275,9 +275,9 @@ pub mod pallet {
 			for record in records {
 				if profile.is_independent() {
 					// Re-staking amount of record should meet min re-staking amount requirement.
-					let record_re_stake = record.amount.unwrap_or_default();
+					let record_restake = record.amount.unwrap_or_default();
 					ensure!(
-						record_re_stake >= min_re_staking_bond,
+						record_restake >= min_re_staking_bond,
 						Error::<T>::InsufficientReStakingBond
 					);
 				}
@@ -342,7 +342,7 @@ pub mod pallet {
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
 
-			let max_re_staking_bond = Self::calculate_max_re_stake_amount(staking_ledger.active);
+			let max_re_staking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
 			// Total re_staking amount should not exceed  max_re_staking_amount.
 			ensure!(total_profile_stake <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
 
