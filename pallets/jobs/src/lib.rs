@@ -62,7 +62,6 @@ pub use weights::WeightInfo;
 #[frame_support::pallet]
 pub mod module {
 	use super::*;
-	use tangle_primitives::jobs::DKGSignatureResult;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -219,12 +218,12 @@ pub mod module {
 
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), job_key.clone()),
+						T::RolesHandler::is_validator(participant.clone(), job_key),
 						Error::<T>::InvalidValidator
 					);
 
 					// Add record for easy lookup
-					Self::add_job_to_validator_lookup(participant, job_key.clone(), job_id)?;
+					Self::add_job_to_validator_lookup(participant, job_key, job_id)?;
 				}
 
 				// Sanity check ensure threshold is valid
@@ -245,14 +244,15 @@ pub mod module {
 				ensure!(result.expiry >= now, Error::<T>::ResultExpired);
 
 				// Ensure the phase one participants are still validators
-				for participant in result.participants {
+				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
+				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), job_key.clone()),
+						T::RolesHandler::is_validator(participant.clone(), job_key),
 						Error::<T>::InvalidValidator
 					);
 
 					// add record for easy lookup
-					Self::add_job_to_validator_lookup(participant, job_key.clone(), job_id)?;
+					Self::add_job_to_validator_lookup(participant, job_key, job_id)?;
 				}
 
 				// ensure the account can use the result
@@ -280,7 +280,7 @@ pub mod module {
 				job_type: job.job_type.clone(),
 				fee,
 			};
-			SubmittedJobs::<T>::insert(job_key.clone(), job_id, job_info);
+			SubmittedJobs::<T>::insert(job_key, job_id, job_info);
 
 			Self::deposit_event(Event::JobSubmitted { job_id, job_key, details: job });
 
@@ -325,66 +325,14 @@ pub mod module {
 
 			// Ensure the job exists
 			let job_info =
-				SubmittedJobs::<T>::get(job_key.clone(), job_id).ok_or(Error::<T>::JobNotFound)?;
-
-			let participants: Vec<T::AccountId>;
-
-			// Handle based on job result
-			match result {
-				JobResult::DKG(info) => {
-					// sanity check, does job and result type match
-					ensure!(job_key == JobKey::DKG, Error::<T>::ResultNotExpectedType);
-
-					// ensure the participants are the expected participants from job
-					participants =
-						job_info.job_type.clone().get_participants().expect("checked above");
-					let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
-
-					for participant in participants.clone() {
-						let key =
-							T::RolesHandler::get_validator_metadata(participant, job_key.clone());
-
-						ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
-						let pub_key = sp_core::ecdsa::Public::from_slice(
-							&key.expect("checked above").get_authority_key()[0..33],
-						)
-						.map_err(|_| Error::<T>::InvalidValidator)?;
-						participant_keys.push(pub_key);
-					}
-
-					let job_result = JobResult::DKG(DKGResult {
-						key: info.key.clone(),
-						keys_and_signatures: info.keys_and_signatures,
-						participants: participant_keys,
-						threshold: job_info
-							.job_type
-							.clone()
-							.get_threshold()
-							.expect("Checked before"),
-					});
-
-					T::MPCHandler::verify(job_result)?;
-
-					let result = PhaseOneResult {
-						owner: job_info.owner,
-						expiry: job_info.expiry,
-						result: info.key,
-						participants: job_info
-							.job_type
-							.clone()
-							.get_participants()
-							.ok_or(Error::<T>::InvalidJobPhase)?,
-						threshold: job_info.job_type.clone().get_threshold(),
-						permitted_caller: job_info.job_type.get_permitted_caller(),
-					};
-
-					KnownResults::<T>::insert(job_key.clone(), job_id, result);
-				},
-				JobResult::DKGSignature(info) => {
-					let now = <frame_system::Pallet<T>>::block_number();
-					// sanity check, does job and result type match
-					ensure!(job_key == JobKey::DKGSignature, Error::<T>::ResultNotExpectedType);
-
+				SubmittedJobs::<T>::get(job_key, job_id).ok_or(Error::<T>::JobNotFound)?;
+			let participants = match &result {
+				JobResult::DKGPhaseOne(_) | JobResult::ZkSaaSPhaseOne(_) => job_info
+					.job_type
+					.clone()
+					.get_participants()
+					.ok_or(Error::<T>::InvalidJobParams)?,
+				JobResult::DKGPhaseTwo(_) | JobResult::ZkSaaSPhaseTwo(_) => {
 					let existing_result_id = job_info
 						.job_type
 						.clone()
@@ -396,37 +344,31 @@ pub mod module {
 						existing_result_id,
 					)
 					.ok_or(Error::<T>::PreviousResultNotFound)?;
-
-					// Validate existing result
-					ensure!(phase_one_result.expiry >= now, Error::<T>::ResultExpired);
-
-					// ensure the participants are the expected participants from job
-					participants = phase_one_result.participants.clone();
-					let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
-
-					for participant in phase_one_result.participants {
-						let key =
-							T::RolesHandler::get_validator_metadata(participant, job_key.clone());
-						ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
-						let pub_key = sp_core::ecdsa::Public::from_slice(
-							&key.expect("checked above").get_authority_key()[0..33],
-						)
-						.map_err(|_| Error::<T>::InvalidValidator)?;
-						participant_keys.push(pub_key);
-					}
-
-					let job_result = JobResult::DKGSignature(DKGSignatureResult {
-						signature: info.signature,
-						data: info.data,
-						signing_key: phase_one_result.result,
-					});
-
-					T::MPCHandler::verify(job_result)?;
+					phase_one_result.participants().ok_or(Error::<T>::InvalidJobPhase)?
 				},
-				_ => todo!(),
 			};
 
-			let fee_per_participant = job_info.fee / (participants.len() as u32).into();
+			// Handle based on job result
+			match result {
+				JobResult::DKGPhaseOne(info) => {
+					let result = Self::verify_dkg_job_result(job_key, &job_info, info)?;
+					KnownResults::<T>::insert(job_key, job_id, result);
+				},
+				JobResult::DKGPhaseTwo(info) => {
+					Self::verify_dkg_signature_job_result(job_key, &job_info, info)?;
+				},
+				JobResult::ZkSaaSPhaseOne(info) => {
+					let result =
+						Self::verify_zksaas_circuit_job_result(job_key, job_id, &job_info, info)?;
+					KnownResults::<T>::insert(job_key, job_id, result);
+				},
+				JobResult::ZkSaaSPhaseTwo(info) => {
+					Self::verify_zksaas_prove_job_result(job_key, &job_info, info)?;
+				},
+			};
+
+			let l = if participants.is_empty() { 1u32 } else { participants.len() as u32 };
+			let fee_per_participant = job_info.fee / l.into();
 
 			for participant in participants {
 				Self::record_reward_to_validator(participant.clone(), fee_per_participant)?;
@@ -436,7 +378,7 @@ pub mod module {
 				});
 			}
 
-			SubmittedJobs::<T>::remove(job_key.clone(), job_id);
+			SubmittedJobs::<T>::remove(job_key, job_id);
 
 			Self::deposit_event(Event::JobResultSubmitted { job_id, job_key });
 
@@ -524,13 +466,13 @@ pub mod module {
 
 			// Remove the validator from the job
 			let job_info =
-				SubmittedJobs::<T>::get(job_key.clone(), job_id).ok_or(Error::<T>::JobNotFound)?;
+				SubmittedJobs::<T>::get(job_key, job_id).ok_or(Error::<T>::JobNotFound)?;
 
 			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
 
 			// If phase2, fetch phase1 result
 			if !job_info.job_type.is_phase_one() {
-				let result = KnownResults::<T>::get(job_key.clone(), job_id)
+				let result = KnownResults::<T>::get(job_key, job_id)
 					.ok_or(Error::<T>::PhaseOneResultNotFound)?;
 				phase1_result = Some(result);
 			}
@@ -538,7 +480,7 @@ pub mod module {
 			let participants = if job_info.job_type.is_phase_one() {
 				job_info.job_type.clone().get_participants().unwrap()
 			} else {
-				phase1_result.unwrap().participants
+				phase1_result.unwrap().participants().unwrap()
 			};
 
 			ensure!(participants.contains(&validator), Error::<T>::JobNotFound);

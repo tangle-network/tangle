@@ -19,7 +19,31 @@ sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 
+# Arkworks
+ark-crypto-primitives = { workspace = true, default-features = false, optional = true }
+ark-ff = { workspace = true, default-features = false, optional = true }
+ark-ec = { workspace = true, default-features = false, optional = true }
+ark-std = { workspace = true, default-features = false, optional = true }
+ark-groth16 = { workspace = true, default-features = false, optional = true }
+ark-serialize = { workspace = true, default-features = false, optional = true }
+ark-bn254 = { workspace = true, optional = true }
+
+ethabi = { workspace = true, optional = true }
+
+[dev-dependencies]
+hex = { workspace = true }
+
 [features]
-default = ["std"]
-std = ["frame-support/std", "sp-runtime/std", "sp-core/std"]
+default = ["std", "verifying"]
+std = ["frame-support/std", "sp-runtime/std", "sp-core/std", "cumulus-primitives-core/std"]
+verifying = [
+  "ark-crypto-primitives",
+  "ark-ec",
+  "ark-ff",
+  "ark-std",
+  "ark-groth16",
+  "ark-serialize",
+  "ark-bn254",
+  "ethabi",
+]
 integration-tests = []

@@ -72,7 +72,7 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 use tangle_primitives::{
-	jobs::{JobResult, JobSubmission, JobType, ValidatorOffenceType},
+	jobs::{JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType},
 	roles::ValidatorRewardDistribution,
 	traits::jobs::{JobToFee, MPCHandler},
 };
@@ -1109,10 +1109,10 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 
 	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
 		match job.job_type {
-			JobType::DKG(_) => Dkg::job_to_fee(job),
-			JobType::DKGSignature(_) => Dkg::job_to_fee(job),
-			JobType::ZkSaasPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
-			JobType::ZkSaasPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobType::DKGTSSPhaseOne(_) => Dkg::job_to_fee(job),
+			JobType::DKGTSSPhaseTwo(_) => Dkg::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobType::ZkSaaSPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
 		}
 	}
 }
@@ -1120,12 +1120,12 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 pub struct MockMPCHandler;
 
 impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(data: JobResult) -> DispatchResult {
-		match data {
-			JobResult::DKG(_) => Dkg::verify(data),
-			JobResult::DKGSignature(_) => Dkg::verify(data),
-			JobResult::ZkSaasPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
-			JobResult::ZkSaasPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
+	fn verify(data: JobWithResult<AccountId>) -> DispatchResult {
+		match data.result {
+			JobResult::DKGPhaseOne(_) => Dkg::verify(data.result),
+			JobResult::DKGPhaseTwo(_) => Dkg::verify(data.result),
+			JobResult::ZkSaaSPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobResult::ZkSaaSPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
 		}
 	}
 

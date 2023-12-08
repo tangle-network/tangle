@@ -56,44 +56,6 @@ interface Jobs {
 
     /// @custom:selector <selector_hash>
     ///
-    /// @notice Submits a job for the first phase of the Zero-Knowledge as a Service (ZkSaas) protocol.
-    ///
-    /// @param expiry The expiration timestamp for the submitted job.
-    /// @param participants An array of Ethereum addresses representing participants in the ZkSaas phase one.
-    /// @param permitted_caller The Ethereum address of the permitted caller initiating the job submission.
-    ///
-    /// @dev This function initiates the first phase of a ZkSaas protocol, where participants collaborate to achieve
-    /// specific cryptographic tasks. The submitted job includes details such as the expiration time, the list of
-    /// participants, and the permitted caller's address. It is essential for the caller to ensure that the provided
-    /// parameters align with the intended ZkSaas phase one process.
-    ///
-    function submitDkgzkSaasPhaseOneJob(
-        uint64 expiry,
-        address[] memory participants,
-        address permitted_caller
-    ) external;
-
-    /// @custom:selector <selector_hash>
-    ///
-    /// @notice Submits a job for the second phase of the Zero-Knowledge as a Service (ZkSaas) protocol.
-    ///
-    /// @param expiry The expiration timestamp for the submitted job.
-    /// @param phase_one_id The identifier of the corresponding phase one ZkSaas job.
-    /// @param submission The byte array containing the data submission for the ZkSaas phase two.
-    ///
-    /// @dev This function initiates the second phase of a Zero-Knowledge as a Service protocol, building upon
-    /// the results of a prior phase one submission. The submitted job includes an expiration time, the identifier
-    /// of the phase one ZkSaas job, and the byte array representing the participant's data contribution for phase two.
-    /// It is important for the caller to ensure that the provided parameters align with the ongoing ZkSaas process.
-    ///
-    function submitzkSaasPhaseTwoJob(
-        uint64 expiry,
-        uint32 phase_one_id,
-        bytes memory submission
-    ) external;
-
-    /// @custom:selector <selector_hash>
-    ///
     /// @notice Initiates the withdrawal of accumulated rewards for the caller.
     ///
     /// @dev This function allows the caller to withdraw any rewards accumulated through participation in

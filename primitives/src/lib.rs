@@ -31,6 +31,9 @@ pub mod types;
 pub use types::*;
 pub mod traits;
 
+#[cfg(feature = "verifying")]
+pub mod verifier;
+
 /// Tangle parachain time-related
 pub mod time {
 	use crate::types::{BlockNumber, Moment};

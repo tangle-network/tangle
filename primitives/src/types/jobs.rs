@@ -48,25 +48,111 @@ pub struct JobInfo<AccountId, BlockNumber, Balance> {
 	pub fee: Balance,
 }
 
+/// Represents a job with its result.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+pub struct JobWithResult<AccountId> {
+	/// Current Job type
+	pub job_type: JobType<AccountId>,
+	/// Phase one job type if any.
+	///
+	/// None if this job is a phase one job.
+	pub phase_one_job_type: Option<JobType<AccountId>>,
+	/// Current job result
+	pub result: JobResult,
+}
+
 /// Enum representing different types of jobs.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum JobType<AccountId> {
 	/// Distributed Key Generation (DKG) job type.
-	DKG(DKGJobType<AccountId>),
+	DKGTSSPhaseOne(DKGTSSPhaseOneJobType<AccountId>),
 	/// DKG Signature job type.
-	DKGSignature(DKGSignatureJobType),
-	/// (zk-SNARK) Phase One job type.
-	ZkSaasPhaseOne(ZkSaasPhaseOneJobType<AccountId>),
-	/// (zk-SNARK) Phase Two job type.
-	ZkSaasPhaseTwo(ZkSaasPhaseTwoJobType),
+	DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType),
+	/// (zk-SNARK) Create Circuit job type.
+	ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType<AccountId>),
+	/// (zk-SNARK) Create Proof job type.
+	ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType),
+}
+
+/// Enum representing different types of data sources.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum HyperData {
+	/// Raw data, stored on-chain.
+	///
+	/// Only use this for small files.
+	Raw(Vec<u8>),
+	/// IPFS CID. The CID is stored on-chain.
+	/// The actual data is stored off-chain.
+	IPFS(Vec<u8>),
+	/// HTTP URL. The URL is stored on-chain.
+	/// The actual data is stored off-chain.
+	/// The URL is expected to be accessible via HTTP GET.
+	HTTP(Vec<u8>),
+}
+
+/// Enum representing different types of circuits and snark schemes.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum ZkSaaSSystem {
+	Groth16(Groth16System),
+}
+
+/// Represents the Groth16 system for zk-SNARKs.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct Groth16System {
+	/// R1CS circuit file.
+	pub circuit: HyperData,
+	/// Proving key file.
+	pub proving_key: HyperData,
+	/// Verifying key bytes
+	pub verifying_key: Vec<u8>,
+	/// Circom WASM file.
+	pub wasm: HyperData,
+}
+
+/// Represents ZK-SNARK proving request
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum ZkSaaSPhaseTwoRequest {
+	/// Groth16 proving request
+	Groth16(Groth16ProveRequest),
+}
+
+/// Represents Groth16 proving request
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct Groth16ProveRequest {
+	/// Public input that are used during the verification
+	pub public_input: Vec<u8>,
+	/// `a` is the full assignment (full_assginment[0] is 1)
+	/// a = full_assginment[1..]
+	/// Each element contains a PSS of the witness
+	pub a_shares: Vec<HyperData>,
+	/// `ax` is the auxiliary input
+	/// ax = full_assginment[num_inputs..]
+	/// Each element contains a PSS of the auxiliary input
+	pub ax: Vec<HyperData>,
+	/// PSS of the QAP polynomials
+	pub qap_shares: Vec<QAPShare>,
+}
+
+/// Represents QAP share
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct QAPShare {
+	pub a: HyperData,
+	pub b: HyperData,
+	pub c: HyperData,
 }
 
 impl<AccountId> JobType<AccountId> {
 	/// Checks if the job type is a phase one job.
 	pub fn is_phase_one(&self) -> bool {
 		use crate::jobs::JobType::*;
-		if matches!(self, DKG(_) | ZkSaasPhaseOne(_)) {
+		if matches!(self, DKGTSSPhaseOne(_) | ZkSaaSPhaseOne(_)) {
 			return true
 		}
 		false
@@ -76,8 +162,8 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_participants(self) -> Option<Vec<AccountId>> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKG(info) => Some(info.participants),
-			ZkSaasPhaseOne(info) => Some(info.participants),
+			DKGTSSPhaseOne(info) => Some(info.participants),
+			ZkSaaSPhaseOne(info) => Some(info.participants),
 			_ => None,
 		}
 	}
@@ -86,7 +172,7 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_threshold(self) -> Option<u8> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKG(info) => Some(info.threshold),
+			DKGTSSPhaseOne(info) => Some(info.threshold),
 			_ => None,
 		}
 	}
@@ -94,18 +180,18 @@ impl<AccountId> JobType<AccountId> {
 	/// Gets the job key associated with the job type.
 	pub fn get_job_key(&self) -> JobKey {
 		match self {
-			JobType::DKG(_) => JobKey::DKG,
-			JobType::ZkSaasPhaseOne(_) => JobKey::ZkSaasPhaseOne,
-			JobType::DKGSignature(_) => JobKey::DKGSignature,
-			JobType::ZkSaasPhaseTwo(_) => JobKey::ZkSaasPhaseTwo,
+			JobType::DKGTSSPhaseOne(_) => JobKey::DKG,
+			JobType::ZkSaaSPhaseOne(_) => JobKey::ZkSaaSCircuit,
+			JobType::DKGTSSPhaseTwo(_) => JobKey::DKGSignature,
+			JobType::ZkSaaSPhaseTwo(_) => JobKey::ZkSaaSProve,
 		}
 	}
 
 	/// Gets the job key associated with the previous phase job type.
 	pub fn get_previous_phase_job_key(&self) -> Option<JobKey> {
 		match self {
-			JobType::DKGSignature(_) => Some(JobKey::DKG),
-			JobType::ZkSaasPhaseTwo(_) => Some(JobKey::ZkSaasPhaseOne),
+			JobType::DKGTSSPhaseTwo(_) => Some(JobKey::DKG),
+			JobType::ZkSaaSPhaseTwo(_) => Some(JobKey::ZkSaaSCircuit),
 			_ => None,
 		}
 	}
@@ -115,22 +201,18 @@ impl<AccountId> JobType<AccountId> {
 	/// This function is intended for simple checks and may need improvement in the future.
 	pub fn sanity_check(&self) -> bool {
 		match self {
-			JobType::DKG(info) =>
-				if info.participants.len() > info.threshold.into() {
-					return true
-				},
-			_ => return true,
+			JobType::DKGTSSPhaseOne(info) => info.participants.len() > info.threshold.into(),
+			JobType::ZkSaaSPhaseOne(info) => !info.participants.is_empty(),
+			_ => true,
 		}
-
-		false
 	}
 
 	/// Gets the phase one ID for phase two jobs, if applicable.
-	pub fn get_phase_one_id(self) -> Option<u32> {
+	pub fn get_phase_one_id(&self) -> Option<u32> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKGSignature(info) => Some(info.phase_one_id),
-			ZkSaasPhaseTwo(info) => Some(info.phase_one_id),
+			DKGTSSPhaseTwo(info) => Some(info.phase_one_id),
+			ZkSaaSPhaseTwo(info) => Some(info.phase_one_id),
 			_ => None,
 		}
 	}
@@ -138,8 +220,8 @@ impl<AccountId> JobType<AccountId> {
 	pub fn get_permitted_caller(self) -> Option<AccountId> {
 		use crate::jobs::JobType::*;
 		match self {
-			DKG(info) => info.permitted_caller,
-			ZkSaasPhaseOne(info) => info.permitted_caller,
+			DKGTSSPhaseOne(info) => info.permitted_caller,
+			ZkSaaSPhaseOne(info) => info.permitted_caller,
 			_ => None,
 		}
 	}
@@ -148,7 +230,7 @@ impl<AccountId> JobType<AccountId> {
 /// Represents the Distributed Key Generation (DKG) job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGJobType<AccountId> {
+pub struct DKGTSSPhaseOneJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
 
@@ -162,7 +244,7 @@ pub struct DKGJobType<AccountId> {
 /// Represents the DKG Signature job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGSignatureJobType {
+pub struct DKGTSSPhaseTwoJobType {
 	/// The phase one ID.
 	pub phase_one_id: u32,
 
@@ -173,22 +255,24 @@ pub struct DKGSignatureJobType {
 /// Represents the (zk-SNARK) Phase One job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasPhaseOneJobType<AccountId> {
+pub struct ZkSaaSPhaseOneJobType<AccountId> {
 	/// List of participants' account IDs.
 	pub participants: Vec<AccountId>,
 	/// the caller permitted to use this result later
 	pub permitted_caller: Option<AccountId>,
+	/// ZK-SNARK Proving system
+	pub system: ZkSaaSSystem,
 }
 
 /// Represents the (zk-SNARK) Phase Two job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasPhaseTwoJobType {
+pub struct ZkSaaSPhaseTwoJobType {
 	/// The phase one ID.
 	pub phase_one_id: u32,
 
-	/// The submission data as a vector of bytes.
-	pub submission: Vec<u8>,
+	/// ZK-SNARK Proving request
+	pub request: ZkSaaSPhaseTwoRequest,
 }
 
 /// Enum representing different states of a job.
@@ -204,16 +288,16 @@ pub enum JobState {
 }
 
 /// Enum representing different types of job keys.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy)]
 pub enum JobKey {
 	/// Distributed Key Generation (DKG) job type.
 	DKG,
 	/// DKG Signature job type.
 	DKGSignature,
-	/// (zk-SNARK) Phase One job type.
-	ZkSaasPhaseOne,
-	/// (zk-SNARK) Phase Two job type.
-	ZkSaasPhaseTwo,
+	/// (zk-SNARK) Create Circuit job type.
+	ZkSaaSCircuit,
+	/// (zk-SNARK) Create Proof job type.
+	ZkSaaSProve,
 }
 
 impl JobKey {
@@ -222,8 +306,8 @@ impl JobKey {
 		match self {
 			JobKey::DKG => RoleType::Tss,
 			JobKey::DKGSignature => RoleType::Tss,
-			JobKey::ZkSaasPhaseOne => RoleType::ZkSaas,
-			JobKey::ZkSaasPhaseTwo => RoleType::ZkSaas,
+			JobKey::ZkSaaSCircuit => RoleType::ZkSaaS,
+			JobKey::ZkSaaSProve => RoleType::ZkSaaS,
 		}
 	}
 }
@@ -233,21 +317,44 @@ impl JobKey {
 pub struct PhaseOneResult<AccountId, BlockNumber> {
 	/// The owner's account ID.
 	pub owner: AccountId,
-
 	/// The expiry block number.
 	pub expiry: BlockNumber,
-
 	/// The type of the job submission.
 	pub result: Vec<u8>,
-
-	/// List of participants' account IDs.
-	pub participants: Vec<AccountId>,
-
-	/// threshold if any for the original set
-	pub threshold: Option<u8>,
-
 	/// permitted caller to use this result
 	pub permitted_caller: Option<AccountId>,
+	/// The type of the job submission.
+	pub job_type: JobType<AccountId>,
+}
+
+impl<AccountId, BlockNumber> PhaseOneResult<AccountId, BlockNumber>
+where
+	AccountId: Clone,
+{
+	pub fn participants(&self) -> Option<Vec<AccountId>> {
+		match &self.job_type {
+			JobType::DKGTSSPhaseOne(x) => Some(x.participants.clone()),
+			JobType::ZkSaaSPhaseOne(x) => Some(x.participants.clone()),
+			_ => None,
+		}
+	}
+
+	pub fn threshold(&self) -> Option<u8> {
+		match &self.job_type {
+			JobType::DKGTSSPhaseOne(x) => Some(x.threshold),
+			_ => None,
+		}
+	}
+}
+
+/// Represents different types of validator offences.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+pub enum ValidatorOffence {
+	/// The validator has been inactive.
+	Inactivity,
+
+	/// The validator has committed duplicate signing.
+	Equivocation,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
@@ -272,13 +379,13 @@ pub struct RpcResponseJobsData<AccountId> {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum JobResult {
-	DKG(DKGResult),
+	DKGPhaseOne(DKGResult),
 
-	DKGSignature(DKGSignatureResult),
+	DKGPhaseTwo(DKGSignatureResult),
 
-	ZkSaasPhaseOne(ZkSaasPhaseOneResult),
+	ZkSaaSPhaseOne(ZkSaaSCircuitResult),
 
-	ZkSaasPhaseTwo(ZkSaasPhaseTwoResult),
+	ZkSaaSPhaseTwo(ZkSaaSProofResult),
 }
 
 pub type KeysAndSignatures = Vec<(Vec<u8>, Vec<u8>)>;
@@ -314,25 +421,31 @@ pub struct DKGSignatureResult {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasPhaseOneResult {
-	/// The job id of the job
+pub struct ZkSaaSCircuitResult {
+	/// The job id of the job (circuit)
 	pub job_id: JobId,
 
 	/// List of participants' public keys
-	pub participants: Vec<Vec<u8>>,
-
-	/// The data to verify
-	pub data: Vec<u8>,
+	pub participants: Vec<ecdsa::Public>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasPhaseTwoResult {
-	/// The data to verify
-	pub data: Vec<u8>,
+pub enum ZkSaaSProofResult {
+	Arkworks(ArkworksProofResult),
+	Circom(CircomProofResult),
+}
 
-	/// The expected key for the signature
-	pub signing_key: Vec<u8>,
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct CircomProofResult {
+	pub proof: Vec<u8>,
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct ArkworksProofResult {
+	pub proof: Vec<u8>,
 }
 
 /// Represents different types of validator offences.

@@ -69,8 +69,8 @@ impl<T: Config> Pallet<T> {
 	/// an error.
 	pub fn verify(data: JobResult) -> DispatchResult {
 		match data {
-			JobResult::DKG(info) => Self::verify_generated_dkg_key(info),
-			JobResult::DKGSignature(info) => Self::verify_dkg_signature(info),
+			JobResult::DKGPhaseOne(info) => Self::verify_generated_dkg_key(info),
+			JobResult::DKGPhaseTwo(info) => Self::verify_dkg_signature(info),
 			_ => Err(Error::<T>::InvalidJobType.into()), // this should never happen
 		}
 	}

@@ -20,8 +20,6 @@ members = [
   "runtime/testnet/evm_tracer",
   "runtime/mainnet",
   "pallets/*",
-  "pallets/claims",
-  "pallets/roles",
   "pallets/jobs/rpc",
   "pallets/jobs/rpc/runtime-api",
   "precompiles/utils",
@@ -86,6 +84,22 @@ webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.g
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-mainnet-runtime = { package = "tangle-mainnet-runtime", path = "runtime/mainnet" }
+
+# Arkworks
+ark-ec = { version = "^0.4.0", default-features = false }
+ark-ff = { version = "^0.4.0", default-features = false }
+ark-relations = { version = "^0.4.0", default-features = false }
+ark-serialize = { version = "^0.4.0", default-features = false, features = ["derive"] }
+ark-std = { version = "^0.4.0", default-features = false }
+ark-groth16 = { version = "0.4.0", default-features = false }
+
+# Ark Curves
+ark-bls12-381 = { version = "^0.4.0", default-features = false, features = ["curve"] }
+ark-bn254 = { version = "^0.4.0", default-features = false, features = ["curve"] }
+
+ark-crypto-primitives = { version = "^0.4.0", default-features = false }
+
+ethabi = { version = "15.0.0", default-features = false }
 
 # Tangle Dependencies
 pallet-airdrop-claims = { path = "pallets/claims", default-features = false }

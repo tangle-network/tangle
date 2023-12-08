@@ -110,10 +110,10 @@ impl JobToFee<AccountId32, BlockNumber> for MockJobToFeeHandler {
 
 	fn job_to_fee(job: &JobSubmission<AccountId32, BlockNumber>) -> Balance {
 		match job.job_type {
-			JobType::DKG(_) => MockDKGPallet::job_to_fee(job),
-			JobType::DKGSignature(_) => MockDKGPallet::job_to_fee(job),
-			JobType::ZkSaasPhaseOne(_) => MockZkSaasPallet::job_to_fee(job),
-			JobType::ZkSaasPhaseTwo(_) => MockZkSaasPallet::job_to_fee(job),
+			JobType::DKGTSSPhaseOne(_) => MockDKGPallet::job_to_fee(job),
+			JobType::DKGTSSPhaseTwo(_) => MockDKGPallet::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) => MockZkSaasPallet::job_to_fee(job),
+			JobType::ZkSaaSPhaseTwo(_) => MockZkSaasPallet::job_to_fee(job),
 		}
 	}
 }
@@ -151,7 +151,7 @@ impl RolesHandler<AccountId32> for MockRolesHandler {
 pub struct MockMPCHandler;
 
 impl MPCHandler<AccountId32, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(_data: JobResult) -> DispatchResult {
+	fn verify(_data: JobWithResult<AccountId32>) -> DispatchResult {
 		Ok(())
 	}
 
