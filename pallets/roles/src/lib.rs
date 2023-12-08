@@ -36,7 +36,8 @@ use tangle_primitives::{
 	traits::jobs::JobsHandler,
 };
 mod impls;
-use tangle_primitives::profile::Profile;
+mod profile;
+use profile::Profile;
 
 #[cfg(test)]
 pub(crate) mod mock;
@@ -61,12 +62,12 @@ pub struct RoleStakingLedger<T: Config> {
 	#[codec(compact)]
 	pub total: BalanceOf<T>,
 	/// Re staking Profile
-	pub profile: Profile,
+	pub profile: Profile<T>,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
 	/// New staking ledger for a stash account.
-	pub fn new(stash: T::AccountId, profile: Profile) -> Self {
+	pub fn new(stash: T::AccountId, profile: Profile<T>) -> Self {
 		let total_re_stake = profile.get_total_profile_stake();
 		Self { stash, total: total_re_stake.into(), profile }
 	}
@@ -243,7 +244,7 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight({0})]
 		#[pallet::call_index(0)]
-		pub fn create_profile(origin: OriginFor<T>, profile: Profile) -> DispatchResult {
+		pub fn create_profile(origin: OriginFor<T>, profile: Profile<T>) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
 			ensure!(
@@ -254,7 +255,7 @@ pub mod pallet {
 			// Ensure no profile is assigned to the validator.
 			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::ProfileAlreadyExists);
 			let ledger = RoleStakingLedger::<T>::new(stash_account.clone(), profile.clone());
-			let total_profile_stake: BalanceOf<T> = profile.get_total_profile_stake().into();
+			let total_profile_stake = profile.get_total_profile_stake();
 
 			// Re-staking amount of profile should meet min re-staking amount requirement.
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
@@ -274,7 +275,7 @@ pub mod pallet {
 			for record in records {
 				if profile.is_independent() {
 					// Re-staking amount of record should meet min re-staking amount requirement.
-					let record_re_stake: BalanceOf<T> = record.amount.unwrap_or_default().into();
+					let record_re_stake = record.amount.unwrap_or_default();
 					ensure!(
 						record_re_stake >= min_re_staking_bond,
 						Error::<T>::InsufficientReStakingBond
@@ -321,7 +322,7 @@ pub mod pallet {
 		/// - Re-staking amount is less than min re-staking bond.
 		#[pallet::weight({0})]
 		#[pallet::call_index(1)]
-		pub fn update_profile(origin: OriginFor<T>, updated_profile: Profile) -> DispatchResult {
+		pub fn update_profile(origin: OriginFor<T>, updated_profile: Profile<T>) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
 			ensure!(
@@ -330,8 +331,7 @@ pub mod pallet {
 			);
 			let mut ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
-			let total_profile_stake: BalanceOf<T> =
-				updated_profile.get_total_profile_stake().into();
+			let total_profile_stake = updated_profile.get_total_profile_stake();
 			// Re-staking amount of record should meet min re-staking amount requirement.
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
 			ensure!(

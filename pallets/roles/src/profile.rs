@@ -1,3 +1,4 @@
+use sp_runtime::traits::Zero;
 // This file is part of Webb.
 // Copyright (C) 2022 Webb Technologies Inc.
 //
@@ -13,33 +14,46 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use crate::roles::{RoleType, RoleTypeMetadata};
+use crate::{BalanceOf, Config};
 use frame_support::{dispatch::Vec, pallet_prelude::*};
+use tangle_primitives::roles::{RoleType, RoleTypeMetadata};
 
-#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
-pub struct Record {
+#[derive(
+	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
+)]
+#[scale_info(skip_type_params(T))]
+pub struct Record<T: Config> {
 	pub metadata: RoleTypeMetadata,
-	pub amount: Option<u64>,
+	pub amount: Option<BalanceOf<T>>,
 }
 
-#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
-pub struct IndependentReStakeProfile {
-	pub records: Vec<Record>,
+#[derive(
+	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
+)]
+#[scale_info(skip_type_params(T))]
+pub struct IndependentReStakeProfile<T: Config> {
+	pub records: BoundedVec<Record<T>, T::MaxRolesPerAccount>,
 }
 
-#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
-pub struct SharedReStakeProfile {
-	pub records: Vec<Record>,
-	pub amount: u64,
+#[derive(
+	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
+)]
+#[scale_info(skip_type_params(T))]
+pub struct SharedReStakeProfile<T: Config> {
+	pub records: BoundedVec<Record<T>, T::MaxRolesPerAccount>,
+	pub amount: BalanceOf<T>,
 }
 
-#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
-pub enum Profile {
-	Independent(IndependentReStakeProfile),
-	Shared(SharedReStakeProfile),
+#[derive(
+	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
+)]
+#[scale_info(skip_type_params(T))]
+pub enum Profile<T: Config> {
+	Independent(IndependentReStakeProfile<T>),
+	Shared(SharedReStakeProfile<T>),
 }
 
-impl Profile {
+impl<T: Config> Profile<T> {
 	/// Checks if the profile is an independent profile.
 	pub fn is_independent(&self) -> bool {
 		matches!(self, Profile::Independent(_))
@@ -51,19 +65,21 @@ impl Profile {
 	}
 
 	/// Returns the total profile stake.
-	pub fn get_total_profile_stake(&self) -> u64 {
+	pub fn get_total_profile_stake(&self) -> BalanceOf<T> {
 		match self {
-			Profile::Independent(profile) =>
-				profile.records.iter().fold(0, |acc, record| acc + record.amount.unwrap_or(0)),
+			Profile::Independent(profile) => profile
+				.records
+				.iter()
+				.fold(Zero::zero(), |acc, record| acc + record.amount.unwrap_or_default()),
 			Profile::Shared(profile) => profile.amount,
 		}
 	}
 
 	/// Returns staking record details containing role metadata and stake amount.
-	pub fn get_records(&self) -> Vec<Record> {
+	pub fn get_records(&self) -> Vec<Record<T>> {
 		match self {
-			Profile::Independent(profile) => profile.records.clone(),
-			Profile::Shared(profile) => profile.records.clone(),
+			Profile::Independent(profile) => profile.records.clone().into_inner(),
+			Profile::Shared(profile) => profile.records.clone().into_inner(),
 		}
 	}
 
@@ -120,7 +136,7 @@ impl Profile {
 	}
 
 	/// Return roles from current profile removed in updated profile.
-	pub fn get_removed_roles(&self, updated_profile: &Profile) -> Vec<RoleType> {
+	pub fn get_removed_roles(&self, updated_profile: &Profile<T>) -> Vec<RoleType> {
 		// Get the roles from the current profile.
 		let roles = self.get_roles();
 		let updated_roles = updated_profile.get_roles();

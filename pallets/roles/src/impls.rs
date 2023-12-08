@@ -88,7 +88,7 @@ impl<T: Config> Pallet<T> {
 	/// - `updated_profile`: The updated profile.
 	pub(crate) fn validate_updated_profile(
 		account: T::AccountId,
-		updated_profile: Profile,
+		updated_profile: Profile<T>,
 	) -> DispatchResult {
 		let ledger = Self::ledger(&account).ok_or(Error::<T>::NoProfileFound)?;
 		let removed_roles = ledger.profile.get_removed_roles(&updated_profile);
@@ -111,7 +111,7 @@ impl<T: Config> Pallet<T> {
 		for record in records {
 			if updated_profile.is_independent() {
 				// Re-staking amount of record should meet min re-staking amount requirement.
-				let record_re_stake: BalanceOf<T> = record.amount.unwrap_or_default().into();
+				let record_re_stake = record.amount.unwrap_or_default();
 				ensure!(
 					record_re_stake >= min_re_staking_bond,
 					Error::<T>::InsufficientReStakingBond

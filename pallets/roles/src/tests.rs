@@ -15,30 +15,30 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![cfg(test)]
 use super::*;
-use frame_support::{assert_err, assert_ok};
+use frame_support::{assert_err, assert_ok, BoundedVec};
 use mock::*;
+use profile::{IndependentReStakeProfile, Record, SharedReStakeProfile};
 use sp_std::{default::Default, vec};
-use tangle_primitives::{
-	jobs::ReportValidatorOffence,
-	profile::{IndependentReStakeProfile, Record, SharedReStakeProfile},
-};
+use tangle_primitives::jobs::ReportValidatorOffence;
 
-pub fn independent_profile() -> Profile {
+pub fn independent_profile() -> Profile<Runtime> {
 	let profile = IndependentReStakeProfile {
-		records: vec![
+		records: BoundedVec::try_from(vec![
 			Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: Some(2500) },
 			Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: Some(2500) },
-		],
+		])
+		.unwrap(),
 	};
 	Profile::Independent(profile)
 }
 
-pub fn shared_profile() -> Profile {
+pub fn shared_profile() -> Profile<Runtime> {
 	let profile = SharedReStakeProfile {
-		records: vec![
+		records: BoundedVec::try_from(vec![
 			Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: None },
 			Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: None },
-		],
+		])
+		.unwrap(),
 		amount: 5000,
 	};
 	Profile::Shared(profile)
@@ -116,10 +116,11 @@ fn test_create_profile_should_fail_if_min_required_stake_condition_is_not_met() 
 		pallet::MinReStakingBond::<Runtime>::put(2500);
 
 		let profile = Profile::Shared(SharedReStakeProfile {
-			records: vec![
+			records: BoundedVec::try_from(vec![
 				Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: None },
 				Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: None },
-			],
+			])
+			.unwrap(),
 			amount: 1000,
 		});
 
@@ -140,13 +141,14 @@ fn test_create_profile_should_fail_if_min_required_stake_condition_is_not_met_fo
 		pallet::MinReStakingBond::<Runtime>::put(2500);
 
 		let profile = Profile::Independent(IndependentReStakeProfile {
-			records: vec![
+			records: BoundedVec::try_from(vec![
 				Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: Some(1000) },
 				Record {
 					metadata: RoleTypeMetadata::ZkSaas(Default::default()),
 					amount: Some(1000),
 				},
-			],
+			])
+			.unwrap(),
 		});
 
 		assert_err!(
