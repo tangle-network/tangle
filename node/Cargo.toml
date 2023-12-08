@@ -36,7 +36,7 @@ tokio = { workspace = true }
 # Light client dependencies
 # pallet-eth2-light-client-relayer-gadget = { workspace = true, optional = true }
 # pallet-eth2-light-client-relayer-gadget-cli = { workspace = true, optional = true }
-#webb-consensus-types = { workspace = true }
+# webb-consensus-types = { workspace = true }
 
 # DKG dependencies
 dkg-gadget = { workspace = true }
@@ -92,13 +92,13 @@ sc-transaction-pool-api = { workspace = true }
 wasmer = { version = "2.3" }
 
 # Frontier
+fc-api = { workspace = true }
 fc-cli = { workspace = true }
 fc-consensus = { workspace = true }
 fc-db = { workspace = true }
 fc-mapping-sync = { workspace = true }
 fc-rpc = { workspace = true, features = ["rpc-binary-search-estimate"] }
 fc-rpc-core = { workspace = true }
-fc-api = { workspace = true }
 fc-storage = { workspace = true }
 fp-account = { workspace = true }
 fp-dynamic-fee = { workspace = true, features = ["default"] }
@@ -114,9 +114,9 @@ rpc-primitives-txpool = { workspace = true }
 rpc-trace = { workspace = true }
 rpc-txpool = { workspace = true }
 
+tangle-mainnet-runtime = { workspace = true }
 tangle-primitives = { workspace = true }
 tangle-testnet-runtime = { workspace = true }
-tangle-mainnet-runtime = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
@@ -135,6 +135,8 @@ rocksdb = [
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]
 txpool = ["fc-rpc/txpool"]
 light-client = [
+
+
   # "pallet-eth2-light-client-relayer-gadget",
   # "pallet-eth2-light-client-relayer-gadget-cli",
 ]

@@ -31,12 +31,12 @@ pub use sc_executor::NativeElseWasmExecutor;
 use sc_network::NetworkStateInfo;
 use sc_service::{error::Error as ServiceError, ChainType, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
-use sc_transaction_pool_api::{OffchainTransactionPoolFactory, TransactionFor};
+use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_api::ProvideRuntimeApi;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sp_core::{Pair, U256};
-use sp_runtime::{generic::Era, traits::BlakeTwo256, SaturatedConversion};
-use sp_trie::PrefixedMemoryDB;
+use sp_runtime::{generic::Era, SaturatedConversion};
+
 use std::{path::Path, sync::Arc, time::Duration};
 use substrate_frame_rpc_system::AccountNonceApi;
 use tangle_testnet_runtime::{self, opaque::Block, RuntimeApi, TransactionConverter};

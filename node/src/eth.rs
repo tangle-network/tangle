@@ -23,7 +23,7 @@ use futures::{future, prelude::*};
 use sc_client_api::BlockchainEvents;
 use sc_network_sync::SyncingService;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
-use sp_runtime::traits::BlakeTwo256;
+
 // Frontier
 pub use fc_consensus::FrontierBlockImport;
 use fc_rpc::{EthTask, OverrideHandle};

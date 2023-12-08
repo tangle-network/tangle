@@ -17,7 +17,10 @@
 
 use super::*;
 use crate as pallet_roles;
-use frame_election_provider_support::{onchain, SequentialPhragmen};
+use frame_election_provider_support::{
+	bounds::{ElectionBounds, ElectionBoundsBuilder},
+	onchain, SequentialPhragmen,
+};
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Contains, Hooks},
@@ -223,7 +226,6 @@ impl onchain::Config for OnChainSeqPhragmen {
 const MAX_QUOTA_NOMINATIONS: u32 = 16;
 
 impl pallet_staking::Config for Runtime {
-	type MaxNominations = ConstU32<16>;
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
 	type UnixTime = pallet_timestamp::Pallet<Self>;

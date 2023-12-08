@@ -12,12 +12,12 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 log = { workspace = true }
-parity-scale-codec = { workspace = true, features = ["derive", "max-encoded-len"] }
 pallet-evm = { workspace = true }
+parity-scale-codec = { workspace = true, features = ["derive", "max-encoded-len"] }
 rustc-hex = { workspace = true }
 scale-info = { workspace = true }
-serde = { workspace = true, features = ["alloc"] }
 schnorrkel = { workspace = true }
+serde = { workspace = true, features = ["alloc"] }
 
 frame-support = { workspace = true }
 frame-system = { workspace = true }

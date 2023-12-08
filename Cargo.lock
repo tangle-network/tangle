@@ -154,9 +154,9 @@ dependencies = [
 
 [[package]]
 name = "anstream"
-version = "0.6.4"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ab91ebe16eb252986481c5b62f6098f3b698a45e34b5b98200cf20dd2484a44"
+checksum = "d664a92ecae85fd0a7392615844904654d1d5f5514837f471ddef4a057aba1b6"
 dependencies = [
  "anstyle",
  "anstyle-parse",
@@ -183,9 +183,9 @@ dependencies = [
 
 [[package]]
 name = "anstyle-query"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3a318f1f38d2418400f8209655bfd825785afd25aa30bb7ba6cc792e4596748"
+checksum = "e28923312444cdd728e4738b3f9c9cac739500909bb3d3c94b43551b16517648"
 dependencies = [
  "windows-sys 0.52.0",
 ]
@@ -868,7 +868,7 @@ dependencies = [
  "futures-lite 2.1.0",
  "parking",
  "polling 3.3.1",
- "rustix 0.38.26",
+ "rustix 0.38.27",
  "slab",
  "tracing",
  "windows-sys 0.52.0",
@@ -918,7 +918,7 @@ dependencies = [
  "cfg-if",
  "event-listener 3.1.0",
  "futures-lite 1.13.0",
- "rustix 0.38.26",
+ "rustix 0.38.27",
  "windows-sys 0.48.0",
 ]
 
@@ -934,7 +934,7 @@ dependencies = [
  "cfg-if",
  "futures-core",
  "futures-io",
- "rustix 0.38.26",
+ "rustix 0.38.27",
  "signal-hook-registry",
  "slab",
  "windows-sys 0.48.0",
@@ -3971,9 +3971,9 @@ dependencies = [
 
 [[package]]
 name = "eyre"
-version = "0.6.9"
+version = "0.6.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80f656be11ddf91bd709454d15d5bd896fbaf4cc3314e69349e4d1569f5b46cd"
+checksum = "8bbb8258be8305fb0237d7b295f47bb24ff1b136a535f473baf40e70468515aa"
 dependencies = [
  "indenter",
  "once_cell",
@@ -5301,12 +5301,6 @@ dependencies = [
 
 [[package]]
 name = "hex-literal"
-version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ebdb29d2ea9ed0083cd8cece49bbd968021bd99b0849edb4a9a7ee0fdf6a4e0"
-
-[[package]]
-name = "hex-literal"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6fe2267d4ed49bc07b63801559be28c718ea06c4738b7a03c94df7386d2cde46"
@@ -5393,9 +5387,9 @@ dependencies = [
 
 [[package]]
 name = "http-body"
-version = "0.4.5"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5f38f16d184e36f2408a55281cd658ecbd3ca05cce6d6510a176eca393e26d1"
+checksum = "7ceab25649e9960c0311ea418d17bee82c0dcec1bd053b5f9a66e265a693bed2"
 dependencies = [
  "bytes",
  "http",
@@ -5470,7 +5464,7 @@ dependencies = [
  "http",
  "hyper",
  "log",
- "rustls 0.21.9",
+ "rustls 0.21.10",
  "rustls-native-certs",
  "tokio",
  "tokio-rustls",
@@ -5721,7 +5715,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb0889898416213fab133e1d33a0e5858a48177452750691bde3666d0fdbaf8b"
 dependencies = [
  "hermit-abi 0.3.3",
- "rustix 0.38.26",
+ "rustix 0.38.27",
  "windows-sys 0.48.0",
 ]
 
@@ -6855,7 +6849,7 @@ version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b2cffa4ad52c6f791f4f8b15f0c05f9824b2ced1160e88cc393d64fff9a8ac64"
 dependencies = [
- "rustix 0.38.26",
+ "rustix 0.38.27",
 ]
 
 [[package]]
@@ -7598,9 +7592,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "openssl-src"
-version = "300.1.6+3.1.4"
+version = "300.2.0+3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "439fac53e092cd7442a3660c85dde4643ab3b5bd39040912388dcdabf6b88085"
+checksum = "b1ebed1d188c4cd64c2bcd73d6c1fe1092f3d98c111831923cc1b706c3859fca"
 dependencies = [
  "cc",
 ]
@@ -7691,7 +7685,7 @@ version = "0.5.0"
 dependencies = [
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
+ "hex-literal",
  "libsecp256k1",
  "log",
  "pallet-balances",
@@ -8079,7 +8073,7 @@ dependencies = [
  "frame-system",
  "hash-db 0.16.0",
  "hex",
- "hex-literal 0.4.1",
+ "hex-literal",
  "impl-trait-for-tuples",
  "log",
  "parity-scale-codec",
@@ -8113,7 +8107,7 @@ dependencies = [
  "fp-evm",
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
+ "hex-literal",
  "log",
  "num_enum 0.5.11",
  "pallet-balances",
@@ -8159,7 +8153,7 @@ dependencies = [
  "fp-evm",
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
+ "hex-literal",
  "libsecp256k1",
  "log",
  "num_enum 0.5.11",
@@ -8196,7 +8190,7 @@ dependencies = [
  "fp-evm",
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
+ "hex-literal",
  "log",
  "num_enum 0.5.11",
  "pallet-balances",
@@ -8254,7 +8248,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "hex",
- "hex-literal 0.3.4",
+ "hex-literal",
  "libsecp256k1",
  "log",
  "num_enum 0.5.11",
@@ -8300,7 +8294,7 @@ dependencies = [
  "fp-evm",
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
+ "hex-literal",
  "log",
  "num_enum 0.5.11",
  "pallet-balances",
@@ -8328,7 +8322,7 @@ dependencies = [
  "fp-evm",
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
+ "hex-literal",
  "log",
  "num_enum 0.5.11",
  "pallet-balances",
@@ -8355,7 +8349,7 @@ dependencies = [
  "fp-evm",
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
+ "hex-literal",
  "log",
  "pallet-balances",
  "pallet-evm",
@@ -8550,7 +8544,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "hex",
- "hex-literal 0.3.4",
+ "hex-literal",
  "libsecp256k1",
  "pallet-balances",
  "pallet-base-fee",
@@ -8677,7 +8671,7 @@ dependencies = [
  "frame-election-provider-support",
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
+ "hex-literal",
  "log",
  "pallet-balances",
  "pallet-session",
@@ -9366,7 +9360,7 @@ dependencies = [
  "cfg-if",
  "concurrent-queue",
  "pin-project-lite 0.2.13",
- "rustix 0.38.26",
+ "rustix 0.38.27",
  "tracing",
  "windows-sys 0.52.0",
 ]
@@ -9439,7 +9433,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "hex",
- "hex-literal 0.3.4",
+ "hex-literal",
  "impl-trait-for-tuples",
  "log",
  "num_enum 0.5.11",
@@ -9455,7 +9449,6 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "staging-xcm",
 ]
 
 [[package]]
@@ -9487,7 +9480,7 @@ dependencies = [
  "fp-evm",
  "frame-support",
  "frame-system",
- "hex-literal 0.3.4",
+ "hex-literal",
  "pallet-balances",
  "pallet-evm",
  "pallet-timestamp",
@@ -10286,7 +10279,7 @@ dependencies = [
  "once_cell",
  "percent-encoding",
  "pin-project-lite 0.2.13",
- "rustls 0.21.9",
+ "rustls 0.21.10",
  "rustls-pemfile",
  "serde",
  "serde_json",
@@ -10532,7 +10525,7 @@ dependencies = [
  "fc-storage",
  "fp-rpc",
  "futures 0.3.29",
- "hex-literal 0.3.4",
+ "hex-literal",
  "jsonrpsee",
  "rpc-core-debug",
  "rpc-core-types",
@@ -10768,9 +10761,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.26"
+version = "0.38.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9470c4bf8246c8daf25f9598dca807fb6510347b1e1cfa55749113850c79d88a"
+checksum = "bfeae074e687625746172d639330f1de242a178bf3189b51e35a7a21573513ac"
 dependencies = [
  "bitflags 2.4.1",
  "errno",
@@ -10793,9 +10786,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.21.9"
+version = "0.21.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "629648aced5775d558af50b2b4c7b02983a04b312126d45eeead26e7caa498b9"
+checksum = "f9d5a6813c0759e4609cd494e8e725babae6a2ca7b62a5536a13daaec6fcb7ba"
 dependencies = [
  "log",
  "ring 0.17.7",
@@ -13674,23 +13667,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
-name = "staging-xcm"
-version = "1.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0#c8d2251cafadc108ba2f1f8a3208dc547ff38901"
-dependencies = [
- "bounded-collections",
- "derivative",
- "environmental",
- "impl-trait-for-tuples",
- "log",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-weights",
- "xcm-procedural",
-]
-
-[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -14176,7 +14152,7 @@ dependencies = [
  "frame-system",
  "frame-system-benchmarking",
  "frame-system-rpc-runtime-api",
- "hex-literal 0.3.4",
+ "hex-literal",
  "log",
  "num_enum 0.5.11",
  "pallet-airdrop-claims",
@@ -14298,7 +14274,7 @@ dependencies = [
  "frame-system",
  "futures 0.3.29",
  "hex",
- "hex-literal 0.3.4",
+ "hex-literal",
  "jsonrpsee",
  "log",
  "pallet-bridge-registry",
@@ -14374,7 +14350,7 @@ dependencies = [
  "frame-system",
  "frame-system-benchmarking",
  "frame-system-rpc-runtime-api",
- "hex-literal 0.3.4",
+ "hex-literal",
  "log",
  "num_enum 0.5.11",
  "pallet-airdrop-claims",
@@ -14498,7 +14474,7 @@ dependencies = [
  "cfg-if",
  "fastrand 2.0.1",
  "redox_syscall 0.4.1",
- "rustix 0.38.26",
+ "rustix 0.38.27",
  "windows-sys 0.48.0",
 ]
 
@@ -14741,7 +14717,7 @@ version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c28327cf380ac148141087fbfb9de9d7bd4e84ab5d2c28fbc911d753de8a7081"
 dependencies = [
- "rustls 0.21.9",
+ "rustls 0.21.10",
  "tokio",
 ]
 
@@ -14765,7 +14741,7 @@ checksum = "212d5dcb2a1ce06d81107c3d0ffa3121fe974b73f068c8282cb1c32328113b6c"
 dependencies = [
  "futures-util",
  "log",
- "rustls 0.21.9",
+ "rustls 0.21.10",
  "tokio",
  "tokio-rustls",
  "tungstenite",
@@ -15171,7 +15147,7 @@ dependencies = [
  "httparse",
  "log",
  "rand 0.8.5",
- "rustls 0.21.9",
+ "rustls 0.21.10",
  "sha1",
  "thiserror",
  "url",
@@ -16161,7 +16137,7 @@ dependencies = [
  "ethereum-types",
  "futures 0.3.29",
  "hex",
- "hex-literal 0.4.1",
+ "hex-literal",
  "tokio",
  "typed-builder 0.16.2",
  "webb 0.8.2",
@@ -16605,7 +16581,7 @@ dependencies = [
  "either",
  "home",
  "once_cell",
- "rustix 0.38.26",
+ "rustix 0.38.27",
 ]
 
 [[package]]
@@ -17023,17 +16999,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "xcm-procedural"
-version = "1.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0#c8d2251cafadc108ba2f1f8a3208dc547ff38901"
-dependencies = [
- "Inflector",
- "proc-macro2",
- "quote",
- "syn 2.0.39",
-]
-
-[[package]]
 name = "yamux"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17070,18 +17035,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.7.29"
+version = "0.7.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d075cf85bbb114e933343e087b92f2146bac0d55b534cbb8188becf0039948e"
+checksum = "306dca4455518f1f31635ec308b6b3e4eb1b11758cefafc782827d0aa7acb5c7"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.7.29"
+version = "0.7.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86cd5ca076997b97ef09d3ad65efe811fa68c9e874cb636ccb211223a813b0c2"
+checksum = "be912bf68235a88fbefd1b73415cb218405958d1655b2ece9035a19920bdf6ba"
 dependencies = [
  "proc-macro2",
  "quote",
