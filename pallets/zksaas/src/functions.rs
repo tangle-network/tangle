@@ -102,7 +102,7 @@ impl<T: Config> Pallet<T> {
 			Ok(true) => Ok(()),
 			Ok(false) => Err(Error::<T>::InvalidProof.into()),
 			Err(e) => {
-				frame_support::log::warn!(target: "zksaas::verify_circom_proof", "Invalid Circom Proof: {}", e);
+				log::warn!(target: "zksaas::verify_circom_proof", "Invalid Circom Proof: {}", e);
 				Err(Error::<T>::MalformedProof.into())
 			},
 		}
@@ -120,7 +120,7 @@ impl<T: Config> Pallet<T> {
 			Ok(true) => Ok(()),
 			Ok(false) => Err(Error::<T>::InvalidProof.into()),
 			Err(e) => {
-				frame_support::log::warn!(target: "zksaas::verify_arkworks_proof", "Invalid Arkworks Proof: {}", e);
+				log::warn!(target: "zksaas::verify_arkworks_proof", "Invalid Arkworks Proof: {}", e);
 				Err(Error::<T>::MalformedProof.into())
 			},
 		}
