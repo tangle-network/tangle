@@ -13,16 +13,17 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
 #![cfg(test)]
 use super::*;
 use frame_support::{assert_err, assert_ok, BoundedVec};
 use mock::*;
-use profile::{IndependentReStakeProfile, Record, SharedReStakeProfile};
+use profile::{IndependentRestakeProfile, Record, SharedRestakeProfile};
 use sp_std::{default::Default, vec};
 use tangle_primitives::jobs::ReportValidatorOffence;
 
 pub fn independent_profile() -> Profile<Runtime> {
-	let profile = IndependentReStakeProfile {
+	let profile = IndependentRestakeProfile {
 		records: BoundedVec::try_from(vec![
 			Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: Some(2500) },
 			Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: Some(2500) },
@@ -33,7 +34,7 @@ pub fn independent_profile() -> Profile<Runtime> {
 }
 
 pub fn shared_profile() -> Profile<Runtime> {
-	let profile = SharedReStakeProfile {
+	let profile = SharedRestakeProfile {
 		records: BoundedVec::try_from(vec![
 			Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: None },
 			Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: None },
@@ -53,7 +54,7 @@ fn test_create_independent_profile() {
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileCreated {
 			account: 1,
-			total_profile_stake: profile.get_total_profile_stake().into(),
+			total_profile_stake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 		// Get the ledger to check if the profile is created.
@@ -72,7 +73,7 @@ fn test_create_shared_profile() {
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileCreated {
 			account: 1,
-			total_profile_stake: profile.get_total_profile_stake().into(),
+			total_profile_stake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 
@@ -108,14 +109,14 @@ fn test_create_profile_should_fail_if_user_already_has_a_profile() {
 	});
 }
 
-// Test create profile should fail if min required stake condition is not met.
-// Min stake required is 2500.
+// Test create profile should fail if min required restake condition is not met.
+// Min restake required is 2500.
 #[test]
 fn test_create_profile_should_fail_if_min_required_stake_condition_is_not_met() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		pallet::MinReStakingBond::<Runtime>::put(2500);
 
-		let profile = Profile::Shared(SharedReStakeProfile {
+		let profile = Profile::Shared(SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: None },
 				Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: None },
@@ -131,16 +132,16 @@ fn test_create_profile_should_fail_if_min_required_stake_condition_is_not_met() 
 	});
 }
 
-// Test create profile should fail if min required stake condition is not met.
-// In case of independent profile, each role should meet the min required stake condition.
-// Min stake required is 2500.
+// Test create profile should fail if min required restake condition is not met.
+// In case of independent profile, each role should meet the min required restake condition.
+// Min restake required is 2500.
 #[test]
 fn test_create_profile_should_fail_if_min_required_stake_condition_is_not_met_for_independent_profile(
 ) {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		pallet::MinReStakingBond::<Runtime>::put(2500);
 
-		let profile = Profile::Independent(IndependentReStakeProfile {
+		let profile = Profile::Independent(IndependentRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: Some(1000) },
 				Record {
@@ -177,7 +178,7 @@ fn test_update_profile_from_independent_to_shared() {
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileUpdated {
 			account: 1,
-			total_profile_stake: profile.get_total_profile_stake().into(),
+			total_profile_stake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 		// Get updated ledger and check if the profile is updated.
@@ -205,7 +206,7 @@ fn test_update_profile_from_shared_to_independent() {
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileUpdated {
 			account: 1,
-			total_profile_stake: profile.get_total_profile_stake().into(),
+			total_profile_stake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 		// Get updated ledger and check if the profile is updated.

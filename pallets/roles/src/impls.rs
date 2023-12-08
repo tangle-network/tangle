@@ -142,7 +142,7 @@ impl<T: Config> Pallet<T> {
 		false
 	}
 
-	/// Calculate max re-stake amount for the given account.
+	/// Calculate max restake amount for the given account.
 	///
 	/// # Parameters
 	/// - `total_stake`: Total stake of the validator
@@ -150,7 +150,7 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	/// Returns the max re-stake amount.
 	pub(crate) fn calculate_max_re_stake_amount(total_stake: BalanceOf<T>) -> BalanceOf<T> {
-		// User can re-stake max 50% of the total stake
+		// User can restake max 50% of the total stake
 		Percent::from_percent(50) * total_stake
 	}
 	/// Calculate slash value for re-staked amount

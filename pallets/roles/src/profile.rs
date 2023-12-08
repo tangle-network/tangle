@@ -1,6 +1,5 @@
-use sp_runtime::traits::Zero;
 // This file is part of Webb.
-// Copyright (C) 2022 Webb Technologies Inc.
+// Copyright (C) 2022-2023 Webb Technologies Inc.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,8 +13,10 @@ use sp_runtime::traits::Zero;
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
 use crate::{BalanceOf, Config};
 use frame_support::{dispatch::Vec, pallet_prelude::*};
+use sp_runtime::traits::Zero;
 use tangle_primitives::roles::{RoleType, RoleTypeMetadata};
 
 #[derive(
@@ -31,7 +32,7 @@ pub struct Record<T: Config> {
 	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
 )]
 #[scale_info(skip_type_params(T))]
-pub struct IndependentReStakeProfile<T: Config> {
+pub struct IndependentRestakeProfile<T: Config> {
 	pub records: BoundedVec<Record<T>, T::MaxRolesPerAccount>,
 }
 
@@ -39,7 +40,7 @@ pub struct IndependentReStakeProfile<T: Config> {
 	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
 )]
 #[scale_info(skip_type_params(T))]
-pub struct SharedReStakeProfile<T: Config> {
+pub struct SharedRestakeProfile<T: Config> {
 	pub records: BoundedVec<Record<T>, T::MaxRolesPerAccount>,
 	pub amount: BalanceOf<T>,
 }
@@ -49,8 +50,8 @@ pub struct SharedReStakeProfile<T: Config> {
 )]
 #[scale_info(skip_type_params(T))]
 pub enum Profile<T: Config> {
-	Independent(IndependentReStakeProfile<T>),
-	Shared(SharedReStakeProfile<T>),
+	Independent(IndependentRestakeProfile<T>),
+	Shared(SharedRestakeProfile<T>),
 }
 
 impl<T: Config> Profile<T> {
@@ -64,8 +65,8 @@ impl<T: Config> Profile<T> {
 		matches!(self, Profile::Shared(_))
 	}
 
-	/// Returns the total profile stake.
-	pub fn get_total_profile_stake(&self) -> BalanceOf<T> {
+	/// Returns the total profile restake.
+	pub fn get_total_profile_restake(&self) -> BalanceOf<T> {
 		match self {
 			Profile::Independent(profile) => profile
 				.records
@@ -75,7 +76,7 @@ impl<T: Config> Profile<T> {
 		}
 	}
 
-	/// Returns staking record details containing role metadata and stake amount.
+	/// Returns staking record details containing role metadata and restake amount.
 	pub fn get_records(&self) -> Vec<Record<T>> {
 		match self {
 			Profile::Independent(profile) => profile.records.clone().into_inner(),

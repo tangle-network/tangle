@@ -61,14 +61,14 @@ pub struct RoleStakingLedger<T: Config> {
 	/// This re-staked balance we are currently accounting for new slashing conditions.
 	#[codec(compact)]
 	pub total: BalanceOf<T>,
-	/// Re staking Profile
+	/// Restaking Profile
 	pub profile: Profile<T>,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
 	/// New staking ledger for a stash account.
 	pub fn new(stash: T::AccountId, profile: Profile<T>) -> Self {
-		let total_re_stake = profile.get_total_profile_stake();
+		let total_re_stake = profile.get_total_profile_restake();
 		Self { stash, total: total_re_stake.into(), profile }
 	}
 
@@ -227,7 +227,7 @@ pub mod pallet {
 	pub(super) type MinReStakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
 	/// Create profile for the validator.
-	/// Validator can choose roles he is interested to opt-in and stake tokens for it.
+	/// Validator can choose roles he is interested to opt-in and restake tokens for it.
 	/// Staking can be done shared or independently for each role.
 	///
 	/// # Parameters
@@ -255,7 +255,7 @@ pub mod pallet {
 			// Ensure no profile is assigned to the validator.
 			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::ProfileAlreadyExists);
 			let ledger = RoleStakingLedger::<T>::new(stash_account.clone(), profile.clone());
-			let total_profile_stake = profile.get_total_profile_stake();
+			let total_profile_stake = profile.get_total_profile_restake();
 
 			// Re-staking amount of profile should meet min re-staking amount requirement.
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
@@ -331,7 +331,7 @@ pub mod pallet {
 			);
 			let mut ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
-			let total_profile_stake = updated_profile.get_total_profile_stake();
+			let total_profile_stake = updated_profile.get_total_profile_restake();
 			// Re-staking amount of record should meet min re-staking amount requirement.
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
 			ensure!(
@@ -499,7 +499,7 @@ pub mod pallet {
 
 			AccountRolesMapping::<T>::insert(&stash_account, profile_roles);
 
-			ledger.total = ledger.profile.get_total_profile_stake().into();
+			ledger.total = ledger.profile.get_total_profile_restake().into();
 			Self::update_ledger(&stash_account, &ledger);
 
 			Self::deposit_event(Event::<T>::RoleRemoved { account: stash_account, role });
