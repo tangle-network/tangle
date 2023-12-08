@@ -50,30 +50,28 @@ impl super::InstanceVerifier for CircomVerifierGroth16Bn254 {
 		let public_input_field_elts = match super::to_field_elements::<Fr>(public_inp_bytes) {
 			Ok(v) => v,
 			Err(e) => {
-				frame_support::log::error!(
-					"Failed to convert public input bytes to field elements: {e:?}",
-				);
+				log::error!("Failed to convert public input bytes to field elements: {e:?}",);
 				return Err(e)
 			},
 		};
 		let vk = match ArkVerifyingKey::deserialize_compressed(vk_bytes) {
 			Ok(v) => v,
 			Err(e) => {
-				frame_support::log::error!("Failed to deserialize verifying key: {e:?}");
+				log::error!("Failed to deserialize verifying key: {e:?}");
 				return Err(e.into())
 			},
 		};
 		let proof = match Proof::decode(proof_bytes).and_then(|v| v.try_into()) {
 			Ok(v) => v,
 			Err(e) => {
-				frame_support::log::error!("Failed to deserialize proof: {e:?}");
+				log::error!("Failed to deserialize proof: {e:?}");
 				return Err(e)
 			},
 		};
 		let res = match verify_groth16(&vk, &public_input_field_elts, &proof) {
 			Ok(v) => v,
 			Err(e) => {
-				frame_support::log::error!("Failed to verify proof: {e:?}");
+				log::error!("Failed to verify proof: {e:?}");
 				return Err(e)
 			},
 		};
@@ -159,7 +157,7 @@ impl Proof {
 			input,
 		)
 		.map_err(|e| {
-			frame_support::log::error!("Failed to decode proof: {:?}", e);
+			log::error!("Failed to decode proof: {:?}", e);
 			CircomError::InvalidProofBytes
 		})?;
 		// Unwrap the decoded tuple

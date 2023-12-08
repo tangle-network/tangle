@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use crate::roles::RoleType;
-use frame_support::{dispatch::Vec, pallet_prelude::*, RuntimeDebug};
+use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::ecdsa;
+use sp_core::{ecdsa, RuntimeDebug};
+use sp_std::vec::Vec;
 
 pub type JobId = u32;
 

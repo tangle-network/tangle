@@ -17,8 +17,9 @@
 use crate::{mock::*, *};
 use precompile_utils::testing::*;
 
-use frame_support::{assert_ok, dispatch::Dispatchable};
+use frame_support::assert_ok;
 use pallet_evm::{Call as EvmCall, Event as EvmEvent};
+use sp_runtime::traits::Dispatchable;
 
 use sp_core::{Hasher, U256};
 

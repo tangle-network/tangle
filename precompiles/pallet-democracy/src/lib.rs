@@ -21,7 +21,7 @@
 
 use fp_evm::PrecompileHandle;
 use frame_support::{
-	dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo},
+	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	traits::{Bounded, ConstU32, Currency, QueryPreimage},
 };
 use frame_system::pallet_prelude::BlockNumberFor;
@@ -32,7 +32,7 @@ use pallet_evm::AddressMapping;
 use pallet_preimage::Call as PreimageCall;
 use precompile_utils::prelude::*;
 use sp_core::{Get, H160, H256, U256};
-use sp_runtime::traits::{Hash, StaticLookup};
+use sp_runtime::traits::{Dispatchable, Hash, StaticLookup};
 use sp_std::{
 	convert::{TryFrom, TryInto},
 	fmt::Debug,

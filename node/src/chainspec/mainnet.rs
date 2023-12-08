@@ -292,7 +292,6 @@ fn testnet_genesis(
 		treasury: Default::default(),
 		aura: Default::default(),
 		grandpa: Default::default(),
-		bridge_registry: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
 		// eth_2_client: Eth2ClientConfig {
 		// 	// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
@@ -405,7 +404,6 @@ fn mainnet_genesis(
 		// 	)],
 		// 	phantom: PhantomData,
 		// },
-		bridge_registry: Default::default(),
 		claims: Default::default(),
 	}
 }

@@ -37,18 +37,18 @@ sha3 = { workspace = true }
 precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate
+ethereum = { workspace = true, features = ["with-codec"] }
+ethers = "2.0"
+hex = { workspace = true }
+libsecp256k1 = { workspace = true }
 pallet-balances = { workspace = true, features = ["std"] }
 pallet-timestamp = { workspace = true, features = ["std"] }
 scale-info = { workspace = true, features = ["derive", "std"] }
-sp-io = { workspace = true }
-ethers = "2.0"
 serde_json = { workspace = true }
-libsecp256k1 = { workspace = true }
 smallvec = { workspace = true }
 sp-application-crypto = { workspace = true }
+sp-io = { workspace = true }
 sp-keystore = { workspace = true }
-ethereum = { workspace = true, features = ["with-codec"] }
-hex = { workspace = true }
 
 # Frontier Primitive
 fp-account = { workspace = true }
@@ -92,5 +92,5 @@ std = [
   "pallet-ethereum/std",
   "pallet-evm/std",
   "pallet-evm-chain-id/std",
-  "pallet-jobs/std"
+  "pallet-jobs/std",
 ]
