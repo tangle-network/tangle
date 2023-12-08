@@ -162,13 +162,13 @@ pub mod pallet {
 		/// New profile created.
 		ProfileCreated {
 			account: T::AccountId,
-			total_profile_stake: BalanceOf<T>,
+			total_profile_restake: BalanceOf<T>,
 			roles: Vec<RoleType>,
 		},
 		/// Profile updated.
 		ProfileUpdated {
 			account: T::AccountId,
-			total_profile_stake: BalanceOf<T>,
+			total_profile_restake: BalanceOf<T>,
 			roles: Vec<RoleType>,
 		},
 		/// Profile deleted.
@@ -255,12 +255,12 @@ pub mod pallet {
 			// Ensure no profile is assigned to the validator.
 			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::ProfileAlreadyExists);
 			let ledger = RoleStakingLedger::<T>::new(stash_account.clone(), profile.clone());
-			let total_profile_stake = profile.get_total_profile_restake();
+			let total_profile_restake = profile.get_total_profile_restake();
 
 			// Re-staking amount of profile should meet min re-staking amount requirement.
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
 			ensure!(
-				total_profile_stake >= min_re_staking_bond,
+				total_profile_restake >= min_re_staking_bond,
 				Error::<T>::InsufficientReStakingBond
 			);
 
@@ -268,7 +268,7 @@ pub mod pallet {
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
 			let max_re_staking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
-			ensure!(total_profile_stake <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
+			ensure!(total_profile_restake <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
 
 			// Validate role staking records.
 			let records = profile.get_records();
@@ -296,7 +296,7 @@ pub mod pallet {
 			Self::update_ledger(&stash_account, &ledger);
 			Self::deposit_event(Event::<T>::ProfileCreated {
 				account: stash_account.clone(),
-				total_profile_stake,
+				total_profile_restake,
 				roles: profile.get_roles(),
 			});
 
@@ -331,11 +331,11 @@ pub mod pallet {
 			);
 			let mut ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
-			let total_profile_stake = updated_profile.get_total_profile_restake();
+			let total_profile_restake = updated_profile.get_total_profile_restake();
 			// Re-staking amount of record should meet min re-staking amount requirement.
 			let min_re_staking_bond = MinReStakingBond::<T>::get();
 			ensure!(
-				total_profile_stake >= min_re_staking_bond,
+				total_profile_restake >= min_re_staking_bond,
 				Error::<T>::InsufficientReStakingBond
 			);
 
@@ -344,11 +344,11 @@ pub mod pallet {
 
 			let max_re_staking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
 			// Total re_staking amount should not exceed  max_re_staking_amount.
-			ensure!(total_profile_stake <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
+			ensure!(total_profile_restake <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
 
 			Self::validate_updated_profile(stash_account.clone(), updated_profile.clone())?;
 			ledger.profile = updated_profile.clone();
-			ledger.total = total_profile_stake;
+			ledger.total = total_profile_restake;
 
 			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
 				BoundedVec::try_from(updated_profile.get_roles())
@@ -359,7 +359,7 @@ pub mod pallet {
 
 			Self::deposit_event(Event::<T>::ProfileUpdated {
 				account: stash_account.clone(),
-				total_profile_stake,
+				total_profile_restake,
 				roles: updated_profile.get_roles(),
 			});
 

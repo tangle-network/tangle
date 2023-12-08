@@ -54,7 +54,7 @@ fn test_create_independent_profile() {
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileCreated {
 			account: 1,
-			total_profile_stake: profile.get_total_profile_restake().into(),
+			total_profile_restake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 		// Get the ledger to check if the profile is created.
@@ -73,7 +73,7 @@ fn test_create_shared_profile() {
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileCreated {
 			account: 1,
-			total_profile_stake: profile.get_total_profile_restake().into(),
+			total_profile_restake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 
@@ -112,7 +112,7 @@ fn test_create_profile_should_fail_if_user_already_has_a_profile() {
 // Test create profile should fail if min required restake condition is not met.
 // Min restake required is 2500.
 #[test]
-fn test_create_profile_should_fail_if_min_required_stake_condition_is_not_met() {
+fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		pallet::MinReStakingBond::<Runtime>::put(2500);
 
@@ -136,7 +136,7 @@ fn test_create_profile_should_fail_if_min_required_stake_condition_is_not_met() 
 // In case of independent profile, each role should meet the min required restake condition.
 // Min restake required is 2500.
 #[test]
-fn test_create_profile_should_fail_if_min_required_stake_condition_is_not_met_for_independent_profile(
+fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_for_independent_profile(
 ) {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		pallet::MinReStakingBond::<Runtime>::put(2500);
@@ -178,7 +178,7 @@ fn test_update_profile_from_independent_to_shared() {
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileUpdated {
 			account: 1,
-			total_profile_stake: profile.get_total_profile_restake().into(),
+			total_profile_restake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 		// Get updated ledger and check if the profile is updated.
@@ -206,7 +206,7 @@ fn test_update_profile_from_shared_to_independent() {
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileUpdated {
 			account: 1,
-			total_profile_stake: profile.get_total_profile_restake().into(),
+			total_profile_restake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 		// Get updated ledger and check if the profile is updated.
