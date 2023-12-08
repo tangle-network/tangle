@@ -287,6 +287,11 @@ pub mod pallet {
 				)?;
 			}
 
+			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
+				BoundedVec::try_from(profile.get_roles()).map_err(|_| Error::<T>::MaxRoles)?;
+
+			AccountRolesMapping::<T>::insert(&stash_account, profile_roles);
+
 			Self::update_ledger(&stash_account, &ledger);
 			Self::deposit_event(Event::<T>::ProfileCreated {
 				account: stash_account.clone(),
@@ -344,7 +349,14 @@ pub mod pallet {
 			Self::validate_updated_profile(stash_account.clone(), updated_profile.clone())?;
 			ledger.profile = updated_profile.clone();
 			ledger.total = total_profile_stake;
+
+			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
+				BoundedVec::try_from(updated_profile.get_roles())
+					.map_err(|_| Error::<T>::MaxRoles)?;
+
+			AccountRolesMapping::<T>::insert(&stash_account, profile_roles);
 			Self::update_ledger(&stash_account, &ledger);
+
 			Self::deposit_event(Event::<T>::ProfileUpdated {
 				account: stash_account.clone(),
 				total_profile_stake,
@@ -398,6 +410,13 @@ pub mod pallet {
 			}
 
 			if !pending_jobs.is_empty() {
+				// Update account roles mapping.
+				let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
+					BoundedVec::try_from(ledger.profile.get_roles())
+						.map_err(|_| Error::<T>::MaxRoles)?;
+
+				AccountRolesMapping::<T>::insert(&stash_account, profile_roles);
+
 				// Profile delete request failed due to pending jobs, which can't be opted out at
 				// the moment.
 				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
@@ -408,6 +427,8 @@ pub mod pallet {
 
 			// Remove entry from ledger.
 			Ledger::<T>::remove(&stash_account);
+			// Remove entry from account roles mapping.
+			AccountRolesMapping::<T>::remove(&stash_account);
 
 			Ok(())
 		}
@@ -440,6 +461,12 @@ pub mod pallet {
 
 			// Get active jobs for the role.
 			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
+
+			if active_jobs.is_empty() {
+				// Remove role from the profile.
+				ledger.profile.remove_role_from_profile(role.clone());
+			}
+
 			let mut pending_jobs = Vec::new();
 			for job in active_jobs {
 				let job_key = job.0;
@@ -466,6 +493,14 @@ pub mod pallet {
 				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
 				return Err(Error::<T>::RoleCannotBeRemoved.into())
 			};
+			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
+				BoundedVec::try_from(ledger.profile.get_roles())
+					.map_err(|_| Error::<T>::MaxRoles)?;
+
+			AccountRolesMapping::<T>::insert(&stash_account, profile_roles);
+
+			ledger.total = ledger.profile.get_total_profile_stake().into();
+			Self::update_ledger(&stash_account, &ledger);
 
 			Self::deposit_event(Event::<T>::RoleRemoved { account: stash_account, role });
 

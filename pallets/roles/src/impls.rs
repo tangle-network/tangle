@@ -201,6 +201,7 @@ impl<T: Config> Pallet<T> {
 			session_index: offence_report.session_index,
 			validator_set_count: offence_report.validator_set_count,
 			offenders,
+			role_type: offence_report.role_type,
 			offence_type: offence_report.offence_type,
 		};
 		let _ = T::ReportOffences::report_offence(sp_std::vec![], offence.clone());
@@ -215,6 +216,7 @@ impl<T: Config> Pallet<T> {
 				Self::calculate_re_stake_slash_value(slash_fraction, staking_ledger.total);
 			// apply slash
 			profile_ledger.total = profile_ledger.total.saturating_sub(slash_value);
+			Self::update_ledger(&offender, &profile_ledger);
 		}
 
 		Ok(())

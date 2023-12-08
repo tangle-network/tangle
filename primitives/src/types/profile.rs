@@ -119,19 +119,6 @@ impl Profile {
 		}
 	}
 
-	/// Checks if the profile contains duplicate roles.
-	pub fn has_duplicate_roles(&self) -> bool {
-		let records = self.get_records();
-		let mut role_types = Vec::new();
-		for record in records {
-			if role_types.contains(&record.metadata.get_role_type()) {
-				return true
-			}
-			role_types.push(record.metadata.get_role_type());
-		}
-		false
-	}
-
 	/// Return roles from current profile removed in updated profile.
 	pub fn get_removed_roles(&self, updated_profile: &Profile) -> Vec<RoleType> {
 		// Get the roles from the current profile.

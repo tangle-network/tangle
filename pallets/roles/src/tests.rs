@@ -18,175 +18,261 @@ use super::*;
 use frame_support::{assert_err, assert_ok};
 use mock::*;
 use sp_std::{default::Default, vec};
-use tangle_primitives::jobs::ReportValidatorOffence;
+use tangle_primitives::{
+	jobs::ReportValidatorOffence,
+	profile::{IndependentReStakeProfile, Record, SharedReStakeProfile},
+};
 
+pub fn independent_profile() -> Profile {
+	let profile = IndependentReStakeProfile {
+		records: vec![
+			Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: Some(2500) },
+			Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: Some(2500) },
+		],
+	};
+	Profile::Independent(profile)
+}
+
+pub fn shared_profile() -> Profile {
+	let profile = SharedReStakeProfile {
+		records: vec![
+			Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: None },
+			Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: None },
+		],
+		amount: 5000,
+	};
+	Profile::Shared(profile)
+}
+
+// Test create independent profile.
 #[test]
-fn test_assign_roles() {
+fn test_create_independent_profile() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
+		let profile = independent_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
 
-		// Roles user is interested in re-staking.
-		let role_records =
-			vec![RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) }];
-
-		// Lets re-stake 5000 tokens for selected roles
-		let re_stake_amount = 5000;
-
-		assert_ok!(Roles::assign_roles(
-			RuntimeOrigin::signed(1),
-			role_records.clone(),
-			re_stake_amount
-		));
-
-		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleAssigned {
+		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileCreated {
 			account: 1,
-			role: RoleType::Tss,
+			total_profile_stake: profile.get_total_profile_stake().into(),
+			roles: profile.get_roles(),
+		})]);
+		// Get the ledger to check if the profile is created.
+		let ledger = Roles::ledger(1).unwrap();
+		assert_eq!(ledger.profile, profile);
+		assert!(ledger.profile.is_independent());
+	});
+}
+
+// Test create shared profile.
+#[test]
+fn test_create_shared_profile() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		let profile = shared_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+
+		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileCreated {
+			account: 1,
+			total_profile_stake: profile.get_total_profile_stake().into(),
+			roles: profile.get_roles(),
 		})]);
 
-		// Lets verify role assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
-
-		// Verify ledger mapping
-		let mut role_records_map: BTreeMap<_, _> = Default::default();
-		role_records_map.insert(
-			RoleType::Tss,
-			RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) },
-		);
-		assert_eq!(
-			Roles::ledger(1),
-			Some(RoleStakingLedger { stash: 1, total: 5000, roles: role_records_map })
-		);
+		// Get the ledger to check if the profile is created.
+		let ledger = Roles::ledger(1).unwrap();
+		assert_eq!(ledger.profile, profile);
+		assert!(ledger.profile.is_shared());
 	});
 }
 
-// test assign multiple roles to an account.
+// Test create profile should fail if user is not a validator.
 #[test]
-fn test_assign_multiple_roles() {
+fn test_create_profile_should_fail_if_user_is_not_a_validator() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-
-		// Roles user is interested in re-staking.
-		let role_records = vec![
-			RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) },
-			RoleStakingRecord { metadata: RoleTypeMetadata::ZkSaas(Default::default()) },
-		];
-
-		// Lets re-stake 5000 tokens for selected roles
-		let re_stake_amount = 5000;
-
-		assert_ok!(Roles::assign_roles(
-			RuntimeOrigin::signed(1),
-			role_records.clone(),
-			re_stake_amount
-		));
-
-		// Lets verify role assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
-
-		// Lets verify role assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::ZkSaas), true);
-
-		assert_eq!(Roles::ledger(1).unwrap().total, re_stake_amount);
-	});
-}
-
-// Test assign roles, should fail if total re-stake value exceeds max re-stake value.
-// Max re-stake value is 5000 (50% of total staked value).
-#[test]
-fn test_assign_roles_should_fail_if_total_re_stake_value_exceeds_max_re_stake_value() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
-
-		// Roles user is interested in re-staking.
-		let role_records = vec![
-			RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) },
-			RoleStakingRecord { metadata: RoleTypeMetadata::ZkSaas(Default::default()) },
-		];
-
-		// Lets re-stake 8000 tokens for selected roles.
-		// This value is greater than 50% of total staked value (10000 tokens).
-		let re_stake_amount = 8000;
-
-		// Since max re_stake limit is 5000 it should fail with `ExceedsMaxReStakeValue` error.
+		let profile = shared_profile();
 		assert_err!(
-			Roles::assign_roles(RuntimeOrigin::signed(1), role_records, re_stake_amount),
-			Error::<Runtime>::ExceedsMaxReStakeValue
+			Roles::create_profile(RuntimeOrigin::signed(5), profile.clone()),
+			Error::<Runtime>::NotValidator
 		);
 	});
 }
 
+// Test create profile should fail if user already has a profile.
 #[test]
-fn test_clear_role() {
+fn test_create_profile_should_fail_if_user_already_has_a_profile() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		// Initially account if funded with 10000 tokens and we are trying to bond 5000 tokens
+		let profile = shared_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_err!(
+			Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()),
+			Error::<Runtime>::ProfileAlreadyExists
+		);
+	});
+}
 
-		// Roles user is interested in re-staking.
-		let role_records =
-			vec![RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) }];
+// Test create profile should fail if min required stake condition is not met.
+// Min stake required is 2500.
+#[test]
+fn test_create_profile_should_fail_if_min_required_stake_condition_is_not_met() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		pallet::MinReStakingBond::<Runtime>::put(2500);
 
-		// Lets re-stake 5000 tokens for selected roles
-		let re_stake_amount = 5000;
+		let profile = Profile::Shared(SharedReStakeProfile {
+			records: vec![
+				Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: None },
+				Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: None },
+			],
+			amount: 1000,
+		});
 
-		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records, re_stake_amount));
+		assert_err!(
+			Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()),
+			Error::<Runtime>::InsufficientReStakingBond
+		);
+	});
+}
 
-		// Now lets clear the role
-		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(1), RoleType::Tss));
+// Test create profile should fail if min required stake condition is not met.
+// In case of independent profile, each role should meet the min required stake condition.
+// Min stake required is 2500.
+#[test]
+fn test_create_profile_should_fail_if_min_required_stake_condition_is_not_met_for_independent_profile(
+) {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		pallet::MinReStakingBond::<Runtime>::put(2500);
+
+		let profile = Profile::Independent(IndependentReStakeProfile {
+			records: vec![
+				Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: Some(1000) },
+				Record {
+					metadata: RoleTypeMetadata::ZkSaas(Default::default()),
+					amount: Some(1000),
+				},
+			],
+		});
+
+		assert_err!(
+			Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()),
+			Error::<Runtime>::InsufficientReStakingBond
+		);
+	});
+}
+
+// Update profile from independent to shared.
+#[test]
+fn test_update_profile_from_independent_to_shared() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		// Lets create independent profile.
+		let profile = independent_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+
+		// Get the ledger to check if the profile is created.
+		let ledger = Roles::ledger(1).unwrap();
+		assert!(ledger.profile.is_independent());
+		assert_eq!(ledger.total_re_stake(), 5000);
+
+		let updated_profile = shared_profile();
+
+		assert_ok!(Roles::update_profile(RuntimeOrigin::signed(1), updated_profile.clone()));
+
+		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileUpdated {
+			account: 1,
+			total_profile_stake: profile.get_total_profile_stake().into(),
+			roles: profile.get_roles(),
+		})]);
+		// Get updated ledger and check if the profile is updated.
+		let ledger = Roles::ledger(1).unwrap();
+		assert_eq!(ledger.profile, updated_profile);
+		assert!(ledger.profile.is_shared());
+	});
+}
+
+// Update profile from shared to independent.
+#[test]
+fn test_update_profile_from_shared_to_independent() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		// Lets create shared profile.
+		let profile = shared_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+
+		// Get the ledger to check if the profile is created.
+		let ledger = Roles::ledger(1).unwrap();
+		assert!(ledger.profile.is_shared());
+		assert_eq!(ledger.total_re_stake(), 5000);
+
+		let updated_profile = independent_profile();
+		assert_ok!(Roles::update_profile(RuntimeOrigin::signed(1), updated_profile.clone()));
+
+		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileUpdated {
+			account: 1,
+			total_profile_stake: profile.get_total_profile_stake().into(),
+			roles: profile.get_roles(),
+		})]);
+		// Get updated ledger and check if the profile is updated.
+		let ledger = Roles::ledger(1).unwrap();
+		assert_eq!(ledger.profile, updated_profile);
+		assert!(ledger.profile.is_independent());
+		assert_eq!(ledger.total_re_stake(), 5000);
+	});
+}
+
+// Test delete profile.
+#[test]
+fn test_delete_profile() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		// Lets create shared profile.
+		let profile = shared_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+
+		// Get the ledger to check if the profile is created.
+		let ledger = Roles::ledger(1).unwrap();
+		assert!(ledger.profile.is_shared());
+		assert_eq!(ledger.total_re_stake(), 5000);
+
+		assert_ok!(Roles::delete_profile(RuntimeOrigin::signed(1)));
+
+		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileDeleted { account: 1 })]);
+		assert_eq!(Roles::ledger(1), None);
+	});
+}
+
+// Test remove role from profile.
+#[test]
+fn test_remove_role_from_profile() {
+	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+		// Lets create shared profile.
+		let profile = shared_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+
+		// Get the ledger to check if the profile is created.
+		let ledger = Roles::ledger(1).unwrap();
+		assert!(ledger.profile.is_shared());
+		assert_eq!(ledger.total_re_stake(), 5000);
+		assert!(ledger.profile.has_role(RoleType::Tss));
+
+		// Lets remove Tss role from the profile.
+		assert_ok!(Roles::remove_role(RuntimeOrigin::signed(1), RoleType::Tss));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleRemoved {
 			account: 1,
 			role: RoleType::Tss,
 		})]);
 
-		// Role should be removed from  account role mappings.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), false);
-
-		// Ledger should be removed from ledger mappings.
-		assert_eq!(Roles::ledger(1), None);
-	});
-}
-
-#[test]
-fn test_assign_roles_should_fail_if_not_validator() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		// we will use account 5 which is not a validator
-
-		// Roles user is interested in re-staking.
-		let role_records =
-			vec![RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) }];
-
-		// Lets re-stake 5000 tokens for selected roles
-		let re_stake_amount = 5000;
-
-		assert_err!(
-			Roles::assign_roles(RuntimeOrigin::signed(5), role_records, re_stake_amount),
-			Error::<Runtime>::NotValidator
-		);
+		// Get the updated ledger to check if the role is removed.
+		let ledger = Roles::ledger(1).unwrap();
+		assert!(!ledger.profile.has_role(RoleType::Tss));
 	});
 }
 
 #[test]
 fn test_unbound_funds_should_work() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		// Initially validator account has staked 10_000 tokens and wants to re-stake 5000 tokens
-		// for providing TSS services.
+		// Lets create shared profile.
+		let profile = shared_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
 
-		// Roles user is interested in re-staking.
-		let role_records =
-			vec![RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) }];
+		// Lets delete profile by opting out of all services.
+		assert_ok!(Roles::delete_profile(RuntimeOrigin::signed(1)));
 
-		// Lets re-stake 5000 tokens for selected roles
-		let re_stake_amount = 5000;
-
-		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records, re_stake_amount));
-
-		// Lets verify role is assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
-
-		// Lets clear the role.
-		assert_ok!(Roles::clear_role(RuntimeOrigin::signed(1), RoleType::Tss));
-
-		// Role should be removed from  account role mappings.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), false);
+		assert_eq!(Roles::ledger(1), None);
 
 		// unbound funds.
 		assert_ok!(Roles::unbound_funds(RuntimeOrigin::signed(1), 5000));
@@ -203,64 +289,13 @@ fn test_unbound_funds_should_work() {
 	});
 }
 
-// Test unbound should fail if role is assigned to account.
-#[test]
-fn test_unbound_funds_should_fail_if_role_assigned() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		// Initially validator account has staked 10_000 tokens and wants to re-stake 5000 tokens
-		// for providing TSS services.
-
-		// Roles user is interested in re-staking.
-		let role_records =
-			vec![RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) }];
-
-		// Lets re-stake 5000 tokens for selected roles
-		let re_stake_amount = 5000;
-
-		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records, re_stake_amount));
-
-		// Lets verify role is assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
-
-		// Lets try to unbound funds.
-		assert_err!(
-			Roles::unbound_funds(RuntimeOrigin::signed(1), 5000),
-			Error::<Runtime>::HasRoleAssigned
-		);
-	});
-}
-
-// Test unbound should work if no role assigned to account.
-#[test]
-fn test_unbound_funds_should_work_if_no_role_assigned() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		// Initially validator account has staked 10_000 tokens.
-
-		// Since validator has not opted for any roles, he should be able to unbound his funds.
-		assert_ok!(Roles::unbound_funds(RuntimeOrigin::signed(1), 5000));
-
-		assert_events(vec![RuntimeEvent::Staking(pallet_staking::Event::Unbonded {
-			stash: 1,
-			amount: 5000,
-		})]);
-	});
-}
-
 #[test]
 fn test_reward_dist_works_as_expected_with_one_validator() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
 		assert_eq!(Balances::free_balance(1), 20_000);
 
-		// Roles user is interested in re-staking.
-		let role_records = vec![
-			RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) },
-			RoleStakingRecord { metadata: RoleTypeMetadata::ZkSaas(Default::default()) },
-		];
-
-		// Lets re-stake 5000 tokens for selected roles
-		let re_stake_amount = 5000;
-
-		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records, re_stake_amount));
+		let profile = shared_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
 
 		// The reward is 100, we have 5 authorities
 		assert_ok!(Roles::distribute_rewards());
@@ -276,21 +311,9 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		let _reward_amount = 10_000;
 		assert_eq!(Balances::free_balance(1), 20_000);
 
-		// Roles user is interested in re-staking.
-		let role_records = vec![
-			RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) },
-			RoleStakingRecord { metadata: RoleTypeMetadata::ZkSaas(Default::default()) },
-		];
-
-		// Lets re-stake 5000 tokens for selected roles for both validators.
-		let re_stake_amount = 5000;
-
-		assert_ok!(Roles::assign_roles(
-			RuntimeOrigin::signed(1),
-			role_records.clone(),
-			re_stake_amount
-		));
-		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(2), role_records, re_stake_amount));
+		let profile = shared_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(2), profile.clone()));
 
 		// The reward is 100, we have 5 authorities
 		assert_ok!(Roles::distribute_rewards());
@@ -305,32 +328,20 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 #[test]
 fn test_report_offence_should_work() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		// Initially validator account has staked 10_000 tokens and wants to re-stake 5000 tokens
-		// for providing TSS services.
+		let profile = shared_profile();
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
 
-		// Roles user is interested in re-staking.
-		let role_records =
-			vec![RoleStakingRecord { metadata: RoleTypeMetadata::Tss(Default::default()) }];
-
-		// Lets re-stake 5000 tokens for selected roles
-		let re_stake_amount = 5000;
-
-		assert_ok!(Roles::assign_roles(RuntimeOrigin::signed(1), role_records, re_stake_amount));
-
-		// Lets verify role is assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
-
-		// get current session index.
+		// Get current session index.
 		let session_index = pallet_session::CurrentIndex::<Runtime>::get();
 
 		// Create offence report.
 		let offence_report = ReportValidatorOffence {
 			session_index,
 			validator_set_count: 4,
+			role_type: RoleType::Tss,
 			offence_type: tangle_primitives::jobs::ValidatorOffenceType::Inactivity,
 			offenders: vec![1],
 		};
-
 		// Lets report offence.
 		assert_ok!(Roles::report_offence(offence_report));
 		// Should slash 700 tokens
