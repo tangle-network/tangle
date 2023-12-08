@@ -66,7 +66,7 @@ fn dkg_key_verifcation_works() {
 
 		// should fail for empty participants
 		assert_noop!(
-			DKG::verify(JobResult::DKG(job_to_verify)),
+			DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),
 			Error::<Runtime>::NoParticipantsFound
 		);
 
@@ -79,7 +79,7 @@ fn dkg_key_verifcation_works() {
 
 		// should fail for empty keys/signatures
 		assert_noop!(
-			DKG::verify(JobResult::DKG(job_to_verify)),
+			DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),
 			Error::<Runtime>::NoSignaturesFound
 		);
 
@@ -96,7 +96,7 @@ fn dkg_key_verifcation_works() {
 
 		// should fail for less than threshold
 		assert_noop!(
-			DKG::verify(JobResult::DKG(job_to_verify)),
+			DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),
 			Error::<Runtime>::NotEnoughSigners
 		);
 
@@ -109,7 +109,7 @@ fn dkg_key_verifcation_works() {
 
 		// should fail for duplicate signers
 		assert_noop!(
-			DKG::verify(JobResult::DKG(job_to_verify)),
+			DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),
 			Error::<Runtime>::DuplicateSignature
 		);
 
@@ -122,7 +122,7 @@ fn dkg_key_verifcation_works() {
 
 		// should fail for signing different keys
 		assert_noop!(
-			DKG::verify(JobResult::DKG(job_to_verify)),
+			DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),
 			Error::<Runtime>::InvalidSignatureData
 		);
 
@@ -139,7 +139,7 @@ fn dkg_key_verifcation_works() {
 		};
 
 		// should fail for signing different keys
-		assert_ok!(DKG::verify(JobResult::DKG(job_to_verify)),);
+		assert_ok!(DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),);
 	});
 }
 
@@ -158,7 +158,7 @@ fn dkg_signature_verifcation_works() {
 
 		// should fail for invalid keys
 		assert_noop!(
-			DKG::verify(JobResult::DKGSignature(job_to_verify)),
+			DKG::verify(JobResult::DKGPhaseTwo(job_to_verify)),
 			Error::<Runtime>::SigningKeyMismatch
 		);
 
@@ -170,6 +170,6 @@ fn dkg_signature_verifcation_works() {
 		};
 
 		// should work with correct params
-		assert_ok!(DKG::verify(JobResult::DKGSignature(job_to_verify)));
+		assert_ok!(DKG::verify(JobResult::DKGPhaseTwo(job_to_verify)));
 	});
 }
