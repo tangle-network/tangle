@@ -13,11 +13,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use frame_support::{dispatch::Vec, pallet_prelude::*};
+use frame_support::pallet_prelude::*;
 use parity_scale_codec::alloc::string::ToString;
 use scale_info::prelude::string::String;
 use sp_arithmetic::Percent;
-use sp_std::ops::Add;
+use sp_std::{ops::Add, vec::Vec};
 
 /// Role type to be used in the system.
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]

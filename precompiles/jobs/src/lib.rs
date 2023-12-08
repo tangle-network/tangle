@@ -18,7 +18,7 @@
 
 use fp_evm::{ExitRevert, PrecompileFailure, PrecompileHandle};
 use frame_support::{
-	dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo},
+	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	traits::ConstU32,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
@@ -26,6 +26,7 @@ use pallet_evm::AddressMapping;
 use pallet_jobs::Call as JobsCall;
 use precompile_utils::{prelude::*, solidity::revert::revert_as_bytes};
 use sp_core::H256;
+use sp_runtime::traits::Dispatchable;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::jobs::{
 	DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, JobKey, JobSubmission, JobType,

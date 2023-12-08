@@ -15,9 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::jobs::{JobId, JobKey, JobSubmission, JobWithResult, ValidatorOffenceType};
-use frame_support::dispatch::Vec;
 use sp_arithmetic::traits::{BaseArithmetic, Unsigned};
 use sp_runtime::DispatchResult;
+use sp_std::vec::Vec;
 
 /// A trait that describes the job to fee calculation.
 pub trait JobToFee<AccountId, BlockNumber> {

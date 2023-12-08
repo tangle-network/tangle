@@ -18,7 +18,6 @@ use crate::offences::ValidatorOffence;
 
 use super::*;
 use frame_support::{
-	log,
 	pallet_prelude::DispatchResult,
 	traits::{Currency, OneSessionHandler},
 };

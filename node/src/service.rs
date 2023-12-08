@@ -32,11 +32,11 @@ use sc_network::NetworkStateInfo;
 use sc_service::{error::Error as ServiceError, ChainType, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-use sp_api::{ProvideRuntimeApi, TransactionFor};
+use sp_api::ProvideRuntimeApi;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sp_core::{Pair, U256};
-use sp_runtime::{generic::Era, traits::BlakeTwo256, SaturatedConversion};
-use sp_trie::PrefixedMemoryDB;
+use sp_runtime::{generic::Era, SaturatedConversion};
+
 use std::{path::Path, sync::Arc, time::Duration};
 use substrate_frame_rpc_system::AccountNonceApi;
 use tangle_testnet_runtime::{self, opaque::Block, RuntimeApi, TransactionConverter};
@@ -48,6 +48,10 @@ pub fn fetch_nonce(client: &FullClient, account: sp_core::sr25519::Pair) -> u32 
 		.account_nonce(best_hash, account.public().into())
 		.expect("Fetching account nonce works; qed")
 }
+
+/// The minimum period of blocks on which justifications will be
+/// imported and generated.
+const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -76,9 +80,9 @@ pub(crate) type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
 type GrandpaLinkHalf<Client> = sc_consensus_grandpa::LinkHalf<Block, Client, FullSelectChain>;
-type BoxBlockImport<Client> = sc_consensus::BoxBlockImport<Block, TransactionFor<Client, Block>>;
+type BoxBlockImport = sc_consensus::BoxBlockImport<Block>;
 
-/// Create a transaction using the given `call`.
+/// Create a transaction using the given `call`
 ///
 /// The transaction will be signed by `sender`. If `nonce` is `None` it will be fetched from the
 /// state of the best block.
@@ -147,11 +151,11 @@ pub fn new_partial(
 		FullClient,
 		FullBackend,
 		FullSelectChain,
-		sc_consensus::DefaultImportQueue<Block, FullClient>,
+		sc_consensus::DefaultImportQueue<Block>,
 		sc_transaction_pool::FullPool<Block, FullClient>,
 		(
 			Option<Telemetry>,
-			BoxBlockImport<FullClient>,
+			BoxBlockImport,
 			GrandpaLinkHalf<FullClient>,
 			FrontierBackend,
 			Arc<fc_rpc::OverrideHandle<Block>>,
@@ -211,7 +215,8 @@ pub fn new_partial(
 
 	let (grandpa_block_import, grandpa_link) = sc_consensus_grandpa::block_import(
 		client.clone(),
-		&(client.clone() as Arc<_>),
+		GRANDPA_JUSTIFICATION_PERIOD,
+		&client,
 		select_chain.clone(),
 		telemetry.as_ref().map(|x| x.handle()),
 	)?;
@@ -688,7 +693,7 @@ pub async fn new_full(
 	let grandpa_config = sc_consensus_grandpa::Config {
 		// FIXME #1578 make this available through chainspec
 		gossip_duration: Duration::from_millis(333),
-		justification_period: 512,
+		justification_generation_period: GRANDPA_JUSTIFICATION_PERIOD,
 		name: Some(name),
 		observer_enabled: false,
 		keystore,
@@ -733,13 +738,7 @@ pub fn new_chain_ops(
 	config: &mut Configuration,
 	eth_config: &EthConfiguration,
 ) -> Result<
-	(
-		Arc<FullClient>,
-		Arc<FullBackend>,
-		BasicQueue<Block, PrefixedMemoryDB<BlakeTwo256>>,
-		TaskManager,
-		FrontierBackend,
-	),
+	(Arc<FullClient>, Arc<FullBackend>, BasicQueue<Block>, TaskManager, FrontierBackend),
 	ServiceError,
 > {
 	config.keystore = sc_service::config::KeystoreConfig::InMemory;

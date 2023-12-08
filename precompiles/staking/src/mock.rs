@@ -18,20 +18,17 @@
 //! Test utilities
 #![allow(dead_code)]
 use super::*;
+use frame_election_provider_support::bounds::{ElectionBounds, ElectionBoundsBuilder};
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{Everything, OnFinalize, OnInitialize},
 	weights::Weight,
-	BasicExternalities,
 };
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use precompile_utils::precompile_set::*;
-use sp_staking::currency_to_vote::U128CurrencyToVote;
-use std::{sync::Arc, vec};
-
 use pallet_session::historical as pallet_session_historical;
 use pallet_staking::EraPayout;
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use precompile_utils::precompile_set::*;
 use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
@@ -39,6 +36,9 @@ use sp_core::{
 	sr25519::{self, Public as sr25519Public, Signature},
 	ConstU32, Get, H160, H256, U256,
 };
+use sp_staking::currency_to_vote::U128CurrencyToVote;
+use sp_state_machine::BasicExternalities;
+use std::{sync::Arc, vec};
 
 use frame_election_provider_support::{onchain, SequentialPhragmen};
 use pallet_staking::{
@@ -376,6 +376,10 @@ parameter_types! {
 		let block_gas_limit = BlockGasLimit::get().min(u64::MAX.into()).low_u64();
 		block_gas_limit.saturating_div(MAX_POV_SIZE)
 	};
+	pub ElectionBoundsOnChain: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(5_000.into()).targets_count(1_250.into()).build();
+	pub ElectionBoundsMultiPhase: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(10_000.into()).targets_count(1_500.into()).build();
 
 }
 
@@ -403,12 +407,13 @@ impl onchain::Config for OnChainSeqPhragmen {
 	type DataProvider = Staking;
 	type WeightInfo = ();
 	type MaxWinners = ConstU32<100>;
-	type VotersBound = ConstU32<{ u32::MAX }>;
-	type TargetsBound = ConstU32<{ u32::MAX }>;
+	type Bounds = ElectionBoundsOnChain;
 }
 
+/// Upper limit on the number of NPOS nominations.
+const MAX_QUOTA_NOMINATIONS: u32 = 16;
+
 impl pallet_staking::Config for Runtime {
-	type MaxNominations = MaxNominations;
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
 	type UnixTime = Timestamp;
@@ -433,6 +438,7 @@ impl pallet_staking::Config for Runtime {
 	type MaxUnlockingChunks = MaxUnlockingChunks;
 	type HistoryDepth = HistoryDepth;
 	type BenchmarkingConfig = TestBenchmarkingConfig;
+	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type EventListeners = ();
 	type WeightInfo = ();
 }

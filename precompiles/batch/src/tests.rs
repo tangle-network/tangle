@@ -24,16 +24,13 @@ use crate::{
 	Mode, LOG_SUBCALL_FAILED, LOG_SUBCALL_SUCCEEDED,
 };
 use fp_evm::ExitError;
-use frame_support::{
-	assert_ok,
-	dispatch::{DispatchError, Dispatchable},
-};
+use frame_support::assert_ok;
 use pallet_evm::Call as EvmCall;
 use precompile_utils::{
 	evm::costs::call_cost, prelude::*, solidity::revert::revert_as_bytes, testing::*,
 };
 use sp_core::{H160, H256, U256};
-use sp_runtime::{DispatchErrorWithPostInfo, ModuleError};
+use sp_runtime::{traits::Dispatchable, DispatchError, DispatchErrorWithPostInfo, ModuleError};
 
 fn precompiles() -> Precompiles<Runtime> {
 	PrecompilesValue::get()

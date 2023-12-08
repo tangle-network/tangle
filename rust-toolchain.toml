@@ -3,6 +3,6 @@
 # substrate has issues with newer versions.
 # See: https://substrate.stackexchange.com/questions/7714/cannot-run-substrate-on-a-fresh-macbook-m2
 # and: https://stackoverflow.com/questions/75955457/substrate-node-template-cannot-create-a-runtime-error-othercannot-deserialize
-channel = "nightly-2023-07-29"
+channel = "nightly-2023-09-29"
 components = ["rustfmt", "clippy", "rust-src"]
 targets = ["wasm32-unknown-unknown"]

@@ -8,26 +8,26 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-cumulus-primitives-core = { workspace = true }
 frame-support = { workspace = true }
+log = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 serde = { workspace = true }
 smallvec = { workspace = true }
 sp-arithmetic = { workspace = true }
-sp-core = { workspace = true }
-sp-std = { workspace = true }
-sp-runtime = { workspace = true }
 sp-consensus-aura = { workspace = true }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
 
 # Arkworks
+ark-bn254 = { workspace = true, optional = true }
 ark-crypto-primitives = { workspace = true, default-features = false, optional = true }
-ark-ff = { workspace = true, default-features = false, optional = true }
 ark-ec = { workspace = true, default-features = false, optional = true }
-ark-std = { workspace = true, default-features = false, optional = true }
+ark-ff = { workspace = true, default-features = false, optional = true }
 ark-groth16 = { workspace = true, default-features = false, optional = true }
 ark-serialize = { workspace = true, default-features = false, optional = true }
-ark-bn254 = { workspace = true, optional = true }
+ark-std = { workspace = true, default-features = false, optional = true }
 
 ethabi = { workspace = true, optional = true }
 
@@ -36,13 +36,7 @@ hex = { workspace = true }
 
 [features]
 default = ["std", "verifying"]
-std = [
-    "frame-support/std",
-    "sp-runtime/std",
-    "sp-core/std",
-    "cumulus-primitives-core/std",
-    "sp-consensus-aura/std",
-]
+std = ["frame-support/std", "sp-runtime/std", "sp-core/std"]
 verifying = [
   "ark-crypto-primitives",
   "ark-ec",
