@@ -21,6 +21,7 @@ use frame_support::{
 	dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo},
 	traits::ConstU32,
 };
+use tangle_primitives::jobs::DkgKeyType;
 use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_evm::AddressMapping;
 use pallet_jobs::Call as JobsCall;
@@ -89,7 +90,7 @@ where
 
 		// Create DKG job type with the provided parameters
 		let job_type =
-			DKGJobType { participants, threshold, permitted_caller: Some(permitted_caller) };
+			DKGJobType { participants, key_type: DkgKeyType::Ecdsa, threshold, permitted_caller: Some(permitted_caller) };
 
 		// Convert expiration period to Substrate block number
 		let expiry_block: BlockNumberFor<Runtime> = expiry.into();

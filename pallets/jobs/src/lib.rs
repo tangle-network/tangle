@@ -338,21 +338,18 @@ pub mod module {
 					// ensure the participants are the expected participants from job
 					participants =
 						job_info.job_type.clone().get_participants().expect("checked above");
-					let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
+					let mut participant_keys: Vec<Vec<u8>> = Default::default();
 
 					for participant in participants.clone() {
 						let key =
 							T::RolesHandler::get_validator_metadata(participant, job_key.clone());
 
 						ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
-						let pub_key = sp_core::ecdsa::Public::from_slice(
-							&key.expect("checked above").get_authority_key()[0..33],
-						)
-						.map_err(|_| Error::<T>::InvalidValidator)?;
-						participant_keys.push(pub_key);
+						participant_keys.push(key.expect("Checked above").get_authority_key());
 					}
 
 					let job_result = JobResult::DKG(DKGResult {
+						key_type: info.key_type.clone(),
 						key: info.key.clone(),
 						keys_and_signatures: info.keys_and_signatures,
 						participants: participant_keys,
@@ -375,6 +372,7 @@ pub mod module {
 							.get_participants()
 							.ok_or(Error::<T>::InvalidJobPhase)?,
 						threshold: job_info.job_type.clone().get_threshold(),
+						key_type: Some(info.key_type),
 						permitted_caller: job_info.job_type.get_permitted_caller(),
 					};
 
@@ -416,6 +414,7 @@ pub mod module {
 					}
 
 					let job_result = JobResult::DKGSignature(DKGSignatureResult {
+						key_type: info.key_type,
 						signature: info.signature,
 						data: info.data,
 						signing_key: phase_one_result.result,

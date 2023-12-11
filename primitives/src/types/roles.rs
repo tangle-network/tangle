@@ -18,6 +18,7 @@ use parity_scale_codec::alloc::string::ToString;
 use scale_info::prelude::string::String;
 use sp_arithmetic::Percent;
 use sp_std::ops::Add;
+use crate::jobs::DkgKeyType;
 
 /// Role type to be used in the system.
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
@@ -67,6 +68,9 @@ impl RoleTypeMetadata {
 pub struct TssRoleMetadata {
 	/// The authority key associated with the role.
 	pub authority_key: Vec<u8>,
+
+	/// The key type of the authority key
+	pub key_type: DkgKeyType
 }
 
 /// Associated metadata needed for a zkSaas role

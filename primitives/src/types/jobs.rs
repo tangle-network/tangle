@@ -156,6 +156,9 @@ pub struct DKGJobType<AccountId> {
 
 	/// the caller permitted to use this result later
 	pub permitted_caller: Option<AccountId>,
+
+	/// the key type to be used
+	pub key_type: DkgKeyType
 }
 
 /// Represents the DKG Signature job type.
@@ -247,6 +250,9 @@ pub struct PhaseOneResult<AccountId, BlockNumber> {
 
 	/// permitted caller to use this result
 	pub permitted_caller: Option<AccountId>,
+
+	/// Key type if applicable
+	pub key_type: Option<DkgKeyType>
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
@@ -367,10 +373,11 @@ pub struct ReportValidatorOffence<Offender> {
 }
 
 /// Possible key types for DKG
-#[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq, Encode, Decode)]
+#[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq, Encode, Decode, Default)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum DkgKeyType {
     /// Elliptic Curve Digital Signature Algorithm (ECDSA) key type.
+	#[default]
     Ecdsa,
 
     /// Schnorr signature key type.

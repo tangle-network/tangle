@@ -162,6 +162,7 @@ impl<T: Config> Pallet<T> {
 						ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
 
 						let job_type = JobType::DKG(DKGJobType {
+							key_type: phase1.key_type.clone().expect("Checked above"),
 							participants: new_participants,
 							threshold: new_threshold,
 							permitted_caller: phase1.clone().permitted_caller,
