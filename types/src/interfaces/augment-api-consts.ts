@@ -6,10 +6,10 @@
 import '@polkadot/api-base/types/consts';
 
 import type { ApiTypes, AugmentedConst } from '@polkadot/api-base/types';
-import type { Option, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
+import type { Bytes, Option, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { Codec } from '@polkadot/types-codec/types';
 import type { Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import { FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, SpWeightsRuntimeDbWeight, SpWeightsWeightV2Weight, WebbProposalsHeaderTypedChainId } from '@polkadot/types/lookup';
+import { FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, SpWeightsRuntimeDbWeight, SpWeightsWeightV2Weight } from '@polkadot/types/lookup';
 
 export type __AugmentedConst<ApiType extends ApiTypes> = AugmentedConst<ApiType>;
 
@@ -109,11 +109,11 @@ declare module '@polkadot/api-base/types/consts' {
       /**
        * The delay period for which a bounty beneficiary need to wait before claim the payout.
        **/
-      bountyDepositPayoutDelay: u32 & AugmentedConst<ApiType>;
+      bountyDepositPayoutDelay: u64 & AugmentedConst<ApiType>;
       /**
        * Bounty duration in blocks.
        **/
-      bountyUpdatePeriod: u32 & AugmentedConst<ApiType>;
+      bountyUpdatePeriod: u64 & AugmentedConst<ApiType>;
       /**
        * Minimum value for a bounty.
        **/
@@ -148,27 +148,6 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
-    bridgeRegistry: {
-      /**
-       * Maximum number of additional fields that may be stored in a bridge's metadata. Needed to
-       * bound the I/O required to access an identity, but can be pretty high.
-       **/
-      maxAdditionalFields: u32 & AugmentedConst<ApiType>;
-      /**
-       * Max length of a proposal
-       **/
-      maxProposalLength: u32 & AugmentedConst<ApiType>;
-      /**
-       * Maximum number of resources that may be stored in a bridge. This is not to be confused
-       * with the actual maximum supported by the bridge. Needed to bound the I/O
-       * required to access a metadata object, but can be pretty high.
-       **/
-      maxResources: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
     childBounties: {
       /**
        * Minimum value for a child-bounty.
@@ -178,6 +157,13 @@ declare module '@polkadot/api-base/types/consts' {
        * Maximum number of child bounties that can be added to a parent bounty.
        **/
       maxActiveChildBountyCount: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    claims: {
+      prefix: Bytes & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -197,7 +183,7 @@ declare module '@polkadot/api-base/types/consts' {
       /**
        * Period in blocks where an external proposal may not be re-submitted after being vetoed.
        **/
-      cooloffPeriod: u32 & AugmentedConst<ApiType>;
+      cooloffPeriod: u64 & AugmentedConst<ApiType>;
       /**
        * The period between a proposal being approved and enacted.
        * 
@@ -205,11 +191,11 @@ declare module '@polkadot/api-base/types/consts' {
        * voting stakers have an opportunity to remove themselves from the system in the case
        * where they are on the losing side of a vote.
        **/
-      enactmentPeriod: u32 & AugmentedConst<ApiType>;
+      enactmentPeriod: u64 & AugmentedConst<ApiType>;
       /**
        * Minimum voting period allowed for a fast-track referendum.
        **/
-      fastTrackVotingPeriod: u32 & AugmentedConst<ApiType>;
+      fastTrackVotingPeriod: u64 & AugmentedConst<ApiType>;
       /**
        * Indicator for whether an emergency origin is even allowed to happen. Some chains may
        * want to set this permanently to `false`, others may want to condition it on things such
@@ -219,7 +205,7 @@ declare module '@polkadot/api-base/types/consts' {
       /**
        * How often (in blocks) new public referenda are launched.
        **/
-      launchPeriod: u32 & AugmentedConst<ApiType>;
+      launchPeriod: u64 & AugmentedConst<ApiType>;
       /**
        * The maximum number of items which can be blacklisted.
        **/
@@ -249,110 +235,11 @@ declare module '@polkadot/api-base/types/consts' {
        * It should be no shorter than enactment period to ensure that in the case of an approval,
        * those successful voters are locked into the consequences that their votes entail.
        **/
-      voteLockingPeriod: u32 & AugmentedConst<ApiType>;
+      voteLockingPeriod: u64 & AugmentedConst<ApiType>;
       /**
        * How often (in blocks) to check for new votes.
        **/
-      votingPeriod: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
-    dkg: {
-      /**
-       * Max authorities to store
-       **/
-      maxAuthorities: u32 & AugmentedConst<ApiType>;
-      /**
-       * MaxLength for keys
-       **/
-      maxKeyLength: u32 & AugmentedConst<ApiType>;
-      /**
-       * Max length of a proposal
-       **/
-      maxProposalLength: u32 & AugmentedConst<ApiType>;
-      /**
-       * Max reporters to store
-       **/
-      maxReporters: u32 & AugmentedConst<ApiType>;
-      /**
-       * MaxLength for signature
-       **/
-      maxSignatureLength: u32 & AugmentedConst<ApiType>;
-      /**
-       * Session length helper allowing to query session length across runtime upgrades.
-       **/
-      sessionPeriod: u32 & AugmentedConst<ApiType>;
-      /**
-       * Number of blocks of cooldown after unsigned transaction is included.
-       * 
-       * This ensures that we only accept unsigned transactions once, every `UnsignedInterval`
-       * blocks.
-       **/
-      unsignedInterval: u32 & AugmentedConst<ApiType>;
-      /**
-       * A configuration for base priority of unsigned transactions.
-       * 
-       * This is exposed so that it can be tuned for particular runtime, when
-       * multiple pallets send unsigned transactions.
-       **/
-      unsignedPriority: u64 & AugmentedConst<ApiType>;
-      /**
-       * Length of encoded proposer vote
-       **/
-      voteLength: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
-    dkgProposalHandler: {
-      /**
-       * Max number of signed proposal submissions per batch;
-       **/
-      maxProposalsPerBatch: u32 & AugmentedConst<ApiType>;
-      /**
-       * Max blocks to store an unsigned proposal
-       **/
-      unsignedProposalExpiry: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
-    dkgProposals: {
-      /**
-       * The identifier for this chain.
-       * This must be unique and must not collide with existing IDs within a
-       * set of bridged chains.
-       **/
-      chainIdentifier: WebbProposalsHeaderTypedChainId & AugmentedConst<ApiType>;
-      /**
-       * Max length of a proposal
-       **/
-      maxProposalLength: u32 & AugmentedConst<ApiType>;
-      /**
-       * The max proposers that can be stored in storage
-       **/
-      maxProposers: u32 & AugmentedConst<ApiType>;
-      /**
-       * The max resources that can be stored in storage
-       **/
-      maxResources: u32 & AugmentedConst<ApiType>;
-      /**
-       * The max votes to store for for and against
-       **/
-      maxVotes: u32 & AugmentedConst<ApiType>;
-      /**
-       * The session period
-       **/
-      period: u32 & AugmentedConst<ApiType>;
-      proposalLifetime: u32 & AugmentedConst<ApiType>;
-      /**
-       * The size of an external proposer account (i.e. 64-byte Ethereum public key)
-       **/
-      votingKeySize: u32 & AugmentedConst<ApiType>;
+      votingPeriod: u64 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -369,16 +256,6 @@ declare module '@polkadot/api-base/types/consts' {
        * "better" in the Unsigned phase.
        **/
       betterUnsignedThreshold: Perbill & AugmentedConst<ApiType>;
-      /**
-       * The maximum number of electable targets to put in the snapshot.
-       **/
-      maxElectableTargets: u16 & AugmentedConst<ApiType>;
-      /**
-       * The maximum number of electing voters to put in the snapshot. At the moment, snapshots
-       * are only over a single block, but once multi-block elections are introduced they will
-       * take place over multiple blocks.
-       **/
-      maxElectingVoters: u32 & AugmentedConst<ApiType>;
       /**
        * The maximum number of winners that can be elected by this `ElectionProvider`
        * implementation.
@@ -400,7 +277,7 @@ declare module '@polkadot/api-base/types/consts' {
        * For example, if it is 5, that means that at least 5 blocks will elapse between attempts
        * to submit the worker's solution.
        **/
-      offchainRepeat: u32 & AugmentedConst<ApiType>;
+      offchainRepeat: u64 & AugmentedConst<ApiType>;
       /**
        * Base deposit for a signed solution.
        **/
@@ -438,7 +315,7 @@ declare module '@polkadot/api-base/types/consts' {
       /**
        * Duration of the signed phase.
        **/
-      signedPhase: u32 & AugmentedConst<ApiType>;
+      signedPhase: u64 & AugmentedConst<ApiType>;
       /**
        * Base reward for a signed solution
        **/
@@ -446,7 +323,7 @@ declare module '@polkadot/api-base/types/consts' {
       /**
        * Duration of the unsigned phase.
        **/
-      unsignedPhase: u32 & AugmentedConst<ApiType>;
+      unsignedPhase: u64 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -499,7 +376,7 @@ declare module '@polkadot/api-base/types/consts' {
        * round will happen. If set to zero, no elections are ever triggered and the module will
        * be in passive mode.
        **/
-      termDuration: u32 & AugmentedConst<ApiType>;
+      termDuration: u64 & AugmentedConst<ApiType>;
       /**
        * Base deposit associated with voting.
        * 
@@ -516,18 +393,15 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
-    eth2Client: {
-      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
     grandpa: {
       /**
        * Max Authorities in use
        **/
       maxAuthorities: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum number of nominators for each validator.
+       **/
+      maxNominators: u32 & AugmentedConst<ApiType>;
       /**
        * The maximum number of entries to keep in the set id to session index mapping.
        * 
@@ -671,10 +545,6 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       historyDepth: u32 & AugmentedConst<ApiType>;
       /**
-       * Maximum number of nominations per nominator.
-       **/
-      maxNominations: u32 & AugmentedConst<ApiType>;
-      /**
        * The maximum number of nominators rewarded for each validator.
        * 
        * For each validator only the `$MaxNominatorRewardedPerValidator` biggest stakers can
@@ -714,7 +584,7 @@ declare module '@polkadot/api-base/types/consts' {
       /**
        * Maximum number of block number to block hash mappings to keep (oldest pruned first).
        **/
-      blockHashCount: u32 & AugmentedConst<ApiType>;
+      blockHashCount: u64 & AugmentedConst<ApiType>;
       /**
        * The maximum length of a block (in bytes).
        **/
@@ -818,7 +688,7 @@ declare module '@polkadot/api-base/types/consts' {
       /**
        * Period between successive spends.
        **/
-      spendPeriod: u32 & AugmentedConst<ApiType>;
+      spendPeriod: u64 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
