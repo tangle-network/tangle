@@ -268,7 +268,10 @@ pub mod pallet {
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
 			let max_re_staking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
-			ensure!(total_profile_restake <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
+			ensure!(
+				total_profile_restake <= max_re_staking_bond,
+				Error::<T>::ExceedsMaxReStakeValue
+			);
 
 			// Validate role staking records.
 			let records = profile.get_records();
@@ -344,7 +347,10 @@ pub mod pallet {
 
 			let max_re_staking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
 			// Total re_staking amount should not exceed  max_re_staking_amount.
-			ensure!(total_profile_restake <= max_re_staking_bond, Error::<T>::ExceedsMaxReStakeValue);
+			ensure!(
+				total_profile_restake <= max_re_staking_bond,
+				Error::<T>::ExceedsMaxReStakeValue
+			);
 
 			Self::validate_updated_profile(stash_account.clone(), updated_profile.clone())?;
 			ledger.profile = updated_profile.clone();
