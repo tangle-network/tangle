@@ -6,10 +6,10 @@
 import '@polkadot/api-base/types/events';
 
 import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
-import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64 } from '@polkadot/types-codec';
+import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u32, u64 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import { PalletDkgProposalHandlerOffencesDkgMisbehaviorOffenceType, EthTypesBlockHeader, DkgRuntimePrimitivesCryptoPublic, DkgRuntimePrimitivesMisbehaviourType, DkgRuntimePrimitivesProposalDkgPayloadKey, DkgRuntimePrimitivesProposalSignedProposalBatch, EthTypesEth2BeaconBlockHeader, EthTypesExecutionHeaderInfo, EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletDkgProposalHandlerSignedProposalEventData, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsPoolState, PalletStakingExposure, PalletStakingForcing, PalletStakingValidatorPrefs, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, WebbProposalsHeaderTypedChainId, WebbProposalsProposalProposalKind } from '@polkadot/types/lookup';
+import { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsPoolState, PalletStakingExposure, PalletStakingForcing, PalletStakingValidatorPrefs, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, PalletAirdropClaimsUtilsMultiAddress  } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -164,12 +164,6 @@ declare module '@polkadot/api-base/types/events' {
        **/
       [key: string]: AugmentedEvent<ApiType>;
     };
-    bridgeRegistry: {
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
     childBounties: {
       /**
        * A child-bounty is added.
@@ -187,6 +181,16 @@ declare module '@polkadot/api-base/types/events' {
        * A child-bounty is claimed by beneficiary.
        **/
       Claimed: AugmentedEvent<ApiType, [index: u32, childIndex: u32, payout: u128, beneficiary: AccountId32], { index: u32, childIndex: u32, payout: u128, beneficiary: AccountId32 }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    claims: {
+      /**
+       * Someone claimed some native tokens.
+       **/
+      Claimed: AugmentedEvent<ApiType, [recipient: AccountId32, source: PalletAirdropClaimsUtilsMultiAddress, amount: u128], { recipient: AccountId32, source: PalletAirdropClaimsUtilsMultiAddress, amount: u128 }>;
       /**
        * Generic event
        **/
@@ -292,149 +296,11 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * An external proposal has been vetoed.
        **/
-      Vetoed: AugmentedEvent<ApiType, [who: AccountId32, proposalHash: H256, until: u32], { who: AccountId32, proposalHash: H256, until: u32 }>;
+      Vetoed: AugmentedEvent<ApiType, [who: AccountId32, proposalHash: H256, until: u64], { who: AccountId32, proposalHash: H256, until: u64 }>;
       /**
        * An account has voted in a referendum
        **/
       Voted: AugmentedEvent<ApiType, [voter: AccountId32, refIndex: u32, vote: PalletDemocracyVoteAccountVote], { voter: AccountId32, refIndex: u32, vote: PalletDemocracyVoteAccountVote }>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    dkg: {
-      /**
-       * An authority has been jailed for misbehaviour
-       **/
-      AuthorityJailed: AugmentedEvent<ApiType, [misbehaviourType: DkgRuntimePrimitivesMisbehaviourType, authority: DkgRuntimePrimitivesCryptoPublic], { misbehaviourType: DkgRuntimePrimitivesMisbehaviourType, authority: DkgRuntimePrimitivesCryptoPublic }>;
-      /**
-       * An authority has been unjailed
-       **/
-      AuthorityUnJailed: AugmentedEvent<ApiType, [authority: DkgRuntimePrimitivesCryptoPublic], { authority: DkgRuntimePrimitivesCryptoPublic }>;
-      /**
-       * An Emergency Keygen Protocol was triggered.
-       **/
-      EmergencyKeygenTriggered: AugmentedEvent<ApiType, []>;
-      /**
-       * Misbehaviour reports submitted
-       **/
-      MisbehaviourReportsSubmitted: AugmentedEvent<ApiType, [misbehaviourType: DkgRuntimePrimitivesMisbehaviourType, reporters: Vec<DkgRuntimePrimitivesCryptoPublic>, offender: DkgRuntimePrimitivesCryptoPublic], { misbehaviourType: DkgRuntimePrimitivesMisbehaviourType, reporters: Vec<DkgRuntimePrimitivesCryptoPublic>, offender: DkgRuntimePrimitivesCryptoPublic }>;
-      /**
-       * NextKeygenThreshold updated
-       **/
-      NextKeygenThresholdUpdated: AugmentedEvent<ApiType, [nextKeygenThreshold: u16], { nextKeygenThreshold: u16 }>;
-      /**
-       * Next public key signature submitted
-       **/
-      NextPublicKeySignatureSubmitted: AugmentedEvent<ApiType, [voterMerkleRoot: U8aFixed, sessionLength: u64, voterCount: u32, nonce: u32, pubKey: Bytes, signature: Bytes, compressedPubKey: Bytes], { voterMerkleRoot: U8aFixed, sessionLength: u64, voterCount: u32, nonce: u32, pubKey: Bytes, signature: Bytes, compressedPubKey: Bytes }>;
-      /**
-       * Next public key submitted
-       **/
-      NextPublicKeySubmitted: AugmentedEvent<ApiType, [compressedPubKey: Bytes], { compressedPubKey: Bytes }>;
-      /**
-       * NextSignatureThreshold updated
-       **/
-      NextSignatureThresholdUpdated: AugmentedEvent<ApiType, [nextSignatureThreshold: u16], { nextSignatureThreshold: u16 }>;
-      /**
-       * PendingKeygenThreshold updated
-       **/
-      PendingKeygenThresholdUpdated: AugmentedEvent<ApiType, [pendingKeygenThreshold: u16], { pendingKeygenThreshold: u16 }>;
-      /**
-       * PendingSignatureThreshold updated
-       **/
-      PendingSignatureThresholdUpdated: AugmentedEvent<ApiType, [pendingSignatureThreshold: u16], { pendingSignatureThreshold: u16 }>;
-      /**
-       * Proposer votes submitted
-       **/
-      ProposerSetVotesSubmitted: AugmentedEvent<ApiType, [voters: Vec<DkgRuntimePrimitivesCryptoPublic>, signatures: Vec<Bytes>, vote: Bytes], { voters: Vec<DkgRuntimePrimitivesCryptoPublic>, signatures: Vec<Bytes>, vote: Bytes }>;
-      /**
-       * Current Public Key Changed.
-       **/
-      PublicKeyChanged: AugmentedEvent<ApiType, [compressedPubKey: Bytes], { compressedPubKey: Bytes }>;
-      /**
-       * Current Public Key Signature Changed.
-       **/
-      PublicKeySignatureChanged: AugmentedEvent<ApiType, [voterMerkleRoot: U8aFixed, sessionLength: u64, voterCount: u32, nonce: u32, pubKey: Bytes, signature: Bytes, compressedPubKey: Bytes], { voterMerkleRoot: U8aFixed, sessionLength: u64, voterCount: u32, nonce: u32, pubKey: Bytes, signature: Bytes, compressedPubKey: Bytes }>;
-      /**
-       * Current public key submitted
-       **/
-      PublicKeySubmitted: AugmentedEvent<ApiType, [compressedPubKey: Bytes], { compressedPubKey: Bytes }>;
-      /**
-       * Refresh DKG Keys Finished (forcefully).
-       **/
-      RefreshKeysFinished: AugmentedEvent<ApiType, [nextAuthoritySetId: u64], { nextAuthoritySetId: u64 }>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    dkgProposalHandler: {
-      /**
-       * RuntimeEvent Emitted when we encounter a Proposal with invalid Signature.
-       **/
-      InvalidProposalBatchSignature: AugmentedEvent<ApiType, [proposals: DkgRuntimePrimitivesProposalSignedProposalBatch, data: Bytes, invalidSignature: Bytes, expectedPublicKey: Option<Bytes>, actualPublicKey: Option<Bytes>], { proposals: DkgRuntimePrimitivesProposalSignedProposalBatch, data: Bytes, invalidSignature: Bytes, expectedPublicKey: Option<Bytes>, actualPublicKey: Option<Bytes> }>;
-      /**
-       * RuntimeEvent When a Proposal is added to UnsignedProposalQueue.
-       **/
-      ProposalAdded: AugmentedEvent<ApiType, [key: DkgRuntimePrimitivesProposalDkgPayloadKey, targetChain: WebbProposalsHeaderTypedChainId, data: Bytes], { key: DkgRuntimePrimitivesProposalDkgPayloadKey, targetChain: WebbProposalsHeaderTypedChainId, data: Bytes }>;
-      /**
-       * RuntimeEvent When a Proposal is expired and removed from UnsignedProposalQueue.
-       **/
-      ProposalBatchExpired: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32 }>;
-      /**
-       * RuntimeEvent When a Proposal is removed from UnsignedProposalQueue.
-       **/
-      ProposalBatchRemoved: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32 }>;
-      /**
-       * RuntimeEvent When a Proposal Gets Signed by DKG.
-       **/
-      ProposalBatchSigned: AugmentedEvent<ApiType, [targetChain: WebbProposalsHeaderTypedChainId, batchId: u32, proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>, signature: Bytes], { targetChain: WebbProposalsHeaderTypedChainId, batchId: u32, proposals: Vec<PalletDkgProposalHandlerSignedProposalEventData>, signature: Bytes }>;
-      /**
-       * Offence reported against current DKG
-       **/
-      SigningOffenceReported: AugmentedEvent<ApiType, [offence: PalletDkgProposalHandlerOffencesDkgMisbehaviorOffenceType, signedData: DkgRuntimePrimitivesProposalSignedProposalBatch], { offence: PalletDkgProposalHandlerOffencesDkgMisbehaviorOffenceType, signedData: DkgRuntimePrimitivesProposalSignedProposalBatch }>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    dkgProposals: {
-      /**
-       * Chain now available for transfers (chain_id)
-       **/
-      ChainWhitelisted: AugmentedEvent<ApiType, [chainId: WebbProposalsHeaderTypedChainId], { chainId: WebbProposalsHeaderTypedChainId }>;
-      /**
-       * Voting successful for a proposal
-       **/
-      ProposalApproved: AugmentedEvent<ApiType, [kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32], { kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32 }>;
-      /**
-       * Execution of call failed
-       **/
-      ProposalFailed: AugmentedEvent<ApiType, [kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32], { kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32 }>;
-      /**
-       * Voting rejected a proposal
-       **/
-      ProposalRejected: AugmentedEvent<ApiType, [kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32], { kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32 }>;
-      /**
-       * Execution of call succeeded
-       **/
-      ProposalSucceeded: AugmentedEvent<ApiType, [kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32], { kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32 }>;
-      /**
-       * Proposers have been reset
-       **/
-      ProposersReset: AugmentedEvent<ApiType, [proposers: Vec<AccountId32>], { proposers: Vec<AccountId32> }>;
-      /**
-       * Vote threshold has changed (new_threshold)
-       **/
-      ProposerThresholdChanged: AugmentedEvent<ApiType, [newThreshold: u32], { newThreshold: u32 }>;
-      /**
-       * Vot submitted against proposal
-       **/
-      VoteAgainst: AugmentedEvent<ApiType, [kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32, who: AccountId32], { kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32, who: AccountId32 }>;
-      /**
-       * Vote submitted in favour of proposal
-       **/
-      VoteFor: AugmentedEvent<ApiType, [kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32, who: AccountId32], { kind: WebbProposalsProposalProposalKind, srcChainId: WebbProposalsHeaderTypedChainId, proposalNonce: u32, who: AccountId32 }>;
       /**
        * Generic event
        **/
@@ -516,16 +382,6 @@ declare module '@polkadot/api-base/types/events' {
        * A seat holder was slashed by amount by being forcefully removed from the set.
        **/
       SeatHolderSlashed: AugmentedEvent<ApiType, [seatHolder: AccountId32, amount: u128], { seatHolder: AccountId32, amount: u128 }>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    eth2Client: {
-      Init: AugmentedEvent<ApiType, [typedChainId: WebbProposalsHeaderTypedChainId, headerInfo: EthTypesExecutionHeaderInfo], { typedChainId: WebbProposalsHeaderTypedChainId, headerInfo: EthTypesExecutionHeaderInfo }>;
-      SubmitBeaconChainLightClientUpdate: AugmentedEvent<ApiType, [typedChainId: WebbProposalsHeaderTypedChainId, submitter: AccountId32, beaconBlockHeader: EthTypesEth2BeaconBlockHeader], { typedChainId: WebbProposalsHeaderTypedChainId, submitter: AccountId32, beaconBlockHeader: EthTypesEth2BeaconBlockHeader }>;
-      SubmitExecutionHeader: AugmentedEvent<ApiType, [typedChainId: WebbProposalsHeaderTypedChainId, headerInfo: EthTypesBlockHeader], { typedChainId: WebbProposalsHeaderTypedChainId, headerInfo: EthTypesBlockHeader }>;
-      UpdateTrustedSigner: AugmentedEvent<ApiType, [trustedSigner: AccountId32], { trustedSigner: AccountId32 }>;
       /**
        * Generic event
        **/
@@ -786,27 +642,27 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * The call for the provided hash was not found so the task has been aborted.
        **/
-      CallUnavailable: AugmentedEvent<ApiType, [task: ITuple<[u32, u32]>, id: Option<U8aFixed>], { task: ITuple<[u32, u32]>, id: Option<U8aFixed> }>;
+      CallUnavailable: AugmentedEvent<ApiType, [task: ITuple<[u64, u32]>, id: Option<U8aFixed>], { task: ITuple<[u64, u32]>, id: Option<U8aFixed> }>;
       /**
        * Canceled some task.
        **/
-      Canceled: AugmentedEvent<ApiType, [when: u32, index: u32], { when: u32, index: u32 }>;
+      Canceled: AugmentedEvent<ApiType, [when: u64, index: u32], { when: u64, index: u32 }>;
       /**
        * Dispatched some task.
        **/
-      Dispatched: AugmentedEvent<ApiType, [task: ITuple<[u32, u32]>, id: Option<U8aFixed>, result: Result<Null, SpRuntimeDispatchError>], { task: ITuple<[u32, u32]>, id: Option<U8aFixed>, result: Result<Null, SpRuntimeDispatchError> }>;
+      Dispatched: AugmentedEvent<ApiType, [task: ITuple<[u64, u32]>, id: Option<U8aFixed>, result: Result<Null, SpRuntimeDispatchError>], { task: ITuple<[u64, u32]>, id: Option<U8aFixed>, result: Result<Null, SpRuntimeDispatchError> }>;
       /**
        * The given task was unable to be renewed since the agenda is full at that block.
        **/
-      PeriodicFailed: AugmentedEvent<ApiType, [task: ITuple<[u32, u32]>, id: Option<U8aFixed>], { task: ITuple<[u32, u32]>, id: Option<U8aFixed> }>;
+      PeriodicFailed: AugmentedEvent<ApiType, [task: ITuple<[u64, u32]>, id: Option<U8aFixed>], { task: ITuple<[u64, u32]>, id: Option<U8aFixed> }>;
       /**
        * The given task can never be executed since it is overweight.
        **/
-      PermanentlyOverweight: AugmentedEvent<ApiType, [task: ITuple<[u32, u32]>, id: Option<U8aFixed>], { task: ITuple<[u32, u32]>, id: Option<U8aFixed> }>;
+      PermanentlyOverweight: AugmentedEvent<ApiType, [task: ITuple<[u64, u32]>, id: Option<U8aFixed>], { task: ITuple<[u64, u32]>, id: Option<U8aFixed> }>;
       /**
        * Scheduled some task.
        **/
-      Scheduled: AugmentedEvent<ApiType, [when: u32, index: u32], { when: u32, index: u32 }>;
+      Scheduled: AugmentedEvent<ApiType, [when: u64, index: u32], { when: u64, index: u32 }>;
       /**
        * Generic event
        **/
@@ -870,6 +726,14 @@ declare module '@polkadot/api-base/types/events' {
        * era as been reported.
        **/
       SlashReported: AugmentedEvent<ApiType, [validator: AccountId32, fraction: Perbill, slashEra: u32], { validator: AccountId32, fraction: Perbill, slashEra: u32 }>;
+      /**
+       * Targets size limit reached.
+       **/
+      SnapshotTargetsSizeExceeded: AugmentedEvent<ApiType, [size_: u32], { size_: u32 }>;
+      /**
+       * Voters size limit reached.
+       **/
+      SnapshotVotersSizeExceeded: AugmentedEvent<ApiType, [size_: u32], { size_: u32 }>;
       /**
        * A new set of stakers was elected.
        **/

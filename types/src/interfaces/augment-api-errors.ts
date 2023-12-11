@@ -118,44 +118,6 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
-    bridgeRegistry: {
-      /**
-       * Resources map to different bridge indices
-       **/
-      BridgeIndexError: AugmentedError<ApiType>;
-      /**
-       * Bridge does not exist.
-       **/
-      BridgeNotFound: AugmentedError<ApiType>;
-      /**
-       * Input out of bounds
-       **/
-      OutOfBounds: AugmentedError<ApiType>;
-      /**
-       * Parameters haven't been initialized
-       **/
-      ParametersNotInitialized: AugmentedError<ApiType>;
-      /**
-       * Proposal is not signed and should not be processed
-       **/
-      ProposalNotSigned: AugmentedError<ApiType>;
-      /**
-       * Too many additional fields.
-       **/
-      TooManyFields: AugmentedError<ApiType>;
-      /**
-       * Too many resources.
-       **/
-      TooManyResources: AugmentedError<ApiType>;
-      /**
-       * Error during verification
-       **/
-      VerifyError: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
     childBounties: {
       /**
        * The bounty balance is not enough to add new child-bounty.
@@ -169,6 +131,45 @@ declare module '@polkadot/api-base/types/errors' {
        * Number of child bounties exceeds limit `MaxActiveChildBountyCount`.
        **/
       TooManyChildBounties: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    claims: {
+      /**
+       * Invalid Ethereum signature.
+       **/
+      InvalidEthereumSignature: AugmentedError<ApiType>;
+      /**
+       * Invalid Native account decoding
+       **/
+      InvalidNativeAccount: AugmentedError<ApiType>;
+      /**
+       * Invalid Native (sr25519) signature
+       **/
+      InvalidNativeSignature: AugmentedError<ApiType>;
+      /**
+       * A needed statement was not included.
+       **/
+      InvalidStatement: AugmentedError<ApiType>;
+      /**
+       * There's not enough in the pot to pay out some unvested amount. Generally implies a
+       * logic error.
+       **/
+      PotUnderflow: AugmentedError<ApiType>;
+      /**
+       * Account ID sending transaction has no claim.
+       **/
+      SenderHasNoClaim: AugmentedError<ApiType>;
+      /**
+       * Ethereum address has no claim.
+       **/
+      SignerHasNoClaim: AugmentedError<ApiType>;
+      /**
+       * The account already has a vested balance.
+       **/
+      VestedBalanceExists: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -191,6 +192,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Account is not a member
        **/
       NotMember: AugmentedError<ApiType>;
+      /**
+       * Prime account is not a member
+       **/
+      PrimeAccountNotMember: AugmentedError<ApiType>;
       /**
        * Proposal must exist
        **/
@@ -318,264 +323,6 @@ declare module '@polkadot/api-base/types/errors' {
        * Invalid upper bound.
        **/
       WrongUpperBound: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    dkg: {
-      /**
-       * Authority is already jailed
-       **/
-      AlreadyJailed: AugmentedError<ApiType>;
-      /**
-       * Already submitted a public key
-       **/
-      AlreadySubmittedPublicKey: AugmentedError<ApiType>;
-      /**
-       * Already submitted a public key signature
-       **/
-      AlreadySubmittedSignature: AugmentedError<ApiType>;
-      /**
-       * Cannot retreive signer from ecdsa signature
-       **/
-      CannotRetreiveSigner: AugmentedError<ApiType>;
-      /**
-       * Must be calling from the controller account
-       **/
-      InvalidControllerAccount: AugmentedError<ApiType>;
-      /**
-       * Invalid misbehaviour reports
-       **/
-      InvalidMisbehaviourReports: AugmentedError<ApiType>;
-      /**
-       * Invalid Nonece used, must be greater than [`refresh_nonce`].
-       **/
-      InvalidNonce: AugmentedError<ApiType>;
-      /**
-       * Invalid public key submission
-       **/
-      InvalidPublicKeys: AugmentedError<ApiType>;
-      /**
-       * Invalid refresh proposal data
-       **/
-      InvalidRefreshProposal: AugmentedError<ApiType>;
-      /**
-       * Invalid public key signature submission
-       **/
-      InvalidSignature: AugmentedError<ApiType>;
-      /**
-       * Invalid threshold
-       **/
-      InvalidThreshold: AugmentedError<ApiType>;
-      /**
-       * Must be an an authority
-       **/
-      MustBeAnActiveAuthority: AugmentedError<ApiType>;
-      /**
-       * Must be queued  to become an authority
-       **/
-      MustBeAQueuedAuthority: AugmentedError<ApiType>;
-      /**
-       * No mapped account to authority
-       **/
-      NoMappedAccount: AugmentedError<ApiType>;
-      /**
-       * No NextPublicKey stored on-chain.
-       **/
-      NoNextPublicKey: AugmentedError<ApiType>;
-      /**
-       * No current refresh active
-       **/
-      NoRefreshProposal: AugmentedError<ApiType>;
-      /**
-       * We do not have authorities to jail
-       **/
-      NotEnoughAuthoritiesToJail: AugmentedError<ApiType>;
-      /**
-       * Reported misbehaviour against a non authority
-       **/
-      OffenderNotAuthority: AugmentedError<ApiType>;
-      /**
-       * Input is out of bounds
-       **/
-      OutOfBounds: AugmentedError<ApiType>;
-      /**
-       * Proposal is not signed and should not be processed
-       **/
-      ProposalNotSigned: AugmentedError<ApiType>;
-      /**
-       * DKG Refresh is already in progress.
-       **/
-      RefreshInProgress: AugmentedError<ApiType>;
-      /**
-       * Used signature from past sessions
-       **/
-      UsedSignature: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    dkgProposalHandler: {
-      /**
-       * Math overflow
-       **/
-      ArithmeticOverflow: AugmentedError<ApiType>;
-      /**
-       * Duplicate signed proposal
-       **/
-      CannotOverwriteSignedProposal: AugmentedError<ApiType>;
-      /**
-       * Chain id is invalid
-       **/
-      ChainIdInvalid: AugmentedError<ApiType>;
-      /**
-       * Batch does not contain proposals
-       **/
-      EmptyBatch: AugmentedError<ApiType>;
-      /**
-       * Proposal bytes length is invalid
-       **/
-      InvalidProposalBytesLength: AugmentedError<ApiType>;
-      /**
-       * the signed data is invalid
-       **/
-      InvalidSignedData: AugmentedError<ApiType>;
-      /**
-       * Error names should be descriptive.
-       **/
-      NoneValue: AugmentedError<ApiType>;
-      /**
-       * The signature does not match current active key
-       **/
-      NotSignedByCurrentDKG: AugmentedError<ApiType>;
-      /**
-       * Proposal with the ID has already been submitted
-       **/
-      ProposalAlreadyExists: AugmentedError<ApiType>;
-      /**
-       * Proposal batch does not exist
-       **/
-      ProposalBatchNotFound: AugmentedError<ApiType>;
-      /**
-       * No proposal with the ID was found
-       **/
-      ProposalDoesNotExists: AugmentedError<ApiType>;
-      /**
-       * the prposal exists on runtime and is valid
-       **/
-      ProposalExistsAndIsValid: AugmentedError<ApiType>;
-      /**
-       * Proposal format is invalid
-       **/
-      ProposalFormatInvalid: AugmentedError<ApiType>;
-      /**
-       * Proposal must be unsigned
-       **/
-      ProposalMustBeUnsigned: AugmentedError<ApiType>;
-      /**
-       * Proposal out of bounds
-       **/
-      ProposalOutOfBounds: AugmentedError<ApiType>;
-      /**
-       * Proposal signature is invalid
-       **/
-      ProposalSignatureInvalid: AugmentedError<ApiType>;
-      /**
-       * Proposal length exceeds max allowed per batch
-       **/
-      ProposalsLengthOverflow: AugmentedError<ApiType>;
-      /**
-       * Errors should have helpful documentation associated with them.
-       **/
-      StorageOverflow: AugmentedError<ApiType>;
-      /**
-       * Unable to accept new unsigned proposal
-       **/
-      UnsignedProposalQueueOverflow: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    dkgProposals: {
-      /**
-       * Chain has already been enabled
-       **/
-      ChainAlreadyWhitelisted: AugmentedError<ApiType>;
-      /**
-       * Interactions with this chain is not permitted
-       **/
-      ChainNotWhitelisted: AugmentedError<ApiType>;
-      /**
-       * Provided chain Id is not valid
-       **/
-      InvalidChainId: AugmentedError<ApiType>;
-      /**
-       * Account does not have correct permissions
-       **/
-      InvalidPermissions: AugmentedError<ApiType>;
-      /**
-       * Invalid proposal
-       **/
-      InvalidProposal: AugmentedError<ApiType>;
-      /**
-       * Proposer threshold cannot be 0
-       **/
-      InvalidThreshold: AugmentedError<ApiType>;
-      /**
-       * Protected operation, must be performed by proposer
-       **/
-      MustBeProposer: AugmentedError<ApiType>;
-      /**
-       * Input is out of bounds
-       **/
-      OutOfBounds: AugmentedError<ApiType>;
-      /**
-       * Proposal has either failed or succeeded
-       **/
-      ProposalAlreadyComplete: AugmentedError<ApiType>;
-      /**
-       * A proposal with these parameters has already been submitted
-       **/
-      ProposalAlreadyExists: AugmentedError<ApiType>;
-      /**
-       * No proposal with the ID was found
-       **/
-      ProposalDoesNotExist: AugmentedError<ApiType>;
-      /**
-       * Lifetime of proposal has been exceeded
-       **/
-      ProposalExpired: AugmentedError<ApiType>;
-      /**
-       * Cannot complete proposal, needs more votes
-       **/
-      ProposalNotComplete: AugmentedError<ApiType>;
-      /**
-       * Proposer already in set
-       **/
-      ProposerAlreadyExists: AugmentedError<ApiType>;
-      /**
-       * Proposer has already submitted some vote for this proposal
-       **/
-      ProposerAlreadyVoted: AugmentedError<ApiType>;
-      /**
-       * Proposer Count is Zero
-       **/
-      ProposerCountIsZero: AugmentedError<ApiType>;
-      /**
-       * Provided accountId is not a proposer
-       **/
-      ProposerInvalid: AugmentedError<ApiType>;
-      /**
-       * Resource ID provided isn't mapped to anything
-       **/
-      ResourceDoesNotExist: AugmentedError<ApiType>;
-      /**
-       * Proposer threshold not set
-       **/
-      ThresholdNotSet: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -712,99 +459,6 @@ declare module '@polkadot/api-base/types/errors' {
        * Cannot vote when no candidates or members exist.
        **/
       UnableToVote: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    eth2Client: {
-      /**
-       * The active header slot number should be higher than the finalized slot
-       **/
-      ActiveHeaderSlotLessThanFinalizedSlot: AugmentedError<ApiType>;
-      /**
-       * The light client is already initialized for the typed chain ID
-       **/
-      AlreadyInitialized: AugmentedError<ApiType>;
-      /**
-       * Block already submitted
-       **/
-      BlockAlreadySubmitted: AugmentedError<ApiType>;
-      /**
-       * The block hash does not match the expected block hash
-       **/
-      BlockHashesDoNotMatch: AugmentedError<ApiType>;
-      /**
-       * The chain cannot be closed
-       **/
-      ChainCannotBeClosed: AugmentedError<ApiType>;
-      CurrentSyncCommitteeNotSet: AugmentedError<ApiType>;
-      FinalizedBeaconHeaderNotPresent: AugmentedError<ApiType>;
-      FinalizedExecutionHeaderNotPresent: AugmentedError<ApiType>;
-      /**
-       * "The `hashes_gc_threshold` is not enough to be able to apply gc correctly"
-       **/
-      HashesGcThresholdInsufficient: AugmentedError<ApiType>;
-      HeaderHashDoesNotExist: AugmentedError<ApiType>;
-      /**
-       * Failed to verify the bls signature
-       **/
-      InvalidBlsSignature: AugmentedError<ApiType>;
-      /**
-       * The current client mode is invalid for the action.
-       **/
-      InvalidClientMode: AugmentedError<ApiType>;
-      InvalidExecutionBlock: AugmentedError<ApiType>;
-      /**
-       * Invalid execution block hash proof
-       **/
-      InvalidExecutionBlockHashProof: AugmentedError<ApiType>;
-      /**
-       * Invalid finality proof
-       **/
-      InvalidFinalityProof: AugmentedError<ApiType>;
-      InvalidNetworkConfig: AugmentedError<ApiType>;
-      InvalidNextSyncCommitteeProof: AugmentedError<ApiType>;
-      InvalidSignaturePeriod: AugmentedError<ApiType>;
-      InvalidSyncCommitteeBitsSum: AugmentedError<ApiType>;
-      /**
-       * The acceptable update periods are not met.
-       **/
-      InvalidUpdatePeriod: AugmentedError<ApiType>;
-      /**
-       * For attempting to update the light client
-       **/
-      LightClientUpdateNotAllowed: AugmentedError<ApiType>;
-      NextSyncCommitteeNotPresent: AugmentedError<ApiType>;
-      NextSyncCommitteeNotSet: AugmentedError<ApiType>;
-      /**
-       * Self-explanatory
-       **/
-      NotTrustedSigner: AugmentedError<ApiType>;
-      SyncCommitteeBitsSumLessThanThreshold: AugmentedError<ApiType>;
-      SyncCommitteeUpdateNotPresent: AugmentedError<ApiType>;
-      /**
-       * The client can't be executed in the trustless mode without BLS sigs verification on
-       * Mainnet
-       **/
-      TrustlessModeError: AugmentedError<ApiType>;
-      UnfinalizedHeaderNotPresent: AugmentedError<ApiType>;
-      /**
-       * Unknown parent block header hash
-       **/
-      UnknownParentHeader: AugmentedError<ApiType>;
-      /**
-       * The attested header slot should be equal to or higher than the finalized header slot
-       **/
-      UpdateHeaderSlotLessThanFinalizedHeaderSlot: AugmentedError<ApiType>;
-      /**
-       * The signature slot should be higher than the attested header slot
-       **/
-      UpdateSignatureSlotLessThanAttestedHeaderSlot: AugmentedError<ApiType>;
-      /**
-       * The updates validation can't be disabled for mainnet
-       **/
-      ValidateUpdatesParameterError: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
