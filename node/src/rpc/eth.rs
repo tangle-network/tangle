@@ -54,7 +54,7 @@ pub struct EthDeps<C, P, A: ChainApi, CT, B: BlockT, CIDP> {
 	/// Chain syncing service
 	pub sync: Arc<SyncingService<B>>,
 	/// Frontier Backend.
-	pub frontier_backend: Arc<dyn fc_db::BackendReader<B> + Send + Sync>,
+	pub frontier_backend: Arc<dyn fc_api::Backend<B>>,
 	/// Ethereum data access overrides.
 	pub overrides: Arc<OverrideHandle<B>>,
 	/// Cache for Ethereum block data.
@@ -107,7 +107,7 @@ impl<C, P, A: ChainApi, CT: Clone, B: BlockT, CIDP: Clone> Clone for EthDeps<C, 
 }
 
 /// Instantiate Ethereum-compatible RPC extensions.
-pub fn create_eth<C, BE, P, A, CT, B, CIDP, EC: EthConfig<B, C>>(
+pub fn create_eth<B, C, BE, P, A, CT, CIDP, EC>(
 	mut io: RpcModule<()>,
 	deps: EthDeps<C, P, A, CT, B, CIDP>,
 	subscription_task_executor: SubscriptionTaskExecutor,
@@ -133,6 +133,7 @@ where
 	A: ChainApi<Block = B> + 'static,
 	CT: ConvertTransaction<<B as BlockT>::Extrinsic> + Send + Sync + 'static,
 	CIDP: CreateInherentDataProviders<B, ()> + Send + 'static,
+	EC: EthConfig<B, C>,
 {
 	use fc_rpc::{
 		Eth, EthApiServer, EthDevSigner, EthFilter, EthFilterApiServer, EthPubSub,
@@ -171,7 +172,7 @@ where
 	}
 
 	io.merge(
-		Eth::new(
+		Eth::<B, C, P, CT, BE, A, CIDP, EC>::new(
 			client.clone(),
 			pool.clone(),
 			graph.clone(),

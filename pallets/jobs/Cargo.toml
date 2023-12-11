@@ -19,19 +19,19 @@ sp-std = { workspace = true }
 tangle-primitives = { workspace = true, default-features = false }
 
 [dev-dependencies]
+ethereum = { workspace = true, features = ["with-codec"] }
 ethers = "2.0"
-serde = { workspace = true }
-serde_json = { workspace = true }
+hex = { workspace = true }
+hex-literal = { workspace = true }
 libsecp256k1 = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-timestamp = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 smallvec = { workspace = true }
-sp-io = { workspace = true }
 sp-application-crypto = { workspace = true }
+sp-io = { workspace = true }
 sp-keystore = { workspace = true }
-ethereum = { workspace = true, features = ["with-codec"] }
-hex-literal = { workspace = true }
-hex = { workspace = true }
 
 # Frontier Primitive
 fp-account = { workspace = true }
@@ -75,7 +75,7 @@ std = [
   "pallet-dynamic-fee/std",
   "pallet-ethereum/std",
   "pallet-evm/std",
-  "pallet-evm-chain-id/std"
+  "pallet-evm-chain-id/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [

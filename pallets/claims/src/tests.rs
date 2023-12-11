@@ -9,7 +9,7 @@ use sp_runtime::TokenError::Frozen;
 // or public keys. `u64` is used as the `AccountId` and no `Signature`s are required.
 use crate::{mock::new_test_ext, pallet::Call as ClaimsCall};
 use frame_support::{
-	assert_err, assert_noop, assert_ok, dispatch::DispatchError::BadOrigin,
+	assert_err, assert_noop, assert_ok, pallet_prelude::DispatchError::BadOrigin,
 	traits::ExistenceRequirement,
 };
 use sp_runtime::transaction_validity::TransactionLongevity;

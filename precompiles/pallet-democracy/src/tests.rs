@@ -25,11 +25,11 @@ use crate::{
 };
 use frame_support::{
 	assert_ok,
-	dispatch::Dispatchable,
 	traits::{Currency, PreimageProvider, QueryPreimage, StorePreimage},
 };
 use pallet_balances::Event as BalancesEvent;
 use pallet_preimage::Event as PreimageEvent;
+use sp_runtime::traits::Dispatchable;
 
 use pallet_democracy::{
 	AccountVote, Call as DemocracyCall, Config as DemocracyConfig, Event as DemocracyEvent, Vote,

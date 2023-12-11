@@ -19,7 +19,7 @@ use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::RuntimeDebug;
+use sp_runtime::RuntimeDebug;
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -33,14 +33,11 @@ pub struct FeeInfo<Balance: MaxEncodedLen> {
 	/// The base fee for all jobs.
 	pub base_fee: Balance,
 
-	/// The fee for Distributed Key Generation (DKG) job.
-	pub dkg_validator_fee: Balance,
+	/// The fee for handling the Circuit.
+	pub circuit_fee: Balance,
 
-	/// The fee for signature generation.
-	pub sig_validator_fee: Balance,
-
-	/// The fee for refresh existing DKG.
-	pub refresh_validator_fee: Balance,
+	/// The fee for Proof generation.
+	pub prove_fee: Balance,
 }
 
 impl<Balance: MaxEncodedLen> FeeInfo<Balance> {
@@ -49,13 +46,13 @@ impl<Balance: MaxEncodedLen> FeeInfo<Balance> {
 		self.base_fee
 	}
 
-	/// Get the DKG validator fee.
-	pub fn get_dkg_validator_fee(self) -> Balance {
-		self.dkg_validator_fee
+	/// Get the circuit fee.
+	pub fn get_circuit_fee(self) -> Balance {
+		self.circuit_fee
 	}
 
-	/// Get the signature validator fee.
-	pub fn get_sig_validator_fee(self) -> Balance {
-		self.sig_validator_fee
+	/// Get the proof generation fee.
+	pub fn get_prove_fee(self) -> Balance {
+		self.prove_fee
 	}
 }

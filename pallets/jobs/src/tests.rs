@@ -21,7 +21,7 @@ use mock::*;
 use sp_runtime::AccountId32;
 
 use tangle_primitives::jobs::{
-	DKGJobType, DKGSignatureJobType, DKGSignatureResult, JobSubmission, JobType,
+	DKGSignatureResult, DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, JobSubmission, JobType,
 };
 
 const ALICE: AccountId32 = AccountId32::new([1u8; 32]);
@@ -41,7 +41,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType {
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 				participants: vec![HUNDRED, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
 				permitted_caller: None,
@@ -56,7 +56,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType {
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 5,
 				permitted_caller: None,
@@ -72,7 +72,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 		// should fail when caller has no balance
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType {
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
 				permitted_caller: None,
@@ -85,7 +85,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKG(DKGJobType {
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
 				permitted_caller: Some(TEN),
@@ -100,7 +100,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			RuntimeOrigin::signed(TEN),
 			JobKey::DKG,
 			0,
-			JobResult::DKG(DKGResult {
+			JobResult::DKGPhaseOne(DKGResult {
 				keys_and_signatures: vec![],
 				threshold: 3,
 				participants: vec![],
@@ -122,7 +122,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 		// another account cannot use solution
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKGSignature(DKGSignatureJobType {
+			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
 				submission: vec![],
 			}),
@@ -134,7 +134,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		let submission = JobSubmission {
 			expiry: 100,
-			job_type: JobType::DKGSignature(DKGSignatureJobType {
+			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
 				submission: vec![],
 			}),
@@ -148,7 +148,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			RuntimeOrigin::signed(TEN),
 			JobKey::DKGSignature,
 			1,
-			JobResult::DKGSignature(DKGSignatureResult {
+			JobResult::DKGPhaseTwo(DKGSignatureResult {
 				signing_key: vec![],
 				signature: vec![],
 				data: vec![]

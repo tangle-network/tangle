@@ -26,6 +26,7 @@ pub mod precompiles;
 pub mod voter_bags;
 
 use frame_election_provider_support::{
+	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
 use frame_support::{
@@ -71,7 +72,7 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 use tangle_primitives::{
-	jobs::{JobResult, JobSubmission, JobType, ValidatorOffenceType},
+	jobs::{JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType},
 	roles::ValidatorRewardDistribution,
 	traits::jobs::{JobToFee, MPCHandler},
 };
@@ -349,6 +350,7 @@ impl pallet_grandpa::Config for Runtime {
 	type MaxAuthorities = MaxAuthorities;
 	type EquivocationReportSystem = ();
 	type KeyOwnerProof = sp_core::Void;
+	type MaxNominators = MaxNominatorRewardedPerValidator;
 	type WeightInfo = ();
 }
 
@@ -412,8 +414,10 @@ impl pallet_staking::BenchmarkingConfig for StakingBenchmarkingConfig {
 	type MaxValidators = ConstU32<1000>;
 }
 
+/// Upper limit on the number of NPOS nominations.
+const MAX_QUOTA_NOMINATIONS: u32 = 16;
+
 impl pallet_staking::Config for Runtime {
-	type MaxNominations = MaxNominations;
 	type Currency = Balances;
 	type CurrencyBalance = Balance;
 	type AdminOrigin = EnsureRoot<AccountId>;
@@ -439,6 +443,7 @@ impl pallet_staking::Config for Runtime {
 	type HistoryDepth = HistoryDepth;
 	type EventListeners = NominationPools;
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
+	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
 }
 
@@ -575,6 +580,10 @@ parameter_types! {
 	// The maximum winners that can be elected by the Election pallet which is equivalent to the
 	// maximum active validators the staking pallet can have.
 	pub MaxActiveValidators: u32 = 1000;
+	pub ElectionBoundsOnChain: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(5_000.into()).targets_count(1_250.into()).build();
+	pub ElectionBoundsMultiPhase: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(10_000.into()).targets_count(1_500.into()).build();
 }
 
 /// The numbers configured here could always be more than the the maximum limits of staking pallet
@@ -626,8 +635,7 @@ impl onchain::Config for OnChainSeqPhragmen {
 	type DataProvider = <Runtime as pallet_election_provider_multi_phase::Config>::DataProvider;
 	type WeightInfo = frame_election_provider_support::weights::SubstrateWeight<Runtime>;
 	type MaxWinners = <Runtime as pallet_election_provider_multi_phase::Config>::MaxWinners;
-	type VotersBound = MaxOnChainElectingVoters;
-	type TargetsBound = MaxOnChainElectableTargets;
+	type Bounds = ElectionBoundsOnChain;
 }
 
 impl pallet_election_provider_multi_phase::MinerConfig for Runtime {
@@ -675,10 +683,9 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type GovernanceFallback = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type Solver = SequentialPhragmen<AccountId, SolutionAccuracyOf<Self>, OffchainRandomBalancing>;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
-	type MaxElectableTargets = MaxElectableTargets;
 	type MaxWinners = MaxActiveValidators;
-	type MaxElectingVoters = MaxElectingVoters;
 	type BenchmarkingConfig = ElectionProviderBenchmarkConfig;
+	type ElectionBounds = ElectionBoundsMultiPhase;
 	type WeightInfo = pallet_election_provider_multi_phase::weights::SubstrateWeight<Self>;
 }
 
@@ -1102,10 +1109,10 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 
 	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
 		match job.job_type {
-			JobType::DKG(_) => Dkg::job_to_fee(job),
-			JobType::DKGSignature(_) => Dkg::job_to_fee(job),
-			JobType::ZkSaasPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
-			JobType::ZkSaasPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobType::DKGTSSPhaseOne(_) => Dkg::job_to_fee(job),
+			JobType::DKGTSSPhaseTwo(_) => Dkg::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobType::ZkSaaSPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
 		}
 	}
 }
@@ -1113,12 +1120,12 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 pub struct MockMPCHandler;
 
 impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(data: JobResult) -> DispatchResult {
-		match data {
-			JobResult::DKG(_) => Dkg::verify(data),
-			JobResult::DKGSignature(_) => Dkg::verify(data),
-			JobResult::ZkSaasPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
-			JobResult::ZkSaasPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
+	fn verify(data: JobWithResult<AccountId>) -> DispatchResult {
+		match data.result {
+			JobResult::DKGPhaseOne(_) => Dkg::verify(data.result),
+			JobResult::DKGPhaseTwo(_) => Dkg::verify(data.result),
+			JobResult::ZkSaaSPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobResult::ZkSaaSPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
 		}
 	}
 

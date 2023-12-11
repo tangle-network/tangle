@@ -86,7 +86,7 @@ fn test_assign_multiple_roles() {
 			},
 		);
 		role_records_map.insert(
-			RoleType::ZkSaas,
+			RoleType::ZkSaaS,
 			RoleStakingRecord {
 				metadata: RoleTypeMetadata::ZkSaas(Default::default()),
 				re_staked: 2500,
@@ -99,7 +99,7 @@ fn test_assign_multiple_roles() {
 		assert_eq!(Roles::has_role(1, RoleType::Tss), true);
 
 		// Lets verify role assigned to account.
-		assert_eq!(Roles::has_role(1, RoleType::ZkSaas), true);
+		assert_eq!(Roles::has_role(1, RoleType::ZkSaaS), true);
 
 		assert_eq!(
 			Roles::ledger(1),

@@ -30,9 +30,7 @@ fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f6
 }
 
 fn get_edgeware_genesis_list() -> Vec<H160> {
-	read_contents_to_evm_accounts(
-		"nodesrcdistributions/data/edgeware_genesis_participants.json",
-	)
+	read_contents_to_evm_accounts("node/src/distributions/data/edgeware_genesis_participants.json")
 }
 
 fn get_edgeware_snapshot_list() -> BTreeMap<AccountId32, f64> {
@@ -42,9 +40,7 @@ fn get_edgeware_snapshot_list() -> BTreeMap<AccountId32, f64> {
 }
 
 fn get_discord_list() -> Vec<H160> {
-	read_contents_to_evm_accounts(
-		"node/src/distributions/data/discord_evm_addresses.json",
-	)
+	read_contents_to_evm_accounts("node/src/distributions/data/discord_evm_addresses.json")
 }
 
 pub fn get_edgeware_genesis_balance_distribution() -> Vec<(H160, GenesisAccount)> {

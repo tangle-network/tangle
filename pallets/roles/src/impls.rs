@@ -18,7 +18,6 @@ use crate::offences::ValidatorOffence;
 
 use super::*;
 use frame_support::{
-	log,
 	pallet_prelude::DispatchResult,
 	traits::{Currency, OneSessionHandler},
 };
@@ -269,7 +268,7 @@ impl<T: Config> Pallet<T> {
 				tss_validators.push(acc.clone())
 			}
 
-			if role_types.contains(&RoleType::ZkSaas) {
+			if role_types.contains(&RoleType::ZkSaaS) {
 				zksaas_validators.push(acc)
 			}
 		}

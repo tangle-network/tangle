@@ -80,7 +80,7 @@ pallet-treasury = { workspace = true }
 
 pallet-authorship = { workspace = true }
 pallet-balances = { workspace = true }
-#pallet-eth2-light-client = { workspace = true }
+# pallet-eth2-light-client = { workspace = true }
 pallet-identity = { workspace = true }
 pallet-proxy = { workspace = true }
 pallet-randomness-collective-flip = { workspace = true }
@@ -93,10 +93,10 @@ pallet-utility = { workspace = true }
 pallet-vesting = { workspace = true }
 
 # Webb dependencies
-tangle-primitives = { workspace = true }
+pallet-dkg = { workspace = true }
 pallet-jobs = { workspace = true }
 pallet-roles = { workspace = true }
-pallet-dkg = { workspace = true }
+tangle-primitives = { workspace = true }
 
 # Frontier dependencies
 fp-account = { workspace = true }
@@ -230,7 +230,7 @@ std = [
   "pallet-dkg/std",
 
   # ETH2 light-client
-  #"pallet-eth2-light-client/std",
+  # "pallet-eth2-light-client/std",
 
   # Frontier
   "fp-account/std",
