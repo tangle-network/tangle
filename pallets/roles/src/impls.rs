@@ -105,15 +105,15 @@ impl<T: Config> Pallet<T> {
 		};
 
 		let records = updated_profile.get_records();
-		let min_re_staking_bond = MinReStakingBond::<T>::get();
+		let min_restaking_bond = MinRestakingBond::<T>::get();
 
 		for record in records {
 			if updated_profile.is_independent() {
-				// Re-staking amount of record should meet min re-staking amount requirement.
+				// Restaking amount of record should meet min restaking amount requirement.
 				let record_restake = record.amount.unwrap_or_default();
 				ensure!(
-					record_restake >= min_re_staking_bond,
-					Error::<T>::InsufficientReStakingBond
+					record_restake >= min_restaking_bond,
+					Error::<T>::InsufficientRestakingBond
 				);
 			}
 			// validate the metadata

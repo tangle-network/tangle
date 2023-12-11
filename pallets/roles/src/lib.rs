@@ -189,10 +189,10 @@ pub mod pallet {
 		MaxRoles,
 		/// Role cannot due to pending jobs, which can't be opted out at the moment.
 		RoleCannotBeRemoved,
-		/// Invalid Re-staking amount, should not exceed total staked amount.
-		ExceedsMaxReStakeValue,
-		/// Re staking amount should be greater than minimum re-staking bond requirement.
-		InsufficientReStakingBond,
+		/// Invalid Restaking amount, should not exceed total staked amount.
+		ExceedsMaxRestakeValue,
+		/// Re staking amount should be greater than minimum Restaking bond requirement.
+		InsufficientRestakingBond,
 		/// Profile Update failed.
 		ProfileUpdateFailed,
 		/// Profile already exists for given validator account.
@@ -224,7 +224,7 @@ pub mod pallet {
 	/// The minimum re staking bond to become and maintain the role.
 	#[pallet::storage]
 	#[pallet::getter(fn min_active_bond)]
-	pub(super) type MinReStakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+	pub(super) type MinRestakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
 	/// Create profile for the validator.
 	/// Validator can choose roles he is interested to opt-in and restake tokens for it.
@@ -238,8 +238,8 @@ pub mod pallet {
 	/// This function will return error if
 	/// - Account is not a validator account.
 	/// - Profile already exists for the validator.
-	/// - Min re-staking bond is not met.
-	/// - Re-staking amount is exceeds max re-staking value.
+	/// - Min Restaking bond is not met.
+	/// - Restaking amount is exceeds max Restaking value.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight({0})]
@@ -257,31 +257,31 @@ pub mod pallet {
 			let ledger = RoleStakingLedger::<T>::new(stash_account.clone(), profile.clone());
 			let total_profile_restake = profile.get_total_profile_restake();
 
-			// Re-staking amount of profile should meet min re-staking amount requirement.
-			let min_re_staking_bond = MinReStakingBond::<T>::get();
+			// Restaking amount of profile should meet min Restaking amount requirement.
+			let min_restaking_bond = MinRestakingBond::<T>::get();
 			ensure!(
-				total_profile_restake >= min_re_staking_bond,
-				Error::<T>::InsufficientReStakingBond
+				total_profile_restake >= min_restaking_bond,
+				Error::<T>::InsufficientRestakingBond
 			);
 
-			// Total re_staking amount should not exceed  max_re_staking_amount.
+			// Total restaking amount should not exceed  max_restaking_amount.
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
-			let max_re_staking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
+			let max_restaking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
 			ensure!(
-				total_profile_restake <= max_re_staking_bond,
-				Error::<T>::ExceedsMaxReStakeValue
+				total_profile_restake <= max_restaking_bond,
+				Error::<T>::ExceedsMaxRestakeValue
 			);
 
 			// Validate role staking records.
 			let records = profile.get_records();
 			for record in records {
 				if profile.is_independent() {
-					// Re-staking amount of record should meet min re-staking amount requirement.
+					// Restaking amount of record should meet min Restaking amount requirement.
 					let record_restake = record.amount.unwrap_or_default();
 					ensure!(
-						record_restake >= min_re_staking_bond,
-						Error::<T>::InsufficientReStakingBond
+						record_restake >= min_restaking_bond,
+						Error::<T>::InsufficientRestakingBond
 					);
 				}
 				// validate the metadata
@@ -310,8 +310,8 @@ pub mod pallet {
 		/// This function will update the profile of the validator.
 		/// If user wants to remove any role, please ensure that all the jobs associated with the
 		/// role are completed else this tx will fail.
-		/// If user wants to add any role, please ensure that the re-staking amount is greater than
-		/// required min re-staking bond.
+		/// If user wants to add any role, please ensure that the Restaking amount is greater than
+		/// required min Restaking bond.
 		///
 		/// # Parameters
 		/// - `origin`: Origin of the transaction.
@@ -321,8 +321,8 @@ pub mod pallet {
 		/// - Account is not a validator account.
 		/// - Profile is not assigned to the validator.
 		/// - If there are any pending jobs for the role which user wants to remove.
-		/// - Re-staking amount is exceeds max re-staking value.
-		/// - Re-staking amount is less than min re-staking bond.
+		/// - Restaking amount is exceeds max Restaking value.
+		/// - Restaking amount is less than min Restaking bond.
 		#[pallet::weight({0})]
 		#[pallet::call_index(1)]
 		pub fn update_profile(origin: OriginFor<T>, updated_profile: Profile<T>) -> DispatchResult {
@@ -335,21 +335,21 @@ pub mod pallet {
 			let mut ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
 			let total_profile_restake = updated_profile.get_total_profile_restake();
-			// Re-staking amount of record should meet min re-staking amount requirement.
-			let min_re_staking_bond = MinReStakingBond::<T>::get();
+			// Restaking amount of record should meet min Restaking amount requirement.
+			let min_restaking_bond = MinRestakingBond::<T>::get();
 			ensure!(
-				total_profile_restake >= min_re_staking_bond,
-				Error::<T>::InsufficientReStakingBond
+				total_profile_restake >= min_restaking_bond,
+				Error::<T>::InsufficientRestakingBond
 			);
 
 			let staking_ledger =
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
 
-			let max_re_staking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
-			// Total re_staking amount should not exceed  max_re_staking_amount.
+			let max_restaking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
+			// Total restaking amount should not exceed  max_restaking_amount.
 			ensure!(
-				total_profile_restake <= max_re_staking_bond,
-				Error::<T>::ExceedsMaxReStakeValue
+				total_profile_restake <= max_restaking_bond,
+				Error::<T>::ExceedsMaxRestakeValue
 			);
 
 			Self::validate_updated_profile(stash_account.clone(), updated_profile.clone())?;

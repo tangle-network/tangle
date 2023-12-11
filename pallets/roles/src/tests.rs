@@ -114,7 +114,7 @@ fn test_create_profile_should_fail_if_user_already_has_a_profile() {
 #[test]
 fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met() {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		pallet::MinReStakingBond::<Runtime>::put(2500);
+		pallet::MinRestakingBond::<Runtime>::put(2500);
 
 		let profile = Profile::Shared(SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
@@ -127,7 +127,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met(
 
 		assert_err!(
 			Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()),
-			Error::<Runtime>::InsufficientReStakingBond
+			Error::<Runtime>::InsufficientRestakingBond
 		);
 	});
 }
@@ -139,7 +139,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met(
 fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_for_independent_profile(
 ) {
 	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
-		pallet::MinReStakingBond::<Runtime>::put(2500);
+		pallet::MinRestakingBond::<Runtime>::put(2500);
 
 		let profile = Profile::Independent(IndependentRestakeProfile {
 			records: BoundedVec::try_from(vec![
@@ -154,7 +154,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_
 
 		assert_err!(
 			Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()),
-			Error::<Runtime>::InsufficientReStakingBond
+			Error::<Runtime>::InsufficientRestakingBond
 		);
 	});
 }
