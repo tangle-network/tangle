@@ -44,7 +44,7 @@ mkdir -p ./tmp
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
 cd "$PROJECT_ROOT"
 
-echo "*** Start Webb DKG Node ***"
+echo "*** Start Tangle Testnet ***"
 # Alice 
 ./target/release/tangle-standalone --tmp --chain local --validator -lerror --alice \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
