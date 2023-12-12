@@ -85,22 +85,6 @@ impl<T: Config> Profile<T> {
 		}
 	}
 
-	/// Returns staking role metadata for given role.
-	pub fn get_role_metadata(&self, role_type: RoleType) -> Option<RoleTypeMetadata> {
-		match self {
-			Profile::Independent(profile) => profile
-				.records
-				.iter()
-				.find(|record| record.metadata.get_role_type() == role_type)
-				.map(|record| record.metadata.clone()),
-			Profile::Shared(profile) => profile
-				.records
-				.iter()
-				.find(|record| record.metadata.get_role_type() == role_type)
-				.map(|record| record.metadata.clone()),
-		}
-	}
-
 	/// Returns roles in the profile.
 	pub fn get_roles(&self) -> Vec<RoleType> {
 		match self {

@@ -67,7 +67,10 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		if Self::is_validator(address.clone(), job_key.clone()) {
 			let ledger = Self::ledger(&address);
 			if let Some(ledger) = ledger {
-				return ledger.profile.get_role_metadata(job_key.get_role_type())
+				return match ledger.roles.get(&job_key.get_role_type()) {
+					Some(stake) => Some(stake.metadata.clone()),
+					None => None,
+				}
 			} else {
 				return None
 			}
@@ -109,8 +112,10 @@ impl<T: Config> Pallet<T> {
 
 		for record in records {
 			if updated_profile.is_independent() {
-				// Restaking amount of record should meet min restaking amount requirement.
+				// TODO: User cannot update profile to lower the restaking amount if there are any
+				// active services.
 				let record_restake = record.amount.unwrap_or_default();
+				// Restaking amount of record should meet min restaking amount requirement.
 				ensure!(
 					record_restake >= min_restaking_bond,
 					Error::<T>::InsufficientRestakingBond

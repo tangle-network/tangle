@@ -30,14 +30,15 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::{traits::Zero, Saturating};
 use sp_staking::offence::ReportOffence;
-use sp_std::{convert::TryInto, prelude::*, vec};
+use sp_std::{collections::btree_map::BTreeMap, convert::TryInto, prelude::*, vec};
 use tangle_primitives::{
 	roles::{RoleType, RoleTypeMetadata},
 	traits::jobs::JobsHandler,
 };
+
 mod impls;
 mod profile;
-use profile::Profile;
+use profile::{Profile, Record};
 
 #[cfg(test)]
 pub(crate) mod mock;
@@ -63,13 +64,20 @@ pub struct RoleStakingLedger<T: Config> {
 	pub total: BalanceOf<T>,
 	/// Restaking Profile
 	pub profile: Profile<T>,
+	/// Roles map with their respective records.
+	pub roles: BTreeMap<RoleType, Record<T>>,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
 	/// New staking ledger for a stash account.
 	pub fn new(stash: T::AccountId, profile: Profile<T>) -> Self {
 		let total_restake = profile.get_total_profile_restake();
-		Self { stash, total: total_restake.into(), profile }
+		let roles = profile
+			.get_records()
+			.into_iter()
+			.map(|record| (record.metadata.get_role_type(), record))
+			.collect::<BTreeMap<_, _>>();
+		Self { stash, total: total_restake.into(), profile, roles }
 	}
 
 	/// Returns the total amount of the stash's balance that is restaked for all selected roles.
@@ -189,6 +197,8 @@ pub mod pallet {
 		MaxRoles,
 		/// Role cannot due to pending jobs, which can't be opted out at the moment.
 		RoleCannotBeRemoved,
+		/// Restaking amount cannot be lowered if there are any pending jobs. You can only add more
+		RestakingAmountCannotBeUpdated,
 		/// Invalid Restaking amount, should not exceed total staked amount.
 		ExceedsMaxRestakeValue,
 		/// Re staking amount should be greater than minimum Restaking bond requirement.
