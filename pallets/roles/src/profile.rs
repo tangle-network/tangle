@@ -15,8 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{BalanceOf, Config};
-use frame_support::{dispatch::Vec, pallet_prelude::*};
+use frame_support::pallet_prelude::*;
 use sp_runtime::traits::Zero;
+use sp_std::vec::Vec;
 use tangle_primitives::roles::{RoleType, RoleTypeMetadata};
 
 #[derive(
