@@ -142,6 +142,7 @@ impl RolesHandler<AccountId32> for MockRolesHandler {
 			None
 		} else {
 			Some(RoleTypeMetadata::Tss(TssRoleMetadata {
+				key_type: DkgKeyType::Ecdsa,
 				authority_key: mock_pub_key().to_raw_vec(),
 			}))
 		}

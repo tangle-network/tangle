@@ -29,7 +29,7 @@ use sp_core::H256;
 use sp_runtime::traits::Dispatchable;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::jobs::{
-	DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, JobKey, JobSubmission, JobType,
+	DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DkgKeyType, JobKey, JobSubmission, JobType,
 };
 
 #[cfg(test)]
@@ -90,6 +90,7 @@ where
 		// Create DKG job type with the provided parameters
 		let job_type = DKGTSSPhaseOneJobType {
 			participants,
+			key_type: DkgKeyType::Ecdsa,
 			threshold,
 			permitted_caller: Some(permitted_caller),
 		};
