@@ -7363,7 +7363,6 @@ dependencies = [
 name = "pallet-dkg"
 version = "0.5.0"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "pallet-balances",

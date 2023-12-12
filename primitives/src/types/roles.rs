@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+use crate::jobs::DkgKeyType;
 use frame_support::pallet_prelude::*;
 use parity_scale_codec::alloc::string::ToString;
 use scale_info::prelude::string::String;
@@ -67,6 +68,9 @@ impl RoleTypeMetadata {
 pub struct TssRoleMetadata {
 	/// The authority key associated with the role.
 	pub authority_key: Vec<u8>,
+
+	/// The key type of the authority key
+	pub key_type: DkgKeyType,
 }
 
 /// Associated metadata needed for a zkSaas role
@@ -75,15 +79,6 @@ pub struct ZkSaasRoleMetadata {
 	/// The authority key associated with the role.
 	// TODO : Expand this
 	authority_key: Vec<u8>,
-}
-
-/// Role type to be used in the system.
-#[derive(Encode, Decode, Clone, Copy, Debug, PartialEq, Eq, TypeInfo)]
-pub enum ReStakingOption {
-	// Re-stake all the staked funds for selected role.
-	Full,
-	// Re-stake only the given amount of funds for selected role.
-	Custom(u64),
 }
 
 /// Represents the reward distribution percentages for validators in a key generation process.
