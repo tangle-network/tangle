@@ -81,15 +81,6 @@ pub struct ZkSaasRoleMetadata {
 	authority_key: Vec<u8>,
 }
 
-/// Role type to be used in the system.
-#[derive(Encode, Decode, Clone, Copy, Debug, PartialEq, Eq, TypeInfo)]
-pub enum ReStakingOption {
-	// Re-stake all the staked funds for selected role.
-	Full,
-	// Re-stake only the given amount of funds for selected role.
-	Custom(u64),
-}
-
 /// Represents the reward distribution percentages for validators in a key generation process.
 pub struct ValidatorRewardDistribution {
 	/// The percentage share of the reward allocated for TSS

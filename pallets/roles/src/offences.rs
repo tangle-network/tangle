@@ -1,3 +1,19 @@
+// This file is part of Webb.
+// Copyright (C) 2022-2023 Webb Technologies Inc.
+//
+// Tangle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tangle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
 use super::*;
 use sp_runtime::{Perbill, Saturating};
 use sp_staking::{
@@ -14,6 +30,8 @@ pub struct ValidatorOffence<Offender> {
 	pub validator_set_count: u32,
 	/// Authorities that committed an offence.
 	pub offenders: Vec<Offender>,
+	/// Role type against which offence is reported.
+	pub role_type: RoleType,
 	/// The different types of the offence.
 	pub offence_type: ValidatorOffenceType,
 }

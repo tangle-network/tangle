@@ -481,6 +481,8 @@ pub struct ReportValidatorOffence<Offender> {
 	pub validator_set_count: u32,
 	/// The type of offence
 	pub offence_type: ValidatorOffenceType,
+	/// Role type against which offence is reported.
+	pub role_type: RoleType,
 	/// Offenders
 	pub offenders: Vec<Offender>,
 }
