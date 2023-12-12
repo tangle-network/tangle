@@ -570,22 +570,22 @@ pub async fn new_full(
 		);
 
 		// Start Eth2 Light client Relayer Gadget - (MAINNET RELAYER)
-		#[cfg(feature = "light-client")]
-		task_manager.spawn_handle().spawn(
-			"mainnet-relayer-gadget",
-			None,
-			pallet_eth2_light_client_relayer_gadget::start_gadget(
-				pallet_eth2_light_client_relayer_gadget::Eth2LightClientParams {
-					lc_relay_config_path: light_client_relayer_cmd
-						.light_client_relay_config_path
-						.clone(),
-					lc_init_config_path: light_client_relayer_cmd
-						.light_client_init_pallet_config_path
-						.clone(),
-					eth2_chain_id: webb_proposals::TypedChainId::Evm(1),
-				},
-			),
-		);
+		// #[cfg(feature = "light-client")]
+		// task_manager.spawn_handle().spawn(
+		// 	"mainnet-relayer-gadget",
+		// 	None,
+		// 	pallet_eth2_light_client_relayer_gadget::start_gadget(
+		// 		pallet_eth2_light_client_relayer_gadget::Eth2LightClientParams {
+		// 			lc_relay_config_path: light_client_relayer_cmd
+		// 				.light_client_relay_config_path
+		// 				.clone(),
+		// 			lc_init_config_path: light_client_relayer_cmd
+		// 				.light_client_init_pallet_config_path
+		// 				.clone(),
+		// 			eth2_chain_id: webb_proposals::TypedChainId::Evm(1),
+		// 		},
+		// 	),
+		// );
 	}
 	let params = sc_service::SpawnTasksParams {
 		network: network.clone(),

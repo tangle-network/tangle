@@ -2811,7 +2811,7 @@ dependencies = [
 [[package]]
 name = "dkg-runtime-primitives"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=drew/update-v1.1.0#6f648edac79c28716328322b9580b7df8e40f55b"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=master#125d553460655602d80e99e9c6c98490346ded4b"
 dependencies = [
  "ethabi 18.0.0",
  "ethereum",
@@ -2819,6 +2819,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "impl-trait-for-tuples",
+ "log",
  "parity-scale-codec",
  "scale-info",
  "sp-api",
@@ -2828,7 +2829,7 @@ dependencies = [
  "sp-runtime",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "tiny-keccak",
- "webb-proposals",
+ "webb-proposals 0.8.0",
 ]
 
 [[package]]
@@ -13464,7 +13465,6 @@ dependencies = [
  "tangle-testnet-runtime",
  "tokio",
  "wasmer",
- "webb-proposals",
  "webb-relayer-gadget",
  "webb-relayer-gadget-cli",
 ]
@@ -13580,8 +13580,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tracing",
- "webb 0.7.4",
- "webb-proposals",
+ "webb 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -14259,7 +14258,16 @@ version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34085c17941e36627a879208083e25d357243812c30e7d7387c3b954f30ade16"
 dependencies = [
- "typed-builder-macro",
+ "typed-builder-macro 0.16.2",
+]
+
+[[package]]
+name = "typed-builder"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e47c0496149861b7c95198088cbf36645016b1a0734cf350c50e2a38e070f38a"
+dependencies = [
+ "typed-builder-macro 0.18.0",
 ]
 
 [[package]]
@@ -14267,6 +14275,17 @@ name = "typed-builder-macro"
 version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f03ca4cb38206e2bef0700092660bb74d696f808514dae47fa1467cbfe26e96e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.39",
+]
+
+[[package]]
+name = "typed-builder-macro"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "982ee4197351b5c9782847ef5ec1fdcaf50503fb19d68f9771adae314e72b492"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -15150,9 +15169,9 @@ dependencies = [
 
 [[package]]
 name = "webb"
-version = "0.7.4"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f7957a32acb6a6415a8b8123418d57ab7d2be3379265f9ea8a407165101863a"
+checksum = "75d7912a9586360097ba5bc53a55117960a5d5daba8a334a8645660093c08cf0"
 dependencies = [
  "async-trait",
  "ethers",
@@ -15168,7 +15187,7 @@ dependencies = [
 [[package]]
 name = "webb"
 version = "0.8.2"
-source = "git+https://github.com/webb-tools/webb-rs?branch=fix-ethers-version#3c8d6d2e44009f60e8e6e2d0bb17746ccc31bfac"
+source = "git+https://github.com/webb-tools/webb-rs#80a94b3d6ea5b0b60cfc48ffed77f74269a2ef2d"
 dependencies = [
  "async-trait",
  "ethers",
@@ -15187,7 +15206,7 @@ dependencies = [
 [[package]]
 name = "webb-bridge-registry-backends"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "async-trait",
  "ethereum-types 0.14.1",
@@ -15196,8 +15215,8 @@ dependencies = [
  "hex-literal",
  "tokio",
  "typed-builder 0.16.2",
- "webb 0.8.2",
- "webb-proposals",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-utils",
 ]
@@ -15205,7 +15224,7 @@ dependencies = [
 [[package]]
 name = "webb-chains-info"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "anyhow",
  "prettyplease 0.2.15",
@@ -15220,7 +15239,7 @@ dependencies = [
 [[package]]
 name = "webb-event-watcher-traits"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "async-trait",
  "backoff",
@@ -15230,8 +15249,8 @@ dependencies = [
  "subxt-signer",
  "tokio",
  "tracing",
- "webb 0.8.2",
- "webb-proposals",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-context",
  "webb-relayer-store",
@@ -15241,7 +15260,7 @@ dependencies = [
 [[package]]
 name = "webb-ew-dkg"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "async-trait",
  "ethereum-types 0.14.1",
@@ -15249,9 +15268,9 @@ dependencies = [
  "sled",
  "tokio",
  "tracing",
- "webb 0.8.2",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
  "webb-event-watcher-traits",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-store",
  "webb-relayer-utils",
@@ -15260,7 +15279,7 @@ dependencies = [
 [[package]]
 name = "webb-ew-evm"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "ark-bls12-381 0.3.0",
  "ark-bn254 0.3.0",
@@ -15278,11 +15297,11 @@ dependencies = [
  "tokio",
  "tracing",
  "typed-builder 0.16.2",
- "webb 0.8.2",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
  "webb-bridge-registry-backends",
  "webb-event-watcher-traits",
  "webb-proposal-signing-backends",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-store",
  "webb-relayer-utils",
@@ -15291,7 +15310,7 @@ dependencies = [
 [[package]]
 name = "webb-price-oracle-backends"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "async-trait",
  "chrono",
@@ -15299,16 +15318,26 @@ dependencies = [
  "reqwest",
  "serde",
  "typed-builder 0.16.2",
- "webb 0.8.2",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
  "webb-chains-info",
  "webb-relayer-store",
  "webb-relayer-utils",
 ]
 
 [[package]]
+name = "webb-proposal-derive"
+version = "0.1.0"
+source = "git+https://github.com/webb-tools/webb-rs#80a94b3d6ea5b0b60cfc48ffed77f74269a2ef2d"
+dependencies = [
+ "ethers-core",
+ "quote",
+ "syn 2.0.39",
+]
+
+[[package]]
 name = "webb-proposal-signing-backends"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "async-trait",
  "ethereum-types 0.14.1",
@@ -15321,8 +15350,8 @@ dependencies = [
  "tokio",
  "tracing",
  "typed-builder 0.16.2",
- "webb 0.8.2",
- "webb-proposals",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
+ "webb-proposals 0.6.0",
  "webb-relayer-store",
  "webb-relayer-types",
  "webb-relayer-utils",
@@ -15344,9 +15373,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "webb-proposals"
+version = "0.8.0"
+source = "git+https://github.com/webb-tools/webb-rs#80a94b3d6ea5b0b60cfc48ffed77f74269a2ef2d"
+dependencies = [
+ "frame-support",
+ "hex",
+ "num-traits",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "thiserror",
+ "tiny-keccak",
+ "typed-builder 0.18.0",
+ "webb-proposal-derive",
+]
+
+[[package]]
 name = "webb-relayer"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "axum",
  "config",
@@ -15359,13 +15405,13 @@ dependencies = [
  "tower-http",
  "tracing",
  "url",
- "webb 0.8.2",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
  "webb-bridge-registry-backends",
  "webb-event-watcher-traits",
  "webb-ew-dkg",
  "webb-ew-evm",
  "webb-proposal-signing-backends",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-context",
  "webb-relayer-handlers",
@@ -15377,7 +15423,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-config"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "anyhow",
  "config",
@@ -15392,8 +15438,8 @@ dependencies = [
  "tracing",
  "tracing-subscriber 0.3.18",
  "url",
- "webb 0.8.2",
- "webb-proposals",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
+ "webb-proposals 0.6.0",
  "webb-relayer-store",
  "webb-relayer-types",
  "webb-relayer-utils",
@@ -15402,7 +15448,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-context"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "http",
  "native-tls",
@@ -15412,7 +15458,7 @@ dependencies = [
  "subxt-signer",
  "tokio",
  "tracing",
- "webb 0.8.2",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
  "webb-price-oracle-backends",
  "webb-relayer-config",
  "webb-relayer-store",
@@ -15423,7 +15469,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-gadget"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=drew/update-v1.1.0#6f648edac79c28716328322b9580b7df8e40f55b"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=master#125d553460655602d80e99e9c6c98490346ded4b"
 dependencies = [
  "dkg-runtime-primitives",
  "ethereum-types 0.14.1",
@@ -15441,7 +15487,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-gadget-cli"
 version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=drew/update-v1.1.0#6f648edac79c28716328322b9580b7df8e40f55b"
+source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=master#125d553460655602d80e99e9c6c98490346ded4b"
 dependencies = [
  "clap 4.4.11",
 ]
@@ -15449,12 +15495,12 @@ dependencies = [
 [[package]]
 name = "webb-relayer-handler-utils"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "native-tls",
  "serde",
  "tokio",
- "webb 0.8.2",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
  "webb-relayer-store",
  "webb-relayer-tx-relay-utils",
 ]
@@ -15462,7 +15508,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-handlers"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "axum",
  "axum-client-ip",
@@ -15476,8 +15522,8 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tracing",
- "webb 0.8.2",
- "webb-proposals",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-context",
  "webb-relayer-handler-utils",
@@ -15489,7 +15535,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-store"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "hex",
  "parking_lot 0.12.1",
@@ -15498,15 +15544,15 @@ dependencies = [
  "sled",
  "tempfile",
  "tracing",
- "webb 0.8.2",
- "webb-proposals",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
+ "webb-proposals 0.6.0",
  "webb-relayer-utils",
 ]
 
 [[package]]
 name = "webb-relayer-tx-queue"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "backoff",
  "ethereum-types 0.14.1",
@@ -15517,7 +15563,7 @@ dependencies = [
  "subxt-signer",
  "tokio",
  "tracing",
- "webb 0.8.2",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
  "webb-relayer-context",
  "webb-relayer-store",
  "webb-relayer-types",
@@ -15527,7 +15573,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-tx-relay"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "chrono",
  "ethereum-types 0.14.1",
@@ -15537,10 +15583,10 @@ dependencies = [
  "subxt-signer",
  "tokio",
  "tracing",
- "webb 0.8.2",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
  "webb-chains-info",
  "webb-price-oracle-backends",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-context",
  "webb-relayer-handler-utils",
@@ -15551,7 +15597,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-tx-relay-utils"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "serde",
 ]
@@ -15559,7 +15605,7 @@ dependencies = [
 [[package]]
 name = "webb-relayer-types"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "ethereum-types 0.14.1",
  "http",
@@ -15570,14 +15616,14 @@ dependencies = [
  "tiny-bip39",
  "tracing",
  "url",
- "webb 0.8.2",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
  "webb-relayer-utils",
 ]
 
 [[package]]
 name = "webb-relayer-utils"
 version = "0.5.15-dev"
-source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
+source = "git+https://github.com/webb-tools/relayer?branch=develop#df5a20bfe3aca2a31110b066fc76eb96a7363fbf"
 dependencies = [
  "ark-std 0.3.0",
  "async-trait",
@@ -15599,8 +15645,8 @@ dependencies = [
  "sled",
  "thiserror",
  "url",
- "webb 0.8.2",
- "webb-proposals",
+ "webb 0.8.2 (git+https://github.com/webb-tools/webb-rs)",
+ "webb-proposals 0.6.0",
 ]
 
 [[package]]
