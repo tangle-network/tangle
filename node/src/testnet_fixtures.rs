@@ -13,7 +13,6 @@
 // limitations under the License.
 //
 //! Testnet fixtures
-use dkg_runtime_primitives::crypto::AuthorityId as DKGId;
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
@@ -51,7 +50,7 @@ pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 
 /// Standalone initial authorities
 pub fn get_standalone_initial_authorities(
-) -> Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)> {
+) -> Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId)> {
 	vec![
 		// standalone 1
 		(
@@ -62,8 +61,6 @@ pub fn get_standalone_initial_authorities(
 			hex!["5bcf983a969f8de7628b271a5bf523924856c3935b15eb3e03f20146ced2c57f"]
 				.unchecked_into(),
 			hex!["0297bc051d94b25787482e60fa4eba19f15af30fa244240ae4439d219ee00e78"]
-				.unchecked_into(),
-			hex!["030c1b7bacd7682a4caab29361499a3cb26fe1a3bc70c157015b947f695f895c48"]
 				.unchecked_into(),
 		),
 		// standalone 2
@@ -76,8 +73,6 @@ pub fn get_standalone_initial_authorities(
 				.unchecked_into(),
 			hex!["de6d5010678fd2175fe70c857d3eba80838e3735b1051f4aed98671800ec483f"]
 				.unchecked_into(),
-			hex!["02c4cf6433b93cf5383653dd89a832cf1f59269b6edac186be4ca37141536e3644"]
-				.unchecked_into(),
 		),
 		// standalone 3
 		(
@@ -88,8 +83,6 @@ pub fn get_standalone_initial_authorities(
 			hex!["340e5969c8dd40ff77184fa73fbdcda77dcc90dd9b68b8b28eef5f01ce42339c"]
 				.unchecked_into(),
 			hex!["8472336050c4e4a51ac69865a4a31c6dd0e5c2f79555d8646cafb3bd8f12d75c"]
-				.unchecked_into(),
-			hex!["02b78be44eb40286dff6ffc1d83c93dc1cd8c17003c25a94a13433fd0117d146a9"]
 				.unchecked_into(),
 		),
 		// standalone 4
@@ -102,8 +95,6 @@ pub fn get_standalone_initial_authorities(
 				.unchecked_into(),
 			hex!["029cb182ddb9c5560aaa299f7b445e575007b8295bd85a80a7b2eb7baa3e2b7c"]
 				.unchecked_into(),
-			hex!["03a5c16cb6ebb2fb956861bd4bf7e9fe3950c2709e24e99355780f3f52a59dcaaf"]
-				.unchecked_into(),
 		),
 		// standalone 5
 		(
@@ -114,8 +105,6 @@ pub fn get_standalone_initial_authorities(
 			hex!["9027284e6cad3f73eee950695c56f87330311331139616640c9168934dba82df"]
 				.unchecked_into(),
 			hex!["1ea007d87f91f96c31b1062548eb77c40d47a43f1c84c36caa8586fc7c359729"]
-				.unchecked_into(),
-			hex!["0363a2753450cd6f651be8e0ac9ee582e5e5d8fda408e0531a5d8051c5983ff953"]
 				.unchecked_into(),
 		),
 	]

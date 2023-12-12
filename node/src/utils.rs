@@ -1,5 +1,5 @@
 use sc_service::{ChainType, Configuration};
-use sp_core::{ecdsa, ed25519, sr25519, ByteArray, Pair, Public};
+use sp_core::{ed25519, sr25519, ByteArray, Pair, Public};
 use sp_keystore::{Keystore, KeystorePtr};
 use sp_runtime::{
 	key_types::{ACCOUNT, AURA, GRANDPA, IM_ONLINE},
@@ -23,12 +23,6 @@ pub fn insert_controller_account_keys_into_keystore(
 		ACCOUNT,
 		key_store.clone(),
 		"acco",
-	);
-	insert_account_keys_into_keystore::<ecdsa::Public>(
-		config,
-		dkg_runtime_primitives::KEY_TYPE,
-		key_store.clone(),
-		"DKG",
 	);
 	insert_account_keys_into_keystore::<ed25519::Public>(
 		config,
@@ -78,11 +72,6 @@ pub fn insert_dev_controller_account_keys_into_keystore(
 	key_store: Option<KeystorePtr>,
 ) {
 	insert_dev_account_keys_into_keystore::<sr25519::Public>(config, ACCOUNT, key_store.clone());
-	insert_dev_account_keys_into_keystore::<ecdsa::Public>(
-		config,
-		dkg_runtime_primitives::KEY_TYPE,
-		key_store.clone(),
-	);
 }
 
 /// Inserts keys of specified type into the keystore for predefined nodes in development mode.
@@ -112,7 +101,7 @@ pub fn insert_dev_account_keys_into_keystore<TPublic: Public>(
 
 /// Ensures all keys exist in the keystore.
 pub fn ensure_all_keys_exist_in_keystore(key_store: KeystorePtr) -> Result<(), String> {
-	let key_types = [dkg_runtime_primitives::KEY_TYPE, ACCOUNT, GRANDPA, AURA, IM_ONLINE];
+	let key_types = [ACCOUNT, GRANDPA, AURA, IM_ONLINE];
 
 	for key_type in key_types {
 		// Ensure key is present

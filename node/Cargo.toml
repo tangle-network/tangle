@@ -38,11 +38,6 @@ tokio = { workspace = true }
 # pallet-eth2-light-client-relayer-gadget-cli = { workspace = true, optional = true }
 # webb-consensus-types = { workspace = true }
 
-# DKG dependencies
-dkg-gadget = { workspace = true }
-dkg-primitives = { workspace = true }
-dkg-runtime-primitives = { workspace = true }
-pallet-bridge-registry = { workspace = true }
 webb-proposals = { workspace = true }
 webb-relayer-gadget = { workspace = true, optional = true }
 webb-relayer-gadget-cli = { workspace = true, optional = true }

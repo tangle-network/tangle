@@ -22,9 +22,6 @@ scale-info = { workspace = true }
 serde = { workspace = true }
 static_assertions = { workspace = true }
 
-# DKG Substrate Dependencies
-pallet-bridge-registry = { workspace = true }
-
 # Webb Substrate Dependencies
 pallet-airdrop-claims = { workspace = true }
 
@@ -201,7 +198,6 @@ std = [
   "pallet-treasury/std",
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
-  "pallet-bridge-registry/std",
 
   # Webb dependencies
   "tangle-primitives/std",

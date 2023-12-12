@@ -22,13 +22,6 @@ scale-info = { workspace = true }
 serde = { workspace = true }
 static_assertions = { workspace = true }
 
-# DKG Substrate Dependencies
-dkg-runtime-primitives = { workspace = true }
-pallet-bridge-registry = { workspace = true }
-pallet-dkg-metadata = { workspace = true }
-pallet-dkg-proposal-handler = { workspace = true }
-pallet-dkg-proposals = { workspace = true }
-
 # Webb Substrate Dependencies
 pallet-airdrop-claims = { workspace = true }
 
@@ -151,11 +144,6 @@ runtime-benchmarks = [
   "pallet-timestamp/runtime-benchmarks",
   "sp-runtime/runtime-benchmarks",
 
-  # dkg deps
-  "pallet-dkg-metadata/runtime-benchmarks",
-  "pallet-dkg-proposals/runtime-benchmarks",
-  "pallet-dkg-proposal-handler/runtime-benchmarks",
-
   # Frontier
   "pallet-ethereum/runtime-benchmarks",
   "pallet-evm/runtime-benchmarks",
@@ -215,13 +203,6 @@ std = [
   "pallet-treasury/std",
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
-  "pallet-bridge-registry/std",
-
-  # DKG
-  "pallet-dkg-metadata/std",
-  "dkg-runtime-primitives/std",
-  "pallet-dkg-proposals/std",
-  "pallet-dkg-proposal-handler/std",
 
   # Webb dependencies
   "tangle-primitives/std",

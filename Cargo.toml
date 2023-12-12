@@ -71,14 +71,6 @@ paste = "1.0.6"
 slices = "0.2.0"
 schnorrkel = { version = "0.9.1", default-features = false }
 
-# DKG Substrate Dependencies
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
-pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
-pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
-pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
-pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0" }
 webb-relayer-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0" }
 webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0" }
 
