@@ -18,8 +18,8 @@ use crate::types::BalanceOf;
 use frame_support::{ensure, pallet_prelude::DispatchResult, sp_runtime::Saturating};
 use frame_system::pallet_prelude::BlockNumberFor;
 use parity_scale_codec::Encode;
-use sp_core::ecdsa;
-use sp_io::{hashing::keccak_256, EcdsaVerifyError};
+use sp_core::{ecdsa, sr25519};
+use sp_io::{crypto::sr25519_verify, hashing::keccak_256, EcdsaVerifyError};
 use sp_std::{default::Default, vec::Vec};
 use tangle_primitives::jobs::*;
 
@@ -27,6 +27,8 @@ use tangle_primitives::jobs::*;
 pub const SIGNATURE_LENGTH: usize = 65;
 /// Expected key length for ecdsa
 const ECDSA_KEY_LENGTH: usize = 33;
+/// Expected key length for sr25519
+const SCHNORR_KEY_LENGTH: usize = 32;
 
 impl<T: Config> Pallet<T> {
 	/// Calculates the fee for a given job submission based on the provided fee information.
@@ -75,17 +77,31 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
+	/// Verifies a generated DKG (Distributed Key Generation) key based on the provided DKG result.
+	///
+	/// The verification process depends on the key type specified in the DKG result.
+	/// It dispatches the verification to the appropriate function for the specified key type (ECDSA
+	/// or Schnorr).
+	///
+	/// # Arguments
+	///
+	/// * `data` - The DKG result containing participants, keys, and signatures.
+	///
+	/// # Returns
+	///
+	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful
+	/// or encountered an error.
 	fn verify_generated_dkg_key(data: DKGResult) -> DispatchResult {
 		match data.key_type {
 			DkgKeyType::Ecdsa => Self::verify_generated_dkg_key_ecdsa(data),
-			_ => todo!(),
+			DkgKeyType::Schnorr => Self::verify_generated_dkg_key_schnorr(data),
 		}
 	}
 
-	/// Verifies the generated DKG key based on the provided DKG verification information.
+	/// Verifies the generated DKG key for ECDSA signatures.
 	///
-	/// The verification process includes generating required signers, validating signatures, and
-	/// ensuring a sufficient number of unique signers are present.
+	/// This function includes generating required signers, validating signatures, and ensuring a
+	/// sufficient number of unique signers are present.
 	///
 	/// # Arguments
 	///
@@ -96,45 +112,121 @@ impl<T: Config> Pallet<T> {
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 	/// encountered an error.
 	fn verify_generated_dkg_key_ecdsa(data: DKGResult) -> DispatchResult {
-		// generate the required signers
+		// Ensure participants and signatures are not empty
+		ensure!(!data.participants.is_empty(), Error::<T>::NoParticipantsFound);
+		ensure!(!data.signatures.is_empty(), Error::<T>::NoSignaturesFound);
+
+		// Generate the required ECDSA signers
 		let maybe_signers = data
 			.participants
 			.iter()
 			.map(|x| {
 				ecdsa::Public(
-					Self::to_slice_33(&x)
+					Self::to_slice_33(x)
 						.unwrap_or_else(|| panic!("Failed to convert input to ecdsa public key")),
 				)
 			})
 			.collect::<Vec<ecdsa::Public>>();
 
 		ensure!(!maybe_signers.is_empty(), Error::<T>::NoParticipantsFound);
-		ensure!(!data.keys_and_signatures.is_empty(), Error::<T>::NoSignaturesFound);
 
 		let mut known_signers: Vec<ecdsa::Public> = Default::default();
-		let signed_pub_key: Vec<u8> =
-			data.keys_and_signatures.first().expect("Cannot be empty").clone().0;
 
-		for (key, signature) in data.keys_and_signatures {
-			// ensure the required signer signature exists
+		for signature in data.signatures {
+			// Ensure the required signer signature exists
 			let (maybe_authority, success) =
-				Self::verify_signer_from_set_ecdsa(maybe_signers.clone(), &key, &signature);
+				Self::verify_signer_from_set_ecdsa(maybe_signers.clone(), &data.key, &signature);
 
 			if success {
-				// sanity check, everyone signed the same key
-				ensure!(key == signed_pub_key, Error::<T>::InvalidSignatureData);
-
 				let authority = maybe_authority.ok_or(Error::<T>::CannotRetreiveSigner)?;
 
+				// Ensure no duplicate signatures
 				ensure!(!known_signers.contains(&authority), Error::<T>::DuplicateSignature);
 
 				known_signers.push(authority);
 			}
 		}
 
+		// Ensure a sufficient number of unique signers are present
 		ensure!(known_signers.len() > data.threshold.into(), Error::<T>::NotEnoughSigners);
 
 		Ok(())
+	}
+
+	/// Verifies the generated DKG key for Schnorr signatures.
+	///
+	/// This function includes generating required signers, validating signatures, and ensuring a
+	/// sufficient number of unique signers are present.
+	///
+	/// # Arguments
+	///
+	/// * `data` - The DKG verification information containing participants, keys, and signatures.
+	///
+	/// # Returns
+	///
+	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
+	/// encountered an error.
+	fn verify_generated_dkg_key_schnorr(data: DKGResult) -> DispatchResult {
+		// Ensure participants and signatures are not empty
+		ensure!(!data.participants.is_empty(), Error::<T>::NoParticipantsFound);
+		ensure!(!data.signatures.is_empty(), Error::<T>::NoSignaturesFound);
+
+		// Generate the required Schnorr signers
+		let maybe_signers = data
+			.participants
+			.iter()
+			.map(|x| {
+				sr25519::Public(
+					Self::to_slice_32(x)
+						.unwrap_or_else(|| panic!("Failed to convert input to sr25519 public key")),
+				)
+			})
+			.collect::<Vec<sr25519::Public>>();
+
+		ensure!(!maybe_signers.is_empty(), Error::<T>::NoParticipantsFound);
+
+		let mut known_signers: Vec<sr25519::Public> = Default::default();
+
+		for signature in data.signatures {
+			// Convert the signature from bytes to sr25519::Signature
+			let signature: sr25519::Signature =
+				signature.as_slice().try_into().map_err(|_| Error::<T>::CannotRetreiveSigner)?;
+
+			let msg = data.key.encode();
+			let hash = keccak_256(&msg);
+
+			for signer in maybe_signers.clone() {
+				// Verify the Schnorr signature
+				if sr25519_verify(&signature, &hash, &signer) {
+					ensure!(!known_signers.contains(&signer), Error::<T>::DuplicateSignature);
+
+					known_signers.push(signer);
+				}
+			}
+		}
+
+		// Ensure a sufficient number of unique signers are present
+		ensure!(known_signers.len() > data.threshold.into(), Error::<T>::NotEnoughSigners);
+
+		Ok(())
+	}
+
+	/// Verifies a DKG (Distributed Key Generation) signature based on the provided DKG signature
+	/// result.
+	///
+	/// The verification process depends on the key type specified in the DKG signature result.
+	/// It dispatches the verification to the appropriate function for the specified key type (ECDSA
+	/// or Schnorr).
+	///
+	/// # Arguments
+	///
+	/// * `data` - The DKG signature result containing the message data, signature, signing key, and
+	///   key type.
+	fn verify_dkg_signature(data: DKGSignatureResult) -> DispatchResult {
+		match data.key_type {
+			DkgKeyType::Ecdsa => Self::verify_dkg_signature_ecdsa(data),
+			DkgKeyType::Schnorr => Self::verify_dkg_signature_schnorr(data),
+		}
 	}
 
 	/// Verifies the DKG signature result by recovering the ECDSA public key from the provided data
@@ -146,21 +238,55 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `data` - The DKG signature result containing the message data and ECDSA signature.
-	///
-	/// # Returns
-	///
-	/// Returns a `DispatchResult` indicating whether the DKG signature verification was successful
-	/// or encountered an error.
-	fn verify_dkg_signature(data: DKGSignatureResult) -> DispatchResult {
+	fn verify_dkg_signature_ecdsa(data: DKGSignatureResult) -> DispatchResult {
+		// Recover the ECDSA public key from the provided data and signature
 		let recovered_key = Self::recover_ecdsa_pub_key(&data.data, &data.signature)
 			.map_err(|_| Error::<T>::InvalidSignature)?;
 
+		// Extract the expected key from the provided signing key
 		let expected_key: Vec<_> = data.signing_key.iter().skip(1).cloned().collect();
 		// The recovered key is 64 bytes uncompressed. The first 32 bytes represent the compressed
 		// portion of the key.
 		let signer = &recovered_key[..32];
 
+		// Ensure that the recovered key matches the expected signing key
 		ensure!(expected_key == signer, Error::<T>::SigningKeyMismatch);
+
+		Ok(())
+	}
+
+	/// Verifies the DKG signature result for Schnorr signatures.
+	///
+	/// This function uses the Schnorr signature algorithm to verify the provided signature
+	/// based on the message data, signature, and signing key in the DKG signature result.
+	///
+	/// # Arguments
+	///
+	/// * `data` - The DKG signature result containing the message data, Schnorr signature, and
+	///   signing key.
+	fn verify_dkg_signature_schnorr(data: DKGSignatureResult) -> DispatchResult {
+		// Convert the signature from bytes to sr25519::Signature
+		let signature: sr25519::Signature = data
+			.signature
+			.as_slice()
+			.try_into()
+			.map_err(|_| Error::<T>::CannotRetreiveSigner)?;
+
+		// Encode the message data and compute its keccak256 hash
+		let msg = data.data.encode();
+		let hash = keccak_256(&msg);
+
+		// Verify the Schnorr signature using sr25519_verify
+		if !sr25519_verify(
+			&signature,
+			&hash,
+			&sr25519::Public(
+				Self::to_slice_32(&data.signing_key)
+					.unwrap_or_else(|| panic!("Failed to convert input to sr25519 public key")),
+			),
+		) {
+			return Err(Error::<T>::InvalidSignature.into())
+		}
 
 		Ok(())
 	}
@@ -239,6 +365,17 @@ impl<T: Config> Pallet<T> {
 		if val.len() == ECDSA_KEY_LENGTH {
 			let mut key = [0u8; ECDSA_KEY_LENGTH];
 			key[..ECDSA_KEY_LENGTH].copy_from_slice(val);
+
+			return Some(key)
+		}
+		None
+	}
+
+	/// Utility function to create slice of fixed size
+	pub fn to_slice_32(val: &[u8]) -> Option<[u8; 32]> {
+		if val.len() == SCHNORR_KEY_LENGTH {
+			let mut key = [0u8; SCHNORR_KEY_LENGTH];
+			key[..SCHNORR_KEY_LENGTH].copy_from_slice(val);
 
 			return Some(key)
 		}

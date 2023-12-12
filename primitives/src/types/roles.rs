@@ -13,11 +13,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+use crate::jobs::DkgKeyType;
 use frame_support::pallet_prelude::*;
 use parity_scale_codec::alloc::string::ToString;
 use scale_info::prelude::string::String;
 use sp_arithmetic::Percent;
-use crate::jobs::DkgKeyType;
 use sp_std::{ops::Add, vec::Vec};
 
 /// Role type to be used in the system.
@@ -70,7 +70,7 @@ pub struct TssRoleMetadata {
 	pub authority_key: Vec<u8>,
 
 	/// The key type of the authority key
-	pub key_type: DkgKeyType
+	pub key_type: DkgKeyType,
 }
 
 /// Associated metadata needed for a zkSaas role

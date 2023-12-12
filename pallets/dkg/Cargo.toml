@@ -8,7 +8,6 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-frame-benchmarking = { workspace = true, optional = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
 parity-scale-codec = { workspace = true }
@@ -31,19 +30,14 @@ default = ["std"]
 std = [
   "scale-info/std",
   "sp-runtime/std",
-  "frame-benchmarking?/std",
   "frame-support/std",
   "frame-system/std",
   "sp-core/std",
   "sp-std/std",
   "tangle-primitives/std",
   "pallet-balances/std",
+  "sp-io/std",
+  "sp-application-crypto/std",
+  "sp-keystore/std"
 ]
 try-runtime = ["frame-support/try-runtime"]
-runtime-benchmarks = [
-  "frame-benchmarking/runtime-benchmarks",
-  "frame-support/runtime-benchmarks",
-  "frame-system/runtime-benchmarks",
-  "sp-runtime/runtime-benchmarks",
-  "pallet-balances/runtime-benchmarks",
-]

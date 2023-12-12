@@ -166,7 +166,7 @@ impl<T: Config> Pallet<T> {
 							.ok_or(Error::<T>::InvalidJobPhase)?
 							.saturating_sub(1);
 						ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
-							
+
 						let job_type = JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 							key_type: phase1.key_type.clone().expect("Checked above"),
 							participants: new_participants,
@@ -275,23 +275,20 @@ impl<T: Config> Pallet<T> {
 			.clone()
 			.get_participants()
 			.ok_or(Error::<T>::InvalidJobParams)?;
-		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
+		let mut participant_keys: Vec<Vec<u8>> = Default::default();
 
 		for participant in participants.clone() {
 			let key = T::RolesHandler::get_validator_metadata(participant, job_key);
 			ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
-			let pub_key = sp_core::ecdsa::Public::from_slice(
-				&key.expect("checked above").get_authority_key()[0..33],
-			)
-			.map_err(|_| Error::<T>::InvalidValidator)?;
-			participant_keys.push(pub_key);
+			participant_keys.push(key.expect("checked above").get_authority_key());
 		}
 
 		let job_result = JobResult::DKGPhaseOne(DKGResult {
 			key: info.key.clone(),
-			keys_and_signatures: info.keys_and_signatures,
+			signatures: info.signatures,
 			participants: participant_keys,
 			threshold: job_info.job_type.clone().get_threshold().expect("Checked before"),
+			key_type: info.key_type.clone(),
 		});
 
 		T::MPCHandler::verify(JobWithResult {
@@ -306,6 +303,7 @@ impl<T: Config> Pallet<T> {
 			job_type: job_info.job_type.clone(),
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 			result: info.key,
+			key_type: Some(info.key_type),
 		};
 		Ok(result)
 	}
@@ -352,6 +350,7 @@ impl<T: Config> Pallet<T> {
 			signature: info.signature,
 			data: info.data,
 			signing_key: phase_one_result.result,
+			key_type: info.key_type,
 		});
 
 		let phase_one_job_info = KnownResults::<T>::get(
@@ -415,6 +414,7 @@ impl<T: Config> Pallet<T> {
 			// No data in the result
 			result: Vec::new(),
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
+			key_type: None,
 		};
 		Ok(result)
 	}

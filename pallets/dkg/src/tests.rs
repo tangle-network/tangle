@@ -16,22 +16,35 @@
 use crate::{mock::*, types::FeeInfo, Error, FeeInfo as FeeInfoStorage};
 use frame_support::{assert_noop, assert_ok, error::BadOrigin};
 use parity_scale_codec::Encode;
-use sp_core::{crypto::ByteArray, ecdsa, keccak_256};
-use sp_io::crypto::{ecdsa_generate, ecdsa_sign_prehashed};
+use sp_core::{crypto::ByteArray, ecdsa, keccak_256, sr25519};
+use sp_io::crypto::{ecdsa_generate, ecdsa_sign_prehashed, sr25519_generate, sr25519_sign};
 use tangle_primitives::jobs::{DKGResult, DKGSignatureResult, DkgKeyType, JobResult};
 
 /// Key type for DKG keys
 pub const KEY_TYPE: sp_application_crypto::KeyTypeId = sp_application_crypto::KeyTypeId(*b"wdkg");
 
-fn mock_pub_key() -> ecdsa::Public {
+fn mock_pub_key_ecdsa() -> ecdsa::Public {
 	ecdsa_generate(KEY_TYPE, None)
 }
 
-fn mock_signature(pub_key: ecdsa::Public, dkg_key: ecdsa::Public) -> (Vec<u8>, Vec<u8>) {
+fn mock_pub_key_sr25519() -> sr25519::Public {
+	sr25519_generate(KEY_TYPE, None)
+}
+
+fn mock_signature_ecdsa(pub_key: ecdsa::Public, dkg_key: ecdsa::Public) -> Vec<u8> {
 	let msg = dkg_key.encode();
 	let hash = keccak_256(&msg);
 	let signature: ecdsa::Signature = ecdsa_sign_prehashed(KEY_TYPE, &pub_key, &hash).unwrap();
-	(msg, signature.encode())
+	signature.encode()
+}
+
+fn mock_signature_sr25519(pub_key: sr25519::Public, dkg_key: sr25519::Public) -> Vec<u8> {
+	let msg = dkg_key.to_vec().encode();
+	let hash = keccak_256(&msg);
+	let signature: sr25519::Signature = sr25519_sign(KEY_TYPE, &pub_key, &hash).unwrap();
+	// sanity check
+	assert!(sp_io::crypto::sr25519_verify(&signature, &hash, &pub_key));
+	signature.encode()
 }
 
 #[test]
@@ -55,13 +68,13 @@ fn set_fees_works() {
 }
 
 #[test]
-fn dkg_key_verifcation_works() {
+fn dkg_key_verifcation_works_for_ecdsa() {
 	new_test_ext().execute_with(|| {
 		let job_to_verify = DKGResult {
 			key_type: DkgKeyType::Ecdsa,
 			key: vec![],
 			participants: vec![],
-			keys_and_signatures: vec![],
+			signatures: vec![],
 			threshold: 2,
 		};
 
@@ -74,8 +87,8 @@ fn dkg_key_verifcation_works() {
 		let job_to_verify = DKGResult {
 			key_type: DkgKeyType::Ecdsa,
 			key: vec![],
-			participants: vec![mock_pub_key().as_mut().to_vec()],
-			keys_and_signatures: vec![],
+			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec()],
+			signatures: vec![],
 			threshold: 2,
 		};
 
@@ -86,15 +99,15 @@ fn dkg_key_verifcation_works() {
 		);
 
 		// setup key/signature
-		let mut pub_key = mock_pub_key();
-		let signature = mock_signature(pub_key, pub_key);
+		let mut pub_key = mock_pub_key_ecdsa();
+		let signature = mock_signature_ecdsa(pub_key, pub_key);
 
 		let job_to_verify = DKGResult {
 			key_type: DkgKeyType::Ecdsa,
 			key: vec![],
-			participants: vec![mock_pub_key().as_mut().to_vec()],
-			keys_and_signatures: vec![signature.clone()],
-			threshold: 2,
+			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec()],
+			signatures: vec![signature.clone()],
+			threshold: 1,
 		};
 
 		// should fail for less than threshold
@@ -105,10 +118,10 @@ fn dkg_key_verifcation_works() {
 
 		let job_to_verify = DKGResult {
 			key_type: DkgKeyType::Ecdsa,
-			key: vec![],
+			key: pub_key.0.to_vec(),
 			participants: vec![pub_key.as_mut().to_vec()],
-			keys_and_signatures: vec![signature.clone(), signature.clone()],
-			threshold: 2,
+			signatures: vec![signature.clone(), signature.clone()],
+			threshold: 1,
 		};
 
 		// should fail for duplicate signers
@@ -117,25 +130,11 @@ fn dkg_key_verifcation_works() {
 			Error::<Runtime>::DuplicateSignature
 		);
 
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Ecdsa,
-			key: signature.1.clone(),
-			participants: vec![pub_key.as_mut().to_vec()],
-			keys_and_signatures: vec![signature.clone(), mock_signature(pub_key, mock_pub_key())],
-			threshold: 2,
-		};
-
-		// should fail for signing different keys
-		assert_noop!(
-			DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),
-			Error::<Runtime>::InvalidSignatureData
-		);
-
 		// works correctly when all params as expected
-		let mut participant_one = mock_pub_key();
-		let mut participant_two = mock_pub_key();
-		let signature_one = mock_signature(participant_one, participant_one);
-		let signature_two = mock_signature(participant_two, participant_one);
+		let mut participant_one = mock_pub_key_ecdsa();
+		let mut participant_two = mock_pub_key_ecdsa();
+		let signature_one = mock_signature_ecdsa(participant_one, participant_one);
+		let signature_two = mock_signature_ecdsa(participant_two, participant_one);
 		let job_to_verify = DKGResult {
 			key_type: DkgKeyType::Ecdsa,
 			key: participant_one.to_raw_vec(),
@@ -143,7 +142,7 @@ fn dkg_key_verifcation_works() {
 				participant_one.as_mut().to_vec(),
 				participant_two.as_mut().to_vec(),
 			],
-			keys_and_signatures: vec![signature_two, signature_one],
+			signatures: vec![signature_two, signature_one],
 			threshold: 1,
 		};
 
@@ -153,15 +152,99 @@ fn dkg_key_verifcation_works() {
 }
 
 #[test]
-fn dkg_signature_verifcation_works() {
+fn dkg_key_verifcation_works_for_schnorr() {
+	new_test_ext().execute_with(|| {
+		let job_to_verify = DKGResult {
+			key_type: DkgKeyType::Schnorr,
+			key: mock_pub_key_sr25519().to_vec(),
+			participants: vec![],
+			signatures: vec![],
+			threshold: 2,
+		};
+
+		// should fail for empty participants
+		assert_noop!(
+			DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),
+			Error::<Runtime>::NoParticipantsFound
+		);
+
+		let job_to_verify = DKGResult {
+			key_type: DkgKeyType::Schnorr,
+			key: vec![],
+			participants: vec![mock_pub_key_sr25519().as_mut().to_vec()],
+			signatures: vec![],
+			threshold: 2,
+		};
+
+		// should fail for empty keys/signatures
+		assert_noop!(
+			DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),
+			Error::<Runtime>::NoSignaturesFound
+		);
+
+		// setup key/signature
+		let mut pub_key = mock_pub_key_sr25519();
+		let signature = mock_signature_sr25519(pub_key, pub_key);
+
+		let job_to_verify = DKGResult {
+			key_type: DkgKeyType::Schnorr,
+			key: pub_key.to_vec(),
+			participants: vec![mock_pub_key_sr25519().as_mut().to_vec()],
+			signatures: vec![signature.clone()],
+			threshold: 1,
+		};
+
+		// should fail for less than threshold
+		assert_noop!(
+			DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),
+			Error::<Runtime>::NotEnoughSigners
+		);
+
+		let job_to_verify = DKGResult {
+			key_type: DkgKeyType::Schnorr,
+			key: pub_key.to_vec(),
+			participants: vec![pub_key.as_mut().to_vec()],
+			signatures: vec![signature.clone(), signature.clone()],
+			threshold: 1,
+		};
+
+		// should fail for duplicate signers
+		assert_noop!(
+			DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),
+			Error::<Runtime>::DuplicateSignature
+		);
+
+		// works correctly when all params as expected
+		let mut participant_one = mock_pub_key_sr25519();
+		let mut participant_two = mock_pub_key_sr25519();
+		let signature_one = mock_signature_sr25519(participant_one, participant_one);
+		let signature_two = mock_signature_sr25519(participant_two, participant_one);
+		let job_to_verify = DKGResult {
+			key_type: DkgKeyType::Schnorr,
+			key: participant_one.to_raw_vec(),
+			participants: vec![
+				participant_one.as_mut().to_vec(),
+				participant_two.as_mut().to_vec(),
+			],
+			signatures: vec![signature_two, signature_one],
+			threshold: 1,
+		};
+
+		// should fail for signing different keys
+		assert_ok!(DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),);
+	});
+}
+
+#[test]
+fn dkg_signature_verifcation_works_ecdsa() {
 	new_test_ext().execute_with(|| {
 		// setup key/signature
-		let pub_key = mock_pub_key();
-		let signature = mock_signature(pub_key, mock_pub_key());
+		let pub_key = mock_pub_key_ecdsa();
+		let signature = mock_signature_ecdsa(pub_key, mock_pub_key_ecdsa());
 
 		let job_to_verify: DKGSignatureResult = DKGSignatureResult {
 			key_type: DkgKeyType::Ecdsa,
-			signature: signature.1,
+			signature,
 			data: pub_key.to_raw_vec(),
 			signing_key: pub_key.to_raw_vec(),
 		};
@@ -172,10 +255,43 @@ fn dkg_signature_verifcation_works() {
 			Error::<Runtime>::SigningKeyMismatch
 		);
 
-		let signature = mock_signature(pub_key, pub_key);
+		let signature = mock_signature_ecdsa(pub_key, pub_key);
 		let job_to_verify: DKGSignatureResult = DKGSignatureResult {
 			key_type: DkgKeyType::Ecdsa,
-			signature: signature.1,
+			signature,
+			data: pub_key.to_raw_vec(),
+			signing_key: pub_key.to_raw_vec(),
+		};
+
+		// should work with correct params
+		assert_ok!(DKG::verify(JobResult::DKGPhaseTwo(job_to_verify)));
+	});
+}
+
+#[test]
+fn dkg_signature_verifcation_works_schnorr() {
+	new_test_ext().execute_with(|| {
+		// setup key/signature
+		let pub_key = mock_pub_key_sr25519();
+		let signature = mock_signature_sr25519(pub_key, mock_pub_key_sr25519());
+
+		let job_to_verify: DKGSignatureResult = DKGSignatureResult {
+			key_type: DkgKeyType::Schnorr,
+			signature,
+			data: pub_key.to_raw_vec(),
+			signing_key: pub_key.to_raw_vec(),
+		};
+
+		// should fail for invalid keys
+		assert_noop!(
+			DKG::verify(JobResult::DKGPhaseTwo(job_to_verify)),
+			Error::<Runtime>::InvalidSignature
+		);
+
+		let signature = mock_signature_sr25519(pub_key, pub_key);
+		let job_to_verify: DKGSignatureResult = DKGSignatureResult {
+			key_type: DkgKeyType::Schnorr,
+			signature,
 			data: pub_key.to_raw_vec(),
 			signing_key: pub_key.to_raw_vec(),
 		};
