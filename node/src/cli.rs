@@ -50,10 +50,6 @@ pub enum Subcommand {
 	#[command(subcommand)]
 	Key(sc_cli::KeySubcommand),
 
-	/// DKG key management cli utilities
-	#[command(subcommand)]
-	DKGKey(dkg_primitives::dkg_key_cli::DKGKeySubcommand),
-
 	/// Build a chain specification.
 	BuildSpec(sc_cli::BuildSpecCmd),
 
@@ -92,7 +88,4 @@ pub enum Subcommand {
 
 	/// Db meta columns information.
 	FrontierDb(fc_cli::FrontierDbCmd),
-
-	/// DKG signer
-	DKGSigner(crate::signer_cli::DKGSignerCmd),
 }

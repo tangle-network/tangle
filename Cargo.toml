@@ -71,16 +71,8 @@ paste = "1.0.6"
 slices = "0.2.0"
 schnorrkel = { version = "0.9.1", default-features = false }
 
-# DKG Substrate Dependencies
-dkg-runtime-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
-pallet-dkg-metadata = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
-pallet-dkg-proposal-handler = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
-pallet-dkg-proposals = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
-pallet-bridge-registry = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0", default-features = false }
-dkg-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0" }
-dkg-primitives = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0" }
-webb-relayer-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0" }
-webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "drew/update-v1.1.0" }
+webb-relayer-gadget = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "master" }
+webb-relayer-gadget-cli = { git = "https://github.com/webb-tools/dkg-substrate.git", branch = "master" }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-mainnet-runtime = { package = "tangle-mainnet-runtime", path = "runtime/mainnet" }
@@ -277,9 +269,7 @@ pallet-transaction-pause = { path = 'pallets/transaction-pause', default-feature
 # pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.6" }
 # webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.4.6" }
 
-webb = { version = "0.7", default-features = false }
-webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", branch = "polkadot-sdk-v1.0.0", default-features = false, features = ["scale", "evm"] }
-
+webb = { version = "0.8.2", default-features = false }
 primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }
 rpc-primitives-debug = { path = "primitives/rpc/debug", default-features = false }
