@@ -33,7 +33,7 @@ pub struct Cli {
 
 	#[cfg(feature = "relayer")]
 	#[clap(flatten)]
-	pub relayer_cmd: webb_relayer_gadget_cli::WebbRelayerCmd,
+	pub relayer_cmd: tangle_relayer_gadget_cli::RelayerCmd,
 
 	#[cfg(feature = "light-client")]
 	#[clap(flatten)]

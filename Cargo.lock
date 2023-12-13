@@ -15233,6 +15233,7 @@ dependencies = [
  "sc-transaction-pool-api",
  "serde_json",
  "sp-api",
+ "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-block-builder",
  "sp-blockchain",
  "sp-consensus-aura",

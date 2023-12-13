@@ -302,7 +302,7 @@ pub struct RunFullParams {
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
 	#[cfg(feature = "relayer")]
-	pub relayer_cmd: webb_relayer_gadget_cli::WebbRelayerCmd,
+	pub relayer_cmd: tangle_relayer_gadget_cli::RelayerCmd,
 	#[cfg(feature = "light-client")]
 	pub light_client_relayer_cmd:
 		pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
@@ -550,7 +550,7 @@ pub async fn new_full(
 	if role.is_authority() {
 		// setup relayer gadget params
 		#[cfg(feature = "relayer")]
-		let relayer_params = webb_relayer_gadget::WebbRelayerParams {
+		let relayer_params = tangle_relayer_gadget::RelayerParams {
 			local_keystore: keystore_container.local_keystore(),
 			config_dir: relayer_cmd.relayer_config_dir,
 			database_path: config
@@ -566,26 +566,29 @@ pub async fn new_full(
 		task_manager.spawn_handle().spawn(
 			"relayer-gadget",
 			None,
-			webb_relayer_gadget::start_relayer_gadget(relayer_params),
+			tangle_relayer_gadget::start_relayer_gadget(
+				relayer_params,
+				sp_application_crypto::KeyTypeId(*b"role"),
+			),
 		);
 
 		// Start Eth2 Light client Relayer Gadget - (MAINNET RELAYER)
-		// #[cfg(feature = "light-client")]
-		// task_manager.spawn_handle().spawn(
-		// 	"mainnet-relayer-gadget",
-		// 	None,
-		// 	pallet_eth2_light_client_relayer_gadget::start_gadget(
-		// 		pallet_eth2_light_client_relayer_gadget::Eth2LightClientParams {
-		// 			lc_relay_config_path: light_client_relayer_cmd
-		// 				.light_client_relay_config_path
-		// 				.clone(),
-		// 			lc_init_config_path: light_client_relayer_cmd
-		// 				.light_client_init_pallet_config_path
-		// 				.clone(),
-		// 			eth2_chain_id: webb_proposals::TypedChainId::Evm(1),
-		// 		},
-		// 	),
-		// );
+		#[cfg(feature = "light-client")]
+		task_manager.spawn_handle().spawn(
+			"mainnet-relayer-gadget",
+			None,
+			pallet_eth2_light_client_relayer_gadget::start_gadget(
+				pallet_eth2_light_client_relayer_gadget::Eth2LightClientParams {
+					lc_relay_config_path: light_client_relayer_cmd
+						.light_client_relay_config_path
+						.clone(),
+					lc_init_config_path: light_client_relayer_cmd
+						.light_client_init_pallet_config_path
+						.clone(),
+					eth2_chain_id: webb_proposals::TypedChainId::Evm(1),
+				},
+			),
+		);
 	}
 	let params = sc_service::SpawnTasksParams {
 		network: network.clone(),
