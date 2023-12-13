@@ -18,6 +18,7 @@ use crate::{
 	distributions::{combine_distributions, develop, mainnet, testnet},
 	mainnet_fixtures::{get_root_key, get_standalone_bootnodes},
 };
+use core::marker::PhantomData;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
@@ -26,10 +27,10 @@ use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_mainnet_runtime::{
 	AccountId, Balance, BalancesConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
-	ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig, Signature,
-	StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
+	Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig,
+	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
 };
-//use webb_consensus_types::network_config::{Network, NetworkConfig};
+use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;

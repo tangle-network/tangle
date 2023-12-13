@@ -13,6 +13,7 @@ use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts}
 fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f64> {
 	let mut path = get_git_root();
 	path.push(path_str);
+	println!("Path {:?}", path_str);
 	let json = read_contents(&path);
 	let json_obj = json.as_object().expect("should be an object");
 	let mut accounts_map = BTreeMap::new();

@@ -19,7 +19,7 @@ use crate::{
 		get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 	},
 };
-use dkg_runtime_primitives::ResourceId;
+use core::marker::PhantomData;
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
@@ -28,35 +28,11 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_testnet_runtime::{
-	AccountId, Balance, BalancesConfig, DKGConfig, DKGId, DKGProposalsConfig, EVMChainIdConfig,
-	EVMConfig, ElectionsConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig,
-	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT,
-	WASM_BINARY,
+	AccountId, Balance, BalancesConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
+	Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig,
+	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
 };
-//use webb_consensus_types::network_config::{Network, NetworkConfig};
-
-// The URL for the telemetry server.
-// const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
-
-/// Hermes (Evm, 5001)
-const CHAIN_ID_HERMES: [u8; 6] = hex_literal::hex!("010000001389");
-/// Athena (Evm, 5002)
-const CHAIN_ID_ATHENA: [u8; 6] = hex_literal::hex!("01000000138a");
-/// Demeter (Evm, 5003)
-const CHAIN_ID_DEMETER: [u8; 6] = hex_literal::hex!("01000000138b");
-
-const RESOURCE_ID_HERMES_ATHENA: ResourceId = ResourceId(hex_literal::hex!(
-	"0000000000000000e69a847cd5bc0c9480ada0b339d7f0a8cac2b6670000138a"
-));
-const RESOURCE_ID_ATHENA_HERMES: ResourceId = ResourceId(hex_literal::hex!(
-	"000000000000d30c8839c1145609e564b986f667b273ddcb8496010000001389"
-));
-
-/// The default value for keygen threshold
-const DEFAULT_DKG_KEYGEN_THRESHOLD: u16 = 5;
-
-/// The default value for signature threshold
-const DEFAULT_DKG_SIGNATURE_THRESHOLD: u16 = 3;
+use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
@@ -82,14 +58,13 @@ where
 pub fn authority_keys_from_seed(
 	controller: &str,
 	stash: &str,
-) -> (AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId) {
+) -> (AccountId, AccountId, AuraId, GrandpaId, ImOnlineId) {
 	(
 		get_account_id_from_seed::<sr25519::Public>(controller),
 		get_account_id_from_seed::<sr25519::Public>(stash),
 		get_from_seed::<AuraId>(controller),
 		get_from_seed::<GrandpaId>(controller),
 		get_from_seed::<ImOnlineId>(stash),
-		get_from_seed::<DKGId>(controller),
 	)
 }
 
@@ -101,9 +76,8 @@ fn dkg_session_keys(
 	grandpa: GrandpaId,
 	aura: AuraId,
 	im_online: ImOnlineId,
-	dkg: DKGId,
 ) -> tangle_testnet_runtime::opaque::SessionKeys {
-	tangle_testnet_runtime::opaque::SessionKeys { grandpa, aura, dkg, im_online }
+	tangle_testnet_runtime::opaque::SessionKeys { grandpa, aura, im_online }
 }
 
 pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -146,21 +120,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 				],
-				// Initial Chain Ids
-				vec![CHAIN_ID_HERMES, CHAIN_ID_ATHENA, CHAIN_ID_DEMETER],
-				// Initial resource Ids
-				vec![
-					(RESOURCE_ID_HERMES_ATHENA, Default::default()),
-					(RESOURCE_ID_ATHENA_HERMES, Default::default()),
-				],
-				// Initial proposers
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-				],
 				chain_id,
-				DEFAULT_DKG_KEYGEN_THRESHOLD,
-				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				combine_distributions(vec![
 					develop::get_evm_balance_distribution(),
 					testnet::get_evm_balance_distribution(),
@@ -233,12 +193,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					hex!["400d597fe03f1031a9b4e1983b7c42eeed29ef3f9da6715667d06b367bdb897f"].into(),
 					hex!["668cf048845804f31759decbec11cb41bf316b1901d2142a35ad3a8eb7420326"].into(),
 				],
-				vec![],
-				vec![],
-				get_standalone_initial_authorities().iter().map(|a| a.0.clone()).collect(),
 				chain_id,
-				DEFAULT_DKG_KEYGEN_THRESHOLD,
-				DEFAULT_DKG_SIGNATURE_THRESHOLD,
 				combine_distributions(vec![
 					develop::get_evm_balance_distribution(),
 					testnet::get_evm_balance_distribution(),
@@ -266,16 +221,11 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId, DKGId)>,
+	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId)>,
 	initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
-	initial_chain_ids: Vec<[u8; 6]>,
-	initial_r_ids: Vec<(ResourceId, Vec<u8>)>,
-	initial_proposers: Vec<AccountId>,
 	chain_id: u64,
-	dkg_keygen_threshold: u16,
-	dkg_signature_threshold: u16,
 	genesis_evm_distribution: Vec<(H160, fp_evm::GenesisAccount)>,
 	genesis_substrate_distribution: Vec<(AccountId, Balance)>,
 	_enable_println: bool,
@@ -327,7 +277,7 @@ fn testnet_genesis(
 					(
 						x.1.clone(),
 						x.0.clone(),
-						dkg_session_keys(x.3.clone(), x.2.clone(), x.4.clone(), x.5.clone()),
+						dkg_session_keys(x.3.clone(), x.2.clone(), x.4.clone()),
 					)
 				})
 				.collect::<Vec<_>>(),
@@ -353,14 +303,6 @@ fn testnet_genesis(
 		treasury: Default::default(),
 		aura: Default::default(),
 		grandpa: Default::default(),
-		dkg: DKGConfig {
-			authorities: initial_authorities.iter().map(|(.., x)| x.clone()).collect::<_>(),
-			keygen_threshold: dkg_keygen_threshold,
-			signature_threshold: dkg_signature_threshold,
-			authority_ids: initial_authorities.iter().map(|(x, ..)| x.clone()).collect::<_>(),
-		},
-		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
-		bridge_registry: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
 		eth_2_client: Eth2ClientConfig {
 			networks: vec![

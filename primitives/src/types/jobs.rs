@@ -239,6 +239,9 @@ pub struct DKGTSSPhaseOneJobType<AccountId> {
 
 	/// the caller permitted to use this result later
 	pub permitted_caller: Option<AccountId>,
+
+	/// the key type to be used
+	pub key_type: DkgKeyType,
 }
 
 /// Represents the DKG Signature job type.
@@ -323,6 +326,8 @@ pub struct PhaseOneResult<AccountId, BlockNumber> {
 	pub result: Vec<u8>,
 	/// permitted caller to use this result
 	pub permitted_caller: Option<AccountId>,
+	/// Key type if applicable
+	pub key_type: Option<DkgKeyType>,
 	/// The type of the job submission.
 	pub job_type: JobType<AccountId>,
 }
@@ -388,19 +393,22 @@ pub enum JobResult {
 	ZkSaaSPhaseTwo(ZkSaaSProofResult),
 }
 
-pub type KeysAndSignatures = Vec<(Vec<u8>, Vec<u8>)>;
+pub type Signatures = Vec<Vec<u8>>;
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGResult {
+	/// Key type to use for DKG
+	pub key_type: DkgKeyType,
+
 	/// Submitted key
 	pub key: Vec<u8>,
 
 	/// List of participants' public keys
-	pub participants: Vec<ecdsa::Public>,
+	pub participants: Vec<Vec<u8>>,
 
-	/// List of participants' keys and signatures
-	pub keys_and_signatures: KeysAndSignatures,
+	/// List of participants' signatures
+	pub signatures: Signatures,
 
 	/// threshold needed to confirm the result
 	pub threshold: u8,
@@ -409,6 +417,9 @@ pub struct DKGResult {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGSignatureResult {
+	/// Key type to use for DKG
+	pub key_type: DkgKeyType,
+
 	/// The input data
 	pub data: Vec<u8>,
 
@@ -470,6 +481,20 @@ pub struct ReportValidatorOffence<Offender> {
 	pub validator_set_count: u32,
 	/// The type of offence
 	pub offence_type: ValidatorOffenceType,
+	/// Role type against which offence is reported.
+	pub role_type: RoleType,
 	/// Offenders
 	pub offenders: Vec<Offender>,
+}
+
+/// Possible key types for DKG
+#[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq, Encode, Decode, Default)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum DkgKeyType {
+	/// Elliptic Curve Digital Signature Algorithm (ECDSA) key type.
+	#[default]
+	Ecdsa,
+
+	/// Schnorr signature key type.
+	Schnorr,
 }

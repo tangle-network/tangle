@@ -21,7 +21,8 @@ use mock::*;
 use sp_runtime::AccountId32;
 
 use tangle_primitives::jobs::{
-	DKGSignatureResult, DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, JobSubmission, JobType,
+	DKGSignatureResult, DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DkgKeyType, JobSubmission,
+	JobType,
 };
 
 const ALICE: AccountId32 = AccountId32::new([1u8; 32]);
@@ -45,6 +46,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: vec![HUNDRED, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
 				permitted_caller: None,
+				key_type: DkgKeyType::Ecdsa,
 			}),
 		};
 
@@ -60,6 +62,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 5,
 				permitted_caller: None,
+				key_type: DkgKeyType::Ecdsa,
 			}),
 		};
 
@@ -76,6 +79,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
 				permitted_caller: None,
+				key_type: DkgKeyType::Ecdsa,
 			}),
 		};
 		assert_noop!(
@@ -89,6 +93,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
 				permitted_caller: Some(TEN),
+				key_type: DkgKeyType::Ecdsa,
 			}),
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
@@ -101,10 +106,11 @@ fn jobs_submission_e2e_works_for_dkg() {
 			JobKey::DKG,
 			0,
 			JobResult::DKGPhaseOne(DKGResult {
-				keys_and_signatures: vec![],
+				signatures: vec![],
 				threshold: 3,
 				participants: vec![],
-				key: vec![]
+				key: vec![],
+				key_type: DkgKeyType::Ecdsa
 			})
 		));
 
@@ -151,7 +157,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 			JobResult::DKGPhaseTwo(DKGSignatureResult {
 				signing_key: vec![],
 				signature: vec![],
-				data: vec![]
+				data: vec![],
+				key_type: DkgKeyType::Ecdsa
 			})
 		));
 

@@ -37,11 +37,8 @@ sha3 = { workspace = true }
 precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate
-dkg-runtime-primitives = { workspace = true, features = ["std"] }
 frame-election-provider-support = { workspace = true, features = ["std"] }
 pallet-balances = { workspace = true, features = ["std"] }
-pallet-dkg-metadata = { workspace = true, features = ["std"] }
-pallet-dkg-proposals = { workspace = true, features = ["std"] }
 pallet-session = { workspace = true, features = ["std"] }
 pallet-staking = { workspace = true, features = ["std"] }
 pallet-staking-reward-curve = { workspace = true }
