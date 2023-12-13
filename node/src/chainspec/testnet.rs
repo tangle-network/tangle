@@ -362,14 +362,13 @@ fn testnet_genesis(
 		dkg_proposals: DKGProposalsConfig { initial_chain_ids, initial_r_ids, initial_proposers },
 		bridge_registry: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
-		// eth_2_client: Eth2ClientConfig {
-		// 	// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
-		// 	networks: vec![
-		// 		(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
-		// 		(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
-		// 	],
-		// 	phantom: PhantomData,
-		// },
+		eth_2_client: Eth2ClientConfig {
+			networks: vec![
+				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+			],
+			phantom: PhantomData,
+		},
 		nomination_pools: Default::default(),
 		transaction_payment: Default::default(),
 		// EVM compatibility

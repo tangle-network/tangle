@@ -3088,7 +3088,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "uuid 1.6.1",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "wsts",
 ]
 
@@ -3180,7 +3180,7 @@ dependencies = [
  "sp-runtime",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "tiny-keccak",
- "webb-proposals",
+ "webb-proposals 0.6.0",
 ]
 
 [[package]]
@@ -7930,7 +7930,7 @@ dependencies = [
  "serde",
  "sp-runtime",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "webb-proposals",
+ "webb-proposals 0.6.0",
 ]
 
 [[package]]
@@ -8027,7 +8027,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "webb-proposals",
+ "webb-proposals 0.6.0",
 ]
 
 [[package]]
@@ -8049,7 +8049,7 @@ dependencies = [
  "sp-runtime",
  "sp-staking",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "webb-proposals",
+ "webb-proposals 0.6.0",
 ]
 
 [[package]]
@@ -14492,7 +14492,7 @@ dependencies = [
  "tangle-testnet-runtime",
  "tokio",
  "wasmer",
- "webb-proposals",
+ "webb-proposals 0.8.0",
  "webb-relayer-gadget",
  "webb-relayer-gadget-cli",
 ]
@@ -14614,7 +14614,7 @@ dependencies = [
  "tokio",
  "tracing",
  "webb 0.7.4",
- "webb-proposals",
+ "webb-proposals 0.8.0",
 ]
 
 [[package]]
@@ -16305,7 +16305,7 @@ dependencies = [
  "tokio",
  "typed-builder 0.16.2",
  "webb 0.8.2",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-utils",
 ]
@@ -16339,7 +16339,7 @@ dependencies = [
  "tokio",
  "tracing",
  "webb 0.8.2",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-context",
  "webb-relayer-store",
@@ -16359,7 +16359,7 @@ dependencies = [
  "tracing",
  "webb 0.8.2",
  "webb-event-watcher-traits",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-store",
  "webb-relayer-utils",
@@ -16390,7 +16390,7 @@ dependencies = [
  "webb-bridge-registry-backends",
  "webb-event-watcher-traits",
  "webb-proposal-signing-backends",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-store",
  "webb-relayer-utils",
@@ -16414,6 +16414,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "webb-proposal-derive"
+version = "0.1.0"
+source = "git+https://github.com/webb-tools/webb-rs.git#80a94b3d6ea5b0b60cfc48ffed77f74269a2ef2d"
+dependencies = [
+ "ethers-core",
+ "quote",
+ "syn 2.0.39",
+]
+
+[[package]]
 name = "webb-proposal-signing-backends"
 version = "0.5.15-dev"
 source = "git+https://github.com/webb-tools/relayer?branch=fix-ethers-version-2.0.10#a46b17b2e1b56297d675185b6cbdef847de535ea"
@@ -16430,7 +16440,7 @@ dependencies = [
  "tracing",
  "typed-builder 0.16.2",
  "webb 0.8.2",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-store",
  "webb-relayer-types",
  "webb-relayer-utils",
@@ -16449,6 +16459,22 @@ dependencies = [
  "serde",
  "tiny-keccak",
  "typed-builder 0.14.0",
+]
+
+[[package]]
+name = "webb-proposals"
+version = "0.8.0"
+source = "git+https://github.com/webb-tools/webb-rs.git#80a94b3d6ea5b0b60cfc48ffed77f74269a2ef2d"
+dependencies = [
+ "frame-support",
+ "hex",
+ "num-traits",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "thiserror",
+ "tiny-keccak",
+ "webb-proposal-derive",
 ]
 
 [[package]]
@@ -16473,7 +16499,7 @@ dependencies = [
  "webb-ew-dkg",
  "webb-ew-evm",
  "webb-proposal-signing-backends",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-context",
  "webb-relayer-handlers",
@@ -16501,7 +16527,7 @@ dependencies = [
  "tracing-subscriber 0.3.18",
  "url",
  "webb 0.8.2",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-store",
  "webb-relayer-types",
  "webb-relayer-utils",
@@ -16585,7 +16611,7 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "webb 0.8.2",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-context",
  "webb-relayer-handler-utils",
@@ -16607,7 +16633,7 @@ dependencies = [
  "tempfile",
  "tracing",
  "webb 0.8.2",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-utils",
 ]
 
@@ -16648,7 +16674,7 @@ dependencies = [
  "webb 0.8.2",
  "webb-chains-info",
  "webb-price-oracle-backends",
- "webb-proposals",
+ "webb-proposals 0.6.0",
  "webb-relayer-config",
  "webb-relayer-context",
  "webb-relayer-handler-utils",
@@ -16708,7 +16734,7 @@ dependencies = [
  "thiserror",
  "url",
  "webb 0.8.2",
- "webb-proposals",
+ "webb-proposals 0.6.0",
 ]
 
 [[package]]

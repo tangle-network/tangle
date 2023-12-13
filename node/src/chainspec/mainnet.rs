@@ -293,14 +293,13 @@ fn testnet_genesis(
 		aura: Default::default(),
 		grandpa: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
-		// eth_2_client: Eth2ClientConfig {
-		// 	// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
-		// 	networks: vec![
-		// 		(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
-		// 		(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
-		// 	],
-		// 	phantom: PhantomData,
-		// },
+		eth_2_client: Eth2ClientConfig {
+			networks: vec![
+				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+			],
+			phantom: PhantomData,
+		},
 		nomination_pools: Default::default(),
 		transaction_payment: Default::default(),
 		// EVM compatibility
@@ -396,14 +395,14 @@ fn mainnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
-		// // ETH2 light client
-		// eth_2_client: Eth2ClientConfig {
-		// 	networks: vec![(
-		// 		webb_proposals::TypedChainId::Evm(1),
-		// 		NetworkConfig::new(&Network::Mainnet),
-		// 	)],
-		// 	phantom: PhantomData,
-		// },
+		// ETH2 light client
+		eth_2_client: Eth2ClientConfig {
+			networks: vec![
+				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+			],
+			phantom: PhantomData,
+		},
 		claims: Default::default(),
 	}
 }
