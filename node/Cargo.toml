@@ -34,12 +34,13 @@ serde_json = { workspace = true }
 tokio = { workspace = true }
 
 # Light client dependencies
-# pallet-eth2-light-client-relayer-gadget = { workspace = true, optional = true }
-# pallet-eth2-light-client-relayer-gadget-cli = { workspace = true, optional = true }
-# webb-consensus-types = { workspace = true }
+pallet-eth2-light-client-relayer-gadget = { workspace = true, optional = true }
+pallet-eth2-light-client-relayer-gadget-cli = { workspace = true, optional = true }
+webb-consensus-types = { workspace = true }
+webb-proposals = { workspace = true }
 
-webb-relayer-gadget = { workspace = true, optional = true }
-webb-relayer-gadget-cli = { workspace = true, optional = true }
+tangle-relayer-gadget = { workspace = true, optional = true }
+tangle-relayer-gadget-cli = { workspace = true, optional = true }
 
 # Substrate dependencies
 frame-benchmarking = { workspace = true }
@@ -129,12 +130,10 @@ rocksdb = [
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]
 txpool = ["fc-rpc/txpool"]
 light-client = [
-
-
-  # "pallet-eth2-light-client-relayer-gadget",
-  # "pallet-eth2-light-client-relayer-gadget-cli",
+  "pallet-eth2-light-client-relayer-gadget",
+  "pallet-eth2-light-client-relayer-gadget-cli",
 ]
 relayer = [
-  "webb-relayer-gadget",
-  "webb-relayer-gadget-cli",
+  "tangle-relayer-gadget",
+  "tangle-relayer-gadget-cli",
 ]

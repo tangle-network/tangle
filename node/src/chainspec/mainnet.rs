@@ -18,6 +18,7 @@ use crate::{
 	distributions::{combine_distributions, develop, mainnet, testnet},
 	mainnet_fixtures::{get_root_key, get_standalone_bootnodes},
 };
+use core::marker::PhantomData;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
@@ -26,10 +27,10 @@ use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_mainnet_runtime::{
 	AccountId, Balance, BalancesConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
-	ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig, Signature,
-	StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
+	Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig,
+	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
 };
-//use webb_consensus_types::network_config::{Network, NetworkConfig};
+use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
@@ -293,14 +294,13 @@ fn testnet_genesis(
 		aura: Default::default(),
 		grandpa: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
-		// eth_2_client: Eth2ClientConfig {
-		// 	// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
-		// 	networks: vec![
-		// 		(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
-		// 		(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
-		// 	],
-		// 	phantom: PhantomData,
-		// },
+		eth_2_client: Eth2ClientConfig {
+			networks: vec![
+				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+			],
+			phantom: PhantomData,
+		},
 		nomination_pools: Default::default(),
 		transaction_payment: Default::default(),
 		// EVM compatibility
@@ -396,14 +396,14 @@ fn mainnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
-		// // ETH2 light client
-		// eth_2_client: Eth2ClientConfig {
-		// 	networks: vec![(
-		// 		webb_proposals::TypedChainId::Evm(1),
-		// 		NetworkConfig::new(&Network::Mainnet),
-		// 	)],
-		// 	phantom: PhantomData,
-		// },
+		// ETH2 light client
+		eth_2_client: Eth2ClientConfig {
+			networks: vec![
+				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+			],
+			phantom: PhantomData,
+		},
 		claims: Default::default(),
 	}
 }

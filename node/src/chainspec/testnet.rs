@@ -19,6 +19,7 @@ use crate::{
 		get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
 	},
 };
+use core::marker::PhantomData;
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
@@ -28,9 +29,10 @@ use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_testnet_runtime::{
 	AccountId, Balance, BalancesConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
-	ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig, Signature,
-	StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
+	Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig,
+	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
 };
+use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
@@ -302,14 +304,13 @@ fn testnet_genesis(
 		aura: Default::default(),
 		grandpa: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
-		// eth_2_client: Eth2ClientConfig {
-		// 	// Vec<(TypedChainId, [u8; 32], ForkVersion, u64)>
-		// 	networks: vec![
-		// 		(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
-		// 		(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
-		// 	],
-		// 	phantom: PhantomData,
-		// },
+		eth_2_client: Eth2ClientConfig {
+			networks: vec![
+				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+			],
+			phantom: PhantomData,
+		},
 		nomination_pools: Default::default(),
 		transaction_payment: Default::default(),
 		// EVM compatibility

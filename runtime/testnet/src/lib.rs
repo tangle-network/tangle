@@ -992,17 +992,17 @@ impl pallet_utility::Config for Runtime {
 	type WeightInfo = ();
 }
 
-// parameter_types! {
-// 	pub const StoragePricePerByte: u128 = MILLIUNIT;
-// 	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
-// }
+parameter_types! {
+	pub const StoragePricePerByte: u128 = MILLIUNIT;
+	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
+}
 
-// impl pallet_eth2_light_client::Config for Runtime {
-// 	type RuntimeEvent = RuntimeEvent;
-// 	type StoragePricePerByte = StoragePricePerByte;
-// 	type PalletId = Eth2ClientPalletId;
-// 	type Currency = Balances;
-// }
+impl pallet_eth2_light_client::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type StoragePricePerByte = StoragePricePerByte;
+	type PalletId = Eth2ClientPalletId;
+	type Currency = Balances;
+}
 
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
@@ -1200,7 +1200,7 @@ construct_runtime!(
 		DynamicFee: pallet_dynamic_fee,
 		BaseFee: pallet_base_fee,
 		HotfixSufficients: pallet_hotfix_sufficients,
-		//Eth2Client: pallet_eth2_light_client,
+		Eth2Client: pallet_eth2_light_client,
 
 		Roles: pallet_roles,
 		Jobs: pallet_jobs,

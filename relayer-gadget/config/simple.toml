@@ -1,0 +1,42 @@
+port = 9955
+
+# Controls what features are enabled in the relayer system
+[features]
+# if you are an authority, this always true.
+governance-relay = true
+data-query = true
+private-tx-relay = true
+
+[evm.goerli]
+name = "goerli"
+http-endpoint = "https://rpc.ankr.com/eth_goerli"
+ws-endpoint = "wss://rpc.ankr.com/eth_goerli"
+chain-id = 5
+enabled = true
+block-confirmations = 2
+# The private key of the account that will be used to sign transactions
+# If not set, we will use the Keystore to get the ECDSA private key.
+# private-key = "$PRIVATE_KEY"
+
+[[evm.goerli.contracts]]
+contract = "VAnchor"
+address = "0x38e7aa90c77f86747fab355eecaa0c2e4c3a463d"
+deployed-at = 8703495
+events-watcher = { enabled = true, polling-interval = 15000 }
+proposal-signing-backend = { type = "DKGNode", chain-id = 0 }
+
+[substrate.internal]
+name = "internal"
+chain-id = 0
+http-endpoint = "http://localhost:9933"
+ws-endpoint = "ws://localhost:9944"
+suri = "//Alice"
+enabled = true
+
+[[substrate.internal.pallets]]
+pallet = "DKG"
+events-watcher = { enabled = true, polling-interval = 3000, print-progress-interval = 30000 }
+
+[[substrate.internal.pallets]]
+pallet = "DKGProposalHandler"
+events-watcher = { enabled = true, polling-interval = 3000, print-progress-interval = 30000 }

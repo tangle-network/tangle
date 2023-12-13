@@ -1,0 +1,11 @@
+[package]
+name = "tangle-relayer-gadget-cli"
+version = "0.0.1"
+authors = ["Webb Developers <dev@webb.tools>", "Shady Khalifa <dev+github@shadykhalifa.me>"]
+license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
+homepage = { workspace = true }
+repository = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+clap = { workspace = true }
