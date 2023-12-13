@@ -2986,30 +2986,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dkg-runtime-primitives"
-version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=master#125d553460655602d80e99e9c6c98490346ded4b"
-dependencies = [
- "ethabi 18.0.0",
- "ethereum",
- "ethereum-types 0.14.1",
- "frame-support",
- "frame-system",
- "impl-trait-for-tuples",
- "log",
- "parity-scale-codec",
- "scale-info",
- "sp-api",
- "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "sp-io 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "sp-runtime 24.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "tiny-keccak",
- "webb-proposals 0.8.0",
-]
-
-[[package]]
 name = "dleq_vrf"
 version = "0.0.2"
 source = "git+https://github.com/w3f/ring-vrf?rev=3119f51#3119f51b54b69308abfb0671f6176cb125ae1bf1"
@@ -15176,6 +15152,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "tangle-relayer-gadget"
+version = "0.0.1"
+dependencies = [
+ "ethereum-types 0.14.1",
+ "sc-keystore",
+ "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+ "sp-keystore 0.27.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+ "tracing",
+ "webb-relayer",
+ "webb-relayer-config",
+ "webb-relayer-context",
+ "webb-relayer-store",
+ "webb-relayer-types",
+]
+
+[[package]]
+name = "tangle-relayer-gadget-cli"
+version = "0.0.1"
+dependencies = [
+ "clap 4.4.11",
+]
+
+[[package]]
 name = "tangle-standalone"
 version = "0.5.0"
 dependencies = [
@@ -15249,13 +15248,13 @@ dependencies = [
  "substrate-prometheus-endpoint",
  "tangle-mainnet-runtime",
  "tangle-primitives",
+ "tangle-relayer-gadget",
+ "tangle-relayer-gadget-cli",
  "tangle-testnet-runtime",
  "tokio 1.35.0",
  "wasmer",
  "webb-consensus-types",
  "webb-proposals 0.8.0",
- "webb-relayer-gadget",
- "webb-relayer-gadget-cli",
 ]
 
 [[package]]
@@ -17864,32 +17863,6 @@ dependencies = [
  "webb-relayer-store",
  "webb-relayer-types",
  "webb-relayer-utils",
-]
-
-[[package]]
-name = "webb-relayer-gadget"
-version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=master#125d553460655602d80e99e9c6c98490346ded4b"
-dependencies = [
- "dkg-runtime-primitives",
- "ethereum-types 0.14.1",
- "sc-keystore",
- "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "sp-keystore 0.27.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "tracing",
- "webb-relayer",
- "webb-relayer-config",
- "webb-relayer-context",
- "webb-relayer-store",
- "webb-relayer-types",
-]
-
-[[package]]
-name = "webb-relayer-gadget-cli"
-version = "0.0.1"
-source = "git+https://github.com/webb-tools/dkg-substrate.git?branch=master#125d553460655602d80e99e9c6c98490346ded4b"
-dependencies = [
- "clap 4.4.11",
 ]
 
 [[package]]
