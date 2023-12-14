@@ -97,9 +97,8 @@ pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 use tangle_primitives::AuraId;
 pub use tangle_primitives::{
 	currency::*, fee::*, time::*, AccountId, AccountIndex, Address, Balance, BlockNumber, Hash,
-	Header, Index, Moment, Reputation, Signature, AVERAGE_ON_INITIALIZE_RATIO,
-	EPOCH_DURATION_IN_BLOCKS, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS,
-	UNSIGNED_PROPOSAL_EXPIRY,
+	Header, Index, Moment, Signature, AVERAGE_ON_INITIALIZE_RATIO, EPOCH_DURATION_IN_BLOCKS,
+	MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS, UNSIGNED_PROPOSAL_EXPIRY,
 };
 
 use pallet_airdrop_claims::TestWeightInfo;

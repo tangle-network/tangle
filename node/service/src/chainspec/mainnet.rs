@@ -16,7 +16,7 @@ use std::collections::BTreeMap;
 
 use crate::{
 	distributions::{combine_distributions, develop, mainnet, testnet},
-	mainnet_fixtures::{get_root_key, get_standalone_bootnodes},
+	fixtures::mainnet::{get_root_key, get_standalone_bootnodes},
 };
 use core::marker::PhantomData;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
