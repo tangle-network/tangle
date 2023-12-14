@@ -54,7 +54,7 @@ impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Tangle Standalone Substrate Node".into()
+		"Tangle Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -83,7 +83,7 @@ impl SubstrateCli for Cli {
 			// generates the spec for testnet
 			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(4006)?),
 			// generates the spec for mainnet
-			"mainnet-local" => Box::new(chainspec::mainnet::local_testnet_config(4006)?),
+			"dev" | "mainnet-local" => Box::new(chainspec::mainnet::local_testnet_config(4006)?),
 			"mainnet" => Box::new(chainspec::mainnet::tangle_mainnet_config(4006)?),
 			"tangle-testnet" => Box::new(chainspec::testnet::ChainSpec::from_json_bytes(
 				&include_bytes!("../../chainspecs/testnet/tangle-standalone.json")[..],
