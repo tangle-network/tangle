@@ -15,20 +15,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use sc_client_api::{Backend as BackendT, BlockchainEvents, KeysIter, PairsIter};
+use parity_scale_codec::Encode;
+use sc_client_api::{Backend as BackendT, BlockBackend, BlockchainEvents, KeysIter, PairsIter};
 use sp_api::{CallApiAt, NumberFor, ProvideRuntimeApi};
-use sp_blockchain::HeaderBackend;
+use sp_blockchain::{HeaderBackend, Info as BlockchainInfo};
 use sp_consensus::BlockStatus;
+use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_core::Pair;
 use sp_runtime::{
-	generic::SignedBlock,
+	generic::{Era, SignedBlock},
 	traits::{BlakeTwo256, Block as BlockT},
-	Justifications,
+	Justifications, OpaqueExtrinsic, SaturatedConversion,
 };
 use sp_storage::{ChildInfo, StorageData, StorageKey};
 use std::sync::Arc;
+use substrate_frame_rpc_system::AccountNonceApi;
 pub use tangle_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Header, Index};
-
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 
 /// A set of APIs that polkadot-like runtimes must implement.
 ///
@@ -350,5 +352,134 @@ impl sp_blockchain::HeaderBackend<Block> for Client {
 
 	fn hash(&self, number: NumberFor<Block>) -> sp_blockchain::Result<Option<Hash>> {
 		match_client!(self, hash(number))
+	}
+}
+
+/// A client instance of tangle.
+#[derive(Clone)]
+pub enum ClientUncheckedExtrinsic {
+	#[cfg(feature = "tangle")]
+	Tangle(Arc<tangle_mainnet_runtime::UncheckedExtrinsic>),
+	#[cfg(feature = "testnet")]
+	Testnet(Arc<tangle_testnet_runtime::UncheckedExtrinsic>),
+}
+
+impl Into<OpaqueExtrinsic> for ClientUncheckedExtrinsic {
+	fn into(self) -> OpaqueExtrinsic {
+		match self {
+			#[cfg(feature = "tangle")]
+			ClientUncheckedExtrinsic::Tangle(extrinsic) =>
+				OpaqueExtrinsic::from_bytes(&extrinsic.encode()).unwrap(),
+			#[cfg(feature = "testnet")]
+			ClientUncheckedExtrinsic::Testnet(extrinsic) =>
+				OpaqueExtrinsic::from_bytes(&extrinsic.encode()).unwrap(),
+		}
+	}
+}
+
+impl Client {
+	pub fn chain_info(&self) -> BlockchainInfo<Block> {
+		match self {
+			#[cfg(feature = "tangle")]
+			Self::Tangle(client) => client.chain_info(),
+			#[cfg(feature = "testnet")]
+			Self::Testnet(client) => client.chain_info(),
+		}
+	}
+
+	pub fn fetch_nonce(&self, account: sp_core::sr25519::Pair) -> u32 {
+		let best_hash = self.chain_info().best_hash;
+		macro_rules! fetch_nonce_from_client {
+			($client:expr) => {
+				$client
+					.runtime_api()
+					.account_nonce(best_hash, account.public().into())
+					.expect("Fetching account nonce works; qed")
+			};
+		}
+
+		match self {
+			#[cfg(feature = "tangle")]
+			Self::Tangle(client) => fetch_nonce_from_client!(client),
+			#[cfg(feature = "testnet")]
+			Self::Testnet(client) => fetch_nonce_from_client!(client),
+		}
+	}
+
+	/// Create a transaction using the given `call`
+	///
+	/// The transaction will be signed by `sender`. If `nonce` is `None` it will be fetched from the
+	/// state of the best block.
+	///
+	/// Note: Should only be used for tests.
+	pub fn create_extrinsic(
+		&self,
+		sender: sp_core::sr25519::Pair,
+		#[cfg(feature = "tangle")] function: impl Into<tangle_mainnet_runtime::RuntimeCall>,
+		#[cfg(feature = "testnet")] function: impl Into<tangle_testnet_runtime::RuntimeCall>,
+		nonce: Option<u32>,
+	) -> ClientUncheckedExtrinsic {
+		let function = function.into();
+		let genesis_hash = self.block_hash(0).ok().flatten().expect("Genesis block exists; qed");
+		let best_hash = self.chain_info().best_hash;
+		let best_block = self.chain_info().best_number;
+		let nonce = nonce.unwrap_or_else(|| self.fetch_nonce(sender.clone()));
+
+		macro_rules! create_extrinsic {
+			($runtime:ident) => {{
+				let period = $runtime::BlockHashCount::get()
+					.checked_next_power_of_two()
+					.map(|c| c / 2)
+					.unwrap_or(2) as u64;
+				let tip = 0;
+				let extra: $runtime::SignedExtra = (
+					frame_system::CheckNonZeroSender::<$runtime::Runtime>::new(),
+					frame_system::CheckSpecVersion::<$runtime::Runtime>::new(),
+					frame_system::CheckTxVersion::<$runtime::Runtime>::new(),
+					frame_system::CheckGenesis::<$runtime::Runtime>::new(),
+					frame_system::CheckEra::<$runtime::Runtime>::from(Era::Mortal(
+						period,
+						best_block.saturated_into(),
+					)),
+					frame_system::CheckNonce::<$runtime::Runtime>::from(nonce),
+					frame_system::CheckWeight::<$runtime::Runtime>::new(),
+					pallet_transaction_payment::ChargeTransactionPayment::<$runtime::Runtime>::from(
+						tip,
+					),
+				);
+
+				let raw_payload = $runtime::SignedPayload::from_raw(
+					function.clone(),
+					extra.clone(),
+					(
+						(),
+						$runtime::VERSION.spec_version,
+						$runtime::VERSION.transaction_version,
+						genesis_hash,
+						best_hash,
+						(),
+						(),
+						(),
+					),
+				);
+				let signature = raw_payload.using_encoded(|e| sender.sign(e));
+
+				$runtime::UncheckedExtrinsic::new_signed(
+					function,
+					sp_runtime::AccountId32::from(sender.public()).into(),
+					$runtime::Signature::Sr25519(signature),
+					extra,
+				)
+			}};
+		}
+
+		#[cfg(feature = "tangle")]
+		let extrinsic =
+			ClientUncheckedExtrinsic::Tangle(Arc::new(create_extrinsic!(tangle_mainnet_runtime)));
+		#[cfg(feature = "testnet")]
+		let extrinsic =
+			ClientUncheckedExtrinsic::Testnet(Arc::new(create_extrinsic!(tangle_testnet_runtime)));
+
+		ClientUncheckedExtrinsic::from(extrinsic)
 	}
 }

@@ -13,38 +13,28 @@
 // limitations under the License.
 
 //! A collection of node-specific RPC methods.
-use fc_mapping_sync::kv::MappingSyncWorker;
 use fp_rpc::EthereumRuntimeRPCApi;
-use futures::{channel::mpsc, StreamExt};
+use futures::channel::mpsc;
 use jsonrpsee::RpcModule;
-use sc_network_sync::SyncingService;
 use sp_block_builder::BlockBuilder;
-use std::{sync::Arc, time::Duration};
+use std::sync::Arc;
 // Substrate
 use sc_client_api::{
 	backend::{Backend, StateBackend, StorageProvider},
 	client::BlockchainEvents,
-	BlockOf,
+	AuxStore, BlockOf, UsageProvider,
 };
 use sc_consensus_manual_seal::rpc::EngineCommand;
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_rpc_api::DenyUnsafe;
-use sc_service::{TaskManager, TransactionPool};
+use sc_service::TransactionPool;
 use sc_transaction_pool::ChainApi;
 use sp_api::{CallApiAt, HeaderT, ProvideRuntimeApi};
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_core::H256;
+use sp_inherents::CreateInherentDataProviders;
 use sp_runtime::traits::{BlakeTwo256, Block as BlockT};
 use tangle_primitives::AuraId;
-// Runtime
-use fc_rpc::{
-	pending::ConsensusDataProvider, EthBlockDataCacheTask, EthTask, OverrideHandle,
-	RuntimeApiStorageOverride, SchemaV1Override, SchemaV2Override, SchemaV3Override,
-	StorageOverride,
-};
-use fc_rpc_core::types::{CallRequest, FeeHistoryCache, FilterPool};
-use sc_client_api::{AuxStore, UsageProvider};
-use sp_inherents::CreateInherentDataProviders;
 use tangle_testnet_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
 
 pub mod eth;

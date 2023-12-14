@@ -293,5 +293,7 @@ rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
 evm-tracer = { path = "runtime/testnet/evm_tracer", default-features = false }
 
+tangle-service = { path = "node/service", default-features = false }
+
 [profile.release]
 panic = "unwind"

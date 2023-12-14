@@ -15288,8 +15288,6 @@ dependencies = [
  "hex-literal",
  "jsonrpsee",
  "log",
- "pallet-eth2-light-client-relayer-gadget",
- "pallet-eth2-light-client-relayer-gadget-cli",
  "pallet-im-online",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
@@ -15338,13 +15336,10 @@ dependencies = [
  "substrate-prometheus-endpoint",
  "tangle-mainnet-runtime",
  "tangle-primitives",
- "tangle-relayer-gadget",
- "tangle-relayer-gadget-cli",
+ "tangle-service",
  "tangle-testnet-runtime",
  "tokio 1.35.0",
  "wasmer",
- "webb-consensus-types",
- "webb-proposals 0.8.0",
 ]
 
 [[package]]

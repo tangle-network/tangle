@@ -20,25 +20,28 @@
 //!
 //! Should only be used for benchmarking as it may break in other contexts.
 
-use crate::service::{create_extrinsic, FullClient};
+use tangle_service::client::Client;
 
 use sc_cli::Result;
 use sp_inherents::{InherentData, InherentDataProvider};
 use sp_keyring::Sr25519Keyring;
 use sp_runtime::OpaqueExtrinsic;
 use std::{sync::Arc, time::Duration};
+#[cfg(feature = "tangle")]
+use tangle_mainnet_runtime::{AccountId, Balance, BalancesCall, SystemCall};
+#[cfg(feature = "testnet")]
 use tangle_testnet_runtime::{AccountId, Balance, BalancesCall, SystemCall};
 
 /// Generates `System::Remark` extrinsics for the benchmarks.
 ///
 /// Note: Should only be used for benchmarking.
 pub struct RemarkBuilder {
-	client: Arc<FullClient>,
+	client: Arc<Client>,
 }
 
 impl RemarkBuilder {
 	/// Creates a new [`Self`] from the given client.
-	pub fn new(client: Arc<FullClient>) -> Self {
+	pub fn new(client: Arc<Client>) -> Self {
 		Self { client }
 	}
 }
@@ -54,13 +57,10 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for RemarkBuilder {
 
 	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
 		let acc = Sr25519Keyring::Bob.pair();
-		let extrinsic: OpaqueExtrinsic = create_extrinsic(
-			self.client.as_ref(),
-			acc,
-			SystemCall::remark { remark: vec![] },
-			Some(nonce),
-		)
-		.into();
+		let extrinsic: OpaqueExtrinsic = self
+			.client
+			.create_extrinsic(acc, SystemCall::remark { remark: vec![] }, Some(nonce))
+			.into();
 
 		Ok(extrinsic)
 	}
@@ -70,14 +70,14 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for RemarkBuilder {
 ///
 /// Note: Should only be used for benchmarking.
 pub struct TransferKeepAliveBuilder {
-	client: Arc<FullClient>,
+	client: Arc<Client>,
 	dest: AccountId,
 	value: Balance,
 }
 
 impl TransferKeepAliveBuilder {
 	/// Creates a new [`Self`] from the given client.
-	pub fn new(client: Arc<FullClient>, dest: AccountId, value: Balance) -> Self {
+	pub fn new(client: Arc<Client>, dest: AccountId, value: Balance) -> Self {
 		Self { client, dest, value }
 	}
 }
@@ -93,13 +93,17 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for TransferKeepAliveBuilder {
 
 	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
 		let acc = Sr25519Keyring::Bob.pair();
-		let extrinsic: OpaqueExtrinsic = create_extrinsic(
-			self.client.as_ref(),
-			acc,
-			BalancesCall::transfer_keep_alive { dest: self.dest.clone().into(), value: self.value },
-			Some(nonce),
-		)
-		.into();
+		let extrinsic: OpaqueExtrinsic = self
+			.client
+			.create_extrinsic(
+				acc,
+				BalancesCall::transfer_keep_alive {
+					dest: self.dest.clone().into(),
+					value: self.value,
+				},
+				Some(nonce),
+			)
+			.into();
 
 		Ok(extrinsic)
 	}

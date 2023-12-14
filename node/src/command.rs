@@ -13,16 +13,21 @@
 // limitations under the License.
 use crate::{
 	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder},
-	chainspec,
 	cli::{Cli, Subcommand},
-	service,
 };
-use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
+use fc_db::DatabaseSource;
+use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory};
 use futures::TryFutureExt;
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
-use tangle_testnet_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use std::sync::Arc;
+use tangle_service::{chainspec, frontier_database_dir, new_full, new_partial};
+
+#[cfg(feature = "tangle")]
+use tangle_mainnet_runtime::EXISTENTIAL_DEPOSIT;
+#[cfg(feature = "testnet")]
+use tangle_testnet_runtime::EXISTENTIAL_DEPOSIT;
 
 trait IdentifyChain {
 	fn is_mainnet(&self) -> bool;
@@ -102,134 +107,295 @@ pub fn run() -> sc_cli::Result<()> {
 		},
 		Some(Subcommand::CheckBlock(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, import_queue, .. } =
-					service::new_partial(&config, &cli.eth)?;
+			runner.async_run(|mut config| {
+				let (client, _, import_queue, task_manager) =
+					tangle_service::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, import_queue), task_manager))
 			})
 		},
 		Some(Subcommand::ExportBlocks(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, .. } =
-					service::new_partial(&config, &cli.eth)?;
+			runner.async_run(|mut config| {
+				let (client, _, _, task_manager) =
+					tangle_service::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, config.database), task_manager))
 			})
 		},
 		Some(Subcommand::ExportState(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, .. } =
-					service::new_partial(&config, &cli.eth)?;
+			runner.async_run(|mut config| {
+				let (client, _, _, task_manager) =
+					tangle_service::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, config.chain_spec), task_manager))
 			})
 		},
 		Some(Subcommand::ImportBlocks(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, import_queue, .. } =
-					service::new_partial(&config, &cli.eth)?;
+			runner.async_run(|mut config| {
+				let (client, _, import_queue, task_manager) =
+					tangle_service::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, import_queue), task_manager))
 			})
 		},
 		Some(Subcommand::PurgeChain(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			runner.sync_run(|config| cmd.run(config.database))
+			runner.sync_run(|config| {
+				// Remove Frontier offchain db
+				let frontier_database_config = match config.database {
+					DatabaseSource::RocksDb { .. } => DatabaseSource::RocksDb {
+						path: frontier_database_dir(&config, "db"),
+						cache_size: 0,
+					},
+					DatabaseSource::ParityDb { .. } => DatabaseSource::ParityDb {
+						path: frontier_database_dir(&config, "paritydb"),
+					},
+					_ =>
+						return Err(format!("Cannot purge `{:?}` database", config.database).into()),
+				};
+				cmd.run(frontier_database_config)?;
+
+				// Remove Tangle db
+				cmd.run(config.database)
+			})
 		},
 		Some(Subcommand::Revert(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, backend, .. } =
-					service::new_partial(&config, &cli.eth)?;
-				let aux_revert = Box::new(|client, _, blocks| {
-					sc_consensus_grandpa::revert(client, blocks)?;
-					Ok(())
-				});
-				Ok((cmd.run(client, backend, Some(aux_revert)), task_manager))
-			})
+			let chain_spec = &runner.config().chain_spec;
+			match chain_spec {
+				#[cfg(feature = "tangle")]
+				spec if spec.is_mainnet() => runner.async_run(|mut config| {
+					let params = new_partial::<
+						tangle_mainnet_runtime::RuntimeApi,
+						tangle_service::TangleExecutor,
+					>(&mut config, &cli.eth)?;
+
+					Ok((cmd.run(params.client, params.backend, None), params.task_manager))
+				}),
+				#[cfg(feature = "testnet")]
+				spec if spec.is_testnet() => runner.async_run(|mut config| {
+					let params = new_partial::<
+						tangle_testnet_runtime::RuntimeApi,
+						tangle_service::TangleExecutor,
+					>(&mut config, &cli.eth)?;
+
+					Ok((cmd.run(params.client, params.backend, None), params.task_manager))
+				}),
+				_ => panic!("invalid chain spec"),
+			}
 		},
 		Some(Subcommand::Benchmark(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-
-			runner.sync_run(|config| {
-				// This switch needs to be in the client, since the client decides
-				// which sub-commands it wants to support.
-				match cmd {
-					BenchmarkCmd::Pallet(cmd) => {
-						if !cfg!(feature = "runtime-benchmarks") {
-							return Err(
-								"Runtime benchmarking wasn't enabled when building the node. \
-							You can enable it with `--features runtime-benchmarks`."
-									.into(),
-							)
+			// This switch needs to be in the client, since the client decides
+			// which sub-commands it wants to support.
+			match cmd {
+				BenchmarkCmd::Pallet(cmd) =>
+					if cfg!(feature = "runtime-benchmarks") {
+						let chain_spec = &runner.config().chain_spec;
+						match chain_spec {
+							#[cfg(feature = "tangle")]
+							spec if spec.is_mainnet() =>
+								return runner.sync_run(|config| {
+									cmd.run::<tangle_mainnet_runtime::Block, tangle_service::HostFunctions>(
+										config,
+									)
+								}),
+							#[cfg(feature = "testnet")]
+							spec if spec.is_testnet() =>
+								return runner.sync_run(|config| {
+									cmd.run::<tangle_testnet_runtime::Block, tangle_service::HostFunctions>(
+										config,
+									)
+								}),
+							_ => panic!("invalid chain spec"),
 						}
-
-						cmd.run::<Block, ()>(config)
+					} else {
+						Err("Benchmarking wasn't enabled when building the node. \
+					You can enable it with `--features runtime-benchmarks`."
+							.into())
 					},
-					BenchmarkCmd::Block(cmd) => {
-						let PartialComponents { client, .. } =
-							service::new_partial(&config, &cli.eth)?;
-						cmd.run(client)
-					},
-					#[cfg(not(feature = "runtime-benchmarks"))]
-					BenchmarkCmd::Storage(_) => Err(sc_cli::Error::Input(
-						"Compile with --features=runtime-benchmarks \
-						to enable storage benchmarks."
-							.into(),
-					)),
-					#[cfg(feature = "runtime-benchmarks")]
-					BenchmarkCmd::Storage(cmd) => {
-						let PartialComponents { client, backend, .. } =
-							service::new_partial(&config, &cli.eth)?;
-						let db = backend.expose_db();
-						let storage = backend.expose_storage();
+				BenchmarkCmd::Block(cmd) => {
+					let chain_spec = &runner.config().chain_spec;
+					match chain_spec {
+						#[cfg(feature = "tangle")]
+						spec if spec.is_mainnet() =>
+							return runner.sync_run(|mut config| {
+								let params = new_partial::<
+									tangle_mainnet_runtime::RuntimeApi,
+									tangle_service::TangleExecutor,
+								>(&mut config, &cli.eth)?;
 
-						cmd.run(config, client, db, storage)
-					},
-					BenchmarkCmd::Overhead(cmd) => {
-						let PartialComponents { client, .. } =
-							service::new_partial(&config, &cli.eth)?;
-						let ext_builder = RemarkBuilder::new(client.clone());
+								cmd.run(params.client)
+							}),
+						#[cfg(feature = "testnet")]
+						spec if spec.is_testnet() =>
+							return runner.sync_run(|mut config| {
+								let params = new_partial::<
+									tangle_testnet_runtime::RuntimeApi,
+									tangle_service::TestnetExecutor,
+								>(&mut config, &cli.eth)?;
 
+								cmd.run(params.client)
+							}),
+						_ => panic!("invalid chain spec"),
+					}
+				},
+				#[cfg(not(feature = "runtime-benchmarks"))]
+				BenchmarkCmd::Storage(_) => Err(sc_cli::Error::Input(
+					"Compile with --features=runtime-benchmarks \
+					to enable storage benchmarks."
+						.into(),
+				)),
+				#[cfg(feature = "runtime-benchmarks")]
+				BenchmarkCmd::Storage(cmd) => {
+					let chain_spec = &runner.config().chain_spec;
+					match chain_spec {
+						#[cfg(feature = "tangle")]
+						spec if spec.is_mainnet() =>
+							return runner.sync_run(|mut config| {
+								let params = new_partial::<
+									tangle_mainnet_runtime::RuntimeApi,
+									tangle_service::TangleExecutor,
+								>(&mut config, &cli.eth)?;
+
+								let db = params.backend.expose_db();
+								let storage = params.backend.expose_storage();
+
+								cmd.run(config, params.client, db, storage)
+							}),
+						#[cfg(feature = "testnet")]
+						spec if spec.is_testnet() =>
+							return runner.sync_run(|mut config| {
+								let params = new_partial::<
+									tangle_testnet_runtime::RuntimeApi,
+									tangle_service::TestnetExecutor,
+								>(&mut config, &cli.eth)?;
+
+								let db = params.backend.expose_db();
+								let storage = params.backend.expose_storage();
+
+								cmd.run(config, params.client, db, storage)
+							}),
+						_ => panic!("invalid chain spec"),
+					}
+				},
+				BenchmarkCmd::Overhead(cmd) => {
+					let chain_spec = &runner.config().chain_spec;
+					match chain_spec {
+						#[cfg(feature = "tangle")]
+						spec if spec.is_mainnet() =>
+							return runner.sync_run(|mut config| {
+								let PartialComponents { client, .. } = new_partial::<
+									tangle_mainnet_runtime::RuntimeApi,
+									tangle_service::TangleExecutor,
+								>(&mut config, &cli.eth)?;
+
+								let c = Arc::new(tangle_service::client::Client::Tangle(
+									client.clone(),
+								));
+								let ext_builder = RemarkBuilder::new(c);
+								cmd.run(
+									config,
+									client,
+									inherent_benchmark_data()?,
+									Vec::new(),
+									&ext_builder,
+								)
+							}),
+						#[cfg(feature = "testnet")]
+						spec if spec.is_testnet() =>
+							return runner.sync_run(|mut config| {
+								let PartialComponents { client, .. } = new_partial::<
+									tangle_testnet_runtime::RuntimeApi,
+									tangle_service::TestnetExecutor,
+								>(&mut config, &cli.eth)?;
+
+								let c = Arc::new(tangle_service::client::Client::Testnet(
+									client.clone(),
+								));
+								let ext_builder = RemarkBuilder::new(c);
+								cmd.run(
+									config,
+									client,
+									inherent_benchmark_data()?,
+									Vec::new(),
+									&ext_builder,
+								)
+							}),
+						_ => panic!("invalid chain spec"),
+					}
+				},
+				BenchmarkCmd::Extrinsic(cmd) => {
+					let chain_spec = &runner.config().chain_spec;
+					match chain_spec {
+						#[cfg(feature = "tangle")]
+						spec if spec.is_mainnet() => {
+							return runner.sync_run(|mut config| {
+								let PartialComponents { client, .. } = new_partial::<
+									tangle_mainnet_runtime::RuntimeApi,
+									tangle_service::TangleExecutor,
+								>(&mut config, &cli.eth)?;
+								// Create a client.
+								let c = Arc::new(tangle_service::client::Client::Tangle(
+									client.clone(),
+								));
+								// Register the *Remark* and *TKA* builders.
+								let ext_factory = ExtrinsicFactory(vec![
+									Box::new(RemarkBuilder::new(c.clone())),
+									Box::new(TransferKeepAliveBuilder::new(
+										c,
+										Sr25519Keyring::Alice.to_account_id(),
+										EXISTENTIAL_DEPOSIT,
+									)),
+								]);
+
+								cmd.run(
+									client,
+									inherent_benchmark_data()?,
+									Vec::new(),
+									&ext_factory,
+								)
+							})
+						},
+						#[cfg(feature = "testnet")]
+						spec if spec.is_testnet() => {
+							return runner.sync_run(|mut config| {
+								let PartialComponents { client, .. } = new_partial::<
+									tangle_testnet_runtime::RuntimeApi,
+									tangle_service::TestnetExecutor,
+								>(&mut config, &cli.eth)?;
+								// Create a client.
+								let c = Arc::new(tangle_service::client::Client::Testnet(
+									client.clone(),
+								));
+								// Register the *Remark* and *TKA* builders.
+								let ext_factory = ExtrinsicFactory(vec![
+									Box::new(RemarkBuilder::new(c.clone())),
+									Box::new(TransferKeepAliveBuilder::new(
+										c,
+										Sr25519Keyring::Alice.to_account_id(),
+										EXISTENTIAL_DEPOSIT,
+									)),
+								]);
+
+								cmd.run(
+									client,
+									inherent_benchmark_data()?,
+									Vec::new(),
+									&ext_factory,
+								)
+							})
+						},
+						_ => panic!("invalid chain spec"),
+					}
+				},
+				BenchmarkCmd::Machine(cmd) =>
+					return runner.sync_run(|config| {
 						cmd.run(
-							config,
-							client,
-							inherent_benchmark_data()?,
-							Vec::new(),
-							&ext_builder,
+							&config,
+							frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE.clone(),
 						)
-					},
-					BenchmarkCmd::Extrinsic(cmd) => {
-						let PartialComponents { client, .. } =
-							service::new_partial(&config, &cli.eth)?;
-						// Register the *Remark* and *TKA* builders.
-						let ext_factory = ExtrinsicFactory(vec![
-							Box::new(RemarkBuilder::new(client.clone())),
-							Box::new(TransferKeepAliveBuilder::new(
-								client.clone(),
-								Sr25519Keyring::Alice.to_account_id(),
-								EXISTENTIAL_DEPOSIT,
-							)),
-						]);
-
-						cmd.run(client, inherent_benchmark_data()?, Vec::new(), &ext_factory)
-					},
-					BenchmarkCmd::Machine(cmd) =>
-						cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),
-				}
-			})
-		},
-		Some(Subcommand::FrontierDb(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			runner.sync_run(|mut config| {
-				let (client, _, _, _, frontier_backend) =
-					service::new_chain_ops(&mut config, &cli.eth)?;
-				let frontier_backend = match frontier_backend {
-					fc_db::Backend::KeyValue(kv) => std::sync::Arc::new(kv),
-					_ => panic!("Only fc_db::Backend::KeyValue supported"),
-				};
-				cmd.run(client, frontier_backend)
-			})
+					}),
+			}
 		},
 		#[cfg(feature = "try-runtime")]
 		Some(Subcommand::TryRuntime(cmd)) => {
@@ -241,19 +407,16 @@ pub fn run() -> sc_cli::Result<()> {
 				let task_manager =
 					sc_service::TaskManager::new(config.tokio_handle.clone(), registry)
 						.map_err(|e| sc_cli::Error::Service(sc_service::Error::Prometheus(e)))?;
-				Ok((cmd.run::<Block, service::ExecutorDispatch>(config), task_manager))
+				#[cfg(feature = "tangle")]
+				Ok((cmd.run::<Block, tangle_service::ExecutorDispatch>(config), task_manager))
 			})
 		},
 		#[cfg(not(feature = "try-runtime"))]
 		Some(Subcommand::TryRuntime) => Err("TryRuntime wasn't enabled when building the node. \
 				You can enable it with `--features try-runtime`."
 			.into()),
-		Some(Subcommand::ChainInfo(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			runner.sync_run(|config| cmd.run::<Block>(&config))
-		},
 		None => {
-			let rpc_config = crate::eth::RpcConfig {
+			let rpc_config = tangle_service::eth::RpcConfig {
 				ethapi: cli.eth.ethapi.clone(),
 				ethapi_max_permits: cli.eth.ethapi_max_permits,
 				ethapi_trace_max_count: cli.eth.ethapi_trace_max_count,
@@ -265,22 +428,50 @@ pub fn run() -> sc_cli::Result<()> {
 				tracing_raw_max_memory_usage: cli.eth.tracing_raw_max_memory_usage,
 			};
 			let runner = cli.create_runner(&cli.run)?;
-
-			runner.run_node_until_exit(|config| async move {
-				service::new_full(service::RunFullParams {
-					config,
-					rpc_config,
-					eth_config: cli.eth,
-					debug_output: cli.output_path,
-					#[cfg(feature = "relayer")]
-					relayer_cmd: cli.relayer_cmd,
-					#[cfg(feature = "light-client")]
-					light_client_relayer_cmd: cli.light_client_relayer_cmd,
-					auto_insert_keys: cli.auto_insert_keys,
-				})
-				.map_err(Into::into)
-				.await
-			})
+			let chain_spec = &runner.config().chain_spec;
+			match chain_spec {
+				#[cfg(feature = "tangle")]
+				spec if spec.is_mainnet() =>
+					return runner.run_node_until_exit(|config| async move {
+						new_full::<
+							tangle_mainnet_runtime::RuntimeApi,
+							tangle_service::TangleExecutor,
+						>(tangle_service::RunFullParams {
+							config,
+							rpc_config,
+							eth_config: cli.eth,
+							debug_output: cli.output_path,
+							#[cfg(feature = "relayer")]
+							relayer_cmd: cli.relayer_cmd,
+							#[cfg(feature = "light-client")]
+							light_client_relayer_cmd: cli.light_client_relayer_cmd,
+							auto_insert_keys: cli.auto_insert_keys,
+						})
+						.map_err(Into::into)
+						.await
+					}),
+				#[cfg(feature = "testnet")]
+				spec if spec.is_testnet() =>
+					return runner.run_node_until_exit(|config| async move {
+						new_full::<
+							tangle_testnet_runtime::RuntimeApi,
+							tangle_service::TestnetExecutor,
+						>(tangle_service::RunFullParams {
+							config,
+							rpc_config,
+							eth_config: cli.eth,
+							debug_output: cli.output_path,
+							#[cfg(feature = "relayer")]
+							relayer_cmd: cli.relayer_cmd,
+							#[cfg(feature = "light-client")]
+							light_client_relayer_cmd: cli.light_client_relayer_cmd,
+							auto_insert_keys: cli.auto_insert_keys,
+						})
+						.map_err(Into::into)
+						.await
+					}),
+				_ => panic!("invalid chain spec"),
+			}
 		},
 	}
 }

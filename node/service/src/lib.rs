@@ -1,10 +1,10 @@
-mod chainspec;
-mod client;
-mod distributions;
-mod eth;
-mod fixtures;
-mod rpc;
-mod utils;
+pub mod chainspec;
+pub mod client;
+pub mod distributions;
+pub mod eth;
+pub mod fixtures;
+pub mod rpc;
+pub mod utils;
 
 use crate::eth::{
 	new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, EthConfiguration,
@@ -15,14 +15,11 @@ use eth::RpcConfig;
 use fc_consensus::FrontierBlockImport as TFrontierBlockImport;
 use fc_db::DatabaseSource;
 use futures::{channel::mpsc, FutureExt};
-use parity_scale_codec::Encode;
 use sc_chain_spec::ChainSpec;
 use sc_client_api::{AuxStore, Backend, BlockBackend, StateBackend, StorageProvider};
-use sc_consensus::BasicQueue;
 use sc_consensus_aura::ImportQueueParams;
 use sc_consensus_grandpa::SharedVoterState;
 pub use sc_executor::NativeElseWasmExecutor;
-use sc_executor::NativeExecutionDispatch;
 use sc_service::{
 	error::Error as ServiceError, ChainType, Configuration, PartialComponents, TFullBackend,
 	TFullClient, TaskManager,
@@ -32,16 +29,10 @@ use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_api::{ConstructRuntimeApi, ProvideRuntimeApi};
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
-use sp_core::{Pair, U256};
-use sp_runtime::{
-	generic::{self, Era},
-	OpaqueExtrinsic, SaturatedConversion,
-};
-use tangle_primitives::{Block, BlockNumber};
-use tokio::runtime::Runtime;
+use sp_core::U256;
+use tangle_primitives::Block;
 
 use std::{path::Path, sync::Arc, time::Duration};
-use substrate_frame_rpc_system::AccountNonceApi;
 
 /// The minimum period of blocks on which justifications will be
 /// imported and generated.
@@ -222,7 +213,7 @@ where
 	Ok(frontier_backend)
 }
 
-use sp_runtime::{traits::BlakeTwo256, DigestItem, Percent};
+use sp_runtime::{traits::BlakeTwo256, Percent};
 
 pub const SOFT_DEADLINE_PERCENT: Percent = Percent::from_percent(100);
 
@@ -402,7 +393,7 @@ pub struct RunFullParams {
 }
 
 /// Builds a new service for a full client.
-pub async fn new_full(
+pub async fn new_full<RuntimeApi, Executor>(
 	RunFullParams {
 		mut config,
 		eth_config,
@@ -414,7 +405,13 @@ pub async fn new_full(
 		light_client_relayer_cmd,
 		auto_insert_keys,
 	}: RunFullParams,
-) -> Result<TaskManager, ServiceError> {
+) -> Result<TaskManager, ServiceError>
+where
+	RuntimeApi:
+		ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>> + Send + Sync + 'static,
+	RuntimeApi::RuntimeApi: RuntimeApiCollection,
+	Executor: sc_executor::NativeExecutionDispatch + 'static,
+{
 	let sc_service::PartialComponents {
 		client,
 		backend,
@@ -424,7 +421,7 @@ pub async fn new_full(
 		select_chain,
 		transaction_pool,
 		other: (mut telemetry, block_import, grandpa_link, frontier_backend, overrides),
-	} = new_partial(&config, &eth_config)?;
+	} = new_partial::<RuntimeApi, Executor>(&config, &eth_config)?;
 
 	if config.role.is_authority() {
 		if auto_insert_keys {
@@ -566,7 +563,10 @@ pub async fn new_full(
 		client: client.clone(),
 		pool: transaction_pool.clone(),
 		graph: transaction_pool.pool().clone(),
-		converter: Some(TransactionConver),
+		#[cfg(feature = "tangle")]
+		converter: Some(tangle_mainnet_runtime::TransactionConverter),
+		#[cfg(feature = "testnet")]
+		converter: Some(tangle_testnet_runtime::TransactionConverter),
 		is_authority: config.role.is_authority(),
 		enable_dev_signer: eth_config.enable_dev_signer,
 		network: network.clone(),

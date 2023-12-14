@@ -14,7 +14,7 @@
 #![allow(clippy::all, deprecated)]
 use sc_cli::RunCmd;
 
-use crate::service::EthConfiguration;
+use tangle_service::eth::EthConfiguration;
 
 #[derive(Debug, clap::Parser)]
 pub struct Cli {
@@ -82,10 +82,4 @@ pub enum Subcommand {
 	/// Try some command against runtime state. Note: `try-runtime` feature must be enabled.
 	#[cfg(not(feature = "try-runtime"))]
 	TryRuntime,
-
-	/// Db meta columns information.
-	ChainInfo(sc_cli::ChainInfoCmd),
-
-	/// Db meta columns information.
-	FrontierDb(fc_cli::FrontierDbCmd),
 }
