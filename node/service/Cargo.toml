@@ -63,6 +63,7 @@ sp-offchain = { workspace = true }
 sp-transaction-pool = { workspace = true }
 sp-storage = { workspace = true }
 sp-consensus = { workspace = true }
+sp-consensus-grandpa = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
 substrate-prometheus-endpoint = { workspace = true }
 

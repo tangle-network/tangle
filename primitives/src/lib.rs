@@ -22,7 +22,6 @@ use frame_support::{
 };
 use smallvec::smallvec;
 use sp_runtime::{
-	generic,
 	traits::{BlakeTwo256, IdentifyAccount, Verify},
 	MultiAddress, MultiSignature, Perbill,
 };

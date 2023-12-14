@@ -28,6 +28,8 @@ use sp_storage::{ChildInfo, StorageData, StorageKey};
 use std::sync::Arc;
 pub use tangle_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Header, Index};
 
+use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+
 /// A set of APIs that polkadot-like runtimes must implement.
 ///
 /// This trait has no methods or associated type. It is a concise marker for all the trait bounds
@@ -45,6 +47,8 @@ pub trait RuntimeApiCollection:
 	+ fp_rpc::EthereumRuntimeRPCApi<Block>
 	+ rpc_primitives_debug::DebugRuntimeApi<Block>
 	+ rpc_primitives_txpool::TxPoolRuntimeApi<Block>
+	+ sp_consensus_aura::AuraApi<Block, AuraId>
+	+ sp_consensus_grandpa::GrandpaApi<Block>
 {
 }
 
@@ -61,6 +65,8 @@ impl<Api> RuntimeApiCollection for Api where
 		+ fp_rpc::EthereumRuntimeRPCApi<Block>
 		+ rpc_primitives_debug::DebugRuntimeApi<Block>
 		+ rpc_primitives_txpool::TxPoolRuntimeApi<Block>
+		+ sp_consensus_aura::AuraApi<Block, AuraId>
+		+ sp_consensus_grandpa::GrandpaApi<Block>
 {
 }
 

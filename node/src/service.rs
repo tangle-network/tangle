@@ -308,6 +308,7 @@ pub struct RunFullParams {
 		pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
 	pub auto_insert_keys: bool,
 }
+
 /// Builds a new service for a full client.
 pub async fn new_full(
 	RunFullParams {
