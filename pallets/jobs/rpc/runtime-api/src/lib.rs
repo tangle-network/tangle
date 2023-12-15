@@ -20,9 +20,7 @@
 use parity_scale_codec::Codec;
 use sp_runtime::{traits::MaybeDisplay, Serialize};
 
-use pallet_jobs::types::JobInfoOf;
-pub use tangle_primitives::jobs::RpcResponseJobsData;
-use tangle_primitives::jobs::{JobId, JobKey, RpcResponsePhaseOneResult};
+use tangle_primitives::jobs::{JobId, JobKey, RpcResponseJobsData, RpcResponsePhaseOneResult};
 
 sp_api::decl_runtime_apis! {
 	pub trait JobsApi<AccountId> where
