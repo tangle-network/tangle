@@ -456,7 +456,7 @@ pub fn run() -> sc_cli::Result<()> {
 						new_full::<
 							tangle_testnet_runtime::RuntimeApi,
 							tangle_service::TestnetExecutor,
-						>(tangle_service::RunFullParams {
+						>(tangle_service::aura::RunFullParams {
 							config,
 							rpc_config,
 							eth_config: cli.eth,

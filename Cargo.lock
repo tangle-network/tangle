@@ -7897,6 +7897,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-babe"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0#c8d2251cafadc108ba2f1f8a3208dc547ff38901"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-authorship",
+ "pallet-session",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+ "sp-consensus-babe",
+ "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+ "sp-io 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+ "sp-runtime 24.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+ "sp-session",
+ "sp-staking",
+ "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+]
+
+[[package]]
 name = "pallet-bags-list"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0#c8d2251cafadc108ba2f1f8a3208dc547ff38901"
@@ -15047,8 +15071,8 @@ dependencies = [
  "log",
  "num_enum 0.5.11",
  "pallet-airdrop-claims",
- "pallet-aura",
  "pallet-authorship",
+ "pallet-babe",
  "pallet-bags-list",
  "pallet-balances",
  "pallet-base-fee",
@@ -15108,7 +15132,7 @@ dependencies = [
  "serde",
  "sp-api",
  "sp-block-builder",
- "sp-consensus-aura",
+ "sp-consensus-babe",
  "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-inherents",
  "sp-io 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
@@ -15145,6 +15169,7 @@ dependencies = [
  "smallvec",
  "sp-arithmetic 16.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-consensus-aura",
+ "sp-consensus-babe",
  "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-runtime 24.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
@@ -15238,14 +15263,17 @@ dependencies = [
  "sp-blockchain",
  "sp-consensus",
  "sp-consensus-aura",
+ "sp-consensus-babe",
  "sp-consensus-grandpa",
  "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-inherents",
+ "sp-io 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-keyring 24.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-keystore 0.27.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-offchain",
  "sp-runtime 24.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-session",
+ "sp-statement-store",
  "sp-storage 13.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-timestamp",
  "sp-transaction-pool",
@@ -16244,7 +16272,7 @@ version = "1.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if 0.1.10",
  "digest 0.10.7",
  "rand 0.8.5",
  "static_assertions",

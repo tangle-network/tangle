@@ -42,6 +42,8 @@ sc-service = { workspace = true }
 sc-telemetry = { workspace = true }
 sc-transaction-pool = { workspace = true }
 sp-consensus-aura = { workspace = true }
+sp-consensus-babe = { workspace = true }
+sp-statement-store = { workspace = true }
 sp-core = { workspace = true }
 sp-inherents = { workspace = true }
 sp-keyring = { workspace = true }
@@ -57,6 +59,7 @@ sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
 sp-timestamp = { workspace = true }
+sp-io = { workspace = true }
 sp-keystore = { workspace = true }
 sp-session = { workspace = true }
 sp-offchain = { workspace = true }
@@ -102,7 +105,7 @@ tangle-primitives = { workspace = true }
 tangle-testnet-runtime = { workspace = true }
 
 [features]
-default = ["with-rocksdb-weights", "rocksdb", "sql", "tangle"]
+default = ["with-rocksdb-weights", "rocksdb", "sql", "testnet"]
 runtime-benchmarks = ["tangle-testnet-runtime/runtime-benchmarks"]
 integration-tests = ["tangle-testnet-runtime/integration-tests"]
 with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]

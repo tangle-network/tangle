@@ -61,7 +61,9 @@ fn read_contents_to_substrate_accounts(path_str: &str) -> Vec<AccountId> {
 }
 
 fn get_edgeware_genesis_list() -> Vec<H160> {
-	read_contents_to_evm_accounts("node/service/src/distributions/data/edgeware_genesis_participants.json")
+	read_contents_to_evm_accounts(
+		"node/service/src/distributions/data/edgeware_genesis_participants.json",
+	)
 }
 
 fn get_edgeware_snapshot_list() -> Vec<AccountId> {

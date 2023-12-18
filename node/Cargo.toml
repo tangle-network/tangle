@@ -107,7 +107,7 @@ tangle-testnet-runtime = { workspace = true }
 tangle-service = { workspace = true }
 
 [features]
-default = ["with-rocksdb-weights", "rocksdb", "sql", "tangle"]
+default = ["with-rocksdb-weights", "rocksdb", "sql", "testnet"]
 runtime-benchmarks = ["tangle-mainnet-runtime/runtime-benchmarks"]
 integration-tests = ["tangle-mainnet-runtime/integration-tests"]
 with-rocksdb-weights = ["tangle-mainnet-runtime/with-rocksdb-weights"]
@@ -128,5 +128,9 @@ relayer = [
   "tangle-service/relayer",
 ]
 
-tangle = []
-testnet = []
+tangle = [
+  "tangle-service/tangle",
+]
+testnet = [
+  "tangle-service/testnet",
+]

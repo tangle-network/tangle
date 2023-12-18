@@ -22,7 +22,7 @@ use core::marker::PhantomData;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_mainnet_runtime::{
@@ -52,15 +52,15 @@ where
 	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
-/// Generate an Aura authority key.
+/// Generate the authority key set and account keys.
 pub fn authority_keys_from_seed(
 	controller: &str,
 	stash: &str,
-) -> (AccountId, AccountId, AuraId, GrandpaId, ImOnlineId) {
+) -> (AccountId, AccountId, BabeId, GrandpaId, ImOnlineId) {
 	(
 		get_account_id_from_seed::<sr25519::Public>(controller),
 		get_account_id_from_seed::<sr25519::Public>(stash),
-		get_from_seed::<AuraId>(controller),
+		get_from_seed::<BabeId>(controller),
 		get_from_seed::<GrandpaId>(controller),
 		get_from_seed::<ImOnlineId>(stash),
 	)
@@ -72,10 +72,10 @@ pub fn authority_keys_from_seed(
 /// have just one key).
 fn session_keys(
 	grandpa: GrandpaId,
-	aura: AuraId,
+	babe: BabeId,
 	im_online: ImOnlineId,
 ) -> tangle_mainnet_runtime::opaque::SessionKeys {
-	tangle_mainnet_runtime::opaque::SessionKeys { grandpa, aura, im_online }
+	tangle_mainnet_runtime::opaque::SessionKeys { grandpa, babe, im_online }
 }
 
 pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -211,7 +211,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId)>,
+	initial_authorities: Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)>,
 	initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
@@ -287,7 +287,7 @@ fn testnet_genesis(
 				.collect(),
 		},
 		treasury: Default::default(),
-		aura: Default::default(),
+		babe: Default::default(),
 		grandpa: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
 		eth_2_client: Eth2ClientConfig {
@@ -322,7 +322,7 @@ fn testnet_genesis(
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId)>,
+	initial_authorities: Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
 	chain_id: u64,
@@ -377,7 +377,7 @@ fn mainnet_genesis(
 		council: Default::default(),
 		elections: Default::default(),
 		treasury: Default::default(),
-		aura: Default::default(),
+		babe: Default::default(),
 		grandpa: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
 		nomination_pools: Default::default(),
