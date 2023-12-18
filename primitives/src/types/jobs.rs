@@ -105,6 +105,10 @@ pub enum ZkSaaSSystem {
 pub struct Groth16System {
 	/// R1CS circuit file.
 	pub circuit: HyperData,
+	/// Number of inputs
+	pub num_inputs: u64,
+	/// Number of constraints
+	pub num_constraints: u64,
 	/// Proving key file.
 	pub proving_key: HyperData,
 	/// Verifying key bytes
@@ -134,7 +138,7 @@ pub struct Groth16ProveRequest {
 	/// `ax` is the auxiliary input
 	/// ax = full_assginment[num_inputs..]
 	/// Each element contains a PSS of the auxiliary input
-	pub ax: Vec<HyperData>,
+	pub ax_shares: Vec<HyperData>,
 	/// PSS of the QAP polynomials
 	pub qap_shares: Vec<QAPShare>,
 }
