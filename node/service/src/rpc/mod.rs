@@ -43,7 +43,6 @@ pub mod policy;
 pub mod tracing;
 pub use self::eth::{create_eth, overrides_handle, EthDeps};
 
-#[cfg(feature = "tangle")]
 /// Extra dependencies for BABE.
 pub struct BabeDeps {
 	/// A handle to the BABE worker for issuing requests.
@@ -125,10 +124,7 @@ where
 	A: ChainApi<Block = Block> + 'static,
 	CIDP: CreateInherentDataProviders<Block, ()> + Send + 'static,
 	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
-	// #[cfg(feature = "testnet")]
-	// C::Api: sp_consensus_aura::AuraApi<Block, AuraId>,
-	// #[cfg(feature = "tangle")]
-	// C::Api: BabeApi<Block>,
+	C::Api: BabeApi<Block>,
 {
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	#[cfg(feature = "tangle")]
@@ -149,13 +145,11 @@ where
 		pool,
 		deny_unsafe,
 		eth,
-		#[cfg(feature = "tangle")]
 		babe,
 		grandpa,
 		statement_store,
 	} = deps;
 
-	#[cfg(feature = "tangle")]
 	let BabeDeps { keystore, babe_worker_handle } = babe;
 
 	let GrandpaDeps {
@@ -169,7 +163,6 @@ where
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	io.merge(TransactionPayment::new(client).into_rpc())?;
 
-	#[cfg(feature = "tangle")]
 	io.merge(
 		Babe::new(client.clone(), babe_worker_handle.clone(), keystore, select_chain, deny_unsafe)
 			.into_rpc(),
