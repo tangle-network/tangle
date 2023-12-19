@@ -75,6 +75,7 @@ use tangle_primitives::{
 	jobs::{JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType},
 	roles::ValidatorRewardDistribution,
 	traits::jobs::{JobToFee, MPCHandler},
+	verifier::{arkworks::ArkworksVerifierGroth16Bn254, circom::CircomVerifierGroth16Bn254},
 };
 
 #[cfg(any(feature = "std", test))]
@@ -1098,8 +1099,8 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 		match job.job_type {
 			JobType::DKGTSSPhaseOne(_) => Dkg::job_to_fee(job),
 			JobType::DKGTSSPhaseTwo(_) => Dkg::job_to_fee(job),
-			JobType::ZkSaaSPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
-			JobType::ZkSaaSPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobType::ZkSaaSPhaseOne(_) => ZkSaaS::job_to_fee(job),
+			JobType::ZkSaaSPhaseTwo(_) => ZkSaaS::job_to_fee(job),
 		}
 	}
 }
@@ -1111,8 +1112,8 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 		match data.result {
 			JobResult::DKGPhaseOne(_) => Dkg::verify(data.result),
 			JobResult::DKGPhaseTwo(_) => Dkg::verify(data.result),
-			JobResult::ZkSaaSPhaseOne(_) => todo!(), // TODO : Replace with zksaas pallet
-			JobResult::ZkSaaSPhaseTwo(_) => todo!(), // TODO : Replace with zksaas pallet
+			JobResult::ZkSaaSPhaseOne(_) => ZkSaaS::verify(data),
+			JobResult::ZkSaaSPhaseTwo(_) => ZkSaaS::verify(data),
 		}
 	}
 
@@ -1176,6 +1177,14 @@ impl pallet_dkg::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type UpdateOrigin = EnsureRootOrHalfCouncil;
+	type WeightInfo = ();
+}
+
+impl pallet_zksaas::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type UpdateOrigin = EnsureRootOrHalfCouncil;
+	type Verifier = (ArkworksVerifierGroth16Bn254, CircomVerifierGroth16Bn254);
 	type WeightInfo = ();
 }
 
@@ -1264,7 +1273,8 @@ construct_runtime!(
 
 		Roles: pallet_roles,
 		Jobs: pallet_jobs,
-		Dkg: pallet_dkg
+		Dkg: pallet_dkg,
+		ZkSaaS: pallet_zksaas,
 	}
 );
 
