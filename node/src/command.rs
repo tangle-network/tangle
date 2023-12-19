@@ -22,7 +22,7 @@ use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
 use std::sync::Arc;
-use tangle_service::{chainspec, frontier_database_dir, new_full, new_partial};
+use tangle_service::{chainspec, frontier_database_dir};
 
 #[cfg(feature = "tangle")]
 use tangle_mainnet_runtime::EXISTENTIAL_DEPOSIT;
@@ -108,32 +108,48 @@ pub fn run() -> sc_cli::Result<()> {
 		Some(Subcommand::CheckBlock(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|mut config| {
+				#[cfg(feature = "tangle")]
 				let (client, _, import_queue, task_manager) =
-					tangle_service::new_chain_ops(&mut config, &cli.eth)?;
+					tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
+				#[cfg(feature = "testnet")]
+				let (client, _, import_queue, task_manager) =
+					tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, import_queue), task_manager))
 			})
 		},
 		Some(Subcommand::ExportBlocks(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|mut config| {
+				#[cfg(feature = "tangle")]
 				let (client, _, _, task_manager) =
-					tangle_service::new_chain_ops(&mut config, &cli.eth)?;
+					tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
+				#[cfg(feature = "testnet")]
+				let (client, _, _, task_manager) =
+					tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, config.database), task_manager))
 			})
 		},
 		Some(Subcommand::ExportState(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|mut config| {
+				#[cfg(feature = "tangle")]
 				let (client, _, _, task_manager) =
-					tangle_service::new_chain_ops(&mut config, &cli.eth)?;
+					tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
+				#[cfg(feature = "testnet")]
+				let (client, _, _, task_manager) =
+					tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, config.chain_spec), task_manager))
 			})
 		},
 		Some(Subcommand::ImportBlocks(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|mut config| {
+				#[cfg(feature = "tangle")]
 				let (client, _, import_queue, task_manager) =
-					tangle_service::new_chain_ops(&mut config, &cli.eth)?;
+					tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
+				#[cfg(feature = "testnet")]
+				let (client, _, import_queue, task_manager) =
+					tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, import_queue), task_manager))
 			})
 		},
@@ -164,7 +180,7 @@ pub fn run() -> sc_cli::Result<()> {
 			match chain_spec {
 				#[cfg(feature = "tangle")]
 				spec if spec.is_mainnet() => runner.async_run(|mut config| {
-					let params = new_partial::<
+					let params = tangle_service::babe::new_partial::<
 						tangle_mainnet_runtime::RuntimeApi,
 						tangle_service::TangleExecutor,
 					>(&mut config, &cli.eth)?;
@@ -173,9 +189,9 @@ pub fn run() -> sc_cli::Result<()> {
 				}),
 				#[cfg(feature = "testnet")]
 				spec if spec.is_testnet() => runner.async_run(|mut config| {
-					let params = new_partial::<
+					let params = tangle_service::aura::new_partial::<
 						tangle_testnet_runtime::RuntimeApi,
-						tangle_service::TangleExecutor,
+						tangle_service::TestnetExecutor,
 					>(&mut config, &cli.eth)?;
 
 					Ok((cmd.run(params.client, params.backend, None), params.task_manager))
@@ -219,7 +235,7 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "tangle")]
 						spec if spec.is_mainnet() =>
 							return runner.sync_run(|mut config| {
-								let params = new_partial::<
+								let params = tangle_service::babe::new_partial::<
 									tangle_mainnet_runtime::RuntimeApi,
 									tangle_service::TangleExecutor,
 								>(&mut config, &cli.eth)?;
@@ -229,7 +245,7 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "testnet")]
 						spec if spec.is_testnet() =>
 							return runner.sync_run(|mut config| {
-								let params = new_partial::<
+								let params = tangle_service::aura::new_partial::<
 									tangle_testnet_runtime::RuntimeApi,
 									tangle_service::TestnetExecutor,
 								>(&mut config, &cli.eth)?;
@@ -284,7 +300,7 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "tangle")]
 						spec if spec.is_mainnet() =>
 							return runner.sync_run(|mut config| {
-								let PartialComponents { client, .. } = new_partial::<
+								let PartialComponents { client, .. } = tangle_service::babe::new_partial::<
 									tangle_mainnet_runtime::RuntimeApi,
 									tangle_service::TangleExecutor,
 								>(&mut config, &cli.eth)?;
@@ -304,7 +320,7 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "testnet")]
 						spec if spec.is_testnet() =>
 							return runner.sync_run(|mut config| {
-								let PartialComponents { client, .. } = new_partial::<
+								let PartialComponents { client, .. } = tangle_service::aura::new_partial::<
 									tangle_testnet_runtime::RuntimeApi,
 									tangle_service::TestnetExecutor,
 								>(&mut config, &cli.eth)?;
@@ -330,7 +346,7 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "tangle")]
 						spec if spec.is_mainnet() => {
 							return runner.sync_run(|mut config| {
-								let PartialComponents { client, .. } = new_partial::<
+								let PartialComponents { client, .. } = tangle_service::babe::new_partial::<
 									tangle_mainnet_runtime::RuntimeApi,
 									tangle_service::TangleExecutor,
 								>(&mut config, &cli.eth)?;
@@ -359,7 +375,7 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "testnet")]
 						spec if spec.is_testnet() => {
 							return runner.sync_run(|mut config| {
-								let PartialComponents { client, .. } = new_partial::<
+								let PartialComponents { client, .. } = tangle_service::aura::new_partial::<
 									tangle_testnet_runtime::RuntimeApi,
 									tangle_service::TestnetExecutor,
 								>(&mut config, &cli.eth)?;
@@ -433,7 +449,7 @@ pub fn run() -> sc_cli::Result<()> {
 				#[cfg(feature = "tangle")]
 				spec if spec.is_mainnet() =>
 					return runner.run_node_until_exit(|config| async move {
-						new_full::<
+						tangle_service::babe::new_full::<
 							tangle_mainnet_runtime::RuntimeApi,
 							tangle_service::TangleExecutor,
 						>(tangle_service::RunFullParams {
@@ -453,7 +469,7 @@ pub fn run() -> sc_cli::Result<()> {
 				#[cfg(feature = "testnet")]
 				spec if spec.is_testnet() =>
 					return runner.run_node_until_exit(|config| async move {
-						new_full::<
+						tangle_service::aura::new_full::<
 							tangle_testnet_runtime::RuntimeApi,
 							tangle_service::TestnetExecutor,
 						>(tangle_service::aura::RunFullParams {

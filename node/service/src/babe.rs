@@ -1,45 +1,102 @@
-// Copyright 2022 Webb Technologies Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// This file is part of Substrate.
+
+// Copyright (C) Parity Technologies (UK) Ltd.
+// SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #![warn(unused_extern_crates)]
 
 //! Service implementation. Specialized wrapper over substrate service.
 
 use crate::Cli;
+use crate::{
+	client::Client,
+	eth::{
+		new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, EthConfiguration,
+		FrontierPartialComponents, RpcConfig,
+	},
+	open_frontier_backend, FrontierBlockImport, FullBackend, FullClient, IdentifyVariant,
+	PartialComponentsResult, RuntimeApiCollection, TestnetExecutor, TangleExecutor
+};
 use codec::Encode;
 use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 use frame_system_rpc_runtime_api::AccountNonceApi;
 use futures::prelude::*;
-use kitchensink_runtime::RuntimeApi;
-use node_primitives::Block;
+use tangle_primitives::Block;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus_babe::{self, SlotProportion};
+use sc_executor::NativeElseWasmExecutor;
 use sc_network::{event::Event, NetworkEventStream, NetworkService};
 use sc_network_sync::{warp::WarpSyncParams, SyncingService};
 use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandlers, TaskManager};
 use sc_statement_store::Store as StatementStore;
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-use sp_api::ProvideRuntimeApi;
+use sp_api::{ConstructRuntimeApi, ProvideRuntimeApi};
 use sp_core::crypto::Pair;
 use sp_runtime::{generic, traits::Block as BlockT, SaturatedConversion};
 use std::sync::Arc;
 
+/// Builds a new object suitable for chain operations.
+#[allow(clippy::type_complexity)]
+pub fn new_chain_ops(
+	config: &mut Configuration,
+	eth_config: &EthConfiguration,
+) -> Result<
+	(Arc<Client>, Arc<FullBackend>, sc_consensus::BasicQueue<Block>, TaskManager),
+	ServiceError,
+> {
+	match &config.chain_spec {
+		#[cfg(feature = "testnet")]
+		spec if spec.is_testnet() => new_chain_ops_inner::<
+			tangle_testnet_runtime::RuntimeApi,
+			TestnetExecutor,
+		>(config, eth_config),
+		#[cfg(feature = "tangle")]
+		spec if spec.is_tangle() => new_chain_ops_inner::<
+			tangle_mainnet_runtime::RuntimeApi,
+			TangleExecutor,
+		>(config, eth_config),
+		_ => panic!("invalid chain spec"),
+	}
+}
+
+#[allow(clippy::type_complexity)]
+fn new_chain_ops_inner<RuntimeApi, Executor>(
+	config: &mut Configuration,
+	eth_config: &EthConfiguration,
+) -> Result<
+	(Arc<Client>, Arc<FullBackend>, sc_consensus::BasicQueue<Block>, TaskManager),
+	ServiceError,
+>
+where
+	Client: From<Arc<crate::FullClient<RuntimeApi, Executor>>>,
+	RuntimeApi:
+		ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>> + Send + Sync + 'static,
+	RuntimeApi::RuntimeApi: RuntimeApiCollection,
+	Executor: sc_executor::NativeExecutionDispatch + 'static,
+{
+	config.keystore = sc_service::config::KeystoreConfig::InMemory;
+	let PartialComponents { client, backend, import_queue, task_manager, .. } =
+		new_partial::<RuntimeApi, Executor>(config, eth_config)?;
+	Ok((Arc::new(Client::from(client)), backend, import_queue, task_manager))
+}
+
 /// Creates a new partial node.
 pub fn new_partial<RuntimeApi, Executor>(
 	config: &Configuration,
-	mixnet_config: Option<&sc_mixnet::Config>,
 ) -> Result<
 	sc_service::PartialComponents<
 		FullClient<RuntimeApi, Executor>,
@@ -49,26 +106,27 @@ pub fn new_partial<RuntimeApi, Executor>(
 		sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, Executor>>,
 		(
 			impl Fn(
-				node_rpc::DenyUnsafe,
+				crate::rpc::policy::DenyUnsafe,
 				sc_rpc::SubscriptionTaskExecutor,
 			) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
 			(
-				sc_consensus_babe::BabeBlockImport<
-					Block,
-					FullClient<RuntimeApi, Executor>,
-					FullGrandpaBlockImport,
-				>,
-				grandpa::LinkHalf<Block, FullClient<RuntimeApi, Executor>, FullSelectChain>,
+				sc_consensus_babe::BabeBlockImport<Block, FullClient<RuntimeApi, Executor>, FullGrandpaBlockImport>,
+				GrandpaLinkHalf<FullClient<RuntimeApi, Executor>>,
 				sc_consensus_babe::BabeLink<Block>,
 			),
-			grandpa::SharedVoterState,
+			sc_consensus_grandpa::SharedVoterState,
 			Option<Telemetry>,
 			Arc<StatementStore>,
-			Option<sc_mixnet::ApiBackend>,
 		),
 	>,
 	ServiceError,
-> {
+>
+where
+	RuntimeApi:
+		ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>> + Send + Sync + 'static,
+	RuntimeApi::RuntimeApi: RuntimeApiCollection,
+	Executor: sc_executor::NativeExecutionDispatch + 'static,
+{
 	let telemetry = config
 		.telemetry_endpoints
 		.clone()
@@ -80,7 +138,7 @@ pub fn new_partial<RuntimeApi, Executor>(
 		})
 		.transpose()?;
 
-	let executor = sc_service::new_wasm_executor(&config);
+	let executor = sc_service::new_native_or_wasm_executor(&config);
 
 	let (client, backend, keystore_container, task_manager) =
 		sc_service::new_full_parts::<Block, RuntimeApi, _>(
@@ -105,14 +163,19 @@ pub fn new_partial<RuntimeApi, Executor>(
 		client.clone(),
 	);
 
-	let (grandpa_block_import, grandpa_link) = grandpa::block_import(
+	let (grandpa_block_import, grandpa_link) = sc_consensus_grandpa::block_import(
 		client.clone(),
-		GRANDPA_JUSTIFICATION_PERIOD,
+		crate::GRANDPA_JUSTIFICATION_PERIOD,
 		&(client.clone() as Arc<_>),
 		select_chain.clone(),
 		telemetry.as_ref().map(|x| x.handle()),
 	)?;
 	let justification_import = grandpa_block_import.clone();
+
+	let overrides = crate::rpc::overrides_handle(client.clone());
+	let frontier_backend = open_frontier_backend(client.clone(), config, &eth_config)?;
+
+	let frontier_block_import = FrontierBlockImport::new(client.clone(), client.clone());
 
 	let (block_import, babe_link) = sc_consensus_babe::block_import(
 		sc_consensus_babe::configuration(&*client)?,
@@ -157,17 +220,15 @@ pub fn new_partial<RuntimeApi, Executor>(
 	)
 	.map_err(|e| ServiceError::Other(format!("Statement store error: {:?}", e)))?;
 
-	let (mixnet_api, mixnet_api_backend) = mixnet_config.map(sc_mixnet::Api::new).unzip();
-
 	let (rpc_extensions_builder, rpc_setup) = {
 		let (_, grandpa_link, _) = &import_setup;
 
 		let justification_stream = grandpa_link.justification_stream();
 		let shared_authority_set = grandpa_link.shared_authority_set().clone();
-		let shared_voter_state = grandpa::SharedVoterState::empty();
+		let shared_voter_state = sc_consensus_grandpa::SharedVoterState::empty();
 		let shared_voter_state2 = shared_voter_state.clone();
 
-		let finality_proof_provider = grandpa::FinalityProofProvider::new_for_service(
+		let finality_proof_provider = sc_consensus_grandpa::FinalityProofProvider::new_for_service(
 			backend.clone(),
 			Some(shared_authority_set.clone()),
 		);
@@ -181,17 +242,17 @@ pub fn new_partial<RuntimeApi, Executor>(
 		let rpc_backend = backend.clone();
 		let rpc_statement_store = statement_store.clone();
 		let rpc_extensions_builder = move |deny_unsafe, subscription_executor| {
-			let deps = node_rpc::FullDeps {
+			let deps = crate::rpc::FullDeps {
 				client: client.clone(),
 				pool: pool.clone(),
 				select_chain: select_chain.clone(),
 				chain_spec: chain_spec.cloned_box(),
 				deny_unsafe,
-				babe: node_rpc::BabeDeps {
+				babe: crate::rpc::BabeDeps {
 					keystore: keystore.clone(),
 					babe_worker_handle: babe_worker_handle.clone(),
 				},
-				grandpa: node_rpc::GrandpaDeps {
+				grandpa: crate::rpc::GrandpaDeps {
 					shared_voter_state: shared_voter_state.clone(),
 					shared_authority_set: shared_authority_set.clone(),
 					justification_stream: justification_stream.clone(),
@@ -200,10 +261,9 @@ pub fn new_partial<RuntimeApi, Executor>(
 				},
 				statement_store: rpc_statement_store.clone(),
 				backend: rpc_backend.clone(),
-				mixnet_api: mixnet_api.as_ref().cloned(),
 			};
 
-			node_rpc::create_full(deps).map_err(Into::into)
+			crate::rpc::create_full(deps).map_err(Into::into)
 		};
 
 		(rpc_extensions_builder, shared_voter_state2)
@@ -217,43 +277,44 @@ pub fn new_partial<RuntimeApi, Executor>(
 		select_chain,
 		import_queue,
 		transaction_pool,
-		other: (
-			rpc_extensions_builder,
-			import_setup,
-			rpc_setup,
-			telemetry,
-			statement_store,
-			mixnet_api_backend,
-		),
+		other: (rpc_extensions_builder, import_setup, rpc_setup, telemetry, statement_store),
 	})
 }
 
 /// Result of [`new_full_base`].
-pub struct NewFullBase {
+pub struct NewFullBase<RuntimeApi, Executor>
+where
+	Executor: sc_executor::NativeExecutionDispatch + 'static
+{
 	/// The task manager of the node.
 	pub task_manager: TaskManager,
 	/// The client instance of the node.
-	pub client: Arc<FullClient>,
+	pub client: FullClient<RuntimeApi, Executor>,
 	/// The networking service of the node.
 	pub network: Arc<NetworkService<Block, <Block as BlockT>::Hash>>,
 	/// The syncing service of the node.
 	pub sync: Arc<SyncingService<Block>>,
 	/// The transaction pool of the node.
-	pub transaction_pool: Arc<TransactionPool>,
+	pub transaction_pool: sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, Executor>>,
 	/// The rpc handlers of the node.
 	pub rpc_handlers: RpcHandlers,
 }
 
 /// Creates a full service from the configuration.
-pub fn new_full_base(
+pub fn new_full_base<RuntimeApi, Executor>(
 	config: Configuration,
-	mixnet_config: Option<sc_mixnet::Config>,
 	disable_hardware_benchmarks: bool,
 	with_startup_data: impl FnOnce(
-		&sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
+		&sc_consensus_babe::BabeBlockImport<Block, FullClient<RuntimeApi, Executor>, FullGrandpaBlockImport>,
 		&sc_consensus_babe::BabeLink<Block>,
 	),
-) -> Result<NewFullBase, ServiceError> {
+) -> Result<NewFullBase<RuntimeApi, Executor>, ServiceError>
+where
+	RuntimeApi:
+		ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>> + Send + Sync + 'static,
+	RuntimeApi::RuntimeApi: RuntimeApiCollection,
+	Executor: sc_executor::NativeExecutionDispatch + 'static,
+{
 	let hwbench = (!disable_hardware_benchmarks)
 		.then_some(config.database.path().map(|database_path| {
 			let _ = std::fs::create_dir_all(&database_path);
@@ -269,37 +330,32 @@ pub fn new_full_base(
 		keystore_container,
 		select_chain,
 		transaction_pool,
-		other:
-			(rpc_builder, import_setup, rpc_setup, mut telemetry, statement_store, mixnet_api_backend),
-	} = new_partial(&config, mixnet_config.as_ref())?;
+		other: (rpc_builder, import_setup, rpc_setup, mut telemetry, statement_store),
+	} = new_partial(&config)?;
 
 	let shared_voter_state = rpc_setup;
 	let auth_disc_publish_non_global_ips = config.network.allow_non_globals_in_dht;
 	let mut net_config = sc_network::config::FullNetworkConfiguration::new(&config.network);
-	let genesis_hash = client.block_hash(0).ok().flatten().expect("Genesis block exists; qed");
 
-	let grandpa_protocol_name = grandpa::protocol_standard_name(&genesis_hash, &config.chain_spec);
-	let (grandpa_protocol_config, grandpa_notification_service) =
-		grandpa::grandpa_peers_set_config(grandpa_protocol_name.clone());
-	net_config.add_notification_protocol(grandpa_protocol_config);
+	let grandpa_protocol_name = sc_consensus_grandpa::protocol_standard_name(
+		&client.block_hash(0).ok().flatten().expect("Genesis block exists; qed"),
+		&config.chain_spec,
+	);
+	net_config.add_notification_protocol(sc_consensus_grandpa::grandpa_peers_set_config(
+		grandpa_protocol_name.clone(),
+	));
 
-	let (statement_handler_proto, statement_config) =
-		sc_network_statement::StatementHandlerPrototype::new(
-			genesis_hash,
-			config.chain_spec.fork_id(),
-		);
-	net_config.add_notification_protocol(statement_config);
+	let statement_handler_proto = sc_network_statement::StatementHandlerPrototype::new(
+		client
+			.block_hash(0u32.into())
+			.ok()
+			.flatten()
+			.expect("Genesis block exists; qed"),
+		config.chain_spec.fork_id(),
+	);
+	net_config.add_notification_protocol(statement_handler_proto.set_config());
 
-	let mixnet_protocol_name =
-		sc_mixnet::protocol_name(genesis_hash.as_ref(), config.chain_spec.fork_id());
-	let mixnet_notification_service = mixnet_config.as_ref().map(|mixnet_config| {
-		let (config, notification_service) =
-			sc_mixnet::peers_set_config(mixnet_protocol_name.clone(), mixnet_config);
-		net_config.add_notification_protocol(config);
-		notification_service
-	});
-
-	let warp_sync = Arc::new(grandpa::warp_proof::NetworkProvider::new(
+	let warp_sync = Arc::new(sc_consensus_grandpa::warp_proof::NetworkProvider::new(
 		backend.clone(),
 		import_setup.1.shared_authority_set().clone(),
 		Vec::default(),
@@ -315,24 +371,7 @@ pub fn new_full_base(
 			import_queue,
 			block_announce_validator_builder: None,
 			warp_sync_params: Some(WarpSyncParams::WithProvider(warp_sync)),
-			block_relay: None,
 		})?;
-
-	if let Some(mixnet_config) = mixnet_config {
-		let mixnet = sc_mixnet::run(
-			mixnet_config,
-			mixnet_api_backend.expect("Mixnet API backend created if mixnet enabled"),
-			client.clone(),
-			sync_service.clone(),
-			network.clone(),
-			mixnet_protocol_name,
-			transaction_pool.clone(),
-			Some(keystore_container.keystore()),
-			mixnet_notification_service
-				.expect("`NotificationService` exists since mixnet was enabled; qed"),
-		);
-		task_manager.spawn_handle().spawn("mixnet", None, mixnet);
-	}
 
 	let role = config.role.clone();
 	let force_authoring = config.force_authoring;
@@ -360,14 +399,10 @@ pub fn new_full_base(
 
 	if let Some(hwbench) = hwbench {
 		sc_sysinfo::print_hwbench(&hwbench);
-		match SUBSTRATE_REFERENCE_HARDWARE.check_hardware(&hwbench) {
-			Err(err) if role.is_authority() => {
-				log::warn!(
-					"⚠️  The hardware does not meet the minimal requirements {} for role 'Authority'.",
-					err
-				);
-			},
-			_ => {},
+		if !SUBSTRATE_REFERENCE_HARDWARE.check_hardware(&hwbench) && role.is_authority() {
+			log::warn!(
+				"⚠️  The hardware does not meet the minimal requirements for role 'Authority'."
+			);
 		}
 
 		if let Some(ref mut telemetry) = telemetry {
@@ -474,10 +509,10 @@ pub fn new_full_base(
 	// need a keystore, regardless of which protocol we use below.
 	let keystore = if role.is_authority() { Some(keystore_container.keystore()) } else { None };
 
-	let grandpa_config = grandpa::Config {
+	let grandpa_config = sc_consensus_grandpa::Config {
 		// FIXME #1578 make this available through chainspec
 		gossip_duration: std::time::Duration::from_millis(333),
-		justification_generation_period: GRANDPA_JUSTIFICATION_PERIOD,
+		justification_generation_period: crate::GRANDPA_JUSTIFICATION_PERIOD,
 		name: Some(name),
 		observer_enabled: false,
 		keystore,
@@ -493,14 +528,13 @@ pub fn new_full_base(
 		// and vote data availability than the observer. The observer has not
 		// been tested extensively yet and having most nodes in a network run it
 		// could lead to finality stalls.
-		let grandpa_params = grandpa::GrandpaParams {
+		let grandpa_config = sc_consensus_grandpa::GrandpaParams {
 			config: grandpa_config,
 			link: grandpa_link,
 			network: network.clone(),
 			sync: Arc::new(sync_service.clone()),
-			notification_service: grandpa_notification_service,
 			telemetry: telemetry.as_ref().map(|x| x.handle()),
-			voting_rule: grandpa::VotingRulesBuilder::default().build(),
+			voting_rule: sc_consensus_grandpa::VotingRulesBuilder::default().build(),
 			prometheus_registry: prometheus_registry.clone(),
 			shared_voter_state,
 			offchain_tx_pool_factory: OffchainTransactionPoolFactory::new(transaction_pool.clone()),
@@ -511,7 +545,7 @@ pub fn new_full_base(
 		task_manager.spawn_essential_handle().spawn_blocking(
 			"grandpa-voter",
 			None,
-			grandpa::run_grandpa_voter(grandpa_params)?,
+			sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?,
 		);
 	}
 
@@ -571,9 +605,8 @@ pub fn new_full_base(
 
 /// Builds a new service for a full client.
 pub fn new_full(config: Configuration, cli: Cli) -> Result<TaskManager, ServiceError> {
-	let mixnet_config = cli.mixnet_params.config(config.role.is_authority());
 	let database_source = config.database.clone();
-	let task_manager = new_full_base(config, mixnet_config, cli.no_hardware_benchmarks, |_, _| ())
+	let task_manager = new_full_base(config, cli.no_hardware_benchmarks, |_, _| ())
 		.map(|NewFullBase { task_manager, .. }| task_manager)?;
 
 	sc_storage_monitor::StorageMonitorService::try_spawn(
@@ -584,259 +617,4 @@ pub fn new_full(config: Configuration, cli: Cli) -> Result<TaskManager, ServiceE
 	.map_err(|e| ServiceError::Application(e.into()))?;
 
 	Ok(task_manager)
-}
-
-#[cfg(test)]
-mod tests {
-	use crate::service::{new_full_base, NewFullBase};
-	use codec::Encode;
-	use kitchensink_runtime::{
-		constants::{currency::CENTS, time::SLOT_DURATION},
-		Address, BalancesCall, RuntimeCall, UncheckedExtrinsic,
-	};
-	use node_primitives::{Block, DigestItem, Signature};
-	use sc_client_api::BlockBackend;
-	use sc_consensus::{BlockImport, BlockImportParams, ForkChoiceStrategy};
-	use sc_consensus_babe::{BabeIntermediate, CompatibleDigestItem, INTERMEDIATE_KEY};
-	use sc_consensus_epochs::descendent_query;
-	use sc_keystore::LocalKeystore;
-	use sc_service_test::TestNetNode;
-	use sc_transaction_pool_api::{ChainEvent, MaintainedTransactionPool};
-	use sp_consensus::{BlockOrigin, Environment, Proposer};
-	use sp_core::crypto::Pair;
-	use sp_inherents::InherentDataProvider;
-	use sp_keyring::AccountKeyring;
-	use sp_keystore::KeystorePtr;
-	use sp_runtime::{
-		generic::{Digest, Era, SignedPayload},
-		key_types::BABE,
-		traits::{Block as BlockT, Header as HeaderT, IdentifyAccount, Verify},
-		RuntimeAppPublic,
-	};
-	use sp_timestamp;
-	use std::sync::Arc;
-
-	type AccountPublic = <Signature as Verify>::Signer;
-
-	#[test]
-	// It is "ignored", but the node-cli ignored tests are running on the CI.
-	// This can be run locally with `cargo test --release -p node-cli test_sync -- --ignored`.
-	#[ignore]
-	fn test_sync() {
-		sp_tracing::try_init_simple();
-
-		let keystore_path = tempfile::tempdir().expect("Creates keystore path");
-		let keystore: KeystorePtr = LocalKeystore::open(keystore_path.path(), None)
-			.expect("Creates keystore")
-			.into();
-		let alice: sp_consensus_babe::AuthorityId = keystore
-			.sr25519_generate_new(BABE, Some("//Alice"))
-			.expect("Creates authority pair")
-			.into();
-
-		let chain_spec = crate::chain_spec::tests::integration_test_config_with_single_authority();
-
-		// For the block factory
-		let mut slot = 1u64;
-
-		// For the extrinsics factory
-		let bob = Arc::new(AccountKeyring::Bob.pair());
-		let charlie = Arc::new(AccountKeyring::Charlie.pair());
-		let mut index = 0;
-
-		sc_service_test::sync(
-			chain_spec,
-			|config| {
-				let mut setup_handles = None;
-				let NewFullBase { task_manager, client, network, sync, transaction_pool, .. } =
-					new_full_base(
-						config,
-						None,
-						false,
-						|block_import: &sc_consensus_babe::BabeBlockImport<Block, _, _>,
-						 babe_link: &sc_consensus_babe::BabeLink<Block>| {
-							setup_handles = Some((block_import.clone(), babe_link.clone()));
-						},
-					)?;
-
-				let node = sc_service_test::TestNetComponents::new(
-					task_manager,
-					client,
-					network,
-					sync,
-					transaction_pool,
-				);
-				Ok((node, setup_handles.unwrap()))
-			},
-			|service, &mut (ref mut block_import, ref babe_link)| {
-				let parent_hash = service.client().chain_info().best_hash;
-				let parent_header = service.client().header(parent_hash).unwrap().unwrap();
-				let parent_number = *parent_header.number();
-
-				futures::executor::block_on(service.transaction_pool().maintain(
-					ChainEvent::NewBestBlock { hash: parent_header.hash(), tree_route: None },
-				));
-
-				let mut proposer_factory = sc_basic_authorship::ProposerFactory::new(
-					service.spawn_handle(),
-					service.client(),
-					service.transaction_pool(),
-					None,
-					None,
-				);
-
-				let mut digest = Digest::default();
-
-				// even though there's only one authority some slots might be empty,
-				// so we must keep trying the next slots until we can claim one.
-				let (babe_pre_digest, epoch_descriptor) = loop {
-					let epoch_descriptor = babe_link
-						.epoch_changes()
-						.shared_data()
-						.epoch_descriptor_for_child_of(
-							descendent_query(&*service.client()),
-							&parent_hash,
-							parent_number,
-							slot.into(),
-						)
-						.unwrap()
-						.unwrap();
-
-					let epoch = babe_link
-						.epoch_changes()
-						.shared_data()
-						.epoch_data(&epoch_descriptor, |slot| {
-							sc_consensus_babe::Epoch::genesis(babe_link.config(), slot)
-						})
-						.unwrap();
-
-					if let Some(babe_pre_digest) =
-						sc_consensus_babe::authorship::claim_slot(slot.into(), &epoch, &keystore)
-							.map(|(digest, _)| digest)
-					{
-						break (babe_pre_digest, epoch_descriptor)
-					}
-
-					slot += 1;
-				};
-
-				let inherent_data = futures::executor::block_on(
-					(
-						sp_timestamp::InherentDataProvider::new(
-							std::time::Duration::from_millis(SLOT_DURATION * slot).into(),
-						),
-						sp_consensus_babe::inherents::InherentDataProvider::new(slot.into()),
-					)
-						.create_inherent_data(),
-				)
-				.expect("Creates inherent data");
-
-				digest.push(<DigestItem as CompatibleDigestItem>::babe_pre_digest(babe_pre_digest));
-
-				let new_block = futures::executor::block_on(async move {
-					let proposer = proposer_factory.init(&parent_header).await;
-					proposer
-						.unwrap()
-						.propose(inherent_data, digest, std::time::Duration::from_secs(1), None)
-						.await
-				})
-				.expect("Error making test block")
-				.block;
-
-				let (new_header, new_body) = new_block.deconstruct();
-				let pre_hash = new_header.hash();
-				// sign the pre-sealed hash of the block and then
-				// add it to a digest item.
-				let to_sign = pre_hash.encode();
-				let signature = keystore
-					.sr25519_sign(sp_consensus_babe::AuthorityId::ID, alice.as_ref(), &to_sign)
-					.unwrap()
-					.unwrap();
-				let item = <DigestItem as CompatibleDigestItem>::babe_seal(signature.into());
-				slot += 1;
-
-				let mut params = BlockImportParams::new(BlockOrigin::File, new_header);
-				params.post_digests.push(item);
-				params.body = Some(new_body);
-				params.insert_intermediate(
-					INTERMEDIATE_KEY,
-					BabeIntermediate::<Block> { epoch_descriptor },
-				);
-				params.fork_choice = Some(ForkChoiceStrategy::LongestChain);
-
-				futures::executor::block_on(block_import.import_block(params))
-					.expect("error importing test block");
-			},
-			|service, _| {
-				let amount = 5 * CENTS;
-				let to: Address = AccountPublic::from(bob.public()).into_account().into();
-				let from: Address = AccountPublic::from(charlie.public()).into_account().into();
-				let genesis_hash = service.client().block_hash(0).unwrap().unwrap();
-				let best_hash = service.client().chain_info().best_hash;
-				let (spec_version, transaction_version) = {
-					let version = service.client().runtime_version_at(best_hash).unwrap();
-					(version.spec_version, version.transaction_version)
-				};
-				let signer = charlie.clone();
-
-				let function = RuntimeCall::Balances(BalancesCall::transfer_allow_death {
-					dest: to.into(),
-					value: amount,
-				});
-
-				let check_non_zero_sender = frame_system::CheckNonZeroSender::new();
-				let check_spec_version = frame_system::CheckSpecVersion::new();
-				let check_tx_version = frame_system::CheckTxVersion::new();
-				let check_genesis = frame_system::CheckGenesis::new();
-				let check_era = frame_system::CheckEra::from(Era::Immortal);
-				let check_nonce = frame_system::CheckNonce::from(index);
-				let check_weight = frame_system::CheckWeight::new();
-				let tx_payment = pallet_skip_feeless_payment::SkipCheckIfFeeless::from(
-					pallet_asset_conversion_tx_payment::ChargeAssetTxPayment::from(0, None),
-				);
-				let extra = (
-					check_non_zero_sender,
-					check_spec_version,
-					check_tx_version,
-					check_genesis,
-					check_era,
-					check_nonce,
-					check_weight,
-					tx_payment,
-				);
-				let raw_payload = SignedPayload::from_raw(
-					function,
-					extra,
-					((), spec_version, transaction_version, genesis_hash, genesis_hash, (), (), ()),
-				);
-				let signature = raw_payload.using_encoded(|payload| signer.sign(payload));
-				let (function, extra, _) = raw_payload.deconstruct();
-				index += 1;
-				UncheckedExtrinsic::new_signed(function, from.into(), signature.into(), extra)
-					.into()
-			},
-		);
-	}
-
-	#[test]
-	#[ignore]
-	fn test_consensus() {
-		sp_tracing::try_init_simple();
-
-		sc_service_test::consensus(
-			crate::chain_spec::tests::integration_test_config_with_two_authorities(),
-			|config| {
-				let NewFullBase { task_manager, client, network, sync, transaction_pool, .. } =
-					new_full_base(config, None, false, |_, _| ())?;
-				Ok(sc_service_test::TestNetComponents::new(
-					task_manager,
-					client,
-					network,
-					sync,
-					transaction_pool,
-				))
-			},
-			vec!["//Alice".into(), "//Bob".into()],
-		)
-	}
 }

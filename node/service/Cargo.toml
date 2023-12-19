@@ -27,11 +27,14 @@ tangle-relayer-gadget-cli = { workspace = true, optional = true }
 frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 frame-system = { workspace = true }
+sc-authority-discovery = { workspace = true }
 sc-basic-authorship = { workspace = true }
 sc-cli = { workspace = true }
 sc-client-api = { workspace = true }
 sc-consensus = { workspace = true }
 sc-consensus-aura = { workspace = true }
+sc-consensus-babe = { workspace = true }
+sc-sysinfo = { workspace = true }
 sc-consensus-grandpa = { workspace = true }
 sc-executor = { workspace = true }
 sc-keystore = { workspace = true }
@@ -105,7 +108,7 @@ tangle-primitives = { workspace = true }
 tangle-testnet-runtime = { workspace = true }
 
 [features]
-default = ["with-rocksdb-weights", "rocksdb", "sql", "testnet"]
+default = ["with-rocksdb-weights", "rocksdb", "sql", "testnet", "tangle"]
 runtime-benchmarks = ["tangle-testnet-runtime/runtime-benchmarks"]
 integration-tests = ["tangle-testnet-runtime/integration-tests"]
 with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]

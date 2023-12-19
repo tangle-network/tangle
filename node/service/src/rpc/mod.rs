@@ -39,6 +39,7 @@ use tangle_testnet_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
 
 pub mod eth;
 pub mod tracing;
+pub mod policy;
 pub use self::eth::{create_eth, overrides_handle, EthDeps};
 
 /// Full client dependencies.
