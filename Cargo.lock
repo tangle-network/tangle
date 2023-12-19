@@ -15335,6 +15335,7 @@ dependencies = [
  "pallet-treasury",
  "pallet-utility",
  "pallet-vesting",
+ "pallet-zksaas",
  "parity-scale-codec",
  "precompile-utils",
  "rpc-primitives-debug",

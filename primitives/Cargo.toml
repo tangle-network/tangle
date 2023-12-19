@@ -36,7 +36,13 @@ hex = { workspace = true }
 
 [features]
 default = ["std", "verifying"]
-std = ["frame-support/std", "sp-runtime/std", "sp-core/std", "sp-consensus-aura/std"]
+std = [
+  "frame-support/std",
+  "sp-runtime/std",
+  "sp-core/std",
+  "sp-consensus-aura/std",
+  "ark-std?/std",
+]
 verifying = [
   "ark-crypto-primitives",
   "ark-ec",

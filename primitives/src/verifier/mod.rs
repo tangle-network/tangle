@@ -1,5 +1,6 @@
 use ark_crypto_primitives::Error;
 use ark_ff::{BigInteger, PrimeField};
+use sp_std::vec::Vec;
 
 pub mod arkworks;
 pub mod circom;
@@ -31,7 +32,7 @@ pub fn to_field_elements<F: PrimeField>(bytes: &[u8]) -> Result<Vec<F>, Error> {
 
 /// Convert a vector of field elements into a vector of bytes.
 pub fn from_field_elements<F: PrimeField>(elts: &[F]) -> Result<Vec<u8>, Error> {
-	let res = elts.iter().fold(vec![], |mut acc, prev| {
+	let res = elts.iter().fold(Vec::with_capacity(elts.len() * 32), |mut acc, prev| {
 		acc.extend_from_slice(&prev.into_bigint().to_bytes_be());
 		acc
 	});
@@ -39,9 +40,25 @@ pub fn from_field_elements<F: PrimeField>(elts: &[F]) -> Result<Vec<u8>, Error> 
 	Ok(res)
 }
 
-// A trait meant to be implemented over a zero-knowledge verifier function.
+/// A trait meant to be implemented over a zero-knowledge verifier function.
 pub trait InstanceVerifier {
 	fn verify(pub_inps: &[u8], proof: &[u8], params: &[u8]) -> Result<bool, Error>;
+}
+
+/// A verifier that always returns true.
+#[derive(Clone, Copy, Debug)]
+pub struct PassThroughVerifier;
+
+impl InstanceVerifier for PassThroughVerifier {
+	fn verify(_pub_inps: &[u8], _proof: &[u8], _params: &[u8]) -> Result<bool, Error> {
+		Ok(true)
+	}
+}
+
+impl InstanceVerifier for () {
+	fn verify(_pub_inps: &[u8], _proof: &[u8], _params: &[u8]) -> Result<bool, Error> {
+		Ok(false)
+	}
 }
 
 impl<V1, V2> InstanceVerifier for (V1, V2)
