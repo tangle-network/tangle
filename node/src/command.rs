@@ -113,7 +113,7 @@ pub fn run() -> sc_cli::Result<()> {
 					tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
 				#[cfg(feature = "testnet")]
 				let (client, _, import_queue, task_manager) =
-					tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
+					tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, import_queue), task_manager))
 			})
 		},
@@ -123,7 +123,7 @@ pub fn run() -> sc_cli::Result<()> {
 				#[cfg(feature = "tangle")]
 				let (client, _, _, task_manager) = tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
 				#[cfg(feature = "testnet")]
-				let (client, _, _, task_manager) = tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
+				let (client, _, _, task_manager) = tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, config.database), task_manager))
 			})
 		},
@@ -133,7 +133,7 @@ pub fn run() -> sc_cli::Result<()> {
 				#[cfg(feature = "tangle")]
 				let (client, _, _, task_manager) = tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
 				#[cfg(feature = "testnet")]
-				let (client, _, _, task_manager) = tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
+				let (client, _, _, task_manager) = tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, config.chain_spec), task_manager))
 			})
 		},
@@ -145,7 +145,7 @@ pub fn run() -> sc_cli::Result<()> {
 					tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
 				#[cfg(feature = "testnet")]
 				let (client, _, import_queue, task_manager) =
-					tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
+					tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, import_queue), task_manager))
 			})
 		},
@@ -185,7 +185,7 @@ pub fn run() -> sc_cli::Result<()> {
 				}),
 				#[cfg(feature = "testnet")]
 				spec if spec.is_testnet() => runner.async_run(|mut config| {
-					let params = tangle_service::aura::new_partial::<
+					let params = tangle_service::babe::new_partial::<
 						tangle_testnet_runtime::RuntimeApi,
 						tangle_service::TestnetExecutor,
 					>(&mut config, &cli.eth)?;
@@ -241,7 +241,7 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "testnet")]
 						spec if spec.is_testnet() =>
 							return runner.sync_run(|mut config| {
-								let params = tangle_service::aura::new_partial::<
+								let params = tangle_service::babe::new_partial::<
 									tangle_testnet_runtime::RuntimeApi,
 									tangle_service::TestnetExecutor,
 								>(&mut config, &cli.eth)?;
@@ -318,7 +318,7 @@ pub fn run() -> sc_cli::Result<()> {
 						spec if spec.is_testnet() =>
 							return runner.sync_run(|mut config| {
 								let PartialComponents { client, .. } =
-									tangle_service::aura::new_partial::<
+									tangle_service::babe::new_partial::<
 										tangle_testnet_runtime::RuntimeApi,
 										tangle_service::TestnetExecutor,
 									>(&mut config, &cli.eth)?;
@@ -375,7 +375,7 @@ pub fn run() -> sc_cli::Result<()> {
 						spec if spec.is_testnet() => {
 							return runner.sync_run(|mut config| {
 								let PartialComponents { client, .. } =
-									tangle_service::aura::new_partial::<
+									tangle_service::babe::new_partial::<
 										tangle_testnet_runtime::RuntimeApi,
 										tangle_service::TestnetExecutor,
 									>(&mut config, &cli.eth)?;
@@ -457,11 +457,8 @@ pub fn run() -> sc_cli::Result<()> {
 							rpc_config,
 							eth_config: cli.eth,
 							debug_output: cli.output_path,
-							#[cfg(feature = "relayer")]
-							relayer_cmd: cli.relayer_cmd,
-							#[cfg(feature = "light-client")]
-							light_client_relayer_cmd: cli.light_client_relayer_cmd,
 							auto_insert_keys: cli.auto_insert_keys,
+							disable_hardware_benchmarks: cli.no_hardware_benchmarks,
 						})
 						.map_err(Into::into)
 						.await
@@ -469,7 +466,7 @@ pub fn run() -> sc_cli::Result<()> {
 				#[cfg(feature = "testnet")]
 				spec if spec.is_testnet() =>
 					return runner.run_node_until_exit(|config| async move {
-						tangle_service::aura::new_full::<
+						tangle_service::babe::new_full::<
 							tangle_testnet_runtime::RuntimeApi,
 							tangle_service::TestnetExecutor,
 						>(tangle_service::RunFullParams {
