@@ -20,27 +20,29 @@
 
 //! Service implementation. Specialized wrapper over substrate service.
 
-use crate::Cli;
 use crate::{
 	client::Client,
 	eth::{
 		new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, EthConfiguration,
 		FrontierPartialComponents, RpcConfig,
 	},
-	open_frontier_backend, FrontierBlockImport, FullBackend, FullClient, IdentifyVariant,
-	PartialComponentsResult, RuntimeApiCollection, TestnetExecutor, TangleExecutor
+	open_frontier_backend, Cli, FrontierBlockImport, FullBackend, FullClient, FullSelectChain,
+	GrandpaLinkHalf, IdentifyVariant, RunFullParams, RuntimeApiCollection, TangleExecutor,
+	TestnetExecutor,
 };
 use codec::Encode;
 use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 use frame_system_rpc_runtime_api::AccountNonceApi;
 use futures::prelude::*;
-use tangle_primitives::Block;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus_babe::{self, SlotProportion};
 use sc_executor::NativeElseWasmExecutor;
 use sc_network::{event::Event, NetworkEventStream, NetworkService};
 use sc_network_sync::{warp::WarpSyncParams, SyncingService};
-use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandlers, TaskManager};
+use sc_service::{
+	config::Configuration, error::Error as ServiceError, PartialComponents, RpcHandlers,
+	TaskManager,
+};
 use sc_statement_store::Store as StatementStore;
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
@@ -48,6 +50,37 @@ use sp_api::{ConstructRuntimeApi, ProvideRuntimeApi};
 use sp_core::crypto::Pair;
 use sp_runtime::{generic, traits::Block as BlockT, SaturatedConversion};
 use std::sync::Arc;
+use tangle_primitives::Block;
+
+type PartialComponentsResult<RuntimeApi, Executor: sc_executor::NativeExecutionDispatch + 'static> =
+	Result<
+		sc_service::PartialComponents<
+			FullClient<RuntimeApi, Executor>,
+			FullBackend,
+			FullSelectChain,
+			sc_consensus::DefaultImportQueue<Block>,
+			sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, Executor>>,
+			(
+				impl Fn(
+					crate::rpc::policy::DenyUnsafe,
+					sc_rpc::SubscriptionTaskExecutor,
+				) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
+				(
+					sc_consensus_babe::BabeBlockImport<
+						Block,
+						FullClient<RuntimeApi, Executor>,
+						FullGrandpaBlockImport,
+					>,
+					GrandpaLinkHalf<FullClient<RuntimeApi, Executor>>,
+					sc_consensus_babe::BabeLink<Block>,
+				),
+				sc_consensus_grandpa::SharedVoterState,
+				Option<Telemetry>,
+				Arc<StatementStore>,
+			),
+		>,
+		ServiceError,
+	>;
 
 /// Builds a new object suitable for chain operations.
 #[allow(clippy::type_complexity)]
@@ -97,30 +130,8 @@ where
 /// Creates a new partial node.
 pub fn new_partial<RuntimeApi, Executor>(
 	config: &Configuration,
-) -> Result<
-	sc_service::PartialComponents<
-		FullClient<RuntimeApi, Executor>,
-		FullBackend,
-		FullSelectChain,
-		sc_consensus::DefaultImportQueue<Block>,
-		sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, Executor>>,
-		(
-			impl Fn(
-				crate::rpc::policy::DenyUnsafe,
-				sc_rpc::SubscriptionTaskExecutor,
-			) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
-			(
-				sc_consensus_babe::BabeBlockImport<Block, FullClient<RuntimeApi, Executor>, FullGrandpaBlockImport>,
-				GrandpaLinkHalf<FullClient<RuntimeApi, Executor>>,
-				sc_consensus_babe::BabeLink<Block>,
-			),
-			sc_consensus_grandpa::SharedVoterState,
-			Option<Telemetry>,
-			Arc<StatementStore>,
-		),
-	>,
-	ServiceError,
->
+	eth_config: &EthConfiguration,
+) -> PartialComponentsResult<RuntimeApi, Executor>
 where
 	RuntimeApi:
 		ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>> + Send + Sync + 'static,
@@ -179,7 +190,7 @@ where
 
 	let (block_import, babe_link) = sc_consensus_babe::block_import(
 		sc_consensus_babe::configuration(&*client)?,
-		grandpa_block_import,
+		frontier_block_import,
 		client.clone(),
 	)?;
 
@@ -281,40 +292,25 @@ where
 	})
 }
 
-/// Result of [`new_full_base`].
-pub struct NewFullBase<RuntimeApi, Executor>
-where
-	Executor: sc_executor::NativeExecutionDispatch + 'static
-{
-	/// The task manager of the node.
-	pub task_manager: TaskManager,
-	/// The client instance of the node.
-	pub client: FullClient<RuntimeApi, Executor>,
-	/// The networking service of the node.
-	pub network: Arc<NetworkService<Block, <Block as BlockT>::Hash>>,
-	/// The syncing service of the node.
-	pub sync: Arc<SyncingService<Block>>,
-	/// The transaction pool of the node.
-	pub transaction_pool: sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, Executor>>,
-	/// The rpc handlers of the node.
-	pub rpc_handlers: RpcHandlers,
-}
-
-/// Creates a full service from the configuration.
-pub fn new_full_base<RuntimeApi, Executor>(
-	config: Configuration,
-	disable_hardware_benchmarks: bool,
-	with_startup_data: impl FnOnce(
-		&sc_consensus_babe::BabeBlockImport<Block, FullClient<RuntimeApi, Executor>, FullGrandpaBlockImport>,
-		&sc_consensus_babe::BabeLink<Block>,
-	),
-) -> Result<NewFullBase<RuntimeApi, Executor>, ServiceError>
+/// Builds a new service for a full client.
+pub fn new_full<RuntimeApi, Executor>(
+	RunFullParams {
+		mut config,
+		eth_config,
+		rpc_config,
+		debug_output: _,
+		auto_insert_keys,
+		disable_hardware_benchmarks,
+	}: RunFullParams,
+) -> Result<TaskManager, ServiceError>
 where
 	RuntimeApi:
 		ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>> + Send + Sync + 'static,
 	RuntimeApi::RuntimeApi: RuntimeApiCollection,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,
 {
+	let database_source = config.database.clone();
+
 	let hwbench = (!disable_hardware_benchmarks)
 		.then_some(config.database.path().map(|database_path| {
 			let _ = std::fs::create_dir_all(&database_path);
@@ -331,7 +327,7 @@ where
 		select_chain,
 		transaction_pool,
 		other: (rpc_builder, import_setup, rpc_setup, mut telemetry, statement_store),
-	} = new_partial(&config)?;
+	} = new_partial(&config, &eth_config)?;
 
 	let shared_voter_state = rpc_setup;
 	let auth_disc_publish_non_global_ips = config.network.allow_non_globals_in_dht;
@@ -593,21 +589,6 @@ where
 	}
 
 	network_starter.start_network();
-	Ok(NewFullBase {
-		task_manager,
-		client,
-		network,
-		sync: sync_service,
-		transaction_pool,
-		rpc_handlers,
-	})
-}
-
-/// Builds a new service for a full client.
-pub fn new_full(config: Configuration, cli: Cli) -> Result<TaskManager, ServiceError> {
-	let database_source = config.database.clone();
-	let task_manager = new_full_base(config, cli.no_hardware_benchmarks, |_, _| ())
-		.map(|NewFullBase { task_manager, .. }| task_manager)?;
 
 	sc_storage_monitor::StorageMonitorService::try_spawn(
 		cli.storage_monitor,

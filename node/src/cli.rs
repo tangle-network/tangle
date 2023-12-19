@@ -32,17 +32,22 @@ pub struct Cli {
 	#[command(flatten)]
 	pub eth: EthConfiguration,
 
-	#[cfg(feature = "relayer")]
-	#[clap(flatten)]
-	pub relayer_cmd: tangle_relayer_gadget_cli::RelayerCmd,
-
-	#[cfg(feature = "light-client")]
-	#[clap(flatten)]
-	pub light_client_relayer_cmd:
-		pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
-
 	#[clap(short, long)]
 	pub auto_insert_keys: bool,
+
+	/// Disable automatic hardware benchmarks.
+	///
+	/// By default these benchmarks are automatically ran at startup and measure
+	/// the CPU speed, the memory bandwidth and the disk speed.
+	///
+	/// The results are then printed out in the logs, and also sent as part of
+	/// telemetry, if telemetry is enabled.
+	#[arg(long)]
+	pub no_hardware_benchmarks: bool,
+
+	#[allow(missing_docs)]
+	#[clap(flatten)]
+	pub storage_monitor: sc_storage_monitor::StorageMonitorParams,
 }
 
 #[derive(Debug, clap::Subcommand)]

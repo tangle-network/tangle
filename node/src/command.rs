@@ -121,11 +121,9 @@ pub fn run() -> sc_cli::Result<()> {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|mut config| {
 				#[cfg(feature = "tangle")]
-				let (client, _, _, task_manager) =
-					tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
+				let (client, _, _, task_manager) = tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
 				#[cfg(feature = "testnet")]
-				let (client, _, _, task_manager) =
-					tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
+				let (client, _, _, task_manager) = tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, config.database), task_manager))
 			})
 		},
@@ -133,11 +131,9 @@ pub fn run() -> sc_cli::Result<()> {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|mut config| {
 				#[cfg(feature = "tangle")]
-				let (client, _, _, task_manager) =
-					tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
+				let (client, _, _, task_manager) = tangle_service::babe::new_chain_ops(&mut config, &cli.eth)?;
 				#[cfg(feature = "testnet")]
-				let (client, _, _, task_manager) =
-					tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
+				let (client, _, _, task_manager) = tangle_service::aura::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, config.chain_spec), task_manager))
 			})
 		},
@@ -300,10 +296,11 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "tangle")]
 						spec if spec.is_mainnet() =>
 							return runner.sync_run(|mut config| {
-								let PartialComponents { client, .. } = tangle_service::babe::new_partial::<
-									tangle_mainnet_runtime::RuntimeApi,
-									tangle_service::TangleExecutor,
-								>(&mut config, &cli.eth)?;
+								let PartialComponents { client, .. } =
+									tangle_service::babe::new_partial::<
+										tangle_mainnet_runtime::RuntimeApi,
+										tangle_service::TangleExecutor,
+									>(&mut config, &cli.eth)?;
 
 								let c = Arc::new(tangle_service::client::Client::Tangle(
 									client.clone(),
@@ -320,10 +317,11 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "testnet")]
 						spec if spec.is_testnet() =>
 							return runner.sync_run(|mut config| {
-								let PartialComponents { client, .. } = tangle_service::aura::new_partial::<
-									tangle_testnet_runtime::RuntimeApi,
-									tangle_service::TestnetExecutor,
-								>(&mut config, &cli.eth)?;
+								let PartialComponents { client, .. } =
+									tangle_service::aura::new_partial::<
+										tangle_testnet_runtime::RuntimeApi,
+										tangle_service::TestnetExecutor,
+									>(&mut config, &cli.eth)?;
 
 								let c = Arc::new(tangle_service::client::Client::Testnet(
 									client.clone(),
@@ -346,10 +344,11 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "tangle")]
 						spec if spec.is_mainnet() => {
 							return runner.sync_run(|mut config| {
-								let PartialComponents { client, .. } = tangle_service::babe::new_partial::<
-									tangle_mainnet_runtime::RuntimeApi,
-									tangle_service::TangleExecutor,
-								>(&mut config, &cli.eth)?;
+								let PartialComponents { client, .. } =
+									tangle_service::babe::new_partial::<
+										tangle_mainnet_runtime::RuntimeApi,
+										tangle_service::TangleExecutor,
+									>(&mut config, &cli.eth)?;
 								// Create a client.
 								let c = Arc::new(tangle_service::client::Client::Tangle(
 									client.clone(),
@@ -375,10 +374,11 @@ pub fn run() -> sc_cli::Result<()> {
 						#[cfg(feature = "testnet")]
 						spec if spec.is_testnet() => {
 							return runner.sync_run(|mut config| {
-								let PartialComponents { client, .. } = tangle_service::aura::new_partial::<
-									tangle_testnet_runtime::RuntimeApi,
-									tangle_service::TestnetExecutor,
-								>(&mut config, &cli.eth)?;
+								let PartialComponents { client, .. } =
+									tangle_service::aura::new_partial::<
+										tangle_testnet_runtime::RuntimeApi,
+										tangle_service::TestnetExecutor,
+									>(&mut config, &cli.eth)?;
 								// Create a client.
 								let c = Arc::new(tangle_service::client::Client::Testnet(
 									client.clone(),
@@ -472,16 +472,13 @@ pub fn run() -> sc_cli::Result<()> {
 						tangle_service::aura::new_full::<
 							tangle_testnet_runtime::RuntimeApi,
 							tangle_service::TestnetExecutor,
-						>(tangle_service::aura::RunFullParams {
+						>(tangle_service::RunFullParams {
 							config,
 							rpc_config,
 							eth_config: cli.eth,
 							debug_output: cli.output_path,
-							#[cfg(feature = "relayer")]
-							relayer_cmd: cli.relayer_cmd,
-							#[cfg(feature = "light-client")]
-							light_client_relayer_cmd: cli.light_client_relayer_cmd,
 							auto_insert_keys: cli.auto_insert_keys,
+							disable_hardware_benchmarks: cli.no_hardware_benchmarks,
 						})
 						.map_err(Into::into)
 						.await

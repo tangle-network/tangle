@@ -5,10 +5,11 @@ use crate::{
 		FrontierPartialComponents, RpcConfig,
 	},
 	open_frontier_backend, FrontierBlockImport, FullBackend, FullClient, IdentifyVariant,
-	PartialComponentsResult, RuntimeApiCollection, TestnetExecutor,
+	PartialComponentsResult, RunFullParams, RuntimeApiCollection,
 };
 use fc_consensus::FrontierBlockImport as TFrontierBlockImport;
 use fc_db::DatabaseSource;
+use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 use futures::{channel::mpsc, FutureExt};
 use sc_chain_spec::ChainSpec;
 use sc_client_api::{AuxStore, Backend, BlockBackend, StateBackend, StorageProvider};
@@ -27,9 +28,28 @@ use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sp_core::U256;
 use tangle_primitives::Block;
 
+use sp_runtime::{traits::BlakeTwo256, Percent};
 use std::{path::Path, sync::Arc, time::Duration};
 
-use sp_runtime::{traits::BlakeTwo256, Percent};
+type PartialComponentsResult<RuntimeApi, Executor: sc_executor::NativeExecutionDispatch + 'static> =
+	Result<
+		PartialComponents<
+			FullClient<RuntimeApi, Executor>,
+			FullBackend,
+			FullSelectChain,
+			sc_consensus::DefaultImportQueue<Block>,
+			sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, Executor>>,
+			(
+				Option<Telemetry>,
+				BoxBlockImport,
+				GrandpaLinkHalf<FullClient<RuntimeApi, Executor>>,
+				FrontierBackend,
+				Arc<fc_rpc::OverrideHandle<Block>>,
+				Arc<StatementStore>,
+			),
+		>,
+		ServiceError,
+	>;
 
 pub const SOFT_DEADLINE_PERCENT: Percent = Percent::from_percent(100);
 
@@ -46,12 +66,12 @@ pub fn new_chain_ops(
 		#[cfg(feature = "testnet")]
 		spec if spec.is_testnet() => new_chain_ops_inner::<
 			tangle_testnet_runtime::RuntimeApi,
-			TestnetExecutor,
+			crate::TestnetExecutor,
 		>(config, eth_config),
 		#[cfg(feature = "tangle")]
 		spec if spec.is_tangle() => new_chain_ops_inner::<
 			tangle_mainnet_runtime::RuntimeApi,
-			TangleExecutor,
+			crate::TangleExecutor,
 		>(config, eth_config),
 		_ => panic!("invalid chain spec"),
 	}
@@ -177,6 +197,16 @@ where
 			compatibility_mode: Default::default(),
 		})?;
 
+	let statement_store = sc_statement_store::Store::new_shared(
+		&config.data_path,
+		Default::default(),
+		client.clone(),
+		keystore_container.local_keystore(),
+		config.prometheus_registry(),
+		&task_manager.spawn_handle(),
+	)
+	.map_err(|e| ServiceError::Other(format!("Statement store error: {:?}", e)))?;
+
 	Ok(sc_service::PartialComponents {
 		client,
 		backend,
@@ -191,21 +221,9 @@ where
 			grandpa_link,
 			frontier_backend,
 			overrides,
+			statement_store,
 		),
 	})
-}
-
-pub struct RunFullParams {
-	pub config: Configuration,
-	pub eth_config: EthConfiguration,
-	pub rpc_config: RpcConfig,
-	pub debug_output: Option<std::path::PathBuf>,
-	#[cfg(feature = "relayer")]
-	pub relayer_cmd: tangle_relayer_gadget_cli::RelayerCmd,
-	#[cfg(feature = "light-client")]
-	pub light_client_relayer_cmd:
-		pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
-	pub auto_insert_keys: bool,
 }
 
 /// Builds a new service for a full client.
@@ -215,11 +233,8 @@ pub async fn new_full<RuntimeApi, Executor>(
 		eth_config,
 		rpc_config,
 		debug_output: _,
-		#[cfg(feature = "relayer")]
-		relayer_cmd,
-		#[cfg(feature = "light-client")]
-		light_client_relayer_cmd,
 		auto_insert_keys,
+		disable_hardware_benchmarks,
 	}: RunFullParams,
 ) -> Result<TaskManager, ServiceError>
 where
@@ -228,6 +243,13 @@ where
 	RuntimeApi::RuntimeApi: RuntimeApiCollection,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,
 {
+	let hwbench = (!disable_hardware_benchmarks)
+		.then_some(config.database.path().map(|database_path| {
+			let _ = std::fs::create_dir_all(&database_path);
+			sc_sysinfo::gather_hwbench(Some(database_path))
+		}))
+		.flatten();
+
 	let sc_service::PartialComponents {
 		client,
 		backend,
@@ -329,9 +351,6 @@ where
 		);
 	}
 
-	// Channel for the rpc handler to communicate with the authorship task.
-	let (command_sink, _commands_stream) = mpsc::channel(1000);
-
 	// Sinks for pubsub notifications.
 	// Everytime a new subscription is created, a new mpsc channel is added to the sink pool.
 	// The MappingSyncWorker sends through the channel on block import and the subscription emits a
@@ -413,16 +432,34 @@ where
 	};
 
 	let rpc_builder = {
+		let justification_stream = grandpa_link.justification_stream();
+		let shared_authority_set = grandpa_link.shared_authority_set().clone();
+		let shared_voter_state = sc_consensus_grandpa::SharedVoterState::empty();
+		let shared_voter_state2 = shared_voter_state.clone();
+
+		let finality_proof_provider = sc_consensus_grandpa::FinalityProofProvider::new_for_service(
+			backend.clone(),
+			Some(shared_authority_set.clone()),
+		);
+
 		let client = client.clone();
 		let pool = transaction_pool.clone();
 		let pubsub_notification_sinks = pubsub_notification_sinks.clone();
+		let rpc_statement_store = statement_store.clone();
 		Box::new(move |deny_unsafe, subscription_task_executor| {
 			let deps = crate::rpc::FullDeps {
 				client: client.clone(),
 				pool: pool.clone(),
 				deny_unsafe,
-				command_sink: Some(command_sink.clone()),
 				eth: eth_rpc_params.clone(),
+				grandpa: crate::rpc::GrandpaDeps {
+					shared_voter_state: shared_voter_state.clone(),
+					shared_authority_set: shared_authority_set.clone(),
+					justification_stream: justification_stream.clone(),
+					subscription_executor,
+					finality_provider: finality_proof_provider.clone(),
+				},
+				statement_store: rpc_statement_store.clone(),
 			};
 			if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
 				crate::rpc::create_full(
@@ -456,49 +493,6 @@ where
 	)
 	.await;
 
-	if role.is_authority() {
-		// setup relayer gadget params
-		#[cfg(feature = "relayer")]
-		let relayer_params = tangle_relayer_gadget::RelayerParams {
-			local_keystore: keystore_container.local_keystore(),
-			config_dir: relayer_cmd.relayer_config_dir,
-			database_path: config
-				.database
-				.path()
-				.and_then(|path| path.parent())
-				.map(|p| p.to_path_buf()),
-			rpc_addr: config.rpc_addr,
-		};
-
-		// Start Webb Relayer Gadget as non-essential task.
-		#[cfg(feature = "relayer")]
-		task_manager.spawn_handle().spawn(
-			"relayer-gadget",
-			None,
-			tangle_relayer_gadget::start_relayer_gadget(
-				relayer_params,
-				sp_application_crypto::KeyTypeId(*b"role"),
-			),
-		);
-
-		// Start Eth2 Light client Relayer Gadget - (MAINNET RELAYER)
-		#[cfg(feature = "light-client")]
-		task_manager.spawn_handle().spawn(
-			"mainnet-relayer-gadget",
-			None,
-			pallet_eth2_light_client_relayer_gadget::start_gadget(
-				pallet_eth2_light_client_relayer_gadget::Eth2LightClientParams {
-					lc_relay_config_path: light_client_relayer_cmd
-						.light_client_relay_config_path
-						.clone(),
-					lc_init_config_path: light_client_relayer_cmd
-						.light_client_init_pallet_config_path
-						.clone(),
-					eth2_chain_id: webb_proposals::TypedChainId::Evm(1),
-				},
-			),
-		);
-	}
 	let params = sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),
@@ -514,6 +508,24 @@ where
 		telemetry: telemetry.as_mut(),
 	};
 	let _rpc_handlers = sc_service::spawn_tasks(params)?;
+
+	if let Some(hwbench) = hwbench {
+		sc_sysinfo::print_hwbench(&hwbench);
+		if !SUBSTRATE_REFERENCE_HARDWARE.check_hardware(&hwbench) && role.is_authority() {
+			log::warn!(
+				"⚠️  The hardware does not meet the minimal requirements for role 'Authority'."
+			);
+		}
+
+		if let Some(ref mut telemetry) = telemetry {
+			let telemetry_handle = telemetry.handle();
+			task_manager.spawn_handle().spawn(
+				"telemetry_hwbench",
+				None,
+				sc_sysinfo::initialize_hwbench_telemetry(telemetry_handle, hwbench),
+			);
+		}
+	}
 
 	if role.is_authority() {
 		let proposer_factory = sc_basic_authorship::ProposerFactory::new(

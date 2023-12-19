@@ -76,6 +76,7 @@ pallet-im-online = { workspace = true }
 pallet-transaction-payment = { workspace = true }
 pallet-transaction-payment-rpc = { workspace = true }
 sc-transaction-pool-api = { workspace = true }
+sc-storage-monitor = { workspace = true }
 wasmer = { version = "2.3" }
 
 # Frontier
@@ -107,7 +108,7 @@ tangle-testnet-runtime = { workspace = true }
 tangle-service = { workspace = true }
 
 [features]
-default = ["with-rocksdb-weights", "rocksdb", "sql", "testnet"]
+default = ["with-rocksdb-weights", "rocksdb", "sql"]
 runtime-benchmarks = ["tangle-mainnet-runtime/runtime-benchmarks"]
 integration-tests = ["tangle-mainnet-runtime/integration-tests"]
 with-rocksdb-weights = ["tangle-mainnet-runtime/with-rocksdb-weights"]
