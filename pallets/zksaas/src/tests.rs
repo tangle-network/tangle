@@ -16,6 +16,7 @@
 use crate::{mock::*, types::FeeInfo, FeeInfo as FeeInfoStorage};
 use ark_crypto_primitives::snark::{CircuitSpecificSetupSNARK, SNARK};
 use ark_groth16::Groth16;
+use ark_relations::r1cs::{ConstraintSynthesizer, ConstraintSystem};
 use ark_serialize::CanonicalSerialize;
 use ark_std::{
 	rand::{Rng, RngCore, SeedableRng},
@@ -84,6 +85,10 @@ fn proof_verification_works() {
 		// Create an instance of our circuit (with the
 		// witness)
 		let c = mimc::MiMCDemo { xl: Some(xl), xr: Some(xr), constants: &constants };
+		let cs = ConstraintSystem::<F>::new_ref();
+		c.clone().generate_constraints(cs.clone()).unwrap();
+		let num_inputs = cs.num_instance_variables();
+		let num_constraints = cs.num_constraints();
 
 		// Create a groth16 proof with our parameters.
 		let proof = Groth16::<E>::prove(&pk, c, &mut rng).unwrap();
@@ -98,6 +103,8 @@ fn proof_verification_works() {
 			participants: vec![1, 2, 3, 4, 5, 6, 7, 8],
 			system: ZkSaaSSystem::Groth16(Groth16System {
 				circuit: HyperData::Raw(vec![]),
+				num_inputs: num_inputs as _,
+				num_constraints: num_constraints as _,
 				proving_key: HyperData::Raw(pk_bytes),
 				verifying_key: vk_bytes,
 				wasm: HyperData::Raw(vec![]),
@@ -110,7 +117,7 @@ fn proof_verification_works() {
 			request: ZkSaaSPhaseTwoRequest::Groth16(Groth16ProveRequest {
 				public_input: from_field_elements(&[image]).unwrap(),
 				a_shares: Default::default(),
-				ax: Default::default(),
+				ax_shares: Default::default(),
 				qap_shares: Default::default(),
 			}),
 		});
@@ -189,6 +196,7 @@ mod mimc {
 
 	/// This is our demo circuit for proving knowledge of the
 	/// preimage of a MiMC hash invocation.
+	#[derive(Clone)]
 	pub struct MiMCDemo<'a, F: Field> {
 		pub xl: Option<F>,
 		pub xr: Option<F>,

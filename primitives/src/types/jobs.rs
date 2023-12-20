@@ -105,6 +105,10 @@ pub enum ZkSaaSSystem {
 pub struct Groth16System {
 	/// R1CS circuit file.
 	pub circuit: HyperData,
+	/// Number of inputs
+	pub num_inputs: u64,
+	/// Number of constraints
+	pub num_constraints: u64,
 	/// Proving key file.
 	pub proving_key: HyperData,
 	/// Verifying key bytes
@@ -134,7 +138,7 @@ pub struct Groth16ProveRequest {
 	/// `ax` is the auxiliary input
 	/// ax = full_assginment[num_inputs..]
 	/// Each element contains a PSS of the auxiliary input
-	pub ax: Vec<HyperData>,
+	pub ax_shares: Vec<HyperData>,
 	/// PSS of the QAP polynomials
 	pub qap_shares: Vec<QAPShare>,
 }
@@ -379,6 +383,21 @@ pub struct RpcResponseJobsData<AccountId> {
 
 	/// previous phase key if any
 	pub key: Option<Vec<u8>>,
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct RpcResponsePhaseOneResult<AccountId> {
+	/// The owner's account ID.
+	pub owner: AccountId,
+	/// The type of the job result.
+	pub result: Vec<u8>,
+	/// permitted caller to use this result
+	pub permitted_caller: Option<AccountId>,
+	/// Key type if applicable
+	pub key_type: Option<DkgKeyType>,
+	/// The type of the job submission.
+	pub job_type: JobType<AccountId>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
