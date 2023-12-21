@@ -1,13 +1,13 @@
 [package]
-name = "tangle-standalone"
+name = "tangle"
+build = "build.rs"
+description = "Tangle Standalone chain node"
 version = { workspace = true }
 authors = { workspace = true }
-build = "build.rs"
 edition = { workspace = true }
-homepage = { workspace = true }
 license = { workspace = true }
+homepage = { workspace = true }
 repository = { workspace = true }
-description = "A fresh FRAME-based Substrate node, ready for hacking."
 
 [package.metadata.wasm-pack.profile.release]
 # `wasm-opt` has some problems on linux, see
@@ -15,7 +15,7 @@ description = "A fresh FRAME-based Substrate node, ready for hacking."
 wasm-opt = false
 
 [[bin]]
-name = "tangle-standalone"
+name = "tangle"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -24,60 +24,52 @@ targets = ["x86_64-unknown-linux-gnu"]
 substrate-build-script-utils = { workspace = true }
 
 [dependencies]
+serde_json = { workspace = true }
+tokio = { workspace = true }
 clap = { workspace = true }
+parity-scale-codec = { workspace = true }
 futures = { workspace = true }
 hex-literal = { workspace = true }
 log = { workspace = true }
-parity-scale-codec = { workspace = true }
 rand = { workspace = true }
-serde_json = { workspace = true }
-tokio = { workspace = true }
-
-# Light client dependencies
-pallet-eth2-light-client-relayer-gadget = { workspace = true, optional = true }
-pallet-eth2-light-client-relayer-gadget-cli = { workspace = true, optional = true }
-webb-consensus-types = { workspace = true }
-webb-proposals = { workspace = true }
-
-tangle-relayer-gadget = { workspace = true, optional = true }
-tangle-relayer-gadget-cli = { workspace = true, optional = true }
 
 # Substrate dependencies
+sc-cli = { workspace = true }
+sc-executor = { workspace = true }
+sc-offchain = { workspace = true }
+sc-keystore = { workspace = true }
+sc-service = { workspace = true }
+sp-core = { workspace = true }
 frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 frame-system = { workspace = true }
 sc-basic-authorship = { workspace = true }
-sc-cli = { workspace = true }
 sc-client-api = { workspace = true }
 sc-consensus = { workspace = true }
-sc-consensus-aura = { workspace = true }
-sc-consensus-grandpa = { workspace = true }
-sc-executor = { workspace = true }
-sc-keystore = { workspace = true }
+sc-consensus-babe = { workspace = true }
 sc-network = { workspace = true }
-sc-network-sync = { workspace = true }
-sc-offchain = { workspace = true }
-sc-service = { workspace = true }
 sc-telemetry = { workspace = true }
 sc-transaction-pool = { workspace = true }
-sp-consensus-aura = { workspace = true }
-sp-core = { workspace = true }
+sp-consensus-babe = { workspace = true }
 sp-inherents = { workspace = true }
 sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }
 sp-trie = { workspace = true }
+sc-consensus-grandpa = { workspace = true }
+sc-network-sync = { workspace = true }
+webb-consensus-types = { workspace = true }
+webb-proposals = { workspace = true }
 
 sc-chain-spec = { workspace = true }
-sc-consensus-manual-seal = { workspace = true }
 sc-rpc = { workspace = true }
 sc-rpc-api = { workspace = true }
-sp-application-crypto = { workspace = true }
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
 sp-timestamp = { workspace = true }
-substrate-frame-rpc-system = { workspace = true }
 substrate-prometheus-endpoint = { workspace = true }
+substrate-frame-rpc-system = { workspace = true }
+sc-consensus-manual-seal = { workspace = true }
 
 # RPC related dependencies
 jsonrpsee = { workspace = true }
@@ -88,7 +80,6 @@ sc-transaction-pool-api = { workspace = true }
 wasmer = { version = "2.3" }
 
 # Frontier
-fc-api = { workspace = true }
 fc-cli = { workspace = true }
 fc-consensus = { workspace = true }
 fc-db = { workspace = true }
@@ -97,44 +88,52 @@ fc-rpc = { workspace = true, features = ["rpc-binary-search-estimate"] }
 fc-rpc-core = { workspace = true }
 fc-storage = { workspace = true }
 fp-account = { workspace = true }
+fc-api = { workspace = true }
 fp-dynamic-fee = { workspace = true, features = ["default"] }
 fp-evm = { workspace = true, features = ["default"] }
 fp-rpc = { workspace = true, features = ["default"] }
-hex = { workspace = true }
-sp-keystore = { workspace = true }
 
-primitives-ext = { workspace = true }
+rpc-trace = { workspace = true }
 rpc-debug = { workspace = true }
+rpc-txpool = { workspace = true }
 rpc-primitives-debug = { workspace = true }
 rpc-primitives-txpool = { workspace = true }
-rpc-trace = { workspace = true }
-rpc-txpool = { workspace = true }
-
-tangle-mainnet-runtime = { workspace = true }
+primitives-ext = { workspace = true }
+sp-transaction-storage-proof = { workspace = true }
+sc-statement-store = { workspace = true }
+sp-statement-store = { workspace = true }
+sc-consensus-slots = { workspace = true }
+sp-consensus = { workspace = true }
+sp-keystore = { workspace = true }
+sc-consensus-babe-rpc = { workspace = true }
+sc-consensus-grandpa-rpc = { workspace = true }
+mmr-rpc = { workspace = true }
+sc-rpc-spec-v2 = { workspace = true }
+substrate-state-trie-migration-rpc = { workspace = true }
+sc-sync-state-rpc = { workspace = true }
+sc-sysinfo = { workspace = true }
+sc-authority-discovery = { workspace = true }
+sc-storage-monitor = { workspace = true }
+sc-network-statement = { workspace = true }
+sc-network-common = { workspace = true }
+frame-system-rpc-runtime-api = { workspace = true }
+tangle-testnet-runtime = { workspace = true, optional = true }
+tangle-runtime = { workspace = true }
 tangle-primitives = { workspace = true }
-tangle-testnet-runtime = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
 runtime-benchmarks = ["tangle-testnet-runtime/runtime-benchmarks"]
-integration-tests = ["tangle-testnet-runtime/integration-tests"]
 with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-testnet-runtime/with-paritydb-weights"]
 rocksdb = [
-  "sc-cli/rocksdb",
-  "sc-service/rocksdb",
-  "fc-cli/rocksdb",
-  "fc-db/rocksdb",
-  "fc-mapping-sync/rocksdb",
-  "fc-rpc/rocksdb",
+ "sc-cli/rocksdb",
+ "sc-service/rocksdb",
+ "fc-cli/rocksdb",
+ "fc-db/rocksdb",
+ "fc-mapping-sync/rocksdb",
+ "fc-rpc/rocksdb",
 ]
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]
+testnet = ["tangle-testnet-runtime"]
 txpool = ["fc-rpc/txpool"]
-light-client = [
-  "pallet-eth2-light-client-relayer-gadget",
-  "pallet-eth2-light-client-relayer-gadget-cli",
-]
-relayer = [
-  "tangle-relayer-gadget",
-  "tangle-relayer-gadget-cli",
-]

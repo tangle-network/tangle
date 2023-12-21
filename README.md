@@ -70,7 +70,7 @@ If you want to use Nix for development, please follow following instructions
 
 <h2 id="standalone"> Run Standalone Local Testnet </h2>
 
-1. Build `tangle-standalone` node.
+1. Build `tangle` node.
 ```bash
   cargo build --release 
 ```

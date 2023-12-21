@@ -1,5 +1,5 @@
 [package]
-name = "tangle-mainnet-runtime"
+name = "tangle-runtime"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }
@@ -28,7 +28,7 @@ pallet-airdrop-claims = { workspace = true }
 # Substrate dependencies
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
-sp-consensus-aura = { workspace = true }
+sp-consensus-babe = { workspace = true }
 sp-core = { workspace = true }
 sp-inherents = { workspace = true }
 sp-io = { workspace = true }
@@ -48,7 +48,7 @@ frame-system = { workspace = true }
 frame-system-benchmarking = { workspace = true, optional = true }
 frame-system-rpc-runtime-api = { workspace = true }
 
-pallet-aura = { workspace = true }
+pallet-babe = { workspace = true }
 pallet-bags-list = { workspace = true }
 pallet-session = { workspace = true }
 
@@ -162,14 +162,14 @@ std = [
   "sp-block-builder/std",
   "sp-transaction-pool/std",
   "sp-inherents/std",
-  "sp-consensus-aura/std",
+  "sp-consensus-babe/std",
   "frame-support/std",
   "frame-executive/std",
   "frame-system/std",
   "frame-system-rpc-runtime-api/std",
   "frame-election-provider-support/std",
   "pallet-authorship/std",
-  "pallet-aura/std",
+  "pallet-babe/std",
   "pallet-bags-list/std",
   "pallet-bounties/std",
   "pallet-child-bounties/std",

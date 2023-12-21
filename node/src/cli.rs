@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#![allow(clippy::all, deprecated)]
+#![allow(clippy::all)]
 use sc_cli::RunCmd;
 
 use crate::service::EthConfiguration;
@@ -30,18 +30,6 @@ pub struct Cli {
 
 	#[command(flatten)]
 	pub eth: EthConfiguration,
-
-	#[cfg(feature = "relayer")]
-	#[clap(flatten)]
-	pub relayer_cmd: tangle_relayer_gadget_cli::RelayerCmd,
-
-	#[cfg(feature = "light-client")]
-	#[clap(flatten)]
-	pub light_client_relayer_cmd:
-		pallet_eth2_light_client_relayer_gadget_cli::LightClientRelayerCmd,
-
-	#[clap(short, long)]
-	pub auto_insert_keys: bool,
 }
 
 #[derive(Debug, clap::Subcommand)]

@@ -17,7 +17,7 @@ use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_network::config::MultiaddrWithPeerId;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::crypto::UncheckedInto;
 use tangle_testnet_runtime::AccountId;
 
@@ -28,7 +28,7 @@ pub fn get_testnet_root_key() -> AccountId {
 }
 
 /// Standalone alpha bootnodes
-pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
+pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
 		"/ip4/3.22.222.30/tcp/30333/p2p/12D3KooWRdvZ3PRteq8DC78Z3z5ZiehipKrKhHDRpgvCjc8XSeQx"
 			.parse()
@@ -49,8 +49,7 @@ pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 }
 
 /// Standalone initial authorities
-pub fn get_standalone_initial_authorities(
-) -> Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId)> {
+pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)> {
 	vec![
 		// standalone 1
 		(

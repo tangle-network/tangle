@@ -46,7 +46,7 @@ cd "$PROJECT_ROOT"
 
 echo "*** Start Tangle Testnet ***"
 # Alice 
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --alice \
+./target/release/tangle --tmp --chain local --validator -lerror --alice \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[0]} \
   --rpc-port 9944 \
@@ -56,7 +56,7 @@ echo "*** Start Tangle Testnet ***"
   --auto-insert-keys \
   --node-key 0000000000000000000000000000000000000000000000000000000000000001 &
 # Bob
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --bob \
+./target/release/tangle --tmp --chain local --validator -lerror --bob \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[1]} \
   --rpc-port 9945 \
@@ -64,7 +64,7 @@ echo "*** Start Tangle Testnet ***"
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Charlie
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --charlie \
+./target/release/tangle --tmp --chain local --validator -lerror --charlie \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[1]} \
   --rpc-port 9946 \
@@ -72,7 +72,7 @@ echo "*** Start Tangle Testnet ***"
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Dave
-./target/release/tangle-standalone --tmp --chain local --validator -lerror --dave \
+./target/release/tangle --tmp --chain local --validator -lerror --dave \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[1]} \
   --rpc-port 9947 \
@@ -80,7 +80,7 @@ echo "*** Start Tangle Testnet ***"
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Eve
-./target/release/tangle-standalone --tmp --chain local --validator -linfo --eve \
+./target/release/tangle --tmp --chain local --validator -linfo --eve \
     --rpc-cors all --rpc-methods=unsafe --rpc-external \
     --port ${ports[2]} \
     --rpc-port 9948 \

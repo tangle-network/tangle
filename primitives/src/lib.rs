@@ -22,7 +22,6 @@ use frame_support::{
 };
 use smallvec::smallvec;
 use sp_runtime::{
-	generic,
 	traits::{BlakeTwo256, IdentifyAccount, Verify},
 	MultiAddress, MultiSignature, Perbill,
 };
@@ -57,6 +56,18 @@ pub mod time {
 	pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 	pub const HOURS: BlockNumber = MINUTES * 60;
 	pub const DAYS: BlockNumber = HOURS * 24;
+
+	// 1 in 4 blocks (on average, not counting collisions) will be primary BABE blocks.
+	pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
+
+	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
+	//       Attempting to do so will brick block production.
+	pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 10 * MINUTES;
+	pub const EPOCH_DURATION_IN_SLOTS: u64 = {
+		const SLOT_FILL_RATE: f64 = MILLISECS_PER_BLOCK as f64 / SLOT_DURATION as f64;
+
+		(EPOCH_DURATION_IN_BLOCKS as f64 * SLOT_FILL_RATE) as u64
+	};
 }
 
 /// Money matters.
@@ -165,4 +176,4 @@ pub const MAX_POV_SIZE: u32 = 5 * 1024 * 1024;
 pub const MAXIMUM_BLOCK_WEIGHT: Weight =
 	Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND, MAX_POV_SIZE as u64);
 
-pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+pub use sp_consensus_babe::AuthorityId as BabeId;

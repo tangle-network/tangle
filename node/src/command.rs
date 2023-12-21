@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::{
-	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder},
 	chainspec,
 	cli::{Cli, Subcommand},
 	service,
 };
-use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
+use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use futures::TryFutureExt;
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
-use sp_keyring::Sr25519Keyring;
-use tangle_testnet_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use tangle_primitives::Block;
 
 trait IdentifyChain {
 	fn is_mainnet(&self) -> bool;
@@ -49,7 +47,7 @@ impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Tangle Standalone Substrate Node".into()
+		"Tangle Substrate Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -74,11 +72,10 @@ impl SubstrateCli for Cli {
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
 		Ok(match id {
-			"" | "local" => Box::new(chainspec::testnet::local_testnet_config(4006)?),
+			"" | "dev" | "local" => Box::new(chainspec::testnet::local_testnet_config(4006)?),
 			// generates the spec for testnet
 			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(4006)?),
 			// generates the spec for mainnet
-			"mainnet-local" => Box::new(chainspec::mainnet::local_testnet_config(4006)?),
 			"mainnet" => Box::new(chainspec::mainnet::tangle_mainnet_config(4006)?),
 			"tangle-testnet" => Box::new(chainspec::testnet::ChainSpec::from_json_bytes(
 				&include_bytes!("../../chainspecs/testnet/tangle-standalone.json")[..],
@@ -186,34 +183,8 @@ pub fn run() -> sc_cli::Result<()> {
 
 						cmd.run(config, client, db, storage)
 					},
-					BenchmarkCmd::Overhead(cmd) => {
-						let PartialComponents { client, .. } =
-							service::new_partial(&config, &cli.eth)?;
-						let ext_builder = RemarkBuilder::new(client.clone());
-
-						cmd.run(
-							config,
-							client,
-							inherent_benchmark_data()?,
-							Vec::new(),
-							&ext_builder,
-						)
-					},
-					BenchmarkCmd::Extrinsic(cmd) => {
-						let PartialComponents { client, .. } =
-							service::new_partial(&config, &cli.eth)?;
-						// Register the *Remark* and *TKA* builders.
-						let ext_factory = ExtrinsicFactory(vec![
-							Box::new(RemarkBuilder::new(client.clone())),
-							Box::new(TransferKeepAliveBuilder::new(
-								client.clone(),
-								Sr25519Keyring::Alice.to_account_id(),
-								EXISTENTIAL_DEPOSIT,
-							)),
-						]);
-
-						cmd.run(client, inherent_benchmark_data()?, Vec::new(), &ext_factory)
-					},
+					BenchmarkCmd::Overhead(_cmd) => Err("Unsupported benchmarking command".into()),
+					BenchmarkCmd::Extrinsic(_cmd) => Err("Unsupported benchmarking command".into()),
 					BenchmarkCmd::Machine(cmd) =>
 						cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),
 				}
@@ -272,11 +243,6 @@ pub fn run() -> sc_cli::Result<()> {
 					rpc_config,
 					eth_config: cli.eth,
 					debug_output: cli.output_path,
-					#[cfg(feature = "relayer")]
-					relayer_cmd: cli.relayer_cmd,
-					#[cfg(feature = "light-client")]
-					light_client_relayer_cmd: cli.light_client_relayer_cmd,
-					auto_insert_keys: cli.auto_insert_keys,
 				})
 				.map_err(Into::into)
 				.await

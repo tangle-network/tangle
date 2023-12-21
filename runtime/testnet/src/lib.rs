@@ -43,7 +43,7 @@ pub use pallet_staking::StakerStatus;
 use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use parity_scale_codec::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
@@ -61,22 +61,11 @@ use sp_runtime::{
 	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill,
 	SaturatedConversion,
 };
-use sp_staking::{
-	currency_to_vote::U128CurrencyToVote,
-	offence::{OffenceError, ReportOffence},
-	SessionIndex,
-};
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-use tangle_primitives::{
-	jobs::{JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType},
-	roles::ValidatorRewardDistribution,
-	traits::jobs::{JobToFee, MPCHandler},
-	verifier::{arkworks::ArkworksVerifierGroth16Bn254, circom::CircomVerifierGroth16Bn254},
-};
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -84,7 +73,7 @@ pub use frame_system::Call as SystemCall;
 pub use frame_support::{
 	construct_runtime,
 	dispatch::DispatchClass,
-	pallet_prelude::{Get, RuntimeDebug},
+	pallet_prelude::Get,
 	parameter_types,
 	traits::{
 		ConstU128, ConstU16, ConstU32, Currency, EitherOfDiverse, EqualPrivilegeOnly, Everything,
@@ -105,28 +94,46 @@ use sp_runtime::generic::Era;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
-use tangle_primitives::AuraId;
-pub use tangle_primitives::{
-	currency::*, fee::*, time::*, AccountId, AccountIndex, Address, Balance, BlockNumber, Hash,
-	Header, Index, Moment, Reputation, Signature, AVERAGE_ON_INITIALIZE_RATIO,
-	EPOCH_DURATION_IN_BLOCKS, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS,
-	UNSIGNED_PROPOSAL_EXPIRY,
+use sp_staking::{
+	currency_to_vote::U128CurrencyToVote,
+	offence::{OffenceError, ReportOffence},
+	SessionIndex,
 };
+pub use tangle_primitives::{
+	currency::*,
+	fee::*,
+	jobs::{JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType},
+	roles::ValidatorRewardDistribution,
+	time::*,
+	traits::jobs::{JobToFee, MPCHandler},
+	verifier::{arkworks::ArkworksVerifierGroth16Bn254, circom::CircomVerifierGroth16Bn254},
+	AccountId, AccountIndex, Address, BabeId, Balance, BlockNumber, Hash, Header, Index, Moment,
+	Signature, AVERAGE_ON_INITIALIZE_RATIO, EPOCH_DURATION_IN_BLOCKS, MAXIMUM_BLOCK_WEIGHT,
+	NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS, UNSIGNED_PROPOSAL_EXPIRY,
+};
+
+use pallet_airdrop_claims::TestWeightInfo;
 
 // Frontier
 use fp_rpc::TransactionStatus;
 use pallet_ethereum::{Call::transact, Transaction as EthereumTransaction};
-use pallet_evm::{Account as EVMAccount, FeeCalculator, Runner};
-
+use pallet_evm::{Account as EVMAccount, FeeCalculator, HashedAddressMapping, Runner};
 pub type Nonce = u32;
+
+/// The BABE epoch configuration at genesis.
+pub const BABE_GENESIS_EPOCH_CONFIG: sp_consensus_babe::BabeEpochConfiguration =
+	sp_consensus_babe::BabeEpochConfiguration {
+		c: PRIMARY_PROBABILITY,
+		allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
+	};
 
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("tangle-standalone"),
-	impl_name: create_runtime_str!("tangle-standalone"),
+	spec_name: create_runtime_str!("tangle-testnet"),
+	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 501, // v0.5.1
+	spec_version: 1000, // v1.0.00
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -174,7 +181,7 @@ pub mod opaque {
 
 	impl_opaque_keys! {
 		pub struct SessionKeys {
-			pub aura: Aura,
+			pub babe: Babe,
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
 		}
@@ -226,7 +233,7 @@ parameter_types! {
 impl pallet_timestamp::Config for Runtime {
 	/// A timestamp: milliseconds since the unix epoch.
 	type Moment = u64;
-	type OnTimestampSet = ();
+	type OnTimestampSet = Babe;
 	type MinimumPeriod = MinimumPeriod;
 	type WeightInfo = ();
 }
@@ -319,87 +326,6 @@ impl pallet_preimage::Config for Runtime {
 	type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
 }
 
-parameter_types! {
-	// One storage item; key size 32, value size 8; .
-	pub const ProxyDepositBase: Balance = deposit(1, 8);
-	// Additional storage item size of 33 bytes.
-	pub const ProxyDepositFactor: Balance = deposit(0, 33);
-	pub const AnnouncementDepositBase: Balance = deposit(1, 8);
-	pub const AnnouncementDepositFactor: Balance = deposit(0, 66);
-}
-
-// The type used to represent the kinds of proxying allowed.
-#[derive(
-	Copy,
-	Clone,
-	Eq,
-	PartialEq,
-	Ord,
-	PartialOrd,
-	Encode,
-	Decode,
-	RuntimeDebug,
-	MaxEncodedLen,
-	scale_info::TypeInfo,
-)]
-pub enum ProxyType {
-	Any,
-	NonTransfer,
-	Governance,
-	Staking,
-}
-impl Default for ProxyType {
-	fn default() -> Self {
-		Self::Any
-	}
-}
-impl InstanceFilter<RuntimeCall> for ProxyType {
-	fn filter(&self, c: &RuntimeCall) -> bool {
-		match self {
-			ProxyType::Any => true,
-			ProxyType::NonTransfer => !matches!(
-				c,
-				RuntimeCall::Balances(..) |
-					RuntimeCall::Vesting(pallet_vesting::Call::vested_transfer { .. })
-			),
-			ProxyType::Governance => matches!(
-				c,
-				RuntimeCall::Democracy(..) |
-					RuntimeCall::Council(..) |
-					RuntimeCall::Elections(..) |
-					RuntimeCall::Treasury(..)
-			),
-			ProxyType::Staking => {
-				matches!(c, RuntimeCall::Staking(..))
-			},
-		}
-	}
-	fn is_superset(&self, o: &Self) -> bool {
-		match (self, o) {
-			(x, y) if x == y => true,
-			(ProxyType::Any, _) => true,
-			(_, ProxyType::Any) => false,
-			(ProxyType::NonTransfer, _) => true,
-			_ => false,
-		}
-	}
-}
-
-impl pallet_proxy::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type RuntimeCall = RuntimeCall;
-	type Currency = Balances;
-	type ProxyType = ProxyType;
-	type ProxyDepositBase = ProxyDepositBase;
-	type ProxyDepositFactor = ProxyDepositFactor;
-	type MaxProxies = ConstU32<32>;
-	type WeightInfo = pallet_proxy::weights::SubstrateWeight<Runtime>;
-	type MaxPending = ConstU32<32>;
-	type CallHasher = BlakeTwo256;
-	type AnnouncementDepositBase = AnnouncementDepositBase;
-	type AnnouncementDepositFactor = AnnouncementDepositFactor;
-}
-
 impl pallet_randomness_collective_flip::Config for Runtime {}
 
 impl pallet_sudo::Config for Runtime {
@@ -409,22 +335,28 @@ impl pallet_sudo::Config for Runtime {
 }
 
 parameter_types! {
-	#[derive(Serialize, Deserialize)]
-	pub const MaxAuthorities: u32 = 1000;
-	#[derive(Serialize, Deserialize)]
-	pub const MaxProposalLength: u32 = 1000;
-}
-
-impl pallet_aura::Config for Runtime {
-	type AuthorityId = AuraId;
-	type DisabledValidators = ();
-	type MaxAuthorities = MaxAuthorities;
-	type AllowMultipleBlocksPerSlot = frame_support::traits::ConstBool<false>;
-}
-
-parameter_types! {
+	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
+	//       Attempting to do so will brick block production.
+	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS;
+	pub const ExpectedBlockTime: Moment = MILLISECS_PER_BLOCK;
 	pub const ReportLongevity: u64 =
-		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * Period::get();
+		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
+	pub const MaxAuthorities: u32 = 1000;
+	pub const MaxNominators: u32 = 1000;
+}
+
+impl pallet_babe::Config for Runtime {
+	type EpochDuration = EpochDuration;
+	type ExpectedBlockTime = ExpectedBlockTime;
+	type EpochChangeTrigger = pallet_babe::ExternalTrigger;
+	type DisabledValidators = Session;
+	type WeightInfo = ();
+	type MaxAuthorities = MaxAuthorities;
+	type MaxNominators = MaxNominatorRewardedPerValidator;
+	type KeyOwnerProof =
+		<Historical as KeyOwnerProofSystem<(KeyTypeId, pallet_babe::AuthorityId)>>::Proof;
+	type EquivocationReportSystem =
+		pallet_babe::EquivocationReportSystem<Self, Offences, Historical, ReportLongevity>;
 }
 
 impl pallet_grandpa::Config for Runtime {
@@ -443,7 +375,7 @@ parameter_types! {
 
 impl pallet_authorship::Config for Runtime {
 	type EventHandler = Staking;
-	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
+	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
 }
 
 parameter_types! {
@@ -1087,6 +1019,20 @@ impl pallet_eth2_light_client::Config for Runtime {
 }
 
 parameter_types! {
+	pub Prefix: &'static [u8] = b"Claim TNTs to the account:";
+}
+
+impl pallet_airdrop_claims::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type VestingSchedule = Vesting;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+	type Prefix = Prefix;
+	type MoveClaimOrigin = frame_system::EnsureRoot<AccountId>;
+	type WeightInfo = TestWeightInfo;
+}
+
+parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
 }
 
@@ -1166,7 +1112,7 @@ impl pallet_roles::Config for Runtime {
 	type MaxRolesPerAccount = ConstU32<2>;
 	type MPCHandler = MockMPCHandler;
 	type InflationRewardPerSession = InflationRewardPerSession;
-	type AuthorityId = AuraId;
+	type AuthorityId = BabeId;
 	type ValidatorSet = Historical;
 	type ReportOffences = OffenceHandler;
 	type ValidatorRewardDistribution = Reward;
@@ -1203,28 +1149,6 @@ impl Contains<RuntimeCall> for BaseFilter {
 			// no paused call
 			return false
 		}
-		// Following staking pallet calls will be blocked and will be allowed to execute
-		// through role pallet.
-		let is_stake_unbound_call =
-			matches!(call, RuntimeCall::Staking(pallet_staking::Call::unbond { .. }));
-
-		if is_stake_unbound_call {
-			// no unbond call
-			return false
-		}
-
-		// no chill call
-		if matches!(call, RuntimeCall::Staking(pallet_staking::Call::chill { .. })) {
-			return false
-		}
-
-		// no withdraw_unbonded call
-		let is_stake_withdraw_call =
-			matches!(call, RuntimeCall::Staking(pallet_staking::Call::withdraw_unbonded { .. }));
-
-		if is_stake_withdraw_call {
-			return false
-		}
 
 		let democracy_related = matches!(
 			call,
@@ -1256,7 +1180,7 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment,
 
 		Authorship: pallet_authorship,
-		Aura: pallet_aura,
+		Babe: pallet_babe,
 		Grandpa: pallet_grandpa,
 
 		Indices: pallet_indices,
@@ -1277,7 +1201,6 @@ construct_runtime!(
 
 		Scheduler: pallet_scheduler,
 		Preimage: pallet_preimage,
-		Proxy: pallet_proxy,
 		Offences: pallet_offences,
 
 		TransactionPause: pallet_transaction_pause,
@@ -1291,8 +1214,9 @@ construct_runtime!(
 		DynamicFee: pallet_dynamic_fee,
 		BaseFee: pallet_base_fee,
 		HotfixSufficients: pallet_hotfix_sufficients,
-		Eth2Client: pallet_eth2_light_client,
 
+		Claims: pallet_airdrop_claims,
+		Eth2Client: pallet_eth2_light_client,
 		Roles: pallet_roles,
 		Jobs: pallet_jobs,
 		Dkg: pallet_dkg,
@@ -1738,13 +1662,52 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
-		fn slot_duration() -> sp_consensus_aura::SlotDuration {
-			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
+	impl sp_consensus_babe::BabeApi<Block> for Runtime {
+		fn configuration() -> sp_consensus_babe::BabeConfiguration {
+			let epoch_config = Babe::epoch_config().unwrap_or(BABE_GENESIS_EPOCH_CONFIG);
+			sp_consensus_babe::BabeConfiguration {
+				slot_duration: Babe::slot_duration(),
+				epoch_length: EpochDuration::get(),
+				c: epoch_config.c,
+				authorities: Babe::authorities().to_vec(),
+				randomness: Babe::randomness(),
+				allowed_slots: epoch_config.allowed_slots,
+			}
 		}
 
-		fn authorities() -> Vec<AuraId> {
-			Aura::authorities().into_inner()
+		fn current_epoch_start() -> sp_consensus_babe::Slot {
+			Babe::current_epoch_start()
+		}
+
+		fn current_epoch() -> sp_consensus_babe::Epoch {
+			Babe::current_epoch()
+		}
+
+		fn next_epoch() -> sp_consensus_babe::Epoch {
+			Babe::next_epoch()
+		}
+
+		fn generate_key_ownership_proof(
+			_slot: sp_consensus_babe::Slot,
+			authority_id: sp_consensus_babe::AuthorityId,
+		) -> Option<sp_consensus_babe::OpaqueKeyOwnershipProof> {
+			use parity_scale_codec::Encode;
+
+			Historical::prove((sp_consensus_babe::KEY_TYPE, authority_id))
+				.map(|p| p.encode())
+				.map(sp_consensus_babe::OpaqueKeyOwnershipProof::new)
+		}
+
+		fn submit_report_equivocation_unsigned_extrinsic(
+			equivocation_proof: sp_consensus_babe::EquivocationProof<<Block as BlockT>::Header>,
+			key_owner_proof: sp_consensus_babe::OpaqueKeyOwnershipProof,
+		) -> Option<()> {
+			let key_owner_proof = key_owner_proof.decode()?;
+
+			Babe::submit_unsigned_equivocation_report(
+				equivocation_proof,
+				key_owner_proof,
+			)
 		}
 	}
 
