@@ -136,3 +136,4 @@ rocksdb = [
 ]
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]
 testnet = ["tangle-testnet-runtime"]
+txpool = ["fc-rpc/txpool"]

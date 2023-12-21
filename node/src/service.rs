@@ -617,6 +617,7 @@ pub async fn new_full(
 	Ok(task_manager)
 }
 
+#[allow(clippy::type_complexity)]
 pub fn new_chain_ops(
 	config: &mut Configuration,
 	eth_config: &EthConfiguration,
