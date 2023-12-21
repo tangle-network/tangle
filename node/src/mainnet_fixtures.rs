@@ -28,7 +28,7 @@ pub fn get_root_key() -> AccountId {
 }
 
 /// Mainnet bootnodes
-pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
+pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
 		"/ip4/3.22.222.30/tcp/30333/p2p/12D3KooWRdvZ3PRteq8DC78Z3z5ZiehipKrKhHDRpgvCjc8XSeQx"
 			.parse()
@@ -49,8 +49,7 @@ pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 }
 
 /// Standalone initial authorities
-pub fn get_standalone_initial_authorities(
-) -> Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)> {
+pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)> {
 	vec![
 		// standalone 1
 		(

@@ -15,9 +15,7 @@ use std::collections::BTreeMap;
 
 use crate::{
 	distributions::{combine_distributions, develop, testnet},
-	testnet_fixtures::{
-		get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
-	},
+	testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key},
 };
 use core::marker::PhantomData;
 use hex_literal::hex;
@@ -28,7 +26,7 @@ use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_testnet_runtime::{
-	AccountId, Balance, BalancesConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
+	AccountId, BabeConfig, Balance, BalancesConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
 	Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig,
 	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
 };
@@ -146,7 +144,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 
 pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
-	let boot_nodes = get_standalone_bootnodes();
+	let boot_nodes = get_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
@@ -160,7 +158,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 			testnet_genesis(
 				wasm_binary,
 				// Initial PoA authorities
-				get_standalone_initial_authorities(),
+				get_initial_authorities(),
 				// initial nominators
 				vec![],
 				// Sudo account
@@ -301,7 +299,10 @@ fn testnet_genesis(
 				.collect(),
 		},
 		treasury: Default::default(),
-		babe: Default::default(),
+		babe: BabeConfig {
+			epoch_config: Some(tangle_testnet_runtime::BABE_GENESIS_EPOCH_CONFIG),
+			..Default::default()
+		},
 		grandpa: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
 		nomination_pools: Default::default(),

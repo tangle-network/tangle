@@ -117,15 +117,13 @@ where
 	SC: SelectChain<Block> + 'static,
 	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
 	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::BlakeTwo256>,
+	CIDP: sp_inherents::CreateInherentDataProviders<Block, ()> + Send + Sync + 'static,
 {
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
 	use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
 	use sc_consensus_manual_seal::rpc::{ManualSeal, ManualSealApiServer};
-	use sc_rpc::{
-		dev::{Dev, DevApiServer},
-		statement::StatementApiServer,
-	};
+	use sc_rpc::{dev::DevApiServer, statement::StatementApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
@@ -170,11 +168,12 @@ where
 	)?;
 
 	// Ethereum compatibility RPCs
-	let io = create_eth::<_, _, _, _, _, _, DefaultEthConfig<C, BE>>(
+	let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
 		io,
 		eth,
 		subscription_task_executor,
 		pubsub_notification_sinks,
 	)?;
+
 	Ok(io)
 }

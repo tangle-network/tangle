@@ -12,20 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::{
-	chain_spec,
+	chainspec,
 	cli::{Cli, Subcommand},
 	service,
 };
-use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
+use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use futures::TryFutureExt;
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
-use sp_keyring::Sr25519Keyring;
-use tangle_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use tangle_primitives::Block;
+
+trait IdentifyChain {
+	fn is_mainnet(&self) -> bool;
+	fn is_testnet(&self) -> bool;
+}
+
+impl IdentifyChain for dyn sc_service::ChainSpec {
+	fn is_mainnet(&self) -> bool {
+		!self.id().starts_with("testnet")
+	}
+	fn is_testnet(&self) -> bool {
+		self.id().starts_with("testnet")
+	}
+}
+
+impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
+	fn is_mainnet(&self) -> bool {
+		<dyn sc_service::ChainSpec>::is_mainnet(self)
+	}
+	fn is_testnet(&self) -> bool {
+		<dyn sc_service::ChainSpec>::is_testnet(self)
+	}
+}
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Tangle Standalone Substrate Node".into()
+		"Tangle Substrate Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -41,26 +63,27 @@ impl SubstrateCli for Cli {
 	}
 
 	fn support_url() -> String {
-		"support.anonymous.an".into()
+		"https://github.com/webb-tools/tangle/issues".into()
 	}
 
 	fn copyright_start_year() -> i32 {
-		2017
+		2023
 	}
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
 		Ok(match id {
-			"dev" => Box::new(chain_spec::development_config(4006)?),
-			"relayer" => Box::new(chain_spec::relayer_testnet_config(4006)?),
-			"" | "local" => Box::new(chain_spec::local_testnet_config(4006)?),
-			// generates the standalone spec for testing locally
-			"standalone-local" => Box::new(chain_spec::standalone_local_config(4006)?),
-			// generates the standalone spec for testnet
-			"standalone-alpha" => Box::new(chain_spec::standalone_testnet_config(4006)?),
-			// generates the standalone spec for longterm testnet
-			"standalone" => Box::new(chain_spec::standalone_live_config(4006)?),
-			path =>
-				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
+			"" | "dev" | "local" => Box::new(chainspec::testnet::local_testnet_config(4006)?),
+			// generates the spec for testnet
+			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(4006)?),
+			// generates the spec for mainnet
+			"mainnet-local" => Box::new(chainspec::mainnet::local_testnet_config(4006)?),
+			"mainnet" => Box::new(chainspec::mainnet::tangle_mainnet_config(4006)?),
+			"tangle-testnet" => Box::new(chainspec::testnet::ChainSpec::from_json_bytes(
+				&include_bytes!("../../chainspecs/testnet/tangle-standalone.json")[..],
+			)?),
+			path => Box::new(chainspec::testnet::ChainSpec::from_json_file(
+				std::path::PathBuf::from(path),
+			)?),
 		})
 	}
 }
@@ -71,7 +94,6 @@ pub fn run() -> sc_cli::Result<()> {
 
 	match &cli.subcommand {
 		Some(Subcommand::Key(cmd)) => cmd.run(&cli),
-		Some(Subcommand::DKGKey(cmd)) => cmd.run(&cli),
 		Some(Subcommand::BuildSpec(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
@@ -162,8 +184,8 @@ pub fn run() -> sc_cli::Result<()> {
 
 						cmd.run(config, client, db, storage)
 					},
-					BenchmarkCmd::Overhead(_) => Err("Unsupported benchmarking command".into()),
-					BenchmarkCmd::Extrinsic(_) => Err("Unsupported benchmarking command".into()),
+					BenchmarkCmd::Overhead(_cmd) => Err("Unsupported benchmarking command".into()),
+					BenchmarkCmd::Extrinsic(_cmd) => Err("Unsupported benchmarking command".into()),
 					BenchmarkCmd::Machine(cmd) =>
 						cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),
 				}

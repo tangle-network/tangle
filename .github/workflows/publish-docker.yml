@@ -23,14 +23,8 @@ jobs:
             features: default
             image_name: tangle-standalone
           - binary: tangle-standalone
-            features: integration-tests
-            image_name: tangle-standalone-integration-tests
-          - binary: tangle-standalone
             features: txpool
             image_name: tangle-standalone-txpool
-          - binary: tangle-standalone
-            features: relayer
-            image_name: tangle-standalone-relayer
     permissions:
       contents: read
       packages: write

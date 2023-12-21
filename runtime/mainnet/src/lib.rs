@@ -94,7 +94,7 @@ use sp_runtime::generic::Era;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
-use tangle_primitives::BabeId;
+
 pub use tangle_primitives::{
 	currency::*, fee::*, time::*, AccountId, AccountIndex, Address, Balance, BlockNumber, Hash,
 	Header, Index, Moment, Signature, AVERAGE_ON_INITIALIZE_RATIO, EPOCH_DURATION_IN_BLOCKS,

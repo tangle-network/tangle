@@ -18,14 +18,14 @@ use sp_core::H256;
 use sp_inherents::CreateInherentDataProviders;
 use sp_runtime::traits::Block as BlockT;
 // Frontier
-use fc_rpc::pending::ConsensusDataProvider;
+
 pub use fc_rpc::{EthBlockDataCacheTask, EthConfig, OverrideHandle, StorageOverride};
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 pub use fc_storage::overrides_handle;
 use fp_rpc::{ConvertTransaction, ConvertTransactionRuntimeApi, EthereumRuntimeRPCApi};
 #[cfg(feature = "txpool")]
 use rpc_txpool::TxPoolServer;
-use sc_client_api::{AuxStore, UsageProvider};
+
 use sp_consensus_babe::BabeApi;
 
 #[derive(Clone)]
@@ -125,13 +125,13 @@ where
 		+ EthereumRuntimeRPCApi<B>,
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<B>,
 	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<B>,
-	C: BlockchainEvents<B> + AuxStore + UsageProvider<B> + StorageProvider<B, BE> + 'static,
+	C: BlockchainEvents<B> + StorageProvider<B, BE> + 'static,
 	C: HeaderBackend<B> + HeaderMetadata<B, Error = BlockChainError> + StorageProvider<B, BE>,
 	BE: Backend<B> + 'static,
 	P: TransactionPool<Block = B> + 'static,
 	A: ChainApi<Block = B> + 'static,
 	CT: ConvertTransaction<<B as BlockT>::Extrinsic> + Send + Sync + 'static,
-	CIDP: CreateInherentDataProviders<B, ()> + Send + 'static,
+	CIDP: CreateInherentDataProviders<B, ()> + Send + Sync + 'static,
 	EC: EthConfig<B, C>,
 {
 	use fc_rpc::{
@@ -187,7 +187,7 @@ where
 			execute_gas_limit_multiplier,
 			forced_parent_hashes,
 			pending_create_inherent_data_providers,
-			Some(Box::new(ConsensusDataProvider::new(client.clone()))),
+			None,
 		)
 		.replace_config::<EC>()
 		.into_rpc(),

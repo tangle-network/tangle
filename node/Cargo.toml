@@ -117,14 +117,13 @@ sc-storage-monitor = { workspace = true }
 sc-network-statement = { workspace = true }
 sc-network-common = { workspace = true }
 frame-system-rpc-runtime-api = { workspace = true }
-tangle-testnet-runtime = { workspace = true }
+tangle-testnet-runtime = { workspace = true, optional = true }
 tangle-runtime = { workspace = true }
 tangle-primitives = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
 runtime-benchmarks = ["tangle-testnet-runtime/runtime-benchmarks"]
-integration-tests = ["tangle-testnet-runtime/integration-tests"]
 with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-testnet-runtime/with-paritydb-weights"]
 rocksdb = [
@@ -136,4 +135,4 @@ rocksdb = [
  "fc-rpc/rocksdb",
 ]
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]
-txpool = ["fc-rpc/txpool"]
+testnet = ["tangle-testnet-runtime"]

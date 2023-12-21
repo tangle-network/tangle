@@ -1,4 +1,3 @@
-#![allow(clippy::all)]
 // Copyright 2022 Webb Technologies Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,125 +19,92 @@ use crate::eth::{
 	FrontierBlockImport, FrontierPartialComponents, RpcConfig,
 };
 use futures::{channel::mpsc, FutureExt};
-use parity_scale_codec::Encode;
+
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
 pub use sc_executor::NativeElseWasmExecutor;
-use sc_network::NetworkStateInfo;
+
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
-use sc_transaction_pool_api::{OffchainTransactionPoolFactory, TransactionFor};
-use sp_api::ProvideRuntimeApi;
-use sp_core::{Pair, U256};
-use sp_runtime::{generic::Era, traits::BlakeTwo256, SaturatedConversion};
-use sp_trie::PrefixedMemoryDB;
+use sc_transaction_pool_api::OffchainTransactionPoolFactory;
+
+use sp_core::U256;
+
 use std::{path::Path, sync::Arc, time::Duration};
-use substrate_frame_rpc_system::AccountNonceApi;
+
+#[cfg(not(feature = "testnet"))]
 use tangle_runtime::{self, opaque::Block, RuntimeApi, TransactionConverter};
+
+#[cfg(feature = "testnet")]
+use tangle_testnet_runtime::{self, opaque::Block, RuntimeApi, TransactionConverter};
 
 /// The minimum period of blocks on which justifications will be
 /// imported and generated.
 const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
 
-pub fn fetch_nonce(client: &FullClient, account: sp_core::sr25519::Pair) -> u32 {
-	let best_hash = client.chain_info().best_hash;
-	client
-		.runtime_api()
-		.account_nonce(best_hash, account.public().into())
-		.expect("Fetching account nonce works; qed")
-}
+#[cfg(not(feature = "testnet"))]
+pub mod tangle {
+	// Our native executor instance.
+	pub struct ExecutorDispatch;
 
-// Our native executor instance.
-pub struct ExecutorDispatch;
+	impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
+		/// Only enable the benchmarking host functions when we actually want to benchmark.
+		#[cfg(feature = "runtime-benchmarks")]
+		type ExtendHostFunctions =
+			(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
+		/// Otherwise we only use the default Substrate host functions.
+		#[cfg(not(feature = "runtime-benchmarks"))]
+		type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
 
-impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
-	/// Only enable the benchmarking host functions when we actually want to benchmark.
-	#[cfg(feature = "runtime-benchmarks")]
-	type ExtendHostFunctions =
-		(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
-	/// Otherwise we only use the default Substrate host functions.
-	#[cfg(not(feature = "runtime-benchmarks"))]
-	type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
+		fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
+			tangle_runtime::api::dispatch(method, data)
+		}
 
-	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		tangle_runtime::api::dispatch(method, data)
-	}
-
-	fn native_version() -> sc_executor::NativeVersion {
-		tangle_runtime::native_version()
+		fn native_version() -> sc_executor::NativeVersion {
+			tangle_runtime::native_version()
+		}
 	}
 }
 
+#[cfg(feature = "testnet")]
+pub mod testnet {
+	// Our native executor instance.
+	pub struct ExecutorDispatch;
+
+	impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
+		/// Only enable the benchmarking host functions when we actually want to benchmark.
+		#[cfg(feature = "runtime-benchmarks")]
+		type ExtendHostFunctions =
+			(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
+		/// Otherwise we only use the default Substrate host functions.
+		#[cfg(not(feature = "runtime-benchmarks"))]
+		type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
+
+		fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
+			tangle_testnet_runtime::api::dispatch(method, data)
+		}
+
+		fn native_version() -> sc_executor::NativeVersion {
+			tangle_testnet_runtime::native_version()
+		}
+	}
+}
+
+#[cfg(not(feature = "testnet"))]
 pub(crate) type FullClient =
-	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
+	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<tangle::ExecutorDispatch>>;
+
+#[cfg(feature = "testnet")]
+pub(crate) type FullClient =
+	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<testnet::ExecutorDispatch>>;
+
 pub(crate) type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
 type GrandpaLinkHalf<Client> = sc_consensus_grandpa::LinkHalf<Block, Client, FullSelectChain>;
 type BoxBlockImport = sc_consensus::BoxBlockImport<Block>;
-
-/// Create a transaction using the given `call`.
-///
-/// The transaction will be signed by `sender`. If `nonce` is `None` it will be fetched from the
-/// state of the best block.
-///
-/// Note: Should only be used for tests.
-pub fn create_extrinsic(
-	client: &FullClient,
-	sender: sp_core::sr25519::Pair,
-	function: impl Into<tangle_runtime::RuntimeCall>,
-	nonce: Option<u32>,
-) -> tangle_runtime::UncheckedExtrinsic {
-	let function = function.into();
-	let genesis_hash = client.block_hash(0).ok().flatten().expect("Genesis block exists; qed");
-	let best_hash = client.chain_info().best_hash;
-	let best_block = client.chain_info().best_number;
-	let nonce = nonce.unwrap_or_else(|| fetch_nonce(client, sender.clone()));
-
-	let period = tangle_runtime::BlockHashCount::get()
-		.checked_next_power_of_two()
-		.map(|c| c / 2)
-		.unwrap_or(2) as u64;
-	let tip = 0;
-	let extra: tangle_runtime::SignedExtra = (
-		frame_system::CheckNonZeroSender::<tangle_runtime::Runtime>::new(),
-		frame_system::CheckSpecVersion::<tangle_runtime::Runtime>::new(),
-		frame_system::CheckTxVersion::<tangle_runtime::Runtime>::new(),
-		frame_system::CheckGenesis::<tangle_runtime::Runtime>::new(),
-		frame_system::CheckEra::<tangle_runtime::Runtime>::from(Era::Mortal(
-			period,
-			best_block.saturated_into(),
-		)),
-		frame_system::CheckNonce::<tangle_runtime::Runtime>::from(nonce),
-		frame_system::CheckWeight::<tangle_runtime::Runtime>::new(),
-		pallet_transaction_payment::ChargeTransactionPayment::<tangle_runtime::Runtime>::from(tip),
-	);
-
-	let raw_payload = tangle_runtime::SignedPayload::from_raw(
-		function.clone(),
-		extra.clone(),
-		(
-			(),
-			tangle_runtime::VERSION.spec_version,
-			tangle_runtime::VERSION.transaction_version,
-			genesis_hash,
-			best_hash,
-			(),
-			(),
-			(),
-		),
-	);
-	let signature = raw_payload.using_encoded(|e| sender.sign(e));
-
-	tangle_runtime::UncheckedExtrinsic::new_signed(
-		function,
-		sp_runtime::AccountId32::from(sender.public()).into(),
-		tangle_runtime::Signature::Sr25519(signature),
-		extra,
-	)
-}
 
 pub fn new_partial(
 	config: &Configuration,
@@ -200,7 +166,8 @@ pub fn new_partial(
 
 	let (grandpa_block_import, grandpa_link) = sc_consensus_grandpa::block_import(
 		client.clone(),
-		&(client.clone() as Arc<_>),
+		GRANDPA_JUSTIFICATION_PERIOD,
+		&client,
 		select_chain.clone(),
 		telemetry.as_ref().map(|x| x.handle()),
 	)?;
@@ -263,7 +230,7 @@ pub fn new_partial(
 					slot_duration,
 				);
 
-				let dynamic_fee =
+				let _dynamic_fee =
 					fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
 				Ok((slot, timestamp))
 			},
@@ -300,7 +267,7 @@ pub struct RunFullParams {
 }
 /// Builds a new service for a full client.
 pub async fn new_full(
-	RunFullParams { mut config, eth_config, rpc_config, debug_output }: RunFullParams,
+	RunFullParams { mut config, eth_config, rpc_config, debug_output: _ }: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -400,19 +367,6 @@ pub async fn new_full(
 	let slot_duration = babe_link.config().slot_duration();
 	let target_gas_price = eth_config.target_gas_price;
 
-	let pending_create_inherent_data_providers = move |_, ()| async move {
-		let current = sp_timestamp::InherentDataProvider::from_system_time();
-		let next_slot = current.timestamp().as_millis() + slot_duration.as_millis();
-		let timestamp = sp_timestamp::InherentDataProvider::new(next_slot.into());
-		let slot =
-			sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
-				*timestamp,
-				slot_duration,
-			);
-		let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
-		Ok((slot, timestamp, dynamic_fee))
-	};
-
 	let ethapi_cmd = rpc_config.ethapi.clone();
 	let tracing_requesters =
 		if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
@@ -428,6 +382,19 @@ pub async fn new_full(
 		} else {
 			crate::rpc::tracing::RpcRequesters { debug: None, trace: None }
 		};
+
+	let pending_create_inherent_data_providers = move |_, ()| async move {
+		let current = sp_timestamp::InherentDataProvider::from_system_time();
+		let next_slot = current.timestamp().as_millis() + slot_duration.as_millis();
+		let timestamp = sp_timestamp::InherentDataProvider::new(next_slot.into());
+		let slot =
+			sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+				*timestamp,
+				slot_duration,
+			);
+		let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
+		Ok((slot, timestamp, dynamic_fee))
+	};
 
 	let eth_rpc_params = crate::rpc::EthDeps {
 		client: client.clone(),
@@ -472,7 +439,7 @@ pub async fn new_full(
 		let justification_stream = grandpa_link.justification_stream();
 		let shared_authority_set = grandpa_link.shared_authority_set().clone();
 		let shared_voter_state = sc_consensus_grandpa::SharedVoterState::empty();
-		let shared_voter_state2 = shared_voter_state.clone();
+		let _shared_voter_state2 = shared_voter_state.clone();
 
 		let finality_proof_provider = sc_consensus_grandpa::FinalityProofProvider::new_for_service(
 			backend.clone(),
@@ -585,7 +552,7 @@ pub async fn new_full(
 							&*client_clone,
 							&parent,
 						)?;
-					let dynamic_fee =
+					let _dynamic_fee =
 						fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
 					Ok((slot, timestamp, storage_proof))
 				}
