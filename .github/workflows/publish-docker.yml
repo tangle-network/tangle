@@ -19,12 +19,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - binary: tangle-standalone
+          - binary: tangle
             features: default
-            image_name: tangle-standalone
-          - binary: tangle-standalone
+            image_name: tangle
+          - binary: tangle
             features: txpool
-            image_name: tangle-standalone-txpool
+            image_name: tangle-txpool
     permissions:
       contents: read
       packages: write

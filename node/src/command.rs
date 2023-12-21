@@ -79,7 +79,7 @@ impl SubstrateCli for Cli {
 			"mainnet-local" => Box::new(chainspec::mainnet::local_testnet_config(4006)?),
 			"mainnet" => Box::new(chainspec::mainnet::tangle_mainnet_config(4006)?),
 			"tangle-testnet" => Box::new(chainspec::testnet::ChainSpec::from_json_bytes(
-				&include_bytes!("../../chainspecs/testnet/tangle-standalone.json")[..],
+				&include_bytes!("../../chainspecs/testnet/tangle.json")[..],
 			)?),
 			path => Box::new(chainspec::testnet::ChainSpec::from_json_file(
 				std::path::PathBuf::from(path),

@@ -21,8 +21,8 @@ https://github.com/webb-tools/tangle/blob/main/chainspecs/arana-alpha.json
 You can use the following command to pull the latest image and run from your CLI, remember to set `YOUR-NODE-NAME`
 
 ```bash
-docker run --platform linux/amd64 --network="host" -v "/var/lib/data" --entrypoint ./tangle-standalone \
-ghcr.io/webb-tools/tangle/tangle-standalone:main \
+docker run --platform linux/amd64 --network="host" -v "/var/lib/data" --entrypoint ./tangle \
+ghcr.io/webb-tools/tangle/tangle:main \
 --base-path=/var/lib/tangle/ \
 --chain <PATH_TO_CHAINSPEC> \
 --name="YOUR-NODE-NAME" \

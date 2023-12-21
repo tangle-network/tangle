@@ -1,6 +1,6 @@
 {
   "name": "Tangle Standalone Testnet",
-  "id": "tangle-standalone-testnet",
+  "id": "tangle-testnet",
   "chainType": "Development",
   "bootNodes": [
     "/ip4/3.22.222.30/tcp/30333/p2p/12D3KooWRdvZ3PRteq8DC78Z3z5ZiehipKrKhHDRpgvCjc8XSeQx",

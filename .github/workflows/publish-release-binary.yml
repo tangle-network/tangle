@@ -28,37 +28,25 @@ jobs:
       run: sudo apt-get install protobuf-compiler
 
     - name: Build binary
-      run: cargo build --release -p tangle-standalone --locked
+      run: cargo build --release -p tangle --locked
     
     - name: Upload regular binary to release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: target/release/tangle-standalone
-        asset_name: tangle-standalone-linux-amd64
+        file: target/release/tangle
+        asset_name: tangle-linux-amd64
         tag: ${{ github.ref }}
         overwrite: true
 
     - name: Build binary with txpool
-      run: cargo build --release -p tangle-standalone --locked --features txpool
+      run: cargo build --release -p tangle --locked --features txpool
     
     - name: Upload txpool binaries to release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: target/release/tangle-standalone
-        asset_name: tangle-standalone-txpool-linux-amd64
-        tag: ${{ github.ref }}
-        overwrite: true
-
-    - name: Build binary with relayer
-      run: cargo build --release -p tangle-standalone --locked --features relayer
-    
-    - name: Upload relayer binaries to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: target/release/tangle-standalone
-        asset_name: tangle-standalone-relayer-linux-amd64
+        file: target/release/tangle
+        asset_name: tangle-txpool-linux-amd64
         tag: ${{ github.ref }}
         overwrite: true

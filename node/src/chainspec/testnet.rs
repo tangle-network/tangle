@@ -152,7 +152,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 
 	Ok(ChainSpec::from_genesis(
 		"Tangle Standalone Testnet",
-		"tangle-standalone-testnet",
+		"tangle-testnet",
 		ChainType::Development,
 		move || {
 			testnet_genesis(

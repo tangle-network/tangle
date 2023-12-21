@@ -9,7 +9,7 @@ For running a standalone tangle network, Here are the steps that you need to fol
 
 1. Compile the standalone in the `release` mode:
 ```sh
-cargo b -rp tangle-standalone
+cargo b -rp tangle
 ```
 2. Execute the `run-standalone.sh` script:
 ```sh
