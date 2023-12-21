@@ -11,23 +11,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-//! Mainnet fixtures
+//
+//! Testnet fixtures
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_network::config::MultiaddrWithPeerId;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::crypto::UncheckedInto;
 use tangle_testnet_runtime::AccountId;
 
-/// Mainnet root key
-pub fn get_root_key() -> AccountId {
+/// Testnet root key
+pub fn get_testnet_root_key() -> AccountId {
 	// Standalone sudo key: 5CDZpRSZ14TmXorHTsTeksY7223FzsaLXPbpTPBUV6NaZSr1
 	hex!["06c225d97d596c57e620aba15e1a8a69c7b334ffdab175788c6553f7dd181a56"].into()
 }
 
-/// Mainnet bootnodes
+/// Standalone alpha bootnodes
 pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
 		"/ip4/3.22.222.30/tcp/30333/p2p/12D3KooWRdvZ3PRteq8DC78Z3z5ZiehipKrKhHDRpgvCjc8XSeQx"
@@ -50,7 +50,7 @@ pub fn get_standalone_bootnodes() -> Vec<MultiaddrWithPeerId> {
 
 /// Standalone initial authorities
 pub fn get_standalone_initial_authorities(
-) -> Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId)> {
+) -> Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)> {
 	vec![
 		// standalone 1
 		(

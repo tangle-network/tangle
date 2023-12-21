@@ -61,7 +61,7 @@ export default {
     }
   },
   /**
-   * Lookup19: frame_system::EventRecord<tangle_mainnet_runtime::RuntimeEvent, primitive_types::H256>
+   * Lookup19: frame_system::EventRecord<tangle_runtime::RuntimeEvent, primitive_types::H256>
    **/
   FrameSystemEventRecord: {
     phase: 'FrameSystemPhase',
@@ -1569,7 +1569,7 @@ export default {
     }
   },
   /**
-   * Lookup156: frame_support::traits::preimages::Bounded<tangle_mainnet_runtime::RuntimeCall>
+   * Lookup156: frame_support::traits::preimages::Bounded<tangle_runtime::RuntimeCall>
    **/
   FrameSupportPreimagesBounded: {
     _enum: {
@@ -1725,7 +1725,7 @@ export default {
     }
   },
   /**
-   * Lookup167: pallet_election_provider_multi_phase::RawSolution<tangle_mainnet_runtime::NposSolution16>
+   * Lookup167: pallet_election_provider_multi_phase::RawSolution<tangle_runtime::NposSolution16>
    **/
   PalletElectionProviderMultiPhaseRawSolution: {
     solution: 'TangleMainnetRuntimeNposSolution16',
@@ -1733,7 +1733,7 @@ export default {
     round: 'u32'
   },
   /**
-   * Lookup168: tangle_mainnet_runtime::NposSolution16
+   * Lookup168: tangle_runtime::NposSolution16
    **/
   TangleMainnetRuntimeNposSolution16: {
     votes1: 'Vec<(Compact<u32>,Compact<u16>)>',
@@ -1926,7 +1926,7 @@ export default {
     }
   },
   /**
-   * Lookup234: tangle_mainnet_runtime::opaque::SessionKeys
+   * Lookup234: tangle_runtime::opaque::SessionKeys
    **/
   TangleMainnetRuntimeOpaqueSessionKeys: {
     aura: 'SpConsensusAuraSr25519AppSr25519Public',
@@ -2453,7 +2453,7 @@ export default {
     }
   },
   /**
-   * Lookup297: tangle_mainnet_runtime::OriginCaller
+   * Lookup297: tangle_runtime::OriginCaller
    **/
   TangleMainnetRuntimeOriginCaller: {
     _enum: {
@@ -2770,7 +2770,7 @@ export default {
     amount: 'u128'
   },
   /**
-   * Lookup340: tangle_mainnet_runtime::RuntimeHoldReason
+   * Lookup340: tangle_runtime::RuntimeHoldReason
    **/
   TangleMainnetRuntimeRuntimeHoldReason: 'Null',
   /**
@@ -2831,7 +2831,7 @@ export default {
     _enum: ['NotAssigned', 'NotOwner', 'InUse', 'NotTransfer', 'Permanent']
   },
   /**
-   * Lookup364: pallet_democracy::types::ReferendumInfo<BlockNumber, frame_support::traits::preimages::Bounded<tangle_mainnet_runtime::RuntimeCall>, Balance>
+   * Lookup364: pallet_democracy::types::ReferendumInfo<BlockNumber, frame_support::traits::preimages::Bounded<tangle_runtime::RuntimeCall>, Balance>
    **/
   PalletDemocracyReferendumInfo: {
     _enum: {
@@ -2843,7 +2843,7 @@ export default {
     }
   },
   /**
-   * Lookup365: pallet_democracy::types::ReferendumStatus<BlockNumber, frame_support::traits::preimages::Bounded<tangle_mainnet_runtime::RuntimeCall>, Balance>
+   * Lookup365: pallet_democracy::types::ReferendumStatus<BlockNumber, frame_support::traits::preimages::Bounded<tangle_runtime::RuntimeCall>, Balance>
    **/
   PalletDemocracyReferendumStatus: {
     end: 'u64',
@@ -2962,7 +2962,7 @@ export default {
     targets: 'Vec<AccountId32>'
   },
   /**
-   * Lookup396: pallet_election_provider_multi_phase::signed::SignedSubmission<sp_core::crypto::AccountId32, Balance, tangle_mainnet_runtime::NposSolution16>
+   * Lookup396: pallet_election_provider_multi_phase::signed::SignedSubmission<sp_core::crypto::AccountId32, Balance, tangle_runtime::NposSolution16>
    **/
   PalletElectionProviderMultiPhaseSignedSignedSubmission: {
     who: 'AccountId32',
@@ -3287,7 +3287,7 @@ export default {
     _enum: ['NotEnoughSpaceInUnbondPool', 'PoolNotFound', 'RewardPoolNotFound', 'SubPoolsNotFound', 'BondedStashKilledPrematurely']
   },
   /**
-   * Lookup465: pallet_scheduler::Scheduled<Name, frame_support::traits::preimages::Bounded<tangle_mainnet_runtime::RuntimeCall>, BlockNumber, tangle_mainnet_runtime::OriginCaller, sp_core::crypto::AccountId32>
+   * Lookup465: pallet_scheduler::Scheduled<Name, frame_support::traits::preimages::Bounded<tangle_runtime::RuntimeCall>, BlockNumber, tangle_runtime::OriginCaller, sp_core::crypto::AccountId32>
    **/
   PalletSchedulerScheduled: {
     maybeId: 'Option<[u8;32]>',
@@ -3516,7 +3516,7 @@ export default {
    **/
   PalletTransactionPaymentChargeTransactionPayment: 'Compact<u128>',
   /**
-   * Lookup527: tangle_mainnet_runtime::Runtime
+   * Lookup527: tangle_runtime::Runtime
    **/
   TangleMainnetRuntimeRuntime: 'Null'
 };

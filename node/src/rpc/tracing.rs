@@ -16,7 +16,10 @@
 
 use std::time::Duration;
 
-use crate::eth::{EthApi, RpcConfig};
+use crate::{
+	eth::{EthApi, FrontierBackend, RpcConfig},
+	service::{FullBackend, FullClient},
+};
 
 use super::*;
 
@@ -34,28 +37,15 @@ pub struct RpcRequesters {
 }
 
 // Spawn the tasks that are required to run a tracing node.
-pub fn spawn_tracing_tasks<B, C, BE>(
+pub fn spawn_tracing_tasks(
 	task_manager: &TaskManager,
-	client: Arc<C>,
-	backend: Arc<BE>,
-	frontier_backend: fc_db::Backend<B>,
-	overrides: Arc<OverrideHandle<B>>,
+	client: Arc<FullClient>,
+	backend: Arc<FullBackend>,
+	frontier_backend: FrontierBackend,
+	overrides: Arc<OverrideHandle<Block>>,
 	rpc_config: &RpcConfig,
 	prometheus: Option<PrometheusRegistry>,
-) -> RpcRequesters
-where
-	C: ProvideRuntimeApi<B> + BlockOf,
-	C: StorageProvider<B, BE>,
-	C: HeaderBackend<B> + HeaderMetadata<B, Error = BlockChainError> + 'static,
-	C: BlockchainEvents<B>,
-	C: Send + Sync + 'static,
-	C::Api: EthereumRuntimeRPCApi<B> + rpc_primitives_debug::DebugRuntimeApi<B>,
-	C::Api: BlockBuilder<B>,
-	B: BlockT<Hash = H256> + Send + Sync + 'static,
-	B::Header: HeaderT<Number = u64>,
-	BE: Backend<B> + 'static,
-	BE::State: StateBackend<BlakeTwo256>,
-{
+) -> RpcRequesters {
 	let permit_pool = Arc::new(Semaphore::new(rpc_config.ethapi_max_permits as usize));
 
 	let (trace_filter_task, trace_filter_requester) = if rpc_config.ethapi.contains(&EthApi::Trace)

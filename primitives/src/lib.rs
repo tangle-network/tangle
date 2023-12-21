@@ -176,5 +176,4 @@ pub const MAX_POV_SIZE: u32 = 5 * 1024 * 1024;
 pub const MAXIMUM_BLOCK_WEIGHT: Weight =
 	Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND, MAX_POV_SIZE as u64);
 
-pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_consensus_babe::AuthorityId as BabeId;

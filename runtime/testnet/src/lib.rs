@@ -58,9 +58,9 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, SaturatedConversion,
+	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill,
+	SaturatedConversion,
 };
-use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -94,11 +94,22 @@ use sp_runtime::generic::Era;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
-use tangle_primitives::BabeId;
+use sp_staking::{
+	currency_to_vote::U128CurrencyToVote,
+	offence::{OffenceError, ReportOffence},
+	SessionIndex,
+};
 pub use tangle_primitives::{
-	currency::*, fee::*, time::*, AccountId, AccountIndex, Address, Balance, BlockNumber, Hash,
-	Header, Index, Moment, Signature, AVERAGE_ON_INITIALIZE_RATIO, EPOCH_DURATION_IN_BLOCKS,
-	MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS, UNSIGNED_PROPOSAL_EXPIRY,
+	currency::*,
+	fee::*,
+	jobs::{JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType},
+	roles::ValidatorRewardDistribution,
+	time::*,
+	traits::jobs::{JobToFee, MPCHandler},
+	verifier::{arkworks::ArkworksVerifierGroth16Bn254, circom::CircomVerifierGroth16Bn254},
+	AccountId, AccountIndex, Address, BabeId, Balance, BlockNumber, Hash, Header, Index, Moment,
+	Signature, AVERAGE_ON_INITIALIZE_RATIO, EPOCH_DURATION_IN_BLOCKS, MAXIMUM_BLOCK_WEIGHT,
+	NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS, UNSIGNED_PROPOSAL_EXPIRY,
 };
 
 use pallet_airdrop_claims::TestWeightInfo;
@@ -1021,6 +1032,108 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type WeightInfo = TestWeightInfo;
 }
 
+parameter_types! {
+	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+}
+
+pub struct MockJobToFeeHandler;
+
+impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+	type Balance = Balance;
+
+	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		match job.job_type {
+			JobType::DKGTSSPhaseOne(_) => Dkg::job_to_fee(job),
+			JobType::DKGTSSPhaseTwo(_) => Dkg::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) => ZkSaaS::job_to_fee(job),
+			JobType::ZkSaaSPhaseTwo(_) => ZkSaaS::job_to_fee(job),
+		}
+	}
+}
+
+pub struct MockMPCHandler;
+
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
+	fn verify(data: JobWithResult<AccountId>) -> DispatchResult {
+		match data.result {
+			JobResult::DKGPhaseOne(_) => Dkg::verify(data.result),
+			JobResult::DKGPhaseTwo(_) => Dkg::verify(data.result),
+			JobResult::ZkSaaSPhaseOne(_) => ZkSaaS::verify(data),
+			JobResult::ZkSaaSPhaseTwo(_) => ZkSaaS::verify(data),
+		}
+	}
+
+	fn verify_validator_report(
+		_validator: AccountId,
+		_offence: ValidatorOffenceType,
+		_signatures: Vec<Vec<u8>>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
+}
+
+impl pallet_jobs::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
+	type Currency = Balances;
+	type JobToFee = MockJobToFeeHandler;
+	type RolesHandler = Roles;
+	type MPCHandler = MockMPCHandler;
+	type PalletId = JobsPalletId;
+	type WeightInfo = ();
+}
+
+type IdTuple = pallet_session::historical::IdentificationTuple<Runtime>;
+type Offence = pallet_roles::offences::ValidatorOffence<IdTuple>;
+/// A mock offence report handler.
+pub struct OffenceHandler;
+impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
+	fn report_offence(_reporters: Vec<AccountId>, _offence: Offence) -> Result<(), OffenceError> {
+		Ok(())
+	}
+
+	fn is_known_offence(_offenders: &[IdTuple], _time_slot: &SessionIndex) -> bool {
+		false
+	}
+}
+
+parameter_types! {
+	pub InflationRewardPerSession: Balance = 10_000;
+	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
+}
+
+impl pallet_roles::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type JobsHandler = Jobs;
+	type MaxRolesPerAccount = ConstU32<2>;
+	type MPCHandler = MockMPCHandler;
+	type InflationRewardPerSession = InflationRewardPerSession;
+	type AuthorityId = BabeId;
+	type ValidatorSet = Historical;
+	type ReportOffences = OffenceHandler;
+	type ValidatorRewardDistribution = Reward;
+	type WeightInfo = ();
+}
+
+impl pallet_dkg::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type UpdateOrigin = EnsureRootOrHalfCouncil;
+	type WeightInfo = ();
+}
+
+impl pallet_zksaas::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type UpdateOrigin = EnsureRootOrHalfCouncil;
+	type Verifier = (ArkworksVerifierGroth16Bn254, CircomVerifierGroth16Bn254);
+	type WeightInfo = ();
+}
+
 pub struct BaseFilter;
 impl Contains<RuntimeCall> for BaseFilter {
 	fn contains(call: &RuntimeCall) -> bool {
@@ -1104,6 +1217,10 @@ construct_runtime!(
 
 		Claims: pallet_airdrop_claims,
 		Eth2Client: pallet_eth2_light_client,
+		Roles: pallet_roles,
+		Jobs: pallet_jobs,
+		Dkg: pallet_dkg,
+		ZkSaaS: pallet_zksaas,
 	}
 );
 

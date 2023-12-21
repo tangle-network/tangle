@@ -11,33 +11,30 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-use fp_rpc::EthereumRuntimeRPCApi;
-use futures::{future, prelude::*};
-use sp_api::{BlockT, HeaderT};
-use sp_core::H256;
 use std::{
 	collections::BTreeMap,
 	path::PathBuf,
 	sync::{Arc, Mutex},
 	time::Duration,
 };
+
+use futures::{future, prelude::*};
 // Substrate
-use sc_client_api::{
-	backend::{Backend, StateBackend, StorageProvider},
-	client::BlockchainEvents,
-	BlockOf,
-};
+use sc_client_api::BlockchainEvents;
 use sc_network_sync::SyncingService;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 
 // Frontier
+pub use fc_consensus::FrontierBlockImport;
 use fc_rpc::{EthTask, OverrideHandle};
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
-use sp_api::ProvideRuntimeApi;
-use sp_block_builder::BlockBuilder;
-use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
-use sp_runtime::traits::BlakeTwo256;
+// Local
+use tangle_testnet_runtime::opaque::Block;
+
+use crate::service::{FullBackend, FullClient};
+
+/// Frontier DB backend type.
+pub type FrontierBackend = fc_db::Backend<Block>;
 
 pub fn db_config_dir(config: &Configuration) -> PathBuf {
 	config.base_path.config_dir(config.chain_spec.id())
@@ -179,50 +176,37 @@ pub fn new_frontier_partial(
 }
 
 /// A set of APIs that ethereum-compatible runtimes must implement.
-pub trait EthCompatRuntimeApiCollection<B>:
-	sp_api::ApiExt<B> + fp_rpc::ConvertTransactionRuntimeApi<B> + fp_rpc::EthereumRuntimeRPCApi<B>
-where
-	B: BlockT<Hash = H256> + Send + Sync + 'static,
+pub trait EthCompatRuntimeApiCollection:
+	sp_api::ApiExt<Block>
+	+ fp_rpc::ConvertTransactionRuntimeApi<Block>
+	+ fp_rpc::EthereumRuntimeRPCApi<Block>
 {
 }
 
-impl<Api, B> EthCompatRuntimeApiCollection<B> for Api
-where
-	Api: sp_api::ApiExt<B>
-		+ fp_rpc::ConvertTransactionRuntimeApi<B>
-		+ fp_rpc::EthereumRuntimeRPCApi<B>,
-	B: BlockT<Hash = H256> + Send + Sync + 'static,
+impl<Api> EthCompatRuntimeApiCollection for Api where
+	Api: sp_api::ApiExt<Block>
+		+ fp_rpc::ConvertTransactionRuntimeApi<Block>
+		+ fp_rpc::EthereumRuntimeRPCApi<Block>
 {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub async fn spawn_frontier_tasks<B, C, BE>(
+pub async fn spawn_frontier_tasks(
 	task_manager: &TaskManager,
-	client: Arc<C>,
-	backend: Arc<BE>,
-	frontier_backend: fc_db::Backend<B>,
+	client: Arc<FullClient>,
+	backend: Arc<FullBackend>,
+	frontier_backend: FrontierBackend,
 	filter_pool: Option<FilterPool>,
-	overrides: Arc<OverrideHandle<B>>,
+	overrides: Arc<OverrideHandle<Block>>,
 	fee_history_cache: FeeHistoryCache,
 	fee_history_cache_limit: FeeHistoryCacheLimit,
-	sync: Arc<SyncingService<B>>,
+	sync: Arc<SyncingService<Block>>,
 	pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
-			fc_mapping_sync::EthereumBlockNotification<B>,
+			fc_mapping_sync::EthereumBlockNotification<Block>,
 		>,
 	>,
-) where
-	C: ProvideRuntimeApi<B> + BlockOf,
-	C: HeaderBackend<B> + HeaderMetadata<B, Error = BlockChainError> + 'static,
-	C: BlockchainEvents<B> + StorageProvider<B, BE>,
-	C: Send + Sync + 'static,
-	C::Api: EthereumRuntimeRPCApi<B>,
-	C::Api: BlockBuilder<B>,
-	B: BlockT<Hash = H256> + Send + Sync + 'static,
-	B::Header: HeaderT<Number = u64>,
-	BE: Backend<B> + 'static,
-	BE::State: StateBackend<BlakeTwo256>,
-{
+) {
 	// Spawn main mapping sync worker background task.
 	match frontier_backend {
 		fc_db::Backend::KeyValue(b) => {

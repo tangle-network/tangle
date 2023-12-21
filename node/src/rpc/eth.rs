@@ -1,17 +1,3 @@
-// Copyright 2022 Webb Technologies Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 use std::{collections::BTreeMap, sync::Arc};
 
 use jsonrpsee::RpcModule;
@@ -32,7 +18,7 @@ use sp_core::H256;
 use sp_inherents::CreateInherentDataProviders;
 use sp_runtime::traits::Block as BlockT;
 // Frontier
-use fc_rpc::pending::AuraConsensusDataProvider;
+use fc_rpc::pending::ConsensusDataProvider;
 pub use fc_rpc::{EthBlockDataCacheTask, EthConfig, OverrideHandle, StorageOverride};
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 pub use fc_storage::overrides_handle;
@@ -40,8 +26,7 @@ use fp_rpc::{ConvertTransaction, ConvertTransactionRuntimeApi, EthereumRuntimeRP
 #[cfg(feature = "txpool")]
 use rpc_txpool::TxPoolServer;
 use sc_client_api::{AuxStore, UsageProvider};
-use sp_consensus_aura::AuraApi;
-use tangle_primitives::AuraId;
+use sp_consensus_babe::BabeApi;
 
 #[derive(Clone)]
 pub struct TracingConfig {
@@ -134,7 +119,7 @@ pub fn create_eth<B, C, BE, P, A, CT, CIDP, EC>(
 where
 	B: BlockT<Hash = sp_core::H256>,
 	C: CallApiAt<B> + ProvideRuntimeApi<B>,
-	C::Api: AuraApi<B, AuraId>
+	C::Api: BabeApi<B>
 		+ BlockBuilderApi<B>
 		+ ConvertTransactionRuntimeApi<B>
 		+ EthereumRuntimeRPCApi<B>,
@@ -202,7 +187,7 @@ where
 			execute_gas_limit_multiplier,
 			forced_parent_hashes,
 			pending_create_inherent_data_providers,
-			Some(Box::new(AuraConsensusDataProvider::new(client.clone()))),
+			Some(Box::new(ConsensusDataProvider::new(client.clone()))),
 		)
 		.replace_config::<EC>()
 		.into_rpc(),

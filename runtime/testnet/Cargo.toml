@@ -22,9 +22,6 @@ scale-info = { workspace = true }
 serde = { workspace = true }
 static_assertions = { workspace = true }
 
-# Webb Substrate Dependencies
-pallet-airdrop-claims = { workspace = true }
-
 # Substrate dependencies
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
@@ -86,7 +83,12 @@ pallet-utility = { workspace = true }
 pallet-vesting = { workspace = true }
 
 # Webb dependencies
-tangle-primitives = { workspace = true }
+pallet-airdrop-claims = { workspace = true }
+pallet-dkg = { workspace = true }
+pallet-zksaas = { workspace = true }
+pallet-jobs = { workspace = true }
+pallet-roles = { workspace = true }
+tangle-primitives = { workspace = true, features = ["verifying"] }
 
 # Frontier dependencies
 fp-account = { workspace = true }
@@ -120,6 +122,7 @@ pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
 pallet-evm-precompile-staking = { workspace = true }
 precompile-utils = { workspace = true }
+pallet-evm-precompile-jobs = { workspace = true }
 
 evm-tracer = { workspace = true }
 rpc-primitives-debug = { workspace = true }
@@ -201,6 +204,10 @@ std = [
 
   # Webb dependencies
   "tangle-primitives/std",
+  "pallet-jobs/std",
+  "pallet-roles/std",
+  "pallet-dkg/std",
+  "pallet-zksaas/std",
 
   # ETH2 light-client
   "pallet-eth2-light-client/std",
@@ -239,6 +246,7 @@ std = [
   "pallet-evm-precompile-democracy/std",
   "pallet-evm-precompile-registry/std",
   "pallet-evm-precompile-staking/std",
+  "pallet-evm-precompile-jobs/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []

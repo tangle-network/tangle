@@ -11,11 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#![allow(clippy::all, deprecated)]
+#![allow(clippy::all)]
 use sc_cli::RunCmd;
 
-use tangle_service::eth::EthConfiguration;
+use crate::service::EthConfiguration;
 
 #[derive(Debug, clap::Parser)]
 pub struct Cli {
@@ -31,23 +30,6 @@ pub struct Cli {
 
 	#[command(flatten)]
 	pub eth: EthConfiguration,
-
-	#[clap(short, long)]
-	pub auto_insert_keys: bool,
-
-	/// Disable automatic hardware benchmarks.
-	///
-	/// By default these benchmarks are automatically ran at startup and measure
-	/// the CPU speed, the memory bandwidth and the disk speed.
-	///
-	/// The results are then printed out in the logs, and also sent as part of
-	/// telemetry, if telemetry is enabled.
-	#[arg(long)]
-	pub no_hardware_benchmarks: bool,
-
-	#[allow(missing_docs)]
-	#[clap(flatten)]
-	pub storage_monitor: sc_storage_monitor::StorageMonitorParams,
 }
 
 #[derive(Debug, clap::Subcommand)]
@@ -88,4 +70,10 @@ pub enum Subcommand {
 	/// Try some command against runtime state. Note: `try-runtime` feature must be enabled.
 	#[cfg(not(feature = "try-runtime"))]
 	TryRuntime,
+
+	/// Db meta columns information.
+	ChainInfo(sc_cli::ChainInfoCmd),
+
+	/// Db meta columns information.
+	FrontierDb(fc_cli::FrontierDbCmd),
 }

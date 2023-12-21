@@ -1,45 +1,34 @@
-// Copyright 2022 Webb Technologies Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 //! A collection of node-specific RPC methods.
-use fp_rpc::EthereumRuntimeRPCApi;
+
 use futures::channel::mpsc;
 use jsonrpsee::RpcModule;
-use sp_block_builder::BlockBuilder;
 use std::sync::Arc;
 // Substrate
 use sc_client_api::{
-	backend::{Backend, StateBackend, StorageProvider},
+	backend::{Backend, StorageProvider},
 	client::BlockchainEvents,
-	AuxStore, BlockOf, UsageProvider,
 };
 use sc_consensus_babe::BabeWorkerHandle;
+use sc_consensus_grandpa::{
+	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState,
+};
+use sc_consensus_manual_seal::rpc::EngineCommand;
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_rpc_api::DenyUnsafe;
 use sc_service::TransactionPool;
 use sc_transaction_pool::ChainApi;
-use sp_api::{CallApiAt, HeaderT, ProvideRuntimeApi};
+use sp_api::{CallApiAt, ProvideRuntimeApi};
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
+use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
-use sp_core::H256;
-use sp_inherents::CreateInherentDataProviders;
-use sp_runtime::traits::{BlakeTwo256, Block as BlockT};
-use tangle_primitives::AuraId;
-use tangle_testnet_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
+use sp_keystore::KeystorePtr;
+use sp_runtime::traits::Block as BlockT;
+use tangle_runtime::BlockNumber;
+
+// Runtime
+use tangle_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
 
 pub mod eth;
-pub mod policy;
 pub mod tracing;
 pub use self::eth::{create_eth, overrides_handle, EthDeps};
 
@@ -64,23 +53,25 @@ pub struct GrandpaDeps<B> {
 	/// Finality proof provider.
 	pub finality_provider: Arc<FinalityProofProvider<B, Block>>,
 }
+
 /// Full client dependencies.
-pub struct FullDeps<C, P, A: ChainApi, CT, CIDP> {
+pub struct FullDeps<C, P, A: ChainApi, CT, SC, B, CIDP> {
 	/// The client instance to use.
 	pub client: Arc<C>,
 	/// Transaction pool instance.
 	pub pool: Arc<P>,
 	/// Whether to deny unsafe calls
 	pub deny_unsafe: DenyUnsafe,
+	/// Manual seal command sink
+	pub command_sink: Option<mpsc::Sender<EngineCommand<Hash>>>,
 	/// Ethereum-compatibility specific dependencies.
 	pub eth: EthDeps<C, P, A, CT, Block, CIDP>,
-	#[cfg(feature = "tangle")]
 	/// BABE specific dependencies.
 	pub babe: BabeDeps,
+	/// The SelectChain Strategy
+	pub select_chain: SC,
 	/// GRANDPA specific dependencies.
 	pub grandpa: GrandpaDeps<B>,
-	/// Shared statement store reference.
-	pub statement_store: Arc<dyn sp_statement_store::StatementStore>,
 }
 
 pub struct DefaultEthConfig<C, BE>(std::marker::PhantomData<(C, BE)>);
@@ -96,8 +87,8 @@ where
 }
 
 /// Instantiate all Full RPC extensions.
-pub fn create_full<C, P, BE, A, CT, CIDP>(
-	deps: FullDeps<C, P, A, CT, CIDP>,
+pub fn create_full<C, P, BE, A, CT, SC, B, CIDP>(
+	deps: FullDeps<C, P, A, CT, SC, B, CIDP>,
 	subscription_task_executor: SubscriptionTaskExecutor,
 	pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
@@ -114,41 +105,32 @@ where
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
 	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
-	C: BlockchainEvents<Block> + AuxStore + UsageProvider<Block> + StorageProvider<Block, BE>,
+	C::Api: BabeApi<Block>,
+	C: BlockchainEvents<Block> + 'static,
 	C: HeaderBackend<Block>
 		+ HeaderMetadata<Block, Error = BlockChainError>
-		+ StorageProvider<Block, BE>
-		+ 'static,
+		+ StorageProvider<Block, BE>,
 	BE: Backend<Block> + 'static,
 	P: TransactionPool<Block = Block> + 'static,
 	A: ChainApi<Block = Block> + 'static,
-	CIDP: CreateInherentDataProviders<Block, ()> + Send + 'static,
 	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
-	C::Api: BabeApi<Block>,
+	SC: SelectChain<Block> + 'static,
+	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
+	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::BlakeTwo256>,
 {
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
-	#[cfg(feature = "tangle")]
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
 	use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
+	use sc_consensus_manual_seal::rpc::{ManualSeal, ManualSealApiServer};
 	use sc_rpc::{
 		dev::{Dev, DevApiServer},
 		statement::StatementApiServer,
 	};
-	use sc_rpc_spec_v2::chain_spec::{ChainSpec, ChainSpecApiServer};
-	use sc_sync_state_rpc::{SyncState, SyncStateApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
-	use substrate_state_trie_migration_rpc::{StateMigration, StateMigrationApiServer};
 
 	let mut io = RpcModule::new(());
-	let FullDeps {
-		client,
-		pool,
-		deny_unsafe,
-		eth,
-		babe,
-		grandpa,
-		statement_store,
-	} = deps;
+	let FullDeps { client, pool, deny_unsafe, command_sink, eth, babe, select_chain, grandpa } =
+		deps;
 
 	let BabeDeps { keystore, babe_worker_handle } = babe;
 
@@ -161,12 +143,20 @@ where
 	} = grandpa;
 
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
-	io.merge(TransactionPayment::new(client).into_rpc())?;
+	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
 
 	io.merge(
 		Babe::new(client.clone(), babe_worker_handle.clone(), keystore, select_chain, deny_unsafe)
 			.into_rpc(),
 	)?;
+
+	if let Some(command_sink) = command_sink {
+		io.merge(
+			// We provide the rpc handler with the sending end of the channel to allow the rpc
+			// send EngineCommands to the background block authorship task.
+			ManualSeal::new(command_sink).into_rpc(),
+		)?;
+	}
 
 	io.merge(
 		Grandpa::new(
@@ -179,19 +169,8 @@ where
 		.into_rpc(),
 	)?;
 
-	io.merge(
-		SyncState::new(chain_spec, client.clone(), shared_authority_set, babe_worker_handle)?
-			.into_rpc(),
-	)?;
-
-	io.merge(StateMigration::new(client.clone(), backend, deny_unsafe).into_rpc())?;
-	io.merge(Dev::new(client, deny_unsafe).into_rpc())?;
-	let statement_store =
-		sc_rpc::statement::StatementStore::new(statement_store, deny_unsafe).into_rpc();
-	io.merge(statement_store)?;
-
 	// Ethereum compatibility RPCs
-	let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
+	let io = create_eth::<_, _, _, _, _, _, DefaultEthConfig<C, BE>>(
 		io,
 		eth,
 		subscription_task_executor,
