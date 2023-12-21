@@ -7,11 +7,11 @@ use scale_info::{
 use serde::{self, Deserialize, Serialize};
 use sp_core::{sr25519::Signature, H160};
 use sp_runtime::{traits::BlakeTwo256, AccountId32, RuntimeDebug};
-use sp_std::prelude::*;
+use sp_std::{hash::Hash, prelude::*};
 
 pub mod ethereum_address;
 
-use ethereum_address::{EcdsaSignature, EthereumAddress};
+pub use ethereum_address::{EcdsaSignature, EthereumAddress};
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo, Serialize, Deserialize)]
 pub enum MultiAddress {
@@ -19,6 +19,15 @@ pub enum MultiAddress {
 	EVM(EthereumAddress),
 	/// Claimer is Substrate address
 	Native(AccountId32),
+}
+
+impl Hash for MultiAddress {
+	fn hash<H: sp_std::hash::Hasher>(&self, state: &mut H) {
+		match self {
+			MultiAddress::EVM(ethereum_address) => ethereum_address.0.hash(state),
+			MultiAddress::Native(substrate_address) => substrate_address.encode().hash(state),
+		}
+	}
 }
 
 impl MultiAddress {

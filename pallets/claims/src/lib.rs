@@ -29,7 +29,7 @@ mod utils;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-use crate::utils::{
+pub use crate::utils::{
 	ethereum_address::{EcdsaSignature, EthereumAddress},
 	MultiAddress, MultiAddressSignature,
 };
@@ -161,6 +161,7 @@ pub mod pallet {
 		type AddressMapping: AddressMapping<Self::AccountId>;
 		/// RuntimeOrigin permitted to call force_ extrinsics
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+		type MaxVestingSchedules: Get<u32>;
 		type WeightInfo: WeightInfo;
 	}
 
@@ -211,8 +212,12 @@ pub mod pallet {
 	/// The block number is when the vesting should start.
 	#[pallet::storage]
 	#[pallet::getter(fn vesting)]
-	pub(super) type Vesting<T: Config> =
-		StorageMap<_, Identity, MultiAddress, (BalanceOf<T>, BalanceOf<T>, BlockNumberFor<T>)>;
+	pub(super) type Vesting<T: Config> = StorageMap<
+		_,
+		Identity,
+		MultiAddress,
+		BoundedVec<(BalanceOf<T>, BalanceOf<T>, BlockNumberFor<T>), T::MaxVestingSchedules>,
+	>;
 
 	/// The statement kind that must be signed, if any.
 	#[pallet::storage]
@@ -221,7 +226,10 @@ pub mod pallet {
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
 		pub claims: Vec<(MultiAddress, BalanceOf<T>, Option<StatementKind>)>,
-		pub vesting: Vec<(MultiAddress, (BalanceOf<T>, BalanceOf<T>, BlockNumberFor<T>))>,
+		pub vesting: Vec<(
+			MultiAddress,
+			BoundedVec<(BalanceOf<T>, BalanceOf<T>, BlockNumberFor<T>), T::MaxVestingSchedules>,
+		)>,
 		pub expiry: Option<(BlockNumberFor<T>, MultiAddress)>,
 	}
 
@@ -344,7 +352,9 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			who: MultiAddress,
 			value: BalanceOf<T>,
-			vesting_schedule: Option<(BalanceOf<T>, BalanceOf<T>, BlockNumberFor<T>)>,
+			vesting_schedule: Option<
+				BoundedVec<(BalanceOf<T>, BalanceOf<T>, BlockNumberFor<T>), T::MaxVestingSchedules>,
+			>,
 			statement: Option<StatementKind>,
 		) -> DispatchResult {
 			ensure_root(origin)?;
@@ -572,18 +582,6 @@ impl<T: Config> Pallet<T> {
 			true => Some(addr),
 			false => None,
 		}
-		// let pk: PublicKey = match addr.clone() {
-		// 	MultiAddress::EVM(_) => return None,
-		// 	MultiAddress::Native(a) => PublicKey::from_bytes(&a.encode()).ok()?,
-		// };
-		// println!("pk: {:?}", pk);
-		// let signature: Signature = Signature::from_bytes(&s.0.encode()).ok()?;
-		// println!("signature: {:?}", signature);
-		// const SIGNING_CTX: &'static [u8] = b"substrate";
-		// match pk.verify_simple(SIGNING_CTX, &msg, &signature) {
-		// 	Ok(_) => Some(addr),
-		// 	Err(_) => None,
-		// }
 	}
 
 	fn process_claim(
@@ -611,10 +609,10 @@ impl<T: Config> Pallet<T> {
 
 		// Check if this claim should have a vesting schedule.
 		if let Some(vs) = vesting {
-			// This can only fail if the account already has a vesting schedule,
-			// but this is checked above.
-			T::VestingSchedule::add_vesting_schedule(&recipient, vs.0, vs.1, vs.2)
-				.expect("No other vesting schedule exists, as checked above; qed");
+			for v in vs.iter() {
+				T::VestingSchedule::add_vesting_schedule(&recipient, v.0, v.1, v.2)
+					.expect("No other vesting schedule exists, as checked above; qed");
+			}
 		}
 
 		<Total<T>>::put(new_total);

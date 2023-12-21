@@ -15750,6 +15750,7 @@ dependencies = [
  "hex-literal",
  "jsonrpsee",
  "log",
+ "pallet-airdrop-claims",
  "pallet-eth2-light-client-relayer-gadget",
  "pallet-eth2-light-client-relayer-gadget-cli",
  "pallet-im-online",

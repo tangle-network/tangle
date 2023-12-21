@@ -66,7 +66,6 @@ sp-inherents = { workspace = true }
 sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }
 sp-trie = { workspace = true }
-
 sc-chain-spec = { workspace = true }
 sc-consensus-manual-seal = { workspace = true }
 sc-rpc = { workspace = true }
@@ -78,6 +77,7 @@ sp-blockchain = { workspace = true }
 sp-timestamp = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
 substrate-prometheus-endpoint = { workspace = true }
+pallet-airdrop-claims = { workspace = true }
 
 # RPC related dependencies
 jsonrpsee = { workspace = true }

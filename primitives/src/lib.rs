@@ -84,7 +84,7 @@ pub mod currency {
 	pub const EXISTENTIAL_DEPOSIT: Balance = 1000;
 
 	#[cfg(not(feature = "integration-tests"))]
-	pub const EXISTENTIAL_DEPOSIT: Balance = MICROUNIT;
+	pub const EXISTENTIAL_DEPOSIT: Balance = MICROUNIT / 1000;
 
 	pub const WEI: Balance = 1;
 	pub const KILOWEI: Balance = 1_000;
