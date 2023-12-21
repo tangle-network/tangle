@@ -1,6 +1,6 @@
 use std::str::FromStr;
-use tangle_mainnet_runtime::UNIT;
 use tangle_primitives::BlockNumber;
+use tangle_runtime::UNIT;
 
 use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts};
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};

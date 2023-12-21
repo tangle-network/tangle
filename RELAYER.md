@@ -8,7 +8,7 @@ which is totally OK if you are not looking into running the webb relayer gadget.
 
 1. Compile the tangle standalone node with relayer feature
 ```sh
-cargo build --release -p tangle-standalone --features relayer
+cargo build --release -p tangle --features relayer
 ```
 2. Create your .env file to store your secrets (during the development)
 
@@ -75,7 +75,7 @@ events-watcher = { enabled = true, polling-interval = 3000, print-progress-inter
 5. Start Tangle Node with the relayer config.
 
 ```sh
-./target/release/tangle-standalone --tmp --chain local --validator --alice --rpc-cors all --rpc-methods=unsafe --rpc-port 9944 --relayer-config-dir ./relayer-config
+./target/release/tangle --tmp --chain local --validator --alice --rpc-cors all --rpc-methods=unsafe --rpc-port 9944 --relayer-config-dir ./relayer-config
 ```
 
 Now, you should notice that the error about not starting the relayer gadget is gone, and to verify everything is working

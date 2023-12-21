@@ -21,7 +21,7 @@
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 128
 
 // Executed Command:
-// target/release/tangle-standalone
+// target/release/tangle
 // benchmark
 // --chain=dev
 // --steps=50

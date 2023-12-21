@@ -14,13 +14,19 @@
 //
 use super::*;
 pub mod jobs;
-use sp_runtime::AccountId32;
+use sp_runtime::{generic, AccountId32, OpaqueExtrinsic};
 
 pub mod roles;
-/// Reputation type
-pub type Reputation = u128;
+
+/// Block header type as expected by this runtime.
+pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+
+/// Block type as expected by this runtime.
+pub type Block = generic::Block<Header, OpaqueExtrinsic>;
+
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
+
 /// Some way of identifying an account on the chain. We intentionally make it equivalent
 /// to the public key of our transaction signing scheme.
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
@@ -30,18 +36,22 @@ pub struct WrappedAccountId32(pub [u8; 32]);
 
 /// The type for looking up accounts.
 pub type AccountIndex = u32;
+
 /// Balance of an account.
 pub type Balance = u128;
+
 /// Index of a transaction in the chain.
 pub type Index = u32;
+
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
+
 /// An index to a block.
 pub type BlockNumber = u64;
+
 /// The address format for describing accounts.
 pub type Address = MultiAddress<AccountId, Index>;
-/// Block header type as expected by this runtime.
-pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+
 // Moment
 pub type Moment = u64;
 

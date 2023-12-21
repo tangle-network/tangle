@@ -17,22 +17,22 @@ use crate::{
 		combine_distributions, get_unique_distribution_results,
 		mainnet::{self, DistributionResult, ONE_TOKEN},
 	},
-	mainnet_fixtures::{get_root_key, get_standalone_bootnodes},
+	mainnet_fixtures::{get_bootnodes, get_initial_authorities, get_root_key},
 };
 use core::marker::PhantomData;
 use pallet_airdrop_claims::MultiAddress;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_runtime::{traits::AccountIdConversion, BoundedVec};
-use tangle_mainnet_runtime::{
+use tangle_primitives::BlockNumber;
+use tangle_runtime::{
 	AccountId, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, Eth2ClientConfig,
 	ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig, SessionConfig,
 	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig,
 	WASM_BINARY,
 };
-use tangle_primitives::BlockNumber;
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
@@ -42,19 +42,17 @@ pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
-fn dkg_session_keys(
+fn generate_session_keys(
 	grandpa: GrandpaId,
-	aura: AuraId,
+	babe: BabeId,
 	im_online: ImOnlineId,
-) -> tangle_mainnet_runtime::opaque::SessionKeys {
-	tangle_mainnet_runtime::opaque::SessionKeys { grandpa, aura, im_online }
+) -> tangle_runtime::opaque::SessionKeys {
+	tangle_runtime::opaque::SessionKeys { grandpa, babe, im_online }
 }
 
-pub fn tangle_mainnet_config(evm_chain_id: u64) -> Result<ChainSpec, String> {
+pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
-	let boot_nodes = get_standalone_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "TNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 4006.into());
 
@@ -67,11 +65,11 @@ pub fn tangle_mainnet_config(evm_chain_id: u64) -> Result<ChainSpec, String> {
 				// Wasm binary
 				wasm_binary,
 				// Initial validators
-				vec![],
+				get_initial_authorities(),
 				// Sudo account
 				get_root_key(),
 				// EVM chain ID
-				evm_chain_id,
+				chain_id,
 				// Genesis airdrop distribution (pallet-claims)
 				get_unique_distribution_results(vec![
 					mainnet::get_edgeware_genesis_balance_distribution(),
@@ -86,7 +84,7 @@ pub fn tangle_mainnet_config(evm_chain_id: u64) -> Result<ChainSpec, String> {
 			)
 		},
 		// Bootnodes
-		boot_nodes,
+		get_bootnodes(),
 		// Telemetry
 		None,
 		// Protocol ID
@@ -104,7 +102,7 @@ pub fn tangle_mainnet_config(evm_chain_id: u64) -> Result<ChainSpec, String> {
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId)>,
+	initial_authorities: Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)>,
 	root_key: AccountId,
 	chain_id: u64,
 	genesis_airdrop: DistributionResult,
@@ -165,7 +163,7 @@ fn mainnet_genesis(
 					(
 						x.1.clone(),
 						x.0.clone(),
-						dkg_session_keys(x.3.clone(), x.2.clone(), x.4.clone()),
+						generate_session_keys(x.3.clone(), x.2.clone(), x.4.clone()),
 					)
 				})
 				.collect::<Vec<_>>(),
@@ -182,7 +180,7 @@ fn mainnet_genesis(
 		council: Default::default(),
 		elections: Default::default(),
 		treasury: Default::default(),
-		aura: Default::default(),
+		babe: Default::default(),
 		grandpa: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
 		nomination_pools: Default::default(),
@@ -193,12 +191,11 @@ fn mainnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
-		// ETH2 light client
 		eth_2_client: Eth2ClientConfig {
-			networks: vec![
-				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
-				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
-			],
+			networks: vec![(
+				webb_proposals::TypedChainId::Evm(1),
+				NetworkConfig::new(&Network::Mainnet),
+			)],
 			phantom: PhantomData,
 		},
 		claims: ClaimsConfig {

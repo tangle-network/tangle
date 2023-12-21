@@ -15,20 +15,18 @@ use std::collections::BTreeMap;
 
 use crate::{
 	distributions::{combine_distributions, develop, testnet},
-	testnet_fixtures::{
-		get_standalone_bootnodes, get_standalone_initial_authorities, get_testnet_root_key,
-	},
+	testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key},
 };
 use core::marker::PhantomData;
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use tangle_testnet_runtime::{
-	AccountId, Balance, BalancesConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
+	AccountId, BabeConfig, Balance, BalancesConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
 	Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig,
 	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
 };
@@ -54,15 +52,15 @@ where
 	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
-/// Generate an Aura authority key.
+/// Generate an babe authority key.
 pub fn authority_keys_from_seed(
 	controller: &str,
 	stash: &str,
-) -> (AccountId, AccountId, AuraId, GrandpaId, ImOnlineId) {
+) -> (AccountId, AccountId, BabeId, GrandpaId, ImOnlineId) {
 	(
 		get_account_id_from_seed::<sr25519::Public>(controller),
 		get_account_id_from_seed::<sr25519::Public>(stash),
-		get_from_seed::<AuraId>(controller),
+		get_from_seed::<BabeId>(controller),
 		get_from_seed::<GrandpaId>(controller),
 		get_from_seed::<ImOnlineId>(stash),
 	)
@@ -72,12 +70,12 @@ pub fn authority_keys_from_seed(
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
-fn dkg_session_keys(
+fn generate_sesion_keys(
 	grandpa: GrandpaId,
-	aura: AuraId,
+	babe: BabeId,
 	im_online: ImOnlineId,
 ) -> tangle_testnet_runtime::opaque::SessionKeys {
-	tangle_testnet_runtime::opaque::SessionKeys { grandpa, aura, im_online }
+	tangle_testnet_runtime::opaque::SessionKeys { grandpa, babe, im_online }
 }
 
 pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -146,7 +144,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 
 pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
-	let boot_nodes = get_standalone_bootnodes();
+	let boot_nodes = get_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
@@ -154,13 +152,13 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 
 	Ok(ChainSpec::from_genesis(
 		"Tangle Standalone Testnet",
-		"tangle-standalone-testnet",
+		"tangle-testnet",
 		ChainType::Development,
 		move || {
 			testnet_genesis(
 				wasm_binary,
 				// Initial PoA authorities
-				get_standalone_initial_authorities(),
+				get_initial_authorities(),
 				// initial nominators
 				vec![],
 				// Sudo account
@@ -221,7 +219,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId, ImOnlineId)>,
+	initial_authorities: Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)>,
 	initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
@@ -277,7 +275,7 @@ fn testnet_genesis(
 					(
 						x.1.clone(),
 						x.0.clone(),
-						dkg_session_keys(x.3.clone(), x.2.clone(), x.4.clone()),
+						generate_sesion_keys(x.3.clone(), x.2.clone(), x.4.clone()),
 					)
 				})
 				.collect::<Vec<_>>(),
@@ -301,16 +299,12 @@ fn testnet_genesis(
 				.collect(),
 		},
 		treasury: Default::default(),
-		aura: Default::default(),
+		babe: BabeConfig {
+			epoch_config: Some(tangle_testnet_runtime::BABE_GENESIS_EPOCH_CONFIG),
+			..Default::default()
+		},
 		grandpa: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
-		eth_2_client: Eth2ClientConfig {
-			networks: vec![
-				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
-				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
-			],
-			phantom: PhantomData,
-		},
 		nomination_pools: Default::default(),
 		transaction_payment: Default::default(),
 		// EVM compatibility
@@ -328,5 +322,13 @@ fn testnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
+		eth_2_client: Eth2ClientConfig {
+			networks: vec![
+				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
+				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
+			],
+			phantom: PhantomData,
+		},
+		claims: Default::default(),
 	}
 }
