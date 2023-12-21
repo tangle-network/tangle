@@ -1,4 +1,5 @@
-// Copyright 2022 Webb Technologies Inc.
+// This file is part of Tangle.
+// Copyright (C) 2022-2024 Webb Technologies Inc.
 //
 // This file is part of pallet-evm-precompile-preimage package, originally developed by Purestake
 // Inc. Pallet-evm-precompile-preimage package used in Tangle Network in terms of GPLv3.
