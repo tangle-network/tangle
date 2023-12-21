@@ -106,6 +106,7 @@ type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 type GrandpaLinkHalf<Client> = sc_consensus_grandpa::LinkHalf<Block, Client, FullSelectChain>;
 type BoxBlockImport = sc_consensus::BoxBlockImport<Block>;
 
+#[allow(clippy::type_complexity)]
 pub fn new_partial(
 	config: &Configuration,
 	eth_config: &EthConfiguration,
@@ -467,21 +468,13 @@ pub async fn new_full(
 						finality_provider: finality_proof_provider.clone(),
 					},
 				};
-				if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
-					crate::rpc::create_full(
-						deps,
-						subscription_task_executor,
-						pubsub_notification_sinks.clone(),
-					)
-					.map_err(Into::into)
-				} else {
-					crate::rpc::create_full(
-						deps,
-						subscription_task_executor,
-						pubsub_notification_sinks.clone(),
-					)
-					.map_err(Into::into)
-				}
+
+				crate::rpc::create_full(
+					deps,
+					subscription_task_executor,
+					pubsub_notification_sinks.clone(),
+				)
+				.map_err(Into::into)
 			},
 		)
 	};

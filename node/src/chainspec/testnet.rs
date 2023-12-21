@@ -70,7 +70,7 @@ pub fn authority_keys_from_seed(
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
-fn dkg_session_keys(
+fn generate_sesion_keys(
 	grandpa: GrandpaId,
 	babe: BabeId,
 	im_online: ImOnlineId,
@@ -275,7 +275,7 @@ fn testnet_genesis(
 					(
 						x.1.clone(),
 						x.0.clone(),
-						dkg_session_keys(x.3.clone(), x.2.clone(), x.4.clone()),
+						generate_sesion_keys(x.3.clone(), x.2.clone(), x.4.clone()),
 					)
 				})
 				.collect::<Vec<_>>(),
