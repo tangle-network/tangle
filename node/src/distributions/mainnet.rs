@@ -1,12 +1,10 @@
 use std::str::FromStr;
-
-use fp_evm::GenesisAccount;
 use tangle_mainnet_runtime::UNIT;
 use tangle_primitives::BlockNumber;
 
 use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts};
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};
-use sp_core::{H160, U256};
+use sp_core::H160;
 use sp_runtime::AccountId32;
 use std::collections::BTreeMap;
 use tangle_testnet_runtime::{AccountId, Balance, ExistentialDeposit};
@@ -53,9 +51,7 @@ pub const ONE_MONTH_BLOCKS: u64 = (30 * 24 * 60 * 60 / BLOCK_TIME) as u64;
 pub const ONE_YEAR_BLOCKS: u64 = (365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
 pub const TWO_YEARS_BLOCKS: u64 = (2 * 365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
 
-pub const ONE_POINT: u64 = 1;
 pub const ONE_HUNDRED_POINTS: u64 = 100;
-pub const ONE_THOUSAND_POINTS: u64 = 1000;
 
 pub struct DistributionResult {
 	pub claims: Vec<(MultiAddress, Balance, Option<StatementKind>)>,

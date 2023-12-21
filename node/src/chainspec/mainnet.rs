@@ -12,13 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
-
 use crate::{
 	distributions::{
-		combine_distributions, develop, get_unique_distribution_results,
+		combine_distributions, get_unique_distribution_results,
 		mainnet::{self, DistributionResult, ONE_TOKEN},
-		testnet,
 	},
 	mainnet_fixtures::{get_root_key, get_standalone_bootnodes},
 };
@@ -28,49 +25,18 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{sr25519, Pair, Public, H160};
-use sp_runtime::traits::{IdentifyAccount, Verify};
+use sp_runtime::{traits::AccountIdConversion, BoundedVec};
 use tangle_mainnet_runtime::{
-	AccountId, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
-	Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig,
-	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, VestingConfig, UNIT,
+	AccountId, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, Eth2ClientConfig,
+	ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig, SessionConfig,
+	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig,
 	WASM_BINARY,
 };
+use tangle_primitives::BlockNumber;
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
-
-/// Generate a crypto pair from seed.
-pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
-	TPublic::Pair::from_string(&format!("//{seed}"), None)
-		.expect("static values are valid; qed")
-		.public()
-}
-
-type AccountPublic = <Signature as Verify>::Signer;
-
-/// Generate an account ID from seed.
-pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
-where
-	AccountPublic: From<<TPublic::Pair as Pair>::Public>,
-{
-	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
-}
-
-/// Generate an Aura authority key.
-pub fn authority_keys_from_seed(
-	controller: &str,
-	stash: &str,
-) -> (AccountId, AccountId, AuraId, GrandpaId, ImOnlineId) {
-	(
-		get_account_id_from_seed::<sr25519::Public>(controller),
-		get_account_id_from_seed::<sr25519::Public>(stash),
-		get_from_seed::<AuraId>(controller),
-		get_from_seed::<GrandpaId>(controller),
-		get_from_seed::<ImOnlineId>(stash),
-	)
-}
 
 /// Generate the session keys from individual elements.
 ///
@@ -150,6 +116,20 @@ fn mainnet_genesis(
 		.map(|x| (x.0.clone(), x.0.clone(), 1 * ONE_TOKEN, StakerStatus::Validator))
 		.collect();
 
+	let vesting_claims: Vec<(
+		MultiAddress,
+		BoundedVec<(Balance, Balance, BlockNumber), MaxVestingSchedules>,
+	)> = genesis_airdrop
+		.vesting
+		.into_iter()
+		.map(|(x, y)| {
+			let mut bounded_vec = BoundedVec::new();
+			for (a, b, c) in y {
+				bounded_vec.try_push((a, b, c)).unwrap();
+			}
+			(x, bounded_vec)
+		})
+		.collect();
 	RuntimeGenesisConfig {
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
@@ -221,6 +201,13 @@ fn mainnet_genesis(
 			],
 			phantom: PhantomData,
 		},
-		claims: Default::default(),
+		claims: ClaimsConfig {
+			claims: genesis_airdrop.claims,
+			vesting: vesting_claims,
+			expiry: Some((
+				5_256_000u64,
+				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
+			)),
+		},
 	}
 }

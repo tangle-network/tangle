@@ -1,6 +1,4 @@
-use fp_evm::GenesisAccount;
 use pallet_airdrop_claims::{MultiAddress, StatementKind};
-use sp_core::H160;
 use tangle_primitives::{Balance, BlockNumber};
 
 use self::mainnet::DistributionResult;
