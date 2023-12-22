@@ -1029,6 +1029,7 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Prefix = Prefix;
+	type MaxVestingSchedules = ConstU32<16>;
 	type MoveClaimOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = TestWeightInfo;
 }

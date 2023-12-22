@@ -69,7 +69,7 @@ sp-blockchain = { workspace = true }
 sp-timestamp = { workspace = true }
 substrate-prometheus-endpoint = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
-sc-consensus-manual-seal = { workspace = true }
+pallet-airdrop-claims = { workspace = true }
 
 # RPC related dependencies
 jsonrpsee = { workspace = true }

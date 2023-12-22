@@ -1010,6 +1010,7 @@ impl pallet_eth2_light_client::Config for Runtime {
 
 parameter_types! {
 	pub Prefix: &'static [u8] = b"Claim TNTs to the account:";
+	pub const MaxVestingSchedules: u32 = 28;
 }
 
 impl pallet_airdrop_claims::Config for Runtime {
@@ -1018,6 +1019,7 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Prefix = Prefix;
+	type MaxVestingSchedules = MaxVestingSchedules;
 	type MoveClaimOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = TestWeightInfo;
 }

@@ -15,7 +15,6 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 //! A collection of node-specific RPC methods.
 
-use futures::channel::mpsc;
 use jsonrpsee::RpcModule;
 use std::sync::Arc;
 // Substrate
@@ -27,7 +26,6 @@ use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_grandpa::{
 	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState,
 };
-use sc_consensus_manual_seal::rpc::EngineCommand;
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_rpc_api::DenyUnsafe;
 use sc_service::TransactionPool;
@@ -77,8 +75,6 @@ pub struct FullDeps<C, P, A: ChainApi, CT, SC, B, CIDP> {
 	pub pool: Arc<P>,
 	/// Whether to deny unsafe calls
 	pub deny_unsafe: DenyUnsafe,
-	/// Manual seal command sink
-	pub command_sink: Option<mpsc::Sender<EngineCommand<Hash>>>,
 	/// Ethereum-compatibility specific dependencies.
 	pub eth: EthDeps<C, P, A, CT, Block, CIDP>,
 	/// BABE specific dependencies.
@@ -137,12 +133,10 @@ where
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
 	use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
-	use sc_consensus_manual_seal::rpc::{ManualSeal, ManualSealApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
-	let FullDeps { client, pool, deny_unsafe, command_sink, eth, babe, select_chain, grandpa } =
-		deps;
+	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa } = deps;
 
 	let BabeDeps { keystore, babe_worker_handle } = babe;
 
@@ -161,14 +155,6 @@ where
 		Babe::new(client.clone(), babe_worker_handle.clone(), keystore, select_chain, deny_unsafe)
 			.into_rpc(),
 	)?;
-
-	if let Some(command_sink) = command_sink {
-		io.merge(
-			// We provide the rpc handler with the sending end of the channel to allow the rpc
-			// send EngineCommands to the background block authorship task.
-			ManualSeal::new(command_sink).into_rpc(),
-		)?;
-	}
 
 	io.merge(
 		Grandpa::new(

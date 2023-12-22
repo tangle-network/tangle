@@ -1,11 +1,11 @@
 use super::*;
 use pallet_evm::HashedAddressMapping;
 use secp_utils::*;
-use sp_core::{sr25519, Pair, H256};
+use sp_core::{sr25519, ConstU32, Pair, H256};
 use sp_std::convert::TryFrom;
 // The testing primitives are very useful for avoiding having to work with signatures
 // or public keys. `u64` is used as the `AccountId` and no `Signature`s are required.
-use crate::{pallet as pallet_airdrop_claims, sr25519_utils::sub};
+use crate::{pallet as pallet_airdrop_claims, sr25519_utils::sub, tests::get_bounded_vec};
 use frame_support::{
 	ord_parameter_types, parameter_types,
 	traits::{OnFinalize, OnInitialize, WithdrawReasons},
@@ -106,6 +106,7 @@ impl Config for Test {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId32>;
 	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Prefix = Prefix;
+	type MaxVestingSchedules = ConstU32<8>;
 	type MoveClaimOrigin = frame_system::EnsureSignedBy<Six, AccountId32>;
 	type WeightInfo = TestWeightInfo;
 }
@@ -165,7 +166,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			(sub(&alice_sr25519()), 500, None),
 			(sub(&bob_sr25519()), 600, None),
 		],
-		vesting: vec![(eth(&alice()), (50, 10, 1))],
+		vesting: vec![(eth(&alice()), get_bounded_vec((50, 10, 1)))],
 		expiry: None,
 	}
 	.assimilate_storage(&mut t)

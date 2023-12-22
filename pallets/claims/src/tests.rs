@@ -1,9 +1,12 @@
+use core::fmt::Debug;
+
 use super::*;
 use frame_support::pallet_prelude::DispatchError;
 use hex_literal::hex;
 use parity_scale_codec::Encode;
 use secp_utils::*;
-use sp_runtime::TokenError::Frozen;
+use sp_core::ConstU32;
+use sp_runtime::{BoundedVec, TokenError::Frozen};
 
 // The testing primitives are very useful for avoiding having to work with signatures
 // or public keys. `u64` is used as the `AccountId` and no `Signature`s are required.
@@ -20,6 +23,10 @@ fn total_claims() -> u64 {
 	100 + 200 + 300 + 400 + 500 + 600
 }
 
+pub fn get_bounded_vec<T: Debug>(elt: T) -> BoundedVec<T, ConstU32<8>> {
+	BoundedVec::<T, ConstU32<8>>::try_from(vec![elt]).unwrap()
+}
+
 #[test]
 fn basic_setup_works() {
 	new_test_ext().execute_with(|| {
@@ -29,7 +36,7 @@ fn basic_setup_works() {
 		assert_eq!(ClaimsPallet::claims(&eth(&eve())), Some(300));
 		assert_eq!(ClaimsPallet::claims(&eth(&frank())), Some(400));
 		assert_eq!(ClaimsPallet::claims(&MultiAddress::EVM(EthereumAddress::default())), None);
-		assert_eq!(ClaimsPallet::vesting(&eth(&alice())), Some((50, 10, 1)));
+		assert_eq!(ClaimsPallet::vesting(&eth(&alice())), Some(get_bounded_vec((50, 10, 1))));
 	});
 }
 
@@ -321,7 +328,7 @@ fn add_claim_with_vesting_works() {
 				RuntimeOrigin::signed(get_multi_address_account_id(42).to_account_id_32()),
 				eth(&bob()),
 				200,
-				Some((50, 10, 1)),
+				Some(get_bounded_vec((50, 10, 1))),
 				None
 			),
 			sp_runtime::traits::BadOrigin,
@@ -340,7 +347,7 @@ fn add_claim_with_vesting_works() {
 			RuntimeOrigin::root(),
 			eth(&bob()),
 			200,
-			Some((50, 10, 1)),
+			Some(get_bounded_vec((50, 10, 1))),
 			None
 		));
 		assert_ok!(ClaimsPallet::claim(
@@ -492,7 +499,7 @@ fn claiming_while_vested_doesnt_work() {
 			RuntimeOrigin::root(),
 			eth(&bob()),
 			200,
-			Some((50, 10, 1)),
+			Some(get_bounded_vec((50, 10, 1))),
 			None
 		));
 		// New total

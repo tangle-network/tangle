@@ -19,7 +19,7 @@ use crate::eth::{
 	new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, FrontierBackend,
 	FrontierBlockImport, FrontierPartialComponents, RpcConfig,
 };
-use futures::{channel::mpsc, FutureExt};
+use futures::FutureExt;
 
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
@@ -350,9 +350,6 @@ pub async fn new_full(
 		);
 	}
 
-	// Channel for the rpc handler to communicate with the authorship task.
-	let (command_sink, _commands_stream) = mpsc::channel(1000);
-
 	// Sinks for pubsub notifications.
 	// Everytime a new subscription is created, a new mpsc channel is added to the sink pool.
 	// The MappingSyncWorker sends through the channel on block import and the subscription emits a
@@ -454,7 +451,6 @@ pub async fn new_full(
 					client: client.clone(),
 					pool: pool.clone(),
 					deny_unsafe,
-					command_sink: Some(command_sink.clone()),
 					eth: eth_rpc_params.clone(),
 					babe: crate::rpc::BabeDeps {
 						keystore: keystore.clone(),
