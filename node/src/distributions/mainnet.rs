@@ -54,7 +54,7 @@ pub fn get_faucet_evm_list() -> Vec<H160> {
 }
 
 pub fn get_faucet_substrate_list() -> Vec<AccountId32> {
-	read_contents_to_substrate_accounts(
+	super::testnet::read_contents_to_substrate_accounts(
 		"node/src/distributions/data/substrate_faucet_addresses.json",
 	)
 }
@@ -119,12 +119,12 @@ pub fn get_leaderboard_balance_distribution() -> DistributionResult {
 		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), ONE_HUNDRED_POINTS))
 		.collect();
 
-	let faucet_evm_list: Vec<(MultiAddress, u128)> = get_faucet_evm_list()
+	let faucet_evm_list: Vec<(MultiAddress, u64)> = get_faucet_evm_list()
 		.into_iter()
 		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), ONE_HUNDRED_POINTS))
 		.collect();
 
-	let faucet_substrate_list: Vec<(MultiAddress, u128)> = get_faucet_substrate_list()
+	let faucet_substrate_list: Vec<(MultiAddress, u64)> = get_faucet_substrate_list()
 		.into_iter()
 		.map(|address| (MultiAddress::Native(address), ONE_HUNDRED_POINTS))
 		.collect();

@@ -60,7 +60,7 @@ pub fn read_contents_to_evm_accounts(path_str: &str) -> Vec<H160> {
 	accounts
 }
 
-fn read_contents_to_substrate_accounts(path_str: &str) -> Vec<AccountId> {
+pub fn read_contents_to_substrate_accounts(path_str: &str) -> Vec<AccountId> {
 	let mut path = get_git_root();
 	path.push(path_str);
 	println!("Path {:?}", path_str);
