@@ -8,7 +8,7 @@ import '@polkadot/api-base/types/calls';
 import type { ApiTypes, AugmentedCall, DecoratedCallBase } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, Vec, u32 } from '@polkadot/types-codec';
 import type { AnyNumber, ITuple } from '@polkadot/types-codec/types';
-import type { OpaqueKeyOwnershipProof } from '@polkadot/types/interfaces/babe';
+import type { BabeEquivocationProof, BabeGenesisConfiguration, Epoch, OpaqueKeyOwnershipProof } from '@polkadot/types/interfaces/babe';
 import type { CheckInherentsResult, InherentData } from '@polkadot/types/interfaces/blockbuilder';
 import type { BlockHash } from '@polkadot/types/interfaces/chain';
 import type { AuthorityId } from '@polkadot/types/interfaces/consensus';
@@ -17,7 +17,7 @@ import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
 import type { AuthorityList, GrandpaEquivocationProof, SetId } from '@polkadot/types/interfaces/grandpa';
 import type { OpaqueMetadata } from '@polkadot/types/interfaces/metadata';
 import type { FeeDetails, RuntimeDispatchInfo } from '@polkadot/types/interfaces/payment';
-import type { AccountId, Balance, Block, H256, Header, Index, KeyTypeId, SlotDuration, Weight } from '@polkadot/types/interfaces/runtime';
+import type { AccountId, Balance, Block, H256, Header, Index, KeyTypeId, Slot, Weight } from '@polkadot/types/interfaces/runtime';
 import type { RuntimeVersion } from '@polkadot/types/interfaces/state';
 import type { ApplyExtrinsicResult, DispatchError } from '@polkadot/types/interfaces/system';
 import type { TransactionSource, TransactionValidity } from '@polkadot/types/interfaces/txqueue';
@@ -39,16 +39,32 @@ declare module '@polkadot/api-base/types/calls' {
        **/
       [key: string]: DecoratedCallBase<ApiType>;
     };
-    /** 0xdd718d5cc53262d4/1 */
-    auraApi: {
+    /** 0xcbca25e39f142387/2 */
+    babeApi: {
       /**
-       * Return the current set of authorities.
+       * Return the genesis configuration for BABE. The configuration is only read on genesis.
        **/
-      authorities: AugmentedCall<ApiType, () => Observable<Vec<AuthorityId>>>;
+      configuration: AugmentedCall<ApiType, () => Observable<BabeGenesisConfiguration>>;
       /**
-       * Returns the slot duration for Aura.
+       * Returns information regarding the current epoch.
        **/
-      slotDuration: AugmentedCall<ApiType, () => Observable<SlotDuration>>;
+      currentEpoch: AugmentedCall<ApiType, () => Observable<Epoch>>;
+      /**
+       * Returns the slot that started the current epoch.
+       **/
+      currentEpochStart: AugmentedCall<ApiType, () => Observable<Slot>>;
+      /**
+       * Generates a proof of key ownership for the given authority in the current epoch.
+       **/
+      generateKeyOwnershipProof: AugmentedCall<ApiType, (slot: Slot | AnyNumber | Uint8Array, authorityId: AuthorityId | string | Uint8Array) => Observable<Option<OpaqueKeyOwnershipProof>>>;
+      /**
+       * Returns information regarding the next epoch (which was already previously announced).
+       **/
+      nextEpoch: AugmentedCall<ApiType, () => Observable<Epoch>>;
+      /**
+       * Submits an unsigned extrinsic to report an equivocation.
+       **/
+      submitReportEquivocationUnsignedExtrinsic: AugmentedCall<ApiType, (equivocationProof: BabeEquivocationProof | { offender?: any; slotNumber?: any; firstHeader?: any; secondHeader?: any } | string | Uint8Array, keyOwnerProof: OpaqueKeyOwnershipProof | string | Uint8Array) => Observable<Option<Null>>>;
       /**
        * Generic call
        **/

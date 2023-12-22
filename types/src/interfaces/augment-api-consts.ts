@@ -15,6 +15,34 @@ export type __AugmentedConst<ApiType extends ApiTypes> = AugmentedConst<ApiType>
 
 declare module '@polkadot/api-base/types/consts' {
   interface AugmentedConsts<ApiType extends ApiTypes> {
+    babe: {
+      /**
+       * The amount of time, in slots, that each epoch should last.
+       * NOTE: Currently it is not possible to change the epoch duration after
+       * the chain has started. Attempting to do so will brick block production.
+       **/
+      epochDuration: u64 & AugmentedConst<ApiType>;
+      /**
+       * The expected average block time at which BABE should be creating
+       * blocks. Since BABE is probabilistic it is not trivial to figure out
+       * what the expected average block time should be based on the slot
+       * duration and the security parameter `c` (where `1 - c` represents
+       * the probability of a slot being empty).
+       **/
+      expectedBlockTime: u64 & AugmentedConst<ApiType>;
+      /**
+       * Max number of authorities allowed
+       **/
+      maxAuthorities: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum number of nominators for each validator.
+       **/
+      maxNominators: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
     bagsList: {
       /**
        * The list of thresholds separating the various bags.
@@ -393,6 +421,13 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
+    eth2Client: {
+      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
     grandpa: {
       /**
        * Max Authorities in use
@@ -473,6 +508,16 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
+    jobs: {
+      /**
+       * `PalletId` for the jobs pallet.
+       **/
+      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
     nominationPools: {
       /**
        * The maximum pool points-to-balance ratio that an `open` pool can have.
@@ -493,6 +538,16 @@ declare module '@polkadot/api-base/types/consts' {
        * The nomination pool's pallet id.
        **/
       palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    roles: {
+      /**
+       * Max roles per account.
+       **/
+      maxRolesPerAccount: u32 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
