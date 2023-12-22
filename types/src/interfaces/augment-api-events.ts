@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u32, u64 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsPoolState, PalletStakingExposure, PalletStakingForcing, PalletStakingValidatorPrefs, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, PalletAirdropClaimsUtilsMultiAddress  } from '@polkadot/types/lookup';
+import { EthTypesBlockHeader, PalletDkgFeeInfo, WebbProposalsHeaderTypedChainId, EthTypesExecutionHeaderInfo, EthereumLog, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsJobKey, TanglePrimitivesJobsJobSubmission, EthTypesEth2BeaconBlockHeader, PalletZksaasFeeInfo, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsPoolState, PalletStakingExposure, PalletStakingForcing, PalletStakingValidatorPrefs, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, PalletAirdropClaimsUtilsMultiAddress  } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -306,6 +306,16 @@ declare module '@polkadot/api-base/types/events' {
        **/
       [key: string]: AugmentedEvent<ApiType>;
     };
+    dkg: {
+      /**
+       * Fee has been updated to the new value
+       **/
+      FeeUpdated: AugmentedEvent<ApiType, [PalletDkgFeeInfo]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
     electionProviderMultiPhase: {
       /**
        * An election failed.
@@ -382,6 +392,16 @@ declare module '@polkadot/api-base/types/events' {
        * A seat holder was slashed by amount by being forcefully removed from the set.
        **/
       SeatHolderSlashed: AugmentedEvent<ApiType, [seatHolder: AccountId32, amount: u128], { seatHolder: AccountId32, amount: u128 }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    eth2Client: {
+      Init: AugmentedEvent<ApiType, [typedChainId: WebbProposalsHeaderTypedChainId, headerInfo: EthTypesExecutionHeaderInfo], { typedChainId: WebbProposalsHeaderTypedChainId, headerInfo: EthTypesExecutionHeaderInfo }>;
+      SubmitBeaconChainLightClientUpdate: AugmentedEvent<ApiType, [typedChainId: WebbProposalsHeaderTypedChainId, submitter: AccountId32, beaconBlockHeader: EthTypesEth2BeaconBlockHeader], { typedChainId: WebbProposalsHeaderTypedChainId, submitter: AccountId32, beaconBlockHeader: EthTypesEth2BeaconBlockHeader }>;
+      SubmitExecutionHeader: AugmentedEvent<ApiType, [typedChainId: WebbProposalsHeaderTypedChainId, headerInfo: EthTypesBlockHeader], { typedChainId: WebbProposalsHeaderTypedChainId, headerInfo: EthTypesBlockHeader }>;
+      UpdateTrustedSigner: AugmentedEvent<ApiType, [trustedSigner: AccountId32], { trustedSigner: AccountId32 }>;
       /**
        * Generic event
        **/
@@ -524,6 +544,24 @@ declare module '@polkadot/api-base/types/events' {
        **/
       [key: string]: AugmentedEvent<ApiType>;
     };
+    jobs: {
+      /**
+       * A new job result has been submitted
+       **/
+      JobResultSubmitted: AugmentedEvent<ApiType, [jobId: u32, jobKey: TanglePrimitivesJobsJobKey], { jobId: u32, jobKey: TanglePrimitivesJobsJobKey }>;
+      /**
+       * A new job has been submitted
+       **/
+      JobSubmitted: AugmentedEvent<ApiType, [jobId: u32, jobKey: TanglePrimitivesJobsJobKey, details: TanglePrimitivesJobsJobSubmission], { jobId: u32, jobKey: TanglePrimitivesJobsJobKey, details: TanglePrimitivesJobsJobSubmission }>;
+      /**
+       * validator has earned reward
+       **/
+      ValidatorRewarded: AugmentedEvent<ApiType, [id: AccountId32, reward: u128], { id: AccountId32, reward: u128 }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
     nominationPools: {
       /**
        * A member has became bonded in a pool.
@@ -633,6 +671,40 @@ declare module '@polkadot/api-base/types/events' {
        * A preimage has been requested.
        **/
       Requested: AugmentedEvent<ApiType, [hash_: H256], { hash_: H256 }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    roles: {
+      /**
+       * Pending jobs,that cannot be opted out at the moment.
+       **/
+      PendingJobs: AugmentedEvent<ApiType, [pendingJobs: Vec<ITuple<[TanglePrimitivesJobsJobKey, u32]>>], { pendingJobs: Vec<ITuple<[TanglePrimitivesJobsJobKey, u32]>> }>;
+      /**
+       * New profile created.
+       **/
+      ProfileCreated: AugmentedEvent<ApiType, [account: AccountId32, totalProfileRestake: u128, roles: Vec<TanglePrimitivesRolesRoleType>], { account: AccountId32, totalProfileRestake: u128, roles: Vec<TanglePrimitivesRolesRoleType> }>;
+      /**
+       * Profile deleted.
+       **/
+      ProfileDeleted: AugmentedEvent<ApiType, [account: AccountId32], { account: AccountId32 }>;
+      /**
+       * Profile updated.
+       **/
+      ProfileUpdated: AugmentedEvent<ApiType, [account: AccountId32, totalProfileRestake: u128, roles: Vec<TanglePrimitivesRolesRoleType>], { account: AccountId32, totalProfileRestake: u128, roles: Vec<TanglePrimitivesRolesRoleType> }>;
+      /**
+       * Role assigned to the validator.
+       **/
+      RoleAssigned: AugmentedEvent<ApiType, [account: AccountId32, role: TanglePrimitivesRolesRoleType], { account: AccountId32, role: TanglePrimitivesRolesRoleType }>;
+      /**
+       * Removed validator from role.
+       **/
+      RoleRemoved: AugmentedEvent<ApiType, [account: AccountId32, role: TanglePrimitivesRolesRoleType], { account: AccountId32, role: TanglePrimitivesRolesRoleType }>;
+      /**
+       * Slashed validator.
+       **/
+      Slashed: AugmentedEvent<ApiType, [account: AccountId32, amount: u128], { account: AccountId32, amount: u128 }>;
       /**
        * Generic event
        **/
@@ -916,6 +988,16 @@ declare module '@polkadot/api-base/types/events' {
        * The balance given is the amount which is left unvested (and thus locked).
        **/
       VestingUpdated: AugmentedEvent<ApiType, [account: AccountId32, unvested: u128], { account: AccountId32, unvested: u128 }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    zkSaaS: {
+      /**
+       * Fee has been updated to the new value
+       **/
+      FeeUpdated: AugmentedEvent<ApiType, [PalletZksaasFeeInfo]>;
       /**
        * Generic event
        **/

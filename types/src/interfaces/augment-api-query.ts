@@ -11,34 +11,131 @@ import type { Bytes, Null, Option, Struct, U256, U8aFixed, Vec, bool, u128, u32,
 import type { AnyNumber, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
 import type { Observable } from '@polkadot/types/types';
-import { TangleMainnetRuntimeOpaqueSessionKeys, PalletAirdropClaimsUtilsMultiAddress, TangleMainnetRuntimeRuntimeHoldReason, EthereumBlock, EthereumReceiptReceiptV3, EthereumTransactionTransactionV2, FpRpcTransactionStatus, FrameSupportDispatchPerDispatchClassWeight, FrameSupportPreimagesBounded, FrameSystemAccountInfo, FrameSystemEventRecord, FrameSystemLastRuntimeUpgradeInfo, FrameSystemPhase, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesBalanceLock, PalletBalancesIdAmount, PalletBalancesReserveData, PalletBountiesBounty, PalletChildBountiesChildBounty, PalletCollectiveVotes, PalletDemocracyMetadataOwner, PalletDemocracyReferendumInfo, PalletDemocracyVoteThreshold, PalletDemocracyVoteVoting, PalletElectionProviderMultiPhasePhase, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, PalletEvmCodeMetadata, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletIdentityRegistrarInfo, PalletIdentityRegistration, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, PalletPreimageRequestStatus, PalletSchedulerScheduled, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingForcing, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingStakingLedger, PalletStakingUnappliedSlash, PalletStakingValidatorPrefs, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletVestingReleases, PalletVestingVestingInfo, SpConsensusAuraSr25519AppSr25519Public, SpCoreCryptoKeyTypeId, SpNposElectionsElectionScore, SpRuntimeDigest, SpStakingOffenceOffenceDetails, PalletAirdropClaimsStatementKind } from '@polkadot/types/lookup';
+import { SpConsensusBabeAppPublic, SpConsensusBabeDigestsPreDigest, PalletAirdropClaimsUtilsMultiAddress, EthereumBlock, EthereumReceiptReceiptV3, PalletZksaasFeeInfo, TangleTestnetRuntimeOpaqueSessionKeys, PalletRolesRoleStakingLedger, EthTypesClientMode, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusBabeBabeEpochConfiguration, EthTypesEth2ExtendedBeaconBlockHeader, EthTypesEth2SyncCommittee, WebbConsensusTypesNetworkConfig, PalletDkgFeeInfo, TangleTestnetRuntimeRuntimeHoldReason, EthTypesExecutionHeaderInfo, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsPhaseOneResult, WebbProposalsHeaderTypedChainId, TanglePrimitivesJobsJobKey, TanglePrimitivesJobsJobInfo, EthereumTransactionTransactionV2, FpRpcTransactionStatus, FrameSupportDispatchPerDispatchClassWeight, FrameSupportPreimagesBounded, FrameSystemAccountInfo, FrameSystemEventRecord, FrameSystemLastRuntimeUpgradeInfo, FrameSystemPhase, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesBalanceLock, PalletBalancesIdAmount, PalletBalancesReserveData, PalletBountiesBounty, PalletChildBountiesChildBounty, PalletCollectiveVotes, PalletDemocracyMetadataOwner, PalletDemocracyReferendumInfo, PalletDemocracyVoteThreshold, PalletDemocracyVoteVoting, PalletElectionProviderMultiPhasePhase, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, PalletEvmCodeMetadata, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletIdentityRegistrarInfo, PalletIdentityRegistration, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, PalletPreimageRequestStatus, PalletSchedulerScheduled, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingForcing, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingStakingLedger, PalletStakingUnappliedSlash, PalletStakingValidatorPrefs, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletVestingReleases, PalletVestingVestingInfo, SpCoreCryptoKeyTypeId, SpNposElectionsElectionScore, SpRuntimeDigest, SpStakingOffenceOffenceDetails, PalletAirdropClaimsStatementKind } from '@polkadot/types/lookup';
 
 export type __AugmentedQuery<ApiType extends ApiTypes> = AugmentedQuery<ApiType, () => unknown>;
 export type __QueryableStorageEntry<ApiType extends ApiTypes> = QueryableStorageEntry<ApiType>;
 
 declare module '@polkadot/api-base/types/storage' {
   interface AugmentedQueries<ApiType extends ApiTypes> {
-    aura: {
-      /**
-       * The current authority set.
-       **/
-      authorities: AugmentedQuery<ApiType, () => Observable<Vec<SpConsensusAuraSr25519AppSr25519Public>>, []> & QueryableStorageEntry<ApiType, []>;
-      /**
-       * The current slot of this block.
-       * 
-       * This will be set in `on_initialize`.
-       **/
-      currentSlot: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
-      /**
-       * Generic query
-       **/
-      [key: string]: QueryableStorageEntry<ApiType>;
-    };
     authorship: {
       /**
        * Author of current block.
        **/
       author: AugmentedQuery<ApiType, () => Observable<Option<AccountId32>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    babe: {
+      /**
+       * Current epoch authorities.
+       **/
+      authorities: AugmentedQuery<ApiType, () => Observable<Vec<ITuple<[SpConsensusBabeAppPublic, u64]>>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * This field should always be populated during block processing unless
+       * secondary plain slots are enabled (which don't contain a VRF output).
+       * 
+       * It is set in `on_finalize`, before it will contain the value from the last block.
+       **/
+      authorVrfRandomness: AugmentedQuery<ApiType, () => Observable<Option<U8aFixed>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Current slot number.
+       **/
+      currentSlot: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * The configuration for the current epoch. Should never be `None` as it is initialized in
+       * genesis.
+       **/
+      epochConfig: AugmentedQuery<ApiType, () => Observable<Option<SpConsensusBabeBabeEpochConfiguration>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Current epoch index.
+       **/
+      epochIndex: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * The block numbers when the last and current epoch have started, respectively `N-1` and
+       * `N`.
+       * NOTE: We track this is in order to annotate the block number when a given pool of
+       * entropy was fixed (i.e. it was known to chain observers). Since epochs are defined in
+       * slots, which may be skipped, the block numbers may not line up with the slot numbers.
+       **/
+      epochStart: AugmentedQuery<ApiType, () => Observable<ITuple<[u64, u64]>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * The slot at which the first epoch actually started. This is 0
+       * until the first block of the chain.
+       **/
+      genesisSlot: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Temporary value (cleared at block finalization) which is `Some`
+       * if per-block initialization has already been called for current block.
+       **/
+      initialized: AugmentedQuery<ApiType, () => Observable<Option<Option<SpConsensusBabeDigestsPreDigest>>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * How late the current block is compared to its parent.
+       * 
+       * This entry is populated as part of block execution and is cleaned up
+       * on block finalization. Querying this storage entry outside of block
+       * execution context should always yield zero.
+       **/
+      lateness: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Next epoch authorities.
+       **/
+      nextAuthorities: AugmentedQuery<ApiType, () => Observable<Vec<ITuple<[SpConsensusBabeAppPublic, u64]>>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * The configuration for the next epoch, `None` if the config will not change
+       * (you can fallback to `EpochConfig` instead in that case).
+       **/
+      nextEpochConfig: AugmentedQuery<ApiType, () => Observable<Option<SpConsensusBabeBabeEpochConfiguration>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Next epoch randomness.
+       **/
+      nextRandomness: AugmentedQuery<ApiType, () => Observable<U8aFixed>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Pending epoch configuration change that will be applied when the next epoch is enacted.
+       **/
+      pendingEpochConfigChange: AugmentedQuery<ApiType, () => Observable<Option<SpConsensusBabeDigestsNextConfigDescriptor>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * The epoch randomness for the *current* epoch.
+       * 
+       * # Security
+       * 
+       * This MUST NOT be used for gambling, as it can be influenced by a
+       * malicious validator in the short term. It MAY be used in many
+       * cryptographic protocols, however, so long as one remembers that this
+       * (like everything else on-chain) it is public. For example, it can be
+       * used where a number is needed that cannot have been chosen by an
+       * adversary, for purposes such as public-coin zero-knowledge proofs.
+       **/
+      randomness: AugmentedQuery<ApiType, () => Observable<U8aFixed>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Randomness under construction.
+       * 
+       * We make a trade-off between storage accesses and list length.
+       * We store the under-construction randomness in segments of up to
+       * `UNDER_CONSTRUCTION_SEGMENT_LENGTH`.
+       * 
+       * Once a segment reaches this length, we begin the next one.
+       * We reset all segments and return to `0` at the beginning of every
+       * epoch.
+       **/
+      segmentIndex: AugmentedQuery<ApiType, () => Observable<u32>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * A list of the last 100 skipped epochs and the corresponding session index
+       * when the epoch was skipped.
+       * 
+       * This is only used for validating equivocation proofs. An equivocation proof
+       * must contains a key-ownership proof for a given session, therefore we need a
+       * way to tie together sessions and epoch indices, i.e. we need to validate that
+       * a validator was the owner of a given key on a given session, and what the
+       * active epoch index was during that session.
+       **/
+      skippedEpochs: AugmentedQuery<ApiType, () => Observable<Vec<ITuple<[u64, u32]>>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * TWOX-NOTE: `SegmentIndex` is an increasing integer, so this is okay.
+       **/
+      underConstruction: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Vec<U8aFixed>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
       /**
        * Generic query
        **/
@@ -102,7 +199,7 @@ declare module '@polkadot/api-base/types/storage' {
        * Holds on account balances.
        **/
       holds: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Vec<{
-    readonly id: TangleMainnetRuntimeRuntimeHoldReason;
+    readonly id: TangleTestnetRuntimeRuntimeHoldReason;
     readonly amount: u128;
   } & Struct>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
       /**
@@ -201,7 +298,7 @@ declare module '@polkadot/api-base/types/storage' {
        * Second balance is how much should be unlocked per block.
        * The block number is when the vesting should start.
        **/
-      vesting: AugmentedQuery<ApiType, (arg: PalletAirdropClaimsUtilsMultiAddress | { EVM: any } | { Native: any } | string | Uint8Array) => Observable<Option<ITuple<[u128, u128, u64]>>>, [PalletAirdropClaimsUtilsMultiAddress]> & QueryableStorageEntry<ApiType, [PalletAirdropClaimsUtilsMultiAddress]>;
+      vesting: AugmentedQuery<ApiType, (arg: PalletAirdropClaimsUtilsMultiAddress | { EVM: any } | { Native: any } | string | Uint8Array) => Observable<Option<Vec<ITuple<[u128, u128, u64]>>>>, [PalletAirdropClaimsUtilsMultiAddress]> & QueryableStorageEntry<ApiType, [PalletAirdropClaimsUtilsMultiAddress]>;
       /**
        * Generic query
        **/
@@ -304,6 +401,13 @@ declare module '@polkadot/api-base/types/storage' {
        * TWOX-NOTE: SAFE as `AccountId`s are crypto hashes anyway.
        **/
       votingOf: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<PalletDemocracyVoteVoting>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    dkg: {
+      feeInfo: AugmentedQuery<ApiType, () => Observable<PalletDkgFeeInfo>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * Generic query
        **/
@@ -431,6 +535,52 @@ declare module '@polkadot/api-base/types/storage' {
        * TWOX-NOTE: SAFE as `AccountId` is a crypto hash.
        **/
       voting: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<PalletElectionsPhragmenVoter>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    eth2Client: {
+      clientModeForChain: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<Option<EthTypesClientMode>>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      currentSyncCommittee: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<Option<EthTypesEth2SyncCommittee>>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      /**
+       * Light client state
+       **/
+      finalizedBeaconHeader: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<Option<EthTypesEth2ExtendedBeaconBlockHeader>>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      /**
+       * Hashes of the finalized execution blocks mapped to their numbers. Stores up to
+       * `hashes_gc_threshold` entries. Execution block number -> execution block hash
+       **/
+      finalizedExecutionBlocks: AugmentedQuery<ApiType, (arg1: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array, arg2: u64 | AnyNumber | Uint8Array) => Observable<Option<H256>>, [WebbProposalsHeaderTypedChainId, u64]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId, u64]>;
+      finalizedExecutionHeader: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<Option<EthTypesExecutionHeaderInfo>>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      /**
+       * We store the hashes of the blocks for the past `hashes_gc_threshold` headers.
+       * Events that happen past this threshold cannot be verified by the client.
+       * It is desirable that this number is larger than 7 days' worth of headers, which is roughly
+       * 51k Ethereum blocks. So this number should be 51k in production.
+       **/
+      hashesGcThreshold: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<u64>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      networkConfigForChain: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<Option<WebbConsensusTypesNetworkConfig>>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      nextSyncCommittee: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<Option<EthTypesEth2SyncCommittee>>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      /**
+       * Mask determining all paused functions
+       **/
+      paused: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<bool>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      /**
+       * If set, only light client updates by the trusted signer will be accepted
+       **/
+      trustedSigner: AugmentedQuery<ApiType, () => Observable<Option<AccountId32>>, []> & QueryableStorageEntry<ApiType, []>;
+      unfinalizedHeadExecutionHeader: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<Option<EthTypesExecutionHeaderInfo>>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      unfinalizedTailExecutionHeader: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<Option<EthTypesExecutionHeaderInfo>>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      /**
+       * Whether the client validates the updates.
+       * Should only be set to `false` for debugging, testing, and diagnostic purposes
+       **/
+      validateUpdates: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<bool>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
+      /**
+       * Whether the client verifies BLS signatures.
+       **/
+      verifyBlsSignatures: AugmentedQuery<ApiType, (arg: WebbProposalsHeaderTypedChainId | { None: any } | { Evm: any } | { Substrate: any } | { PolkadotParachain: any } | { KusamaParachain: any } | { RococoParachain: any } | { Cosmos: any } | { Solana: any } | { Ink: any } | string | Uint8Array) => Observable<bool>, [WebbProposalsHeaderTypedChainId]> & QueryableStorageEntry<ApiType, [WebbProposalsHeaderTypedChainId]>;
       /**
        * Generic query
        **/
@@ -608,6 +758,23 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       [key: string]: QueryableStorageEntry<ApiType>;
     };
+    jobs: {
+      knownResults: AugmentedQuery<ApiType, (arg1: TanglePrimitivesJobsJobKey | 'DKG' | 'DKGSignature' | 'ZkSaaSCircuit' | 'ZkSaaSProve' | number | Uint8Array, arg2: u32 | AnyNumber | Uint8Array) => Observable<Option<TanglePrimitivesJobsPhaseOneResult>>, [TanglePrimitivesJobsJobKey, u32]> & QueryableStorageEntry<ApiType, [TanglePrimitivesJobsJobKey, u32]>;
+      /**
+       * The job-id storage
+       **/
+      nextJobId: AugmentedQuery<ApiType, () => Observable<u32>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * The paused transaction map
+       **/
+      submittedJobs: AugmentedQuery<ApiType, (arg1: TanglePrimitivesJobsJobKey | 'DKG' | 'DKGSignature' | 'ZkSaaSCircuit' | 'ZkSaaSProve' | number | Uint8Array, arg2: u32 | AnyNumber | Uint8Array) => Observable<Option<TanglePrimitivesJobsJobInfo>>, [TanglePrimitivesJobsJobKey, u32]> & QueryableStorageEntry<ApiType, [TanglePrimitivesJobsJobKey, u32]>;
+      validatorJobIdLookup: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Option<Vec<ITuple<[TanglePrimitivesJobsJobKey, u32]>>>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      validatorRewards: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Option<u128>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
     nominationPools: {
       /**
        * Storage for bonded pools.
@@ -749,6 +916,24 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       [key: string]: QueryableStorageEntry<ApiType>;
     };
+    roles: {
+      /**
+       * Mapping of resource to bridge index
+       **/
+      accountRolesMapping: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Vec<TanglePrimitivesRolesRoleType>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
+       * Map from all "controller" accounts to the info regarding the staking.
+       **/
+      ledger: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Option<PalletRolesRoleStakingLedger>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
+       * The minimum re staking bond to become and maintain the role.
+       **/
+      minRestakingBond: AugmentedQuery<ApiType, () => Observable<u128>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
     scheduler: {
       /**
        * Items to be executed, indexed by the block number that they should be executed on.
@@ -787,7 +972,7 @@ declare module '@polkadot/api-base/types/storage' {
       /**
        * The next session keys for a validator.
        **/
-      nextKeys: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Option<TangleMainnetRuntimeOpaqueSessionKeys>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      nextKeys: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Option<TangleTestnetRuntimeOpaqueSessionKeys>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
       /**
        * True if the underlying economic identities or weighting behind the validators
        * has changed in the queued validator set.
@@ -797,7 +982,7 @@ declare module '@polkadot/api-base/types/storage' {
        * The queued keys for the next session. When the next session begins, these keys
        * will be used to determine the validator's session keys.
        **/
-      queuedKeys: AugmentedQuery<ApiType, () => Observable<Vec<ITuple<[AccountId32, TangleMainnetRuntimeOpaqueSessionKeys]>>>, []> & QueryableStorageEntry<ApiType, []>;
+      queuedKeys: AugmentedQuery<ApiType, () => Observable<Vec<ITuple<[AccountId32, TangleTestnetRuntimeOpaqueSessionKeys]>>>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * The current set of validators.
        **/
@@ -1208,6 +1393,13 @@ declare module '@polkadot/api-base/types/storage' {
        * Information regarding the vesting of a given account.
        **/
       vesting: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Option<Vec<PalletVestingVestingInfo>>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    zkSaaS: {
+      feeInfo: AugmentedQuery<ApiType, () => Observable<PalletZksaasFeeInfo>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * Generic query
        **/

@@ -11,6 +11,28 @@ export type __AugmentedError<ApiType extends ApiTypes> = AugmentedError<ApiType>
 
 declare module '@polkadot/api-base/types/errors' {
   interface AugmentedErrors<ApiType extends ApiTypes> {
+    babe: {
+      /**
+       * A given equivocation report is valid but already previously reported.
+       **/
+      DuplicateOffenceReport: AugmentedError<ApiType>;
+      /**
+       * Submitted configuration is invalid.
+       **/
+      InvalidConfiguration: AugmentedError<ApiType>;
+      /**
+       * An equivocation proof provided as part of an equivocation report is invalid.
+       **/
+      InvalidEquivocationProof: AugmentedError<ApiType>;
+      /**
+       * A key ownership proof provided as part of an equivocation report is invalid.
+       **/
+      InvalidKeyOwnershipProof: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     bagsList: {
       /**
        * A error in the list interface implementation.
@@ -328,6 +350,52 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    dkg: {
+      /**
+       * Cannot retreive signers from the signature
+       **/
+      CannotRetreiveSigner: AugmentedError<ApiType>;
+      /**
+       * Duplicate signature found in submission
+       **/
+      DuplicateSignature: AugmentedError<ApiType>;
+      /**
+       * Unexpected job type
+       **/
+      InvalidJobType: AugmentedError<ApiType>;
+      /**
+       * Invalid participant public key
+       **/
+      InvalidParticipantPublicKey: AugmentedError<ApiType>;
+      /**
+       * Invalid signature submitted
+       **/
+      InvalidSignature: AugmentedError<ApiType>;
+      /**
+       * The signers have signed different data
+       **/
+      InvalidSignatureData: AugmentedError<ApiType>;
+      /**
+       * No participants found
+       **/
+      NoParticipantsFound: AugmentedError<ApiType>;
+      /**
+       * No signatures found
+       **/
+      NoSignaturesFound: AugmentedError<ApiType>;
+      /**
+       * Not enough signers for threshold
+       **/
+      NotEnoughSigners: AugmentedError<ApiType>;
+      /**
+       * Signed with a different key
+       **/
+      SigningKeyMismatch: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     electionProviderMultiPhase: {
       /**
        * Some bound not met
@@ -459,6 +527,99 @@ declare module '@polkadot/api-base/types/errors' {
        * Cannot vote when no candidates or members exist.
        **/
       UnableToVote: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    eth2Client: {
+      /**
+       * The active header slot number should be higher than the finalized slot
+       **/
+      ActiveHeaderSlotLessThanFinalizedSlot: AugmentedError<ApiType>;
+      /**
+       * The light client is already initialized for the typed chain ID
+       **/
+      AlreadyInitialized: AugmentedError<ApiType>;
+      /**
+       * Block already submitted
+       **/
+      BlockAlreadySubmitted: AugmentedError<ApiType>;
+      /**
+       * The block hash does not match the expected block hash
+       **/
+      BlockHashesDoNotMatch: AugmentedError<ApiType>;
+      /**
+       * The chain cannot be closed
+       **/
+      ChainCannotBeClosed: AugmentedError<ApiType>;
+      CurrentSyncCommitteeNotSet: AugmentedError<ApiType>;
+      FinalizedBeaconHeaderNotPresent: AugmentedError<ApiType>;
+      FinalizedExecutionHeaderNotPresent: AugmentedError<ApiType>;
+      /**
+       * "The `hashes_gc_threshold` is not enough to be able to apply gc correctly"
+       **/
+      HashesGcThresholdInsufficient: AugmentedError<ApiType>;
+      HeaderHashDoesNotExist: AugmentedError<ApiType>;
+      /**
+       * Failed to verify the bls signature
+       **/
+      InvalidBlsSignature: AugmentedError<ApiType>;
+      /**
+       * The current client mode is invalid for the action.
+       **/
+      InvalidClientMode: AugmentedError<ApiType>;
+      InvalidExecutionBlock: AugmentedError<ApiType>;
+      /**
+       * Invalid execution block hash proof
+       **/
+      InvalidExecutionBlockHashProof: AugmentedError<ApiType>;
+      /**
+       * Invalid finality proof
+       **/
+      InvalidFinalityProof: AugmentedError<ApiType>;
+      InvalidNetworkConfig: AugmentedError<ApiType>;
+      InvalidNextSyncCommitteeProof: AugmentedError<ApiType>;
+      InvalidSignaturePeriod: AugmentedError<ApiType>;
+      InvalidSyncCommitteeBitsSum: AugmentedError<ApiType>;
+      /**
+       * The acceptable update periods are not met.
+       **/
+      InvalidUpdatePeriod: AugmentedError<ApiType>;
+      /**
+       * For attempting to update the light client
+       **/
+      LightClientUpdateNotAllowed: AugmentedError<ApiType>;
+      NextSyncCommitteeNotPresent: AugmentedError<ApiType>;
+      NextSyncCommitteeNotSet: AugmentedError<ApiType>;
+      /**
+       * Self-explanatory
+       **/
+      NotTrustedSigner: AugmentedError<ApiType>;
+      SyncCommitteeBitsSumLessThanThreshold: AugmentedError<ApiType>;
+      SyncCommitteeUpdateNotPresent: AugmentedError<ApiType>;
+      /**
+       * The client can't be executed in the trustless mode without BLS sigs verification on
+       * Mainnet
+       **/
+      TrustlessModeError: AugmentedError<ApiType>;
+      UnfinalizedHeaderNotPresent: AugmentedError<ApiType>;
+      /**
+       * Unknown parent block header hash
+       **/
+      UnknownParentHeader: AugmentedError<ApiType>;
+      /**
+       * The attested header slot should be equal to or higher than the finalized header slot
+       **/
+      UpdateHeaderSlotLessThanFinalizedHeaderSlot: AugmentedError<ApiType>;
+      /**
+       * The signature slot should be higher than the attested header slot
+       **/
+      UpdateSignatureSlotLessThanAttestedHeaderSlot: AugmentedError<ApiType>;
+      /**
+       * The updates validation can't be disabled for mainnet
+       **/
+      ValidateUpdatesParameterError: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -692,6 +853,72 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    jobs: {
+      /**
+       * empty job
+       **/
+      EmptyJob: AugmentedError<ApiType>;
+      /**
+       * empty result
+       **/
+      EmptyResult: AugmentedError<ApiType>;
+      /**
+       * invalid params, cannot execute jobs
+       **/
+      InvalidJobParams: AugmentedError<ApiType>;
+      /**
+       * invalid phase provided
+       **/
+      InvalidJobPhase: AugmentedError<ApiType>;
+      /**
+       * Given validator not valid for job type
+       **/
+      InvalidValidator: AugmentedError<ApiType>;
+      /**
+       * Invalid job expiry input
+       **/
+      JobAlreadyExpired: AugmentedError<ApiType>;
+      /**
+       * The requested job was not found
+       **/
+      JobNotFound: AugmentedError<ApiType>;
+      /**
+       * No permission to change permitted caller
+       **/
+      NoPermission: AugmentedError<ApiType>;
+      /**
+       * no rewards found for validator
+       **/
+      NoRewards: AugmentedError<ApiType>;
+      /**
+       * Not enough validators to exit
+       **/
+      NotEnoughValidators: AugmentedError<ApiType>;
+      /**
+       * P1 result not found
+       **/
+      PhaseOneResultNotFound: AugmentedError<ApiType>;
+      /**
+       * cannot find phase 1 result
+       **/
+      PreviousResultNotFound: AugmentedError<ApiType>;
+      /**
+       * The previous result expired
+       **/
+      ResultExpired: AugmentedError<ApiType>;
+      /**
+       * Unexpected result provided
+       **/
+      ResultNotExpectedType: AugmentedError<ApiType>;
+      /**
+       * Validator metadata not found
+       **/
+      ValidatorMetadataNotFound: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     nominationPools: {
       /**
        * An account is already delegating in another pool. An account may only belong to one
@@ -855,6 +1082,61 @@ declare module '@polkadot/api-base/types/errors' {
        * Preimage is too large to store on-chain.
        **/
       TooBig: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    roles: {
+      /**
+       * Invalid Restaking amount, should not exceed total staked amount.
+       **/
+      ExceedsMaxRestakeValue: AugmentedError<ApiType>;
+      /**
+       * Validator has active role assigned.
+       **/
+      HasRoleAssigned: AugmentedError<ApiType>;
+      /**
+       * Re staking amount should be greater than minimum Restaking bond requirement.
+       **/
+      InsufficientRestakingBond: AugmentedError<ApiType>;
+      /**
+       * Max role limit reached for the account.
+       **/
+      MaxRoles: AugmentedError<ApiType>;
+      /**
+       * Stash controller account not found in Roles Ledger.
+       **/
+      NoProfileFound: AugmentedError<ApiType>;
+      /**
+       * Not a validator.
+       **/
+      NotValidator: AugmentedError<ApiType>;
+      /**
+       * Profile already exists for given validator account.
+       **/
+      ProfileAlreadyExists: AugmentedError<ApiType>;
+      /**
+       * Profile delete request failed due to pending jobs, which can't be opted out at the
+       * moment.
+       **/
+      ProfileDeleteRequestFailed: AugmentedError<ApiType>;
+      /**
+       * Profile Update failed.
+       **/
+      ProfileUpdateFailed: AugmentedError<ApiType>;
+      /**
+       * Restaking amount cannot be lowered if there are any pending jobs. You can only add more
+       **/
+      RestakingAmountCannotBeUpdated: AugmentedError<ApiType>;
+      /**
+       * Role cannot due to pending jobs, which can't be opted out at the moment.
+       **/
+      RoleCannotBeRemoved: AugmentedError<ApiType>;
+      /**
+       * Given role is not assigned to the validator.
+       **/
+      RoleNotAssigned: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -1139,6 +1421,25 @@ declare module '@polkadot/api-base/types/errors' {
        * An index was out of bounds of the vesting schedules.
        **/
       ScheduleIndexOutOfBounds: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    zkSaaS: {
+      /**
+       * Unexpected job type
+       **/
+      InvalidJobType: AugmentedError<ApiType>;
+      /**
+       * Invalid proof
+       **/
+      InvalidProof: AugmentedError<ApiType>;
+      /**
+       * Malformed Proof
+       * if the proof bytes is not correct.
+       **/
+      MalformedProof: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
