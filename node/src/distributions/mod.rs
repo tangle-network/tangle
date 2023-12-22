@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity)]
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 //
@@ -13,11 +14,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use pallet_airdrop_claims::{MultiAddress, StatementKind};
-use tangle_primitives::{Balance, BlockNumber};
 use self::mainnet::DistributionResult;
-use fp_evm::GenesisAccount;
-use sp_core::H160;
+
+use pallet_airdrop_claims::{MultiAddress, StatementKind};
+
+use tangle_primitives::{Balance, BlockNumber};
 
 pub mod develop;
 pub mod mainnet;
@@ -36,7 +37,7 @@ pub fn combine_distributions<T>(distributions: Vec<Vec<T>>) -> Vec<T> {
 pub fn get_unique_distribution_results(
 	distribution_results: Vec<DistributionResult>,
 ) -> DistributionResult {
-	assert!(distribution_results.len() > 0);
+	assert!(!distribution_results.is_empty());
 	let vesting_lengths: Vec<BlockNumber> =
 		distribution_results.iter().map(|result| result.vesting_length).collect();
 	let vesting_cliffs: Vec<BlockNumber> =
@@ -44,17 +45,10 @@ pub fn get_unique_distribution_results(
 	assert!(vesting_lengths.windows(2).all(|w| w[0] == w[1]), "Vesting lengths are not equal.");
 	assert!(vesting_cliffs.windows(2).all(|w| w[0] == w[1]), "Vesting cliffs are not equal.");
 
-	let combined_claims: Vec<(MultiAddress, Balance, Option<StatementKind>)> = distribution_results
-		.iter()
-		.map(|result| result.claims.clone())
-		.flatten()
-		.collect();
+	let combined_claims: Vec<(MultiAddress, Balance, Option<StatementKind>)> =
+		distribution_results.iter().flat_map(|result| result.claims.clone()).collect();
 	let combined_vesting: Vec<(MultiAddress, Vec<(Balance, Balance, BlockNumber)>)> =
-		distribution_results
-			.iter()
-			.map(|result| result.vesting.clone())
-			.flatten()
-			.collect();
+		distribution_results.iter().flat_map(|result| result.vesting.clone()).collect();
 
 	let mut unique_claims = std::collections::HashMap::new();
 	for (address, balance, statement) in combined_claims {

@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity)]
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 //
@@ -112,7 +113,7 @@ fn mainnet_genesis(
 	// stakers: all validators and nominators.
 	let stakers = initial_authorities
 		.iter()
-		.map(|x| (x.0.clone(), x.0.clone(), 1 * ONE_TOKEN, StakerStatus::Validator))
+		.map(|x| (x.0.clone(), x.0.clone(), ONE_TOKEN, StakerStatus::Validator))
 		.collect();
 
 	let vesting_claims: Vec<(
@@ -145,15 +146,13 @@ fn mainnet_genesis(
 				// 		MultiAddress::Native(_) => true,
 				// 	}
 				// })
-				.map(|(x, y, _, _, _)| (x.clone().to_account_id_32(), y.clone()))
+				.map(|(x, y, _, _, _)| (x.clone().to_account_id_32(), *y))
 				.collect(),
 		},
 		vesting: VestingConfig {
 			vesting: genesis_non_airdrop
 				.iter()
-				.map(|(x, _, a, b, c)| {
-					(x.clone().to_account_id_32(), a.clone(), b.clone(), c.clone())
-				})
+				.map(|(x, _, a, b, c)| (x.clone().to_account_id_32(), *a, *b, *c))
 				.collect(),
 		},
 		indices: Default::default(),

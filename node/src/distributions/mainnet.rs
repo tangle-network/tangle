@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity)]
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 //
@@ -92,9 +93,9 @@ pub fn get_edgeware_genesis_balance_distribution() -> DistributionResult {
 	let endowment = ONE_PERCENT_TOTAL_SUPPLY / list.len() as u128;
 	let edgeware_genesis_list: Vec<(MultiAddress, u128)> = list
 		.into_iter()
-		.map(|address| ((MultiAddress::EVM(EthereumAddress(address.0)), endowment)))
+		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), endowment))
 		.collect();
-	return get_distribution_for(
+	get_distribution_for(
 		edgeware_genesis_list,
 		Some(StatementKind::Regular),
 		ONE_MONTH_BLOCKS,
@@ -105,23 +106,23 @@ pub fn get_edgeware_genesis_balance_distribution() -> DistributionResult {
 pub fn get_leaderboard_balance_distribution() -> DistributionResult {
 	let discord_list: Vec<(MultiAddress, u64)> = get_discord_list()
 		.into_iter()
-		.map(|address| ((MultiAddress::EVM(EthereumAddress(address.0)), ONE_HUNDRED_POINTS)))
+		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), ONE_HUNDRED_POINTS))
 		.collect();
 
 	let leaderboard_points: Vec<(MultiAddress, u64)> = vec![];
 	let points_list = discord_list
 		.into_iter()
-		.chain(leaderboard_points.into_iter())
+		.chain(leaderboard_points)
 		.collect::<Vec<(MultiAddress, u64)>>();
 	let total_points = points_list.iter().map(|(_, points)| points).sum::<u64>();
 	let combined_balances: Vec<(MultiAddress, u128)> = points_list
 		.into_iter()
 		.map(|(address, points)| {
-			(address, (points as u128 * ONE_PERCENT_TOTAL_SUPPLY as u128) / total_points as u128)
+			(address, (points as u128 * ONE_PERCENT_TOTAL_SUPPLY) / total_points as u128)
 		})
 		.collect();
 
-	return get_distribution_for(
+	get_distribution_for(
 		combined_balances,
 		Some(StatementKind::Regular),
 		ONE_MONTH_BLOCKS,
@@ -138,17 +139,12 @@ pub fn get_substrate_balance_distribution() -> DistributionResult {
 		})
 		.collect();
 
-	return get_distribution_for(
-		arr,
-		Some(StatementKind::Regular),
-		ONE_MONTH_BLOCKS,
-		TWO_YEARS_BLOCKS,
-	)
+	get_distribution_for(arr, Some(StatementKind::Regular), ONE_MONTH_BLOCKS, TWO_YEARS_BLOCKS)
 }
 
 pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
 	let investor_accounts: Vec<(MultiAddress, u128)> = vec![];
-	return investor_accounts
+	investor_accounts
 		.into_iter()
 		.map(|(address, value)| {
 			(
@@ -164,7 +160,7 @@ pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64,
 
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
 	let team_accounts: Vec<(MultiAddress, u128)> = vec![];
-	return team_accounts
+	team_accounts
 		.into_iter()
 		.map(|(address, value)| {
 			(
