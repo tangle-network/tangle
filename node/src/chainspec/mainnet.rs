@@ -140,12 +140,6 @@ fn mainnet_genesis(
 		balances: BalancesConfig {
 			balances: genesis_non_airdrop
 				.iter()
-				// .filter(|(x, y, _)| {
-				// 	match x {
-				// 		MultiAddress::EVM(_) => false,
-				// 		MultiAddress::Native(_) => true,
-				// 	}
-				// })
 				.map(|(x, y, _, _, _)| (x.clone().to_account_id_32(), *y))
 				.collect(),
 		},

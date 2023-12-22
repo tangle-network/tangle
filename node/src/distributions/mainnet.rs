@@ -49,6 +49,16 @@ pub fn get_edgeware_genesis_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/edgeware_genesis_participants.json")
 }
 
+pub fn get_faucet_evm_list() -> Vec<H160> {
+	read_contents_to_evm_accounts("node/src/distributions/data/evm_faucet_addresses.json")
+}
+
+pub fn get_faucet_substrate_list() -> Vec<AccountId32> {
+	super::testnet::read_contents_to_substrate_accounts(
+		"node/src/distributions/data/substrate_faucet_addresses.json",
+	)
+}
+
 fn get_edgeware_snapshot_list() -> BTreeMap<AccountId32, f64> {
 	read_contents_to_substrate_accounts(
 		"node/src/distributions/data/edgeware_snapshot_distribution.json",
@@ -109,11 +119,25 @@ pub fn get_leaderboard_balance_distribution() -> DistributionResult {
 		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), ONE_HUNDRED_POINTS))
 		.collect();
 
+	let faucet_evm_list: Vec<(MultiAddress, u64)> = get_faucet_evm_list()
+		.into_iter()
+		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), ONE_HUNDRED_POINTS))
+		.collect();
+
+	let faucet_substrate_list: Vec<(MultiAddress, u64)> = get_faucet_substrate_list()
+		.into_iter()
+		.map(|address| (MultiAddress::Native(address), ONE_HUNDRED_POINTS))
+		.collect();
+
 	let leaderboard_points: Vec<(MultiAddress, u64)> = vec![];
+	// Chain all point lists together
 	let points_list = discord_list
 		.into_iter()
 		.chain(leaderboard_points)
+		.chain(faucet_evm_list)
+		.chain(faucet_substrate_list)
 		.collect::<Vec<(MultiAddress, u64)>>();
+	// Sum all the points
 	let total_points = points_list.iter().map(|(_, points)| points).sum::<u64>();
 	let combined_balances: Vec<(MultiAddress, u128)> = points_list
 		.into_iter()
