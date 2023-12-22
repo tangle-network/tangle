@@ -20,16 +20,22 @@ use crate::{
 };
 use core::marker::PhantomData;
 use hex_literal::hex;
+use pallet_airdrop_claims::{MultiAddress, StatementKind};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{sr25519, Pair, Public, H160};
-use sp_runtime::traits::{IdentifyAccount, Verify};
+use sp_runtime::{
+	traits::{AccountIdConversion, IdentifyAccount, Verify},
+	BoundedVec,
+};
+use tangle_primitives::BlockNumber;
 use tangle_testnet_runtime::{
-	AccountId, BabeConfig, Balance, BalancesConfig, EVMChainIdConfig, EVMConfig, ElectionsConfig,
-	Eth2ClientConfig, ImOnlineConfig, MaxNominations, Perbill, RuntimeGenesisConfig, SessionConfig,
-	Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT, WASM_BINARY,
+	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
+	ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxNominations, MaxVestingSchedules,
+	Perbill, RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig,
+	SudoConfig, SystemConfig, TreasuryPalletId, UNIT, WASM_BINARY,
 };
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
@@ -251,6 +257,21 @@ fn testnet_genesis(
 		.collect::<Vec<_>>();
 
 	let num_endowed_accounts = endowed_accounts.len();
+	let claims: Vec<(MultiAddress, Balance, Option<StatementKind>)> = endowed_accounts
+		.iter()
+		.map(|x| (MultiAddress::Native(x.clone()), ENDOWMENT, Some(StatementKind::Regular)))
+		.collect();
+	let vesting_claims: Vec<(
+		MultiAddress,
+		BoundedVec<(Balance, Balance, BlockNumber), MaxVestingSchedules>,
+	)> = endowed_accounts
+		.iter()
+		.map(|x| {
+			let mut bounded_vec = BoundedVec::new();
+			bounded_vec.try_push((ENDOWMENT, ENDOWMENT, 0)).unwrap();
+			(MultiAddress::Native(x.clone()), bounded_vec)
+		})
+		.collect();
 	RuntimeGenesisConfig {
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
@@ -330,6 +351,13 @@ fn testnet_genesis(
 			],
 			phantom: PhantomData,
 		},
-		claims: Default::default(),
+		claims: ClaimsConfig {
+			claims,
+			vesting: vesting_claims,
+			expiry: Some((
+				200u64,
+				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
+			)),
+		},
 	}
 }
