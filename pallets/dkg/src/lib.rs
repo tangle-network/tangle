@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2023 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Webb Technologies Inc.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
 #![cfg_attr(not(feature = "std"), no_std)]
 //! # Pallet-DKG
 //!

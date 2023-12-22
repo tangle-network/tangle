@@ -1,4 +1,5 @@
-// Copyright 2022 Webb Technologies Inc.
+// This file is part of Tangle.
+// Copyright (C) 2022-2024 Webb Technologies Inc.
 //
 // This file is part of Utils package, originally developed by Purestake Inc.
 // Utils package used in Tangle Network in terms of GPLv3.
