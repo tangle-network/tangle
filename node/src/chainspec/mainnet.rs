@@ -1,4 +1,3 @@
-#![allow(clippy::type_complexity)]
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 //
@@ -13,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+#![allow(clippy::type_complexity)]
 
 use crate::{
 	distributions::{
