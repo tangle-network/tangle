@@ -15,7 +15,6 @@
 
 #![allow(clippy::type_complexity)]
 
-use std::collections::BTreeMap;
 use crate::{
 	distributions::{combine_distributions, develop, testnet},
 	testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key},
@@ -32,6 +31,7 @@ use sp_runtime::{
 	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
 };
+use std::collections::BTreeMap;
 use tangle_primitives::BlockNumber;
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,

@@ -53,7 +53,6 @@ pub fn get_faucet_evm_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/evm_faucet_addresses.json")
 }
 
-
 pub fn get_bridge_evm_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/evm_bridge_addresses.json")
 }
@@ -134,7 +133,6 @@ pub fn get_leaderboard_balance_distribution() -> DistributionResult {
 		.map(|address| (MultiAddress::Native(address), ONE_HUNDRED_POINTS))
 		.collect();
 
-
 	let bridge_evm_list: Vec<(MultiAddress, u64)> = get_bridge_evm_list()
 		.into_iter()
 		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), ONE_HUNDRED_POINTS))
@@ -147,7 +145,7 @@ pub fn get_leaderboard_balance_distribution() -> DistributionResult {
 		.chain(leaderboard_points)
 		.chain(faucet_evm_list)
 		.chain(faucet_substrate_list)
-        .chain(bridge_evm_list)
+		.chain(bridge_evm_list)
 		.collect::<Vec<(MultiAddress, u64)>>();
 	// Sum all the points
 	let total_points = points_list.iter().map(|(_, points)| points).sum::<u64>();
