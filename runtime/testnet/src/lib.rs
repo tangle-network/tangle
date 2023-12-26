@@ -109,8 +109,8 @@ pub use tangle_primitives::{
 	traits::jobs::{JobToFee, MPCHandler},
 	verifier::{arkworks::ArkworksVerifierGroth16Bn254, circom::CircomVerifierGroth16Bn254},
 	AccountId, AccountIndex, Address, BabeId, Balance, BlockNumber, Hash, Header, Index, Moment,
-	Signature, AVERAGE_ON_INITIALIZE_RATIO, EPOCH_DURATION_IN_BLOCKS, MAXIMUM_BLOCK_WEIGHT,
-	NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS, UNSIGNED_PROPOSAL_EXPIRY,
+	Signature, AVERAGE_ON_INITIALIZE_RATIO, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO,
+	SESSION_PERIOD_BLOCKS, UNSIGNED_PROPOSAL_EXPIRY,
 };
 
 use pallet_airdrop_claims::TestWeightInfo;

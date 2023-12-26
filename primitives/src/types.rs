@@ -56,8 +56,6 @@ pub type Address = MultiAddress<AccountId, Index>;
 // Moment
 pub type Moment = u64;
 
-pub const EPOCH_DURATION_IN_BLOCKS: u64 = 10 * crate::time::MINUTES;
-
 impl From<WrappedAccountId32> for AccountId32 {
 	fn from(x: WrappedAccountId32) -> Self {
 		AccountId32::new(x.0)
