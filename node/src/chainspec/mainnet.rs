@@ -28,18 +28,53 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_runtime::{traits::AccountIdConversion, BoundedVec};
-use tangle_primitives::BlockNumber;
+use sp_core::{sr25519, Pair, Public};
+use sp_runtime::{
+	traits::{AccountIdConversion, IdentifyAccount, Verify},
+	BoundedVec,
+};
+use tangle_primitives::{BlockNumber, Signature};
 use tangle_runtime::{
-	AccountId, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, Eth2ClientConfig,
-	ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig, SessionConfig,
-	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig,
-	WASM_BINARY,
+	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig,
+	Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig,
+	SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId,
+	VestingConfig, UNIT, WASM_BINARY,
 };
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
+
+/// Generate a crypto pair from seed.
+pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
+	TPublic::Pair::from_string(&format!("//{seed}"), None)
+		.expect("static values are valid; qed")
+		.public()
+}
+
+type AccountPublic = <Signature as Verify>::Signer;
+
+/// Generate an account ID from seed.
+pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
+where
+	AccountPublic: From<<TPublic::Pair as Pair>::Public>,
+{
+	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
+}
+
+/// Generate an babe authority key.
+pub fn authority_keys_from_seed(
+	controller: &str,
+	stash: &str,
+) -> (AccountId, AccountId, BabeId, GrandpaId, ImOnlineId) {
+	(
+		get_account_id_from_seed::<sr25519::Public>(controller),
+		get_account_id_from_seed::<sr25519::Public>(stash),
+		get_from_seed::<BabeId>(controller),
+		get_from_seed::<GrandpaId>(controller),
+		get_from_seed::<ImOnlineId>(stash),
+	)
+}
 
 /// Generate the session keys from individual elements.
 ///
@@ -51,6 +86,66 @@ fn generate_session_keys(
 	im_online: ImOnlineId,
 ) -> tangle_runtime::opaque::SessionKeys {
 	tangle_runtime::opaque::SessionKeys { grandpa, babe, im_online }
+}
+
+pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 4006.into());
+	// TODO: use mainnet ss58Format
+	properties.insert("ss58Format".into(), 42.into());
+
+	Ok(ChainSpec::from_genesis(
+		"Local Tangle Mainnet",
+		"local-tangle-mainnet",
+		ChainType::Local,
+		move || {
+			mainnet_genesis(
+				// Wasm binary
+				wasm_binary,
+				// Initial validators
+				vec![
+					authority_keys_from_seed("Alice", "Alice//stash"),
+					authority_keys_from_seed("Bob", "Bob//stash"),
+				],
+				// Endowed accounts
+				vec![
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie"),
+				],
+				// Sudo account
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				// EVM chain ID
+				chain_id,
+				// Genesis airdrop distribution (pallet-claims)
+				get_unique_distribution_results(vec![
+					mainnet::get_edgeware_genesis_balance_distribution(),
+					mainnet::get_leaderboard_balance_distribution(),
+					mainnet::get_substrate_balance_distribution(),
+					mainnet::get_local_balance_distribution(),
+				]),
+				// Genesis investor / team distribution (pallet-balances + pallet-vesting)
+				combine_distributions(vec![
+					mainnet::get_team_balance_distribution(),
+					mainnet::get_investor_balance_distribution(),
+				]),
+			)
+		},
+		// Bootnodes
+		vec![],
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// Fork id
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		None,
+	))
 }
 
 pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -69,6 +164,8 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				wasm_binary,
 				// Initial validators
 				get_initial_authorities(),
+				// Endowed accounts
+				vec![],
 				// Sudo account
 				get_root_key(),
 				// EVM chain ID
@@ -106,11 +203,13 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 fn mainnet_genesis(
 	wasm_binary: &[u8],
 	initial_authorities: Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)>,
+	endowed_accounts: Vec<AccountId>,
 	root_key: AccountId,
 	chain_id: u64,
 	genesis_airdrop: DistributionResult,
 	genesis_non_airdrop: Vec<(MultiAddress, u128, u64, u64, u128)>,
 ) -> RuntimeGenesisConfig {
+	const ENDOWMENT: Balance = 10_000_000 * UNIT;
 	// stakers: all validators and nominators.
 	let stakers = initial_authorities
 		.iter()
@@ -142,6 +241,7 @@ fn mainnet_genesis(
 			balances: genesis_non_airdrop
 				.iter()
 				.map(|(x, y, _, _, _)| (x.clone().to_account_id_32(), *y))
+				.chain(endowed_accounts.iter().map(|k| (k.clone(), ENDOWMENT)))
 				.collect(),
 		},
 		vesting: VestingConfig {
@@ -175,7 +275,10 @@ fn mainnet_genesis(
 		council: Default::default(),
 		elections: Default::default(),
 		treasury: Default::default(),
-		babe: Default::default(),
+		babe: BabeConfig {
+			epoch_config: Some(tangle_runtime::BABE_GENESIS_EPOCH_CONFIG),
+			..Default::default()
+		},
 		grandpa: Default::default(),
 		im_online: ImOnlineConfig { keys: vec![] },
 		nomination_pools: Default::default(),
