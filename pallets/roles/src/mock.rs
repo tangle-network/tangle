@@ -28,7 +28,7 @@ use frame_support::{
 use pallet_session::{historical as pallet_session_historical, TestSessionHandler};
 use sp_core::H256;
 use sp_runtime::{
-	testing::{Header, UintAuthorityId},
+	testing::{Header, RoleKeyId},
 	traits::{ConvertInto, IdentityLookup},
 	BuildStorage, DispatchResult, Perbill, Percent,
 };
@@ -36,6 +36,7 @@ use sp_staking::{
 	offence::{OffenceError, ReportOffence},
 	SessionIndex,
 };
+use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{jobs::*, roles::ValidatorRewardDistribution, traits::jobs::MPCHandler};
 pub type AccountId = u64;
 pub type Balance = u128;
@@ -169,13 +170,13 @@ impl Contains<RuntimeCall> for BaseFilter {
 
 sp_runtime::impl_opaque_keys! {
 	pub struct MockSessionKeys {
-		pub dummy: UintAuthorityId,
+		pub role: RoleKeyId,
 	}
 }
 
-impl From<UintAuthorityId> for MockSessionKeys {
-	fn from(dummy: UintAuthorityId) -> Self {
-		Self { dummy }
+impl From<RoleKeyId> for MockSessionKeys {
+	fn from(role: RoleKeyId) -> Self {
+		Self { role }
 	}
 }
 
@@ -282,7 +283,7 @@ impl Config for Runtime {
 	type MaxRolesPerAccount = ConstU32<2>;
 	type MPCHandler = MockMPCHandler;
 	type InflationRewardPerSession = InflationRewardPerSession;
-	type AuthorityId = UintAuthorityId;
+	type RoleKeyId = RoleKeyId;
 	type ValidatorRewardDistribution = Reward;
 	type ValidatorSet = Historical;
 	type ReportOffences = OffenceHandler;
@@ -338,7 +339,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 	let session_keys: Vec<_> = authorities
 		.iter()
-		.map(|id| (*id, *id, MockSessionKeys { dummy: UintAuthorityId(*id) }))
+		.map(|id| (*id, *id, MockSessionKeys { role: RoleKeyId(*id) }))
 		.collect();
 
 	pallet_session::GenesisConfig::<Runtime> { keys: session_keys }

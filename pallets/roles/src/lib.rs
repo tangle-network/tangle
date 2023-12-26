@@ -28,6 +28,7 @@ use tangle_primitives::roles::ValidatorRewardDistribution;
 pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
+use sp_core::ecdsa;
 use sp_runtime::{traits::Zero, Saturating};
 use sp_staking::offence::ReportOffence;
 use sp_std::{collections::btree_map::BTreeMap, convert::TryInto, prelude::*, vec};
@@ -126,6 +127,16 @@ pub mod pallet {
 		/// The overarching event type.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
+		/// Authority identifier type
+		type RoleKeyId: Member
+			+ Parameter
+			+ RuntimeAppPublic
+			+ MaybeSerializeDeserialize
+			+ AsRef<[u8]>
+			+ Into<ecdsa::Public>
+			+ From<ecdsa::Public>
+			+ MaxEncodedLen;
+
 		/// The job manager mechanism.
 		type JobsHandler: JobsHandler<Self::AccountId>;
 
@@ -141,9 +152,6 @@ pub mod pallet {
 
 		/// The inflation distribution based on validator type
 		type ValidatorRewardDistribution: Get<ValidatorRewardDistribution>;
-
-		/// The type used to identify an authority
-		type AuthorityId: RuntimeAppPublic + Decode;
 
 		/// A type for retrieving the validators supposed to be online in a session.
 		type ValidatorSet: ValidatorSetWithIdentification<Self::AccountId>;

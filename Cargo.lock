@@ -8822,6 +8822,7 @@ dependencies = [
  "sp-runtime 24.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-staking",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+ "tangle-crypto-primitives",
  "tangle-primitives",
 ]
 
@@ -15008,6 +15009,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "tangle-crypto-primitives"
+version = "0.5.0"
+dependencies = [
+ "parity-scale-codec",
+ "scale-info",
+ "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+]
+
+[[package]]
 name = "tangle-primitives"
 version = "0.5.0"
 dependencies = [
@@ -15150,6 +15160,7 @@ dependencies = [
  "sp-version",
  "static_assertions",
  "substrate-wasm-builder",
+ "tangle-crypto-primitives",
  "tangle-primitives",
 ]
 
@@ -15252,6 +15263,7 @@ dependencies = [
  "sp-version",
  "static_assertions",
  "substrate-wasm-builder",
+ "tangle-crypto-primitives",
  "tangle-primitives",
 ]
 

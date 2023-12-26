@@ -67,6 +67,7 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -185,6 +186,7 @@ pub mod opaque {
 			pub babe: Babe,
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
+			pub role: Roles,
 		}
 	}
 }
@@ -1112,6 +1114,7 @@ parameter_types! {
 impl pallet_roles::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type JobsHandler = Jobs;
+	type RoleKeyId = RoleKeyId;
 	type MaxRolesPerAccount = ConstU32<2>;
 	type MPCHandler = MockMPCHandler;
 	type InflationRewardPerSession = InflationRewardPerSession;

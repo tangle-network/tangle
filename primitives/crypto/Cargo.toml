@@ -1,0 +1,21 @@
+[package]
+name = "tangle-crypto-primitives"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+sp-application-crypto = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+  "parity-scale-codec/std",
+  "scale-info/std",
+  "sp-application-crypto/std",
+]
