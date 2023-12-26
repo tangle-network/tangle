@@ -67,7 +67,7 @@ fn set_fees_works() {
 }
 
 #[test]
-fn role_key_verifcation_works_for_ecdsa() {
+fn dkg_key_verifcation_works_for_ecdsa() {
 	new_test_ext().execute_with(|| {
 		let job_to_verify = DKGResult {
 			key_type: DkgKeyType::Ecdsa,
@@ -151,7 +151,7 @@ fn role_key_verifcation_works_for_ecdsa() {
 }
 
 #[test]
-fn role_key_verifcation_works_for_schnorr() {
+fn dkg_key_verifcation_works_for_schnorr() {
 	new_test_ext().execute_with(|| {
 		let job_to_verify = DKGResult {
 			key_type: DkgKeyType::Schnorr,
