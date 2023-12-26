@@ -17,6 +17,7 @@ sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 tangle-primitives = { workspace = true, default-features = false }
+tangle-crypto-primitives = { workspace = true, default-features = false }
 
 [dev-dependencies]
 ethereum = { workspace = true, features = ["with-codec"] }
@@ -29,7 +30,6 @@ pallet-timestamp = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 smallvec = { workspace = true }
-sp-application-crypto = { workspace = true }
 sp-io = { workspace = true }
 sp-keystore = { workspace = true }
 
@@ -61,6 +61,7 @@ std = [
   "sp-core/std",
   "sp-std/std",
   "tangle-primitives/std",
+  "tangle-crypto-primitives/std",
   "pallet-balances/std",
   "pallet-timestamp/std",
   "fp-account/std",

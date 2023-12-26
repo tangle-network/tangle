@@ -20,28 +20,27 @@ use sp_core::{crypto::ByteArray, ecdsa, keccak_256, sr25519};
 use sp_io::crypto::{ecdsa_generate, ecdsa_sign_prehashed, sr25519_generate, sr25519_sign};
 use tangle_primitives::jobs::{DKGResult, DKGSignatureResult, DkgKeyType, JobResult};
 
-/// Key type for DKG keys
-pub const KEY_TYPE: sp_application_crypto::KeyTypeId = sp_application_crypto::KeyTypeId(*b"wdkg");
-
 fn mock_pub_key_ecdsa() -> ecdsa::Public {
-	ecdsa_generate(KEY_TYPE, None)
+	ecdsa_generate(tangle_crypto_primitives::ROLE_KEY_TYPE, None)
 }
 
 fn mock_pub_key_sr25519() -> sr25519::Public {
-	sr25519_generate(KEY_TYPE, None)
+	sr25519_generate(tangle_crypto_primitives::ROLE_KEY_TYPE, None)
 }
 
-fn mock_signature_ecdsa(pub_key: ecdsa::Public, dkg_key: ecdsa::Public) -> Vec<u8> {
-	let msg = dkg_key.encode();
+fn mock_signature_ecdsa(pub_key: ecdsa::Public, role_key: ecdsa::Public) -> Vec<u8> {
+	let msg = role_key.encode();
 	let hash = keccak_256(&msg);
-	let signature: ecdsa::Signature = ecdsa_sign_prehashed(KEY_TYPE, &pub_key, &hash).unwrap();
+	let signature: ecdsa::Signature =
+		ecdsa_sign_prehashed(tangle_crypto_primitives::ROLE_KEY_TYPE, &pub_key, &hash).unwrap();
 	signature.encode()
 }
 
-fn mock_signature_sr25519(pub_key: sr25519::Public, dkg_key: sr25519::Public) -> Vec<u8> {
-	let msg = dkg_key.to_vec().encode();
+fn mock_signature_sr25519(pub_key: sr25519::Public, role_key: sr25519::Public) -> Vec<u8> {
+	let msg = role_key.to_vec().encode();
 	let hash = keccak_256(&msg);
-	let signature: sr25519::Signature = sr25519_sign(KEY_TYPE, &pub_key, &hash).unwrap();
+	let signature: sr25519::Signature =
+		sr25519_sign(tangle_crypto_primitives::ROLE_KEY_TYPE, &pub_key, &hash).unwrap();
 	// sanity check
 	assert!(sp_io::crypto::sr25519_verify(&signature, &hash, &pub_key));
 	signature.encode()
@@ -68,7 +67,7 @@ fn set_fees_works() {
 }
 
 #[test]
-fn dkg_key_verifcation_works_for_ecdsa() {
+fn role_key_verifcation_works_for_ecdsa() {
 	new_test_ext().execute_with(|| {
 		let job_to_verify = DKGResult {
 			key_type: DkgKeyType::Ecdsa,
@@ -152,7 +151,7 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 }
 
 #[test]
-fn dkg_key_verifcation_works_for_schnorr() {
+fn role_key_verifcation_works_for_schnorr() {
 	new_test_ext().execute_with(|| {
 		let job_to_verify = DKGResult {
 			key_type: DkgKeyType::Schnorr,

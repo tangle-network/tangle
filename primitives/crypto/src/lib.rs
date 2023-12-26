@@ -1,4 +1,4 @@
-/// Key type for DKG keys
+/// Key type for ROLE keys
 pub const ROLE_KEY_TYPE: sp_application_crypto::KeyTypeId =
 	sp_application_crypto::KeyTypeId(*b"role");
 

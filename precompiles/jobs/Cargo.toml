@@ -46,7 +46,6 @@ pallet-timestamp = { workspace = true, features = ["std"] }
 scale-info = { workspace = true, features = ["derive", "std"] }
 serde_json = { workspace = true }
 smallvec = { workspace = true }
-sp-application-crypto = { workspace = true }
 sp-io = { workspace = true }
 sp-keystore = { workspace = true }
 
