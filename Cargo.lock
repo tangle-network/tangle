@@ -14437,6 +14437,7 @@ dependencies = [
  "substrate-frame-rpc-system",
  "substrate-prometheus-endpoint",
  "substrate-state-trie-migration-rpc",
+ "tangle-crypto-primitives",
  "tangle-primitives",
  "tangle-runtime",
  "tangle-testnet-runtime",

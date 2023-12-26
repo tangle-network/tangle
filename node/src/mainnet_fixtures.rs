@@ -50,11 +50,10 @@ pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 }
 
 /// Standalone initial authorities
-pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)> {
+pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)> {
 	vec![
 		// standalone 1
 		(
-			hex!["d4c197403bae729fd0f219a0925c4f9274d432c7bfce5f94f2e0dae605dde407"].into(),
 			hex!["6c99e8e4ae3fe7e3328d7e9d85eb98e86bdc6410695797349fa536ebb9bb0a4a"].into(),
 			hex!["d8a00a2454cd7455c040e363e6e76f4abd9e4d3876253964d9f40a66ad79694b"]
 				.unchecked_into(),
@@ -65,7 +64,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId
 		),
 		// standalone 2
 		(
-			hex!["48a705897c103ddeda7e38bdadb42dc4c429e1b542287dfb07a9837982e04d14"].into(),
 			hex!["444dbfd0220eb1a993a7a2b9e1530aee1d17388ba3db34a0ee2b8ff971bfd073"].into(),
 			hex!["f02ee9baa32c490cf06eabe3580a90be704618f04636b321ee599c8912392c7a"]
 				.unchecked_into(),
@@ -76,7 +74,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId
 		),
 		// standalone 3
 		(
-			hex!["e2629eedccc6887f78d62d4ed15becd1b791ba0c38a5c72ccd416367097d7c3c"].into(),
 			hex!["2c4e648b0fbbb88ff6b92b208273eb144383b2b19edc992e91448a4371d4d97d"].into(),
 			hex!["a41b35f75e5509ce96e62bc27bb9a1b5587cc3d596f8afa867962b0e03230513"]
 				.unchecked_into(),
@@ -87,7 +84,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId
 		),
 		// standalone 4
 		(
-			hex!["3281b9311756ee35e8bd53bc05e38af78ea4211c72db0ffcd8dd317785fa1327"].into(),
 			hex!["c884c8eb280327221a3ae6a45fe6c8805f09bcfc11b409c8e2daa621c0d99608"].into(),
 			hex!["06e0a0d39503a101ca9c36f84b3ccf53015ee625a546bc570e550af963d13164"]
 				.unchecked_into(),
@@ -98,7 +94,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId
 		),
 		// standalone 5
 		(
-			hex!["34d06ae4117b82a936b81d5219a438fa7b4093a6b67ebb0899686fb4e3b79b55"].into(),
 			hex!["483e0b8d6801c51115fd4b124c91e2d5dcd642b30335f6c5a1738ea18f66c251"].into(),
 			hex!["ce80df4851003f6ffd4ee88d9be85966f1de8b2e494c009dbf336177485f023f"]
 				.unchecked_into(),
