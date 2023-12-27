@@ -18,7 +18,7 @@ use self::mainnet::DistributionResult;
 
 use pallet_airdrop_claims::{MultiAddress, StatementKind};
 
-use tangle_primitives::{Balance, BlockNumber, currency::EXISTENTIAL_DEPOSIT};
+use tangle_primitives::{currency::EXISTENTIAL_DEPOSIT, Balance, BlockNumber};
 pub mod develop;
 pub mod mainnet;
 pub mod testnet;
