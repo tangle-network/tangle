@@ -40,6 +40,10 @@ std = [
   "frame-support/std",
   "sp-runtime/std",
   "sp-core/std",
+  "parity-scale-codec/std",
+  "scale-info/std",
+  "sp-consensus-babe/std",
+  "sp-std/std",
   "ark-std?/std",
 ]
 verifying = [
