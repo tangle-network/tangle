@@ -48,7 +48,6 @@ pub fn read_contents(path: &Path) -> Value {
 pub fn read_contents_to_evm_accounts(path_str: &str) -> Vec<H160> {
 	let mut path = get_git_root();
 	path.push(path_str);
-	println!("Path {:?}", path_str);
 	let json = read_contents(&path);
 	let mut accounts = Vec::new();
 	for address in json.as_array().expect("should be an object") {
@@ -63,7 +62,6 @@ pub fn read_contents_to_evm_accounts(path_str: &str) -> Vec<H160> {
 pub fn read_contents_to_substrate_accounts(path_str: &str) -> Vec<AccountId> {
 	let mut path = get_git_root();
 	path.push(path_str);
-	println!("Path {:?}", path_str);
 	let json = read_contents(&path);
 	let mut accounts = Vec::new();
 	for address in json.as_array().expect("should be an object") {

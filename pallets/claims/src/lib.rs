@@ -122,13 +122,13 @@ impl StatementKind {
 	fn to_text(self) -> &'static [u8] {
 		match self {
 			StatementKind::Regular =>
-				&b"I hereby agree to the terms of the statement whose SHA-256 multihash is \
-				Qmc1XYqT6S39WNp2UeiRUrZichUWUPpGEThDE6dAb3f6Ny. (This may be found at the URL: \
-				https://statement.polkadot.network/regular.html)"[..],
+				&b"I hereby agree to the terms of the statement whose sha2256sum is \
+				5627de05cfe235cd4ffa0d6375c8a5278b89cc9b9e75622fa2039f4d1b43dadf. (This may be found at the URL: \
+				https://statement.tangle.tools/airdrop-statement.html)"[..],
 			StatementKind::Safe =>
-				&b"I hereby agree to the terms of the statement whose SHA-256 multihash is \
-				QmXEkMahfhHJPzT3RjkXiZVFi77ZeVeuxtAjhojGRNYckz. (This may be found at the URL: \
-				https://statement.polkadot.network/saft.html)"[..],
+				&b"I hereby agree to the terms of the statement whose sha2256sum is \
+				7eae145b00c1912c8b01674df5df4ad9abcf6d18ea3f33d27eb6897a762f4273. (This may be found at the URL: \
+				https://https://statement.tangle.tools/safe-claim-statement)"[..],
 		}
 	}
 }
