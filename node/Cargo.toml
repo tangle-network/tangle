@@ -124,7 +124,12 @@ tangle-crypto-primitives = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
-runtime-benchmarks = ["tangle-testnet-runtime/runtime-benchmarks"]
+runtime-benchmarks = [
+    "tangle-testnet-runtime/runtime-benchmarks",
+    "frame-benchmarking/runtime-benchmarks",
+    "frame-benchmarking-cli/runtime-benchmarks",
+    "sc-service/runtime-benchmarks",
+    ]
 with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-testnet-runtime/with-paritydb-weights"]
 rocksdb = [
