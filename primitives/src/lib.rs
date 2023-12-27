@@ -86,7 +86,7 @@ pub mod currency {
 	pub const CENT: Balance = DOLLAR / 100;
 	pub const MILLICENT: Balance = CENT / 1000;
 	/// The existential deposit.
-	pub const EXISTENTIAL_DEPOSIT: Balance = 1000 * MICROUNIT;
+	pub const EXISTENTIAL_DEPOSIT: Balance = UNIT;
 
 	pub const WEI: Balance = 1;
 	pub const KILOWEI: Balance = 1_000;

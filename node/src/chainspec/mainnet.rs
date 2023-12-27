@@ -91,10 +91,9 @@ fn generate_session_keys(
 pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "TNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 4006.into());
-	// TODO: use mainnet ss58Format
-	properties.insert("ss58Format".into(), 42.into());
 
 	Ok(ChainSpec::from_genesis(
 		"Local Tangle Mainnet",
@@ -151,6 +150,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "TNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 4006.into());
 
