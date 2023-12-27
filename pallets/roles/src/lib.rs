@@ -46,6 +46,10 @@ pub(crate) mod mock;
 pub mod offences;
 #[cfg(test)]
 mod tests;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
+
 mod weights;
 pub use weights::WeightInfo;
 
@@ -457,80 +461,6 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Removes the role from the validator.
-		///
-		/// # Parameters
-		///
-		/// - `origin`: Origin of the transaction.
-		/// - `role`: Role to remove from the validator.
-		///
-		/// This function will return error if
-		/// - Account is not a validator account.
-		/// - Role is not assigned to the validator.
-		/// - All the jobs are not completed.
-		#[pallet::weight({0})]
-		#[pallet::call_index(3)]
-		pub fn remove_role(origin: OriginFor<T>, role: RoleType) -> DispatchResult {
-			let stash_account = ensure_signed(origin)?;
-			// Ensure stash account is a validator.
-			ensure!(
-				pallet_staking::Validators::<T>::contains_key(&stash_account),
-				Error::<T>::NotValidator
-			);
-
-			let mut ledger = Self::ledger(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
-
-			// Check if role is assigned.
-			ensure!(ledger.profile.has_role(role.clone()), Error::<T>::RoleNotAssigned);
-
-			// Get active jobs for the role.
-			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
-
-			if active_jobs.is_empty() {
-				// Remove role from the profile.
-				ledger.profile.remove_role_from_profile(role.clone());
-			}
-
-			let mut pending_jobs = Vec::new();
-			for job in active_jobs {
-				let job_key = job.0;
-				if job_key.get_role_type() == role {
-					// Submit request to exit from the known set.
-					let res = T::JobsHandler::exit_from_known_set(
-						stash_account.clone(),
-						job_key.clone(),
-						job.1,
-					);
-
-					if res.is_err() {
-						pending_jobs.push((job_key.clone(), job.1));
-					} else {
-						// Remove role from the profile.
-						ledger.profile.remove_role_from_profile(role.clone());
-					}
-				}
-			}
-
-			if !pending_jobs.is_empty() {
-				// Role clear request failed due to pending jobs, which can't be opted out at the
-				// moment.
-				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
-				return Err(Error::<T>::RoleCannotBeRemoved.into())
-			};
-			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
-				BoundedVec::try_from(ledger.profile.get_roles())
-					.map_err(|_| Error::<T>::MaxRoles)?;
-
-			AccountRolesMapping::<T>::insert(&stash_account, profile_roles);
-
-			ledger.total = ledger.profile.get_total_profile_restake().into();
-			Self::update_ledger(&stash_account, &ledger);
-
-			Self::deposit_event(Event::<T>::RoleRemoved { account: stash_account, role });
-
-			Ok(())
-		}
-
 		/// Declare no desire to either validate or nominate.
 		///
 		/// If you have opted for any of the roles, please submit `clear_role` extrinsic to opt out
@@ -544,7 +474,7 @@ pub mod pallet {
 		/// - Account is not a validator account.
 		/// - Role is assigned to the validator.
 		#[pallet::weight({0})]
-		#[pallet::call_index(4)]
+		#[pallet::call_index(3)]
 		pub fn chill(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the account before chilling.
@@ -569,7 +499,7 @@ pub mod pallet {
 		/// - If there is any active role assigned to the user.
 		///  
 		#[pallet::weight({0})]
-		#[pallet::call_index(5)]
+		#[pallet::call_index(4)]
 		pub fn unbound_funds(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
@@ -595,7 +525,7 @@ pub mod pallet {
 		/// This function will return error if
 		/// - If there is any active role assigned to the user.
 		#[pallet::weight({0})]
-		#[pallet::call_index(6)]
+		#[pallet::call_index(5)]
 		pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the account and is eligible to withdraw.

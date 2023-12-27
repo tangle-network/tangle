@@ -237,34 +237,6 @@ fn test_delete_profile() {
 	});
 }
 
-// Test remove role from profile.
-#[test]
-fn test_remove_role_from_profile() {
-	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
-		// Lets create shared profile.
-		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
-
-		// Get the ledger to check if the profile is created.
-		let ledger = Roles::ledger(1).unwrap();
-		assert!(ledger.profile.is_shared());
-		assert_eq!(ledger.total_restake(), 5000);
-		assert!(ledger.profile.has_role(RoleType::Tss));
-
-		// Lets remove Tss role from the profile.
-		assert_ok!(Roles::remove_role(RuntimeOrigin::signed(1), RoleType::Tss));
-
-		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleRemoved {
-			account: 1,
-			role: RoleType::Tss,
-		})]);
-
-		// Get the updated ledger to check if the role is removed.
-		let ledger = Roles::ledger(1).unwrap();
-		assert!(!ledger.profile.has_role(RoleType::Tss));
-	});
-}
-
 #[test]
 fn test_unbound_funds_should_work() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
