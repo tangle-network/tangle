@@ -99,7 +99,7 @@ pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 pub use tangle_primitives::{
 	currency::*, fee::*, time::*, AccountId, AccountIndex, Address, Balance, BlockNumber, Hash,
 	Header, Index, Moment, Signature, AVERAGE_ON_INITIALIZE_RATIO, MAXIMUM_BLOCK_WEIGHT,
-	NORMAL_DISPATCH_RATIO, SESSION_PERIOD_BLOCKS, UNSIGNED_PROPOSAL_EXPIRY,
+	NORMAL_DISPATCH_RATIO,
 };
 
 use pallet_airdrop_claims::TestWeightInfo;
@@ -368,21 +368,18 @@ impl pallet_authorship::Config for Runtime {
 	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
 }
 
-parameter_types! {
-	pub const Period: BlockNumber = SESSION_PERIOD_BLOCKS;
-	pub const Offset: BlockNumber = 0;
-}
+use crate::opaque::SessionKeys;
 
 impl pallet_session::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = <Self as frame_system::Config>::AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Self>;
-	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
-	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-	type SessionManager = Staking;
-	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
-	type Keys = opaque::SessionKeys;
-	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
+	type ShouldEndSession = Babe;
+	type NextSessionRotation = Babe;
+	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
+	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+	type Keys = SessionKeys;
+	type WeightInfo = ();
 }
 
 impl pallet_session::historical::Config for Runtime {
@@ -949,7 +946,7 @@ parameter_types! {
 impl pallet_im_online::Config for Runtime {
 	type AuthorityId = ImOnlineId;
 	type RuntimeEvent = RuntimeEvent;
-	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = Babe;
 	type ValidatorSet = Historical;
 	type ReportUnresponsiveness = ();
 	type UnsignedPriority = ImOnlineUnsignedPriority;
