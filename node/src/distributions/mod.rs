@@ -18,8 +18,7 @@ use self::mainnet::DistributionResult;
 
 use pallet_airdrop_claims::{MultiAddress, StatementKind};
 
-use tangle_primitives::{Balance, BlockNumber};
-
+use tangle_primitives::{currency::EXISTENTIAL_DEPOSIT, Balance, BlockNumber};
 pub mod develop;
 pub mod mainnet;
 pub mod testnet;
@@ -59,7 +58,14 @@ pub fn get_unique_distribution_results(
 	}
 	let unique_claims: Vec<(MultiAddress, Balance, Option<StatementKind>)> = unique_claims
 		.into_iter()
-		.map(|(address, (balance, statement))| (address, balance, statement))
+		.filter_map(|(address, (balance, statement))| {
+			// Skip any claims that are below the existential deposit.
+			if balance < EXISTENTIAL_DEPOSIT {
+				None
+			} else {
+				Some((address, balance, statement))
+			}
+		})
 		.collect();
 
 	let mut unique_vesting = std::collections::HashMap::new();

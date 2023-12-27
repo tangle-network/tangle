@@ -139,5 +139,19 @@ pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 				code: Default::default(),
 			},
 		),
+		// Test account with a simple menmonic
+		// Mnemonic: "test test test test test test test test test test test junk"
+		// Path: m/44'/60'/0'/0/0
+		// Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+		(
+			H160::from_str("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+				.expect("internal H160 is valid; qed"),
+			GenesisAccount {
+				nonce: U256::from(1),
+				balance: U256::from(1_000_000_000_000_000_000_000_000u128),
+				storage: Default::default(),
+				code: Default::default(),
+			},
+		),
 	]
 }
