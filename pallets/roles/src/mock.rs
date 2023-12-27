@@ -25,11 +25,12 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Contains, Hooks},
 };
-use pallet_session::{historical as pallet_session_historical, TestSessionHandler};
+use pallet_session::historical as pallet_session_historical;
 use sp_core::H256;
 use sp_runtime::{
+	app_crypto::ecdsa::Public,
 	testing::Header,
-	traits::{ConvertInto, IdentityLookup},
+	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
 	BuildStorage, DispatchResult, Perbill, Percent,
 };
 use sp_staking::{
@@ -170,13 +171,7 @@ impl Contains<RuntimeCall> for BaseFilter {
 
 sp_runtime::impl_opaque_keys! {
 	pub struct MockSessionKeys {
-		pub role: RoleKeyId,
-	}
-}
-
-impl From<RoleKeyId> for MockSessionKeys {
-	fn from(role: RoleKeyId) -> Self {
-		Self { role }
+		pub role: pallet_roles::Pallet<Runtime>,
 	}
 }
 
@@ -206,7 +201,7 @@ impl pallet_session::Config for Runtime {
 	type Keys = MockSessionKeys;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-	type SessionHandler = TestSessionHandler;
+	type SessionHandler = <MockSessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
@@ -326,12 +321,26 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 	}
 }
 
+pub fn mock_role_key_id(id: u8) -> RoleKeyId {
+	RoleKeyId::from(Public::from_raw([id; 33]))
+}
+
+pub fn mock_authorities(vec: Vec<u8>) -> Vec<(AccountId, RoleKeyId)> {
+	vec.into_iter().map(|id| (id as u64, mock_role_key_id(id))).collect()
+}
+
+pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
+	new_test_ext_raw_authorities(mock_authorities(ids))
+}
+
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
-pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestExternalities {
+pub fn new_test_ext_raw_authorities(
+	authorities: Vec<(AccountId, RoleKeyId)>,
+) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	let balances: Vec<_> = authorities.iter().map(|i| (*i, 20_000_u128)).collect();
+	let balances: Vec<_> = authorities.iter().map(|(i, _)| (*i, 20_000_u128)).collect();
 
 	pallet_balances::GenesisConfig::<Runtime> { balances }
 		.assimilate_storage(&mut t)
@@ -339,7 +348,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 	let session_keys: Vec<_> = authorities
 		.iter()
-		.map(|id| (*id, *id, MockSessionKeys { role: RoleKeyId(*id) }))
+		.map(|(id, role_id)| (*id, *id, MockSessionKeys { role: role_id.clone() }))
 		.collect();
 
 	pallet_session::GenesisConfig::<Runtime> { keys: session_keys }
@@ -348,7 +357,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 	let stakers: Vec<_> = authorities
 		.iter()
-		.map(|authority| {
+		.map(|(authority, _)| {
 			(
 				*authority,
 				*authority,
