@@ -270,6 +270,7 @@ fn testnet_genesis(
 			(MultiAddress::Native(x.clone()), bounded_vec)
 		})
 		.collect();
+
 	RuntimeGenesisConfig {
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
