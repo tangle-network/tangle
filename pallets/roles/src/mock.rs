@@ -28,7 +28,7 @@ use frame_support::{
 use pallet_session::{historical as pallet_session_historical, TestSessionHandler};
 use sp_core::H256;
 use sp_runtime::{
-	testing::{Header, RoleKeyId},
+	testing::Header,
 	traits::{ConvertInto, IdentityLookup},
 	BuildStorage, DispatchResult, Perbill, Percent,
 };
