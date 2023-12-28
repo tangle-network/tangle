@@ -52,8 +52,8 @@ impl RoleTypeMetadata {
 	/// Return type of role.
 	pub fn get_role_type(&self) -> RoleType {
 		match self {
-			RoleTypeMetadata::Tss(metadata) => RoleType::Tss(metadata.role_type),
-			RoleTypeMetadata::ZkSaas(metadata) => RoleType::ZkSaaS(metadata.role_type),
+			RoleTypeMetadata::Tss(metadata) => RoleType::Tss(metadata.role_type.clone()),
+			RoleTypeMetadata::ZkSaas(metadata) => RoleType::ZkSaaS(metadata.role_type.clone()),
 		}
 	}
 

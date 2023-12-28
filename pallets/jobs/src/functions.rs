@@ -168,7 +168,7 @@ impl<T: Config> Pallet<T> {
 						ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
 
 						let job_type = JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-							key_type: phase1.key_type.clone().expect("Checked above"),
+							role_type: phase1.role_type.clone(),
 							participants: new_participants,
 							threshold: new_threshold,
 							permitted_caller: phase1.clone().permitted_caller,
@@ -288,7 +288,7 @@ impl<T: Config> Pallet<T> {
 			signatures: info.signatures,
 			participants: participant_keys,
 			threshold: job_info.job_type.clone().get_threshold().expect("Checked before"),
-			key_type: info.key_type.clone(),
+			signature_type: info.signature_type.clone(),
 		});
 
 		T::MPCHandler::verify(JobWithResult {
@@ -303,7 +303,6 @@ impl<T: Config> Pallet<T> {
 			job_type: job_info.job_type.clone(),
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 			result: info.key,
-			key_type: Some(info.key_type),
 		};
 		Ok(result)
 	}
@@ -350,7 +349,7 @@ impl<T: Config> Pallet<T> {
 			signature: info.signature,
 			data: info.data,
 			signing_key: phase_one_result.result,
-			key_type: info.key_type,
+			signature_type: info.signature_type,
 		});
 
 		let phase_one_job_info = KnownResults::<T>::get(
@@ -414,7 +413,6 @@ impl<T: Config> Pallet<T> {
 			// No data in the result
 			result: Vec::new(),
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
-			key_type: None,
 		};
 		Ok(result)
 	}

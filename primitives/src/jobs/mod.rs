@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::roles::RoleType;
+use crate::roles::{RoleType, ThresholdSignatureRoleType, ZeroKnowledgeRoleType};
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -208,10 +208,10 @@ impl JobKey {
 	/// Returns role assigned with the job.
 	pub fn get_role_type(&self) -> RoleType {
 		match self {
-			JobKey::DKG => RoleType::Tss,
-			JobKey::DKGSignature => RoleType::Tss,
-			JobKey::ZkSaaSCircuit => RoleType::ZkSaaS,
-			JobKey::ZkSaaSProve => RoleType::ZkSaaS,
+			JobKey::DKG => RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			JobKey::DKGSignature => RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			JobKey::ZkSaaSCircuit => RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+			JobKey::ZkSaaSProve => RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
 		}
 	}
 }

@@ -32,10 +32,7 @@ use sp_core::ecdsa;
 use sp_runtime::{traits::Zero, Saturating};
 use sp_staking::offence::ReportOffence;
 use sp_std::{collections::btree_map::BTreeMap, convert::TryInto, prelude::*, vec};
-use tangle_primitives::{
-	roles::{RoleType, RoleTypeMetadata},
-	traits::jobs::JobsHandler,
-};
+use tangle_primitives::roles::{RoleType, RoleTypeMetadata};
 
 mod impls;
 mod profile;
@@ -98,9 +95,9 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
-	use tangle_primitives::{
-		jobs::{JobId, JobKey},
-		traits::jobs::MPCHandler,
+	use tangle_primitives::jobs::{
+		traits::{JobsHandler, MPCHandler},
+		JobId, JobKey,
 	};
 
 	/// A type for representing the validator id in a session.

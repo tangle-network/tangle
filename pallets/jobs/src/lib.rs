@@ -32,13 +32,11 @@ use sp_runtime::{
 use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
 	jobs::{
+		traits::{JobToFee, MPCHandler},
 		DKGTSSKeySubmissionResult, JobId, JobInfo, JobKey, JobResult, PhaseOneResult,
 		ValidatorOffenceType,
 	},
-	traits::{
-		jobs::{JobToFee, MPCHandler},
-		roles::RolesHandler,
-	},
+	roles::traits::RolesHandler,
 };
 
 mod functions;

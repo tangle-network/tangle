@@ -1,5 +1,5 @@
 use super::*;
-use tangle_primitives::traits::jobs::JobsHandler;
+use tangle_primitives::jobs::traits::JobsHandler;
 
 /// A trait that handles various aspects of jobs for a validator.
 impl<T: Config> JobsHandler<T::AccountId> for Pallet<T> {

@@ -28,8 +28,11 @@ use sp_runtime::{
 
 use sp_staking::offence::Offence;
 use tangle_primitives::{
-	jobs::{JobKey, ReportValidatorOffence},
-	traits::{jobs::MPCHandler, roles::RolesHandler},
+	jobs::{
+		traits::{JobsHandler, MPCHandler},
+		JobKey, ReportValidatorOffence,
+	},
+	roles::traits::RolesHandler,
 };
 
 /// Implements RolesHandler for the pallet.
