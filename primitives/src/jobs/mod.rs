@@ -227,8 +227,6 @@ pub struct PhaseOneResult<AccountId, BlockNumber> {
 	pub result: Vec<u8>,
 	/// permitted caller to use this result
 	pub permitted_caller: Option<AccountId>,
-	/// Key type if applicable
-	pub key_type: Option<DkgKeyType>,
 	/// The type of the job submission.
 	pub job_type: JobType<AccountId>,
 }
@@ -291,8 +289,6 @@ pub struct RpcResponsePhaseOneResult<AccountId> {
 	pub result: Vec<u8>,
 	/// permitted caller to use this result
 	pub permitted_caller: Option<AccountId>,
-	/// Key type if applicable
-	pub key_type: Option<DkgKeyType>,
 	/// The type of the job submission.
 	pub job_type: JobType<AccountId>,
 }
@@ -300,7 +296,7 @@ pub struct RpcResponsePhaseOneResult<AccountId> {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum JobResult {
-	DKGPhaseOne(DKGTSSResult),
+	DKGPhaseOne(DKGTSSKeySubmissionResult),
 
 	DKGPhaseTwo(DKGTSSSignatureResult),
 

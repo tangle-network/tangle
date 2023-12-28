@@ -27,15 +27,17 @@ use sp_std::vec::Vec;
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ThresholdSignatureRoleType {
+	#[default]
 	TssGG20,
 	TssCGGMP,
-	TssBls381,
+	TssFrostSr25519,
 	TssFrostP256,
 	TssFrostSecp256k1,
 	TssFrostRistretto255,
 	TssFrostBabyJubJub,
 	TssFrostEd25519,
 	TssEdDSABabyJubJub,
+	TssBls381,
 }
 
 /// Associated metadata needed for a DKG/TSS role

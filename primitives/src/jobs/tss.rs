@@ -20,6 +20,8 @@ use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
 use sp_std::vec::Vec;
 
+use crate::roles::RoleType;
+
 /// Represents the Distributed Key Generation (DKG) job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
@@ -30,11 +32,11 @@ pub struct DKGTSSPhaseOneJobType<AccountId> {
 	/// The threshold value for the DKG.
 	pub threshold: u8,
 
-	/// the caller permitted to use this result later
+	/// The caller permitted to use this result later
 	pub permitted_caller: Option<AccountId>,
 
-	/// the key type to be used
-	pub key_type: DkgKeyType,
+	/// The role type to be used
+	pub role_type: RoleType,
 }
 
 /// Represents the DKG Signature job type.
@@ -46,13 +48,16 @@ pub struct DKGTSSPhaseTwoJobType {
 
 	/// The submission data as a vector of bytes.
 	pub submission: Vec<u8>,
+
+	/// The role type to be used
+	pub role_type: RoleType,
 }
 
 pub type Signatures = Vec<Vec<u8>>;
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGTSSResult {
+pub struct DKGTSSKeySubmissionResult {
 	/// Signature type of the DKG
 	pub signature_type: DigitalSignatureType,
 
@@ -92,6 +97,9 @@ pub enum DigitalSignatureType {
 	/// Elliptic Curve Digital Signature Algorithm (ECDSA) key type.
 	#[default]
 	Ecdsa,
+
+	/// Schnorr signature type for sr25519.
+	SchnorrSr25519,
 
 	/// Schnorr signature type over the P256 curve.
 	SchnorrP256,

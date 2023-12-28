@@ -264,7 +264,7 @@ impl<T: Config> Pallet<T> {
 	pub fn verify_dkg_job_result(
 		job_key: JobKey,
 		job_info: &JobInfoOf<T>,
-		info: DKGTSSResult,
+		info: DKGTSSKeySubmissionResult,
 	) -> Result<PhaseOneResultOf<T>, DispatchError> {
 		// sanity check, does job and result type match
 		ensure!(job_key == JobKey::DKG, Error::<T>::ResultNotExpectedType);
@@ -283,7 +283,7 @@ impl<T: Config> Pallet<T> {
 			participant_keys.push(key.expect("checked above").get_authority_key());
 		}
 
-		let job_result = JobResult::DKGPhaseOne(DKGTSSResult {
+		let job_result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 			key: info.key.clone(),
 			signatures: info.signatures,
 			participants: participant_keys,

@@ -25,6 +25,7 @@ use sp_std::vec::Vec;
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ZeroKnowledgeRoleType {
+	#[default]
 	ZkSaaSGroth16,
 	ZkSaaSMarlin,
 }

@@ -105,7 +105,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			RuntimeOrigin::signed(TEN),
 			JobKey::DKG,
 			0,
-			JobResult::DKGPhaseOne(DKGTSSResult {
+			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![],
 				threshold: 3,
 				participants: vec![],

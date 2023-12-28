@@ -91,7 +91,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful
 	/// or encountered an error.
-	fn verify_generated_dkg_key(data: DKGTSSResult) -> DispatchResult {
+	fn verify_generated_dkg_key(data: DKGTSSKeySubmissionResult) -> DispatchResult {
 		match data.key_type {
 			DkgKeyType::Ecdsa => Self::verify_generated_dkg_key_ecdsa(data),
 			DkgKeyType::Schnorr => Self::verify_generated_dkg_key_schnorr(data),
@@ -111,7 +111,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 	/// encountered an error.
-	fn verify_generated_dkg_key_ecdsa(data: DKGTSSResult) -> DispatchResult {
+	fn verify_generated_dkg_key_ecdsa(data: DKGTSSKeySubmissionResult) -> DispatchResult {
 		// Ensure participants and signatures are not empty
 		ensure!(!data.participants.is_empty(), Error::<T>::NoParticipantsFound);
 		ensure!(!data.signatures.is_empty(), Error::<T>::NoSignaturesFound);
@@ -166,7 +166,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 	/// encountered an error.
-	fn verify_generated_dkg_key_schnorr(data: DKGTSSResult) -> DispatchResult {
+	fn verify_generated_dkg_key_schnorr(data: DKGTSSKeySubmissionResult) -> DispatchResult {
 		// Ensure participants and signatures are not empty
 		ensure!(!data.participants.is_empty(), Error::<T>::NoParticipantsFound);
 		ensure!(!data.signatures.is_empty(), Error::<T>::NoSignaturesFound);

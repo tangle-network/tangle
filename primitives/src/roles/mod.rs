@@ -14,12 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::DkgKeyType;
 use frame_support::pallet_prelude::*;
 use parity_scale_codec::alloc::string::ToString;
 use scale_info::prelude::string::String;
 use sp_arithmetic::Percent;
 use sp_std::{ops::Add, vec::Vec};
+
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 
 pub mod traits;
 pub mod tss;
@@ -30,6 +32,7 @@ pub use zksaas::*;
 
 /// Role type to be used in the system.
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum RoleType {
 	/// TSS role type.
 	Tss(ThresholdSignatureRoleType),
@@ -37,20 +40,9 @@ pub enum RoleType {
 	ZkSaaS(ZeroKnowledgeRoleType),
 }
 
-impl RoleType {
-	/// Checks if the role type is a TSS role.
-	pub fn is_tss(&self) -> bool {
-		matches!(self, RoleType::Tss)
-	}
-
-	/// Checks if the role type is a Zk-Saas role.
-	pub fn is_zksaas(&self) -> bool {
-		matches!(self, RoleType::ZkSaaS)
-	}
-}
-
 /// Metadata associated with a role type.
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum RoleTypeMetadata {
 	Tss(TssRoleMetadata),
 	ZkSaas(ZkSaasRoleMetadata),
@@ -74,6 +66,8 @@ impl RoleTypeMetadata {
 }
 
 /// Represents the reward distribution percentages for validators in a key generation process.
+#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ValidatorRewardDistribution {
 	/// The percentage share of the reward allocated for TSS
 	tss_share: Percent,
