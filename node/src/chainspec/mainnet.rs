@@ -66,9 +66,8 @@ where
 pub fn authority_keys_from_seed(
 	controller: &str,
 	stash: &str,
-) -> (AccountId, AccountId, BabeId, GrandpaId, ImOnlineId) {
+) -> (AccountId, BabeId, GrandpaId, ImOnlineId) {
 	(
-		get_account_id_from_seed::<sr25519::Public>(controller),
 		get_account_id_from_seed::<sr25519::Public>(stash),
 		get_from_seed::<BabeId>(controller),
 		get_from_seed::<GrandpaId>(controller),
@@ -202,7 +201,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)>,
+	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)>,
 	endowed_accounts: Vec<AccountId>,
 	root_key: AccountId,
 	chain_id: u64,
