@@ -36,9 +36,6 @@ use tangle_primitives::{
 	roles::{RoleTypeMetadata, TssRoleMetadata},
 };
 
-/// Key type for DKG keys
-pub const KEY_TYPE: sp_application_crypto::KeyTypeId = sp_application_crypto::KeyTypeId(*b"wdkg");
-
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
 	type Nonce = u64;
@@ -240,5 +237,5 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 fn mock_pub_key() -> ecdsa::Public {
-	ecdsa_generate(KEY_TYPE, None)
+	ecdsa_generate(tangle_crypto_primitives::ROLE_KEY_TYPE, None)
 }

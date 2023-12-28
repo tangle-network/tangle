@@ -87,6 +87,7 @@ pallet-vesting = { workspace = true }
 
 # Webb dependencies
 tangle-primitives = { workspace = true }
+tangle-crypto-primitives = { workspace = true }
 
 # Frontier dependencies
 fp-account = { workspace = true }
@@ -199,8 +200,9 @@ std = [
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
 
-  # Webb dependencies
+  # Tangle dependencies
   "tangle-primitives/std",
+  "tangle-crypto-primitives/std",
 
   # ETH2 light-client
   "pallet-eth2-light-client/std",

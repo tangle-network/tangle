@@ -24,7 +24,6 @@ tangle-primitives = { workspace = true, default-features = false, features = ["v
 [dev-dependencies]
 pallet-balances = { workspace = true }
 smallvec = { workspace = true }
-sp-application-crypto = { workspace = true }
 sp-keystore = { workspace = true }
 
 # Arkworks

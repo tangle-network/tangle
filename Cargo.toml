@@ -9,6 +9,7 @@ repository = "https://github.com/webb-tools/tangle"
 [workspace]
 members = [
   "primitives",
+  "primitives/crypto",
   "primitives/rpc/*",
   "primitives/ext",
   "client/evm-tracing",
@@ -277,8 +278,9 @@ pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot
 sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0" }
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0" }
 
-# Webb dependencies
+# Tangle dependencies
 tangle-primitives = { path = 'primitives', default-features = false }
+tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
 pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
 
 # Light client dependencies

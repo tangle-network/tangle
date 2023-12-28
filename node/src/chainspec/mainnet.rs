@@ -66,9 +66,8 @@ where
 pub fn authority_keys_from_seed(
 	controller: &str,
 	stash: &str,
-) -> (AccountId, AccountId, BabeId, GrandpaId, ImOnlineId) {
+) -> (AccountId, BabeId, GrandpaId, ImOnlineId) {
 	(
-		get_account_id_from_seed::<sr25519::Public>(controller),
 		get_account_id_from_seed::<sr25519::Public>(stash),
 		get_from_seed::<BabeId>(controller),
 		get_from_seed::<GrandpaId>(controller),
@@ -81,11 +80,11 @@ pub fn authority_keys_from_seed(
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
 fn generate_session_keys(
-	grandpa: GrandpaId,
 	babe: BabeId,
+	grandpa: GrandpaId,
 	im_online: ImOnlineId,
 ) -> tangle_runtime::opaque::SessionKeys {
-	tangle_runtime::opaque::SessionKeys { grandpa, babe, im_online }
+	tangle_runtime::opaque::SessionKeys { babe, grandpa, im_online }
 }
 
 pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -202,7 +201,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)>,
+	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)>,
 	endowed_accounts: Vec<AccountId>,
 	root_key: AccountId,
 	chain_id: u64,
@@ -256,9 +255,9 @@ fn mainnet_genesis(
 				.iter()
 				.map(|x| {
 					(
-						x.1.clone(),
 						x.0.clone(),
-						generate_session_keys(x.3.clone(), x.2.clone(), x.4.clone()),
+						x.0.clone(),
+						generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone()),
 					)
 				})
 				.collect::<Vec<_>>(),
