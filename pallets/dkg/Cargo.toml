@@ -18,11 +18,11 @@ sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 tangle-primitives = { workspace = true, default-features = false }
+tangle-crypto-primitives = { workspace = true, default-features = false }
 
 [dev-dependencies]
 pallet-balances = { workspace = true }
 smallvec = { workspace = true }
-sp-application-crypto = { workspace = true }
 sp-keystore = { workspace = true }
 
 [features]
@@ -35,9 +35,9 @@ std = [
   "sp-core/std",
   "sp-std/std",
   "tangle-primitives/std",
+  "tangle-crypto-primitives/std",
   "pallet-balances/std",
   "sp-io/std",
-  "sp-application-crypto/std",
   "sp-keystore/std"
 ]
 try-runtime = ["frame-support/try-runtime"]

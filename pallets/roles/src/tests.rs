@@ -48,7 +48,7 @@ pub fn shared_profile() -> Profile<Runtime> {
 // Test create independent profile.
 #[test]
 fn test_create_independent_profile() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = independent_profile();
 		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
 
@@ -67,7 +67,7 @@ fn test_create_independent_profile() {
 // Test create shared profile.
 #[test]
 fn test_create_shared_profile() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
 		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
 
@@ -87,7 +87,7 @@ fn test_create_shared_profile() {
 // Test create profile should fail if user is not a validator.
 #[test]
 fn test_create_profile_should_fail_if_user_is_not_a_validator() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
 		assert_err!(
 			Roles::create_profile(RuntimeOrigin::signed(5), profile.clone()),
@@ -99,7 +99,7 @@ fn test_create_profile_should_fail_if_user_is_not_a_validator() {
 // Test create profile should fail if user already has a profile.
 #[test]
 fn test_create_profile_should_fail_if_user_already_has_a_profile() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
 		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
 		assert_err!(
@@ -113,7 +113,7 @@ fn test_create_profile_should_fail_if_user_already_has_a_profile() {
 // Min restake required is 2500.
 #[test]
 fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		pallet::MinRestakingBond::<Runtime>::put(2500);
 
 		let profile = Profile::Shared(SharedRestakeProfile {
@@ -138,7 +138,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met(
 #[test]
 fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_for_independent_profile(
 ) {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		pallet::MinRestakingBond::<Runtime>::put(2500);
 
 		let profile = Profile::Independent(IndependentRestakeProfile {
@@ -162,7 +162,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_
 // Update profile from independent to shared.
 #[test]
 fn test_update_profile_from_independent_to_shared() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create independent profile.
 		let profile = independent_profile();
 		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
@@ -191,7 +191,7 @@ fn test_update_profile_from_independent_to_shared() {
 // Update profile from shared to independent.
 #[test]
 fn test_update_profile_from_shared_to_independent() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
 		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
@@ -220,7 +220,7 @@ fn test_update_profile_from_shared_to_independent() {
 // Test delete profile.
 #[test]
 fn test_delete_profile() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
 		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
@@ -240,7 +240,7 @@ fn test_delete_profile() {
 // Test remove role from profile.
 #[test]
 fn test_remove_role_from_profile() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
 		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
@@ -267,7 +267,7 @@ fn test_remove_role_from_profile() {
 
 #[test]
 fn test_unbound_funds_should_work() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
 		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
@@ -294,7 +294,7 @@ fn test_unbound_funds_should_work() {
 
 #[test]
 fn test_reward_dist_works_as_expected_with_one_validator() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		assert_eq!(Balances::free_balance(1), 20_000);
 
 		let profile = shared_profile();
@@ -310,7 +310,7 @@ fn test_reward_dist_works_as_expected_with_one_validator() {
 
 #[test]
 fn test_reward_dist_works_as_expected_with_multiple_validator() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let _reward_amount = 10_000;
 		assert_eq!(Balances::free_balance(1), 20_000);
 
@@ -330,7 +330,7 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 // Test report offence should work.
 #[test]
 fn test_report_offence_should_work() {
-	new_test_ext_raw_authorities(vec![1, 2, 3, 4]).execute_with(|| {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
 		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
 

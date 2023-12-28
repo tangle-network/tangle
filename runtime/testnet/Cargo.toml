@@ -89,6 +89,7 @@ pallet-zksaas = { workspace = true }
 pallet-jobs = { workspace = true }
 pallet-roles = { workspace = true }
 tangle-primitives = { workspace = true, features = ["verifying"] }
+tangle-crypto-primitives = { workspace = true }
 
 # Frontier dependencies
 fp-account = { workspace = true }
@@ -202,8 +203,9 @@ std = [
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
 
-  # Webb dependencies
+  # Tangle dependencies
   "tangle-primitives/std",
+  "tangle-crypto-primitives/std",
   "pallet-jobs/std",
   "pallet-roles/std",
   "pallet-dkg/std",

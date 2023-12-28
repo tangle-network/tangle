@@ -20,6 +20,7 @@ use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_network::config::MultiaddrWithPeerId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::crypto::UncheckedInto;
+use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_testnet_runtime::AccountId;
 
 /// Testnet root key
@@ -50,11 +51,11 @@ pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 }
 
 /// Standalone initial authorities
-pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)> {
+pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)> {
 	vec![
 		// standalone 1
 		(
-			hex!["d4c197403bae729fd0f219a0925c4f9274d432c7bfce5f94f2e0dae605dde407"].into(),
+			// hex!["d4c197403bae729fd0f219a0925c4f9274d432c7bfce5f94f2e0dae605dde407"].into(),
 			hex!["6c99e8e4ae3fe7e3328d7e9d85eb98e86bdc6410695797349fa536ebb9bb0a4a"].into(),
 			hex!["d8a00a2454cd7455c040e363e6e76f4abd9e4d3876253964d9f40a66ad79694b"]
 				.unchecked_into(),
@@ -62,10 +63,12 @@ pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId
 				.unchecked_into(),
 			hex!["0297bc051d94b25787482e60fa4eba19f15af30fa244240ae4439d219ee00e78"]
 				.unchecked_into(),
+			hex!["000000000000000000000000000000000000000000000000000000000000000000"]
+				.unchecked_into(),
 		),
 		// standalone 2
 		(
-			hex!["48a705897c103ddeda7e38bdadb42dc4c429e1b542287dfb07a9837982e04d14"].into(),
+			// hex!["48a705897c103ddeda7e38bdadb42dc4c429e1b542287dfb07a9837982e04d14"].into(),
 			hex!["444dbfd0220eb1a993a7a2b9e1530aee1d17388ba3db34a0ee2b8ff971bfd073"].into(),
 			hex!["f02ee9baa32c490cf06eabe3580a90be704618f04636b321ee599c8912392c7a"]
 				.unchecked_into(),
@@ -73,10 +76,12 @@ pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId
 				.unchecked_into(),
 			hex!["de6d5010678fd2175fe70c857d3eba80838e3735b1051f4aed98671800ec483f"]
 				.unchecked_into(),
+			hex!["000000000000000000000000000000000000000000000000000000000000000000"]
+				.unchecked_into(),
 		),
 		// standalone 3
 		(
-			hex!["e2629eedccc6887f78d62d4ed15becd1b791ba0c38a5c72ccd416367097d7c3c"].into(),
+			// hex!["e2629eedccc6887f78d62d4ed15becd1b791ba0c38a5c72ccd416367097d7c3c"].into(),
 			hex!["2c4e648b0fbbb88ff6b92b208273eb144383b2b19edc992e91448a4371d4d97d"].into(),
 			hex!["a41b35f75e5509ce96e62bc27bb9a1b5587cc3d596f8afa867962b0e03230513"]
 				.unchecked_into(),
@@ -84,10 +89,12 @@ pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId
 				.unchecked_into(),
 			hex!["8472336050c4e4a51ac69865a4a31c6dd0e5c2f79555d8646cafb3bd8f12d75c"]
 				.unchecked_into(),
+			hex!["000000000000000000000000000000000000000000000000000000000000000000"]
+				.unchecked_into(),
 		),
 		// standalone 4
 		(
-			hex!["3281b9311756ee35e8bd53bc05e38af78ea4211c72db0ffcd8dd317785fa1327"].into(),
+			// hex!["3281b9311756ee35e8bd53bc05e38af78ea4211c72db0ffcd8dd317785fa1327"].into(),
 			hex!["c884c8eb280327221a3ae6a45fe6c8805f09bcfc11b409c8e2daa621c0d99608"].into(),
 			hex!["06e0a0d39503a101ca9c36f84b3ccf53015ee625a546bc570e550af963d13164"]
 				.unchecked_into(),
@@ -95,16 +102,20 @@ pub fn get_initial_authorities() -> Vec<(AccountId, AccountId, BabeId, GrandpaId
 				.unchecked_into(),
 			hex!["029cb182ddb9c5560aaa299f7b445e575007b8295bd85a80a7b2eb7baa3e2b7c"]
 				.unchecked_into(),
+			hex!["000000000000000000000000000000000000000000000000000000000000000000"]
+				.unchecked_into(),
 		),
 		// standalone 5
 		(
-			hex!["34d06ae4117b82a936b81d5219a438fa7b4093a6b67ebb0899686fb4e3b79b55"].into(),
+			// hex!["34d06ae4117b82a936b81d5219a438fa7b4093a6b67ebb0899686fb4e3b79b55"].into(),
 			hex!["483e0b8d6801c51115fd4b124c91e2d5dcd642b30335f6c5a1738ea18f66c251"].into(),
 			hex!["ce80df4851003f6ffd4ee88d9be85966f1de8b2e494c009dbf336177485f023f"]
 				.unchecked_into(),
 			hex!["9027284e6cad3f73eee950695c56f87330311331139616640c9168934dba82df"]
 				.unchecked_into(),
 			hex!["1ea007d87f91f96c31b1062548eb77c40d47a43f1c84c36caa8586fc7c359729"]
+				.unchecked_into(),
+			hex!["000000000000000000000000000000000000000000000000000000000000000000"]
 				.unchecked_into(),
 		),
 	]

@@ -32,6 +32,7 @@ use sp_runtime::{
 	BoundedVec,
 };
 use std::collections::BTreeMap;
+use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::BlockNumber;
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
@@ -63,15 +64,14 @@ where
 
 /// Generate an babe authority key.
 pub fn authority_keys_from_seed(
-	controller: &str,
 	stash: &str,
-) -> (AccountId, AccountId, BabeId, GrandpaId, ImOnlineId) {
+) -> (AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId) {
 	(
-		get_account_id_from_seed::<sr25519::Public>(controller),
 		get_account_id_from_seed::<sr25519::Public>(stash),
-		get_from_seed::<BabeId>(controller),
-		get_from_seed::<GrandpaId>(controller),
+		get_from_seed::<BabeId>(stash),
+		get_from_seed::<GrandpaId>(stash),
 		get_from_seed::<ImOnlineId>(stash),
+		get_from_seed::<RoleKeyId>(stash),
 	)
 }
 
@@ -79,12 +79,13 @@ pub fn authority_keys_from_seed(
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
-fn generate_sesion_keys(
-	grandpa: GrandpaId,
+fn generate_session_keys(
 	babe: BabeId,
+	grandpa: GrandpaId,
 	im_online: ImOnlineId,
+	role: RoleKeyId,
 ) -> tangle_testnet_runtime::opaque::SessionKeys {
-	tangle_testnet_runtime::opaque::SessionKeys { grandpa, babe, im_online }
+	tangle_testnet_runtime::opaque::SessionKeys { babe, grandpa, im_online, role }
 }
 
 pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -105,22 +106,17 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				wasm_binary,
 				// Initial PoA authorities
 				vec![
-					authority_keys_from_seed("Alice", "Alice//stash"),
-					authority_keys_from_seed("Bob", "Bob//stash"),
-					authority_keys_from_seed("Charlie", "Charlie//stash"),
-					authority_keys_from_seed("Dave", "Dave//stash"),
-					authority_keys_from_seed("Eve", "Eve//stash"),
+					authority_keys_from_seed("Alice//stash"),
+					authority_keys_from_seed("Bob//stash"),
+					authority_keys_from_seed("Charlie//stash"),
+					authority_keys_from_seed("Dave//stash"),
+					authority_keys_from_seed("Eve//stash"),
 				],
 				vec![],
 				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
 				// Pre-funded accounts
 				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
 					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
@@ -228,7 +224,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AccountId, BabeId, GrandpaId, ImOnlineId)>,
+	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
 	initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
@@ -244,7 +240,7 @@ fn testnet_genesis(
 	let mut rng = rand::thread_rng();
 	let stakers = initial_authorities
 		.iter()
-		.map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
+		.map(|x| (x.0.clone(), x.0.clone(), STASH, StakerStatus::Validator))
 		.chain(initial_nominators.iter().map(|x| {
 			use rand::{seq::SliceRandom, Rng};
 			let limit = (MaxNominations::get() as usize).min(initial_authorities.len());
@@ -298,9 +294,9 @@ fn testnet_genesis(
 				.iter()
 				.map(|x| {
 					(
-						x.1.clone(),
 						x.0.clone(),
-						generate_sesion_keys(x.3.clone(), x.2.clone(), x.4.clone()),
+						x.0.clone(),
+						generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone(), x.4.clone()),
 					)
 				})
 				.collect::<Vec<_>>(),

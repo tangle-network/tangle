@@ -120,6 +120,7 @@ frame-system-rpc-runtime-api = { workspace = true }
 tangle-testnet-runtime = { workspace = true, optional = true }
 tangle-runtime = { workspace = true }
 tangle-primitives = { workspace = true }
+tangle-crypto-primitives = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]

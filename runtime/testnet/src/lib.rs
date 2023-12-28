@@ -12,7 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
+
 #![cfg_attr(not(feature = "std"), no_std)]
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
 #![recursion_limit = "256"]
@@ -67,6 +67,7 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -184,6 +185,7 @@ pub mod opaque {
 			pub babe: Babe,
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
+			pub role: Roles,
 		}
 	}
 }
@@ -1108,10 +1110,10 @@ parameter_types! {
 impl pallet_roles::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type JobsHandler = Jobs;
+	type RoleKeyId = RoleKeyId;
 	type MaxRolesPerAccount = ConstU32<2>;
 	type MPCHandler = MockMPCHandler;
 	type InflationRewardPerSession = InflationRewardPerSession;
-	type AuthorityId = BabeId;
 	type ValidatorSet = Historical;
 	type ReportOffences = OffenceHandler;
 	type ValidatorRewardDistribution = Reward;
