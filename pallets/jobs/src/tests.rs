@@ -21,7 +21,7 @@ use mock::*;
 use sp_runtime::AccountId32;
 
 use tangle_primitives::jobs::{
-	DKGSignatureResult, DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DkgKeyType, JobSubmission,
+	DKGTSSSignatureResult, DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DkgKeyType, JobSubmission,
 	JobType,
 };
 
@@ -105,7 +105,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			RuntimeOrigin::signed(TEN),
 			JobKey::DKG,
 			0,
-			JobResult::DKGPhaseOne(DKGResult {
+			JobResult::DKGPhaseOne(DKGTSSResult {
 				signatures: vec![],
 				threshold: 3,
 				participants: vec![],
@@ -154,7 +154,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			RuntimeOrigin::signed(TEN),
 			JobKey::DKGSignature,
 			1,
-			JobResult::DKGPhaseTwo(DKGSignatureResult {
+			JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
 				signing_key: vec![],
 				signature: vec![],
 				data: vec![],

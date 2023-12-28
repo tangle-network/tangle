@@ -1,5 +1,5 @@
-// This file is part of Webb.
-// Copyright (C) 2022 Webb Technologies Inc.
+// This file is part of Tangle.
+// Copyright (C) 2022-2024 Webb Technologies Inc.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
 use crate::jobs::DkgKeyType;
 use frame_support::pallet_prelude::*;
 use parity_scale_codec::alloc::string::ToString;
@@ -20,11 +21,20 @@ use scale_info::prelude::string::String;
 use sp_arithmetic::Percent;
 use sp_std::{ops::Add, vec::Vec};
 
+pub mod traits;
+pub mod tss;
+pub mod zksaas;
+
+pub use tss::*;
+pub use zksaas::*;
+
 /// Role type to be used in the system.
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
 pub enum RoleType {
-	Tss,
-	ZkSaaS,
+	/// TSS role type.
+    Tss(ThresholdSignatureRoleType),
+    /// Zk-SaaS role type.
+    ZkSaaS(ZeroKnowledgeRoleType),
 }
 
 impl RoleType {
@@ -50,8 +60,8 @@ impl RoleTypeMetadata {
 	/// Return type of role.
 	pub fn get_role_type(&self) -> RoleType {
 		match self {
-			RoleTypeMetadata::Tss(_) => RoleType::Tss,
-			RoleTypeMetadata::ZkSaas(_) => RoleType::ZkSaaS,
+			RoleTypeMetadata::Tss(metadata) => RoleType::Tss(metadata.role_type),
+			RoleTypeMetadata::ZkSaas(metadata) => RoleType::ZkSaaS(metadata.role_type),
 		}
 	}
 
@@ -61,24 +71,6 @@ impl RoleTypeMetadata {
 			RoleTypeMetadata::ZkSaas(metadata) => metadata.authority_key.clone(),
 		}
 	}
-}
-
-/// Associated metadata needed for a DKG role
-#[derive(Encode, Decode, Clone, Debug, PartialEq, Default, Eq, TypeInfo)]
-pub struct TssRoleMetadata {
-	/// The authority key associated with the role.
-	pub authority_key: Vec<u8>,
-
-	/// The key type of the authority key
-	pub key_type: DkgKeyType,
-}
-
-/// Associated metadata needed for a zkSaas role
-#[derive(Encode, Decode, Clone, Debug, PartialEq, Default, Eq, TypeInfo)]
-pub struct ZkSaasRoleMetadata {
-	/// The authority key associated with the role.
-	// TODO : Expand this
-	authority_key: Vec<u8>,
 }
 
 /// Represents the reward distribution percentages for validators in a key generation process.

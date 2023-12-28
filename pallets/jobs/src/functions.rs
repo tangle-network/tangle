@@ -1,7 +1,7 @@
 use super::*;
 use sp_runtime::traits::Zero;
 use tangle_primitives::jobs::{
-	DKGSignatureResult, DKGTSSPhaseOneJobType, JobKey, JobType, JobWithResult, ZkSaaSCircuitResult,
+	DKGTSSSignatureResult, DKGTSSPhaseOneJobType, JobKey, JobType, JobWithResult, ZkSaaSCircuitResult,
 	ZkSaaSPhaseOneJobType, ZkSaaSProofResult,
 };
 
@@ -264,7 +264,7 @@ impl<T: Config> Pallet<T> {
 	pub fn verify_dkg_job_result(
 		job_key: JobKey,
 		job_info: &JobInfoOf<T>,
-		info: DKGResult,
+		info: DKGTSSResult,
 	) -> Result<PhaseOneResultOf<T>, DispatchError> {
 		// sanity check, does job and result type match
 		ensure!(job_key == JobKey::DKG, Error::<T>::ResultNotExpectedType);
@@ -283,7 +283,7 @@ impl<T: Config> Pallet<T> {
 			participant_keys.push(key.expect("checked above").get_authority_key());
 		}
 
-		let job_result = JobResult::DKGPhaseOne(DKGResult {
+		let job_result = JobResult::DKGPhaseOne(DKGTSSResult {
 			key: info.key.clone(),
 			signatures: info.signatures,
 			participants: participant_keys,
@@ -311,7 +311,7 @@ impl<T: Config> Pallet<T> {
 	pub fn verify_dkg_signature_job_result(
 		job_key: JobKey,
 		job_info: &JobInfoOf<T>,
-		info: DKGSignatureResult,
+		info: DKGTSSSignatureResult,
 	) -> DispatchResult {
 		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
@@ -346,7 +346,7 @@ impl<T: Config> Pallet<T> {
 			participant_keys.push(pub_key);
 		}
 
-		let job_result = JobResult::DKGPhaseTwo(DKGSignatureResult {
+		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
 			signature: info.signature,
 			data: info.data,
 			signing_key: phase_one_result.result,

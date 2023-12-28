@@ -27,9 +27,8 @@ use sp_runtime::{
 	MultiAddress, MultiSignature, Perbill,
 };
 
-pub mod types;
-pub use types::*;
-pub mod traits;
+pub mod jobs;
+pub mod roles;
 
 #[cfg(feature = "verifying")]
 pub mod verifier;
