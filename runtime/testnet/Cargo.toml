@@ -134,7 +134,6 @@ default = ["std", "with-rocksdb-weights", "evm-tracing"]
 runtime-benchmarks = [
   "hex-literal",
   "frame-benchmarking",
-  "frame-system-benchmarking",
   "frame-support/runtime-benchmarks",
   "frame-system/runtime-benchmarks",
   "frame-system-benchmarking/runtime-benchmarks",
@@ -148,6 +147,9 @@ runtime-benchmarks = [
   "pallet-ethereum/runtime-benchmarks",
   "pallet-evm/runtime-benchmarks",
   "pallet-hotfix-sufficients/runtime-benchmarks",
+
+  # Tangle
+  "pallet-roles/runtime-benchmarks",
 ]
 
 std = [

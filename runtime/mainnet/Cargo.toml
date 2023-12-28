@@ -131,7 +131,6 @@ default = ["std", "with-rocksdb-weights", "evm-tracing"]
 runtime-benchmarks = [
   "hex-literal",
   "frame-benchmarking",
-  "frame-system-benchmarking",
   "frame-support/runtime-benchmarks",
   "frame-system/runtime-benchmarks",
   "frame-system-benchmarking/runtime-benchmarks",
