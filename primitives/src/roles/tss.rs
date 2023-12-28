@@ -22,26 +22,30 @@ use sp_core::RuntimeDebug;
 use sp_std::vec::Vec;
 
 /// Threshold signature role types and their specific elliptic curve.
-#[derive(Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord)]
+#[derive(
+	Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ThresholdSignatureRoleType {
-    TssGG20,
-    TssCGGMP,
-    TssBls381,
-    TssFrostP256,
-    TssFrostSecp256k1,
-    TssFrostRistretto255,
-    TssFrostBabyJubJub,
-    TssFrostEd25519,
-    TssEdDSABabyJubJub,
+	TssGG20,
+	TssCGGMP,
+	TssBls381,
+	TssFrostP256,
+	TssFrostSecp256k1,
+	TssFrostRistretto255,
+	TssFrostBabyJubJub,
+	TssFrostEd25519,
+	TssEdDSABabyJubJub,
 }
 
 /// Associated metadata needed for a DKG/TSS role
-#[derive(Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord)]
+#[derive(
+	Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct TssRoleMetadata {
-    /// The threshold role type for the DKG.
-    pub role_type: ThresholdSignatureRoleType,
+	/// The threshold role type for the DKG.
+	pub role_type: ThresholdSignatureRoleType,
 
 	/// The authority key associated with the role.
 	pub authority_key: Vec<u8>,

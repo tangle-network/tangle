@@ -1,8 +1,8 @@
 use super::*;
 use sp_runtime::traits::Zero;
 use tangle_primitives::jobs::{
-	DKGTSSSignatureResult, DKGTSSPhaseOneJobType, JobKey, JobType, JobWithResult, ZkSaaSCircuitResult,
-	ZkSaaSPhaseOneJobType, ZkSaaSProofResult,
+	DKGTSSPhaseOneJobType, DKGTSSSignatureResult, JobKey, JobType, JobWithResult,
+	ZkSaaSCircuitResult, ZkSaaSPhaseOneJobType, ZkSaaSProofResult,
 };
 
 impl<T: Config> Pallet<T> {

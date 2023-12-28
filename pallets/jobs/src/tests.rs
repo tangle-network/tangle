@@ -21,7 +21,7 @@ use mock::*;
 use sp_runtime::AccountId32;
 
 use tangle_primitives::jobs::{
-	DKGTSSSignatureResult, DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DkgKeyType, JobSubmission,
+	DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DKGTSSSignatureResult, DkgKeyType, JobSubmission,
 	JobType,
 };
 

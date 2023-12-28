@@ -32,9 +32,9 @@ pub use zksaas::*;
 #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
 pub enum RoleType {
 	/// TSS role type.
-    Tss(ThresholdSignatureRoleType),
-    /// Zk-SaaS role type.
-    ZkSaaS(ZeroKnowledgeRoleType),
+	Tss(ThresholdSignatureRoleType),
+	/// Zk-SaaS role type.
+	ZkSaaS(ZeroKnowledgeRoleType),
 }
 
 impl RoleType {

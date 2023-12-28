@@ -20,15 +20,19 @@ use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
 use sp_std::vec::Vec;
 
-#[derive(Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord)]
+#[derive(
+	Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ZeroKnowledgeRoleType {
-    ZkSaaSGroth16,
-    ZkSaaSMarlin,
+	ZkSaaSGroth16,
+	ZkSaaSMarlin,
 }
 
 /// Associated metadata needed for a zkSaas role
-#[derive(Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord)]
+#[derive(
+	Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ZkSaasRoleMetadata {
 	/// The zkSaaS scheme

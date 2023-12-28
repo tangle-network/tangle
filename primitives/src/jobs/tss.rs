@@ -17,7 +17,7 @@
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{RuntimeDebug};
+use sp_core::RuntimeDebug;
 use sp_std::vec::Vec;
 
 /// Represents the Distributed Key Generation (DKG) job type.
@@ -96,21 +96,21 @@ pub enum DigitalSignatureType {
 	/// Schnorr signature type over the P256 curve.
 	SchnorrP256,
 
-    /// Schnorr signature type over the Secp256k1 curve.
-    SchnorrSecp256k1,
+	/// Schnorr signature type over the Secp256k1 curve.
+	SchnorrSecp256k1,
 
-    /// Schnorr signature type over the Ristretto255 curve.
-    SchnorrRistretto255,
+	/// Schnorr signature type over the Ristretto255 curve.
+	SchnorrRistretto255,
 
-    /// Schnorr signature type over the BabyJubJub curve.
-    SchnorrBabyJubJub,
+	/// Schnorr signature type over the BabyJubJub curve.
+	SchnorrBabyJubJub,
 
-    /// Schnorr signature type over the Ed25519 curve.
-    SchnorrEd25519,
+	/// Schnorr signature type over the Ed25519 curve.
+	SchnorrEd25519,
 
-    /// Edwards Digital Signature Algorithm (EdDSA) key type over the BabyJubJub curve.
-    EdDSABabyJubJub,
+	/// Edwards Digital Signature Algorithm (EdDSA) key type over the BabyJubJub curve.
+	EdDSABabyJubJub,
 
-    /// BLS 381 signature type.
-    Bls381
+	/// BLS 381 signature type.
+	Bls381,
 }
