@@ -26,11 +26,14 @@ use frame_support::{
 	traits::{ConstU128, ConstU32, ConstU64, Contains, Hooks},
 };
 use pallet_session::historical as pallet_session_historical;
-use sp_core::H256;
+use sp_core::{
+	sr25519::{self, Signature},
+	H256,
+};
 use sp_runtime::{
 	app_crypto::ecdsa::Public,
 	testing::Header,
-	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
+	traits::{ConvertInto, IdentifyAccount, IdentityLookup, OpaqueKeys, Verify},
 	BuildStorage, DispatchResult, Perbill, Percent,
 };
 use sp_staking::{
@@ -39,7 +42,9 @@ use sp_staking::{
 };
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{jobs::*, roles::ValidatorRewardDistribution, traits::jobs::MPCHandler};
-pub type AccountId = u64;
+
+// pub type AccountId = u64;
+pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u128;
 pub type BlockNumber = u64;
 
@@ -182,9 +187,9 @@ impl pallet_session::SessionManager<AccountId> for MockSessionManager {
 	fn start_session(_: sp_staking::SessionIndex) {}
 	fn new_session(idx: sp_staking::SessionIndex) -> Option<Vec<AccountId>> {
 		if idx == 0 || idx == 1 {
-			Some(vec![1, 2, 3, 4])
+			Some(vec![mock_pub_key(1), mock_pub_key(2), mock_pub_key(3), mock_pub_key(4)])
 		} else if idx == 2 {
-			Some(vec![1, 2, 3, 4])
+			Some(vec![mock_pub_key(1), mock_pub_key(2), mock_pub_key(3), mock_pub_key(4)])
 		} else {
 			None
 		}
@@ -321,12 +326,16 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 	}
 }
 
+pub fn mock_pub_key(id: u8) -> AccountId {
+	sr25519::Public::from_raw([id; 32])
+}
+
 pub fn mock_role_key_id(id: u8) -> RoleKeyId {
 	RoleKeyId::from(Public::from_raw([id; 33]))
 }
 
 pub fn mock_authorities(vec: Vec<u8>) -> Vec<(AccountId, RoleKeyId)> {
-	vec.into_iter().map(|id| (id as u64, mock_role_key_id(id))).collect()
+	vec.into_iter().map(|id| (mock_pub_key(id), mock_role_key_id(id))).collect()
 }
 
 pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
