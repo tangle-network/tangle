@@ -362,12 +362,8 @@ pub mod module {
 					Self::verify_dkg_signature_job_result(role_type, &job_info, info)?;
 				},
 				JobResult::ZkSaaSPhaseOne(info) => {
-					let result = Self::verify_zksaas_circuit_job_result(
-						role_type,
-						job_id,
-						&job_info,
-						info,
-					)?;
+					let result =
+						Self::verify_zksaas_circuit_job_result(role_type, job_id, &job_info, info)?;
 					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::ZkSaaSPhaseTwo(info) => {
@@ -474,8 +470,8 @@ pub mod module {
 			let _caller = ensure_signed(origin)?;
 
 			// Remove the validator from the job
-			let job_info = SubmittedJobs::<T>::get(role_type, job_id)
-				.ok_or(Error::<T>::JobNotFound)?;
+			let job_info =
+				SubmittedJobs::<T>::get(role_type, job_id).ok_or(Error::<T>::JobNotFound)?;
 
 			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
 

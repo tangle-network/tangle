@@ -416,11 +416,8 @@ pub mod pallet {
 			for job in active_jobs {
 				let role_type = job.0;
 				// Submit request to exit from the known set.
-				let res = T::JobsHandler::exit_from_known_set(
-					stash_account.clone(),
-					role_type,
-					job.1,
-				);
+				let res =
+					T::JobsHandler::exit_from_known_set(stash_account.clone(), role_type, job.1);
 
 				if res.is_err() {
 					pending_jobs.push((role_type, job.1));
