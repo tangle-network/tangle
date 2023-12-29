@@ -104,13 +104,18 @@ use sp_staking::{
 pub use tangle_primitives::{
 	currency::*,
 	fee::*,
-	jobs::{JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType},
+	jobs::{
+		traits::{JobToFee, MPCHandler},
+		JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType,
+	},
 	roles::ValidatorRewardDistribution,
 	time::*,
-	traits::jobs::{JobToFee, MPCHandler},
+	types::{
+		AccountId, AccountIndex, Address, Balance, BlockNumber, Hash, Header, Index, Moment,
+		Signature,
+	},
 	verifier::{arkworks::ArkworksVerifierGroth16Bn254, circom::CircomVerifierGroth16Bn254},
-	AccountId, AccountIndex, Address, BabeId, Balance, BlockNumber, Hash, Header, Index, Moment,
-	Signature, AVERAGE_ON_INITIALIZE_RATIO, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO,
+	BabeId, AVERAGE_ON_INITIALIZE_RATIO, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO,
 };
 
 use pallet_airdrop_claims::TestWeightInfo;

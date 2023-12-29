@@ -29,8 +29,10 @@ use precompile_utils::{prelude::*, solidity::revert::revert_as_bytes};
 use sp_core::H256;
 use sp_runtime::traits::Dispatchable;
 use sp_std::{marker::PhantomData, vec::Vec};
-use tangle_primitives::jobs::{
-	DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DkgKeyType, JobKey, JobSubmission, JobType,
+use tangle_primitives::{
+	jobs::{DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, JobId, JobSubmission, JobType},
+	roles::{RoleType, ThresholdSignatureRoleType, ZeroKnowledgeRoleType},
+	types::BlockNumber,
 };
 
 #[cfg(test)]
@@ -77,6 +79,7 @@ where
 		expiry: u64,
 		participants: Vec<Address>,
 		threshold: u8,
+		role_type: u16,
 		permitted_caller: Address,
 	) -> EvmResult {
 		// Convert Ethereum address to Substrate account ID
@@ -88,10 +91,30 @@ where
 			.map(|x| Runtime::AddressMapping::into_account_id(x.0))
 			.collect();
 
+		// Convert (u16) role type to RoleType
+		let role_type = Self::convert_role_type(role_type);
+
+		// Check if job key is valid, otherwise return an error
+		if role_type.is_none() {
+			return Err(PrecompileFailure::Revert {
+				exit_status: ExitRevert::Reverted,
+				output: revert_as_bytes("Invalid role type!"),
+			})
+		}
+
+		let threshold_signature_role = match role_type {
+			Some(RoleType::Tss(role)) => role,
+			_ =>
+				return Err(PrecompileFailure::Revert {
+					exit_status: ExitRevert::Reverted,
+					output: revert_as_bytes("Invalid role type!"),
+				}),
+		};
+
 		// Create DKG job type with the provided parameters
 		let job_type = DKGTSSPhaseOneJobType {
+			role_type: threshold_signature_role,
 			participants,
-			key_type: DkgKeyType::Ecdsa,
 			threshold,
 			permitted_caller: Some(permitted_caller),
 		};
@@ -132,8 +155,8 @@ where
 	#[precompile::public("submitDkgPhaseTwoJob(uint64,uint32,bytes)")]
 	fn submit_dkg_phase_two_job(
 		handle: &mut impl PrecompileHandle,
-		expiry: u64,
-		phase_one_id: u32,
+		expiry: BlockNumber,
+		phase_one_id: JobId,
 		submission: BoundedBytes<GetJobSubmissionSizeLimit>,
 	) -> EvmResult {
 		// Convert BoundedBytes to Vec<u8>
@@ -146,19 +169,45 @@ where
 		let expiry_block: BlockNumberFor<Runtime> = expiry.into();
 
 		// Create DKG signature job type with the provided parameters
-		let job_type = DKGTSSPhaseTwoJobType { phase_one_id, submission };
+		match pallet_jobs::SubmittedJobsRole::<Runtime>::get(phase_one_id) {
+			Some(role_type) => {
+				// Parse the inner role type. It should be a TSS role.
+				let threshold_signature_role = match role_type {
+					RoleType::Tss(role) => role,
+					_ =>
+						return Err(PrecompileFailure::Revert {
+							exit_status: ExitRevert::Reverted,
+							output: revert_as_bytes("Invalid role type!"),
+						}),
+				};
 
-		// Create job submission object
-		let job =
-			JobSubmission { expiry: expiry_block, job_type: JobType::DKGTSSPhaseTwo(job_type) };
+				// Construct the phase 2 job type.
+				let job_type = DKGTSSPhaseTwoJobType {
+					role_type: threshold_signature_role,
+					phase_one_id,
+					submission,
+				};
 
-		// Create the call to the Jobs module's submit_job function
-		let call = JobsCall::<Runtime>::submit_job { job };
+				// Create job submission object
+				let job = JobSubmission {
+					expiry: expiry_block,
+					job_type: JobType::DKGTSSPhaseTwo(job_type),
+				};
 
-		// Dispatch the call using the RuntimeHelper
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
+				// Create the call to the Jobs module's submit_job function
+				let call = JobsCall::<Runtime>::submit_job { job };
 
-		Ok(())
+				// Dispatch the call using the RuntimeHelper
+				<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
+
+				Ok(())
+			},
+			None =>
+				return Err(PrecompileFailure::Revert {
+					exit_status: ExitRevert::Reverted,
+					output: revert_as_bytes("Invalid job ID!"),
+				}),
+		}
 	}
 
 	/// Withdraws accumulated rewards for the caller from the Jobs module.
@@ -189,8 +238,9 @@ where
 	/// # Parameters
 	///
 	/// - `handle`: A mutable reference to the `PrecompileHandle` implementation.
-	/// - `job_key`: An identifier specifying the type of job to update the permitted caller for
-	///   (u8).
+	/// - `role_type`: An identifier specifying the role of the job to update the permitted caller
+	///   for (u16) - first byte is the top-level role (TSS, ZkSaaS, etc.), second byte is the
+	///   sub-role.
 	/// - `job_id`: The unique identifier of the job for which the permitted caller is being updated
 	///   (u32).
 	/// - `new_permitted_caller`: The Ethereum address of the new permitted caller.
@@ -201,24 +251,18 @@ where
 	#[precompile::public("setPermittedCaller(uint8,uint32,address)")]
 	fn set_permitted_caller(
 		handle: &mut impl PrecompileHandle,
-		job_key: u8,
-		job_id: u32,
+		role_type: u16,
+		job_id: JobId,
 		new_permitted_caller: Address,
 	) -> EvmResult {
-		// Convert job_key to JobKey
-		let job_key = match job_key {
-			0 => Some(JobKey::DKG),
-			1 => Some(JobKey::DKGSignature),
-			2 => Some(JobKey::ZkSaaSCircuit),
-			3 => Some(JobKey::ZkSaaSProve),
-			_ => None,
-		};
+		// Convert (u16) role_type to RoleType
+		let role_type = Self::convert_role_type(role_type);
 
-		// Check if job key is valid, otherwise return an error
-		if job_key.is_none() {
+		// Check if role type is valid, otherwise return an error
+		if role_type.is_none() {
 			return Err(PrecompileFailure::Revert {
 				exit_status: ExitRevert::Reverted,
-				output: revert_as_bytes("Invalid job key!"),
+				output: revert_as_bytes("Invalid role type!"),
 			})
 		}
 
@@ -230,7 +274,7 @@ where
 
 		// Create the call to the Jobs module's set_permitted_caller function
 		let call = JobsCall::<Runtime>::set_permitted_caller {
-			job_key: job_key.unwrap(),
+			role_type: role_type.unwrap(),
 			job_id,
 			new_permitted_caller,
 		};
@@ -239,5 +283,24 @@ where
 		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())
+	}
+
+	fn convert_role_type(role_type: u16) -> Option<RoleType> {
+		match role_type.to_be_bytes() {
+			[0, 1] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssGG20)),
+			[0, 2] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssCGGMP)),
+			[0, 3] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostSr25519)),
+			[0, 4] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostP256)),
+			[0, 5] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostSecp256k1)),
+			[0, 6] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostRistretto255)),
+			[0, 7] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostBabyJubJub)),
+			[0, 8] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostEd25519)),
+			[0, 9] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssEdDSABabyJubJub)),
+			[0, 10] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssBls381)),
+			[1, 0] => Some(RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16)),
+			[1, 1] => Some(RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSMarlin)),
+			[2, 0] => Some(RoleType::LightClientRelaying),
+			_ => None,
+		}
 	}
 }

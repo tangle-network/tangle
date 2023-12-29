@@ -97,7 +97,7 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use tangle_primitives::jobs::{
 		traits::{JobsHandler, MPCHandler},
-		JobId, JobKey,
+		JobId,
 	};
 
 	/// A type for representing the validator id in a session.
@@ -187,7 +187,7 @@ pub mod pallet {
 		/// Profile deleted.
 		ProfileDeleted { account: T::AccountId },
 		/// Pending jobs,that cannot be opted out at the moment.
-		PendingJobs { pending_jobs: Vec<(JobKey, JobId)> },
+		PendingJobs { pending_jobs: Vec<(RoleType, JobId)> },
 	}
 
 	#[pallet::error]
@@ -414,19 +414,19 @@ pub mod pallet {
 			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
 			let mut pending_jobs = Vec::new();
 			for job in active_jobs {
-				let job_key = job.0;
+				let role_type = job.0;
 				// Submit request to exit from the known set.
 				let res = T::JobsHandler::exit_from_known_set(
 					stash_account.clone(),
-					job_key.clone(),
+					role_type.clone(),
 					job.1,
 				);
 
 				if res.is_err() {
-					pending_jobs.push((job_key.clone(), job.1));
+					pending_jobs.push((role_type.clone(), job.1));
 				} else {
 					// Remove role from the profile.
-					ledger.profile.remove_role_from_profile(job_key.get_role_type());
+					ledger.profile.remove_role_from_profile(role_type);
 				}
 			}
 
@@ -490,17 +490,17 @@ pub mod pallet {
 
 			let mut pending_jobs = Vec::new();
 			for job in active_jobs {
-				let job_key = job.0;
-				if job_key.get_role_type() == role {
+				let role_type = job.0;
+				if role_type == role {
 					// Submit request to exit from the known set.
 					let res = T::JobsHandler::exit_from_known_set(
 						stash_account.clone(),
-						job_key.clone(),
+						role_type.clone(),
 						job.1,
 					);
 
 					if res.is_err() {
-						pending_jobs.push((job_key.clone(), job.1));
+						pending_jobs.push((role_type.clone(), job.1));
 					} else {
 						// Remove role from the profile.
 						ledger.profile.remove_role_from_profile(role.clone());

@@ -97,9 +97,14 @@ pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 
 pub use tangle_primitives::{
-	currency::*, fee::*, time::*, AccountId, AccountIndex, Address, Balance, BlockNumber, Hash,
-	Header, Index, Moment, Signature, AVERAGE_ON_INITIALIZE_RATIO, MAXIMUM_BLOCK_WEIGHT,
-	NORMAL_DISPATCH_RATIO,
+	currency::*,
+	fee::*,
+	time::*,
+	types::{
+		AccountId, AccountIndex, Address, Balance, BlockNumber, Hash, Header, Index, Moment,
+		Signature,
+	},
+	AVERAGE_ON_INITIALIZE_RATIO, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO,
 };
 
 use pallet_airdrop_claims::TestWeightInfo;
@@ -483,7 +488,7 @@ impl pallet_democracy::Config for Runtime {
 	/// (NTB) vote.
 	type ExternalDefaultOrigin =
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1, 1>;
-	/// Two thirds of the technical committee can have an ExternalMajority/ExternalDefault vote
+	/// Two thirds of the council can have an ExternalMajority/ExternalDefault vote
 	/// be tabled immediately and with a shorter voting/enactment period.
 	type FastTrackOrigin =
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2, 3>;
@@ -494,14 +499,14 @@ impl pallet_democracy::Config for Runtime {
 	// To cancel a proposal which has been passed, 2/3 of the council must agree to it.
 	type CancellationOrigin =
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2, 3>;
-	// To cancel a proposal before it has been passed, the technical committee must be unanimous or
+	// To cancel a proposal before it has been passed, the council must be unanimous or
 	// Root must agree.
 	type CancelProposalOrigin = EitherOfDiverse<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1, 1>,
 	>;
 	type BlacklistOrigin = EnsureRoot<AccountId>;
-	// Any single technical committee member may veto a coming council proposal, however they can
+	// Any single council member may veto a coming council proposal, however they can
 	// only do it once and it lasts only for the cool-off period.
 	type VetoOrigin = pallet_collective::EnsureMember<AccountId, CouncilCollective>;
 	type CooloffPeriod = CooloffPeriod;

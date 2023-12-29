@@ -31,13 +31,38 @@ pub use tss::*;
 pub use zksaas::*;
 
 /// Role type to be used in the system.
-#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
+#[derive(Encode, Decode, Copy, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum RoleType {
 	/// TSS role type.
 	Tss(ThresholdSignatureRoleType),
 	/// Zk-SaaS role type.
 	ZkSaaS(ZeroKnowledgeRoleType),
+	/// Light client relaying role type.
+	LightClientRelaying,
+}
+
+impl RoleType {
+	pub fn is_dkg_tss(&self) -> bool {
+		match self {
+			RoleType::Tss(_) => true,
+			_ => false,
+		}
+	}
+
+	pub fn is_zksaas(&self) -> bool {
+		match self {
+			RoleType::ZkSaaS(_) => true,
+			_ => false,
+		}
+	}
+
+	pub fn is_light_client_relaying(&self) -> bool {
+		match self {
+			RoleType::LightClientRelaying => true,
+			_ => false,
+		}
+	}
 }
 
 /// Metadata associated with a role type.
@@ -46,6 +71,7 @@ pub enum RoleType {
 pub enum RoleTypeMetadata {
 	Tss(TssRoleMetadata),
 	ZkSaas(ZkSaasRoleMetadata),
+	LightClientRelaying,
 }
 
 impl RoleTypeMetadata {
@@ -54,6 +80,7 @@ impl RoleTypeMetadata {
 		match self {
 			RoleTypeMetadata::Tss(metadata) => RoleType::Tss(metadata.role_type.clone()),
 			RoleTypeMetadata::ZkSaas(metadata) => RoleType::ZkSaaS(metadata.role_type.clone()),
+			RoleTypeMetadata::LightClientRelaying => RoleType::LightClientRelaying,
 		}
 	}
 
@@ -61,6 +88,7 @@ impl RoleTypeMetadata {
 		match self {
 			RoleTypeMetadata::Tss(metadata) => metadata.authority_key.clone(),
 			RoleTypeMetadata::ZkSaas(metadata) => metadata.authority_key.clone(),
+			_ => Vec::new(),
 		}
 	}
 }

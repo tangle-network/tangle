@@ -21,7 +21,7 @@ use sp_core::RuntimeDebug;
 use sp_std::vec::Vec;
 
 #[derive(
-	Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
+	Encode, Decode, Copy, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ZeroKnowledgeRoleType {

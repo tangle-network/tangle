@@ -14,14 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::roles::{RoleType, ThresholdSignatureRoleType, ZeroKnowledgeRoleType};
+use crate::roles::RoleType;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, RuntimeDebug};
+use sp_core::RuntimeDebug;
 use sp_std::vec::Vec;
 
-pub type JobId = u32;
+pub type JobId = u64;
 
 pub mod traits;
 pub mod tss;
@@ -33,7 +33,7 @@ pub use zksaas::*;
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub struct JobSubmission<AccountId, BlockNumber> {
-	/// The expiry block number.
+	/// The time to live for the submitted job.
 	pub expiry: BlockNumber,
 
 	/// The type of the job submission.
@@ -129,22 +129,13 @@ impl<AccountId> JobType<AccountId> {
 		}
 	}
 
-	/// Gets the job key associated with the job type.
-	pub fn get_job_key(&self) -> JobKey {
+	/// Gets the role associated with the job type.
+	pub fn get_role_type(&self) -> RoleType {
 		match self {
-			JobType::DKGTSSPhaseOne(_) => JobKey::DKG,
-			JobType::ZkSaaSPhaseOne(_) => JobKey::ZkSaaSCircuit,
-			JobType::DKGTSSPhaseTwo(_) => JobKey::DKGSignature,
-			JobType::ZkSaaSPhaseTwo(_) => JobKey::ZkSaaSProve,
-		}
-	}
-
-	/// Gets the job key associated with the previous phase job type.
-	pub fn get_previous_phase_job_key(&self) -> Option<JobKey> {
-		match self {
-			JobType::DKGTSSPhaseTwo(_) => Some(JobKey::DKG),
-			JobType::ZkSaaSPhaseTwo(_) => Some(JobKey::ZkSaaSCircuit),
-			_ => None,
+			JobType::DKGTSSPhaseOne(job) => RoleType::Tss(job.role_type.clone()),
+			JobType::ZkSaaSPhaseOne(job) => RoleType::ZkSaaS(job.role_type.clone()),
+			JobType::DKGTSSPhaseTwo(job) => RoleType::Tss(job.role_type.clone()),
+			JobType::ZkSaaSPhaseTwo(job) => RoleType::ZkSaaS(job.role_type.clone()),
 		}
 	}
 
@@ -160,7 +151,7 @@ impl<AccountId> JobType<AccountId> {
 	}
 
 	/// Gets the phase one ID for phase two jobs, if applicable.
-	pub fn get_phase_one_id(&self) -> Option<u32> {
+	pub fn get_phase_one_id(&self) -> Option<JobId> {
 		use crate::jobs::JobType::*;
 		match self {
 			DKGTSSPhaseTwo(info) => Some(info.phase_one_id),
@@ -191,37 +182,12 @@ pub enum JobState {
 	Terminated,
 }
 
-/// Enum representing different types of job keys.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy)]
-pub enum JobKey {
-	/// Distributed Key Generation (DKG) job type.
-	DKG,
-	/// DKG Signature job type.
-	DKGSignature,
-	/// (zk-SNARK) Create Circuit job type.
-	ZkSaaSCircuit,
-	/// (zk-SNARK) Create Proof job type.
-	ZkSaaSProve,
-}
-
-impl JobKey {
-	/// Returns role assigned with the job.
-	pub fn get_role_type(&self) -> RoleType {
-		match self {
-			JobKey::DKG => RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
-			JobKey::DKGSignature => RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
-			JobKey::ZkSaaSCircuit => RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
-			JobKey::ZkSaaSProve => RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
-		}
-	}
-}
-
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub struct PhaseOneResult<AccountId, BlockNumber> {
 	/// The owner's account ID.
 	pub owner: AccountId,
-	/// The expiry block number.
+	/// The time to live as a block number.
 	pub expiry: BlockNumber,
 	/// The type of the job submission.
 	pub result: Vec<u8>,

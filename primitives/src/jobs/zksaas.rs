@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::{HyperData, JobId};
+use crate::{
+	jobs::{HyperData, JobId},
+	roles::ZeroKnowledgeRoleType,
+};
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -56,6 +59,8 @@ pub struct ZkSaaSPhaseOneJobType<AccountId> {
 	pub permitted_caller: Option<AccountId>,
 	/// ZK-SNARK Proving system
 	pub system: ZkSaaSSystem,
+	/// The role type of the job
+	pub role_type: ZeroKnowledgeRoleType,
 }
 
 /// Represents the (zk-SNARK) Phase Two job type.
@@ -63,10 +68,11 @@ pub struct ZkSaaSPhaseOneJobType<AccountId> {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ZkSaaSPhaseTwoJobType {
 	/// The phase one ID.
-	pub phase_one_id: u32,
-
+	pub phase_one_id: JobId,
 	/// ZK-SNARK Proving request
 	pub request: ZkSaaSPhaseTwoRequest,
+	/// The role type of the job
+	pub role_type: ZeroKnowledgeRoleType,
 }
 
 /// Represents ZK-SNARK proving request

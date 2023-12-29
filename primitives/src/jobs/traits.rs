@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::{JobId, JobKey, JobSubmission, JobWithResult, ValidatorOffenceType};
+use crate::{
+	jobs::{JobId, JobSubmission, JobWithResult, ValidatorOffenceType},
+	roles::RoleType,
+};
 use sp_arithmetic::traits::{BaseArithmetic, Unsigned};
 use sp_runtime::DispatchResult;
 use sp_std::vec::Vec;
@@ -89,7 +92,7 @@ pub trait JobsHandler<AccountId> {
 	/// # Returns
 	///
 	/// Returns a vector of `JobId` representing the active jobs of the validator.
-	fn get_active_jobs(validator: AccountId) -> Vec<(JobKey, JobId)>;
+	fn get_active_jobs(validator: AccountId) -> Vec<(RoleType, JobId)>;
 
 	/// Exits a job from the known set of a validator.
 	///
@@ -101,5 +104,9 @@ pub trait JobsHandler<AccountId> {
 	/// # Errors
 	///
 	/// Returns a `DispatchResult` indicating success or an error if the operation fails.
-	fn exit_from_known_set(validator: AccountId, job_key: JobKey, job_id: JobId) -> DispatchResult;
+	fn exit_from_known_set(
+		validator: AccountId,
+		role_type: RoleType,
+		job_id: JobId,
+	) -> DispatchResult;
 }

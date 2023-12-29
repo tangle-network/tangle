@@ -33,7 +33,7 @@ use sp_runtime::{
 };
 use std::collections::BTreeMap;
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::BlockNumber;
+use tangle_primitives::types::BlockNumber;
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
 	ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxNominations, MaxVestingSchedules,

@@ -254,13 +254,13 @@ impl pallet_staking::Config for Runtime {
 pub struct MockJobsHandler;
 
 impl JobsHandler<AccountId> for MockJobsHandler {
-	fn get_active_jobs(_validator: AccountId) -> Vec<(JobKey, JobId)> {
+	fn get_active_jobs(_validator: AccountId) -> Vec<(RoleType, JobId)> {
 		Default::default()
 	}
 
 	fn exit_from_known_set(
 		_validator: AccountId,
-		_job_key: JobKey,
+		_role_type: RoleType,
 		_job_id: JobId,
 	) -> sp_runtime::DispatchResult {
 		Ok(())

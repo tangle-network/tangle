@@ -20,7 +20,9 @@ use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
 use sp_std::vec::Vec;
 
-use crate::roles::RoleType;
+use crate::roles::ThresholdSignatureRoleType;
+
+use super::JobId;
 
 /// Represents the Distributed Key Generation (DKG) job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
@@ -36,7 +38,7 @@ pub struct DKGTSSPhaseOneJobType<AccountId> {
 	pub permitted_caller: Option<AccountId>,
 
 	/// The role type to be used
-	pub role_type: RoleType,
+	pub role_type: ThresholdSignatureRoleType,
 }
 
 /// Represents the DKG Signature job type.
@@ -44,13 +46,13 @@ pub struct DKGTSSPhaseOneJobType<AccountId> {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGTSSPhaseTwoJobType {
 	/// The phase one ID.
-	pub phase_one_id: u32,
+	pub phase_one_id: JobId,
 
 	/// The submission data as a vector of bytes.
 	pub submission: Vec<u8>,
 
 	/// The role type to be used
-	pub role_type: RoleType,
+	pub role_type: ThresholdSignatureRoleType,
 }
 
 pub type Signatures = Vec<Vec<u8>>;

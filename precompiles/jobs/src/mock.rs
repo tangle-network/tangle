@@ -26,12 +26,11 @@ use sp_runtime::{
 	BuildStorage, DispatchResult, Perbill,
 };
 use tangle_primitives::{
-	jobs::*,
-	roles::RoleTypeMetadata,
-	traits::{
-		jobs::{JobToFee, MPCHandler},
-		roles::RolesHandler,
+	jobs::{
+		traits::{JobToFee, MPCHandler},
+		*,
 	},
+	roles::{traits::RolesHandler, RoleTypeMetadata},
 };
 
 pub type AccountId = MockAccount;
@@ -193,7 +192,7 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 pub struct MockRolesHandler;
 
 impl RolesHandler<AccountId> for MockRolesHandler {
-	fn is_validator(address: AccountId, _role_type: JobKey) -> bool {
+	fn is_validator(address: AccountId, _role_type: RoleType) -> bool {
 		let validators = [
 			AccountId::from_u64(1u64),
 			AccountId::from_u64(2u64),
@@ -204,7 +203,10 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		validators.contains(&address)
 	}
 
-	fn get_validator_metadata(_address: AccountId, _job_key: JobKey) -> Option<RoleTypeMetadata> {
+	fn get_validator_metadata(
+		_address: AccountId,
+		_role_type: RoleType,
+	) -> Option<RoleTypeMetadata> {
 		None
 	}
 

@@ -20,7 +20,10 @@
 use parity_scale_codec::Codec;
 use sp_runtime::{traits::MaybeDisplay, Serialize};
 
-use tangle_primitives::jobs::{JobId, JobKey, RpcResponseJobsData, RpcResponsePhaseOneResult};
+use tangle_primitives::{
+	jobs::{JobId, RpcResponseJobsData, RpcResponsePhaseOneResult},
+	roles::RoleType,
+};
 
 sp_api::decl_runtime_apis! {
 	pub trait JobsApi<AccountId> where
@@ -46,25 +49,25 @@ sp_api::decl_runtime_apis! {
 		///
 		/// # Arguments
 		///
-		/// * `job_key` - The key of the job.
+		/// * `role_type` - The role of the job.
 		/// * `job_id` - The ID of the job.
 		///
 		/// # Returns
 		///
 		/// An optional `RpcResponseJobsData` containing the account ID of the job.
-		fn query_job_by_id(job_key: JobKey, job_id: JobId) -> Option<RpcResponseJobsData<AccountId>>;
+		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId>>;
 
 		/// Queries the phase one result of a job by its key and ID.
 		///
 		/// # Arguments
 		///
-		/// * `job_key` - The key of the job.
+		/// * `role_type` - The role of the job.
 		/// * `job_id` - The ID of the job.
 		///
 		/// # Returns
 		///
 		/// An `Option` containing the phase one result of the job, wrapped in an `RpcResponsePhaseOneResult`.
-		fn query_phase_one_by_id(job_key: JobKey, job_id: JobId) -> Option<RpcResponsePhaseOneResult<AccountId>>;
+		fn query_phase_one_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponsePhaseOneResult<AccountId>>;
 
 		/// Queries next job ID.
 		///

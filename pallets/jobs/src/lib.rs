@@ -33,8 +33,7 @@ use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
 	jobs::{
 		traits::{JobToFee, MPCHandler},
-		DKGTSSKeySubmissionResult, JobId, JobInfo, JobKey, JobResult, PhaseOneResult,
-		ValidatorOffenceType,
+		DKGTSSKeySubmissionResult, JobId, JobInfo, JobResult, PhaseOneResult, ValidatorOffenceType,
 	},
 	roles::traits::RolesHandler,
 };
@@ -63,6 +62,7 @@ pub use weights::WeightInfo;
 #[frame_support::pallet]
 pub mod module {
 	use super::*;
+	use tangle_primitives::roles::RoleType;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -129,9 +129,9 @@ pub mod module {
 	#[pallet::generate_deposit(fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// A new job has been submitted
-		JobSubmitted { job_id: JobId, job_key: JobKey, details: JobSubmissionOf<T> },
+		JobSubmitted { job_id: JobId, role_type: RoleType, details: JobSubmissionOf<T> },
 		/// A new job result has been submitted
-		JobResultSubmitted { job_id: JobId, job_key: JobKey },
+		JobResultSubmitted { job_id: JobId, role_type: RoleType },
 		/// validator has earned reward
 		ValidatorRewarded { id: T::AccountId, reward: BalanceOf<T> },
 	}
@@ -140,14 +140,18 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn submitted_jobs)]
 	pub type SubmittedJobs<T: Config> =
-		StorageDoubleMap<_, Twox64Concat, JobKey, Blake2_128Concat, JobId, JobInfoOf<T>>;
+		StorageDoubleMap<_, Twox64Concat, RoleType, Blake2_128Concat, JobId, JobInfoOf<T>>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn submitted_jobs_role)]
+	pub type SubmittedJobsRole<T: Config> = StorageMap<_, Twox64Concat, JobId, RoleType>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn known_results)]
 	pub type KnownResults<T: Config> = StorageDoubleMap<
 		_,
 		Twox64Concat,
-		JobKey,
+		RoleType,
 		Blake2_128Concat,
 		JobId,
 		PhaseOneResult<T::AccountId, BlockNumberFor<T>>,
@@ -156,7 +160,7 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn validator_job_id_lookup)]
 	pub type ValidatorJobIdLookup<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, Vec<(JobKey, JobId)>>;
+		StorageMap<_, Twox64Concat, T::AccountId, Vec<(RoleType, JobId)>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn validator_rewards)]
@@ -207,7 +211,7 @@ pub mod module {
 			let now = <frame_system::Pallet<T>>::block_number();
 
 			let job_id = Self::get_next_job_id()?;
-			let job_key = job.job_type.get_job_key();
+			let role_type = job.job_type.get_role_type();
 
 			// Ensure the job can be processed
 			if job.job_type.is_phase_one() {
@@ -219,12 +223,12 @@ pub mod module {
 
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), job_key),
+						T::RolesHandler::is_validator(participant.clone(), role_type.clone()),
 						Error::<T>::InvalidValidator
 					);
 
 					// Add record for easy lookup
-					Self::add_job_to_validator_lookup(participant, job_key, job_id)?;
+					Self::add_job_to_validator_lookup(participant, role_type.clone(), job_id)?;
 				}
 
 				// Sanity check ensure threshold is valid
@@ -235,11 +239,9 @@ pub mod module {
 				let existing_result_id =
 					job.job_type.clone().get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?;
 				// Ensure the result exists
-				let result = KnownResults::<T>::get(
-					job.job_type.clone().get_previous_phase_job_key().unwrap(),
-					existing_result_id,
-				)
-				.ok_or(Error::<T>::PreviousResultNotFound)?;
+				let result =
+					KnownResults::<T>::get(job.job_type.get_role_type(), existing_result_id)
+						.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 				// Validate existing result
 				ensure!(result.expiry >= now, Error::<T>::ResultExpired);
@@ -248,12 +250,12 @@ pub mod module {
 				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), job_key),
+						T::RolesHandler::is_validator(participant.clone(), role_type.clone()),
 						Error::<T>::InvalidValidator
 					);
 
 					// add record for easy lookup
-					Self::add_job_to_validator_lookup(participant, job_key, job_id)?;
+					Self::add_job_to_validator_lookup(participant, role_type.clone(), job_id)?;
 				}
 
 				// ensure the account can use the result
@@ -281,9 +283,10 @@ pub mod module {
 				job_type: job.job_type.clone(),
 				fee,
 			};
-			SubmittedJobs::<T>::insert(job_key, job_id, job_info);
+			SubmittedJobs::<T>::insert(role_type.clone(), job_id, job_info);
+			SubmittedJobsRole::<T>::insert(job_id, role_type.clone());
 
-			Self::deposit_event(Event::JobSubmitted { job_id, job_key, details: job });
+			Self::deposit_event(Event::JobSubmitted { job_id, role_type, details: job });
 
 			Ok(())
 		}
@@ -293,7 +296,7 @@ pub mod module {
 		/// # Parameters
 		///
 		/// - `origin`: The origin of the call (typically a signed account).
-		/// - `job_key`: A unique identifier for the job category.
+		/// - `role_type`: An identifier for the role type of the job.
 		/// - `job_id`: A unique identifier for the job within the category.
 		/// - `result`: A vector containing the result of the job.
 		///
@@ -318,7 +321,7 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::submit_job_result())]
 		pub fn submit_job_result(
 			origin: OriginFor<T>,
-			job_key: JobKey,
+			role_type: RoleType,
 			job_id: JobId,
 			result: JobResult,
 		) -> DispatchResult {
@@ -326,7 +329,7 @@ pub mod module {
 
 			// Ensure the job exists
 			let job_info =
-				SubmittedJobs::<T>::get(job_key, job_id).ok_or(Error::<T>::JobNotFound)?;
+				SubmittedJobs::<T>::get(role_type, job_id).ok_or(Error::<T>::JobNotFound)?;
 			let participants = match &result {
 				JobResult::DKGPhaseOne(_) | JobResult::ZkSaaSPhaseOne(_) => job_info
 					.job_type
@@ -341,7 +344,7 @@ pub mod module {
 						.ok_or(Error::<T>::InvalidJobPhase)?;
 					// Ensure the result exists
 					let phase_one_result = KnownResults::<T>::get(
-						job_info.job_type.clone().get_previous_phase_job_key().unwrap(),
+						job_info.job_type.get_role_type(),
 						existing_result_id,
 					)
 					.ok_or(Error::<T>::PreviousResultNotFound)?;
@@ -352,19 +355,23 @@ pub mod module {
 			// Handle based on job result
 			match result {
 				JobResult::DKGPhaseOne(info) => {
-					let result = Self::verify_dkg_job_result(job_key, &job_info, info)?;
-					KnownResults::<T>::insert(job_key, job_id, result);
+					let result = Self::verify_dkg_job_result(role_type.clone(), &job_info, info)?;
+					KnownResults::<T>::insert(role_type.clone(), job_id, result);
 				},
 				JobResult::DKGPhaseTwo(info) => {
-					Self::verify_dkg_signature_job_result(job_key, &job_info, info)?;
+					Self::verify_dkg_signature_job_result(role_type.clone(), &job_info, info)?;
 				},
 				JobResult::ZkSaaSPhaseOne(info) => {
-					let result =
-						Self::verify_zksaas_circuit_job_result(job_key, job_id, &job_info, info)?;
-					KnownResults::<T>::insert(job_key, job_id, result);
+					let result = Self::verify_zksaas_circuit_job_result(
+						role_type.clone(),
+						job_id,
+						&job_info,
+						info,
+					)?;
+					KnownResults::<T>::insert(role_type.clone(), job_id, result);
 				},
 				JobResult::ZkSaaSPhaseTwo(info) => {
-					Self::verify_zksaas_prove_job_result(job_key, &job_info, info)?;
+					Self::verify_zksaas_prove_job_result(role_type.clone(), &job_info, info)?;
 				},
 			};
 
@@ -379,9 +386,10 @@ pub mod module {
 				});
 			}
 
-			SubmittedJobs::<T>::remove(job_key, job_id);
+			SubmittedJobs::<T>::remove(role_type, job_id);
+			SubmittedJobsRole::<T>::remove(job_id);
 
-			Self::deposit_event(Event::JobResultSubmitted { job_id, job_key });
+			Self::deposit_event(Event::JobResultSubmitted { job_id, role_type });
 
 			Ok(())
 		}
@@ -429,7 +437,7 @@ pub mod module {
 		/// # Parameters
 		///
 		/// - `origin`: The origin of the call (typically a signed account).
-		/// - `job_key`: A unique identifier for the job category.
+		/// - `role_type`: An identifier for the role
 		/// - `job_id`: A unique identifier for the job within the category.
 		/// - `validator`: The account ID of the inactive validator.
 		/// - `offence`: The type of offence committed by the validator.
@@ -457,7 +465,7 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::report_inactive_validator())]
 		pub fn report_inactive_validator(
 			origin: OriginFor<T>,
-			job_key: JobKey,
+			role_type: RoleType,
 			job_id: JobId,
 			validator: T::AccountId,
 			offence: ValidatorOffenceType,
@@ -466,14 +474,14 @@ pub mod module {
 			let _caller = ensure_signed(origin)?;
 
 			// Remove the validator from the job
-			let job_info =
-				SubmittedJobs::<T>::get(job_key, job_id).ok_or(Error::<T>::JobNotFound)?;
+			let job_info = SubmittedJobs::<T>::get(role_type.clone(), job_id)
+				.ok_or(Error::<T>::JobNotFound)?;
 
 			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
 
 			// If phase2, fetch phase1 result
 			if !job_info.job_type.is_phase_one() {
-				let result = KnownResults::<T>::get(job_key, job_id)
+				let result = KnownResults::<T>::get(role_type.clone(), job_id)
 					.ok_or(Error::<T>::PhaseOneResultNotFound)?;
 				phase1_result = Some(result);
 			}
@@ -493,7 +501,7 @@ pub mod module {
 			// T::RolesHandler::report_offence(validator.clone(), offence)?;
 
 			// Trigger validator removal
-			Self::try_validator_removal_from_job(job_key, job_id, validator)?;
+			Self::try_validator_removal_from_job(role_type, job_id, validator)?;
 
 			Ok(())
 		}
@@ -520,13 +528,13 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
 		pub fn set_permitted_caller(
 			origin: OriginFor<T>,
-			job_key: JobKey,
+			role_type: RoleType,
 			job_id: JobId,
 			new_permitted_caller: T::AccountId,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 
-			KnownResults::<T>::try_mutate(job_key, job_id, |job| -> DispatchResult {
+			KnownResults::<T>::try_mutate(role_type, job_id, |job| -> DispatchResult {
 				let job = job.as_mut().ok_or(Error::<T>::JobNotFound)?;
 
 				// ensure the caller is the current permitted caller

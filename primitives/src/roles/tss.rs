@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::DigitalSignatureType;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -23,7 +22,7 @@ use sp_std::vec::Vec;
 
 /// Threshold signature role types and their specific elliptic curve.
 #[derive(
-	Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
+	Encode, Decode, Copy, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ThresholdSignatureRoleType {
