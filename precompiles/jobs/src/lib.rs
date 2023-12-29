@@ -248,7 +248,7 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("setPermittedCaller(uint8,uint32,address)")]
+	#[precompile::public("setPermittedCaller(uint16,uint64,address)")]
 	fn set_permitted_caller(
 		handle: &mut impl PrecompileHandle,
 		role_type: u16,

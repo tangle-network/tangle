@@ -39,9 +39,11 @@ use sp_staking::{
 };
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
-	jobs::{traits::JobsHandler, *},
+	jobs::{
+		traits::{JobsHandler, MPCHandler},
+		*,
+	},
 	roles::ValidatorRewardDistribution,
-	traits::jobs::MPCHandler,
 };
 pub type AccountId = u64;
 pub type Balance = u128;

@@ -29,6 +29,7 @@ use tangle_primitives::{
 		JobResult, JobType, JobWithResult, ZkSaaSPhaseOneJobType, ZkSaaSPhaseTwoJobType,
 		ZkSaaSPhaseTwoRequest, ZkSaaSProofResult, ZkSaaSSystem,
 	},
+	roles::ZeroKnowledgeRoleType,
 	verifier::{self, from_field_elements},
 };
 
@@ -99,7 +100,9 @@ fn proof_verification_works() {
 		proof.serialize_compressed(&mut proof_bytes).unwrap();
 
 		// Phase1
+		let zero_knowledge_role_type = ZeroKnowledgeRoleType::ZkSaaSGroth16;
 		let phase_one = JobType::<AccountId>::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
+			role_type: zero_knowledge_role_type,
 			participants: vec![1, 2, 3, 4, 5, 6, 7, 8],
 			system: ZkSaaSSystem::Groth16(Groth16System {
 				circuit: HyperData::Raw(vec![]),
@@ -113,6 +116,7 @@ fn proof_verification_works() {
 		});
 
 		let phase_two = JobType::<AccountId>::ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType {
+			role_type: zero_knowledge_role_type,
 			phase_one_id: 0,
 			request: ZkSaaSPhaseTwoRequest::Groth16(Groth16ProveRequest {
 				public_input: from_field_elements(&[image]).unwrap(),

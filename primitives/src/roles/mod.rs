@@ -63,6 +63,26 @@ impl RoleType {
 			_ => false,
 		}
 	}
+
+	pub fn to_u16(&self) -> u16 {
+		let be_bytes: [u8; 2] = match self {
+			RoleType::Tss(ThresholdSignatureRoleType::TssGG20) => [0, 1],
+			RoleType::Tss(ThresholdSignatureRoleType::TssCGGMP) => [0, 2],
+			RoleType::Tss(ThresholdSignatureRoleType::TssFrostSr25519) => [0, 3],
+			RoleType::Tss(ThresholdSignatureRoleType::TssFrostP256) => [0, 4],
+			RoleType::Tss(ThresholdSignatureRoleType::TssFrostSecp256k1) => [0, 5],
+			RoleType::Tss(ThresholdSignatureRoleType::TssFrostRistretto255) => [0, 6],
+			RoleType::Tss(ThresholdSignatureRoleType::TssFrostBabyJubJub) => [0, 7],
+			RoleType::Tss(ThresholdSignatureRoleType::TssFrostEd25519) => [0, 8],
+			RoleType::Tss(ThresholdSignatureRoleType::TssEdDSABabyJubJub) => [0, 9],
+			RoleType::Tss(ThresholdSignatureRoleType::TssBls381) => [0, 10],
+			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16) => [1, 0],
+			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSMarlin) => [1, 1],
+			RoleType::LightClientRelaying => [2, 0],
+		};
+
+		u16::from_be_bytes(be_bytes)
+	}
 }
 
 /// Metadata associated with a role type.

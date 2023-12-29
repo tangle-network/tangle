@@ -249,19 +249,19 @@ fn test_remove_role_from_profile() {
 		let ledger = Roles::ledger(1).unwrap();
 		assert!(ledger.profile.is_shared());
 		assert_eq!(ledger.total_restake(), 5000);
-		assert!(ledger.profile.has_role(RoleType::Tss));
+		assert!(ledger.profile.has_role(RoleType::Tss(Default::default())));
 
 		// Lets remove Tss role from the profile.
-		assert_ok!(Roles::remove_role(RuntimeOrigin::signed(1), RoleType::Tss));
+		assert_ok!(Roles::remove_role(RuntimeOrigin::signed(1), RoleType::Tss(Default::default())));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleRemoved {
 			account: 1,
-			role: RoleType::Tss,
+			role: RoleType::Tss(Default::default()),
 		})]);
 
 		// Get the updated ledger to check if the role is removed.
 		let ledger = Roles::ledger(1).unwrap();
-		assert!(!ledger.profile.has_role(RoleType::Tss));
+		assert!(!ledger.profile.has_role(RoleType::Tss(Default::default())));
 	});
 }
 
@@ -341,7 +341,7 @@ fn test_report_offence_should_work() {
 		let offence_report = ReportValidatorOffence {
 			session_index,
 			validator_set_count: 4,
-			role_type: RoleType::Tss,
+			role_type: RoleType::Tss(Default::default()),
 			offence_type: tangle_primitives::jobs::ValidatorOffenceType::Inactivity,
 			offenders: vec![1],
 		};
