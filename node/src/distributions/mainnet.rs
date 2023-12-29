@@ -82,6 +82,7 @@ pub const TWO_YEARS_BLOCKS: u64 = (2 * 365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
 
 pub const ONE_HUNDRED_POINTS: u64 = 100;
 
+#[derive(PartialEq, Eq, Debug)]
 pub struct DistributionResult {
 	pub claims: Vec<(MultiAddress, Balance, Option<StatementKind>)>,
 	pub vesting: Vec<(MultiAddress, Vec<(Balance, Balance, BlockNumber)>)>,
@@ -98,6 +99,7 @@ fn one_percent_endowment(endowment: u128) -> u128 {
 }
 
 fn vesting_per_block(endowment: u128, blocks: u64) -> u128 {
+	print!("Endowment {:?} Blocks {:?} ", endowment, blocks);
 	endowment / blocks as u128
 }
 
@@ -215,24 +217,21 @@ pub fn get_substrate_balance_distribution() -> DistributionResult {
 }
 
 pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+	// TODO : Read from actual investor file
 	let investor_accounts: Vec<(MultiAddress, u128)> = vec![];
-	investor_accounts
-		.into_iter()
-		.map(|(address, value)| {
-			(
-				address,
-				value,
-				ONE_YEAR_BLOCKS,
-				TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS,
-				one_percent_endowment(value),
-			)
-		})
-		.collect()
+	compute_balance_distribution_with_cliff_and_vesting(investor_accounts)
 }
 
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+	// TODO : Read from actual team file
 	let team_accounts: Vec<(MultiAddress, u128)> = vec![];
-	team_accounts
+	compute_balance_distribution_with_cliff_and_vesting(team_accounts)
+}
+
+pub fn compute_balance_distribution_with_cliff_and_vesting(
+	investor_accounts: Vec<(MultiAddress, u128)>,
+) -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+	investor_accounts
 		.into_iter()
 		.map(|(address, value)| {
 			(
@@ -257,8 +256,10 @@ pub fn get_distribution_for(
 	arr.into_iter().filter(|(_, value)| *value > 0).for_each(|(address, value)| {
 		let claimable_amount = one_percent_endowment(value);
 		let vested_amount = value - claimable_amount;
+		println!("Vested amount {:?}", vested_amount);
 		let cliff_fraction = vesting_cliff as f64 / total_vesting_schedule as f64;
 		let remaining_fraction = 1.0 - cliff_fraction;
+		println!("remaining_fraction {:?}", remaining_fraction);
 
 		if claimable_amount <= ExistentialDeposit::get() {
 			log::warn!(
@@ -269,9 +270,15 @@ pub fn get_distribution_for(
 
 		claims.push((address.clone(), claimable_amount, statement_kind));
 		let amount_on_cliff = (vested_amount as f64 * cliff_fraction) as u128;
+		println!("amount_on_cliff {:?}", amount_on_cliff);
 		let amount_after_cliff = (vested_amount as f64 * remaining_fraction) as u128;
+		println!("amount_after_cliff {:?}", amount_after_cliff);
 		let amount_unlocked_per_block_after_cliff =
 			vesting_per_block(amount_after_cliff, total_vesting_schedule - vesting_cliff);
+		println!(
+			"amount_unlocked_per_block_after_cliff {:?}",
+			amount_unlocked_per_block_after_cliff
+		);
 		vesting.push((
 			address,
 			vec![
@@ -282,4 +289,78 @@ pub fn get_distribution_for(
 	});
 
 	DistributionResult { claims, vesting, vesting_length: total_vesting_schedule, vesting_cliff }
+}
+
+#[test]
+fn test_compute_investor_balance_distribution() {
+	let alice = MultiAddress::Native(AccountId32::new([0; 32]));
+	let bob = MultiAddress::Native(AccountId32::new([1; 32]));
+
+	let amount_per_investor = 100;
+
+	// let compute the expected output
+	// the expected output is that
+	// 1% is immedately release
+	// 1 year cliff (vesting starts after year 1)
+	// Vesting finishes 1 year after cliff
+	let alice_expected_response: (MultiAddress, u128, u64, u64, u128) = (
+		alice.clone(),
+		amount_per_investor,
+		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
+		tangle_primitives::time::DAYS * 365, // num of blocks from beging till fully vested
+		1,                                   // 1% of 100
+	);
+	let bob_expected_response: (MultiAddress, u128, u64, u64, u128) = (
+		bob.clone(),
+		amount_per_investor,
+		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
+		tangle_primitives::time::DAYS * 365, // num of blocks from beging till fully vested
+		1,                                   // 1% of 100
+	);
+
+	assert_eq!(
+		compute_balance_distribution_with_cliff_and_vesting(vec![
+			(alice, amount_per_investor),
+			(bob, amount_per_investor),
+		]),
+		vec![alice_expected_response, bob_expected_response]
+	);
+}
+
+#[test]
+fn test_get_distribution_for() {
+	let alice = MultiAddress::Native(AccountId32::new([0; 32]));
+	let bob = MultiAddress::Native(AccountId32::new([1; 32]));
+
+	let amount_per_investor = 100;
+
+	// let compute the expected output
+	// the expected output is that
+	// 1% is immedately claimable
+	// 1 month cliff (vesting starts after 1 month) (use 1 for easier calculation)
+	// at 1 month cliff, release 1/24th rewards
+	// Vesting finishes after 2 years (use 24 for easier calculation)
+	// 1/24th claimable at every month
+	let expected_distibution_result = DistributionResult {
+		claims: vec![
+			(alice.clone(), 1, Some(StatementKind::Regular)),
+			(bob.clone(), 1, Some(StatementKind::Regular)),
+		],
+		vesting: vec![
+			(alice.clone(), vec![(4, 4, 1), (94, 4, 1)]),
+			(bob.clone(), vec![(4, 4, 1), (94, 4, 1)]),
+		],
+		vesting_length: 24,
+		vesting_cliff: 1,
+	};
+
+	assert_eq!(
+		get_distribution_for(
+			vec![(alice, amount_per_investor), (bob, amount_per_investor),],
+			Some(StatementKind::Regular),
+			1,
+			24,
+		),
+		expected_distibution_result
+	);
 }
