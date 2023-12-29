@@ -121,7 +121,7 @@ impl<T: Config> Pallet<T> {
 
 			let phase1_result = if !job_info.job_type.is_phase_one() {
 				Some(
-					KnownResults::<T>::get(role_type.clone(), job_id)
+					KnownResults::<T>::get(role_type, job_id)
 						.ok_or(Error::<T>::PhaseOneResultNotFound)?,
 				)
 			} else {
@@ -150,7 +150,7 @@ impl<T: Config> Pallet<T> {
 				// Generate a job to generate new key
 				let job_id = Self::get_next_job_id()?;
 
-				match role_type.clone() {
+				match role_type {
 					// Case for RoleType::Tss
 					// - Extract information from 'phase1'
 					// - Create a new 'job_type' of DKGJobType with adjusted parameters (remove the
@@ -197,7 +197,7 @@ impl<T: Config> Pallet<T> {
 							job_type,
 							fee,
 						};
-						SubmittedJobs::<T>::insert(role_type.clone(), job_id, job_info);
+						SubmittedJobs::<T>::insert(role_type, job_id, job_info);
 					},
 					// Case for RoleType::ZkSaas
 					// - Extract information from 'phase1'
@@ -216,7 +216,7 @@ impl<T: Config> Pallet<T> {
 							.job_type
 							.get_phase_one_id()
 							.ok_or(Error::<T>::PhaseOneResultNotFound)?;
-						let phase_one = SubmittedJobs::<T>::get(role_type.clone(), phase_one_id)
+						let phase_one = SubmittedJobs::<T>::get(role_type, phase_one_id)
 							.ok_or(Error::<T>::JobNotFound)?;
 						let system = match phase_one.job_type {
 							JobType::ZkSaaSPhaseOne(ref info) => info.system.clone(),
@@ -250,7 +250,7 @@ impl<T: Config> Pallet<T> {
 							job_type,
 							fee,
 						};
-						SubmittedJobs::<T>::insert(role_type.clone(), job_id, job_info);
+						SubmittedJobs::<T>::insert(role_type, job_id, job_info);
 					},
 					_ => {
 						// The phase one cases are handled above
@@ -281,7 +281,7 @@ impl<T: Config> Pallet<T> {
 		let mut participant_keys: Vec<Vec<u8>> = Default::default();
 
 		for participant in participants.clone() {
-			let key = T::RolesHandler::get_validator_metadata(participant, role_type.clone());
+			let key = T::RolesHandler::get_validator_metadata(participant, role_type);
 			ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
 			participant_keys.push(key.expect("checked above").get_authority_key());
 		}
@@ -337,7 +337,7 @@ impl<T: Config> Pallet<T> {
 
 		let participants = phase_one_result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
 		for participant in participants {
-			let key = T::RolesHandler::get_validator_metadata(participant, role_type.clone());
+			let key = T::RolesHandler::get_validator_metadata(participant, role_type);
 			ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
 			let pub_key = sp_core::ecdsa::Public::from_slice(
 				&key.expect("checked above").get_authority_key()[0..33],
@@ -384,7 +384,7 @@ impl<T: Config> Pallet<T> {
 		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
 
 		for participant in participants.clone() {
-			let key = T::RolesHandler::get_validator_metadata(participant, role_type.clone());
+			let key = T::RolesHandler::get_validator_metadata(participant, role_type);
 			ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
 			let pub_key = sp_core::ecdsa::Public::from_slice(
 				&key.expect("checked above").get_authority_key()[0..33],
@@ -441,7 +441,7 @@ impl<T: Config> Pallet<T> {
 		let job_result = JobResult::ZkSaaSPhaseTwo(info);
 
 		let phase_one_job_info = SubmittedJobs::<T>::get(
-			role_type.clone(),
+			role_type,
 			job_info.job_type.get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?,
 		)
 		.ok_or(Error::<T>::JobNotFound)?;

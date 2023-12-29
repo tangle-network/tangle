@@ -418,12 +418,12 @@ pub mod pallet {
 				// Submit request to exit from the known set.
 				let res = T::JobsHandler::exit_from_known_set(
 					stash_account.clone(),
-					role_type.clone(),
+					role_type,
 					job.1,
 				);
 
 				if res.is_err() {
-					pending_jobs.push((role_type.clone(), job.1));
+					pending_jobs.push((role_type, job.1));
 				} else {
 					// Remove role from the profile.
 					ledger.profile.remove_role_from_profile(role_type);
@@ -495,12 +495,12 @@ pub mod pallet {
 					// Submit request to exit from the known set.
 					let res = T::JobsHandler::exit_from_known_set(
 						stash_account.clone(),
-						role_type.clone(),
+						role_type,
 						job.1,
 					);
 
 					if res.is_err() {
-						pending_jobs.push((role_type.clone(), job.1));
+						pending_jobs.push((role_type, job.1));
 					} else {
 						// Remove role from the profile.
 						ledger.profile.remove_role_from_profile(role.clone());

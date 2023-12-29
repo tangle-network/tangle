@@ -223,12 +223,12 @@ pub mod module {
 
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), role_type.clone()),
+						T::RolesHandler::is_validator(participant.clone(), role_type),
 						Error::<T>::InvalidValidator
 					);
 
 					// Add record for easy lookup
-					Self::add_job_to_validator_lookup(participant, role_type.clone(), job_id)?;
+					Self::add_job_to_validator_lookup(participant, role_type, job_id)?;
 				}
 
 				// Sanity check ensure threshold is valid
@@ -250,12 +250,12 @@ pub mod module {
 				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), role_type.clone()),
+						T::RolesHandler::is_validator(participant.clone(), role_type),
 						Error::<T>::InvalidValidator
 					);
 
 					// add record for easy lookup
-					Self::add_job_to_validator_lookup(participant, role_type.clone(), job_id)?;
+					Self::add_job_to_validator_lookup(participant, role_type, job_id)?;
 				}
 
 				// ensure the account can use the result
@@ -283,8 +283,8 @@ pub mod module {
 				job_type: job.job_type.clone(),
 				fee,
 			};
-			SubmittedJobs::<T>::insert(role_type.clone(), job_id, job_info);
-			SubmittedJobsRole::<T>::insert(job_id, role_type.clone());
+			SubmittedJobs::<T>::insert(role_type, job_id, job_info);
+			SubmittedJobsRole::<T>::insert(job_id, role_type);
 
 			Self::deposit_event(Event::JobSubmitted { job_id, role_type, details: job });
 
@@ -355,23 +355,23 @@ pub mod module {
 			// Handle based on job result
 			match result {
 				JobResult::DKGPhaseOne(info) => {
-					let result = Self::verify_dkg_job_result(role_type.clone(), &job_info, info)?;
-					KnownResults::<T>::insert(role_type.clone(), job_id, result);
+					let result = Self::verify_dkg_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::DKGPhaseTwo(info) => {
-					Self::verify_dkg_signature_job_result(role_type.clone(), &job_info, info)?;
+					Self::verify_dkg_signature_job_result(role_type, &job_info, info)?;
 				},
 				JobResult::ZkSaaSPhaseOne(info) => {
 					let result = Self::verify_zksaas_circuit_job_result(
-						role_type.clone(),
+						role_type,
 						job_id,
 						&job_info,
 						info,
 					)?;
-					KnownResults::<T>::insert(role_type.clone(), job_id, result);
+					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::ZkSaaSPhaseTwo(info) => {
-					Self::verify_zksaas_prove_job_result(role_type.clone(), &job_info, info)?;
+					Self::verify_zksaas_prove_job_result(role_type, &job_info, info)?;
 				},
 			};
 
@@ -474,14 +474,14 @@ pub mod module {
 			let _caller = ensure_signed(origin)?;
 
 			// Remove the validator from the job
-			let job_info = SubmittedJobs::<T>::get(role_type.clone(), job_id)
+			let job_info = SubmittedJobs::<T>::get(role_type, job_id)
 				.ok_or(Error::<T>::JobNotFound)?;
 
 			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
 
 			// If phase2, fetch phase1 result
 			if !job_info.job_type.is_phase_one() {
-				let result = KnownResults::<T>::get(role_type.clone(), job_id)
+				let result = KnownResults::<T>::get(role_type, job_id)
 					.ok_or(Error::<T>::PhaseOneResultNotFound)?;
 				phase1_result = Some(result);
 			}

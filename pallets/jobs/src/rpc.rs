@@ -25,7 +25,7 @@ impl<T: Config> Pallet<T> {
 			let mut jobs: Vec<RpcResponseJobsData<T::AccountId>> = vec![];
 
 			for (role_type, job_id) in jobs_list.iter() {
-				if let Some(job_info) = SubmittedJobs::<T>::get(role_type.clone(), job_id) {
+				if let Some(job_info) = SubmittedJobs::<T>::get(role_type, job_id) {
 					if !job_info.job_type.is_phase_one() {
 						let result = KnownResults::<T>::get(
 							job_info.job_type.get_role_type(),

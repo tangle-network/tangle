@@ -69,7 +69,7 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		address: T::AccountId,
 		role_type: RoleType,
 	) -> Option<RoleTypeMetadata> {
-		if Self::is_validator(address.clone(), role_type.clone()) {
+		if Self::is_validator(address.clone(), role_type) {
 			let ledger = Self::ledger(&address);
 			if let Some(ledger) = ledger {
 				return match ledger.roles.get(&role_type) {

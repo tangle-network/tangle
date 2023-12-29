@@ -132,10 +132,10 @@ impl<AccountId> JobType<AccountId> {
 	/// Gets the role associated with the job type.
 	pub fn get_role_type(&self) -> RoleType {
 		match self {
-			JobType::DKGTSSPhaseOne(job) => RoleType::Tss(job.role_type.clone()),
-			JobType::ZkSaaSPhaseOne(job) => RoleType::ZkSaaS(job.role_type.clone()),
-			JobType::DKGTSSPhaseTwo(job) => RoleType::Tss(job.role_type.clone()),
-			JobType::ZkSaaSPhaseTwo(job) => RoleType::ZkSaaS(job.role_type.clone()),
+			JobType::DKGTSSPhaseOne(job) => RoleType::Tss(job.role_type),
+			JobType::ZkSaaSPhaseOne(job) => RoleType::ZkSaaS(job.role_type),
+			JobType::DKGTSSPhaseTwo(job) => RoleType::Tss(job.role_type),
+			JobType::ZkSaaSPhaseTwo(job) => RoleType::ZkSaaS(job.role_type),
 		}
 	}
 
