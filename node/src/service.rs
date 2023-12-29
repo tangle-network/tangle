@@ -53,11 +53,10 @@ pub mod tangle {
 	impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 		/// Only enable the benchmarking host functions when we actually want to benchmark.
 		#[cfg(feature = "runtime-benchmarks")]
-		type ExtendHostFunctions =
-			(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
+		type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 		/// Otherwise we only use the default Substrate host functions.
 		#[cfg(not(feature = "runtime-benchmarks"))]
-		type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
+		type ExtendHostFunctions = ();
 
 		fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
 			tangle_runtime::api::dispatch(method, data)
@@ -77,11 +76,10 @@ pub mod testnet {
 	impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 		/// Only enable the benchmarking host functions when we actually want to benchmark.
 		#[cfg(feature = "runtime-benchmarks")]
-		type ExtendHostFunctions =
-			(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
+		type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 		/// Otherwise we only use the default Substrate host functions.
 		#[cfg(not(feature = "runtime-benchmarks"))]
-		type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
+		type ExtendHostFunctions = ();
 
 		fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
 			tangle_testnet_runtime::api::dispatch(method, data)

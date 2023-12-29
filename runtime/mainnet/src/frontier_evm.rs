@@ -31,7 +31,7 @@ use sp_std::{marker::PhantomData, prelude::*};
 // Frontier
 use pallet_ethereum::PostLogContent;
 use pallet_evm::HashedAddressMapping;
-
+use tangle_primitives::evm::{GAS_PER_SECOND, WEIGHT_PER_GAS};
 impl pallet_evm_chain_id::Config for Runtime {}
 
 pub struct FindAuthorTruncated<F>(PhantomData<F>);
@@ -76,6 +76,19 @@ fn is_governance_precompile(precompile_name: &precompiles::PrecompileName) -> bo
 	)
 }
 
+pub struct BaseFeeThreshold;
+impl pallet_base_fee::BaseFeeThreshold for BaseFeeThreshold {
+	fn lower() -> Permill {
+		Permill::zero()
+	}
+	fn ideal() -> Permill {
+		Permill::from_parts(500_000)
+	}
+	fn upper() -> Permill {
+		Permill::from_parts(1_000_000)
+	}
+}
+
 // Be careful: Each time this filter is modified, the substrate filter must also be modified
 // consistently.
 impl pallet_evm_precompile_proxy::EvmProxyCallFilter for ProxyType {
@@ -108,15 +121,7 @@ impl pallet_evm_precompile_proxy::EvmProxyCallFilter for ProxyType {
 	}
 }
 
-/// Current approximation of the gas/s consumption considering
-/// EVM execution over compiled WASM (on 4.4Ghz CPU).
-/// Given the 500ms Weight, from which 75% only are used for transactions,
-/// the total EVM execution gas limit is: GAS_PER_SECOND * 0.500 * 0.75 ~= 15_000_000.
-pub const GAS_PER_SECOND: u64 = 40_000_000;
 
-/// Approximate ratio of the amount of Weight per Gas.
-/// u64 works for approximations because Weight is a very small unit compared to gas.
-pub const WEIGHT_PER_GAS: u64 = WEIGHT_REF_TIME_PER_SECOND.saturating_div(GAS_PER_SECOND);
 
 parameter_types! {
 	/// EVM gas limit
@@ -182,18 +187,6 @@ parameter_types! {
 	pub DefaultElasticity: Permill = Permill::zero();
 }
 
-pub struct BaseFeeThreshold;
-impl pallet_base_fee::BaseFeeThreshold for BaseFeeThreshold {
-	fn lower() -> Permill {
-		Permill::zero()
-	}
-	fn ideal() -> Permill {
-		Permill::from_parts(500_000)
-	}
-	fn upper() -> Permill {
-		Permill::from_parts(1_000_000)
-	}
-}
 
 impl pallet_base_fee::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;

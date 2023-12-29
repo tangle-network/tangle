@@ -118,13 +118,21 @@ sc-network-statement = { workspace = true }
 sc-network-common = { workspace = true }
 frame-system-rpc-runtime-api = { workspace = true }
 tangle-testnet-runtime = { workspace = true, optional = true }
-tangle-runtime = { workspace = true }
-tangle-primitives = { workspace = true }
+tangle-runtime = { workspace = true, features = ["std"] }
+tangle-primitives = { workspace = true, features = ["std"] }
 tangle-crypto-primitives = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
-runtime-benchmarks = ["tangle-testnet-runtime/runtime-benchmarks"]
+runtime-benchmarks = [
+	"frame-benchmarking-cli/runtime-benchmarks",
+	"frame-benchmarking/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
+	"tangle-runtime/runtime-benchmarks",
+    "tangle-testnet-runtime?/runtime-benchmarks",
+	"sc-service/runtime-benchmarks",
+	"sp-runtime/runtime-benchmarks",
+]
 with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-testnet-runtime/with-paritydb-weights"]
 rocksdb = [

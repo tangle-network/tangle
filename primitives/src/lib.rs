@@ -17,7 +17,7 @@
 use frame_support::{
 	pallet_prelude::Weight,
 	weights::{
-		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_SECOND},
+		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_SECOND, WEIGHT_REF_TIME_PER_MILLIS},
 		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 	},
 };
@@ -132,6 +132,18 @@ pub mod fee {
 	}
 }
 
+pub mod evm {
+	/// Current approximation of the gas/s consumption considering
+	/// EVM execution over compiled WASM (on 4.4Ghz CPU).
+	/// Given the 500ms Weight, from which 75% only are used for transactions,
+	/// the total EVM execution gas limit is: GAS_PER_SECOND * 0.500 * 0.75 ~= 15_000_000.
+	pub const GAS_PER_SECOND: u64 = 40_000_000;
+
+	/// Approximate ratio of the amount of Weight per Gas.
+	/// u64 works for approximations because Weight is a very small unit compared to gas.
+	pub const WEIGHT_PER_GAS: u64 = crate::WEIGHT_REF_TIME_PER_SECOND.saturating_div(GAS_PER_SECOND);
+}
+
 /// We assume that ~10% of the block weight is consumed by `on_initialize` handlers. This is
 /// used to limit the maximal weight of a single extrinsic.
 pub const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
@@ -140,17 +152,11 @@ pub const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 /// `Operational` extrinsics.
 pub const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 
-/// Maximum PoV size we support right now.
-///
-/// Used for:
-/// * initial genesis for the Parachains configuration
-/// * checking updates to this stored runtime configuration do not exceed this limit
-/// * when detecting a PoV decompression bomb in the client
-// NOTE: This value is used in the runtime so be careful when changing it.
-pub const MAX_POV_SIZE: u32 = 5 * 1024 * 1024;
-
-/// We allow for 1 of a second of compute with a 6 second average block time.
-pub const MAXIMUM_BLOCK_WEIGHT: Weight =
-	Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND, MAX_POV_SIZE as u64);
+/// We allow for 2000ms of compute with a 6 second average block time.
+pub const WEIGHT_MILLISECS_PER_BLOCK: u64 = 2000;
+pub const MAXIMUM_BLOCK_WEIGHT: Weight = Weight::from_parts(
+	WEIGHT_MILLISECS_PER_BLOCK * WEIGHT_REF_TIME_PER_MILLIS,
+	u64::MAX,
+);
 
 pub use sp_consensus_babe::AuthorityId as BabeId;
