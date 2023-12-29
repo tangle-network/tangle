@@ -141,10 +141,14 @@ impl RolesHandler<AccountId32> for MockRolesHandler {
 		if address == mock_err_account {
 			None
 		} else {
-			Some(RoleTypeMetadata::Tss(TssRoleMetadata {
-				role_type,
-				authority_key: mock_pub_key().to_raw_vec(),
-			}))
+			match role_type {
+				RoleType::Tss(threshold_signature_role) =>
+					Some(RoleTypeMetadata::Tss(TssRoleMetadata {
+						role_type: threshold_signature_role,
+						authority_key: mock_pub_key().to_raw_vec(),
+					})),
+				_ => None,
+			}
 		}
 	}
 }
