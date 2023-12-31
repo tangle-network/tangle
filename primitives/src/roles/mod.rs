@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+#![allow(clippy::match_like_matches_macro)]
+
 use frame_support::pallet_prelude::*;
 use parity_scale_codec::alloc::string::ToString;
 use scale_info::prelude::string::String;
