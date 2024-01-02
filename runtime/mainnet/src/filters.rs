@@ -32,31 +32,17 @@ impl Contains<RuntimeCall> for MainnetCallFilter {
 			return false
 		}
 
-		let democracy_related = matches!(
-			call,
+		match call {
 			// Filter democracy proposals creation
 			RuntimeCall::Democracy(_) |
 			// disallow council
-			RuntimeCall::Council(_)
-		);
-
-		// block all democracy calls in mainnet, TODO : this will be enabled later
-		if democracy_related {
-			return false
-		}
-
-		let light_client_related = matches!(
-			call,
+			RuntimeCall::Council(_) |
 			// Filter light client calls
-			RuntimeCall::Eth2Client(_)
-		);
+			RuntimeCall::Eth2Client(_) => false,
 
-		// block all light client calls in mainnet, TODO : this will be enabled later
-		if light_client_related {
-			return false
+			// al other calls are allowed
+			_ =>true
+
 		}
-
-		// al other calls are allowed
-		true
 	}
 }
