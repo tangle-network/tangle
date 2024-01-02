@@ -256,10 +256,8 @@ pub fn get_distribution_for(
 	arr.into_iter().filter(|(_, value)| *value > 0).for_each(|(address, value)| {
 		let claimable_amount = one_percent_endowment(value);
 		let vested_amount = value - claimable_amount;
-		println!("Vested amount {:?}", vested_amount);
 		let cliff_fraction = vesting_cliff as f64 / total_vesting_schedule as f64;
 		let remaining_fraction = 1.0 - cliff_fraction;
-		println!("remaining_fraction {:?}", remaining_fraction);
 
 		if claimable_amount <= ExistentialDeposit::get() {
 			log::warn!(
@@ -270,15 +268,9 @@ pub fn get_distribution_for(
 
 		claims.push((address.clone(), claimable_amount, statement_kind));
 		let amount_on_cliff = (vested_amount as f64 * cliff_fraction) as u128;
-		println!("amount_on_cliff {:?}", amount_on_cliff);
 		let amount_after_cliff = (vested_amount as f64 * remaining_fraction) as u128;
-		println!("amount_after_cliff {:?}", amount_after_cliff);
 		let amount_unlocked_per_block_after_cliff =
 			vesting_per_block(amount_after_cliff, total_vesting_schedule - vesting_cliff);
-		println!(
-			"amount_unlocked_per_block_after_cliff {:?}",
-			amount_unlocked_per_block_after_cliff
-		);
 		vesting.push((
 			address,
 			vec![
