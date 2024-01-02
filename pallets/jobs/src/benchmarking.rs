@@ -6,7 +6,10 @@ use frame_support::traits::Currency;
 use frame_system::RawOrigin;
 use sp_runtime::traits::{Bounded, Zero};
 use sp_std::vec;
-use tangle_primitives::jobs::{DKGJobType, JobId, JobKey, JobType};
+use tangle_primitives::{
+	jobs::{DKGJobType, JobId, JobType},
+	roles::RoleType,
+};
 
 benchmarks! {
 	// Benchmark submit_job function
@@ -30,9 +33,9 @@ benchmarks! {
 			job_type: JobType::DKG(DKGJobType { participants: vec![caller.clone(), validator2], threshold: 1, permitted_caller: None }),
 		};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
-		let job_key: JobKey = JobKey::DKG;
+		let role_type: RoleType = RoleType::Tss(ThresholdSignatureRoleType::TssGG20);
 		let job_id: JobId = 0;
-	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), vec![])
+	}: _(RawOrigin::Signed(caller.clone()), role_type, job_id.clone(), vec![])
 
 	// Benchmark withdraw_rewards function
 	withdraw_rewards {
@@ -54,9 +57,9 @@ benchmarks! {
 			job_type: JobType::DKG(DKGJobType { participants: vec![caller.clone(), validator2, validator3], threshold: 2, permitted_caller: None }),
 			};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
-		let job_key: JobKey = JobKey::DKG;
+		let role_type: RoleType = RoleType::Tss(ThresholdSignatureRoleType::TssGG20);
 		let job_id: JobId = 0;
-	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), caller.clone(), ValidatorOffenceType::Inactivity, vec![])
+	}: _(RawOrigin::Signed(caller.clone()), role_type, job_id.clone(), caller.clone(), ValidatorOffenceType::Inactivity, vec![])
 }
 
 // Define the module and associated types for the benchmarks

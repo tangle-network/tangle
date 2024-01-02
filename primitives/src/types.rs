@@ -14,10 +14,7 @@
 // limitations under the License.
 //
 use super::*;
-pub mod jobs;
 use sp_runtime::{generic, AccountId32, OpaqueExtrinsic};
-
-pub mod roles;
 
 /// Block header type as expected by this runtime.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;

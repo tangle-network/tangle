@@ -91,10 +91,11 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful
 	/// or encountered an error.
-	fn verify_generated_dkg_key(data: DKGResult) -> DispatchResult {
-		match data.key_type {
-			DkgKeyType::Ecdsa => Self::verify_generated_dkg_key_ecdsa(data),
-			DkgKeyType::Schnorr => Self::verify_generated_dkg_key_schnorr(data),
+	fn verify_generated_dkg_key(data: DKGTSSKeySubmissionResult) -> DispatchResult {
+		match data.signature_type {
+			DigitalSignatureType::Ecdsa => Self::verify_generated_dkg_key_ecdsa(data),
+			DigitalSignatureType::SchnorrSr25519 => Self::verify_generated_dkg_key_schnorr(data),
+			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
 		}
 	}
 
@@ -111,7 +112,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 	/// encountered an error.
-	fn verify_generated_dkg_key_ecdsa(data: DKGResult) -> DispatchResult {
+	fn verify_generated_dkg_key_ecdsa(data: DKGTSSKeySubmissionResult) -> DispatchResult {
 		// Ensure participants and signatures are not empty
 		ensure!(!data.participants.is_empty(), Error::<T>::NoParticipantsFound);
 		ensure!(!data.signatures.is_empty(), Error::<T>::NoSignaturesFound);
@@ -166,7 +167,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 	/// encountered an error.
-	fn verify_generated_dkg_key_schnorr(data: DKGResult) -> DispatchResult {
+	fn verify_generated_dkg_key_schnorr(data: DKGTSSKeySubmissionResult) -> DispatchResult {
 		// Ensure participants and signatures are not empty
 		ensure!(!data.participants.is_empty(), Error::<T>::NoParticipantsFound);
 		ensure!(!data.signatures.is_empty(), Error::<T>::NoSignaturesFound);
@@ -222,10 +223,11 @@ impl<T: Config> Pallet<T> {
 	///
 	/// * `data` - The DKG signature result containing the message data, signature, signing key, and
 	///   key type.
-	fn verify_dkg_signature(data: DKGSignatureResult) -> DispatchResult {
-		match data.key_type {
-			DkgKeyType::Ecdsa => Self::verify_dkg_signature_ecdsa(data),
-			DkgKeyType::Schnorr => Self::verify_dkg_signature_schnorr(data),
+	fn verify_dkg_signature(data: DKGTSSSignatureResult) -> DispatchResult {
+		match data.signature_type {
+			DigitalSignatureType::Ecdsa => Self::verify_dkg_signature_ecdsa(data),
+			DigitalSignatureType::SchnorrSr25519 => Self::verify_dkg_signature_schnorr(data),
+			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
 		}
 	}
 
@@ -238,7 +240,7 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `data` - The DKG signature result containing the message data and ECDSA signature.
-	fn verify_dkg_signature_ecdsa(data: DKGSignatureResult) -> DispatchResult {
+	fn verify_dkg_signature_ecdsa(data: DKGTSSSignatureResult) -> DispatchResult {
 		// Recover the ECDSA public key from the provided data and signature
 		let recovered_key = Self::recover_ecdsa_pub_key(&data.data, &data.signature)
 			.map_err(|_| Error::<T>::InvalidSignature)?;
@@ -264,7 +266,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// * `data` - The DKG signature result containing the message data, Schnorr signature, and
 	///   signing key.
-	fn verify_dkg_signature_schnorr(data: DKGSignatureResult) -> DispatchResult {
+	fn verify_dkg_signature_schnorr(data: DKGTSSSignatureResult) -> DispatchResult {
 		// Convert the signature from bytes to sr25519::Signature
 		let signature: sr25519::Signature = data
 			.signature

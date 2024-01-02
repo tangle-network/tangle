@@ -29,6 +29,7 @@ fn submit_dkg_phase_one_job() {
 				Address(CryptoAlith.into()),
 				Precompile1,
 				PCall::submit_dkg_phase_one_job {
+					role_type: RoleType::Tss(ThresholdSignatureRoleType::TssGG20).to_u16(),
 					expiry: 100,
 					participants: vec![],
 					threshold: 2,

@@ -33,7 +33,7 @@ use sp_std::sync::Arc;
 use tangle_primitives::{
 	currency::UNIT,
 	jobs::*,
-	roles::{RoleTypeMetadata, TssRoleMetadata},
+	roles::{RoleType, RoleTypeMetadata, TssRoleMetadata},
 };
 
 impl frame_system::Config for Runtime {
@@ -118,7 +118,7 @@ impl JobToFee<AccountId32, BlockNumber> for MockJobToFeeHandler {
 pub struct MockRolesHandler;
 
 impl RolesHandler<AccountId32> for MockRolesHandler {
-	fn is_validator(address: AccountId32, _role_type: JobKey) -> bool {
+	fn is_validator(address: AccountId32, _role_type: RoleType) -> bool {
 		let validators = [
 			AccountId32::new([1u8; 32]),
 			AccountId32::new([2u8; 32]),
@@ -133,15 +133,22 @@ impl RolesHandler<AccountId32> for MockRolesHandler {
 		Ok(())
 	}
 
-	fn get_validator_metadata(address: AccountId32, _job_key: JobKey) -> Option<RoleTypeMetadata> {
+	fn get_validator_metadata(
+		address: AccountId32,
+		role_type: RoleType,
+	) -> Option<RoleTypeMetadata> {
 		let mock_err_account = AccountId32::new([100u8; 32]);
 		if address == mock_err_account {
 			None
 		} else {
-			Some(RoleTypeMetadata::Tss(TssRoleMetadata {
-				key_type: DkgKeyType::Ecdsa,
-				authority_key: mock_pub_key().to_raw_vec(),
-			}))
+			match role_type {
+				RoleType::Tss(threshold_signature_role) =>
+					Some(RoleTypeMetadata::Tss(TssRoleMetadata {
+						role_type: threshold_signature_role,
+						authority_key: mock_pub_key().to_raw_vec(),
+					})),
+				_ => None,
+			}
 		}
 	}
 }

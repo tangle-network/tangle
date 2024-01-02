@@ -21,6 +21,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+mod filters;
 pub mod frontier_evm;
 pub mod impls;
 pub mod precompiles;
@@ -104,13 +105,18 @@ use sp_staking::{
 pub use tangle_primitives::{
 	currency::*,
 	fee::*,
-	jobs::{JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType},
+	jobs::{
+		traits::{JobToFee, MPCHandler},
+		JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType,
+	},
 	roles::ValidatorRewardDistribution,
 	time::*,
-	traits::jobs::{JobToFee, MPCHandler},
+	types::{
+		AccountId, AccountIndex, Address, Balance, BlockNumber, Hash, Header, Index, Moment,
+		Signature,
+	},
 	verifier::{arkworks::ArkworksVerifierGroth16Bn254, circom::CircomVerifierGroth16Bn254},
-	AccountId, AccountIndex, Address, BabeId, Balance, BlockNumber, Hash, Header, Index, Moment,
-	Signature, AVERAGE_ON_INITIALIZE_RATIO, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO,
+	BabeId, AVERAGE_ON_INITIALIZE_RATIO, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO,
 };
 use tangle_primitives::{
 	democracy::{
@@ -199,7 +205,7 @@ pub mod opaque {
 impl frame_system::Config for Runtime {
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type AccountId = AccountId;
-	type BaseCallFilter = BaseFilter;
+	type BaseCallFilter = filters::TestnetCallFilter;
 	type BlockHashCount = BlockHashCount;
 	type BlockLength = BlockLength;
 	type Block = Block;
@@ -1139,39 +1145,6 @@ impl pallet_zksaas::Config for Runtime {
 	type UpdateOrigin = EnsureRootOrHalfCouncil;
 	type Verifier = (ArkworksVerifierGroth16Bn254, CircomVerifierGroth16Bn254);
 	type WeightInfo = ();
-}
-
-pub struct BaseFilter;
-impl Contains<RuntimeCall> for BaseFilter {
-	fn contains(call: &RuntimeCall) -> bool {
-		let is_core_call = matches!(call, RuntimeCall::System(_) | RuntimeCall::Timestamp(_));
-		if is_core_call {
-			// always allow core call
-			return true
-		}
-
-		let is_paused =
-			pallet_transaction_pause::PausedTransactionFilter::<Runtime>::contains(call);
-		if is_paused {
-			// no paused call
-			return false
-		}
-
-		let democracy_related = matches!(
-			call,
-			// Filter democracy proposals creation
-			RuntimeCall::Democracy(_) |
-			// disallow council
-			RuntimeCall::Council(_)
-		);
-
-		if democracy_related {
-			// no democracy call
-			return false
-		}
-
-		true
-	}
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

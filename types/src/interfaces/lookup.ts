@@ -3327,16 +3327,16 @@ export default {
    **/
   TanglePrimitivesJobsJobResult: {
     _enum: {
-      DKGPhaseOne: 'TanglePrimitivesJobsDkgResult',
-      DKGPhaseTwo: 'TanglePrimitivesJobsDkgSignatureResult',
+      DKGPhaseOne: 'TanglePrimitivesJobsDKGTSSResult',
+      DKGPhaseTwo: 'TanglePrimitivesJobsDKGTSSSignatureResult',
       ZkSaaSPhaseOne: 'TanglePrimitivesJobsZkSaaSCircuitResult',
       ZkSaaSPhaseTwo: 'TanglePrimitivesJobsZkSaaSProofResult'
     }
   },
   /**
-   * Lookup411: tangle_primitives::types::jobs::DKGResult
+   * Lookup411: tangle_primitives::types::jobs::DKGTSSResult
    **/
-  TanglePrimitivesJobsDkgResult: {
+  TanglePrimitivesJobsDKGTSSResult: {
     keyType: 'TanglePrimitivesJobsDkgKeyType',
     key: 'Bytes',
     participants: 'Vec<Bytes>',
@@ -3344,9 +3344,9 @@ export default {
     threshold: 'u8'
   },
   /**
-   * Lookup412: tangle_primitives::types::jobs::DKGSignatureResult
+   * Lookup412: tangle_primitives::types::jobs::DKGTSSSignatureResult
    **/
-  TanglePrimitivesJobsDkgSignatureResult: {
+  TanglePrimitivesJobsDKGTSSSignatureResult: {
     keyType: 'TanglePrimitivesJobsDkgKeyType',
     data: 'Bytes',
     signature: 'Bytes',

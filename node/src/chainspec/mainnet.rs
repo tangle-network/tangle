@@ -33,7 +33,7 @@ use sp_runtime::{
 	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
 };
-use tangle_primitives::{BlockNumber, Signature};
+use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig,
 	Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig,

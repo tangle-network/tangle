@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use std::str::FromStr;
-use tangle_primitives::BlockNumber;
+use tangle_primitives::types::BlockNumber;
 use tangle_runtime::UNIT;
 
 use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts};
