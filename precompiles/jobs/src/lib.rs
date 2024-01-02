@@ -202,11 +202,10 @@ where
 
 				Ok(())
 			},
-			None =>
-				return Err(PrecompileFailure::Revert {
-					exit_status: ExitRevert::Reverted,
-					output: revert_as_bytes("Invalid job ID!"),
-				}),
+			None => Err(PrecompileFailure::Revert {
+				exit_status: ExitRevert::Reverted,
+				output: revert_as_bytes("Invalid job ID!"),
+			}),
 		}
 	}
 
