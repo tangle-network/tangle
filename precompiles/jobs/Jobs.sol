@@ -69,7 +69,7 @@ interface Jobs {
     ///
     /// @notice Sets a new permitted caller for a specific job type identified by the given key and job ID.
     ///
-    /// @param job_key An identifier specifying the type of job to update the permitted caller for.
+    /// @param role_type An identifier specifying the role type to update the permitted caller for.
     /// @param job_id The unique identifier of the job for which the permitted caller is being updated.
     /// @param new_permitted_caller The Ethereum address of the new permitted caller.
     ///
@@ -79,7 +79,7 @@ interface Jobs {
     /// align with the ongoing processes and permissions within the contract.
     ///
     function setPermittedCaller(
-        uint8 job_key,
+        uint16 role_type,
         uint32 job_id,
         address new_permitted_caller
     ) external;

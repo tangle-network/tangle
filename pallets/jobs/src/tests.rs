@@ -20,9 +20,12 @@ use mock::*;
 
 use sp_runtime::AccountId32;
 
-use tangle_primitives::jobs::{
-	DKGSignatureResult, DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DkgKeyType, JobSubmission,
-	JobType,
+use tangle_primitives::{
+	jobs::{
+		DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DKGTSSSignatureResult, DigitalSignatureType,
+		JobSubmission, JobType,
+	},
+	roles::{RoleType, ThresholdSignatureRoleType},
 };
 
 const ALICE: AccountId32 = AccountId32::new([1u8; 32]);
@@ -40,13 +43,14 @@ fn jobs_submission_e2e_works_for_dkg() {
 	new_test_ext().execute_with(|| {
 		System::set_block_number(1);
 
+		let threshold_signature_role_type = ThresholdSignatureRoleType::TssGG20;
 		let submission = JobSubmission {
 			expiry: 100,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 				participants: vec![HUNDRED, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
 				permitted_caller: None,
-				key_type: DkgKeyType::Ecdsa,
+				role_type: threshold_signature_role_type,
 			}),
 		};
 
@@ -62,7 +66,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 5,
 				permitted_caller: None,
-				key_type: DkgKeyType::Ecdsa,
+				role_type: threshold_signature_role_type,
 			}),
 		};
 
@@ -79,7 +83,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
 				permitted_caller: None,
-				key_type: DkgKeyType::Ecdsa,
+				role_type: threshold_signature_role_type,
 			}),
 		};
 		assert_noop!(
@@ -93,7 +97,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
 				permitted_caller: Some(TEN),
-				key_type: DkgKeyType::Ecdsa,
+				role_type: threshold_signature_role_type,
 			}),
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
@@ -103,14 +107,14 @@ fn jobs_submission_e2e_works_for_dkg() {
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(TEN),
-			JobKey::DKG,
+			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
 			0,
-			JobResult::DKGPhaseOne(DKGResult {
+			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![],
 				threshold: 3,
 				participants: vec![],
 				key: vec![],
-				key_type: DkgKeyType::Ecdsa
+				signature_type: DigitalSignatureType::Ecdsa
 			})
 		));
 
@@ -120,8 +124,16 @@ fn jobs_submission_e2e_works_for_dkg() {
 		}
 
 		// ensure storage is correctly setup
-		assert!(KnownResults::<Runtime>::get(JobKey::DKG, 0).is_some());
-		assert!(SubmittedJobs::<Runtime>::get(JobKey::DKG, 0).is_none());
+		assert!(KnownResults::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			0
+		)
+		.is_some());
+		assert!(SubmittedJobs::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			0
+		)
+		.is_none());
 
 		// ---- use phase one solution in phase 2 signinig -------
 
@@ -131,6 +143,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
 				submission: vec![],
+				role_type: threshold_signature_role_type,
 			}),
 		};
 		assert_noop!(
@@ -143,6 +156,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
 				submission: vec![],
+				role_type: threshold_signature_role_type,
 			}),
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
@@ -152,13 +166,13 @@ fn jobs_submission_e2e_works_for_dkg() {
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(TEN),
-			JobKey::DKGSignature,
+			RoleType::Tss(threshold_signature_role_type),
 			1,
-			JobResult::DKGPhaseTwo(DKGSignatureResult {
+			JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
 				signing_key: vec![],
 				signature: vec![],
 				data: vec![],
-				key_type: DkgKeyType::Ecdsa
+				signature_type: DigitalSignatureType::Ecdsa
 			})
 		));
 
@@ -168,8 +182,16 @@ fn jobs_submission_e2e_works_for_dkg() {
 		}
 
 		// ensure storage is correctly setup
-		assert!(KnownResults::<Runtime>::get(JobKey::DKG, 0).is_some());
-		assert!(SubmittedJobs::<Runtime>::get(JobKey::DKG, 0).is_none());
+		assert!(KnownResults::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			0
+		)
+		.is_some());
+		assert!(SubmittedJobs::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			0
+		)
+		.is_none());
 	});
 }
 

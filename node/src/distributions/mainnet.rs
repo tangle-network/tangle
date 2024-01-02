@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use std::str::FromStr;
-use tangle_primitives::BlockNumber;
+use tangle_primitives::types::BlockNumber;
 use tangle_runtime::UNIT;
 
 use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts};
@@ -231,7 +231,8 @@ pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64,
 }
 
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
-	let team_accounts: Vec<(MultiAddress, u128)> = vec![];
+	let team_accounts: Vec<(MultiAddress, u128)> =
+		vec![(MultiAddress::Native(AccountId32::from([0u8; 32])), 15_000_000 * ONE_TOKEN)];
 	team_accounts
 		.into_iter()
 		.map(|(address, value)| {

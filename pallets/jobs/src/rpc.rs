@@ -24,11 +24,11 @@ impl<T: Config> Pallet<T> {
 		if let Some(jobs_list) = ValidatorJobIdLookup::<T>::get(validator) {
 			let mut jobs: Vec<RpcResponseJobsData<T::AccountId>> = vec![];
 
-			for (job_key, job_id) in jobs_list.iter() {
-				if let Some(job_info) = SubmittedJobs::<T>::get(job_key, job_id) {
+			for (role_type, job_id) in jobs_list.iter() {
+				if let Some(job_info) = SubmittedJobs::<T>::get(role_type, job_id) {
 					if !job_info.job_type.is_phase_one() {
 						let result = KnownResults::<T>::get(
-							job_info.job_type.get_previous_phase_job_key().unwrap(),
+							job_info.job_type.get_role_type(),
 							job_info.job_type.clone().get_phase_one_id().unwrap(),
 						)
 						.unwrap();
