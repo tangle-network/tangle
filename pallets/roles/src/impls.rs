@@ -28,8 +28,11 @@ use sp_runtime::{
 
 use sp_staking::offence::Offence;
 use tangle_primitives::{
-	jobs::{JobKey, ReportValidatorOffence},
-	traits::{jobs::MPCHandler, roles::RolesHandler},
+	jobs::{
+		traits::{JobsHandler, MPCHandler},
+		ReportValidatorOffence,
+	},
+	roles::traits::RolesHandler,
 };
 
 /// Implements RolesHandler for the pallet.
@@ -42,10 +45,9 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	///
 	/// # Returns
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	fn is_validator(address: T::AccountId, job_key: JobKey) -> bool {
+	fn is_validator(address: T::AccountId, role_type: RoleType) -> bool {
 		let assigned_roles = AccountRolesMapping::<T>::get(address);
-		let job_role = job_key.get_role_type();
-		assigned_roles.contains(&job_role)
+		assigned_roles.contains(&role_type)
 	}
 
 	/// Report offence for the given validator.
@@ -63,11 +65,14 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		Self::report_offence(offence_report)
 	}
 
-	fn get_validator_metadata(address: T::AccountId, job_key: JobKey) -> Option<RoleTypeMetadata> {
-		if Self::is_validator(address.clone(), job_key.clone()) {
+	fn get_validator_metadata(
+		address: T::AccountId,
+		role_type: RoleType,
+	) -> Option<RoleTypeMetadata> {
+		if Self::is_validator(address.clone(), role_type) {
 			let ledger = Self::ledger(&address);
 			if let Some(ledger) = ledger {
-				return match ledger.roles.get(&job_key.get_role_type()) {
+				return match ledger.roles.get(&role_type) {
 					Some(stake) => Some(stake.metadata.clone()),
 					None => None,
 				}
@@ -99,8 +104,8 @@ impl<T: Config> Pallet<T> {
 			// Check removed roles has any active jobs.
 			for role in removed_roles {
 				for job in active_jobs.clone() {
-					let job_key = job.0;
-					if job_key.get_role_type() == role {
+					let role_type = job.0;
+					if role_type == role {
 						return Err(Error::<T>::RoleCannotBeRemoved.into())
 					}
 				}
@@ -242,12 +247,18 @@ impl<T: Config> Pallet<T> {
 		let mut zksaas_validators: Vec<T::AccountId> = Default::default();
 
 		for (acc, role_types) in AccountRolesMapping::<T>::iter() {
-			if role_types.contains(&RoleType::Tss) {
-				tss_validators.push(acc.clone())
-			}
-
-			if role_types.contains(&RoleType::ZkSaaS) {
-				zksaas_validators.push(acc)
+			for role_type in role_types.iter() {
+				match role_type {
+					RoleType::Tss(_) =>
+						if !tss_validators.contains(&acc) {
+							tss_validators.push(acc.clone());
+						},
+					RoleType::ZkSaaS(_) =>
+						if !zksaas_validators.contains(&acc) {
+							zksaas_validators.push(acc.clone());
+						},
+					_ => (),
+				}
 			}
 		}
 

@@ -33,7 +33,7 @@ use sp_runtime::{
 };
 use std::collections::BTreeMap;
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::BlockNumber;
+use tangle_primitives::types::BlockNumber;
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
 	ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxNominations, MaxVestingSchedules,
@@ -106,22 +106,22 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				wasm_binary,
 				// Initial PoA authorities
 				vec![
-					authority_keys_from_seed("Alice//stash"),
-					authority_keys_from_seed("Bob//stash"),
-					authority_keys_from_seed("Charlie//stash"),
-					authority_keys_from_seed("Dave//stash"),
-					authority_keys_from_seed("Eve//stash"),
+					authority_keys_from_seed("Alice"),
+					authority_keys_from_seed("Bob"),
+					authority_keys_from_seed("Charlie"),
+					authority_keys_from_seed("Dave"),
+					authority_keys_from_seed("Eve"),
 				],
 				vec![],
 				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				// Pre-funded accounts
 				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie"),
+					get_account_id_from_seed::<sr25519::Public>("Dave"),
+					get_account_id_from_seed::<sr25519::Public>("Eve"),
 				],
 				chain_id,
 				combine_distributions(vec![

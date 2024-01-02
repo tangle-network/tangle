@@ -18,7 +18,9 @@ use frame_support::{assert_noop, assert_ok, error::BadOrigin};
 use parity_scale_codec::Encode;
 use sp_core::{crypto::ByteArray, ecdsa, keccak_256, sr25519};
 use sp_io::crypto::{ecdsa_generate, ecdsa_sign_prehashed, sr25519_generate, sr25519_sign};
-use tangle_primitives::jobs::{DKGResult, DKGSignatureResult, DkgKeyType, JobResult};
+use tangle_primitives::jobs::{
+	DKGTSSKeySubmissionResult, DKGTSSSignatureResult, DigitalSignatureType, JobResult,
+};
 
 fn mock_pub_key_ecdsa() -> ecdsa::Public {
 	ecdsa_generate(tangle_crypto_primitives::ROLE_KEY_TYPE, None)
@@ -69,8 +71,8 @@ fn set_fees_works() {
 #[test]
 fn dkg_key_verifcation_works_for_ecdsa() {
 	new_test_ext().execute_with(|| {
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Ecdsa,
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::Ecdsa,
 			key: vec![],
 			participants: vec![],
 			signatures: vec![],
@@ -83,8 +85,8 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 			Error::<Runtime>::NoParticipantsFound
 		);
 
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Ecdsa,
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::Ecdsa,
 			key: vec![],
 			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec()],
 			signatures: vec![],
@@ -101,8 +103,8 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 		let mut pub_key = mock_pub_key_ecdsa();
 		let signature = mock_signature_ecdsa(pub_key, pub_key);
 
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Ecdsa,
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::Ecdsa,
 			key: vec![],
 			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec()],
 			signatures: vec![signature.clone()],
@@ -115,8 +117,8 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 			Error::<Runtime>::NotEnoughSigners
 		);
 
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Ecdsa,
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::Ecdsa,
 			key: pub_key.0.to_vec(),
 			participants: vec![pub_key.as_mut().to_vec()],
 			signatures: vec![signature.clone(), signature.clone()],
@@ -134,8 +136,8 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 		let mut participant_two = mock_pub_key_ecdsa();
 		let signature_one = mock_signature_ecdsa(participant_one, participant_one);
 		let signature_two = mock_signature_ecdsa(participant_two, participant_one);
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Ecdsa,
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::Ecdsa,
 			key: participant_one.to_raw_vec(),
 			participants: vec![
 				participant_one.as_mut().to_vec(),
@@ -153,8 +155,8 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 #[test]
 fn dkg_key_verifcation_works_for_schnorr() {
 	new_test_ext().execute_with(|| {
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Schnorr,
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::SchnorrSr25519,
 			key: mock_pub_key_sr25519().to_vec(),
 			participants: vec![],
 			signatures: vec![],
@@ -167,8 +169,8 @@ fn dkg_key_verifcation_works_for_schnorr() {
 			Error::<Runtime>::NoParticipantsFound
 		);
 
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Schnorr,
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::SchnorrSr25519,
 			key: vec![],
 			participants: vec![mock_pub_key_sr25519().as_mut().to_vec()],
 			signatures: vec![],
@@ -185,8 +187,8 @@ fn dkg_key_verifcation_works_for_schnorr() {
 		let mut pub_key = mock_pub_key_sr25519();
 		let signature = mock_signature_sr25519(pub_key, pub_key);
 
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Schnorr,
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::SchnorrSr25519,
 			key: pub_key.to_vec(),
 			participants: vec![mock_pub_key_sr25519().as_mut().to_vec()],
 			signatures: vec![signature.clone()],
@@ -199,8 +201,8 @@ fn dkg_key_verifcation_works_for_schnorr() {
 			Error::<Runtime>::NotEnoughSigners
 		);
 
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Schnorr,
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::SchnorrSr25519,
 			key: pub_key.to_vec(),
 			participants: vec![pub_key.as_mut().to_vec()],
 			signatures: vec![signature.clone(), signature.clone()],
@@ -218,8 +220,8 @@ fn dkg_key_verifcation_works_for_schnorr() {
 		let mut participant_two = mock_pub_key_sr25519();
 		let signature_one = mock_signature_sr25519(participant_one, participant_one);
 		let signature_two = mock_signature_sr25519(participant_two, participant_one);
-		let job_to_verify = DKGResult {
-			key_type: DkgKeyType::Schnorr,
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::SchnorrSr25519,
 			key: participant_one.to_raw_vec(),
 			participants: vec![
 				participant_one.as_mut().to_vec(),
@@ -241,8 +243,8 @@ fn dkg_signature_verifcation_works_ecdsa() {
 		let pub_key = mock_pub_key_ecdsa();
 		let signature = mock_signature_ecdsa(pub_key, mock_pub_key_ecdsa());
 
-		let job_to_verify: DKGSignatureResult = DKGSignatureResult {
-			key_type: DkgKeyType::Ecdsa,
+		let job_to_verify: DKGTSSSignatureResult = DKGTSSSignatureResult {
+			signature_type: DigitalSignatureType::Ecdsa,
 			signature,
 			data: pub_key.to_raw_vec(),
 			signing_key: pub_key.to_raw_vec(),
@@ -255,8 +257,8 @@ fn dkg_signature_verifcation_works_ecdsa() {
 		);
 
 		let signature = mock_signature_ecdsa(pub_key, pub_key);
-		let job_to_verify: DKGSignatureResult = DKGSignatureResult {
-			key_type: DkgKeyType::Ecdsa,
+		let job_to_verify: DKGTSSSignatureResult = DKGTSSSignatureResult {
+			signature_type: DigitalSignatureType::Ecdsa,
 			signature,
 			data: pub_key.to_raw_vec(),
 			signing_key: pub_key.to_raw_vec(),
@@ -274,8 +276,8 @@ fn dkg_signature_verifcation_works_schnorr() {
 		let pub_key = mock_pub_key_sr25519();
 		let signature = mock_signature_sr25519(pub_key, mock_pub_key_sr25519());
 
-		let job_to_verify: DKGSignatureResult = DKGSignatureResult {
-			key_type: DkgKeyType::Schnorr,
+		let job_to_verify: DKGTSSSignatureResult = DKGTSSSignatureResult {
+			signature_type: DigitalSignatureType::SchnorrSr25519,
 			signature,
 			data: pub_key.to_raw_vec(),
 			signing_key: pub_key.to_raw_vec(),
@@ -288,8 +290,8 @@ fn dkg_signature_verifcation_works_schnorr() {
 		);
 
 		let signature = mock_signature_sr25519(pub_key, pub_key);
-		let job_to_verify: DKGSignatureResult = DKGSignatureResult {
-			key_type: DkgKeyType::Schnorr,
+		let job_to_verify: DKGTSSSignatureResult = DKGTSSSignatureResult {
+			signature_type: DigitalSignatureType::SchnorrSr25519,
 			signature,
 			data: pub_key.to_raw_vec(),
 			signing_key: pub_key.to_raw_vec(),

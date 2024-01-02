@@ -27,9 +27,12 @@ use sp_runtime::{
 	MultiAddress, MultiSignature, Perbill,
 };
 
+pub mod jobs;
+pub mod roles;
 pub mod types;
 pub use types::*;
-pub mod traits;
+pub mod impls;
+pub use impls::*;
 
 #[cfg(feature = "verifying")]
 pub mod verifier;
@@ -68,7 +71,7 @@ pub mod time {
 
 /// Money matters.
 pub mod currency {
-	use crate::Balance;
+	use crate::types::Balance;
 
 	// Supply units
 	// =============
@@ -103,7 +106,7 @@ pub mod currency {
 /// Fee config for tangle parachain
 pub mod fee {
 	use super::*;
-	use crate::currency::*;
+	use crate::{currency::*, types::Balance};
 	/// Handles converting a weight scalar to a fee value, based on the scale and granularity of the
 	/// node's balance type.
 	///
@@ -121,7 +124,7 @@ pub mod fee {
 			// in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1 MILLIUNIT:
 			// in our template, we map to 1/10 of that, or 1/10 MILLIUNIT
 			let p = CENT;
-			let q = 100 * crate::Balance::from(ExtrinsicBaseWeight::get().ref_time());
+			let q = 100 * Balance::from(ExtrinsicBaseWeight::get().ref_time());
 			smallvec![WeightToFeeCoefficient {
 				degree: 1,
 				negative: false,
@@ -141,7 +144,126 @@ pub mod evm {
 
 	/// Approximate ratio of the amount of Weight per Gas.
 	/// u64 works for approximations because Weight is a very small unit compared to gas.
-	pub const WEIGHT_PER_GAS: u64 = crate::WEIGHT_REF_TIME_PER_SECOND.saturating_div(GAS_PER_SECOND);
+	pub const WEIGHT_PER_GAS: u64 = frame_support::weights::constants::WEIGHT_REF_TIME_PER_SECOND
+		.saturating_div(GAS_PER_SECOND);
+
+	/// The amount of gas per pov. A ratio of 4 if we convert ref_time to gas and we compare
+	/// it with the pov_size for a block. E.g.
+	/// ceil(
+	///     (max_extrinsic.ref_time() / max_extrinsic.proof_size()) / WEIGHT_PER_GAS
+	/// )
+	pub const GAS_LIMIT_POV_SIZE_RATIO: u64 = 4;
+
+	#[macro_export]
+	macro_rules! impl_proxy_type {
+		() => {
+			#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+			#[derive(
+				Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug, MaxEncodedLen, TypeInfo,
+			)]
+			pub enum ProxyType {
+				/// All calls can be proxied. This is the trivial/most permissive filter.
+				Any = 0,
+				/// Only extrinsics related to governance (democracy and collectives).
+				Governance = 1,
+				/// Allow to veto an announced proxy call.
+				CancelProxy = 2,
+				/// Allow extrinsic related to Balances.
+				Balances = 3,
+			}
+
+			impl Default for ProxyType {
+				fn default() -> Self {
+					Self::Any
+				}
+			}
+
+			fn is_governance_precompile(precompile_name: &precompiles::PrecompileName) -> bool {
+				matches!(
+					precompile_name,
+					PrecompileName::DemocracyPrecompile | PrecompileName::PreimagePrecompile
+				)
+			}
+
+			// Be careful: Each time this filter is modified, the substrate filter must also be modified
+			// consistently.
+			impl pallet_evm_precompile_proxy::EvmProxyCallFilter for ProxyType {
+				fn is_evm_proxy_call_allowed(
+					&self,
+					call: &pallet_evm_precompile_proxy::EvmSubCall,
+					recipient_has_code: bool,
+					gas: u64,
+				) -> precompile_utils::EvmResult<bool> {
+					Ok(match self {
+						ProxyType::Any => true,
+						ProxyType::Governance =>
+							call.value == U256::zero() &&
+								matches!(
+									PrecompileName::from_address(call.to.0),
+									Some(ref precompile) if is_governance_precompile(precompile)
+								),
+						// The proxy precompile does not contain method cancel_proxy
+						ProxyType::CancelProxy => false,
+						ProxyType::Balances => {
+							// Allow only "simple" accounts as recipient (no code nor precompile).
+							// Note: Checking the presence of the code is not enough because some precompiles
+							// have no code.
+							!recipient_has_code &&
+								!precompile_utils::precompile_set::is_precompile_or_fail::<Runtime>(
+									call.to.0, gas,
+								)?
+						},
+					})
+				}
+			}
+		}
+	}
+}
+
+pub mod democracy {
+	use crate::{currency::UNIT, time::MINUTES, Balance, BlockNumber};
+
+	pub const LAUNCH_PERIOD: BlockNumber = 28 * 24 * 60 * MINUTES;
+	pub const VOTING_PERIOD: BlockNumber = 28 * 24 * 60 * MINUTES;
+	pub const FASTTRACK_VOTING_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES;
+	pub const MINIMUM_DEPOSIT: Balance = 100 * UNIT;
+	pub const ENACTMENT_PERIOD: BlockNumber = 30 * 24 * 60 * MINUTES;
+	pub const COOLOFF_PERIOD: BlockNumber = 28 * 24 * 60 * MINUTES;
+	pub const MAX_PROPOSALS: u32 = 100;
+}
+
+pub mod elections {
+	use crate::{currency::UNIT, time::DAYS, Balance, BlockNumber};
+
+	pub const CANDIDACY_BOND: Balance = 10 * UNIT;
+	pub const TERM_DURATION: BlockNumber = 7 * DAYS;
+	pub const DESIRED_MEMBERS: u32 = 13;
+	pub const DESIRED_RUNNERS_UP: u32 = 7;
+	pub const MAX_CANDIDATES: u32 = 10;
+	pub const MAX_VOTERS: u32 = 5;
+	pub const ELECTIONS_PHRAGMEN_PALLET_ID: frame_support::traits::LockIdentifier = *b"phrelect";
+}
+
+pub mod treasury {
+	use crate::{
+		currency::{CENT, UNIT},
+		time::DAYS,
+		Balance, BlockNumber,
+	};
+	use frame_support::PalletId;
+	use sp_runtime::{Percent, Permill};
+
+	pub const PROPOSAL_BOND: Permill = Permill::from_percent(5);
+	pub const PROPOSAL_BOND_MINIMUM: Balance = UNIT;
+	pub const SPEND_PERIOD: BlockNumber = DAYS;
+	pub const BURN: Permill = Permill::from_percent(50);
+	pub const TIP_COUNTDOWN: BlockNumber = DAYS;
+	pub const TIP_FINDERS_FEE: Percent = Percent::from_percent(20);
+	pub const TIP_REPORT_DEPOSIT_BASE: Balance = UNIT;
+	pub const DATA_DEPOSIT_PER_BYTE: Balance = CENT;
+	pub const TREASURY_PALLET_ID: PalletId = PalletId(*b"py/trsry");
+	pub const MAXIMUM_REASON_LENGTH: u32 = 300;
+	pub const MAX_APPROVALS: u32 = 100;
 }
 
 /// We assume that ~10% of the block weight is consumed by `on_initialize` handlers. This is

@@ -38,7 +38,13 @@ use sp_staking::{
 	SessionIndex,
 };
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::{jobs::*, roles::ValidatorRewardDistribution, traits::jobs::MPCHandler};
+use tangle_primitives::{
+	jobs::{
+		traits::{JobsHandler, MPCHandler},
+		*,
+	},
+	roles::ValidatorRewardDistribution,
+};
 pub type AccountId = u64;
 pub type Balance = u128;
 pub type BlockNumber = u64;
@@ -254,13 +260,13 @@ impl pallet_staking::Config for Runtime {
 pub struct MockJobsHandler;
 
 impl JobsHandler<AccountId> for MockJobsHandler {
-	fn get_active_jobs(_validator: AccountId) -> Vec<(JobKey, JobId)> {
+	fn get_active_jobs(_validator: AccountId) -> Vec<(RoleType, JobId)> {
 		Default::default()
 	}
 
 	fn exit_from_known_set(
 		_validator: AccountId,
-		_job_key: JobKey,
+		_role_type: RoleType,
 		_job_id: JobId,
 	) -> sp_runtime::DispatchResult {
 		Ok(())

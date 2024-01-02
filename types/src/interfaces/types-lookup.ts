@@ -3422,9 +3422,9 @@ declare module '@polkadot/types/lookup' {
   /** @name TanglePrimitivesJobsJobResult (410) */
   interface TanglePrimitivesJobsJobResult extends Enum {
     readonly isDkgPhaseOne: boolean;
-    readonly asDkgPhaseOne: TanglePrimitivesJobsDkgResult;
+    readonly asDkgPhaseOne: TanglePrimitivesJobsDKGTSSResult;
     readonly isDkgPhaseTwo: boolean;
-    readonly asDkgPhaseTwo: TanglePrimitivesJobsDkgSignatureResult;
+    readonly asDkgPhaseTwo: TanglePrimitivesJobsDKGTSSSignatureResult;
     readonly isZkSaaSPhaseOne: boolean;
     readonly asZkSaaSPhaseOne: TanglePrimitivesJobsZkSaaSCircuitResult;
     readonly isZkSaaSPhaseTwo: boolean;
@@ -3432,8 +3432,8 @@ declare module '@polkadot/types/lookup' {
     readonly type: 'DkgPhaseOne' | 'DkgPhaseTwo' | 'ZkSaaSPhaseOne' | 'ZkSaaSPhaseTwo';
   }
 
-  /** @name TanglePrimitivesJobsDkgResult (411) */
-  interface TanglePrimitivesJobsDkgResult extends Struct {
+  /** @name TanglePrimitivesJobsDKGTSSResult (411) */
+  interface TanglePrimitivesJobsDKGTSSResult extends Struct {
     readonly keyType: TanglePrimitivesJobsDkgKeyType;
     readonly key: Bytes;
     readonly participants: Vec<Bytes>;
@@ -3441,8 +3441,8 @@ declare module '@polkadot/types/lookup' {
     readonly threshold: u8;
   }
 
-  /** @name TanglePrimitivesJobsDkgSignatureResult (412) */
-  interface TanglePrimitivesJobsDkgSignatureResult extends Struct {
+  /** @name TanglePrimitivesJobsDKGTSSSignatureResult (412) */
+  interface TanglePrimitivesJobsDKGTSSSignatureResult extends Struct {
     readonly keyType: TanglePrimitivesJobsDkgKeyType;
     readonly data: Bytes;
     readonly signature: Bytes;

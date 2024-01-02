@@ -30,16 +30,16 @@ pub use sc_executor::NativeElseWasmExecutor;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-
 use sp_core::U256;
+use tangle_primitives::Block;
 
 use std::{path::Path, sync::Arc, time::Duration};
 
 #[cfg(not(feature = "testnet"))]
-use tangle_runtime::{self, opaque::Block, RuntimeApi, TransactionConverter};
+use tangle_runtime::{self, RuntimeApi, TransactionConverter};
 
 #[cfg(feature = "testnet")]
-use tangle_testnet_runtime::{self, opaque::Block, RuntimeApi, TransactionConverter};
+use tangle_testnet_runtime::{self, RuntimeApi, TransactionConverter};
 
 /// The minimum period of blocks on which justifications will be
 /// imported and generated.
