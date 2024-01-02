@@ -36,10 +36,10 @@ use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
 use sp_keystore::KeystorePtr;
 use sp_runtime::traits::Block as BlockT;
+use tangle_primitives::Block;
 use tangle_runtime::BlockNumber;
-
 // Runtime
-use tangle_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
+use tangle_runtime::{AccountId, Balance, Hash, Index};
 
 pub mod eth;
 pub mod tracing;

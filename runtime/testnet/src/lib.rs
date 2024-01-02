@@ -112,6 +112,21 @@ pub use tangle_primitives::{
 	AccountId, AccountIndex, Address, BabeId, Balance, BlockNumber, Hash, Header, Index, Moment,
 	Signature, AVERAGE_ON_INITIALIZE_RATIO, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO,
 };
+use tangle_primitives::{
+	democracy::{
+		COOLOFF_PERIOD, ENACTMENT_PERIOD, FASTTRACK_VOTING_PERIOD, LAUNCH_PERIOD, MAX_PROPOSALS,
+		MINIMUM_DEPOSIT, VOTING_PERIOD,
+	},
+	elections::{
+		CANDIDACY_BOND, DESIRED_MEMBERS, DESIRED_RUNNERS_UP, ELECTIONS_PHRAGMEN_PALLET_ID,
+		MAX_CANDIDATES, MAX_VOTERS, TERM_DURATION,
+	},
+	treasury::{
+		BURN, DATA_DEPOSIT_PER_BYTE, MAXIMUM_REASON_LENGTH, MAX_APPROVALS, PROPOSAL_BOND,
+		PROPOSAL_BOND_MINIMUM, SPEND_PERIOD, TIP_COUNTDOWN, TIP_FINDERS_FEE,
+		TIP_REPORT_DEPOSIT_BASE, TREASURY_PALLET_ID,
+	},
+};
 
 use pallet_airdrop_claims::TestWeightInfo;
 
@@ -141,11 +156,6 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	state_version: 0,
 };
 
-pub const fn deposit(items: u32, bytes: u32) -> Balance {
-	// map to 1/10 of what the kusama relay chain charges (v9020)
-	(items as Balance * 2_000 * CENT + (bytes as Balance) * 100 * MILLIUNIT) / 10
-}
-
 /// The version information used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
@@ -173,10 +183,6 @@ pub mod opaque {
 
 	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
 
-	/// Opaque block header type.
-	pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
-	/// Opaque block type.
-	pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 	/// Opaque block identifier type.
 	pub type BlockId = generic::BlockId<Block>;
 
@@ -462,13 +468,13 @@ impl pallet_staking::Config for Runtime {
 }
 
 parameter_types! {
-	pub const LaunchPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
-	pub const VotingPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
-	pub const FastTrackVotingPeriod: BlockNumber = 3 * 24 * 60 * MINUTES;
-	pub const MinimumDeposit: Balance = 100 * UNIT;
-	pub const EnactmentPeriod: BlockNumber = 30 * 24 * 60 * MINUTES;
-	pub const CooloffPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
-	pub const MaxProposals: u32 = 100;
+	pub const LaunchPeriod: BlockNumber = LAUNCH_PERIOD;
+	pub const VotingPeriod: BlockNumber = VOTING_PERIOD;
+	pub const FastTrackVotingPeriod: BlockNumber = FASTTRACK_VOTING_PERIOD;
+	pub const MinimumDeposit: Balance = MINIMUM_DEPOSIT;
+	pub const EnactmentPeriod: BlockNumber = ENACTMENT_PERIOD;
+	pub const CooloffPeriod: BlockNumber = COOLOFF_PERIOD;
+	pub const MaxProposals: u32 = MAX_PROPOSALS;
 }
 
 type EnsureRootOrHalfCouncil = EitherOfDiverse<
@@ -834,17 +840,17 @@ impl pallet_offences::Config for Runtime {
 }
 
 parameter_types! {
-	pub const CandidacyBond: Balance = 10 * UNIT;
+	pub const CandidacyBond: Balance = CANDIDACY_BOND;
 	// 1 storage item created, key size is 32 bytes, value size is 16+16.
 	pub const VotingBondBase: Balance = deposit(1, 64);
 	// additional data per vote is 32 bytes (account id).
 	pub const VotingBondFactor: Balance = deposit(0, 32);
-	pub const TermDuration: BlockNumber = 7 * DAYS;
-	pub const DesiredMembers: u32 = 13;
-	pub const DesiredRunnersUp: u32 = 7;
-	pub const MaxCandidates: u32 = 10;
-	pub const MaxVoters: u32 = 5;
-	pub const ElectionsPhragmenPalletId: LockIdentifier = *b"phrelect";
+	pub const TermDuration: BlockNumber = TERM_DURATION;
+	pub const DesiredMembers: u32 = DESIRED_MEMBERS;
+	pub const DesiredRunnersUp: u32 = DESIRED_RUNNERS_UP;
+	pub const MaxCandidates: u32 = MAX_CANDIDATES;
+	pub const MaxVoters: u32 = MAX_VOTERS;
+	pub const ElectionsPhragmenPalletId: LockIdentifier = ELECTIONS_PHRAGMEN_PALLET_ID;
 }
 
 // Make sure that there are no more than `MaxMembers` members elected via
@@ -875,17 +881,17 @@ impl pallet_elections_phragmen::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ProposalBond: Permill = Permill::from_percent(5);
-	pub const ProposalBondMinimum: Balance = UNIT;
-	pub const SpendPeriod: BlockNumber = DAYS;
-	pub const Burn: Permill = Permill::from_percent(50);
-	pub const TipCountdown: BlockNumber = DAYS;
-	pub const TipFindersFee: Percent = Percent::from_percent(20);
-	pub const TipReportDepositBase: Balance = UNIT;
-	pub const DataDepositPerByte: Balance = CENT;
-	pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
-	pub const MaximumReasonLength: u32 = 300;
-	pub const MaxApprovals: u32 = 100;
+	pub const ProposalBond: Permill = PROPOSAL_BOND;
+	pub const ProposalBondMinimum: Balance = PROPOSAL_BOND_MINIMUM;
+	pub const SpendPeriod: BlockNumber = SPEND_PERIOD;
+	pub const Burn: Permill = BURN;
+	pub const TipCountdown: BlockNumber = TIP_COUNTDOWN;
+	pub const TipFindersFee: Percent = TIP_FINDERS_FEE;
+	pub const TipReportDepositBase: Balance = TIP_REPORT_DEPOSIT_BASE;
+	pub const DataDepositPerByte: Balance = DATA_DEPOSIT_PER_BYTE;
+	pub const TreasuryPalletId: PalletId = TREASURY_PALLET_ID;
+	pub const MaximumReasonLength: u32 = MAXIMUM_REASON_LENGTH;
+	pub const MaxApprovals: u32 = MAX_APPROVALS;
 }
 
 impl pallet_treasury::Config for Runtime {
