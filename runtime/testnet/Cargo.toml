@@ -143,7 +143,6 @@ runtime-benchmarks = [
   "pallet-collective/runtime-benchmarks",
   "pallet-timestamp/runtime-benchmarks",
   "sp-runtime/runtime-benchmarks",
-  "pallet-jobs/runtime-benchmarks",
   "pallet-dkg/runtime-benchmarks",
   "pallet-grandpa/runtime-benchmarks",
 

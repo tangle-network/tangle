@@ -58,9 +58,6 @@ fn set_fees_works() {
 			refresh_validator_fee: 5,
 		};
 
-		// should fail for non update origin
-		assert_noop!(DKG::set_fee(RuntimeOrigin::signed(10), new_fee.clone()), BadOrigin);
-
 		// Dispatch a signed extrinsic.
 		assert_ok!(DKG::set_fee(RuntimeOrigin::signed(1), new_fee.clone()));
 

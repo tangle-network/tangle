@@ -39,7 +39,6 @@ sc-executor = { workspace = true }
 sc-offchain = { workspace = true }
 sc-keystore = { workspace = true }
 sc-service = { workspace = true }
-sp-core = { workspace = true }
 frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 frame-system = { workspace = true }
@@ -51,14 +50,22 @@ sc-network = { workspace = true }
 sc-telemetry = { workspace = true }
 sc-transaction-pool = { workspace = true }
 sp-consensus-babe = { workspace = true }
-sp-inherents = { workspace = true }
 sp-keyring = { workspace = true }
-sp-runtime = { workspace = true }
 sp-trie = { workspace = true }
 sc-consensus-grandpa = { workspace = true }
 sc-network-sync = { workspace = true }
 webb-consensus-types = { workspace = true }
 webb-proposals = { workspace = true }
+
+sp-consensus-grandpa = { workspace = true, features = ["default"] }
+sp-core = { workspace = true, features = ["default"] }
+sp-inherents = { workspace = true, features = ["default"] }
+sp-offchain = { workspace = true, features = ["default"] }
+sp-runtime = { workspace = true, features = ["default"] }
+sp-session = { workspace = true, features = ["default"] }
+sp-state-machine = { workspace = true, features = ["default"] }
+sp-timestamp = { workspace = true, features = ["default"] }
+sp-transaction-pool = { workspace = true, features = ["default"] }
 
 sc-chain-spec = { workspace = true }
 sc-rpc = { workspace = true }
@@ -66,7 +73,6 @@ sc-rpc-api = { workspace = true }
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
-sp-timestamp = { workspace = true }
 substrate-prometheus-endpoint = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
 pallet-airdrop-claims = { workspace = true }
@@ -131,7 +137,6 @@ runtime-benchmarks = [
 	"tangle-runtime/runtime-benchmarks",
     "tangle-testnet-runtime?/runtime-benchmarks",
 	"sc-service/runtime-benchmarks",
-	"sp-runtime/runtime-benchmarks",
 ]
 with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-testnet-runtime/with-paritydb-weights"]

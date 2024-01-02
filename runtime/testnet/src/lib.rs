@@ -1338,7 +1338,6 @@ mod benches {
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
-		[pallet_jobs, Jobs]
 		[pallet_dkg, Dkg]
 	);
 }
@@ -1865,7 +1864,7 @@ impl_runtime_apis! {
 			}
 		}
 	}
-	
+
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
 		fn benchmark_metadata(extra: bool) -> (

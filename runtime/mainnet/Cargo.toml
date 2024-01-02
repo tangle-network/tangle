@@ -130,15 +130,14 @@ rpc-primitives-txpool = { workspace = true }
 [features]
 default = ["std", "with-rocksdb-weights", "evm-tracing"]
 runtime-benchmarks = [
-  "hex-literal",
-  "frame-benchmarking",
-  "frame-system-benchmarking/runtime-benchmarks",
-  "frame-support/runtime-benchmarks",
-  "frame-system/runtime-benchmarks",
-  "pallet-balances/runtime-benchmarks",
+  "frame-benchmarking/runtime-benchmarks",
+	"frame-system-benchmarking/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
+	"pallet-balances/runtime-benchmarks",
+	"pallet-grandpa/runtime-benchmarks",
+	"pallet-timestamp/runtime-benchmarks",
   "pallet-vesting/runtime-benchmarks",
   "pallet-collective/runtime-benchmarks",
-  "pallet-timestamp/runtime-benchmarks",
   "sp-runtime/runtime-benchmarks",
 
   # Frontier

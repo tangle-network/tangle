@@ -7,8 +7,11 @@ use frame_system::RawOrigin;
 use sp_runtime::traits::{Bounded, Zero};
 use sp_std::vec;
 use tangle_primitives::{
-	jobs::{DKGJobType, JobId, JobType},
-	roles::RoleType,
+	jobs::{
+		DKGTSSKeySubmissionResult, DKGTSSPhaseOneJobType, DigitalSignatureType, JobId, JobResult,
+		JobType,
+	},
+	roles::{RoleType, ThresholdSignatureRoleType},
 };
 
 benchmarks! {
@@ -18,7 +21,7 @@ benchmarks! {
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
-			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), caller.clone()], threshold: 1, permitted_caller: None, key_type: Ecdsa }),
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), caller.clone()], threshold: 1, permitted_caller: None, role_type : ThresholdSignatureRoleType::TssGG20  }),
 		};
 
 	}: _(RawOrigin::Signed(caller.clone()), job.clone())
@@ -30,12 +33,19 @@ benchmarks! {
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
-			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2], threshold: 1, permitted_caller: None, key_type: Ecdsa }),
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2], threshold: 1, permitted_caller: None, role_type : ThresholdSignatureRoleType::TssGG20 }),
 		};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
-		let role_type: RoleType = RoleType::Tss(ThresholdSignatureRoleType::TssGG20);
+		let job_key: RoleType = RoleType::Tss(ThresholdSignatureRoleType::TssGG20);
 		let job_id: JobId = 0;
-	}: _(RawOrigin::Signed(caller.clone()), role_type, job_id.clone(), vec![])
+		let result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
+			signatures: vec![],
+			threshold: 3,
+			participants: vec![],
+			key: vec![],
+			signature_type: DigitalSignatureType::Ecdsa
+		});
+	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), result)
 
 	// Benchmark withdraw_rewards function
 	withdraw_rewards {
@@ -54,12 +64,12 @@ benchmarks! {
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
-			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2, validator3], threshold: 2, permitted_caller: None, key_type: Ecdsa }),
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2, validator3], threshold: 2, permitted_caller: None, role_type : ThresholdSignatureRoleType::TssGG20 }),
 			};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
-		let role_type: RoleType = RoleType::Tss(ThresholdSignatureRoleType::TssGG20);
+		let job_key: RoleType = RoleType::Tss(ThresholdSignatureRoleType::TssGG20);
 		let job_id: JobId = 0;
-	}: _(RawOrigin::Signed(caller.clone()), role_type, job_id.clone(), caller.clone(), ValidatorOffenceType::Inactivity, vec![])
+	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), caller.clone(), ValidatorOffenceType::Inactivity, vec![])
 }
 
 // Define the module and associated types for the benchmarks
