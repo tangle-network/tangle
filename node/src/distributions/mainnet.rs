@@ -299,7 +299,7 @@ fn test_compute_investor_balance_distribution() {
 		alice.clone(),
 		amount_per_investor,
 		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
-		tangle_primitives::time::DAYS * 365, // num of blocks from beging till fully vested
+		tangle_primitives::time::DAYS * 365, // num of blocks from beginning till fully vested
 		1,                                   // 1% of 100
 	);
 	let bob_expected_response: (MultiAddress, u128, u64, u64, u128) = (
