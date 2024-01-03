@@ -86,8 +86,8 @@ pallet-utility = { workspace = true }
 pallet-vesting = { workspace = true }
 
 # Webb dependencies
-tangle-primitives = { workspace = true }
 tangle-crypto-primitives = { workspace = true }
+tangle-primitives = { workspace = true }
 
 # Frontier dependencies
 fp-account = { workspace = true }
@@ -199,6 +199,10 @@ std = [
   "pallet-treasury/std",
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
+  "frame-benchmarking/std",
+  "frame-system-benchmarking/std",
+  "num_enum/std",
+  "pallet-proxy/std",
 
   # Tangle dependencies
   "tangle-primitives/std",

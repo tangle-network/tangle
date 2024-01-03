@@ -85,11 +85,12 @@ pallet-vesting = { workspace = true }
 # Webb dependencies
 pallet-airdrop-claims = { workspace = true }
 pallet-dkg = { workspace = true }
-pallet-zksaas = { workspace = true }
 pallet-jobs = { workspace = true }
+pallet-jobs-rpc-runtime-api = { workspace = true }
 pallet-roles = { workspace = true }
-tangle-primitives = { workspace = true, features = ["verifying"] }
+pallet-zksaas = { workspace = true }
 tangle-crypto-primitives = { workspace = true }
+tangle-primitives = { workspace = true, features = ["verifying"] }
 
 # Frontier dependencies
 fp-account = { workspace = true }
@@ -118,12 +119,12 @@ pallet-hotfix-sufficients = { workspace = true }
 pallet-evm-precompile-batch = { workspace = true }
 pallet-evm-precompile-call-permit = { workspace = true }
 pallet-evm-precompile-democracy = { workspace = true }
+pallet-evm-precompile-jobs = { workspace = true }
 pallet-evm-precompile-preimage = { workspace = true }
 pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
 pallet-evm-precompile-staking = { workspace = true }
 precompile-utils = { workspace = true }
-pallet-evm-precompile-jobs = { workspace = true }
 
 evm-tracer = { workspace = true }
 rpc-primitives-debug = { workspace = true }
@@ -202,6 +203,10 @@ std = [
   "pallet-treasury/std",
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
+  "frame-benchmarking/std",
+  "frame-system-benchmarking/std",
+  "num_enum/std",
+  "pallet-proxy/std",
 
   # Tangle dependencies
   "tangle-primitives/std",
@@ -210,6 +215,7 @@ std = [
   "pallet-roles/std",
   "pallet-dkg/std",
   "pallet-zksaas/std",
+  "pallet-jobs-rpc-runtime-api/std",
 
   # ETH2 light-client
   "pallet-eth2-light-client/std",

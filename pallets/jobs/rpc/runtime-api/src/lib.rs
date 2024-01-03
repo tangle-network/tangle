@@ -19,7 +19,7 @@
 
 use parity_scale_codec::Codec;
 use sp_runtime::{traits::MaybeDisplay, Serialize};
-
+use sp_std::vec::Vec;
 use tangle_primitives::{
 	jobs::{JobId, RpcResponseJobsData, RpcResponsePhaseOneResult},
 	roles::RoleType,
@@ -42,9 +42,8 @@ sp_api::decl_runtime_apis! {
 		///
 		/// # Returns
 		///
-		/// Returns a `Result` containing a vector of `RpcResponseJobsData<AccountId>` if the
-		/// operation is successful
-		fn query_jobs_by_validator(validator: AccountId) -> Result<Vec<RpcResponseJobsData<AccountId>>, String>;
+		/// An optional vec of `RpcResponseJobsData` of jobs assigned to validator
+		fn query_jobs_by_validator(validator: AccountId) -> Option<Vec<RpcResponseJobsData<AccountId>>>;
 		/// Queries a job by its key and ID.
 		///
 		/// # Arguments

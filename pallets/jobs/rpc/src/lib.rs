@@ -29,7 +29,10 @@ use sp_runtime::{
 	Serialize,
 };
 use std::sync::Arc;
-use tangle_primitives::jobs::RpcResponseJobsData;
+use tangle_primitives::{
+	jobs::{JobId, RpcResponseJobsData, RpcResponsePhaseOneResult},
+	roles::RoleType,
+};
 
 /// JobsClient RPC methods.
 #[rpc(client, server)]
@@ -39,7 +42,26 @@ pub trait JobsApi<BlockHash, AccountId> {
 		&self,
 		at: Option<BlockHash>,
 		validator: AccountId,
-	) -> RpcResult<Vec<RpcResponseJobsData<AccountId>>>;
+	) -> RpcResult<Option<Vec<RpcResponseJobsData<AccountId>>>>;
+
+	#[method(name = "jobs_queryJobById")]
+	fn query_job_by_id(
+		&self,
+		at: Option<BlockHash>,
+		role_type: RoleType,
+		job_id: JobId,
+	) -> RpcResult<Option<RpcResponseJobsData<AccountId>>>;
+
+	#[method(name = "jobs_queryPhaseOneById")]
+	fn query_phase_one_by_id(
+		&self,
+		at: Option<BlockHash>,
+		role_type: RoleType,
+		job_id: JobId,
+	) -> RpcResult<Option<RpcResponsePhaseOneResult<AccountId>>>;
+
+	#[method(name = "jobs_queryNextJobId")]
+	fn query_next_job_id(&self, at: Option<BlockHash>) -> RpcResult<JobId>;
 }
 
 /// A struct that implements the `JobsApi`.
@@ -67,15 +89,52 @@ where
 		&self,
 		at: Option<<Block as BlockT>::Hash>,
 		validator: AccountId,
-	) -> RpcResult<Vec<RpcResponseJobsData<AccountId>>> {
+	) -> RpcResult<Option<Vec<RpcResponseJobsData<AccountId>>>> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 
 		match api.query_jobs_by_validator(at, validator) {
-			Ok(res) => match res {
-				Ok(res) => Ok(res),
-				Err(e) => Err(runtime_error_into_rpc_err(e)),
-			},
+			Ok(res) => Ok(res),
+			Err(e) => Err(runtime_error_into_rpc_err(e)),
+		}
+	}
+
+	fn query_job_by_id(
+		&self,
+		at: Option<<Block as BlockT>::Hash>,
+		role_type: RoleType,
+		job_id: JobId,
+	) -> RpcResult<Option<RpcResponseJobsData<AccountId>>> {
+		let api = self.client.runtime_api();
+		let at = at.unwrap_or_else(|| self.client.info().best_hash);
+
+		match api.query_job_by_id(at, role_type, job_id) {
+			Ok(res) => Ok(res),
+			Err(e) => Err(runtime_error_into_rpc_err(e)),
+		}
+	}
+
+	fn query_phase_one_by_id(
+		&self,
+		at: Option<<Block as BlockT>::Hash>,
+		role_type: RoleType,
+		job_id: JobId,
+	) -> RpcResult<Option<RpcResponsePhaseOneResult<AccountId>>> {
+		let api = self.client.runtime_api();
+		let at = at.unwrap_or_else(|| self.client.info().best_hash);
+
+		match api.query_phase_one_by_id(at, role_type, job_id) {
+			Ok(res) => Ok(res),
+			Err(e) => Err(runtime_error_into_rpc_err(e)),
+		}
+	}
+
+	fn query_next_job_id(&self, at: Option<<Block as BlockT>::Hash>) -> RpcResult<JobId> {
+		let api = self.client.runtime_api();
+		let at = at.unwrap_or_else(|| self.client.info().best_hash);
+
+		match api.query_next_job_id(at) {
+			Ok(res) => Ok(res),
 			Err(e) => Err(runtime_error_into_rpc_err(e)),
 		}
 	}

@@ -69,6 +69,10 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
+use tangle_primitives::{
+	jobs::{JobId, RpcResponseJobsData, RpcResponsePhaseOneResult},
+	roles::RoleType,
+};
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -1375,6 +1379,27 @@ impl_runtime_apis! {
 		) -> sp_inherents::CheckInherentsResult {
 			data.check_extrinsics(&block)
 		}
+	}
+
+	impl pallet_jobs_rpc_runtime_api::JobsApi<Block, AccountId> for Runtime {
+		fn query_jobs_by_validator(
+			validator: AccountId,
+		) -> Option<Vec<RpcResponseJobsData<AccountId>>> {
+			Jobs::query_jobs_by_validator(validator)
+		}
+
+		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId>> {
+			Jobs::query_job_by_id(role_type, job_id)
+		}
+
+		fn query_phase_one_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponsePhaseOneResult<AccountId>> {
+			Jobs::query_phase_one_by_id(role_type, job_id)
+		}
+
+		fn query_next_job_id() -> JobId {
+			Jobs::query_next_job_id()
+		}
+
 	}
 
 	impl fp_rpc::EthereumRuntimeRPCApi<Block> for Runtime {

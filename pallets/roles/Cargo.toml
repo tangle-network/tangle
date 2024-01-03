@@ -28,8 +28,8 @@ sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-staking = { workspace = true }
 sp-std = { workspace = true }
-tangle-primitives = { workspace = true, default-features = false }
 tangle-crypto-primitives = { workspace = true, default-features = false }
+tangle-primitives = { workspace = true, default-features = false }
 
 [dev-dependencies]
 hex-literal = { workspace = true }
