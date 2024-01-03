@@ -97,7 +97,6 @@ use sp_runtime::generic::Era;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 
-use pallet_airdrop_claims::TestWeightInfo;
 pub use tangle_primitives::{
 	currency::*,
 	fee::*,
@@ -1029,7 +1028,7 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type Prefix = Prefix;
 	type MaxVestingSchedules = MaxVestingSchedules;
 	type MoveClaimOrigin = frame_system::EnsureRoot<AccountId>;
-	type WeightInfo = TestWeightInfo;
+	type WeightInfo = ();
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

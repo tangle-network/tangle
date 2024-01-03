@@ -134,8 +134,6 @@ use tangle_primitives::{
 	},
 };
 
-use pallet_airdrop_claims::TestWeightInfo;
-
 // Frontier
 use fp_rpc::TransactionStatus;
 use pallet_ethereum::{Call::transact, Transaction as EthereumTransaction};
@@ -1042,7 +1040,7 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type Prefix = Prefix;
 	type MaxVestingSchedules = MaxVestingSchedules;
 	type MoveClaimOrigin = frame_system::EnsureRoot<AccountId>;
-	type WeightInfo = TestWeightInfo;
+	type WeightInfo = ();
 }
 
 parameter_types! {

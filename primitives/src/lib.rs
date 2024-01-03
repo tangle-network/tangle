@@ -17,7 +17,7 @@
 use frame_support::{
 	pallet_prelude::Weight,
 	weights::{
-		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_MILLIS, WEIGHT_REF_TIME_PER_SECOND},
+		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_MILLIS},
 		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 	},
 };

@@ -17,7 +17,7 @@ use crate::{
 	cli::{Cli, Subcommand},
 	service,
 };
-use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
+
 use futures::TryFutureExt;
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
@@ -152,9 +152,7 @@ pub fn run() -> sc_cli::Result<()> {
 			use crate::benchmarking::{
 				inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder,
 			};
-			use frame_benchmarking_cli::{
-				BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE,
-			};
+			use frame_benchmarking_cli::ExtrinsicFactory;
 			use tangle_runtime::{Block, ExistentialDeposit};
 
 			let runner = cli.create_runner(cmd)?;
@@ -196,7 +194,7 @@ pub fn run() -> sc_cli::Result<()> {
 			}
 		},
 		#[cfg(not(feature = "runtime-benchmarks"))]
-		Some(Subcommand::Benchmark) => Err("Benchmarking wasn't enabled when building the node. \
+		Some(Subcommand::Benchmark(_)) => Err("Benchmarking wasn't enabled when building the node. \
 			You can enable it with `--features runtime-benchmarks`."
 			.into()),
 		Some(Subcommand::FrontierDb(cmd)) => {

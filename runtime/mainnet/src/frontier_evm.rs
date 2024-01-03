@@ -19,19 +19,14 @@ use crate::{
 	precompiles::{PrecompileName, WebbPrecompiles},
 	*,
 };
-use frame_support::{
-	pallet_prelude::*,
-	parameter_types,
-	traits::FindAuthor,
-	weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
-};
+use frame_support::{pallet_prelude::*, parameter_types, traits::FindAuthor, weights::Weight};
 use sp_core::{crypto::ByteArray, H160, U256};
 use sp_runtime::{traits::BlakeTwo256, ConsensusEngineId, Permill};
 use sp_std::{marker::PhantomData, prelude::*};
 // Frontier
 use pallet_ethereum::PostLogContent;
 use pallet_evm::HashedAddressMapping;
-use tangle_primitives::evm::{GAS_PER_SECOND, WEIGHT_PER_GAS};
+use tangle_primitives::evm::WEIGHT_PER_GAS;
 impl pallet_evm_chain_id::Config for Runtime {}
 
 pub struct FindAuthorTruncated<F>(PhantomData<F>);
