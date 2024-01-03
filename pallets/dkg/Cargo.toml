@@ -8,6 +8,7 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
+frame-benchmarking = { workspace = true, optional = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
 parity-scale-codec = { workspace = true }
@@ -17,9 +18,8 @@ sp-core = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
-tangle-primitives = { workspace = true, default-features = false }
 tangle-crypto-primitives = { workspace = true, default-features = false }
-frame-benchmarking = { workspace = true, optional = true }
+tangle-primitives = { workspace = true, default-features = false }
 
 [dev-dependencies]
 pallet-balances = { workspace = true }
@@ -39,7 +39,7 @@ std = [
   "tangle-crypto-primitives/std",
   "pallet-balances/std",
   "sp-io/std",
-  "sp-keystore/std"
+  "sp-keystore/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
