@@ -122,7 +122,6 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					mainnet::get_edgeware_genesis_balance_distribution(),
 					mainnet::get_leaderboard_balance_distribution(),
 					mainnet::get_substrate_balance_distribution(),
-					mainnet::get_local_balance_distribution(),
 				]),
 				// Genesis investor / team distribution (pallet-balances + pallet-vesting)
 				combine_distributions(vec![

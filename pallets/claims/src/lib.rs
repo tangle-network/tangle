@@ -323,8 +323,12 @@ pub mod pallet {
 			signature: MultiAddressSignature,
 		) -> DispatchResult {
 			ensure_none(origin)?;
-
-			let data = dest.using_encoded(to_ascii_hex);
+			let data = match dest {
+				Some(MultiAddress::EVM(ref evm)) => evm.using_encoded(to_ascii_hex),
+				Some(MultiAddress::Native(ref native)) => native.using_encoded(to_ascii_hex),
+				// no dest, no data.
+				None => Vec::new(),
+			};
 			let signer = Self::get_signer_multi_address(signer.clone(), signature, data, vec![])?;
 			ensure!(Signing::<T>::get(&signer).is_none(), Error::<T>::InvalidStatement);
 			Self::process_claim(signer, dest)?;
@@ -407,8 +411,12 @@ pub mod pallet {
 			statement: Vec<u8>,
 		) -> DispatchResult {
 			ensure_none(origin)?;
-
-			let data = dest.using_encoded(to_ascii_hex);
+			let data = match dest {
+				Some(MultiAddress::EVM(ref evm)) => evm.using_encoded(to_ascii_hex),
+				Some(MultiAddress::Native(ref native)) => native.using_encoded(to_ascii_hex),
+				// no dest, no data.
+				None => Vec::new(),
+			};
 			let signer =
 				Self::get_signer_multi_address(signer.clone(), signature, data, statement.clone())?;
 			if let Some(s) = Signing::<T>::get(signer.clone()) {
@@ -460,7 +468,13 @@ pub mod pallet {
 				// The weight of this logic is included in the `claim` dispatchable.
 				// </weight>
 				Call::claim { dest: account, signer, signature } => {
-					let data = account.using_encoded(to_ascii_hex);
+					let data = match account {
+						Some(MultiAddress::EVM(ref evm)) => evm.using_encoded(to_ascii_hex),
+						Some(MultiAddress::Native(ref native)) =>
+							native.using_encoded(to_ascii_hex),
+						// no dest, no data.
+						None => Vec::new(),
+					};
 					match Self::get_signer_multi_address(
 						signer.clone(),
 						signature.clone(),
@@ -475,7 +489,13 @@ pub mod pallet {
 				// The weight of this logic is included in the `claim_attest` dispatchable.
 				// </weight>
 				Call::claim_attest { dest: account, signer, signature, statement } => {
-					let data = account.using_encoded(to_ascii_hex);
+					let data = match account {
+						Some(MultiAddress::EVM(ref evm)) => evm.using_encoded(to_ascii_hex),
+						Some(MultiAddress::Native(ref native)) =>
+							native.using_encoded(to_ascii_hex),
+						// no dest, no data.
+						None => Vec::new(),
+					};
 					match Self::get_signer_multi_address(
 						signer.clone(),
 						signature.clone(),
@@ -554,10 +574,15 @@ impl<T: Config> Pallet<T> {
 
 	// Constructs the message that PolkadotJS would sign.
 	fn polkadotjs_signable_message(what: &[u8], extra: &[u8]) -> Vec<u8> {
+		let mut v = Vec::new();
+		let polkadotjs_prefix = b"<Bytes>";
+		let polkadotjs_suffix = b"</Bytes>";
 		let prefix = T::Prefix::get();
-		let mut v = prefix.to_vec();
+		v.extend_from_slice(polkadotjs_prefix);
+		v.extend_from_slice(prefix);
 		v.extend_from_slice(what);
 		v.extend_from_slice(extra);
+		v.extend_from_slice(polkadotjs_suffix);
 		v
 	}
 

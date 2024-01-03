@@ -81,7 +81,11 @@ fn claiming_works() {
 			RuntimeOrigin::none(),
 			Some(get_multi_address_account_id(42)),
 			None,
-			sig::<Test>(&alice(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+			sig::<Test>(
+				&alice(),
+				&get_multi_address_account_id(42).to_account_id_32().encode(),
+				&[][..]
+			)
 		));
 		assert_eq!(
 			Balances::free_balance(&get_multi_address_account_id(42).to_account_id_32()),
@@ -117,7 +121,11 @@ fn basic_claim_moving_works() {
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(42)),
 				None,
-				sig::<Test>(&alice(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+				sig::<Test>(
+					&alice(),
+					&get_multi_address_account_id(42).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			Error::<Test>::SignerHasNoClaim
 		);
@@ -125,7 +133,11 @@ fn basic_claim_moving_works() {
 			RuntimeOrigin::none(),
 			Some(get_multi_address_account_id(42)),
 			None,
-			sig::<Test>(&bob(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+			sig::<Test>(
+				&bob(),
+				&get_multi_address_account_id(42).to_account_id_32().encode(),
+				&[][..]
+			)
 		));
 		assert_eq!(
 			Balances::free_balance(&get_multi_address_account_id(42).to_account_id_32()),
@@ -149,7 +161,7 @@ fn claim_attest_moving_works() {
 		));
 		let s = sig::<Test>(
 			&bob(),
-			&Some(get_multi_address_account_id(42)).encode(),
+			&get_multi_address_account_id(42).to_account_id_32().encode(),
 			StatementKind::Regular.to_text(),
 		);
 		assert_ok!(ClaimsPallet::claim_attest(
@@ -173,14 +185,22 @@ fn claiming_does_not_bypass_signing() {
 			RuntimeOrigin::none(),
 			Some(get_multi_address_account_id(42)),
 			None,
-			sig::<Test>(&alice(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+			sig::<Test>(
+				&alice(),
+				&get_multi_address_account_id(42).to_account_id_32().encode(),
+				&[][..]
+			)
 		));
 		assert_noop!(
 			ClaimsPallet::claim(
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(42)),
 				None,
-				sig::<Test>(&dave(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+				sig::<Test>(
+					&dave(),
+					&get_multi_address_account_id(42).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			Error::<Test>::InvalidStatement,
 		);
@@ -189,7 +209,11 @@ fn claiming_does_not_bypass_signing() {
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(42)),
 				None,
-				sig::<Test>(&eve(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+				sig::<Test>(
+					&eve(),
+					&get_multi_address_account_id(42).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			Error::<Test>::InvalidStatement,
 		);
@@ -197,7 +221,11 @@ fn claiming_does_not_bypass_signing() {
 			RuntimeOrigin::none(),
 			Some(get_multi_address_account_id(42)),
 			None,
-			sig::<Test>(&frank(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+			sig::<Test>(
+				&frank(),
+				&get_multi_address_account_id(42).to_account_id_32().encode(),
+				&[][..]
+			)
 		));
 	});
 }
@@ -206,7 +234,7 @@ fn claiming_does_not_bypass_signing() {
 fn attest_claiming_works() {
 	new_test_ext().execute_with(|| {
 		assert_eq!(Balances::free_balance(get_multi_address_account_id(42).to_account_id_32()), 0);
-		let data = Some(get_multi_address_account_id(42)).encode();
+		let data = get_multi_address_account_id(42).to_account_id_32().encode();
 		let s = sig::<Test>(&dave(), &data, StatementKind::Safe.to_text());
 		let r = ClaimsPallet::claim_attest(
 			RuntimeOrigin::none(),
@@ -230,7 +258,7 @@ fn attest_claiming_works() {
 
 		let s = sig::<Test>(
 			&dave(),
-			&Some(get_multi_address_account_id(42)).encode(),
+			&get_multi_address_account_id(42).to_account_id_32().encode(),
 			StatementKind::Regular.to_text(),
 		);
 		assert_ok!(ClaimsPallet::claim_attest(
@@ -248,7 +276,7 @@ fn attest_claiming_works() {
 
 		let s = sig::<Test>(
 			&dave(),
-			&Some(get_multi_address_account_id(42)).encode(),
+			&get_multi_address_account_id(42).to_account_id_32().encode(),
 			StatementKind::Regular.to_text(),
 		);
 		let r = ClaimsPallet::claim_attest(
@@ -266,7 +294,11 @@ fn attest_claiming_works() {
 fn cannot_bypass_attest_claiming() {
 	new_test_ext().execute_with(|| {
 		assert_eq!(Balances::free_balance(get_multi_address_account_id(42).to_account_id_32()), 0);
-		let s = sig::<Test>(&dave(), &Some(get_multi_address_account_id(42)).encode(), &[]);
+		let s = sig::<Test>(
+			&dave(),
+			&get_multi_address_account_id(42).to_account_id_32().encode(),
+			&[],
+		);
 		let r = ClaimsPallet::claim(
 			RuntimeOrigin::none(),
 			Some(get_multi_address_account_id(42)),
@@ -296,7 +328,11 @@ fn add_claim_works() {
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(69)),
 				None,
-				sig::<Test>(&bob(), &Some(get_multi_address_account_id(69)).encode(), &[][..])
+				sig::<Test>(
+					&bob(),
+					&get_multi_address_account_id(69).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			Error::<Test>::SignerHasNoClaim,
 		);
@@ -306,7 +342,11 @@ fn add_claim_works() {
 			RuntimeOrigin::none(),
 			Some(get_multi_address_account_id(69)),
 			None,
-			sig::<Test>(&bob(), &Some(get_multi_address_account_id(69)).encode(), &[][..])
+			sig::<Test>(
+				&bob(),
+				&get_multi_address_account_id(69).to_account_id_32().encode(),
+				&[][..]
+			)
 		));
 		assert_eq!(
 			Balances::free_balance(get_multi_address_account_id(69).to_account_id_32()),
@@ -339,7 +379,11 @@ fn add_claim_with_vesting_works() {
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(69)),
 				None,
-				sig::<Test>(&bob(), &Some(get_multi_address_account_id(69)).encode(), &[][..])
+				sig::<Test>(
+					&bob(),
+					&get_multi_address_account_id(69).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			Error::<Test>::SignerHasNoClaim,
 		);
@@ -354,7 +398,11 @@ fn add_claim_with_vesting_works() {
 			RuntimeOrigin::none(),
 			Some(get_multi_address_account_id(69)),
 			None,
-			sig::<Test>(&bob(), &Some(get_multi_address_account_id(69)).encode(), &[][..])
+			sig::<Test>(
+				&bob(),
+				&get_multi_address_account_id(69).to_account_id_32().encode(),
+				&[][..]
+			)
 		));
 		assert_eq!(
 			Balances::free_balance(get_multi_address_account_id(69).to_account_id_32()),
@@ -394,7 +442,7 @@ fn add_claim_with_statement_works() {
 		assert_eq!(Balances::free_balance(get_multi_address_account_id(42).to_account_id_32()), 0);
 		let signature = sig::<Test>(
 			&bob(),
-			&Some(get_multi_address_account_id(69)).encode(),
+			&get_multi_address_account_id(69).to_account_id_32().encode(),
 			StatementKind::Regular.to_text(),
 		);
 
@@ -448,7 +496,11 @@ fn origin_signed_claiming_fail() {
 				RuntimeOrigin::signed(get_multi_address_account_id(42).to_account_id_32()),
 				Some(get_multi_address_account_id(42)),
 				None,
-				sig::<Test>(&alice(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+				sig::<Test>(
+					&alice(),
+					&get_multi_address_account_id(42).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			sp_runtime::traits::BadOrigin,
 		);
@@ -463,14 +515,22 @@ fn double_claiming_doesnt_work() {
 			RuntimeOrigin::none(),
 			Some(get_multi_address_account_id(42)),
 			None,
-			sig::<Test>(&alice(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+			sig::<Test>(
+				&alice(),
+				&get_multi_address_account_id(42).to_account_id_32().encode(),
+				&[][..]
+			)
 		));
 		assert_noop!(
 			ClaimsPallet::claim(
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(42)),
 				None,
-				sig::<Test>(&alice(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+				sig::<Test>(
+					&alice(),
+					&get_multi_address_account_id(42).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			Error::<Test>::SignerHasNoClaim
 		);
@@ -511,7 +571,11 @@ fn claiming_while_vested_doesnt_work() {
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(69)),
 				None,
-				sig::<Test>(&bob(), &Some(get_multi_address_account_id(69)).encode(), &[][..])
+				sig::<Test>(
+					&bob(),
+					&get_multi_address_account_id(69).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			Error::<Test>::VestedBalanceExists,
 		);
@@ -527,7 +591,11 @@ fn non_sender_sig_doesnt_work() {
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(42)),
 				None,
-				sig::<Test>(&alice(), &Some(get_multi_address_account_id(69)).encode(), &[][..])
+				sig::<Test>(
+					&alice(),
+					&get_multi_address_account_id(69).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			Error::<Test>::SignerHasNoClaim
 		);
@@ -543,7 +611,11 @@ fn non_claimant_doesnt_work() {
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(42)),
 				None,
-				sig::<Test>(&bob(), &Some(get_multi_address_account_id(69)).encode(), &[][..])
+				sig::<Test>(
+					&bob(),
+					&get_multi_address_account_id(69).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			Error::<Test>::SignerHasNoClaim
 		);
@@ -576,7 +648,7 @@ fn validate_unsigned_works() {
 					signer: None,
 					signature: sig::<Test>(
 						&alice(),
-						&Some(get_multi_address_account_id(1)).encode(),
+						&get_multi_address_account_id(1).to_account_id_32().encode(),
 						&[][..]
 					)
 				}
@@ -608,7 +680,7 @@ fn validate_unsigned_works() {
 					signer: None,
 					signature: sig::<Test>(
 						&bob(),
-						&Some(get_multi_address_account_id(1)).encode(),
+						&get_multi_address_account_id(1).to_account_id_32().encode(),
 						&[][..]
 					)
 				}
@@ -617,7 +689,7 @@ fn validate_unsigned_works() {
 		);
 		let s = sig::<Test>(
 			&dave(),
-			&Some(get_multi_address_account_id(1)).encode(),
+			&get_multi_address_account_id(1).to_account_id_32().encode(),
 			StatementKind::Regular.to_text(),
 		);
 		let call = ClaimsCall::claim_attest {
@@ -651,7 +723,7 @@ fn validate_unsigned_works() {
 
 		let s = sig::<Test>(
 			&bob(),
-			&Some(get_multi_address_account_id(1)).encode(),
+			&get_multi_address_account_id(1).to_account_id_32().encode(),
 			StatementKind::Regular.to_text(),
 		);
 		let call = ClaimsCall::claim_attest {
@@ -667,7 +739,7 @@ fn validate_unsigned_works() {
 
 		let s = sig::<Test>(
 			&dave(),
-			&Some(get_multi_address_account_id(1)).encode(),
+			&get_multi_address_account_id(1).to_account_id_32().encode(),
 			StatementKind::Safe.to_text(),
 		);
 		let call = ClaimsCall::claim_attest {
@@ -683,7 +755,7 @@ fn validate_unsigned_works() {
 
 		let s = sig::<Test>(
 			&dave(),
-			&Some(get_multi_address_account_id(1)).encode(),
+			&get_multi_address_account_id(1).to_account_id_32().encode(),
 			StatementKind::Safe.to_text(),
 		);
 		let call = ClaimsCall::claim_attest {
@@ -708,7 +780,11 @@ fn test_unclaimed_returned_to_destination() {
 			RuntimeOrigin::none(),
 			Some(get_multi_address_account_id(42)),
 			None,
-			sig::<Test>(&alice(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+			sig::<Test>(
+				&alice(),
+				&get_multi_address_account_id(42).to_account_id_32().encode(),
+				&[][..]
+			)
 		));
 		assert_eq!(Total::<Test>::get(), original_total_claims - claim_of_alice);
 
@@ -735,7 +811,11 @@ fn test_unclaimed_returned_to_destination() {
 				RuntimeOrigin::none(),
 				Some(get_multi_address_account_id(42)),
 				None,
-				sig::<Test>(&frank(), &Some(get_multi_address_account_id(42)).encode(), &[][..])
+				sig::<Test>(
+					&frank(),
+					&get_multi_address_account_id(42).to_account_id_32().encode(),
+					&[][..]
+				)
 			),
 			Error::<Test>::PotUnderflow
 		);
@@ -753,7 +833,7 @@ fn test_claim_from_substrate_address_to_evm() {
 			Some(sr25519_utils::sub(&alice_sr25519())),
 			sr25519_utils::sig::<Test>(
 				&alice_sr25519(),
-				&Some(get_multi_address_account_id(42)).encode(),
+				&get_multi_address_account_id(42).to_account_id_32().encode(),
 				&[][..]
 			)
 		));
@@ -770,7 +850,7 @@ fn test_claim_from_substrate_address_to_evm() {
 				None,
 				sr25519_utils::sig::<Test>(
 					&bob_sr25519(),
-					&Some(get_multi_address_account_id(42)).encode(),
+					&get_multi_address_account_id(42).to_account_id_32().encode(),
 					&[][..]
 				)
 			),
@@ -801,7 +881,7 @@ fn test_claim_from_substrate_address_to_evm() {
 				Some(sr25519_utils::sub(&bob_sr25519())),
 				sr25519_utils::sig::<Test>(
 					&bob_sr25519(),
-					&Some(get_multi_address_account_id(42)).encode(),
+					&get_multi_address_account_id(42).to_account_id_32().encode(),
 					&[][..]
 				)
 			),
@@ -821,7 +901,7 @@ fn test_double_claim_fails_for_substrate_account() {
 			Some(sr25519_utils::sub(&alice_sr25519())),
 			sr25519_utils::sig::<Test>(
 				&alice_sr25519(),
-				&Some(get_multi_address_account_id(42)).encode(),
+				&get_multi_address_account_id(42).to_account_id_32().encode(),
 				&[][..]
 			)
 		));
@@ -838,7 +918,7 @@ fn test_double_claim_fails_for_substrate_account() {
 				Some(sr25519_utils::sub(&alice_sr25519())),
 				sr25519_utils::sig::<Test>(
 					&alice_sr25519(),
-					&Some(get_multi_address_account_id(42)).encode(),
+					&get_multi_address_account_id(42).to_account_id_32().encode(),
 					&[][..]
 				)
 			),
