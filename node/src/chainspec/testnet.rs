@@ -36,9 +36,9 @@ use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::types::BlockNumber;
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
-	ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxNominations, MaxVestingSchedules,
-	Perbill, RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig,
-	SudoConfig, SystemConfig, TreasuryPalletId, UNIT, WASM_BINARY,
+	ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill,
+	RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
+	SystemConfig, TreasuryPalletId, UNIT, WASM_BINARY,
 };
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
@@ -93,7 +93,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
-	properties.insert("ss58Format".into(), 42.into());
+	properties.insert("ss58Format".into(), tangle_primitives::TESTNET_SS58_PREFIX.into());
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -124,11 +124,8 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Eve"),
 				],
 				chain_id,
-				combine_distributions(vec![
-					develop::get_evm_balance_distribution(),
-					testnet::get_evm_balance_distribution(),
-				]),
-				testnet::get_substrate_balance_distribution(),
+				vec![],
+				vec![],
 				true,
 			)
 		},
@@ -153,12 +150,12 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
-	properties.insert("ss58Format".into(), 42.into());
+	properties.insert("ss58Format".into(), tangle_primitives::TESTNET_SS58_PREFIX.into());
 
 	Ok(ChainSpec::from_genesis(
-		"Tangle Standalone Testnet",
+		"Tangle Testnet",
 		"tangle-testnet",
-		ChainType::Development,
+		ChainType::Live,
 		move || {
 			testnet_genesis(
 				wasm_binary,
@@ -225,7 +222,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 fn testnet_genesis(
 	wasm_binary: &[u8],
 	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
-	initial_nominators: Vec<AccountId>,
+	_initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
 	chain_id: u64,
@@ -237,22 +234,12 @@ fn testnet_genesis(
 	const STASH: Balance = ENDOWMENT / 100;
 
 	// stakers: all validators and nominators.
-	let mut rng = rand::thread_rng();
+	let _rng = rand::thread_rng();
+	// stakers: all validators and nominators.
 	let stakers = initial_authorities
 		.iter()
-		.map(|x| (x.0.clone(), x.0.clone(), STASH, StakerStatus::Validator))
-		.chain(initial_nominators.iter().map(|x| {
-			use rand::{seq::SliceRandom, Rng};
-			let limit = (MaxNominations::get() as usize).min(initial_authorities.len());
-			let count = rng.gen::<usize>() % limit;
-			let nominations = initial_authorities
-				.as_slice()
-				.choose_multiple(&mut rng, count)
-				.map(|choice| choice.0.clone())
-				.collect::<Vec<_>>();
-			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
-		}))
-		.collect::<Vec<_>>();
+		.map(|x| (x.0.clone(), x.0.clone(), UNIT, StakerStatus::Validator))
+		.collect();
 
 	let num_endowed_accounts = endowed_accounts.len();
 	let claims: Vec<(MultiAddress, Balance, Option<StatementKind>)> = endowed_accounts
