@@ -16,7 +16,26 @@
 use std::str::FromStr;
 
 use fp_evm::GenesisAccount;
+use pallet_airdrop_claims::MultiAddress;
 use sp_core::{H160, U256};
+use tangle_primitives::Balance;
+
+pub fn get_evm_claims() -> Vec<(MultiAddress, Balance)> {
+	vec![
+		// Test account with a simple menmonic
+		// Mnemonic: "test test test test test test test test test test test junk"
+		// Path: m/44'/60'/0'/0/0
+		// Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+		(
+			MultiAddress::EVM(
+				H160::from_str("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+					.expect("internal H160 is valid; qed")
+					.into(),
+			),
+			1_000_000_000_000_000_000_000_000u128,
+		),
+	]
+}
 
 pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 	vec![

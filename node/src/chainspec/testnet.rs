@@ -129,6 +129,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					testnet::get_evm_balance_distribution(),
 				]),
 				testnet::get_substrate_balance_distribution(),
+				develop::get_evm_claims(),
 				true,
 			)
 		},
@@ -202,6 +203,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					testnet::get_evm_balance_distribution(),
 				]),
 				testnet::get_substrate_balance_distribution(),
+				vec![],
 				true,
 			)
 		},
@@ -231,6 +233,7 @@ fn testnet_genesis(
 	chain_id: u64,
 	genesis_evm_distribution: Vec<(H160, fp_evm::GenesisAccount)>,
 	genesis_substrate_distribution: Vec<(AccountId, Balance)>,
+	claims: Vec<(MultiAddress, Balance)>,
 	_enable_println: bool,
 ) -> RuntimeGenesisConfig {
 	const ENDOWMENT: Balance = 10_000_000 * UNIT;
@@ -258,6 +261,7 @@ fn testnet_genesis(
 	let claims: Vec<(MultiAddress, Balance, Option<StatementKind>)> = endowed_accounts
 		.iter()
 		.map(|x| (MultiAddress::Native(x.clone()), ENDOWMENT, Some(StatementKind::Regular)))
+		.chain(claims.into_iter().map(|(a, b)| (a, b, Some(StatementKind::Regular))))
 		.collect();
 	let vesting_claims: Vec<(
 		MultiAddress,
