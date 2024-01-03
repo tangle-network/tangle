@@ -559,14 +559,11 @@ impl<T: Config> Pallet<T> {
 	// Constructs the message that PolkadotJS would sign.
 	fn polkadotjs_signable_message(what: &[u8], extra: &[u8]) -> Vec<u8> {
 		let mut v = Vec::new();
-		let polkadotjs_prefix = b"<Bytes>";
-		let polkadotjs_suffix = b"</Bytes>";
 		let prefix = T::Prefix::get();
-		v.extend_from_slice(polkadotjs_prefix);
+
 		v.extend_from_slice(prefix);
 		v.extend_from_slice(what);
 		v.extend_from_slice(extra);
-		v.extend_from_slice(polkadotjs_suffix);
 		v
 	}
 
@@ -579,6 +576,7 @@ impl<T: Config> Pallet<T> {
 		extra: &[u8],
 	) -> Option<MultiAddress> {
 		let msg = keccak_256(&Self::polkadotjs_signable_message(what, extra));
+
 		let public: Public = match addr.clone() {
 			MultiAddress::EVM(_) => return None,
 			MultiAddress::Native(a) => {
@@ -587,9 +585,25 @@ impl<T: Config> Pallet<T> {
 				Public(bytes)
 			},
 		};
+
 		match sr25519_verify(&s.0, &msg, &public) {
 			true => Some(addr),
-			false => None,
+			false => {
+				// If the signature verification fails, we try to wrap the hashed msg in a
+				// `<Bytes></Bytes>` tag and try again.
+				let polkadotjs_prefix = b"<Bytes>";
+				let polkadotjs_suffix = b"</Bytes>";
+
+				let mut wrapped_msg = Vec::new();
+				wrapped_msg.extend_from_slice(polkadotjs_prefix);
+				wrapped_msg.extend_from_slice(&msg);
+				wrapped_msg.extend_from_slice(polkadotjs_suffix);
+
+				match sr25519_verify(&s.0, &wrapped_msg, &public) {
+					true => Some(addr),
+					false => None,
+				}
+			},
 		}
 	}
 
