@@ -323,12 +323,7 @@ pub mod pallet {
 			signature: MultiAddressSignature,
 		) -> DispatchResult {
 			ensure_none(origin)?;
-			let data = match dest {
-				Some(MultiAddress::EVM(ref evm)) => evm.using_encoded(to_ascii_hex),
-				Some(MultiAddress::Native(ref native)) => native.using_encoded(to_ascii_hex),
-				// no dest, no data.
-				None => Vec::new(),
-			};
+			let data = dest.as_ref().map(Self::encode_multi_address).unwrap_or_default();
 			let signer = Self::get_signer_multi_address(signer.clone(), signature, data, vec![])?;
 			ensure!(Signing::<T>::get(&signer).is_none(), Error::<T>::InvalidStatement);
 			Self::process_claim(signer, dest)?;
@@ -411,12 +406,7 @@ pub mod pallet {
 			statement: Vec<u8>,
 		) -> DispatchResult {
 			ensure_none(origin)?;
-			let data = match dest {
-				Some(MultiAddress::EVM(ref evm)) => evm.using_encoded(to_ascii_hex),
-				Some(MultiAddress::Native(ref native)) => native.using_encoded(to_ascii_hex),
-				// no dest, no data.
-				None => Vec::new(),
-			};
+			let data = dest.as_ref().map(Self::encode_multi_address).unwrap_or_default();
 			let signer =
 				Self::get_signer_multi_address(signer.clone(), signature, data, statement.clone())?;
 			if let Some(s) = Signing::<T>::get(signer.clone()) {
@@ -468,13 +458,7 @@ pub mod pallet {
 				// The weight of this logic is included in the `claim` dispatchable.
 				// </weight>
 				Call::claim { dest: account, signer, signature } => {
-					let data = match account {
-						Some(MultiAddress::EVM(ref evm)) => evm.using_encoded(to_ascii_hex),
-						Some(MultiAddress::Native(ref native)) =>
-							native.using_encoded(to_ascii_hex),
-						// no dest, no data.
-						None => Vec::new(),
-					};
+					let data = account.as_ref().map(Self::encode_multi_address).unwrap_or_default();
 					match Self::get_signer_multi_address(
 						signer.clone(),
 						signature.clone(),
@@ -489,13 +473,7 @@ pub mod pallet {
 				// The weight of this logic is included in the `claim_attest` dispatchable.
 				// </weight>
 				Call::claim_attest { dest: account, signer, signature, statement } => {
-					let data = match account {
-						Some(MultiAddress::EVM(ref evm)) => evm.using_encoded(to_ascii_hex),
-						Some(MultiAddress::Native(ref native)) =>
-							native.using_encoded(to_ascii_hex),
-						// no dest, no data.
-						None => Vec::new(),
-					};
+					let data = account.as_ref().map(Self::encode_multi_address).unwrap_or_default();
 					match Self::get_signer_multi_address(
 						signer.clone(),
 						signature.clone(),
@@ -545,7 +523,13 @@ fn to_ascii_hex(data: &[u8]) -> Vec<u8> {
 }
 
 impl<T: Config> Pallet<T> {
-	// Constructs the message that Ethereum RPC's `personal_sign` and `eth_sign` would sign.
+	fn encode_multi_address(multi_address: &MultiAddress) -> Vec<u8> {
+		match multi_address {
+			MultiAddress::EVM(ref address) => address.using_encoded(to_ascii_hex),
+			MultiAddress::Native(ref address) => address.using_encoded(to_ascii_hex),
+		}
+	}
+	/// Constructs the message that Ethereum RPC's `personal_sign` and `eth_sign` would sign.
 	fn ethereum_signable_message(what: &[u8], extra: &[u8]) -> Vec<u8> {
 		let prefix = T::Prefix::get();
 		let mut l = prefix.len() + what.len() + extra.len();
