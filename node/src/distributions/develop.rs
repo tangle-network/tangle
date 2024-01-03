@@ -18,9 +18,10 @@ use std::str::FromStr;
 use fp_evm::GenesisAccount;
 use pallet_airdrop_claims::MultiAddress;
 use sp_core::{H160, U256};
+use sp_runtime::AccountId32;
 use tangle_primitives::Balance;
 
-pub fn get_evm_claims() -> Vec<(MultiAddress, Balance)> {
+pub fn get_local_claims() -> Vec<(MultiAddress, Balance)> {
 	vec![
 		// Test account with a simple menmonic
 		// Mnemonic: "test test test test test test test test test test test junk"
@@ -30,6 +31,30 @@ pub fn get_evm_claims() -> Vec<(MultiAddress, Balance)> {
 			MultiAddress::EVM(
 				H160::from_str("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 					.expect("internal H160 is valid; qed")
+					.into(),
+			),
+			1_000_000_000_000_000_000_000_000u128,
+		),
+		(
+			MultiAddress::EVM(
+				H160::from_str("2DFA35bd8C59C38FB3eC4e71b0106160E130A40E")
+					.expect("internal H160 is valid; qed")
+					.into(),
+			),
+			1_000_000_000_000_000_000_000_000u128,
+		),
+		(
+			MultiAddress::Native(
+				AccountId32::from_str("5EbkKKTdRJzP1j3aM3S7q178du6tW7ZVWK9Dtjx9CbTFEpGf")
+					.expect("internal AccountId32 is valid; qed")
+					.into(),
+			),
+			1_000_000_000_000_000_000_000_000u128,
+		),
+		(
+			MultiAddress::Native(
+				AccountId32::from_str("5DLXgUoVVeCZKHduaVhkH4RvLcyG1GdQwLqYLd4aFuYX1qve")
+					.expect("internal AccountId32 is valid; qed")
 					.into(),
 			),
 			1_000_000_000_000_000_000_000_000u128,

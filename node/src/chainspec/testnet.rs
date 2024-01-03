@@ -129,7 +129,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					testnet::get_evm_balance_distribution(),
 				]),
 				testnet::get_substrate_balance_distribution(),
-				develop::get_evm_claims(),
+				develop::get_local_claims(),
 				true,
 			)
 		},
@@ -258,11 +258,13 @@ fn testnet_genesis(
 		.collect::<Vec<_>>();
 
 	let num_endowed_accounts = endowed_accounts.len();
-	let claims: Vec<(MultiAddress, Balance, Option<StatementKind>)> = endowed_accounts
+
+	let claims_list: Vec<(MultiAddress, Balance, Option<StatementKind>)> = endowed_accounts
 		.iter()
 		.map(|x| (MultiAddress::Native(x.clone()), ENDOWMENT, Some(StatementKind::Regular)))
-		.chain(claims.into_iter().map(|(a, b)| (a, b, Some(StatementKind::Regular))))
+		.chain(claims.clone().into_iter().map(|(a, b)| (a, b, Some(StatementKind::Regular))))
 		.collect();
+
 	let vesting_claims: Vec<(
 		MultiAddress,
 		BoundedVec<(Balance, Balance, BlockNumber), MaxVestingSchedules>,
@@ -273,6 +275,11 @@ fn testnet_genesis(
 			bounded_vec.try_push((ENDOWMENT, ENDOWMENT, 0)).unwrap();
 			(MultiAddress::Native(x.clone()), bounded_vec)
 		})
+		.chain(claims.into_iter().map(|(a, b)| {
+			let mut bounded_vec = BoundedVec::new();
+			bounded_vec.try_push((b, b, 0)).unwrap();
+			(a, bounded_vec)
+		}))
 		.collect();
 
 	RuntimeGenesisConfig {
@@ -355,7 +362,7 @@ fn testnet_genesis(
 			phantom: PhantomData,
 		},
 		claims: ClaimsConfig {
-			claims,
+			claims: claims_list,
 			vesting: vesting_claims,
 			expiry: Some((
 				200u64,
