@@ -73,9 +73,9 @@ impl SubstrateCli for Cli {
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
 		Ok(match id {
-			"" | "dev" | "local" => Box::new(chainspec::testnet::local_testnet_config(4006)?),
+			"" | "dev" | "local" => Box::new(chainspec::testnet::local_testnet_config(4007)?),
 			// generates the spec for testnet
-			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(4006)?),
+			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(4007)?),
 			"tangle-testnet" => Box::new(chainspec::testnet::ChainSpec::from_json_bytes(
 				&include_bytes!("../../chainspecs/testnet/tangle-standalone.json")[..],
 			)?),
