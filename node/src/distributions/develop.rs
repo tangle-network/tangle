@@ -46,16 +46,14 @@ pub fn get_local_claims() -> Vec<(MultiAddress, Balance)> {
 		(
 			MultiAddress::Native(
 				AccountId32::from_str("5EbkKKTdRJzP1j3aM3S7q178du6tW7ZVWK9Dtjx9CbTFEpGf")
-					.expect("internal AccountId32 is valid; qed")
-					.into(),
+					.expect("internal AccountId32 is valid; qed"),
 			),
 			1_000_000_000_000_000_000_000_000u128,
 		),
 		(
 			MultiAddress::Native(
 				AccountId32::from_str("5DLXgUoVVeCZKHduaVhkH4RvLcyG1GdQwLqYLd4aFuYX1qve")
-					.expect("internal AccountId32 is valid; qed")
-					.into(),
+					.expect("internal AccountId32 is valid; qed"),
 			),
 			1_000_000_000_000_000_000_000_000u128,
 		),
