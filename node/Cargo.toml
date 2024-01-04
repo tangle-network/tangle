@@ -1,5 +1,7 @@
 [package]
 name = "tangle"
+build = "build.rs"
+description = "Tangle chain node"
 version = { workspace = true }
 authors = { workspace = true }
 build = "build.rs"

@@ -280,3 +280,11 @@ pub const MAXIMUM_BLOCK_WEIGHT: Weight =
 	Weight::from_parts(WEIGHT_MILLISECS_PER_BLOCK * WEIGHT_REF_TIME_PER_MILLIS, u64::MAX);
 
 pub use sp_consensus_babe::AuthorityId as BabeId;
+
+// 5845 this would give us addresses with tg prefix for mainnet like
+// tgGmBRR5yM53bvq8tTzgsUirpPtfCXngYYU7uiihmWFJhmYGM
+pub const MAINNET_SS58_PREFIX: u16 = 5845;
+
+// 3799 this would give us addresses with  tt prefix for testnet like
+// ttFELSU4MTyzpfsgZ9tFinrmox7pV7nF1BLbfYjsu4rfDYM74
+pub const TESTNET_SS58_PREFIX: u16 = 3799;
