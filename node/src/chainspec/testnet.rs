@@ -124,8 +124,12 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Eve"),
 				],
 				chain_id,
-				vec![],
-				vec![],
+				combine_distributions(vec![
+					develop::get_evm_balance_distribution(),
+					testnet::get_evm_balance_distribution(),
+				]),
+				testnet::get_substrate_balance_distribution(),
+				develop::get_local_claims(),
 				true,
 			)
 		},
@@ -199,6 +203,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					testnet::get_evm_balance_distribution(),
 				]),
 				testnet::get_substrate_balance_distribution(),
+				vec![],
 				true,
 			)
 		},
@@ -228,6 +233,7 @@ fn testnet_genesis(
 	chain_id: u64,
 	genesis_evm_distribution: Vec<(H160, fp_evm::GenesisAccount)>,
 	genesis_substrate_distribution: Vec<(AccountId, Balance)>,
+	claims: Vec<(MultiAddress, Balance)>,
 	_enable_println: bool,
 ) -> RuntimeGenesisConfig {
 	const ENDOWMENT: Balance = 10_000_000 * UNIT;
@@ -242,10 +248,13 @@ fn testnet_genesis(
 		.collect();
 
 	let num_endowed_accounts = endowed_accounts.len();
-	let claims: Vec<(MultiAddress, Balance, Option<StatementKind>)> = endowed_accounts
+
+	let claims_list: Vec<(MultiAddress, Balance, Option<StatementKind>)> = endowed_accounts
 		.iter()
 		.map(|x| (MultiAddress::Native(x.clone()), ENDOWMENT, Some(StatementKind::Regular)))
+		.chain(claims.clone().into_iter().map(|(a, b)| (a, b, Some(StatementKind::Regular))))
 		.collect();
+
 	let vesting_claims: Vec<(
 		MultiAddress,
 		BoundedVec<(Balance, Balance, BlockNumber), MaxVestingSchedules>,
@@ -256,6 +265,11 @@ fn testnet_genesis(
 			bounded_vec.try_push((ENDOWMENT, ENDOWMENT, 0)).unwrap();
 			(MultiAddress::Native(x.clone()), bounded_vec)
 		})
+		.chain(claims.into_iter().map(|(a, b)| {
+			let mut bounded_vec = BoundedVec::new();
+			bounded_vec.try_push((b, b, 0)).unwrap();
+			(a, bounded_vec)
+		}))
 		.collect();
 
 	RuntimeGenesisConfig {
@@ -338,7 +352,7 @@ fn testnet_genesis(
 			phantom: PhantomData,
 		},
 		claims: ClaimsConfig {
-			claims,
+			claims: claims_list,
 			vesting: vesting_claims,
 			expiry: Some((
 				200u64,

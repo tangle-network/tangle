@@ -165,45 +165,6 @@ pub fn get_leaderboard_balance_distribution() -> DistributionResult {
 	)
 }
 
-/// Used for testing purposes
-///
-/// DO NOT USE IN MAINNET
-pub fn get_local_balance_distribution() -> DistributionResult {
-	let list = vec![
-		// Test account with a simple menmonic
-		// Mnemonic: "test test test test test test test test test test test junk"
-		// Path: m/44'/60'/0'/0/0
-		// Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-		H160::from_str("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-			.expect("internal H160 is valid; qed"),
-		// Test account with a simple menmonic
-		// Mnemonic: "test test test test test test test test test test test junk"
-		// Path: m/44'/60'/0'/0/1
-		// Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-		H160::from_str("70997970C51812dc3A010C7d01b50e0d17dc79C8")
-			.expect("internal H160 is valid; qed"),
-		// H160 address of Alice dev account
-		// Derived from SS58 (42 prefix) address
-		// SS58: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
-		// hex: 0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d
-		// Using the full hex key, truncating to the first 20 bytes (the first 40 hex
-		// chars)
-		H160::from_str("d43593c715fdd31c61141abd04a99fd6822c8558")
-			.expect("internal H160 is valid; qed"),
-	];
-	let endowment = ONE_PERCENT_TOTAL_SUPPLY / list.len() as u128;
-	let local_list: Vec<(MultiAddress, u128)> = list
-		.into_iter()
-		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), endowment))
-		.collect();
-	get_distribution_for(
-		local_list,
-		Some(StatementKind::Regular),
-		ONE_MONTH_BLOCKS,
-		TWO_YEARS_BLOCKS,
-	)
-}
-
 pub fn get_substrate_balance_distribution() -> DistributionResult {
 	let arr = get_edgeware_snapshot_list()
 		.into_iter()
