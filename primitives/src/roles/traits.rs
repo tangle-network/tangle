@@ -14,11 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-	jobs::{JobKey, ReportValidatorOffence},
-	roles::RoleTypeMetadata,
-};
+use crate::{jobs::ReportValidatorOffence, roles::RoleTypeMetadata};
 use sp_runtime::DispatchResult;
+
+use super::RoleType;
 
 /// A trait that handles roles associated with job types.
 pub trait RolesHandler<AccountId> {
@@ -27,12 +26,12 @@ pub trait RolesHandler<AccountId> {
 	/// # Parameters
 	///
 	/// - `address`: The account ID of the validator.
-	/// - `job_key`: The type of job
+	/// - `role_type`: The type of role.
 	///
 	/// # Returns
 	///
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	fn is_validator(address: AccountId, job_key: JobKey) -> bool;
+	fn is_validator(address: AccountId, role_type: RoleType) -> bool;
 
 	/// Report offence for the given validator.
 	/// This function will report validators for committing offence.
@@ -50,11 +49,11 @@ pub trait RolesHandler<AccountId> {
 	/// # Arguments
 	///
 	/// * `address` - The account ID of the validator for which metadata is to be retrieved.
-	/// * `job_key` - The unique identifier for the job associated with the validator.
+	/// * `role_type` - The role data associated with the validator.
 	///
 	/// # Returns
 	///
 	/// Returns an `Option<RoleTypeMetadata>` containing metadata information for the specified
 	/// validator, or `None` if no metadata is found.
-	fn get_validator_metadata(address: AccountId, job_key: JobKey) -> Option<RoleTypeMetadata>;
+	fn get_validator_metadata(address: AccountId, role_type: RoleType) -> Option<RoleTypeMetadata>;
 }

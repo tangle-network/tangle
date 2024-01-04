@@ -49,7 +49,7 @@ use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
 use sp_runtime::traits::{Dispatchable, StaticLookup};
 use sp_std::{convert::TryInto, marker::PhantomData, vec, vec::Vec};
-use tangle_primitives::WrappedAccountId32;
+use tangle_primitives::types::WrappedAccountId32;
 
 type BalanceOf<Runtime> = <<Runtime as pallet_staking::Config>::Currency as Currency<
 	<Runtime as frame_system::Config>::AccountId,

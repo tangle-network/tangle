@@ -321,7 +321,7 @@ fn test_report_offence_should_work() {
 		let offence_report = ReportValidatorOffence {
 			session_index,
 			validator_set_count: 4,
-			role_type: RoleType::Tss,
+			role_type: RoleType::Tss(Default::default()),
 			offence_type: tangle_primitives::jobs::ValidatorOffenceType::Inactivity,
 			offenders: vec![mock_pub_key(1)],
 		};

@@ -33,7 +33,7 @@ use sp_runtime::{
 	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
 };
-use tangle_primitives::{BlockNumber, Signature};
+use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig,
 	Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig,
@@ -92,7 +92,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "TNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
-	properties.insert("ss58Format".into(), 4006.into());
+	properties.insert("ss58Format".into(), tangle_primitives::MAINNET_SS58_PREFIX.into());
 
 	Ok(ChainSpec::from_genesis(
 		"Local Tangle Mainnet",
@@ -112,6 +112,9 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
 					get_account_id_from_seed::<sr25519::Public>("Charlie"),
+					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
 				],
 				// Sudo account
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -151,7 +154,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "TNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
-	properties.insert("ss58Format".into(), 4006.into());
+	properties.insert("ss58Format".into(), tangle_primitives::MAINNET_SS58_PREFIX.into());
 
 	Ok(ChainSpec::from_genesis(
 		"Tangle Mainnet",
