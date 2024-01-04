@@ -1,7 +1,5 @@
 [package]
 name = "tangle"
-build = "build.rs"
-description = "Tangle chain node"
 version = { workspace = true }
 authors = { workspace = true }
 build = "build.rs"
@@ -9,7 +7,7 @@ edition = { workspace = true }
 homepage = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
-description = "Tangle Standalone chain node"
+description = "Tangle chain node"
 
 [package.metadata.wasm-pack.profile.release]
 # `wasm-opt` has some problems on linux, see
