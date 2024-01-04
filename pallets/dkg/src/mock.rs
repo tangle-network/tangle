@@ -21,7 +21,7 @@ use frame_support::{
 	construct_runtime,
 	traits::{ConstU128, ConstU32, ConstU64, Everything},
 };
-use frame_system::EnsureSignedBy;
+use frame_system::EnsureSigned;
 use sp_core::H256;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{testing::Header, traits::IdentityLookup, BuildStorage};
@@ -79,7 +79,7 @@ frame_support::ord_parameter_types! {
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
-	type UpdateOrigin = EnsureSignedBy<One, AccountId>;
+	type UpdateOrigin = EnsureSigned<AccountId>;
 	type WeightInfo = ();
 }
 

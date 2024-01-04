@@ -7,7 +7,7 @@ edition = { workspace = true }
 homepage = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
-description = "Tangle Chain node"
+description = "Tangle chain node"
 
 [package.metadata.wasm-pack.profile.release]
 # `wasm-opt` has some problems on linux, see
@@ -52,23 +52,29 @@ sc-service = { workspace = true }
 sc-telemetry = { workspace = true }
 sc-transaction-pool = { workspace = true }
 sp-consensus-babe = { workspace = true }
-sp-core = { workspace = true }
-sp-inherents = { workspace = true }
 sp-keyring = { workspace = true }
-sp-runtime = { workspace = true }
 sp-trie = { workspace = true }
 webb-consensus-types = { workspace = true }
 webb-proposals = { workspace = true }
 
-pallet-airdrop-claims = { workspace = true }
+sp-consensus-grandpa = { workspace = true, features = ["default"] }
+sp-core = { workspace = true, features = ["default"] }
+sp-inherents = { workspace = true, features = ["default"] }
+sp-offchain = { workspace = true, features = ["default"] }
+sp-runtime = { workspace = true, features = ["default"] }
+sp-session = { workspace = true, features = ["default"] }
+sp-state-machine = { workspace = true, features = ["default"] }
+sp-timestamp = { workspace = true, features = ["default"] }
+sp-transaction-pool = { workspace = true, features = ["default"] }
 pallet-jobs-rpc = { workspace = true }
+
+pallet-airdrop-claims = { workspace = true }
 sc-chain-spec = { workspace = true }
 sc-rpc = { workspace = true }
 sc-rpc-api = { workspace = true }
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
-sp-timestamp = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
 substrate-prometheus-endpoint = { workspace = true }
 
@@ -119,13 +125,20 @@ sp-statement-store = { workspace = true }
 sp-transaction-storage-proof = { workspace = true }
 substrate-state-trie-migration-rpc = { workspace = true }
 tangle-crypto-primitives = { workspace = true }
-tangle-primitives = { workspace = true }
-tangle-runtime = { workspace = true }
+tangle-primitives = { workspace = true, features = ["std"] }
+tangle-runtime = { workspace = true, features = ["std"] }
 tangle-testnet-runtime = { workspace = true, optional = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
-runtime-benchmarks = ["tangle-testnet-runtime/runtime-benchmarks"]
+runtime-benchmarks = [
+  "frame-benchmarking-cli/runtime-benchmarks",
+  "frame-benchmarking/runtime-benchmarks",
+  "frame-system/runtime-benchmarks",
+  "tangle-runtime/runtime-benchmarks",
+  "tangle-testnet-runtime?/runtime-benchmarks",
+  "sc-service/runtime-benchmarks",
+]
 with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-testnet-runtime/with-paritydb-weights"]
 rocksdb = [

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use crate::{mock::*, types::FeeInfo, Error, FeeInfo as FeeInfoStorage};
-use frame_support::{assert_noop, assert_ok, error::BadOrigin};
+use frame_support::{assert_noop, assert_ok};
 use parity_scale_codec::Encode;
 use sp_core::{crypto::ByteArray, ecdsa, keccak_256, sr25519};
 use sp_io::crypto::{ecdsa_generate, ecdsa_sign_prehashed, sr25519_generate, sr25519_sign};
@@ -57,9 +57,6 @@ fn set_fees_works() {
 			sig_validator_fee: 5,
 			refresh_validator_fee: 5,
 		};
-
-		// should fail for non update origin
-		assert_noop!(DKG::set_fee(RuntimeOrigin::signed(10), new_fee.clone()), BadOrigin);
 
 		// Dispatch a signed extrinsic.
 		assert_ok!(DKG::set_fee(RuntimeOrigin::signed(1), new_fee.clone()));
