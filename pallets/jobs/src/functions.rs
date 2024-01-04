@@ -268,7 +268,7 @@ impl<T: Config> Pallet<T> {
 		role_type: RoleType,
 		job_info: &JobInfoOf<T>,
 		info: DKGTSSKeySubmissionResult,
-	) -> Result<PhaseOneResultOf<T>, DispatchError> {
+	) -> Result<PhaseResultOf<T>, DispatchError> {
 		// sanity check, does job and result type match
 		ensure!(role_type.is_dkg_tss(), Error::<T>::ResultNotExpectedType);
 
@@ -300,7 +300,7 @@ impl<T: Config> Pallet<T> {
 			result: job_result,
 		})?;
 
-		let result = PhaseOneResult {
+		let result = PhaseResult {
 			owner: job_info.owner.clone(),
 			expiry: job_info.expiry,
 			job_type: job_info.job_type.clone(),
@@ -314,7 +314,7 @@ impl<T: Config> Pallet<T> {
 		role_type: RoleType,
 		job_info: &JobInfoOf<T>,
 		info: DKGTSSSignatureResult,
-	) -> DispatchResult {
+	) -> Result<PhaseResultOf<T>, DispatchError> {
 		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
 		ensure!(role_type.is_dkg_tss(), Error::<T>::ResultNotExpectedType);
@@ -347,7 +347,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
-			signature: info.signature,
+			signature: info.signature.clone(),
 			data: info.data,
 			signing_key: phase_one_result.result,
 			signature_type: info.signature_type,
@@ -363,7 +363,15 @@ impl<T: Config> Pallet<T> {
 			phase_one_job_type: Some(phase_one_job_info.job_type),
 			result: job_result,
 		})?;
-		Ok(())
+
+		let result = PhaseResult {
+			owner: job_info.owner.clone(),
+			expiry: job_info.expiry,
+			job_type: job_info.job_type.clone(),
+			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
+			result: info.signature,
+		};
+		Ok(result)
 	}
 
 	pub fn verify_zksaas_circuit_job_result(
@@ -371,7 +379,7 @@ impl<T: Config> Pallet<T> {
 		job_id: JobId,
 		job_info: &JobInfoOf<T>,
 		_info: ZkSaaSCircuitResult,
-	) -> Result<PhaseOneResultOf<T>, DispatchError> {
+	) -> Result<PhaseResultOf<T>, DispatchError> {
 		// sanity check, does job and result type match
 		ensure!(role_type.is_zksaas(), Error::<T>::ResultNotExpectedType);
 		// ensure the participants are the expected participants from job
@@ -404,7 +412,7 @@ impl<T: Config> Pallet<T> {
 			result: job_result,
 		})?;
 
-		let result = PhaseOneResult {
+		let result = PhaseResult {
 			owner: job_info.owner.clone(),
 			expiry: job_info.expiry,
 			job_type: job_info.job_type.clone(),
@@ -419,7 +427,7 @@ impl<T: Config> Pallet<T> {
 		role_type: RoleType,
 		job_info: &JobInfoOf<T>,
 		info: ZkSaaSProofResult,
-	) -> DispatchResult {
+	) -> Result<PhaseResultOf<T>, DispatchError> {
 		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
 		ensure!(role_type.is_zksaas(), Error::<T>::ResultNotExpectedType);
@@ -438,7 +446,7 @@ impl<T: Config> Pallet<T> {
 		// Validate existing result
 		ensure!(phase_one_result.expiry >= now, Error::<T>::ResultExpired);
 
-		let job_result = JobResult::ZkSaaSPhaseTwo(info);
+		let job_result = JobResult::ZkSaaSPhaseTwo(info.clone());
 
 		let phase_one_job_info = SubmittedJobs::<T>::get(
 			role_type,
@@ -450,6 +458,14 @@ impl<T: Config> Pallet<T> {
 			phase_one_job_type: Some(phase_one_job_info.job_type),
 			result: job_result,
 		})?;
-		Ok(())
+
+		let result = PhaseResult {
+			owner: job_info.owner.clone(),
+			expiry: job_info.expiry,
+			job_type: job_info.job_type.clone(),
+			result: info.proof(),
+			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
+		};
+		Ok(result)
 	}
 }
