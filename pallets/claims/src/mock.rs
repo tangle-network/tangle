@@ -108,7 +108,7 @@ impl Config for Test {
 	type Prefix = Prefix;
 	type MaxVestingSchedules = ConstU32<8>;
 	type MoveClaimOrigin = frame_system::EnsureSignedBy<Six, AccountId32>;
-	type WeightInfo = TestWeightInfo;
+	type WeightInfo = ();
 }
 
 pub fn run_to_block(n: u64) {
