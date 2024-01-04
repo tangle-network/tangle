@@ -253,8 +253,6 @@ pub struct RpcResponsePhaseOneResult<AccountId> {
 	pub owner: AccountId,
 	/// The type of the job result.
 	pub result: Vec<u8>,
-	/// permitted caller to use this result
-	pub permitted_caller: Option<AccountId>,
 	/// The type of the job submission.
 	pub job_type: JobType<AccountId>,
 }
