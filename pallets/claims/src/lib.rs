@@ -25,7 +25,8 @@ mod mock;
 mod tests;
 
 mod utils;
-
+mod weights;
+use weights::WeightInfo;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
@@ -36,7 +37,6 @@ pub use crate::utils::{
 use frame_support::{
 	ensure,
 	traits::{Currency, Get, VestingSchedule},
-	weights::Weight,
 };
 pub use pallet::*;
 use pallet_evm::AddressMapping;
@@ -78,33 +78,6 @@ type CurrencyOf<T> = <<T as Config>::VestingSchedule as VestingSchedule<
 	<T as frame_system::Config>::AccountId,
 >>::Currency;
 type BalanceOf<T> = <CurrencyOf<T> as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-
-pub trait WeightInfo {
-	fn claim() -> Weight;
-	fn mint_claim() -> Weight;
-	fn claim_attest() -> Weight;
-	fn attest() -> Weight;
-	fn move_claim() -> Weight;
-}
-
-pub struct TestWeightInfo;
-impl WeightInfo for TestWeightInfo {
-	fn claim() -> Weight {
-		Weight::from_parts(0, 0)
-	}
-	fn mint_claim() -> Weight {
-		Weight::from_parts(0, 0)
-	}
-	fn claim_attest() -> Weight {
-		Weight::from_parts(0, 0)
-	}
-	fn attest() -> Weight {
-		Weight::from_parts(0, 0)
-	}
-	fn move_claim() -> Weight {
-		Weight::from_parts(0, 0)
-	}
-}
 
 /// The kind of statement an account needs to make for a claim to be valid.
 #[derive(
@@ -162,7 +135,7 @@ pub mod pallet {
 		/// RuntimeOrigin permitted to call force_ extrinsics
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		type MaxVestingSchedules: Get<u32>;
-		type WeightInfo: WeightInfo;
+		type WeightInfo: weights::WeightInfo;
 	}
 
 	#[pallet::event]
@@ -314,7 +287,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight({0})]
+		#[pallet::weight(T::WeightInfo::claim())]
 		#[pallet::call_index(0)]
 		pub fn claim(
 			origin: OriginFor<T>,
@@ -345,7 +318,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight({1})]
+		#[pallet::weight(T::WeightInfo::mint_claim())]
 		#[pallet::call_index(1)]
 		pub fn mint_claim(
 			origin: OriginFor<T>,
@@ -396,7 +369,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight({2})]
+		#[pallet::weight(T::WeightInfo::claim_attest())]
 		#[pallet::call_index(2)]
 		pub fn claim_attest(
 			origin: OriginFor<T>,
@@ -416,7 +389,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		#[pallet::weight({4})]
+		#[pallet::weight(T::WeightInfo::move_claim())]
 		#[pallet::call_index(4)]
 		pub fn move_claim(
 			origin: OriginFor<T>,
@@ -433,7 +406,7 @@ pub mod pallet {
 
 		/// Set the value for expiryconfig
 		/// Can only be called by ForceOrigin
-		#[pallet::weight({5})]
+		#[pallet::weight(T::WeightInfo::force_set_expiry_config())]
 		#[pallet::call_index(5)]
 		pub fn force_set_expiry_config(
 			origin: OriginFor<T>,

@@ -4,6 +4,8 @@
 mod chainspec;
 #[macro_use]
 mod service;
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
 mod cli;
 mod command;
 mod distributions;
