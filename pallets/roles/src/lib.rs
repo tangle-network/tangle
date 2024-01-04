@@ -72,18 +72,20 @@ pub struct RoleStakingLedger<T: Config> {
 	pub profile: Profile<T>,
 	/// Roles map with their respective records.
 	pub roles: BTreeMap<RoleType, Record<T>>,
+	/// Role key
+	pub role_key: Vec<u8>,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
 	/// New staking ledger for a stash account.
-	pub fn new(stash: T::AccountId, profile: Profile<T>) -> Self {
+	pub fn new(stash: T::AccountId, profile: Profile<T>, role_key: Vec<u8>) -> Self {
 		let total_restake = profile.get_total_profile_restake();
 		let roles = profile
 			.get_records()
 			.into_iter()
 			.map(|record| (record.metadata.get_role_type(), record))
 			.collect::<BTreeMap<_, _>>();
-		Self { stash, total: total_restake.into(), profile, roles }
+		Self { stash, total: total_restake.into(), profile, roles, role_key }
 	}
 
 	/// Returns the total amount of the stash's balance that is restaked for all selected roles.
@@ -274,23 +276,28 @@ pub mod pallet {
 		pub fn create_profile(origin: OriginFor<T>, profile: Profile<T>) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
 
-			let validator_id =
-				<T as pallet_session::Config>::ValidatorIdOf::convert(stash_account.clone())
-					.ok_or(Error::<T>::NotValidator)?;
-
-			let session_keys = pallet_session::NextKeys::<T>::get(validator_id)
-				.ok_or(Error::<T>::SessionKeysNotProvided)?;
-			let _role_key = OpaqueKeys::get_raw(&session_keys, ROLE_KEY_TYPE);
-
 			// Ensure stash account is a validator.
 			ensure!(
 				pallet_staking::Validators::<T>::contains_key(&stash_account),
 				Error::<T>::NotValidator
 			);
 
+			// Get Role key of validator.
+			let validator_id =
+				<T as pallet_session::Config>::ValidatorIdOf::convert(stash_account.clone())
+					.ok_or(Error::<T>::NotValidator)?;
+
+			let session_keys = pallet_session::NextKeys::<T>::get(validator_id)
+				.ok_or(Error::<T>::SessionKeysNotProvided)?;
+			let role_key = OpaqueKeys::get_raw(&session_keys, ROLE_KEY_TYPE);
+
 			// Ensure no profile is assigned to the validator.
 			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::ProfileAlreadyExists);
-			let ledger = RoleStakingLedger::<T>::new(stash_account.clone(), profile.clone());
+			let ledger = RoleStakingLedger::<T>::new(
+				stash_account.clone(),
+				profile.clone(),
+				role_key.to_vec(),
+			);
 			let total_profile_restake = profile.get_total_profile_restake();
 
 			// Restaking amount of profile should meet min Restaking amount requirement.

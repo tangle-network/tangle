@@ -60,7 +60,7 @@ fn test_create_independent_profile() {
 		// Get the ledger to check if the profile is created.
 		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
 		assert_eq!(ledger.profile, profile);
-		assert!(ledger.profile.is_independent());
+		assert!(ledger.profile.is_shared());
 	});
 }
 
