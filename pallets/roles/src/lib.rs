@@ -43,6 +43,10 @@ pub(crate) mod mock;
 pub mod offences;
 #[cfg(test)]
 mod tests;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
+
 mod weights;
 pub use weights::WeightInfo;
 
@@ -257,10 +261,11 @@ pub mod pallet {
 	/// - Restaking amount is exceeds max Restaking value.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight({0})]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::create_profile())]
 		#[pallet::call_index(0)]
 		pub fn create_profile(origin: OriginFor<T>, profile: Profile<T>) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
+
 			// Ensure stash account is a validator.
 			ensure!(
 				pallet_staking::Validators::<T>::contains_key(&stash_account),
@@ -338,7 +343,7 @@ pub mod pallet {
 		/// - If there are any pending jobs for the role which user wants to remove.
 		/// - Restaking amount is exceeds max Restaking value.
 		/// - Restaking amount is less than min Restaking bond.
-		#[pallet::weight({0})]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::update_profile())]
 		#[pallet::call_index(1)]
 		pub fn update_profile(origin: OriginFor<T>, updated_profile: Profile<T>) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
@@ -399,7 +404,7 @@ pub mod pallet {
 		/// - Account is not a validator account.
 		/// - Profile is not assigned to the validator.
 		/// - All the jobs are not completed.
-		#[pallet::weight({0})]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::delete_profile())]
 		#[pallet::call_index(2)]
 		pub fn delete_profile(origin: OriginFor<T>) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
@@ -451,80 +456,6 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Removes the role from the validator.
-		///
-		/// # Parameters
-		///
-		/// - `origin`: Origin of the transaction.
-		/// - `role`: Role to remove from the validator.
-		///
-		/// This function will return error if
-		/// - Account is not a validator account.
-		/// - Role is not assigned to the validator.
-		/// - All the jobs are not completed.
-		#[pallet::weight({0})]
-		#[pallet::call_index(3)]
-		pub fn remove_role(origin: OriginFor<T>, role: RoleType) -> DispatchResult {
-			let stash_account = ensure_signed(origin)?;
-			// Ensure stash account is a validator.
-			ensure!(
-				pallet_staking::Validators::<T>::contains_key(&stash_account),
-				Error::<T>::NotValidator
-			);
-
-			let mut ledger = Self::ledger(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
-
-			// Check if role is assigned.
-			ensure!(ledger.profile.has_role(role.clone()), Error::<T>::RoleNotAssigned);
-
-			// Get active jobs for the role.
-			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
-
-			if active_jobs.is_empty() {
-				// Remove role from the profile.
-				ledger.profile.remove_role_from_profile(role.clone());
-			}
-
-			let mut pending_jobs = Vec::new();
-			for job in active_jobs {
-				let role_type = job.0;
-				if role_type == role {
-					// Submit request to exit from the known set.
-					let res = T::JobsHandler::exit_from_known_set(
-						stash_account.clone(),
-						role_type,
-						job.1,
-					);
-
-					if res.is_err() {
-						pending_jobs.push((role_type, job.1));
-					} else {
-						// Remove role from the profile.
-						ledger.profile.remove_role_from_profile(role.clone());
-					}
-				}
-			}
-
-			if !pending_jobs.is_empty() {
-				// Role clear request failed due to pending jobs, which can't be opted out at the
-				// moment.
-				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
-				return Err(Error::<T>::RoleCannotBeRemoved.into())
-			};
-			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
-				BoundedVec::try_from(ledger.profile.get_roles())
-					.map_err(|_| Error::<T>::MaxRoles)?;
-
-			AccountRolesMapping::<T>::insert(&stash_account, profile_roles);
-
-			ledger.total = ledger.profile.get_total_profile_restake().into();
-			Self::update_ledger(&stash_account, &ledger);
-
-			Self::deposit_event(Event::<T>::RoleRemoved { account: stash_account, role });
-
-			Ok(())
-		}
-
 		/// Declare no desire to either validate or nominate.
 		///
 		/// If you have opted for any of the roles, please submit `clear_role` extrinsic to opt out
@@ -537,8 +468,8 @@ pub mod pallet {
 		/// This function will return error if
 		/// - Account is not a validator account.
 		/// - Role is assigned to the validator.
-		#[pallet::weight({0})]
-		#[pallet::call_index(4)]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::chill())]
+		#[pallet::call_index(3)]
 		pub fn chill(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the account before chilling.
@@ -562,8 +493,8 @@ pub mod pallet {
 		/// This function will return error if
 		/// - If there is any active role assigned to the user.
 		///  
-		#[pallet::weight({0})]
-		#[pallet::call_index(5)]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::unbound_funds())]
+		#[pallet::call_index(4)]
 		pub fn unbound_funds(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
@@ -588,8 +519,8 @@ pub mod pallet {
 		///
 		/// This function will return error if
 		/// - If there is any active role assigned to the user.
-		#[pallet::weight({0})]
-		#[pallet::call_index(6)]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::withdraw_unbonded())]
+		#[pallet::call_index(5)]
 		pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the account and is eligible to withdraw.

@@ -50,15 +50,15 @@ pub fn shared_profile() -> Profile<Runtime> {
 fn test_create_independent_profile() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = independent_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileCreated {
-			account: 1,
+			account: mock_pub_key(1),
 			total_profile_restake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 		// Get the ledger to check if the profile is created.
-		let ledger = Roles::ledger(1).unwrap();
+		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
 		assert_eq!(ledger.profile, profile);
 		assert!(ledger.profile.is_independent());
 	});
@@ -69,16 +69,16 @@ fn test_create_independent_profile() {
 fn test_create_shared_profile() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileCreated {
-			account: 1,
+			account: mock_pub_key(1),
 			total_profile_restake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 
 		// Get the ledger to check if the profile is created.
-		let ledger = Roles::ledger(1).unwrap();
+		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
 		assert_eq!(ledger.profile, profile);
 		assert!(ledger.profile.is_shared());
 	});
@@ -90,7 +90,7 @@ fn test_create_profile_should_fail_if_user_is_not_a_validator() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
 		assert_err!(
-			Roles::create_profile(RuntimeOrigin::signed(5), profile.clone()),
+			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(5)), profile.clone()),
 			Error::<Runtime>::NotValidator
 		);
 	});
@@ -101,9 +101,9 @@ fn test_create_profile_should_fail_if_user_is_not_a_validator() {
 fn test_create_profile_should_fail_if_user_already_has_a_profile() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
 		assert_err!(
-			Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()),
+			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()),
 			Error::<Runtime>::ProfileAlreadyExists
 		);
 	});
@@ -126,7 +126,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met(
 		});
 
 		assert_err!(
-			Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()),
+			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()),
 			Error::<Runtime>::InsufficientRestakingBond
 		);
 	});
@@ -153,7 +153,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_
 		});
 
 		assert_err!(
-			Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()),
+			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()),
 			Error::<Runtime>::InsufficientRestakingBond
 		);
 	});
@@ -165,24 +165,27 @@ fn test_update_profile_from_independent_to_shared() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create independent profile.
 		let profile = independent_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
 
 		// Get the ledger to check if the profile is created.
-		let ledger = Roles::ledger(1).unwrap();
+		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
 		assert!(ledger.profile.is_independent());
 		assert_eq!(ledger.total_restake(), 5000);
 
 		let updated_profile = shared_profile();
 
-		assert_ok!(Roles::update_profile(RuntimeOrigin::signed(1), updated_profile.clone()));
+		assert_ok!(Roles::update_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			updated_profile.clone()
+		));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileUpdated {
-			account: 1,
+			account: mock_pub_key(1),
 			total_profile_restake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 		// Get updated ledger and check if the profile is updated.
-		let ledger = Roles::ledger(1).unwrap();
+		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
 		assert_eq!(ledger.profile, updated_profile);
 		assert!(ledger.profile.is_shared());
 	});
@@ -194,23 +197,26 @@ fn test_update_profile_from_shared_to_independent() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
 
 		// Get the ledger to check if the profile is created.
-		let ledger = Roles::ledger(1).unwrap();
+		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
 		assert!(ledger.profile.is_shared());
 		assert_eq!(ledger.total_restake(), 5000);
 
 		let updated_profile = independent_profile();
-		assert_ok!(Roles::update_profile(RuntimeOrigin::signed(1), updated_profile.clone()));
+		assert_ok!(Roles::update_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			updated_profile.clone()
+		));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileUpdated {
-			account: 1,
+			account: mock_pub_key(1),
 			total_profile_restake: profile.get_total_profile_restake().into(),
 			roles: profile.get_roles(),
 		})]);
 		// Get updated ledger and check if the profile is updated.
-		let ledger = Roles::ledger(1).unwrap();
+		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
 		assert_eq!(ledger.profile, updated_profile);
 		assert!(ledger.profile.is_independent());
 		assert_eq!(ledger.total_restake(), 5000);
@@ -223,45 +229,19 @@ fn test_delete_profile() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
 
 		// Get the ledger to check if the profile is created.
-		let ledger = Roles::ledger(1).unwrap();
+		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
 		assert!(ledger.profile.is_shared());
 		assert_eq!(ledger.total_restake(), 5000);
 
-		assert_ok!(Roles::delete_profile(RuntimeOrigin::signed(1)));
+		assert_ok!(Roles::delete_profile(RuntimeOrigin::signed(mock_pub_key(1))));
 
-		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileDeleted { account: 1 })]);
-		assert_eq!(Roles::ledger(1), None);
-	});
-}
-
-// Test remove role from profile.
-#[test]
-fn test_remove_role_from_profile() {
-	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
-		// Lets create shared profile.
-		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
-
-		// Get the ledger to check if the profile is created.
-		let ledger = Roles::ledger(1).unwrap();
-		assert!(ledger.profile.is_shared());
-		assert_eq!(ledger.total_restake(), 5000);
-		assert!(ledger.profile.has_role(RoleType::Tss(Default::default())));
-
-		// Lets remove Tss role from the profile.
-		assert_ok!(Roles::remove_role(RuntimeOrigin::signed(1), RoleType::Tss(Default::default())));
-
-		assert_events(vec![RuntimeEvent::Roles(crate::Event::RoleRemoved {
-			account: 1,
-			role: RoleType::Tss(Default::default()),
+		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileDeleted {
+			account: mock_pub_key(1),
 		})]);
-
-		// Get the updated ledger to check if the role is removed.
-		let ledger = Roles::ledger(1).unwrap();
-		assert!(!ledger.profile.has_role(RoleType::Tss(Default::default())));
+		assert_eq!(Roles::ledger(mock_pub_key(1)), None);
 	});
 }
 
@@ -270,23 +250,23 @@ fn test_unbound_funds_should_work() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
 
 		// Lets delete profile by opting out of all services.
-		assert_ok!(Roles::delete_profile(RuntimeOrigin::signed(1)));
+		assert_ok!(Roles::delete_profile(RuntimeOrigin::signed(mock_pub_key(1))));
 
-		assert_eq!(Roles::ledger(1), None);
+		assert_eq!(Roles::ledger(mock_pub_key(1)), None);
 
 		// unbound funds.
-		assert_ok!(Roles::unbound_funds(RuntimeOrigin::signed(1), 5000));
+		assert_ok!(Roles::unbound_funds(RuntimeOrigin::signed(mock_pub_key(1)), 5000));
 
 		assert_events(vec![RuntimeEvent::Staking(pallet_staking::Event::Unbonded {
-			stash: 1,
+			stash: mock_pub_key(1),
 			amount: 5000,
 		})]);
 
 		// Get  pallet staking ledger mapping.
-		let staking_ledger = pallet_staking::Ledger::<Runtime>::get(1).unwrap();
+		let staking_ledger = pallet_staking::Ledger::<Runtime>::get(mock_pub_key(1)).unwrap();
 		// Since we we have unbounded 5000 tokens, we should have 5000 tokens in staking ledger.
 		assert_eq!(staking_ledger.active, 5000);
 	});
@@ -295,16 +275,16 @@ fn test_unbound_funds_should_work() {
 #[test]
 fn test_reward_dist_works_as_expected_with_one_validator() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
-		assert_eq!(Balances::free_balance(1), 20_000);
+		assert_eq!(Balances::free_balance(mock_pub_key(1)), 20_000);
 
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
 
 		// The reward is 100, we have 5 authorities
 		assert_ok!(Roles::distribute_rewards());
 
 		// ensure the distribution is correct
-		assert_eq!(Balances::free_balance(1), 20_000 + 10_000);
+		assert_eq!(Balances::free_balance(mock_pub_key(1)), 20_000 + 10_000);
 	});
 }
 
@@ -312,18 +292,18 @@ fn test_reward_dist_works_as_expected_with_one_validator() {
 fn test_reward_dist_works_as_expected_with_multiple_validator() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let _reward_amount = 10_000;
-		assert_eq!(Balances::free_balance(1), 20_000);
+		assert_eq!(Balances::free_balance(mock_pub_key(1)), 20_000);
 
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(2), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(2)), profile.clone()));
 
 		// The reward is 100, we have 5 authorities
 		assert_ok!(Roles::distribute_rewards());
 
 		// ensure the distribution is correct
-		assert_eq!(Balances::free_balance(1), 20_000 + 5000);
-		assert_eq!(Balances::free_balance(2), 20_000 + 5000);
+		assert_eq!(Balances::free_balance(mock_pub_key(1)), 20_000 + 5000);
+		assert_eq!(Balances::free_balance(mock_pub_key(2)), 20_000 + 5000);
 	});
 }
 
@@ -332,7 +312,7 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 fn test_report_offence_should_work() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(1), profile.clone()));
+		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
 
 		// Get current session index.
 		let session_index = pallet_session::CurrentIndex::<Runtime>::get();
@@ -343,12 +323,12 @@ fn test_report_offence_should_work() {
 			validator_set_count: 4,
 			role_type: RoleType::Tss(Default::default()),
 			offence_type: tangle_primitives::jobs::ValidatorOffenceType::Inactivity,
-			offenders: vec![1],
+			offenders: vec![mock_pub_key(1)],
 		};
 		// Lets report offence.
 		assert_ok!(Roles::report_offence(offence_report));
 		// Should slash 700 tokens
-		let ledger = Roles::ledger(1).unwrap();
+		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
 		assert_eq!(ledger.total, 4300);
 	});
 }
