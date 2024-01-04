@@ -47,6 +47,14 @@ impl From<EthereumAddress> for H160 {
 	}
 }
 
+impl From<H160> for EthereumAddress {
+	fn from(a: H160) -> Self {
+		let mut r = Self::default();
+		r.0.copy_from_slice(&a.0);
+		r
+	}
+}
+
 #[derive(Clone, Copy, Eq, Encode, Decode, TypeInfo)]
 pub struct EcdsaSignature(pub [u8; 65]);
 
