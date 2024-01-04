@@ -29,9 +29,13 @@ pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_core::ecdsa;
-use sp_runtime::{traits::Zero, Saturating};
+use sp_runtime::{
+	traits::{Convert, OpaqueKeys, Zero},
+	Saturating,
+};
 use sp_staking::offence::ReportOffence;
 use sp_std::{collections::btree_map::BTreeMap, convert::TryInto, prelude::*, vec};
+use tangle_crypto_primitives::ROLE_KEY_TYPE;
 use tangle_primitives::roles::{RoleType, RoleTypeMetadata};
 
 mod impls;
@@ -124,7 +128,9 @@ pub mod pallet {
 
 	/// Configuration trait.
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_staking::Config {
+	pub trait Config:
+		frame_system::Config + pallet_staking::Config + pallet_session::Config
+	{
 		/// The overarching event type.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
@@ -221,6 +227,8 @@ pub mod pallet {
 		/// Profile delete request failed due to pending jobs, which can't be opted out at the
 		/// moment.
 		ProfileDeleteRequestFailed,
+		/// SessionKeys not provided
+		SessionKeysNotProvided,
 	}
 
 	/// Map from all "controller" accounts to the info regarding the staking.
@@ -265,6 +273,14 @@ pub mod pallet {
 		#[pallet::call_index(0)]
 		pub fn create_profile(origin: OriginFor<T>, profile: Profile<T>) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
+
+			let validator_id =
+				<T as pallet_session::Config>::ValidatorIdOf::convert(stash_account.clone())
+					.ok_or(Error::<T>::NotValidator)?;
+
+			let session_keys = pallet_session::NextKeys::<T>::get(validator_id)
+				.ok_or(Error::<T>::SessionKeysNotProvided)?;
+			let _role_key = OpaqueKeys::get_raw(&session_keys, ROLE_KEY_TYPE);
 
 			// Ensure stash account is a validator.
 			ensure!(
