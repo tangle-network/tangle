@@ -127,7 +127,7 @@ mod benchmarks {
 	// Delete profile
 	#[benchmark]
 	fn delete_profile() {
-		let caller: T::AccountId =create_validator_account::<T>("Alice");
+		let caller: T::AccountId = create_validator_account::<T>("Alice");
 		let shared_profile = shared_profile::<T>();
 		let ledger = RoleStakingLedger::<T>::new(caller.clone(), shared_profile.clone());
 		Ledger::<T>::insert(caller.clone(), ledger);
