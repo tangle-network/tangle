@@ -34,6 +34,9 @@ mod tests;
 mod types;
 mod weights;
 
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
+
 #[frame_support::pallet]
 pub mod pallet {
 	use crate::{types::FeeInfoOf, weights::WeightInfo};

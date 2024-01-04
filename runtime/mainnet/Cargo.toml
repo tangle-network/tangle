@@ -37,6 +37,7 @@ sp-runtime = { workspace = true }
 sp-session = { workspace = true }
 sp-staking = { workspace = true }
 sp-std = { workspace = true }
+sp-storage = { workspace = true }
 sp-transaction-pool = { workspace = true }
 sp-version = { workspace = true }
 
@@ -86,8 +87,8 @@ pallet-utility = { workspace = true }
 pallet-vesting = { workspace = true }
 
 # Webb dependencies
-tangle-primitives = { workspace = true }
 tangle-crypto-primitives = { workspace = true }
+tangle-primitives = { workspace = true }
 
 # Frontier dependencies
 fp-account = { workspace = true }
@@ -129,15 +130,14 @@ rpc-primitives-txpool = { workspace = true }
 [features]
 default = ["std", "with-rocksdb-weights", "evm-tracing"]
 runtime-benchmarks = [
-  "hex-literal",
-  "frame-benchmarking",
-  "frame-system-benchmarking",
-  "frame-support/runtime-benchmarks",
+  "frame-benchmarking/runtime-benchmarks",
+  "frame-system-benchmarking/runtime-benchmarks",
   "frame-system/runtime-benchmarks",
   "pallet-balances/runtime-benchmarks",
+  "pallet-grandpa/runtime-benchmarks",
+  "pallet-timestamp/runtime-benchmarks",
   "pallet-vesting/runtime-benchmarks",
   "pallet-collective/runtime-benchmarks",
-  "pallet-timestamp/runtime-benchmarks",
   "sp-runtime/runtime-benchmarks",
 
   # Frontier
@@ -199,6 +199,8 @@ std = [
   "pallet-treasury/std",
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
+  "frame-system-benchmarking?/std",
+  "sp-storage/std",
 
   # Tangle dependencies
   "tangle-primitives/std",
