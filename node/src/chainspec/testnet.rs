@@ -124,12 +124,9 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Eve"),
 				],
 				chain_id,
-				combine_distributions(vec![
-					develop::get_evm_balance_distribution(),
-					testnet::get_evm_balance_distribution(),
-				]),
-				testnet::get_substrate_balance_distribution(),
-				develop::get_local_claims(),
+				Default::default(),
+				Default::default(),
+				Default::default(),
 				true,
 			)
 		},
@@ -244,7 +241,7 @@ fn testnet_genesis(
 	// stakers: all validators and nominators.
 	let stakers = initial_authorities
 		.iter()
-		.map(|x| (x.0.clone(), x.0.clone(), UNIT, StakerStatus::Validator))
+		.map(|x| (x.0.clone(), x.0.clone(), STASH, StakerStatus::Validator))
 		.collect();
 
 	let num_endowed_accounts = endowed_accounts.len();
