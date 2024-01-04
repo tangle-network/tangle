@@ -17,7 +17,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
 
-use crate::types::{JobInfoOf, JobSubmissionOf, PhaseOneResultOf};
+use crate::types::{JobInfoOf, JobSubmissionOf, PhaseResultOf};
 use frame_support::{
 	pallet_prelude::*,
 	traits::{Currency, ExistenceRequirement, ReservableCurrency},
@@ -33,7 +33,7 @@ use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
 	jobs::{
 		traits::{JobToFee, MPCHandler},
-		DKGTSSKeySubmissionResult, JobId, JobInfo, JobResult, PhaseOneResult, ValidatorOffenceType,
+		DKGTSSKeySubmissionResult, JobId, JobInfo, JobResult, PhaseResult, ValidatorOffenceType,
 	},
 	roles::traits::RolesHandler,
 };
@@ -154,7 +154,7 @@ pub mod module {
 		RoleType,
 		Blake2_128Concat,
 		JobId,
-		PhaseOneResult<T::AccountId, BlockNumberFor<T>>,
+		PhaseResult<T::AccountId, BlockNumberFor<T>>,
 	>;
 
 	#[pallet::storage]
@@ -359,7 +359,8 @@ pub mod module {
 					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::DKGPhaseTwo(info) => {
-					Self::verify_dkg_signature_job_result(role_type, &job_info, info)?;
+					let result = Self::verify_dkg_signature_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::ZkSaaSPhaseOne(info) => {
 					let result =
@@ -367,7 +368,8 @@ pub mod module {
 					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::ZkSaaSPhaseTwo(info) => {
-					Self::verify_zksaas_prove_job_result(role_type, &job_info, info)?;
+					let result = Self::verify_zksaas_prove_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 			};
 
@@ -473,7 +475,7 @@ pub mod module {
 			let job_info =
 				SubmittedJobs::<T>::get(role_type, job_id).ok_or(Error::<T>::JobNotFound)?;
 
-			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
+			let mut phase1_result: Option<PhaseResultOf<T>> = None;
 
 			// If phase2, fetch phase1 result
 			if !job_info.job_type.is_phase_one() {
