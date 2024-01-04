@@ -261,10 +261,11 @@ pub mod pallet {
 	/// - Restaking amount is exceeds max Restaking value.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight({0})]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::create_profile())]
 		#[pallet::call_index(0)]
 		pub fn create_profile(origin: OriginFor<T>, profile: Profile<T>) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
+
 			// Ensure stash account is a validator.
 			ensure!(
 				pallet_staking::Validators::<T>::contains_key(&stash_account),
@@ -342,7 +343,7 @@ pub mod pallet {
 		/// - If there are any pending jobs for the role which user wants to remove.
 		/// - Restaking amount is exceeds max Restaking value.
 		/// - Restaking amount is less than min Restaking bond.
-		#[pallet::weight({0})]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::update_profile())]
 		#[pallet::call_index(1)]
 		pub fn update_profile(origin: OriginFor<T>, updated_profile: Profile<T>) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
@@ -403,7 +404,7 @@ pub mod pallet {
 		/// - Account is not a validator account.
 		/// - Profile is not assigned to the validator.
 		/// - All the jobs are not completed.
-		#[pallet::weight({0})]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::delete_profile())]
 		#[pallet::call_index(2)]
 		pub fn delete_profile(origin: OriginFor<T>) -> DispatchResult {
 			let stash_account = ensure_signed(origin)?;
@@ -467,7 +468,7 @@ pub mod pallet {
 		/// This function will return error if
 		/// - Account is not a validator account.
 		/// - Role is assigned to the validator.
-		#[pallet::weight({0})]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::chill())]
 		#[pallet::call_index(3)]
 		pub fn chill(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;
@@ -492,7 +493,7 @@ pub mod pallet {
 		/// This function will return error if
 		/// - If there is any active role assigned to the user.
 		///  
-		#[pallet::weight({0})]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::unbound_funds())]
 		#[pallet::call_index(4)]
 		pub fn unbound_funds(
 			origin: OriginFor<T>,
@@ -518,7 +519,7 @@ pub mod pallet {
 		///
 		/// This function will return error if
 		/// - If there is any active role assigned to the user.
-		#[pallet::weight({0})]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::withdraw_unbonded())]
 		#[pallet::call_index(5)]
 		pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;

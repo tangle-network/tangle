@@ -163,7 +163,10 @@ pub fn run() -> sc_cli::Result<()> {
 							)
 						}
 
-						cmd.run::<Block, ()>(config)
+						cmd.run::<Block, (
+							frame_benchmarking::benchmarking::HostFunctions,
+							primitives_ext::ext::HostFunctions,
+						)>(config)
 					},
 					BenchmarkCmd::Block(cmd) => {
 						let PartialComponents { client, .. } =
