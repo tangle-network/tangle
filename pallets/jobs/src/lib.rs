@@ -132,9 +132,6 @@ pub mod module {
 		JobSubmitted { job_id: JobId, role_type: RoleType, details: JobSubmissionOf<T> },
 		/// A new job result has been submitted
 		JobResultSubmitted { job_id: JobId, role_type: RoleType },
-		/// A Job Result has expired.
-		/// No more submissions will be accepted for this job.
-		JobResultExpired { job_id: JobId, role_type: RoleType },
 		/// validator has earned reward
 		ValidatorRewarded { id: T::AccountId, reward: BalanceOf<T> },
 	}
@@ -540,22 +537,6 @@ pub mod module {
 
 				Ok(())
 			})
-		}
-	}
-
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		/// Hook that execute when there is leftover space in a block
-		/// This function will execute on even blocks and move any proposals
-		/// in unsigned proposals to unsigned proposal queue
-		fn on_idle(now: BlockNumberFor<T>, remaining_weight: Weight) -> Weight {
-			// execute on even blocks
-			if now % 2_u32.into() != 0_u32.into() {
-				return remaining_weight
-			}
-
-			// remove expired jobs with remaining weight
-			Self::on_idle_remove_expired_jobs(now, remaining_weight)
 		}
 	}
 }

@@ -1,5 +1,5 @@
 use super::*;
-use sp_runtime::traits::{One, Zero};
+use sp_runtime::traits::Zero;
 use tangle_primitives::{
 	jobs::{
 		DKGTSSPhaseOneJobType, DKGTSSSignatureResult, JobType, JobWithResult, ZkSaaSCircuitResult,
@@ -473,45 +473,5 @@ impl<T: Config> Pallet<T> {
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 		};
 		Ok(result)
-	}
-
-	pub fn on_idle_remove_expired_jobs(
-		now: BlockNumberFor<T>,
-		mut remaining_weight: Weight,
-	) -> Weight {
-		// early return if we dont have enough weight to perform a read
-		if remaining_weight.is_zero() {
-			return remaining_weight
-		}
-
-		// fetch all known results
-		let known_results = KnownResults::<T>::iter();
-		// we use size hint to avoid reallocations
-		let known_results_len = known_results.size_hint().0 as u64;
-		remaining_weight =
-			remaining_weight.saturating_sub(T::DbWeight::get().reads(known_results_len));
-
-		let results_to_remove = known_results.filter_map(|(role_type, job_id, result)| {
-			if result.ttl < now {
-				Some((role_type, job_id))
-			} else {
-				None
-			}
-		});
-
-		for (role_type, job_id) in results_to_remove {
-			// remaining_weight =
-			// 	remaining_weight.saturating_sub(T::DbWeight::get().reads(One::one()));
-
-			if remaining_weight.is_zero() {
-				break
-			}
-
-			Self::deposit_event(Event::<T>::JobResultExpired { role_type, job_id });
-			// DO NOT REMOVE RESULTS KEEP THEM FOR NOW.
-			// KnownResults::<T>::remove(role_type, job_id);
-		}
-
-		remaining_weight
 	}
 }
