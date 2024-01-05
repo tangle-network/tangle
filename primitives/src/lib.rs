@@ -284,7 +284,9 @@ pub use sp_consensus_babe::AuthorityId as BabeId;
 // 5845 this would give us addresses with tg prefix for mainnet like
 // tgGmBRR5yM53bvq8tTzgsUirpPtfCXngYYU7uiihmWFJhmYGM
 pub const MAINNET_SS58_PREFIX: u16 = 5845;
+pub const MAINNET_CHAIN_ID: u64 = MAINNET_SS58_PREFIX as u64;
 
 // 3799 this would give us addresses with  tt prefix for testnet like
 // ttFELSU4MTyzpfsgZ9tFinrmox7pV7nF1BLbfYjsu4rfDYM74
 pub const TESTNET_SS58_PREFIX: u16 = 3799;
+pub const TESTNET_CHAIN_ID: u64 = TESTNET_SS58_PREFIX as u64;
