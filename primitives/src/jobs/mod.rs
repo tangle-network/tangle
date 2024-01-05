@@ -184,7 +184,7 @@ pub enum JobState {
 
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub struct PhaseOneResult<AccountId, BlockNumber> {
+pub struct PhaseResult<AccountId, BlockNumber> {
 	/// The owner's account ID.
 	pub owner: AccountId,
 	/// The time to live as a block number.
@@ -197,7 +197,7 @@ pub struct PhaseOneResult<AccountId, BlockNumber> {
 	pub job_type: JobType<AccountId>,
 }
 
-impl<AccountId, BlockNumber> PhaseOneResult<AccountId, BlockNumber>
+impl<AccountId, BlockNumber> PhaseResult<AccountId, BlockNumber>
 where
 	AccountId: Clone,
 {
@@ -253,8 +253,6 @@ pub struct RpcResponsePhaseOneResult<AccountId> {
 	pub owner: AccountId,
 	/// The type of the job result.
 	pub result: Vec<u8>,
-	/// permitted caller to use this result
-	pub permitted_caller: Option<AccountId>,
 	/// The type of the job submission.
 	pub job_type: JobType<AccountId>,
 }
