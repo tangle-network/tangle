@@ -30,11 +30,7 @@ use sp_core::ecdsa;
 use sp_io::crypto::ecdsa_generate;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_std::sync::Arc;
-use tangle_primitives::{
-	currency::UNIT,
-	jobs::*,
-	roles::{RoleType, RoleTypeMetadata, TssRoleMetadata},
-};
+use tangle_primitives::{currency::UNIT, jobs::*, roles::RoleType};
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
@@ -133,22 +129,12 @@ impl RolesHandler<AccountId32> for MockRolesHandler {
 		Ok(())
 	}
 
-	fn get_validator_metadata(
-		address: AccountId32,
-		role_type: RoleType,
-	) -> Option<RoleTypeMetadata> {
+	fn get_validator_role_key(address: AccountId32) -> Option<Vec<u8>> {
 		let mock_err_account = AccountId32::new([100u8; 32]);
 		if address == mock_err_account {
 			None
 		} else {
-			match role_type {
-				RoleType::Tss(threshold_signature_role) =>
-					Some(RoleTypeMetadata::Tss(TssRoleMetadata {
-						role_type: threshold_signature_role,
-						authority_key: mock_pub_key().to_raw_vec(),
-					})),
-				_ => None,
-			}
+			Some(mock_pub_key().to_raw_vec())
 		}
 	}
 }

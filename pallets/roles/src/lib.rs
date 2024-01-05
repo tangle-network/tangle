@@ -36,7 +36,7 @@ use sp_runtime::{
 use sp_staking::offence::ReportOffence;
 use sp_std::{collections::btree_map::BTreeMap, convert::TryInto, prelude::*, vec};
 use tangle_crypto_primitives::ROLE_KEY_TYPE;
-use tangle_primitives::roles::{RoleType, RoleTypeMetadata};
+use tangle_primitives::roles::RoleType;
 
 mod impls;
 mod profile;
@@ -83,7 +83,7 @@ impl<T: Config> RoleStakingLedger<T> {
 		let roles = profile
 			.get_records()
 			.into_iter()
-			.map(|record| (record.metadata.get_role_type(), record))
+			.map(|record| (record.role, record))
 			.collect::<BTreeMap<_, _>>();
 		Self { stash, total: total_restake.into(), profile, roles, role_key }
 	}
@@ -291,6 +291,9 @@ pub mod pallet {
 				.ok_or(Error::<T>::SessionKeysNotProvided)?;
 			let role_key = OpaqueKeys::get_raw(&session_keys, ROLE_KEY_TYPE);
 
+			// Validate role key.
+			T::MPCHandler::validate_authority_key(stash_account.clone(), role_key.to_vec())?;
+
 			// Ensure no profile is assigned to the validator.
 			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::ProfileAlreadyExists);
 			let ledger = RoleStakingLedger::<T>::new(
@@ -327,11 +330,6 @@ pub mod pallet {
 						Error::<T>::InsufficientRestakingBond
 					);
 				}
-				// validate the metadata
-				T::MPCHandler::validate_authority_key(
-					stash_account.clone(),
-					record.metadata.get_authority_key(),
-				)?;
 			}
 
 			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =

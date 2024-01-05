@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{jobs::ReportValidatorOffence, roles::RoleTypeMetadata};
+use crate::jobs::ReportValidatorOffence;
 use sp_runtime::DispatchResult;
+use sp_std::vec::Vec;
 
 use super::RoleType;
 
@@ -44,16 +45,15 @@ pub trait RolesHandler<AccountId> {
 	/// Returns Ok() if validator offence report is submitted successfully.
 	fn report_offence(offence_report: ReportValidatorOffence<AccountId>) -> DispatchResult;
 
-	/// Retrieves metadata information for a validator associated with a specific job key.
+	/// Retrieves role key associated with given validator
 	///
 	/// # Arguments
 	///
-	/// * `address` - The account ID of the validator for which metadata is to be retrieved.
-	/// * `role_type` - The role data associated with the validator.
+	/// * `address` - The account ID of the validator for which role key is to be retrieved.
 	///
 	/// # Returns
 	///
-	/// Returns an `Option<RoleTypeMetadata>` containing metadata information for the specified
-	/// validator, or `None` if no metadata is found.
-	fn get_validator_metadata(address: AccountId, role_type: RoleType) -> Option<RoleTypeMetadata>;
+	/// Returns an `Option<Vec<u8>>` containing role key information for the specified
+	/// validator, or `None` if no role key is found.
+	fn get_validator_role_key(address: AccountId) -> Option<Vec<u8>>;
 }

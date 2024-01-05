@@ -28,10 +28,7 @@ use sp_runtime::{
 
 use sp_staking::offence::Offence;
 use tangle_primitives::{
-	jobs::{
-		traits::{JobsHandler, MPCHandler},
-		ReportValidatorOffence,
-	},
+	jobs::{traits::JobsHandler, ReportValidatorOffence},
 	roles::traits::RolesHandler,
 };
 
@@ -65,20 +62,10 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		Self::report_offence(offence_report)
 	}
 
-	fn get_validator_metadata(
-		address: T::AccountId,
-		role_type: RoleType,
-	) -> Option<RoleTypeMetadata> {
-		if Self::is_validator(address.clone(), role_type) {
-			let ledger = Self::ledger(&address);
-			if let Some(ledger) = ledger {
-				return match ledger.roles.get(&role_type) {
-					Some(stake) => Some(stake.metadata.clone()),
-					None => None,
-				}
-			} else {
-				return None
-			}
+	fn get_validator_role_key(address: T::AccountId) -> Option<Vec<u8>> {
+		let maybe_ledger = Self::ledger(&address);
+		if let Some(ledger) = maybe_ledger {
+			Some(ledger.role_key)
 		} else {
 			return None
 		}
@@ -126,11 +113,6 @@ impl<T: Config> Pallet<T> {
 					Error::<T>::InsufficientRestakingBond
 				);
 			}
-			// validate the metadata
-			T::MPCHandler::validate_authority_key(
-				account.clone(),
-				record.metadata.get_authority_key(),
-			)?;
 		}
 		Ok(())
 	}

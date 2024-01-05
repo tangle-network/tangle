@@ -281,9 +281,9 @@ impl<T: Config> Pallet<T> {
 		let mut participant_keys: Vec<Vec<u8>> = Default::default();
 
 		for participant in participants.clone() {
-			let key = T::RolesHandler::get_validator_metadata(participant, role_type);
-			ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
-			participant_keys.push(key.expect("checked above").get_authority_key());
+			let key = T::RolesHandler::get_validator_role_key(participant);
+			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
+			participant_keys.push(key.expect("checked above"));
 		}
 
 		let job_result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
@@ -337,12 +337,10 @@ impl<T: Config> Pallet<T> {
 
 		let participants = phase_one_result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
 		for participant in participants {
-			let key = T::RolesHandler::get_validator_metadata(participant, role_type);
-			ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
-			let pub_key = sp_core::ecdsa::Public::from_slice(
-				&key.expect("checked above").get_authority_key()[0..33],
-			)
-			.map_err(|_| Error::<T>::InvalidValidator)?;
+			let key = T::RolesHandler::get_validator_role_key(participant);
+			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
+			let pub_key = sp_core::ecdsa::Public::from_slice(&key.expect("checked above")[0..33])
+				.map_err(|_| Error::<T>::InvalidValidator)?;
 			participant_keys.push(pub_key);
 		}
 
@@ -392,12 +390,10 @@ impl<T: Config> Pallet<T> {
 		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
 
 		for participant in participants.clone() {
-			let key = T::RolesHandler::get_validator_metadata(participant, role_type);
-			ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
-			let pub_key = sp_core::ecdsa::Public::from_slice(
-				&key.expect("checked above").get_authority_key()[0..33],
-			)
-			.map_err(|_| Error::<T>::InvalidValidator)?;
+			let key = T::RolesHandler::get_validator_role_key(participant);
+			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
+			let pub_key = sp_core::ecdsa::Public::from_slice(&key.expect("checked above")[0..33])
+				.map_err(|_| Error::<T>::InvalidValidator)?;
 			participant_keys.push(pub_key);
 		}
 
