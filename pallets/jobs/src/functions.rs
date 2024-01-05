@@ -1,5 +1,5 @@
 use super::*;
-use sp_runtime::traits::Zero;
+use sp_runtime::traits::{One, Zero};
 use tangle_primitives::{
 	jobs::{
 		DKGTSSPhaseOneJobType, DKGTSSSignatureResult, JobType, JobWithResult, ZkSaaSCircuitResult,
@@ -179,7 +179,8 @@ impl<T: Config> Pallet<T> {
 
 						// charge the validator fee for job submission
 						let job = JobSubmissionOf::<T> {
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type: job_type.clone(),
 						};
 
@@ -193,7 +194,8 @@ impl<T: Config> Pallet<T> {
 
 						let job_info = JobInfo {
 							owner: phase1.owner.clone(),
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type,
 							fee,
 						};
@@ -232,7 +234,8 @@ impl<T: Config> Pallet<T> {
 
 						// charge the validator fee for job submission
 						let job = JobSubmissionOf::<T> {
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type: job_type.clone(),
 						};
 
@@ -246,7 +249,8 @@ impl<T: Config> Pallet<T> {
 
 						let job_info = JobInfo {
 							owner: phase1.owner.clone(),
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type,
 							fee,
 						};
@@ -297,15 +301,15 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: None,
-			result: job_result,
+			result: job_result.clone(),
 		})?;
 
 		let result = PhaseResult {
 			owner: job_info.owner.clone(),
-			expiry: job_info.expiry,
 			job_type: job_info.job_type.clone(),
+			ttl: job_info.ttl,
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
-			result: info.key,
+			result: job_result,
 		};
 		Ok(result)
 	}
@@ -330,7 +334,7 @@ impl<T: Config> Pallet<T> {
 				.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 		// Validate existing result
-		ensure!(phase_one_result.expiry >= now, Error::<T>::ResultExpired);
+		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
 
 		// ensure the participants are the expected participants from job
 		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
@@ -345,11 +349,14 @@ impl<T: Config> Pallet<T> {
 			.map_err(|_| Error::<T>::InvalidValidator)?;
 			participant_keys.push(pub_key);
 		}
-
+		let signing_key = match phase_one_result.result {
+			JobResult::DKGPhaseOne(result) => result.key,
+			_ => return Err(Error::<T>::InvalidJobPhase.into()),
+		};
 		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
 			signature: info.signature.clone(),
 			data: info.data,
-			signing_key: phase_one_result.result,
+			signing_key,
 			signature_type: info.signature_type,
 		});
 
@@ -361,15 +368,15 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: Some(phase_one_job_info.job_type),
-			result: job_result,
+			result: job_result.clone(),
 		})?;
 
 		let result = PhaseResult {
 			owner: job_info.owner.clone(),
-			expiry: job_info.expiry,
+			ttl: job_info.ttl,
 			job_type: job_info.job_type.clone(),
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
-			result: info.signature,
+			result: job_result,
 		};
 		Ok(result)
 	}
@@ -409,15 +416,14 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: None,
-			result: job_result,
+			result: job_result.clone(),
 		})?;
 
 		let result = PhaseResult {
 			owner: job_info.owner.clone(),
-			expiry: job_info.expiry,
+			ttl: job_info.ttl,
 			job_type: job_info.job_type.clone(),
-			// No data in the result
-			result: Vec::new(),
+			result: job_result,
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 		};
 		Ok(result)
@@ -444,7 +450,7 @@ impl<T: Config> Pallet<T> {
 				.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 		// Validate existing result
-		ensure!(phase_one_result.expiry >= now, Error::<T>::ResultExpired);
+		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
 
 		let job_result = JobResult::ZkSaaSPhaseTwo(info.clone());
 
@@ -456,16 +462,56 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: Some(phase_one_job_info.job_type),
-			result: job_result,
+			result: job_result.clone(),
 		})?;
 
 		let result = PhaseResult {
 			owner: job_info.owner.clone(),
-			expiry: job_info.expiry,
+			ttl: job_info.ttl,
 			job_type: job_info.job_type.clone(),
-			result: info.proof(),
+			result: job_result,
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 		};
 		Ok(result)
+	}
+
+	pub fn on_idle_remove_expired_jobs(
+		now: BlockNumberFor<T>,
+		mut remaining_weight: Weight,
+	) -> Weight {
+		// early return if we dont have enough weight to perform a read
+		if remaining_weight.is_zero() {
+			return remaining_weight
+		}
+
+		// fetch all known results
+		let known_results = KnownResults::<T>::iter();
+		// we use size hint to avoid reallocations
+		let known_results_len = known_results.size_hint().0 as u64;
+		remaining_weight =
+			remaining_weight.saturating_sub(T::DbWeight::get().reads(known_results_len));
+
+		let results_to_remove = known_results.filter_map(|(role_type, job_id, result)| {
+			if result.ttl < now {
+				Some((role_type, job_id))
+			} else {
+				None
+			}
+		});
+
+		for (role_type, job_id) in results_to_remove {
+			// remaining_weight =
+			// 	remaining_weight.saturating_sub(T::DbWeight::get().reads(One::one()));
+
+			if remaining_weight.is_zero() {
+				break
+			}
+
+			Self::deposit_event(Event::<T>::JobResultExpired { role_type, job_id });
+			// DO NOT REMOVE RESULTS KEEP THEM FOR NOW.
+			// KnownResults::<T>::remove(role_type, job_id);
+		}
+
+		remaining_weight
 	}
 }

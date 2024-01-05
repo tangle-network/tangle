@@ -126,12 +126,15 @@ pub mod module {
 	}
 
 	#[pallet::event]
-	#[pallet::generate_deposit(fn deposit_event)]
+	#[pallet::generate_deposit(pub(crate) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// A new job has been submitted
 		JobSubmitted { job_id: JobId, role_type: RoleType, details: JobSubmissionOf<T> },
 		/// A new job result has been submitted
 		JobResultSubmitted { job_id: JobId, role_type: RoleType },
+		/// A Job Result has expired.
+		/// No more submissions will be accepted for this job.
+		JobResultExpired { job_id: JobId, role_type: RoleType },
 		/// validator has earned reward
 		ValidatorRewarded { id: T::AccountId, reward: BalanceOf<T> },
 	}
@@ -148,14 +151,8 @@ pub mod module {
 
 	#[pallet::storage]
 	#[pallet::getter(fn known_results)]
-	pub type KnownResults<T: Config> = StorageDoubleMap<
-		_,
-		Twox64Concat,
-		RoleType,
-		Blake2_128Concat,
-		JobId,
-		PhaseResult<T::AccountId, BlockNumberFor<T>>,
-	>;
+	pub type KnownResults<T: Config> =
+		StorageDoubleMap<_, Twox64Concat, RoleType, Blake2_128Concat, JobId, PhaseResultOf<T>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn validator_job_id_lookup)]
@@ -244,7 +241,7 @@ pub mod module {
 						.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 				// Validate existing result
-				ensure!(result.expiry >= now, Error::<T>::ResultExpired);
+				ensure!(result.ttl >= now, Error::<T>::ResultExpired);
 
 				// Ensure the phase one participants are still validators
 				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
@@ -279,6 +276,7 @@ pub mod module {
 			// store the job to pallet
 			let job_info = JobInfo {
 				owner: caller.clone(),
+				ttl: job.ttl,
 				expiry: job.expiry,
 				job_type: job.job_type.clone(),
 				fee,
@@ -542,6 +540,22 @@ pub mod module {
 
 				Ok(())
 			})
+		}
+	}
+
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		/// Hook that execute when there is leftover space in a block
+		/// This function will execute on even blocks and move any proposals
+		/// in unsigned proposals to unsigned proposal queue
+		fn on_idle(now: BlockNumberFor<T>, remaining_weight: Weight) -> Weight {
+			// execute on even blocks
+			if now % 2_u32.into() != 0_u32.into() {
+				return remaining_weight
+			}
+
+			// remove expired jobs with remaining weight
+			Self::on_idle_remove_expired_jobs(now, remaining_weight)
 		}
 	}
 }

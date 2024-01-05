@@ -1344,6 +1344,7 @@ mod benches {
 	);
 }
 
+use pallet_jobs_rpc_runtime_api::BlockNumberOf;
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {
 		fn version() -> RuntimeVersion {
@@ -1397,15 +1398,15 @@ impl_runtime_apis! {
 	impl pallet_jobs_rpc_runtime_api::JobsApi<Block, AccountId> for Runtime {
 		fn query_jobs_by_validator(
 			validator: AccountId,
-		) -> Option<Vec<RpcResponseJobsData<AccountId>>> {
+		) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>> {
 			Jobs::query_jobs_by_validator(validator)
 		}
 
-		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId>> {
+		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>> {
 			Jobs::query_job_by_id(role_type, job_id)
 		}
 
-		fn query_phase_one_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponsePhaseOneResult<AccountId>> {
+		fn query_phase_one_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponsePhaseOneResult<AccountId, BlockNumberOf<Block>>> {
 			Jobs::query_phase_one_by_id(role_type, job_id)
 		}
 

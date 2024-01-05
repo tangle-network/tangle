@@ -66,6 +66,7 @@ where
 	///
 	/// - `handle`: A mutable reference to the `PrecompileHandle` implementation.
 	/// - `expiry`: The expiration period for the submitted job
+	/// - `ttl`: The time-to-live period for the submitted job
 	/// - `participants`: A vector containing Ethereum addresses of the participants in the DKG.
 	/// - `threshold`: The threshold number of participants required for the DKG to succeed (u8).
 	/// - `permitted_caller`: The Ethereum address of the permitted caller.
@@ -73,10 +74,11 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submitDkgPhaseOneJob(uint64,address[],uint8,uint16,address)")]
+	#[precompile::public("submitDkgPhaseOneJob(uint64,unit64,address[],uint8,uint16,address)")]
 	fn submit_dkg_phase_one_job(
 		handle: &mut impl PrecompileHandle,
-		expiry: u64,
+		expiry: BlockNumber,
+		ttl: BlockNumber,
 		participants: Vec<Address>,
 		threshold: u8,
 		role_type: u16,
@@ -121,10 +123,14 @@ where
 
 		// Convert expiration period to Substrate block number
 		let expiry_block: BlockNumberFor<Runtime> = expiry.into();
+		let ttl_block: BlockNumberFor<Runtime> = ttl.into();
 
 		// Create job submission object
-		let job =
-			JobSubmission { expiry: expiry_block, job_type: JobType::DKGTSSPhaseOne(job_type) };
+		let job = JobSubmission {
+			expiry: expiry_block,
+			ttl: ttl_block,
+			job_type: JobType::DKGTSSPhaseOne(job_type),
+		};
 
 		// Convert caller's Ethereum address to Substrate account ID
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -145,6 +151,7 @@ where
 	///
 	/// - `handle`: A mutable reference to the `PrecompileHandle` implementation.
 	/// - `expiry`: The expiration period for the submitted job
+	/// - `ttl`: The time-to-live period for the submitted job
 	/// - `phase_one_id`: The identifier of the corresponding phase one DKG job (u32).
 	/// - `submission`: The signature submission for the DKG phase two, represented as
 	///   `BoundedBytes`.
@@ -152,10 +159,11 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submitDkgPhaseTwoJob(uint64,uint64,bytes)")]
+	#[precompile::public("submitDkgPhaseTwoJob(uint64,uint64,uint64,bytes)")]
 	fn submit_dkg_phase_two_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: BlockNumber,
+		ttl: BlockNumber,
 		phase_one_id: JobId,
 		submission: BoundedBytes<GetJobSubmissionSizeLimit>,
 	) -> EvmResult {
@@ -167,6 +175,7 @@ where
 
 		// Convert expiration period to Substrate block number
 		let expiry_block: BlockNumberFor<Runtime> = expiry.into();
+		let ttl_block: BlockNumberFor<Runtime> = ttl.into();
 
 		// Create DKG signature job type with the provided parameters
 		match pallet_jobs::SubmittedJobsRole::<Runtime>::get(phase_one_id) {
@@ -191,6 +200,7 @@ where
 				// Create job submission object
 				let job = JobSubmission {
 					expiry: expiry_block,
+					ttl: ttl_block,
 					job_type: JobType::DKGTSSPhaseTwo(job_type),
 				};
 

@@ -34,15 +34,18 @@ use tangle_primitives::{
 	roles::RoleType,
 };
 
+type BlockNumberOf<Block> =
+	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
+
 /// JobsClient RPC methods.
 #[rpc(client, server)]
-pub trait JobsApi<BlockHash, AccountId> {
+pub trait JobsApi<BlockHash, AccountId, BlockNumber> {
 	#[method(name = "jobs_queryJobsByValidator")]
 	fn query_jobs_by_validator(
 		&self,
 		at: Option<BlockHash>,
 		validator: AccountId,
-	) -> RpcResult<Option<Vec<RpcResponseJobsData<AccountId>>>>;
+	) -> RpcResult<Option<Vec<RpcResponseJobsData<AccountId, BlockNumber>>>>;
 
 	#[method(name = "jobs_queryJobById")]
 	fn query_job_by_id(
@@ -50,7 +53,7 @@ pub trait JobsApi<BlockHash, AccountId> {
 		at: Option<BlockHash>,
 		role_type: RoleType,
 		job_id: JobId,
-	) -> RpcResult<Option<RpcResponseJobsData<AccountId>>>;
+	) -> RpcResult<Option<RpcResponseJobsData<AccountId, BlockNumber>>>;
 
 	#[method(name = "jobs_queryPhaseOneById")]
 	fn query_phase_one_by_id(
@@ -58,7 +61,7 @@ pub trait JobsApi<BlockHash, AccountId> {
 		at: Option<BlockHash>,
 		role_type: RoleType,
 		job_id: JobId,
-	) -> RpcResult<Option<RpcResponsePhaseOneResult<AccountId>>>;
+	) -> RpcResult<Option<RpcResponsePhaseOneResult<AccountId, BlockNumber>>>;
 
 	#[method(name = "jobs_queryNextJobId")]
 	fn query_next_job_id(&self, at: Option<BlockHash>) -> RpcResult<JobId>;
@@ -77,7 +80,7 @@ impl<C, M, P> JobsClient<C, M, P> {
 	}
 }
 
-impl<C, Block, AccountId> JobsApiServer<<Block as BlockT>::Hash, AccountId>
+impl<C, Block, AccountId> JobsApiServer<<Block as BlockT>::Hash, AccountId, BlockNumberOf<Block>>
 	for JobsClient<C, Block, AccountId>
 where
 	Block: BlockT,
@@ -89,7 +92,7 @@ where
 		&self,
 		at: Option<<Block as BlockT>::Hash>,
 		validator: AccountId,
-	) -> RpcResult<Option<Vec<RpcResponseJobsData<AccountId>>>> {
+	) -> RpcResult<Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>>> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 
@@ -104,10 +107,9 @@ where
 		at: Option<<Block as BlockT>::Hash>,
 		role_type: RoleType,
 		job_id: JobId,
-	) -> RpcResult<Option<RpcResponseJobsData<AccountId>>> {
+	) -> RpcResult<Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
-
 		match api.query_job_by_id(at, role_type, job_id) {
 			Ok(res) => Ok(res),
 			Err(e) => Err(runtime_error_into_rpc_err(e)),
@@ -119,7 +121,7 @@ where
 		at: Option<<Block as BlockT>::Hash>,
 		role_type: RoleType,
 		job_id: JobId,
-	) -> RpcResult<Option<RpcResponsePhaseOneResult<AccountId>>> {
+	) -> RpcResult<Option<RpcResponsePhaseOneResult<AccountId, BlockNumberOf<Block>>>> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 
