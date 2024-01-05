@@ -73,15 +73,23 @@ impl SubstrateCli for Cli {
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
 		Ok(match id {
-			"" | "dev" | "local" => Box::new(chainspec::testnet::local_testnet_config(4007)?),
+			"" | "dev" | "local" => Box::new(chainspec::testnet::local_testnet_config(
+				tangle_primitives::TESTNET_CHAIN_ID,
+			)?),
 			// generates the spec for testnet
-			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(4007)?),
+			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(
+				tangle_primitives::TESTNET_CHAIN_ID,
+			)?),
 			"tangle-testnet" => Box::new(chainspec::testnet::ChainSpec::from_json_bytes(
 				&include_bytes!("../../chainspecs/testnet/tangle-standalone.json")[..],
 			)?),
 			// generates the spec for mainnet
-			"mainnet-local" => Box::new(chainspec::mainnet::local_mainnet_config(4006)?),
-			"mainnet" => Box::new(chainspec::mainnet::tangle_mainnet_config(4006)?),
+			"mainnet-local" => Box::new(chainspec::mainnet::local_mainnet_config(
+				tangle_primitives::MAINNET_CHAIN_ID,
+			)?),
+			"mainnet" => Box::new(chainspec::mainnet::tangle_mainnet_config(
+				tangle_primitives::MAINNET_CHAIN_ID,
+			)?),
 			path => Box::new(chainspec::testnet::ChainSpec::from_json_file(
 				std::path::PathBuf::from(path),
 			)?),
