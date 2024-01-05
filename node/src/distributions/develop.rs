@@ -21,6 +21,8 @@ use sp_core::{H160, U256};
 use sp_runtime::AccountId32;
 use tangle_primitives::Balance;
 
+const CLAIM_AMOUNT: Balance = 1_000_000_000_000_000_000_000u128;
+
 pub fn get_local_claims() -> Vec<(MultiAddress, Balance)> {
 	vec![
 		// Test account with a simple menmonic
@@ -33,7 +35,7 @@ pub fn get_local_claims() -> Vec<(MultiAddress, Balance)> {
 					.expect("internal H160 is valid; qed")
 					.into(),
 			),
-			1_000_000_000_000_000_000_000_000u128,
+			CLAIM_AMOUNT,
 		),
 		(
 			MultiAddress::EVM(
@@ -41,21 +43,21 @@ pub fn get_local_claims() -> Vec<(MultiAddress, Balance)> {
 					.expect("internal H160 is valid; qed")
 					.into(),
 			),
-			1_000_000_000_000_000_000_000_000u128,
+			CLAIM_AMOUNT,
 		),
 		(
 			MultiAddress::Native(
 				AccountId32::from_str("5EbkKKTdRJzP1j3aM3S7q178du6tW7ZVWK9Dtjx9CbTFEpGf")
 					.expect("internal AccountId32 is valid; qed"),
 			),
-			1_000_000_000_000_000_000_000_000u128,
+			CLAIM_AMOUNT,
 		),
 		(
 			MultiAddress::Native(
 				AccountId32::from_str("5DLXgUoVVeCZKHduaVhkH4RvLcyG1GdQwLqYLd4aFuYX1qve")
 					.expect("internal AccountId32 is valid; qed"),
 			),
-			1_000_000_000_000_000_000_000_000u128,
+			CLAIM_AMOUNT,
 		),
 	]
 }
