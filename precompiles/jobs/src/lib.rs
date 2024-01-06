@@ -74,7 +74,7 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submitDkgPhaseOneJob(uint64,unit64,address[],uint8,uint16,address)")]
+	#[precompile::public("submitDkgPhaseOneJob(uint64,uint64,address[],uint8,uint16,address)")]
 	fn submit_dkg_phase_one_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: BlockNumber,
