@@ -253,6 +253,7 @@ pub fn run() -> sc_cli::Result<()> {
 					rpc_config,
 					eth_config: cli.eth,
 					debug_output: cli.output_path,
+					auto_insert_keys: cli.auto_insert_keys,
 				})
 				.map_err(Into::into)
 				.await

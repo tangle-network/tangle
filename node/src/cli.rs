@@ -31,6 +31,9 @@ pub struct Cli {
 
 	#[command(flatten)]
 	pub eth: EthConfiguration,
+
+	#[arg(short, long)]
+	pub auto_insert_keys: bool,
 }
 
 #[derive(Debug, clap::Subcommand)]
