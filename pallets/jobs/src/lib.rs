@@ -126,7 +126,7 @@ pub mod module {
 	}
 
 	#[pallet::event]
-	#[pallet::generate_deposit(fn deposit_event)]
+	#[pallet::generate_deposit(pub(crate) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// A new job has been submitted
 		JobSubmitted { job_id: JobId, role_type: RoleType, details: JobSubmissionOf<T> },
@@ -148,14 +148,8 @@ pub mod module {
 
 	#[pallet::storage]
 	#[pallet::getter(fn known_results)]
-	pub type KnownResults<T: Config> = StorageDoubleMap<
-		_,
-		Twox64Concat,
-		RoleType,
-		Blake2_128Concat,
-		JobId,
-		PhaseResult<T::AccountId, BlockNumberFor<T>>,
-	>;
+	pub type KnownResults<T: Config> =
+		StorageDoubleMap<_, Twox64Concat, RoleType, Blake2_128Concat, JobId, PhaseResultOf<T>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn validator_job_id_lookup)]
@@ -244,7 +238,7 @@ pub mod module {
 						.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 				// Validate existing result
-				ensure!(result.expiry >= now, Error::<T>::ResultExpired);
+				ensure!(result.ttl >= now, Error::<T>::ResultExpired);
 
 				// Ensure the phase one participants are still validators
 				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
@@ -279,6 +273,7 @@ pub mod module {
 			// store the job to pallet
 			let job_info = JobInfo {
 				owner: caller.clone(),
+				ttl: job.ttl,
 				expiry: job.expiry,
 				job_type: job.job_type.clone(),
 				fee,

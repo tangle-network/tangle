@@ -179,7 +179,7 @@ parameter_types! {
 		::with_sensible_defaults(MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO);
 	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
 		::max_with_normal_ratio(MAXIMUM_BLOCK_LENGTH, NORMAL_DISPATCH_RATIO);
-	pub const SS58Prefix: u16 = tangle_primitives::TESTNET_SS58_PREFIX;
+	pub const SS58Prefix: u8 = 42;
 }
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
@@ -434,8 +434,8 @@ parameter_types! {
 	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
 	// 28 eras for unbonding (28 days).
 	pub const BondingDuration: sp_staking::EraIndex = 28;
-	// 28 eras for slash defer duration (28 days).
-	pub const SlashDeferDuration: sp_staking::EraIndex = 28;
+	// 27 eras for slash defer duration (27 days).
+	pub const SlashDeferDuration: sp_staking::EraIndex = 27;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 	pub const MaxNominatorRewardedPerValidator: u32 = 256;
 	pub const OffendingValidatorsThreshold: Perbill = Perbill::from_percent(17);
@@ -1351,6 +1351,7 @@ mod benches {
 	);
 }
 
+use pallet_jobs_rpc_runtime_api::BlockNumberOf;
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {
 		fn version() -> RuntimeVersion {
@@ -1404,15 +1405,15 @@ impl_runtime_apis! {
 	impl pallet_jobs_rpc_runtime_api::JobsApi<Block, AccountId> for Runtime {
 		fn query_jobs_by_validator(
 			validator: AccountId,
-		) -> Option<Vec<RpcResponseJobsData<AccountId>>> {
+		) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>> {
 			Jobs::query_jobs_by_validator(validator)
 		}
 
-		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId>> {
+		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>> {
 			Jobs::query_job_by_id(role_type, job_id)
 		}
 
-		fn query_phase_one_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponsePhaseOneResult<AccountId>> {
+		fn query_phase_one_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponsePhaseOneResult<AccountId, BlockNumberOf<Block>>> {
 			Jobs::query_phase_one_by_id(role_type, job_id)
 		}
 

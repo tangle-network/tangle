@@ -30,7 +30,8 @@ fn submit_dkg_phase_one_job() {
 				Precompile1,
 				PCall::submit_dkg_phase_one_job {
 					role_type: RoleType::Tss(ThresholdSignatureRoleType::TssGG20).to_u16(),
-					expiry: 100,
+					expiry: 5,
+					ttl: 200,
 					participants: vec![],
 					threshold: 2,
 					permitted_caller: Address(CryptoAlith.into()),
@@ -49,7 +50,8 @@ fn submit_dkg_phase_two_job() {
 				Address(CryptoAlith.into()),
 				Precompile1,
 				PCall::submit_dkg_phase_two_job {
-					expiry: 100,
+					expiry: 5,
+					ttl: 0,
 					phase_one_id: 1,
 					submission: vec![].into(),
 				},

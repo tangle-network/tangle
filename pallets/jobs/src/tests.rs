@@ -45,7 +45,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		let threshold_signature_role_type = ThresholdSignatureRoleType::TssGG20;
 		let submission = JobSubmission {
-			expiry: 100,
+			expiry: 10,
+			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 				participants: vec![HUNDRED, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
@@ -61,7 +62,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 		);
 
 		let submission = JobSubmission {
-			expiry: 100,
+			expiry: 10,
+			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 5,
@@ -78,7 +80,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		// should fail when caller has no balance
 		let submission = JobSubmission {
-			expiry: 100,
+			expiry: 10,
+			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
@@ -92,7 +95,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 		);
 
 		let submission = JobSubmission {
-			expiry: 100,
+			expiry: 10,
+			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
 				threshold: 3,
@@ -139,7 +143,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		// another account cannot use solution
 		let submission = JobSubmission {
-			expiry: 100,
+			expiry: 10,
+			ttl: 0,
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
 				submission: vec![],
@@ -152,7 +157,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 		);
 
 		let submission = JobSubmission {
-			expiry: 100,
+			expiry: 10,
+			ttl: 0,
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
 				submission: vec![],

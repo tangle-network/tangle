@@ -7,7 +7,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// This function takes a `validator` parameter of type `T::AccountId` and attempts
 	/// to retrieve a list of jobs associated with the provided validator. If successful,
-	/// it constructs a vector of `RpcResponseJobsData<T::AccountId>` containing information
+	/// it constructs a vector of `RpcResponseJobsData` containing information
 	/// about the jobs and returns it as a `Result`.
 	///
 	/// # Arguments
@@ -20,38 +20,18 @@ impl<T: Config> Pallet<T> {
 	/// operation is successful, or an error message as a `String` if there is an issue.
 	pub fn query_jobs_by_validator(
 		validator: T::AccountId,
-	) -> Option<Vec<RpcResponseJobsData<T::AccountId>>> {
-		let mut jobs: Vec<RpcResponseJobsData<T::AccountId>> = vec![];
+	) -> Option<Vec<RpcResponseJobsData<T::AccountId, BlockNumberFor<T>>>> {
+		let mut jobs: Vec<RpcResponseJobsData<_, _>> = vec![];
 		if let Some(jobs_list) = ValidatorJobIdLookup::<T>::get(validator) {
 			for (role_type, job_id) in jobs_list.iter() {
 				if let Some(job_info) = SubmittedJobs::<T>::get(role_type, job_id) {
-					if !job_info.job_type.is_phase_one() {
-						let result = KnownResults::<T>::get(
-							job_info.job_type.get_role_type(),
-							job_info.job_type.clone().get_phase_one_id().unwrap(),
-						)
-						.unwrap();
-
-						let info = RpcResponseJobsData::<T::AccountId> {
-							job_id: *job_id,
-							job_type: job_info.job_type,
-							participants: result.participants(),
-							threshold: result.threshold(),
-							key: Some(result.result),
-						};
-
-						jobs.push(info);
-					} else {
-						let info = RpcResponseJobsData::<T::AccountId> {
-							job_id: *job_id,
-							job_type: job_info.job_type,
-							participants: None,
-							threshold: None,
-							key: None,
-						};
-
-						jobs.push(info);
-					}
+					let info = RpcResponseJobsData::<T::AccountId, BlockNumberFor<T>> {
+						job_id: *job_id,
+						job_type: job_info.job_type,
+						ttl: job_info.ttl,
+						expiry: job_info.expiry,
+					};
+					jobs.push(info);
 				} else {
 					continue
 				}
@@ -74,38 +54,13 @@ impl<T: Config> Pallet<T> {
 	pub fn query_job_by_id(
 		role_type: RoleType,
 		job_id: JobId,
-	) -> Option<RpcResponseJobsData<T::AccountId>> {
-		if let Some(job_info) = SubmittedJobs::<T>::get(role_type, job_id) {
-			if !job_info.job_type.is_phase_one() {
-				let result = KnownResults::<T>::get(
-					job_info.job_type.get_role_type(),
-					job_info.job_type.clone().get_phase_one_id().unwrap(),
-				)
-				.unwrap();
-
-				let info = RpcResponseJobsData::<T::AccountId> {
-					job_id,
-					job_type: job_info.job_type,
-					participants: result.participants(),
-					threshold: result.threshold(),
-					key: Some(result.result),
-				};
-
-				return Some(info)
-			} else {
-				let info = RpcResponseJobsData::<T::AccountId> {
-					job_id,
-					job_type: job_info.job_type,
-					participants: None,
-					threshold: None,
-					key: None,
-				};
-
-				return Some(info)
-			}
-		}
-
-		None
+	) -> Option<RpcResponseJobsData<T::AccountId, BlockNumberFor<T>>> {
+		SubmittedJobs::<T>::get(role_type, job_id).map(|job_info| RpcResponseJobsData {
+			job_id,
+			job_type: job_info.job_type,
+			ttl: job_info.ttl,
+			expiry: job_info.expiry,
+		})
 	}
 
 	/// Queries the phase one result of a job by its key and ID.
@@ -122,7 +77,7 @@ impl<T: Config> Pallet<T> {
 	pub fn query_phase_one_by_id(
 		role_type: RoleType,
 		job_id: JobId,
-	) -> Option<RpcResponsePhaseOneResult<T::AccountId>> {
+	) -> Option<RpcResponsePhaseOneResult<T::AccountId, BlockNumberFor<T>>> {
 		if let Some(job_info) = SubmittedJobs::<T>::get(role_type, job_id) {
 			if !job_info.job_type.is_phase_one() {
 				let result = KnownResults::<T>::get(
@@ -131,10 +86,11 @@ impl<T: Config> Pallet<T> {
 				)
 				.unwrap();
 
-				let info = RpcResponsePhaseOneResult::<T::AccountId> {
+				let info = RpcResponsePhaseOneResult {
 					owner: job_info.owner,
 					result: result.result,
 					job_type: job_info.job_type,
+					ttl: job_info.ttl,
 				};
 
 				return Some(info)
