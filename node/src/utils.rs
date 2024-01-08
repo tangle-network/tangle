@@ -66,7 +66,7 @@ fn insert_account_keys_into_keystore<TPublic: Public>(
                 Pubkey : {:?}
                 STORE THE KEYS SAFELY, NOT TO BE SHARED WITH ANYONE ELSE.
     ++++++++++++++++++++++++++++++++++++++++++++++++   							
-            \n", key_name, seed, pub_key.encode());
+            \n", key_name, seed, pub_key);
 }
 
 /// Inserts a key of type `ACCOUNT` into the keystore for development/testing.
