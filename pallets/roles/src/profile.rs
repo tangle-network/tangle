@@ -18,14 +18,14 @@ use crate::{BalanceOf, Config};
 use frame_support::pallet_prelude::*;
 use sp_runtime::traits::Zero;
 use sp_std::vec::Vec;
-use tangle_primitives::roles::{RoleType, RoleTypeMetadata};
+use tangle_primitives::roles::RoleType;
 
 #[derive(
 	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
 )]
 #[scale_info(skip_type_params(T))]
 pub struct Record<T: Config> {
-	pub metadata: RoleTypeMetadata,
+	pub role: RoleType,
 	pub amount: Option<BalanceOf<T>>,
 }
 
@@ -89,23 +89,18 @@ impl<T: Config> Profile<T> {
 	pub fn get_roles(&self) -> Vec<RoleType> {
 		match self {
 			Profile::Independent(profile) =>
-				profile.records.iter().map(|record| record.metadata.get_role_type()).collect(),
-			Profile::Shared(profile) =>
-				profile.records.iter().map(|record| record.metadata.get_role_type()).collect(),
+				profile.records.iter().map(|record| record.role).collect(),
+			Profile::Shared(profile) => profile.records.iter().map(|record| record.role).collect(),
 		}
 	}
 
 	/// Checks if the profile contains given role.
 	pub fn has_role(&self, role_type: RoleType) -> bool {
 		match self {
-			Profile::Independent(profile) => profile
-				.records
-				.iter()
-				.any(|record| record.metadata.get_role_type() == role_type),
-			Profile::Shared(profile) => profile
-				.records
-				.iter()
-				.any(|record| record.metadata.get_role_type() == role_type),
+			Profile::Independent(profile) =>
+				profile.records.iter().any(|record| record.role == role_type),
+			Profile::Shared(profile) =>
+				profile.records.iter().any(|record| record.role == role_type),
 		}
 	}
 
@@ -113,10 +108,10 @@ impl<T: Config> Profile<T> {
 	pub fn remove_role_from_profile(&mut self, role_type: RoleType) {
 		match self {
 			Profile::Independent(profile) => {
-				profile.records.retain(|record| record.metadata.get_role_type() != role_type);
+				profile.records.retain(|record| record.role != role_type);
 			},
 			Profile::Shared(profile) => {
-				profile.records.retain(|record| record.metadata.get_role_type() != role_type);
+				profile.records.retain(|record| record.role != role_type);
 			},
 		}
 	}

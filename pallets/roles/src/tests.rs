@@ -20,13 +20,19 @@ use frame_support::{assert_err, assert_ok, BoundedVec};
 use mock::*;
 use profile::{IndependentRestakeProfile, Record, SharedRestakeProfile};
 use sp_std::{default::Default, vec};
-use tangle_primitives::jobs::ReportValidatorOffence;
+use tangle_primitives::{
+	jobs::ReportValidatorOffence,
+	roles::{ThresholdSignatureRoleType, ZeroKnowledgeRoleType},
+};
 
 pub fn independent_profile() -> Profile<Runtime> {
 	let profile = IndependentRestakeProfile {
 		records: BoundedVec::try_from(vec![
-			Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: Some(2500) },
-			Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: Some(2500) },
+			Record { role: RoleType::Tss(ThresholdSignatureRoleType::TssGG20), amount: Some(2500) },
+			Record {
+				role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+				amount: Some(2500),
+			},
 		])
 		.unwrap(),
 	};
@@ -36,8 +42,8 @@ pub fn independent_profile() -> Profile<Runtime> {
 pub fn shared_profile() -> Profile<Runtime> {
 	let profile = SharedRestakeProfile {
 		records: BoundedVec::try_from(vec![
-			Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: None },
-			Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: None },
+			Record { role: RoleType::Tss(ThresholdSignatureRoleType::TssGG20), amount: None },
+			Record { role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16), amount: None },
 		])
 		.unwrap(),
 		amount: 5000,
@@ -118,8 +124,11 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met(
 
 		let profile = Profile::Shared(SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
-				Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: None },
-				Record { metadata: RoleTypeMetadata::ZkSaas(Default::default()), amount: None },
+				Record { role: RoleType::Tss(ThresholdSignatureRoleType::TssGG20), amount: None },
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+					amount: None,
+				},
 			])
 			.unwrap(),
 			amount: 1000,
@@ -143,9 +152,12 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_
 
 		let profile = Profile::Independent(IndependentRestakeProfile {
 			records: BoundedVec::try_from(vec![
-				Record { metadata: RoleTypeMetadata::Tss(Default::default()), amount: Some(1000) },
 				Record {
-					metadata: RoleTypeMetadata::ZkSaas(Default::default()),
+					role: RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+					amount: Some(1000),
+				},
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
 					amount: Some(1000),
 				},
 			])

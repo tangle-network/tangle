@@ -29,10 +29,14 @@ pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_core::ecdsa;
-use sp_runtime::{traits::Zero, Saturating};
+use sp_runtime::{
+	traits::{Convert, OpaqueKeys, Zero},
+	Saturating,
+};
 use sp_staking::offence::ReportOffence;
 use sp_std::{collections::btree_map::BTreeMap, convert::TryInto, prelude::*, vec};
-use tangle_primitives::roles::{RoleType, RoleTypeMetadata};
+use tangle_crypto_primitives::ROLE_KEY_TYPE;
+use tangle_primitives::roles::RoleType;
 
 mod impls;
 mod profile;
@@ -68,18 +72,20 @@ pub struct RoleStakingLedger<T: Config> {
 	pub profile: Profile<T>,
 	/// Roles map with their respective records.
 	pub roles: BTreeMap<RoleType, Record<T>>,
+	/// Role key
+	pub role_key: Vec<u8>,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
 	/// New staking ledger for a stash account.
-	pub fn new(stash: T::AccountId, profile: Profile<T>) -> Self {
+	pub fn new(stash: T::AccountId, profile: Profile<T>, role_key: Vec<u8>) -> Self {
 		let total_restake = profile.get_total_profile_restake();
 		let roles = profile
 			.get_records()
 			.into_iter()
-			.map(|record| (record.metadata.get_role_type(), record))
+			.map(|record| (record.role, record))
 			.collect::<BTreeMap<_, _>>();
-		Self { stash, total: total_restake.into(), profile, roles }
+		Self { stash, total: total_restake.into(), profile, roles, role_key }
 	}
 
 	/// Returns the total amount of the stash's balance that is restaked for all selected roles.
@@ -124,7 +130,9 @@ pub mod pallet {
 
 	/// Configuration trait.
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_staking::Config {
+	pub trait Config:
+		frame_system::Config + pallet_staking::Config + pallet_session::Config
+	{
 		/// The overarching event type.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
@@ -221,6 +229,8 @@ pub mod pallet {
 		/// Profile delete request failed due to pending jobs, which can't be opted out at the
 		/// moment.
 		ProfileDeleteRequestFailed,
+		/// SessionKeys not provided
+		SessionKeysNotProvided,
 	}
 
 	/// Map from all "controller" accounts to the info regarding the staking.
@@ -272,9 +282,25 @@ pub mod pallet {
 				Error::<T>::NotValidator
 			);
 
+			// Get Role key of validator.
+			let validator_id =
+				<T as pallet_session::Config>::ValidatorIdOf::convert(stash_account.clone())
+					.ok_or(Error::<T>::NotValidator)?;
+
+			let session_keys = pallet_session::NextKeys::<T>::get(validator_id)
+				.ok_or(Error::<T>::SessionKeysNotProvided)?;
+			let role_key = OpaqueKeys::get_raw(&session_keys, ROLE_KEY_TYPE);
+
+			// Validate role key.
+			T::MPCHandler::validate_authority_key(stash_account.clone(), role_key.to_vec())?;
+
 			// Ensure no profile is assigned to the validator.
 			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::ProfileAlreadyExists);
-			let ledger = RoleStakingLedger::<T>::new(stash_account.clone(), profile.clone());
+			let ledger = RoleStakingLedger::<T>::new(
+				stash_account.clone(),
+				profile.clone(),
+				role_key.to_vec(),
+			);
 			let total_profile_restake = profile.get_total_profile_restake();
 
 			// Restaking amount of profile should meet min Restaking amount requirement.
@@ -304,11 +330,6 @@ pub mod pallet {
 						Error::<T>::InsufficientRestakingBond
 					);
 				}
-				// validate the metadata
-				T::MPCHandler::validate_authority_key(
-					stash_account.clone(),
-					record.metadata.get_authority_key(),
-				)?;
 			}
 
 			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =

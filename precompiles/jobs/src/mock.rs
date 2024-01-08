@@ -30,7 +30,7 @@ use tangle_primitives::{
 		traits::{JobToFee, MPCHandler},
 		*,
 	},
-	roles::{traits::RolesHandler, RoleTypeMetadata},
+	roles::traits::RolesHandler,
 };
 
 pub type AccountId = MockAccount;
@@ -203,10 +203,7 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		validators.contains(&address)
 	}
 
-	fn get_validator_metadata(
-		_address: AccountId,
-		_role_type: RoleType,
-	) -> Option<RoleTypeMetadata> {
+	fn get_validator_role_key(_address: AccountId) -> Option<Vec<u8>> {
 		None
 	}
 

@@ -117,8 +117,8 @@ pub mod module {
 		EmptyResult,
 		/// empty job
 		EmptyJob,
-		/// Validator metadata not found
-		ValidatorMetadataNotFound,
+		/// Validator role key not found.
+		ValidatorRoleKeyNotFound,
 		/// Unexpected result provided
 		ResultNotExpectedType,
 		/// No permission to change permitted caller
