@@ -81,7 +81,7 @@ impl SubstrateCli for Cli {
 				tangle_primitives::TESTNET_CHAIN_ID,
 			)?),
 			"tangle-testnet" => Box::new(chainspec::testnet::ChainSpec::from_json_bytes(
-				&include_bytes!("../../chainspecs/testnet/tangle-standalone.json")[..],
+				&include_bytes!("../../chainspecs/testnet/tangle-testnet.json")[..],
 			)?),
 			// generates the spec for mainnet
 			"mainnet-local" => Box::new(chainspec::mainnet::local_mainnet_config(
