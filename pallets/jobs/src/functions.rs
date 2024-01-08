@@ -179,7 +179,8 @@ impl<T: Config> Pallet<T> {
 
 						// charge the validator fee for job submission
 						let job = JobSubmissionOf::<T> {
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type: job_type.clone(),
 						};
 
@@ -193,7 +194,8 @@ impl<T: Config> Pallet<T> {
 
 						let job_info = JobInfo {
 							owner: phase1.owner.clone(),
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type,
 							fee,
 						};
@@ -232,7 +234,8 @@ impl<T: Config> Pallet<T> {
 
 						// charge the validator fee for job submission
 						let job = JobSubmissionOf::<T> {
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type: job_type.clone(),
 						};
 
@@ -246,7 +249,8 @@ impl<T: Config> Pallet<T> {
 
 						let job_info = JobInfo {
 							owner: phase1.owner.clone(),
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type,
 							fee,
 						};
@@ -297,15 +301,15 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: None,
-			result: job_result,
+			result: job_result.clone(),
 		})?;
 
 		let result = PhaseResult {
 			owner: job_info.owner.clone(),
-			expiry: job_info.expiry,
 			job_type: job_info.job_type.clone(),
+			ttl: job_info.ttl,
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
-			result: info.key,
+			result: job_result,
 		};
 		Ok(result)
 	}
@@ -330,7 +334,7 @@ impl<T: Config> Pallet<T> {
 				.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 		// Validate existing result
-		ensure!(phase_one_result.expiry >= now, Error::<T>::ResultExpired);
+		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
 
 		// ensure the participants are the expected participants from job
 		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
@@ -345,11 +349,14 @@ impl<T: Config> Pallet<T> {
 			.map_err(|_| Error::<T>::InvalidValidator)?;
 			participant_keys.push(pub_key);
 		}
-
+		let signing_key = match phase_one_result.result {
+			JobResult::DKGPhaseOne(result) => result.key,
+			_ => return Err(Error::<T>::InvalidJobPhase.into()),
+		};
 		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
 			signature: info.signature.clone(),
 			data: info.data,
-			signing_key: phase_one_result.result,
+			signing_key,
 			signature_type: info.signature_type,
 		});
 
@@ -361,15 +368,15 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: Some(phase_one_job_info.job_type),
-			result: job_result,
+			result: job_result.clone(),
 		})?;
 
 		let result = PhaseResult {
 			owner: job_info.owner.clone(),
-			expiry: job_info.expiry,
+			ttl: job_info.ttl,
 			job_type: job_info.job_type.clone(),
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
-			result: info.signature,
+			result: job_result,
 		};
 		Ok(result)
 	}
@@ -409,15 +416,14 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: None,
-			result: job_result,
+			result: job_result.clone(),
 		})?;
 
 		let result = PhaseResult {
 			owner: job_info.owner.clone(),
-			expiry: job_info.expiry,
+			ttl: job_info.ttl,
 			job_type: job_info.job_type.clone(),
-			// No data in the result
-			result: Vec::new(),
+			result: job_result,
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 		};
 		Ok(result)
@@ -444,7 +450,7 @@ impl<T: Config> Pallet<T> {
 				.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 		// Validate existing result
-		ensure!(phase_one_result.expiry >= now, Error::<T>::ResultExpired);
+		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
 
 		let job_result = JobResult::ZkSaaSPhaseTwo(info.clone());
 
@@ -456,14 +462,14 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: Some(phase_one_job_info.job_type),
-			result: job_result,
+			result: job_result.clone(),
 		})?;
 
 		let result = PhaseResult {
 			owner: job_info.owner.clone(),
-			expiry: job_info.expiry,
+			ttl: job_info.ttl,
 			job_type: job_info.job_type.clone(),
-			result: info.proof(),
+			result: job_result,
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 		};
 		Ok(result)
