@@ -397,12 +397,16 @@ impl pallet_session::historical::Config for Runtime {
 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
 }
 
+// Staking reward curve, more details at
+// https://docs.rs/pallet-staking-reward-curve/latest/pallet_staking_reward_curve/macro.build.html
+// We are aiming for a max inflation of 5%, when 60% of tokens are staked
+// In practical sense, our reward rate will fluctuate between 2.5%-5% since the staked token count
+// varies
 pallet_staking_reward_curve::build! {
 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
-		min_inflation: 0_040_000,
-		max_inflation: 0_050_000,
-		// 60% of total issuance at a yearly inflation rate of 5%
-		ideal_stake: 0_600_000,
+		min_inflation: 0_025_000, // min inflation of 2.5%
+		max_inflation: 0_050_000, // max inflation of 5% (acheived only at ideal stake)
+		ideal_stake: 0_600_000, // ideal stake (60% of total supply)
 		falloff: 0_050_000,
 		max_piece_count: 40,
 		test_precision: 0_005_000,
@@ -411,7 +415,11 @@ pallet_staking_reward_curve::build! {
 
 parameter_types! {
 	pub const SessionsPerEra: sp_staking::SessionIndex = 1;
-	pub const BondingDuration: sp_staking::EraIndex = 24 * 28;
+	// Six sessions in an era (24 hours).
+	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
+	// 28 eras for unbonding (28 days).
+	pub const BondingDuration: sp_staking::EraIndex = 28;
+	// 27 eras for slash defer duration (27 days).
 	pub const SlashDeferDuration: sp_staking::EraIndex = 27;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 	pub const MaxNominatorRewardedPerValidator: u32 = 256;

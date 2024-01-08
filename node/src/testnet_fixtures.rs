@@ -25,37 +25,35 @@ use tangle_testnet_runtime::AccountId;
 
 /// Testnet root key
 pub fn get_testnet_root_key() -> AccountId {
-	// Standalone sudo key: 5CDZpRSZ14TmXorHTsTeksY7223FzsaLXPbpTPBUV6NaZSr1
-	hex!["06c225d97d596c57e620aba15e1a8a69c7b334ffdab175788c6553f7dd181a56"].into()
+	hex!["9c2c928c3b9ac62c6dc4caaf5777c16ce28984dedc92687ef427f8f4f6d61d2f"].into()
 }
 
 /// Standalone alpha bootnodes
 pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
-		"/ip4/3.22.222.30/tcp/30333/p2p/12D3KooWRdvZ3PRteq8DC78Z3z5ZiehipKrKhHDRpgvCjc8XSeQx"
+		"/ip4/3.22.222.30/tcp/40333/p2p/12D3KooWRdvZ3PRteq8DC78Z3z5ZiehipKrKhHDRpgvCjc8XSeQx"
 			.parse()
 			.unwrap(),
-		"/ip4/18.119.14.21/tcp/30333/p2p/12D3KooWJP5NbEjEK1YihofJm3MMSJWrbRWjeEkRf3LtKvkj6mr9"
+		"/ip4/18.119.14.21/tcp/40333/p2p/12D3KooWJP5NbEjEK1YihofJm3MMSJWrbRWjeEkRf3LtKvkj6mr9"
 			.parse()
 			.unwrap(),
-		"/ip4/18.188.183.185/tcp/30333/p2p/12D3KooWDL3KiR6CpnEbgUgheje1cMGQtwH4euxGMPQBkwU5cZdu"
+		"/ip4/18.188.183.185/tcp/40333/p2p/12D3KooWDL3KiR6CpnEbgUgheje1cMGQtwH4euxGMPQBkwU5cZdu"
 			.parse()
 			.unwrap(),
-		"/ip4/3.137.213.159/tcp/30333/p2p/12D3KooWS4aniCJTz2RiNfNUka8TTa3gXak63FJgdAgfAWLCnsAi"
+		"/ip4/3.137.213.159/tcp/40333/p2p/12D3KooWS4aniCJTz2RiNfNUka8TTa3gXak63FJgdAgfAWLCnsAi"
 			.parse()
 			.unwrap(),
-		"/ip4/3.144.191.66/tcp/30333/p2p/12D3KooWM8RYTbVygshTJAbiM5YqvTwWPbZrF8iQ9WS96nEE2Ebr"
+		"/ip4/3.144.191.66/tcp/40333/p2p/12D3KooWM8RYTbVygshTJAbiM5YqvTwWPbZrF8iQ9WS96nEE2Ebr"
 			.parse()
 			.unwrap(),
 	]
 }
 
-/// Standalone initial authorities
+/// Tangle testnet authorities
 pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)> {
 	vec![
-		// standalone 1
+		// tangle-testnet 1
 		(
-			// hex!["d4c197403bae729fd0f219a0925c4f9274d432c7bfce5f94f2e0dae605dde407"].into(),
 			hex!["6c99e8e4ae3fe7e3328d7e9d85eb98e86bdc6410695797349fa536ebb9bb0a4a"].into(),
 			hex!["d8a00a2454cd7455c040e363e6e76f4abd9e4d3876253964d9f40a66ad79694b"]
 				.unchecked_into(),
@@ -63,12 +61,11 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 				.unchecked_into(),
 			hex!["0297bc051d94b25787482e60fa4eba19f15af30fa244240ae4439d219ee00e78"]
 				.unchecked_into(),
-			hex!["000000000000000000000000000000000000000000000000000000000000000000"]
+			hex!["02a1af3c93d94e9b658a9aaa994bfa3fc156c9d38c60872d3dd33f63cd7aa12a6b"]
 				.unchecked_into(),
 		),
-		// standalone 2
+		// tangle-testnet 2
 		(
-			// hex!["48a705897c103ddeda7e38bdadb42dc4c429e1b542287dfb07a9837982e04d14"].into(),
 			hex!["444dbfd0220eb1a993a7a2b9e1530aee1d17388ba3db34a0ee2b8ff971bfd073"].into(),
 			hex!["f02ee9baa32c490cf06eabe3580a90be704618f04636b321ee599c8912392c7a"]
 				.unchecked_into(),
@@ -76,12 +73,11 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 				.unchecked_into(),
 			hex!["de6d5010678fd2175fe70c857d3eba80838e3735b1051f4aed98671800ec483f"]
 				.unchecked_into(),
-			hex!["000000000000000000000000000000000000000000000000000000000000000000"]
+			hex!["0305c8dd5a251ed604350f50a993edc9baa66fb72b56091346316dd94052a068fa"]
 				.unchecked_into(),
 		),
-		// standalone 3
+		// tangle-testnet 3
 		(
-			// hex!["e2629eedccc6887f78d62d4ed15becd1b791ba0c38a5c72ccd416367097d7c3c"].into(),
 			hex!["2c4e648b0fbbb88ff6b92b208273eb144383b2b19edc992e91448a4371d4d97d"].into(),
 			hex!["a41b35f75e5509ce96e62bc27bb9a1b5587cc3d596f8afa867962b0e03230513"]
 				.unchecked_into(),
@@ -89,12 +85,11 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 				.unchecked_into(),
 			hex!["8472336050c4e4a51ac69865a4a31c6dd0e5c2f79555d8646cafb3bd8f12d75c"]
 				.unchecked_into(),
-			hex!["000000000000000000000000000000000000000000000000000000000000000000"]
+			hex!["02825faaf113b15b28dfdfe52eeee66554fe2892825e146d20ac49dd7c37d6e793"]
 				.unchecked_into(),
 		),
-		// standalone 4
+		// tangle-testnet 4
 		(
-			// hex!["3281b9311756ee35e8bd53bc05e38af78ea4211c72db0ffcd8dd317785fa1327"].into(),
 			hex!["c884c8eb280327221a3ae6a45fe6c8805f09bcfc11b409c8e2daa621c0d99608"].into(),
 			hex!["06e0a0d39503a101ca9c36f84b3ccf53015ee625a546bc570e550af963d13164"]
 				.unchecked_into(),
@@ -102,12 +97,11 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 				.unchecked_into(),
 			hex!["029cb182ddb9c5560aaa299f7b445e575007b8295bd85a80a7b2eb7baa3e2b7c"]
 				.unchecked_into(),
-			hex!["000000000000000000000000000000000000000000000000000000000000000000"]
+			hex!["02745849fbb4cf0f1f9f310cf67740431fd4cd1b4292bb1a3efeb93956e612e75f"]
 				.unchecked_into(),
 		),
-		// standalone 5
+		// tangle-testnet 5
 		(
-			// hex!["34d06ae4117b82a936b81d5219a438fa7b4093a6b67ebb0899686fb4e3b79b55"].into(),
 			hex!["483e0b8d6801c51115fd4b124c91e2d5dcd642b30335f6c5a1738ea18f66c251"].into(),
 			hex!["ce80df4851003f6ffd4ee88d9be85966f1de8b2e494c009dbf336177485f023f"]
 				.unchecked_into(),
@@ -115,7 +109,7 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 				.unchecked_into(),
 			hex!["1ea007d87f91f96c31b1062548eb77c40d47a43f1c84c36caa8586fc7c359729"]
 				.unchecked_into(),
-			hex!["000000000000000000000000000000000000000000000000000000000000000000"]
+			hex!["03dd29b916c41662207e2e5b7dd7c5c7054681bef8897bd4f0634b9075463159ca"]
 				.unchecked_into(),
 		),
 	]
