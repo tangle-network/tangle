@@ -131,6 +131,21 @@ pub fn new_partial(
 	>,
 	ServiceError,
 > {
+	println!("    ++++++++++++++++++++++++                                                                          
+	+++++++++++++++++++++++++++                                                                        
+	+++++++++++++++++++++++++++                                                                        
+	+++        ++++++      +++         @%%%%%%%%%%%                                     %%%
+	++++++      ++++      +++++        %%%%%%%%%%%%                                     %%%@
+	++++++++++++++++++++++++++            %%%%      %%%%@     %%% %%@       @%%%%%%%   %%%@    %%%%@
+	       ++++++++                       %%%%    @%%%%%%%@   %%%%%%%%%   @%%%%%%%%%   %%%@  %%%%%%%%%
+	       ++++++++                       %%%%    %%%%%%%%%   %%%% @%%%@  %%%%  %%%%   %%%@  %%%%%%%%%%
+	++++++++++++++++++++++++++            %%%%    %%%%%%%%%   %%%   %%%%  %%%   @%%%   %%%@ @%%%%%  %%%%%
+	++++++      ++++      ++++++          %%%%    %%%%%%%%%   %%%   %%%%  %%%%%%%%%%   %%%@  %%%%%%%%%@
+	+++        ++++++        +++          %%%%    %%%%%%%%%   %%%   %%%@   %%%%%%%%%   %%%    %%%%%%%@
+	++++      +++++++++      +++                                           %%%%  %%%%               
+	++++++++++++++++++++++++++++                                           %%%%%%%%%         
+	  +++++++++++++++++++++++                                                 %%%%% \n");
+
 	let telemetry = config
 		.telemetry_endpoints
 		.clone()
@@ -267,10 +282,11 @@ pub struct RunFullParams {
 	pub eth_config: EthConfiguration,
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
+	pub auto_insert_keys: bool,
 }
 /// Builds a new service for a full client.
 pub async fn new_full(
-	RunFullParams { mut config, eth_config, rpc_config, debug_output: _ }: RunFullParams,
+	RunFullParams { mut config, eth_config, rpc_config, debug_output: _, auto_insert_keys }: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -291,6 +307,32 @@ pub async fn new_full(
 				babe_worker_handle,
 			),
 	} = new_partial(&config, &eth_config)?;
+
+	if config.role.is_authority() {
+		if auto_insert_keys {
+			crate::utils::insert_controller_account_keys_into_keystore(
+				&config,
+				Some(keystore_container.keystore()),
+			);
+		} else {
+			crate::utils::insert_dev_controller_account_keys_into_keystore(
+				&config,
+				Some(keystore_container.keystore()),
+			);
+		}
+
+		// finally check if keys are inserted correctly
+		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore()).is_err() {
+			println!("   
+			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
+				Validator keys not found, validator keys are essential to run a validator on
+				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
+				how to generate and insert keys. OR start the node with --auto-insert-keys to automatically generate the keys.
+			++++++++++++++++++++++++++++++++++++++++++++++++   							
+			\n");
+			panic!("Keys not detected!")
+		}
+	}
 
 	let FrontierPartialComponents { filter_pool, fee_history_cache, fee_history_cache_limit } =
 		new_frontier_partial(&eth_config)?;

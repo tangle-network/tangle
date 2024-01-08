@@ -14439,6 +14439,7 @@ dependencies = [
  "frame-system",
  "frame-system-rpc-runtime-api",
  "futures 0.3.30",
+ "hex",
  "hex-literal",
  "jsonrpsee",
  "log",
