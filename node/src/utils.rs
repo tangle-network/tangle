@@ -1,3 +1,4 @@
+use parity_scale_codec::Encode;
 use sc_service::{ChainType, Configuration};
 use sp_core::{ecdsa, ed25519, sr25519, ByteArray, Pair, Public};
 use sp_keystore::{Keystore, KeystorePtr};
@@ -5,7 +6,6 @@ use sp_runtime::{
 	key_types::{ACCOUNT, BABE, GRANDPA, IM_ONLINE},
 	KeyTypeId,
 };
-
 /// Helper function to generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
 	TPublic::Pair::from_string(&format!("//{seed}"), None)
