@@ -345,10 +345,7 @@ fn testnet_genesis(
 		claims: ClaimsConfig {
 			claims: claims_list,
 			vesting: vesting_claims,
-			expiry: Some((
-				200u64,
-				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
-			)),
+			expiry: None, // no expiry on testnet
 		},
 	}
 }
