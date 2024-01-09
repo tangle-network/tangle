@@ -911,9 +911,9 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ResultNotExpectedType: AugmentedError<ApiType>;
       /**
-       * Validator metadata not found
+       * Validator role key not found.
        **/
-      ValidatorMetadataNotFound: AugmentedError<ApiType>;
+      ValidatorRoleKeyNotFound: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -1137,6 +1137,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Given role is not assigned to the validator.
        **/
       RoleNotAssigned: AugmentedError<ApiType>;
+      /**
+       * SessionKeys not provided
+       **/
+      SessionKeysNotProvided: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
