@@ -170,27 +170,27 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				vec![
 					(get_testnet_root_key(), ENDOWMENT * 5), // 50 Million
 					(
-						hex!["6c99e8e4ae3fe7e3328d7e9d85eb98e86bdc6410695797349fa536ebb9bb0a4a"]
+						hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"]
 							.into(),
 						ENDOWMENT,
 					),
 					(
-						hex!["444dbfd0220eb1a993a7a2b9e1530aee1d17388ba3db34a0ee2b8ff971bfd073"]
+						hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"]
 							.into(),
 						ENDOWMENT,
 					),
 					(
-						hex!["2c4e648b0fbbb88ff6b92b208273eb144383b2b19edc992e91448a4371d4d97d"]
+						hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"]
 							.into(),
 						ENDOWMENT,
 					),
 					(
-						hex!["c884c8eb280327221a3ae6a45fe6c8805f09bcfc11b409c8e2daa621c0d99608"]
+						hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"]
 							.into(),
 						ENDOWMENT,
 					),
 					(
-						hex!["483e0b8d6801c51115fd4b124c91e2d5dcd642b30335f6c5a1738ea18f66c251"]
+						hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"]
 							.into(),
 						ENDOWMENT,
 					),
