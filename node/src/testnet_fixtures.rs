@@ -31,19 +31,19 @@ pub fn get_testnet_root_key() -> AccountId {
 /// Standalone alpha bootnodes
 pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
-		"/ip4/3.22.222.30/tcp/40333/p2p/12D3KooWRdvZ3PRteq8DC78Z3z5ZiehipKrKhHDRpgvCjc8XSeQx"
+		"/ip4/3.22.222.30/tcp/30333/p2p/12D3KooWRdvZ3PRteq8DC78Z3z5ZiehipKrKhHDRpgvCjc8XSeQx"
 			.parse()
 			.unwrap(),
-		"/ip4/18.119.14.21/tcp/40333/p2p/12D3KooWJP5NbEjEK1YihofJm3MMSJWrbRWjeEkRf3LtKvkj6mr9"
+		"/ip4/18.119.14.21/tcp/30333/p2p/12D3KooWJP5NbEjEK1YihofJm3MMSJWrbRWjeEkRf3LtKvkj6mr9"
 			.parse()
 			.unwrap(),
-		"/ip4/18.188.183.185/tcp/40333/p2p/12D3KooWDL3KiR6CpnEbgUgheje1cMGQtwH4euxGMPQBkwU5cZdu"
+		"/ip4/3.15.186.160/tcp/30333/p2p/12D3KooWDL3KiR6CpnEbgUgheje1cMGQtwH4euxGMPQBkwU5cZdu"
 			.parse()
 			.unwrap(),
-		"/ip4/3.137.213.159/tcp/40333/p2p/12D3KooWS4aniCJTz2RiNfNUka8TTa3gXak63FJgdAgfAWLCnsAi"
+		"/ip4/3.137.213.159/tcp/30333/p2p/12D3KooWS4aniCJTz2RiNfNUka8TTa3gXak63FJgdAgfAWLCnsAi"
 			.parse()
 			.unwrap(),
-		"/ip4/3.144.191.66/tcp/40333/p2p/12D3KooWM8RYTbVygshTJAbiM5YqvTwWPbZrF8iQ9WS96nEE2Ebr"
+		"/ip4/3.144.191.66/tcp/30333/p2p/12D3KooWM8RYTbVygshTJAbiM5YqvTwWPbZrF8iQ9WS96nEE2Ebr"
 			.parse()
 			.unwrap(),
 	]
