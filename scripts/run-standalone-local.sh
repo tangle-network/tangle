@@ -53,6 +53,7 @@ echo "*** Start Tangle Testnet ***"
   --rpc-max-request-size 3000 \
   --rpc-max-response-size 3000 \
   --ethapi trace,debug \
+  --auto-insert-keys \
   --node-key 0000000000000000000000000000000000000000000000000000000000000001 &
 # Bob
 ./target/release/tangle --tmp --dev --validator -lerror --bob \
@@ -60,6 +61,7 @@ echo "*** Start Tangle Testnet ***"
   --port ${ports[1]} \
   --rpc-port 9945 \
   --ethapi trace,debug \
+  --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Charlie
 ./target/release/tangle --tmp --dev --validator -lerror --charlie \
@@ -67,6 +69,7 @@ echo "*** Start Tangle Testnet ***"
   --port ${ports[1]} \
   --rpc-port 9946 \
   --ethapi trace,debug \
+  --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Dave
 ./target/release/tangle --tmp --dev --validator -lerror --dave \
@@ -74,6 +77,7 @@ echo "*** Start Tangle Testnet ***"
   --port ${ports[1]} \
   --rpc-port 9947 \
   --ethapi trace,debug \
+  --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Eve
 ./target/release/tangle --tmp --dev --validator -linfo --eve \
@@ -81,6 +85,7 @@ echo "*** Start Tangle Testnet ***"
     --port ${ports[2]} \
     --rpc-port 9948 \
     --ethapi trace,debug \
+    --auto-insert-keys \
     -levm=debug \
     --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
 popd
