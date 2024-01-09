@@ -1,4 +1,4 @@
-use parity_scale_codec::Encode;
+
 use sc_service::{ChainType, Configuration};
 use sp_core::{ecdsa, ed25519, sr25519, ByteArray, Pair, Public};
 use sp_keystore::{Keystore, KeystorePtr};

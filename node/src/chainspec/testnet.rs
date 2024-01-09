@@ -25,7 +25,7 @@ use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::{
-	traits::{AccountIdConversion, IdentifyAccount, Verify},
+	traits::{IdentifyAccount, Verify},
 	BoundedVec,
 };
 use std::collections::BTreeMap;
@@ -35,7 +35,7 @@ use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
 	ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill,
 	RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
-	SystemConfig, TreasuryPalletId, UNIT, WASM_BINARY,
+	SystemConfig, UNIT, WASM_BINARY,
 };
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
