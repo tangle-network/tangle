@@ -7,7 +7,7 @@
   </div>
 <h1 align="left"> The Tangle Network </h1>
 <p align="left">
-    <strong>An MPC based governance system for cross-chain zero-knowledge applications. </strong>
+    <strong>An MPC-as-a-service blockchain infrastructure for empowering cross-chain and zero-knowledge applications development. </strong>
 </p>
 
 <div align="left" >
@@ -27,8 +27,8 @@
     <li><a href="#start"> Getting Started</a></li>
     <li><a href="#prerequisites">Prerequisites</a></li>
     <li><a href="#nix">Installation using Nix</a></li>
-    <li><a href="#standalone">Run Standalone Testnet</a></li>
-    <li><a href="#relayer">Running Standalone Node with Webb Relayer</a></li>
+    <li><a href="#testnet">Run Tangle Testnet</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
     <li><a href="#contribute">Contributing</a></li>
     <li><a href="#license">License</a></li>
   </ul>  
@@ -36,12 +36,13 @@
 
 <h1 id="start"> Getting Started </h1>
 
-The Tangle Network contains runtimes for standalone node featuring Webb's DKG and privacy pallet protocols.If you would like to familiarize yourself with Tangle and DKG protocol check out following repo and docs:
+Tangle, Built on Substrate, Tangle Network empowers privacy-enhancing and governance-decentralized applications, incorporating cross-chain functionality, EVM compatibility, advanced governance systems, and ZK applications into a unified ecosystem.
 
-- [Dkg Substrate Protocol](https://github.com/webb-tools/dkg-substrate)
-- [Tangle Docs](https://docs.webb.tools/docs/tangle-network/overview/) 
+If you would like to familiarize yourself with Tangle Network check out following repo and docs:
+
+- [Webb Gadgets](https://github.com/webb-tools/gadgets)
+- [Tangle Docs](https://docs.webb.tools/docs/tangle-network/overview/)
 - [Tangle Website](https://tangle.webb.tools/)
-
 
 <h2 id="prerequisites"> Prerequisites</h2>
 
@@ -55,6 +56,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # Configure
 source ~/.cargo/env
 ```
+
 Great! Now your Rust environment is ready!
 
 **Note:** You may need additional dependencies, checkout [substrate.io](https://docs.substrate.io/v3/getting-started/installation) for more information.
@@ -67,29 +69,34 @@ If you want to use Nix for development, please follow following instructions
 3. If you have [`direnv`](https://github.com/nix-community/nix-direnv#installation) installed, everything should work out of the box.
 4. Alternatively, you can run `nix flake develop` in the root of this repo to get a shell with all the dependencies installed.
 
-
-<h2 id="standalone"> Run Standalone Local Testnet </h2>
+<h2 id="testnet"> Run Tangle Testnet </h2>
 
 1. Build `tangle` node.
+
 ```bash
-  cargo build --release 
+  cargo build --release
 ```
-2. Execute tangle network setup script.
+
+2. Execute tangle network setup script to run it locally.
+
 ```bash
 ./scripts/run-standalone-local.sh --clean
 ```
+
 This should start the local testnet, you can view the logs in /tmp directory for all the authorities and use [polkadotJS](https://polkadot.js.org/apps/#/explorer) to view the running testnet.
 
+3. To Start validating on the live testnet please visit [Starting a validator on Tangle docs](https://docs.tangle.tools/docs/node/validator/requirements).
 
-<h2 id="relayer"> Run Standalone Node with Webb Relayer</h2>
+<h2 id="troubleshooting"> Troubleshooting </h2>
 
-Tangle standalone node ships with [Webb Relayer](https://github.com/webb-tools/relayer) in the node itself, which is useful to run them together.
-For instructions on how to run Tangle Standalone Node with Webb Relayer, Please refer to [this document](./RELAYER.md).
+The linking phase may fail due to not finding libgmp (i.e., "could not find library -lgmp") when building on a mac M1. To fix this problem, run:
 
-<h2 id="relayer"> Run Standalone Node with Light Client</h2>
-
-Tangle standalone node ships with [Webb Light Client](https://github.com/webb-tools/pallet-eth2-light-client) in the node itself, which is useful to run them together.
-For instructions on how to run Tangle Standalone Node with Webb Light Client, Please refer to [this document](./light-client-configs/LIGHT-CLIENT.md).
+```bash
+brew install gmp
+# make sure to run the commands below each time when starting a new env, or, append them to .zshrc
+export LIBRARY_PATH=$LIBRARY_PATH:/opt/homebrew/lib
+export INCLUDE_PATH=$INCLUDE_PATH:/opt/homebrew/include
+```
 
 <h2 id="contribute"> Contributing </h2>
 
@@ -102,14 +109,3 @@ If you have a contribution in mind, please check out our [Contribution Guide](./
 Licensed under <a href="LICENSE">GNU General Public License v3.0</a>.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, as defined in the GNU General Public License v3.0 license, shall be licensed as above, without any additional terms or conditions.
-
-## Troubleshooting
-The linking phase may fail due to not finding libgmp (i.e., "could not find library -lgmp") when building on a mac M1. To fix this problem, run:
-
-```bash
-brew install gmp
-# make sure to run the commands below each time when starting a new env, or, append them to .zshrc
-export LIBRARY_PATH=$LIBRARY_PATH:/opt/homebrew/lib
-export INCLUDE_PATH=$INCLUDE_PATH:/opt/homebrew/include
-```
-
