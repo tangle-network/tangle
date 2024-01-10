@@ -116,6 +116,10 @@ use tangle_primitives::{
 		CANDIDACY_BOND, DESIRED_MEMBERS, DESIRED_RUNNERS_UP, ELECTIONS_PHRAGMEN_PALLET_ID,
 		MAX_CANDIDATES, MAX_VOTERS, TERM_DURATION,
 	},
+	staking::{
+		BONDING_DURATION, HISTORY_DEPTH, MAX_NOMINATOR_REWARDED_PER_VALIDATOR, OFFCHAIN_REPEAT,
+		OFFENDING_VALIDATOR_THRESHOLD, SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
+	},
 	treasury::{
 		BURN, DATA_DEPOSIT_PER_BYTE, MAXIMUM_REASON_LENGTH, MAX_APPROVALS, PROPOSAL_BOND,
 		PROPOSAL_BOND_MINIMUM, SPEND_PERIOD, TIP_COUNTDOWN, TIP_FINDERS_FEE,
@@ -415,16 +419,16 @@ pallet_staking_reward_curve::build! {
 
 parameter_types! {
 	// Six sessions in an era (24 hours).
-	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
+	pub const SessionsPerEra: sp_staking::SessionIndex = SESSIONS_PER_ERA;
 	// 28 eras for unbonding (28 days).
-	pub const BondingDuration: sp_staking::EraIndex = 28;
+	pub const BondingDuration: sp_staking::EraIndex = BONDING_DURATION;
 	// 27 eras for slash defer duration (27 days).
-	pub const SlashDeferDuration: sp_staking::EraIndex = 27;
+	pub const SlashDeferDuration: sp_staking::EraIndex = SLASH_DEFER_DURATION;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
-	pub const MaxNominatorRewardedPerValidator: u32 = 256;
-	pub const OffendingValidatorsThreshold: Perbill = Perbill::from_percent(17);
-	pub OffchainRepeat: BlockNumber = 5;
-	pub const HistoryDepth: u32 = 80;
+	pub const MaxNominatorRewardedPerValidator: u32 = MAX_NOMINATOR_REWARDED_PER_VALIDATOR;
+	pub const OffendingValidatorsThreshold: Perbill = OFFENDING_VALIDATOR_THRESHOLD;
+	pub OffchainRepeat: BlockNumber = OFFCHAIN_REPEAT;
+	pub const HistoryDepth: u32 = HISTORY_DEPTH;
 }
 
 pub struct StakingBenchmarkingConfig;
