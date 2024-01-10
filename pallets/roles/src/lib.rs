@@ -387,7 +387,7 @@ pub mod pallet {
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
 
 			let max_restaking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
-			// Total restaking amount should not exceed `max_restaking_amount``.
+			// Total restaking amount should not exceed `max_restaking_amount`.
 			ensure!(
 				total_profile_restake <= max_restaking_bond,
 				Error::<T>::ExceedsMaxRestakeValue
