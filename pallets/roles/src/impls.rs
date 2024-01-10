@@ -147,7 +147,7 @@ impl<T: Config> Pallet<T> {
 	/// Calculate slash value for restaked amount
 	///
 	/// # Parameters
-	/// - slash_fraction: Slash fraction of total-stake
+	/// - `slash_fraction`: Slash fraction of total-stake
 	/// - `total_stake`: Total stake of the validator
 	///
 	/// # Returns
@@ -284,18 +284,36 @@ impl<T: Config> sp_runtime::BoundToRuntimeAppPublic for Pallet<T> {
 impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
 	type Key = T::RoleKeyId;
 
-	fn on_genesis_session<'a, I: 'a>(_validators: I)
+	fn on_genesis_session<'a, I: 'a>(validators: I)
 	where
 		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
 	{
-		// nothing to be done
+		validators
+			.into_iter()
+			.filter(|(acc, _)| Ledger::<T>::contains_key(acc))
+			.for_each(|(acc, role_key)| {
+				let mut ledger: RoleStakingLedger<T> = Ledger::<T>::get(acc).unwrap();
+				if ledger.role_key != role_key.encode() {
+					ledger.role_key = role_key.encode();
+					Self::update_ledger(acc, &ledger);
+				}
+			});
 	}
 
-	fn on_new_session<'a, I: 'a>(_changed: bool, _validators: I, _queued_validators: I)
+	fn on_new_session<'a, I: 'a>(_changed: bool, validators: I, _queued_validators: I)
 	where
 		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
 	{
-		// nothing to be done
+		validators
+			.into_iter()
+			.filter(|(acc, _)| Ledger::<T>::contains_key(acc))
+			.for_each(|(acc, role_key)| {
+				let mut ledger: RoleStakingLedger<T> = Ledger::<T>::get(acc).unwrap();
+				if ledger.role_key != role_key.encode() {
+					ledger.role_key = role_key.encode();
+					Self::update_ledger(acc, &ledger);
+				}
+			});
 	}
 
 	fn on_disabled(_i: u32) {

@@ -376,7 +376,7 @@ pub mod pallet {
 			let mut ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
 			let total_profile_restake = updated_profile.get_total_profile_restake();
-			// Restaking amount of record should meet min Restaking amount requirement.
+			// Restaking amount of record should meet min restaking amount requirement.
 			let min_restaking_bond = MinRestakingBond::<T>::get();
 			ensure!(
 				total_profile_restake >= min_restaking_bond,
@@ -387,7 +387,7 @@ pub mod pallet {
 				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
 
 			let max_restaking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
-			// Total restaking amount should not exceed  max_restaking_amount.
+			// Total restaking amount should not exceed `max_restaking_amount``.
 			ensure!(
 				total_profile_restake <= max_restaking_bond,
 				Error::<T>::ExceedsMaxRestakeValue
