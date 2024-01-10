@@ -74,7 +74,7 @@ If you want to use Nix for development, please follow following instructions
 1. Build `tangle` node.
 
 ```bash
-  cargo build --release
+  cargo build --release --features testnet
 ```
 
 2. Execute tangle network setup script to run it locally.
