@@ -23,7 +23,7 @@ use sp_runtime::AccountId32;
 use tangle_primitives::{
 	jobs::{
 		DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DKGTSSSignatureResult, DigitalSignatureType,
-		JobSubmission, JobType,
+		JobSubmission, JobType, RpcResponseJobsData,
 	},
 	roles::{RoleType, ThresholdSignatureRoleType},
 };
@@ -198,6 +198,108 @@ fn jobs_submission_e2e_works_for_dkg() {
 			0
 		)
 		.is_none());
+	});
+}
+
+#[test]
+fn jobs_rpc_tests() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+
+		let participants = vec![ALICE, BOB, CHARLIE, DAVE, EVE];
+
+		let threshold_signature_role_type = ThresholdSignatureRoleType::TssGG20;
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: participants.clone(),
+				threshold: 3,
+				permitted_caller: Some(TEN),
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
+
+		let stored_job =
+			SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 0).unwrap();
+		let expected_rpc_response = RpcResponseJobsData {
+			job_id: 0,
+			job_type: stored_job.job_type,
+			ttl: stored_job.ttl,
+			expiry: stored_job.expiry,
+		};
+
+		// query jobs by validator should work
+		for validator in participants {
+			assert_eq!(
+				Jobs::query_jobs_by_validator(validator),
+				Some(vec![expected_rpc_response.clone()])
+			);
+		}
+
+		assert_eq!(
+			Jobs::query_job_by_id(RoleType::Tss(threshold_signature_role_type), 0),
+			Some(expected_rpc_response)
+		);
+		assert_eq!(Jobs::query_next_job_id(), 1);
+
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(
+			RuntimeOrigin::signed(TEN),
+			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			0,
+			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
+				signatures: vec![],
+				threshold: 3,
+				participants: vec![],
+				key: vec![],
+				signature_type: DigitalSignatureType::Ecdsa
+			})
+		));
+
+		assert_eq!(Jobs::query_job_by_id(RoleType::Tss(threshold_signature_role_type), 0), None);
+		assert_eq!(Jobs::query_next_job_id(), 1);
+
+		let expected_result =
+			KnownResults::<Runtime>::get(RoleType::Tss(ThresholdSignatureRoleType::TssGG20), 0);
+		assert_eq!(
+			Jobs::query_job_result(RoleType::Tss(threshold_signature_role_type), 0),
+			expected_result
+		);
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 0,
+			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
+				phase_one_id: 0,
+				submission: vec![],
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
+
+		let stored_job =
+			SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 1).unwrap();
+		let expected_rpc_response = RpcResponseJobsData {
+			job_id: 1,
+			job_type: stored_job.job_type,
+			ttl: stored_job.ttl,
+			expiry: stored_job.expiry,
+		};
+
+		assert_eq!(
+			Jobs::query_job_by_id(RoleType::Tss(threshold_signature_role_type), 1),
+			Some(expected_rpc_response)
+		);
+		assert_eq!(Jobs::query_next_job_id(), 2);
+
+		let expected_result =
+			KnownResults::<Runtime>::get(RoleType::Tss(ThresholdSignatureRoleType::TssGG20), 1);
+		assert_eq!(
+			Jobs::query_job_result(RoleType::Tss(threshold_signature_role_type), 1),
+			expected_result
+		);
 	});
 }
 

@@ -70,7 +70,7 @@ use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
-	jobs::{JobId, RpcResponseJobsData, RpcResponsePhaseOneResult},
+	jobs::{JobId, PhaseResult, RpcResponseJobsData},
 	roles::RoleType,
 };
 
@@ -1417,8 +1417,8 @@ impl_runtime_apis! {
 			Jobs::query_job_by_id(role_type, job_id)
 		}
 
-		fn query_phase_one_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponsePhaseOneResult<AccountId, BlockNumberOf<Block>>> {
-			Jobs::query_phase_one_by_id(role_type, job_id)
+		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>>> {
+			Jobs::query_job_result(role_type, job_id)
 		}
 
 		fn query_next_job_id() -> JobId {
