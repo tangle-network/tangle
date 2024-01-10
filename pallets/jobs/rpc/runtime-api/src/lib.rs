@@ -21,7 +21,7 @@ use parity_scale_codec::Codec;
 use sp_runtime::{traits::MaybeDisplay, Serialize};
 use sp_std::vec::Vec;
 use tangle_primitives::{
-	jobs::{JobId, RpcResponseJobsData, RpcResponsePhaseOneResult},
+	jobs::{JobId, PhaseResult, RpcResponseJobsData},
 	roles::RoleType,
 };
 
@@ -59,7 +59,7 @@ sp_api::decl_runtime_apis! {
 		/// An optional `RpcResponseJobsData` containing the account ID of the job.
 		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>;
 
-		/// Queries the phase one result of a job by its key and ID.
+		/// Queries the result of a job by its role_type and ID.
 		///
 		/// # Arguments
 		///
@@ -68,8 +68,8 @@ sp_api::decl_runtime_apis! {
 		///
 		/// # Returns
 		///
-		/// An `Option` containing the phase one result of the job, wrapped in an `RpcResponsePhaseOneResult`.
-		fn query_phase_one_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponsePhaseOneResult<AccountId, BlockNumberOf<Block>>>;
+		/// An `Option` containing the phase one result of the job, wrapped in an `PhaseResult`.
+		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>>>;
 
 		/// Queries next job ID.
 		///

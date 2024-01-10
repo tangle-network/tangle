@@ -30,7 +30,7 @@ use sp_runtime::{
 };
 use std::sync::Arc;
 use tangle_primitives::{
-	jobs::{JobId, RpcResponseJobsData, RpcResponsePhaseOneResult},
+	jobs::{JobId, PhaseResult, RpcResponseJobsData},
 	roles::RoleType,
 };
 
@@ -56,12 +56,12 @@ pub trait JobsApi<BlockHash, AccountId, BlockNumber> {
 	) -> RpcResult<Option<RpcResponseJobsData<AccountId, BlockNumber>>>;
 
 	#[method(name = "jobs_queryPhaseOneById")]
-	fn query_phase_one_by_id(
+	fn query_job_result(
 		&self,
 		at: Option<BlockHash>,
 		role_type: RoleType,
 		job_id: JobId,
-	) -> RpcResult<Option<RpcResponsePhaseOneResult<AccountId, BlockNumber>>>;
+	) -> RpcResult<Option<PhaseResult<AccountId, BlockNumber>>>;
 
 	#[method(name = "jobs_queryNextJobId")]
 	fn query_next_job_id(&self, at: Option<BlockHash>) -> RpcResult<JobId>;
@@ -116,16 +116,16 @@ where
 		}
 	}
 
-	fn query_phase_one_by_id(
+	fn query_job_result(
 		&self,
 		at: Option<<Block as BlockT>::Hash>,
 		role_type: RoleType,
 		job_id: JobId,
-	) -> RpcResult<Option<RpcResponsePhaseOneResult<AccountId, BlockNumberOf<Block>>>> {
+	) -> RpcResult<Option<PhaseResult<AccountId, BlockNumberOf<Block>>>> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 
-		match api.query_phase_one_by_id(at, role_type, job_id) {
+		match api.query_job_result(at, role_type, job_id) {
 			Ok(res) => Ok(res),
 			Err(e) => Err(runtime_error_into_rpc_err(e)),
 		}
