@@ -194,6 +194,7 @@ pub enum JobState {
 
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct PhaseResult<AccountId, BlockNumber> {
 	/// The owner's account ID.
 	pub owner: AccountId,
@@ -250,21 +251,6 @@ pub struct RpcResponseJobsData<AccountId, BlockNumber> {
 	/// Represents the maximum allowed submission time for a job result.
 	/// Once this time has passed, the result cannot be submitted.
 	pub expiry: BlockNumber,
-
-	/// The time-to-live (TTL) for the job, which determines the maximum allowed time for this job
-	/// to be available. After the TTL expires, the job can no longer be used.
-	pub ttl: BlockNumber,
-}
-
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct RpcResponsePhaseOneResult<AccountId, BlockNumber> {
-	/// The owner's account ID.
-	pub owner: AccountId,
-	/// The type of the job result.
-	pub result: JobResult,
-	/// The type of the job submission.
-	pub job_type: JobType<AccountId>,
 
 	/// The time-to-live (TTL) for the job, which determines the maximum allowed time for this job
 	/// to be available. After the TTL expires, the job can no longer be used.

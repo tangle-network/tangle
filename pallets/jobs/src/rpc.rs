@@ -1,6 +1,6 @@
 use super::*;
 pub use tangle_primitives::jobs::RpcResponseJobsData;
-use tangle_primitives::{jobs::RpcResponsePhaseOneResult, roles::RoleType};
+use tangle_primitives::{jobs::PhaseResult, roles::RoleType};
 
 impl<T: Config> Pallet<T> {
 	/// Queries jobs associated with a specific validator.
@@ -73,31 +73,12 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	///
 	/// An `Option` containing the phase one result of the job, wrapped in an
-	/// `RpcResponsePhaseOneResult`.
-	pub fn query_phase_one_by_id(
+	/// `PhaseResult`.
+	pub fn query_job_result(
 		role_type: RoleType,
 		job_id: JobId,
-	) -> Option<RpcResponsePhaseOneResult<T::AccountId, BlockNumberFor<T>>> {
-		if let Some(job_info) = SubmittedJobs::<T>::get(role_type, job_id) {
-			if !job_info.job_type.is_phase_one() {
-				let result = KnownResults::<T>::get(
-					job_info.job_type.get_role_type(),
-					job_info.job_type.clone().get_phase_one_id().unwrap(),
-				)
-				.unwrap();
-
-				let info = RpcResponsePhaseOneResult {
-					owner: job_info.owner,
-					result: result.result,
-					job_type: job_info.job_type,
-					ttl: job_info.ttl,
-				};
-
-				return Some(info)
-			}
-		}
-
-		None
+	) -> Option<PhaseResult<T::AccountId, BlockNumberFor<T>>> {
+		KnownResults::<T>::get(role_type, job_id)
 	}
 
 	/// Queries next job ID.
