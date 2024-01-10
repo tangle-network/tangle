@@ -93,6 +93,18 @@ pub enum JobType<AccountId> {
 	ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType),
 }
 
+/// Represents the different kinds of participants
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum Participants<AccountId> {
+	/// A Predefined set of participants
+	Predefined(Vec<AccountId>),
+	/// Any participant with a specific role type for the given job type
+	Any,
+	/// ???
+	LeaderElection,
+}
+
 /// Enum representing different types of data sources.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
