@@ -41,8 +41,8 @@ Tangle, Built on Substrate, Tangle Network empowers privacy-enhancing and govern
 If you would like to familiarize yourself with Tangle Network check out following repo and docs:
 
 - [Webb Gadgets](https://github.com/webb-tools/gadgets)
-- [Tangle Docs](https://docs.webb.tools/docs/tangle-network/overview/)
-- [Tangle Website](https://tangle.webb.tools/)
+- [Tangle Docs](https://docs.tangle.tools/docs)
+- [Tangle Website](https://tangle.tools/)
 
 <h2 id="prerequisites"> Prerequisites</h2>
 
