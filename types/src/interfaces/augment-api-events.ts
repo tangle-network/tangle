@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u32, u64 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import { EthTypesBlockHeader, PalletDkgFeeInfo, WebbProposalsHeaderTypedChainId, EthTypesExecutionHeaderInfo, EthereumLog, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsJobKey, TanglePrimitivesJobsJobSubmission, EthTypesEth2BeaconBlockHeader, PalletZksaasFeeInfo, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsPoolState, PalletStakingExposure, PalletStakingForcing, PalletStakingValidatorPrefs, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, PalletAirdropClaimsUtilsMultiAddress  } from '@polkadot/types/lookup';
+import { EthTypesBlockHeader, PalletDkgFeeInfo, WebbProposalsHeaderTypedChainId, EthTypesExecutionHeaderInfo, EthereumLog, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsJobSubmission, EthTypesEth2BeaconBlockHeader, PalletZksaasFeeInfo, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsPoolState, PalletStakingExposure, PalletStakingForcing, PalletStakingValidatorPrefs, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, PalletAirdropClaimsUtilsMultiAddress  } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -548,11 +548,11 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * A new job result has been submitted
        **/
-      JobResultSubmitted: AugmentedEvent<ApiType, [jobId: u32, jobKey: TanglePrimitivesJobsJobKey], { jobId: u32, jobKey: TanglePrimitivesJobsJobKey }>;
+      JobResultSubmitted: AugmentedEvent<ApiType, [jobId: u64, roleType: TanglePrimitivesRolesRoleType], { jobId: u64, roleType: TanglePrimitivesRolesRoleType }>;
       /**
        * A new job has been submitted
        **/
-      JobSubmitted: AugmentedEvent<ApiType, [jobId: u32, jobKey: TanglePrimitivesJobsJobKey, details: TanglePrimitivesJobsJobSubmission], { jobId: u32, jobKey: TanglePrimitivesJobsJobKey, details: TanglePrimitivesJobsJobSubmission }>;
+      JobSubmitted: AugmentedEvent<ApiType, [jobId: u64, roleType: TanglePrimitivesRolesRoleType, details: TanglePrimitivesJobsJobSubmission], { jobId: u64, roleType: TanglePrimitivesRolesRoleType, details: TanglePrimitivesJobsJobSubmission }>;
       /**
        * validator has earned reward
        **/
@@ -680,7 +680,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Pending jobs,that cannot be opted out at the moment.
        **/
-      PendingJobs: AugmentedEvent<ApiType, [pendingJobs: Vec<ITuple<[TanglePrimitivesJobsJobKey, u32]>>], { pendingJobs: Vec<ITuple<[TanglePrimitivesJobsJobKey, u32]>> }>;
+      PendingJobs: AugmentedEvent<ApiType, [pendingJobs: Vec<ITuple<[TanglePrimitivesRolesRoleType, u64]>>], { pendingJobs: Vec<ITuple<[TanglePrimitivesRolesRoleType, u64]>> }>;
       /**
        * New profile created.
        **/

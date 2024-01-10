@@ -1,4 +1,3 @@
-use parity_scale_codec::Encode;
 use sc_service::{ChainType, Configuration};
 use sp_core::{ecdsa, ed25519, sr25519, ByteArray, Pair, Public};
 use sp_keystore::{Keystore, KeystorePtr};
@@ -66,7 +65,7 @@ fn insert_account_keys_into_keystore<TPublic: Public>(
                 Pubkey : {:?}
                 STORE THE KEYS SAFELY, NOT TO BE SHARED WITH ANYONE ELSE.
     ++++++++++++++++++++++++++++++++++++++++++++++++   							
-            \n", key_name, seed, pub_key.encode());
+            \n", key_name, seed, pub_key);
 }
 
 /// Inserts a key of type `ACCOUNT` into the keystore for development/testing.

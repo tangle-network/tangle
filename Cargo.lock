@@ -7510,7 +7510,7 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7695,7 +7695,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-dkg"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -8314,7 +8314,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "ethereum",
  "ethers",
@@ -8355,7 +8355,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs-rpc"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "jsonrpsee",
  "pallet-jobs-rpc-runtime-api",
@@ -8371,7 +8371,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs-rpc-runtime-api"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "parity-scale-codec 3.6.9",
  "sp-api",
@@ -8450,7 +8450,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-roles"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -8586,7 +8586,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-pause"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -8694,7 +8694,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-zksaas"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "ark-bn254 0.4.0",
  "ark-crypto-primitives 0.4.0",
@@ -14419,7 +14419,7 @@ dependencies = [
 
 [[package]]
 name = "tangle"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "clap 4.4.11",
  "fc-api",
@@ -14522,7 +14522,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "parity-scale-codec 3.6.9",
  "scale-info",
@@ -14531,7 +14531,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "ark-bn254 0.4.0",
  "ark-crypto-primitives 0.4.0",
@@ -14580,7 +14580,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "evm-tracer",
  "fp-account",
@@ -14679,7 +14679,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "evm-tracer",
  "fp-account",
@@ -14784,7 +14784,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-voter"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "anyhow",
  "clap 4.4.11",
