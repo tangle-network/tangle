@@ -19,6 +19,7 @@ sp-consensus-babe = { workspace = true }
 sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
+sp-staking = { workspace = true }
 
 # Arkworks
 ark-bn254 = { workspace = true, optional = true }
@@ -54,6 +55,7 @@ std = [
   "ark-groth16?/std",
   "ark-serialize?/std",
   "ethabi?/std",
+  "sp-staking/std"
 ]
 verifying = [
   "ark-crypto-primitives",
@@ -66,3 +68,4 @@ verifying = [
   "ethabi",
 ]
 integration-tests = []
+fast-runtime = []

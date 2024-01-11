@@ -59,8 +59,12 @@ pub mod time {
 	// 1 in 4 blocks (on average, not counting collisions) will be primary BABE blocks.
 	pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
 
+	#[cfg(feature = "fast-runtime")]
+	pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 10; // 10 blocks for fast tests
+
 	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
 	//       Attempting to do so will brick block production.
+	#[cfg(not(feature = "fast-runtime"))]
 	pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 4 * HOURS;
 	pub const EPOCH_DURATION_IN_SLOTS: u64 = {
 		const SLOT_FILL_RATE: f64 = MILLISECS_PER_BLOCK as f64 / SLOT_DURATION as f64;
@@ -264,6 +268,36 @@ pub mod treasury {
 	pub const TREASURY_PALLET_ID: PalletId = PalletId(*b"py/trsry");
 	pub const MAXIMUM_REASON_LENGTH: u32 = 300;
 	pub const MAX_APPROVALS: u32 = 100;
+}
+
+#[cfg(not(feature = "fast-runtime"))]
+pub mod staking {
+	// Six sessions in an era (24 hours).
+	pub const SESSIONS_PER_ERA: sp_staking::SessionIndex = 6;
+	// 28 eras for unbonding (28 days).
+	pub const BONDING_DURATION: sp_staking::EraIndex = 28;
+	// 27 eras for slash defer duration (27 days).
+	pub const SLASH_DEFER_DURATION: sp_staking::EraIndex = 27;
+	pub const MAX_NOMINATOR_REWARDED_PER_VALIDATOR: u32 = 256;
+	pub const OFFENDING_VALIDATOR_THRESHOLD: sp_arithmetic::Perbill =
+		sp_arithmetic::Perbill::from_percent(17);
+	pub const OFFCHAIN_REPEAT: crate::BlockNumber = 5;
+	pub const HISTORY_DEPTH: u32 = 80;
+}
+
+#[cfg(feature = "fast-runtime")]
+pub mod staking {
+	// 1 sessions in an era (10 blocks).
+	pub const SESSIONS_PER_ERA: sp_staking::SessionIndex = 1;
+	// 2 eras for unbonding (20 blocks).
+	pub const BONDING_DURATION: sp_staking::EraIndex = 2;
+	// 1 eras for slash defer (10 blocks).
+	pub const SLASH_DEFER_DURATION: sp_staking::EraIndex = 1;
+	pub const MAX_NOMINATOR_REWARDED_PER_VALIDATOR: u32 = 256;
+	pub const OFFENDING_VALIDATOR_THRESHOLD: sp_arithmetic::Perbill =
+		sp_arithmetic::Perbill::from_percent(17);
+	pub const OFFCHAIN_REPEAT: crate::BlockNumber = 5;
+	pub const HISTORY_DEPTH: u32 = 80;
 }
 
 /// We assume that ~10% of the block weight is consumed by `on_initialize` handlers. This is

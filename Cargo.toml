@@ -32,8 +32,8 @@ members = [
   "precompiles/proxy",
   "precompiles/preimage",
   "precompiles/jobs",
-  "relayer-gadget",
-  "relayer-gadget/cli",
+  # "relayer-gadget",
+  # "relayer-gadget/cli",
 ]
 resolver = "2"
 
@@ -74,8 +74,8 @@ paste = "1.0.6"
 slices = "0.2.0"
 schnorrkel = { version = "0.9.1", default-features = false }
 
-tangle-relayer-gadget = { packge = "tangle-relayer-gadget", path = "relayer-gadget" }
-tangle-relayer-gadget-cli = { packge = "tangle-relayer-gadget-cli", path = "relayer-gadget/cli" }
+# tangle-relayer-gadget = { packge = "tangle-relayer-gadget", path = "relayer-gadget" }
+# tangle-relayer-gadget-cli = { packge = "tangle-relayer-gadget-cli", path = "relayer-gadget/cli" }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
