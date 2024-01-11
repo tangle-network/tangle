@@ -408,7 +408,7 @@ pub mod pallet {
 				updated_profile.get_total_profile_restake() <= max_restaking_bond,
 				Error::<T>::ExceedsMaxRestakeValue
 			);
-
+			// Validate additional rules for profile update.
 			Self::validate_updated_profile(stash_account.clone(), updated_profile.clone())?;
 			ledger.profile = updated_profile.clone();
 			ledger.total = updated_profile.get_total_profile_restake().into();

@@ -236,6 +236,17 @@ fn test_update_profile_from_shared_to_independent() {
 	});
 }
 
+#[test]
+fn test_update_profile_should_fail_if_user_is_not_a_validator() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		let profile = shared_profile();
+		assert_err!(
+			Roles::update_profile(RuntimeOrigin::signed(mock_pub_key(5)), profile.clone()),
+			Error::<Runtime>::NotValidator
+		);
+	});
+}
+
 // Test delete profile.
 #[test]
 fn test_delete_profile() {

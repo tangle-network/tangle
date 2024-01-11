@@ -87,10 +87,10 @@ impl<T: Config> Pallet<T> {
 		account: T::AccountId,
 		updated_profile: Profile<T>,
 	) -> DispatchResult {
-		let ledger = Self::ledger(&account).ok_or(Error::<T>::NoProfileFound)?;
+		let current_ledger = Self::ledger(&account).ok_or(Error::<T>::NoProfileFound)?;
 		let active_jobs: Vec<(RoleType, JobId)> = T::JobsHandler::get_active_jobs(account.clone());
 		// Check if the account has any active jobs for the removed roles.
-		let removed_roles = ledger.profile.get_removed_roles(&updated_profile);
+		let removed_roles = current_ledger.profile.get_removed_roles(&updated_profile);
 		if !removed_roles.is_empty() {
 			for role in removed_roles {
 				for job in active_jobs.clone() {
@@ -111,24 +111,25 @@ impl<T: Config> Pallet<T> {
 		// stake for all roles will be affected.
 		//
 		// *** Perhaps this is entirely unnecessary, and I am overthinking it. ***
-		if updated_profile.is_shared() && ledger.profile.is_independent() {
+		if updated_profile.is_shared() && current_ledger.profile.is_independent() {
 			ensure!(active_jobs.len() == 0, Error::<T>::HasRoleAssigned);
 			return Ok(())
 		}
+		// Get all roles for which there are active jobs
+		let roles_with_active_jobs: Vec<RoleType> =
+			active_jobs.iter().map(|job| job.0).fold(Vec::new(), |mut acc, role| {
+				if !acc.contains(&role) {
+					acc.push(role);
+				}
+				acc
+			});
 		// Changing a current shared profile to an independent profile is allowed if there are
 		// active jobs as long as the stake allocated to the active roles is at least as much as
 		// the shared profile restaking amount. This is because the shared restaking profile for an
 		// active role is entirely allocated to that role (as it is shared between all selected
 		// roles). Thus, we allow the user to change to an independent profile as long as the
 		// restaking amount for the active roles is at least as much as the shared restaking amount.
-		if updated_profile.is_independent() && ledger.profile.is_shared() {
-			let roles_with_active_jobs: Vec<RoleType> =
-				active_jobs.iter().map(|job| job.0).fold(Vec::new(), |mut acc, role| {
-					if !acc.contains(&role) {
-						acc.push(role);
-					}
-					acc
-				});
+		if updated_profile.is_independent() && current_ledger.profile.is_shared() {
 			// For each role with an active job, ensure its stake is greater than or equal to the
 			// existing ledger's shared restaking amount.
 			for role in roles_with_active_jobs {
@@ -138,7 +139,8 @@ impl<T: Config> Pallet<T> {
 					.find_map(|record| if record.role == role { record.amount } else { None })
 					.unwrap_or_else(|| Zero::zero());
 				ensure!(
-					updated_role_restaking_amount >= ledger.profile.get_total_profile_restake(),
+					updated_role_restaking_amount >=
+						current_ledger.profile.get_total_profile_restake(),
 					Error::<T>::InsufficientRestakingBond
 				);
 			}
@@ -149,13 +151,6 @@ impl<T: Config> Pallet<T> {
 		// existing ledger's restaking amount for that role. If it's a shared profile, then the
 		// restaking amount for that role is the entire shared restaking amount.
 		let min_restaking_bond = MinRestakingBond::<T>::get();
-		let roles_with_active_jobs: Vec<RoleType> =
-			active_jobs.iter().map(|job| job.0).fold(Vec::new(), |mut acc, role| {
-				if !acc.contains(&role) {
-					acc.push(role);
-				}
-				acc
-			});
 		for record in updated_profile.clone().get_records() {
 			match updated_profile.clone() {
 				Profile::Independent(_) =>
@@ -165,15 +160,15 @@ impl<T: Config> Pallet<T> {
 							Error::<T>::InsufficientRestakingBond
 						);
 						ensure!(
-							record.amount.unwrap_or_default() >= ledger.restake_for(&record.role),
+							record.amount.unwrap_or_default() >=
+								current_ledger.restake_for(&record.role),
 							Error::<T>::InsufficientRestakingBond
 						);
 					},
 				Profile::Shared(profile) =>
 					if roles_with_active_jobs.contains(&record.role) {
 						ensure!(
-							record.amount.unwrap_or_default() >=
-								ledger.profile.get_total_profile_restake(),
+							profile.amount >= current_ledger.profile.get_total_profile_restake(),
 							Error::<T>::InsufficientRestakingBond
 						);
 					},
