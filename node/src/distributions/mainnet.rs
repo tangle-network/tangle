@@ -14,15 +14,13 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use std::str::FromStr;
-use tangle_primitives::types::BlockNumber;
-use tangle_runtime::UNIT;
-
 use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts};
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};
 use sp_core::H160;
-use sp_runtime::AccountId32;
-use std::collections::BTreeMap;
+use sp_runtime::{traits::AccountIdConversion, AccountId32};
+use std::{collections::BTreeMap, str::FromStr};
+use tangle_primitives::types::BlockNumber;
+use tangle_runtime::UNIT;
 use tangle_testnet_runtime::{AccountId, Balance, ExistentialDeposit};
 
 /// The contents of the file should be a map of accounts to balances.
@@ -65,6 +63,16 @@ pub fn get_faucet_substrate_list() -> Vec<AccountId32> {
 fn get_edgeware_snapshot_list() -> BTreeMap<AccountId32, f64> {
 	read_contents_to_substrate_accounts(
 		"node/src/distributions/data/edgeware_snapshot_distribution.json",
+	)
+}
+
+fn get_team_balance_distribution_list() -> BTreeMap<AccountId32, f64> {
+	read_contents_to_substrate_accounts("node/src/distributions/data/webb_team_distribution.json")
+}
+
+fn get_investor_balance_distribution_list() -> BTreeMap<AccountId32, f64> {
+	read_contents_to_substrate_accounts(
+		"node/src/distributions/data/webb_investor_distribution.json",
 	)
 }
 
@@ -178,15 +186,32 @@ pub fn get_substrate_balance_distribution() -> DistributionResult {
 }
 
 pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
-	// TODO : Read from actual investor file
-	let investor_accounts: Vec<(MultiAddress, u128)> = vec![];
+	let investor_accounts: Vec<(MultiAddress, u128)> = get_investor_balance_distribution_list()
+		.into_iter()
+		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
+		.collect();
 	compute_balance_distribution_with_cliff_and_vesting(investor_accounts)
 }
 
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
-	// TODO : Read from actual team file
-	let team_accounts: Vec<(MultiAddress, u128)> = vec![];
+	let team_accounts: Vec<(MultiAddress, u128)> = get_team_balance_distribution_list()
+		.into_iter()
+		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
+		.collect();
 	compute_balance_distribution_with_cliff_and_vesting(team_accounts)
+}
+
+pub fn get_treasury_balance() -> (AccountId, u128) {
+	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
+	let acc: AccountId = pallet_id.into_account_truncating();
+	(acc, UNIT * 100_000)
+}
+
+pub fn get_foundation_balance() -> (AccountId, u128) {
+	// TODO : Setup foundation account here
+	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
+	let acc: AccountId = pallet_id.into_account_truncating();
+	(acc, UNIT * 100_000)
 }
 
 pub fn compute_balance_distribution_with_cliff_and_vesting(

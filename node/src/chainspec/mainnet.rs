@@ -94,6 +94,8 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), tangle_primitives::MAINNET_SS58_PREFIX.into());
 
+	let endowment: Balance = 10_000_000 * UNIT;
+
 	Ok(ChainSpec::from_genesis(
 		"Local Tangle Mainnet",
 		"local-tangle-mainnet",
@@ -109,12 +111,12 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				],
 				// Endowed accounts
 				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+					(get_account_id_from_seed::<sr25519::Public>("Alice"), endowment),
+					(get_account_id_from_seed::<sr25519::Public>("Bob"), endowment),
+					(get_account_id_from_seed::<sr25519::Public>("Charlie"), endowment),
+					(get_account_id_from_seed::<sr25519::Public>("Alice//stash"), endowment),
+					(get_account_id_from_seed::<sr25519::Public>("Bob//stash"), endowment),
+					(get_account_id_from_seed::<sr25519::Public>("Charlie//stash"), endowment),
 				],
 				// Sudo account
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -166,7 +168,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				// Initial validators
 				get_initial_authorities(),
 				// Endowed accounts
-				vec![],
+				vec![mainnet::get_treasury_balance(), mainnet::get_foundation_balance()],
 				// Sudo account
 				get_root_key(),
 				// EVM chain ID
@@ -204,13 +206,12 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 fn mainnet_genesis(
 	wasm_binary: &[u8],
 	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)>,
-	endowed_accounts: Vec<AccountId>,
+	endowed_accounts: Vec<(AccountId, Balance)>,
 	root_key: AccountId,
 	chain_id: u64,
 	genesis_airdrop: DistributionResult,
 	genesis_non_airdrop: Vec<(MultiAddress, u128, u64, u64, u128)>,
 ) -> RuntimeGenesisConfig {
-	const ENDOWMENT: Balance = 10_000_000 * UNIT;
 	// stakers: all validators and nominators.
 	let stakers = initial_authorities
 		.iter()
@@ -242,7 +243,7 @@ fn mainnet_genesis(
 			balances: genesis_non_airdrop
 				.iter()
 				.map(|(x, y, _, _, _)| (x.clone().to_account_id_32(), *y))
-				.chain(endowed_accounts.iter().map(|k| (k.clone(), ENDOWMENT)))
+				.chain(endowed_accounts.into_iter())
 				.collect(),
 		},
 		vesting: VestingConfig {
