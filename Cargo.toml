@@ -41,7 +41,7 @@ resolver = "2"
 substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
 substrate-build-script-utils = "3.0.0"
 
-hex-literal = '0.4.1'
+hex-literal = "0.4.1"
 log = { version = "0.4.20", default-features = false }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 serde = { version = "1.0.101", default-features = false, features = ["derive"] }
@@ -281,9 +281,9 @@ sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", 
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0" }
 
 # Tangle dependencies
-tangle-primitives = { path = 'primitives', default-features = false }
+tangle-primitives = { path = "primitives", default-features = false }
 tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
-pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
+pallet-transaction-pause = { path = "pallets/transaction-pause", default-features = false }
 
 # Light client dependencies
 pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.5.0" }

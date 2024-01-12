@@ -175,6 +175,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_
 #[test]
 fn test_update_profile_from_independent_to_shared() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		println!("{:?}", pallet::MinRestakingBond::<Runtime>::get());
 		// Lets create independent profile.
 		let profile = independent_profile();
 		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
@@ -232,6 +233,17 @@ fn test_update_profile_from_shared_to_independent() {
 		assert_eq!(ledger.profile, updated_profile);
 		assert!(ledger.profile.is_independent());
 		assert_eq!(ledger.total_restake(), 5000);
+	});
+}
+
+#[test]
+fn test_update_profile_should_fail_if_user_is_not_a_validator() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		let profile = shared_profile();
+		assert_err!(
+			Roles::update_profile(RuntimeOrigin::signed(mock_pub_key(5)), profile.clone()),
+			Error::<Runtime>::NotValidator
+		);
 	});
 }
 
