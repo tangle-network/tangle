@@ -335,6 +335,13 @@ impl<T: Config> Pallet<T> {
 
 		Ok(())
 	}
+
+	pub fn update_ledger_role_key(staker: &T::AccountId, role_key: Vec<u8>) -> DispatchResult {
+		let mut ledger = Ledger::<T>::get(staker).ok_or(Error::<T>::NoProfileFound)?;
+		ledger.role_key = role_key;
+		Self::update_ledger(staker, &ledger);
+		Ok(())
+	}
 }
 
 impl<T: Config> sp_runtime::BoundToRuntimeAppPublic for Pallet<T> {
@@ -352,10 +359,9 @@ impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
 			.into_iter()
 			.filter(|(acc, _)| Ledger::<T>::contains_key(acc))
 			.for_each(|(acc, role_key)| {
-				let mut ledger: RoleStakingLedger<T> = Ledger::<T>::get(acc).unwrap();
-				if ledger.role_key != role_key.encode() {
-					ledger.role_key = role_key.encode();
-					Self::update_ledger(acc, &ledger);
+				match Self::update_ledger_role_key(acc, role_key.encode()) {
+					Ok(_) => (),
+					Err(e) => log::error!("Error updating ledger role key: {:?}", e),
 				}
 			});
 	}
@@ -368,10 +374,9 @@ impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
 			.into_iter()
 			.filter(|(acc, _)| Ledger::<T>::contains_key(acc))
 			.for_each(|(acc, role_key)| {
-				let mut ledger: RoleStakingLedger<T> = Ledger::<T>::get(acc).unwrap();
-				if ledger.role_key != role_key.encode() {
-					ledger.role_key = role_key.encode();
-					Self::update_ledger(acc, &ledger);
+				match Self::update_ledger_role_key(acc, role_key.encode()) {
+					Ok(_) => (),
+					Err(e) => log::error!("Error updating ledger role key: {:?}", e),
 				}
 			});
 	}
