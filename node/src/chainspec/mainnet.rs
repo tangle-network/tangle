@@ -243,7 +243,7 @@ fn mainnet_genesis(
 			balances: genesis_non_airdrop
 				.iter()
 				.map(|(x, y, _, _, _)| (x.clone().to_account_id_32(), *y))
-				.chain(endowed_accounts.into_iter())
+				.chain(endowed_accounts)
 				.collect(),
 		},
 		vesting: VestingConfig {
