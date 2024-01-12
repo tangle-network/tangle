@@ -450,14 +450,9 @@ impl<T: Config> Pallet<T> {
 
 		let job_result = JobResult::ZkSaaSPhaseTwo(info.clone());
 
-		let phase_one_job_info = SubmittedJobs::<T>::get(
-			role_type,
-			job_info.job_type.get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?,
-		)
-		.ok_or(Error::<T>::JobNotFound)?;
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
-			phase_one_job_type: Some(phase_one_job_info.job_type),
+			phase_one_job_type: Some(phase_one_result.job_type),
 			result: job_result.clone(),
 		})?;
 
