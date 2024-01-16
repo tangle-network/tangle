@@ -1,5 +1,5 @@
 <div align="center">
-<a href="https://www.webb.tools/">
+<a href="https://www.tangle.tools/">
     
 ![Webb Logo](./assets/webb_banner_light.png#gh-light-mode-only)
 ![Webb Logo](./assets/webb_banner_dark.png#gh-dark-mode-only)
@@ -12,7 +12,7 @@
 
 <div align="left" >
 
-[![Twitter](https://img.shields.io/twitter/follow/webbprotocol.svg?style=flat-square&label=Twitter&color=1DA1F2)](https://twitter.com/webbprotocol)
+[![Twitter](https://img.shields.io/twitter/follow/webbprotocol.svg?style=flat-square&label=Twitter&color=1DA1F2)](https://twitter.com/tangle_network)
 [![Telegram](https://img.shields.io/badge/Telegram-gray?logo=telegram)](https://t.me/webbprotocol)
 [![Discord](https://img.shields.io/discord/833784453251596298.svg?style=flat-square&label=Discord&logo=discord)](https://discord.gg/cv8EfJu3Tn)
 
