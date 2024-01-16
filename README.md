@@ -1,8 +1,7 @@
 <div align="center">
 <a href="https://www.tangle.tools/">
     
-![Webb Logo](./assets/webb_banner_light.png#gh-light-mode-only)
-![Webb Logo](./assets/webb_banner_dark.png#gh-dark-mode-only)
+![Tangle Banner](https://raw.githubusercontent.com/webb-tools/tangle/678b7ea2f23976e091a1c84b8f9fc8361218073e/assets/Tangle%20Banner%201.jpg)
   </a>
   </div>
 <h1 align="left"> The Tangle Network </h1>
