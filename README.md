@@ -6,7 +6,7 @@
   </div>
 <h1 align="left"> The Tangle Network </h1>
 <p align="left">
-    <strong>An MPC-as-a-service blockchain infrastructure for empowering cross-chain and zero-knowledge applications development. </strong>
+    <strong>An MPC-as-a-service restaking infrastructure powering cross-chain and zero-knowledge application development. </strong>
 </p>
 
 <div align="left" >
