@@ -20,8 +20,7 @@ use sp_core::H160;
 use sp_runtime::{traits::AccountIdConversion, AccountId32};
 use std::{collections::BTreeMap, str::FromStr};
 use tangle_primitives::types::BlockNumber;
-use tangle_runtime::UNIT;
-use tangle_testnet_runtime::{AccountId, Balance, ExistentialDeposit};
+use tangle_runtime::{AccountId, Balance, ExistentialDeposit, Perbill, UNIT};
 
 /// The contents of the file should be a map of accounts to balances.
 fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f64> {
@@ -98,17 +97,37 @@ pub struct DistributionResult {
 	pub vesting_cliff: BlockNumber,
 }
 
-fn ninety_nine_percent_endowment(endowment: u128) -> u128 {
-	endowment * 99 / 100
+fn ninety_five_percent_endowment(endowment: u128) -> u128 {
+	endowment * 95 / 100
 }
 
-fn one_percent_endowment(endowment: u128) -> u128 {
-	endowment - ninety_nine_percent_endowment(endowment)
+fn five_percent_endowment(endowment: u128) -> u128 {
+	endowment - ninety_five_percent_endowment(endowment)
 }
 
 fn vesting_per_block(endowment: u128, blocks: u64) -> u128 {
 	print!("Endowment {:?} Blocks {:?} ", endowment, blocks);
 	endowment / blocks as u128
+}
+
+fn get_team_distribution_share() -> Perbill {
+	Perbill::from_rational(25_u32, 100_u32)
+}
+
+fn get_investor_distribution_share() -> Perbill {
+	Perbill::from_rational(20_u32, 100_u32)
+}
+
+fn get_foundation_distribution_share() -> Perbill {
+	Perbill::from_rational(15_u32, 100_u32)
+}
+
+fn get_treasury_distribution_share() -> Perbill {
+	Perbill::from_rational(34_u32, 100_u32)
+}
+
+fn get_initial_liquidity_share() -> Perbill {
+	Perbill::from_rational(5_u32, 100_u32)
 }
 
 pub fn get_edgeware_genesis_balance_distribution() -> DistributionResult {
@@ -193,12 +212,24 @@ pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64,
 	compute_balance_distribution_with_cliff_and_vesting(investor_accounts)
 }
 
-pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+pub fn get_team_endowment() -> Vec<(MultiAddress, u128)> {
+	// TODO : Ensure this sums up to 5%
 	let team_accounts: Vec<(MultiAddress, u128)> = get_team_balance_distribution_list()
 		.into_iter()
 		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
 		.collect();
-	compute_balance_distribution_with_cliff_and_vesting(team_accounts)
+	team_accounts
+}
+
+pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+	// the team vesting is completely sent to a single account and vested and claimed by that
+	// account TODO : Finalise this account
+	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
+	let address: AccountId = pallet_id.into_account_truncating();
+	let balance =
+		(get_team_distribution_share() - get_initial_liquidity_share()).mul_floor(TOTAL_SUPPLY);
+	let team_account = (MultiAddress::Native(address), balance as u128);
+	compute_balance_distribution_with_cliff_and_vesting(vec![team_account])
 }
 
 pub fn get_treasury_balance() -> (AccountId, u128) {
@@ -207,11 +238,24 @@ pub fn get_treasury_balance() -> (AccountId, u128) {
 	(acc, UNIT * 100_000)
 }
 
-pub fn get_foundation_balance() -> (AccountId, u128) {
+pub fn get_foundation_endowment() -> (AccountId, u128) {
 	// TODO : Setup foundation account here
 	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
 	let acc: AccountId = pallet_id.into_account_truncating();
-	(acc, UNIT * 100_000)
+	let balance = (get_foundation_distribution_share() * get_initial_liquidity_share())
+		.mul_floor(TOTAL_SUPPLY);
+	(acc, balance)
+}
+
+pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+	// TODO : Setup foundation account here
+	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
+	let address: AccountId = pallet_id.into_account_truncating();
+	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY) -
+		get_initial_liquidity_share()
+			.mul_floor(get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY));
+	let foundation_account = (MultiAddress::Native(address), balance as u128);
+	compute_balance_distribution_with_cliff_and_vesting(vec![foundation_account])
 }
 
 pub fn compute_balance_distribution_with_cliff_and_vesting(
@@ -225,7 +269,7 @@ pub fn compute_balance_distribution_with_cliff_and_vesting(
 				value,
 				ONE_YEAR_BLOCKS,
 				TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS,
-				one_percent_endowment(value),
+				five_percent_endowment(value),
 			)
 		})
 		.collect()
@@ -240,7 +284,7 @@ pub fn get_distribution_for(
 	let mut claims = vec![];
 	let mut vesting = vec![];
 	arr.into_iter().filter(|(_, value)| *value > 0).for_each(|(address, value)| {
-		let claimable_amount = one_percent_endowment(value);
+		let claimable_amount = five_percent_endowment(value);
 		let vested_amount = value - claimable_amount;
 		let cliff_fraction = vesting_cliff as f64 / total_vesting_schedule as f64;
 		let remaining_fraction = 1.0 - cliff_fraction;

@@ -36,9 +36,9 @@ use sp_runtime::{
 use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig,
-	Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig,
-	SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId,
-	VestingConfig, UNIT, WASM_BINARY,
+	Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId,
+	RuntimeGenesisConfig, SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
+	TreasuryPalletId, VestingConfig, UNIT, WASM_BINARY,
 };
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
@@ -64,14 +64,14 @@ where
 
 /// Generate an babe authority key.
 pub fn authority_keys_from_seed(
-	controller: &str,
 	stash: &str,
-) -> (AccountId, BabeId, GrandpaId, ImOnlineId) {
+) -> (AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId) {
 	(
 		get_account_id_from_seed::<sr25519::Public>(stash),
-		get_from_seed::<BabeId>(controller),
-		get_from_seed::<GrandpaId>(controller),
+		get_from_seed::<BabeId>(stash),
+		get_from_seed::<GrandpaId>(stash),
 		get_from_seed::<ImOnlineId>(stash),
+		get_from_seed::<RoleKeyId>(stash),
 	)
 }
 
@@ -83,8 +83,9 @@ fn generate_session_keys(
 	babe: BabeId,
 	grandpa: GrandpaId,
 	im_online: ImOnlineId,
+	role: RoleKeyId,
 ) -> tangle_runtime::opaque::SessionKeys {
-	tangle_runtime::opaque::SessionKeys { babe, grandpa, im_online }
+	tangle_runtime::opaque::SessionKeys { babe, grandpa, im_online, role }
 }
 
 pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -105,10 +106,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				// Wasm binary
 				wasm_binary,
 				// Initial validators
-				vec![
-					authority_keys_from_seed("Alice", "Alice//stash"),
-					authority_keys_from_seed("Bob", "Bob//stash"),
-				],
+				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
 				// Endowed accounts
 				vec![
 					(get_account_id_from_seed::<sr25519::Public>("Alice"), endowment),
@@ -168,7 +166,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				// Initial validators
 				get_initial_authorities(),
 				// Endowed accounts
-				vec![mainnet::get_treasury_balance(), mainnet::get_foundation_balance()],
+				vec![mainnet::get_treasury_balance(), mainnet::get_foundation_endowment()],
 				// Sudo account
 				get_root_key(),
 				// EVM chain ID
@@ -205,7 +203,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)>,
+	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
 	endowed_accounts: Vec<(AccountId, Balance)>,
 	root_key: AccountId,
 	chain_id: u64,
@@ -260,7 +258,7 @@ fn mainnet_genesis(
 					(
 						x.0.clone(),
 						x.0.clone(),
-						generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone()),
+						generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone(), x.4.clone()),
 					)
 				})
 				.collect::<Vec<_>>(),

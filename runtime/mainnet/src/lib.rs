@@ -63,14 +63,22 @@ use sp_runtime::{
 	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
+use tangle_primitives::jobs::{traits::JobToFee, JobSubmission};
+
+#[cfg(any(feature = "std", test))]
+pub use frame_system::Call as SystemCall;
+use sp_runtime::DispatchResult;
+use sp_staking::{
+	offence::{OffenceError, ReportOffence},
+	SessionIndex,
+};
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-
-#[cfg(any(feature = "std", test))]
-pub use frame_system::Call as SystemCall;
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
+use tangle_primitives::jobs::{traits::MPCHandler, JobWithResult, ValidatorOffenceType};
 
 pub use frame_support::{
 	construct_runtime,
@@ -188,6 +196,7 @@ pub mod opaque {
 			pub babe: Babe,
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
+			pub role: Roles,
 		}
 	}
 }
@@ -1042,6 +1051,83 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type WeightInfo = ();
 }
 
+pub struct MockMPCHandler;
+
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
+	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
+		Ok(())
+	}
+
+	fn verify_validator_report(
+		_validator: AccountId,
+		_offence: ValidatorOffenceType,
+		_signatures: Vec<Vec<u8>>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
+}
+
+type IdTuple = pallet_session::historical::IdentificationTuple<Runtime>;
+type Offence = pallet_roles::offences::ValidatorOffence<IdTuple>;
+/// A mock offence report handler.
+pub struct OffenceHandler;
+impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
+	fn report_offence(_reporters: Vec<AccountId>, _offence: Offence) -> Result<(), OffenceError> {
+		Ok(())
+	}
+
+	fn is_known_offence(_offenders: &[IdTuple], _time_slot: &SessionIndex) -> bool {
+		false
+	}
+}
+
+parameter_types! {
+	pub InflationRewardPerSession: Balance = 10_000;
+	pub Reward : tangle_primitives::roles::ValidatorRewardDistribution = tangle_primitives::roles::ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
+}
+
+impl pallet_roles::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type JobsHandler = Jobs;
+	type RoleKeyId = RoleKeyId;
+	type MaxRolesPerAccount = ConstU32<2>;
+	type MPCHandler = MockMPCHandler;
+	type InflationRewardPerSession = InflationRewardPerSession;
+	type ValidatorSet = Historical;
+	type ReportOffences = OffenceHandler;
+	type ValidatorRewardDistribution = Reward;
+	type WeightInfo = ();
+}
+
+pub struct MockJobToFeeHandler;
+
+impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+	type Balance = Balance;
+
+	fn job_to_fee(_job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		Default::default()
+	}
+}
+
+parameter_types! {
+	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+}
+
+impl pallet_jobs::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
+	type Currency = Balances;
+	type JobToFee = MockJobToFeeHandler;
+	type RolesHandler = Roles;
+	type MPCHandler = MockMPCHandler;
+	type PalletId = JobsPalletId;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1092,6 +1178,8 @@ construct_runtime!(
 
 		Claims: pallet_airdrop_claims,
 		Eth2Client: pallet_eth2_light_client,
+		Roles: pallet_roles,
+		Jobs: pallet_jobs
 	}
 );
 

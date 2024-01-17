@@ -20,12 +20,12 @@ use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_network::config::MultiaddrWithPeerId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::crypto::UncheckedInto;
-use tangle_testnet_runtime::AccountId;
+use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
+use tangle_runtime::AccountId;
 
 /// Mainnet root key
 pub fn get_root_key() -> AccountId {
-	// Standalone sudo key: 5CDZpRSZ14TmXorHTsTeksY7223FzsaLXPbpTPBUV6NaZSr1
-	hex!["06c225d97d596c57e620aba15e1a8a69c7b334ffdab175788c6553f7dd181a56"].into()
+	hex!["9c2c928c3b9ac62c6dc4caaf5777c16ce28984dedc92687ef427f8f4f6d61d2f"].into()
 }
 
 /// Mainnet bootnodes
@@ -37,7 +37,7 @@ pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 		"/ip4/18.119.14.21/tcp/30333/p2p/12D3KooWJP5NbEjEK1YihofJm3MMSJWrbRWjeEkRf3LtKvkj6mr9"
 			.parse()
 			.unwrap(),
-		"/ip4/18.188.183.185/tcp/30333/p2p/12D3KooWDL3KiR6CpnEbgUgheje1cMGQtwH4euxGMPQBkwU5cZdu"
+		"/ip4/3.15.186.160/tcp/30333/p2p/12D3KooWDL3KiR6CpnEbgUgheje1cMGQtwH4euxGMPQBkwU5cZdu"
 			.parse()
 			.unwrap(),
 		"/ip4/3.137.213.159/tcp/30333/p2p/12D3KooWS4aniCJTz2RiNfNUka8TTa3gXak63FJgdAgfAWLCnsAi"
@@ -49,57 +49,67 @@ pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	]
 }
 
-/// Standalone initial authorities
-pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)> {
+/// Tangle runtime initial authorities
+pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)> {
 	vec![
-		// standalone 1
+		// tangle 1
 		(
-			hex!["6c99e8e4ae3fe7e3328d7e9d85eb98e86bdc6410695797349fa536ebb9bb0a4a"].into(),
-			hex!["d8a00a2454cd7455c040e363e6e76f4abd9e4d3876253964d9f40a66ad79694b"]
+			hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"].into(),
+			hex!["82a764a9835b2ac7aacd8ec96479d872e91256fba11cc0393b0e98dd320bbf38"]
 				.unchecked_into(),
-			hex!["5bcf983a969f8de7628b271a5bf523924856c3935b15eb3e03f20146ced2c57f"]
+			hex!["71bf01524c555f1e0f6b7dc7243caf00851d3afc543422f98d3eb6bca78acd8c"]
 				.unchecked_into(),
-			hex!["0297bc051d94b25787482e60fa4eba19f15af30fa244240ae4439d219ee00e78"]
+			hex!["2c7d0dbc639d8d52d02e9e03b6dd19b50f44a6a491ca75c9ebd6a1a29782e743"]
+				.unchecked_into(),
+			hex!["02a1af3c93d94e9b658a9aaa994bfa3fc156c9d38c60872d3dd33f63cd7aa12a6b"]
 				.unchecked_into(),
 		),
-		// standalone 2
+		// tangle 2
 		(
-			hex!["444dbfd0220eb1a993a7a2b9e1530aee1d17388ba3db34a0ee2b8ff971bfd073"].into(),
-			hex!["f02ee9baa32c490cf06eabe3580a90be704618f04636b321ee599c8912392c7a"]
+			hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"].into(),
+			hex!["020af75377d0b400946938970c47055a2a48ad4fd728a427b7a1dd96e75db65f"]
 				.unchecked_into(),
-			hex!["2d6ac10cde791863771847c035c36e13ad60e6129465e1aefad8f5fee8dff5c7"]
+			hex!["61f771ebfdb0a6de08b8e0ca7a39a01f24e7eaa3d1e7f1001e6503490c25c044"]
 				.unchecked_into(),
-			hex!["de6d5010678fd2175fe70c857d3eba80838e3735b1051f4aed98671800ec483f"]
+			hex!["ecb58b3d1eaaad8ef42c27e183e41830628ca5fee5bb06cdf13883e57c4a0770"]
+				.unchecked_into(),
+			hex!["0305c8dd5a251ed604350f50a993edc9baa66fb72b56091346316dd94052a068fa"]
 				.unchecked_into(),
 		),
-		// standalone 3
+		// tangle 3
 		(
-			hex!["2c4e648b0fbbb88ff6b92b208273eb144383b2b19edc992e91448a4371d4d97d"].into(),
-			hex!["a41b35f75e5509ce96e62bc27bb9a1b5587cc3d596f8afa867962b0e03230513"]
+			hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"].into(),
+			hex!["a8f14e015ced0b21e680e577231519c33484d1b63f5529bf4fbb137a920bb82e"]
 				.unchecked_into(),
-			hex!["340e5969c8dd40ff77184fa73fbdcda77dcc90dd9b68b8b28eef5f01ce42339c"]
+			hex!["a41a815db90b9bd3d9ec462f90ba77ba1d627a9fccc9f7847e34c9e9e9b57c90"]
 				.unchecked_into(),
-			hex!["8472336050c4e4a51ac69865a4a31c6dd0e5c2f79555d8646cafb3bd8f12d75c"]
+			hex!["2ef4f718a407e0b4d86913a989f749b7edfe836bae1d726b07f9c419ad94c42c"]
+				.unchecked_into(),
+			hex!["02825faaf113b15b28dfdfe52eeee66554fe2892825e146d20ac49dd7c37d6e793"]
 				.unchecked_into(),
 		),
-		// standalone 4
+		// tangle 4
 		(
-			hex!["c884c8eb280327221a3ae6a45fe6c8805f09bcfc11b409c8e2daa621c0d99608"].into(),
-			hex!["06e0a0d39503a101ca9c36f84b3ccf53015ee625a546bc570e550af963d13164"]
+			hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"].into(),
+			hex!["2296eb6f84cafd066c07e19fd127e7f5ca0d6e26ce305f9facc0e0221c7ecb1a"]
 				.unchecked_into(),
-			hex!["57eda010788108257f4c148cf0c3112d620b9067546777dc393a65dd34732079"]
+			hex!["b0f002333f4fd657155dfcb4ac5c6ce04d0b2c68b64befa178d4357ceb05fe2d"]
 				.unchecked_into(),
-			hex!["029cb182ddb9c5560aaa299f7b445e575007b8295bd85a80a7b2eb7baa3e2b7c"]
+			hex!["dc8be4d69084d5bb8a6a0cd48c4d3ab82def85e996b87c63176b49f70c028c35"]
+				.unchecked_into(),
+			hex!["02745849fbb4cf0f1f9f310cf67740431fd4cd1b4292bb1a3efeb93956e612e75f"]
 				.unchecked_into(),
 		),
-		// standalone 5
+		// tangle 5
 		(
-			hex!["483e0b8d6801c51115fd4b124c91e2d5dcd642b30335f6c5a1738ea18f66c251"].into(),
-			hex!["ce80df4851003f6ffd4ee88d9be85966f1de8b2e494c009dbf336177485f023f"]
+			hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"].into(),
+			hex!["0e08bb5a9cc4e7dbd279ba53bd5aecd78956c34a2dae678c5490c52bc754521e"]
 				.unchecked_into(),
-			hex!["9027284e6cad3f73eee950695c56f87330311331139616640c9168934dba82df"]
+			hex!["d2eb206f8c7a64ce47828b33314806ac6cb915d464990eaff9f6435880c6e54f"]
 				.unchecked_into(),
-			hex!["1ea007d87f91f96c31b1062548eb77c40d47a43f1c84c36caa8586fc7c359729"]
+			hex!["363e33c500396cc52ef58924a005227eed67801bd376ca886fd6432ba7070711"]
+				.unchecked_into(),
+			hex!["03dd29b916c41662207e2e5b7dd7c5c7054681bef8897bd4f0634b9075463159ca"]
 				.unchecked_into(),
 		),
 	]
