@@ -118,7 +118,7 @@ where
 	Runtime::AccountId: From<WrappedAccountId32>,
 {
 	#[precompile::public("vest()")]
-	fn vest(handle: &mut impl PrecompileHandle) -> EvmResult<u8> {
+	fn vest(handle: &mut impl PrecompileHandle) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
 		// Make the call to vest the `msg.sender` account.
@@ -128,7 +128,7 @@ where
 		// Dispatch call (if enough gas).
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
-		Ok((0))
+		Ok(())
 	}
 
 	#[precompile::public("vestOther(bytes32)")]
@@ -150,7 +150,11 @@ where
 
 	#[precompile::public("vestedTransfer(bytes32,uint8)")]
 	#[precompile::public("vested_transfer(bytes32,uint8)")]
-	fn vested_transfer(handle: &mut impl PrecompileHandle, target: H256, index: u8) -> EvmResult<u8> {
+	fn vested_transfer(
+		handle: &mut impl PrecompileHandle,
+		target: H256,
+		index: u8,
+	) -> EvmResult<u8> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
 		// First get the vesting schedule of the `msg.sender`

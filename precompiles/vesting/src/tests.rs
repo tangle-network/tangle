@@ -17,13 +17,14 @@
 // limitations under the License.
 
 use crate::mock::{
-	AccountId, ExtBuilder, PCall, PrecompilesValue, Runtime, RuntimeCall, RuntimeEvent,
-	RuntimeOrigin, TestAccount, System, Balance, roll_to,
+	roll_to, AccountId, Balance, ExtBuilder, PCall, PrecompilesValue, Runtime, RuntimeCall,
+	RuntimeEvent, RuntimeOrigin, System, TestAccount,
 };
 use frame_support::{assert_ok, traits::OnFinalize};
-use pallet_evm::{Call as EvmCall, AddressMapping};
+use pallet_evm::{AddressMapping, Call as EvmCall};
 use pallet_vesting::{
-	Call as VestingCall, Event as VestingEvent, Pallet as VestingPallet, Vesting, VestingInfo, MaxVestingSchedulesGet,
+	Call as VestingCall, Event as VestingEvent, MaxVestingSchedulesGet, Pallet as VestingPallet,
+	Vesting, VestingInfo,
 };
 use precompile_utils::{
 	assert_event_emitted, assert_event_not_emitted, precompile_set::AddressU64, prelude::*,
@@ -54,16 +55,12 @@ fn test_unimplemented_selector_reverts() {
 #[test]
 fn test_claim_vesting_schedule() {
 	ExtBuilder::default().build().execute_with(|| {
-		let schedules = Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
+		let schedules =
+			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
 		assert!(!schedules.is_empty());
 		roll_to(1000);
 		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(6),
-				PCall::vest {},
-			)
+			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::vest {})
 			.execute_returns(());
 	});
 }
-

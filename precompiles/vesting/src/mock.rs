@@ -20,33 +20,28 @@
 use super::*;
 use crate::{VestingPrecompile, VestingPrecompileCall};
 use frame_support::{
-	construct_runtime, 
-	parameter_types,
-	traits::{ConstU64, Everything, InstanceFilter, WithdrawReasons, Hooks},
+	construct_runtime, parameter_types,
+	traits::{ConstU64, Everything, Hooks, InstanceFilter, WithdrawReasons},
 	weights::Weight,
 };
-use serde::{Serialize, Deserialize};
 use frame_system::Account;
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
-use precompile_utils::
-	precompile_set::{
-		AddressU64, PrecompileAt,
-		PrecompileSetBuilder,
-	}
-;
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
 use scale_info::TypeInfo;
-use sp_runtime::{
-	curve::PiecewiseLinear,
-	testing::TestXt,
-	traits::{self, Extrinsic as ExtrinsicT, IdentifyAccount,
-		 IdentityLookup, Verify, Zero, Identity},
-	AccountId32, BuildStorage, Perbill,
-};
+use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
 	sr25519::{self, Public as sr25519Public, Signature},
 	ConstU32, Get, H160, H256, U256,
+};
+use sp_runtime::{
+	curve::PiecewiseLinear,
+	testing::TestXt,
+	traits::{
+		self, Extrinsic as ExtrinsicT, IdentifyAccount, Identity, IdentityLookup, Verify, Zero,
+	},
+	AccountId32, BuildStorage, Perbill,
 };
 use tangle_primitives::WrappedAccountId32;
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
@@ -56,7 +51,7 @@ pub type BlockNumber = u64;
 type Block = frame_system::mocking::MockBlock<Runtime>;
 
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 ];
 
 #[derive(
@@ -84,8 +79,7 @@ pub enum TestAccount {
 	PrecompileAddress,
 }
 
-impl Default for TestAccount
- {
+impl Default for TestAccount {
 	fn default() -> Self {
 		Self::Empty
 	}
@@ -338,18 +332,22 @@ impl ExtBuilder {
 			.expect("Frame system builds valid default genesis config");
 
 		pallet_balances::GenesisConfig::<Runtime> {
-			balances: self.balances
+			balances: self
+				.balances
 				.iter()
-				.chain(vec![
-					(TestAccount::Alex.into(), 100_000),
-					(TestAccount::Bobo.into(), 100_000),
-					(TestAccount::Charlie.into(), 100_000),
-				].iter())
+				.chain(
+					vec![
+						(TestAccount::Alex.into(), 100_000),
+						(TestAccount::Bobo.into(), 100_000),
+						(TestAccount::Charlie.into(), 100_000),
+					]
+					.iter(),
+				)
 				.cloned()
-				.collect()
+				.collect(),
 		}
-			.assimilate_storage(&mut t)
-			.expect("Pallet balances storage can be assimilated");
+		.assimilate_storage(&mut t)
+		.expect("Pallet balances storage can be assimilated");
 
 		pallet_vesting::GenesisConfig::<Runtime> {
 			vesting: vec![
@@ -361,8 +359,9 @@ impl ExtBuilder {
 				(TestAccount::Bobo.into(), 10, 100, 0),
 				(TestAccount::Charlie.into(), 10, 100, 0),
 			],
-		}.assimilate_storage(&mut t)
-			.expect("Pallet vesting storage can be assimilated");
+		}
+		.assimilate_storage(&mut t)
+		.expect("Pallet vesting storage can be assimilated");
 
 		let mut ext = sp_io::TestExternalities::new(t);
 		ext.execute_with(|| {
