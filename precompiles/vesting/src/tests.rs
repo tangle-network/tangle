@@ -16,7 +16,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::mock::{roll_to, ExtBuilder, PCall, PrecompilesValue, Runtime, TestAccount};
+use crate::mock::{
+	mock_pub_key, roll_to, ExtBuilder, PCall, PrecompilesValue, Runtime, TestAccount,
+};
 
 use pallet_vesting::Vesting;
 use precompile_utils::testing::*;
@@ -54,14 +56,14 @@ fn test_claim_vesting_schedule() {
 	});
 }
 
-// Test unlocking any vested funds of a `target` account.
+// Test unlocking any vested funds of a target account.
 #[test]
 fn test_vest_other() {
 	ExtBuilder::default().build().execute_with(|| {
 		let schedules =
 			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
 		assert!(!schedules.is_empty());
-		roll_to(1000);
+
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Bobo,
@@ -76,22 +78,23 @@ fn test_vest_other() {
 
 // Test vested transfer.
 #[test]
-fn test_vest_transfer() {
+fn test_vested_transfer() {
 	ExtBuilder::default().build().execute_with(|| {
 		let schedules =
 			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
 		assert!(!schedules.is_empty());
-		let target = TestAccount::Bobo;
-		roll_to(1000);
+		let target = mock_pub_key(5);
+
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::vested_transfer {
-					target: sp_core::sr25519::Public::from(target).into(),
-					index: 0,
-				},
+				PCall::vested_transfer { target: target.into(), index: 0 },
 			)
 			.execute_returns(());
+
+		// Should transfer vested schedule to target account.
+		let vesting_info = pallet_vesting::Pallet::<Runtime>::vesting(&target);
+		assert_eq!(vesting_info, Some(schedules));
 	});
 }

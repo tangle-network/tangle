@@ -32,7 +32,7 @@ use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBu
 use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
-	sr25519::{Public as sr25519Public, Signature},
+	sr25519::{self, Public as sr25519Public, Signature},
 	ConstU32, H160, H256, U256,
 };
 use sp_runtime::{
@@ -303,6 +303,10 @@ impl pallet_vesting::Config for Runtime {
 	type UnvestedFundsAllowedWithdrawReasons = UnvestedFundsAllowedWithdrawReasons;
 }
 
+pub fn mock_pub_key(id: u8) -> AccountId {
+	sr25519::Public::from_raw([id; 32])
+}
+
 /// Build test externalities, prepopulated with data for testing democracy precompiles
 #[derive(Default)]
 pub(crate) struct ExtBuilder {
@@ -323,9 +327,9 @@ impl ExtBuilder {
 				.iter()
 				.chain(
 					[
-						(TestAccount::Alex.into(), 100_000),
-						(TestAccount::Bobo.into(), 100_000),
-						(TestAccount::Charlie.into(), 100_000),
+						(TestAccount::Alex.into(), 10_00_000),
+						(TestAccount::Bobo.into(), 10_00_000),
+						(TestAccount::Charlie.into(), 10_00_000),
 					]
 					.iter(),
 				)
@@ -341,9 +345,9 @@ impl ExtBuilder {
 				// * begin - Block when the account will start to vest
 				// * length - Number of blocks from `begin` until fully vested
 				// * liquid - Number of units which can be spent before vesting begins
-				(TestAccount::Alex.into(), 10, 100, 0),
-				(TestAccount::Bobo.into(), 10, 100, 0),
-				(TestAccount::Charlie.into(), 10, 100, 0),
+				(TestAccount::Alex.into(), 10, 100, 500_000),
+				(TestAccount::Bobo.into(), 10, 100, 500_000),
+				(TestAccount::Charlie.into(), 10, 100, 500_000),
 			],
 		}
 		.assimilate_storage(&mut t)
