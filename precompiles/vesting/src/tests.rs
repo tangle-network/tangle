@@ -94,7 +94,7 @@ fn test_vested_transfer() {
 			.execute_returns(());
 
 		// Should transfer vested schedule to target account.
-		let vesting_info = pallet_vesting::Pallet::<Runtime>::vesting(&target);
+		let vesting_info = pallet_vesting::Pallet::<Runtime>::vesting(target);
 		assert_eq!(vesting_info, Some(schedules));
 	});
 }

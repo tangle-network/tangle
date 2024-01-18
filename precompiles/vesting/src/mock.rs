@@ -327,9 +327,9 @@ impl ExtBuilder {
 				.iter()
 				.chain(
 					[
-						(TestAccount::Alex.into(), 10_00_000),
-						(TestAccount::Bobo.into(), 10_00_000),
-						(TestAccount::Charlie.into(), 10_00_000),
+						(TestAccount::Alex.into(), 1_000_000),
+						(TestAccount::Bobo.into(), 1_000_000),
+						(TestAccount::Charlie.into(), 1_000_000),
 					]
 					.iter(),
 				)
