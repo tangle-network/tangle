@@ -56,6 +56,26 @@ fn test_claim_vesting_schedule() {
 	});
 }
 
+#[test]
+fn non_vested_cannot_vest() {
+	ExtBuilder::default().build().execute_with(|| {
+		let non_vested_account = TestAccount::Dave;
+		assert_eq!(pallet_vesting::Pallet::<Runtime>::vesting(
+			sp_core::sr25519::Public::from(non_vested_account.clone())), None);
+
+		let error_msg = "Dispatched call failed with error: Module(ModuleError { index: 4, error: [0, 0, 0, 0], message: Some(\"NotVesting\") })";
+		// non_vested_account should not be able to vest.
+		PrecompilesValue::get()
+			.prepare_test(
+				non_vested_account,
+				H160::from_low_u64_be(1),
+				PCall::vest {},
+			)
+			.execute_reverts(|output| output == error_msg.as_bytes());
+
+	});
+}
+
 // Test unlocking any vested funds of a target account.
 #[test]
 fn test_vest_other() {
@@ -73,6 +93,27 @@ fn test_vest_other() {
 				},
 			)
 			.execute_returns(());
+	});
+}
+
+#[test]
+fn non_vested_cannot_vest_other() {
+	ExtBuilder::default().build().execute_with(|| {
+		let non_vested_account = TestAccount::Dave;
+		assert_eq!(pallet_vesting::Pallet::<Runtime>::vesting(
+			sp_core::sr25519::Public::from(non_vested_account.clone())), None);
+
+		let target = mock_pub_key(6);
+		let error_msg = "Dispatched call failed with error: Module(ModuleError { index: 4, error: [0, 0, 0, 0], message: Some(\"NotVesting\") })";
+		// non_vested_account should not be able to vest other.
+		PrecompilesValue::get()
+			.prepare_test(
+				non_vested_account,
+				H160::from_low_u64_be(1),
+				PCall::vest_other { target: target.into() },
+			)
+			.execute_reverts(|output| output == error_msg.as_bytes());
+
 	});
 }
 
@@ -100,22 +141,25 @@ fn test_vested_transfer() {
 }
 
 #[test]
-fn non_vested_cannot_vest_other() {
+fn non_vested_cannot_vest_transfer() {
 	ExtBuilder::default().build().execute_with(|| {
 		let non_vested_account = TestAccount::Dave;
-		assert_eq!(pallet_vesting::Pallet::<Runtime>::vesting(
-			sp_core::sr25519::Public::from(non_vested_account.clone())), None);
+		assert_eq!(
+			pallet_vesting::Pallet::<Runtime>::vesting(sp_core::sr25519::Public::from(
+				non_vested_account.clone()
+			)),
+			None
+		);
 
 		let target = mock_pub_key(6);
-		let error_msg = "Dispatched call failed with error: Module(ModuleError { index: 4, error: [0, 0, 0, 0], message: Some(\"NotVesting\") })";
-		// non_vested_account should not be able to vest other
+		let error_msg = "No vesting schedule found for the sender";
+		// non_vested_account should not be able to transfer vest schedule.
 		PrecompilesValue::get()
 			.prepare_test(
 				non_vested_account,
 				H160::from_low_u64_be(1),
-				PCall::vest_other { target: target.into() },
+				PCall::vested_transfer { target: target.into(), index: 0 },
 			)
 			.execute_reverts(|output| output == error_msg.as_bytes());
-
 	});
 }
