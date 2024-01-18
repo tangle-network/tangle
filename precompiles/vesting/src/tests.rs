@@ -16,23 +16,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::mock::{
-	roll_to, AccountId, Balance, ExtBuilder, PCall, PrecompilesValue, Runtime, RuntimeCall,
-	RuntimeEvent, RuntimeOrigin, System, TestAccount,
-};
-use frame_support::{assert_ok, traits::OnFinalize};
-use pallet_evm::{AddressMapping, Call as EvmCall};
-use pallet_vesting::{
-	Call as VestingCall, Event as VestingEvent, MaxVestingSchedulesGet, Pallet as VestingPallet,
-	Vesting, VestingInfo,
-};
-use precompile_utils::{
-	assert_event_emitted, assert_event_not_emitted, precompile_set::AddressU64, prelude::*,
-	testing::*,
-};
-use sp_core::{Get, H160, H256, U256};
-use sp_runtime::traits::Dispatchable;
-use std::{cell::Cell, rc::Rc, str::from_utf8};
+use crate::mock::{roll_to, ExtBuilder, PCall, PrecompilesValue, Runtime, TestAccount};
+
+use pallet_vesting::Vesting;
+use precompile_utils::testing::*;
+use sp_core::H160;
 
 #[test]
 fn test_selector_less_than_four_bytes_reverts() {

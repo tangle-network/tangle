@@ -21,29 +21,25 @@ use super::*;
 use crate::{VestingPrecompile, VestingPrecompileCall};
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU64, Everything, Hooks, InstanceFilter, WithdrawReasons},
+	traits::{ConstU64, Everything, Hooks, WithdrawReasons},
 	weights::Weight,
 };
-use frame_system::Account;
+
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
-use scale_info::TypeInfo;
+
 use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
-	sr25519::{self, Public as sr25519Public, Signature},
-	ConstU32, Get, H160, H256, U256,
+	sr25519::{Public as sr25519Public, Signature},
+	ConstU32, H160, H256, U256,
 };
 use sp_runtime::{
-	curve::PiecewiseLinear,
-	testing::TestXt,
-	traits::{
-		self, Extrinsic as ExtrinsicT, IdentifyAccount, Identity, IdentityLookup, Verify, Zero,
-	},
-	AccountId32, BuildStorage, Perbill,
+	traits::{IdentifyAccount, Identity, IdentityLookup, Verify},
+	AccountId32, BuildStorage,
 };
-use tangle_primitives::WrappedAccountId32;
+
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u64;
 pub type BlockNumber = u64;
@@ -307,10 +303,6 @@ impl pallet_vesting::Config for Runtime {
 	type UnvestedFundsAllowedWithdrawReasons = UnvestedFundsAllowedWithdrawReasons;
 }
 
-pub fn mock_pub_key(id: u8) -> AccountId {
-	sr25519::Public::from_raw([id; 32])
-}
-
 /// Build test externalities, prepopulated with data for testing democracy precompiles
 #[derive(Default)]
 pub(crate) struct ExtBuilder {
@@ -319,12 +311,6 @@ pub(crate) struct ExtBuilder {
 }
 
 impl ExtBuilder {
-	/// Fund some accounts before starting the test
-	pub(crate) fn with_balances(mut self, balances: Vec<(AccountId, Balance)>) -> Self {
-		self.balances = balances;
-		self
-	}
-
 	/// Build the test externalities for use in tests
 	pub(crate) fn build(self) -> sp_io::TestExternalities {
 		let mut t = frame_system::GenesisConfig::<Runtime>::default()
@@ -336,7 +322,7 @@ impl ExtBuilder {
 				.balances
 				.iter()
 				.chain(
-					vec![
+					[
 						(TestAccount::Alex.into(), 100_000),
 						(TestAccount::Bobo.into(), 100_000),
 						(TestAccount::Charlie.into(), 100_000),
@@ -369,10 +355,6 @@ impl ExtBuilder {
 		});
 		ext
 	}
-}
-
-pub(crate) fn events() -> Vec<RuntimeEvent> {
-	System::events().into_iter().map(|r| r.event).collect::<Vec<_>>()
 }
 
 pub(crate) fn roll_to(n: BlockNumber) {

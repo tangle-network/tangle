@@ -39,22 +39,17 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-use evm::Runtime;
 use fp_evm::PrecompileHandle;
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
-	ensure,
 	traits::Currency,
 };
 
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
-use sp_runtime::{
-	traits::{AccountIdLookup, Dispatchable, StaticLookup},
-	MultiAddress,
-};
-use sp_std::{convert::TryInto, marker::PhantomData, vec, vec::Vec};
+use sp_runtime::traits::{Dispatchable, StaticLookup};
+use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::types::WrappedAccountId32;
 
 type BalanceOf<Runtime> = <<Runtime as pallet_vesting::Config>::Currency as Currency<
@@ -133,7 +128,7 @@ where
 
 	#[precompile::public("vestOther(bytes32)")]
 	#[precompile::public("vest_other(bytes32)")]
-	fn vest_other(handle: &mut impl PrecompileHandle, target: H256) -> EvmResult<u8> {
+	fn vest_other(handle: &mut impl PrecompileHandle, target: H256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
 		// Make the call to vest the `target` account.
@@ -145,16 +140,12 @@ where
 		// Dispatch call (if enough gas).
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
-		Ok((0))
+		Ok(())
 	}
 
 	#[precompile::public("vestedTransfer(bytes32,uint8)")]
 	#[precompile::public("vested_transfer(bytes32,uint8)")]
-	fn vested_transfer(
-		handle: &mut impl PrecompileHandle,
-		target: H256,
-		index: u8,
-	) -> EvmResult<u8> {
+	fn vested_transfer(handle: &mut impl PrecompileHandle, target: H256, index: u8) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
 		// First get the vesting schedule of the `msg.sender`
@@ -176,7 +167,7 @@ where
 				// Dispatch call (if enough gas).
 				RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
-				return Ok((0))
+				Ok(())
 			},
 			None => Err(revert("No vesting schedule found for the sender")),
 		}
