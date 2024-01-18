@@ -40,6 +40,7 @@ fn test_unimplemented_selector_reverts() {
 	});
 }
 
+// Test unlocking any vested funds of the sender account.
 #[test]
 fn test_claim_vesting_schedule() {
 	ExtBuilder::default().build().execute_with(|| {
@@ -49,6 +50,48 @@ fn test_claim_vesting_schedule() {
 		roll_to(1000);
 		PrecompilesValue::get()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::vest {})
+			.execute_returns(());
+	});
+}
+
+// Test unlocking any vested funds of a `target` account.
+#[test]
+fn test_vest_other() {
+	ExtBuilder::default().build().execute_with(|| {
+		let schedules =
+			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
+		assert!(!schedules.is_empty());
+		roll_to(1000);
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bobo,
+				H160::from_low_u64_be(1),
+				PCall::vest_other {
+					target: sp_core::sr25519::Public::from(TestAccount::Alex).into(),
+				},
+			)
+			.execute_returns(());
+	});
+}
+
+// Test vested transfer.
+#[test]
+fn test_vest_transfer() {
+	ExtBuilder::default().build().execute_with(|| {
+		let schedules =
+			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
+		assert!(!schedules.is_empty());
+		let target = TestAccount::Bobo;
+		roll_to(1000);
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::vested_transfer {
+					target: sp_core::sr25519::Public::from(target).into(),
+					index: 0,
+				},
+			)
 			.execute_returns(());
 	});
 }
