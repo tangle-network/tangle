@@ -50,6 +50,7 @@ pub type WebbPrecompilesAt<R> = (
 		StakingPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
+	PrecompileAt<AddressU64<2049>, VestingPrecompile, (CallableByContract, CallableByPrecompile)>,
 	// Moonbeam precompiles
 	PrecompileAt<
 		AddressU64<2051>,
