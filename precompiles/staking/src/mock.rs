@@ -77,7 +77,7 @@ type Block = frame_system::mocking::MockBlock<Runtime>;
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 ];
 
 #[derive(
@@ -153,7 +153,7 @@ impl From<TestAccount> for H160 {
 		}
 	}
 }
-trait H160Conversion {
+pub trait H160Conversion {
 	fn to_h160(&self) -> H160;
 }
 
@@ -210,7 +210,6 @@ parameter_types! {
 	pub static SlashDeferDuration: EraIndex = 0;
 	pub static Period: BlockNumber = 5;
 	pub static Offset: BlockNumber = 0;
-
 }
 
 impl frame_system::Config for Runtime {
@@ -285,7 +284,7 @@ parameter_types! {
 }
 
 pub type Precompiles<R> =
-	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<5>, StakingPrecompile<R>>,)>;
+	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, StakingPrecompile<R>>,)>;
 
 pub type PCall = StakingPrecompileCall<Runtime>;
 
