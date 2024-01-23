@@ -84,6 +84,7 @@ pallet-transaction-pause = { workspace = true }
 pallet-transaction-payment = { workspace = true }
 pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 pallet-utility = { workspace = true }
+pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
 
 # Webb dependencies
@@ -191,6 +192,7 @@ std = [
   "pallet-transaction-payment-rpc-runtime-api/std",
   "pallet-transaction-pause/std",
   "pallet-utility/std",
+  "pallet-multisig/std",
   "pallet-collective/std",
   "pallet-democracy/std",
   "pallet-election-provider-multi-phase/std",
