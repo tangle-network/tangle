@@ -166,7 +166,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				// Initial validators
 				get_initial_authorities(),
 				// Endowed accounts
-				vec![mainnet::get_treasury_balance(), mainnet::get_foundation_endowment()],
+				vec![mainnet::get_treasury_balance()],
 				// Sudo account
 				get_root_key(),
 				// EVM chain ID
@@ -181,6 +181,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				combine_distributions(vec![
 					mainnet::get_team_balance_distribution(),
 					mainnet::get_investor_balance_distribution(),
+					mainnet::get_foundation_balance_distribution(),
 				]),
 			)
 		},

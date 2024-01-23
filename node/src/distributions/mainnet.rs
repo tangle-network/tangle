@@ -41,6 +41,16 @@ fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f6
 	accounts_map
 }
 
+// *** Distribution
+// Team : 30% (5% immediate) (team account gets 95% that is vested over 2years with 1 year cliff))
+// Foundation : 15% (5% immediate) (foundation account gets 95% that is vested over 2years with 1
+// year cliff) Investors : 16% (5% liquid immediately)(investor accounts gets 95% that is vested
+// over 2years with 1 year cliff) Treasury : 35% (immediate release to treasury pallet account)
+// EDG Genesis Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
+// EDG Snapshot Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
+// Leaderboard airdrop : 2% (5% immediate release)(95% vested over two years, with one month cliff)
+// ***
+
 pub fn get_edgeware_genesis_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/edgeware_genesis_participants.json")
 }
@@ -63,10 +73,6 @@ fn get_edgeware_snapshot_list() -> BTreeMap<AccountId32, f64> {
 	read_contents_to_substrate_accounts(
 		"node/src/distributions/data/edgeware_snapshot_distribution.json",
 	)
-}
-
-fn get_team_balance_distribution_list() -> BTreeMap<AccountId32, f64> {
-	read_contents_to_substrate_accounts("node/src/distributions/data/webb_team_distribution.json")
 }
 
 fn get_investor_balance_distribution_list() -> BTreeMap<AccountId32, f64> {
@@ -111,11 +117,11 @@ fn vesting_per_block(endowment: u128, blocks: u64) -> u128 {
 }
 
 fn get_team_distribution_share() -> Perbill {
-	Perbill::from_rational(25_u32, 100_u32)
+	Perbill::from_rational(30_u32, 100_u32)
 }
 
 fn get_investor_distribution_share() -> Perbill {
-	Perbill::from_rational(20_u32, 100_u32)
+	Perbill::from_rational(16_u32, 100_u32)
 }
 
 fn get_foundation_distribution_share() -> Perbill {
@@ -123,7 +129,7 @@ fn get_foundation_distribution_share() -> Perbill {
 }
 
 fn get_treasury_distribution_share() -> Perbill {
-	Perbill::from_rational(34_u32, 100_u32)
+	Perbill::from_rational(35_u32, 100_u32)
 }
 
 fn get_initial_liquidity_share() -> Perbill {
@@ -209,16 +215,7 @@ pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64,
 		.into_iter()
 		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
 		.collect();
-	compute_balance_distribution_with_cliff_and_vesting(investor_accounts)
-}
-
-pub fn get_team_endowment() -> Vec<(MultiAddress, u128)> {
-	// TODO : Ensure this sums up to 5%
-	let team_accounts: Vec<(MultiAddress, u128)> = get_team_balance_distribution_list()
-		.into_iter()
-		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
-		.collect();
-	team_accounts
+	compute_balance_distribution_with_cliff_and_vesting_no_endowment(investor_accounts)
 }
 
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
@@ -235,16 +232,7 @@ pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u12
 pub fn get_treasury_balance() -> (AccountId, u128) {
 	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
 	let acc: AccountId = pallet_id.into_account_truncating();
-	(acc, UNIT * 100_000)
-}
-
-pub fn get_foundation_endowment() -> (AccountId, u128) {
-	// TODO : Setup foundation account here
-	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
-	let acc: AccountId = pallet_id.into_account_truncating();
-	let balance = (get_foundation_distribution_share() * get_initial_liquidity_share())
-		.mul_floor(TOTAL_SUPPLY);
-	(acc, balance)
+	(acc, get_treasury_distribution_share() * TOTAL_SUPPLY)
 }
 
 pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
@@ -270,6 +258,23 @@ pub fn compute_balance_distribution_with_cliff_and_vesting(
 				ONE_YEAR_BLOCKS,
 				TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS,
 				five_percent_endowment(value),
+			)
+		})
+		.collect()
+}
+
+pub fn compute_balance_distribution_with_cliff_and_vesting_no_endowment(
+	investor_accounts: Vec<(MultiAddress, u128)>,
+) -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+	investor_accounts
+		.into_iter()
+		.map(|(address, value)| {
+			(
+				address,
+				value,
+				ONE_YEAR_BLOCKS,
+				TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS,
+				Default::default(),
 			)
 		})
 		.collect()
