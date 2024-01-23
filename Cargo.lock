@@ -13347,6 +13347,7 @@ dependencies = [
  "pallet-im-online",
  "pallet-indices",
  "pallet-insecure-randomness-collective-flip",
+ "pallet-jobs",
  "pallet-multisig",
  "pallet-nomination-pools",
  "pallet-offences",
