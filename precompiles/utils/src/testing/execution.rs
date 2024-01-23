@@ -117,7 +117,7 @@ impl<'p, P: PrecompileSet> PrecompilesTester<'p, P> {
 		}
 	}
 
-	fn execute(&mut self) -> Option<PrecompileResult> {
+	pub fn execute(&mut self) -> Option<PrecompileResult> {
 		let handle = &mut self.handle;
 		handle.subcall_handle = self.subcall_handle.take();
 		handle.is_static = self.static_call;

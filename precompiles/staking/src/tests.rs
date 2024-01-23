@@ -35,7 +35,7 @@ fn max_validator_count_works() {
 		precompiles()
 			.prepare_test(
 				TestAccount::Alex,
-				H160::from_low_u64_be(5),
+				H160::from_low_u64_be(1),
 				PCall::max_validator_count {},
 			)
 			.expect_cost(0)
@@ -50,7 +50,7 @@ fn current_era_works() {
 		start_session(3);
 		assert_eq!(active_era(), 2);
 		precompiles()
-			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(5), PCall::current_era {})
+			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::current_era {})
 			.expect_cost(0)
 			.expect_no_logs()
 			.execute_returns(3u32);
@@ -61,7 +61,7 @@ fn current_era_works() {
 fn validator_count_works() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		precompiles()
-			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(5), PCall::validator_count {})
+			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::validator_count {})
 			.expect_cost(0)
 			.expect_no_logs()
 			.execute_returns(4u32);
@@ -74,7 +74,7 @@ fn max_nominator_count_works() {
 		precompiles()
 			.prepare_test(
 				TestAccount::Alex,
-				H160::from_low_u64_be(5),
+				H160::from_low_u64_be(1),
 				PCall::max_nominator_count {},
 			)
 			.expect_cost(0)
@@ -89,7 +89,7 @@ fn is_validator_works() {
 		precompiles()
 			.prepare_test(
 				TestAccount::Alex,
-				H160::from_low_u64_be(5),
+				H160::from_low_u64_be(1),
 				PCall::is_validator { validator: H160::from(TestAccount::Alex).into() },
 			)
 			.expect_cost(0)
@@ -109,7 +109,7 @@ fn eras_total_rewards_should_work() {
 		precompiles()
 			.prepare_test(
 				TestAccount::Alex,
-				H160::from_low_u64_be(5),
+				H160::from_low_u64_be(1),
 				PCall::eras_total_reward_points { era_index },
 			)
 			.expect_cost(0)
@@ -128,7 +128,7 @@ fn nominate_should_work() {
 		precompiles()
 			.prepare_test(
 				TestAccount::Alex,
-				H160::from_low_u64_be(5),
+				H160::from_low_u64_be(1),
 				PCall::nominate { targets: vec![H256::from(mock_pub_key(1))] },
 			)
 			.expect_no_logs()
@@ -149,7 +149,7 @@ fn bond_should_work() {
 		precompiles()
 			.prepare_test(
 				TestAccount::Eve,
-				H160::from_low_u64_be(5),
+				H160::from_low_u64_be(1),
 				PCall::bond {
 					value: U256::from(100),
 					payee: H256([

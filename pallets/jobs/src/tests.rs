@@ -23,9 +23,11 @@ use sp_runtime::AccountId32;
 use tangle_primitives::{
 	jobs::{
 		DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DKGTSSSignatureResult, DigitalSignatureType,
-		JobSubmission, JobType, RpcResponseJobsData,
+		Groth16ProveRequest, Groth16System, HyperData, JobSubmission, JobType, RpcResponseJobsData,
+		ZkSaaSCircuitResult, ZkSaaSPhaseOneJobType, ZkSaaSPhaseTwoJobType, ZkSaaSPhaseTwoRequest,
+		ZkSaaSSystem,
 	},
-	roles::{RoleType, ThresholdSignatureRoleType},
+	roles::{RoleType, ThresholdSignatureRoleType, ZeroKnowledgeRoleType},
 };
 
 const ALICE: AccountId32 = AccountId32::new([1u8; 32]);
@@ -303,100 +305,146 @@ fn jobs_rpc_tests() {
 	});
 }
 
-// TODO : Integrate after zksaas pallet
-// #[test]
-// fn jobs_submission_e2e_works_for_zksaas() {
-// 	new_test_ext().execute_with(|| {
-// 		System::set_block_number(1);
-//
-// 		let submission = JobSubmission {
-// 			expiry: 100,
-// 			job_type: JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
-// 				participants: vec![100, 2, 3, 4, 5],
-// 			}),
-// 		};
-//
-// 		// should fail with invalid validator
-// 		assert_noop!(
-// 			Jobs::submit_job(RuntimeOrigin::signed(ALICE), submission),
-// 			Error::<Runtime>::InvalidValidator
-// 		);
-//
-// 		// should fail when caller has no balance
-// 		let submission = JobSubmission {
-// 			expiry: 100,
-// 			job_type: JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
-// 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
-// 			}),
-// 		};
-// 		assert_noop!(
-// 			Jobs::submit_job(RuntimeOrigin::signed(ALICE), submission),
-// 			sp_runtime::TokenError::FundsUnavailable
-// 		);
-//
-// 		let submission = JobSubmission {
-// 			expiry: 100,
-// 			job_type: JobType::ZkSaasPhaseOne(ZkSaasPhaseOneJobType {
-// 				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
-// 			}),
-// 		};
-// 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
-//
-// 		assert_eq!(Balances::free_balance(TEN), 100 - 10);
-//
-// 		// submit a solution for this job
-// 		assert_ok!(Jobs::submit_job_result(
-// 			RuntimeOrigin::signed(TEN),
-// 			JobKey::ZkSaasPhaseOne,
-// 			0,
-// 			vec![]
-// 		));
-//
-// 		// ensure the job reward is distributed correctly
-// 		for validator in [1, 2, 3, 4, 5] {
-// 			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(2));
-// 		}
-//
-// 		// ensure storage is correctly setup
-// 		assert!(KnownResults::<Runtime>::get(JobKey::ZkSaasPhaseOne, 0).is_some());
-// 		assert!(SubmittedJobs::<Runtime>::get(JobKey::ZkSaasPhaseOne, 0).is_none());
-//
-// 		// ---- use phase one solution in phase 2 signinig -------
-//
-// 		// another account cannot use solution
-// 		let submission = JobSubmission {
-// 			expiry: 100,
-// 			job_type: JobType::ZkSaasPhaseTwo(ZkSaasPhaseTwoJobType {
-// 				phase_one_id: 0,
-// 				submission: vec![],
-// 			}),
-// 		};
-// 		assert_noop!(
-// 			Jobs::submit_job(RuntimeOrigin::signed(TWENTY), submission),
-// 			Error::<Runtime>::InvalidJobParams
-// 		);
-//
-// 		let submission = JobSubmission {
-// 			expiry: 100,
-// 			job_type: JobType::ZkSaasPhaseTwo(ZkSaasPhaseTwoJobType {
-// 				phase_one_id: 0,
-// 				submission: vec![],
-// 			}),
-// 		};
-// 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
-//
-// 		assert_eq!(Balances::free_balance(TEN), 100 - 30);
-//
-// 		// ensure the job reward is distributed correctly
-// 		for validator in [1, 2, 3, 4, 5] {
-// 			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(2));
-// 		}
-//
-// 		// ensure storage is correctly setup
-// 		assert!(KnownResults::<Runtime>::get(JobKey::ZkSaasPhaseOne, 0).is_some());
-// 		assert!(SubmittedJobs::<Runtime>::get(JobKey::ZkSaasPhaseOne, 0).is_none());
-// 	});
-// }
+#[test]
+fn jobs_submission_e2e_works_for_zksaas() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+		let dummy_system = ZkSaaSSystem::Groth16(Groth16System {
+			circuit: HyperData::Raw(vec![]),
+			num_inputs: 0,
+			num_constraints: 0,
+			proving_key: HyperData::Raw(vec![]),
+			verifying_key: vec![],
+			wasm: HyperData::Raw(vec![]),
+		});
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
+				permitted_caller: None,
+				system: dummy_system.clone(),
+				role_type: ZeroKnowledgeRoleType::ZkSaaSGroth16,
+				participants: vec![HUNDRED, BOB, CHARLIE, DAVE, EVE],
+			}),
+		};
+
+		// should fail with invalid validator
+		assert_noop!(
+			Jobs::submit_job(RuntimeOrigin::signed(ALICE), submission),
+			Error::<Runtime>::InvalidValidator
+		);
+
+		// should fail when caller has no balance
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
+				permitted_caller: None,
+				system: dummy_system.clone(),
+				role_type: ZeroKnowledgeRoleType::ZkSaaSGroth16,
+				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
+			}),
+		};
+
+		assert_noop!(
+			Jobs::submit_job(RuntimeOrigin::signed(ALICE), submission),
+			sp_runtime::TokenError::FundsUnavailable
+		);
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
+				permitted_caller: Some(TEN),
+				system: dummy_system.clone(),
+				role_type: ZeroKnowledgeRoleType::ZkSaaSGroth16,
+				participants: vec![ALICE, BOB, CHARLIE, DAVE, EVE],
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
+
+		assert_eq!(Balances::free_balance(TEN), 100 - 10);
+
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(
+			RuntimeOrigin::signed(TEN),
+			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+			0,
+			JobResult::ZkSaaSPhaseOne(ZkSaaSCircuitResult { job_id: 0, participants: vec![] }),
+		));
+
+		// ensure the job reward is distributed correctly
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
+			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(2));
+		}
+
+		// ensure storage is correctly setup
+		assert!(KnownResults::<Runtime>::get(
+			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+			0
+		)
+		.is_some());
+		assert!(SubmittedJobs::<Runtime>::get(
+			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+			0
+		)
+		.is_none());
+
+		// ---- use phase one solution in phase 2 proving -------
+		let dummy_req = ZkSaaSPhaseTwoRequest::Groth16(Groth16ProveRequest {
+			public_input: vec![],
+			a_shares: vec![],
+			ax_shares: vec![],
+			qap_shares: vec![],
+		});
+		// another account cannot use solution
+		let submission = JobSubmission {
+			expiry: 100,
+			ttl: 200,
+			job_type: JobType::ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType {
+				phase_one_id: 0,
+				request: dummy_req.clone(),
+				role_type: ZeroKnowledgeRoleType::ZkSaaSGroth16,
+			}),
+		};
+		assert_noop!(
+			Jobs::submit_job(RuntimeOrigin::signed(TWENTY), submission),
+			Error::<Runtime>::InvalidJobParams
+		);
+
+		let submission = JobSubmission {
+			expiry: 100,
+			ttl: 200,
+			job_type: JobType::ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType {
+				phase_one_id: 0,
+				request: dummy_req,
+				role_type: ZeroKnowledgeRoleType::ZkSaaSGroth16,
+			}),
+		};
+
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(TEN), submission));
+
+		assert_eq!(Balances::free_balance(TEN), 100 - 30);
+
+		// ensure the job reward is distributed correctly
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
+			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(2));
+		}
+
+		// ensure storage is correctly setup
+		assert!(KnownResults::<Runtime>::get(
+			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+			1
+		)
+		.is_none());
+		assert!(SubmittedJobs::<Runtime>::get(
+			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+			1
+		)
+		.is_some());
+	});
+}
 
 // #[test]
 // fn withdraw_validator_rewards_works() {

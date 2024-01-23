@@ -1,18 +1,17 @@
 <div align="center">
-<a href="https://www.webb.tools/">
+<a href="https://www.tangle.tools/">
     
-![Webb Logo](./assets/webb_banner_light.png#gh-light-mode-only)
-![Webb Logo](./assets/webb_banner_dark.png#gh-dark-mode-only)
+![Alt text](<assets/Tangle Banner 4.png>)
   </a>
   </div>
 <h1 align="left"> The Tangle Network </h1>
 <p align="left">
-    <strong>An MPC-as-a-service blockchain infrastructure for empowering cross-chain and zero-knowledge applications development. </strong>
+    <strong>An MPC-as-a-service restaking infrastructure powering cross-chain and zero-knowledge application development. </strong>
 </p>
 
 <div align="left" >
 
-[![Twitter](https://img.shields.io/twitter/follow/webbprotocol.svg?style=flat-square&label=Twitter&color=1DA1F2)](https://twitter.com/webbprotocol)
+[![Twitter](https://img.shields.io/twitter/follow/webbprotocol.svg?style=flat-square&label=Twitter&color=1DA1F2)](https://twitter.com/intent/user?screen_name=tangle_network)
 [![Telegram](https://img.shields.io/badge/Telegram-gray?logo=telegram)](https://t.me/webbprotocol)
 [![Discord](https://img.shields.io/discord/833784453251596298.svg?style=flat-square&label=Discord&logo=discord)](https://discord.gg/cv8EfJu3Tn)
 
