@@ -1,5 +1,4 @@
-# Docker compose file to start tangle parachain collator that connects to tangle testnet
-
+# Docker compose file to start tangle node
 version: "3.7"
 services:
 
@@ -8,8 +7,7 @@ services:
     network_mode: host
     entrypoint: /tangle
     command:
-      - "--chain"
-      - "/var/lib/data/arana-alpha.json"
+      - "--chain=tangle-testnet"
       - "--validator"
       - "--prometheus-external"
     ports:

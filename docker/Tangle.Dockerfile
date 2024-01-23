@@ -48,5 +48,9 @@ ENV BINARY=${BINARY}
 
 COPY --from=builder /tangle/target/release/${BINARY} /usr/local/bin
 
-EXPOSE 30333 9933 9944 9615
-VOLUME ["/data"]
+# check if executable works in this container
+RUN /usr/local/bin/tangle --version
+
+EXPOSE 30333 9933 9944
+VOLUME ["/tangle"]
+ENTRYPOINT ["/usr/local/bin/tangle "]

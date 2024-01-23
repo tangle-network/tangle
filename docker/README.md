@@ -2,7 +2,7 @@ The (Provided Dockerfile)[./Tangle.Dockerfile] is used as a base file to build d
 
 You can build it by executing the following commands:
 
-**Standalone node**
+**Tangle node**
 
 Execute the following script:
 
@@ -10,11 +10,3 @@ Execute the following script:
 ./scripts/build-standalone-docker.sh
 ```
 
-
-**Parachain Node**
-
-Execute the following script:
-
-```sh
-./scripts/build-parachain-docker.sh
-```
