@@ -58,7 +58,7 @@ fn insert_account_keys_into_keystore<TPublic: Public>(
 
 	let pub_key = get_from_seed::<TPublic>(&seed).to_raw_vec();
 	if let Some(keystore) = key_store {
-		let _ = Keystore::insert(&*keystore, key_type, &format!("{seed}"), &pub_key);
+		let _ = Keystore::insert(&*keystore, key_type, &seed.to_string(), &pub_key);
 	}
 
 	println!("++++++++++++++++++++++++++++++++++++++++++++++++  
