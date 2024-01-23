@@ -39,7 +39,7 @@ use tangle_crypto_primitives::ROLE_KEY_TYPE;
 use tangle_primitives::roles::RoleType;
 
 mod impls;
-mod profile;
+pub mod profile;
 use profile::{Profile, Record};
 
 #[cfg(test)]

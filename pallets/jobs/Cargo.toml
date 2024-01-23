@@ -50,6 +50,13 @@ pallet-ethereum = { workspace = true }
 pallet-evm = { workspace = true }
 pallet-evm-chain-id = { workspace = true }
 
+# Roles pallet
+pallet-roles = { workspace = true }
+pallet-session = { workspace = true }
+pallet-staking = { workspace = true }
+sp-staking = { workspace = true }
+frame-election-provider-support = { workspace = true }
+
 [features]
 default = ["std"]
 std = [
@@ -77,6 +84,7 @@ std = [
   "pallet-ethereum/std",
   "pallet-evm/std",
   "pallet-evm-chain-id/std",
+  "pallet-roles/std"
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
