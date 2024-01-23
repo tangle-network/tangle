@@ -1,4 +1,4 @@
-use rand::{distributions::Alphanumeric, Rng};
+use rand::{Rng};
 use sc_service::{ChainType, Configuration};
 use sp_core::{ecdsa, ed25519, sr25519, ByteArray, Pair, Public};
 use sp_keystore::{Keystore, KeystorePtr};
@@ -53,12 +53,13 @@ fn insert_account_keys_into_keystore<TPublic: Public>(
 	key_store: Option<KeystorePtr>,
 	key_name: &str,
 ) {
-	let seed: String =
-		rand::thread_rng().sample_iter(&Alphanumeric).take(30).map(char::from).collect();
+	let mut seed_raw = [0u8; 32];
+	rand::thread_rng().fill(&mut seed_raw[..]);
+	let seed: &str = &hex::encode(seed_raw);
 
-	let pub_key = get_from_seed::<TPublic>(&seed).to_raw_vec();
+	let pub_key = get_from_seed::<TPublic>(seed).to_raw_vec();
 	if let Some(keystore) = key_store {
-		let _ = Keystore::insert(&*keystore, key_type, &seed.to_string(), &pub_key);
+		let _ = Keystore::insert(&*keystore, key_type, seed, &pub_key);
 	}
 
 	println!("++++++++++++++++++++++++++++++++++++++++++++++++  
