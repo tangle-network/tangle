@@ -1,3 +1,4 @@
+use rand::{distributions::Alphanumeric, Rng};
 use sc_service::{ChainType, Configuration};
 use sp_core::{ecdsa, ed25519, sr25519, ByteArray, Pair, Public};
 use sp_keystore::{Keystore, KeystorePtr};
@@ -5,6 +6,7 @@ use sp_runtime::{
 	key_types::{ACCOUNT, BABE, GRANDPA, IM_ONLINE},
 	KeyTypeId,
 };
+
 /// Helper function to generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
 	TPublic::Pair::from_string(&format!("//{seed}"), None)
@@ -46,22 +48,23 @@ pub fn insert_controller_account_keys_into_keystore(
 
 /// Inserts keys of specified type into the keystore.
 fn insert_account_keys_into_keystore<TPublic: Public>(
-	config: &Configuration,
+	_config: &Configuration,
 	key_type: KeyTypeId,
 	key_store: Option<KeystorePtr>,
 	key_name: &str,
 ) {
-	let seed = &config.network.node_name[..];
+	let seed: String =
+		rand::thread_rng().sample_iter(&Alphanumeric).take(30).map(char::from).collect();
 
-	let pub_key = get_from_seed::<TPublic>(seed).to_raw_vec();
+	let pub_key = get_from_seed::<TPublic>(&seed).to_raw_vec();
 	if let Some(keystore) = key_store {
-		let _ = Keystore::insert(&*keystore, key_type, &format!("//{seed}"), &pub_key);
+		let _ = Keystore::insert(&*keystore, key_type, &format!("{seed}"), &pub_key);
 	}
 
 	println!("++++++++++++++++++++++++++++++++++++++++++++++++  
                 AUTO GENERATED KEYS                                                                        
                 {:?} key inserted to keystore
-                Seed : //{:?}
+                Seed : {:?}
                 Pubkey : {:?}
                 STORE THE KEYS SAFELY, NOT TO BE SHARED WITH ANYONE ELSE.
     ++++++++++++++++++++++++++++++++++++++++++++++++   							
