@@ -27,14 +27,13 @@ use frame_support::{
 use frame_system::EnsureSigned;
 use pallet_session::historical as pallet_session_historical;
 use sp_core::{
-	sr25519::{self, Signature},
+	sr25519::{self},
 	H256,
 };
-
 use sp_runtime::{
 	app_crypto::ecdsa::Public,
-	traits::{ConvertInto, IdentifyAccount, IdentityLookup, OpaqueKeys, Verify},
-	BuildStorage, DispatchResult, Perbill, Percent,
+	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
+	AccountId32, BuildStorage, DispatchResult, Perbill, Percent,
 };
 use sp_staking::{
 	offence::{OffenceError, ReportOffence},
@@ -44,7 +43,7 @@ use sp_staking::{
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{jobs::*, roles::ValidatorRewardDistribution};
 
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+pub type AccountId = AccountId32;
 pub type Balance = u128;
 pub type BlockNumber = u64;
 
@@ -216,9 +215,7 @@ impl pallet_session::SessionManager<AccountId> for MockSessionManager {
 	fn end_session(_: sp_staking::SessionIndex) {}
 	fn start_session(_: sp_staking::SessionIndex) {}
 	fn new_session(idx: sp_staking::SessionIndex) -> Option<Vec<AccountId>> {
-		if idx == 0 || idx == 1 {
-			Some(vec![mock_pub_key(1), mock_pub_key(2), mock_pub_key(3), mock_pub_key(4)])
-		} else if idx == 2 {
+		if idx == 0 || idx == 1 || idx == 2 {
 			Some(vec![mock_pub_key(1), mock_pub_key(2), mock_pub_key(3), mock_pub_key(4)])
 		} else {
 			None
@@ -328,8 +325,8 @@ construct_runtime!(
 		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
 		Jobs: pallet_jobs,
-		//EVM: pallet_evm,
-		//Ethereum: pallet_ethereum,
+		EVM: pallet_evm,
+		Ethereum: pallet_ethereum,
 		Roles: pallet_roles,
 		Session: pallet_session,
 		Staking: pallet_staking,
@@ -346,7 +343,7 @@ impl Default for ExtBuilder {
 }
 
 pub fn mock_pub_key(id: u8) -> AccountId {
-	sr25519::Public::from_raw([id; 32])
+	sr25519::Public::from_raw([id; 32]).into()
 }
 
 pub fn mock_role_key_id(id: u8) -> RoleKeyId {
@@ -368,15 +365,14 @@ pub fn new_test_ext_raw_authorities(
 ) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	let balances: Vec<_> = authorities.iter().map(|(i, _)| (*i, 20_000_u128)).collect();
-
+	let balances: Vec<_> = authorities.iter().map(|(i, _)| (i.clone(), 20_000_u128)).collect();
 	pallet_balances::GenesisConfig::<Runtime> { balances }
 		.assimilate_storage(&mut t)
 		.unwrap();
 
 	let session_keys: Vec<_> = authorities
 		.iter()
-		.map(|(id, role_id)| (*id, *id, MockSessionKeys { role: role_id.clone() }))
+		.map(|(id, role_id)| (id.clone(), id.clone(), MockSessionKeys { role: role_id.clone() }))
 		.collect();
 
 	pallet_session::GenesisConfig::<Runtime> { keys: session_keys }
@@ -387,8 +383,8 @@ pub fn new_test_ext_raw_authorities(
 		.iter()
 		.map(|(authority, _)| {
 			(
-				*authority,
-				*authority,
+				authority.clone(),
+				authority.clone(),
 				10_000_u128,
 				pallet_staking::StakerStatus::<AccountId>::Validator,
 			)
