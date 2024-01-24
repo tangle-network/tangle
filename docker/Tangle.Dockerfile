@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM docker.io/paritytech/ci-linux:production as builder
+FROM docker.io/paritytech/ci-linux:production
 
 ENV TZ=GMT
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -22,7 +22,7 @@ WORKDIR /tangle
 COPY . .
 
 # Install Required Packages
-RUN apt-get update && apt-get install -y git apt-get -y install sudo \
+RUN apt-get update && apt-get install -y git && apt-get -y install sudo \
   cmake clang curl libssl-dev llvm libudev-dev \
   libgmp3-dev protobuf-compiler ca-certificates \
   && rm -rf /var/lib/apt/lists/* && update-ca-certificates
@@ -32,15 +32,14 @@ RUN cargo build --locked --release --features txpool
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Tangle Network Node"
 
-COPY /tangle/target/release/tangle /usr/local/bin
-
 RUN useradd -m -u 1000 -U -s /bin/sh -d /tangle tangle && \
 	mkdir -p /data /tangle/.local/share && \
 	chown -R tangle:tangle /data && \
 	ln -s /data /tangle/.local/share/tangle && \
-# unclutter and minimize the attack surface
+	/tangle/target/release/tangle /usr/local/bin && \
+	# unclutter and minimize the attack surface
 	rm -rf /usr/bin /usr/sbin && \
-# check if executable works in this container
+	# check if executable works in this container
 	/usr/local/bin/tangle --version
 
 USER tangle
