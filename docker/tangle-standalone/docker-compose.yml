@@ -2,7 +2,7 @@
 version: "3.7"
 services:
   tangle:
-    image: ghcr.io/webb-tools/tangle/tangle:${RELEASE_VERSION}
+    image: ghcr.io/webb-tools/tangle/tangle:update-docker-container
     network_mode: host
     entrypoint: /tangle
     volumes:

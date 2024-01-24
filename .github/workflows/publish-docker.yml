@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   push:
-    branches: [main]
+    branches: [main, update-docker-container]
     tags: ["v*.*.*"]
 
 env:

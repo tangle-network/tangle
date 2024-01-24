@@ -19,9 +19,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 WORKDIR /tangle
 
-# Set the Binary name that we are trying to build.
-ARG BINARY
-
 COPY . .
 
 # Install Required Packages
@@ -30,26 +27,26 @@ RUN apt-get update && apt-get install -y git \
   libgmp3-dev protobuf-compiler ca-certificates \
   && rm -rf /var/lib/apt/lists/* && update-ca-certificates
 
-COPY rust-toolchain.toml .
-# Build dependencies - this is the caching Docker layer!
-ARG BINARY
-ARG FEATURES=default
-COPY . .
-# Build application
-RUN cargo build -Z sparse-registry --release --features ${FEATURES} -p ${BINARY}
+RUN cargo build --locked --release
 
 # This is the 2nd stage: a very small image where we copy the tangle binary."
-FROM ubuntu:20.04
+FROM docker.io/parity/base-bin:latest
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Tangle Network Node"
-ARG BINARY
-ENV BINARY=${BINARY}
 
-COPY --from=builder /tangle/target/release/${BINARY} /usr/local/bin
+COPY --from=builder /tangle/target/release/tangle /usr/local/bin
 
+RUN useradd -m -u 1000 -U -s /bin/sh -d /tangle tangle && \
+	mkdir -p /data /tangle/.local/share && \
+	chown -R tangle:tangle /data && \
+	ln -s /data /tangle/.local/share/tangle && \
+# unclutter and minimize the attack surface
+	rm -rf /usr/bin /usr/sbin && \
 # check if executable works in this container
-RUN /usr/local/bin/tangle --version
+	/usr/local/bin/tangle --version
 
-EXPOSE 30333 9933 9944
-VOLUME ["/tangle"]
-ENTRYPOINT ["/usr/local/bin/tangle "]
+USER polkadot
+
+EXPOSE 30333 9933 9944 9615
+VOLUME ["/data"]
+ENTRYPOINT ["/usr/local/bin/tangle"]
