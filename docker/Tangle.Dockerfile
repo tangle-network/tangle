@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
+FROM ubuntu:20.04 AS chef
 WORKDIR /tangle
 
 # Set the Binary name that we are trying to build.
