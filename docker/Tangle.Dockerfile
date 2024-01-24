@@ -22,19 +22,17 @@ WORKDIR /tangle
 COPY . .
 
 # Install Required Packages
-RUN apt-get update && apt-get install -y git \
+RUN apt-get update && apt-get install -y git apt-get -y install sudo \
   cmake clang curl libssl-dev llvm libudev-dev \
   libgmp3-dev protobuf-compiler ca-certificates \
   && rm -rf /var/lib/apt/lists/* && update-ca-certificates
 
 RUN cargo build --locked --release --features txpool
 
-# This is the 2nd stage: a very small image where we copy the tangle binary."
-FROM docker.io/parity/base-bin:latest
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Tangle Network Node"
 
-COPY --from=builder /tangle/target/release/tangle /usr/local/bin
+COPY /tangle/target/release/tangle /usr/local/bin
 
 RUN useradd -m -u 1000 -U -s /bin/sh -d /tangle tangle && \
 	mkdir -p /data /tangle/.local/share && \
@@ -45,7 +43,7 @@ RUN useradd -m -u 1000 -U -s /bin/sh -d /tangle tangle && \
 # check if executable works in this container
 	/usr/local/bin/tangle --version
 
-USER polkadot
+USER tangle
 
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
