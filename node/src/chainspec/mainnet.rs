@@ -23,6 +23,7 @@ use crate::{
 	mainnet_fixtures::{get_bootnodes, get_initial_authorities, get_root_key},
 };
 use core::marker::PhantomData;
+use hex_literal::hex;
 use pallet_airdrop_claims::MultiAddress;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
@@ -35,7 +36,7 @@ use sp_runtime::{
 };
 use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
-	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig,
+	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
 	Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId,
 	RuntimeGenesisConfig, SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
 	TreasuryPalletId, VestingConfig, UNIT, WASM_BINARY,
@@ -273,7 +274,16 @@ fn mainnet_genesis(
 			..Default::default()
 		},
 		democracy: Default::default(),
-		council: Default::default(),
+		council: CouncilConfig {
+			members: vec![
+				hex!["483b466832e094f01b1779a7ed07025df319c492dac5160aca89a3be117a7b6d"].into(),
+				hex!["86d08e7bbe77bc74e3d88ee22edc53368bc13d619e05b66fe6c4b8e2d5c7015a"].into(),
+				hex!["e421301e5aa5dddee51f0d8c73e794df16673e53157c5ea657be742e35b1793f"].into(),
+				hex!["4ce3a4da3a7c1ce65f7edeff864dc3dd42e8f47eecc2726d99a0a80124698217"].into(),
+				hex!["dcd9b70a0409b7626cba1a4016d8da19f4df5ce9fc5e8d16b789e71bb1161d73"].into(),
+			],
+			..Default::default()
+		},
 		elections: Default::default(),
 		treasury: Default::default(),
 		babe: BabeConfig {

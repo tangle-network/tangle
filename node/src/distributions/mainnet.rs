@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts};
+use hex_literal::hex;
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};
 use sp_core::H160;
 use sp_runtime::{traits::AccountIdConversion, AccountId32};
@@ -219,13 +220,11 @@ pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64,
 }
 
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
-	// the team vesting is completely sent to a single account and vested and claimed by that
-	// account TODO : Finalise this account
-	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
-	let address: AccountId = pallet_id.into_account_truncating();
+	let team_address: AccountId =
+		hex!["8e1c2bdddab9573d8cb094dbffba24a2b2c21b7e71e3f5b604e8607483872443"].into();
 	let balance =
 		(get_team_distribution_share() - get_initial_liquidity_share()).mul_floor(TOTAL_SUPPLY);
-	let team_account = (MultiAddress::Native(address), balance as u128);
+	let team_account = (MultiAddress::Native(team_address), balance as u128);
 	compute_balance_distribution_with_cliff_and_vesting(vec![team_account])
 }
 
@@ -236,13 +235,12 @@ pub fn get_treasury_balance() -> (AccountId, u128) {
 }
 
 pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
-	// TODO : Setup foundation account here
-	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
-	let address: AccountId = pallet_id.into_account_truncating();
+	let foundation_address: AccountId =
+		hex!["0cdd6ca9c578fabcc65373004944a401866d5c61568ffb22ecd8ef528599f95b"].into();
 	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY) -
 		get_initial_liquidity_share()
 			.mul_floor(get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY));
-	let foundation_account = (MultiAddress::Native(address), balance as u128);
+	let foundation_account = (MultiAddress::Native(foundation_address), balance as u128);
 	compute_balance_distribution_with_cliff_and_vesting(vec![foundation_account])
 }
 

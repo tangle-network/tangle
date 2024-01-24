@@ -25,7 +25,7 @@ use tangle_runtime::AccountId;
 
 /// Mainnet root key
 pub fn get_root_key() -> AccountId {
-	hex!["9c2c928c3b9ac62c6dc4caaf5777c16ce28984dedc92687ef427f8f4f6d61d2f"].into()
+	hex!["dc15b770b3cab4c43ab92173516482891c5f8ef4d42967f364bd2c52e0aebc0f"].into()
 }
 
 /// Mainnet bootnodes
