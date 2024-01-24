@@ -44,6 +44,49 @@ pub enum RoleType {
 	LightClientRelaying,
 }
 
+impl TryFrom<u16> for RoleType {
+	type Error = InvalidRoleType;
+
+	fn try_from(value: u16) -> Result<Self, Self::Error> {
+		match value {
+			0x0001 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1)),
+			0x0002 => Ok(RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1)),
+			0x0003 => Ok(RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256r1)),
+			0x0004 => Ok(RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Stark)),
+			0x0005 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostSr25519)),
+			0x0006 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostP256)),
+			0x0007 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostSecp256k1)),
+			0x0008 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostRistretto255)),
+			0x0009 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostEd25519)),
+			0x000A => Ok(RoleType::Tss(ThresholdSignatureRoleType::GennaroDKGBls381)),
+			0x0100 => Ok(RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16)),
+			0x0101 => Ok(RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSMarlin)),
+			0x0200 => Ok(RoleType::LightClientRelaying),
+			_ => Err(InvalidRoleType),
+		}
+	}
+}
+
+impl From<RoleType> for u16 {
+	fn from(value: RoleType) -> Self {
+		match value {
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1) => 0x0001,
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1) => 0x0002,
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256r1) => 0x0003,
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Stark) => 0x0004,
+			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostSr25519) => 0x0005,
+			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostP256) => 0x0006,
+			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostSecp256k1) => 0x0007,
+			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostRistretto255) => 0x0008,
+			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostEd25519) => 0x0009,
+			RoleType::Tss(ThresholdSignatureRoleType::GennaroDKGBls381) => 0x000A,
+			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16) => 0x0100,
+			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSMarlin) => 0x0101,
+			RoleType::LightClientRelaying => 0x0200,
+		}
+	}
+}
+
 impl RoleType {
 	pub fn is_dkg_tss(&self) -> bool {
 		match self {
@@ -64,26 +107,6 @@ impl RoleType {
 			RoleType::LightClientRelaying => true,
 			_ => false,
 		}
-	}
-
-	pub fn to_u16(&self) -> u16 {
-		let be_bytes: [u8; 2] = match self {
-			RoleType::Tss(ThresholdSignatureRoleType::TssGG20) => [0, 1],
-			RoleType::Tss(ThresholdSignatureRoleType::TssCGGMP) => [0, 2],
-			RoleType::Tss(ThresholdSignatureRoleType::TssFrostSr25519) => [0, 3],
-			RoleType::Tss(ThresholdSignatureRoleType::TssFrostP256) => [0, 4],
-			RoleType::Tss(ThresholdSignatureRoleType::TssFrostSecp256k1) => [0, 5],
-			RoleType::Tss(ThresholdSignatureRoleType::TssFrostRistretto255) => [0, 6],
-			RoleType::Tss(ThresholdSignatureRoleType::TssFrostBabyJubJub) => [0, 7],
-			RoleType::Tss(ThresholdSignatureRoleType::TssFrostEd25519) => [0, 8],
-			RoleType::Tss(ThresholdSignatureRoleType::TssEdDSABabyJubJub) => [0, 9],
-			RoleType::Tss(ThresholdSignatureRoleType::TssBls381) => [0, 10],
-			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16) => [1, 0],
-			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSMarlin) => [1, 1],
-			RoleType::LightClientRelaying => [2, 0],
-		};
-
-		u16::from_be_bytes(be_bytes)
 	}
 }
 
@@ -138,3 +161,8 @@ impl ValidatorRewardDistribution {
 		(self.tss_share, self.zksaas_share)
 	}
 }
+
+/// Invalid role type error.
+#[derive(Encode, Decode, Copy, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct InvalidRoleType;

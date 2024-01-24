@@ -28,7 +28,10 @@ use tangle_primitives::{
 pub fn independent_profile() -> Profile<Runtime> {
 	let profile = IndependentRestakeProfile {
 		records: BoundedVec::try_from(vec![
-			Record { role: RoleType::Tss(ThresholdSignatureRoleType::TssGG20), amount: Some(2500) },
+			Record {
+				role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+				amount: Some(2500),
+			},
 			Record {
 				role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
 				amount: Some(2500),
@@ -42,7 +45,10 @@ pub fn independent_profile() -> Profile<Runtime> {
 pub fn shared_profile() -> Profile<Runtime> {
 	let profile = SharedRestakeProfile {
 		records: BoundedVec::try_from(vec![
-			Record { role: RoleType::Tss(ThresholdSignatureRoleType::TssGG20), amount: None },
+			Record {
+				role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+				amount: None,
+			},
 			Record { role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16), amount: None },
 		])
 		.unwrap(),
@@ -124,7 +130,10 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met(
 
 		let profile = Profile::Shared(SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
-				Record { role: RoleType::Tss(ThresholdSignatureRoleType::TssGG20), amount: None },
+				Record {
+					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					amount: None,
+				},
 				Record {
 					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
 					amount: None,
@@ -153,7 +162,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_
 		let profile = Profile::Independent(IndependentRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 					amount: Some(1000),
 				},
 				Record {
