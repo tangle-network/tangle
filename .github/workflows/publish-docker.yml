@@ -20,9 +20,6 @@ jobs:
           - binary: tangle
             features: default
             image_name: tangle
-          - binary: tangle
-            features: txpool
-            image_name: tangle-txpool
     permissions:
       contents: read
       packages: write

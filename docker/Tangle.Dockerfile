@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y git \
   libgmp3-dev protobuf-compiler ca-certificates \
   && rm -rf /var/lib/apt/lists/* && update-ca-certificates
 
-RUN cargo build --locked --release
+RUN cargo build --locked --release --features txpool
 
 # This is the 2nd stage: a very small image where we copy the tangle binary."
 FROM docker.io/parity/base-bin:latest
