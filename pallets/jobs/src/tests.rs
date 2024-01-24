@@ -55,7 +55,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
 
-		let threshold_signature_role_type = ThresholdSignatureRoleType::TssGG20;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -146,7 +146,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
-			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![],
@@ -164,12 +164,12 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		// ensure storage is correctly setup
 		assert!(KnownResults::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			0
 		)
 		.is_some());
 		assert!(SubmittedJobs::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			0
 		)
 		.is_none());
@@ -224,12 +224,12 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		// ensure storage is correctly setup
 		assert!(KnownResults::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			0
 		)
 		.is_some());
 		assert!(SubmittedJobs::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			0
 		)
 		.is_none());
@@ -253,7 +253,7 @@ fn jobs_rpc_tests() {
 			));
 		}
 
-		let threshold_signature_role_type = ThresholdSignatureRoleType::TssGG20;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -292,7 +292,7 @@ fn jobs_rpc_tests() {
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
-			RoleType::Tss(ThresholdSignatureRoleType::TssGG20),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![],
@@ -306,8 +306,10 @@ fn jobs_rpc_tests() {
 		assert_eq!(Jobs::query_job_by_id(RoleType::Tss(threshold_signature_role_type), 0), None);
 		assert_eq!(Jobs::query_next_job_id(), 1);
 
-		let expected_result =
-			KnownResults::<Runtime>::get(RoleType::Tss(ThresholdSignatureRoleType::TssGG20), 0);
+		let expected_result = KnownResults::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0,
+		);
 		assert_eq!(
 			Jobs::query_job_result(RoleType::Tss(threshold_signature_role_type), 0),
 			expected_result
@@ -339,8 +341,10 @@ fn jobs_rpc_tests() {
 		);
 		assert_eq!(Jobs::query_next_job_id(), 2);
 
-		let expected_result =
-			KnownResults::<Runtime>::get(RoleType::Tss(ThresholdSignatureRoleType::TssGG20), 1);
+		let expected_result = KnownResults::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			1,
+		);
 		assert_eq!(
 			Jobs::query_job_result(RoleType::Tss(threshold_signature_role_type), 1),
 			expected_result
