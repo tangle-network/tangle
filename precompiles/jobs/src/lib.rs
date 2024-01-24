@@ -31,7 +31,7 @@ use sp_runtime::traits::Dispatchable;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::{
 	jobs::{DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, JobId, JobSubmission, JobType},
-	roles::{RoleType, ThresholdSignatureRoleType, ZeroKnowledgeRoleType},
+	roles::RoleType,
 	types::BlockNumber,
 };
 
@@ -295,21 +295,6 @@ where
 	}
 
 	fn convert_role_type(role_type: u16) -> Option<RoleType> {
-		match role_type.to_be_bytes() {
-			[0, 1] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssGG20)),
-			[0, 2] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssCGGMP)),
-			[0, 3] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostSr25519)),
-			[0, 4] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostP256)),
-			[0, 5] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostSecp256k1)),
-			[0, 6] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostRistretto255)),
-			[0, 7] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostBabyJubJub)),
-			[0, 8] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssFrostEd25519)),
-			[0, 9] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssEdDSABabyJubJub)),
-			[0, 10] => Some(RoleType::Tss(ThresholdSignatureRoleType::TssBls381)),
-			[1, 0] => Some(RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16)),
-			[1, 1] => Some(RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSMarlin)),
-			[2, 0] => Some(RoleType::LightClientRelaying),
-			_ => None,
-		}
+		role_type.try_into().ok()
 	}
 }
