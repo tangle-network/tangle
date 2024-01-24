@@ -13,6 +13,10 @@
 # limitations under the License.
 #
 FROM ubuntu:20.04 AS chef
+
+ENV TZ=GMT
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 WORKDIR /tangle
 
 # Set the Binary name that we are trying to build.
