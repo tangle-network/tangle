@@ -450,23 +450,14 @@ pub mod pallet {
 				pallet_staking::Validators::<T>::contains_key(&stash_account),
 				Error::<T>::NotValidator
 			);
-			let mut ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
+			let ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
 
 			// Submit request to exit from all the services.
 			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
 			let mut pending_jobs = Vec::new();
 			for job in active_jobs {
 				let role_type = job.0;
-				// Submit request to exit from the known set.
-				let res =
-					T::JobsHandler::exit_from_known_set(stash_account.clone(), role_type, job.1);
-
-				if res.is_err() {
-					pending_jobs.push((role_type, job.1));
-				} else {
-					// Remove role from the profile.
-					ledger.profile.remove_role_from_profile(role_type);
-				}
+				pending_jobs.push((role_type, job.1));
 			}
 
 			if !pending_jobs.is_empty() {
@@ -481,7 +472,7 @@ pub mod pallet {
 				// the moment.
 				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
 				return Err(Error::<T>::ProfileDeleteRequestFailed.into())
-			};
+			}
 
 			Self::deposit_event(Event::<T>::ProfileDeleted { account: stash_account.clone() });
 

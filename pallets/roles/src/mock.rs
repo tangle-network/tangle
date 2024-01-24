@@ -24,7 +24,9 @@ use frame_election_provider_support::{
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Contains, Hooks},
+	PalletId,
 };
+use frame_system::EnsureSigned;
 use pallet_session::historical as pallet_session_historical;
 use sp_core::{
 	sr25519::{self, Signature},
@@ -43,7 +45,7 @@ use sp_staking::{
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	jobs::{
-		traits::{JobsHandler, MPCHandler},
+		traits::{JobToFee, JobsHandler, MPCHandler},
 		*,
 	},
 	roles::ValidatorRewardDistribution,
@@ -94,26 +96,6 @@ impl pallet_balances::Config for Runtime {
 	type MaxHolds = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
-}
-
-pub struct MockMPCHandler;
-
-impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
-		Ok(())
-	}
-
-	fn verify_validator_report(
-		_validator: AccountId,
-		_offence: ValidatorOffenceType,
-		_signatures: Vec<Vec<u8>>,
-	) -> DispatchResult {
-		Ok(())
-	}
-
-	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
-		Ok(())
-	}
 }
 
 type IdentificationTuple = (AccountId, AccountId);
@@ -278,6 +260,51 @@ impl JobsHandler<AccountId> for MockJobsHandler {
 	}
 }
 
+pub struct MockJobToFeeHandler;
+
+impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+	type Balance = Balance;
+
+	fn job_to_fee(_job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		Default::default()
+	}
+}
+
+pub struct MockMPCHandler;
+
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
+	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
+		Ok(())
+	}
+
+	fn verify_validator_report(
+		_validator: AccountId,
+		_offence: ValidatorOffenceType,
+		_signatures: Vec<Vec<u8>>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
+}
+
+parameter_types! {
+	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+}
+
+impl pallet_jobs::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type ForceOrigin = EnsureSigned<AccountId>;
+	type Currency = Balances;
+	type JobToFee = MockJobToFeeHandler;
+	type RolesHandler = Roles;
+	type MPCHandler = MockMPCHandler;
+	type PalletId = JobsPalletId;
+	type WeightInfo = ();
+}
+
 parameter_types! {
 	pub InflationRewardPerSession: Balance = 10_000;
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
@@ -285,7 +312,7 @@ parameter_types! {
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type JobsHandler = MockJobsHandler;
+	type JobsHandler = Jobs;
 	type MaxRolesPerAccount = ConstU32<2>;
 	type MPCHandler = MockMPCHandler;
 	type InflationRewardPerSession = InflationRewardPerSession;
@@ -308,6 +335,7 @@ construct_runtime!(
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
+		Jobs: pallet_jobs
 	}
 );
 

@@ -18,7 +18,7 @@ use super::*;
 use frame_support::{assert_noop, assert_ok};
 use mock::*;
 
-use pallet_roles::profile::{Profile, Record, SharedRestakeProfile};
+use pallet_roles::profile::{IndependentRestakeProfile, Profile, Record, SharedRestakeProfile};
 use tangle_primitives::{
 	jobs::{
 		DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DKGTSSSignatureResult, DigitalSignatureType,
@@ -28,6 +28,7 @@ use tangle_primitives::{
 	},
 	roles::{RoleType, ThresholdSignatureRoleType, ZeroKnowledgeRoleType},
 };
+
 const ALICE: u8 = 1;
 const BOB: u8 = 2;
 const CHARLIE: u8 = 3;
@@ -41,7 +42,10 @@ const HUNDRED: u8 = 100;
 pub fn shared_profile() -> Profile<Runtime> {
 	let profile = SharedRestakeProfile {
 		records: BoundedVec::try_from(vec![
-			Record { role: RoleType::Tss(ThresholdSignatureRoleType::TssGG20), amount: None },
+			Record {
+				role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+				amount: None,
+			},
 			Record { role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16), amount: None },
 		])
 		.unwrap(),
@@ -511,19 +515,172 @@ fn jobs_submission_e2e_works_for_zksaas() {
 	});
 }
 
-// #[test]
-// fn withdraw_validator_rewards_works() {
-// 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
-// 		System::set_block_number(1);
-//
-// 		ValidatorRewards::<Runtime>::insert(1, 100);
-// 		ValidatorRewards::<Runtime>::insert(2, 100);
-// 		ValidatorRewards::<Runtime>::insert(3, 100);
-//
-// 		// can withdraw the reward by validator
-// 		for validator in [1, 2, 3] {
-// 			assert_ok!(Jobs::withdraw_rewards(RuntimeOrigin::signed(validator)));
-// 			assert_eq!(ValidatorRewards::<Runtime>::get(validator), None);
-// 		}
-// 	});
-// }
+#[test]
+fn jobs_validator_checks_work() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+
+		let participants = vec![ALICE, BOB, CHARLIE, DAVE, EVE];
+
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in participants.clone() {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone()
+			));
+		}
+
+		// submit job with existing validators
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				threshold: 3,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		// ======= active validator cannot reduce stake ===============
+		let reduced_profile = SharedRestakeProfile {
+			records: BoundedVec::try_from(vec![
+				Record {
+					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					amount: None,
+				},
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+					amount: None,
+				},
+			])
+			.unwrap(),
+			amount: 500, // reduce stake by 50%
+		};
+
+		for validator in participants.clone() {
+			assert_noop!(
+				Roles::update_profile(
+					RuntimeOrigin::signed(mock_pub_key(validator)),
+					Profile::Shared(reduced_profile.clone())
+				),
+				pallet_roles::Error::<Runtime>::InsufficientRestakingBond
+			);
+		}
+
+		// ========= active validator cannot delete profile with active job =============
+		for validator in participants.clone() {
+			assert_noop!(
+				Roles::delete_profile(RuntimeOrigin::signed(mock_pub_key(validator)),),
+				pallet_roles::Error::<Runtime>::ProfileDeleteRequestFailed
+			);
+		}
+
+		// ========= active validator cannot remove role with active job =============
+		let reduced_profile = SharedRestakeProfile {
+			records: BoundedVec::try_from(vec![Record {
+				role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+				amount: None,
+			}])
+			.unwrap(),
+			amount: 500, // reduce stake by 50%
+		};
+		for validator in participants.clone() {
+			assert_noop!(
+				Roles::update_profile(
+					RuntimeOrigin::signed(mock_pub_key(validator)),
+					Profile::Shared(reduced_profile.clone())
+				),
+				pallet_roles::Error::<Runtime>::RoleCannotBeRemoved
+			);
+		}
+
+		// =========  active validator can remove role without active job =========
+		let reduced_profile = SharedRestakeProfile {
+			records: BoundedVec::try_from(vec![Record {
+				role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+				amount: None,
+			}])
+			.unwrap(),
+			amount: 1000,
+		};
+
+		for validator in participants.clone() {
+			assert_ok!(Roles::update_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				Profile::Shared(reduced_profile.clone())
+			));
+		}
+
+		// =========  active validator can add a new role with current active role =========
+		let updated_profile = SharedRestakeProfile {
+			records: BoundedVec::try_from(vec![
+				Record {
+					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					amount: None,
+				},
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+					amount: None,
+				},
+			])
+			.unwrap(),
+			amount: 1000,
+		};
+
+		for validator in participants.clone() {
+			assert_ok!(Roles::update_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				Profile::Shared(updated_profile.clone())
+			));
+		}
+
+		// =========  active validator can increase stake with current active role =========
+		let updated_profile = SharedRestakeProfile {
+			records: BoundedVec::try_from(vec![
+				Record {
+					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					amount: None,
+				},
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+					amount: None,
+				},
+			])
+			.unwrap(),
+			amount: 1500,
+		};
+
+		for validator in participants.clone() {
+			assert_ok!(Roles::update_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				Profile::Shared(updated_profile.clone())
+			));
+		}
+
+		// =========  active validator can reduce stake on non active role =========
+		let updated_profile = IndependentRestakeProfile {
+			records: BoundedVec::try_from(vec![
+				Record {
+					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					amount: Some(1500),
+				},
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+					amount: Some(500), // reduced by 3x
+				},
+			])
+			.unwrap(),
+		};
+
+		for validator in participants.clone() {
+			assert_ok!(Roles::update_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				Profile::Independent(updated_profile.clone())
+			));
+		}
+	});
+}

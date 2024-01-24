@@ -7768,6 +7768,7 @@ dependencies = [
  "hex-literal",
  "log",
  "pallet-balances",
+ "pallet-jobs",
  "pallet-session",
  "pallet-staking",
  "pallet-timestamp",
