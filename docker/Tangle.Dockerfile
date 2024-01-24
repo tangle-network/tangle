@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM ubuntu:20.04 AS chef
+FROM docker.io/paritytech/ci-linux:production as builder
 
 ENV TZ=GMT
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -24,7 +24,6 @@ ARG BINARY
 
 COPY . .
 
-FROM chef AS builder
 # Install Required Packages
 RUN apt-get update && apt-get install -y git \
   cmake clang curl libssl-dev llvm libudev-dev \
