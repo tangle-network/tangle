@@ -18,9 +18,7 @@ WORKDIR /tangle
 # Set the Binary name that we are trying to build.
 ARG BINARY
 
-FROM chef AS planner
 COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
 # Install Required Packages
@@ -29,8 +27,8 @@ RUN apt-get update && apt-get install -y git \
   libgmp3-dev protobuf-compiler ca-certificates \
   && rm -rf /var/lib/apt/lists/* && update-ca-certificates
 
-COPY --from=planner /tangle/recipe.json recipe.json
 COPY rust-toolchain.toml .
+# Build dependencies - this is the caching Docker layer!
 ARG BINARY
 ARG FEATURES=default
 COPY . .
