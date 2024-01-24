@@ -4,10 +4,8 @@ on:
   workflow_dispatch:
 
   push:
-    branches: [main, update-docker-container]
-    tags: ["v*.*.*"]
-  pull_request:
     branches: [main]
+    tags: ["v*.*.*"]
 
 env:
   REGISTRY: ghcr.io

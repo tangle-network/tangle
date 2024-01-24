@@ -1,19 +1,22 @@
 # Docker compose file to start tangle node
 version: "3.7"
 services:
-
   tangle:
     image: ghcr.io/webb-tools/tangle/tangle:${RELEASE_VERSION}
     network_mode: host
     entrypoint: /tangle
+    volumes:
+      - "tangle-data:/data"
     command:
       - "--chain=tangle-testnet"
       - "--validator"
       - "--prometheus-external"
+      - "--telemetry-url wss://telemetry.polkadot.io/submit/ 0"
     ports:
       - "9944:9944"
       - "9615:9615"
       - "9933:9933"
       - "30333:30333"
-    volumes:
-      - ${CHAINSPEC_PATH}:/var/lib/data/arana-alpha.json
+
+volumes:
+  tangle-data: {}
