@@ -340,6 +340,11 @@ impl<T: Config> Pallet<T> {
 		// Ensure that the recovered key matches the expected signing key
 		ensure!(expected_key == signer, Error::<T>::SigningKeyMismatch);
 
+		Self::deposit_event(Event::KeyRotated {
+			from_job_id: data.phase_one_id,
+			to_job_id: data.new_phase_one_id,
+			signature: data.signature,
+		});
 		Ok(())
 	}
 
@@ -376,6 +381,11 @@ impl<T: Config> Pallet<T> {
 			return Err(Error::<T>::InvalidSignature.into())
 		}
 
+		Self::deposit_event(Event::KeyRotated {
+			from_job_id: data.phase_one_id,
+			to_job_id: data.new_phase_one_id,
+			signature: data.signature,
+		});
 		Ok(())
 	}
 

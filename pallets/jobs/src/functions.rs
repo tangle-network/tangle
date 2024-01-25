@@ -474,10 +474,15 @@ impl<T: Config> Pallet<T> {
 			_ => return Err(Error::<T>::InvalidJobPhase.into()),
 		};
 		let job_result = JobResult::DKGPhaseFour(DKGTSSKeyRotationResult {
-			signature_type: info.signature_type.clone(),
-			key: curr_key,
+			phase_one_id: job_info
+				.job_type
+				.get_phase_one_id()
+				.ok_or(Error::<T>::InvalidJobPhase)?,
+			new_phase_one_id: new_phase_one_job_id,
 			new_key,
+			key: curr_key,
 			signature: info.signature.clone(),
+			signature_type: info.signature_type.clone(),
 		});
 
 		T::MPCHandler::verify(JobWithResult {

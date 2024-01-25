@@ -69,14 +69,12 @@ pub struct DKGTSSPhaseThreeJobType {
 /// Represents the DKG Key Rotation job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGTSSPhaseFourJobType<AccountId> {
+pub struct DKGTSSPhaseFourJobType {
 	/// The phase one ID.
 	pub phase_one_id: JobId,
 	/// The new phase one ID.
 	/// That will be used for the rotation.
 	pub new_phase_one_id: JobId,
-	/// The caller permitted to use this result later
-	pub permitted_caller: Option<AccountId>,
 	/// The role type to be used
 	pub role_type: ThresholdSignatureRoleType,
 }
@@ -128,14 +126,19 @@ pub struct DKGTSSKeyRefreshResult {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGTSSKeyRotationResult {
-	/// Signature type of the DKG
-	pub signature_type: DigitalSignatureType,
+	/// The phase one ID.
+	pub phase_one_id: JobId,
+	/// The new phase one ID.
+	/// That will be used for the rotation.
+	pub new_phase_one_id: JobId,
 	/// Key from the new phase 1.
 	pub new_key: Vec<u8>,
 	/// Current key (from phase 1).
 	pub key: Vec<u8>,
 	/// The signature of signing the new key with the current key.
 	pub signature: Vec<u8>,
+	/// Signature type of the DKG
+	pub signature_type: DigitalSignatureType,
 }
 
 /// Possible key types for DKG
