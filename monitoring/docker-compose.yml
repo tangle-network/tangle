@@ -1,6 +1,24 @@
+# Docker compose file to start tangle node with all monitoring services
 version: '3.7'
 
 services:
+  tangle:
+    image: ghcr.io/webb-tools/tangle/tangle:main
+    network_mode: host
+    entrypoint: /tangle
+    volumes:
+      - "tangle-data:/data"
+    command:
+      - "--chain=tangle-testnet"
+      - "--validator"
+      - "--prometheus-external"
+      - "--telemetry-url wss://telemetry.polkadot.io/submit/ 0"
+    ports:
+      - "9944:9944"
+      - "9615:9615"
+      - "9933:9933"
+      - "30333:30333"
+
   prometheus:
     image: prom/prometheus
     network_mode: host
@@ -64,3 +82,4 @@ volumes:
   prometheus_data: {}
   alertmanager_data: {}
   grafana_data: {}
+  tangle-data: {}
