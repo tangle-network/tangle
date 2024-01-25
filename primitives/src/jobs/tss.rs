@@ -55,6 +55,14 @@ pub struct DKGTSSPhaseTwoJobType {
 	pub role_type: ThresholdSignatureRoleType,
 }
 
+/// Represents the DKG Key Refresh job type.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct DKGTSSPhaseThreeJobType {
+	/// The phase one ID.
+	pub phase_one_id: JobId,
+}
+
 pub type Signatures = Vec<Vec<u8>>;
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]

@@ -87,6 +87,10 @@ pub enum JobType<AccountId> {
 	DKGTSSPhaseOne(DKGTSSPhaseOneJobType<AccountId>),
 	/// DKG Signature job type.
 	DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType),
+	/// DKG Key Refresh job type.
+	DKGTSSPhaseThree(DKGTSSPhaseThreeJobType),
+	/// DKG Key Rotation job type.
+	DKGTSSPhaseThree(DKGTSSPhaseFourJobType<AccountId>),
 	/// (zk-SNARK) Create Circuit job type.
 	ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType<AccountId>),
 	/// (zk-SNARK) Create Proof job type.
