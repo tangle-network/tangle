@@ -32,11 +32,11 @@ RUN cargo build --locked --release --features txpool
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Tangle Network Node"
 
-RUN useradd -m -u 1000 -U -s /bin/sh -d /tangle tangle && \
+RUN useradd -m -u 5000 -U -s /bin/sh -d /tangle tangle && \
 	mkdir -p /data /tangle/.local/share && \
 	chown -R tangle:tangle /data && \
 	ln -s /data /tangle/.local/share/tangle && \
-	/tangle/target/release/tangle /usr/local/bin && \
+	cp /tangle/target/release/tangle /usr/local/bin && \
 	# unclutter and minimize the attack surface
 	rm -rf /usr/bin /usr/sbin && \
 	# check if executable works in this container
