@@ -75,6 +75,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// Fee has been updated to the new value
 		FeeUpdated(FeeInfoOf<T>),
+        KeyRotated { from_job_id: JobId, to_job_id: JobId, signature: Vec<u8> },
 	}
 
 	// Errors inform users that something went wrong.
