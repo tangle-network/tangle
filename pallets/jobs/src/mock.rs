@@ -118,10 +118,12 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 
 	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
 		match job.job_type {
-			JobType::DKGTSSPhaseOne(_) => MockDKGPallet::job_to_fee(job),
-			JobType::DKGTSSPhaseTwo(_) => MockDKGPallet::job_to_fee(job),
-			JobType::ZkSaaSPhaseOne(_) => MockZkSaasPallet::job_to_fee(job),
-			JobType::ZkSaaSPhaseTwo(_) => MockZkSaasPallet::job_to_fee(job),
+			JobType::DKGTSSPhaseOne(_) |
+			JobType::DKGTSSPhaseTwo(_) |
+			JobType::DKGTSSPhaseThree(_) |
+			JobType::DKGTSSPhaseFour(_) => MockDKGPallet::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) =>
+				MockZkSaasPallet::job_to_fee(job),
 		}
 	}
 }

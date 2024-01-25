@@ -326,12 +326,16 @@ pub mod module {
 			let job_info =
 				SubmittedJobs::<T>::get(role_type, job_id).ok_or(Error::<T>::JobNotFound)?;
 			let participants = match &result {
-				JobResult::DKGPhaseOne(_) | JobResult::ZkSaaSPhaseOne(_) => job_info
+				JobResult::DKGPhaseOne(_) |
+				JobResult::ZkSaaSPhaseOne(_) |
+				JobResult::DKGPhaseFour(_) => job_info
 					.job_type
 					.clone()
 					.get_participants()
 					.ok_or(Error::<T>::InvalidJobParams)?,
-				JobResult::DKGPhaseTwo(_) | JobResult::ZkSaaSPhaseTwo(_) => {
+				JobResult::DKGPhaseTwo(_) |
+				JobResult::DKGPhaseThree(_) |
+				JobResult::ZkSaaSPhaseTwo(_) => {
 					let existing_result_id = job_info
 						.job_type
 						.clone()
@@ -356,6 +360,12 @@ pub mod module {
 				JobResult::DKGPhaseTwo(info) => {
 					let result = Self::verify_dkg_signature_job_result(role_type, &job_info, info)?;
 					KnownResults::<T>::insert(role_type, job_id, result);
+				},
+				JobResult::DKGPhaseThree(info) => {
+					// TODO: verify dkg phase 3
+				},
+				JobResult::DKGPhaseFour(info) => {
+					// TODO: verify dkg phase 4
 				},
 				JobResult::ZkSaaSPhaseOne(info) => {
 					let result =
