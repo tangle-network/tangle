@@ -1,4 +1,4 @@
-# Tangle Standalone Docker
+# Tangle Docker
 
 ## Installation Instructions
 
