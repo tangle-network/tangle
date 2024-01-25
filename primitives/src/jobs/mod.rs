@@ -171,6 +171,8 @@ impl<AccountId> JobType<AccountId> {
 		use crate::jobs::JobType::*;
 		match self {
 			DKGTSSPhaseTwo(info) => Some(info.phase_one_id),
+			DKGTSSPhaseThree(info) => Some(info.phase_one_id),
+			DKGTSSPhaseFour(info) => Some(info.phase_one_id),
 			ZkSaaSPhaseTwo(info) => Some(info.phase_one_id),
 			_ => None,
 		}

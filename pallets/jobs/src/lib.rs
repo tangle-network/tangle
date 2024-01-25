@@ -362,10 +362,14 @@ pub mod module {
 					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::DKGPhaseThree(info) => {
-					// TODO: verify dkg phase 3
+					let result =
+						Self::verify_dkg_key_refresh_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::DKGPhaseFour(info) => {
-					// TODO: verify dkg phase 4
+					let result =
+						Self::verify_dkg_key_rotation_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::ZkSaaSPhaseOne(info) => {
 					let result =
