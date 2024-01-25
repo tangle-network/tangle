@@ -15,22 +15,37 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use crate::{self as pallet_jobs, mock_evm::address_build};
+use crate::{self as pallet_jobs};
+use frame_election_provider_support::{
+	bounds::{ElectionBounds, ElectionBoundsBuilder},
+	onchain, SequentialPhragmen,
+};
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU128, ConstU32, ConstU64, Everything},
+	traits::{ConstU128, ConstU32, ConstU64, Contains, Everything},
 };
 use frame_system::EnsureSigned;
-use sp_core::H256;
-use sp_runtime::{traits::IdentityLookup, AccountId32, BuildStorage};
+use pallet_session::historical as pallet_session_historical;
+use sp_core::{
+	sr25519::{self},
+	H256,
+};
+use sp_runtime::{
+	app_crypto::ecdsa::Public,
+	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
+	AccountId32, BuildStorage, DispatchResult, Perbill, Percent,
+};
+use sp_staking::{
+	offence::{OffenceError, ReportOffence},
+	SessionIndex,
+};
+
+use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
+use tangle_primitives::{jobs::*, roles::ValidatorRewardDistribution};
+
+pub type AccountId = AccountId32;
 pub type Balance = u128;
 pub type BlockNumber = u64;
-
-use sp_core::ecdsa;
-use sp_io::crypto::ecdsa_generate;
-use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
-use sp_std::sync::Arc;
-use tangle_primitives::{currency::UNIT, jobs::*, roles::RoleType};
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
@@ -38,7 +53,7 @@ impl frame_system::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
 	type Hash = H256;
 	type Hashing = ::sp_runtime::traits::BlakeTwo256;
-	type AccountId = AccountId32;
+	type AccountId = AccountId;
 	type Block = Block;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type RuntimeEvent = RuntimeEvent;
@@ -76,7 +91,7 @@ impl pallet_balances::Config for Runtime {
 
 pub struct MockDKGPallet;
 impl MockDKGPallet {
-	fn job_to_fee(job: &JobSubmission<AccountId32, BlockNumber>) -> Balance {
+	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
 		if job.job_type.is_phase_one() {
 			job.job_type.clone().get_participants().unwrap().len().try_into().unwrap()
 		} else {
@@ -87,7 +102,7 @@ impl MockDKGPallet {
 
 pub struct MockZkSaasPallet;
 impl MockZkSaasPallet {
-	fn job_to_fee(job: &JobSubmission<AccountId32, BlockNumber>) -> Balance {
+	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
 		if job.job_type.is_phase_one() {
 			10
 		} else {
@@ -98,10 +113,10 @@ impl MockZkSaasPallet {
 
 pub struct MockJobToFeeHandler;
 
-impl JobToFee<AccountId32, BlockNumber> for MockJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 	type Balance = Balance;
 
-	fn job_to_fee(job: &JobSubmission<AccountId32, BlockNumber>) -> Balance {
+	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
 		match job.job_type {
 			JobType::DKGTSSPhaseOne(_) => MockDKGPallet::job_to_fee(job),
 			JobType::DKGTSSPhaseTwo(_) => MockDKGPallet::job_to_fee(job),
@@ -111,52 +126,179 @@ impl JobToFee<AccountId32, BlockNumber> for MockJobToFeeHandler {
 	}
 }
 
-pub struct MockRolesHandler;
-
-impl RolesHandler<AccountId32> for MockRolesHandler {
-	fn is_validator(address: AccountId32, _role_type: RoleType) -> bool {
-		let validators = [
-			AccountId32::new([1u8; 32]),
-			AccountId32::new([2u8; 32]),
-			AccountId32::new([3u8; 32]),
-			AccountId32::new([4u8; 32]),
-			AccountId32::new([5u8; 32]),
-		];
-		validators.contains(&address)
-	}
-
-	fn report_offence(_offence_report: ReportValidatorOffence<AccountId32>) -> DispatchResult {
-		Ok(())
-	}
-
-	fn get_validator_role_key(address: AccountId32) -> Option<Vec<u8>> {
-		let mock_err_account = AccountId32::new([100u8; 32]);
-		if address == mock_err_account {
-			None
-		} else {
-			Some(mock_pub_key().to_raw_vec())
-		}
-	}
-}
-
 pub struct MockMPCHandler;
 
-impl MPCHandler<AccountId32, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(_data: JobWithResult<AccountId32>) -> DispatchResult {
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
+	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
 		Ok(())
 	}
 
 	fn verify_validator_report(
-		_validator: AccountId32,
+		_validator: AccountId,
 		_offence: ValidatorOffenceType,
 		_signatures: Vec<Vec<u8>>,
 	) -> DispatchResult {
 		Ok(())
 	}
 
-	fn validate_authority_key(_validator: AccountId32, _authority_key: Vec<u8>) -> DispatchResult {
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
 		Ok(())
 	}
+}
+
+type IdentificationTuple = (AccountId, AccountId);
+type Offence = pallet_roles::offences::ValidatorOffence<IdentificationTuple>;
+
+parameter_types! {
+	pub static Offences: Vec<(Vec<AccountId>, Offence)> = vec![];
+	pub ElectionBoundsOnChain: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(5_000.into()).targets_count(1_250.into()).build();
+	pub ElectionBoundsMultiPhase: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(10_000.into()).targets_count(1_500.into()).build();
+}
+
+/// A mock offence report handler.
+pub struct OffenceHandler;
+impl ReportOffence<AccountId, IdentificationTuple, Offence> for OffenceHandler {
+	fn report_offence(reporters: Vec<AccountId>, offence: Offence) -> Result<(), OffenceError> {
+		Offences::mutate(|l| l.push((reporters, offence)));
+		Ok(())
+	}
+
+	fn is_known_offence(_offenders: &[IdentificationTuple], _time_slot: &SessionIndex) -> bool {
+		false
+	}
+}
+
+impl pallet_session::historical::Config for Runtime {
+	type FullIdentification = AccountId;
+	type FullIdentificationOf = ConvertInto;
+}
+
+pub struct BaseFilter;
+impl Contains<RuntimeCall> for BaseFilter {
+	fn contains(call: &RuntimeCall) -> bool {
+		let is_stake_unbound_call =
+			matches!(call, RuntimeCall::Staking(pallet_staking::Call::unbond { .. }));
+
+		if is_stake_unbound_call {
+			// no unbond call
+			return false
+		}
+
+		// no chill call
+		if matches!(call, RuntimeCall::Staking(pallet_staking::Call::chill { .. })) {
+			return false
+		}
+
+		// no withdraw_unbonded call
+		let is_stake_withdraw_call =
+			matches!(call, RuntimeCall::Staking(pallet_staking::Call::withdraw_unbonded { .. }));
+
+		if is_stake_withdraw_call {
+			return false
+		}
+
+		true
+	}
+}
+
+sp_runtime::impl_opaque_keys! {
+	pub struct MockSessionKeys {
+		pub role: pallet_roles::Pallet<Runtime>,
+	}
+}
+
+pub struct MockSessionManager;
+
+impl pallet_session::SessionManager<AccountId> for MockSessionManager {
+	fn end_session(_: sp_staking::SessionIndex) {}
+	fn start_session(_: sp_staking::SessionIndex) {}
+	fn new_session(idx: sp_staking::SessionIndex) -> Option<Vec<AccountId>> {
+		if idx == 0 || idx == 1 || idx == 2 {
+			Some(vec![mock_pub_key(1), mock_pub_key(2), mock_pub_key(3), mock_pub_key(4)])
+		} else {
+			None
+		}
+	}
+}
+
+parameter_types! {
+	pub const Period: u64 = 1;
+	pub const Offset: u64 = 0;
+}
+
+impl pallet_session::Config for Runtime {
+	type SessionManager = MockSessionManager;
+	type Keys = MockSessionKeys;
+	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type SessionHandler = <MockSessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+	type RuntimeEvent = RuntimeEvent;
+	type ValidatorId = AccountId;
+	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
+	type WeightInfo = ();
+}
+
+pub struct OnChainSeqPhragmen;
+impl onchain::Config for OnChainSeqPhragmen {
+	type System = Runtime;
+	type Solver = SequentialPhragmen<AccountId, Perbill>;
+	type DataProvider = Staking;
+	type WeightInfo = ();
+	type MaxWinners = ConstU32<100>;
+	type Bounds = ElectionBoundsOnChain;
+}
+
+/// Upper limit on the number of NPOS nominations.
+const MAX_QUOTA_NOMINATIONS: u32 = 16;
+
+impl pallet_staking::Config for Runtime {
+	type Currency = Balances;
+	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
+	type UnixTime = pallet_timestamp::Pallet<Self>;
+	type CurrencyToVote = ();
+	type RewardRemainder = ();
+	type RuntimeEvent = RuntimeEvent;
+	type Slash = ();
+	type Reward = ();
+	type SessionsPerEra = ();
+	type SlashDeferDuration = ();
+	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type BondingDuration = ();
+	type SessionInterface = ();
+	type EraPayout = ();
+	type NextNewSession = Session;
+	type MaxNominatorRewardedPerValidator = ConstU32<64>;
+	type OffendingValidatorsThreshold = ();
+	type ElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
+	type GenesisElectionProvider = Self::ElectionProvider;
+	type VoterList = pallet_staking::UseNominatorsAndValidatorsMap<Self>;
+	type TargetList = pallet_staking::UseValidatorsMap<Self>;
+	type MaxUnlockingChunks = ConstU32<32>;
+	type HistoryDepth = ConstU32<84>;
+	type EventListeners = ();
+	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
+	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
+	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub InflationRewardPerSession: Balance = 10_000;
+	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
+}
+
+impl pallet_roles::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type JobsHandler = Jobs;
+	type MaxRolesPerAccount = ConstU32<2>;
+	type MPCHandler = MockMPCHandler;
+	type InflationRewardPerSession = InflationRewardPerSession;
+	type RoleKeyId = RoleKeyId;
+	type ValidatorRewardDistribution = Reward;
+	type ValidatorSet = Historical;
+	type ReportOffences = OffenceHandler;
+	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -165,10 +307,10 @@ parameter_types! {
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type ForceOrigin = EnsureSigned<AccountId32>;
+	type ForceOrigin = EnsureSigned<AccountId>;
 	type Currency = Balances;
 	type JobToFee = MockJobToFeeHandler;
-	type RolesHandler = MockRolesHandler;
+	type RolesHandler = Roles;
 	type MPCHandler = MockMPCHandler;
 	type PalletId = JobsPalletId;
 	type WeightInfo = ();
@@ -185,6 +327,10 @@ construct_runtime!(
 		Jobs: pallet_jobs,
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
+		Roles: pallet_roles,
+		Session: pallet_session,
+		Staking: pallet_staking,
+		Historical: pallet_session_historical,
 	}
 );
 
@@ -196,39 +342,75 @@ impl Default for ExtBuilder {
 	}
 }
 
-pub fn to_account_id32(id: u8) -> AccountId32 {
-	AccountId32::new([id; 32])
+pub fn mock_pub_key(id: u8) -> AccountId {
+	sr25519::Public::from_raw([id; 32]).into()
+}
+
+pub fn mock_role_key_id(id: u8) -> RoleKeyId {
+	RoleKeyId::from(Public::from_raw([id; 33]))
+}
+
+pub fn mock_authorities(vec: Vec<u8>) -> Vec<(AccountId, RoleKeyId)> {
+	vec.into_iter().map(|id| (mock_pub_key(id), mock_role_key_id(id))).collect()
+}
+
+pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
+	new_test_ext_raw_authorities(mock_authorities(ids))
 }
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
-pub fn new_test_ext() -> sp_io::TestExternalities {
+pub fn new_test_ext_raw_authorities(
+	authorities: Vec<(AccountId, RoleKeyId)>,
+) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
-
-	let pairs = (0..10).map(|i| address_build(i as u8)).collect::<Vec<_>>();
-
-	let initial_balance: u128 = 10 * UNIT;
-	let balances: Vec<(AccountId32, u128)> =
-		(0..10).map(|i| (pairs[i].account_id.clone(), initial_balance)).collect();
-
 	// We use default for brevity, but you can configure as desired if needed.
-	pallet_balances::GenesisConfig::<Runtime> {
-		balances: [(to_account_id32(10), 100u128), (to_account_id32(20), 100u128)]
-			.iter()
-			.cloned()
-			.chain(balances.iter().cloned())
-			.collect::<Vec<(AccountId32, u128)>>(),
-	}
-	.assimilate_storage(&mut t)
-	.unwrap();
+	let balances: Vec<_> = authorities.iter().map(|(i, _)| (i.clone(), 20_000_u128)).collect();
+	pallet_balances::GenesisConfig::<Runtime> { balances }
+		.assimilate_storage(&mut t)
+		.unwrap();
 
-	// set to block 1 to test events
+	let session_keys: Vec<_> = authorities
+		.iter()
+		.map(|(id, role_id)| (id.clone(), id.clone(), MockSessionKeys { role: role_id.clone() }))
+		.collect();
+
+	pallet_session::GenesisConfig::<Runtime> { keys: session_keys }
+		.assimilate_storage(&mut t)
+		.unwrap();
+
+	let stakers: Vec<_> = authorities
+		.iter()
+		.map(|(authority, _)| {
+			(
+				authority.clone(),
+				authority.clone(),
+				10_000_u128,
+				pallet_staking::StakerStatus::<AccountId>::Validator,
+			)
+		})
+		.collect();
+
+	let staking_config = pallet_staking::GenesisConfig::<Runtime> {
+		stakers,
+		validator_count: 4,
+		force_era: pallet_staking::Forcing::ForceNew,
+		minimum_validator_count: 0,
+		max_validator_count: Some(5),
+		max_nominator_count: Some(5),
+		invulnerables: vec![],
+		..Default::default()
+	};
+
+	staking_config.assimilate_storage(&mut t).unwrap();
+
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.execute_with(|| System::set_block_number(1));
-	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
-	ext
-}
+	ext.execute_with(|| {
+		System::set_block_number(1);
+		Session::on_initialize(1);
+		<Staking as Hooks<u64>>::on_initialize(1);
+	});
 
-fn mock_pub_key() -> ecdsa::Public {
-	ecdsa_generate(tangle_crypto_primitives::ROLE_KEY_TYPE, None)
+	ext
 }
