@@ -326,15 +326,14 @@ pub mod module {
 			let job_info =
 				SubmittedJobs::<T>::get(role_type, job_id).ok_or(Error::<T>::JobNotFound)?;
 			let participants = match &result {
-				JobResult::DKGPhaseOne(_) |
-				JobResult::ZkSaaSPhaseOne(_) |
-				JobResult::DKGPhaseFour(_) => job_info
+				JobResult::DKGPhaseOne(_) | JobResult::ZkSaaSPhaseOne(_) => job_info
 					.job_type
 					.clone()
 					.get_participants()
 					.ok_or(Error::<T>::InvalidJobParams)?,
 				JobResult::DKGPhaseTwo(_) |
 				JobResult::DKGPhaseThree(_) |
+				JobResult::DKGPhaseFour(_) |
 				JobResult::ZkSaaSPhaseTwo(_) => {
 					let existing_result_id = job_info
 						.job_type
