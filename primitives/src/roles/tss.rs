@@ -21,22 +21,26 @@ use sp_core::RuntimeDebug;
 use sp_std::vec::Vec;
 
 /// Threshold signature role types and their specific elliptic curve.
+///
+/// Naming convention:
+/// <vendor><protocol><curve>
 #[derive(
 	Encode, Decode, Copy, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[repr(u16)]
 pub enum ThresholdSignatureRoleType {
 	#[default]
-	TssGG20,
-	TssCGGMP,
-	TssFrostSr25519,
-	TssFrostP256,
-	TssFrostSecp256k1,
-	TssFrostRistretto255,
-	TssFrostBabyJubJub,
-	TssFrostEd25519,
-	TssEdDSABabyJubJub,
-	TssBls381,
+	ZengoGG20Secp256k1,
+	DfnsCGGMP21Secp256k1,
+	DfnsCGGMP21Secp256r1,
+	DfnsCGGMP21Stark,
+	ZcashFrostSr25519,
+	ZcashFrostP256,
+	ZcashFrostSecp256k1,
+	ZcashFrostRistretto255,
+	ZcashFrostEd25519,
+	GennaroDKGBls381,
 }
 
 /// Associated metadata needed for a DKG/TSS role

@@ -1,15 +1,32 @@
+// This file is part of Tangle.
+// Copyright (C) 2022-2024 Webb Technologies Inc.
+//
+// Tangle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tangle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
+use crate::mock::{
+	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
+};
 use fp_evm::FeeCalculator;
 use frame_support::{parameter_types, traits::FindAuthor, weights::Weight, PalletId};
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
-use pallet_evm::{AddressMapping, EnsureAddressTruncated, HashedAddressMapping};
+use pallet_evm::{AddressMapping, EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping};
 use sp_core::{keccak_256, ConstU32, H160, H256, U256};
 use sp_runtime::{
 	traits::{BlakeTwo256, DispatchInfoOf, Dispatchable},
 	transaction_validity::{TransactionValidity, TransactionValidityError},
-	AccountId32, ConsensusEngineId,
+	ConsensusEngineId,
 };
-
-use crate::mock::{Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp};
 
 parameter_types! {
 	pub const MinimumPeriod: u64 = 6000 / 2;
@@ -60,8 +77,8 @@ impl pallet_evm::Config for Runtime {
 	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
 	type WeightPerGas = WeightPerGas;
 	type BlockHashMapping = EthereumBlockHashMapping<Self>;
-	type CallOrigin = EnsureAddressTruncated;
-	type WithdrawOrigin = EnsureAddressTruncated;
+	type CallOrigin = EnsureAddressRoot<AccountId>;
+	type WithdrawOrigin = EnsureAddressNever<AccountId>;
 	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
@@ -145,7 +162,7 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 
 pub struct AccountInfo {
 	pub address: H160,
-	pub account_id: AccountId32,
+	pub account_id: AccountId,
 	pub private_key: H256,
 }
 
