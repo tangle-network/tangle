@@ -46,6 +46,7 @@ pub mod pallet {
 		traits::{Get, ReservableCurrency},
 	};
 	use frame_system::pallet_prelude::*;
+	use sp_std::prelude::*;
 	use tangle_primitives::jobs::JobId;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
