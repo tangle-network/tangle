@@ -46,6 +46,8 @@ pub mod pallet {
 		traits::{Get, ReservableCurrency},
 	};
 	use frame_system::pallet_prelude::*;
+	use sp_std::prelude::*;
+	use tangle_primitives::jobs::JobId;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
@@ -75,6 +77,8 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// Fee has been updated to the new value
 		FeeUpdated(FeeInfoOf<T>),
+		/// A DKG has been rotated.
+		KeyRotated { from_job_id: JobId, to_job_id: JobId, signature: Vec<u8> },
 	}
 
 	// Errors inform users that something went wrong.

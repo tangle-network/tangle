@@ -73,6 +73,8 @@ impl<T: Config> Pallet<T> {
 		match data {
 			JobResult::DKGPhaseOne(info) => Self::verify_generated_dkg_key(info),
 			JobResult::DKGPhaseTwo(info) => Self::verify_dkg_signature(info),
+			JobResult::DKGPhaseThree(_) => Ok(()),
+			JobResult::DKGPhaseFour(info) => Self::verify_dkg_key_rotation(info),
 			_ => Err(Error::<T>::InvalidJobType.into()), // this should never happen
 		}
 	}
@@ -290,6 +292,100 @@ impl<T: Config> Pallet<T> {
 			return Err(Error::<T>::InvalidSignature.into())
 		}
 
+		Ok(())
+	}
+
+	/// Verifies a DKG Key Rotation.
+	///
+	/// The verification process depends on the key type specified in the DKG result.
+	/// It dispatches the verification to the appropriate function for the specified key type (ECDSA
+	/// or Schnorr).
+	///
+	/// # Arguments
+	///
+	/// * `data` - The DKG result containing current key, new key and signature.
+	///
+	/// # Returns
+	///
+	/// Returns a `DispatchResult` indicating whether the key rotation verification was successful
+	/// or encountered an error.
+	fn verify_dkg_key_rotation(data: DKGTSSKeyRotationResult) -> DispatchResult {
+		match data.signature_type {
+			DigitalSignatureType::Ecdsa => Self::verify_dkg_key_rotation_ecdsa(data),
+			DigitalSignatureType::SchnorrSr25519 => Self::verify_dkg_key_rotation_schnorr(data),
+			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
+		}
+	}
+
+	/// Verifies the Key Rotation signature result by recovering the ECDSA public key from the
+	/// provided new key and signature.
+	///
+	/// This function checks whether the recovered public key matches the expected current key,
+	/// ensuring the validity of the signature.
+	///
+	/// # Arguments
+	///
+	/// * `data` - The Key Rotation result containing the new key and ECDSA signature.
+	fn verify_dkg_key_rotation_ecdsa(data: DKGTSSKeyRotationResult) -> DispatchResult {
+		// Recover the ECDSA public key from the provided data and signature
+		let recovered_key = Self::recover_ecdsa_pub_key(&data.new_key, &data.signature)
+			.map_err(|_| Error::<T>::InvalidSignature)?;
+
+		// Extract the expected key from the provided signing key
+		let expected_key: Vec<_> = data.key.iter().skip(1).cloned().collect();
+		// The recovered key is 64 bytes uncompressed. The first 32 bytes represent the compressed
+		// portion of the key.
+		let signer = &recovered_key[..32];
+
+		// Ensure that the recovered key matches the expected signing key
+		ensure!(expected_key == signer, Error::<T>::SigningKeyMismatch);
+
+		Self::deposit_event(Event::KeyRotated {
+			from_job_id: data.phase_one_id,
+			to_job_id: data.new_phase_one_id,
+			signature: data.signature,
+		});
+		Ok(())
+	}
+
+	/// Verifies the Key Rotation signature result by recovering the Schnorr public key from the
+	/// provided new key and signature.
+	///
+	/// This function checks whether the recovered public key matches the expected current key,
+	/// ensuring the validity of the signature.
+	///
+	/// # Arguments
+	///
+	/// * `data` - The Key Rotation result containing the new key and Schnorr signature.
+	fn verify_dkg_key_rotation_schnorr(data: DKGTSSKeyRotationResult) -> DispatchResult {
+		// Convert the signature from bytes to sr25519::Signature
+		let signature: sr25519::Signature = data
+			.signature
+			.as_slice()
+			.try_into()
+			.map_err(|_| Error::<T>::CannotRetreiveSigner)?;
+
+		// Encode the message data and compute its keccak256 hash
+		let msg = data.new_key;
+		let hash = keccak_256(&msg);
+
+		// Verify the Schnorr signature using sr25519_verify
+		if !sr25519_verify(
+			&signature,
+			&hash,
+			&sr25519::Public(
+				Self::to_slice_32(&data.key)
+					.unwrap_or_else(|| panic!("Failed to convert input to sr25519 public key")),
+			),
+		) {
+			return Err(Error::<T>::InvalidSignature.into())
+		}
+
+		Self::deposit_event(Event::KeyRotated {
+			from_job_id: data.phase_one_id,
+			to_job_id: data.new_phase_one_id,
+			signature: data.signature,
+		});
 		Ok(())
 	}
 

@@ -331,7 +331,10 @@ pub mod module {
 					.clone()
 					.get_participants()
 					.ok_or(Error::<T>::InvalidJobParams)?,
-				JobResult::DKGPhaseTwo(_) | JobResult::ZkSaaSPhaseTwo(_) => {
+				JobResult::DKGPhaseTwo(_) |
+				JobResult::DKGPhaseThree(_) |
+				JobResult::DKGPhaseFour(_) |
+				JobResult::ZkSaaSPhaseTwo(_) => {
 					let existing_result_id = job_info
 						.job_type
 						.clone()
@@ -355,6 +358,16 @@ pub mod module {
 				},
 				JobResult::DKGPhaseTwo(info) => {
 					let result = Self::verify_dkg_signature_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
+				},
+				JobResult::DKGPhaseThree(info) => {
+					let result =
+						Self::verify_dkg_key_refresh_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
+				},
+				JobResult::DKGPhaseFour(info) => {
+					let result =
+						Self::verify_dkg_key_rotation_job_result(role_type, &job_info, info)?;
 					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::ZkSaaSPhaseOne(info) => {

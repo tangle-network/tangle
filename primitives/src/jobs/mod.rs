@@ -87,6 +87,10 @@ pub enum JobType<AccountId> {
 	DKGTSSPhaseOne(DKGTSSPhaseOneJobType<AccountId>),
 	/// DKG Signature job type.
 	DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType),
+	/// DKG Key Refresh job type.
+	DKGTSSPhaseThree(DKGTSSPhaseThreeJobType),
+	/// DKG Key Rotation job type.
+	DKGTSSPhaseFour(DKGTSSPhaseFourJobType),
 	/// (zk-SNARK) Create Circuit job type.
 	ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType<AccountId>),
 	/// (zk-SNARK) Create Proof job type.
@@ -146,6 +150,8 @@ impl<AccountId> JobType<AccountId> {
 			JobType::ZkSaaSPhaseOne(job) => RoleType::ZkSaaS(job.role_type),
 			JobType::DKGTSSPhaseTwo(job) => RoleType::Tss(job.role_type),
 			JobType::ZkSaaSPhaseTwo(job) => RoleType::ZkSaaS(job.role_type),
+			JobType::DKGTSSPhaseThree(job) => RoleType::Tss(job.role_type),
+			JobType::DKGTSSPhaseFour(job) => RoleType::Tss(job.role_type),
 		}
 	}
 
@@ -165,6 +171,8 @@ impl<AccountId> JobType<AccountId> {
 		use crate::jobs::JobType::*;
 		match self {
 			DKGTSSPhaseTwo(info) => Some(info.phase_one_id),
+			DKGTSSPhaseThree(info) => Some(info.phase_one_id),
+			DKGTSSPhaseFour(info) => Some(info.phase_one_id),
 			ZkSaaSPhaseTwo(info) => Some(info.phase_one_id),
 			_ => None,
 		}
@@ -261,11 +269,10 @@ pub struct RpcResponseJobsData<AccountId, BlockNumber> {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum JobResult {
 	DKGPhaseOne(DKGTSSKeySubmissionResult),
-
 	DKGPhaseTwo(DKGTSSSignatureResult),
-
+	DKGPhaseThree(DKGTSSKeyRefreshResult),
+	DKGPhaseFour(DKGTSSKeyRotationResult),
 	ZkSaaSPhaseOne(ZkSaaSCircuitResult),
-
 	ZkSaaSPhaseTwo(ZkSaaSProofResult),
 }
 
