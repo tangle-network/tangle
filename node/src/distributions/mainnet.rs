@@ -231,7 +231,18 @@ pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u12
 pub fn get_treasury_balance() -> (AccountId, u128) {
 	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
 	let acc: AccountId = pallet_id.into_account_truncating();
-	(acc, get_treasury_distribution_share() * TOTAL_SUPPLY)
+
+	// any leftover from investors are sent to treasury
+	let investors_actual_spend = get_investor_balance_distribution_list().into_values().map(|balance| (balance as u128))
+		.sum::<u128>();
+
+	let investors_actual_spend_as_percent =
+		Perbill::from_rational(investors_actual_spend, TOTAL_SUPPLY);
+	let leftover_from_investors =
+		get_investor_distribution_share() - investors_actual_spend_as_percent;
+	let leftover_amount = leftover_from_investors * TOTAL_SUPPLY;
+
+	(acc, get_treasury_distribution_share() * TOTAL_SUPPLY + leftover_amount)
 }
 
 pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
@@ -325,7 +336,7 @@ fn test_compute_investor_balance_distribution() {
 
 	// let compute the expected output
 	// the expected output is that
-	// 1% is immedately release
+	// 5% is immedately release
 	// 1 year cliff (vesting starts after year 1)
 	// Vesting finishes 1 year after cliff
 	let alice_expected_response: (MultiAddress, u128, u64, u64, u128) = (
@@ -333,14 +344,14 @@ fn test_compute_investor_balance_distribution() {
 		amount_per_investor,
 		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
 		tangle_primitives::time::DAYS * 365, // num of blocks from beginning till fully vested
-		1,                                   // 1% of 100
+		5,                                   // 5% of 100
 	);
 	let bob_expected_response: (MultiAddress, u128, u64, u64, u128) = (
 		bob.clone(),
 		amount_per_investor,
 		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
 		tangle_primitives::time::DAYS * 365, // num of blocks from beging till fully vested
-		1,                                   // 1% of 100
+		5,                                   // 5% of 100
 	);
 
 	assert_eq!(
@@ -361,19 +372,19 @@ fn test_get_distribution_for() {
 
 	// let compute the expected output
 	// the expected output is that
-	// 1% is immedately claimable
+	// 5% is immedately claimable
 	// 1 month cliff (vesting starts after 1 month) (use 1 for easier calculation)
 	// at 1 month cliff, release 1/24th rewards
 	// Vesting finishes after 2 years (use 24 for easier calculation)
 	// 1/24th claimable at every month
 	let expected_distibution_result = DistributionResult {
 		claims: vec![
-			(alice.clone(), 1, Some(StatementKind::Regular)),
-			(bob.clone(), 1, Some(StatementKind::Regular)),
+			(alice.clone(), 5, Some(StatementKind::Regular)),
+			(bob.clone(), 5, Some(StatementKind::Regular)),
 		],
 		vesting: vec![
-			(alice.clone(), vec![(4, 4, 1), (94, 4, 1)]),
-			(bob.clone(), vec![(4, 4, 1), (94, 4, 1)]),
+			(alice.clone(), vec![(3, 3, 1), (91, 3, 1)]),
+			(bob.clone(), vec![(3, 3, 1), (91, 3, 1)]),
 		],
 		vesting_length: 24,
 		vesting_cliff: 1,
