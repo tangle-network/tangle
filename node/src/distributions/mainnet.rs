@@ -233,7 +233,9 @@ pub fn get_treasury_balance() -> (AccountId, u128) {
 	let acc: AccountId = pallet_id.into_account_truncating();
 
 	// any leftover from investors are sent to treasury
-	let investors_actual_spend = get_investor_balance_distribution_list().into_values().map(|balance| (balance as u128))
+	let investors_actual_spend = get_investor_balance_distribution_list()
+		.into_values()
+		.map(|balance| (balance as u128))
 		.sum::<u128>();
 
 	let investors_actual_spend_as_percent =
