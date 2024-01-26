@@ -55,6 +55,30 @@ pub struct DKGTSSPhaseTwoJobType {
 	pub role_type: ThresholdSignatureRoleType,
 }
 
+/// Represents the DKG Key Refresh job type.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct DKGTSSPhaseThreeJobType {
+	/// The phase one ID.
+	pub phase_one_id: JobId,
+
+	/// The role type to be used
+	pub role_type: ThresholdSignatureRoleType,
+}
+
+/// Represents the DKG Key Rotation job type.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct DKGTSSPhaseFourJobType {
+	/// The phase one ID.
+	pub phase_one_id: JobId,
+	/// The new phase one ID.
+	/// That will be used for the rotation.
+	pub new_phase_one_id: JobId,
+	/// The role type to be used
+	pub role_type: ThresholdSignatureRoleType,
+}
+
 pub type Signatures = Vec<Vec<u8>>;
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
@@ -90,6 +114,31 @@ pub struct DKGTSSSignatureResult {
 
 	/// The expected key for the signature
 	pub signing_key: Vec<u8>,
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct DKGTSSKeyRefreshResult {
+	/// Signature type to use for DKG
+	pub signature_type: DigitalSignatureType,
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct DKGTSSKeyRotationResult {
+	/// The phase one ID.
+	pub phase_one_id: JobId,
+	/// The new phase one ID.
+	/// That will be used for the rotation.
+	pub new_phase_one_id: JobId,
+	/// Key from the new phase 1.
+	pub new_key: Vec<u8>,
+	/// Current key (from phase 1).
+	pub key: Vec<u8>,
+	/// The signature of signing the new key with the current key.
+	pub signature: Vec<u8>,
+	/// Signature type of the DKG
+	pub signature_type: DigitalSignatureType,
 }
 
 /// Possible key types for DKG
