@@ -101,20 +101,7 @@ impl<T: Config> Pallet<T> {
 				}
 			}
 		};
-		// Changing a current independent profile to shared profile is not allowed if there are
-		// any active jobs for any role that is currently in the profile. The reason we don't
-		// allow this is because a user who requested the active job might have done so because
-		// they wanted independent risk for the security of their application. If the validator
-		// fails to perform the job of a different role, their stake for "this" role won't be
-		// affected. It won't fall below the minimum and any removal protocol will only be triggered
-		// on the role that failed to perform the job. If the validator is now shared, then the
-		// stake for all roles will be affected.
-		//
-		// *** Perhaps this is entirely unnecessary, and I am overthinking it. ***
-		if updated_profile.is_shared() && current_ledger.profile.is_independent() {
-			ensure!(active_jobs.len() == 0, Error::<T>::HasRoleAssigned);
-			return Ok(())
-		}
+
 		// Get all roles for which there are active jobs
 		let roles_with_active_jobs: Vec<RoleType> =
 			active_jobs.iter().map(|job| job.0).fold(Vec::new(), |mut acc, role| {
@@ -123,6 +110,32 @@ impl<T: Config> Pallet<T> {
 				}
 				acc
 			});
+
+		// If there are active jobs, changing a current independent profile to shared profile
+		// is allowed if and only if the shared restaking amount is at least as much as the
+		// sum of the restaking amounts of the current profile. This is because we require
+		// the total amount staked to only increase or remain the same across active roles.
+		if updated_profile.is_shared() && current_ledger.profile.is_independent() {
+			ensure!(active_jobs.len() == 0, Error::<T>::HasRoleAssigned);
+			if active_jobs.len() > 0 {
+				let mut active_role_restaking_sum = Zero::zero();
+				for role in roles_with_active_jobs.iter() {
+					let current_role_restaking_amount = current_ledger
+						.profile
+						.get_records()
+						.iter()
+						.find_map(|record| if record.role == *role { record.amount } else { None })
+						.unwrap_or_else(|| Zero::zero());
+					active_role_restaking_sum += current_role_restaking_amount;
+				}
+
+				ensure!(
+					updated_profile.get_total_profile_restake() >= active_role_restaking_sum,
+					Error::<T>::InsufficientRestakingBond
+				);
+			}
+		}
+
 		// Changing a current shared profile to an independent profile is allowed if there are
 		// active jobs as long as the stake allocated to the active roles is at least as much as
 		// the shared profile restaking amount. This is because the shared restaking profile for an
@@ -132,11 +145,11 @@ impl<T: Config> Pallet<T> {
 		if updated_profile.is_independent() && current_ledger.profile.is_shared() {
 			// For each role with an active job, ensure its stake is greater than or equal to the
 			// existing ledger's shared restaking amount.
-			for role in roles_with_active_jobs {
+			for role in roles_with_active_jobs.iter() {
 				let updated_role_restaking_amount = updated_profile
 					.get_records()
 					.iter()
-					.find_map(|record| if record.role == role { record.amount } else { None })
+					.find_map(|record| if record.role == *role { record.amount } else { None })
 					.unwrap_or_else(|| Zero::zero());
 				ensure!(
 					updated_role_restaking_amount >=
