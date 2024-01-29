@@ -21,10 +21,11 @@ use mock::*;
 use pallet_roles::profile::{IndependentRestakeProfile, Profile, Record, SharedRestakeProfile};
 use tangle_primitives::{
 	jobs::{
-		DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, DKGTSSSignatureResult, DigitalSignatureType,
-		Groth16ProveRequest, Groth16System, HyperData, JobSubmission, JobType, RpcResponseJobsData,
-		ZkSaaSCircuitResult, ZkSaaSPhaseOneJobType, ZkSaaSPhaseTwoJobType, ZkSaaSPhaseTwoRequest,
-		ZkSaaSSystem,
+		DKGTSSKeyRefreshResult, DKGTSSKeyRotationResult, DKGTSSPhaseFourJobType,
+		DKGTSSPhaseOneJobType, DKGTSSPhaseThreeJobType, DKGTSSPhaseTwoJobType,
+		DKGTSSSignatureResult, DigitalSignatureType, Groth16ProveRequest, Groth16System, HyperData,
+		JobSubmission, JobType, RpcResponseJobsData, ZkSaaSCircuitResult, ZkSaaSPhaseOneJobType,
+		ZkSaaSPhaseTwoJobType, ZkSaaSPhaseTwoRequest, ZkSaaSSystem,
 	},
 	roles::{RoleType, ThresholdSignatureRoleType, ZeroKnowledgeRoleType},
 };
@@ -237,6 +238,200 @@ fn jobs_submission_e2e_works_for_dkg() {
 			0
 		)
 		.is_none());
+	});
+}
+
+#[test]
+fn jobs_submission_e2e_for_dkg_refresh() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone()
+			));
+		}
+
+		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect(),
+				threshold: 3,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), 100 - 5);
+
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(
+			RuntimeOrigin::signed(mock_pub_key(TEN)),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0,
+			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
+				signatures: vec![],
+				threshold: 3,
+				participants: vec![],
+				key: vec![],
+				signature_type: DigitalSignatureType::Ecdsa
+			})
+		));
+
+		// ---- use phase one solution in phase 3 key refresh -------
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 0,
+			job_type: JobType::DKGTSSPhaseThree(DKGTSSPhaseThreeJobType {
+				phase_one_id: 0,
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), 100 - 25);
+
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(
+			RuntimeOrigin::signed(mock_pub_key(TEN)),
+			RoleType::Tss(threshold_signature_role_type),
+			1,
+			JobResult::DKGPhaseThree(DKGTSSKeyRefreshResult {
+				signature_type: DigitalSignatureType::Ecdsa
+			})
+		));
+
+		// ensure the job reward is distributed correctly
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
+			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(5));
+		}
+	});
+}
+
+#[test]
+fn jobs_submission_e2e_for_dkg_rotation() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone()
+			));
+		}
+
+		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect(),
+				threshold: 3,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), 100 - 5);
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect(),
+				threshold: 3,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), 100 - 10);
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(
+			RuntimeOrigin::signed(mock_pub_key(TEN)),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0,
+			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
+				signatures: vec![],
+				threshold: 3,
+				participants: vec![],
+				key: vec![],
+				signature_type: DigitalSignatureType::Ecdsa
+			})
+		));
+
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(
+			RuntimeOrigin::signed(mock_pub_key(TEN)),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			1,
+			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
+				signatures: vec![],
+				threshold: 3,
+				participants: vec![],
+				key: vec![],
+				signature_type: DigitalSignatureType::Ecdsa
+			})
+		));
+
+		// ---- use phase one solution in phase 4 key rotation -------
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 0,
+			job_type: JobType::DKGTSSPhaseFour(DKGTSSPhaseFourJobType {
+				phase_one_id: 0,
+				new_phase_one_id: 1,
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), 100 - 30);
+
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(
+			RuntimeOrigin::signed(mock_pub_key(TEN)),
+			RoleType::Tss(threshold_signature_role_type),
+			2,
+			JobResult::DKGPhaseFour(DKGTSSKeyRotationResult {
+				key: vec![],
+				new_key: vec![],
+				signature: vec![],
+				phase_one_id: 0,
+				new_phase_one_id: 1,
+				signature_type: DigitalSignatureType::Ecdsa
+			})
+		));
+
+		// ensure the job reward is distributed correctly
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
+			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(6));
+		}
 	});
 }
 
