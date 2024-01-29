@@ -22,7 +22,7 @@ benchmarks! {
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
 			ttl: 100u32.into(),
-			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), caller.clone()], threshold: 1, permitted_caller: None, role_type : ThresholdSignatureRoleType::TssGG20  }),
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), caller.clone()], threshold: 1, permitted_caller: None, role_type : Default::default()  }),
 		};
 
 	}: _(RawOrigin::Signed(caller.clone()), job.clone())
@@ -35,10 +35,10 @@ benchmarks! {
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
 			ttl: 100u32.into(),
-			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2], threshold: 1, permitted_caller: None, role_type : ThresholdSignatureRoleType::TssGG20 }),
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2], threshold: 1, permitted_caller: None, role_type : Default::default() }),
 		};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
-		let job_key: RoleType = RoleType::Tss(ThresholdSignatureRoleType::TssGG20);
+		let job_key: RoleType = RoleType::Tss(Default::default());
 		let job_id: JobId = 0;
 		let result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 			signatures: vec![],
@@ -66,10 +66,11 @@ benchmarks! {
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
-			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2, validator3], threshold: 2, permitted_caller: None, role_type : ThresholdSignatureRoleType::TssGG20 }),
-			};
+			ttl: 100u32.into(),
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2, validator3], threshold: 2, permitted_caller: None, role_type : Default::default() }),
+		};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
-		let job_key: RoleType = RoleType::Tss(ThresholdSignatureRoleType::TssGG20);
+		let job_key: RoleType = RoleType::Tss(Default::default());
 		let job_id: JobId = 0;
 	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), caller.clone(), ValidatorOffenceType::Inactivity, vec![])
 }
