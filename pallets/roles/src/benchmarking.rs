@@ -149,7 +149,7 @@ mod benchmarks {
 	}
 
 	#[benchmark]
-	fn unbound_funds() {
+	fn unbond_funds() {
 		let caller: T::AccountId = create_validator_account::<T>("Alice");
 		let amount: T::CurrencyBalance = 2000_u64.into();
 

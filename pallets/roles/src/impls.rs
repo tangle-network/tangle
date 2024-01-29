@@ -116,7 +116,6 @@ impl<T: Config> Pallet<T> {
 		// sum of the restaking amounts of the current profile. This is because we require
 		// the total amount staked to only increase or remain the same across active roles.
 		if updated_profile.is_shared() && current_ledger.profile.is_independent() {
-			ensure!(active_jobs.len() == 0, Error::<T>::HasRoleAssigned);
 			if active_jobs.len() > 0 {
 				let mut active_role_restaking_sum = Zero::zero();
 				for role in roles_with_active_jobs.iter() {
@@ -190,7 +189,7 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	/// Check if account can chill, unbound and withdraw funds.
+	/// Check if account can chill, unbond and withdraw funds.
 	///
 	/// # Parameters
 	/// - `account`: The account ID of the validator.
@@ -200,7 +199,7 @@ impl<T: Config> Pallet<T> {
 	pub(crate) fn can_exit(account: T::AccountId) -> bool {
 		let assigned_roles = AccountRolesMapping::<T>::get(account);
 		if assigned_roles.is_empty() {
-			// Role is cleared, account can chill, unbound and withdraw funds.
+			// Role is cleared, account can chill, unbond and withdraw funds.
 			return true
 		}
 		false
