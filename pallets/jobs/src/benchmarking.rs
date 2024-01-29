@@ -21,6 +21,7 @@ benchmarks! {
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
+			ttl: 100u32.into(),
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), caller.clone()], threshold: 1, permitted_caller: None, role_type : ThresholdSignatureRoleType::TssGG20  }),
 		};
 
@@ -33,6 +34,7 @@ benchmarks! {
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
+			ttl: 100u32.into(),
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2], threshold: 1, permitted_caller: None, role_type : ThresholdSignatureRoleType::TssGG20 }),
 		};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
