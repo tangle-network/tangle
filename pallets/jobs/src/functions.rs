@@ -385,21 +385,33 @@ impl<T: Config> Pallet<T> {
 		job_info: &JobInfoOf<T>,
 		info: DKGTSSKeyRefreshResult,
 	) -> Result<PhaseResultOf<T>, DispatchError> {
+		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
 		ensure!(role_type.is_dkg_tss(), Error::<T>::ResultNotExpectedType);
 
-		// ensure the participants are the expected participants from job
-		let participants = job_info
+		let existing_result_id = job_info
 			.job_type
 			.clone()
-			.get_participants()
-			.ok_or(Error::<T>::InvalidJobParams)?;
-		let mut participant_keys: Vec<Vec<u8>> = Default::default();
+			.get_phase_one_id()
+			.ok_or(Error::<T>::InvalidJobPhase)?;
+		// Ensure the result exists
+		let phase_one_result =
+			KnownResults::<T>::get(job_info.job_type.get_role_type(), existing_result_id)
+				.ok_or(Error::<T>::PreviousResultNotFound)?;
 
-		for participant in participants.clone() {
+		// Validate existing result
+		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
+
+		// ensure the participants are the expected participants from job
+		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
+
+		let participants = phase_one_result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
+		for participant in participants {
 			let key = T::RolesHandler::get_validator_role_key(participant);
 			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
-			participant_keys.push(key.expect("checked above"));
+			let pub_key = sp_core::ecdsa::Public::from_slice(&key.expect("checked above")[0..33])
+				.map_err(|_| Error::<T>::InvalidValidator)?;
+			participant_keys.push(pub_key);
 		}
 
 		let job_result = JobResult::DKGPhaseThree(DKGTSSKeyRefreshResult {
@@ -432,30 +444,36 @@ impl<T: Config> Pallet<T> {
 		job_info: &JobInfoOf<T>,
 		info: DKGTSSKeyRotationResult,
 	) -> Result<PhaseResultOf<T>, DispatchError> {
+		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
 		ensure!(role_type.is_dkg_tss(), Error::<T>::ResultNotExpectedType);
 
-		// ensure the participants are the expected participants from job
-		let participants = job_info
+		let existing_result_id = job_info
 			.job_type
 			.clone()
-			.get_participants()
-			.ok_or(Error::<T>::InvalidJobParams)?;
-		let mut participant_keys: Vec<Vec<u8>> = Default::default();
+			.get_phase_one_id()
+			.ok_or(Error::<T>::InvalidJobPhase)?;
+		// Ensure the result exists
+		let phase_one_result =
+			KnownResults::<T>::get(job_info.job_type.get_role_type(), existing_result_id)
+				.ok_or(Error::<T>::PreviousResultNotFound)?;
 
-		for participant in participants.clone() {
+		// Validate existing result
+		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
+
+		// ensure the participants are the expected participants from job
+		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
+
+		let participants = phase_one_result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
+		for participant in participants {
 			let key = T::RolesHandler::get_validator_role_key(participant);
 			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
-			participant_keys.push(key.expect("checked above"));
+			let pub_key = sp_core::ecdsa::Public::from_slice(&key.expect("checked above")[0..33])
+				.map_err(|_| Error::<T>::InvalidValidator)?;
+			participant_keys.push(pub_key);
 		}
 
-		let phase_one_job_info = KnownResults::<T>::get(
-			job_info.job_type.get_role_type(),
-			job_info.job_type.get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?,
-		)
-		.ok_or(Error::<T>::JobNotFound)?;
-
-		let curr_key = match phase_one_job_info.result {
+		let curr_key = match phase_one_result.result {
 			JobResult::DKGPhaseOne(info) => info.key.clone(),
 			_ => return Err(Error::<T>::InvalidJobPhase.into()),
 		};
@@ -487,7 +505,7 @@ impl<T: Config> Pallet<T> {
 
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
-			phase_one_job_type: Some(phase_one_job_info.job_type),
+			phase_one_job_type: Some(phase_one_result.job_type),
 			result: job_result.clone(),
 		})?;
 
