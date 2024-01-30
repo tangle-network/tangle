@@ -137,10 +137,10 @@ impl pallet_session::historical::Config for Runtime {
 pub struct BaseFilter;
 impl Contains<RuntimeCall> for BaseFilter {
 	fn contains(call: &RuntimeCall) -> bool {
-		let is_stake_unbound_call =
+		let is_stake_unbond_call =
 			matches!(call, RuntimeCall::Staking(pallet_staking::Call::unbond { .. }));
 
-		if is_stake_unbound_call {
+		if is_stake_unbond_call {
 			// no unbond call
 			return false
 		}

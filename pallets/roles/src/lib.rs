@@ -507,31 +507,31 @@ pub mod pallet {
 			pallet_staking::Pallet::<T>::chill(origin)
 		}
 
-		/// Unbound funds from the stash account.
-		/// This will allow user to unbound and later withdraw funds.
+		/// Unbond funds from the stash account.
+		/// This will allow user to unbond and later withdraw funds.
 		/// If you have opted for any of the roles, please submit `clear_role` extrinsic to opt out
-		/// of all the services. Once your role is cleared, you can unbound
+		/// of all the services. Once your role is cleared, you can unbond
 		/// and withdraw funds.
 		///
 		/// # Parameters
 		///
 		/// - `origin`: Origin of the transaction.
-		/// - `amount`: Amount of funds to unbound.
+		/// - `amount`: Amount of funds to unbond.
 		///
 		/// This function will return error if
 		/// - If there is any active role assigned to the user.
 		///  
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::unbound_funds())]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::unbond_funds())]
 		#[pallet::call_index(4)]
-		pub fn unbound_funds(
+		pub fn unbond_funds(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let account = ensure_signed(origin.clone())?;
-			// Ensure no role is assigned to the account and is eligible to unbound.
+			// Ensure no role is assigned to the account and is eligible to unbond.
 			ensure!(Self::can_exit(account), Error::<T>::HasRoleAssigned);
 
-			// Unbound funds.
+			// Unbond funds.
 			let res = pallet_staking::Pallet::<T>::unbond(origin, amount);
 			match res {
 				Ok(_) => Ok(()),
@@ -539,7 +539,7 @@ pub mod pallet {
 			}
 		}
 
-		/// Withdraw unbound funds after un-bonding period has passed.
+		/// Withdraw unbond funds after un-bonding period has passed.
 		///
 		/// # Parameters
 		///
@@ -554,7 +554,7 @@ pub mod pallet {
 			// Ensure no role is assigned to the account and is eligible to withdraw.
 			ensure!(Self::can_exit(account), Error::<T>::HasRoleAssigned);
 
-			// Withdraw unbound funds.
+			// Withdraw unbond funds.
 			let res = pallet_staking::Pallet::<T>::withdraw_unbonded(origin, 0);
 			match res {
 				Ok(_) => Ok(()),

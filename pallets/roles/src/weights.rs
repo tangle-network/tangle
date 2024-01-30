@@ -36,7 +36,7 @@ pub trait WeightInfo {
 	fn update_profile() -> Weight;
 	fn delete_profile() -> Weight;
 	fn chill() -> Weight;
-	fn unbound_funds() -> Weight;
+	fn unbond_funds() -> Weight;
 	fn withdraw_unbonded() -> Weight;
 }
 
@@ -145,7 +145,7 @@ impl<T: frame_system::Config> WeightInfo for WebbWeight<T> {
 	/// Proof: `BagsList::ListNodes` (`max_values`: None, `max_size`: Some(154), added: 2629, mode: `MaxEncodedLen`)
 	/// Storage: `Staking::Bonded` (r:1 w:0)
 	/// Proof: `Staking::Bonded` (`max_values`: None, `max_size`: Some(72), added: 2547, mode: `MaxEncodedLen`)
-	fn unbound_funds() -> Weight {
+	fn unbond_funds() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `2379`
 		//  Estimated: `5844`
@@ -281,7 +281,7 @@ impl WeightInfo for () {
 	/// Proof: `BagsList::ListNodes` (`max_values`: None, `max_size`: Some(154), added: 2629, mode: `MaxEncodedLen`)
 	/// Storage: `Staking::Bonded` (r:1 w:0)
 	/// Proof: `Staking::Bonded` (`max_values`: None, `max_size`: Some(72), added: 2547, mode: `MaxEncodedLen`)
-	fn unbound_funds() -> Weight {
+	fn unbond_funds() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `2379`
 		//  Estimated: `5844`
