@@ -3251,7 +3251,7 @@ export default {
       },
       delete_profile: 'Null',
       chill: 'Null',
-      unbound_funds: {
+      unbond_funds: {
         amount: 'Compact<u128>',
       },
       withdraw_unbonded: 'Null'

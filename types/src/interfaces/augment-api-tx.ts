@@ -785,9 +785,9 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       deleteProfile: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
-       * See [`Pallet::unbound_funds`].
+       * See [`Pallet::unbond_funds`].
        **/
-      unboundFunds: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>]>;
+      unbondFunds: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>]>;
       /**
        * See [`Pallet::update_profile`].
        **/
