@@ -21,18 +21,29 @@ use sp_std::vec::Vec;
 /// Represents a Signed Round Message by the offender.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub struct SignedRoundMessage {
+	/// Index of a party who sent the message
+	pub sender: u16,
+	/// Received message
 	pub message: Vec<u8>,
+	/// Signature of sender + message.
+	///
+	/// This is the signature of the message by the sender.
+	///
+	/// # Note
+	/// sender_bytes = sender.to_be_bytes();
+	/// hash = keccak256(sender_bytes + message);
+	/// signature = sign(hash);
 	pub signature: Vec<u8>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub enum DfnsCGGMP21Justification {
-	Keygen(KeyAborted),
+	Keygen(KeygenAborted),
 	Signing(SigningAborted),
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum KeyAborted {
+pub enum KeygenAborted {
 	/// party decommitment doesn't match commitment.
 	InvalidDecommitment { round1: SignedRoundMessage, round2: SignedRoundMessage },
 	/// party provided invalid schnorr proof.

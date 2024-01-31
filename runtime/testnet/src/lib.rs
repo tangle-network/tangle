@@ -113,6 +113,7 @@ pub use tangle_primitives::{
 		traits::{JobToFee, MPCHandler},
 		JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType,
 	},
+	misbehavior::{traits::MisbehaviorHandler, MisbehaviorSubmission},
 	roles::ValidatorRewardDistribution,
 	time::*,
 	types::{
@@ -1121,6 +1122,14 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 	}
 }
 
+pub struct MockMisbehaviorHandler;
+
+impl MisbehaviorHandler for MockMisbehaviorHandler {
+	fn verify(_data: MisbehaviorSubmission) -> DispatchResult {
+		Ok(())
+	}
+}
+
 impl pallet_jobs::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
@@ -1128,6 +1137,7 @@ impl pallet_jobs::Config for Runtime {
 	type JobToFee = MockJobToFeeHandler;
 	type RolesHandler = Roles;
 	type MPCHandler = MockMPCHandler;
+	type MisbehaviorHandler = MockMisbehaviorHandler;
 	type PalletId = JobsPalletId;
 	type WeightInfo = ();
 }

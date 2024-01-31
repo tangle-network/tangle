@@ -13,21 +13,26 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+use super::*;
+use frame_support::traits::Currency;
 
-use sp_runtime::DispatchResult;
+pub type DefaultDigest = sha2::Sha256;
 
-use super::MisbehaviorSubmission;
+pub type BalanceOf<T> =
+	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
-/// A trait that describes the misbehavior verification.
-pub trait MisbehaviorHandler {
-	/// Verifies the misbehavior submission.
-	///
-	/// # Parameters
-	///
-	/// - `data`: Details of the misbehavior to verify
-	///
-	/// # Errors
-	///
-	/// Returns a `DispatchResult` indicating success or an error if verification fails.
-	fn verify(data: MisbehaviorSubmission) -> DispatchResult;
+#[derive(udigest::Digestable)]
+#[udigest(tag = "dfns.cggmp21.keygen.threshold.tag")]
+pub enum Tag<'a> {
+	/// Tag that includes the prover index
+	Indexed {
+		party_index: u16,
+		#[udigest(as_bytes)]
+		sid: &'a [u8],
+	},
+	/// Tag w/o party index
+	Unindexed {
+		#[udigest(as_bytes)]
+		sid: &'a [u8],
+	},
 }

@@ -82,7 +82,7 @@ pub mod module {
 		type MPCHandler: MPCHandler<Self::AccountId, BlockNumberFor<Self>, BalanceOf<Self>>;
 
 		/// The misbehavior verifying mechanism
-		type MisbehaviorHandler: MisbehaviorHandler<Self::AccountId>;
+		type MisbehaviorHandler: MisbehaviorHandler;
 		/// The origin which may set filter.
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
@@ -573,7 +573,7 @@ pub mod module {
 		#[pallet::weight({0})]
 		pub fn submit_misbehavior(
 			origin: OriginFor<T>,
-			misbehavior: MisbehaviorSubmission<T::AccountId>,
+			misbehavior: MisbehaviorSubmission,
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;
 

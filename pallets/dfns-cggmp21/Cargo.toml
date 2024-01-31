@@ -1,0 +1,63 @@
+[package]
+name = "pallet-dfns-cggmp21"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+frame-benchmarking = { workspace = true, optional = true }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true }
+sp-core = { workspace = true }
+sp-io = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+tangle-crypto-primitives = { workspace = true, default-features = false }
+tangle-primitives = { workspace = true, default-features = false }
+
+dfns-cggmp21 = { workspace = true, default-features = false, features = ["curve-secp256k1"] }
+bincode2 = { workspace = true }
+sha2 = { workspace = true }
+udigest = { workspace = true, features = ["derive"] }
+
+[dev-dependencies]
+pallet-balances = { workspace = true }
+smallvec = { workspace = true }
+sp-keystore = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+generic-ec = { workspace = true, features = ["serde", "udigest"] }
+generic-ec-zkp = { workspace = true, features = ["serde", "udigest"] }
+round-based = { workspace = true, features = ["derive"] }
+paillier-zk = { workspace = true, features = ["serde"] }
+
+[features]
+default = ["std"]
+std = [
+  "scale-info/std",
+  "sp-runtime/std",
+  "frame-support/std",
+  "frame-system/std",
+  "sp-core/std",
+  "sp-std/std",
+  "tangle-primitives/std",
+  "tangle-crypto-primitives/std",
+  "pallet-balances/std",
+  "sp-io/std",
+  "sp-keystore/std",
+  "udigest/std"
+]
+try-runtime = ["frame-support/try-runtime"]
+runtime-benchmarks = [
+  "frame-benchmarking/runtime-benchmarks",
+  "frame-support/runtime-benchmarks",
+  "frame-system/runtime-benchmarks",
+  "sp-runtime/runtime-benchmarks",
+  "pallet-balances/runtime-benchmarks",
+]

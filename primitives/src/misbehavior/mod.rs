@@ -26,11 +26,11 @@ pub use traits::*;
 
 /// Represents a Misbehavior submission
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub struct MisbehaviorSubmission<AccountId> {
+pub struct MisbehaviorSubmission {
 	/// The role type of the misbehaving node
 	pub role_type: RoleType,
-	/// The misbehaving node.
-	pub offender: AccountId,
+	/// The misbehaving party's ECDSA public key.
+	pub offender: [u8; 33],
 	/// The current Job id.
 	pub job_id: JobId,
 	/// The justification for the misbehavior
@@ -40,15 +40,15 @@ pub struct MisbehaviorSubmission<AccountId> {
 /// Represents a Misbehavior Justification kind
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub enum MisbehaviorJustification {
-	DKGTSS(DKGTranscriptSubmissionJustification),
-	ZkSaaS(ZkSaaSSubmissionJustification),
+	DKGTSS(DKGTSSJustification),
+	ZkSaaS(ZkSaaSJustification),
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum DKGTranscriptSubmissionJustification {
+pub enum DKGTSSJustification {
 	/// dfns CGGMP21 Implementation-specific justification
 	DfnsCGGMP21(dfns_cggmp21::DfnsCGGMP21Justification),
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum ZkSaaSSubmissionJustification {}
+pub enum ZkSaaSJustification {}
