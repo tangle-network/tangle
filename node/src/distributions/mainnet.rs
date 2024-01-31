@@ -45,8 +45,10 @@ fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f6
 // *** Distribution
 // Team : 30% (5% immediate) (team account gets 95% that is vested over 2years with 1 year cliff))
 // Foundation : 15% (5% immediate) (foundation account gets 95% that is vested over 2years with 1
-// year cliff) Investors : 16% (5% liquid immediately)(investor accounts gets 95% that is vested
-// over 2years with 1 year cliff) Treasury : 35% (immediate release to treasury pallet account)
+// year cliff)
+// Investors : 16% (5% liquid immediately)(investor accounts gets 95% that is vested
+// over 2years with 1 year cliff)
+// Treasury : 35% (immediate release to treasury pallet account)
 // EDG Genesis Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // EDG Snapshot Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // Leaderboard airdrop : 2% (5% immediate release)(95% vested over two years, with one month cliff)
