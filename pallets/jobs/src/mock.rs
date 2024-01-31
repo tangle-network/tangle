@@ -24,7 +24,6 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Contains, Everything},
 };
-use frame_system::EnsureSigned;
 use pallet_session::historical as pallet_session_historical;
 use sp_core::{
 	sr25519::{self},
@@ -309,7 +308,7 @@ parameter_types! {
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type ForceOrigin = EnsureSigned<AccountId>;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
 	type JobToFee = MockJobToFeeHandler;
 	type RolesHandler = Roles;
