@@ -46,7 +46,7 @@ pub trait MPCHandler<AccountId, BlockNumber, Balance> {
 	///
 	/// # Parameters
 	///
-	/// - `data`: Details of the job with its to verify
+	/// - `data`: Details of the job with its result to verify
 	///
 	/// # Errors
 	///

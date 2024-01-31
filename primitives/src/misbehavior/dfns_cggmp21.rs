@@ -14,41 +14,43 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{jobs::JobId, roles::RoleType};
-
 use frame_support::pallet_prelude::*;
 use sp_core::RuntimeDebug;
+use sp_std::vec::Vec;
 
-pub mod dfns_cggmp21;
-pub mod traits;
-
-pub use traits::*;
-
-/// Represents a Misbehavior submission
+/// Represents a Signed Round Message by the offender.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub struct MisbehaviorSubmission<AccountId> {
-	/// The role type of the misbehaving node
-	pub role_type: RoleType,
-	/// The misbehaving node.
-	pub offender: AccountId,
-	/// The current Job id.
-	pub job_id: JobId,
-	/// The justification for the misbehavior
-	pub justification: MisbehaviorJustification,
-}
-
-/// Represents a Misbehavior Justification kind
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum MisbehaviorJustification {
-	DKGTSS(DKGTranscriptSubmissionJustification),
-	ZkSaaS(ZkSaaSSubmissionJustification),
+pub struct SignedRoundMessage {
+	pub message: Vec<u8>,
+	pub signature: Vec<u8>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum DKGTranscriptSubmissionJustification {
-	/// dfns CGGMP21 Implementation-specific justification
-	DfnsCGGMP21(dfns_cggmp21::DfnsCGGMP21Justification),
+pub enum DfnsCGGMP21Justification {
+	Keygen(KeyAborted),
+	Signing(SigningAborted),
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum ZkSaaSSubmissionJustification {}
+pub enum KeyAborted {
+	/// party decommitment doesn't match commitment.
+	InvalidDecommitment { round1: SignedRoundMessage, round2: SignedRoundMessage },
+	/// party provided invalid schnorr proof.
+	InvalidSchnorrProof,
+	/// party secret share is not consistent.
+	FeldmanVerificationFailed,
+	/// party data size is not suitable for threshold parameters.
+	InvalidDataSize,
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+pub enum SigningAborted {
+	/// `pi_enc::verify(K)` failed.
+	EncProofOfK,
+	/// ψ, ψˆ, or ψ' proofs are invalid
+	InvalidPsi,
+	/// ψ'' proof is invalid.
+	InvalidPsiPrimePrime,
+	/// Delta != G * delta
+	MismatchedDelta,
+}
