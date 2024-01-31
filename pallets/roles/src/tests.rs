@@ -278,7 +278,7 @@ fn test_delete_profile() {
 }
 
 #[test]
-fn test_unbound_funds_should_work() {
+fn test_unbond_funds_should_work() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
@@ -289,8 +289,8 @@ fn test_unbound_funds_should_work() {
 
 		assert_eq!(Roles::ledger(mock_pub_key(1)), None);
 
-		// unbound funds.
-		assert_ok!(Roles::unbound_funds(RuntimeOrigin::signed(mock_pub_key(1)), 5000));
+		// unbond funds.
+		assert_ok!(Roles::unbond_funds(RuntimeOrigin::signed(mock_pub_key(1)), 5000));
 
 		assert_events(vec![RuntimeEvent::Staking(pallet_staking::Event::Unbonded {
 			stash: mock_pub_key(1),
@@ -299,7 +299,7 @@ fn test_unbound_funds_should_work() {
 
 		// Get  pallet staking ledger mapping.
 		let staking_ledger = pallet_staking::Ledger::<Runtime>::get(mock_pub_key(1)).unwrap();
-		// Since we we have unbounded 5000 tokens, we should have 5000 tokens in staking ledger.
+		// Since we we have unbonded 5000 tokens, we should have 5000 tokens in staking ledger.
 		assert_eq!(staking_ledger.active, 5000);
 	});
 }
