@@ -37,6 +37,9 @@ impl Contains<RuntimeCall> for MainnetCallFilter {
 			RuntimeCall::Democracy(_) |
 			// disallow council
 			RuntimeCall::Council(_) |
+			// Block jobs and roles pallet
+			RuntimeCall::Roles(_) |
+			RuntimeCall::Jobs(_) |
 			// Filter light client calls
 			RuntimeCall::Eth2Client(_) => false,
 

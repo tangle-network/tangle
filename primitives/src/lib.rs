@@ -103,7 +103,7 @@ pub mod currency {
 	pub const WEIGHT_FEE: Balance = 100 * MEGAWEI;
 	/// Return the cost to add an item to storage based on size
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
-		items as Balance * 20 * DOLLAR + (bytes as Balance) * 100 * MILLICENT
+		items as Balance * 10 * DOLLAR + (bytes as Balance) * 100 * MILLICENT
 	}
 }
 
@@ -226,13 +226,12 @@ pub mod evm {
 
 pub mod democracy {
 	use crate::{currency::UNIT, time::MINUTES, Balance, BlockNumber};
-
-	pub const LAUNCH_PERIOD: BlockNumber = 28 * 24 * 60 * MINUTES;
-	pub const VOTING_PERIOD: BlockNumber = 28 * 24 * 60 * MINUTES;
-	pub const FASTTRACK_VOTING_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES;
-	pub const MINIMUM_DEPOSIT: Balance = 100 * UNIT;
-	pub const ENACTMENT_PERIOD: BlockNumber = 30 * 24 * 60 * MINUTES;
-	pub const COOLOFF_PERIOD: BlockNumber = 28 * 24 * 60 * MINUTES;
+	pub const LAUNCH_PERIOD: BlockNumber = 10 * 24 * 60 * MINUTES; // 10 days
+	pub const VOTING_PERIOD: BlockNumber = 10 * 24 * 60 * MINUTES; // 10 days
+	pub const FASTTRACK_VOTING_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES; // 3 days
+	pub const MINIMUM_DEPOSIT: Balance = 1000 * UNIT; // 1000 TNT
+	pub const ENACTMENT_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES; // 3 days
+	pub const COOLOFF_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES; // 3 days
 	pub const MAX_PROPOSALS: u32 = 100;
 }
 
@@ -260,7 +259,7 @@ pub mod treasury {
 	pub const PROPOSAL_BOND: Permill = Permill::from_percent(5);
 	pub const PROPOSAL_BOND_MINIMUM: Balance = UNIT;
 	pub const SPEND_PERIOD: BlockNumber = DAYS;
-	pub const BURN: Permill = Permill::from_percent(50);
+	pub const BURN: Permill = Permill::from_percent(0);
 	pub const TIP_COUNTDOWN: BlockNumber = DAYS;
 	pub const TIP_FINDERS_FEE: Percent = Percent::from_percent(20);
 	pub const TIP_REPORT_DEPOSIT_BASE: Balance = UNIT;
