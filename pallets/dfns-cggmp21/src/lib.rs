@@ -86,6 +86,11 @@ pub mod pallet {
 		/// This error is returned when the decommitment data size is valid
 		/// but the caller claims it is invalid!
 		ValidDataSize,
+		/// The submitted messages passed Feldman verification.
+		///
+		/// This error is returned when the messages passed Feldman verification
+		/// but the caller claims it is invalid!
+		ValidFeldmanVerification,
 	}
 
 	#[pallet::call]

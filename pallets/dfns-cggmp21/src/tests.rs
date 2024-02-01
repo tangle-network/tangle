@@ -26,7 +26,7 @@ use dfns_cggmp21::{
 };
 
 use frame_support::{assert_err, assert_ok};
-use generic_ec::{curves::Secp256k1, SecretScalar};
+use generic_ec::{curves::Secp256k1, Scalar, SecretScalar};
 use generic_ec_zkp::{polynomial::Polynomial, schnorr_pok};
 use parity_scale_codec::Encode;
 use rand_chacha::rand_core::{RngCore, SeedableRng};
@@ -305,6 +305,150 @@ fn submit_keygen_invalid_decommitment_data_size_should_work() {
 					n,
 					t: t + 1,
 					reason: KeygenAborted::InvalidDataSize { round2a: round2_signed_message },
+				},
+			)),
+		};
+
+		assert_ok!(DfnsCGGMP21::verify(submission));
+	});
+}
+
+#[test]
+fn submit_keygen_feldman_verification_should_work() {
+	new_test_ext().execute_with(|| {
+		let pub_key = pub_key();
+		let offender = pub_key.0;
+		let job_id = 1_u64;
+		let i = 2_u16;
+		let n = 5_u16;
+		let t = 3_u16;
+		let rng = &mut rand_chacha::ChaChaRng::from_seed([42; 32]);
+
+		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		rng.fill_bytes(rid.as_mut());
+
+		let (_r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
+
+		let f = Polynomial::<SecretScalar<Secp256k1>>::sample(rng, usize::from(t) - 1);
+		let F = &f * &Point::generator();
+		let my_decommitment: keygen::msg::threshold::MsgRound2Broad<_, SecurityLevel128> =
+			keygen::msg::threshold::MsgRound2Broad {
+				rid,
+				F,
+				sch_commit: h,
+				decommit: {
+					let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+					rng.fill_bytes(nonce.as_mut());
+					nonce
+				},
+			};
+		let round2a_msg = bincode2::serialize(&my_decommitment).unwrap();
+
+		let my_sigma: keygen::msg::threshold::MsgRound2Uni<Secp256k1> =
+			keygen::msg::threshold::MsgRound2Uni {
+				sigma: {
+					let x = Scalar::from(i + 1);
+					f.value(&x)
+				},
+			};
+
+		let round2b_msg = bincode2::serialize(&my_sigma).unwrap();
+
+		let msg_to_sign = [&i.to_be_bytes()[..], &round2a_msg[..]].concat();
+		let signature = sign(pub_key, &msg_to_sign);
+		let round2a_signed_message =
+			SignedRoundMessage { sender: i, message: round2a_msg, signature };
+
+		let msg_to_sign = [&i.to_be_bytes()[..], &round2b_msg[..]].concat();
+		let signature = sign(pub_key, &msg_to_sign);
+		let round2b_signed_message =
+			SignedRoundMessage { sender: i, message: round2b_msg, signature };
+		let submission = MisbehaviorSubmission {
+			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
+			offender,
+			job_id,
+			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
+				DfnsCGGMP21Justification::Keygen {
+					n,
+					t,
+					reason: KeygenAborted::FeldmanVerificationFailed {
+						round2a: round2a_signed_message,
+						round2b: round2b_signed_message,
+					},
+				},
+			)),
+		};
+
+		assert_err!(
+			DfnsCGGMP21::verify(submission),
+			crate::Error::<Runtime>::ValidFeldmanVerification
+		);
+	});
+}
+
+#[test]
+fn submit_keygen_invalid_feldman_verification_should_work() {
+	new_test_ext().execute_with(|| {
+		let pub_key = pub_key();
+		let offender = pub_key.0;
+		let job_id = 1_u64;
+		let i = 2_u16;
+		let n = 5_u16;
+		let t = 3_u16;
+		let rng = &mut rand_chacha::ChaChaRng::from_seed([42; 32]);
+
+		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		rng.fill_bytes(rid.as_mut());
+
+		let (_r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
+
+		let f = Polynomial::<SecretScalar<Secp256k1>>::sample(rng, usize::from(t) - 1);
+		let F = &f * &Point::generator();
+		let my_decommitment: keygen::msg::threshold::MsgRound2Broad<_, SecurityLevel128> =
+			keygen::msg::threshold::MsgRound2Broad {
+				rid,
+				F,
+				sch_commit: h,
+				decommit: {
+					let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+					rng.fill_bytes(nonce.as_mut());
+					nonce
+				},
+			};
+		let round2a_msg = bincode2::serialize(&my_decommitment).unwrap();
+
+		let my_sigma: keygen::msg::threshold::MsgRound2Uni<Secp256k1> =
+			keygen::msg::threshold::MsgRound2Uni {
+				sigma: {
+					// invalid value
+					let x = Scalar::from(i + 1 + 5);
+					f.value(&x)
+				},
+			};
+
+		let round2b_msg = bincode2::serialize(&my_sigma).unwrap();
+
+		let msg_to_sign = [&i.to_be_bytes()[..], &round2a_msg[..]].concat();
+		let signature = sign(pub_key, &msg_to_sign);
+		let round2a_signed_message =
+			SignedRoundMessage { sender: i, message: round2a_msg, signature };
+
+		let msg_to_sign = [&i.to_be_bytes()[..], &round2b_msg[..]].concat();
+		let signature = sign(pub_key, &msg_to_sign);
+		let round2b_signed_message =
+			SignedRoundMessage { sender: i, message: round2b_msg, signature };
+		let submission = MisbehaviorSubmission {
+			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
+			offender,
+			job_id,
+			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
+				DfnsCGGMP21Justification::Keygen {
+					n,
+					t,
+					reason: KeygenAborted::FeldmanVerificationFailed {
+						round2a: round2a_signed_message,
+						round2b: round2b_signed_message,
+					},
 				},
 			)),
 		};

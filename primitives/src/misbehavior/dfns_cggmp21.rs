@@ -49,7 +49,7 @@ pub enum KeygenAborted {
 	/// party provided invalid schnorr proof.
 	InvalidSchnorrProof { round2a: SignedRoundMessage, round2b: SignedRoundMessage },
 	/// party secret share is not consistent.
-	FeldmanVerificationFailed,
+	FeldmanVerificationFailed { round2a: SignedRoundMessage, round2b: SignedRoundMessage },
 	/// party data size is not suitable for threshold parameters.
 	InvalidDataSize { round2a: SignedRoundMessage },
 }

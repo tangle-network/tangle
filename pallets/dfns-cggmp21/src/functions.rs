@@ -27,7 +27,7 @@ use tangle_primitives::{
 	roles::{RoleType, ThresholdSignatureRoleType},
 };
 
-use dfns_cggmp21::supported_curves::Secp256k1;
+use dfns_cggmp21::{generic_ec, supported_curves::Secp256k1};
 use types::{DefaultDigest, Tag};
 
 /// Expected signature length
@@ -103,6 +103,8 @@ impl<T: Config> Pallet<T> {
 				Self::verify_keygen_invalid_decommitment(data, round1, round2a),
 			KeygenAborted::InvalidDataSize { round2a } =>
 				Self::verify_keygen_invalid_data_size(data, t, round2a),
+			KeygenAborted::FeldmanVerificationFailed { round2a, round2b } =>
+				Self::verify_keygen_feldman(data, round2a, round2b),
 			_ => unimplemented!(),
 		}
 	}
@@ -146,14 +148,11 @@ impl<T: Config> Pallet<T> {
 		>(&round2a.message)
 		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 		let hash_commit = tag.digest(round2_msg);
-		if round1_msg.commitment == hash_commit {
-			Err(Error::<T>::ValidDecommitment.into())
-		} else {
-			// Slash the offender!
-			// TODO: add slashing logic
 
-			Ok(())
-		}
+		ensure!(round1_msg.commitment != hash_commit, Error::<T>::ValidDecommitment);
+		// Slash the offender!
+		// TODO: add slashing logic
+		Ok(())
 	}
 
 	/// Given a Keygen t and Round2a messages, verify the misbehavior and return the result.
@@ -168,14 +167,41 @@ impl<T: Config> Pallet<T> {
 			keygen::msg::threshold::MsgRound2Broad<Secp256k1, SecurityLevel128>,
 		>(&round2a.message)
 		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
-		if round2a_msg.F.degree() + 1 == usize::from(t) {
-			Err(Error::<T>::ValidDataSize.into())
-		} else {
-			// Slash the offender!
-			// TODO: add slashing logic
 
-			Ok(())
-		}
+		ensure!(round2a_msg.F.degree() + 1 != usize::from(t), Error::<T>::ValidDataSize);
+		// Slash the offender!
+		// TODO: add slashing logic
+		Ok(())
+	}
+
+	/// Given a Keygen Round2a and Round2b messages, verify the misbehavior and return the result.
+	pub fn verify_keygen_feldman(
+		data: &MisbehaviorSubmission,
+		round2a: &SignedRoundMessage,
+		round2b: &SignedRoundMessage,
+	) -> DispatchResult {
+		Self::ensure_signed_by_offender(round2a, data.offender)?;
+		Self::ensure_signed_by_offender(round2b, data.offender)?;
+		ensure!(round2a.sender == round2b.sender, Error::<T>::InvalidJustification);
+		let i = round2a.sender;
+
+		let round2a_msg = bincode2::deserialize::<
+			keygen::msg::threshold::MsgRound2Broad<Secp256k1, SecurityLevel128>,
+		>(&round2a.message)
+		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+
+		let round2b_msg = bincode2::deserialize::<keygen::msg::threshold::MsgRound2Uni<Secp256k1>>(
+			&round2b.message,
+		)
+		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+
+		let lhs = round2a_msg.F.value::<_, generic_ec::Point<_>>(&generic_ec::Scalar::from(i + 1));
+		let rhs = generic_ec::Point::generator() * round2b_msg.sigma;
+		let feldman_verification = lhs != rhs;
+		ensure!(feldman_verification, Error::<T>::ValidFeldmanVerification);
+		// Slash the offender!
+		// TODO: add slashing logic
+		Ok(())
 	}
 	/// Given a [`SignedMessage`] ensure that the message is signed by the given offender.
 	pub fn ensure_signed_by_offender(
