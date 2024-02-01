@@ -83,10 +83,10 @@ impl<T: Config> Pallet<T> {
 		justification: &DfnsCGGMP21Justification,
 	) -> DispatchResult {
 		match justification {
-			DfnsCGGMP21Justification::Keygen(keygen_justification) =>
-				Self::verify_keygen_misbehavior(data, keygen_justification),
-			DfnsCGGMP21Justification::Signing(signing_justification) =>
-				Self::verify_signing_misbehavior(data, signing_justification),
+			DfnsCGGMP21Justification::Keygen { n, t, reason } =>
+				Self::verify_keygen_misbehavior(data, *n, *t, reason),
+			DfnsCGGMP21Justification::Signing { n, t, reason } =>
+				Self::verify_signing_misbehavior(data, *n, *t, reason),
 		}
 	}
 
@@ -94,11 +94,15 @@ impl<T: Config> Pallet<T> {
 	/// result
 	pub fn verify_keygen_misbehavior(
 		data: &MisbehaviorSubmission,
-		justification: &KeygenAborted,
+		n: u16,
+		t: u16,
+		reason: &KeygenAborted,
 	) -> DispatchResult {
-		match justification {
-			KeygenAborted::InvalidDecommitment { round1, round2 } =>
-				Self::verify_keygen_invalid_decommitment(data, round1, round2),
+		match reason {
+			KeygenAborted::InvalidDecommitment { round1, round2a } =>
+				Self::verify_keygen_invalid_decommitment(data, round1, round2a),
+			KeygenAborted::InvalidDataSize { round2a } =>
+				Self::verify_keygen_invalid_data_size(data, t, round2a),
 			_ => unimplemented!(),
 		}
 	}
@@ -107,20 +111,22 @@ impl<T: Config> Pallet<T> {
 	/// result
 	pub fn verify_signing_misbehavior(
 		data: &MisbehaviorSubmission,
-		justification: &SigningAborted,
+		n: u16,
+		t: u16,
+		reason: &SigningAborted,
 	) -> DispatchResult {
 		unimplemented!()
 	}
 
-	/// Given a Keygen Round1 and Round2 messages, verify the misbehavior and return the result.
+	/// Given a Keygen Round1 and Round2a messages, verify the misbehavior and return the result.
 	pub fn verify_keygen_invalid_decommitment(
 		data: &MisbehaviorSubmission,
 		round1: &SignedRoundMessage,
-		round2: &SignedRoundMessage,
+		round2a: &SignedRoundMessage,
 	) -> DispatchResult {
 		Self::ensure_signed_by_offender(round1, data.offender)?;
-		Self::ensure_signed_by_offender(round2, data.offender)?;
-		ensure!(round1.sender == round2.sender, Error::<T>::InvalidJustification);
+		Self::ensure_signed_by_offender(round2a, data.offender)?;
+		ensure!(round1.sender == round2a.sender, Error::<T>::InvalidJustification);
 
 		let job_id_bytes = data.job_id.to_be_bytes();
 		let mix = keccak_256(b"dnfs-cggmp21-keygen");
@@ -137,11 +143,10 @@ impl<T: Config> Pallet<T> {
 
 		let round2_msg = bincode2::deserialize::<
 			keygen::msg::threshold::MsgRound2Broad<Secp256k1, SecurityLevel128>,
-		>(&round2.message)
+		>(&round2a.message)
 		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 		let hash_commit = tag.digest(round2_msg);
 		if round1_msg.commitment == hash_commit {
-			// Slash the caller! since the commitment is valid!
 			Err(Error::<T>::ValidDecommitment.into())
 		} else {
 			// Slash the offender!
@@ -151,6 +156,27 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
+	/// Given a Keygen t and Round2a messages, verify the misbehavior and return the result.
+	pub fn verify_keygen_invalid_data_size(
+		data: &MisbehaviorSubmission,
+		t: u16,
+		round2a: &SignedRoundMessage,
+	) -> DispatchResult {
+		Self::ensure_signed_by_offender(round2a, data.offender)?;
+
+		let round2a_msg = bincode2::deserialize::<
+			keygen::msg::threshold::MsgRound2Broad<Secp256k1, SecurityLevel128>,
+		>(&round2a.message)
+		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+		if round2a_msg.F.degree() + 1 == usize::from(t) {
+			Err(Error::<T>::ValidDataSize.into())
+		} else {
+			// Slash the offender!
+			// TODO: add slashing logic
+
+			Ok(())
+		}
+	}
 	/// Given a [`SignedMessage`] ensure that the message is signed by the given offender.
 	pub fn ensure_signed_by_offender(
 		signed_message: &SignedRoundMessage,

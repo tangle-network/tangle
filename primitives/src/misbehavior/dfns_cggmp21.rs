@@ -38,20 +38,20 @@ pub struct SignedRoundMessage {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub enum DfnsCGGMP21Justification {
-	Keygen(KeygenAborted),
-	Signing(SigningAborted),
+	Keygen { n: u16, t: u16, reason: KeygenAborted },
+	Signing { n: u16, t: u16, reason: SigningAborted },
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub enum KeygenAborted {
 	/// party decommitment doesn't match commitment.
-	InvalidDecommitment { round1: SignedRoundMessage, round2: SignedRoundMessage },
+	InvalidDecommitment { round1: SignedRoundMessage, round2a: SignedRoundMessage },
 	/// party provided invalid schnorr proof.
-	InvalidSchnorrProof,
+	InvalidSchnorrProof { round2a: SignedRoundMessage, round2b: SignedRoundMessage },
 	/// party secret share is not consistent.
 	FeldmanVerificationFailed,
 	/// party data size is not suitable for threshold parameters.
-	InvalidDataSize,
+	InvalidDataSize { round2a: SignedRoundMessage },
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]

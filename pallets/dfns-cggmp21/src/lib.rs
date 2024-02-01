@@ -81,6 +81,11 @@ pub mod pallet {
 		/// This error is returned when the decommitment is valid
 		/// but the caller claims it is invalid!
 		ValidDecommitment,
+		/// The submitted decommitment data size is valid.
+		///
+		/// This error is returned when the decommitment data size is valid
+		/// but the caller claims it is invalid!
+		ValidDataSize,
 	}
 
 	#[pallet::call]
