@@ -224,7 +224,7 @@ impl<T: Config> Pallet<T> {
 		round2a
 			.iter()
 			.zip(parties_including_offender)
-			.try_for_each(|(r, p)| Self::ensure_signed_by_offender(r, *p))?;
+			.try_for_each(|(r, p)| Self::ensure_signed_by(r, *p))?;
 
 		let decomm = round2a.get(usize::from(i)).ok_or(Error::<T>::InvalidJustification)?;
 		// double-check
@@ -292,11 +292,19 @@ impl<T: Config> Pallet<T> {
 		signed_message: &SignedRoundMessage,
 		offender: [u8; 33],
 	) -> DispatchResult {
+		Self::ensure_signed_by(signed_message, offender)
+	}
+
+	/// Given a [`SignedRoundMessage`] ensure that the message is signed by the given signer
+	pub fn ensure_signed_by(
+		signed_message: &SignedRoundMessage,
+		expected_signer: [u8; 33],
+	) -> DispatchResult {
 		let final_message =
 			[&signed_message.sender.to_be_bytes()[..], signed_message.message.as_slice()].concat();
 		let signer = Self::recover_ecdsa_pub_key(&final_message, &signed_message.signature)
 			.map_err(|_| Error::<T>::InvalidSignature)?;
-		ensure!(signer == offender, Error::<T>::NotSignedByOffender);
+		ensure!(signer == expected_signer, Error::<T>::NotSignedByOffender);
 		Ok(())
 	}
 	/// Recovers the ECDSA public key from a given message and signature.
