@@ -456,3 +456,5 @@ fn submit_keygen_invalid_feldman_verification_should_work() {
 		assert_ok!(DfnsCGGMP21::verify(submission));
 	});
 }
+
+fn submit_keygen_schnorr_proof_verification_should_work() {}

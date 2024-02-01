@@ -25,6 +25,8 @@ dfns-cggmp21 = { workspace = true, default-features = false, features = ["curve-
 bincode2 = { workspace = true }
 sha2 = { workspace = true }
 udigest = { workspace = true, features = ["derive"] }
+generic-ec-zkp = { workspace = true, features = ["serde", "udigest"] }
+paillier-zk = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]
 pallet-balances = { workspace = true }

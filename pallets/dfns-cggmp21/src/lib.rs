@@ -91,6 +91,12 @@ pub mod pallet {
 		/// This error is returned when the messages passed Feldman verification
 		/// but the caller claims it is invalid!
 		ValidFeldmanVerification,
+		/// The submitted Schnorr Proof is valid.
+		///
+		/// This error is returned when the decommitment and its
+		/// Schnorr are valid. but the caller
+		/// claims it is invalid.
+		ValidSchnorrProof,
 	}
 
 	#[pallet::call]

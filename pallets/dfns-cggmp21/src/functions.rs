@@ -14,8 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use dfns_cggmp21::{keygen, security_level::SecurityLevel128};
+use dfns_cggmp21::{
+	keygen,
+	security_level::{SecurityLevel, SecurityLevel128},
+};
 use frame_support::{ensure, pallet_prelude::DispatchResult};
+use generic_ec::{Point, Scalar};
+use generic_ec_zkp::{polynomial::Polynomial, schnorr_pok};
+use sha2::Digest;
 use sp_io::{hashing::keccak_256, EcdsaVerifyError};
 use tangle_primitives::{
 	misbehavior::{
@@ -83,10 +89,10 @@ impl<T: Config> Pallet<T> {
 		justification: &DfnsCGGMP21Justification,
 	) -> DispatchResult {
 		match justification {
-			DfnsCGGMP21Justification::Keygen { n, t, reason } =>
-				Self::verify_keygen_misbehavior(data, *n, *t, reason),
-			DfnsCGGMP21Justification::Signing { n, t, reason } =>
-				Self::verify_signing_misbehavior(data, *n, *t, reason),
+			DfnsCGGMP21Justification::Keygen { participants, t, reason } =>
+				Self::verify_keygen_misbehavior(data, participants, *t, reason),
+			DfnsCGGMP21Justification::Signing { participants, t, reason } =>
+				Self::verify_signing_misbehavior(data, participants, *t, reason),
 		}
 	}
 
@@ -94,7 +100,7 @@ impl<T: Config> Pallet<T> {
 	/// result
 	pub fn verify_keygen_misbehavior(
 		data: &MisbehaviorSubmission,
-		n: u16,
+		participants: &[[u8; 33]],
 		t: u16,
 		reason: &KeygenAborted,
 	) -> DispatchResult {
@@ -105,7 +111,8 @@ impl<T: Config> Pallet<T> {
 				Self::verify_keygen_invalid_data_size(data, t, round2a),
 			KeygenAborted::FeldmanVerificationFailed { round2a, round2b } =>
 				Self::verify_keygen_feldman(data, round2a, round2b),
-			_ => unimplemented!(),
+			KeygenAborted::InvalidSchnorrProof { round2a, round3 } =>
+				Self::verify_schnorr_proof(data, participants, round2a, round3),
 		}
 	}
 
@@ -113,7 +120,7 @@ impl<T: Config> Pallet<T> {
 	/// result
 	pub fn verify_signing_misbehavior(
 		data: &MisbehaviorSubmission,
-		n: u16,
+		participants: &[[u8; 33]],
 		t: u16,
 		reason: &SigningAborted,
 	) -> DispatchResult {
@@ -195,7 +202,7 @@ impl<T: Config> Pallet<T> {
 		)
 		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-		let lhs = round2a_msg.F.value::<_, generic_ec::Point<_>>(&generic_ec::Scalar::from(i + 1));
+		let lhs = round2a_msg.F.value::<_, generic_ec::Point<_>>(&Scalar::from(i + 1));
 		let rhs = generic_ec::Point::generator() * round2b_msg.sigma;
 		let feldman_verification = lhs != rhs;
 		ensure!(feldman_verification, Error::<T>::ValidFeldmanVerification);
@@ -203,7 +210,84 @@ impl<T: Config> Pallet<T> {
 		// TODO: add slashing logic
 		Ok(())
 	}
-	/// Given a [`SignedMessage`] ensure that the message is signed by the given offender.
+
+	pub fn verify_schnorr_proof(
+		data: &MisbehaviorSubmission,
+		parties_including_offender: &[[u8; 33]],
+		round2a: &[SignedRoundMessage],
+		round3: &SignedRoundMessage,
+	) -> DispatchResult {
+		let i = round3.sender;
+		let n = parties_including_offender.len() as u16;
+		Self::ensure_signed_by_offender(round3, data.offender)?;
+		ensure!(round2a.len() == usize::from(n), Error::<T>::InvalidJustification);
+		round2a
+			.iter()
+			.zip(parties_including_offender)
+			.try_for_each(|(r, p)| Self::ensure_signed_by_offender(r, *p))?;
+
+		let decomm = round2a.get(usize::from(i)).ok_or(Error::<T>::InvalidJustification)?;
+		// double-check
+		Self::ensure_signed_by_offender(decomm, data.offender)?;
+
+		let job_id_bytes = data.job_id.to_be_bytes();
+		let mix = keccak_256(b"dnfs-cggmp21-keygen");
+		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
+
+		let round3_msg =
+			bincode2::deserialize::<keygen::msg::threshold::MsgRound3<Secp256k1>>(&round3.message)
+				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+
+		let round2a_msgs = round2a
+			.iter()
+			.map(|r| {
+				bincode2::deserialize::<
+					keygen::msg::threshold::MsgRound2Broad<Secp256k1, SecurityLevel128>,
+				>(&r.message)
+				.map_err(|_| Error::<T>::MalformedRoundMessage)
+			})
+			.collect::<Result<Vec<_>, _>>()?;
+		let round2a_msg =
+			round2a_msgs.get(usize::from(i)).ok_or(Error::<T>::InvalidJustification)?;
+
+		let polynomial_sum =
+			round2a_msgs.iter().map(|d| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
+
+		let rid = round2a_msgs
+			.iter()
+			.map(|d| &d.rid)
+			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), Self::xor_array);
+		let ys = (0..n)
+			.map(|l| polynomial_sum.value(&Scalar::from(l + 1)))
+			.collect::<Vec<Point<Secp256k1>>>();
+
+		let challenge = {
+			let hash = |d: DefaultDigest| {
+				d.chain_update(&eid_bytes)
+					.chain_update(i.to_be_bytes())
+					.chain_update(rid.as_ref())
+					.chain_update(ys[usize::from(i)].to_bytes(true)) // y_i
+					.chain_update(round2a_msg.sch_commit.0.to_bytes(false)) // h
+					.finalize()
+			};
+			let mut rng = paillier_zk::rng::HashRng::new(hash);
+			Scalar::random(&mut rng)
+		};
+		let challenge = schnorr_pok::Challenge { nonce: challenge };
+
+		let proof =
+			round3_msg
+				.sch_proof
+				.verify(&round2a_msg.sch_commit, &challenge, &ys[usize::from(i)]);
+
+		ensure!(proof.is_err(), Error::<T>::ValidSchnorrProof);
+
+		// TODO: add slashing logic
+		// Slash the offender!
+		Ok(())
+	}
+
+	/// Given a [`SignedRoundMessage`] ensure that the message is signed by the given offender.
 	pub fn ensure_signed_by_offender(
 		signed_message: &SignedRoundMessage,
 		offender: [u8; 33],
@@ -262,5 +346,14 @@ impl<T: Config> Pallet<T> {
 			return Some(key)
 		}
 		None
+	}
+
+	pub fn xor_array<A, B>(mut a: A, b: B) -> A
+	where
+		A: AsMut<[u8]>,
+		B: AsRef<[u8]>,
+	{
+		a.as_mut().iter_mut().zip(b.as_ref()).for_each(|(a_i, b_i)| *a_i ^= *b_i);
+		a
 	}
 }
