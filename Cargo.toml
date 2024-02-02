@@ -73,6 +73,7 @@ hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
 slices = "0.2.0"
 schnorrkel = { version = "0.9.1", default-features = false }
+milagro_bls = { git = "https://github.com/Snowfork/milagro_bls", default-features = false, rev="a6d66e4eb89015e352fb1c9f7b661ecdbb5b2176" }
 
 tangle-relayer-gadget = { packge = "tangle-relayer-gadget", path = "relayer-gadget" }
 tangle-relayer-gadget-cli = { packge = "tangle-relayer-gadget-cli", path = "relayer-gadget/cli" }
