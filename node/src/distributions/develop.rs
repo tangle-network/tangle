@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 //
@@ -16,7 +17,51 @@
 use std::str::FromStr;
 
 use fp_evm::GenesisAccount;
+use pallet_airdrop_claims::MultiAddress;
 use sp_core::{H160, U256};
+use sp_runtime::AccountId32;
+use tangle_primitives::Balance;
+
+const CLAIM_AMOUNT: Balance = 1_000_000_000_000_000_000_000u128;
+
+pub fn get_local_claims() -> Vec<(MultiAddress, Balance)> {
+	vec![
+		// Test account with a simple menmonic
+		// Mnemonic: "test test test test test test test test test test test junk"
+		// Path: m/44'/60'/0'/0/0
+		// Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+		(
+			MultiAddress::EVM(
+				H160::from_str("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+					.expect("internal H160 is valid; qed")
+					.into(),
+			),
+			CLAIM_AMOUNT,
+		),
+		(
+			MultiAddress::EVM(
+				H160::from_str("2DFA35bd8C59C38FB3eC4e71b0106160E130A40E")
+					.expect("internal H160 is valid; qed")
+					.into(),
+			),
+			CLAIM_AMOUNT,
+		),
+		(
+			MultiAddress::Native(
+				AccountId32::from_str("5EbkKKTdRJzP1j3aM3S7q178du6tW7ZVWK9Dtjx9CbTFEpGf")
+					.expect("internal AccountId32 is valid; qed"),
+			),
+			CLAIM_AMOUNT,
+		),
+		(
+			MultiAddress::Native(
+				AccountId32::from_str("5DLXgUoVVeCZKHduaVhkH4RvLcyG1GdQwLqYLd4aFuYX1qve")
+					.expect("internal AccountId32 is valid; qed"),
+			),
+			CLAIM_AMOUNT,
+		),
+	]
+}
 
 pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 	vec![

@@ -17,7 +17,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
 
-use crate::types::{JobInfoOf, JobSubmissionOf, PhaseOneResultOf};
+use crate::types::{JobInfoOf, JobSubmissionOf, PhaseResultOf};
 use frame_support::{
 	pallet_prelude::*,
 	traits::{Currency, ExistenceRequirement, ReservableCurrency},
@@ -33,7 +33,7 @@ use sp_std::{prelude::*, vec::Vec};
 use tangle_primitives::{
 	jobs::{
 		traits::{JobToFee, MPCHandler},
-		DKGTSSKeySubmissionResult, JobId, JobInfo, JobResult, PhaseOneResult, ValidatorOffenceType,
+		DKGTSSKeySubmissionResult, JobId, JobInfo, JobResult, PhaseResult, ValidatorOffenceType,
 	},
 	roles::traits::RolesHandler,
 };
@@ -117,8 +117,8 @@ pub mod module {
 		EmptyResult,
 		/// empty job
 		EmptyJob,
-		/// Validator metadata not found
-		ValidatorMetadataNotFound,
+		/// Validator role key not found.
+		ValidatorRoleKeyNotFound,
 		/// Unexpected result provided
 		ResultNotExpectedType,
 		/// No permission to change permitted caller
@@ -126,7 +126,7 @@ pub mod module {
 	}
 
 	#[pallet::event]
-	#[pallet::generate_deposit(fn deposit_event)]
+	#[pallet::generate_deposit(pub(crate) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// A new job has been submitted
 		JobSubmitted { job_id: JobId, role_type: RoleType, details: JobSubmissionOf<T> },
@@ -148,14 +148,8 @@ pub mod module {
 
 	#[pallet::storage]
 	#[pallet::getter(fn known_results)]
-	pub type KnownResults<T: Config> = StorageDoubleMap<
-		_,
-		Twox64Concat,
-		RoleType,
-		Blake2_128Concat,
-		JobId,
-		PhaseOneResult<T::AccountId, BlockNumberFor<T>>,
-	>;
+	pub type KnownResults<T: Config> =
+		StorageDoubleMap<_, Twox64Concat, RoleType, Blake2_128Concat, JobId, PhaseResultOf<T>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn validator_job_id_lookup)]
@@ -244,7 +238,7 @@ pub mod module {
 						.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 				// Validate existing result
-				ensure!(result.expiry >= now, Error::<T>::ResultExpired);
+				ensure!(result.ttl >= now, Error::<T>::ResultExpired);
 
 				// Ensure the phase one participants are still validators
 				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
@@ -279,6 +273,7 @@ pub mod module {
 			// store the job to pallet
 			let job_info = JobInfo {
 				owner: caller.clone(),
+				ttl: job.ttl,
 				expiry: job.expiry,
 				job_type: job.job_type.clone(),
 				fee,
@@ -336,7 +331,10 @@ pub mod module {
 					.clone()
 					.get_participants()
 					.ok_or(Error::<T>::InvalidJobParams)?,
-				JobResult::DKGPhaseTwo(_) | JobResult::ZkSaaSPhaseTwo(_) => {
+				JobResult::DKGPhaseTwo(_) |
+				JobResult::DKGPhaseThree(_) |
+				JobResult::DKGPhaseFour(_) |
+				JobResult::ZkSaaSPhaseTwo(_) => {
 					let existing_result_id = job_info
 						.job_type
 						.clone()
@@ -359,7 +357,18 @@ pub mod module {
 					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::DKGPhaseTwo(info) => {
-					Self::verify_dkg_signature_job_result(role_type, &job_info, info)?;
+					let result = Self::verify_dkg_signature_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
+				},
+				JobResult::DKGPhaseThree(info) => {
+					let result =
+						Self::verify_dkg_key_refresh_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
+				},
+				JobResult::DKGPhaseFour(info) => {
+					let result =
+						Self::verify_dkg_key_rotation_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::ZkSaaSPhaseOne(info) => {
 					let result =
@@ -367,7 +376,8 @@ pub mod module {
 					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 				JobResult::ZkSaaSPhaseTwo(info) => {
-					Self::verify_zksaas_prove_job_result(role_type, &job_info, info)?;
+					let result = Self::verify_zksaas_prove_job_result(role_type, &job_info, info)?;
+					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 			};
 
@@ -473,7 +483,7 @@ pub mod module {
 			let job_info =
 				SubmittedJobs::<T>::get(role_type, job_id).ok_or(Error::<T>::JobNotFound)?;
 
-			let mut phase1_result: Option<PhaseOneResultOf<T>> = None;
+			let mut phase1_result: Option<PhaseResultOf<T>> = None;
 
 			// If phase2, fetch phase1 result
 			if !job_info.job_type.is_phase_one() {

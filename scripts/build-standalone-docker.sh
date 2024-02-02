@@ -8,7 +8,7 @@ PROJECT_ROOT=$(git rev-parse --show-toplevel)
 cd "$PROJECT_ROOT"
 
 # Find the current version from Cargo.toml
-VERSION=$(grep "^version" ./standalone/node/Cargo.toml | grep -E -o "([0-9\.]+)")
+VERSION=$(grep "^version" ./node/Cargo.toml | grep -E -o "([0-9\.]+)")
 GITUSER=webb-tools
 IMAGE_NAME=tangle
 

@@ -28,10 +28,7 @@ use sp_runtime::{
 
 use sp_staking::offence::Offence;
 use tangle_primitives::{
-	jobs::{
-		traits::{JobsHandler, MPCHandler},
-		ReportValidatorOffence,
-	},
+	jobs::{traits::JobsHandler, JobId, ReportValidatorOffence},
 	roles::traits::RolesHandler,
 };
 
@@ -65,20 +62,10 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		Self::report_offence(offence_report)
 	}
 
-	fn get_validator_metadata(
-		address: T::AccountId,
-		role_type: RoleType,
-	) -> Option<RoleTypeMetadata> {
-		if Self::is_validator(address.clone(), role_type) {
-			let ledger = Self::ledger(&address);
-			if let Some(ledger) = ledger {
-				return match ledger.roles.get(&role_type) {
-					Some(stake) => Some(stake.metadata.clone()),
-					None => None,
-				}
-			} else {
-				return None
-			}
+	fn get_validator_role_key(address: T::AccountId) -> Option<Vec<u8>> {
+		let maybe_ledger = Self::ledger(&address);
+		if let Some(ledger) = maybe_ledger {
+			Some(ledger.role_key)
 		} else {
 			return None
 		}
@@ -88,7 +75,10 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 /// Functions for the pallet.
 impl<T: Config> Pallet<T> {
 	/// Validate updated profile for the given account.
-	/// This function will validate the updated profile for the given account.
+	/// This function will validate the updated profile for the given account by
+	/// checking if the account has any active jobs for the removed roles. If the
+	/// account has any active jobs for the removed roles, then it will return
+	/// the error `RoleCannotBeRemoved`.
 	///
 	/// # Parameters
 	/// - `account`: The account ID of the validator.
@@ -97,11 +87,11 @@ impl<T: Config> Pallet<T> {
 		account: T::AccountId,
 		updated_profile: Profile<T>,
 	) -> DispatchResult {
-		let ledger = Self::ledger(&account).ok_or(Error::<T>::NoProfileFound)?;
-		let removed_roles = ledger.profile.get_removed_roles(&updated_profile);
+		let current_ledger = Self::ledger(&account).ok_or(Error::<T>::NoProfileFound)?;
+		let active_jobs: Vec<(RoleType, JobId)> = T::JobsHandler::get_active_jobs(account.clone());
+		// Check if the account has any active jobs for the removed roles.
+		let removed_roles = current_ledger.profile.get_removed_roles(&updated_profile);
 		if !removed_roles.is_empty() {
-			let active_jobs = T::JobsHandler::get_active_jobs(account.clone());
-			// Check removed roles has any active jobs.
 			for role in removed_roles {
 				for job in active_jobs.clone() {
 					let role_type = job.0;
@@ -112,30 +102,94 @@ impl<T: Config> Pallet<T> {
 			}
 		};
 
-		let records = updated_profile.get_records();
-		let min_restaking_bond = MinRestakingBond::<T>::get();
+		// Get all roles for which there are active jobs
+		let roles_with_active_jobs: Vec<RoleType> =
+			active_jobs.iter().map(|job| job.0).fold(Vec::new(), |mut acc, role| {
+				if !acc.contains(&role) {
+					acc.push(role);
+				}
+				acc
+			});
 
-		for record in records {
-			if updated_profile.is_independent() {
-				// TODO: User cannot update profile to lower the restaking amount if there are any
-				// active services.
-				let record_restake = record.amount.unwrap_or_default();
-				// Restaking amount of record should meet min restaking amount requirement.
+		// If there are active jobs, changing a current independent profile to shared profile
+		// is allowed if and only if the shared restaking amount is at least as much as the
+		// sum of the restaking amounts of the current profile. This is because we require
+		// the total amount staked to only increase or remain the same across active roles.
+		if updated_profile.is_shared() && current_ledger.profile.is_independent() {
+			if active_jobs.len() > 0 {
+				let mut active_role_restaking_sum = Zero::zero();
+				for role in roles_with_active_jobs.iter() {
+					let current_role_restaking_amount = current_ledger
+						.profile
+						.get_records()
+						.iter()
+						.find_map(|record| if record.role == *role { record.amount } else { None })
+						.unwrap_or_else(|| Zero::zero());
+					active_role_restaking_sum += current_role_restaking_amount;
+				}
+
 				ensure!(
-					record_restake >= min_restaking_bond,
+					updated_profile.get_total_profile_restake() >= active_role_restaking_sum,
 					Error::<T>::InsufficientRestakingBond
 				);
 			}
-			// validate the metadata
-			T::MPCHandler::validate_authority_key(
-				account.clone(),
-				record.metadata.get_authority_key(),
-			)?;
+		}
+
+		// Changing a current shared profile to an independent profile is allowed if there are
+		// active jobs as long as the stake allocated to the active roles is at least as much as
+		// the shared profile restaking amount. This is because the shared restaking profile for an
+		// active role is entirely allocated to that role (as it is shared between all selected
+		// roles). Thus, we allow the user to change to an independent profile as long as the
+		// restaking amount for the active roles is at least as much as the shared restaking amount.
+		if updated_profile.is_independent() && current_ledger.profile.is_shared() {
+			// For each role with an active job, ensure its stake is greater than or equal to the
+			// existing ledger's shared restaking amount.
+			for role in roles_with_active_jobs.iter() {
+				let updated_role_restaking_amount = updated_profile
+					.get_records()
+					.iter()
+					.find_map(|record| if record.role == *role { record.amount } else { None })
+					.unwrap_or_else(|| Zero::zero());
+				ensure!(
+					updated_role_restaking_amount >=
+						current_ledger.profile.get_total_profile_restake(),
+					Error::<T>::InsufficientRestakingBond
+				);
+			}
+
+			return Ok(())
+		}
+		// For each role with an active job, ensure its stake is greater than or equal to the
+		// existing ledger's restaking amount for that role. If it's a shared profile, then the
+		// restaking amount for that role is the entire shared restaking amount.
+		let min_restaking_bond = MinRestakingBond::<T>::get();
+		for record in updated_profile.clone().get_records() {
+			match updated_profile.clone() {
+				Profile::Independent(_) =>
+					if roles_with_active_jobs.contains(&record.role) {
+						ensure!(
+							record.amount.unwrap_or_default() >= min_restaking_bond,
+							Error::<T>::InsufficientRestakingBond
+						);
+						ensure!(
+							record.amount.unwrap_or_default() >=
+								current_ledger.restake_for(&record.role),
+							Error::<T>::InsufficientRestakingBond
+						);
+					},
+				Profile::Shared(profile) =>
+					if roles_with_active_jobs.contains(&record.role) {
+						ensure!(
+							profile.amount >= current_ledger.profile.get_total_profile_restake(),
+							Error::<T>::InsufficientRestakingBond
+						);
+					},
+			}
 		}
 		Ok(())
 	}
 
-	/// Check if account can chill, unbound and withdraw funds.
+	/// Check if account can chill, unbond and withdraw funds.
 	///
 	/// # Parameters
 	/// - `account`: The account ID of the validator.
@@ -145,7 +199,7 @@ impl<T: Config> Pallet<T> {
 	pub(crate) fn can_exit(account: T::AccountId) -> bool {
 		let assigned_roles = AccountRolesMapping::<T>::get(account);
 		if assigned_roles.is_empty() {
-			// Role is cleared, account can chill, unbound and withdraw funds.
+			// Role is cleared, account can chill, unbond and withdraw funds.
 			return true
 		}
 		false
@@ -165,7 +219,7 @@ impl<T: Config> Pallet<T> {
 	/// Calculate slash value for restaked amount
 	///
 	/// # Parameters
-	/// - slash_fraction: Slash fraction of total-stake
+	/// - `slash_fraction`: Slash fraction of total-stake
 	/// - `total_stake`: Total stake of the validator
 	///
 	/// # Returns
@@ -293,6 +347,13 @@ impl<T: Config> Pallet<T> {
 
 		Ok(())
 	}
+
+	pub fn update_ledger_role_key(staker: &T::AccountId, role_key: Vec<u8>) -> DispatchResult {
+		let mut ledger = Ledger::<T>::get(staker).ok_or(Error::<T>::NoProfileFound)?;
+		ledger.role_key = role_key;
+		Self::update_ledger(staker, &ledger);
+		Ok(())
+	}
 }
 
 impl<T: Config> sp_runtime::BoundToRuntimeAppPublic for Pallet<T> {
@@ -302,18 +363,34 @@ impl<T: Config> sp_runtime::BoundToRuntimeAppPublic for Pallet<T> {
 impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
 	type Key = T::RoleKeyId;
 
-	fn on_genesis_session<'a, I: 'a>(_validators: I)
+	fn on_genesis_session<'a, I: 'a>(validators: I)
 	where
 		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
 	{
-		// nothing to be done
+		validators
+			.into_iter()
+			.filter(|(acc, _)| Ledger::<T>::contains_key(acc))
+			.for_each(|(acc, role_key)| {
+				match Self::update_ledger_role_key(acc, role_key.encode()) {
+					Ok(_) => (),
+					Err(e) => log::error!("Error updating ledger role key: {:?}", e),
+				}
+			});
 	}
 
-	fn on_new_session<'a, I: 'a>(_changed: bool, _validators: I, _queued_validators: I)
+	fn on_new_session<'a, I: 'a>(_changed: bool, validators: I, _queued_validators: I)
 	where
 		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
 	{
-		// nothing to be done
+		validators
+			.into_iter()
+			.filter(|(acc, _)| Ledger::<T>::contains_key(acc))
+			.for_each(|(acc, role_key)| {
+				match Self::update_ledger_role_key(acc, role_key.encode()) {
+					Ok(_) => (),
+					Err(e) => log::error!("Error updating ledger role key: {:?}", e),
+				}
+			});
 	}
 
 	fn on_disabled(_i: u32) {

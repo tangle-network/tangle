@@ -30,7 +30,7 @@ use tangle_primitives::{
 		traits::{JobToFee, MPCHandler},
 		*,
 	},
-	roles::{traits::RolesHandler, RoleTypeMetadata},
+	roles::traits::RolesHandler,
 };
 
 pub type AccountId = MockAccount;
@@ -181,10 +181,12 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 
 	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
 		match job.job_type {
-			JobType::DKGTSSPhaseOne(_) => MockDKGPallet::job_to_fee(job),
-			JobType::DKGTSSPhaseTwo(_) => MockDKGPallet::job_to_fee(job),
-			JobType::ZkSaaSPhaseOne(_) => MockZkSaasPallet::job_to_fee(job),
-			JobType::ZkSaaSPhaseTwo(_) => MockZkSaasPallet::job_to_fee(job),
+			JobType::DKGTSSPhaseOne(_) |
+			JobType::DKGTSSPhaseTwo(_) |
+			JobType::DKGTSSPhaseThree(_) |
+			JobType::DKGTSSPhaseFour(_) => MockDKGPallet::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) =>
+				MockZkSaasPallet::job_to_fee(job),
 		}
 	}
 }
@@ -203,10 +205,7 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		validators.contains(&address)
 	}
 
-	fn get_validator_metadata(
-		_address: AccountId,
-		_role_type: RoleType,
-	) -> Option<RoleTypeMetadata> {
+	fn get_validator_role_key(_address: AccountId) -> Option<Vec<u8>> {
 		None
 	}
 

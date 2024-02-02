@@ -1,20 +1,35 @@
-The (Provided Dockerfile)[./Tangle.Dockerfile] is used as a base file to build different Docker images, the standalone node and the collator node.
+# Tangle Docker
 
-You can build it by executing the following commands:
+## Installation Instructions
 
-**Standalone node**
+When connecting to testnet, it will take a few hours/days to completely sync chain. Make sure that your system meets the requirements.
 
-Execute the following script:
+## Run via CLI :
 
-```sh
-./scripts/build-standalone-docker.sh
+Make sure to set `<RELEASE_VERSION>` to your desired version.
+
+You can use the following command to pull the latest image and run from your CLI, remember to set `YOUR-NODE-NAME`
+
+```bash
+docker run --network="host" -v "/var/lib/data" \
+ghcr.io/webb-tools/tangle/tangle:update-docker-container \
+--chain tangle-testnet \
+--name="YOUR-NODE-NAME" \
+--trie-cache-size 0 \
+--telemetry-url "wss://telemetry.polkadot.io/submit/ 0"
 ```
 
+## Run via Docker Compose :
 
-**Parachain Node**
+The docker-compose file will spin up a container running tangle standalone node, but you have to set the following environment variables.
+Remember to customize your the values depending on your environment and then copy paste this to CLI.
 
-Execute the following script:
+```bash
+export RELEASE_VERSION=<RELEASE_VERSION>
+```
 
-```sh
-./scripts/build-parachain-docker.sh
+After that run :
+
+```bash
+docker compose up -d
 ```

@@ -33,8 +33,13 @@ pub use zksaas::*;
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub struct JobSubmission<AccountId, BlockNumber> {
-	/// The time to live for the submitted job.
+	/// Represents the maximum allowed submission time for a job result.
+	/// Once this time has passed, the result cannot be submitted.
 	pub expiry: BlockNumber,
+
+	/// The time-to-live (TTL) for the job, which determines the maximum allowed time for this job
+	/// to be available. After the TTL expires, the job can no longer be used.
+	pub ttl: BlockNumber,
 
 	/// The type of the job submission.
 	pub job_type: JobType<AccountId>,
@@ -46,8 +51,13 @@ pub struct JobInfo<AccountId, BlockNumber, Balance> {
 	/// The caller that requested the job
 	pub owner: AccountId,
 
-	/// The expiry block number.
+	/// Represents the maximum allowed submission time for a job result.
+	/// Once this time has passed, the result cannot be submitted.
 	pub expiry: BlockNumber,
+
+	/// The time-to-live (TTL) for the job, which determines the maximum allowed time for this job
+	/// to be available. After the TTL expires, the job can no longer be used.
+	pub ttl: BlockNumber,
 
 	/// The type of the job submission.
 	pub job_type: JobType<AccountId>,
@@ -77,6 +87,10 @@ pub enum JobType<AccountId> {
 	DKGTSSPhaseOne(DKGTSSPhaseOneJobType<AccountId>),
 	/// DKG Signature job type.
 	DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType),
+	/// DKG Key Refresh job type.
+	DKGTSSPhaseThree(DKGTSSPhaseThreeJobType),
+	/// DKG Key Rotation job type.
+	DKGTSSPhaseFour(DKGTSSPhaseFourJobType),
 	/// (zk-SNARK) Create Circuit job type.
 	ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType<AccountId>),
 	/// (zk-SNARK) Create Proof job type.
@@ -136,6 +150,8 @@ impl<AccountId> JobType<AccountId> {
 			JobType::ZkSaaSPhaseOne(job) => RoleType::ZkSaaS(job.role_type),
 			JobType::DKGTSSPhaseTwo(job) => RoleType::Tss(job.role_type),
 			JobType::ZkSaaSPhaseTwo(job) => RoleType::ZkSaaS(job.role_type),
+			JobType::DKGTSSPhaseThree(job) => RoleType::Tss(job.role_type),
+			JobType::DKGTSSPhaseFour(job) => RoleType::Tss(job.role_type),
 		}
 	}
 
@@ -155,6 +171,8 @@ impl<AccountId> JobType<AccountId> {
 		use crate::jobs::JobType::*;
 		match self {
 			DKGTSSPhaseTwo(info) => Some(info.phase_one_id),
+			DKGTSSPhaseThree(info) => Some(info.phase_one_id),
+			DKGTSSPhaseFour(info) => Some(info.phase_one_id),
 			ZkSaaSPhaseTwo(info) => Some(info.phase_one_id),
 			_ => None,
 		}
@@ -184,20 +202,22 @@ pub enum JobState {
 
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub struct PhaseOneResult<AccountId, BlockNumber> {
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct PhaseResult<AccountId, BlockNumber> {
 	/// The owner's account ID.
 	pub owner: AccountId,
-	/// The time to live as a block number.
-	pub expiry: BlockNumber,
 	/// The type of the job submission.
-	pub result: Vec<u8>,
+	pub result: JobResult,
+	/// The time-to-live (TTL) for the job, which determines the maximum allowed time for this job
+	/// to be available. After the TTL expires, the job can no longer be used.
+	pub ttl: BlockNumber,
 	/// permitted caller to use this result
 	pub permitted_caller: Option<AccountId>,
 	/// The type of the job submission.
 	pub job_type: JobType<AccountId>,
 }
 
-impl<AccountId, BlockNumber> PhaseOneResult<AccountId, BlockNumber>
+impl<AccountId, BlockNumber> PhaseResult<AccountId, BlockNumber>
 where
 	AccountId: Clone,
 {
@@ -229,45 +249,30 @@ pub enum ValidatorOffence {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct RpcResponseJobsData<AccountId> {
+pub struct RpcResponseJobsData<AccountId, BlockNumber> {
 	/// The job id of the job
 	pub job_id: JobId,
 
 	/// The type of the job submission.
 	pub job_type: JobType<AccountId>,
 
-	/// (Optional) List of participants' account IDs.
-	pub participants: Option<Vec<AccountId>>,
+	/// Represents the maximum allowed submission time for a job result.
+	/// Once this time has passed, the result cannot be submitted.
+	pub expiry: BlockNumber,
 
-	/// threshold if any for the original set
-	pub threshold: Option<u8>,
-
-	/// previous phase key if any
-	pub key: Option<Vec<u8>>,
-}
-
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct RpcResponsePhaseOneResult<AccountId> {
-	/// The owner's account ID.
-	pub owner: AccountId,
-	/// The type of the job result.
-	pub result: Vec<u8>,
-	/// permitted caller to use this result
-	pub permitted_caller: Option<AccountId>,
-	/// The type of the job submission.
-	pub job_type: JobType<AccountId>,
+	/// The time-to-live (TTL) for the job, which determines the maximum allowed time for this job
+	/// to be available. After the TTL expires, the job can no longer be used.
+	pub ttl: BlockNumber,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum JobResult {
 	DKGPhaseOne(DKGTSSKeySubmissionResult),
-
 	DKGPhaseTwo(DKGTSSSignatureResult),
-
+	DKGPhaseThree(DKGTSSKeyRefreshResult),
+	DKGPhaseFour(DKGTSSKeyRotationResult),
 	ZkSaaSPhaseOne(ZkSaaSCircuitResult),
-
 	ZkSaaSPhaseTwo(ZkSaaSProofResult),
 }
 

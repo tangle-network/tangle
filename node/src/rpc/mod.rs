@@ -98,6 +98,92 @@ where
 }
 
 /// Instantiate all Full RPC extensions.
+#[cfg(feature = "testnet")]
+pub fn create_full<C, P, BE, A, CT, SC, B, CIDP>(
+	deps: FullDeps<C, P, A, CT, SC, B, CIDP>,
+	subscription_task_executor: SubscriptionTaskExecutor,
+	pubsub_notification_sinks: Arc<
+		fc_mapping_sync::EthereumBlockNotificationSinks<
+			fc_mapping_sync::EthereumBlockNotification<Block>,
+		>,
+	>,
+) -> Result<RpcModule<()>, Box<dyn std::error::Error + Send + Sync>>
+where
+	C: CallApiAt<Block> + ProvideRuntimeApi<Block>,
+	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
+	C::Api: sp_block_builder::BlockBuilder<Block>,
+	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
+	C::Api: pallet_jobs_rpc::JobsRuntimeApi<Block, AccountId>,
+	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
+	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
+	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
+	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
+	C::Api: BabeApi<Block>,
+	C: BlockchainEvents<Block> + 'static,
+	C: HeaderBackend<Block>
+		+ HeaderMetadata<Block, Error = BlockChainError>
+		+ StorageProvider<Block, BE>,
+	BE: Backend<Block> + 'static,
+	P: TransactionPool<Block = Block> + 'static,
+	A: ChainApi<Block = Block> + 'static,
+	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
+	SC: SelectChain<Block> + 'static,
+	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
+	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::BlakeTwo256>,
+	CIDP: sp_inherents::CreateInherentDataProviders<Block, ()> + Send + Sync + 'static,
+{
+	use pallet_jobs_rpc::{JobsApiServer, JobsClient};
+	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
+	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
+	use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
+	use substrate_frame_rpc_system::{System, SystemApiServer};
+
+	let mut io = RpcModule::new(());
+	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa } = deps;
+
+	let BabeDeps { keystore, babe_worker_handle } = babe;
+
+	let GrandpaDeps {
+		shared_voter_state,
+		shared_authority_set,
+		justification_stream,
+		subscription_executor,
+		finality_provider,
+	} = grandpa;
+
+	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
+	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
+	io.merge(JobsClient::new(client.clone()).into_rpc())?;
+
+	io.merge(
+		Babe::new(client.clone(), babe_worker_handle.clone(), keystore, select_chain, deny_unsafe)
+			.into_rpc(),
+	)?;
+
+	io.merge(
+		Grandpa::new(
+			subscription_executor,
+			shared_authority_set.clone(),
+			shared_voter_state,
+			justification_stream,
+			finality_provider,
+		)
+		.into_rpc(),
+	)?;
+
+	// Ethereum compatibility RPCs
+	let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
+		io,
+		eth,
+		subscription_task_executor,
+		pubsub_notification_sinks,
+	)?;
+
+	Ok(io)
+}
+
+/// Instantiate all Full RPC extensions.
+#[cfg(not(feature = "testnet"))]
 pub fn create_full<C, P, BE, A, CT, SC, B, CIDP>(
 	deps: FullDeps<C, P, A, CT, SC, B, CIDP>,
 	subscription_task_executor: SubscriptionTaskExecutor,

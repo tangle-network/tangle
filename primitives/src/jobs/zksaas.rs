@@ -127,6 +127,15 @@ pub enum ZkSaaSProofResult {
 	Circom(CircomProofResult),
 }
 
+impl ZkSaaSProofResult {
+	pub fn proof(&self) -> Vec<u8> {
+		match self {
+			ZkSaaSProofResult::Arkworks(x) => x.proof.clone(),
+			ZkSaaSProofResult::Circom(x) => x.proof.clone(),
+		}
+	}
+}
+
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct CircomProofResult {

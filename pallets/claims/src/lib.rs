@@ -25,7 +25,8 @@ mod mock;
 mod tests;
 
 mod utils;
-
+mod weights;
+use weights::WeightInfo;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
@@ -36,7 +37,6 @@ pub use crate::utils::{
 use frame_support::{
 	ensure,
 	traits::{Currency, Get, VestingSchedule},
-	weights::Weight,
 };
 pub use pallet::*;
 use pallet_evm::AddressMapping;
@@ -78,33 +78,6 @@ type CurrencyOf<T> = <<T as Config>::VestingSchedule as VestingSchedule<
 	<T as frame_system::Config>::AccountId,
 >>::Currency;
 type BalanceOf<T> = <CurrencyOf<T> as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-
-pub trait WeightInfo {
-	fn claim() -> Weight;
-	fn mint_claim() -> Weight;
-	fn claim_attest() -> Weight;
-	fn attest() -> Weight;
-	fn move_claim() -> Weight;
-}
-
-pub struct TestWeightInfo;
-impl WeightInfo for TestWeightInfo {
-	fn claim() -> Weight {
-		Weight::from_parts(0, 0)
-	}
-	fn mint_claim() -> Weight {
-		Weight::from_parts(0, 0)
-	}
-	fn claim_attest() -> Weight {
-		Weight::from_parts(0, 0)
-	}
-	fn attest() -> Weight {
-		Weight::from_parts(0, 0)
-	}
-	fn move_claim() -> Weight {
-		Weight::from_parts(0, 0)
-	}
-}
 
 /// The kind of statement an account needs to make for a claim to be valid.
 #[derive(
@@ -162,7 +135,7 @@ pub mod pallet {
 		/// RuntimeOrigin permitted to call force_ extrinsics
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		type MaxVestingSchedules: Get<u32>;
-		type WeightInfo: WeightInfo;
+		type WeightInfo: weights::WeightInfo;
 	}
 
 	#[pallet::event]
@@ -314,7 +287,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight({0})]
+		#[pallet::weight(T::WeightInfo::claim())]
 		#[pallet::call_index(0)]
 		pub fn claim(
 			origin: OriginFor<T>,
@@ -323,8 +296,7 @@ pub mod pallet {
 			signature: MultiAddressSignature,
 		) -> DispatchResult {
 			ensure_none(origin)?;
-
-			let data = dest.using_encoded(to_ascii_hex);
+			let data = dest.as_ref().map(Self::encode_multi_address).unwrap_or_default();
 			let signer = Self::get_signer_multi_address(signer.clone(), signature, data, vec![])?;
 			ensure!(Signing::<T>::get(&signer).is_none(), Error::<T>::InvalidStatement);
 			Self::process_claim(signer, dest)?;
@@ -346,7 +318,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight({1})]
+		#[pallet::weight(T::WeightInfo::mint_claim())]
 		#[pallet::call_index(1)]
 		pub fn mint_claim(
 			origin: OriginFor<T>,
@@ -397,7 +369,7 @@ pub mod pallet {
 		///
 		/// Total Complexity: O(1)
 		/// </weight>
-		#[pallet::weight({2})]
+		#[pallet::weight(T::WeightInfo::claim_attest())]
 		#[pallet::call_index(2)]
 		pub fn claim_attest(
 			origin: OriginFor<T>,
@@ -407,8 +379,7 @@ pub mod pallet {
 			statement: Vec<u8>,
 		) -> DispatchResult {
 			ensure_none(origin)?;
-
-			let data = dest.using_encoded(to_ascii_hex);
+			let data = dest.as_ref().map(Self::encode_multi_address).unwrap_or_default();
 			let signer =
 				Self::get_signer_multi_address(signer.clone(), signature, data, statement.clone())?;
 			if let Some(s) = Signing::<T>::get(signer.clone()) {
@@ -418,7 +389,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		#[pallet::weight({4})]
+		#[pallet::weight(T::WeightInfo::move_claim())]
 		#[pallet::call_index(4)]
 		pub fn move_claim(
 			origin: OriginFor<T>,
@@ -435,7 +406,7 @@ pub mod pallet {
 
 		/// Set the value for expiryconfig
 		/// Can only be called by ForceOrigin
-		#[pallet::weight({5})]
+		#[pallet::weight(T::WeightInfo::force_set_expiry_config())]
 		#[pallet::call_index(5)]
 		pub fn force_set_expiry_config(
 			origin: OriginFor<T>,
@@ -460,7 +431,7 @@ pub mod pallet {
 				// The weight of this logic is included in the `claim` dispatchable.
 				// </weight>
 				Call::claim { dest: account, signer, signature } => {
-					let data = account.using_encoded(to_ascii_hex);
+					let data = account.as_ref().map(Self::encode_multi_address).unwrap_or_default();
 					match Self::get_signer_multi_address(
 						signer.clone(),
 						signature.clone(),
@@ -475,7 +446,7 @@ pub mod pallet {
 				// The weight of this logic is included in the `claim_attest` dispatchable.
 				// </weight>
 				Call::claim_attest { dest: account, signer, signature, statement } => {
-					let data = account.using_encoded(to_ascii_hex);
+					let data = account.as_ref().map(Self::encode_multi_address).unwrap_or_default();
 					match Self::get_signer_multi_address(
 						signer.clone(),
 						signature.clone(),
@@ -525,7 +496,13 @@ fn to_ascii_hex(data: &[u8]) -> Vec<u8> {
 }
 
 impl<T: Config> Pallet<T> {
-	// Constructs the message that Ethereum RPC's `personal_sign` and `eth_sign` would sign.
+	fn encode_multi_address(multi_address: &MultiAddress) -> Vec<u8> {
+		match multi_address {
+			MultiAddress::EVM(ref address) => address.using_encoded(to_ascii_hex),
+			MultiAddress::Native(ref address) => address.using_encoded(to_ascii_hex),
+		}
+	}
+	/// Constructs the message that Ethereum RPC's `personal_sign` and `eth_sign` would sign.
 	fn ethereum_signable_message(what: &[u8], extra: &[u8]) -> Vec<u8> {
 		let prefix = T::Prefix::get();
 		let mut l = prefix.len() + what.len() + extra.len();
@@ -554,8 +531,10 @@ impl<T: Config> Pallet<T> {
 
 	// Constructs the message that PolkadotJS would sign.
 	fn polkadotjs_signable_message(what: &[u8], extra: &[u8]) -> Vec<u8> {
+		let mut v = Vec::new();
 		let prefix = T::Prefix::get();
-		let mut v = prefix.to_vec();
+
+		v.extend_from_slice(prefix);
 		v.extend_from_slice(what);
 		v.extend_from_slice(extra);
 		v
@@ -570,6 +549,7 @@ impl<T: Config> Pallet<T> {
 		extra: &[u8],
 	) -> Option<MultiAddress> {
 		let msg = keccak_256(&Self::polkadotjs_signable_message(what, extra));
+
 		let public: Public = match addr.clone() {
 			MultiAddress::EVM(_) => return None,
 			MultiAddress::Native(a) => {
@@ -578,9 +558,25 @@ impl<T: Config> Pallet<T> {
 				Public(bytes)
 			},
 		};
+
 		match sr25519_verify(&s.0, &msg, &public) {
 			true => Some(addr),
-			false => None,
+			false => {
+				// If the signature verification fails, we try to wrap the hashed msg in a
+				// `<Bytes></Bytes>` tag and try again.
+				let polkadotjs_prefix = b"<Bytes>";
+				let polkadotjs_suffix = b"</Bytes>";
+
+				let mut wrapped_msg = Vec::new();
+				wrapped_msg.extend_from_slice(polkadotjs_prefix);
+				wrapped_msg.extend_from_slice(&msg);
+				wrapped_msg.extend_from_slice(polkadotjs_suffix);
+
+				match sr25519_verify(&s.0, &wrapped_msg, &public) {
+					true => Some(addr),
+					false => None,
+				}
+			},
 		}
 	}
 

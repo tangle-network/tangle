@@ -19,6 +19,7 @@ sp-consensus-babe = { workspace = true }
 sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
+sp-staking = { workspace = true }
 
 # Arkworks
 ark-bn254 = { workspace = true, optional = true }
@@ -28,15 +29,17 @@ ark-ff = { workspace = true, default-features = false, optional = true }
 ark-groth16 = { workspace = true, default-features = false, optional = true }
 ark-serialize = { workspace = true, default-features = false, optional = true }
 ark-std = { workspace = true, default-features = false, optional = true }
-
 ethabi = { workspace = true, optional = true }
 
 [dev-dependencies]
 hex = { workspace = true }
 
 [features]
-default = ["std", "verifying"]
+default = ["std"]
 std = [
+  "serde/std",
+  "sp-arithmetic/std",
+  "log/std",
   "frame-support/std",
   "sp-runtime/std",
   "sp-core/std",
@@ -45,6 +48,14 @@ std = [
   "sp-consensus-babe/std",
   "sp-std/std",
   "ark-std?/std",
+  "ark-bn254?/std",
+  "ark-crypto-primitives?/std",
+  "ark-ec?/std",
+  "ark-ff?/std",
+  "ark-groth16?/std",
+  "ark-serialize?/std",
+  "ethabi?/std",
+  "sp-staking/std"
 ]
 verifying = [
   "ark-crypto-primitives",
@@ -57,3 +68,4 @@ verifying = [
   "ethabi",
 ]
 integration-tests = []
+fast-runtime = []

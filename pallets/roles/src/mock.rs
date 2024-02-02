@@ -24,13 +24,18 @@ use frame_election_provider_support::{
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Contains, Hooks},
+	PalletId,
 };
+use frame_system::EnsureSigned;
 use pallet_session::historical as pallet_session_historical;
-use sp_core::H256;
+use sp_core::{
+	sr25519::{self, Signature},
+	H256,
+};
 use sp_runtime::{
 	app_crypto::ecdsa::Public,
 	testing::Header,
-	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
+	traits::{ConvertInto, IdentifyAccount, IdentityLookup, OpaqueKeys, Verify},
 	BuildStorage, DispatchResult, Perbill, Percent,
 };
 use sp_staking::{
@@ -40,12 +45,14 @@ use sp_staking::{
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	jobs::{
-		traits::{JobsHandler, MPCHandler},
+		traits::{JobToFee, JobsHandler, MPCHandler},
 		*,
 	},
 	roles::ValidatorRewardDistribution,
 };
-pub type AccountId = u64;
+
+// pub type AccountId = u64;
+pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u128;
 pub type BlockNumber = u64;
 
@@ -91,26 +98,6 @@ impl pallet_balances::Config for Runtime {
 	type MaxFreezes = ();
 }
 
-pub struct MockMPCHandler;
-
-impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
-		Ok(())
-	}
-
-	fn verify_validator_report(
-		_validator: AccountId,
-		_offence: ValidatorOffenceType,
-		_signatures: Vec<Vec<u8>>,
-	) -> DispatchResult {
-		Ok(())
-	}
-
-	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
-		Ok(())
-	}
-}
-
 type IdentificationTuple = (AccountId, AccountId);
 type Offence = crate::offences::ValidatorOffence<IdentificationTuple>;
 
@@ -150,10 +137,10 @@ impl pallet_session::historical::Config for Runtime {
 pub struct BaseFilter;
 impl Contains<RuntimeCall> for BaseFilter {
 	fn contains(call: &RuntimeCall) -> bool {
-		let is_stake_unbound_call =
+		let is_stake_unbond_call =
 			matches!(call, RuntimeCall::Staking(pallet_staking::Call::unbond { .. }));
 
-		if is_stake_unbound_call {
+		if is_stake_unbond_call {
 			// no unbond call
 			return false
 		}
@@ -188,9 +175,9 @@ impl pallet_session::SessionManager<AccountId> for MockSessionManager {
 	fn start_session(_: sp_staking::SessionIndex) {}
 	fn new_session(idx: sp_staking::SessionIndex) -> Option<Vec<AccountId>> {
 		if idx == 0 || idx == 1 {
-			Some(vec![1, 2, 3, 4])
+			Some(vec![mock_pub_key(1), mock_pub_key(2), mock_pub_key(3), mock_pub_key(4)])
 		} else if idx == 2 {
-			Some(vec![1, 2, 3, 4])
+			Some(vec![mock_pub_key(1), mock_pub_key(2), mock_pub_key(3), mock_pub_key(4)])
 		} else {
 			None
 		}
@@ -273,6 +260,51 @@ impl JobsHandler<AccountId> for MockJobsHandler {
 	}
 }
 
+pub struct MockJobToFeeHandler;
+
+impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+	type Balance = Balance;
+
+	fn job_to_fee(_job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		Default::default()
+	}
+}
+
+pub struct MockMPCHandler;
+
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
+	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
+		Ok(())
+	}
+
+	fn verify_validator_report(
+		_validator: AccountId,
+		_offence: ValidatorOffenceType,
+		_signatures: Vec<Vec<u8>>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
+}
+
+parameter_types! {
+	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+}
+
+impl pallet_jobs::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type ForceOrigin = EnsureSigned<AccountId>;
+	type Currency = Balances;
+	type JobToFee = MockJobToFeeHandler;
+	type RolesHandler = Roles;
+	type MPCHandler = MockMPCHandler;
+	type PalletId = JobsPalletId;
+	type WeightInfo = ();
+}
+
 parameter_types! {
 	pub InflationRewardPerSession: Balance = 10_000;
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
@@ -280,7 +312,7 @@ parameter_types! {
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type JobsHandler = MockJobsHandler;
+	type JobsHandler = Jobs;
 	type MaxRolesPerAccount = ConstU32<2>;
 	type MPCHandler = MockMPCHandler;
 	type InflationRewardPerSession = InflationRewardPerSession;
@@ -303,6 +335,7 @@ construct_runtime!(
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
+		Jobs: pallet_jobs
 	}
 );
 
@@ -327,12 +360,16 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 	}
 }
 
+pub fn mock_pub_key(id: u8) -> AccountId {
+	sr25519::Public::from_raw([id; 32])
+}
+
 pub fn mock_role_key_id(id: u8) -> RoleKeyId {
 	RoleKeyId::from(Public::from_raw([id; 33]))
 }
 
 pub fn mock_authorities(vec: Vec<u8>) -> Vec<(AccountId, RoleKeyId)> {
-	vec.into_iter().map(|id| (id as u64, mock_role_key_id(id))).collect()
+	vec.into_iter().map(|id| (mock_pub_key(id), mock_role_key_id(id))).collect()
 }
 
 pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {

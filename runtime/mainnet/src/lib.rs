@@ -63,14 +63,22 @@ use sp_runtime::{
 	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
+use tangle_primitives::jobs::{traits::JobToFee, JobSubmission};
+
+#[cfg(any(feature = "std", test))]
+pub use frame_system::Call as SystemCall;
+use sp_runtime::DispatchResult;
+use sp_staking::{
+	offence::{OffenceError, ReportOffence},
+	SessionIndex,
+};
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-
-#[cfg(any(feature = "std", test))]
-pub use frame_system::Call as SystemCall;
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
+use tangle_primitives::jobs::{traits::MPCHandler, JobWithResult, ValidatorOffenceType};
 
 pub use frame_support::{
 	construct_runtime,
@@ -97,7 +105,6 @@ use sp_runtime::generic::Era;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 
-use pallet_airdrop_claims::TestWeightInfo;
 pub use tangle_primitives::{
 	currency::*,
 	fee::*,
@@ -116,6 +123,10 @@ use tangle_primitives::{
 	elections::{
 		CANDIDACY_BOND, DESIRED_MEMBERS, DESIRED_RUNNERS_UP, ELECTIONS_PHRAGMEN_PALLET_ID,
 		MAX_CANDIDATES, MAX_VOTERS, TERM_DURATION,
+	},
+	staking::{
+		BONDING_DURATION, HISTORY_DEPTH, MAX_NOMINATOR_REWARDED_PER_VALIDATOR, OFFCHAIN_REPEAT,
+		OFFENDING_VALIDATOR_THRESHOLD, SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
 	},
 	treasury::{
 		BURN, DATA_DEPOSIT_PER_BYTE, MAXIMUM_REASON_LENGTH, MAX_APPROVALS, PROPOSAL_BOND,
@@ -165,7 +176,7 @@ parameter_types! {
 		::with_sensible_defaults(MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO);
 	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
 		::max_with_normal_ratio(MAXIMUM_BLOCK_LENGTH, NORMAL_DISPATCH_RATIO);
-	pub const SS58Prefix: u8 = 42;
+	pub const SS58Prefix: u16 = tangle_primitives::MAINNET_SS58_PREFIX;
 }
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
@@ -185,6 +196,7 @@ pub mod opaque {
 			pub babe: Babe,
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
+			pub role: Roles,
 		}
 	}
 }
@@ -398,12 +410,16 @@ impl pallet_session::historical::Config for Runtime {
 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
 }
 
+// Staking reward curve, more details at
+// https://docs.rs/pallet-staking-reward-curve/latest/pallet_staking_reward_curve/macro.build.html
+// We are aiming for a max inflation of 5%, when 60% of tokens are staked
+// In practical sense, our reward rate will fluctuate between 2.5%-5% since the staked token count
+// varies
 pallet_staking_reward_curve::build! {
 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
-		min_inflation: 0_040_000,
-		max_inflation: 0_050_000,
-		// 60% of total issuance at a yearly inflation rate of 5%
-		ideal_stake: 0_600_000,
+		min_inflation: 0_025_000, // min inflation of 2.5%
+		max_inflation: 0_050_000, // max inflation of 5% (acheived only at ideal stake)
+		ideal_stake: 0_600_000, // ideal stake (60% of total supply)
 		falloff: 0_050_000,
 		max_piece_count: 40,
 		test_precision: 0_005_000,
@@ -411,14 +427,17 @@ pallet_staking_reward_curve::build! {
 }
 
 parameter_types! {
-	pub const SessionsPerEra: sp_staking::SessionIndex = 1;
-	pub const BondingDuration: sp_staking::EraIndex = 24 * 28;
-	pub const SlashDeferDuration: sp_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
+	// Six sessions in an era (24 hours).
+	pub const SessionsPerEra: sp_staking::SessionIndex = SESSIONS_PER_ERA;
+	// 28 eras for unbonding (28 days).
+	pub const BondingDuration: sp_staking::EraIndex = BONDING_DURATION;
+	// 27 eras for slash defer duration (27 days).
+	pub const SlashDeferDuration: sp_staking::EraIndex = SLASH_DEFER_DURATION;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
-	pub const MaxNominatorRewardedPerValidator: u32 = 256;
-	pub const OffendingValidatorsThreshold: Perbill = Perbill::from_percent(17);
-	pub OffchainRepeat: BlockNumber = 5;
-	pub const HistoryDepth: u32 = 80;
+	pub const MaxNominatorRewardedPerValidator: u32 = MAX_NOMINATOR_REWARDED_PER_VALIDATOR;
+	pub const OffendingValidatorsThreshold: Perbill = OFFENDING_VALIDATOR_THRESHOLD;
+	pub OffchainRepeat: BlockNumber = OFFCHAIN_REPEAT;
+	pub const HistoryDepth: u32 = HISTORY_DEPTH;
 }
 
 pub struct StakingBenchmarkingConfig;
@@ -1005,6 +1024,23 @@ impl pallet_utility::Config for Runtime {
 }
 
 parameter_types! {
+	// One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
+	pub const DepositBase: Balance = deposit(1, 88);
+	// Additional storage item size of 32 bytes.
+	pub const DepositFactor: Balance = deposit(0, 32);
+}
+
+impl pallet_multisig::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type Currency = Balances;
+	type DepositBase = DepositBase;
+	type DepositFactor = DepositFactor;
+	type MaxSignatories = ConstU32<100>;
+	type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
 	pub const StoragePricePerByte: u128 = MILLIUNIT;
 	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
 }
@@ -1029,7 +1065,84 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type Prefix = Prefix;
 	type MaxVestingSchedules = MaxVestingSchedules;
 	type MoveClaimOrigin = frame_system::EnsureRoot<AccountId>;
-	type WeightInfo = TestWeightInfo;
+	type WeightInfo = ();
+}
+
+pub struct MockMPCHandler;
+
+impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
+	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
+		Ok(())
+	}
+
+	fn verify_validator_report(
+		_validator: AccountId,
+		_offence: ValidatorOffenceType,
+		_signatures: Vec<Vec<u8>>,
+	) -> DispatchResult {
+		Ok(())
+	}
+
+	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
+		Ok(())
+	}
+}
+
+type IdTuple = pallet_session::historical::IdentificationTuple<Runtime>;
+type Offence = pallet_roles::offences::ValidatorOffence<IdTuple>;
+/// A mock offence report handler.
+pub struct OffenceHandler;
+impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
+	fn report_offence(_reporters: Vec<AccountId>, _offence: Offence) -> Result<(), OffenceError> {
+		Ok(())
+	}
+
+	fn is_known_offence(_offenders: &[IdTuple], _time_slot: &SessionIndex) -> bool {
+		false
+	}
+}
+
+parameter_types! {
+	pub InflationRewardPerSession: Balance = 10_000;
+	pub Reward : tangle_primitives::roles::ValidatorRewardDistribution = tangle_primitives::roles::ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
+}
+
+impl pallet_roles::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type JobsHandler = Jobs;
+	type RoleKeyId = RoleKeyId;
+	type MaxRolesPerAccount = ConstU32<2>;
+	type MPCHandler = MockMPCHandler;
+	type InflationRewardPerSession = InflationRewardPerSession;
+	type ValidatorSet = Historical;
+	type ReportOffences = OffenceHandler;
+	type ValidatorRewardDistribution = Reward;
+	type WeightInfo = ();
+}
+
+pub struct MockJobToFeeHandler;
+
+impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+	type Balance = Balance;
+
+	fn job_to_fee(_job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+		Default::default()
+	}
+}
+
+parameter_types! {
+	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+}
+
+impl pallet_jobs::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
+	type Currency = Balances;
+	type JobToFee = MockJobToFeeHandler;
+	type RolesHandler = Roles;
+	type MPCHandler = MockMPCHandler;
+	type PalletId = JobsPalletId;
+	type WeightInfo = ();
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -1072,6 +1185,7 @@ construct_runtime!(
 		ImOnline: pallet_im_online,
 		Identity: pallet_identity,
 		Utility: pallet_utility,
+		Multisig: pallet_multisig,
 
 		Ethereum: pallet_ethereum,
 		EVM: pallet_evm,
@@ -1082,6 +1196,8 @@ construct_runtime!(
 
 		Claims: pallet_airdrop_claims,
 		Eth2Client: pallet_eth2_light_client,
+		Roles: pallet_roles,
+		Jobs: pallet_jobs
 	}
 );
 
@@ -1206,6 +1322,20 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 			_ => None,
 		}
 	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+#[macro_use]
+extern crate frame_benchmarking;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benches {
+	define_benchmarks!(
+		[frame_benchmarking, BaselineBench::<Runtime>]
+		[frame_system, SystemBench::<Runtime>]
+		[pallet_balances, Balances]
+		[pallet_timestamp, Timestamp]
+	);
 }
 
 impl_runtime_apis! {
@@ -1730,58 +1860,43 @@ impl_runtime_apis! {
 			}
 		}
 	}
+
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
 		fn benchmark_metadata(extra: bool) -> (
 			Vec<frame_benchmarking::BenchmarkList>,
 			Vec<frame_support::traits::StorageInfo>,
 		) {
-			use frame_benchmarking::{list_benchmark, baseline, Benchmarking, BenchmarkList};
+			use frame_benchmarking::{baseline, Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
-
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use baseline::Pallet as BaselineBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
-
-			list_benchmark!(list, extra, pallet_balances, Balances);
-			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
-			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
+			list_benchmarks!(list, extra);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
-			return (list, storage_info)
+			(list, storage_info)
 		}
 
 		fn dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
-
+			use frame_benchmarking::{baseline, Benchmarking, BenchmarkBatch};
+			use sp_storage::TrackedStorageKey;
 			use frame_system_benchmarking::Pallet as SystemBench;
+			use baseline::Pallet as BaselineBench;
 			impl frame_system_benchmarking::Config for Runtime {}
+			impl baseline::Config for Runtime {}
 
-			let whitelist: Vec<TrackedStorageKey> = vec![
-				// Block Number
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),
-				// Total Issuance
-				hex_literal::hex!("c2261276cc9d1f8598ea4b6a74b15c2f57c875e4cff74148e4628f264b974c80").to_vec().into(),
-				// Execution Phase
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef7ff553b5a9862a516939d82b3d3d8661a").to_vec().into(),
-				// Event Count
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef70a98fdbe9ce6c55837576c60c7af3850").to_vec().into(),
-				// System Events
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef780d41e5e16056765bc8461851072c9d7").to_vec().into(),
-			];
+			use frame_support::traits::WhitelistedStorageKeys;
+			let whitelist: Vec<TrackedStorageKey> = AllPalletsWithSystem::whitelisted_storage_keys();
 
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
+			add_benchmarks!(params, batches);
 
-			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
-			add_benchmark!(params, batches, pallet_balances, Balances);
-			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
-
-			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
 		}
 	}

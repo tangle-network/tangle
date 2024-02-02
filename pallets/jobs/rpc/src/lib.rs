@@ -29,17 +29,42 @@ use sp_runtime::{
 	Serialize,
 };
 use std::sync::Arc;
-use tangle_primitives::jobs::RpcResponseJobsData;
+use tangle_primitives::{
+	jobs::{JobId, PhaseResult, RpcResponseJobsData},
+	roles::RoleType,
+};
+
+type BlockNumberOf<Block> =
+	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
 
 /// JobsClient RPC methods.
 #[rpc(client, server)]
-pub trait JobsApi<BlockHash, AccountId> {
+pub trait JobsApi<BlockHash, AccountId, BlockNumber> {
 	#[method(name = "jobs_queryJobsByValidator")]
 	fn query_jobs_by_validator(
 		&self,
 		at: Option<BlockHash>,
 		validator: AccountId,
-	) -> RpcResult<Vec<RpcResponseJobsData<AccountId>>>;
+	) -> RpcResult<Option<Vec<RpcResponseJobsData<AccountId, BlockNumber>>>>;
+
+	#[method(name = "jobs_queryJobById")]
+	fn query_job_by_id(
+		&self,
+		at: Option<BlockHash>,
+		role_type: RoleType,
+		job_id: JobId,
+	) -> RpcResult<Option<RpcResponseJobsData<AccountId, BlockNumber>>>;
+
+	#[method(name = "jobs_queryPhaseOneById")]
+	fn query_job_result(
+		&self,
+		at: Option<BlockHash>,
+		role_type: RoleType,
+		job_id: JobId,
+	) -> RpcResult<Option<PhaseResult<AccountId, BlockNumber>>>;
+
+	#[method(name = "jobs_queryNextJobId")]
+	fn query_next_job_id(&self, at: Option<BlockHash>) -> RpcResult<JobId>;
 }
 
 /// A struct that implements the `JobsApi`.
@@ -55,7 +80,7 @@ impl<C, M, P> JobsClient<C, M, P> {
 	}
 }
 
-impl<C, Block, AccountId> JobsApiServer<<Block as BlockT>::Hash, AccountId>
+impl<C, Block, AccountId> JobsApiServer<<Block as BlockT>::Hash, AccountId, BlockNumberOf<Block>>
 	for JobsClient<C, Block, AccountId>
 where
 	Block: BlockT,
@@ -67,15 +92,51 @@ where
 		&self,
 		at: Option<<Block as BlockT>::Hash>,
 		validator: AccountId,
-	) -> RpcResult<Vec<RpcResponseJobsData<AccountId>>> {
+	) -> RpcResult<Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>>> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 
 		match api.query_jobs_by_validator(at, validator) {
-			Ok(res) => match res {
-				Ok(res) => Ok(res),
-				Err(e) => Err(runtime_error_into_rpc_err(e)),
-			},
+			Ok(res) => Ok(res),
+			Err(e) => Err(runtime_error_into_rpc_err(e)),
+		}
+	}
+
+	fn query_job_by_id(
+		&self,
+		at: Option<<Block as BlockT>::Hash>,
+		role_type: RoleType,
+		job_id: JobId,
+	) -> RpcResult<Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>> {
+		let api = self.client.runtime_api();
+		let at = at.unwrap_or_else(|| self.client.info().best_hash);
+		match api.query_job_by_id(at, role_type, job_id) {
+			Ok(res) => Ok(res),
+			Err(e) => Err(runtime_error_into_rpc_err(e)),
+		}
+	}
+
+	fn query_job_result(
+		&self,
+		at: Option<<Block as BlockT>::Hash>,
+		role_type: RoleType,
+		job_id: JobId,
+	) -> RpcResult<Option<PhaseResult<AccountId, BlockNumberOf<Block>>>> {
+		let api = self.client.runtime_api();
+		let at = at.unwrap_or_else(|| self.client.info().best_hash);
+
+		match api.query_job_result(at, role_type, job_id) {
+			Ok(res) => Ok(res),
+			Err(e) => Err(runtime_error_into_rpc_err(e)),
+		}
+	}
+
+	fn query_next_job_id(&self, at: Option<<Block as BlockT>::Hash>) -> RpcResult<JobId> {
+		let api = self.client.runtime_api();
+		let at = at.unwrap_or_else(|| self.client.info().best_hash);
+
+		match api.query_next_job_id(at) {
+			Ok(res) => Ok(res),
 			Err(e) => Err(runtime_error_into_rpc_err(e)),
 		}
 	}

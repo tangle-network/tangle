@@ -14,16 +14,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use std::str::FromStr;
-use tangle_primitives::types::BlockNumber;
-use tangle_runtime::UNIT;
-
 use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts};
+use hex_literal::hex;
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};
 use sp_core::H160;
-use sp_runtime::AccountId32;
-use std::collections::BTreeMap;
-use tangle_testnet_runtime::{AccountId, Balance, ExistentialDeposit};
+use sp_runtime::{traits::AccountIdConversion, AccountId32};
+use std::{collections::BTreeMap, str::FromStr};
+use tangle_primitives::types::BlockNumber;
+use tangle_runtime::{AccountId, Balance, ExistentialDeposit, Perbill, UNIT};
 
 /// The contents of the file should be a map of accounts to balances.
 fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f64> {
@@ -43,6 +41,18 @@ fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f6
 	}
 	accounts_map
 }
+
+// *** Distribution
+// Team : 30% (5% immediate) (team account gets 95% that is vested over 2years with 1 year cliff))
+// Foundation : 15% (5% immediate) (foundation account gets 95% that is vested over 2years with 1
+// year cliff)
+// Investors : 16% (5% liquid immediately)(investor accounts gets 95% that is vested
+// over 2years with 1 year cliff)
+// Treasury : 35% (immediate release to treasury pallet account)
+// EDG Genesis Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
+// EDG Snapshot Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
+// Leaderboard airdrop : 2% (5% immediate release)(95% vested over two years, with one month cliff)
+// ***
 
 pub fn get_edgeware_genesis_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/edgeware_genesis_participants.json")
@@ -68,6 +78,12 @@ fn get_edgeware_snapshot_list() -> BTreeMap<AccountId32, f64> {
 	)
 }
 
+fn get_investor_balance_distribution_list() -> BTreeMap<AccountId32, f64> {
+	read_contents_to_substrate_accounts(
+		"node/src/distributions/data/webb_investor_distribution.json",
+	)
+}
+
 pub fn get_discord_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/discord_evm_addresses.json")
 }
@@ -90,17 +106,37 @@ pub struct DistributionResult {
 	pub vesting_cliff: BlockNumber,
 }
 
-fn ninety_nine_percent_endowment(endowment: u128) -> u128 {
-	endowment * 99 / 100
+fn ninety_five_percent_endowment(endowment: u128) -> u128 {
+	endowment * 95 / 100
 }
 
-fn one_percent_endowment(endowment: u128) -> u128 {
-	endowment - ninety_nine_percent_endowment(endowment)
+fn five_percent_endowment(endowment: u128) -> u128 {
+	endowment - ninety_five_percent_endowment(endowment)
 }
 
 fn vesting_per_block(endowment: u128, blocks: u64) -> u128 {
 	print!("Endowment {:?} Blocks {:?} ", endowment, blocks);
 	endowment / blocks as u128
+}
+
+fn get_team_distribution_share() -> Perbill {
+	Perbill::from_rational(30_u32, 100_u32)
+}
+
+fn get_investor_distribution_share() -> Perbill {
+	Perbill::from_rational(16_u32, 100_u32)
+}
+
+fn get_foundation_distribution_share() -> Perbill {
+	Perbill::from_rational(15_u32, 100_u32)
+}
+
+fn get_treasury_distribution_share() -> Perbill {
+	Perbill::from_rational(35_u32, 100_u32)
+}
+
+fn get_initial_liquidity_share() -> Perbill {
+	Perbill::from_rational(5_u32, 100_u32)
 }
 
 pub fn get_edgeware_genesis_balance_distribution() -> DistributionResult {
@@ -165,45 +201,6 @@ pub fn get_leaderboard_balance_distribution() -> DistributionResult {
 	)
 }
 
-/// Used for testing purposes
-///
-/// DO NOT USE IN MAINNET
-pub fn get_local_balance_distribution() -> DistributionResult {
-	let list = vec![
-		// Test account with a simple menmonic
-		// Mnemonic: "test test test test test test test test test test test junk"
-		// Path: m/44'/60'/0'/0/0
-		// Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-		H160::from_str("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-			.expect("internal H160 is valid; qed"),
-		// Test account with a simple menmonic
-		// Mnemonic: "test test test test test test test test test test test junk"
-		// Path: m/44'/60'/0'/0/1
-		// Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-		H160::from_str("70997970C51812dc3A010C7d01b50e0d17dc79C8")
-			.expect("internal H160 is valid; qed"),
-		// H160 address of Alice dev account
-		// Derived from SS58 (42 prefix) address
-		// SS58: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
-		// hex: 0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d
-		// Using the full hex key, truncating to the first 20 bytes (the first 40 hex
-		// chars)
-		H160::from_str("d43593c715fdd31c61141abd04a99fd6822c8558")
-			.expect("internal H160 is valid; qed"),
-	];
-	let endowment = ONE_PERCENT_TOTAL_SUPPLY / list.len() as u128;
-	let local_list: Vec<(MultiAddress, u128)> = list
-		.into_iter()
-		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), endowment))
-		.collect();
-	get_distribution_for(
-		local_list,
-		Some(StatementKind::Regular),
-		ONE_MONTH_BLOCKS,
-		TWO_YEARS_BLOCKS,
-	)
-}
-
 pub fn get_substrate_balance_distribution() -> DistributionResult {
 	let arr = get_edgeware_snapshot_list()
 		.into_iter()
@@ -217,15 +214,49 @@ pub fn get_substrate_balance_distribution() -> DistributionResult {
 }
 
 pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
-	// TODO : Read from actual investor file
-	let investor_accounts: Vec<(MultiAddress, u128)> = vec![];
-	compute_balance_distribution_with_cliff_and_vesting(investor_accounts)
+	let investor_accounts: Vec<(MultiAddress, u128)> = get_investor_balance_distribution_list()
+		.into_iter()
+		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
+		.collect();
+	compute_balance_distribution_with_cliff_and_vesting_no_endowment(investor_accounts)
 }
 
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
-	// TODO : Read from actual team file
-	let team_accounts: Vec<(MultiAddress, u128)> = vec![];
-	compute_balance_distribution_with_cliff_and_vesting(team_accounts)
+	let team_address: AccountId =
+		hex!["8e1c2bdddab9573d8cb094dbffba24a2b2c21b7e71e3f5b604e8607483872443"].into();
+	let balance =
+		(get_team_distribution_share() - get_initial_liquidity_share()).mul_floor(TOTAL_SUPPLY);
+	let team_account = (MultiAddress::Native(team_address), balance as u128);
+	compute_balance_distribution_with_cliff_and_vesting(vec![team_account])
+}
+
+pub fn get_treasury_balance() -> (AccountId, u128) {
+	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
+	let acc: AccountId = pallet_id.into_account_truncating();
+
+	// any leftover from investors are sent to treasury
+	let investors_actual_spend = get_investor_balance_distribution_list()
+		.into_values()
+		.map(|balance| (balance as u128))
+		.sum::<u128>();
+
+	let investors_actual_spend_as_percent =
+		Perbill::from_rational(investors_actual_spend, TOTAL_SUPPLY);
+	let leftover_from_investors =
+		get_investor_distribution_share() - investors_actual_spend_as_percent;
+	let leftover_amount = leftover_from_investors * TOTAL_SUPPLY;
+
+	(acc, get_treasury_distribution_share() * TOTAL_SUPPLY + leftover_amount)
+}
+
+pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+	let foundation_address: AccountId =
+		hex!["0cdd6ca9c578fabcc65373004944a401866d5c61568ffb22ecd8ef528599f95b"].into();
+	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY) -
+		get_initial_liquidity_share()
+			.mul_floor(get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY));
+	let foundation_account = (MultiAddress::Native(foundation_address), balance as u128);
+	compute_balance_distribution_with_cliff_and_vesting(vec![foundation_account])
 }
 
 pub fn compute_balance_distribution_with_cliff_and_vesting(
@@ -239,7 +270,24 @@ pub fn compute_balance_distribution_with_cliff_and_vesting(
 				value,
 				ONE_YEAR_BLOCKS,
 				TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS,
-				one_percent_endowment(value),
+				five_percent_endowment(value),
+			)
+		})
+		.collect()
+}
+
+pub fn compute_balance_distribution_with_cliff_and_vesting_no_endowment(
+	investor_accounts: Vec<(MultiAddress, u128)>,
+) -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+	investor_accounts
+		.into_iter()
+		.map(|(address, value)| {
+			(
+				address,
+				value,
+				ONE_YEAR_BLOCKS,
+				TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS,
+				Default::default(),
 			)
 		})
 		.collect()
@@ -254,7 +302,7 @@ pub fn get_distribution_for(
 	let mut claims = vec![];
 	let mut vesting = vec![];
 	arr.into_iter().filter(|(_, value)| *value > 0).for_each(|(address, value)| {
-		let claimable_amount = one_percent_endowment(value);
+		let claimable_amount = five_percent_endowment(value);
 		let vested_amount = value - claimable_amount;
 		let cliff_fraction = vesting_cliff as f64 / total_vesting_schedule as f64;
 		let remaining_fraction = 1.0 - cliff_fraction;
@@ -292,7 +340,7 @@ fn test_compute_investor_balance_distribution() {
 
 	// let compute the expected output
 	// the expected output is that
-	// 1% is immedately release
+	// 5% is immedately release
 	// 1 year cliff (vesting starts after year 1)
 	// Vesting finishes 1 year after cliff
 	let alice_expected_response: (MultiAddress, u128, u64, u64, u128) = (
@@ -300,14 +348,14 @@ fn test_compute_investor_balance_distribution() {
 		amount_per_investor,
 		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
 		tangle_primitives::time::DAYS * 365, // num of blocks from beginning till fully vested
-		1,                                   // 1% of 100
+		5,                                   // 5% of 100
 	);
 	let bob_expected_response: (MultiAddress, u128, u64, u64, u128) = (
 		bob.clone(),
 		amount_per_investor,
 		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
 		tangle_primitives::time::DAYS * 365, // num of blocks from beging till fully vested
-		1,                                   // 1% of 100
+		5,                                   // 5% of 100
 	);
 
 	assert_eq!(
@@ -328,19 +376,19 @@ fn test_get_distribution_for() {
 
 	// let compute the expected output
 	// the expected output is that
-	// 1% is immedately claimable
+	// 5% is immedately claimable
 	// 1 month cliff (vesting starts after 1 month) (use 1 for easier calculation)
 	// at 1 month cliff, release 1/24th rewards
 	// Vesting finishes after 2 years (use 24 for easier calculation)
 	// 1/24th claimable at every month
 	let expected_distibution_result = DistributionResult {
 		claims: vec![
-			(alice.clone(), 1, Some(StatementKind::Regular)),
-			(bob.clone(), 1, Some(StatementKind::Regular)),
+			(alice.clone(), 5, Some(StatementKind::Regular)),
+			(bob.clone(), 5, Some(StatementKind::Regular)),
 		],
 		vesting: vec![
-			(alice.clone(), vec![(4, 4, 1), (94, 4, 1)]),
-			(bob.clone(), vec![(4, 4, 1), (94, 4, 1)]),
+			(alice.clone(), vec![(3, 3, 1), (91, 3, 1)]),
+			(bob.clone(), vec![(3, 3, 1), (91, 3, 1)]),
 		],
 		vesting_length: 24,
 		vesting_cliff: 1,

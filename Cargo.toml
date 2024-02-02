@@ -1,5 +1,5 @@
 [workspace.package]
-version = "0.5.0"
+version = "0.6.1"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
@@ -32,8 +32,8 @@ members = [
   "precompiles/proxy",
   "precompiles/preimage",
   "precompiles/jobs",
-  "relayer-gadget",
-  "relayer-gadget/cli",
+  # "relayer-gadget",
+  # "relayer-gadget/cli",
 ]
 resolver = "2"
 
@@ -41,7 +41,7 @@ resolver = "2"
 substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
 substrate-build-script-utils = "3.0.0"
 
-hex-literal = '0.4.1'
+hex-literal = "0.4.1"
 log = { version = "0.4.20", default-features = false }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 serde = { version = "1.0.101", default-features = false, features = ["derive"] }
@@ -75,8 +75,8 @@ slices = "0.2.0"
 schnorrkel = { version = "0.9.1", default-features = false }
 milagro_bls = { git = "https://github.com/Snowfork/milagro_bls", default-features = false, rev="a6d66e4eb89015e352fb1c9f7b661ecdbb5b2176" }
 
-tangle-relayer-gadget = { packge = "tangle-relayer-gadget", path = "relayer-gadget" }
-tangle-relayer-gadget-cli = { packge = "tangle-relayer-gadget-cli", path = "relayer-gadget/cli" }
+# tangle-relayer-gadget = { packge = "tangle-relayer-gadget", path = "relayer-gadget" }
+# tangle-relayer-gadget-cli = { packge = "tangle-relayer-gadget-cli", path = "relayer-gadget/cli" }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
@@ -103,6 +103,8 @@ pallet-jobs = { path = "pallets/jobs", default-features = false }
 pallet-roles = { path = "pallets/roles", default-features = false }
 pallet-dkg = { path = "pallets/dkg", default-features = false }
 pallet-zksaas = { path = "pallets/zksaas", default-features = false }
+pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-features = false }
+pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
@@ -212,6 +214,7 @@ pallet-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", branch 
 pallet-transaction-payment = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
 pallet-utility = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
+pallet-multisig = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
 pallet-identity = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
 pallet-vesting = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
 pallet-proxy = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
@@ -264,6 +267,7 @@ pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-featur
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
 pallet-evm-precompile-jobs = { path = "precompiles/jobs", default-features = false }
+pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features = false }
 
 # EVM & Ethereum
 # (wasm)
@@ -280,9 +284,9 @@ sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", 
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0" }
 
 # Tangle dependencies
-tangle-primitives = { path = 'primitives', default-features = false }
+tangle-primitives = { path = "primitives", default-features = false }
 tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
-pallet-transaction-pause = { path = 'pallets/transaction-pause', default-features = false }
+pallet-transaction-pause = { path = "pallets/transaction-pause", default-features = false }
 
 # Light client dependencies
 pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.5.0" }

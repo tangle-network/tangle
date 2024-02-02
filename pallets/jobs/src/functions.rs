@@ -2,8 +2,9 @@ use super::*;
 use sp_runtime::traits::Zero;
 use tangle_primitives::{
 	jobs::{
-		DKGTSSPhaseOneJobType, DKGTSSSignatureResult, JobType, JobWithResult, ZkSaaSCircuitResult,
-		ZkSaaSPhaseOneJobType, ZkSaaSProofResult,
+		DKGTSSKeyRefreshResult, DKGTSSKeyRotationResult, DKGTSSPhaseOneJobType,
+		DKGTSSSignatureResult, JobType, JobWithResult, ZkSaaSCircuitResult, ZkSaaSPhaseOneJobType,
+		ZkSaaSProofResult,
 	},
 	roles::RoleType,
 };
@@ -179,7 +180,8 @@ impl<T: Config> Pallet<T> {
 
 						// charge the validator fee for job submission
 						let job = JobSubmissionOf::<T> {
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type: job_type.clone(),
 						};
 
@@ -193,7 +195,8 @@ impl<T: Config> Pallet<T> {
 
 						let job_info = JobInfo {
 							owner: phase1.owner.clone(),
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type,
 							fee,
 						};
@@ -232,7 +235,8 @@ impl<T: Config> Pallet<T> {
 
 						// charge the validator fee for job submission
 						let job = JobSubmissionOf::<T> {
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type: job_type.clone(),
 						};
 
@@ -246,7 +250,8 @@ impl<T: Config> Pallet<T> {
 
 						let job_info = JobInfo {
 							owner: phase1.owner.clone(),
-							expiry: phase1.expiry,
+							expiry: job_info.expiry,
+							ttl: job_info.ttl,
 							job_type,
 							fee,
 						};
@@ -268,7 +273,7 @@ impl<T: Config> Pallet<T> {
 		role_type: RoleType,
 		job_info: &JobInfoOf<T>,
 		info: DKGTSSKeySubmissionResult,
-	) -> Result<PhaseOneResultOf<T>, DispatchError> {
+	) -> Result<PhaseResultOf<T>, DispatchError> {
 		// sanity check, does job and result type match
 		ensure!(role_type.is_dkg_tss(), Error::<T>::ResultNotExpectedType);
 
@@ -281,9 +286,9 @@ impl<T: Config> Pallet<T> {
 		let mut participant_keys: Vec<Vec<u8>> = Default::default();
 
 		for participant in participants.clone() {
-			let key = T::RolesHandler::get_validator_metadata(participant, role_type);
-			ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
-			participant_keys.push(key.expect("checked above").get_authority_key());
+			let key = T::RolesHandler::get_validator_role_key(participant);
+			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
+			participant_keys.push(key.expect("checked above"));
 		}
 
 		let job_result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
@@ -297,15 +302,15 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: None,
-			result: job_result,
+			result: job_result.clone(),
 		})?;
 
-		let result = PhaseOneResult {
+		let result = PhaseResult {
 			owner: job_info.owner.clone(),
-			expiry: job_info.expiry,
 			job_type: job_info.job_type.clone(),
+			ttl: job_info.ttl,
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
-			result: info.key,
+			result: job_result,
 		};
 		Ok(result)
 	}
@@ -314,7 +319,7 @@ impl<T: Config> Pallet<T> {
 		role_type: RoleType,
 		job_info: &JobInfoOf<T>,
 		info: DKGTSSSignatureResult,
-	) -> DispatchResult {
+	) -> Result<PhaseResultOf<T>, DispatchError> {
 		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
 		ensure!(role_type.is_dkg_tss(), Error::<T>::ResultNotExpectedType);
@@ -330,26 +335,27 @@ impl<T: Config> Pallet<T> {
 				.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 		// Validate existing result
-		ensure!(phase_one_result.expiry >= now, Error::<T>::ResultExpired);
+		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
 
 		// ensure the participants are the expected participants from job
 		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
 
 		let participants = phase_one_result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
 		for participant in participants {
-			let key = T::RolesHandler::get_validator_metadata(participant, role_type);
-			ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
-			let pub_key = sp_core::ecdsa::Public::from_slice(
-				&key.expect("checked above").get_authority_key()[0..33],
-			)
-			.map_err(|_| Error::<T>::InvalidValidator)?;
+			let key = T::RolesHandler::get_validator_role_key(participant);
+			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
+			let pub_key = sp_core::ecdsa::Public::from_slice(&key.expect("checked above")[0..33])
+				.map_err(|_| Error::<T>::InvalidValidator)?;
 			participant_keys.push(pub_key);
 		}
-
+		let signing_key = match phase_one_result.result {
+			JobResult::DKGPhaseOne(result) => result.key,
+			_ => return Err(Error::<T>::InvalidJobPhase.into()),
+		};
 		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
-			signature: info.signature,
+			signature: info.signature.clone(),
 			data: info.data,
-			signing_key: phase_one_result.result,
+			signing_key,
 			signature_type: info.signature_type,
 		});
 
@@ -361,9 +367,156 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: Some(phase_one_job_info.job_type),
-			result: job_result,
+			result: job_result.clone(),
 		})?;
-		Ok(())
+
+		let result = PhaseResult {
+			owner: job_info.owner.clone(),
+			ttl: job_info.ttl,
+			job_type: job_info.job_type.clone(),
+			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
+			result: job_result,
+		};
+		Ok(result)
+	}
+
+	pub fn verify_dkg_key_refresh_job_result(
+		role_type: RoleType,
+		job_info: &JobInfoOf<T>,
+		info: DKGTSSKeyRefreshResult,
+	) -> Result<PhaseResultOf<T>, DispatchError> {
+		let now = <frame_system::Pallet<T>>::block_number();
+		// sanity check, does job and result type match
+		ensure!(role_type.is_dkg_tss(), Error::<T>::ResultNotExpectedType);
+
+		let existing_result_id = job_info
+			.job_type
+			.clone()
+			.get_phase_one_id()
+			.ok_or(Error::<T>::InvalidJobPhase)?;
+		// Ensure the result exists
+		let phase_one_result =
+			KnownResults::<T>::get(job_info.job_type.get_role_type(), existing_result_id)
+				.ok_or(Error::<T>::PreviousResultNotFound)?;
+
+		// Validate existing result
+		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
+
+		// ensure the participants are the expected participants from job
+		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
+
+		let participants = phase_one_result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
+		for participant in participants {
+			let key = T::RolesHandler::get_validator_role_key(participant);
+			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
+			let pub_key = sp_core::ecdsa::Public::from_slice(&key.expect("checked above")[0..33])
+				.map_err(|_| Error::<T>::InvalidValidator)?;
+			participant_keys.push(pub_key);
+		}
+
+		let job_result = JobResult::DKGPhaseThree(DKGTSSKeyRefreshResult {
+			signature_type: info.signature_type.clone(),
+		});
+
+		let phase_one_job_info = KnownResults::<T>::get(
+			job_info.job_type.get_role_type(),
+			job_info.job_type.get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?,
+		)
+		.ok_or(Error::<T>::JobNotFound)?;
+		T::MPCHandler::verify(JobWithResult {
+			job_type: job_info.job_type.clone(),
+			phase_one_job_type: Some(phase_one_job_info.job_type),
+			result: job_result.clone(),
+		})?;
+
+		let result = PhaseResult {
+			owner: job_info.owner.clone(),
+			job_type: job_info.job_type.clone(),
+			ttl: job_info.ttl,
+			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
+			result: job_result,
+		};
+		Ok(result)
+	}
+
+	pub fn verify_dkg_key_rotation_job_result(
+		role_type: RoleType,
+		job_info: &JobInfoOf<T>,
+		info: DKGTSSKeyRotationResult,
+	) -> Result<PhaseResultOf<T>, DispatchError> {
+		let now = <frame_system::Pallet<T>>::block_number();
+		// sanity check, does job and result type match
+		ensure!(role_type.is_dkg_tss(), Error::<T>::ResultNotExpectedType);
+
+		let existing_result_id = job_info
+			.job_type
+			.clone()
+			.get_phase_one_id()
+			.ok_or(Error::<T>::InvalidJobPhase)?;
+		// Ensure the result exists
+		let phase_one_result =
+			KnownResults::<T>::get(job_info.job_type.get_role_type(), existing_result_id)
+				.ok_or(Error::<T>::PreviousResultNotFound)?;
+
+		// Validate existing result
+		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
+
+		// ensure the participants are the expected participants from job
+		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
+
+		let participants = phase_one_result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
+		for participant in participants {
+			let key = T::RolesHandler::get_validator_role_key(participant);
+			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
+			let pub_key = sp_core::ecdsa::Public::from_slice(&key.expect("checked above")[0..33])
+				.map_err(|_| Error::<T>::InvalidValidator)?;
+			participant_keys.push(pub_key);
+		}
+
+		let curr_key = match phase_one_result.result {
+			JobResult::DKGPhaseOne(info) => info.key.clone(),
+			_ => return Err(Error::<T>::InvalidJobPhase.into()),
+		};
+
+		let new_phase_one_job_id = match job_info.job_type {
+			JobType::DKGTSSPhaseFour(ref info) => info.new_phase_one_id,
+			_ => return Err(Error::<T>::InvalidJobPhase.into()),
+		};
+
+		let new_phase_one_job_info =
+			KnownResults::<T>::get(job_info.job_type.get_role_type(), new_phase_one_job_id)
+				.ok_or(Error::<T>::JobNotFound)?;
+
+		let new_key = match new_phase_one_job_info.result {
+			JobResult::DKGPhaseOne(info) => info.key.clone(),
+			_ => return Err(Error::<T>::InvalidJobPhase.into()),
+		};
+		let job_result = JobResult::DKGPhaseFour(DKGTSSKeyRotationResult {
+			phase_one_id: job_info
+				.job_type
+				.get_phase_one_id()
+				.ok_or(Error::<T>::InvalidJobPhase)?,
+			new_phase_one_id: new_phase_one_job_id,
+			new_key,
+			key: curr_key,
+			signature: info.signature.clone(),
+			signature_type: info.signature_type.clone(),
+		});
+
+		T::MPCHandler::verify(JobWithResult {
+			job_type: job_info.job_type.clone(),
+			phase_one_job_type: Some(phase_one_result.job_type),
+			result: job_result.clone(),
+		})?;
+
+		let result = PhaseResult {
+			owner: job_info.owner.clone(),
+			job_type: job_info.job_type.clone(),
+			ttl: job_info.ttl,
+			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
+			result: job_result,
+		};
+		Ok(result)
 	}
 
 	pub fn verify_zksaas_circuit_job_result(
@@ -371,7 +524,7 @@ impl<T: Config> Pallet<T> {
 		job_id: JobId,
 		job_info: &JobInfoOf<T>,
 		_info: ZkSaaSCircuitResult,
-	) -> Result<PhaseOneResultOf<T>, DispatchError> {
+	) -> Result<PhaseResultOf<T>, DispatchError> {
 		// sanity check, does job and result type match
 		ensure!(role_type.is_zksaas(), Error::<T>::ResultNotExpectedType);
 		// ensure the participants are the expected participants from job
@@ -384,12 +537,10 @@ impl<T: Config> Pallet<T> {
 		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
 
 		for participant in participants.clone() {
-			let key = T::RolesHandler::get_validator_metadata(participant, role_type);
-			ensure!(key.is_some(), Error::<T>::ValidatorMetadataNotFound);
-			let pub_key = sp_core::ecdsa::Public::from_slice(
-				&key.expect("checked above").get_authority_key()[0..33],
-			)
-			.map_err(|_| Error::<T>::InvalidValidator)?;
+			let key = T::RolesHandler::get_validator_role_key(participant);
+			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
+			let pub_key = sp_core::ecdsa::Public::from_slice(&key.expect("checked above")[0..33])
+				.map_err(|_| Error::<T>::InvalidValidator)?;
 			participant_keys.push(pub_key);
 		}
 
@@ -401,15 +552,14 @@ impl<T: Config> Pallet<T> {
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
 			phase_one_job_type: None,
-			result: job_result,
+			result: job_result.clone(),
 		})?;
 
-		let result = PhaseOneResult {
+		let result = PhaseResult {
 			owner: job_info.owner.clone(),
-			expiry: job_info.expiry,
+			ttl: job_info.ttl,
 			job_type: job_info.job_type.clone(),
-			// No data in the result
-			result: Vec::new(),
+			result: job_result,
 			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
 		};
 		Ok(result)
@@ -419,7 +569,7 @@ impl<T: Config> Pallet<T> {
 		role_type: RoleType,
 		job_info: &JobInfoOf<T>,
 		info: ZkSaaSProofResult,
-	) -> DispatchResult {
+	) -> Result<PhaseResultOf<T>, DispatchError> {
 		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
 		ensure!(role_type.is_zksaas(), Error::<T>::ResultNotExpectedType);
@@ -436,20 +586,23 @@ impl<T: Config> Pallet<T> {
 				.ok_or(Error::<T>::PreviousResultNotFound)?;
 
 		// Validate existing result
-		ensure!(phase_one_result.expiry >= now, Error::<T>::ResultExpired);
+		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
 
-		let job_result = JobResult::ZkSaaSPhaseTwo(info);
+		let job_result = JobResult::ZkSaaSPhaseTwo(info.clone());
 
-		let phase_one_job_info = SubmittedJobs::<T>::get(
-			role_type,
-			job_info.job_type.get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?,
-		)
-		.ok_or(Error::<T>::JobNotFound)?;
 		T::MPCHandler::verify(JobWithResult {
 			job_type: job_info.job_type.clone(),
-			phase_one_job_type: Some(phase_one_job_info.job_type),
-			result: job_result,
+			phase_one_job_type: Some(phase_one_result.job_type),
+			result: job_result.clone(),
 		})?;
-		Ok(())
+
+		let result = PhaseResult {
+			owner: job_info.owner.clone(),
+			ttl: job_info.ttl,
+			job_type: job_info.job_type.clone(),
+			result: job_result,
+			permitted_caller: job_info.job_type.clone().get_permitted_caller(),
+		};
+		Ok(result)
 	}
 }

@@ -17,7 +17,7 @@
 use frame_support::{
 	pallet_prelude::Weight,
 	weights::{
-		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_SECOND},
+		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_MILLIS},
 		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 	},
 };
@@ -59,9 +59,13 @@ pub mod time {
 	// 1 in 4 blocks (on average, not counting collisions) will be primary BABE blocks.
 	pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
 
+	#[cfg(feature = "fast-runtime")]
+	pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 10; // 10 blocks for fast tests
+
 	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
 	//       Attempting to do so will brick block production.
-	pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 10 * MINUTES;
+	#[cfg(not(feature = "fast-runtime"))]
+	pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 4 * HOURS;
 	pub const EPOCH_DURATION_IN_SLOTS: u64 = {
 		const SLOT_FILL_RATE: f64 = MILLISECS_PER_BLOCK as f64 / SLOT_DURATION as f64;
 
@@ -99,7 +103,7 @@ pub mod currency {
 	pub const WEIGHT_FEE: Balance = 100 * MEGAWEI;
 	/// Return the cost to add an item to storage based on size
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
-		items as Balance * 20 * DOLLAR + (bytes as Balance) * 100 * MILLICENT
+		items as Balance * 10 * DOLLAR + (bytes as Balance) * 100 * MILLICENT
 	}
 }
 
@@ -222,13 +226,12 @@ pub mod evm {
 
 pub mod democracy {
 	use crate::{currency::UNIT, time::MINUTES, Balance, BlockNumber};
-
-	pub const LAUNCH_PERIOD: BlockNumber = 28 * 24 * 60 * MINUTES;
-	pub const VOTING_PERIOD: BlockNumber = 28 * 24 * 60 * MINUTES;
-	pub const FASTTRACK_VOTING_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES;
-	pub const MINIMUM_DEPOSIT: Balance = 100 * UNIT;
-	pub const ENACTMENT_PERIOD: BlockNumber = 30 * 24 * 60 * MINUTES;
-	pub const COOLOFF_PERIOD: BlockNumber = 28 * 24 * 60 * MINUTES;
+	pub const LAUNCH_PERIOD: BlockNumber = 10 * 24 * 60 * MINUTES; // 10 days
+	pub const VOTING_PERIOD: BlockNumber = 10 * 24 * 60 * MINUTES; // 10 days
+	pub const FASTTRACK_VOTING_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES; // 3 days
+	pub const MINIMUM_DEPOSIT: Balance = 1000 * UNIT; // 1000 TNT
+	pub const ENACTMENT_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES; // 3 days
+	pub const COOLOFF_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES; // 3 days
 	pub const MAX_PROPOSALS: u32 = 100;
 }
 
@@ -256,7 +259,7 @@ pub mod treasury {
 	pub const PROPOSAL_BOND: Permill = Permill::from_percent(5);
 	pub const PROPOSAL_BOND_MINIMUM: Balance = UNIT;
 	pub const SPEND_PERIOD: BlockNumber = DAYS;
-	pub const BURN: Permill = Permill::from_percent(50);
+	pub const BURN: Permill = Permill::from_percent(0);
 	pub const TIP_COUNTDOWN: BlockNumber = DAYS;
 	pub const TIP_FINDERS_FEE: Percent = Percent::from_percent(20);
 	pub const TIP_REPORT_DEPOSIT_BASE: Balance = UNIT;
@@ -264,6 +267,36 @@ pub mod treasury {
 	pub const TREASURY_PALLET_ID: PalletId = PalletId(*b"py/trsry");
 	pub const MAXIMUM_REASON_LENGTH: u32 = 300;
 	pub const MAX_APPROVALS: u32 = 100;
+}
+
+#[cfg(not(feature = "fast-runtime"))]
+pub mod staking {
+	// Six sessions in an era (24 hours).
+	pub const SESSIONS_PER_ERA: sp_staking::SessionIndex = 6;
+	// 28 eras for unbonding (28 days).
+	pub const BONDING_DURATION: sp_staking::EraIndex = 28;
+	// 27 eras for slash defer duration (27 days).
+	pub const SLASH_DEFER_DURATION: sp_staking::EraIndex = 27;
+	pub const MAX_NOMINATOR_REWARDED_PER_VALIDATOR: u32 = 256;
+	pub const OFFENDING_VALIDATOR_THRESHOLD: sp_arithmetic::Perbill =
+		sp_arithmetic::Perbill::from_percent(17);
+	pub const OFFCHAIN_REPEAT: crate::BlockNumber = 5;
+	pub const HISTORY_DEPTH: u32 = 80;
+}
+
+#[cfg(feature = "fast-runtime")]
+pub mod staking {
+	// 1 sessions in an era (10 blocks).
+	pub const SESSIONS_PER_ERA: sp_staking::SessionIndex = 1;
+	// 2 eras for unbonding (20 blocks).
+	pub const BONDING_DURATION: sp_staking::EraIndex = 2;
+	// 1 eras for slash defer (10 blocks).
+	pub const SLASH_DEFER_DURATION: sp_staking::EraIndex = 1;
+	pub const MAX_NOMINATOR_REWARDED_PER_VALIDATOR: u32 = 256;
+	pub const OFFENDING_VALIDATOR_THRESHOLD: sp_arithmetic::Perbill =
+		sp_arithmetic::Perbill::from_percent(17);
+	pub const OFFCHAIN_REPEAT: crate::BlockNumber = 5;
+	pub const HISTORY_DEPTH: u32 = 80;
 }
 
 /// We assume that ~10% of the block weight is consumed by `on_initialize` handlers. This is
@@ -274,17 +307,19 @@ pub const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 /// `Operational` extrinsics.
 pub const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 
-/// Maximum PoV size we support right now.
-///
-/// Used for:
-/// * initial genesis for the Parachains configuration
-/// * checking updates to this stored runtime configuration do not exceed this limit
-/// * when detecting a PoV decompression bomb in the client
-// NOTE: This value is used in the runtime so be careful when changing it.
-pub const MAX_POV_SIZE: u32 = 5 * 1024 * 1024;
-
-/// We allow for 1 of a second of compute with a 6 second average block time.
+/// We allow for 2000ms of compute with a 6 second average block time.
+pub const WEIGHT_MILLISECS_PER_BLOCK: u64 = 2000;
 pub const MAXIMUM_BLOCK_WEIGHT: Weight =
-	Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND, MAX_POV_SIZE as u64);
+	Weight::from_parts(WEIGHT_MILLISECS_PER_BLOCK * WEIGHT_REF_TIME_PER_MILLIS, u64::MAX);
 
 pub use sp_consensus_babe::AuthorityId as BabeId;
+
+// 5845 this would give us addresses with tg prefix for mainnet like
+// tgGmBRR5yM53bvq8tTzgsUirpPtfCXngYYU7uiihmWFJhmYGM
+pub const MAINNET_SS58_PREFIX: u16 = 5845;
+pub const MAINNET_CHAIN_ID: u64 = MAINNET_SS58_PREFIX as u64;
+
+// 3799 this would give us addresses with  tt prefix for testnet like
+// ttFELSU4MTyzpfsgZ9tFinrmox7pV7nF1BLbfYjsu4rfDYM74
+pub const TESTNET_SS58_PREFIX: u16 = 3799;
+pub const TESTNET_CHAIN_ID: u64 = TESTNET_SS58_PREFIX as u64;

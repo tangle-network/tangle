@@ -25,5 +25,4 @@ pub type JobInfoOf<T> =
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
-pub type PhaseOneResultOf<T> =
-	PhaseOneResult<<T as frame_system::Config>::AccountId, BlockNumberFor<T>>;
+pub type PhaseResultOf<T> = PhaseResult<<T as frame_system::Config>::AccountId, BlockNumberFor<T>>;

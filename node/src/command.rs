@@ -48,7 +48,7 @@ impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Tangle Substrate Node".into()
+		"Tangle Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -73,15 +73,23 @@ impl SubstrateCli for Cli {
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
 		Ok(match id {
-			"" | "dev" | "local" => Box::new(chainspec::testnet::local_testnet_config(4007)?),
+			"" | "dev" | "local" => Box::new(chainspec::testnet::local_testnet_config(
+				tangle_primitives::TESTNET_CHAIN_ID,
+			)?),
 			// generates the spec for testnet
-			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(4007)?),
+			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(
+				tangle_primitives::TESTNET_CHAIN_ID,
+			)?),
 			"tangle-testnet" => Box::new(chainspec::testnet::ChainSpec::from_json_bytes(
-				&include_bytes!("../../chainspecs/testnet/tangle-standalone.json")[..],
+				&include_bytes!("../../chainspecs/testnet/tangle-testnet.json")[..],
 			)?),
 			// generates the spec for mainnet
-			"mainnet-local" => Box::new(chainspec::mainnet::local_mainnet_config(4006)?),
-			"mainnet" => Box::new(chainspec::mainnet::tangle_mainnet_config(4006)?),
+			"mainnet-local" => Box::new(chainspec::mainnet::local_mainnet_config(
+				tangle_primitives::MAINNET_CHAIN_ID,
+			)?),
+			"mainnet" => Box::new(chainspec::mainnet::tangle_mainnet_config(
+				tangle_primitives::MAINNET_CHAIN_ID,
+			)?),
 			path => Box::new(chainspec::testnet::ChainSpec::from_json_file(
 				std::path::PathBuf::from(path),
 			)?),
@@ -163,7 +171,7 @@ pub fn run() -> sc_cli::Result<()> {
 							)
 						}
 
-						cmd.run::<Block, ()>(config)
+						cmd.run::<Block, service::HostFunctions>(config)
 					},
 					BenchmarkCmd::Block(cmd) => {
 						let PartialComponents { client, .. } =
@@ -245,6 +253,7 @@ pub fn run() -> sc_cli::Result<()> {
 					rpc_config,
 					eth_config: cli.eth,
 					debug_output: cli.output_path,
+					auto_insert_keys: cli.auto_insert_keys,
 				})
 				.map_err(Into::into)
 				.await

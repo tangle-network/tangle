@@ -19,11 +19,14 @@
 
 use parity_scale_codec::Codec;
 use sp_runtime::{traits::MaybeDisplay, Serialize};
-
+use sp_std::vec::Vec;
 use tangle_primitives::{
-	jobs::{JobId, RpcResponseJobsData, RpcResponsePhaseOneResult},
+	jobs::{JobId, PhaseResult, RpcResponseJobsData},
 	roles::RoleType,
 };
+
+pub type BlockNumberOf<Block> =
+	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
 
 sp_api::decl_runtime_apis! {
 	pub trait JobsApi<AccountId> where
@@ -33,7 +36,7 @@ sp_api::decl_runtime_apis! {
 		///
 		/// This function takes a `validator` parameter of type `AccountId` and attempts
 		/// to retrieve a list of jobs associated with the provided validator. If successful,
-		/// it constructs a vector of `RpcResponseJobsData<AccountId>` containing information
+		/// it constructs a vector of `RpcResponseJobsData` containing information
 		/// about the jobs and returns it as a `Result`.
 		///
 		/// # Arguments
@@ -42,9 +45,8 @@ sp_api::decl_runtime_apis! {
 		///
 		/// # Returns
 		///
-		/// Returns a `Result` containing a vector of `RpcResponseJobsData<AccountId>` if the
-		/// operation is successful
-		fn query_jobs_by_validator(validator: AccountId) -> Result<Vec<RpcResponseJobsData<AccountId>>, String>;
+		/// An optional vec of `RpcResponseJobsData` of jobs assigned to validator
+		fn query_jobs_by_validator(validator: AccountId) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>>;
 		/// Queries a job by its key and ID.
 		///
 		/// # Arguments
@@ -55,9 +57,9 @@ sp_api::decl_runtime_apis! {
 		/// # Returns
 		///
 		/// An optional `RpcResponseJobsData` containing the account ID of the job.
-		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId>>;
+		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>;
 
-		/// Queries the phase one result of a job by its key and ID.
+		/// Queries the result of a job by its role_type and ID.
 		///
 		/// # Arguments
 		///
@@ -66,8 +68,8 @@ sp_api::decl_runtime_apis! {
 		///
 		/// # Returns
 		///
-		/// An `Option` containing the phase one result of the job, wrapped in an `RpcResponsePhaseOneResult`.
-		fn query_phase_one_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponsePhaseOneResult<AccountId>>;
+		/// An `Option` containing the phase one result of the job, wrapped in an `PhaseResult`.
+		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>>>;
 
 		/// Queries next job ID.
 		///

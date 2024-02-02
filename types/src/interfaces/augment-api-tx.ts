@@ -5,25 +5,11 @@
 // this is required to allow for ambient/previous definitions
 import '@polkadot/api-base/types/submittable';
 
-import type {
-  ApiTypes,
-  AugmentedSubmittable,
-  SubmittableExtrinsic,
-  SubmittableExtrinsicFunction
-} from '@polkadot/api-base/types';
+import type { ApiTypes, AugmentedSubmittable, SubmittableExtrinsic, SubmittableExtrinsicFunction } from '@polkadot/api-base/types';
 import type { Data } from '@polkadot/types';
-import type { bool, Bytes, Compact, Option, u128, u16, U256, u32, u64, u8, U8aFixed, Vec } from '@polkadot/types-codec';
+import type { Bytes, Compact, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, IMethod, ITuple } from '@polkadot/types-codec/types';
-import type {
-  AccountId32,
-  Call,
-  H160,
-  H256,
-  MultiAddress,
-  Perbill,
-  Percent,
-  Permill
-} from '@polkadot/types/interfaces/runtime';
+import type { AccountId32, Call, H160, H256, MultiAddress, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
 import {
   EthereumTransactionTransactionV2,
   FrameSupportPreimagesBounded,
@@ -63,7 +49,6 @@ import {
   SpNposElectionsElectionScore,
   SpNposElectionsSupport,
   SpWeightsWeightV2Weight,
-  TanglePrimitivesJobsJobKey,
   TanglePrimitivesJobsValidatorOffenceType,
   TanglePrimitivesRolesRoleType,
   TangleTestnetRuntimeOpaqueSessionKeys,
@@ -652,19 +637,19 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * See [`Pallet::report_inactive_validator`].
        **/
-      reportInactiveValidator: AugmentedSubmittable<(jobKey: TanglePrimitivesJobsJobKey | 'DKG' | 'DKGSignature' | 'ZkSaaSCircuit' | 'ZkSaaSProve' | number | Uint8Array, jobId: u32 | AnyNumber | Uint8Array, validator: AccountId32 | string | Uint8Array, offence: TanglePrimitivesJobsValidatorOffenceType | 'Inactivity' | 'InvalidSignatureSubmitted' | 'RejectedValidAction' | 'ApprovedInvalidAction' | number | Uint8Array, signatures: Vec<Bytes> | (Bytes | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesJobsJobKey, u32, AccountId32, TanglePrimitivesJobsValidatorOffenceType, Vec<Bytes>]>;
+      reportInactiveValidator: AugmentedSubmittable<(roleType: TanglePrimitivesRolesRoleType | { Tss: any } | { ZkSaaS: any } | { LightClientRelaying: any } | string | Uint8Array, jobId: u64 | AnyNumber | Uint8Array, validator: AccountId32 | string | Uint8Array, offence: TanglePrimitivesJobsValidatorOffenceType | 'Inactivity' | 'InvalidSignatureSubmitted' | 'RejectedValidAction' | 'ApprovedInvalidAction' | number | Uint8Array, signatures: Vec<Bytes> | (Bytes | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesRolesRoleType, u64, AccountId32, TanglePrimitivesJobsValidatorOffenceType, Vec<Bytes>]>;
       /**
        * See [`Pallet::set_permitted_caller`].
        **/
-      setPermittedCaller: AugmentedSubmittable<(jobKey: TanglePrimitivesJobsJobKey | 'DKG' | 'DKGSignature' | 'ZkSaaSCircuit' | 'ZkSaaSProve' | number | Uint8Array, jobId: u32 | AnyNumber | Uint8Array, newPermittedCaller: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesJobsJobKey, u32, AccountId32]>;
+      setPermittedCaller: AugmentedSubmittable<(roleType: TanglePrimitivesRolesRoleType | { Tss: any } | { ZkSaaS: any } | { LightClientRelaying: any } | string | Uint8Array, jobId: u64 | AnyNumber | Uint8Array, newPermittedCaller: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesRolesRoleType, u64, AccountId32]>;
       /**
        * See [`Pallet::submit_job`].
        **/
-      submitJob: AugmentedSubmittable<(job: TanglePrimitivesJobsJobSubmission | { expiry?: any; jobType?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesJobsJobSubmission]>;
+      submitJob: AugmentedSubmittable<(job: TanglePrimitivesJobsJobSubmission | { expiry?: any; ttl?: any; jobType?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesJobsJobSubmission]>;
       /**
        * See [`Pallet::submit_job_result`].
        **/
-      submitJobResult: AugmentedSubmittable<(jobKey: TanglePrimitivesJobsJobKey | 'DKG' | 'DKGSignature' | 'ZkSaaSCircuit' | 'ZkSaaSProve' | number | Uint8Array, jobId: u32 | AnyNumber | Uint8Array, result: TanglePrimitivesJobsJobResult | { DKGPhaseOne: any } | { DKGPhaseTwo: any } | { ZkSaaSPhaseOne: any } | { ZkSaaSPhaseTwo: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesJobsJobKey, u32, TanglePrimitivesJobsJobResult]>;
+      submitJobResult: AugmentedSubmittable<(roleType: TanglePrimitivesRolesRoleType | { Tss: any } | { ZkSaaS: any } | { LightClientRelaying: any } | string | Uint8Array, jobId: u64 | AnyNumber | Uint8Array, result: TanglePrimitivesJobsJobResult | { DKGPhaseOne: any } | { DKGPhaseTwo: any } | { ZkSaaSPhaseOne: any } | { ZkSaaSPhaseTwo: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesRolesRoleType, u64, TanglePrimitivesJobsJobResult]>;
       /**
        * See [`Pallet::withdraw_rewards`].
        **/
@@ -800,13 +785,9 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       deleteProfile: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
-       * See [`Pallet::remove_role`].
+       * See [`Pallet::unbond_funds`].
        **/
-      removeRole: AugmentedSubmittable<(role: TanglePrimitivesRolesRoleType | 'Tss' | 'ZkSaaS' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesRolesRoleType]>;
-      /**
-       * See [`Pallet::unbound_funds`].
-       **/
-      unboundFunds: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>]>;
+      unbondFunds: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>]>;
       /**
        * See [`Pallet::update_profile`].
        **/
@@ -858,7 +839,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * See [`Pallet::set_keys`].
        **/
-      setKeys: AugmentedSubmittable<(keys: TangleTestnetRuntimeOpaqueSessionKeys | { babe?: any; grandpa?: any; imOnline?: any } | string | Uint8Array, proof: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TangleTestnetRuntimeOpaqueSessionKeys, Bytes]>;
+      setKeys: AugmentedSubmittable<(keys: TangleTestnetRuntimeOpaqueSessionKeys | { babe?: any; grandpa?: any; imOnline?: any; role?: any } | string | Uint8Array, proof: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TangleTestnetRuntimeOpaqueSessionKeys, Bytes]>;
       /**
        * Generic tx
        **/
