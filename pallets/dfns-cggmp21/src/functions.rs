@@ -250,13 +250,14 @@ impl<T: Config> Pallet<T> {
 		let round2a_msg =
 			round2a_msgs.get(usize::from(i)).ok_or(Error::<T>::InvalidJustification)?;
 
-		let polynomial_sum =
-			round2a_msgs.iter().map(|d| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
-
 		let rid = round2a_msgs
 			.iter()
 			.map(|d| &d.rid)
 			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), Self::xor_array);
+
+		let polynomial_sum =
+			round2a_msgs.iter().map(|d| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
+
 		let ys = (0..n)
 			.map(|l| polynomial_sum.value(&Scalar::from(l + 1)))
 			.collect::<Vec<Point<Secp256k1>>>();

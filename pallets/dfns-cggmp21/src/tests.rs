@@ -24,6 +24,7 @@ use dfns_cggmp21::{
 	keygen,
 	security_level::{SecurityLevel, SecurityLevel128},
 };
+use sha2::Digest;
 
 use frame_support::{assert_err, assert_ok};
 use generic_ec::{curves::Secp256k1, Scalar, SecretScalar};
@@ -51,14 +52,25 @@ fn sign(key: ecdsa::Public, msg: &[u8]) -> Vec<u8> {
 	signature.encode()
 }
 
+fn sign_round_msg<M: serde::Serialize>(
+	key: ecdsa::Public,
+	sender: u16,
+	msg: &M,
+) -> SignedRoundMessage {
+	let msg_bytes = bincode2::serialize(msg).unwrap();
+	let sender_bytes = sender.to_be_bytes();
+	let msg_to_sign = [&sender_bytes[..], &msg_bytes[..]].concat();
+	let signature = sign(key, &msg_to_sign);
+	SignedRoundMessage { sender, message: msg_bytes, signature }
+}
+
 #[test]
 fn submit_keygen_decommitment_should_work() {
 	new_test_ext().execute_with(|| {
-		let pub_key = pub_key();
-		let offender = pub_key.0;
 		let i = 2_u16;
-		let n = 5_u16;
+		let participants = (0..5).map(|_| pub_key()).collect::<Vec<_>>();
 		let t = 3_u16;
+		let offender = participants[usize::from(i)];
 		let job_id = 1_u64;
 		let job_id_bytes = job_id.to_be_bytes();
 		let mix = keccak_256(b"dnfs-cggmp21-keygen");
@@ -92,30 +104,20 @@ fn submit_keygen_decommitment_should_work() {
 		let my_commitment: keygen::msg::threshold::MsgRound1<DefaultDigest> =
 			keygen::msg::threshold::MsgRound1 { commitment: hash_commit };
 
-		let round1_msg = bincode2::serialize(&my_commitment).unwrap();
-		let round2_msg = bincode2::serialize(&my_decommitment).unwrap();
-
-		let msg_to_sign = [&i.to_be_bytes()[..], &round1_msg[..]].concat();
-		let signature = sign(pub_key, &msg_to_sign);
-		let round1_signed_message =
-			SignedRoundMessage { sender: i, message: round1_msg, signature };
-
-		let msg_to_sign = [&i.to_be_bytes()[..], &round2_msg[..]].concat();
-		let signature = sign(pub_key, &msg_to_sign);
-		let round2_signed_message =
-			SignedRoundMessage { sender: i, message: round2_msg, signature };
+		let round1_signed_msg = sign_round_msg(offender, i, &my_commitment);
+		let round2a_signed_msg = sign_round_msg(offender, i, &my_decommitment);
 
 		let submission = MisbehaviorSubmission {
 			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
-			offender,
+			offender: offender.0,
 			job_id,
 			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
 				DfnsCGGMP21Justification::Keygen {
-					n,
+					participants: participants.iter().map(|p| p.0).collect(),
 					t,
 					reason: KeygenAborted::InvalidDecommitment {
-						round1: round1_signed_message,
-						round2a: round2_signed_message,
+						round1: round1_signed_msg,
+						round2a: round2a_signed_msg,
 					},
 				},
 			)),
@@ -128,11 +130,10 @@ fn submit_keygen_decommitment_should_work() {
 #[test]
 fn submit_keygen_invalid_decommitment_should_work() {
 	new_test_ext().execute_with(|| {
-		let pub_key = pub_key();
-		let offender = pub_key.0;
 		let i = 2_u16;
-		let n = 5_u16;
+		let participants = (0..5).map(|_| pub_key()).collect::<Vec<_>>();
 		let t = 3_u16;
+		let offender = participants[usize::from(i)];
 		let job_id = 1_u64;
 		let job_id_bytes = job_id.to_be_bytes();
 		let mix = keccak_256(b"dnfs-cggmp21-keygen");
@@ -174,30 +175,21 @@ fn submit_keygen_invalid_decommitment_should_work() {
 				sch_commit: h,
 				decommit: Default::default(),
 			};
-		let round1_msg = bincode2::serialize(&my_commitment).unwrap();
-		let round2_msg = bincode2::serialize(&my_decommitment2).unwrap();
 
-		let msg_to_sign = [&i.to_be_bytes()[..], &round1_msg[..]].concat();
-		let signature = sign(pub_key, &msg_to_sign);
-		let round1_signed_message =
-			SignedRoundMessage { sender: i, message: round1_msg, signature };
-
-		let msg_to_sign = [&i.to_be_bytes()[..], &round2_msg[..]].concat();
-		let signature = sign(pub_key, &msg_to_sign);
-		let round2_signed_message =
-			SignedRoundMessage { sender: i, message: round2_msg, signature };
+		let round1_signed_msg = sign_round_msg(offender, i, &my_commitment);
+		let round2a_signed_msg = sign_round_msg(offender, i, &my_decommitment2);
 
 		let submission = MisbehaviorSubmission {
 			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
-			offender,
+			offender: offender.0,
 			job_id,
 			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
 				DfnsCGGMP21Justification::Keygen {
-					n,
+					participants: participants.iter().map(|p| p.0).collect(),
 					t,
 					reason: KeygenAborted::InvalidDecommitment {
-						round1: round1_signed_message,
-						round2a: round2_signed_message,
+						round1: round1_signed_msg,
+						round2a: round2a_signed_msg,
 					},
 				},
 			)),
@@ -210,12 +202,11 @@ fn submit_keygen_invalid_decommitment_should_work() {
 #[test]
 fn submit_keygen_decommitment_data_size_should_work() {
 	new_test_ext().execute_with(|| {
-		let pub_key = pub_key();
-		let offender = pub_key.0;
-		let job_id = 1_u64;
 		let i = 2_u16;
-		let n = 5_u16;
+		let participants = (0..5).map(|_| pub_key()).collect::<Vec<_>>();
 		let t = 3_u16;
+		let offender = participants[usize::from(i)];
+		let job_id = 1_u64;
 		let rng = &mut rand_chacha::ChaChaRng::from_seed([42; 32]);
 
 		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
@@ -236,22 +227,17 @@ fn submit_keygen_decommitment_data_size_should_work() {
 					nonce
 				},
 			};
-		let round2_msg = bincode2::serialize(&my_decommitment).unwrap();
-
-		let msg_to_sign = [&i.to_be_bytes()[..], &round2_msg[..]].concat();
-		let signature = sign(pub_key, &msg_to_sign);
-		let round2_signed_message =
-			SignedRoundMessage { sender: i, message: round2_msg, signature };
+		let round2a_signed_msg = sign_round_msg(offender, i, &my_decommitment);
 
 		let submission = MisbehaviorSubmission {
 			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
-			offender,
+			offender: offender.0,
 			job_id,
 			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
 				DfnsCGGMP21Justification::Keygen {
-					n,
+					participants: participants.iter().map(|p| p.0).collect(),
 					t,
-					reason: KeygenAborted::InvalidDataSize { round2a: round2_signed_message },
+					reason: KeygenAborted::InvalidDataSize { round2a: round2a_signed_msg },
 				},
 			)),
 		};
@@ -263,12 +249,11 @@ fn submit_keygen_decommitment_data_size_should_work() {
 #[test]
 fn submit_keygen_invalid_decommitment_data_size_should_work() {
 	new_test_ext().execute_with(|| {
-		let pub_key = pub_key();
-		let offender = pub_key.0;
-		let job_id = 1_u64;
 		let i = 2_u16;
-		let n = 5_u16;
+		let participants = (0..5).map(|_| pub_key()).collect::<Vec<_>>();
 		let t = 3_u16;
+		let offender = participants[usize::from(i)];
+		let job_id = 1_u64;
 		let rng = &mut rand_chacha::ChaChaRng::from_seed([42; 32]);
 
 		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
@@ -289,22 +274,17 @@ fn submit_keygen_invalid_decommitment_data_size_should_work() {
 					nonce
 				},
 			};
-		let round2_msg = bincode2::serialize(&my_decommitment).unwrap();
-
-		let msg_to_sign = [&i.to_be_bytes()[..], &round2_msg[..]].concat();
-		let signature = sign(pub_key, &msg_to_sign);
-		let round2_signed_message =
-			SignedRoundMessage { sender: i, message: round2_msg, signature };
+		let round2a_signed_msg = sign_round_msg(offender, i, &my_decommitment);
 
 		let submission = MisbehaviorSubmission {
 			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
-			offender,
+			offender: offender.0,
 			job_id,
 			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
 				DfnsCGGMP21Justification::Keygen {
-					n,
+					participants: participants.iter().map(|p| p.0).collect(),
 					t: t + 1,
-					reason: KeygenAborted::InvalidDataSize { round2a: round2_signed_message },
+					reason: KeygenAborted::InvalidDataSize { round2a: round2a_signed_msg },
 				},
 			)),
 		};
@@ -316,12 +296,11 @@ fn submit_keygen_invalid_decommitment_data_size_should_work() {
 #[test]
 fn submit_keygen_feldman_verification_should_work() {
 	new_test_ext().execute_with(|| {
-		let pub_key = pub_key();
-		let offender = pub_key.0;
-		let job_id = 1_u64;
 		let i = 2_u16;
-		let n = 5_u16;
+		let participants = (0..5).map(|_| pub_key()).collect::<Vec<_>>();
 		let t = 3_u16;
+		let offender = participants[usize::from(i)];
+		let job_id = 1_u64;
 		let rng = &mut rand_chacha::ChaChaRng::from_seed([42; 32]);
 
 		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
@@ -342,7 +321,6 @@ fn submit_keygen_feldman_verification_should_work() {
 					nonce
 				},
 			};
-		let round2a_msg = bincode2::serialize(&my_decommitment).unwrap();
 
 		let my_sigma: keygen::msg::threshold::MsgRound2Uni<Secp256k1> =
 			keygen::msg::threshold::MsgRound2Uni {
@@ -352,28 +330,20 @@ fn submit_keygen_feldman_verification_should_work() {
 				},
 			};
 
-		let round2b_msg = bincode2::serialize(&my_sigma).unwrap();
+		let round2a_signed_msg = sign_round_msg(offender, i, &my_decommitment);
+		let round2b_signed_msg = sign_round_msg(offender, i, &my_sigma);
 
-		let msg_to_sign = [&i.to_be_bytes()[..], &round2a_msg[..]].concat();
-		let signature = sign(pub_key, &msg_to_sign);
-		let round2a_signed_message =
-			SignedRoundMessage { sender: i, message: round2a_msg, signature };
-
-		let msg_to_sign = [&i.to_be_bytes()[..], &round2b_msg[..]].concat();
-		let signature = sign(pub_key, &msg_to_sign);
-		let round2b_signed_message =
-			SignedRoundMessage { sender: i, message: round2b_msg, signature };
 		let submission = MisbehaviorSubmission {
 			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
-			offender,
+			offender: offender.0,
 			job_id,
 			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
 				DfnsCGGMP21Justification::Keygen {
-					n,
+					participants: participants.iter().map(|p| p.0).collect(),
 					t,
 					reason: KeygenAborted::FeldmanVerificationFailed {
-						round2a: round2a_signed_message,
-						round2b: round2b_signed_message,
+						round2a: round2a_signed_msg,
+						round2b: round2b_signed_msg,
 					},
 				},
 			)),
@@ -389,12 +359,11 @@ fn submit_keygen_feldman_verification_should_work() {
 #[test]
 fn submit_keygen_invalid_feldman_verification_should_work() {
 	new_test_ext().execute_with(|| {
-		let pub_key = pub_key();
-		let offender = pub_key.0;
-		let job_id = 1_u64;
 		let i = 2_u16;
-		let n = 5_u16;
+		let participants = (0..5).map(|_| pub_key()).collect::<Vec<_>>();
 		let t = 3_u16;
+		let offender = participants[usize::from(i)];
+		let job_id = 1_u64;
 		let rng = &mut rand_chacha::ChaChaRng::from_seed([42; 32]);
 
 		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
@@ -415,7 +384,6 @@ fn submit_keygen_invalid_feldman_verification_should_work() {
 					nonce
 				},
 			};
-		let round2a_msg = bincode2::serialize(&my_decommitment).unwrap();
 
 		let my_sigma: keygen::msg::threshold::MsgRound2Uni<Secp256k1> =
 			keygen::msg::threshold::MsgRound2Uni {
@@ -426,28 +394,20 @@ fn submit_keygen_invalid_feldman_verification_should_work() {
 				},
 			};
 
-		let round2b_msg = bincode2::serialize(&my_sigma).unwrap();
+		let round2a_signed_msg = sign_round_msg(offender, i, &my_decommitment);
+		let round2b_signed_msg = sign_round_msg(offender, i, &my_sigma);
 
-		let msg_to_sign = [&i.to_be_bytes()[..], &round2a_msg[..]].concat();
-		let signature = sign(pub_key, &msg_to_sign);
-		let round2a_signed_message =
-			SignedRoundMessage { sender: i, message: round2a_msg, signature };
-
-		let msg_to_sign = [&i.to_be_bytes()[..], &round2b_msg[..]].concat();
-		let signature = sign(pub_key, &msg_to_sign);
-		let round2b_signed_message =
-			SignedRoundMessage { sender: i, message: round2b_msg, signature };
 		let submission = MisbehaviorSubmission {
 			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
-			offender,
+			offender: offender.0,
 			job_id,
 			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
 				DfnsCGGMP21Justification::Keygen {
-					n,
+					participants: participants.iter().map(|p| p.0).collect(),
 					t,
 					reason: KeygenAborted::FeldmanVerificationFailed {
-						round2a: round2a_signed_message,
-						round2b: round2b_signed_message,
+						round2a: round2a_signed_msg,
+						round2b: round2b_signed_msg,
 					},
 				},
 			)),
@@ -457,4 +417,223 @@ fn submit_keygen_invalid_feldman_verification_should_work() {
 	});
 }
 
-fn submit_keygen_schnorr_proof_verification_should_work() {}
+#[test]
+fn submit_keygen_schnorr_proof_verification_should_work() {
+	new_test_ext().execute_with(|| {
+		let i = 2_u16;
+		let participants = (0..5).map(|_| pub_key()).collect::<Vec<_>>();
+		let n = participants.len() as u16;
+		let t = 3_u16;
+		let offender = participants[usize::from(i)];
+		let job_id = 1_u64;
+		let job_id_bytes = job_id.to_be_bytes();
+		let mix = keccak_256(b"dnfs-cggmp21-keygen");
+		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
+		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
+
+		let fp = (0..n)
+			.map(|_| Polynomial::<SecretScalar<Secp256k1>>::sample(rng, usize::from(t) - 1))
+			.collect::<Vec<_>>();
+		let round2a_msgs = (0..n)
+			.map(|j| {
+				let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				rng.fill_bytes(rid.as_mut());
+				let (r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
+				let f = &fp[usize::from(j)];
+				let F = f * &Point::generator();
+				let my_decommitment: keygen::msg::threshold::MsgRound2Broad<_, SecurityLevel128> =
+					keygen::msg::threshold::MsgRound2Broad {
+						rid,
+						F,
+						sch_commit: h,
+						decommit: {
+							let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+							rng.fill_bytes(nonce.as_mut());
+							nonce
+						},
+					};
+				(r, my_decommitment)
+			})
+			.collect::<Vec<_>>();
+
+		let sigmas = (0..n)
+			.map(|j| {
+				let f = &fp[usize::from(j)];
+				f.value(&Scalar::from(i + 1))
+			})
+			.collect::<Vec<Scalar<Secp256k1>>>();
+		debug_assert_eq!(sigmas.len(), usize::from(n));
+
+		let (r, my_decommitment) = &round2a_msgs[usize::from(i)];
+
+		let rid = round2a_msgs
+			.iter()
+			.map(|(_, d)| &d.rid)
+			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), DfnsCGGMP21::xor_array);
+
+		let polynomial_sum =
+			round2a_msgs.iter().map(|(_, d)| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
+
+		let ys = (0..n)
+			.map(|l| polynomial_sum.value(&Scalar::from(l + 1)))
+			.collect::<Vec<Point<Secp256k1>>>();
+
+		let mut sigma: Scalar<Secp256k1> = sigmas.iter().sum();
+		let sigma = SecretScalar::new(&mut sigma);
+		debug_assert_eq!(Point::generator() * &sigma, ys[usize::from(i)]);
+
+		let challenge = {
+			let hash = |d: DefaultDigest| {
+				d.chain_update(&eid_bytes)
+					.chain_update(i.to_be_bytes())
+					.chain_update(rid.as_ref())
+					.chain_update(ys[usize::from(i)].to_bytes(true)) // y_i
+					.chain_update(my_decommitment.sch_commit.0.to_bytes(false)) // h
+					.finalize()
+			};
+			let mut rng = paillier_zk::rng::HashRng::new(hash);
+			Scalar::random(&mut rng)
+		};
+		let challenge = schnorr_pok::Challenge { nonce: challenge };
+
+		let z = schnorr_pok::prove(r, &challenge, sigma);
+
+		let round3_msg = keygen::msg::threshold::MsgRound3 { sch_proof: z };
+		let round3_signed_msg = sign_round_msg(offender, i, &round3_msg);
+
+		let signed_round2a_msgs = (0..n)
+			.zip(participants.iter())
+			.zip(round2a_msgs.iter())
+			.map(|((i, key), (_, msg))| sign_round_msg(*key, i, msg))
+			.collect::<Vec<_>>();
+
+		let submission = MisbehaviorSubmission {
+			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
+			offender: offender.0,
+			job_id,
+			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
+				DfnsCGGMP21Justification::Keygen {
+					participants: participants.iter().map(|p| p.0).collect(),
+					t,
+					reason: KeygenAborted::InvalidSchnorrProof {
+						round2a: signed_round2a_msgs,
+						round3: round3_signed_msg,
+					},
+				},
+			)),
+		};
+
+		assert_err!(DfnsCGGMP21::verify(submission), crate::Error::<Runtime>::ValidSchnorrProof);
+	});
+}
+
+#[test]
+fn submit_keygen_invalid_schnorr_proof_verification_should_work() {
+	new_test_ext().execute_with(|| {
+		let i = 2_u16;
+		let participants = (0..5).map(|_| pub_key()).collect::<Vec<_>>();
+		let n = participants.len() as u16;
+		let t = 3_u16;
+		let offender = participants[usize::from(i)];
+		let job_id = 1_u64;
+		let job_id_bytes = job_id.to_be_bytes();
+		let mix = keccak_256(b"dnfs-cggmp21-keygen");
+		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
+		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
+
+		let fp = (0..n)
+			.map(|_| Polynomial::<SecretScalar<Secp256k1>>::sample(rng, usize::from(t) - 1))
+			.collect::<Vec<_>>();
+		let round2a_msgs = (0..n)
+			.map(|j| {
+				let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				rng.fill_bytes(rid.as_mut());
+				let (r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
+				let f = &fp[usize::from(j)];
+				let F = f * &Point::generator();
+				let my_decommitment: keygen::msg::threshold::MsgRound2Broad<_, SecurityLevel128> =
+					keygen::msg::threshold::MsgRound2Broad {
+						rid,
+						F,
+						sch_commit: h,
+						decommit: {
+							let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+							rng.fill_bytes(nonce.as_mut());
+							nonce
+						},
+					};
+				(r, my_decommitment)
+			})
+			.collect::<Vec<_>>();
+
+		let sigmas = (0..n)
+			.map(|j| {
+				let f = &fp[usize::from(j)];
+				f.value(&Scalar::from(i + 1))
+			})
+			.collect::<Vec<Scalar<Secp256k1>>>();
+		debug_assert_eq!(sigmas.len(), usize::from(n));
+
+		let (r, my_decommitment) = &round2a_msgs[usize::from(i)];
+
+		let rid = round2a_msgs
+			.iter()
+			.map(|(_, d)| &d.rid)
+			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), DfnsCGGMP21::xor_array);
+
+		let polynomial_sum =
+			round2a_msgs.iter().map(|(_, d)| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
+
+		let ys = (0..n)
+			.map(|l| polynomial_sum.value(&Scalar::from(l + 1)))
+			.collect::<Vec<Point<Secp256k1>>>();
+
+		let mut sigma: Scalar<Secp256k1> = sigmas.iter().sum();
+		let sigma = SecretScalar::new(&mut sigma);
+		debug_assert_eq!(Point::generator() * &sigma, ys[usize::from(i)]);
+
+		let challenge = {
+			let hash = |d: DefaultDigest| {
+				d.chain_update(&eid_bytes)
+					// commented intuentially to make the proof invalid
+					// .chain_update(i.to_be_bytes())
+					.chain_update(rid.as_ref())
+					.chain_update(ys[usize::from(i)].to_bytes(true)) // y_i
+					.chain_update(my_decommitment.sch_commit.0.to_bytes(false)) // h
+					.finalize()
+			};
+			let mut rng = paillier_zk::rng::HashRng::new(hash);
+			Scalar::random(&mut rng)
+		};
+		let challenge = schnorr_pok::Challenge { nonce: challenge };
+
+		let z = schnorr_pok::prove(r, &challenge, sigma);
+
+		let round3_msg = keygen::msg::threshold::MsgRound3 { sch_proof: z };
+		let round3_signed_msg = sign_round_msg(offender, i, &round3_msg);
+
+		let signed_round2a_msgs = (0..n)
+			.zip(participants.iter())
+			.zip(round2a_msgs.iter())
+			.map(|((i, key), (_, msg))| sign_round_msg(*key, i, msg))
+			.collect::<Vec<_>>();
+
+		let submission = MisbehaviorSubmission {
+			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
+			offender: offender.0,
+			job_id,
+			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
+				DfnsCGGMP21Justification::Keygen {
+					participants: participants.iter().map(|p| p.0).collect(),
+					t,
+					reason: KeygenAborted::InvalidSchnorrProof {
+						round2a: signed_round2a_msgs,
+						round3: round3_signed_msg,
+					},
+				},
+			)),
+		};
+
+		assert_ok!(DfnsCGGMP21::verify(submission));
+	});
+}
