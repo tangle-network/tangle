@@ -23,7 +23,23 @@ pub type BalanceOf<T> =
 
 #[derive(udigest::Digestable)]
 #[udigest(tag = "dfns.cggmp21.keygen.threshold.tag")]
-pub enum Tag<'a> {
+pub enum KeygenTag<'a> {
+	/// Tag that includes the prover index
+	Indexed {
+		party_index: u16,
+		#[udigest(as_bytes)]
+		sid: &'a [u8],
+	},
+	/// Tag w/o party index
+	Unindexed {
+		#[udigest(as_bytes)]
+		sid: &'a [u8],
+	},
+}
+
+#[derive(udigest::Digestable)]
+#[udigest(tag = "dfns.cggmp21.aux_gen.tag")]
+pub enum AuxGenTag<'a> {
 	/// Tag that includes the prover index
 	Indexed {
 		party_index: u16,

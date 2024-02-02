@@ -39,6 +39,7 @@ pub struct SignedRoundMessage {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub enum DfnsCGGMP21Justification {
 	Keygen { participants: Vec<[u8; 33]>, t: u16, reason: KeygenAborted },
+	KeyRefresh { participants: Vec<[u8; 33]>, t: u16, reason: KeyRefreshAborted },
 	Signing { participants: Vec<[u8; 33]>, t: u16, reason: SigningAborted },
 }
 
@@ -52,6 +53,28 @@ pub enum KeygenAborted {
 	FeldmanVerificationFailed { round2a: SignedRoundMessage, round2b: SignedRoundMessage },
 	/// party data size is not suitable for threshold parameters.
 	InvalidDataSize { round2a: SignedRoundMessage },
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+pub enum KeyRefreshAborted {
+	/// decommitment doesn't match commitment.
+	InvalidDecommitment { round1: SignedRoundMessage, round2: SignedRoundMessage },
+	/// provided invalid schnorr proof.
+	InvalidSchnorrProof,
+	/// provided invalid proof for Rmod.
+	InvalidModProof,
+	/// provided invalid proof for Rfac.
+	InvalidFacProof,
+	/// N, s and t parameters are invalid.
+	InvalidRingPedersenParameters,
+	/// X is malformed.
+	InvalidX,
+	/// x doesn't correspond to X.
+	InvalidXShare,
+	/// party sent a message with missing data.
+	InvalidDataSize,
+	/// party message could not be decrypted.
+	PaillierDec,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]

@@ -7151,6 +7151,7 @@ dependencies = [
  "round-based",
  "scale-info",
  "serde",
+ "serde_with 2.3.3",
  "sha2 0.10.8",
  "smallvec",
  "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",

@@ -38,6 +38,7 @@ generic-ec = { workspace = true, features = ["serde", "udigest"] }
 generic-ec-zkp = { workspace = true, features = ["serde", "udigest"] }
 round-based = { workspace = true, features = ["derive"] }
 paillier-zk = { workspace = true, features = ["serde"] }
+serde_with = { workspace = true }
 
 [features]
 default = ["std"]

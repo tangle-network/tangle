@@ -1,3 +1,5 @@
+use crate::types::AuxGenTag;
+
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 //
@@ -15,6 +17,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use dfns_cggmp21::{
+	key_refresh::msg::aux_only,
 	keygen,
 	security_level::{SecurityLevel, SecurityLevel128},
 };
@@ -26,7 +29,8 @@ use sp_io::{hashing::keccak_256, EcdsaVerifyError};
 use tangle_primitives::{
 	misbehavior::{
 		dfns_cggmp21::{
-			DfnsCGGMP21Justification, KeygenAborted, SignedRoundMessage, SigningAborted,
+			DfnsCGGMP21Justification, KeyRefreshAborted, KeygenAborted, SignedRoundMessage,
+			SigningAborted,
 		},
 		DKGTSSJustification, MisbehaviorJustification, MisbehaviorSubmission,
 	},
@@ -34,7 +38,7 @@ use tangle_primitives::{
 };
 
 use dfns_cggmp21::{generic_ec, supported_curves::Secp256k1};
-use types::{DefaultDigest, Tag};
+use types::{DefaultDigest, KeygenTag};
 
 /// Expected signature length
 pub const SIGNATURE_LENGTH: usize = 65;
@@ -91,6 +95,8 @@ impl<T: Config> Pallet<T> {
 		match justification {
 			DfnsCGGMP21Justification::Keygen { participants, t, reason } =>
 				Self::verify_keygen_misbehavior(data, participants, *t, reason),
+			DfnsCGGMP21Justification::KeyRefresh { participants, t, reason } =>
+				Self::verify_key_refresh_misbehavior(data, participants, *t, reason),
 			DfnsCGGMP21Justification::Signing { participants, t, reason } =>
 				Self::verify_signing_misbehavior(data, participants, *t, reason),
 		}
@@ -116,6 +122,20 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
+	/// given a key refresh misbehavior justification, verify the misbehavior and return a dispatch
+	/// result
+	pub fn verify_key_refresh_misbehavior(
+		data: &MisbehaviorSubmission,
+		participants: &[[u8; 33]],
+		t: u16,
+		reason: &KeyRefreshAborted,
+	) -> DispatchResult {
+		match reason {
+			KeyRefreshAborted::InvalidDecommitment { round1, round2 } =>
+				Self::verify_key_refresh_invalid_decommitment(data, round1, round2),
+			_ => unimplemented!(),
+		}
+	}
 	/// given a signing misbehavior justification, verify the misbehavior and return a dispatch
 	/// result
 	pub fn verify_signing_misbehavior(
@@ -138,9 +158,9 @@ impl<T: Config> Pallet<T> {
 		ensure!(round1.sender == round2a.sender, Error::<T>::InvalidJustification);
 
 		let job_id_bytes = data.job_id.to_be_bytes();
-		let mix = keccak_256(b"dnfs-cggmp21-keygen");
+		let mix = keccak_256(crate::constants::KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
-		let tag = udigest::Tag::<DefaultDigest>::new_structured(Tag::Indexed {
+		let tag = udigest::Tag::<DefaultDigest>::new_structured(KeygenTag::Indexed {
 			party_index: round1.sender,
 			sid: &eid_bytes[..],
 		});
@@ -231,7 +251,7 @@ impl<T: Config> Pallet<T> {
 		Self::ensure_signed_by_offender(decomm, data.offender)?;
 
 		let job_id_bytes = data.job_id.to_be_bytes();
-		let mix = keccak_256(b"dnfs-cggmp21-keygen");
+		let mix = keccak_256(crate::constants::KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 
 		let round3_msg =
@@ -288,6 +308,38 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
+	/// Given a KeyRefresh Round1 and Round2 messages, verify the misbehavior and return the result.
+	pub fn verify_key_refresh_invalid_decommitment(
+		data: &MisbehaviorSubmission,
+		round1: &SignedRoundMessage,
+		round2: &SignedRoundMessage,
+	) -> DispatchResult {
+		Self::ensure_signed_by_offender(round1, data.offender)?;
+		Self::ensure_signed_by_offender(round2, data.offender)?;
+		ensure!(round1.sender == round2.sender, Error::<T>::InvalidJustification);
+
+		let job_id_bytes = data.job_id.to_be_bytes();
+		let mix = keccak_256(crate::constants::AUX_GEN_EID);
+		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
+		let tag = udigest::Tag::<DefaultDigest>::new_structured(AuxGenTag::Indexed {
+			party_index: round1.sender,
+			sid: &eid_bytes[..],
+		});
+
+		let round1_msg =
+			bincode2::deserialize::<aux_only::MsgRound1<DefaultDigest>>(&round1.message)
+				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+
+		let round2_msg =
+			bincode2::deserialize::<aux_only::MsgRound2<SecurityLevel128>>(&round2.message)
+				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+		let hash_commit = tag.digest(round2_msg);
+
+		ensure!(round1_msg.commitment != hash_commit, Error::<T>::ValidDecommitment);
+		// Slash the offender!
+		// TODO: add slashing logic
+		Ok(())
+	}
 	/// Given a [`SignedRoundMessage`] ensure that the message is signed by the given offender.
 	pub fn ensure_signed_by_offender(
 		signed_message: &SignedRoundMessage,
