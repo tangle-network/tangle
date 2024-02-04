@@ -165,7 +165,7 @@ impl<AccountId, MaxParticipants: Get<u32> + Clone, MaxSubmissionLen: Get<u32>>
 	/// This function is intended for simple checks and may need improvement in the future.
 	pub fn sanity_check(&self) -> bool {
 		match self {
-			JobType::DKGTSSPhaseOne(info) => info.participants.len() > info.threshold.into(),
+			JobType::DKGTSSPhaseOne(info) => info.participants.len() >= info.threshold.into(),
 			JobType::ZkSaaSPhaseOne(info) => !info.participants.is_empty(),
 			_ => true,
 		}
