@@ -85,7 +85,9 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: [HUNDRED, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
@@ -114,7 +116,9 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 5,
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
@@ -135,7 +139,9 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
@@ -155,7 +161,9 @@ fn jobs_submission_e2e_works_for_dkg() {
 				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -171,10 +179,10 @@ fn jobs_submission_e2e_works_for_dkg() {
 			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
-				signatures: vec![],
+				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
-				participants: vec![],
-				key: vec![],
+				participants: vec![].try_into().unwrap(),
+				key: vec![].try_into().unwrap(),
 				signature_type: DigitalSignatureType::Ecdsa
 			})
 		));
@@ -204,7 +212,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			ttl: 0,
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
-				submission: vec![],
+				submission: vec![].try_into().unwrap(),
 				role_type: threshold_signature_role_type,
 			}),
 		};
@@ -218,7 +226,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			ttl: 0,
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
-				submission: vec![],
+				submission: vec![].try_into().unwrap(),
 				role_type: threshold_signature_role_type,
 			}),
 		};
@@ -232,9 +240,9 @@ fn jobs_submission_e2e_works_for_dkg() {
 			RoleType::Tss(threshold_signature_role_type),
 			1,
 			JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
-				signing_key: vec![],
-				signature: vec![],
-				data: vec![],
+				signing_key: vec![].try_into().unwrap(),
+				signature: vec![].try_into().unwrap(),
+				data: vec![].try_into().unwrap(),
 				signature_type: DigitalSignatureType::Ecdsa
 			})
 		));
@@ -282,7 +290,9 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -298,10 +308,10 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
-				signatures: vec![],
+				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
-				participants: vec![],
-				key: vec![],
+				participants: vec![].try_into().unwrap(),
+				key: vec![].try_into().unwrap(),
 				signature_type: DigitalSignatureType::Ecdsa
 			})
 		));
@@ -361,7 +371,9 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -378,7 +390,9 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -393,10 +407,10 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
-				signatures: vec![],
+				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
-				participants: vec![],
-				key: vec![],
+				participants: vec![].try_into().unwrap(),
+				key: vec![].try_into().unwrap(),
 				signature_type: DigitalSignatureType::Ecdsa
 			})
 		));
@@ -407,10 +421,10 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			1,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
-				signatures: vec![],
+				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
-				participants: vec![],
-				key: vec![],
+				participants: vec![].try_into().unwrap(),
+				key: vec![].try_into().unwrap(),
 				signature_type: DigitalSignatureType::Ecdsa
 			})
 		));
@@ -436,9 +450,9 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 			RoleType::Tss(threshold_signature_role_type),
 			2,
 			JobResult::DKGPhaseFour(DKGTSSKeyRotationResult {
-				key: vec![],
-				new_key: vec![],
-				signature: vec![],
+				key: vec![].try_into().unwrap(),
+				new_key: vec![].try_into().unwrap(),
+				signature: vec![].try_into().unwrap(),
 				phase_one_id: 0,
 				new_phase_one_id: 1,
 				signature_type: DigitalSignatureType::Ecdsa
@@ -474,7 +488,13 @@ fn jobs_rpc_tests() {
 			expiry: 10,
 			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -511,10 +531,10 @@ fn jobs_rpc_tests() {
 			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
-				signatures: vec![],
+				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
-				participants: vec![],
-				key: vec![],
+				participants: vec![].try_into().unwrap(),
+				key: vec![].try_into().unwrap(),
 				signature_type: DigitalSignatureType::Ecdsa
 			})
 		));
@@ -536,7 +556,7 @@ fn jobs_rpc_tests() {
 			ttl: 0,
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
-				submission: vec![],
+				submission: vec![].try_into().unwrap(),
 				role_type: threshold_signature_role_type,
 			}),
 		};
@@ -583,12 +603,12 @@ fn jobs_submission_e2e_works_for_zksaas() {
 		}
 
 		let dummy_system = ZkSaaSSystem::Groth16(Groth16System {
-			circuit: HyperData::Raw(vec![]),
+			circuit: HyperData::Raw(vec![].try_into().unwrap()),
 			num_inputs: 0,
 			num_constraints: 0,
-			proving_key: HyperData::Raw(vec![]),
-			verifying_key: vec![],
-			wasm: HyperData::Raw(vec![]),
+			proving_key: HyperData::Raw(vec![].try_into().unwrap()),
+			verifying_key: vec![].try_into().unwrap(),
+			wasm: HyperData::Raw(vec![].try_into().unwrap()),
 		});
 
 		let submission = JobSubmission {
@@ -601,7 +621,9 @@ fn jobs_submission_e2e_works_for_zksaas() {
 				participants: [HUNDRED, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect::<Vec<_>>(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 			}),
 		};
 
@@ -615,14 +637,20 @@ fn jobs_submission_e2e_works_for_zksaas() {
 		let _submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
-			job_type: JobType::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
+			job_type: JobType::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType::<
+				sp_runtime::AccountId32,
+				MaxParticipants,
+				MaxSubmissionLen,
+			> {
 				permitted_caller: None,
 				system: dummy_system.clone(),
 				role_type: ZeroKnowledgeRoleType::ZkSaaSGroth16,
 				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect::<Vec<_>>(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 			}),
 		};
 
@@ -636,7 +664,9 @@ fn jobs_submission_e2e_works_for_zksaas() {
 				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect::<Vec<_>>(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 			}),
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
@@ -648,7 +678,10 @@ fn jobs_submission_e2e_works_for_zksaas() {
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
 			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
 			0,
-			JobResult::ZkSaaSPhaseOne(ZkSaaSCircuitResult { job_id: 0, participants: vec![] }),
+			JobResult::ZkSaaSPhaseOne(ZkSaaSCircuitResult {
+				job_id: 0,
+				participants: vec![].try_into().unwrap()
+			}),
 		));
 
 		// ensure the job reward is distributed correctly
@@ -670,10 +703,10 @@ fn jobs_submission_e2e_works_for_zksaas() {
 
 		// ---- use phase one solution in phase 2 proving -------
 		let dummy_req = ZkSaaSPhaseTwoRequest::Groth16(Groth16ProveRequest {
-			public_input: vec![],
-			a_shares: vec![],
-			ax_shares: vec![],
-			qap_shares: vec![],
+			public_input: vec![].try_into().unwrap(),
+			a_shares: vec![].try_into().unwrap(),
+			ax_shares: vec![].try_into().unwrap(),
+			qap_shares: vec![].try_into().unwrap(),
 		});
 		// another account cannot use solution
 		let submission = JobSubmission {
@@ -749,7 +782,13 @@ fn reduce_active_role_restake_should_fail() {
 			expiry: 10,
 			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -807,7 +846,13 @@ fn delete_profile_with_active_role_should_fail() {
 			expiry: 10,
 			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -847,7 +892,13 @@ fn remove_active_role_should_fail() {
 			expiry: 10,
 			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -898,7 +949,13 @@ fn remove_role_without_active_jobs_should_work() {
 			expiry: 10,
 			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -947,7 +1004,13 @@ fn add_role_to_active_profile_should_work() {
 			expiry: 10,
 			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -1002,7 +1065,13 @@ fn reduce_stake_on_non_active_role_should_work() {
 			expiry: 10,
 			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -1056,7 +1125,13 @@ fn increase_stake_on_active_role_should_work() {
 			expiry: 10,
 			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -1172,7 +1247,13 @@ fn switch_active_shared_profile_to_independent_should_work_if_active_stake_prese
 			expiry: 10,
 			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
@@ -1251,7 +1332,13 @@ fn switch_active_independent_profile_to_shared_should_work_if_active_restake_sum
 			expiry: 10,
 			ttl: 200,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-				participants: participants.clone().iter().map(|x| mock_pub_key(*x)).collect(),
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,

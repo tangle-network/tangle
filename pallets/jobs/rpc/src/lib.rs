@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 #![allow(clippy::unnecessary_mut_passed)]
-
+#![allow(clippy::type_complexity)]
 use jsonrpsee::{
 	core::{Error as JsonRpseeError, RpcResult},
 	proc_macros::rpc,
@@ -25,7 +25,7 @@ use parity_scale_codec::Codec;
 use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
 use sp_runtime::{
-	traits::{Block as BlockT, MaybeDisplay},
+	traits::{Block as BlockT, Get, MaybeDisplay},
 	Serialize,
 };
 use std::sync::Arc;
@@ -39,13 +39,26 @@ type BlockNumberOf<Block> =
 
 /// JobsClient RPC methods.
 #[rpc(client, server)]
-pub trait JobsApi<BlockHash, AccountId, BlockNumber> {
+pub trait JobsApi<
+	BlockHash,
+	AccountId,
+	BlockNumber,
+	MaxParticipants: Get<u32> + Clone,
+	MaxSubmissionLen: Get<u32>,
+	MaxKeyLen: Get<u32>,
+	MaxDataLen: Get<u32>,
+	MaxSignatureLen: Get<u32>,
+	MaxProofLen: Get<u32>,
+>
+{
 	#[method(name = "jobs_queryJobsByValidator")]
 	fn query_jobs_by_validator(
 		&self,
 		at: Option<BlockHash>,
 		validator: AccountId,
-	) -> RpcResult<Option<Vec<RpcResponseJobsData<AccountId, BlockNumber>>>>;
+	) -> RpcResult<
+		Option<Vec<RpcResponseJobsData<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>>>,
+	>;
 
 	#[method(name = "jobs_queryJobById")]
 	fn query_job_by_id(
@@ -53,7 +66,9 @@ pub trait JobsApi<BlockHash, AccountId, BlockNumber> {
 		at: Option<BlockHash>,
 		role_type: RoleType,
 		job_id: JobId,
-	) -> RpcResult<Option<RpcResponseJobsData<AccountId, BlockNumber>>>;
+	) -> RpcResult<
+		Option<RpcResponseJobsData<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>>,
+	>;
 
 	#[method(name = "jobs_queryPhaseOneById")]
 	fn query_job_result(
@@ -61,7 +76,20 @@ pub trait JobsApi<BlockHash, AccountId, BlockNumber> {
 		at: Option<BlockHash>,
 		role_type: RoleType,
 		job_id: JobId,
-	) -> RpcResult<Option<PhaseResult<AccountId, BlockNumber>>>;
+	) -> RpcResult<
+		Option<
+			PhaseResult<
+				AccountId,
+				BlockNumber,
+				MaxParticipants,
+				MaxKeyLen,
+				MaxDataLen,
+				MaxSignatureLen,
+				MaxSubmissionLen,
+				MaxProofLen,
+			>,
+		>,
+	>;
 
 	#[method(name = "jobs_queryNextJobId")]
 	fn query_next_job_id(&self, at: Option<BlockHash>) -> RpcResult<JobId>;
@@ -80,19 +108,65 @@ impl<C, M, P> JobsClient<C, M, P> {
 	}
 }
 
-impl<C, Block, AccountId> JobsApiServer<<Block as BlockT>::Hash, AccountId, BlockNumberOf<Block>>
-	for JobsClient<C, Block, AccountId>
+impl<
+		C,
+		Block,
+		AccountId,
+		MaxParticipants,
+		MaxSubmissionLen,
+		MaxKeyLen,
+		MaxDataLen,
+		MaxSignatureLen,
+		MaxProofLen,
+	>
+	JobsApiServer<
+		<Block as BlockT>::Hash,
+		AccountId,
+		BlockNumberOf<Block>,
+		MaxParticipants,
+		MaxSubmissionLen,
+		MaxKeyLen,
+		MaxDataLen,
+		MaxSignatureLen,
+		MaxProofLen,
+	> for JobsClient<C, Block, AccountId>
 where
 	Block: BlockT,
 	AccountId: Codec + MaybeDisplay + Send + Sync + 'static + Serialize,
+	MaxParticipants: Codec + Serialize + Get<u32> + Clone,
+	MaxSubmissionLen: Codec + Serialize + Get<u32>,
+	MaxKeyLen: Codec + Serialize + Get<u32>,
+	MaxDataLen: Codec + Serialize + Get<u32>,
+	MaxSignatureLen: Codec + Serialize + Get<u32>,
+	MaxProofLen: Codec + Serialize + Get<u32>,
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
-	C::Api: JobsRuntimeApi<Block, AccountId>,
+	C::Api: JobsRuntimeApi<
+		Block,
+		AccountId,
+		MaxParticipants,
+		MaxSubmissionLen,
+		MaxKeyLen,
+		MaxDataLen,
+		MaxSignatureLen,
+		MaxProofLen,
+	>,
 {
 	fn query_jobs_by_validator(
 		&self,
 		at: Option<<Block as BlockT>::Hash>,
 		validator: AccountId,
-	) -> RpcResult<Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>>> {
+	) -> RpcResult<
+		Option<
+			Vec<
+				RpcResponseJobsData<
+					AccountId,
+					BlockNumberOf<Block>,
+					MaxParticipants,
+					MaxSubmissionLen,
+				>,
+			>,
+		>,
+	> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 
@@ -107,7 +181,11 @@ where
 		at: Option<<Block as BlockT>::Hash>,
 		role_type: RoleType,
 		job_id: JobId,
-	) -> RpcResult<Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>> {
+	) -> RpcResult<
+		Option<
+			RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen>,
+		>,
+	> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 		match api.query_job_by_id(at, role_type, job_id) {
@@ -121,7 +199,20 @@ where
 		at: Option<<Block as BlockT>::Hash>,
 		role_type: RoleType,
 		job_id: JobId,
-	) -> RpcResult<Option<PhaseResult<AccountId, BlockNumberOf<Block>>>> {
+	) -> RpcResult<
+		Option<
+			PhaseResult<
+				AccountId,
+				BlockNumberOf<Block>,
+				MaxParticipants,
+				MaxKeyLen,
+				MaxDataLen,
+				MaxSignatureLen,
+				MaxSubmissionLen,
+				MaxProofLen,
+			>,
+		>,
+	> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 

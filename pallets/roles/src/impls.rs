@@ -65,7 +65,7 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	fn get_validator_role_key(address: T::AccountId) -> Option<Vec<u8>> {
 		let maybe_ledger = Self::ledger(&address);
 		if let Some(ledger) = maybe_ledger {
-			Some(ledger.role_key)
+			Some(ledger.role_key.to_vec())
 		} else {
 			return None
 		}
@@ -350,7 +350,9 @@ impl<T: Config> Pallet<T> {
 
 	pub fn update_ledger_role_key(staker: &T::AccountId, role_key: Vec<u8>) -> DispatchResult {
 		let mut ledger = Ledger::<T>::get(staker).ok_or(Error::<T>::NoProfileFound)?;
-		ledger.role_key = role_key;
+		let bounded_role_key: BoundedVec<u8, T::MaxKeyLen> =
+			role_key.try_into().map_err(|_| Error::<T>::KeySizeExceeded)?;
+		ledger.role_key = bounded_role_key;
 		Self::update_ledger(staker, &ledger);
 		Ok(())
 	}

@@ -21,7 +21,14 @@ use sp_std::vec::Vec;
 use tangle_primitives::roles::RoleType;
 
 #[derive(
-	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
+	PartialEqNoBound,
+	EqNoBound,
+	CloneNoBound,
+	Encode,
+	Decode,
+	RuntimeDebugNoBound,
+	TypeInfo,
+	MaxEncodedLen,
 )]
 #[scale_info(skip_type_params(T))]
 pub struct Record<T: Config> {
@@ -30,7 +37,14 @@ pub struct Record<T: Config> {
 }
 
 #[derive(
-	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
+	PartialEqNoBound,
+	EqNoBound,
+	CloneNoBound,
+	Encode,
+	Decode,
+	RuntimeDebugNoBound,
+	TypeInfo,
+	MaxEncodedLen,
 )]
 #[scale_info(skip_type_params(T))]
 pub struct IndependentRestakeProfile<T: Config> {
@@ -38,7 +52,14 @@ pub struct IndependentRestakeProfile<T: Config> {
 }
 
 #[derive(
-	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
+	PartialEqNoBound,
+	EqNoBound,
+	CloneNoBound,
+	Encode,
+	Decode,
+	RuntimeDebugNoBound,
+	TypeInfo,
+	MaxEncodedLen,
 )]
 #[scale_info(skip_type_params(T))]
 pub struct SharedRestakeProfile<T: Config> {
@@ -47,7 +68,14 @@ pub struct SharedRestakeProfile<T: Config> {
 }
 
 #[derive(
-	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
+	PartialEqNoBound,
+	EqNoBound,
+	CloneNoBound,
+	Encode,
+	Decode,
+	RuntimeDebugNoBound,
+	TypeInfo,
+	MaxEncodedLen,
 )]
 #[scale_info(skip_type_params(T))]
 pub enum Profile<T: Config> {

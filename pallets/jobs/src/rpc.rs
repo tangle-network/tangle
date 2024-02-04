@@ -1,6 +1,7 @@
 use super::*;
+use crate::types::{PhaseResultOf, RpcResponseJobsDataOf};
 pub use tangle_primitives::jobs::RpcResponseJobsData;
-use tangle_primitives::{jobs::PhaseResult, roles::RoleType};
+use tangle_primitives::roles::RoleType;
 
 impl<T: Config> Pallet<T> {
 	/// Queries jobs associated with a specific validator.
@@ -20,12 +21,12 @@ impl<T: Config> Pallet<T> {
 	/// operation is successful, or an error message as a `String` if there is an issue.
 	pub fn query_jobs_by_validator(
 		validator: T::AccountId,
-	) -> Option<Vec<RpcResponseJobsData<T::AccountId, BlockNumberFor<T>>>> {
-		let mut jobs: Vec<RpcResponseJobsData<_, _>> = vec![];
+	) -> Option<Vec<RpcResponseJobsDataOf<T>>> {
+		let mut jobs: Vec<RpcResponseJobsDataOf<T>> = vec![];
 		if let Some(jobs_list) = ValidatorJobIdLookup::<T>::get(validator) {
 			for (role_type, job_id) in jobs_list.iter() {
 				if let Some(job_info) = SubmittedJobs::<T>::get(role_type, job_id) {
-					let info = RpcResponseJobsData::<T::AccountId, BlockNumberFor<T>> {
+					let info = RpcResponseJobsData {
 						job_id: *job_id,
 						job_type: job_info.job_type,
 						ttl: job_info.ttl,
@@ -51,10 +52,7 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	///
 	/// An optional `RpcResponseJobsData` containing the account ID of the job.
-	pub fn query_job_by_id(
-		role_type: RoleType,
-		job_id: JobId,
-	) -> Option<RpcResponseJobsData<T::AccountId, BlockNumberFor<T>>> {
+	pub fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsDataOf<T>> {
 		SubmittedJobs::<T>::get(role_type, job_id).map(|job_info| RpcResponseJobsData {
 			job_id,
 			job_type: job_info.job_type,
@@ -74,10 +72,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// An `Option` containing the phase one result of the job, wrapped in an
 	/// `PhaseResult`.
-	pub fn query_job_result(
-		role_type: RoleType,
-		job_id: JobId,
-	) -> Option<PhaseResult<T::AccountId, BlockNumberFor<T>>> {
+	pub fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResultOf<T>> {
 		KnownResults::<T>::get(role_type, job_id)
 	}
 

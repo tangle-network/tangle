@@ -91,7 +91,9 @@ where
 		let participants = participants
 			.iter()
 			.map(|x| Runtime::AddressMapping::into_account_id(x.0))
-			.collect();
+			.collect::<Vec<_>>()
+			.try_into()
+			.unwrap();
 
 		// Convert (u16) role type to RoleType
 		let role_type = Self::convert_role_type(role_type);
@@ -168,7 +170,7 @@ where
 		submission: BoundedBytes<GetJobSubmissionSizeLimit>,
 	) -> EvmResult {
 		// Convert BoundedBytes to Vec<u8>
-		let submission: Vec<u8> = submission.into();
+		let submission: Vec<u8> = submission.try_into().unwrap();
 
 		// Convert caller's Ethereum address to Substrate account ID
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -194,7 +196,7 @@ where
 				let job_type = DKGTSSPhaseTwoJobType {
 					role_type: threshold_signature_role,
 					phase_one_id,
-					submission,
+					submission: submission.try_into().unwrap(),
 				};
 
 				// Create job submission object
