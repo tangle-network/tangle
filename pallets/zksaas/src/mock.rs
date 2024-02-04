@@ -84,15 +84,15 @@ parameter_types! {
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxParticipants: u32 = 10;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxSubmissionLen: u32 = 256;
+	pub const MaxSubmissionLen: u32 = u32::MAX;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxKeyLen: u32 = 256;
+	pub const MaxKeyLen: u32 = u32::MAX;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxDataLen: u32 = 256;
+	pub const MaxDataLen: u32 = u32::MAX;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxSignatureLen: u32 = 256;
+	pub const MaxSignatureLen: u32 = u32::MAX;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxProofLen: u32 = 256;
+	pub const MaxProofLen: u32 = u32::MAX; // TODO : Figure out sensible limits for zksaas
 }
 
 impl Config for Runtime {
