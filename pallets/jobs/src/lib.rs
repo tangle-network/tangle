@@ -17,7 +17,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
 
-use crate::types::{JobInfoOf, JobSubmissionOf, PhaseResultOf};
+use crate::types::{JobInfoOf, JobResultOf, JobSubmissionOf, PhaseResultOf};
 use frame_support::{
 	pallet_prelude::*,
 	traits::{Currency, ExistenceRequirement, ReservableCurrency},
@@ -26,7 +26,7 @@ use frame_support::{
 use frame_system::pallet_prelude::*;
 use sp_core::crypto::ByteArray;
 use sp_runtime::{
-	traits::{AccountIdConversion, Zero},
+	traits::{AccountIdConversion, Get, Zero},
 	DispatchResult,
 };
 use sp_std::{prelude::*, vec::Vec};
@@ -62,6 +62,7 @@ pub use weights::WeightInfo;
 #[frame_support::pallet]
 pub mod module {
 	use super::*;
+	use scale_info::prelude::fmt::Debug;
 	use tangle_primitives::roles::RoleType;
 
 	#[pallet::config]
@@ -72,16 +73,53 @@ pub mod module {
 		type Currency: ReservableCurrency<Self::AccountId>;
 
 		/// The job to fee converter
-		type JobToFee: JobToFee<Self::AccountId, BlockNumberFor<Self>, Balance = BalanceOf<Self>>;
+		type JobToFee: JobToFee<
+			Self::AccountId,
+			BlockNumberFor<Self>,
+			Self::MaxParticipants,
+			Self::MaxSubmissionLen,
+			Balance = BalanceOf<Self>,
+		>;
 
 		/// The roles manager mechanism
 		type RolesHandler: RolesHandler<Self::AccountId>;
 
 		/// The job result verifying mechanism
-		type MPCHandler: MPCHandler<Self::AccountId, BlockNumberFor<Self>, BalanceOf<Self>>;
+		type MPCHandler: MPCHandler<
+			Self::AccountId,
+			BlockNumberFor<Self>,
+			BalanceOf<Self>,
+			Self::MaxParticipants,
+			Self::MaxSubmissionLen,
+			Self::MaxKeyLen,
+			Self::MaxDataLen,
+			Self::MaxSignatureLen,
+			Self::MaxProofLen,
+		>;
 
 		/// The origin which may set filter.
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+
+		/// The maximum participants allowed in a job
+		type MaxParticipants: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of job result submission
+		type MaxSubmissionLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of a signature
+		type MaxSignatureLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of data to be signed
+		type MaxDataLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of validator key allowed
+		type MaxKeyLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of proof allowed
+		type MaxProofLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum active jobs per validator
+		type MaxActiveJobsPerValidator: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
 
 		/// `PalletId` for the jobs pallet.
 		#[pallet::constant]
@@ -123,6 +161,12 @@ pub mod module {
 		ResultNotExpectedType,
 		/// No permission to change permitted caller
 		NoPermission,
+		/// Exceeds max participant limits
+		TooManyParticipants,
+		/// Invalid Key size
+		ExceedsMaxKeySize,
+		/// Validator exceeds limit of max active jobs
+		TooManyJobsForValidator,
 	}
 
 	#[pallet::event]
@@ -153,8 +197,12 @@ pub mod module {
 
 	#[pallet::storage]
 	#[pallet::getter(fn validator_job_id_lookup)]
-	pub type ValidatorJobIdLookup<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, Vec<(RoleType, JobId)>>;
+	pub type ValidatorJobIdLookup<T: Config> = StorageMap<
+		_,
+		Twox64Concat,
+		T::AccountId,
+		BoundedVec<(RoleType, JobId), T::MaxActiveJobsPerValidator>,
+	>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn validator_rewards)]
@@ -166,7 +214,6 @@ pub mod module {
 	pub type NextJobId<T: Config> = StorageValue<_, JobId, ValueQuery>;
 
 	#[pallet::pallet]
-	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	#[pallet::call]
@@ -318,7 +365,7 @@ pub mod module {
 			origin: OriginFor<T>,
 			role_type: RoleType,
 			job_id: JobId,
-			result: JobResult,
+			result: JobResultOf<T>,
 		) -> DispatchResult {
 			let _caller = ensure_signed(origin)?;
 

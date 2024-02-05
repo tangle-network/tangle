@@ -18,10 +18,21 @@ use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
-use sp_std::vec::Vec;
+use sp_runtime::traits::Get;
 
 #[derive(
-	Encode, Decode, Copy, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
+	Encode,
+	Decode,
+	Copy,
+	Clone,
+	RuntimeDebug,
+	PartialEq,
+	Default,
+	Eq,
+	TypeInfo,
+	PartialOrd,
+	Ord,
+	MaxEncodedLen,
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ZeroKnowledgeRoleType {
@@ -35,11 +46,11 @@ pub enum ZeroKnowledgeRoleType {
 	Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ZkSaasRoleMetadata {
+pub struct ZkSaasRoleMetadata<MaxAuthorityKeyLen: Get<u32>> {
 	/// The zkSaaS scheme
 	pub role_type: ZeroKnowledgeRoleType,
 
 	/// The authority key associated with the role.
 	// TODO: Expand this
-	pub authority_key: Vec<u8>,
+	pub authority_key: BoundedVec<u8, MaxAuthorityKeyLen>,
 }
