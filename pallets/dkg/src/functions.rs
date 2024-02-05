@@ -139,7 +139,9 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 	/// encountered an error.
-	fn verify_generated_dkg_key_bls(data: DKGTSSKeySubmissionResult) -> DispatchResult {
+	fn verify_generated_dkg_key_bls(
+		data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		// The BLS public key is signed using an ECDSA signature, therefore, validate the ECDSA
 		// signature only
 		Self::verify_generated_dkg_key_ecdsa(data)
@@ -359,7 +361,9 @@ impl<T: Config> Pallet<T> {
 	///
 	/// * `data` - The DKG signature result containing the message data, BLS signature, and signing
 	///   key.
-	fn verify_bls_signature(data: DKGTSSSignatureResult) -> DispatchResult {
+	fn verify_bls_signature(
+		data: DKGTSSSignatureResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		let public_key = blst::min_pk::PublicKey::deserialize(&data.signing_key)
 			.map_err(|_err| Error::<T>::InvalidBlsPublicKey)?;
 		let signature = blst::min_pk::Signature::deserialize(&data.signature)
