@@ -16,13 +16,69 @@
 use super::*;
 use tangle_primitives::jobs::*;
 
-pub type JobSubmissionOf<T> =
-	JobSubmission<<T as frame_system::Config>::AccountId, BlockNumberFor<T>>;
+pub type JobSubmissionOf<T> = JobSubmission<
+	<T as frame_system::Config>::AccountId,
+	BlockNumberFor<T>,
+	<T as Config>::MaxParticipants,
+	<T as Config>::MaxSubmissionLen,
+>;
 
-pub type JobInfoOf<T> =
-	JobInfo<<T as frame_system::Config>::AccountId, BlockNumberFor<T>, BalanceOf<T>>;
+pub type JobInfoOf<T> = JobInfo<
+	<T as frame_system::Config>::AccountId,
+	BlockNumberFor<T>,
+	BalanceOf<T>,
+	<T as Config>::MaxParticipants,
+	<T as Config>::MaxSubmissionLen,
+>;
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
-pub type PhaseResultOf<T> = PhaseResult<<T as frame_system::Config>::AccountId, BlockNumberFor<T>>;
+pub type PhaseResultOf<T> = PhaseResult<
+	<T as frame_system::Config>::AccountId,
+	BlockNumberFor<T>,
+	<T as Config>::MaxParticipants,
+	<T as Config>::MaxKeyLen,
+	<T as Config>::MaxDataLen,
+	<T as Config>::MaxSignatureLen,
+	<T as Config>::MaxSubmissionLen,
+	<T as Config>::MaxProofLen,
+>;
+
+pub type JobResultOf<T> = JobResult<
+	<T as Config>::MaxParticipants,
+	<T as Config>::MaxKeyLen,
+	<T as Config>::MaxSignatureLen,
+	<T as Config>::MaxDataLen,
+	<T as Config>::MaxProofLen,
+>;
+
+pub type DKGTSSKeySubmissionResultOf<T> = DKGTSSKeySubmissionResult<
+	<T as Config>::MaxKeyLen,
+	<T as Config>::MaxParticipants,
+	<T as Config>::MaxSignatureLen,
+>;
+
+pub type DKGTSSSignatureResultOf<T> = DKGTSSSignatureResult<
+	<T as Config>::MaxDataLen,
+	<T as Config>::MaxKeyLen,
+	<T as Config>::MaxSignatureLen,
+>;
+
+pub type DKGTSSKeyRotationResultOf<T> =
+	DKGTSSKeyRotationResult<<T as Config>::MaxKeyLen, <T as Config>::MaxSignatureLen>;
+
+pub type ZkSaaSCircuitResultOf<T> = ZkSaaSCircuitResult<<T as Config>::MaxParticipants>;
+
+pub type ZkSaaSProofResultOf<T> = ZkSaaSProofResult<<T as Config>::MaxProofLen>;
+
+pub type RpcResponseJobsDataOf<T> = RpcResponseJobsData<
+	<T as frame_system::Config>::AccountId,
+	BlockNumberFor<T>,
+	<T as Config>::MaxParticipants,
+	<T as Config>::MaxSubmissionLen,
+>;
+
+pub type ParticipantKeysOf<T> = BoundedVec<ParticipantKeyOf<T>, <T as Config>::MaxParticipants>;
+
+pub type ParticipantKeyOf<T> = BoundedVec<u8, <T as Config>::MaxKeyLen>;

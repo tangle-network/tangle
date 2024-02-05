@@ -19,11 +19,17 @@ use crate::{
 	roles::RoleType,
 };
 use sp_arithmetic::traits::{BaseArithmetic, Unsigned};
-use sp_runtime::DispatchResult;
+use sp_runtime::{traits::Get, DispatchResult};
 use sp_std::vec::Vec;
 
 /// A trait that describes the job to fee calculation.
-pub trait JobToFee<AccountId, BlockNumber> {
+pub trait JobToFee<
+	AccountId,
+	BlockNumber,
+	MaxParticipants: Get<u32> + Clone,
+	MaxSubmissionLen: Get<u32>,
+>
+{
 	/// The type that is returned as result from calculation.
 	type Balance: BaseArithmetic + From<u32> + Copy + Unsigned;
 
@@ -37,11 +43,24 @@ pub trait JobToFee<AccountId, BlockNumber> {
 	/// # Returns
 	///
 	/// Returns the calculated fee as `Self::Balance`.
-	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Self::Balance;
+	fn job_to_fee(
+		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+	) -> Self::Balance;
 }
 
 /// A trait that describes the job result verification.
-pub trait MPCHandler<AccountId, BlockNumber, Balance> {
+pub trait MPCHandler<
+	AccountId,
+	BlockNumber,
+	Balance,
+	MaxParticipants: Get<u32> + Clone,
+	MaxSubmissionLen: Get<u32>,
+	MaxKeyLen: Get<u32>,
+	MaxDataLen: Get<u32>,
+	MaxSignatureLen: Get<u32>,
+	MaxProofLen: Get<u32>,
+>
+{
 	/// Verifies the result of a job.
 	///
 	/// # Parameters
@@ -51,7 +70,17 @@ pub trait MPCHandler<AccountId, BlockNumber, Balance> {
 	/// # Errors
 	///
 	/// Returns a `DispatchResult` indicating success or an error if verification fails.
-	fn verify(data: JobWithResult<AccountId>) -> DispatchResult;
+	fn verify(
+		data: JobWithResult<
+			AccountId,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxKeyLen,
+			MaxDataLen,
+			MaxSignatureLen,
+			MaxProofLen,
+		>,
+	) -> DispatchResult;
 
 	// Verify a validator report
 	///

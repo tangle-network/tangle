@@ -21,20 +21,22 @@
 use frame_support::{
 	ensure,
 	traits::{Currency, Get, ValidatorSet, ValidatorSetWithIdentification},
-	CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
+	BoundedBTreeMap, CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
 };
+use parity_scale_codec::MaxEncodedLen;
 use tangle_primitives::roles::ValidatorRewardDistribution;
 
+use frame_support::BoundedVec;
 pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_core::ecdsa;
 use sp_runtime::{
 	traits::{Convert, OpaqueKeys, Zero},
-	Saturating,
+	DispatchError, Saturating,
 };
 use sp_staking::offence::ReportOffence;
-use sp_std::{collections::btree_map::BTreeMap, convert::TryInto, prelude::*, vec};
+use sp_std::{convert::TryInto, prelude::*, vec};
 use tangle_crypto_primitives::ROLE_KEY_TYPE;
 use tangle_primitives::roles::RoleType;
 
@@ -58,7 +60,14 @@ use sp_runtime::RuntimeAppPublic;
 
 /// The ledger of a (bonded) stash.
 #[derive(
-	PartialEqNoBound, EqNoBound, CloneNoBound, Encode, Decode, RuntimeDebugNoBound, TypeInfo,
+	PartialEqNoBound,
+	EqNoBound,
+	CloneNoBound,
+	Encode,
+	Decode,
+	RuntimeDebugNoBound,
+	TypeInfo,
+	MaxEncodedLen,
 )]
 #[scale_info(skip_type_params(T))]
 pub struct RoleStakingLedger<T: Config> {
@@ -71,21 +80,26 @@ pub struct RoleStakingLedger<T: Config> {
 	/// Restaking Profile
 	pub profile: Profile<T>,
 	/// Roles map with their respective records.
-	pub roles: BTreeMap<RoleType, Record<T>>,
+	pub roles: BoundedBTreeMap<RoleType, Record<T>, T::MaxRolesPerValidator>,
 	/// Role key
-	pub role_key: Vec<u8>,
+	pub role_key: BoundedVec<u8, T::MaxKeyLen>,
 }
 
 impl<T: Config> RoleStakingLedger<T> {
 	/// New staking ledger for a stash account.
-	pub fn new(stash: T::AccountId, profile: Profile<T>, role_key: Vec<u8>) -> Self {
+	pub fn try_new(
+		stash: T::AccountId,
+		profile: Profile<T>,
+		role_key: Vec<u8>,
+	) -> Result<Self, DispatchError> {
 		let total_restake = profile.get_total_profile_restake();
-		let roles = profile
-			.get_records()
-			.into_iter()
-			.map(|record| (record.role, record))
-			.collect::<BTreeMap<_, _>>();
-		Self { stash, total: total_restake.into(), profile, roles, role_key }
+		let mut roles: BoundedBTreeMap<_, _, _> = Default::default();
+		for record in profile.get_records().into_iter() {
+			roles.try_insert(record.role, record).map_err(|_| Error::<T>::KeySizeExceeded)?;
+		}
+		let bounded_role_key: BoundedVec<u8, T::MaxKeyLen> =
+			role_key.try_into().map_err(|_| Error::<T>::KeySizeExceeded)?;
+		Ok(Self { stash, total: total_restake.into(), profile, roles, role_key: bounded_role_key })
 	}
 
 	/// Returns the total amount of the stash's balance that is restaked for all selected roles.
@@ -113,10 +127,7 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
-	use tangle_primitives::jobs::{
-		traits::{JobsHandler, MPCHandler},
-		JobId,
-	};
+	use tangle_primitives::jobs::{traits::JobsHandler, JobId};
 
 	/// A type for representing the validator id in a session.
 	pub type ValidatorId<T> = <<T as Config>::ValidatorSet as ValidatorSet<
@@ -133,7 +144,6 @@ pub mod pallet {
 	);
 
 	#[pallet::pallet]
-	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	/// Configuration trait.
@@ -161,9 +171,6 @@ pub mod pallet {
 		#[pallet::constant]
 		type MaxRolesPerAccount: Get<u32>;
 
-		/// The config that verifies MPC related functions
-		type MPCHandler: MPCHandler<Self::AccountId, BlockNumberFor<Self>, BalanceOf<Self>>;
-
 		/// The inflation reward to distribute per era
 		type InflationRewardPerSession: Get<BalanceOf<Self>>;
 
@@ -172,6 +179,10 @@ pub mod pallet {
 
 		/// A type for retrieving the validators supposed to be online in a session.
 		type ValidatorSet: ValidatorSetWithIdentification<Self::AccountId>;
+
+		type MaxKeyLen: Get<u32>;
+
+		type MaxRolesPerValidator: Get<u32>;
 
 		/// A type to submit offence reports against the validators.
 		type ReportOffences: ReportOffence<
@@ -239,6 +250,8 @@ pub mod pallet {
 		ProfileDeleteRequestFailed,
 		/// SessionKeys not provided
 		SessionKeysNotProvided,
+		/// Key size exceeded
+		KeySizeExceeded,
 	}
 
 	/// Map from all "controller" accounts to the info regarding the staking.
@@ -299,16 +312,13 @@ pub mod pallet {
 				.ok_or(Error::<T>::SessionKeysNotProvided)?;
 			let role_key = OpaqueKeys::get_raw(&session_keys, ROLE_KEY_TYPE);
 
-			// Validate role key.
-			T::MPCHandler::validate_authority_key(stash_account.clone(), role_key.to_vec())?;
-
 			// Ensure no profile is assigned to the validator.
 			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::ProfileAlreadyExists);
-			let ledger = RoleStakingLedger::<T>::new(
+			let ledger = RoleStakingLedger::<T>::try_new(
 				stash_account.clone(),
 				profile.clone(),
 				role_key.to_vec(),
-			);
+			)?;
 			let total_profile_restake = profile.get_total_profile_restake();
 
 			// Restaking amount of profile should meet min Restaking amount requirement.
