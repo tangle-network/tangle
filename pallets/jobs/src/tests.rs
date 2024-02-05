@@ -1397,3 +1397,48 @@ fn switch_active_independent_profile_to_shared_should_work_if_active_restake_sum
 		}
 	});
 }
+
+#[test]
+fn test_fee_charged_for_jobs_submission() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+
+		// setup time fees
+		assert_ok!(Jobs::set_time_fee(RuntimeOrigin::root(), 1));
+
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone()
+			));
+		}
+
+		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 20,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
+				threshold: 3,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		// Fees charged
+		// 1. 1unit per participant
+		// 2. 1unit per ttl block (20)
+		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), 100 - 5 - 20);
+	});
+}
