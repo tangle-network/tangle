@@ -62,8 +62,8 @@ pub use weights::WeightInfo;
 #[frame_support::pallet]
 pub mod module {
 	use super::*;
-	use sp_runtime::Saturating;
 	use scale_info::prelude::fmt::Debug;
+	use sp_runtime::Saturating;
 	use tangle_primitives::roles::RoleType;
 
 	#[pallet::config]
