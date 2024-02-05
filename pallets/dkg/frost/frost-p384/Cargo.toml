@@ -1,0 +1,39 @@
+[package]
+name = "frost-p384"
+edition = "2021"
+# When releasing to crates.io:
+# - Update html_root_url
+# - Update CHANGELOG.md
+# - Create git tag.
+version = "1.0.0-rc.0"
+authors = [
+    "Deirdre Connolly <durumcrustulum@gmail.com>",
+    "Chelsea Komlo <me@chelseakomlo.com>",
+    "Conrado Gouvea <conradoplg@gmail.com>"
+]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ZcashFoundation/frost"
+categories = ["cryptography"]
+keywords = ["cryptography", "crypto", "ed25519", "threshold", "signature"]
+description = "A Schnorr signature scheme over Ed25519 that supports FROST."
+
+[package.metadata.docs.rs]
+features = ["serde"]
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+parity-scale-codec = { workspace = true }
+p384 = { version = "0.13.0", features = ["hash2curve", "alloc"], git = "https://github.com/LIT-Protocol/elliptic-curves.git", default-features = false }
+frost-core = { workspace = true }
+rand_core = { version = "0.6", optional = true }
+sha2 = { version = "0.10.2", default-features = false }
+subtle = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+    "parity-scale-codec/std",
+    "rand_core/std",
+    "p384/std"
+]

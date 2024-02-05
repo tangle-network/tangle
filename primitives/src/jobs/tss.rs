@@ -149,26 +149,32 @@ pub enum DigitalSignatureType {
 	#[default]
 	Ecdsa,
 
-	/// Schnorr signature type for sr25519.
-	SchnorrSr25519,
-
 	/// Schnorr signature type over the P256 curve.
 	SchnorrP256,
+
+	/// Schnorr signature type of the P384 curve.
+	SchnorrP384,
 
 	/// Schnorr signature type over the Secp256k1 curve.
 	SchnorrSecp256k1,
 
-	/// Schnorr signature type over the Ristretto255 curve.
+	/// Schnorr signature type of the Secp256k1 curve w/ Taproot compatibility.
+	SchnorrSecp256k1Taproot,
+
+	/// Schnorr signature type over the sr25519 curve.
+	SchnorrSr25519,
+
+	/// Schnorr signature type over the Ristretto255 curve / sr25519.
 	SchnorrRistretto255,
 
-	/// Schnorr signature type over the BabyJubJub curve.
-	SchnorrBabyJubJub,
+	/// Schnorr signature type over the JubJub curve.
+	SchnorrRedJubJub,
 
 	/// Schnorr signature type over the Ed25519 curve.
 	SchnorrEd25519,
 
-	/// Edwards Digital Signature Algorithm (EdDSA) key type over the BabyJubJub curve.
-	EdDSABabyJubJub,
+	/// Schnorr signature type over the Ed448 curve.
+	SchnorrEd448,
 
 	/// BLS 381 signature type.
 	Bls381,

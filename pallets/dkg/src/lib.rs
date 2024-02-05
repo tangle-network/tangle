@@ -25,10 +25,13 @@
 //! DKG key.
 pub use pallet::*;
 
+extern crate alloc;
+
 #[cfg(test)]
 mod mock;
 
 mod functions;
+mod signatures_schemes;
 #[cfg(test)]
 mod tests;
 mod types;

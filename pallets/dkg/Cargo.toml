@@ -14,12 +14,15 @@ frame-system = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 serde = { workspace = true }
+serdect = { workspace = true, features = ["alloc"] }
 sp-core = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
+subtle = { workspace = true }
 tangle-crypto-primitives = { workspace = true, default-features = false }
 tangle-primitives = { workspace = true, default-features = false }
+frost-core = { package = "frost-core", workspace = true, default-features = false }
 
 [dev-dependencies]
 pallet-balances = { workspace = true }
@@ -29,6 +32,7 @@ sp-keystore = { workspace = true }
 [features]
 default = ["std"]
 std = [
+  "parity-scale-codec/std",
   "scale-info/std",
   "sp-runtime/std",
   "frame-support/std",
@@ -37,10 +41,12 @@ std = [
   "sp-std/std",
   "tangle-primitives/std",
   "tangle-crypto-primitives/std",
+  "frost-core/std",
   "pallet-balances/std",
   "sp-io/std",
   "sp-keystore/std",
 ]
+serde = []
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
   "frame-benchmarking/runtime-benchmarks",
