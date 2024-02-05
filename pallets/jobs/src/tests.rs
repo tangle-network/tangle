@@ -119,7 +119,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 					.collect::<Vec<_>>()
 					.try_into()
 					.unwrap(),
-				threshold: 6,
+				threshold: 5,
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
 			}),
