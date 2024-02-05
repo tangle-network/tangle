@@ -29,6 +29,7 @@ mod functions;
 #[cfg(test)]
 mod tests;
 mod types;
+mod utils;
 mod weights;
 
 #[cfg(feature = "runtime-benchmarks")]

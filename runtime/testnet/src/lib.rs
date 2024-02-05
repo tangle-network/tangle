@@ -71,6 +71,7 @@ use static_assertions::const_assert;
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	jobs::{JobId, PhaseResult, RpcResponseJobsData},
+	misbehavior::DKGTSSJustification,
 	roles::RoleType,
 };
 
@@ -1125,8 +1126,12 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 pub struct MockMisbehaviorHandler;
 
 impl MisbehaviorHandler for MockMisbehaviorHandler {
-	fn verify(_data: MisbehaviorSubmission) -> DispatchResult {
-		Ok(())
+	fn verify(data: MisbehaviorSubmission) -> DispatchResult {
+		match data.justification {
+			MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(_)) =>
+				DfnsCGGMP21::verify(data),
+			_ => Ok(()),
+		}
 	}
 }
 
@@ -1189,6 +1194,13 @@ impl pallet_zksaas::Config for Runtime {
 	type WeightInfo = ();
 }
 
+impl pallet_dfns_cggmp21::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type UpdateOrigin = EnsureRootOrHalfCouncil;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1244,6 +1256,7 @@ construct_runtime!(
 		Jobs: pallet_jobs,
 		Dkg: pallet_dkg,
 		ZkSaaS: pallet_zksaas,
+		DfnsCGGMP21: pallet_dfns_cggmp21,
 	}
 );
 

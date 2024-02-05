@@ -55,6 +55,7 @@ tracing = "0.1.34"
 tokio = { version = "1.13" }
 futures = { version = "0.3.16" }
 rand = "0.7.2"
+rand_core = "0.6"
 rand_chacha = "0.3"
 smallvec = "1.6.1"
 async-trait = "0.1.59"
@@ -326,3 +327,7 @@ paillier-zk = { version = "0.1", default-features = false }
 
 [profile.release]
 panic = "unwind"
+
+[patch.crates-io]
+generic-ec = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
+generic-ec-core = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }

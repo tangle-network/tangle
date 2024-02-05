@@ -91,6 +91,7 @@ pallet-jobs = { workspace = true }
 pallet-jobs-rpc-runtime-api = { workspace = true }
 pallet-roles = { workspace = true }
 pallet-zksaas = { workspace = true }
+pallet-dfns-cggmp21 = { workspace = true }
 tangle-crypto-primitives = { workspace = true }
 tangle-primitives = { workspace = true, features = ["verifying"] }
 
@@ -221,6 +222,7 @@ std = [
   "pallet-roles/std",
   "pallet-dkg/std",
   "pallet-zksaas/std",
+  "pallet-dfns-cggmp21/std",
   "pallet-jobs-rpc-runtime-api/std",
 
   # ETH2 light-client

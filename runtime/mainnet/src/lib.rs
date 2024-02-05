@@ -78,7 +78,10 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::jobs::{traits::MPCHandler, JobWithResult, ValidatorOffenceType};
+use tangle_primitives::{
+	jobs::{traits::MPCHandler, JobWithResult, ValidatorOffenceType},
+	misbehavior::{MisbehaviorHandler, MisbehaviorSubmission},
+};
 
 pub use frame_support::{
 	construct_runtime,
@@ -1130,6 +1133,14 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 	}
 }
 
+pub struct MockMisbehaviorHandler;
+
+impl MisbehaviorHandler for MockMisbehaviorHandler {
+	fn verify(data: MisbehaviorSubmission) -> DispatchResult {
+		Ok(())
+	}
+}
+
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
 }
@@ -1141,6 +1152,7 @@ impl pallet_jobs::Config for Runtime {
 	type JobToFee = MockJobToFeeHandler;
 	type RolesHandler = Roles;
 	type MPCHandler = MockMPCHandler;
+	type MisbehaviorHandler = MockMisbehaviorHandler;
 	type PalletId = JobsPalletId;
 	type WeightInfo = ();
 }

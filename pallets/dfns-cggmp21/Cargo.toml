@@ -20,13 +20,13 @@ sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 tangle-crypto-primitives = { workspace = true, default-features = false }
 tangle-primitives = { workspace = true, default-features = false }
+rand_core = { workspace = true, default-features = false }
 
 dfns-cggmp21 = { workspace = true, default-features = false, features = ["curve-secp256k1"] }
 bincode2 = { workspace = true }
 sha2 = { workspace = true }
 udigest = { workspace = true, features = ["derive"] }
-generic-ec-zkp = { workspace = true, features = ["serde", "udigest"] }
-paillier-zk = { workspace = true, features = ["serde"] }
+generic-ec-zkp = { workspace = true, default-features = false, features = ["udigest"] }
 
 [dev-dependencies]
 pallet-balances = { workspace = true }

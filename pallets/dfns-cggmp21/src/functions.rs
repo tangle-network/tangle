@@ -291,7 +291,7 @@ impl<T: Config> Pallet<T> {
 					.chain_update(round2a_msg.sch_commit.0.to_bytes(false)) // h
 					.finalize()
 			};
-			let mut rng = paillier_zk::rng::HashRng::new(hash);
+			let mut rng = crate::utils::HashRng::new(hash);
 			Scalar::random(&mut rng)
 		};
 		let challenge = schnorr_pok::Challenge { nonce: challenge };
