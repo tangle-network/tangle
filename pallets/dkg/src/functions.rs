@@ -40,7 +40,14 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	///
 	/// Returns the calculated fee as a `BalanceOf<T>` type.
-	pub fn job_to_fee(job: &JobSubmission<T::AccountId, BlockNumberFor<T>>) -> BalanceOf<T> {
+	pub fn job_to_fee(
+		job: &JobSubmission<
+			T::AccountId,
+			BlockNumberFor<T>,
+			T::MaxParticipants,
+			T::MaxSubmissionLen,
+		>,
+	) -> BalanceOf<T> {
 		let fee_info = FeeInfo::<T>::get();
 		// charge the base fee + per validator fee
 		if job.job_type.is_phase_one() {
@@ -65,7 +72,16 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the verification was successful or encountered
 	/// an error.
-	pub fn verify(data: JobResult) -> DispatchResult {
+	#[allow(clippy::type_complexity)]
+	pub fn verify(
+		data: JobResult<
+			T::MaxParticipants,
+			T::MaxKeyLen,
+			T::MaxSignatureLen,
+			T::MaxDataLen,
+			T::MaxProofLen,
+		>,
+	) -> DispatchResult {
 		match data {
 			JobResult::DKGPhaseOne(info) => Self::verify_generated_dkg_key(info),
 			JobResult::DKGPhaseTwo(info) => Self::verify_dkg_signature(info),
@@ -89,7 +105,9 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful
 	/// or encountered an error.
-	fn verify_generated_dkg_key(data: DKGTSSKeySubmissionResult) -> DispatchResult {
+	fn verify_generated_dkg_key(
+		data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		match data.signature_type {
 			DigitalSignatureType::Ecdsa => verify_generated_dkg_key_ecdsa::<T>(data),
 			DigitalSignatureType::SchnorrRistretto255 =>
@@ -109,7 +127,9 @@ impl<T: Config> Pallet<T> {
 	///
 	/// * `data` - The DKG signature result containing the message data, signature, signing key, and
 	///   key type.
-	fn verify_dkg_signature(data: DKGTSSSignatureResult) -> DispatchResult {
+	fn verify_dkg_signature(
+		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		match data.signature_type {
 			DigitalSignatureType::Ecdsa =>
 				verify_dkg_signature_ecdsa::<T>(&data.data, &data.signature, &data.signing_key),

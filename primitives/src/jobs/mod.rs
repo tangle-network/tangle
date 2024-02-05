@@ -19,6 +19,7 @@ use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
+use sp_runtime::traits::Get;
 use sp_std::vec::Vec;
 
 pub type JobId = u64;
@@ -31,8 +32,13 @@ pub use tss::*;
 pub use zksaas::*;
 
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub struct JobSubmission<AccountId, BlockNumber> {
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+pub struct JobSubmission<
+	AccountId,
+	BlockNumber,
+	MaxParticipants: Get<u32> + Clone,
+	MaxSubmissionLen: Get<u32>,
+> {
 	/// Represents the maximum allowed submission time for a job result.
 	/// Once this time has passed, the result cannot be submitted.
 	pub expiry: BlockNumber,
@@ -42,12 +48,18 @@ pub struct JobSubmission<AccountId, BlockNumber> {
 	pub ttl: BlockNumber,
 
 	/// The type of the job submission.
-	pub job_type: JobType<AccountId>,
+	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
 }
 
 /// Represents a job info
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub struct JobInfo<AccountId, BlockNumber, Balance> {
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+pub struct JobInfo<
+	AccountId,
+	BlockNumber,
+	Balance,
+	MaxParticipants: Get<u32> + Clone,
+	MaxSubmissionLen: Get<u32>,
+> {
 	/// The caller that requested the job
 	pub owner: AccountId,
 
@@ -60,61 +72,54 @@ pub struct JobInfo<AccountId, BlockNumber, Balance> {
 	pub ttl: BlockNumber,
 
 	/// The type of the job submission.
-	pub job_type: JobType<AccountId>,
+	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
 
 	/// The fee taken for the job
 	pub fee: Balance,
 }
 
 /// Represents a job with its result.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub struct JobWithResult<AccountId> {
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+pub struct JobWithResult<
+	AccountId,
+	MaxParticipants: Get<u32> + Clone,
+	MaxSubmissionLen: Get<u32>,
+	MaxKeyLen: Get<u32>,
+	MaxDataLen: Get<u32>,
+	MaxSignatureLen: Get<u32>,
+	MaxProofLen: Get<u32>,
+> {
 	/// Current Job type
-	pub job_type: JobType<AccountId>,
+	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
 	/// Phase one job type if any.
 	///
 	/// None if this job is a phase one job.
-	pub phase_one_job_type: Option<JobType<AccountId>>,
+	pub phase_one_job_type: Option<JobType<AccountId, MaxParticipants, MaxSubmissionLen>>,
 	/// Current job result
-	pub result: JobResult,
+	pub result: JobResult<MaxParticipants, MaxKeyLen, MaxSignatureLen, MaxDataLen, MaxProofLen>,
 }
 
 /// Enum representing different types of jobs.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum JobType<AccountId> {
+pub enum JobType<AccountId, MaxParticipants: Get<u32> + Clone, MaxSubmissionLen: Get<u32>> {
 	/// Distributed Key Generation (DKG) job type.
-	DKGTSSPhaseOne(DKGTSSPhaseOneJobType<AccountId>),
+	DKGTSSPhaseOne(DKGTSSPhaseOneJobType<AccountId, MaxParticipants>),
 	/// DKG Signature job type.
-	DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType),
+	DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType<MaxSubmissionLen>),
 	/// DKG Key Refresh job type.
 	DKGTSSPhaseThree(DKGTSSPhaseThreeJobType),
 	/// DKG Key Rotation job type.
 	DKGTSSPhaseFour(DKGTSSPhaseFourJobType),
 	/// (zk-SNARK) Create Circuit job type.
-	ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType<AccountId>),
+	ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType<AccountId, MaxParticipants, MaxSubmissionLen>),
 	/// (zk-SNARK) Create Proof job type.
-	ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType),
+	ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType<MaxSubmissionLen>),
 }
 
-/// Enum representing different types of data sources.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum HyperData {
-	/// Raw data, stored on-chain.
-	///
-	/// Only use this for small files.
-	Raw(Vec<u8>),
-	/// IPFS CID. The CID is stored on-chain.
-	/// The actual data is stored off-chain.
-	IPFS(Vec<u8>),
-	/// HTTP URL. The URL is stored on-chain.
-	/// The actual data is stored off-chain.
-	/// The URL is expected to be accessible via HTTP GET.
-	HTTP(Vec<u8>),
-}
-
-impl<AccountId> JobType<AccountId> {
+impl<AccountId, MaxParticipants: Get<u32> + Clone, MaxSubmissionLen: Get<u32>>
+	JobType<AccountId, MaxParticipants, MaxSubmissionLen>
+{
 	/// Checks if the job type is a phase one job.
 	pub fn is_phase_one(&self) -> bool {
 		use crate::jobs::JobType::*;
@@ -125,7 +130,7 @@ impl<AccountId> JobType<AccountId> {
 	}
 
 	/// Gets the participants for the job type, if applicable.
-	pub fn get_participants(self) -> Option<Vec<AccountId>> {
+	pub fn get_participants(self) -> Option<BoundedVec<AccountId, MaxParticipants>> {
 		use crate::jobs::JobType::*;
 		match self {
 			DKGTSSPhaseOne(info) => Some(info.participants),
@@ -160,7 +165,7 @@ impl<AccountId> JobType<AccountId> {
 	/// This function is intended for simple checks and may need improvement in the future.
 	pub fn sanity_check(&self) -> bool {
 		match self {
-			JobType::DKGTSSPhaseOne(info) => info.participants.len() > info.threshold.into(),
+			JobType::DKGTSSPhaseOne(info) => info.participants.len() >= info.threshold.into(),
 			JobType::ZkSaaSPhaseOne(info) => !info.participants.is_empty(),
 			_ => true,
 		}
@@ -201,27 +206,54 @@ pub enum JobState {
 }
 
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct PhaseResult<AccountId, BlockNumber> {
+pub struct PhaseResult<
+	AccountId,
+	BlockNumber,
+	MaxParticipants: Get<u32> + Clone,
+	MaxKeyLen: Get<u32>,
+	MaxDataLen: Get<u32>,
+	MaxSignatureLen: Get<u32>,
+	MaxSubmissionLen: Get<u32>,
+	MaxProofLen: Get<u32>,
+> {
 	/// The owner's account ID.
 	pub owner: AccountId,
 	/// The type of the job submission.
-	pub result: JobResult,
+	pub result: JobResult<MaxParticipants, MaxKeyLen, MaxSignatureLen, MaxDataLen, MaxProofLen>,
 	/// The time-to-live (TTL) for the job, which determines the maximum allowed time for this job
 	/// to be available. After the TTL expires, the job can no longer be used.
 	pub ttl: BlockNumber,
 	/// permitted caller to use this result
 	pub permitted_caller: Option<AccountId>,
 	/// The type of the job submission.
-	pub job_type: JobType<AccountId>,
+	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
 }
 
-impl<AccountId, BlockNumber> PhaseResult<AccountId, BlockNumber>
-where
+impl<
+		AccountId,
+		BlockNumber,
+		MaxParticipants: Get<u32> + Clone,
+		MaxKeyLen: Get<u32>,
+		MaxDataLen: Get<u32>,
+		MaxSignatureLen: Get<u32>,
+		MaxSubmissionLen: Get<u32>,
+		MaxProofLen: Get<u32>,
+	>
+	PhaseResult<
+		AccountId,
+		BlockNumber,
+		MaxParticipants,
+		MaxKeyLen,
+		MaxDataLen,
+		MaxSignatureLen,
+		MaxSubmissionLen,
+		MaxProofLen,
+	> where
 	AccountId: Clone,
 {
-	pub fn participants(&self) -> Option<Vec<AccountId>> {
+	pub fn participants(&self) -> Option<BoundedVec<AccountId, MaxParticipants>> {
 		match &self.job_type {
 			JobType::DKGTSSPhaseOne(x) => Some(x.participants.clone()),
 			JobType::ZkSaaSPhaseOne(x) => Some(x.participants.clone()),
@@ -249,12 +281,17 @@ pub enum ValidatorOffence {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct RpcResponseJobsData<AccountId, BlockNumber> {
+pub struct RpcResponseJobsData<
+	AccountId,
+	BlockNumber,
+	MaxParticipants: Get<u32> + Clone,
+	MaxSubmissionLen: Get<u32>,
+> {
 	/// The job id of the job
 	pub job_id: JobId,
 
 	/// The type of the job submission.
-	pub job_type: JobType<AccountId>,
+	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
 
 	/// Represents the maximum allowed submission time for a job result.
 	/// Once this time has passed, the result cannot be submitted.
@@ -265,15 +302,21 @@ pub struct RpcResponseJobsData<AccountId, BlockNumber> {
 	pub ttl: BlockNumber,
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum JobResult {
-	DKGPhaseOne(DKGTSSKeySubmissionResult),
-	DKGPhaseTwo(DKGTSSSignatureResult),
+pub enum JobResult<
+	MaxParticipants: Get<u32>,
+	MaxKeyLen: Get<u32>,
+	MaxSignatureLen: Get<u32>,
+	MaxDataLen: Get<u32>,
+	MaxProofLen: Get<u32>,
+> {
+	DKGPhaseOne(DKGTSSKeySubmissionResult<MaxKeyLen, MaxParticipants, MaxSignatureLen>),
+	DKGPhaseTwo(DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen>),
 	DKGPhaseThree(DKGTSSKeyRefreshResult),
-	DKGPhaseFour(DKGTSSKeyRotationResult),
-	ZkSaaSPhaseOne(ZkSaaSCircuitResult),
-	ZkSaaSPhaseTwo(ZkSaaSProofResult),
+	DKGPhaseFour(DKGTSSKeyRotationResult<MaxKeyLen, MaxSignatureLen>),
+	ZkSaaSPhaseOne(ZkSaaSCircuitResult<MaxParticipants>),
+	ZkSaaSPhaseTwo(ZkSaaSProofResult<MaxProofLen>),
 }
 
 /// Represents different types of validator offences.

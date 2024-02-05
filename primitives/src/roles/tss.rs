@@ -18,14 +18,25 @@ use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
-use sp_std::vec::Vec;
+use sp_runtime::traits::Get;
 
 /// Threshold signature role types and their specific elliptic curve.
 ///
 /// Naming convention:
 /// <vendor><protocol><curve>
 #[derive(
-	Encode, Decode, Copy, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
+	Encode,
+	Decode,
+	Copy,
+	Clone,
+	RuntimeDebug,
+	PartialEq,
+	Default,
+	Eq,
+	TypeInfo,
+	PartialOrd,
+	Ord,
+	MaxEncodedLen,
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 #[repr(u16)]
@@ -51,10 +62,10 @@ pub enum ThresholdSignatureRoleType {
 	Encode, Decode, Clone, RuntimeDebug, PartialEq, Default, Eq, TypeInfo, PartialOrd, Ord,
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct TssRoleMetadata {
+pub struct TssRoleMetadata<MaxAuthorityKeyLen: Get<u32>> {
 	/// The threshold role type for the DKG.
 	pub role_type: ThresholdSignatureRoleType,
 
 	/// The authority key associated with the role.
-	pub authority_key: Vec<u8>,
+	pub authority_key: BoundedVec<u8, MaxAuthorityKeyLen>,
 }

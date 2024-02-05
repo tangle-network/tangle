@@ -71,9 +71,9 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 	new_test_ext().execute_with(|| {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::Ecdsa,
-			key: vec![],
-			participants: vec![],
-			signatures: vec![],
+			key: vec![].try_into().unwrap(),
+			participants: vec![].try_into().unwrap(),
+			signatures: vec![].try_into().unwrap(),
 			threshold: 2,
 		};
 
@@ -85,9 +85,11 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::Ecdsa,
-			key: vec![],
-			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec()],
-			signatures: vec![],
+			key: vec![].try_into().unwrap(),
+			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec().try_into().unwrap()]
+				.try_into()
+				.unwrap(),
+			signatures: vec![].try_into().unwrap(),
 			threshold: 2,
 		};
 
@@ -103,9 +105,11 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::Ecdsa,
-			key: vec![],
-			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec()],
-			signatures: vec![signature.clone()],
+			key: vec![].try_into().unwrap(),
+			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec().try_into().unwrap()]
+				.try_into()
+				.unwrap(),
+			signatures: vec![signature.clone().try_into().unwrap()].try_into().unwrap(),
 			threshold: 1,
 		};
 
@@ -117,9 +121,14 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::Ecdsa,
-			key: pub_key.0.to_vec(),
-			participants: vec![pub_key.as_mut().to_vec()],
-			signatures: vec![signature.clone(), signature.clone()],
+			key: pub_key.0.to_vec().try_into().unwrap(),
+			participants: vec![pub_key.as_mut().to_vec().try_into().unwrap()].try_into().unwrap(),
+			signatures: vec![
+				signature.clone().try_into().unwrap(),
+				signature.clone().try_into().unwrap(),
+			]
+			.try_into()
+			.unwrap(),
 			threshold: 1,
 		};
 
@@ -136,16 +145,45 @@ fn dkg_key_verifcation_works_for_ecdsa() {
 		let signature_two = mock_signature_ecdsa(participant_two, participant_one);
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::Ecdsa,
-			key: participant_one.to_raw_vec(),
+			key: participant_one.to_raw_vec().try_into().unwrap(),
 			participants: vec![
-				participant_one.as_mut().to_vec(),
-				participant_two.as_mut().to_vec(),
-			],
-			signatures: vec![signature_two, signature_one],
+				participant_one.as_mut().to_vec().try_into().unwrap(),
+				participant_two.as_mut().to_vec().try_into().unwrap(),
+			]
+			.try_into()
+			.unwrap(),
+			signatures: vec![signature_two.try_into().unwrap(), signature_one.try_into().unwrap()]
+				.try_into()
+				.unwrap(),
 			threshold: 1,
 		};
 
-		// should fail for signing different keys
+		assert_ok!(DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),);
+	});
+}
+
+#[test]
+fn dkg_key_verifcation_works_for_ecdsa_when_n_equals_t() {
+	new_test_ext().execute_with(|| {
+		let mut participant_one = mock_pub_key_ecdsa();
+		let mut participant_two = mock_pub_key_ecdsa();
+		let signature_one = mock_signature_ecdsa(participant_one, participant_one);
+		let signature_two = mock_signature_ecdsa(participant_two, participant_one);
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::Ecdsa,
+			key: participant_one.to_raw_vec().try_into().unwrap(),
+			participants: vec![
+				participant_one.as_mut().to_vec().try_into().unwrap(),
+				participant_two.as_mut().to_vec().try_into().unwrap(),
+			]
+			.try_into()
+			.unwrap(),
+			signatures: vec![signature_two.try_into().unwrap(), signature_one.try_into().unwrap()]
+				.try_into()
+				.unwrap(),
+			threshold: 2,
+		};
+
 		assert_ok!(DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),);
 	});
 }
@@ -155,9 +193,9 @@ fn dkg_key_verifcation_works_for_schnorr() {
 	new_test_ext().execute_with(|| {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::SchnorrSr25519,
-			key: mock_pub_key_sr25519().to_vec(),
-			participants: vec![],
-			signatures: vec![],
+			key: mock_pub_key_sr25519().to_vec().try_into().unwrap(),
+			participants: vec![].try_into().unwrap(),
+			signatures: vec![].try_into().unwrap(),
 			threshold: 2,
 		};
 
@@ -169,9 +207,11 @@ fn dkg_key_verifcation_works_for_schnorr() {
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::SchnorrSr25519,
-			key: vec![],
-			participants: vec![mock_pub_key_sr25519().as_mut().to_vec()],
-			signatures: vec![],
+			key: vec![].try_into().unwrap(),
+			participants: vec![mock_pub_key_sr25519().as_mut().to_vec().try_into().unwrap()]
+				.try_into()
+				.unwrap(),
+			signatures: vec![].try_into().unwrap(),
 			threshold: 2,
 		};
 
@@ -187,9 +227,11 @@ fn dkg_key_verifcation_works_for_schnorr() {
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::SchnorrSr25519,
-			key: pub_key.to_vec(),
-			participants: vec![mock_pub_key_sr25519().as_mut().to_vec()],
-			signatures: vec![signature.clone()],
+			key: pub_key.to_vec().try_into().unwrap(),
+			participants: vec![mock_pub_key_sr25519().as_mut().to_vec().try_into().unwrap()]
+				.try_into()
+				.unwrap(),
+			signatures: vec![signature.clone().try_into().unwrap()].try_into().unwrap(),
 			threshold: 1,
 		};
 
@@ -201,9 +243,14 @@ fn dkg_key_verifcation_works_for_schnorr() {
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::SchnorrSr25519,
-			key: pub_key.to_vec(),
-			participants: vec![pub_key.as_mut().to_vec()],
-			signatures: vec![signature.clone(), signature.clone()],
+			key: pub_key.to_vec().try_into().unwrap(),
+			participants: vec![pub_key.as_mut().to_vec().try_into().unwrap()].try_into().unwrap(),
+			signatures: vec![
+				signature.clone().try_into().unwrap(),
+				signature.clone().try_into().unwrap(),
+			]
+			.try_into()
+			.unwrap(),
 			threshold: 1,
 		};
 
@@ -220,16 +267,45 @@ fn dkg_key_verifcation_works_for_schnorr() {
 		let signature_two = mock_signature_sr25519(participant_two, participant_one);
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::SchnorrSr25519,
-			key: participant_one.to_raw_vec(),
+			key: participant_one.to_raw_vec().try_into().unwrap(),
 			participants: vec![
-				participant_one.as_mut().to_vec(),
-				participant_two.as_mut().to_vec(),
-			],
-			signatures: vec![signature_two, signature_one],
+				participant_one.as_mut().to_vec().try_into().unwrap(),
+				participant_two.as_mut().to_vec().try_into().unwrap(),
+			]
+			.try_into()
+			.unwrap(),
+			signatures: vec![signature_two.try_into().unwrap(), signature_one.try_into().unwrap()]
+				.try_into()
+				.unwrap(),
 			threshold: 1,
 		};
 
-		// should fail for signing different keys
+		assert_ok!(DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),);
+	});
+}
+
+#[test]
+fn dkg_key_verifcation_works_for_schnorr_when_n_equals_t() {
+	new_test_ext().execute_with(|| {
+		let mut participant_one = mock_pub_key_sr25519();
+		let mut participant_two = mock_pub_key_sr25519();
+		let signature_one = mock_signature_sr25519(participant_one, participant_one);
+		let signature_two = mock_signature_sr25519(participant_two, participant_one);
+		let job_to_verify = DKGTSSKeySubmissionResult {
+			signature_type: DigitalSignatureType::SchnorrSr25519,
+			key: participant_one.to_raw_vec().try_into().unwrap(),
+			participants: vec![
+				participant_one.as_mut().to_vec().try_into().unwrap(),
+				participant_two.as_mut().to_vec().try_into().unwrap(),
+			]
+			.try_into()
+			.unwrap(),
+			signatures: vec![signature_two.try_into().unwrap(), signature_one.try_into().unwrap()]
+				.try_into()
+				.unwrap(),
+			threshold: 2,
+		};
+
 		assert_ok!(DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),);
 	});
 }
@@ -241,11 +317,11 @@ fn dkg_signature_verifcation_works_ecdsa() {
 		let pub_key = mock_pub_key_ecdsa();
 		let signature = mock_signature_ecdsa(pub_key, mock_pub_key_ecdsa());
 
-		let job_to_verify: DKGTSSSignatureResult = DKGTSSSignatureResult {
+		let job_to_verify = DKGTSSSignatureResult::<MaxDataLen, MaxKeyLen, MaxSignatureLen> {
 			signature_type: DigitalSignatureType::Ecdsa,
-			signature,
-			data: pub_key.to_raw_vec(),
-			signing_key: pub_key.to_raw_vec(),
+			signature: signature.try_into().unwrap(),
+			data: pub_key.to_raw_vec().try_into().unwrap(),
+			signing_key: pub_key.to_raw_vec().try_into().unwrap(),
 		};
 
 		// should fail for invalid keys
@@ -255,11 +331,11 @@ fn dkg_signature_verifcation_works_ecdsa() {
 		);
 
 		let signature = mock_signature_ecdsa(pub_key, pub_key);
-		let job_to_verify: DKGTSSSignatureResult = DKGTSSSignatureResult {
+		let job_to_verify = DKGTSSSignatureResult::<MaxDataLen, MaxKeyLen, MaxSignatureLen> {
 			signature_type: DigitalSignatureType::Ecdsa,
-			signature,
-			data: pub_key.to_raw_vec(),
-			signing_key: pub_key.to_raw_vec(),
+			signature: signature.try_into().unwrap(),
+			data: pub_key.to_raw_vec().try_into().unwrap(),
+			signing_key: pub_key.to_raw_vec().try_into().unwrap(),
 		};
 
 		// should work with correct params
@@ -274,11 +350,11 @@ fn dkg_signature_verifcation_works_schnorr() {
 		let pub_key = mock_pub_key_sr25519();
 		let signature = mock_signature_sr25519(pub_key, mock_pub_key_sr25519());
 
-		let job_to_verify: DKGTSSSignatureResult = DKGTSSSignatureResult {
+		let job_to_verify = DKGTSSSignatureResult::<MaxDataLen, MaxKeyLen, MaxSignatureLen> {
 			signature_type: DigitalSignatureType::SchnorrSr25519,
-			signature,
-			data: pub_key.to_raw_vec(),
-			signing_key: pub_key.to_raw_vec(),
+			signature: signature.try_into().unwrap(),
+			data: pub_key.to_raw_vec().try_into().unwrap(),
+			signing_key: pub_key.to_raw_vec().try_into().unwrap(),
 		};
 
 		// should fail for invalid keys
@@ -288,11 +364,11 @@ fn dkg_signature_verifcation_works_schnorr() {
 		);
 
 		let signature = mock_signature_sr25519(pub_key, pub_key);
-		let job_to_verify: DKGTSSSignatureResult = DKGTSSSignatureResult {
+		let job_to_verify = DKGTSSSignatureResult {
 			signature_type: DigitalSignatureType::SchnorrSr25519,
-			signature,
-			data: pub_key.to_raw_vec(),
-			signing_key: pub_key.to_raw_vec(),
+			signature: signature.try_into().unwrap(),
+			data: pub_key.to_raw_vec().try_into().unwrap(),
+			signing_key: pub_key.to_raw_vec().try_into().unwrap(),
 		};
 
 		// should work with correct params
@@ -311,9 +387,9 @@ fn dkg_key_rotation_works() {
 
 		let job_to_verify = DKGTSSKeyRotationResult {
 			signature_type: DigitalSignatureType::Ecdsa,
-			signature,
-			key: curr_key.to_raw_vec(),
-			new_key: new_key.to_raw_vec(),
+			signature: signature.try_into().unwrap(),
+			key: curr_key.to_raw_vec().try_into().unwrap(),
+			new_key: new_key.to_raw_vec().try_into().unwrap(),
 			phase_one_id: 1,
 			new_phase_one_id: 2,
 		};
@@ -328,9 +404,9 @@ fn dkg_key_rotation_works() {
 
 		let job_to_verify = DKGTSSKeyRotationResult {
 			signature_type: DigitalSignatureType::Ecdsa,
-			signature: signature.clone(),
-			key: curr_key.to_raw_vec(),
-			new_key: new_key.to_raw_vec(),
+			signature: signature.clone().try_into().unwrap(),
+			key: curr_key.to_raw_vec().try_into().unwrap(),
+			new_key: new_key.to_raw_vec().try_into().unwrap(),
 			phase_one_id: 1,
 			new_phase_one_id: 2,
 		};

@@ -20,7 +20,7 @@ use frame_support::pallet_prelude::*;
 use parity_scale_codec::alloc::string::ToString;
 use scale_info::prelude::string::String;
 use sp_arithmetic::Percent;
-use sp_std::{ops::Add, vec::Vec};
+use sp_std::ops::Add;
 
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -33,7 +33,9 @@ pub use tss::*;
 pub use zksaas::*;
 
 /// Role type to be used in the system.
-#[derive(Encode, Decode, Copy, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord)]
+#[derive(
+	Encode, Decode, Copy, Clone, Debug, PartialEq, Eq, TypeInfo, PartialOrd, Ord, MaxEncodedLen,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum RoleType {
 	/// TSS role type.
@@ -117,15 +119,15 @@ impl RoleType {
 }
 
 /// Metadata associated with a role type.
-#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo)]
+#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum RoleTypeMetadata {
-	Tss(TssRoleMetadata),
-	ZkSaas(ZkSaasRoleMetadata),
+pub enum RoleTypeMetadata<MaxAuthorityKeyLen: Get<u32>> {
+	Tss(TssRoleMetadata<MaxAuthorityKeyLen>),
+	ZkSaas(ZkSaasRoleMetadata<MaxAuthorityKeyLen>),
 	LightClientRelaying,
 }
 
-impl RoleTypeMetadata {
+impl<MaxAuthorityKeyLen: Get<u32>> RoleTypeMetadata<MaxAuthorityKeyLen> {
 	/// Return type of role.
 	pub fn get_role_type(&self) -> RoleType {
 		match self {
@@ -135,11 +137,11 @@ impl RoleTypeMetadata {
 		}
 	}
 
-	pub fn get_authority_key(&self) -> Vec<u8> {
+	pub fn get_authority_key(&self) -> BoundedVec<u8, MaxAuthorityKeyLen> {
 		match self {
 			RoleTypeMetadata::Tss(metadata) => metadata.authority_key.clone(),
 			RoleTypeMetadata::ZkSaas(metadata) => metadata.authority_key.clone(),
-			_ => Vec::new(),
+			_ => Default::default(),
 		}
 	}
 }

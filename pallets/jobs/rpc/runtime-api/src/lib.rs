@@ -16,9 +16,12 @@
 //! Runtime API definition for jobs pallet.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-
+#![allow(clippy::type_complexity)]
 use parity_scale_codec::Codec;
-use sp_runtime::{traits::MaybeDisplay, Serialize};
+use sp_runtime::{
+	traits::{Get, MaybeDisplay},
+	Serialize,
+};
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	jobs::{JobId, PhaseResult, RpcResponseJobsData},
@@ -29,8 +32,14 @@ pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
 
 sp_api::decl_runtime_apis! {
-	pub trait JobsApi<AccountId> where
+	pub trait JobsApi<AccountId, MaxParticipants, MaxSubmissionLen, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxProofLen> where
 		AccountId: Codec + MaybeDisplay + Serialize,
+		MaxParticipants: Codec + Serialize + Get<u32> + Clone,
+		MaxSubmissionLen: Codec + Serialize + Get<u32>,
+		MaxKeyLen: Codec + Serialize + Get<u32>,
+		MaxDataLen: Codec + Serialize + Get<u32>,
+		MaxSignatureLen: Codec + Serialize + Get<u32>,
+		MaxProofLen: Codec + Serialize + Get<u32>,
 	{
 		/// Query jobs associated with a specific validator.
 		///
@@ -46,7 +55,7 @@ sp_api::decl_runtime_apis! {
 		/// # Returns
 		///
 		/// An optional vec of `RpcResponseJobsData` of jobs assigned to validator
-		fn query_jobs_by_validator(validator: AccountId) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>>;
+		fn query_jobs_by_validator(validator: AccountId) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen>>>;
 		/// Queries a job by its key and ID.
 		///
 		/// # Arguments
@@ -57,7 +66,7 @@ sp_api::decl_runtime_apis! {
 		/// # Returns
 		///
 		/// An optional `RpcResponseJobsData` containing the account ID of the job.
-		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>;
+		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen>>;
 
 		/// Queries the result of a job by its role_type and ID.
 		///
@@ -69,7 +78,7 @@ sp_api::decl_runtime_apis! {
 		/// # Returns
 		///
 		/// An `Option` containing the phase one result of the job, wrapped in an `PhaseResult`.
-		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>>>;
+		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxSubmissionLen, MaxProofLen>>;
 
 		/// Queries next job ID.
 		///
