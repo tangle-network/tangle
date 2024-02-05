@@ -41,6 +41,9 @@ pub struct FeeInfo<Balance: MaxEncodedLen> {
 
 	/// The fee for refresh existing DKG.
 	pub refresh_validator_fee: Balance,
+
+	/// The storage fee per byts
+	pub storage_fee_per_byte: Balance,
 }
 
 impl<Balance: MaxEncodedLen> FeeInfo<Balance> {
@@ -57,5 +60,10 @@ impl<Balance: MaxEncodedLen> FeeInfo<Balance> {
 	/// Get the signature validator fee.
 	pub fn get_sig_validator_fee(self) -> Balance {
 		self.sig_validator_fee
+	}
+
+	/// Get the storage fee per byte
+	pub fn get_storage_fee_per_byte(self) -> Balance {
+		self.storage_fee_per_byte
 	}
 }

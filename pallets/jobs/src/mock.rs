@@ -24,7 +24,6 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Contains, Everything},
 };
-use frame_system::EnsureSigned;
 use pallet_session::historical as pallet_session_historical;
 use sp_core::{
 	sr25519::{self},
@@ -91,7 +90,9 @@ impl pallet_balances::Config for Runtime {
 
 pub struct MockDKGPallet;
 impl MockDKGPallet {
-	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+	fn job_to_fee(
+		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+	) -> Balance {
 		if job.job_type.is_phase_one() {
 			job.job_type.clone().get_participants().unwrap().len().try_into().unwrap()
 		} else {
@@ -102,7 +103,9 @@ impl MockDKGPallet {
 
 pub struct MockZkSaasPallet;
 impl MockZkSaasPallet {
-	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+	fn job_to_fee(
+		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+	) -> Balance {
 		if job.job_type.is_phase_one() {
 			10
 		} else {
@@ -113,10 +116,12 @@ impl MockZkSaasPallet {
 
 pub struct MockJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for MockJobToFeeHandler {
 	type Balance = Balance;
 
-	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+	fn job_to_fee(
+		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+	) -> Balance {
 		match job.job_type {
 			JobType::DKGTSSPhaseOne(_) |
 			JobType::DKGTSSPhaseTwo(_) |
@@ -130,8 +135,30 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 
 pub struct MockMPCHandler;
 
-impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
+impl
+	MPCHandler<
+		AccountId,
+		BlockNumber,
+		Balance,
+		MaxParticipants,
+		MaxSubmissionLen,
+		MaxKeyLen,
+		MaxDataLen,
+		MaxSignatureLen,
+		MaxProofLen,
+	> for MockMPCHandler
+{
+	fn verify(
+		_data: JobWithResult<
+			AccountId,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxKeyLen,
+			MaxDataLen,
+			MaxSignatureLen,
+			MaxProofLen,
+		>,
+	) -> DispatchResult {
 		Ok(())
 	}
 
@@ -302,28 +329,50 @@ impl pallet_roles::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type JobsHandler = Jobs;
 	type MaxRolesPerAccount = ConstU32<2>;
-	type MPCHandler = MockMPCHandler;
 	type InflationRewardPerSession = InflationRewardPerSession;
 	type RoleKeyId = RoleKeyId;
 	type ValidatorRewardDistribution = Reward;
 	type ValidatorSet = Historical;
 	type ReportOffences = OffenceHandler;
+	type MaxKeyLen = MaxKeyLen;
+	type MaxRolesPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
 
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxParticipants: u32 = 10;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxSubmissionLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxKeyLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxDataLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxSignatureLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxProofLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxActiveJobsPerValidator: u32 = 100;
 }
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type MisbehaviorHandler = MockMisbehaviorHandler;
-	type ForceOrigin = EnsureSigned<AccountId>;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
 	type JobToFee = MockJobToFeeHandler;
 	type RolesHandler = Roles;
 	type MPCHandler = MockMPCHandler;
 	type PalletId = JobsPalletId;
+	type MaxParticipants = MaxParticipants;
+	type MaxSubmissionLen = MaxSubmissionLen;
+	type MaxKeyLen = MaxKeyLen;
+	type MaxDataLen = MaxDataLen;
+	type MaxSignatureLen = MaxSignatureLen;
+	type MaxProofLen = MaxProofLen;
+	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
 

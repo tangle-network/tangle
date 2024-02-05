@@ -20,6 +20,7 @@ use frame_support::{
 use frame_system::EnsureSigned;
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
 use precompile_utils::{precompile_set::*, testing::MockAccount};
+use scale_info::TypeInfo;
 use sp_core::{H256, U256};
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
@@ -155,7 +156,9 @@ impl pallet_timestamp::Config for Runtime {
 
 pub struct MockDKGPallet;
 impl MockDKGPallet {
-	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+	fn job_to_fee(
+		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+	) -> Balance {
 		if job.job_type.is_phase_one() {
 			job.job_type.clone().get_participants().unwrap().len().try_into().unwrap()
 		} else {
@@ -166,7 +169,9 @@ impl MockDKGPallet {
 
 pub struct MockZkSaasPallet;
 impl MockZkSaasPallet {
-	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+	fn job_to_fee(
+		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+	) -> Balance {
 		if job.job_type.is_phase_one() {
 			10
 		} else {
@@ -177,10 +182,12 @@ impl MockZkSaasPallet {
 
 pub struct MockJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for MockJobToFeeHandler {
 	type Balance = Balance;
 
-	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+	fn job_to_fee(
+		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+	) -> Balance {
 		match job.job_type {
 			JobType::DKGTSSPhaseOne(_) |
 			JobType::DKGTSSPhaseTwo(_) |
@@ -217,8 +224,30 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 
 pub struct MockMPCHandler;
 
-impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
+impl
+	MPCHandler<
+		AccountId,
+		BlockNumber,
+		Balance,
+		MaxParticipants,
+		MaxSubmissionLen,
+		MaxKeyLen,
+		MaxDataLen,
+		MaxSignatureLen,
+		MaxProofLen,
+	> for MockMPCHandler
+{
+	fn verify(
+		_data: JobWithResult<
+			AccountId,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxKeyLen,
+			MaxDataLen,
+			MaxSignatureLen,
+			MaxProofLen,
+		>,
+	) -> DispatchResult {
 		Ok(())
 	}
 
@@ -245,6 +274,20 @@ impl MisbehaviorHandler for MockMisbehaviorHandler {
 
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxParticipants: u32 = 10;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxSubmissionLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxKeyLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxDataLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxSignatureLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxProofLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxActiveJobsPerValidator: u32 = 100;
 }
 
 impl pallet_jobs::Config for Runtime {
@@ -256,6 +299,13 @@ impl pallet_jobs::Config for Runtime {
 	type MPCHandler = MockMPCHandler;
 	type MisbehaviorHandler = MockMisbehaviorHandler;
 	type PalletId = JobsPalletId;
+	type MaxParticipants = MaxParticipants;
+	type MaxSubmissionLen = MaxSubmissionLen;
+	type MaxKeyLen = MaxKeyLen;
+	type MaxDataLen = MaxDataLen;
+	type MaxSignatureLen = MaxSignatureLen;
+	type MaxProofLen = MaxProofLen;
+	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
 

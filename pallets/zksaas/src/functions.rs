@@ -17,6 +17,8 @@ use super::*;
 use crate::types::BalanceOf;
 use frame_support::{pallet_prelude::DispatchResult, sp_runtime::Saturating};
 use frame_system::pallet_prelude::BlockNumberFor;
+use sp_core::crypto::ByteArray;
+use sp_runtime::traits::Get;
 use tangle_primitives::{jobs::*, verifier::*};
 
 impl<T: Config> Pallet<T> {
@@ -33,16 +35,29 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	///
 	/// Returns the calculated fee as a `BalanceOf<T>` type.
-	pub fn job_to_fee(job: &JobSubmission<T::AccountId, BlockNumberFor<T>>) -> BalanceOf<T> {
+	pub fn job_to_fee(
+		job: &JobSubmission<
+			T::AccountId,
+			BlockNumberFor<T>,
+			T::MaxParticipants,
+			T::MaxSubmissionLen,
+		>,
+	) -> BalanceOf<T> {
 		let fee_info = FeeInfo::<T>::get();
 		// charge the base fee + per validator fee
 		if job.job_type.is_phase_one() {
 			let validator_count =
 				job.job_type.clone().get_participants().expect("checked_above").len();
 			let validator_fee = fee_info.circuit_fee * (validator_count as u32).into();
-			validator_fee.saturating_add(fee_info.base_fee)
+			let data_stored: usize = sp_core::ecdsa::Public::LEN * validator_count;
+			let storage_fee = fee_info.storage_fee_per_byte * (data_stored as u32).into();
+			validator_fee.saturating_add(fee_info.base_fee).saturating_add(storage_fee)
 		} else {
-			fee_info.base_fee.saturating_add(fee_info.get_prove_fee())
+			let storage_fee = fee_info.storage_fee_per_byte * T::MaxProofLen::get().into();
+			fee_info
+				.base_fee
+				.saturating_add(fee_info.get_prove_fee())
+				.saturating_add(storage_fee)
 		}
 	}
 
@@ -58,7 +73,18 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the verification was successful or encountered
 	/// an error.
-	pub fn verify(data: JobWithResult<T::AccountId>) -> DispatchResult {
+	#[allow(clippy::type_complexity)]
+	pub fn verify(
+		data: JobWithResult<
+			T::AccountId,
+			T::MaxParticipants,
+			T::MaxSubmissionLen,
+			T::MaxKeyLen,
+			T::MaxDataLen,
+			T::MaxSignatureLen,
+			T::MaxProofLen,
+		>,
+	) -> DispatchResult {
 		match (data.phase_one_job_type, data.job_type, data.result) {
 			(None, _, JobResult::ZkSaaSPhaseOne(_)) => Ok(()),
 			(
@@ -72,9 +98,13 @@ impl<T: Config> Pallet<T> {
 
 	/// Verifies a given proof submission.
 	pub fn verify_proof(
-		ZkSaaSPhaseOneJobType { system, .. }: ZkSaaSPhaseOneJobType<T::AccountId>,
-		ZkSaaSPhaseTwoJobType { request, .. }: ZkSaaSPhaseTwoJobType,
-		res: ZkSaaSProofResult,
+		ZkSaaSPhaseOneJobType { system, .. }: ZkSaaSPhaseOneJobType<
+			T::AccountId,
+			T::MaxParticipants,
+			T::MaxSubmissionLen,
+		>,
+		ZkSaaSPhaseTwoJobType { request, .. }: ZkSaaSPhaseTwoJobType<T::MaxSubmissionLen>,
+		res: ZkSaaSProofResult<T::MaxProofLen>,
 	) -> DispatchResult {
 		match (system, request, res) {
 			(
@@ -92,9 +122,9 @@ impl<T: Config> Pallet<T> {
 
 	/// Verifies a given circom proof submission.
 	pub fn verify_circom_proof(
-		system: Groth16System,
-		req: Groth16ProveRequest,
-		res: CircomProofResult,
+		system: Groth16System<T::MaxSubmissionLen>,
+		req: Groth16ProveRequest<T::MaxSubmissionLen>,
+		res: CircomProofResult<T::MaxProofLen>,
 	) -> DispatchResult {
 		let maybe_verified =
 			T::Verifier::verify(&req.public_input, &res.proof, &system.verifying_key);
@@ -110,9 +140,9 @@ impl<T: Config> Pallet<T> {
 
 	/// Verifies a given arkworks proof submission.
 	pub fn verify_arkworks_proof(
-		system: Groth16System,
-		req: Groth16ProveRequest,
-		res: ArkworksProofResult,
+		system: Groth16System<T::MaxSubmissionLen>,
+		req: Groth16ProveRequest<T::MaxSubmissionLen>,
+		res: ArkworksProofResult<T::MaxProofLen>,
 	) -> DispatchResult {
 		let maybe_verified =
 			T::Verifier::verify(&req.public_input, &res.proof, &system.verifying_key);

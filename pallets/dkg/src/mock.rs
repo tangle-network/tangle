@@ -18,10 +18,11 @@
 use super::*;
 use crate as pallet_dkg;
 use frame_support::{
-	construct_runtime,
+	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Everything},
 };
 use frame_system::EnsureSigned;
+use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{testing::Header, traits::IdentityLookup, BuildStorage};
@@ -76,10 +77,31 @@ frame_support::ord_parameter_types! {
 	pub const One: AccountId = 1;
 }
 
+parameter_types! {
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxParticipants: u32 = 10;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxSubmissionLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxKeyLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxDataLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxSignatureLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxProofLen: u32 = 256;
+}
+
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type UpdateOrigin = EnsureSigned<AccountId>;
+	type MaxParticipants = MaxParticipants;
+	type MaxSubmissionLen = MaxSubmissionLen;
+	type MaxKeyLen = MaxKeyLen;
+	type MaxDataLen = MaxDataLen;
+	type MaxSignatureLen = MaxSignatureLen;
+	type MaxProofLen = MaxProofLen;
 	type WeightInfo = ();
 }
 

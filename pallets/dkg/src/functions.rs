@@ -20,6 +20,7 @@ use frame_system::pallet_prelude::BlockNumberFor;
 use parity_scale_codec::Encode;
 use sp_core::{ecdsa, sr25519};
 use sp_io::{crypto::sr25519_verify, hashing::keccak_256, EcdsaVerifyError};
+use sp_runtime::traits::Get;
 use sp_std::{default::Default, vec::Vec};
 use tangle_primitives::jobs::*;
 
@@ -44,16 +45,28 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	///
 	/// Returns the calculated fee as a `BalanceOf<T>` type.
-	pub fn job_to_fee(job: &JobSubmission<T::AccountId, BlockNumberFor<T>>) -> BalanceOf<T> {
+	pub fn job_to_fee(
+		job: &JobSubmission<
+			T::AccountId,
+			BlockNumberFor<T>,
+			T::MaxParticipants,
+			T::MaxSubmissionLen,
+		>,
+	) -> BalanceOf<T> {
 		let fee_info = FeeInfo::<T>::get();
 		// charge the base fee + per validator fee
 		if job.job_type.is_phase_one() {
 			let validator_count =
 				job.job_type.clone().get_participants().expect("checked_above").len();
 			let validator_fee = fee_info.dkg_validator_fee * (validator_count as u32).into();
-			validator_fee.saturating_add(fee_info.base_fee)
+			let storage_fee = fee_info.storage_fee_per_byte * T::MaxKeyLen::get().into();
+			validator_fee.saturating_add(fee_info.base_fee).saturating_add(storage_fee)
 		} else {
-			fee_info.base_fee.saturating_add(fee_info.sig_validator_fee)
+			let storage_fee = fee_info.storage_fee_per_byte * T::MaxSignatureLen::get().into();
+			fee_info
+				.base_fee
+				.saturating_add(fee_info.sig_validator_fee)
+				.saturating_add(storage_fee)
 		}
 	}
 
@@ -69,7 +82,16 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the verification was successful or encountered
 	/// an error.
-	pub fn verify(data: JobResult) -> DispatchResult {
+	#[allow(clippy::type_complexity)]
+	pub fn verify(
+		data: JobResult<
+			T::MaxParticipants,
+			T::MaxKeyLen,
+			T::MaxSignatureLen,
+			T::MaxDataLen,
+			T::MaxProofLen,
+		>,
+	) -> DispatchResult {
 		match data {
 			JobResult::DKGPhaseOne(info) => Self::verify_generated_dkg_key(info),
 			JobResult::DKGPhaseTwo(info) => Self::verify_dkg_signature(info),
@@ -93,7 +115,9 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful
 	/// or encountered an error.
-	fn verify_generated_dkg_key(data: DKGTSSKeySubmissionResult) -> DispatchResult {
+	fn verify_generated_dkg_key(
+		data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		match data.signature_type {
 			DigitalSignatureType::Ecdsa => Self::verify_generated_dkg_key_ecdsa(data),
 			DigitalSignatureType::SchnorrSr25519 => Self::verify_generated_dkg_key_schnorr(data),
@@ -114,7 +138,9 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 	/// encountered an error.
-	fn verify_generated_dkg_key_ecdsa(data: DKGTSSKeySubmissionResult) -> DispatchResult {
+	fn verify_generated_dkg_key_ecdsa(
+		data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		// Ensure participants and signatures are not empty
 		ensure!(!data.participants.is_empty(), Error::<T>::NoParticipantsFound);
 		ensure!(!data.signatures.is_empty(), Error::<T>::NoSignaturesFound);
@@ -151,7 +177,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		// Ensure a sufficient number of unique signers are present
-		ensure!(known_signers.len() > data.threshold.into(), Error::<T>::NotEnoughSigners);
+		ensure!(known_signers.len() >= data.threshold.into(), Error::<T>::NotEnoughSigners);
 
 		Ok(())
 	}
@@ -169,7 +195,9 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 	/// encountered an error.
-	fn verify_generated_dkg_key_schnorr(data: DKGTSSKeySubmissionResult) -> DispatchResult {
+	fn verify_generated_dkg_key_schnorr(
+		data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		// Ensure participants and signatures are not empty
 		ensure!(!data.participants.is_empty(), Error::<T>::NoParticipantsFound);
 		ensure!(!data.signatures.is_empty(), Error::<T>::NoSignaturesFound);
@@ -209,7 +237,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		// Ensure a sufficient number of unique signers are present
-		ensure!(known_signers.len() > data.threshold.into(), Error::<T>::NotEnoughSigners);
+		ensure!(known_signers.len() >= data.threshold.into(), Error::<T>::NotEnoughSigners);
 
 		Ok(())
 	}
@@ -225,7 +253,9 @@ impl<T: Config> Pallet<T> {
 	///
 	/// * `data` - The DKG signature result containing the message data, signature, signing key, and
 	///   key type.
-	fn verify_dkg_signature(data: DKGTSSSignatureResult) -> DispatchResult {
+	fn verify_dkg_signature(
+		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		match data.signature_type {
 			DigitalSignatureType::Ecdsa => Self::verify_dkg_signature_ecdsa(data),
 			DigitalSignatureType::SchnorrSr25519 => Self::verify_dkg_signature_schnorr(data),
@@ -242,7 +272,9 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `data` - The DKG signature result containing the message data and ECDSA signature.
-	fn verify_dkg_signature_ecdsa(data: DKGTSSSignatureResult) -> DispatchResult {
+	fn verify_dkg_signature_ecdsa(
+		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		// Recover the ECDSA public key from the provided data and signature
 		let recovered_key = Self::recover_ecdsa_pub_key(&data.data, &data.signature)
 			.map_err(|_| Error::<T>::InvalidSignature)?;
@@ -268,7 +300,9 @@ impl<T: Config> Pallet<T> {
 	///
 	/// * `data` - The DKG signature result containing the message data, Schnorr signature, and
 	///   signing key.
-	fn verify_dkg_signature_schnorr(data: DKGTSSSignatureResult) -> DispatchResult {
+	fn verify_dkg_signature_schnorr(
+		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		// Convert the signature from bytes to sr25519::Signature
 		let signature: sr25519::Signature = data
 			.signature
@@ -309,7 +343,9 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the key rotation verification was successful
 	/// or encountered an error.
-	fn verify_dkg_key_rotation(data: DKGTSSKeyRotationResult) -> DispatchResult {
+	fn verify_dkg_key_rotation(
+		data: DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		match data.signature_type {
 			DigitalSignatureType::Ecdsa => Self::verify_dkg_key_rotation_ecdsa(data),
 			DigitalSignatureType::SchnorrSr25519 => Self::verify_dkg_key_rotation_schnorr(data),
@@ -326,7 +362,9 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `data` - The Key Rotation result containing the new key and ECDSA signature.
-	fn verify_dkg_key_rotation_ecdsa(data: DKGTSSKeyRotationResult) -> DispatchResult {
+	fn verify_dkg_key_rotation_ecdsa(
+		data: DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		// Recover the ECDSA public key from the provided data and signature
 		let recovered_key = Self::recover_ecdsa_pub_key(&data.new_key, &data.signature)
 			.map_err(|_| Error::<T>::InvalidSignature)?;
@@ -343,7 +381,7 @@ impl<T: Config> Pallet<T> {
 		Self::deposit_event(Event::KeyRotated {
 			from_job_id: data.phase_one_id,
 			to_job_id: data.new_phase_one_id,
-			signature: data.signature,
+			signature: data.signature.to_vec(),
 		});
 		Ok(())
 	}
@@ -357,7 +395,9 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `data` - The Key Rotation result containing the new key and Schnorr signature.
-	fn verify_dkg_key_rotation_schnorr(data: DKGTSSKeyRotationResult) -> DispatchResult {
+	fn verify_dkg_key_rotation_schnorr(
+		data: DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen>,
+	) -> DispatchResult {
 		// Convert the signature from bytes to sr25519::Signature
 		let signature: sr25519::Signature = data
 			.signature
@@ -384,7 +424,7 @@ impl<T: Config> Pallet<T> {
 		Self::deposit_event(Event::KeyRotated {
 			from_job_id: data.phase_one_id,
 			to_job_id: data.new_phase_one_id,
-			signature: data.signature,
+			signature: data.signature.to_vec(),
 		});
 		Ok(())
 	}

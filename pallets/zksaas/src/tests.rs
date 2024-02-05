@@ -39,7 +39,8 @@ type F = ark_bn254::Fr;
 #[test]
 fn set_fees_works() {
 	new_test_ext().execute_with(|| {
-		let new_fee = FeeInfo { base_fee: 10, circuit_fee: 5, prove_fee: 5 };
+		let new_fee =
+			FeeInfo { base_fee: 10, circuit_fee: 5, prove_fee: 5, storage_fee_per_byte: 1 };
 
 		// should fail for non update origin
 		assert_noop!(ZKSaaS::set_fee(RuntimeOrigin::signed(10), new_fee.clone()), BadOrigin);
@@ -54,7 +55,8 @@ fn set_fees_works() {
 #[test]
 fn proof_verification_works() {
 	new_test_ext().execute_with(|| {
-		let new_fee = FeeInfo { base_fee: 10, circuit_fee: 5, prove_fee: 5 };
+		let new_fee =
+			FeeInfo { base_fee: 10, circuit_fee: 5, prove_fee: 5, storage_fee_per_byte: 1 };
 		// Dispatch a signed extrinsic.
 		assert_ok!(ZKSaaS::set_fee(RuntimeOrigin::signed(1), new_fee.clone()));
 
@@ -101,37 +103,49 @@ fn proof_verification_works() {
 
 		// Phase1
 		let zero_knowledge_role_type = ZeroKnowledgeRoleType::ZkSaaSGroth16;
-		let phase_one = JobType::<AccountId>::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
-			role_type: zero_knowledge_role_type,
-			participants: vec![1, 2, 3, 4, 5, 6, 7, 8],
-			system: ZkSaaSSystem::Groth16(Groth16System {
-				circuit: HyperData::Raw(vec![]),
-				num_inputs: num_inputs as _,
-				num_constraints: num_constraints as _,
-				proving_key: HyperData::Raw(pk_bytes),
-				verifying_key: vk_bytes,
-				wasm: HyperData::Raw(vec![]),
-			}),
-			permitted_caller: None,
-		});
+		let phase_one = JobType::<AccountId, MaxParticipants, MaxSubmissionLen>::ZkSaaSPhaseOne(
+			ZkSaaSPhaseOneJobType {
+				role_type: zero_knowledge_role_type,
+				participants: vec![1, 2, 3, 4, 5, 6, 7, 8].try_into().unwrap(),
+				system: ZkSaaSSystem::Groth16(Groth16System {
+					circuit: HyperData::Raw(vec![].try_into().unwrap()),
+					num_inputs: num_inputs as _,
+					num_constraints: num_constraints as _,
+					proving_key: HyperData::Raw(pk_bytes.try_into().unwrap()),
+					verifying_key: vk_bytes.try_into().unwrap(),
+					wasm: HyperData::Raw(vec![].try_into().unwrap()),
+				}),
+				permitted_caller: None,
+			},
+		);
 
-		let phase_two = JobType::<AccountId>::ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType {
-			role_type: zero_knowledge_role_type,
-			phase_one_id: 0,
-			request: ZkSaaSPhaseTwoRequest::Groth16(Groth16ProveRequest {
-				public_input: from_field_elements(&[image]).unwrap(),
-				a_shares: Default::default(),
-				ax_shares: Default::default(),
-				qap_shares: Default::default(),
-			}),
-		});
+		let phase_two = JobType::<AccountId, MaxParticipants, MaxSubmissionLen>::ZkSaaSPhaseTwo(
+			ZkSaaSPhaseTwoJobType {
+				role_type: zero_knowledge_role_type,
+				phase_one_id: 0,
+				request: ZkSaaSPhaseTwoRequest::Groth16(Groth16ProveRequest {
+					public_input: from_field_elements(&[image]).unwrap().try_into().unwrap(),
+					a_shares: Default::default(),
+					ax_shares: Default::default(),
+					qap_shares: Default::default(),
+				}),
+			},
+		);
 
 		// Arkworks
 		let result = JobResult::ZkSaaSPhaseTwo(ZkSaaSProofResult::Arkworks(ArkworksProofResult {
-			proof: proof_bytes,
+			proof: proof_bytes.try_into().unwrap(),
 		}));
 
-		let data = JobWithResult::<AccountId> {
+		let data = JobWithResult::<
+			AccountId,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxKeyLen,
+			MaxDataLen,
+			MaxSignatureLen,
+			MaxProofLen,
+		> {
 			job_type: phase_two.clone(),
 			phase_one_job_type: Some(phase_one.clone()),
 			result,
@@ -143,10 +157,18 @@ fn proof_verification_works() {
 		let circom_proof = verifier::circom::Proof::try_from(proof).unwrap();
 
 		let result = JobResult::ZkSaaSPhaseTwo(ZkSaaSProofResult::Circom(CircomProofResult {
-			proof: circom_proof.encode().unwrap(),
+			proof: circom_proof.encode().unwrap().try_into().unwrap(),
 		}));
 
-		let data = JobWithResult::<AccountId> {
+		let data = JobWithResult::<
+			AccountId,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxKeyLen,
+			MaxDataLen,
+			MaxSignatureLen,
+			MaxProofLen,
+		> {
 			job_type: phase_two,
 			phase_one_job_type: Some(phase_one),
 			result,

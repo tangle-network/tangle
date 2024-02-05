@@ -46,6 +46,7 @@ use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use parity_scale_codec::{Decode, Encode};
+use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
@@ -60,7 +61,7 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill,
+	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
 	SaturatedConversion,
 };
 use sp_std::prelude::*;
@@ -1077,16 +1078,14 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type WeightInfo = ();
 }
 
-parameter_types! {
-	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
-}
-
 pub struct MockJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for MockJobToFeeHandler {
 	type Balance = Balance;
 
-	fn job_to_fee(job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+	fn job_to_fee(
+		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+	) -> Balance {
 		match job.job_type {
 			JobType::DKGTSSPhaseOne(_) |
 			JobType::DKGTSSPhaseTwo(_) |
@@ -1099,8 +1098,30 @@ impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
 
 pub struct MockMPCHandler;
 
-impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(data: JobWithResult<AccountId>) -> DispatchResult {
+impl
+	MPCHandler<
+		AccountId,
+		BlockNumber,
+		Balance,
+		MaxParticipants,
+		MaxSubmissionLen,
+		MaxKeyLen,
+		MaxDataLen,
+		MaxSignatureLen,
+		MaxProofLen,
+	> for MockMPCHandler
+{
+	fn verify(
+		data: JobWithResult<
+			AccountId,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxKeyLen,
+			MaxDataLen,
+			MaxSignatureLen,
+			MaxProofLen,
+		>,
+	) -> DispatchResult {
 		match data.result {
 			JobResult::DKGPhaseOne(_) |
 			JobResult::DKGPhaseTwo(_) |
@@ -1132,7 +1153,35 @@ impl MisbehaviorHandler for MockMisbehaviorHandler {
 				DfnsCGGMP21::verify(data),
 			_ => Ok(()),
 		}
-	}
+  }
+}
+
+parameter_types! {
+	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxParticipants: u32 = 10;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxSubmissionLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxKeyLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxDataLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxSignatureLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxProofLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxActiveJobsPerValidator: u32 = 100;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxRolesPerValidator: u32 = 100;
 }
 
 impl pallet_jobs::Config for Runtime {
@@ -1144,6 +1193,13 @@ impl pallet_jobs::Config for Runtime {
 	type MPCHandler = MockMPCHandler;
 	type MisbehaviorHandler = MockMisbehaviorHandler;
 	type PalletId = JobsPalletId;
+	type MaxParticipants = MaxParticipants;
+	type MaxSubmissionLen = MaxSubmissionLen;
+	type MaxKeyLen = MaxKeyLen;
+	type MaxDataLen = MaxDataLen;
+	type MaxSignatureLen = MaxSignatureLen;
+	type MaxProofLen = MaxProofLen;
+	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
 
@@ -1171,11 +1227,12 @@ impl pallet_roles::Config for Runtime {
 	type JobsHandler = Jobs;
 	type RoleKeyId = RoleKeyId;
 	type MaxRolesPerAccount = ConstU32<2>;
-	type MPCHandler = MockMPCHandler;
 	type InflationRewardPerSession = InflationRewardPerSession;
 	type ValidatorSet = Historical;
 	type ReportOffences = OffenceHandler;
 	type ValidatorRewardDistribution = Reward;
+	type MaxRolesPerValidator = MaxRolesPerValidator;
+	type MaxKeyLen = MaxKeyLen;
 	type WeightInfo = ();
 }
 
@@ -1183,6 +1240,12 @@ impl pallet_dkg::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type UpdateOrigin = EnsureRootOrHalfCouncil;
+	type MaxParticipants = MaxParticipants;
+	type MaxSubmissionLen = MaxSubmissionLen;
+	type MaxKeyLen = MaxKeyLen;
+	type MaxDataLen = MaxDataLen;
+	type MaxSignatureLen = MaxSignatureLen;
+	type MaxProofLen = MaxProofLen;
 	type WeightInfo = ();
 }
 
@@ -1191,6 +1254,12 @@ impl pallet_zksaas::Config for Runtime {
 	type Currency = Balances;
 	type UpdateOrigin = EnsureRootOrHalfCouncil;
 	type Verifier = (ArkworksVerifierGroth16Bn254, CircomVerifierGroth16Bn254);
+	type MaxParticipants = MaxParticipants;
+	type MaxSubmissionLen = MaxSubmissionLen;
+	type MaxKeyLen = MaxKeyLen;
+	type MaxDataLen = MaxDataLen;
+	type MaxSignatureLen = MaxSignatureLen;
+	type MaxProofLen = MaxProofLen;
 	type WeightInfo = ();
 }
 
@@ -1449,18 +1518,18 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_jobs_rpc_runtime_api::JobsApi<Block, AccountId> for Runtime {
+	impl pallet_jobs_rpc_runtime_api::JobsApi<Block, AccountId, MaxParticipants, MaxSubmissionLen, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxProofLen> for Runtime {
 		fn query_jobs_by_validator(
 			validator: AccountId,
-		) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>>> {
+		) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen>>> {
 			Jobs::query_jobs_by_validator(validator)
 		}
 
-		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>>> {
+		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen>> {
 			Jobs::query_job_by_id(role_type, job_id)
 		}
 
-		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>>> {
+		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxSubmissionLen, MaxProofLen>> {
 			Jobs::query_job_result(role_type, job_id)
 		}
 

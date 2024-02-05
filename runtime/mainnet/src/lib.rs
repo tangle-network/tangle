@@ -46,6 +46,7 @@ use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use parity_scale_codec::{Decode, Encode};
+use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
@@ -1073,8 +1074,30 @@ impl pallet_airdrop_claims::Config for Runtime {
 
 pub struct MockMPCHandler;
 
-impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
-	fn verify(_data: JobWithResult<AccountId>) -> DispatchResult {
+impl
+	MPCHandler<
+		AccountId,
+		BlockNumber,
+		Balance,
+		MaxParticipants,
+		MaxSubmissionLen,
+		MaxKeyLen,
+		MaxDataLen,
+		MaxSignatureLen,
+		MaxProofLen,
+	> for MockMPCHandler
+{
+	fn verify(
+		_data: JobWithResult<
+			AccountId,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxKeyLen,
+			MaxDataLen,
+			MaxSignatureLen,
+			MaxProofLen,
+		>,
+	) -> DispatchResult {
 		Ok(())
 	}
 
@@ -1115,20 +1138,23 @@ impl pallet_roles::Config for Runtime {
 	type JobsHandler = Jobs;
 	type RoleKeyId = RoleKeyId;
 	type MaxRolesPerAccount = ConstU32<2>;
-	type MPCHandler = MockMPCHandler;
 	type InflationRewardPerSession = InflationRewardPerSession;
 	type ValidatorSet = Historical;
 	type ReportOffences = OffenceHandler;
 	type ValidatorRewardDistribution = Reward;
+	type MaxRolesPerValidator = MaxRolesPerValidator;
+	type MaxKeyLen = MaxKeyLen;
 	type WeightInfo = ();
 }
 
 pub struct MockJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber> for MockJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for MockJobToFeeHandler {
 	type Balance = Balance;
 
-	fn job_to_fee(_job: &JobSubmission<AccountId, BlockNumber>) -> Balance {
+	fn job_to_fee(
+		_job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+	) -> Balance {
 		Default::default()
 	}
 }
@@ -1143,6 +1169,22 @@ impl MisbehaviorHandler for MockMisbehaviorHandler {
 
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxParticipants: u32 = 10;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxSubmissionLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxKeyLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxDataLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxSignatureLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxProofLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxActiveJobsPerValidator: u32 = 100;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxRolesPerValidator: u32 = 100;
 }
 
 impl pallet_jobs::Config for Runtime {
@@ -1154,6 +1196,13 @@ impl pallet_jobs::Config for Runtime {
 	type MPCHandler = MockMPCHandler;
 	type MisbehaviorHandler = MockMisbehaviorHandler;
 	type PalletId = JobsPalletId;
+	type MaxParticipants = MaxParticipants;
+	type MaxSubmissionLen = MaxSubmissionLen;
+	type MaxKeyLen = MaxKeyLen;
+	type MaxDataLen = MaxDataLen;
+	type MaxSignatureLen = MaxSignatureLen;
+	type MaxProofLen = MaxProofLen;
+	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
 
