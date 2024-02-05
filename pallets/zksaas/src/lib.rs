@@ -41,6 +41,7 @@ pub mod pallet {
 		traits::{Get, ReservableCurrency},
 	};
 	use frame_system::pallet_prelude::*;
+	use scale_info::prelude::fmt::Debug;
 	use tangle_primitives::verifier::InstanceVerifier;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -57,6 +58,24 @@ pub mod pallet {
 
 		/// The verifier instance trait
 		type Verifier: InstanceVerifier;
+
+		/// The maximum participants allowed in a job
+		type MaxParticipants: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of job result submission
+		type MaxSubmissionLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of a signature
+		type MaxSignatureLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of data to be signed
+		type MaxDataLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of validator key allowed
+		type MaxKeyLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of proof allowed
+		type MaxProofLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
 
 		/// Weight info for pallet
 		type WeightInfo: WeightInfo;

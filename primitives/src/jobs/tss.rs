@@ -14,22 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::roles::ThresholdSignatureRoleType;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
-use sp_std::vec::Vec;
-
-use crate::roles::ThresholdSignatureRoleType;
+use sp_runtime::traits::Get;
 
 use super::JobId;
 
 /// Represents the Distributed Key Generation (DKG) job type.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGTSSPhaseOneJobType<AccountId> {
+pub struct DKGTSSPhaseOneJobType<AccountId, MaxParticipants: Get<u32> + Clone> {
 	/// List of participants' account IDs.
-	pub participants: Vec<AccountId>,
+	pub participants: BoundedVec<AccountId, MaxParticipants>,
 
 	/// The threshold value for the DKG.
 	pub threshold: u8,
@@ -42,21 +41,21 @@ pub struct DKGTSSPhaseOneJobType<AccountId> {
 }
 
 /// Represents the DKG Signature job type.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGTSSPhaseTwoJobType {
+pub struct DKGTSSPhaseTwoJobType<MaxSubmissionLen: Get<u32>> {
 	/// The phase one ID.
 	pub phase_one_id: JobId,
 
 	/// The submission data as a vector of bytes.
-	pub submission: Vec<u8>,
+	pub submission: BoundedVec<u8, MaxSubmissionLen>,
 
 	/// The role type to be used
 	pub role_type: ThresholdSignatureRoleType,
 }
 
 /// Represents the DKG Key Refresh job type.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGTSSPhaseThreeJobType {
 	/// The phase one ID.
@@ -67,7 +66,7 @@ pub struct DKGTSSPhaseThreeJobType {
 }
 
 /// Represents the DKG Key Rotation job type.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGTSSPhaseFourJobType {
 	/// The phase one ID.
@@ -79,70 +78,76 @@ pub struct DKGTSSPhaseFourJobType {
 	pub role_type: ThresholdSignatureRoleType,
 }
 
-pub type Signatures = Vec<Vec<u8>>;
-
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGTSSKeySubmissionResult {
+pub struct DKGTSSKeySubmissionResult<
+	MaxKeyLen: Get<u32>,
+	MaxParticipants: Get<u32>,
+	MaxSignatureLen: Get<u32>,
+> {
 	/// Signature type of the DKG
 	pub signature_type: DigitalSignatureType,
 
 	/// Submitted key
-	pub key: Vec<u8>,
+	pub key: BoundedVec<u8, MaxKeyLen>,
 
 	/// List of participants' public keys
-	pub participants: Vec<Vec<u8>>,
+	pub participants: BoundedVec<BoundedVec<u8, MaxKeyLen>, MaxParticipants>,
 
 	/// List of participants' signatures
-	pub signatures: Signatures,
+	pub signatures: BoundedVec<BoundedVec<u8, MaxSignatureLen>, MaxParticipants>,
 
 	/// threshold needed to confirm the result
 	pub threshold: u8,
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGTSSSignatureResult {
+pub struct DKGTSSSignatureResult<
+	MaxDataLen: Get<u32>,
+	MaxKeyLen: Get<u32>,
+	MaxSignatureLen: Get<u32>,
+> {
 	/// Signature type to use for DKG
 	pub signature_type: DigitalSignatureType,
 
 	/// The input data
-	pub data: Vec<u8>,
+	pub data: BoundedVec<u8, MaxDataLen>,
 
 	/// The signature to verify
-	pub signature: Vec<u8>,
+	pub signature: BoundedVec<u8, MaxSignatureLen>,
 
 	/// The expected key for the signature
-	pub signing_key: Vec<u8>,
+	pub signing_key: BoundedVec<u8, MaxKeyLen>,
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGTSSKeyRefreshResult {
 	/// Signature type to use for DKG
 	pub signature_type: DigitalSignatureType,
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGTSSKeyRotationResult {
+pub struct DKGTSSKeyRotationResult<MaxKeyLen: Get<u32>, MaxSignatureLen: Get<u32>> {
 	/// The phase one ID.
 	pub phase_one_id: JobId,
 	/// The new phase one ID.
 	/// That will be used for the rotation.
 	pub new_phase_one_id: JobId,
 	/// Key from the new phase 1.
-	pub new_key: Vec<u8>,
+	pub new_key: BoundedVec<u8, MaxKeyLen>,
 	/// Current key (from phase 1).
-	pub key: Vec<u8>,
+	pub key: BoundedVec<u8, MaxKeyLen>,
 	/// The signature of signing the new key with the current key.
-	pub signature: Vec<u8>,
+	pub signature: BoundedVec<u8, MaxSignatureLen>,
 	/// Signature type of the DKG
 	pub signature_type: DigitalSignatureType,
 }
 
 /// Possible key types for DKG
-#[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq, Encode, Decode, Default)]
+#[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq, Encode, Decode, Default, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum DigitalSignatureType {
 	/// Elliptic Curve Digital Signature Algorithm (ECDSA) key type.

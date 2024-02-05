@@ -1,10 +1,13 @@
 use super::*;
+use crate::types::{
+	DKGTSSKeyRotationResultOf, DKGTSSKeySubmissionResultOf, DKGTSSSignatureResultOf,
+	ParticipantKeyOf, ParticipantKeysOf, ZkSaaSCircuitResultOf, ZkSaaSProofResultOf,
+};
 use sp_runtime::traits::Zero;
 use tangle_primitives::{
 	jobs::{
-		DKGTSSKeyRefreshResult, DKGTSSKeyRotationResult, DKGTSSPhaseOneJobType,
-		DKGTSSSignatureResult, JobType, JobWithResult, ZkSaaSCircuitResult, ZkSaaSPhaseOneJobType,
-		ZkSaaSProofResult,
+		DKGTSSKeyRefreshResult, DKGTSSPhaseOneJobType, JobType, JobWithResult,
+		ZkSaaSPhaseOneJobType,
 	},
 	roles::RoleType,
 };
@@ -30,7 +33,8 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		ValidatorJobIdLookup::<T>::try_mutate(validator, |jobs| -> DispatchResult {
 			let jobs = jobs.get_or_insert_with(Default::default);
-			jobs.push((role_type, job_id));
+			jobs.try_push((role_type, job_id))
+				.map_err(|_| Error::<T>::TooManyJobsForValidator)?;
 			Ok(())
 		})
 	}
@@ -164,7 +168,10 @@ impl<T: Config> Pallet<T> {
 							.ok_or(Error::<T>::InvalidJobPhase)?
 							.into_iter()
 							.filter(|x| x != &validator)
-							.collect();
+							.collect::<Vec<_>>()
+							.try_into()
+							.map_err(|_| Error::<T>::TooManyParticipants)?;
+
 						let new_threshold = phase1
 							.threshold()
 							.ok_or(Error::<T>::InvalidJobPhase)?
@@ -214,7 +221,9 @@ impl<T: Config> Pallet<T> {
 							.ok_or(Error::<T>::InvalidJobPhase)?
 							.into_iter()
 							.filter(|x| x != &validator)
-							.collect();
+							.collect::<Vec<_>>()
+							.try_into()
+							.map_err(|_| Error::<T>::TooManyParticipants)?;
 						let phase_one_id = job_info
 							.job_type
 							.get_phase_one_id()
@@ -272,7 +281,7 @@ impl<T: Config> Pallet<T> {
 	pub fn verify_dkg_job_result(
 		role_type: RoleType,
 		job_info: &JobInfoOf<T>,
-		info: DKGTSSKeySubmissionResult,
+		info: DKGTSSKeySubmissionResultOf<T>,
 	) -> Result<PhaseResultOf<T>, DispatchError> {
 		// sanity check, does job and result type match
 		ensure!(role_type.is_dkg_tss(), Error::<T>::ResultNotExpectedType);
@@ -283,15 +292,21 @@ impl<T: Config> Pallet<T> {
 			.clone()
 			.get_participants()
 			.ok_or(Error::<T>::InvalidJobParams)?;
-		let mut participant_keys: Vec<Vec<u8>> = Default::default();
+		let mut participant_keys: ParticipantKeysOf<T> = Default::default();
 
 		for participant in participants.clone() {
 			let key = T::RolesHandler::get_validator_role_key(participant);
 			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
-			participant_keys.push(key.expect("checked above"));
+			let bounded_key: ParticipantKeyOf<T> = key
+				.expect("Checked above!")
+				.try_into()
+				.map_err(|_| Error::<T>::ExceedsMaxKeySize)?;
+			participant_keys
+				.try_push(bounded_key)
+				.map_err(|_| Error::<T>::TooManyParticipants)?;
 		}
 
-		let job_result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
+		let job_result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResultOf::<T> {
 			key: info.key.clone(),
 			signatures: info.signatures,
 			participants: participant_keys,
@@ -318,7 +333,7 @@ impl<T: Config> Pallet<T> {
 	pub fn verify_dkg_signature_job_result(
 		role_type: RoleType,
 		job_info: &JobInfoOf<T>,
-		info: DKGTSSSignatureResult,
+		info: DKGTSSSignatureResultOf<T>,
 	) -> Result<PhaseResultOf<T>, DispatchError> {
 		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
@@ -353,7 +368,7 @@ impl<T: Config> Pallet<T> {
 			JobResult::DKGPhaseOne(result) => result.key,
 			_ => return Err(Error::<T>::InvalidJobPhase.into()),
 		};
-		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
+		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResultOf::<T> {
 			signature: info.signature.clone(),
 			data: info.data,
 			signing_key,
@@ -443,7 +458,7 @@ impl<T: Config> Pallet<T> {
 	pub fn verify_dkg_key_rotation_job_result(
 		role_type: RoleType,
 		job_info: &JobInfoOf<T>,
-		info: DKGTSSKeyRotationResult,
+		info: DKGTSSKeyRotationResultOf<T>,
 	) -> Result<PhaseResultOf<T>, DispatchError> {
 		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
@@ -492,7 +507,7 @@ impl<T: Config> Pallet<T> {
 			JobResult::DKGPhaseOne(info) => info.key.clone(),
 			_ => return Err(Error::<T>::InvalidJobPhase.into()),
 		};
-		let job_result = JobResult::DKGPhaseFour(DKGTSSKeyRotationResult {
+		let job_result = JobResult::DKGPhaseFour(DKGTSSKeyRotationResultOf::<T> {
 			phase_one_id: job_info
 				.job_type
 				.get_phase_one_id()
@@ -524,7 +539,7 @@ impl<T: Config> Pallet<T> {
 		role_type: RoleType,
 		job_id: JobId,
 		job_info: &JobInfoOf<T>,
-		_info: ZkSaaSCircuitResult,
+		_info: ZkSaaSCircuitResultOf<T>,
 	) -> Result<PhaseResultOf<T>, DispatchError> {
 		// sanity check, does job and result type match
 		ensure!(role_type.is_zksaas(), Error::<T>::ResultNotExpectedType);
@@ -535,17 +550,22 @@ impl<T: Config> Pallet<T> {
 			.clone()
 			.get_participants()
 			.ok_or(Error::<T>::InvalidJobParams)?;
-		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
+		let mut participant_keys: BoundedVec<
+			sp_core::ecdsa::Public,
+			<T as Config>::MaxParticipants,
+		> = Default::default();
 
 		for participant in participants.clone() {
 			let key = T::RolesHandler::get_validator_role_key(participant);
 			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
 			let pub_key = sp_core::ecdsa::Public::from_slice(&key.expect("checked above")[0..33])
 				.map_err(|_| Error::<T>::InvalidValidator)?;
-			participant_keys.push(pub_key);
+			participant_keys
+				.try_push(pub_key)
+				.map_err(|_| Error::<T>::TooManyParticipants)?;
 		}
 
-		let job_result = JobResult::ZkSaaSPhaseOne(ZkSaaSCircuitResult {
+		let job_result = JobResult::ZkSaaSPhaseOne(ZkSaaSCircuitResultOf::<T> {
 			job_id,
 			participants: participant_keys,
 		});
@@ -569,7 +589,7 @@ impl<T: Config> Pallet<T> {
 	pub fn verify_zksaas_prove_job_result(
 		role_type: RoleType,
 		job_info: &JobInfoOf<T>,
-		info: ZkSaaSProofResult,
+		info: ZkSaaSProofResultOf<T>,
 	) -> Result<PhaseResultOf<T>, DispatchError> {
 		let now = <frame_system::Pallet<T>>::block_number();
 		// sanity check, does job and result type match
