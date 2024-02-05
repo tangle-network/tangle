@@ -148,6 +148,14 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 	}
 }
 
+pub struct MockMisbehaviorHandler;
+
+impl MisbehaviorHandler for MockMisbehaviorHandler {
+	fn verify(_data: MisbehaviorSubmission) -> DispatchResult {
+		Ok(())
+	}
+}
+
 type IdentificationTuple = (AccountId, AccountId);
 type Offence = pallet_roles::offences::ValidatorOffence<IdentificationTuple>;
 
@@ -309,6 +317,7 @@ parameter_types! {
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type MisbehaviorHandler = MockMisbehaviorHandler;
 	type ForceOrigin = EnsureSigned<AccountId>;
 	type Currency = Balances;
 	type JobToFee = MockJobToFeeHandler;

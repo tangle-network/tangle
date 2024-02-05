@@ -48,6 +48,7 @@ use tangle_primitives::{
 		traits::{JobToFee, JobsHandler, MPCHandler},
 		*,
 	},
+	misbehavior::{MisbehaviorHandler, MisbehaviorSubmission},
 	roles::ValidatorRewardDistribution,
 };
 
@@ -290,6 +291,14 @@ impl MPCHandler<AccountId, BlockNumber, Balance> for MockMPCHandler {
 	}
 }
 
+pub struct MockMisbehaviorHandler;
+
+impl MisbehaviorHandler for MockMisbehaviorHandler {
+	fn verify(_data: MisbehaviorSubmission) -> DispatchResult {
+		Ok(())
+	}
+}
+
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
 }
@@ -301,6 +310,7 @@ impl pallet_jobs::Config for Runtime {
 	type JobToFee = MockJobToFeeHandler;
 	type RolesHandler = Roles;
 	type MPCHandler = MockMPCHandler;
+	type MisbehaviorHandler = MockMisbehaviorHandler;
 	type PalletId = JobsPalletId;
 	type WeightInfo = ();
 }

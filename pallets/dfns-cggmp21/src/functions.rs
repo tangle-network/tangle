@@ -340,6 +340,7 @@ impl<T: Config> Pallet<T> {
 		// TODO: add slashing logic
 		Ok(())
 	}
+
 	/// Given a [`SignedRoundMessage`] ensure that the message is signed by the given offender.
 	pub fn ensure_signed_by_offender(
 		signed_message: &SignedRoundMessage,
