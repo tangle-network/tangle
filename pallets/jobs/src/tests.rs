@@ -119,7 +119,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 					.collect::<Vec<_>>()
 					.try_into()
 					.unwrap(),
-				threshold: 5,
+				threshold: 6,
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
 			}),
@@ -154,6 +154,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 		);
 		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
 
+		// should work when n = t
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -164,7 +165,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 					.collect::<Vec<_>>()
 					.try_into()
 					.unwrap(),
-				threshold: 3,
+				threshold: 5,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
