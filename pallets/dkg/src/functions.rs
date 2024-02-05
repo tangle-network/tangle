@@ -171,7 +171,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		// Ensure a sufficient number of unique signers are present
-		ensure!(known_signers.len() > data.threshold.into(), Error::<T>::NotEnoughSigners);
+		ensure!(known_signers.len() >= data.threshold.into(), Error::<T>::NotEnoughSigners);
 
 		Ok(())
 	}
@@ -231,7 +231,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		// Ensure a sufficient number of unique signers are present
-		ensure!(known_signers.len() > data.threshold.into(), Error::<T>::NotEnoughSigners);
+		ensure!(known_signers.len() >= data.threshold.into(), Error::<T>::NotEnoughSigners);
 
 		Ok(())
 	}
