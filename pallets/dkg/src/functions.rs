@@ -20,6 +20,7 @@ use frame_system::pallet_prelude::BlockNumberFor;
 use parity_scale_codec::Encode;
 use sp_core::{ecdsa, sr25519};
 use sp_io::{crypto::sr25519_verify, hashing::keccak_256, EcdsaVerifyError};
+use sp_runtime::traits::Get;
 use sp_std::{default::Default, vec::Vec};
 use tangle_primitives::jobs::*;
 
@@ -58,9 +59,14 @@ impl<T: Config> Pallet<T> {
 			let validator_count =
 				job.job_type.clone().get_participants().expect("checked_above").len();
 			let validator_fee = fee_info.dkg_validator_fee * (validator_count as u32).into();
-			validator_fee.saturating_add(fee_info.base_fee)
+			let storage_fee = fee_info.storage_fee_per_byte * T::MaxKeyLen::get().into();
+			validator_fee.saturating_add(fee_info.base_fee).saturating_add(storage_fee)
 		} else {
-			fee_info.base_fee.saturating_add(fee_info.sig_validator_fee)
+			let storage_fee = fee_info.storage_fee_per_byte * T::MaxSignatureLen::get().into();
+			fee_info
+				.base_fee
+				.saturating_add(fee_info.sig_validator_fee)
+				.saturating_add(storage_fee)
 		}
 	}
 
