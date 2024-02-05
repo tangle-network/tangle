@@ -23,9 +23,9 @@ use tangle_primitives::{
 	jobs::{
 		DKGTSSKeyRefreshResult, DKGTSSKeyRotationResult, DKGTSSPhaseFourJobType,
 		DKGTSSPhaseOneJobType, DKGTSSPhaseThreeJobType, DKGTSSPhaseTwoJobType,
-		DKGTSSSignatureResult, DigitalSignatureType, Groth16ProveRequest, Groth16System, HyperData,
-		JobSubmission, JobType, RpcResponseJobsData, ZkSaaSCircuitResult, ZkSaaSPhaseOneJobType,
-		ZkSaaSPhaseTwoJobType, ZkSaaSPhaseTwoRequest, ZkSaaSSystem,
+		DKGTSSSignatureResult, DigitalSignatureScheme, Groth16ProveRequest, Groth16System,
+		HyperData, JobSubmission, JobType, RpcResponseJobsData, ZkSaaSCircuitResult,
+		ZkSaaSPhaseOneJobType, ZkSaaSPhaseTwoJobType, ZkSaaSPhaseTwoRequest, ZkSaaSSystem,
 	},
 	roles::{RoleType, ThresholdSignatureRoleType, ZeroKnowledgeRoleType},
 };
@@ -184,7 +184,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -244,7 +244,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				signing_key: vec![].try_into().unwrap(),
 				signature: vec![].try_into().unwrap(),
 				data: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -313,7 +313,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -337,7 +337,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 			RoleType::Tss(threshold_signature_role_type),
 			1,
 			JobResult::DKGPhaseThree(DKGTSSKeyRefreshResult {
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -412,7 +412,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -426,7 +426,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -456,7 +456,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				signature: vec![].try_into().unwrap(),
 				phase_one_id: 0,
 				new_phase_one_id: 1,
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -536,7 +536,7 @@ fn jobs_rpc_tests() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 

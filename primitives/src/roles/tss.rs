@@ -53,7 +53,7 @@ pub enum ThresholdSignatureRoleType {
 	ZcashFrostRistretto255,
 	ZcashFrostEd25519,
 	ZcashFrostEd448,
-	ZcashFrostRedJubJub,
+	// ZcashFrostRedJubJub,
 	GennaroDKGBls381,
 }
 

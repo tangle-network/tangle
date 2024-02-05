@@ -31,7 +31,6 @@ frost-secp256k1 = { package = "frost-secp256k1", workspace = true, default-featu
 frost-taproot = { package = "frost-taproot", workspace = true, default-features = false }
 frost-p256 = { package = "frost-p256", workspace = true, default-features = false }
 frost-p384 = { package = "frost-p384", workspace = true, default-features = false }
-jubjub = { version = "0.10", git = "https://github.com/LIT-Protocol/jubjub.git", features = ["alloc"], default-features = false }
 
 # FROST RedJubjub is not yet no_std compatible
 # TODO: Update this once it is.

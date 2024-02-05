@@ -1,4 +1,5 @@
 pub mod ecdsa;
+pub mod schnorr_frost;
 pub mod schnorr_sr25519;
 
 /// Utility function to create slice of fixed size

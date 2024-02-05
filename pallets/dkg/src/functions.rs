@@ -21,6 +21,7 @@ use tangle_primitives::jobs::*;
 
 use self::signatures_schemes::{
 	ecdsa::{verify_dkg_signature_ecdsa, verify_generated_dkg_key_ecdsa},
+	schnorr_frost::verify_dkg_signature_schnorr_frost,
 	schnorr_sr25519::{
 		verify_dkg_signature_schnorr_sr25519, verify_generated_dkg_key_schnorr_sr25519,
 	},
@@ -108,9 +109,9 @@ impl<T: Config> Pallet<T> {
 	fn verify_generated_dkg_key(
 		data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
 	) -> DispatchResult {
-		match data.signature_type {
-			DigitalSignatureType::Ecdsa => verify_generated_dkg_key_ecdsa::<T>(data),
-			DigitalSignatureType::SchnorrRistretto255 =>
+		match data.signature_scheme {
+			DigitalSignatureScheme::Ecdsa => verify_generated_dkg_key_ecdsa::<T>(data),
+			DigitalSignatureScheme::SchnorrSr25519 =>
 				verify_generated_dkg_key_schnorr_sr25519::<T>(data),
 			_ => Err(Error::<T>::InvalidSignature.into()),
 		}
@@ -130,24 +131,27 @@ impl<T: Config> Pallet<T> {
 	fn verify_dkg_signature(
 		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
 	) -> DispatchResult {
-		match data.signature_type {
-			DigitalSignatureType::Ecdsa =>
+		match data.signature_scheme {
+			DigitalSignatureScheme::Ecdsa =>
 				verify_dkg_signature_ecdsa::<T>(&data.data, &data.signature, &data.signing_key),
-			DigitalSignatureType::SchnorrSr25519 | DigitalSignatureType::SchnorrRistretto255 =>
-				verify_dkg_signature_schnorr_sr25519::<T>(
-					&data.data,
-					&data.signature,
-					&data.signing_key,
-				),
-			DigitalSignatureType::SchnorrEd25519 => Err(Error::<T>::InvalidSignature.into()), /* unimplemented */
-			DigitalSignatureType::SchnorrEd448 => Err(Error::<T>::InvalidSignature.into()), /* unimplemented */
-			DigitalSignatureType::SchnorrP256 => Err(Error::<T>::InvalidSignature.into()),  /* unimplemented */
-			DigitalSignatureType::SchnorrP384 => Err(Error::<T>::InvalidSignature.into()),  /* unimplemented */
-			DigitalSignatureType::SchnorrSecp256k1 => Err(Error::<T>::InvalidSignature.into()), /* unimplemented */
-			DigitalSignatureType::SchnorrSecp256k1Taproot =>
-				Err(Error::<T>::InvalidSignature.into()), /* unimplemented */
-			DigitalSignatureType::SchnorrRedJubJub => Err(Error::<T>::InvalidSignature.into()), /* unimplemented */
-			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
+			DigitalSignatureScheme::SchnorrSr25519 => verify_dkg_signature_schnorr_sr25519::<T>(
+				&data.data,
+				&data.signature,
+				&data.signing_key,
+			),
+			DigitalSignatureScheme::SchnorrEd25519 |
+			DigitalSignatureScheme::SchnorrEd448 |
+			DigitalSignatureScheme::SchnorrP256 |
+			DigitalSignatureScheme::SchnorrP384 |
+			DigitalSignatureScheme::SchnorrSecp256k1 |
+			DigitalSignatureScheme::SchnorrSecp256k1Taproot |
+			DigitalSignatureScheme::SchnorrRistretto255 => verify_dkg_signature_schnorr_frost::<T>(
+				data.signature_scheme,
+				&data.data,
+				&data.signature,
+				&data.signing_key,
+			),
+			_ => Err(Error::<T>::InvalidSignature.into()),
 		}
 	}
 
@@ -178,11 +182,11 @@ impl<T: Config> Pallet<T> {
 			Ok(())
 		};
 
-		match data.signature_type {
-			DigitalSignatureType::Ecdsa =>
+		match data.signature_scheme {
+			DigitalSignatureScheme::Ecdsa =>
 				verify_dkg_signature_ecdsa::<T>(&data.new_key, &data.signature, &data.key)
 					.map(|_| emit_event(data))?,
-			DigitalSignatureType::SchnorrRistretto255 =>
+			DigitalSignatureScheme::SchnorrSr25519 =>
 				verify_dkg_signature_schnorr_sr25519::<T>(&data.new_key, &data.signature, &data.key)
 					.map(|_| emit_event(data))?,
 			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented

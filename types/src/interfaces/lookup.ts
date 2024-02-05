@@ -3329,23 +3329,23 @@ export default {
    * Lookup411: tangle_primitives::jobs::tss::DKGTSSKeySubmissionResult
    **/
   TanglePrimitivesJobsTssDkgtssKeySubmissionResult: {
-    signatureType: 'TanglePrimitivesJobsTssDigitalSignatureType',
+    signatureType: 'TanglePrimitivesJobsTssDigitalSignatureScheme',
     key: 'Bytes',
     participants: 'Vec<Bytes>',
     signatures: 'Vec<Bytes>',
     threshold: 'u8'
   },
   /**
-   * Lookup412: tangle_primitives::jobs::tss::DigitalSignatureType
+   * Lookup412: tangle_primitives::jobs::tss::DigitalSignatureScheme
    **/
-  TanglePrimitivesJobsTssDigitalSignatureType: {
+  TanglePrimitivesJobsTssDigitalSignatureScheme: {
     _enum: ['Ecdsa', 'SchnorrSr25519', 'SchnorrP256', 'SchnorrSecp256k1', 'SchnorrRistretto255', 'SchnorrBabyJubJub', 'SchnorrEd25519', 'EdDSABabyJubJub', 'Bls381']
   },
   /**
    * Lookup413: tangle_primitives::jobs::tss::DKGTSSSignatureResult
    **/
   TanglePrimitivesJobsTssDkgtssSignatureResult: {
-    signatureType: 'TanglePrimitivesJobsTssDigitalSignatureType',
+    signatureType: 'TanglePrimitivesJobsTssDigitalSignatureScheme',
     data: 'Bytes',
     signature: 'Bytes',
     signingKey: 'Bytes'

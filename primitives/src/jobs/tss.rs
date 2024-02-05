@@ -85,8 +85,8 @@ pub struct DKGTSSKeySubmissionResult<
 	MaxParticipants: Get<u32>,
 	MaxSignatureLen: Get<u32>,
 > {
-	/// Signature type of the DKG
-	pub signature_type: DigitalSignatureType,
+	/// Signature scheme of the DKG
+	pub signature_scheme: DigitalSignatureScheme,
 
 	/// Submitted key
 	pub key: BoundedVec<u8, MaxKeyLen>,
@@ -108,8 +108,8 @@ pub struct DKGTSSSignatureResult<
 	MaxKeyLen: Get<u32>,
 	MaxSignatureLen: Get<u32>,
 > {
-	/// Signature type to use for DKG
-	pub signature_type: DigitalSignatureType,
+	/// Signature scheme to use for DKG
+	pub signature_scheme: DigitalSignatureScheme,
 
 	/// The input data
 	pub data: BoundedVec<u8, MaxDataLen>,
@@ -124,8 +124,8 @@ pub struct DKGTSSSignatureResult<
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct DKGTSSKeyRefreshResult {
-	/// Signature type to use for DKG
-	pub signature_type: DigitalSignatureType,
+	/// Signature scheme to use for DKG
+	pub signature_scheme: DigitalSignatureScheme,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
@@ -142,45 +142,45 @@ pub struct DKGTSSKeyRotationResult<MaxKeyLen: Get<u32>, MaxSignatureLen: Get<u32
 	pub key: BoundedVec<u8, MaxKeyLen>,
 	/// The signature of signing the new key with the current key.
 	pub signature: BoundedVec<u8, MaxSignatureLen>,
-	/// Signature type of the DKG
-	pub signature_type: DigitalSignatureType,
+	/// Signature scheme of the DKG
+	pub signature_scheme: DigitalSignatureScheme,
 }
 
 /// Possible key types for DKG
 #[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq, Encode, Decode, Default, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum DigitalSignatureType {
+pub enum DigitalSignatureScheme {
 	/// Elliptic Curve Digital Signature Algorithm (ECDSA) key type.
 	#[default]
 	Ecdsa,
 
-	/// Schnorr signature type over the P256 curve.
+	/// Schnorr signature scheme over the P256 curve.
 	SchnorrP256,
 
-	/// Schnorr signature type of the P384 curve.
+	/// Schnorr signature scheme of the P384 curve.
 	SchnorrP384,
 
-	/// Schnorr signature type over the Secp256k1 curve.
+	/// Schnorr signature scheme over the Secp256k1 curve.
 	SchnorrSecp256k1,
 
-	/// Schnorr signature type of the Secp256k1 curve w/ Taproot compatibility.
+	/// Schnorr signature scheme of the Secp256k1 curve w/ Taproot compatibility.
 	SchnorrSecp256k1Taproot,
 
-	/// Schnorr signature type over the sr25519 curve.
+	/// Schnorr signature scheme over the sr25519 curve.
 	SchnorrSr25519,
 
-	/// Schnorr signature type over the Ristretto255 curve / sr25519.
+	/// Schnorr signature scheme over the Ristretto255 curve / sr25519.
 	SchnorrRistretto255,
 
-	/// Schnorr signature type over the JubJub curve.
+	/// Schnorr signature scheme over the JubJub curve.
 	SchnorrRedJubJub,
 
-	/// Schnorr signature type over the Ed25519 curve.
+	/// Schnorr signature scheme over the Ed25519 curve.
 	SchnorrEd25519,
 
-	/// Schnorr signature type over the Ed448 curve.
+	/// Schnorr signature scheme over the Ed448 curve.
 	SchnorrEd448,
 
-	/// BLS 381 signature type.
+	/// BLS 381 signature scheme.
 	Bls381,
 }

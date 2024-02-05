@@ -9,15 +9,16 @@ use crate::{Config, Error};
 
 use super::to_slice_32;
 
-/// Verifies the DKG signature result for Schnorr signatures over ristretto 255.
+/// Verifies the DKG signature result for Schnorr signatures over sr25519.
 ///
 /// This function uses the Schnorr signature algorithm to verify the provided signature
 /// based on the message data, signature, and signing key in the DKG signature result.
 ///
 /// # Arguments
 ///
-/// * `data` - The DKG signature result containing the message data, Schnorr signature, and signing
-///   key.
+/// * `msg` - The message data that was signed.
+/// * `signature` - The Schnorr signature to be verified.
+/// * `key` - The public key associated with the signature.
 pub fn verify_dkg_signature_schnorr_sr25519<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
