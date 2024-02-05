@@ -1426,7 +1426,9 @@ fn test_fee_charged_for_jobs_submission() {
 				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
 					.iter()
 					.map(|x| mock_pub_key(*x))
-					.collect(),
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
