@@ -611,7 +611,7 @@ pub mod module {
 				Ok(())
 			})
 		}
-    
+
 		#[pallet::call_index(5)]
 		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
 		pub fn set_time_fee(origin: OriginFor<T>, new_fee: BalanceOf<T>) -> DispatchResult {
@@ -619,8 +619,8 @@ pub mod module {
 			TimeFeePerBlock::<T>::set(new_fee);
 			Ok(())
 		}
-    
-    /// Submit a misbehavior report
+
+		/// Submit a misbehavior report
 		///
 		/// # Parameters
 		///
@@ -648,6 +648,6 @@ pub mod module {
 			// TODO: verify misbehavior
 			// TODO: handle slashing
 			// TODO: emit events
-    }
+		}
 	}
 }

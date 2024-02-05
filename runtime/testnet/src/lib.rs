@@ -1153,7 +1153,7 @@ impl MisbehaviorHandler for MockMisbehaviorHandler {
 				DfnsCGGMP21::verify(data),
 			_ => Ok(()),
 		}
-  }
+	}
 }
 
 parameter_types! {
