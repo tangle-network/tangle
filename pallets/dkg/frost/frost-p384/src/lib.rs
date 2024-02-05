@@ -1,11 +1,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate alloc;
 
+use crate::alloc::borrow::ToOwned;
 use p384::{
 	elliptic_curve::{
 		hash2curve::{hash_to_field, ExpandMsgXmd},
 		sec1::{FromEncodedPoint, ToEncodedPoint},
-		Field as FFField, PrimeField,
+		PrimeField,
 	},
 	AffinePoint, ProjectivePoint, Scalar,
 };
@@ -55,6 +56,8 @@ impl Field for P384ScalarField {
 
 	#[cfg(feature = "std")]
 	fn random<R: RngCore + CryptoRng>(rng: &mut R) -> Self::Scalar {
+		use p384::elliptic_curve::Field;
+
 		WrappedScalar(Scalar::random(rng))
 	}
 

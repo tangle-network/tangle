@@ -24,12 +24,13 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 parity-scale-codec = { workspace = true }
-k256 = { version = "0.13.0", features = ["arithmetic", "expose-field", "hash2curve", "alloc"], default-features = false }
+k256 = { version = "0.13.0", features = ["arithmetic", "expose-field", "hash2curve", "schnorr", "alloc"], default-features = false }
 frost-core = { workspace = true }
 frost-secp256k1 = { workspace = true }
-rand_core = { version = "0.6", optional = true }
+rand_core = { version = "0.6", default-features = false, optional = true }
 sha2 = { version = "0.10.2", default-features = false }
 signature = { version = "2.2", default-features = false }
+sp-std = { workspace = true, default-features = false }
 subtle = { workspace = true }
 
 [features]
@@ -39,5 +40,6 @@ std = [
     "rand_core/std",
     "k256/std",
     "sha2/std",
+    "sp-std/std",
     "frost-secp256k1/std",
 ]

@@ -60,7 +60,7 @@ pub fn verify_dkg_signature_schnorr_sr25519<T: Config>(
 /// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 /// encountered an error.
 pub fn verify_generated_dkg_key_schnorr_sr25519<T: Config>(
-	data: DKGTSSKeySubmissionResult,
+	data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
 ) -> DispatchResult {
 	// Ensure participants and signatures are not empty
 	ensure!(!data.participants.is_empty(), Error::<T>::NoParticipantsFound);

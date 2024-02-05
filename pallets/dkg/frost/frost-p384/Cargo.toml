@@ -26,7 +26,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 parity-scale-codec = { workspace = true }
 p384 = { version = "0.13.0", features = ["hash2curve", "alloc"], git = "https://github.com/LIT-Protocol/elliptic-curves.git", default-features = false }
 frost-core = { workspace = true }
-rand_core = { version = "0.6", optional = true }
+rand_core = { version = "0.6", default-features = false, optional = true }
 sha2 = { version = "0.10.2", default-features = false }
 subtle = { workspace = true }
 

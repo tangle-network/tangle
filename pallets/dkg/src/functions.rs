@@ -165,12 +165,14 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a `DispatchResult` indicating whether the key rotation verification was successful
 	/// or encountered an error.
-	fn verify_dkg_key_rotation(data: DKGTSSKeyRotationResult) -> DispatchResult {
-		let emit_event = |data: DKGTSSKeyRotationResult| {
+	fn verify_dkg_key_rotation(
+		data: DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen>,
+	) -> DispatchResult {
+		let emit_event = |data: DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen>| {
 			Self::deposit_event(Event::KeyRotated {
 				from_job_id: data.phase_one_id,
 				to_job_id: data.new_phase_one_id,
-				signature: data.signature,
+				signature: data.signature.to_vec(),
 			});
 
 			Ok(())

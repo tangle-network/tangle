@@ -26,7 +26,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 parity-scale-codec = { workspace = true }
 k256 = { version = "0.13.0", features = ["arithmetic", "expose-field", "hash2curve", "alloc"], default-features = false }
 frost-core = { workspace = true }
-rand_core = { version = "0.6", optional = true }
+rand_core = { version = "0.6", default-features = false, optional = true }
 sha2 = { version = "0.10.2", default-features = false }
 subtle = { workspace = true }
 

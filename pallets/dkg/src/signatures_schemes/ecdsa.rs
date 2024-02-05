@@ -119,7 +119,7 @@ pub fn verify_signer_from_set_ecdsa(
 /// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
 /// encountered an error.
 pub fn verify_generated_dkg_key_ecdsa<T: Config>(
-	data: DKGTSSKeySubmissionResult,
+	data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
 ) -> DispatchResult {
 	// Ensure participants and signatures are not empty
 	ensure!(!data.participants.is_empty(), Error::<T>::NoParticipantsFound);

@@ -1,5 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+extern crate alloc;
 
+use crate::alloc::borrow::ToOwned;
 use frost_core::error::Error;
 use frost_secp256k1::{WrappedProjectivePoint, WrappedScalar};
 use k256::{
@@ -11,10 +13,11 @@ use k256::{
 		point::AffineCoordinates,
 		sec1::{FromEncodedPoint, ToEncodedPoint},
 		subtle::Choice,
-		Field as FFField, PrimeField,
+		PrimeField,
 	},
 	AffinePoint, ProjectivePoint, Scalar,
 };
+use sp_std::vec::Vec;
 
 #[cfg(feature = "std")]
 use rand_core::{CryptoRng, RngCore};
@@ -55,7 +58,10 @@ impl Field for Secp256K1TaprootScalarField {
 		}
 	}
 
+	#[cfg(feature = "std")]
 	fn random<R: RngCore + CryptoRng>(rng: &mut R) -> Self::Scalar {
+		use k256::elliptic_curve::Field;
+
 		WrappedScalar(Scalar::random(rng))
 	}
 

@@ -1,10 +1,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+extern crate alloc;
 
 mod constants;
 mod hash;
 pub mod types;
+use blake2::digest::Mac;
 pub use types::*;
 
+use crate::alloc::borrow::ToOwned;
 use group::{
 	cofactor::CofactorGroup,
 	ff::{Field as FFField, PrimeField},
@@ -32,7 +35,14 @@ fn hash_to_array(inputs: &[&[u8]]) -> [u8; 64] {
 	for i in &inputs[1..] {
 		state.update(i);
 	}
-	*state.state.finalize().as_array()
+	*state
+		.state
+		.finalize()
+		.into_bytes()
+		.to_vec()
+		.as_slice()
+		.try_into()
+		.unwrap_or(&[0u8; 64])
 }
 fn hash_to_scalar(domain: &[u8], msg: &[u8]) -> jubjub::Scalar {
 	HStar::default().update(domain).update(msg).finalize()

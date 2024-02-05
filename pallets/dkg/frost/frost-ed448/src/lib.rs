@@ -1,5 +1,4 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-extern crate alloc;
 
 use ed448_goldilocks::{
 	elliptic_curve::generic_array::{typenum::U114, GenericArray},

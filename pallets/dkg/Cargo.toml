@@ -23,6 +23,19 @@ subtle = { workspace = true }
 tangle-crypto-primitives = { workspace = true, default-features = false }
 tangle-primitives = { workspace = true, default-features = false }
 frost-core = { package = "frost-core", workspace = true, default-features = false }
+frost-ed25519 = { package = "frost-ed25519", workspace = true, default-features = false }
+elliptic-curve = { version = "0.13", features = ["hash2curve"], default-features = false }
+frost-ed448 = { package = "frost-ed448", workspace = true, default-features = false }
+frost-ristretto255 = { package = "frost-ristretto255", workspace = true, default-features = false }
+frost-secp256k1 = { package = "frost-secp256k1", workspace = true, default-features = false }
+frost-taproot = { package = "frost-taproot", workspace = true, default-features = false }
+frost-p256 = { package = "frost-p256", workspace = true, default-features = false }
+frost-p384 = { package = "frost-p384", workspace = true, default-features = false }
+jubjub = { version = "0.10", git = "https://github.com/LIT-Protocol/jubjub.git", features = ["alloc"], default-features = false }
+
+# FROST RedJubjub is not yet no_std compatible
+# TODO: Update this once it is.
+# frost-redjubjub = { package = "frost-redjubjub", workspace = true, default-features = false }
 
 [dev-dependencies]
 pallet-balances = { workspace = true }
@@ -41,10 +54,20 @@ std = [
   "sp-std/std",
   "tangle-primitives/std",
   "tangle-crypto-primitives/std",
-  "frost-core/std",
   "pallet-balances/std",
   "sp-io/std",
   "sp-keystore/std",
+
+  "frost-core/std",
+  "frost-ed25519/std",
+  "elliptic-curve/std",
+  "frost-ed448/std",
+  "frost-ristretto255/std",
+  "frost-secp256k1/std",
+  "frost-taproot/std",
+  "frost-p256/std",
+  "frost-p384/std",
+  # "frost-redjubjub/std",
 ]
 serde = []
 try-runtime = ["frame-support/try-runtime"]
