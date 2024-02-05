@@ -97,28 +97,29 @@ impl<T: Config> Pallet<T> {
 		match data.signature_type {
 			DigitalSignatureType::Ecdsa => Self::verify_generated_dkg_key_ecdsa(data),
 			DigitalSignatureType::SchnorrSr25519 => Self::verify_generated_dkg_key_schnorr(data),
-            DigitalSignatureType::Bls381 => Self::verify_generated_dkg_key_bls(data),
+			DigitalSignatureType::Bls381 => Self::verify_generated_dkg_key_bls(data),
 			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
 		}
 	}
 
-    /// Verifies the generated DKG key for BLS signatures.
-    ///
-    /// This function includes generating required signers, validating signatures, and ensuring a
-    /// sufficient number of unique signers are present.
-    ///
-    /// # Arguments
-    ///
-    /// * `data` - The DKG verification information containing participants, keys, and signatures.
-    ///
-    /// # Returns
-    ///
-    /// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
-    /// encountered an error.
-    fn verify_generated_dkg_key_bls(data: DKGTSSKeySubmissionResult) -> DispatchResult {
-        // The BLS public key is signed using an ECDSA signature, therefore, validate the ECDSA signature only
-        Self::verify_generated_dkg_key_ecdsa(data)
-    }
+	/// Verifies the generated DKG key for BLS signatures.
+	///
+	/// This function includes generating required signers, validating signatures, and ensuring a
+	/// sufficient number of unique signers are present.
+	///
+	/// # Arguments
+	///
+	/// * `data` - The DKG verification information containing participants, keys, and signatures.
+	///
+	/// # Returns
+	///
+	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
+	/// encountered an error.
+	fn verify_generated_dkg_key_bls(data: DKGTSSKeySubmissionResult) -> DispatchResult {
+		// The BLS public key is signed using an ECDSA signature, therefore, validate the ECDSA
+		// signature only
+		Self::verify_generated_dkg_key_ecdsa(data)
+	}
 
 	/// Verifies the generated DKG key for ECDSA signatures.
 	///
@@ -248,7 +249,7 @@ impl<T: Config> Pallet<T> {
 		match data.signature_type {
 			DigitalSignatureType::Ecdsa => Self::verify_dkg_signature_ecdsa(data),
 			DigitalSignatureType::SchnorrSr25519 => Self::verify_dkg_signature_schnorr(data),
-            DigitalSignatureType::Bls381 => Self::verify_bls_signature(data),
+			DigitalSignatureType::Bls381 => Self::verify_bls_signature(data),
 			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
 		}
 	}
@@ -315,33 +316,32 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-    /// Verifies the DKG signature result for BLS signatures.
-    ///
-    /// This function uses the BLS signature algorithm to verify the provided signature
-    /// based on the message data, signature, and signing key in the DKG signature result.
-    ///
-    /// # Arguments
-    ///
-    /// * `data` - The DKG signature result containing the message data, BLS signature, and
-    ///   signing key.
-    fn verify_bls_signature(data: DKGTSSSignatureResult) -> DispatchResult {
-        // Convert the signature from bytes to sr25519::Signature
-        let signature = milagro_bls::Signature::from_bytes(&data.signature)
-            .map_err(|_| Error::<T>::CannotRetreiveSigner)?;
+	/// Verifies the DKG signature result for BLS signatures.
+	///
+	/// This function uses the BLS signature algorithm to verify the provided signature
+	/// based on the message data, signature, and signing key in the DKG signature result.
+	///
+	/// # Arguments
+	///
+	/// * `data` - The DKG signature result containing the message data, BLS signature, and signing
+	///   key.
+	fn verify_bls_signature(data: DKGTSSSignatureResult) -> DispatchResult {
+		let public_key = blst::min_pk::PublicKey::deserialize(&data.signing_key)
+			.map_err(|_err| Error::<T>::InvalidParticipantPublicKey)?;
+		let signature = blst::min_pk::Signature::deserialize(&data.signature)
+			.map_err(|_err| Error::<T>::InvalidSignatureData)?;
 
-        let public_key = milagro_bls::PublicKey::from_uncompressed_bytes(data.signing_key.as_slice())
-            .map_err(|_| Error::<T>::CannotRetreiveSigner)?;
-        // Encode the message data and compute its keccak256 hash
-        let msg = data.data.encode();
-        let hash = keccak_256(&msg);
+		let dst = &mut [0u8; 48];
+		let signed_data = data.data;
 
-        // Verify the BLS signature using milagro_bls
-        if !signature.verify(&hash, &public_key) {
-            return Err(Error::<T>::InvalidSignature.into())
-        }
+		if signature.verify(true, &signed_data, dst, &[], &public_key, true) !=
+			blst::BLST_ERROR::BLST_SUCCESS
+		{
+			return Err(Error::<T>::InvalidSignature.into())
+		}
 
-        Ok(())
-    }
+		Ok(())
+	}
 
 	/// Verifies a DKG Key Rotation.
 	///

@@ -104,8 +104,8 @@ pub mod pallet {
 		SigningKeyMismatch,
 		/// Invalid participant public key
 		InvalidParticipantPublicKey,
-        /// DKG key not supplied
-        NoKeyFound,
+		/// DKG key not supplied
+		NoKeyFound,
 	}
 
 	#[pallet::call]

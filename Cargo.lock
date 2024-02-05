@@ -6956,10 +6956,10 @@ dependencies = [
 name = "pallet-dkg"
 version = "0.6.1"
 dependencies = [
+ "blst",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "milagro_bls",
  "pallet-balances",
  "parity-scale-codec 3.6.9",
  "scale-info",

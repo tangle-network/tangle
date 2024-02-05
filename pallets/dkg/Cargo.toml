@@ -20,7 +20,7 @@ sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 tangle-primitives = { workspace = true, default-features = false }
 tangle-crypto-primitives = { workspace = true, default-features = false }
-milagro_bls = { workspace = true }
+blst = { workspace = true }
 #getrandom = { version = "0.2.12", default-features = false, features = ["js"] }
 
 [dev-dependencies]
