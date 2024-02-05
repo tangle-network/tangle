@@ -348,10 +348,16 @@ impl<T: Config> Pallet<T> {
 				.map_err(|_| Error::<T>::InvalidValidator)?;
 			participant_keys.push(pub_key);
 		}
-		let signing_key = match phase_one_result.result {
-			JobResult::DKGPhaseOne(result) => result.key,
-			_ => return Err(Error::<T>::InvalidJobPhase.into()),
+
+		let signing_key = if info.signing_key.is_empty() {
+			match phase_one_result.result {
+				JobResult::DKGPhaseOne(result) => result.key,
+				_ => return Err(Error::<T>::InvalidJobPhase.into()),
+			}
+		} else {
+			info.signing_key
 		};
+
 		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
 			signature: info.signature.clone(),
 			data: info.data,

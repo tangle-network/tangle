@@ -330,7 +330,6 @@ impl<T: Config> Pallet<T> {
 			.map_err(|_err| Error::<T>::InvalidParticipantPublicKey)?;
 		let signature = blst::min_pk::Signature::deserialize(&data.signature)
 			.map_err(|_err| Error::<T>::InvalidSignatureData)?;
-
 		let dst = &mut [0u8; 48];
 		let signed_data = data.data;
 
