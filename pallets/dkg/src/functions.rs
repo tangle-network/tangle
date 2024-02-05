@@ -327,7 +327,7 @@ impl<T: Config> Pallet<T> {
 	///   key.
 	fn verify_bls_signature(data: DKGTSSSignatureResult) -> DispatchResult {
 		let public_key = blst::min_pk::PublicKey::deserialize(&data.signing_key)
-			.map_err(|_err| Error::<T>::InvalidParticipantPublicKey)?;
+			.map_err(|_err| Error::<T>::InvalidBlsPublicKey)?;
 		let signature = blst::min_pk::Signature::deserialize(&data.signature)
 			.map_err(|_err| Error::<T>::InvalidSignatureData)?;
 		let dst = &mut [0u8; 48];
