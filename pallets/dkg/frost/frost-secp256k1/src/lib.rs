@@ -242,7 +242,7 @@ mod tests {
 		let vk = VerifyingKey::<Secp256K1Sha256>::from(sk);
 
 		let msg = b"Hello, world!";
-		let signature = sk.sign(&mut rng, msg);
+		let signature = sk.sign(rng, msg);
 		assert!(vk.verify(msg, &signature).is_ok());
 	}
 }

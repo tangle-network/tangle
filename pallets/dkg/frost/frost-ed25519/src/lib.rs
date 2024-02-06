@@ -218,7 +218,7 @@ mod tests {
 		let vk = VerifyingKey::<Ed25519Sha512>::from(sk);
 
 		let msg = b"Hello, world!";
-		let signature = sk.sign(&mut rng, msg);
+		let signature = sk.sign(rng, msg);
 		assert!(vk.verify(msg, &signature).is_ok());
 	}
 }
