@@ -17,7 +17,7 @@
 
 use crate::{
 	mock::*,
-	types::{AuxGenTag, DefaultDigest, KeygenTag},
+	types::{self, DefaultDigest},
 };
 use dfns_cggmp21::{
 	generic_ec::Point,
@@ -81,7 +81,7 @@ fn submit_keygen_decommitment_should_work() {
 		let mix = keccak_256(crate::constants::KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
-		let tag = udigest::Tag::<DefaultDigest>::new_structured(KeygenTag::Indexed {
+		let tag = udigest::Tag::<DefaultDigest>::new_structured(types::keygen::Tag::Indexed {
 			party_index: i,
 			sid: &eid_bytes[..],
 		});
@@ -144,7 +144,7 @@ fn submit_keygen_invalid_decommitment_should_work() {
 		let mix = keccak_256(crate::constants::KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
-		let tag = udigest::Tag::<DefaultDigest>::new_structured(KeygenTag::Indexed {
+		let tag = udigest::Tag::<DefaultDigest>::new_structured(types::keygen::Tag::Indexed {
 			party_index: i,
 			sid: &eid_bytes[..],
 		});
@@ -657,13 +657,13 @@ fn submit_key_refresh_decommitment_should_work() {
 		let mix = keccak_256(crate::constants::AUX_GEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
-		let tag = udigest::Tag::<DefaultDigest>::new_structured(AuxGenTag::Indexed {
+		let tag = udigest::Tag::<DefaultDigest>::new_structured(types::aux_only::Tag::Indexed {
 			party_index: i,
 			sid: &eid_bytes[..],
 		});
 
 		let N = paillier_zk::Integer::ZERO;
-		let s = paillier_zk::Integer::ZERO;
+		let s = paillier_zk::Integer::ONE.clone();
 		let t = paillier_zk::Integer::ZERO;
 
 		#[serde_with::serde_as]

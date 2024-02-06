@@ -1,5 +1,3 @@
-use crate::types::AuxGenTag;
-
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 //
@@ -16,11 +14,6 @@ use crate::types::AuxGenTag;
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use dfns_cggmp21::{
-	key_refresh::msg::aux_only,
-	keygen,
-	security_level::{SecurityLevel, SecurityLevel128},
-};
 use frame_support::{ensure, pallet_prelude::DispatchResult};
 use generic_ec::{Point, Scalar};
 use generic_ec_zkp::{polynomial::Polynomial, schnorr_pok};
@@ -37,8 +30,8 @@ use tangle_primitives::{
 	roles::{RoleType, ThresholdSignatureRoleType},
 };
 
-use dfns_cggmp21::{generic_ec, supported_curves::Secp256k1};
-use types::{DefaultDigest, KeygenTag};
+use generic_ec::curves::Secp256k1;
+use types::{self, aux_only, keygen, DefaultDigest};
 
 /// Expected signature length
 pub const SIGNATURE_LENGTH: usize = 65;
@@ -160,20 +153,17 @@ impl<T: Config> Pallet<T> {
 		let job_id_bytes = data.job_id.to_be_bytes();
 		let mix = keccak_256(crate::constants::KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
-		let tag = udigest::Tag::<DefaultDigest>::new_structured(KeygenTag::Indexed {
+		let tag = udigest::Tag::<DefaultDigest>::new_structured(keygen::Tag::Indexed {
 			party_index: round1.sender,
 			sid: &eid_bytes[..],
 		});
 
-		let round1_msg = bincode2::deserialize::<keygen::msg::threshold::MsgRound1<DefaultDigest>>(
-			&round1.message,
-		)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+		let round1_msg = bincode2::deserialize::<keygen::MsgRound1<DefaultDigest>>(&round1.message)
+			.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-		let round2_msg = bincode2::deserialize::<
-			keygen::msg::threshold::MsgRound2Broad<Secp256k1, SecurityLevel128>,
-		>(&round2a.message)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+		let round2_msg =
+			bincode2::deserialize::<keygen::MsgRound2Broad<Secp256k1>>(&round2a.message)
+				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 		let hash_commit = tag.digest(round2_msg);
 
 		ensure!(round1_msg.commitment != hash_commit, Error::<T>::ValidDecommitment);
@@ -190,10 +180,9 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		Self::ensure_signed_by_offender(round2a, data.offender)?;
 
-		let round2a_msg = bincode2::deserialize::<
-			keygen::msg::threshold::MsgRound2Broad<Secp256k1, SecurityLevel128>,
-		>(&round2a.message)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+		let round2a_msg =
+			bincode2::deserialize::<keygen::MsgRound2Broad<Secp256k1>>(&round2a.message)
+				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 		ensure!(round2a_msg.F.degree() + 1 != usize::from(t), Error::<T>::ValidDataSize);
 		// Slash the offender!
@@ -212,15 +201,13 @@ impl<T: Config> Pallet<T> {
 		ensure!(round2a.sender == round2b.sender, Error::<T>::InvalidJustification);
 		let i = round2a.sender;
 
-		let round2a_msg = bincode2::deserialize::<
-			keygen::msg::threshold::MsgRound2Broad<Secp256k1, SecurityLevel128>,
-		>(&round2a.message)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+		let round2a_msg =
+			bincode2::deserialize::<keygen::MsgRound2Broad<Secp256k1>>(&round2a.message)
+				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-		let round2b_msg = bincode2::deserialize::<keygen::msg::threshold::MsgRound2Uni<Secp256k1>>(
-			&round2b.message,
-		)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+		let round2b_msg =
+			bincode2::deserialize::<keygen::MsgRound2Uni<Secp256k1>>(&round2b.message)
+				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 		let lhs = round2a_msg.F.value::<_, generic_ec::Point<_>>(&Scalar::from(i + 1));
 		let rhs = generic_ec::Point::generator() * round2b_msg.sigma;
@@ -254,17 +241,14 @@ impl<T: Config> Pallet<T> {
 		let mix = keccak_256(crate::constants::KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 
-		let round3_msg =
-			bincode2::deserialize::<keygen::msg::threshold::MsgRound3<Secp256k1>>(&round3.message)
-				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+		let round3_msg = bincode2::deserialize::<keygen::MsgRound3<Secp256k1>>(&round3.message)
+			.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 		let round2a_msgs = round2a
 			.iter()
 			.map(|r| {
-				bincode2::deserialize::<
-					keygen::msg::threshold::MsgRound2Broad<Secp256k1, SecurityLevel128>,
-				>(&r.message)
-				.map_err(|_| Error::<T>::MalformedRoundMessage)
+				bincode2::deserialize::<keygen::MsgRound2Broad<Secp256k1>>(&r.message)
+					.map_err(|_| Error::<T>::MalformedRoundMessage)
 			})
 			.collect::<Result<Vec<_>, _>>()?;
 		let round2a_msg =
@@ -273,7 +257,7 @@ impl<T: Config> Pallet<T> {
 		let rid = round2a_msgs
 			.iter()
 			.map(|d| &d.rid)
-			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), Self::xor_array);
+			.fold([0u8; types::SECURITY_BYTES], Self::xor_array);
 
 		let polynomial_sum =
 			round2a_msgs.iter().map(|d| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
@@ -286,7 +270,7 @@ impl<T: Config> Pallet<T> {
 			let hash = |d: DefaultDigest| {
 				d.chain_update(&eid_bytes)
 					.chain_update(i.to_be_bytes())
-					.chain_update(rid.as_ref())
+					.chain_update(rid.as_slice())
 					.chain_update(ys[usize::from(i)].to_bytes(true)) // y_i
 					.chain_update(round2a_msg.sch_commit.0.to_bytes(false)) // h
 					.finalize()
@@ -321,7 +305,7 @@ impl<T: Config> Pallet<T> {
 		let job_id_bytes = data.job_id.to_be_bytes();
 		let mix = keccak_256(crate::constants::AUX_GEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
-		let tag = udigest::Tag::<DefaultDigest>::new_structured(AuxGenTag::Indexed {
+		let tag = udigest::Tag::<DefaultDigest>::new_structured(aux_only::Tag::Indexed {
 			party_index: round1.sender,
 			sid: &eid_bytes[..],
 		});
@@ -331,8 +315,9 @@ impl<T: Config> Pallet<T> {
 				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 		let round2_msg =
-			bincode2::deserialize::<aux_only::MsgRound2<SecurityLevel128>>(&round2.message)
+			bincode2::deserialize::<aux_only::MsgRound2<{ types::M }>>(&round2.message)
 				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+
 		let hash_commit = tag.digest(round2_msg);
 
 		ensure!(round1_msg.commitment != hash_commit, Error::<T>::ValidDecommitment);

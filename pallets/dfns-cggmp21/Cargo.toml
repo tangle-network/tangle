@@ -14,6 +14,8 @@ frame-system = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 serde = { workspace = true }
+serde_with = { workspace = true }
+serde_json = { workspace = true }
 sp-core = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
@@ -22,11 +24,14 @@ tangle-crypto-primitives = { workspace = true, default-features = false }
 tangle-primitives = { workspace = true, default-features = false }
 rand_core = { workspace = true, default-features = false }
 
-dfns-cggmp21 = { workspace = true, default-features = false, features = ["curve-secp256k1"] }
+malachite = { workspace = true, default-features = false, features = ["naturals_and_integers"] }
+hex = { workspace = true, default-features = false, features = ["serde"] }
 bincode2 = { workspace = true }
 sha2 = { workspace = true }
+digest = { workspace = true }
 udigest = { workspace = true, features = ["derive"] }
-generic-ec-zkp = { workspace = true, default-features = false, features = ["udigest"] }
+generic-ec = { workspace = true, features = ["serde", "udigest"] }
+generic-ec-zkp = { workspace = true, default-features = false, features = ["udigest", "serde"] }
 
 [dev-dependencies]
 pallet-balances = { workspace = true }
@@ -34,11 +39,9 @@ smallvec = { workspace = true }
 sp-keystore = { workspace = true }
 rand = { workspace = true }
 rand_chacha = { workspace = true }
-generic-ec = { workspace = true, features = ["serde", "udigest"] }
-generic-ec-zkp = { workspace = true, features = ["serde", "udigest"] }
+dfns-cggmp21 = { workspace = true, default-features = false, features = ["curve-secp256k1"] }
 round-based = { workspace = true, features = ["derive"] }
 paillier-zk = { workspace = true, features = ["serde"] }
-serde_with = { workspace = true }
 
 [features]
 default = ["std"]

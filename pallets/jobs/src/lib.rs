@@ -643,11 +643,12 @@ pub mod module {
 			let _caller = ensure_signed(origin)?;
 
 			// Ensure the job exists
-			let job_info = SubmittedJobs::<T>::get(misbehavior.role_type, misbehavior.job_id)
+			let _job_info = SubmittedJobs::<T>::get(misbehavior.role_type, misbehavior.job_id)
 				.ok_or(Error::<T>::JobNotFound)?;
 			// TODO: verify misbehavior
 			// TODO: handle slashing
 			// TODO: emit events
+			Ok(())
 		}
 	}
 }

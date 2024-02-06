@@ -2615,6 +2615,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "embed-doc-image"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "af36f591236d9d822425cb6896595658fa558fcebf5ee8accac1d4b92c47166e"
+dependencies = [
+ "base64 0.13.1",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "ena"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6168,6 +6180,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "malachite"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "220cb36c52aa6eff45559df497abe0e2a4c1209f92279a746a399f622d7b95c7"
+dependencies = [
+ "malachite-base",
+ "malachite-nz",
+]
+
+[[package]]
+name = "malachite-base"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6538136c5daf04126d6be4899f7fe4879b7f8de896dd1b4210fe6de5b94f2555"
+dependencies = [
+ "itertools 0.11.0",
+ "ryu",
+]
+
+[[package]]
+name = "malachite-nz"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f0b05577b7a3f09433106460b10304f97fc572f0baabf6640e6cb1e23f5fc52"
+dependencies = [
+ "embed-doc-image",
+ "itertools 0.11.0",
+ "malachite-base",
+]
+
+[[package]]
 name = "maplit"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7144,11 +7187,14 @@ version = "0.6.1"
 dependencies = [
  "bincode2",
  "cggmp21",
+ "digest 0.10.7",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
  "generic-ec",
  "generic-ec-zkp",
+ "hex",
+ "malachite",
  "paillier-zk",
  "pallet-balances",
  "parity-scale-codec 3.6.9",
@@ -7158,6 +7204,7 @@ dependencies = [
  "round-based",
  "scale-info",
  "serde",
+ "serde_json",
  "serde_with 2.3.3",
  "sha2 0.10.8",
  "smallvec",
