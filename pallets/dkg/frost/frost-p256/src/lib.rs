@@ -228,3 +228,21 @@ impl Ciphersuite for P256Sha256 {
 		Some(WrappedScalar(hash_to_scalar((CONTEXT_STRING.to_owned() + "id").as_bytes(), m)))
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use frost_core::{signing_key::SigningKey, verifying_key::VerifyingKey};
+
+	#[test]
+	fn test_sign_and_verify() {
+		let mut rng = rand_core::OsRng;
+
+		let sk = SigningKey::<P256Sha256>::new(&mut rng);
+		let vk = VerifyingKey::<P256Sha256>::from(sk);
+
+		let msg = b"Hello, world!";
+		let signature = sk.sign(&mut rng, msg);
+		assert!(vk.verify(msg, &signature).is_ok());
+	}
+}

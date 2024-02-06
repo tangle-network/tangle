@@ -190,3 +190,21 @@ impl Ciphersuite for JubjubBlake2b512 {
 		Some(WrappedScalar(hash_to_scalar((CONTEXT_STRING.to_owned() + "id").as_bytes(), m)))
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use frost_core::{signing_key::SigningKey, verifying_key::VerifyingKey};
+
+	#[test]
+	fn test_sign_and_verify() {
+		let mut rng = rand_core::OsRng;
+
+		let sk = SigningKey::<JubjubBlake2b512>::new(&mut rng);
+		let vk = VerifyingKey::<JubjubBlake2b512>::from(sk);
+
+		let msg = b"Hello, world!";
+		let signature = sk.sign(&mut rng, msg);
+		assert!(vk.verify(msg, &signature).is_ok());
+	}
+}

@@ -66,10 +66,10 @@ where
 		let zB = C::Group::generator() * signature.z;
 		let cA = self.element * challenge.0;
 		let check = (zB - cA - signature.R) * C::Group::cofactor();
-
 		if check == C::Group::identity() {
 			Ok(())
 		} else {
+			println!("Failed check");
 			Err(Error::MalformedSignature)
 		}
 	}

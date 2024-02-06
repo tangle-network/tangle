@@ -4,7 +4,7 @@
 //!
 //! ```
 //! const BYTES: &[u8] = "The quick brown fox jumps over the lazy dog".as_bytes();
-//! const CKSUM: u32 = const_crc32::crc32(BYTES);
+//! const CKSUM: u32 = frost_core::const_crc32::crc32(BYTES);
 //! assert_eq!(CKSUM, 0x414fa339_u32);
 //! ```
 /// used to generate up a [u32; 256] lookup table in `crc32`. this computes
@@ -52,11 +52,11 @@ pub const fn crc32(buf: &[u8]) -> u32 {
 ///
 /// let mut cksum = 0u32;
 ///
-/// cksum = const_crc32::crc32_seed(&BYTES[0..10], cksum);
-/// cksum = const_crc32::crc32_seed(&BYTES[10..15], cksum);
-/// cksum = const_crc32::crc32_seed(&BYTES[15..], cksum);
+/// cksum = frost_core::const_crc32::crc32_seed(&BYTES[0..10], cksum);
+/// cksum = frost_core::const_crc32::crc32_seed(&BYTES[10..15], cksum);
+/// cksum = frost_core::const_crc32::crc32_seed(&BYTES[15..], cksum);
 ///
-/// assert_eq!(cksum, const_crc32::crc32(BYTES));
+/// assert_eq!(cksum, frost_core::const_crc32::crc32(BYTES));
 /// ```
 ///
 /// Using separate seeds for different kinds of data, to produce different checksums depending
@@ -69,8 +69,8 @@ pub const fn crc32(buf: &[u8]) -> u32 {
 /// let thing_one_bytes = "bump! thump!".as_bytes();
 /// let thing_two_bytes = "thump! bump!".as_bytes();
 ///
-/// let thing_one_cksum = const_crc32::crc32_seed(thing_one_bytes, THING_ONE_SEED);
-/// let thing_two_cksum = const_crc32::crc32_seed(thing_two_bytes, THING_TWO_SEED);
+/// let thing_one_cksum = frost_core::const_crc32::crc32_seed(thing_one_bytes, THING_ONE_SEED);
+/// let thing_two_cksum = frost_core::const_crc32::crc32_seed(thing_two_bytes, THING_TWO_SEED);
 ///
 /// assert_ne!(thing_one_cksum, thing_two_cksum);
 /// ```

@@ -28,7 +28,6 @@ elliptic-curve = { version = "0.13", features = ["hash2curve"], default-features
 frost-ed448 = { package = "frost-ed448", workspace = true, default-features = false }
 frost-ristretto255 = { package = "frost-ristretto255", workspace = true, default-features = false }
 frost-secp256k1 = { package = "frost-secp256k1", workspace = true, default-features = false }
-frost-taproot = { package = "frost-taproot", workspace = true, default-features = false }
 frost-p256 = { package = "frost-p256", workspace = true, default-features = false }
 frost-p384 = { package = "frost-p384", workspace = true, default-features = false }
 
@@ -40,6 +39,9 @@ frost-p384 = { package = "frost-p384", workspace = true, default-features = fals
 pallet-balances = { workspace = true }
 smallvec = { workspace = true }
 sp-keystore = { workspace = true }
+rand_core = { workspace = true }
+frost-core = { workspace = true }
+paste = { workspace = true }
 
 [features]
 default = ["std"]
@@ -63,7 +65,6 @@ std = [
   "frost-ed448/std",
   "frost-ristretto255/std",
   "frost-secp256k1/std",
-  "frost-taproot/std",
   "frost-p256/std",
   "frost-p384/std",
   # "frost-redjubjub/std",

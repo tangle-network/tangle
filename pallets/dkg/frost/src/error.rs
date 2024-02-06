@@ -37,6 +37,8 @@ pub enum Error {
 	InvalidSignature,
 	/// An error related to a VerifyingKey.
 	MalformedVerifyingKey,
+	/// An error related to a SigningKey
+	MalformedSigningKey,
 }
 
 impl Debug for Error {
@@ -47,6 +49,7 @@ impl Debug for Error {
 			Error::MalformedSignature => write!(f, "Malformed Signature error"),
 			Error::InvalidSignature => write!(f, "Invalid Signature error"),
 			Error::MalformedVerifyingKey => write!(f, "Malformed VerifyingKey"),
+			Error::MalformedSigningKey => write!(f, "Malformed SigningKey"),
 		}
 	}
 }
@@ -54,5 +57,17 @@ impl Debug for Error {
 impl Display for Error {
 	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
 		Debug::fmt(self, f)
+	}
+}
+
+impl From<FieldError> for Error {
+	fn from(e: FieldError) -> Self {
+		Error::Field(e)
+	}
+}
+
+impl From<GroupError> for Error {
+	fn from(e: GroupError) -> Self {
+		Error::Group(e)
 	}
 }

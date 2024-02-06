@@ -6,7 +6,6 @@ use frost_p256::P256Sha256;
 use frost_p384::P384Sha384;
 use frost_ristretto255::Ristretto255Sha512;
 use frost_secp256k1::Secp256K1Sha256;
-use frost_taproot::Secp256K1Taproot;
 use tangle_primitives::jobs::DigitalSignatureScheme;
 
 use crate::{Config, Error};
@@ -61,11 +60,73 @@ pub fn verify_dkg_signature_schnorr_frost<T: Config>(
 		DigitalSignatureScheme::SchnorrSecp256k1 => {
 			verify_signature!(Secp256K1Sha256, key, signature, msg, [0u8; 33], [0u8; 65]);
 		},
-		DigitalSignatureScheme::SchnorrSecp256k1Taproot => {
-			verify_signature!(Secp256K1Taproot, key, signature, msg, [0u8; 33], [0u8; 65]);
-		},
 		_ => return Err(Error::<T>::InvalidSignature.into()),
 	};
 
 	Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::mock::Runtime;
+	use frame_support::assert_ok;
+	use frost_core::{signing_key::SigningKey, verifying_key::VerifyingKey};
+
+	const MESSAGE: &[u8] = b"test message";
+
+	macro_rules! test_verify_dkg_signature {
+		($sig_name:ident, $scheme:expr, $impl_type:ty, $msg:expr) => {
+			paste::item! {
+				#[test]
+				fn [< test_verify_signature_ $sig_name >] () {
+					let mut rng = rand_core::OsRng;
+
+					let sk = SigningKey::<$impl_type>::new(&mut rng);
+					let vk = VerifyingKey::<$impl_type>::from(sk);
+
+					// Generate the signature
+					let signature = sk.sign(&mut rng, $msg);
+
+					// Verify the signature
+					assert!(vk.verify($msg, &signature).is_ok());
+
+					// Verify using the DKG signature verification function
+					assert_ok!(verify_dkg_signature_schnorr_frost::<Runtime>(
+						$scheme,
+						$msg,
+						&signature.serialize(),
+						&vk.serialize()
+					));
+				}
+			}
+		};
+	}
+
+	test_verify_dkg_signature!(
+		secp256k1,
+		DigitalSignatureScheme::SchnorrSecp256k1,
+		Secp256K1Sha256,
+		MESSAGE
+	);
+
+	test_verify_dkg_signature!(
+		ed25519,
+		DigitalSignatureScheme::SchnorrEd25519,
+		Ed25519Sha512,
+		MESSAGE
+	);
+
+	test_verify_dkg_signature!(ed448, DigitalSignatureScheme::SchnorrEd448, Ed448Shake256, MESSAGE);
+
+	test_verify_dkg_signature!(p256, DigitalSignatureScheme::SchnorrP256, P256Sha256, MESSAGE);
+
+	test_verify_dkg_signature!(p384, DigitalSignatureScheme::SchnorrP384, P384Sha384, MESSAGE);
+
+	test_verify_dkg_signature!(
+		ristretto255,
+		DigitalSignatureScheme::SchnorrRistretto255,
+		Ristretto255Sha512,
+		MESSAGE
+	);
 }

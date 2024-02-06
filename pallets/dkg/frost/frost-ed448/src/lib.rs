@@ -201,3 +201,21 @@ impl Ciphersuite for Ed448Shake256 {
 		Some(WrappedScalar(hash_to_scalar(&[CONTEXT_STRING.as_bytes(), b"id", m])))
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use frost_core::{signing_key::SigningKey, verifying_key::VerifyingKey};
+
+	#[test]
+	fn test_sign_and_verify() {
+		let mut rng = rand_core::OsRng;
+
+		let sk = SigningKey::<Ed448Shake256>::new(&mut rng);
+		let vk = VerifyingKey::<Ed448Shake256>::from(sk);
+
+		let msg = b"Hello, world!";
+		let signature = sk.sign(&mut rng, msg);
+		assert!(vk.verify(msg, &signature).is_ok());
+	}
+}

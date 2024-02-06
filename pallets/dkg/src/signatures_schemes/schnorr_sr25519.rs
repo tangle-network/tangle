@@ -102,7 +102,7 @@ pub fn verify_generated_dkg_key_schnorr_sr25519<T: Config>(
 	}
 
 	// Ensure a sufficient number of unique signers are present
-	ensure!(known_signers.len() > data.threshold.into(), Error::<T>::NotEnoughSigners);
+	ensure!(known_signers.len() >= data.threshold.into(), Error::<T>::NotEnoughSigners);
 
 	Ok(())
 }
