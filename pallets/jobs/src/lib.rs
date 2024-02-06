@@ -174,7 +174,13 @@ pub mod module {
 	#[pallet::generate_deposit(pub(crate) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// A new job has been submitted
-		JobSubmitted { job_id: JobId, role_type: RoleType, details: JobSubmissionOf<T> },
+		JobSubmitted {
+			job_id: JobId,
+			role_type: RoleType,
+			participants: BoundedVec<T::AccountId, T::MaxParticipants>,
+			fee: <T::Currency as Currency<T::AccountId>>::Balance,
+			details: JobSubmissionOf<T>,
+		},
 		/// A new job result has been submitted
 		JobResultSubmitted { job_id: JobId, role_type: RoleType },
 		/// validator has earned reward
@@ -258,23 +264,22 @@ pub mod module {
 
 			let job_id = Self::get_next_job_id()?;
 			let role_type = job.job_type.get_role_type();
+			let participants =
+				job.job_type.clone().get_participants().ok_or(Error::<T>::InvalidJobPhase)?;
 
 			// Ensure the job can be processed
 			if job.job_type.is_phase_one() {
 				// Ensure all the participants have valid roles
-				let participants =
-					job.job_type.clone().get_participants().ok_or(Error::<T>::InvalidJobPhase)?;
-
 				ensure!(!participants.len().is_zero(), Error::<T>::InvalidJobPhase);
 
-				for participant in participants {
+				for participant in &participants {
 					ensure!(
 						T::RolesHandler::is_validator(participant.clone(), role_type),
 						Error::<T>::InvalidValidator
 					);
 
 					// Add record for easy lookup
-					Self::add_job_to_validator_lookup(participant, role_type, job_id)?;
+					Self::add_job_to_validator_lookup(participant.clone(), role_type, job_id)?;
 				}
 
 				// Sanity check ensure threshold is valid
@@ -338,7 +343,13 @@ pub mod module {
 			SubmittedJobs::<T>::insert(role_type, job_id, job_info);
 			SubmittedJobsRole::<T>::insert(job_id, role_type);
 
-			Self::deposit_event(Event::JobSubmitted { job_id, role_type, details: job });
+			Self::deposit_event(Event::JobSubmitted {
+				job_id,
+				role_type,
+				participants: participants.clone(),
+				fee,
+				details: job,
+			});
 
 			Ok(())
 		}
