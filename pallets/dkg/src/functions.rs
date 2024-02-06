@@ -362,7 +362,7 @@ impl<T: Config> Pallet<T> {
 	/// * `data` - The DKG signature result containing the message data, BLS signature, and signing
 	///   key.
 	fn verify_bls_signature(
-		data: DKGTSSSignatureResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
+		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
 	) -> DispatchResult {
 		let public_key = blst::min_pk::PublicKey::deserialize(&data.signing_key)
 			.map_err(|_err| Error::<T>::InvalidBlsPublicKey)?;
