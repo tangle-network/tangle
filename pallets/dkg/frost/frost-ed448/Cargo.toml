@@ -24,7 +24,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 parity-scale-codec = { workspace = true }
-ed448-goldilocks = { path = "../../../../../Ed448-Goldilocks", package = "ed448-goldilocks-plus", default-features = false }
+ed448-goldilocks = { git = "https://github.com/drewstone/Ed448-Goldilocks.git", branch = "drew/zeroize", package = "ed448-goldilocks-plus", default-features = false }
 frost-core = { workspace = true }
 rand_core = { version = "0.6", default-features = false, optional = true }
 sha3 = { version = "0.10", default-features = false }

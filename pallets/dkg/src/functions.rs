@@ -17,6 +17,7 @@ use super::*;
 use crate::types::BalanceOf;
 use frame_support::{pallet_prelude::DispatchResult, sp_runtime::Saturating};
 use frame_system::pallet_prelude::BlockNumberFor;
+use sp_core::Get;
 use tangle_primitives::jobs::*;
 
 use self::signatures_schemes::{
