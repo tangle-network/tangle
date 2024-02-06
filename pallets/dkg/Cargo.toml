@@ -31,6 +31,7 @@ frost-secp256k1 = { package = "frost-secp256k1", workspace = true, default-featu
 frost-p256 = { package = "frost-p256", workspace = true, default-features = false }
 frost-p384 = { package = "frost-p384", workspace = true, default-features = false }
 blst = { workspace = true, default-features = false, features = ["portable", "no-threads"] }
+log = { workspace = true }
 
 # FROST RedJubjub is not yet no_std compatible
 # TODO: Update this once it is.

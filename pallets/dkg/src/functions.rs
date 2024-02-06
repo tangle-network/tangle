@@ -146,6 +146,7 @@ impl<T: Config> Pallet<T> {
 				&data.signature,
 				&data.signing_key,
 			),
+			DigitalSignatureScheme::Bls381 => Self::verify_bls_signature(&data),
 			DigitalSignatureScheme::SchnorrEd25519 |
 			DigitalSignatureScheme::SchnorrEd448 |
 			DigitalSignatureScheme::SchnorrP256 |
@@ -195,8 +196,6 @@ impl<T: Config> Pallet<T> {
 			DigitalSignatureScheme::SchnorrSr25519 =>
 				verify_dkg_signature_schnorr_sr25519::<T>(&data.new_key, &data.signature, &data.key)
 					.map(|_| emit_event(data))?,
-			DigitalSignatureScheme::Bls381 =>
-				Self::verify_bls_signature(&data).map(|_| emit_event(data))?,
 			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
 		}
 	}
@@ -211,14 +210,14 @@ impl<T: Config> Pallet<T> {
 	/// * `data` - The DKG signature result containing the message data, BLS signature, and signing
 	///   key.
 	fn verify_bls_signature(
-		data: &DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen>,
+		data: &DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
 	) -> DispatchResult {
-		let public_key = blst::min_pk::PublicKey::deserialize(&data.key)
+		let public_key = blst::min_pk::PublicKey::deserialize(&data.signing_key)
 			.map_err(|_err| Error::<T>::InvalidBlsPublicKey)?;
 		let signature = blst::min_pk::Signature::deserialize(&data.signature)
 			.map_err(|_err| Error::<T>::InvalidSignatureData)?;
 		let dst = &mut [0u8; 48];
-		let signed_data = &data.signature;
+		let signed_data = &data.data;
 
 		if signature.verify(true, signed_data, dst, &[], &public_key, true) !=
 			blst::BLST_ERROR::BLST_SUCCESS
