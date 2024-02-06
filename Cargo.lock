@@ -7148,7 +7148,6 @@ dependencies = [
  "frost-p384",
  "frost-ristretto255",
  "frost-secp256k1",
- "log",
  "pallet-balances",
  "parity-scale-codec 3.6.9",
  "paste",
