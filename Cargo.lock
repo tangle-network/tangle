@@ -168,9 +168,9 @@ dependencies = [
 
 [[package]]
 name = "anstyle"
-version = "1.0.5"
+version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2faccea4cc4ab4a667ce676a30e8ec13922a692c99bb8f5b11f1502c72e04220"
+checksum = "8901269c6307e8d93993578286ac0edf7f195079ffff5ebdeea6a59ffb7e36bc"
 
 [[package]]
 name = "anstyle-parse"
@@ -818,16 +818,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bincode2"
-version = "2.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f49f6183038e081170ebbbadee6678966c7d54728938a3e7de7f4e780770318f"
-dependencies = [
- "byteorder",
- "serde",
-]
-
-[[package]]
 name = "bindgen"
 version = "0.65.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1438,6 +1428,12 @@ dependencies = [
  "serde_json",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
 ]
+
+[[package]]
+name = "cobs"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67ba02a97a2bd10f4b59b25c7973101c79642302776489e030cd13cdab09ed15"
 
 [[package]]
 name = "codespan-reporting"
@@ -2625,6 +2621,12 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "embedded-io"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef1a6892d9eef45c8fa6b9e0086428a2cca8491aca8f787c534a3d6d0bcb3ced"
 
 [[package]]
 name = "ena"
@@ -4411,7 +4413,7 @@ dependencies = [
 [[package]]
 name = "generic-ec"
 version = "0.1.3"
-source = "git+https://github.com/webb-tools/generic-ec?branch=m#1d0df237fb78432bee22933eb80993444acc1dc4"
+source = "git+https://github.com/webb-tools/generic-ec?branch=m#63afba71f076f1aebf85168b29428b3fd88243c7"
 dependencies = [
  "generic-ec-core",
  "generic-ec-curves",
@@ -4428,7 +4430,7 @@ dependencies = [
 [[package]]
 name = "generic-ec-core"
 version = "0.1.2"
-source = "git+https://github.com/webb-tools/generic-ec?branch=m#1d0df237fb78432bee22933eb80993444acc1dc4"
+source = "git+https://github.com/webb-tools/generic-ec?branch=m#63afba71f076f1aebf85168b29428b3fd88243c7"
 dependencies = [
  "generic-array 0.14.7",
  "rand_core 0.6.4",
@@ -4720,9 +4722,9 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
-version = "0.3.4"
+version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d3d0e0f38255e7fa3cf31335b3a56f05febd18025f4db5ef7a0cfb4f8da651f"
+checksum = "d0c62115964e08cb8039170eb33c1d0e2388a256930279edca206fff675f82c3"
 
 [[package]]
 name = "hex"
@@ -5121,7 +5123,7 @@ version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eae7b9aee968036d54dce06cebaefd919e4472e753296daccd6d344e3e2df0c2"
 dependencies = [
- "hermit-abi 0.3.4",
+ "hermit-abi 0.3.5",
  "libc",
  "windows-sys 0.48.0",
 ]
@@ -5156,7 +5158,7 @@ version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bad00257d07be169d870ab665980b06cdb366d792ad690bf2e76876dc503455"
 dependencies = [
- "hermit-abi 0.3.4",
+ "hermit-abi 0.3.5",
  "rustix 0.38.31",
  "windows-sys 0.52.0",
 ]
@@ -6800,7 +6802,7 @@ version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
 dependencies = [
- "hermit-abi 0.3.4",
+ "hermit-abi 0.3.5",
  "libc",
 ]
 
@@ -7185,7 +7187,6 @@ dependencies = [
 name = "pallet-dfns-cggmp21"
 version = "0.6.1"
 dependencies = [
- "bincode2",
  "cggmp21",
  "digest 0.10.7",
  "frame-benchmarking",
@@ -7198,13 +7199,12 @@ dependencies = [
  "paillier-zk",
  "pallet-balances",
  "parity-scale-codec 3.6.9",
- "rand 0.7.3",
+ "postcard",
  "rand_chacha 0.3.1",
  "rand_core 0.6.4",
  "round-based",
  "scale-info",
  "serde",
- "serde_json",
  "serde_with 2.3.3",
  "sha2 0.10.8",
  "smallvec",
@@ -8722,9 +8722,9 @@ checksum = "626dec3cac7cc0e1577a2ec3fc496277ec2baa084bebad95bb6fdbfae235f84c"
 
 [[package]]
 name = "polling"
-version = "3.3.2"
+version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "545c980a3880efd47b2e262f6a4bb6daad6555cf3367aa9c4e52895f69537a41"
+checksum = "30054e72317ab98eddd8561db0f6524df3367636884b7b21b703e4b280a84a14"
 dependencies = [
  "cfg-if",
  "concurrent-queue",
@@ -8755,6 +8755,17 @@ dependencies = [
  "cpufeatures",
  "opaque-debug 0.3.0",
  "universal-hash",
+]
+
+[[package]]
+name = "postcard"
+version = "1.0.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a55c51ee6c0db07e68448e336cf8ea4131a620edefebf9893e759b2d793420f8"
+dependencies = [
+ "cobs",
+ "embedded-io",
+ "serde",
 ]
 
 [[package]]
@@ -13636,7 +13647,6 @@ dependencies = [
  "tokio",
  "wasmer",
  "webb-consensus-types",
- "webb-proposals",
 ]
 
 [[package]]
@@ -13914,13 +13924,12 @@ checksum = "69758bda2e78f098e4ccb393021a0963bb3442eac05f135c30f61b7370bbafae"
 
 [[package]]
 name = "tempfile"
-version = "3.9.0"
+version = "3.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01ce4141aa927a6d1bd34a041795abd0db1cccba5d5f24b009f694bdf3a1f3fa"
+checksum = "a365e8cd18e44762ef95d87f284f4b5cd04107fec2ff3052bd6a3e6069669e67"
 dependencies = [
  "cfg-if",
  "fastrand",
- "redox_syscall 0.4.1",
  "rustix 0.38.31",
  "windows-sys 0.52.0",
 ]
@@ -15486,7 +15495,7 @@ dependencies = [
 [[package]]
 name = "webb"
 version = "0.8.4"
-source = "git+https://github.com/webb-tools/webb-rs.git#4fec9228812f55a7b4239cc489bb011a844d67df"
+source = "git+https://github.com/webb-tools/webb-rs.git#1f0d2635971b2d9c36af4bc0bd1501d0b2a1e675"
 dependencies = [
  "async-trait",
  "ethers",
@@ -15672,7 +15681,7 @@ dependencies = [
 [[package]]
 name = "webb-proposal-derive"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/webb-rs.git#4fec9228812f55a7b4239cc489bb011a844d67df"
+source = "git+https://github.com/webb-tools/webb-rs.git#1f0d2635971b2d9c36af4bc0bd1501d0b2a1e675"
 dependencies = [
  "ethers-core",
  "quote",
@@ -15682,7 +15691,7 @@ dependencies = [
 [[package]]
 name = "webb-proposals"
 version = "0.8.0"
-source = "git+https://github.com/webb-tools/webb-rs.git#4fec9228812f55a7b4239cc489bb011a844d67df"
+source = "git+https://github.com/webb-tools/webb-rs.git#1f0d2635971b2d9c36af4bc0bd1501d0b2a1e675"
 dependencies = [
  "frame-support",
  "hex",

@@ -158,11 +158,11 @@ impl<T: Config> Pallet<T> {
 			sid: &eid_bytes[..],
 		});
 
-		let round1_msg = bincode2::deserialize::<keygen::MsgRound1<DefaultDigest>>(&round1.message)
+		let round1_msg = postcard::from_bytes::<keygen::MsgRound1<DefaultDigest>>(&round1.message)
 			.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 		let round2_msg =
-			bincode2::deserialize::<keygen::MsgRound2Broad<Secp256k1>>(&round2a.message)
+			postcard::from_bytes::<keygen::MsgRound2Broad<Secp256k1>>(&round2a.message)
 				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 		let hash_commit = tag.digest(round2_msg);
 
@@ -181,7 +181,7 @@ impl<T: Config> Pallet<T> {
 		Self::ensure_signed_by_offender(round2a, data.offender)?;
 
 		let round2a_msg =
-			bincode2::deserialize::<keygen::MsgRound2Broad<Secp256k1>>(&round2a.message)
+			postcard::from_bytes::<keygen::MsgRound2Broad<Secp256k1>>(&round2a.message)
 				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 		ensure!(round2a_msg.F.degree() + 1 != usize::from(t), Error::<T>::ValidDataSize);
@@ -202,12 +202,11 @@ impl<T: Config> Pallet<T> {
 		let i = round2a.sender;
 
 		let round2a_msg =
-			bincode2::deserialize::<keygen::MsgRound2Broad<Secp256k1>>(&round2a.message)
+			postcard::from_bytes::<keygen::MsgRound2Broad<Secp256k1>>(&round2a.message)
 				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-		let round2b_msg =
-			bincode2::deserialize::<keygen::MsgRound2Uni<Secp256k1>>(&round2b.message)
-				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+		let round2b_msg = postcard::from_bytes::<keygen::MsgRound2Uni<Secp256k1>>(&round2b.message)
+			.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 		let lhs = round2a_msg.F.value::<_, generic_ec::Point<_>>(&Scalar::from(i + 1));
 		let rhs = generic_ec::Point::generator() * round2b_msg.sigma;
@@ -241,13 +240,13 @@ impl<T: Config> Pallet<T> {
 		let mix = keccak_256(crate::constants::KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 
-		let round3_msg = bincode2::deserialize::<keygen::MsgRound3<Secp256k1>>(&round3.message)
+		let round3_msg = postcard::from_bytes::<keygen::MsgRound3<Secp256k1>>(&round3.message)
 			.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 		let round2a_msgs = round2a
 			.iter()
 			.map(|r| {
-				bincode2::deserialize::<keygen::MsgRound2Broad<Secp256k1>>(&r.message)
+				postcard::from_bytes::<keygen::MsgRound2Broad<Secp256k1>>(&r.message)
 					.map_err(|_| Error::<T>::MalformedRoundMessage)
 			})
 			.collect::<Result<Vec<_>, _>>()?;
@@ -311,12 +310,11 @@ impl<T: Config> Pallet<T> {
 		});
 
 		let round1_msg =
-			bincode2::deserialize::<aux_only::MsgRound1<DefaultDigest>>(&round1.message)
+			postcard::from_bytes::<aux_only::MsgRound1<DefaultDigest>>(&round1.message)
 				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-		let round2_msg =
-			bincode2::deserialize::<aux_only::MsgRound2<{ types::M }>>(&round2.message)
-				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+		let round2_msg = postcard::from_bytes::<aux_only::MsgRound2<{ types::M }>>(&round2.message)
+			.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 		let hash_commit = tag.digest(round2_msg);
 

@@ -60,7 +60,7 @@ fn sign_round_msg<M: serde::Serialize>(
 	sender: u16,
 	msg: &M,
 ) -> SignedRoundMessage {
-	let msg_bytes = bincode2::serialize(msg).unwrap();
+	let msg_bytes = postcard::to_allocvec(msg).unwrap();
 	let sender_bytes = sender.to_be_bytes();
 	let msg_to_sign = [&sender_bytes[..], &msg_bytes[..]].concat();
 	let signature = sign(key, &msg_to_sign);
@@ -680,7 +680,7 @@ fn submit_key_refresh_decommitment_should_work() {
 			zs: [paillier_zk::Integer::ZERO; <SecurityLevel128 as SecurityLevel>::M],
 		};
 
-		let mock_proof_bytes = bincode2::serialize(&mock_proof).unwrap();
+		let mock_proof_bytes = postcard::to_allocvec(&mock_proof).unwrap();
 
 		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
@@ -694,7 +694,7 @@ fn submit_key_refresh_decommitment_should_work() {
 			N,
 			s,
 			t,
-			params_proof: bincode2::deserialize(&mock_proof_bytes).unwrap(),
+			params_proof: postcard::from_bytes(&mock_proof_bytes).unwrap(),
 			rho_bytes: {
 				let mut rho = <SecurityLevel128 as SecurityLevel>::Rid::default();
 				rng.fill_bytes(rho.as_mut());
@@ -758,7 +758,7 @@ fn submit_key_refresh_invalid_decommitment_should_work() {
 			zs: [paillier_zk::Integer::ZERO; <SecurityLevel128 as SecurityLevel>::M],
 		};
 
-		let mock_proof_bytes = bincode2::serialize(&mock_proof).unwrap();
+		let mock_proof_bytes = postcard::to_allocvec(&mock_proof).unwrap();
 
 		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
@@ -772,7 +772,7 @@ fn submit_key_refresh_invalid_decommitment_should_work() {
 			N,
 			s,
 			t,
-			params_proof: bincode2::deserialize(&mock_proof_bytes).unwrap(),
+			params_proof: postcard::from_bytes(&mock_proof_bytes).unwrap(),
 			rho_bytes: {
 				let mut rho = <SecurityLevel128 as SecurityLevel>::Rid::default();
 				rng.fill_bytes(rho.as_mut());
