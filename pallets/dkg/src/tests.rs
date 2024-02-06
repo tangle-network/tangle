@@ -72,9 +72,9 @@ fn dkg_key_verification_works_for_bls() {
 	new_test_ext().execute_with(|| {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::Bls381,
-			key: vec![],
-			participants: vec![],
-			signatures: vec![],
+			key: vec![].try_into().unwrap(),
+			participants: vec![].try_into().unwrap(),
+			signatures: vec![].try_into().unwrap(),
 			threshold: 2,
 		};
 
@@ -86,9 +86,11 @@ fn dkg_key_verification_works_for_bls() {
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::Bls381,
-			key: vec![],
-			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec()],
-			signatures: vec![],
+			key: vec![].try_into().unwrap(),
+			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec().try_into().unwrap()]
+				.try_into()
+				.unwrap(),
+			signatures: vec![].try_into().unwrap(),
 			threshold: 2,
 		};
 
@@ -104,9 +106,11 @@ fn dkg_key_verification_works_for_bls() {
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::Bls381,
-			key: vec![],
-			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec()],
-			signatures: vec![signature.clone()],
+			key: vec![].try_into().unwrap(),
+			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec().try_into().unwrap()]
+				.try_into()
+				.unwrap(),
+			signatures: vec![signature.clone().try_into().unwrap()].try_into().unwrap(),
 			threshold: 1,
 		};
 
@@ -118,9 +122,14 @@ fn dkg_key_verification_works_for_bls() {
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::Bls381,
-			key: pub_key.0.to_vec(),
-			participants: vec![pub_key.as_mut().to_vec()],
-			signatures: vec![signature.clone(), signature.clone()],
+			key: pub_key.0.to_vec().try_into().unwrap(),
+			participants: vec![pub_key.as_mut().to_vec().try_into().unwrap()].try_into().unwrap(),
+			signatures: vec![
+				signature.clone().try_into().unwrap(),
+				signature.clone().try_into().unwrap(),
+			]
+			.try_into()
+			.unwrap(),
 			threshold: 1,
 		};
 
@@ -137,12 +146,16 @@ fn dkg_key_verification_works_for_bls() {
 		let signature_two = mock_signature_ecdsa(participant_two, participant_one);
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_type: DigitalSignatureType::Bls381,
-			key: participant_one.to_raw_vec(),
+			key: participant_one.to_raw_vec().try_into().unwrap(),
 			participants: vec![
-				participant_one.as_mut().to_vec(),
-				participant_two.as_mut().to_vec(),
-			],
-			signatures: vec![signature_two, signature_one],
+				participant_one.as_mut().to_vec().try_into().unwrap(),
+				participant_two.as_mut().to_vec().try_into().unwrap(),
+			]
+			.try_into()
+			.unwrap(),
+			signatures: vec![signature_two.try_into().unwrap(), signature_one.try_into().unwrap()]
+				.try_into()
+				.unwrap(),
 			threshold: 1,
 		};
 
@@ -411,12 +424,13 @@ fn dkg_signature_verification_works_bls() {
 		let dst = &mut [0u8; 192];
 		let signature = secret_key.sign(BLS_DATA_TO_SIGN, dst, &[]);
 
-		let job_to_verify: DKGTSSSignatureResult = DKGTSSSignatureResult {
-			signature_type: DigitalSignatureType::Bls381,
-			signature: signature.serialize().to_vec(),
-			data: pub_key.serialize().to_vec(),
-			signing_key: pub_key.serialize()[..10].to_vec(), // Provide invalid input
-		};
+		let job_to_verify: DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen> =
+			DKGTSSSignatureResult {
+				signature_type: DigitalSignatureType::Bls381,
+				signature: signature.serialize().to_vec().try_into().unwrap(),
+				data: pub_key.serialize().to_vec().try_into().unwrap(),
+				signing_key: pub_key.serialize()[..10].to_vec().try_into().unwrap(), /* Provide invalid input */
+			};
 
 		// Should fail for an invalid public key
 		assert_noop!(
@@ -424,12 +438,13 @@ fn dkg_signature_verification_works_bls() {
 			Error::<Runtime>::InvalidBlsPublicKey
 		);
 
-		let job_to_verify: DKGTSSSignatureResult = DKGTSSSignatureResult {
-			signature_type: DigitalSignatureType::Bls381,
-			signature: signature.serialize()[..10].to_vec(), // Pass invalid signature
-			data: pub_key.serialize().to_vec(),
-			signing_key: pub_key.serialize().to_vec(),
-		};
+		let job_to_verify: DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen> =
+			DKGTSSSignatureResult {
+				signature_type: DigitalSignatureType::Bls381,
+				signature: signature.serialize()[..10].to_vec().try_into().unwrap(), /* Pass invalid signature */
+				data: pub_key.serialize().to_vec().try_into().unwrap(),
+				signing_key: pub_key.serialize().to_vec().try_into().unwrap(),
+			};
 
 		// Should fail for an invalid public key
 		assert_noop!(
