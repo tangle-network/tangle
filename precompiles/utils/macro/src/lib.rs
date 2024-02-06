@@ -32,7 +32,7 @@ struct Bytes(Vec<u8>);
 
 impl ::std::fmt::Debug for Bytes {
 	#[inline]
-	fn fmt(&self, f: &mut std::fmt::Formatter) -> ::std::fmt::Result {
+	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
 		let data = &self.0;
 		write!(f, "[")?;
 		if !data.is_empty() {

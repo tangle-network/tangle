@@ -23,6 +23,8 @@ members = [
   "pallets/*",
   "pallets/jobs/rpc",
   "pallets/jobs/rpc/runtime-api",
+  "pallets/dkg/frost",
+  "pallets/dkg/frost/frost-*",
   "precompiles/utils",
   "precompiles/utils/macro",
   "precompiles/utils/tests-external",
@@ -40,12 +42,13 @@ resolver = "2"
 [workspace.dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
 substrate-build-script-utils = "3.0.0"
-
+subtle = { version = "2.2", default-features = false }
 hex-literal = "0.4.1"
 log = { version = "0.4.20", default-features = false }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 serde = { version = "1.0.101", default-features = false, features = ["derive"] }
 serde_json = "1.0.81"
+serdect = { version = "0.2.0", default-features = false }
 static_assertions = "1.1.0"
 clap = { version = "4.4.2", features = ["derive"] }
 parity-scale-codec = { version = "3.6.1", default-features = false, features = ["derive"] }
@@ -54,6 +57,7 @@ tracing = "0.1.34"
 tokio = { version = "1.13" }
 futures = { version = "0.3.16" }
 rand = "0.7.2"
+rand_core = "0.6.4"
 smallvec = "1.6.1"
 async-trait = "0.1.59"
 libsecp256k1 = { version = "0.7.0", default-features = false }
@@ -74,8 +78,7 @@ paste = "1.0.6"
 slices = "0.2.0"
 schnorrkel = { version = "0.9.1", default-features = false }
 blst = "0.3.11"
-# tangle-relayer-gadget = { packge = "tangle-relayer-gadget", path = "relayer-gadget" }
-# tangle-relayer-gadget-cli = { packge = "tangle-relayer-gadget-cli", path = "relayer-gadget/cli" }
+
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
@@ -104,6 +107,15 @@ pallet-dkg = { path = "pallets/dkg", default-features = false }
 pallet-zksaas = { path = "pallets/zksaas", default-features = false }
 pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-features = false }
 pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
+
+frost-core = { path = "pallets/dkg/frost", default-features = false }
+frost-ed25519 = { path = "pallets/dkg/frost/frost-ed25519", default-features = false }
+frost-ed448 = { path = "pallets/dkg/frost/frost-ed448", default-features = false }
+frost-ristretto255 = { path = "pallets/dkg/frost/frost-ristretto255", default-features = false }
+frost-secp256k1 = { path = "pallets/dkg/frost/frost-secp256k1", default-features = false }
+frost-p256 = { path = "pallets/dkg/frost/frost-p256", default-features = false }
+frost-p384 = { path = "pallets/dkg/frost/frost-p384", default-features = false }
+frost-redjubjub = { path = "pallets/dkg/frost/frost-redjubjub", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
