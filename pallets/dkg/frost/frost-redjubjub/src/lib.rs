@@ -204,7 +204,7 @@ mod tests {
 		let vk = VerifyingKey::<JubjubBlake2b512>::from(sk);
 
 		let msg = b"Hello, world!";
-		let signature = sk.sign(&mut rng, msg);
+		let signature = sk.sign(rng, msg);
 		assert!(vk.verify(msg, &signature).is_ok());
 	}
 }
