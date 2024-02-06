@@ -3430,15 +3430,15 @@ declare module '@polkadot/types/lookup' {
 
   /** @name TanglePrimitivesJobsTssDkgtssKeySubmissionResult (411) */
   interface TanglePrimitivesJobsTssDkgtssKeySubmissionResult extends Struct {
-    readonly signatureType: TanglePrimitivesJobsTssDigitalSignatureType;
+    readonly signatureType: TanglePrimitivesJobsTssDigitalSignatureScheme;
     readonly key: Bytes;
     readonly participants: Vec<Bytes>;
     readonly signatures: Vec<Bytes>;
     readonly threshold: u8;
   }
 
-  /** @name TanglePrimitivesJobsTssDigitalSignatureType (412) */
-  interface TanglePrimitivesJobsTssDigitalSignatureType extends Enum {
+  /** @name TanglePrimitivesJobsTssDigitalSignatureScheme (412) */
+  interface TanglePrimitivesJobsTssDigitalSignatureScheme extends Enum {
     readonly isEcdsa: boolean;
     readonly isSchnorrSr25519: boolean;
     readonly isSchnorrP256: boolean;
@@ -3453,7 +3453,7 @@ declare module '@polkadot/types/lookup' {
 
   /** @name TanglePrimitivesJobsTssDkgtssSignatureResult (413) */
   interface TanglePrimitivesJobsTssDkgtssSignatureResult extends Struct {
-    readonly signatureType: TanglePrimitivesJobsTssDigitalSignatureType;
+    readonly signatureType: TanglePrimitivesJobsTssDigitalSignatureScheme;
     readonly data: Bytes;
     readonly signature: Bytes;
     readonly signingKey: Bytes;
