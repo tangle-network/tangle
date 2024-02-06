@@ -71,7 +71,7 @@ fn set_fees_works() {
 fn dkg_key_verification_works_for_bls() {
 	new_test_ext().execute_with(|| {
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_type: DigitalSignatureType::Bls381,
+			signature_scheme: DigitalSignatureScheme::Bls381,
 			key: vec![].try_into().unwrap(),
 			participants: vec![].try_into().unwrap(),
 			signatures: vec![].try_into().unwrap(),
@@ -85,7 +85,7 @@ fn dkg_key_verification_works_for_bls() {
 		);
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_type: DigitalSignatureType::Bls381,
+			signature_scheme: DigitalSignatureScheme::Bls381,
 			key: vec![].try_into().unwrap(),
 			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec().try_into().unwrap()]
 				.try_into()
@@ -105,7 +105,7 @@ fn dkg_key_verification_works_for_bls() {
 		let signature = mock_signature_ecdsa(pub_key, pub_key);
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_type: DigitalSignatureType::Bls381,
+			signature_scheme: DigitalSignatureScheme::Bls381,
 			key: vec![].try_into().unwrap(),
 			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec().try_into().unwrap()]
 				.try_into()
@@ -121,7 +121,7 @@ fn dkg_key_verification_works_for_bls() {
 		);
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_type: DigitalSignatureType::Bls381,
+			signature_scheme: DigitalSignatureScheme::Bls381,
 			key: pub_key.0.to_vec().try_into().unwrap(),
 			participants: vec![pub_key.as_mut().to_vec().try_into().unwrap()].try_into().unwrap(),
 			signatures: vec![
@@ -145,7 +145,7 @@ fn dkg_key_verification_works_for_bls() {
 		let signature_one = mock_signature_ecdsa(participant_one, participant_one);
 		let signature_two = mock_signature_ecdsa(participant_two, participant_one);
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_type: DigitalSignatureType::Bls381,
+			signature_scheme: DigitalSignatureScheme::Bls381,
 			key: participant_one.to_raw_vec().try_into().unwrap(),
 			participants: vec![
 				participant_one.as_mut().to_vec().try_into().unwrap(),
@@ -426,7 +426,7 @@ fn dkg_signature_verification_works_bls() {
 
 		let job_to_verify: DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen> =
 			DKGTSSSignatureResult {
-				signature_type: DigitalSignatureType::Bls381,
+				signature_scheme: DigitalSignatureScheme::Bls381,
 				signature: signature.serialize().to_vec().try_into().unwrap(),
 				data: pub_key.serialize().to_vec().try_into().unwrap(),
 				signing_key: pub_key.serialize()[..10].to_vec().try_into().unwrap(), /* Provide invalid input */
@@ -440,7 +440,7 @@ fn dkg_signature_verification_works_bls() {
 
 		let job_to_verify: DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen> =
 			DKGTSSSignatureResult {
-				signature_type: DigitalSignatureType::Bls381,
+				signature_scheme: DigitalSignatureScheme::Bls381,
 				signature: signature.serialize()[..10].to_vec().try_into().unwrap(), /* Pass invalid signature */
 				data: pub_key.serialize().to_vec().try_into().unwrap(),
 				signing_key: pub_key.serialize().to_vec().try_into().unwrap(),

@@ -119,30 +119,9 @@ impl<T: Config> Pallet<T> {
 			DigitalSignatureScheme::Ecdsa => verify_generated_dkg_key_ecdsa::<T>(data),
 			DigitalSignatureScheme::SchnorrSr25519 =>
 				verify_generated_dkg_key_schnorr_sr25519::<T>(data),
-            DigitalSignatureScheme::Bls381 => Self::verify_generated_dkg_key_bls(data),
+			DigitalSignatureScheme::Bls381 => verify_generated_dkg_key_ecdsa::<T>(data),
 			_ => Err(Error::<T>::InvalidSignature.into()),
 		}
-	}
-
-    /// Verifies the generated DKG key for BLS signatures.
-	///
-	/// This function includes generating required signers, validating signatures, and ensuring a
-	/// sufficient number of unique signers are present.
-	///
-	/// # Arguments
-	///
-	/// * `data` - The DKG verification information containing participants, keys, and signatures.
-	///
-	/// # Returns
-	///
-	/// Returns a `DispatchResult` indicating whether the DKG key verification was successful or
-	/// encountered an error.
-	fn verify_generated_dkg_key_bls(
-		data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
-	) -> DispatchResult {
-		// The BLS public key is signed using an ECDSA signature, therefore, validate the ECDSA
-		// signature only
-		Self::verify_generated_dkg_key_ecdsa(data)
 	}
 
 	/// Verifies a DKG (Distributed Key Generation) signature based on the provided DKG signature
@@ -216,37 +195,37 @@ impl<T: Config> Pallet<T> {
 			DigitalSignatureScheme::SchnorrSr25519 =>
 				verify_dkg_signature_schnorr_sr25519::<T>(&data.new_key, &data.signature, &data.key)
 					.map(|_| emit_event(data))?,
-            DigitalSignatureScheme::Bls381 => Self::verify_bls_signature(&data).map(|_| emit_event(data))?,
+			DigitalSignatureScheme::Bls381 =>
+				Self::verify_bls_signature(&data).map(|_| emit_event(data))?,
 			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
 		}
 	}
 
+	/// Verifies the DKG signature result for BLS signatures.
+	///
+	/// This function uses the BLS signature algorithm to verify the provided signature
+	/// based on the message data, signature, and signing key in the DKG signature result.
+	///
+	/// # Arguments
+	///
+	/// * `data` - The DKG signature result containing the message data, BLS signature, and signing
+	///   key.
+	fn verify_bls_signature(
+		data: &DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen>,
+	) -> DispatchResult {
+		let public_key = blst::min_pk::PublicKey::deserialize(&data.key)
+			.map_err(|_err| Error::<T>::InvalidBlsPublicKey)?;
+		let signature = blst::min_pk::Signature::deserialize(&data.signature)
+			.map_err(|_err| Error::<T>::InvalidSignatureData)?;
+		let dst = &mut [0u8; 48];
+		let signed_data = &data.signature;
 
-    /// Verifies the DKG signature result for BLS signatures.
-    ///
-    /// This function uses the BLS signature algorithm to verify the provided signature
-    /// based on the message data, signature, and signing key in the DKG signature result.
-    ///
-    /// # Arguments
-    ///
-    /// * `data` - The DKG signature result containing the message data, BLS signature, and signing
-    ///   key.
-    fn verify_bls_signature(
-        data: &DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
-    ) -> DispatchResult {
-        let public_key = blst::min_pk::PublicKey::deserialize(&data.signing_key)
-            .map_err(|_err| Error::<T>::InvalidBlsPublicKey)?;
-        let signature = blst::min_pk::Signature::deserialize(&data.signature)
-            .map_err(|_err| Error::<T>::InvalidSignatureData)?;
-        let dst = &mut [0u8; 48];
-        let signed_data = &data.data;
+		if signature.verify(true, signed_data, dst, &[], &public_key, true) !=
+			blst::BLST_ERROR::BLST_SUCCESS
+		{
+			return Err(Error::<T>::InvalidSignature.into())
+		}
 
-        if signature.verify(true, signed_data, dst, &[], &public_key, true) !=
-            blst::BLST_ERROR::BLST_SUCCESS
-        {
-            return Err(Error::<T>::InvalidSignature.into())
-        }
-
-        Ok(())
-    }
+		Ok(())
+	}
 }
