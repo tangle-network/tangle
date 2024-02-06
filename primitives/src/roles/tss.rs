@@ -49,7 +49,6 @@ pub enum ThresholdSignatureRoleType {
 	ZcashFrostP256,
 	ZcashFrostP384,
 	ZcashFrostSecp256k1,
-	ZcashFrostSecp256k1Taproot,
 	ZcashFrostRistretto255,
 	ZcashFrostEd25519,
 	ZcashFrostEd448,

@@ -111,7 +111,6 @@ frost-ed25519 = { path = "pallets/dkg/frost/frost-ed25519", default-features = f
 frost-ed448 = { path = "pallets/dkg/frost/frost-ed448", default-features = false }
 frost-ristretto255 = { path = "pallets/dkg/frost/frost-ristretto255", default-features = false }
 frost-secp256k1 = { path = "pallets/dkg/frost/frost-secp256k1", default-features = false }
-frost-taproot = { path = "pallets/dkg/frost/frost-taproot", default-features = false }
 frost-p256 = { path = "pallets/dkg/frost/frost-p256", default-features = false }
 frost-p384 = { path = "pallets/dkg/frost/frost-p384", default-features = false }
 frost-redjubjub = { path = "pallets/dkg/frost/frost-redjubjub", default-features = false }

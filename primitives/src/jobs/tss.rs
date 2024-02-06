@@ -163,9 +163,6 @@ pub enum DigitalSignatureScheme {
 	/// Schnorr signature scheme over the Secp256k1 curve.
 	SchnorrSecp256k1,
 
-	/// Schnorr signature scheme of the Secp256k1 curve w/ Taproot compatibility.
-	SchnorrSecp256k1Taproot,
-
 	/// Schnorr signature scheme over the sr25519 curve.
 	SchnorrSr25519,
 

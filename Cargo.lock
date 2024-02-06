@@ -4221,21 +4221,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "frost-taproot"
-version = "1.0.0-rc.0"
-dependencies = [
- "frost-core",
- "frost-secp256k1",
- "k256",
- "parity-scale-codec 3.6.9",
- "rand_core 0.6.4",
- "sha2 0.10.8",
- "signature 2.2.0",
- "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "subtle",
-]
-
-[[package]]
 name = "fs-err"
 version = "2.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7162,9 +7147,10 @@ dependencies = [
  "frost-p384",
  "frost-ristretto255",
  "frost-secp256k1",
- "frost-taproot",
  "pallet-balances",
  "parity-scale-codec 3.6.9",
+ "paste",
+ "rand_core 0.6.4",
  "scale-info",
  "serde",
  "serdect",

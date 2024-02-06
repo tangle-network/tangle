@@ -33,20 +33,20 @@ pub mod traits;
 pub mod util;
 pub mod verifying_key;
 
-use traits::{Ciphersuite, Scalar, Group, Field};
 #[cfg(feature = "std")]
 use rand_core::{CryptoRng, RngCore};
+use traits::{Ciphersuite, Field, Group, Scalar};
 
 /// Generates a random nonzero scalar.
 ///
 /// It assumes that the Scalar Eq/PartialEq implementation is constant-time.
 #[cfg(feature = "std")]
 pub fn random_nonzero<C: Ciphersuite, R: RngCore + CryptoRng>(rng: &mut R) -> Scalar<C> {
-    loop {
-        let scalar = <<C::Group as Group>::Field>::random(rng);
+	loop {
+		let scalar = <<C::Group as Group>::Field>::random(rng);
 
-        if scalar != <<C::Group as Group>::Field>::zero() {
-            return scalar;
-        }
-    }
+		if scalar != <<C::Group as Group>::Field>::zero() {
+			return scalar
+		}
+	}
 }
