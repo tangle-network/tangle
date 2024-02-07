@@ -15,11 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use frame_support::traits::Currency;
-use malachite::{
-	num::{basic::traits::Zero, conversion::traits::FromStringBase},
-	strings::ToLowerHexString,
-};
 use sp_core::RuntimeDebug;
+use sp_std::prelude::*;
 
 pub type DefaultDigest = sha2::Sha256;
 
@@ -40,23 +37,23 @@ pub const ELL_PRIME: usize = 848;
 #[derive(Clone, RuntimeDebug, serde::Serialize, serde::Deserialize)]
 pub struct Integer {
 	pub radix: i32,
-	pub value: String,
+	#[cfg(not(feature = "std"))]
+	pub value: ::alloc::string::String,
+	#[cfg(feature = "std")]
+	pub value: ::std::string::String,
 }
 
 impl Integer {
 	pub fn to_vec(&self) -> Vec<u8> {
-		let v = malachite::Integer::from_string_base(self.radix as u8, &self.value).unwrap();
-		// special case for zero
-		if v == malachite::Integer::ZERO {
+		if self.value == "0" {
 			return Vec::new()
 		}
-		let mut x = v.to_lower_hex_string();
+		let mut x = self.value.clone();
 		// fix odd length
 		if x.len() % 2 != 0 {
 			// add a leading zero
-			x = format!("0{}", x);
+			x.insert(0, '0');
 		}
-
 		let mut out = vec![0; x.len() / 2];
 		hex::decode_to_slice(x, &mut out).unwrap();
 		out
@@ -88,6 +85,9 @@ pub mod keygen {
 	use generic_ec::{Curve, Point, Scalar};
 	use generic_ec_zkp::{polynomial::Polynomial, schnorr_pok};
 	use sp_core::RuntimeDebug;
+	use sp_std::prelude::*;
+
+	use super::SECURITY_BYTES;
 
 	#[derive(udigest::Digestable)]
 	#[udigest(tag = "dfns.cggmp21.keygen.threshold.tag")]
@@ -124,17 +124,17 @@ pub mod keygen {
 	#[allow(non_snake_case)]
 	pub struct MsgRound2Broad<E: Curve> {
 		/// `rid_i`
-		#[serde(with = "hex::serde")]
+		#[serde(with = "hex")]
 		#[udigest(as_bytes)]
-		pub rid: Vec<u8>,
+		pub rid: [u8; SECURITY_BYTES],
 		/// $\vec S_i$
 		pub F: Polynomial<Point<E>>,
 		/// $A_i$
 		pub sch_commit: schnorr_pok::Commit<E>,
 		/// $u_i$
-		#[serde(with = "hex::serde")]
+		#[serde(with = "hex")]
 		#[udigest(as_bytes)]
-		pub decommit: Vec<u8>,
+		pub decommit: [u8; SECURITY_BYTES],
 	}
 
 	/// Message from round 2 unicasted to each party
@@ -156,8 +156,9 @@ pub mod keygen {
 pub mod aux_only {
 	use digest::Digest;
 	use sp_core::RuntimeDebug;
+	use sp_std::prelude::*;
 
-	use super::Integer;
+	use super::{Integer, M, SECURITY_BYTES};
 
 	#[derive(udigest::Digestable)]
 	#[udigest(tag = "dfns.cggmp21.aux_gen.tag")]
@@ -187,7 +188,7 @@ pub mod aux_only {
 	/// a correct proof for incorrect data is $2^{-M}$. You can use M defined here
 	/// as [`SECURITY`]
 	#[serde_with::serde_as]
-	#[derive(Clone, RuntimeDebug, serde::Serialize, serde::Deserialize, udigest::Digestable)]
+	#[derive(Clone, RuntimeDebug, serde::Deserialize, udigest::Digestable)]
 	pub struct ParamProof<const M: usize> {
 		#[serde_as(as = "[_; M]")]
 		#[udigest(with = super::encoding::integers_list)]
@@ -206,7 +207,7 @@ pub mod aux_only {
 	}
 
 	/// Message from round 1
-	#[derive(Clone, RuntimeDebug, serde::Serialize, serde::Deserialize, udigest::Digestable)]
+	#[derive(Clone, RuntimeDebug, serde::Deserialize, udigest::Digestable)]
 	#[udigest(tag = "dfns.cggmp21.aux_gen.round1")]
 	#[udigest(bound = "")]
 	#[serde(bound = "")]
@@ -216,12 +217,12 @@ pub mod aux_only {
 		pub commitment: digest::Output<D>,
 	}
 	/// Message from round 2
-	#[derive(Clone, RuntimeDebug, serde::Serialize, serde::Deserialize, udigest::Digestable)]
+	#[derive(Clone, RuntimeDebug, serde::Deserialize, udigest::Digestable)]
 	#[udigest(tag = "dfns.cggmp21.aux_gen.round2")]
 	#[udigest(bound = "")]
 	#[serde(bound = "")]
 	#[allow(non_snake_case)]
-	pub struct MsgRound2<const M: usize> {
+	pub struct MsgRound2 {
 		/// $N_i$
 		#[udigest(with = super::encoding::integer)]
 		pub N: Integer,
@@ -236,10 +237,10 @@ pub mod aux_only {
 		/// $\rho_i$
 		#[serde(with = "hex")]
 		#[udigest(as_bytes)]
-		pub rho_bytes: Vec<u8>,
+		pub rho_bytes: [u8; SECURITY_BYTES],
 		/// $u_i$
 		#[serde(with = "hex")]
 		#[udigest(as_bytes)]
-		pub decommit: Vec<u8>,
+		pub decommit: [u8; SECURITY_BYTES],
 	}
 }

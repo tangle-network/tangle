@@ -662,9 +662,14 @@ fn submit_key_refresh_decommitment_should_work() {
 			sid: &eid_bytes[..],
 		});
 
-		let N = paillier_zk::Integer::ZERO;
-		let s = paillier_zk::Integer::ONE.clone();
-		let t = paillier_zk::Integer::ZERO;
+		let mut bigint = [0u8; 32];
+		rng.fill_bytes(&mut bigint);
+
+		let N = paillier_zk::Integer::from_digits(&bigint, paillier_zk::rug::integer::Order::Msf);
+		rng.fill_bytes(&mut bigint);
+		let s = paillier_zk::Integer::from_digits(&bigint, paillier_zk::rug::integer::Order::Msf);
+		rng.fill_bytes(&mut bigint);
+		let t = paillier_zk::Integer::from_digits(&bigint, paillier_zk::rug::integer::Order::Msf);
 
 		#[serde_with::serde_as]
 		#[derive(Clone, serde::Serialize, serde::Deserialize)]

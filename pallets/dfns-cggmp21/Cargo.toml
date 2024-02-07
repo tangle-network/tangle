@@ -23,13 +23,13 @@ tangle-crypto-primitives = { workspace = true, default-features = false }
 tangle-primitives = { workspace = true, default-features = false }
 rand_core = { workspace = true, default-features = false }
 
-malachite = { workspace = true, default-features = false, features = ["naturals_and_integers"] }
+# malachite = { workspace = true, default-features = false, features = ["naturals_and_integers"] }
 hex = { workspace = true, default-features = false, features = ["serde"] }
 postcard = { workspace = true, default-features = false }
 sha2 = { workspace = true, default-features = false }
 digest = { workspace = true, default-features = false }
 udigest = { workspace = true, features = ["derive"] }
-generic-ec = { workspace = true, features = ["udigest", "serde", "curve-secp256k1"] }
+generic-ec = { workspace = true, default-features = false, features = ["serde", "udigest", "curve-secp256k1"] }
 generic-ec-zkp = { workspace = true, default-features = false, features = ["serde", "udigest", "alloc"] }
 
 [dev-dependencies]

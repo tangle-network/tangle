@@ -15,11 +15,15 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 #![cfg_attr(not(feature = "std"), no_std)]
+
 //! # Pallet-Dfns-CGGMP21
 //!
 //! A Substrate pallet for verifying submitted misbehavior of Distributed Key Generation (DKG)
 //! protocol using the CGGMP21 scheme developed by dfns.
 pub use pallet::*;
+
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
 #[cfg(test)]
 mod mock;

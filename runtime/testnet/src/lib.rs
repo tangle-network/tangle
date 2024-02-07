@@ -115,7 +115,7 @@ pub use tangle_primitives::{
 		traits::{JobToFee, MPCHandler},
 		JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType,
 	},
-	misbehavior::{traits::MisbehaviorHandler, MisbehaviorSubmission},
+	misbehavior::{traits::MisbehaviorHandler, MisbehaviorJustification, MisbehaviorSubmission},
 	roles::ValidatorRewardDistribution,
 	time::*,
 	types::{

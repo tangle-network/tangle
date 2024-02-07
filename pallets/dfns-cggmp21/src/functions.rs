@@ -19,6 +19,7 @@ use generic_ec::{Point, Scalar};
 use generic_ec_zkp::{polynomial::Polynomial, schnorr_pok};
 use sha2::Digest;
 use sp_io::{hashing::keccak_256, EcdsaVerifyError};
+use sp_std::prelude::*;
 use tangle_primitives::{
 	misbehavior::{
 		dfns_cggmp21::{
@@ -313,7 +314,7 @@ impl<T: Config> Pallet<T> {
 			postcard::from_bytes::<aux_only::MsgRound1<DefaultDigest>>(&round1.message)
 				.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-		let round2_msg = postcard::from_bytes::<aux_only::MsgRound2<{ types::M }>>(&round2.message)
+		let round2_msg = postcard::from_bytes::<aux_only::MsgRound2>(&round2.message)
 			.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 		let hash_commit = tag.digest(round2_msg);

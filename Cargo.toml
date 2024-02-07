@@ -333,3 +333,5 @@ panic = "unwind"
 [patch.crates-io]
 generic-ec = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
 generic-ec-core = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
+generic-ec-curves = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
+generic-ec-zkp = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
