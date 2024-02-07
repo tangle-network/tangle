@@ -1164,11 +1164,11 @@ parameter_types! {
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxParticipants: u32 = 10;
-    #[cfg(not(feature = "local-testing"))]
+	#[cfg(not(feature = "local-testing"))]
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxSubmissionLen: u32 = 256;
-    #[cfg(feature = "local-testing")]
+	#[cfg(feature = "local-testing")]
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxSubmissionLen: u32 = 60_000_000;
