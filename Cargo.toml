@@ -77,6 +77,8 @@ hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
 slices = "0.2.0"
 schnorrkel = { version = "0.9.1", default-features = false }
+blst = "0.3.11"
+
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }

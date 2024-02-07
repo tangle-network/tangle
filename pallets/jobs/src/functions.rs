@@ -363,6 +363,7 @@ impl<T: Config> Pallet<T> {
 				.map_err(|_| Error::<T>::InvalidValidator)?;
 			participant_keys.push(pub_key);
 		}
+
 		let signing_key = match phase_one_result.result {
 			JobResult::DKGPhaseOne(result) => result.key,
 			_ => return Err(Error::<T>::InvalidJobPhase.into()),
