@@ -18,6 +18,9 @@ use frame_support::pallet_prelude::*;
 use sp_core::RuntimeDebug;
 use sp_std::vec::Vec;
 
+pub const KEYGEN_EID: &[u8] = b"dfns.cggmp21.keygen";
+pub const AUX_GEN_EID: &[u8] = b"dfns.cggmp21.aux_gen";
+
 /// Represents a Signed Round Message by the offender.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub struct SignedRoundMessage {

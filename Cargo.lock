@@ -7176,13 +7176,25 @@ dependencies = [
 name = "pallet-dkg"
 version = "0.6.1"
 dependencies = [
+ "cggmp21",
+ "digest 0.10.7",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "generic-ec",
+ "generic-ec-zkp",
+ "hex",
+ "paillier-zk",
  "pallet-balances",
  "parity-scale-codec 3.6.9",
+ "postcard",
+ "rand_chacha 0.3.1",
+ "rand_core 0.6.4",
+ "round-based",
  "scale-info",
  "serde",
+ "serde_with 2.3.3",
+ "sha2 0.10.8",
  "smallvec",
  "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-io 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
@@ -7191,6 +7203,7 @@ dependencies = [
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "tangle-crypto-primitives",
  "tangle-primitives",
+ "udigest",
 ]
 
 [[package]]
@@ -13772,7 +13785,6 @@ dependencies = [
  "pallet-child-bounties",
  "pallet-collective",
  "pallet-democracy",
- "pallet-dfns-cggmp21",
  "pallet-dkg",
  "pallet-dynamic-fee",
  "pallet-election-provider-multi-phase",

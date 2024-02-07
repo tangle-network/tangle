@@ -25,17 +25,16 @@
 //! DKG key.
 pub use pallet::*;
 
-#[cfg(test)]
-mod mock;
-
 mod functions;
-#[cfg(test)]
-mod tests;
-mod types;
+pub mod misbehavior;
+pub mod types;
 mod weights;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -123,6 +122,35 @@ pub mod pallet {
 		SigningKeyMismatch,
 		/// Invalid participant public key
 		InvalidParticipantPublicKey,
+		/// Invalid Misbehavior Role type.
+		InvalidRoleType,
+		/// Invalid Justification type.
+		InvalidJustification,
+		/// Could not deserialize the round message.
+		MalformedRoundMessage,
+		/// Signed Round Message not signed by the offender.
+		NotSignedByOffender,
+		/// The submitted decommitment is valid.
+		///
+		/// This error is returned when the decommitment is valid
+		/// but the caller claims it is invalid!
+		ValidDecommitment,
+		/// The submitted decommitment data size is valid.
+		///
+		/// This error is returned when the decommitment data size is valid
+		/// but the caller claims it is invalid!
+		ValidDataSize,
+		/// The submitted messages passed Feldman verification.
+		///
+		/// This error is returned when the messages passed Feldman verification
+		/// but the caller claims it is invalid!
+		ValidFeldmanVerification,
+		/// The submitted Schnorr Proof is valid.
+		///
+		/// This error is returned when the decommitment and its
+		/// Schnorr are valid. but the caller
+		/// claims it is invalid.
+		ValidSchnorrProof,
 	}
 
 	#[pallet::call]

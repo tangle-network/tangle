@@ -15,21 +15,20 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(non_snake_case)]
 
-use crate::{
-	mock::*,
-	types::{self, DefaultDigest},
-};
 use dfns_cggmp21::{
 	generic_ec::Point,
 	key_refresh::msg::aux_only,
 	keygen,
 	security_level::{SecurityLevel, SecurityLevel128},
 };
-use sha2::Digest;
-
+use digest::Digest;
 use frame_support::{assert_err, assert_ok};
 use generic_ec::{curves::Secp256k1, Scalar, SecretScalar};
 use generic_ec_zkp::{polynomial::Polynomial, schnorr_pok};
+use pallet_dkg::{
+	misbehavior::dfns_cggmp21::{aux_only as _aux_only, keygen as _keygen, DefaultDigest},
+	Error,
+};
 use parity_scale_codec::Encode;
 use rand_chacha::rand_core::{RngCore, SeedableRng};
 use sp_core::{ecdsa, keccak_256};
@@ -38,11 +37,15 @@ use tangle_primitives::{
 	misbehavior::{
 		dfns_cggmp21::{
 			DfnsCGGMP21Justification, KeyRefreshAborted, KeygenAborted, SignedRoundMessage,
+			AUX_GEN_EID, KEYGEN_EID,
 		},
 		DKGTSSJustification, MisbehaviorJustification, MisbehaviorSubmission,
 	},
 	roles::{RoleType, ThresholdSignatureRoleType},
 };
+
+mod mock;
+use mock::*;
 
 fn pub_key() -> ecdsa::Public {
 	ecdsa_generate(tangle_crypto_primitives::ROLE_KEY_TYPE, None)
@@ -78,10 +81,10 @@ fn submit_keygen_decommitment_should_work() {
 		let offender = participants[usize::from(i)];
 		let job_id = 1_u64;
 		let job_id_bytes = job_id.to_be_bytes();
-		let mix = keccak_256(crate::constants::KEYGEN_EID);
+		let mix = keccak_256(KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
-		let tag = udigest::Tag::<DefaultDigest>::new_structured(types::keygen::Tag::Indexed {
+		let tag = udigest::Tag::<DefaultDigest>::new_structured(_keygen::Tag::Indexed {
 			party_index: i,
 			sid: &eid_bytes[..],
 		});
@@ -128,7 +131,10 @@ fn submit_keygen_decommitment_should_work() {
 			)),
 		};
 
-		assert_err!(DfnsCGGMP21::verify(submission), crate::Error::<Runtime>::ValidDecommitment);
+		assert_err!(
+			DKG::verify_misbehavior(submission),
+			crate::Error::<Runtime>::ValidDecommitment
+		);
 	});
 }
 
@@ -141,10 +147,10 @@ fn submit_keygen_invalid_decommitment_should_work() {
 		let offender = participants[usize::from(i)];
 		let job_id = 1_u64;
 		let job_id_bytes = job_id.to_be_bytes();
-		let mix = keccak_256(crate::constants::KEYGEN_EID);
+		let mix = keccak_256(KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
-		let tag = udigest::Tag::<DefaultDigest>::new_structured(types::keygen::Tag::Indexed {
+		let tag = udigest::Tag::<DefaultDigest>::new_structured(_keygen::Tag::Indexed {
 			party_index: i,
 			sid: &eid_bytes[..],
 		});
@@ -200,7 +206,7 @@ fn submit_keygen_invalid_decommitment_should_work() {
 			)),
 		};
 
-		assert_ok!(DfnsCGGMP21::verify(submission));
+		assert_ok!(DKG::verify_misbehavior(submission));
 	});
 }
 
@@ -247,7 +253,7 @@ fn submit_keygen_decommitment_data_size_should_work() {
 			)),
 		};
 
-		assert_err!(DfnsCGGMP21::verify(submission), crate::Error::<Runtime>::ValidDataSize);
+		assert_err!(DKG::verify_misbehavior(submission), Error::<Runtime>::ValidDataSize);
 	});
 }
 
@@ -294,7 +300,7 @@ fn submit_keygen_invalid_decommitment_data_size_should_work() {
 			)),
 		};
 
-		assert_ok!(DfnsCGGMP21::verify(submission));
+		assert_ok!(DKG::verify_misbehavior(submission));
 	});
 }
 
@@ -355,7 +361,7 @@ fn submit_keygen_feldman_verification_should_work() {
 		};
 
 		assert_err!(
-			DfnsCGGMP21::verify(submission),
+			DKG::verify_misbehavior(submission),
 			crate::Error::<Runtime>::ValidFeldmanVerification
 		);
 	});
@@ -418,7 +424,7 @@ fn submit_keygen_invalid_feldman_verification_should_work() {
 			)),
 		};
 
-		assert_ok!(DfnsCGGMP21::verify(submission));
+		assert_ok!(DKG::verify_misbehavior(submission));
 	});
 }
 
@@ -432,7 +438,7 @@ fn submit_keygen_schnorr_proof_verification_should_work() {
 		let offender = participants[usize::from(i)];
 		let job_id = 1_u64;
 		let job_id_bytes = job_id.to_be_bytes();
-		let mix = keccak_256(crate::constants::KEYGEN_EID);
+		let mix = keccak_256(KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
 
@@ -474,7 +480,7 @@ fn submit_keygen_schnorr_proof_verification_should_work() {
 		let rid = round2a_msgs
 			.iter()
 			.map(|(_, d)| &d.rid)
-			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), DfnsCGGMP21::xor_array);
+			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), _keygen::xor_array);
 
 		let polynomial_sum =
 			round2a_msgs.iter().map(|(_, d)| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
@@ -528,7 +534,10 @@ fn submit_keygen_schnorr_proof_verification_should_work() {
 			)),
 		};
 
-		assert_err!(DfnsCGGMP21::verify(submission), crate::Error::<Runtime>::ValidSchnorrProof);
+		assert_err!(
+			DKG::verify_misbehavior(submission),
+			crate::Error::<Runtime>::ValidSchnorrProof
+		);
 	});
 }
 
@@ -542,7 +551,7 @@ fn submit_keygen_invalid_schnorr_proof_verification_should_work() {
 		let offender = participants[usize::from(i)];
 		let job_id = 1_u64;
 		let job_id_bytes = job_id.to_be_bytes();
-		let mix = keccak_256(crate::constants::KEYGEN_EID);
+		let mix = keccak_256(KEYGEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
 
@@ -584,7 +593,7 @@ fn submit_keygen_invalid_schnorr_proof_verification_should_work() {
 		let rid = round2a_msgs
 			.iter()
 			.map(|(_, d)| &d.rid)
-			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), DfnsCGGMP21::xor_array);
+			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), _keygen::xor_array);
 
 		let polynomial_sum =
 			round2a_msgs.iter().map(|(_, d)| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
@@ -639,7 +648,7 @@ fn submit_keygen_invalid_schnorr_proof_verification_should_work() {
 			)),
 		};
 
-		assert_ok!(DfnsCGGMP21::verify(submission));
+		assert_ok!(DKG::verify_misbehavior(submission));
 	});
 }
 
@@ -654,10 +663,10 @@ fn submit_key_refresh_decommitment_should_work() {
 		let offender = participants[usize::from(i)];
 		let job_id = 1_u64;
 		let job_id_bytes = job_id.to_be_bytes();
-		let mix = keccak_256(crate::constants::AUX_GEN_EID);
+		let mix = keccak_256(AUX_GEN_EID);
 		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
 		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
-		let tag = udigest::Tag::<DefaultDigest>::new_structured(types::aux_only::Tag::Indexed {
+		let tag = udigest::Tag::<DefaultDigest>::new_structured(_aux_only::Tag::Indexed {
 			party_index: i,
 			sid: &eid_bytes[..],
 		});
@@ -730,7 +739,10 @@ fn submit_key_refresh_decommitment_should_work() {
 			)),
 		};
 
-		assert_err!(DfnsCGGMP21::verify(submission), crate::Error::<Runtime>::ValidDecommitment);
+		assert_err!(
+			DKG::verify_misbehavior(submission),
+			crate::Error::<Runtime>::ValidDecommitment
+		);
 	});
 }
 
@@ -742,7 +754,7 @@ fn submit_key_refresh_invalid_decommitment_should_work() {
 		let threshold = 3_u16;
 		let offender = participants[usize::from(i)];
 		let job_id = 1_u64;
-		let mix = keccak_256(crate::constants::AUX_GEN_EID);
+		let mix = keccak_256(AUX_GEN_EID);
 		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
 
 		let N = paillier_zk::Integer::ZERO;
@@ -808,6 +820,6 @@ fn submit_key_refresh_invalid_decommitment_should_work() {
 			)),
 		};
 
-		assert_ok!(DfnsCGGMP21::verify(submission));
+		assert_ok!(DKG::verify_misbehavior(submission));
 	});
 }

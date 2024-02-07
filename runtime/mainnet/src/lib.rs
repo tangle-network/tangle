@@ -1162,7 +1162,7 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 pub struct MockMisbehaviorHandler;
 
 impl MisbehaviorHandler for MockMisbehaviorHandler {
-	fn verify(data: MisbehaviorSubmission) -> DispatchResult {
+	fn verify(_data: MisbehaviorSubmission) -> DispatchResult {
 		Ok(())
 	}
 }
