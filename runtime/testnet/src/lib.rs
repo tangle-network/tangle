@@ -1142,14 +1142,21 @@ impl
 	}
 }
 
+#[cfg(feature = "local-testing")]
+parameter_types! {
+	pub const MaxSubmissionLen: u32 = 60_000_000;
+}
+
+#[cfg(not(feature = "local-testing"))]
+parameter_types! {
+	pub const MaxSubmissionLen: u32 = 256;
+}
+
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
 	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxParticipants: u32 = 10;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 10_000_000;
 	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxKeyLen: u32 = 256;
