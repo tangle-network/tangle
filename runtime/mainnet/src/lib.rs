@@ -1166,7 +1166,7 @@ parameter_types! {
 	pub const MaxParticipants: u32 = 10;
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 1_000_000;
+	pub const MaxSubmissionLen: u32 = 10_000_000;
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxKeyLen: u32 = 256;
