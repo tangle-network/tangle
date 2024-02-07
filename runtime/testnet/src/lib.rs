@@ -1144,11 +1144,15 @@ impl
 
 #[cfg(feature = "local-testing")]
 parameter_types! {
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
 	pub const MaxSubmissionLen: u32 = 60_000_000;
 }
 
 #[cfg(not(feature = "local-testing"))]
 parameter_types! {
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
 	pub const MaxSubmissionLen: u32 = 256;
 }
 
