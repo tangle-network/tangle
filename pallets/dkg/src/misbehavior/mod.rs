@@ -16,7 +16,7 @@
 
 use super::*;
 use frame_support::{ensure, pallet_prelude::DispatchResult};
-use sp_io::{hashing::keccak_256, EcdsaVerifyError};
+use signatures_schemes::ecdsa::recover_ecdsa_pub_key_compressed;
 use tangle_primitives::{
 	misbehavior::{
 		dfns_cggmp21::SignedRoundMessage, DKGTSSJustification, MisbehaviorJustification,
@@ -74,36 +74,9 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		let final_message =
 			[&signed_message.sender.to_be_bytes()[..], signed_message.message.as_slice()].concat();
-		let signer =
-			Self::recover_ecdsa_pub_key_compressed(&final_message, &signed_message.signature)
-				.map_err(|_| Error::<T>::InvalidSignature)?;
+		let signer = recover_ecdsa_pub_key_compressed(&final_message, &signed_message.signature)
+			.map_err(|_| Error::<T>::InvalidSignature)?;
 		ensure!(signer == expected_signer, Error::<T>::NotSignedByOffender);
 		Ok(())
-	}
-	/// Recovers the ECDSA public key from a given message and signature.
-	///
-	/// # Arguments
-	///
-	/// * `data` - The message for which the signature is being verified.
-	/// * `signature` - The ECDSA signature to be verified.
-	///
-	/// # Returns
-	///
-	/// Returns a `Result` containing the recovered ECDSA public key as a `Vec<u8>` or an
-	/// `EcdsaVerifyError` if verification fails.
-	pub fn recover_ecdsa_pub_key_compressed(
-		data: &[u8],
-		signature: &[u8],
-	) -> Result<[u8; 33], EcdsaVerifyError> {
-		if signature.len() == SIGNATURE_LENGTH {
-			let mut sig = [0u8; SIGNATURE_LENGTH];
-			sig[..SIGNATURE_LENGTH].copy_from_slice(signature);
-
-			let hash = keccak_256(data);
-
-			let pub_key = sp_io::crypto::secp256k1_ecdsa_recover_compressed(&sig, &hash)?;
-			return Ok(pub_key)
-		}
-		Err(EcdsaVerifyError::BadSignature)
 	}
 }

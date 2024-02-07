@@ -68,13 +68,13 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		match reason {
 			KeygenAborted::InvalidDecommitment { round1, round2a } =>
-				Self::verify_dfns_cggmp21_keygen_invalid_decommitment(data, round1, round2a),
+				keygen::invalid_decommitment::<T>(data, round1, round2a),
 			KeygenAborted::InvalidDataSize { round2a } =>
-				Self::verify_dfns_cggmp21_keygen_invalid_data_size(data, t, round2a),
+				keygen::invalid_data_size::<T>(data, t, round2a),
 			KeygenAborted::FeldmanVerificationFailed { round2a, round2b } =>
-				Self::verify_dfns_cggmp21_keygen_feldman(data, round2a, round2b),
+				keygen::feldman::<T>(data, round2a, round2b),
 			KeygenAborted::InvalidSchnorrProof { round2a, round3 } =>
-				Self::verify_dfns_cggmp21_schnorr_proof(data, participants, round2a, round3),
+				keygen::schnorr_proof::<T>(data, participants, round2a, round3),
 		}
 	}
 
@@ -88,7 +88,7 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		match reason {
 			KeyRefreshAborted::InvalidDecommitment { round1, round2 } =>
-				Self::verify_dfns_cggmp21_key_refresh_invalid_decommitment(data, round1, round2),
+				aux_only::invalid_decommitment::<T>(data, round1, round2),
 			_ => unimplemented!(),
 		}
 	}

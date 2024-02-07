@@ -112,36 +112,34 @@ pub struct MsgRound2 {
 	pub decommit: [u8; SECURITY_BYTES],
 }
 
-impl<T: Config> Pallet<T> {
-	/// Given a KeyRefresh Round1 and Round2 messages, verify the misbehavior and return the result.
-	pub fn verify_dfns_cggmp21_key_refresh_invalid_decommitment(
-		data: &MisbehaviorSubmission,
-		round1: &SignedRoundMessage,
-		round2: &SignedRoundMessage,
-	) -> DispatchResult {
-		Self::ensure_signed_by_offender(round1, data.offender)?;
-		Self::ensure_signed_by_offender(round2, data.offender)?;
-		ensure!(round1.sender == round2.sender, Error::<T>::InvalidJustification);
+/// Given a KeyRefresh Round1 and Round2 messages, verify the misbehavior and return the result.
+pub fn invalid_decommitment<T: Config>(
+	data: &MisbehaviorSubmission,
+	round1: &SignedRoundMessage,
+	round2: &SignedRoundMessage,
+) -> DispatchResult {
+	Pallet::<T>::ensure_signed_by_offender(round1, data.offender)?;
+	Pallet::<T>::ensure_signed_by_offender(round2, data.offender)?;
+	ensure!(round1.sender == round2.sender, Error::<T>::InvalidJustification);
 
-		let job_id_bytes = data.job_id.to_be_bytes();
-		let mix = keccak_256(AUX_GEN_EID);
-		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
-		let tag = udigest::Tag::<DefaultDigest>::new_structured(Tag::Indexed {
-			party_index: round1.sender,
-			sid: &eid_bytes[..],
-		});
+	let job_id_bytes = data.job_id.to_be_bytes();
+	let mix = keccak_256(AUX_GEN_EID);
+	let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
+	let tag = udigest::Tag::<DefaultDigest>::new_structured(Tag::Indexed {
+		party_index: round1.sender,
+		sid: &eid_bytes[..],
+	});
 
-		let round1_msg = postcard::from_bytes::<MsgRound1<DefaultDigest>>(&round1.message)
-			.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+	let round1_msg = postcard::from_bytes::<MsgRound1<DefaultDigest>>(&round1.message)
+		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-		let round2_msg = postcard::from_bytes::<MsgRound2>(&round2.message)
-			.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+	let round2_msg = postcard::from_bytes::<MsgRound2>(&round2.message)
+		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-		let hash_commit = tag.digest(round2_msg);
+	let hash_commit = tag.digest(round2_msg);
 
-		ensure!(round1_msg.commitment != hash_commit, Error::<T>::ValidDecommitment);
-		// Slash the offender!
-		// TODO: add slashing logic
-		Ok(())
-	}
+	ensure!(round1_msg.commitment != hash_commit, Error::<T>::ValidDecommitment);
+	// Slash the offender!
+	// TODO: add slashing logic
+	Ok(())
 }
