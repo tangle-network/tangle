@@ -1169,17 +1169,17 @@ impl MisbehaviorHandler for MockMisbehaviorHandler {
 
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Debug, Eq, PartialEq, Encode, Decode, sp_runtime::Serialize, TypeInfo)]
 	pub const MaxParticipants: u32 = 10;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Debug, Eq, PartialEq, Encode, Decode, sp_runtime::Serialize, TypeInfo)]
 	pub const MaxSubmissionLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Debug, Eq, PartialEq, Encode, Decode, sp_runtime::Serialize, TypeInfo)]
 	pub const MaxKeyLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Debug, Eq, PartialEq, Encode, Decode, sp_runtime::Serialize, TypeInfo)]
 	pub const MaxDataLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Debug, Eq, PartialEq, Encode, Decode, sp_runtime::Serialize, TypeInfo)]
 	pub const MaxSignatureLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Debug, Eq, PartialEq, Encode, Decode, sp_runtime::Serialize, TypeInfo)]
 	pub const MaxProofLen: u32 = 256;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxActiveJobsPerValidator: u32 = 100;

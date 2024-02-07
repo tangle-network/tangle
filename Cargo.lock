@@ -999,6 +999,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "bls12_381_plus"
+version = "0.8.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7533858fe2da020c4fba936036e702de0f73144fe13f9c71113f6f804cde3466"
+dependencies = [
+ "arrayref",
+ "elliptic-curve",
+ "ff",
+ "group",
+ "hex",
+ "rand_core 0.6.4",
+ "serde",
+ "subtle",
+ "zeroize",
+]
+
+[[package]]
 name = "blst"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1944,9 +1961,9 @@ dependencies = [
 
 [[package]]
 name = "crypto-mac"
-version = "0.11.1"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1d1a86f49236c215f271d40892d5fc950490551400b02ef360692c29815c714"
+checksum = "25fab6889090c8133f3deb8f73ba3c65a7f456f66436fc012a1b1e272b1e103e"
 dependencies = [
  "generic-array 0.14.7",
  "subtle",
@@ -1989,9 +2006,9 @@ dependencies = [
 
 [[package]]
 name = "curve25519-dalek"
-version = "4.1.2"
+version = "4.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a677b8922c94e01bdbb12126b0bc852f00447528dee1782229af9c720c3f348"
+checksum = "e89b8c6a2e4b1f45971ad09761aafb85514a84744b67a95e32c3cc1352d1f65c"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -1999,6 +2016,7 @@ dependencies = [
  "digest 0.10.7",
  "fiat-crypto",
  "platforms 3.3.0",
+ "rand_core 0.6.4",
  "rustc_version 0.4.0",
  "subtle",
  "zeroize",
@@ -2189,6 +2207,12 @@ dependencies = [
  "data-encoding",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "debugless-unwrap"
+version = "0.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f400d0750c0c069e8493f2256cb4da6f604b6d2eeb69a0ca8863acde352f8400"
 
 [[package]]
 name = "der"
@@ -2547,7 +2571,7 @@ version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a3daa8e81a3963a60642bcc1f90a670680bd4a77535faa384e9d1c79d620871"
 dependencies = [
- "curve25519-dalek 4.1.2",
+ "curve25519-dalek 4.1.1",
  "ed25519 2.2.3",
  "rand_core 0.6.4",
  "serde",
@@ -2568,6 +2592,17 @@ dependencies = [
  "rand_core 0.6.4",
  "sha2 0.9.9",
  "zeroize",
+]
+
+[[package]]
+name = "ed448-goldilocks-plus"
+version = "0.11.1"
+source = "git+https://github.com/drewstone/Ed448-Goldilocks.git?branch=drew/zeroize#e5200a473655d2b8abb61263f62fdbe6a6c4d16c"
+dependencies = [
+ "elliptic-curve",
+ "rand_core 0.6.4",
+ "sha3 0.10.8",
+ "subtle",
 ]
 
 [[package]]
@@ -3625,6 +3660,7 @@ version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ded41244b729663b1e574f1b4fb731469f69f79c17667b5d776b16cda0479449"
 dependencies = [
+ "bitvec 1.0.1",
  "rand_core 0.6.4",
  "subtle",
 ]
@@ -4176,6 +4212,106 @@ dependencies = [
  "sp-api",
  "sp-runtime 24.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+]
+
+[[package]]
+name = "frost-core"
+version = "0.6.1"
+dependencies = [
+ "debugless-unwrap",
+ "hex",
+ "parity-scale-codec 3.6.9",
+ "rand_core 0.6.4",
+ "serde",
+ "serdect",
+ "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+ "subtle",
+]
+
+[[package]]
+name = "frost-ed25519"
+version = "1.0.0-rc.0"
+dependencies = [
+ "curve25519-dalek 4.1.1",
+ "frost-core",
+ "parity-scale-codec 3.6.9",
+ "rand_core 0.6.4",
+ "sha2 0.10.8",
+ "subtle",
+]
+
+[[package]]
+name = "frost-ed448"
+version = "1.0.0-rc.0"
+dependencies = [
+ "ed448-goldilocks-plus",
+ "frost-core",
+ "parity-scale-codec 3.6.9",
+ "rand_core 0.6.4",
+ "sha3 0.10.8",
+ "subtle",
+]
+
+[[package]]
+name = "frost-p256"
+version = "1.0.0-rc.0"
+dependencies = [
+ "frost-core",
+ "p256",
+ "parity-scale-codec 3.6.9",
+ "rand_core 0.6.4",
+ "sha2 0.10.8",
+ "subtle",
+]
+
+[[package]]
+name = "frost-p384"
+version = "1.0.0-rc.0"
+dependencies = [
+ "frost-core",
+ "p384",
+ "parity-scale-codec 3.6.9",
+ "rand_core 0.6.4",
+ "sha2 0.10.8",
+ "subtle",
+]
+
+[[package]]
+name = "frost-redjubjub"
+version = "1.0.0-rc.0"
+dependencies = [
+ "blake2",
+ "frost-core",
+ "group",
+ "jubjub",
+ "parity-scale-codec 3.6.9",
+ "rand_core 0.6.4",
+ "sha2 0.10.8",
+ "subtle",
+]
+
+[[package]]
+name = "frost-ristretto255"
+version = "1.0.0-rc.0"
+dependencies = [
+ "curve25519-dalek 4.1.1",
+ "frost-core",
+ "parity-scale-codec 3.6.9",
+ "rand_core 0.6.4",
+ "sha2 0.10.8",
+ "subtle",
+]
+
+[[package]]
+name = "frost-secp256k1"
+version = "1.0.0-rc.0"
+dependencies = [
+ "frost-core",
+ "k256",
+ "parity-scale-codec 3.6.9",
+ "rand_core 0.6.4",
+ "sha2 0.10.8",
+ "subtle",
 ]
 
 [[package]]
@@ -4752,7 +4888,7 @@ version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a2a2320eb7ec0ebe8da8f744d7812d9fc4cb4d09344ac01898dbcb6a20ae69b"
 dependencies = [
- "crypto-mac 0.11.1",
+ "crypto-mac 0.11.0",
  "digest 0.9.0",
 ]
 
@@ -4907,7 +5043,7 @@ dependencies = [
  "iana-time-zone-haiku",
  "js-sys",
  "wasm-bindgen",
- "windows-core",
+ "windows-core 0.52.0",
 ]
 
 [[package]]
@@ -5344,6 +5480,21 @@ dependencies = [
  "serde",
  "serde_json",
  "simple_asn1",
+]
+
+[[package]]
+name = "jubjub"
+version = "0.10.4"
+source = "git+https://github.com/LIT-Protocol/jubjub.git#3924292eb6b3ef5489744998c18de7c5144df499"
+dependencies = [
+ "bitvec 1.0.1",
+ "bls12_381_plus",
+ "elliptic-curve",
+ "ff",
+ "group",
+ "rand_chacha 0.3.1",
+ "rand_core 0.6.4",
+ "subtle",
 ]
 
 [[package]]
@@ -6938,6 +7089,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
+name = "p256"
+version = "0.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c9863ad85fa8f4460f9c48cb909d38a0d689dba1f6f6988a5e3e0d31071bcd4b"
+dependencies = [
+ "ecdsa",
+ "elliptic-curve",
+ "primeorder 0.13.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "p384"
+version = "0.13.0"
+source = "git+https://github.com/LIT-Protocol/elliptic-curves.git#67924afc93d236e1508afd5f55bbf738e1c41eaa"
+dependencies = [
+ "ecdsa",
+ "elliptic-curve",
+ "primeorder 0.13.6 (git+https://github.com/LIT-Protocol/elliptic-curves.git)",
+]
+
+[[package]]
 name = "paillier-zk"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7139,61 +7311,37 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-dfns-cggmp21"
-version = "0.6.1"
-dependencies = [
- "cggmp21",
- "digest 0.10.7",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "generic-ec",
- "generic-ec-zkp",
- "hex",
- "paillier-zk",
- "pallet-balances",
- "parity-scale-codec 3.6.9",
- "postcard",
- "rand_chacha 0.3.1",
- "rand_core 0.6.4",
- "round-based",
- "scale-info",
- "serde",
- "serde_with 2.3.3",
- "sha2 0.10.8",
- "smallvec",
- "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "sp-io 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "sp-keystore 0.27.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "sp-runtime 24.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
- "tangle-crypto-primitives",
- "tangle-primitives",
- "udigest",
-]
-
-[[package]]
 name = "pallet-dkg"
 version = "0.6.1"
 dependencies = [
  "cggmp21",
  "digest 0.10.7",
+ "elliptic-curve",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "frost-core",
+ "frost-ed25519",
+ "frost-ed448",
+ "frost-p256",
+ "frost-p384",
+ "frost-ristretto255",
+ "frost-secp256k1",
  "generic-ec",
  "generic-ec-zkp",
  "hex",
  "paillier-zk",
  "pallet-balances",
  "parity-scale-codec 3.6.9",
+ "paste",
  "postcard",
  "rand_chacha 0.3.1",
  "rand_core 0.6.4",
  "round-based",
  "scale-info",
  "serde",
- "serde_with 2.3.3",
+ "serde_with 3.6.0",
+ "serdect",
  "sha2 0.10.8",
  "smallvec",
  "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
@@ -7201,6 +7349,7 @@ dependencies = [
  "sp-keystore 0.27.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-runtime 24.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
+ "subtle",
  "tangle-crypto-primitives",
  "tangle-primitives",
  "udigest",
@@ -7460,7 +7609,7 @@ name = "pallet-evm-precompile-curve25519"
 version = "1.0.0-dev"
 source = "git+https://github.com/paritytech/frontier.git?branch=polkadot-v1.1.0#de5a3df59d3ada67c8cacdb79e607ad0b229ec5b"
 dependencies = [
- "curve25519-dalek 4.1.2",
+ "curve25519-dalek 4.1.1",
  "fp-evm",
 ]
 
@@ -8441,7 +8590,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d95f5254224e617595d2cc3cc73ff0a5eaf2637519e25f03388154e9378b6ffa"
 dependencies = [
- "crypto-mac 0.11.1",
+ "crypto-mac 0.11.0",
 ]
 
 [[package]]
@@ -8875,6 +9024,23 @@ checksum = "a41cf62165e97c7f814d2221421dbb9afcbcdb0a88068e5ea206e19951c2cbb5"
 dependencies = [
  "proc-macro2",
  "syn 2.0.48",
+]
+
+[[package]]
+name = "primeorder"
+version = "0.13.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "353e1ca18966c16d9deb1c69278edbc5f194139612772bd9537af60ac231e1e6"
+dependencies = [
+ "elliptic-curve",
+]
+
+[[package]]
+name = "primeorder"
+version = "0.13.6"
+source = "git+https://github.com/LIT-Protocol/elliptic-curves.git#67924afc93d236e1508afd5f55bbf738e1c41eaa"
+dependencies = [
+ "elliptic-curve",
 ]
 
 [[package]]
@@ -11601,6 +11767,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serdect"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a84f14a19e9a014bb9f4512488d9829a68e04ecabffb0f9904cd1ace94598177"
+dependencies = [
+ "base16ct",
+ "serde",
+]
+
+[[package]]
 name = "sha-1"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11833,7 +12009,7 @@ dependencies = [
  "aes-gcm",
  "blake2",
  "chacha20poly1305",
- "curve25519-dalek 4.1.2",
+ "curve25519-dalek 4.1.1",
  "rand_core 0.6.4",
  "ring 0.17.7",
  "rustc_version 0.4.0",
@@ -12691,7 +12867,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0#c8d2251cafadc108ba2f1f8a3208dc547ff38901"
 dependencies = [
  "aes-gcm",
- "curve25519-dalek 4.1.2",
+ "curve25519-dalek 4.1.1",
  "ed25519-dalek 2.1.1",
  "hkdf",
  "parity-scale-codec 3.6.9",
@@ -13327,9 +13503,9 @@ dependencies = [
 
 [[package]]
 name = "subtle"
-version = "2.4.1"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6bdef32e8150c2a081110b42772ffe7d7c9032b606bc226c8260fd97e0976601"
+checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
@@ -15787,7 +15963,7 @@ version = "0.51.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ca229916c5ee38c2f2bc1e9d8f04df975b4bd93f9955dc69fabb5d91270045c9"
 dependencies = [
- "windows-core",
+ "windows-core 0.51.1",
  "windows-targets 0.48.5",
 ]
 
@@ -15798,6 +15974,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1f8cf84f35d2db49a46868f947758c7a1138116f7fac3bc844f43ade1292e64"
 dependencies = [
  "windows-targets 0.48.5",
+]
+
+[[package]]
+name = "windows-core"
+version = "0.52.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33ab640c8d7e35bf8ba19b884ba838ceb4fba93a4e8c65a9059d08afcfc683d9"
+dependencies = [
+ "windows-targets 0.52.0",
 ]
 
 [[package]]
@@ -16111,7 +16296,7 @@ version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7e468321c81fb07fa7f4c636c3972b9100f0346e5b6a9f2bd0603a52f7ed277"
 dependencies = [
- "curve25519-dalek 4.1.2",
+ "curve25519-dalek 4.1.1",
  "rand_core 0.6.4",
  "serde",
  "zeroize",

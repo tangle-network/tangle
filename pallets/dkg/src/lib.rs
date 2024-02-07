@@ -27,6 +27,7 @@ pub use pallet::*;
 
 mod functions;
 pub mod misbehavior;
+mod signatures_schemes;
 pub mod types;
 mod weights;
 
@@ -118,6 +119,8 @@ pub mod pallet {
 		DuplicateSignature,
 		/// Invalid signature submitted
 		InvalidSignature,
+		/// Invalid verifying key submitted
+		InvalidVerifyingKey,
 		/// Signed with a different key
 		SigningKeyMismatch,
 		/// Invalid participant public key

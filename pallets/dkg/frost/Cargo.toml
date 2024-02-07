@@ -1,0 +1,27 @@
+[package]
+name = "frost-core"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+parity-scale-codec = { workspace = true }
+serde = { workspace = true }
+serdect = { workspace = true, features = ["alloc"] }
+sp-std = { workspace = true }
+subtle = { workspace = true }
+
+hex = { workspace = true, features = ["alloc"] }
+rand_core = { workspace = true, optional = true }
+debugless-unwrap = "0.0.4"
+
+[features]
+default = ["std"]
+std = [
+  "rand_core/std",
+  "hex/std",
+  "sp-std/std",
+]

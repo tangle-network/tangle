@@ -8,45 +8,49 @@ repository = "https://github.com/webb-tools/tangle"
 
 [workspace]
 members = [
-  "primitives",
-  "primitives/crypto",
-  "primitives/rpc/*",
-  "primitives/ext",
-  "client/evm-tracing",
-  "client/rpc/*",
-  "client/rpc-core/*",
-  "client/voter",
-  "node",
-  "runtime/testnet",
-  "runtime/testnet/evm_tracer",
-  "runtime/mainnet",
-  "pallets/*",
-  "pallets/jobs/rpc",
-  "pallets/jobs/rpc/runtime-api",
-  "precompiles/utils",
-  "precompiles/utils/macro",
-  "precompiles/utils/tests-external",
-  "precompiles/pallet-democracy",
-  "precompiles/batch",
-  "precompiles/call-permit",
-  "precompiles/proxy",
-  "precompiles/preimage",
-  "precompiles/jobs",
-  # "relayer-gadget",
-  # "relayer-gadget/cli",
+ "primitives",
+ "primitives/crypto",
+ "primitives/rpc/*",
+ "primitives/ext",
+ "client/evm-tracing",
+ "client/rpc/*",
+ "client/rpc-core/*",
+ "client/voter",
+ "node",
+ "runtime/testnet",
+ "runtime/testnet/evm_tracer",
+ "runtime/mainnet",
+ "pallets/*",
+ "pallets/jobs/rpc",
+ "pallets/jobs/rpc/runtime-api",
+ "pallets/dkg/frost",
+ "pallets/dkg/frost/frost-*",
+ "precompiles/utils",
+ "precompiles/utils/macro",
+ "precompiles/utils/tests-external",
+ "precompiles/pallet-democracy",
+ "precompiles/batch",
+ "precompiles/call-permit",
+ "precompiles/proxy",
+ "precompiles/preimage",
+ "precompiles/jobs",
+ # "relayer-gadget",
+ # "relayer-gadget/cli",
 ]
 resolver = "2"
 
 [workspace.dependencies]
+smallvec = "1.6.1"
 substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
 substrate-build-script-utils = "3.0.0"
-
+subtle = { version = "2.2", default-features = false }
 hex-literal = "0.4.1"
 log = { version = "0.4.20", default-features = false }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0", default-features = false }
-serde_with = { version = "2", default-features = false }
+serde_with = { version = "3.6", default-features = false }
+serdect = { version = "0.2.0", default-features = false }
 static_assertions = "1.1.0"
 clap = { version = "4.4.2", features = ["derive"] }
 parity-scale-codec = { version = "3.6.1", default-features = false, features = ["derive"] }
@@ -54,10 +58,9 @@ rlp = { version = "0.5", default-features = false }
 tracing = "0.1.34"
 tokio = { version = "1.13" }
 futures = { version = "0.3.16" }
-rand = { version = "0.7.2", default-features = false }
 rand_core = { version = "0.6", default-features = false }
-rand_chacha = "0.3"
-smallvec = "1.6.1"
+rand_chacha = { version = "0.3", default-features = false }
+rand = { version = "0.7.2", default-features = false }
 async-trait = "0.1.59"
 libsecp256k1 = { version = "0.7.0", default-features = false }
 rustc-hex = { version = "2.1.0", default-features = false }
@@ -78,9 +81,6 @@ hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
 slices = "0.2.0"
 schnorrkel = { version = "0.9.1", default-features = false }
-
-# tangle-relayer-gadget = { packge = "tangle-relayer-gadget", path = "relayer-gadget" }
-# tangle-relayer-gadget-cli = { packge = "tangle-relayer-gadget-cli", path = "relayer-gadget/cli" }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
@@ -109,6 +109,15 @@ pallet-dkg = { path = "pallets/dkg", default-features = false }
 pallet-zksaas = { path = "pallets/zksaas", default-features = false }
 pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-features = false }
 pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
+
+frost-core = { path = "pallets/dkg/frost", default-features = false }
+frost-ed25519 = { path = "pallets/dkg/frost/frost-ed25519", default-features = false }
+frost-ed448 = { path = "pallets/dkg/frost/frost-ed448", default-features = false }
+frost-ristretto255 = { path = "pallets/dkg/frost/frost-ristretto255", default-features = false }
+frost-secp256k1 = { path = "pallets/dkg/frost/frost-secp256k1", default-features = false }
+frost-p256 = { path = "pallets/dkg/frost/frost-p256", default-features = false }
+frost-p384 = { path = "pallets/dkg/frost/frost-p384", default-features = false }
+frost-redjubjub = { path = "pallets/dkg/frost/frost-redjubjub", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.1.0", default-features = false }
@@ -235,13 +244,19 @@ fc-storage = { git = "https://github.com/paritytech/frontier.git", branch = "pol
 fc-api = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0" }
 
 # Frontier Primitive
-fp-account = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false, features = ["serde"] }
+fp-account = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false, features = [
+ "serde",
+] }
 fp-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false }
 fp-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false }
 fp-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false }
-fp-evm = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false, features = ["serde"] }
+fp-evm = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false, features = [
+ "serde",
+] }
 fp-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false }
-fp-self-contained = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false, features = ["serde"] }
+fp-self-contained = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false, features = [
+ "serde",
+] }
 fp-storage = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.1.0", default-features = false }
 
 # Frontier FRAME
@@ -299,7 +314,10 @@ pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-t
 webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.5.0" }
 
 webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false }
-webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false, features = ["scale", "evm"] }
+webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false, features = [
+ "scale",
+ "evm",
+] }
 
 primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }
