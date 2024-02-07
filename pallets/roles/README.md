@@ -57,13 +57,13 @@ Currently we allow max 50% of staked amount that can be restaked for providing v
     Validators can unbond funds, these operations are only allowed when the validator has no active roles.
 
 - ##### withdraw_unbonded
-    withdraw unbonded funds after a certain period. These operations are only allowed when the validator has no active roles.
+    Validators can withdraw unbonded funds after a certain period. These operations are only allowed when the validator has no active roles.
 
 ---
 
 <h2> Contributing </h2>
 
-Interested in contributing to the Webb Tangle Network? Thank you so much for your interest! We are always appreciative for contributions from the open-source community!
+Interested in contributing to the Tangle Network? Thank you so much for your interest! We are always appreciative for contributions from the open-source community!
 
 If you have a contribution in mind, please check out our [Contribution Guide](../../.github/CONTRIBUTING.md) for information on how to do so. We are excited for your first contribution!
 
