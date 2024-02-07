@@ -1,13 +1,14 @@
 //! Schnorr signature signing keys
 
 use crate::{
-	challenge::challenge,
 	error::Error,
-	signature::Signature,
 	traits::{Ciphersuite, Field, Group, Scalar},
 	util::scalar_is_valid,
 	verifying_key::VerifyingKey,
 };
+
+#[cfg(feature = "std")]
+use crate::{challenge::challenge, signature::Signature};
 
 #[cfg(feature = "std")]
 use crate::random_nonzero;
