@@ -125,6 +125,8 @@ pub mod pallet {
 		SigningKeyMismatch,
 		/// Invalid participant public key
 		InvalidParticipantPublicKey,
+		/// Invalid BLS public key
+		InvalidBlsPublicKey,
 		/// Invalid Misbehavior Role type.
 		InvalidRoleType,
 		/// Invalid Justification type.

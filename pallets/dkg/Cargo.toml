@@ -41,6 +41,7 @@ frost-ristretto255 = { workspace = true, default-features = false }
 frost-secp256k1 = { workspace = true, default-features = false }
 frost-p256 = { workspace = true, default-features = false }
 frost-p384 = { workspace = true, default-features = false }
+blst = { workspace = true, default-features = false, features = ["portable", "no-threads"] }
 
 # FROST RedJubjub is not yet no_std compatible
 # TODO: Update this once it is.

@@ -135,6 +135,7 @@ rpc-primitives-txpool = { workspace = true }
 
 [features]
 default = ["std", "with-rocksdb-weights", "evm-tracing"]
+local-testing = []
 runtime-benchmarks = [
   "hex-literal",
   "frame-benchmarking",

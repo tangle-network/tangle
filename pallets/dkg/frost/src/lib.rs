@@ -35,6 +35,7 @@ pub mod verifying_key;
 
 #[cfg(feature = "std")]
 use rand_core::{CryptoRng, RngCore};
+#[cfg(feature = "std")]
 use traits::{Ciphersuite, Field, Group, Scalar};
 
 /// Generates a random nonzero scalar.

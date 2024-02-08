@@ -25,10 +25,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 use sp_runtime_interface::runtime_interface;
 
+#[cfg(feature = "std")]
 use parity_scale_codec::Decode;
 use sp_std::vec::Vec;
 
-use evm_tracing_events::{Event, EvmEvent, GasometerEvent, RuntimeEvent, StepEventFilter};
+use evm_tracing_events::StepEventFilter;
+#[cfg(feature = "std")]
+use evm_tracing_events::{Event, EvmEvent, GasometerEvent, RuntimeEvent};
 
 #[runtime_interface]
 pub trait Ext {

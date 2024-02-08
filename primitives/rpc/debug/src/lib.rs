@@ -16,7 +16,9 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use ethereum::{TransactionV0 as LegacyTransaction, TransactionV2 as Transaction};
+#[cfg(feature = "std")]
+use ethereum::TransactionV0 as LegacyTransaction;
+use ethereum::TransactionV2 as Transaction;
 use ethereum_types::H256;
 use parity_scale_codec::{Decode, Encode};
 use sp_std::vec::Vec;
