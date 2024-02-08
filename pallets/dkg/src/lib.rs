@@ -25,10 +25,13 @@
 //! DKG key.
 pub use pallet::*;
 
+extern crate alloc;
+
 #[cfg(test)]
 mod mock;
 
 mod functions;
+mod signatures_schemes;
 #[cfg(test)]
 mod tests;
 mod types;
@@ -119,10 +122,14 @@ pub mod pallet {
 		DuplicateSignature,
 		/// Invalid signature submitted
 		InvalidSignature,
+		/// Invalid verifying key submitted
+		InvalidVerifyingKey,
 		/// Signed with a different key
 		SigningKeyMismatch,
 		/// Invalid participant public key
 		InvalidParticipantPublicKey,
+		/// Invalid BLS public key
+		InvalidBlsPublicKey,
 	}
 
 	#[pallet::call]

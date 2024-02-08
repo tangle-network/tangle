@@ -39,7 +39,8 @@ type F = ark_bn254::Fr;
 #[test]
 fn set_fees_works() {
 	new_test_ext().execute_with(|| {
-		let new_fee = FeeInfo { base_fee: 10, circuit_fee: 5, prove_fee: 5 };
+		let new_fee =
+			FeeInfo { base_fee: 10, circuit_fee: 5, prove_fee: 5, storage_fee_per_byte: 1 };
 
 		// should fail for non update origin
 		assert_noop!(ZKSaaS::set_fee(RuntimeOrigin::signed(10), new_fee.clone()), BadOrigin);
@@ -54,7 +55,8 @@ fn set_fees_works() {
 #[test]
 fn proof_verification_works() {
 	new_test_ext().execute_with(|| {
-		let new_fee = FeeInfo { base_fee: 10, circuit_fee: 5, prove_fee: 5 };
+		let new_fee =
+			FeeInfo { base_fee: 10, circuit_fee: 5, prove_fee: 5, storage_fee_per_byte: 1 };
 		// Dispatch a signed extrinsic.
 		assert_ok!(ZKSaaS::set_fee(RuntimeOrigin::signed(1), new_fee.clone()));
 

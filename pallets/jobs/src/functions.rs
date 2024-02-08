@@ -288,7 +288,7 @@ impl<T: Config> Pallet<T> {
 			signatures: info.signatures,
 			participants: participant_keys,
 			threshold: job_info.job_type.clone().get_threshold().expect("Checked before"),
-			signature_type: info.signature_type.clone(),
+			signature_scheme: info.signature_scheme.clone(),
 		});
 
 		T::MPCHandler::verify(JobWithResult {
@@ -340,6 +340,7 @@ impl<T: Config> Pallet<T> {
 				.map_err(|_| Error::<T>::InvalidValidator)?;
 			participant_keys.push(pub_key);
 		}
+
 		let signing_key = match phase_one_result.result {
 			JobResult::DKGPhaseOne(result) => result.key,
 			_ => return Err(Error::<T>::InvalidJobPhase.into()),
@@ -348,7 +349,7 @@ impl<T: Config> Pallet<T> {
 			signature: info.signature.clone(),
 			data: info.data,
 			signing_key,
-			signature_type: info.signature_type,
+			signature_scheme: info.signature_scheme,
 		});
 
 		let phase_one_job_info = KnownResults::<T>::get(
@@ -407,7 +408,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		let job_result = JobResult::DKGPhaseThree(DKGTSSKeyRefreshResult {
-			signature_type: info.signature_type.clone(),
+			signature_scheme: info.signature_scheme.clone(),
 		});
 
 		let phase_one_job_info = KnownResults::<T>::get(
@@ -492,7 +493,7 @@ impl<T: Config> Pallet<T> {
 			new_key,
 			key: curr_key,
 			signature: info.signature.clone(),
-			signature_type: info.signature_type.clone(),
+			signature_scheme: info.signature_scheme.clone(),
 		});
 
 		T::MPCHandler::verify(JobWithResult {

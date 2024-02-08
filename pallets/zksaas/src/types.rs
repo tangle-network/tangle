@@ -38,6 +38,9 @@ pub struct FeeInfo<Balance: MaxEncodedLen> {
 
 	/// The fee for Proof generation.
 	pub prove_fee: Balance,
+
+	/// The storage fee per byte
+	pub storage_fee_per_byte: Balance,
 }
 
 impl<Balance: MaxEncodedLen> FeeInfo<Balance> {
@@ -54,5 +57,10 @@ impl<Balance: MaxEncodedLen> FeeInfo<Balance> {
 	/// Get the proof generation fee.
 	pub fn get_prove_fee(self) -> Balance {
 		self.prove_fee
+	}
+
+	/// Get the storage fee per byte
+	pub fn get_storage_fee_per_byte(self) -> Balance {
+		self.storage_fee_per_byte
 	}
 }

@@ -21,6 +21,8 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+pub use tangle_primitives::jobs::JobResult;
+
 mod filters;
 pub mod frontier_evm;
 pub mod impls;
@@ -61,7 +63,8 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, SaturatedConversion,
+	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
+	SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use tangle_primitives::jobs::{traits::JobToFee, JobSubmission};
@@ -1160,21 +1163,29 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
+	#[derive(Serialize, Deserialize)]
 	pub const MaxParticipants: u32 = 10;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
+	#[derive(Serialize, Deserialize)]
 	pub const MaxSubmissionLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
+	#[derive(Serialize, Deserialize)]
 	pub const MaxKeyLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
+	#[derive(Serialize, Deserialize)]
 	pub const MaxDataLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
+	#[derive(Serialize, Deserialize)]
 	pub const MaxSignatureLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
+	#[derive(Serialize, Deserialize)]
 	pub const MaxProofLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
+	#[derive(Serialize, Deserialize)]
 	pub const MaxActiveJobsPerValidator: u32 = 100;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
+	#[derive(Serialize, Deserialize)]
 	pub const MaxRolesPerValidator: u32 = 100;
 }
 

@@ -26,9 +26,9 @@ use tangle_primitives::{
 	jobs::{
 		DKGTSSKeyRefreshResult, DKGTSSKeyRotationResult, DKGTSSPhaseFourJobType,
 		DKGTSSPhaseOneJobType, DKGTSSPhaseThreeJobType, DKGTSSPhaseTwoJobType,
-		DKGTSSSignatureResult, DigitalSignatureType, Groth16ProveRequest, Groth16System, HyperData,
-		JobSubmission, JobType, RpcResponseJobsData, ZkSaaSCircuitResult, ZkSaaSPhaseOneJobType,
-		ZkSaaSPhaseTwoJobType, ZkSaaSPhaseTwoRequest, ZkSaaSSystem,
+		DKGTSSSignatureResult, DigitalSignatureScheme, Groth16ProveRequest, Groth16System,
+		HyperData, JobSubmission, JobType, RpcResponseJobsData, ZkSaaSCircuitResult,
+		ZkSaaSPhaseOneJobType, ZkSaaSPhaseTwoJobType, ZkSaaSPhaseTwoRequest, ZkSaaSSystem,
 	},
 	roles::{RoleType, ThresholdSignatureRoleType, ZeroKnowledgeRoleType},
 };
@@ -187,7 +187,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -248,7 +248,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				signing_key: vec![].try_into().unwrap(),
 				signature: vec![].try_into().unwrap(),
 				data: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -318,7 +318,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -342,7 +342,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 			RoleType::Tss(threshold_signature_role_type),
 			1,
 			JobResult::DKGPhaseThree(DKGTSSKeyRefreshResult {
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -418,7 +418,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -432,7 +432,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -462,7 +462,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				signature: vec![].try_into().unwrap(),
 				phase_one_id: 0,
 				new_phase_one_id: 1,
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -543,7 +543,7 @@ fn jobs_rpc_tests() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_type: DigitalSignatureType::Ecdsa
+				signature_scheme: DigitalSignatureScheme::Ecdsa
 			})
 		));
 
@@ -1404,5 +1404,50 @@ fn switch_active_independent_profile_to_shared_should_work_if_active_restake_sum
 				Profile::Shared(updated_profile.clone())
 			));
 		}
+	});
+}
+
+#[test]
+fn test_fee_charged_for_jobs_submission() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+
+		// setup time fees
+		assert_ok!(Jobs::set_time_fee(RuntimeOrigin::root(), 1));
+
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone()
+			));
+		}
+
+		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 20,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
+				threshold: 3,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		// Fees charged
+		// 1. 1unit per participant
+		// 2. 1unit per ttl block (20)
+		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), 100 - 5 - 20);
 	});
 }

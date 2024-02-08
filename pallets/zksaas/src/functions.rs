@@ -17,6 +17,8 @@ use super::*;
 use crate::types::BalanceOf;
 use frame_support::{pallet_prelude::DispatchResult, sp_runtime::Saturating};
 use frame_system::pallet_prelude::BlockNumberFor;
+use sp_core::crypto::ByteArray;
+use sp_runtime::traits::Get;
 use tangle_primitives::{jobs::*, verifier::*};
 
 impl<T: Config> Pallet<T> {
@@ -47,9 +49,15 @@ impl<T: Config> Pallet<T> {
 			let validator_count =
 				job.job_type.clone().get_participants().expect("checked_above").len();
 			let validator_fee = fee_info.circuit_fee * (validator_count as u32).into();
-			validator_fee.saturating_add(fee_info.base_fee)
+			let data_stored: usize = sp_core::ecdsa::Public::LEN * validator_count;
+			let storage_fee = fee_info.storage_fee_per_byte * (data_stored as u32).into();
+			validator_fee.saturating_add(fee_info.base_fee).saturating_add(storage_fee)
 		} else {
-			fee_info.base_fee.saturating_add(fee_info.get_prove_fee())
+			let storage_fee = fee_info.storage_fee_per_byte * T::MaxProofLen::get().into();
+			fee_info
+				.base_fee
+				.saturating_add(fee_info.get_prove_fee())
+				.saturating_add(storage_fee)
 		}
 	}
 

@@ -63,6 +63,7 @@ pub use weights::WeightInfo;
 pub mod module {
 	use super::*;
 	use scale_info::prelude::fmt::Debug;
+	use sp_runtime::Saturating;
 	use tangle_primitives::roles::RoleType;
 
 	#[pallet::config]
@@ -209,6 +210,10 @@ pub mod module {
 	#[pallet::getter(fn next_job_id)]
 	pub type NextJobId<T: Config> = StorageValue<_, JobId, ValueQuery>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn time_fee)]
+	pub type TimeFeePerBlock<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
 
@@ -305,7 +310,12 @@ pub mod module {
 			ensure!(job.expiry > now, Error::<T>::JobAlreadyExpired);
 
 			// charge the user fee for job submission
-			let fee = T::JobToFee::job_to_fee(&job);
+			let processing_fee = T::JobToFee::job_to_fee(&job);
+			let ttl_u32: u32 =
+				job.ttl.try_into().map_err(|_| sp_runtime::ArithmeticError::Underflow)?;
+			let time_fee = Self::time_fee() * ttl_u32.into();
+			let fee = processing_fee.saturating_add(time_fee);
+
 			T::Currency::transfer(
 				&caller,
 				&Self::rewards_account_id(),
@@ -558,6 +568,14 @@ pub mod module {
 
 				Ok(())
 			})
+		}
+
+		#[pallet::call_index(5)]
+		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
+		pub fn set_time_fee(origin: OriginFor<T>, new_fee: BalanceOf<T>) -> DispatchResult {
+			T::ForceOrigin::ensure_origin(origin)?;
+			TimeFeePerBlock::<T>::set(new_fee);
+			Ok(())
 		}
 	}
 }

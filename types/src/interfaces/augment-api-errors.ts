@@ -376,6 +376,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidSignatureData: AugmentedError<ApiType>;
       /**
+       * Invalid verifying key submitted
+       **/
+      InvalidVerifyingKey: AugmentedError<ApiType>;
+      /**
        * No participants found
        **/
       NoParticipantsFound: AugmentedError<ApiType>;
@@ -863,6 +867,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       EmptyResult: AugmentedError<ApiType>;
       /**
+       * Invalid Key size
+       **/
+      ExceedsMaxKeySize: AugmentedError<ApiType>;
+      /**
        * invalid params, cannot execute jobs
        **/
       InvalidJobParams: AugmentedError<ApiType>;
@@ -911,9 +919,79 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ResultNotExpectedType: AugmentedError<ApiType>;
       /**
+       * Validator exceeds limit of max active jobs
+       **/
+      TooManyJobsForValidator: AugmentedError<ApiType>;
+      /**
+       * Exceeds max participant limits
+       **/
+      TooManyParticipants: AugmentedError<ApiType>;
+      /**
        * Validator role key not found.
        **/
       ValidatorRoleKeyNotFound: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    multisig: {
+      /**
+       * Call is already approved by this signatory.
+       **/
+      AlreadyApproved: AugmentedError<ApiType>;
+      /**
+       * The data to be stored is already stored.
+       **/
+      AlreadyStored: AugmentedError<ApiType>;
+      /**
+       * The maximum weight information provided was too low.
+       **/
+      MaxWeightTooLow: AugmentedError<ApiType>;
+      /**
+       * Threshold must be 2 or greater.
+       **/
+      MinimumThreshold: AugmentedError<ApiType>;
+      /**
+       * Call doesn't need any (more) approvals.
+       **/
+      NoApprovalsNeeded: AugmentedError<ApiType>;
+      /**
+       * Multisig operation not found when attempting to cancel.
+       **/
+      NotFound: AugmentedError<ApiType>;
+      /**
+       * No timepoint was given, yet the multisig operation is already underway.
+       **/
+      NoTimepoint: AugmentedError<ApiType>;
+      /**
+       * Only the account that originally created the multisig is able to cancel it.
+       **/
+      NotOwner: AugmentedError<ApiType>;
+      /**
+       * The sender was contained in the other signatories; it shouldn't be.
+       **/
+      SenderInSignatories: AugmentedError<ApiType>;
+      /**
+       * The signatories were provided out of order; they should be ordered.
+       **/
+      SignatoriesOutOfOrder: AugmentedError<ApiType>;
+      /**
+       * There are too few signatories in the list.
+       **/
+      TooFewSignatories: AugmentedError<ApiType>;
+      /**
+       * There are too many signatories in the list.
+       **/
+      TooManySignatories: AugmentedError<ApiType>;
+      /**
+       * A timepoint was given, yet no multisig operation is underway.
+       **/
+      UnexpectedTimepoint: AugmentedError<ApiType>;
+      /**
+       * A different timepoint was given to the multisig operation that is underway.
+       **/
+      WrongTimepoint: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -1100,6 +1178,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Re staking amount should be greater than minimum Restaking bond requirement.
        **/
       InsufficientRestakingBond: AugmentedError<ApiType>;
+      /**
+       * Key size exceeded
+       **/
+      KeySizeExceeded: AugmentedError<ApiType>;
       /**
        * Max role limit reached for the account.
        **/

@@ -56,6 +56,8 @@ import {
   TanglePrimitivesJobsJobResult,
   TanglePrimitivesJobsJobSubmission,
   EthTypesBlockHeader,
+  PalletMultisigTimepoint,
+  PalletMultisigMultisig,
   WebbProposalsHeaderTypedChainId,
   EthTypesEth2LightClientUpdate, EthTypesInitInput, PalletDkgFeeInfo, SpSessionMembershipProof, SpConsensusSlotsEquivocationProof,
   SpConsensusBabeDigestsNextConfigDescriptor
@@ -377,7 +379,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * See [`Pallet::set_fee`].
        **/
-      setFee: AugmentedSubmittable<(feeInfo: PalletDkgFeeInfo | { baseFee?: any; dkgValidatorFee?: any; sigValidatorFee?: any; refreshValidatorFee?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletDkgFeeInfo]>;
+      setFee: AugmentedSubmittable<(feeInfo: PalletDkgFeeInfo | { baseFee?: any; dkgValidatorFee?: any; sigValidatorFee?: any; refreshValidatorFee?: any; storageFeePerByte?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletDkgFeeInfo]>;
       /**
        * Generic tx
        **/
@@ -643,17 +645,43 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       setPermittedCaller: AugmentedSubmittable<(roleType: TanglePrimitivesRolesRoleType | { Tss: any } | { ZkSaaS: any } | { LightClientRelaying: any } | string | Uint8Array, jobId: u64 | AnyNumber | Uint8Array, newPermittedCaller: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesRolesRoleType, u64, AccountId32]>;
       /**
+       * See [`Pallet::set_time_fee`].
+       **/
+      setTimeFee: AugmentedSubmittable<(newFee: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
+      /**
        * See [`Pallet::submit_job`].
        **/
       submitJob: AugmentedSubmittable<(job: TanglePrimitivesJobsJobSubmission | { expiry?: any; ttl?: any; jobType?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesJobsJobSubmission]>;
       /**
        * See [`Pallet::submit_job_result`].
        **/
-      submitJobResult: AugmentedSubmittable<(roleType: TanglePrimitivesRolesRoleType | { Tss: any } | { ZkSaaS: any } | { LightClientRelaying: any } | string | Uint8Array, jobId: u64 | AnyNumber | Uint8Array, result: TanglePrimitivesJobsJobResult | { DKGPhaseOne: any } | { DKGPhaseTwo: any } | { ZkSaaSPhaseOne: any } | { ZkSaaSPhaseTwo: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesRolesRoleType, u64, TanglePrimitivesJobsJobResult]>;
+      submitJobResult: AugmentedSubmittable<(roleType: TanglePrimitivesRolesRoleType | { Tss: any } | { ZkSaaS: any } | { LightClientRelaying: any } | string | Uint8Array, jobId: u64 | AnyNumber | Uint8Array, result: TanglePrimitivesJobsJobResult | { DKGPhaseOne: any } | { DKGPhaseTwo: any } | { DKGPhaseThree: any } | { DKGPhaseFour: any } | { ZkSaaSPhaseOne: any } | { ZkSaaSPhaseTwo: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesRolesRoleType, u64, TanglePrimitivesJobsJobResult]>;
       /**
        * See [`Pallet::withdraw_rewards`].
        **/
       withdrawRewards: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
+      /**
+       * Generic tx
+       **/
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
+    multisig: {
+      /**
+       * See [`Pallet::approve_as_multi`].
+       **/
+      approveAsMulti: AugmentedSubmittable<(threshold: u16 | AnyNumber | Uint8Array, otherSignatories: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], maybeTimepoint: Option<PalletMultisigTimepoint> | null | Uint8Array | PalletMultisigTimepoint | { height?: any; index?: any } | string, callHash: U8aFixed | string | Uint8Array, maxWeight: SpWeightsWeightV2Weight | { refTime?: any; proofSize?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u16, Vec<AccountId32>, Option<PalletMultisigTimepoint>, U8aFixed, SpWeightsWeightV2Weight]>;
+      /**
+       * See [`Pallet::as_multi`].
+       **/
+      asMulti: AugmentedSubmittable<(threshold: u16 | AnyNumber | Uint8Array, otherSignatories: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], maybeTimepoint: Option<PalletMultisigTimepoint> | null | Uint8Array | PalletMultisigTimepoint | { height?: any; index?: any } | string, call: Call | IMethod | string | Uint8Array, maxWeight: SpWeightsWeightV2Weight | { refTime?: any; proofSize?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u16, Vec<AccountId32>, Option<PalletMultisigTimepoint>, Call, SpWeightsWeightV2Weight]>;
+      /**
+       * See [`Pallet::as_multi_threshold_1`].
+       **/
+      asMultiThreshold1: AugmentedSubmittable<(otherSignatories: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], call: Call | IMethod | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Vec<AccountId32>, Call]>;
+      /**
+       * See [`Pallet::cancel_as_multi`].
+       **/
+      cancelAsMulti: AugmentedSubmittable<(threshold: u16 | AnyNumber | Uint8Array, otherSignatories: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], timepoint: PalletMultisigTimepoint | { height?: any; index?: any } | string | Uint8Array, callHash: U8aFixed | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u16, Vec<AccountId32>, PalletMultisigTimepoint, U8aFixed]>;
       /**
        * Generic tx
        **/
@@ -1125,7 +1153,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * See [`Pallet::set_fee`].
        **/
-      setFee: AugmentedSubmittable<(feeInfo: PalletZksaasFeeInfo | { baseFee?: any; circuitFee?: any; proveFee?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletZksaasFeeInfo]>;
+      setFee: AugmentedSubmittable<(feeInfo: PalletZksaasFeeInfo | { baseFee?: any; circuitFee?: any; proveFee?: any; storageFeePerByte?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletZksaasFeeInfo]>;
       /**
        * Generic tx
        **/

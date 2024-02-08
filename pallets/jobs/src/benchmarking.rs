@@ -8,7 +8,7 @@ use sp_runtime::traits::{Bounded, Zero};
 use sp_std::vec;
 use tangle_primitives::{
 	jobs::{
-		DKGTSSKeySubmissionResult, DKGTSSPhaseOneJobType, DigitalSignatureType, JobId, JobResult,
+		DKGTSSKeySubmissionResult, DKGTSSPhaseOneJobType, DigitalSignatureScheme, JobId, JobResult,
 		JobType,
 	},
 	roles::{RoleType, ThresholdSignatureRoleType},
@@ -45,7 +45,7 @@ benchmarks! {
 			threshold: 3,
 			participants: vec![],
 			key: vec![],
-			signature_type: DigitalSignatureType::Ecdsa
+			signature_scheme: DigitalSignatureScheme::Ecdsa
 		});
 	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), result)
 

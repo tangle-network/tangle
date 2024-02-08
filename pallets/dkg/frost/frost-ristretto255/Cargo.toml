@@ -1,0 +1,35 @@
+[package]
+name = "frost-ristretto255"
+edition = "2021"
+# When releasing to crates.io:
+# - Update html_root_url
+# - Update CHANGELOG.md
+# - Create git tag.
+version = "1.0.0-rc.0"
+authors = [
+    "Deirdre Connolly <durumcrustulum@gmail.com>",
+    "Chelsea Komlo <me@chelseakomlo.com>",
+    "Conrado Gouvea <conradoplg@gmail.com>"
+]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ZcashFoundation/frost"
+categories = ["cryptography"]
+keywords = ["cryptography", "crypto", "ed25519", "threshold", "signature"]
+description = "A Schnorr signature scheme over Ed25519 that supports FROST."
+
+[dependencies]
+parity-scale-codec = { workspace = true }
+curve25519-dalek = { version = "=4.1.1", default-features = false }
+frost-core = { workspace = true }
+rand_core = { version = "0.6", optional = true }
+sha2 = { version = "0.10.2", default-features = false }
+subtle = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+    "parity-scale-codec/std",
+    "rand_core/std",
+    "curve25519-dalek/rand_core",
+]

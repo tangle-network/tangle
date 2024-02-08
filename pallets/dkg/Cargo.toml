@@ -14,21 +14,40 @@ frame-system = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 serde = { workspace = true }
+serdect = { workspace = true, features = ["alloc"] }
 sp-core = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
+subtle = { workspace = true }
 tangle-crypto-primitives = { workspace = true, default-features = false }
 tangle-primitives = { workspace = true, default-features = false }
+frost-core = { package = "frost-core", workspace = true, default-features = false }
+frost-ed25519 = { package = "frost-ed25519", workspace = true, default-features = false }
+elliptic-curve = { version = "0.13", features = ["hash2curve"], default-features = false }
+frost-ed448 = { package = "frost-ed448", workspace = true, default-features = false }
+frost-ristretto255 = { package = "frost-ristretto255", workspace = true, default-features = false }
+frost-secp256k1 = { package = "frost-secp256k1", workspace = true, default-features = false }
+frost-p256 = { package = "frost-p256", workspace = true, default-features = false }
+frost-p384 = { package = "frost-p384", workspace = true, default-features = false }
+blst = { workspace = true, default-features = false, features = ["portable", "no-threads"] }
+
+# FROST RedJubjub is not yet no_std compatible
+# TODO: Update this once it is.
+# frost-redjubjub = { package = "frost-redjubjub", workspace = true, default-features = false }
 
 [dev-dependencies]
 pallet-balances = { workspace = true }
 smallvec = { workspace = true }
 sp-keystore = { workspace = true }
+rand_core = { workspace = true }
+frost-core = { workspace = true }
+paste = { workspace = true }
 
 [features]
 default = ["std"]
 std = [
+  "parity-scale-codec/std",
   "scale-info/std",
   "sp-runtime/std",
   "frame-support/std",
@@ -40,7 +59,18 @@ std = [
   "pallet-balances/std",
   "sp-io/std",
   "sp-keystore/std",
+
+  "frost-core/std",
+  "frost-ed25519/std",
+  "elliptic-curve/std",
+  "frost-ed448/std",
+  "frost-ristretto255/std",
+  "frost-secp256k1/std",
+  "frost-p256/std",
+  "frost-p384/std",
+  # "frost-redjubjub/std",
 ]
+serde = []
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
   "frame-benchmarking/runtime-benchmarks",
