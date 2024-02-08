@@ -201,6 +201,8 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 pub struct MockRolesHandler;
 
 impl RolesHandler<AccountId> for MockRolesHandler {
+	type Balance = Balance;
+
 	fn is_validator(address: AccountId, _role_type: RoleType) -> bool {
 		let validators = [
 			AccountId::from_u64(1u64),
@@ -217,6 +219,13 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 	}
 
 	fn report_offence(_offence_report: ReportValidatorOffence<AccountId>) -> DispatchResult {
+		Ok(())
+	}
+
+	fn record_reward_to_validator(
+		_validators: Vec<AccountId>,
+		_reward_per_validator: Self::Balance,
+	) -> DispatchResult {
 		Ok(())
 	}
 }

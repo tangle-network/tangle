@@ -60,29 +60,6 @@ impl<T: Config> Pallet<T> {
 		Ok(current_job_id)
 	}
 
-	/// Record rewards to a validator.
-	///
-	/// This function records the rewards earned by a validator account.
-	///
-	/// # Parameters
-	///
-	/// - `validator`: The account ID of the validator.
-	/// - `reward`: The amount of rewards to record.
-	///
-	/// # Errors
-	///
-	/// Returns a `DispatchError` if the operation fails.
-	pub(crate) fn record_reward_to_validator(
-		validator: T::AccountId,
-		reward: BalanceOf<T>,
-	) -> DispatchResult {
-		ValidatorRewards::<T>::try_mutate(validator, |existing| -> DispatchResult {
-			let existing = existing.get_or_insert_with(Default::default);
-			*existing += reward;
-			Ok(())
-		})
-	}
-
 	/// Get the account ID of the rewards pot.
 	///
 	/// This function returns the account ID associated with the rewards pot.

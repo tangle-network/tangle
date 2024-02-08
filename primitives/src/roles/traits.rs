@@ -22,6 +22,8 @@ use super::RoleType;
 
 /// A trait that handles roles associated with job types.
 pub trait RolesHandler<AccountId> {
+	type Balance;
+
 	/// Returns true if the validator is permitted to work with this job type.
 	///
 	/// # Parameters
@@ -56,4 +58,22 @@ pub trait RolesHandler<AccountId> {
 	/// Returns an `Option<Vec<u8>>` containing role key information for the specified
 	/// validator, or `None` if no role key is found.
 	fn get_validator_role_key(address: AccountId) -> Option<Vec<u8>>;
+
+	/// Record rewards to a validator.
+	///
+	/// This function records the rewards earned by a validator account.
+	///
+	/// # Parameters
+	///
+	/// - `validators`: The account ID of the validators.
+	/// - `reward_per_validator`: The amount of rewards to record per validator, all validators are
+	///   rewarded equally for a job
+	///
+	/// # Errors
+	///
+	/// Returns a `DispatchError` if the operation fails.
+	fn record_reward_to_validator(
+		validators: Vec<AccountId>,
+		reward_per_validator: Self::Balance,
+	) -> DispatchResult;
 }

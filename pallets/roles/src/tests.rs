@@ -18,6 +18,7 @@
 use super::*;
 use frame_support::{assert_err, assert_ok, BoundedVec};
 use mock::*;
+use pallet_staking::{CurrentEra, ErasRewardPoints, ErasValidatorReward};
 use profile::{IndependentRestakeProfile, Record, SharedRestakeProfile};
 use sp_std::{default::Default, vec};
 use tangle_primitives::{
@@ -305,37 +306,96 @@ fn test_unbond_funds_should_work() {
 }
 
 #[test]
-fn test_reward_dist_works_as_expected_with_one_validator() {
+fn test_reward_dist_works_as_expected_with_multiple_validator() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		let _total_inflation_reward = 10_000;
+		CurrentEra::<Runtime>::put(1);
+
 		assert_eq!(Balances::free_balance(mock_pub_key(1)), 20_000);
+		assert_eq!(Balances::free_balance(mock_pub_key(2)), 20_000);
+
+		// lets give both validators equal rewards for jobs participation
+		let mut validator_rewards: BoundedBTreeMap<_, _, _> = Default::default();
+		validator_rewards.try_insert(mock_pub_key(1), 100_u128).unwrap();
+		validator_rewards.try_insert(mock_pub_key(2), 100_u128).unwrap();
+		ValidatorRewardsInSession::<Runtime>::put(validator_rewards);
 
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
+		for validator in vec![1, 2, 3, 4] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone()
+			));
+		}
 
-		// The reward is 100, we have 5 authorities
+		// The reward is 1000, we have 5 authorities
 		assert_ok!(Roles::distribute_rewards());
 
-		// ensure the distribution is correct
-		assert_eq!(Balances::free_balance(mock_pub_key(1)), 20_000 + 10_000);
+		// Rewards math
+		// Total rewards : 10_000
+		// Active validators : 1&2, will receive 50% each
+		// All validators : will receive 50%, everyone receives equally
+
+		// 1 & 2 receives, 5000/2 + 5000/4
+		let reward_points = ErasRewardPoints::<Runtime>::get(1);
+		assert_eq!(*reward_points.individual.get(&mock_pub_key(1)).unwrap(), 2500_u32 + 1250_u32);
+		assert_eq!(*reward_points.individual.get(&mock_pub_key(2)).unwrap(), 2500_u32 + 1250_u32);
+
+		// 3 & 4 receives only 5000/4
+		assert_eq!(*reward_points.individual.get(&mock_pub_key(3)).unwrap(), 1250_u32);
+		assert_eq!(*reward_points.individual.get(&mock_pub_key(4)).unwrap(), 1250_u32);
 	});
 }
 
 #[test]
-fn test_reward_dist_works_as_expected_with_multiple_validator() {
+fn test_inflation_rewards_paid_out_with_staking_rewards() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
-		let _reward_amount = 10_000;
+		let _total_inflation_reward = 10_000;
+		CurrentEra::<Runtime>::put(1);
+
 		assert_eq!(Balances::free_balance(mock_pub_key(1)), 20_000);
+		assert_eq!(Balances::free_balance(mock_pub_key(2)), 20_000);
+
+		// lets give both validators equal rewards for jobs participation
+		let mut validator_rewards: BoundedBTreeMap<_, _, _> = Default::default();
+		validator_rewards.try_insert(mock_pub_key(1), 100_u128).unwrap();
+		validator_rewards.try_insert(mock_pub_key(2), 100_u128).unwrap();
+		ValidatorRewardsInSession::<Runtime>::put(validator_rewards);
 
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(2)), profile.clone()));
+		for validator in vec![1, 2, 3, 4] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone()
+			));
+		}
 
-		// The reward is 100, we have 5 authorities
+		// The reward is 1000, we have 5 authorities
 		assert_ok!(Roles::distribute_rewards());
 
-		// ensure the distribution is correct
-		assert_eq!(Balances::free_balance(mock_pub_key(1)), 20_000 + 5000);
-		assert_eq!(Balances::free_balance(mock_pub_key(2)), 20_000 + 5000);
+		ErasValidatorReward::<Runtime>::insert(1, 10_000);
+		assert_ok!(Staking::payout_stakers(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			mock_pub_key(1),
+			1
+		));
+
+		assert_eq!(Balances::total_balance(&mock_pub_key(1)), 20_000 + 2500 + 1250);
+
+		assert_ok!(Staking::payout_stakers(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			mock_pub_key(2),
+			1
+		));
+
+		assert_eq!(Balances::total_balance(&mock_pub_key(2)), 20_000 + 2500 + 1250);
+
+		assert_ok!(Staking::payout_stakers(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			mock_pub_key(3),
+			1
+		));
+		assert_eq!(Balances::total_balance(&mock_pub_key(3)), 20_000 + 1250);
 	});
 }
 

@@ -180,9 +180,14 @@ pub mod pallet {
 		/// A type for retrieving the validators supposed to be online in a session.
 		type ValidatorSet: ValidatorSetWithIdentification<Self::AccountId>;
 
+		/// The max length for validator key
 		type MaxKeyLen: Get<u32>;
 
+		/// The max roles a validator is allowed to have
 		type MaxRolesPerValidator: Get<u32>;
+
+		/// The max validators allowed in the pallet
+		type MaxValidators: Get<u32>;
 
 		/// A type to submit offence reports against the validators.
 		type ReportOffences: ReportOffence<
@@ -219,6 +224,8 @@ pub mod pallet {
 		ProfileDeleted { account: T::AccountId },
 		/// Pending jobs,that cannot be opted out at the moment.
 		PendingJobs { pending_jobs: Vec<(RoleType, JobId)> },
+		/// Roles inflation reward paid for era
+		RolesRewardPaid { total_rewards: BalanceOf<T> },
 	}
 
 	#[pallet::error]
@@ -252,6 +259,8 @@ pub mod pallet {
 		SessionKeysNotProvided,
 		/// Key size exceeded
 		KeySizeExceeded,
+		/// Cannot find Current era
+		CannotGetCurrentEra,
 	}
 
 	/// Map from all "controller" accounts to the info regarding the staking.
@@ -275,6 +284,19 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn min_active_bond)]
 	pub(super) type MinRestakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+
+	/// The rewards accumlated by a validator per session
+	/// Rewards are assigned to a validator for every job completed, aka if a job was completed and
+	/// it involved 5 validators then all 5 validators receive the fee paid for the job divided by
+	/// 5. This data is then used to compute total jobs completed and active validators. We use
+	/// StorageValue and BTreeMap here since its a single r/w regardless of the number of
+	/// validators. So to record the points of a job with 5 validators it will be a single write
+	/// operation in storage, also allows for bounded query of all the validators active within a
+	/// session. This storage is wiped every session and rewards recorded in the session pallet.
+	#[pallet::storage]
+	#[pallet::getter(fn validator_points_per_session)]
+	pub type ValidatorRewardsInSession<T: Config> =
+		StorageValue<_, BoundedBTreeMap<T::AccountId, BalanceOf<T>, T::MaxValidators>, ValueQuery>;
 
 	/// Create profile for the validator.
 	/// Validator can choose roles he is interested to opt-in and restake tokens for it.

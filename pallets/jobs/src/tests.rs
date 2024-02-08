@@ -18,7 +18,10 @@ use super::*;
 use frame_support::{assert_noop, assert_ok};
 use mock::*;
 
-use pallet_roles::profile::{IndependentRestakeProfile, Profile, Record, SharedRestakeProfile};
+use pallet_roles::{
+	profile::{IndependentRestakeProfile, Profile, Record, SharedRestakeProfile},
+	ValidatorRewardsInSession,
+};
 use tangle_primitives::{
 	jobs::{
 		DKGTSSKeyRefreshResult, DKGTSSKeyRotationResult, DKGTSSPhaseFourJobType,
@@ -190,7 +193,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		// ensure the job reward is distributed correctly
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
-			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(1));
+			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			assert_eq!(rewards.get(&validator), Some(1_u128).as_ref());
 		}
 
 		// ensure storage is correctly setup
@@ -250,7 +254,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		// ensure the job reward is distributed correctly
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
-			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(5));
+			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			assert_eq!(rewards.get(&validator), Some(5_u128).as_ref());
 		}
 
 		// ensure storage is correctly setup
@@ -343,7 +348,8 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 
 		// ensure the job reward is distributed correctly
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
-			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(5));
+			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			assert_eq!(rewards.get(&validator), Some(5_u128).as_ref());
 		}
 	});
 }
@@ -462,7 +468,8 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 
 		// ensure the job reward is distributed correctly
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
-			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(6));
+			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			assert_eq!(rewards.get(&validator), Some(6_u128).as_ref());
 		}
 	});
 }
@@ -687,7 +694,8 @@ fn jobs_submission_e2e_works_for_zksaas() {
 
 		// ensure the job reward is distributed correctly
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
-			assert_eq!(ValidatorRewards::<Runtime>::get(mock_pub_key(validator)), Some(2));
+			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			assert_eq!(rewards.get(&mock_pub_key(validator)), Some(2_u128).as_ref());
 		}
 
 		// ensure storage is correctly setup
@@ -744,7 +752,8 @@ fn jobs_submission_e2e_works_for_zksaas() {
 			.map(|x| mock_pub_key(*x))
 			.collect::<Vec<_>>()
 		{
-			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(2));
+			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			assert_eq!(rewards.get(&validator), Some(2_u128).as_ref());
 		}
 
 		// ensure storage is correctly setup
