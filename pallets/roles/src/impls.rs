@@ -389,6 +389,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		ErasRewardPoints::<T>::insert(current_era, era_reward_points);
+		ValidatorRewardsInSession::<T>::take();
 		Self::deposit_event(Event::<T>::RolesRewardPaid { total_rewards });
 
 		Ok(())

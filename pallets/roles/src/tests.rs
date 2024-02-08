@@ -330,6 +330,7 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 
 		// The reward is 1000, we have 5 authorities
 		assert_ok!(Roles::distribute_rewards());
+		assert!(ValidatorRewardsInSession::<Runtime>::get().is_empty());
 
 		// Rewards math
 		// Total rewards : 10_000
