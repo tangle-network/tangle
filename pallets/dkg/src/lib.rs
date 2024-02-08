@@ -26,10 +26,16 @@
 pub use pallet::*;
 
 mod functions;
-pub mod misbehavior;
+mod misbehavior;
 mod signatures_schemes;
-pub mod types;
+mod types;
 mod weights;
+
+#[cfg(test)]
+mod mock;
+
+#[cfg(test)]
+mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;

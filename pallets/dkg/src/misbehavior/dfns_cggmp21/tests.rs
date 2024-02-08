@@ -15,6 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(non_snake_case)]
 
+use crate::mock::*;
+
 use dfns_cggmp21::{
 	generic_ec::Point,
 	key_refresh::msg::aux_only,
@@ -43,9 +45,6 @@ use tangle_primitives::{
 	},
 	roles::{RoleType, ThresholdSignatureRoleType},
 };
-
-mod mock;
-use mock::*;
 
 fn pub_key() -> ecdsa::Public {
 	ecdsa_generate(tangle_crypto_primitives::ROLE_KEY_TYPE, None)

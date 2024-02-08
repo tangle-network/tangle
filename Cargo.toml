@@ -81,7 +81,7 @@ hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
 slices = "0.2.0"
 schnorrkel = { version = "0.9.1", default-features = false }
-blst = "0.3.11"
+snowbridge-milagro-bls = { git = "https://github.com/Snowfork/milagro_bls", default-features = false, rev = "43a5d480ed6e3b83de4cf54888680d51604199e6" }
 
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }

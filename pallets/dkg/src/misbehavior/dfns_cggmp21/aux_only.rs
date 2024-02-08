@@ -37,11 +37,6 @@ pub enum Tag<'a> {
 		#[udigest(as_bytes)]
 		sid: &'a [u8],
 	},
-	/// Tag w/o party index
-	Unindexed {
-		#[udigest(as_bytes)]
-		sid: &'a [u8],
-	},
 }
 
 #[derive(Clone, RuntimeDebug, serde::Deserialize)]

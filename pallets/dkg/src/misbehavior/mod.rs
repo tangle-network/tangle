@@ -25,9 +25,6 @@ use tangle_primitives::{
 	roles::RoleType,
 };
 
-/// Expected signature length
-pub const SIGNATURE_LENGTH: usize = 65;
-
 pub mod dfns_cggmp21;
 
 impl<T: Config> Pallet<T> {

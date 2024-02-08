@@ -28,6 +28,9 @@ mod integer;
 pub mod keygen;
 pub mod sign;
 
+#[cfg(test)]
+mod tests;
+
 pub type DefaultDigest = sha2::Sha256;
 pub use integer::Integer;
 
@@ -38,9 +41,6 @@ pub use integer::Integer;
 pub const M: usize = 128;
 pub const SECURITY_BITS: usize = 384;
 pub const SECURITY_BYTES: usize = SECURITY_BITS / 8;
-pub const EPSILON: usize = 230;
-pub const ELL: usize = 2 * M;
-pub const ELL_PRIME: usize = 848;
 
 impl<T: Config> Pallet<T> {
 	/// Verifies a given a misbehavior justification and dispatches to specific verification logic

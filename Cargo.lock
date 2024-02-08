@@ -7314,7 +7314,6 @@ dependencies = [
 name = "pallet-dkg"
 version = "0.6.1"
 dependencies = [
- "blst",
  "cggmp21",
  "digest 0.10.7",
  "elliptic-curve",
@@ -7345,6 +7344,7 @@ dependencies = [
  "serdect",
  "sha2 0.10.8",
  "smallvec",
+ "snowbridge-milagro-bls",
  "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-io 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-keystore 0.27.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
@@ -12016,6 +12016,30 @@ dependencies = [
  "rustc_version 0.4.0",
  "sha2 0.10.8",
  "subtle",
+]
+
+[[package]]
+name = "snowbridge-amcl"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "460a9ed63cdf03c1b9847e8a12a5f5ba19c4efd5869e4a737e05be25d7c427e5"
+dependencies = [
+ "parity-scale-codec 3.6.9",
+ "scale-info",
+]
+
+[[package]]
+name = "snowbridge-milagro-bls"
+version = "1.5.4"
+source = "git+https://github.com/Snowfork/milagro_bls?rev=43a5d480ed6e3b83de4cf54888680d51604199e6#43a5d480ed6e3b83de4cf54888680d51604199e6"
+dependencies = [
+ "hex",
+ "lazy_static",
+ "parity-scale-codec 3.6.9",
+ "rand 0.8.5",
+ "scale-info",
+ "snowbridge-amcl",
+ "zeroize",
 ]
 
 [[package]]
