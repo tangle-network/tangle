@@ -336,10 +336,16 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		// Active validators : 1&2, will receive 50% each
 		// All validators : will receive 50%, everyone receives equally
 
-		// 1 & 2 receives, 5000/2 + 5000/4
+		// 1 & 2 receives, 5000/2 + 5000/4 + 100 (job reward)
 		let reward_points = ErasRewardPoints::<Runtime>::get(1);
-		assert_eq!(*reward_points.individual.get(&mock_pub_key(1)).unwrap(), 2500_u32 + 1250_u32);
-		assert_eq!(*reward_points.individual.get(&mock_pub_key(2)).unwrap(), 2500_u32 + 1250_u32);
+		assert_eq!(
+			*reward_points.individual.get(&mock_pub_key(1)).unwrap(),
+			2500_u32 + 1250_u32 + 100_u32
+		);
+		assert_eq!(
+			*reward_points.individual.get(&mock_pub_key(2)).unwrap(),
+			2500_u32 + 1250_u32 + 100_u32
+		);
 
 		// 3 & 4 receives only 5000/4
 		assert_eq!(*reward_points.individual.get(&mock_pub_key(3)).unwrap(), 1250_u32);
@@ -380,7 +386,7 @@ fn test_inflation_rewards_paid_out_with_staking_rewards() {
 			1
 		));
 
-		assert_eq!(Balances::total_balance(&mock_pub_key(1)), 20_000 + 2500 + 1250);
+		assert_eq!(Balances::total_balance(&mock_pub_key(1)), 20_000 + 2500 + 1250 + 100);
 
 		assert_ok!(Staking::payout_stakers(
 			RuntimeOrigin::signed(mock_pub_key(1)),
@@ -388,7 +394,7 @@ fn test_inflation_rewards_paid_out_with_staking_rewards() {
 			1
 		));
 
-		assert_eq!(Balances::total_balance(&mock_pub_key(2)), 20_000 + 2500 + 1250);
+		assert_eq!(Balances::total_balance(&mock_pub_key(2)), 20_000 + 2500 + 1250 + 100);
 
 		assert_ok!(Staking::payout_stakers(
 			RuntimeOrigin::signed(mock_pub_key(1)),

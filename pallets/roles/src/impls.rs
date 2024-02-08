@@ -339,7 +339,7 @@ impl<T: Config> Pallet<T> {
 	/// points to each eligible validator and records them in the staking pallet ErasRewardPoints
 	/// storage for the current era.
 	///
-	/// The total rewards are distributed in two steps:
+	/// The total reward is calculated as follows:
 	/// 1. Fifty percent of the total rewards is divided among all "active" validators. Active
 	///    validators
 	/// are those who have completed at least one job in the last session. Within this group, the
@@ -434,7 +434,8 @@ impl<T: Config> Pallet<T> {
 			// Calculate the actual reward amount for the current validator
 			let validator_share_of_total_reward = validator_share.mul_floor(total_rewards);
 			// Insert the validator's account ID and reward amount into the reward map
-			active_validator_reward_map.insert(validator.clone(), validator_share_of_total_reward);
+			active_validator_reward_map
+				.insert(validator.clone(), validator_share_of_total_reward.saturating_add(*reward));
 		}
 
 		// Return the map containing rewards for active validators

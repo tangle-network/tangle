@@ -40,7 +40,7 @@ use sp_runtime::{
 };
 use sp_staking::{
 	offence::{OffenceError, ReportOffence},
-	EraIndex, SessionIndex,
+	SessionIndex,
 };
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{

@@ -171,7 +171,7 @@ fn dkg_key_verifcation_works_for_ecdsa_when_n_equals_t() {
 		let signature_one = mock_signature_ecdsa(participant_one, participant_one);
 		let signature_two = mock_signature_ecdsa(participant_two, participant_one);
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_type: DigitalSignatureType::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::Ecdsa,
 			key: participant_one.to_raw_vec().try_into().unwrap(),
 			participants: vec![
 				participant_one.as_mut().to_vec().try_into().unwrap(),
@@ -279,32 +279,6 @@ fn dkg_key_verification_works_for_ecdsa() {
 				.try_into()
 				.unwrap(),
 			threshold: 1,
-		};
-
-		assert_ok!(DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),);
-	});
-}
-
-#[test]
-fn dkg_key_verifcation_works_for_ecdsa_when_n_equals_t() {
-	new_test_ext().execute_with(|| {
-		let mut participant_one = mock_pub_key_ecdsa();
-		let mut participant_two = mock_pub_key_ecdsa();
-		let signature_one = mock_signature_ecdsa(participant_one, participant_one);
-		let signature_two = mock_signature_ecdsa(participant_two, participant_one);
-		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
-			key: participant_one.to_raw_vec().try_into().unwrap(),
-			participants: vec![
-				participant_one.as_mut().to_vec().try_into().unwrap(),
-				participant_two.as_mut().to_vec().try_into().unwrap(),
-			]
-			.try_into()
-			.unwrap(),
-			signatures: vec![signature_two.try_into().unwrap(), signature_one.try_into().unwrap()]
-				.try_into()
-				.unwrap(),
-			threshold: 2,
 		};
 
 		assert_ok!(DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),);
