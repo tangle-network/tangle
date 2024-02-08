@@ -28,6 +28,7 @@ use sp_runtime::{
 };
 
 pub mod jobs;
+pub mod misbehavior;
 pub mod roles;
 pub mod types;
 pub use types::*;

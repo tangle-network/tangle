@@ -35,6 +35,7 @@ use tangle_primitives::{
 		traits::{JobToFee, MPCHandler},
 		DKGTSSKeySubmissionResult, JobId, JobInfo, JobResult, PhaseResult, ValidatorOffenceType,
 	},
+	misbehavior::{traits::MisbehaviorHandler, MisbehaviorSubmission},
 	roles::traits::RolesHandler,
 };
 
@@ -98,6 +99,8 @@ pub mod module {
 			Self::MaxProofLen,
 		>;
 
+		/// The misbehavior verifying mechanism
+		type MisbehaviorHandler: MisbehaviorHandler;
 		/// The origin which may set filter.
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
@@ -614,6 +617,37 @@ pub mod module {
 		pub fn set_time_fee(origin: OriginFor<T>, new_fee: BalanceOf<T>) -> DispatchResult {
 			T::ForceOrigin::ensure_origin(origin)?;
 			TimeFeePerBlock::<T>::set(new_fee);
+			Ok(())
+		}
+
+		/// Submit a misbehavior report
+		///
+		/// # Parameters
+		///
+		/// - `origin`: The origin of the call (typically a signed account).
+		/// - `misbehavior`: A detailed misbehavior report.
+		///
+		/// # Errors
+		///
+		/// This function can return an error if:
+		///  TODO: Fill this in
+		///
+		/// # Details
+		/// TODO: Fill this in
+		#[pallet::call_index(6)]
+		#[pallet::weight({0})]
+		pub fn submit_misbehavior(
+			origin: OriginFor<T>,
+			misbehavior: MisbehaviorSubmission,
+		) -> DispatchResult {
+			let _caller = ensure_signed(origin)?;
+
+			// Ensure the job exists
+			let _job_info = SubmittedJobs::<T>::get(misbehavior.role_type, misbehavior.job_id)
+				.ok_or(Error::<T>::JobNotFound)?;
+			// TODO: verify misbehavior
+			// TODO: handle slashing
+			// TODO: emit events
 			Ok(())
 		}
 	}

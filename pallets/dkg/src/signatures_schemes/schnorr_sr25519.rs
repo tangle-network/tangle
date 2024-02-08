@@ -1,3 +1,19 @@
+// This file is part of Tangle.
+// Copyright (C) 2022-2024 Webb Technologies Inc.
+//
+// Tangle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tangle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
 use frame_support::{ensure, pallet_prelude::DispatchResult};
 use parity_scale_codec::Encode;
 use sp_core::sr25519;
@@ -102,7 +118,7 @@ pub fn verify_generated_dkg_key_schnorr_sr25519<T: Config>(
 	}
 
 	// Ensure a sufficient number of unique signers are present
-	ensure!(known_signers.len() >= data.threshold.into(), Error::<T>::NotEnoughSigners);
+	ensure!(known_signers.len() >= usize::from(data.threshold), Error::<T>::NotEnoughSigners);
 
 	Ok(())
 }

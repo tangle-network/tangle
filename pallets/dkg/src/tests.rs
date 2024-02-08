@@ -13,8 +13,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use crate::{mock::*, types::FeeInfo, Error, Event, FeeInfo as FeeInfoStorage};
+
+use crate::mock::*;
+
 use frame_support::{assert_noop, assert_ok};
+use pallet_dkg::{types::FeeInfo, Error, Event, FeeInfo as FeeInfoStorage};
 use parity_scale_codec::Encode;
 use sp_core::{crypto::ByteArray, ecdsa, keccak_256, sr25519};
 use sp_io::crypto::{ecdsa_generate, ecdsa_sign_prehashed, sr25519_generate, sr25519_sign};
@@ -408,28 +411,29 @@ fn dkg_key_verifcation_works_for_schnorr_when_n_equals_t() {
 	});
 }
 
-const BLS_SECRET_KEY: [u8; 32] = [
-	25, 192, 46, 5, 150, 93, 249, 180, 243, 38, 104, 158, 250, 226, 60, 6, 248, 5, 232, 52, 111,
-	140, 82, 20, 226, 220, 135, 137, 186, 203, 181, 133,
-];
-
-const BLS_DATA_TO_SIGN: &[u8; 13] = b"Hello, world!";
-
 #[test]
 fn dkg_signature_verification_works_bls() {
-	new_test_ext().execute_with(|| {
-		let secret_key = blst::min_pk::SecretKey::deserialize(&BLS_SECRET_KEY).unwrap();
-		let pub_key = secret_key.sk_to_pk();
+	use snowbridge_milagro_bls::{PublicKey, SecretKey, Signature};
 
-		let dst = &mut [0u8; 192];
-		let signature = secret_key.sign(BLS_DATA_TO_SIGN, dst, &[]);
+	const BLS_SECRET_KEY: [u8; 32] = [
+		25, 192, 46, 5, 150, 93, 249, 180, 243, 38, 104, 158, 250, 226, 60, 6, 248, 5, 232, 52,
+		111, 140, 82, 20, 226, 220, 135, 137, 186, 203, 181, 133,
+	];
+
+	const BLS_DATA_TO_SIGN: &[u8; 13] = b"Hello, world!";
+
+	new_test_ext().execute_with(|| {
+		let secret_key = SecretKey::from_bytes(&BLS_SECRET_KEY).unwrap();
+		let pub_key = PublicKey::from_secret_key(&secret_key);
+		let message = keccak_256(BLS_DATA_TO_SIGN);
+		let signature = Signature::new(&message, &secret_key);
 
 		let job_to_verify: DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen> =
 			DKGTSSSignatureResult {
 				signature_scheme: DigitalSignatureScheme::Bls381,
-				signature: signature.serialize().to_vec().try_into().unwrap(),
-				data: pub_key.serialize().to_vec().try_into().unwrap(),
-				signing_key: pub_key.serialize()[..10].to_vec().try_into().unwrap(), /* Provide invalid input */
+				signature: signature.as_bytes().to_vec().try_into().unwrap(),
+				signing_key: pub_key.as_bytes().to_vec().try_into().unwrap(),
+				data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
 			};
 
 		// Should fail for an invalid public key
@@ -441,16 +445,26 @@ fn dkg_signature_verification_works_bls() {
 		let job_to_verify: DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen> =
 			DKGTSSSignatureResult {
 				signature_scheme: DigitalSignatureScheme::Bls381,
-				signature: signature.serialize()[..10].to_vec().try_into().unwrap(), /* Pass invalid signature */
-				data: pub_key.serialize().to_vec().try_into().unwrap(),
-				signing_key: pub_key.serialize().to_vec().try_into().unwrap(),
+				signature: signature.as_bytes()[..10].to_vec().try_into().unwrap(),
+				data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
+				signing_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
 			};
 
-		// Should fail for an invalid public key
+		// Should fail for an invalid signature
 		assert_noop!(
 			DKG::verify(JobResult::DKGPhaseTwo(job_to_verify)),
 			Error::<Runtime>::InvalidSignatureData
 		);
+
+		let job_to_verify: DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen> =
+			DKGTSSSignatureResult {
+				signature_scheme: DigitalSignatureScheme::Bls381,
+				signature: signature.as_bytes().to_vec().try_into().unwrap(),
+				signing_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
+				data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
+			};
+
+		assert_ok!(DKG::verify(JobResult::DKGPhaseTwo(job_to_verify)));
 	});
 }
 

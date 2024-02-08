@@ -31,6 +31,7 @@ use tangle_primitives::{
 		traits::{JobToFee, MPCHandler},
 		*,
 	},
+	misbehavior::{MisbehaviorHandler, MisbehaviorSubmission},
 	roles::traits::RolesHandler,
 };
 
@@ -263,6 +264,14 @@ impl
 	}
 }
 
+pub struct MockMisbehaviorHandler;
+
+impl MisbehaviorHandler for MockMisbehaviorHandler {
+	fn verify(_data: MisbehaviorSubmission) -> DispatchResult {
+		Ok(())
+	}
+}
+
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
@@ -288,6 +297,7 @@ impl pallet_jobs::Config for Runtime {
 	type JobToFee = MockJobToFeeHandler;
 	type RolesHandler = MockRolesHandler;
 	type MPCHandler = MockMPCHandler;
+	type MisbehaviorHandler = MockMisbehaviorHandler;
 	type PalletId = JobsPalletId;
 	type MaxParticipants = MaxParticipants;
 	type MaxSubmissionLen = MaxSubmissionLen;

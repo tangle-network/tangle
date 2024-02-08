@@ -13,10 +13,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-#![cfg(test)]
 
-use super::*;
-use crate as pallet_dkg;
+pub use crate as pallet_dkg;
+
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, ConstU64, Everything},
@@ -92,7 +91,7 @@ parameter_types! {
 	pub const MaxProofLen: u32 = 256;
 }
 
-impl Config for Runtime {
+impl pallet_dkg::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type UpdateOrigin = EnsureSigned<AccountId>;
