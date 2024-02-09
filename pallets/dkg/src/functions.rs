@@ -21,12 +21,10 @@ use sp_core::Get;
 use tangle_primitives::jobs::*;
 
 use self::signatures_schemes::{
-	bls12_381::verify_dkg_signature_bls12_381,
-	ecdsa::{verify_dkg_signature_ecdsa, verify_generated_dkg_key_ecdsa},
+	bls12_381::verify_bls12_381_signature,
+	ecdsa::{verify_ecdsa_signature, verify_generated_dkg_key_ecdsa},
 	schnorr_frost::verify_dkg_signature_schnorr_frost,
-	schnorr_sr25519::{
-		verify_dkg_signature_schnorr_sr25519, verify_generated_dkg_key_schnorr_sr25519,
-	},
+	schnorr_sr25519::verify_schnorr_sr25519_signature,
 };
 
 impl<T: Config> Pallet<T> {
@@ -116,13 +114,7 @@ impl<T: Config> Pallet<T> {
 	fn verify_generated_dkg_key(
 		data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
 	) -> DispatchResult {
-		match data.signature_scheme {
-			DigitalSignatureScheme::Ecdsa => verify_generated_dkg_key_ecdsa::<T>(data),
-			DigitalSignatureScheme::SchnorrSr25519 =>
-				verify_generated_dkg_key_schnorr_sr25519::<T>(data),
-			DigitalSignatureScheme::Bls381 => verify_generated_dkg_key_ecdsa::<T>(data),
-			_ => Err(Error::<T>::InvalidSignature.into()),
-		}
+		verify_generated_dkg_key_ecdsa::<T>(data)
 	}
 
 	/// Verifies a DKG (Distributed Key Generation) signature based on the provided DKG signature
@@ -141,14 +133,14 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		match data.signature_scheme {
 			DigitalSignatureScheme::Ecdsa =>
-				verify_dkg_signature_ecdsa::<T>(&data.data, &data.signature, &data.signing_key),
-			DigitalSignatureScheme::SchnorrSr25519 => verify_dkg_signature_schnorr_sr25519::<T>(
+				verify_ecdsa_signature::<T>(&data.data, &data.signature, &data.signing_key),
+			DigitalSignatureScheme::SchnorrSr25519 => verify_schnorr_sr25519_signature::<T>(
 				&data.data,
 				&data.signature,
 				&data.signing_key,
 			),
 			DigitalSignatureScheme::Bls381 =>
-				verify_dkg_signature_bls12_381::<T>(&data.data, &data.signature, &data.signing_key),
+				verify_bls12_381_signature::<T>(&data.data, &data.signature, &data.signing_key),
 			DigitalSignatureScheme::SchnorrEd25519 |
 			DigitalSignatureScheme::SchnorrEd448 |
 			DigitalSignatureScheme::SchnorrP256 |
@@ -193,10 +185,13 @@ impl<T: Config> Pallet<T> {
 
 		match data.signature_scheme {
 			DigitalSignatureScheme::Ecdsa =>
-				verify_dkg_signature_ecdsa::<T>(&data.new_key, &data.signature, &data.key)
+				verify_ecdsa_signature::<T>(&data.new_key, &data.signature, &data.key)
 					.map(|_| emit_event(data))?,
 			DigitalSignatureScheme::SchnorrSr25519 =>
-				verify_dkg_signature_schnorr_sr25519::<T>(&data.new_key, &data.signature, &data.key)
+				verify_schnorr_sr25519_signature::<T>(&data.new_key, &data.signature, &data.key)
+					.map(|_| emit_event(data))?,
+			DigitalSignatureScheme::Bls381 =>
+				verify_bls12_381_signature::<T>(&data.new_key, &data.signature, &data.key)
 					.map(|_| emit_event(data))?,
 			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
 		}

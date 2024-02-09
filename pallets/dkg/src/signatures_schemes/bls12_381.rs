@@ -20,7 +20,7 @@ use crate::{Config, Error};
 /// Verifies the DKG signature result with the given public key, data and signature.
 ///
 /// The signature is verified using the BLS12-381 curve.
-pub fn verify_dkg_signature_bls12_381<T: Config>(
+pub fn verify_bls12_381_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
