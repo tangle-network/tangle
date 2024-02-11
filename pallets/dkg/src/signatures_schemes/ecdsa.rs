@@ -83,7 +83,7 @@ pub fn recover_ecdsa_pub_key_compressed(
 /// # Arguments
 ///
 /// * `data` - The DKG signature result containing the message data and ECDSA signature.
-pub fn verify_dkg_signature_ecdsa<T: Config>(
+pub fn verify_ecdsa_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
