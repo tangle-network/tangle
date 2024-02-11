@@ -15,18 +15,23 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(non_snake_case)]
 
-use crate::mock::*;
+use crate::{
+	misbehavior::dfns_cggmp21::zk::ring_pedersen_parameters::{self, original as π_prm},
+	mock::*,
+};
 
 use dfns_cggmp21::{
 	generic_ec::Point,
 	key_refresh::msg::aux_only,
 	keygen,
 	security_level::{SecurityLevel, SecurityLevel128},
+	PregeneratedPrimes,
 };
 use digest::Digest;
 use frame_support::{assert_err, assert_ok};
 use generic_ec::{curves::Secp256k1, Scalar, SecretScalar};
 use generic_ec_zkp::{polynomial::Polynomial, schnorr_pok};
+use paillier_zk::{fast_paillier::utils, rug::Complete, Integer, IntegerExt};
 use pallet_dkg::{
 	misbehavior::dfns_cggmp21::{aux_only as _aux_only, keygen as _keygen, DefaultDigest},
 	Error,
@@ -813,6 +818,158 @@ fn submit_key_refresh_invalid_decommitment_should_work() {
 					t: threshold,
 					reason: KeyRefreshAborted::InvalidDecommitment {
 						round1: round1_signed_msg,
+						round2: round2_signed_msg,
+					},
+				},
+			)),
+		};
+
+		assert_ok!(DKG::verify_misbehavior(submission));
+	});
+}
+
+#[test]
+fn submit_key_refresh_ring_pedersen_parameters_should_work() {
+	new_test_ext().execute_with(|| {
+		let i = 2_u16;
+		let participants = (0..5).map(|_| pub_key()).collect::<Vec<_>>();
+		let threshold = 3_u16;
+		let offender = participants[usize::from(i)];
+		let job_id = 1_u64;
+		let job_id_bytes = job_id.to_be_bytes();
+		let mix = keccak_256(AUX_GEN_EID);
+		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
+		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
+
+		let parties_shared_state = DefaultDigest::new_with_prefix(DefaultDigest::digest(eid_bytes));
+		let (p, q) = PregeneratedPrimes::<SecurityLevel128>::generate(rng).split();
+		let N = (&p * &q).complete();
+		let phi_N = (&p - 1u8).complete() * (&q - 1u8).complete();
+
+		let r = Integer::gen_invertible(&N, rng);
+		let lambda = phi_N.random_below_ref(&mut utils::external_rand(rng)).into();
+		let t = r.square().modulo(&N);
+		let s = t.pow_mod_ref(&lambda, &N).unwrap().into();
+
+		let hat_psi = π_prm::prove::<{ <SecurityLevel128 as SecurityLevel>::M }, _, _>(
+			parties_shared_state.clone().chain_update(i.to_be_bytes()),
+			rng,
+			π_prm::Data { N: &N, s: &s, t: &t },
+			&phi_N,
+			&lambda,
+		)
+		.unwrap();
+
+		let params_proof = postcard::from_bytes(&postcard::to_allocvec(&hat_psi).unwrap()).unwrap();
+
+		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		rng.fill_bytes(rid.as_mut());
+
+		let my_decommitment: aux_only::MsgRound2<SecurityLevel128> = aux_only::MsgRound2 {
+			decommit: {
+				let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				rng.fill_bytes(nonce.as_mut());
+				nonce
+			},
+			N,
+			s,
+			t,
+			params_proof,
+			rho_bytes: {
+				let mut rho = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				rng.fill_bytes(rho.as_mut());
+				rho
+			},
+		};
+		let round2_signed_msg = sign_round_msg(offender, i, &my_decommitment);
+
+		let submission = MisbehaviorSubmission {
+			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
+			offender: offender.0,
+			job_id,
+			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
+				DfnsCGGMP21Justification::KeyRefresh {
+					participants: participants.iter().map(|p| p.0).collect(),
+					t: threshold,
+					reason: KeyRefreshAborted::InvalidRingPedersenParameters {
+						round2: round2_signed_msg,
+					},
+				},
+			)),
+		};
+
+		assert_err!(
+			DKG::verify_misbehavior(submission),
+			crate::Error::<Runtime>::ValidRingPedersenParameters
+		);
+	});
+}
+
+#[test]
+fn submit_key_refresh_invalid_ring_pedersen_parameters_should_work() {
+	new_test_ext().execute_with(|| {
+		let i = 2_u16;
+		let participants = (0..5).map(|_| pub_key()).collect::<Vec<_>>();
+		let threshold = 3_u16;
+		let offender = participants[usize::from(i)];
+		let job_id = 1_u64;
+		let job_id_bytes = job_id.to_be_bytes();
+		let mix = keccak_256(AUX_GEN_EID);
+		let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
+		let rng = &mut rand_chacha::ChaChaRng::from_seed(mix);
+
+		let parties_shared_state = DefaultDigest::new_with_prefix(DefaultDigest::digest(eid_bytes));
+		let p = Integer::from(11u8);
+		let q = Integer::from(13u8);
+		let N = (&p * &q).complete();
+		let phi_N = (&p - 1u8).complete() * (&q - 1u8).complete();
+
+		let r = Integer::gen_invertible(&N, rng);
+		let lambda = phi_N.random_below_ref(&mut utils::external_rand(rng)).into();
+		let t = r.square().modulo(&N);
+		let s = t.pow_mod_ref(&lambda, &N).unwrap().into();
+
+		let hat_psi = π_prm::prove::<{ <SecurityLevel128 as SecurityLevel>::M }, _, _>(
+			parties_shared_state.clone().chain_update(i.to_be_bytes()),
+			rng,
+			π_prm::Data { N: &N, s: &s, t: &t },
+			&phi_N,
+			&lambda,
+		)
+		.unwrap();
+
+		let params_proof = postcard::from_bytes(&postcard::to_allocvec(&hat_psi).unwrap()).unwrap();
+
+		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		rng.fill_bytes(rid.as_mut());
+
+		let my_decommitment: aux_only::MsgRound2<SecurityLevel128> = aux_only::MsgRound2 {
+			decommit: {
+				let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				rng.fill_bytes(nonce.as_mut());
+				nonce
+			},
+			N,
+			s,
+			t,
+			params_proof,
+			rho_bytes: {
+				let mut rho = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				rng.fill_bytes(rho.as_mut());
+				rho
+			},
+		};
+		let round2_signed_msg = sign_round_msg(offender, i, &my_decommitment);
+
+		let submission = MisbehaviorSubmission {
+			role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
+			offender: offender.0,
+			job_id,
+			justification: MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
+				DfnsCGGMP21Justification::KeyRefresh {
+					participants: participants.iter().map(|p| p.0).collect(),
+					t: threshold,
+					reason: KeyRefreshAborted::InvalidRingPedersenParameters {
 						round2: round2_signed_msg,
 					},
 				},

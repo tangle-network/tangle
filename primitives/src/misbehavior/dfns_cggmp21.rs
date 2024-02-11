@@ -69,7 +69,7 @@ pub enum KeyRefreshAborted {
 	/// provided invalid proof for Rfac.
 	InvalidFacProof,
 	/// N, s and t parameters are invalid.
-	InvalidRingPedersenParameters,
+	InvalidRingPedersenParameters { round2: SignedRoundMessage },
 	/// X is malformed.
 	InvalidX,
 	/// x doesn't correspond to X.

@@ -162,6 +162,11 @@ pub mod pallet {
 		/// Schnorr are valid. but the caller
 		/// claims it is invalid.
 		ValidSchnorrProof,
+		/// The submitted ring pedersen parameters are valid.
+		///
+		/// This error is returned when the ring pedersen parameters are valid
+		/// but the caller claims it is invalid.
+		ValidRingPedersenParameters,
 	}
 
 	#[pallet::call]

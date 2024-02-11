@@ -27,12 +27,13 @@ mod hashing_rng;
 mod integer;
 pub mod keygen;
 pub mod sign;
+mod zk;
 
 #[cfg(test)]
 mod tests;
 
 pub type DefaultDigest = sha2::Sha256;
-pub use integer::Integer;
+pub use malachite_nz::integer::Integer;
 
 /// Hardcoded value for parameter $m$ of security level
 ///
@@ -89,6 +90,8 @@ impl<T: Config> Pallet<T> {
 		match reason {
 			KeyRefreshAborted::InvalidDecommitment { round1, round2 } =>
 				aux_only::invalid_decommitment::<T>(data, round1, round2),
+			KeyRefreshAborted::InvalidRingPedersenParameters { round2 } =>
+				aux_only::invalid_ring_pedersen_parameters::<T>(data, round2),
 			_ => unimplemented!(),
 		}
 	}
@@ -102,4 +105,17 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		unimplemented!()
 	}
+}
+
+/// Checks that public paillier key meets security level constraints
+pub fn validate_public_paillier_key_size(n: &Integer) -> bool {
+	use malachite_base::num::logic::traits::SignificantBits;
+	n.significant_bits() >= 8 * (SECURITY_BITS as u64) - 1
+}
+
+/// Checks that secret paillier key meets security level constraints
+pub fn validate_secret_paillier_key_size(p: &Integer, q: &Integer) -> bool {
+	use malachite_base::num::logic::traits::SignificantBits;
+	p.significant_bits() >= 4 * (SECURITY_BITS as u64) &&
+		q.significant_bits() >= 4 * (SECURITY_BITS as u64)
 }
