@@ -337,7 +337,8 @@ rpc-txpool = { path = "client/rpc/txpool" }
 evm-tracer = { path = "runtime/testnet/evm_tracer", default-features = false }
 
 # MPC
-malachite = { version = "0.4", default-features = false }
+malachite-base = { version = "0.4", default-features = false }
+malachite-nz = { version = "0.4", default-features = false, features = ["32_bit_limbs"] }
 postcard = { version = "1", default-features = false }
 dfns-cggmp21 = { package = "cggmp21", version = "0.1.1", default-features = false }
 udigest = { version = "0.1.0", default-features = false }
@@ -354,3 +355,5 @@ generic-ec = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
 generic-ec-core = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
 generic-ec-curves = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
 generic-ec-zkp = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
+malachite-base = { git = "https://github.com/shekohex/malachite", branch = "no-std" }
+malachite-nz = { git = "https://github.com/shekohex/malachite", branch = "no-std" }

@@ -24,8 +24,11 @@ subtle = { workspace = true }
 tangle-crypto-primitives = { workspace = true, default-features = false }
 tangle-primitives = { workspace = true, default-features = false }
 rand_core = { workspace = true, default-features = false }
+rand_chacha = { workspace = true, default-features = false }
 
 # dfns/CGGMP21 specific dependencies
+malachite-base = { workspace = true, default-features = false }
+malachite-nz = { workspace = true, default-features = false }
 hex = { workspace = true, default-features = false, features = ["serde"] }
 postcard = { workspace = true, default-features = false }
 sha2 = { workspace = true, default-features = false }
@@ -33,6 +36,8 @@ digest = { workspace = true, default-features = false }
 udigest = { workspace = true, features = ["derive"] }
 generic-ec = { workspace = true, default-features = false, features = ["serde", "udigest", "curve-secp256k1"] }
 generic-ec-zkp = { workspace = true, default-features = false, features = ["serde", "udigest", "alloc"] }
+
+# FROST specific dependencies
 frost-core = { workspace = true, default-features = false }
 frost-ed25519 = { workspace = true, default-features = false }
 elliptic-curve = { version = "0.13", features = ["hash2curve"], default-features = false }
@@ -52,7 +57,6 @@ pallet-balances = { workspace = true }
 postcard = { workspace = true, default-features = false, features = ["alloc"] }
 smallvec = { workspace = true }
 sp-keystore = { workspace = true }
-rand_chacha = { workspace = true }
 dfns-cggmp21 = { workspace = true, default-features = false, features = ["curve-secp256k1"] }
 round-based = { workspace = true, features = ["derive"] }
 paillier-zk = { workspace = true, features = ["serde"] }

@@ -6319,6 +6319,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "malachite-base"
+version = "0.4.4"
+source = "git+https://github.com/shekohex/malachite?branch=no-std#ed6582d5ff96081ad41b4febb02c557cf087d105"
+dependencies = [
+ "hashbrown 0.14.3",
+ "itertools 0.11.0",
+ "libm",
+ "ryu",
+]
+
+[[package]]
+name = "malachite-nz"
+version = "0.4.4"
+source = "git+https://github.com/shekohex/malachite?branch=no-std#ed6582d5ff96081ad41b4febb02c557cf087d105"
+dependencies = [
+ "itertools 0.11.0",
+ "libm",
+ "malachite-base",
+]
+
+[[package]]
 name = "maplit"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7330,6 +7351,8 @@ dependencies = [
  "generic-ec",
  "generic-ec-zkp",
  "hex",
+ "malachite-base",
+ "malachite-nz",
  "paillier-zk",
  "pallet-balances",
  "parity-scale-codec 3.6.9",

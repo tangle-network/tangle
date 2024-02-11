@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+#![allow(mixed_script_confusables, non_snake_case)]
 #![cfg_attr(not(feature = "std"), no_std)]
 //! # Pallet-DKG
 //!
@@ -162,6 +163,11 @@ pub mod pallet {
 		/// Schnorr are valid. but the caller
 		/// claims it is invalid.
 		ValidSchnorrProof,
+		/// The submitted ring pedersen parameters are valid.
+		///
+		/// This error is returned when the ring pedersen parameters are valid
+		/// but the caller claims it is invalid.
+		ValidRingPedersenParameters,
 	}
 
 	#[pallet::call]
