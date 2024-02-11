@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use frame_support::{ensure, pallet_prelude::DispatchResult};
+use frame_support::pallet_prelude::DispatchResult;
 use parity_scale_codec::Encode;
 use sp_core::sr25519;
 use sp_io::{crypto::sr25519_verify, hashing::keccak_256};
-use sp_std::vec::Vec;
-use tangle_primitives::jobs::DKGTSSKeySubmissionResult;
 
 use crate::{Config, Error};
 
