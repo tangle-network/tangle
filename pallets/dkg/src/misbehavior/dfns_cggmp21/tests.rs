@@ -15,10 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(non_snake_case)]
 
-use crate::{
-	misbehavior::dfns_cggmp21::zk::ring_pedersen_parameters::{self, original as π_prm},
-	mock::*,
-};
+use crate::{misbehavior::dfns_cggmp21::zk::ring_pedersen_parameters::original as π_prm, mock::*};
 
 use dfns_cggmp21::{
 	generic_ec::Point,

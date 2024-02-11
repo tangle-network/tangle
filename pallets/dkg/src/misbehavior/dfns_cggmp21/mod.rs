@@ -112,10 +112,3 @@ pub fn validate_public_paillier_key_size(n: &Integer) -> bool {
 	use malachite_base::num::logic::traits::SignificantBits;
 	n.significant_bits() >= 8 * (SECURITY_BITS as u64) - 1
 }
-
-/// Checks that secret paillier key meets security level constraints
-pub fn validate_secret_paillier_key_size(p: &Integer, q: &Integer) -> bool {
-	use malachite_base::num::logic::traits::SignificantBits;
-	p.significant_bits() >= 4 * (SECURITY_BITS as u64) &&
-		q.significant_bits() >= 4 * (SECURITY_BITS as u64)
-}

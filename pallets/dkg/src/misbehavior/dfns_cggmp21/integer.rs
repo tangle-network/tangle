@@ -105,6 +105,7 @@ pub mod encoding {
 	}
 }
 
+#[allow(unused)]
 pub mod serde {
 	use ::serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -124,6 +125,7 @@ pub mod serde {
 	}
 }
 
+#[allow(unused)]
 pub mod serde_list {
 	use crate::misbehavior::dfns_cggmp21::M;
 	#[cfg(not(feature = "std"))]
@@ -163,6 +165,7 @@ pub mod serde_list {
 	}
 }
 
+#[allow(unused)]
 pub mod serde_vec {
 	#[cfg(not(feature = "std"))]
 	use ::alloc::vec::Vec;

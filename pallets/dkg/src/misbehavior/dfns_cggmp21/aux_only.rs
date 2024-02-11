@@ -122,7 +122,7 @@ pub fn invalid_ring_pedersen_parameters<T: Config>(
 	let job_id_bytes = data.job_id.to_be_bytes();
 	let mix = keccak_256(AUX_GEN_EID);
 	let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
-	let parties_shared_state = DefaultDigest::new_with_prefix(DefaultDigest::digest(&eid_bytes));
+	let parties_shared_state = DefaultDigest::new_with_prefix(DefaultDigest::digest(eid_bytes));
 	let round2_msg = postcard::from_bytes::<MsgRound2>(&round2.message)
 		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 	if !super::validate_public_paillier_key_size(&round2_msg.N) {

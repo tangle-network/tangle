@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+#![allow(mixed_script_confusables, non_snake_case)]
 #![cfg_attr(not(feature = "std"), no_std)]
 //! # Pallet-DKG
 //!
