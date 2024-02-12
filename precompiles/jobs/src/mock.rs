@@ -202,7 +202,7 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 pub struct MockRolesHandler;
 
 impl RolesHandler<AccountId> for MockRolesHandler {
-	fn is_validator(address: AccountId, _role_type: RoleType) -> bool {
+	fn is_restaker(address: AccountId, _role_type: RoleType) -> bool {
 		let validators = [
 			AccountId::from_u64(1u64),
 			AccountId::from_u64(2u64),
@@ -217,7 +217,7 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		None
 	}
 
-	fn report_offence(_offence_report: ReportValidatorOffence<AccountId>) -> DispatchResult {
+	fn report_offence(_offence_report: ReportRestakerOffence<AccountId>) -> DispatchResult {
 		Ok(())
 	}
 }

@@ -90,7 +90,7 @@ fn is_validator_works() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::is_validator { validator: H160::from(TestAccount::Alex).into() },
+				PCall::is_restaker { validator: H160::from(TestAccount::Alex).into() },
 			)
 			.expect_cost(0)
 			.expect_no_logs()

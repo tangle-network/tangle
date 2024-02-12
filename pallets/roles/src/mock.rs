@@ -348,6 +348,7 @@ impl pallet_jobs::Config for Runtime {
 
 parameter_types! {
 	pub InflationRewardPerSession: Balance = 10_000;
+	pub MaxRestake: Percent = Percent::from_percent(50);
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
 }
 
@@ -362,6 +363,7 @@ impl Config for Runtime {
 	type ReportOffences = OffenceHandler;
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxKeyLen = MaxKeyLen;
+	type MaxRestake = MaxRestake;
 	type WeightInfo = ();
 }
 

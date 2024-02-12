@@ -23,12 +23,12 @@ use frame_support::{
 };
 use sp_runtime::{
 	traits::{CheckedDiv, Convert},
-	Perbill, Percent,
+	Perbill,
 };
 
 use sp_staking::offence::Offence;
 use tangle_primitives::{
-	jobs::{traits::JobsHandler, JobId, ReportValidatorOffence},
+	jobs::{traits::JobsHandler, JobId, ReportRestakerOffence},
 	roles::traits::RolesHandler,
 };
 
@@ -42,7 +42,7 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	///
 	/// # Returns
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	fn is_validator(address: T::AccountId, role_type: RoleType) -> bool {
+	fn is_restaker(address: T::AccountId, role_type: RoleType) -> bool {
 		let assigned_roles = AccountRolesMapping::<T>::get(address);
 		assigned_roles.contains(&role_type)
 	}
@@ -57,7 +57,7 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	///
 	/// Returns Ok() if validator offence report is submitted successfully.
 	fn report_offence(
-		offence_report: ReportValidatorOffence<T::AccountId>,
+		offence_report: ReportRestakerOffence<T::AccountId>,
 	) -> sp_runtime::DispatchResult {
 		Self::report_offence(offence_report)
 	}
@@ -192,7 +192,7 @@ impl<T: Config> Pallet<T> {
 	/// Check if account can chill, unbond and withdraw funds.
 	///
 	/// # Parameters
-	/// - `account`: The account ID of the validator.
+	/// - `account`: The account ID of the restaker.
 	///
 	/// # Returns
 	/// Returns boolean value.
@@ -208,14 +208,15 @@ impl<T: Config> Pallet<T> {
 	/// Calculate max restake amount for the given account.
 	///
 	/// # Parameters
-	/// - `total_stake`: Total stake of the validator
+	/// - `total_stake`: Total stake of the restaker
 	///
 	/// # Returns
 	/// Returns the max restake amount.
 	pub(crate) fn calculate_max_restake_amount(total_stake: BalanceOf<T>) -> BalanceOf<T> {
 		// User can restake max 50% of the total stake
-		Percent::from_percent(50) * total_stake
+		T::MaxRestake::get() * total_stake
 	}
+
 	/// Calculate slash value for restaked amount
 	///
 	/// # Parameters
@@ -232,17 +233,17 @@ impl<T: Config> Pallet<T> {
 		slash_fraction * total_stake
 	}
 
-	/// Report offence for the given validator.
-	/// This function will report validators for committing offence.
+	/// Report offence for the given restaker.
+	/// This function will report restakers for committing offence.
 	///
 	/// # Parameters
 	/// - `offence_report`: The offence report.
 	///
 	/// # Returns
 	///
-	/// Returns Ok() if validator offence report is submitted successfully.
+	/// Returns Ok() if restaker offence report is submitted successfully.
 	pub(crate) fn report_offence(
-		offence_report: ReportValidatorOffence<T::AccountId>,
+		offence_report: ReportRestakerOffence<T::AccountId>,
 	) -> sp_runtime::DispatchResult {
 		let offenders = offence_report
 			.clone()
@@ -288,10 +289,10 @@ impl<T: Config> Pallet<T> {
 	/// Update the ledger for the given stash account.
 	///
 	/// # Parameters
-	/// - `staker`: The stash account ID.
+	/// - `restaker`: The stash account ID.
 	/// - `ledger`: The new ledger.
-	pub(crate) fn update_ledger(staker: &T::AccountId, ledger: &RoleStakingLedger<T>) {
-		<Ledger<T>>::insert(staker, ledger);
+	pub(crate) fn update_ledger(restaker: &T::AccountId, ledger: &RestakingLedger<T>) {
+		<Ledger<T>>::insert(restaker, ledger);
 	}
 
 	pub fn distribute_rewards() -> DispatchResult {
@@ -348,12 +349,12 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	pub fn update_ledger_role_key(staker: &T::AccountId, role_key: Vec<u8>) -> DispatchResult {
-		let mut ledger = Ledger::<T>::get(staker).ok_or(Error::<T>::NoProfileFound)?;
+	pub fn update_ledger_role_key(restaker: &T::AccountId, role_key: Vec<u8>) -> DispatchResult {
+		let mut ledger = Ledger::<T>::get(restaker).ok_or(Error::<T>::NoProfileFound)?;
 		let bounded_role_key: BoundedVec<u8, T::MaxKeyLen> =
 			role_key.try_into().map_err(|_| Error::<T>::KeySizeExceeded)?;
 		ledger.role_key = bounded_role_key;
-		Self::update_ledger(staker, &ledger);
+		Self::update_ledger(restaker, &ledger);
 		Ok(())
 	}
 }

@@ -24,6 +24,7 @@ use frame_support::{
 	BoundedBTreeMap, CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
 };
 use parity_scale_codec::MaxEncodedLen;
+use sp_runtime::Percent;
 use tangle_primitives::roles::ValidatorRewardDistribution;
 
 use frame_support::BoundedVec;
@@ -70,7 +71,7 @@ use sp_runtime::RuntimeAppPublic;
 	MaxEncodedLen,
 )]
 #[scale_info(skip_type_params(T))]
-pub struct RoleStakingLedger<T: Config> {
+pub struct RestakingLedger<T: Config> {
 	/// The stash account whose balance is actually locked and at stake.
 	pub stash: T::AccountId,
 	/// The total amount of the stash's balance that is restaked for all selected roles.
@@ -85,7 +86,7 @@ pub struct RoleStakingLedger<T: Config> {
 	pub role_key: BoundedVec<u8, T::MaxKeyLen>,
 }
 
-impl<T: Config> RoleStakingLedger<T> {
+impl<T: Config> RestakingLedger<T> {
 	/// New staking ledger for a stash account.
 	pub fn try_new(
 		stash: T::AccountId,
@@ -191,6 +192,9 @@ pub mod pallet {
 			ValidatorOffence<IdentificationTuple<Self>>,
 		>;
 
+		/// The max permitted restake for a restaker
+		type MaxRestake: Get<Percent>;
+
 		type WeightInfo: WeightInfo;
 	}
 
@@ -257,8 +261,7 @@ pub mod pallet {
 	/// Map from all "controller" accounts to the info regarding the staking.
 	#[pallet::storage]
 	#[pallet::getter(fn ledger)]
-	pub type Ledger<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, RoleStakingLedger<T>>;
+	pub type Ledger<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, RestakingLedger<T>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn account_roles)]
@@ -276,9 +279,9 @@ pub mod pallet {
 	#[pallet::getter(fn min_active_bond)]
 	pub(super) type MinRestakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
-	/// Create profile for the validator.
-	/// Validator can choose roles he is interested to opt-in and restake tokens for it.
-	/// Staking can be done shared or independently for each role.
+	/// Create profile for the restaker.
+	/// Restaker can choose roles he is interested to opt-in and restake tokens for it.
+	/// ReStaking can be done shared or independently for each role.
 	///
 	/// # Parameters
 	///
@@ -295,17 +298,17 @@ pub mod pallet {
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::create_profile())]
 		#[pallet::call_index(0)]
 		pub fn create_profile(origin: OriginFor<T>, profile: Profile<T>) -> DispatchResult {
-			let stash_account = ensure_signed(origin)?;
+			let restaker_account = ensure_signed(origin)?;
 
 			// Ensure stash account is a validator.
 			ensure!(
-				pallet_staking::Validators::<T>::contains_key(&stash_account),
+				pallet_staking::Validators::<T>::contains_key(&restaker_account),
 				Error::<T>::NotValidator
 			);
 
 			// Get Role key of validator.
 			let validator_id =
-				<T as pallet_session::Config>::ValidatorIdOf::convert(stash_account.clone())
+				<T as pallet_session::Config>::ValidatorIdOf::convert(restaker_account.clone())
 					.ok_or(Error::<T>::NotValidator)?;
 
 			let session_keys = pallet_session::NextKeys::<T>::get(validator_id)
@@ -313,9 +316,12 @@ pub mod pallet {
 			let role_key = OpaqueKeys::get_raw(&session_keys, ROLE_KEY_TYPE);
 
 			// Ensure no profile is assigned to the validator.
-			ensure!(!Ledger::<T>::contains_key(&stash_account), Error::<T>::ProfileAlreadyExists);
-			let ledger = RoleStakingLedger::<T>::try_new(
-				stash_account.clone(),
+			ensure!(
+				!Ledger::<T>::contains_key(&restaker_account),
+				Error::<T>::ProfileAlreadyExists
+			);
+			let ledger = RestakingLedger::<T>::try_new(
+				restaker_account.clone(),
 				profile.clone(),
 				role_key.to_vec(),
 			)?;
@@ -329,15 +335,15 @@ pub mod pallet {
 			);
 
 			// Total restaking amount should not exceed  max_restaking_amount.
-			let staking_ledger =
-				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
+			let staking_ledger = pallet_staking::Ledger::<T>::get(&restaker_account)
+				.ok_or(Error::<T>::NotValidator)?;
 			let max_restaking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
 			ensure!(
 				total_profile_restake <= max_restaking_bond,
 				Error::<T>::ExceedsMaxRestakeValue
 			);
 
-			// Validate role staking records.
+			// Validate role re-staking records.
 			let records = profile.get_records();
 			for record in records {
 				if profile.is_independent() {
@@ -353,11 +359,11 @@ pub mod pallet {
 			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
 				BoundedVec::try_from(profile.get_roles()).map_err(|_| Error::<T>::MaxRoles)?;
 
-			AccountRolesMapping::<T>::insert(&stash_account, profile_roles);
+			AccountRolesMapping::<T>::insert(&restaker_account, profile_roles);
 
-			Self::update_ledger(&stash_account, &ledger);
+			Self::update_ledger(&restaker_account, &ledger);
 			Self::deposit_event(Event::<T>::ProfileCreated {
-				account: stash_account.clone(),
+				account: restaker_account.clone(),
 				total_profile_restake,
 				roles: profile.get_roles(),
 			});
@@ -365,8 +371,8 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Update profile of the validator.
-		/// This function will update the profile of the validator.
+		/// Update profile of the restaker.
+		/// This function will update the profile of the restaker.
 		/// If user wants to remove any role, please ensure that all the jobs associated with the
 		/// role are completed else this tx will fail.
 		/// If user wants to add any role, please ensure that the Restaking amount is greater than
@@ -385,13 +391,14 @@ pub mod pallet {
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::update_profile())]
 		#[pallet::call_index(1)]
 		pub fn update_profile(origin: OriginFor<T>, updated_profile: Profile<T>) -> DispatchResult {
-			let stash_account = ensure_signed(origin)?;
+			let restaker_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
 			ensure!(
-				pallet_staking::Validators::<T>::contains_key(&stash_account),
+				pallet_staking::Validators::<T>::contains_key(&restaker_account),
 				Error::<T>::NotValidator
 			);
-			let mut ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
+			let mut ledger =
+				Ledger::<T>::get(&restaker_account).ok_or(Error::<T>::NoProfileFound)?;
 			// Restaking amount of record should meet min restaking amount requirement.
 			match updated_profile.clone() {
 				Profile::Shared(profile) => {
@@ -411,15 +418,15 @@ pub mod pallet {
 			};
 
 			// Total restaking amount should not exceed `max_restaking_amount`.
-			let staking_ledger =
-				pallet_staking::Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NotValidator)?;
+			let staking_ledger = pallet_staking::Ledger::<T>::get(&restaker_account)
+				.ok_or(Error::<T>::NotValidator)?;
 			let max_restaking_bond = Self::calculate_max_restake_amount(staking_ledger.active);
 			ensure!(
 				updated_profile.get_total_profile_restake() <= max_restaking_bond,
 				Error::<T>::ExceedsMaxRestakeValue
 			);
 			// Validate additional rules for profile update.
-			Self::validate_updated_profile(stash_account.clone(), updated_profile.clone())?;
+			Self::validate_updated_profile(restaker_account.clone(), updated_profile.clone())?;
 			ledger.profile = updated_profile.clone();
 			ledger.total = updated_profile.get_total_profile_restake().into();
 
@@ -427,11 +434,11 @@ pub mod pallet {
 				BoundedVec::try_from(updated_profile.get_roles())
 					.map_err(|_| Error::<T>::MaxRoles)?;
 
-			AccountRolesMapping::<T>::insert(&stash_account, profile_roles);
-			Self::update_ledger(&stash_account, &ledger);
+			AccountRolesMapping::<T>::insert(&restaker_account, profile_roles);
+			Self::update_ledger(&restaker_account, &ledger);
 
 			Self::deposit_event(Event::<T>::ProfileUpdated {
-				account: stash_account.clone(),
+				account: restaker_account.clone(),
 				total_profile_restake: updated_profile.get_total_profile_restake().into(),
 				roles: updated_profile.get_roles(),
 			});
@@ -439,7 +446,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Delete profile of the validator.
+		/// Delete profile of the restaker.
 		/// This function will submit the request to exit from all the services and will fails if
 		/// all the job are not completed.
 		///
@@ -449,21 +456,21 @@ pub mod pallet {
 		///
 		/// This function will return error if
 		/// - Account is not a validator account.
-		/// - Profile is not assigned to the validator.
+		/// - Profile is not assigned to the restaker.
 		/// - All the jobs are not completed.
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::delete_profile())]
 		#[pallet::call_index(2)]
 		pub fn delete_profile(origin: OriginFor<T>) -> DispatchResult {
-			let stash_account = ensure_signed(origin)?;
+			let restaker_account = ensure_signed(origin)?;
 			// Ensure stash account is a validator.
 			ensure!(
-				pallet_staking::Validators::<T>::contains_key(&stash_account),
+				pallet_staking::Validators::<T>::contains_key(&restaker_account),
 				Error::<T>::NotValidator
 			);
-			let ledger = Ledger::<T>::get(&stash_account).ok_or(Error::<T>::NoProfileFound)?;
+			let ledger = Ledger::<T>::get(&restaker_account).ok_or(Error::<T>::NoProfileFound)?;
 
 			// Submit request to exit from all the services.
-			let active_jobs = T::JobsHandler::get_active_jobs(stash_account.clone());
+			let active_jobs = T::JobsHandler::get_active_jobs(restaker_account.clone());
 			let mut pending_jobs = Vec::new();
 			for job in active_jobs {
 				let role_type = job.0;
@@ -476,7 +483,7 @@ pub mod pallet {
 					BoundedVec::try_from(ledger.profile.get_roles())
 						.map_err(|_| Error::<T>::MaxRoles)?;
 
-				AccountRolesMapping::<T>::insert(&stash_account, profile_roles);
+				AccountRolesMapping::<T>::insert(&restaker_account, profile_roles);
 
 				// Profile delete request failed due to pending jobs, which can't be opted out at
 				// the moment.
@@ -484,12 +491,12 @@ pub mod pallet {
 				return Err(Error::<T>::ProfileDeleteRequestFailed.into())
 			}
 
-			Self::deposit_event(Event::<T>::ProfileDeleted { account: stash_account.clone() });
+			Self::deposit_event(Event::<T>::ProfileDeleted { account: restaker_account.clone() });
 
 			// Remove entry from ledger.
-			Ledger::<T>::remove(&stash_account);
+			Ledger::<T>::remove(&restaker_account);
 			// Remove entry from account roles mapping.
-			AccountRolesMapping::<T>::remove(&stash_account);
+			AccountRolesMapping::<T>::remove(&restaker_account);
 
 			Ok(())
 		}
@@ -509,9 +516,9 @@ pub mod pallet {
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::chill())]
 		#[pallet::call_index(3)]
 		pub fn chill(origin: OriginFor<T>) -> DispatchResult {
-			let account = ensure_signed(origin.clone())?;
-			// Ensure no role is assigned to the account before chilling.
-			ensure!(Self::can_exit(account), Error::<T>::HasRoleAssigned);
+			let restaker_account = ensure_signed(origin.clone())?;
+			// Ensure no role is assigned to the restaker_account before chilling.
+			ensure!(Self::can_exit(restaker_account), Error::<T>::HasRoleAssigned);
 
 			// chill
 			pallet_staking::Pallet::<T>::chill(origin)
@@ -531,15 +538,17 @@ pub mod pallet {
 		/// This function will return error if
 		/// - If there is any active role assigned to the user.
 		///  
+		/// NOTE : This call wraps pallet_staking.unbond, so the pallet_staking.unbond call should
+		/// be blocked in runtime
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::unbond_funds())]
 		#[pallet::call_index(4)]
 		pub fn unbond_funds(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
 		) -> DispatchResult {
-			let account = ensure_signed(origin.clone())?;
-			// Ensure no role is assigned to the account and is eligible to unbond.
-			ensure!(Self::can_exit(account), Error::<T>::HasRoleAssigned);
+			let restaker_account = ensure_signed(origin.clone())?;
+			// Ensure no role is assigned to the restaker_account and is eligible to unbond.
+			ensure!(Self::can_exit(restaker_account), Error::<T>::HasRoleAssigned);
 
 			// Unbond funds.
 			let res = pallet_staking::Pallet::<T>::unbond(origin, amount);
@@ -557,12 +566,14 @@ pub mod pallet {
 		///
 		/// This function will return error if
 		/// - If there is any active role assigned to the user.
+		/// NOTE : This call wraps pallet_staking.withdraw_unbonded, so the
+		/// pallet_staking.withdraw_unbonded call should be blocked in runtime
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::withdraw_unbonded())]
 		#[pallet::call_index(5)]
 		pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResult {
-			let account = ensure_signed(origin.clone())?;
-			// Ensure no role is assigned to the account and is eligible to withdraw.
-			ensure!(Self::can_exit(account), Error::<T>::HasRoleAssigned);
+			let restaker_account = ensure_signed(origin.clone())?;
+			// Ensure no role is assigned to the restaker_account and is eligible to withdraw.
+			ensure!(Self::can_exit(restaker_account), Error::<T>::HasRoleAssigned);
 
 			// Withdraw unbond funds.
 			let res = pallet_staking::Pallet::<T>::withdraw_unbonded(origin, 0);

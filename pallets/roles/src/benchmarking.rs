@@ -112,7 +112,7 @@ mod benchmarks {
 	fn update_profile() {
 		let caller: T::AccountId = create_validator_account::<T>("Alice");
 		let shared_profile = shared_profile::<T>();
-		let ledger = RoleStakingLedger::<T>::new(caller.clone(), shared_profile.clone(), vec![]);
+		let ledger = RestakingLedger::<T>::new(caller.clone(), shared_profile.clone(), vec![]);
 		Ledger::<T>::insert(caller.clone(), ledger);
 		// Updating shared stake from 3000 to 5000 tokens
 		let updated_profile = updated_profile::<T>();
@@ -129,7 +129,7 @@ mod benchmarks {
 	fn delete_profile() {
 		let caller: T::AccountId = create_validator_account::<T>("Alice");
 		let shared_profile = shared_profile::<T>();
-		let ledger = RoleStakingLedger::<T>::new(caller.clone(), shared_profile.clone(), vec![]);
+		let ledger = RestakingLedger::<T>::new(caller.clone(), shared_profile.clone(), vec![]);
 		Ledger::<T>::insert(caller.clone(), ledger);
 
 		#[extrinsic_call]
