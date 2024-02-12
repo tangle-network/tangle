@@ -61,19 +61,16 @@ pub trait RolesHandler<AccountId> {
 
 	/// Record rewards to a validator.
 	///
-	/// This function records the rewards earned by a validator account.
+	/// This function records a job completed by the given validators
 	///
 	/// # Parameters
 	///
 	/// - `validators`: The account ID of the validators.
-	/// - `reward_per_validator`: The amount of rewards to record per validator, all validators are
-	///   rewarded equally for a job
 	///
 	/// # Errors
 	///
 	/// Returns a `DispatchError` if the operation fails.
-	fn record_reward_to_validator(
+	fn record_job_by_validators(
 		validators: Vec<AccountId>,
-		reward_per_validator: Self::Balance,
 	) -> DispatchResult;
 }

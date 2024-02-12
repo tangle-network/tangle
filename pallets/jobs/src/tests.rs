@@ -20,7 +20,7 @@ use mock::*;
 
 use pallet_roles::{
 	profile::{IndependentRestakeProfile, Profile, Record, SharedRestakeProfile},
-	ValidatorRewardsInSession,
+	ValidatorJobsInEra,
 };
 use tangle_primitives::{
 	jobs::{
@@ -193,7 +193,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		// ensure the job reward is distributed correctly
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
-			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			let rewards = ValidatorJobsInEra::<Runtime>::get();
 			assert_eq!(rewards.get(&validator), Some(1_u128).as_ref());
 		}
 
@@ -254,7 +254,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		// ensure the job reward is distributed correctly
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
-			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			let rewards = ValidatorJobsInEra::<Runtime>::get();
 			assert_eq!(rewards.get(&validator), Some(5_u128).as_ref());
 		}
 
@@ -348,7 +348,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 
 		// ensure the job reward is distributed correctly
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
-			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			let rewards = ValidatorJobsInEra::<Runtime>::get();
 			assert_eq!(rewards.get(&validator), Some(5_u128).as_ref());
 		}
 	});
@@ -468,7 +468,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 
 		// ensure the job reward is distributed correctly
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
-			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			let rewards = ValidatorJobsInEra::<Runtime>::get();
 			assert_eq!(rewards.get(&validator), Some(6_u128).as_ref());
 		}
 	});
@@ -694,7 +694,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 
 		// ensure the job reward is distributed correctly
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
-			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			let rewards = ValidatorJobsInEra::<Runtime>::get();
 			assert_eq!(rewards.get(&mock_pub_key(validator)), Some(2_u128).as_ref());
 		}
 
@@ -752,7 +752,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 			.map(|x| mock_pub_key(*x))
 			.collect::<Vec<_>>()
 		{
-			let rewards = ValidatorRewardsInSession::<Runtime>::get();
+			let rewards = ValidatorJobsInEra::<Runtime>::get();
 			assert_eq!(rewards.get(&validator), Some(2_u128).as_ref());
 		}
 

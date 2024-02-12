@@ -318,7 +318,7 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		let mut validator_rewards: BoundedBTreeMap<_, _, _> = Default::default();
 		validator_rewards.try_insert(mock_pub_key(1), 100_u128).unwrap();
 		validator_rewards.try_insert(mock_pub_key(2), 100_u128).unwrap();
-		ValidatorRewardsInSession::<Runtime>::put(validator_rewards);
+		ValidatorJobsInEra::<Runtime>::put(validator_rewards);
 
 		let profile = shared_profile();
 		for validator in vec![1, 2, 3, 4] {
@@ -330,7 +330,7 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 
 		// The reward is 1000, we have 5 authorities
 		assert_ok!(Roles::distribute_rewards());
-		assert!(ValidatorRewardsInSession::<Runtime>::get().is_empty());
+		assert!(ValidatorJobsInEra::<Runtime>::get().is_empty());
 
 		// Rewards math
 		// Total rewards : 10_000
@@ -367,7 +367,7 @@ fn test_inflation_rewards_paid_out_with_staking_rewards() {
 		let mut validator_rewards: BoundedBTreeMap<_, _, _> = Default::default();
 		validator_rewards.try_insert(mock_pub_key(1), 100_u128).unwrap();
 		validator_rewards.try_insert(mock_pub_key(2), 100_u128).unwrap();
-		ValidatorRewardsInSession::<Runtime>::put(validator_rewards);
+		ValidatorJobsInEra::<Runtime>::put(validator_rewards);
 
 		let profile = shared_profile();
 		for validator in vec![1, 2, 3, 4] {

@@ -439,9 +439,8 @@ pub mod module {
 
 			let l = if participants.is_empty() { 1u32 } else { participants.len() as u32 };
 			let fee_per_participant = job_info.fee / l.into();
-			T::RolesHandler::record_reward_to_validator(
+			T::RolesHandler::record_job_by_validators(
 				participants.to_vec(),
-				fee_per_participant,
 			)?;
 
 			for participant in participants {

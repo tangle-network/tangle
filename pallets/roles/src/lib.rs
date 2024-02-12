@@ -21,24 +21,21 @@
 use frame_support::{
 	ensure,
 	traits::{Currency, Get, ValidatorSet, ValidatorSetWithIdentification},
-	BoundedBTreeMap, CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
+	BoundedBTreeMap, BoundedVec, CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
 };
-use parity_scale_codec::MaxEncodedLen;
-use tangle_primitives::roles::ValidatorRewardDistribution;
-
-use frame_support::BoundedVec;
 pub use pallet::*;
-use parity_scale_codec::{Decode, Encode};
+use pallet_staking::EraRewardPoints;
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use sp_core::ecdsa;
 use sp_runtime::{
 	traits::{Convert, OpaqueKeys, Zero},
 	DispatchError, Saturating,
 };
-use sp_staking::offence::ReportOffence;
+use sp_staking::{offence::ReportOffence, EraIndex};
 use sp_std::{convert::TryInto, prelude::*, vec};
 use tangle_crypto_primitives::ROLE_KEY_TYPE;
-use tangle_primitives::roles::RoleType;
+use tangle_primitives::roles::{RoleType, ValidatorRewardDistribution};
 
 mod impls;
 pub mod profile;
@@ -285,18 +282,38 @@ pub mod pallet {
 	#[pallet::getter(fn min_active_bond)]
 	pub(super) type MinRestakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
-	/// The rewards accumlated by a validator per session
-	/// Rewards are assigned to a validator for every job completed, aka if a job was completed and
-	/// it involved 5 validators then all 5 validators receive the fee paid for the job divided by
-	/// 5. This data is then used to compute total jobs completed and active validators. We use
-	/// StorageValue and BTreeMap here since its a single r/w regardless of the number of
-	/// validators. So to record the points of a job with 5 validators it will be a single write
-	/// operation in storage, also allows for bounded query of all the validators active within a
-	/// session. This storage is wiped every session and rewards recorded in the session pallet.
+	/// The minimum jobs in era expected
+	#[pallet::storage]
+	#[pallet::getter(fn min_active_bond)]
+	pub(super) type MinJobsInEra<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+
+	/// The number of jobs completed by a validator in era
 	#[pallet::storage]
 	#[pallet::getter(fn validator_points_per_session)]
-	pub type ValidatorRewardsInSession<T: Config> =
-		StorageValue<_, BoundedBTreeMap<T::AccountId, BalanceOf<T>, T::MaxValidators>, ValueQuery>;
+	pub type ValidatorJobsInEra<T: Config> =
+		StorageValue<_, BoundedBTreeMap<T::AccountId, u32, T::MaxValidators>, ValueQuery>;
+
+	/// The total validator era payout for the last `HISTORY_DEPTH` eras.
+	///
+	/// Eras that haven't finished yet or has been removed doesn't have reward.
+	#[pallet::storage]
+	#[pallet::getter(fn eras_validator_reward)]
+	pub type ErasValidatorReward<T: Config> = StorageMap<_, Twox64Concat, EraIndex, BalanceOf<T>>;
+
+	/// Rewards for the last `HISTORY_DEPTH` eras.
+	/// If reward hasn't been set or has been removed then 0 reward is returned.
+	#[pallet::storage]
+	#[pallet::unbounded]
+	#[pallet::getter(fn eras_reward_points)]
+	pub type ErasRewardPoints<T: Config> =
+		StorageMap<_, Twox64Concat, EraIndex, EraRewardPoints<T::AccountId>, ValueQuery>;
+
+	/// The total amount staked for the last `HISTORY_DEPTH` eras.
+	/// If total hasn't been set or has been removed then 0 stake is returned.
+	#[pallet::storage]
+	#[pallet::getter(fn eras_total_stake)]
+	pub type ErasTotalStake<T: Config> =
+		StorageMap<_, Twox64Concat, EraIndex, BalanceOf<T>, ValueQuery>;
 
 	/// Create profile for the validator.
 	/// Validator can choose roles he is interested to opt-in and restake tokens for it.

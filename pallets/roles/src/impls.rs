@@ -91,21 +91,16 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	/// # Errors
 	///
 	/// Returns a `DispatchError` if the operation fails.
-	fn record_reward_to_validator(
-		validators: Vec<T::AccountId>,
-		reward_per_validator: BalanceOf<T>,
-	) -> DispatchResult {
-		let mut validator_reward_map = ValidatorRewardsInSession::<T>::get();
-		let default_points: BalanceOf<T> = 0u32.into();
-
+	fn record_job_by_validators(validators: Vec<T::AccountId>) -> DispatchResult {
+		let mut validator_job_map = ValidatorJobsInEra::<T>::get();
 		for validator in validators {
-			let current_points: BalanceOf<T> =
-				*validator_reward_map.get(&validator).unwrap_or(&default_points);
-			let new_points = current_points.saturating_add(reward_per_validator.into());
-			let _ = validator_reward_map.try_insert(validator, new_points);
+			let current_job_count: u32 =
+				*validator_job_map.get(&validator).unwrap_or(&Default::default());
+			let new_job_count = current_job_count.saturating_add(1u32.into());
+			let _ = validator_job_map.try_insert(validator, new_job_count);
 		}
 
-		ValidatorRewardsInSession::<T>::put(validator_reward_map);
+		ValidatorJobsInEra::<T>::put(validator_job_map);
 
 		Ok(())
 	}
@@ -389,7 +384,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		ErasRewardPoints::<T>::insert(current_era, era_reward_points);
-		ValidatorRewardsInSession::<T>::take();
+		ValidatorJobsInEra::<T>::take();
 		Self::deposit_event(Event::<T>::RolesRewardPaid { total_rewards });
 
 		Ok(())
@@ -418,25 +413,25 @@ impl<T: Config> Pallet<T> {
 		);
 
 		// Retrieve active validators and their rewards from storage
-		let active_validators = ValidatorRewardsInSession::<T>::get();
+		let active_validators = ValidatorJobsInEra::<T>::get();
 
 		// Initialize a map to store rewards for active validators
 		let mut active_validator_reward_map: BTreeMap<_, _> = Default::default();
 
-		// Calculate the total rewards for all active validators
-		let total_rewards_accumlated: BalanceOf<T> =
+		// Calculate the total jobs for all active validators
+		let total_jobs_completed: u32 =
 			active_validators.values().rfold(0_u32.into(), |acc, &x| acc + x);
 
 		// Distribute rewards to active validators based on their share
-		for (validator, reward) in active_validators.iter() {
+		for (validator, jobs_completed) in active_validators.iter() {
 			// Calculate the share of rewards for the current validator
-			let validator_share = Perbill::from_rational(reward.clone(), total_rewards_accumlated);
+			let validator_share = Perbill::from_rational(jobs_completed.clone(), total_jobs_completed);
 
 			// Calculate the actual reward amount for the current validator
 			let validator_share_of_total_reward = validator_share.mul_floor(total_rewards);
 			// Insert the validator's account ID and reward amount into the reward map
 			active_validator_reward_map
-				.insert(validator.clone(), validator_share_of_total_reward.saturating_add(*reward));
+				.insert(validator.clone(), validator_share_of_total_reward.saturating_add(*jobs_completed.into()));
 		}
 
 		// Return the map containing rewards for active validators
