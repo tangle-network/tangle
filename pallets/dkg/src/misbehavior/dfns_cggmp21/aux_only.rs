@@ -22,7 +22,7 @@ use sp_io::hashing::keccak_256;
 use sp_runtime::DispatchResult;
 use sp_std::prelude::*;
 use tangle_primitives::misbehavior::{
-	dfns_cggmp21::{SignedRoundMessage, AUX_GEN_EID},
+	dfns_cggmp21::{InvalidProofReason, SignedRoundMessage, AUX_GEN_EID},
 	MisbehaviorSubmission,
 };
 
@@ -164,6 +164,7 @@ pub fn invalid_ring_pedersen_parameters<T: Config>(
 pub fn invalid_mod_proof<T: Config>(
 	data: &MisbehaviorSubmission,
 	parties_including_offender: &[[u8; 33]],
+	reason: &InvalidProofReason,
 	round2: &[SignedRoundMessage],
 	round3: &SignedRoundMessage,
 ) -> DispatchResult {
@@ -201,18 +202,35 @@ pub fn invalid_mod_proof<T: Config>(
 		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 	let data = π_mod::Data { n: round2_msg.N.clone() };
-	let (comm, proof) = &round3_msg.mod_proof;
-	let proof = π_mod::non_interactive::verify(
-		parties_shared_state
-			.clone()
-			.chain_update(i.to_be_bytes())
-			.chain_update(&rho_bytes),
-		&data,
-		comm,
-		proof,
-	);
+	let (commitment, proof) = &round3_msg.mod_proof;
 
-	ensure!(proof.is_err(), Error::<T>::ValidModProof);
+	let invalid_proof = match reason {
+		InvalidProofReason::ModulusIsPrime { z } => π_mod::verify_n_is_prime(&data, z),
+		InvalidProofReason::ModulusIsEven => π_mod::verify_n_is_even(&data),
+		InvalidProofReason::IncorrectNthRoot(i) => π_mod::verify_incorrect_nth_root(
+			usize::from(*i),
+			parties_shared_state
+				.clone()
+				.chain_update(i.to_be_bytes())
+				.chain_update(rho_bytes),
+			&data,
+			&proof,
+			&commitment,
+		),
+		InvalidProofReason::IncorrectFourthRoot(i) => π_mod::verify_incorrect_fourth_root(
+			usize::from(*i),
+			parties_shared_state
+				.clone()
+				.chain_update(i.to_be_bytes())
+				.chain_update(rho_bytes),
+			&data,
+			&proof,
+			&commitment,
+		),
+		_ => return Err(Error::<T>::InvalidJustification.into()),
+	};
+
+	ensure!(!invalid_proof, Error::<T>::ValidModProof);
 
 	// Slash the offender!
 	// TODO: add slashing logic

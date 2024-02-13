@@ -65,7 +65,11 @@ pub enum KeyRefreshAborted {
 	/// provided invalid schnorr proof.
 	InvalidSchnorrProof,
 	/// provided invalid proof for Rmod.
-	InvalidModProof { round2: Vec<SignedRoundMessage>, round3: SignedRoundMessage },
+	InvalidModProof {
+		reason: InvalidProofReason,
+		round2: Vec<SignedRoundMessage>,
+		round3: SignedRoundMessage,
+	},
 	/// provided invalid proof for Rfac.
 	InvalidFacProof,
 	/// N, s and t parameters are invalid.
@@ -78,6 +82,35 @@ pub enum KeyRefreshAborted {
 	InvalidDataSize,
 	/// party message could not be decrypted.
 	PaillierDec,
+}
+
+/// Reason for failure. If the proof failes, you should only be interested in a
+/// reason for debugging purposes
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
+pub enum InvalidProofReason {
+	/// One equality doesn't hold. Parameterized by equality index
+	EqualityCheck(u8),
+	/// One range check doesn't hold. Parameterized by check index
+	RangeCheck(u8),
+	/// Encryption of supplied data failed when attempting to verify
+	Encryption,
+	PaillierEnc,
+	PaillierOp,
+	/// Failed to evaluate powmod
+	ModPow,
+	/// Paillier-Blum modulus is prime
+	ModulusIsPrime {
+		/// The value such that `N | z` (z divides N)
+		z: Vec<u8>,
+	},
+	/// Paillier-Blum modulus is even
+	ModulusIsEven,
+	/// Proof's z value in n-th power does not equal commitment value
+	/// parameterized by the index of failed check.
+	IncorrectNthRoot(u8),
+	/// Proof's x value in 4-th power does not equal commitment value
+	/// parameterized by the index of failed check.
+	IncorrectFourthRoot(u8),
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]

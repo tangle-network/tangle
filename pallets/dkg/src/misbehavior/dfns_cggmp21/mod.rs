@@ -92,8 +92,8 @@ impl<T: Config> Pallet<T> {
 				aux_only::invalid_decommitment::<T>(data, round1, round2),
 			KeyRefreshAborted::InvalidRingPedersenParameters { round2 } =>
 				aux_only::invalid_ring_pedersen_parameters::<T>(data, round2),
-			KeyRefreshAborted::InvalidModProof { round2, round3 } =>
-				aux_only::invalid_mod_proof::<T>(data, participants, round2, round3),
+			KeyRefreshAborted::InvalidModProof { round2, round3, reason } =>
+				aux_only::invalid_mod_proof::<T>(data, participants, reason, round2, round3),
 			_ => unimplemented!(),
 		}
 	}
