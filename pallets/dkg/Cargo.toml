@@ -13,7 +13,8 @@ frame-support = { workspace = true }
 frame-system = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
-serde = { workspace = true }
+serde = { workspace = true, default-features = false, features = ["derive"] }
+serde_with = { workspace = true, default-features = false, features = ["macros"] }
 serdect = { workspace = true, features = ["alloc"] }
 sp-core = { workspace = true }
 sp-io = { workspace = true }
@@ -22,15 +23,30 @@ sp-std = { workspace = true }
 subtle = { workspace = true }
 tangle-crypto-primitives = { workspace = true, default-features = false }
 tangle-primitives = { workspace = true, default-features = false }
-frost-core = { package = "frost-core", workspace = true, default-features = false }
-frost-ed25519 = { package = "frost-ed25519", workspace = true, default-features = false }
+rand_core = { workspace = true, default-features = false }
+rand_chacha = { workspace = true, default-features = false }
+
+# dfns/CGGMP21 specific dependencies
+malachite-base = { workspace = true, default-features = false }
+malachite-nz = { workspace = true, default-features = false }
+hex = { workspace = true, default-features = false, features = ["serde"] }
+postcard = { workspace = true, default-features = false }
+sha2 = { workspace = true, default-features = false }
+digest = { workspace = true, default-features = false }
+udigest = { workspace = true, features = ["derive"] }
+generic-ec = { workspace = true, default-features = false, features = ["serde", "udigest", "curve-secp256k1"] }
+generic-ec-zkp = { workspace = true, default-features = false, features = ["serde", "udigest", "alloc"] }
+
+# FROST specific dependencies
+frost-core = { workspace = true, default-features = false }
+frost-ed25519 = { workspace = true, default-features = false }
 elliptic-curve = { version = "0.13", features = ["hash2curve"], default-features = false }
-frost-ed448 = { package = "frost-ed448", workspace = true, default-features = false }
-frost-ristretto255 = { package = "frost-ristretto255", workspace = true, default-features = false }
-frost-secp256k1 = { package = "frost-secp256k1", workspace = true, default-features = false }
-frost-p256 = { package = "frost-p256", workspace = true, default-features = false }
-frost-p384 = { package = "frost-p384", workspace = true, default-features = false }
-blst = { workspace = true, default-features = false, features = ["portable", "no-threads"] }
+frost-ed448 = { workspace = true, default-features = false }
+frost-ristretto255 = { workspace = true, default-features = false }
+frost-secp256k1 = { workspace = true, default-features = false }
+frost-p256 = { workspace = true, default-features = false }
+frost-p384 = { workspace = true, default-features = false }
+snowbridge-milagro-bls = { workspace = true, default-features = false }
 
 # FROST RedJubjub is not yet no_std compatible
 # TODO: Update this once it is.
@@ -38,8 +54,12 @@ blst = { workspace = true, default-features = false, features = ["portable", "no
 
 [dev-dependencies]
 pallet-balances = { workspace = true }
+postcard = { workspace = true, default-features = false, features = ["alloc"] }
 smallvec = { workspace = true }
 sp-keystore = { workspace = true }
+dfns-cggmp21 = { workspace = true, default-features = false, features = ["curve-secp256k1"] }
+round-based = { workspace = true, features = ["derive"] }
+paillier-zk = { workspace = true, features = ["serde"] }
 rand_core = { workspace = true }
 frost-core = { workspace = true }
 paste = { workspace = true }
@@ -47,35 +67,36 @@ paste = { workspace = true }
 [features]
 default = ["std"]
 std = [
-  "parity-scale-codec/std",
-  "scale-info/std",
-  "sp-runtime/std",
-  "frame-support/std",
-  "frame-system/std",
-  "sp-core/std",
-  "sp-std/std",
-  "tangle-primitives/std",
-  "tangle-crypto-primitives/std",
-  "pallet-balances/std",
-  "sp-io/std",
-  "sp-keystore/std",
+ "parity-scale-codec/std",
+ "scale-info/std",
+ "sp-runtime/std",
+ "frame-support/std",
+ "frame-system/std",
+ "sp-core/std",
+ "sp-std/std",
+ "tangle-primitives/std",
+ "tangle-crypto-primitives/std",
+ "pallet-balances/std",
+ "sp-io/std",
+ "sp-keystore/std",
 
-  "frost-core/std",
-  "frost-ed25519/std",
-  "elliptic-curve/std",
-  "frost-ed448/std",
-  "frost-ristretto255/std",
-  "frost-secp256k1/std",
-  "frost-p256/std",
-  "frost-p384/std",
-  # "frost-redjubjub/std",
+ "frost-core/std",
+ "frost-ed25519/std",
+ "elliptic-curve/std",
+ "frost-ed448/std",
+ "frost-ristretto255/std",
+ "frost-secp256k1/std",
+ "frost-p256/std",
+ "frost-p384/std",
+ # "frost-redjubjub/std",
+ "snowbridge-milagro-bls/std",
 ]
 serde = []
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
-  "frame-benchmarking/runtime-benchmarks",
-  "frame-support/runtime-benchmarks",
-  "frame-system/runtime-benchmarks",
-  "sp-runtime/runtime-benchmarks",
-  "pallet-balances/runtime-benchmarks",
+ "frame-benchmarking/runtime-benchmarks",
+ "frame-support/runtime-benchmarks",
+ "frame-system/runtime-benchmarks",
+ "sp-runtime/runtime-benchmarks",
+ "pallet-balances/runtime-benchmarks",
 ]

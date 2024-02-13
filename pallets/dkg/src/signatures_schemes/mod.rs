@@ -1,3 +1,4 @@
+pub mod bls12_381;
 pub mod ecdsa;
 pub mod schnorr_frost;
 pub mod schnorr_sr25519;

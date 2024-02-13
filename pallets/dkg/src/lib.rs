@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+#![allow(mixed_script_confusables, non_snake_case)]
 #![cfg_attr(not(feature = "std"), no_std)]
 //! # Pallet-DKG
 //!
@@ -25,20 +26,23 @@
 //! DKG key.
 pub use pallet::*;
 
-extern crate alloc;
+mod functions;
+mod misbehavior;
+mod signatures_schemes;
+mod types;
+mod weights;
 
 #[cfg(test)]
 mod mock;
 
-mod functions;
-mod signatures_schemes;
 #[cfg(test)]
 mod tests;
-mod types;
-mod weights;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -130,6 +134,40 @@ pub mod pallet {
 		InvalidParticipantPublicKey,
 		/// Invalid BLS public key
 		InvalidBlsPublicKey,
+		/// Invalid Misbehavior Role type.
+		InvalidRoleType,
+		/// Invalid Justification type.
+		InvalidJustification,
+		/// Could not deserialize the round message.
+		MalformedRoundMessage,
+		/// Signed Round Message not signed by the offender.
+		NotSignedByOffender,
+		/// The submitted decommitment is valid.
+		///
+		/// This error is returned when the decommitment is valid
+		/// but the caller claims it is invalid!
+		ValidDecommitment,
+		/// The submitted decommitment data size is valid.
+		///
+		/// This error is returned when the decommitment data size is valid
+		/// but the caller claims it is invalid!
+		ValidDataSize,
+		/// The submitted messages passed Feldman verification.
+		///
+		/// This error is returned when the messages passed Feldman verification
+		/// but the caller claims it is invalid!
+		ValidFeldmanVerification,
+		/// The submitted Schnorr Proof is valid.
+		///
+		/// This error is returned when the decommitment and its
+		/// Schnorr are valid. but the caller
+		/// claims it is invalid.
+		ValidSchnorrProof,
+		/// The submitted ring pedersen parameters are valid.
+		///
+		/// This error is returned when the ring pedersen parameters are valid
+		/// but the caller claims it is invalid.
+		ValidRingPedersenParameters,
 	}
 
 	#[pallet::call]

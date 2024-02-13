@@ -1,3 +1,18 @@
+// This file is part of Tangle.
+// Copyright (C) 2022-2024 Webb Technologies Inc.
+//
+// Tangle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tangle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use frame_support::{ensure, pallet_prelude::DispatchResult};
 use sp_core::ecdsa;
 use sp_io::{hashing::keccak_256, EcdsaVerifyError};
@@ -32,6 +47,33 @@ pub fn recover_ecdsa_pub_key(data: &[u8], signature: &[u8]) -> Result<Vec<u8>, E
 	Err(EcdsaVerifyError::BadSignature)
 }
 
+/// Recovers the compressed ECDSA public key from a given message and signature.
+///
+/// # Arguments
+///
+/// * `data` - The message for which the signature is being verified.
+/// * `signature` - The ECDSA signature to be verified.
+///
+/// # Returns
+///
+/// Returns a `Result` containing the recovered ECDSA public key as a `Vec<u8>` or an
+/// `EcdsaVerifyError` if verification fails.
+pub fn recover_ecdsa_pub_key_compressed(
+	data: &[u8],
+	signature: &[u8],
+) -> Result<[u8; 33], EcdsaVerifyError> {
+	if signature.len() == ECDSA_SIGNATURE_LENGTH {
+		let mut sig = [0u8; ECDSA_SIGNATURE_LENGTH];
+		sig[..ECDSA_SIGNATURE_LENGTH].copy_from_slice(signature);
+
+		let hash = keccak_256(data);
+
+		let pub_key = sp_io::crypto::secp256k1_ecdsa_recover_compressed(&sig, &hash)?;
+		return Ok(pub_key)
+	}
+	Err(EcdsaVerifyError::BadSignature)
+}
+
 /// Verifies the DKG signature result by recovering the ECDSA public key from the provided data
 /// and signature.
 ///
@@ -41,7 +83,7 @@ pub fn recover_ecdsa_pub_key(data: &[u8], signature: &[u8]) -> Result<Vec<u8>, E
 /// # Arguments
 ///
 /// * `data` - The DKG signature result containing the message data and ECDSA signature.
-pub fn verify_dkg_signature_ecdsa<T: Config>(
+pub fn verify_ecdsa_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
@@ -157,7 +199,7 @@ pub fn verify_generated_dkg_key_ecdsa<T: Config>(
 	}
 
 	// Ensure a sufficient number of unique signers are present
-	ensure!(known_signers.len() >= data.threshold.into(), Error::<T>::NotEnoughSigners);
+	ensure!(known_signers.len() >= usize::from(data.threshold), Error::<T>::NotEnoughSigners);
 
 	Ok(())
 }

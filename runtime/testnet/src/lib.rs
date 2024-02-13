@@ -114,6 +114,7 @@ pub use tangle_primitives::{
 		traits::{JobToFee, MPCHandler},
 		JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType,
 	},
+	misbehavior::{traits::MisbehaviorHandler, MisbehaviorJustification, MisbehaviorSubmission},
 	roles::ValidatorRewardDistribution,
 	time::*,
 	types::{
@@ -1142,6 +1143,17 @@ impl
 	}
 }
 
+pub struct MockMisbehaviorHandler;
+
+impl MisbehaviorHandler for MockMisbehaviorHandler {
+	fn verify(data: MisbehaviorSubmission) -> DispatchResult {
+		match data.justification {
+			MisbehaviorJustification::DKGTSS(_) => Dkg::verify_misbehavior(data),
+			_ => Ok(()),
+		}
+	}
+}
+
 #[cfg(feature = "local-testing")]
 parameter_types! {
 	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
@@ -1188,6 +1200,7 @@ impl pallet_jobs::Config for Runtime {
 	type JobToFee = MockJobToFeeHandler;
 	type RolesHandler = Roles;
 	type MPCHandler = MockMPCHandler;
+	type MisbehaviorHandler = MockMisbehaviorHandler;
 	type PalletId = JobsPalletId;
 	type MaxParticipants = MaxParticipants;
 	type MaxSubmissionLen = MaxSubmissionLen;

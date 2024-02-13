@@ -21,11 +21,10 @@ use sp_core::Get;
 use tangle_primitives::jobs::*;
 
 use self::signatures_schemes::{
-	ecdsa::{verify_dkg_signature_ecdsa, verify_generated_dkg_key_ecdsa},
+	bls12_381::verify_bls12_381_signature,
+	ecdsa::{verify_ecdsa_signature, verify_generated_dkg_key_ecdsa},
 	schnorr_frost::verify_dkg_signature_schnorr_frost,
-	schnorr_sr25519::{
-		verify_dkg_signature_schnorr_sr25519, verify_generated_dkg_key_schnorr_sr25519,
-	},
+	schnorr_sr25519::verify_schnorr_sr25519_signature,
 };
 
 impl<T: Config> Pallet<T> {
@@ -115,13 +114,7 @@ impl<T: Config> Pallet<T> {
 	fn verify_generated_dkg_key(
 		data: DKGTSSKeySubmissionResult<T::MaxKeyLen, T::MaxParticipants, T::MaxSignatureLen>,
 	) -> DispatchResult {
-		match data.signature_scheme {
-			DigitalSignatureScheme::Ecdsa => verify_generated_dkg_key_ecdsa::<T>(data),
-			DigitalSignatureScheme::SchnorrSr25519 =>
-				verify_generated_dkg_key_schnorr_sr25519::<T>(data),
-			DigitalSignatureScheme::Bls381 => verify_generated_dkg_key_ecdsa::<T>(data),
-			_ => Err(Error::<T>::InvalidSignature.into()),
-		}
+		verify_generated_dkg_key_ecdsa::<T>(data)
 	}
 
 	/// Verifies a DKG (Distributed Key Generation) signature based on the provided DKG signature
@@ -140,13 +133,14 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		match data.signature_scheme {
 			DigitalSignatureScheme::Ecdsa =>
-				verify_dkg_signature_ecdsa::<T>(&data.data, &data.signature, &data.signing_key),
-			DigitalSignatureScheme::SchnorrSr25519 => verify_dkg_signature_schnorr_sr25519::<T>(
+				verify_ecdsa_signature::<T>(&data.data, &data.signature, &data.signing_key),
+			DigitalSignatureScheme::SchnorrSr25519 => verify_schnorr_sr25519_signature::<T>(
 				&data.data,
 				&data.signature,
 				&data.signing_key,
 			),
-			DigitalSignatureScheme::Bls381 => Self::verify_bls_signature(&data),
+			DigitalSignatureScheme::Bls381 =>
+				verify_bls12_381_signature::<T>(&data.data, &data.signature, &data.signing_key),
 			DigitalSignatureScheme::SchnorrEd25519 |
 			DigitalSignatureScheme::SchnorrEd448 |
 			DigitalSignatureScheme::SchnorrP256 |
@@ -191,40 +185,15 @@ impl<T: Config> Pallet<T> {
 
 		match data.signature_scheme {
 			DigitalSignatureScheme::Ecdsa =>
-				verify_dkg_signature_ecdsa::<T>(&data.new_key, &data.signature, &data.key)
+				verify_ecdsa_signature::<T>(&data.new_key, &data.signature, &data.key)
 					.map(|_| emit_event(data))?,
 			DigitalSignatureScheme::SchnorrSr25519 =>
-				verify_dkg_signature_schnorr_sr25519::<T>(&data.new_key, &data.signature, &data.key)
+				verify_schnorr_sr25519_signature::<T>(&data.new_key, &data.signature, &data.key)
+					.map(|_| emit_event(data))?,
+			DigitalSignatureScheme::Bls381 =>
+				verify_bls12_381_signature::<T>(&data.new_key, &data.signature, &data.key)
 					.map(|_| emit_event(data))?,
 			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
 		}
-	}
-
-	/// Verifies the DKG signature result for BLS signatures.
-	///
-	/// This function uses the BLS signature algorithm to verify the provided signature
-	/// based on the message data, signature, and signing key in the DKG signature result.
-	///
-	/// # Arguments
-	///
-	/// * `data` - The DKG signature result containing the message data, BLS signature, and signing
-	///   key.
-	fn verify_bls_signature(
-		data: &DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
-	) -> DispatchResult {
-		let public_key = blst::min_pk::PublicKey::deserialize(&data.signing_key)
-			.map_err(|_err| Error::<T>::InvalidBlsPublicKey)?;
-		let signature = blst::min_pk::Signature::deserialize(&data.signature)
-			.map_err(|_err| Error::<T>::InvalidSignatureData)?;
-		let dst = &mut [0u8; 48];
-		let signed_data = &data.data;
-
-		if signature.verify(true, signed_data, dst, &[], &public_key, true) !=
-			blst::BLST_ERROR::BLST_SUCCESS
-		{
-			return Err(Error::<T>::InvalidSignature.into())
-		}
-
-		Ok(())
 	}
 }
