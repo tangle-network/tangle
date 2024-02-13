@@ -29,7 +29,7 @@ use tangle_primitives::misbehavior::{
 	MisbehaviorSubmission,
 };
 
-use super::{hashing_rng::HashRng, DefaultDigest, SECURITY_BYTES};
+use super::{hashing_rng::HashRng, xor_array, DefaultDigest, SECURITY_BYTES};
 
 #[derive(udigest::Digestable)]
 #[udigest(tag = "dfns.cggmp21.keygen.threshold.tag")]
@@ -230,13 +230,4 @@ pub fn schnorr_proof<T: Config>(
 	// TODO: add slashing logic
 	// Slash the offender!
 	Ok(())
-}
-
-pub fn xor_array<A, B>(mut a: A, b: B) -> A
-where
-	A: AsMut<[u8]>,
-	B: AsRef<[u8]>,
-{
-	a.as_mut().iter_mut().zip(b.as_ref()).for_each(|(a_i, b_i)| *a_i ^= *b_i);
-	a
 }

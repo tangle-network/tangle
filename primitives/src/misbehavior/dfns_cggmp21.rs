@@ -65,7 +65,7 @@ pub enum KeyRefreshAborted {
 	/// provided invalid schnorr proof.
 	InvalidSchnorrProof,
 	/// provided invalid proof for Rmod.
-	InvalidModProof,
+	InvalidModProof { round2: Vec<SignedRoundMessage>, round3: SignedRoundMessage },
 	/// provided invalid proof for Rfac.
 	InvalidFacProof,
 	/// N, s and t parameters are invalid.
