@@ -1,3 +1,4 @@
+#![allow(unused)]
 //! ZK-proof for factoring of a RSA modulus. Called Пfac or Rfac in the CGGMP21
 //! paper.
 //!

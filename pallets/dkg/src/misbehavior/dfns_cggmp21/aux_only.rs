@@ -205,7 +205,7 @@ pub fn invalid_mod_proof<T: Config>(
 	let (commitment, proof) = &round3_msg.mod_proof;
 
 	let invalid_proof = match reason {
-		InvalidProofReason::ModulusIsPrime { z } => π_mod::verify_n_is_prime(&data, z),
+		InvalidProofReason::ModulusIsPrime => π_mod::verify_n_is_prime(&data),
 		InvalidProofReason::ModulusIsEven => π_mod::verify_n_is_even(&data),
 		InvalidProofReason::IncorrectNthRoot(i) => π_mod::verify_incorrect_nth_root(
 			usize::from(*i),
@@ -214,8 +214,8 @@ pub fn invalid_mod_proof<T: Config>(
 				.chain_update(i.to_be_bytes())
 				.chain_update(rho_bytes),
 			&data,
-			&proof,
-			&commitment,
+			proof,
+			commitment,
 		),
 		InvalidProofReason::IncorrectFourthRoot(i) => π_mod::verify_incorrect_fourth_root(
 			usize::from(*i),
@@ -224,8 +224,8 @@ pub fn invalid_mod_proof<T: Config>(
 				.chain_update(i.to_be_bytes())
 				.chain_update(rho_bytes),
 			&data,
-			&proof,
-			&commitment,
+			proof,
+			commitment,
 		),
 		_ => return Err(Error::<T>::InvalidJustification.into()),
 	};

@@ -99,10 +99,7 @@ pub enum InvalidProofReason {
 	/// Failed to evaluate powmod
 	ModPow,
 	/// Paillier-Blum modulus is prime
-	ModulusIsPrime {
-		/// The value such that `N | z` (z divides N)
-		z: Vec<u8>,
-	},
+	ModulusIsPrime,
 	/// Paillier-Blum modulus is even
 	ModulusIsEven,
 	/// Proof's z value in n-th power does not equal commitment value

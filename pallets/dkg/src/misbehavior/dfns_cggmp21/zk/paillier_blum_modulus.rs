@@ -62,8 +62,10 @@ pub struct Proof {
 }
 
 /// Verify that `n` is prime.
-pub fn verify_n_is_prime(data: &Data, z: Integer) -> bool {
-	data.n.mod_op(&z) == Integer::ZERO
+pub fn verify_n_is_prime(data: &Data) -> bool {
+	// N should not be prime.
+	// TODO: check if this is correct.
+	todo!("check if N = {} is prime or not.", data.n)
 }
 
 pub fn verify_n_is_even(data: &Data) -> bool {
@@ -108,8 +110,8 @@ where
 	let ys = challenge_up_to(i, shared_state, data, commitment);
 	let n = data.n.unsigned_abs_ref();
 	let point = &proof.points[i];
-	let y = &ys[i];
-	let y = if point.a { &data.n - *y } else { *y };
+	let y = ys[i].clone();
+	let y = if point.a { &data.n - y } else { y };
 	let y = if point.b { (y * &commitment.w).mod_op(&data.n) } else { y };
 	point.x.unsigned_abs_ref().mod_pow(&Natural::from(4u32), n).ne(&y)
 }
