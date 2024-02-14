@@ -352,26 +352,14 @@ impl<T: Config> Pallet<T> {
 		// Validate existing result
 		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
 
-		// ensure the participants are the expected participants from job
-		let mut participant_keys: Vec<sp_core::ecdsa::Public> = Default::default();
-
-		let participants = phase_one_result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
-		for participant in participants {
-			let key = T::RolesHandler::get_validator_role_key(participant);
-			ensure!(key.is_some(), Error::<T>::ValidatorRoleKeyNotFound);
-			let pub_key = sp_core::ecdsa::Public::from_slice(&key.expect("checked above")[0..33])
-				.map_err(|_| Error::<T>::InvalidValidator)?;
-			participant_keys.push(pub_key);
-		}
-
-		let signing_key = match phase_one_result.result {
+		let verifying_key = match phase_one_result.result {
 			JobResult::DKGPhaseOne(result) => result.key,
 			_ => return Err(Error::<T>::InvalidJobPhase.into()),
 		};
 		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResultOf::<T> {
 			signature: info.signature.clone(),
 			data: info.data,
-			signing_key,
+			verifying_key,
 			signature_scheme: info.signature_scheme,
 		});
 

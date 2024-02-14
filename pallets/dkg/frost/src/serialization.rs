@@ -1,8 +1,10 @@
 //! Serialization support.
 
+use crate::error::Error;
+
 use super::traits::{Ciphersuite, Field, Group};
 use alloc::string::String;
-use sp_std::vec;
+use sp_std::{vec, vec::Vec};
 
 /// Helper struct to serialize a Scalar.
 pub(crate) struct ScalarSerialization<C: Ciphersuite>(
@@ -97,7 +99,7 @@ where
 	use serde::Serialize;
 
 	if s.is_human_readable() {
-		C::ID.serialize(s)
+		s.serialize_str(C::ID)
 	} else {
 		serde::Serialize::serialize(&short_id::<C>(), s)
 	}
@@ -150,30 +152,26 @@ where
 // parametrized with the ciphersuite, but trait aliases are not currently
 // supported: <https://github.com/rust-lang/rust/issues/41517>
 
-#[cfg(feature = "serialization")]
-pub(crate) trait Serialize<C: Ciphersuite> {
+pub(crate) trait Serialize {
 	/// Serialize the struct into a Vec.
-	fn serialize(&self) -> Result<Vec<u8>, Error<C>>;
+	fn serialize(&self) -> Result<Vec<u8>, Error>;
 }
 
-#[cfg(feature = "serialization")]
-pub(crate) trait Deserialize<C: Ciphersuite> {
+pub(crate) trait Deserialize {
 	/// Deserialize the struct from a slice of bytes.
-	fn deserialize(bytes: &[u8]) -> Result<Self, Error<C>>
+	fn deserialize(bytes: &[u8]) -> Result<Self, Error>
 	where
-		Self: std::marker::Sized;
+		Self: core::marker::Sized;
 }
 
-#[cfg(feature = "serialization")]
-impl<T: serde::Serialize, C: Ciphersuite> Serialize<C> for T {
-	fn serialize(&self) -> Result<Vec<u8>, Error<C>> {
-		postcard::to_stdvec(self).map_err(|_| Error::SerializationError)
+impl<T: serde::Serialize> Serialize for T {
+	fn serialize(&self) -> Result<Vec<u8>, Error> {
+		postcard::to_allocvec(self).map_err(|_| Error::SerializationError)
 	}
 }
 
-#[cfg(feature = "serialization")]
-impl<T: for<'de> serde::Deserialize<'de>, C: Ciphersuite> Deserialize<C> for T {
-	fn deserialize(bytes: &[u8]) -> Result<Self, Error<C>> {
+impl<T: for<'de> serde::Deserialize<'de>> Deserialize for T {
+	fn deserialize(bytes: &[u8]) -> Result<Self, Error> {
 		postcard::from_bytes(bytes).map_err(|_| Error::DeserializationError)
 	}
 }

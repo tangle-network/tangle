@@ -117,8 +117,8 @@ pub struct DKGTSSSignatureResult<
 	/// The signature to verify
 	pub signature: BoundedVec<u8, MaxSignatureLen>,
 
-	/// The expected key for the signature
-	pub signing_key: BoundedVec<u8, MaxKeyLen>,
+	/// The expected key for verifying the signature
+	pub verifying_key: BoundedVec<u8, MaxKeyLen>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]

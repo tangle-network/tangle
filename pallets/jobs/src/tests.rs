@@ -241,7 +241,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			RoleType::Tss(threshold_signature_role_type),
 			1,
 			JobResult::DKGPhaseTwo(DKGTSSSignatureResult {
-				signing_key: vec![].try_into().unwrap(),
+				verifying_key: vec![].try_into().unwrap(),
 				signature: vec![].try_into().unwrap(),
 				data: vec![].try_into().unwrap(),
 				signature_scheme: DigitalSignatureScheme::Ecdsa
