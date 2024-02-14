@@ -316,7 +316,7 @@ parameter_types! {
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxParticipants: u32 = 10;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxSubmissionLen: u32 = 256;
+	pub const MaxSubmissionLen: u32 = 32;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxKeyLen: u32 = 256;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
@@ -352,6 +352,7 @@ impl pallet_jobs::Config for Runtime {
 
 parameter_types! {
 	pub InflationRewardPerSession: Balance = 10_000;
+	pub MaxRestake: Percent = Percent::from_percent(50);
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
 }
 
@@ -367,6 +368,7 @@ impl Config for Runtime {
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxKeyLen = MaxKeyLen;
 	type MaxValidators = ConstU32<100>;
+	type MaxRestake = MaxRestake;
 	type WeightInfo = ();
 }
 

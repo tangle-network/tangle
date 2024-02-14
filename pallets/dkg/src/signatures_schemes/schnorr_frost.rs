@@ -30,10 +30,10 @@ macro_rules! verify_signature {
 	($impl_type:ty, $key:expr, $signature:expr, $msg:expr, $key_default:expr, $sig_default:expr) => {{
 		let verifying_key: VerifyingKey<$impl_type> =
 			VerifyingKey::deserialize($key.try_into().unwrap_or($key_default))
-				.map_err(|_| Error::<T>::InvalidVerifyingKey)?;
+				.map_err(|_| Error::<T>::InvalidVerifyingKeyDeserialization)?;
 		let sig: Signature<$impl_type> =
 			Signature::deserialize($signature.try_into().unwrap_or($sig_default))
-				.map_err(|_| Error::<T>::InvalidSignature)?;
+				.map_err(|_| Error::<T>::InvalidSignatureDeserialization)?;
 		verifying_key.verify($msg, &sig).map_err(|_| Error::<T>::InvalidSignature)?
 	}};
 }

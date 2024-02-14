@@ -22,11 +22,18 @@ use sp_io::hashing::keccak_256;
 use sp_runtime::DispatchResult;
 use sp_std::prelude::*;
 use tangle_primitives::misbehavior::{
-	dfns_cggmp21::{SignedRoundMessage, AUX_GEN_EID},
+	dfns_cggmp21::{InvalidProofReason, SignedRoundMessage, AUX_GEN_EID},
 	MisbehaviorSubmission,
 };
 
-use super::{zk::ring_pedersen_parameters as π_prm, DefaultDigest, Integer, SECURITY_BYTES};
+use super::{
+	xor_array,
+	zk::{
+		no_small_factor::non_interactive as π_fac, paillier_blum_modulus as π_mod,
+		ring_pedersen_parameters as π_prm,
+	},
+	DefaultDigest, Integer, SECURITY_BYTES,
+};
 
 #[derive(udigest::Digestable)]
 #[udigest(tag = "dfns.cggmp21.aux_gen.tag")]
@@ -78,6 +85,16 @@ pub struct MsgRound2 {
 	#[serde(with = "hex")]
 	#[udigest(as_bytes)]
 	pub decommit: [u8; SECURITY_BYTES],
+}
+
+/// Unicast message of round 3, sent to each participant
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+pub struct MsgRound3 {
+	/// $\psi_i$
+	// this should be L::M instead, but no rustc support yet
+	pub mod_proof: (π_mod::Commitment, π_mod::Proof),
+	/// $\phi_i^j$
+	pub fac_proof: π_fac::Proof,
 }
 
 /// Given a KeyRefresh Round1 and Round2 messages, verify the misbehavior and return the result.
@@ -138,6 +155,82 @@ pub fn invalid_ring_pedersen_parameters<T: Config>(
 	);
 
 	ensure!(proof.is_err(), Error::<T>::ValidRingPedersenParameters);
+
+	// Slash the offender!
+	// TODO: add slashing logic
+	Ok(())
+}
+
+pub fn invalid_mod_proof<T: Config>(
+	data: &MisbehaviorSubmission,
+	parties_including_offender: &[[u8; 33]],
+	reason: &InvalidProofReason,
+	round2: &[SignedRoundMessage],
+	round3: &SignedRoundMessage,
+) -> DispatchResult {
+	let i = round3.sender;
+	let n = parties_including_offender.len() as u16;
+	Pallet::<T>::ensure_signed_by_offender(round3, data.offender)?;
+	ensure!(round2.len() == usize::from(n), Error::<T>::InvalidJustification);
+	round2
+		.iter()
+		.zip(parties_including_offender)
+		.try_for_each(|(r, p)| Pallet::<T>::ensure_signed_by(r, *p))?;
+
+	let decomm = round2.get(usize::from(i)).ok_or(Error::<T>::InvalidJustification)?;
+	// double-check
+	Pallet::<T>::ensure_signed_by_offender(decomm, data.offender)?;
+
+	let job_id_bytes = data.job_id.to_be_bytes();
+	let mix = keccak_256(AUX_GEN_EID);
+	let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
+	let parties_shared_state = DefaultDigest::new_with_prefix(DefaultDigest::digest(eid_bytes));
+
+	let round2_msgs = round2
+		.iter()
+		.map(|r| {
+			postcard::from_bytes::<MsgRound2>(&r.message)
+				.map_err(|_| Error::<T>::MalformedRoundMessage)
+		})
+		.collect::<Result<Vec<_>, _>>()?;
+	let round2_msg = round2_msgs.get(usize::from(i)).ok_or(Error::<T>::InvalidJustification)?;
+
+	// rho in paper, collective random bytes
+	let rho_bytes = round2_msgs.iter().map(|d| &d.rho_bytes).fold([0u8; SECURITY_BYTES], xor_array);
+
+	let round3_msg = postcard::from_bytes::<MsgRound3>(&round3.message)
+		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+
+	let data = π_mod::Data { n: round2_msg.N.clone() };
+	let (commitment, proof) = &round3_msg.mod_proof;
+
+	let invalid_proof = match reason {
+		InvalidProofReason::ModulusIsPrime => π_mod::verify_n_is_prime(&data),
+		InvalidProofReason::ModulusIsEven => π_mod::verify_n_is_even(&data),
+		InvalidProofReason::IncorrectNthRoot(i) => π_mod::verify_incorrect_nth_root(
+			usize::from(*i),
+			parties_shared_state
+				.clone()
+				.chain_update(i.to_be_bytes())
+				.chain_update(rho_bytes),
+			&data,
+			proof,
+			commitment,
+		),
+		InvalidProofReason::IncorrectFourthRoot(i) => π_mod::verify_incorrect_fourth_root(
+			usize::from(*i),
+			parties_shared_state
+				.clone()
+				.chain_update(i.to_be_bytes())
+				.chain_update(rho_bytes),
+			&data,
+			proof,
+			commitment,
+		),
+		_ => return Err(Error::<T>::InvalidJustification.into()),
+	};
+
+	ensure!(!invalid_proof, Error::<T>::ValidModProof);
 
 	// Slash the offender!
 	// TODO: add slashing logic

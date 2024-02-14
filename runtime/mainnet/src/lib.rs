@@ -1134,6 +1134,7 @@ impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
 parameter_types! {
 	pub InflationRewardPerSession: Balance = 10_000;
 	pub const MaxValidators : u32 = 1000;
+	pub MaxRestake: Percent = Percent::from_percent(50);
 	pub Reward : tangle_primitives::roles::ValidatorRewardDistribution = tangle_primitives::roles::ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
 }
 
@@ -1149,6 +1150,7 @@ impl pallet_roles::Config for Runtime {
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxValidators = MaxValidators;
 	type MaxKeyLen = MaxKeyLen;
+	type MaxRestake = MaxRestake;
 	type WeightInfo = ();
 }
 
@@ -1179,7 +1181,7 @@ parameter_types! {
 	pub const MaxParticipants: u32 = 10;
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 256;
+	pub const MaxSubmissionLen: u32 = 32;
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxKeyLen: u32 = 256;

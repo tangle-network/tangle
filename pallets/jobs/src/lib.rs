@@ -268,7 +268,7 @@ pub mod module {
 
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), role_type),
+						T::RolesHandler::is_restaker(participant.clone(), role_type),
 						Error::<T>::InvalidValidator
 					);
 
@@ -295,7 +295,7 @@ pub mod module {
 				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_validator(participant.clone(), role_type),
+						T::RolesHandler::is_restaker(participant.clone(), role_type),
 						Error::<T>::InvalidValidator
 					);
 

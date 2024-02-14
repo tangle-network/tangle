@@ -28,8 +28,8 @@ pub use pallet::*;
 
 mod functions;
 mod misbehavior;
-mod signatures_schemes;
-mod types;
+pub mod signatures_schemes;
+pub mod types;
 mod weights;
 
 #[cfg(test)]
@@ -126,8 +126,14 @@ pub mod pallet {
 		DuplicateSignature,
 		/// Invalid signature submitted
 		InvalidSignature,
+		/// Invalid signature scheme
+		InvalidSignatureScheme,
+		/// Invalid signature deserialization
+		InvalidSignatureDeserialization,
 		/// Invalid verifying key submitted
 		InvalidVerifyingKey,
+		/// Invalid verifying key deserialization
+		InvalidVerifyingKeyDeserialization,
 		/// Signed with a different key
 		SigningKeyMismatch,
 		/// Invalid participant public key
@@ -168,6 +174,11 @@ pub mod pallet {
 		/// This error is returned when the ring pedersen parameters are valid
 		/// but the caller claims it is invalid.
 		ValidRingPedersenParameters,
+		/// The submitted Mod Proof is valid.
+		///
+		/// This error is returned when the Mod Proof is valid
+		/// but the caller claims it is invalid.
+		ValidModProof,
 	}
 
 	#[pallet::call]

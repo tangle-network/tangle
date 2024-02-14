@@ -4359,7 +4359,7 @@ export default {
     _enum: ['AlreadyInitialized', 'LightClientUpdateNotAllowed', 'BlockAlreadySubmitted', 'UnknownParentHeader', 'NotTrustedSigner', 'ValidateUpdatesParameterError', 'TrustlessModeError', 'InvalidSyncCommitteeBitsSum', 'SyncCommitteeBitsSumLessThanThreshold', 'InvalidNetworkConfig', 'InvalidBlsSignature', 'InvalidExecutionBlock', 'ActiveHeaderSlotLessThanFinalizedSlot', 'UpdateHeaderSlotLessThanFinalizedHeaderSlot', 'UpdateSignatureSlotLessThanAttestedHeaderSlot', 'InvalidUpdatePeriod', 'InvalidFinalityProof', 'InvalidExecutionBlockHashProof', 'NextSyncCommitteeNotPresent', 'InvalidNextSyncCommitteeProof', 'FinalizedExecutionHeaderNotPresent', 'FinalizedBeaconHeaderNotPresent', 'UnfinalizedHeaderNotPresent', 'SyncCommitteeUpdateNotPresent', 'HeaderHashDoesNotExist', 'BlockHashesDoNotMatch', 'InvalidSignaturePeriod', 'CurrentSyncCommitteeNotSet', 'NextSyncCommitteeNotSet', 'InvalidClientMode', 'HashesGcThresholdInsufficient', 'ChainCannotBeClosed']
   },
   /**
-   * Lookup645: pallet_roles::RoleStakingLedger<T>
+   * Lookup645: pallet_roles::RestakingLedger<T>
    **/
   PalletRolesRoleStakingLedger: {
     stash: 'AccountId32',

@@ -4221,6 +4221,7 @@ dependencies = [
  "debugless-unwrap",
  "hex",
  "parity-scale-codec 3.6.9",
+ "postcard",
  "rand_core 0.6.4",
  "serde",
  "serdect",

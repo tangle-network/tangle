@@ -334,7 +334,7 @@ pub enum ValidatorOffenceType {
 
 /// An offence report that is filed if a validator misbehaves.
 #[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq)]
-pub struct ReportValidatorOffence<Offender> {
+pub struct ReportRestakerOffence<Offender> {
 	/// The current session index in which offence is reported.
 	pub session_index: u32,
 	/// The size of the validator set in current session/era.

@@ -22,7 +22,7 @@ use pallet_staking::{CurrentEra, ErasRewardPoints, ErasValidatorReward};
 use profile::{IndependentRestakeProfile, Record, SharedRestakeProfile};
 use sp_std::{default::Default, vec};
 use tangle_primitives::{
-	jobs::ReportValidatorOffence,
+	jobs::ReportRestakerOffence,
 	roles::{ThresholdSignatureRoleType, ZeroKnowledgeRoleType},
 };
 
@@ -417,7 +417,7 @@ fn test_report_offence_should_work() {
 		let session_index = pallet_session::CurrentIndex::<Runtime>::get();
 
 		// Create offence report.
-		let offence_report = ReportValidatorOffence {
+		let offence_report = ReportRestakerOffence {
 			session_index,
 			validator_set_count: 4,
 			role_type: RoleType::Tss(Default::default()),
