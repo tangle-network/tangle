@@ -126,8 +126,14 @@ pub mod pallet {
 		DuplicateSignature,
 		/// Invalid signature submitted
 		InvalidSignature,
+		/// Invalid signature scheme
+		InvalidSignatureScheme,
+		/// Invalid signature deserialization
+		InvalidSignatureDeserialization,
 		/// Invalid verifying key submitted
 		InvalidVerifyingKey,
+		/// Invalid verifying key deserialization
+		InvalidVerifyingKeyDeserialization,
 		/// Signed with a different key
 		SigningKeyMismatch,
 		/// Invalid participant public key

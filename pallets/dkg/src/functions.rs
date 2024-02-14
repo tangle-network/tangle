@@ -133,14 +133,14 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		match data.signature_scheme {
 			DigitalSignatureScheme::Ecdsa =>
-				verify_ecdsa_signature::<T>(&data.data, &data.signature, &data.signing_key),
+				verify_ecdsa_signature::<T>(&data.data, &data.signature, &data.verifying_key),
 			DigitalSignatureScheme::SchnorrSr25519 => verify_schnorr_sr25519_signature::<T>(
 				&data.data,
 				&data.signature,
-				&data.signing_key,
+				&data.verifying_key,
 			),
 			DigitalSignatureScheme::Bls381 =>
-				verify_bls12_381_signature::<T>(&data.data, &data.signature, &data.signing_key),
+				verify_bls12_381_signature::<T>(&data.data, &data.signature, &data.verifying_key),
 			DigitalSignatureScheme::SchnorrEd25519 |
 			DigitalSignatureScheme::SchnorrEd448 |
 			DigitalSignatureScheme::SchnorrP256 |
@@ -150,7 +150,7 @@ impl<T: Config> Pallet<T> {
 				data.signature_scheme,
 				&data.data,
 				&data.signature,
-				&data.signing_key,
+				&data.verifying_key,
 			),
 			_ => Err(Error::<T>::InvalidSignature.into()),
 		}
@@ -193,7 +193,7 @@ impl<T: Config> Pallet<T> {
 			DigitalSignatureScheme::Bls381 =>
 				verify_bls12_381_signature::<T>(&data.new_key, &data.signature, &data.key)
 					.map(|_| emit_event(data))?,
-			_ => Err(Error::<T>::InvalidSignature.into()), // unimplemented
+			_ => Err(Error::<T>::InvalidSignatureScheme.into()), // unimplemented
 		}
 	}
 }

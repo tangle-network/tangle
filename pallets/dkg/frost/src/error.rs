@@ -31,6 +31,11 @@ pub enum Error {
 	/// An error related to a Group (usually an elliptic curve or constructed from one) or one of
 	/// its Elements.
 	Group(GroupError),
+	/// Serialization error
+	SerializationError,
+	/// Deserialization error
+	DeserializationError,
+	IdentifierDerivationNotSupported,
 	/// An error related to a Malformed Signature.
 	MalformedSignature,
 	/// An error related to an invalid signature verification
@@ -50,6 +55,10 @@ impl Debug for Error {
 			Error::InvalidSignature => write!(f, "Invalid Signature error"),
 			Error::MalformedVerifyingKey => write!(f, "Malformed VerifyingKey"),
 			Error::MalformedSigningKey => write!(f, "Malformed SigningKey"),
+			Error::SerializationError => write!(f, "Serialization error"),
+			Error::DeserializationError => write!(f, "Deserialization error"),
+			Error::IdentifierDerivationNotSupported =>
+				write!(f, "Identifier derivation not supported"),
 		}
 	}
 }

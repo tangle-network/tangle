@@ -26,6 +26,8 @@ extern crate alloc;
 pub mod challenge;
 pub mod const_crc32;
 pub mod error;
+pub mod identifier;
+pub mod keys;
 pub mod serialization;
 pub mod signature;
 pub mod signing_key;
@@ -33,9 +35,11 @@ pub mod traits;
 pub mod util;
 pub mod verifying_key;
 
+use core::marker::PhantomData;
+
 #[cfg(feature = "std")]
 use rand_core::{CryptoRng, RngCore};
-#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 use traits::{Ciphersuite, Field, Group, Scalar};
 
 /// Generates a random nonzero scalar.
@@ -50,4 +54,14 @@ pub fn random_nonzero<C: Ciphersuite, R: RngCore + CryptoRng>(rng: &mut R) -> Sc
 			return scalar
 		}
 	}
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Header<C: Ciphersuite> {
+	/// Format version
+	pub version: u8,
+	/// Ciphersuite ID
+	pub ciphersuite: (),
+	#[serde(skip)]
+	pub phantom: PhantomData<C>,
 }
