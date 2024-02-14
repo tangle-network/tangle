@@ -28,8 +28,8 @@ pub use pallet::*;
 
 mod functions;
 mod misbehavior;
-mod signatures_schemes;
-mod types;
+pub mod signatures_schemes;
+pub mod types;
 mod weights;
 
 #[cfg(test)]
