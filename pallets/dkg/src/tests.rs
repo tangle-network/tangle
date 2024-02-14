@@ -310,7 +310,7 @@ fn dkg_signature_verification_works_bls() {
 			DKGTSSSignatureResult {
 				signature_scheme: DigitalSignatureScheme::Bls381,
 				signature: signature.as_bytes().to_vec().try_into().unwrap(),
-				signing_key: pub_key.as_bytes().to_vec().try_into().unwrap(),
+				verifying_key: pub_key.as_bytes().to_vec().try_into().unwrap(),
 				data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
 			};
 
@@ -325,7 +325,7 @@ fn dkg_signature_verification_works_bls() {
 				signature_scheme: DigitalSignatureScheme::Bls381,
 				signature: signature.as_bytes()[..10].to_vec().try_into().unwrap(),
 				data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
-				signing_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
+				verifying_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
 			};
 
 		// Should fail for an invalid signature
@@ -338,7 +338,7 @@ fn dkg_signature_verification_works_bls() {
 			DKGTSSSignatureResult {
 				signature_scheme: DigitalSignatureScheme::Bls381,
 				signature: signature.as_bytes().to_vec().try_into().unwrap(),
-				signing_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
+				verifying_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
 				data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
 			};
 
@@ -357,7 +357,7 @@ fn dkg_signature_verification_works_ecdsa() {
 			signature_scheme: DigitalSignatureScheme::Ecdsa,
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
-			signing_key: pub_key.to_raw_vec().try_into().unwrap(),
+			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
 		};
 
 		// should fail for invalid keys
@@ -371,7 +371,7 @@ fn dkg_signature_verification_works_ecdsa() {
 			signature_scheme: DigitalSignatureScheme::Ecdsa,
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
-			signing_key: pub_key.to_raw_vec().try_into().unwrap(),
+			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
 		};
 
 		// should work with correct params
@@ -390,7 +390,7 @@ fn dkg_signature_verification_works_schnorr() {
 			signature_scheme: DigitalSignatureScheme::SchnorrSr25519,
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
-			signing_key: pub_key.to_raw_vec().try_into().unwrap(),
+			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
 		};
 
 		// should fail for invalid keys
@@ -404,7 +404,7 @@ fn dkg_signature_verification_works_schnorr() {
 			signature_scheme: DigitalSignatureScheme::SchnorrSr25519,
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
-			signing_key: pub_key.to_raw_vec().try_into().unwrap(),
+			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
 		};
 
 		// should work with correct params

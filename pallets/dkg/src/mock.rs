@@ -80,7 +80,7 @@ parameter_types! {
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxParticipants: u32 = 10;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxSubmissionLen: u32 = 256;
+	pub const MaxSubmissionLen: u32 = 32;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxKeyLen: u32 = 256;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]

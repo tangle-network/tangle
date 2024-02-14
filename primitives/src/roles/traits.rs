@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::jobs::ReportValidatorOffence;
+use crate::jobs::ReportRestakerOffence;
 use sp_runtime::DispatchResult;
 use sp_std::vec::Vec;
 
@@ -32,7 +32,7 @@ pub trait RolesHandler<AccountId> {
 	/// # Returns
 	///
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	fn is_validator(address: AccountId, role_type: RoleType) -> bool;
+	fn is_restaker(address: AccountId, role_type: RoleType) -> bool;
 
 	/// Report offence for the given validator.
 	/// This function will report validators for committing offence.
@@ -43,7 +43,7 @@ pub trait RolesHandler<AccountId> {
 	/// # Returns
 	///
 	/// Returns Ok() if validator offence report is submitted successfully.
-	fn report_offence(offence_report: ReportValidatorOffence<AccountId>) -> DispatchResult;
+	fn report_offence(offence_report: ReportRestakerOffence<AccountId>) -> DispatchResult;
 
 	/// Retrieves role key associated with given validator
 	///

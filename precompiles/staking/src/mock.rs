@@ -493,7 +493,6 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 /// Used to run to the specified block number
 pub(crate) fn run_to_block(n: BlockNumber) {
 	while System::block_number() < n {
-		println!("System nlock number : {}", System::block_number());
 		<frame_system::Pallet<Runtime> as OnFinalize<u64>>::on_finalize(System::block_number());
 		<pallet_session::Pallet<Runtime> as OnFinalize<u64>>::on_finalize(System::block_number());
 		<pallet_balances::Pallet<Runtime> as OnFinalize<u64>>::on_finalize(System::block_number());
@@ -506,9 +505,6 @@ pub(crate) fn run_to_block(n: BlockNumber) {
 		<pallet_staking::Pallet<Runtime> as OnInitialize<u64>>::on_initialize(
 			System::block_number(),
 		);
-
-		let current_era = Staking::current_era().unwrap_or(0);
-		println!("current_era : {}", current_era);
 	}
 }
 
@@ -519,7 +515,6 @@ pub(crate) fn start_session(session_index: SessionIndex) {
 	} else {
 		Offset::get() + (session_index.saturating_sub(1) as u64) * Period::get()
 	};
-	println!("RUNTOBLOCK: {}", end);
 	run_to_block(end);
 	// session must have progressed properly.
 	assert_eq!(

@@ -14,8 +14,10 @@ use parity_scale_codec::{Decode, Encode};
 use sp_std::vec::Vec;
 
 /// A valid verifying key for Schnorr signatures over a FROST [`Ciphersuite::Group`].
-#[derive(Copy, Clone, PartialEq, Eq, Encode, Decode)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, serde::Serialize, serde::Deserialize)]
+#[serde(bound = "C: Ciphersuite")]
+#[serde(try_from = "ElementSerialization<C>")]
+#[serde(into = "ElementSerialization<C>")]
 pub struct VerifyingKey<C>
 where
 	C: Ciphersuite,
