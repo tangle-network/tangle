@@ -20,16 +20,23 @@ use scale_info::TypeInfo;
 use sp_core::RuntimeDebug;
 use sp_std::prelude::*;
 
+#[cfg(not(feature = "std"))]
+use ::alloc::string::{String, ToString};
+
 #[derive(Clone, RuntimeDebug, ::serde::Deserialize, ::serde::Serialize)]
 pub struct RugInteger {
 	radix: i32,
-	#[cfg(not(feature = "std"))]
-	value: ::alloc::string::String,
-	#[cfg(feature = "std")]
-	value: ::std::string::String,
+	value: String,
 }
 
 impl RugInteger {
+	/// Create a new `RugInteger` from a utf8 bytes and a radix.
+	pub fn from_utf8_and_radix(v: &[u8], radix: i32) -> Result<Self, core::str::Utf8Error> {
+		let value = core::str::from_utf8(v).map(|x| x.to_string())?;
+		Ok(Self { radix, value })
+	}
+
+	/// Convert `RugInteger` to a `Vec<u8>`.
 	pub fn to_vec(&self) -> Vec<u8> {
 		if self.value == "0" || self.value.is_empty() {
 			return Vec::new()

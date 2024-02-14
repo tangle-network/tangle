@@ -15,7 +15,10 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(non_snake_case)]
 
-use crate::{misbehavior::dfns_cggmp21::zk::ring_pedersen_parameters::original as π_prm, mock::*};
+use crate::{
+	misbehavior::dfns_cggmp21::{xor_array, zk::ring_pedersen_parameters::original as π_prm},
+	mock::*,
+};
 
 use dfns_cggmp21::{
 	generic_ec::Point,
@@ -481,7 +484,7 @@ fn submit_keygen_schnorr_proof_verification_should_work() {
 		let rid = round2a_msgs
 			.iter()
 			.map(|(_, d)| &d.rid)
-			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), _keygen::xor_array);
+			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), xor_array);
 
 		let polynomial_sum =
 			round2a_msgs.iter().map(|(_, d)| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
@@ -594,7 +597,7 @@ fn submit_keygen_invalid_schnorr_proof_verification_should_work() {
 		let rid = round2a_msgs
 			.iter()
 			.map(|(_, d)| &d.rid)
-			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), _keygen::xor_array);
+			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), xor_array);
 
 		let polynomial_sum =
 			round2a_msgs.iter().map(|(_, d)| &d.F).sum::<Polynomial<Point<Secp256k1>>>();

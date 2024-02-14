@@ -174,6 +174,11 @@ pub mod pallet {
 		/// This error is returned when the ring pedersen parameters are valid
 		/// but the caller claims it is invalid.
 		ValidRingPedersenParameters,
+		/// The submitted Mod Proof is valid.
+		///
+		/// This error is returned when the Mod Proof is valid
+		/// but the caller claims it is invalid.
+		ValidModProof,
 	}
 
 	#[pallet::call]

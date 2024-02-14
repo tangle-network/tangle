@@ -83,7 +83,7 @@ impl<T: Config> Pallet<T> {
 	/// result
 	pub fn verify_dfns_cggmp21_key_refresh_misbehavior(
 		data: &MisbehaviorSubmission,
-		_participants: &[[u8; 33]],
+		participants: &[[u8; 33]],
 		_t: u16,
 		reason: &KeyRefreshAborted,
 	) -> DispatchResult {
@@ -92,6 +92,8 @@ impl<T: Config> Pallet<T> {
 				aux_only::invalid_decommitment::<T>(data, round1, round2),
 			KeyRefreshAborted::InvalidRingPedersenParameters { round2 } =>
 				aux_only::invalid_ring_pedersen_parameters::<T>(data, round2),
+			KeyRefreshAborted::InvalidModProof { round2, round3, reason } =>
+				aux_only::invalid_mod_proof::<T>(data, participants, reason, round2, round3),
 			_ => unimplemented!(),
 		}
 	}
@@ -111,4 +113,13 @@ impl<T: Config> Pallet<T> {
 pub fn validate_public_paillier_key_size(n: &Integer) -> bool {
 	use malachite_base::num::logic::traits::SignificantBits;
 	n.significant_bits() >= 8 * (SECURITY_BITS as u64) - 1
+}
+
+pub fn xor_array<A, B>(mut a: A, b: B) -> A
+where
+	A: AsMut<[u8]>,
+	B: AsRef<[u8]>,
+{
+	a.as_mut().iter_mut().zip(b.as_ref()).for_each(|(a_i, b_i)| *a_i ^= *b_i);
+	a
 }
