@@ -14,7 +14,7 @@
 #
 FROM ubuntu:22.04
 
-COPY ./target/release/tangle /usr/local/bin/
+COPY ../target/release/tangle /usr/local/bin/
 
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Tangle Network Node"
