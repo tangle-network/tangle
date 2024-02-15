@@ -76,12 +76,9 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ./docker/Tangle.Dockerfile
+          file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            BINARY=${{ matrix.binary }}
-            FEATURES=${{ matrix.features }}
           cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
           cache-to: type=inline
