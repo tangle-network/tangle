@@ -18,7 +18,7 @@
 use super::*;
 use frame_support::{assert_err, assert_ok, BoundedVec};
 use mock::*;
-use pallet_staking::CurrentEra;
+use pallet_staking::{CurrentEra, ErasTotalStake};
 use profile::{IndependentRestakeProfile, Record, SharedRestakeProfile};
 use sp_std::{default::Default, vec};
 use tangle_primitives::{
@@ -310,6 +310,7 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let _total_inflation_reward = 10_000;
 		CurrentEra::<Runtime>::put(1);
+		ErasTotalStake::<Runtime>::insert(1, 40_000);
 
 		assert_eq!(Balances::free_balance(mock_pub_key(1)), 20_000);
 		assert_eq!(Balances::free_balance(mock_pub_key(2)), 20_000);
@@ -351,6 +352,130 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		// 3 & 4 receives only 5000/4
 		assert_eq!(*reward_points.individual.get(&mock_pub_key(3)).unwrap(), 1250_u32);
 		assert_eq!(*reward_points.individual.get(&mock_pub_key(4)).unwrap(), 1250_u32);
+	});
+}
+
+#[test]
+fn test_reward_dist_takes_restake_into_account() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		let _total_inflation_reward = 10_000;
+		CurrentEra::<Runtime>::put(1);
+		ErasTotalStake::<Runtime>::insert(1, 24000);
+
+		let profile = SharedRestakeProfile {
+			records: BoundedVec::try_from(vec![
+				Record {
+					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					amount: None,
+				},
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+					amount: None,
+				},
+			])
+			.unwrap(),
+			amount: 1000,
+		};
+
+		for validator in vec![1, 2] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				Profile::Shared(profile.clone())
+			));
+		}
+
+		let profile = SharedRestakeProfile {
+			records: BoundedVec::try_from(vec![
+				Record {
+					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					amount: None,
+				},
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+					amount: None,
+				},
+			])
+			.unwrap(),
+			amount: 5000,
+		};
+		for validator in vec![3, 4] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				Profile::Shared(profile.clone())
+			));
+		}
+
+		// The reward is 1000, we have 5 authorities
+		assert_ok!(Roles::compute_rewards(1));
+		assert!(ValidatorJobsInEra::<Runtime>::get().is_empty());
+
+		// Rewards math
+		// Total rewards : 10_000
+		// Inflation rewards for re-staking : 50% = 5000
+		// Stake of 1 = 1000
+		// Stake of 2 = 1000
+		// Stake of 3 = 5000
+		// Stake of 4 = 5000
+		// Total stake = 12000
+
+		let reward_points = ErasRestakeRewardPoints::<Runtime>::get(1);
+		// rewards should be 1/12, since validator 1 bonded 1000/12000
+		assert_eq!(*reward_points.individual.get(&mock_pub_key(1)).unwrap(), 5000 / 12);
+		// rewards should be 1/12, since validator 2 bonded 1000/12000
+		assert_eq!(*reward_points.individual.get(&mock_pub_key(2)).unwrap(), 5000 / 12);
+
+		// rewards should be 5/12, since validator 3 bonded 5000/12000
+		assert_eq!(*reward_points.individual.get(&mock_pub_key(3)).unwrap(), (5000 * 5) / 12);
+
+		// rewards should be 5/12, since validator4 bonded 5000/12000
+		assert_eq!(*reward_points.individual.get(&mock_pub_key(4)).unwrap(), (5000 * 5) / 12);
+	});
+}
+
+#[test]
+fn test_reward_dist_handles_less_than_ideal_restake() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		let _total_inflation_reward = 10_000;
+		CurrentEra::<Runtime>::put(1);
+		ErasTotalStake::<Runtime>::insert(1, 100_000);
+
+		let profile = SharedRestakeProfile {
+			records: BoundedVec::try_from(vec![
+				Record {
+					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					amount: None,
+				},
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+					amount: None,
+				},
+			])
+			.unwrap(),
+			amount: 1000,
+		};
+
+		for validator in vec![1] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				Profile::Shared(profile.clone())
+			));
+		}
+
+		// The reward is 10_000, we have 1 authority
+		assert_ok!(Roles::compute_rewards(1));
+		assert!(ValidatorJobsInEra::<Runtime>::get().is_empty());
+
+		// Rewards math
+		// Total rewards : 10_000
+		// Inflation rewards for re-staking : 50% = 5000
+		// Stake of 1 = 1000
+		// Total stake = 1000
+
+		let reward_points = ErasRestakeRewardPoints::<Runtime>::get(1);
+		// our ideal re-stake rate is 50%
+		// but we only have 1%
+		// so reward of 5000 will be reduced to 1% of 5000
+		assert_eq!(*reward_points.individual.get(&mock_pub_key(1)).unwrap(), 50);
 	});
 }
 

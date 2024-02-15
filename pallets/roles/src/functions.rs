@@ -256,7 +256,10 @@ impl<T: Config> Pallet<T> {
 			Self::compute_active_validator_rewards(total_rewards / 2_u32.into());
 
 		let role_type_validator_rewards: BTreeMap<_, _> =
-			Self::compute_validator_rewards_by_restake(total_rewards / 2_u32.into());
+			Self::compute_validator_rewards_by_restake(
+				total_rewards / 2_u32.into(),
+				current_era_index,
+			);
 
 		let mut combined_validator_rewards: BTreeMap<_, _> = Default::default();
 		for (validator, role_reward) in role_type_validator_rewards.iter() {
@@ -354,9 +357,13 @@ impl<T: Config> Pallet<T> {
 	/// values.
 	pub fn compute_validator_rewards_by_restake(
 		total_rewards: BalanceOf<T>,
+		era_index: EraIndex,
 	) -> BTreeMap<T::AccountId, BalanceOf<T>> {
 		let mut total_restake: BalanceOf<T> = Default::default();
 		let mut restakers_with_restake: Vec<(T::AccountId, BalanceOf<T>)> = Default::default();
+
+		let total_stake_in_system: BalanceOf<T> =
+			pallet_staking::Pallet::<T>::eras_total_stake(era_index);
 
 		// TODO : This is an unbounded query, potentially dangerous
 		for (restaker, ledger) in Ledger::<T>::iter() {
@@ -364,11 +371,42 @@ impl<T: Config> Pallet<T> {
 			total_restake += ledger.total_restake();
 		}
 
+		let restake_to_stake_ratio = Perbill::from_rational(total_restake, total_stake_in_system);
+		log::debug!(
+			target: "pallet-roles",
+			"EraIndex {:?} restake_to_stake_ratio {:?}",
+			era_index, restake_to_stake_ratio
+		);
+
+		let missing_restake_ratio =
+			Perbill::from_percent(T::MaxRestake::get().deconstruct().into()) -
+				restake_to_stake_ratio;
+		log::debug!(
+			target: "pallet-roles",
+			"EraIndex {:?} missing_restake_ratio {:?}",
+			era_index, missing_restake_ratio
+		);
+
+		let mut normalized_total_rewards = total_rewards;
+
+		if !missing_restake_ratio.is_zero() {
+			normalized_total_rewards =
+				(Perbill::from_percent(T::MaxRestake::get().deconstruct().into())
+					.saturating_sub(missing_restake_ratio))
+				.mul_floor(total_rewards);
+		}
+
+		log::debug!(
+			target: "pallet-roles",
+			"EraIndex {:?} total_rewards {:?} normalized_total_rewards {:?}",
+			era_index, total_rewards, normalized_total_rewards
+		);
+
 		let mut validator_reward_map: BTreeMap<T::AccountId, BalanceOf<T>> = Default::default();
 
 		for (restaker, restake_amount) in restakers_with_restake {
 			let restaker_reward_share = Perbill::from_rational(restake_amount, total_restake);
-			let restaker_reward = restaker_reward_share.mul_floor(total_rewards);
+			let restaker_reward = restaker_reward_share.mul_floor(normalized_total_rewards);
 			validator_reward_map.insert(restaker, restaker_reward);
 		}
 
