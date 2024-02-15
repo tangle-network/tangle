@@ -67,7 +67,7 @@ jobs:
         run: sudo apt-get install protobuf-compiler
 
       - name: Build binary
-        run: cargo build --release tangle
+        run: cargo build --release
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
