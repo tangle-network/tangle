@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   push:
-    branches: [main]
+    branches: [main, update-docker]
     tags: ["v*.*.*"]
 
 env:
@@ -51,6 +51,23 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.image_name }}
+
+      - name: Install toolchain
+        id: toolchain
+        uses: actions-rs/toolchain@master
+        with:
+          profile: minimal
+          toolchain: nightly
+          target: wasm32-unknown-unknown
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1.3.0
+      
+      - name: Install Protobuf
+        run: sudo apt-get install protobuf-compiler
+
+      - name: Build binary
+        run: cargo build --release tangle
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
