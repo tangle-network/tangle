@@ -202,6 +202,7 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 pub struct MockRolesHandler;
 
 impl RolesHandler<AccountId> for MockRolesHandler {
+	type Balance = Balance;
 	fn is_restaker(address: AccountId, _role_type: RoleType) -> bool {
 		let validators = [
 			AccountId::from_u64(1u64),
@@ -221,9 +222,7 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 		Ok(())
 	}
 
-	fn record_job_by_validators(
-		_validators: Vec<AccountId>,
-	) -> DispatchResult {
+	fn record_job_by_validators(_validators: Vec<AccountId>) -> DispatchResult {
 		Ok(())
 	}
 }

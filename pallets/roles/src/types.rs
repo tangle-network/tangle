@@ -1,5 +1,17 @@
 use super::*;
-use pallet_staking::UnlockChunk;
+use parity_scale_codec::HasCompact;
+use sp_runtime::RuntimeDebug;
+
+/// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+pub struct UnlockChunk<Balance: HasCompact + MaxEncodedLen> {
+	/// Amount of funds to be unlocked.
+	#[codec(compact)]
+	pub value: Balance,
+	/// Era number at which point it'll be unlocked.
+	#[codec(compact)]
+	pub era: EraIndex,
+}
 
 /// The ledger of a (bonded) stash.
 #[derive(

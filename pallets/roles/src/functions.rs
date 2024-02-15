@@ -3,22 +3,14 @@ use super::*;
 use crate::{offences::ValidatorOffence, types::*};
 use frame_support::{
 	pallet_prelude::DispatchResult,
-	traits::{DefensiveResult, Imbalance, OnUnbalanced, OneSessionHandler},
+	traits::{DefensiveResult, Imbalance, OnUnbalanced},
 };
-use log::log;
-use pallet_staking::{
-	ActiveEra, CurrentEra, ErasRewardPoints, ForceEra, Forcing, RewardDestination,
-};
-use sp_runtime::{
-	traits::{CheckedDiv, Convert},
-	Perbill,
-};
+
+use pallet_staking::ActiveEra;
+use sp_runtime::{traits::Convert, Perbill};
 use sp_staking::offence::Offence;
 use sp_std::collections::btree_map::BTreeMap;
-use tangle_primitives::{
-	jobs::{traits::JobsHandler, JobId, ReportRestakerOffence},
-	roles::traits::RolesHandler,
-};
+use tangle_primitives::jobs::{traits::JobsHandler, JobId, ReportRestakerOffence};
 
 impl<T: Config> Pallet<T> {
 	/// Validate updated profile for the given account.
@@ -312,6 +304,7 @@ impl<T: Config> Pallet<T> {
 	) -> BTreeMap<T::AccountId, BalanceOf<T>> {
 		// Log total rewards available for debugging
 		log::debug!(
+			target: "pallet-roles",
 			"Compute_active_validator_rewards, total rewards available {:?}",
 			total_rewards
 		);

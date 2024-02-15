@@ -23,7 +23,6 @@ use frame_support::{
 	traits::{Currency, Get, ValidatorSet, ValidatorSetWithIdentification},
 	BoundedBTreeMap, BoundedVec, CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
 };
-
 pub use pallet::*;
 use pallet_staking::{ActiveEraInfo, EraRewardPoints};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -41,7 +40,7 @@ use tangle_primitives::roles::{RoleType, ValidatorRewardDistribution};
 mod functions;
 mod impls;
 mod types;
-use functions::*;
+
 pub mod profile;
 use profile::{Profile, Record};
 pub use types::*;
@@ -210,8 +209,12 @@ pub mod pallet {
 		CannotGetCurrentEra,
 		/// Invalid era info
 		InvalidEraToReward,
+		/// Out of bounds input
 		BoundNotMet,
+		/// Rewards already claimed
 		AlreadyClaimed,
+		/// Unlock chunks already filled
+		NoMoreChunks,
 	}
 
 	/// Map from all "controller" accounts to the info regarding the staking.
@@ -406,6 +409,9 @@ pub mod pallet {
 			);
 			let mut ledger =
 				Ledger::<T>::get(&restaker_account).ok_or(Error::<T>::NoProfileFound)?;
+
+			let profile_before_update = ledger.profile;
+
 			// Restaking amount of record should meet min restaking amount requirement.
 			match updated_profile.clone() {
 				Profile::Shared(profile) => {
@@ -436,6 +442,22 @@ pub mod pallet {
 			Self::validate_updated_profile(restaker_account.clone(), updated_profile.clone())?;
 			ledger.profile = updated_profile.clone();
 			ledger.total = updated_profile.get_total_profile_restake().into();
+
+			// if the total restake was reduced, we record that in unlock data
+			if profile_before_update.get_total_profile_restake() >
+				updated_profile.get_total_profile_restake()
+			{
+				let value = profile_before_update
+					.get_total_profile_restake()
+					.saturating_sub(updated_profile.get_total_profile_restake());
+				let era = Self::active_restaker_era().ok_or(Error::<T>::InvalidEraToReward)?.index +
+					T::BondingDuration::get();
+
+				ledger
+					.unlocking
+					.try_push(UnlockChunk { value, era })
+					.map_err(|_| Error::<T>::NoMoreChunks)?;
+			}
 
 			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
 				BoundedVec::try_from(updated_profile.get_roles())
@@ -579,7 +601,19 @@ pub mod pallet {
 		pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResult {
 			let restaker_account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the restaker_account and is eligible to withdraw.
-			ensure!(Self::can_exit(restaker_account), Error::<T>::HasRoleAssigned);
+			ensure!(Self::can_exit(restaker_account.clone()), Error::<T>::HasRoleAssigned);
+
+			// if any unlocking restake, then remove any eligible restake
+			let mut ledger =
+				Ledger::<T>::get(&restaker_account.clone()).ok_or(Error::<T>::NoProfileFound)?;
+
+			if !ledger.unlocking.is_empty() {
+				let current_era =
+					Self::active_restaker_era().ok_or(Error::<T>::InvalidEraToReward)?.index;
+
+				ledger.unlocking.retain(|x| x.era >= current_era);
+				Ledger::<T>::insert(restaker_account, ledger);
+			}
 
 			// Withdraw unbond funds.
 			let res = pallet_staking::Pallet::<T>::withdraw_unbonded(origin, 0);

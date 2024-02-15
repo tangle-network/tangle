@@ -18,7 +18,7 @@
 use super::*;
 use frame_support::{assert_err, assert_ok, BoundedVec};
 use mock::*;
-use pallet_staking::{CurrentEra, ErasRewardPoints, ErasValidatorReward};
+use pallet_staking::CurrentEra;
 use profile::{IndependentRestakeProfile, Record, SharedRestakeProfile};
 use sp_std::{default::Default, vec};
 use tangle_primitives::{
@@ -316,8 +316,8 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 
 		// lets give both validators equal rewards for jobs participation
 		let mut validator_rewards: BoundedBTreeMap<_, _, _> = Default::default();
-		validator_rewards.try_insert(mock_pub_key(1), 100_u128).unwrap();
-		validator_rewards.try_insert(mock_pub_key(2), 100_u128).unwrap();
+		validator_rewards.try_insert(mock_pub_key(1), 100_u32).unwrap();
+		validator_rewards.try_insert(mock_pub_key(2), 100_u32).unwrap();
 		ValidatorJobsInEra::<Runtime>::put(validator_rewards);
 
 		let profile = shared_profile();
@@ -329,7 +329,7 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		}
 
 		// The reward is 1000, we have 5 authorities
-		assert_ok!(Roles::distribute_rewards());
+		assert_ok!(Roles::compute_rewards(1));
 		assert!(ValidatorJobsInEra::<Runtime>::get().is_empty());
 
 		// Rewards math
@@ -338,7 +338,7 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		// All validators : will receive 50%, everyone receives equally
 
 		// 1 & 2 receives, 5000/2 + 5000/4 + 100 (job reward)
-		let reward_points = ErasRewardPoints::<Runtime>::get(1);
+		let reward_points = ErasRestakeRewardPoints::<Runtime>::get(1);
 		assert_eq!(
 			*reward_points.individual.get(&mock_pub_key(1)).unwrap(),
 			2500_u32 + 1250_u32 + 100_u32
@@ -351,58 +351,6 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		// 3 & 4 receives only 5000/4
 		assert_eq!(*reward_points.individual.get(&mock_pub_key(3)).unwrap(), 1250_u32);
 		assert_eq!(*reward_points.individual.get(&mock_pub_key(4)).unwrap(), 1250_u32);
-	});
-}
-
-#[test]
-fn test_inflation_rewards_paid_out_with_staking_rewards() {
-	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
-		let _total_inflation_reward = 10_000;
-		CurrentEra::<Runtime>::put(1);
-
-		assert_eq!(Balances::free_balance(mock_pub_key(1)), 20_000);
-		assert_eq!(Balances::free_balance(mock_pub_key(2)), 20_000);
-
-		// lets give both validators equal rewards for jobs participation
-		let mut validator_rewards: BoundedBTreeMap<_, _, _> = Default::default();
-		validator_rewards.try_insert(mock_pub_key(1), 100_u128).unwrap();
-		validator_rewards.try_insert(mock_pub_key(2), 100_u128).unwrap();
-		ValidatorJobsInEra::<Runtime>::put(validator_rewards);
-
-		let profile = shared_profile();
-		for validator in vec![1, 2, 3, 4] {
-			assert_ok!(Roles::create_profile(
-				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
-			));
-		}
-
-		// The reward is 1000, we have 5 authorities
-		assert_ok!(Roles::distribute_rewards());
-
-		ErasValidatorReward::<Runtime>::insert(1, 10_000);
-		assert_ok!(Staking::payout_stakers(
-			RuntimeOrigin::signed(mock_pub_key(1)),
-			mock_pub_key(1),
-			1
-		));
-
-		assert_eq!(Balances::total_balance(&mock_pub_key(1)), 20_000 + 2500 + 1250 + 100);
-
-		assert_ok!(Staking::payout_stakers(
-			RuntimeOrigin::signed(mock_pub_key(1)),
-			mock_pub_key(2),
-			1
-		));
-
-		assert_eq!(Balances::total_balance(&mock_pub_key(2)), 20_000 + 2500 + 1250 + 100);
-
-		assert_ok!(Staking::payout_stakers(
-			RuntimeOrigin::signed(mock_pub_key(1)),
-			mock_pub_key(3),
-			1
-		));
-		assert_eq!(Balances::total_balance(&mock_pub_key(3)), 20_000 + 1250);
 	});
 }
 

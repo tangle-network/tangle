@@ -70,7 +70,5 @@ pub trait RolesHandler<AccountId> {
 	/// # Errors
 	///
 	/// Returns a `DispatchError` if the operation fails.
-	fn record_job_by_validators(
-		validators: Vec<AccountId>,
-	) -> DispatchResult;
+	fn record_job_by_validators(validators: Vec<AccountId>) -> DispatchResult;
 }

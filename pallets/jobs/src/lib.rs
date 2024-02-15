@@ -208,6 +208,10 @@ pub mod module {
 		BoundedVec<(RoleType, JobId), T::MaxActiveJobsPerValidator>,
 	>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn validator_rewards)]
+	pub type ValidatorRewards<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, BalanceOf<T>>;
+
 	/// The job-id storage
 	#[pallet::storage]
 	#[pallet::getter(fn next_job_id)]
@@ -437,13 +441,13 @@ pub mod module {
 				},
 			};
 
+			T::RolesHandler::record_job_by_validators(participants.to_vec())?;
+
 			let l = if participants.is_empty() { 1u32 } else { participants.len() as u32 };
 			let fee_per_participant = job_info.fee / l.into();
-			T::RolesHandler::record_job_by_validators(
-				participants.to_vec(),
-			)?;
 
 			for participant in participants {
+				Self::record_reward_to_validator(participant.clone(), fee_per_participant)?;
 				Self::deposit_event(Event::ValidatorRewarded {
 					id: participant,
 					reward: fee_per_participant,
@@ -454,6 +458,44 @@ pub mod module {
 			SubmittedJobsRole::<T>::remove(job_id);
 
 			Self::deposit_event(Event::JobResultSubmitted { job_id, role_type });
+
+			Ok(())
+		}
+
+		/// Withdraw rewards accumulated by the caller.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: The origin of the call (typically a signed account).
+		///
+		/// # Errors
+		///
+		/// This function can return an error if:
+		///
+		/// - The caller is not authorized.
+		/// - No rewards are available for the caller.
+		/// - The reward transfer operation fails.
+		///
+		/// # Details
+		///
+		/// This function allows a caller to withdraw rewards that have been accumulated in their
+		/// account.
+		#[pallet::call_index(2)]
+		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
+		pub fn withdraw_rewards(origin: OriginFor<T>) -> DispatchResult {
+			let caller = ensure_signed(origin)?;
+
+			let reward_available =
+				ValidatorRewards::<T>::get(caller.clone()).ok_or(Error::<T>::NoRewards)?;
+
+			T::Currency::transfer(
+				&Self::rewards_account_id(),
+				&caller,
+				reward_available,
+				ExistenceRequirement::KeepAlive,
+			)?;
+
+			ValidatorRewards::<T>::remove(caller);
 
 			Ok(())
 		}

@@ -15,20 +15,10 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use crate::offences::ValidatorOffence;
+
 use frame_support::{pallet_prelude::DispatchResult, traits::OneSessionHandler};
-use log::log;
-use pallet_staking::{CurrentEra, ErasRewardPoints, ForceEra, Forcing};
-use sp_runtime::{
-	traits::{CheckedDiv, Convert},
-	Perbill,
-};
-use sp_staking::offence::Offence;
-use sp_std::collections::btree_map::BTreeMap;
-use tangle_primitives::{
-	jobs::{traits::JobsHandler, JobId, ReportRestakerOffence},
-	roles::traits::RolesHandler,
-};
+
+use tangle_primitives::{jobs::ReportRestakerOffence, roles::traits::RolesHandler};
 
 /// Implements RolesHandler for the pallet.
 impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
