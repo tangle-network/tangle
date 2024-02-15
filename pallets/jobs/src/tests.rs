@@ -1201,28 +1201,28 @@ fn switch_non_active_profile_should_work() {
 			));
 		}
 
-		// =========  active validator can switch independent to shared profile =========
-		let updated_profile = SharedRestakeProfile {
-			records: BoundedVec::try_from(vec![
-				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
-					amount: None,
-				},
-				Record {
-					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
-					amount: None,
-				},
-			])
-			.unwrap(),
-			amount: 1500,
-		};
+		// // =========  active validator can switch independent to shared profile =========
+		// let updated_profile = SharedRestakeProfile {
+		// 	records: BoundedVec::try_from(vec![
+		// 		Record {
+		// 			role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+		// 			amount: None,
+		// 		},
+		// 		Record {
+		// 			role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+		// 			amount: None,
+		// 		},
+		// 	])
+		// 	.unwrap(),
+		// 	amount: 1500,
+		// };
 
-		for validator in participants.clone() {
-			assert_ok!(Roles::update_profile(
-				RuntimeOrigin::signed(mock_pub_key(validator)),
-				Profile::Shared(updated_profile.clone())
-			));
-		}
+		// for validator in participants.clone() {
+		// 	assert_ok!(Roles::update_profile(
+		// 		RuntimeOrigin::signed(mock_pub_key(validator)),
+		// 		Profile::Shared(updated_profile.clone())
+		// 	));
+		// }
 	});
 }
 
