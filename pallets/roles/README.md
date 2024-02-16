@@ -97,22 +97,22 @@ The validator rewards system is designed to distribute rewards among validators 
 - **Formula:**
 
     1. **Compute Total Restake in the System ($\( R_{\text{total}} \$)):**
-    $[ R_{\text{total}} = \sum_{i=1}^{n} R_i \]$
+    $$[ R_{\text{total}} = \sum_{i=1}^{n} R_i \]$
 
     2. **Compute Restake-to-Stake Ratio (\( \text{Restake-to-Stake Ratio} \)):**
-    $[ \text{Restake-to-Stake Ratio} = \frac{R_{\text{total}}}{S_{\text{era}}} \]$
+    $$[ \text{Restake-to-Stake Ratio} = \frac{R_{\text{total}}}{S_{\text{era}}} \]$
 
     3. **Compute Missing Restake Ratio (\( \text{Missing Restake Ratio} \)):**
-    $[ \text{Missing Restake Ratio} = \text{MaxRestake} - \text{Restake-to-Stake Ratio} \]$
+    $$[ \text{Missing Restake Ratio} = \text{MaxRestake} - \text{Restake-to-Stake Ratio} \]$
 
     4. **Adjust Total Rewards (\( \text{Adjusted Total Rewards} \)):**
-    $[ \text{Adjusted Total Rewards} = \begin{cases} (100 - \text{Missing Restake Ratio}) \times R & \text{if } \text{Missing Restake Ratio} \neq 0 \\ R & \text{otherwise} \end{cases} \]$
+    $$[ \text{Adjusted Total Rewards} = \begin{cases} (100 - \text{Missing Restake Ratio}) \times R & \text{if } \text{Missing Restake Ratio} \neq 0 \\ R & \text{otherwise} \end{cases} \]$
 
     5. **Compute Reward Share for Each Restaker (\( \text{Reward Share}_i \)):**
-    $[ \text{Reward Share}_i = \frac{R_i}{R_{\text{total}}} \]$
+    $$[ \text{Reward Share}_i = \frac{R_i}{R_{\text{total}}} \]$
 
     6. **Compute Reward for Each Restaker (\( \text{Reward}_i \)):**
-    $[ \text{Reward}_i = \text{Reward Share}_i \times \text{Adjusted Total Rewards} \]$
+    $$[ \text{Reward}_i = \text{Reward Share}_i \times \text{Adjusted Total Rewards} \]$
 
 
 #### Example:
