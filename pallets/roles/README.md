@@ -96,8 +96,8 @@ The validator rewards system is designed to distribute rewards among validators 
   - Calculates rewards for each validator based on their restake amount relative to the total restake in the system.
 - **Formula:**
 
-    1. **Compute Total Restake in the System (\( R_{\text{total}} \)):**
-    $\`[ R_{\text{total}} = \sum_{i=1}^{n} R_i \]\`$
+    1. **Compute Total Restake in the System ($\( R_{\text{total}} \$)):**
+    $[ R_{\text{total}} = \sum_{i=1}^{n} R_i \]$
 
     2. **Compute Restake-to-Stake Ratio (\( \text{Restake-to-Stake Ratio} \)):**
     \[ \text{Restake-to-Stake Ratio} = \frac{R_{\text{total}}}{S_{\text{era}}} \]
