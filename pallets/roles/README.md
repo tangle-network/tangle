@@ -73,6 +73,17 @@ The validator rewards system is designed to distribute rewards among validators 
   - Retrieves active validators and their completed jobs from storage.
   - Calculates the total number of jobs completed by all active validators.
   - Distributes rewards among active validators proportionally to the number of jobs they have completed relative to the total jobs completed.
+- **Formula:**
+
+    1. **Calculate Total Jobs Completed by Active Validators (\( \text{total\_jobs\_completed} \)):**
+    \[ \text{total\_jobs\_completed} = \sum_{\text{validator}} \text{jobs\_completed}_{\text{validator}} \]
+
+    2. **Compute Reward Share for Each Active Validator (\( \text{validator\_share} \)):**
+    \[ \text{validator\_share}_{\text{validator}} = \frac{\text{jobs\_completed}_{\text{validator}}}{\text{total\_jobs\_completed}} \]
+
+    3. **Compute Reward for Each Active Validator (\( \text{validator\_reward} \)):**
+    \[ \text{validator\_reward}_{\text{validator}} = \text{validator\_share}_{\text{validator}} \times R \]
+
 
 ### 2. Validator Rewards by Restake (50%)
 
@@ -83,6 +94,26 @@ The validator rewards system is designed to distribute rewards among validators 
   - Calculates the ratio of restake to total stake in the system.
   - Adjusts the total rewards based on the missing restake ratio to ensure rewards are distributed properly.
   - Calculates rewards for each validator based on their restake amount relative to the total restake in the system.
+- **Formula:**
+
+    1. **Compute Total Restake in the System (\( R_{\text{total}} \)):**
+    \[ R_{\text{total}} = \sum_{i=1}^{n} R_i \]
+
+    2. **Compute Restake-to-Stake Ratio (\( \text{Restake-to-Stake Ratio} \)):**
+    \[ \text{Restake-to-Stake Ratio} = \frac{R_{\text{total}}}{S_{\text{era}}} \]
+
+    3. **Compute Missing Restake Ratio (\( \text{Missing Restake Ratio} \)):**
+    \[ \text{Missing Restake Ratio} = \text{MaxRestake} - \text{Restake-to-Stake Ratio} \]
+
+    4. **Adjust Total Rewards (\( \text{Adjusted Total Rewards} \)):**
+    \[ \text{Adjusted Total Rewards} = \begin{cases} (100 - \text{Missing Restake Ratio}) \times R & \text{if } \text{Missing Restake Ratio} \neq 0 \\ R & \text{otherwise} \end{cases} \]
+
+    5. **Compute Reward Share for Each Restaker (\( \text{Reward Share}_i \)):**
+    \[ \text{Reward Share}_i = \frac{R_i}{R_{\text{total}}} \]
+
+    6. **Compute Reward for Each Restaker (\( \text{Reward}_i \)):**
+    \[ \text{Reward}_i = \text{Reward Share}_i \times \text{Adjusted Total Rewards} \]
+
 
 #### Example:
 Lets take an example in era 100, we have 20 restakers at era 100, and the roles reward for era is 1000TNT
