@@ -61,6 +61,46 @@ Currently we allow max 50% of staked amount that can be restaked for providing v
 
 ---
 
+<h2>Rewards</h2>
+
+The validator rewards system is designed to distribute rewards among validators in the current era based on their contributions and stake in the system. Here's a summary of how the rewards are computed:
+
+### 1. Active Validator Rewards (50%)
+
+- **Function:** `compute_active_validator_rewards`
+- **Purpose:** Calculates rewards for validators who have completed jobs in the current era.
+- **Method:**
+  - Retrieves active validators and their completed jobs from storage.
+  - Calculates the total number of jobs completed by all active validators.
+  - Distributes rewards among active validators proportionally to the number of jobs they have completed relative to the total jobs completed.
+
+### 2. Validator Rewards by Restake (50%)
+
+- **Function:** `compute_validator_rewards_by_restake`
+- **Purpose:** Computes rewards for validators based on the amount they have staked in the system.
+- **Method:**
+  - Retrieves the total stake in the system and the restake amount of individual validators.
+  - Calculates the ratio of restake to total stake in the system.
+  - Adjusts the total rewards based on the missing restake ratio to ensure rewards are distributed properly.
+  - Calculates rewards for each validator based on their restake amount relative to the total restake in the system.
+
+#### Example:
+Lets take an example in era 100, we have 20 restakers at era 100, and the roles reward for era is 1000TNT
+10 restakers have completed 5 jobs each.
+
+1. Active Validator Rewards
+    - 50% of 1000TNT is meant for active restakers (completed atleast one job in last era)
+    - 10 restakers have completed 5 jobs each, since everyone completed the same amount of jobs, 500TNT is equally divided among all 10 restakers.
+    - If one restaker had completed a higher number of jobs compared to the rest of the restakers, they would get a larger share of the rewards.
+
+2. Rewards by restake
+    - 50% of 1000TNT is meant for all restakers, as long as you were restaked in the era, you are eligible for a share of the reward
+    - The restaker reward share is determined by the amount of restake, if a restaker has restaked 100TNT and the total restake in the system is 1000TNT, then the restaker is eligible for 10% of the rewards.
+    - The restaker rewards are also weighted by the total restake in the system compared to the total stake. If the total stake in the system is 100_000 TNT and only 1000TNT is restaked (1%), then the total rewards are reduced propotional to this value.
+
+
+---
+
 <h2> Contributing </h2>
 
 Interested in contributing to the Tangle Network? Thank you so much for your interest! We are always appreciative for contributions from the open-source community!
