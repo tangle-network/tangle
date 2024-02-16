@@ -14,10 +14,10 @@
 #
 FROM ubuntu:22.04
 
-COPY ../target/release/tangle /usr/local/bin/
-
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Tangle Network Node"
+
+COPY ./target/release/tangle /usr/local/bin/
 
 RUN useradd -m -u 5000 -U -s /bin/sh -d /tangle tangle && \
 	mkdir -p /data /tangle/.local/share && \
