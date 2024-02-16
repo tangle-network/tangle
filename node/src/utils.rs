@@ -48,28 +48,46 @@ pub fn insert_controller_account_keys_into_keystore(
 
 /// Inserts keys of specified type into the keystore.
 fn insert_account_keys_into_keystore<TPublic: Public>(
-	_config: &Configuration,
+	config: &Configuration,
 	key_type: KeyTypeId,
 	key_store: Option<KeystorePtr>,
 	key_name: &str,
 ) {
-	let mut seed_raw = [0u8; 32];
-	rand::thread_rng().fill(&mut seed_raw[..]);
-	let seed: &str = &hex::encode(seed_raw);
+	let chain_type = config.chain_spec.chain_type();
+	let node_name = &config.network.node_name[..];
 
-	let pub_key = get_from_seed::<TPublic>(seed).to_raw_vec();
+	let seed = match node_name {
+		"Alice" | "Bob" | "Charlie" | "Dave" | "Eve" | "Ferdie"
+			if chain_type == ChainType::Development || chain_type == ChainType::Local =>
+		{
+			let a = node_name.chars().next().unwrap() as u8;
+			vec![a; 32].try_into().unwrap()
+		},
+		_ => {
+			let mut seed_raw = [0u8; 32];
+			rand::thread_rng().fill(&mut seed_raw[..]);
+			seed_raw
+		},
+	};
+
+	let pub_key = <TPublic::Pair as Pair>::from_seed_slice(&seed).unwrap().public();
 	if let Some(keystore) = key_store {
-		let _ = Keystore::insert(&*keystore, key_type, seed, &pub_key);
+		let _ = Keystore::insert(
+			&*keystore,
+			key_type,
+			&format!("0x{}", hex::encode(seed)),
+			&pub_key.to_raw_vec(),
+		);
 	}
 
 	println!("++++++++++++++++++++++++++++++++++++++++++++++++  
                 AUTO GENERATED KEYS                                                                        
-                {:?} key inserted to keystore
-                Seed : {:?}
-                Pubkey : {:?}
+                '{}' key inserted to keystore
+                Seed: 0x{}
+                PublicKey: 0x{}
                 STORE THE KEYS SAFELY, NOT TO BE SHARED WITH ANYONE ELSE.
     ++++++++++++++++++++++++++++++++++++++++++++++++   							
-            \n", key_name, seed, pub_key);
+            \n", key_name, hex::encode(seed), hex::encode(pub_key));
 }
 
 /// Inserts a key of type `ACCOUNT` into the keystore for development/testing.
