@@ -84,7 +84,7 @@ pub mod module {
 		>;
 
 		/// The roles manager mechanism
-		type RolesHandler: RolesHandler<Self::AccountId>;
+		type RolesHandler: RolesHandler<Self::AccountId, Balance = BalanceOf<Self>>;
 
 		/// The job result verifying mechanism
 		type MPCHandler: MPCHandler<
@@ -440,6 +440,8 @@ pub mod module {
 					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 			};
+
+			T::RolesHandler::record_job_by_validators(participants.to_vec())?;
 
 			let l = if participants.is_empty() { 1u32 } else { participants.len() as u32 };
 			let fee_per_participant = job_info.fee / l.into();

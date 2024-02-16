@@ -215,6 +215,10 @@ impl onchain::Config for OnChainSeqPhragmen {
 /// Upper limit on the number of NPOS nominations.
 const MAX_QUOTA_NOMINATIONS: u32 = 16;
 
+parameter_types! {
+	pub static SessionsPerEra: SessionIndex = 1;
+}
+
 impl pallet_staking::Config for Runtime {
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
@@ -224,7 +228,7 @@ impl pallet_staking::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Slash = ();
 	type Reward = ();
-	type SessionsPerEra = ();
+	type SessionsPerEra = SessionsPerEra;
 	type SlashDeferDuration = ();
 	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type BondingDuration = ();
@@ -363,6 +367,7 @@ impl Config for Runtime {
 	type ReportOffences = OffenceHandler;
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxKeyLen = MaxKeyLen;
+	type MaxValidators = ConstU32<100>;
 	type MaxRestake = MaxRestake;
 	type WeightInfo = ();
 }

@@ -162,9 +162,8 @@ fn dkg_key_verification_works_for_bls() {
 			threshold: 1,
 		};
 
-		// should fail for signing different keys
 		assert_ok!(DKG::verify(JobResult::DKGPhaseOne(job_to_verify)),);
-	})
+	});
 }
 
 #[test]

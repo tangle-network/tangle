@@ -1214,7 +1214,7 @@ fn switch_non_active_profile_should_work() {
 				},
 			])
 			.unwrap(),
-			amount: 1500,
+			amount: 2000,
 		};
 
 		for validator in participants.clone() {
