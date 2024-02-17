@@ -292,6 +292,9 @@ pub mod module {
 				let result =
 					KnownResults::<T>::get(job.job_type.get_role_type(), existing_result_id)
 						.ok_or(Error::<T>::PreviousResultNotFound)?;
+				
+				// Ensure the phase one participants are still validators
+				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
 
 				// ensure the account can use the result
 				if let Some(permitted_caller) = result.permitted_caller {
@@ -301,8 +304,6 @@ pub mod module {
 				// Validate existing result
 				ensure!(result.ttl >= now, Error::<T>::ResultExpired);
 
-				// Ensure the phase one participants are still validators
-				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
 				for participant in participants {
 					ensure!(
 						T::RolesHandler::is_restaker(participant.clone(), role_type),
