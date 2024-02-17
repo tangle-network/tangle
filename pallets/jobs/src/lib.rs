@@ -287,10 +287,16 @@ pub mod module {
 			else {
 				let existing_result_id =
 					job.job_type.clone().get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?;
+
 				// Ensure the result exists
 				let result =
 					KnownResults::<T>::get(job.job_type.get_role_type(), existing_result_id)
 						.ok_or(Error::<T>::PreviousResultNotFound)?;
+
+				// ensure the account can use the result
+				if let Some(permitted_caller) = result.permitted_caller {
+					ensure!(permitted_caller == caller, Error::<T>::InvalidJobParams);
+				}
 
 				// Validate existing result
 				ensure!(result.ttl >= now, Error::<T>::ResultExpired);
@@ -305,11 +311,6 @@ pub mod module {
 
 					// add record for easy lookup
 					Self::add_job_to_validator_lookup(participant, role_type, job_id)?;
-				}
-
-				// ensure the account can use the result
-				if let Some(permitted_caller) = result.permitted_caller {
-					ensure!(permitted_caller == caller, Error::<T>::InvalidJobParams);
 				}
 			}
 
