@@ -2597,7 +2597,7 @@ dependencies = [
 [[package]]
 name = "ed448-goldilocks-plus"
 version = "0.11.1"
-source = "git+https://github.com/drewstone/Ed448-Goldilocks.git?branch=drew/zeroize#e5200a473655d2b8abb61263f62fdbe6a6c4d16c"
+source = "git+https://github.com/mikelodder7/Ed448-Goldilocks#b133ca00a584e22322b98cc49c36db1a59b15a47"
 dependencies = [
  "elliptic-curve",
  "rand_core 0.6.4",
