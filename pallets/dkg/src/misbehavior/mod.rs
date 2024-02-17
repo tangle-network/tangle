@@ -26,6 +26,7 @@ use tangle_primitives::{
 };
 
 pub mod dfns_cggmp21;
+pub mod zcash_frost;
 
 impl<T: Config> Pallet<T> {
 	/// Verifies a given a misbehavior report and dispatches to specific verification logic

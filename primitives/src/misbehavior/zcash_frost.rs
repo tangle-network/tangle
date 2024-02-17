@@ -14,44 +14,45 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{jobs::JobId, roles::RoleType};
-
 use frame_support::pallet_prelude::*;
 use sp_core::RuntimeDebug;
+use sp_std::vec::Vec;
 
-pub mod dfns_cggmp21;
-pub mod zcash_frost;
-pub mod traits;
+pub const KEYGEN_EID: &[u8] = b"zcash.frost.keygen";
+pub const SIGN_EID: &[u8] = b"zcash.frost.sign";
 
-pub use traits::*;
-
-/// Represents a Misbehavior submission
+/// Represents a Signed Round Message by the offender.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub struct MisbehaviorSubmission {
-	/// The role type of the misbehaving node
-	pub role_type: RoleType,
-	/// The misbehaving party's ECDSA public key.
-	pub offender: [u8; 33],
-	/// The current Job id.
-	pub job_id: JobId,
-	/// The justification for the misbehavior
-	pub justification: MisbehaviorJustification,
-}
-
-/// Represents a Misbehavior Justification kind
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum MisbehaviorJustification {
-	DKGTSS(DKGTSSJustification),
-	ZkSaaS(ZkSaaSJustification),
+pub struct SignedRoundMessage {
+	/// Index of a party who sent the message
+	pub sender: u16,
+	/// Received message
+	pub message: Vec<u8>,
+	/// Signature of sender + message.
+	///
+	/// This is the signature of the message by the sender.
+	///
+	/// # Note
+	/// sender_bytes = sender.to_be_bytes();
+	/// hash = keccak256(sender_bytes + message);
+	/// signature = sign(hash);
+	pub signature: Vec<u8>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum DKGTSSJustification {
-	/// dfns CGGMP21 Implementation-specific justification
-	DfnsCGGMP21(dfns_cggmp21::DfnsCGGMP21Justification),
-	/// zcash FROST Implementation-specific justification
-	ZCashFrost(zcash_frost::ZCashFrostJustification),
+pub enum ZCashFrostJustification {
+	Keygen { participants: Vec<[u8; 33]>, t: u16, reason: KeygenAborted },
+	Signing { participants: Vec<[u8; 33]>, t: u16, reason: SigningAborted },
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub enum ZkSaaSJustification {}
+pub enum KeygenAborted {
+	/// party decommitment doesn't match commitment.
+	InvalidProofOfKnowledge { round1: SignedRoundMessage, round2: SignedRoundMessage },
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+pub enum SigningAborted {
+	/// Invalid signature share for aggregation
+	InvalidSignatureShare,
+}

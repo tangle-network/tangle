@@ -13864,6 +13864,7 @@ dependencies = [
  "ark-std",
  "ethabi 15.0.0",
  "frame-support",
+ "frost-core",
  "hex",
  "log",
  "parity-scale-codec 3.6.9",
