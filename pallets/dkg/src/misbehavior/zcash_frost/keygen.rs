@@ -15,217 +15,55 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::*;
-use digest::Digest;
-use frame_support::ensure;
-use generic_ec::{curves::Secp256k1, Curve, Point, Scalar};
-use generic_ec_zkp::{polynomial::Polynomial, schnorr_pok};
-use sp_core::RuntimeDebug;
-use sp_io::hashing::keccak_256;
 use sp_runtime::DispatchResult;
-use sp_std::prelude::*;
 
-use tangle_primitives::misbehavior::{
-	dfns_cggmp21::{SignedRoundMessage, KEYGEN_EID},
-	MisbehaviorSubmission,
+use tangle_primitives::{
+	misbehavior::{MisbehaviorSubmission, SignedRoundMessage},
+	roles::ThresholdSignatureRoleType,
 };
 
-use super::{hashing_rng::HashRng, xor_array, DefaultDigest, SECURITY_BYTES};
+use frost_core::{
+	identifier::Identifier,
+	keys::VerifiableSecretSharingCommitment,
+	pok_challenge,
+	signature::Signature,
+	traits::{Ciphersuite, Group},
+};
 
-#[derive(udigest::Digestable)]
-#[udigest(tag = "dfns.cggmp21.keygen.threshold.tag")]
-pub enum Tag<'a> {
-	/// Tag that includes the prover index
-	Indexed {
-		party_index: u16,
-		#[udigest(as_bytes)]
-		sid: &'a [u8],
-	},
-}
-
-/// Message from round 1
-#[derive(Clone, RuntimeDebug, serde::Deserialize, udigest::Digestable)]
-#[serde(bound = "")]
-#[udigest(bound = "")]
-#[udigest(tag = "dfns.cggmp21.keygen.threshold.round1")]
-pub struct MsgRound1<D: Digest> {
-	/// $V_i$
-	#[udigest(as_bytes)]
-	pub commitment: digest::Output<D>,
-}
-
-/// Message from round 2 broadcasted to everyone
-#[derive(Clone, serde::Deserialize, udigest::Digestable)]
-#[serde(bound = "")]
-#[udigest(bound = "")]
-#[udigest(tag = "dfns.cggmp21.keygen.threshold.round1")]
-#[allow(non_snake_case)]
-pub struct MsgRound2Broad<E: Curve> {
-	/// `rid_i`
-	#[serde(with = "hex")]
-	#[udigest(as_bytes)]
-	pub rid: [u8; SECURITY_BYTES],
-	/// $\vec S_i$
-	pub F: Polynomial<Point<E>>,
-	/// $A_i$
-	pub sch_commit: schnorr_pok::Commit<E>,
-	/// $u_i$
-	#[serde(with = "hex")]
-	#[udigest(as_bytes)]
-	pub decommit: [u8; SECURITY_BYTES],
-}
-
-/// Message from round 2 unicasted to each party
-#[derive(Clone, RuntimeDebug, serde::Deserialize)]
-#[serde(bound = "")]
-pub struct MsgRound2Uni<E: Curve> {
-	/// $\sigma_{i,j}$
-	pub sigma: Scalar<E>,
-}
-/// Message from round 3
-#[derive(Clone, serde::Deserialize)]
-#[serde(bound = "")]
-pub struct MsgRound3<E: Curve> {
-	/// $\psi_i$
-	pub sch_proof: schnorr_pok::Proof<E>,
-}
-
-/// Given a Keygen Round1 and Round2a messages, verify the misbehavior and return the result.
-pub fn invalid_decommitment<T: Config>(
-	data: &MisbehaviorSubmission,
-	round1: &SignedRoundMessage,
-	round2a: &SignedRoundMessage,
-) -> DispatchResult {
-	Pallet::<T>::ensure_signed_by_offender(round1, data.offender)?;
-	Pallet::<T>::ensure_signed_by_offender(round2a, data.offender)?;
-	ensure!(round1.sender == round2a.sender, Error::<T>::InvalidJustification);
-
-	let job_id_bytes = data.job_id.to_be_bytes();
-	let mix = keccak_256(KEYGEN_EID);
-	let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
-	let tag = udigest::Tag::<DefaultDigest>::new_structured(Tag::Indexed {
-		party_index: round1.sender,
-		sid: &eid_bytes[..],
-	});
-
-	let round1_msg = postcard::from_bytes::<MsgRound1<DefaultDigest>>(&round1.message)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
-
-	let round2_msg = postcard::from_bytes::<MsgRound2Broad<Secp256k1>>(&round2a.message)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
-	let hash_commit = tag.digest(round2_msg);
-
-	ensure!(round1_msg.commitment != hash_commit, Error::<T>::ValidDecommitment);
-	// Slash the offender!
-	// TODO: add slashing logic
-	Ok(())
-}
-
-/// Given a Keygen t and Round2a messages, verify the misbehavior and return the result.
-pub fn invalid_data_size<T: Config>(
-	data: &MisbehaviorSubmission,
-	t: u16,
-	round2a: &SignedRoundMessage,
-) -> DispatchResult {
-	Pallet::<T>::ensure_signed_by_offender(round2a, data.offender)?;
-
-	let round2a_msg = postcard::from_bytes::<MsgRound2Broad<Secp256k1>>(&round2a.message)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
-
-	ensure!(round2a_msg.F.degree() + 1 != usize::from(t), Error::<T>::ValidDataSize);
-	// Slash the offender!
-	// TODO: add slashing logic
-	Ok(())
-}
-
-/// Given a Keygen Round2a and Round2b messages, verify the misbehavior and return the result.
-pub fn feldman<T: Config>(
-	data: &MisbehaviorSubmission,
-	round2a: &SignedRoundMessage,
-	round2b: &SignedRoundMessage,
-) -> DispatchResult {
-	Pallet::<T>::ensure_signed_by_offender(round2a, data.offender)?;
-	Pallet::<T>::ensure_signed_by_offender(round2b, data.offender)?;
-	ensure!(round2a.sender == round2b.sender, Error::<T>::InvalidJustification);
-	let i = round2a.sender;
-
-	let round2a_msg = postcard::from_bytes::<MsgRound2Broad<Secp256k1>>(&round2a.message)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
-
-	let round2b_msg = postcard::from_bytes::<MsgRound2Uni<Secp256k1>>(&round2b.message)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
-
-	let lhs = round2a_msg.F.value::<_, generic_ec::Point<_>>(&Scalar::from(i + 1));
-	let rhs = generic_ec::Point::generator() * round2b_msg.sigma;
-	let feldman_verification = lhs != rhs;
-	ensure!(feldman_verification, Error::<T>::ValidFeldmanVerification);
-	// Slash the offender!
-	// TODO: add slashing logic
-	Ok(())
+/// Verifies the proof of knowledge of the secret coefficients used to generate the
+/// public secret sharing commitment.
+pub fn verify_invalid_proof_of_knowledge<T: Config, C: Ciphersuite>(
+	identifier: Identifier<C>,
+	commitment: &VerifiableSecretSharingCommitment<C>,
+	proof_of_knowledge: Signature<C>,
+) -> Result<Option<Identifier<C>>, Error<T>> {
+	// Round 1, Step 5
+	//
+	// > Upon receiving C⃗_ℓ, σ_ℓ from participants 1 ≤ ℓ ≤ n, ℓ ≠ i, participant
+	// > P_i verifies σ_ℓ = (R_ℓ, μ_ℓ), aborting on failure, by checking
+	// > R_ℓ ? ≟ g^{μ_ℓ} · φ^{-c_ℓ}_{ℓ0}, where c_ℓ = H(ℓ, Φ, φ_{ℓ0}, R_ℓ).
+	let ell = identifier;
+	let R_ell = proof_of_knowledge.R;
+	let mu_ell = proof_of_knowledge.z;
+	let phi_ell0 = commitment.verifying_key().map_err(|_| Error::<T>::MissingFrostCommitment)?;
+	let c_ell = pok_challenge::<C>(ell, &phi_ell0, &R_ell)
+		.ok_or(Error::<T>::InvalidFrostSignatureScheme)?;
+	if R_ell != <C::Group>::generator() * mu_ell - phi_ell0.element * c_ell.0 {
+		Ok(Some(ell))
+	} else {
+		Ok(None)
+	}
 }
 
 pub fn schnorr_proof<T: Config>(
+	_role: ThresholdSignatureRoleType,
 	data: &MisbehaviorSubmission,
 	parties_including_offender: &[[u8; 33]],
-	round2a: &[SignedRoundMessage],
-	round3: &SignedRoundMessage,
+	round: &SignedRoundMessage,
 ) -> DispatchResult {
-	let i = round3.sender;
-	let n = parties_including_offender.len() as u16;
-	Pallet::<T>::ensure_signed_by_offender(round3, data.offender)?;
-	ensure!(round2a.len() == usize::from(n), Error::<T>::InvalidJustification);
-	round2a
-		.iter()
-		.zip(parties_including_offender)
-		.try_for_each(|(r, p)| Pallet::<T>::ensure_signed_by(r, *p))?;
-
-	let decomm = round2a.get(usize::from(i)).ok_or(Error::<T>::InvalidJustification)?;
-	// double-check
-	Pallet::<T>::ensure_signed_by_offender(decomm, data.offender)?;
-
-	let job_id_bytes = data.job_id.to_be_bytes();
-	let mix = keccak_256(KEYGEN_EID);
-	let eid_bytes = [&job_id_bytes[..], &mix[..]].concat();
-
-	let round3_msg = postcard::from_bytes::<MsgRound3<Secp256k1>>(&round3.message)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
-
-	let round2a_msgs = round2a
-		.iter()
-		.map(|r| {
-			postcard::from_bytes::<MsgRound2Broad<Secp256k1>>(&r.message)
-				.map_err(|_| Error::<T>::MalformedRoundMessage)
-		})
-		.collect::<Result<Vec<_>, _>>()?;
-	let round2a_msg = round2a_msgs.get(usize::from(i)).ok_or(Error::<T>::InvalidJustification)?;
-
-	let rid = round2a_msgs.iter().map(|d| &d.rid).fold([0u8; SECURITY_BYTES], xor_array);
-
-	let polynomial_sum = round2a_msgs.iter().map(|d| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
-
-	let ys = (0..n)
-		.map(|l| polynomial_sum.value(&Scalar::from(l + 1)))
-		.collect::<Vec<Point<Secp256k1>>>();
-
-	let challenge = {
-		let hash = |d: DefaultDigest| {
-			d.chain_update(&eid_bytes)
-				.chain_update(i.to_be_bytes())
-				.chain_update(rid.as_slice())
-				.chain_update(ys[usize::from(i)].to_bytes(true)) // y_i
-				.chain_update(round2a_msg.sch_commit.0.to_bytes(false)) // h
-				.finalize()
-		};
-		let mut rng = HashRng::new(hash);
-		Scalar::random(&mut rng)
-	};
-	let challenge = schnorr_pok::Challenge { nonce: challenge };
-
-	let proof =
-		round3_msg
-			.sch_proof
-			.verify(&round2a_msg.sch_commit, &challenge, &ys[usize::from(i)]);
-
-	ensure!(proof.is_err(), Error::<T>::ValidSchnorrProof);
+	let _i = round.sender;
+	let _n = parties_including_offender.len() as u16;
+	Pallet::<T>::ensure_signed_by_offender(round, data.offender)?;
 
 	// TODO: add slashing logic
 	// Slash the offender!

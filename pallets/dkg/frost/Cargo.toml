@@ -8,6 +8,7 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
+byteorder = { workspace = true }
 parity-scale-codec = { workspace = true }
 serde = { workspace = true }
 serdect = { workspace = true, features = ["alloc"] }
@@ -21,6 +22,7 @@ debugless-unwrap = "0.0.4"
 [features]
 default = ["std"]
 std = [
+  "byteorder/std",
   "rand_core/std",
   "hex/std",
   "sp-std/std",

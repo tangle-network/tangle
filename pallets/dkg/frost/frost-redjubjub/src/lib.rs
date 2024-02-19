@@ -143,7 +143,7 @@ impl Group for JubjubGroup {
 }
 
 /// An implementation of the FROST(Jubjub, BLAKE2b-512) ciphersuite.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, Debug)]
 pub struct JubjubBlake2b512;
 
 impl Ciphersuite for JubjubBlake2b512 {

@@ -18,12 +18,31 @@ use crate::{jobs::JobId, roles::RoleType};
 
 use frame_support::pallet_prelude::*;
 use sp_core::RuntimeDebug;
+use sp_std::vec::Vec;
 
 pub mod dfns_cggmp21;
-pub mod zcash_frost;
 pub mod traits;
+pub mod zcash_frost;
 
 pub use traits::*;
+
+/// Represents a Signed Round Message by the offender.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
+pub struct SignedRoundMessage {
+	/// Index of a party who sent the message
+	pub sender: u16,
+	/// Received message
+	pub message: Vec<u8>,
+	/// Signature of sender + message.
+	///
+	/// This is the signature of the message by the sender.
+	///
+	/// # Note
+	/// sender_bytes = sender.to_be_bytes();
+	/// hash = keccak256(sender_bytes + message);
+	/// signature = sign(hash);
+	pub signature: Vec<u8>,
+}
 
 /// Represents a Misbehavior submission
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]

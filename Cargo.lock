@@ -4218,6 +4218,7 @@ dependencies = [
 name = "frost-core"
 version = "0.6.1"
 dependencies = [
+ "byteorder",
  "debugless-unwrap",
  "hex",
  "parity-scale-codec 3.6.9",
@@ -7356,6 +7357,7 @@ dependencies = [
  "malachite-nz",
  "paillier-zk",
  "pallet-balances",
+ "pallet-jobs",
  "parity-scale-codec 3.6.9",
  "paste",
  "postcard",

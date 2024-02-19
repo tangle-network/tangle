@@ -19,8 +19,7 @@ use frame_support::{ensure, pallet_prelude::DispatchResult};
 use signatures_schemes::ecdsa::recover_ecdsa_pub_key_compressed;
 use tangle_primitives::{
 	misbehavior::{
-		dfns_cggmp21::SignedRoundMessage, DKGTSSJustification, MisbehaviorJustification,
-		MisbehaviorSubmission,
+		DKGTSSJustification, MisbehaviorJustification, MisbehaviorSubmission, SignedRoundMessage,
 	},
 	roles::RoleType,
 };
@@ -53,6 +52,9 @@ impl<T: Config> Pallet<T> {
 			MisbehaviorJustification::DKGTSS(DKGTSSJustification::DfnsCGGMP21(
 				ref justification,
 			)) => Self::verify_dfns_cggmp21_misbehavior(&data, justification),
+			MisbehaviorJustification::DKGTSS(DKGTSSJustification::ZCashFrost(
+				ref justification,
+			)) => Self::verify_zcash_frost_misbehavior(&data, justification),
 			MisbehaviorJustification::ZkSaaS(_) => Err(Error::<T>::InvalidJustification.into()),
 		}
 	}

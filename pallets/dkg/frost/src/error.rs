@@ -44,6 +44,18 @@ pub enum Error {
 	MalformedVerifyingKey,
 	/// An error related to a SigningKey
 	MalformedSigningKey,
+	/// Missing commitment
+	MissingCommitment,
+	/// Invalid signature share
+	InvalidSignatureShare,
+	/// Duplicated identifier
+	DuplicatedIdentifier,
+	/// Unknown identifier
+	UnknownIdentifier,
+	/// Incorrect number of identifiers
+	IncorrectNumberOfIdentifiers,
+	/// Identity commitment error
+	IdentityCommitment,
 }
 
 impl Debug for Error {
@@ -59,6 +71,12 @@ impl Debug for Error {
 			Error::DeserializationError => write!(f, "Deserialization error"),
 			Error::IdentifierDerivationNotSupported =>
 				write!(f, "Identifier derivation not supported"),
+			Error::MissingCommitment => write!(f, "Missing commitment"),
+			Error::InvalidSignatureShare => write!(f, "Invalid signature share"),
+			Error::DuplicatedIdentifier => write!(f, "Duplicated identifier"),
+			Error::UnknownIdentifier => write!(f, "Unknown identifier"),
+			Error::IncorrectNumberOfIdentifiers => write!(f, "Incorrect number of identifiers"),
+			Error::IdentityCommitment => write!(f, "Identity commitment error"),
 		}
 	}
 }

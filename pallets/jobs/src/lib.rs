@@ -184,7 +184,6 @@ pub mod module {
 		ValidatorRewarded { id: T::AccountId, reward: BalanceOf<T> },
 	}
 
-	/// The paused transaction map
 	#[pallet::storage]
 	#[pallet::getter(fn submitted_jobs)]
 	pub type SubmittedJobs<T: Config> =
