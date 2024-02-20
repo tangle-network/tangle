@@ -31,8 +31,10 @@ pub enum ZCashFrostJustification {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub enum KeygenAborted {
-	/// party decommitment doesn't match commitment.
-	InvalidProofOfKnowledge { round: SignedRoundMessage },
+	/// Party sent an invliad schnorr proof of knowledge
+	InvalidProofOfKnowledge { round1: SignedRoundMessage },
+	/// Party sent an invalid secret share
+	InvalidSecretShare { round1: SignedRoundMessage, round2: SignedRoundMessage },
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]

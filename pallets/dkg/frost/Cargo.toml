@@ -8,6 +8,7 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
+zeroize = { version = "1.5.4", default-features = false, features = ["derive"] }
 byteorder = { workspace = true }
 parity-scale-codec = { workspace = true }
 serde = { workspace = true }

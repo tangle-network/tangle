@@ -56,6 +56,8 @@ pub enum Error {
 	IncorrectNumberOfIdentifiers,
 	/// Identity commitment error
 	IdentityCommitment,
+	/// Invalid secret share
+	InvalidSecretShare,
 }
 
 impl Debug for Error {
@@ -77,6 +79,7 @@ impl Debug for Error {
 			Error::UnknownIdentifier => write!(f, "Unknown identifier"),
 			Error::IncorrectNumberOfIdentifiers => write!(f, "Incorrect number of identifiers"),
 			Error::IdentityCommitment => write!(f, "Identity commitment error"),
+			Error::InvalidSecretShare => write!(f, "Invalid secret share"),
 		}
 	}
 }

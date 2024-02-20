@@ -54,8 +54,10 @@ impl<T: Config> Pallet<T> {
 		reason: &KeygenAborted,
 	) -> DispatchResult {
 		match reason {
-			KeygenAborted::InvalidProofOfKnowledge { round } =>
-				keygen::schnorr_proof::<T>(role, data, participants, round),
+			KeygenAborted::InvalidProofOfKnowledge { round1 } =>
+				keygen::schnorr_proof::<T>(role, data, participants, round1),
+			KeygenAborted::InvalidSecretShare { round1, round2 } =>
+				keygen::invalid_secret_share::<T>(role, data, participants, round1, round2),
 		}
 	}
 

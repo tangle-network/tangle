@@ -27,6 +27,7 @@ pub mod challenge;
 pub mod const_crc32;
 pub mod error;
 pub mod identifier;
+pub mod keygen;
 pub mod keys;
 pub mod round1;
 pub mod scalar_mul;
@@ -41,6 +42,7 @@ use alloc::collections::{BTreeMap, BTreeSet};
 use core::{fmt::Debug, marker::PhantomData};
 use scalar_mul::VartimeMultiscalarMul;
 use sp_std::{vec, vec::Vec};
+use zeroize::Zeroize;
 
 use challenge::Challenge;
 use error::Error;
@@ -69,7 +71,7 @@ pub fn random_nonzero<C: Ciphersuite, R: RngCore + CryptoRng>(rng: &mut R) -> Sc
 	}
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Zeroize, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Header<C: Ciphersuite> {
 	/// Format version
 	pub version: u8,

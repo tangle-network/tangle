@@ -4228,6 +4228,7 @@ dependencies = [
  "serdect",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "subtle",
+ "zeroize",
 ]
 
 [[package]]
