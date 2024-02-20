@@ -52,7 +52,8 @@ where
 	}
 
 	/// Computes the signing share from a list of coefficients.
-	pub(crate) fn from_coefficients(coefficients: &[Scalar<C>], peer: Identifier<C>) -> Self {
+	#[allow(dead_code)]
+	pub fn from_coefficients(coefficients: &[Scalar<C>], peer: Identifier<C>) -> Self {
 		Self(evaluate_polynomial(peer, coefficients))
 	}
 

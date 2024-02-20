@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::*;
-use frame_support::ensure;
+
 use frost_ed25519::Ed25519Sha512;
 use frost_ed448::Ed448Shake256;
 use frost_p256::P256Sha256;
@@ -71,11 +71,13 @@ pub fn verify_invalid_schnorr_proof<T: Config, C: Ciphersuite>(
 	let round1_package: round1::Package<C> =
 		postcard::from_bytes(&round1.msg).map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-	if let Some(_) = verify_invalid_proof_of_knowledge::<T, C>(
+	if (verify_invalid_proof_of_knowledge::<T, C>(
 		identifier,
 		&round1_package.commitment,
 		round1_package.proof_of_knowledge,
-	)? {
+	)?)
+	.is_some()
+	{
 		Ok(())
 	} else {
 		Err(Error::<T>::ValidSchnorrProof)?
