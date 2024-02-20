@@ -21,29 +21,29 @@
 use frame_support::{
 	ensure,
 	traits::{Currency, Get, ValidatorSet, ValidatorSetWithIdentification},
-	BoundedBTreeMap, CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
+	BoundedBTreeMap, BoundedVec, CloneNoBound, EqNoBound, PartialEqNoBound, RuntimeDebugNoBound,
 };
-use parity_scale_codec::MaxEncodedLen;
-use sp_runtime::Percent;
-use tangle_primitives::roles::ValidatorRewardDistribution;
-
-use frame_support::BoundedVec;
 pub use pallet::*;
-use parity_scale_codec::{Decode, Encode};
+use pallet_staking::{ActiveEraInfo, EraRewardPoints};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use sp_core::ecdsa;
 use sp_runtime::{
 	traits::{Convert, OpaqueKeys, Zero},
-	DispatchError, Saturating,
+	DispatchError, Percent, Saturating,
 };
-use sp_staking::offence::ReportOffence;
+use sp_staking::{offence::ReportOffence, EraIndex};
 use sp_std::{convert::TryInto, prelude::*, vec};
 use tangle_crypto_primitives::ROLE_KEY_TYPE;
-use tangle_primitives::roles::RoleType;
+use tangle_primitives::roles::{RoleType, ValidatorRewardDistribution};
 
+mod functions;
 mod impls;
+mod types;
+
 pub mod profile;
 use profile::{Profile, Record};
+pub use types::*;
 
 #[cfg(test)]
 pub(crate) mod mock;
@@ -58,68 +58,6 @@ mod weights;
 pub use weights::WeightInfo;
 
 use sp_runtime::RuntimeAppPublic;
-
-/// The ledger of a (bonded) stash.
-#[derive(
-	PartialEqNoBound,
-	EqNoBound,
-	CloneNoBound,
-	Encode,
-	Decode,
-	RuntimeDebugNoBound,
-	TypeInfo,
-	MaxEncodedLen,
-)]
-#[scale_info(skip_type_params(T))]
-pub struct RestakingLedger<T: Config> {
-	/// The stash account whose balance is actually locked and at stake.
-	pub stash: T::AccountId,
-	/// The total amount of the stash's balance that is restaked for all selected roles.
-	/// This restaked balance we are currently accounting for new slashing conditions.
-	#[codec(compact)]
-	pub total: BalanceOf<T>,
-	/// Restaking Profile
-	pub profile: Profile<T>,
-	/// Roles map with their respective records.
-	pub roles: BoundedBTreeMap<RoleType, Record<T>, T::MaxRolesPerValidator>,
-	/// Role key
-	pub role_key: BoundedVec<u8, T::MaxKeyLen>,
-}
-
-impl<T: Config> RestakingLedger<T> {
-	/// New staking ledger for a stash account.
-	pub fn try_new(
-		stash: T::AccountId,
-		profile: Profile<T>,
-		role_key: Vec<u8>,
-	) -> Result<Self, DispatchError> {
-		let total_restake = profile.get_total_profile_restake();
-		let mut roles: BoundedBTreeMap<_, _, _> = Default::default();
-		for record in profile.get_records().into_iter() {
-			roles.try_insert(record.role, record).map_err(|_| Error::<T>::KeySizeExceeded)?;
-		}
-		let bounded_role_key: BoundedVec<u8, T::MaxKeyLen> =
-			role_key.try_into().map_err(|_| Error::<T>::KeySizeExceeded)?;
-		Ok(Self { stash, total: total_restake.into(), profile, roles, role_key: bounded_role_key })
-	}
-
-	/// Returns the total amount of the stash's balance that is restaked for all selected roles.
-	pub fn total_restake(&self) -> BalanceOf<T> {
-		self.total
-	}
-
-	/// Returns the amount of the stash's balance that is restaked for the given role.
-	/// If the role is not found, returns zero.
-	pub fn restake_for(&self, role: &RoleType) -> BalanceOf<T> {
-		self.roles
-			.get(role)
-			.map_or_else(Zero::zero, |record| record.amount.unwrap_or_default())
-	}
-}
-
-pub type CurrencyOf<T> = <T as pallet_staking::Config>::Currency;
-pub type BalanceOf<T> =
-	<CurrencyOf<T> as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -181,9 +119,14 @@ pub mod pallet {
 		/// A type for retrieving the validators supposed to be online in a session.
 		type ValidatorSet: ValidatorSetWithIdentification<Self::AccountId>;
 
+		/// The max length for validator key
 		type MaxKeyLen: Get<u32>;
 
+		/// The max roles a validator is allowed to have
 		type MaxRolesPerValidator: Get<u32>;
+
+		/// The max validators allowed in the pallet
+		type MaxValidators: Get<u32>;
 
 		/// A type to submit offence reports against the validators.
 		type ReportOffences: ReportOffence<
@@ -223,6 +166,12 @@ pub mod pallet {
 		ProfileDeleted { account: T::AccountId },
 		/// Pending jobs,that cannot be opted out at the moment.
 		PendingJobs { pending_jobs: Vec<(RoleType, JobId)> },
+		/// Roles inflation reward paid for era
+		RolesRewardSet { total_rewards: BalanceOf<T> },
+		/// The re-stakers' rewards are getting paid.
+		PayoutStarted { era_index: EraIndex, validator_stash: T::AccountId },
+		/// The re-staker has been rewarded by this amount.
+		Rewarded { stash: T::AccountId, amount: BalanceOf<T> },
 	}
 
 	#[pallet::error]
@@ -256,6 +205,16 @@ pub mod pallet {
 		SessionKeysNotProvided,
 		/// Key size exceeded
 		KeySizeExceeded,
+		/// Cannot find Current era
+		CannotGetCurrentEra,
+		/// Invalid era info
+		InvalidEraToReward,
+		/// Out of bounds input
+		BoundNotMet,
+		/// Rewards already claimed
+		AlreadyClaimed,
+		/// Unlock chunks already filled
+		NoMoreChunks,
 	}
 
 	/// Map from all "controller" accounts to the info regarding the staking.
@@ -279,22 +238,73 @@ pub mod pallet {
 	#[pallet::getter(fn min_active_bond)]
 	pub(super) type MinRestakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
-	/// Create profile for the restaker.
-	/// Restaker can choose roles he is interested to opt-in and restake tokens for it.
-	/// ReStaking can be done shared or independently for each role.
+	/// The number of jobs completed by a validator in era
+	#[pallet::storage]
+	#[pallet::getter(fn validator_points_per_session)]
+	pub type ValidatorJobsInEra<T: Config> =
+		StorageValue<_, BoundedBTreeMap<T::AccountId, u32, T::MaxValidators>, ValueQuery>;
+
+	/// Rewards for the last `HISTORY_DEPTH` eras.
+	/// If reward hasn't been set or has been removed then 0 reward is returned.
+	#[pallet::storage]
+	#[pallet::unbounded]
+	#[pallet::getter(fn eras_reward_points)]
+	pub type ErasRestakeRewardPoints<T: Config> =
+		StorageMap<_, Twox64Concat, EraIndex, EraRewardPoints<T::AccountId>, ValueQuery>;
+
+	/// The active era information, it holds index and start.
 	///
-	/// # Parameters
-	///
-	/// - `origin`: Origin of the transaction.
-	/// - `profile`: Profile to be created
-	///
-	/// This function will return error if
-	/// - Account is not a validator account.
-	/// - Profile already exists for the validator.
-	/// - Min Restaking bond is not met.
-	/// - Restaking amount is exceeds max Restaking value.
+	/// The active era is the era being currently rewarded.
+	#[pallet::storage]
+	#[pallet::getter(fn active_restaker_era)]
+	pub type ActiveRestakerEra<T> = StorageValue<_, ActiveEraInfo>;
+
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn on_initialize(_now: BlockNumberFor<T>) -> Weight {
+			// just return the weight of the on_finalize.
+			T::DbWeight::get().reads_writes(1, 1)
+		}
+
+		fn on_finalize(_n: BlockNumberFor<T>) {
+			// if we already have restaker era information, check if the
+			// staking pallet has advanced in active era
+			if let Some(restaker_era) = Self::active_restaker_era() {
+				if let Some(staking_era) = pallet_staking::Pallet::<T>::active_era() {
+					// if we staking pallet has advanced a session, then we
+					// compute rewards with last session restakers
+					// and set new era
+					if staking_era.index > restaker_era.index {
+						let _ = Self::compute_rewards(restaker_era.index);
+						ActiveRestakerEra::<T>::put(staking_era);
+					}
+				}
+			}
+			// Set the start of the first era.
+			else {
+				if let Some(staking_era) = pallet_staking::Pallet::<T>::active_era() {
+					ActiveRestakerEra::<T>::put(staking_era);
+				}
+			}
+		}
+	}
+
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+		/// Create profile for the validator.
+		/// Validator can choose roles he is interested to opt-in and restake tokens for it.
+		/// Staking can be done shared or independently for each role.
+		///
+		/// # Parameters
+		///
+		/// - `origin`: Origin of the transaction.
+		/// - `profile`: Profile to be created
+		///
+		/// This function will return error if
+		/// - Account is not a validator account.
+		/// - Profile already exists for the validator.
+		/// - Min Restaking bond is not met.
+		/// - Restaking amount is exceeds max Restaking value.
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::create_profile())]
 		#[pallet::call_index(0)]
 		pub fn create_profile(origin: OriginFor<T>, profile: Profile<T>) -> DispatchResult {
@@ -373,9 +383,9 @@ pub mod pallet {
 
 		/// Update profile of the restaker.
 		/// This function will update the profile of the restaker.
-		/// If user wants to remove any role, please ensure that all the jobs associated with the
+		/// If user wants to remove any role, ensure that all the jobs associated with the
 		/// role are completed else this tx will fail.
-		/// If user wants to add any role, please ensure that the Restaking amount is greater than
+		/// If user wants to add any role, ensure that the Restaking amount is greater than
 		/// required min Restaking bond.
 		///
 		/// # Parameters
@@ -399,6 +409,9 @@ pub mod pallet {
 			);
 			let mut ledger =
 				Ledger::<T>::get(&restaker_account).ok_or(Error::<T>::NoProfileFound)?;
+
+			let profile_before_update = ledger.profile;
+
 			// Restaking amount of record should meet min restaking amount requirement.
 			match updated_profile.clone() {
 				Profile::Shared(profile) => {
@@ -429,6 +442,22 @@ pub mod pallet {
 			Self::validate_updated_profile(restaker_account.clone(), updated_profile.clone())?;
 			ledger.profile = updated_profile.clone();
 			ledger.total = updated_profile.get_total_profile_restake().into();
+
+			// if the total restake was reduced, we record that in unlock data
+			if profile_before_update.get_total_profile_restake() >
+				updated_profile.get_total_profile_restake()
+			{
+				let value = profile_before_update
+					.get_total_profile_restake()
+					.saturating_sub(updated_profile.get_total_profile_restake());
+				let era = Self::active_restaker_era().ok_or(Error::<T>::InvalidEraToReward)?.index +
+					T::BondingDuration::get();
+
+				ledger
+					.unlocking
+					.try_push(UnlockChunk { value, era })
+					.map_err(|_| Error::<T>::NoMoreChunks)?;
+			}
 
 			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
 				BoundedVec::try_from(updated_profile.get_roles())
@@ -487,7 +516,6 @@ pub mod pallet {
 
 				// Profile delete request failed due to pending jobs, which can't be opted out at
 				// the moment.
-				Self::deposit_event(Event::<T>::PendingJobs { pending_jobs });
 				return Err(Error::<T>::ProfileDeleteRequestFailed.into())
 			}
 
@@ -573,7 +601,19 @@ pub mod pallet {
 		pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResult {
 			let restaker_account = ensure_signed(origin.clone())?;
 			// Ensure no role is assigned to the restaker_account and is eligible to withdraw.
-			ensure!(Self::can_exit(restaker_account), Error::<T>::HasRoleAssigned);
+			ensure!(Self::can_exit(restaker_account.clone()), Error::<T>::HasRoleAssigned);
+
+			// if any unlocking restake, then remove any eligible restake
+			let mut ledger =
+				Ledger::<T>::get(&restaker_account.clone()).ok_or(Error::<T>::NoProfileFound)?;
+
+			if !ledger.unlocking.is_empty() {
+				let current_era =
+					Self::active_restaker_era().ok_or(Error::<T>::InvalidEraToReward)?.index;
+
+				ledger.unlocking.retain(|x| x.era >= current_era);
+				Ledger::<T>::insert(restaker_account, ledger);
+			}
 
 			// Withdraw unbond funds.
 			let res = pallet_staking::Pallet::<T>::withdraw_unbonded(origin, 0);
@@ -581,6 +621,30 @@ pub mod pallet {
 				Ok(_) => Ok(()),
 				Err(dispatch_post_info) => Err(dispatch_post_info.error),
 			}
+		}
+
+		/// Pay out all the stakers behind a single restaker for a single era.
+		///
+		/// - `validator_stash` is the stash account of the restaker. Their nominators, up to
+		///   `T::MaxNominatorRewardedPerValidator`, will also receive their rewards.
+		/// - `era` may be any era between `[current_era - history_depth; current_era]`.
+		///
+		/// The origin of this call must be _Signed_. Any account can call this function, even if
+		/// it is not one of the stakers.
+		/// Note : This will only payout the restaker rewards, the validator/restaker will have to
+		/// call staking.payout_stakers to claim staking rewards
+		///
+		/// ## Complexity
+		/// - At most O(MaxNominatorRewardedPerValidator).
+		#[pallet::call_index(6)]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::withdraw_unbonded())]
+		pub fn payout_stakers(
+			origin: OriginFor<T>,
+			validator_stash: T::AccountId,
+			era: EraIndex,
+		) -> DispatchResult {
+			ensure_signed(origin)?;
+			Self::do_payout_stakers(validator_stash, era)
 		}
 	}
 }

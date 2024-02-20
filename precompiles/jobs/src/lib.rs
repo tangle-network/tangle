@@ -221,29 +221,6 @@ where
 		}
 	}
 
-	/// Withdraws accumulated rewards for the caller from the Jobs module.
-	///
-	/// # Parameters
-	///
-	/// - `handle`: A mutable reference to the `PrecompileHandle` implementation.
-	///
-	/// # Returns
-	///
-	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("withdrawRewards()")]
-	fn withdraw_rewards(handle: &mut impl PrecompileHandle) -> EvmResult {
-		// Convert caller's Ethereum address to Substrate account ID
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		// Create the call to the Jobs module's withdraw_rewards function
-		let call = JobsCall::<Runtime>::withdraw_rewards {};
-
-		// Dispatch the call using the RuntimeHelper
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
 	/// Sets a new permitted caller for a specific job type identified by the given key and job ID.
 	///
 	/// # Parameters

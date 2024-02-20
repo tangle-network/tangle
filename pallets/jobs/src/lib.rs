@@ -84,7 +84,7 @@ pub mod module {
 		>;
 
 		/// The roles manager mechanism
-		type RolesHandler: RolesHandler<Self::AccountId>;
+		type RolesHandler: RolesHandler<Self::AccountId, Balance = BalanceOf<Self>>;
 
 		/// The job result verifying mechanism
 		type MPCHandler: MPCHandler<
@@ -286,16 +286,23 @@ pub mod module {
 			else {
 				let existing_result_id =
 					job.job_type.clone().get_phase_one_id().ok_or(Error::<T>::InvalidJobPhase)?;
+
 				// Ensure the result exists
 				let result =
 					KnownResults::<T>::get(job.job_type.get_role_type(), existing_result_id)
 						.ok_or(Error::<T>::PreviousResultNotFound)?;
 
+				// Ensure the phase one participants are still validators
+				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
+
+				// ensure the account can use the result
+				if let Some(permitted_caller) = result.permitted_caller {
+					ensure!(permitted_caller == caller, Error::<T>::InvalidJobParams);
+				}
+
 				// Validate existing result
 				ensure!(result.ttl >= now, Error::<T>::ResultExpired);
 
-				// Ensure the phase one participants are still validators
-				let participants = result.participants().ok_or(Error::<T>::InvalidJobPhase)?;
 				for participant in participants {
 					ensure!(
 						T::RolesHandler::is_restaker(participant.clone(), role_type),
@@ -304,11 +311,6 @@ pub mod module {
 
 					// add record for easy lookup
 					Self::add_job_to_validator_lookup(participant, role_type, job_id)?;
-				}
-
-				// ensure the account can use the result
-				if let Some(permitted_caller) = result.permitted_caller {
-					ensure!(permitted_caller == caller, Error::<T>::InvalidJobParams);
 				}
 			}
 
@@ -439,6 +441,8 @@ pub mod module {
 					KnownResults::<T>::insert(role_type, job_id, result);
 				},
 			};
+
+			T::RolesHandler::record_job_by_validators(participants.to_vec())?;
 
 			let l = if participants.is_empty() { 1u32 } else { participants.len() as u32 };
 			let fee_per_participant = job_info.fee / l.into();
