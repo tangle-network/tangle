@@ -272,7 +272,9 @@ pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u12
 	let balance =
 		(get_team_distribution_share() - get_initial_liquidity_share()).mul_floor(TOTAL_SUPPLY);
 
-	let direct_team_spend: u128 = get_team_direct_vesting_accounts().into_values().map(|balance| balance as u128)
+	let direct_team_spend: u128 = get_team_direct_vesting_accounts()
+		.into_values()
+		.map(|balance| balance as u128)
 		.sum();
 	let team_final_balance = balance - direct_team_spend;
 	let team_account = (MultiAddress::Native(team_address), team_final_balance as u128);
