@@ -7,7 +7,7 @@ use alloc::string::String;
 use sp_std::{vec, vec::Vec};
 
 /// Helper struct to serialize a Scalar.
-pub(crate) struct ScalarSerialization<C: Ciphersuite>(
+pub struct ScalarSerialization<C: Ciphersuite>(
 	pub <<<C as Ciphersuite>::Group as Group>::Field as Field>::Serialization,
 );
 
@@ -43,8 +43,8 @@ where
 	}
 }
 
-pub(crate) struct ElementSerialization<C: Ciphersuite>(
-	pub(crate) <<C as Ciphersuite>::Group as Group>::Serialization,
+pub struct ElementSerialization<C: Ciphersuite>(
+	pub <<C as Ciphersuite>::Group as Group>::Serialization,
 );
 
 impl<C> serde::Serialize for ElementSerialization<C>
@@ -91,7 +91,7 @@ where
 
 /// Serialize a placeholder ciphersuite field with the ciphersuite ID string.
 #[allow(unused)]
-pub(crate) fn ciphersuite_serialize<S, C>(_: &(), s: S) -> Result<S::Ok, S::Error>
+pub fn ciphersuite_serialize<S, C>(_: &(), s: S) -> Result<S::Ok, S::Error>
 where
 	S: serde::Serializer,
 	C: Ciphersuite,
@@ -107,7 +107,7 @@ where
 
 /// Deserialize a placeholder ciphersuite field, checking if it's the ciphersuite ID string.
 #[allow(unused)]
-pub(crate) fn ciphersuite_deserialize<'de, D, C>(deserializer: D) -> Result<(), D::Error>
+pub fn ciphersuite_deserialize<'de, D, C>(deserializer: D) -> Result<(), D::Error>
 where
 	D: serde::Deserializer<'de>,
 	C: Ciphersuite,
@@ -132,7 +132,7 @@ where
 /// Deserialize a version. For now, since there is a single version 0,
 /// simply validate if it's 0.
 #[allow(unused)]
-pub(crate) fn version_deserialize<'de, D>(deserializer: D) -> Result<u8, D::Error>
+pub fn version_deserialize<'de, D>(deserializer: D) -> Result<u8, D::Error>
 where
 	D: serde::Deserializer<'de>,
 {
@@ -152,12 +152,12 @@ where
 // parametrized with the ciphersuite, but trait aliases are not currently
 // supported: <https://github.com/rust-lang/rust/issues/41517>
 
-pub(crate) trait Serialize {
+pub trait Serialize {
 	/// Serialize the struct into a Vec.
 	fn serialize(&self) -> Result<Vec<u8>, Error>;
 }
 
-pub(crate) trait Deserialize {
+pub trait Deserialize {
 	/// Deserialize the struct from a slice of bytes.
 	fn deserialize(bytes: &[u8]) -> Result<Self, Error>
 	where

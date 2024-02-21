@@ -171,7 +171,7 @@ fn hash_to_scalar(domain: &[u8], msg: &[u8]) -> Scalar {
 const CONTEXT_STRING: &str = "FROST-P384-SHA384-v1";
 
 /// An implementation of the FROST(P-384, SHA-384) ciphersuite.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, Debug)]
 pub struct P384Sha384;
 
 impl Ciphersuite for P384Sha384 {

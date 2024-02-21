@@ -43,10 +43,9 @@ use sp_io::crypto::{ecdsa_generate, ecdsa_sign_prehashed};
 use tangle_primitives::{
 	misbehavior::{
 		dfns_cggmp21::{
-			DfnsCGGMP21Justification, KeyRefreshAborted, KeygenAborted, SignedRoundMessage,
-			AUX_GEN_EID, KEYGEN_EID,
+			DfnsCGGMP21Justification, KeyRefreshAborted, KeygenAborted, AUX_GEN_EID, KEYGEN_EID,
 		},
-		DKGTSSJustification, MisbehaviorJustification, MisbehaviorSubmission,
+		DKGTSSJustification, MisbehaviorJustification, MisbehaviorSubmission, SignedRoundMessage,
 	},
 	roles::{RoleType, ThresholdSignatureRoleType},
 };

@@ -22,7 +22,7 @@ pub struct VerifyingKey<C>
 where
 	C: Ciphersuite,
 {
-	pub(crate) element: Element<C>,
+	pub element: Element<C>,
 }
 
 impl<C> VerifyingKey<C>
@@ -31,7 +31,7 @@ where
 {
 	/// Create a new VerifyingKey from the given element.
 	#[allow(unused)]
-	pub(crate) fn new(element: <C::Group as Group>::Element) -> Self {
+	pub fn new(element: <C::Group as Group>::Element) -> Self {
 		Self { element }
 	}
 
@@ -56,7 +56,7 @@ where
 
 	/// Verify a purported `signature` with a pre-hashed [`Challenge`] made by this verification
 	/// key.
-	pub(crate) fn verify_prehashed(
+	pub fn verify_prehashed(
 		&self,
 		challenge: Challenge<C>,
 		signature: &Signature<C>,
