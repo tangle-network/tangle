@@ -1508,11 +1508,11 @@ fn try_validator_removal_from_job_with_destory_fallback_works() {
 			fallback: FallbackOptions::Destroy,
 		};
 
-		let job_creator_balance = Balances::free_balance(mock_pub_key(TEN));
+		let job_creator_balance = Balances::free_balance(&mock_pub_key(TEN));
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
 		// sanity check, creator was charged for job
-		assert!(Balances::free_balance(mock_pub_key(TEN)) < job_creator_balance);
+		assert!(Balances::free_balance(&mock_pub_key(TEN)) < job_creator_balance);
 
 		// ==== now we try to remove inactive validator in the set ====
 		assert_ok!(Jobs::try_validator_removal_from_job(
@@ -1527,7 +1527,7 @@ fn try_validator_removal_from_job_with_destory_fallback_works() {
 		})]);
 
 		// jobs creator should recieve all fees back
-		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), job_creator_balance);
+		assert_eq!(Balances::free_balance(&mock_pub_key(TEN)), job_creator_balance);
 
 		// the job should be removed from storage
 		assert!(SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 0)
@@ -1571,11 +1571,11 @@ fn try_validator_removal_from_job_with_retry_works_phase_one() {
 			fallback: FallbackOptions::RegenerateWithThreshold(3),
 		};
 
-		let job_creator_balance = Balances::free_balance(mock_pub_key(TEN));
+		let job_creator_balance = Balances::free_balance(&mock_pub_key(TEN));
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
 		// sanity check, creator was charged for job
-		assert!(Balances::free_balance(mock_pub_key(TEN)) < job_creator_balance);
+		assert!(Balances::free_balance(&mock_pub_key(TEN)) < job_creator_balance);
 
 		let job_info =
 			SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 0).unwrap();
@@ -1635,7 +1635,7 @@ fn try_validator_removal_from_job_with_retry_works_phase_two() {
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
-		let _job_info =
+		let job_info =
 			SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 0).unwrap();
 
 		// submit a solution for this job
