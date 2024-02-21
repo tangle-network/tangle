@@ -18,26 +18,10 @@ use frame_support::pallet_prelude::*;
 use sp_core::RuntimeDebug;
 use sp_std::vec::Vec;
 
+use super::SignedRoundMessage;
+
 pub const KEYGEN_EID: &[u8] = b"dfns.cggmp21.keygen";
 pub const AUX_GEN_EID: &[u8] = b"dfns.cggmp21.aux_gen";
-
-/// Represents a Signed Round Message by the offender.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
-pub struct SignedRoundMessage {
-	/// Index of a party who sent the message
-	pub sender: u16,
-	/// Received message
-	pub message: Vec<u8>,
-	/// Signature of sender + message.
-	///
-	/// This is the signature of the message by the sender.
-	///
-	/// # Note
-	/// sender_bytes = sender.to_be_bytes();
-	/// hash = keccak256(sender_bytes + message);
-	/// signature = sign(hash);
-	pub signature: Vec<u8>,
-}
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone)]
 pub enum DfnsCGGMP21Justification {
