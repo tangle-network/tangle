@@ -165,7 +165,7 @@ pub type Element<C> = <<C as Ciphersuite>::Group as Group>::Element;
 /// function.
 ///
 /// [FROST ciphersuite]: https://www.ietf.org/archive/id/draft-irtf-cfrg-frost-14.html#name-ciphersuites
-pub trait Ciphersuite: Copy + Clone + PartialEq + Debug {
+pub trait Ciphersuite: Copy + Clone + PartialEq + Debug + Default {
 	/// The ciphersuite ID string. It should be equal to the contextString in
 	/// the spec. For new ciphersuites, this should be a string that identifies
 	/// the ciphersuite; it's recommended to use a similar format to the
@@ -255,7 +255,7 @@ pub trait Ciphersuite: Copy + Clone + PartialEq + Debug {
 		signature: &Signature<Self>,
 		public_key: &VerifyingKey<Self>,
 	) -> Result<(), Error> {
-		let c = super::challenge::challenge::<Self>(&signature.R, public_key, msg);
+		let c = super::challenge::<Self>(&signature.R, public_key, msg);
 
 		public_key.verify_prehashed(c, signature)
 	}

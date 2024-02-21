@@ -31,10 +31,17 @@ impl<T: Config> Pallet<T> {
 		role_type: RoleType,
 		job_id: JobId,
 	) -> DispatchResult {
-		ValidatorJobIdLookup::<T>::try_mutate(validator, |jobs| -> DispatchResult {
+		ValidatorJobIdLookup::<T>::try_mutate(validator.clone(), |jobs| -> DispatchResult {
 			let jobs = jobs.get_or_insert_with(Default::default);
+
+			// ensure the max limit of validator is followed
+			let max_allowed = T::RolesHandler::get_max_active_service_for_restaker(validator)
+				.unwrap_or_else(Default::default);
+
 			jobs.try_push((role_type, job_id))
 				.map_err(|_| Error::<T>::TooManyJobsForValidator)?;
+
+			ensure!(jobs.len() <= max_allowed as usize, Error::<T>::TooManyJobsForValidator);
 			Ok(())
 		})
 	}

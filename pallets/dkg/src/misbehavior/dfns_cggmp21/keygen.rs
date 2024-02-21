@@ -25,8 +25,7 @@ use sp_runtime::DispatchResult;
 use sp_std::prelude::*;
 
 use tangle_primitives::misbehavior::{
-	dfns_cggmp21::{SignedRoundMessage, KEYGEN_EID},
-	MisbehaviorSubmission,
+	dfns_cggmp21::KEYGEN_EID, MisbehaviorSubmission, SignedRoundMessage,
 };
 
 use super::{hashing_rng::HashRng, xor_array, DefaultDigest, SECURITY_BYTES};

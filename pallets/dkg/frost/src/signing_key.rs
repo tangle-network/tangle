@@ -8,7 +8,7 @@ use crate::{
 };
 
 #[cfg(feature = "std")]
-use crate::{challenge::challenge, signature::Signature};
+use crate::{challenge, signature::Signature};
 
 #[cfg(feature = "std")]
 use crate::random_nonzero;

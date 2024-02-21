@@ -107,7 +107,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -285,7 +286,8 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -368,7 +370,8 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -492,7 +495,8 @@ fn jobs_rpc_tests() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -613,7 +617,8 @@ fn jobs_submission_e2e_works_for_zksaas() {
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -792,7 +797,8 @@ fn reduce_active_role_restake_should_fail() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -857,7 +863,8 @@ fn delete_profile_with_active_role_should_fail() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -904,7 +911,8 @@ fn remove_active_role_should_fail() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -962,7 +970,8 @@ fn remove_role_without_active_jobs_should_work() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1018,7 +1027,8 @@ fn add_role_to_active_profile_should_work() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1080,7 +1090,8 @@ fn reduce_stake_on_non_active_role_should_work() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1141,7 +1152,8 @@ fn increase_stake_on_active_role_should_work() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1201,7 +1213,8 @@ fn switch_non_active_profile_should_work() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1264,7 +1277,8 @@ fn switch_active_shared_profile_to_independent_should_work_if_active_stake_prese
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1350,7 +1364,8 @@ fn switch_active_independent_profile_to_shared_should_work_if_active_restake_sum
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1441,7 +1456,8 @@ fn test_fee_charged_for_jobs_submission() {
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1710,5 +1726,52 @@ fn try_validator_removal_from_job_with_retry_works_phase_two() {
 			SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 1).unwrap();
 		assert_eq!(job_info.job_type.get_phase_one_id().unwrap(), 2);
 		assert_eq!(job_info.fallback, FallbackOptions::Destroy);
+	});
+}
+
+#[test]
+fn test_validator_limit_is_counted_for_jobs_submission() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+
+		// setup time fees
+		assert_ok!(Jobs::set_time_fee(RuntimeOrigin::root(), 1));
+
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone(),
+				Some(1)
+			));
+		}
+
+		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 20,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
+				threshold: 3,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission.clone()));
+
+		// submitting again should fail since the max validators can accept is one
+		assert_noop!(
+			Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission),
+			Error::<Runtime>::TooManyJobsForValidator
+		);
 	});
 }

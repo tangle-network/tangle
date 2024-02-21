@@ -1,9 +1,5 @@
-use super::{
-	traits::{Ciphersuite, Element, Field, Group},
-	verifying_key::VerifyingKey,
-};
+use super::traits::{Ciphersuite, Field, Group};
 use core::fmt::Debug;
-use sp_std::vec;
 
 /// A type refinement for the scalar field element representing the per-message _[challenge]_.
 ///
@@ -37,26 +33,4 @@ where
 			.field(&hex::encode(<<C::Group as Group>::Field>::serialize(&self.0)))
 			.finish()
 	}
-}
-
-/// Generates the challenge as is required for Schnorr signatures.
-///
-/// Deals in bytes, so that [FROST] and singleton signing and verification can use it with different
-/// types.
-///
-/// This is the only invocation of the H2 hash function from the [RFC].
-///
-/// [FROST]: https://www.ietf.org/archive/id/draft-irtf-cfrg-frost-14.html#name-signature-challenge-computa
-/// [RFC]: https://www.ietf.org/archive/id/draft-irtf-cfrg-frost-14.html#section-3.2
-pub fn challenge<C>(R: &Element<C>, verifying_key: &VerifyingKey<C>, msg: &[u8]) -> Challenge<C>
-where
-	C: Ciphersuite,
-{
-	let mut preimage = vec![];
-
-	preimage.extend_from_slice(<C::Group>::challenge_bytes(R).as_ref());
-	preimage.extend_from_slice(<C::Group>::challenge_bytes(&verifying_key.element).as_ref());
-	preimage.extend_from_slice(msg);
-
-	Challenge(C::H2(&preimage[..]))
 }
