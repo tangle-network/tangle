@@ -6,7 +6,7 @@ use crate::types::{
 use sp_runtime::traits::Zero;
 use tangle_primitives::{
 	jobs::{
-		DKGTSSKeyRefreshResult, DKGTSSPhaseOneJobType, JobType, JobWithResult,
+		DKGTSSKeyRefreshResult, DKGTSSPhaseOneJobType, FallbackOptions, JobType, JobWithResult,
 		ZkSaaSPhaseOneJobType,
 	},
 	roles::RoleType,
@@ -121,160 +121,224 @@ impl<T: Config> Pallet<T> {
 		job_id: JobId,
 		validator: T::AccountId,
 	) -> DispatchResult {
-		SubmittedJobs::<T>::try_mutate(role_type, job_id, |job_info| -> DispatchResult {
-			let job_info = job_info.as_mut().ok_or(Error::<T>::JobNotFound)?;
+		SubmittedJobs::<T>::try_mutate(role_type, job_id, |maybe_job_info| -> DispatchResult {
+			let job_info = maybe_job_info.as_mut().ok_or(Error::<T>::JobNotFound)?;
 
-			let phase1_result = if !job_info.job_type.is_phase_one() {
-				Some(
-					KnownResults::<T>::get(role_type, job_id)
-						.ok_or(Error::<T>::PhaseOneResultNotFound)?,
-				)
-			} else {
-				None
-			};
+			match job_info.fallback {
+				FallbackOptions::Destroy => {
+					// refund the job creator
+					T::Currency::transfer(
+						&Self::rewards_account_id(),
+						&job_info.owner,
+						job_info.fee,
+						ExistenceRequirement::AllowDeath,
+					)?;
 
-			// If the job type is in the phase one.
-			// If it is, adjusts the participants and threshold accordingly.
-			// Ensures that the threshold is not zero after adjustment.
-			if job_info.job_type.is_phase_one() {
-				let participants = job_info.job_type.clone().get_participants().unwrap();
-				let mut threshold = job_info.job_type.clone().get_threshold().unwrap();
+					Self::deposit_event(Event::JobRefunded { job_id, role_type });
 
-				let participants: Vec<T::AccountId> =
-					participants.into_iter().filter(|x| x != &validator).collect();
+					// remove the job from storage
+					*maybe_job_info = None;
+					Ok(())
+				},
+				FallbackOptions::RegenerateWithThreshold(new_threshold) => {
+					// == else case, the job fallback option is retry ==
 
-				if participants.len() <= threshold.into() {
-					threshold = threshold.saturating_sub(1);
-				}
+					// If the job type is in the phase one.
+					// If it is, adjusts the participants and threshold accordingly.
+					if job_info.job_type.is_phase_one() {
+						let participants = job_info.job_type.clone().get_participants().unwrap();
 
-				ensure!(!threshold.is_zero(), Error::<T>::NotEnoughValidators);
-			} else {
-				// This phase1 result cannot be used
-				let phase1 = phase1_result.as_ref().ok_or(Error::<T>::PhaseOneResultNotFound)?;
+						let participants: Vec<T::AccountId> =
+							participants.into_iter().filter(|x| x != &validator).collect();
 
-				// Generate a job to generate new key
-				let job_id = Self::get_next_job_id()?;
+						if participants.len() <= new_threshold as usize {
+							return Err(Error::<T>::NotEnoughValidators.into())
+						}
 
-				match role_type {
-					// Case for RoleType::Tss
-					// - Extract information from 'phase1'
-					// - Create a new 'job_type' of DKGJobType with adjusted parameters (remove the
-					//   reported validator and reduce threshold)
-					// - Charge the validator fee for job submission
-					// - Store information about the submitted job in 'SubmittedJobs'
-					RoleType::Tss(role) => {
-						let new_participants = phase1
-							.participants()
-							.ok_or(Error::<T>::InvalidJobPhase)?
-							.into_iter()
-							.filter(|x| x != &validator)
-							.collect::<Vec<_>>()
-							.try_into()
-							.map_err(|_| Error::<T>::TooManyParticipants)?;
-
-						let new_threshold = phase1
-							.threshold()
-							.ok_or(Error::<T>::InvalidJobPhase)?
-							.saturating_sub(1);
 						ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
 
-						let job_type = JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
-							role_type: role,
-							participants: new_participants,
-							threshold: new_threshold,
-							permitted_caller: phase1.clone().permitted_caller,
+						// set fallback to destroy since we already regenerated
+						job_info.fallback = FallbackOptions::Destroy;
+
+						Self::deposit_event(Event::JobParticipantsUpdated {
+							job_id,
+							role_type,
+							details: job_info.clone(),
 						});
 
-						// charge the validator fee for job submission
-						let job = JobSubmissionOf::<T> {
-							expiry: job_info.expiry,
-							ttl: job_info.ttl,
-							job_type: job_type.clone(),
+						Ok(())
+					} else {
+						let phase1_result = if !job_info.job_type.is_phase_one() {
+							Some(
+								KnownResults::<T>::take(
+									role_type,
+									job_info
+										.job_type
+										.get_phase_one_id()
+										.ok_or(Error::<T>::InvalidJobPhase)?,
+								)
+								.ok_or(Error::<T>::PhaseOneResultNotFound)?,
+							)
+						} else {
+							None
 						};
 
-						let fee = T::JobToFee::job_to_fee(&job);
-						T::Currency::transfer(
-							&validator,
-							&Self::rewards_account_id(),
-							fee,
-							ExistenceRequirement::KeepAlive,
-						)?;
+						// This phase1 result cannot be used
+						let phase1 =
+							phase1_result.as_ref().ok_or(Error::<T>::PhaseOneResultNotFound)?;
 
-						let job_info = JobInfo {
-							owner: phase1.owner.clone(),
-							expiry: job_info.expiry,
-							ttl: job_info.ttl,
-							job_type,
-							fee,
+						// Generate a job to generate new key
+						let job_id = Self::get_next_job_id()?;
+
+						match role_type {
+							// Case for RoleType::Tss
+							// - Extract information from 'phase1'
+							// - Create a new 'job_type' of DKGJobType with adjusted parameters
+							//   (remove the reported validator and reduce threshold)
+							// - Charge the validator fee for job submission
+							// - Store information about the submitted job in 'SubmittedJobs'
+							RoleType::Tss(role) => {
+								let new_participants = phase1
+									.participants()
+									.ok_or(Error::<T>::InvalidJobPhase)?
+									.into_iter()
+									.filter(|x| x != &validator)
+									.collect::<Vec<_>>()
+									.try_into()
+									.map_err(|_| Error::<T>::TooManyParticipants)?;
+
+								ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
+
+								let job_type = JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+									role_type: role,
+									participants: new_participants,
+									threshold: new_threshold,
+									permitted_caller: phase1.clone().permitted_caller,
+								});
+
+								// charge the validator fee for job submission
+								let job = JobSubmissionOf::<T> {
+									expiry: job_info.expiry,
+									ttl: job_info.ttl,
+									job_type: job_type.clone(),
+									fallback: job_info.fallback,
+								};
+
+								let fee = T::JobToFee::job_to_fee(&job);
+								T::Currency::transfer(
+									&validator,
+									&Self::rewards_account_id(),
+									fee,
+									ExistenceRequirement::KeepAlive,
+								)?;
+
+								let phase_one_job_info = JobInfo {
+									owner: phase1.owner.clone(),
+									expiry: job_info.expiry,
+									ttl: job_info.ttl,
+									job_type,
+									fee,
+									fallback: FallbackOptions::Destroy, /* set to destroy, we
+									                                     * dont want to keep
+									                                     * looping */
+								};
+								Self::deposit_event(Event::JobReSubmitted {
+									job_id,
+									role_type,
+									details: phase_one_job_info.clone(),
+								});
+								SubmittedJobs::<T>::insert(role_type, job_id, phase_one_job_info);
+
+								// update the current job with new phase-one id
+								job_info.job_type.update_phase_one_id(job_id);
+
+								// set fallback to destroy since we already regenerated
+								job_info.fallback = FallbackOptions::Destroy;
+							},
+							// Case for RoleType::ZkSaas
+							// - Extract information from 'phase1'
+							// - Create a new 'job_type' of ZkSaasPhaseOneJobType with adjusted
+							//   parameters (remove the reported validator)
+							// - Charge the validator fee for job submission
+							// - Store information about the submitted job in 'SubmittedJobs'
+							RoleType::ZkSaaS(role) => {
+								let new_participants = phase1
+									.participants()
+									.ok_or(Error::<T>::InvalidJobPhase)?
+									.into_iter()
+									.filter(|x| x != &validator)
+									.collect::<Vec<_>>()
+									.try_into()
+									.map_err(|_| Error::<T>::TooManyParticipants)?;
+								let phase_one_id = job_info
+									.job_type
+									.get_phase_one_id()
+									.ok_or(Error::<T>::PhaseOneResultNotFound)?;
+								let phase_one = SubmittedJobs::<T>::get(role_type, phase_one_id)
+									.ok_or(Error::<T>::JobNotFound)?;
+								let system = match phase_one.job_type {
+									JobType::ZkSaaSPhaseOne(ref info) => info.system.clone(),
+									_ => return Err(Error::<T>::JobNotFound.into()),
+								};
+
+								let job_type = JobType::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
+									role_type: role,
+									participants: new_participants,
+									system,
+									permitted_caller: phase1.clone().permitted_caller,
+								});
+
+								// charge the validator fee for job submission
+								let job = JobSubmissionOf::<T> {
+									expiry: job_info.expiry,
+									ttl: job_info.ttl,
+									job_type: job_type.clone(),
+									fallback: job_info.fallback,
+								};
+
+								let fee = T::JobToFee::job_to_fee(&job);
+								T::Currency::transfer(
+									&validator,
+									&Self::rewards_account_id(),
+									fee,
+									ExistenceRequirement::KeepAlive,
+								)?;
+
+								let phase_one_job_info = JobInfo {
+									owner: phase1.owner.clone(),
+									expiry: job_info.expiry,
+									ttl: job_info.ttl,
+									job_type,
+									fee,
+									fallback: FallbackOptions::Destroy, /* set to destroy, we
+									                                     * dont want to keep
+									                                     * looping */
+								};
+								Self::deposit_event(Event::JobReSubmitted {
+									job_id,
+									role_type,
+									details: phase_one_job_info.clone(),
+								});
+								SubmittedJobs::<T>::insert(role_type, job_id, phase_one_job_info);
+
+								// update the current job with new phase-one id
+								job_info.job_type.update_phase_one_id(job_id);
+
+								// set fallback to destroy since we already regenerated
+								job_info.fallback = FallbackOptions::Destroy;
+							},
+							_ => {
+								// The phase one cases are handled above
+							},
 						};
-						SubmittedJobs::<T>::insert(role_type, job_id, job_info);
-					},
-					// Case for RoleType::ZkSaas
-					// - Extract information from 'phase1'
-					// - Create a new 'job_type' of ZkSaasPhaseOneJobType with adjusted parameters
-					//   (remove the reported validator)
-					// - Charge the validator fee for job submission
-					// - Store information about the submitted job in 'SubmittedJobs'
-					RoleType::ZkSaaS(role) => {
-						let new_participants = phase1
-							.participants()
-							.ok_or(Error::<T>::InvalidJobPhase)?
-							.into_iter()
-							.filter(|x| x != &validator)
-							.collect::<Vec<_>>()
-							.try_into()
-							.map_err(|_| Error::<T>::TooManyParticipants)?;
-						let phase_one_id = job_info
-							.job_type
-							.get_phase_one_id()
-							.ok_or(Error::<T>::PhaseOneResultNotFound)?;
-						let phase_one = SubmittedJobs::<T>::get(role_type, phase_one_id)
-							.ok_or(Error::<T>::JobNotFound)?;
-						let system = match phase_one.job_type {
-							JobType::ZkSaaSPhaseOne(ref info) => info.system.clone(),
-							_ => return Err(Error::<T>::JobNotFound.into()),
-						};
 
-						let job_type = JobType::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
-							role_type: role,
-							participants: new_participants,
-							system,
-							permitted_caller: phase1.clone().permitted_caller,
-						});
-
-						// charge the validator fee for job submission
-						let job = JobSubmissionOf::<T> {
-							expiry: job_info.expiry,
-							ttl: job_info.ttl,
-							job_type: job_type.clone(),
-						};
-
-						let fee = T::JobToFee::job_to_fee(&job);
-						T::Currency::transfer(
-							&validator,
-							&Self::rewards_account_id(),
-							fee,
-							ExistenceRequirement::KeepAlive,
-						)?;
-
-						let job_info = JobInfo {
-							owner: phase1.owner.clone(),
-							expiry: job_info.expiry,
-							ttl: job_info.ttl,
-							job_type,
-							fee,
-						};
-						SubmittedJobs::<T>::insert(role_type, job_id, job_info);
-					},
-					_ => {
-						// The phase one cases are handled above
-					},
-				};
-
-				// the old results are not useful since a participant has left, remove from storage
-				KnownResults::<T>::remove(role_type, job_id);
+						// the old results are not useful since a participant has left, remove from
+						// storage
+						KnownResults::<T>::remove(role_type, job_id);
+						Ok(())
+					}
+				},
 			}
-			Ok(())
 		})
 	}
 

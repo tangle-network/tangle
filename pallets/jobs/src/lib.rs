@@ -182,6 +182,13 @@ pub mod module {
 		JobResultSubmitted { job_id: JobId, role_type: RoleType },
 		/// validator has earned reward
 		ValidatorRewarded { id: T::AccountId, reward: BalanceOf<T> },
+		/// An existing job was removed and refunded
+		JobRefunded { job_id: JobId, role_type: RoleType },
+		/// The participants of a job has been updated
+		JobParticipantsUpdated { job_id: JobId, role_type: RoleType, details: JobInfoOf<T> },
+		/// A job has been resubmitted, this is when a phase1 result has been discarded
+		/// and a new phase1 job is requested
+		JobReSubmitted { job_id: JobId, role_type: RoleType, details: JobInfoOf<T> },
 	}
 
 	/// The paused transaction map
@@ -339,6 +346,7 @@ pub mod module {
 				expiry: job.expiry,
 				job_type: job.job_type.clone(),
 				fee,
+				fallback: job.fallback,
 			};
 			SubmittedJobs::<T>::insert(role_type, job_id, job_info);
 			SubmittedJobsRole::<T>::insert(job_id, role_type);

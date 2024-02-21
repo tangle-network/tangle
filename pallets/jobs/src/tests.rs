@@ -17,6 +17,7 @@
 use super::*;
 use frame_support::{assert_noop, assert_ok};
 use mock::*;
+use tangle_primitives::jobs::FallbackOptions;
 
 use pallet_roles::profile::{IndependentRestakeProfile, Profile, Record, SharedRestakeProfile};
 use tangle_primitives::{
@@ -92,6 +93,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 
 		// should fail with invalid validator
@@ -123,6 +125,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 
 		// should fail with invalid threshold
@@ -146,6 +149,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 
 		assert_noop!(
@@ -169,6 +173,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -216,6 +221,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				submission: vec![].try_into().unwrap(),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_noop!(
 			Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TWENTY)), submission),
@@ -230,6 +236,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				submission: vec![].try_into().unwrap(),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -298,6 +305,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -326,6 +334,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 				phase_one_id: 0,
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -379,6 +388,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -398,6 +408,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -440,6 +451,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				new_phase_one_id: 1,
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -500,6 +512,7 @@ fn jobs_rpc_tests() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -560,6 +573,7 @@ fn jobs_rpc_tests() {
 				submission: vec![].try_into().unwrap(),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -626,6 +640,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 					.try_into()
 					.unwrap(),
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 
 		// should fail with invalid validator
@@ -653,6 +668,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 					.try_into()
 					.unwrap(),
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 
 		let submission = JobSubmission {
@@ -669,6 +685,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 					.try_into()
 					.unwrap(),
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -718,6 +735,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 				request: dummy_req.clone(),
 				role_type: ZeroKnowledgeRoleType::ZkSaaSGroth16,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_noop!(
 			Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TWENTY)), submission),
@@ -732,6 +750,7 @@ fn jobs_submission_e2e_works_for_zksaas() {
 				request: dummy_req,
 				role_type: ZeroKnowledgeRoleType::ZkSaaSGroth16,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
@@ -794,6 +813,7 @@ fn reduce_active_role_restake_should_fail() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -858,6 +878,7 @@ fn delete_profile_with_active_role_should_fail() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -904,6 +925,7 @@ fn remove_active_role_should_fail() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -961,6 +983,7 @@ fn remove_role_without_active_jobs_should_work() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -1016,6 +1039,7 @@ fn add_role_to_active_profile_should_work() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -1077,6 +1101,7 @@ fn reduce_stake_on_non_active_role_should_work() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -1137,6 +1162,7 @@ fn increase_stake_on_active_role_should_work() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -1259,6 +1285,7 @@ fn switch_active_shared_profile_to_independent_should_work_if_active_stake_prese
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -1344,6 +1371,7 @@ fn switch_active_independent_profile_to_shared_should_work_if_active_restake_sum
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -1433,6 +1461,7 @@ fn test_fee_charged_for_jobs_submission() {
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
 			}),
+			fallback: FallbackOptions::Destroy,
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
 
@@ -1440,5 +1469,246 @@ fn test_fee_charged_for_jobs_submission() {
 		// 1. 1unit per participant
 		// 2. 1unit per ttl block (20)
 		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), 100 - 5 - 20);
+	});
+}
+
+#[test]
+fn try_validator_removal_from_job_with_destory_fallback_works() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+
+		let participants = vec![ALICE, BOB, CHARLIE, DAVE, EVE];
+
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in participants.clone() {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone()
+			));
+		}
+
+		// submit job with existing validators
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
+				threshold: 3,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+			fallback: FallbackOptions::Destroy,
+		};
+
+		let job_creator_balance = Balances::free_balance(mock_pub_key(TEN));
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		// sanity check, creator was charged for job
+		assert!(Balances::free_balance(mock_pub_key(TEN)) < job_creator_balance);
+
+		// ==== now we try to remove inactive validator in the set ====
+		assert_ok!(Jobs::try_validator_removal_from_job(
+			RoleType::Tss(threshold_signature_role_type),
+			0,
+			mock_pub_key(ALICE)
+		));
+
+		assert_events(vec![RuntimeEvent::Jobs(crate::Event::JobRefunded {
+			job_id: 0,
+			role_type: RoleType::Tss(threshold_signature_role_type),
+		})]);
+
+		// jobs creator should recieve all fees back
+		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), job_creator_balance);
+
+		// the job should be removed from storage
+		assert!(SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 0)
+			.is_none());
+	});
+}
+
+#[test]
+fn try_validator_removal_from_job_with_retry_works_phase_one() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+
+		let participants = vec![ALICE, BOB, CHARLIE, DAVE, EVE];
+
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in participants.clone() {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone()
+			));
+		}
+
+		// submit job with existing validators
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
+				threshold: 3,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+			fallback: FallbackOptions::RegenerateWithThreshold(3),
+		};
+
+		let job_creator_balance = Balances::free_balance(mock_pub_key(TEN));
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		// sanity check, creator was charged for job
+		assert!(Balances::free_balance(mock_pub_key(TEN)) < job_creator_balance);
+
+		let job_info =
+			SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 0).unwrap();
+
+		// ==== now we try to remove inactive validator in the set ====
+		assert_ok!(Jobs::try_validator_removal_from_job(
+			RoleType::Tss(threshold_signature_role_type),
+			0,
+			mock_pub_key(ALICE)
+		));
+
+		// the job will have two changes
+		let mut new_job_info = job_info.clone();
+		new_job_info.fallback = FallbackOptions::Destroy;
+		System::assert_has_event(RuntimeEvent::Jobs(crate::Event::JobParticipantsUpdated {
+			job_id: 0,
+			role_type: RoleType::Tss(threshold_signature_role_type),
+			details: new_job_info,
+		}));
+	});
+}
+
+#[test]
+fn try_validator_removal_from_job_with_retry_works_phase_two() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+
+		let participants = vec![ALICE, BOB, CHARLIE, DAVE, EVE];
+
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in participants.clone() {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone()
+			));
+		}
+
+		// submit job with existing validators
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: participants
+					.clone()
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
+				threshold: 3,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+			fallback: FallbackOptions::RegenerateWithThreshold(3),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		let _job_info =
+			SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 0).unwrap();
+
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(
+			RuntimeOrigin::signed(mock_pub_key(TEN)),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0,
+			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
+				signatures: vec![].try_into().unwrap(),
+				threshold: 3,
+				participants: vec![].try_into().unwrap(),
+				key: vec![].try_into().unwrap(),
+				signature_scheme: DigitalSignatureScheme::Ecdsa
+			})
+		));
+
+		// ensure the job reward is distributed correctly
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE].iter().map(|x| mock_pub_key(*x)) {
+			assert_eq!(ValidatorRewards::<Runtime>::get(validator), Some(1));
+		}
+
+		// ensure storage is correctly setup
+		assert!(KnownResults::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0
+		)
+		.is_some());
+		assert!(SubmittedJobs::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0
+		)
+		.is_none());
+
+		// ---- use phase one solution in phase 2 signinig -------
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
+				phase_one_id: 0,
+				submission: vec![].try_into().unwrap(),
+				role_type: threshold_signature_role_type,
+			}),
+			fallback: FallbackOptions::RegenerateWithThreshold(3),
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		// ==== now we try to remove inactive validator in the set ====
+		assert_ok!(Jobs::try_validator_removal_from_job(
+			RoleType::Tss(threshold_signature_role_type),
+			1,
+			mock_pub_key(ALICE)
+		));
+
+		// the job will have two changes
+		let job_info =
+			SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 2).unwrap();
+
+		System::assert_has_event(RuntimeEvent::Jobs(crate::Event::JobReSubmitted {
+			job_id: 2,
+			role_type: RoleType::Tss(threshold_signature_role_type),
+			details: job_info,
+		}));
+
+		assert!(KnownResults::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0
+		)
+		.is_none());
+
+		// the phase two job should ahve new job id for phase one
+		let job_info =
+			SubmittedJobs::<Runtime>::get(RoleType::Tss(threshold_signature_role_type), 1).unwrap();
+		assert_eq!(job_info.job_type.get_phase_one_id().unwrap(), 2);
+		assert_eq!(job_info.fallback, FallbackOptions::Destroy);
 	});
 }
