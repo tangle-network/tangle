@@ -30,7 +30,10 @@ use sp_core::H256;
 use sp_runtime::traits::Dispatchable;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::{
-	jobs::{DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, JobId, JobSubmission, JobType},
+	jobs::{
+		DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, FallbackOptions, JobId, JobSubmission,
+		JobType,
+	},
 	roles::RoleType,
 	types::BlockNumber,
 };
@@ -132,6 +135,7 @@ where
 			expiry: expiry_block,
 			ttl: ttl_block,
 			job_type: JobType::DKGTSSPhaseOne(job_type),
+			fallback: FallbackOptions::Destroy,
 		};
 
 		// Convert caller's Ethereum address to Substrate account ID
@@ -204,6 +208,7 @@ where
 					expiry: expiry_block,
 					ttl: ttl_block,
 					job_type: JobType::DKGTSSPhaseTwo(job_type),
+					fallback: FallbackOptions::Destroy,
 				};
 
 				// Create the call to the Jobs module's submit_job function
