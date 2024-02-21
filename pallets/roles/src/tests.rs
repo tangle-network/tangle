@@ -63,7 +63,11 @@ pub fn shared_profile() -> Profile<Runtime> {
 fn test_create_independent_profile() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = independent_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
+		assert_ok!(Roles::create_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			profile.clone(),
+			None
+		));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileCreated {
 			account: mock_pub_key(1),
@@ -82,7 +86,11 @@ fn test_create_independent_profile() {
 fn test_create_shared_profile() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
+		assert_ok!(Roles::create_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			profile.clone(),
+			None
+		));
 
 		assert_events(vec![RuntimeEvent::Roles(crate::Event::ProfileCreated {
 			account: mock_pub_key(1),
@@ -103,7 +111,7 @@ fn test_create_profile_should_fail_if_user_is_not_a_validator() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
 		assert_err!(
-			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(5)), profile.clone()),
+			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(5)), profile.clone(), None),
 			Error::<Runtime>::NotValidator
 		);
 	});
@@ -114,9 +122,13 @@ fn test_create_profile_should_fail_if_user_is_not_a_validator() {
 fn test_create_profile_should_fail_if_user_already_has_a_profile() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
+		assert_ok!(Roles::create_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			profile.clone(),
+			None
+		));
 		assert_err!(
-			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()),
+			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone(), None),
 			Error::<Runtime>::ProfileAlreadyExists
 		);
 	});
@@ -145,7 +157,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met(
 		});
 
 		assert_err!(
-			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()),
+			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone(), None),
 			Error::<Runtime>::InsufficientRestakingBond
 		);
 	});
@@ -175,7 +187,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_
 		});
 
 		assert_err!(
-			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()),
+			Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone(), None),
 			Error::<Runtime>::InsufficientRestakingBond
 		);
 	});
@@ -187,7 +199,11 @@ fn test_update_profile_from_independent_to_shared() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create independent profile.
 		let profile = independent_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
+		assert_ok!(Roles::create_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			profile.clone(),
+			None
+		));
 
 		// Get the ledger to check if the profile is created.
 		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
@@ -219,7 +235,11 @@ fn test_update_profile_from_shared_to_independent() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
+		assert_ok!(Roles::create_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			profile.clone(),
+			None
+		));
 
 		// Get the ledger to check if the profile is created.
 		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
@@ -262,7 +282,11 @@ fn test_delete_profile() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
+		assert_ok!(Roles::create_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			profile.clone(),
+			None
+		));
 
 		// Get the ledger to check if the profile is created.
 		let ledger = Roles::ledger(mock_pub_key(1)).unwrap();
@@ -283,7 +307,11 @@ fn test_unbond_funds_should_work() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		// Lets create shared profile.
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
+		assert_ok!(Roles::create_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			profile.clone(),
+			None
+		));
 
 		// Lets delete profile by opting out of all services.
 		assert_ok!(Roles::delete_profile(RuntimeOrigin::signed(mock_pub_key(1))));
@@ -325,7 +353,8 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		for validator in vec![1, 2, 3, 4] {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -380,7 +409,8 @@ fn test_reward_dist_takes_restake_into_account() {
 		for validator in vec![1, 2] {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				Profile::Shared(profile.clone())
+				Profile::Shared(profile.clone()),
+				None
 			));
 		}
 
@@ -401,7 +431,8 @@ fn test_reward_dist_takes_restake_into_account() {
 		for validator in vec![3, 4] {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				Profile::Shared(profile.clone())
+				Profile::Shared(profile.clone()),
+				None
 			));
 		}
 
@@ -457,7 +488,8 @@ fn test_reward_dist_handles_less_than_ideal_restake() {
 		for validator in vec![1] {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				Profile::Shared(profile.clone())
+				Profile::Shared(profile.clone()),
+				None
 			));
 		}
 
@@ -484,7 +516,11 @@ fn test_reward_dist_handles_less_than_ideal_restake() {
 fn test_report_offence_should_work() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let profile = shared_profile();
-		assert_ok!(Roles::create_profile(RuntimeOrigin::signed(mock_pub_key(1)), profile.clone()));
+		assert_ok!(Roles::create_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			profile.clone(),
+			None
+		));
 
 		// Get current session index.
 		let session_index = pallet_session::CurrentIndex::<Runtime>::get();

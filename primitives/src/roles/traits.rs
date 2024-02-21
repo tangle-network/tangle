@@ -71,4 +71,15 @@ pub trait RolesHandler<AccountId> {
 	///
 	/// Returns a `DispatchError` if the operation fails.
 	fn record_job_by_validators(validators: Vec<AccountId>) -> DispatchResult;
+
+	/// Retrieves max services that a validator has configured
+	///
+	/// # Arguments
+	///
+	/// * `address` - The account ID of the validator for which role key is to be retrieved.
+	///
+	/// # Returns
+	///
+	/// Returns the max active services that a validator has opted for
+	fn get_max_active_service_for_restaker(address: AccountId) -> Option<u32>;
 }
