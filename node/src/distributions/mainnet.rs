@@ -116,6 +116,10 @@ fn get_investor_balance_distribution_list() -> BTreeMap<MultiAddress, f64> {
 	)
 }
 
+fn get_team_direct_vesting_accounts() -> BTreeMap<AccountId32, f64> {
+	read_contents_to_substrate_accounts("node/src/distributions/data/webb_team_distributions.json")
+}
+
 pub fn get_discord_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/discord_evm_addresses.json")
 }
@@ -253,12 +257,25 @@ pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64,
 	compute_balance_distribution_with_cliff_and_vesting_no_endowment(investor_accounts)
 }
 
+pub fn get_team_direct_vesting_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+	let direct_team_accounts: Vec<(MultiAddress, u128)> = get_team_direct_vesting_accounts()
+		.into_iter()
+		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
+		.collect();
+
+	compute_balance_distribution_with_cliff_and_vesting(direct_team_accounts)
+}
+
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
 	let team_address: AccountId =
 		hex!["8e1c2bdddab9573d8cb094dbffba24a2b2c21b7e71e3f5b604e8607483872443"].into();
 	let balance =
 		(get_team_distribution_share() - get_initial_liquidity_share()).mul_floor(TOTAL_SUPPLY);
-	let team_account = (MultiAddress::Native(team_address), balance as u128);
+
+	let direct_team_spend: u128 = get_team_direct_vesting_accounts().into_values().map(|balance| balance as u128)
+		.sum();
+	let team_final_balance = balance - direct_team_spend;
+	let team_account = (MultiAddress::Native(team_address), team_final_balance as u128);
 	compute_balance_distribution_with_cliff_and_vesting(vec![team_account])
 }
 
