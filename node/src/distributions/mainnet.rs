@@ -14,7 +14,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use super::testnet::{get_git_root, read_contents, read_contents_to_evm_accounts};
+use super::{
+	get_git_root, read_contents, read_contents_to_evm_accounts,
+	read_contents_to_substrate_accounts_list,
+};
 use hex_literal::hex;
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};
 use sp_core::H160;
@@ -38,6 +41,36 @@ fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f6
 		}
 
 		*accounts_map.entry(account_id).or_insert(0.0) += balance;
+	}
+	accounts_map
+}
+
+fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddress, f64> {
+	let mut path = get_git_root();
+	path.push(path_str);
+	let json = read_contents(&path);
+	let json_obj = json.as_object().expect("should be an object");
+	let mut accounts_map = BTreeMap::new();
+	for (key, value) in json_obj {
+		// eth address start with `0x`
+		let first = key.chars().nth(0).unwrap();
+		if first == '0' {
+			let account_id = H160::from_str(key).expect("should be a valid address");
+			let balance = value.as_f64().expect("Invalid balance");
+
+			if balance <= 0.0 {
+				continue
+			}
+
+			accounts_map.insert(MultiAddress::EVM(account_id.into()), balance);
+		} else {
+			let account_id = AccountId::from_str(key).expect("Invalid account ID");
+			let balance = value.as_f64().expect("Invalid balance");
+			if balance <= 0.0 {
+				continue
+			}
+			accounts_map.insert(MultiAddress::Native(account_id), balance);
+		}
 	}
 	accounts_map
 }
@@ -67,7 +100,7 @@ pub fn get_bridge_evm_list() -> Vec<H160> {
 }
 
 pub fn get_faucet_substrate_list() -> Vec<AccountId32> {
-	super::testnet::read_contents_to_substrate_accounts(
+	read_contents_to_substrate_accounts_list(
 		"node/src/distributions/data/substrate_faucet_addresses.json",
 	)
 }
@@ -78,8 +111,8 @@ fn get_edgeware_snapshot_list() -> BTreeMap<AccountId32, f64> {
 	)
 }
 
-fn get_investor_balance_distribution_list() -> BTreeMap<AccountId32, f64> {
-	read_contents_to_substrate_accounts(
+fn get_investor_balance_distribution_list() -> BTreeMap<MultiAddress, f64> {
+	read_investor_accounts_to_multiaddress(
 		"node/src/distributions/data/webb_investor_distribution.json",
 	)
 }
@@ -216,7 +249,7 @@ pub fn get_substrate_balance_distribution() -> DistributionResult {
 pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
 	let investor_accounts: Vec<(MultiAddress, u128)> = get_investor_balance_distribution_list()
 		.into_iter()
-		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
+		.map(|(address, balance)| (address, balance as u128))
 		.collect();
 	compute_balance_distribution_with_cliff_and_vesting_no_endowment(investor_accounts)
 }
