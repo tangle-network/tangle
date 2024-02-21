@@ -19,8 +19,9 @@ use crate::eth::{
 	new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, FrontierBackend,
 	FrontierBlockImport, FrontierPartialComponents, RpcConfig,
 };
-use futures::FutureExt;
+use futures::{FutureExt, TryFutureExt};
 
+use gadget_common::gadget::network::gossip::NetworkGossipEngineBuilder;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
@@ -30,7 +31,7 @@ pub use sc_executor::NativeElseWasmExecutor;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-use sp_core::U256;
+use sp_core::{ByteArray, Pair, U256};
 use tangle_primitives::Block;
 
 use std::{path::Path, sync::Arc, time::Duration};
@@ -131,9 +132,9 @@ pub fn new_partial(
 	>,
 	ServiceError,
 > {
-	println!("    ++++++++++++++++++++++++                                                                          
-	+++++++++++++++++++++++++++                                                                        
-	+++++++++++++++++++++++++++                                                                        
+	println!("    ++++++++++++++++++++++++
+	+++++++++++++++++++++++++++
+	+++++++++++++++++++++++++++
 	+++        ++++++      +++         @%%%%%%%%%%%                                     %%%
 	++++++      ++++      +++++        %%%%%%%%%%%%                                     %%%@
 	++++++++++++++++++++++++++            %%%%      %%%%@     %%% %%@       @%%%%%%%   %%%@    %%%%@
@@ -142,8 +143,8 @@ pub fn new_partial(
 	++++++++++++++++++++++++++            %%%%    %%%%%%%%%   %%%   %%%%  %%%   @%%%   %%%@ @%%%%%  %%%%%
 	++++++      ++++      ++++++          %%%%    %%%%%%%%%   %%%   %%%%  %%%%%%%%%%   %%%@  %%%%%%%%%@
 	+++        ++++++        +++          %%%%    %%%%%%%%%   %%%   %%%@   %%%%%%%%%   %%%    %%%%%%%@
-	++++      +++++++++      +++                                           %%%%  %%%%               
-	++++++++++++++++++++++++++++                                           %%%%%%%%%         
+	++++      +++++++++      +++                                           %%%%  %%%%
+	++++++++++++++++++++++++++++                                           %%%%%%%%%
 	  +++++++++++++++++++++++                                                 %%%%% \n");
 
 	let telemetry = config
@@ -323,12 +324,12 @@ pub async fn new_full(
 
 		// finally check if keys are inserted correctly
 		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore()).is_err() {
-			println!("   
-			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
+			println!("
+			++++++++++++++++++++++++++++++++++++++++++++++++
 				Validator keys not found, validator keys are essential to run a validator on
 				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
 				how to generate and insert keys. OR start the node with --auto-insert-keys to automatically generate the keys.
-			++++++++++++++++++++++++++++++++++++++++++++++++   							
+			++++++++++++++++++++++++++++++++++++++++++++++++
 			\n");
 			panic!("Keys not detected!")
 		}
@@ -346,6 +347,22 @@ pub async fn new_full(
 
 	net_config.add_notification_protocol(sc_consensus_grandpa::grandpa_peers_set_config(
 		grandpa_protocol_name.clone(),
+	));
+
+	net_config.add_notification_protocol(NetworkGossipEngineBuilder::set_config(
+		dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYGEN_PROTOCOL_NAME.into(),
+	));
+
+	net_config.add_notification_protocol(NetworkGossipEngineBuilder::set_config(
+		dfns_cggmp21_protocol::constants::DFNS_CGGMP21_SIGNING_PROTOCOL_NAME.into(),
+	));
+
+	net_config.add_notification_protocol(NetworkGossipEngineBuilder::set_config(
+		dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYREFRESH_PROTOCOL_NAME.into(),
+	));
+
+	net_config.add_notification_protocol(NetworkGossipEngineBuilder::set_config(
+		dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYROTATE_PROTOCOL_NAME.into(),
 	));
 
 	let warp_sync = Arc::new(sc_consensus_grandpa::warp_proof::NetworkProvider::new(
@@ -612,6 +629,8 @@ pub async fn new_full(
 	// if the node isn't actively participating in consensus then it doesn't
 	// need a keystore, regardless of which protocol we use below.
 	let keystore = if role.is_authority() { Some(keystore_container.keystore()) } else { None };
+	let local_keystore =
+		if role.is_authority() { Some(keystore_container.local_keystore()) } else { None };
 
 	let grandpa_config = sc_consensus_grandpa::Config {
 		// FIXME #1578 make this available through chainspec
@@ -651,6 +670,134 @@ pub async fn new_full(
 			None,
 			sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?,
 		);
+	}
+
+	// dfns/CGGMP21 gadget
+	if role.is_authority() {
+		use gadget_common::prelude::*;
+		use sc_keystore::Keystore;
+		let logger = DebugLogger { peer_id: config.network.node_name.clone() };
+		let account_id = local_keystore
+			.and_then(|k| k.ecdsa_public_keys(tangle_crypto_primitives::ROLE_KEY_TYPE).first())
+			.cloned()
+			.ok_or_else(|| sc_service::Error::Other("ECDSA Role key not found".into()))?;
+		let acco_account_id = local_keystore
+			.and_then(|k| k.sr25519_public_keys(sp_runtime::key_types::ACCOUNT).first())
+			.cloned()
+			.ok_or_else(|| sc_service::Error::Other("sr25519 acco key not found".into()))?;
+		let role_public_key = tangle_crypto_primitives::crypto::Public::from_slice(
+			account_id.as_slice(),
+		)
+		.map_err(|_| {
+			sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
+				tangle_crypto_primitives::ROLE_KEY_TYPE,
+			))
+		})?;
+
+		let acco_public_key =
+			sp_runtime::app_crypto::sr25519::AppPublic::from_slice(acco_account_id.as_slice())
+				.map_err(|_| {
+					sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
+						tangle_crypto_primitives::ROLE_KEY_TYPE,
+					))
+				})?;
+
+		let ecdsa_keypair = local_keystore
+			.and_then(|k| {
+				k.key_pair::<tangle_crypto_primitives::crypto::Pair>(&role_public_key).ok()
+			})
+			.flatten()
+			.ok_or_else(|| {
+				sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
+					tangle_crypto_primitives::ROLE_KEY_TYPE,
+				))
+			})?;
+
+		let sr25519_keypair = local_keystore
+			.and_then(|k| {
+				k.key_pair::<sp_runtime::app_crypto::sr25519::AppPair>(&acco_public_key).ok()
+			})
+			.flatten()
+			.ok_or_else(|| {
+				sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
+					sp_runtime::key_types::ACCOUNT,
+				))
+			})?;
+		let mut slice = [0u8; 32];
+		slice.copy_from_slice(&sr25519_keypair.to_raw_vec());
+		let signer = gadget_common::subxt_signer::sr25519::Keypair::from_seed(slice)
+			.map_err(|e| sc_service::Error::Other(e.to_string()))?;
+		let keystore = ECDSAKeyStore::in_memory(ecdsa_keypair.into());
+		let pallet_tx = SubxtPalletSubmitter::new(signer)
+			.map_err(|e| sc_service::Error::Other(e.to_string()))
+			.await?;
+		let client_keygen = client.clone();
+		let client_signing = client.clone();
+		let client_key_refresh = client.clone();
+		let client_key_rotate = client.clone();
+		let (network_keygen_handler, network_keygen_controller) = NetworkGossipEngineBuilder::new(
+			dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYGEN_PROTOCOL_NAME.into(),
+			keystore.clone(),
+		)
+		.build(network.clone(), sync_service.clone(), None, logger.clone())?;
+
+		let (network_signing_handler, network_signing_controller) =
+			NetworkGossipEngineBuilder::new(
+				dfns_cggmp21_protocol::constants::DFNS_CGGMP21_SIGNING_PROTOCOL_NAME.into(),
+				keystore.clone(),
+			)
+			.build(network.clone(), sync_service.clone(), None, logger.clone())?;
+
+		let (network_key_refresh_handler, network_key_refresh_controller) =
+			NetworkGossipEngineBuilder::new(
+				dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYREFRESH_PROTOCOL_NAME.into(),
+				keystore.clone(),
+			)
+			.build(network.clone(), sync_service.clone(), None, logger.clone())?;
+
+		let (network_key_rotate_handler, network_key_rotate_controller) =
+			NetworkGossipEngineBuilder::new(
+				dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYROTATE_PROTOCOL_NAME.into(),
+				keystore.clone(),
+			)
+			.build(network.clone(), sync_service.clone(), None, logger.clone())?;
+		let gadget = async move {
+			let _ = dfns_cggmp21_protocol::run(
+				account_id,
+				logger,
+				keystore,
+				pallet_tx,
+				(client_keygen, client_signing, client_key_refresh, client_key_rotate),
+				(
+					network_keygen_controller,
+					network_signing_controller,
+					network_key_refresh_controller,
+					network_key_rotate_controller,
+				),
+			)
+			.await;
+		};
+		task_manager.spawn_handle().spawn(
+			"keygen-network",
+			"dfns-cggmp21",
+			network_keygen_handler.run(),
+		);
+		task_manager.spawn_handle().spawn(
+			"signing-network",
+			"dfns-cggmp21",
+			network_signing_handler.run(),
+		);
+		task_manager.spawn_handle().spawn(
+			"key-refresh-network",
+			"dfns-cggmp21",
+			network_key_refresh_handler.run(),
+		);
+		task_manager.spawn_handle().spawn(
+			"key-rotate-network",
+			"dfns-cggmp21",
+			network_key_rotate_handler.run(),
+		);
+		task_manager.spawn_handle().spawn("dfns-cggmp21", "dfns-cggmp21", gadget);
 	}
 
 	network_starter.start_network();

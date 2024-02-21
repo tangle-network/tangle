@@ -350,6 +350,12 @@ generic-ec-zkp = { version = "0.1", default-features = false }
 round-based = { version = "0.2", default-features = false }
 paillier-zk = { version = "0.1", default-features = false }
 
+# Gadgets
+gadget-core = { version = "0.0.1", path = "../gadget/gadget-core", default-features = false }
+gadget-common = { version = "0.1.0", path = "../gadget/gadget-common", default-features = false }
+# dfns/CGGMP21
+dfns-cggmp21-protocol = { version = "0.1.0", path = "../gadget/protocols/dfns-cggmp21", default-features = false }
+
 [profile.release]
 panic = "unwind"
 

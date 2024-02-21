@@ -39,7 +39,18 @@ use sp_runtime::traits::Block as BlockT;
 use tangle_primitives::Block;
 use tangle_runtime::BlockNumber;
 // Runtime
-use tangle_runtime::{AccountId, Balance, Hash, Index};
+
+#[cfg(not(feature = "testnet"))]
+use tangle_runtime::{
+	AccountId, Balance, Hash, Index, MaxDataLen, MaxKeyLen, MaxParticipants, MaxProofLen,
+	MaxSignatureLen, MaxSubmissionLen,
+};
+
+#[cfg(feature = "testnet")]
+use tangle_testnet_runtime::{
+	AccountId, Balance, Hash, Index, MaxDataLen, MaxKeyLen, MaxParticipants, MaxProofLen,
+	MaxSignatureLen, MaxSubmissionLen,
+};
 
 pub mod eth;
 pub mod tracing;
@@ -113,7 +124,16 @@ where
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
 	C::Api: sp_block_builder::BlockBuilder<Block>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
-	C::Api: pallet_jobs_rpc::JobsRuntimeApi<Block, AccountId>,
+	C::Api: pallet_jobs_rpc::JobsRuntimeApi<
+		Block,
+		AccountId,
+		MaxParticipants,
+		MaxSubmissionLen,
+		MaxKeyLen,
+		MaxDataLen,
+		MaxSignatureLen,
+		MaxProofLen,
+	>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,

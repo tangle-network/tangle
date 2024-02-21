@@ -130,8 +130,13 @@ tangle-primitives = { workspace = true, features = ["std"] }
 tangle-runtime = { workspace = true, features = ["std"] }
 tangle-testnet-runtime = { workspace = true, optional = true }
 
+# Gadgets
+gadget-core = { workspace = true, default-features = false, features = ["substrate"] }
+gadget-common = { workspace = true, default-features = false, features = ["std"] }
+dfns-cggmp21-protocol = { workspace = true, default-features = false }
+
 [features]
-default = ["with-rocksdb-weights", "rocksdb", "sql"]
+default = ["with-rocksdb-weights", "rocksdb", "sql", "testnet"]
 runtime-benchmarks = [
   "frame-benchmarking-cli/runtime-benchmarks",
   "frame-benchmarking/runtime-benchmarks",
