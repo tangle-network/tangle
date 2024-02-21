@@ -761,21 +761,29 @@ pub async fn new_full(
 				keystore.clone(),
 			)
 			.build(network.clone(), sync_service.clone(), None, logger.clone())?;
+		let node_input = NodeInput {
+			mock_clients: vec![
+				client_keygen,
+				client_signing,
+				client_key_refresh,
+				client_key_rotate,
+			],
+			mock_networks: vec![
+				network_keygen_controller,
+				network_signing_controller,
+				network_key_refresh_controller,
+				network_key_rotate_controller,
+			],
+			account_id,
+			logger,
+			pallet_tx: Arc::new(pallet_tx),
+			keystore,
+			node_index: 0,
+			additional_params: (),
+			_pd: std::marker::PhantomData,
+		};
 		let gadget = async move {
-			let _ = dfns_cggmp21_protocol::run(
-				account_id,
-				logger,
-				keystore,
-				pallet_tx,
-				(client_keygen, client_signing, client_key_refresh, client_key_rotate),
-				(
-					network_keygen_controller,
-					network_signing_controller,
-					network_key_refresh_controller,
-					network_key_rotate_controller,
-				),
-			)
-			.await;
+			let _ = dfns_cggmp21_protocol::setup_node(node_input).await;
 		};
 		task_manager.spawn_handle().spawn(
 			"keygen-network",
