@@ -36,7 +36,7 @@ impl<T: Config> Pallet<T> {
 
 			// ensure the max limit of validator is followed
 			let max_allowed = T::RolesHandler::get_max_active_service_for_restaker(validator)
-				.unwrap_or_else(|| Default::default());
+				.unwrap_or_else(Default::default);
 
 			jobs.try_push((role_type, job_id))
 				.map_err(|_| Error::<T>::TooManyJobsForValidator)?;

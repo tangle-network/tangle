@@ -225,6 +225,10 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 	fn record_job_by_validators(_validators: Vec<AccountId>) -> DispatchResult {
 		Ok(())
 	}
+
+	fn get_max_active_service_for_restaker(_restaker: AccountId) -> Option<u32> {
+		None
+	}
 }
 
 pub struct MockMPCHandler;

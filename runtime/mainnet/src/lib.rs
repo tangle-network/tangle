@@ -1151,6 +1151,7 @@ impl pallet_roles::Config for Runtime {
 	type MaxValidators = MaxValidators;
 	type MaxKeyLen = MaxKeyLen;
 	type MaxRestake = MaxRestake;
+	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
 
