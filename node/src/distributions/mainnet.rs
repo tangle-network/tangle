@@ -53,8 +53,7 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 	let mut accounts_map = BTreeMap::new();
 	for (key, value) in json_obj {
 		// eth address start with `0x`
-		let first = key.chars().nth(0).unwrap();
-		if first == '0' {
+		if key.starts_with("0x") {
 			let account_id = H160::from_str(key).expect("should be a valid address");
 			let balance = value.as_f64().expect("Invalid balance");
 
