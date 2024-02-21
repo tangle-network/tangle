@@ -1500,7 +1500,8 @@ fn try_validator_removal_from_job_with_destory_fallback_works() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1563,7 +1564,8 @@ fn try_validator_removal_from_job_with_retry_works_phase_one() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1626,7 +1628,8 @@ fn try_validator_removal_from_job_with_retry_works_phase_two() {
 		for validator in participants.clone() {
 			assert_ok!(Roles::create_profile(
 				RuntimeOrigin::signed(mock_pub_key(validator)),
-				profile.clone()
+				profile.clone(),
+				None
 			));
 		}
 
@@ -1754,6 +1757,7 @@ fn test_validator_limit_is_counted_for_jobs_submission() {
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 20,
+			fallback: FallbackOptions::Destroy,
 			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
 					.iter()
