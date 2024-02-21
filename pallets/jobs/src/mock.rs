@@ -337,6 +337,7 @@ impl pallet_roles::Config for Runtime {
 	type ReportOffences = OffenceHandler;
 	type MaxKeyLen = MaxKeyLen;
 	type MaxValidators = ConstU32<100>;
+	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type MaxRestake = MaxRestake;
 	type MaxRolesPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();

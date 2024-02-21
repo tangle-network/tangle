@@ -45,6 +45,8 @@ pub struct RestakingLedger<T: Config> {
 	/// List of eras for which the stakers behind a validator have claimed rewards. Only updated
 	/// for validators.
 	pub claimed_rewards: BoundedVec<EraIndex, T::HistoryDepth>,
+	/// Max active services
+	pub max_active_services: u32,
 }
 
 impl<T: Config> RestakingLedger<T> {
@@ -53,6 +55,7 @@ impl<T: Config> RestakingLedger<T> {
 		stash: T::AccountId,
 		profile: Profile<T>,
 		role_key: Vec<u8>,
+		max_active_services: Option<u32>,
 	) -> Result<Self, DispatchError> {
 		let total_restake = profile.get_total_profile_restake();
 		let mut roles: BoundedBTreeMap<_, _, _> = Default::default();
@@ -69,6 +72,8 @@ impl<T: Config> RestakingLedger<T> {
 			role_key: bounded_role_key,
 			unlocking: Default::default(),
 			claimed_rewards: Default::default(),
+			max_active_services: max_active_services
+				.unwrap_or_else(|| T::MaxActiveJobsPerValidator::get()),
 		})
 	}
 

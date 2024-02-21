@@ -33,7 +33,7 @@ use sp_runtime::{
 	DispatchError, Percent, Saturating,
 };
 use sp_staking::{offence::ReportOffence, EraIndex};
-use sp_std::{convert::TryInto, prelude::*, vec};
+use sp_std::{convert::TryInto, fmt::Debug, prelude::*, vec};
 use tangle_crypto_primitives::ROLE_KEY_TYPE;
 use tangle_primitives::roles::{RoleType, ValidatorRewardDistribution};
 
@@ -134,6 +134,9 @@ pub mod pallet {
 			IdentificationTuple<Self>,
 			ValidatorOffence<IdentificationTuple<Self>>,
 		>;
+
+		/// The maximum active jobs per validator
+		type MaxActiveJobsPerValidator: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
 
 		/// The max permitted restake for a restaker
 		type MaxRestake: Get<Percent>;
@@ -307,7 +310,11 @@ pub mod pallet {
 		/// - Restaking amount is exceeds max Restaking value.
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::create_profile())]
 		#[pallet::call_index(0)]
-		pub fn create_profile(origin: OriginFor<T>, profile: Profile<T>) -> DispatchResult {
+		pub fn create_profile(
+			origin: OriginFor<T>,
+			profile: Profile<T>,
+			max_active_services: Option<u32>,
+		) -> DispatchResult {
 			let restaker_account = ensure_signed(origin)?;
 
 			// Ensure stash account is a validator.
@@ -334,6 +341,7 @@ pub mod pallet {
 				restaker_account.clone(),
 				profile.clone(),
 				role_key.to_vec(),
+				max_active_services,
 			)?;
 			let total_profile_restake = profile.get_total_profile_restake();
 
