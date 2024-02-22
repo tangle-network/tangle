@@ -107,7 +107,7 @@ The validator rewards system is designed to distribute rewards among validators 
     $$\text{MRR} = \text{MaxRestake} - \text{RSR}$$
 
     5. **Adjust Total Rewards:** $\text{Adjusted Total Rewards}$ (ATR)
-        - $\text{if } \text{MRR} \neq 0$, $\text{ATR} = (100 - \text{MRR}) \times R$
+        - $\text{if } \text{MRR} \neq 0$, $\text{ATR} = (\text{MaxRestakeRatio} - \text{MRR}) \times R$
         - $\text{otherwise } \text{ATR} = R$
 
     6. **Compute Reward Share for Each Restaker:** $\text{RS}_i$
