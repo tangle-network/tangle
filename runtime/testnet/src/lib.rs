@@ -71,7 +71,10 @@ use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
-	jobs::{JobId, PhaseResult, RpcResponseJobsData},
+	jobs::{
+		JobId, MaxActiveJobsPerValidator, MaxDataLen, MaxKeyLen, MaxParticipants, MaxProofLen,
+		MaxRolesPerValidator, MaxSignatureLen, MaxSubmissionLen, PhaseResult, RpcResponseJobsData,
+	},
 	roles::RoleType,
 };
 
@@ -1154,43 +1157,8 @@ impl MisbehaviorHandler for MockMisbehaviorHandler {
 	}
 }
 
-#[cfg(feature = "local-testing")]
-parameter_types! {
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 60_000_000;
-}
-
-#[cfg(not(feature = "local-testing"))]
-parameter_types! {
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 32;
-}
-
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxParticipants: u32 = 10;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxKeyLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxDataLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSignatureLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxProofLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxActiveJobsPerValidator: u32 = 100;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxRolesPerValidator: u32 = 100;
 }
 
 impl pallet_jobs::Config for Runtime {

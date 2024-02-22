@@ -19,10 +19,12 @@ use crate::eth::{
 	new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, FrontierBackend,
 	FrontierBlockImport, FrontierPartialComponents, RpcConfig,
 };
-use futures::{FutureExt, TryFutureExt};
+use futures::{FutureExt, StreamExt, TryFutureExt};
 
 use gadget_common::gadget::network::gossip::NetworkGossipEngineBuilder;
-use sc_client_api::{Backend, BlockBackend};
+use sc_client_api::{
+	Backend, BlockBackend, BlockchainEvents, FinalityNotification, FinalityNotifications,
+};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
@@ -108,6 +110,90 @@ type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
 type GrandpaLinkHalf<Client> = sc_consensus_grandpa::LinkHalf<Block, Client, FullSelectChain>;
 type BoxBlockImport = sc_consensus::BoxBlockImport<Block>;
+
+#[derive(Clone)]
+struct ClientWrapper {
+	inner: Arc<FullClient>,
+	finality_notification_stream: Arc<tokio::sync::Mutex<Option<FinalityNotifications<Block>>>>,
+	latest_finality_notification: Arc<tokio::sync::Mutex<Option<FinalityNotification<Block>>>>,
+}
+
+impl ClientWrapper {
+	fn new(inner: Arc<FullClient>) -> Self {
+		Self {
+			inner,
+			finality_notification_stream: Arc::new(tokio::sync::Mutex::new(None)),
+			latest_finality_notification: Arc::new(tokio::sync::Mutex::new(None)),
+		}
+	}
+}
+
+impl sc_client_api::BlockchainEvents<Block> for ClientWrapper {
+	fn import_notification_stream(&self) -> sc_client_api::ImportNotifications<Block> {
+		self.inner.import_notification_stream()
+	}
+
+	fn every_import_notification_stream(&self) -> sc_client_api::ImportNotifications<Block> {
+		self.inner.every_import_notification_stream()
+	}
+
+	fn finality_notification_stream(&self) -> sc_client_api::FinalityNotifications<Block> {
+		self.inner.finality_notification_stream()
+	}
+
+	fn storage_changes_notification_stream(
+		&self,
+		filter_keys: Option<&[sc_client_api::StorageKey]>,
+		child_filter_keys: Option<
+			&[(sc_client_api::StorageKey, Option<Vec<sc_client_api::StorageKey>>)],
+		>,
+	) -> sp_blockchain::Result<
+		sc_client_api::StorageEventStream<<Block as gadget_common::prelude::Block>::Hash>,
+	> {
+		self.storage_changes_notification_stream(filter_keys, child_filter_keys)
+	}
+}
+
+impl sp_api::ProvideRuntimeApi<Block> for ClientWrapper {
+	type Api = <FullClient as sp_api::ProvideRuntimeApi<Block>>::Api;
+	fn runtime_api(&self) -> sp_api::ApiRef<'_, Self::Api> {
+		self.inner.runtime_api()
+	}
+}
+
+#[async_trait::async_trait]
+impl gadget_core::gadget::substrate::Client<Block> for ClientWrapper {
+	async fn get_next_finality_notification(&self) -> Option<FinalityNotification<Block>> {
+		let mut lock1 = self.finality_notification_stream.lock().await;
+		match *lock1 {
+			Some(s) => {
+				let next = s.next().await;
+				let lock2 = self.latest_finality_notification.lock().await;
+				*lock2 = next.clone();
+				next
+			},
+			None => {
+				let stream = self.inner.finality_notification_stream();
+				let next = stream.next().await;
+				*lock1 = Some(stream);
+				let lock2 = self.latest_finality_notification.lock().await;
+				*lock2 = next.clone();
+				next
+			},
+		}
+	}
+
+	async fn get_latest_finality_notification(&self) -> Option<FinalityNotification<Block>> {
+		let lock = self.latest_finality_notification.lock().await;
+		match &*lock {
+			Some(n) => Some(n.clone()),
+			None => {
+				drop(lock);
+				self.get_next_finality_notification().await
+			},
+		}
+	}
+}
 
 #[allow(clippy::type_complexity)]
 pub fn new_partial(
@@ -731,10 +817,10 @@ pub async fn new_full(
 		let pallet_tx = SubxtPalletSubmitter::new(signer)
 			.map_err(|e| sc_service::Error::Other(e.to_string()))
 			.await?;
-		let client_keygen = client.clone();
-		let client_signing = client.clone();
-		let client_key_refresh = client.clone();
-		let client_key_rotate = client.clone();
+		let client_keygen = ClientWrapper::new(client.clone());
+		let client_signing = ClientWrapper::new(client.clone());
+		let client_key_refresh = ClientWrapper::new(client.clone());
+		let client_key_rotate = ClientWrapper::new(client.clone());
 		let (network_keygen_handler, network_keygen_controller) = NetworkGossipEngineBuilder::new(
 			dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYGEN_PROTOCOL_NAME.into(),
 			keystore.clone(),
