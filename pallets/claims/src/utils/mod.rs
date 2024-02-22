@@ -13,7 +13,19 @@ pub mod ethereum_address;
 
 pub use ethereum_address::{EcdsaSignature, EthereumAddress};
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo, Serialize, Deserialize)]
+#[derive(
+	Encode,
+	Decode,
+	Clone,
+	Eq,
+	PartialEq,
+	RuntimeDebug,
+	TypeInfo,
+	Serialize,
+	Deserialize,
+	Ord,
+	PartialOrd,
+)]
 pub enum MultiAddress {
 	/// Claimer is Ethereum address
 	EVM(EthereumAddress),

@@ -131,6 +131,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				combine_distributions(vec![
 					mainnet::get_team_balance_distribution(),
 					mainnet::get_investor_balance_distribution(),
+					mainnet::get_team_direct_vesting_distribution(),
 				]),
 			)
 		},
