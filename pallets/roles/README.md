@@ -9,19 +9,19 @@ By opting into a role, validators agree to new slashing conditions specific to t
 
 - ##### TSS Roles
     Validators can opt into various threshold signature schemes roles, following are different types of TSS roles 
-    - ZengoGG20Secp256k1, 
     - DfnsCGGMP21Secp256k1
     - DfnsCGGMP21Secp256r1
     - DfnsCGGMP21Stark
     - ZcashFrostP256
+    - ZcashFrostP384
+    - ZcashFrostSecp256k1
+    - ZcashFrostEd25519
+    - ZcashFrostEd448
+    - ZcashFrostRistretto255
 
 - ##### ZkSaaS Roles,
     Validators can opt into various zero-knowledge proof (ZkSaaS) roles, following are different type of ZKSaaS roles 
     - ZkSaaSGroth16
-    - ZkSaaSMarlin
-
-- ##### LightClientRelaying Role
-    This role is designed for validators participating in light client relaying services.
 
 ---
 
