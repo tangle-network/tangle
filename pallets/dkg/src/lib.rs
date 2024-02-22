@@ -18,12 +18,15 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 //! # Pallet-DKG
 //!
-//! A Substrate pallet for verifying submitted results of Distributed Key Generation (DKG)
-//! protocols.
+//! A Substrate pallet for verifying submitted results and misbehaviors
+//! of Distributed Key Generation (DKG) protocols.
 //!
 //! This pallet provides functionality to verify the results of a DKG process. It includes methods
 //! to verify DKG signatures, recover ECDSA public keys, and ensure the validity of the generated
 //! DKG key.
+
+extern crate alloc;
+
 pub use pallet::*;
 
 mod functions;
@@ -40,9 +43,6 @@ mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
-
-#[cfg(not(feature = "std"))]
-extern crate alloc;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -179,6 +179,47 @@ pub mod pallet {
 		/// This error is returned when the Mod Proof is valid
 		/// but the caller claims it is invalid.
 		ValidModProof,
+		/// ------------------------------------------------------------ ///
+		///                         FROST ERRORS                         ///
+		/// ------------------------------------------------------------ ///
+		/// Valid FROST signature share
+		ValidFrostSignatureShare,
+		/// Invalid FROST message serialization
+		InvalidFrostMessageSerialization,
+		/// Invalid FROST message deserialization
+		InvalidFrostMessageDeserialization,
+		/// Invalid identifier deserialization
+		InvalidIdentifierDeserialization,
+		/// Valid FROST signature error for a misbehavior report
+		ValidFrostSignature,
+		/// Unknown identifier
+		UnknownIdentifier,
+		/// Duplicate identifier
+		DuplicateIdentifier,
+		/// Incorrect number of identifiers
+		IncorrectNumberOfIdentifiers,
+		/// Identifier derivation not supported
+		IdentifierDerivationNotSupported,
+		/// Malformed signature
+		MalformedFrostSignature,
+		/// Invalid FROST signature
+		InvalidFrostSignature,
+		/// Invalid FROST signature share
+		InvalidFrostSignatureShare,
+		/// Invalid FROST signature scheme
+		InvalidFrostSignatureScheme,
+		/// Malformed FROST verifying key
+		MalformedFrostVerifyingKey,
+		/// Malformed FROST signing key
+		MalformedFrostSigningKey,
+		/// Missing FROST commitment
+		MissingFrostCommitment,
+		/// Invalid FROST commitment
+		IdentityCommitment,
+		/// FROST Field scalar error
+		FrostFieldError,
+		/// FROST Group element error
+		FrostGroupError,
 	}
 
 	#[pallet::call]

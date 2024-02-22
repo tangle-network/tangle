@@ -26,6 +26,9 @@ tangle-primitives = { workspace = true, default-features = false }
 rand_core = { workspace = true, default-features = false }
 rand_chacha = { workspace = true, default-features = false }
 
+# Pallets
+pallet-jobs = { workspace = true }
+
 # dfns/CGGMP21 specific dependencies
 malachite-base = { workspace = true, default-features = false }
 malachite-nz = { workspace = true, default-features = false }
@@ -67,36 +70,37 @@ paste = { workspace = true }
 [features]
 default = ["std"]
 std = [
- "parity-scale-codec/std",
- "scale-info/std",
- "sp-runtime/std",
- "frame-support/std",
- "frame-system/std",
- "sp-core/std",
- "sp-std/std",
- "tangle-primitives/std",
- "tangle-crypto-primitives/std",
- "pallet-balances/std",
- "sp-io/std",
- "sp-keystore/std",
+    "parity-scale-codec/std",
+    "scale-info/std",
+    "sp-runtime/std",
+    "frame-support/std",
+    "frame-system/std",
+    "sp-core/std",
+    "sp-std/std",
+    "tangle-primitives/std",
+    "tangle-crypto-primitives/std",
+    "pallet-balances/std",
+    "sp-io/std",
+    "sp-keystore/std",
+    "pallet-jobs/std",
 
- "frost-core/std",
- "frost-ed25519/std",
- "elliptic-curve/std",
- "frost-ed448/std",
- "frost-ristretto255/std",
- "frost-secp256k1/std",
- "frost-p256/std",
- "frost-p384/std",
- # "frost-redjubjub/std",
- "snowbridge-milagro-bls/std",
+    "frost-core/std",
+    "frost-ed25519/std",
+    "elliptic-curve/std",
+    "frost-ed448/std",
+    "frost-ristretto255/std",
+    "frost-secp256k1/std",
+    "frost-p256/std",
+    "frost-p384/std",
+    # "frost-redjubjub/std",
+    "snowbridge-milagro-bls/std",
 ]
 serde = []
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
- "frame-benchmarking/runtime-benchmarks",
- "frame-support/runtime-benchmarks",
- "frame-system/runtime-benchmarks",
- "sp-runtime/runtime-benchmarks",
- "pallet-balances/runtime-benchmarks",
+    "frame-benchmarking/runtime-benchmarks",
+    "frame-support/runtime-benchmarks",
+    "frame-system/runtime-benchmarks",
+    "sp-runtime/runtime-benchmarks",
+    "pallet-balances/runtime-benchmarks",
 ]

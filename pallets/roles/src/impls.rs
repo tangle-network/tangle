@@ -95,6 +95,15 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 
 		Ok(())
 	}
+
+	fn get_max_active_service_for_restaker(restaker: T::AccountId) -> Option<u32> {
+		let maybe_ledger = Self::ledger(&restaker);
+		if let Some(ledger) = maybe_ledger {
+			Some(ledger.max_active_services)
+		} else {
+			return None
+		}
+	}
 }
 
 impl<T: Config> sp_runtime::BoundToRuntimeAppPublic for Pallet<T> {

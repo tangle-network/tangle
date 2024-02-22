@@ -4724,6 +4724,7 @@ dependencies = [
 name = "frost-core"
 version = "0.6.1"
 dependencies = [
+ "byteorder",
  "debugless-unwrap",
  "hex",
  "parity-scale-codec 3.6.9",
@@ -4733,6 +4734,7 @@ dependencies = [
  "serdect",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "subtle",
+ "zeroize",
 ]
 
 [[package]]
@@ -8183,6 +8185,7 @@ dependencies = [
  "malachite-nz",
  "paillier-zk",
  "pallet-balances",
+ "pallet-jobs",
  "parity-scale-codec 3.6.9",
  "paste",
  "postcard",
@@ -15560,6 +15563,7 @@ dependencies = [
  "ark-std",
  "ethabi 15.0.0",
  "frame-support",
+ "frost-core",
  "hex",
  "log",
  "parity-scale-codec 3.6.9",

@@ -80,6 +80,7 @@ syn = { version = "1.0" }
 hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
 slices = "0.2.0"
+byteorder = { version = "1", default-features = false }
 schnorrkel = { version = "0.9.1", default-features = false }
 snowbridge-milagro-bls = { git = "https://github.com/Snowfork/milagro_bls", default-features = false, rev = "43a5d480ed6e3b83de4cf54888680d51604199e6" }
 

@@ -22,8 +22,8 @@ use sp_io::hashing::keccak_256;
 use sp_runtime::DispatchResult;
 use sp_std::prelude::*;
 use tangle_primitives::misbehavior::{
-	dfns_cggmp21::{InvalidProofReason, SignedRoundMessage, AUX_GEN_EID},
-	MisbehaviorSubmission,
+	dfns_cggmp21::{InvalidProofReason, AUX_GEN_EID},
+	MisbehaviorSubmission, SignedRoundMessage,
 };
 
 use super::{
