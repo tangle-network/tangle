@@ -75,14 +75,15 @@ The validator rewards system is designed to distribute rewards among validators 
   - Distributes rewards among active validators proportionally to the number of jobs they have completed relative to the total jobs completed.
 - **Formula:**
 
-    1. **Calculate Total Jobs Completed by Active Validators (\( \text{total\_jobs\_completed} \)):**
-    \[ \text{total\_jobs\_completed} = \sum_{\text{validator}} \text{jobs\_completed}_{\text{validator}} \]
+    1. **Calculate Total Jobs Completed by Active Validators:** $\text{total jobs completed}$ (TJC), $\text{jobs completed}$ (JC)
+    $$\text{TJC} = \sum_{\text{validator}} \text{JC}\_{\text{validator}}$$
 
-    2. **Compute Reward Share for Each Active Validator (\( \text{validator\_share} \)):**
-    \[ \text{validator\_share}_{\text{validator}} = \frac{\text{jobs\_completed}_{\text{validator}}}{\text{total\_jobs\_completed}} \]
+    2. **Compute Reward Share for Each Active Validator $v$:** $\text{validator share}$ (VS)
+    $$\text{VS}\_v = \frac{\text{JC}_v}{\text{TJC}}$$
 
-    3. **Compute Reward for Each Active Validator (\( \text{validator\_reward} \)):**
-    \[ \text{validator\_reward}_{\text{validator}} = \text{validator\_share}_{\text{validator}} \times R \]
+    3. **Compute Reward for Each Active Validator $v$:** $\text{validator reward}$ (VR)
+
+    $$\text{VR}_v = \text{VS}_v \times R$$
 
 
 ### 2. Validator Rewards by Restake (50%)
@@ -96,23 +97,24 @@ The validator rewards system is designed to distribute rewards among validators 
   - Calculates rewards for each validator based on their restake amount relative to the total restake in the system.
 - **Formula:**
 
-    1. **Compute Total Restake in the System (\( R_{\text{total}} \)):**
-    \[ R_{\text{total}} = \sum_{i=1}^{n} R_i \]
+    1. **Compute Total Restake in the System:** $\text{total restake}$ (TR)
+    $$TR = \sum_{i=1}^{n} R_i$$
 
-    2. **Compute Restake-to-Stake Ratio (\( \text{Restake-to-Stake Ratio} \)):**
-    \[ \text{Restake-to-Stake Ratio} = \frac{R_{\text{total}}}{S_{\text{era}}} \]
+    3. **Compute Restake-to-Stake Ratio:** $\text{Restake-to-Stake Ratio}$ (RSR)
+    $$\text{RSR} = \frac{TR}{S_{\text{era}}}$$
 
-    3. **Compute Missing Restake Ratio (\( \text{Missing Restake Ratio} \)):**
-    \[ \text{Missing Restake Ratio} = \text{MaxRestake} - \text{Restake-to-Stake Ratio} \]
+    4. **Compute Missing Restake Ratio:** $\text{Missing Restake Ratio}$ (MRR)
+    $$\text{MRR} = \text{MaxRestake} - \text{RSR}$$
 
-    4. **Adjust Total Rewards (\( \text{Adjusted Total Rewards} \)):**
-    \[ \text{Adjusted Total Rewards} = \begin{cases} (100 - \text{Missing Restake Ratio}) \times R & \text{if } \text{Missing Restake Ratio} \neq 0 \\ R & \text{otherwise} \end{cases} \]
+    5. **Adjust Total Rewards:** $\text{Adjusted Total Rewards}$ (ATR)
+        - $\text{if } \text{MRR} \neq 0$, $\text{ATR} = (\text{MaxRestakeRatio} - \text{MRR}) \times R$
+        - $\text{otherwise } \text{ATR} = R$
 
-    5. **Compute Reward Share for Each Restaker (\( \text{Reward Share}_i \)):**
-    \[ \text{Reward Share}_i = \frac{R_i}{R_{\text{total}}} \]
+    6. **Compute Reward Share for Each Restaker:** $\text{RS}_i$
+    $$\text{RS}_i = \frac{R_i}{TR}$$
 
-    6. **Compute Reward for Each Restaker (\( \text{Reward}_i \)):**
-    \[ \text{Reward}_i = \text{Reward Share}_i \times \text{Adjusted Total Rewards} \]
+    7. **Compute Reward for Each Restaker:** $\text{Reward}_i$
+    $$\text{Reward}_i = \text{RS}_i \times \text{ATR}$$
 
 
 #### Example:
