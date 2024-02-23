@@ -37,4 +37,5 @@ std = [
     "parity-scale-codec/std",
     "sha3/std",
     "frost-core/std",
+    "ed448-goldilocks/std"
 ]
