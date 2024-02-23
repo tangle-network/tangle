@@ -93,6 +93,13 @@ pub trait JobsApi<
 
 	#[method(name = "jobs_queryNextJobId")]
 	fn query_next_job_id(&self, at: Option<BlockHash>) -> RpcResult<JobId>;
+
+	#[method(name = "jobs_queryRestakerRoleKey")]
+	fn query_restaker_role_key(
+		&self,
+		at: Option<BlockHash>,
+		address: AccountId,
+	) -> RpcResult<Option<Vec<u8>>>;
 }
 
 /// A struct that implements the `JobsApi`.
@@ -227,6 +234,20 @@ where
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 
 		match api.query_next_job_id(at) {
+			Ok(res) => Ok(res),
+			Err(e) => Err(runtime_error_into_rpc_err(e)),
+		}
+	}
+
+	fn query_restaker_role_key(
+		&self,
+		at: Option<<Block as BlockT>::Hash>,
+		address: AccountId,
+	) -> RpcResult<Option<Vec<u8>>> {
+		let api = self.client.runtime_api();
+		let at = at.unwrap_or_else(|| self.client.info().best_hash);
+
+		match api.query_restaker_role_key(at, address) {
 			Ok(res) => Ok(res),
 			Err(e) => Err(runtime_error_into_rpc_err(e)),
 		}
