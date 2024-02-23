@@ -97,6 +97,16 @@ impl<T: Config> Pallet<T> {
 		T::PalletId::get().into_sub_account_truncating(0)
 	}
 
+	pub fn refund_job_creator(owner: &T::AccountId, fee: BalanceOf<T>) -> DispatchResult {
+		// refund the job creator
+		T::Currency::transfer(
+			&Self::rewards_account_id(),
+			owner,
+			fee,
+			ExistenceRequirement::AllowDeath,
+		)
+	}
+
 	/// Try to remove a validator from a submitted job.
 	///
 	/// # Parameters
@@ -131,28 +141,16 @@ impl<T: Config> Pallet<T> {
 		SubmittedJobs::<T>::try_mutate(role_type, job_id, |maybe_job_info| -> DispatchResult {
 			let job_info = maybe_job_info.as_mut().ok_or(Error::<T>::JobNotFound)?;
 
-			match job_info.fallback {
-				FallbackOptions::Destroy => {
-					// refund the job creator
-					T::Currency::transfer(
-						&Self::rewards_account_id(),
-						&job_info.owner,
-						job_info.fee,
-						ExistenceRequirement::AllowDeath,
-					)?;
-
-					Self::deposit_event(Event::JobRefunded { job_id, role_type });
-
-					// remove the job from storage
-					*maybe_job_info = None;
-					Ok(())
-				},
-				FallbackOptions::RegenerateWithThreshold(new_threshold) => {
-					// == else case, the job fallback option is retry ==
-
-					// If the job type is in the phase one.
-					// If it is, adjusts the participants and threshold accordingly.
-					if job_info.job_type.is_phase_one() {
+			if job_info.job_type.is_phase_one() {
+				match job_info.fallback {
+					FallbackOptions::Destroy => {
+						Self::refund_job_creator(&job_info.owner, job_info.fee)?;
+						Self::deposit_event(Event::JobRefunded { job_id, role_type });
+						// remove the job from storage
+						*maybe_job_info = None;
+						Ok(())
+					},
+					FallbackOptions::RegenerateWithThreshold(new_threshold) => {
 						let participants = job_info.job_type.clone().get_participants().unwrap();
 
 						let participants: Vec<T::AccountId> =
@@ -172,38 +170,52 @@ impl<T: Config> Pallet<T> {
 							role_type,
 							details: job_info.clone(),
 						});
-
 						Ok(())
-					} else {
-						let phase_one_id = job_info
-							.job_type
-							.get_phase_one_id()
-							.ok_or(Error::<T>::PhaseOneResultNotFound)?;
+					},
+				}
+			} else {
+				let phase_one_id = job_info
+					.job_type
+					.get_phase_one_id()
+					.ok_or(Error::<T>::PhaseOneResultNotFound)?;
 
-						let phase1_result = if !job_info.job_type.is_phase_one() {
-							Some(
-								KnownResults::<T>::take(role_type, phase_one_id)
-									.ok_or(Error::<T>::PhaseOneResultNotFound)?,
-							)
-						} else {
-							None
-						};
+				let phase1 = KnownResults::<T>::take(role_type, phase_one_id)
+					.ok_or(Error::<T>::PhaseOneResultNotFound)?;
 
-						// This phase1 result cannot be used
-						let phase1 =
-							phase1_result.as_ref().ok_or(Error::<T>::PhaseOneResultNotFound)?;
+				let new_participants: BoundedVec<_, _> = phase1
+					.participants()
+					.ok_or(Error::<T>::InvalidJobPhase)?
+					.into_iter()
+					.filter(|x| x != &validator)
+					.collect::<Vec<_>>()
+					.try_into()
+					.map_err(|_| Error::<T>::TooManyParticipants)?;
 
+				match job_info.fallback {
+					FallbackOptions::Destroy => {
+						// if the role is TSS, then destory only if signing is impossible
+						if matches!(role_type, RoleType::Tss(_)) {
+							if new_participants.len() >=
+								job_info
+									.job_type
+									.clone()
+									.get_threshold()
+									.expect("Should exist!")
+									.into()
+							{
+								return Ok(())
+							}
+						}
+
+						Self::refund_job_creator(&job_info.owner, job_info.fee)?;
+						Self::deposit_event(Event::JobRefunded { job_id, role_type });
+						// remove the job from storage
+						*maybe_job_info = None;
+						Ok(())
+					},
+					FallbackOptions::RegenerateWithThreshold(new_threshold) => {
 						// Generate a job to generate new key
 						let job_id = Self::get_next_job_id()?;
-
-						let new_participants = phase1
-							.participants()
-							.ok_or(Error::<T>::InvalidJobPhase)?
-							.into_iter()
-							.filter(|x| x != &validator)
-							.collect::<Vec<_>>()
-							.try_into()
-							.map_err(|_| Error::<T>::TooManyParticipants)?;
 
 						ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
 
@@ -246,6 +258,7 @@ impl<T: Config> Pallet<T> {
 						};
 
 						let fee = T::JobToFee::job_to_fee(&job);
+
 						T::Currency::transfer(
 							&validator,
 							&Self::rewards_account_id(),
@@ -263,11 +276,13 @@ impl<T: Config> Pallet<T> {
 							                                     * dont want to keep
 							                                     * looping */
 						};
+
 						Self::deposit_event(Event::JobReSubmitted {
 							job_id,
 							role_type,
 							details: phase_one_job_info.clone(),
 						});
+
 						SubmittedJobs::<T>::insert(role_type, job_id, phase_one_job_info);
 
 						// update the current job with new phase-one id
@@ -276,12 +291,12 @@ impl<T: Config> Pallet<T> {
 						// set fallback to destroy since we already regenerated
 						job_info.fallback = FallbackOptions::Destroy;
 
-						// the old results are not useful since a participant has left, remove from
-						// storage
+						// the old results are not useful since a participant has left, remove
+						// from storage
 						KnownResults::<T>::remove(role_type, job_id);
 						Ok(())
-					}
-				},
+					},
+				}
 			}
 		})
 	}
