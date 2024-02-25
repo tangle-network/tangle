@@ -47,9 +47,11 @@ use tangle_runtime::{
 };
 
 #[cfg(feature = "testnet")]
-use tangle_testnet_runtime::{AccountId, Balance, Hash, Index};
+use tangle_primitives::jobs::{
+	MaxDataLen, MaxKeyLen, MaxParticipants, MaxProofLen, MaxSignatureLen, MaxSubmissionLen,
+};
 #[cfg(feature = "testnet")]
-use tangle_primitives::jobs::{MaxDataLen, MaxKeyLen, MaxParticipants, MaxProofLen, MaxSignatureLen, MaxSubmissionLen};
+use tangle_testnet_runtime::{AccountId, Balance, Hash, Index};
 
 pub mod eth;
 pub mod tracing;

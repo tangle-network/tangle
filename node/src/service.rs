@@ -763,7 +763,7 @@ pub async fn new_full(
 		use gadget_common::prelude::*;
 		use sc_keystore::Keystore;
 		let logger = DebugLogger { peer_id: config.network.node_name.clone() };
-		let account_id = local_keystore
+		let role_id = local_keystore
 			.and_then(|k| k.ecdsa_public_keys(tangle_crypto_primitives::ROLE_KEY_TYPE).first())
 			.cloned()
 			.ok_or_else(|| sc_service::Error::Other("ECDSA Role key not found".into()))?;
@@ -772,7 +772,7 @@ pub async fn new_full(
 			.cloned()
 			.ok_or_else(|| sc_service::Error::Other("sr25519 acco key not found".into()))?;
 		let role_public_key = tangle_crypto_primitives::crypto::Public::from_slice(
-			account_id.as_slice(),
+			role_id.as_slice(),
 		)
 		.map_err(|_| {
 			sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
@@ -860,7 +860,7 @@ pub async fn new_full(
 				network_key_refresh_controller,
 				network_key_rotate_controller,
 			],
-			account_id,
+			account_id: AccountId::from(acco_account_id),
 			logger,
 			pallet_tx: Arc::new(pallet_tx),
 			keystore,
