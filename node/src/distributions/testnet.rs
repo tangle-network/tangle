@@ -60,7 +60,7 @@ pub fn read_contents_to_evm_accounts(path_str: &str) -> Vec<H160> {
 	accounts
 }
 
-pub fn read_contents_to_substrate_accounts(path_str: &str) -> Vec<AccountId> {
+pub fn read_contents_to_substrate_accounts_list(path_str: &str) -> Vec<AccountId> {
 	let mut path = get_git_root();
 	path.push(path_str);
 	let json = read_contents(&path);
@@ -79,7 +79,7 @@ pub fn get_edgeware_genesis_list() -> Vec<H160> {
 }
 
 pub fn get_edgeware_snapshot_list() -> Vec<AccountId> {
-	read_contents_to_substrate_accounts(
+	read_contents_to_substrate_accounts_list(
 		"node/src/distributions/data/edgeware_snapshot_participants.json",
 	)
 }
