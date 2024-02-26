@@ -5077,6 +5077,7 @@ dependencies = [
  "sc-service",
  "scale-info",
  "serde",
+ "serde_bytes",
  "sp-api",
  "sp-application-crypto 23.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",
  "sp-core 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0)",

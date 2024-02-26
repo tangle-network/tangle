@@ -399,17 +399,19 @@ pub async fn new_full(
 		if auto_insert_keys {
 			crate::utils::insert_controller_account_keys_into_keystore(
 				&config,
-				Some(keystore_container.keystore()),
+				Some(keystore_container.local_keystore()),
 			);
 		} else {
 			crate::utils::insert_dev_controller_account_keys_into_keystore(
 				&config,
-				Some(keystore_container.keystore()),
+				Some(keystore_container.local_keystore()),
 			);
 		}
 
 		// finally check if keys are inserted correctly
-		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore()).is_err() {
+		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.local_keystore())
+			.is_err()
+		{
 			println!("
 			++++++++++++++++++++++++++++++++++++++++++++++++
 				Validator keys not found, validator keys are essential to run a validator on
@@ -782,7 +784,9 @@ pub async fn new_full(
 			.ok_or_else(|| sc_service::Error::Other("ECDSA Role key not found".into()))?;
 		let acco_account_id = local_keystore
 			.clone()
-			.and_then(|k| k.sr25519_public_keys(sp_runtime::key_types::ACCOUNT).first().cloned())
+			.and_then(|k| {
+				k.sr25519_public_keys(sp_core::crypto::key_types::ACCOUNT).first().cloned()
+			})
 			.ok_or_else(|| sc_service::Error::Other("sr25519 acco key not found".into()))?;
 		let role_public_key = tangle_crypto_primitives::crypto::Public::from_slice(
 			role_id.as_slice(),
@@ -794,13 +798,12 @@ pub async fn new_full(
 		})?;
 
 		let acco_public_key =
-			sp_runtime::app_crypto::sr25519::AppPublic::from_slice(acco_account_id.as_slice())
+			tangle_crypto_primitives::crypto::acco::Public::from_slice(acco_account_id.as_slice())
 				.map_err(|_| {
 					sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
 						tangle_crypto_primitives::ROLE_KEY_TYPE,
 					))
 				})?;
-
 		let ecdsa_keypair = local_keystore
 			.clone()
 			.and_then(|k| {
@@ -812,19 +815,19 @@ pub async fn new_full(
 					tangle_crypto_primitives::ROLE_KEY_TYPE,
 				))
 			})?;
-
 		let sr25519_keypair = local_keystore
 			.and_then(|k| {
-				k.key_pair::<sp_runtime::app_crypto::sr25519::AppPair>(&acco_public_key).ok()
+				k.key_pair::<tangle_crypto_primitives::crypto::acco::Pair>(&acco_public_key)
+					.ok()
 			})
 			.flatten()
 			.ok_or_else(|| {
 				sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
-					sp_runtime::key_types::ACCOUNT,
+					sp_core::crypto::key_types::ACCOUNT,
 				))
 			})?;
 		let mut slice = [0u8; 32];
-		slice.copy_from_slice(&sr25519_keypair.to_raw_vec());
+		slice.copy_from_slice(&sr25519_keypair.to_raw_vec()[..32]);
 		let signer = gadget_common::subxt_signer::sr25519::Keypair::from_seed(slice)
 			.map_err(|e| sc_service::Error::Other(e.to_string()))?;
 		let keystore = ECDSAKeyStore::in_memory(ecdsa_keypair.into());

@@ -4,7 +4,7 @@ set -e
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
 #define default ports
-ports=(30333 30305 30308)
+ports=(30333 30305 30308 30311 30313)
 
 #check to see process is not orphaned or already running
 for port in ${ports[@]}; do
@@ -66,7 +66,7 @@ echo "*** Start Tangle Testnet ***"
 # Charlie
 ./target/release/tangle --tmp --dev --validator -lerror --charlie \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
-  --port ${ports[1]} \
+  --port ${ports[2]} \
   --rpc-port 9946 \
   --ethapi trace,debug \
   --auto-insert-keys \
@@ -74,7 +74,7 @@ echo "*** Start Tangle Testnet ***"
 # Dave
 ./target/release/tangle --tmp --dev --validator -lerror --dave \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
-  --port ${ports[1]} \
+  --port ${ports[3]} \
   --rpc-port 9947 \
   --ethapi trace,debug \
   --auto-insert-keys \
@@ -82,10 +82,11 @@ echo "*** Start Tangle Testnet ***"
 # Eve
 ./target/release/tangle --tmp --dev --validator -linfo --eve \
     --rpc-cors all --rpc-methods=unsafe --rpc-external \
-    --port ${ports[2]} \
+    --port ${ports[4]} \
     --rpc-port 9948 \
     --ethapi trace,debug \
     --auto-insert-keys \
     -levm=debug \
+    -lgadget=trace \
     --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
 popd
