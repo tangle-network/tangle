@@ -369,6 +369,7 @@ impl Config for Runtime {
 	type MaxKeyLen = MaxKeyLen;
 	type MaxValidators = ConstU32<100>;
 	type MaxRestake = MaxRestake;
+	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
 

@@ -75,9 +75,6 @@ use tangle_primitives::{
 	roles::RoleType,
 };
 
-#[cfg(any(feature = "std", test))]
-pub use frame_system::Call as SystemCall;
-
 pub use frame_support::{
 	construct_runtime,
 	dispatch::DispatchClass,
@@ -95,6 +92,8 @@ pub use frame_support::{
 	},
 	PalletId, StorageValue,
 };
+#[cfg(any(feature = "std", test))]
+pub use frame_system::Call as SystemCall;
 use frame_system::EnsureRoot;
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
@@ -133,6 +132,7 @@ use tangle_primitives::{
 		CANDIDACY_BOND, DESIRED_MEMBERS, DESIRED_RUNNERS_UP, ELECTIONS_PHRAGMEN_PALLET_ID,
 		MAX_CANDIDATES, MAX_VOTERS, TERM_DURATION,
 	},
+	roles::traits::RolesHandler,
 	staking::{
 		BONDING_DURATION, HISTORY_DEPTH, MAX_NOMINATOR_REWARDED_PER_VALIDATOR, OFFCHAIN_REPEAT,
 		OFFENDING_VALIDATOR_THRESHOLD, SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
@@ -1245,6 +1245,7 @@ impl pallet_roles::Config for Runtime {
 	type MaxValidators = MaxValidators;
 	type MaxRestake = MaxRestake;
 	type MaxRolesPerValidator = MaxRolesPerValidator;
+	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type MaxKeyLen = MaxKeyLen;
 	type WeightInfo = ();
 }
@@ -1540,6 +1541,10 @@ impl_runtime_apis! {
 
 		fn query_next_job_id() -> JobId {
 			Jobs::query_next_job_id()
+		}
+
+		fn query_restaker_role_key(address: AccountId) -> Option<Vec<u8>> {
+			Roles::get_validator_role_key(address)
 		}
 
 	}

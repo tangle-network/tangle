@@ -144,7 +144,7 @@ fn hash_to_scalar(inputs: &[&[u8]]) -> Scalar {
 const CONTEXT_STRING: &str = "FROST-ED448-SHAKE256-v1";
 
 /// An implementation of the FROST(Ed448, SHAKE256) ciphersuite.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, Debug)]
 pub struct Ed448Shake256;
 
 impl Ciphersuite for Ed448Shake256 {

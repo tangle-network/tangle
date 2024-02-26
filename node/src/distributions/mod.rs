@@ -22,9 +22,11 @@ use tangle_primitives::{
 	currency::EXISTENTIAL_DEPOSIT,
 	types::{Balance, BlockNumber},
 };
+
+pub mod testnet;
+pub use testnet::*;
 pub mod develop;
 pub mod mainnet;
-pub mod testnet;
 
 pub fn combine_distributions<T>(distributions: Vec<Vec<T>>) -> Vec<T> {
 	let mut combined = Vec::new();

@@ -147,7 +147,7 @@ fn hash_to_scalar(inputs: &[&[u8]]) -> Scalar {
 const CONTEXT_STRING: &str = "FROST-ED25519-SHA512-v1";
 
 /// An implementation of the FROST(Ed25519, SHA-512) ciphersuite.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, Debug)]
 pub struct Ed25519Sha512;
 
 impl Ciphersuite for Ed25519Sha512 {
