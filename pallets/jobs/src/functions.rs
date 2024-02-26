@@ -191,6 +191,7 @@ impl<T: Config> Pallet<T> {
 					.try_into()
 					.map_err(|_| Error::<T>::TooManyParticipants)?;
 
+				#[allow(clippy::collapsible_if)]
 				match job_info.fallback {
 					FallbackOptions::Destroy => {
 						// if the role is TSS, then destory only if signing is impossible
