@@ -886,6 +886,7 @@ pub async fn new_full(
 			keystore,
 			node_index: 0,
 			additional_params: (),
+			prometheus_config: PrometheusConfig::Disabled,
 			_pd: std::marker::PhantomData,
 		};
 		let gadget = async move {
