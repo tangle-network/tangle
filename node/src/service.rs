@@ -826,15 +826,16 @@ pub async fn new_full(
 					sp_core::crypto::key_types::ACCOUNT,
 				))
 			})?;
-		let mut slice = [0u8; 32];
-		slice.copy_from_slice(&sr25519_keypair.to_raw_vec()[..32]);
-		let signer = gadget_common::subxt_signer::sr25519::Keypair::from_seed(slice)
-			.map_err(|e| sc_service::Error::Other(e.to_string()))?;
 		let keystore = ECDSAKeyStore::in_memory(ecdsa_keypair.into());
 		let pallet_tx = SubxtPalletSubmitter::<
 			gadget_common::webb::substrate::subxt::PolkadotConfig,
 			_,
-		>::new(signer)
+		>::new(
+			gadget_common::client::PairSigner::<_, sp_core::sr25519::Pair>::new(
+				sr25519_keypair.into(),
+			),
+			logger.clone(),
+		)
 		.map_err(|e| sc_service::Error::Other(e.to_string()))
 		.await?;
 		let client_keygen = ClientWrapper::new(client.clone());

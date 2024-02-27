@@ -15613,7 +15613,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tracing",
- "webb 0.8.4",
+ "webb 0.8.4 (git+https://github.com/webb-tools/webb-rs.git)",
 ]
 
 [[package]]
@@ -17332,10 +17332,8 @@ dependencies = [
 [[package]]
 name = "webb"
 version = "0.8.4"
-source = "git+https://github.com/webb-tools/webb-rs.git#33f65ddea4478923c8e27042265928b6f6715cd9"
 dependencies = [
  "async-trait",
- "ethers",
  "hex",
  "parity-scale-codec 3.6.9",
  "prettyplease 0.2.16",
@@ -17344,6 +17342,22 @@ dependencies = [
  "serde",
  "serde_json",
  "subxt 0.31.0",
+ "tempfile",
+ "thiserror",
+]
+
+[[package]]
+name = "webb"
+version = "0.8.4"
+source = "git+https://github.com/webb-tools/webb-rs.git#33f65ddea4478923c8e27042265928b6f6715cd9"
+dependencies = [
+ "async-trait",
+ "ethers",
+ "hex",
+ "prettyplease 0.2.16",
+ "rand 0.8.5",
+ "serde",
+ "serde_json",
  "tempfile",
  "thiserror",
 ]

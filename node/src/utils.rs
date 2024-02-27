@@ -28,20 +28,20 @@ pub fn insert_controller_account_keys_into_keystore(
 		config,
 		tangle_crypto_primitives::ROLE_KEY_TYPE,
 		key_store.clone(),
-		"Role",
+		"role",
 	);
 	insert_account_keys_into_keystore::<ed25519::Public>(
 		config,
 		GRANDPA,
 		key_store.clone(),
-		"Grandpa",
+		"gran",
 	);
-	insert_account_keys_into_keystore::<sr25519::Public>(config, BABE, key_store.clone(), "Babe");
+	insert_account_keys_into_keystore::<sr25519::Public>(config, BABE, key_store.clone(), "babe");
 	insert_account_keys_into_keystore::<sr25519::Public>(
 		config,
 		IM_ONLINE,
 		key_store.clone(),
-		"ImOnline",
+		"imon",
 	);
 }
 
@@ -56,20 +56,13 @@ fn insert_account_keys_into_keystore<TPublic: Public>(
 	let node_name = &config.network.node_name[..];
 
 	let (pub_key, seed) = match node_name {
-		"Alice" | "Bob" | "Charlie" | "Dave" | "Eve" | "Ferdie" if key_type == ACCOUNT => {
+		"Alice" | "Bob" | "Charlie" | "Dave" | "Eve" | "Ferdie"
+			if chain_type == ChainType::Development || chain_type == ChainType::Local =>
+		{
 			let (pair, seed) =
 				<TPublic::Pair as Pair>::from_string_with_seed(&format!("//{node_name}"), None)
 					.expect("static values are valid; qed");
 			(pair.public(), seed.unwrap().as_ref().to_vec())
-		},
-		"Alice" | "Bob" | "Charlie" | "Dave" | "Eve" | "Ferdie"
-			if chain_type == ChainType::Development || chain_type == ChainType::Local =>
-		{
-			let a = node_name.chars().next().unwrap() as u8;
-			let seed = vec![a; 32];
-			let pair = <TPublic::Pair as Pair>::from_seed_slice(&seed)
-				.expect("static values are valid; qed");
-			(pair.public(), seed)
 		},
 		_ => {
 			let mut seed_raw = [0u8; 32];

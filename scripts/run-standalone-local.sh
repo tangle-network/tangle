@@ -55,6 +55,8 @@ echo "*** Start Tangle Testnet ***"
   --ethapi trace,debug \
   --auto-insert-keys \
   --node-key 0000000000000000000000000000000000000000000000000000000000000001 &
+# Sleep for a while to allow the node to start
+sleep 3
 # Bob
 ./target/release/tangle --tmp --dev --validator -lerror --bob \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
