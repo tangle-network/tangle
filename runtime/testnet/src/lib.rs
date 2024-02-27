@@ -46,7 +46,7 @@ use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use parity_scale_codec::{Decode, Encode};
-use scale_info::TypeInfo;
+
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
@@ -61,7 +61,7 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
+	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill,
 	SaturatedConversion,
 };
 use sp_std::prelude::*;

@@ -33,7 +33,7 @@ pub use sc_executor::NativeElseWasmExecutor;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-use sp_core::{ByteArray, Pair, U256};
+use sp_core::{ByteArray, U256};
 use tangle_primitives::Block;
 
 use std::{path::Path, sync::Arc, time::Duration};
@@ -827,17 +827,13 @@ pub async fn new_full(
 				))
 			})?;
 		let keystore = ECDSAKeyStore::in_memory(ecdsa_keypair.into());
-		let pallet_tx = SubxtPalletSubmitter::<
-			gadget_common::webb::substrate::subxt::PolkadotConfig,
-			_,
-		>::new(
-			gadget_common::client::PairSigner::<_, sp_core::sr25519::Pair>::new(
-				sr25519_keypair.into(),
-			),
-			logger.clone(),
-		)
-		.map_err(|e| sc_service::Error::Other(e.to_string()))
-		.await?;
+		let pallet_tx =
+			SubxtPalletSubmitter::<gadget_common::webb::substrate::subxt::PolkadotConfig, _>::new(
+				gadget_common::client::PairSigner::<_>::new(sr25519_keypair.into()),
+				logger.clone(),
+			)
+			.map_err(|e| sc_service::Error::Other(e.to_string()))
+			.await?;
 		let client_keygen = ClientWrapper::new(client.clone());
 		let client_signing = ClientWrapper::new(client.clone());
 		let client_key_refresh = ClientWrapper::new(client.clone());
