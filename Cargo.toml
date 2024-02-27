@@ -359,11 +359,3 @@ dfns-cggmp21-protocol = { version = "0.1.0", path = "../gadget/protocols/dfns-cg
 
 [profile.release]
 panic = "unwind"
-
-[patch.crates-io]
-generic-ec = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
-generic-ec-core = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
-generic-ec-curves = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
-generic-ec-zkp = { git = "https://github.com/webb-tools/generic-ec", branch = "m" }
-malachite-base = { git = "https://github.com/shekohex/malachite", branch = "no-std" }
-malachite-nz = { git = "https://github.com/shekohex/malachite", branch = "no-std" }
