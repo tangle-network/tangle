@@ -28,4 +28,9 @@ pub mod crypto {
 
 	/// Signature for a DKG authority using ECDSA as its crypto.
 	pub type AuthoritySignature = Signature;
+
+	pub mod acco {
+		use sp_application_crypto::{app_crypto, key_types::ACCOUNT, sr25519};
+		app_crypto!(sr25519, ACCOUNT);
+	}
 }

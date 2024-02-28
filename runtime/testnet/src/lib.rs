@@ -46,7 +46,7 @@ use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use parity_scale_codec::{Decode, Encode};
-use scale_info::TypeInfo;
+
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
@@ -61,7 +61,7 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
+	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill,
 	SaturatedConversion,
 };
 use sp_std::prelude::*;
@@ -71,12 +71,12 @@ use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
-	jobs::{JobId, PhaseResult, RpcResponseJobsData},
+	jobs::{
+		JobId, MaxActiveJobsPerValidator, MaxDataLen, MaxKeyLen, MaxParticipants, MaxProofLen,
+		MaxRolesPerValidator, MaxSignatureLen, MaxSubmissionLen, PhaseResult, RpcResponseJobsData,
+	},
 	roles::RoleType,
 };
-
-#[cfg(any(feature = "std", test))]
-pub use frame_system::Call as SystemCall;
 
 pub use frame_support::{
 	construct_runtime,
@@ -95,6 +95,8 @@ pub use frame_support::{
 	},
 	PalletId, StorageValue,
 };
+#[cfg(any(feature = "std", test))]
+pub use frame_system::Call as SystemCall;
 use frame_system::EnsureRoot;
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
@@ -133,6 +135,7 @@ use tangle_primitives::{
 		CANDIDACY_BOND, DESIRED_MEMBERS, DESIRED_RUNNERS_UP, ELECTIONS_PHRAGMEN_PALLET_ID,
 		MAX_CANDIDATES, MAX_VOTERS, TERM_DURATION,
 	},
+	roles::traits::RolesHandler,
 	staking::{
 		BONDING_DURATION, HISTORY_DEPTH, MAX_NOMINATOR_REWARDED_PER_VALIDATOR, OFFCHAIN_REPEAT,
 		OFFENDING_VALIDATOR_THRESHOLD, SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
@@ -1154,43 +1157,8 @@ impl MisbehaviorHandler for MockMisbehaviorHandler {
 	}
 }
 
-#[cfg(feature = "local-testing")]
-parameter_types! {
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 60_000_000;
-}
-
-#[cfg(not(feature = "local-testing"))]
-parameter_types! {
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 32;
-}
-
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxParticipants: u32 = 10;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxKeyLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxDataLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSignatureLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxProofLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxActiveJobsPerValidator: u32 = 100;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxRolesPerValidator: u32 = 100;
 }
 
 impl pallet_jobs::Config for Runtime {
@@ -1541,6 +1509,10 @@ impl_runtime_apis! {
 
 		fn query_next_job_id() -> JobId {
 			Jobs::query_next_job_id()
+		}
+
+		fn query_restaker_role_key(address: AccountId) -> Option<Vec<u8>> {
+			Roles::get_validator_role_key(address)
 		}
 
 	}

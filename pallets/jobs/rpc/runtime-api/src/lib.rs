@@ -85,5 +85,11 @@ sp_api::decl_runtime_apis! {
 		///  # Returns
 		///  Next job ID.
 		fn query_next_job_id() -> JobId;
+
+		/// Queries restaker's role key
+		///
+		///  # Returns
+		///  Role key
+		fn query_restaker_role_key(address: AccountId) -> Option<Vec<u8>>;
 	}
 }
