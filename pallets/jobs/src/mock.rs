@@ -478,3 +478,16 @@ pub fn new_test_ext_raw_authorities(
 
 	ext
 }
+
+// Checks events against the latest. A contiguous set of events must be
+// provided. They must include the most recent RuntimeEvent, but do not have to include
+// every past RuntimeEvent.
+pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
+	let mut actual: Vec<RuntimeEvent> = System::events().iter().map(|e| e.event.clone()).collect();
+
+	expected.reverse();
+	for evt in expected {
+		let next = actual.pop().expect("RuntimeEvent expected");
+		assert_eq!(next, evt, "Events don't match (actual,expected)");
+	}
+}
