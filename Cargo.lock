@@ -104,9 +104,9 @@ dependencies = [
 
 [[package]]
 name = "ahash"
-version = "0.8.9"
+version = "0.8.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d713b3834d76b85304d4d525563c1276e2e30dc97cc67bfb4585a4a29fc2c89f"
+checksum = "8b79b82693f705137f8fb9b37871d99e4f9a7df12b917eed79c3d3954830a60b"
 dependencies = [
  "cfg-if",
  "getrandom 0.2.12",
@@ -165,9 +165,9 @@ dependencies = [
 
 [[package]]
 name = "anstream"
-version = "0.6.12"
+version = "0.6.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96b09b5178381e0874812a9b157f7fe84982617e48f71f4e3235482775e5b540"
+checksum = "d96bd03f33fe50a863e394ee9718a706f988b9079b20c3784fb726e7678b62fb"
 dependencies = [
  "anstyle",
  "anstyle-parse",
@@ -2617,6 +2617,7 @@ dependencies = [
 [[package]]
 name = "dfns-cggmp21-protocol"
 version = "0.1.0"
+source = "git+https://github.com/webb-tools/gadget.git?branch=main#7af09f0418e700c450a51d6896fca26324165e24"
 dependencies = [
  "async-trait",
  "bincode2",
@@ -5166,6 +5167,7 @@ dependencies = [
 [[package]]
 name = "gadget-common"
 version = "0.1.0"
+source = "git+https://github.com/webb-tools/gadget.git?branch=main#7af09f0418e700c450a51d6896fca26324165e24"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -5208,6 +5210,7 @@ dependencies = [
 [[package]]
 name = "gadget-core"
 version = "0.0.1"
+source = "git+https://github.com/webb-tools/gadget.git?branch=main#7af09f0418e700c450a51d6896fca26324165e24"
 dependencies = [
  "async-trait",
  "auto_impl",
@@ -5517,7 +5520,7 @@ version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
 dependencies = [
- "ahash 0.8.9",
+ "ahash 0.8.10",
 ]
 
 [[package]]
@@ -5526,7 +5529,7 @@ version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
 dependencies = [
- "ahash 0.8.9",
+ "ahash 0.8.10",
  "allocator-api2",
  "serde",
 ]
@@ -10278,6 +10281,7 @@ dependencies = [
 [[package]]
 name = "protocol-macros"
 version = "0.1.0"
+source = "git+https://github.com/webb-tools/gadget.git?branch=main#7af09f0418e700c450a51d6896fca26324165e24"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -10616,9 +10620,9 @@ checksum = "60a357793950651c4ed0f3f52338f53b2f809f32d83a07f72909fa13e4c6c1e3"
 
 [[package]]
 name = "rayon"
-version = "1.8.1"
+version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa7237101a77a10773db45d62004a272517633fbcc3df19d96455ede1122e051"
+checksum = "e4963ed1bc86e4f3ee217022bd855b297cef07fb9eac5dfa1f788b220b49b3bd"
 dependencies = [
  "either",
  "rayon-core",
@@ -11827,7 +11831,7 @@ name = "sc-consensus-grandpa"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0#c8d2251cafadc108ba2f1f8a3208dc547ff38901"
 dependencies = [
- "ahash 0.8.9",
+ "ahash 0.8.10",
  "array-bytes 6.2.2",
  "async-trait",
  "dyn-clone",
@@ -12070,7 +12074,7 @@ name = "sc-network-gossip"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0#c8d2251cafadc108ba2f1f8a3208dc547ff38901"
 dependencies = [
- "ahash 0.8.9",
+ "ahash 0.8.10",
  "futures 0.3.30",
  "futures-timer",
  "libp2p",
@@ -12787,7 +12791,7 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "772575a524feeb803e5b0fcbc6dd9f367e579488197c94c6e4023aad2305774d"
 dependencies = [
- "ahash 0.8.9",
+ "ahash 0.8.10",
  "cfg-if",
  "hashbrown 0.13.2",
 ]
@@ -14508,7 +14512,7 @@ version = "22.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48e4eeb7ef23f79eba8609db79ef9cef242f994f1f87a3c0387b4b5f177fda74"
 dependencies = [
- "ahash 0.8.9",
+ "ahash 0.8.10",
  "hash-db 0.16.0",
  "hashbrown 0.13.2",
  "lazy_static",
@@ -14531,7 +14535,7 @@ name = "sp-trie"
 version = "22.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.1.0#c8d2251cafadc108ba2f1f8a3208dc547ff38901"
 dependencies = [
- "ahash 0.8.9",
+ "ahash 0.8.10",
  "hash-db 0.16.0",
  "hashbrown 0.13.2",
  "lazy_static",
@@ -14700,7 +14704,7 @@ version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd4cef4251aabbae751a3710927945901ee1d97ee96d757f6880ebb9a79bfd53"
 dependencies = [
- "ahash 0.8.9",
+ "ahash 0.8.10",
  "atoi",
  "byteorder",
  "bytes",
@@ -15915,6 +15919,7 @@ checksum = "3369f5ac52d5eb6ab48c6b4ffdc8efbcad6b89c765749064ba298f2c68a16a76"
 [[package]]
 name = "test-utils"
 version = "0.1.0"
+source = "git+https://github.com/webb-tools/gadget.git?branch=main#7af09f0418e700c450a51d6896fca26324165e24"
 dependencies = [
  "async-trait",
  "frame-support",
@@ -16969,9 +16974,9 @@ checksum = "4f186bd2dcf04330886ce82d6f33dd75a7bfcf69ecf5763b89fcde53b6ac9838"
 
 [[package]]
 name = "wasm-encoder"
-version = "0.200.0"
+version = "0.201.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9e3fb0c8fbddd78aa6095b850dfeedbc7506cf5f81e633f69cf8f2333ab84b9"
+checksum = "b9c7d2731df60006819b013f64ccc2019691deccf6e11a1804bc850cd6748f1a"
 dependencies = [
  "leb128",
 ]
@@ -17525,9 +17530,9 @@ dependencies = [
 
 [[package]]
 name = "wast"
-version = "200.0.0"
+version = "201.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1810d14e6b03ebb8fb05eef4009ad5749c989b65197d83bce7de7172ed91366"
+checksum = "1ef6e1ef34d7da3e2b374fd2b1a9c0227aff6cad596e1b24df9b58d0f6222faa"
 dependencies = [
  "bumpalo",
  "leb128",
@@ -17538,9 +17543,9 @@ dependencies = [
 
 [[package]]
 name = "wat"
-version = "1.200.0"
+version = "1.201.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "776cbd10e217f83869beaa3f40e312bb9e91d5eee29bbf6f560db1261b6a4c3d"
+checksum = "453d5b37a45b98dee4f4cb68015fc73634d7883bbef1c65e6e9c78d454cf3f32"
 dependencies = [
  "wast",
 ]
