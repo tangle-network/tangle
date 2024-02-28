@@ -124,6 +124,12 @@ pub fn get_discord_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/discord_evm_addresses.json")
 }
 
+pub fn get_polkadot_validator_address_list() -> Vec<AccountId32> {
+	read_contents_to_substrate_accounts_list(
+		"node/src/distributions/data/polkadot_validator_addresses.json",
+	)
+}
+
 pub const ONE_TOKEN: u128 = UNIT;
 pub const TOTAL_SUPPLY: u128 = 100_000_000 * ONE_TOKEN;
 pub const ONE_PERCENT_TOTAL_SUPPLY: u128 = TOTAL_SUPPLY / 100;
@@ -308,6 +314,21 @@ pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u6
 			.mul_floor(get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY));
 	let foundation_account = (MultiAddress::Native(foundation_address), balance as u128);
 	compute_balance_distribution_with_cliff_and_vesting(vec![foundation_account])
+}
+
+pub fn get_polkadot_validator_distribution() -> DistributionResult {
+	let list = get_polkadot_validator_address_list();
+	let endowment = ONE_PERCENT_TOTAL_SUPPLY / list.len() as u128;
+	let polkadot_validator_dist: Vec<(MultiAddress, u128)> = list
+		.into_iter()
+		.map(|address| (MultiAddress::Native(address), endowment))
+		.collect();
+	get_distribution_for(
+		polkadot_validator_dist,
+		Some(StatementKind::Regular),
+		ONE_MONTH_BLOCKS,
+		TWO_YEARS_BLOCKS,
+	)
 }
 
 pub fn compute_balance_distribution_with_cliff_and_vesting(
