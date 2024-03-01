@@ -15,8 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::roles::RoleType;
-use frame_support::pallet_prelude::*;
-#[cfg(feature = "std")]
+use frame_support::{pallet_prelude::*, parameter_types};
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
 use sp_runtime::traits::Get;
@@ -30,6 +29,33 @@ pub mod zksaas;
 
 pub use tss::*;
 pub use zksaas::*;
+
+parameter_types! {
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxSubmissionLen: u32 = 32;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxParticipants: u32 = 10;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxKeyLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxDataLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxSignatureLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxProofLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxActiveJobsPerValidator: u32 = 100;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxRolesPerValidator: u32 = 100;
+}
 
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
@@ -49,6 +75,9 @@ pub struct JobSubmission<
 
 	/// The type of the job submission.
 	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
+
+	/// The fallback option selected by user
+	pub fallback: FallbackOptions,
 }
 
 /// Represents a job info
@@ -76,6 +105,9 @@ pub struct JobInfo<
 
 	/// The fee taken for the job
 	pub fee: Balance,
+
+	/// The fallback option selected by user
+	pub fallback: FallbackOptions,
 }
 
 /// Represents a job with its result.
@@ -183,6 +215,18 @@ impl<AccountId, MaxParticipants: Get<u32> + Clone, MaxSubmissionLen: Get<u32>>
 		}
 	}
 
+	/// Updates the phase one ID for phase two jobs, if applicable.
+	pub fn update_phase_one_id(&mut self, new_phase_one_id: u64) {
+		use crate::jobs::JobType::*;
+		match self {
+			DKGTSSPhaseTwo(info) => info.phase_one_id = new_phase_one_id,
+			DKGTSSPhaseThree(info) => info.phase_one_id = new_phase_one_id,
+			DKGTSSPhaseFour(info) => info.phase_one_id = new_phase_one_id,
+			ZkSaaSPhaseTwo(info) => info.phase_one_id = new_phase_one_id,
+			_ => {},
+		}
+	}
+
 	pub fn get_permitted_caller(self) -> Option<AccountId> {
 		use crate::jobs::JobType::*;
 		match self {
@@ -203,6 +247,17 @@ pub enum JobState {
 	Pending,
 	/// The job has been terminated.
 	Terminated,
+}
+
+/// Enum representing fallback options that the job creator has
+#[derive(Copy, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum FallbackOptions {
+	/// The job should be destroyed and caller refunded
+	Destroy,
+	/// The job can be regenerated with a lower threshold
+	/// The user supplies the lower threshold
+	RegenerateWithThreshold(u8),
 }
 
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.

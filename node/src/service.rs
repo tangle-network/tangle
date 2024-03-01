@@ -19,9 +19,12 @@ use crate::eth::{
 	new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, FrontierBackend,
 	FrontierBlockImport, FrontierPartialComponents, RpcConfig,
 };
-use futures::FutureExt;
+use futures::{FutureExt, StreamExt, TryFutureExt};
 
-use sc_client_api::{Backend, BlockBackend};
+use gadget_common::gadget::network::gossip::NetworkGossipEngineBuilder;
+use sc_client_api::{
+	Backend, BlockBackend, BlockchainEvents, FinalityNotification, FinalityNotifications,
+};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
@@ -30,7 +33,7 @@ pub use sc_executor::NativeElseWasmExecutor;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-use sp_core::U256;
+use sp_core::{ByteArray, U256};
 use tangle_primitives::Block;
 
 use std::{path::Path, sync::Arc, time::Duration};
@@ -108,6 +111,90 @@ type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 type GrandpaLinkHalf<Client> = sc_consensus_grandpa::LinkHalf<Block, Client, FullSelectChain>;
 type BoxBlockImport = sc_consensus::BoxBlockImport<Block>;
 
+#[derive(Clone)]
+struct ClientWrapper {
+	inner: Arc<FullClient>,
+	finality_notification_stream: Arc<tokio::sync::Mutex<Option<FinalityNotifications<Block>>>>,
+	latest_finality_notification: Arc<tokio::sync::Mutex<Option<FinalityNotification<Block>>>>,
+}
+
+impl ClientWrapper {
+	fn new(inner: Arc<FullClient>) -> Self {
+		Self {
+			inner,
+			finality_notification_stream: Arc::new(tokio::sync::Mutex::new(None)),
+			latest_finality_notification: Arc::new(tokio::sync::Mutex::new(None)),
+		}
+	}
+}
+
+impl sc_client_api::BlockchainEvents<Block> for ClientWrapper {
+	fn import_notification_stream(&self) -> sc_client_api::ImportNotifications<Block> {
+		self.inner.import_notification_stream()
+	}
+
+	fn every_import_notification_stream(&self) -> sc_client_api::ImportNotifications<Block> {
+		self.inner.every_import_notification_stream()
+	}
+
+	fn finality_notification_stream(&self) -> sc_client_api::FinalityNotifications<Block> {
+		self.inner.finality_notification_stream()
+	}
+
+	fn storage_changes_notification_stream(
+		&self,
+		filter_keys: Option<&[sc_client_api::StorageKey]>,
+		child_filter_keys: Option<
+			&[(sc_client_api::StorageKey, Option<Vec<sc_client_api::StorageKey>>)],
+		>,
+	) -> sp_blockchain::Result<
+		sc_client_api::StorageEventStream<<Block as gadget_common::prelude::Block>::Hash>,
+	> {
+		self.inner.storage_changes_notification_stream(filter_keys, child_filter_keys)
+	}
+}
+
+impl sp_api::ProvideRuntimeApi<Block> for ClientWrapper {
+	type Api = <FullClient as sp_api::ProvideRuntimeApi<Block>>::Api;
+	fn runtime_api(&self) -> sp_api::ApiRef<'_, Self::Api> {
+		self.inner.runtime_api()
+	}
+}
+
+#[async_trait::async_trait]
+impl gadget_core::gadget::substrate::Client<Block> for ClientWrapper {
+	async fn get_next_finality_notification(&self) -> Option<FinalityNotification<Block>> {
+		let mut lock1 = self.finality_notification_stream.lock().await;
+		match lock1.as_mut() {
+			Some(s) => {
+				let next = s.next().await;
+				let mut lock2 = self.latest_finality_notification.lock().await;
+				*lock2 = next.clone();
+				next
+			},
+			None => {
+				let mut stream = self.inner.finality_notification_stream();
+				let next = stream.next().await;
+				*lock1 = Some(stream);
+				let mut lock2 = self.latest_finality_notification.lock().await;
+				*lock2 = next.clone();
+				next
+			},
+		}
+	}
+
+	async fn get_latest_finality_notification(&self) -> Option<FinalityNotification<Block>> {
+		let lock = self.latest_finality_notification.lock().await;
+		match &*lock {
+			Some(n) => Some(n.clone()),
+			None => {
+				drop(lock);
+				self.get_next_finality_notification().await
+			},
+		}
+	}
+}
+
 #[allow(clippy::type_complexity)]
 pub fn new_partial(
 	config: &Configuration,
@@ -131,9 +218,9 @@ pub fn new_partial(
 	>,
 	ServiceError,
 > {
-	println!("    ++++++++++++++++++++++++                                                                          
-	+++++++++++++++++++++++++++                                                                        
-	+++++++++++++++++++++++++++                                                                        
+	println!("    ++++++++++++++++++++++++
+	+++++++++++++++++++++++++++
+	+++++++++++++++++++++++++++
 	+++        ++++++      +++         @%%%%%%%%%%%                                     %%%
 	++++++      ++++      +++++        %%%%%%%%%%%%                                     %%%@
 	++++++++++++++++++++++++++            %%%%      %%%%@     %%% %%@       @%%%%%%%   %%%@    %%%%@
@@ -142,8 +229,8 @@ pub fn new_partial(
 	++++++++++++++++++++++++++            %%%%    %%%%%%%%%   %%%   %%%%  %%%   @%%%   %%%@ @%%%%%  %%%%%
 	++++++      ++++      ++++++          %%%%    %%%%%%%%%   %%%   %%%%  %%%%%%%%%%   %%%@  %%%%%%%%%@
 	+++        ++++++        +++          %%%%    %%%%%%%%%   %%%   %%%@   %%%%%%%%%   %%%    %%%%%%%@
-	++++      +++++++++      +++                                           %%%%  %%%%               
-	++++++++++++++++++++++++++++                                           %%%%%%%%%         
+	++++      +++++++++      +++                                           %%%%  %%%%
+	++++++++++++++++++++++++++++                                           %%%%%%%%%
 	  +++++++++++++++++++++++                                                 %%%%% \n");
 
 	let telemetry = config
@@ -312,23 +399,25 @@ pub async fn new_full(
 		if auto_insert_keys {
 			crate::utils::insert_controller_account_keys_into_keystore(
 				&config,
-				Some(keystore_container.keystore()),
+				Some(keystore_container.local_keystore()),
 			);
 		} else {
 			crate::utils::insert_dev_controller_account_keys_into_keystore(
 				&config,
-				Some(keystore_container.keystore()),
+				Some(keystore_container.local_keystore()),
 			);
 		}
 
 		// finally check if keys are inserted correctly
-		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore()).is_err() {
-			println!("   
-			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
+		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.local_keystore())
+			.is_err()
+		{
+			println!("
+			++++++++++++++++++++++++++++++++++++++++++++++++
 				Validator keys not found, validator keys are essential to run a validator on
 				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
 				how to generate and insert keys. OR start the node with --auto-insert-keys to automatically generate the keys.
-			++++++++++++++++++++++++++++++++++++++++++++++++   							
+			++++++++++++++++++++++++++++++++++++++++++++++++
 			\n");
 			panic!("Keys not detected!")
 		}
@@ -346,6 +435,30 @@ pub async fn new_full(
 
 	net_config.add_notification_protocol(sc_consensus_grandpa::grandpa_peers_set_config(
 		grandpa_protocol_name.clone(),
+	));
+
+	net_config.add_notification_protocol(NetworkGossipEngineBuilder::<
+		gadget_common::keystore::InMemoryBackend,
+	>::set_config(
+		dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYGEN_PROTOCOL_NAME.into(),
+	));
+
+	net_config.add_notification_protocol(NetworkGossipEngineBuilder::<
+		gadget_common::keystore::InMemoryBackend,
+	>::set_config(
+		dfns_cggmp21_protocol::constants::DFNS_CGGMP21_SIGNING_PROTOCOL_NAME.into(),
+	));
+
+	net_config.add_notification_protocol(NetworkGossipEngineBuilder::<
+		gadget_common::keystore::InMemoryBackend,
+	>::set_config(
+		dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYREFRESH_PROTOCOL_NAME.into(),
+	));
+
+	net_config.add_notification_protocol(NetworkGossipEngineBuilder::<
+		gadget_common::keystore::InMemoryBackend,
+	>::set_config(
+		dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYROTATE_PROTOCOL_NAME.into(),
 	));
 
 	let warp_sync = Arc::new(sc_consensus_grandpa::warp_proof::NetworkProvider::new(
@@ -533,6 +646,8 @@ pub async fn new_full(
 	)
 	.await;
 
+	let node_name = config.network.node_name.clone();
+
 	let params = sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),
@@ -561,6 +676,7 @@ pub async fn new_full(
 		let backoff_authoring_blocks =
 			Some(sc_consensus_slots::BackoffAuthoringOnFinalizedHeadLagging::default());
 
+		let client_clone = client.clone();
 		let babe_config = sc_consensus_babe::BabeParams {
 			keystore: keystore_container.keystore(),
 			client: client.clone(),
@@ -570,7 +686,7 @@ pub async fn new_full(
 			sync_oracle: sync_service.clone(),
 			justification_sync_link: sync_service.clone(),
 			create_inherent_data_providers: move |parent, ()| {
-				let client_clone = client.clone();
+				let client_clone = client_clone.clone();
 				async move {
 					let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
 
@@ -612,6 +728,8 @@ pub async fn new_full(
 	// if the node isn't actively participating in consensus then it doesn't
 	// need a keystore, regardless of which protocol we use below.
 	let keystore = if role.is_authority() { Some(keystore_container.keystore()) } else { None };
+	let local_keystore =
+		if role.is_authority() { Some(keystore_container.local_keystore()) } else { None };
 
 	let grandpa_config = sc_consensus_grandpa::Config {
 		// FIXME #1578 make this available through chainspec
@@ -620,7 +738,7 @@ pub async fn new_full(
 		name: Some(name),
 		observer_enabled: false,
 		keystore,
-		local_role: role,
+		local_role: role.clone(),
 		telemetry: telemetry.as_ref().map(|x| x.handle()),
 		protocol_name: grandpa_protocol_name,
 	};
@@ -635,8 +753,8 @@ pub async fn new_full(
 		let grandpa_config = sc_consensus_grandpa::GrandpaParams {
 			config: grandpa_config,
 			link: grandpa_link,
-			network,
-			sync: Arc::new(sync_service),
+			network: network.clone(),
+			sync: Arc::new(sync_service.clone()),
 			voting_rule: sc_consensus_grandpa::VotingRulesBuilder::default().build(),
 			prometheus_registry,
 			shared_voter_state: SharedVoterState::empty(),
@@ -651,6 +769,148 @@ pub async fn new_full(
 			None,
 			sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?,
 		);
+	}
+
+	// dfns/CGGMP21 gadget
+	if role.is_authority() {
+		use gadget_common::prelude::*;
+		use sc_keystore::Keystore;
+		let logger = DebugLogger { peer_id: node_name };
+		let role_id = local_keystore
+			.clone()
+			.and_then(|k| {
+				k.ecdsa_public_keys(tangle_crypto_primitives::ROLE_KEY_TYPE).first().cloned()
+			})
+			.ok_or_else(|| sc_service::Error::Other("ECDSA Role key not found".into()))?;
+		let acco_account_id = local_keystore
+			.clone()
+			.and_then(|k| {
+				k.sr25519_public_keys(sp_core::crypto::key_types::ACCOUNT).first().cloned()
+			})
+			.ok_or_else(|| sc_service::Error::Other("sr25519 acco key not found".into()))?;
+		let role_public_key = tangle_crypto_primitives::crypto::Public::from_slice(
+			role_id.as_slice(),
+		)
+		.map_err(|_| {
+			sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
+				tangle_crypto_primitives::ROLE_KEY_TYPE,
+			))
+		})?;
+
+		let acco_public_key =
+			tangle_crypto_primitives::crypto::acco::Public::from_slice(acco_account_id.as_slice())
+				.map_err(|_| {
+					sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
+						tangle_crypto_primitives::ROLE_KEY_TYPE,
+					))
+				})?;
+		let ecdsa_keypair = local_keystore
+			.clone()
+			.and_then(|k| {
+				k.key_pair::<tangle_crypto_primitives::crypto::Pair>(&role_public_key).ok()
+			})
+			.flatten()
+			.ok_or_else(|| {
+				sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
+					tangle_crypto_primitives::ROLE_KEY_TYPE,
+				))
+			})?;
+		let sr25519_keypair = local_keystore
+			.and_then(|k| {
+				k.key_pair::<tangle_crypto_primitives::crypto::acco::Pair>(&acco_public_key)
+					.ok()
+			})
+			.flatten()
+			.ok_or_else(|| {
+				sc_service::Error::Keystore(sc_keystore::Error::KeyNotSupported(
+					sp_core::crypto::key_types::ACCOUNT,
+				))
+			})?;
+		let keystore = ECDSAKeyStore::in_memory(ecdsa_keypair.into());
+		let pallet_tx =
+			SubxtPalletSubmitter::<gadget_common::webb::substrate::subxt::PolkadotConfig, _>::new(
+				gadget_common::client::PairSigner::<_>::new(sr25519_keypair.into()),
+				logger.clone(),
+			)
+			.map_err(|e| sc_service::Error::Other(e.to_string()))
+			.await?;
+		let client_keygen = ClientWrapper::new(client.clone());
+		let client_signing = ClientWrapper::new(client.clone());
+		let client_key_refresh = ClientWrapper::new(client.clone());
+		let client_key_rotate = ClientWrapper::new(client.clone());
+		let (network_keygen_handler, network_keygen_controller) = NetworkGossipEngineBuilder::new(
+			dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYGEN_PROTOCOL_NAME.into(),
+			keystore.clone(),
+		)
+		.build(network.clone(), sync_service.clone(), None, logger.clone())?;
+
+		let (network_signing_handler, network_signing_controller) =
+			NetworkGossipEngineBuilder::new(
+				dfns_cggmp21_protocol::constants::DFNS_CGGMP21_SIGNING_PROTOCOL_NAME.into(),
+				keystore.clone(),
+			)
+			.build(network.clone(), sync_service.clone(), None, logger.clone())?;
+
+		let (network_key_refresh_handler, network_key_refresh_controller) =
+			NetworkGossipEngineBuilder::new(
+				dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYREFRESH_PROTOCOL_NAME.into(),
+				keystore.clone(),
+			)
+			.build(network.clone(), sync_service.clone(), None, logger.clone())?;
+
+		let (network_key_rotate_handler, network_key_rotate_controller) =
+			NetworkGossipEngineBuilder::new(
+				dfns_cggmp21_protocol::constants::DFNS_CGGMP21_KEYROTATE_PROTOCOL_NAME.into(),
+				keystore.clone(),
+			)
+			.build(network.clone(), sync_service.clone(), None, logger.clone())?;
+		let node_input = NodeInput {
+			mock_clients: vec![
+				client_keygen,
+				client_signing,
+				client_key_refresh,
+				client_key_rotate,
+			],
+			mock_networks: vec![
+				network_keygen_controller,
+				network_signing_controller,
+				network_key_refresh_controller,
+				network_key_rotate_controller,
+			],
+			account_id: AccountId::from(acco_account_id),
+			logger,
+			pallet_tx: Arc::new(pallet_tx),
+			keystore,
+			node_index: 0,
+			additional_params: (),
+			prometheus_config: PrometheusConfig::Disabled,
+			_pd: std::marker::PhantomData,
+		};
+		let gadget = async move {
+			let _ =
+				dfns_cggmp21_protocol::setup_node::<_, FullBackend, _, _, _, _>(node_input).await;
+		};
+		task_manager.spawn_handle().spawn(
+			"keygen-network",
+			"dfns-cggmp21",
+			network_keygen_handler.run(),
+		);
+		task_manager.spawn_handle().spawn(
+			"signing-network",
+			"dfns-cggmp21",
+			network_signing_handler.run(),
+		);
+		task_manager.spawn_handle().spawn(
+			"key-refresh-network",
+			"dfns-cggmp21",
+			network_key_refresh_handler.run(),
+		);
+		task_manager.spawn_handle().spawn(
+			"key-rotate-network",
+			"dfns-cggmp21",
+			network_key_rotate_handler.run(),
+		);
+		task_manager.spawn_handle().spawn("dfns-cggmp21", "dfns-cggmp21", gadget);
 	}
 
 	network_starter.start_network();
