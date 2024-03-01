@@ -23,12 +23,11 @@ Run the release build of the `tangle` node, then on another terminal run:
 subxt metadata -f bytes > ./metadata/tangle-runtime.scale
 ```
 
-3. Generating the rust code from the metadata:
+3. Generating the subxt code from the metadata:
 
 ```bash
-cargo build
+subxt codegen --file metadata/tangle-runtime.scale > src/tangle_runtime.rs
 ```
 
-> Tip: See the [build.rs](./build.rs) file to see how everything is being generated.
 
 
