@@ -24,8 +24,7 @@ mod substrate {
 			subxt_codegen::DerivesRegistry::with_default_derives(&crate_path);
 
 		generated_type_derives.extend_for_all(
-			[syn::parse_quote!(Eq), syn::parse_quote!(PartialEq), syn::parse_quote!(Clone)]
-				.into_iter(),
+			[syn::parse_quote!(Eq), syn::parse_quote!(PartialEq), syn::parse_quote!(Clone)],
 			[],
 		);
 
