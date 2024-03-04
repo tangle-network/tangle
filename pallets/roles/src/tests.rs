@@ -540,3 +540,18 @@ fn test_report_offence_should_work() {
 		assert_eq!(ledger.total, 4300);
 	});
 }
+
+#[test]
+fn test_set_min_validator_stake() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		// should fail with non force origin
+		frame_support::assert_noop!(
+			Roles::set_min_restaking_bond(RuntimeOrigin::signed(mock_pub_key(1)), 100u32.into()),
+			sp_runtime::DispatchError::BadOrigin
+		);
+
+		assert_ok!(Roles::set_min_restaking_bond(RuntimeOrigin::root(), 100u32.into()));
+
+		assert_eq!(MinRestakingBond::<Runtime>::get(), 100u32.into());
+	})
+}

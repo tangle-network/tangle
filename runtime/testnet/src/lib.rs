@@ -1207,6 +1207,7 @@ impl pallet_roles::Config for Runtime {
 	type ReportOffences = OffenceHandler;
 	type ValidatorRewardDistribution = Reward;
 	type MaxValidators = MaxValidators;
+	type ForceOrigin = EnsureRoot<Self::AccountId>;
 	type MaxRestake = MaxRestake;
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
