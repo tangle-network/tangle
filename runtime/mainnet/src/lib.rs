@@ -1047,17 +1047,6 @@ impl pallet_multisig::Config for Runtime {
 	type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
 }
 
-parameter_types! {
-	pub const StoragePricePerByte: u128 = MILLIUNIT;
-	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
-}
-
-impl pallet_eth2_light_client::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type StoragePricePerByte = StoragePricePerByte;
-	type PalletId = Eth2ClientPalletId;
-	type Currency = Balances;
-}
 
 parameter_types! {
 	pub Prefix: &'static [u8] = b"Claim TNTs to the account:";
@@ -1272,7 +1261,6 @@ construct_runtime!(
 		HotfixSufficients: pallet_hotfix_sufficients,
 
 		Claims: pallet_airdrop_claims,
-		Eth2Client: pallet_eth2_light_client,
 		Roles: pallet_roles,
 		Jobs: pallet_jobs
 	}
