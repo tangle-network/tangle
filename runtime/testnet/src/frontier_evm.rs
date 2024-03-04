@@ -77,6 +77,7 @@ impl pallet_evm::Config for Runtime {
 	type OnChargeTransaction =
 		pallet_evm::EVMCurrencyAdapter<Balances, impls::DealWithFees<Runtime>>;
 	type OnCreate = ();
+	type SuicideQuickClearLimit = ConstU32<0>;
 	type FindAuthor = FindAuthorTruncated<Babe>;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;

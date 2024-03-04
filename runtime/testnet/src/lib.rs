@@ -229,6 +229,7 @@ impl frame_system::Config for Runtime {
 	type OnKilledAccount = ();
 	type OnNewAccount = ();
 	type OnSetCode = ();
+	type RuntimeTask = ();
 	type RuntimeOrigin = RuntimeOrigin;
 	type PalletInfo = PalletInfo;
 	type SS58Prefix = SS58Prefix;
@@ -285,7 +286,7 @@ impl pallet_balances::Config for Runtime {
 	type MaxReserves = MaxReserves;
 	type ReserveIdentifier = [u8; 8];
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type MaxHolds = ();
+	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
 }
@@ -340,8 +341,7 @@ parameter_types! {
 }
 
 impl pallet_preimage::Config for Runtime {
-	type BaseDeposit = PreimageBaseDeposit;
-	type ByteDeposit = PreimageByteDeposit;
+	type Consideration = ();
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
 	type ManagerOrigin = EnsureRoot<AccountId>;
@@ -475,7 +475,8 @@ impl pallet_staking::Config for Runtime {
 	type TargetList = pallet_staking::UseValidatorsMap<Runtime>;
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type NextNewSession = Session;
-	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
+	type MaxExposurePageSize = ConstU32<64>;
+	type MaxControllersInDeprecationBatch = ConstU32<100>;
 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
 	type ElectionProvider = ElectionProviderMultiPhase;
 	type GenesisElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
@@ -705,7 +706,6 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type EstimateCallFee = TransactionPayment;
 	type SignedPhase = SignedPhase;
 	type UnsignedPhase = UnsignedPhase;
-	type BetterUnsignedThreshold = BetterUnsignedThreshold;
 	type BetterSignedThreshold = ();
 	type OffchainRepeat = OffchainRepeat;
 	type MinerTxPriority = MultiPhaseUnsignedPriority;
@@ -774,6 +774,7 @@ impl pallet_nomination_pools::Config for Runtime {
 	type MaxUnbonding = ConstU32<8>;
 	type PalletId = NominationPoolsPalletId;
 	type MaxPointsToBalance = MaxPointsToBalance;
+	type RuntimeFreezeReason = ();
 }
 
 parameter_types! {
@@ -849,6 +850,7 @@ impl pallet_vesting::Config for Runtime {
 	type MinVestedTransfer = MinVestedTransfer;
 	type WeightInfo = pallet_vesting::weights::SubstrateWeight<Runtime>;
 	type UnvestedFundsAllowedWithdrawReasons = UnvestedFundsAllowedWithdrawReasons;
+	type BlockNumberProvider = System;
 	// `VestingInfo` encode length is 36bytes. 28 schedules gets encoded as 1009 bytes, which is the
 	// highest number of schedules that encodes less than 2^10.
 	const MAX_VESTING_SCHEDULES: u32 = 28;
@@ -928,6 +930,12 @@ impl pallet_treasury::Config for Runtime {
 	>;
 	type RuntimeEvent = RuntimeEvent;
 	type OnSlash = ();
+	type AssetKind = ();
+	type Beneficiary = Self::AccountId;
+	type BeneficiaryLookup = IdentityLookup<Self::Beneficiary>;
+	type Paymaster = ();
+	type BalanceConverter = ();
+	type PayoutPeriod = ConstU64<10>;
 	type ProposalBond = ProposalBond;
 	type ProposalBondMinimum = ProposalBondMinimum;
 	type ProposalBondMaximum = ();
@@ -1002,24 +1010,32 @@ impl pallet_transaction_pause::Config for Runtime {
 
 parameter_types! {
 	pub const BasicDeposit: Balance = deposit(0, 100); // purposely set low, do not copy for mainnet
-	pub const FieldDeposit: Balance = deposit(0, 100); // purposely set low, do not copy for mainnet
+	pub const ByteDeposit: Balance = deposit(0, 100); // purposely set low, do not copy for mainnet
 	pub const SubAccountDeposit: Balance = deposit(1, 1); // purposely set low, do not copy for mainnet
 	pub const MaxSubAccounts: u32 = 100;
 	#[derive(Serialize, Deserialize)]
 	pub const MaxAdditionalFields: u32 = 100;
 	pub const MaxRegistrars: u32 = 20;
+	pub const PendingUsernameExpiration: u64 = 100;
 }
 
 impl pallet_identity::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type BasicDeposit = BasicDeposit;
-	type FieldDeposit = FieldDeposit;
 	type SubAccountDeposit = SubAccountDeposit;
 	type MaxSubAccounts = MaxSubAccounts;
-	type MaxAdditionalFields = MaxAdditionalFields;
 	type MaxRegistrars = MaxRegistrars;
 	type Slashed = ();
+	type ByteDeposit = ByteDeposit;	
+	type IdentityInformation = ();	
+	type OffchainSignature = ();	
+	type SigningPublicKey = ();	
+	type UsernameAuthorityOrigin = EnsureOneOrRoot;	
+	type PendingUsernameExpiration = PendingUsernameExpiration;	
+	type MaxSuffixLength = ConstU32<7>;
+	type MaxUsernameLength = ConstU32<32>;
+
 	type ForceOrigin = EnsureRoot<Self::AccountId>;
 	type RegistrarOrigin = EnsureRoot<Self::AccountId>;
 	type WeightInfo = ();
@@ -1049,17 +1065,6 @@ impl pallet_multisig::Config for Runtime {
 	type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
 }
 
-parameter_types! {
-	pub const StoragePricePerByte: u128 = MILLIUNIT;
-	pub const Eth2ClientPalletId: PalletId = PalletId(*b"py/eth2c");
-}
-
-impl pallet_eth2_light_client::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type StoragePricePerByte = StoragePricePerByte;
-	type PalletId = Eth2ClientPalletId;
-	type Currency = Balances;
-}
 
 parameter_types! {
 	pub Prefix: &'static [u8] = b"Claim TNTs to the account:";
@@ -1327,7 +1332,6 @@ construct_runtime!(
 		HotfixSufficients: pallet_hotfix_sufficients,
 
 		Claims: pallet_airdrop_claims,
-		Eth2Client: pallet_eth2_light_client,
 		Roles: pallet_roles,
 		Jobs: pallet_jobs,
 		Dkg: pallet_dkg,
