@@ -300,8 +300,8 @@ evm = { version = "0.41.1", default-features = false }
 ethereum-types = { version = "0.14.1", default-features = false }
 ethereum = { version = "0.15.0", default-features = false }
 
-evm-gasometer = { version = "0.41.1", default-features = false }
-evm-runtime = { version = "0.41.1", default-features = false }
+evm-gasometer = { version = "0.41.0", default-features = false }
+evm-runtime = { version = "0.41.0", default-features = false }
 
 # RPC related dependencies
 jsonrpsee = { version = "0.16.2", features = ["server"] }
