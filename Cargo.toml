@@ -34,6 +34,7 @@ members = [
  "precompiles/proxy",
  "precompiles/preimage",
  "precompiles/jobs",
+#  "tangle-subxt"
  # "relayer-gadget",
  # "relayer-gadget/cli",
 ]
@@ -295,11 +296,12 @@ pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features
 
 # EVM & Ethereum
 # (wasm)
-evm = { git = "https://github.com/rust-blockchain/evm", rev = "b7b82c7e1fc57b7449d6dfa6826600de37cc1e65", default-features = false }
+evm = { version = "0.41.1", default-features = false }
 ethereum-types = { version = "0.14.1", default-features = false }
-ethereum = { version = "0.14.0", default-features = false }
-evm-gasometer = { git = "https://github.com/rust-blockchain/evm", rev = "b7b82c7e1fc57b7449d6dfa6826600de37cc1e65", default-features = false }
-evm-runtime = { git = "https://github.com/rust-blockchain/evm", rev = "b7b82c7e1fc57b7449d6dfa6826600de37cc1e65", default-features = false }
+ethereum = { version = "0.15.0", default-features = false }
+
+evm-gasometer = { version = "0.41.1", default-features = false }
+evm-runtime = { version = "0.41.1", default-features = false }
 
 # RPC related dependencies
 jsonrpsee = { version = "0.16.2", features = ["server"] }
@@ -313,16 +315,22 @@ tangle-crypto-primitives = { path = "primitives/crypto", default-features = fals
 pallet-transaction-pause = { path = "pallets/transaction-pause", default-features = false }
 
 # Light client dependencies
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
-pallet-eth2-light-client-relayer-gadget = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
-pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
+# pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
+# pallet-eth2-light-client-relayer-gadget = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
+# pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
+
+pallet-eth2-light-client = { path = "/Users/salman01zz/Webb-Tools/pallet-eth2-light-client/pallets/eth2-light-client", default-features = false }
+pallet-eth2-light-client-relayer-gadget = { path = "/Users/salman01zz/Webb-Tools/pallet-eth2-light-client/gadget", default-features = false }
+pallet-eth2-light-client-relayer-gadget-cli = { path  = "/Users/salman01zz/Webb-Tools/pallet-eth2-light-client/gadget/cli/", default-features = false }
+
+
 webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
 
-webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false }
+webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false, branch = "salman/polkadot-v1.7.0" }
 webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false, features = [
  "scale",
  "evm",
-] }
+], branch = "salman/polkadot-v1.7.0" }
 
 primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }

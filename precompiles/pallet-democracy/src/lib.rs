@@ -177,7 +177,7 @@ where
 
 		Ok((
 			ref_status.end.into(),
-			ref_status.proposal.hash(),
+			ref_status.proposal.hash().into(),
 			threshold_u8,
 			ref_status.delay.into(),
 			ref_status.tally.ayes.into(),
@@ -227,12 +227,18 @@ where
 		// Storage item: StatusFor
 		// max encoded len: Hash(32) + RequestStatus(enum(1) + deposit(1+20+16) + count(4) + len(5))
 		handle.record_db_read::<Runtime>(79)?;
-		let len = <Runtime as pallet_democracy::Config>::Preimages::len(&proposal_hash).ok_or({
-			RevertReason::custom("Failure in preimage fetch").in_field("proposal_hash")
-		})?;
+		let len = <Runtime as pallet_democracy::Config>::Preimages::len(&proposal_hash.into())
+			.ok_or({
+				RevertReason::custom("Failure in preimage fetch").in_field("proposal_hash")
+			})?;
 
-		let bounded =
-			Bounded::Lookup::<pallet_democracy::CallOf<Runtime>> { hash: proposal_hash, len };
+		let bounded = Bounded::<
+			pallet_democracy::CallOf<Runtime>,
+			<Runtime as frame_system::Config>::Hashing,
+		>::Lookup {
+			hash: proposal_hash.into(),
+			len,
+		};
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = DemocracyCall::<Runtime>::propose { proposal: bounded, value };
@@ -461,7 +467,7 @@ where
 		// max encoded len: Hash(32) + RequestStatus(enum(1) + deposit(1+20+16) + count(4) + len(5))
 		handle.record_db_read::<Runtime>(79)?;
 		if !<<Runtime as pallet_democracy::Config>::Preimages as QueryPreimage>::is_requested(
-			&proposal_hash.into(),
+			&proposal_hash,
 		) {
 			return Err(revert("not imminent preimage (preimage not requested)"))
 		};

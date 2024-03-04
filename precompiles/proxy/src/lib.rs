@@ -18,8 +18,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use evm::ExitReason;
-use fp_evm::{Context, PrecompileFailure, PrecompileHandle, Transfer};
+use fp_evm::{Context, ExitReason, PrecompileFailure, PrecompileHandle, Transfer};
 use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
 use pallet_balances::Call as BalancesCall;
 use pallet_evm::AddressMapping;
@@ -390,7 +389,7 @@ where
 			RuntimeHelper::<Runtime>::try_dispatch(
 				handle,
 				Some(contract_address).into(),
-				pallet_balances::Call::<Runtime>::transfer {
+				pallet_balances::Call::<Runtime>::transfer_allow_death {
 					dest: Runtime::Lookup::unlookup(who),
 					value: {
 						let balance: <Runtime as pallet_balances::Config<()>>::Balance =
