@@ -82,7 +82,7 @@ hex = { version = "0.4.3", default-features = false }
 paste = "1.0.6"
 slices = "0.2.0"
 byteorder = { version = "1", default-features = false }
-schnorrkel = { version = "0.9.1", default-features = false }
+schnorrkel = { version = "0.11.4", default-features = false }
 snowbridge-milagro-bls = { git = "https://github.com/Snowfork/milagro_bls", default-features = false, rev = "43a5d480ed6e3b83de4cf54888680d51604199e6" }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
@@ -304,7 +304,7 @@ evm-gasometer = { version = "0.41.0", default-features = false }
 evm-runtime = { version = "0.41.0", default-features = false }
 
 # RPC related dependencies
-jsonrpsee = { version = "0.22", features = ["server"] }
+jsonrpsee = { version = "0.20.3", features = ["server"] }
 pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
 sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
@@ -314,10 +314,6 @@ tangle-primitives = { path = "primitives", default-features = false }
 tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
 pallet-transaction-pause = { path = "pallets/transaction-pause", default-features = false }
 
-# Light client dependencies
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
-pallet-eth2-light-client-relayer-gadget = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
-pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
 
 
 
