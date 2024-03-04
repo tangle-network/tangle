@@ -304,7 +304,7 @@ evm-gasometer = { version = "0.41.0", default-features = false }
 evm-runtime = { version = "0.41.0", default-features = false }
 
 # RPC related dependencies
-jsonrpsee = { version = "0.16.2", features = ["server"] }
+jsonrpsee = { version = "0.22", features = ["server"] }
 pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
 sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }

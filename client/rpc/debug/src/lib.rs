@@ -37,7 +37,7 @@ use sp_blockchain::{
 };
 use sp_runtime::{
 	generic::BlockId,
-	traits::{BlakeTwo256, Block as BlockT, UniqueSaturatedInto},
+	traits::{BlakeTwo256, Block as BlockT, Header, UniqueSaturatedInto},
 };
 use std::{future::Future, marker::PhantomData, sync::Arc};
 

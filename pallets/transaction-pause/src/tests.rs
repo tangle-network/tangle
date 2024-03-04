@@ -5,7 +5,10 @@ use mock::{RuntimeEvent, *};
 use sp_runtime::traits::BadOrigin;
 
 const BALANCE_TRANSFER: &<Runtime as frame_system::Config>::RuntimeCall =
-	&mock::RuntimeCall::Balances(pallet_balances::Call::transfer { dest: ALICE, value: 10 });
+	&mock::RuntimeCall::Balances(pallet_balances::Call::transfer_allow_death {
+		dest: ALICE,
+		value: 10,
+	});
 
 #[test]
 fn pause_transaction_work() {
