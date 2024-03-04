@@ -336,6 +336,7 @@ impl pallet_roles::Config for Runtime {
 	type ValidatorSet = Historical;
 	type ReportOffences = OffenceHandler;
 	type MaxKeyLen = MaxKeyLen;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxValidators = ConstU32<100>;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type MaxRestake = MaxRestake;
