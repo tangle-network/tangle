@@ -265,9 +265,9 @@ impl<T: Config> Pallet<T> {
 		for (validator, role_reward) in role_type_validator_rewards.iter() {
 			if let Some(reward) = active_validator_rewards.get(&validator) {
 				combined_validator_rewards
-					.insert(validator.clone(), role_reward.saturating_add(reward));
+					.insert(validator.clone(), role_reward.saturating_add(*reward));
 			} else {
-				combined_validator_rewards.insert(validator.clone(), role_reward);
+				combined_validator_rewards.insert(validator.clone(), *role_reward);
 			}
 		}
 

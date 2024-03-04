@@ -296,7 +296,7 @@ pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features
 
 # EVM & Ethereum
 # (wasm)
-evm = { version = "0.41.1", default-features = false }
+evm = { version = "0.41.0", default-features = false }
 ethereum-types = { version = "0.14.1", default-features = false }
 ethereum = { version = "0.15.0", default-features = false }
 
