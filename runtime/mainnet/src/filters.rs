@@ -40,8 +40,6 @@ impl Contains<RuntimeCall> for MainnetCallFilter {
 			// Block jobs and roles pallet
 			RuntimeCall::Roles(_) |
 			RuntimeCall::Jobs(_) |
-			// Filter light client calls
-			RuntimeCall::Eth2Client(_) => false,
 
 			// al other calls are allowed
 			_ =>true
