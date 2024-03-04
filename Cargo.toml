@@ -315,13 +315,10 @@ tangle-crypto-primitives = { path = "primitives/crypto", default-features = fals
 pallet-transaction-pause = { path = "pallets/transaction-pause", default-features = false }
 
 # Light client dependencies
-# pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
-# pallet-eth2-light-client-relayer-gadget = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
-# pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
+pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
+pallet-eth2-light-client-relayer-gadget = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
+pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
 
-pallet-eth2-light-client = { path = "/Users/salman01zz/Webb-Tools/pallet-eth2-light-client/pallets/eth2-light-client", default-features = false }
-pallet-eth2-light-client-relayer-gadget = { path = "/Users/salman01zz/Webb-Tools/pallet-eth2-light-client/gadget", default-features = false }
-pallet-eth2-light-client-relayer-gadget-cli = { path  = "/Users/salman01zz/Webb-Tools/pallet-eth2-light-client/gadget/cli/", default-features = false }
 
 
 webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, branch = "polkadot-v1.7.0" }
