@@ -74,6 +74,9 @@ jobs:
           profile: minimal
           toolchain: nightly
           target: wasm32-unknown-unknown
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1.3.0
       
       - name: Install Protobuf
         run: sudo apt-get install protobuf-compiler
