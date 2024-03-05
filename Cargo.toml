@@ -352,11 +352,5 @@ generic-ec-zkp = { version = "0.1", default-features = false }
 round-based = { version = "0.2", default-features = false }
 paillier-zk = { version = "0.1", default-features = false }
 
-# Gadgets
-gadget-core = { git = "https://github.com/webb-tools/gadget.git", default-features = false, branch = "main" }
-gadget-common = { git = "https://github.com/webb-tools/gadget.git", default-features = false, branch = "main" }
-# dfns/CGGMP21
-dfns-cggmp21-protocol = { git = "https://github.com/webb-tools/gadget.git", default-features = false, branch = "main" }
-
 [profile.release]
 panic = "unwind"

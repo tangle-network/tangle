@@ -15,7 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::roles::RoleType;
-use frame_support::{pallet_prelude::*, parameter_types};
+use frame_support::pallet_prelude::*;
+#[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
 use sp_runtime::traits::Get;
@@ -29,33 +30,6 @@ pub mod zksaas;
 
 pub use tss::*;
 pub use zksaas::*;
-
-parameter_types! {
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 32;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxParticipants: u32 = 10;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxKeyLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxDataLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSignatureLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxProofLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxActiveJobsPerValidator: u32 = 100;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxRolesPerValidator: u32 = 100;
-}
 
 /// Represents a job submission with specified `AccountId` and `BlockNumber`.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
