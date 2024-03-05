@@ -18,7 +18,6 @@ members = [
  "client/voter",
  "node",
  "runtime/testnet",
- "runtime/testnet/evm_tracer",
  "runtime/mainnet",
  "pallets/*",
  "pallets/jobs/rpc",
@@ -34,7 +33,8 @@ members = [
  "precompiles/proxy",
  "precompiles/preimage",
  "precompiles/jobs",
- "tangle-subxt"
+ "tangle-subxt",
+ "evm-tracer"
  # "relayer-gadget",
  # "relayer-gadget/cli",
 ]
@@ -339,7 +339,7 @@ rpc-core-types = { path = "client/rpc-core/types" }
 rpc-debug = { path = "client/rpc/debug" }
 rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
-evm-tracer = { path = "runtime/testnet/evm_tracer", default-features = false }
+evm-tracer = { path = "evm-tracer", default-features = false }
 
 # MPC
 malachite-base = { version = "0.4", default-features = false }
