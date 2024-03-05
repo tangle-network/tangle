@@ -33,9 +33,9 @@ use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::types::BlockNumber;
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
-	ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill,
-	RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
-	SystemConfig, UNIT, WASM_BINARY,
+	ElectionsConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig,
+	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT,
+	WASM_BINARY,
 };
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
@@ -103,7 +103,6 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		ChainType::Local,
 		move || {
 			testnet_genesis(
-				wasm_binary,
 				// Initial PoA authorities
 				vec![
 					authority_keys_from_seed("Alice"),
@@ -142,6 +141,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		Some(properties),
 		// Extensions
 		None,
+		wasm_binary,
 	))
 }
 
@@ -159,7 +159,6 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		ChainType::Live,
 		move || {
 			testnet_genesis(
-				wasm_binary,
 				// Initial PoA authorities
 				get_initial_authorities(),
 				// initial nominators
@@ -214,13 +213,13 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		Some(properties),
 		// Extensions
 		None,
+		wasm_binary,
 	))
 }
 
 /// Configure initial storage state for FRAME modules.
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
-	wasm_binary: &[u8],
 	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
 	_initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
@@ -265,11 +264,7 @@ fn testnet_genesis(
 		.collect();
 
 	RuntimeGenesisConfig {
-		system: SystemConfig {
-			// Add Wasm runtime to storage.
-			code: wasm_binary.to_vec(),
-			..Default::default()
-		},
+		system: SystemConfig { ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
@@ -335,13 +330,6 @@ fn testnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
-		eth_2_client: Eth2ClientConfig {
-			networks: vec![
-				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
-				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
-			],
-			phantom: PhantomData,
-		},
 		claims: ClaimsConfig {
 			claims: claims_list,
 			vesting: vesting_claims,

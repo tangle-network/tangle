@@ -37,9 +37,9 @@ use sp_runtime::{
 use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId,
-	RuntimeGenesisConfig, SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-	TreasuryPalletId, VestingConfig, UNIT, WASM_BINARY,
+	ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId, RuntimeGenesisConfig, SessionConfig,
+	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig, UNIT,
+	WASM_BINARY,
 };
 use webb_consensus_types::network_config::{Network, NetworkConfig};
 
@@ -104,8 +104,6 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		ChainType::Local,
 		move || {
 			mainnet_genesis(
-				// Wasm binary
-				wasm_binary,
 				// Initial validators
 				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
 				// Endowed accounts
@@ -147,6 +145,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		Some(properties),
 		// Extensions
 		None,
+		wasm_binary,
 	))
 }
 
@@ -163,8 +162,6 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		ChainType::Live,
 		move || {
 			mainnet_genesis(
-				// Wasm binary
-				wasm_binary,
 				// Initial validators
 				get_initial_authorities(),
 				// Endowed accounts
@@ -199,13 +196,13 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		Some(properties),
 		// Extensions
 		None,
+		wasm_binary,
 	))
 }
 
 /// Configure initial storage state for FRAME modules.
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
-	wasm_binary: &[u8],
 	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
 	endowed_accounts: Vec<(AccountId, Balance)>,
 	root_key: AccountId,
@@ -234,11 +231,7 @@ fn mainnet_genesis(
 		})
 		.collect();
 	RuntimeGenesisConfig {
-		system: SystemConfig {
-			// Add Wasm runtime to storage.
-			code: wasm_binary.to_vec(),
-			..Default::default()
-		},
+		system: SystemConfig { ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },
 		balances: BalancesConfig {
 			balances: genesis_non_airdrop
@@ -301,13 +294,6 @@ fn mainnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
-		eth_2_client: Eth2ClientConfig {
-			networks: vec![(
-				webb_proposals::TypedChainId::Evm(1),
-				NetworkConfig::new(&Network::Mainnet),
-			)],
-			phantom: PhantomData,
-		},
 		claims: ClaimsConfig {
 			claims: genesis_airdrop.claims,
 			vesting: vesting_claims,
