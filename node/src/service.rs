@@ -27,7 +27,7 @@ use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
 pub use sc_executor::NativeElseWasmExecutor;
 
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
+use sc_service::{error::Error as ServiceError, Configuration, TaskManager, ChainType};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_core::U256;
@@ -309,16 +309,18 @@ pub async fn new_full(
 	} = new_partial(&config, &eth_config)?;
 
 	if config.role.is_authority() {
-		if auto_insert_keys {
-			crate::utils::insert_controller_account_keys_into_keystore(
-				&config,
-				Some(keystore_container.keystore()),
-			);
-		} else {
-			crate::utils::insert_dev_controller_account_keys_into_keystore(
-				&config,
-				Some(keystore_container.keystore()),
-			);
+		if config.chain_spec.chain_type() == ChainType::Development || config.chain_spec.chain_type() == ChainType::Local {
+			if auto_insert_keys {
+				crate::utils::insert_controller_account_keys_into_keystore(
+					&config,
+					Some(keystore_container.local_keystore()),
+				);
+			} else {
+				crate::utils::insert_dev_controller_account_keys_into_keystore(
+					&config,
+					Some(keystore_container.local_keystore()),
+				);
+			}
 		}
 
 		// finally check if keys are inserted correctly
@@ -327,8 +329,8 @@ pub async fn new_full(
 			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
 				Validator keys not found, validator keys are essential to run a validator on
 				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
-				how to generate and insert keys. OR start the node with --auto-insert-keys to automatically generate the keys.
-			++++++++++++++++++++++++++++++++++++++++++++++++   							
+				how to generate and insert keys. OR start the node with --auto-insert-keys to automatically generate the keys in testnet.
+			++++++++++++++++++++++++++++++++++++++++++++++++
 			\n");
 			panic!("Keys not detected!")
 		}

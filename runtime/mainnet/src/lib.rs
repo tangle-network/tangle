@@ -1173,6 +1173,7 @@ impl pallet_roles::Config for Runtime {
 	type InflationRewardPerSession = InflationRewardPerSession;
 	type ValidatorSet = Historical;
 	type ReportOffences = OffenceHandler;
+	type ForceOrigin = EnsureRoot<Self::AccountId>;
 	type ValidatorRewardDistribution = Reward;
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxValidators = MaxValidators;

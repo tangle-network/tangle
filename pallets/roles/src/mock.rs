@@ -366,6 +366,7 @@ impl Config for Runtime {
 	type RoleKeyId = RoleKeyId;
 	type ValidatorRewardDistribution = Reward;
 	type ValidatorSet = Historical;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type ReportOffences = OffenceHandler;
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxKeyLen = MaxKeyLen;
