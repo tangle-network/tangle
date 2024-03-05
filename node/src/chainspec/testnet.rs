@@ -16,7 +16,7 @@
 #![allow(clippy::type_complexity)]
 
 use crate::testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key};
-use core::marker::PhantomData;
+
 use hex_literal::hex;
 use pallet_airdrop_claims::{MultiAddress, StatementKind};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -37,7 +37,7 @@ use tangle_testnet_runtime::{
 	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT,
 	WASM_BINARY,
 };
-use webb_consensus_types::network_config::{Network, NetworkConfig};
+
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
