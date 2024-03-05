@@ -20,7 +20,7 @@ description = "A Schnorr signature scheme over Ed25519 that supports FROST."
 
 [dependencies]
 parity-scale-codec = { workspace = true }
-curve25519-dalek = { version = "4.1.1", default-features = false }
+curve25519-dalek = { version = "4.1.2", default-features = false }
 frost-core = { workspace = true }
 rand_core = { version = "0.6", optional = true }
 sha2 = { version = "0.10.2", default-features = false }

@@ -1,5 +1,4 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![feature(stdsimd)]
 use curve25519_dalek::{
 	constants::RISTRETTO_BASEPOINT_POINT,
 	ristretto::{CompressedRistretto, RistrettoPoint},

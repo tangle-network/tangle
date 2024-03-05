@@ -1,5 +1,4 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![feature(stdsimd)]
 use curve25519_dalek::{
 	constants::ED25519_BASEPOINT_POINT,
 	edwards::{CompressedEdwardsY, EdwardsPoint},
