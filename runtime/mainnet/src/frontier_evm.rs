@@ -129,6 +129,7 @@ parameter_types! {
 	pub const GasLimitPovSizeRatio: u64 = 4;
 	pub WeightPerGas: Weight = Weight::from_parts(WEIGHT_PER_GAS, 0);
 	pub PrecompilesValue: WebbPrecompiles<Runtime> = WebbPrecompiles::<_>::new();
+	pub SuicideQuickClearLimit: u32 = 0;
 }
 
 impl pallet_evm::Config for Runtime {
@@ -149,6 +150,7 @@ impl pallet_evm::Config for Runtime {
 	type OnChargeTransaction =
 		pallet_evm::EVMCurrencyAdapter<Balances, impls::DealWithFees<Runtime>>;
 	type OnCreate = ();
+	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type FindAuthor = FindAuthorTruncated<Babe>;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
