@@ -20,12 +20,12 @@ use crate::eth::{
 	FrontierBlockImport, FrontierPartialComponents, RpcConfig,
 };
 use futures::FutureExt;
-
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
 pub use sc_executor::NativeElseWasmExecutor;
+use sc_service::ChainType;
 
 use sc_service::{error::Error as ServiceError, ChainType, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
