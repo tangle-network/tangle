@@ -38,7 +38,6 @@ use tangle_testnet_runtime::{
 	WASM_BINARY,
 };
 
-
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
 
