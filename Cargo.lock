@@ -604,6 +604,12 @@ dependencies = [
 
 [[package]]
 name = "arrayvec"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
+
+[[package]]
+name = "arrayvec"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
@@ -914,7 +920,7 @@ dependencies = [
  "ark-std",
  "dleq_vrf",
  "fflonk",
- "merlin",
+ "merlin 3.0.0",
  "rand_chacha 0.3.1",
  "rand_core 0.6.4",
  "ring 0.1.0",
@@ -1152,11 +1158,23 @@ dependencies = [
 
 [[package]]
 name = "block-buffer"
+version = "0.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c0940dc441f31689269e10ac70eb1002a3a1d3ad1390e030043662eb7fe4688b"
+dependencies = [
+ "block-padding 0.1.5",
+ "byte-tools",
+ "byteorder",
+ "generic-array 0.12.4",
+]
+
+[[package]]
+name = "block-buffer"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4152116fd6e9dadb291ae18fc1ec3575ed6d84c29642d97890f4b4a3417297e4"
 dependencies = [
- "block-padding",
+ "block-padding 0.2.1",
  "generic-array 0.14.7",
 ]
 
@@ -1167,6 +1185,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
 dependencies = [
  "generic-array 0.14.7",
+]
+
+[[package]]
+name = "block-padding"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa79dedbb091f449f1f39e53edf88d5dbe95f895dae6135a8d7b881fb5af73f5"
+dependencies = [
+ "byte-tools",
 ]
 
 [[package]]
@@ -1752,7 +1779,7 @@ dependencies = [
  "ark-std",
  "fflonk",
  "getrandom_or_panic",
- "merlin",
+ "merlin 3.0.0",
  "rand_chacha 0.3.1",
 ]
 
@@ -2190,6 +2217,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0369ee1ad671834580515889b80f2ea915f23b8be8d0daa4bbaf2ac5c7590835"
 dependencies = [
  "cipher 0.4.4",
+]
+
+[[package]]
+name = "curve25519-dalek"
+version = "2.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a9b85542f99a2dfa2a1b8e192662741c9859a846b296bef1c92ef9b58b5a216"
+dependencies = [
+ "byteorder",
+ "digest 0.8.1",
+ "rand_core 0.5.1",
+ "subtle 2.5.0",
+ "zeroize",
 ]
 
 [[package]]
@@ -3560,6 +3600,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "fake-simd"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e88a8acf291dafb59c2d96e8f59828f3838bb1a70398823ade51a84de6a6deed"
+
+[[package]]
 name = "fallible-iterator"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3809,7 +3855,7 @@ dependencies = [
  "ark-poly",
  "ark-serialize",
  "ark-std",
- "merlin",
+ "merlin 3.0.0",
 ]
 
 [[package]]
@@ -6726,6 +6772,18 @@ dependencies = [
 
 [[package]]
 name = "merlin"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4e261cf0f8b3c42ded9f7d2bb59dea03aa52bc8a1cbc7482f9fc3fd1229d3b42"
+dependencies = [
+ "byteorder",
+ "keccak",
+ "rand_core 0.5.1",
+ "zeroize",
+]
+
+[[package]]
+name = "merlin"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58c38e2799fc0978b65dfff8023ec7843e2330bb462f19198840b34b6582397d"
@@ -7503,7 +7561,7 @@ dependencies = [
  "parity-scale-codec 3.6.9",
  "rustc-hex",
  "scale-info",
- "schnorrkel",
+ "schnorrkel 0.11.4",
  "serde",
  "serde_json",
  "sp-core 28.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
@@ -10126,7 +10184,7 @@ dependencies = [
  "blake2 0.10.6",
  "common",
  "fflonk",
- "merlin",
+ "merlin 3.0.0",
 ]
 
 [[package]]
@@ -12000,6 +12058,22 @@ dependencies = [
 
 [[package]]
 name = "schnorrkel"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "021b403afe70d81eea68f6ea12f6b3c9588e5d536a94c3bf80f15e7faa267862"
+dependencies = [
+ "arrayref",
+ "arrayvec 0.5.2",
+ "curve25519-dalek 2.1.3",
+ "merlin 2.0.1",
+ "rand_core 0.5.1",
+ "sha2 0.8.2",
+ "subtle 2.5.0",
+ "zeroize",
+]
+
+[[package]]
+name = "schnorrkel"
 version = "0.11.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8de18f6d8ba0aad7045f5feae07ec29899c1112584a38509a84ad7b04451eaa0"
@@ -12009,7 +12083,7 @@ dependencies = [
  "arrayvec 0.7.4",
  "curve25519-dalek 4.1.2",
  "getrandom_or_panic",
- "merlin",
+ "merlin 3.0.0",
  "rand_core 0.6.4",
  "serde_bytes",
  "sha2 0.10.8",
@@ -12315,6 +12389,18 @@ dependencies = [
 
 [[package]]
 name = "sha2"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a256f46ea78a0c0d9ff00077504903ac881a1dafdc20da66545699e7776b3e69"
+dependencies = [
+ "block-buffer 0.7.3",
+ "digest 0.8.1",
+ "fake-simd",
+ "opaque-debug 0.2.3",
+]
+
+[[package]]
+name = "sha2"
 version = "0.9.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d58a1e1bf39749807d89cf2d98ac2dfa0ff1cb3faa38fbb64dd88ac8013d800"
@@ -12545,7 +12631,7 @@ dependencies = [
  "itertools 0.12.1",
  "libm",
  "libsecp256k1",
- "merlin",
+ "merlin 3.0.0",
  "no-std-net",
  "nom",
  "num-bigint",
@@ -12557,7 +12643,7 @@ dependencies = [
  "rand 0.8.5",
  "rand_chacha 0.3.1",
  "ruzstd",
- "schnorrkel",
+ "schnorrkel 0.11.4",
  "serde",
  "serde_json",
  "sha2 0.10.8",
@@ -12959,14 +13045,14 @@ dependencies = [
  "itertools 0.10.5",
  "libsecp256k1",
  "log",
- "merlin",
+ "merlin 3.0.0",
  "parity-scale-codec 3.6.9",
  "parking_lot 0.12.1",
  "paste",
  "primitive-types 0.12.2",
  "rand 0.8.5",
  "scale-info",
- "schnorrkel",
+ "schnorrkel 0.11.4",
  "secp256k1",
  "secrecy",
  "serde",
@@ -13005,14 +13091,14 @@ dependencies = [
  "itertools 0.10.5",
  "libsecp256k1",
  "log",
- "merlin",
+ "merlin 3.0.0",
  "parity-scale-codec 3.6.9",
  "parking_lot 0.12.1",
  "paste",
  "primitive-types 0.12.2",
  "rand 0.8.5",
  "scale-info",
- "schnorrkel",
+ "schnorrkel 0.11.4",
  "secp256k1",
  "secrecy",
  "serde",
@@ -13055,7 +13141,7 @@ dependencies = [
 [[package]]
 name = "sp-crypto-ec-utils"
 version = "0.10.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#c367ac2488db23a68e1cdf446cece58c66ea93d5"
+source = "git+https://github.com/paritytech/polkadot-sdk#c34ad77d0524add1ef7cec3de72df7874c67f8a9"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-377-ext",
@@ -13129,7 +13215,7 @@ dependencies = [
 [[package]]
 name = "sp-debug-derive"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#c367ac2488db23a68e1cdf446cece58c66ea93d5"
+source = "git+https://github.com/paritytech/polkadot-sdk#c34ad77d0524add1ef7cec3de72df7874c67f8a9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -13162,7 +13248,7 @@ dependencies = [
 [[package]]
 name = "sp-externalities"
 version = "0.25.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#c367ac2488db23a68e1cdf446cece58c66ea93d5"
+source = "git+https://github.com/paritytech/polkadot-sdk#c34ad77d0524add1ef7cec3de72df7874c67f8a9"
 dependencies = [
  "environmental",
  "parity-scale-codec 3.6.9",
@@ -13474,7 +13560,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface"
 version = "24.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#c367ac2488db23a68e1cdf446cece58c66ea93d5"
+source = "git+https://github.com/paritytech/polkadot-sdk#c34ad77d0524add1ef7cec3de72df7874c67f8a9"
 dependencies = [
  "bytes",
  "impl-trait-for-tuples",
@@ -13520,7 +13606,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#c367ac2488db23a68e1cdf446cece58c66ea93d5"
+source = "git+https://github.com/paritytech/polkadot-sdk#c34ad77d0524add1ef7cec3de72df7874c67f8a9"
 dependencies = [
  "Inflector",
  "expander",
@@ -13641,7 +13727,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot
 [[package]]
 name = "sp-std"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#c367ac2488db23a68e1cdf446cece58c66ea93d5"
+source = "git+https://github.com/paritytech/polkadot-sdk#c34ad77d0524add1ef7cec3de72df7874c67f8a9"
 
 [[package]]
 name = "sp-storage"
@@ -13673,7 +13759,7 @@ dependencies = [
 [[package]]
 name = "sp-storage"
 version = "19.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#c367ac2488db23a68e1cdf446cece58c66ea93d5"
+source = "git+https://github.com/paritytech/polkadot-sdk#c34ad77d0524add1ef7cec3de72df7874c67f8a9"
 dependencies = [
  "impl-serde",
  "parity-scale-codec 3.6.9",
@@ -13724,7 +13810,7 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#c367ac2488db23a68e1cdf446cece58c66ea93d5"
+source = "git+https://github.com/paritytech/polkadot-sdk#c34ad77d0524add1ef7cec3de72df7874c67f8a9"
 dependencies = [
  "parity-scale-codec 3.6.9",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk)",
@@ -13864,7 +13950,7 @@ dependencies = [
 [[package]]
 name = "sp-wasm-interface"
 version = "20.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#c367ac2488db23a68e1cdf446cece58c66ea93d5"
+source = "git+https://github.com/paritytech/polkadot-sdk#c34ad77d0524add1ef7cec3de72df7874c67f8a9"
 dependencies = [
  "anyhow",
  "impl-trait-for-tuples",
@@ -14192,13 +14278,13 @@ dependencies = [
 
 [[package]]
 name = "substrate-bip39"
-version = "0.4.6"
+version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a7590dc041b9bc2825e52ce5af8416c73dbe9d0654402bfd4b4941938b94d8f"
+checksum = "e620c7098893ba667438b47169c00aacdd9e7c10e042250ce2b60b087ec97328"
 dependencies = [
  "hmac 0.11.0",
  "pbkdf2 0.8.0",
- "schnorrkel",
+ "schnorrkel 0.9.1",
  "sha2 0.9.9",
  "zeroize",
 ]
