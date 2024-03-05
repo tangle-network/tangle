@@ -34,6 +34,7 @@ members = [
  "precompiles/proxy",
  "precompiles/preimage",
  "precompiles/jobs",
+ "tangle-subxt"
  # "relayer-gadget",
  # "relayer-gadget/cli",
 ]

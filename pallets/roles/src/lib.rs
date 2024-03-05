@@ -141,6 +141,9 @@ pub mod pallet {
 		/// The max permitted restake for a restaker
 		type MaxRestake: Get<Percent>;
 
+		/// The origin for privileged calls
+		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+
 		type WeightInfo: WeightInfo;
 	}
 
@@ -175,6 +178,8 @@ pub mod pallet {
 		PayoutStarted { era_index: EraIndex, validator_stash: T::AccountId },
 		/// The re-staker has been rewarded by this amount.
 		Rewarded { stash: T::AccountId, amount: BalanceOf<T> },
+		/// The min restaking bond amount has been updated
+		MinRestakingBondUpdated { value: BalanceOf<T> },
 	}
 
 	#[pallet::error]
@@ -236,10 +241,16 @@ pub mod pallet {
 		ValueQuery,
 	>;
 
+	#[pallet::type_value]
+	pub fn DefaultMinRestakingBond<T: Config>() -> BalanceOf<T> {
+		1000u32.into()
+	}
+
 	/// The minimum re staking bond to become and maintain the role.
 	#[pallet::storage]
 	#[pallet::getter(fn min_active_bond)]
-	pub(super) type MinRestakingBond<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+	pub(super) type MinRestakingBond<T: Config> =
+		StorageValue<_, BalanceOf<T>, ValueQuery, DefaultMinRestakingBond<T>>;
 
 	/// The number of jobs completed by a validator in era
 	#[pallet::storage]
@@ -653,6 +664,18 @@ pub mod pallet {
 		) -> DispatchResult {
 			ensure_signed(origin)?;
 			Self::do_payout_stakers(validator_stash, era)
+		}
+
+		#[pallet::call_index(7)]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::withdraw_unbonded())]
+		pub fn set_min_restaking_bond(
+			origin: OriginFor<T>,
+			min_restaking_bond: BalanceOf<T>,
+		) -> DispatchResult {
+			T::ForceOrigin::ensure_origin(origin)?;
+			MinRestakingBond::<T>::put(min_restaking_bond.clone());
+			Self::deposit_event(Event::<T>::MinRestakingBondUpdated { value: min_restaking_bond });
+			Ok(())
 		}
 	}
 }
