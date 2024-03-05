@@ -32,10 +32,13 @@ use frame_election_provider_support::{
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
 use frame_support::{
-	traits::{Contains, OnFinalize, WithdrawReasons},
+	traits::{
+		tokens::{PayFromAccount, UnityAssetBalanceConversion},
+		Contains, OnFinalize, WithdrawReasons,
+	},
 	weights::ConstantMultiplier,
 };
-use pallet_election_provider_multi_phase::SolutionAccuracyOf;
+use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -56,7 +59,8 @@ use sp_runtime::{
 	generic, impl_opaque_keys,
 	traits::{
 		self, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto, DispatchInfoOf,
-		Dispatchable, NumberFor, OpaqueKeys, PostDispatchInfoOf, StaticLookup, UniqueSaturatedInto,
+		Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf, StaticLookup,
+		UniqueSaturatedInto,
 	},
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
@@ -229,7 +233,7 @@ impl frame_system::Config for Runtime {
 	type OnKilledAccount = ();
 	type OnNewAccount = ();
 	type OnSetCode = ();
-	type RuntimeTask = ();
+	type RuntimeTask = RuntimeTask;
 	type RuntimeOrigin = RuntimeOrigin;
 	type PalletInfo = PalletInfo;
 	type SS58Prefix = SS58Prefix;
@@ -267,6 +271,7 @@ parameter_types! {
 	pub const CreationFee: u128 = MILLIUNIT;
 	pub const MaxLocks: u32 = 50;
 	pub const MaxReserves: u32 = 50;
+	pub const MaxFreezes: u32 = 1;
 }
 
 pub type NegativeImbalance<T> = <pallet_balances::Pallet<T> as Currency<
@@ -286,9 +291,9 @@ impl pallet_balances::Config for Runtime {
 	type MaxReserves = MaxReserves;
 	type ReserveIdentifier = [u8; 8];
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type RuntimeFreezeReason = ();
-	type FreezeIdentifier = ();
-	type MaxFreezes = ();
+	type RuntimeFreezeReason = RuntimeFreezeReason;
+	type FreezeIdentifier = RuntimeFreezeReason;
+	type MaxFreezes = MaxFreezes;
 }
 
 parameter_types! {
@@ -700,6 +705,11 @@ impl pallet_election_provider_multi_phase::MinerConfig for Runtime {
 	}
 }
 
+parameter_types! {
+	pub const SignedFixedDeposit: Balance = 1;
+	pub const SignedDepositIncreaseFactor: Percent = Percent::from_percent(10);
+}
+
 impl pallet_election_provider_multi_phase::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
@@ -712,7 +722,8 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type MinerConfig = Self;
 	type SignedMaxSubmissions = ConstU32<10>;
 	type SignedRewardBase = SignedRewardBase;
-	type SignedDepositBase = SignedDepositBase;
+	type SignedDepositBase =
+		GeometricDepositBase<Balance, SignedFixedDeposit, SignedDepositIncreaseFactor>;
 	type SignedDepositByte = SignedDepositByte;
 	type SignedMaxRefunds = ConstU32<3>;
 	type SignedDepositWeight = ();
@@ -774,7 +785,7 @@ impl pallet_nomination_pools::Config for Runtime {
 	type MaxUnbonding = ConstU32<8>;
 	type PalletId = NominationPoolsPalletId;
 	type MaxPointsToBalance = MaxPointsToBalance;
-	type RuntimeFreezeReason = ();
+	type RuntimeFreezeReason = RuntimeFreezeReason;
 }
 
 parameter_types! {
@@ -915,6 +926,8 @@ parameter_types! {
 	pub const TreasuryPalletId: PalletId = TREASURY_PALLET_ID;
 	pub const MaximumReasonLength: u32 = MAXIMUM_REASON_LENGTH;
 	pub const MaxApprovals: u32 = MAX_APPROVALS;
+	pub TreasuryAccount: AccountId = Treasury::account_id();
+	pub PayoutPeriod: u64 = 10;
 }
 
 impl pallet_treasury::Config for Runtime {
@@ -931,11 +944,11 @@ impl pallet_treasury::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type OnSlash = ();
 	type AssetKind = ();
-	type Beneficiary = Self::AccountId;
-	type BeneficiaryLookup = IdentityLookup<Self::Beneficiary>;
-	type Paymaster = ();
-	type BalanceConverter = ();
-	type PayoutPeriod = ConstU64<10>;
+	type Beneficiary = AccountId;
+	type BeneficiaryLookup = IdentityLookup<AccountId>;
+	type Paymaster = PayFromAccount<Balances, TreasuryAccount>;
+	type BalanceConverter = UnityAssetBalanceConversion;
+	type PayoutPeriod = PayoutPeriod;
 	type ProposalBond = ProposalBond;
 	type ProposalBondMinimum = ProposalBondMinimum;
 	type ProposalBondMaximum = ();
@@ -1016,7 +1029,7 @@ parameter_types! {
 	#[derive(Serialize, Deserialize)]
 	pub const MaxAdditionalFields: u32 = 100;
 	pub const MaxRegistrars: u32 = 20;
-	pub const PendingUsernameExpiration: u64 = 100;
+	pub const PendingUsernameExpiration: u64 = 7 * DAYS;
 }
 
 impl pallet_identity::Config for Runtime {
@@ -1026,16 +1039,15 @@ impl pallet_identity::Config for Runtime {
 	type SubAccountDeposit = SubAccountDeposit;
 	type MaxSubAccounts = MaxSubAccounts;
 	type MaxRegistrars = MaxRegistrars;
-	type Slashed = ();
-	type ByteDeposit = ByteDeposit;	
-	type IdentityInformation = ();	
-	type OffchainSignature = ();	
-	type SigningPublicKey = ();	
-	type UsernameAuthorityOrigin = EnsureOneOrRoot;	
-	type PendingUsernameExpiration = PendingUsernameExpiration;	
+	type Slashed = Treasury;
+	type ByteDeposit = ByteDeposit;
+	type IdentityInformation = pallet_identity::legacy::IdentityInfo<MaxAdditionalFields>;
+	type OffchainSignature = Signature;
+	type SigningPublicKey = <Signature as traits::Verify>::Signer;
+	type UsernameAuthorityOrigin = EnsureRoot<AccountId>;
+	type PendingUsernameExpiration = PendingUsernameExpiration;
 	type MaxSuffixLength = ConstU32<7>;
 	type MaxUsernameLength = ConstU32<32>;
-
 	type ForceOrigin = EnsureRoot<Self::AccountId>;
 	type RegistrarOrigin = EnsureRoot<Self::AccountId>;
 	type WeightInfo = ();
@@ -1064,7 +1076,6 @@ impl pallet_multisig::Config for Runtime {
 	type MaxSignatories = ConstU32<100>;
 	type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
 }
-
 
 parameter_types! {
 	pub Prefix: &'static [u8] = b"Claim TNTs to the account:";
