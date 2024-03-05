@@ -46,7 +46,7 @@ use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use parity_scale_codec::{Decode, Encode};
-
+use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
@@ -61,7 +61,7 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill,
+	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
 	SaturatedConversion,
 };
 use sp_std::prelude::*;
@@ -71,10 +71,7 @@ use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
-	jobs::{
-		JobId, MaxActiveJobsPerValidator, MaxDataLen, MaxKeyLen, MaxParticipants, MaxProofLen,
-		MaxRolesPerValidator, MaxSignatureLen, MaxSubmissionLen, PhaseResult, RpcResponseJobsData,
-	},
+	jobs::{JobId, PhaseResult, RpcResponseJobsData},
 	roles::RoleType,
 };
 
@@ -1153,8 +1150,43 @@ impl MisbehaviorHandler for MockMisbehaviorHandler {
 	}
 }
 
+#[cfg(feature = "local-testing")]
+parameter_types! {
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxSubmissionLen: u32 = 60_000_000;
+}
+
+#[cfg(not(feature = "local-testing"))]
+parameter_types! {
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxSubmissionLen: u32 = 32;
+}
+
 parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxParticipants: u32 = 10;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxKeyLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxDataLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxSignatureLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxProofLen: u32 = 256;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxActiveJobsPerValidator: u32 = 100;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxRolesPerValidator: u32 = 100;
 }
 
 impl pallet_jobs::Config for Runtime {

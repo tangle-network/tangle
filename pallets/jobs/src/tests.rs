@@ -903,6 +903,7 @@ fn delete_profile_with_active_role_should_fail() {
 fn remove_active_role_should_fail() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+		Roles::set_min_restaking_bond(RuntimeOrigin::root(), Default::default()).unwrap();
 
 		let participants = vec![ALICE, BOB, CHARLIE, DAVE, EVE];
 
@@ -1082,6 +1083,7 @@ fn add_role_to_active_profile_should_work() {
 fn reduce_stake_on_non_active_role_should_work() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+		Roles::set_min_restaking_bond(RuntimeOrigin::root(), Default::default()).unwrap();
 
 		let participants = vec![ALICE, BOB, CHARLIE, DAVE, EVE];
 
@@ -1207,6 +1209,7 @@ fn increase_stake_on_active_role_should_work() {
 fn switch_non_active_profile_should_work() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		let participants = vec![ALICE, BOB, CHARLIE, DAVE, EVE];
+		Roles::set_min_restaking_bond(RuntimeOrigin::root(), Default::default()).unwrap();
 
 		// all validators sign up in roles pallet
 		let profile = shared_profile();
@@ -1269,6 +1272,7 @@ fn switch_non_active_profile_should_work() {
 fn switch_active_shared_profile_to_independent_should_work_if_active_stake_preserved() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+		Roles::set_min_restaking_bond(RuntimeOrigin::root(), Default::default()).unwrap();
 
 		let participants = vec![ALICE, BOB, CHARLIE, DAVE, EVE];
 
@@ -1356,6 +1360,7 @@ fn switch_active_shared_profile_to_independent_should_work_if_active_stake_prese
 fn switch_active_independent_profile_to_shared_should_work_if_active_restake_sum_preserved() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+		Roles::set_min_restaking_bond(RuntimeOrigin::root(), Default::default()).unwrap();
 
 		let participants = vec![ALICE, BOB, CHARLIE, DAVE, EVE];
 

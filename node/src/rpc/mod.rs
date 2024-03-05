@@ -39,19 +39,13 @@ use sp_runtime::traits::Block as BlockT;
 use tangle_primitives::Block;
 use tangle_runtime::BlockNumber;
 // Runtime
-
 #[cfg(not(feature = "testnet"))]
-use tangle_runtime::{
+use tangle_runtime::{AccountId, Balance, Hash, Index};
+#[cfg(feature = "testnet")]
+use tangle_testnet_runtime::{
 	AccountId, Balance, Hash, Index, MaxDataLen, MaxKeyLen, MaxParticipants, MaxProofLen,
 	MaxSignatureLen, MaxSubmissionLen,
 };
-
-#[cfg(feature = "testnet")]
-use tangle_primitives::jobs::{
-	MaxDataLen, MaxKeyLen, MaxParticipants, MaxProofLen, MaxSignatureLen, MaxSubmissionLen,
-};
-#[cfg(feature = "testnet")]
-use tangle_testnet_runtime::{AccountId, Balance, Hash, Index};
 
 pub mod eth;
 pub mod tracing;
