@@ -8,22 +8,6 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-parity-scale-codec = { workspace = true, optional = true }
-scale-info = { workspace = true, optional = true }
-subxt = { version = "0.34.0", optional = true, features = ["substrate-compat", "default"] }
-subxt-metadata = { version = "0.34.0", optional = true }
-subxt-codegen = { version = "0.34.0", optional = true }
-serde_json = "^1.0.111"
-syn = { version = "2", features = ["full", "parsing"], optional = true }
-
-
-[features]
-default = [
-    "subxt",
-    "subxt-codegen",
-    "subxt-metadata",
-    "parity-scale-codec",
-    "scale-info",
-    "syn"
-]
-
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+subxt = { version = "0.31.0" }
