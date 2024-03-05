@@ -1,6 +1,6 @@
 use rand::Rng;
 use sc_service::{ChainType, Configuration};
-use sp_core::{crypto::Ss58Codec, ecdsa, ed25519, sr25519, ByteArray, Pair, Public};
+use sp_core::{ecdsa, ed25519, sr25519, ByteArray, Pair, Public};
 use sp_keystore::{Keystore, KeystorePtr};
 use sp_runtime::{
 	key_types::{ACCOUNT, BABE, GRANDPA, IM_ONLINE},
@@ -14,6 +14,7 @@ pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Pu
 		.public()
 }
 
+/// Inserts a key of type `ACCOUNT` into the keystore for development/testing.
 pub fn insert_controller_account_keys_into_keystore(
 	config: &Configuration,
 	key_store: Option<KeystorePtr>,
@@ -28,20 +29,20 @@ pub fn insert_controller_account_keys_into_keystore(
 		config,
 		tangle_crypto_primitives::ROLE_KEY_TYPE,
 		key_store.clone(),
-		"role",
+		"Role",
 	);
 	insert_account_keys_into_keystore::<ed25519::Public>(
 		config,
 		GRANDPA,
 		key_store.clone(),
-		"gran",
+		"Grandpa",
 	);
-	insert_account_keys_into_keystore::<sr25519::Public>(config, BABE, key_store.clone(), "babe");
+	insert_account_keys_into_keystore::<sr25519::Public>(config, BABE, key_store.clone(), "Babe");
 	insert_account_keys_into_keystore::<sr25519::Public>(
 		config,
 		IM_ONLINE,
 		key_store.clone(),
-		"imon",
+		"ImOnline",
 	);
 }
 
@@ -55,29 +56,26 @@ fn insert_account_keys_into_keystore<TPublic: Public>(
 	let chain_type = config.chain_spec.chain_type();
 	let node_name = &config.network.node_name[..];
 
-	let (pub_key, seed) = match node_name {
+	let seed = match node_name {
 		"Alice" | "Bob" | "Charlie" | "Dave" | "Eve" | "Ferdie"
 			if chain_type == ChainType::Development || chain_type == ChainType::Local =>
 		{
-			let (pair, seed) =
-				<TPublic::Pair as Pair>::from_string_with_seed(&format!("//{node_name}"), None)
-					.expect("static values are valid; qed");
-			(pair.public(), seed.unwrap().as_ref().to_vec())
+			let a = node_name.chars().next().unwrap() as u8;
+			vec![a; 32].try_into().unwrap()
 		},
 		_ => {
 			let mut seed_raw = [0u8; 32];
 			rand::thread_rng().fill(&mut seed_raw[..]);
-			let pair = <TPublic::Pair as Pair>::from_seed_slice(&seed_raw)
-				.expect("static values are valid; qed");
-			(pair.public(), seed_raw.to_vec())
+			seed_raw
 		},
 	};
 
+	let pub_key = <TPublic::Pair as Pair>::from_seed_slice(&seed).unwrap().public();
 	if let Some(keystore) = key_store {
 		let _ = Keystore::insert(
 			&*keystore,
 			key_type,
-			&format!("0x{}", hex::encode(&seed)),
+			&format!("0x{}", hex::encode(seed)),
 			&pub_key.to_raw_vec(),
 		);
 	}
@@ -87,10 +85,9 @@ fn insert_account_keys_into_keystore<TPublic: Public>(
                 '{}' key inserted to keystore
                 Seed: 0x{}
                 PublicKey: 0x{}
-                AccountId: {}
                 STORE THE KEYS SAFELY, NOT TO BE SHARED WITH ANYONE ELSE.
     ++++++++++++++++++++++++++++++++++++++++++++++++   							
-            \n", key_name, hex::encode(seed), hex::encode(&pub_key), pub_key.to_ss58check())
+            \n", key_name, hex::encode(seed), hex::encode(pub_key));
 }
 
 /// Inserts a key of type `ACCOUNT` into the keystore for development/testing.
