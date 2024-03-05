@@ -80,11 +80,12 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 // year cliff)
 // Investors : 16% (5% liquid immediately)(investor accounts gets 95% that is vested
 // over 2years with 1 year cliff)
-// Treasury : 35% (immediate release to treasury pallet account)
+// Treasury : 34% (immediate release to treasury pallet account)
 // EDG Genesis Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // EDG Snapshot Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // Leaderboard airdrop : 2% (5% immediate release)(95% vested over two years, with one month cliff)
-// ***
+// Polkadot validators Airdrop : 1% (5% immediate release)(95% vested over two years, with one month
+// cliff) ***
 
 pub fn get_edgeware_genesis_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/edgeware_genesis_participants.json")

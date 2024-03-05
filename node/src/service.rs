@@ -20,12 +20,12 @@ use crate::eth::{
 	FrontierBlockImport, FrontierPartialComponents, RpcConfig,
 };
 use futures::FutureExt;
-
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
 pub use sc_executor::NativeElseWasmExecutor;
+use sc_service::ChainType;
 
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
@@ -309,7 +309,9 @@ pub async fn new_full(
 	} = new_partial(&config, &eth_config)?;
 
 	if config.role.is_authority() {
-		if config.chain_spec.chain_type() == ChainType::Development || config.chain_spec.chain_type() == ChainType::Local {
+		if config.chain_spec.chain_type() == ChainType::Development ||
+			config.chain_spec.chain_type() == ChainType::Local
+		{
 			if auto_insert_keys {
 				crate::utils::insert_controller_account_keys_into_keystore(
 					&config,
