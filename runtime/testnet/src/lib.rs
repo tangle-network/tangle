@@ -271,7 +271,7 @@ parameter_types! {
 	pub const CreationFee: u128 = MILLIUNIT;
 	pub const MaxLocks: u32 = 50;
 	pub const MaxReserves: u32 = 50;
-	pub const MaxFreezes: u32 = 1;
+	pub const MaxFreezes: u32 = 50;
 }
 
 pub type NegativeImbalance<T> = <pallet_balances::Pallet<T> as Currency<
