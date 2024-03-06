@@ -37,7 +37,7 @@ fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f6
 		let account_id = AccountId::from_str(key).expect("Invalid account ID");
 		let balance = value.as_f64().expect("Invalid balance");
 		if balance <= 0.0 {
-			continue
+			continue;
 		}
 
 		*accounts_map.entry(account_id).or_insert(0.0) += balance;
@@ -58,7 +58,7 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 			let balance = value.as_f64().expect("Invalid balance");
 
 			if balance <= 0.0 {
-				continue
+				continue;
 			}
 
 			accounts_map.insert(MultiAddress::EVM(account_id.into()), balance);
@@ -66,7 +66,7 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 			let account_id = AccountId::from_str(key).expect("Invalid account ID");
 			let balance = value.as_f64().expect("Invalid balance");
 			if balance <= 0.0 {
-				continue
+				continue;
 			}
 			accounts_map.insert(MultiAddress::Native(account_id), balance);
 		}
@@ -310,8 +310,8 @@ pub fn get_treasury_balance() -> (AccountId, u128) {
 pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
 	let foundation_address: AccountId =
 		hex!["0cdd6ca9c578fabcc65373004944a401866d5c61568ffb22ecd8ef528599f95b"].into();
-	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY) -
-		get_initial_liquidity_share()
+	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY)
+		- get_initial_liquidity_share()
 			.mul_floor(get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY));
 	let foundation_account = (MultiAddress::Native(foundation_address), balance as u128);
 	compute_balance_distribution_with_cliff_and_vesting(vec![foundation_account])

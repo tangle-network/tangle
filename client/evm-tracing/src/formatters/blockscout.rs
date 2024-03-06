@@ -36,7 +36,7 @@ impl super::ResponseFormatter for Formatter {
 		if let Some(entry) = listener.entries.last() {
 			return Some(TransactionTrace::CallList(
 				entry.iter().map(|(_, value)| Call::Blockscout(value.clone())).collect(),
-			))
+			));
 		}
 		None
 	}

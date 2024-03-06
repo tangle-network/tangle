@@ -384,7 +384,7 @@ where
 		let result = evaluate_vss(self.identifier, &self.commitment);
 
 		if !(f_result == result) {
-			return Err(Error::InvalidSecretShare)
+			return Err(Error::InvalidSecretShare);
 		}
 
 		Ok((VerifyingShare(result), self.commitment.verifying_key()?))

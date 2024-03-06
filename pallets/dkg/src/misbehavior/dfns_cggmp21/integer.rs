@@ -39,7 +39,7 @@ impl RugInteger {
 	/// Convert `RugInteger` to a `Vec<u8>`.
 	pub fn to_vec(&self) -> Vec<u8> {
 		if self.value == "0" || self.value.is_empty() {
-			return Vec::new()
+			return Vec::new();
 		}
 		let mut x = self.value.clone();
 		// fix odd length
@@ -83,7 +83,7 @@ impl TryFrom<RugInteger> for malachite_nz::integer::Integer {
 	type Error = MalachiteIntegerError;
 	fn try_from(x: RugInteger) -> Result<Self, Self::Error> {
 		if x.radix < 2 || x.radix > 36 {
-			return Err(MalachiteIntegerError)
+			return Err(MalachiteIntegerError);
 		}
 		let radix = x.radix as _;
 		let value = x.value;

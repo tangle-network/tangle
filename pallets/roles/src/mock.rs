@@ -144,12 +144,12 @@ impl Contains<RuntimeCall> for BaseFilter {
 
 		if is_stake_unbond_call {
 			// no unbond call
-			return false
+			return false;
 		}
 
 		// no chill call
 		if matches!(call, RuntimeCall::Staking(pallet_staking::Call::chill { .. })) {
-			return false
+			return false;
 		}
 
 		// no withdraw_unbonded call
@@ -157,7 +157,7 @@ impl Contains<RuntimeCall> for BaseFilter {
 			matches!(call, RuntimeCall::Staking(pallet_staking::Call::withdraw_unbonded { .. }));
 
 		if is_stake_withdraw_call {
-			return false
+			return false;
 		}
 
 		true

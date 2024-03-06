@@ -661,8 +661,8 @@ impl Get<Option<BalancingConfig>> for OffchainRandomBalancing {
 			max => {
 				let seed = sp_io::offchain::random_seed();
 				let random = <u32>::decode(&mut TrailingZeroInput::new(&seed))
-					.expect("input is padded with zeroes; qed") %
-					max.saturating_add(1);
+					.expect("input is padded with zeroes; qed")
+					% max.saturating_add(1);
 				random as usize
 			},
 		};
@@ -1102,10 +1102,10 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
 	) -> Balance {
 		match job.job_type {
-			JobType::DKGTSSPhaseOne(_) |
-			JobType::DKGTSSPhaseTwo(_) |
-			JobType::DKGTSSPhaseThree(_) |
-			JobType::DKGTSSPhaseFour(_) => Dkg::job_to_fee(job),
+			JobType::DKGTSSPhaseOne(_)
+			| JobType::DKGTSSPhaseTwo(_)
+			| JobType::DKGTSSPhaseThree(_)
+			| JobType::DKGTSSPhaseFour(_) => Dkg::job_to_fee(job),
 			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => ZkSaaS::job_to_fee(job),
 		}
 	}
@@ -1138,10 +1138,10 @@ impl
 		>,
 	) -> DispatchResult {
 		match data.result {
-			JobResult::DKGPhaseOne(_) |
-			JobResult::DKGPhaseTwo(_) |
-			JobResult::DKGPhaseThree(_) |
-			JobResult::DKGPhaseFour(_) => Dkg::verify(data.result),
+			JobResult::DKGPhaseOne(_)
+			| JobResult::DKGPhaseTwo(_)
+			| JobResult::DKGPhaseThree(_)
+			| JobResult::DKGPhaseFour(_) => Dkg::verify(data.result),
 			JobResult::ZkSaaSPhaseOne(_) | JobResult::ZkSaaSPhaseTwo(_) => ZkSaaS::verify(data),
 		}
 	}
@@ -1454,8 +1454,9 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		len: usize,
 	) -> Option<Result<(), TransactionValidityError>> {
 		match self {
-			RuntimeCall::Ethereum(call) =>
-				call.pre_dispatch_self_contained(info, dispatch_info, len),
+			RuntimeCall::Ethereum(call) => {
+				call.pre_dispatch_self_contained(info, dispatch_info, len)
+			},
 			_ => None,
 		}
 	}
@@ -1465,10 +1466,11 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		info: Self::SignedInfo,
 	) -> Option<sp_runtime::DispatchResultWithInfo<PostDispatchInfoOf<Self>>> {
 		match self {
-			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) =>
+			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) => {
 				Some(call.dispatch(RuntimeOrigin::from(
 					pallet_ethereum::RawOrigin::EthereumTransaction(info),
-				))),
+				)))
+			},
 			_ => None,
 		}
 	}

@@ -124,12 +124,13 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
 	) -> Balance {
 		match job.job_type {
-			JobType::DKGTSSPhaseOne(_) |
-			JobType::DKGTSSPhaseTwo(_) |
-			JobType::DKGTSSPhaseThree(_) |
-			JobType::DKGTSSPhaseFour(_) => MockDKGPallet::job_to_fee(job),
-			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) =>
-				MockZkSaasPallet::job_to_fee(job),
+			JobType::DKGTSSPhaseOne(_)
+			| JobType::DKGTSSPhaseTwo(_)
+			| JobType::DKGTSSPhaseThree(_)
+			| JobType::DKGTSSPhaseFour(_) => MockDKGPallet::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => {
+				MockZkSaasPallet::job_to_fee(job)
+			},
 		}
 	}
 }
@@ -221,12 +222,12 @@ impl Contains<RuntimeCall> for BaseFilter {
 
 		if is_stake_unbond_call {
 			// no unbond call
-			return false
+			return false;
 		}
 
 		// no chill call
 		if matches!(call, RuntimeCall::Staking(pallet_staking::Call::chill { .. })) {
-			return false
+			return false;
 		}
 
 		// no withdraw_unbonded call
@@ -234,7 +235,7 @@ impl Contains<RuntimeCall> for BaseFilter {
 			matches!(call, RuntimeCall::Staking(pallet_staking::Call::withdraw_unbonded { .. }));
 
 		if is_stake_withdraw_call {
-			return false
+			return false;
 		}
 
 		true

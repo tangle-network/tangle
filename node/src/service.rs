@@ -307,8 +307,8 @@ pub async fn new_full(
 	} = new_partial(&config, &eth_config)?;
 
 	if config.role.is_authority() {
-		if config.chain_spec.chain_type() == ChainType::Development ||
-			config.chain_spec.chain_type() == ChainType::Local
+		if config.chain_spec.chain_type() == ChainType::Development
+			|| config.chain_spec.chain_type() == ChainType::Local
 		{
 			if auto_insert_keys {
 				crate::utils::insert_controller_account_keys_into_keystore(

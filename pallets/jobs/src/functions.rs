@@ -157,7 +157,7 @@ impl<T: Config> Pallet<T> {
 							participants.into_iter().filter(|x| x != &validator).collect();
 
 						if participants.len() <= new_threshold as usize {
-							return Err(Error::<T>::NotEnoughValidators.into())
+							return Err(Error::<T>::NotEnoughValidators.into());
 						}
 
 						ensure!(!new_threshold.is_zero(), Error::<T>::NotEnoughValidators);
@@ -196,15 +196,15 @@ impl<T: Config> Pallet<T> {
 					FallbackOptions::Destroy => {
 						// if the role is TSS, then destory only if signing is impossible
 						if matches!(role_type, RoleType::Tss(_)) {
-							if new_participants.len() >=
-								job_info
+							if new_participants.len()
+								>= job_info
 									.job_type
 									.clone()
 									.get_threshold()
 									.expect("Should exist!")
 									.into()
 							{
-								return Ok(())
+								return Ok(());
 							}
 						}
 

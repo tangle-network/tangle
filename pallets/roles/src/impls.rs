@@ -65,7 +65,7 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		if let Some(ledger) = maybe_ledger {
 			Some(ledger.role_key.to_vec())
 		} else {
-			return None
+			return None;
 		}
 	}
 
@@ -101,7 +101,7 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 		if let Some(ledger) = maybe_ledger {
 			Some(ledger.max_active_services)
 		} else {
-			return None
+			return None;
 		}
 	}
 }
