@@ -620,20 +620,21 @@ fn test_distribution_shares() {
 		Perbill::from_float(0.298618493)
 	); // 29.8618493%
 
-	let total_genesis_endowment = total_investor_amount +
-		total_direct_team_amount +
-		total_treasury_amount +
-		foundation_total_amount +
-		total_edgeware_claims_amount +
-		total_edgeware_vesting_amount +
-		total_edgeware_snapshot_claims_amount +
-		total_edgeware_snapshot_vesting_amount +
-		total_leaderboard_claims_amount +
-		total_leaderboard_vesting_amount +
-		total_polkadot_claims_amount +
-		total_polkadot_vesting_amount +
-		total_team_claims_amount;
+	let total_genesis_endowment = total_investor_amount
+		+ total_direct_team_amount
+		+ total_treasury_amount
+		+ foundation_total_amount
+		+ total_edgeware_claims_amount
+		+ total_edgeware_vesting_amount
+		+ total_edgeware_snapshot_claims_amount
+		+ total_edgeware_snapshot_vesting_amount
+		+ total_leaderboard_claims_amount
+		+ total_leaderboard_vesting_amount
+		+ total_polkadot_claims_amount
+		+ total_polkadot_vesting_amount
+		+ total_team_claims_amount;
 
 	assert_eq!(total_genesis_endowment, 100000000000000007768522730); // 100000000 TNT
-	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one()); // 100%
+	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one());
+	// 100%
 }
