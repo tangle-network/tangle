@@ -48,7 +48,6 @@ fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f6
 fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddress, f64> {
 	let mut path = get_git_root();
 	path.push(path_str);
-	println!("path : {:?}", path);
 	let json = read_contents(&path);
 	let json_obj = json.as_object().expect("should be an object");
 	let mut accounts_map = BTreeMap::new();
