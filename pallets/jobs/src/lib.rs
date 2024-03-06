@@ -189,6 +189,8 @@ pub mod module {
 		/// A job has been resubmitted, this is when a phase1 result has been discarded
 		/// and a new phase1 job is requested
 		JobReSubmitted { job_id: JobId, role_type: RoleType, details: JobInfoOf<T> },
+		/// A job result expiry time has been extended
+		JobResultExtended { job_id: JobId, role_type: RoleType, new_expiry: BlockNumberFor<T> },
 	}
 
 	#[pallet::storage]
@@ -660,6 +662,61 @@ pub mod module {
 			// TODO: handle slashing
 			// TODO: emit events
 			Ok(())
+		}
+
+		/// Extend the time-to-live (TTL) of a job result.
+		///
+		/// This function allows extending the TTL of a job result for a specific role type and job
+		/// ID. The TTL represents the time until the result is considered expired.
+		///
+		/// - `origin`: The dispatch origin, usually a signed account.
+		/// - `role_type`: The type of role associated with the job result.
+		/// - `job_id`: The ID of the job whose result's TTL is to be extended.
+		/// - `extend_by`: The number of blocks by which to extend the TTL.
+		///
+		/// Weight: `T::WeightInfo::withdraw_rewards()` where `T` is the pallet configuration trait.
+		///
+		/// # Errors
+		///
+		/// - `JobNotFound`: The specified job ID does not exist.
+		/// - `ResultExpired`: The result is already expired.
+		/// - Transfer errors: Errors related to transferring fees.
+		#[pallet::call_index(7)]
+		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
+		pub fn extend_job_result_ttl(
+			origin: OriginFor<T>,
+			role_type: RoleType,
+			job_id: JobId,
+			extend_by: BlockNumberFor<T>,
+		) -> DispatchResult {
+			let caller = ensure_signed(origin)?;
+
+			KnownResults::<T>::try_mutate(role_type, job_id, |result| -> DispatchResult {
+				let result = result.as_mut().ok_or(Error::<T>::JobNotFound)?;
+
+				let now = <frame_system::Pallet<T>>::block_number();
+				ensure!(result.ttl > now, Error::<T>::ResultExpired);
+
+				let extension_fee =
+					T::JobToFee::calculate_result_extension_fee(result.encode(), extend_by);
+
+				T::Currency::transfer(
+					&caller,
+					&Self::rewards_account_id(),
+					extension_fee,
+					ExistenceRequirement::KeepAlive,
+				)?;
+
+				result.ttl += extend_by;
+
+				Self::deposit_event(Event::JobResultExtended {
+					job_id,
+					role_type,
+					new_expiry: result.ttl,
+				});
+
+				Ok(())
+			})
 		}
 	}
 }

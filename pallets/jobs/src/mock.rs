@@ -99,6 +99,10 @@ impl MockDKGPallet {
 			20
 		}
 	}
+
+	fn calculate_result_extension_fee(_result: Vec<u8>, _extension_time: BlockNumber) -> Balance {
+		20
+	}
 }
 
 pub struct MockZkSaasPallet;
@@ -130,6 +134,10 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) =>
 				MockZkSaasPallet::job_to_fee(job),
 		}
+	}
+
+	fn calculate_result_extension_fee(result: Vec<u8>, extension_time: BlockNumber) -> Balance {
+		MockDKGPallet::calculate_result_extension_fee(result, extension_time)
 	}
 }
 

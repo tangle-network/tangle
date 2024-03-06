@@ -197,6 +197,13 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 				MockZkSaasPallet::job_to_fee(job),
 		}
 	}
+
+	fn calculate_result_extension_fee(
+		result: Vec<u8>,
+		extension_time: BlockNumber,
+	) -> Balance {
+		Default::default()
+	}
 }
 
 pub struct MockRolesHandler;

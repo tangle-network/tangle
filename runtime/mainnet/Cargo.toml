@@ -92,6 +92,9 @@ tangle-crypto-primitives = { workspace = true }
 tangle-primitives = { workspace = true }
 pallet-roles = { workspace = true }
 pallet-jobs = { workspace = true }
+pallet-jobs-rpc-runtime-api = { workspace = true }
+pallet-zksaas = { workspace = true }
+pallet-dkg = { workspace = true }
 
 # Frontier dependencies
 fp-account = { workspace = true }

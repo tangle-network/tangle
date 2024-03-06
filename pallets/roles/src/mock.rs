@@ -259,6 +259,13 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 	) -> Balance {
 		Default::default()
 	}
+
+	fn calculate_result_extension_fee(
+		result: Vec<u8>,
+		extension_time: BlockNumber,
+	) -> Balance {
+		Default::default()
+	}
 }
 
 pub struct MockMPCHandler;
