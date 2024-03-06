@@ -34,12 +34,13 @@ use tracing::{instrument, Instrument};
 
 use sc_client_api::backend::{Backend, StateBackend, StorageProvider};
 use sc_utils::mpsc::TracingUnboundedSender;
-use sp_api::{ApiExt, Core, HeaderT, ProvideRuntimeApi};
+use sp_api::{ApiExt, Core, ProvideRuntimeApi};
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{
 	Backend as BlockchainBackend, Error as BlockChainError, HeaderBackend, HeaderMetadata,
 };
-use sp_runtime::traits::{BlakeTwo256, Block as BlockT};
+use sp_runtime::traits::{BlakeTwo256, Block as BlockT, Header as HeaderT};
+
 use substrate_prometheus_endpoint::{
 	register, Counter, PrometheusError, Registry as PrometheusRegistry, U64,
 };
@@ -99,8 +100,9 @@ where
 				.try_into()
 				.map_err(|_| "Block number overflow")?),
 			Some(RequestBlockId::Tag(RequestBlockTag::Earliest)) => Ok(0),
-			Some(RequestBlockId::Tag(RequestBlockTag::Pending)) =>
-				Err("'pending' is not supported"),
+			Some(RequestBlockId::Tag(RequestBlockTag::Pending)) => {
+				Err("'pending' is not supported")
+			},
 			Some(RequestBlockId::Hash(_)) => Err("Block hash not supported"),
 		}
 	}
@@ -116,14 +118,14 @@ where
 			return Err(format!(
 				"count ({}) can't be greater than maximum ({})",
 				count, self.max_count
-			))
+			));
 		}
 
 		// Build a list of all the Substrate block hashes that need to be traced.
 		let mut block_hashes = vec![];
 		for block_height in block_heights {
 			if block_height == 0 {
-				continue // no traces for genesis block.
+				continue; // no traces for genesis block.
 			}
 
 			let block_hash = self
@@ -170,15 +172,18 @@ where
 			let mut block_traces: Vec<_> = block_traces
 				.iter()
 				.filter(|trace| match trace.action {
-					block::TransactionTraceAction::Call { from, to, .. } =>
-						(from_address.is_empty() || from_address.contains(&from)) &&
-							(to_address.is_empty() || to_address.contains(&to)),
-					block::TransactionTraceAction::Create { from, .. } =>
-						(from_address.is_empty() || from_address.contains(&from)) &&
-							to_address.is_empty(),
-					block::TransactionTraceAction::Suicide { address, .. } =>
-						(from_address.is_empty() || from_address.contains(&address)) &&
-							to_address.is_empty(),
+					block::TransactionTraceAction::Call { from, to, .. } => {
+						(from_address.is_empty() || from_address.contains(&from))
+							&& (to_address.is_empty() || to_address.contains(&to))
+					},
+					block::TransactionTraceAction::Create { from, .. } => {
+						(from_address.is_empty() || from_address.contains(&from))
+							&& to_address.is_empty()
+					},
+					block::TransactionTraceAction::Suicide { address, .. } => {
+						(from_address.is_empty() || from_address.contains(&address))
+							&& to_address.is_empty()
+					},
 				})
 				.cloned()
 				.collect();
@@ -204,11 +209,11 @@ where
 							"the amount of traces goes over the maximum ({}), please use 'after' \
 							and 'count' in your request",
 							self.max_count
-						))
+						));
 					}
 
 					traces = traces.into_iter().take(count).collect();
-					break
+					break;
 				}
 			}
 		}
@@ -643,8 +648,8 @@ where
 				// We remove early the block cache if this batch is the last
 				// pooling this block.
 				if let Some(block_cache) = self.cached_blocks.get_mut(block) {
-					if block_cache.active_batch_count == 1 &&
-						matches!(
+					if block_cache.active_batch_count == 1
+						&& matches!(
 							block_cache.state,
 							CacheBlockState::Pooled { started: false, .. }
 						) {
@@ -755,10 +760,11 @@ where
 				schema.current_transaction_statuses(substrate_hash),
 			) {
 				(Some(a), Some(b)) => (a, b),
-				_ =>
+				_ => {
 					return Err(format!(
 						"Failed to get Ethereum block data for Substrate block {substrate_hash}"
-					)),
+					))
+				},
 			},
 			_ => return Err(format!("No storage override at {substrate_hash:?}")),
 		};

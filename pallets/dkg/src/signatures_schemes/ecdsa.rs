@@ -42,7 +42,7 @@ pub fn recover_ecdsa_pub_key(data: &[u8], signature: &[u8]) -> Result<Vec<u8>, E
 		let hash = keccak_256(data);
 
 		let pub_key = sp_io::crypto::secp256k1_ecdsa_recover(&sig, &hash)?;
-		return Ok(pub_key.to_vec())
+		return Ok(pub_key.to_vec());
 	}
 	Err(EcdsaVerifyError::BadSignature)
 }
@@ -69,7 +69,7 @@ pub fn recover_ecdsa_pub_key_compressed(
 		let hash = keccak_256(data);
 
 		let pub_key = sp_io::crypto::secp256k1_ecdsa_recover_compressed(&sig, &hash)?;
-		return Ok(pub_key)
+		return Ok(pub_key);
 	}
 	Err(EcdsaVerifyError::BadSignature)
 }

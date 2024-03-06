@@ -141,21 +141,23 @@ impl<T: Config> Pallet<T> {
 		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
 	) -> DispatchResult {
 		match data.signature_scheme {
-			DigitalSignatureScheme::Ecdsa =>
-				verify_ecdsa_signature::<T>(&data.data, &data.signature, &data.verifying_key),
+			DigitalSignatureScheme::Ecdsa => {
+				verify_ecdsa_signature::<T>(&data.data, &data.signature, &data.verifying_key)
+			},
 			DigitalSignatureScheme::SchnorrSr25519 => verify_schnorr_sr25519_signature::<T>(
 				&data.data,
 				&data.signature,
 				&data.verifying_key,
 			),
-			DigitalSignatureScheme::Bls381 =>
-				verify_bls12_381_signature::<T>(&data.data, &data.signature, &data.verifying_key),
-			DigitalSignatureScheme::SchnorrEd25519 |
-			DigitalSignatureScheme::SchnorrEd448 |
-			DigitalSignatureScheme::SchnorrP256 |
-			DigitalSignatureScheme::SchnorrP384 |
-			DigitalSignatureScheme::SchnorrSecp256k1 |
-			DigitalSignatureScheme::SchnorrRistretto255 => verify_dkg_signature_schnorr_frost::<T>(
+			DigitalSignatureScheme::Bls381 => {
+				verify_bls12_381_signature::<T>(&data.data, &data.signature, &data.verifying_key)
+			},
+			DigitalSignatureScheme::SchnorrEd25519
+			| DigitalSignatureScheme::SchnorrEd448
+			| DigitalSignatureScheme::SchnorrP256
+			| DigitalSignatureScheme::SchnorrP384
+			| DigitalSignatureScheme::SchnorrSecp256k1
+			| DigitalSignatureScheme::SchnorrRistretto255 => verify_dkg_signature_schnorr_frost::<T>(
 				data.signature_scheme,
 				&data.data,
 				&data.signature,
@@ -193,15 +195,18 @@ impl<T: Config> Pallet<T> {
 		};
 
 		match data.signature_scheme {
-			DigitalSignatureScheme::Ecdsa =>
+			DigitalSignatureScheme::Ecdsa => {
 				verify_ecdsa_signature::<T>(&data.new_key, &data.signature, &data.key)
-					.map(|_| emit_event(data))?,
-			DigitalSignatureScheme::SchnorrSr25519 =>
+					.map(|_| emit_event(data))?
+			},
+			DigitalSignatureScheme::SchnorrSr25519 => {
 				verify_schnorr_sr25519_signature::<T>(&data.new_key, &data.signature, &data.key)
-					.map(|_| emit_event(data))?,
-			DigitalSignatureScheme::Bls381 =>
+					.map(|_| emit_event(data))?
+			},
+			DigitalSignatureScheme::Bls381 => {
 				verify_bls12_381_signature::<T>(&data.new_key, &data.signature, &data.key)
-					.map(|_| emit_event(data))?,
+					.map(|_| emit_event(data))?
+			},
 			_ => Err(Error::<T>::InvalidSignatureScheme.into()), // unimplemented
 		}
 	}

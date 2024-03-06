@@ -402,10 +402,10 @@ pub mod module {
 					.clone()
 					.get_participants()
 					.ok_or(Error::<T>::InvalidJobParams)?,
-				JobResult::DKGPhaseTwo(_) |
-				JobResult::DKGPhaseThree(_) |
-				JobResult::DKGPhaseFour(_) |
-				JobResult::ZkSaaSPhaseTwo(_) => {
+				JobResult::DKGPhaseTwo(_)
+				| JobResult::DKGPhaseThree(_)
+				| JobResult::DKGPhaseFour(_)
+				| JobResult::ZkSaaSPhaseTwo(_) => {
 					let existing_result_id = job_info
 						.job_type
 						.clone()

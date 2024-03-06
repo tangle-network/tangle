@@ -92,7 +92,7 @@ impl RuntimeEvent {
 		filter: crate::StepEventFilter,
 	) -> Self {
 		match i {
-			evm_runtime::tracing::Event::Step { context, opcode, position, stack, memory } =>
+			evm_runtime::tracing::Event::Step { context, opcode, position, stack, memory } => {
 				Self::Step {
 					context: context.clone().into(),
 					opcode: opcodes_string(opcode),
@@ -102,7 +102,8 @@ impl RuntimeEvent {
 					},
 					stack: if filter.enable_stack { Some(stack.into()) } else { None },
 					memory: if filter.enable_memory { Some(memory.into()) } else { None },
-				},
+				}
+			},
 			evm_runtime::tracing::Event::StepResult { result, return_value } => Self::StepResult {
 				result: match result {
 					Ok(_) => Ok(()),
@@ -113,10 +114,12 @@ impl RuntimeEvent {
 				},
 				return_value: return_value.to_vec(),
 			},
-			evm_runtime::tracing::Event::SLoad { address, index, value } =>
-				Self::SLoad { address, index, value },
-			evm_runtime::tracing::Event::SStore { address, index, value } =>
-				Self::SStore { address, index, value },
+			evm_runtime::tracing::Event::SLoad { address, index, value } => {
+				Self::SLoad { address, index, value }
+			},
+			evm_runtime::tracing::Event::SStore { address, index, value } => {
+				Self::SStore { address, index, value }
+			},
 		}
 	}
 }

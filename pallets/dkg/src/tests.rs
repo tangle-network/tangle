@@ -449,8 +449,8 @@ fn dkg_key_rotation_works() {
 		// should work with correct params
 		assert_ok!(DKG::verify(JobResult::DKGPhaseFour(job_to_verify)));
 		// should emit KeyRotated event
-		assert!(System::events().iter().any(|r| r.event ==
-			RuntimeEvent::DKG(Event::KeyRotated {
+		assert!(System::events().iter().any(|r| r.event
+			== RuntimeEvent::DKG(Event::KeyRotated {
 				from_job_id: 1,
 				to_job_id: 2,
 				signature: signature.clone()

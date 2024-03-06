@@ -80,10 +80,8 @@ pub fn get_unique_distribution_results(
 			.and_modify(|e: &mut Vec<(Balance, Balance, BlockNumber)>| e.extend(schedules.clone()))
 			.or_insert(schedules);
 	}
-	let unique_vesting: Vec<(MultiAddress, Vec<(Balance, Balance, BlockNumber)>)> = unique_vesting
-		.into_iter()
-		.map(|(address, schedules)| (address, schedules))
-		.collect();
+	let unique_vesting: Vec<(MultiAddress, Vec<(Balance, Balance, BlockNumber)>)> =
+		unique_vesting.into_iter().collect();
 
 	DistributionResult {
 		claims: unique_claims,

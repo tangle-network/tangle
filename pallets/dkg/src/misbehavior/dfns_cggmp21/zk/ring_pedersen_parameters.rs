@@ -78,10 +78,10 @@ where
 		if *e {
 			let rhs = (data.s * a).mod_op(data.N);
 			if lhs != rhs {
-				return Err(InvalidProof)
+				return Err(InvalidProof);
 			}
 		} else if lhs != *a {
-			return Err(InvalidProof)
+			return Err(InvalidProof);
 		}
 	}
 	Ok(())
@@ -183,7 +183,7 @@ pub mod original {
 			.map(|a| data.t.pow_mod_ref(&a, data.N).map(|r| r.into()));
 		// TODO: since array::try_map is not stable yet, we have to be hacky here
 		let commitment = if commitment.iter().any(Option::is_none) {
-			return Err(())
+			return Err(());
 		} else {
 			// We made sure that every item in the array is `Some(_)`
 			#[allow(clippy::unwrap_used)]

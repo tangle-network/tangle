@@ -54,6 +54,7 @@ impl frame_system::Config for Test {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+	type RuntimeTask = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
@@ -72,7 +73,7 @@ impl pallet_balances::Config for Test {
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type MaxHolds = ();
+	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
 }
@@ -90,6 +91,7 @@ impl pallet_vesting::Config for Test {
 	type MinVestedTransfer = MinVestedTransfer;
 	type WeightInfo = ();
 	type UnvestedFundsAllowedWithdrawReasons = UnvestedFundsAllowedWithdrawReasons;
+	type BlockNumberProvider = System;
 	const MAX_VESTING_SCHEDULES: u32 = 28;
 }
 

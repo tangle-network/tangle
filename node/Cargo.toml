@@ -29,7 +29,7 @@ futures = { workspace = true }
 hex-literal = { workspace = true }
 log = { workspace = true }
 parity-scale-codec = { workspace = true }
-rand = { workspace = true }
+rand = { workspace = true, features = ["std"]  }
 serde_json = { workspace = true }
 tokio = { workspace = true }
 hex = {workspace = true }
@@ -55,7 +55,7 @@ sc-transaction-pool = { workspace = true }
 sp-consensus-babe = { workspace = true }
 sp-keyring = { workspace = true }
 sp-trie = { workspace = true }
-webb-proposals = { workspace = true, default-features = false }
+webb-proposals = { workspace = true, features = ["default"]}
 webb-consensus-types = { workspace = true }
 
 sp-consensus-grandpa = { workspace = true, features = ["default"] }

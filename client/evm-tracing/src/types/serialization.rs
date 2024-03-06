@@ -53,7 +53,7 @@ where
 	S: Serializer,
 {
 	if let Some(bytes) = bytes.as_ref() {
-		return serializer.serialize_str(&format!("0x{}", hex::encode(&bytes[..])))
+		return serializer.serialize_str(&format!("0x{}", hex::encode(&bytes[..])));
 	}
 	Err(S::Error::custom("String serialize error."))
 }
@@ -86,7 +86,7 @@ where
 		let d = std::str::from_utf8(&value[..])
 			.map_err(|_| S::Error::custom("String serialize error."))?
 			.to_string();
-		return serializer.serialize_str(&d)
+		return serializer.serialize_str(&d);
 	}
 	Err(S::Error::custom("String serialize error."))
 }

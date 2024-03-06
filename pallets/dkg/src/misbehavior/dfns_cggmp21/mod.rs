@@ -50,12 +50,15 @@ impl<T: Config> Pallet<T> {
 		justification: &DfnsCGGMP21Justification,
 	) -> DispatchResult {
 		match justification {
-			DfnsCGGMP21Justification::Keygen { participants, t, reason } =>
-				Self::verify_dfns_cggmp21_keygen_misbehavior(data, participants, *t, reason),
-			DfnsCGGMP21Justification::KeyRefresh { participants, t, reason } =>
-				Self::verify_dfns_cggmp21_key_refresh_misbehavior(data, participants, *t, reason),
-			DfnsCGGMP21Justification::Signing { participants, t, reason } =>
-				Self::verify_dfns_cggmp21_signing_misbehavior(data, participants, *t, reason),
+			DfnsCGGMP21Justification::Keygen { participants, t, reason } => {
+				Self::verify_dfns_cggmp21_keygen_misbehavior(data, participants, *t, reason)
+			},
+			DfnsCGGMP21Justification::KeyRefresh { participants, t, reason } => {
+				Self::verify_dfns_cggmp21_key_refresh_misbehavior(data, participants, *t, reason)
+			},
+			DfnsCGGMP21Justification::Signing { participants, t, reason } => {
+				Self::verify_dfns_cggmp21_signing_misbehavior(data, participants, *t, reason)
+			},
 		}
 	}
 
@@ -68,14 +71,18 @@ impl<T: Config> Pallet<T> {
 		reason: &KeygenAborted,
 	) -> DispatchResult {
 		match reason {
-			KeygenAborted::InvalidDecommitment { round1, round2a } =>
-				keygen::invalid_decommitment::<T>(data, round1, round2a),
-			KeygenAborted::InvalidDataSize { round2a } =>
-				keygen::invalid_data_size::<T>(data, t, round2a),
-			KeygenAborted::FeldmanVerificationFailed { round2a, round2b } =>
-				keygen::feldman::<T>(data, round2a, round2b),
-			KeygenAborted::InvalidSchnorrProof { round2a, round3 } =>
-				keygen::schnorr_proof::<T>(data, participants, round2a, round3),
+			KeygenAborted::InvalidDecommitment { round1, round2a } => {
+				keygen::invalid_decommitment::<T>(data, round1, round2a)
+			},
+			KeygenAborted::InvalidDataSize { round2a } => {
+				keygen::invalid_data_size::<T>(data, t, round2a)
+			},
+			KeygenAborted::FeldmanVerificationFailed { round2a, round2b } => {
+				keygen::feldman::<T>(data, round2a, round2b)
+			},
+			KeygenAborted::InvalidSchnorrProof { round2a, round3 } => {
+				keygen::schnorr_proof::<T>(data, participants, round2a, round3)
+			},
 		}
 	}
 
@@ -88,12 +95,15 @@ impl<T: Config> Pallet<T> {
 		reason: &KeyRefreshAborted,
 	) -> DispatchResult {
 		match reason {
-			KeyRefreshAborted::InvalidDecommitment { round1, round2 } =>
-				aux_only::invalid_decommitment::<T>(data, round1, round2),
-			KeyRefreshAborted::InvalidRingPedersenParameters { round2 } =>
-				aux_only::invalid_ring_pedersen_parameters::<T>(data, round2),
-			KeyRefreshAborted::InvalidModProof { round2, round3, reason } =>
-				aux_only::invalid_mod_proof::<T>(data, participants, reason, round2, round3),
+			KeyRefreshAborted::InvalidDecommitment { round1, round2 } => {
+				aux_only::invalid_decommitment::<T>(data, round1, round2)
+			},
+			KeyRefreshAborted::InvalidRingPedersenParameters { round2 } => {
+				aux_only::invalid_ring_pedersen_parameters::<T>(data, round2)
+			},
+			KeyRefreshAborted::InvalidModProof { round2, round3, reason } => {
+				aux_only::invalid_mod_proof::<T>(data, participants, reason, round2, round3)
+			},
 			_ => unimplemented!(),
 		}
 	}

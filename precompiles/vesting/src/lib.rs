@@ -79,7 +79,7 @@ where
 			},
 			_ => {
 				// Return err if account length is wrong
-				return Err(revert("Error while parsing staker's address"))
+				return Err(revert("Error while parsing staker's address"));
 			},
 		};
 
@@ -153,7 +153,7 @@ where
 		match pallet_vesting::Vesting::<Runtime>::get(origin.clone()) {
 			Some(schedules) => {
 				if index >= schedules.len() as u8 {
-					return Err(revert("Invalid vesting schedule index"))
+					return Err(revert("Invalid vesting schedule index"));
 				}
 				// Make the call to transfer the vested funds to the `target` account.
 				let target = Self::convert_to_account_id(target)?;
