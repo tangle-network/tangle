@@ -175,7 +175,7 @@ where
 		submission: BoundedBytes<GetJobSubmissionSizeLimit>,
 	) -> EvmResult {
 		// Convert BoundedBytes to Vec<u8>
-		let submission: Vec<u8> = submission.try_into().unwrap();
+		let submission: Vec<u8> = submission.into();
 
 		// Convert caller's Ethereum address to Substrate account ID
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);

@@ -96,9 +96,7 @@ where
 			H256(
 				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
 			) => pallet_staking::RewardDestination::Stash,
-			H256(
-				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
-			) => pallet_staking::RewardDestination::Controller,
+
 			H256(
 				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
 			) => {
@@ -344,9 +342,8 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let payee = match payee {
-			0 => pallet_staking::RewardDestination::Staked,
-			1 => pallet_staking::RewardDestination::Stash,
-			2 => pallet_staking::RewardDestination::Controller,
+			1 => pallet_staking::RewardDestination::Staked,
+			2 => pallet_staking::RewardDestination::Stash,
 			_ => return Err(revert("Invalid payee")),
 		};
 

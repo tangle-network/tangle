@@ -96,7 +96,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("ss58Format".into(), tangle_primitives::MAINNET_SS58_PREFIX.into());
 
 	let endowment: Balance = 10_000_000 * UNIT;
-
+	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		"Local Tangle Mainnet",
 		"local-tangle-mainnet",
@@ -154,7 +154,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "TNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), tangle_primitives::MAINNET_SS58_PREFIX.into());
-
+	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		"Tangle Mainnet",
 		"tangle-mainnet",

@@ -93,7 +93,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
-
+	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		// Name
 		"Local Testnet",
@@ -151,7 +151,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
-
+	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		"Tangle Testnet",
 		"tangle-testnet",
@@ -270,7 +270,7 @@ fn testnet_genesis(
 			balances: endowed_accounts
 				.iter()
 				.cloned()
-				.chain(genesis_substrate_distribution.iter().cloned().map(|(k, v)| (k, v)))
+				.chain(genesis_substrate_distribution)
 				.collect(),
 		},
 		vesting: Default::default(),

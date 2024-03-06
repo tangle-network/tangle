@@ -255,7 +255,8 @@ pub mod pallet {
 							Ok(a) => a,
 							Err(_) => return,
 						};
-					CurrencyOf::<T>::deposit_creating(&expiry_destination, unclaimed_amount);
+					let _ =
+						CurrencyOf::<T>::deposit_creating(&expiry_destination, unclaimed_amount);
 					// clear the expiry detail
 					ExpiryConfig::<T>::take();
 				}
@@ -603,7 +604,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		// We first need to deposit the balance to ensure that the account exists.
-		CurrencyOf::<T>::deposit_creating(&recipient, balance_due);
+		let _ = CurrencyOf::<T>::deposit_creating(&recipient, balance_due);
 
 		// Check if this claim should have a vesting schedule.
 		if let Some(vs) = vesting {

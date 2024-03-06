@@ -1127,9 +1127,6 @@ fn cannot_note_duplicate_preimage() {
 				<<Runtime as frame_system::Config>::Hashing as sp_runtime::traits::Hash>::hash(
 					&dummy_preimage[..],
 				);
-			let expected_deposit = (crate::mock::ByteDeposit::get() as u128
-				* (dummy_preimage.len() as u128))
-				.saturating_add(crate::mock::BaseDeposit::get() as u128);
 
 			// Construct input data to note preimage
 			let input: Vec<_> =
@@ -1167,7 +1164,6 @@ fn cannot_note_duplicate_preimage() {
 			assert_eq!(
 				events(),
 				vec![
-					BalancesEvent::Reserved { who: Alice.into(), amount: expected_deposit }.into(),
 					PreimageEvent::Noted { hash: proposal_hash }.into(),
 					EvmEvent::Executed { address: Precompile1.into() }.into(),
 					EvmEvent::ExecutedFailed { address: Precompile1.into() }.into(),

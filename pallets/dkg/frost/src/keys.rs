@@ -311,7 +311,7 @@ where
 	/// Get the VerifyingKey matching this commitment vector (which is the first
 	/// element in the vector), or an error if the vector is empty.
 	pub fn verifying_key(&self) -> Result<VerifyingKey<C>, Error> {
-		Ok(VerifyingKey::new(self.0.get(0).ok_or(Error::MissingCommitment)?.0))
+		Ok(VerifyingKey::new(self.0.first().ok_or(Error::MissingCommitment)?.0))
 	}
 
 	/// Returns the coefficient commitments.
@@ -493,7 +493,7 @@ pub fn evaluate_polynomial<C: Ciphersuite>(
 		value = value + *coeff;
 		value *= ell_scalar;
 	}
-	value = value + *coefficients.get(0).expect("coefficients must have at least one element");
+	value = value + *coefficients.first().expect("coefficients must have at least one element");
 	value
 }
 
