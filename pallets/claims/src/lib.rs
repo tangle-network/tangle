@@ -102,7 +102,7 @@ impl StatementKind {
 			StatementKind::Safe => {
 				&b"I hereby agree to the terms of the statement whose sha2256sum is \
 				7eae145b00c1912c8b01674df5df4ad9abcf6d18ea3f33d27eb6897a762f4273. (This may be found at the URL: \
-				https://https://statement.tangle.tools/safe-claim-statement)"[..]
+				https://statement.tangle.tools/safe-claim-statement)"[..]
 			},
 		}
 	}
