@@ -167,10 +167,6 @@ fn get_team_distribution_share() -> Perbill {
 	Perbill::from_rational(30_u32, 100_u32)
 }
 
-fn get_investor_distribution_share() -> Perbill {
-	Perbill::from_rational(16_u32, 100_u32)
-}
-
 fn get_foundation_distribution_share() -> Perbill {
 	Perbill::from_rational(15_u32, 100_u32)
 }
@@ -474,7 +470,7 @@ fn test_distribution_shares() {
 		.collect();
 
 	let total_investor_amount =
-		investor_accounts.into_iter().map(|(_address, balance)| balance as u128).sum();
+		investor_accounts.into_iter().map(|(_address, balance)| balance).sum();
 
 	assert_eq!(total_investor_amount, 13639999999999999916113920); // 13639999 TNT
 	assert_eq!(
@@ -489,7 +485,7 @@ fn test_distribution_shares() {
 		.collect();
 
 	let total_direct_team_amount =
-		direct_team_accounts.into_iter().map(|(address, balance)| balance as u128).sum();
+		direct_team_accounts.into_iter().map(|(_address, balance)| balance).sum();
 
 	assert_eq!(total_direct_team_amount, 138150689999999993905152); // 138150 TNT
 	assert_eq!(
@@ -518,11 +514,8 @@ fn test_distribution_shares() {
 	// ============== compute edgeware distribution total amount ====================== //
 	let edgeware_genesis_list = get_edgeware_genesis_balance_distribution();
 
-	let total_edgeware_claims_amount: u128 = edgeware_genesis_list
-		.claims
-		.into_iter()
-		.map(|(_, amount, _)| amount as u128)
-		.sum();
+	let total_edgeware_claims_amount: u128 =
+		edgeware_genesis_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
 	let mut total_edgeware_vesting_amount: u128 = Default::default();
 
 	for (_acc, vesting) in edgeware_genesis_list.vesting.into_iter() {
@@ -545,11 +538,8 @@ fn test_distribution_shares() {
 	// ============== compute edgeware snapshot distribution total amount ====================== //
 	let edgeware_snapshot_list = get_substrate_balance_distribution();
 
-	let total_edgeware_snapshot_claims_amount: u128 = edgeware_snapshot_list
-		.claims
-		.into_iter()
-		.map(|(_, amount, _)| amount as u128)
-		.sum();
+	let total_edgeware_snapshot_claims_amount: u128 =
+		edgeware_snapshot_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
 	let mut total_edgeware_snapshot_vesting_amount: u128 = Default::default();
 
 	for (_acc, vesting) in edgeware_snapshot_list.vesting.into_iter() {
@@ -572,11 +562,8 @@ fn test_distribution_shares() {
 	// ============== compute leaderboard distribution total amount ====================== //
 	let leaderboard_genesis_list = get_leaderboard_balance_distribution();
 
-	let total_leaderboard_claims_amount: u128 = leaderboard_genesis_list
-		.claims
-		.into_iter()
-		.map(|(_, amount, _)| amount as u128)
-		.sum();
+	let total_leaderboard_claims_amount: u128 =
+		leaderboard_genesis_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
 	let mut total_leaderboard_vesting_amount: u128 = Default::default();
 
 	for (_acc, vesting) in leaderboard_genesis_list.vesting.into_iter() {
@@ -599,11 +586,8 @@ fn test_distribution_shares() {
 	// ============== compute polkadot distribution total amount ====================== //
 	let polkadot_genesis_list = get_polkadot_validator_distribution();
 
-	let total_polkadot_claims_amount: u128 = polkadot_genesis_list
-		.claims
-		.into_iter()
-		.map(|(_, amount, _)| amount as u128)
-		.sum();
+	let total_polkadot_claims_amount: u128 =
+		polkadot_genesis_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
 	let mut total_polkadot_vesting_amount: u128 = Default::default();
 
 	for (_acc, vesting) in polkadot_genesis_list.vesting.into_iter() {
@@ -627,7 +611,7 @@ fn test_distribution_shares() {
 	let team_balance_account_distribution = get_team_balance_distribution();
 	let total_team_claims_amount: u128 = team_balance_account_distribution
 		.into_iter()
-		.map(|(_, amount, _, _, _)| amount as u128)
+		.map(|(_, amount, _, _, _)| amount)
 		.sum();
 
 	assert_eq!(total_team_claims_amount, 29861849310000000006094848); // 29861849 TNT
