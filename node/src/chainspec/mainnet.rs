@@ -22,7 +22,6 @@ use crate::{
 	},
 	mainnet_fixtures::{get_bootnodes, get_initial_authorities, get_root_key},
 };
-use core::marker::PhantomData;
 use hex_literal::hex;
 use pallet_airdrop_claims::MultiAddress;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -37,11 +36,10 @@ use sp_runtime::{
 use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId,
-	RuntimeGenesisConfig, SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-	TreasuryPalletId, VestingConfig, UNIT, WASM_BINARY,
+	ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId, RuntimeGenesisConfig, SessionConfig,
+	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig, UNIT,
+	WASM_BINARY,
 };
-use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
@@ -302,13 +300,6 @@ fn mainnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
-		eth_2_client: Eth2ClientConfig {
-			networks: vec![(
-				webb_proposals::TypedChainId::Evm(1),
-				NetworkConfig::new(&Network::Mainnet),
-			)],
-			phantom: PhantomData,
-		},
 		claims: ClaimsConfig {
 			claims: genesis_airdrop.claims,
 			vesting: vesting_claims,

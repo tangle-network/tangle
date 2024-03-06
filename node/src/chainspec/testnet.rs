@@ -16,7 +16,6 @@
 #![allow(clippy::type_complexity)]
 
 use crate::testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key};
-use core::marker::PhantomData;
 use hex_literal::hex;
 use pallet_airdrop_claims::{MultiAddress, StatementKind};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -33,11 +32,10 @@ use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::types::BlockNumber;
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
-	ElectionsConfig, Eth2ClientConfig, ImOnlineConfig, MaxVestingSchedules, Perbill,
-	RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
-	SystemConfig, UNIT, WASM_BINARY,
+	ElectionsConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig,
+	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT,
+	WASM_BINARY,
 };
-use webb_consensus_types::network_config::{Network, NetworkConfig};
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
@@ -335,13 +333,6 @@ fn testnet_genesis(
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
-		eth_2_client: Eth2ClientConfig {
-			networks: vec![
-				(webb_proposals::TypedChainId::Evm(1), NetworkConfig::new(&Network::Mainnet)),
-				(webb_proposals::TypedChainId::Evm(5), NetworkConfig::new(&Network::Goerli)),
-			],
-			phantom: PhantomData,
-		},
 		claims: ClaimsConfig {
 			claims: claims_list,
 			vesting: vesting_claims,
