@@ -15712,11 +15712,7 @@ version = "0.6.1"
 dependencies = [
  "parity-scale-codec 3.6.9",
  "scale-info",
- "serde_json",
  "subxt 0.31.0",
- "subxt-codegen 0.31.0",
- "subxt-metadata 0.31.0",
- "syn 2.0.52",
 ]
 
 [[package]]

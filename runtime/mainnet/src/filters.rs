@@ -39,8 +39,7 @@ impl Contains<RuntimeCall> for MainnetCallFilter {
 			RuntimeCall::Council(_) |
 			// Block jobs and roles pallet
 			RuntimeCall::Roles(_) |
-			RuntimeCall::Jobs(_) |
-
+			RuntimeCall::Jobs(_) => false,
 			// al other calls are allowed
 			_ =>true
 
