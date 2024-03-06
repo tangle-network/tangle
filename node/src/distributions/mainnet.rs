@@ -81,7 +81,7 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 // year cliff)
 // Investors : 13.63% (5% liquid immediately)(investor accounts gets 95% that is vested
 // over 2years with 1 year cliff)
-// Treasury : 36.37% (immediate release to treasury pallet account)
+// Treasury : 36.36% (immediate release to treasury pallet account)
 // EDG Genesis Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // EDG Snapshot Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // Leaderboard airdrop : 2% (5% immediate release)(95% vested over two years, with one month cliff)
@@ -177,7 +177,7 @@ fn get_foundation_distribution_share() -> Perbill {
 }
 
 fn get_treasury_distribution_share() -> Perbill {
-	Perbill::from_float(0.3637_f64)
+	Perbill::from_float(0.3636_f64)
 }
 
 fn get_initial_liquidity_share() -> Perbill {
@@ -501,11 +501,11 @@ fn test_distribution_shares() {
 	// =========== compute treasury total amount ======================== //
 
 	let total_treasury_amount = get_treasury_distribution_share() * TOTAL_SUPPLY;
-	assert_eq!(total_treasury_amount, 36370000000000000000000000); // 36370000 TNT
+	assert_eq!(total_treasury_amount, 36360000000000000000000000); // 36360000 TNT
 	assert_eq!(
 		Perbill::from_rational(total_treasury_amount, TOTAL_SUPPLY),
-		Perbill::from_float(0.3637)
-	); // 36.37%
+		Perbill::from_float(0.3636)
+	); // 36.36%
 
 	// ============== compute foundation total amount ==================== //
 
@@ -651,6 +651,6 @@ fn test_distribution_shares() {
 		total_polkadot_vesting_amount +
 		total_team_claims_amount;
 
-	assert_eq!(total_genesis_endowment, 100010000000000007768522730); // 100010000 TNT (10k minted extra!!)
+	assert_eq!(total_genesis_endowment, 100000000000000007768522730); // 100000000 TNT
 	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one()); // 100%
 }
