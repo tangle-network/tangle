@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install latest nightly
+      - name: Install latest stable
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2023-07-16
+          toolchain: stable-2023-07-16
           override: true
           components: rustfmt
 
@@ -41,7 +41,7 @@ jobs:
         uses: actions-rs/toolchain@master
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: stable
           target: wasm32-unknown-unknown
 
       - name: Install cargo-nextest
@@ -72,7 +72,7 @@ jobs:
         uses: actions-rs/toolchain@master
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: stable
           target: wasm32-unknown-unknown
 
       - name: Rust Cache
