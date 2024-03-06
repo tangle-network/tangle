@@ -40,13 +40,10 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
-use tangle_primitives::jobs::JobType;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
-use tangle_primitives::verifier::circom::CircomVerifierGroth16Bn254;
-use tangle_primitives::verifier::arkworks::ArkworksVerifierGroth16Bn254;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking::StakerStatus;
@@ -74,7 +71,10 @@ use sp_runtime::{
 	SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
+use tangle_primitives::jobs::JobType;
 use tangle_primitives::jobs::{traits::JobToFee, JobSubmission};
+use tangle_primitives::verifier::arkworks::ArkworksVerifierGroth16Bn254;
+use tangle_primitives::verifier::circom::CircomVerifierGroth16Bn254;
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -1133,10 +1133,10 @@ impl
 		>,
 	) -> DispatchResult {
 		match data.result {
-			JobResult::DKGPhaseOne(_) |
-			JobResult::DKGPhaseTwo(_) |
-			JobResult::DKGPhaseThree(_) |
-			JobResult::DKGPhaseFour(_) => Dkg::verify(data.result),
+			JobResult::DKGPhaseOne(_)
+			| JobResult::DKGPhaseTwo(_)
+			| JobResult::DKGPhaseThree(_)
+			| JobResult::DKGPhaseFour(_) => Dkg::verify(data.result),
 			JobResult::ZkSaaSPhaseOne(_) | JobResult::ZkSaaSPhaseTwo(_) => ZkSaaS::verify(data),
 		}
 	}
@@ -1195,17 +1195,19 @@ impl pallet_roles::Config for Runtime {
 
 pub struct MainnetJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for MainnetJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>
+	for MainnetJobToFeeHandler
+{
 	type Balance = Balance;
 
 	fn job_to_fee(
 		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
 	) -> Balance {
 		match job.job_type {
-			JobType::DKGTSSPhaseOne(_) |
-			JobType::DKGTSSPhaseTwo(_) |
-			JobType::DKGTSSPhaseThree(_) |
-			JobType::DKGTSSPhaseFour(_) => Dkg::job_to_fee(job),
+			JobType::DKGTSSPhaseOne(_)
+			| JobType::DKGTSSPhaseTwo(_)
+			| JobType::DKGTSSPhaseThree(_)
+			| JobType::DKGTSSPhaseFour(_) => Dkg::job_to_fee(job),
 			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => ZkSaaS::job_to_fee(job),
 		}
 	}

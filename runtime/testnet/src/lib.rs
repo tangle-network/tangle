@@ -1095,7 +1095,9 @@ impl pallet_airdrop_claims::Config for Runtime {
 
 pub struct TestnetJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for TestnetJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>
+	for TestnetJobToFeeHandler
+{
 	type Balance = Balance;
 
 	fn job_to_fee(
