@@ -78,13 +78,13 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 // Team : 30% (5% immediate) (team account gets 95% that is vested over 2years with 1 year cliff))
 // Foundation : 15% (5% immediate) (foundation account gets 95% that is vested over 2years with 1
 // year cliff)
-// Investors : 16% (5% liquid immediately)(investor accounts gets 95% that is vested
+// Investors : 13.63% (5% liquid immediately)(investor accounts gets 95% that is vested
 // over 2years with 1 year cliff)
-// Treasury : 34% (immediate release to treasury pallet account)
+// Treasury : 36.36% (immediate release to treasury pallet account)
 // EDG Genesis Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // EDG Snapshot Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // Leaderboard airdrop : 2% (5% immediate release)(95% vested over two years, with one month cliff)
-// Polkadot validators Airdrop : 1% (5% immediate release)(95% vested over two years, with one month
+// Polkadot validator airdrop : 1% (5% immediate release)(95% vested over two years, with one month
 // cliff) ***
 
 pub fn get_edgeware_genesis_list() -> Vec<H160> {
@@ -113,7 +113,7 @@ fn get_edgeware_snapshot_list() -> BTreeMap<AccountId32, f64> {
 
 fn get_investor_balance_distribution_list() -> BTreeMap<MultiAddress, f64> {
 	read_investor_accounts_to_multiaddress(
-		"node/src/distributions/data/webb_investor_distribution.json",
+		"node/src/distributions/data/webb_investor_distributions.json",
 	)
 }
 
@@ -134,6 +134,7 @@ pub fn get_polkadot_validator_address_list() -> Vec<AccountId32> {
 pub const ONE_TOKEN: u128 = UNIT;
 pub const TOTAL_SUPPLY: u128 = 100_000_000 * ONE_TOKEN;
 pub const ONE_PERCENT_TOTAL_SUPPLY: u128 = TOTAL_SUPPLY / 100;
+pub const TWO_PERCENT_TOTAL_SUPPLY: u128 = ONE_PERCENT_TOTAL_SUPPLY * 2;
 pub const BLOCK_TIME: u128 = 6;
 pub const ONE_MONTH_BLOCKS: u64 = (30 * 24 * 60 * 60 / BLOCK_TIME) as u64;
 pub const ONE_YEAR_BLOCKS: u64 = (365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
@@ -166,16 +167,12 @@ fn get_team_distribution_share() -> Perbill {
 	Perbill::from_rational(30_u32, 100_u32)
 }
 
-fn get_investor_distribution_share() -> Perbill {
-	Perbill::from_rational(16_u32, 100_u32)
-}
-
 fn get_foundation_distribution_share() -> Perbill {
 	Perbill::from_rational(15_u32, 100_u32)
 }
 
 fn get_treasury_distribution_share() -> Perbill {
-	Perbill::from_rational(35_u32, 100_u32)
+	Perbill::from_float(0.3636_f64)
 }
 
 fn get_initial_liquidity_share() -> Perbill {
@@ -232,7 +229,7 @@ pub fn get_leaderboard_balance_distribution() -> DistributionResult {
 	let combined_balances: Vec<(MultiAddress, u128)> = points_list
 		.into_iter()
 		.map(|(address, points)| {
-			(address, (points as u128 * ONE_PERCENT_TOTAL_SUPPLY) / total_points as u128)
+			(address, (points as u128 * TWO_PERCENT_TOTAL_SUPPLY) / total_points as u128)
 		})
 		.collect();
 
@@ -276,8 +273,7 @@ pub fn get_team_direct_vesting_distribution() -> Vec<(MultiAddress, u128, u64, u
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
 	let team_address: AccountId =
 		hex!["8e1c2bdddab9573d8cb094dbffba24a2b2c21b7e71e3f5b604e8607483872443"].into();
-	let balance =
-		(get_team_distribution_share() - get_initial_liquidity_share()).mul_floor(TOTAL_SUPPLY);
+	let balance = (get_team_distribution_share()).mul_floor(TOTAL_SUPPLY);
 
 	let direct_team_spend: u128 = get_team_direct_vesting_accounts()
 		.into_values()
@@ -291,20 +287,7 @@ pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u12
 pub fn get_treasury_balance() -> (AccountId, u128) {
 	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
 	let acc: AccountId = pallet_id.into_account_truncating();
-
-	// any leftover from investors are sent to treasury
-	let investors_actual_spend = get_investor_balance_distribution_list()
-		.into_values()
-		.map(|balance| (balance as u128))
-		.sum::<u128>();
-
-	let investors_actual_spend_as_percent =
-		Perbill::from_rational(investors_actual_spend, TOTAL_SUPPLY);
-	let leftover_from_investors =
-		get_investor_distribution_share() - investors_actual_spend_as_percent;
-	let leftover_amount = leftover_from_investors * TOTAL_SUPPLY;
-
-	(acc, get_treasury_distribution_share() * TOTAL_SUPPLY + leftover_amount)
+	(acc, get_treasury_distribution_share() * TOTAL_SUPPLY)
 }
 
 pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
@@ -476,4 +459,181 @@ fn test_get_distribution_for() {
 		),
 		expected_distibution_result
 	);
+}
+
+#[test]
+fn test_distribution_shares() {
+	// ============== compute total investor amount and share of distribution ================= //
+	let investor_accounts: Vec<(MultiAddress, u128)> = get_investor_balance_distribution_list()
+		.into_iter()
+		.map(|(address, balance)| (address, balance as u128))
+		.collect();
+
+	let total_investor_amount =
+		investor_accounts.into_iter().map(|(_address, balance)| balance).sum();
+
+	assert_eq!(total_investor_amount, 13639999999999999916113920); // 13639999 TNT
+	assert_eq!(
+		Perbill::from_rational(total_investor_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.136399999)
+	); // 13.6399999%
+
+	// ============== compute direct vesting team accounts ================= //
+	let direct_team_accounts: Vec<(MultiAddress, u128)> = get_team_direct_vesting_accounts()
+		.into_iter()
+		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
+		.collect();
+
+	let total_direct_team_amount =
+		direct_team_accounts.into_iter().map(|(_address, balance)| balance).sum();
+
+	assert_eq!(total_direct_team_amount, 138150689999999993905152); // 138150 TNT
+	assert_eq!(
+		Perbill::from_rational(total_direct_team_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.001381506)
+	); // 0.1381506%
+
+	// =========== compute treasury total amount ======================== //
+
+	let total_treasury_amount = get_treasury_distribution_share() * TOTAL_SUPPLY;
+	assert_eq!(total_treasury_amount, 36360000000000000000000000); // 36360000 TNT
+	assert_eq!(
+		Perbill::from_rational(total_treasury_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.3636)
+	); // 36.36%
+
+	// ============== compute foundation total amount ==================== //
+
+	let foundation_total_amount = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY);
+	assert_eq!(foundation_total_amount, 15000000000000000000000000); // 15000000 TNT
+	assert_eq!(
+		Perbill::from_rational(foundation_total_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.15)
+	); // 15%
+
+	// ============== compute edgeware distribution total amount ====================== //
+	let edgeware_genesis_list = get_edgeware_genesis_balance_distribution();
+
+	let total_edgeware_claims_amount: u128 =
+		edgeware_genesis_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
+	let mut total_edgeware_vesting_amount: u128 = Default::default();
+
+	for (_acc, vesting) in edgeware_genesis_list.vesting.into_iter() {
+		let cliff_vesting = vesting[0].0;
+		let post_cliff_vesting = vesting[1].0;
+		total_edgeware_vesting_amount += cliff_vesting + post_cliff_vesting;
+	}
+
+	assert_eq!(total_edgeware_claims_amount, 50000000000000000000940); // 50000 TNT
+	assert_eq!(total_edgeware_vesting_amount, 949999999999999990376448); // 949999 TNT
+	assert_eq!(
+		Perbill::from_rational(total_edgeware_claims_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.0005)
+	); // 0.05%
+	assert_eq!(
+		Perbill::from_rational(total_edgeware_vesting_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.009499999)
+	); // 0.9499999%
+
+	// ============== compute edgeware snapshot distribution total amount ====================== //
+	let edgeware_snapshot_list = get_substrate_balance_distribution();
+
+	let total_edgeware_snapshot_claims_amount: u128 =
+		edgeware_snapshot_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
+	let mut total_edgeware_snapshot_vesting_amount: u128 = Default::default();
+
+	for (_acc, vesting) in edgeware_snapshot_list.vesting.into_iter() {
+		let cliff_vesting = vesting[0].0;
+		let post_cliff_vesting = vesting[1].0;
+		total_edgeware_snapshot_vesting_amount += cliff_vesting + post_cliff_vesting;
+	}
+
+	assert_eq!(total_edgeware_snapshot_claims_amount, 50000000000000383783868); // 50000 TNT
+	assert_eq!(total_edgeware_snapshot_vesting_amount, 950000000000007330583432); // 949999 TNT
+	assert_eq!(
+		Perbill::from_rational(total_edgeware_snapshot_claims_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.0005)
+	); // 0.05%
+	assert_eq!(
+		Perbill::from_rational(total_edgeware_snapshot_vesting_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.0095)
+	); // 0.95%
+
+	// ============== compute leaderboard distribution total amount ====================== //
+	let leaderboard_genesis_list = get_leaderboard_balance_distribution();
+
+	let total_leaderboard_claims_amount: u128 =
+		leaderboard_genesis_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
+	let mut total_leaderboard_vesting_amount: u128 = Default::default();
+
+	for (_acc, vesting) in leaderboard_genesis_list.vesting.into_iter() {
+		let cliff_vesting = vesting[0].0;
+		let post_cliff_vesting = vesting[1].0;
+		total_leaderboard_vesting_amount += cliff_vesting + post_cliff_vesting;
+	}
+
+	assert_eq!(total_leaderboard_claims_amount, 100000000000000000002814); // 100000 TNT
+	assert_eq!(total_leaderboard_vesting_amount, 1900000000000000057155584); // 1900000 TNT
+	assert_eq!(
+		Perbill::from_rational(total_leaderboard_claims_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.001)
+	); // 0.1%
+	assert_eq!(
+		Perbill::from_rational(total_leaderboard_vesting_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.019)
+	); // 1.9%
+
+	// ============== compute polkadot distribution total amount ====================== //
+	let polkadot_genesis_list = get_polkadot_validator_distribution();
+
+	let total_polkadot_claims_amount: u128 =
+		polkadot_genesis_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
+	let mut total_polkadot_vesting_amount: u128 = Default::default();
+
+	for (_acc, vesting) in polkadot_genesis_list.vesting.into_iter() {
+		let cliff_vesting = vesting[0].0;
+		let post_cliff_vesting = vesting[1].0;
+		total_polkadot_vesting_amount += cliff_vesting + post_cliff_vesting;
+	}
+
+	assert_eq!(total_polkadot_claims_amount, 50000000000000000000508); // 50000 TNT
+	assert_eq!(total_polkadot_vesting_amount, 950000000000000090505216); // 949999 TNT
+	assert_eq!(
+		Perbill::from_rational(total_polkadot_claims_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.0005)
+	); // 0.05%
+	assert_eq!(
+		Perbill::from_rational(total_polkadot_vesting_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.0095)
+	); // 0.95%
+
+	// ================= compute team account distribution ======================= //
+	let team_balance_account_distribution = get_team_balance_distribution();
+	let total_team_claims_amount: u128 = team_balance_account_distribution
+		.into_iter()
+		.map(|(_, amount, _, _, _)| amount)
+		.sum();
+
+	assert_eq!(total_team_claims_amount, 29861849310000000006094848); // 29861849 TNT
+	assert_eq!(
+		Perbill::from_rational(total_team_claims_amount, TOTAL_SUPPLY),
+		Perbill::from_float(0.298618493)
+	); // 29.8618493%
+
+	let total_genesis_endowment = total_investor_amount +
+		total_direct_team_amount +
+		total_treasury_amount +
+		foundation_total_amount +
+		total_edgeware_claims_amount +
+		total_edgeware_vesting_amount +
+		total_edgeware_snapshot_claims_amount +
+		total_edgeware_snapshot_vesting_amount +
+		total_leaderboard_claims_amount +
+		total_leaderboard_vesting_amount +
+		total_polkadot_claims_amount +
+		total_polkadot_vesting_amount +
+		total_team_claims_amount;
+
+	assert_eq!(total_genesis_endowment, 100000000000000007768522730); // 100000000 TNT
+	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one()); // 100%
 }
