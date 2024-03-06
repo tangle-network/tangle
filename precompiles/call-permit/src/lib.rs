@@ -19,8 +19,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use core::marker::PhantomData;
-use evm::ExitReason;
-use fp_evm::{Context, ExitRevert, PrecompileFailure, PrecompileHandle, Transfer};
+use fp_evm::{Context, ExitReason, ExitRevert, PrecompileFailure, PrecompileHandle, Transfer};
 use frame_support::{
 	ensure,
 	storage::types::{StorageMap, ValueQuery},
@@ -171,7 +170,7 @@ where
 			.ok_or_else(|| revert("Call require too much gas (uint64 overflow)"))?;
 
 		if total_cost > handle.remaining_gas() {
-			return Err(revert("Gaslimit is too low to dispatch provided call"))
+			return Err(revert("Gaslimit is too low to dispatch provided call"));
 		}
 
 		// VERIFY PERMIT
@@ -217,8 +216,9 @@ where
 		match reason {
 			ExitReason::Error(exit_status) => Err(PrecompileFailure::Error { exit_status }),
 			ExitReason::Fatal(exit_status) => Err(PrecompileFailure::Fatal { exit_status }),
-			ExitReason::Revert(_) =>
-				Err(PrecompileFailure::Revert { exit_status: ExitRevert::Reverted, output }),
+			ExitReason::Revert(_) => {
+				Err(PrecompileFailure::Revert { exit_status: ExitRevert::Reverted, output })
+			},
 			ExitReason::Succeed(_) => Ok(output.into()),
 		}
 	}

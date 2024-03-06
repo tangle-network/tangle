@@ -161,7 +161,7 @@ impl Listener {
 								.and_then(|inner| inner.checked_sub(memory.data.len()));
 
 							if self.remaining_memory_usage.is_none() {
-								return
+								return;
 							}
 
 							Some(memory.data)
@@ -176,7 +176,7 @@ impl Listener {
 								.and_then(|inner| inner.checked_sub(stack.data.len()));
 
 							if self.remaining_memory_usage.is_none() {
-								return
+								return;
 							}
 
 							Some(stack.data)
@@ -205,7 +205,7 @@ impl Listener {
 								});
 
 							if self.remaining_memory_usage.is_none() {
-								return
+								return;
 							}
 
 							Some(context.storage_cache.clone())
@@ -277,8 +277,8 @@ impl Listener {
 					_ => (),
 				}
 			},
-			RuntimeEvent::SLoad { address: _, index, value } |
-			RuntimeEvent::SStore { address: _, index, value } => {
+			RuntimeEvent::SLoad { address: _, index, value }
+			| RuntimeEvent::SStore { address: _, index, value } => {
 				if let Some(context) = self.context_stack.last_mut() {
 					if !self.disable_storage {
 						context.storage_cache.insert(index, value);
@@ -295,7 +295,7 @@ impl Listener {
 impl ListenerT for Listener {
 	fn event(&mut self, event: Event) {
 		if self.remaining_memory_usage.is_none() {
-			return
+			return;
 		}
 
 		match event {

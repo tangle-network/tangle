@@ -43,6 +43,7 @@ hex-literal = { workspace = true }
 [features]
 default = ["std"]
 std = [
+  "serde/std",
   "environmental/std",
   "fp-evm/std",
   "frame-support/std",

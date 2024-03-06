@@ -84,7 +84,7 @@ where
 {
 	// bounds check
 	if i >= M {
-		return false
+		return false;
 	}
 	let ys = challenge_up_to(i, shared_state, data, commitment);
 	let n = data.n.unsigned_abs_ref();
@@ -105,7 +105,7 @@ where
 {
 	// bounds check
 	if i >= M {
-		return false
+		return false;
 	}
 	let ys = challenge_up_to(i, shared_state, data, commitment);
 	let n = data.n.unsigned_abs_ref();
@@ -155,7 +155,7 @@ impl<'a, R: RngCore> Iterator for RandomNaturalsLessThan<'a, R> {
 		loop {
 			let x = get_random_natural_with_up_to_bits(&mut self.rng, self.bits);
 			if x < self.limit {
-				return Some(x)
+				return Some(x);
 			}
 		}
 	}
@@ -210,7 +210,7 @@ pub fn random_naturals_less_than<R: RngCore>(
 /// where $T$ is time, $M$ is additional memory, and `n` is `bits`.
 pub fn get_random_natural_with_up_to_bits<R: RngCore>(rng: &mut R, bits: u64) -> Natural {
 	if bits == 0 {
-		return Natural::ZERO
+		return Natural::ZERO;
 	}
 	let l = usize::exact_from(
 		bits.shr_round(Limb::LOG_WIDTH, malachite_base::rounding_modes::RoundingMode::Ceiling)
@@ -239,14 +239,14 @@ pub fn get_random_natural_with_up_to_bits<R: RngCore>(rng: &mut R, bits: u64) ->
 fn limbs_slice_mod_power_of_2_in_place(xs: &mut [Limb], pow: u64) {
 	if pow == 0 {
 		malachite_base::slices::slice_set_zero(xs);
-		return
+		return;
 	}
 	let new_size = usize::exact_from(
 		pow.shr_round(Limb::LOG_WIDTH, malachite_base::rounding_modes::RoundingMode::Ceiling)
 			.0,
 	);
 	if new_size > xs.len() {
-		return
+		return;
 	}
 	malachite_base::slices::slice_set_zero(&mut xs[new_size..]);
 	let leftover_bits = pow & Limb::WIDTH_MASK;

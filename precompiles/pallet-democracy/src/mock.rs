@@ -67,7 +67,6 @@ impl frame_system::Config for Runtime {
 	type Hashing = BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
-
 	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
@@ -80,6 +79,7 @@ impl frame_system::Config for Runtime {
 	type BlockLength = ();
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = ();
+	type RuntimeTask = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 parameter_types! {
@@ -96,7 +96,7 @@ impl pallet_balances::Config for Runtime {
 	type AccountStore = System;
 	type WeightInfo = ();
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type MaxHolds = ();
+	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
 }
@@ -118,6 +118,10 @@ pub type Precompiles<R> =
 
 pub type PCall = DemocracyPrecompileCall<Runtime>;
 
+parameter_types! {
+	pub SuicideQuickClearLimit: u32 = 0;
+}
+
 impl pallet_evm::Config for Runtime {
 	type FeeCalculator = ();
 	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
@@ -136,6 +140,7 @@ impl pallet_evm::Config for Runtime {
 	type BlockHashMapping = SubstrateBlockHashMapping<Self>;
 	type FindAuthor = ();
 	type OnCreate = ();
+	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
@@ -219,8 +224,7 @@ impl pallet_preimage::Config for Runtime {
 	type WeightInfo = ();
 	type Currency = Balances;
 	type ManagerOrigin = EnsureRoot<AccountId>;
-	type BaseDeposit = BaseDeposit;
-	type ByteDeposit = ByteDeposit;
+	type Consideration = ();
 }
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles
@@ -229,7 +233,7 @@ pub(crate) struct ExtBuilder {
 	/// Endowed accounts with balances
 	balances: Vec<(AccountId, Balance)>,
 	/// Referenda that already exist (don't need a proposal and launch period delay)
-	referenda: Vec<(Bounded<RuntimeCall>, VoteThreshold, BlockNumber)>,
+	referenda: Vec<(BoundedCallOf<Runtime>, VoteThreshold, BlockNumber)>,
 }
 
 impl ExtBuilder {
@@ -242,7 +246,7 @@ impl ExtBuilder {
 	/// Put some referenda into storage before starting the test
 	pub(crate) fn with_referenda(
 		mut self,
-		referenda: Vec<(Bounded<RuntimeCall>, VoteThreshold, BlockNumber)>,
+		referenda: Vec<(BoundedCallOf<Runtime>, VoteThreshold, BlockNumber)>,
 	) -> Self {
 		self.referenda = referenda;
 		self

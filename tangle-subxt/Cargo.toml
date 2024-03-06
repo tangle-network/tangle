@@ -10,4 +10,4 @@ repository = { workspace = true }
 [dependencies]
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
-subxt = { version = "0.31.0" }
+subxt = { version = "0.34.0" }

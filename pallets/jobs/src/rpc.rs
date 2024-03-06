@@ -34,7 +34,7 @@ impl<T: Config> Pallet<T> {
 					};
 					jobs.push(info);
 				} else {
-					continue
+					continue;
 				}
 			}
 		}

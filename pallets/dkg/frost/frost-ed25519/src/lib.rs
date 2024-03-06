@@ -1,5 +1,4 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-
 use curve25519_dalek::{
 	constants::ED25519_BASEPOINT_POINT,
 	edwards::{CompressedEdwardsY, EdwardsPoint},
@@ -105,21 +104,21 @@ impl Group for Ed25519Group {
 		{
 			Some(point) => {
 				if WrappedEdwardsPoint(point) == Self::identity() {
-                    Err(GroupError::InvalidIdentityElement)
-                } else if point.is_torsion_free() {
-                    // At this point we should reject points which were not
-                    // encoded canonically (i.e. Y coordinate >= p).
-                    // However, we don't allow non-prime order elements,
-                    // and that suffices to also reject non-canonical encodings
-                    // per https://eprint.iacr.org/2020/1244.pdf:
-                    //
-                    // > There are 19 elliptic curve points that can be encoded in a non-canonical form.
-                    // > (...) Among these points there are 2 points of small order and from the
-                    // > remaining 17 y-coordinates only 10 decode to valid curve points all of mixed order.
-                    Ok(WrappedEdwardsPoint(point))
-                } else {
-                    Err(GroupError::InvalidNonPrimeOrderElement)
-                }
+					Err(GroupError::InvalidIdentityElement)
+				} else if point.is_torsion_free() {
+					// At this point we should reject points which were not
+					// encoded canonically (i.e. Y coordinate >= p).
+					// However, we don't allow non-prime order elements,
+					// and that suffices to also reject non-canonical encodings
+					// per https://eprint.iacr.org/2020/1244.pdf:
+					//
+					// > There are 19 elliptic curve points that can be encoded in a non-canonical form.
+					// > (...) Among these points there are 2 points of small order and from the
+					// > remaining 17 y-coordinates only 10 decode to valid curve points all of mixed order.
+					Ok(WrappedEdwardsPoint(point))
+				} else {
+					Err(GroupError::InvalidNonPrimeOrderElement)
+				}
 			},
 			None => Err(GroupError::MalformedElement),
 		}

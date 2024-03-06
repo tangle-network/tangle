@@ -234,6 +234,7 @@ impl frame_system::Config for Runtime {
 	type BaseCallFilter = Everything;
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
+	type RuntimeTask = ();
 	type OnSetCode = ();
 	type MaxConsumers = ConstU32<16>;
 }
@@ -249,7 +250,7 @@ impl pallet_balances::Config for Runtime {
 	type AccountStore = System;
 	type WeightInfo = ();
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type MaxHolds = ();
+	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
 }
@@ -306,6 +307,7 @@ impl pallet_evm::Config for Runtime {
 	type BlockHashMapping = pallet_evm::SubstrateBlockHashMapping<Self>;
 	type FindAuthor = ();
 	type OnCreate = ();
+	type SuicideQuickClearLimit = ConstU32<0>;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
@@ -375,8 +377,9 @@ impl pallet_staking::Config for Runtime {
 	type BondingDuration = ();
 	type SessionInterface = ();
 	type EraPayout = ();
+	type MaxExposurePageSize = ConstU32<64>;
+	type MaxControllersInDeprecationBatch = ConstU32<100>;
 	type NextNewSession = Session;
-	type MaxNominatorRewardedPerValidator = ConstU32<64>;
 	type OffendingValidatorsThreshold = ();
 	type ElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type GenesisElectionProvider = Self::ElectionProvider;

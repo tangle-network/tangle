@@ -215,9 +215,9 @@ impl Listener {
 
 	pub fn gasometer_event(&mut self, event: GasometerEvent) {
 		match event {
-			GasometerEvent::RecordCost { snapshot, .. } |
-			GasometerEvent::RecordDynamicCost { snapshot, .. } |
-			GasometerEvent::RecordStipend { snapshot, .. } => {
+			GasometerEvent::RecordCost { snapshot, .. }
+			| GasometerEvent::RecordDynamicCost { snapshot, .. }
+			| GasometerEvent::RecordStipend { snapshot, .. } => {
 				if let Some(context) = self.context_stack.last_mut() {
 					if context.start_gas.is_none() {
 						context.start_gas = Some(snapshot.gas());
@@ -510,13 +510,15 @@ impl Listener {
 				match context.context_type {
 					ContextType::Call(call_type) => {
 						let res = match &reason {
-							ExitReason::Succeed(ExitSucceed::Returned) =>
-								CallResult::Output(return_value.to_vec()),
+							ExitReason::Succeed(ExitSucceed::Returned) => {
+								CallResult::Output(return_value.to_vec())
+							},
 							ExitReason::Succeed(_) => CallResult::Output(vec![]),
 							ExitReason::Error(error) => CallResult::Error(error_message(error)),
 
-							ExitReason::Revert(_) =>
-								CallResult::Error(b"execution reverted".to_vec()),
+							ExitReason::Revert(_) => {
+								CallResult::Error(b"execution reverted".to_vec())
+							},
 							ExitReason::Fatal(_) => CallResult::Error(vec![]),
 						};
 
@@ -541,10 +543,12 @@ impl Listener {
 								created_contract_address_hash: context.to,
 								created_contract_code: return_value.to_vec(),
 							},
-							ExitReason::Error(error) =>
-								CreateResult::Error { error: error_message(error) },
-							ExitReason::Revert(_) =>
-								CreateResult::Error { error: b"execution reverted".to_vec() },
+							ExitReason::Error(error) => {
+								CreateResult::Error { error: error_message(error) }
+							},
+							ExitReason::Revert(_) => {
+								CreateResult::Error { error: b"execution reverted".to_vec() }
+							},
 							ExitReason::Fatal(_) => CreateResult::Error { error: vec![] },
 						};
 
@@ -592,14 +596,15 @@ impl ListenerT for Listener {
 			Event::Gasometer(gasometer_event) => self.gasometer_event(gasometer_event),
 			Event::Runtime(runtime_event) => self.runtime_event(runtime_event),
 			Event::Evm(evm_event) => self.evm_event(evm_event),
-			Event::CallListNew() =>
+			Event::CallListNew() => {
 				if !self.call_list_first_transaction {
 					self.finish_transaction();
 					self.skip_next_context = false;
 					self.entries.push(BTreeMap::new());
 				} else {
 					self.call_list_first_transaction = false;
-				},
+				}
+			},
 		};
 	}
 
@@ -697,8 +702,9 @@ mod tests {
 				target: H160::default(),
 				balance: U256::zero(),
 			},
-			TestEvmEvent::Exit =>
-				EvmEvent::Exit { reason: exit_reason.unwrap(), return_value: Vec::new() },
+			TestEvmEvent::Exit => {
+				EvmEvent::Exit { reason: exit_reason.unwrap(), return_value: Vec::new() }
+			},
 			TestEvmEvent::TransactCall => EvmEvent::TransactCall {
 				caller: H160::default(),
 				address: H160::default(),
@@ -733,8 +739,9 @@ mod tests {
 				stack: test_stack(),
 				memory: test_memory(),
 			},
-			TestRuntimeEvent::StepResult =>
-				RuntimeEvent::StepResult { result: Ok(()), return_value: Vec::new() },
+			TestRuntimeEvent::StepResult => {
+				RuntimeEvent::StepResult { result: Ok(()), return_value: Vec::new() }
+			},
 			TestRuntimeEvent::SLoad => RuntimeEvent::SLoad {
 				address: H160::default(),
 				index: H256::default(),
@@ -750,20 +757,24 @@ mod tests {
 
 	fn test_emit_gasometer_event(event_type: TestGasometerEvent) -> GasometerEvent {
 		match event_type {
-			TestGasometerEvent::RecordCost =>
-				GasometerEvent::RecordCost { cost: 0u64, snapshot: test_snapshot() },
-			TestGasometerEvent::RecordRefund =>
-				GasometerEvent::RecordRefund { refund: 0i64, snapshot: test_snapshot() },
-			TestGasometerEvent::RecordStipend =>
-				GasometerEvent::RecordStipend { stipend: 0u64, snapshot: test_snapshot() },
+			TestGasometerEvent::RecordCost => {
+				GasometerEvent::RecordCost { cost: 0u64, snapshot: test_snapshot() }
+			},
+			TestGasometerEvent::RecordRefund => {
+				GasometerEvent::RecordRefund { refund: 0i64, snapshot: test_snapshot() }
+			},
+			TestGasometerEvent::RecordStipend => {
+				GasometerEvent::RecordStipend { stipend: 0u64, snapshot: test_snapshot() }
+			},
 			TestGasometerEvent::RecordDynamicCost => GasometerEvent::RecordDynamicCost {
 				gas_cost: 0u64,
 				memory_gas: 0u64,
 				gas_refund: 0i64,
 				snapshot: test_snapshot(),
 			},
-			TestGasometerEvent::RecordTransaction =>
-				GasometerEvent::RecordTransaction { cost: 0u64, snapshot: test_snapshot() },
+			TestGasometerEvent::RecordTransaction => {
+				GasometerEvent::RecordTransaction { cost: 0u64, snapshot: test_snapshot() }
+			},
 		}
 	}
 

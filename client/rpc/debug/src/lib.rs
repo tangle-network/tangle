@@ -30,12 +30,15 @@ use rpc_core_types::{RequestBlockId, RequestBlockTag};
 use rpc_primitives_debug::{DebugRuntimeApi, TracerInput};
 use sc_client_api::backend::{Backend, StateBackend, StorageProvider};
 use sc_utils::mpsc::TracingUnboundedSender;
-use sp_api::{ApiExt, BlockId, Core, HeaderT, ProvideRuntimeApi};
+use sp_api::{ApiExt, Core, ProvideRuntimeApi};
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{
 	Backend as BlockchainBackend, Error as BlockChainError, HeaderBackend, HeaderMetadata,
 };
-use sp_runtime::traits::{BlakeTwo256, Block as BlockT, UniqueSaturatedInto};
+use sp_runtime::{
+	generic::BlockId,
+	traits::{BlakeTwo256, Block as BlockT, Header, UniqueSaturatedInto},
+};
 use std::{future::Future, marker::PhantomData, sync::Arc};
 
 pub enum RequesterInput {
@@ -264,12 +267,15 @@ where
 
 		let reference_id: BlockId<B> = match request_block_id {
 			RequestBlockId::Number(n) => Ok(BlockId::Number(n.unique_saturated_into())),
-			RequestBlockId::Tag(RequestBlockTag::Latest) =>
-				Ok(BlockId::Number(client.info().best_number)),
-			RequestBlockId::Tag(RequestBlockTag::Earliest) =>
-				Ok(BlockId::Number(0u32.unique_saturated_into())),
-			RequestBlockId::Tag(RequestBlockTag::Pending) =>
-				Err(internal_err("'pending' blocks are not supported")),
+			RequestBlockId::Tag(RequestBlockTag::Latest) => {
+				Ok(BlockId::Number(client.info().best_number))
+			},
+			RequestBlockId::Tag(RequestBlockTag::Earliest) => {
+				Ok(BlockId::Number(0u32.unique_saturated_into()))
+			},
+			RequestBlockId::Tag(RequestBlockTag::Pending) => {
+				Err(internal_err("'pending' blocks are not supported"))
+			},
 			RequestBlockId::Hash(eth_hash) => match frontier_backend_client::load_hash::<B, C>(
 				client.as_ref(),
 				match &frontier_backend {
@@ -292,7 +298,7 @@ where
 		let blockchain = backend.blockchain();
 		// Get the header I want to work with.
 		let Ok(hash) = client.expect_block_hash_from_id(&reference_id) else {
-			return Err(internal_err("Block header not found"))
+			return Err(internal_err("Block header not found"));
 		};
 		let header = match client.header(hash) {
 			Ok(Some(h)) => h,
@@ -316,7 +322,7 @@ where
 
 		// If there are no ethereum transactions in the block return empty trace right away.
 		if eth_tx_hashes.is_empty() {
-			return Ok(Response::Block(vec![]))
+			return Ok(Response::Block(vec![]));
 		}
 
 		// Get block extrinsics.
@@ -350,10 +356,11 @@ where
 				proxy.using(f)?;
 				proxy.finish_transaction();
 				let response = match tracer_input {
-					TracerInput::CallTracer =>
+					TracerInput::CallTracer => {
 						client_evm_tracing::formatters::CallTracer::format(proxy)
 							.ok_or("Trace result is empty.")
-							.map_err(|e| internal_err(format!("{e:?}"))),
+							.map_err(|e| internal_err(format!("{e:?}")))
+					},
 					_ => Err(internal_err("Bug: failed to resolve the tracer format.".to_string())),
 				}?;
 
@@ -421,7 +428,7 @@ where
 		let blockchain = backend.blockchain();
 		// Get the header I want to work with.
 		let Ok(reference_hash) = client.expect_block_hash_from_id(&reference_id) else {
-			return Err(internal_err("Block header not found"))
+			return Err(internal_err("Block header not found"));
 		};
 		let header = match client.header(reference_hash) {
 			Ok(Some(h)) => h,
@@ -442,7 +449,7 @@ where
 		{
 			api_version
 		} else {
-			return Err(internal_err("Runtime api version call failed (trace)".to_string()))
+			return Err(internal_err("Runtime api version call failed (trace)".to_string()));
 		};
 
 		let schema =
@@ -483,11 +490,12 @@ where
 									))
 								})?
 								.map_err(|e| internal_err(format!("DispatchError: {e:?}")))?,
-							_ =>
+							_ => {
 								return Err(internal_err(
 									"Bug: pre-london runtime expects legacy transactions"
 										.to_string(),
-								)),
+								))
+							},
 						};
 					}
 
@@ -517,10 +525,11 @@ where
 						proxy.using(f)?;
 						proxy.finish_transaction();
 						let response = match tracer_input {
-							TracerInput::Blockscout =>
+							TracerInput::Blockscout => {
 								client_evm_tracing::formatters::Blockscout::format(proxy)
 									.ok_or("Trace result is empty.")
-									.map_err(|e| internal_err(format!("{e:?}"))),
+									.map_err(|e| internal_err(format!("{e:?}")))
+							},
 							TracerInput::CallTracer => {
 								let mut res =
 									client_evm_tracing::formatters::CallTracer::format(proxy)
@@ -537,7 +546,7 @@ where
 					not_supported => Err(internal_err(format!(
 						"Bug: `handle_transaction_request` does not support {not_supported:?}."
 					))),
-				}
+				};
 			}
 		}
 		Err(internal_err("Runtime block call failed".to_string()))

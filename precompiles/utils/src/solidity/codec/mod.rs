@@ -121,7 +121,7 @@ impl<'inner> Reader<'inner> {
 	/// Create a Reader while skipping an initial selector.
 	pub fn new_skip_selector(input: &'inner [u8]) -> MayRevert<Self> {
 		if input.len() < 4 {
-			return Err(RevertReason::read_out_of_bounds("selector").into())
+			return Err(RevertReason::read_out_of_bounds("selector").into());
 		}
 
 		Ok(Self::new(&input[4..]))
@@ -165,7 +165,7 @@ impl<'inner> Reader<'inner> {
 			.map_err(|_| RevertReason::value_is_too_large("pointer"))?;
 
 		if offset >= self.input.len() {
-			return Err(RevertReason::PointerToOutofBound.into())
+			return Err(RevertReason::PointerToOutofBound.into());
 		}
 
 		Ok(Self { input: &self.input[offset..], cursor: 0 })

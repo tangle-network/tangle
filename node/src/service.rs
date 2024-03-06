@@ -25,9 +25,7 @@ use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
 pub use sc_executor::NativeElseWasmExecutor;
-use sc_service::ChainType;
-
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
+use sc_service::{error::Error as ServiceError, ChainType, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_core::U256;
@@ -309,8 +307,8 @@ pub async fn new_full(
 	} = new_partial(&config, &eth_config)?;
 
 	if config.role.is_authority() {
-		if config.chain_spec.chain_type() == ChainType::Development ||
-			config.chain_spec.chain_type() == ChainType::Local
+		if config.chain_spec.chain_type() == ChainType::Development
+			|| config.chain_spec.chain_type() == ChainType::Local
 		{
 			if auto_insert_keys {
 				crate::utils::insert_controller_account_keys_into_keystore(
@@ -348,9 +346,10 @@ pub async fn new_full(
 		&config.chain_spec,
 	);
 
-	net_config.add_notification_protocol(sc_consensus_grandpa::grandpa_peers_set_config(
-		grandpa_protocol_name.clone(),
-	));
+	let (grandpa_protocol_config, grandpa_notification_service) =
+		sc_consensus_grandpa::grandpa_peers_set_config(grandpa_protocol_name.clone());
+
+	net_config.add_notification_protocol(grandpa_protocol_config);
 
 	let warp_sync = Arc::new(sc_consensus_grandpa::warp_proof::NetworkProvider::new(
 		backend.clone(),
@@ -368,6 +367,7 @@ pub async fn new_full(
 			import_queue,
 			block_announce_validator_builder: None,
 			warp_sync_params: Some(sc_service::WarpSyncParams::WithProvider(warp_sync)),
+			block_relay: None,
 		})?;
 
 	let role = config.role.clone();
@@ -641,6 +641,7 @@ pub async fn new_full(
 			link: grandpa_link,
 			network,
 			sync: Arc::new(sync_service),
+			notification_service: grandpa_notification_service,
 			voting_rule: sc_consensus_grandpa::VotingRulesBuilder::default().build(),
 			prometheus_registry,
 			shared_voter_state: SharedVoterState::empty(),

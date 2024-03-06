@@ -71,8 +71,9 @@ impl Debug for Error {
 			Error::MalformedSigningKey => write!(f, "Malformed SigningKey"),
 			Error::SerializationError => write!(f, "Serialization error"),
 			Error::DeserializationError => write!(f, "Deserialization error"),
-			Error::IdentifierDerivationNotSupported =>
-				write!(f, "Identifier derivation not supported"),
+			Error::IdentifierDerivationNotSupported => {
+				write!(f, "Identifier derivation not supported")
+			},
 			Error::MissingCommitment => write!(f, "Missing commitment"),
 			Error::InvalidSignatureShare => write!(f, "Invalid signature share"),
 			Error::DuplicatedIdentifier => write!(f, "Duplicated identifier"),

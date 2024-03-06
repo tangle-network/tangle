@@ -1,5 +1,4 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-
 use curve25519_dalek::{
 	constants::RISTRETTO_BASEPOINT_POINT,
 	ristretto::{CompressedRistretto, RistrettoPoint},
@@ -103,12 +102,13 @@ impl Group for RistrettoGroup {
 			.map_err(|_| GroupError::MalformedElement)?
 			.decompress()
 		{
-			Some(point) =>
+			Some(point) => {
 				if point == RistrettoPoint::identity() {
 					Err(GroupError::InvalidIdentityElement)
 				} else {
 					Ok(WrappedRistrettoPoint(point))
-				},
+				}
+			},
 			None => Err(GroupError::MalformedElement),
 		}
 	}

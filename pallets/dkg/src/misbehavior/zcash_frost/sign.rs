@@ -194,7 +194,7 @@ pub fn invalid_signature_share<T: Config>(
 		.collect::<Result<Vec<MsgRound2>, Error<T>>>()?;
 
 	match role {
-		ThresholdSignatureRoleType::ZcashFrostP256 =>
+		ThresholdSignatureRoleType::ZcashFrostP256 => {
 			verify_invalid_signature_share::<T, P256Sha256>(
 				index as u16,
 				&round1_msgs,
@@ -202,8 +202,9 @@ pub fn invalid_signature_share<T: Config>(
 				&offender,
 				group_pubkey,
 				msg_to_sign,
-			)?,
-		ThresholdSignatureRoleType::ZcashFrostP384 =>
+			)?
+		},
+		ThresholdSignatureRoleType::ZcashFrostP384 => {
 			verify_invalid_signature_share::<T, P384Sha384>(
 				index as u16,
 				&round1_msgs,
@@ -211,8 +212,9 @@ pub fn invalid_signature_share<T: Config>(
 				&offender,
 				group_pubkey,
 				msg_to_sign,
-			)?,
-		ThresholdSignatureRoleType::ZcashFrostSecp256k1 =>
+			)?
+		},
+		ThresholdSignatureRoleType::ZcashFrostSecp256k1 => {
 			verify_invalid_signature_share::<T, Secp256K1Sha256>(
 				index as u16,
 				&round1_msgs,
@@ -220,8 +222,9 @@ pub fn invalid_signature_share<T: Config>(
 				&offender,
 				group_pubkey,
 				msg_to_sign,
-			)?,
-		ThresholdSignatureRoleType::ZcashFrostRistretto255 =>
+			)?
+		},
+		ThresholdSignatureRoleType::ZcashFrostRistretto255 => {
 			verify_invalid_signature_share::<T, Ristretto255Sha512>(
 				index as u16,
 				&round1_msgs,
@@ -229,8 +232,9 @@ pub fn invalid_signature_share<T: Config>(
 				&offender,
 				group_pubkey,
 				msg_to_sign,
-			)?,
-		ThresholdSignatureRoleType::ZcashFrostEd25519 =>
+			)?
+		},
+		ThresholdSignatureRoleType::ZcashFrostEd25519 => {
 			verify_invalid_signature_share::<T, Ed25519Sha512>(
 				index as u16,
 				&round1_msgs,
@@ -238,8 +242,9 @@ pub fn invalid_signature_share<T: Config>(
 				&offender,
 				group_pubkey,
 				msg_to_sign,
-			)?,
-		ThresholdSignatureRoleType::ZcashFrostEd448 =>
+			)?
+		},
+		ThresholdSignatureRoleType::ZcashFrostEd448 => {
 			verify_invalid_signature_share::<T, Ed448Shake256>(
 				index as u16,
 				&round1_msgs,
@@ -247,7 +252,8 @@ pub fn invalid_signature_share<T: Config>(
 				&offender,
 				group_pubkey,
 				msg_to_sign,
-			)?,
+			)?
+		},
 		_ => Err(Error::<T>::InvalidFrostSignatureScheme)?,
 	};
 

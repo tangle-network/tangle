@@ -116,8 +116,9 @@ impl<T: Config> Profile<T> {
 	/// Returns roles in the profile.
 	pub fn get_roles(&self) -> Vec<RoleType> {
 		match self {
-			Profile::Independent(profile) =>
-				profile.records.iter().map(|record| record.role).collect(),
+			Profile::Independent(profile) => {
+				profile.records.iter().map(|record| record.role).collect()
+			},
 			Profile::Shared(profile) => profile.records.iter().map(|record| record.role).collect(),
 		}
 	}
@@ -125,10 +126,12 @@ impl<T: Config> Profile<T> {
 	/// Checks if the profile contains given role.
 	pub fn has_role(&self, role_type: RoleType) -> bool {
 		match self {
-			Profile::Independent(profile) =>
-				profile.records.iter().any(|record| record.role == role_type),
-			Profile::Shared(profile) =>
-				profile.records.iter().any(|record| record.role == role_type),
+			Profile::Independent(profile) => {
+				profile.records.iter().any(|record| record.role == role_type)
+			},
+			Profile::Shared(profile) => {
+				profile.records.iter().any(|record| record.role == role_type)
+			},
 		}
 	}
 

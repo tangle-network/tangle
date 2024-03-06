@@ -53,6 +53,7 @@ impl frame_system::Config for Runtime {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+	type RuntimeTask = ();
 	type MaxConsumers = ConstU32<16>;
 }
 
@@ -67,7 +68,7 @@ impl pallet_balances::Config for Runtime {
 	type ReserveIdentifier = ();
 	type WeightInfo = ();
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type MaxHolds = ();
+	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
 }
