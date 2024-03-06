@@ -314,17 +314,8 @@ tangle-primitives = { path = "primitives", default-features = false }
 tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
 pallet-transaction-pause = { path = "pallets/transaction-pause", default-features = false }
 
-# Light client dependencies
-pallet-eth2-light-client = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.5.1" }
-pallet-eth2-light-client-relayer-gadget = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.5.1" }
-pallet-eth2-light-client-relayer-gadget-cli = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.5.1" }
-webb-consensus-types = { git = "https://github.com/webb-tools/pallet-eth2-light-client", default-features = false, tag = "v0.5.1" }
+webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false , branch = "salman/polkadot-v1.7.0"}
 
-webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false }
-webb-proposals = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false, features = [
- "scale",
- "evm",
-] }
 
 primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }

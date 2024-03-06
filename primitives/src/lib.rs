@@ -32,6 +32,7 @@ pub mod misbehavior;
 pub mod roles;
 pub mod types;
 pub use types::*;
+pub mod chain_identifier;
 pub mod impls;
 pub use impls::*;
 
