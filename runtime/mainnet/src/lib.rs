@@ -73,6 +73,7 @@ use sp_runtime::{
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use tangle_primitives::jobs::JobType;
 use tangle_primitives::jobs::{traits::JobToFee, JobSubmission};
+use tangle_primitives::roles::ValidatorRewardDistribution;
 use tangle_primitives::verifier::arkworks::ArkworksVerifierGroth16Bn254;
 use tangle_primitives::verifier::circom::CircomVerifierGroth16Bn254;
 
