@@ -45,7 +45,7 @@ pub fn shared_profile() -> Profile<Runtime> {
 	let profile = SharedRestakeProfile {
 		records: BoundedVec::try_from(vec![
 			Record {
-				role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+				role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 				amount: None,
 			},
 			Record { role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16), amount: None },
@@ -60,7 +60,7 @@ pub fn independent_profile() -> Profile<Runtime> {
 	let profile = IndependentRestakeProfile {
 		records: BoundedVec::try_from(vec![
 			Record {
-				role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+				role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 				amount: Some(500),
 			},
 			Record {
@@ -78,7 +78,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
 
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -183,14 +183,14 @@ fn jobs_submission_e2e_works_for_dkg() {
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_scheme: DigitalSignatureScheme::Ecdsa
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
 
@@ -201,12 +201,12 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		// ensure storage is correctly setup
 		assert!(KnownResults::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0
 		)
 		.is_some());
 		assert!(SubmittedJobs::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0
 		)
 		.is_none());
@@ -252,7 +252,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				verifying_key: vec![].try_into().unwrap(),
 				signature: vec![].try_into().unwrap(),
 				data: vec![].try_into().unwrap(),
-				signature_scheme: DigitalSignatureScheme::Ecdsa
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
 
@@ -263,12 +263,12 @@ fn jobs_submission_e2e_works_for_dkg() {
 
 		// ensure storage is correctly setup
 		assert!(KnownResults::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0
 		)
 		.is_some());
 		assert!(SubmittedJobs::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0
 		)
 		.is_none());
@@ -280,7 +280,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
 
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		// all validators sign up in roles pallet
 		let profile = shared_profile();
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
@@ -316,14 +316,14 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_scheme: DigitalSignatureScheme::Ecdsa
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
 
@@ -348,7 +348,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 			RoleType::Tss(threshold_signature_role_type),
 			1,
 			JobResult::DKGPhaseThree(DKGTSSKeyRefreshResult {
-				signature_scheme: DigitalSignatureScheme::Ecdsa
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
 
@@ -364,7 +364,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
 
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		// all validators sign up in roles pallet
 		let profile = shared_profile();
 		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
@@ -419,28 +419,28 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_scheme: DigitalSignatureScheme::Ecdsa
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
 
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			1,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_scheme: DigitalSignatureScheme::Ecdsa
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
 
@@ -471,7 +471,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				signature: vec![].try_into().unwrap(),
 				phase_one_id: 0,
 				new_phase_one_id: 1,
-				signature_scheme: DigitalSignatureScheme::Ecdsa
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
 
@@ -500,7 +500,7 @@ fn jobs_rpc_tests() {
 			));
 		}
 
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -546,14 +546,14 @@ fn jobs_rpc_tests() {
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_scheme: DigitalSignatureScheme::Ecdsa
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
 
@@ -561,7 +561,7 @@ fn jobs_rpc_tests() {
 		assert_eq!(Jobs::query_next_job_id(), 1);
 
 		let expected_result = KnownResults::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0,
 		);
 		assert_eq!(
@@ -597,7 +597,7 @@ fn jobs_rpc_tests() {
 		assert_eq!(Jobs::query_next_job_id(), 2);
 
 		let expected_result = KnownResults::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			1,
 		);
 		assert_eq!(
@@ -803,7 +803,7 @@ fn reduce_active_role_restake_should_fail() {
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -827,7 +827,7 @@ fn reduce_active_role_restake_should_fail() {
 		let reduced_profile = SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: None,
 				},
 				Record {
@@ -869,7 +869,7 @@ fn delete_profile_with_active_role_should_fail() {
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -918,7 +918,7 @@ fn remove_active_role_should_fail() {
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -977,7 +977,7 @@ fn remove_role_without_active_jobs_should_work() {
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -1000,7 +1000,7 @@ fn remove_role_without_active_jobs_should_work() {
 		// =========  active validator can remove role without active job =========
 		let reduced_profile = SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![Record {
-				role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+				role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 				amount: None,
 			}])
 			.unwrap(),
@@ -1034,7 +1034,7 @@ fn add_role_to_active_profile_should_work() {
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -1058,7 +1058,7 @@ fn add_role_to_active_profile_should_work() {
 		let updated_profile = SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: None,
 				},
 				Record {
@@ -1098,7 +1098,7 @@ fn reduce_stake_on_non_active_role_should_work() {
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -1122,7 +1122,7 @@ fn reduce_stake_on_non_active_role_should_work() {
 		let updated_profile = IndependentRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: Some(1500),
 				},
 				Record {
@@ -1160,7 +1160,7 @@ fn increase_stake_on_active_role_should_work() {
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -1184,7 +1184,7 @@ fn increase_stake_on_active_role_should_work() {
 		let updated_profile = SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: None,
 				},
 				Record {
@@ -1225,7 +1225,7 @@ fn switch_non_active_profile_should_work() {
 		let updated_profile = IndependentRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: Some(1500),
 				},
 				Record {
@@ -1247,7 +1247,7 @@ fn switch_non_active_profile_should_work() {
 		let updated_profile = SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: None,
 				},
 				Record {
@@ -1287,7 +1287,7 @@ fn switch_active_shared_profile_to_independent_should_work_if_active_stake_prese
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -1311,7 +1311,7 @@ fn switch_active_shared_profile_to_independent_should_work_if_active_stake_prese
 		let updated_profile = IndependentRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: Some(500), // <---------- ACTIVE STAKE NOT PRESERVED
 				},
 				Record {
@@ -1336,7 +1336,7 @@ fn switch_active_shared_profile_to_independent_should_work_if_active_stake_prese
 		let updated_profile = IndependentRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: Some(1000), // <---------- ACTIVE STAKE PRESERVED
 				},
 				Record {
@@ -1375,7 +1375,7 @@ fn switch_active_independent_profile_to_shared_should_work_if_active_restake_sum
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -1399,7 +1399,7 @@ fn switch_active_independent_profile_to_shared_should_work_if_active_restake_sum
 		let updated_profile = SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: None,
 				},
 				Record {
@@ -1425,7 +1425,7 @@ fn switch_active_independent_profile_to_shared_should_work_if_active_restake_sum
 		let updated_profile = SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: None,
 				},
 				Record {
@@ -1454,7 +1454,7 @@ fn test_fee_charged_for_jobs_submission() {
 		// setup time fees
 		assert_ok!(Jobs::set_time_fee(RuntimeOrigin::root(), 1));
 
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 
 		// all validators sign up in roles pallet
 		let profile = shared_profile();
@@ -1511,7 +1511,7 @@ fn try_validator_removal_from_job_with_destory_fallback_works() {
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -1575,7 +1575,7 @@ fn try_validator_removal_from_job_with_retry_works_phase_one() {
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -1639,7 +1639,7 @@ fn try_validator_removal_from_job_with_retry_works_phase_two() {
 		}
 
 		// submit job with existing validators
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 		let submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
@@ -1665,14 +1665,14 @@ fn try_validator_removal_from_job_with_retry_works_phase_two() {
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_scheme: DigitalSignatureScheme::Ecdsa
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
 
@@ -1683,12 +1683,12 @@ fn try_validator_removal_from_job_with_retry_works_phase_two() {
 
 		// ensure storage is correctly setup
 		assert!(KnownResults::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0
 		)
 		.is_some());
 		assert!(SubmittedJobs::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0
 		)
 		.is_none());
@@ -1724,7 +1724,7 @@ fn try_validator_removal_from_job_with_retry_works_phase_two() {
 		}));
 
 		assert!(KnownResults::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0
 		)
 		.is_none());
@@ -1745,7 +1745,7 @@ fn test_validator_limit_is_counted_for_jobs_submission() {
 		// setup time fees
 		assert_ok!(Jobs::set_time_fee(RuntimeOrigin::root(), 1));
 
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 
 		// all validators sign up in roles pallet
 		let profile = shared_profile();
@@ -1790,7 +1790,7 @@ fn jobs_extend_result_works() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
 
-		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+		let threshold_signature_role_type = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 
 		// all validators sign up in roles pallet
 		let profile = shared_profile();
@@ -1826,20 +1826,20 @@ fn jobs_extend_result_works() {
 		// submit a solution for this job
 		assert_ok!(Jobs::submit_job_result(
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0,
 			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
 				signatures: vec![].try_into().unwrap(),
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
-				signature_scheme: DigitalSignatureScheme::Ecdsa
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
 
 		// ensure storage is correctly setup
 		assert!(KnownResults::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0
 		)
 		.is_some());
@@ -1847,7 +1847,7 @@ fn jobs_extend_result_works() {
 		// extend result by paying fee
 		assert_ok!(Jobs::extend_job_result_ttl(
 			RuntimeOrigin::signed(mock_pub_key(TEN)),
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0,
 			100
 		));
@@ -1856,7 +1856,7 @@ fn jobs_extend_result_works() {
 		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), 100 - 25);
 
 		let known_result = KnownResults::<Runtime>::get(
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 			0,
 		)
 		.unwrap();

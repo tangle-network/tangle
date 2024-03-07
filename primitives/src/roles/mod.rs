@@ -51,17 +51,16 @@ impl TryFrom<u16> for RoleType {
 
 	fn try_from(value: u16) -> Result<Self, Self::Error> {
 		match value {
-			0x0001 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1)),
 			0x0011 => Ok(RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1)),
 			0x0012 => Ok(RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256r1)),
 			0x0013 => Ok(RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Stark)),
+			0x0014 => Ok(RoleType::Tss(ThresholdSignatureRoleType::SilentShardDKLS23Secpk256k1)),
 			0x0021 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostP256)),
 			0x0022 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostP384)),
 			0x0023 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostSecp256k1)),
 			0x0024 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostRistretto255)),
 			0x0025 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostEd25519)),
 			0x0026 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostEd448)),
-			// 0x0027 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostRedJubJub)),
 			0x0031 => Ok(RoleType::Tss(ThresholdSignatureRoleType::GennaroDKGBls381)),
 			0x0041 => Ok(RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16)),
 			0x0042 => Ok(RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSMarlin)),
@@ -74,17 +73,16 @@ impl TryFrom<u16> for RoleType {
 impl From<RoleType> for u16 {
 	fn from(value: RoleType) -> Self {
 		match value {
-			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1) => 0x0001,
 			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1) => 0x0011,
 			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256r1) => 0x0012,
 			RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Stark) => 0x0013,
+			RoleType::Tss(ThresholdSignatureRoleType::SilentShardDKLS23Secpk256k1) => 0x0014,
 			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostP256) => 0x0021,
 			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostP384) => 0x0022,
 			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostSecp256k1) => 0x0023,
 			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostRistretto255) => 0x0024,
 			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostEd25519) => 0x0025,
 			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostEd448) => 0x0026,
-			// RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostRedJubJub) => 0x0027,
 			RoleType::Tss(ThresholdSignatureRoleType::GennaroDKGBls381) => 0x0031,
 			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16) => 0x0041,
 			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSMarlin) => 0x0042,

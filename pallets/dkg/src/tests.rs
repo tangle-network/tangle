@@ -171,7 +171,7 @@ fn dkg_key_verification_works_for_bls() {
 fn dkg_key_verification_works_for_ecdsa() {
 	new_test_ext().execute_with(|| {
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: vec![].try_into().unwrap(),
 			participants: vec![].try_into().unwrap(),
 			signatures: vec![].try_into().unwrap(),
@@ -185,7 +185,7 @@ fn dkg_key_verification_works_for_ecdsa() {
 		);
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: vec![].try_into().unwrap(),
 			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec().try_into().unwrap()]
 				.try_into()
@@ -205,7 +205,7 @@ fn dkg_key_verification_works_for_ecdsa() {
 		let signature = mock_signature_ecdsa(pub_key, pub_key);
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: vec![].try_into().unwrap(),
 			participants: vec![mock_pub_key_ecdsa().as_mut().to_vec().try_into().unwrap()]
 				.try_into()
@@ -221,7 +221,7 @@ fn dkg_key_verification_works_for_ecdsa() {
 		);
 
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: pub_key.0.to_vec().try_into().unwrap(),
 			participants: vec![pub_key.as_mut().to_vec().try_into().unwrap()].try_into().unwrap(),
 			signatures: vec![
@@ -245,7 +245,7 @@ fn dkg_key_verification_works_for_ecdsa() {
 		let signature_one = mock_signature_ecdsa(participant_one, participant_one);
 		let signature_two = mock_signature_ecdsa(participant_two, participant_one);
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: participant_one.to_raw_vec().try_into().unwrap(),
 			participants: vec![
 				participant_one.as_mut().to_vec().try_into().unwrap(),
@@ -271,7 +271,7 @@ fn dkg_key_verifcation_works_for_ecdsa_when_n_equals_t() {
 		let signature_one = mock_signature_ecdsa(participant_one, participant_one);
 		let signature_two = mock_signature_ecdsa(participant_two, participant_one);
 		let job_to_verify = DKGTSSKeySubmissionResult {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: participant_one.to_raw_vec().try_into().unwrap(),
 			participants: vec![
 				participant_one.as_mut().to_vec().try_into().unwrap(),
@@ -354,7 +354,7 @@ fn dkg_signature_verification_works_ecdsa() {
 		let signature = mock_signature_ecdsa(pub_key, mock_pub_key_ecdsa());
 
 		let job_to_verify = DKGTSSSignatureResult::<MaxDataLen, MaxKeyLen, MaxSignatureLen> {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
@@ -368,7 +368,7 @@ fn dkg_signature_verification_works_ecdsa() {
 
 		let signature = mock_signature_ecdsa(pub_key, pub_key);
 		let job_to_verify = DKGTSSSignatureResult::<MaxDataLen, MaxKeyLen, MaxSignatureLen> {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
@@ -422,7 +422,7 @@ fn dkg_key_rotation_works() {
 		let signature = mock_signature_ecdsa(invalid_key, new_key);
 
 		let job_to_verify = DKGTSSKeyRotationResult {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			signature: signature.try_into().unwrap(),
 			key: curr_key.to_raw_vec().try_into().unwrap(),
 			new_key: new_key.to_raw_vec().try_into().unwrap(),
@@ -439,7 +439,7 @@ fn dkg_key_rotation_works() {
 		let signature = mock_signature_ecdsa(curr_key, new_key);
 
 		let job_to_verify = DKGTSSKeyRotationResult {
-			signature_scheme: DigitalSignatureScheme::Ecdsa,
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			signature: signature.clone().try_into().unwrap(),
 			key: curr_key.to_raw_vec().try_into().unwrap(),
 			new_key: new_key.to_raw_vec().try_into().unwrap(),

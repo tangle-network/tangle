@@ -3359,7 +3359,7 @@ export default {
     }
   },
   /**
-   * Lookup383: pallet_airdrop_claims::utils::ethereum_address::EcdsaSignature
+   * Lookup383: pallet_airdrop_claims::utils::ethereum_address::EcdsaSecp256k1Signature
    **/
   PalletAirdropClaimsUtilsEthereumAddressEcdsaSignature: '[u8;65]',
   /**

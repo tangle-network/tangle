@@ -141,7 +141,7 @@ impl<T: Config> Pallet<T> {
 		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
 	) -> DispatchResult {
 		match data.signature_scheme {
-			DigitalSignatureScheme::Ecdsa => {
+			DigitalSignatureScheme::EcdsaSecp256k1 => {
 				verify_ecdsa_signature::<T>(&data.data, &data.signature, &data.verifying_key)
 			},
 			DigitalSignatureScheme::SchnorrSr25519 => verify_schnorr_sr25519_signature::<T>(
@@ -195,7 +195,7 @@ impl<T: Config> Pallet<T> {
 		};
 
 		match data.signature_scheme {
-			DigitalSignatureScheme::Ecdsa => {
+			DigitalSignatureScheme::EcdsaSecp256k1 => {
 				verify_ecdsa_signature::<T>(&data.new_key, &data.signature, &data.key)
 					.map(|_| emit_event(data))?
 			},

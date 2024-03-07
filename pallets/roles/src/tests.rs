@@ -30,7 +30,7 @@ pub fn independent_profile() -> Profile<Runtime> {
 	let profile = IndependentRestakeProfile {
 		records: BoundedVec::try_from(vec![
 			Record {
-				role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+				role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 				amount: Some(2500),
 			},
 			Record {
@@ -47,7 +47,7 @@ pub fn shared_profile() -> Profile<Runtime> {
 	let profile = SharedRestakeProfile {
 		records: BoundedVec::try_from(vec![
 			Record {
-				role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+				role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 				amount: None,
 			},
 			Record { role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16), amount: None },
@@ -144,7 +144,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met(
 		let profile = Profile::Shared(SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: None,
 				},
 				Record {
@@ -175,7 +175,7 @@ fn test_create_profile_should_fail_if_min_required_restake_condition_is_not_met_
 		let profile = Profile::Independent(IndependentRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: Some(1000),
 				},
 				Record {
@@ -394,7 +394,7 @@ fn test_reward_dist_takes_restake_into_account() {
 		let profile = SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: None,
 				},
 				Record {
@@ -417,7 +417,7 @@ fn test_reward_dist_takes_restake_into_account() {
 		let profile = SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: None,
 				},
 				Record {
@@ -473,7 +473,7 @@ fn test_reward_dist_handles_less_than_ideal_restake() {
 		let profile = SharedRestakeProfile {
 			records: BoundedVec::try_from(vec![
 				Record {
-					role: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 					amount: None,
 				},
 				Record {
