@@ -13,19 +13,19 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use super::*;
-use crate::types::BalanceOf;
-use frame_support::{pallet_prelude::DispatchResult, sp_runtime::Saturating};
-use frame_system::pallet_prelude::BlockNumberFor;
-use sp_core::Get;
-use tangle_primitives::jobs::*;
-
 use self::signatures_schemes::{
 	bls12_381::verify_bls12_381_signature,
 	ecdsa::{verify_ecdsa_signature, verify_generated_dkg_key_ecdsa},
 	schnorr_frost::verify_dkg_signature_schnorr_frost,
 	schnorr_sr25519::verify_schnorr_sr25519_signature,
 };
+use super::*;
+use crate::types::BalanceOf;
+use frame_support::{pallet_prelude::DispatchResult, sp_runtime::Saturating};
+use frame_system::pallet_prelude::BlockNumberFor;
+use scale_info::prelude::vec::Vec;
+use sp_core::Get;
+use tangle_primitives::jobs::*;
 
 impl<T: Config> Pallet<T> {
 	/// Calculates the fee for a given job submission based on the provided fee information.
@@ -64,6 +64,15 @@ impl<T: Config> Pallet<T> {
 				.saturating_add(fee_info.sig_validator_fee)
 				.saturating_add(storage_fee)
 		}
+	}
+
+	pub fn calculate_result_extension_fee(
+		result: Vec<u8>,
+		_extension_time: BlockNumberFor<T>,
+	) -> BalanceOf<T> {
+		let fee_info = FeeInfo::<T>::get();
+		let storage_fee = fee_info.storage_fee_per_byte * (result.len() as u32).into();
+		fee_info.storage_fee_per_block * storage_fee
 	}
 
 	/// Verifies a given job verification information and dispatches to specific verification logic
