@@ -44,6 +44,9 @@ pub struct FeeInfo<Balance: MaxEncodedLen> {
 
 	/// The storage fee per byts
 	pub storage_fee_per_byte: Balance,
+
+	// The storage fee per block
+	pub storage_fee_per_block: Balance,
 }
 
 impl<Balance: MaxEncodedLen> FeeInfo<Balance> {

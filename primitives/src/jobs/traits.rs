@@ -46,6 +46,21 @@ pub trait JobToFee<
 	fn job_to_fee(
 		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
 	) -> Self::Balance;
+
+	/// Calculates the fee to extend an already existing result.
+	///
+	/// # Parameters
+	///
+	/// - `result`: A reference to the result stored onchain
+	/// - `extension_time` : The number of blocks to extend the job ttl by
+	///
+	/// # Returns
+	///
+	/// Returns the calculated fee as `Self::Balance`.
+	fn calculate_result_extension_fee(
+		result: Vec<u8>,
+		extension_time: BlockNumber,
+	) -> Self::Balance;
 }
 
 /// A trait that describes the job result verification.

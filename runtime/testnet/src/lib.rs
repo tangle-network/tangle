@@ -1089,9 +1089,11 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type WeightInfo = ();
 }
 
-pub struct MockJobToFeeHandler;
+pub struct TestnetJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for MockJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>
+	for TestnetJobToFeeHandler
+{
 	type Balance = Balance;
 
 	fn job_to_fee(
@@ -1105,9 +1107,13 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => ZkSaaS::job_to_fee(job),
 		}
 	}
+
+	fn calculate_result_extension_fee(result: Vec<u8>, extension_time: BlockNumber) -> Balance {
+		Dkg::calculate_result_extension_fee(result, extension_time)
+	}
 }
 
-pub struct MockMPCHandler;
+pub struct TestnetMPCHandler;
 
 impl
 	MPCHandler<
@@ -1120,7 +1126,7 @@ impl
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
-	> for MockMPCHandler
+	> for TestnetMPCHandler
 {
 	fn verify(
 		data: JobWithResult<
@@ -1155,9 +1161,9 @@ impl
 	}
 }
 
-pub struct MockMisbehaviorHandler;
+pub struct TestnetMisbehaviorHandler;
 
-impl MisbehaviorHandler for MockMisbehaviorHandler {
+impl MisbehaviorHandler for TestnetMisbehaviorHandler {
 	fn verify(data: MisbehaviorSubmission) -> DispatchResult {
 		match data.justification {
 			MisbehaviorJustification::DKGTSS(_) => Dkg::verify_misbehavior(data),
@@ -1209,10 +1215,10 @@ impl pallet_jobs::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
-	type JobToFee = MockJobToFeeHandler;
+	type JobToFee = TestnetJobToFeeHandler;
 	type RolesHandler = Roles;
-	type MPCHandler = MockMPCHandler;
-	type MisbehaviorHandler = MockMisbehaviorHandler;
+	type MPCHandler = TestnetMPCHandler;
+	type MisbehaviorHandler = TestnetMisbehaviorHandler;
 	type PalletId = JobsPalletId;
 	type MaxParticipants = MaxParticipants;
 	type MaxSubmissionLen = MaxSubmissionLen;

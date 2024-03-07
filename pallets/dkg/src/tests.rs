@@ -61,6 +61,7 @@ fn set_fees_works() {
 			sig_validator_fee: 5,
 			refresh_validator_fee: 5,
 			storage_fee_per_byte: 1,
+			storage_fee_per_block: 0,
 		};
 
 		// Dispatch a signed extrinsic.

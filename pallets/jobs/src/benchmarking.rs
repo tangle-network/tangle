@@ -8,8 +8,8 @@ use sp_runtime::traits::{Bounded, Zero};
 use sp_std::vec;
 use tangle_primitives::{
 	jobs::{
-		DKGTSSKeySubmissionResult, DKGTSSPhaseOneJobType, DigitalSignatureScheme, JobId, JobResult,
-		JobType,
+		DKGTSSKeySubmissionResult, DKGTSSPhaseOneJobType, DigitalSignatureScheme, FallbackOptions,
+		JobId, JobResult, JobType,
 	},
 	roles::{RoleType, ThresholdSignatureRoleType},
 };
@@ -22,7 +22,8 @@ benchmarks! {
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
 			ttl: 100u32.into(),
-			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), caller.clone()], threshold: 1, permitted_caller: None, role_type : Default::default()  }),
+			fallback: FallbackOptions::Destroy,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), caller.clone()].try_into().unwrap(), threshold: 1, permitted_caller: None, role_type : Default::default()  }),
 		};
 
 	}: _(RawOrigin::Signed(caller.clone()), job.clone())
@@ -35,16 +36,17 @@ benchmarks! {
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
 			ttl: 100u32.into(),
-			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2], threshold: 1, permitted_caller: None, role_type : Default::default() }),
+			fallback: FallbackOptions::Destroy,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2].try_into().unwrap(), threshold: 1, permitted_caller: None, role_type : Default::default() }),
 		};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
 		let job_key: RoleType = RoleType::Tss(Default::default());
 		let job_id: JobId = 0;
 		let result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
-			signatures: vec![],
+			signatures: vec![].try_into().unwrap(),
 			threshold: 3,
-			participants: vec![],
-			key: vec![],
+			participants: vec![].try_into().unwrap(),
+			key: vec![].try_into().unwrap(),
 			signature_scheme: DigitalSignatureScheme::Ecdsa
 		});
 	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), result)
@@ -67,13 +69,45 @@ benchmarks! {
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
 			ttl: 100u32.into(),
-			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2, validator3], threshold: 2, permitted_caller: None, role_type : Default::default() }),
+			fallback: FallbackOptions::Destroy,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2, validator3].try_into().unwrap(), threshold: 2, permitted_caller: None, role_type : Default::default() }),
 		};
 		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
 		let job_key: RoleType = RoleType::Tss(Default::default());
 		let job_id: JobId = 0;
 	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), caller.clone(), ValidatorOffenceType::Inactivity, vec![])
+
+	// Benchmark extend_job_result_ttl function
+	extend_job_result_ttl {
+		let caller: T::AccountId = account("caller", 0, 0);
+		let validator2: T::AccountId = account("caller", 0, 1);
+		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
+		let job =  JobSubmissionOf::<T> {
+			expiry: 100u32.into(),
+			ttl: 100u32.into(),
+			fallback: FallbackOptions::Destroy,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType { participants: vec![caller.clone(), validator2].try_into().unwrap(), threshold: 1, permitted_caller: None, role_type : Default::default() }),
+		};
+		let _ = Pallet::<T>::submit_job(RawOrigin::Signed(caller.clone()).into(), job);
+		let job_key: RoleType = RoleType::Tss(Default::default());
+		let job_id: JobId = 0;
+		let result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
+			signatures: vec![].try_into().unwrap(),
+			threshold: 3,
+			participants: vec![].try_into().unwrap(),
+			key: vec![].try_into().unwrap(),
+			signature_scheme: DigitalSignatureScheme::Ecdsa
+		});
+		let _ = Pallet::<T>::submit_job_result(RawOrigin::Signed(caller.clone()).into(), job_key.clone(), job_id.clone(), result);
+	}: _(RawOrigin::Signed(caller.clone()), RoleType::Tss(Default::default()), job_id.clone(), 10u32.into())
 }
 
 // Define the module and associated types for the benchmarks
-impl_benchmark_test_suite!(Pallet, crate::mock::new_test_ext(), crate::mock::Runtime,);
+impl_benchmark_test_suite!(
+	Pallet,
+	crate::mock::new_test_ext(vec![
+		frame_benchmarking::account("caller", 0, 1),
+		frame_benchmarking::account("caller", 0, 2)
+	]),
+	crate::mock::Runtime,
+);

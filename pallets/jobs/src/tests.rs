@@ -1784,3 +1784,83 @@ fn test_validator_limit_is_counted_for_jobs_submission() {
 		);
 	});
 }
+
+#[test]
+fn jobs_extend_result_works() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+
+		let threshold_signature_role_type = ThresholdSignatureRoleType::ZengoGG20Secp256k1;
+
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone(),
+				None
+			));
+		}
+
+		Balances::make_free_balance_be(&mock_pub_key(TEN), 100);
+
+		// should work when n = t
+		let submission = JobSubmission {
+			expiry: 10,
+			ttl: 200,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
+				threshold: 5,
+				permitted_caller: Some(mock_pub_key(TEN)),
+				role_type: threshold_signature_role_type,
+			}),
+			fallback: FallbackOptions::Destroy,
+		};
+		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission));
+
+		// submit a solution for this job
+		assert_ok!(Jobs::submit_job_result(
+			RuntimeOrigin::signed(mock_pub_key(TEN)),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0,
+			JobResult::DKGPhaseOne(DKGTSSKeySubmissionResult {
+				signatures: vec![].try_into().unwrap(),
+				threshold: 3,
+				participants: vec![].try_into().unwrap(),
+				key: vec![].try_into().unwrap(),
+				signature_scheme: DigitalSignatureScheme::Ecdsa
+			})
+		));
+
+		// ensure storage is correctly setup
+		assert!(KnownResults::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0
+		)
+		.is_some());
+
+		// extend result by paying fee
+		assert_ok!(Jobs::extend_job_result_ttl(
+			RuntimeOrigin::signed(mock_pub_key(TEN)),
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0,
+			100
+		));
+
+		// should be charged 5 for creation and 20 for extension
+		assert_eq!(Balances::free_balance(mock_pub_key(TEN)), 100 - 25);
+
+		let known_result = KnownResults::<Runtime>::get(
+			RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1),
+			0,
+		)
+		.unwrap();
+
+		assert_eq!(known_result.ttl, 300);
+	});
+}

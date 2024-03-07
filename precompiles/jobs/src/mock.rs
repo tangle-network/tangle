@@ -203,6 +203,10 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 			},
 		}
 	}
+
+	fn calculate_result_extension_fee(_result: Vec<u8>, _extension_time: BlockNumber) -> Balance {
+		Default::default()
+	}
 }
 
 pub struct MockRolesHandler;

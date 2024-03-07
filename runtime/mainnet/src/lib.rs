@@ -71,10 +71,10 @@ use sp_runtime::{
 	SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
-use tangle_primitives::{
-	jobs::{traits::JobToFee, JobSubmission},
-	roles::ValidatorRewardDistribution,
-};
+use tangle_primitives::jobs::JobType;
+use tangle_primitives::jobs::{traits::JobToFee, JobSubmission};
+use tangle_primitives::verifier::arkworks::ArkworksVerifierGroth16Bn254;
+use tangle_primitives::verifier::circom::CircomVerifierGroth16Bn254;
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -1104,7 +1104,7 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type WeightInfo = pallet_airdrop_claims::weights::SubstrateWeight<Runtime>;
 }
 
-pub struct MockMPCHandler;
+pub struct MainnetMPCHandler;
 
 impl
 	MPCHandler<
@@ -1117,10 +1117,10 @@ impl
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
-	> for MockMPCHandler
+	> for MainnetMPCHandler
 {
 	fn verify(
-		_data: JobWithResult<
+		data: JobWithResult<
 			AccountId,
 			MaxParticipants,
 			MaxSubmissionLen,
@@ -1130,7 +1130,13 @@ impl
 			MaxProofLen,
 		>,
 	) -> DispatchResult {
-		Ok(())
+		match data.result {
+			JobResult::DKGPhaseOne(_)
+			| JobResult::DKGPhaseTwo(_)
+			| JobResult::DKGPhaseThree(_)
+			| JobResult::DKGPhaseFour(_) => Dkg::verify(data.result),
+			JobResult::ZkSaaSPhaseOne(_) | JobResult::ZkSaaSPhaseTwo(_) => ZkSaaS::verify(data),
+		}
 	}
 
 	fn verify_validator_report(
@@ -1188,21 +1194,33 @@ impl pallet_roles::Config for Runtime {
 	type WeightInfo = ();
 }
 
-pub struct MockJobToFeeHandler;
+pub struct MainnetJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for MockJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>
+	for MainnetJobToFeeHandler
+{
 	type Balance = Balance;
 
 	fn job_to_fee(
-		_job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
 	) -> Balance {
-		Default::default()
+		match job.job_type {
+			JobType::DKGTSSPhaseOne(_)
+			| JobType::DKGTSSPhaseTwo(_)
+			| JobType::DKGTSSPhaseThree(_)
+			| JobType::DKGTSSPhaseFour(_) => Dkg::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => ZkSaaS::job_to_fee(job),
+		}
+	}
+
+	fn calculate_result_extension_fee(result: Vec<u8>, extension_time: BlockNumber) -> Balance {
+		Dkg::calculate_result_extension_fee(result, extension_time)
 	}
 }
 
-pub struct MockMisbehaviorHandler;
+pub struct MainnetMisbehaviorHandler;
 
-impl MisbehaviorHandler for MockMisbehaviorHandler {
+impl MisbehaviorHandler for MainnetMisbehaviorHandler {
 	fn verify(_data: MisbehaviorSubmission) -> DispatchResult {
 		Ok(())
 	}
@@ -1240,10 +1258,10 @@ impl pallet_jobs::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
-	type JobToFee = MockJobToFeeHandler;
+	type JobToFee = MainnetJobToFeeHandler;
 	type RolesHandler = Roles;
-	type MPCHandler = MockMPCHandler;
-	type MisbehaviorHandler = MockMisbehaviorHandler;
+	type MPCHandler = MainnetMPCHandler;
+	type MisbehaviorHandler = MainnetMisbehaviorHandler;
 	type PalletId = JobsPalletId;
 	type MaxParticipants = MaxParticipants;
 	type MaxSubmissionLen = MaxSubmissionLen;
@@ -1252,6 +1270,33 @@ impl pallet_jobs::Config for Runtime {
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
+	type WeightInfo = ();
+}
+
+impl pallet_dkg::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type UpdateOrigin = EnsureRootOrHalfCouncil;
+	type MaxParticipants = MaxParticipants;
+	type MaxSubmissionLen = MaxSubmissionLen;
+	type MaxKeyLen = MaxKeyLen;
+	type MaxDataLen = MaxDataLen;
+	type MaxSignatureLen = MaxSignatureLen;
+	type MaxProofLen = MaxProofLen;
+	type WeightInfo = ();
+}
+
+impl pallet_zksaas::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type UpdateOrigin = EnsureRootOrHalfCouncil;
+	type Verifier = (ArkworksVerifierGroth16Bn254, CircomVerifierGroth16Bn254);
+	type MaxParticipants = MaxParticipants;
+	type MaxSubmissionLen = MaxSubmissionLen;
+	type MaxKeyLen = MaxKeyLen;
+	type MaxDataLen = MaxDataLen;
+	type MaxSignatureLen = MaxSignatureLen;
+	type MaxProofLen = MaxProofLen;
 	type WeightInfo = ();
 }
 
@@ -1306,7 +1351,9 @@ construct_runtime!(
 
 		Claims: pallet_airdrop_claims,
 		Roles: pallet_roles,
-		Jobs: pallet_jobs
+		Jobs: pallet_jobs,
+		Dkg: pallet_dkg,
+		ZkSaaS: pallet_zksaas,
 	}
 );
 
