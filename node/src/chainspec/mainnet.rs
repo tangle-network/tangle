@@ -22,6 +22,7 @@ use crate::{
 	},
 	mainnet_fixtures::{get_bootnodes, get_initial_authorities, get_root_key},
 };
+
 use hex_literal::hex;
 use pallet_airdrop_claims::MultiAddress;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
