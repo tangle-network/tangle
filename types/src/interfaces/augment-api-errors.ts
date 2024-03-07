@@ -49,6 +49,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       DeadAccount: AugmentedError<ApiType>;
       /**
+       * The delta cannot be zero.
+       **/
+      DeltaZero: AugmentedError<ApiType>;
+      /**
        * Value too low to create account due to existential deposit.
        **/
       ExistentialDeposit: AugmentedError<ApiType>;
@@ -65,6 +69,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InsufficientBalance: AugmentedError<ApiType>;
       /**
+       * The issuance cannot be modified since it is already deactivated.
+       **/
+      IssuanceDeactivated: AugmentedError<ApiType>;
+      /**
        * Account liquidity restrictions prevent withdrawal.
        **/
       LiquidityRestrictions: AugmentedError<ApiType>;
@@ -73,7 +81,7 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       TooManyFreezes: AugmentedError<ApiType>;
       /**
-       * Number of holds exceed `MaxHolds`.
+       * Number of holds exceed `VariantCountOf<T::RuntimeHoldReason>`.
        **/
       TooManyHolds: AugmentedError<ApiType>;
       /**
@@ -356,17 +364,77 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       CannotRetreiveSigner: AugmentedError<ApiType>;
       /**
+       * Duplicate identifier
+       **/
+      DuplicateIdentifier: AugmentedError<ApiType>;
+      /**
        * Duplicate signature found in submission
        **/
       DuplicateSignature: AugmentedError<ApiType>;
+      /**
+       * FROST Field scalar error
+       **/
+      FrostFieldError: AugmentedError<ApiType>;
+      /**
+       * FROST Group element error
+       **/
+      FrostGroupError: AugmentedError<ApiType>;
+      /**
+       * Identifier derivation not supported
+       **/
+      IdentifierDerivationNotSupported: AugmentedError<ApiType>;
+      /**
+       * Invalid FROST commitment
+       **/
+      IdentityCommitment: AugmentedError<ApiType>;
+      /**
+       * Incorrect number of identifiers
+       **/
+      IncorrectNumberOfIdentifiers: AugmentedError<ApiType>;
+      /**
+       * Invalid BLS public key
+       **/
+      InvalidBlsPublicKey: AugmentedError<ApiType>;
+      /**
+       * Invalid FROST message deserialization
+       **/
+      InvalidFrostMessageDeserialization: AugmentedError<ApiType>;
+      /**
+       * Invalid FROST message serialization
+       **/
+      InvalidFrostMessageSerialization: AugmentedError<ApiType>;
+      /**
+       * Invalid FROST signature
+       **/
+      InvalidFrostSignature: AugmentedError<ApiType>;
+      /**
+       * Invalid FROST signature scheme
+       **/
+      InvalidFrostSignatureScheme: AugmentedError<ApiType>;
+      /**
+       * Invalid FROST signature share
+       **/
+      InvalidFrostSignatureShare: AugmentedError<ApiType>;
+      /**
+       * Invalid identifier deserialization
+       **/
+      InvalidIdentifierDeserialization: AugmentedError<ApiType>;
       /**
        * Unexpected job type
        **/
       InvalidJobType: AugmentedError<ApiType>;
       /**
+       * Invalid Justification type.
+       **/
+      InvalidJustification: AugmentedError<ApiType>;
+      /**
        * Invalid participant public key
        **/
       InvalidParticipantPublicKey: AugmentedError<ApiType>;
+      /**
+       * Invalid Misbehavior Role type.
+       **/
+      InvalidRoleType: AugmentedError<ApiType>;
       /**
        * Invalid signature submitted
        **/
@@ -376,9 +444,41 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidSignatureData: AugmentedError<ApiType>;
       /**
+       * Invalid signature deserialization
+       **/
+      InvalidSignatureDeserialization: AugmentedError<ApiType>;
+      /**
+       * Invalid signature scheme
+       **/
+      InvalidSignatureScheme: AugmentedError<ApiType>;
+      /**
        * Invalid verifying key submitted
        **/
       InvalidVerifyingKey: AugmentedError<ApiType>;
+      /**
+       * Invalid verifying key deserialization
+       **/
+      InvalidVerifyingKeyDeserialization: AugmentedError<ApiType>;
+      /**
+       * Malformed signature
+       **/
+      MalformedFrostSignature: AugmentedError<ApiType>;
+      /**
+       * Malformed FROST signing key
+       **/
+      MalformedFrostSigningKey: AugmentedError<ApiType>;
+      /**
+       * Malformed FROST verifying key
+       **/
+      MalformedFrostVerifyingKey: AugmentedError<ApiType>;
+      /**
+       * Could not deserialize the round message.
+       **/
+      MalformedRoundMessage: AugmentedError<ApiType>;
+      /**
+       * Missing FROST commitment
+       **/
+      MissingFrostCommitment: AugmentedError<ApiType>;
       /**
        * No participants found
        **/
@@ -392,9 +492,71 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NotEnoughSigners: AugmentedError<ApiType>;
       /**
+       * Signed Round Message not signed by the offender.
+       **/
+      NotSignedByOffender: AugmentedError<ApiType>;
+      /**
        * Signed with a different key
        **/
       SigningKeyMismatch: AugmentedError<ApiType>;
+      /**
+       * Unknown identifier
+       **/
+      UnknownIdentifier: AugmentedError<ApiType>;
+      /**
+       * The submitted decommitment data size is valid.
+       * 
+       * This error is returned when the decommitment data size is valid
+       * but the caller claims it is invalid!
+       **/
+      ValidDataSize: AugmentedError<ApiType>;
+      /**
+       * The submitted decommitment is valid.
+       * 
+       * This error is returned when the decommitment is valid
+       * but the caller claims it is invalid!
+       **/
+      ValidDecommitment: AugmentedError<ApiType>;
+      /**
+       * The submitted messages passed Feldman verification.
+       * 
+       * This error is returned when the messages passed Feldman verification
+       * but the caller claims it is invalid!
+       **/
+      ValidFeldmanVerification: AugmentedError<ApiType>;
+      /**
+       * Valid FROST signature error for a misbehavior report
+       **/
+      ValidFrostSignature: AugmentedError<ApiType>;
+      /**
+       * ------------------------------------------------------------ ///
+       * FROST ERRORS                         ///
+       * ------------------------------------------------------------ ///
+       * Valid FROST signature share
+       **/
+      ValidFrostSignatureShare: AugmentedError<ApiType>;
+      /**
+       * The submitted Mod Proof is valid.
+       * 
+       * This error is returned when the Mod Proof is valid
+       * but the caller claims it is invalid.
+       **/
+      ValidModProof: AugmentedError<ApiType>;
+      /**
+       * The submitted ring pedersen parameters are valid.
+       * 
+       * This error is returned when the ring pedersen parameters are valid
+       * but the caller claims it is invalid.
+       **/
+      ValidRingPedersenParameters: AugmentedError<ApiType>;
+      /**
+       * The submitted Schnorr Proof is valid.
+       * 
+       * This error is returned when the decommitment and its
+       * Schnorr are valid. but the caller
+       * claims it is invalid.
+       **/
+      ValidSchnorrProof: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -425,6 +587,10 @@ declare module '@polkadot/api-base/types/errors' {
        * OCW submitted solution for wrong round
        **/
       OcwCallWrongEra: AugmentedError<ApiType>;
+      /**
+       * Sumission was prepared for a different round.
+       **/
+      PreDispatchDifferentRound: AugmentedError<ApiType>;
       /**
        * Submission was too early.
        **/
@@ -536,99 +702,6 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
-    eth2Client: {
-      /**
-       * The active header slot number should be higher than the finalized slot
-       **/
-      ActiveHeaderSlotLessThanFinalizedSlot: AugmentedError<ApiType>;
-      /**
-       * The light client is already initialized for the typed chain ID
-       **/
-      AlreadyInitialized: AugmentedError<ApiType>;
-      /**
-       * Block already submitted
-       **/
-      BlockAlreadySubmitted: AugmentedError<ApiType>;
-      /**
-       * The block hash does not match the expected block hash
-       **/
-      BlockHashesDoNotMatch: AugmentedError<ApiType>;
-      /**
-       * The chain cannot be closed
-       **/
-      ChainCannotBeClosed: AugmentedError<ApiType>;
-      CurrentSyncCommitteeNotSet: AugmentedError<ApiType>;
-      FinalizedBeaconHeaderNotPresent: AugmentedError<ApiType>;
-      FinalizedExecutionHeaderNotPresent: AugmentedError<ApiType>;
-      /**
-       * "The `hashes_gc_threshold` is not enough to be able to apply gc correctly"
-       **/
-      HashesGcThresholdInsufficient: AugmentedError<ApiType>;
-      HeaderHashDoesNotExist: AugmentedError<ApiType>;
-      /**
-       * Failed to verify the bls signature
-       **/
-      InvalidBlsSignature: AugmentedError<ApiType>;
-      /**
-       * The current client mode is invalid for the action.
-       **/
-      InvalidClientMode: AugmentedError<ApiType>;
-      InvalidExecutionBlock: AugmentedError<ApiType>;
-      /**
-       * Invalid execution block hash proof
-       **/
-      InvalidExecutionBlockHashProof: AugmentedError<ApiType>;
-      /**
-       * Invalid finality proof
-       **/
-      InvalidFinalityProof: AugmentedError<ApiType>;
-      InvalidNetworkConfig: AugmentedError<ApiType>;
-      InvalidNextSyncCommitteeProof: AugmentedError<ApiType>;
-      InvalidSignaturePeriod: AugmentedError<ApiType>;
-      InvalidSyncCommitteeBitsSum: AugmentedError<ApiType>;
-      /**
-       * The acceptable update periods are not met.
-       **/
-      InvalidUpdatePeriod: AugmentedError<ApiType>;
-      /**
-       * For attempting to update the light client
-       **/
-      LightClientUpdateNotAllowed: AugmentedError<ApiType>;
-      NextSyncCommitteeNotPresent: AugmentedError<ApiType>;
-      NextSyncCommitteeNotSet: AugmentedError<ApiType>;
-      /**
-       * Self-explanatory
-       **/
-      NotTrustedSigner: AugmentedError<ApiType>;
-      SyncCommitteeBitsSumLessThanThreshold: AugmentedError<ApiType>;
-      SyncCommitteeUpdateNotPresent: AugmentedError<ApiType>;
-      /**
-       * The client can't be executed in the trustless mode without BLS sigs verification on
-       * Mainnet
-       **/
-      TrustlessModeError: AugmentedError<ApiType>;
-      UnfinalizedHeaderNotPresent: AugmentedError<ApiType>;
-      /**
-       * Unknown parent block header hash
-       **/
-      UnknownParentHeader: AugmentedError<ApiType>;
-      /**
-       * The attested header slot should be equal to or higher than the finalized header slot
-       **/
-      UpdateHeaderSlotLessThanFinalizedHeaderSlot: AugmentedError<ApiType>;
-      /**
-       * The signature slot should be higher than the attested header slot
-       **/
-      UpdateSignatureSlotLessThanAttestedHeaderSlot: AugmentedError<ApiType>;
-      /**
-       * The updates validation can't be disabled for mainnet
-       **/
-      ValidateUpdatesParameterError: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
     ethereum: {
       /**
        * Signature is invalid.
@@ -665,9 +738,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       GasPriceTooLow: AugmentedError<ApiType>;
       /**
+       * The chain id is invalid.
+       **/
+      InvalidChainId: AugmentedError<ApiType>;
+      /**
        * Nonce is invalid
        **/
       InvalidNonce: AugmentedError<ApiType>;
+      /**
+       * the signature is invalid.
+       **/
+      InvalidSignature: AugmentedError<ApiType>;
       /**
        * Calculating total payment overflowed
        **/
@@ -761,9 +842,21 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidJudgement: AugmentedError<ApiType>;
       /**
+       * The signature on a username was not valid.
+       **/
+      InvalidSignature: AugmentedError<ApiType>;
+      /**
+       * The provided suffix is too long.
+       **/
+      InvalidSuffix: AugmentedError<ApiType>;
+      /**
        * The target is invalid.
        **/
       InvalidTarget: AugmentedError<ApiType>;
+      /**
+       * The username does not meet the requirements.
+       **/
+      InvalidUsername: AugmentedError<ApiType>;
       /**
        * The provided judgement was for a different identity.
        **/
@@ -777,9 +870,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       JudgementPaymentFailed: AugmentedError<ApiType>;
       /**
+       * The authority cannot allocate any more usernames.
+       **/
+      NoAllocation: AugmentedError<ApiType>;
+      /**
        * No identity found.
        **/
       NoIdentity: AugmentedError<ApiType>;
+      /**
+       * The username cannot be forcefully removed because it can still be accepted.
+       **/
+      NotExpired: AugmentedError<ApiType>;
       /**
        * Account isn't found.
        **/
@@ -797,13 +898,21 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NotSub: AugmentedError<ApiType>;
       /**
+       * The sender does not have permission to issue a username.
+       **/
+      NotUsernameAuthority: AugmentedError<ApiType>;
+      /**
+       * The requested username does not exist.
+       **/
+      NoUsername: AugmentedError<ApiType>;
+      /**
+       * Setting this username requires a signature, but none was provided.
+       **/
+      RequiresSignature: AugmentedError<ApiType>;
+      /**
        * Sticky judgement.
        **/
       StickyJudgement: AugmentedError<ApiType>;
-      /**
-       * Too many additional fields.
-       **/
-      TooManyFields: AugmentedError<ApiType>;
       /**
        * Maximum amount of registrars reached. Cannot add any more.
        **/
@@ -812,6 +921,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Too many subs-accounts.
        **/
       TooManySubAccounts: AugmentedError<ApiType>;
+      /**
+       * The username is already taken.
+       **/
+      UsernameTaken: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -1072,9 +1185,9 @@ declare module '@polkadot/api-base/types/errors' {
       /**
        * The amount does not meet the minimum bond to either join or create a pool.
        * 
-       * The depositor can never unbond to a value less than
-       * `Pallet::depositor_min_bond`. The caller does not have nominating
-       * permissions for the pool. Members can never unbond to a value below `MinJoinBond`.
+       * The depositor can never unbond to a value less than `Pallet::depositor_min_bond`. The
+       * caller does not have nominating permissions for the pool. Members can never unbond to a
+       * value below `MinJoinBond`.
        **/
       MinimumBondNotMet: AugmentedError<ApiType>;
       /**
@@ -1090,6 +1203,10 @@ declare module '@polkadot/api-base/types/errors' {
        * other members to be permissionlessly unbonded.
        **/
       NotDestroying: AugmentedError<ApiType>;
+      /**
+       * No imbalance in the ED deposit for the pool.
+       **/
+      NothingToAdjust: AugmentedError<ApiType>;
       /**
        * Either a) the caller cannot make a valid kick or b) the pool is not destroying.
        **/
@@ -1161,11 +1278,31 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       TooBig: AugmentedError<ApiType>;
       /**
+       * Too few hashes were requested to be upgraded (i.e. zero).
+       **/
+      TooFew: AugmentedError<ApiType>;
+      /**
+       * More than `MAX_HASH_UPGRADE_BULK_COUNT` hashes were requested to be upgraded at once.
+       **/
+      TooMany: AugmentedError<ApiType>;
+      /**
        * Generic error
        **/
       [key: string]: AugmentedError<ApiType>;
     };
     roles: {
+      /**
+       * Rewards already claimed
+       **/
+      AlreadyClaimed: AugmentedError<ApiType>;
+      /**
+       * Out of bounds input
+       **/
+      BoundNotMet: AugmentedError<ApiType>;
+      /**
+       * Cannot find Current era
+       **/
+      CannotGetCurrentEra: AugmentedError<ApiType>;
       /**
        * Invalid Restaking amount, should not exceed total staked amount.
        **/
@@ -1179,6 +1316,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InsufficientRestakingBond: AugmentedError<ApiType>;
       /**
+       * Invalid era info
+       **/
+      InvalidEraToReward: AugmentedError<ApiType>;
+      /**
        * Key size exceeded
        **/
       KeySizeExceeded: AugmentedError<ApiType>;
@@ -1186,6 +1327,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Max role limit reached for the account.
        **/
       MaxRoles: AugmentedError<ApiType>;
+      /**
+       * Unlock chunks already filled
+       **/
+      NoMoreChunks: AugmentedError<ApiType>;
       /**
        * Stash controller account not found in Roles Ledger.
        **/
@@ -1314,6 +1459,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       CommissionTooLow: AugmentedError<ApiType>;
       /**
+       * Used when attempting to use deprecated controller account logic.
+       **/
+      ControllerDeprecated: AugmentedError<ApiType>;
+      /**
        * Duplicate index.
        **/
       DuplicateIndex: AugmentedError<ApiType>;
@@ -1347,6 +1496,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Invalid number of nominations.
        **/
       InvalidNumberOfNominations: AugmentedError<ApiType>;
+      /**
+       * No nominators exist on this page.
+       **/
+      InvalidPage: AugmentedError<ApiType>;
       /**
        * Slash record index out of bounds.
        **/
@@ -1392,7 +1545,7 @@ declare module '@polkadot/api-base/types/errors' {
     };
     sudo: {
       /**
-       * Sender must be the Sudo account
+       * Sender must be the Sudo account.
        **/
       RequireSudo: AugmentedError<ApiType>;
       /**
@@ -1425,10 +1578,18 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NonZeroRefCount: AugmentedError<ApiType>;
       /**
+       * No upgrade authorized.
+       **/
+      NothingAuthorized: AugmentedError<ApiType>;
+      /**
        * The specification version is not allowed to decrease between the current runtime
        * and the new runtime.
        **/
       SpecVersionNeedsToIncrease: AugmentedError<ApiType>;
+      /**
+       * The submitted code is not authorized.
+       **/
+      Unauthorized: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -1450,6 +1611,22 @@ declare module '@polkadot/api-base/types/errors' {
     };
     treasury: {
       /**
+       * The payment has already been attempted.
+       **/
+      AlreadyAttempted: AugmentedError<ApiType>;
+      /**
+       * The spend is not yet eligible for payout.
+       **/
+      EarlyPayout: AugmentedError<ApiType>;
+      /**
+       * The balance of the asset kind is not convertible to the balance of the native asset.
+       **/
+      FailedToConvertBalance: AugmentedError<ApiType>;
+      /**
+       * The payment has neither failed nor succeeded yet.
+       **/
+      Inconclusive: AugmentedError<ApiType>;
+      /**
        * The spend origin is valid but the amount it is allowed to spend is lower than the
        * amount to be spent.
        **/
@@ -1459,13 +1636,25 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InsufficientProposersBalance: AugmentedError<ApiType>;
       /**
-       * No proposal or bounty at that index.
+       * No proposal, bounty or spend at that index.
        **/
       InvalidIndex: AugmentedError<ApiType>;
+      /**
+       * The payout was not yet attempted/claimed.
+       **/
+      NotAttempted: AugmentedError<ApiType>;
+      /**
+       * There was some issue with the mechanism of payment.
+       **/
+      PayoutError: AugmentedError<ApiType>;
       /**
        * Proposal has not been approved.
        **/
       ProposalNotApproved: AugmentedError<ApiType>;
+      /**
+       * The spend has expired and cannot be claimed.
+       **/
+      SpendExpired: AugmentedError<ApiType>;
       /**
        * Too many approvals in the queue.
        **/
