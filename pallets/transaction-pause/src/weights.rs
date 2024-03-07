@@ -49,8 +49,8 @@ pub trait WeightInfo {
 }
 
 /// Weights for module_transaction_pause using the Acala node and recommended hardware.
-pub struct AcalaWeight<T>(PhantomData<T>);
-impl<T: frame_system::Config> WeightInfo for AcalaWeight<T> {
+pub struct SubstrateWeight<T>(PhantomData<T>);
+impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn pause_transaction() -> Weight {
 		Weight::from_parts(32_778_000, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))

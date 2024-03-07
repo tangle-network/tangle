@@ -266,7 +266,7 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ExistentialDeposit: u128 = EXISTENTIAL_DEPOSIT;
+	pub const ExistentialDeposit: u128 = EXISTENTIAL_DEPOSIT / 100_000_000;
 	pub const TransferFee: u128 = MILLIUNIT;
 	pub const CreationFee: u128 = MILLIUNIT;
 	pub const MaxLocks: u32 = 50;
@@ -394,10 +394,6 @@ impl pallet_grandpa::Config for Runtime {
 	type KeyOwnerProof = sp_core::Void;
 	type MaxNominators = MaxNominatorRewardedPerValidator;
 	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub const UncleGenerations: u32 = 0;
 }
 
 impl pallet_authorship::Config for Runtime {

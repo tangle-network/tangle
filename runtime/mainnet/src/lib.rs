@@ -73,6 +73,7 @@ use sp_runtime::{
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use tangle_primitives::jobs::JobType;
 use tangle_primitives::jobs::{traits::JobToFee, JobSubmission};
+use tangle_primitives::roles::ValidatorRewardDistribution;
 use tangle_primitives::verifier::arkworks::ArkworksVerifierGroth16Bn254;
 use tangle_primitives::verifier::circom::CircomVerifierGroth16Bn254;
 
@@ -111,7 +112,7 @@ pub use frame_support::{
 	},
 	PalletId, StorageValue,
 };
-use frame_system::EnsureRoot;
+use frame_system::{EnsureRoot, EnsureWithSuccess};
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 use sp_runtime::generic::Era;
@@ -136,7 +137,7 @@ use tangle_primitives::{
 	},
 	elections::{
 		CANDIDACY_BOND, DESIRED_MEMBERS, DESIRED_RUNNERS_UP, ELECTIONS_PHRAGMEN_PALLET_ID,
-		MAX_CANDIDATES, MAX_VOTERS, TERM_DURATION,
+		MAX_CANDIDATES, MAX_VOTERS, MAX_VOTES_PER_VOTER, TERM_DURATION,
 	},
 	staking::{
 		BONDING_DURATION, HISTORY_DEPTH, MAX_NOMINATOR_REWARDED_PER_VALIDATOR, OFFCHAIN_REPEAT,
@@ -263,11 +264,12 @@ impl pallet_timestamp::Config for Runtime {
 	type Moment = u64;
 	type OnTimestampSet = Babe;
 	type MinimumPeriod = MinimumPeriod;
-	type WeightInfo = ();
+	type WeightInfo = pallet_timestamp::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
-	pub const ExistentialDeposit: u128 = EXISTENTIAL_DEPOSIT;
+	// 1e18 / 1e8 = 1e10 existential balance
+	pub const ExistentialDeposit: u128 = EXISTENTIAL_DEPOSIT / 100_000_000;
 	pub const TransferFee: u128 = MILLIUNIT;
 	pub const CreationFee: u128 = MILLIUNIT;
 	pub const MaxLocks: u32 = 50;
@@ -340,7 +342,6 @@ impl pallet_scheduler::Config for Runtime {
 }
 
 parameter_types! {
-	pub const PreimageMaxSize: u32 = 4096 * 1024;
 	pub const PreimageBaseDeposit: Balance = UNIT;
 	// One cent: $10,000 / MB
 	pub const PreimageByteDeposit: Balance = 10 * MILLIUNIT;
@@ -359,7 +360,7 @@ impl pallet_randomness_collective_flip::Config for Runtime {}
 impl pallet_sudo::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
 	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = ();
+	type WeightInfo = pallet_sudo::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -397,10 +398,6 @@ impl pallet_grandpa::Config for Runtime {
 	type WeightInfo = ();
 }
 
-parameter_types! {
-	pub const UncleGenerations: u32 = 0;
-}
-
 impl pallet_authorship::Config for Runtime {
 	type EventHandler = Staking;
 	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
@@ -417,7 +414,7 @@ impl pallet_session::Config for Runtime {
 	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
 	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
-	type WeightInfo = ();
+	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_session::historical::Config for Runtime {
@@ -888,6 +885,7 @@ parameter_types! {
 	pub const DesiredRunnersUp: u32 = DESIRED_RUNNERS_UP;
 	pub const MaxCandidates: u32 = MAX_CANDIDATES;
 	pub const MaxVoters: u32 = MAX_VOTERS;
+	pub const MaxVotesPerVoter: u32 = MAX_VOTES_PER_VOTER;
 	pub const ElectionsPhragmenPalletId: LockIdentifier = ELECTIONS_PHRAGMEN_PALLET_ID;
 }
 
@@ -903,7 +901,7 @@ impl pallet_elections_phragmen::Config for Runtime {
 	type DesiredMembers = DesiredMembers;
 	type DesiredRunnersUp = DesiredRunnersUp;
 	type RuntimeEvent = RuntimeEvent;
-	type MaxVotesPerVoter = ConstU32<100>;
+	type MaxVotesPerVoter = MaxVotesPerVoter;
 	// NOTE: this implies that council's genesis members cannot be set directly and
 	// must come from this module.
 	type InitializeMembers = Council;
@@ -932,6 +930,7 @@ parameter_types! {
 	pub const MaxApprovals: u32 = MAX_APPROVALS;
 	pub const PayoutPeriod: BlockNumber = 30 * DAYS;
 	pub TreasuryAccount: AccountId = Treasury::account_id();
+	pub const MaxBalance: Balance = Balance::max_value();
 }
 
 impl pallet_treasury::Config for Runtime {
@@ -959,7 +958,7 @@ impl pallet_treasury::Config for Runtime {
 	type SpendPeriod = SpendPeriod;
 	type Burn = Burn;
 	type BurnDestination = ();
-	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
+	type SpendOrigin = EnsureWithSuccess<EnsureRoot<AccountId>, AccountId, MaxBalance>;
 	type SpendFunds = Bounties;
 	type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
 	type MaxApprovals = MaxApprovals;
@@ -1022,7 +1021,7 @@ impl pallet_im_online::Config for Runtime {
 impl pallet_transaction_pause::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type UpdateOrigin = EnsureRoot<AccountId>;
-	type WeightInfo = ();
+	type WeightInfo = pallet_transaction_pause::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -1092,7 +1091,7 @@ impl pallet_multisig::Config for Runtime {
 
 parameter_types! {
 	pub Prefix: &'static [u8] = b"Claim TNTs to the account:";
-	pub const MaxVestingSchedules: u32 = 100;
+	pub const MaxVestingSchedules: u32 = 10;
 }
 
 impl pallet_airdrop_claims::Config for Runtime {
@@ -1103,7 +1102,7 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type Prefix = Prefix;
 	type MaxVestingSchedules = MaxVestingSchedules;
 	type MoveClaimOrigin = frame_system::EnsureRoot<AccountId>;
-	type WeightInfo = ();
+	type WeightInfo = pallet_airdrop_claims::weights::SubstrateWeight<Runtime>;
 }
 
 pub struct MainnetMPCHandler;
@@ -1170,9 +1169,12 @@ impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
 
 parameter_types! {
 	pub InflationRewardPerSession: Balance = 10_000;
-	pub const MaxValidators : u32 = 1000;
+	pub const MaxValidators: u32 = 1000;
 	pub MaxRestake: Percent = Percent::from_percent(50);
-	pub Reward : tangle_primitives::roles::ValidatorRewardDistribution = tangle_primitives::roles::ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
+	pub Reward: ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(
+		Percent::one(),
+		Percent::zero()
+	).unwrap();
 }
 
 impl pallet_roles::Config for Runtime {
@@ -1229,10 +1231,10 @@ parameter_types! {
 	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
-	pub const MaxParticipants: u32 = 10;
+	pub const MaxParticipants: u32 = 20;
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 32;
+	pub const MaxSubmissionLen: u32 = 256;
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxKeyLen: u32 = 256;

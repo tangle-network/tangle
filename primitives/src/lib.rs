@@ -32,6 +32,7 @@ pub mod misbehavior;
 pub mod roles;
 pub mod types;
 pub use types::*;
+pub mod chain_identifier;
 pub mod impls;
 
 #[cfg(feature = "verifying")]
@@ -226,9 +227,9 @@ pub mod evm {
 
 pub mod democracy {
 	use crate::{currency::UNIT, time::MINUTES, Balance, BlockNumber};
-	pub const LAUNCH_PERIOD: BlockNumber = 10 * 24 * 60 * MINUTES; // 10 days
-	pub const VOTING_PERIOD: BlockNumber = 10 * 24 * 60 * MINUTES; // 10 days
-	pub const FASTTRACK_VOTING_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES; // 3 days
+	pub const LAUNCH_PERIOD: BlockNumber = 2 * 24 * 60 * MINUTES; // 2 days
+	pub const VOTING_PERIOD: BlockNumber = 7 * 24 * 60 * MINUTES; // 7 days
+	pub const FASTTRACK_VOTING_PERIOD: BlockNumber = 2 * 24 * 60 * MINUTES; // 2 days
 	pub const MINIMUM_DEPOSIT: Balance = 1000 * UNIT; // 1000 TNT
 	pub const ENACTMENT_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES; // 3 days
 	pub const COOLOFF_PERIOD: BlockNumber = 3 * 24 * 60 * MINUTES; // 3 days
@@ -238,12 +239,13 @@ pub mod democracy {
 pub mod elections {
 	use crate::{currency::UNIT, time::DAYS, Balance, BlockNumber};
 
-	pub const CANDIDACY_BOND: Balance = 10 * UNIT;
+	pub const CANDIDACY_BOND: Balance = 1_000 * UNIT;
 	pub const TERM_DURATION: BlockNumber = 7 * DAYS;
-	pub const DESIRED_MEMBERS: u32 = 13;
-	pub const DESIRED_RUNNERS_UP: u32 = 7;
-	pub const MAX_CANDIDATES: u32 = 10;
-	pub const MAX_VOTERS: u32 = 5;
+	pub const DESIRED_MEMBERS: u32 = 5;
+	pub const DESIRED_RUNNERS_UP: u32 = 3;
+	pub const MAX_CANDIDATES: u32 = 64;
+	pub const MAX_VOTERS: u32 = 512;
+	pub const MAX_VOTES_PER_VOTER: u32 = 32;
 	pub const ELECTIONS_PHRAGMEN_PALLET_ID: frame_support::traits::LockIdentifier = *b"phrelect";
 }
 
@@ -273,10 +275,10 @@ pub mod treasury {
 pub mod staking {
 	// Six sessions in an era (24 hours).
 	pub const SESSIONS_PER_ERA: sp_staking::SessionIndex = 6;
-	// 28 eras for unbonding (28 days).
-	pub const BONDING_DURATION: sp_staking::EraIndex = 28;
-	// 27 eras for slash defer duration (27 days).
-	pub const SLASH_DEFER_DURATION: sp_staking::EraIndex = 27;
+	// 14 eras for unbonding (14 days).
+	pub const BONDING_DURATION: sp_staking::EraIndex = 14;
+	// 27 eras for slash defer duration (10 days).
+	pub const SLASH_DEFER_DURATION: sp_staking::EraIndex = 10;
 	pub const MAX_NOMINATOR_REWARDED_PER_VALIDATOR: u32 = 256;
 	pub const OFFENDING_VALIDATOR_THRESHOLD: sp_arithmetic::Perbill =
 		sp_arithmetic::Perbill::from_percent(17);
