@@ -42,11 +42,11 @@ pub fn check_function_modifier(
 	modifier: FunctionModifier,
 ) -> MayRevert {
 	if is_static && modifier != FunctionModifier::View {
-		return Err(RevertReason::custom("Can't call non-static function in static context").into())
+		return Err(RevertReason::custom("Can't call non-static function in static context").into());
 	}
 
 	if modifier != FunctionModifier::Payable && context.apparent_value > U256::zero() {
-		return Err(RevertReason::custom("Function is not payable").into())
+		return Err(RevertReason::custom("Function is not payable").into());
 	}
 
 	Ok(())

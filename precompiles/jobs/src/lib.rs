@@ -106,16 +106,17 @@ where
 			return Err(PrecompileFailure::Revert {
 				exit_status: ExitRevert::Reverted,
 				output: revert_as_bytes("Invalid role type!"),
-			})
+			});
 		}
 
 		let threshold_signature_role = match role_type {
 			Some(RoleType::Tss(role)) => role,
-			_ =>
+			_ => {
 				return Err(PrecompileFailure::Revert {
 					exit_status: ExitRevert::Reverted,
 					output: revert_as_bytes("Invalid role type!"),
-				}),
+				})
+			},
 		};
 
 		// Create DKG job type with the provided parameters
@@ -174,7 +175,7 @@ where
 		submission: BoundedBytes<GetJobSubmissionSizeLimit>,
 	) -> EvmResult {
 		// Convert BoundedBytes to Vec<u8>
-		let submission: Vec<u8> = submission.try_into().unwrap();
+		let submission: Vec<u8> = submission.into();
 
 		// Convert caller's Ethereum address to Substrate account ID
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -189,11 +190,12 @@ where
 				// Parse the inner role type. It should be a TSS role.
 				let threshold_signature_role = match role_type {
 					RoleType::Tss(role) => role,
-					_ =>
+					_ => {
 						return Err(PrecompileFailure::Revert {
 							exit_status: ExitRevert::Reverted,
 							output: revert_as_bytes("Invalid role type!"),
-						}),
+						})
+					},
 				};
 
 				// Construct the phase 2 job type.
@@ -256,7 +258,7 @@ where
 			return Err(PrecompileFailure::Revert {
 				exit_status: ExitRevert::Reverted,
 				output: revert_as_bytes("Invalid role type!"),
-			})
+			});
 		}
 
 		// Convert Ethereum address to Substrate account ID

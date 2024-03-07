@@ -95,15 +95,13 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("ss58Format".into(), tangle_primitives::MAINNET_SS58_PREFIX.into());
 
 	let endowment: Balance = 10_000_000 * UNIT;
-
+	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		"Local Tangle Mainnet",
 		"local-tangle-mainnet",
 		ChainType::Local,
 		move || {
 			mainnet_genesis(
-				// Wasm binary
-				wasm_binary,
 				// Initial validators
 				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
 				// Endowed accounts
@@ -145,6 +143,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		Some(properties),
 		// Extensions
 		None,
+		wasm_binary,
 	))
 }
 
@@ -154,15 +153,13 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "TNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), tangle_primitives::MAINNET_SS58_PREFIX.into());
-
+	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		"Tangle Mainnet",
 		"tangle-mainnet",
 		ChainType::Live,
 		move || {
 			mainnet_genesis(
-				// Wasm binary
-				wasm_binary,
 				// Initial validators
 				get_initial_authorities(),
 				// Endowed accounts
@@ -198,13 +195,13 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		Some(properties),
 		// Extensions
 		None,
+		wasm_binary,
 	))
 }
 
 /// Configure initial storage state for FRAME modules.
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
-	wasm_binary: &[u8],
 	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
 	endowed_accounts: Vec<(AccountId, Balance)>,
 	root_key: AccountId,
@@ -233,11 +230,7 @@ fn mainnet_genesis(
 		})
 		.collect();
 	RuntimeGenesisConfig {
-		system: SystemConfig {
-			// Add Wasm runtime to storage.
-			code: wasm_binary.to_vec(),
-			..Default::default()
-		},
+		system: SystemConfig { ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },
 		balances: BalancesConfig {
 			balances: genesis_non_airdrop

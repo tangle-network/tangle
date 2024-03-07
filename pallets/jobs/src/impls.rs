@@ -14,7 +14,7 @@ impl<T: Config> JobsHandler<T::AccountId> for Pallet<T> {
 	/// Returns a vector of `JobId` representing the active jobs of the validator.
 	fn get_active_jobs(validator: T::AccountId) -> Vec<(RoleType, JobId)> {
 		if let Some(jobs) = ValidatorJobIdLookup::<T>::get(validator) {
-			return jobs.to_vec()
+			return jobs.to_vec();
 		}
 		Default::default()
 	}

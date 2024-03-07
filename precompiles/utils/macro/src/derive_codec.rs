@@ -31,7 +31,7 @@ pub fn main(input: TokenStream) -> TokenStream {
 		return quote_spanned! { ident.span() =>
 			compile_error!("Codec can only be derived for structs with named fields");
 		}
-		.into()
+		.into();
 	};
 	let fields = fields.named;
 
@@ -39,14 +39,14 @@ pub fn main(input: TokenStream) -> TokenStream {
 		return quote_spanned! { ident.span() =>
 			compile_error!("Codec can only be derived for structs with at least one field");
 		}
-		.into()
+		.into();
 	}
 
 	if let Some(unamed_field) = fields.iter().find(|f| f.ident.is_none()) {
 		return quote_spanned! { unamed_field.ty.span() =>
 			compile_error!("Codec can only be derived for structs with named fields");
 		}
-		.into()
+		.into();
 	}
 
 	let fields_ty: Vec<_> = fields.iter().map(|f| &f.ty).collect();

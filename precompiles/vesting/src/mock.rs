@@ -201,6 +201,7 @@ impl frame_system::Config for Runtime {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+	type RuntimeTask = ();
 	type MaxConsumers = ConstU32<16>;
 }
 
@@ -215,7 +216,7 @@ impl pallet_balances::Config for Runtime {
 	type AccountStore = System;
 	type WeightInfo = ();
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type MaxHolds = ();
+	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
 }
@@ -254,6 +255,8 @@ parameter_types! {
 		let block_gas_limit = BlockGasLimit::get().min(u64::MAX.into()).low_u64();
 		block_gas_limit.saturating_div(MAX_POV_SIZE)
 	};
+	pub SuicideQuickClearLimit: u32 = 0;
+
 }
 impl pallet_evm::Config for Runtime {
 	type FeeCalculator = ();
@@ -273,6 +276,7 @@ impl pallet_evm::Config for Runtime {
 	type BlockHashMapping = SubstrateBlockHashMapping<Self>;
 	type FindAuthor = ();
 	type OnCreate = ();
+	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
@@ -301,6 +305,7 @@ impl pallet_vesting::Config for Runtime {
 	type MinVestedTransfer = MinVestedTransfer;
 	type WeightInfo = ();
 	type UnvestedFundsAllowedWithdrawReasons = UnvestedFundsAllowedWithdrawReasons;
+	type BlockNumberProvider = System;
 }
 
 pub fn mock_pub_key(id: u8) -> AccountId {

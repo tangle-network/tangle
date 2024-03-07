@@ -213,7 +213,8 @@ std = [
   # Tangle dependencies
   "tangle-primitives/std",
   "tangle-crypto-primitives/std",
-  
+
+
   # Frontier
   "fp-account/std",
   "fp-evm/std",

@@ -130,7 +130,7 @@ impl<AccountId, MaxParticipants: Get<u32> + Clone, MaxSubmissionLen: Get<u32>>
 	pub fn is_phase_one(&self) -> bool {
 		use crate::jobs::JobType::*;
 		if matches!(self, DKGTSSPhaseOne(_) | ZkSaaSPhaseOne(_)) {
-			return true
+			return true;
 		}
 		false
 	}

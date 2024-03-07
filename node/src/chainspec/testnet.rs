@@ -16,6 +16,7 @@
 #![allow(clippy::type_complexity)]
 
 use crate::testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key};
+
 use hex_literal::hex;
 use pallet_airdrop_claims::{MultiAddress, StatementKind};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -92,7 +93,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
-
+	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		// Name
 		"Local Testnet",
@@ -101,7 +102,6 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		ChainType::Local,
 		move || {
 			testnet_genesis(
-				wasm_binary,
 				// Initial PoA authorities
 				vec![
 					authority_keys_from_seed("Alice"),
@@ -140,6 +140,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		Some(properties),
 		// Extensions
 		None,
+		wasm_binary,
 	))
 }
 
@@ -150,14 +151,13 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
-
+	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		"Tangle Testnet",
 		"tangle-testnet",
 		ChainType::Live,
 		move || {
 			testnet_genesis(
-				wasm_binary,
 				// Initial PoA authorities
 				get_initial_authorities(),
 				// initial nominators
@@ -212,13 +212,13 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		Some(properties),
 		// Extensions
 		None,
+		wasm_binary,
 	))
 }
 
 /// Configure initial storage state for FRAME modules.
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
-	wasm_binary: &[u8],
 	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
 	_initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
@@ -263,18 +263,14 @@ fn testnet_genesis(
 		.collect();
 
 	RuntimeGenesisConfig {
-		system: SystemConfig {
-			// Add Wasm runtime to storage.
-			code: wasm_binary.to_vec(),
-			..Default::default()
-		},
+		system: SystemConfig { ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
 			balances: endowed_accounts
 				.iter()
 				.cloned()
-				.chain(genesis_substrate_distribution.iter().cloned().map(|(k, v)| (k, v)))
+				.chain(genesis_substrate_distribution)
 				.collect(),
 		},
 		vesting: Default::default(),

@@ -18,8 +18,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use evm::ExitReason;
-use fp_evm::{Context, PrecompileFailure, PrecompileHandle, Transfer};
+use fp_evm::{Context, ExitReason, PrecompileFailure, PrecompileHandle, Transfer};
 use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
 use pallet_balances::Call as BalancesCall;
 use pallet_evm::AddressMapping;
@@ -61,8 +60,9 @@ where
 	fn is_allowed(_caller: H160, selector: Option<u32>) -> bool {
 		match selector {
 			None => false,
-			Some(selector) =>
-				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector),
+			Some(selector) => {
+				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector)
+			},
 		}
 	}
 
@@ -92,11 +92,12 @@ where
 	fn is_allowed(_caller: H160, selector: Option<u32>) -> bool {
 		match selector {
 			None => false,
-			Some(selector) =>
-				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector) ||
-					ProxyPrecompileCall::<Runtime>::proxy_selectors().contains(&selector) ||
-					ProxyPrecompileCall::<Runtime>::proxy_force_type_selectors()
-						.contains(&selector),
+			Some(selector) => {
+				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector)
+					|| ProxyPrecompileCall::<Runtime>::proxy_selectors().contains(&selector)
+					|| ProxyPrecompileCall::<Runtime>::proxy_force_type_selectors()
+						.contains(&selector)
+			},
 		}
 	}
 
@@ -186,7 +187,7 @@ where
 			.iter()
 			.any(|pd| pd.delegate == delegate)
 		{
-			return Err(revert("Cannot add more than one proxy"))
+			return Err(revert("Cannot add more than one proxy"));
 		}
 
 		let delegate: <Runtime::Lookup as StaticLookup>::Source =
@@ -342,7 +343,7 @@ where
 		// Check that we only perform proxy calls on behalf of externally owned accounts
 		let AddressType::EOA = precompile_set::get_address_type::<Runtime>(handle, real.into())?
 		else {
-			return Err(revert("real address must be EOA"))
+			return Err(revert("real address must be EOA"));
 		};
 
 		// Read proxy
@@ -390,7 +391,7 @@ where
 			RuntimeHelper::<Runtime>::try_dispatch(
 				handle,
 				Some(contract_address).into(),
-				pallet_balances::Call::<Runtime>::transfer {
+				pallet_balances::Call::<Runtime>::transfer_allow_death {
 					dest: Runtime::Lookup::unlookup(who),
 					value: {
 						let balance: <Runtime as pallet_balances::Config<()>>::Balance =
@@ -418,8 +419,9 @@ where
 		// Return subcall result
 		match reason {
 			ExitReason::Fatal(exit_status) => Err(PrecompileFailure::Fatal { exit_status }),
-			ExitReason::Revert(exit_status) =>
-				Err(PrecompileFailure::Revert { exit_status, output }),
+			ExitReason::Revert(exit_status) => {
+				Err(PrecompileFailure::Revert { exit_status, output })
+			},
 			ExitReason::Error(exit_status) => Err(PrecompileFailure::Error { exit_status }),
 			ExitReason::Succeed(_) => Ok(()),
 		}

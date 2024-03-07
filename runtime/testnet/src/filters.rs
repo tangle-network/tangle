@@ -22,14 +22,14 @@ impl Contains<RuntimeCall> for TestnetCallFilter {
 		let is_core_call = matches!(call, RuntimeCall::System(_) | RuntimeCall::Timestamp(_));
 		if is_core_call {
 			// always allow core call
-			return true
+			return true;
 		}
 
 		let is_paused =
 			pallet_transaction_pause::PausedTransactionFilter::<Runtime>::contains(call);
 		if is_paused {
 			// no paused call
-			return false
+			return false;
 		}
 
 		match call {

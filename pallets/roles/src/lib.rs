@@ -439,14 +439,15 @@ pub mod pallet {
 						Error::<T>::InsufficientRestakingBond
 					);
 				},
-				Profile::Independent(profile) =>
+				Profile::Independent(profile) => {
 					for record in profile.records.iter() {
 						let record_restake = record.amount.unwrap_or_default();
 						ensure!(
 							record_restake >= MinRestakingBond::<T>::get(),
 							Error::<T>::InsufficientRestakingBond
 						);
-					},
+					}
+				},
 			};
 
 			// Total restaking amount should not exceed `max_restaking_amount`.
@@ -463,14 +464,14 @@ pub mod pallet {
 			ledger.total = updated_profile.get_total_profile_restake().into();
 
 			// if the total restake was reduced, we record that in unlock data
-			if profile_before_update.get_total_profile_restake() >
-				updated_profile.get_total_profile_restake()
+			if profile_before_update.get_total_profile_restake()
+				> updated_profile.get_total_profile_restake()
 			{
 				let value = profile_before_update
 					.get_total_profile_restake()
 					.saturating_sub(updated_profile.get_total_profile_restake());
-				let era = Self::active_restaker_era().ok_or(Error::<T>::InvalidEraToReward)?.index +
-					T::BondingDuration::get();
+				let era = Self::active_restaker_era().ok_or(Error::<T>::InvalidEraToReward)?.index
+					+ T::BondingDuration::get();
 
 				ledger
 					.unlocking
@@ -535,7 +536,7 @@ pub mod pallet {
 
 				// Profile delete request failed due to pending jobs, which can't be opted out at
 				// the moment.
-				return Err(Error::<T>::ProfileDeleteRequestFailed.into())
+				return Err(Error::<T>::ProfileDeleteRequestFailed.into());
 			}
 
 			Self::deposit_event(Event::<T>::ProfileDeleted { account: restaker_account.clone() });

@@ -157,7 +157,7 @@ pub struct ValidatorRewardDistribution {
 impl ValidatorRewardDistribution {
 	pub fn try_new(tss_share: Percent, zksaas_share: Percent) -> Result<Self, String> {
 		if !tss_share.add(zksaas_share).is_one() {
-			return Err("Shares must add to One".to_string())
+			return Err("Shares must add to One".to_string());
 		}
 
 		Ok(Self { tss_share, zksaas_share })

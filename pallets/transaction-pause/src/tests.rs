@@ -5,7 +5,10 @@ use mock::{RuntimeEvent, *};
 use sp_runtime::traits::BadOrigin;
 
 const BALANCE_TRANSFER: &<Runtime as frame_system::Config>::RuntimeCall =
-	&mock::RuntimeCall::Balances(pallet_balances::Call::transfer { dest: ALICE, value: 10 });
+	&mock::RuntimeCall::Balances(pallet_balances::Call::transfer_allow_death {
+		dest: ALICE,
+		value: 10,
+	});
 
 #[test]
 fn pause_transaction_work() {
@@ -16,28 +19,34 @@ fn pause_transaction_work() {
 			TransactionPause::pause_transaction(
 				RuntimeOrigin::signed(5),
 				b"Balances".to_vec(),
-				b"transfer".to_vec()
+				b"transfer_allow_death".to_vec()
 			),
 			BadOrigin
 		);
 
 		assert_eq!(
-			TransactionPause::paused_transactions((b"Balances".to_vec(), b"transfer".to_vec())),
+			TransactionPause::paused_transactions((
+				b"Balances".to_vec(),
+				b"transfer_allow_death".to_vec()
+			)),
 			None
 		);
 		assert_ok!(TransactionPause::pause_transaction(
 			RuntimeOrigin::signed(1),
 			b"Balances".to_vec(),
-			b"transfer".to_vec()
+			b"transfer_allow_death".to_vec()
 		));
 		System::assert_last_event(RuntimeEvent::TransactionPause(
 			crate::Event::TransactionPaused {
 				pallet_name_bytes: b"Balances".to_vec(),
-				function_name_bytes: b"transfer".to_vec(),
+				function_name_bytes: b"transfer_allow_death".to_vec(),
 			},
 		));
 		assert_eq!(
-			TransactionPause::paused_transactions((b"Balances".to_vec(), b"transfer".to_vec())),
+			TransactionPause::paused_transactions((
+				b"Balances".to_vec(),
+				b"transfer_allow_death".to_vec()
+			)),
 			Some(())
 		);
 
@@ -73,10 +82,13 @@ fn unpause_transaction_work() {
 		assert_ok!(TransactionPause::pause_transaction(
 			RuntimeOrigin::signed(1),
 			b"Balances".to_vec(),
-			b"transfer".to_vec()
+			b"transfer_allow_death".to_vec()
 		));
 		assert_eq!(
-			TransactionPause::paused_transactions((b"Balances".to_vec(), b"transfer".to_vec())),
+			TransactionPause::paused_transactions((
+				b"Balances".to_vec(),
+				b"transfer_allow_death".to_vec()
+			)),
 			Some(())
 		);
 
@@ -84,7 +96,7 @@ fn unpause_transaction_work() {
 			TransactionPause::unpause_transaction(
 				RuntimeOrigin::signed(5),
 				b"Balances".to_vec(),
-				b"transfer".to_vec()
+				b"transfer_allow_death".to_vec()
 			),
 			BadOrigin
 		);
@@ -92,16 +104,19 @@ fn unpause_transaction_work() {
 		assert_ok!(TransactionPause::unpause_transaction(
 			RuntimeOrigin::signed(1),
 			b"Balances".to_vec(),
-			b"transfer".to_vec()
+			b"transfer_allow_death".to_vec()
 		));
 		System::assert_last_event(RuntimeEvent::TransactionPause(
 			crate::Event::TransactionUnpaused {
 				pallet_name_bytes: b"Balances".to_vec(),
-				function_name_bytes: b"transfer".to_vec(),
+				function_name_bytes: b"transfer_allow_death".to_vec(),
 			},
 		));
 		assert_eq!(
-			TransactionPause::paused_transactions((b"Balances".to_vec(), b"transfer".to_vec())),
+			TransactionPause::paused_transactions((
+				b"Balances".to_vec(),
+				b"transfer_allow_death".to_vec()
+			)),
 			None
 		);
 	});
@@ -115,14 +130,14 @@ fn paused_transaction_filter_work() {
 		assert_ok!(TransactionPause::pause_transaction(
 			RuntimeOrigin::signed(1),
 			b"Balances".to_vec(),
-			b"transfer".to_vec()
+			b"transfer_allow_death".to_vec()
 		));
 		assert!(PausedTransactionFilter::<Runtime>::contains(BALANCE_TRANSFER));
 
 		assert_ok!(TransactionPause::unpause_transaction(
 			RuntimeOrigin::signed(1),
 			b"Balances".to_vec(),
-			b"transfer".to_vec()
+			b"transfer_allow_death".to_vec()
 		));
 		assert!(!PausedTransactionFilter::<Runtime>::contains(BALANCE_TRANSFER));
 	});

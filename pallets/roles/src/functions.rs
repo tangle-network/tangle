@@ -35,7 +35,7 @@ impl<T: Config> Pallet<T> {
 				for job in active_jobs.clone() {
 					let role_type = job.0;
 					if role_type == role {
-						return Err(Error::<T>::RoleCannotBeRemoved.into())
+						return Err(Error::<T>::RoleCannotBeRemoved.into());
 					}
 				}
 			}
@@ -90,13 +90,13 @@ impl<T: Config> Pallet<T> {
 					.find_map(|record| if record.role == *role { record.amount } else { None })
 					.unwrap_or_else(|| Zero::zero());
 				ensure!(
-					updated_role_restaking_amount >=
-						current_ledger.profile.get_total_profile_restake(),
+					updated_role_restaking_amount
+						>= current_ledger.profile.get_total_profile_restake(),
 					Error::<T>::InsufficientRestakingBond
 				);
 			}
 
-			return Ok(())
+			return Ok(());
 		}
 		// For each role with an active job, ensure its stake is greater than or equal to the
 		// existing ledger's restaking amount for that role. If it's a shared profile, then the
@@ -104,25 +104,27 @@ impl<T: Config> Pallet<T> {
 		let min_restaking_bond = MinRestakingBond::<T>::get();
 		for record in updated_profile.clone().get_records() {
 			match updated_profile.clone() {
-				Profile::Independent(_) =>
+				Profile::Independent(_) => {
 					if roles_with_active_jobs.contains(&record.role) {
 						ensure!(
 							record.amount.unwrap_or_default() >= min_restaking_bond,
 							Error::<T>::InsufficientRestakingBond
 						);
 						ensure!(
-							record.amount.unwrap_or_default() >=
-								current_ledger.restake_for(&record.role),
+							record.amount.unwrap_or_default()
+								>= current_ledger.restake_for(&record.role),
 							Error::<T>::InsufficientRestakingBond
 						);
-					},
-				Profile::Shared(profile) =>
+					}
+				},
+				Profile::Shared(profile) => {
 					if roles_with_active_jobs.contains(&record.role) {
 						ensure!(
 							profile.amount >= current_ledger.profile.get_total_profile_restake(),
 							Error::<T>::InsufficientRestakingBond
 						);
-					},
+					}
+				},
 			}
 		}
 		Ok(())
@@ -139,7 +141,7 @@ impl<T: Config> Pallet<T> {
 		let assigned_roles = AccountRolesMapping::<T>::get(account);
 		if assigned_roles.is_empty() {
 			// Role is cleared, account can chill, unbond and withdraw funds.
-			return true
+			return true;
 		}
 		false
 	}
@@ -379,8 +381,8 @@ impl<T: Config> Pallet<T> {
 		);
 
 		let missing_restake_ratio =
-			Perbill::from_percent(T::MaxRestake::get().deconstruct().into()) -
-				restake_to_stake_ratio;
+			Perbill::from_percent(T::MaxRestake::get().deconstruct().into())
+				- restake_to_stake_ratio;
 		log::debug!(
 			target: "pallet-roles",
 			"EraIndex {:?} missing_restake_ratio {:?}",
@@ -479,7 +481,7 @@ impl<T: Config> Pallet<T> {
 
 		// Nothing to do if they have no reward points.
 		if restaker_reward_points.is_zero() {
-			return Ok(())
+			return Ok(());
 		}
 
 		// This is how much validator + nominators are entitled to.
@@ -539,7 +541,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		T::Reward::on_unbalanced(total_imbalance);
-		debug_assert!(nominator_payout_count <= T::MaxNominatorRewardedPerValidator::get());
+		debug_assert!(nominator_payout_count <= T::MaxExposurePageSize::get());
 		Ok(())
 	}
 

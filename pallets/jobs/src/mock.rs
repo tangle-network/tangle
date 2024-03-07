@@ -69,6 +69,7 @@ impl frame_system::Config for Runtime {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+	type RuntimeTask = ();
 	type MaxConsumers = ConstU32<16>;
 }
 
@@ -83,7 +84,7 @@ impl pallet_balances::Config for Runtime {
 	type ReserveIdentifier = ();
 	type WeightInfo = ();
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type MaxHolds = ();
+	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
 }
@@ -123,12 +124,13 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for Moc
 		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
 	) -> Balance {
 		match job.job_type {
-			JobType::DKGTSSPhaseOne(_) |
-			JobType::DKGTSSPhaseTwo(_) |
-			JobType::DKGTSSPhaseThree(_) |
-			JobType::DKGTSSPhaseFour(_) => MockDKGPallet::job_to_fee(job),
-			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) =>
-				MockZkSaasPallet::job_to_fee(job),
+			JobType::DKGTSSPhaseOne(_)
+			| JobType::DKGTSSPhaseTwo(_)
+			| JobType::DKGTSSPhaseThree(_)
+			| JobType::DKGTSSPhaseFour(_) => MockDKGPallet::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => {
+				MockZkSaasPallet::job_to_fee(job)
+			},
 		}
 	}
 }
@@ -220,12 +222,12 @@ impl Contains<RuntimeCall> for BaseFilter {
 
 		if is_stake_unbond_call {
 			// no unbond call
-			return false
+			return false;
 		}
 
 		// no chill call
 		if matches!(call, RuntimeCall::Staking(pallet_staking::Call::chill { .. })) {
-			return false
+			return false;
 		}
 
 		// no withdraw_unbonded call
@@ -233,7 +235,7 @@ impl Contains<RuntimeCall> for BaseFilter {
 			matches!(call, RuntimeCall::Staking(pallet_staking::Call::withdraw_unbonded { .. }));
 
 		if is_stake_withdraw_call {
-			return false
+			return false;
 		}
 
 		true
@@ -306,7 +308,8 @@ impl pallet_staking::Config for Runtime {
 	type SessionInterface = ();
 	type EraPayout = ();
 	type NextNewSession = Session;
-	type MaxNominatorRewardedPerValidator = ConstU32<64>;
+	type MaxExposurePageSize = ConstU32<64>;
+	type MaxControllersInDeprecationBatch = ConstU32<100>;
 	type OffendingValidatorsThreshold = ();
 	type ElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type GenesisElectionProvider = Self::ElectionProvider;

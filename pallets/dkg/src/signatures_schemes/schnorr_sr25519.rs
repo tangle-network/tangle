@@ -55,7 +55,7 @@ pub fn verify_schnorr_sr25519_signature<T: Config>(
 				.unwrap_or_else(|| panic!("Failed to convert input to sr25519 public key")),
 		),
 	) {
-		return Err(Error::<T>::InvalidSignature.into())
+		return Err(Error::<T>::InvalidSignature.into());
 	}
 
 	Ok(())

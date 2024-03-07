@@ -131,12 +131,13 @@ impl Group for JubjubGroup {
 		let point = SubgroupPoint::from_bytes(buf);
 
 		match Option::<SubgroupPoint>::from(point) {
-			Some(point) =>
+			Some(point) => {
 				if point == SubgroupPoint::identity() {
 					Err(GroupError::InvalidIdentityElement)
 				} else {
 					Ok(WrappedSubgroupPoint(point))
-				},
+				}
+			},
 			None => Err(GroupError::MalformedElement),
 		}
 	}
