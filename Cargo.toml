@@ -113,6 +113,9 @@ pallet-zksaas = { path = "pallets/zksaas", default-features = false }
 pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-features = false }
 pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
 
+p256 = { version = "0.13.0", default-features = false }
+ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
+starknet-crypto = { version = "0.6.1", no-default-features = true }
 frost-core = { path = "pallets/dkg/frost", default-features = false }
 frost-ed25519 = { path = "pallets/dkg/frost/frost-ed25519", default-features = false }
 frost-ed448 = { path = "pallets/dkg/frost/frost-ed448", default-features = false }

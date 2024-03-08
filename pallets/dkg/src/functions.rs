@@ -15,7 +15,10 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use self::signatures_schemes::{
 	bls12_381::verify_bls12_381_signature,
-	ecdsa::{verify_ecdsa_signature, verify_generated_dkg_key_ecdsa},
+	ecdsa::{
+		verify_generated_dkg_key_ecdsa, verify_secp256k1_ecdsa_signature,
+		verify_secp256r1_ecdsa_signature, verify_stark_ecdsa_signature,
+	},
 	schnorr_frost::verify_dkg_signature_schnorr_frost,
 	schnorr_sr25519::verify_schnorr_sr25519_signature,
 };
@@ -25,6 +28,7 @@ use frame_support::{pallet_prelude::DispatchResult, sp_runtime::Saturating};
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::prelude::vec::Vec;
 use sp_core::Get;
+use sp_runtime::BoundedVec;
 use tangle_primitives::jobs::*;
 
 impl<T: Config> Pallet<T> {
@@ -141,8 +145,18 @@ impl<T: Config> Pallet<T> {
 		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
 	) -> DispatchResult {
 		match data.signature_scheme {
-			DigitalSignatureScheme::EcdsaSecp256k1 => {
-				verify_ecdsa_signature::<T>(&data.data, &data.signature, &data.verifying_key)
+			DigitalSignatureScheme::EcdsaSecp256k1 => verify_secp256k1_ecdsa_signature::<T>(
+				&data.data,
+				&data.signature,
+				&data.verifying_key,
+			),
+			DigitalSignatureScheme::EcdsaSecp256r1 => verify_secp256r1_ecdsa_signature::<T>(
+				&data.data,
+				&data.signature,
+				&data.verifying_key,
+			),
+			DigitalSignatureScheme::EcdsaStark => {
+				verify_stark_ecdsa_signature::<T>(&data.data, &data.signature, &data.verifying_key)
 			},
 			DigitalSignatureScheme::SchnorrSr25519 => verify_schnorr_sr25519_signature::<T>(
 				&data.data,
@@ -194,20 +208,17 @@ impl<T: Config> Pallet<T> {
 			Ok(())
 		};
 
-		match data.signature_scheme {
-			DigitalSignatureScheme::EcdsaSecp256k1 => {
-				verify_ecdsa_signature::<T>(&data.new_key, &data.signature, &data.key)
-					.map(|_| emit_event(data))?
-			},
-			DigitalSignatureScheme::SchnorrSr25519 => {
-				verify_schnorr_sr25519_signature::<T>(&data.new_key, &data.signature, &data.key)
-					.map(|_| emit_event(data))?
-			},
-			DigitalSignatureScheme::Bls381 => {
-				verify_bls12_381_signature::<T>(&data.new_key, &data.signature, &data.key)
-					.map(|_| emit_event(data))?
-			},
-			_ => Err(Error::<T>::InvalidSignatureScheme.into()), // unimplemented
-		}
+		let encoded_data: BoundedVec<u8, T::MaxDataLen> =
+			data.new_key.to_vec().try_into().unwrap_or_default();
+		let signature = data.signature.clone();
+		let verifying_key = data.key.clone();
+		let signature_scheme = data.signature_scheme.clone();
+		let sig_result_data: DKGTSSSignatureResult<
+			T::MaxDataLen,
+			T::MaxKeyLen,
+			T::MaxSignatureLen,
+		> = DKGTSSSignatureResult { data: encoded_data, signature, verifying_key, signature_scheme };
+
+		Self::verify_dkg_signature(sig_result_data).and_then(|_| emit_event(data))
 	}
 }

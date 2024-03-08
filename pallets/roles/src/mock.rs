@@ -33,7 +33,7 @@ use sp_core::{
 	H256,
 };
 use sp_runtime::{
-	app_crypto::EcdsaSecp256k1::Public,
+	app_crypto::ecdsa::Public,
 	testing::Header,
 	traits::{ConvertInto, IdentifyAccount, IdentityLookup, OpaqueKeys, Verify},
 	BuildStorage, DispatchResult, Perbill, Percent,

@@ -13,13 +13,16 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+use crate::{signatures_schemes::to_slice_33, Config, Error};
+use ecdsa_core::signature::hazmat::PrehashVerifier;
 use frame_support::{ensure, pallet_prelude::DispatchResult};
+use p256::ecdsa::{Signature, VerifyingKey};
 use sp_core::ecdsa;
 use sp_io::{hashing::keccak_256, EcdsaVerifyError};
-use sp_std::vec::Vec;
-use tangle_primitives::jobs::DKGTSSKeySubmissionResult;
 
-use crate::{signatures_schemes::to_slice_33, Config, Error};
+use sp_std::vec::Vec;
+
+use tangle_primitives::jobs::DKGTSSKeySubmissionResult;
 
 pub const ECDSA_SIGNATURE_LENGTH: usize = 65;
 
@@ -74,7 +77,7 @@ pub fn recover_ecdsa_pub_key_compressed(
 	Err(EcdsaVerifyError::BadSignature)
 }
 
-/// Verifies the DKG signature result by recovering the ECDSA public key from the provided data
+/// Verifies the Secp256k1 DKG signature result by recovering the ECDSA public key from the provided data
 /// and signature.
 ///
 /// This function checks whether the recovered public key matches the expected signing key,
@@ -83,7 +86,9 @@ pub fn recover_ecdsa_pub_key_compressed(
 /// # Arguments
 ///
 /// * `data` - The DKG signature result containing the message data and ECDSA signature.
-pub fn verify_ecdsa_signature<T: Config>(
+/// * `signature` - The ECDSA signature to be verified.
+/// * `expected_key` - The expected ECDSA public key.
+pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
@@ -104,7 +109,81 @@ pub fn verify_ecdsa_signature<T: Config>(
 	Ok(())
 }
 
-/// Verifies the signer of a given message using a set of ECDSA public keys.
+/// Verify the Secp256r1 DKG signature result by recovering the ECDSA public key from the provided data
+/// and signature.
+///
+/// This function checks whether the recovered public key matches the expected signing key,
+/// ensuring the validity of the signature.
+///
+/// # Arguments
+///
+/// * `data` - The DKG signature result containing the message data and ECDSA signature.
+/// * `signature` - The ECDSA signature to be verified.
+/// * `expected_key` - The expected ECDSA public key.
+pub fn verify_secp256r1_ecdsa_signature<T: Config>(
+	msg: &[u8],
+	signature: &[u8],
+	expected_key: &[u8],
+) -> DispatchResult {
+	let verifying_key =
+		VerifyingKey::from_sec1_bytes(expected_key).map_err(|_| Error::<T>::InvalidPublicKey)?;
+	let signature = Signature::from_slice(signature).map_err(|_| Error::<T>::InvalidSignature)?;
+	ensure!(verifying_key.verify_prehash(msg, &signature).is_ok(), Error::<T>::InvalidSignature);
+	Ok(())
+}
+
+/// Verifies the Stark curve DKG signature result by recovering the ECDSA public key from the provided data
+/// and signature.
+///
+/// This function checks whether the recovered public key matches the expected signing key,
+/// ensuring the validity of the signature.
+///
+/// # Arguments
+///
+/// * `data` - The DKG signature result containing the message data and ECDSA signature.
+/// * `signature` - The ECDSA signature to be verified.
+/// * `expected_key` - The expected ECDSA public key.
+pub fn verify_stark_ecdsa_signature<T: Config>(
+	msg: &[u8],
+	signature: &[u8],
+	expected_key: &[u8],
+) -> DispatchResult {
+	// The expected key should be a 32-byte public key x coordinate
+	if expected_key.len() != 32 {
+		Err(Error::<T>::InvalidPublicKey)?;
+	}
+	// The message should be pre-hashed uisng a 32-byte digest
+	if msg.len() != 32 {
+		Err(Error::<T>::InvalidMessage)?;
+	}
+
+	// The signature should be a 64-byte r and s pair
+	if signature.len() != 64 {
+		Err(Error::<T>::MalformedFrostSignature)?;
+	}
+
+	let public_key = convert_stark_scalar::<T>(expected_key)?;
+	let message = convert_stark_scalar::<T>(msg)?;
+	let r = convert_stark_scalar::<T>(&signature[..32])?;
+	let s = convert_stark_scalar::<T>(&signature[32..])?;
+
+	let result = starknet_crypto::verify(&public_key, &message, &r, &s)
+		.map_err(|_| Error::<T>::InvalidSignature)?;
+
+	ensure!(result, Error::<T>::InvalidSignature);
+	Ok(())
+}
+
+pub fn convert_stark_scalar<T: Config>(
+	x: &[u8],
+) -> Result<starknet_crypto::FieldElement, Error<T>> {
+	debug_assert_eq!(x.len(), 32);
+	let mut buffer = [0u8; 32];
+	buffer.copy_from_slice(x);
+	starknet_crypto::FieldElement::from_bytes_be(&buffer).map_err(|_| Error::<T>::FieldElementError)
+}
+
+/// Verifies the signer of a given message using a set of Secp256k1 ECDSA public keys.
 ///
 /// Given a vector of ECDSA public keys (`maybe_signers`), a message (`msg`), and an ECDSA
 /// signature (`signature`), this function checks if any of the public keys in the set can be a
@@ -147,7 +226,7 @@ pub fn verify_signer_from_set_ecdsa(
 	(signer, res)
 }
 
-/// Verifies the generated DKG key from a set of participants' ECDSA keys and signatures.
+/// Verifies the generated DKG key from a set of participants' Secp256k1 ECDSA keys and signatures.
 ///
 /// This function includes generating required signers, validating signatures, and ensuring a
 /// sufficient number of unique signers are present.

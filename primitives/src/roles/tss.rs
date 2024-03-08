@@ -45,7 +45,7 @@ pub enum ThresholdSignatureRoleType {
 	DfnsCGGMP21Secp256k1,
 	DfnsCGGMP21Secp256r1,
 	DfnsCGGMP21Stark,
-	SilentShardDKLS23Secpk256k1,
+	SilentShardDKLS23Secp256k1,
 	ZcashFrostP256,
 	ZcashFrostP384,
 	ZcashFrostSecp256k1,
