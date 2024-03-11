@@ -280,7 +280,7 @@ pub mod module {
 
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_restaker(participant.clone(), role_type),
+						T::RolesHandler::is_restaker_with_role(participant.clone(), role_type),
 						Error::<T>::InvalidValidator
 					);
 
@@ -314,7 +314,7 @@ pub mod module {
 
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_restaker(participant.clone(), role_type),
+						T::RolesHandler::is_restaker_with_role(participant.clone(), role_type),
 						Error::<T>::InvalidValidator
 					);
 

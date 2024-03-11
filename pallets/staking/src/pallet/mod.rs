@@ -52,6 +52,7 @@ use crate::{
 	Nominations, NominationsQuota, PositiveImbalanceOf, RewardDestination, SessionInterface,
 	StakingLedger, UnappliedSlash, UnlockChunk, ValidatorPrefs,
 };
+use tangle_primitives::roles::traits::RolesHandler;
 
 // The speculative number of spans are used as an input of the weight annotation of
 // [`Call::unbond`], as the post dipatch weight may depend on the number of slashing span on the
@@ -280,6 +281,9 @@ pub mod pallet {
 
 		/// Some parameters of the benchmarking.
 		type BenchmarkingConfig: BenchmarkingConfig;
+
+		/// The restaker roles handler interface
+		type RolesHandler: RolesHandler<Self::AccountId>;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -723,8 +727,8 @@ pub mod pallet {
 					_ => Ok(()),
 				});
 				assert!(
-					ValidatorCount::<T>::get() <=
-						<T::ElectionProvider as ElectionProviderBase>::MaxWinners::get()
+					ValidatorCount::<T>::get()
+						<= <T::ElectionProvider as ElectionProviderBase>::MaxWinners::get()
 				);
 			}
 
@@ -847,6 +851,8 @@ pub mod pallet {
 		BoundNotMet,
 		/// Used when attempting to use deprecated controller account logic.
 		ControllerDeprecated,
+		/// The user has active restake
+		RestakeActive,
 	}
 
 	#[pallet::hooks]
@@ -881,8 +887,8 @@ pub mod pallet {
 
 			// ensure election results are always bounded with the same value
 			assert!(
-				<T::ElectionProvider as ElectionProviderBase>::MaxWinners::get() ==
-					<T::GenesisElectionProvider as ElectionProviderBase>::MaxWinners::get()
+				<T::ElectionProvider as ElectionProviderBase>::MaxWinners::get()
+					== <T::GenesisElectionProvider as ElectionProviderBase>::MaxWinners::get()
 			);
 
 			assert!(
@@ -926,12 +932,12 @@ pub mod pallet {
 			let stash = ensure_signed(origin)?;
 
 			if StakingLedger::<T>::is_bonded(StakingAccount::Stash(stash.clone())) {
-				return Err(Error::<T>::AlreadyBonded.into())
+				return Err(Error::<T>::AlreadyBonded.into());
 			}
 
 			// Reject a bond which is considered to be _dust_.
 			if value < T::Currency::minimum_balance() {
-				return Err(Error::<T>::InsufficientBond.into())
+				return Err(Error::<T>::InsufficientBond.into());
 			}
 
 			frame_system::Pallet::<T>::inc_consumers(&stash).map_err(|_| Error::<T>::BadState)?;
@@ -1023,6 +1029,9 @@ pub mod pallet {
 			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let controller = ensure_signed(origin)?;
+
+			ensure!(!T::RolesHandler::is_restaker(controller.clone()), Error::<T>::RestakeActive);
+
 			let unlocking =
 				Self::ledger(Controller(controller.clone())).map(|l| l.unlocking.len())?;
 
@@ -1135,6 +1144,8 @@ pub mod pallet {
 			num_slashing_spans: u32,
 		) -> DispatchResultWithPostInfo {
 			let controller = ensure_signed(origin)?;
+
+			ensure!(!T::RolesHandler::is_restaker(controller.clone()), Error::<T>::RestakeActive);
 
 			let actual_weight = Self::do_withdraw_unbonded(&controller, num_slashing_spans)?;
 			Ok(Some(actual_weight).into())
@@ -1300,7 +1311,7 @@ pub mod pallet {
 				Error::<T>::ControllerDeprecated
 			);
 
-			let _ = ledger
+			ledger
 				.set_payee(payee)
 				.defensive_proof("ledger was retrieved from storage, thus its bonded; qed.")?;
 
@@ -1529,7 +1540,7 @@ pub mod pallet {
 			ensure!(!slash_indices.is_empty(), Error::<T>::EmptyTargets);
 			ensure!(is_sorted_and_unique(&slash_indices), Error::<T>::NotSortedAndUnique);
 
-			let mut unapplied = UnappliedSlashes::<T>::get(&era);
+			let mut unapplied = UnappliedSlashes::<T>::get(era);
 			let last_item = slash_indices[slash_indices.len() - 1];
 			ensure!((last_item as usize) < unapplied.len(), Error::<T>::InvalidSlashIndex);
 
@@ -1538,7 +1549,7 @@ pub mod pallet {
 				unapplied.remove(index);
 			}
 
-			UnappliedSlashes::<T>::insert(&era, &unapplied);
+			UnappliedSlashes::<T>::insert(era, &unapplied);
 			Ok(())
 		}
 
@@ -1574,7 +1585,7 @@ pub mod pallet {
 		/// - Time complexity: O(L), where L is unlocking chunks
 		/// - Bounded by `MaxUnlockingChunks`.
 		#[pallet::call_index(19)]
-		#[pallet::weight(T::WeightInfo::rebond(T::MaxUnlockingChunks::get() as u32))]
+		#[pallet::weight(T::WeightInfo::rebond(T::MaxUnlockingChunks::get()))]
 		pub fn rebond(
 			origin: OriginFor<T>,
 			#[pallet::compact] value: BalanceOf<T>,
@@ -1635,8 +1646,8 @@ pub mod pallet {
 			let _ = ensure_signed(origin)?;
 
 			let ed = T::Currency::minimum_balance();
-			let reapable = T::Currency::total_balance(&stash) < ed ||
-				Self::ledger(Stash(stash.clone())).map(|l| l.total).unwrap_or_default() < ed;
+			let reapable = T::Currency::total_balance(&stash) < ed
+				|| Self::ledger(Stash(stash.clone())).map(|l| l.total).unwrap_or_default() < ed;
 			ensure!(reapable, Error::<T>::FundedTarget);
 
 			// Remove all staking-related information and lock.
@@ -1795,7 +1806,7 @@ pub mod pallet {
 
 			if Nominators::<T>::contains_key(&stash) && Nominators::<T>::get(&stash).is_none() {
 				Self::chill_stash(&stash);
-				return Ok(())
+				return Ok(());
 			}
 
 			if caller != controller {
@@ -1916,7 +1927,7 @@ pub mod pallet {
 				Error::<T>::NotController
 			);
 
-			let _ = ledger
+			ledger
 				.set_payee(RewardDestination::Account(controller))
 				.defensive_proof("ledger should have been previously retrieved from storage.")?;
 
@@ -1943,7 +1954,7 @@ pub mod pallet {
 				.iter()
 				.filter_map(|controller| {
 					let ledger = Self::ledger(StakingAccount::Controller(controller.clone()));
-					ledger.ok().map_or(None, |ledger| {
+					ledger.ok().and_then(|ledger| {
 						// If the controller `RewardDestination` is still the deprecated
 						// `Controller` variant, skip deprecating this account.
 						let payee_deprecated = Payee::<T>::get(&ledger.stash) == {

@@ -33,6 +33,7 @@ use frame_support::{
 use frame_system::{EnsureRoot, EnsureSignedBy};
 use sp_core::H256;
 use sp_io;
+use sp_runtime::DispatchResult;
 use sp_runtime::{
 	curve::PiecewiseLinear,
 	testing::UintAuthorityId,
@@ -43,6 +44,8 @@ use sp_staking::{
 	offence::{DisableStrategy, OffenceDetails, OnOffenceHandler},
 	OnStakingUpdate,
 };
+use tangle_primitives::jobs::ReportRestakerOffence;
+use tangle_primitives::roles::RoleType;
 
 pub const INIT_TIMESTAMP: u64 = 30_000;
 pub const BLOCK_TIME: u64 = 1000;
@@ -290,6 +293,34 @@ impl OnStakingUpdate<AccountId, Balance> for EventListenerMock {
 	}
 }
 
+pub struct MockRolesHandler;
+impl tangle_primitives::roles::traits::RolesHandler<AccountId> for MockRolesHandler {
+	type Balance = Balance;
+	fn is_restaker_with_role(_address: AccountId, _role_type: RoleType) -> bool {
+		false
+	}
+
+	fn is_restaker(_address: AccountId) -> bool {
+		false
+	}
+
+	fn get_validator_role_key(_address: AccountId) -> Option<Vec<u8>> {
+		None
+	}
+
+	fn report_offence(_offence_report: ReportRestakerOffence<AccountId>) -> DispatchResult {
+		Ok(())
+	}
+
+	fn record_job_by_validators(_validators: Vec<AccountId>) -> DispatchResult {
+		Ok(())
+	}
+
+	fn get_max_active_service_for_restaker(_restaker: AccountId) -> Option<u32> {
+		None
+	}
+}
+
 impl crate::pallet::pallet::Config for Test {
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
@@ -319,6 +350,7 @@ impl crate::pallet::pallet::Config for Test {
 	type MaxControllersInDeprecationBatch = MaxControllersInDeprecationBatch;
 	type EventListeners = EventListenerMock;
 	type BenchmarkingConfig = TestBenchmarkingConfig;
+	type RolesHandler = MockRolesHandler;
 	type WeightInfo = ();
 }
 
@@ -742,9 +774,9 @@ pub(crate) fn on_offence_in_era(
 	for &(bonded_era, start_session) in bonded_eras.iter() {
 		if bonded_era == era {
 			let _ = Staking::on_offence(offenders, slash_fraction, start_session, disable_strategy);
-			return
+			return;
 		} else if bonded_era > era {
-			break
+			break;
 		}
 	}
 

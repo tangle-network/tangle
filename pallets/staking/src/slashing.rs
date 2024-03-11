@@ -125,7 +125,7 @@ impl SlashingSpans {
 	pub(crate) fn end_span(&mut self, now: EraIndex) -> bool {
 		let next_start = now.defensive_saturating_add(1);
 		if next_start <= self.last_start {
-			return false
+			return false;
 		}
 
 		let last_length = next_start.defensive_saturating_sub(self.last_start);
@@ -242,20 +242,16 @@ pub(crate) fn compute_slash<T: Config>(
 		// kick out the validator even if they won't be slashed,
 		// as long as the misbehavior is from their most recent slashing span.
 		kick_out_if_recent::<T>(params);
-		return None
+		return None;
 	}
 
-	let prior_slash_p = ValidatorSlashInEra::<T>::get(&params.slash_era, params.stash)
+	let prior_slash_p = ValidatorSlashInEra::<T>::get(params.slash_era, params.stash)
 		.map_or(Zero::zero(), |(prior_slash_proportion, _)| prior_slash_proportion);
 
 	// compare slash proportions rather than slash values to avoid issues due to rounding
 	// error.
 	if params.slash.deconstruct() > prior_slash_p.deconstruct() {
-		ValidatorSlashInEra::<T>::insert(
-			&params.slash_era,
-			params.stash,
-			&(params.slash, own_slash),
-		);
+		ValidatorSlashInEra::<T>::insert(params.slash_era, params.stash, (params.slash, own_slash));
 	} else {
 		// we slash based on the max in era - this new event is not the max,
 		// so neither the validator or any nominators will need an update.
@@ -264,7 +260,7 @@ pub(crate) fn compute_slash<T: Config>(
 		// pays out some reward even if the latest report is not max-in-era.
 		// we opt to avoid the nominator lookups and edits and leave more rewards
 		// for more drastic misbehavior.
-		return None
+		return None;
 	}
 
 	// apply slash to validator.
@@ -393,9 +389,9 @@ fn slash_nominators<T: Config>(
 			let own_slash_difference = own_slash_by_validator.saturating_sub(own_slash_prior);
 
 			let mut era_slash =
-				NominatorSlashInEra::<T>::get(&params.slash_era, stash).unwrap_or_else(Zero::zero);
+				NominatorSlashInEra::<T>::get(params.slash_era, stash).unwrap_or_else(Zero::zero);
 			era_slash += own_slash_difference;
-			NominatorSlashInEra::<T>::insert(&params.slash_era, stash, &era_slash);
+			NominatorSlashInEra::<T>::insert(params.slash_era, stash, era_slash);
 
 			era_slash
 		};
@@ -542,7 +538,7 @@ impl<'a, T: 'a + Config> Drop for InspectingSpans<'a, T> {
 	fn drop(&mut self) {
 		// only update on disk if we slashed this account.
 		if !self.dirty {
-			return
+			return;
 		}
 
 		if let Some((start, end)) = self.spans.prune(self.window_start) {
@@ -558,9 +554,9 @@ impl<'a, T: 'a + Config> Drop for InspectingSpans<'a, T> {
 /// Clear slashing metadata for an obsolete era.
 pub(crate) fn clear_era_metadata<T: Config>(obsolete_era: EraIndex) {
 	#[allow(deprecated)]
-	ValidatorSlashInEra::<T>::remove_prefix(&obsolete_era, None);
+	ValidatorSlashInEra::<T>::remove_prefix(obsolete_era, None);
 	#[allow(deprecated)]
-	NominatorSlashInEra::<T>::remove_prefix(&obsolete_era, None);
+	NominatorSlashInEra::<T>::remove_prefix(obsolete_era, None);
 }
 
 /// Clear slashing metadata for a dead account.
@@ -670,7 +666,7 @@ fn pay_reporters<T: Config>(
 		// nobody to pay out to or nothing to pay;
 		// just treat the whole value as slashed.
 		T::Slash::on_unbalanced(slashed_imbalance);
-		return
+		return;
 	}
 
 	// take rewards out of the slashed imbalance.

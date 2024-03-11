@@ -332,7 +332,7 @@ pub(crate) const LOG_TARGET: &str = "runtime::staking";
 macro_rules! log {
 	($level:tt, $patter:expr $(, $values:expr)* $(,)?) => {
 		log::$level!(
-			target: crate::LOG_TARGET,
+			target: $crate::LOG_TARGET,
 			concat!("[{:?}] 💸 ", $patter), <frame_system::Pallet<T>>::block_number() $(, $values)*
 		)
 	};
@@ -537,7 +537,7 @@ impl<T: Config> StakingLedger<T> {
 			}
 
 			if unlocking_balance >= value {
-				break
+				break;
 			}
 		}
 
@@ -574,7 +574,7 @@ impl<T: Config> StakingLedger<T> {
 		slash_era: EraIndex,
 	) -> BalanceOf<T> {
 		if slash_amount.is_zero() {
-			return Zero::zero()
+			return Zero::zero();
 		}
 
 		use sp_runtime::PerThing as _;
@@ -648,7 +648,7 @@ impl<T: Config> StakingLedger<T> {
 			.min(*slash_remaining);
 
 			// slash out from *target exactly `slash_from_target`.
-			*target = *target - slash_from_target;
+			*target -= slash_from_target;
 			if *target < minimum_balance {
 				// Slash the rest of the target if it's dust. This might cause the last chunk to be
 				// slightly under-slashed, by at most `MaxUnlockingChunks * ED`, which is not a big
@@ -667,7 +667,7 @@ impl<T: Config> StakingLedger<T> {
 		let mut slashed_unlocking = BTreeMap::<_, _>::new();
 		for i in slash_chunks_priority {
 			if remaining_slash.is_zero() {
-				break
+				break;
 			}
 
 			if let Some(chunk) = self.unlocking.get_mut(i).defensive() {
@@ -675,7 +675,7 @@ impl<T: Config> StakingLedger<T> {
 				// write the new slashed value of this chunk to the map.
 				slashed_unlocking.insert(chunk.era, chunk.value);
 			} else {
-				break
+				break;
 			}
 		}
 
@@ -866,9 +866,7 @@ impl<AccountId> SessionInterface<AccountId> for () {
 	fn validators() -> Vec<AccountId> {
 		Vec::new()
 	}
-	fn prune_historical_up_to(_: SessionIndex) {
-		()
-	}
+	fn prune_historical_up_to(_: SessionIndex) {}
 }
 
 /// Handler for determining how much of a balance should be paid out on the current era.
@@ -930,9 +928,11 @@ impl<Balance: AtLeast32BitUnsigned + Clone, T: Get<&'static PiecewiseLinear<'sta
 	MaxEncodedLen,
 	serde::Serialize,
 	serde::Deserialize,
+	Default,
 )]
 pub enum Forcing {
 	/// Not forcing anything - just let whatever happen.
+	#[default]
 	NotForcing,
 	/// Force a new era, then reset to `NotForcing` as soon as it is done.
 	/// Note that this will force to trigger an election until a new era is triggered, if the
@@ -942,12 +942,6 @@ pub enum Forcing {
 	ForceNone,
 	/// Force a new era at the end of all sessions indefinitely.
 	ForceAlways,
-}
-
-impl Default for Forcing {
-	fn default() -> Self {
-		Forcing::NotForcing
-	}
 }
 
 /// A `Convert` implementation that finds the stash of the given controller account,
@@ -1024,8 +1018,8 @@ impl<T: Config> EraInfo<T> {
 		validator: &T::AccountId,
 		page: Page,
 	) -> bool {
-		ledger.legacy_claimed_rewards.binary_search(&era).is_ok() ||
-			Self::is_rewards_claimed(era, validator, page)
+		ledger.legacy_claimed_rewards.binary_search(&era).is_ok()
+			|| Self::is_rewards_claimed(era, validator, page)
 	}
 
 	/// Check if the rewards for the given era and page index have been claimed.
@@ -1046,18 +1040,16 @@ impl<T: Config> EraInfo<T> {
 		validator: &T::AccountId,
 		page: Page,
 	) -> Option<PagedExposure<T::AccountId, BalanceOf<T>>> {
-		let overview = <ErasStakersOverview<T>>::get(&era, validator);
+		let overview = <ErasStakersOverview<T>>::get(era, validator);
 
 		// return clipped exposure if page zero and paged exposure does not exist
 		// exists for backward compatibility and can be removed as part of #13034
 		if overview.is_none() && page == 0 {
-			return Some(PagedExposure::from_clipped(<ErasStakersClipped<T>>::get(era, validator)))
+			return Some(PagedExposure::from_clipped(<ErasStakersClipped<T>>::get(era, validator)));
 		}
 
 		// no exposure for this validator
-		if overview.is_none() {
-			return None
-		}
+		overview.as_ref()?;
 
 		let overview = overview.expect("checked above; qed");
 
@@ -1080,10 +1072,10 @@ impl<T: Config> EraInfo<T> {
 		era: EraIndex,
 		validator: &T::AccountId,
 	) -> Exposure<T::AccountId, BalanceOf<T>> {
-		let overview = <ErasStakersOverview<T>>::get(&era, validator);
+		let overview = <ErasStakersOverview<T>>::get(era, validator);
 
 		if overview.is_none() {
-			return ErasStakers::<T>::get(era, validator)
+			return ErasStakers::<T>::get(era, validator);
 		}
 
 		let overview = overview.expect("checked above; qed");
@@ -1101,7 +1093,7 @@ impl<T: Config> EraInfo<T> {
 	///
 	/// For eras where paged exposure does not exist, this returns 1 to keep backward compatibility.
 	pub(crate) fn get_page_count(era: EraIndex, validator: &T::AccountId) -> Page {
-		<ErasStakersOverview<T>>::get(&era, validator)
+		<ErasStakersOverview<T>>::get(era, validator)
 			.map(|overview| {
 				if overview.page_count == 0 && overview.own > Zero::zero() {
 					// Even though there are no nominator pages, there is still validator's own
@@ -1128,7 +1120,7 @@ impl<T: Config> EraInfo<T> {
 				Ok(_) => None,
 				// Non-paged exposure is considered as a single page
 				Err(_) => Some(0),
-			}
+			};
 		}
 
 		// Find next claimable page of paged exposure.
@@ -1141,7 +1133,7 @@ impl<T: Config> EraInfo<T> {
 
 	/// Checks if exposure is paged or not.
 	fn is_non_paged_exposure(era: EraIndex, validator: &T::AccountId) -> bool {
-		<ErasStakersClipped<T>>::contains_key(&era, validator)
+		<ErasStakersClipped<T>>::contains_key(era, validator)
 	}
 
 	/// Returns validator commission for this era and page.
@@ -1149,7 +1141,7 @@ impl<T: Config> EraInfo<T> {
 		era: EraIndex,
 		validator_stash: &T::AccountId,
 	) -> Perbill {
-		<ErasValidatorPrefs<T>>::get(&era, validator_stash).commission
+		<ErasValidatorPrefs<T>>::get(era, validator_stash).commission
 	}
 
 	/// Creates an entry to track validator reward has been claimed for a given era and page.
@@ -1161,7 +1153,7 @@ impl<T: Config> EraInfo<T> {
 		if claimed_pages.contains(&page) {
 			defensive!("Trying to set an already claimed reward");
 			// nevertheless don't do anything since the page already exist in claimed rewards.
-			return
+			return;
 		}
 
 		// add page to claimed entries
@@ -1186,7 +1178,7 @@ impl<T: Config> EraInfo<T> {
 		let (exposure_metadata, exposure_pages) = exposure.into_pages(page_size);
 		defensive_assert!(exposure_pages.len() == expected_page_count, "unexpected page count");
 
-		<ErasStakersOverview<T>>::insert(era, &validator, &exposure_metadata);
+		<ErasStakersOverview<T>>::insert(era, validator, exposure_metadata);
 		exposure_pages.iter().enumerate().for_each(|(page, paged_exposure)| {
 			<ErasStakersPaged<T>>::insert((era, &validator, page as Page), &paged_exposure);
 		});

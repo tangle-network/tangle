@@ -33,7 +33,9 @@ use sp_runtime::TryRuntimeError;
 /// Used for release versioning upto v12.
 ///
 /// Obsolete from v13. Keeping around to make encoding/decoding of old migration code easier.
-#[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+#[derive(
+	Encode, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo, MaxEncodedLen, Default,
+)]
 enum ObsoleteReleases {
 	V1_0_0Ancient,
 	V2_0_0,
@@ -46,13 +48,8 @@ enum ObsoleteReleases {
 	V9_0_0,  // inject validators into `VoterList` as well.
 	V10_0_0, // remove `EarliestUnappliedSlash`.
 	V11_0_0, // Move pallet storage prefix, e.g. BagsList -> VoterBagsList
+	#[default]
 	V12_0_0, // remove `HistoryDepth`.
-}
-
-impl Default for ObsoleteReleases {
-	fn default() -> Self {
-		ObsoleteReleases::V12_0_0
-	}
 }
 
 /// Alias to the old storage item used for release versioning. Obsolete since v13.
@@ -245,7 +242,9 @@ pub mod v11 {
 						warn,
 						"new bags-list name is equal to the old one, only bumping the version"
 					);
-					return T::DbWeight::get().reads(1).saturating_add(T::DbWeight::get().writes(1))
+					return T::DbWeight::get()
+						.reads(1)
+						.saturating_add(T::DbWeight::get().writes(1));
 				}
 
 				move_pallet(old_pallet_name.as_bytes(), new_pallet_name.as_bytes());
@@ -268,7 +267,7 @@ pub mod v11 {
 
 			// skip storage prefix checks for the same pallet names
 			if new_pallet_name == old_pallet_name {
-				return Ok(())
+				return Ok(());
 			}
 
 			let old_pallet_prefix = twox_128(N::get().as_bytes());
