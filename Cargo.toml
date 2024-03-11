@@ -221,8 +221,6 @@ pallet-offences = { git = "https://github.com/paritytech/polkadot-sdk.git", bran
 pallet-nomination-pools = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-preimage = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-scheduler = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
-pallet-staking = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
-pallet-staking-reward-curve = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-treasury = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
 
 pallet-authorship = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
@@ -313,6 +311,8 @@ sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk",
 tangle-primitives = { path = "primitives", default-features = false }
 tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
 pallet-transaction-pause = { path = "pallets/transaction-pause", default-features = false }
+pallet-staking = { path = "pallets/staking", default-features = false }
+pallet-staking-reward-curve = { path = "pallets/staking/reward-curve", default-features = false }
 
 webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false , branch = "salman/polkadot-v1.7.0"}
 
