@@ -73,7 +73,7 @@ mod tests {
 			.at_latest()
 			.await
 			.unwrap()
-			.fetch(&ledger_address)
+			.fetch(&session_key_query)
 			.await
 			.unwrap()
 			.unwrap();
