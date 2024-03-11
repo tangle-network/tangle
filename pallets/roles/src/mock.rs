@@ -375,6 +375,7 @@ impl Config for Runtime {
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxKeyLen = MaxKeyLen;
 	type MaxValidators = ConstU32<100>;
+	type RestakerEraPayout = ();
 	type MaxRestake = MaxRestake;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
@@ -388,10 +389,10 @@ construct_runtime!(
 	{
 		System: frame_system,
 		Balances: pallet_balances,
-		Roles: pallet_roles,
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
+		Roles: pallet_roles,
 		Jobs: pallet_jobs
 	}
 );

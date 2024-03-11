@@ -144,6 +144,9 @@ pub mod pallet {
 		/// The origin for privileged calls
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
+		/// The restaker payout per era
+		type RestakerEraPayout: pallet_staking::EraPayout<BalanceOf<Self>>;
+
 		type WeightInfo: WeightInfo;
 	}
 

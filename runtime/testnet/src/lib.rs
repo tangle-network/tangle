@@ -1244,10 +1244,27 @@ impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
 	}
 }
 
+// Staking reward curve, more details at
+// https://docs.rs/pallet-staking-reward-curve/latest/pallet_staking_reward_curve/macro.build.html
+// We are aiming for a max inflation of 5%, when 60% of tokens are staked
+// In practical sense, our reward rate will fluctuate between 2.5%-5% since the staked token count
+// varies
+pallet_staking_reward_curve::build! {
+	const RESTAKER_REWARD_CURVE: PiecewiseLinear<'static> = curve!(
+		min_inflation: 0_001_000, // min inflation of 0.1%
+		max_inflation: 0_010_000, // max inflation of 1% (acheived only at ideal re-stake)
+		ideal_stake: 0_250_000, // ideal restake (25% of total supply (50% of ideal stake))
+		falloff: 0_050_000,
+		max_piece_count: 40,
+		test_precision: 0_005_000,
+	);
+}
+
 parameter_types! {
 	pub InflationRewardPerSession: Balance = 10_000;
 	pub const MaxValidators : u32 = 1000;
 	pub MaxRestake: Percent = Percent::from_percent(50);
+	pub const RestakerRewardCurve: &'static PiecewiseLinear<'static> = &RESTAKER_REWARD_CURVE;
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
 }
 
@@ -1266,6 +1283,7 @@ impl pallet_roles::Config for Runtime {
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type MaxKeyLen = MaxKeyLen;
+	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type WeightInfo = ();
 }
 

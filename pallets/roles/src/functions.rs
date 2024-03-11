@@ -1,12 +1,15 @@
 /// Functions for the pallet.
 use super::*;
 use crate::{offences::ValidatorOffence, types::*};
+use frame_support::traits::DefensiveSaturating;
+use frame_support::traits::UnixTime;
 use frame_support::{
 	pallet_prelude::DispatchResult,
 	traits::{DefensiveResult, Imbalance, OnUnbalanced},
 };
-
 use pallet_staking::ActiveEra;
+use pallet_staking::EraPayout;
+use sp_runtime::SaturatedConversion;
 use sp_runtime::{traits::Convert, Perbill};
 use sp_staking::offence::Offence;
 use sp_std::collections::btree_map::BTreeMap;
@@ -252,7 +255,21 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns an error if any dispatch operation fails.
 	pub fn compute_rewards(current_era_index: EraIndex) -> DispatchResult {
-		let total_rewards = T::InflationRewardPerSession::get();
+		let now_as_millis_u64 = T::UnixTime::now().as_millis().saturated_into::<u64>();
+
+		let era_duration = (now_as_millis_u64.defensive_saturating_sub(0)) // TODO : Fix calculation
+			.saturated_into::<u64>();
+
+		let mut total_restake: BalanceOf<T> = Default::default();
+		// TODO : This is an unbounded query, potentially dangerous
+		for (restaker, ledger) in Ledger::<T>::iter() {
+			total_restake += ledger.total_restake();
+		}
+
+		let issuance = T::Currency::total_issuance();
+
+		let (total_rewards, remainder) =
+			T::RestakerEraPayout::era_payout(total_restake, issuance, era_duration);
 
 		let active_validator_rewards: BTreeMap<_, _> =
 			Self::compute_active_validator_rewards(total_rewards / 2_u32.into());
