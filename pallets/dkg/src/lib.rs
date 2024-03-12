@@ -220,6 +220,14 @@ pub mod pallet {
 		FrostFieldError,
 		/// FROST Group element error
 		FrostGroupError,
+		/// Field element error
+		FieldElementError,
+		/// Invalid public key error
+		InvalidPublicKey,
+		/// Invalid message
+		InvalidMessage,
+		/// Malformed Stark signature
+		MalformedStarkSignature,
 	}
 
 	#[pallet::call]
