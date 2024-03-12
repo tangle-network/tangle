@@ -16,7 +16,6 @@
 use crate::{signatures_schemes::to_slice_33, Config, Error};
 use ecdsa_core::signature::hazmat::PrehashVerifier;
 use frame_support::{ensure, pallet_prelude::DispatchResult};
-use p256::ecdsa::{Signature, VerifyingKey};
 use sp_core::ecdsa;
 use sp_io::{hashing::keccak_256, EcdsaVerifyError};
 
@@ -25,57 +24,6 @@ use sp_std::vec::Vec;
 use tangle_primitives::jobs::DKGTSSKeySubmissionResult;
 
 pub const ECDSA_SIGNATURE_LENGTH: usize = 65;
-
-/// Recovers the ECDSA public key from a given message and signature.
-///
-/// # Arguments
-///
-/// * `data` - The message for which the signature is being verified.
-/// * `signature` - The ECDSA signature to be verified.
-///
-/// # Returns
-///
-/// Returns a `Result` containing the recovered ECDSA public key as a `Vec<u8>` or an
-/// `EcdsaVerifyError` if verification fails.
-pub fn recover_ecdsa_pub_key(data: &[u8], signature: &[u8]) -> Result<Vec<u8>, EcdsaVerifyError> {
-	if signature.len() == ECDSA_SIGNATURE_LENGTH {
-		let mut sig = [0u8; ECDSA_SIGNATURE_LENGTH];
-		sig[..ECDSA_SIGNATURE_LENGTH].copy_from_slice(signature);
-
-		let hash = keccak_256(data);
-
-		let pub_key = sp_io::crypto::secp256k1_ecdsa_recover(&sig, &hash)?;
-		return Ok(pub_key.to_vec());
-	}
-	Err(EcdsaVerifyError::BadSignature)
-}
-
-/// Recovers the compressed ECDSA public key from a given message and signature.
-///
-/// # Arguments
-///
-/// * `data` - The message for which the signature is being verified.
-/// * `signature` - The ECDSA signature to be verified.
-///
-/// # Returns
-///
-/// Returns a `Result` containing the recovered ECDSA public key as a `Vec<u8>` or an
-/// `EcdsaVerifyError` if verification fails.
-pub fn recover_ecdsa_pub_key_compressed(
-	data: &[u8],
-	signature: &[u8],
-) -> Result<[u8; 33], EcdsaVerifyError> {
-	if signature.len() == ECDSA_SIGNATURE_LENGTH {
-		let mut sig = [0u8; ECDSA_SIGNATURE_LENGTH];
-		sig[..ECDSA_SIGNATURE_LENGTH].copy_from_slice(signature);
-
-		let hash = keccak_256(data);
-
-		let pub_key = sp_io::crypto::secp256k1_ecdsa_recover_compressed(&sig, &hash)?;
-		return Ok(pub_key);
-	}
-	Err(EcdsaVerifyError::BadSignature)
-}
 
 /// Verifies the Secp256k1 DKG signature result by recovering the ECDSA public key from the provided data
 /// and signature.
@@ -93,19 +41,14 @@ pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 	signature: &[u8],
 	expected_key: &[u8],
 ) -> DispatchResult {
-	// Recover the ECDSA public key from the provided data and signature
-	let recovered_key =
-		recover_ecdsa_pub_key(msg, signature).map_err(|_| Error::<T>::InvalidSignature)?;
-
-	// Extract the expected key from the provided signing key
-	let expected_key: Vec<_> = expected_key.iter().skip(1).cloned().collect();
-	// The recovered key is 64 bytes uncompressed. The first 32 bytes represent the compressed
-	// portion of the key.
-	let signer = &recovered_key[..32];
-
-	// Ensure that the recovered key matches the expected signing key
-	ensure!(expected_key == signer, Error::<T>::SigningKeyMismatch);
-
+	let verifying_key = k256::ecdsa::VerifyingKey::from_sec1_bytes(expected_key)
+		.map_err(|_| Error::<T>::InvalidPublicKey)?;
+	let signature =
+		k256::ecdsa::Signature::from_slice(signature).map_err(|_| Error::<T>::InvalidSignature)?;
+	println!("verifying_key: {:?}", verifying_key);
+	println!("signature: {:?}", signature);
+	println!("verify: {:?}", verifying_key.verify_prehash(msg, &signature));
+	ensure!(verifying_key.verify_prehash(msg, &signature).is_ok(), Error::<T>::InvalidSignature);
 	Ok(())
 }
 
@@ -125,9 +68,10 @@ pub fn verify_secp256r1_ecdsa_signature<T: Config>(
 	signature: &[u8],
 	expected_key: &[u8],
 ) -> DispatchResult {
-	let verifying_key =
-		VerifyingKey::from_sec1_bytes(expected_key).map_err(|_| Error::<T>::InvalidPublicKey)?;
-	let signature = Signature::from_slice(signature).map_err(|_| Error::<T>::InvalidSignature)?;
+	let verifying_key = p256::ecdsa::VerifyingKey::from_sec1_bytes(expected_key)
+		.map_err(|_| Error::<T>::InvalidPublicKey)?;
+	let signature =
+		p256::ecdsa::Signature::from_slice(signature).map_err(|_| Error::<T>::InvalidSignature)?;
 	ensure!(verifying_key.verify_prehash(msg, &signature).is_ok(), Error::<T>::InvalidSignature);
 	Ok(())
 }
@@ -159,7 +103,7 @@ pub fn verify_stark_ecdsa_signature<T: Config>(
 
 	// The signature should be a 64-byte r and s pair
 	if signature.len() != 64 {
-		Err(Error::<T>::MalformedFrostSignature)?;
+		Err(Error::<T>::MalformedStarkSignature)?;
 	}
 
 	let public_key = convert_stark_scalar::<T>(expected_key)?;
@@ -181,6 +125,57 @@ pub fn convert_stark_scalar<T: Config>(
 	let mut buffer = [0u8; 32];
 	buffer.copy_from_slice(x);
 	starknet_crypto::FieldElement::from_bytes_be(&buffer).map_err(|_| Error::<T>::FieldElementError)
+}
+
+/// Recovers the ECDSA public key from a given message and signature.
+///
+/// # Arguments
+///
+/// * `data` - The message for which the signature is being verified.
+/// * `signature` - The ECDSA signature to be verified.
+///
+/// # Returns
+///
+/// Returns a `Result` containing the recovered ECDSA public key as a `Vec<u8>` or an
+/// `EcdsaVerifyError` if verification fails.
+pub fn recover_ecdsa_pub_key(data: &[u8], signature: &[u8]) -> Result<Vec<u8>, EcdsaVerifyError> {
+	if signature.len() == ECDSA_SIGNATURE_LENGTH {
+		let mut sig = [0u8; ECDSA_SIGNATURE_LENGTH];
+		sig[..ECDSA_SIGNATURE_LENGTH].copy_from_slice(signature);
+
+		let hash = keccak_256(data);
+
+		let pub_key = sp_io::crypto::secp256k1_ecdsa_recover(&sig, &hash)?;
+		return Ok(pub_key.to_vec());
+	}
+	Err(EcdsaVerifyError::BadSignature)
+}
+
+/// Recovers the ECDSA public key from a given message and signature.
+///
+/// # Arguments
+///
+/// * `data` - The message for which the signature is being verified.
+/// * `signature` - The ECDSA signature to be verified.
+///
+/// # Returns
+///
+/// Returns a `Result` containing the recovered ECDSA public key as a `Vec<u8>` or an
+/// `EcdsaVerifyError` if verification fails.
+pub fn recover_ecdsa_pub_key_compressed(
+	data: &[u8],
+	signature: &[u8],
+) -> Result<Vec<u8>, EcdsaVerifyError> {
+	if signature.len() == ECDSA_SIGNATURE_LENGTH {
+		let mut sig = [0u8; ECDSA_SIGNATURE_LENGTH];
+		sig[..ECDSA_SIGNATURE_LENGTH].copy_from_slice(signature);
+
+		let hash = keccak_256(data);
+
+		let pub_key = sp_io::crypto::secp256k1_ecdsa_recover_compressed(&sig, &hash)?;
+		return Ok(pub_key.to_vec());
+	}
+	Err(EcdsaVerifyError::BadSignature)
 }
 
 /// Verifies the signer of a given message using a set of Secp256k1 ECDSA public keys.

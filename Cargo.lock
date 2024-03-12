@@ -7680,6 +7680,7 @@ dependencies = [
  "generic-ec",
  "generic-ec-zkp",
  "hex",
+ "k256",
  "malachite-base",
  "malachite-nz",
  "p256",

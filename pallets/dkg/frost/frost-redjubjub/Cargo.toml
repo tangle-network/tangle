@@ -29,8 +29,8 @@ parity-scale-codec = { workspace = true }
 jubjub = { version = "0.10", git = "https://github.com/LIT-Protocol/jubjub.git", features = ["alloc"], default-features = false }
 group = { version = "0.13", features = ["alloc"], default-features = false }
 frost-core = { workspace = true }
-rand_core = { version = "0.6", optional = true }
-sha2 = { version = "0.10.2", default-features = false }
+rand_core = { workspace = true, optional = true }
+sha2 = { workspace = true }
 subtle = { workspace = true }
 
 [features]

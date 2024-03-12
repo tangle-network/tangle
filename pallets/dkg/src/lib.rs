@@ -226,6 +226,8 @@ pub mod pallet {
 		InvalidPublicKey,
 		/// Invalid message
 		InvalidMessage,
+		/// Malformed Stark signature
+		MalformedStarkSignature,
 	}
 
 	#[pallet::call]
