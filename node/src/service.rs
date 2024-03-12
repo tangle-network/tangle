@@ -280,11 +280,10 @@ pub struct RunFullParams {
 	pub eth_config: EthConfiguration,
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
-	pub auto_insert_keys: bool,
 }
 /// Builds a new service for a full client.
 pub async fn new_full(
-	RunFullParams { mut config, eth_config, rpc_config, debug_output: _, auto_insert_keys }: RunFullParams,
+	RunFullParams { mut config, eth_config, rpc_config, debug_output: _ }: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -310,17 +309,10 @@ pub async fn new_full(
 		if config.chain_spec.chain_type() == ChainType::Development
 			|| config.chain_spec.chain_type() == ChainType::Local
 		{
-			if auto_insert_keys {
-				crate::utils::insert_controller_account_keys_into_keystore(
-					&config,
-					Some(keystore_container.local_keystore()),
-				);
-			} else {
-				crate::utils::insert_dev_controller_account_keys_into_keystore(
-					&config,
-					Some(keystore_container.local_keystore()),
-				);
-			}
+			crate::utils::insert_dev_controller_account_keys_into_keystore(
+				&config,
+				Some(keystore_container.local_keystore()),
+			);
 		}
 
 		// finally check if keys are inserted correctly

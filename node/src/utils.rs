@@ -1,5 +1,4 @@
-use rand::Rng;
-use sc_service::{ChainType, Configuration};
+use sc_service::Configuration;
 use sp_core::{ecdsa, ed25519, sr25519, ByteArray, Pair, Public};
 use sp_keystore::{Keystore, KeystorePtr};
 use sp_runtime::{
@@ -12,82 +11,6 @@ pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Pu
 	TPublic::Pair::from_string(&format!("//{seed}"), None)
 		.expect("static values are valid; qed")
 		.public()
-}
-
-/// Inserts a key of type `ACCOUNT` into the keystore for development/testing.
-pub fn insert_controller_account_keys_into_keystore(
-	config: &Configuration,
-	key_store: Option<KeystorePtr>,
-) {
-	insert_account_keys_into_keystore::<sr25519::Public>(
-		config,
-		ACCOUNT,
-		key_store.clone(),
-		"acco",
-	);
-	insert_account_keys_into_keystore::<ecdsa::Public>(
-		config,
-		tangle_crypto_primitives::ROLE_KEY_TYPE,
-		key_store.clone(),
-		"Role",
-	);
-	insert_account_keys_into_keystore::<ed25519::Public>(
-		config,
-		GRANDPA,
-		key_store.clone(),
-		"Grandpa",
-	);
-	insert_account_keys_into_keystore::<sr25519::Public>(config, BABE, key_store.clone(), "Babe");
-	insert_account_keys_into_keystore::<sr25519::Public>(
-		config,
-		IM_ONLINE,
-		key_store.clone(),
-		"ImOnline",
-	);
-}
-
-/// Inserts keys of specified type into the keystore.
-fn insert_account_keys_into_keystore<TPublic: Public>(
-	config: &Configuration,
-	key_type: KeyTypeId,
-	key_store: Option<KeystorePtr>,
-	key_name: &str,
-) {
-	let chain_type = config.chain_spec.chain_type();
-	let node_name = &config.network.node_name[..];
-
-	let seed = match node_name {
-		"Alice" | "Bob" | "Charlie" | "Dave" | "Eve" | "Ferdie"
-			if chain_type == ChainType::Development || chain_type == ChainType::Local =>
-		{
-			let a = node_name.chars().next().unwrap() as u8;
-			vec![a; 32].try_into().unwrap()
-		},
-		_ => {
-			let mut seed_raw = [0u8; 32];
-			rand::thread_rng().fill(&mut seed_raw[..]);
-			seed_raw
-		},
-	};
-
-	let pub_key = <TPublic::Pair as Pair>::from_seed_slice(&seed).unwrap().public();
-	if let Some(keystore) = key_store {
-		let _ = Keystore::insert(
-			&*keystore,
-			key_type,
-			&format!("0x{}", hex::encode(seed)),
-			&pub_key.to_raw_vec(),
-		);
-	}
-
-	println!("++++++++++++++++++++++++++++++++++++++++++++++++  
-                AUTO GENERATED KEYS                                                                        
-                '{}' key inserted to keystore
-                Seed: 0x{}
-                PublicKey: 0x{}
-                STORE THE KEYS SAFELY, NOT TO BE SHARED WITH ANYONE ELSE.
-    ++++++++++++++++++++++++++++++++++++++++++++++++   							
-            \n", key_name, hex::encode(seed), hex::encode(pub_key));
 }
 
 /// Inserts a key of type `ACCOUNT` into the keystore for development/testing.
@@ -104,6 +27,9 @@ pub fn insert_dev_controller_account_keys_into_keystore(
 		tangle_crypto_primitives::ROLE_KEY_TYPE,
 		key_store.clone(),
 	);
+	insert_dev_account_keys_into_keystore::<ed25519::Public>(config, GRANDPA, key_store.clone());
+	insert_dev_account_keys_into_keystore::<sr25519::Public>(config, BABE, key_store.clone());
+	insert_dev_account_keys_into_keystore::<sr25519::Public>(config, IM_ONLINE, key_store.clone());
 }
 
 /// Inserts keys of specified type into the keystore for predefined nodes in development mode.
@@ -112,22 +38,10 @@ pub fn insert_dev_account_keys_into_keystore<TPublic: Public>(
 	key_type: KeyTypeId,
 	key_store: Option<KeystorePtr>,
 ) {
-	let chain_type = config.chain_spec.chain_type();
 	let seed = &config.network.node_name[..];
-
-	match seed {
-		// When running the chain in dev or local test net, we insert the sr25519 account keys for
-		// collator accounts or validator accounts into the keystore Only if the node running is one
-		// of the predefined nodes Alice, Bob, Charlie, Dave, Eve or Ferdie
-		"Alice" | "Bob" | "Charlie" | "Dave" | "Eve" | "Ferdie" => {
-			if chain_type == ChainType::Development || chain_type == ChainType::Local {
-				let pub_key = get_from_seed::<TPublic>(seed).to_raw_vec();
-				if let Some(keystore) = key_store {
-					let _ = Keystore::insert(&*keystore, key_type, &format!("//{seed}"), &pub_key);
-				}
-			}
-		},
-		_ => {},
+	let pub_key = get_from_seed::<TPublic>(seed).to_raw_vec();
+	if let Some(keystore) = key_store {
+		let _ = Keystore::insert(&*keystore, key_type, &format!("//{seed}"), &pub_key);
 	}
 }
 
