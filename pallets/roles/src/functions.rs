@@ -262,13 +262,13 @@ impl<T: Config> Pallet<T> {
 
 		let mut total_restake: BalanceOf<T> = Default::default();
 		// TODO : This is an unbounded query, potentially dangerous
-		for (restaker, ledger) in Ledger::<T>::iter() {
+		for (_restaker, ledger) in Ledger::<T>::iter() {
 			total_restake += ledger.total_restake();
 		}
 
 		let issuance = T::Currency::total_issuance();
 
-		let (total_rewards, remainder) =
+		let (total_rewards, _remainder) =
 			T::RestakerEraPayout::era_payout(total_restake, issuance, era_duration);
 
 		let active_validator_rewards: BTreeMap<_, _> =
