@@ -150,9 +150,15 @@ pub struct DKGTSSKeyRotationResult<MaxKeyLen: Get<u32>, MaxSignatureLen: Get<u32
 #[derive(Clone, RuntimeDebug, TypeInfo, PartialEq, Eq, Encode, Decode, Default, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum DigitalSignatureScheme {
-	/// Elliptic Curve Digital Signature Algorithm (ECDSA) key type.
+	/// Elliptic Curve Digital Signature Algorithm (ECDSA) key type for Secp256k1 curve.
 	#[default]
-	Ecdsa,
+	EcdsaSecp256k1,
+
+	/// Elliptic Curve Digital Signature Algorithm (ECDSA) key type for Secp256r1 curve.
+	EcdsaSecp256r1,
+
+	/// Elliptic Curve Digital Signature Algorithm (ECDSA) key type for Stark curve.
+	EcdsaStark,
 
 	/// Schnorr signature scheme over the P256 curve.
 	SchnorrP256,

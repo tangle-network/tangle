@@ -213,7 +213,18 @@ pub struct MockRolesHandler;
 
 impl RolesHandler<AccountId> for MockRolesHandler {
 	type Balance = Balance;
-	fn is_restaker(address: AccountId, _role_type: RoleType) -> bool {
+	fn is_restaker_with_role(address: AccountId, _role_type: RoleType) -> bool {
+		let validators = [
+			AccountId::from_u64(1u64),
+			AccountId::from_u64(2u64),
+			AccountId::from_u64(3u64),
+			AccountId::from_u64(4u64),
+			AccountId::from_u64(5u64),
+		];
+		validators.contains(&address)
+	}
+
+	fn is_restaker(address: AccountId) -> bool {
 		let validators = [
 			AccountId::from_u64(1u64),
 			AccountId::from_u64(2u64),

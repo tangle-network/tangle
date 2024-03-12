@@ -90,7 +90,6 @@ fn create_validator_account<T: Config>(seed: &'static str) -> T::AccountId {
 		T::RoleKeyId: From<ecdsa::Public>,
 		T::AccountId : From<sr25519::Public>,
 )]
-
 mod benchmarks {
 	use super::*;
 	// Create profile.

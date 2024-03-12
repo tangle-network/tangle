@@ -34,7 +34,18 @@ pub trait RolesHandler<AccountId> {
 	/// # Returns
 	///
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	fn is_restaker(address: AccountId, role_type: RoleType) -> bool;
+	fn is_restaker_with_role(address: AccountId, role_type: RoleType) -> bool;
+
+	/// Returns true if the validator is permitted to work with any job type.
+	///
+	/// # Parameters
+	///
+	/// - `address`: The account ID of the validator.
+	///
+	/// # Returns
+	///
+	/// Returns `true` if the validator is permitted to work with any job type, otherwise `false`.
+	fn is_restaker(address: AccountId) -> bool;
 
 	/// Report offence for the given validator.
 	/// This function will report validators for committing offence.

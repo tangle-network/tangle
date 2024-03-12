@@ -57,7 +57,7 @@ jobs:
         run: sudo apt-get install protobuf-compiler
 
       - name: Run test suite
-        run: cargo nextest run --release --workspace
+        run: cargo test --release --workspace
       
   clippy:
     concurrency:

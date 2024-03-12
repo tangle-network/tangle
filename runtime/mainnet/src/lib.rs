@@ -480,7 +480,7 @@ impl pallet_staking::Config for Runtime {
 	type TargetList = pallet_staking::UseValidatorsMap<Runtime>;
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type NextNewSession = Session;
-	///
+	type RolesHandler = Roles;
 	type MaxExposurePageSize = MaxExposurePageSize;
 	type MaxControllersInDeprecationBatch = MaxControllersInDeprecationBatch;
 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
