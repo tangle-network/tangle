@@ -45,9 +45,6 @@ pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 		.map_err(|_| Error::<T>::InvalidPublicKey)?;
 	let signature =
 		k256::ecdsa::Signature::from_slice(signature).map_err(|_| Error::<T>::InvalidSignature)?;
-	println!("verifying_key: {:?}", verifying_key);
-	println!("signature: {:?}", signature);
-	println!("verify: {:?}", verifying_key.verify_prehash(msg, &signature));
 	ensure!(verifying_key.verify_prehash(msg, &signature).is_ok(), Error::<T>::InvalidSignature);
 	Ok(())
 }
