@@ -14065,6 +14065,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "subxt-signer"
+version = "0.34.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f88a76a5d114bfae2f6f9cc1491c46173ecc3fb2b9e53948eb3c8d43d4b43ab5"
+dependencies = [
+ "bip39",
+ "hex",
+ "hmac 0.12.1",
+ "parity-scale-codec 3.6.9",
+ "pbkdf2 0.12.2",
+ "regex",
+ "schnorrkel",
+ "secrecy",
+ "sha2 0.10.8",
+ "sp-core-hashing 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "subxt",
+ "thiserror",
+ "zeroize",
+]
+
+[[package]]
 name = "svm-rs"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -14413,9 +14434,15 @@ dependencies = [
 name = "tangle-subxt"
 version = "0.6.1"
 dependencies = [
+ "hex",
  "parity-scale-codec 3.6.9",
  "scale-info",
+ "sp-core",
+ "sp-io",
  "subxt",
+ "subxt-signer",
+ "tangle-crypto-primitives",
+ "tokio",
 ]
 
 [[package]]
