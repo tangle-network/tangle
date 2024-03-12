@@ -229,6 +229,7 @@ impl pallet_staking::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Slash = ();
 	type Reward = ();
+	type RolesHandler = Roles;
 	type SessionsPerEra = SessionsPerEra;
 	type SlashDeferDuration = ();
 	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;

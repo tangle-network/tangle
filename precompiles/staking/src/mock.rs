@@ -45,13 +45,16 @@ use std::vec;
 use frame_election_provider_support::{onchain, SequentialPhragmen};
 use pallet_staking::Config;
 use sp_io::TestExternalities;
-
+use sp_runtime::DispatchResult;
 use sp_runtime::{
 	curve::PiecewiseLinear,
 	testing::TestXt,
 	traits::{self, Extrinsic as ExtrinsicT, IdentifyAccount, IdentityLookup, Verify, Zero},
 	AccountId32, BuildStorage, Perbill,
 };
+use tangle_primitives::jobs::ReportRestakerOffence;
+use tangle_primitives::roles::traits::RolesHandler;
+use tangle_primitives::roles::RoleType;
 
 sp_runtime::impl_opaque_keys! {
 	pub struct MockSessionKeys {
@@ -362,6 +365,34 @@ impl onchain::Config for OnChainSeqPhragmen {
 /// Upper limit on the number of NPOS nominations.
 const MAX_QUOTA_NOMINATIONS: u32 = 16;
 
+pub struct MockRolesHandler;
+impl RolesHandler<AccountId> for MockRolesHandler {
+	type Balance = Balance;
+	fn is_restaker_with_role(_address: AccountId, _role_type: RoleType) -> bool {
+		false
+	}
+
+	fn is_restaker(_address: AccountId) -> bool {
+		false
+	}
+
+	fn get_validator_role_key(_address: AccountId) -> Option<Vec<u8>> {
+		None
+	}
+
+	fn report_offence(_offence_report: ReportRestakerOffence<AccountId>) -> DispatchResult {
+		Ok(())
+	}
+
+	fn record_job_by_validators(_validators: Vec<AccountId>) -> DispatchResult {
+		Ok(())
+	}
+
+	fn get_max_active_service_for_restaker(_restaker: AccountId) -> Option<u32> {
+		None
+	}
+}
+
 impl pallet_staking::Config for Runtime {
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
@@ -388,6 +419,7 @@ impl pallet_staking::Config for Runtime {
 	type MaxUnlockingChunks = ConstU32<32>;
 	type HistoryDepth = ConstU32<84>;
 	type EventListeners = ();
+	type RolesHandler = MockRolesHandler;
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
