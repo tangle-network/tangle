@@ -78,7 +78,7 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 // Team : 30% (5% immediate) (team account gets 95% that is vested over 2years with 1 year cliff))
 // Foundation : 15% (5% immediate) (foundation account gets 95% that is vested over 2years with 1
 // year cliff)
-// Investors : 13.63% (5% liquid immediately)(investor accounts gets 95% that is vested
+// Investors : 13.64% (5% liquid immediately)(investor accounts gets 95% that is vested
 // over 2years with 1 year cliff)
 // Treasury : 36.36% (immediate release to treasury pallet account)
 // EDG Genesis Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)

@@ -60,26 +60,19 @@ fn insert_account_keys_into_keystore<TPublic: Public>(
 		"Alice" | "Bob" | "Charlie" | "Dave" | "Eve" | "Ferdie"
 			if chain_type == ChainType::Development || chain_type == ChainType::Local =>
 		{
-			let a = node_name.chars().next().unwrap() as u8;
-			vec![a; 32].try_into().unwrap()
+			node_name.to_string()
 		},
 		_ => {
 			let mut seed_raw = [0u8; 32];
 			rand::thread_rng().fill(&mut seed_raw[..]);
-			seed_raw
+			hex::encode(seed_raw)
 		},
 	};
 
-	let pub_key = <TPublic::Pair as Pair>::from_seed_slice(&seed).unwrap().public();
+	let pub_key = get_from_seed::<TPublic>(&seed).to_raw_vec();
 	if let Some(keystore) = key_store {
-		let _ = Keystore::insert(
-			&*keystore,
-			key_type,
-			&format!("0x{}", hex::encode(seed)),
-			&pub_key.to_raw_vec(),
-		);
+		let _ = Keystore::insert(&*keystore, key_type, &format!("//{seed}"), &pub_key);
 	}
-
 	println!("++++++++++++++++++++++++++++++++++++++++++++++++  
                 AUTO GENERATED KEYS                                                                        
                 '{}' key inserted to keystore
