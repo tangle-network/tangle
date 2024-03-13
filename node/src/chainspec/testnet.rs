@@ -314,6 +314,8 @@ fn testnet_genesis(
 		im_online: ImOnlineConfig { keys: vec![] },
 		nomination_pools: Default::default(),
 		transaction_payment: Default::default(),
+		tx_pause: Default::default(),
+
 		// EVM compatibility
 		evm_chain_id: EVMChainIdConfig { chain_id, ..Default::default() },
 		evm: EVMConfig {

@@ -19,17 +19,13 @@ use super::*;
 pub struct TestnetCallFilter;
 impl Contains<RuntimeCall> for TestnetCallFilter {
 	fn contains(call: &RuntimeCall) -> bool {
-		let is_core_call = matches!(call, RuntimeCall::System(_) | RuntimeCall::Timestamp(_));
+		let is_core_call = matches!(
+			call,
+			RuntimeCall::System(_) | RuntimeCall::Timestamp(_) | RuntimeCall::TxPause(_)
+		);
 		if is_core_call {
 			// always allow core call
 			return true;
-		}
-
-		let is_paused =
-			pallet_transaction_pause::PausedTransactionFilter::<Runtime>::contains(call);
-		if is_paused {
-			// no paused call
-			return false;
 		}
 
 		match call {
