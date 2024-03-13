@@ -116,7 +116,7 @@ pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
 k256 = { version = "0.13.0", default-features = false }
 p256 = { version = "0.13.0", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
-starknet-crypto = { version = "0.6.1", no-default-features = true }
+starknet-crypto = { version = "0.6.1", default-features = false, features = ["signature-display","alloc"] }
 frost-core = { path = "pallets/dkg/frost", default-features = false }
 frost-ed25519 = { path = "pallets/dkg/frost/frost-ed25519", default-features = false }
 frost-ed448 = { path = "pallets/dkg/frost/frost-ed448", default-features = false }
@@ -226,6 +226,7 @@ pallet-nomination-pools = { git = "https://github.com/paritytech/polkadot-sdk.gi
 pallet-preimage = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-scheduler = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-treasury = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
+pallet-tx-pause = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
 
 pallet-authorship = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
@@ -314,7 +315,6 @@ sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk",
 # Tangle dependencies
 tangle-primitives = { path = "primitives", default-features = false }
 tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
-pallet-transaction-pause = { path = "pallets/transaction-pause", default-features = false }
 pallet-staking = { path = "pallets/staking", default-features = false }
 pallet-staking-reward-curve = { path = "pallets/staking/reward-curve", default-features = false }
 
