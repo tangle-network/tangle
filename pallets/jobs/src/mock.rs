@@ -352,6 +352,7 @@ impl pallet_roles::Config for Runtime {
 	type MaxValidators = ConstU32<100>;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type MaxRestake = MaxRestake;
+	type RestakerEraPayout = ();
 	type MaxRolesPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
