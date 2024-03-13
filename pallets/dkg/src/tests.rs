@@ -17,6 +17,7 @@
 use crate::mock::*;
 
 use frame_support::{assert_noop, assert_ok};
+use p256::ecdsa::signature::hazmat::PrehashSigner;
 use p256::ecdsa::{SigningKey, VerifyingKey};
 use pallet_dkg::{types::FeeInfo, Error, Event, FeeInfo as FeeInfoStorage};
 use parity_scale_codec::Encode;
@@ -400,7 +401,7 @@ fn signature_verification_works_secp256k1_ecdsa() {
 		// should fail for invalid keys
 		assert_noop!(
 			DKG::verify(JobResult::DKGPhaseTwo(job_to_verify)),
-			Error::<Runtime>::SigningKeyMismatch
+			Error::<Runtime>::InvalidSignature
 		);
 
 		let signature = mock_signature_secp256k1_ecdsa(pub_key, pub_key);
@@ -469,13 +470,13 @@ fn signature_verification_works_secp256r1_ecdsa() {
 		let public_key = VerifyingKey::from(&secret_key);
 		let message = b"hello world";
 		let prehash = keccak_256(message);
-		let (signature, _) = secret_key.sign_prehash_recoverable(&prehash).unwrap();
+		let (signature, _) = secret_key.sign_prehash(&prehash).unwrap();
 
 		let job_to_verify = DKGTSSSignatureResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256r1,
 			derivation_path: None,
 			signature: signature.to_vec().try_into().unwrap(),
-			data: prehash.to_vec().try_into().unwrap(),
+			data: message.to_vec().try_into().unwrap(),
 			verifying_key: public_key.to_sec1_bytes().to_vec().try_into().unwrap(),
 		};
 
@@ -550,7 +551,7 @@ fn dkg_key_rotation_works() {
 		// should fail for invalid keys
 		assert_noop!(
 			DKG::verify(JobResult::DKGPhaseFour(job_to_verify)),
-			Error::<Runtime>::SigningKeyMismatch
+			Error::<Runtime>::InvalidSignature
 		);
 
 		let signature = mock_signature_secp256k1_ecdsa(curr_key, new_key);

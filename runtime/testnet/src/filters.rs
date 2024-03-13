@@ -25,8 +25,7 @@ impl Contains<RuntimeCall> for TestnetCallFilter {
 			return true;
 		}
 
-		let is_paused =
-			pallet_transaction_pause::PausedTransactionFilter::<Runtime>::contains(call);
+		let is_paused = <pallet_tx_pause::Pallet<Runtime> as Contains<RuntimeCall>>::contains(call);
 		if is_paused {
 			// no paused call
 			return false;
