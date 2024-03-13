@@ -18,7 +18,7 @@
 use crate::{
 	distributions::{
 		combine_distributions, get_unique_distribution_results,
-		mainnet::{self, DistributionResult, ONE_TOKEN},
+		mainnet::{self, DistributionResult},
 	},
 	mainnet_fixtures::{get_bootnodes, get_initial_authorities, get_root_key},
 };
@@ -164,7 +164,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				// Initial validators
 				get_initial_authorities(),
 				// Endowed accounts
-				vec![mainnet::get_treasury_balance()],
+				mainnet::get_initial_endowed_accounts(),
 				// Sudo account
 				get_root_key(),
 				// EVM chain ID
@@ -213,7 +213,7 @@ fn mainnet_genesis(
 	// stakers: all validators and nominators.
 	let stakers = initial_authorities
 		.iter()
-		.map(|x| (x.0.clone(), x.0.clone(), ONE_TOKEN, StakerStatus::Validator))
+		.map(|x| (x.0.clone(), x.0.clone(), 100 * UNIT, StakerStatus::Validator))
 		.collect();
 
 	let vesting_claims: Vec<(
