@@ -94,6 +94,7 @@ std = [
     "frost-p384/std",
     # "frost-redjubjub/std",
     "snowbridge-milagro-bls/std",
+    "starknet-crypto/std",
 ]
 serde = []
 try-runtime = ["frame-support/try-runtime"]
