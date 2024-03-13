@@ -25,8 +25,7 @@ impl Contains<RuntimeCall> for MainnetCallFilter {
 			return true;
 		}
 
-		let is_paused =
-			<pallet_tx_pause::Pallet<Runtime> as Contains<RuntimeCall>>::contains(call);
+		let is_paused = <pallet_tx_pause::Pallet<Runtime> as Contains<RuntimeCall>>::contains(call);
 		if is_paused {
 			// no paused call
 			return false;
