@@ -323,13 +323,18 @@ fn signature_verification_works_bls() {
 		let message = keccak_256(BLS_DATA_TO_SIGN);
 		let signature = Signature::new(&message, &secret_key);
 
-		let job_to_verify: DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen> =
-			DKGTSSSignatureResult {
-				signature_scheme: DigitalSignatureScheme::Bls381,
-				signature: signature.as_bytes().to_vec().try_into().unwrap(),
-				verifying_key: pub_key.as_bytes().to_vec().try_into().unwrap(),
-				data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
-			};
+		let job_to_verify: DKGTSSSignatureResult<
+			MaxDataLen,
+			MaxKeyLen,
+			MaxSignatureLen,
+			MaxAdditionalParamsLen,
+		> = DKGTSSSignatureResult {
+			signature_scheme: DigitalSignatureScheme::Bls381,
+			derivation_path: None,
+			signature: signature.as_bytes().to_vec().try_into().unwrap(),
+			verifying_key: pub_key.as_bytes().to_vec().try_into().unwrap(),
+			data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
+		};
 
 		// Should fail for an invalid public key
 		assert_noop!(
@@ -337,13 +342,18 @@ fn signature_verification_works_bls() {
 			Error::<Runtime>::InvalidBlsPublicKey
 		);
 
-		let job_to_verify: DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen> =
-			DKGTSSSignatureResult {
-				signature_scheme: DigitalSignatureScheme::Bls381,
-				signature: signature.as_bytes()[..10].to_vec().try_into().unwrap(),
-				data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
-				verifying_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
-			};
+		let job_to_verify: DKGTSSSignatureResult<
+			MaxDataLen,
+			MaxKeyLen,
+			MaxSignatureLen,
+			MaxAdditionalParamsLen,
+		> = DKGTSSSignatureResult {
+			signature_scheme: DigitalSignatureScheme::Bls381,
+			derivation_path: None,
+			signature: signature.as_bytes()[..10].to_vec().try_into().unwrap(),
+			data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
+			verifying_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
+		};
 
 		// Should fail for an invalid signature
 		assert_noop!(
@@ -351,26 +361,37 @@ fn signature_verification_works_bls() {
 			Error::<Runtime>::InvalidSignatureData
 		);
 
-		let job_to_verify: DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen> =
-			DKGTSSSignatureResult {
-				signature_scheme: DigitalSignatureScheme::Bls381,
-				signature: signature.as_bytes().to_vec().try_into().unwrap(),
-				verifying_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
-				data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
-			};
+		let job_to_verify: DKGTSSSignatureResult<
+			MaxDataLen,
+			MaxKeyLen,
+			MaxSignatureLen,
+			MaxAdditionalParamsLen,
+		> = DKGTSSSignatureResult {
+			signature_scheme: DigitalSignatureScheme::Bls381,
+			derivation_path: None,
+			signature: signature.as_bytes().to_vec().try_into().unwrap(),
+			verifying_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
+			data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
+		};
 
 		assert_ok!(DKG::verify(JobResult::DKGPhaseTwo(job_to_verify)));
 	});
 }
 
 #[test]
-fn signature_verification_works_ecdsa() {
+fn signature_verification_works_secp256k1_ecdsa() {
 	new_test_ext().execute_with(|| {
 		let pub_key = mock_pub_key_secp256k1_ecdsa();
 		let signature = mock_signature_secp256k1_ecdsa(pub_key, mock_pub_key_secp256k1_ecdsa());
 
-		let job_to_verify = DKGTSSSignatureResult::<MaxDataLen, MaxKeyLen, MaxSignatureLen> {
+		let job_to_verify = DKGTSSSignatureResult::<
+			MaxDataLen,
+			MaxKeyLen,
+			MaxSignatureLen,
+			MaxAdditionalParamsLen,
+		> {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
+			derivation_path: None,
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
@@ -383,8 +404,14 @@ fn signature_verification_works_ecdsa() {
 		);
 
 		let signature = mock_signature_secp256k1_ecdsa(pub_key, pub_key);
-		let job_to_verify = DKGTSSSignatureResult::<MaxDataLen, MaxKeyLen, MaxSignatureLen> {
+		let job_to_verify = DKGTSSSignatureResult::<
+			MaxDataLen,
+			MaxKeyLen,
+			MaxSignatureLen,
+			MaxAdditionalParamsLen,
+		> {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
+			derivation_path: None,
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
@@ -401,8 +428,14 @@ fn signature_verification_works_sr25519_schnorr() {
 		let pub_key = mock_pub_key_sr25519();
 		let signature = mock_signature_sr25519(pub_key, mock_pub_key_sr25519());
 
-		let job_to_verify = DKGTSSSignatureResult::<MaxDataLen, MaxKeyLen, MaxSignatureLen> {
+		let job_to_verify = DKGTSSSignatureResult::<
+			MaxDataLen,
+			MaxKeyLen,
+			MaxSignatureLen,
+			MaxAdditionalParamsLen,
+		> {
 			signature_scheme: DigitalSignatureScheme::SchnorrSr25519,
+			derivation_path: None,
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
@@ -417,6 +450,7 @@ fn signature_verification_works_sr25519_schnorr() {
 		let signature = mock_signature_sr25519(pub_key, pub_key);
 		let job_to_verify = DKGTSSSignatureResult {
 			signature_scheme: DigitalSignatureScheme::SchnorrSr25519,
+			derivation_path: None,
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
@@ -439,6 +473,7 @@ fn signature_verification_works_secp256r1_ecdsa() {
 
 		let job_to_verify = DKGTSSSignatureResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256r1,
+			derivation_path: None,
 			signature: signature.to_vec().try_into().unwrap(),
 			data: prehash.to_vec().try_into().unwrap(),
 			verifying_key: public_key.to_sec1_bytes().to_vec().try_into().unwrap(),
@@ -483,6 +518,7 @@ fn signature_verification_works_stark_ecdsa() {
 
 		let job_to_verify = DKGTSSSignatureResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaStark,
+			derivation_path: None,
 			signature: encoded_signature.to_vec().try_into().unwrap(),
 			data: message.to_bytes_be().to_vec().try_into().unwrap(),
 			verifying_key: public_key.to_bytes_be().to_vec().try_into().unwrap(),
@@ -503,6 +539,7 @@ fn dkg_key_rotation_works() {
 
 		let job_to_verify = DKGTSSKeyRotationResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
+			derivation_path: None,
 			signature: signature.try_into().unwrap(),
 			key: curr_key.to_raw_vec().try_into().unwrap(),
 			new_key: new_key.to_raw_vec().try_into().unwrap(),
@@ -520,6 +557,7 @@ fn dkg_key_rotation_works() {
 
 		let job_to_verify = DKGTSSKeyRotationResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
+			derivation_path: None,
 			signature: signature.clone().try_into().unwrap(),
 			key: curr_key.to_raw_vec().try_into().unwrap(),
 			new_key: new_key.to_raw_vec().try_into().unwrap(),

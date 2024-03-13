@@ -220,6 +220,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
 				submission: vec![].try_into().unwrap(),
+				derivation_path: None,
 				role_type: threshold_signature_role_type,
 			}),
 			fallback: FallbackOptions::Destroy,
@@ -235,6 +236,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
 				submission: vec![].try_into().unwrap(),
+				derivation_path: None,
 				role_type: threshold_signature_role_type,
 			}),
 			fallback: FallbackOptions::Destroy,
@@ -252,7 +254,8 @@ fn jobs_submission_e2e_works_for_dkg() {
 				verifying_key: vec![].try_into().unwrap(),
 				signature: vec![].try_into().unwrap(),
 				data: vec![].try_into().unwrap(),
-				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
+				derivation_path: None,
 			})
 		));
 
@@ -471,7 +474,8 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				signature: vec![].try_into().unwrap(),
 				phase_one_id: 0,
 				new_phase_one_id: 1,
-				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
+				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
+				derivation_path: None,
 			})
 		));
 
@@ -575,6 +579,7 @@ fn jobs_rpc_tests() {
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
 				submission: vec![].try_into().unwrap(),
+				derivation_path: None,
 				role_type: threshold_signature_role_type,
 			}),
 			fallback: FallbackOptions::Destroy,
@@ -658,21 +663,19 @@ fn jobs_submission_e2e_works_for_zksaas() {
 		let _submission = JobSubmission {
 			expiry: 10,
 			ttl: 200,
-			job_type: JobType::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType::<
-				sp_runtime::AccountId32,
-				MaxParticipants,
-				MaxSubmissionLen,
-			> {
-				permitted_caller: None,
-				system: dummy_system.clone(),
-				role_type: ZeroKnowledgeRoleType::ZkSaaSGroth16,
-				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
-					.iter()
-					.map(|x| mock_pub_key(*x))
-					.collect::<Vec<_>>()
-					.try_into()
-					.unwrap(),
-			}),
+			job_type: JobType::<_, _, _, MaxAdditionalParamsLen>::ZkSaaSPhaseOne(
+				ZkSaaSPhaseOneJobType::<sp_runtime::AccountId32, MaxParticipants, MaxSubmissionLen> {
+					permitted_caller: None,
+					system: dummy_system.clone(),
+					role_type: ZeroKnowledgeRoleType::ZkSaaSGroth16,
+					participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
+						.iter()
+						.map(|x| mock_pub_key(*x))
+						.collect::<Vec<_>>()
+						.try_into()
+						.unwrap(),
+				},
+			),
 			fallback: FallbackOptions::Destroy,
 		};
 
@@ -1700,6 +1703,7 @@ fn try_validator_removal_from_job_with_retry_works_phase_two() {
 			job_type: JobType::DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType {
 				phase_one_id: 0,
 				submission: vec![].try_into().unwrap(),
+				derivation_path: None,
 				role_type: threshold_signature_role_type,
 			}),
 			fallback: FallbackOptions::RegenerateWithThreshold(3),

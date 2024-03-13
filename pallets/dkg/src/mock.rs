@@ -90,6 +90,8 @@ parameter_types! {
 	pub const MaxSignatureLen: u32 = 256;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxProofLen: u32 = 256;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxAdditionalParamsLen: u32 = 256;
 }
 
 impl pallet_dkg::Config for Runtime {
@@ -102,6 +104,7 @@ impl pallet_dkg::Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
 }
 

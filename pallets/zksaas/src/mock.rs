@@ -93,7 +93,9 @@ parameter_types! {
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxSignatureLen: u32 = u32::MAX;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxProofLen: u32 = u32::MAX; // TODO : Figure out sensible limits for zksaas
+	pub const MaxProofLen: u32 = u32::MAX;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxAdditionalParamsLen: u32 = 256;
 }
 
 impl Config for Runtime {
@@ -107,6 +109,7 @@ impl Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
 }
 

@@ -1118,6 +1118,7 @@ impl
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	> for MainnetMPCHandler
 {
 	fn verify(
@@ -1129,6 +1130,7 @@ impl
 			MaxDataLen,
 			MaxSignatureLen,
 			MaxProofLen,
+			MaxAdditionalParamsLen,
 		>,
 	) -> DispatchResult {
 		match data.result {
@@ -1197,13 +1199,19 @@ impl pallet_roles::Config for Runtime {
 
 pub struct MainnetJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>
 	for MainnetJobToFeeHandler
 {
 	type Balance = Balance;
 
 	fn job_to_fee(
-		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Balance {
 		match job.job_type {
 			JobType::DKGTSSPhaseOne(_)
@@ -1253,6 +1261,9 @@ parameter_types! {
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxRolesPerValidator: u32 = 100;
+	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxAdditionalParamsLen: u32 = 256;
 }
 
 impl pallet_jobs::Config for Runtime {
@@ -1270,6 +1281,7 @@ impl pallet_jobs::Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
@@ -1284,6 +1296,7 @@ impl pallet_dkg::Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
 }
 
@@ -1298,6 +1311,7 @@ impl pallet_zksaas::Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
 }
 

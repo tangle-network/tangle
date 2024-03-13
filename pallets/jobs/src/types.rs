@@ -21,6 +21,7 @@ pub type JobSubmissionOf<T> = JobSubmission<
 	BlockNumberFor<T>,
 	<T as Config>::MaxParticipants,
 	<T as Config>::MaxSubmissionLen,
+	<T as Config>::MaxAdditionalParamsLen,
 >;
 
 pub type JobInfoOf<T> = JobInfo<
@@ -29,6 +30,7 @@ pub type JobInfoOf<T> = JobInfo<
 	BalanceOf<T>,
 	<T as Config>::MaxParticipants,
 	<T as Config>::MaxSubmissionLen,
+	<T as Config>::MaxAdditionalParamsLen,
 >;
 
 pub type BalanceOf<T> =
@@ -43,6 +45,7 @@ pub type PhaseResultOf<T> = PhaseResult<
 	<T as Config>::MaxSignatureLen,
 	<T as Config>::MaxSubmissionLen,
 	<T as Config>::MaxProofLen,
+	<T as Config>::MaxAdditionalParamsLen,
 >;
 
 pub type JobResultOf<T> = JobResult<
@@ -51,6 +54,7 @@ pub type JobResultOf<T> = JobResult<
 	<T as Config>::MaxSignatureLen,
 	<T as Config>::MaxDataLen,
 	<T as Config>::MaxProofLen,
+	<T as Config>::MaxAdditionalParamsLen,
 >;
 
 pub type DKGTSSKeySubmissionResultOf<T> = DKGTSSKeySubmissionResult<
@@ -63,10 +67,14 @@ pub type DKGTSSSignatureResultOf<T> = DKGTSSSignatureResult<
 	<T as Config>::MaxDataLen,
 	<T as Config>::MaxKeyLen,
 	<T as Config>::MaxSignatureLen,
+	<T as Config>::MaxAdditionalParamsLen,
 >;
 
-pub type DKGTSSKeyRotationResultOf<T> =
-	DKGTSSKeyRotationResult<<T as Config>::MaxKeyLen, <T as Config>::MaxSignatureLen>;
+pub type DKGTSSKeyRotationResultOf<T> = DKGTSSKeyRotationResult<
+	<T as Config>::MaxKeyLen,
+	<T as Config>::MaxSignatureLen,
+	<T as Config>::MaxAdditionalParamsLen,
+>;
 
 pub type ZkSaaSCircuitResultOf<T> = ZkSaaSCircuitResult<<T as Config>::MaxParticipants>;
 
@@ -77,6 +85,7 @@ pub type RpcResponseJobsDataOf<T> = RpcResponseJobsData<
 	BlockNumberFor<T>,
 	<T as Config>::MaxParticipants,
 	<T as Config>::MaxSubmissionLen,
+	<T as Config>::MaxAdditionalParamsLen,
 >;
 
 pub type ParticipantKeysOf<T> = BoundedVec<ParticipantKeyOf<T>, <T as Config>::MaxParticipants>;

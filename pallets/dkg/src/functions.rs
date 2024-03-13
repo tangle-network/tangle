@@ -51,6 +51,7 @@ impl<T: Config> Pallet<T> {
 			BlockNumberFor<T>,
 			T::MaxParticipants,
 			T::MaxSubmissionLen,
+			T::MaxAdditionalParamsLen,
 		>,
 	) -> BalanceOf<T> {
 		let fee_info = FeeInfo::<T>::get();
@@ -99,6 +100,7 @@ impl<T: Config> Pallet<T> {
 			T::MaxSignatureLen,
 			T::MaxDataLen,
 			T::MaxProofLen,
+			T::MaxAdditionalParamsLen,
 		>,
 	) -> DispatchResult {
 		match data {
@@ -142,7 +144,12 @@ impl<T: Config> Pallet<T> {
 	/// * `data` - The DKG signature result containing the message data, signature, signing key, and
 	///   key type.
 	fn verify_dkg_signature(
-		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
+		data: DKGTSSSignatureResult<
+			T::MaxDataLen,
+			T::MaxKeyLen,
+			T::MaxSignatureLen,
+			T::MaxAdditionalParamsLen,
+		>,
 	) -> DispatchResult {
 		match data.signature_scheme {
 			DigitalSignatureScheme::EcdsaSecp256k1 => verify_secp256k1_ecdsa_signature::<T>(
@@ -196,9 +203,13 @@ impl<T: Config> Pallet<T> {
 	/// Returns a `DispatchResult` indicating whether the key rotation verification was successful
 	/// or encountered an error.
 	fn verify_dkg_key_rotation(
-		data: DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen>,
+		data: DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen, T::MaxAdditionalParamsLen>,
 	) -> DispatchResult {
-		let emit_event = |data: DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen>| {
+		let emit_event = |data: DKGTSSKeyRotationResult<
+			T::MaxKeyLen,
+			T::MaxSignatureLen,
+			T::MaxAdditionalParamsLen,
+		>| {
 			Self::deposit_event(Event::KeyRotated {
 				from_job_id: data.phase_one_id,
 				to_job_id: data.new_phase_one_id,
@@ -213,11 +224,19 @@ impl<T: Config> Pallet<T> {
 		let signature = data.signature.clone();
 		let verifying_key = data.key.clone();
 		let signature_scheme = data.signature_scheme.clone();
+		let derivation_path = data.derivation_path.clone();
 		let sig_result_data: DKGTSSSignatureResult<
 			T::MaxDataLen,
 			T::MaxKeyLen,
 			T::MaxSignatureLen,
-		> = DKGTSSSignatureResult { data: encoded_data, signature, verifying_key, signature_scheme };
+			T::MaxAdditionalParamsLen,
+		> = DKGTSSSignatureResult {
+			data: encoded_data,
+			signature,
+			verifying_key,
+			signature_scheme,
+			derivation_path,
+		};
 
 		Self::verify_dkg_signature(sig_result_data).and_then(|_| emit_event(data))
 	}

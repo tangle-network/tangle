@@ -41,6 +41,7 @@ impl<T: Config> Pallet<T> {
 			BlockNumberFor<T>,
 			T::MaxParticipants,
 			T::MaxSubmissionLen,
+			T::MaxAdditionalParamsLen,
 		>,
 	) -> BalanceOf<T> {
 		let fee_info = FeeInfo::<T>::get();
@@ -83,6 +84,7 @@ impl<T: Config> Pallet<T> {
 			T::MaxDataLen,
 			T::MaxSignatureLen,
 			T::MaxProofLen,
+			T::MaxAdditionalParamsLen,
 		>,
 	) -> DispatchResult {
 		match (data.phase_one_job_type, data.job_type, data.result) {

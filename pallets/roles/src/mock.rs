@@ -254,11 +254,19 @@ impl pallet_staking::Config for Runtime {
 
 pub struct MockJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for MockJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>
+	for MockJobToFeeHandler
+{
 	type Balance = Balance;
 
 	fn job_to_fee(
-		_job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		_job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Balance {
 		Default::default()
 	}
@@ -281,6 +289,7 @@ impl
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	> for MockMPCHandler
 {
 	fn verify(
@@ -292,6 +301,7 @@ impl
 			MaxDataLen,
 			MaxSignatureLen,
 			MaxProofLen,
+			MaxAdditionalParamsLen,
 		>,
 	) -> DispatchResult {
 		Ok(())
@@ -336,6 +346,8 @@ parameter_types! {
 	pub const MaxActiveJobsPerValidator: u32 = 100;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxRolesPerValidator: u32 = 100;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxAdditionalParamsLen: u32 = 256;
 }
 
 impl pallet_jobs::Config for Runtime {
@@ -354,6 +366,7 @@ impl pallet_jobs::Config for Runtime {
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
 }
 
