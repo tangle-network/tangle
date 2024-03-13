@@ -18,6 +18,8 @@ use ecdsa_core::signature::hazmat::PrehashVerifier;
 use elliptic_curve::consts::U32;
 use frame_support::{ensure, pallet_prelude::DispatchResult};
 use generic_array::GenericArray;
+use generic_ec::coords::HasAffineX;
+use generic_ec::{curves::Stark, Point, Scalar};
 use sp_core::ecdsa;
 use sp_io::{hashing::keccak_256, EcdsaVerifyError};
 use sp_std::vec::Vec;
@@ -120,10 +122,6 @@ pub fn verify_stark_ecdsa_signature<T: Config>(
 	signature: &[u8],
 	expected_key: &[u8],
 ) -> DispatchResult {
-	// The expected key should be a 32-byte public key x coordinate
-	if expected_key.len() != 32 {
-		Err(Error::<T>::InvalidPublicKey)?;
-	}
 	// The message should be pre-hashed uisng a 32-byte digest
 	if msg.len() != 32 {
 		Err(Error::<T>::InvalidMessage)?;
@@ -134,10 +132,27 @@ pub fn verify_stark_ecdsa_signature<T: Config>(
 		Err(Error::<T>::MalformedStarkSignature)?;
 	}
 
-	let public_key = convert_stark_scalar::<T>(expected_key)?;
-	let message = convert_stark_scalar::<T>(msg)?;
-	let r = convert_stark_scalar::<T>(&signature[..32])?;
-	let s = convert_stark_scalar::<T>(&signature[32..])?;
+	let parse_signature = |inp: &[u8]| -> Result<(Scalar<Stark>, Scalar<Stark>), Error<T>> {
+		let r_bytes = &inp[0..inp.len() / 2];
+		let s_bytes = &inp[inp.len() / 2..];
+		let r = Scalar::from_be_bytes(r_bytes).map_err(|_| Error::<T>::FieldElementError)?;
+		let s = Scalar::from_be_bytes(s_bytes).map_err(|_| Error::<T>::FieldElementError)?;
+
+		Ok((r, s))
+	};
+
+	let (r, s) = parse_signature(signature)?;
+	println!("Public key: {:?}", expected_key);
+	let public_key_x: Scalar<Stark> = Point::from_bytes(expected_key)
+		.map_err(|_| Error::<T>::InvalidPublicKey)?
+		.x()
+		.ok_or(Error::<T>::FieldElementError)?
+		.to_scalar();
+
+	let public_key = convert_stark_scalar::<T>(&public_key_x)?;
+	let message = convert_stark_scalar::<T>(&Scalar::<Stark>::from_be_bytes_mod_order(msg))?;
+	let r = convert_stark_scalar::<T>(&r)?;
+	let s = convert_stark_scalar::<T>(&s)?;
 
 	let result = starknet_crypto::verify(&public_key, &message, &r, &s)
 		.map_err(|_| Error::<T>::InvalidSignature)?;
@@ -147,11 +162,12 @@ pub fn verify_stark_ecdsa_signature<T: Config>(
 }
 
 pub fn convert_stark_scalar<T: Config>(
-	x: &[u8],
+	x: &Scalar<Stark>,
 ) -> Result<starknet_crypto::FieldElement, Error<T>> {
-	debug_assert_eq!(x.len(), 32);
+	let bytes = x.to_be_bytes();
+	debug_assert_eq!(bytes.len(), 32);
 	let mut buffer = [0u8; 32];
-	buffer.copy_from_slice(x);
+	buffer.copy_from_slice(bytes.as_bytes());
 	starknet_crypto::FieldElement::from_bytes_be(&buffer).map_err(|_| Error::<T>::FieldElementError)
 }
 
