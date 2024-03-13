@@ -144,6 +144,7 @@ impl<T: Config> Pallet<T> {
 	fn verify_dkg_signature(
 		data: DKGTSSSignatureResult<T::MaxDataLen, T::MaxKeyLen, T::MaxSignatureLen>,
 	) -> DispatchResult {
+		println!("Verify DKG Signature");
 		match data.signature_scheme {
 			DigitalSignatureScheme::EcdsaSecp256k1 => verify_secp256k1_ecdsa_signature::<T>(
 				&data.data,
@@ -177,7 +178,10 @@ impl<T: Config> Pallet<T> {
 				&data.signature,
 				&data.verifying_key,
 			),
-			_ => Err(Error::<T>::InvalidSignature.into()),
+			_ => {
+				println!("Invalid Signature Scheme");
+				Err(Error::<T>::InvalidSignature.into())
+			},
 		}
 	}
 
