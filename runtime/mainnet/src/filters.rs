@@ -19,13 +19,17 @@ use super::*;
 pub struct MainnetCallFilter;
 impl Contains<RuntimeCall> for MainnetCallFilter {
 	fn contains(call: &RuntimeCall) -> bool {
-		let is_core_call = matches!(
-			call,
-			RuntimeCall::System(_) | RuntimeCall::Timestamp(_) | RuntimeCall::TxPause(_)
-		);
+		let is_core_call = matches!(call, RuntimeCall::System(_) | RuntimeCall::Timestamp(_));
 		if is_core_call {
 			// always allow core call
 			return true;
+		}
+
+		let is_paused =
+			<pallet_tx_pause::Pallet<Runtime> as Contains<RuntimeCall>>::contains(call);
+		if is_paused {
+			// no paused call
+			return false;
 		}
 
 		match call {
