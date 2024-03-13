@@ -42,6 +42,7 @@ interface Jobs {
     /// @param expiry The expiration timestamp for the submitted job.
     /// @param phase_one_id The identifier of the corresponding phase one DKG job.
     /// @param submission The byte array containing the data submission for the DKG phase two.
+    /// @param derivation_path The byte array containing the derivation path for the DKG phase two.
     ///
     /// @dev This function initiates the second phase of a Distributed Key Generation process, building upon
     /// the results of a prior phase one submission. The submitted job includes an expiration time, the identifier
@@ -52,6 +53,7 @@ interface Jobs {
         uint64 expiry,
         uint32 phase_one_id,
         bytes memory submission
+        bytes memory derivation_path
     ) external;
 
     /// @custom:selector <selector_hash>

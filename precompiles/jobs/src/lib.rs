@@ -168,7 +168,7 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submitDkgPhaseTwoJob(uint64,uint64,uint64,bytes)")]
+	#[precompile::public("submitDkgPhaseTwoJob(uint64,uint64,uint64,bytes,bytes)")]
 	fn submit_dkg_phase_two_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: BlockNumber,

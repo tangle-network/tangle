@@ -17,6 +17,9 @@
 use crate::mock::*;
 
 use frame_support::{assert_noop, assert_ok};
+use generic_ec::coords::{Coordinate, HasAffineXAndParity, HasAffineXY, Parity};
+use generic_ec::curves::Stark;
+use generic_ec::Point;
 use p256::ecdsa::signature::hazmat::PrehashSigner;
 use p256::ecdsa::{SigningKey, VerifyingKey};
 use pallet_dkg::{types::FeeInfo, Error, Event, FeeInfo as FeeInfoStorage};
@@ -512,7 +515,11 @@ fn signature_verification_works_stark_ecdsa() {
 		);
 		let signature = starknet_crypto::sign(&private_key, &message, &k).unwrap();
 		let public_key = starknet_crypto::get_public_key(&private_key);
-
+		let public_key_point: Point<Stark> = Point::from_x_and_parity(
+			&Coordinate::from_be_bytes(&public_key.to_bytes_be()).unwrap(),
+			Parity::Odd,
+		)
+		.unwrap();
 		let mut encoded_signature: [u8; 64] = [0u8; 64];
 		encoded_signature[..32].copy_from_slice(&signature.r.to_bytes_be());
 		encoded_signature[32..].copy_from_slice(&signature.s.to_bytes_be());
@@ -522,7 +529,7 @@ fn signature_verification_works_stark_ecdsa() {
 			derivation_path: None,
 			signature: encoded_signature.to_vec().try_into().unwrap(),
 			data: message.to_bytes_be().to_vec().try_into().unwrap(),
-			verifying_key: public_key.to_bytes_be().to_vec().try_into().unwrap(),
+			verifying_key: public_key_point.to_bytes(true).to_vec().try_into().unwrap(),
 		};
 
 		// should work with correct params
