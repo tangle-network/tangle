@@ -45,6 +45,7 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	///
 	/// Returns the calculated fee as a `BalanceOf<T>` type.
+	#[allow(clippy::type_complexity)]
 	pub fn job_to_fee(
 		job: &JobSubmission<
 			T::AccountId,

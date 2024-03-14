@@ -17,7 +17,7 @@
 use crate::mock::*;
 
 use frame_support::{assert_noop, assert_ok};
-use generic_ec::coords::{Coordinate, HasAffineXAndParity, HasAffineXY, Parity};
+use generic_ec::coords::{Coordinate, HasAffineXAndParity, Parity};
 use generic_ec::curves::Stark;
 use generic_ec::Point;
 use p256::ecdsa::signature::hazmat::PrehashSigner;
