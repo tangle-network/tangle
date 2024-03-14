@@ -77,6 +77,9 @@ pub mod pallet {
 		/// The maximum size of proof allowed
 		type MaxProofLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
 
+		/// The maximum size of additional parameters
+		type MaxAdditionalParamsLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
 		/// Weight info for pallet
 		type WeightInfo: WeightInfo;
 	}
