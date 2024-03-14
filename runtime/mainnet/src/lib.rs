@@ -50,6 +50,7 @@ pub use pallet_staking::StakerStatus;
 use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
+use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
@@ -1018,10 +1019,26 @@ impl pallet_im_online::Config for Runtime {
 	type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
 }
 
-impl pallet_transaction_pause::Config for Runtime {
+/// Calls that cannot be paused by the tx-pause pallet.
+pub struct TxPauseWhitelistedCalls;
+/// Whitelist `Balances::transfer_keep_alive`, all others are pauseable.
+impl Contains<RuntimeCallNameOf<Runtime>> for TxPauseWhitelistedCalls {
+	fn contains(full_name: &RuntimeCallNameOf<Runtime>) -> bool {
+		matches!(
+			(full_name.0.as_slice(), full_name.1.as_slice()),
+			(b"Balances", b"transfer_keep_alive")
+		)
+	}
+}
+
+impl pallet_tx_pause::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type UpdateOrigin = EnsureRoot<AccountId>;
-	type WeightInfo = pallet_transaction_pause::weights::SubstrateWeight<Runtime>;
+	type RuntimeCall = RuntimeCall;
+	type PauseOrigin = EnsureRoot<AccountId>;
+	type UnpauseOrigin = EnsureRoot<AccountId>;
+	type WhitelistedCalls = TxPauseWhitelistedCalls;
+	type MaxNameLen = ConstU32<256>;
+	type WeightInfo = pallet_tx_pause::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -1118,6 +1135,7 @@ impl
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	> for MainnetMPCHandler
 {
 	fn verify(
@@ -1129,6 +1147,7 @@ impl
 			MaxDataLen,
 			MaxSignatureLen,
 			MaxProofLen,
+			MaxAdditionalParamsLen,
 		>,
 	) -> DispatchResult {
 		match data.result {
@@ -1197,13 +1216,19 @@ impl pallet_roles::Config for Runtime {
 
 pub struct MainnetJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>
 	for MainnetJobToFeeHandler
 {
 	type Balance = Balance;
 
 	fn job_to_fee(
-		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Balance {
 		match job.job_type {
 			JobType::DKGTSSPhaseOne(_)
@@ -1253,6 +1278,9 @@ parameter_types! {
 	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxRolesPerValidator: u32 = 100;
+	#[derive(Clone, Eq, PartialEq, TypeInfo, Encode, Decode, RuntimeDebug)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxAdditionalParamsLen: u32 = 256;
 }
 
 impl pallet_jobs::Config for Runtime {
@@ -1270,6 +1298,7 @@ impl pallet_jobs::Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
@@ -1284,6 +1313,7 @@ impl pallet_dkg::Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
 }
 
@@ -1298,6 +1328,7 @@ impl pallet_zksaas::Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
 }
 
@@ -1337,7 +1368,7 @@ construct_runtime!(
 		Preimage: pallet_preimage,
 		Offences: pallet_offences,
 
-		TransactionPause: pallet_transaction_pause,
+		TxPause: pallet_tx_pause,
 		ImOnline: pallet_im_online,
 		Identity: pallet_identity,
 		Utility: pallet_utility,

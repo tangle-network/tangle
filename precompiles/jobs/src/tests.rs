@@ -56,6 +56,7 @@ fn submit_dkg_phase_two_job() {
 					ttl: 0,
 					phase_one_id: 1,
 					submission: vec![].into(),
+					derivation_path: vec![].into(),
 				},
 			);
 		})

@@ -45,7 +45,9 @@ mod mock;
 mod tests;
 
 pub const JOB_SUBMISSION_SIZE_LIMIT: u32 = 2u32.pow(16);
+pub const DERIVATION_PATH_SIZE_LIMIT: u32 = 2u32.pow(16);
 type GetJobSubmissionSizeLimit = ConstU32<JOB_SUBMISSION_SIZE_LIMIT>;
+type GetDerivationPathSizeLimit = ConstU32<DERIVATION_PATH_SIZE_LIMIT>;
 
 /// A precompile to wrap the functionality from pallet-preimage.
 pub struct JobsPrecompile<Runtime>(PhantomData<Runtime>);
@@ -166,16 +168,19 @@ where
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submitDkgPhaseTwoJob(uint64,uint64,uint64,bytes)")]
+	#[precompile::public("submitDkgPhaseTwoJob(uint64,uint64,uint64,bytes,bytes)")]
 	fn submit_dkg_phase_two_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: BlockNumber,
 		ttl: BlockNumber,
 		phase_one_id: JobId,
 		submission: BoundedBytes<GetJobSubmissionSizeLimit>,
+		derivation_path: BoundedBytes<GetDerivationPathSizeLimit>,
 	) -> EvmResult {
 		// Convert BoundedBytes to Vec<u8>
 		let submission: Vec<u8> = submission.into();
+
+		let derivation_path: Vec<u8> = derivation_path.into();
 
 		// Convert caller's Ethereum address to Substrate account ID
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -203,6 +208,11 @@ where
 					role_type: threshold_signature_role,
 					phase_one_id,
 					submission: submission.try_into().unwrap(),
+					derivation_path: if derivation_path.is_empty() {
+						None
+					} else {
+						Some(derivation_path.try_into().unwrap())
+					},
 				};
 
 				// Create job submission object

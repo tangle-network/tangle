@@ -224,6 +224,7 @@ impl<T: Config> Pallet<T> {
 							T::AccountId,
 							T::MaxParticipants,
 							T::MaxSubmissionLen,
+							T::MaxAdditionalParamsLen,
 						> = match role_type {
 							RoleType::Tss(role) => JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
 								role_type: role,
@@ -385,6 +386,7 @@ impl<T: Config> Pallet<T> {
 			data: info.data,
 			verifying_key,
 			signature_scheme: info.signature_scheme,
+			derivation_path: None,
 		});
 
 		let phase_one_job_info = KnownResults::<T>::get(
@@ -529,6 +531,7 @@ impl<T: Config> Pallet<T> {
 			key: curr_key,
 			signature: info.signature.clone(),
 			signature_scheme: info.signature_scheme.clone(),
+			derivation_path: None,
 		});
 
 		T::MPCHandler::verify(JobWithResult {

@@ -71,7 +71,7 @@ async fn test_job_submission_event() {
 			threshold: 1u8,
 			permitted_caller: None,
 			role_type: roles::tss::ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1,
-			__subxt_unused_type_params: Default::default(),
+			__ignore: Default::default(),
 		}),
 		fallback: jobs::FallbackOptions::Destroy,
 	};
@@ -99,13 +99,13 @@ async fn test_job_submission_event() {
 			BoundedVec(alice_account_id.0.to_vec()),
 			BoundedVec(bob_account_id.0.to_vec()),
 		]),
-		signature_scheme: jobs::tss::DigitalSignatureScheme::Ecdsa,
+		signature_scheme: jobs::tss::DigitalSignatureScheme::EcdsaSecp256k1,
 		signatures: BoundedVec(vec![
 			BoundedVec(alice_signature.0.to_vec()),
 			BoundedVec(bob_signature.0.to_vec()),
 		]),
 		threshold: 1,
-		__subxt_unused_type_params: Default::default(),
+		__ignore: Default::default(),
 	});
 
 	let job_result_tx = tangle_runtime::api::tx().jobs().submit_job_result(

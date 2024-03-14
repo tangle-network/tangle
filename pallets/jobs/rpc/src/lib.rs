@@ -49,6 +49,7 @@ pub trait JobsApi<
 	MaxDataLen: Get<u32>,
 	MaxSignatureLen: Get<u32>,
 	MaxProofLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
 >
 {
 	#[method(name = "jobs_queryJobsByValidator")]
@@ -57,7 +58,17 @@ pub trait JobsApi<
 		at: Option<BlockHash>,
 		validator: AccountId,
 	) -> RpcResult<
-		Option<Vec<RpcResponseJobsData<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>>>,
+		Option<
+			Vec<
+				RpcResponseJobsData<
+					AccountId,
+					BlockNumber,
+					MaxParticipants,
+					MaxSubmissionLen,
+					MaxAdditionalParamsLen,
+				>,
+			>,
+		>,
 	>;
 
 	#[method(name = "jobs_queryJobById")]
@@ -67,7 +78,15 @@ pub trait JobsApi<
 		role_type: RoleType,
 		job_id: JobId,
 	) -> RpcResult<
-		Option<RpcResponseJobsData<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>>,
+		Option<
+			RpcResponseJobsData<
+				AccountId,
+				BlockNumber,
+				MaxParticipants,
+				MaxSubmissionLen,
+				MaxAdditionalParamsLen,
+			>,
+		>,
 	>;
 
 	#[method(name = "jobs_queryPhaseOneById")]
@@ -87,6 +106,7 @@ pub trait JobsApi<
 				MaxSignatureLen,
 				MaxSubmissionLen,
 				MaxProofLen,
+				MaxAdditionalParamsLen,
 			>,
 		>,
 	>;
@@ -125,6 +145,7 @@ impl<
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	>
 	JobsApiServer<
 		<Block as BlockT>::Hash,
@@ -136,6 +157,7 @@ impl<
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	> for JobsClient<C, Block, AccountId>
 where
 	Block: BlockT,
@@ -146,6 +168,7 @@ where
 	MaxDataLen: Codec + Serialize + Get<u32>,
 	MaxSignatureLen: Codec + Serialize + Get<u32>,
 	MaxProofLen: Codec + Serialize + Get<u32>,
+	MaxAdditionalParamsLen: Codec + Serialize + Get<u32>,
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
 	C::Api: JobsRuntimeApi<
 		Block,
@@ -156,6 +179,7 @@ where
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	>,
 {
 	fn query_jobs_by_validator(
@@ -170,6 +194,7 @@ where
 					BlockNumberOf<Block>,
 					MaxParticipants,
 					MaxSubmissionLen,
+					MaxAdditionalParamsLen,
 				>,
 			>,
 		>,
@@ -190,7 +215,13 @@ where
 		job_id: JobId,
 	) -> RpcResult<
 		Option<
-			RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen>,
+			RpcResponseJobsData<
+				AccountId,
+				BlockNumberOf<Block>,
+				MaxParticipants,
+				MaxSubmissionLen,
+				MaxAdditionalParamsLen,
+			>,
 		>,
 	> {
 		let api = self.client.runtime_api();
@@ -217,6 +248,7 @@ where
 				MaxSignatureLen,
 				MaxSubmissionLen,
 				MaxProofLen,
+				MaxAdditionalParamsLen,
 			>,
 		>,
 	> {
