@@ -17,11 +17,12 @@
 use crate::mock::*;
 
 use frame_support::{assert_noop, assert_ok};
-use generic_ec::coords::{Coordinate, HasAffineXAndParity, Parity};
-use generic_ec::curves::Stark;
-use generic_ec::Point;
-use p256::ecdsa::signature::hazmat::PrehashSigner;
-use p256::ecdsa::{SigningKey, VerifyingKey};
+use generic_ec::{
+	coords::{Coordinate, HasAffineXAndParity, Parity},
+	curves::Stark,
+	Point,
+};
+use p256::ecdsa::{signature::hazmat::PrehashSigner, SigningKey, VerifyingKey};
 use pallet_dkg::{types::FeeInfo, Error, Event, FeeInfo as FeeInfoStorage};
 use parity_scale_codec::Encode;
 use rand_core::OsRng;

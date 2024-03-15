@@ -7691,7 +7691,6 @@ dependencies = [
  "generic-ec",
  "generic-ec-zkp",
  "hex",
- "k256",
  "malachite-base",
  "malachite-nz",
  "p256",
@@ -7705,6 +7704,7 @@ dependencies = [
  "rand_core 0.6.4",
  "round-based",
  "scale-info",
+ "secp256k1",
  "serde",
  "serde_with 3.6.1",
  "serdect",
@@ -15282,7 +15282,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.7",
- "rand 0.7.3",
+ "rand 0.8.5",
  "static_assertions",
 ]
 

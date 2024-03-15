@@ -115,6 +115,7 @@ pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
 
 k256 = { version = "0.13.0", default-features = false }
 p256 = { version = "0.13.0", default-features = false }
+secp256k1 = { version = "0.28.2", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
 starknet-crypto = { version = "0.6.1", default-features = false, features = ["signature-display","alloc"] }
 frost-core = { path = "pallets/dkg/frost", default-features = false }
