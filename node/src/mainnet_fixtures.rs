@@ -31,19 +31,22 @@ pub fn get_root_key() -> AccountId {
 /// Mainnet bootnodes
 pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
-		"/ip4/3.22.222.30/tcp/30333/p2p/12D3KooWRdvZ3PRteq8DC78Z3z5ZiehipKrKhHDRpgvCjc8XSeQx"
+		"/ip4/213.199.45.84/tcp/30333/p2p/12D3KooWHtMDPXL4NJzdVBDKQmUrLBDqDFjLwXm6xnTMgcmnfgTz"
 			.parse()
 			.unwrap(),
-		"/ip4/18.119.14.21/tcp/30333/p2p/12D3KooWJP5NbEjEK1YihofJm3MMSJWrbRWjeEkRf3LtKvkj6mr9"
+		"/ip4/213.199.45.83/tcp/30333/p2p/12D3KooWSxrtFrdT4wQQqafGYGaS5Z6UfGiwpbHs2Gsqt9Pc1i7L"
 			.parse()
 			.unwrap(),
-		"/ip4/3.15.186.160/tcp/30333/p2p/12D3KooWDL3KiR6CpnEbgUgheje1cMGQtwH4euxGMPQBkwU5cZdu"
+		"/ip4/213.199.45.82/tcp/30333/p2p/12D3KooWExCWbJHKDdX6NSMwXRQK4AtwnCwdYMPTzBfqCYmRkuqH"
 			.parse()
 			.unwrap(),
-		"/ip4/3.137.213.159/tcp/30333/p2p/12D3KooWS4aniCJTz2RiNfNUka8TTa3gXak63FJgdAgfAWLCnsAi"
+		"/ip4/213.199.45.81/tcp/30333/p2p/12D3KooWRhiprU2Nck47vtSpYs1K9718WyDYx8UQKXWqo9zFccFu"
 			.parse()
 			.unwrap(),
-		"/ip4/3.144.191.66/tcp/30333/p2p/12D3KooWM8RYTbVygshTJAbiM5YqvTwWPbZrF8iQ9WS96nEE2Ebr"
+		"/ip4/213.199.45.80/tcp/30333/p2p/12D3KooWSc5zpr9cuFqfXqCFS8G4FVSEELHwrb5uP2mCdrsW9XTC"
+			.parse()
+			.unwrap(),
+		"/ip4/213.199.45.79/tcp/30333/p2p/12D3KooWGwU6web5sEVKzSFgFroJFbmuTcB42PEAHx6QPm86Cg9z"
 			.parse()
 			.unwrap(),
 	]
@@ -153,7 +156,7 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["a21d680b5daed8ca06772666e4245340d2fb6d363f7edab5cf78baa1456a5650"].into(),
 			hex!["c851a63384fa6d5f7708a233e7de8c4bc81c07cacd0a8f329cb294d47aa64b78"]
 				.unchecked_into(),
-			hex!["5b120ba5d2399de8ba3201d1c464973070934c570c539ddcad1318832353f7b0"]
+			hex!["a2948fb6f455ac9252ff39c59d46203dded2b0a2685e71a641942d58afc372a5"]
 				.unchecked_into(),
 			hex!["7842e1623d6a19cd267ad9b926ddb81a27c6aedc4cab58e99cd0ac3e2a53a762"]
 				.unchecked_into(),
