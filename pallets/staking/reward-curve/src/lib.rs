@@ -16,7 +16,7 @@
 // limitations under the License.
 
 //! Proc macro to generate the reward curve functions and tests.
-#![allow(clippy::all)]
+#![allow(clippy::all, dead_code)]
 mod log;
 
 use log::log2;
