@@ -22,6 +22,7 @@ use crate::mainnet_fixtures::{get_initial_authorities, get_root_key};
 use hex_literal::hex;
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};
 use sp_core::H160;
+use sp_core::U256;
 use sp_runtime::{traits::AccountIdConversion, AccountId32};
 use std::{collections::BTreeMap, str::FromStr};
 use tangle_primitives::types::BlockNumber;
@@ -282,8 +283,10 @@ pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u12
 	compute_balance_distribution_with_cliff_and_vesting(team_accounts)
 }
 
-pub fn get_initial_endowed_accounts() -> Vec<(AccountId, u128)> {
+pub fn get_initial_endowed_accounts(
+) -> (Vec<(AccountId, u128)>, Vec<(H160, fp_evm::GenesisAccount)>) {
 	let mut endowed_accounts = vec![];
+	let mut endowed_evm_accounts = vec![];
 
 	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
 	let acc: AccountId = pallet_id.into_account_truncating();
@@ -303,8 +306,15 @@ pub fn get_initial_endowed_accounts() -> Vec<(AccountId, u128)> {
 			MultiAddress::Native(account) => {
 				endowed_accounts.push((account, 100 * UNIT));
 			},
-			_ => { // cant endow balance to evm account
-			},
+			MultiAddress::EVM(account) => endowed_evm_accounts.push((
+				H160::from_slice(&account.0),
+				fp_evm::GenesisAccount {
+					nonce: U256::from(1),
+					balance: U256::from(100 * UNIT),
+					storage: Default::default(),
+					code: Default::default(),
+				},
+			)),
 		}
 	}
 
@@ -312,7 +322,7 @@ pub fn get_initial_endowed_accounts() -> Vec<(AccountId, u128)> {
 		endowed_accounts.push((team_account, 100 * UNIT));
 	}
 
-	endowed_accounts
+	(endowed_accounts, endowed_evm_accounts)
 }
 
 pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
@@ -670,7 +680,7 @@ fn test_distribution_shares() {
 
 	// ================= compute intial endowment at genesis ========================= //
 	let total_endowmwnent: u128 =
-		get_initial_endowed_accounts().into_iter().map(|(_, amount)| amount).sum();
+		get_initial_endowed_accounts().0.into_iter().map(|(_, amount)| amount).sum();
 	assert_eq!(total_endowmwnent - total_treasury_amount, 8900000000000000000000); // 8900 TNT
 
 	let total_genesis_endowment = total_investor_amount
