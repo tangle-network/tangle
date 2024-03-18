@@ -28,6 +28,7 @@ pub trait JobToFee<
 	BlockNumber,
 	MaxParticipants: Get<u32> + Clone,
 	MaxSubmissionLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
 >
 {
 	/// The type that is returned as result from calculation.
@@ -44,7 +45,13 @@ pub trait JobToFee<
 	///
 	/// Returns the calculated fee as `Self::Balance`.
 	fn job_to_fee(
-		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Self::Balance;
 
 	/// Calculates the fee to extend an already existing result.
@@ -74,6 +81,7 @@ pub trait MPCHandler<
 	MaxDataLen: Get<u32>,
 	MaxSignatureLen: Get<u32>,
 	MaxProofLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
 >
 {
 	/// Verifies the result of a job.
@@ -94,6 +102,7 @@ pub trait MPCHandler<
 			MaxDataLen,
 			MaxSignatureLen,
 			MaxProofLen,
+			MaxAdditionalParamsLen,
 		>,
 	) -> DispatchResult;
 

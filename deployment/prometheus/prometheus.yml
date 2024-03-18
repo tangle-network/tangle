@@ -1,0 +1,33 @@
+global:
+  # How frequently to scrape targets
+  scrape_interval:     10s
+  # How frequently to evaluate rules
+  evaluation_interval: 10s
+
+# Rules and alerts are read from the specified file(s)
+rule_files:
+  - rules.yml
+
+# # Alerting specifies settings related to the Alertmanager
+alerting:
+  alertmanagers:
+    - static_configs:
+      - targets:
+        # Alertmanager's default port is 9093
+        - alertmanager:9093
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # Job to scrape substrate node
+  - job_name: "substrate"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['127.0.0.1:9615']
+  
+  # Job to get system metrics
+  - job_name: 'node_exporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['127.0.0.1:9100']
+  

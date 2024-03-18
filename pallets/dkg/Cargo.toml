@@ -42,7 +42,8 @@ generic-ec-zkp = { workspace = true, default-features = false, features = ["serd
 starknet-crypto = { workspace = true, default-features = false }
 k256 = { workspace = true, features = ["arithmetic", "expose-field", "hash2curve", "alloc"], default-features = false }
 p256 = { workspace = true, default-features = false, features = ["hash2curve", "alloc", "ecdsa"] }
-ecdsa-core = { workspace = true, default-features = false, features = ["der"] }
+ecdsa-core = { workspace = true, default-features = false  }
+generic-array = { version = "0.14.7", default-features = false }
 
 # FROST specific dependencies
 frost-core = { workspace = true, default-features = false }

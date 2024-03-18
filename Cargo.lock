@@ -7687,6 +7687,7 @@ dependencies = [
  "frost-p384",
  "frost-ristretto255",
  "frost-secp256k1",
+ "generic-array 0.14.7",
  "generic-ec",
  "generic-ec-zkp",
  "hex",

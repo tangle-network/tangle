@@ -43,12 +43,15 @@ pub struct DKGTSSPhaseOneJobType<AccountId, MaxParticipants: Get<u32> + Clone> {
 /// Represents the DKG Signature job type.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGTSSPhaseTwoJobType<MaxSubmissionLen: Get<u32>> {
+pub struct DKGTSSPhaseTwoJobType<MaxSubmissionLen: Get<u32>, MaxAdditionalParamsLen: Get<u32>> {
 	/// The phase one ID.
 	pub phase_one_id: JobId,
 
 	/// The submission data as a vector of bytes.
 	pub submission: BoundedVec<u8, MaxSubmissionLen>,
+
+	/// Optional derivation path for the signature
+	pub derivation_path: Option<BoundedVec<u8, MaxAdditionalParamsLen>>,
 
 	/// The role type to be used
 	pub role_type: ThresholdSignatureRoleType,
@@ -107,9 +110,13 @@ pub struct DKGTSSSignatureResult<
 	MaxDataLen: Get<u32>,
 	MaxKeyLen: Get<u32>,
 	MaxSignatureLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
 > {
 	/// Signature scheme to use for DKG
 	pub signature_scheme: DigitalSignatureScheme,
+
+	/// The derivation path used for the signature
+	pub derivation_path: Option<BoundedVec<u8, MaxAdditionalParamsLen>>,
 
 	/// The input data
 	pub data: BoundedVec<u8, MaxDataLen>,
@@ -130,7 +137,11 @@ pub struct DKGTSSKeyRefreshResult {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct DKGTSSKeyRotationResult<MaxKeyLen: Get<u32>, MaxSignatureLen: Get<u32>> {
+pub struct DKGTSSKeyRotationResult<
+	MaxKeyLen: Get<u32>,
+	MaxSignatureLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
+> {
 	/// The phase one ID.
 	pub phase_one_id: JobId,
 	/// The new phase one ID.
@@ -144,6 +155,8 @@ pub struct DKGTSSKeyRotationResult<MaxKeyLen: Get<u32>, MaxSignatureLen: Get<u32
 	pub signature: BoundedVec<u8, MaxSignatureLen>,
 	/// Signature scheme of the DKG
 	pub signature_scheme: DigitalSignatureScheme,
+	/// The derivation path used for the signature
+	pub derivation_path: Option<BoundedVec<u8, MaxAdditionalParamsLen>>,
 }
 
 /// Possible key types for DKG

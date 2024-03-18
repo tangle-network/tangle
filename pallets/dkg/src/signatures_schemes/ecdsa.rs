@@ -15,7 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use crate::{signatures_schemes::to_slice_33, Config, Error};
 use ecdsa_core::signature::hazmat::PrehashVerifier;
+use elliptic_curve::consts::U32;
 use frame_support::{ensure, pallet_prelude::DispatchResult};
+use generic_array::GenericArray;
 use generic_ec::coords::HasAffineX;
 use generic_ec::{curves::Stark, Point, Scalar};
 use sp_core::ecdsa;
@@ -43,9 +45,25 @@ pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 ) -> DispatchResult {
 	let verifying_key = k256::ecdsa::VerifyingKey::from_sec1_bytes(expected_key)
 		.map_err(|_| Error::<T>::InvalidPublicKey)?;
-	let signature =
-		k256::ecdsa::Signature::from_slice(signature).map_err(|_| Error::<T>::InvalidSignature)?;
-	ensure!(verifying_key.verify_prehash(msg, &signature).is_ok(), Error::<T>::InvalidSignature);
+	ensure!(signature.len() == ECDSA_SIGNATURE_LENGTH, Error::<T>::InvalidSignature);
+
+	// Normalize the signature
+	// https://github.com/RustCrypto/elliptic-curves/issues/988
+	let mut r_bytes = [0u8; 32];
+	let mut s_bytes = [0u8; 32];
+	r_bytes.copy_from_slice(&signature[0..32]);
+	s_bytes.copy_from_slice(&signature[32..64]);
+	let gar: &GenericArray<u8, U32> = GenericArray::from_slice(&r_bytes);
+	let gas: &GenericArray<u8, U32> = GenericArray::from_slice(&s_bytes);
+	let signature = k256::ecdsa::Signature::from_scalars(*gar, *gas)
+		.map_err(|_| Error::<T>::InvalidSignature)?;
+	let normalized_signature = signature.normalize_s().unwrap_or(signature);
+
+	let hash = keccak_256(msg);
+	ensure!(
+		verifying_key.verify_prehash(&hash, &normalized_signature).is_ok(),
+		Error::<T>::InvalidSignature
+	);
 	Ok(())
 }
 
@@ -67,9 +85,24 @@ pub fn verify_secp256r1_ecdsa_signature<T: Config>(
 ) -> DispatchResult {
 	let verifying_key = p256::ecdsa::VerifyingKey::from_sec1_bytes(expected_key)
 		.map_err(|_| Error::<T>::InvalidPublicKey)?;
-	let signature =
-		p256::ecdsa::Signature::from_slice(signature).map_err(|_| Error::<T>::InvalidSignature)?;
-	ensure!(verifying_key.verify_prehash(msg, &signature).is_ok(), Error::<T>::InvalidSignature);
+
+	// Normalize the signature
+	// https://github.com/RustCrypto/elliptic-curves/issues/988
+	let mut r_bytes = [0u8; 32];
+	let mut s_bytes = [0u8; 32];
+	r_bytes.copy_from_slice(&signature[0..32]);
+	s_bytes.copy_from_slice(&signature[32..64]);
+	let gar: &GenericArray<u8, U32> = GenericArray::from_slice(&r_bytes);
+	let gas: &GenericArray<u8, U32> = GenericArray::from_slice(&s_bytes);
+	let signature = p256::ecdsa::Signature::from_scalars(*gar, *gas)
+		.map_err(|_| Error::<T>::InvalidSignature)?;
+	let normalized_signature = signature.normalize_s().unwrap_or(signature);
+	let hash = keccak_256(msg);
+
+	ensure!(
+		verifying_key.verify_prehash(&hash, &normalized_signature).is_ok(),
+		Error::<T>::InvalidSignature
+	);
 	Ok(())
 }
 
