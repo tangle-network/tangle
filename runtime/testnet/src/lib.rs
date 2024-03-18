@@ -1291,7 +1291,6 @@ pallet_staking_reward_curve::build! {
 }
 
 parameter_types! {
-	pub InflationRewardPerSession: Balance = 10_000;
 	pub const MaxValidators : u32 = 1000;
 	pub MaxRestake: Percent = Percent::from_percent(50);
 	pub const RestakerRewardCurve: &'static PiecewiseLinear<'static> = &RESTAKER_REWARD_CURVE;
@@ -1303,7 +1302,6 @@ impl pallet_roles::Config for Runtime {
 	type JobsHandler = Jobs;
 	type RoleKeyId = RoleKeyId;
 	type MaxRolesPerAccount = ConstU32<2>;
-	type InflationRewardPerSession = InflationRewardPerSession;
 	type ValidatorSet = Historical;
 	type ReportOffences = OffenceHandler;
 	type ValidatorRewardDistribution = Reward;

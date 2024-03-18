@@ -110,9 +110,6 @@ pub mod pallet {
 		#[pallet::constant]
 		type MaxRolesPerAccount: Get<u32>;
 
-		/// The inflation reward to distribute per era
-		type InflationRewardPerSession: Get<BalanceOf<Self>>;
-
 		/// The inflation distribution based on validator type
 		type ValidatorRewardDistribution: Get<ValidatorRewardDistribution>;
 
