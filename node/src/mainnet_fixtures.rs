@@ -115,7 +115,7 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["02150142402731bc289cd6edd27536f7fb419e312f25e2c8d0f67c5e76f2a2a9fd"]
 				.unchecked_into(),
 		),
-		// tangle 6
+		// // tangle 6
 		// (
 		// 	hex!["5effe50292a6a8932efde21623ea0a8c2acaffe85cf30827907dba715c04137f"].into(),
 		// 	hex!["fe77de52662d43eafc069b81538e57bbecc266b21f783ceba9302df95c2b6453"]
