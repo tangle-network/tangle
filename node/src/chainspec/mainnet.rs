@@ -22,19 +22,21 @@ use crate::{
 	},
 	mainnet_fixtures::{get_bootnodes, get_initial_authorities, get_root_key},
 };
-
 use hex_literal::hex;
 use pallet_airdrop_claims::MultiAddress;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use parity_scale_codec::alloc::collections::BTreeMap;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
+use sp_core::H160;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::{
 	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
 };
 use tangle_primitives::types::{BlockNumber, Signature};
+use tangle_runtime::EVMConfig;
 use tangle_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
 	ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId, RuntimeGenesisConfig, SessionConfig,
@@ -130,6 +132,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					mainnet::get_investor_balance_distribution(),
 					mainnet::get_team_direct_vesting_distribution(),
 				]),
+				Default::default(),
 			)
 		},
 		// Bootnodes
@@ -164,7 +167,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				// Initial validators
 				get_initial_authorities(),
 				// Endowed accounts
-				mainnet::get_initial_endowed_accounts(),
+				mainnet::get_initial_endowed_accounts().0,
 				// Sudo account
 				get_root_key(),
 				// EVM chain ID
@@ -182,6 +185,8 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					mainnet::get_investor_balance_distribution(),
 					mainnet::get_foundation_balance_distribution(),
 				]),
+				// endowed evm accounts
+				mainnet::get_initial_endowed_accounts().1,
 			)
 		},
 		// Bootnodes
@@ -209,6 +214,7 @@ fn mainnet_genesis(
 	chain_id: u64,
 	genesis_airdrop: DistributionResult,
 	genesis_non_airdrop: Vec<(MultiAddress, u128, u64, u64, u128)>,
+	genesis_evm_distribution: Vec<(H160, fp_evm::GenesisAccount)>,
 ) -> RuntimeGenesisConfig {
 	// stakers: all validators and nominators.
 	let stakers = initial_authorities
@@ -291,7 +297,16 @@ fn mainnet_genesis(
 		tx_pause: Default::default(),
 		// EVM compatibility
 		evm_chain_id: EVMChainIdConfig { chain_id, ..Default::default() },
-		evm: Default::default(),
+		evm: EVMConfig {
+			accounts: {
+				let mut map = BTreeMap::new();
+				for (address, account) in genesis_evm_distribution {
+					map.insert(address, account);
+				}
+				map
+			},
+			..Default::default()
+		},
 		ethereum: Default::default(),
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
