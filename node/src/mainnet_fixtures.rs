@@ -115,65 +115,65 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["02150142402731bc289cd6edd27536f7fb419e312f25e2c8d0f67c5e76f2a2a9fd"]
 				.unchecked_into(),
 		),
-		// tangle 6
-		(
-			hex!["5effe50292a6a8932efde21623ea0a8c2acaffe85cf30827907dba715c04137f"].into(),
-			hex!["fe77de52662d43eafc069b81538e57bbecc266b21f783ceba9302df95c2b6453"]
-				.unchecked_into(),
-			hex!["5922a3e86519cb61ab1e4eae6d4feee5c9bee4007a002c1cb4d4f99b69eedd63"]
-				.unchecked_into(),
-			hex!["4482f8fa27f9c9ec566554d2cf6ae3f7430da66fdeb486074a80237f6a7ca55c"]
-				.unchecked_into(),
-			hex!["028b4b49f4ab47aaf8583b98c800779397234cb23810856eeca151cc39c7e4637a"]
-				.unchecked_into(),
-		),
-		// tangle 7
-		(
-			hex!["f65b33a645a71be5a0953c53855ce3f8e882167d85910dc1e2cc1b9d32abe56d"].into(),
-			hex!["eaea45fd67d4211b3b20706452c58850f7415c7b821c5617b42fb3373b822645"]
-				.unchecked_into(),
-			hex!["5b120ba5d2399de8ba3201d1c464973070934c570c539ddcad1318832353f7b0"]
-				.unchecked_into(),
-			hex!["1261548c9de1476e4e8e06e9dddd543ebbd7504ae502ac91a0eb8b6037334372"]
-				.unchecked_into(),
-			hex!["02320ab70b215ed1d37748d2aadae924ddb1e6042598ae9c2479684f0913cc15ae"]
-				.unchecked_into(),
-		),
-		// tangle 8
-		(
-			hex!["72db776eda47a3962a4dc987801e4762cabe38dfc7f639bd76823e09ec37e422"].into(),
-			hex!["0a006e5c139ac2a46ed260a41db9bca6edbb937befe83cae167c68902d192d26"]
-				.unchecked_into(),
-			hex!["63e68e70b16f553476b879b5dba4b9ff587cd2a4a449df9c97698d56ea067b18"]
-				.unchecked_into(),
-			hex!["7c04e33631ff7ae0a453827c82c4b69179e72612f982c4d9b45393f25b4f5f48"]
-				.unchecked_into(),
-			hex!["026fa903a87d7e0e262e5c70d6dffecca3f5262f05096a1c5bcd477e8ea63813ad"]
-				.unchecked_into(),
-		),
-		// tangle 9
-		(
-			hex!["a21d680b5daed8ca06772666e4245340d2fb6d363f7edab5cf78baa1456a5650"].into(),
-			hex!["c851a63384fa6d5f7708a233e7de8c4bc81c07cacd0a8f329cb294d47aa64b78"]
-				.unchecked_into(),
-			hex!["a2948fb6f455ac9252ff39c59d46203dded2b0a2685e71a641942d58afc372a5"]
-				.unchecked_into(),
-			hex!["7842e1623d6a19cd267ad9b926ddb81a27c6aedc4cab58e99cd0ac3e2a53a762"]
-				.unchecked_into(),
-			hex!["02c876f99aa4361e7e81eb96ff325833452efb6eed6ae43abfbbed4106ac556829"]
-				.unchecked_into(),
-		),
-		// tangle 10
-		(
-			hex!["3079d12fd7978cee5ff87fad722e3ef2156dea0daaaa1c6f73c28b69cf9a9201"].into(),
-			hex!["000a4209bd78a7c1ff2eb8093b095be0d2776c3d5d6392ef4edb3d05f41d7e2e"]
-				.unchecked_into(),
-			hex!["7363e73123e3fd7600d136652ac763751baf65589a4c5cd6e45f49934f32058f"]
-				.unchecked_into(),
-			hex!["c0fc962bcbc623e343d0dddf9915f9c269dced366283e76e6302612d5172281d"]
-				.unchecked_into(),
-			hex!["03d1198468f5ba4f67d155a576d5b2b2823265616b7669000eab08bca538d8c34c"]
-				.unchecked_into(),
-		),
+		// // tangle 6
+		// (
+		// 	hex!["5effe50292a6a8932efde21623ea0a8c2acaffe85cf30827907dba715c04137f"].into(),
+		// 	hex!["fe77de52662d43eafc069b81538e57bbecc266b21f783ceba9302df95c2b6453"]
+		// 		.unchecked_into(),
+		// 	hex!["5922a3e86519cb61ab1e4eae6d4feee5c9bee4007a002c1cb4d4f99b69eedd63"]
+		// 		.unchecked_into(),
+		// 	hex!["4482f8fa27f9c9ec566554d2cf6ae3f7430da66fdeb486074a80237f6a7ca55c"]
+		// 		.unchecked_into(),
+		// 	hex!["028b4b49f4ab47aaf8583b98c800779397234cb23810856eeca151cc39c7e4637a"]
+		// 		.unchecked_into(),
+		// ),
+		// // tangle 7
+		// (
+		// 	hex!["f65b33a645a71be5a0953c53855ce3f8e882167d85910dc1e2cc1b9d32abe56d"].into(),
+		// 	hex!["eaea45fd67d4211b3b20706452c58850f7415c7b821c5617b42fb3373b822645"]
+		// 		.unchecked_into(),
+		// 	hex!["5b120ba5d2399de8ba3201d1c464973070934c570c539ddcad1318832353f7b0"]
+		// 		.unchecked_into(),
+		// 	hex!["1261548c9de1476e4e8e06e9dddd543ebbd7504ae502ac91a0eb8b6037334372"]
+		// 		.unchecked_into(),
+		// 	hex!["02320ab70b215ed1d37748d2aadae924ddb1e6042598ae9c2479684f0913cc15ae"]
+		// 		.unchecked_into(),
+		// ),
+		// // tangle 8
+		// (
+		// 	hex!["72db776eda47a3962a4dc987801e4762cabe38dfc7f639bd76823e09ec37e422"].into(),
+		// 	hex!["0a006e5c139ac2a46ed260a41db9bca6edbb937befe83cae167c68902d192d26"]
+		// 		.unchecked_into(),
+		// 	hex!["63e68e70b16f553476b879b5dba4b9ff587cd2a4a449df9c97698d56ea067b18"]
+		// 		.unchecked_into(),
+		// 	hex!["7c04e33631ff7ae0a453827c82c4b69179e72612f982c4d9b45393f25b4f5f48"]
+		// 		.unchecked_into(),
+		// 	hex!["026fa903a87d7e0e262e5c70d6dffecca3f5262f05096a1c5bcd477e8ea63813ad"]
+		// 		.unchecked_into(),
+		// ),
+		// // tangle 9
+		// (
+		// 	hex!["a21d680b5daed8ca06772666e4245340d2fb6d363f7edab5cf78baa1456a5650"].into(),
+		// 	hex!["c851a63384fa6d5f7708a233e7de8c4bc81c07cacd0a8f329cb294d47aa64b78"]
+		// 		.unchecked_into(),
+		// 	hex!["a2948fb6f455ac9252ff39c59d46203dded2b0a2685e71a641942d58afc372a5"]
+		// 		.unchecked_into(),
+		// 	hex!["7842e1623d6a19cd267ad9b926ddb81a27c6aedc4cab58e99cd0ac3e2a53a762"]
+		// 		.unchecked_into(),
+		// 	hex!["02c876f99aa4361e7e81eb96ff325833452efb6eed6ae43abfbbed4106ac556829"]
+		// 		.unchecked_into(),
+		// ),
+		// // tangle 10
+		// (
+		// 	hex!["3079d12fd7978cee5ff87fad722e3ef2156dea0daaaa1c6f73c28b69cf9a9201"].into(),
+		// 	hex!["000a4209bd78a7c1ff2eb8093b095be0d2776c3d5d6392ef4edb3d05f41d7e2e"]
+		// 		.unchecked_into(),
+		// 	hex!["7363e73123e3fd7600d136652ac763751baf65589a4c5cd6e45f49934f32058f"]
+		// 		.unchecked_into(),
+		// 	hex!["c0fc962bcbc623e343d0dddf9915f9c269dced366283e76e6302612d5172281d"]
+		// 		.unchecked_into(),
+		// 	hex!["03d1198468f5ba4f67d155a576d5b2b2823265616b7669000eab08bca538d8c34c"]
+		// 		.unchecked_into(),
+		// ),
 	]
 }
