@@ -24,9 +24,7 @@ sp-staking = { workspace = true, default-features = false, features = ["serde"] 
 sp-std = { workspace = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
-pallet-session = { workspace = true, default-features = false, features = [
-	"historical",
-] }
+pallet-session = { workspace = true }
 pallet-authorship = { workspace = true }
 sp-application-crypto = { workspace = true, default-features = false, features = ["serde"]  }
 frame-election-provider-support = { workspace = true }
