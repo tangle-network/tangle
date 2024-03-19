@@ -18,10 +18,10 @@ rustc-hex = { workspace = true }
 scale-info = { workspace = true }
 schnorrkel = { workspace = true }
 serde = { workspace = true, features = ["alloc"] }
-
+frame-benchmarking = { workspace = true, optional = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
-libsecp256k1 = { workspace = true }
+libsecp256k1 = { workspace = true, features = ["hmac", "static-context"] }
 pallet-balances = { workspace = true }
 pallet-vesting = { workspace = true }
 sp-core = { workspace = true }
@@ -56,4 +56,14 @@ std = [
   "pallet-evm/std",
   "schnorrkel/std",
 ]
+
 try-runtime = ["frame-support/try-runtime"]
+
+runtime-benchmarks = [
+  "frame-benchmarking/runtime-benchmarks",
+  "frame-support/runtime-benchmarks",
+  "frame-system/runtime-benchmarks",
+  "pallet-balances/runtime-benchmarks",
+  "pallet-vesting/runtime-benchmarks",
+  "sp-runtime/runtime-benchmarks",
+  ]

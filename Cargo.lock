@@ -7487,6 +7487,7 @@ dependencies = [
 name = "pallet-airdrop-claims"
 version = "0.6.3"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "hex-literal 0.4.1",
