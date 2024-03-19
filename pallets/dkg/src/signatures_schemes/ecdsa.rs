@@ -142,7 +142,6 @@ pub fn verify_stark_ecdsa_signature<T: Config>(
 	};
 
 	let (r, s) = parse_signature(signature)?;
-
 	let public_key_x: Scalar<Stark> = Point::from_bytes(expected_key)
 		.map_err(|_| Error::<T>::InvalidPublicKey)?
 		.x()

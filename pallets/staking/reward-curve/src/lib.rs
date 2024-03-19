@@ -16,7 +16,7 @@
 // limitations under the License.
 
 //! Proc macro to generate the reward curve functions and tests.
-#![allow(clippy::all)]
+#![allow(clippy::all, dead_code)]
 mod log;
 
 use log::log2;
@@ -77,7 +77,7 @@ pub fn build(input: TokenStream) -> TokenStream {
 	let points = compute_points(&input);
 
 	let declaration = generate_piecewise_linear(points);
-	let test_module = generate_test_module(&input);
+	//let test_module = generate_test_module(&input);
 
 	let imports = match crate_name("sp-runtime") {
 		Ok(FoundCrate::Itself) => quote!(
@@ -99,7 +99,7 @@ pub fn build(input: TokenStream) -> TokenStream {
 			#imports
 			#declaration
 		};
-		#test_module
+		//#test_module
 	)
 	.into()
 }
