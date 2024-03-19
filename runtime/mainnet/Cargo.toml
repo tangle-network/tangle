@@ -152,6 +152,13 @@ runtime-benchmarks = [
   "pallet-ethereum/runtime-benchmarks",
   "pallet-evm/runtime-benchmarks",
   "pallet-hotfix-sufficients/runtime-benchmarks",
+
+  # Tangle
+  "pallet-roles/runtime-benchmarks",
+  "pallet-jobs/runtime-benchmarks",
+  "pallet-airdrop-claims/runtime-benchmarks",
+
+
 ]
 
 std = [

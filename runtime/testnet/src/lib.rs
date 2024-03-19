@@ -2087,6 +2087,8 @@ impl_runtime_apis! {
 
 			let mut list = Vec::<BenchmarkList>::new();
 			list_benchmark!(list, extra, pallet_roles, Roles);
+			list_benchmark!(list, extra, pallet_jobs, Jobs);
+			list_benchmark!(list, extra, pallet_airdrop_claims, Claims);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -2100,7 +2102,6 @@ impl_runtime_apis! {
 			use sp_storage::TrackedStorageKey;
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use baseline::Pallet as BaselineBench;
-
 			impl frame_system_benchmarking::Config for Runtime {}
 			impl baseline::Config for Runtime {}
 
@@ -2110,6 +2111,8 @@ impl_runtime_apis! {
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
 			add_benchmark!(params, batches, pallet_roles, Roles);
+			add_benchmark!(params, batches, pallet_jobs, Jobs);
+			add_benchmark!(params, batches, pallet_airdrop_claims, Claims);
 
 			Ok(batches)
 		}

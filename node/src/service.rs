@@ -43,9 +43,6 @@ use tangle_testnet_runtime::{self, RuntimeApi, TransactionConverter};
 /// imported and generated.
 const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
 
-pub type HostFunctions =
-	(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
-
 #[cfg(not(feature = "testnet"))]
 pub mod tangle {
 	// Our native executor instance.
@@ -78,7 +75,8 @@ pub mod testnet {
 	impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 		/// Only enable the benchmarking host functions when we actually want to benchmark.
 		#[cfg(feature = "runtime-benchmarks")]
-		type ExtendHostFunctions = HostFunctions;
+		type ExtendHostFunctions =
+			(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
 		/// Otherwise we only use the default Substrate host functions.
 		#[cfg(not(feature = "runtime-benchmarks"))]
 		type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
