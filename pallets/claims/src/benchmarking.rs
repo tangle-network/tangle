@@ -157,6 +157,13 @@ benchmarks! {
 		assert!(Claims::<T>::contains_key(new_eth_address));
 	}
 
+	// Benchmark `force_set_expiry_config` logic.
+	force_set_expiry_config {
+		let new_expiry = 1000u32;
+		let account: AccountId32 = account("user", 0, SEED);
+
+	}: _(RawOrigin::Root, new_expiry.into(), MultiAddress::Native(account) )
+
 	// Benchmark the time it takes to do `repeat` number of keccak256 hashes
 	#[extra]
 	keccak256 {

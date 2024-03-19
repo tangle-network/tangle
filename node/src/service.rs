@@ -43,6 +43,9 @@ use tangle_testnet_runtime::{self, RuntimeApi, TransactionConverter};
 /// imported and generated.
 const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
 
+pub type HostFunctions =
+	(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
+
 #[cfg(not(feature = "testnet"))]
 pub mod tangle {
 	// Our native executor instance.

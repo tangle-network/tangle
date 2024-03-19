@@ -37,6 +37,7 @@ pub trait WeightInfo {
 	fn mint_claim() -> Weight;
 	fn claim_attest() -> Weight;
 	fn move_claim() -> Weight;
+	fn force_set_expiry_config() -> Weight;
 }
 
 /// Weights for `pallet_airdrop_claims` using the Substrate node and recommended hardware.
@@ -62,8 +63,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		// Proof Size summary in bytes:
 		//  Measured:  `673`
 		//  Estimated: `4764`
-		// Minimum execution time: 149_000_000 picoseconds.
-		Weight::from_parts(256_000_000, 4764)
+		// Minimum execution time: 157_000_000 picoseconds.
+		Weight::from_parts(265_000_000, 4764)
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
@@ -80,7 +81,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		//  Measured:  `145`
 		//  Estimated: `1630`
 		// Minimum execution time: 12_000_000 picoseconds.
-		Weight::from_parts(22_000_000, 1630)
+		Weight::from_parts(18_000_000, 1630)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -104,8 +105,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		// Proof Size summary in bytes:
 		//  Measured:  `673`
 		//  Estimated: `4764`
-		// Minimum execution time: 131_000_000 picoseconds.
-		Weight::from_parts(273_000_000, 4764)
+		// Minimum execution time: 161_000_000 picoseconds.
+		Weight::from_parts(252_000_000, 4764)
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
@@ -119,10 +120,20 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		// Proof Size summary in bytes:
 		//  Measured:  `413`
 		//  Estimated: `3878`
-		// Minimum execution time: 19_000_000 picoseconds.
-		Weight::from_parts(35_000_000, 3878)
+		// Minimum execution time: 17_000_000 picoseconds.
+		Weight::from_parts(27_000_000, 3878)
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
+	/// Storage: `Claims::ExpiryConfig` (r:0 w:1)
+	/// Proof: `Claims::ExpiryConfig` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	fn force_set_expiry_config() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 2_000_000 picoseconds.
+		Weight::from_parts(2_000_000, 0)
+			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 }
 
@@ -148,8 +159,8 @@ impl WeightInfo for () {
 		// Proof Size summary in bytes:
 		//  Measured:  `673`
 		//  Estimated: `4764`
-		// Minimum execution time: 149_000_000 picoseconds.
-		Weight::from_parts(256_000_000, 4764)
+		// Minimum execution time: 157_000_000 picoseconds.
+		Weight::from_parts(265_000_000, 4764)
 			.saturating_add(RocksDbWeight::get().reads(8_u64))
 			.saturating_add(RocksDbWeight::get().writes(6_u64))
 	}
@@ -166,7 +177,7 @@ impl WeightInfo for () {
 		//  Measured:  `145`
 		//  Estimated: `1630`
 		// Minimum execution time: 12_000_000 picoseconds.
-		Weight::from_parts(22_000_000, 1630)
+		Weight::from_parts(18_000_000, 1630)
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(4_u64))
 	}
@@ -190,8 +201,8 @@ impl WeightInfo for () {
 		// Proof Size summary in bytes:
 		//  Measured:  `673`
 		//  Estimated: `4764`
-		// Minimum execution time: 131_000_000 picoseconds.
-		Weight::from_parts(273_000_000, 4764)
+		// Minimum execution time: 161_000_000 picoseconds.
+		Weight::from_parts(252_000_000, 4764)
 			.saturating_add(RocksDbWeight::get().reads(8_u64))
 			.saturating_add(RocksDbWeight::get().writes(6_u64))
 	}
@@ -205,9 +216,19 @@ impl WeightInfo for () {
 		// Proof Size summary in bytes:
 		//  Measured:  `413`
 		//  Estimated: `3878`
-		// Minimum execution time: 19_000_000 picoseconds.
-		Weight::from_parts(35_000_000, 3878)
+		// Minimum execution time: 17_000_000 picoseconds.
+		Weight::from_parts(27_000_000, 3878)
 			.saturating_add(RocksDbWeight::get().reads(3_u64))
 			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
+	/// Storage: `Claims::ExpiryConfig` (r:0 w:1)
+	/// Proof: `Claims::ExpiryConfig` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	fn force_set_expiry_config() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 2_000_000 picoseconds.
+		Weight::from_parts(2_000_000, 0)
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
 }
