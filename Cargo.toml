@@ -111,7 +111,7 @@ pallet-roles = { path = "pallets/roles", default-features = false }
 pallet-dkg = { path = "pallets/dkg", default-features = false }
 pallet-zksaas = { path = "pallets/zksaas", default-features = false }
 pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-features = false }
-pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
+pallet-jobs-rpc = { path = "pallets/jobs/rpc", default-features = false }
 
 k256 = { version = "0.13.0", default-features = false }
 p256 = { version = "0.13.0", default-features = false }
@@ -282,7 +282,7 @@ pallet-evm-precompile-ed25519 = { git = "https://github.com/paritytech/frontier.
 pallet-evm-precompile-modexp = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.7.0", default-features = false }
 pallet-evm-precompile-sha3fips = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.7.0", default-features = false }
 pallet-evm-precompile-simple = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.7.0", default-features = false }
-pallet-evm-test-vector-support = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.7.0" }
+pallet-evm-test-vector-support = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.7.0", default-features = false }
 pallet-hotfix-sufficients = { git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v1.7.0", default-features = false }
 
 # Local precompiles
@@ -308,7 +308,7 @@ evm-runtime = { version = "0.41.0", default-features = false }
 
 # RPC related dependencies
 jsonrpsee = { version = "0.20.3", features = ["server"] }
-pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
+pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
 
