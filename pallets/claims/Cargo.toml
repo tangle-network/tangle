@@ -21,7 +21,7 @@ serde = { workspace = true, features = ["alloc"] }
 frame-benchmarking = { workspace = true, optional = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
-libsecp256k1 = { workspace = true }
+libsecp256k1 = { workspace = true, features = ["hmac", "static-context"] }
 pallet-balances = { workspace = true }
 pallet-vesting = { workspace = true }
 sp-core = { workspace = true }
