@@ -372,6 +372,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       DuplicateSignature: AugmentedError<ApiType>;
       /**
+       * Field element error
+       **/
+      FieldElementError: AugmentedError<ApiType>;
+      /**
        * FROST Field scalar error
        **/
       FrostFieldError: AugmentedError<ApiType>;
@@ -428,9 +432,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidJustification: AugmentedError<ApiType>;
       /**
+       * Invalid message
+       **/
+      InvalidMessage: AugmentedError<ApiType>;
+      /**
        * Invalid participant public key
        **/
       InvalidParticipantPublicKey: AugmentedError<ApiType>;
+      /**
+       * Invalid public key error
+       **/
+      InvalidPublicKey: AugmentedError<ApiType>;
       /**
        * Invalid Misbehavior Role type.
        **/
@@ -475,6 +487,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Could not deserialize the round message.
        **/
       MalformedRoundMessage: AugmentedError<ApiType>;
+      /**
+       * Malformed Stark signature
+       **/
+      MalformedStarkSignature: AugmentedError<ApiType>;
       /**
        * Missing FROST commitment
        **/
@@ -1525,6 +1541,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NoUnlockChunk: AugmentedError<ApiType>;
       /**
+       * The user has active restake
+       **/
+      RestakeActive: AugmentedError<ApiType>;
+      /**
        * There are too many nominators in the system. Governance needs to adjust the staking
        * settings to keep things safe for the runtime.
        **/
@@ -1595,20 +1615,6 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
-    transactionPause: {
-      /**
-       * can not pause
-       **/
-      CannotPause: AugmentedError<ApiType>;
-      /**
-       * invalid character encoding
-       **/
-      InvalidCharacter: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
     treasury: {
       /**
        * The payment has already been attempted.
@@ -1659,6 +1665,25 @@ declare module '@polkadot/api-base/types/errors' {
        * Too many approvals in the queue.
        **/
       TooManyApprovals: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    txPause: {
+      /**
+       * The call is paused.
+       **/
+      IsPaused: AugmentedError<ApiType>;
+      /**
+       * The call is unpaused.
+       **/
+      IsUnpaused: AugmentedError<ApiType>;
+      NotFound: AugmentedError<ApiType>;
+      /**
+       * The call is whitelisted and cannot be paused.
+       **/
+      Unpausable: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
