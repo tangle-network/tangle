@@ -22,7 +22,6 @@ use crate::mainnet_fixtures::{get_initial_authorities, get_root_key};
 use hex_literal::hex;
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};
 use sp_core::H160;
-use sp_core::U256;
 use sp_runtime::{traits::AccountIdConversion, AccountId32};
 use std::{collections::BTreeMap, str::FromStr};
 use tangle_primitives::types::BlockNumber;
@@ -274,7 +273,7 @@ pub fn get_team_direct_vesting_distribution() -> Vec<(MultiAddress, u128, u64, u
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
 	let team_accounts: Vec<(MultiAddress, u128)> = get_team_vesting_accounts()
 		.into_iter()
-		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128 - 100 * UNIT)) // we reduce 100TNT from all team balance since 100TNT has been paid out as endowment for txfees
+		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
 		.collect();
 	compute_balance_distribution_with_cliff_and_vesting(team_accounts)
 }
@@ -282,7 +281,6 @@ pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u12
 pub fn get_initial_endowed_accounts(
 ) -> (Vec<(AccountId, u128)>, Vec<(H160, fp_evm::GenesisAccount)>) {
 	let mut endowed_accounts = vec![];
-	let mut endowed_evm_accounts = vec![];
 
 	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
 	let acc: AccountId = pallet_id.into_account_truncating();
@@ -313,7 +311,7 @@ pub fn get_initial_endowed_accounts(
 	endowed_accounts.push((foundation_address, balance as u128));
 
 	//println!("Endowed accounts {:?}", endowed_accounts);
-	(endowed_accounts, endowed_evm_accounts)
+	(endowed_accounts, Default::default())
 }
 
 pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
@@ -345,13 +343,7 @@ pub fn compute_balance_distribution_with_cliff_and_vesting(
 	investor_accounts
 		.into_iter()
 		.map(|(address, value)| {
-			(
-				address,
-				value,
-				ONE_YEAR_BLOCKS,
-				TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS,
-				five_percent_endowment(value),
-			)
+			(address, value, ONE_YEAR_BLOCKS, TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS, 100 * UNIT)
 		})
 		.collect()
 }
