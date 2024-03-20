@@ -1,0 +1,32 @@
+# PROMTAIL CONFIGURATION
+#
+# The below configuration outlines a simple setup for sending logs to Loki to be visualized and queryable. 
+# 
+# In order to log events with Grafana Loki, download and install both Promtail and Loki.
+#
+# - Loki is the logging engine.
+# - Promtail sends logs to Loki.
+# 
+# There are many other config options for Promtail, and you can read more about Promtail configuration 
+# at: https://grafana.com/docs/loki/latest/clients/promtail/configuration/
+#
+# For an in-depth guide on how to install Promtail please follow: https://grafana.com/docs/loki/latest/clients/promtail/installation/
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://127.0.0.1:3100/loki/api/v1/push
+
+scrape_configs:
+- job_name: system
+  static_configs:
+  - targets:
+      - 127.0.0.1
+    labels:
+      job: varlogs
+      __path__: /var/log/*log

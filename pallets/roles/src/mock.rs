@@ -371,16 +371,25 @@ impl pallet_jobs::Config for Runtime {
 }
 
 parameter_types! {
-	pub InflationRewardPerSession: Balance = 10_000;
 	pub MaxRestake: Percent = Percent::from_percent(50);
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
+}
+
+pub struct RestakerEraPayout;
+impl pallet_staking::EraPayout<Balance> for RestakerEraPayout {
+	fn era_payout(
+		_total_staked: Balance,
+		_total_issuance: Balance,
+		_era_duration_millis: u64,
+	) -> (Balance, Balance) {
+		(10_000, 0)
+	}
 }
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type JobsHandler = Jobs;
 	type MaxRolesPerAccount = ConstU32<2>;
-	type InflationRewardPerSession = InflationRewardPerSession;
 	type RoleKeyId = RoleKeyId;
 	type ValidatorRewardDistribution = Reward;
 	type ValidatorSet = Historical;
@@ -389,6 +398,7 @@ impl Config for Runtime {
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxKeyLen = MaxKeyLen;
 	type MaxValidators = ConstU32<100>;
+	type RestakerEraPayout = RestakerEraPayout;
 	type MaxRestake = MaxRestake;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
@@ -401,11 +411,12 @@ construct_runtime!(
 	pub enum Runtime
 	{
 		System: frame_system,
+		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
-		Roles: pallet_roles,
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
+		Roles: pallet_roles,
 		Jobs: pallet_jobs
 	}
 );

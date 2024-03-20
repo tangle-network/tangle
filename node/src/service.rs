@@ -54,7 +54,8 @@ pub mod tangle {
 	impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 		/// Only enable the benchmarking host functions when we actually want to benchmark.
 		#[cfg(feature = "runtime-benchmarks")]
-		type ExtendHostFunctions = HostFunctions;
+		type ExtendHostFunctions =
+			(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
 		/// Otherwise we only use the default Substrate host functions.
 		#[cfg(not(feature = "runtime-benchmarks"))]
 		type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
@@ -77,7 +78,8 @@ pub mod testnet {
 	impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 		/// Only enable the benchmarking host functions when we actually want to benchmark.
 		#[cfg(feature = "runtime-benchmarks")]
-		type ExtendHostFunctions = HostFunctions;
+		type ExtendHostFunctions =
+			(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
 		/// Otherwise we only use the default Substrate host functions.
 		#[cfg(not(feature = "runtime-benchmarks"))]
 		type ExtendHostFunctions = primitives_ext::ext::HostFunctions;

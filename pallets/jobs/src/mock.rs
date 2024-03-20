@@ -355,7 +355,6 @@ impl pallet_staking::Config for Runtime {
 }
 
 parameter_types! {
-	pub InflationRewardPerSession: Balance = 10_000;
 	pub MaxRestake : Percent = Percent::from_percent(50);
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
 }
@@ -364,7 +363,6 @@ impl pallet_roles::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type JobsHandler = Jobs;
 	type MaxRolesPerAccount = ConstU32<2>;
-	type InflationRewardPerSession = InflationRewardPerSession;
 	type RoleKeyId = RoleKeyId;
 	type ValidatorRewardDistribution = Reward;
 	type ValidatorSet = Historical;
@@ -374,6 +372,7 @@ impl pallet_roles::Config for Runtime {
 	type MaxValidators = ConstU32<100>;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type MaxRestake = MaxRestake;
+	type RestakerEraPayout = ();
 	type MaxRolesPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }

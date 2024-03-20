@@ -20,14 +20,11 @@ cargo install subxt-cli
 Run the release build of the `tangle` node, then on another terminal run:
 
 ```bash
-subxt metadata -f bytes > ./metadata/tangle-runtime.scale
+subxt metadata -f bytes > ./metadata/tangle-mainnet-runtime.scale
 ```
 
 3. Generating the subxt code from the metadata:
 
 ```bash
-subxt codegen --file metadata/tangle-runtime.scale --derive Clone --derive Eq --derive PartialEq | rustfmt --edition=2018 --emit=stdout > src/tangle_runtime.rs
+subxt codegen --file metadata/tangle-mainnet-runtime.scale --derive Clone --derive Eq --derive PartialEq | rustfmt --edition=2018 --emit=stdout > src/tangle_mainnet_runtime.rs
 ```
-
-
-

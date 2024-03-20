@@ -25,7 +25,6 @@ use frame_benchmarking::v2::*;
 use frame_support::BoundedVec;
 use frame_system::RawOrigin;
 use sp_core::sr25519;
-use sp_runtime::Perbill;
 use tangle_primitives::roles::RoleType;
 
 fn assert_last_event<T: Config>(generic_event: <T as Config>::RuntimeEvent) {
@@ -58,30 +57,8 @@ pub fn updated_profile<T: Config>() -> Profile<T> {
 	Profile::Shared(profile)
 }
 
-fn bond_amount<T: Config>() -> BalanceOf<T> {
-	T::Currency::minimum_balance().saturating_mul(10_000u32.into())
-}
-
-fn create_validator_account<T: Config>(seed: &'static str) -> T::AccountId {
-	let stash: T::AccountId = account(seed, 0, 0);
-	let reward_destination = pallet_staking::RewardDestination::Staked;
-	let amount = bond_amount::<T>();
-	// add twice as much balance to prevent the account from being killed.
-	let free_amount = amount.saturating_mul(2u32.into());
-	T::Currency::make_free_balance_be(&stash, free_amount);
-	pallet_staking::Pallet::<T>::bond(
-		RawOrigin::Signed(stash.clone()).into(),
-		amount,
-		reward_destination.clone(),
-	)
-	.unwrap();
-
-	let validator_prefs = pallet_staking::ValidatorPrefs {
-		commission: Perbill::from_percent(50),
-		..Default::default()
-	};
-	pallet_staking::Pallet::<T>::validate(RawOrigin::Signed(stash.clone()).into(), validator_prefs)
-		.unwrap();
+fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
+	let stash: T::AccountId = T::AccountId::decode(&mut &[id; 32][..]).unwrap();
 	stash
 }
 
@@ -97,10 +74,10 @@ mod benchmarks {
 	fn create_profile() {
 		let shared_profile = shared_profile::<T>();
 
-		let caller: T::AccountId = create_validator_account::<T>("Alice");
+		let caller: T::AccountId = mock_account_id::<T>(1u8);
 
 		#[extrinsic_call]
-		_(RawOrigin::Signed(caller.clone().into()), shared_profile.clone());
+		_(RawOrigin::Signed(caller.clone().into()), shared_profile.clone(), None);
 
 		let ledger = Roles::<T>::ledger(caller).unwrap();
 		assert!(ledger.profile == shared_profile);
@@ -109,9 +86,11 @@ mod benchmarks {
 	// Update profile.
 	#[benchmark]
 	fn update_profile() {
-		let caller: T::AccountId = create_validator_account::<T>("Alice");
+		let caller: T::AccountId = mock_account_id::<T>(1u8);
 		let shared_profile = shared_profile::<T>();
-		let ledger = RestakingLedger::<T>::new(caller.clone(), shared_profile.clone(), vec![]);
+		let ledger =
+			RestakingLedger::<T>::try_new(caller.clone(), shared_profile.clone(), vec![], None)
+				.unwrap();
 		Ledger::<T>::insert(caller.clone(), ledger);
 		// Updating shared stake from 3000 to 5000 tokens
 		let updated_profile = updated_profile::<T>();
@@ -126,9 +105,11 @@ mod benchmarks {
 	// Delete profile
 	#[benchmark]
 	fn delete_profile() {
-		let caller: T::AccountId = create_validator_account::<T>("Alice");
+		let caller: T::AccountId = mock_account_id::<T>(1u8);
 		let shared_profile = shared_profile::<T>();
-		let ledger = RestakingLedger::<T>::new(caller.clone(), shared_profile.clone(), vec![]);
+		let ledger =
+			RestakingLedger::<T>::try_new(caller.clone(), shared_profile.clone(), vec![], None)
+				.unwrap();
 		Ledger::<T>::insert(caller.clone(), ledger);
 
 		#[extrinsic_call]
@@ -141,7 +122,7 @@ mod benchmarks {
 
 	#[benchmark]
 	fn chill() {
-		let caller: T::AccountId = create_validator_account::<T>("Alice");
+		let caller: T::AccountId = mock_account_id::<T>(1u8);
 
 		#[extrinsic_call]
 		_(RawOrigin::Signed(caller.clone()));
@@ -149,7 +130,7 @@ mod benchmarks {
 
 	#[benchmark]
 	fn unbond_funds() {
-		let caller: T::AccountId = create_validator_account::<T>("Alice");
+		let caller: T::AccountId = mock_account_id::<T>(1u8);
 		let amount: T::CurrencyBalance = 2000_u64.into();
 
 		#[extrinsic_call]
@@ -158,12 +139,21 @@ mod benchmarks {
 
 	#[benchmark]
 	fn withdraw_unbonded() {
-		let caller: T::AccountId = create_validator_account::<T>("Alice");
+		let caller: T::AccountId = mock_account_id::<T>(1u8);
+		let shared_profile = shared_profile::<T>();
+		let ledger =
+			RestakingLedger::<T>::try_new(caller.clone(), shared_profile.clone(), vec![], None)
+				.unwrap();
+		Ledger::<T>::insert(caller.clone(), ledger);
 
 		#[extrinsic_call]
 		_(RawOrigin::Signed(caller.clone()));
 	}
 
 	// Define the module and associated types for the benchmarks
-	impl_benchmark_test_suite!(Roles, crate::mock::new_test_ext(vec![]), crate::mock::Runtime,);
+	impl_benchmark_test_suite!(
+		Roles,
+		crate::mock::new_test_ext(vec![1, 2, 3, 4]),
+		crate::mock::Runtime,
+	);
 }
