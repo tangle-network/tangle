@@ -305,7 +305,7 @@ impl From<Error> for i32 {
 
 /// Converts a runtime trap into an RPC error.
 fn runtime_error_into_rpc_err(err: impl std::fmt::Debug) -> ErrorObjectOwned {
-	ErrorObject::owned(RUNTIME_ERROR, "Runtime error", Some(format!("{:?}", err))).into()
+	ErrorObject::owned(RUNTIME_ERROR, "Runtime error", Some(format!("{:?}", err)))
 }
 
 const RUNTIME_ERROR: i32 = 1;
