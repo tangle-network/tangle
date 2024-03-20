@@ -240,16 +240,14 @@ fn mainnet_genesis(
 		system: SystemConfig { ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },
 		balances: BalancesConfig {
-			balances: genesis_non_airdrop
-				.iter()
-				.map(|(x, y, _, _, _)| (x.clone().to_account_id_32(), *y))
-				.chain(endowed_accounts)
-				.collect(),
+			balances: endowed_accounts.iter().cloned().collect(),
 		},
 		vesting: VestingConfig {
 			vesting: genesis_non_airdrop
 				.iter()
-				.map(|(x, _, a, b, c)| (x.clone().to_account_id_32(), *a, *b, *c))
+				.map(|(address, _value, begin, end, liquid)| {
+					(address.clone().to_account_id_32(), *begin, *end, *liquid)
+				})
 				.collect(),
 		},
 		indices: Default::default(),

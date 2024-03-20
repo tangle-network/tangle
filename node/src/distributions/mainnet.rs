@@ -26,7 +26,7 @@ use sp_core::U256;
 use sp_runtime::{traits::AccountIdConversion, AccountId32};
 use std::{collections::BTreeMap, str::FromStr};
 use tangle_primitives::types::BlockNumber;
-use tangle_runtime::{AccountId, Balance, ExistentialDeposit, Perbill, UNIT};
+use tangle_runtime::{AccountId, Balance, Perbill, UNIT};
 
 /// The contents of the file should be a map of accounts to balances.
 fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f64> {
@@ -167,7 +167,7 @@ fn five_percent_endowment(endowment: u128) -> u128 {
 }
 
 fn vesting_per_block(endowment: u128, blocks: u64) -> u128 {
-	print!("Endowment {:?} Blocks {:?} ", endowment, blocks);
+	//print!("Endowment {:?} Blocks {:?} ", endowment, blocks);
 	endowment / blocks as u128
 }
 
@@ -177,10 +177,6 @@ fn get_foundation_distribution_share() -> Perbill {
 
 fn get_treasury_distribution_share() -> Perbill {
 	Perbill::from_float(0.3636_f64)
-}
-
-fn get_initial_liquidity_share() -> Perbill {
-	Perbill::from_rational(5_u32, 100_u32)
 }
 
 pub fn get_edgeware_genesis_balance_distribution() -> DistributionResult {
@@ -300,37 +296,30 @@ pub fn get_initial_endowed_accounts(
 		endowed_accounts.push((acco.clone(), 100 * UNIT));
 	}
 
-	// all team and investor accounts get 100 TNT
-	for (inv_account, _) in get_investor_balance_distribution_list() {
-		match inv_account {
-			MultiAddress::Native(account) => {
-				endowed_accounts.push((account, 100 * UNIT));
-			},
-			MultiAddress::EVM(account) => endowed_evm_accounts.push((
-				H160::from_slice(&account.0),
-				fp_evm::GenesisAccount {
-					nonce: U256::from(1),
-					balance: U256::from(100 * UNIT),
-					storage: Default::default(),
-					code: Default::default(),
-				},
-			)),
-		}
+	// all team and investor accounts get entire balance
+	// this is a requirement for vesting pallet to lockup the balances later
+	// see : https://github.com/paritytech/polkadot-sdk/blame/7241a8db7b3496816503c6058dae67f66c666b00/substrate/frame/vesting/src/lib.rs#L241
+	for (inv_account, amount) in get_investor_balance_distribution_list() {
+		endowed_accounts.push((inv_account.clone().to_account_id_32(), amount as u128))
 	}
 
-	for (team_account, _) in get_team_vesting_accounts() {
-		endowed_accounts.push((team_account, 100 * UNIT));
+	for (team_account, amount) in get_team_vesting_accounts() {
+		endowed_accounts.push((team_account, amount as u128));
 	}
 
+	let foundation_address: AccountId =
+		hex!["0cdd6ca9c578fabcc65373004944a401866d5c61568ffb22ecd8ef528599f95b"].into();
+	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY);
+	endowed_accounts.push((foundation_address, balance as u128));
+
+	//println!("Endowed accounts {:?}", endowed_accounts);
 	(endowed_accounts, endowed_evm_accounts)
 }
 
 pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
 	let foundation_address: AccountId =
 		hex!["0cdd6ca9c578fabcc65373004944a401866d5c61568ffb22ecd8ef528599f95b"].into();
-	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY)
-		- get_initial_liquidity_share()
-			.mul_floor(get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY));
+	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY);
 	let foundation_account = (MultiAddress::Native(foundation_address), balance as u128);
 	compute_balance_distribution_with_cliff_and_vesting(vec![foundation_account])
 }
@@ -373,13 +362,7 @@ pub fn compute_balance_distribution_with_cliff_and_vesting_no_endowment(
 	investor_accounts
 		.into_iter()
 		.map(|(address, value)| {
-			(
-				address,
-				value,
-				ONE_YEAR_BLOCKS,
-				TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS,
-				Default::default(),
-			)
+			(address, value, ONE_YEAR_BLOCKS, TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS, 100 * UNIT)
 		})
 		.collect()
 }
@@ -395,7 +378,7 @@ pub fn compute_balance_distribution_with_cliff_and_no_endowment(
 				value,
 				ONE_YEAR_BLOCKS,
 				ONE_YEAR_BLOCKS, // immediately vested
-				Default::default(),
+				100 * UNIT,
 			)
 		})
 		.collect()
@@ -415,12 +398,12 @@ pub fn get_distribution_for(
 		let cliff_fraction = vesting_cliff as f64 / total_vesting_schedule as f64;
 		let remaining_fraction = 1.0 - cliff_fraction;
 
-		if claimable_amount <= ExistentialDeposit::get() {
-			log::warn!(
-				"One percent endowment for account {:?} is not above the existential deposit",
-				address.clone()
-			);
-		}
+		// if claimable_amount <= ExistentialDeposit::get() {
+		// 	log::warn!(
+		// 		"One percent endowment for account {:?} is not above the existential deposit",
+		// 		address.clone()
+		// 	);
+		// }
 
 		claims.push((address.clone(), claimable_amount, statement_kind));
 		let amount_on_cliff = (vested_amount as f64 * cliff_fraction) as u128;
