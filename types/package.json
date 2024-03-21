@@ -3,6 +3,8 @@
   "version": "0.5.4",
   "description": "Polkadot.js type definitions required for interacting with Webb's tangle network",
   "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "typings": "./build/index.d.ts",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
   "type": "commonjs",
