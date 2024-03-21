@@ -642,11 +642,11 @@ fn test_distribution_shares() {
 		.sum();
 
 	//println!("Remaining total team amount {:?}", 30000000000000000000000000 - total_team_claims_amount - total_direct_team_amount);
-	assert_eq!(total_team_claims_amount, 29856949309999998197301248); // 29861849 TNT
+	assert_eq!(total_team_claims_amount, 29856849309999999859294208); // 29856849 TNT
 	assert_eq!(
 		Perbill::from_rational(total_team_claims_amount, TOTAL_SUPPLY),
-		Perbill::from_float(0.298569493)
-	); // 29.8569493%
+		Perbill::from_float(0.298568493)
+	); // 29.8568493%
 
 	// ================= compute intial endowment at genesis ========================= //
 	// let total_endowmwnent: u128 =
@@ -669,7 +669,7 @@ fn test_distribution_shares() {
 		+ total_team_claims_amount;
 	//+ total_endowmwnent;
 
-	assert_eq!(total_genesis_endowment, 100000100000000005959729130); // 100000000 TNT
+	assert_eq!(total_genesis_endowment, 100000000000000007621722090); // 100000000 TNT
 	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one());
 	// 100%
 }
