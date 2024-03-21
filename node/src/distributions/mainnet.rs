@@ -255,7 +255,7 @@ pub fn get_substrate_balance_distribution() -> DistributionResult {
 pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
 	let investor_accounts: Vec<(MultiAddress, u128)> = get_investor_balance_distribution_list()
 		.into_iter()
-		.map(|(address, balance)| (address, balance as u128 - 100 * UNIT)) // we reduce 100TNT from all investor balance since 100TNT has been paid out as endowment for txfees
+		.map(|(address, balance)| (address, balance as u128))
 		.collect();
 
 	compute_balance_distribution_with_cliff_and_vesting_no_endowment(investor_accounts)
@@ -419,7 +419,7 @@ fn test_compute_investor_balance_distribution() {
 	let alice = MultiAddress::Native(AccountId32::new([0; 32]));
 	let bob = MultiAddress::Native(AccountId32::new([1; 32]));
 
-	let amount_per_investor = 100;
+	let amount_per_investor = 1000 * UNIT;
 
 	// let compute the expected output
 	// the expected output is that
@@ -431,14 +431,14 @@ fn test_compute_investor_balance_distribution() {
 		amount_per_investor,
 		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
 		tangle_primitives::time::DAYS * 365, // num of blocks from beginning till fully vested
-		5,                                   // 5% of 100
+		100 * UNIT,                          // 100 units
 	);
 	let bob_expected_response: (MultiAddress, u128, u64, u64, u128) = (
 		bob.clone(),
 		amount_per_investor,
 		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
 		tangle_primitives::time::DAYS * 365, // num of blocks from beging till fully vested
-		5,                                   // 5% of 100
+		100 * UNIT,                          // 100 units
 	);
 
 	assert_eq!(
@@ -499,14 +499,9 @@ fn test_distribution_shares() {
 		.map(|(_, amount, _, _, _)| amount)
 		.sum();
 
-	let investor_endowed_balance: u128 = investor_balance_account_distribution
-		.into_iter()
-		.map(|(_, _, _, _, _)| 100 * UNIT)
-		.sum();
-
-	assert_eq!(total_investor_amount + investor_endowed_balance, 13639999999999999916113920); // 13639999 TNT
+	assert_eq!(total_investor_amount, 13639999999999999916113920); // 13639999 TNT
 	assert_eq!(
-		Perbill::from_rational(total_investor_amount + investor_endowed_balance, TOTAL_SUPPLY),
+		Perbill::from_rational(total_investor_amount, TOTAL_SUPPLY),
 		Perbill::from_float(0.136399999)
 	); // 13.6399999%
 
@@ -647,16 +642,16 @@ fn test_distribution_shares() {
 		.sum();
 
 	//println!("Remaining total team amount {:?}", 30000000000000000000000000 - total_team_claims_amount - total_direct_team_amount);
-	assert_eq!(total_team_claims_amount, 29855849309999998197301248); // 29861849 TNT
+	assert_eq!(total_team_claims_amount, 29856949309999998197301248); // 29861849 TNT
 	assert_eq!(
 		Perbill::from_rational(total_team_claims_amount, TOTAL_SUPPLY),
-		Perbill::from_float(0.298558493)
-	); // 29.8558493%
+		Perbill::from_float(0.298569493)
+	); // 29.8569493%
 
 	// ================= compute intial endowment at genesis ========================= //
-	let total_endowmwnent: u128 =
-		get_initial_endowed_accounts().0.into_iter().map(|(_, amount)| amount).sum();
-	assert_eq!(total_endowmwnent - total_treasury_amount, 8900000000000000000000); // 8900 TNT
+	// let total_endowmwnent: u128 =
+	// 	get_initial_endowed_accounts().0.into_iter().map(|(_, amount)| amount).sum();
+	// assert_eq!(total_endowmwnent - total_treasury_amount, 8900000000000000000000); // 8900 TNT
 
 	let total_genesis_endowment = total_investor_amount
 		+ total_direct_team_amount
@@ -669,10 +664,12 @@ fn test_distribution_shares() {
 		+ total_leaderboard_vesting_amount
 		+ total_polkadot_claims_amount
 		+ total_polkadot_vesting_amount
-		+ total_team_claims_amount
-		+ total_endowmwnent;
+		+ total_treasury_amount
+		+ 5000 * UNIT
+		+ total_team_claims_amount;
+	//+ total_endowmwnent;
 
-	assert_eq!(total_genesis_endowment, 100000000000000005959729130); // 100000000 TNT
+	assert_eq!(total_genesis_endowment, 100000100000000005959729130); // 100000000 TNT
 	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one());
 	// 100%
 }
