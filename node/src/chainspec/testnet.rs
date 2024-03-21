@@ -98,7 +98,7 @@ fn generate_session_keys(
 	tangle_testnet_runtime::opaque::SessionKeys { babe, grandpa, im_online, role }
 }
 
-pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
+pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
@@ -137,6 +137,63 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					(authority_keys_for_dev(1).0, ENDOWMENT),
 					(authority_keys_for_dev(2).0, ENDOWMENT),
 					(authority_keys_for_dev(3).0, ENDOWMENT),
+				],
+				chain_id,
+				Default::default(),
+				Default::default(),
+				Default::default(),
+				true,
+			)
+		},
+		// Bootnodes
+		vec![],
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// Fork id
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		None,
+		wasm_binary,
+	))
+}
+
+pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "tTNT".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42.into());
+	#[allow(deprecated)]
+	Ok(ChainSpec::from_genesis(
+		// Name
+		"Local Testnet",
+		// ID
+		"local_testnet",
+		ChainType::Local,
+		move || {
+			testnet_genesis(
+				// Initial PoA authorities
+				vec![
+					authority_keys_from_seed("Alice"),
+					authority_keys_from_seed("Bob"),
+					authority_keys_from_seed("Charlie"),
+					authority_keys_from_seed("Dave"),
+					authority_keys_from_seed("Eve"),
+				],
+				vec![],
+				// Sudo account
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				// Pre-funded accounts
+				vec![
+					(get_account_id_from_seed::<sr25519::Public>("Alice"), ENDOWMENT),
+					(get_account_id_from_seed::<sr25519::Public>("Bob"), ENDOWMENT),
+					(get_account_id_from_seed::<sr25519::Public>("Charlie"), ENDOWMENT),
+					(get_account_id_from_seed::<sr25519::Public>("Dave"), ENDOWMENT),
+					(get_account_id_from_seed::<sr25519::Public>("Eve"), ENDOWMENT),
 				],
 				chain_id,
 				Default::default(),
