@@ -157,14 +157,16 @@ impl<T: Config> Pallet<T> {
 				&data.data,
 				&data.signature,
 				&data.verifying_key,
+				&data.derivation_path,
 			),
 			DigitalSignatureScheme::EcdsaSecp256r1 => verify_secp256r1_ecdsa_signature::<T>(
 				&data.data,
 				&data.signature,
 				&data.verifying_key,
+				&data.derivation_path,
 			),
 			DigitalSignatureScheme::EcdsaStark => {
-				verify_stark_ecdsa_signature::<T>(&data.data, &data.signature, &data.verifying_key)
+				verify_stark_ecdsa_signature::<T>(&data.data, &data.signature, &data.verifying_key, &data.derivation_path)
 			},
 			DigitalSignatureScheme::SchnorrSr25519 => verify_schnorr_sr25519_signature::<T>(
 				&data.data,

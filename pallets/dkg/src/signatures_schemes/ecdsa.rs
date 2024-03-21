@@ -19,6 +19,7 @@ use frame_support::{ensure, pallet_prelude::DispatchResult};
 use generic_ec::{coords::HasAffineX, curves::Stark, Point, Scalar};
 use sp_core::ecdsa;
 use sp_io::{hashing::keccak_256, EcdsaVerifyError};
+use sp_runtime::BoundedVec;
 use sp_std::vec::Vec;
 use tangle_primitives::jobs::DKGTSSKeySubmissionResult;
 
@@ -39,6 +40,7 @@ pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
+	derivation_path: Option<BoundedVec<u8, T::MaxAdditionalParamsLen>>,
 ) -> DispatchResult {
 	let public_key =
 		secp256k1::PublicKey::from_slice(expected_key).map_err(|_| Error::<T>::InvalidPublicKey)?;
@@ -65,6 +67,7 @@ pub fn verify_secp256r1_ecdsa_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
+	derivation_path: Option<BoundedVec<u8, T::MaxAdditionalParamsLen>>,
 ) -> DispatchResult {
 	use p256::elliptic_curve::group::GroupEncoding;
 	let maybe_affine_point = p256::AffinePoint::from_bytes(expected_key.into());
@@ -98,6 +101,7 @@ pub fn verify_stark_ecdsa_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
+	derivation_path: Option<BoundedVec<u8, T::MaxAdditionalParamsLen>>,
 ) -> DispatchResult {
 	// The message should be pre-hashed uisng a 32-byte digest
 	if msg.len() != 32 {
