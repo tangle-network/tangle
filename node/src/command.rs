@@ -76,6 +76,10 @@ impl SubstrateCli for Cli {
 			"" | "dev" | "local" => Box::new(chainspec::testnet::local_testnet_config(
 				tangle_primitives::TESTNET_CHAIN_ID,
 			)?),
+			// generates the spec for benchmarking.
+			"benchmark" => Box::new(chainspec::testnet::local_benchmarking_config(
+				tangle_primitives::TESTNET_CHAIN_ID,
+			)?),
 			// generates the spec for testnet
 			"testnet" => Box::new(chainspec::testnet::tangle_testnet_config(
 				tangle_primitives::TESTNET_CHAIN_ID,
