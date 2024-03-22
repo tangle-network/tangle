@@ -53,6 +53,7 @@ pub enum ThresholdSignatureRoleType {
 	ZcashFrostEd25519,
 	ZcashFrostEd448,
 	GennaroDKGBls381,
+	Wsts,
 }
 
 /// Associated metadata needed for a DKG/TSS role

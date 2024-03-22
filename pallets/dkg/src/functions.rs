@@ -30,6 +30,7 @@ use scale_info::prelude::vec::Vec;
 use sp_core::Get;
 use sp_runtime::BoundedVec;
 use tangle_primitives::jobs::*;
+use crate::signatures_schemes::wsts::verify_wsts_signature;
 
 impl<T: Config> Pallet<T> {
 	/// Calculates the fee for a given job submission based on the provided fee information.
@@ -171,6 +172,9 @@ impl<T: Config> Pallet<T> {
 				&data.signature,
 				&data.verifying_key,
 			),
+            DigitalSignatureScheme::Wsts => {
+                verify_wsts_signature::<T>(data.data.to_vec() data.signature.to_vec(), data.verifying_key.to_vec())
+            },
 			DigitalSignatureScheme::Bls381 => {
 				verify_bls12_381_signature::<T>(&data.data, &data.signature, &data.verifying_key)
 			},

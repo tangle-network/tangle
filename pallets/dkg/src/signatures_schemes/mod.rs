@@ -2,6 +2,7 @@ pub mod bls12_381;
 pub mod ecdsa;
 pub mod schnorr_frost;
 pub mod schnorr_sr25519;
+pub mod wsts;
 
 /// Utility function to create slice of fixed size
 pub fn to_slice_33(val: &[u8]) -> Option<[u8; 33]> {
