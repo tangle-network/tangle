@@ -98,7 +98,7 @@ impl SubstrateCli for Cli {
 				&include_bytes!("../../chainspecs/mainnet/tangle-mainnet.json")[..],
 			)?),
 
-			path => Box::new(chainspec::testnet::ChainSpec::from_json_file(
+			path => Box::new(chainspec::mainnet::ChainSpec::from_json_file(
 				std::path::PathBuf::from(path),
 			)?),
 		})
