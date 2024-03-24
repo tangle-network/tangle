@@ -314,7 +314,7 @@ fn mainnet_genesis(
 			claims: genesis_airdrop.claims,
 			vesting: vesting_claims,
 			expiry: Some((
-				525_600u64,
+				5_265_000u64, // 1 year
 				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
 			)),
 		},
