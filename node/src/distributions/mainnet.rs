@@ -599,8 +599,8 @@ fn test_distribution_shares() {
 		total_leaderboard_vesting_amount += cliff_vesting + post_cliff_vesting;
 	}
 
-	assert_eq!(total_leaderboard_claims_amount, 100000000000000000002814); // 100000 TNT
-	assert_eq!(total_leaderboard_vesting_amount, 1900000000000000057155584); // 1900000 TNT
+	assert_eq!(total_leaderboard_claims_amount, 100000000000000000003008); // 100000 TNT
+	assert_eq!(total_leaderboard_vesting_amount, 1900000000000000274989056); // 1900000 TNT
 	assert_eq!(
 		Perbill::from_rational(total_leaderboard_claims_amount, TOTAL_SUPPLY),
 		Perbill::from_float(0.001)
@@ -669,7 +669,7 @@ fn test_distribution_shares() {
 		+ total_team_claims_amount;
 	//+ total_endowmwnent;
 
-	assert_eq!(total_genesis_endowment, 100000000000000007621722090); // 100000000 TNT
+	assert_eq!(total_genesis_endowment, 100000000000000007839555756); // 100000000 TNT
 	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one());
 	// 100%
 }
