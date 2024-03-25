@@ -47,7 +47,7 @@ benchmarks! {
 			threshold: 3,
 			participants: vec![].try_into().unwrap(),
 			key: vec![].try_into().unwrap(),
-			signature_scheme: DigitalSignatureScheme::Ecdsa
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 		});
 	}: _(RawOrigin::Signed(caller.clone()), job_key.clone(), job_id.clone(), result)
 
@@ -96,7 +96,7 @@ benchmarks! {
 			threshold: 3,
 			participants: vec![].try_into().unwrap(),
 			key: vec![].try_into().unwrap(),
-			signature_scheme: DigitalSignatureScheme::Ecdsa
+			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 		});
 		let _ = Pallet::<T>::submit_job_result(RawOrigin::Signed(caller.clone()).into(), job_key.clone(), job_id.clone(), result);
 	}: _(RawOrigin::Signed(caller.clone()), RoleType::Tss(Default::default()), job_id.clone(), 10u32.into())

@@ -162,7 +162,13 @@ impl pallet_timestamp::Config for Runtime {
 pub struct MockDKGPallet;
 impl MockDKGPallet {
 	fn job_to_fee(
-		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Balance {
 		if job.job_type.is_phase_one() {
 			job.job_type.clone().get_participants().unwrap().len().try_into().unwrap()
@@ -175,7 +181,13 @@ impl MockDKGPallet {
 pub struct MockZkSaasPallet;
 impl MockZkSaasPallet {
 	fn job_to_fee(
-		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Balance {
 		if job.job_type.is_phase_one() {
 			10
@@ -187,11 +199,19 @@ impl MockZkSaasPallet {
 
 pub struct MockJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for MockJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>
+	for MockJobToFeeHandler
+{
 	type Balance = Balance;
 
 	fn job_to_fee(
-		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Balance {
 		match job.job_type {
 			JobType::DKGTSSPhaseOne(_)
@@ -213,7 +233,18 @@ pub struct MockRolesHandler;
 
 impl RolesHandler<AccountId> for MockRolesHandler {
 	type Balance = Balance;
-	fn is_restaker(address: AccountId, _role_type: RoleType) -> bool {
+	fn is_restaker_with_role(address: AccountId, _role_type: RoleType) -> bool {
+		let validators = [
+			AccountId::from_u64(1u64),
+			AccountId::from_u64(2u64),
+			AccountId::from_u64(3u64),
+			AccountId::from_u64(4u64),
+			AccountId::from_u64(5u64),
+		];
+		validators.contains(&address)
+	}
+
+	fn is_restaker(address: AccountId) -> bool {
 		let validators = [
 			AccountId::from_u64(1u64),
 			AccountId::from_u64(2u64),
@@ -254,6 +285,7 @@ impl
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	> for MockMPCHandler
 {
 	fn verify(
@@ -265,6 +297,7 @@ impl
 			MaxDataLen,
 			MaxSignatureLen,
 			MaxProofLen,
+			MaxAdditionalParamsLen,
 		>,
 	) -> DispatchResult {
 		Ok(())
@@ -307,6 +340,8 @@ parameter_types! {
 	pub const MaxProofLen: u32 = 256;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxActiveJobsPerValidator: u32 = 100;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxAdditionalParamsLen: u32 = 256;
 }
 
 impl pallet_jobs::Config for Runtime {
@@ -325,6 +360,7 @@ impl pallet_jobs::Config for Runtime {
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
 }
 

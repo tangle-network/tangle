@@ -38,6 +38,7 @@ pub struct JobSubmission<
 	BlockNumber,
 	MaxParticipants: Get<u32> + Clone,
 	MaxSubmissionLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
 > {
 	/// Represents the maximum allowed submission time for a job result.
 	/// Once this time has passed, the result cannot be submitted.
@@ -48,7 +49,7 @@ pub struct JobSubmission<
 	pub ttl: BlockNumber,
 
 	/// The type of the job submission.
-	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
+	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>,
 
 	/// The fallback option selected by user
 	pub fallback: FallbackOptions,
@@ -62,6 +63,7 @@ pub struct JobInfo<
 	Balance,
 	MaxParticipants: Get<u32> + Clone,
 	MaxSubmissionLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
 > {
 	/// The caller that requested the job
 	pub owner: AccountId,
@@ -75,7 +77,7 @@ pub struct JobInfo<
 	pub ttl: BlockNumber,
 
 	/// The type of the job submission.
-	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
+	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>,
 
 	/// The fee taken for the job
 	pub fee: Balance,
@@ -94,25 +96,39 @@ pub struct JobWithResult<
 	MaxDataLen: Get<u32>,
 	MaxSignatureLen: Get<u32>,
 	MaxProofLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
 > {
 	/// Current Job type
-	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
+	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>,
 	/// Phase one job type if any.
 	///
 	/// None if this job is a phase one job.
-	pub phase_one_job_type: Option<JobType<AccountId, MaxParticipants, MaxSubmissionLen>>,
+	pub phase_one_job_type:
+		Option<JobType<AccountId, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>>,
 	/// Current job result
-	pub result: JobResult<MaxParticipants, MaxKeyLen, MaxSignatureLen, MaxDataLen, MaxProofLen>,
+	pub result: JobResult<
+		MaxParticipants,
+		MaxKeyLen,
+		MaxSignatureLen,
+		MaxDataLen,
+		MaxProofLen,
+		MaxAdditionalParamsLen,
+	>,
 }
 
 /// Enum representing different types of jobs.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum JobType<AccountId, MaxParticipants: Get<u32> + Clone, MaxSubmissionLen: Get<u32>> {
+pub enum JobType<
+	AccountId,
+	MaxParticipants: Get<u32> + Clone,
+	MaxSubmissionLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
+> {
 	/// Distributed Key Generation (DKG) job type.
 	DKGTSSPhaseOne(DKGTSSPhaseOneJobType<AccountId, MaxParticipants>),
 	/// DKG Signature job type.
-	DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType<MaxSubmissionLen>),
+	DKGTSSPhaseTwo(DKGTSSPhaseTwoJobType<MaxSubmissionLen, MaxAdditionalParamsLen>),
 	/// DKG Key Refresh job type.
 	DKGTSSPhaseThree(DKGTSSPhaseThreeJobType),
 	/// DKG Key Rotation job type.
@@ -123,8 +139,12 @@ pub enum JobType<AccountId, MaxParticipants: Get<u32> + Clone, MaxSubmissionLen:
 	ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType<MaxSubmissionLen>),
 }
 
-impl<AccountId, MaxParticipants: Get<u32> + Clone, MaxSubmissionLen: Get<u32>>
-	JobType<AccountId, MaxParticipants, MaxSubmissionLen>
+impl<
+		AccountId,
+		MaxParticipants: Get<u32> + Clone,
+		MaxSubmissionLen: Get<u32>,
+		MaxAdditionalParamsLen: Get<u32>,
+	> JobType<AccountId, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>
 {
 	/// Checks if the job type is a phase one job.
 	pub fn is_phase_one(&self) -> bool {
@@ -246,18 +266,26 @@ pub struct PhaseResult<
 	MaxSignatureLen: Get<u32>,
 	MaxSubmissionLen: Get<u32>,
 	MaxProofLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
 > {
 	/// The owner's account ID.
 	pub owner: AccountId,
 	/// The type of the job submission.
-	pub result: JobResult<MaxParticipants, MaxKeyLen, MaxSignatureLen, MaxDataLen, MaxProofLen>,
+	pub result: JobResult<
+		MaxParticipants,
+		MaxKeyLen,
+		MaxSignatureLen,
+		MaxDataLen,
+		MaxProofLen,
+		MaxAdditionalParamsLen,
+	>,
 	/// The time-to-live (TTL) for the job, which determines the maximum allowed time for this job
 	/// to be available. After the TTL expires, the job can no longer be used.
 	pub ttl: BlockNumber,
 	/// permitted caller to use this result
 	pub permitted_caller: Option<AccountId>,
 	/// The type of the job submission.
-	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
+	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>,
 }
 
 impl<
@@ -269,6 +297,7 @@ impl<
 		MaxSignatureLen: Get<u32>,
 		MaxSubmissionLen: Get<u32>,
 		MaxProofLen: Get<u32>,
+		MaxAdditionalParamsLen: Get<u32>,
 	>
 	PhaseResult<
 		AccountId,
@@ -279,6 +308,7 @@ impl<
 		MaxSignatureLen,
 		MaxSubmissionLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	> where
 	AccountId: Clone,
 {
@@ -315,12 +345,13 @@ pub struct RpcResponseJobsData<
 	BlockNumber,
 	MaxParticipants: Get<u32> + Clone,
 	MaxSubmissionLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
 > {
 	/// The job id of the job
 	pub job_id: JobId,
 
 	/// The type of the job submission.
-	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen>,
+	pub job_type: JobType<AccountId, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>,
 
 	/// Represents the maximum allowed submission time for a job result.
 	/// Once this time has passed, the result cannot be submitted.
@@ -339,11 +370,14 @@ pub enum JobResult<
 	MaxSignatureLen: Get<u32>,
 	MaxDataLen: Get<u32>,
 	MaxProofLen: Get<u32>,
+	MaxAdditionalParamsLen: Get<u32>,
 > {
 	DKGPhaseOne(DKGTSSKeySubmissionResult<MaxKeyLen, MaxParticipants, MaxSignatureLen>),
-	DKGPhaseTwo(DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen>),
+	DKGPhaseTwo(
+		DKGTSSSignatureResult<MaxDataLen, MaxKeyLen, MaxSignatureLen, MaxAdditionalParamsLen>,
+	),
 	DKGPhaseThree(DKGTSSKeyRefreshResult),
-	DKGPhaseFour(DKGTSSKeyRotationResult<MaxKeyLen, MaxSignatureLen>),
+	DKGPhaseFour(DKGTSSKeyRotationResult<MaxKeyLen, MaxSignatureLen, MaxAdditionalParamsLen>),
 	ZkSaaSPhaseOne(ZkSaaSCircuitResult<MaxParticipants>),
 	ZkSaaSPhaseTwo(ZkSaaSProofResult<MaxProofLen>),
 }

@@ -689,7 +689,7 @@ mod secp_utils {
 	}
 }
 
-#[cfg(any(test, feature = "runtime-benchmarks"))]
+#[cfg(any(test))]
 mod sr25519_utils {
 	use super::*;
 	use frame_support::assert_ok;

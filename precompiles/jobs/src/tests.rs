@@ -30,7 +30,8 @@ fn submit_dkg_phase_one_job() {
 				Address(CryptoAlith.into()),
 				Precompile1,
 				PCall::submit_dkg_phase_one_job {
-					role_type: RoleType::Tss(ThresholdSignatureRoleType::ZengoGG20Secp256k1).into(),
+					role_type: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1)
+						.into(),
 					expiry: 5,
 					ttl: 200,
 					participants: vec![],
@@ -55,6 +56,7 @@ fn submit_dkg_phase_two_job() {
 					ttl: 0,
 					phase_one_id: 1,
 					submission: vec![].into(),
+					derivation_path: vec![].into(),
 				},
 			);
 		})

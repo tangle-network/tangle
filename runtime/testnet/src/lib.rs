@@ -48,6 +48,8 @@ pub use pallet_staking::StakerStatus;
 use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
+use pallet_tx_pause::RuntimeCallNameOf;
+use parity_scale_codec::MaxEncodedLen;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
@@ -167,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 602, // v0.6.2
+	spec_version: 604, // v0.6.4
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -476,6 +478,7 @@ impl pallet_staking::Config for Runtime {
 	type TargetList = pallet_staking::UseValidatorsMap<Runtime>;
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type NextNewSession = Session;
+	type RolesHandler = Roles;
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
@@ -1011,10 +1014,26 @@ impl pallet_im_online::Config for Runtime {
 	type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
 }
 
-impl pallet_transaction_pause::Config for Runtime {
+/// Calls that cannot be paused by the tx-pause pallet.
+pub struct TxPauseWhitelistedCalls;
+/// Whitelist `Balances::transfer_keep_alive`, all others are pauseable.
+impl Contains<RuntimeCallNameOf<Runtime>> for TxPauseWhitelistedCalls {
+	fn contains(full_name: &RuntimeCallNameOf<Runtime>) -> bool {
+		matches!(
+			(full_name.0.as_slice(), full_name.1.as_slice()),
+			(b"Balances", b"transfer_keep_alive")
+		)
+	}
+}
+
+impl pallet_tx_pause::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type UpdateOrigin = EnsureRoot<AccountId>;
-	type WeightInfo = ();
+	type RuntimeCall = RuntimeCall;
+	type PauseOrigin = EnsureRoot<AccountId>;
+	type UnpauseOrigin = EnsureRoot<AccountId>;
+	type WhitelistedCalls = TxPauseWhitelistedCalls;
+	type MaxNameLen = ConstU32<256>;
+	type WeightInfo = pallet_tx_pause::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -1091,13 +1110,19 @@ impl pallet_airdrop_claims::Config for Runtime {
 
 pub struct TestnetJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>
 	for TestnetJobToFeeHandler
 {
 	type Balance = Balance;
 
 	fn job_to_fee(
-		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Balance {
 		match job.job_type {
 			JobType::DKGTSSPhaseOne(_)
@@ -1126,6 +1151,7 @@ impl
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	> for TestnetMPCHandler
 {
 	fn verify(
@@ -1137,6 +1163,7 @@ impl
 			MaxDataLen,
 			MaxSignatureLen,
 			MaxProofLen,
+			MaxAdditionalParamsLen,
 		>,
 	) -> DispatchResult {
 		match data.result {
@@ -1209,6 +1236,9 @@ parameter_types! {
 	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
 	#[derive(Serialize, Deserialize)]
 	pub const MaxRolesPerValidator: u32 = 100;
+	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
+	#[derive(Serialize, Deserialize)]
+	pub const MaxAdditionalParamsLen: u32 = 256;
 }
 
 impl pallet_jobs::Config for Runtime {
@@ -1226,6 +1256,7 @@ impl pallet_jobs::Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
@@ -1244,10 +1275,26 @@ impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
 	}
 }
 
+// ReStaking reward curve, more details at
+// https://docs.rs/pallet-staking-reward-curve/latest/pallet_staking_reward_curve/macro.build.html
+// We are aiming for a max inflation of 1%, when 25% of tokens are re-staked
+// In practical sense, our reward rate will fluctuate between 0.5%-1% since the restaked token count
+// varies
+pallet_staking_reward_curve::build! {
+	const RESTAKER_REWARD_CURVE: PiecewiseLinear<'static> = curve!(
+		min_inflation: 0_001_000, // min inflation of 0.01%
+		max_inflation: 0_020_000, // max inflation of 2% (acheived only at ideal stake)
+		ideal_stake: 0_250_000, // ideal stake (60% of total supply)
+		falloff: 0_025_000,
+		max_piece_count: 40,
+		test_precision: 0_005_000,
+	);
+}
+
 parameter_types! {
-	pub InflationRewardPerSession: Balance = 10_000;
 	pub const MaxValidators : u32 = 1000;
 	pub MaxRestake: Percent = Percent::from_percent(50);
+	pub const RestakerRewardCurve: &'static PiecewiseLinear<'static> = &RESTAKER_REWARD_CURVE;
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
 }
 
@@ -1256,7 +1303,6 @@ impl pallet_roles::Config for Runtime {
 	type JobsHandler = Jobs;
 	type RoleKeyId = RoleKeyId;
 	type MaxRolesPerAccount = ConstU32<2>;
-	type InflationRewardPerSession = InflationRewardPerSession;
 	type ValidatorSet = Historical;
 	type ReportOffences = OffenceHandler;
 	type ValidatorRewardDistribution = Reward;
@@ -1266,6 +1312,7 @@ impl pallet_roles::Config for Runtime {
 	type MaxRolesPerValidator = MaxRolesPerValidator;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type MaxKeyLen = MaxKeyLen;
+	type RestakerEraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type WeightInfo = ();
 }
 
@@ -1279,6 +1326,7 @@ impl pallet_dkg::Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
 }
 
@@ -1293,7 +1341,89 @@ impl pallet_zksaas::Config for Runtime {
 	type MaxDataLen = MaxDataLen;
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
+}
+
+parameter_types! {
+	// One storage item; key size 32, value size 8; .
+	pub const ProxyDepositBase: Balance = deposit(1, 8);
+	// Additional storage item size of 33 bytes.
+	pub const ProxyDepositFactor: Balance = deposit(0, 33);
+	pub const AnnouncementDepositBase: Balance = deposit(1, 8);
+	pub const AnnouncementDepositFactor: Balance = deposit(0, 66);
+}
+
+/// The type used to represent the kinds of proxying allowed.
+#[derive(
+	Copy,
+	Clone,
+	Eq,
+	PartialEq,
+	Ord,
+	PartialOrd,
+	Encode,
+	Decode,
+	RuntimeDebug,
+	MaxEncodedLen,
+	scale_info::TypeInfo,
+)]
+pub enum ProxyType {
+	Any,
+	NonTransfer,
+	Governance,
+	Staking,
+}
+impl Default for ProxyType {
+	fn default() -> Self {
+		Self::Any
+	}
+}
+impl InstanceFilter<RuntimeCall> for ProxyType {
+	fn filter(&self, c: &RuntimeCall) -> bool {
+		match self {
+			ProxyType::Any => true,
+			ProxyType::NonTransfer => !matches!(
+				c,
+				RuntimeCall::Balances(..)
+					| RuntimeCall::Vesting(pallet_vesting::Call::vested_transfer { .. })
+			),
+			ProxyType::Governance => matches!(
+				c,
+				RuntimeCall::Democracy(..)
+					| RuntimeCall::Council(..)
+					| RuntimeCall::Elections(..)
+					| RuntimeCall::Treasury(..)
+			),
+			ProxyType::Staking => {
+				matches!(c, RuntimeCall::Staking(..))
+			},
+		}
+	}
+	fn is_superset(&self, o: &Self) -> bool {
+		match (self, o) {
+			(x, y) if x == y => true,
+			(ProxyType::Any, _) => true,
+			(_, ProxyType::Any) => false,
+			(ProxyType::NonTransfer, _) => true,
+			_ => false,
+		}
+	}
+}
+
+impl pallet_proxy::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type Currency = Balances;
+	type ProxyType = ProxyType;
+	type ProxyDepositBase = ProxyDepositBase;
+	type ProxyDepositFactor = ProxyDepositFactor;
+	type MaxProxies = ConstU32<32>;
+	type WeightInfo = pallet_proxy::weights::SubstrateWeight<Runtime>;
+	type MaxPending = ConstU32<32>;
+	type CallHasher = BlakeTwo256;
+	type AnnouncementDepositBase = AnnouncementDepositBase;
+	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -1332,7 +1462,7 @@ construct_runtime!(
 		Preimage: pallet_preimage,
 		Offences: pallet_offences,
 
-		TransactionPause: pallet_transaction_pause,
+		TxPause: pallet_tx_pause,
 		ImOnline: pallet_im_online,
 		Identity: pallet_identity,
 		Utility: pallet_utility,
@@ -1350,6 +1480,7 @@ construct_runtime!(
 		Jobs: pallet_jobs,
 		Dkg: pallet_dkg,
 		ZkSaaS: pallet_zksaas,
+		Proxy: pallet_proxy,
 	}
 );
 
@@ -1489,7 +1620,6 @@ mod benches {
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
-		[pallet_dkg, Dkg]
 	);
 }
 
@@ -1544,18 +1674,18 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_jobs_rpc_runtime_api::JobsApi<Block, AccountId, MaxParticipants, MaxSubmissionLen, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxProofLen> for Runtime {
+	impl pallet_jobs_rpc_runtime_api::JobsApi<Block, AccountId, MaxParticipants, MaxSubmissionLen, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxProofLen, MaxAdditionalParamsLen> for Runtime {
 		fn query_jobs_by_validator(
 			validator: AccountId,
-		) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen>>> {
+		) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>>> {
 			Jobs::query_jobs_by_validator(validator)
 		}
 
-		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen>> {
+		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>> {
 			Jobs::query_job_by_id(role_type, job_id)
 		}
 
-		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxSubmissionLen, MaxProofLen>> {
+		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxSubmissionLen, MaxProofLen, MaxAdditionalParamsLen>> {
 			Jobs::query_job_result(role_type, job_id)
 		}
 
@@ -2055,6 +2185,9 @@ impl_runtime_apis! {
 
 			let mut list = Vec::<BenchmarkList>::new();
 			list_benchmark!(list, extra, pallet_roles, Roles);
+			list_benchmark!(list, extra, pallet_jobs, Jobs);
+			list_benchmark!(list, extra, pallet_dkg, Dkg);
+			list_benchmark!(list, extra, pallet_airdrop_claims, Claims);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -2068,7 +2201,6 @@ impl_runtime_apis! {
 			use sp_storage::TrackedStorageKey;
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use baseline::Pallet as BaselineBench;
-
 			impl frame_system_benchmarking::Config for Runtime {}
 			impl baseline::Config for Runtime {}
 
@@ -2078,6 +2210,9 @@ impl_runtime_apis! {
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
 			add_benchmark!(params, batches, pallet_roles, Roles);
+			add_benchmark!(params, batches, pallet_jobs, Jobs);
+			add_benchmark!(params, batches, pallet_dkg, Dkg);
+			add_benchmark!(params, batches, pallet_airdrop_claims, Claims);
 
 			Ok(batches)
 		}

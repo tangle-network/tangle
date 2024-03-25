@@ -103,34 +103,40 @@ fn proof_verification_works() {
 
 		// Phase1
 		let zero_knowledge_role_type = ZeroKnowledgeRoleType::ZkSaaSGroth16;
-		let phase_one = JobType::<AccountId, MaxParticipants, MaxSubmissionLen>::ZkSaaSPhaseOne(
-			ZkSaaSPhaseOneJobType {
-				role_type: zero_knowledge_role_type,
-				participants: vec![1, 2, 3, 4, 5, 6, 7, 8].try_into().unwrap(),
-				system: ZkSaaSSystem::Groth16(Groth16System {
-					circuit: HyperData::Raw(vec![].try_into().unwrap()),
-					num_inputs: num_inputs as _,
-					num_constraints: num_constraints as _,
-					proving_key: HyperData::Raw(pk_bytes.try_into().unwrap()),
-					verifying_key: vk_bytes.try_into().unwrap(),
-					wasm: HyperData::Raw(vec![].try_into().unwrap()),
-				}),
-				permitted_caller: None,
-			},
-		);
+		let phase_one = JobType::<
+			AccountId,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
+			role_type: zero_knowledge_role_type,
+			participants: vec![1, 2, 3, 4, 5, 6, 7, 8].try_into().unwrap(),
+			system: ZkSaaSSystem::Groth16(Groth16System {
+				circuit: HyperData::Raw(vec![].try_into().unwrap()),
+				num_inputs: num_inputs as _,
+				num_constraints: num_constraints as _,
+				proving_key: HyperData::Raw(pk_bytes.try_into().unwrap()),
+				verifying_key: vk_bytes.try_into().unwrap(),
+				wasm: HyperData::Raw(vec![].try_into().unwrap()),
+			}),
+			permitted_caller: None,
+		});
 
-		let phase_two = JobType::<AccountId, MaxParticipants, MaxSubmissionLen>::ZkSaaSPhaseTwo(
-			ZkSaaSPhaseTwoJobType {
-				role_type: zero_knowledge_role_type,
-				phase_one_id: 0,
-				request: ZkSaaSPhaseTwoRequest::Groth16(Groth16ProveRequest {
-					public_input: from_field_elements(&[image]).unwrap().try_into().unwrap(),
-					a_shares: Default::default(),
-					ax_shares: Default::default(),
-					qap_shares: Default::default(),
-				}),
-			},
-		);
+		let phase_two = JobType::<
+			AccountId,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>::ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType {
+			role_type: zero_knowledge_role_type,
+			phase_one_id: 0,
+			request: ZkSaaSPhaseTwoRequest::Groth16(Groth16ProveRequest {
+				public_input: from_field_elements(&[image]).unwrap().try_into().unwrap(),
+				a_shares: Default::default(),
+				ax_shares: Default::default(),
+				qap_shares: Default::default(),
+			}),
+		});
 
 		// Arkworks
 		let result = JobResult::ZkSaaSPhaseTwo(ZkSaaSProofResult::Arkworks(ArkworksProofResult {
@@ -145,6 +151,7 @@ fn proof_verification_works() {
 			MaxDataLen,
 			MaxSignatureLen,
 			MaxProofLen,
+			MaxAdditionalParamsLen,
 		> {
 			job_type: phase_two.clone(),
 			phase_one_job_type: Some(phase_one.clone()),
@@ -168,6 +175,7 @@ fn proof_verification_works() {
 			MaxDataLen,
 			MaxSignatureLen,
 			MaxProofLen,
+			MaxAdditionalParamsLen,
 		> {
 			job_type: phase_two,
 			phase_one_job_type: Some(phase_one),

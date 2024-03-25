@@ -76,7 +76,7 @@ pallet-proxy = { workspace = true }
 pallet-randomness-collective-flip = { workspace = true }
 pallet-sudo = { workspace = true }
 pallet-timestamp = { workspace = true }
-pallet-transaction-pause = { workspace = true }
+pallet-tx-pause = { workspace = true }
 pallet-transaction-payment = { workspace = true }
 pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 pallet-utility = { workspace = true }
@@ -145,6 +145,7 @@ runtime-benchmarks = [
   "pallet-vesting/runtime-benchmarks",
   "pallet-collective/runtime-benchmarks",
   "pallet-timestamp/runtime-benchmarks",
+  "pallet-tx-pause/runtime-benchmarks",
   "sp-runtime/runtime-benchmarks",
 
   # Frontier
@@ -154,6 +155,8 @@ runtime-benchmarks = [
 
   # Tangle
   "pallet-roles/runtime-benchmarks",
+  "pallet-jobs/runtime-benchmarks",
+  "pallet-airdrop-claims/runtime-benchmarks",
 ]
 
 std = [
@@ -196,7 +199,7 @@ std = [
   "pallet-timestamp/std",
   "pallet-transaction-payment/std",
   "pallet-transaction-payment-rpc-runtime-api/std",
-  "pallet-transaction-pause/std",
+  "pallet-tx-pause/std",
   "pallet-utility/std",
   "pallet-multisig/std",
   "pallet-collective/std",

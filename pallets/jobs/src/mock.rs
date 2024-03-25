@@ -92,7 +92,13 @@ impl pallet_balances::Config for Runtime {
 pub struct MockDKGPallet;
 impl MockDKGPallet {
 	fn job_to_fee(
-		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Balance {
 		if job.job_type.is_phase_one() {
 			job.job_type.clone().get_participants().unwrap().len().try_into().unwrap()
@@ -109,7 +115,13 @@ impl MockDKGPallet {
 pub struct MockZkSaasPallet;
 impl MockZkSaasPallet {
 	fn job_to_fee(
-		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Balance {
 		if job.job_type.is_phase_one() {
 			10
@@ -121,11 +133,19 @@ impl MockZkSaasPallet {
 
 pub struct MockJobToFeeHandler;
 
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen> for MockJobToFeeHandler {
+impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>
+	for MockJobToFeeHandler
+{
 	type Balance = Balance;
 
 	fn job_to_fee(
-		job: &JobSubmission<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen>,
+		job: &JobSubmission<
+			AccountId,
+			BlockNumber,
+			MaxParticipants,
+			MaxSubmissionLen,
+			MaxAdditionalParamsLen,
+		>,
 	) -> Balance {
 		match job.job_type {
 			JobType::DKGTSSPhaseOne(_)
@@ -156,6 +176,7 @@ impl
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	> for MockMPCHandler
 {
 	fn verify(
@@ -167,6 +188,7 @@ impl
 			MaxDataLen,
 			MaxSignatureLen,
 			MaxProofLen,
+			MaxAdditionalParamsLen,
 		>,
 	) -> DispatchResult {
 		Ok(())
@@ -316,6 +338,7 @@ impl pallet_staking::Config for Runtime {
 	type SessionInterface = ();
 	type EraPayout = ();
 	type NextNewSession = Session;
+	type RolesHandler = Roles;
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
 	type OffendingValidatorsThreshold = ();
@@ -332,7 +355,6 @@ impl pallet_staking::Config for Runtime {
 }
 
 parameter_types! {
-	pub InflationRewardPerSession: Balance = 10_000;
 	pub MaxRestake : Percent = Percent::from_percent(50);
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
 }
@@ -341,7 +363,6 @@ impl pallet_roles::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type JobsHandler = Jobs;
 	type MaxRolesPerAccount = ConstU32<2>;
-	type InflationRewardPerSession = InflationRewardPerSession;
 	type RoleKeyId = RoleKeyId;
 	type ValidatorRewardDistribution = Reward;
 	type ValidatorSet = Historical;
@@ -351,6 +372,7 @@ impl pallet_roles::Config for Runtime {
 	type MaxValidators = ConstU32<100>;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
 	type MaxRestake = MaxRestake;
+	type RestakerEraPayout = ();
 	type MaxRolesPerValidator = MaxActiveJobsPerValidator;
 	type WeightInfo = ();
 }
@@ -371,6 +393,8 @@ parameter_types! {
 	pub const MaxProofLen: u32 = 256;
 	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
 	pub const MaxActiveJobsPerValidator: u32 = 100;
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxAdditionalParamsLen: u32 = 256;
 }
 
 impl Config for Runtime {
@@ -389,6 +413,7 @@ impl Config for Runtime {
 	type MaxSignatureLen = MaxSignatureLen;
 	type MaxProofLen = MaxProofLen;
 	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
+	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
 	type WeightInfo = ();
 }
 

@@ -23,7 +23,7 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::{sr25519, Pair, Public, H160};
+use sp_core::{ecdsa, ed25519, sr25519, Pair, Public, H160};
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	BoundedVec,
@@ -74,6 +74,17 @@ pub fn authority_keys_from_seed(
 	)
 }
 
+/// Generate authority keys for benchmarking.
+/// This is used for the `--chain dev` command.
+pub fn authority_keys_for_dev(id: u8) -> (AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId) {
+	(
+		AccountPublic::from(sr25519::Public::from_raw([id; 32])).into_account(),
+		BabeId::from(sr25519::Public::from_raw([id; 32])),
+		GrandpaId::from(ed25519::Public::from_raw([id; 32])),
+		ImOnlineId::from(sr25519::Public::from_raw([id; 32])),
+		RoleKeyId::from(ecdsa::Public::from_raw([id; 33])),
+	)
+}
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
@@ -85,6 +96,69 @@ fn generate_session_keys(
 	role: RoleKeyId,
 ) -> tangle_testnet_runtime::opaque::SessionKeys {
 	tangle_testnet_runtime::opaque::SessionKeys { babe, grandpa, im_online, role }
+}
+
+pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "tTNT".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42.into());
+	#[allow(deprecated)]
+	Ok(ChainSpec::from_genesis(
+		// Name
+		"Local Testnet",
+		// ID
+		"local_testnet",
+		ChainType::Local,
+		move || {
+			testnet_genesis(
+				// Initial PoA authorities
+				vec![
+					authority_keys_from_seed("Alice"),
+					authority_keys_from_seed("Bob"),
+					authority_keys_from_seed("Charlie"),
+					authority_keys_from_seed("Dave"),
+					authority_keys_from_seed("Eve"),
+					authority_keys_for_dev(1),
+					authority_keys_for_dev(2),
+					authority_keys_for_dev(3),
+				],
+				vec![],
+				// Sudo account
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				// Pre-funded accounts
+				vec![
+					(get_account_id_from_seed::<sr25519::Public>("Alice"), ENDOWMENT),
+					(get_account_id_from_seed::<sr25519::Public>("Bob"), ENDOWMENT),
+					(get_account_id_from_seed::<sr25519::Public>("Charlie"), ENDOWMENT),
+					(get_account_id_from_seed::<sr25519::Public>("Dave"), ENDOWMENT),
+					(get_account_id_from_seed::<sr25519::Public>("Eve"), ENDOWMENT),
+					(authority_keys_for_dev(1).0, ENDOWMENT),
+					(authority_keys_for_dev(2).0, ENDOWMENT),
+					(authority_keys_for_dev(3).0, ENDOWMENT),
+				],
+				chain_id,
+				Default::default(),
+				Default::default(),
+				Default::default(),
+				true,
+			)
+		},
+		// Bootnodes
+		vec![],
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// Fork id
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		None,
+		wasm_binary,
+	))
 }
 
 pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -314,6 +388,8 @@ fn testnet_genesis(
 		im_online: ImOnlineConfig { keys: vec![] },
 		nomination_pools: Default::default(),
 		transaction_payment: Default::default(),
+		tx_pause: Default::default(),
+
 		// EVM compatibility
 		evm_chain_id: EVMChainIdConfig { chain_id, ..Default::default() },
 		evm: EVMConfig {

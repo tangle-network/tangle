@@ -32,9 +32,21 @@ impl<T: Config> RolesHandler<T::AccountId> for Pallet<T> {
 	///
 	/// # Returns
 	/// Returns `true` if the validator is permitted to work with this job type, otherwise `false`.
-	fn is_restaker(address: T::AccountId, role_type: RoleType) -> bool {
+	fn is_restaker_with_role(address: T::AccountId, role_type: RoleType) -> bool {
 		let assigned_roles = AccountRolesMapping::<T>::get(address);
 		assigned_roles.contains(&role_type)
+	}
+
+	/// Validates if the given address has any active role
+	///
+	/// # Parameters
+	/// - `address`: The account ID of the validator.
+	///
+	/// # Returns
+	/// Returns `true` if the validator has any active role
+	fn is_restaker(address: T::AccountId) -> bool {
+		let assigned_roles = AccountRolesMapping::<T>::get(address);
+		!assigned_roles.is_empty()
 	}
 
 	/// Report offence for the given validator.

@@ -43,8 +43,8 @@ use tangle_runtime::BlockNumber;
 use tangle_runtime::{AccountId, Balance, Hash, Index};
 #[cfg(feature = "testnet")]
 use tangle_testnet_runtime::{
-	AccountId, Balance, Hash, Index, MaxDataLen, MaxKeyLen, MaxParticipants, MaxProofLen,
-	MaxSignatureLen, MaxSubmissionLen,
+	AccountId, Balance, Hash, Index, MaxAdditionalParamsLen, MaxDataLen, MaxKeyLen,
+	MaxParticipants, MaxProofLen, MaxSignatureLen, MaxSubmissionLen,
 };
 
 pub mod eth;
@@ -128,6 +128,7 @@ where
 		MaxDataLen,
 		MaxSignatureLen,
 		MaxProofLen,
+		MaxAdditionalParamsLen,
 	>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,

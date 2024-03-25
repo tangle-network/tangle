@@ -18,13 +18,14 @@ use super::{
 	get_git_root, read_contents, read_contents_to_evm_accounts,
 	read_contents_to_substrate_accounts_list,
 };
+use crate::mainnet_fixtures::{get_initial_authorities, get_root_key};
 use hex_literal::hex;
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};
 use sp_core::H160;
 use sp_runtime::{traits::AccountIdConversion, AccountId32};
 use std::{collections::BTreeMap, str::FromStr};
 use tangle_primitives::types::BlockNumber;
-use tangle_runtime::{AccountId, Balance, ExistentialDeposit, Perbill, UNIT};
+use tangle_runtime::{AccountId, Balance, Perbill, UNIT};
 
 /// The contents of the file should be a map of accounts to balances.
 fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f64> {
@@ -117,7 +118,13 @@ fn get_investor_balance_distribution_list() -> BTreeMap<MultiAddress, f64> {
 	)
 }
 
-fn get_team_direct_vesting_accounts() -> BTreeMap<AccountId32, f64> {
+fn get_team_vesting_only_cliff_accounts() -> BTreeMap<AccountId32, f64> {
+	read_contents_to_substrate_accounts(
+		"node/src/distributions/data/webb_team_distributions_only_cliff.json",
+	)
+}
+
+fn get_team_vesting_accounts() -> BTreeMap<AccountId32, f64> {
 	read_contents_to_substrate_accounts("node/src/distributions/data/webb_team_distributions.json")
 }
 
@@ -159,12 +166,8 @@ fn five_percent_endowment(endowment: u128) -> u128 {
 }
 
 fn vesting_per_block(endowment: u128, blocks: u64) -> u128 {
-	print!("Endowment {:?} Blocks {:?} ", endowment, blocks);
+	//print!("Endowment {:?} Blocks {:?} ", endowment, blocks);
 	endowment / blocks as u128
-}
-
-fn get_team_distribution_share() -> Perbill {
-	Perbill::from_rational(30_u32, 100_u32)
 }
 
 fn get_foundation_distribution_share() -> Perbill {
@@ -173,10 +176,6 @@ fn get_foundation_distribution_share() -> Perbill {
 
 fn get_treasury_distribution_share() -> Perbill {
 	Perbill::from_float(0.3636_f64)
-}
-
-fn get_initial_liquidity_share() -> Perbill {
-	Perbill::from_rational(5_u32, 100_u32)
 }
 
 pub fn get_edgeware_genesis_balance_distribution() -> DistributionResult {
@@ -258,44 +257,67 @@ pub fn get_investor_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64,
 		.into_iter()
 		.map(|(address, balance)| (address, balance as u128))
 		.collect();
+
 	compute_balance_distribution_with_cliff_and_vesting_no_endowment(investor_accounts)
 }
 
 pub fn get_team_direct_vesting_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
-	let direct_team_accounts: Vec<(MultiAddress, u128)> = get_team_direct_vesting_accounts()
+	let direct_team_accounts: Vec<(MultiAddress, u128)> = get_team_vesting_only_cliff_accounts()
 		.into_iter()
 		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
 		.collect();
 
-	compute_balance_distribution_with_cliff_and_vesting(direct_team_accounts)
+	compute_balance_distribution_with_cliff_and_no_endowment(direct_team_accounts)
 }
 
 pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
-	let team_address: AccountId =
-		hex!["8e1c2bdddab9573d8cb094dbffba24a2b2c21b7e71e3f5b604e8607483872443"].into();
-	let balance = (get_team_distribution_share()).mul_floor(TOTAL_SUPPLY);
-
-	let direct_team_spend: u128 = get_team_direct_vesting_accounts()
-		.into_values()
-		.map(|balance| balance as u128)
-		.sum();
-	let team_final_balance = balance - direct_team_spend;
-	let team_account = (MultiAddress::Native(team_address), team_final_balance as u128);
-	compute_balance_distribution_with_cliff_and_vesting(vec![team_account])
+	let team_accounts: Vec<(MultiAddress, u128)> = get_team_vesting_accounts()
+		.into_iter()
+		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
+		.collect();
+	compute_balance_distribution_with_cliff_and_vesting(team_accounts)
 }
 
-pub fn get_treasury_balance() -> (AccountId, u128) {
+pub fn get_initial_endowed_accounts(
+) -> (Vec<(AccountId, u128)>, Vec<(H160, fp_evm::GenesisAccount)>) {
+	let mut endowed_accounts = vec![];
+
 	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
 	let acc: AccountId = pallet_id.into_account_truncating();
-	(acc, get_treasury_distribution_share() * TOTAL_SUPPLY)
+	endowed_accounts.push((acc, get_treasury_distribution_share() * TOTAL_SUPPLY));
+
+	let root_account: AccountId = get_root_key();
+	endowed_accounts.push((root_account, 5000 * UNIT)); // root key gets 5000 tokens for transactions
+
+	let initial_authorities = get_initial_authorities();
+	for (acco, _, _, _, _) in initial_authorities.iter() {
+		endowed_accounts.push((acco.clone(), 100 * UNIT));
+	}
+
+	// all team and investor accounts get entire balance
+	// this is a requirement for vesting pallet to lockup the balances later
+	// see : https://github.com/paritytech/polkadot-sdk/blame/7241a8db7b3496816503c6058dae67f66c666b00/substrate/frame/vesting/src/lib.rs#L241
+	for (inv_account, amount) in get_investor_balance_distribution_list() {
+		endowed_accounts.push((inv_account.clone().to_account_id_32(), amount as u128))
+	}
+
+	for (team_account, amount) in get_team_vesting_accounts() {
+		endowed_accounts.push((team_account, amount as u128));
+	}
+
+	let foundation_address: AccountId =
+		hex!["0cdd6ca9c578fabcc65373004944a401866d5c61568ffb22ecd8ef528599f95b"].into();
+	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY);
+	endowed_accounts.push((foundation_address, balance as u128));
+
+	//println!("Endowed accounts {:?}", endowed_accounts);
+	(endowed_accounts, Default::default())
 }
 
 pub fn get_foundation_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u128)> {
 	let foundation_address: AccountId =
 		hex!["0cdd6ca9c578fabcc65373004944a401866d5c61568ffb22ecd8ef528599f95b"].into();
-	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY)
-		- get_initial_liquidity_share()
-			.mul_floor(get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY));
+	let balance = get_foundation_distribution_share().mul_floor(TOTAL_SUPPLY);
 	let foundation_account = (MultiAddress::Native(foundation_address), balance as u128);
 	compute_balance_distribution_with_cliff_and_vesting(vec![foundation_account])
 }
@@ -321,13 +343,7 @@ pub fn compute_balance_distribution_with_cliff_and_vesting(
 	investor_accounts
 		.into_iter()
 		.map(|(address, value)| {
-			(
-				address,
-				value,
-				ONE_YEAR_BLOCKS,
-				TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS,
-				five_percent_endowment(value),
-			)
+			(address, value, ONE_YEAR_BLOCKS, TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS, 100 * UNIT)
 		})
 		.collect()
 }
@@ -338,12 +354,23 @@ pub fn compute_balance_distribution_with_cliff_and_vesting_no_endowment(
 	investor_accounts
 		.into_iter()
 		.map(|(address, value)| {
+			(address, value, ONE_YEAR_BLOCKS, TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS, 100 * UNIT)
+		})
+		.collect()
+}
+
+pub fn compute_balance_distribution_with_cliff_and_no_endowment(
+	investor_accounts: Vec<(MultiAddress, u128)>,
+) -> Vec<(MultiAddress, u128, u64, u64, u128)> {
+	investor_accounts
+		.into_iter()
+		.map(|(address, value)| {
 			(
 				address,
 				value,
 				ONE_YEAR_BLOCKS,
-				TWO_YEARS_BLOCKS - ONE_YEAR_BLOCKS,
-				Default::default(),
+				ONE_YEAR_BLOCKS, // immediately vested
+				100 * UNIT,
 			)
 		})
 		.collect()
@@ -363,12 +390,12 @@ pub fn get_distribution_for(
 		let cliff_fraction = vesting_cliff as f64 / total_vesting_schedule as f64;
 		let remaining_fraction = 1.0 - cliff_fraction;
 
-		if claimable_amount <= ExistentialDeposit::get() {
-			log::warn!(
-				"One percent endowment for account {:?} is not above the existential deposit",
-				address.clone()
-			);
-		}
+		// if claimable_amount <= ExistentialDeposit::get() {
+		// 	log::warn!(
+		// 		"One percent endowment for account {:?} is not above the existential deposit",
+		// 		address.clone()
+		// 	);
+		// }
 
 		claims.push((address.clone(), claimable_amount, statement_kind));
 		let amount_on_cliff = (vested_amount as f64 * cliff_fraction) as u128;
@@ -392,7 +419,7 @@ fn test_compute_investor_balance_distribution() {
 	let alice = MultiAddress::Native(AccountId32::new([0; 32]));
 	let bob = MultiAddress::Native(AccountId32::new([1; 32]));
 
-	let amount_per_investor = 100;
+	let amount_per_investor = 1000 * UNIT;
 
 	// let compute the expected output
 	// the expected output is that
@@ -404,14 +431,14 @@ fn test_compute_investor_balance_distribution() {
 		amount_per_investor,
 		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
 		tangle_primitives::time::DAYS * 365, // num of blocks from beginning till fully vested
-		5,                                   // 5% of 100
+		100 * UNIT,                          // 100 units
 	);
 	let bob_expected_response: (MultiAddress, u128, u64, u64, u128) = (
 		bob.clone(),
 		amount_per_investor,
 		tangle_primitives::time::DAYS * 365, // begins at one year after block 0
 		tangle_primitives::time::DAYS * 365, // num of blocks from beging till fully vested
-		5,                                   // 5% of 100
+		100 * UNIT,                          // 100 units
 	);
 
 	assert_eq!(
@@ -464,13 +491,13 @@ fn test_get_distribution_for() {
 #[test]
 fn test_distribution_shares() {
 	// ============== compute total investor amount and share of distribution ================= //
-	let investor_accounts: Vec<(MultiAddress, u128)> = get_investor_balance_distribution_list()
-		.into_iter()
-		.map(|(address, balance)| (address, balance as u128))
-		.collect();
 
-	let total_investor_amount =
-		investor_accounts.into_iter().map(|(_address, balance)| balance).sum();
+	let investor_balance_account_distribution = get_investor_balance_distribution();
+	let total_investor_amount: u128 = investor_balance_account_distribution
+		.clone()
+		.into_iter()
+		.map(|(_, amount, _, _, _)| amount)
+		.sum();
 
 	assert_eq!(total_investor_amount, 13639999999999999916113920); // 13639999 TNT
 	assert_eq!(
@@ -479,7 +506,7 @@ fn test_distribution_shares() {
 	); // 13.6399999%
 
 	// ============== compute direct vesting team accounts ================= //
-	let direct_team_accounts: Vec<(MultiAddress, u128)> = get_team_direct_vesting_accounts()
+	let direct_team_accounts: Vec<(MultiAddress, u128)> = get_team_vesting_only_cliff_accounts()
 		.into_iter()
 		.map(|(address, balance)| (MultiAddress::Native(address), balance as u128))
 		.collect();
@@ -572,8 +599,8 @@ fn test_distribution_shares() {
 		total_leaderboard_vesting_amount += cliff_vesting + post_cliff_vesting;
 	}
 
-	assert_eq!(total_leaderboard_claims_amount, 100000000000000000002814); // 100000 TNT
-	assert_eq!(total_leaderboard_vesting_amount, 1900000000000000057155584); // 1900000 TNT
+	assert_eq!(total_leaderboard_claims_amount, 100000000000000000003008); // 100000 TNT
+	assert_eq!(total_leaderboard_vesting_amount, 1900000000000000274989056); // 1900000 TNT
 	assert_eq!(
 		Perbill::from_rational(total_leaderboard_claims_amount, TOTAL_SUPPLY),
 		Perbill::from_float(0.001)
@@ -614,15 +641,20 @@ fn test_distribution_shares() {
 		.map(|(_, amount, _, _, _)| amount)
 		.sum();
 
-	assert_eq!(total_team_claims_amount, 29861849310000000006094848); // 29861849 TNT
+	//println!("Remaining total team amount {:?}", 30000000000000000000000000 - total_team_claims_amount - total_direct_team_amount);
+	assert_eq!(total_team_claims_amount, 29856849309999999859294208); // 29856849 TNT
 	assert_eq!(
 		Perbill::from_rational(total_team_claims_amount, TOTAL_SUPPLY),
-		Perbill::from_float(0.298618493)
-	); // 29.8618493%
+		Perbill::from_float(0.298568493)
+	); // 29.8568493%
+
+	// ================= compute intial endowment at genesis ========================= //
+	// let total_endowmwnent: u128 =
+	// 	get_initial_endowed_accounts().0.into_iter().map(|(_, amount)| amount).sum();
+	// assert_eq!(total_endowmwnent - total_treasury_amount, 8900000000000000000000); // 8900 TNT
 
 	let total_genesis_endowment = total_investor_amount
 		+ total_direct_team_amount
-		+ total_treasury_amount
 		+ foundation_total_amount
 		+ total_edgeware_claims_amount
 		+ total_edgeware_vesting_amount
@@ -632,9 +664,12 @@ fn test_distribution_shares() {
 		+ total_leaderboard_vesting_amount
 		+ total_polkadot_claims_amount
 		+ total_polkadot_vesting_amount
+		+ total_treasury_amount
+		+ 5000 * UNIT
 		+ total_team_claims_amount;
+	//+ total_endowmwnent;
 
-	assert_eq!(total_genesis_endowment, 100000000000000007768522730); // 100000000 TNT
+	assert_eq!(total_genesis_endowment, 100000000000000007839555756); // 100000000 TNT
 	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one());
 	// 100%
 }

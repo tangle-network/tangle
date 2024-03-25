@@ -87,6 +87,9 @@ pub mod pallet {
 		/// The maximum size of proof allowed
 		type MaxProofLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
 
+		/// The maximum size of additional parameters
+		type MaxAdditionalParamsLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
 		/// Weight info for pallet
 		type WeightInfo: WeightInfo;
 	}
@@ -220,6 +223,14 @@ pub mod pallet {
 		FrostFieldError,
 		/// FROST Group element error
 		FrostGroupError,
+		/// Field element error
+		FieldElementError,
+		/// Invalid public key error
+		InvalidPublicKey,
+		/// Invalid message
+		InvalidMessage,
+		/// Malformed Stark signature
+		MalformedStarkSignature,
 	}
 
 	#[pallet::call]

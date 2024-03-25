@@ -187,13 +187,17 @@ where
 	}
 
 	#[precompile::public("isValidator(address)")]
-	#[precompile::public("is_restaker(address)")]
+	#[precompile::public("is_restaker_with_role(address)")]
 	#[precompile::view]
-	fn is_restaker(handle: &mut impl PrecompileHandle, validator: Address) -> EvmResult<bool> {
+	fn is_restaker_with_role(
+		handle: &mut impl PrecompileHandle,
+		validator: Address,
+	) -> EvmResult<bool> {
 		let validator_account = Runtime::AddressMapping::into_account_id(validator.0);
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let is_restaker = pallet_staking::Validators::<Runtime>::contains_key(validator_account);
-		Ok(is_restaker)
+		let is_restaker_with_role =
+			pallet_staking::Validators::<Runtime>::contains_key(validator_account);
+		Ok(is_restaker_with_role)
 	}
 
 	#[precompile::public("maxNominatorCount()")]

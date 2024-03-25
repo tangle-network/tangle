@@ -80,6 +80,7 @@ pub mod module {
 			BlockNumberFor<Self>,
 			Self::MaxParticipants,
 			Self::MaxSubmissionLen,
+			Self::MaxAdditionalParamsLen,
 			Balance = BalanceOf<Self>,
 		>;
 
@@ -97,6 +98,7 @@ pub mod module {
 			Self::MaxDataLen,
 			Self::MaxSignatureLen,
 			Self::MaxProofLen,
+			Self::MaxAdditionalParamsLen,
 		>;
 
 		/// The misbehavior verifying mechanism
@@ -124,6 +126,9 @@ pub mod module {
 
 		/// The maximum active jobs per validator
 		type MaxActiveJobsPerValidator: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
+
+		/// The maximum size of additional parameters
+		type MaxAdditionalParamsLen: Get<u32> + Clone + TypeInfo + Debug + Eq + PartialEq;
 
 		/// `PalletId` for the jobs pallet.
 		#[pallet::constant]
@@ -280,7 +285,7 @@ pub mod module {
 
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_restaker(participant.clone(), role_type),
+						T::RolesHandler::is_restaker_with_role(participant.clone(), role_type),
 						Error::<T>::InvalidValidator
 					);
 
@@ -314,7 +319,7 @@ pub mod module {
 
 				for participant in participants {
 					ensure!(
-						T::RolesHandler::is_restaker(participant.clone(), role_type),
+						T::RolesHandler::is_restaker_with_role(participant.clone(), role_type),
 						Error::<T>::InvalidValidator
 					);
 

@@ -37,8 +37,13 @@ postcard = { workspace = true, default-features = false }
 sha2 = { workspace = true, default-features = false }
 digest = { workspace = true, default-features = false }
 udigest = { workspace = true, features = ["derive"] }
-generic-ec = { workspace = true, default-features = false, features = ["serde", "udigest", "curve-secp256k1"] }
+generic-ec = { workspace = true, default-features = false, features = ["serde", "udigest", "curve-secp256k1", "curve-secp256r1", "curve-stark"] }
 generic-ec-zkp = { workspace = true, default-features = false, features = ["serde", "udigest", "alloc"] }
+starknet-crypto = { workspace = true, default-features = false }
+k256 = { workspace = true, features = ["arithmetic", "expose-field", "hash2curve", "alloc"], default-features = false }
+p256 = { workspace = true, default-features = false, features = ["hash2curve", "alloc", "ecdsa"] }
+ecdsa-core = { workspace = true, default-features = false  }
+generic-array = { version = "0.14.7", default-features = false }
 
 # FROST specific dependencies
 frost-core = { workspace = true, default-features = false }
@@ -51,16 +56,12 @@ frost-p256 = { workspace = true, default-features = false }
 frost-p384 = { workspace = true, default-features = false }
 snowbridge-milagro-bls = { workspace = true, default-features = false }
 
-# FROST RedJubjub is not yet no_std compatible
-# TODO: Update this once it is.
-# frost-redjubjub = { package = "frost-redjubjub", workspace = true, default-features = false }
-
 [dev-dependencies]
 pallet-balances = { workspace = true }
 postcard = { workspace = true, default-features = false, features = ["alloc"] }
 smallvec = { workspace = true }
 sp-keystore = { workspace = true }
-dfns-cggmp21 = { workspace = true, default-features = false, features = ["curve-secp256k1"] }
+dfns-cggmp21 = { workspace = true, default-features = false, features = ["curve-secp256k1", "curve-secp256r1", "curve-stark"] }
 round-based = { workspace = true, features = ["derive"] }
 paillier-zk = { workspace = true, features = ["serde"] }
 rand_core = { workspace = true }
@@ -94,6 +95,7 @@ std = [
     "frost-p384/std",
     # "frost-redjubjub/std",
     "snowbridge-milagro-bls/std",
+    "starknet-crypto/std",
 ]
 serde = []
 try-runtime = ["frame-support/try-runtime"]

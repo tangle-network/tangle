@@ -1,10 +1,10 @@
+use crate::tangle_testnet_runtime::api::runtime_types::pallet_roles::profile::Record;
 use sp_core::Pair;
 use subxt::OnlineClient;
 use subxt::{self, tx::Signer, utils::AccountId32, PolkadotConfig};
-use tangle_runtime::api::runtime_types::pallet_roles::profile::Record;
 
-use crate::tangle_runtime;
-use crate::tangle_runtime::api::{
+use crate::tangle_testnet_runtime;
+use crate::tangle_testnet_runtime::api::{
 	self,
 	runtime_types::{
 		bounded_collections::bounded_vec::BoundedVec,
@@ -40,7 +40,7 @@ async fn test_job_submission_event() {
 			amount: 100 * 1_000_000_000,
 		},
 	);
-	let create_profile_tx = tangle_runtime::api::tx().roles().create_profile(profile, None);
+	let create_profile_tx = tangle_testnet_runtime::api::tx().roles().create_profile(profile, None);
 
 	let _hash = subxt_client
 		.tx()
@@ -76,7 +76,7 @@ async fn test_job_submission_event() {
 		fallback: jobs::FallbackOptions::Destroy,
 	};
 
-	let jobs_tx = tangle_runtime::api::tx().jobs().submit_job(dkg_phase_one);
+	let jobs_tx = tangle_testnet_runtime::api::tx().jobs().submit_job(dkg_phase_one);
 	let _hash = subxt_client
 		.tx()
 		.sign_and_submit_then_watch_default(&jobs_tx, &alice)
@@ -99,7 +99,7 @@ async fn test_job_submission_event() {
 			BoundedVec(alice_account_id.0.to_vec()),
 			BoundedVec(bob_account_id.0.to_vec()),
 		]),
-		signature_scheme: jobs::tss::DigitalSignatureScheme::Ecdsa,
+		signature_scheme: jobs::tss::DigitalSignatureScheme::EcdsaSecp256k1,
 		signatures: BoundedVec(vec![
 			BoundedVec(alice_signature.0.to_vec()),
 			BoundedVec(bob_signature.0.to_vec()),
@@ -108,7 +108,7 @@ async fn test_job_submission_event() {
 		__subxt_unused_type_params: Default::default(),
 	});
 
-	let job_result_tx = tangle_runtime::api::tx().jobs().submit_job_result(
+	let job_result_tx = tangle_testnet_runtime::api::tx().jobs().submit_job_result(
 		roles::RoleType::Tss(roles::tss::ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
 		0,
 		dkg_phase_one_result,

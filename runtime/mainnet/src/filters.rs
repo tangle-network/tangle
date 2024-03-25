@@ -25,10 +25,10 @@ impl Contains<RuntimeCall> for MainnetCallFilter {
 			return true;
 		}
 
-		let is_paused =
-			pallet_transaction_pause::PausedTransactionFilter::<Runtime>::contains(call);
-		if is_paused {
-			// no paused call
+		let is_allowed_to_dispatch =
+			<pallet_tx_pause::Pallet<Runtime> as Contains<RuntimeCall>>::contains(call);
+		if !is_allowed_to_dispatch {
+			// tx is paused and not allowed to dispatch.
 			return false;
 		}
 
