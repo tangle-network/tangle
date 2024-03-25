@@ -115,7 +115,6 @@ pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
 
 k256 = { version = "0.13.0", default-features = false }
 p256 = { version = "0.13.0", default-features = false }
-secp256k1 = { version = "0.28.2", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
 starknet-crypto = { version = "0.6.1", default-features = false, features = ["signature-display","alloc"] }
 frost-core = { path = "pallets/dkg/frost", default-features = false }
@@ -343,10 +342,11 @@ malachite-nz = { version = "0.4", default-features = false, features = ["32_bit_
 postcard = { version = "1", default-features = false }
 dfns-cggmp21 = { package = "cggmp21", version = "0.1.1", default-features = false }
 udigest = { version = "0.1.0", default-features = false }
-generic-ec = { version = "0.1", default-features = false }
-generic-ec-zkp = { version = "0.1", default-features = false }
+generic-ec = { version = "0.2", default-features = false }
+generic-ec-zkp = { version = "0.2", default-features = false }
 round-based = { version = "0.2", default-features = false }
 paillier-zk = { version = "0.1", default-features = false }
+derivation-path = { version = "0.2.0", default-features = false }
 
 [profile.release]
 panic = "unwind"

@@ -14,9 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use crate::{signatures_schemes::to_slice_33, Config, Error};
+use core::str::FromStr;
+use derivation_path::DerivationPath;
 use ecdsa_core::signature::hazmat::PrehashVerifier;
 use frame_support::{ensure, pallet_prelude::DispatchResult};
-use generic_ec::{coords::HasAffineX, curves::Stark, Point, Scalar};
+use generic_ec::{
+	coords::HasAffineX,
+	curves::{Secp256k1, Stark},
+	Point, Scalar,
+};
 use sp_core::ecdsa;
 use sp_io::{hashing::keccak_256, EcdsaVerifyError};
 use sp_runtime::BoundedVec;
@@ -40,15 +46,47 @@ pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
-	derivation_path: Option<BoundedVec<u8, T::MaxAdditionalParamsLen>>,
+	derivation_path: &Option<BoundedVec<u8, T::MaxAdditionalParamsLen>>,
 ) -> DispatchResult {
-	let public_key =
-		secp256k1::PublicKey::from_slice(expected_key).map_err(|_| Error::<T>::InvalidPublicKey)?;
-	let message =
-		secp256k1::Message::from_digest_slice(msg).map_err(|_| Error::<T>::InvalidMessage)?;
-	let signature = secp256k1::ecdsa::Signature::from_compact(&signature)
-		.map_err(|_| Error::<T>::InvalidSignature)?;
-	ensure!(signature.verify(&message, &public_key).is_ok(), Error::<T>::InvalidSignature);
+	use k256::elliptic_curve::group::GroupEncoding;
+	// generic_ec::NonZero::from_point(
+	// 	shares[0]
+	// 		.derive_child_public_key(path.iter().cloned())
+	// 		.unwrap()
+	// 		.public_key,
+	// )
+	// .unwrap()
+	let maybe_affine_point = k256::AffinePoint::from_bytes(expected_key.into());
+	if maybe_affine_point.is_none().into() {
+		Err(Error::<T>::InvalidPublicKey)?;
+	}
+
+	let point: Point<Secp256k1> =
+		Point::from_bytes(expected_key).map_err(|_| Error::<T>::InvalidPublicKey)?;
+	let epub =
+		slip_10::ExtendedPublicKey { public_key: point, chain_code: slip_10::ChainCode::default() };
+	// Deserialize the derivation path as an ascii string
+	let derivation_path_str = derivation_path
+		.as_ref()
+		.map(|path| path.to_vec())
+		.map(|path| String::from_utf8(path).unwrap_or_default())
+		.unwrap_or_else(|| "m".to_string());
+	let path = DerivationPath::from_str(&derivation_path_str).unwrap();
+	let ext_pub_key = slip_10::try_derive_child_public_key_with_path(
+		&epub,
+		path.into_iter().map(|index| index.to_u32().try_into()),
+	)
+	.map_err(|_| Error::<T>::InvalidPublicKey)?
+	.public_key;
+	let verifying_key = k256::ecdsa::VerifyingKey::from_affine(maybe_affine_point.unwrap())
+		.map_err(|_| Error::<T>::InvalidPublicKey)?;
+	let signature =
+		k256::ecdsa::Signature::from_slice(&signature).map_err(|_| Error::<T>::InvalidSignature)?;
+
+	ensure!(
+		verifying_key.verify_prehash(msg, &signature).map(|_| signature).is_ok(),
+		Error::<T>::InvalidSignature
+	);
 	Ok(())
 }
 
@@ -67,7 +105,7 @@ pub fn verify_secp256r1_ecdsa_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
-	derivation_path: Option<BoundedVec<u8, T::MaxAdditionalParamsLen>>,
+	derivation_path: &Option<BoundedVec<u8, T::MaxAdditionalParamsLen>>,
 ) -> DispatchResult {
 	use p256::elliptic_curve::group::GroupEncoding;
 	let maybe_affine_point = p256::AffinePoint::from_bytes(expected_key.into());
@@ -101,7 +139,7 @@ pub fn verify_stark_ecdsa_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
-	derivation_path: Option<BoundedVec<u8, T::MaxAdditionalParamsLen>>,
+	derivation_path: &Option<BoundedVec<u8, T::MaxAdditionalParamsLen>>,
 ) -> DispatchResult {
 	// The message should be pre-hashed uisng a 32-byte digest
 	if msg.len() != 32 {
