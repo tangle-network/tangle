@@ -31,22 +31,22 @@ pub fn get_root_key() -> AccountId {
 /// Mainnet bootnodes
 pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 	vec![
-		"/ip4/213.199.45.84/tcp/30333/p2p/12D3KooWHtMDPXL4NJzdVBDKQmUrLBDqDFjLwXm6xnTMgcmnfgTz"
+		"/ip4/213.199.45.84/tcp/30333/ws/p2p/12D3KooWHtMDPXL4NJzdVBDKQmUrLBDqDFjLwXm6xnTMgcmnfgTz"
 			.parse()
 			.unwrap(),
-		"/ip4/213.199.45.83/tcp/30333/p2p/12D3KooWSxrtFrdT4wQQqafGYGaS5Z6UfGiwpbHs2Gsqt9Pc1i7L"
+		"/ip4/213.199.45.83/tcp/30333/ws/p2p/12D3KooWSxrtFrdT4wQQqafGYGaS5Z6UfGiwpbHs2Gsqt9Pc1i7L"
 			.parse()
 			.unwrap(),
-		"/ip4/213.199.45.82/tcp/30333/p2p/12D3KooWExCWbJHKDdX6NSMwXRQK4AtwnCwdYMPTzBfqCYmRkuqH"
+		"/ip4/213.199.45.82/tcp/30333/ws/p2p/12D3KooWExCWbJHKDdX6NSMwXRQK4AtwnCwdYMPTzBfqCYmRkuqH"
 			.parse()
 			.unwrap(),
-		"/ip4/213.199.45.81/tcp/30333/p2p/12D3KooWRhiprU2Nck47vtSpYs1K9718WyDYx8UQKXWqo9zFccFu"
+		"/ip4/213.199.45.81/tcp/30333/ws/p2p/12D3KooWRhiprU2Nck47vtSpYs1K9718WyDYx8UQKXWqo9zFccFu"
 			.parse()
 			.unwrap(),
-		"/ip4/213.199.45.80/tcp/30333/p2p/12D3KooWSc5zpr9cuFqfXqCFS8G4FVSEELHwrb5uP2mCdrsW9XTC"
+		"/ip4/213.199.45.80/tcp/30333/ws/p2p/12D3KooWSc5zpr9cuFqfXqCFS8G4FVSEELHwrb5uP2mCdrsW9XTC"
 			.parse()
 			.unwrap(),
-		"/ip4/213.199.45.79/tcp/30333/p2p/12D3KooWGwU6web5sEVKzSFgFroJFbmuTcB42PEAHx6QPm86Cg9z"
+		"/ip4/213.199.45.79/tcp/30333/ws/p2p/12D3KooWGwU6web5sEVKzSFgFroJFbmuTcB42PEAHx6QPm86Cg9z"
 			.parse()
 			.unwrap(),
 	]
