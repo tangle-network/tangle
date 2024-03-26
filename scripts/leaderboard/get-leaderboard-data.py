@@ -31,11 +31,15 @@ def write_to_json(addresses_and_points, output_file):
         json.dump(formatted_data, f, indent=4)
 
 def main():
-    url = "https://leaderboard-backend.tangle.tools/leaderboard?skip=0&limit=500" # we only have ~1200, change this once we fix api endpoint
     output_file = "leaderboard_data.json"
+    data = []
 
-    # Fetch data from the API
-    data = fetch_data(url)
+    for skip in range(0, 2000, 500):
+        url = "https://leaderboard-backend.tangle.tools/leaderboard?skip={}&limit=500".format(skip) # we only have ~1200, change this once we fix api endpoint
+        # Fetch data from the API
+        page = fetch_data(url)
+        data.append(page)
+
     if data:
         # Process the fetched data
         addresses_and_points = process_data(data)
