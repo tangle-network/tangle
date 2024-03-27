@@ -42,11 +42,14 @@ pub const ECDSA_SIGNATURE_LENGTH: usize = 65;
 /// * `data` - The DKG signature result containing the message data and ECDSA signature.
 /// * `signature` - The ECDSA signature to be verified.
 /// * `expected_key` - The expected ECDSA public key.
+/// * `derivation_path` - The derivation path used to derive the public key.
+/// * `chain_code` - The chain code used to derive the public key.
 pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 	msg: &[u8],
 	signature: &[u8],
 	expected_key: &[u8],
 	derivation_path: &Option<BoundedVec<u8, T::MaxAdditionalParamsLen>>,
+	chain_code: Option<[u8; 32]>,
 ) -> DispatchResult {
 	use k256::elliptic_curve::group::GroupEncoding;
 	// generic_ec::NonZero::from_point(
@@ -61,29 +64,35 @@ pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 		Err(Error::<T>::InvalidPublicKey)?;
 	}
 
-	let point: Point<Secp256k1> =
-		Point::from_bytes(expected_key).map_err(|_| Error::<T>::InvalidPublicKey)?;
-	let epub = slip_10::ExtendedPublicKey { public_key: point, chain_code: Default::default() };
-	// Deserialize the derivation path as an ascii string
-	let derivation_path_str = derivation_path
-		.as_ref()
-		.map(|path| path.to_vec())
-		.map(|path| String::from_utf8(path).unwrap_or_default())
-		.unwrap_or_else(|| "m".to_string());
-	let path = DerivationPath::from_str(&derivation_path_str).unwrap();
-	let ext_pub_key = slip_10::try_derive_child_public_key_with_path(
-		&epub,
-		path.into_iter().map(|index| index.to_u32().try_into()),
-	)
-	.map_err(|_| Error::<T>::InvalidPublicKey)?
-	.public_key
-	.to_bytes(true)
-	.to_vec();
-	let ext_pub_key_point = k256::AffinePoint::from_bytes(ext_pub_key.as_slice().into());
+	let pub_key = match derivation_path.zip(chain_code) {
+		Some((path, chain_code)) => {
+			let point: Point<Secp256k1> =
+				Point::from_bytes(expected_key).map_err(|_| Error::<T>::InvalidPublicKey)?;
+			let epub = slip_10::ExtendedPublicKey { public_key: point, chain_code };
+			// Deserialize the derivation path as an ascii string
+			let derivation_path_str = derivation_path
+				.as_ref()
+				.map(|path| path.to_vec())
+				.map(|path| String::from_utf8(path).unwrap_or_default())
+				.unwrap_or_else(|| "m".to_string());
+			let path = DerivationPath::from_str(&derivation_path_str).unwrap();
+			slip_10::try_derive_child_public_key_with_path(
+				&epub,
+				path.into_iter().map(|index| index.to_u32().try_into()),
+			)
+			.map_err(|_| Error::<T>::InvalidPublicKey)?
+			.public_key
+			.to_bytes(true)
+			.to_vec()
+		},
+		None => expected_key.to_vec(),
+	};
+
+	let pub_key_point = k256::AffinePoint::from_bytes(pub_key.as_slice().into());
 	if ext_pub_key_point.is_none().into() {
 		Err(Error::<T>::InvalidPublicKey)?;
 	}
-	let verifying_key = k256::ecdsa::VerifyingKey::from_affine(ext_pub_key_point.unwrap())
+	let verifying_key = k256::ecdsa::VerifyingKey::from_affine(pub_key_point.unwrap())
 		.map_err(|_| Error::<T>::InvalidPublicKey)?;
 	let signature =
 		k256::ecdsa::Signature::from_slice(signature).map_err(|_| Error::<T>::InvalidSignature)?;
