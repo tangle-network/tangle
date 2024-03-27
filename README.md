@@ -88,7 +88,7 @@ This should start the local testnet, you can view the logs in /tmp directory for
 
 <h2 id="troubleshooting"> Troubleshooting </h2>
 
-The linking phase may fail due to not finding libgmp (i.e., "could not find library -lgmp") when building on a mac M1. To fix this problem, run:
+The linking phase may fail due to not finding libgmp (i.e., "could not find library -lgmp") when building on apple silicon. To fix this problem, run:
 
 ```bash
 brew install gmp
