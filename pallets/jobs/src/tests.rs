@@ -92,6 +92,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				threshold: 3,
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -125,6 +126,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				threshold: 6,
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -149,6 +151,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				threshold: 3,
 				permitted_caller: None,
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -173,6 +176,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				threshold: 5,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -190,6 +194,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
+				chain_code: None,
 				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
@@ -309,6 +314,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -326,6 +332,7 @@ fn jobs_submission_e2e_for_dkg_refresh() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
+				chain_code: None,
 				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
@@ -393,6 +400,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -413,6 +421,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -429,6 +438,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
+				chain_code: None,
 				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
@@ -443,6 +453,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
+				chain_code: None,
 				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
@@ -519,6 +530,7 @@ fn jobs_rpc_tests() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -557,6 +569,7 @@ fn jobs_rpc_tests() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
+				chain_code: None,
 				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
@@ -821,6 +834,7 @@ fn reduce_active_role_restake_should_fail() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -887,6 +901,7 @@ fn delete_profile_with_active_role_should_fail() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -936,6 +951,7 @@ fn remove_active_role_should_fail() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -995,6 +1011,7 @@ fn remove_role_without_active_jobs_should_work() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -1052,6 +1069,7 @@ fn add_role_to_active_profile_should_work() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -1116,6 +1134,7 @@ fn reduce_stake_on_non_active_role_should_work() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -1178,6 +1197,7 @@ fn increase_stake_on_active_role_should_work() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -1305,6 +1325,7 @@ fn switch_active_shared_profile_to_independent_should_work_if_active_stake_prese
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -1393,6 +1414,7 @@ fn switch_active_independent_profile_to_shared_should_work_if_active_restake_sum
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -1484,6 +1506,7 @@ fn test_fee_charged_for_jobs_submission() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -1529,6 +1552,7 @@ fn try_validator_removal_from_job_with_destory_fallback_works() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -1593,6 +1617,7 @@ fn try_validator_removal_from_job_with_retry_works_phase_one() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::RegenerateWithThreshold(3),
 		};
@@ -1657,6 +1682,7 @@ fn try_validator_removal_from_job_with_retry_works_phase_two() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::RegenerateWithThreshold(3),
 		};
@@ -1675,6 +1701,7 @@ fn try_validator_removal_from_job_with_retry_works_phase_two() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
+				chain_code: None,
 				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));
@@ -1777,6 +1804,7 @@ fn test_validator_limit_is_counted_for_jobs_submission() {
 				threshold: 3,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 		};
 		assert_ok!(Jobs::submit_job(RuntimeOrigin::signed(mock_pub_key(TEN)), submission.clone()));
@@ -1822,6 +1850,7 @@ fn jobs_extend_result_works() {
 				threshold: 5,
 				permitted_caller: Some(mock_pub_key(TEN)),
 				role_type: threshold_signature_role_type,
+				hd_wallet: false,
 			}),
 			fallback: FallbackOptions::Destroy,
 		};
@@ -1837,6 +1866,7 @@ fn jobs_extend_result_works() {
 				threshold: 3,
 				participants: vec![].try_into().unwrap(),
 				key: vec![].try_into().unwrap(),
+				chain_code: None,
 				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1
 			})
 		));

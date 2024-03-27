@@ -85,6 +85,7 @@ fn dkg_key_verification_works_for_bls() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::Bls381,
 			key: vec![].try_into().unwrap(),
+			chain_code: None,
 			participants: vec![].try_into().unwrap(),
 			signatures: vec![].try_into().unwrap(),
 			threshold: 2,
@@ -99,6 +100,7 @@ fn dkg_key_verification_works_for_bls() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::Bls381,
 			key: vec![].try_into().unwrap(),
+			chain_code: None,
 			participants: vec![mock_pub_key_secp256k1_ecdsa()
 				.as_mut()
 				.to_vec()
@@ -122,6 +124,7 @@ fn dkg_key_verification_works_for_bls() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::Bls381,
 			key: vec![].try_into().unwrap(),
+			chain_code: None,
 			participants: vec![mock_pub_key_secp256k1_ecdsa()
 				.as_mut()
 				.to_vec()
@@ -142,6 +145,7 @@ fn dkg_key_verification_works_for_bls() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::Bls381,
 			key: pub_key.0.to_vec().try_into().unwrap(),
+			chain_code: None,
 			participants: vec![pub_key.as_mut().to_vec().try_into().unwrap()].try_into().unwrap(),
 			signatures: vec![
 				signature.clone().try_into().unwrap(),
@@ -166,6 +170,7 @@ fn dkg_key_verification_works_for_bls() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::Bls381,
 			key: participant_one.to_raw_vec().try_into().unwrap(),
+			chain_code: None,
 			participants: vec![
 				participant_one.as_mut().to_vec().try_into().unwrap(),
 				participant_two.as_mut().to_vec().try_into().unwrap(),
@@ -188,6 +193,7 @@ fn dkg_key_verification_works_for_ecdsa() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: vec![].try_into().unwrap(),
+			chain_code: None,
 			participants: vec![].try_into().unwrap(),
 			signatures: vec![].try_into().unwrap(),
 			threshold: 2,
@@ -202,6 +208,7 @@ fn dkg_key_verification_works_for_ecdsa() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: vec![].try_into().unwrap(),
+			chain_code: None,
 			participants: vec![mock_pub_key_secp256k1_ecdsa()
 				.as_mut()
 				.to_vec()
@@ -225,6 +232,7 @@ fn dkg_key_verification_works_for_ecdsa() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: vec![].try_into().unwrap(),
+			chain_code: None,
 			participants: vec![mock_pub_key_secp256k1_ecdsa()
 				.as_mut()
 				.to_vec()
@@ -245,6 +253,7 @@ fn dkg_key_verification_works_for_ecdsa() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: pub_key.0.to_vec().try_into().unwrap(),
+			chain_code: None,
 			participants: vec![pub_key.as_mut().to_vec().try_into().unwrap()].try_into().unwrap(),
 			signatures: vec![
 				signature.clone().try_into().unwrap(),
@@ -269,6 +278,7 @@ fn dkg_key_verification_works_for_ecdsa() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: participant_one.to_raw_vec().try_into().unwrap(),
+			chain_code: None,
 			participants: vec![
 				participant_one.as_mut().to_vec().try_into().unwrap(),
 				participant_two.as_mut().to_vec().try_into().unwrap(),
@@ -295,6 +305,7 @@ fn dkg_key_verifcation_works_for_ecdsa_when_n_equals_t() {
 		let job_to_verify = DKGTSSKeySubmissionResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			key: participant_one.to_raw_vec().try_into().unwrap(),
+			chain_code: None,
 			participants: vec![
 				participant_one.as_mut().to_vec().try_into().unwrap(),
 				participant_two.as_mut().to_vec().try_into().unwrap(),

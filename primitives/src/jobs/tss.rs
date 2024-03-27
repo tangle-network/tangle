@@ -38,6 +38,9 @@ pub struct DKGTSSPhaseOneJobType<AccountId, MaxParticipants: Get<u32> + Clone> {
 
 	/// The role type to be used
 	pub role_type: ThresholdSignatureRoleType,
+
+	/// specifies whether hd derivation is enabled.
+	pub hd_wallet: bool,
 }
 
 /// Represents the DKG Signature job type.
@@ -93,7 +96,9 @@ pub struct DKGTSSKeySubmissionResult<
 
 	/// Submitted key
 	pub key: BoundedVec<u8, MaxKeyLen>,
-
+	/// Chain Key used during the Keygen.
+	/// Used during derivation of child keys.
+	pub chain_code: Option<[u8; 32]>,
 	/// List of participants' public keys
 	pub participants: BoundedVec<BoundedVec<u8, MaxKeyLen>, MaxParticipants>,
 

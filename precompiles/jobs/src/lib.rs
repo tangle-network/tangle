@@ -16,6 +16,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(clippy::too_many_arguments)]
 
 use fp_evm::{ExitRevert, PrecompileFailure, PrecompileHandle};
 use frame_support::{
@@ -75,11 +76,12 @@ where
 	/// - `participants`: A vector containing Ethereum addresses of the participants in the DKG.
 	/// - `threshold`: The threshold number of participants required for the DKG to succeed (u8).
 	/// - `permitted_caller`: The Ethereum address of the permitted caller.
+	/// - `hd_wallet`: specifies whether hd derivation is enabled..
 	///
 	/// # Returns
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
-	#[precompile::public("submitDkgPhaseOneJob(uint64,uint64,address[],uint8,uint16,address)")]
+	#[precompile::public("submitDkgPhaseOneJob(uint64,uint64,address[],uint8,uint16,address,bool)")]
 	fn submit_dkg_phase_one_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: BlockNumber,
@@ -88,6 +90,7 @@ where
 		threshold: u8,
 		role_type: u16,
 		permitted_caller: Address,
+		hd_wallet: bool,
 	) -> EvmResult {
 		// Convert Ethereum address to Substrate account ID
 		let permitted_caller = Runtime::AddressMapping::into_account_id(permitted_caller.0);
@@ -127,6 +130,7 @@ where
 			participants,
 			threshold,
 			permitted_caller: Some(permitted_caller),
+			hd_wallet,
 		};
 
 		// Convert expiration period to Substrate block number

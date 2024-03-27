@@ -37,6 +37,7 @@ fn submit_dkg_phase_one_job() {
 					participants: vec![],
 					threshold: 2,
 					permitted_caller: Address(CryptoAlith.into()),
+					hd_wallet: false,
 				},
 			);
 		})

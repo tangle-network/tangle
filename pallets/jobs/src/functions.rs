@@ -231,6 +231,10 @@ impl<T: Config> Pallet<T> {
 								participants: new_participants,
 								threshold: new_threshold,
 								permitted_caller: phase1.clone().permitted_caller,
+								hd_wallet: match phase1.job_type {
+									JobType::DKGTSSPhaseOne(info) => info.hd_wallet,
+									_ => false,
+								},
 							}),
 
 							RoleType::ZkSaaS(role) => {
@@ -333,6 +337,7 @@ impl<T: Config> Pallet<T> {
 
 		let job_result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResultOf::<T> {
 			key: info.key.clone(),
+			chain_code: info.chain_code,
 			signatures: info.signatures,
 			participants: participant_keys,
 			threshold: job_info.job_type.clone().get_threshold().expect("Checked before"),
@@ -386,7 +391,7 @@ impl<T: Config> Pallet<T> {
 			data: info.data,
 			verifying_key,
 			signature_scheme: info.signature_scheme,
-			derivation_path: None,
+			derivation_path: info.derivation_path,
 		});
 
 		let phase_one_job_info = KnownResults::<T>::get(
