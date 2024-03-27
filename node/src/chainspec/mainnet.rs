@@ -124,7 +124,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				get_unique_distribution_results(vec![
 					mainnet::get_edgeware_genesis_balance_distribution(),
 					mainnet::get_leaderboard_balance_distribution(),
-					mainnet::get_substrate_balance_distribution(),
+					mainnet::get_edgeware_snapshot_distribution(),
 				]),
 				// Genesis investor / team distribution (pallet-balances + pallet-vesting)
 				combine_distributions(vec![
@@ -176,7 +176,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				get_unique_distribution_results(vec![
 					mainnet::get_edgeware_genesis_balance_distribution(),
 					mainnet::get_leaderboard_balance_distribution(),
-					mainnet::get_substrate_balance_distribution(),
+					mainnet::get_edgeware_snapshot_distribution(),
 					mainnet::get_polkadot_validator_distribution(),
 				]),
 				// Genesis investor / team distribution (pallet-balances + pallet-vesting)
