@@ -7746,6 +7746,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-evm-precompile-balances-erc20"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "libsecp256k1",
+ "log",
+ "num_enum 0.5.11",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-timestamp",
+ "parity-scale-codec 3.6.9",
+ "paste",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3 0.10.8",
+ "slices",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+]
+
+[[package]]
 name = "pallet-evm-precompile-batch"
 version = "0.1.0"
 dependencies = [
@@ -14374,6 +14402,7 @@ dependencies = [
  "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-chain-id",
+ "pallet-evm-precompile-balances-erc20",
  "pallet-evm-precompile-batch",
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
@@ -14494,6 +14523,7 @@ dependencies = [
  "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-chain-id",
+ "pallet-evm-precompile-balances-erc20",
  "pallet-evm-precompile-batch",
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
