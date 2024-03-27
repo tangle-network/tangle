@@ -56,6 +56,10 @@ frost-p256 = { workspace = true, default-features = false }
 frost-p384 = { workspace = true, default-features = false }
 snowbridge-milagro-bls = { workspace = true, default-features = false }
 
+# WSTS specific dependencies
+wsts = "3.0.0"
+bincode2 = { version = "2.0.1", default-features = false }
+
 [dev-dependencies]
 pallet-balances = { workspace = true }
 postcard = { workspace = true, default-features = false, features = ["alloc"] }

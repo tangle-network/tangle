@@ -40816,6 +40816,8 @@ pub mod api {
 						SchnorrEd448,
 						#[codec(index = 11)]
 						Bls381,
+                        #[codec(index = 12)]
+                        WstsV2,
 					}
 				}
 				pub mod zksaas {
