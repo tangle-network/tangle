@@ -69,18 +69,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 		),
 		// tangle 2
 		(
-			hex!["22e254b686c1f38823d9d4012c75b9afe44a51ed802485f189d8df2f99053472"].into(),
-			hex!["30fe2a18dbd35278c804267c61e00bebdc07d912b900d3af5b6df3bb6a35ed77"]
-				.unchecked_into(),
-			hex!["dcaef0b1c2e2d8fdeac4f07d60b3eb0d93564dba0c2e6bc5d0a63d775a4318da"]
-				.unchecked_into(),
-			hex!["cebebb5bf58a2a989bf8827d7360f04057835e42141162bfa17f3d12dde96a59"]
-				.unchecked_into(),
-			hex!["02596bcb7dfc93455d1e7bf93aa874d481590b37af0d43598506f9ed8609086ba0"]
-				.unchecked_into(),
-		),
-		// tangle 3
-		(
 			hex!["c083df88dca627b873c972875d3570677ddc8ef7582041ca7c8c5bf6f04b1155"].into(),
 			hex!["ee9da837e817f7d87eab1df000f92257811a21b895d09653b4bcd44f7e08ff7e"]
 				.unchecked_into(),
@@ -91,7 +79,7 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["0301760025504e5f9bec992e1ef79c83c126b372658d676c2c9f51be4bca55c859"]
 				.unchecked_into(),
 		),
-		// tangle 4
+		// tangle 3
 		(
 			hex!["ec012c87ebfac36ab4a56fb19d7ef5561785fc5bc9a1fa380185ae6440f0196f"].into(),
 			hex!["66621351db6c9ddd0836df712e8838ad03c11d1703401f5f4b4d71a5c14d9b1e"]
@@ -103,7 +91,7 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["03c7f43daff671e51b56c51b0029903f41c7a4b149b43dc5115c7dbfeba5e9ac3c"]
 				.unchecked_into(),
 		),
-		// tangle 5
+		// tangle 4
 		(
 			hex!["dc6d32ff27a13a3be0c6cebe857c31e17ab8a12da6aecea79541b30a909c8539"].into(),
 			hex!["a085f963e31e1fd9592a8e3b1106cc7ea5571df53e2bbedc303d244274d24b09"]
@@ -113,6 +101,18 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["48bccc462321ccf5806ad45d35755e9ac3e76813ad64c5f15e3f15a5b25f1437"]
 				.unchecked_into(),
 			hex!["02150142402731bc289cd6edd27536f7fb419e312f25e2c8d0f67c5e76f2a2a9fd"]
+				.unchecked_into(),
+		),
+		// tangle 5
+		(
+			hex!["5effe50292a6a8932efde21623ea0a8c2acaffe85cf30827907dba715c04137f"].into(),
+			hex!["fe77de52662d43eafc069b81538e57bbecc266b21f783ceba9302df95c2b6453"]
+				.unchecked_into(),
+			hex!["5922a3e86519cb61ab1e4eae6d4feee5c9bee4007a002c1cb4d4f99b69eedd63"]
+				.unchecked_into(),
+			hex!["4482f8fa27f9c9ec566554d2cf6ae3f7430da66fdeb486074a80237f6a7ca55c"]
+				.unchecked_into(),
+			hex!["028b4b49f4ab47aaf8583b98c800779397234cb23810856eeca151cc39c7e4637a"]
 				.unchecked_into(),
 		),
 		// snowflake
