@@ -456,6 +456,7 @@ where
 		Ok(())
 	}
 
+	#[allow(clippy::too_many_arguments)]
 	#[precompile::public("permit(address,address,uint256,uint256,uint8,bytes32,bytes32)")]
 	fn eip2612_permit(
 		handle: &mut impl PrecompileHandle,
