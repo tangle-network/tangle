@@ -97,6 +97,7 @@ pub fn get_bridge_evm_list() -> Vec<H160> {
 }
 
 fn get_leaderboard_distribution() -> BTreeMap<AccountId32, f64> {
+	// leaderboard data last updated : 27/03/2024
 	read_contents_to_substrate_accounts("node/src/distributions/data/leaderboard_addresses.json")
 }
 
