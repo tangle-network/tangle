@@ -41642,6 +41642,8 @@ pub mod api {
 						ZcashFrostEd448,
 						#[codec(index = 10)]
 						GennaroDKGBls381,
+						#[codec(index = 11)]
+						WstsV2,
 					}
 				}
 				pub mod zksaas {

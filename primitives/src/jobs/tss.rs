@@ -199,7 +199,4 @@ pub enum DigitalSignatureScheme {
 
 	/// BLS 381 signature scheme.
 	Bls381,
-
-	/// Weighted threshold schnorr signature scheme
-	Wsts,
 }
