@@ -105,14 +105,14 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 		),
 		// tangle 5
 		(
-			hex!["dc6d32ff27a13a3be0c6cebe857c31e17ab8a12da6aecea79541b30a909c8539"].into(),
-			hex!["a085f963e31e1fd9592a8e3b1106cc7ea5571df53e2bbedc303d244274d24b09"]
+			hex!["5effe50292a6a8932efde21623ea0a8c2acaffe85cf30827907dba715c04137f"].into(),
+			hex!["fe77de52662d43eafc069b81538e57bbecc266b21f783ceba9302df95c2b6453"]
 				.unchecked_into(),
-			hex!["4d416faaa28fd1d32744e00e40aa783dd30779e7e49f9fc7026923103b460895"]
+			hex!["5922a3e86519cb61ab1e4eae6d4feee5c9bee4007a002c1cb4d4f99b69eedd63"]
 				.unchecked_into(),
-			hex!["48bccc462321ccf5806ad45d35755e9ac3e76813ad64c5f15e3f15a5b25f1437"]
+			hex!["4482f8fa27f9c9ec566554d2cf6ae3f7430da66fdeb486074a80237f6a7ca55c"]
 				.unchecked_into(),
-			hex!["02150142402731bc289cd6edd27536f7fb419e312f25e2c8d0f67c5e76f2a2a9fd"]
+			hex!["028b4b49f4ab47aaf8583b98c800779397234cb23810856eeca151cc39c7e4637a"]
 				.unchecked_into(),
 		),
 		// snowflake
