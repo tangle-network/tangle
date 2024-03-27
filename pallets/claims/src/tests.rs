@@ -538,7 +538,7 @@ fn double_claiming_doesnt_work() {
 }
 
 #[test]
-fn claiming_while_vested_doesnt_work() {
+fn claiming_while_vested_works() {
 	new_test_ext().execute_with(|| {
 		CurrencyOf::<Test>::make_free_balance_be(
 			&get_multi_address_account_id(69).to_account_id_32(),
@@ -555,6 +555,12 @@ fn claiming_while_vested_doesnt_work() {
 			100,
 			10
 		));
+
+		assert_eq!(
+			Balances::total_balance(&get_multi_address_account_id(69).to_account_id_32()),
+			total_claims()
+		);
+
 		assert_ok!(ClaimsPallet::mint_claim(
 			RuntimeOrigin::root(),
 			eth(&bob()),
@@ -565,19 +571,21 @@ fn claiming_while_vested_doesnt_work() {
 		// New total
 		assert_eq!(ClaimsPallet::total(), total_claims() + 200);
 
-		// They should not be able to claim
-		assert_noop!(
-			ClaimsPallet::claim(
-				RuntimeOrigin::none(),
-				Some(get_multi_address_account_id(69)),
-				None,
-				sig::<Test>(
-					&bob(),
-					&get_multi_address_account_id(69).to_account_id_32().encode(),
-					&[][..]
-				)
-			),
-			Error::<Test>::VestedBalanceExists,
+		// They should be able to claim
+		assert_ok!(ClaimsPallet::claim(
+			RuntimeOrigin::none(),
+			Some(get_multi_address_account_id(69)),
+			None,
+			sig::<Test>(
+				&bob(),
+				&get_multi_address_account_id(69).to_account_id_32().encode(),
+				&[][..]
+			)
+		));
+
+		assert_eq!(
+			Balances::free_balance(&get_multi_address_account_id(69).to_account_id_32()),
+			total_claims() + 200
 		);
 	});
 }
