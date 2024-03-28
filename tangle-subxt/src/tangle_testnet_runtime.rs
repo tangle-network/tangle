@@ -227,7 +227,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -250,7 +249,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -276,7 +274,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -371,7 +368,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -395,7 +391,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -419,7 +414,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -533,7 +527,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -559,7 +552,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -582,7 +574,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -608,7 +599,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -789,7 +779,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -823,7 +812,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -862,7 +850,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -887,7 +874,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -911,7 +897,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1276,7 +1261,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1299,7 +1283,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1323,7 +1306,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1346,7 +1328,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1370,7 +1351,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1394,7 +1374,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1441,7 +1420,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1493,7 +1471,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1529,7 +1506,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1553,7 +1529,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1577,7 +1552,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1611,7 +1585,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1635,7 +1608,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1661,7 +1633,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1683,7 +1654,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1715,7 +1685,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1768,7 +1737,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1836,7 +1804,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1894,7 +1861,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -1977,7 +1943,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2007,7 +1972,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2179,7 +2143,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2201,7 +2164,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2223,7 +2185,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2245,7 +2206,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2271,7 +2231,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2305,7 +2264,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2364,7 +2322,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2479,7 +2436,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2509,7 +2465,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2535,7 +2490,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2560,7 +2514,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2711,7 +2664,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2740,7 +2692,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2771,7 +2722,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2796,7 +2746,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2869,7 +2818,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2897,7 +2845,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -2953,7 +2900,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3341,7 +3287,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3367,7 +3312,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3393,7 +3337,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3419,7 +3362,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3445,7 +3387,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3474,7 +3415,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3500,7 +3440,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3528,7 +3467,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3554,7 +3492,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3580,7 +3517,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3606,7 +3542,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -3826,7 +3761,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -3852,7 +3786,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -3880,7 +3813,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -3900,7 +3832,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -3926,7 +3857,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -3952,7 +3882,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -3980,7 +3909,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -4685,7 +4613,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -4833,7 +4760,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -4859,7 +4785,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -4887,7 +4812,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -4916,7 +4840,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -4947,7 +4870,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -5057,7 +4979,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5084,7 +5005,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5112,7 +5032,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5132,7 +5051,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5252,7 +5170,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -5284,7 +5201,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -5321,7 +5237,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -5353,7 +5268,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -5384,7 +5298,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -5415,7 +5328,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -5441,7 +5353,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -5473,7 +5384,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -5652,7 +5562,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5680,7 +5589,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5709,7 +5617,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5739,7 +5646,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5767,7 +5673,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5795,7 +5700,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5823,7 +5727,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5857,7 +5760,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5885,7 +5787,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5913,7 +5814,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5941,7 +5841,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5969,7 +5868,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -5997,7 +5895,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6025,7 +5922,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6053,7 +5949,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6079,7 +5974,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6105,7 +5999,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6131,7 +6024,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6159,7 +6051,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6187,7 +6078,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6215,7 +6105,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6243,7 +6132,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6718,7 +6606,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -6904,7 +6791,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -6939,7 +6825,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -6974,7 +6859,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -7677,7 +7561,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -7710,7 +7593,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -7743,7 +7625,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -7839,7 +7720,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -7868,7 +7748,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -7888,7 +7767,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -8215,7 +8093,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8241,7 +8118,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8272,7 +8148,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8298,7 +8173,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8331,7 +8205,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8450,7 +8323,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -8478,7 +8350,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -8504,7 +8375,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -8628,7 +8498,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8660,7 +8529,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8687,7 +8555,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8717,7 +8584,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8743,7 +8609,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8772,7 +8637,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8801,7 +8665,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8830,7 +8693,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8860,7 +8722,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8886,7 +8747,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8913,7 +8773,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8946,7 +8805,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8966,7 +8824,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -8986,7 +8843,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -9015,7 +8871,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -9041,7 +8896,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -9072,7 +8926,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -9100,7 +8953,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -9127,7 +8979,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -9482,7 +9333,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9510,7 +9360,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9538,7 +9387,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9558,7 +9406,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9586,7 +9433,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9612,7 +9458,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9638,7 +9483,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9664,7 +9508,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9692,7 +9535,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9718,7 +9560,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9748,7 +9589,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9774,7 +9614,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9805,7 +9644,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9833,7 +9671,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9859,7 +9696,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9887,7 +9723,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -9915,7 +9750,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -10671,7 +10505,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -10701,7 +10534,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -10730,7 +10562,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -10762,7 +10593,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -10793,7 +10623,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -10819,7 +10648,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -10975,7 +10803,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -11008,7 +10835,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -11043,7 +10869,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -11069,7 +10894,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -11095,7 +10919,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -11124,7 +10947,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -11153,7 +10975,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -11430,7 +11251,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -11450,7 +11270,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -11479,7 +11298,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -11513,7 +11331,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -11552,7 +11369,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -11580,7 +11396,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -11721,7 +11536,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -11750,7 +11564,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -11914,7 +11727,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -11943,7 +11755,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -11963,7 +11774,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -11990,7 +11800,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -12016,7 +11825,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -12049,7 +11857,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -12187,7 +11994,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -12218,7 +12024,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -12239,7 +12044,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -12259,7 +12063,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -12286,7 +12089,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -12312,7 +12114,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -12343,7 +12144,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -12738,7 +12538,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -12770,7 +12569,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -12797,7 +12595,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -12826,7 +12623,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -12855,7 +12651,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -12979,7 +12774,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -13016,7 +12810,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -13045,7 +12838,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -13067,7 +12859,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -13095,7 +12886,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -13123,7 +12913,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -13773,7 +13562,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -13804,7 +13592,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -13831,7 +13618,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -13858,7 +13644,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -13884,7 +13669,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -13910,7 +13694,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -13941,7 +13724,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -13961,7 +13743,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -13989,7 +13770,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14009,7 +13789,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14036,7 +13815,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14063,7 +13841,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14089,7 +13866,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14109,7 +13885,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14129,7 +13904,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14155,7 +13929,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14183,7 +13956,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14203,7 +13975,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14231,7 +14002,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14259,7 +14029,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14286,7 +14055,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14314,7 +14082,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14345,7 +14112,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14399,7 +14165,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14425,7 +14190,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14451,7 +14215,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14477,7 +14240,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14507,7 +14269,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -14533,7 +14294,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -15051,7 +14811,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15082,7 +14841,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15113,7 +14871,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15141,7 +14898,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15172,7 +14928,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15199,7 +14954,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15219,7 +14973,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15250,7 +15003,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15278,7 +15030,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15307,7 +15058,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15335,7 +15085,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15355,7 +15104,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15381,7 +15129,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15409,7 +15156,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15437,7 +15183,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15463,7 +15208,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -15489,7 +15233,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -17720,7 +17463,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -17748,7 +17490,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -17808,7 +17549,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18210,7 +17950,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -18242,7 +17981,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -18269,7 +18007,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -18296,7 +18033,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -18328,7 +18064,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -18355,7 +18090,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -18388,7 +18122,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -18414,7 +18147,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -18440,7 +18172,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -18631,7 +18362,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18657,7 +18387,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18683,7 +18412,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18713,7 +18441,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18741,7 +18468,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18767,7 +18493,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18793,7 +18518,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18819,7 +18543,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18849,7 +18572,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18877,7 +18599,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18913,7 +18634,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18939,7 +18659,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18967,7 +18686,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -18995,7 +18713,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -19379,7 +19096,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -19408,7 +19124,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -19435,7 +19150,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -19470,7 +19184,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -19497,7 +19210,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -19524,7 +19236,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -19556,7 +19267,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -19583,7 +19293,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -19610,7 +19319,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -19803,7 +19511,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -19829,7 +19536,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -19857,7 +19563,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -19883,7 +19588,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -19911,7 +19615,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -19941,7 +19644,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -19967,7 +19669,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -19993,7 +19694,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -20019,7 +19719,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -20047,7 +19746,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -20073,7 +19771,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -20425,7 +20122,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -20457,7 +20153,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -20495,7 +20190,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -20525,7 +20219,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -20555,7 +20248,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -20590,7 +20282,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -20620,7 +20311,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -20786,7 +20476,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -20814,7 +20503,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -20844,7 +20532,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -20876,7 +20563,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -21219,7 +20905,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21248,7 +20933,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21277,7 +20961,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21370,7 +21053,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -21400,7 +21082,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -21644,7 +21325,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21673,7 +21353,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21700,7 +21379,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21720,7 +21398,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21752,7 +21429,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21780,7 +21456,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21811,7 +21486,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21853,7 +21527,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21897,7 +21570,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21925,7 +21597,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21953,7 +21624,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -21981,7 +21651,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22024,7 +21693,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22062,7 +21730,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22088,7 +21755,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22120,7 +21786,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22146,7 +21811,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22172,7 +21836,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22203,7 +21866,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22231,7 +21893,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22262,7 +21923,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22288,7 +21948,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22314,7 +21973,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -22764,7 +22422,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -22792,7 +22449,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -22824,7 +22480,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -22854,7 +22509,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -22898,7 +22552,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -22935,7 +22588,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -22961,7 +22613,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -22989,7 +22640,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -23019,7 +22669,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -23050,7 +22699,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -23078,7 +22726,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -23108,7 +22755,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -23139,7 +22785,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -23167,7 +22812,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -23197,7 +22841,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -23229,7 +22872,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -23257,7 +22899,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -23285,7 +22926,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -24131,7 +23771,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -24164,7 +23803,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -24192,7 +23830,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -24227,7 +23864,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -24253,7 +23889,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -24286,7 +23921,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -24466,7 +24100,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -24494,7 +24127,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -24522,7 +24154,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -24553,7 +24184,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -24581,7 +24211,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -24609,7 +24238,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -24845,7 +24473,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -24871,7 +24498,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -24897,7 +24523,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -24923,7 +24548,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -24949,7 +24573,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -25067,7 +24690,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -25093,7 +24715,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -25119,7 +24740,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -25345,7 +24965,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -25534,7 +25153,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -25567,7 +25185,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -25642,7 +25259,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -25675,7 +25291,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -25832,7 +25447,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -25888,7 +25502,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -25915,7 +25528,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -25935,7 +25547,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -26235,7 +25846,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26264,7 +25874,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26290,7 +25899,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26319,7 +25927,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26339,7 +25946,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26369,7 +25975,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26395,7 +26000,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26425,7 +26029,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26457,7 +26060,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26486,7 +26088,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26523,7 +26124,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26552,7 +26152,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26583,7 +26182,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26614,7 +26212,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26643,7 +26240,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26663,7 +26259,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26696,7 +26291,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26725,7 +26319,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26759,7 +26352,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26787,7 +26379,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26815,7 +26406,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -26843,7 +26433,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -27249,7 +26838,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27275,7 +26863,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27303,7 +26890,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27331,7 +26917,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27359,7 +26944,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27387,7 +26971,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27415,7 +26998,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27441,7 +27023,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27471,7 +27052,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27501,7 +27081,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27532,7 +27111,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27558,7 +27136,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27584,7 +27161,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27614,7 +27190,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27646,7 +27221,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27672,7 +27246,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -27702,7 +27275,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -28273,7 +27845,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -28300,7 +27871,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -28328,7 +27898,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -28355,7 +27924,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -28383,7 +27951,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -28410,7 +27977,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -28551,7 +28117,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -28580,7 +28145,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -28600,7 +28164,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -28620,7 +28183,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -28640,7 +28202,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -28666,7 +28227,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -28729,7 +28289,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -28757,7 +28316,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -28793,7 +28351,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -28829,7 +28386,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -28963,7 +28519,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -28993,7 +28548,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -29026,7 +28580,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -29062,7 +28615,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -29255,7 +28807,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -29306,7 +28857,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -29520,7 +29070,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -29548,7 +29097,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -29594,7 +29142,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -29638,7 +29185,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -29812,7 +29358,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -29838,7 +29383,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -29864,7 +29408,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -29890,7 +29433,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -29916,7 +29458,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -30215,7 +29756,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -30331,7 +29871,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -30357,7 +29896,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -30425,7 +29963,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -30450,7 +29987,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -30469,7 +30005,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -30567,7 +30102,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -30629,7 +30163,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -30664,7 +30197,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -30703,7 +30235,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -30740,7 +30271,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -30768,7 +30298,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -30897,7 +30426,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31176,7 +30704,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -31204,7 +30731,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -31230,7 +30756,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -31250,7 +30775,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -31270,7 +30794,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -31297,7 +30820,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -31317,7 +30839,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -31345,7 +30866,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -31502,7 +31022,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31530,7 +31049,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31558,7 +31076,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31586,7 +31103,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31616,7 +31132,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31646,7 +31161,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31672,7 +31186,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31701,7 +31214,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31727,7 +31239,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31755,7 +31266,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -31783,7 +31293,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -32088,7 +31597,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -32120,7 +31628,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -32157,7 +31664,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -32177,7 +31683,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -32211,7 +31716,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -32241,7 +31745,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -32267,7 +31770,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -32294,7 +31796,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -32476,7 +31977,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -32512,7 +32012,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -32540,7 +32039,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -32568,7 +32066,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -32596,7 +32093,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -32633,7 +32129,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -32671,7 +32166,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -33105,7 +32599,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33157,7 +32650,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -33182,7 +32674,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -33261,7 +32752,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33313,7 +32803,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -33387,7 +32876,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33421,7 +32909,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33454,7 +32941,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33487,7 +32973,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33507,7 +32992,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33537,7 +33021,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33576,7 +33059,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33607,7 +33089,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33638,7 +33119,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33669,7 +33149,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -33899,7 +33378,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -33926,7 +33404,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -33959,7 +33436,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -33989,7 +33465,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -34021,7 +33496,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -34289,7 +33763,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34307,7 +33780,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34325,7 +33797,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34344,7 +33815,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -34364,7 +33834,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34386,7 +33855,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34420,7 +33888,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34442,7 +33909,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34462,7 +33928,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34487,7 +33952,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34505,7 +33969,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34534,7 +33997,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34562,7 +34024,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34585,7 +34046,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34606,7 +34066,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34621,7 +34080,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34640,7 +34098,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34668,7 +34125,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34689,7 +34145,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34713,7 +34168,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34761,7 +34215,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34785,7 +34238,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34809,7 +34261,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34827,7 +34278,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34853,7 +34303,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -34872,7 +34321,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -34892,7 +34340,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -34910,7 +34357,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -34931,7 +34377,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -34952,7 +34397,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -34970,7 +34414,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -34993,7 +34436,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -35021,7 +34463,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35044,7 +34485,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35066,7 +34506,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35085,7 +34524,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35105,7 +34543,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35124,7 +34561,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35151,7 +34587,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -35188,7 +34623,6 @@ pub mod api {
 							Clone,
 							Debug,
 							Eq,
-							Hash,
 							PartialEq,
 						)]
 						# [codec (crate = :: subxt :: ext :: codec)]
@@ -35211,7 +34645,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -35233,7 +34666,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -35251,7 +34683,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -35269,7 +34700,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -35287,7 +34717,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -35305,7 +34734,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -35323,7 +34751,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -35341,7 +34768,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -35360,7 +34786,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35379,7 +34804,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35400,7 +34824,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35426,7 +34849,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35484,7 +34906,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35529,7 +34950,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35576,7 +34996,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -35597,7 +35016,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -35615,7 +35033,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -35634,7 +35051,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -35653,7 +35069,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -35680,7 +35095,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35750,7 +35164,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35792,7 +35205,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35821,7 +35233,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -35836,7 +35247,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -35852,7 +35262,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35868,7 +35277,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35884,7 +35292,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35900,7 +35307,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -35925,7 +35331,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -35973,7 +35378,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36008,7 +35412,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36026,7 +35429,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36050,7 +35452,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36074,7 +35475,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36119,7 +35519,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36139,7 +35538,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36175,7 +35573,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36264,7 +35661,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36317,7 +35713,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36424,7 +35819,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36444,7 +35838,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36464,7 +35857,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36484,7 +35876,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36499,7 +35890,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36517,7 +35907,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36539,7 +35928,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36563,7 +35951,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36586,7 +35973,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36615,7 +36001,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36698,7 +36083,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36749,7 +36133,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36813,7 +36196,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -36835,7 +36217,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -36868,7 +36249,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36952,7 +36332,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -36978,7 +36357,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37017,7 +36395,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -37038,7 +36415,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -37067,7 +36443,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37130,7 +36505,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37180,7 +36554,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37244,7 +36617,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -37266,7 +36638,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -37292,7 +36663,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37325,7 +36695,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37464,7 +36833,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37554,7 +36922,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37660,7 +37027,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37678,7 +37044,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37700,7 +37065,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37720,7 +37084,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37741,7 +37104,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37763,7 +37125,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37783,7 +37144,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37799,7 +37159,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37814,7 +37173,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37850,7 +37208,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37878,7 +37235,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -37901,7 +37257,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38084,7 +37439,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38114,7 +37468,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38142,7 +37495,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38168,7 +37520,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38185,7 +37536,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38247,7 +37597,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38313,7 +37662,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38335,7 +37683,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38361,7 +37708,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38385,7 +37731,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38404,7 +37749,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38426,7 +37770,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38444,7 +37787,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38469,7 +37811,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38523,7 +37864,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38591,7 +37931,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38648,7 +37987,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38670,7 +38008,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38689,7 +38026,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38713,7 +38049,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38733,7 +38068,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38756,7 +38090,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38783,7 +38116,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38806,7 +38138,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38876,7 +38207,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38932,7 +38262,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -38965,7 +38294,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -38988,7 +38316,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39033,7 +38360,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39073,7 +38399,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39105,7 +38430,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -39129,7 +38453,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -39158,7 +38481,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39180,7 +38502,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39206,7 +38527,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39237,7 +38557,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39423,7 +38742,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39518,7 +38836,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39639,7 +38956,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39657,7 +38973,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39749,7 +39064,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39779,7 +39093,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39798,7 +39111,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39826,7 +39138,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39850,7 +39161,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39873,7 +39183,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -39914,7 +39223,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -39929,7 +39237,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -39946,7 +39253,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -39971,7 +39277,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40016,7 +39321,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40048,7 +39352,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40083,7 +39386,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40160,7 +39462,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40231,7 +39532,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40321,7 +39621,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40375,7 +39674,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40434,7 +39732,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40488,7 +39785,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -40508,7 +39804,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -40531,7 +39826,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40742,7 +40036,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40768,7 +40061,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -40889,7 +40181,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41048,7 +40339,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41067,7 +40357,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41087,7 +40376,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41109,7 +40397,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41133,7 +40420,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41165,7 +40451,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41183,7 +40468,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41203,7 +40487,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41225,7 +40508,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41250,7 +40532,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41270,7 +40551,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41292,7 +40572,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41314,7 +40593,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41336,7 +40614,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41359,7 +40636,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41390,7 +40666,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41422,7 +40697,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41463,7 +40737,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41489,7 +40762,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41508,7 +40780,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41532,7 +40803,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41561,7 +40831,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41677,7 +40946,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41718,7 +40986,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41774,7 +41041,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41793,7 +41059,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -41817,7 +41082,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41869,7 +41133,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -41944,7 +41207,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42022,7 +41284,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42041,7 +41302,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42061,7 +41321,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42079,7 +41338,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42102,7 +41360,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42138,7 +41395,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42164,7 +41420,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42233,7 +41488,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42265,7 +41519,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42315,7 +41568,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -42343,7 +41595,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42369,7 +41620,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42401,7 +41651,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42430,7 +41679,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -42624,7 +41872,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -42646,7 +41893,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -42751,7 +41997,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -42865,7 +42110,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42885,7 +42129,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -42904,7 +42147,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -42922,7 +42164,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -42940,7 +42181,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -42964,7 +42204,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -42985,7 +42224,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -43011,7 +42249,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -43039,7 +42276,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -43060,7 +42296,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -43080,7 +42315,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -43104,7 +42338,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43152,7 +42385,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43172,7 +42404,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43216,7 +42447,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43245,7 +42475,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43273,7 +42502,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43293,7 +42521,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43312,7 +42539,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43332,7 +42558,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -43347,7 +42572,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -43372,7 +42596,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43445,7 +42668,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43499,7 +42721,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43581,7 +42802,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -43603,7 +42823,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -43623,7 +42842,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -43652,7 +42870,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43693,7 +42910,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43721,7 +42937,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43768,7 +42983,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43819,7 +43033,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43839,7 +43052,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43887,7 +43099,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43958,7 +43169,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -43991,7 +43201,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44021,7 +43230,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44041,7 +43249,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44066,7 +43273,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44089,7 +43295,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44116,7 +43321,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44141,7 +43345,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44165,7 +43368,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44183,7 +43385,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44207,7 +43408,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44226,7 +43426,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44242,7 +43441,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44258,7 +43456,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44274,7 +43471,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44290,7 +43486,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44317,7 +43512,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44335,7 +43529,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44356,7 +43549,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44380,7 +43572,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44399,7 +43590,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44417,7 +43607,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44437,7 +43626,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44459,7 +43647,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44484,7 +43671,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44502,7 +43688,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44527,7 +43712,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44547,7 +43731,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44562,7 +43745,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44578,7 +43760,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44610,7 +43791,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44628,7 +43808,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44646,7 +43825,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44667,7 +43845,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44687,7 +43864,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44705,7 +43881,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44720,7 +43895,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44738,7 +43912,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44753,7 +43926,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44773,7 +43945,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -44792,7 +43963,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44807,7 +43977,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -44823,7 +43992,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44838,7 +44006,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44856,7 +44023,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44875,7 +44041,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44898,7 +44063,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44917,7 +44081,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -44942,7 +44105,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -44963,7 +44125,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -44981,7 +44142,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -45019,7 +44179,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -45550,7 +44709,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -45576,7 +44734,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -45594,7 +44751,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -45632,7 +44788,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -45654,7 +44809,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -45674,7 +44828,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -45696,7 +44849,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -45718,7 +44870,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -45762,7 +44913,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -45780,7 +44930,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -45802,7 +44951,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -45838,7 +44986,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -45861,7 +45008,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -45885,7 +45031,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -45904,7 +45049,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -45925,7 +45069,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -45944,7 +45087,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -45963,7 +45105,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -45988,7 +45129,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -46018,7 +45158,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -46039,7 +45178,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -46062,7 +45200,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -46085,7 +45222,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46103,7 +45239,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46139,7 +45274,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46174,7 +45308,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46189,7 +45322,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46204,7 +45336,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46219,7 +45350,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46234,7 +45364,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46269,7 +45398,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46312,7 +45440,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46333,7 +45460,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46354,7 +45480,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46383,7 +45508,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46409,7 +45533,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46444,7 +45567,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46463,7 +45585,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46486,7 +45607,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46511,7 +45631,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46534,7 +45653,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46554,7 +45672,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46578,7 +45695,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46597,7 +45713,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -46617,7 +45732,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -46639,7 +45753,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -46692,7 +45805,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -46712,7 +45824,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -46756,7 +45867,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -46778,7 +45888,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -46798,7 +45907,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -46827,7 +45935,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46843,7 +45950,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46879,7 +45985,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46895,7 +46000,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46938,7 +46042,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46965,7 +46068,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -46993,7 +46095,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -47018,7 +46119,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -47035,7 +46135,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -47051,7 +46150,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -47071,7 +46169,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -47092,7 +46189,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -47111,7 +46207,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -47131,7 +46226,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -47172,7 +46266,6 @@ pub mod api {
 						Clone,
 						Debug,
 						Eq,
-						Hash,
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt :: ext :: codec)]
@@ -47193,7 +46286,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -47221,7 +46313,6 @@ pub mod api {
 					Clone,
 					Debug,
 					Eq,
-					Hash,
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt :: ext :: codec)]
@@ -47242,7 +46333,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47257,7 +46347,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47272,7 +46361,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47287,7 +46375,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47302,7 +46389,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47317,7 +46403,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47332,7 +46417,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47347,7 +46431,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47517,7 +46600,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47543,7 +46625,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47567,7 +46648,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47582,7 +46662,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47674,7 +46753,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47760,7 +46838,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47848,7 +46925,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
@@ -47866,7 +46942,6 @@ pub mod api {
 				Clone,
 				Debug,
 				Eq,
-				Hash,
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt :: ext :: codec)]
