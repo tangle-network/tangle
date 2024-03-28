@@ -23,7 +23,6 @@ use self::signatures_schemes::{
 	schnorr_sr25519::verify_schnorr_sr25519_signature,
 };
 use super::*;
-use crate::signatures_schemes::wsts::verify_dkg_signature_wsts_v2;
 use crate::types::BalanceOf;
 use frame_support::{pallet_prelude::DispatchResult, sp_runtime::Saturating};
 use frame_system::pallet_prelude::BlockNumberFor;
@@ -181,12 +180,6 @@ impl<T: Config> Pallet<T> {
 			| DigitalSignatureScheme::SchnorrP384
 			| DigitalSignatureScheme::SchnorrSecp256k1
 			| DigitalSignatureScheme::SchnorrRistretto255 => verify_dkg_signature_schnorr_frost::<T>(
-				data.signature_scheme,
-				&data.data,
-				&data.signature,
-				&data.verifying_key,
-			),
-			DigitalSignatureScheme::WstsV2 => verify_dkg_signature_wsts_v2::<T>(
 				data.signature_scheme,
 				&data.data,
 				&data.signature,
