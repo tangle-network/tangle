@@ -261,6 +261,7 @@ fn jobs_submission_e2e_works_for_dkg() {
 				data: vec![].try_into().unwrap(),
 				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 				derivation_path: None,
+				chain_code: None,
 			})
 		));
 
@@ -487,6 +488,7 @@ fn jobs_submission_e2e_for_dkg_rotation() {
 				new_phase_one_id: 1,
 				signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 				derivation_path: None,
+				chain_code: None,
 			})
 		));
 

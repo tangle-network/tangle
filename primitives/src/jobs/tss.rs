@@ -120,9 +120,6 @@ pub struct DKGTSSSignatureResult<
 	/// Signature scheme to use for DKG
 	pub signature_scheme: DigitalSignatureScheme,
 
-	/// The derivation path used for the signature
-	pub derivation_path: Option<BoundedVec<u8, MaxAdditionalParamsLen>>,
-
 	/// The input data
 	pub data: BoundedVec<u8, MaxDataLen>,
 
@@ -131,6 +128,13 @@ pub struct DKGTSSSignatureResult<
 
 	/// The expected key for verifying the signature
 	pub verifying_key: BoundedVec<u8, MaxKeyLen>,
+
+	/// The derivation path used for the signature
+	pub derivation_path: Option<BoundedVec<u8, MaxAdditionalParamsLen>>,
+
+	/// Chain Key used during the Keygen.
+	/// Used during derivation of child keys.
+	pub chain_code: Option<[u8; 32]>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
@@ -162,6 +166,8 @@ pub struct DKGTSSKeyRotationResult<
 	pub signature_scheme: DigitalSignatureScheme,
 	/// The derivation path used for the signature
 	pub derivation_path: Option<BoundedVec<u8, MaxAdditionalParamsLen>>,
+	/// Chain Key used during the Keygen.
+	pub chain_code: Option<[u8; 32]>,
 }
 
 /// Possible key types for DKG

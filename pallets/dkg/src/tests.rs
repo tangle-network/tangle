@@ -350,6 +350,7 @@ fn signature_verification_works_bls() {
 			signature: signature.as_bytes().to_vec().try_into().unwrap(),
 			verifying_key: pub_key.as_bytes().to_vec().try_into().unwrap(),
 			data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
+			chain_code: None,
 		};
 
 		// Should fail for an invalid public key
@@ -369,6 +370,7 @@ fn signature_verification_works_bls() {
 			signature: signature.as_bytes()[..10].to_vec().try_into().unwrap(),
 			data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
 			verifying_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
+			chain_code: None,
 		};
 
 		// Should fail for an invalid signature
@@ -388,6 +390,7 @@ fn signature_verification_works_bls() {
 			signature: signature.as_bytes().to_vec().try_into().unwrap(),
 			verifying_key: pub_key.as_uncompressed_bytes().to_vec().try_into().unwrap(),
 			data: BLS_DATA_TO_SIGN.to_vec().try_into().unwrap(),
+			chain_code: None,
 		};
 
 		assert_ok!(DKG::verify(JobResult::DKGPhaseTwo(job_to_verify)));
@@ -411,6 +414,7 @@ fn signature_verification_works_secp256k1_ecdsa() {
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
+			chain_code: None,
 		};
 
 		// should fail for invalid keys
@@ -431,6 +435,7 @@ fn signature_verification_works_secp256k1_ecdsa() {
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
+			chain_code: None,
 		};
 
 		// should work with correct params
@@ -455,6 +460,7 @@ fn signature_verification_works_sr25519_schnorr() {
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
+			chain_code: None,
 		};
 
 		// should fail for invalid keys
@@ -470,6 +476,7 @@ fn signature_verification_works_sr25519_schnorr() {
 			signature: signature.try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
+			chain_code: None,
 		};
 
 		// should work with correct params
@@ -493,6 +500,7 @@ fn signature_verification_works_secp256r1_ecdsa() {
 			signature: signature.to_vec().try_into().unwrap(),
 			data: message.to_vec().try_into().unwrap(),
 			verifying_key: public_key.to_sec1_bytes().to_vec().try_into().unwrap(),
+			chain_code: None,
 		};
 
 		// should work with correct params
@@ -542,6 +550,7 @@ fn signature_verification_works_stark_ecdsa() {
 			signature: encoded_signature.to_vec().try_into().unwrap(),
 			data: message.to_bytes_be().to_vec().try_into().unwrap(),
 			verifying_key: public_key_point.to_bytes(true).to_vec().try_into().unwrap(),
+			chain_code: None,
 		};
 
 		// should work with correct params
@@ -565,6 +574,7 @@ fn dkg_key_rotation_works() {
 			new_key: new_key.to_raw_vec().try_into().unwrap(),
 			phase_one_id: 1,
 			new_phase_one_id: 2,
+			chain_code: None,
 		};
 
 		// should fail for invalid keys
@@ -583,6 +593,7 @@ fn dkg_key_rotation_works() {
 			new_key: new_key.to_raw_vec().try_into().unwrap(),
 			phase_one_id: 1,
 			new_phase_one_id: 2,
+			chain_code: None,
 		};
 		// should work with correct params
 		assert_ok!(DKG::verify(JobResult::DKGPhaseFour(job_to_verify)));

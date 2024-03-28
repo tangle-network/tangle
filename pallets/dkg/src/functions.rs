@@ -158,6 +158,7 @@ impl<T: Config> Pallet<T> {
 				&data.signature,
 				&data.verifying_key,
 				&data.derivation_path,
+				data.chain_code,
 			),
 			DigitalSignatureScheme::EcdsaSecp256r1 => verify_secp256r1_ecdsa_signature::<T>(
 				&data.data,
@@ -231,6 +232,7 @@ impl<T: Config> Pallet<T> {
 		let verifying_key = data.key.clone();
 		let signature_scheme = data.signature_scheme.clone();
 		let derivation_path = data.derivation_path.clone();
+		let chain_code = data.chain_code;
 		let sig_result_data: DKGTSSSignatureResult<
 			T::MaxDataLen,
 			T::MaxKeyLen,
@@ -242,6 +244,7 @@ impl<T: Config> Pallet<T> {
 			verifying_key,
 			signature_scheme,
 			derivation_path,
+			chain_code,
 		};
 
 		Self::verify_dkg_signature(sig_result_data).and_then(|_| emit_event(data))

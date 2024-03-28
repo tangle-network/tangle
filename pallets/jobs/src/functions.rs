@@ -382,8 +382,8 @@ impl<T: Config> Pallet<T> {
 		// Validate existing result
 		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
 
-		let verifying_key = match phase_one_result.result {
-			JobResult::DKGPhaseOne(result) => result.key,
+		let (verifying_key, chain_code) = match phase_one_result.result {
+			JobResult::DKGPhaseOne(result) => (result.key, result.chain_code),
 			_ => return Err(Error::<T>::InvalidJobPhase.into()),
 		};
 		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResultOf::<T> {
@@ -392,6 +392,7 @@ impl<T: Config> Pallet<T> {
 			verifying_key,
 			signature_scheme: info.signature_scheme,
 			derivation_path: info.derivation_path,
+			chain_code,
 		});
 
 		let phase_one_job_info = KnownResults::<T>::get(
@@ -537,6 +538,7 @@ impl<T: Config> Pallet<T> {
 			signature: info.signature.clone(),
 			signature_scheme: info.signature_scheme.clone(),
 			derivation_path: None,
+			chain_code: None,
 		});
 
 		T::MPCHandler::verify(JobWithResult {
