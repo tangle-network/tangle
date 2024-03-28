@@ -599,9 +599,6 @@ impl<T: Config> Pallet<T> {
 		let recipient = Self::convert_multi_address_to_account_id(recipient)?;
 
 		let vesting = Vesting::<T>::get(&signer);
-		if vesting.is_some() && T::VestingSchedule::vesting_balance(&recipient).is_some() {
-			return Err(Error::<T>::VestedBalanceExists.into());
-		}
 
 		// We first need to deposit the balance to ensure that the account exists.
 		let _ = CurrencyOf::<T>::deposit_creating(&recipient, balance_due);
@@ -609,8 +606,7 @@ impl<T: Config> Pallet<T> {
 		// Check if this claim should have a vesting schedule.
 		if let Some(vs) = vesting {
 			for v in vs.iter() {
-				T::VestingSchedule::add_vesting_schedule(&recipient, v.0, v.1, v.2)
-					.expect("No other vesting schedule exists, as checked above; qed");
+				T::VestingSchedule::add_vesting_schedule(&recipient, v.0, v.1, v.2)?;
 			}
 		}
 

@@ -4320,7 +4320,7 @@ dependencies = [
 
 [[package]]
 name = "frost-core"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "byteorder",
  "debugless-unwrap",
@@ -7412,7 +7412,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7599,7 +7599,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-dkg"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "cggmp21",
  "derivation-path",
@@ -7783,6 +7783,34 @@ dependencies = [
  "frame-system",
  "parity-scale-codec 3.6.9",
  "scale-info",
+]
+
+[[package]]
+name = "pallet-evm-precompile-balances-erc20"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "libsecp256k1",
+ "log",
+ "num_enum 0.5.11",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-timestamp",
+ "parity-scale-codec 3.6.9",
+ "paste",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3 0.10.8",
+ "slices",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
 ]
 
 [[package]]
@@ -8242,7 +8270,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "ethereum",
  "ethers",
@@ -8288,7 +8316,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs-rpc"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "jsonrpsee 0.20.3",
  "pallet-jobs-rpc-runtime-api",
@@ -8304,7 +8332,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs-rpc-runtime-api"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "parity-scale-codec 3.6.9",
  "sp-api",
@@ -8399,7 +8427,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-roles"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -8658,7 +8686,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-zksaas"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -14255,7 +14283,7 @@ dependencies = [
 
 [[package]]
 name = "tangle"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "clap",
  "fc-api",
@@ -14356,7 +14384,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "parity-scale-codec 3.6.9",
  "scale-info",
@@ -14365,7 +14393,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -14393,7 +14421,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "evm-tracer",
  "fp-account",
@@ -14427,6 +14455,7 @@ dependencies = [
  "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-chain-id",
+ "pallet-evm-precompile-balances-erc20",
  "pallet-evm-precompile-batch",
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
@@ -14498,7 +14527,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "hex",
  "parity-scale-codec 3.6.9",
@@ -14513,7 +14542,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "evm-tracer",
  "fp-account",
@@ -14547,6 +14576,7 @@ dependencies = [
  "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-chain-id",
+ "pallet-evm-precompile-balances-erc20",
  "pallet-evm-precompile-batch",
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
@@ -14619,7 +14649,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-voter"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "anyhow",
  "clap",
