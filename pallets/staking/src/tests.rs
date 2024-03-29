@@ -5101,7 +5101,6 @@ mod election_data_provider {
 	// `maybe_max_len` voters, and if some of them end up being skipped, we iterate at most `2 *
 	// maybe_max_len`.
 	#[test]
-	#[should_panic]
 	fn only_iterates_max_2_times_max_allowed_len() {
 		ExtBuilder::default()
 			.nominate(false)
@@ -5782,7 +5781,6 @@ fn min_commission_works() {
 }
 
 #[test]
-#[should_panic]
 fn change_of_absolute_max_nominations() {
 	use frame_election_provider_support::ElectionDataProvider;
 	ExtBuilder::default()
