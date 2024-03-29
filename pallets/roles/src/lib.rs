@@ -289,7 +289,7 @@ pub mod pallet {
 					// compute rewards with last session restakers
 					// and set new era
 					if staking_era.index > restaker_era.index {
-						let _ = Self::compute_rewards(restaker_era.index);
+						let _ = Self::compute_rewards(staking_era.clone(), restaker_era.index);
 						ActiveRestakerEra::<T>::put(staking_era);
 					}
 				}

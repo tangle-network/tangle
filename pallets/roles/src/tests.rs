@@ -359,7 +359,9 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		}
 
 		// The reward is 1000, we have 5 authorities
-		assert_ok!(Roles::compute_rewards(1));
+		let active_era_info = ActiveEraInfo { index: Session::current_index(), start: Some(0) };
+
+		assert_ok!(Roles::compute_rewards(active_era_info, 1));
 		assert!(ValidatorJobsInEra::<Runtime>::get().is_empty());
 
 		// Rewards math
@@ -437,7 +439,9 @@ fn test_reward_dist_takes_restake_into_account() {
 		}
 
 		// The reward is 1000, we have 5 authorities
-		assert_ok!(Roles::compute_rewards(1));
+		let active_era_info = ActiveEraInfo { index: Session::current_index(), start: Some(0) };
+
+		assert_ok!(Roles::compute_rewards(active_era_info, 1));
 		assert!(ValidatorJobsInEra::<Runtime>::get().is_empty());
 
 		// Rewards math
@@ -494,7 +498,9 @@ fn test_reward_dist_handles_less_than_ideal_restake() {
 		}
 
 		// The reward is 10_000, we have 1 authority
-		assert_ok!(Roles::compute_rewards(1));
+		let active_era_info = ActiveEraInfo { index: Session::current_index(), start: Some(0) };
+
+		assert_ok!(Roles::compute_rewards(active_era_info, 1));
 		assert!(ValidatorJobsInEra::<Runtime>::get().is_empty());
 
 		// Rewards math
