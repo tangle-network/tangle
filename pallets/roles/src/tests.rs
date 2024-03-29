@@ -336,7 +336,7 @@ fn test_unbond_funds_should_work() {
 #[test]
 fn total_restake_should_calculate_correctly() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
-		Staking::bond_extra(RuntimeOrigin::signed(mock_pub_key(1)), 5000);
+		Staking::bond_extra(RuntimeOrigin::signed(mock_pub_key(1)), 5000).unwrap();
 		let active_era_info = ActiveEraInfo { index: Session::current_index(), start: Some(0) };
 		ActiveRestakerEra::<Runtime>::put(active_era_info);
 
