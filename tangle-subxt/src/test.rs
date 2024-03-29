@@ -71,6 +71,7 @@ async fn test_job_submission_event() {
 			threshold: 1u8,
 			permitted_caller: None,
 			role_type: roles::tss::ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1,
+			hd_wallet: false,
 			__ignore: Default::default(),
 		}),
 		fallback: jobs::FallbackOptions::Destroy,
@@ -105,6 +106,7 @@ async fn test_job_submission_event() {
 			BoundedVec(bob_signature.0.to_vec()),
 		]),
 		threshold: 1,
+		chain_code: None,
 		__ignore: Default::default(),
 	});
 
