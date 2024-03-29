@@ -267,11 +267,7 @@ impl<T: Config> Pallet<T> {
 			let era_duration = (now_as_millis_u64.defensive_saturating_sub(active_era_start))
 				.saturated_into::<u64>();
 
-			let mut total_restake: BalanceOf<T> = Default::default();
-			// TODO : This is an unbounded query, potentially dangerous
-			for (_restaker, ledger) in Ledger::<T>::iter() {
-				total_restake += ledger.total_restake();
-			}
+			let total_restake: BalanceOf<T> = TotalRestake::<T>::get();
 
 			let issuance = T::Currency::total_issuance();
 
