@@ -10,6 +10,7 @@ use frame_support::{
 use pallet_staking::ActiveEra;
 use pallet_staking::EraPayout;
 use sp_runtime::SaturatedConversion;
+use sp_runtime::Saturating;
 use sp_runtime::{traits::Convert, Perbill};
 use sp_staking::offence::Offence;
 use sp_std::collections::btree_map::BTreeMap;
@@ -59,7 +60,7 @@ impl<T: Config> Pallet<T> {
 		// the total amount staked to only increase or remain the same across active roles.
 		if updated_profile.is_shared() && current_ledger.profile.is_independent() {
 			if active_jobs.len() > 0 {
-				let mut active_role_restaking_sum = Zero::zero();
+				let mut active_role_restaking_sum: BalanceOf<T> = Zero::zero();
 				for role in roles_with_active_jobs.iter() {
 					let current_role_restaking_amount = current_ledger
 						.profile
@@ -67,7 +68,8 @@ impl<T: Config> Pallet<T> {
 						.iter()
 						.find_map(|record| if record.role == *role { record.amount } else { None })
 						.unwrap_or_else(|| Zero::zero());
-					active_role_restaking_sum += current_role_restaking_amount;
+					active_role_restaking_sum =
+						active_role_restaking_sum.saturating_add(current_role_restaking_amount);
 				}
 
 				ensure!(
@@ -339,7 +341,7 @@ impl<T: Config> Pallet<T> {
 
 		// Calculate the total jobs for all active validators
 		let total_jobs_completed: u32 =
-			active_validators.values().rfold(0_u32.into(), |acc, &x| acc + x);
+			active_validators.values().rfold(0_u32.into(), |acc, &x| acc.saturating_add(x));
 
 		// Distribute rewards to active validators based on their share
 		for (validator, jobs_completed) in active_validators.iter() {
