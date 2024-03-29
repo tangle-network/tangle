@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use crate::{signatures_schemes::to_slice_33, Config, Error};
+use alloc::string::String;
 use core::str::FromStr;
 use derivation_path::DerivationPath;
 use ecdsa_core::signature::hazmat::PrehashVerifier;
