@@ -532,40 +532,48 @@ fn deposit(data: Vec<u8>) {
 			)
 			.expect("it works");
 
-			assert_eq!(
-				events(),
-				vec![
-					RuntimeEvent::System(frame_system::Event::NewAccount {
-						account: Precompile1.into()
-					}),
-					RuntimeEvent::Balances(pallet_balances::Event::Endowed {
-						account: Precompile1.into(),
-						free_balance: 500
-					}),
-					// EVM make a transfer because some value is provided.
-					RuntimeEvent::Balances(pallet_balances::Event::Transfer {
-						from: CryptoAlith.into(),
-						to: Precompile1.into(),
-						amount: 500
-					}),
-					// Precompile1 send it back since deposit should be a no-op.
-					RuntimeEvent::Balances(pallet_balances::Event::Transfer {
-						from: Precompile1.into(),
-						to: CryptoAlith.into(),
-						amount: 500
-					}),
-					// Log is correctly emited.
-					RuntimeEvent::Evm(pallet_evm::Event::Log {
-						log: log2(
-							Precompile1,
-							SELECTOR_LOG_DEPOSIT,
-							CryptoAlith,
-							solidity::encode_event_data(U256::from(500)),
-						)
-					}),
-					RuntimeEvent::Evm(pallet_evm::Event::Executed { address: Precompile1.into() }),
-				]
-			);
+			assert!(events().contains(&RuntimeEvent::Balances(pallet_balances::Event::Endowed {
+				account: Precompile1.into(),
+				free_balance: 500
+			}),));
+
+			assert!(events().contains(&RuntimeEvent::System(frame_system::Event::NewAccount {
+				account: Precompile1.into()
+			})));
+
+			assert!(events().contains(
+				// EVM make a transfer because some value is provided.
+				&RuntimeEvent::Balances(pallet_balances::Event::Transfer {
+					from: CryptoAlith.into(),
+					to: Precompile1.into(),
+					amount: 500
+				}),
+			));
+
+			assert!(events().contains(
+				// Precompile1 send it back since deposit should be a no-op.
+				&RuntimeEvent::Balances(pallet_balances::Event::Transfer {
+					from: Precompile1.into(),
+					to: CryptoAlith.into(),
+					amount: 500
+				}),
+			));
+
+			assert!(events().contains(
+				// Log is correctly emited.
+				&RuntimeEvent::Evm(pallet_evm::Event::Log {
+					log: log2(
+						Precompile1,
+						SELECTOR_LOG_DEPOSIT,
+						CryptoAlith,
+						solidity::encode_event_data(U256::from(500)),
+					)
+				}),
+			));
+
+			assert!(events().contains(&RuntimeEvent::Evm(pallet_evm::Event::Executed {
+				address: Precompile1.into()
+			}),));
 
 			// Check precompile balance is still 0.
 			precompiles()

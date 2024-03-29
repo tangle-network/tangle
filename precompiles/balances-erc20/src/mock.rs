@@ -75,7 +75,7 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ExistentialDeposit: u128 = 0;
+	pub const ExistentialDeposit: u128 = 1;
 }
 
 impl pallet_balances::Config for Runtime {
