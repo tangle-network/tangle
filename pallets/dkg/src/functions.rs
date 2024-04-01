@@ -227,7 +227,7 @@ impl<T: Config> Pallet<T> {
 			Ok(())
 		};
 
-		let data = sp_core::keccak_256(&res.new_key).to_vec().try_into().unwrap_or_default();
+		let data = sp_io::hashing::keccak_256(&res.new_key).to_vec().try_into().unwrap_or_default();
 		let signature = res.signature.clone();
 		let verifying_key = res.key.clone();
 		let signature_scheme = res.signature_scheme.clone();

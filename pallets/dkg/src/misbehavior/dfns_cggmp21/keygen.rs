@@ -141,11 +141,8 @@ pub fn invalid_decommitment<T: Config>(
 	let round1_msg = postcard::from_bytes::<MsgRound1<DefaultDigest>>(&round1.message)
 		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-	let round2_msg =
-		postcard::from_bytes::<MsgRound2Broad<Secp256k1>>(&round2a.message).map_err(|e| {
-			eprintln!("Error: {:?}", e);
-			Error::<T>::MalformedRoundMessage
-		})?;
+	let round2_msg = postcard::from_bytes::<MsgRound2Broad<Secp256k1>>(&round2a.message)
+		.map_err(|e| Error::<T>::MalformedRoundMessage)?;
 	let hash_commit = tag.digest(round2_msg);
 
 	ensure!(round1_msg.commitment != hash_commit, Error::<T>::ValidDecommitment);
