@@ -252,6 +252,11 @@ pub mod pallet {
 	pub(super) type MinRestakingBond<T: Config> =
 		StorageValue<_, BalanceOf<T>, ValueQuery, DefaultMinRestakingBond<T>>;
 
+	/// The total restake amount in the system
+	#[pallet::storage]
+	#[pallet::getter(fn total_restake)]
+	pub(super) type TotalRestake<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+
 	/// The number of jobs completed by a validator in era
 	#[pallet::storage]
 	#[pallet::getter(fn validator_points_per_session)]
@@ -289,7 +294,7 @@ pub mod pallet {
 					// compute rewards with last session restakers
 					// and set new era
 					if staking_era.index > restaker_era.index {
-						let _ = Self::compute_rewards(restaker_era.index);
+						let _ = Self::compute_rewards(staking_era.clone(), restaker_era.index);
 						ActiveRestakerEra::<T>::put(staking_era);
 					}
 				}
@@ -355,6 +360,10 @@ pub mod pallet {
 				max_active_services,
 			)?;
 			let total_profile_restake = profile.get_total_profile_restake();
+
+			// add the restake to system restake
+			let total_system_restake = TotalRestake::<T>::get();
+			TotalRestake::<T>::put(total_system_restake.saturating_add(total_profile_restake));
 
 			// Restaking amount of profile should meet min Restaking amount requirement.
 			let min_restaking_bond = MinRestakingBond::<T>::get();
@@ -470,6 +479,7 @@ pub mod pallet {
 				let value = profile_before_update
 					.get_total_profile_restake()
 					.saturating_sub(updated_profile.get_total_profile_restake());
+
 				let era = Self::active_restaker_era().ok_or(Error::<T>::InvalidEraToReward)?.index
 					+ T::BondingDuration::get();
 
@@ -477,6 +487,18 @@ pub mod pallet {
 					.unlocking
 					.try_push(UnlockChunk { value, era })
 					.map_err(|_| Error::<T>::NoMoreChunks)?;
+
+				// remove the unlocked amount
+				let total_system_restake = TotalRestake::<T>::get();
+				TotalRestake::<T>::put(total_system_restake.saturating_sub(value));
+			} else {
+				let value_increased = updated_profile
+					.get_total_profile_restake()
+					.saturating_sub(profile_before_update.get_total_profile_restake());
+
+				// update the unlocked amount
+				let total_system_restake = TotalRestake::<T>::get();
+				TotalRestake::<T>::put(total_system_restake.saturating_add(value_increased));
 			}
 
 			let profile_roles: BoundedVec<RoleType, T::MaxRolesPerAccount> =
@@ -538,6 +560,10 @@ pub mod pallet {
 				// the moment.
 				return Err(Error::<T>::ProfileDeleteRequestFailed.into());
 			}
+
+			// remove the restaker amount from total restake
+			let total_system_restake = TotalRestake::<T>::get();
+			TotalRestake::<T>::put(total_system_restake.saturating_sub(ledger.total_restake()));
 
 			Self::deposit_event(Event::<T>::ProfileDeleted { account: restaker_account.clone() });
 

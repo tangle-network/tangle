@@ -334,6 +334,66 @@ fn test_unbond_funds_should_work() {
 }
 
 #[test]
+fn total_restake_should_calculate_correctly() {
+	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
+		Staking::bond_extra(RuntimeOrigin::signed(mock_pub_key(1)), 5000).unwrap();
+		let active_era_info = ActiveEraInfo { index: Session::current_index(), start: Some(0) };
+		ActiveRestakerEra::<Runtime>::put(active_era_info);
+
+		// Lets create shared profile.
+		let profile = SharedRestakeProfile {
+			records: BoundedVec::try_from(vec![
+				Record {
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
+					amount: None,
+				},
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+					amount: None,
+				},
+			])
+			.unwrap(),
+			amount: 6000,
+		};
+
+		assert_ok!(Roles::create_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			Profile::Shared(profile),
+			None
+		));
+
+		assert_eq!(TotalRestake::<Runtime>::get(), 6000);
+
+		let updated_profile = SharedRestakeProfile {
+			records: BoundedVec::try_from(vec![
+				Record {
+					role: RoleType::Tss(ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
+					amount: None,
+				},
+				Record {
+					role: RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16),
+					amount: None,
+				},
+			])
+			.unwrap(),
+			amount: 5000,
+		};
+
+		assert_ok!(Roles::update_profile(
+			RuntimeOrigin::signed(mock_pub_key(1)),
+			Profile::Shared(updated_profile),
+		));
+
+		assert_eq!(TotalRestake::<Runtime>::get(), 5000);
+
+		// Lets delete profile by opting out of all services.
+		assert_ok!(Roles::delete_profile(RuntimeOrigin::signed(mock_pub_key(1))));
+
+		assert_eq!(TotalRestake::<Runtime>::get(), 0);
+	});
+}
+
+#[test]
 fn test_reward_dist_works_as_expected_with_multiple_validator() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		let _total_inflation_reward = 10_000;
@@ -359,7 +419,9 @@ fn test_reward_dist_works_as_expected_with_multiple_validator() {
 		}
 
 		// The reward is 1000, we have 5 authorities
-		assert_ok!(Roles::compute_rewards(1));
+		let active_era_info = ActiveEraInfo { index: Session::current_index(), start: Some(0) };
+
+		assert_ok!(Roles::compute_rewards(active_era_info, 1));
 		assert!(ValidatorJobsInEra::<Runtime>::get().is_empty());
 
 		// Rewards math
@@ -437,7 +499,9 @@ fn test_reward_dist_takes_restake_into_account() {
 		}
 
 		// The reward is 1000, we have 5 authorities
-		assert_ok!(Roles::compute_rewards(1));
+		let active_era_info = ActiveEraInfo { index: Session::current_index(), start: Some(0) };
+
+		assert_ok!(Roles::compute_rewards(active_era_info, 1));
 		assert!(ValidatorJobsInEra::<Runtime>::get().is_empty());
 
 		// Rewards math
@@ -494,7 +558,9 @@ fn test_reward_dist_handles_less_than_ideal_restake() {
 		}
 
 		// The reward is 10_000, we have 1 authority
-		assert_ok!(Roles::compute_rewards(1));
+		let active_era_info = ActiveEraInfo { index: Session::current_index(), start: Some(0) };
+
+		assert_ok!(Roles::compute_rewards(active_era_info, 1));
 		assert!(ValidatorJobsInEra::<Runtime>::get().is_empty());
 
 		// Rewards math
