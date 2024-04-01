@@ -17,6 +17,7 @@
 use crate::{BalanceOf, Config};
 use frame_support::pallet_prelude::*;
 use sp_runtime::traits::Zero;
+use sp_runtime::Saturating;
 use sp_std::vec::Vec;
 use tangle_primitives::roles::RoleType;
 
@@ -97,10 +98,11 @@ impl<T: Config> Profile<T> {
 	/// Returns the total profile restake.
 	pub fn get_total_profile_restake(&self) -> BalanceOf<T> {
 		match self {
-			Profile::Independent(profile) => profile
-				.records
-				.iter()
-				.fold(Zero::zero(), |acc, record| acc + record.amount.unwrap_or_default()),
+			Profile::Independent(profile) => {
+				profile.records.iter().fold(Zero::zero(), |acc, record| {
+					acc.saturating_add(record.amount.unwrap_or_default())
+				})
+			},
 			Profile::Shared(profile) => profile.amount,
 		}
 	}

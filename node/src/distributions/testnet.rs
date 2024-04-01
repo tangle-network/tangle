@@ -108,7 +108,7 @@ pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 		.collect()
 }
 
-pub fn get_substrate_balance_distribution() -> Vec<(AccountId32, Balance)> {
+pub fn get_edgeware_snapshot_distribution() -> Vec<(AccountId32, Balance)> {
 	const ONE_TOKEN: u128 = 1_000_000_000_000_000_000;
 	const ENDOWMENT: u128 = 100 * ONE_TOKEN;
 	get_edgeware_snapshot_list()

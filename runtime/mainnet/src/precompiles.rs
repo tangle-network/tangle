@@ -12,6 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+use pallet_evm_precompile_balances_erc20::{Erc20BalancesPrecompile, Erc20Metadata};
 use pallet_evm_precompile_batch::BatchPrecompile;
 use pallet_evm_precompile_blake2::Blake2F;
 use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
@@ -31,6 +32,32 @@ use precompile_utils::precompile_set::{
 };
 
 type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, CallableByPrecompile);
+
+pub struct NativeErc20Metadata;
+
+/// ERC20 metadata for the native token.
+impl Erc20Metadata for NativeErc20Metadata {
+	/// Returns the name of the token.
+	fn name() -> &'static str {
+		"Tangle Network Token"
+	}
+
+	/// Returns the symbol of the token.
+	fn symbol() -> &'static str {
+		"TNT"
+	}
+
+	/// Returns the decimals places of the token.
+	fn decimals() -> u8 {
+		18
+	}
+
+	/// Must return `true` only if it represents the main native currency of
+	/// the network. It must be the currency used in `pallet_evm`.
+	fn is_native_currency() -> bool {
+		true
+	}
+}
 
 #[precompile_utils::precompile_name_from_address]
 pub type WebbPrecompilesAt<R> = (
@@ -57,6 +84,11 @@ pub type WebbPrecompilesAt<R> = (
 		(CallableByContract, CallableByPrecompile),
 	>,
 	// Moonbeam precompiles
+	PrecompileAt<
+		AddressU64<2050>,
+		Erc20BalancesPrecompile<R, NativeErc20Metadata>,
+		(CallableByContract, CallableByPrecompile),
+	>,
 	PrecompileAt<
 		AddressU64<2051>,
 		DemocracyPrecompile<R>,

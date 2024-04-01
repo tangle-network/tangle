@@ -92,18 +92,13 @@ pub fn get_edgeware_genesis_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/edgeware_genesis_participants.json")
 }
 
-pub fn get_faucet_evm_list() -> Vec<H160> {
-	read_contents_to_evm_accounts("node/src/distributions/data/evm_faucet_addresses.json")
-}
-
 pub fn get_bridge_evm_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/evm_bridge_addresses.json")
 }
 
-pub fn get_faucet_substrate_list() -> Vec<AccountId32> {
-	read_contents_to_substrate_accounts_list(
-		"node/src/distributions/data/substrate_faucet_addresses.json",
-	)
+fn get_leaderboard_distribution() -> BTreeMap<AccountId32, f64> {
+	// leaderboard data last updated : 27/03/2024
+	read_contents_to_substrate_accounts("node/src/distributions/data/leaderboard_addresses.json")
 }
 
 fn get_edgeware_snapshot_list() -> BTreeMap<AccountId32, f64> {
@@ -126,10 +121,6 @@ fn get_team_vesting_only_cliff_accounts() -> BTreeMap<AccountId32, f64> {
 
 fn get_team_vesting_accounts() -> BTreeMap<AccountId32, f64> {
 	read_contents_to_substrate_accounts("node/src/distributions/data/webb_team_distributions.json")
-}
-
-pub fn get_discord_list() -> Vec<H160> {
-	read_contents_to_evm_accounts("node/src/distributions/data/discord_evm_addresses.json")
 }
 
 pub fn get_polkadot_validator_address_list() -> Vec<AccountId32> {
@@ -194,35 +185,22 @@ pub fn get_edgeware_genesis_balance_distribution() -> DistributionResult {
 }
 
 pub fn get_leaderboard_balance_distribution() -> DistributionResult {
-	let discord_list: Vec<(MultiAddress, u64)> = get_discord_list()
-		.into_iter()
-		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), ONE_HUNDRED_POINTS))
-		.collect();
-
-	let faucet_evm_list: Vec<(MultiAddress, u64)> = get_faucet_evm_list()
-		.into_iter()
-		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), ONE_HUNDRED_POINTS))
-		.collect();
-
-	let faucet_substrate_list: Vec<(MultiAddress, u64)> = get_faucet_substrate_list()
-		.into_iter()
-		.map(|address| (MultiAddress::Native(address), ONE_HUNDRED_POINTS))
-		.collect();
-
 	let bridge_evm_list: Vec<(MultiAddress, u64)> = get_bridge_evm_list()
 		.into_iter()
 		.map(|address| (MultiAddress::EVM(EthereumAddress(address.0)), ONE_HUNDRED_POINTS))
 		.collect();
 
-	let leaderboard_points: Vec<(MultiAddress, u64)> = vec![];
+	let leaderboard_points: Vec<(MultiAddress, u64)> = get_leaderboard_distribution()
+		.into_iter()
+		.map(|(address, points)| (MultiAddress::Native(address), points as u64))
+		.collect();
+
 	// Chain all point lists together
-	let points_list = discord_list
+	let points_list = bridge_evm_list
 		.into_iter()
 		.chain(leaderboard_points)
-		.chain(faucet_evm_list)
-		.chain(faucet_substrate_list)
-		.chain(bridge_evm_list)
 		.collect::<Vec<(MultiAddress, u64)>>();
+
 	// Sum all the points
 	let total_points = points_list.iter().map(|(_, points)| points).sum::<u64>();
 	let combined_balances: Vec<(MultiAddress, u128)> = points_list
@@ -240,7 +218,7 @@ pub fn get_leaderboard_balance_distribution() -> DistributionResult {
 	)
 }
 
-pub fn get_substrate_balance_distribution() -> DistributionResult {
+pub fn get_edgeware_snapshot_distribution() -> DistributionResult {
 	let arr = get_edgeware_snapshot_list()
 		.into_iter()
 		.filter(|(_, value)| *value > 0.0)
@@ -541,11 +519,15 @@ fn test_distribution_shares() {
 	// ============== compute edgeware distribution total amount ====================== //
 	let edgeware_genesis_list = get_edgeware_genesis_balance_distribution();
 
-	let total_edgeware_claims_amount: u128 =
-		edgeware_genesis_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
+	let total_edgeware_claims_amount: u128 = edgeware_genesis_list
+		.claims
+		.clone()
+		.into_iter()
+		.map(|(_, amount, _)| amount)
+		.sum();
 	let mut total_edgeware_vesting_amount: u128 = Default::default();
 
-	for (_acc, vesting) in edgeware_genesis_list.vesting.into_iter() {
+	for (_acc, vesting) in edgeware_genesis_list.vesting.clone().into_iter() {
 		let cliff_vesting = vesting[0].0;
 		let post_cliff_vesting = vesting[1].0;
 		total_edgeware_vesting_amount += cliff_vesting + post_cliff_vesting;
@@ -563,13 +545,17 @@ fn test_distribution_shares() {
 	); // 0.9499999%
 
 	// ============== compute edgeware snapshot distribution total amount ====================== //
-	let edgeware_snapshot_list = get_substrate_balance_distribution();
+	let edgeware_snapshot_list = get_edgeware_snapshot_distribution();
 
-	let total_edgeware_snapshot_claims_amount: u128 =
-		edgeware_snapshot_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
+	let total_edgeware_snapshot_claims_amount: u128 = edgeware_snapshot_list
+		.claims
+		.clone()
+		.into_iter()
+		.map(|(_, amount, _)| amount)
+		.sum();
 	let mut total_edgeware_snapshot_vesting_amount: u128 = Default::default();
 
-	for (_acc, vesting) in edgeware_snapshot_list.vesting.into_iter() {
+	for (_acc, vesting) in edgeware_snapshot_list.vesting.clone().into_iter() {
 		let cliff_vesting = vesting[0].0;
 		let post_cliff_vesting = vesting[1].0;
 		total_edgeware_snapshot_vesting_amount += cliff_vesting + post_cliff_vesting;
@@ -589,18 +575,22 @@ fn test_distribution_shares() {
 	// ============== compute leaderboard distribution total amount ====================== //
 	let leaderboard_genesis_list = get_leaderboard_balance_distribution();
 
-	let total_leaderboard_claims_amount: u128 =
-		leaderboard_genesis_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
+	let total_leaderboard_claims_amount: u128 = leaderboard_genesis_list
+		.claims
+		.clone()
+		.into_iter()
+		.map(|(_, amount, _)| amount)
+		.sum();
 	let mut total_leaderboard_vesting_amount: u128 = Default::default();
 
-	for (_acc, vesting) in leaderboard_genesis_list.vesting.into_iter() {
+	for (_acc, vesting) in leaderboard_genesis_list.vesting.clone().into_iter() {
 		let cliff_vesting = vesting[0].0;
 		let post_cliff_vesting = vesting[1].0;
 		total_leaderboard_vesting_amount += cliff_vesting + post_cliff_vesting;
 	}
 
-	assert_eq!(total_leaderboard_claims_amount, 100000000000000000003008); // 100000 TNT
-	assert_eq!(total_leaderboard_vesting_amount, 1900000000000000274989056); // 1900000 TNT
+	assert_eq!(total_leaderboard_claims_amount, 100000000000000000001092); // 100000 TNT
+	assert_eq!(total_leaderboard_vesting_amount, 1900000000000000087640984); // 1900000 TNT
 	assert_eq!(
 		Perbill::from_rational(total_leaderboard_claims_amount, TOTAL_SUPPLY),
 		Perbill::from_float(0.001)
@@ -613,11 +603,15 @@ fn test_distribution_shares() {
 	// ============== compute polkadot distribution total amount ====================== //
 	let polkadot_genesis_list = get_polkadot_validator_distribution();
 
-	let total_polkadot_claims_amount: u128 =
-		polkadot_genesis_list.claims.into_iter().map(|(_, amount, _)| amount).sum();
+	let total_polkadot_claims_amount: u128 = polkadot_genesis_list
+		.claims
+		.clone()
+		.into_iter()
+		.map(|(_, amount, _)| amount)
+		.sum();
 	let mut total_polkadot_vesting_amount: u128 = Default::default();
 
-	for (_acc, vesting) in polkadot_genesis_list.vesting.into_iter() {
+	for (_acc, vesting) in polkadot_genesis_list.vesting.clone().into_iter() {
 		let cliff_vesting = vesting[0].0;
 		let post_cliff_vesting = vesting[1].0;
 		total_polkadot_vesting_amount += cliff_vesting + post_cliff_vesting;
@@ -633,6 +627,28 @@ fn test_distribution_shares() {
 		Perbill::from_rational(total_polkadot_vesting_amount, TOTAL_SUPPLY),
 		Perbill::from_float(0.0095)
 	); // 0.95%
+
+	// Test total claims
+	let total_claims = edgeware_genesis_list.claims.len()
+		+ edgeware_snapshot_list.claims.len()
+		+ polkadot_genesis_list.claims.len()
+		+ leaderboard_genesis_list.claims.len();
+	assert_eq!(total_claims, 29452);
+
+	let total_vesting = edgeware_genesis_list.vesting.len()
+		+ edgeware_snapshot_list.vesting.len()
+		+ polkadot_genesis_list.vesting.len()
+		+ leaderboard_genesis_list.vesting.len();
+	assert_eq!(total_vesting, 29452);
+
+	let unique_dist = crate::distributions::get_unique_distribution_results(vec![
+		get_edgeware_genesis_balance_distribution(),
+		get_leaderboard_balance_distribution(),
+		get_edgeware_snapshot_distribution(),
+		get_polkadot_validator_distribution(),
+	]);
+	assert_eq!(unique_dist.claims.len(), 10689);
+	assert_eq!(unique_dist.vesting.len(), 29140);
 
 	// ================= compute team account distribution ======================= //
 	let team_balance_account_distribution = get_team_balance_distribution();
@@ -669,7 +685,7 @@ fn test_distribution_shares() {
 		+ total_team_claims_amount;
 	//+ total_endowmwnent;
 
-	assert_eq!(total_genesis_endowment, 100000000000000007839555756); // 100000000 TNT
+	assert_eq!(total_genesis_endowment, 100000000000000007652205768); // 100000000 TNT
 	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one());
 	// 100%
 }

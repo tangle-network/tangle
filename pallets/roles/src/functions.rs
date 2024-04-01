@@ -10,6 +10,7 @@ use frame_support::{
 use pallet_staking::ActiveEra;
 use pallet_staking::EraPayout;
 use sp_runtime::SaturatedConversion;
+use sp_runtime::Saturating;
 use sp_runtime::{traits::Convert, Perbill};
 use sp_staking::offence::Offence;
 use sp_std::collections::btree_map::BTreeMap;
@@ -59,7 +60,7 @@ impl<T: Config> Pallet<T> {
 		// the total amount staked to only increase or remain the same across active roles.
 		if updated_profile.is_shared() && current_ledger.profile.is_independent() {
 			if active_jobs.len() > 0 {
-				let mut active_role_restaking_sum = Zero::zero();
+				let mut active_role_restaking_sum: BalanceOf<T> = Zero::zero();
 				for role in roles_with_active_jobs.iter() {
 					let current_role_restaking_amount = current_ledger
 						.profile
@@ -67,7 +68,8 @@ impl<T: Config> Pallet<T> {
 						.iter()
 						.find_map(|record| if record.role == *role { record.amount } else { None })
 						.unwrap_or_else(|| Zero::zero());
-					active_role_restaking_sum += current_role_restaking_amount;
+					active_role_restaking_sum =
+						active_role_restaking_sum.saturating_add(current_role_restaking_amount);
 				}
 
 				ensure!(
@@ -254,55 +256,57 @@ impl<T: Config> Pallet<T> {
 	/// # Errors
 	///
 	/// Returns an error if any dispatch operation fails.
-	pub fn compute_rewards(current_era_index: EraIndex) -> DispatchResult {
-		let now_as_millis_u64 = T::UnixTime::now().as_millis().saturated_into::<u64>();
+	pub fn compute_rewards(
+		active_era: ActiveEraInfo,
+		current_era_index: EraIndex,
+	) -> DispatchResult {
+		// Note: active_era_start can be None if end era is called during genesis config.
+		if let Some(active_era_start) = active_era.start {
+			let now_as_millis_u64 = T::UnixTime::now().as_millis().saturated_into::<u64>();
 
-		let era_duration = (now_as_millis_u64.defensive_saturating_sub(0)) // TODO : Fix calculation
-			.saturated_into::<u64>();
+			let era_duration = (now_as_millis_u64.defensive_saturating_sub(active_era_start))
+				.saturated_into::<u64>();
 
-		let mut total_restake: BalanceOf<T> = Default::default();
-		// TODO : This is an unbounded query, potentially dangerous
-		for (_restaker, ledger) in Ledger::<T>::iter() {
-			total_restake += ledger.total_restake();
-		}
+			let total_restake: BalanceOf<T> = TotalRestake::<T>::get();
 
-		let issuance = T::Currency::total_issuance();
+			let issuance = T::Currency::total_issuance();
 
-		let (total_rewards, _remainder) =
-			T::RestakerEraPayout::era_payout(total_restake, issuance, era_duration);
+			let (total_rewards, _remainder) =
+				T::RestakerEraPayout::era_payout(total_restake, issuance, era_duration);
 
-		let active_validator_rewards: BTreeMap<_, _> =
-			Self::compute_active_validator_rewards(total_rewards / 2_u32.into());
+			let active_validator_rewards: BTreeMap<_, _> =
+				Self::compute_active_validator_rewards(total_rewards / 2_u32.into());
 
-		let role_type_validator_rewards: BTreeMap<_, _> =
-			Self::compute_validator_rewards_by_restake(
-				total_rewards / 2_u32.into(),
-				current_era_index,
-			);
+			let role_type_validator_rewards: BTreeMap<_, _> =
+				Self::compute_validator_rewards_by_restake(
+					total_rewards / 2_u32.into(),
+					current_era_index,
+				);
 
-		let mut combined_validator_rewards: BTreeMap<_, _> = Default::default();
-		for (validator, role_reward) in role_type_validator_rewards.iter() {
-			if let Some(reward) = active_validator_rewards.get(&validator) {
-				combined_validator_rewards
-					.insert(validator.clone(), role_reward.saturating_add(*reward));
-			} else {
-				combined_validator_rewards.insert(validator.clone(), *role_reward);
+			let mut combined_validator_rewards: BTreeMap<_, _> = Default::default();
+			for (validator, role_reward) in role_type_validator_rewards.iter() {
+				if let Some(reward) = active_validator_rewards.get(&validator) {
+					combined_validator_rewards
+						.insert(validator.clone(), role_reward.saturating_add(*reward));
+				} else {
+					combined_validator_rewards.insert(validator.clone(), *role_reward);
+				}
 			}
+
+			// set the era restaker reward point storage
+			let mut era_reward_points = <ErasRestakeRewardPoints<T>>::get(&current_era_index);
+			era_reward_points.total = total_rewards.try_into().unwrap_or(0_u32);
+
+			// add individual reward points to each eligible validator
+			for (validator, reward) in combined_validator_rewards.into_iter() {
+				let reward_as_u32: u32 = reward.try_into().unwrap_or(0_u32);
+				era_reward_points.individual.insert(validator.clone(), reward_as_u32.into());
+			}
+
+			ErasRestakeRewardPoints::<T>::insert(current_era_index, era_reward_points);
+			ValidatorJobsInEra::<T>::take();
+			Self::deposit_event(Event::<T>::RolesRewardSet { total_rewards });
 		}
-
-		// set the era restaker reward point storage
-		let mut era_reward_points = <ErasRestakeRewardPoints<T>>::get(&current_era_index);
-		era_reward_points.total = total_rewards.try_into().unwrap_or(0_u32);
-
-		// add individual reward points to each eligible validator
-		for (validator, reward) in combined_validator_rewards.into_iter() {
-			let reward_as_u32: u32 = reward.try_into().unwrap_or(0_u32);
-			era_reward_points.individual.insert(validator.clone(), reward_as_u32.into());
-		}
-
-		ErasRestakeRewardPoints::<T>::insert(current_era_index, era_reward_points);
-		ValidatorJobsInEra::<T>::take();
-		Self::deposit_event(Event::<T>::RolesRewardSet { total_rewards });
 
 		Ok(())
 	}
@@ -339,7 +343,7 @@ impl<T: Config> Pallet<T> {
 
 		// Calculate the total jobs for all active validators
 		let total_jobs_completed: u32 =
-			active_validators.values().rfold(0_u32.into(), |acc, &x| acc + x);
+			active_validators.values().rfold(0_u32.into(), |acc, &x| acc.saturating_add(x));
 
 		// Distribute rewards to active validators based on their share
 		for (validator, jobs_completed) in active_validators.iter() {
