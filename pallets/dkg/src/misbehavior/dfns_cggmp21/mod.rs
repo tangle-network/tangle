@@ -24,6 +24,7 @@ use crate::*;
 
 pub mod aux_only;
 mod hashing_rng;
+mod hex_or_bin;
 mod integer;
 pub mod keygen;
 pub mod sign;

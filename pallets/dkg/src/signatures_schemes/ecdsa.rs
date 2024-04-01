@@ -52,11 +52,6 @@ pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 	chain_code: Option<[u8; 32]>,
 ) -> DispatchResult {
 	use k256::elliptic_curve::group::GroupEncoding;
-	let maybe_affine_point = k256::AffinePoint::from_bytes(expected_key.into());
-	if maybe_affine_point.is_none().into() {
-		Err(Error::<T>::InvalidPublicKey)?;
-	}
-
 	let pub_key = match derivation_path.as_ref().zip(chain_code) {
 		Some((path, chain_code)) => {
 			derive_child_public_key::<T, Secp256k1>(expected_key, path, chain_code)?
@@ -70,8 +65,8 @@ pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 	}
 	let verifying_key = k256::ecdsa::VerifyingKey::from_affine(pub_key_point.unwrap())
 		.map_err(|_| Error::<T>::InvalidPublicKey)?;
-	let signature =
-		k256::ecdsa::Signature::from_slice(signature).map_err(|_| Error::<T>::InvalidSignature)?;
+	let signature = k256::ecdsa::Signature::from_slice(signature)
+		.map_err(|_| Error::<T>::InvalidSignatureDeserialization)?;
 
 	ensure!(
 		verifying_key.verify_prehash(msg, &signature).map(|_| signature).is_ok(),
@@ -99,11 +94,6 @@ pub fn verify_secp256r1_ecdsa_signature<T: Config>(
 	chain_code: Option<[u8; 32]>,
 ) -> DispatchResult {
 	use p256::elliptic_curve::group::GroupEncoding;
-	let maybe_affine_point = p256::AffinePoint::from_bytes(expected_key.into());
-	if maybe_affine_point.is_none().into() {
-		Err(Error::<T>::InvalidPublicKey)?;
-	}
-
 	let pub_key = match derivation_path.as_ref().zip(chain_code) {
 		Some((path, chain_code)) => {
 			derive_child_public_key::<T, Secp256r1>(expected_key, path, chain_code)?
@@ -117,8 +107,8 @@ pub fn verify_secp256r1_ecdsa_signature<T: Config>(
 	}
 	let verifying_key = p256::ecdsa::VerifyingKey::from_affine(pub_key_point.unwrap())
 		.map_err(|_| Error::<T>::InvalidPublicKey)?;
-	let signature =
-		p256::ecdsa::Signature::from_slice(signature).map_err(|_| Error::<T>::InvalidSignature)?;
+	let signature = p256::ecdsa::Signature::from_slice(signature)
+		.map_err(|_| Error::<T>::InvalidSignatureDeserialization)?;
 
 	ensure!(
 		verifying_key.verify_prehash(msg, &signature).map(|_| signature).is_ok(),

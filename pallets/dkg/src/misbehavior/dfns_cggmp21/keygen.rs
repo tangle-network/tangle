@@ -41,6 +41,37 @@ pub enum Tag<'a> {
 	},
 }
 
+#[derive(Clone)]
+pub struct Rid<const N: usize>([u8; N]);
+
+impl<const N: usize> AsRef<[u8]> for Rid<N> {
+	fn as_ref(&self) -> &[u8] {
+		&self.0
+	}
+}
+
+impl<const N: usize> AsMut<[u8]> for Rid<N> {
+	fn as_mut(&mut self) -> &mut [u8] {
+		&mut self.0
+	}
+}
+
+impl<const N: usize> Default for Rid<N> {
+	fn default() -> Self {
+		Self([0u8; N])
+	}
+}
+
+impl<const N: usize> hex::FromHex for Rid<N>
+where
+	[u8; N]: hex::FromHex,
+{
+	type Error = <[u8; N] as hex::FromHex>::Error;
+	fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, Self::Error> {
+		hex::FromHex::from_hex(hex).map(Self)
+	}
+}
+
 /// Message from round 1
 #[derive(Clone, RuntimeDebug, serde::Deserialize, udigest::Digestable)]
 #[serde(bound = "")]
@@ -53,6 +84,7 @@ pub struct MsgRound1<D: Digest> {
 }
 
 /// Message from round 2 broadcasted to everyone
+#[serde_with::serde_as]
 #[derive(Clone, serde::Deserialize, udigest::Digestable)]
 #[serde(bound = "")]
 #[udigest(bound = "")]
@@ -60,15 +92,15 @@ pub struct MsgRound1<D: Digest> {
 #[allow(non_snake_case)]
 pub struct MsgRound2Broad<E: Curve> {
 	/// `rid_i`
-	#[serde(with = "hex")]
+	#[serde_as(as = "super::hex_or_bin::HexOrBin")]
 	#[udigest(as_bytes)]
-	pub rid: [u8; SECURITY_BYTES],
+	pub rid: Rid<{ SECURITY_BYTES }>,
 	/// $\vec S_i$
 	pub F: Polynomial<Point<E>>,
 	/// $A_i$
 	pub sch_commit: schnorr_pok::Commit<E>,
 	/// $u_i$
-	#[serde(with = "hex")]
+	#[serde(with = "hex::serde")]
 	#[udigest(as_bytes)]
 	pub decommit: [u8; SECURITY_BYTES],
 }
@@ -109,8 +141,11 @@ pub fn invalid_decommitment<T: Config>(
 	let round1_msg = postcard::from_bytes::<MsgRound1<DefaultDigest>>(&round1.message)
 		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
-	let round2_msg = postcard::from_bytes::<MsgRound2Broad<Secp256k1>>(&round2a.message)
-		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
+	let round2_msg =
+		postcard::from_bytes::<MsgRound2Broad<Secp256k1>>(&round2a.message).map_err(|e| {
+			eprintln!("Error: {:?}", e);
+			Error::<T>::MalformedRoundMessage
+		})?;
 	let hash_commit = tag.digest(round2_msg);
 
 	ensure!(round1_msg.commitment != hash_commit, Error::<T>::ValidDecommitment);

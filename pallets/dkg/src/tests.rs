@@ -47,6 +47,11 @@ fn mock_signature_secp256k1_ecdsa(pub_key: ecdsa::Public, role_key: ecdsa::Publi
 	let hash = keccak_256(&msg);
 	let signature: ecdsa::Signature =
 		ecdsa_sign_prehashed(tangle_crypto_primitives::ROLE_KEY_TYPE, &pub_key, &hash).unwrap();
+	// sanity check
+	assert!(
+		sp_io::crypto::ecdsa_verify_prehashed(&signature, &hash, &pub_key),
+		"Invalid signature"
+	);
 	signature.encode()
 }
 
@@ -411,7 +416,7 @@ fn signature_verification_works_secp256k1_ecdsa() {
 		> {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			derivation_path: None,
-			signature: signature.try_into().unwrap(),
+			signature: signature[..64].to_vec().try_into().unwrap(),
 			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
 			chain_code: None,
@@ -424,6 +429,7 @@ fn signature_verification_works_secp256k1_ecdsa() {
 		);
 
 		let signature = mock_signature_secp256k1_ecdsa(pub_key, pub_key);
+		let data_hash = keccak_256(&pub_key.to_raw_vec());
 		let job_to_verify = DKGTSSSignatureResult::<
 			MaxDataLen,
 			MaxKeyLen,
@@ -432,8 +438,8 @@ fn signature_verification_works_secp256k1_ecdsa() {
 		> {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			derivation_path: None,
-			signature: signature.try_into().unwrap(),
-			data: pub_key.to_raw_vec().try_into().unwrap(),
+			signature: signature[..64].to_vec().try_into().unwrap(),
+			data: data_hash.to_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
 			chain_code: None,
 		};
@@ -498,8 +504,13 @@ fn signature_verification_works_secp256r1_ecdsa() {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256r1,
 			derivation_path: None,
 			signature: signature.to_vec().try_into().unwrap(),
-			data: message.to_vec().try_into().unwrap(),
-			verifying_key: public_key.to_sec1_bytes().to_vec().try_into().unwrap(),
+			data: prehash.to_vec().try_into().unwrap(),
+			verifying_key: public_key
+				.to_encoded_point(true)
+				.to_bytes()
+				.to_vec()
+				.try_into()
+				.unwrap(),
 			chain_code: None,
 		};
 
@@ -569,7 +580,7 @@ fn dkg_key_rotation_works() {
 		let job_to_verify = DKGTSSKeyRotationResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			derivation_path: None,
-			signature: signature.try_into().unwrap(),
+			signature: signature[..64].to_vec().try_into().unwrap(),
 			key: curr_key.to_raw_vec().try_into().unwrap(),
 			new_key: new_key.to_raw_vec().try_into().unwrap(),
 			phase_one_id: 1,
@@ -587,22 +598,25 @@ fn dkg_key_rotation_works() {
 
 		let job_to_verify = DKGTSSKeyRotationResult {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
-			derivation_path: None,
-			signature: signature.clone().try_into().unwrap(),
+			signature: signature[..64].to_vec().try_into().unwrap(),
 			key: curr_key.to_raw_vec().try_into().unwrap(),
 			new_key: new_key.to_raw_vec().try_into().unwrap(),
 			phase_one_id: 1,
 			new_phase_one_id: 2,
+			derivation_path: None,
 			chain_code: None,
 		};
 		// should work with correct params
 		assert_ok!(DKG::verify(JobResult::DKGPhaseFour(job_to_verify)));
 		// should emit KeyRotated event
-		assert!(System::events().iter().any(|r| r.event
-			== RuntimeEvent::DKG(Event::KeyRotated {
-				from_job_id: 1,
-				to_job_id: 2,
-				signature: signature.clone()
-			})));
+		assert!(
+			System::events().iter().any(|r| r.event
+				== RuntimeEvent::DKG(Event::KeyRotated {
+					from_job_id: 1,
+					to_job_id: 2,
+					signature: signature[..64].to_vec(),
+				})),
+			"KeyRotated event not emitted"
+		);
 	});
 }
