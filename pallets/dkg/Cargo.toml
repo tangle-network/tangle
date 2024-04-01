@@ -40,10 +40,12 @@ udigest = { workspace = true, features = ["derive"] }
 generic-ec = { workspace = true, default-features = false, features = ["serde", "udigest", "curve-secp256k1", "curve-secp256r1", "curve-stark"] }
 generic-ec-zkp = { workspace = true, default-features = false, features = ["serde", "udigest", "alloc"] }
 starknet-crypto = { workspace = true, default-features = false }
-k256 = { workspace = true, features = ["arithmetic", "expose-field", "hash2curve", "alloc"], default-features = false }
+k256 = { workspace = true, default-features = false, features = ["hash2curve", "alloc", "ecdsa"] }
 p256 = { workspace = true, default-features = false, features = ["hash2curve", "alloc", "ecdsa"] }
+slip-10 = { version = "0.2", default-features = false, features = ["all-curves"] }
 ecdsa-core = { workspace = true, default-features = false  }
 generic-array = { version = "0.14.7", default-features = false }
+derivation-path = { workspace = true, default-features = false }
 
 # FROST specific dependencies
 frost-core = { workspace = true, default-features = false }

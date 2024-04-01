@@ -4,6 +4,7 @@ use crate::types::{
 	ParticipantKeyOf, ParticipantKeysOf, ZkSaaSCircuitResultOf, ZkSaaSProofResultOf,
 };
 use sp_runtime::traits::Zero;
+use sp_runtime::Saturating;
 use tangle_primitives::{
 	jobs::{
 		DKGTSSKeyRefreshResult, DKGTSSPhaseOneJobType, FallbackOptions, JobType, JobWithResult,
@@ -61,7 +62,7 @@ impl<T: Config> Pallet<T> {
 	pub(crate) fn get_next_job_id() -> Result<JobId, DispatchError> {
 		let current_job_id = NextJobId::<T>::get();
 		NextJobId::<T>::try_mutate(|job_id| -> DispatchResult {
-			*job_id += 1;
+			*job_id = job_id.saturating_add(1);
 			Ok(())
 		})?;
 		Ok(current_job_id)
@@ -85,7 +86,7 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		ValidatorRewards::<T>::try_mutate(validator, |existing| -> DispatchResult {
 			let existing = existing.get_or_insert_with(Default::default);
-			*existing += reward;
+			*existing = existing.saturating_add(reward);
 			Ok(())
 		})
 	}
@@ -231,6 +232,10 @@ impl<T: Config> Pallet<T> {
 								participants: new_participants,
 								threshold: new_threshold,
 								permitted_caller: phase1.clone().permitted_caller,
+								hd_wallet: match phase1.job_type {
+									JobType::DKGTSSPhaseOne(info) => info.hd_wallet,
+									_ => false,
+								},
 							}),
 
 							RoleType::ZkSaaS(role) => {
@@ -333,6 +338,7 @@ impl<T: Config> Pallet<T> {
 
 		let job_result = JobResult::DKGPhaseOne(DKGTSSKeySubmissionResultOf::<T> {
 			key: info.key.clone(),
+			chain_code: info.chain_code,
 			signatures: info.signatures,
 			participants: participant_keys,
 			threshold: job_info.job_type.clone().get_threshold().expect("Checked before"),
@@ -377,8 +383,8 @@ impl<T: Config> Pallet<T> {
 		// Validate existing result
 		ensure!(phase_one_result.ttl >= now, Error::<T>::ResultExpired);
 
-		let verifying_key = match phase_one_result.result {
-			JobResult::DKGPhaseOne(result) => result.key,
+		let (verifying_key, chain_code) = match phase_one_result.result {
+			JobResult::DKGPhaseOne(result) => (result.key, result.chain_code),
 			_ => return Err(Error::<T>::InvalidJobPhase.into()),
 		};
 		let job_result = JobResult::DKGPhaseTwo(DKGTSSSignatureResultOf::<T> {
@@ -386,7 +392,8 @@ impl<T: Config> Pallet<T> {
 			data: info.data,
 			verifying_key,
 			signature_scheme: info.signature_scheme,
-			derivation_path: None,
+			derivation_path: info.derivation_path,
+			chain_code,
 		});
 
 		let phase_one_job_info = KnownResults::<T>::get(
@@ -532,6 +539,7 @@ impl<T: Config> Pallet<T> {
 			signature: info.signature.clone(),
 			signature_scheme: info.signature_scheme.clone(),
 			derivation_path: None,
+			chain_code: None,
 		});
 
 		T::MPCHandler::verify(JobWithResult {

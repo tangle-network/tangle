@@ -38,3 +38,4 @@ resources/para-2076-wasm
 .vscode
 
 scripts/edg-balances-new.json
+*.venv

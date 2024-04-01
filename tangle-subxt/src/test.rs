@@ -71,7 +71,8 @@ async fn test_job_submission_event() {
 			threshold: 1u8,
 			permitted_caller: None,
 			role_type: roles::tss::ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1,
-			__subxt_unused_type_params: Default::default(),
+			hd_wallet: false,
+			__ignore: Default::default(),
 		}),
 		fallback: jobs::FallbackOptions::Destroy,
 	};
@@ -105,7 +106,8 @@ async fn test_job_submission_event() {
 			BoundedVec(bob_signature.0.to_vec()),
 		]),
 		threshold: 1,
-		__subxt_unused_type_params: Default::default(),
+		chain_code: None,
+		__ignore: Default::default(),
 	});
 
 	let job_result_tx = tangle_testnet_runtime::api::tx().jobs().submit_job_result(

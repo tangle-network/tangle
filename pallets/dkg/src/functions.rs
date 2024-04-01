@@ -28,7 +28,6 @@ use frame_support::{pallet_prelude::DispatchResult, sp_runtime::Saturating};
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::prelude::vec::Vec;
 use sp_core::Get;
-use sp_runtime::BoundedVec;
 use tangle_primitives::jobs::*;
 
 impl<T: Config> Pallet<T> {
@@ -157,15 +156,23 @@ impl<T: Config> Pallet<T> {
 				&data.data,
 				&data.signature,
 				&data.verifying_key,
+				&data.derivation_path,
+				data.chain_code,
 			),
 			DigitalSignatureScheme::EcdsaSecp256r1 => verify_secp256r1_ecdsa_signature::<T>(
 				&data.data,
 				&data.signature,
 				&data.verifying_key,
+				&data.derivation_path,
+				data.chain_code,
 			),
-			DigitalSignatureScheme::EcdsaStark => {
-				verify_stark_ecdsa_signature::<T>(&data.data, &data.signature, &data.verifying_key)
-			},
+			DigitalSignatureScheme::EcdsaStark => verify_stark_ecdsa_signature::<T>(
+				&data.data,
+				&data.signature,
+				&data.verifying_key,
+				&data.derivation_path,
+				data.chain_code,
+			),
 			DigitalSignatureScheme::SchnorrSr25519 => verify_schnorr_sr25519_signature::<T>(
 				&data.data,
 				&data.signature,
@@ -204,7 +211,7 @@ impl<T: Config> Pallet<T> {
 	/// Returns a `DispatchResult` indicating whether the key rotation verification was successful
 	/// or encountered an error.
 	fn verify_dkg_key_rotation(
-		data: DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen, T::MaxAdditionalParamsLen>,
+		res: DKGTSSKeyRotationResult<T::MaxKeyLen, T::MaxSignatureLen, T::MaxAdditionalParamsLen>,
 	) -> DispatchResult {
 		let emit_event = |data: DKGTSSKeyRotationResult<
 			T::MaxKeyLen,
@@ -220,25 +227,26 @@ impl<T: Config> Pallet<T> {
 			Ok(())
 		};
 
-		let encoded_data: BoundedVec<u8, T::MaxDataLen> =
-			data.new_key.to_vec().try_into().unwrap_or_default();
-		let signature = data.signature.clone();
-		let verifying_key = data.key.clone();
-		let signature_scheme = data.signature_scheme.clone();
-		let derivation_path = data.derivation_path.clone();
+		let data = sp_io::hashing::keccak_256(&res.new_key).to_vec().try_into().unwrap_or_default();
+		let signature = res.signature.clone();
+		let verifying_key = res.key.clone();
+		let signature_scheme = res.signature_scheme.clone();
+		let derivation_path = res.derivation_path.clone();
+		let chain_code = res.chain_code;
 		let sig_result_data: DKGTSSSignatureResult<
 			T::MaxDataLen,
 			T::MaxKeyLen,
 			T::MaxSignatureLen,
 			T::MaxAdditionalParamsLen,
 		> = DKGTSSSignatureResult {
-			data: encoded_data,
+			data,
 			signature,
 			verifying_key,
 			signature_scheme,
 			derivation_path,
+			chain_code,
 		};
 
-		Self::verify_dkg_signature(sig_result_data).and_then(|_| emit_event(data))
+		Self::verify_dkg_signature(sig_result_data).and_then(|_| emit_event(res))
 	}
 }

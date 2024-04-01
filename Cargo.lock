@@ -1477,17 +1477,40 @@ checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
 
 [[package]]
 name = "cggmp21"
-version = "0.1.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "051c2befb2a8a0f920d91bfda17a2e101f80a1e5dc6470b9f03434e40ca77012"
+checksum = "b4c7abfc40dd1933be1eb1a9d607336330754ed08ad59acc538d3352864514ec"
+dependencies = [
+ "cggmp21-keygen",
+ "digest 0.10.7",
+ "futures 0.3.30",
+ "generic-ec",
+ "generic-ec-zkp",
+ "hex",
+ "key-share",
+ "paillier-zk",
+ "rand_chacha 0.3.1",
+ "rand_core 0.6.4",
+ "round-based",
+ "serde",
+ "serde_with 2.3.3",
+ "sha2 0.10.8",
+ "thiserror",
+ "udigest",
+]
+
+[[package]]
+name = "cggmp21-keygen"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2a502901b03b7a77e31348435318ed5e0c01193322c145211d265e4b973f98e"
 dependencies = [
  "digest 0.10.7",
  "futures 0.3.30",
  "generic-ec",
  "generic-ec-zkp",
  "hex",
- "paillier-zk",
- "rand_chacha 0.3.1",
+ "key-share",
  "rand_core 0.6.4",
  "round-based",
  "serde",
@@ -2413,6 +2436,12 @@ dependencies = [
  "powerfmt",
  "serde",
 ]
+
+[[package]]
+name = "derivation-path"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e5c37193a1db1d8ed868c03ec7b152175f26160a5b740e5e484143877e0adf0"
 
 [[package]]
 name = "derivative"
@@ -4314,7 +4343,7 @@ dependencies = [
 
 [[package]]
 name = "frost-core"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "byteorder",
  "debugless-unwrap",
@@ -4640,9 +4669,9 @@ dependencies = [
 
 [[package]]
 name = "generic-ec"
-version = "0.1.4"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f20aec40cfb745f7af3d8e889bbfedbe1565cd383a645ceae86b32e8766d5060"
+checksum = "8f27328a31bb6dcce5ab6539cb13d5d206cd18c1f4a1b36e680129b037d6ea9a"
 dependencies = [
  "generic-ec-core",
  "generic-ec-curves",
@@ -4689,9 +4718,9 @@ dependencies = [
 
 [[package]]
 name = "generic-ec-zkp"
-version = "0.1.2"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aba23d4bd116ecc034402603a3d12c7032dd6c3476c6075b69eeae58d8054fa9"
+checksum = "a9b631ea71fa0294e80d479c5b952e276776c9abf1b1a542b48e66b83fe1828c"
 dependencies = [
  "generic-array 0.14.7",
  "generic-ec",
@@ -5646,6 +5675,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ecc2af9a1119c51f12a14607e783cb977bde58bc069ff0c3da1095e635d70654"
 dependencies = [
  "cpufeatures",
+]
+
+[[package]]
+name = "key-share"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b92d6a48de7507329eb252365d274b2d704d35a6616ca1be1292a2d96f2b4a59"
+dependencies = [
+ "displaydoc",
+ "generic-ec",
+ "generic-ec-zkp",
+ "hex",
+ "serde",
+ "serde_with 2.3.3",
+ "thiserror",
 ]
 
 [[package]]
@@ -7358,9 +7402,9 @@ dependencies = [
 
 [[package]]
 name = "paillier-zk"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4956496b1cb7ecf45e86844ae50a5c0ade430dd4d491de8d020adb95ca6f328"
+checksum = "390990e7d2f9a189043a2ce042cce3107955046561d5a89ae717dfc31b9c1ca4"
 dependencies = [
  "digest 0.10.7",
  "fast-paillier",
@@ -7374,7 +7418,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7561,9 +7605,10 @@ dependencies = [
 
 [[package]]
 name = "pallet-dkg"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "cggmp21",
+ "derivation-path",
  "digest 0.10.7",
  "ecdsa",
  "elliptic-curve",
@@ -7599,6 +7644,7 @@ dependencies = [
  "serde_with 3.6.1",
  "serdect",
  "sha2 0.10.8",
+ "slip-10",
  "smallvec",
  "snowbridge-milagro-bls",
  "sp-core",
@@ -7743,6 +7789,34 @@ dependencies = [
  "frame-system",
  "parity-scale-codec 3.6.9",
  "scale-info",
+]
+
+[[package]]
+name = "pallet-evm-precompile-balances-erc20"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "libsecp256k1",
+ "log",
+ "num_enum 0.5.11",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-timestamp",
+ "parity-scale-codec 3.6.9",
+ "paste",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3 0.10.8",
+ "slices",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
 ]
 
 [[package]]
@@ -8202,7 +8276,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "ethereum",
  "ethers",
@@ -8248,7 +8322,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs-rpc"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "jsonrpsee 0.20.3",
  "pallet-jobs-rpc-runtime-api",
@@ -8264,7 +8338,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs-rpc-runtime-api"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "parity-scale-codec 3.6.9",
  "sp-api",
@@ -8359,7 +8433,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-roles"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -8618,7 +8692,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-zksaas"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -12389,6 +12463,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "slip-10"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f20f0918d675ab26ca9fa3e2c42548356f54b7a09fb4633313756522ddd59f75"
+dependencies = [
+ "generic-array 0.14.7",
+ "generic-ec",
+ "hmac 0.12.1",
+ "sha2 0.10.8",
+ "subtle 2.5.0",
+]
+
+[[package]]
 name = "smallvec"
 version = "1.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -14202,7 +14289,7 @@ dependencies = [
 
 [[package]]
 name = "tangle"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "clap",
  "fc-api",
@@ -14303,7 +14390,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "parity-scale-codec 3.6.9",
  "scale-info",
@@ -14312,7 +14399,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -14340,7 +14427,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "evm-tracer",
  "fp-account",
@@ -14374,6 +14461,7 @@ dependencies = [
  "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-chain-id",
+ "pallet-evm-precompile-balances-erc20",
  "pallet-evm-precompile-batch",
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
@@ -14445,7 +14533,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "hex",
  "parity-scale-codec 3.6.9",
@@ -14460,7 +14548,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "evm-tracer",
  "fp-account",
@@ -14494,6 +14582,7 @@ dependencies = [
  "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-chain-id",
+ "pallet-evm-precompile-balances-erc20",
  "pallet-evm-precompile-batch",
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
@@ -14566,7 +14655,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-voter"
-version = "0.6.3"
+version = "0.6.5"
 dependencies = [
  "anyhow",
  "clap",

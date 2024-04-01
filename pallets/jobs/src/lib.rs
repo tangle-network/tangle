@@ -712,7 +712,7 @@ pub mod module {
 					ExistenceRequirement::KeepAlive,
 				)?;
 
-				result.ttl += extend_by;
+				result.ttl = result.ttl.saturating_add(extend_by);
 
 				Self::deposit_event(Event::JobResultExtended {
 					job_id,
