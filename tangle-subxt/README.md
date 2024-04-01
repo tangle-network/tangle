@@ -13,7 +13,7 @@ Use the [`subxt-cli`](https://lib.rs/crates/subxt-cli) tool to download the meta
 
 1. Install:
 ```bash
-cargo install subxt-cli
+cargo install subxt-cli@0.34.0 --force
 ```
 
 2. To Save the metadata of `tangle`:

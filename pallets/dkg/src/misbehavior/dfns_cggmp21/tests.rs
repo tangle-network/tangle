@@ -24,7 +24,7 @@ use dfns_cggmp21::{
 	generic_ec::Point,
 	key_refresh::msg::aux_only,
 	keygen,
-	security_level::{SecurityLevel, SecurityLevel128},
+	security_level::{KeygenSecurityLevel, SecurityLevel, SecurityLevel128},
 	PregeneratedPrimes,
 };
 use digest::Digest;
@@ -92,7 +92,7 @@ fn submit_keygen_decommitment_should_work() {
 			sid: &eid_bytes[..],
 		});
 
-		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
 
 		let (_r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
@@ -105,7 +105,7 @@ fn submit_keygen_decommitment_should_work() {
 				F,
 				sch_commit: h,
 				decommit: {
-					let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+					let mut nonce = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 					rng.fill_bytes(nonce.as_mut());
 					nonce
 				},
@@ -158,7 +158,7 @@ fn submit_keygen_invalid_decommitment_should_work() {
 			sid: &eid_bytes[..],
 		});
 
-		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
 
 		let (_r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
@@ -171,7 +171,7 @@ fn submit_keygen_invalid_decommitment_should_work() {
 				F: F.clone(),
 				sch_commit: h.clone(),
 				decommit: {
-					let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+					let mut nonce = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 					rng.fill_bytes(nonce.as_mut());
 					nonce
 				},
@@ -223,7 +223,7 @@ fn submit_keygen_decommitment_data_size_should_work() {
 		let job_id = 1_u64;
 		let rng = &mut rand_chacha::ChaChaRng::from_seed([42; 32]);
 
-		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
 
 		let (_r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
@@ -236,7 +236,7 @@ fn submit_keygen_decommitment_data_size_should_work() {
 				F,
 				sch_commit: h,
 				decommit: {
-					let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+					let mut nonce = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 					rng.fill_bytes(nonce.as_mut());
 					nonce
 				},
@@ -270,7 +270,7 @@ fn submit_keygen_invalid_decommitment_data_size_should_work() {
 		let job_id = 1_u64;
 		let rng = &mut rand_chacha::ChaChaRng::from_seed([42; 32]);
 
-		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
 
 		let (_r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
@@ -283,7 +283,7 @@ fn submit_keygen_invalid_decommitment_data_size_should_work() {
 				F,
 				sch_commit: h,
 				decommit: {
-					let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+					let mut nonce = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 					rng.fill_bytes(nonce.as_mut());
 					nonce
 				},
@@ -317,7 +317,7 @@ fn submit_keygen_feldman_verification_should_work() {
 		let job_id = 1_u64;
 		let rng = &mut rand_chacha::ChaChaRng::from_seed([42; 32]);
 
-		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
 
 		let (_r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
@@ -330,7 +330,7 @@ fn submit_keygen_feldman_verification_should_work() {
 				F,
 				sch_commit: h,
 				decommit: {
-					let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+					let mut nonce = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 					rng.fill_bytes(nonce.as_mut());
 					nonce
 				},
@@ -380,7 +380,7 @@ fn submit_keygen_invalid_feldman_verification_should_work() {
 		let job_id = 1_u64;
 		let rng = &mut rand_chacha::ChaChaRng::from_seed([42; 32]);
 
-		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
 
 		let (_r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
@@ -393,7 +393,7 @@ fn submit_keygen_invalid_feldman_verification_should_work() {
 				F,
 				sch_commit: h,
 				decommit: {
-					let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+					let mut nonce = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 					rng.fill_bytes(nonce.as_mut());
 					nonce
 				},
@@ -450,7 +450,7 @@ fn submit_keygen_schnorr_proof_verification_should_work() {
 			.collect::<Vec<_>>();
 		let round2a_msgs = (0..n)
 			.map(|j| {
-				let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 				rng.fill_bytes(rid.as_mut());
 				let (r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
 				let f = &fp[usize::from(j)];
@@ -461,7 +461,8 @@ fn submit_keygen_schnorr_proof_verification_should_work() {
 						F,
 						sch_commit: h,
 						decommit: {
-							let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+							let mut nonce =
+								<SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 							rng.fill_bytes(nonce.as_mut());
 							nonce
 						},
@@ -483,7 +484,7 @@ fn submit_keygen_schnorr_proof_verification_should_work() {
 		let rid = round2a_msgs
 			.iter()
 			.map(|(_, d)| &d.rid)
-			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), xor_array);
+			.fold(<SecurityLevel128 as KeygenSecurityLevel>::Rid::default(), xor_array);
 
 		let polynomial_sum =
 			round2a_msgs.iter().map(|(_, d)| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
@@ -563,7 +564,7 @@ fn submit_keygen_invalid_schnorr_proof_verification_should_work() {
 			.collect::<Vec<_>>();
 		let round2a_msgs = (0..n)
 			.map(|j| {
-				let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 				rng.fill_bytes(rid.as_mut());
 				let (r, h) = schnorr_pok::prover_commits_ephemeral_secret::<Secp256k1, _>(rng);
 				let f = &fp[usize::from(j)];
@@ -574,7 +575,8 @@ fn submit_keygen_invalid_schnorr_proof_verification_should_work() {
 						F,
 						sch_commit: h,
 						decommit: {
-							let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+							let mut nonce =
+								<SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 							rng.fill_bytes(nonce.as_mut());
 							nonce
 						},
@@ -596,7 +598,7 @@ fn submit_keygen_invalid_schnorr_proof_verification_should_work() {
 		let rid = round2a_msgs
 			.iter()
 			.map(|(_, d)| &d.rid)
-			.fold(<SecurityLevel128 as SecurityLevel>::Rid::default(), xor_array);
+			.fold(<SecurityLevel128 as KeygenSecurityLevel>::Rid::default(), xor_array);
 
 		let polynomial_sum =
 			round2a_msgs.iter().map(|(_, d)| &d.F).sum::<Polynomial<Point<Secp256k1>>>();
@@ -699,12 +701,12 @@ fn submit_key_refresh_decommitment_should_work() {
 
 		let mock_proof_bytes = postcard::to_allocvec(&mock_proof).unwrap();
 
-		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
 
 		let my_decommitment: aux_only::MsgRound2<SecurityLevel128> = aux_only::MsgRound2 {
 			decommit: {
-				let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				let mut nonce = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 				rng.fill_bytes(nonce.as_mut());
 				nonce
 			},
@@ -713,7 +715,7 @@ fn submit_key_refresh_decommitment_should_work() {
 			t,
 			params_proof: postcard::from_bytes(&mock_proof_bytes).unwrap(),
 			rho_bytes: {
-				let mut rho = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				let mut rho = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 				rng.fill_bytes(rho.as_mut());
 				rho
 			},
@@ -780,12 +782,12 @@ fn submit_key_refresh_invalid_decommitment_should_work() {
 
 		let mock_proof_bytes = postcard::to_allocvec(&mock_proof).unwrap();
 
-		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
 
 		let my_decommitment: aux_only::MsgRound2<SecurityLevel128> = aux_only::MsgRound2 {
 			decommit: {
-				let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				let mut nonce = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 				rng.fill_bytes(nonce.as_mut());
 				nonce
 			},
@@ -794,7 +796,7 @@ fn submit_key_refresh_invalid_decommitment_should_work() {
 			t,
 			params_proof: postcard::from_bytes(&mock_proof_bytes).unwrap(),
 			rho_bytes: {
-				let mut rho = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				let mut rho = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 				rng.fill_bytes(rho.as_mut());
 				rho
 			},
@@ -861,12 +863,12 @@ fn submit_key_refresh_ring_pedersen_parameters_should_work() {
 
 		let params_proof = postcard::from_bytes(&postcard::to_allocvec(&hat_psi).unwrap()).unwrap();
 
-		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
 
 		let my_decommitment: aux_only::MsgRound2<SecurityLevel128> = aux_only::MsgRound2 {
 			decommit: {
-				let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				let mut nonce = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 				rng.fill_bytes(nonce.as_mut());
 				nonce
 			},
@@ -875,7 +877,7 @@ fn submit_key_refresh_ring_pedersen_parameters_should_work() {
 			t,
 			params_proof,
 			rho_bytes: {
-				let mut rho = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				let mut rho = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 				rng.fill_bytes(rho.as_mut());
 				rho
 			},
@@ -939,12 +941,12 @@ fn submit_key_refresh_invalid_ring_pedersen_parameters_should_work() {
 
 		let params_proof = postcard::from_bytes(&postcard::to_allocvec(&hat_psi).unwrap()).unwrap();
 
-		let mut rid = <SecurityLevel128 as SecurityLevel>::Rid::default();
+		let mut rid = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 		rng.fill_bytes(rid.as_mut());
 
 		let my_decommitment: aux_only::MsgRound2<SecurityLevel128> = aux_only::MsgRound2 {
 			decommit: {
-				let mut nonce = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				let mut nonce = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 				rng.fill_bytes(nonce.as_mut());
 				nonce
 			},
@@ -953,7 +955,7 @@ fn submit_key_refresh_invalid_ring_pedersen_parameters_should_work() {
 			t,
 			params_proof,
 			rho_bytes: {
-				let mut rho = <SecurityLevel128 as SecurityLevel>::Rid::default();
+				let mut rho = <SecurityLevel128 as KeygenSecurityLevel>::Rid::default();
 				rng.fill_bytes(rho.as_mut());
 				rho
 			},

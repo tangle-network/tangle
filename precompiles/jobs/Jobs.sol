@@ -52,7 +52,7 @@ interface Jobs {
     function submitDkgPhaseTwoJob(
         uint64 expiry,
         uint32 phase_one_id,
-        bytes memory submission
+        bytes memory submission,
         bytes memory derivation_path
     ) external;
 
