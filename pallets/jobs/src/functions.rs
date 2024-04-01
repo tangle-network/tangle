@@ -4,6 +4,7 @@ use crate::types::{
 	ParticipantKeyOf, ParticipantKeysOf, ZkSaaSCircuitResultOf, ZkSaaSProofResultOf,
 };
 use sp_runtime::traits::Zero;
+use sp_runtime::Saturating;
 use tangle_primitives::{
 	jobs::{
 		DKGTSSKeyRefreshResult, DKGTSSPhaseOneJobType, FallbackOptions, JobType, JobWithResult,
@@ -61,7 +62,7 @@ impl<T: Config> Pallet<T> {
 	pub(crate) fn get_next_job_id() -> Result<JobId, DispatchError> {
 		let current_job_id = NextJobId::<T>::get();
 		NextJobId::<T>::try_mutate(|job_id| -> DispatchResult {
-			*job_id += 1;
+			*job_id = job_id.saturating_add(1);
 			Ok(())
 		})?;
 		Ok(current_job_id)
@@ -85,7 +86,7 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		ValidatorRewards::<T>::try_mutate(validator, |existing| -> DispatchResult {
 			let existing = existing.get_or_insert_with(Default::default);
-			*existing += reward;
+			*existing = existing.saturating_add(reward);
 			Ok(())
 		})
 	}
