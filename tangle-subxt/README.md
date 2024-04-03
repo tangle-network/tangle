@@ -28,3 +28,17 @@ subxt metadata -f bytes > ./metadata/tangle-mainnet-runtime.scale
 ```bash
 subxt codegen --file metadata/tangle-mainnet-runtime.scale --derive Clone --derive Eq --derive PartialEq | rustfmt --edition=2018 --emit=stdout > src/tangle_mainnet_runtime.rs
 ```
+
+### Local Testing
+
+You can run following tests to trigger Job pallet events for local development.
+
+1. Run Local Tangle network 
+```bash
+./scripts/run-standalone-local.sh --clean
+```
+2. Run Test
+```bash
+cargo test test_job_submission_event
+```
+
