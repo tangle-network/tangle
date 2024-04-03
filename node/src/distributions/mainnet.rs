@@ -377,7 +377,7 @@ pub fn get_distribution_for(
 
 		// the entire value is claimable here
 		// the claims pallet will lock all the vesting balance so in effect only claimable-amount is usable
-		claims.push((address.clone(), value, statement_kind)); 
+		claims.push((address.clone(), value, statement_kind));
 		let amount_on_cliff = (vested_amount as f64 * cliff_fraction) as u128;
 		let amount_after_cliff = (vested_amount as f64 * remaining_fraction) as u128;
 		let amount_unlocked_per_block_after_cliff =
