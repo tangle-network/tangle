@@ -182,11 +182,12 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				// Genesis investor / team distribution (pallet-balances + pallet-vesting)
 				combine_distributions(vec![
 					mainnet::get_team_balance_distribution(),
+					mainnet::get_team_direct_vesting_distribution(),
 					mainnet::get_investor_balance_distribution(),
 					mainnet::get_foundation_balance_distribution(),
 				]),
 				// endowed evm accounts
-				mainnet::get_initial_endowed_accounts().1,
+				vec![],
 			)
 		},
 		// Bootnodes
@@ -194,7 +195,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		// Telemetry
 		None,
 		// Protocol ID
-		None,
+		None, // TODO : Investigate if we need protocol id
 		// Fork id
 		None,
 		// Properties

@@ -227,7 +227,7 @@ pub mod evm {
 
 pub mod democracy {
 	use crate::{currency::UNIT, time::MINUTES, Balance, BlockNumber};
-	pub const LAUNCH_PERIOD: BlockNumber = 2 * 24 * 60 * MINUTES; // 2 days
+	pub const LAUNCH_PERIOD: BlockNumber = 12 * 60 * MINUTES; // 12 hours
 	pub const VOTING_PERIOD: BlockNumber = 7 * 24 * 60 * MINUTES; // 7 days
 	pub const FASTTRACK_VOTING_PERIOD: BlockNumber = 2 * 24 * 60 * MINUTES; // 2 days
 	pub const MINIMUM_DEPOSIT: Balance = 1000 * UNIT; // 1000 TNT
@@ -259,7 +259,7 @@ pub mod treasury {
 	use sp_runtime::{Percent, Permill};
 
 	pub const PROPOSAL_BOND: Permill = Permill::from_percent(5);
-	pub const PROPOSAL_BOND_MINIMUM: Balance = UNIT;
+	pub const PROPOSAL_BOND_MINIMUM: Balance = 1000 * UNIT;
 	pub const SPEND_PERIOD: BlockNumber = DAYS;
 	pub const BURN: Permill = Permill::from_percent(0);
 	pub const TIP_COUNTDOWN: BlockNumber = DAYS;
