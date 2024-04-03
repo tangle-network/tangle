@@ -195,7 +195,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		// Telemetry
 		None,
 		// Protocol ID
-		None, // TODO : Investigate if we need protocol id
+		None,
 		// Fork id
 		None,
 		// Properties
