@@ -375,7 +375,9 @@ pub fn get_distribution_for(
 		// 	);
 		// }
 
-		claims.push((address.clone(), claimable_amount, statement_kind));
+		// the entire value is claimable here
+		// the claims pallet will lock all the vesting balance so in effect only claimable-amount is usable
+		claims.push((address.clone(), value, statement_kind));
 		let amount_on_cliff = (vested_amount as f64 * cliff_fraction) as u128;
 		let amount_after_cliff = (vested_amount as f64 * remaining_fraction) as u128;
 		let amount_unlocked_per_block_after_cliff =
@@ -444,8 +446,8 @@ fn test_get_distribution_for() {
 	// 1/24th claimable at every month
 	let expected_distibution_result = DistributionResult {
 		claims: vec![
-			(alice.clone(), 5, Some(StatementKind::Regular)),
-			(bob.clone(), 5, Some(StatementKind::Regular)),
+			(alice.clone(), 100, Some(StatementKind::Regular)),
+			(bob.clone(), 100, Some(StatementKind::Regular)),
 		],
 		vesting: vec![
 			(alice.clone(), vec![(3, 3, 1), (91, 3, 1)]),
@@ -533,12 +535,12 @@ fn test_distribution_shares() {
 		total_edgeware_vesting_amount += cliff_vesting + post_cliff_vesting;
 	}
 
-	assert_eq!(total_edgeware_claims_amount, 50000000000000000000940); // 50000 TNT
+	assert_eq!(total_edgeware_claims_amount, 999999999999999999996210); // 50000 TNT
 	assert_eq!(total_edgeware_vesting_amount, 949999999999999990376448); // 949999 TNT
 	assert_eq!(
 		Perbill::from_rational(total_edgeware_claims_amount, TOTAL_SUPPLY),
-		Perbill::from_float(0.0005)
-	); // 0.05%
+		Perbill::from_float(0.009999999)
+	); // 1%
 	assert_eq!(
 		Perbill::from_rational(total_edgeware_vesting_amount, TOTAL_SUPPLY),
 		Perbill::from_float(0.009499999)
@@ -561,12 +563,12 @@ fn test_distribution_shares() {
 		total_edgeware_snapshot_vesting_amount += cliff_vesting + post_cliff_vesting;
 	}
 
-	assert_eq!(total_edgeware_snapshot_claims_amount, 50000000000000383783868); // 50000 TNT
+	assert_eq!(total_edgeware_snapshot_claims_amount, 1000000000000007675499460); // 50000 TNT
 	assert_eq!(total_edgeware_snapshot_vesting_amount, 950000000000007330583432); // 949999 TNT
 	assert_eq!(
 		Perbill::from_rational(total_edgeware_snapshot_claims_amount, TOTAL_SUPPLY),
-		Perbill::from_float(0.0005)
-	); // 0.05%
+		Perbill::from_float(0.01)
+	); // 1%
 	assert_eq!(
 		Perbill::from_rational(total_edgeware_snapshot_vesting_amount, TOTAL_SUPPLY),
 		Perbill::from_float(0.0095)
@@ -589,12 +591,12 @@ fn test_distribution_shares() {
 		total_leaderboard_vesting_amount += cliff_vesting + post_cliff_vesting;
 	}
 
-	assert_eq!(total_leaderboard_claims_amount, 100000000000000000001092); // 100000 TNT
+	assert_eq!(total_leaderboard_claims_amount, 1999999999999999999996877); // 100000 TNT
 	assert_eq!(total_leaderboard_vesting_amount, 1900000000000000087640984); // 1900000 TNT
 	assert_eq!(
 		Perbill::from_rational(total_leaderboard_claims_amount, TOTAL_SUPPLY),
-		Perbill::from_float(0.001)
-	); // 0.1%
+		Perbill::from_float(0.019999999)
+	); // 1.9999999%
 	assert_eq!(
 		Perbill::from_rational(total_leaderboard_vesting_amount, TOTAL_SUPPLY),
 		Perbill::from_float(0.019)
@@ -617,12 +619,12 @@ fn test_distribution_shares() {
 		total_polkadot_vesting_amount += cliff_vesting + post_cliff_vesting;
 	}
 
-	assert_eq!(total_polkadot_claims_amount, 50000000000000000000508); // 50000 TNT
+	assert_eq!(total_polkadot_claims_amount, 999999999999999999999204); // 50000 TNT
 	assert_eq!(total_polkadot_vesting_amount, 950000000000000090505216); // 949999 TNT
 	assert_eq!(
 		Perbill::from_rational(total_polkadot_claims_amount, TOTAL_SUPPLY),
-		Perbill::from_float(0.0005)
-	); // 0.05%
+		Perbill::from_float(0.009999999)
+	); // 0.9999999%
 	assert_eq!(
 		Perbill::from_rational(total_polkadot_vesting_amount, TOTAL_SUPPLY),
 		Perbill::from_float(0.0095)
@@ -647,7 +649,7 @@ fn test_distribution_shares() {
 		get_edgeware_snapshot_distribution(),
 		get_polkadot_validator_distribution(),
 	]);
-	assert_eq!(unique_dist.claims.len(), 10689);
+	assert_eq!(unique_dist.claims.len(), 13250);
 	assert_eq!(unique_dist.vesting.len(), 29140);
 
 	// ================= compute team account distribution ======================= //
@@ -673,19 +675,15 @@ fn test_distribution_shares() {
 		+ total_direct_team_amount
 		+ foundation_total_amount
 		+ total_edgeware_claims_amount
-		+ total_edgeware_vesting_amount
 		+ total_edgeware_snapshot_claims_amount
-		+ total_edgeware_snapshot_vesting_amount
 		+ total_leaderboard_claims_amount
-		+ total_leaderboard_vesting_amount
 		+ total_polkadot_claims_amount
-		+ total_polkadot_vesting_amount
 		+ total_treasury_amount
 		+ 5000 * UNIT
 		+ total_team_claims_amount;
 	//+ total_endowmwnent;
 
-	assert_eq!(total_genesis_endowment, 100000000000000007652205768); // 100000000 TNT
+	assert_eq!(total_genesis_endowment, 100000000000000007444805031); // 100000000 TNT
 	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one());
 	// 100%
 }
