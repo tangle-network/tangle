@@ -678,11 +678,7 @@ fn test_distribution_shares() {
 		+ total_team_claims_amount;
 	//+ total_endowmwnent;
 
-<<<<<<< HEAD
 	assert_eq!(total_genesis_endowment, 100000000000000006345897383); // 100000000 TNT
-=======
-	assert_eq!(total_genesis_endowment, 100000000000000007444805031); // 100000000 TNT
->>>>>>> 50d30ebc2e21a67e1a4e6035148172030cd6d9ee
 	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one());
 	// 100%
 }
