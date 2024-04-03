@@ -76,17 +76,15 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 }
 
 // *** Distribution
-// Team : 30% (5% immediate) (team account gets 95% that is vested over 2years with 1 year cliff))
-// Foundation : 15% (5% immediate) (foundation account gets 95% that is vested over 2years with 1
-// year cliff)
-// Investors : 13.64% (5% liquid immediately)(investor accounts gets 95% that is vested
-// over 2years with 1 year cliff)
+// Team : 30% (team account is vested over two years with one year cliff)
+// Foundation : 15% (foundation account is vested over two years with one year cliff)
+// Investors : 13.64% (investor accounts is vested over two years with one year cliff)
 // Treasury : 36.36% (immediate release to treasury pallet account)
 // EDG Genesis Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // EDG Snapshot Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // Leaderboard airdrop : 2% (5% immediate release)(95% vested over two years, with one month cliff)
-// Polkadot validator airdrop : 1% (5% immediate release)(95% vested over two years, with one month
-// cliff) ***
+// Polkadot validator airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
+// ***
 
 pub fn get_edgeware_genesis_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/edgeware_genesis_participants.json")
@@ -279,6 +277,10 @@ pub fn get_initial_endowed_accounts(
 		endowed_accounts.push((inv_account.clone().to_account_id_32(), amount as u128))
 	}
 
+	for (team_account, amount) in get_team_vesting_only_cliff_accounts() {
+		endowed_accounts.push((team_account, amount as u128));
+	}
+
 	for (team_account, amount) in get_team_vesting_accounts() {
 		endowed_accounts.push((team_account, amount as u128));
 	}
@@ -367,13 +369,6 @@ pub fn get_distribution_for(
 		let vested_amount = value - claimable_amount;
 		let cliff_fraction = vesting_cliff as f64 / total_vesting_schedule as f64;
 		let remaining_fraction = 1.0 - cliff_fraction;
-
-		// if claimable_amount <= ExistentialDeposit::get() {
-		// 	log::warn!(
-		// 		"One percent endowment for account {:?} is not above the existential deposit",
-		// 		address.clone()
-		// 	);
-		// }
 
 		// the entire value is claimable here
 		// the claims pallet will lock all the vesting balance so in effect only claimable-amount is usable
@@ -659,8 +654,8 @@ fn test_distribution_shares() {
 		.map(|(_, amount, _, _, _)| amount)
 		.sum();
 
-	//println!("Remaining total team amount {:?}", 30000000000000000000000000 - total_team_claims_amount - total_direct_team_amount);
-	assert_eq!(total_team_claims_amount, 29856849309999999859294208); // 29856849 TNT
+	//println!("Remaining total team amount {:?}", 30000000000000000000000000 - total_team_claims_amount - total_direct_team_amount - 5000 * UNIT);
+	assert_eq!(total_team_claims_amount, 29856849309999998760386560); // 29856849 TNT
 	assert_eq!(
 		Perbill::from_rational(total_team_claims_amount, TOTAL_SUPPLY),
 		Perbill::from_float(0.298568493)
@@ -683,7 +678,7 @@ fn test_distribution_shares() {
 		+ total_team_claims_amount;
 	//+ total_endowmwnent;
 
-	assert_eq!(total_genesis_endowment, 100000000000000007444805031); // 100000000 TNT
+	assert_eq!(total_genesis_endowment, 100000000000000006345897383); // 100000000 TNT
 	assert_eq!(Perbill::from_rational(total_genesis_endowment, TOTAL_SUPPLY), Perbill::one());
 	// 100%
 }
