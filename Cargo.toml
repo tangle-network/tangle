@@ -126,6 +126,7 @@ frost-secp256k1 = { path = "pallets/dkg/frost/frost-secp256k1", default-features
 frost-p256 = { path = "pallets/dkg/frost/frost-p256", default-features = false }
 frost-p384 = { path = "pallets/dkg/frost/frost-p384", default-features = false }
 frost-redjubjub = { path = "pallets/dkg/frost/frost-redjubjub", default-features = false }
+frost-taproot = { path = "pallets/dkg/frost/frost-taproot", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
@@ -349,6 +350,7 @@ generic-ec-zkp = { version = "0.2", default-features = false }
 round-based = { version = "0.2", default-features = false }
 paillier-zk = { version = "0.2", default-features = false }
 derivation-path = { version = "0.2.0", default-features = false }
+signature = { version = "2.2", default-features = false }
 
 [profile.release]
 panic = "unwind"

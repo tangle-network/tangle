@@ -4438,6 +4438,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "frost-taproot"
+version = "1.0.0-rc.0"
+dependencies = [
+ "frost-core",
+ "k256",
+ "parity-scale-codec 3.6.9",
+ "rand_core 0.6.4",
+ "sha2 0.10.8",
+ "signature",
+ "subtle 2.5.0",
+]
+
+[[package]]
 name = "fs-err"
 version = "2.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7618,6 +7631,7 @@ dependencies = [
  "frost-p384",
  "frost-ristretto255",
  "frost-secp256k1",
+ "frost-taproot",
  "generic-array 0.14.7",
  "generic-ec",
  "generic-ec-zkp",
