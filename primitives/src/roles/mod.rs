@@ -62,6 +62,7 @@ impl TryFrom<u16> for RoleType {
 			0x0025 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostEd25519)),
 			0x0026 => Ok(RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostEd448)),
 			0x0031 => Ok(RoleType::Tss(ThresholdSignatureRoleType::GennaroDKGBls381)),
+			0x0032 => Ok(RoleType::Tss(ThresholdSignatureRoleType::WstsV2)),
 			0x0041 => Ok(RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16)),
 			0x0042 => Ok(RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSMarlin)),
 			0x0100 => Ok(RoleType::LightClientRelaying),
