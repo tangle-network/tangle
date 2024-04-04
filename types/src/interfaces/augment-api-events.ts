@@ -6,38 +6,10 @@
 import '@polkadot/api-base/types/events';
 
 import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
-import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u32, u64 } from '@polkadot/types-codec';
+import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import {
-  EthereumLog,
-  EvmCoreErrorExitReason,
-  FrameSupportDispatchDispatchInfo,
-  FrameSupportTokensMiscBalanceStatus,
-  PalletAirdropClaimsUtilsMultiAddress,
-  PalletDemocracyMetadataOwner,
-  PalletDemocracyVoteAccountVote,
-  PalletDemocracyVoteThreshold,
-  PalletDkgFeeInfo,
-  PalletElectionProviderMultiPhaseElectionCompute,
-  PalletElectionProviderMultiPhasePhase,
-  PalletImOnlineSr25519AppSr25519Public,
-  PalletMultisigTimepoint,
-  PalletNominationPoolsCommissionChangeRate,
-  PalletNominationPoolsCommissionClaimPermission,
-  PalletNominationPoolsPoolState,
-  PalletStakingForcing,
-  PalletStakingRewardDestination,
-  PalletStakingValidatorPrefs,
-  PalletZksaasFeeInfo,
-  SpConsensusGrandpaAppPublic,
-  SpNposElectionsElectionScore,
-  SpRuntimeDispatchError,
-  SpStakingExposure,
-  TanglePrimitivesJobsJobInfo,
-  TanglePrimitivesJobsJobSubmission,
-  TanglePrimitivesRolesRoleType,
-} from '@polkadot/types/lookup'
+import { FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, SpRuntimeDispatchError, PalletDemocracyMetadataOwner, PalletDemocracyVoteThreshold, PalletDemocracyVoteAccountVote, PalletDkgFeeInfo, PalletElectionProviderMultiPhaseElectionCompute, SpNposElectionsElectionScore, PalletElectionProviderMultiPhasePhase, EvmCoreErrorExitReason, EthereumLog, SpConsensusGrandpaAppPublic, PalletImOnlineSr25519AppSr25519Public, SpStakingExposure, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsJobInfo, TanglePrimitivesJobsJobSubmission, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, TangleTestnetRuntimeProxyType, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, FrameSupportDispatchDispatchInfo, PalletZksaasFeeInfo } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -793,6 +765,33 @@ declare module '@polkadot/api-base/types/events' {
        * A preimage has been requested.
        **/
       Requested: AugmentedEvent<ApiType, [hash_: H256], { hash_: H256 }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    proxy: {
+      /**
+       * An announcement was placed to make a call in the future.
+       **/
+      Announced: AugmentedEvent<ApiType, [real: AccountId32, proxy: AccountId32, callHash: H256], { real: AccountId32, proxy: AccountId32, callHash: H256 }>;
+      /**
+       * A proxy was added.
+       **/
+      ProxyAdded: AugmentedEvent<ApiType, [delegator: AccountId32, delegatee: AccountId32, proxyType: TangleTestnetRuntimeProxyType, delay: u64], { delegator: AccountId32, delegatee: AccountId32, proxyType: TangleTestnetRuntimeProxyType, delay: u64 }>;
+      /**
+       * A proxy was executed correctly, with the given.
+       **/
+      ProxyExecuted: AugmentedEvent<ApiType, [result: Result<Null, SpRuntimeDispatchError>], { result: Result<Null, SpRuntimeDispatchError> }>;
+      /**
+       * A proxy was removed.
+       **/
+      ProxyRemoved: AugmentedEvent<ApiType, [delegator: AccountId32, delegatee: AccountId32, proxyType: TangleTestnetRuntimeProxyType, delay: u64], { delegator: AccountId32, delegatee: AccountId32, proxyType: TangleTestnetRuntimeProxyType, delay: u64 }>;
+      /**
+       * A pure account has been created by new proxy with given
+       * disambiguation index and proxy type.
+       **/
+      PureCreated: AugmentedEvent<ApiType, [pure: AccountId32, who: AccountId32, proxyType: TangleTestnetRuntimeProxyType, disambiguationIndex: u16], { pure: AccountId32, who: AccountId32, proxyType: TangleTestnetRuntimeProxyType, disambiguationIndex: u16 }>;
       /**
        * Generic event
        **/
