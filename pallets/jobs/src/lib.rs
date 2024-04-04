@@ -609,7 +609,7 @@ pub mod module {
 		/// This function allows a caller to withdraw rewards that have been accumulated in their
 		/// account.
 		#[pallet::call_index(4)]
-		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
+		#[pallet::weight(T::WeightInfo::set_permitted_caller())]
 		pub fn set_permitted_caller(
 			origin: OriginFor<T>,
 			role_type: RoleType,
@@ -631,7 +631,7 @@ pub mod module {
 		}
 
 		#[pallet::call_index(5)]
-		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
+		#[pallet::weight(T::WeightInfo::set_time_fee())]
 		pub fn set_time_fee(origin: OriginFor<T>, new_fee: BalanceOf<T>) -> DispatchResult {
 			T::ForceOrigin::ensure_origin(origin)?;
 			TimeFeePerBlock::<T>::set(new_fee);
@@ -687,7 +687,7 @@ pub mod module {
 		/// - `ResultExpired`: The result is already expired.
 		/// - Transfer errors: Errors related to transferring fees.
 		#[pallet::call_index(7)]
-		#[pallet::weight(T::WeightInfo::withdraw_rewards())]
+		#[pallet::weight(T::WeightInfo::extend_job_result_ttl())]
 		pub fn extend_job_result_ttl(
 			origin: OriginFor<T>,
 			role_type: RoleType,
