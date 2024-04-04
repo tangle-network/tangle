@@ -208,6 +208,9 @@ pub enum DigitalSignatureScheme {
 	/// Schnorr signature scheme over the Ed448 curve.
 	SchnorrEd448,
 
+	/// Schnorr signature scheme over the Secp256k1 curve with Taproot Support.
+	SchnorrTaproot,
+
 	/// BLS 381 signature scheme.
 	Bls381,
 }

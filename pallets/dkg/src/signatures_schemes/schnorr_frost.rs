@@ -21,6 +21,7 @@ use frost_p256::P256Sha256;
 use frost_p384::P384Sha384;
 use frost_ristretto255::Ristretto255Sha512;
 use frost_secp256k1::Secp256K1Sha256;
+use frost_taproot::Secp256K1Taproot;
 use tangle_primitives::jobs::DigitalSignatureScheme;
 
 use crate::{Config, Error};
@@ -75,6 +76,9 @@ pub fn verify_dkg_signature_schnorr_frost<T: Config>(
 		DigitalSignatureScheme::SchnorrSecp256k1 => {
 			verify_signature!(Secp256K1Sha256, key, signature, msg, [0u8; 33], [0u8; 65]);
 		},
+		DigitalSignatureScheme::SchnorrTaproot => {
+			verify_signature!(Secp256K1Taproot, key, signature, msg, [0u8; 33], [0u8; 65]);
+		},
 		_ => return Err(Error::<T>::InvalidSignature.into()),
 	};
 
@@ -122,6 +126,13 @@ mod tests {
 		secp256k1,
 		DigitalSignatureScheme::SchnorrSecp256k1,
 		Secp256K1Sha256,
+		MESSAGE
+	);
+
+	test_verify_dkg_signature!(
+		taproot,
+		DigitalSignatureScheme::SchnorrTaproot,
+		Secp256K1Taproot,
 		MESSAGE
 	);
 

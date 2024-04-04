@@ -84,6 +84,7 @@ impl From<RoleType> for u16 {
 			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostEd25519) => 0x0025,
 			RoleType::Tss(ThresholdSignatureRoleType::ZcashFrostEd448) => 0x0026,
 			RoleType::Tss(ThresholdSignatureRoleType::GennaroDKGBls381) => 0x0031,
+			RoleType::Tss(ThresholdSignatureRoleType::WstsV2) => 0x0032,
 			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSGroth16) => 0x0041,
 			RoleType::ZkSaaS(ZeroKnowledgeRoleType::ZkSaaSMarlin) => 0x0042,
 			RoleType::LightClientRelaying => 0x0100,
