@@ -129,15 +129,12 @@ mod tests {
 		MESSAGE
 	);
 
-	// Commented out because the taproot scheme public key needs
-	// to be tweaked to be compatible with the verifying key.
-	//
-	// test_verify_dkg_signature!(
-	// 	taproot,
-	// 	DigitalSignatureScheme::SchnorrTaproot,
-	// 	Secp256K1Taproot,
-	// 	MESSAGE
-	// );
+	test_verify_dkg_signature!(
+		taproot,
+		DigitalSignatureScheme::SchnorrTaproot,
+		Secp256K1Taproot,
+		MESSAGE
+	);
 
 	test_verify_dkg_signature!(
 		ed25519,

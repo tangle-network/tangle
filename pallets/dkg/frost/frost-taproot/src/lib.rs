@@ -3,6 +3,7 @@
 extern crate alloc;
 
 use crate::alloc::borrow::ToOwned;
+use alloc::vec::Vec;
 use k256::{
 	elliptic_curve::{
 		group::prime::PrimeCurveAffine,
@@ -14,7 +15,6 @@ use k256::{
 	},
 	AffinePoint, ProjectivePoint, Scalar,
 };
-use signature::hazmat::PrehashVerifier;
 use subtle::Choice;
 
 #[cfg(feature = "std")]
@@ -251,20 +251,18 @@ impl Ciphersuite for Secp256K1Taproot {
 	fn HID(m: &[u8]) -> Option<<<Self::Group as Group>::Field as Field>::Scalar> {
 		Some(WrappedScalar(hash_to_scalar((CONTEXT_STRING.to_owned() + "id").as_bytes(), m)))
 	}
-
-	fn verify_signature(
-		msg: &[u8],
-		signature: &frost_core::signature::Signature<Self>,
-		public_key: &frost_core::verifying_key::VerifyingKey<Self>,
-	) -> Result<(), frost_core::error::Error> {
-		let vk = k256::schnorr::VerifyingKey::from_bytes(&public_key.serialize()[1..])
-			.map_err(|_| frost_core::error::Error::MalformedVerifyingKey)?;
-		let sig = k256::schnorr::Signature::try_from(&signature.serialize()[1..])
-			.map_err(|_| frost_core::error::Error::MalformedSignature)?;
-		vk.verify_prehash(msg, &sig)
-			.map_err(|_| frost_core::error::Error::InvalidSignature)
-	}
 }
+
+type S = Secp256K1Taproot;
+
+/// A Schnorr signature on FROST(secp256k1, Taproot).
+pub type Signature = frost_core::signature::Signature<S>;
+
+/// A signing key for a Schnorr signature on FROST(secp256k1, Taproot).
+pub type SigningKey = frost_core::signing_key::SigningKey<S>;
+
+/// A valid verifying key for Schnorr signatures on FROST(secp256k1, Taproot).
+pub type VerifyingKey = frost_core::verifying_key::VerifyingKey<S>;
 
 #[cfg(test)]
 mod tests {
