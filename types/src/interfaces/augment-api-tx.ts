@@ -10,60 +10,7 @@ import type { Data } from '@polkadot/types';
 import type { Bytes, Compact, Null, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, IMethod, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, MultiAddress, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import {
-  SpConsensusBabeDigestsNextConfigDescriptor,
-  SpConsensusSlotsEquivocationProof,
-  SpSessionMembershipProof,
-  PalletBalancesAdjustmentDirection,
-  PalletAirdropClaimsUtilsMultiAddress,
-  PalletAirdropClaimsUtilsMultiAddressSignature,
-  PalletAirdropClaimsStatementKind,
-  SpWeightsWeightV2Weight,
-  PalletDemocracyConviction,
-  FrameSupportPreimagesBounded,
-  PalletDemocracyMetadataOwner,
-  PalletDemocracyVoteAccountVote,
-  PalletDkgFeeInfo,
-  SpNposElectionsSupport,
-  SpNposElectionsElectionScore,
-  PalletElectionProviderMultiPhaseRawSolution,
-  PalletElectionProviderMultiPhaseSolutionOrSnapshotSize,
-  PalletElectionsPhragmenRenouncing,
-  EthereumTransactionTransactionV2,
-  SpConsensusGrandpaEquivocationProof,
-  SpCoreVoid,
-  PalletIdentityJudgement,
-  PalletIdentityLegacyIdentityInfo,
-  SpRuntimeMultiSignature,
-  PalletImOnlineHeartbeat,
-  PalletImOnlineSr25519AppSr25519Signature,
-  TanglePrimitivesRolesRoleType,
-  TanglePrimitivesJobsValidatorOffenceType,
-  TanglePrimitivesJobsJobSubmission,
-  TanglePrimitivesJobsJobResult,
-  TanglePrimitivesMisbehaviorMisbehaviorSubmission,
-  PalletMultisigTimepoint,
-  PalletNominationPoolsBondExtra,
-  PalletNominationPoolsClaimPermission,
-  PalletNominationPoolsCommissionChangeRate,
-  PalletNominationPoolsCommissionClaimPermission,
-  PalletNominationPoolsConfigOpU128,
-  PalletNominationPoolsConfigOpU32,
-  PalletNominationPoolsConfigOpPerbill,
-  PalletNominationPoolsPoolState,
-  PalletNominationPoolsConfigOpAccountId32,
-  PalletRolesProfile,
-  TangleTestnetRuntimeOpaqueSessionKeys,
-  PalletStakingRewardDestination,
-  PalletStakingPalletConfigOpU128,
-  PalletStakingPalletConfigOpU32,
-  PalletStakingPalletConfigOpPercent,
-  PalletStakingPalletConfigOpPerbill,
-  PalletStakingValidatorPrefs,
-  TangleTestnetRuntimeOriginCaller,
-  PalletVestingVestingInfo,
-  PalletZksaasFeeInfo,
-} from '@polkadot/types/lookup'
+import { SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusSlotsEquivocationProof, SpSessionMembershipProof, PalletBalancesAdjustmentDirection, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletAirdropClaimsStatementKind, SpWeightsWeightV2Weight, PalletDemocracyConviction, FrameSupportPreimagesBounded, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDkgFeeInfo, SpNposElectionsSupport, SpNposElectionsElectionScore, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, EthereumTransactionTransactionV2, SpConsensusGrandpaEquivocationProof, SpCoreVoid, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, SpRuntimeMultiSignature, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsValidatorOffenceType, TanglePrimitivesJobsJobSubmission, TanglePrimitivesJobsJobResult, TanglePrimitivesMisbehaviorMisbehaviorSubmission, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsPoolState, PalletNominationPoolsConfigOpAccountId32, TangleTestnetRuntimeProxyType, PalletRolesProfile, TangleTestnetRuntimeOpaqueSessionKeys, PalletStakingRewardDestination, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpPerbill, PalletStakingValidatorPrefs, TangleTestnetRuntimeOriginCaller, PalletVestingVestingInfo, PalletZksaasFeeInfo } from '@polkadot/types/lookup';
 
 export type __AugmentedSubmittable = AugmentedSubmittable<() => unknown>;
 export type __SubmittableExtrinsic<ApiType extends ApiTypes> = SubmittableExtrinsic<ApiType>;
@@ -818,6 +765,52 @@ declare module '@polkadot/api-base/types/submittable' {
        * See [`Pallet::unrequest_preimage`].
        **/
       unrequestPreimage: AugmentedSubmittable<(hash: H256 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [H256]>;
+      /**
+       * Generic tx
+       **/
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
+    proxy: {
+      /**
+       * See [`Pallet::add_proxy`].
+       **/
+      addProxy: AugmentedSubmittable<(delegate: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, proxyType: TangleTestnetRuntimeProxyType | 'Any' | 'NonTransfer' | 'Governance' | 'Staking' | number | Uint8Array, delay: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, TangleTestnetRuntimeProxyType, u64]>;
+      /**
+       * See [`Pallet::announce`].
+       **/
+      announce: AugmentedSubmittable<(real: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, callHash: H256 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, H256]>;
+      /**
+       * See [`Pallet::create_pure`].
+       **/
+      createPure: AugmentedSubmittable<(proxyType: TangleTestnetRuntimeProxyType | 'Any' | 'NonTransfer' | 'Governance' | 'Staking' | number | Uint8Array, delay: u64 | AnyNumber | Uint8Array, index: u16 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [TangleTestnetRuntimeProxyType, u64, u16]>;
+      /**
+       * See [`Pallet::kill_pure`].
+       **/
+      killPure: AugmentedSubmittable<(spawner: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, proxyType: TangleTestnetRuntimeProxyType | 'Any' | 'NonTransfer' | 'Governance' | 'Staking' | number | Uint8Array, index: u16 | AnyNumber | Uint8Array, height: Compact<u64> | AnyNumber | Uint8Array, extIndex: Compact<u32> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, TangleTestnetRuntimeProxyType, u16, Compact<u64>, Compact<u32>]>;
+      /**
+       * See [`Pallet::proxy`].
+       **/
+      proxy: AugmentedSubmittable<(real: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, forceProxyType: Option<TangleTestnetRuntimeProxyType> | null | Uint8Array | TangleTestnetRuntimeProxyType | 'Any' | 'NonTransfer' | 'Governance' | 'Staking' | number, call: Call | IMethod | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, Option<TangleTestnetRuntimeProxyType>, Call]>;
+      /**
+       * See [`Pallet::proxy_announced`].
+       **/
+      proxyAnnounced: AugmentedSubmittable<(delegate: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, real: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, forceProxyType: Option<TangleTestnetRuntimeProxyType> | null | Uint8Array | TangleTestnetRuntimeProxyType | 'Any' | 'NonTransfer' | 'Governance' | 'Staking' | number, call: Call | IMethod | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, MultiAddress, Option<TangleTestnetRuntimeProxyType>, Call]>;
+      /**
+       * See [`Pallet::reject_announcement`].
+       **/
+      rejectAnnouncement: AugmentedSubmittable<(delegate: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, callHash: H256 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, H256]>;
+      /**
+       * See [`Pallet::remove_announcement`].
+       **/
+      removeAnnouncement: AugmentedSubmittable<(real: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, callHash: H256 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, H256]>;
+      /**
+       * See [`Pallet::remove_proxies`].
+       **/
+      removeProxies: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
+      /**
+       * See [`Pallet::remove_proxy`].
+       **/
+      removeProxy: AugmentedSubmittable<(delegate: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, proxyType: TangleTestnetRuntimeProxyType | 'Any' | 'NonTransfer' | 'Governance' | 'Staking' | number | Uint8Array, delay: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, TangleTestnetRuntimeProxyType, u64]>;
       /**
        * Generic tx
        **/
