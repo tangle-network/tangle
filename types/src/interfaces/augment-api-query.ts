@@ -11,92 +11,7 @@ import type { BTreeMap, Bytes, Null, Option, U256, U8aFixed, Vec, bool, u128, u3
 import type { AnyNumber, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
 import type { Observable } from '@polkadot/types/types';
-import {
-  EthereumBlock,
-  EthereumReceiptReceiptV3,
-  EthereumTransactionTransactionV2,
-  FpRpcTransactionStatus,
-  FrameSupportDispatchPerDispatchClassWeight,
-  FrameSupportPreimagesBounded,
-  FrameSystemAccountInfo,
-  FrameSystemCodeUpgradeAuthorization,
-  FrameSystemEventRecord,
-  FrameSystemLastRuntimeUpgradeInfo,
-  FrameSystemPhase,
-  PalletAirdropClaimsStatementKind,
-  PalletAirdropClaimsUtilsMultiAddress,
-  PalletBagsListListBag,
-  PalletBagsListListNode,
-  PalletBalancesAccountData,
-  PalletBalancesBalanceLock,
-  PalletBalancesIdAmountRuntimeFreezeReason,
-  PalletBalancesIdAmountRuntimeHoldReason,
-  PalletBalancesReserveData,
-  PalletBountiesBounty,
-  PalletChildBountiesChildBounty,
-  PalletCollectiveVotes,
-  PalletDemocracyMetadataOwner,
-  PalletDemocracyReferendumInfo,
-  PalletDemocracyVoteThreshold,
-  PalletDemocracyVoteVoting,
-  PalletDkgFeeInfo,
-  PalletElectionProviderMultiPhasePhase,
-  PalletElectionProviderMultiPhaseReadySolution,
-  PalletElectionProviderMultiPhaseRoundSnapshot,
-  PalletElectionProviderMultiPhaseSignedSignedSubmission,
-  PalletElectionProviderMultiPhaseSolutionOrSnapshotSize,
-  PalletElectionsPhragmenSeatHolder,
-  PalletElectionsPhragmenVoter,
-  PalletEvmCodeMetadata,
-  PalletGrandpaStoredPendingChange,
-  PalletGrandpaStoredState,
-  PalletIdentityAuthorityProperties,
-  PalletIdentityRegistrarInfo,
-  PalletIdentityRegistration,
-  PalletImOnlineSr25519AppSr25519Public,
-  PalletMultisigMultisig,
-  PalletNominationPoolsBondedPoolInner,
-  PalletNominationPoolsClaimPermission,
-  PalletNominationPoolsPoolMember,
-  PalletNominationPoolsRewardPool,
-  PalletNominationPoolsSubPools,
-  PalletPreimageOldRequestStatus,
-  PalletPreimageRequestStatus,
-  PalletRolesRestakingLedger,
-  PalletSchedulerScheduled,
-  PalletStakingActiveEraInfo,
-  PalletStakingEraRewardPoints,
-  PalletStakingForcing,
-  PalletStakingNominations,
-  PalletStakingRewardDestination,
-  PalletStakingSlashingSlashingSpans,
-  PalletStakingSlashingSpanRecord,
-  PalletStakingStakingLedger,
-  PalletStakingUnappliedSlash,
-  PalletStakingValidatorPrefs,
-  PalletTransactionPaymentReleases,
-  PalletTreasuryProposal,
-  PalletTreasurySpendStatus,
-  PalletVestingReleases,
-  PalletVestingVestingInfo,
-  PalletZksaasFeeInfo,
-  SpConsensusBabeAppPublic,
-  SpConsensusBabeBabeEpochConfiguration,
-  SpConsensusBabeDigestsNextConfigDescriptor,
-  SpConsensusBabeDigestsPreDigest,
-  SpConsensusGrandpaAppPublic,
-  SpCoreCryptoKeyTypeId,
-  SpNposElectionsElectionScore,
-  SpRuntimeDigest,
-  SpStakingExposure,
-  SpStakingExposurePage,
-  SpStakingOffenceOffenceDetails,
-  SpStakingPagedExposureMetadata,
-  TanglePrimitivesJobsJobInfo,
-  TanglePrimitivesJobsPhaseResult,
-  TanglePrimitivesRolesRoleType,
-  TangleTestnetRuntimeOpaqueSessionKeys,
-} from '@polkadot/types/lookup'
+import { SpConsensusBabeAppPublic, SpConsensusBabeBabeEpochConfiguration, SpConsensusBabeDigestsPreDigest, SpConsensusBabeDigestsNextConfigDescriptor, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesIdAmountRuntimeFreezeReason, PalletBalancesIdAmountRuntimeHoldReason, PalletBalancesBalanceLock, PalletBalancesReserveData, PalletBountiesBounty, PalletChildBountiesChildBounty, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsStatementKind, PalletCollectiveVotes, PalletDemocracyMetadataOwner, FrameSupportPreimagesBounded, PalletDemocracyVoteThreshold, PalletDemocracyReferendumInfo, PalletDemocracyVoteVoting, PalletDkgFeeInfo, PalletElectionProviderMultiPhasePhase, SpNposElectionsElectionScore, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, EthereumBlock, EthereumReceiptReceiptV3, FpRpcTransactionStatus, EthereumTransactionTransactionV2, PalletEvmCodeMetadata, SpConsensusGrandpaAppPublic, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletIdentityRegistration, PalletIdentityRegistrarInfo, PalletIdentityAuthorityProperties, PalletImOnlineSr25519AppSr25519Public, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsPhaseResult, TanglePrimitivesJobsJobInfo, PalletMultisigMultisig, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, SpStakingOffenceOffenceDetails, PalletPreimageRequestStatus, PalletPreimageOldRequestStatus, PalletProxyAnnouncement, PalletProxyProxyDefinition, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletRolesRestakingLedger, PalletSchedulerScheduled, SpCoreCryptoKeyTypeId, TangleTestnetRuntimeOpaqueSessionKeys, SpStakingExposure, SpStakingPagedExposureMetadata, SpStakingExposurePage, PalletStakingValidatorPrefs, PalletStakingForcing, PalletStakingStakingLedger, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingUnappliedSlash, FrameSystemAccountInfo, FrameSystemCodeUpgradeAuthorization, FrameSupportDispatchPerDispatchClassWeight, SpRuntimeDigest, FrameSystemEventRecord, FrameSystemPhase, FrameSystemLastRuntimeUpgradeInfo, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletTreasurySpendStatus, PalletVestingReleases, PalletVestingVestingInfo, PalletZksaasFeeInfo } from '@polkadot/types/lookup';
 
 export type __AugmentedQuery<ApiType extends ApiTypes> = AugmentedQuery<ApiType, () => unknown>;
 export type __QueryableStorageEntry<ApiType extends ApiTypes> = QueryableStorageEntry<ApiType>;
@@ -990,6 +905,21 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       [key: string]: QueryableStorageEntry<ApiType>;
     };
+    proxy: {
+      /**
+       * The announcements made by the proxy (key).
+       **/
+      announcements: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<ITuple<[Vec<PalletProxyAnnouncement>, u128]>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
+       * The set of account proxies. Maps the account which has delegated to the accounts
+       * which are being delegated to, together with the amount held on deposit.
+       **/
+      proxies: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<ITuple<[Vec<PalletProxyProxyDefinition>, u128]>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
     randomnessCollectiveFlip: {
       /**
        * Series of block headers from the last 81 blocks that acts as random seed material. This
@@ -1026,6 +956,10 @@ declare module '@polkadot/api-base/types/storage' {
        * The minimum re staking bond to become and maintain the role.
        **/
       minRestakingBond: AugmentedQuery<ApiType, () => Observable<u128>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * The total restake amount in the system
+       **/
+      totalRestake: AugmentedQuery<ApiType, () => Observable<u128>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * The number of jobs completed by a validator in era
        **/
