@@ -127,5 +127,17 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["03ace29a9b62f4aee605b74a7b44624b9d96570cd70aa5d4d6f771d5824889038b"]
 				.unchecked_into(),
 		),
+		// trident
+		(
+			hex!["76aea5c2b3054df24605401596995d4425f6f82d842125f1db2e4ceeeade5934"].into(),
+			hex!["82e0be1db35aa2bea192a24d86e296b50eaa0c1ee6b9bbc15332684df883277e"]
+				.unchecked_into(),
+			hex!["d9ceb6f89ac6fee1bb709e3e979a8d0da5e43a68debdc5fcb88a9e11705a6ae7"]
+				.unchecked_into(),
+			hex!["7c623a93a6691ecc211ea709f8eb606e2c9af5ac413b2cab88e54c2d4391872a"]
+				.unchecked_into(),
+			hex!["020acb5833e9cace29f9f94feaff71ecd854bc79c0646ef7c2a46700313b9e83c7"]
+				.unchecked_into(),
+		),
 	]
 }
