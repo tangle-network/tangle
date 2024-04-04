@@ -186,13 +186,13 @@ impl<T: Config> Pallet<T> {
 			| DigitalSignatureScheme::SchnorrP256
 			| DigitalSignatureScheme::SchnorrP384
 			| DigitalSignatureScheme::SchnorrSecp256k1
+			| DigitalSignatureScheme::SchnorrTaproot
 			| DigitalSignatureScheme::SchnorrRistretto255 => verify_dkg_signature_schnorr_frost::<T>(
 				data.signature_scheme,
 				&data.data,
 				&data.signature,
 				&data.verifying_key,
 			),
-			_ => Err(Error::<T>::InvalidSignature.into()),
 		}
 	}
 

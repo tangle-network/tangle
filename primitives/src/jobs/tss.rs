@@ -199,9 +199,6 @@ pub enum DigitalSignatureScheme {
 	/// Schnorr signature scheme over the Ristretto255 curve / sr25519.
 	SchnorrRistretto255,
 
-	/// Schnorr signature scheme over the JubJub curve.
-	SchnorrRedJubJub,
-
 	/// Schnorr signature scheme over the Ed25519 curve.
 	SchnorrEd25519,
 
