@@ -124,7 +124,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				get_unique_distribution_results(vec![
 					mainnet::get_edgeware_genesis_balance_distribution(),
 					mainnet::get_leaderboard_balance_distribution(),
-					mainnet::get_substrate_balance_distribution(),
+					mainnet::get_edgeware_snapshot_distribution(),
 				]),
 				// Genesis investor / team distribution (pallet-balances + pallet-vesting)
 				combine_distributions(vec![
@@ -176,17 +176,18 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				get_unique_distribution_results(vec![
 					mainnet::get_edgeware_genesis_balance_distribution(),
 					mainnet::get_leaderboard_balance_distribution(),
-					mainnet::get_substrate_balance_distribution(),
+					mainnet::get_edgeware_snapshot_distribution(),
 					mainnet::get_polkadot_validator_distribution(),
 				]),
 				// Genesis investor / team distribution (pallet-balances + pallet-vesting)
 				combine_distributions(vec![
 					mainnet::get_team_balance_distribution(),
+					mainnet::get_team_direct_vesting_distribution(),
 					mainnet::get_investor_balance_distribution(),
 					mainnet::get_foundation_balance_distribution(),
 				]),
 				// endowed evm accounts
-				mainnet::get_initial_endowed_accounts().1,
+				vec![],
 			)
 		},
 		// Bootnodes
@@ -239,17 +240,13 @@ fn mainnet_genesis(
 	RuntimeGenesisConfig {
 		system: SystemConfig { ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },
-		balances: BalancesConfig {
-			balances: genesis_non_airdrop
-				.iter()
-				.map(|(x, y, _, _, _)| (x.clone().to_account_id_32(), *y))
-				.chain(endowed_accounts)
-				.collect(),
-		},
+		balances: BalancesConfig { balances: endowed_accounts.to_vec() },
 		vesting: VestingConfig {
 			vesting: genesis_non_airdrop
 				.iter()
-				.map(|(x, _, a, b, c)| (x.clone().to_account_id_32(), *a, *b, *c))
+				.map(|(address, _value, begin, end, liquid)| {
+					(address.clone().to_account_id_32(), *begin, *end, *liquid)
+				})
 				.collect(),
 		},
 		indices: Default::default(),
@@ -314,7 +311,7 @@ fn mainnet_genesis(
 			claims: genesis_airdrop.claims,
 			vesting: vesting_claims,
 			expiry: Some((
-				525_600u64,
+				5_265_000u64, // 1 year
 				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
 			)),
 		},

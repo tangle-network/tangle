@@ -24,10 +24,7 @@ async fn test_job_submission_event() {
 		<subxt_signer::sr25519::Keypair as Signer<PolkadotConfig>>::account_id(&bob);
 
 	let alice_role_key = sp_core::ecdsa::Pair::from_string("//Alice", None).unwrap();
-	println!("Alice role key: {:?}", alice_role_key.public());
-
 	let bob_role_key = sp_core::ecdsa::Pair::from_string("//Bob", None).unwrap();
-	println!("Bob role key: {:?}", bob_role_key.public());
 
 	let profile = api::runtime_types::pallet_roles::profile::Profile::Shared(
 		api::runtime_types::pallet_roles::profile::SharedRestakeProfile {
@@ -61,8 +58,8 @@ async fn test_job_submission_event() {
 		.unwrap();
 
 	let dkg_phase_one = jobs::JobSubmission {
-		expiry: 100u64,
-		ttl: 100u64,
+		expiry: 1000u64,
+		ttl: 1000u64,
 		job_type: jobs::JobType::DKGTSSPhaseOne(jobs::tss::DKGTSSPhaseOneJobType {
 			participants: BoundedVec::<AccountId32>(vec![
 				alice_account_id.clone(),
@@ -71,7 +68,8 @@ async fn test_job_submission_event() {
 			threshold: 1u8,
 			permitted_caller: None,
 			role_type: roles::tss::ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1,
-			__subxt_unused_type_params: Default::default(),
+			hd_wallet: false,
+			__ignore: Default::default(),
 		}),
 		fallback: jobs::FallbackOptions::Destroy,
 	};
@@ -105,7 +103,8 @@ async fn test_job_submission_event() {
 			BoundedVec(bob_signature.0.to_vec()),
 		]),
 		threshold: 1,
-		__subxt_unused_type_params: Default::default(),
+		chain_code: None,
+		__ignore: Default::default(),
 	});
 
 	let job_result_tx = tangle_testnet_runtime::api::tx().jobs().submit_job_result(
@@ -122,4 +121,62 @@ async fn test_job_submission_event() {
 		.wait_for_finalized_success()
 		.await
 		.unwrap();
+
+	for i in 1..10 {
+		// Submit Phase 2 Job Request.
+		let phase_one_id = 0u64;
+		let proposal_data = b"proposalBytes";
+		let dkg_phase_two = jobs::JobSubmission {
+			expiry: 1000u64,
+			ttl: 1000u64,
+			job_type: jobs::JobType::DKGTSSPhaseTwo(jobs::tss::DKGTSSPhaseTwoJobType {
+				role_type: roles::tss::ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1,
+				phase_one_id,
+				submission: BoundedVec(proposal_data.to_vec()),
+				derivation_path: None,
+				__ignore: Default::default(),
+			}),
+			fallback: jobs::FallbackOptions::Destroy,
+		};
+
+		let jobs_tx = tangle_testnet_runtime::api::tx().jobs().submit_job(dkg_phase_two);
+		let _hash = subxt_client
+			.tx()
+			.sign_and_submit_then_watch_default(&jobs_tx, &alice)
+			.await
+			.unwrap()
+			.wait_for_finalized_success()
+			.await
+			.unwrap();
+
+		// Submit Phase 2 Job Result.
+		let proposal_data_hash = sp_core::hashing::keccak_256(proposal_data);
+		let dkg_signature = dkg_key.sign_prehashed(&proposal_data_hash);
+		let dkg_phase_two_result = jobs::JobResult::DKGPhaseTwo(jobs::tss::DKGTSSSignatureResult {
+			signature_scheme: jobs::tss::DigitalSignatureScheme::EcdsaSecp256k1,
+			signature: BoundedVec(dkg_signature.0[..64].to_vec()),
+			derivation_path: None,
+			data: BoundedVec(proposal_data_hash.to_vec()),
+			verifying_key: BoundedVec(dkg_pubkey.0.to_vec()),
+			chain_code: None,
+			__ignore: Default::default(),
+		});
+
+		// Phase 2 Job Id
+		let new_job_id = i as u64;
+		let job_result_tx = tangle_testnet_runtime::api::tx().jobs().submit_job_result(
+			roles::RoleType::Tss(roles::tss::ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1),
+			new_job_id,
+			dkg_phase_two_result,
+		);
+
+		let _hash = subxt_client
+			.tx()
+			.sign_and_submit_then_watch_default(&job_result_tx, &alice)
+			.await
+			.unwrap()
+			.wait_for_finalized_success()
+			.await
+			.unwrap();
+	}
 }

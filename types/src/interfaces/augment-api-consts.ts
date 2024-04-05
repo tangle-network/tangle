@@ -9,14 +9,7 @@ import type { ApiTypes, AugmentedConst } from '@polkadot/api-base/types';
 import type { Bytes, Option, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { Codec } from '@polkadot/types-codec/types';
 import type { Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import {
-  FrameSupportPalletId,
-  FrameSystemLimitsBlockLength,
-  FrameSystemLimitsBlockWeights,
-  SpVersionRuntimeVersion,
-  SpWeightsRuntimeDbWeight,
-  SpWeightsWeightV2Weight,
-} from '@polkadot/types/lookup'
+import { SpWeightsWeightV2Weight, FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpWeightsRuntimeDbWeight, SpVersionRuntimeVersion } from '@polkadot/types/lookup';
 
 export type __AugmentedConst<ApiType extends ApiTypes> = AugmentedConst<ApiType>;
 
@@ -561,6 +554,49 @@ declare module '@polkadot/api-base/types/consts' {
        * The nomination pool's pallet id.
        **/
       palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    proxy: {
+      /**
+       * The base amount of currency needed to reserve for creating an announcement.
+       * 
+       * This is held when a new storage item holding a `Balance` is created (typically 16
+       * bytes).
+       **/
+      announcementDepositBase: u128 & AugmentedConst<ApiType>;
+      /**
+       * The amount of currency needed per announcement made.
+       * 
+       * This is held for adding an `AccountId`, `Hash` and `BlockNumber` (typically 68 bytes)
+       * into a pre-existing storage value.
+       **/
+      announcementDepositFactor: u128 & AugmentedConst<ApiType>;
+      /**
+       * The maximum amount of time-delayed announcements that are allowed to be pending.
+       **/
+      maxPending: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum amount of proxies allowed for a single account.
+       **/
+      maxProxies: u32 & AugmentedConst<ApiType>;
+      /**
+       * The base amount of currency needed to reserve for creating a proxy.
+       * 
+       * This is held for an additional storage item whose value size is
+       * `sizeof(Balance)` bytes and whose key size is `sizeof(AccountId)` bytes.
+       **/
+      proxyDepositBase: u128 & AugmentedConst<ApiType>;
+      /**
+       * The amount of currency needed per proxy added.
+       * 
+       * This is held for adding 32 bytes plus an instance of `ProxyType` more into a
+       * pre-existing storage value. Thus, when configuring `ProxyDepositFactor` one should take
+       * into account `32 + proxy_type.encode().len()` bytes of data.
+       **/
+      proxyDepositFactor: u128 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/

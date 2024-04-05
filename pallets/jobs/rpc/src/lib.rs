@@ -16,9 +16,9 @@
 #![allow(clippy::unnecessary_mut_passed)]
 #![allow(clippy::type_complexity)]
 use jsonrpsee::{
-	core::{Error as JsonRpseeError, RpcResult},
+	core::RpcResult,
 	proc_macros::rpc,
-	types::error::{CallError, ErrorObject},
+	types::error::{ErrorObject, ErrorObjectOwned},
 };
 pub use pallet_jobs_rpc_runtime_api::JobsApi as JobsRuntimeApi;
 use parity_scale_codec::Codec;
@@ -304,13 +304,8 @@ impl From<Error> for i32 {
 }
 
 /// Converts a runtime trap into an RPC error.
-fn runtime_error_into_rpc_err(err: impl std::fmt::Debug) -> JsonRpseeError {
-	CallError::Custom(ErrorObject::owned(
-		RUNTIME_ERROR,
-		"Runtime error",
-		Some(format!("{:?}", err)),
-	))
-	.into()
+fn runtime_error_into_rpc_err(err: impl std::fmt::Debug) -> ErrorObjectOwned {
+	ErrorObject::owned(RUNTIME_ERROR, "Runtime error", Some(format!("{:?}", err)))
 }
 
 const RUNTIME_ERROR: i32 = 1;

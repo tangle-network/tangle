@@ -38,6 +38,9 @@ pub struct DKGTSSPhaseOneJobType<AccountId, MaxParticipants: Get<u32> + Clone> {
 
 	/// The role type to be used
 	pub role_type: ThresholdSignatureRoleType,
+
+	/// specifies whether hd derivation is enabled.
+	pub hd_wallet: bool,
 }
 
 /// Represents the DKG Signature job type.
@@ -93,7 +96,9 @@ pub struct DKGTSSKeySubmissionResult<
 
 	/// Submitted key
 	pub key: BoundedVec<u8, MaxKeyLen>,
-
+	/// Chain Key used during the Keygen.
+	/// Used during derivation of child keys.
+	pub chain_code: Option<[u8; 32]>,
 	/// List of participants' public keys
 	pub participants: BoundedVec<BoundedVec<u8, MaxKeyLen>, MaxParticipants>,
 
@@ -115,9 +120,6 @@ pub struct DKGTSSSignatureResult<
 	/// Signature scheme to use for DKG
 	pub signature_scheme: DigitalSignatureScheme,
 
-	/// The derivation path used for the signature
-	pub derivation_path: Option<BoundedVec<u8, MaxAdditionalParamsLen>>,
-
 	/// The input data
 	pub data: BoundedVec<u8, MaxDataLen>,
 
@@ -126,6 +128,13 @@ pub struct DKGTSSSignatureResult<
 
 	/// The expected key for verifying the signature
 	pub verifying_key: BoundedVec<u8, MaxKeyLen>,
+
+	/// The derivation path used for the signature
+	pub derivation_path: Option<BoundedVec<u8, MaxAdditionalParamsLen>>,
+
+	/// Chain Key used during the Keygen.
+	/// Used during derivation of child keys.
+	pub chain_code: Option<[u8; 32]>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
@@ -157,6 +166,8 @@ pub struct DKGTSSKeyRotationResult<
 	pub signature_scheme: DigitalSignatureScheme,
 	/// The derivation path used for the signature
 	pub derivation_path: Option<BoundedVec<u8, MaxAdditionalParamsLen>>,
+	/// Chain Key used during the Keygen.
+	pub chain_code: Option<[u8; 32]>,
 }
 
 /// Possible key types for DKG
@@ -188,14 +199,14 @@ pub enum DigitalSignatureScheme {
 	/// Schnorr signature scheme over the Ristretto255 curve / sr25519.
 	SchnorrRistretto255,
 
-	/// Schnorr signature scheme over the JubJub curve.
-	SchnorrRedJubJub,
-
 	/// Schnorr signature scheme over the Ed25519 curve.
 	SchnorrEd25519,
 
 	/// Schnorr signature scheme over the Ed448 curve.
 	SchnorrEd448,
+
+	/// Schnorr signature scheme over the Secp256k1 curve with Taproot Support.
+	SchnorrTaproot,
 
 	/// BLS 381 signature scheme.
 	Bls381,

@@ -1,5 +1,5 @@
 [workspace.package]
-version = "0.6.3"
+version = "0.6.7"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
@@ -33,6 +33,7 @@ members = [
  "precompiles/proxy",
  "precompiles/preimage",
  "precompiles/jobs",
+ "precompiles/balances-erc20",
  "tangle-subxt",
  "evm-tracer"
  # "relayer-gadget",
@@ -125,6 +126,7 @@ frost-secp256k1 = { path = "pallets/dkg/frost/frost-secp256k1", default-features
 frost-p256 = { path = "pallets/dkg/frost/frost-p256", default-features = false }
 frost-p384 = { path = "pallets/dkg/frost/frost-p384", default-features = false }
 frost-redjubjub = { path = "pallets/dkg/frost/frost-redjubjub", default-features = false }
+frost-taproot = { path = "pallets/dkg/frost/frost-taproot", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
@@ -289,6 +291,7 @@ pallet-hotfix-sufficients = { git = "https://github.com/paritytech/frontier.git"
 pallet-evm-precompile-democracy = { path = "precompiles/pallet-democracy", default-features = false }
 precompile-utils = { path = "precompiles/utils", default-features = false }
 pallet-evm-precompile-batch = { path = "precompiles/batch", default-features = false }
+pallet-evm-precompile-balances-erc20 = { path = "precompiles/balances-erc20", default-features = false }
 pallet-evm-precompile-call-permit = { path = "precompiles/call-permit", default-features = false }
 pallet-evm-precompile-proxy = { path = "precompiles/proxy", default-features = false }
 pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-features = false }
@@ -340,12 +343,14 @@ evm-tracer = { path = "evm-tracer", default-features = false }
 malachite-base = { version = "0.4", default-features = false }
 malachite-nz = { version = "0.4", default-features = false, features = ["32_bit_limbs"] }
 postcard = { version = "1", default-features = false }
-dfns-cggmp21 = { package = "cggmp21", version = "0.1.1", default-features = false }
+dfns-cggmp21 = { package = "cggmp21", version = "0.2.0", default-features = false }
 udigest = { version = "0.1.0", default-features = false }
-generic-ec = { version = "0.1", default-features = false }
-generic-ec-zkp = { version = "0.1", default-features = false }
+generic-ec = { version = "0.2", default-features = false }
+generic-ec-zkp = { version = "0.2", default-features = false }
 round-based = { version = "0.2", default-features = false }
-paillier-zk = { version = "0.1", default-features = false }
+paillier-zk = { version = "0.2", default-features = false }
+derivation-path = { version = "0.2.0", default-features = false }
+signature = { version = "2.2", default-features = false }
 
 [profile.release]
 panic = "unwind"

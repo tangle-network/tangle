@@ -4,7 +4,7 @@ set -e
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
 #define default ports
-ports=(30333 30305 30308)
+ports=(30333 30305 30308 30311 30313)
 
 #check to see process is not orphaned or already running
 for port in ${ports[@]}; do
@@ -46,7 +46,7 @@ cd "$PROJECT_ROOT"
 
 echo "*** Start Tangle Testnet ***"
 # Alice 
-./target/release/tangle --tmp --dev --validator -lerror --alice \
+./target/release/tangle -d ./tmp/alice --dev --validator -lerror --alice \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[0]} \
   --rpc-port 9944 \
@@ -55,8 +55,10 @@ echo "*** Start Tangle Testnet ***"
   --ethapi trace,debug \
   --auto-insert-keys \
   --node-key 0000000000000000000000000000000000000000000000000000000000000001 &
+# Sleep for a while to allow the node to start
+sleep 3
 # Bob
-./target/release/tangle --tmp --dev --validator -lerror --bob \
+./target/release/tangle -d ./tmp/bob --dev --validator -lerror --bob \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[1]} \
   --rpc-port 9945 \
@@ -64,28 +66,29 @@ echo "*** Start Tangle Testnet ***"
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Charlie
-./target/release/tangle --tmp --dev --validator -lerror --charlie \
+./target/release/tangle -d ./tmp/charlie --dev --validator -lerror --charlie \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
-  --port ${ports[1]} \
+  --port ${ports[2]} \
   --rpc-port 9946 \
   --ethapi trace,debug \
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Dave
-./target/release/tangle --tmp --dev --validator -lerror --dave \
+./target/release/tangle -d ./tmp/dave --dev --validator -lerror --dave \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
-  --port ${ports[1]} \
+  --port ${ports[3]} \
   --rpc-port 9947 \
   --ethapi trace,debug \
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Eve
-./target/release/tangle --tmp --dev --validator -linfo --eve \
+./target/release/tangle -d ./tmp/eve --dev --validator -linfo --eve \
     --rpc-cors all --rpc-methods=unsafe --rpc-external \
-    --port ${ports[2]} \
+    --port ${ports[4]} \
     --rpc-port 9948 \
     --ethapi trace,debug \
     --auto-insert-keys \
     -levm=debug \
+    -lgadget=trace \
     --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
 popd
