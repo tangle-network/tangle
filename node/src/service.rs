@@ -327,14 +327,27 @@ pub async fn new_full(
 
 		// finally check if keys are inserted correctly
 		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore()).is_err() {
-			println!("   
+			if config.chain_spec.chain_type() == ChainType::Development
+				|| config.chain_spec.chain_type() == ChainType::Local
+			{
+				println!("   
 			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
 				Validator keys not found, validator keys are essential to run a validator on
 				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
 				how to generate and insert keys. OR start the node with --auto-insert-keys to automatically generate the keys in testnet.
 			++++++++++++++++++++++++++++++++++++++++++++++++
 			\n");
-			panic!("Keys not detected!")
+				panic!("Keys not detected!")
+			} else {
+				println!("   
+			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
+				Validator keys not found, validator keys are essential to run a validator on
+				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
+				how to generate and insert keys.
+			++++++++++++++++++++++++++++++++++++++++++++++++
+			\n");
+				panic!("Keys not detected!")
+			}
 		}
 	}
 
