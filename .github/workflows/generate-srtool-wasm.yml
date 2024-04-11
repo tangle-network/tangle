@@ -1,4 +1,4 @@
-name: Srtool build
+name: Srtool build Wasm
 
 on:
   workflow_dispatch:
@@ -13,6 +13,7 @@ jobs:
       matrix:
         chain: ["testnet", "mainnet"]
     steps:
+
       - uses: actions/checkout@v3
       - name: Srtool build
         id: srtool_build
@@ -20,8 +21,18 @@ jobs:
         with:
           chain: ${{ matrix.chain }}
           runtime_dir: runtime/${{ matrix.chain }}
+          package: tangle-${{ matrix.chain }}-runtime
+
       - name: Summary
         run: |
           echo '${{ steps.srtool_build.outputs.json }}' | jq . > ${{ matrix.chain }}-srtool-digest.json
           cat ${{ matrix.chain }}-srtool-digest.json
           echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
+
+      - name: Archive Runtime
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.chain }}-runtime-${{ github.sha }}
+          path: |
+            ${{ steps.srtool_build.outputs.wasm }}
+            ${{ matrix.chain }}-srtool-digest.json
