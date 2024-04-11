@@ -1,0 +1,36 @@
+name: Srtool build
+
+on:
+  workflow_dispatch:
+
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  srtool:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chain: ["testnet", "mainnet"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Srtool build
+        id: srtool_build
+        uses: chevdor/srtool-actions@v0.8.0
+        with:
+          chain: ${{ matrix.chain }}
+          runtime_dir: runtime/${{ matrix.chain }}
+      - name: Summary
+        run: |
+          echo '${{ steps.srtool_build.outputs.json }}' | jq . > ${{ matrix.chain }}-srtool-digest.json
+          cat ${{ matrix.chain }}-srtool-digest.json
+          echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
+
+      - name: Upload ${{ matrix.chain }} wasm to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ steps.srtool_build.outputs.wasm }}
+          asset_name: tangle-${{ matrix.features }}-srtool-wasm
+          tag: ${{ github.ref }}
+          overwrite: true
