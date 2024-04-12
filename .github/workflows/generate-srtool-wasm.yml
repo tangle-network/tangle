@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        chain: ["testnet", ""]
+        chain: ["testnet", "mainnet"]
     steps:
 
       - uses: actions/checkout@v3
@@ -19,10 +19,18 @@ jobs:
         id: srtool_build
         
         uses: chevdor/srtool-actions@v0.8.0
+        if: matrix.chain == 'mainnet'
         with:
           chain: ${{ matrix.chain }}
           runtime_dir: runtime/${{ matrix.chain }}
-          package: tangle-${{ matrix.chain }}-runtime
+          package: tangle-runtime
+        
+        uses: chevdor/srtool-actions@v0.8.0
+        if: matrix.chain == 'testnet'
+        with:
+          chain: ${{ matrix.chain }}
+          runtime_dir: runtime/${{ matrix.chain }}
+          package: tangle-testnet-runtime
 
       - name: Summary
         run: |
