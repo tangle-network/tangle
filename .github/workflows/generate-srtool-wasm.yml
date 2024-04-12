@@ -11,12 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        chain: ["testnet", "mainnet"]
+        chain: ["testnet", ""]
     steps:
 
       - uses: actions/checkout@v3
       - name: Srtool build
         id: srtool_build
+        
         uses: chevdor/srtool-actions@v0.8.0
         with:
           chain: ${{ matrix.chain }}
