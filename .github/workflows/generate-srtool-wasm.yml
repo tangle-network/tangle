@@ -15,18 +15,19 @@ jobs:
     steps:
 
       - uses: actions/checkout@v3
+
       - name: Srtool build
-        id: srtool_build
-        
-        uses: chevdor/srtool-actions@v0.8.0
         if: matrix.chain == 'mainnet'
+        id: srtool_build
+        uses: chevdor/srtool-actions@v0.8.0
         with:
           chain: ${{ matrix.chain }}
           runtime_dir: runtime/${{ matrix.chain }}
           package: tangle-runtime
         
-        uses: chevdor/srtool-actions@v0.8.0
+      - name: Srtool build testnet
         if: matrix.chain == 'testnet'
+        uses: chevdor/srtool-actions@v0.8.0
         with:
           chain: ${{ matrix.chain }}
           runtime_dir: runtime/${{ matrix.chain }}
