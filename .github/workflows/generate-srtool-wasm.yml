@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   push:
-    branches: [main, srtool-action]
+    branches: [main]
 
 jobs:
   srtool:
