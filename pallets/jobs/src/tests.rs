@@ -174,7 +174,7 @@ fn test_signing_rules() {
 			submission.clone()
 		));
 
-		abigen!(SigningRules, "../../forge/out/SigningRules.sol/VotableSigningRules.json");
+		abigen!(SigningRules, "../../forge/artifacts/VotableSigningRules.json");
 		let (provider, _) = Provider::mocked();
 		let client = Arc::new(provider);
 		let contract = SigningRules::new(Address::from(signing_rules_address), client);
