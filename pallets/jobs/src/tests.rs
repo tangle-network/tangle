@@ -180,7 +180,7 @@ fn test_signing_rules() {
 		let contract = SigningRules::new(Address::from(signing_rules_address), client);
 
 		let phase_1_job_id = [0u8; 32];
-		let phase_1_job_details:Bytes = submission.job_type.encode().into();
+		let phase_1_job_details: Bytes = submission.job_type.encode().into();
 		let threshold = 3;
 		let use_democracy = false;
 		let voters = vec![
@@ -207,12 +207,11 @@ fn test_signing_rules() {
 		let res = Ethereum::execute(alice.address, &signed_tx, None);
 		assert_ok!(res.clone());
 
-
 		let phase_2_job_details: Bytes = b"phase2".into();
 		let vote_proposal_call: FunctionCall<_, _, _> = contract.vote_proposal(
 			phase_1_job_id.clone(),
 			phase_1_job_details.clone(),
-			phase_2_job_details.clone()
+			phase_2_job_details.clone(),
 		);
 		let vote_proposal_tx = eip1559_contract_call_unsigned_transaction(
 			signing_rules_address,
@@ -227,7 +226,6 @@ fn test_signing_rules() {
 		let signed_tx = vote_proposal_tx.sign(&bob.private_key, None);
 		let res = Ethereum::execute(bob.address, &signed_tx, None);
 		assert_ok!(res.clone());
-
 	});
 }
 
