@@ -87,10 +87,10 @@ pub mod currency {
 
 	// Monetary value
 	// =============
-	/// Lets assume 10 TNT = 1USD
+	/// Lets assume 100 TNT = 1USD
 	/// This assumption forms the base of all fee calculations, revisit this
 	/// if the assumption is no longer true.
-	pub const DOLLAR: Balance = UNIT * 10;
+	pub const DOLLAR: Balance = UNIT * 100;
 	pub const CENT: Balance = DOLLAR / 100;
 	pub const MILLICENT: Balance = CENT / 1000;
 	/// The existential deposit.
