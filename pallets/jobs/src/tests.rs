@@ -208,11 +208,8 @@ fn test_signing_rules() {
 		assert_ok!(res.clone());
 
 		let phase_2_job_details: Bytes = b"phase2".into();
-		let vote_proposal_call: FunctionCall<_, _, _> = contract.vote_proposal(
-			phase_1_job_id,
-			phase_1_job_details,
-			phase_2_job_details,
-		);
+		let vote_proposal_call: FunctionCall<_, _, _> =
+			contract.vote_proposal(phase_1_job_id, phase_1_job_details, phase_2_job_details);
 		let vote_proposal_tx = eip1559_contract_call_unsigned_transaction(
 			signing_rules_address,
 			vote_proposal_call.calldata().unwrap().to_vec(),
