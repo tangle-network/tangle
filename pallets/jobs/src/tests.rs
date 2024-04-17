@@ -23,7 +23,7 @@ use pallet_evm::{AddressMapping, HashedAddressMapping};
 use pallet_roles::profile::{IndependentRestakeProfile, Profile, Record, SharedRestakeProfile};
 use serde_json::Value;
 use sp_core::U256;
-use sp_runtime::{traits::BlakeTwo256, AccountId32};
+use sp_runtime::traits::BlakeTwo256;
 use sp_std::sync::Arc;
 use std::fs;
 use tangle_primitives::jobs::FallbackOptions;
@@ -82,7 +82,7 @@ pub fn independent_profile() -> Profile<Runtime> {
 
 fn get_signing_rules_abi() -> (Value, Value) {
 	let mut data: Value = serde_json::from_str(
-		&fs::read_to_string("../../forge/out/SigningRules.sol/VotableSigningRules.json").unwrap(),
+		&fs::read_to_string("../../forge/artifacts/VotableSigningRules.json").unwrap(),
 	)
 	.unwrap();
 	let abi = data["abi"].take();
@@ -209,9 +209,9 @@ fn test_signing_rules() {
 
 		let phase_2_job_details: Bytes = b"phase2".into();
 		let vote_proposal_call: FunctionCall<_, _, _> = contract.vote_proposal(
-			phase_1_job_id.clone(),
-			phase_1_job_details.clone(),
-			phase_2_job_details.clone(),
+			phase_1_job_id,
+			phase_1_job_details,
+			phase_2_job_details,
 		);
 		let vote_proposal_tx = eip1559_contract_call_unsigned_transaction(
 			signing_rules_address,

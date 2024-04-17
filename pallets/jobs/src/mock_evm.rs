@@ -27,7 +27,7 @@ use sp_core::{keccak_256, ConstU32, H160, H256, U256};
 use sp_runtime::{
 	traits::{BlakeTwo256, DispatchInfoOf, Dispatchable},
 	transaction_validity::{TransactionValidity, TransactionValidityError},
-	AccountId32, ConsensusEngineId,
+	ConsensusEngineId,
 };
 
 parameter_types! {
