@@ -126,7 +126,9 @@ fn test_signing_rules() {
 
 		let pairs = (0..10).map(|i| address_build(i as u8)).collect::<Vec<_>>();
 		let alice = &pairs[0];
+		let bob = &pairs[1];
 		Balances::make_free_balance_be(&alice.account_id, 20_000_000_u128);
+		Balances::make_free_balance_be(&bob.account_id, 20_000_000_u128);
 
 		let (_abi, bytecode) = get_signing_rules_abi();
 		let stripped_bytecode = bytecode.as_str().unwrap().trim_start_matches("0x");
@@ -158,7 +160,7 @@ fn test_signing_rules() {
 					.collect::<Vec<_>>()
 					.try_into()
 					.unwrap(),
-				threshold: 3,
+				threshold: 2,
 				permitted_caller: Some(HashedAddressMapping::<BlakeTwo256>::into_account_id(
 					signing_rules_address,
 				)),
@@ -178,7 +180,7 @@ fn test_signing_rules() {
 		let contract = SigningRules::new(Address::from(signing_rules_address), client);
 
 		let phase_1_job_id = [0u8; 32];
-		let phase_1_job_details = submission.job_type.encode().into();
+		let phase_1_job_details:Bytes = submission.job_type.encode().into();
 		let threshold = 3;
 		let use_democracy = false;
 		let voters = vec![
@@ -191,7 +193,7 @@ fn test_signing_rules() {
 		let expiry = 1000;
 		let ethers_call: FunctionCall<_, _, _> = contract.initialize(
 			phase_1_job_id,
-			phase_1_job_details,
+			phase_1_job_details.clone(),
 			threshold,
 			use_democracy,
 			voters,
@@ -204,6 +206,28 @@ fn test_signing_rules() {
 		let signed_tx = initialize_tx.sign(&alice.private_key, None);
 		let res = Ethereum::execute(alice.address, &signed_tx, None);
 		assert_ok!(res.clone());
+
+
+		let phase_2_job_details: Bytes = b"phase2".into();
+		let vote_proposal_call: FunctionCall<_, _, _> = contract.vote_proposal(
+			phase_1_job_id.clone(),
+			phase_1_job_details.clone(),
+			phase_2_job_details.clone()
+		);
+		let vote_proposal_tx = eip1559_contract_call_unsigned_transaction(
+			signing_rules_address,
+			vote_proposal_call.calldata().unwrap().to_vec(),
+		);
+		// Submit first proposal vote.
+		let signed_tx = vote_proposal_tx.sign(&alice.private_key, None);
+		let res = Ethereum::execute(alice.address, &signed_tx, None);
+		assert_ok!(res.clone());
+
+		// Submit second proposal vote.
+		let signed_tx = vote_proposal_tx.sign(&bob.private_key, None);
+		let res = Ethereum::execute(bob.address, &signed_tx, None);
+		assert_ok!(res.clone());
+
 	});
 }
 
