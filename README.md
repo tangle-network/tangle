@@ -35,7 +35,7 @@
 
 <h1 id="start"> Getting Started </h1>
 
-Tangle, Built on Substrate, Tangle Network empowers privacy-enhancing and governance-decentralized applications, incorporating cross-chain functionality, EVM compatibility, advanced governance systems, and ZK applications into a unified ecosystem.
+Tangle is restaking network focused around complex offchain computations, such as MPC (multi party computation), zero-knowledge proof generation, AI services, and more.
 
 If you would like to familiarize yourself with Tangle Network check out following repo and docs:
 
