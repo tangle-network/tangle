@@ -27,6 +27,9 @@ use sp_runtime::{
 	MultiAddress, MultiSignature, Perbill,
 };
 
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+
 pub mod jobs;
 pub mod misbehavior;
 pub mod roles;
