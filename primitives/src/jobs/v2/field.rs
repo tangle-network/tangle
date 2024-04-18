@@ -46,389 +46,56 @@ macro_rules! impl_from {
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(transparent))]
-pub struct BoundedSring<S: Get<u32>>(pub BoundedVec<u8, S>);
-
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Field<AccountId, MaxSize: Get<u32>> {
 	/// Represents a field of null value.
+	#[codec(index = 0)]
 	None,
 	/// Represents a boolean.
+	#[codec(index = 1)]
 	Bool(bool),
 	/// Represents a u8 Number.
+	#[codec(index = 2)]
 	Uint8(u8),
 	/// Represents a i8 Number.
+	#[codec(index = 3)]
 	Int8(i8),
 	/// Represents a u16 Number.
+	#[codec(index = 4)]
 	Uint16(u16),
 	/// Represents a i16 Number.
+	#[codec(index = 5)]
 	Int16(i16),
 	/// Represents a u32 Number.
+	#[codec(index = 6)]
 	Uint32(u32),
 	/// Represents a i32 Number.
+	#[codec(index = 7)]
 	Int32(i32),
 	/// Represents a u64 Number.
+	#[codec(index = 8)]
 	Uint64(u64),
 	/// Represents a i64 Number.
+	#[codec(index = 9)]
 	Int64(i64),
 	/// Represents a UTF-8 string.
-	String(BoundedSring<MaxSize>),
+	#[codec(index = 10)]
+	String(BoundedString<MaxSize>),
 	/// Represents a Raw Bytes.
+	#[codec(index = 11)]
 	Bytes(BoundedVec<u8, MaxSize>),
 	/// Represents an array of values
 	/// Fixed Length of values.
+	#[codec(index = 12)]
 	Array(BoundedVec<Self, MaxSize>),
 	/// Represents a list of values
+	#[codec(index = 13)]
 	List(BoundedVec<Self, MaxSize>),
+
+	// NOTE: Special types starts from 100
 	/// A sepcial type for AccountId
+	#[codec(index = 100)]
 	AccountId(AccountId),
-}
-
-impl<AccountId, MaxSize: Get<u32>> Field<AccountId, MaxSize> {
-	/// Returns `true` if the field is [`None`].
-	///
-	/// [`None`]: Field::None
-	#[must_use]
-	pub fn is_none(&self) -> bool {
-		matches!(self, Self::None)
-	}
-
-	/// Returns `true` if the field is [`Bool`].
-	///
-	/// [`Bool`]: Field::Bool
-	#[must_use]
-	pub fn is_bool(&self) -> bool {
-		matches!(self, Self::Bool(..))
-	}
-
-	pub fn as_bool(&self) -> Option<&bool> {
-		if let Self::Bool(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_bool(self) -> Result<bool, Self> {
-		if let Self::Bool(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`Uint8`].
-	///
-	/// [`Uint8`]: Field::Uint8
-	#[must_use]
-	pub fn is_uint8(&self) -> bool {
-		matches!(self, Self::Uint8(..))
-	}
-
-	pub fn as_uint8(&self) -> Option<&u8> {
-		if let Self::Uint8(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_uint8(self) -> Result<u8, Self> {
-		if let Self::Uint8(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`Int8`].
-	///
-	/// [`Int8`]: Field::Int8
-	#[must_use]
-	pub fn is_int8(&self) -> bool {
-		matches!(self, Self::Int8(..))
-	}
-
-	pub fn as_int8(&self) -> Option<&i8> {
-		if let Self::Int8(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_int8(self) -> Result<i8, Self> {
-		if let Self::Int8(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`Uint16`].
-	///
-	/// [`Uint16`]: Field::Uint16
-	#[must_use]
-	pub fn is_uint16(&self) -> bool {
-		matches!(self, Self::Uint16(..))
-	}
-
-	pub fn as_uint16(&self) -> Option<&u16> {
-		if let Self::Uint16(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_uint16(self) -> Result<u16, Self> {
-		if let Self::Uint16(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`Int16`].
-	///
-	/// [`Int16`]: Field::Int16
-	#[must_use]
-	pub fn is_int16(&self) -> bool {
-		matches!(self, Self::Int16(..))
-	}
-
-	pub fn as_int16(&self) -> Option<&i16> {
-		if let Self::Int16(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_int16(self) -> Result<i16, Self> {
-		if let Self::Int16(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`Uint32`].
-	///
-	/// [`Uint32`]: Field::Uint32
-	#[must_use]
-	pub fn is_uint32(&self) -> bool {
-		matches!(self, Self::Uint32(..))
-	}
-
-	pub fn as_uint32(&self) -> Option<&u32> {
-		if let Self::Uint32(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_uint32(self) -> Result<u32, Self> {
-		if let Self::Uint32(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`Int32`].
-	///
-	/// [`Int32`]: Field::Int32
-	#[must_use]
-	pub fn is_int32(&self) -> bool {
-		matches!(self, Self::Int32(..))
-	}
-
-	pub fn as_int32(&self) -> Option<&i32> {
-		if let Self::Int32(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_int32(self) -> Result<i32, Self> {
-		if let Self::Int32(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`Uint64`].
-	///
-	/// [`Uint64`]: Field::Uint64
-	#[must_use]
-	pub fn is_uint64(&self) -> bool {
-		matches!(self, Self::Uint64(..))
-	}
-
-	pub fn as_uint64(&self) -> Option<&u64> {
-		if let Self::Uint64(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_uint64(self) -> Result<u64, Self> {
-		if let Self::Uint64(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`Int64`].
-	///
-	/// [`Int64`]: Field::Int64
-	#[must_use]
-	pub fn is_int64(&self) -> bool {
-		matches!(self, Self::Int64(..))
-	}
-
-	pub fn as_int64(&self) -> Option<&i64> {
-		if let Self::Int64(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_int64(self) -> Result<i64, Self> {
-		if let Self::Int64(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`String`].
-	///
-	/// [`String`]: Field::String
-	#[must_use]
-	pub fn is_string(&self) -> bool {
-		matches!(self, Self::String(..))
-	}
-
-	pub fn as_string(&self) -> Option<&str> {
-		if let Self::String(v) = self {
-			core::str::from_utf8(&v.0).ok()
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_string(self) -> Result<String, Self> {
-		if let Self::String(ref v) = self {
-			String::from_utf8(v.0.to_vec()).map_err(|_| self)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`Bytes`].
-	///
-	/// [`Bytes`]: Field::Bytes
-	#[must_use]
-	pub fn is_bytes(&self) -> bool {
-		matches!(self, Self::Bytes(..))
-	}
-
-	pub fn as_bytes(&self) -> Option<&BoundedVec<u8, MaxSize>> {
-		if let Self::Bytes(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_bytes(self) -> Result<BoundedVec<u8, MaxSize>, Self> {
-		if let Self::Bytes(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`Array`].
-	///
-	/// [`Array`]: Field::Array
-	#[must_use]
-	pub fn is_array(&self) -> bool {
-		matches!(self, Self::Array(..))
-	}
-
-	pub fn as_array(&self) -> Option<&BoundedVec<Self, MaxSize>> {
-		if let Self::Array(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_array(self) -> Result<BoundedVec<Self, MaxSize>, Self> {
-		if let Self::Array(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`List`].
-	///
-	/// [`List`]: Field::List
-	#[must_use]
-	pub fn is_list(&self) -> bool {
-		matches!(self, Self::List(..))
-	}
-
-	pub fn as_list(&self) -> Option<&BoundedVec<Self, MaxSize>> {
-		if let Self::List(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_list(self) -> Result<BoundedVec<Self, MaxSize>, Self> {
-		if let Self::List(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
-
-	/// Returns `true` if the field is [`AccountId`].
-	///
-	/// [`AccountId`]: Field::AccountId
-	#[must_use]
-	pub fn is_account_id(&self) -> bool {
-		matches!(self, Self::AccountId(..))
-	}
-
-	pub fn as_account_id(&self) -> Option<&AccountId> {
-		if let Self::AccountId(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
-	pub fn try_into_account_id(self) -> Result<AccountId, Self> {
-		if let Self::AccountId(v) = self {
-			Ok(v)
-		} else {
-			Err(self)
-		}
-	}
 }
 
 impl_from! {
@@ -442,7 +109,7 @@ impl_from! {
 	u64 => Uint64,
 	i64 => Int64,
 	BoundedVec<u8, MaxSize> => Bytes,
-	BoundedSring<MaxSize> => String,
+	BoundedString<MaxSize> => String,
 	BoundedVec<Self, MaxSize> => List
 }
 
@@ -465,167 +132,54 @@ impl<AccountId: Clone, MaxSize: Get<u32> + Clone, const N: usize> TryFrom<[Self;
 pub enum FieldType {
 	/// A Field of `void` type.
 	#[default]
+	#[codec(index = 0)]
 	Void,
 	/// A Field of `bool` type.
+	#[codec(index = 1)]
 	Bool,
 	/// A Field of `u8` type.
+	#[codec(index = 2)]
 	Uint8,
 	/// A Field of `i8` type.
+	#[codec(index = 3)]
 	Int8,
 	/// A Field of `u16` type.
+	#[codec(index = 4)]
 	Uint16,
 	/// A Field of `i16` type.
+	#[codec(index = 5)]
 	Int16,
 	/// A Field of `u32` type.
+	#[codec(index = 6)]
 	Uint32,
 	/// A Field of `i32` type.
+	#[codec(index = 7)]
 	Int32,
 	/// A Field of `u64` type.
+	#[codec(index = 8)]
 	Uint64,
 	/// A Field of `i64` type.
+	#[codec(index = 9)]
 	Int64,
 	/// A Field of `String` type.
+	#[codec(index = 10)]
 	String,
 	/// A Field of `Vec<u8>` type.
+	#[codec(index = 11)]
 	Bytes,
 	/// A Field of `Option<T>` type.
+	#[codec(index = 12)]
 	Optional(Box<Self>),
 	/// An array of N items of type [`FieldType`].
+	#[codec(index = 13)]
 	Array(u64, Box<Self>),
 	/// A List of items of type [`FieldType`].
+	#[codec(index = 14)]
 	List(Box<Self>),
+	// NOTE: Special types starts from 100
 	/// A special type for AccountId
+	#[codec(index = 100)]
 	AccountId,
-}
-
-impl FieldType {
-	/// Returns `true` if the field type is [`Bool`].
-	///
-	/// [`Bool`]: FieldType::Bool
-	#[must_use]
-	pub fn is_bool(&self) -> bool {
-		matches!(self, Self::Bool)
-	}
-
-	/// Returns `true` if the field type is [`Uint8`].
-	///
-	/// [`Uint8`]: FieldType::Uint8
-	#[must_use]
-	pub fn is_uint8(&self) -> bool {
-		matches!(self, Self::Uint8)
-	}
-
-	/// Returns `true` if the field type is [`Int8`].
-	///
-	/// [`Int8`]: FieldType::Int8
-	#[must_use]
-	pub fn is_int8(&self) -> bool {
-		matches!(self, Self::Int8)
-	}
-
-	/// Returns `true` if the field type is [`Uint16`].
-	///
-	/// [`Uint16`]: FieldType::Uint16
-	#[must_use]
-	pub fn is_uint16(&self) -> bool {
-		matches!(self, Self::Uint16)
-	}
-
-	/// Returns `true` if the field type is [`Int16`].
-	///
-	/// [`Int16`]: FieldType::Int16
-	#[must_use]
-	pub fn is_int16(&self) -> bool {
-		matches!(self, Self::Int16)
-	}
-
-	/// Returns `true` if the field type is [`Uint32`].
-	///
-	/// [`Uint32`]: FieldType::Uint32
-	#[must_use]
-	pub fn is_uint32(&self) -> bool {
-		matches!(self, Self::Uint32)
-	}
-
-	/// Returns `true` if the field type is [`Int32`].
-	///
-	/// [`Int32`]: FieldType::Int32
-	#[must_use]
-	pub fn is_int32(&self) -> bool {
-		matches!(self, Self::Int32)
-	}
-
-	/// Returns `true` if the field type is [`Uint64`].
-	///
-	/// [`Uint64`]: FieldType::Uint64
-	#[must_use]
-	pub fn is_uint64(&self) -> bool {
-		matches!(self, Self::Uint64)
-	}
-
-	/// Returns `true` if the field type is [`Int64`].
-	///
-	/// [`Int64`]: FieldType::Int64
-	#[must_use]
-	pub fn is_int64(&self) -> bool {
-		matches!(self, Self::Int64)
-	}
-
-	/// Returns `true` if the field type is [`String`].
-	///
-	/// [`String`]: FieldType::String
-	#[must_use]
-	pub fn is_string(&self) -> bool {
-		matches!(self, Self::String)
-	}
-
-	/// Returns `true` if the field type is [`Bytes`].
-	///
-	/// [`Bytes`]: FieldType::Bytes
-	#[must_use]
-	pub fn is_bytes(&self) -> bool {
-		matches!(self, Self::Bytes)
-	}
-
-	/// Returns `true` if the field type is [`Optional`].
-	///
-	/// [`Optional`]: FieldType::Optional
-	#[must_use]
-	pub fn is_optional(&self) -> bool {
-		matches!(self, Self::Optional(..))
-	}
-
-	/// Returns `true` if the field type is [`Array`] with the given length.
-	///
-	/// [`Array`]: FieldType::Array
-	#[must_use]
-	pub fn is_array(&self, len: usize) -> bool {
-		matches!(self, Self::Array(l, ..) if *l == len as u64)
-	}
-
-	/// Returns `true` if the field type is [`List`].
-	///
-	/// [`List`]: FieldType::List
-	#[must_use]
-	pub fn is_list(&self) -> bool {
-		matches!(self, Self::List(..))
-	}
-
-	/// Returns `true` if the field type is [`AccountId`].
-	///
-	/// [`AccountId`]: FieldType::AccountId
-	#[must_use]
-	pub fn is_account_id(&self) -> bool {
-		matches!(self, Self::AccountId)
-	}
-
-	/// Returns `true` if the field type is [`Void`].
-	///
-	/// [`Void`]: FieldType::Void
-	#[must_use]
-	pub fn is_void(&self) -> bool {
-		matches!(self, Self::Void)
-	}
 }
 
 impl<AccountId, MaxSize: Get<u32>> PartialEq<FieldType> for Field<AccountId, MaxSize> {
@@ -677,5 +231,117 @@ impl<AccountId: Clone, MaxSize: Get<u32> + Clone> From<Field<AccountId, MaxSize>
 			)),
 			Field::AccountId(_) => FieldType::AccountId,
 		}
+	}
+}
+
+#[derive(Encode, Decode, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+#[scale_info(skip_type_params(S))]
+#[cfg_attr(feature = "std", derive(Serialize), serde(transparent), serde(bound = ""))]
+#[repr(transparent)]
+pub struct BoundedString<S: Get<u32>>(pub(crate) BoundedVec<u8, S>);
+
+impl<S: Get<u32>> Clone for BoundedString<S> {
+	fn clone(&self) -> Self {
+		Self(self.0.clone())
+	}
+}
+
+impl<S: Get<u32>> PartialEq for BoundedString<S> {
+	fn eq(&self, other: &Self) -> bool {
+		self.0 == other.0
+	}
+}
+
+impl<S: Get<u32>> Eq for BoundedString<S> {}
+
+impl<S: Get<u32>> TryFrom<String> for BoundedString<S> {
+	type Error = String;
+	fn try_from(value: String) -> Result<Self, Self::Error> {
+		let bytes = value.as_bytes().to_vec().try_into().map_err(|_| value)?;
+		Ok(Self(bytes))
+	}
+}
+
+impl<S: Get<u32>> TryFrom<&str> for BoundedString<S> {
+	type Error = String;
+	fn try_from(value: &str) -> Result<Self, Self::Error> {
+		Self::try_from(value.to_string())
+	}
+}
+
+impl<S: Get<u32>> core::fmt::Display for BoundedString<S> {
+	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+		core::fmt::Display::fmt(&core::str::from_utf8(&self.0).unwrap_or_default(), f)
+	}
+}
+
+impl<S: Get<u32>> BoundedString<S> {
+	/// Try to convert the bytes to a string slice.
+	pub fn try_as_str(&self) -> Result<&str, core::str::Utf8Error> {
+		core::str::from_utf8(&self.0)
+	}
+
+	/// Convert the bytes to a string slice.
+	pub fn as_str(&self) -> &str {
+		self.try_as_str().unwrap_or_default()
+	}
+
+	/// check if the string is empty.
+	pub fn is_empty(&self) -> bool {
+		self.0.is_empty()
+	}
+
+	/// Returns the length of the string.
+	pub fn len(&self) -> usize {
+		self.0.len()
+	}
+
+	/// Check if the underlying bytes are valid utf8.
+	pub fn is_utf8(&self) -> bool {
+		core::str::from_utf8(&self.0).is_ok()
+	}
+}
+
+#[cfg(feature = "std")]
+impl<'de, S: Get<u32>> serde::Deserialize<'de> for BoundedString<S> {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: serde::Deserializer<'de>,
+	{
+		struct StringVisitor<S: Get<u32>>(PhantomData<S>);
+
+		impl<'de, S: Get<u32>> serde::de::Visitor<'de> for StringVisitor<S> {
+			type Value = String;
+
+			fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+				formatter.write_str("a string")
+			}
+
+			fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+			where
+				E: serde::de::Error,
+			{
+				let size = v.len();
+				let max = match usize::try_from(S::get()) {
+					Ok(n) => n,
+					Err(_) => return Err(serde::de::Error::custom("can't convert to usize")),
+				};
+				if size > max {
+					Err(serde::de::Error::invalid_length(
+						size,
+						&"string length is greater than the maximum allowed",
+					))
+				} else {
+					Ok(v)
+				}
+			}
+		}
+
+		let visitor: StringVisitor<S> = StringVisitor(PhantomData);
+		deserializer.deserialize_string(visitor).map(|v| {
+			Ok(BoundedString::<S>(
+				v.as_bytes().to_vec().try_into().expect("length checked in visitor"),
+			))
+		})?
 	}
 }
