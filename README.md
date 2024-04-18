@@ -39,7 +39,7 @@ Tangle is restaking network focused around complex offchain computations, such a
 
 If you would like to familiarize yourself with Tangle Network check out following repo and docs:
 
-- [Webb Gadgets](https://github.com/webb-tools/gadgets)
+- [Tangle Gadgets](https://github.com/webb-tools/gadget)
 - [Tangle Docs](https://docs.tangle.tools/docs)
 - [Tangle Website](https://tangle.tools/)
 
