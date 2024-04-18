@@ -15,11 +15,18 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![cfg(test)]
 use super::*;
+use crate::mock_evm::{address_build, EIP1559UnsignedTransaction};
+use ethers::prelude::*;
 use frame_support::{assert_noop, assert_ok};
 use mock::*;
-use tangle_primitives::jobs::FallbackOptions;
-
+use pallet_evm::{AddressMapping, HashedAddressMapping};
 use pallet_roles::profile::{IndependentRestakeProfile, Profile, Record, SharedRestakeProfile};
+use serde_json::Value;
+use sp_core::U256;
+use sp_runtime::traits::BlakeTwo256;
+use sp_std::sync::Arc;
+use std::fs;
+use tangle_primitives::jobs::FallbackOptions;
 use tangle_primitives::{
 	jobs::{
 		DKGTSSKeyRefreshResult, DKGTSSKeyRotationResult, DKGTSSPhaseFourJobType,
@@ -71,6 +78,152 @@ pub fn independent_profile() -> Profile<Runtime> {
 		.unwrap(),
 	};
 	Profile::Independent(profile)
+}
+
+fn get_signing_rules_abi() -> (Value, Value) {
+	let mut data: Value = serde_json::from_str(
+		&fs::read_to_string("../../forge/artifacts/VotableSigningRules.json").unwrap(),
+	)
+	.unwrap();
+	let abi = data["abi"].take();
+	let bytecode = data["bytecode"]["object"].take();
+	(abi, bytecode)
+}
+
+fn eip1559_signing_rules_creation_unsigned_transaction(
+	bytecode: Vec<u8>,
+) -> EIP1559UnsignedTransaction {
+	EIP1559UnsignedTransaction {
+		nonce: U256::zero(),
+		max_priority_fee_per_gas: U256::from(1),
+		max_fee_per_gas: U256::from(1),
+		gas_limit: U256::from(0x100000),
+		action: pallet_ethereum::TransactionAction::Create,
+		value: U256::zero(),
+		input: bytecode,
+	}
+}
+
+fn eip1559_contract_call_unsigned_transaction(
+	address: Address,
+	data: Vec<u8>,
+) -> EIP1559UnsignedTransaction {
+	EIP1559UnsignedTransaction {
+		nonce: U256::zero(),
+		max_priority_fee_per_gas: U256::from(1),
+		max_fee_per_gas: U256::from(1),
+		gas_limit: U256::from(0x100000),
+		action: pallet_ethereum::TransactionAction::Call(address),
+		value: U256::zero(),
+		input: data,
+	}
+}
+
+#[test]
+fn test_signing_rules() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+
+		let pairs = (0..10).map(|i| address_build(i as u8)).collect::<Vec<_>>();
+		let alice = &pairs[0];
+		let bob = &pairs[1];
+		Balances::make_free_balance_be(&alice.account_id, 20_000_000_u128);
+		Balances::make_free_balance_be(&bob.account_id, 20_000_000_u128);
+
+		let (_abi, bytecode) = get_signing_rules_abi();
+		let stripped_bytecode = bytecode.as_str().unwrap().trim_start_matches("0x");
+		let decoded = hex::decode(stripped_bytecode).unwrap();
+		let signing_rules_create_tx = eip1559_signing_rules_creation_unsigned_transaction(decoded);
+		let signed_tx = signing_rules_create_tx.sign(&alice.private_key, None);
+		let res = Ethereum::execute(alice.address, &signed_tx, None);
+		assert_ok!(res.clone());
+		assert!(res.clone().unwrap().1.is_some());
+		let signing_rules_address = res.unwrap().1.unwrap();
+
+		// all validators sign up in roles pallet
+		let profile = shared_profile();
+		for validator in [ALICE, BOB, CHARLIE, DAVE, EVE] {
+			assert_ok!(Roles::create_profile(
+				RuntimeOrigin::signed(mock_pub_key(validator)),
+				profile.clone(),
+				None
+			));
+		}
+
+		let submission = JobSubmission {
+			ttl: 200,
+			expiry: 100,
+			job_type: JobType::DKGTSSPhaseOne(DKGTSSPhaseOneJobType {
+				participants: [ALICE, BOB, CHARLIE, DAVE, EVE]
+					.iter()
+					.map(|x| mock_pub_key(*x))
+					.collect::<Vec<_>>()
+					.try_into()
+					.unwrap(),
+				threshold: 2,
+				permitted_caller: Some(HashedAddressMapping::<BlakeTwo256>::into_account_id(
+					signing_rules_address,
+				)),
+				role_type: ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1,
+				hd_wallet: false,
+			}),
+			fallback: FallbackOptions::Destroy,
+		};
+		assert_ok!(Jobs::submit_job(
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
+			submission.clone()
+		));
+
+		abigen!(SigningRules, "../../forge/artifacts/VotableSigningRules.json");
+		let (provider, _) = Provider::mocked();
+		let client = Arc::new(provider);
+		let contract = SigningRules::new(Address::from(signing_rules_address), client);
+
+		let phase_1_job_id = [0u8; 32];
+		let phase_1_job_details: Bytes = submission.job_type.encode().into();
+		let threshold = 3;
+		let use_democracy = false;
+		let voters = vec![
+			pairs[0].address,
+			pairs[1].address,
+			pairs[2].address,
+			pairs[3].address,
+			pairs[4].address,
+		];
+		let expiry = 1000;
+		let ethers_call: FunctionCall<_, _, _> = contract.initialize(
+			phase_1_job_id,
+			phase_1_job_details.clone(),
+			threshold,
+			use_democracy,
+			voters,
+			expiry,
+		);
+		let initialize_tx = eip1559_contract_call_unsigned_transaction(
+			signing_rules_address,
+			ethers_call.calldata().unwrap().to_vec(),
+		);
+		let signed_tx = initialize_tx.sign(&alice.private_key, None);
+		let res = Ethereum::execute(alice.address, &signed_tx, None);
+		assert_ok!(res.clone());
+
+		let phase_2_job_details: Bytes = b"phase2".into();
+		let vote_proposal_call: FunctionCall<_, _, _> =
+			contract.vote_proposal(phase_1_job_id, phase_1_job_details, phase_2_job_details);
+		let vote_proposal_tx = eip1559_contract_call_unsigned_transaction(
+			signing_rules_address,
+			vote_proposal_call.calldata().unwrap().to_vec(),
+		);
+		// Submit first proposal vote.
+		let signed_tx = vote_proposal_tx.sign(&alice.private_key, None);
+		let res = Ethereum::execute(alice.address, &signed_tx, None);
+		assert_ok!(res.clone());
+
+		// Submit second proposal vote.
+		let signed_tx = vote_proposal_tx.sign(&bob.private_key, None);
+		let res = Ethereum::execute(bob.address, &signed_tx, None);
+		assert_ok!(res.clone());
+	});
 }
 
 #[test]

@@ -39,10 +39,21 @@ jobs:
           echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
 
       - name: Upload ${{ matrix.chain }} wasm to release
+        if: matrix.chain == 'mainnet'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ steps.srtool_build.outputs.wasm }}
-          asset_name: tangle-${{ matrix.features }}-srtool-wasm
+          file: runtime/mainnet/target/srtool/release/wbuild/tangle-runtime/tangle_runtime.compact.compressed.wasm
+          asset_name: tangle-${{ matrix.chain }}-srtool-compact.compressed.wasm
+          tag: ${{ github.ref }}
+          overwrite: true
+
+      - name: Upload ${{ matrix.chain }} wasm to release
+        if: matrix.chain == 'testnet'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: runtime/testnet/target/srtool/release/wbuild/tangle-testnet-runtime/tangle_runtime.compact.compressed.wasm
+          asset_name: tangle-${{ matrix.chain }}-srtool-compact.compressed.wasm
           tag: ${{ github.ref }}
           overwrite: true
