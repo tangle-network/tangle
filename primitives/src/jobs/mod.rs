@@ -20,13 +20,14 @@ use frame_support::pallet_prelude::*;
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
 use sp_runtime::traits::Get;
-use sp_std::boxed::Box;
 use sp_std::vec::Vec;
 
 pub type JobId = u64;
 
 pub mod traits;
 pub mod tss;
+/// Temporary module to design the v2 SPEC, once done it will be moved here.
+pub mod v2;
 pub mod zksaas;
 
 pub use tss::*;
@@ -115,104 +116,6 @@ pub struct JobWithResult<
 		MaxProofLen,
 		MaxAdditionalParamsLen,
 	>,
-}
-
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum Field<AccountId, MaxSize: Get<u32>> {
-	/// Represents a field of null value.
-	None,
-	/// Represents a boolean.
-	Bool(bool),
-	/// Represents a u8 Number.
-	Uint8(u8),
-	/// Represents a i8 Number.
-	Int8(i8),
-	/// Represents a u16 Number.
-	Uint16(u16),
-	/// Represents a i16 Number.
-	Int16(i16),
-	/// Represents a u32 Number.
-	Uint32(u32),
-	/// Represents a i32 Number.
-	Int32(i32),
-	/// Represents a u64 Number.
-	Uint64(u64),
-	/// Represents a i64 Number.
-	Int64(i64),
-	/// Represents a UTF-8 string.
-	String(BoundedVec<u8, MaxSize>),
-	/// Represents a Raw Bytes.
-	Bytes(BoundedVec<u8, MaxSize>),
-	/// Represents an array of values
-	/// Fixed Length of values.
-	Array(BoundedVec<Self, MaxSize>),
-	/// Represents a list of values
-	List(BoundedVec<Self, MaxSize>),
-	/// A sepcial type for AccountId
-	AccountId(AccountId),
-}
-
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum FieldType {
-	/// A Field of `bool` type.
-	Bool,
-	/// A Field of `u8` type.
-	Uint8,
-	/// A Field of `i8` type.
-	Int8,
-	/// A Field of `u16` type.
-	Uint16,
-	/// A Field of `i16` type.
-	Int16,
-	/// A Field of `u32` type.
-	Uint32,
-	/// A Field of `i32` type.
-	Int32,
-	/// A Field of `u64` type.
-	Uint64,
-	/// A Field of `i64` type.
-	Int64,
-	/// A Field of `String` type.
-	String,
-	/// A Field of `Vec<u8>` type.
-	Bytes,
-	/// A Field of `Option<T>` type.
-	Optional(Box<Self>),
-	/// An array of N items of type [`FieldType`].
-	Array(u64, Box<Self>),
-	/// A List of items of type [`FieldType`].
-	List(Box<Self>),
-	/// A special type for AccountId
-	AccountId,
-}
-
-/// A Job Definition is a definition of a job that can be called.
-/// It contains the input and output fields of the job with the permitted caller.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobDefinition<AccountId, MaxFields: Get<u32>> {
-	/// The caller that requested the job
-	pub owner: AccountId,
-	/// These are parameters that are required for this job.
-	/// i.e. the input.
-	pub params: BoundedVec<FieldType, MaxFields>,
-	/// These are the result, the return values of this job.
-	/// i.e. the output.
-	pub result: BoundedVec<FieldType, MaxFields>,
-	/// The caller who can trigger this submission of this job type
-	pub permitted_caller: Option<AccountId>,
-}
-
-/// A Job Call is a call to execute a job using it's job definition.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobCall<AccountId, MaxFieldsSize: Get<u32>, MaxFields: Get<u32>> {
-	/// The job definition that this call is for.
-	pub job_def_id: u64,
-	/// The supplied arguments for this job call.
-	pub args: BoundedVec<Field<AccountId, MaxFieldsSize>, MaxFields>,
 }
 
 /// Enum representing different types of jobs.
