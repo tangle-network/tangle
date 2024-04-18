@@ -54,7 +54,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: runtime/mainnet/target/srtool/release/wbuild/tangle-testnet-runtime/tangle_runtime.compact.compressed.wasm
+          file: runtime/testnet/target/srtool/release/wbuild/tangle-testnet-runtime/tangle_runtime.compact.compressed.wasm
           asset_name: tangle-${{ matrix.chain }}-srtool-compact.compressed.wasm
           tag: ${{ github.ref }}
           overwrite: true
