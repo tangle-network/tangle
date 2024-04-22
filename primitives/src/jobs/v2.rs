@@ -183,6 +183,27 @@ pub enum TypeCheckError {
 
 // -*** Service ***-
 
+/// Service Registration hook is a hook that will be called before registering the restaker as
+/// a service provider.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum ServiceRegistrationHook {
+	/// No hook is needed, the restaker will be registered immediately.
+	None,
+	/// A Smart contract that will be called to determine if the restaker will be registered.
+	Evm(sp_core::H160),
+}
+
+/// Service Request hook is a hook that will be called before creating a service from the service blueprint.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum ServiceRequestHook {
+	/// No hook is needed, the caller will get the service created immediately.
+	None,
+	/// A Smart contract that will be called to determine if the caller meets the requirements to create a service.
+	Evm(sp_core::H160),
+}
+
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ServiceMetadata<MaxLength: Get<u32>> {
@@ -206,15 +227,25 @@ pub struct ServiceMetadata<MaxLength: Get<u32>> {
 	pub license: Option<BoundedString<MaxLength>>,
 }
 
-/// A Service is a collection of job definitions, where each job definition is a job that can be
-/// called in the service.
+/// A Service Blueprint is a the main definition of a service.
+/// it contains the metadata of the service, the job definitions, and other hooks, along with the
+/// gadget that will be executed when one of the jobs is calling this service.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct Service<AccountId, MaxJobs: Get<u32>, MaxFields: Get<u32>, MaxMetadataLength: Get<u32>> {
+pub struct ServiceBlueprint<
+	AccountId,
+	MaxJobs: Get<u32>,
+	MaxFields: Get<u32>,
+	MaxMetadataLength: Get<u32>,
+> {
 	/// The metadata of the service.
 	pub metadata: ServiceMetadata<MaxMetadataLength>,
-	/// The jobs that are available in this service.
+	/// The job definitions that are available in this service.
 	pub jobs: BoundedVec<JobDefinition<AccountId, MaxFields, MaxMetadataLength>, MaxJobs>,
+	/// The registration hook that will be called before restaker registration.
+	pub registration_hook: ServiceRegistrationHook,
+	/// The request hook that will be called before creating a service from the service blueprint.
+	pub request_hook: ServiceRequestHook,
 	/// The gadget that will be executed for the service.
 	pub gadget: Gadget,
 }
