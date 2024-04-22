@@ -26,6 +26,8 @@ pub type JobId = u64;
 
 pub mod traits;
 pub mod tss;
+/// Temporary module to design the v2 SPEC, once done it will be moved here.
+pub mod v2;
 pub mod zksaas;
 
 pub use tss::*;
