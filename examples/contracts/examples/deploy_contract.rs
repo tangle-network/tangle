@@ -10,23 +10,11 @@ use std::fs;
 use std::str::FromStr;
 use tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_testnet_runtime::RuntimeCall;
 
-pub fn get_git_root_path() -> std::path::PathBuf {
-	let git_root = std::process::Command::new("git")
-		.args(["rev-parse", "--show-toplevel"])
-		.output()
-		.expect("Failed to get git root")
-		.stdout;
-	let git_root = std::str::from_utf8(&git_root)
-		.expect("Failed to parse git root")
-		.trim()
-		.to_string();
-	std::path::PathBuf::from(&git_root)
-}
-
 fn get_signing_rules_abi() -> (Value, Value) {
-	let abi_path = get_git_root_path().join("forge/artifacts/VotableSigningRules.json");
-	let mut data: Value =
-		serde_json::from_str(&fs::read_to_string(abi_path.as_path()).unwrap()).unwrap();
+	let mut data: Value = serde_json::from_str(
+		&fs::read_to_string("examples/contracts/artifacts/VotableSigningRules.json").unwrap(),
+	)
+	.unwrap();
 	let abi = data["abi"].take();
 	let bytecode = data["bytecode"]["object"].take();
 	(abi, bytecode)
