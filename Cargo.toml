@@ -6,6 +6,10 @@ license = "Unlicense"
 homepage = "https://webb.tools"
 repository = "https://github.com/webb-tools/tangle"
 
+exclude = [
+    "examples"
+]
+
 [workspace]
 members = [
  "primitives",
@@ -35,6 +39,7 @@ members = [
  "precompiles/jobs",
  "precompiles/balances-erc20",
  "tangle-subxt",
+ "examples/*",
  "evm-tracer"
  # "relayer-gadget",
  # "relayer-gadget/cli",

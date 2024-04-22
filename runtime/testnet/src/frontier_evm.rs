@@ -104,11 +104,14 @@ impl pallet_dynamic_fee::Config for Runtime {
 }
 
 parameter_types! {
-	pub DefaultBaseFeePerGas: U256 = (MILLIUNIT / 1_000_000).into();
-	// At the moment, we don't use dynamic fee calculation by default.
-	pub DefaultElasticity: Permill = Permill::zero();
+	pub DefaultBaseFeePerGas: U256 = U256::from(1_000_000);
+	pub DefaultElasticity: Permill = Permill::from_parts(125_000);
 }
 
+/// Sets the ideal block fullness to 50%.
+/// If the block weight is between:
+/// - 0-50% the gas fee will decrease
+/// - 50-100% the gas fee will increase
 pub struct BaseFeeThreshold;
 impl pallet_base_fee::BaseFeeThreshold for BaseFeeThreshold {
 	fn lower() -> Permill {
