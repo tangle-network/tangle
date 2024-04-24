@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/console.sol";
+import { JOBS_CONTRACT } from "./Jobs.sol";
 
 enum ProposalStatus {Inactive, Active, Passed, Executed, Cancelled}
 
@@ -17,7 +18,8 @@ abstract contract SigningRules {
     mapping (bytes32 => address) public admins;
     mapping (bytes32 => address[]) public voters;
     mapping (bytes32 => uint8) public threshold;
-    mapping (bytes32 => uint40) public expiry;
+    mapping (bytes32 => uint64) public expiry;
+    mapping (bytes32 => uint64) public ttl;
     mapping (bytes32 => bool) public useDemocracy;
     mapping (bytes32 => bool) public useValidators;
 
@@ -47,7 +49,7 @@ abstract contract SigningRules {
         _;
     }
 
-    function calculatePhase1ProposalId(bytes32 phase1JobId, bytes memory phase1JobDetails) public pure returns (bytes32) {
+    function calculatePhase1ProposalId(uint64 phase1JobId, bytes memory phase1JobDetails) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(phase1JobId, phase1JobDetails));
     }
 
@@ -56,12 +58,13 @@ abstract contract SigningRules {
     }
 
     function initialize(
-        bytes32 phase1JobId,
+        uint64 phase1JobId,
         bytes memory phase1JobDetails,
         uint8 _threshold,
         bool _useDemocracy,
         address[] memory _voters,
-        uint40 _expiry
+        uint64 _expiry,
+        uint64 _ttl
     ) external {
         require(_voters.length <= MAX_VOTERS, "Too many voters");
         require(initialized == false, "Already initialized");
@@ -72,6 +75,7 @@ abstract contract SigningRules {
         threshold[phase1ProposalId] = _threshold;
         useDemocracy[phase1ProposalId] = _useDemocracy;
         expiry[phase1ProposalId] = _expiry;
+        ttl[phase1ProposalId] = _ttl;
         admins[phase1ProposalId] = msg.sender;
 
         // If we have voters, add them to the list.
@@ -98,7 +102,7 @@ abstract contract SigningRules {
         isValidForwarder[proposalId][forwarder] = valid;
     }
 
-	function submitGovernanceProposal(bytes32 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) public {
+	function submitGovernanceProposal(uint64 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) public {
 		// Validate the governance proposal
         bytes32 proposalId = keccak256(abi.encodePacked(phase1JobId, phase1JobDetails));
         bytes32 phase2JobHash = keccak256(abi.encodePacked(proposalId, phase2JobDetails));
@@ -108,14 +112,12 @@ abstract contract SigningRules {
         _submitToDemocracyPallet(phase1JobId, phase1JobDetails, phase2JobDetails);
 	}
 
-	function voteProposal(bytes32 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) public {
+	function voteProposal(uint64 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) public {
 		// Validate the job/details are AUP
 		require(_isVotableProposal(phase1JobId, phase1JobDetails, phase2JobDetails), "Proposal must be votable");
 		// Check that we have received enough votes for the anchor update proposal.
         // Execute the proposal happens in `_voteProposal` if this vote tips the balance.
-		bytes32 proposalId = keccak256(abi.encodePacked(phase1JobId, phase1JobDetails));
-        bytes32 phase2JobHash = keccak256(abi.encodePacked(proposalId, phase2JobDetails));
-        _voteProposal(proposalId, phase2JobHash);
+        _voteProposal(phase1JobId, phase1JobDetails, phase2JobDetails );
 	}
 
     /// --------------------------------------------------------------------------------------- ///
@@ -123,18 +125,19 @@ abstract contract SigningRules {
     /// --------------------------------------------------------------------------------------- ///
 
     /// @notice When called, {_msgSender()} will be marked as voting in favor of proposal.
-    /// @param phase1ProposalId ID of the proposal to vote on.
     /// @notice Proposal must not have already been passed or executed.
     /// @notice {_msgSender()} must not have already voted on proposal.
     /// @notice Emits {ProposalEvent} event with status indicating the proposal status.
     /// @notice Emits {ProposalVote} event.
-    function _voteProposal(bytes32 phase1ProposalId, bytes32 phase2JobHash) internal {
+    function _voteProposal(uint64 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) internal {
+        bytes32 phase1ProposalId = keccak256(abi.encodePacked(phase1JobId, phase1JobDetails));
+        bytes32 phase2JobHash = keccak256(abi.encodePacked(phase1ProposalId, phase2JobDetails));
         Proposal storage proposal = _proposals[phase2JobHash];
         if (proposal._status == ProposalStatus.Passed) {
-            _executeProposal(phase1ProposalId, phase2JobHash);
+            _executeProposal(phase1ProposalId, phase1JobId, phase2JobHash, phase2JobDetails );
             return;
         }
-
+        
         address sender = _msgSender(phase1ProposalId);
         
         require(uint(proposal._status) <= 1, "proposal already executed/cancelled");
@@ -169,10 +172,10 @@ abstract contract SigningRules {
                 emit ProposalEvent(ProposalStatus.Passed, phase1ProposalId, phase2JobHash);
             }
         }
-        _proposals[phase1ProposalId] = proposal;
+        _proposals[phase2JobHash] = proposal;
 
         if (proposal._status == ProposalStatus.Passed) {
-            _executeProposal(phase1ProposalId, phase2JobHash);
+            _executeProposal(phase1ProposalId, phase1JobId, phase2JobHash, phase2JobDetails );
         }
     }
 
@@ -181,10 +184,13 @@ abstract contract SigningRules {
     /// @notice Proposal must have Passed status.
     /// @notice Emits {ProposalEvent} event with status {Executed}.
     /// @notice Emits {FailedExecution} event with the failed reason.
-    function _executeProposal(bytes32 phase1ProposalId, bytes32 phase2JobHash) internal {
+    function _executeProposal(bytes32 phase1ProposalId, uint64 phase1JobId, bytes32 phase2JobHash, bytes memory phase2JobDetails) internal {
         Proposal storage proposal = _proposals[phase2JobHash];
         require(proposal._status == ProposalStatus.Passed, "Proposal must have Passed status");
-        proposal._status = ProposalStatus.Executed;                
+        
+        JOBS_CONTRACT.submitDkgPhaseTwoJob(expiry[phase1ProposalId], ttl[phase1ProposalId], phase1JobId, phase2JobDetails, bytes(""));
+        
+        proposal._status = ProposalStatus.Executed;
         emit ProposalEvent(ProposalStatus.Executed, phase1ProposalId, phase2JobHash);
     }
 
@@ -220,9 +226,9 @@ abstract contract SigningRules {
     /// -------------------------------------- Virtuals --------------------------------------- ///
     /// --------------------------------------------------------------------------------------- ///
 
-    function _isVotableProposal(bytes32 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) internal virtual returns (bool);
+    function _isVotableProposal(uint64 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) internal virtual returns (bool);
     function _refreshVoters(bytes32 proposalId) internal virtual;
-    function _submitToDemocracyPallet(bytes32 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) internal virtual;
+    function _submitToDemocracyPallet(uint64 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) internal virtual;
 
     /// --------------------------------------------------------------------------------------- ///
     /// -------------------------------------- Helpers ---------------------------------------- ///

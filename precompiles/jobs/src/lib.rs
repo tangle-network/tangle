@@ -35,7 +35,7 @@ use tangle_primitives::{
 		DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, FallbackOptions, JobId, JobSubmission,
 		JobType,
 	},
-	roles::RoleType,
+	roles::{RoleType, ThresholdSignatureRoleType},
 	types::BlockNumber,
 };
 
@@ -198,52 +198,36 @@ where
 		let ttl_block: BlockNumberFor<Runtime> = ttl.into();
 
 		// Create DKG signature job type with the provided parameters
-		match pallet_jobs::SubmittedJobsRole::<Runtime>::get(phase_one_id) {
-			Some(role_type) => {
-				// Parse the inner role type. It should be a TSS role.
-				let threshold_signature_role = match role_type {
-					RoleType::Tss(role) => role,
-					_ => {
-						return Err(PrecompileFailure::Revert {
-							exit_status: ExitRevert::Reverted,
-							output: revert_as_bytes("Invalid role type!"),
-						})
-					},
-				};
 
-				// Construct the phase 2 job type.
-				let job_type = DKGTSSPhaseTwoJobType {
-					role_type: threshold_signature_role,
-					phase_one_id,
-					submission: submission.try_into().unwrap(),
-					derivation_path: if derivation_path.is_empty() {
-						None
-					} else {
-						Some(derivation_path.try_into().unwrap())
-					},
-				};
+		let threshold_signature_role = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 
-				// Create job submission object
-				let job = JobSubmission {
-					expiry: expiry_block,
-					ttl: ttl_block,
-					job_type: JobType::DKGTSSPhaseTwo(job_type),
-					fallback: FallbackOptions::Destroy,
-				};
-
-				// Create the call to the Jobs module's submit_job function
-				let call = JobsCall::<Runtime>::submit_job { job };
-
-				// Dispatch the call using the RuntimeHelper
-				<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
-
-				Ok(())
+		// Construct the phase 2 job type.
+		let job_type = DKGTSSPhaseTwoJobType {
+			role_type: threshold_signature_role,
+			phase_one_id,
+			submission: submission.try_into().unwrap(),
+			derivation_path: if derivation_path.is_empty() {
+				None
+			} else {
+				Some(derivation_path.try_into().unwrap())
 			},
-			None => Err(PrecompileFailure::Revert {
-				exit_status: ExitRevert::Reverted,
-				output: revert_as_bytes("Invalid job ID!"),
-			}),
-		}
+		};
+
+		// Create job submission object
+		let job = JobSubmission {
+			expiry: expiry_block,
+			ttl: ttl_block,
+			job_type: JobType::DKGTSSPhaseTwo(job_type),
+			fallback: FallbackOptions::Destroy,
+		};
+
+		// Create the call to the Jobs module's submit_job function
+		let call = JobsCall::<Runtime>::submit_job { job };
+
+		// Dispatch the call using the RuntimeHelper
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
 	}
 
 	/// Sets a new permitted caller for a specific job type identified by the given key and job ID.
