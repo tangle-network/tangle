@@ -82,6 +82,9 @@ where
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
 	#[precompile::public("submitDkgPhaseOneJob(uint64,uint64,address[],uint8,uint16,address,bool)")]
+	#[precompile::public(
+		"submit_dkg_phase_one_job(uint64,uint64,address[],uint8,uint16,address,bool)"
+	)]
 	fn submit_dkg_phase_one_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: BlockNumber,
@@ -173,6 +176,7 @@ where
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
 	#[precompile::public("submitDkgPhaseTwoJob(uint64,uint64,uint64,bytes,bytes)")]
+	#[precompile::public("submit_dkg_phase_two_job(uint64,uint64,uint64,bytes,bytes)")]
 	fn submit_dkg_phase_two_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: BlockNumber,
@@ -258,6 +262,7 @@ where
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
 	#[precompile::public("setPermittedCaller(uint16,uint64,address)")]
+	#[precompile::public("set_permitted_caller(uint16,uint64,address)")]
 	fn set_permitted_caller(
 		handle: &mut impl PrecompileHandle,
 		role_type: u16,
