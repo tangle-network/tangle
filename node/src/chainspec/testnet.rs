@@ -33,9 +33,9 @@ use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::types::BlockNumber;
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
-	ElectionsConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig,
-	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT,
-	WASM_BINARY,
+	ElectionsConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, Precompiles,
+	RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
+	SystemConfig, UNIT, WASM_BINARY,
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
@@ -336,6 +336,13 @@ fn testnet_genesis(
 		}))
 		.collect();
 
+	// As precompiles are implemented inside the Runtime, they don't have a bytecode, and
+	// their account code is empty by default. However in Solidity calling a function of a
+	// contract often automatically adds a check that the contract bytecode is non-empty.
+	// For that reason a dummy code (0x60006000fd) can be inserted at the precompile address
+	// to pass that check.
+	let revert_bytecode = vec![0x60, 0x00, 0x60, 0x00, 0xFD];
+
 	RuntimeGenesisConfig {
 		system: SystemConfig { ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },
@@ -398,6 +405,18 @@ fn testnet_genesis(
 				for (address, account) in genesis_evm_distribution {
 					map.insert(address, account);
 				}
+
+				Precompiles::used_addresses().for_each(|address| {
+					map.insert(
+						address,
+						fp_evm::GenesisAccount {
+							nonce: Default::default(),
+							balance: Default::default(),
+							storage: Default::default(),
+							code: revert_bytecode.clone(),
+						},
+					);
+				});
 
 				map.insert(
 					// H160 address of Alice dev account

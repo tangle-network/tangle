@@ -82,7 +82,7 @@ pub fn independent_profile() -> Profile<Runtime> {
 
 fn get_signing_rules_abi() -> (Value, Value) {
 	let mut data: Value = serde_json::from_str(
-		&fs::read_to_string("../../forge/artifacts/VotableSigningRules.json").unwrap(),
+		&fs::read_to_string("../../examples/contracts/artifacts/VotableSigningRules.json").unwrap(),
 	)
 	.unwrap();
 	let abi = data["abi"].take();
@@ -174,7 +174,7 @@ fn test_signing_rules() {
 			submission.clone()
 		));
 
-		abigen!(SigningRules, "../../forge/artifacts/VotableSigningRules.json");
+		abigen!(SigningRules, "../../examples/contracts/artifacts/VotableSigningRules.json");
 		let (provider, _) = Provider::mocked();
 		let client = Arc::new(provider);
 		let contract = SigningRules::new(Address::from(signing_rules_address), client);
