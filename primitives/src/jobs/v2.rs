@@ -20,59 +20,60 @@ use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
-use sp_runtime::traits::Get;
 
 mod field;
 pub use field::*;
+
+/// Maximum number of fields in a job call.
+pub type MaxFields = ConstU32<64>;
+/// Maximum size of a field in a job call.
+pub type MaxFieldsSize = ConstU32<1024>;
+/// Maximum length of metadata string length.
+pub type MaxMetadataLength = ConstU32<1024>;
+/// Maximum number of jobs per service.
+pub type MaxJobsPerService = ConstU32<32>;
 
 /// A Job Definition is a definition of a job that can be called.
 /// It contains the input and output fields of the job with the permitted caller.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobDefinition<AccountId, MaxFields: Get<u32>, MaxMetadataLength: Get<u32>> {
+pub struct JobDefinition {
 	/// The metadata of the job.
-	pub metadata: JobMetadata<MaxMetadataLength>,
+	pub metadata: JobMetadata,
 	/// These are parameters that are required for this job.
 	/// i.e. the input.
 	pub params: BoundedVec<FieldType, MaxFields>,
 	/// These are the result, the return values of this job.
 	/// i.e. the output.
 	pub result: BoundedVec<FieldType, MaxFields>,
-	/// The caller who can trigger this submission of this job type
-	pub permitted_caller: Option<AccountId>,
 	/// The verifier of the job result.
 	pub verifier: JobResultVerifier,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobMetadata<MaxLength: Get<u32>> {
+pub struct JobMetadata {
 	/// The Job name.
-	pub name: BoundedString<MaxLength>,
+	pub name: BoundedString<MaxMetadataLength>,
 	/// The Job description.
-	pub description: Option<BoundedString<MaxLength>>,
+	pub description: Option<BoundedString<MaxMetadataLength>>,
 }
 
 /// A Job Call is a call to execute a job using it's job definition.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobCall<AccountId, MaxFieldsSize: Get<u32>, MaxFields: Get<u32>> {
+pub struct JobCall<AccountId> {
 	/// The Service ID that this call is for.
 	pub service_id: u64,
 	/// The job definition index in the service that this call is for.
 	pub job_index: u64,
 	/// The supplied arguments for this job call.
-	pub args: BoundedVec<Field<AccountId, MaxFieldsSize>, MaxFields>,
+	pub args: BoundedVec<Field<AccountId>, MaxFields>,
 }
 
-impl<AccountId: Clone, MaxFieldsSize: Get<u32> + Clone, MaxFields: Get<u32> + Clone>
-	JobCall<AccountId, MaxFieldsSize, MaxFields>
-{
+impl<AccountId: Clone> JobCall<AccountId> {
 	/// Check if the supplied arguments match the job definition types.
-	pub fn type_check<MaxMetadataLength: Get<u32>>(
-		&self,
-		job_def: &JobDefinition<AccountId, MaxFields, MaxMetadataLength>,
-	) -> Result<(), TypeCheckError> {
+	pub fn type_check(&self, job_def: &JobDefinition) -> Result<(), TypeCheckError> {
 		if job_def.params.len() != self.args.len() {
 			return Err(TypeCheckError::NotEnoughArguments {
 				expected: job_def.params.len() as u8,
@@ -96,14 +97,9 @@ impl<AccountId: Clone, MaxFieldsSize: Get<u32> + Clone, MaxFields: Get<u32> + Cl
 	}
 }
 
-impl<AccountId: Clone, MaxFieldsSize: Get<u32> + Clone, MaxFields: Get<u32> + Clone>
-	JobCallResult<AccountId, MaxFieldsSize, MaxFields>
-{
+impl<AccountId: Clone> JobCallResult<AccountId> {
 	/// Check if the supplied result match the job definition types.
-	pub fn type_check<MaxMetadataLength: Get<u32>>(
-		&self,
-		job_def: &JobDefinition<AccountId, MaxFields, MaxMetadataLength>,
-	) -> Result<(), TypeCheckError> {
+	pub fn type_check(&self, job_def: &JobDefinition) -> Result<(), TypeCheckError> {
 		if job_def.result.len() != self.result.len() {
 			return Err(TypeCheckError::NotEnoughArguments {
 				expected: job_def.result.len() as u8,
@@ -130,11 +126,11 @@ impl<AccountId: Clone, MaxFieldsSize: Get<u32> + Clone, MaxFields: Get<u32> + Cl
 /// A Job Call Result is the result of a job call.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobCallResult<AccountId, MaxFieldsSize: Get<u32>, MaxFields: Get<u32>> {
+pub struct JobCallResult<AccountId> {
 	/// The id of the job call.
 	pub call_id: u64,
 	/// The result of the job call.
-	pub result: BoundedVec<Field<AccountId, MaxFieldsSize>, MaxFields>,
+	pub result: BoundedVec<Field<AccountId>, MaxFields>,
 }
 
 /// A Job Result verifier is a verifier that will verify the result of a job call
@@ -206,25 +202,25 @@ pub enum ServiceRequestHook {
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ServiceMetadata<MaxLength: Get<u32>> {
+pub struct ServiceMetadata {
 	/// The Service name.
-	pub name: BoundedString<MaxLength>,
+	pub name: BoundedString<MaxMetadataLength>,
 	/// The Service description.
-	pub description: Option<BoundedString<MaxLength>>,
+	pub description: Option<BoundedString<MaxMetadataLength>>,
 	/// The Service author.
 	/// Could be a company or a person.
-	pub author: Option<BoundedString<MaxLength>>,
+	pub author: Option<BoundedString<MaxMetadataLength>>,
 	/// The Job category.
-	pub category: Option<BoundedString<MaxLength>>,
+	pub category: Option<BoundedString<MaxMetadataLength>>,
 	/// Code Repository URL.
 	/// Could be a github, gitlab, or any other code repository.
-	pub code_repository: Option<BoundedString<MaxLength>>,
+	pub code_repository: Option<BoundedString<MaxMetadataLength>>,
 	/// Service Logo URL.
-	pub logo: Option<BoundedString<MaxLength>>,
+	pub logo: Option<BoundedString<MaxMetadataLength>>,
 	/// Service Website URL.
-	pub website: Option<BoundedString<MaxLength>>,
+	pub website: Option<BoundedString<MaxMetadataLength>>,
 	/// Service License.
-	pub license: Option<BoundedString<MaxLength>>,
+	pub license: Option<BoundedString<MaxMetadataLength>>,
 }
 
 /// A Service Blueprint is a the main definition of a service.
@@ -232,22 +228,44 @@ pub struct ServiceMetadata<MaxLength: Get<u32>> {
 /// gadget that will be executed when one of the jobs is calling this service.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ServiceBlueprint<
-	AccountId,
-	MaxJobs: Get<u32>,
-	MaxFields: Get<u32>,
-	MaxMetadataLength: Get<u32>,
-> {
+pub struct ServiceBlueprint {
 	/// The metadata of the service.
-	pub metadata: ServiceMetadata<MaxMetadataLength>,
+	pub metadata: ServiceMetadata,
 	/// The job definitions that are available in this service.
-	pub jobs: BoundedVec<JobDefinition<AccountId, MaxFields, MaxMetadataLength>, MaxJobs>,
+	pub jobs: BoundedVec<JobDefinition, MaxJobsPerService>,
 	/// The registration hook that will be called before restaker registration.
 	pub registration_hook: ServiceRegistrationHook,
 	/// The request hook that will be called before creating a service from the service blueprint.
 	pub request_hook: ServiceRequestHook,
 	/// The gadget that will be executed for the service.
 	pub gadget: Gadget,
+}
+
+/// A Service is an instance of a service blueprint.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct Service<AccountId, BlockNumber> {
+	/// The Blueprint ID of the service.
+	pub blueprint: u64,
+	/// The owner of the service.
+	pub owner: AccountId,
+	/// The Permitted caller(s) of the service.
+	pub permitted_callers: BoundedVec<AccountId, ConstU32<32>>,
+	/// The Lifetime of the service.
+	pub ttl: BlockNumber,
+}
+
+/// Service Provider Approval Prefrence.
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum ApprovalPrefrence {
+	/// No approval is required to provide the service.
+	#[codec(index = 0)]
+	#[default]
+	None,
+	/// The approval is required to provide the service.
+	#[codec(index = 1)]
+	Required,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
