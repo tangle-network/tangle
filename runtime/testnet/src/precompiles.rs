@@ -124,5 +124,5 @@ pub type WebbPrecompilesAt<R> = (
 
 pub type WebbPrecompiles<R> = PrecompileSetBuilder<
 	R,
-	(PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<4095>), WebbPrecompilesAt<R>>,),
+	(PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<2095>), WebbPrecompilesAt<R>>,),
 >;
