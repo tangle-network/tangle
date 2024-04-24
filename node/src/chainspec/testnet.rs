@@ -34,12 +34,11 @@ use sp_runtime::{
 };
 use std::collections::BTreeMap;
 use tangle_primitives::types::{BlockNumber, Signature};
-use tangle_testnet_runtime::EVMConfig;
 use tangle_testnet_runtime::{
-	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
-	ElectionsConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, Precompiles,
-	RuntimeGenesisConfig, SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig,
-	SystemConfig, UNIT, WASM_BINARY,
+	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
+	EVMConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, Precompiles, RoleKeyId,
+	RuntimeGenesisConfig, SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
+	TreasuryPalletId, VestingConfig, UNIT, WASM_BINARY,
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
