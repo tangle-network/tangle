@@ -51,6 +51,7 @@ use pallet_transaction_payment::{
 use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::MaxEncodedLen;
 use parity_scale_codec::{Decode, Encode};
+use precompiles::WebbPrecompiles;
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
@@ -149,6 +150,9 @@ use tangle_primitives::{
 		TIP_REPORT_DEPOSIT_BASE, TREASURY_PALLET_ID,
 	},
 };
+
+// Precompiles
+pub type Precompiles = WebbPrecompiles<Runtime>;
 
 // Frontier
 use fp_rpc::TransactionStatus;
