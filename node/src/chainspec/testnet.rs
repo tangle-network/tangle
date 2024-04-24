@@ -398,7 +398,7 @@ fn testnet_genesis(
 			claims: genesis_airdrop.claims,
 			vesting: vesting_claims,
 			expiry: Some((
-				5_265_000u64, // 1 year
+				3_265_000u64,
 				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
 			)),
 		},
