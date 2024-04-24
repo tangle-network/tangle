@@ -15,26 +15,30 @@
 
 #![allow(clippy::type_complexity)]
 
+use crate::distributions::{
+	combine_distributions, get_unique_distribution_results,
+	mainnet::{self, DistributionResult},
+};
 use crate::testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key};
-
 use hex_literal::hex;
-use pallet_airdrop_claims::{MultiAddress, StatementKind};
+use pallet_airdrop_claims::MultiAddress;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{ecdsa, ed25519, sr25519, Pair, Public, H160};
+use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	BoundedVec,
 };
 use std::collections::BTreeMap;
-use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::types::BlockNumber;
+use tangle_primitives::types::{BlockNumber, Signature};
+use tangle_testnet_runtime::EVMConfig;
 use tangle_testnet_runtime::{
-	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, EVMChainIdConfig, EVMConfig,
-	ElectionsConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig,
-	SessionConfig, Signature, StakerStatus, StakingConfig, SudoConfig, SystemConfig, UNIT,
+	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
+	ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId, RuntimeGenesisConfig, SessionConfig,
+	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig, UNIT,
 	WASM_BINARY,
 };
 
@@ -42,7 +46,6 @@ use tangle_testnet_runtime::{
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
 
 pub const ENDOWMENT: Balance = 10_000_000 * UNIT;
-pub const STASH: Balance = ENDOWMENT / 10;
 
 /// Generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -124,9 +127,6 @@ pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
 					authority_keys_for_dev(2),
 					authority_keys_for_dev(3),
 				],
-				vec![],
-				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				// Pre-funded accounts
 				vec![
 					(get_account_id_from_seed::<sr25519::Public>("Alice"), ENDOWMENT),
@@ -138,11 +138,12 @@ pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
 					(authority_keys_for_dev(2).0, ENDOWMENT),
 					(authority_keys_for_dev(3).0, ENDOWMENT),
 				],
+				// Sudo account
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				chain_id,
 				Default::default(),
 				Default::default(),
 				Default::default(),
-				true,
 			)
 		},
 		// Bootnodes
@@ -184,9 +185,6 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					authority_keys_from_seed("Dave"),
 					authority_keys_from_seed("Eve"),
 				],
-				vec![],
-				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				// Pre-funded accounts
 				vec![
 					(get_account_id_from_seed::<sr25519::Public>("Alice"), ENDOWMENT),
@@ -195,11 +193,12 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					(get_account_id_from_seed::<sr25519::Public>("Dave"), ENDOWMENT),
 					(get_account_id_from_seed::<sr25519::Public>("Eve"), ENDOWMENT),
 				],
+				// Sudo account
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				chain_id,
 				Default::default(),
 				Default::default(),
 				Default::default(),
-				true,
 			)
 		},
 		// Bootnodes
@@ -232,46 +231,30 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 		ChainType::Live,
 		move || {
 			testnet_genesis(
-				// Initial PoA authorities
+				// Initial validators
 				get_initial_authorities(),
-				// initial nominators
-				vec![],
+				// Endowed accounts
+				mainnet::get_initial_endowed_accounts().0,
 				// Sudo account
 				get_testnet_root_key(),
-				// Pre-funded accounts
-				vec![
-					(get_testnet_root_key(), ENDOWMENT * 5), // 50 Million
-					(
-						hex!["4e85271af1330e5e9384bd3ac5bdc04c0f8ef5a8cc29c1a8ae483d674164745c"]
-							.into(),
-						ENDOWMENT,
-					),
-					(
-						hex!["587c2ef00ec0a1b98af4c655763acd76ece690fccbb255f01663660bc274960d"]
-							.into(),
-						ENDOWMENT,
-					),
-					(
-						hex!["a24f729f085de51eebaeaeca97d6d499761b8f6daeca9b99d754a06ef8bcec3f"]
-							.into(),
-						ENDOWMENT,
-					),
-					(
-						hex!["0a55e5245382700f35d16a5ea6d60a56c36c435bef7204353b8c36871f347857"]
-							.into(),
-						ENDOWMENT,
-					),
-					(
-						hex!["e0948453e7acbc6ac937e124eb01580191e99f4262d588d4524994deb6134349"]
-							.into(),
-						ENDOWMENT,
-					),
-				],
+				// EVM chain ID
 				chain_id,
-				Default::default(),
-				Default::default(),
-				Default::default(),
-				true,
+				// Genesis airdrop distribution (pallet-claims)
+				get_unique_distribution_results(vec![
+					mainnet::get_edgeware_genesis_balance_distribution(),
+					mainnet::get_leaderboard_balance_distribution(),
+					mainnet::get_edgeware_snapshot_distribution(),
+					mainnet::get_polkadot_validator_distribution(),
+				]),
+				// Genesis investor / team distribution (pallet-balances + pallet-vesting)
+				combine_distributions(vec![
+					mainnet::get_team_balance_distribution(),
+					mainnet::get_team_direct_vesting_distribution(),
+					mainnet::get_investor_balance_distribution(),
+					mainnet::get_foundation_balance_distribution(),
+				]),
+				// endowed evm accounts
+				vec![],
 			)
 		},
 		// Bootnodes
@@ -294,60 +277,45 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
 	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
-	_initial_nominators: Vec<AccountId>,
-	root_key: AccountId,
 	endowed_accounts: Vec<(AccountId, Balance)>,
+	root_key: AccountId,
 	chain_id: u64,
+	genesis_airdrop: DistributionResult,
+	genesis_non_airdrop: Vec<(MultiAddress, u128, u64, u64, u128)>,
 	genesis_evm_distribution: Vec<(H160, fp_evm::GenesisAccount)>,
-	genesis_substrate_distribution: Vec<(AccountId, Balance)>,
-	claims: Vec<(MultiAddress, Balance)>,
-	_enable_println: bool,
 ) -> RuntimeGenesisConfig {
-	// stakers: all validators and nominators.
-	let _rng = rand::thread_rng();
 	// stakers: all validators and nominators.
 	let stakers = initial_authorities
 		.iter()
-		.map(|x| (x.0.clone(), x.0.clone(), STASH, StakerStatus::Validator))
-		.collect();
-
-	let num_endowed_accounts = endowed_accounts.len();
-
-	let claims_list: Vec<(MultiAddress, Balance, Option<StatementKind>)> = endowed_accounts
-		.iter()
-		.map(|x| (MultiAddress::Native(x.0.clone()), ENDOWMENT, Some(StatementKind::Regular)))
-		.chain(claims.clone().into_iter().map(|(a, b)| (a, b, Some(StatementKind::Regular))))
+		.map(|x| (x.0.clone(), x.0.clone(), 100 * UNIT, StakerStatus::Validator))
 		.collect();
 
 	let vesting_claims: Vec<(
 		MultiAddress,
 		BoundedVec<(Balance, Balance, BlockNumber), MaxVestingSchedules>,
-	)> = endowed_accounts
-		.iter()
-		.map(|x| {
+	)> = genesis_airdrop
+		.vesting
+		.into_iter()
+		.map(|(x, y)| {
 			let mut bounded_vec = BoundedVec::new();
-			bounded_vec.try_push((ENDOWMENT, ENDOWMENT, 0)).unwrap();
-			(MultiAddress::Native(x.0.clone()), bounded_vec)
+			for (a, b, c) in y {
+				bounded_vec.try_push((a, b, c)).unwrap();
+			}
+			(x, bounded_vec)
 		})
-		.chain(claims.into_iter().map(|(a, b)| {
-			let mut bounded_vec = BoundedVec::new();
-			bounded_vec.try_push((b, b, 0)).unwrap();
-			(a, bounded_vec)
-		}))
 		.collect();
-
 	RuntimeGenesisConfig {
 		system: SystemConfig { ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },
-		balances: BalancesConfig {
-			// Configure endowed accounts with initial balance of 1 << 60.
-			balances: endowed_accounts
+		balances: BalancesConfig { balances: endowed_accounts.to_vec() },
+		vesting: VestingConfig {
+			vesting: genesis_non_airdrop
 				.iter()
-				.cloned()
-				.chain(genesis_substrate_distribution)
+				.map(|(address, _value, begin, end, liquid)| {
+					(address.clone().to_account_id_32(), *begin, *end, *liquid)
+				})
 				.collect(),
 		},
-		vesting: Default::default(),
 		indices: Default::default(),
 		session: SessionConfig {
 			keys: initial_authorities
@@ -370,18 +338,20 @@ fn testnet_genesis(
 			..Default::default()
 		},
 		democracy: Default::default(),
-		council: Default::default(),
-		elections: ElectionsConfig {
-			members: endowed_accounts
-				.iter()
-				.take((num_endowed_accounts + 1) / 2)
-				.cloned()
-				.map(|member| (member.0, STASH))
-				.collect(),
+		council: CouncilConfig {
+			members: vec![
+				hex!["483b466832e094f01b1779a7ed07025df319c492dac5160aca89a3be117a7b6d"].into(),
+				hex!["86d08e7bbe77bc74e3d88ee22edc53368bc13d619e05b66fe6c4b8e2d5c7015a"].into(),
+				hex!["e421301e5aa5dddee51f0d8c73e794df16673e53157c5ea657be742e35b1793f"].into(),
+				hex!["4ce3a4da3a7c1ce65f7edeff864dc3dd42e8f47eecc2726d99a0a80124698217"].into(),
+				hex!["dcd9b70a0409b7626cba1a4016d8da19f4df5ce9fc5e8d16b789e71bb1161d73"].into(),
+			],
+			..Default::default()
 		},
+		elections: Default::default(),
 		treasury: Default::default(),
 		babe: BabeConfig {
-			epoch_config: Some(tangle_testnet_runtime::BABE_GENESIS_EPOCH_CONFIG),
+			epoch_config: Some(tangle_runtime::BABE_GENESIS_EPOCH_CONFIG),
 			..Default::default()
 		},
 		grandpa: Default::default(),
@@ -389,7 +359,6 @@ fn testnet_genesis(
 		nomination_pools: Default::default(),
 		transaction_payment: Default::default(),
 		tx_pause: Default::default(),
-
 		// EVM compatibility
 		evm_chain_id: EVMChainIdConfig { chain_id, ..Default::default() },
 		evm: EVMConfig {
@@ -406,9 +375,12 @@ fn testnet_genesis(
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
 		claims: ClaimsConfig {
-			claims: claims_list,
+			claims: genesis_airdrop.claims,
 			vesting: vesting_claims,
-			expiry: None, // no expiry on testnet
+			expiry: Some((
+				5_265_000u64, // 1 year
+				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
+			)),
 		},
 	}
 }
