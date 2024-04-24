@@ -29,7 +29,7 @@ use pallet_evm_precompile_vesting::VestingPrecompile;
 
 use precompile_utils::precompile_set::{
 	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, OnlyFrom,
-	PrecompileAt, PrecompileSetBuilder, SubcallWithMaxNesting,
+	PrecompileAt, PrecompileSetBuilder, PrecompilesInRangeInclusive, SubcallWithMaxNesting,
 };
 
 type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, CallableByPrecompile);
@@ -122,4 +122,7 @@ pub type WebbPrecompilesAt<R> = (
 	>,
 );
 
-pub type WebbPrecompiles<R> = PrecompileSetBuilder<R, WebbPrecompilesAt<R>>;
+pub type WebbPrecompiles<R> = PrecompileSetBuilder<
+	R,
+	(PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<4095>), WebbPrecompilesAt<R>>,),
+>;
