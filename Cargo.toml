@@ -108,6 +108,7 @@ ethabi = { version = "15.0.0", default-features = false }
 # Tangle Dependencies
 pallet-airdrop-claims = { path = "pallets/claims", default-features = false }
 pallet-jobs = { path = "pallets/jobs", default-features = false }
+pallet-services = { path = "pallets/services", default-features = false }
 pallet-roles = { path = "pallets/roles", default-features = false }
 pallet-dkg = { path = "pallets/dkg", default-features = false }
 pallet-zksaas = { path = "pallets/zksaas", default-features = false }

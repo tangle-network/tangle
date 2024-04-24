@@ -1,0 +1,98 @@
+[package]
+name = "pallet-services"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+frame-benchmarking = { workspace = true, optional = true }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+tangle-crypto-primitives = { workspace = true, default-features = false }
+tangle-primitives = { workspace = true, default-features = false }
+
+[dev-dependencies]
+ethereum = { workspace = true, features = ["with-codec"] }
+ethers = "2.0"
+hex = { workspace = true }
+hex-literal = { workspace = true }
+libsecp256k1 = { workspace = true }
+pallet-balances = { workspace = true }
+pallet-timestamp = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+smallvec = { workspace = true }
+sp-io = { workspace = true }
+sp-keystore = { workspace = true }
+
+# Frontier Primitive
+fp-account = { workspace = true }
+fp-consensus = { workspace = true }
+fp-dynamic-fee = { workspace = true }
+fp-ethereum = { workspace = true }
+fp-evm = { workspace = true }
+fp-rpc = { workspace = true }
+fp-self-contained = { workspace = true }
+fp-storage = { workspace = true }
+
+# Frontier FRAME
+pallet-base-fee = { workspace = true }
+pallet-dynamic-fee = { workspace = true }
+pallet-ethereum = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-evm-chain-id = { workspace = true }
+
+# Roles pallet
+pallet-roles = { workspace = true }
+pallet-session = { workspace = true }
+pallet-staking = { workspace = true }
+sp-staking = { workspace = true }
+frame-election-provider-support = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+  "scale-info/std",
+  "sp-runtime/std",
+  "frame-benchmarking?/std",
+  "frame-support/std",
+  "frame-system/std",
+  "sp-core/std",
+  "sp-std/std",
+  "tangle-primitives/std",
+  "tangle-crypto-primitives/std",
+  "pallet-balances/std",
+  "pallet-timestamp/std",
+  "fp-account/std",
+  "fp-consensus/std",
+  "fp-dynamic-fee/std",
+  "fp-ethereum/std",
+  "fp-evm/std",
+  "fp-rpc/std",
+  "fp-self-contained/std",
+  "fp-storage/std",
+  "pallet-base-fee/std",
+  "pallet-dynamic-fee/std",
+  "pallet-ethereum/std",
+  "pallet-evm/std",
+  "pallet-evm-chain-id/std",
+  "pallet-roles/std"
+]
+try-runtime = ["frame-support/try-runtime"]
+runtime-benchmarks = [
+  "frame-benchmarking/runtime-benchmarks",
+  "frame-support/runtime-benchmarks",
+  "frame-system/runtime-benchmarks",
+  "sp-runtime/runtime-benchmarks",
+  "pallet-balances/runtime-benchmarks",
+  "pallet-ethereum/runtime-benchmarks",
+  "pallet-evm/runtime-benchmarks",
+]

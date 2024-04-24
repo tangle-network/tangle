@@ -8489,6 +8489,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-services"
+version = "1.0.0"
+dependencies = [
+ "ethereum",
+ "ethers",
+ "fp-account",
+ "fp-consensus",
+ "fp-dynamic-fee",
+ "fp-ethereum",
+ "fp-evm",
+ "fp-rpc",
+ "fp-self-contained",
+ "fp-storage",
+ "frame-benchmarking",
+ "frame-election-provider-support",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "hex-literal 0.4.1",
+ "libsecp256k1",
+ "pallet-balances",
+ "pallet-base-fee",
+ "pallet-dynamic-fee",
+ "pallet-ethereum",
+ "pallet-evm",
+ "pallet-evm-chain-id",
+ "pallet-roles",
+ "pallet-session",
+ "pallet-staking",
+ "pallet-timestamp",
+ "parity-scale-codec 3.6.9",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "smallvec",
+ "sp-core",
+ "sp-io",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-staking",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+ "tangle-crypto-primitives",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-session"
 version = "28.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0#162c6796bac740802fe11c9e39f3094677d1f08f"

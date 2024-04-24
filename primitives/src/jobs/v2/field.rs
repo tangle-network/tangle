@@ -317,6 +317,13 @@ impl<'de, S: Get<u32>> serde::Deserialize<'de> for BoundedString<S> {
 				formatter.write_str("a string")
 			}
 
+			fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+			where
+				E: serde::de::Error,
+			{
+				Self::visit_string(self, v.to_owned())
+			}
+
 			fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
 			where
 				E: serde::de::Error,
