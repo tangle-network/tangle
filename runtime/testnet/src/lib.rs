@@ -370,7 +370,7 @@ impl pallet_sudo::Config for Runtime {
 parameter_types! {
 	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
 	//       Attempting to do so will brick block production.
-	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS;
+	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS / 2;
 	pub const ExpectedBlockTime: Moment = MILLISECS_PER_BLOCK;
 	pub const ReportLongevity: u64 =
 		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
@@ -444,7 +444,7 @@ pallet_staking_reward_curve::build! {
 
 parameter_types! {
 	// Six sessions in an era (24 hours).
-	pub const SessionsPerEra: sp_staking::SessionIndex = SESSIONS_PER_ERA;
+	pub const SessionsPerEra: sp_staking::SessionIndex = SESSIONS_PER_ERA / 2;
 	// 28 eras for unbonding (28 days).
 	pub const BondingDuration: sp_staking::EraIndex = BONDING_DURATION;
 	// 27 eras for slash defer duration (27 days).
