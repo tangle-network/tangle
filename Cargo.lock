@@ -3495,6 +3495,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "examples-contracts"
+version = "0.1.0"
+dependencies = [
+ "ethers",
+ "hex",
+ "parity-scale-codec 3.6.9",
+ "scale-info",
+ "serde_json",
+ "sp-core",
+ "sp-io",
+ "subxt",
+ "subxt-signer",
+ "tangle-crypto-primitives",
+ "tangle-subxt",
+ "tokio",
+]
+
+[[package]]
+name = "examples-profile"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "parity-scale-codec 3.6.9",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "subxt",
+ "subxt-signer",
+ "tangle-crypto-primitives",
+ "tangle-subxt",
+ "tokio",
+]
+
+[[package]]
 name = "exit-future"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
