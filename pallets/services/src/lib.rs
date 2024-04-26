@@ -34,10 +34,10 @@ mod impls;
 mod rpc;
 mod types;
 
-// #[cfg(test)]
-// mod mock;
-// #[cfg(test)]
-// mod mock_evm;
+#[cfg(test)]
+mod mock;
+#[cfg(test)]
+mod mock_evm;
 // #[cfg(test)]
 // mod tests;
 
@@ -63,7 +63,8 @@ pub mod module {
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-
+		/// The origin which may set filter.
+		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// The currency mechanism.
 		type Currency: ReservableCurrency<Self::AccountId>;
 

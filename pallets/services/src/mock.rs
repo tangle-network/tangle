@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use crate::{self as pallet_jobs};
+use crate::{self as pallet_services};
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
@@ -25,10 +25,7 @@ use frame_support::{
 	traits::{ConstU128, ConstU32, ConstU64, Contains, Everything},
 };
 use pallet_session::historical as pallet_session_historical;
-use sp_core::{
-	sr25519::{self},
-	H256,
-};
+use sp_core::{sr25519, H256};
 use sp_runtime::{
 	app_crypto::ecdsa::Public,
 	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
@@ -87,132 +84,6 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
-}
-
-pub struct MockDKGPallet;
-impl MockDKGPallet {
-	fn job_to_fee(
-		job: &JobSubmission<
-			AccountId,
-			BlockNumber,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxAdditionalParamsLen,
-		>,
-	) -> Balance {
-		if job.job_type.is_phase_one() {
-			job.job_type.clone().get_participants().unwrap().len().try_into().unwrap()
-		} else {
-			20
-		}
-	}
-
-	fn calculate_result_extension_fee(_result: Vec<u8>, _extension_time: BlockNumber) -> Balance {
-		20
-	}
-}
-
-pub struct MockZkSaasPallet;
-impl MockZkSaasPallet {
-	fn job_to_fee(
-		job: &JobSubmission<
-			AccountId,
-			BlockNumber,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxAdditionalParamsLen,
-		>,
-	) -> Balance {
-		if job.job_type.is_phase_one() {
-			10
-		} else {
-			20
-		}
-	}
-}
-
-pub struct MockJobToFeeHandler;
-
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>
-	for MockJobToFeeHandler
-{
-	type Balance = Balance;
-
-	fn job_to_fee(
-		job: &JobSubmission<
-			AccountId,
-			BlockNumber,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxAdditionalParamsLen,
-		>,
-	) -> Balance {
-		match job.job_type {
-			JobType::DKGTSSPhaseOne(_)
-			| JobType::DKGTSSPhaseTwo(_)
-			| JobType::DKGTSSPhaseThree(_)
-			| JobType::DKGTSSPhaseFour(_) => MockDKGPallet::job_to_fee(job),
-			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => {
-				MockZkSaasPallet::job_to_fee(job)
-			},
-		}
-	}
-
-	fn calculate_result_extension_fee(result: Vec<u8>, extension_time: BlockNumber) -> Balance {
-		MockDKGPallet::calculate_result_extension_fee(result, extension_time)
-	}
-}
-
-pub struct MockMPCHandler;
-
-impl
-	MPCHandler<
-		AccountId,
-		BlockNumber,
-		Balance,
-		MaxParticipants,
-		MaxSubmissionLen,
-		MaxKeyLen,
-		MaxDataLen,
-		MaxSignatureLen,
-		MaxProofLen,
-		MaxAdditionalParamsLen,
-	> for MockMPCHandler
-{
-	fn verify(
-		_data: JobWithResult<
-			AccountId,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxKeyLen,
-			MaxDataLen,
-			MaxSignatureLen,
-			MaxProofLen,
-			MaxAdditionalParamsLen,
-		>,
-	) -> DispatchResult {
-		Ok(())
-	}
-
-	fn verify_validator_report(
-		_validator: AccountId,
-		_offence: ValidatorOffenceType,
-		_signatures: Vec<Vec<u8>>,
-	) -> DispatchResult {
-		Ok(())
-	}
-
-	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
-		Ok(())
-	}
-}
-
-pub struct MockMisbehaviorHandler;
-
-impl MisbehaviorHandler for MockMisbehaviorHandler {
-	fn verify(_data: MisbehaviorSubmission) -> DispatchResult {
-		Ok(())
-	}
 }
 
 type IdentificationTuple = (AccountId, AccountId);
@@ -359,61 +230,15 @@ parameter_types! {
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
 }
 
-impl pallet_roles::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type JobsHandler = Jobs;
-	type MaxRolesPerAccount = ConstU32<2>;
-	type RoleKeyId = RoleKeyId;
-	type ValidatorRewardDistribution = Reward;
-	type ValidatorSet = Historical;
-	type ReportOffences = OffenceHandler;
-	type MaxKeyLen = MaxKeyLen;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type MaxValidators = ConstU32<100>;
-	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
-	type MaxRestake = MaxRestake;
-	type RestakerEraPayout = ();
-	type MaxRolesPerValidator = MaxActiveJobsPerValidator;
-	type WeightInfo = ();
-}
-
 parameter_types! {
-	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxParticipants: u32 = 10;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxSubmissionLen: u32 = 32;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxKeyLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxDataLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxSignatureLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxProofLen: u32 = 256;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxActiveJobsPerValidator: u32 = 100;
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxAdditionalParamsLen: u32 = 256;
+	pub const ServicesPalletId: PalletId = PalletId(*b"py/srvs");
 }
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type MisbehaviorHandler = MockMisbehaviorHandler;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
-	type JobToFee = MockJobToFeeHandler;
-	type RolesHandler = Roles;
-	type MPCHandler = MockMPCHandler;
-	type PalletId = JobsPalletId;
-	type MaxParticipants = MaxParticipants;
-	type MaxSubmissionLen = MaxSubmissionLen;
-	type MaxKeyLen = MaxKeyLen;
-	type MaxDataLen = MaxDataLen;
-	type MaxSignatureLen = MaxSignatureLen;
-	type MaxProofLen = MaxProofLen;
-	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
-	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
+    type PalletId = ServicesPalletId;
 	type WeightInfo = ();
 }
 
@@ -428,7 +253,6 @@ construct_runtime!(
 		Jobs: pallet_jobs,
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
-		Roles: pallet_roles,
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
