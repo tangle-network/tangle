@@ -37,7 +37,10 @@ use sp_staking::{
 };
 
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::{jobs::*, roles::ValidatorRewardDistribution};
+use tangle_primitives::{
+	jobs::{traits::JobsHandler, *},
+	roles::{traits::RolesHandler, ValidatorRewardDistribution},
+};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -163,6 +166,23 @@ impl pallet_session::SessionManager<AccountId> for MockSessionManager {
 	}
 }
 
+// LEGACY: This is a legacy implementation of the RolesHandler trait.
+pub struct MockedJobsHandler;
+
+impl JobsHandler<AccountId> for MockedJobsHandler {
+	fn get_active_jobs(validator: AccountId) -> Vec<(tangle_primitives::roles::RoleType, JobId)> {
+		todo!()
+	}
+
+	fn exit_from_known_set(
+		validator: AccountId,
+		role_type: tangle_primitives::roles::RoleType,
+		job_id: JobId,
+	) -> DispatchResult {
+		todo!()
+	}
+}
+
 parameter_types! {
 	pub const Period: u64 = 1;
 	pub const Offset: u64 = 0;
@@ -228,17 +248,37 @@ impl pallet_staking::Config for Runtime {
 parameter_types! {
 	pub MaxRestake : Percent = Percent::from_percent(50);
 	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
+	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
+	pub const MaxActiveJobsPerValidator: u32 = 10;
+}
+
+impl pallet_roles::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type JobsHandler = MockedJobsHandler;
+	type MaxRolesPerAccount = ConstU32<2>;
+	type RoleKeyId = RoleKeyId;
+	type ValidatorRewardDistribution = Reward;
+	type ValidatorSet = Historical;
+	type ReportOffences = OffenceHandler;
+	type MaxKeyLen = ConstU32<33>;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxValidators = ConstU32<100>;
+	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
+	type MaxRestake = MaxRestake;
+	type RestakerEraPayout = ();
+	type MaxRolesPerValidator = ConstU32<15>;
+	type WeightInfo = ();
 }
 
 parameter_types! {
-	pub const ServicesPalletId: PalletId = PalletId(*b"py/srvs");
+	pub const ServicesPalletId: PalletId = PalletId(*b"py/servs");
 }
 
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
-    type PalletId = ServicesPalletId;
+	type PalletId = ServicesPalletId;
 	type WeightInfo = ();
 }
 
@@ -250,8 +290,9 @@ construct_runtime!(
 		System: frame_system,
 		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
-		Jobs: pallet_jobs,
+		Services: pallet_services,
 		EVM: pallet_evm,
+		Roles: pallet_roles,
 		Ethereum: pallet_ethereum,
 		Session: pallet_session,
 		Staking: pallet_staking,

@@ -35,7 +35,7 @@ pub type MaxJobsPerService = ConstU32<32>;
 
 /// A Job Definition is a definition of a job that can be called.
 /// It contains the input and output fields of the job with the permitted caller.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct JobDefinition {
 	/// The metadata of the job.
@@ -50,7 +50,7 @@ pub struct JobDefinition {
 	pub verifier: JobResultVerifier,
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct JobMetadata {
 	/// The Job name.
@@ -60,7 +60,7 @@ pub struct JobMetadata {
 }
 
 /// A Job Call is a call to execute a job using it's job definition.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct JobCall<AccountId> {
 	/// The Service ID that this call is for.
@@ -71,55 +71,42 @@ pub struct JobCall<AccountId> {
 	pub args: BoundedVec<Field<AccountId>, MaxFields>,
 }
 
+/// Type checks the supplied arguments against the parameters.
+pub fn type_checker<AccountId: Clone>(
+	params: &[FieldType],
+	args: &[Field<AccountId>],
+) -> Result<(), TypeCheckError> {
+	if params.len() != args.len() {
+		return Err(TypeCheckError::NotEnoughArguments {
+			expected: params.len() as u8,
+			actual: args.len() as u8,
+		});
+	}
+	for i in 0..args.len() {
+		let arg = &args[i];
+		let expected = &params[i];
+		if arg != expected {
+			return Err(TypeCheckError::ArgumentTypeMismatch {
+				index: i as u8,
+				expected: expected.clone(),
+				actual: arg.clone().into(),
+			});
+		}
+	}
+	Ok(())
+}
+
 impl<AccountId: Clone> JobCall<AccountId> {
 	/// Check if the supplied arguments match the job definition types.
 	pub fn type_check(&self, job_def: &JobDefinition) -> Result<(), TypeCheckError> {
-		if job_def.params.len() != self.args.len() {
-			return Err(TypeCheckError::NotEnoughArguments {
-				expected: job_def.params.len() as u8,
-				actual: self.args.len() as u8,
-			});
-		}
-
-		for i in 0..self.args.len() {
-			let arg = &self.args[i];
-			let expected = &job_def.params[i];
-			if arg != expected {
-				return Err(TypeCheckError::ArgumentTypeMismatch {
-					index: i as u8,
-					expected: expected.clone(),
-					actual: arg.clone().into(),
-				});
-			}
-		}
-
-		Ok(())
+		type_checker(&job_def.params, &self.args)
 	}
 }
 
 impl<AccountId: Clone> JobCallResult<AccountId> {
 	/// Check if the supplied result match the job definition types.
 	pub fn type_check(&self, job_def: &JobDefinition) -> Result<(), TypeCheckError> {
-		if job_def.result.len() != self.result.len() {
-			return Err(TypeCheckError::NotEnoughArguments {
-				expected: job_def.result.len() as u8,
-				actual: self.result.len() as u8,
-			});
-		}
-
-		for i in 0..self.result.len() {
-			let arg = &self.result[i];
-			let expected = &job_def.result[i];
-			if arg != expected {
-				return Err(TypeCheckError::ResultTypeMismatch {
-					index: i as u8,
-					expected: expected.clone(),
-					actual: arg.clone().into(),
-				});
-			}
-		}
-
-		Ok(())
+		type_checker(&job_def.params, &self.result)
 	}
 }
 
@@ -177,30 +164,40 @@ pub enum TypeCheckError {
 	},
 }
 
+impl frame_support::traits::PalletError for TypeCheckError {
+	const MAX_ENCODED_SIZE: usize = 2;
+}
+
 // -*** Service ***-
 
 /// Service Registration hook is a hook that will be called before registering the restaker as
 /// a service provider.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen)]
+#[derive(
+	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ServiceRegistrationHook {
 	/// No hook is needed, the restaker will be registered immediately.
+	#[default]
 	None,
 	/// A Smart contract that will be called to determine if the restaker will be registered.
 	Evm(sp_core::H160),
 }
 
 /// Service Request hook is a hook that will be called before creating a service from the service blueprint.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen)]
+#[derive(
+	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ServiceRequestHook {
 	/// No hook is needed, the caller will get the service created immediately.
+	#[default]
 	None,
 	/// A Smart contract that will be called to determine if the caller meets the requirements to create a service.
 	Evm(sp_core::H160),
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ServiceMetadata {
 	/// The Service name.
@@ -226,7 +223,7 @@ pub struct ServiceMetadata {
 /// A Service Blueprint is a the main definition of a service.
 /// it contains the metadata of the service, the job definitions, and other hooks, along with the
 /// gadget that will be executed when one of the jobs is calling this service.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ServiceBlueprint {
 	/// The metadata of the service.
@@ -235,14 +232,36 @@ pub struct ServiceBlueprint {
 	pub jobs: BoundedVec<JobDefinition, MaxJobsPerService>,
 	/// The registration hook that will be called before restaker registration.
 	pub registration_hook: ServiceRegistrationHook,
+	/// The parameters that are required for the service registration.
+	pub registration_params: BoundedVec<FieldType, MaxFields>,
 	/// The request hook that will be called before creating a service from the service blueprint.
 	pub request_hook: ServiceRequestHook,
+	/// The parameters that are required for the service request.
+	pub request_params: BoundedVec<FieldType, MaxFields>,
 	/// The gadget that will be executed for the service.
 	pub gadget: Gadget,
 }
 
+impl ServiceBlueprint {
+	/// Check if the supplied arguments match the registration parameters.
+	pub fn type_check_registration<AccountId: Clone>(
+		&self,
+		args: &[Field<AccountId>],
+	) -> Result<(), TypeCheckError> {
+		type_checker(&self.registration_params, args)
+	}
+
+	/// Check if the supplied arguments match the request parameters.
+	pub fn type_check_request<AccountId: Clone>(
+		&self,
+		args: &[Field<AccountId>],
+	) -> Result<(), TypeCheckError> {
+		type_checker(&self.request_params, args)
+	}
+}
+
 /// A Service is an instance of a service blueprint.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Service<AccountId, BlockNumber> {
 	/// The Blueprint ID of the service.
@@ -280,6 +299,12 @@ pub enum Gadget {
 	/// A Gadget that is a container that will be executed.
 	/// inside the shell using the container runtime (e.g. Docker, Podman, etc.)
 	Container(ContainerGadget),
+}
+
+impl Default for Gadget {
+	fn default() -> Self {
+		Gadget::Wasm(WasmGadget::IPFS(Default::default()))
+	}
 }
 
 /// A WASM binary that is stored in the Github release.
@@ -328,10 +353,13 @@ pub struct ImageRegistryFetcher {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum WasmGadget {
 	/// A WASM binary that is stored in the IPFS.
+	#[codec(index = 0)]
 	IPFS(BoundedVec<u8, ConstU32<64>>),
 	/// A WASM binary that is stored in the Github release.
+	#[codec(index = 1)]
 	Github(GithubFetcher),
 	/// A WASM binary that is stored in the remote server.
+	#[codec(index = 2)]
 	Remote(RemoteFetcher),
 }
 
@@ -340,10 +368,13 @@ pub enum WasmGadget {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum NativeGadget {
 	/// A Native binary that is stored in the IPFS.
+	#[codec(index = 0)]
 	IPFS(BoundedVec<u8, ConstU32<64>>),
 	/// A Native binary that is stored in the Github release.
+	#[codec(index = 1)]
 	Github(GithubFetcher),
 	/// A Native binary that is stored in the remote server.
+	#[codec(index = 2)]
 	Remote(RemoteFetcher),
 }
 
@@ -351,7 +382,9 @@ pub enum NativeGadget {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ContainerGadget {
 	/// An Image that is stored in the IPFS.
+	#[codec(index = 0)]
 	IPFS(BoundedVec<u8, ConstU32<64>>),
 	/// An Image that is stored in a remote container registry.
+	#[codec(index = 1)]
 	Registry(ImageRegistryFetcher),
 }

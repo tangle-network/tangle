@@ -50,6 +50,7 @@ pallet-ethereum = { workspace = true }
 pallet-evm = { workspace = true }
 pallet-evm-chain-id = { workspace = true }
 
+pallet-roles = { workspace = true }
 pallet-session = { workspace = true }
 pallet-staking = { workspace = true }
 sp-staking = { workspace = true }
@@ -65,10 +66,13 @@ std = [
   "frame-system/std",
   "sp-core/std",
   "sp-std/std",
+  "sp-staking/std",
   "tangle-primitives/std",
   "tangle-crypto-primitives/std",
   "pallet-balances/std",
   "pallet-timestamp/std",
+  "pallet-staking/std",
+  "pallet-roles/std",
   "fp-account/std",
   "fp-consensus/std",
   "fp-dynamic-fee/std",

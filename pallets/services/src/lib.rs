@@ -38,8 +38,8 @@ mod types;
 mod mock;
 #[cfg(test)]
 mod mock_evm;
-// #[cfg(test)]
-// mod tests;
+#[cfg(test)]
+mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -55,9 +55,8 @@ pub mod module {
 	use super::*;
 	use scale_info::prelude::fmt::Debug;
 	use sp_runtime::Saturating;
-	use tangle_primitives::{
-		jobs::v2::{ApprovalPrefrence, Field, MaxFields, MaxFieldsSize, ServiceBlueprint},
-		roles::RoleType,
+	use tangle_primitives::jobs::v2::{
+		ApprovalPrefrence, Field, MaxFields, ServiceBlueprint, TypeCheckError,
 	};
 
 	#[pallet::config]
@@ -84,6 +83,8 @@ pub mod module {
 		AlreadyRegistered,
 		/// The caller does not have the requirements to be a service provider.
 		InvalidRegistrationInput,
+		/// An error occurred while type checking the provided input input.
+		TypeCheck(TypeCheckError),
 	}
 
 	#[pallet::event]
@@ -104,6 +105,8 @@ pub mod module {
 			blueprint_id: u64,
 			/// The approval preference for the service provider for this specific blueprint.
 			approval_preference: ApprovalPrefrence,
+			/// The arguments used for registration.
+			registration_args: Vec<Field<T::AccountId>>,
 		},
 		/// A service provider has been deregistered.
 		Deregistered {
@@ -211,6 +214,28 @@ pub mod module {
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
 
+	/// The next free ID for a service blueprint.
+	#[pallet::storage]
+	#[pallet::getter(fn next_blueprint_id)]
+	pub type NextBlueprintId<T> = StorageValue<_, u64, ValueQuery>;
+
+	/// The service blueprints along with their owner.
+	#[pallet::storage]
+	#[pallet::getter(fn blueprints)]
+	pub type Blueprints<T: Config> = StorageMap<
+		_,
+		Identity,
+		u64,
+		(T::AccountId, ServiceBlueprint),
+		ResultQuery<Error<T>::BlueprintNotFound>,
+	>;
+
+	/// The service providers for a specific service blueprint.
+	#[pallet::storage]
+	#[pallet::getter(fn service_providers)]
+	pub type ServiceProviders<T: Config> =
+		StorageDoubleMap<_, Identity, u64, Identity, T::AccountId, (), ValueQuery>;
+
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Create a new service blueprint.
@@ -225,12 +250,13 @@ pub mod module {
 			origin: OriginFor<T>,
 			blueprint: ServiceBlueprint,
 		) -> DispatchResult {
-			let caller = ensure_signed(origin)?;
-			// TODO: get the next blueprint id.
-			let blueprint_id = Zero::zero();
-			// TODO: store the blueprint.
-			Self::deposit_event(Event::BlueprintCreated { owner: caller.clone(), blueprint_id });
-			todo!()
+			let owner = ensure_signed(origin)?;
+			let blueprint_id = NextBlueprintId::<T>::get();
+			Blueprints::<T>::insert(blueprint_id, (owner.clone(), blueprint));
+			NextBlueprintId::<T>::set(blueprint_id.saturating_add(1));
+
+			Self::deposit_event(Event::BlueprintCreated { owner, blueprint_id });
+			Ok(())
 		}
 
 		/// Register the caller as a service provider for a specific blueprint.
@@ -243,19 +269,28 @@ pub mod module {
 			approval_preference: ApprovalPrefrence,
 			// NOTE: add role profiles here.
 			// profile: Profile,
-			registration_input: Vec<u8>,
+			registration_args: Vec<Field<T::AccountId>>,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			// TODO: check if the blueprint exists.
-			// TODO: check if the caller is not already registered.
+			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
+			let already_registered = ServiceProviders::<T>::contains_key(blueprint_id, &caller);
+			if already_registered {
+				return Err(Error::<T>::AlreadyRegistered.into());
+			}
 			// TODO: check if the caller has the valid requirements to be a service provider.
-			// TODO: store the registration.
+			blueprint
+				.type_check_registration(&registration_args)
+				.map_err(Error::<T>::TypeCheck)?;
+			ServiceProviders::<T>::insert(blueprint_id, &caller, ());
+
 			Self::deposit_event(Event::Registered {
 				provider: caller.clone(),
 				blueprint_id,
 				approval_preference,
+				registration_args,
 			});
-			todo!()
+
+			Ok(())
 		}
 
 		/// Deregister the caller from being a service provider for the service blueprint

@@ -239,6 +239,12 @@ impl<AccountId: Clone> From<Field<AccountId>> for FieldType {
 #[repr(transparent)]
 pub struct BoundedString<S: Get<u32>>(pub(crate) BoundedVec<u8, S>);
 
+impl<S: Get<u32>> Default for BoundedString<S> {
+	fn default() -> Self {
+		Self(Default::default())
+	}
+}
+
 impl<S: Get<u32>> Clone for BoundedString<S> {
 	fn clone(&self) -> Self {
 		Self(self.0.clone())
@@ -264,7 +270,7 @@ impl<S: Get<u32>> TryFrom<String> for BoundedString<S> {
 impl<S: Get<u32>> TryFrom<&str> for BoundedString<S> {
 	type Error = String;
 	fn try_from(value: &str) -> Result<Self, Self::Error> {
-        #[cfg(not(feature = "std"))]
+		#[cfg(not(feature = "std"))]
 		use alloc::string::ToString;
 
 		Self::try_from(value.to_string())
