@@ -1,5 +1,6 @@
 use std::fs;
 use std::sync::Arc;
+use std::time::Duration;
 
 use crate::tangle_testnet_runtime::api::runtime_types::pallet_roles::profile::Record;
 use crate::tangle_testnet_runtime::api::{
@@ -25,6 +26,7 @@ use tangle_subxt::subxt::{tx::Signer, utils::AccountId32, utils::H160, PolkadotC
 use tangle_subxt::tangle_testnet_runtime;
 use tangle_subxt::tangle_testnet_runtime::api::runtime_types::primitive_types::U256 as WebbU256;
 use tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_testnet_runtime::RuntimeCall;
+use tokio::time::sleep;
 
 fn get_signing_rules_abi() -> (Value, Value) {
 	let mut data: Value = serde_json::from_str(
@@ -184,7 +186,7 @@ async fn main() -> Result<(), String> {
 	let provider = Provider::<Http>::try_from("http://127.0.0.1:9944").unwrap();
 	let client = Arc::new(provider.clone());
 	let contract = VotableSigningRules::new(Address::from(contract_address), client);
-	let phase_1_job_id = [0u8; 32];
+	let phase_1_job_id = 0u64;
 	let phase_1_job_details: Bytes = dkg_phase_one.job_type.encode().into();
 	let threshold = 2;
 	let use_democracy = false;
@@ -245,6 +247,7 @@ async fn main() -> Result<(), String> {
 		.await
 		.unwrap();
 
+	sleep(Duration::from_secs(5)).await;
 	println!("Relayer 1 voted on proposal");
 
 	let relayer_wallet2 =
@@ -257,6 +260,7 @@ async fn main() -> Result<(), String> {
 		.await
 		.unwrap();
 
+	sleep(Duration::from_secs(5)).await;
 	println!("Relayer 2 voted on proposal");
 
 	let relayer_wallet3 =
@@ -269,6 +273,7 @@ async fn main() -> Result<(), String> {
 		.await
 		.unwrap();
 
+	sleep(Duration::from_secs(5)).await;
 	println!("Relayer 3 voted on proposal");
 
 	Ok(())

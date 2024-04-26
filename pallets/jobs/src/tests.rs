@@ -179,7 +179,7 @@ fn test_signing_rules() {
 		let client = Arc::new(provider);
 		let contract = SigningRules::new(Address::from(signing_rules_address), client);
 
-		let phase_1_job_id = [0u8; 32];
+		let phase_1_job_id = 0u64;
 		let phase_1_job_details: Bytes = submission.job_type.encode().into();
 		let threshold = 3;
 		let use_democracy = false;
