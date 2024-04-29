@@ -53,10 +53,10 @@ pub use weights::WeightInfo;
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
-	use scale_info::prelude::fmt::Debug;
 	use sp_runtime::Saturating;
 	use tangle_primitives::jobs::v2::{
-		ApprovalPrefrence, Field, MaxFields, ServiceBlueprint, TypeCheckError,
+		ApprovalPrefrence, ApprovalState, Field, MaxFields, MaxPermittedCallers,
+		MaxProvidersPerService, ServiceBlueprint, ServiceRequest, TypeCheckError,
 	};
 
 	#[pallet::config]
@@ -89,6 +89,14 @@ pub mod module {
 		ServiceRequestNotFound,
 		/// An error occurred while type checking the provided input input.
 		TypeCheck(TypeCheckError),
+		/// The maximum number of permitted callers per service has been exceeded.
+		MaxPermittedCallersExceeded,
+		/// The maximum number of service providers per service has been exceeded.
+		MaxServiceProvidersExceeded,
+		/// The maximum number of fields per request has been exceeded.
+		MaxFieldsExceeded,
+		/// The approval is not requested for the service provider (the caller).
+		ApprovalNotRequested,
 	}
 
 	#[pallet::event]
@@ -260,16 +268,14 @@ pub mod module {
 	>;
 
 	/// The service requests along with their owner.
-	/// Owner -> Request ID -> Service Request
+	/// Request ID -> Service Request
 	#[pallet::storage]
 	#[pallet::getter(fn service_requests)]
-	pub type ServiceRequests<T: Config> = StorageDoubleMap<
+	pub type ServiceRequests<T: Config> = StorageMap<
 		_,
 		Identity,
-		T::AccountId,
-		Identity,
 		u64,
-		ServiceRequest<T::AccountId, T::BlockNumber>,
+		ServiceRequest<T::AccountId, BlockNumberFor<T>>,
 		ResultQuery<Error<T>::ServiceRequestNotFound>,
 	>;
 
@@ -317,7 +323,7 @@ pub mod module {
 			blueprint
 				.type_check_registration(&registration_args)
 				.map_err(Error::<T>::TypeCheck)?;
-			ServiceProviders::<T>::insert(blueprint_id, &caller, approval_preference.clone());
+			ServiceProviders::<T>::insert(blueprint_id, &caller, approval_preference);
 
 			Self::deposit_event(Event::Registered {
 				provider: caller.clone(),
@@ -359,14 +365,13 @@ pub mod module {
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			ensure!(Blueprints::<T>::contains_key(blueprint_id), Error::<T>::BlueprintNotFound);
-			let updated_approval_preference = approval_preference.clone();
 			ServiceProviders::<T>::try_mutate_exists(
 				blueprint_id,
 				&caller,
 				|current_approval_preference| {
 					current_approval_preference
 						.as_mut()
-						.map(|v| *v = updated_approval_preference)
+						.map(|v| *v = approval_preference)
 						.ok_or(Error::<T>::NotRegistered)
 				},
 			)?;
@@ -389,54 +394,118 @@ pub mod module {
 			#[pallet::compact] blueprint_id: u64,
 			permitted_callers: Vec<T::AccountId>,
 			service_providers: Vec<T::AccountId>,
+			#[pallet::compact] ttl: BlockNumberFor<T>,
+			request_args: Vec<Field<T::AccountId>>,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
+
+			blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
 			// TODO: check if all the service providers are registered.
 			// TODO: check if any of the service providers are required approval.
 			let mut required_approvals = Vec::new();
+			let mut approved = Vec::new();
 			for provider in &service_providers {
 				let approval_preference = ServiceProviders::<T>::get(blueprint_id, provider)?;
 				if approval_preference == ApprovalPrefrence::Required {
 					required_approvals.push(provider.clone());
+				} else {
+					approved.push(provider.clone());
 				}
 			}
-			// TODO: create a new service, and store it.
+
+			if required_approvals.is_empty() {
+				// TODO: create a new service, and store it.
+			} else {
+				let request_id = NextServiceRequestId::<T>::get();
+				let providers = required_approvals
+					.iter()
+					.cloned()
+					.map(|v| (v, ApprovalState::Pending))
+					.chain(approved.iter().cloned().map(|v| (v, ApprovalState::Approved)))
+					.collect::<Vec<_>>();
+
+				let permitted_callers =
+					BoundedVec::<_, MaxPermittedCallers>::try_from(permitted_callers)
+						.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
+				let args = BoundedVec::<_, MaxFields>::try_from(request_args)
+					.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
+
+				let providers_with_approval_state =
+					BoundedVec::<_, MaxProvidersPerService>::try_from(providers)
+						.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
+				let service_request = ServiceRequest {
+					blueprint: blueprint_id,
+					owner: caller.clone(),
+					ttl,
+					args,
+					permitted_callers,
+					providers_with_approval_state,
+				};
+				ServiceRequests::<T>::insert(request_id, service_request);
+				NextServiceRequestId::<T>::set(request_id.saturating_add(1));
+
+				Self::deposit_event(Event::ServiceRequested {
+					owner: caller.clone(),
+					request_id,
+					blueprint_id,
+					required_approvals,
+					approved,
+				});
+			}
 			// TODO: notify the service providers, by storing the service id in their storage.
-			// TODO: emit an event.
-			Self::deposit_event(Event::ServiceRequested {
-				owner: caller.clone(),
-				request_id: 0,
-				blueprint_id,
-				required_approvals: vec![],
-				approved: vec![],
-			});
-			todo!()
+			Ok(())
 		}
 
 		/// Approve a service request, so that the service can be initiated.
 		pub fn approve(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			// TODO: check if the service exists.
-			// TODO: check if the caller is a service provider.
-			// TODO: check if the caller is required to approve the service.
-			// TODO: approve the service.
+			let mut request = ServiceRequests::<T>::get(request_id)?;
+			let updated = request
+				.providers_with_approval_state
+				.iter_mut()
+				.find(|(v, _)| v == &caller)
+				.map(|(_, s)| *s = ApprovalState::Approved);
+			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
+
+			let approved = request
+				.providers_with_approval_state
+				.iter()
+				.filter(|(_, s)| *s == ApprovalState::Approved)
+				.map(|(v, _)| v.clone())
+				.collect::<Vec<_>>();
+			let required_approvals = request
+				.providers_with_approval_state
+				.iter()
+				.filter(|(_, s)| *s == ApprovalState::Pending)
+				.map(|(v, _)| v.clone())
+				.collect::<Vec<_>>();
+
+			let blueprint_id = request.blueprint;
+			let owner = request.owner.clone();
+			let is_approved = required_approvals.is_empty();
+			ServiceRequests::<T>::insert(request_id, request);
+
 			Self::deposit_event(Event::ServiceRequestApproved {
 				provider: caller.clone(),
 				request_id,
-				blueprint_id: 0,
-				required_approvals: vec![],
-				approved: vec![],
+				blueprint_id,
+				required_approvals,
+				approved,
 			});
-			// TODO: check if all the required approvals are done.
-			// TODO: initiate the service.
-			Self::deposit_event(Event::ServiceInitiated {
-				owner: todo!(),
-				request_id,
-				service_id: 0,
-				blueprint_id: 0,
-			});
-			todo!()
+
+			if is_approved {
+				// remove the service request.
+				ServiceRequests::<T>::remove(request_id);
+				// TODO: initiate the service.
+				Self::deposit_event(Event::ServiceInitiated {
+					owner,
+					request_id,
+					service_id: 0,
+					blueprint_id,
+				});
+			}
+			Ok(())
 		}
 
 		/// Reject a service request.
@@ -444,41 +513,19 @@ pub mod module {
 		pub fn reject(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			// TODO: check if the service request exists.
-			// TODO: check if the caller is a service provider.
-			// TODO: reject the service.
-			// TODO: emit an event.
+			let mut request = ServiceRequests::<T>::get(request_id)?;
+			let updated = request
+				.providers_with_approval_state
+				.iter_mut()
+				.find(|(v, _)| v == &caller)
+				.map(|(_, s)| *s = ApprovalState::Rejected);
+			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
 			Self::deposit_event(Event::ServiceRequestRejected {
 				provider: caller.clone(),
 				request_id,
 				blueprint_id: 0,
 			});
-			todo!()
-		}
-
-		/// Update the service request.
-		/// The owner of the service request can update the service request, and the service providers will need to approve it again.
-		pub fn update_request(
-			origin: OriginFor<T>,
-			#[pallet::compact] request_id: u64,
-			permitted_callers: Vec<T::AccountId>,
-			service_providers: Vec<T::AccountId>,
-		) -> DispatchResult {
-			let caller = ensure_signed(origin)?;
-			// TODO: check if the service request exists.
-			// TODO: check if the caller is the owner of the service request.
-			// TODO: check if all the service providers are registered.
-			// TODO: check if any of the service providers are required approval.
-			// TODO: update the service request.
-			// TODO: notify the service providers, by storing the service id in their storage.
-			// TODO: emit an event.
-			Self::deposit_event(Event::ServiceRequestUpdated {
-				owner: caller.clone(),
-				request_id,
-				blueprint_id: 0,
-				required_approvals: vec![],
-				approved: vec![],
-			});
-			todo!()
+			Ok(())
 		}
 
 		/// Terminates the service by the owner of the service.
