@@ -32,6 +32,10 @@ pub type MaxFieldsSize = ConstU32<1024>;
 pub type MaxMetadataLength = ConstU32<1024>;
 /// Maximum number of jobs per service.
 pub type MaxJobsPerService = ConstU32<32>;
+/// Maximum number of service providers per service.
+pub type MaxProvidersPerService = ConstU32<512>;
+/// Maximum number of permitted callers per service.
+pub type MaxPermittedCallers = ConstU32<32>;
 
 /// A Job Definition is a definition of a job that can be called.
 /// It contains the input and output fields of the job with the permitted caller.
@@ -260,6 +264,48 @@ impl ServiceBlueprint {
 	}
 }
 
+/// A service request is a request to create a service from a service blueprint.
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct ServiceRequest<AccountId, BlockNumber> {
+	/// The service blueprint ID.
+	pub blueprint: u64,
+	/// The owner of the service.
+	pub owner: AccountId,
+	/// The permitted caller(s) of the service.
+	pub permitted_callers: BoundedVec<AccountId, MaxPermittedCallers>,
+	/// The Lifetime of the service.
+	pub ttl: BlockNumber,
+	/// The supplied arguments for the service request.
+	pub args: BoundedVec<Field<AccountId>, MaxFields>,
+	/// The Selected Service Provider(s) with their approval state.
+	pub providers_with_approval_state:
+		BoundedVec<(AccountId, ApprovalState), MaxProvidersPerService>,
+}
+
+impl<AccountId, BlockNumber> ServiceRequest<AccountId, BlockNumber> {
+	/// Returns true if all the service providers are [ApprovalState::Approved].
+	pub fn is_approved(&self) -> bool {
+		self.providers_with_approval_state
+			.iter()
+			.all(|(_, state)| state == &ApprovalState::Approved)
+	}
+
+	/// Returns true if any the service providers are [ApprovalState::Pending].
+	pub fn is_pending(&self) -> bool {
+		self.providers_with_approval_state
+			.iter()
+			.any(|(_, state)| state == &ApprovalState::Pending)
+	}
+
+	/// Returns true if any the service providers are [ApprovalState::Rejected].
+	pub fn is_rejected(&self) -> bool {
+		self.providers_with_approval_state
+			.iter()
+			.any(|(_, state)| state == &ApprovalState::Rejected)
+	}
+}
+
 /// A Service is an instance of a service blueprint.
 #[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
@@ -269,13 +315,15 @@ pub struct Service<AccountId, BlockNumber> {
 	/// The owner of the service.
 	pub owner: AccountId,
 	/// The Permitted caller(s) of the service.
-	pub permitted_callers: BoundedVec<AccountId, ConstU32<32>>,
+	pub permitted_callers: BoundedVec<AccountId, MaxPermittedCallers>,
 	/// The Lifetime of the service.
 	pub ttl: BlockNumber,
 }
 
 /// Service Provider Approval Prefrence.
-#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(
+	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ApprovalPrefrence {
 	/// No approval is required to provide the service.
@@ -285,6 +333,23 @@ pub enum ApprovalPrefrence {
 	/// The approval is required to provide the service.
 	#[codec(index = 1)]
 	Required,
+}
+
+#[derive(
+	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
+)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum ApprovalState {
+	/// The service provider is pending approval.
+	#[codec(index = 0)]
+	#[default]
+	Pending,
+	/// The service provider is approved to provide the service.
+	#[codec(index = 1)]
+	Approved,
+	/// The service provider is rejected to provide the service.
+	#[codec(index = 2)]
+	Rejected,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]

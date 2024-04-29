@@ -83,6 +83,10 @@ pub mod module {
 		AlreadyRegistered,
 		/// The caller does not have the requirements to be a service provider.
 		InvalidRegistrationInput,
+		/// The caller is not registered as a service provider.
+		NotRegistered,
+		/// The service request was not found.
+		ServiceRequestNotFound,
 		/// An error occurred while type checking the provided input input.
 		TypeCheck(TypeCheckError),
 	}
@@ -214,10 +218,22 @@ pub mod module {
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
 
+	// Counters
+
 	/// The next free ID for a service blueprint.
 	#[pallet::storage]
 	#[pallet::getter(fn next_blueprint_id)]
 	pub type NextBlueprintId<T> = StorageValue<_, u64, ValueQuery>;
+
+	/// The next free ID for a service request.
+	#[pallet::storage]
+	#[pallet::getter(fn next_service_request_id)]
+	pub type NextServiceRequestId<T> = StorageValue<_, u64, ValueQuery>;
+
+	/// The next free ID for a service.
+	#[pallet::storage]
+	#[pallet::getter(fn next_service_id)]
+	pub type NextServiceId<T> = StorageValue<_, u64, ValueQuery>;
 
 	/// The service blueprints along with their owner.
 	#[pallet::storage]
@@ -233,8 +249,29 @@ pub mod module {
 	/// The service providers for a specific service blueprint.
 	#[pallet::storage]
 	#[pallet::getter(fn service_providers)]
-	pub type ServiceProviders<T: Config> =
-		StorageDoubleMap<_, Identity, u64, Identity, T::AccountId, (), ValueQuery>;
+	pub type ServiceProviders<T: Config> = StorageDoubleMap<
+		_,
+		Identity,
+		u64,
+		Identity,
+		T::AccountId,
+		ApprovalPrefrence,
+		ResultQuery<Error<T>::NotRegistered>,
+	>;
+
+	/// The service requests along with their owner.
+	/// Owner -> Request ID -> Service Request
+	#[pallet::storage]
+	#[pallet::getter(fn service_requests)]
+	pub type ServiceRequests<T: Config> = StorageDoubleMap<
+		_,
+		Identity,
+		T::AccountId,
+		Identity,
+		u64,
+		ServiceRequest<T::AccountId, T::BlockNumber>,
+		ResultQuery<Error<T>::ServiceRequestNotFound>,
+	>;
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -274,14 +311,13 @@ pub mod module {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
 			let already_registered = ServiceProviders::<T>::contains_key(blueprint_id, &caller);
-			if already_registered {
-				return Err(Error::<T>::AlreadyRegistered.into());
-			}
+			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
 			// TODO: check if the caller has the valid requirements to be a service provider.
+			// TODO: call into EVM here.
 			blueprint
 				.type_check_registration(&registration_args)
 				.map_err(Error::<T>::TypeCheck)?;
-			ServiceProviders::<T>::insert(blueprint_id, &caller, ());
+			ServiceProviders::<T>::insert(blueprint_id, &caller, approval_preference.clone());
 
 			Self::deposit_event(Event::Registered {
 				provider: caller.clone(),
@@ -303,12 +339,14 @@ pub mod module {
 			#[pallet::compact] blueprint_id: u64,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			// TODO: check if the blueprint exists.
-			// TODO: check if the caller is registered.
+			ensure!(Blueprints::<T>::contains_key(blueprint_id), Error::<T>::BlueprintNotFound);
+			let registered = ServiceProviders::<T>::contains_key(blueprint_id, &caller);
+			ensure!(registered, Error::<T>::NotRegistered);
 			// TODO: check if the caller is not providing any service for the blueprint.
-			// TODO: remove the registration.
+			ServiceProviders::<T>::remove(blueprint_id, &caller);
+
 			Self::deposit_event(Event::Deregistered { provider: caller.clone(), blueprint_id });
-			todo!()
+			Ok(())
 		}
 
 		/// Update the approval preference for the caller for a specific service blueprint.
@@ -320,16 +358,25 @@ pub mod module {
 			approval_preference: ApprovalPrefrence,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			// TODO: check if the blueprint exists.
-			// TODO: check if the caller is registered.
-			// TODO: update the approval preference.
-			// TODO: store the registration.
+			ensure!(Blueprints::<T>::contains_key(blueprint_id), Error::<T>::BlueprintNotFound);
+			let updated_approval_preference = approval_preference.clone();
+			ServiceProviders::<T>::try_mutate_exists(
+				blueprint_id,
+				&caller,
+				|current_approval_preference| {
+					current_approval_preference
+						.as_mut()
+						.map(|v| *v = updated_approval_preference)
+						.ok_or(Error::<T>::NotRegistered)
+				},
+			)?;
+
 			Self::deposit_event(Event::ApprovalPreferenceUpdated {
 				provider: caller.clone(),
 				blueprint_id,
 				approval_preference,
 			});
-			todo!()
+			Ok(())
 		}
 		/// Request a new service to be initiated using the provided blueprint with a list of
 		/// service providers that will run your service. Optionally, you can specifiy who is permitted caller
@@ -344,9 +391,16 @@ pub mod module {
 			service_providers: Vec<T::AccountId>,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			// TODO: check if the blueprint exists.
+			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
 			// TODO: check if all the service providers are registered.
 			// TODO: check if any of the service providers are required approval.
+			let mut required_approvals = Vec::new();
+			for provider in &service_providers {
+				let approval_preference = ServiceProviders::<T>::get(blueprint_id, provider)?;
+				if approval_preference == ApprovalPrefrence::Required {
+					required_approvals.push(provider.clone());
+				}
+			}
 			// TODO: create a new service, and store it.
 			// TODO: notify the service providers, by storing the service id in their storage.
 			// TODO: emit an event.
