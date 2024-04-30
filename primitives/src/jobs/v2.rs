@@ -308,6 +308,7 @@ impl<AccountId, BlockNumber> ServiceRequest<AccountId, BlockNumber> {
 
 /// A Service is an instance of a service blueprint.
 #[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[scale_info(skip_type_params(AccountId, BlockNumber))]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Service<AccountId, BlockNumber> {
 	/// The Blueprint ID of the service.

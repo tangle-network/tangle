@@ -45,7 +45,6 @@ mod tests;
 mod benchmarking;
 
 pub mod weights;
-use crate::types::BalanceOf;
 
 pub use module::*;
 pub use weights::WeightInfo;
@@ -56,7 +55,7 @@ pub mod module {
 	use sp_runtime::Saturating;
 	use tangle_primitives::jobs::v2::{
 		ApprovalPrefrence, ApprovalState, Field, MaxFields, MaxPermittedCallers,
-		MaxProvidersPerService, ServiceBlueprint, ServiceRequest, TypeCheckError,
+		MaxProvidersPerService, Service, ServiceBlueprint, ServiceRequest, TypeCheckError,
 	};
 
 	#[pallet::config]
@@ -87,6 +86,8 @@ pub mod module {
 		NotRegistered,
 		/// The service request was not found.
 		ServiceRequestNotFound,
+		/// The service was not found.
+		ServiceNotFound,
 		/// An error occurred while type checking the provided input input.
 		TypeCheck(TypeCheckError),
 		/// The maximum number of permitted callers per service has been exceeded.
@@ -190,8 +191,8 @@ pub mod module {
 		ServiceInitiated {
 			/// The owner of the service.
 			owner: T::AccountId,
-			/// The ID of the service request that got approved.
-			request_id: u64,
+			/// The ID of the service request that got approved (if required).
+			request_id: Option<u64>,
 			/// The ID of the service.
 			service_id: u64,
 			/// The ID of the service blueprint.
@@ -238,10 +239,10 @@ pub mod module {
 	#[pallet::getter(fn next_service_request_id)]
 	pub type NextServiceRequestId<T> = StorageValue<_, u64, ValueQuery>;
 
-	/// The next free ID for a service.
+	/// The next free ID for a service Instance.
 	#[pallet::storage]
-	#[pallet::getter(fn next_service_id)]
-	pub type NextServiceId<T> = StorageValue<_, u64, ValueQuery>;
+	#[pallet::getter(fn next_instance_id)]
+	pub type NextInstanceId<T> = StorageValue<_, u64, ValueQuery>;
 
 	/// The service blueprints along with their owner.
 	#[pallet::storage]
@@ -277,6 +278,18 @@ pub mod module {
 		u64,
 		ServiceRequest<T::AccountId, BlockNumberFor<T>>,
 		ResultQuery<Error<T>::ServiceRequestNotFound>,
+	>;
+
+	/// The Services Instances
+	/// Service ID -> Service
+	#[pallet::storage]
+	#[pallet::getter(fn services)]
+	pub type Instances<T: Config> = StorageMap<
+		_,
+		Identity,
+		u64,
+		Service<T::AccountId, BlockNumberFor<T>>,
+		ResultQuery<Error<T>::ServiceNotFound>,
 	>;
 
 	#[pallet::call]
@@ -414,8 +427,28 @@ pub mod module {
 				}
 			}
 
+			let permitted_callers =
+				BoundedVec::<_, MaxPermittedCallers>::try_from(permitted_callers)
+					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
 			if required_approvals.is_empty() {
-				// TODO: create a new service, and store it.
+				// No approval is required, initiate the service immediately.
+				let service_id = NextInstanceId::<T>::get();
+				let service = Service {
+					blueprint: blueprint_id,
+					owner: caller.clone(),
+					permitted_callers,
+					ttl,
+				};
+				Instances::<T>::insert(service_id, service);
+				NextInstanceId::<T>::set(service_id.saturating_add(1));
+				Self::deposit_event(Event::ServiceInitiated {
+					owner: caller.clone(),
+					request_id: None,
+					service_id,
+					blueprint_id,
+				});
+
+				Ok(())
 			} else {
 				let request_id = NextServiceRequestId::<T>::get();
 				let providers = required_approvals
@@ -425,9 +458,6 @@ pub mod module {
 					.chain(approved.iter().cloned().map(|v| (v, ApprovalState::Approved)))
 					.collect::<Vec<_>>();
 
-				let permitted_callers =
-					BoundedVec::<_, MaxPermittedCallers>::try_from(permitted_callers)
-						.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
 				let args = BoundedVec::<_, MaxFields>::try_from(request_args)
 					.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
 
@@ -452,9 +482,9 @@ pub mod module {
 					required_approvals,
 					approved,
 				});
+
+				Ok(())
 			}
-			// TODO: notify the service providers, by storing the service id in their storage.
-			Ok(())
 		}
 
 		/// Approve a service request, so that the service can be initiated.
@@ -483,9 +513,11 @@ pub mod module {
 
 			let blueprint_id = request.blueprint;
 			let owner = request.owner.clone();
-			let is_approved = required_approvals.is_empty();
-			ServiceRequests::<T>::insert(request_id, request);
+			let is_approved = request.is_approved();
+			let ttl = request.ttl;
+			let permitted_callers = request.permitted_callers.clone();
 
+			// we emit this event regardless of the outcome of the approval.
 			Self::deposit_event(Event::ServiceRequestApproved {
 				provider: caller.clone(),
 				request_id,
@@ -497,13 +529,26 @@ pub mod module {
 			if is_approved {
 				// remove the service request.
 				ServiceRequests::<T>::remove(request_id);
-				// TODO: initiate the service.
+
+				let service_id = NextInstanceId::<T>::get();
+				let service = Service {
+					blueprint: blueprint_id,
+					owner: owner.clone(),
+					permitted_callers,
+					ttl,
+				};
+				Instances::<T>::insert(service_id, service);
+				NextInstanceId::<T>::set(service_id.saturating_add(1));
+
 				Self::deposit_event(Event::ServiceInitiated {
 					owner,
-					request_id,
-					service_id: 0,
+					request_id: Some(request_id),
+					service_id,
 					blueprint_id,
 				});
+			} else {
+				// Update the service request.
+				ServiceRequests::<T>::insert(request_id, request);
 			}
 			Ok(())
 		}
@@ -512,7 +557,6 @@ pub mod module {
 		/// The service will not be initiated, and the requester will need to update the service request.
 		pub fn reject(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			// TODO: check if the service request exists.
 			let mut request = ServiceRequests::<T>::get(request_id)?;
 			let updated = request
 				.providers_with_approval_state
@@ -520,10 +564,11 @@ pub mod module {
 				.find(|(v, _)| v == &caller)
 				.map(|(_, s)| *s = ApprovalState::Rejected);
 			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
+
 			Self::deposit_event(Event::ServiceRequestRejected {
 				provider: caller.clone(),
 				request_id,
-				blueprint_id: 0,
+				blueprint_id: request.blueprint,
 			});
 			Ok(())
 		}
@@ -534,15 +579,16 @@ pub mod module {
 			#[pallet::compact] service_id: u64,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			// TODO: check if the service exists.
-			// TODO: check if the caller is the owner of the service.
-			// TODO: terminate the service.
+			let service = Instances::<T>::get(service_id)?;
+			ensure!(service.owner == caller, DispatchError::BadOrigin);
+			Instances::<T>::remove(service_id);
+
 			Self::deposit_event(Event::ServiceTerminated {
 				owner: caller.clone(),
 				service_id,
-				blueprint_id: 0,
+				blueprint_id: service.blueprint,
 			});
-			todo!()
+			Ok(())
 		}
 
 		/// Call a Job in the service.
