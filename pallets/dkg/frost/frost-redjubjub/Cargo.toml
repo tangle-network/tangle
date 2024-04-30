@@ -5,7 +5,7 @@ edition = "2021"
 # - Update html_root_url
 # - Update CHANGELOG.md
 # - Create git tag.
-version = "1.0.0-rc.0"
+version.workspace = true
 authors = [
     "Deirdre Connolly <durumcrustulum@gmail.com>",
     "Chelsea Komlo <me@chelseakomlo.com>",
@@ -13,7 +13,6 @@ authors = [
 ]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/ZcashFoundation/frost"
 categories = ["cryptography"]
 keywords = ["cryptography", "crypto", "ed25519", "threshold", "signature"]
 description = "A Schnorr signature scheme over Ed25519 that supports FROST."
