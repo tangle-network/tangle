@@ -284,6 +284,7 @@ impl Config for Runtime {
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
 
+#[allow(non_camel_case_types)]
 construct_runtime!(
 	pub enum Runtime
 	{
@@ -384,12 +385,19 @@ pub fn new_test_ext_raw_authorities(
 // Checks events against the latest. A contiguous set of events must be
 // provided. They must include the most recent RuntimeEvent, but do not have to include
 // every past RuntimeEvent.
+#[track_caller]
 pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 	let mut actual: Vec<RuntimeEvent> = System::events().iter().map(|e| e.event.clone()).collect();
 
 	expected.reverse();
 	for evt in expected {
 		let next = actual.pop().expect("RuntimeEvent expected");
-		assert_eq!(next, evt, "Events don't match (actual,expected)");
+		match (&next, &evt) {
+			(left_val, right_val) => {
+				if !(*left_val == *right_val) {
+					panic!("Events don't match\nactual: {next:#?}\nexpected: {evt:#?}");
+				}
+			},
+		};
 	}
 }

@@ -19,14 +19,11 @@
 
 use frame_support::{
 	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, ReservableCurrency},
+	traits::{Currency, ReservableCurrency},
 	PalletId,
 };
 use frame_system::pallet_prelude::*;
-use sp_runtime::{
-	traits::{Get, Zero},
-	DispatchResult,
-};
+use sp_runtime::{traits::Get, DispatchResult};
 use sp_std::prelude::*;
 
 mod functions;
@@ -52,7 +49,6 @@ pub use weights::WeightInfo;
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
-	use sp_runtime::Saturating;
 	use tangle_primitives::jobs::v2::{
 		ApprovalPrefrence, ApprovalState, Field, JobCall, JobCallResult, MaxFields,
 		MaxPermittedCallers, MaxProvidersPerService, Service, ServiceBlueprint, ServiceRequest,
@@ -155,7 +151,7 @@ pub mod module {
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 			/// The list of service providers that need to approve the service.
-			required_approvals: Vec<T::AccountId>,
+			pending_approvals: Vec<T::AccountId>,
 			/// The list of service providers that atomaticaly approved the service.
 			approved: Vec<T::AccountId>,
 		},
@@ -168,7 +164,7 @@ pub mod module {
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 			/// The list of service providers that need to approve the service.
-			required_approvals: Vec<T::AccountId>,
+			pending_approvals: Vec<T::AccountId>,
 			/// The list of service providers that atomaticaly approved the service.
 			approved: Vec<T::AccountId>,
 		},
@@ -191,7 +187,7 @@ pub mod module {
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 			/// The list of service providers that need to approve the service.
-			required_approvals: Vec<T::AccountId>,
+			pending_approvals: Vec<T::AccountId>,
 			/// The list of service providers that atomaticaly approved the service.
 			approved: Vec<T::AccountId>,
 		},
@@ -470,12 +466,12 @@ pub mod module {
 
 			blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
 			// TODO: check if any of the service providers are required approval.
-			let mut required_approvals = Vec::new();
+			let mut pending_approvals = Vec::new();
 			let mut approved = Vec::new();
 			for provider in &service_providers {
 				let approval_preference = ServiceProviders::<T>::get(blueprint_id, provider)?;
 				if approval_preference == ApprovalPrefrence::Required {
-					required_approvals.push(provider.clone());
+					pending_approvals.push(provider.clone());
 				} else {
 					approved.push(provider.clone());
 				}
@@ -484,7 +480,7 @@ pub mod module {
 			let permitted_callers =
 				BoundedVec::<_, MaxPermittedCallers>::try_from(permitted_callers)
 					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
-			if required_approvals.is_empty() {
+			if pending_approvals.is_empty() {
 				// No approval is required, initiate the service immediately.
 				let providers = BoundedVec::<_, MaxProvidersPerService>::try_from(approved)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
@@ -508,7 +504,7 @@ pub mod module {
 				Ok(())
 			} else {
 				let request_id = NextServiceRequestId::<T>::get();
-				let providers = required_approvals
+				let providers = pending_approvals
 					.iter()
 					.cloned()
 					.map(|v| (v, ApprovalState::Pending))
@@ -536,7 +532,7 @@ pub mod module {
 					owner: caller.clone(),
 					request_id,
 					blueprint_id,
-					required_approvals,
+					pending_approvals,
 					approved,
 				});
 
@@ -561,7 +557,7 @@ pub mod module {
 				.filter(|(_, s)| *s == ApprovalState::Approved)
 				.map(|(v, _)| v.clone())
 				.collect::<Vec<_>>();
-			let required_approvals = request
+			let pending_approvals = request
 				.providers_with_approval_state
 				.iter()
 				.filter(|(_, s)| *s == ApprovalState::Pending)
@@ -573,7 +569,7 @@ pub mod module {
 				provider: caller.clone(),
 				request_id,
 				blueprint_id: request.blueprint,
-				required_approvals,
+				pending_approvals,
 				approved,
 			});
 
