@@ -1214,7 +1214,7 @@ parameter_types! {
 parameter_types! {
 	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
 	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 32;
+	pub const MaxSubmissionLen: u32 = 60_000_000;
 }
 
 parameter_types! {
