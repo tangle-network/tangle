@@ -17,7 +17,7 @@
 use super::*;
 use crate::mock_evm::{address_build, EIP1559UnsignedTransaction};
 use ethers::prelude::*;
-use frame_support::{assert_noop, assert_ok};
+use frame_support::{assert_err, assert_noop, assert_ok};
 use mock::*;
 use serde_json::Value;
 use sp_core::{bounded_vec, U256};
@@ -82,5 +82,74 @@ fn create_service_blueprint() {
 			owner: alice,
 			blueprint_id: next_id - 1,
 		})]);
+	});
+}
+
+#[test]
+fn register_on_blueprint() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let alice = mock_pub_key(ALICE);
+
+		let blueprint = ServiceBlueprint {
+			metadata: ServiceMetadata {
+				name: "CGGMP21 TSS".try_into().unwrap(),
+				..Default::default()
+			},
+			jobs: bounded_vec![
+				JobDefinition {
+					metadata: JobMetadata {
+						name: "keygen".try_into().unwrap(),
+						..Default::default()
+					},
+					params: bounded_vec![FieldType::Uint8],
+					result: bounded_vec![FieldType::Array(33, Box::new(FieldType::Uint8))],
+					verifier: JobResultVerifier::None,
+				},
+				JobDefinition {
+					metadata: JobMetadata {
+						name: "sign".try_into().unwrap(),
+						..Default::default()
+					},
+					params: bounded_vec![FieldType::Array(32, Box::new(FieldType::Uint8))],
+					result: bounded_vec![FieldType::Array(64, Box::new(FieldType::Uint8))],
+					verifier: JobResultVerifier::None,
+				},
+			],
+			registration_hook: ServiceRegistrationHook::None,
+			registration_params: bounded_vec![],
+			request_hook: ServiceRequestHook::None,
+			request_params: bounded_vec![],
+			gadget: Default::default(),
+		};
+
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		let bob = mock_pub_key(BOB);
+
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			ApprovalPrefrence::default(),
+			Default::default(),
+		));
+
+		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
+			provider: bob.clone(),
+			blueprint_id: 0,
+			approval_preference: ApprovalPrefrence::default(),
+			registration_args: Default::default(),
+		})]);
+
+		// if we try to register again, it should fail.
+		assert_err!(
+			Services::register(
+				RuntimeOrigin::signed(bob),
+				0,
+				ApprovalPrefrence::default(),
+				Default::default(),
+			),
+			crate::Error::<Runtime>::AlreadyRegistered
+		);
 	});
 }
