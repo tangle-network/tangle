@@ -54,8 +54,9 @@ pub mod module {
 	use super::*;
 	use sp_runtime::Saturating;
 	use tangle_primitives::jobs::v2::{
-		ApprovalPrefrence, ApprovalState, Field, MaxFields, MaxPermittedCallers,
-		MaxProvidersPerService, Service, ServiceBlueprint, ServiceRequest, TypeCheckError,
+		ApprovalPrefrence, ApprovalState, Field, JobCall, JobCallResult, MaxFields,
+		MaxPermittedCallers, MaxProvidersPerService, Service, ServiceBlueprint, ServiceRequest,
+		TypeCheckError,
 	};
 
 	#[pallet::config]
@@ -98,6 +99,13 @@ pub mod module {
 		MaxFieldsExceeded,
 		/// The approval is not requested for the service provider (the caller).
 		ApprovalNotRequested,
+		/// The requested job definition does not exist.
+		/// This error is returned when the requested job definition does not exist in the service blueprint.
+		JobDefinitionNotFound,
+		/// Either the service or the job call was not found.
+		ServiceOrJobCallNotFound,
+		/// The result of the job call was not found.
+		JobCallResultNotFound,
 	}
 
 	#[pallet::event]
@@ -217,10 +225,24 @@ pub mod module {
 			service_id: u64,
 			/// The ID of the call.
 			call_id: u64,
-			/// The ID of the job.
+			/// The index of the job.
 			job: u8,
 			/// The arguments of the job.
 			args: Vec<Field<T::AccountId>>,
+		},
+
+		/// A job result has been submitted.
+		JobResultSubmitted {
+			/// The account that submitted the job result.
+			provider: T::AccountId,
+			/// The ID of the service.
+			service_id: u64,
+			/// The ID of the call.
+			call_id: u64,
+			/// The index of the job.
+			job: u8,
+			/// The result of the job.
+			result: Vec<Field<T::AccountId>>,
 		},
 	}
 
@@ -243,6 +265,11 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn next_instance_id)]
 	pub type NextInstanceId<T> = StorageValue<_, u64, ValueQuery>;
+
+	/// The next free ID for a service call.
+	#[pallet::storage]
+	#[pallet::getter(fn next_job_call_id)]
+	pub type NextJobCallId<T> = StorageValue<_, u64, ValueQuery>;
 
 	/// The service blueprints along with their owner.
 	#[pallet::storage]
@@ -290,6 +317,34 @@ pub mod module {
 		u64,
 		Service<T::AccountId, BlockNumberFor<T>>,
 		ResultQuery<Error<T>::ServiceNotFound>,
+	>;
+
+	/// The Service Job Calls
+	/// Service ID -> Call ID -> Job Call
+	#[pallet::storage]
+	#[pallet::getter(fn job_calls)]
+	pub type JobCalls<T: Config> = StorageDoubleMap<
+		_,
+		Identity,
+		u64,
+		Identity,
+		u64,
+		JobCall<T::AccountId>,
+		ResultQuery<Error<T>::ServiceOrJobCallNotFound>,
+	>;
+
+	/// The Service Job Call Results
+	/// Service ID -> Call ID -> Job Call Result
+	#[pallet::storage]
+	#[pallet::getter(fn job_results)]
+	pub type JobResults<T: Config> = StorageDoubleMap<
+		_,
+		Identity,
+		u64,
+		Identity,
+		u64,
+		JobCallResult<T::AccountId>,
+		ResultQuery<Error<T>::ServiceOrJobCallNotFound>,
 	>;
 
 	#[pallet::call]
@@ -414,7 +469,6 @@ pub mod module {
 			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
 
 			blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
-			// TODO: check if all the service providers are registered.
 			// TODO: check if any of the service providers are required approval.
 			let mut required_approvals = Vec::new();
 			let mut approved = Vec::new();
@@ -432,11 +486,14 @@ pub mod module {
 					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
 			if required_approvals.is_empty() {
 				// No approval is required, initiate the service immediately.
+				let providers = BoundedVec::<_, MaxProvidersPerService>::try_from(approved)
+					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service_id = NextInstanceId::<T>::get();
 				let service = Service {
 					blueprint: blueprint_id,
 					owner: caller.clone(),
 					permitted_callers,
+					providers,
 					ttl,
 				};
 				Instances::<T>::insert(service_id, service);
@@ -511,40 +568,42 @@ pub mod module {
 				.map(|(v, _)| v.clone())
 				.collect::<Vec<_>>();
 
-			let blueprint_id = request.blueprint;
-			let owner = request.owner.clone();
-			let is_approved = request.is_approved();
-			let ttl = request.ttl;
-			let permitted_callers = request.permitted_callers.clone();
-
 			// we emit this event regardless of the outcome of the approval.
 			Self::deposit_event(Event::ServiceRequestApproved {
 				provider: caller.clone(),
 				request_id,
-				blueprint_id,
+				blueprint_id: request.blueprint,
 				required_approvals,
 				approved,
 			});
 
-			if is_approved {
+			if request.is_approved() {
 				// remove the service request.
 				ServiceRequests::<T>::remove(request_id);
 
 				let service_id = NextInstanceId::<T>::get();
+				let providers = request
+					.providers_with_approval_state
+					.into_iter()
+					.map(|(v, _)| v)
+					.collect::<Vec<_>>();
+				let providers = BoundedVec::<_, MaxProvidersPerService>::try_from(providers)
+					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
-					blueprint: blueprint_id,
-					owner: owner.clone(),
-					permitted_callers,
-					ttl,
+					blueprint: request.blueprint,
+					owner: request.owner.clone(),
+					permitted_callers: request.permitted_callers.clone(),
+					providers,
+					ttl: request.ttl,
 				};
 				Instances::<T>::insert(service_id, service);
 				NextInstanceId::<T>::set(service_id.saturating_add(1));
 
 				Self::deposit_event(Event::ServiceInitiated {
-					owner,
+					owner: request.owner,
 					request_id: Some(request_id),
 					service_id,
-					blueprint_id,
+					blueprint_id: request.blueprint,
 				});
 			} else {
 				// Update the service request.
@@ -600,39 +659,61 @@ pub mod module {
 			args: BoundedVec<Field<T::AccountId>, MaxFields>,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			// TODO: check if the service exists.
-			// TODO: check if the caller is the owner of the service, or a permitted caller.
-			// TODO: check if the job exists.
-			// TODO: check if the job input is correct.
-			// TODO: call the job.
-			// TODO: emit an event.
+			let service = Instances::<T>::get(service_id)?;
+			let (_, blueprint) = Blueprints::<T>::get(service.blueprint)?;
+			let is_permitted_caller = service.permitted_callers.iter().any(|v| v == &caller);
+			ensure!(service.owner == caller || is_permitted_caller, DispatchError::BadOrigin);
+
+			let job_def =
+				blueprint.jobs.get(usize::from(job)).ok_or(Error::<T>::JobDefinitionNotFound)?;
+			let job_call = JobCall { service_id, job, args: args.clone() };
+
+			job_call.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
+			let call_id = NextJobCallId::<T>::get();
+			JobCalls::<T>::insert(service_id, call_id, job_call);
+			NextJobCallId::<T>::set(call_id.saturating_add(1));
+			// TODO: call request hook.
 			Self::deposit_event(Event::JobCalled {
 				caller: caller.clone(),
 				service_id,
-				call_id: 0,
+				call_id,
 				job,
 				args: args.into(),
 			});
 			todo!()
 		}
 
-		/// Submit the job result by using the call id.
-		/// The caller needs to be one of the service providers for this specific service.
+		/// Submit the job result by using the service ID and call ID.
 		pub fn job_submit(
 			origin: OriginFor<T>,
+			#[pallet::compact] service_id: u64,
 			#[pallet::compact] call_id: u64,
 			result: BoundedVec<Field<T::AccountId>, MaxFields>,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			// TODO: check if the call exists.
-			// TODO: check if the service exists, from the call_id.
-			// TODO: check if the caller is a service provider.
-			// TODO: check if the caller is a service provider for this specific service.
-			// TODO: check if the job result is correct.
+			let job_call = JobCalls::<T>::get(service_id, call_id)?;
+			let service = Instances::<T>::get(job_call.service_id)?;
+			let (_, blueprint) = Blueprints::<T>::get(service.blueprint)?;
+			let job_def = blueprint
+				.jobs
+				.get(usize::from(job_call.job))
+				.ok_or(Error::<T>::JobDefinitionNotFound)?;
+
+			let is_provider = service.providers.iter().any(|v| v == &caller);
+			ensure!(is_provider, DispatchError::BadOrigin);
+
+			let job_result = JobCallResult { service_id, call_id, result: result.clone() };
+			job_result.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
 			// TODO: verify the job result.
-			// TODO: store the job result.
-			// TODO: emit an event.
-			todo!()
+			JobResults::<T>::insert(service_id, call_id, job_result);
+			Self::deposit_event(Event::JobResultSubmitted {
+				provider: caller.clone(),
+				service_id,
+				call_id,
+				job: job_call.job,
+				result: result.into(),
+			});
+			Ok(())
 		}
 	}
 }

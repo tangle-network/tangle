@@ -70,7 +70,7 @@ pub struct JobCall<AccountId> {
 	/// The Service ID that this call is for.
 	pub service_id: u64,
 	/// The job definition index in the service that this call is for.
-	pub job_index: u64,
+	pub job: u8,
 	/// The supplied arguments for this job call.
 	pub args: BoundedVec<Field<AccountId>, MaxFields>,
 }
@@ -107,21 +107,23 @@ impl<AccountId: Clone> JobCall<AccountId> {
 	}
 }
 
+/// A Job Call Result is the result of a job call.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct JobCallResult<AccountId> {
+	/// The id of the service.
+	pub service_id: u64,
+	/// The id of the job call.
+	pub call_id: u64,
+	/// The result of the job call.
+	pub result: BoundedVec<Field<AccountId>, MaxFields>,
+}
+
 impl<AccountId: Clone> JobCallResult<AccountId> {
 	/// Check if the supplied result match the job definition types.
 	pub fn type_check(&self, job_def: &JobDefinition) -> Result<(), TypeCheckError> {
 		type_checker(&job_def.params, &self.result)
 	}
-}
-
-/// A Job Call Result is the result of a job call.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobCallResult<AccountId> {
-	/// The id of the job call.
-	pub call_id: u64,
-	/// The result of the job call.
-	pub result: BoundedVec<Field<AccountId>, MaxFields>,
 }
 
 /// A Job Result verifier is a verifier that will verify the result of a job call
@@ -317,6 +319,8 @@ pub struct Service<AccountId, BlockNumber> {
 	pub owner: AccountId,
 	/// The Permitted caller(s) of the service.
 	pub permitted_callers: BoundedVec<AccountId, MaxPermittedCallers>,
+	/// The Selected Service Provider(s) for this service.
+	pub providers: BoundedVec<AccountId, MaxProvidersPerService>,
 	/// The Lifetime of the service.
 	pub ttl: BlockNumber,
 }
