@@ -429,7 +429,6 @@ fn signature_verification_works_secp256k1_ecdsa() {
 		);
 
 		let signature = mock_signature_secp256k1_ecdsa(pub_key, pub_key);
-		let data_hash = keccak_256(&pub_key.to_raw_vec());
 		let job_to_verify = DKGTSSSignatureResult::<
 			MaxDataLen,
 			MaxKeyLen,
@@ -439,7 +438,7 @@ fn signature_verification_works_secp256k1_ecdsa() {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256k1,
 			derivation_path: None,
 			signature: signature[..64].to_vec().try_into().unwrap(),
-			data: data_hash.to_vec().try_into().unwrap(),
+			data: pub_key.to_raw_vec().try_into().unwrap(),
 			verifying_key: pub_key.to_raw_vec().try_into().unwrap(),
 			chain_code: None,
 		};
@@ -504,7 +503,7 @@ fn signature_verification_works_secp256r1_ecdsa() {
 			signature_scheme: DigitalSignatureScheme::EcdsaSecp256r1,
 			derivation_path: None,
 			signature: signature.to_vec().try_into().unwrap(),
-			data: prehash.to_vec().try_into().unwrap(),
+			data: message.to_vec().try_into().unwrap(),
 			verifying_key: public_key
 				.to_encoded_point(true)
 				.to_bytes()
