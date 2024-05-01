@@ -37,6 +37,7 @@ members = [
  "precompiles/proxy",
  "precompiles/preimage",
  "precompiles/jobs",
+ "precompiles/services",
  "precompiles/balances-erc20",
  "tangle-subxt",
  "examples/*",
@@ -304,6 +305,7 @@ pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-featur
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
 pallet-evm-precompile-jobs = { path = "precompiles/jobs", default-features = false }
+pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
 pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features = false }
 
 # EVM & Ethereum
