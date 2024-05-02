@@ -26,7 +26,7 @@ use frame_support::{
 use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_evm::AddressMapping;
 use pallet_services::Call as ServicesCall;
-use precompile_utils::{prelude::*, solidity::revert::revert_as_bytes};
+use precompile_utils::prelude::*;
 use sp_core::H256;
 use sp_runtime::traits::Dispatchable;
 use sp_std::{marker::PhantomData, vec::Vec};
@@ -54,22 +54,19 @@ where
 	<Runtime as frame_system::Config>::RuntimeCall: From<ServicesCall<Runtime>>,
 	BlockNumberFor<Runtime>: From<u64>,
 {
-	/// Returns the service providers for a given service blueprint.
+	/// Returns a list of service providers for a given service blueprint.
 	#[precompile::public("serviceProviders(uint64)")]
 	#[precompile::public("service_providers(uint64)")]
 	#[precompile::view]
 	pub fn service_providers(
 		handle: &mut impl PrecompileHandle,
 		blueprint_id: u64,
-	) -> EvmResult<Vec<Address>> {
+	) -> EvmResult<Vec<BoundedBytes<ConstU32<33>>>> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let (_, blueprint) = pallet_services::Blueprints::<Runtime>::get(blueprint_id)
-			.map_err(|_| revert("E001: BlueprintNotFound"))?;
 		let service_providers =
 			pallet_services::ServiceProviders::<Runtime>::iter_prefix(blueprint_id)
-				.map(|(account_id, _)| account_id)
+				.map(|(_, prefs)| BoundedBytes::from(prefs.key.0))
 				.collect::<Vec<_>>();
-		// TODO: Convert account_id to address
 		Ok(service_providers)
 	}
 }
