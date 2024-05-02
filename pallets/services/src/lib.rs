@@ -51,8 +51,8 @@ pub mod module {
 	use super::*;
 	use tangle_primitives::jobs::v2::{
 		ApprovalPrefrence, ApprovalState, Field, JobCall, JobCallResult, MaxFields,
-		MaxPermittedCallers, MaxProvidersPerService, Service, ServiceBlueprint, ServiceRequest,
-		TypeCheckError,
+		MaxPermittedCallers, MaxProvidersPerService, Service, ServiceBlueprint,
+		ServiceProviderPrefrences, ServiceRequest, TypeCheckError,
 	};
 
 	#[pallet::config]
@@ -120,8 +120,8 @@ pub mod module {
 			provider: T::AccountId,
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
-			/// The approval preference for the service provider for this specific blueprint.
-			approval_preference: ApprovalPrefrence,
+			/// The preferences for the service provider for this specific blueprint.
+			preferences: ServiceProviderPrefrences,
 			/// The arguments used for registration.
 			registration_args: Vec<Field<T::AccountId>>,
 		},
@@ -287,7 +287,7 @@ pub mod module {
 		u64,
 		Identity,
 		T::AccountId,
-		ApprovalPrefrence,
+		ServiceProviderPrefrences,
 		ResultQuery<Error<T>::NotRegistered>,
 	>;
 
@@ -373,9 +373,7 @@ pub mod module {
 		pub fn register(
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: u64,
-			approval_preference: ApprovalPrefrence,
-			// NOTE: add role profiles here.
-			// profile: Profile,
+			preferences: ServiceProviderPrefrences,
 			registration_args: Vec<Field<T::AccountId>>,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
@@ -387,12 +385,12 @@ pub mod module {
 			blueprint
 				.type_check_registration(&registration_args)
 				.map_err(Error::<T>::TypeCheck)?;
-			ServiceProviders::<T>::insert(blueprint_id, &caller, approval_preference);
+			ServiceProviders::<T>::insert(blueprint_id, &caller, preferences);
 
 			Self::deposit_event(Event::Registered {
 				provider: caller.clone(),
 				blueprint_id,
-				approval_preference,
+				preferences,
 				registration_args,
 			});
 
@@ -432,10 +430,10 @@ pub mod module {
 			ServiceProviders::<T>::try_mutate_exists(
 				blueprint_id,
 				&caller,
-				|current_approval_preference| {
-					current_approval_preference
+				|current_preferences| {
+					current_preferences
 						.as_mut()
-						.map(|v| *v = approval_preference)
+						.map(|v| v.approval = approval_preference)
 						.ok_or(Error::<T>::NotRegistered)
 				},
 			)?;
@@ -451,7 +449,7 @@ pub mod module {
 		/// service providers that will run your service. Optionally, you can specifiy who is permitted caller
 		/// of this service, by default anyone could use this service.
 		///
-		/// Note that, if anyone of the participants set their [`ApprovalPreference`] to `ApprovalPreference::RequireApproval`
+		/// Note that, if anyone of the participants set their [`ApprovalPreference`] to `ApprovalPreference::Required`
 		/// you will need to wait until they are approve your request, otherwise (if none), the service is initiated immediately.
 		pub fn request(
 			origin: OriginFor<T>,
@@ -469,8 +467,8 @@ pub mod module {
 			let mut pending_approvals = Vec::new();
 			let mut approved = Vec::new();
 			for provider in &service_providers {
-				let approval_preference = ServiceProviders::<T>::get(blueprint_id, provider)?;
-				if approval_preference == ApprovalPrefrence::Required {
+				let preferences = ServiceProviders::<T>::get(blueprint_id, provider)?;
+				if preferences.approval == ApprovalPrefrence::Required {
 					pending_approvals.push(provider.clone());
 				} else {
 					approved.push(provider.clone());

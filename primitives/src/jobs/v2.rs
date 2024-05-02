@@ -19,7 +19,7 @@
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::RuntimeDebug;
+use sp_core::{ecdsa, RuntimeDebug};
 
 mod field;
 pub use field::*;
@@ -355,6 +355,15 @@ pub enum ApprovalState {
 	/// The service provider is rejected to provide the service.
 	#[codec(index = 2)]
 	Rejected,
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct ServiceProviderPrefrences {
+	/// The service provider ECDSA public key.
+	pub key: ecdsa::Public,
+	/// The approval prefrence of the service provider.
+	pub approval: ApprovalPrefrence,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
