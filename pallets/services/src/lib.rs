@@ -29,6 +29,7 @@ use sp_std::prelude::*;
 mod functions;
 mod impls;
 mod rpc;
+mod traits;
 mod types;
 
 #[cfg(test)]
@@ -49,11 +50,15 @@ pub use weights::WeightInfo;
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
+	use sp_core::U256;
+	use sp_runtime::traits::Zero;
 	use tangle_primitives::jobs::v2::{
 		ApprovalPrefrence, ApprovalState, Field, JobCall, JobCallResult, MaxFields,
 		MaxPermittedCallers, MaxProvidersPerService, Service, ServiceBlueprint,
-		ServiceProviderPrefrences, ServiceRequest, TypeCheckError,
+		ServiceProviderPrefrences, ServiceRegistrationHook, ServiceRequest, TypeCheckError,
 	};
+
+	use traits::*;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -69,6 +74,10 @@ pub mod module {
 
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
+
+		/// A type that implements the `EvmRunner` trait for the execution of EVM
+		/// transactions.
+		type EvmRunner: traits::EvmRunner<Self>;
 	}
 
 	#[pallet::error]
@@ -381,7 +390,30 @@ pub mod module {
 			let already_registered = ServiceProviders::<T>::contains_key(blueprint_id, &caller);
 			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
 			// TODO: check if the caller has the valid requirements to be a service provider.
-			// TODO: call into EVM here.
+			let res = match blueprint.registration_hook {
+				ServiceRegistrationHook::None => Ok(true),
+				ServiceRegistrationHook::Evm(contract) => {
+					// TODO: call into EVM here.
+					T::EvmRunner::call(
+						contract,
+						contract,
+						Default::default(),
+						U256::from(0),
+						0,
+						None,
+						None,
+						None,
+						Default::default(),
+						true,
+						true,
+						None,
+						None,
+						&(),
+					)
+					.map_err(Into::into)?;
+					Ok(true)
+				},
+			};
 			blueprint
 				.type_check_registration(&registration_args)
 				.map_err(Error::<T>::TypeCheck)?;
