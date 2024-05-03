@@ -233,6 +233,36 @@ impl<AccountId: Clone> From<Field<AccountId>> for FieldType {
 	}
 }
 
+impl<AccountId: Encode> From<Field<AccountId>> for ethabi::Token {
+	fn from(value: Field<AccountId>) -> Self {
+		match value {
+			Field::None => ethabi::Token::Tuple(Vec::new()),
+			Field::Bool(val) => ethabi::Token::Bool(val),
+			Field::Uint8(val) => ethabi::Token::Uint(val.into()),
+			Field::Int8(val) => ethabi::Token::Int(val.into()),
+			Field::Uint16(val) => ethabi::Token::Uint(val.into()),
+			Field::Int16(val) => ethabi::Token::Int(val.into()),
+			Field::Uint32(val) => ethabi::Token::Uint(val.into()),
+			Field::Int32(val) => ethabi::Token::Int(val.into()),
+			Field::Uint64(val) => ethabi::Token::Uint(val.into()),
+			Field::Int64(val) => ethabi::Token::Int(val.into()),
+			Field::String(val) => ethabi::Token::String(val.to_string()),
+			Field::Bytes(val) => ethabi::Token::FixedBytes(val.to_vec()),
+			Field::Array(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
+			Field::List(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
+			Field::AccountId(val) => ethabi::Token::Bytes(val.encode()),
+		}
+	}
+}
+
+impl<AccountId: Encode> Field<AccountId> {
+	/// Convrts the field to a `ethabi::Token`.
+	/// This is useful for converting the field to a type that can be used in an Ethereum transaction.
+	pub fn into_ethabi_token(self) -> ethabi::Token {
+		self.into()
+	}
+}
+
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo, MaxEncodedLen)]
 #[scale_info(skip_type_params(S))]
 #[cfg_attr(feature = "std", derive(Serialize), serde(transparent), serde(bound = ""))]

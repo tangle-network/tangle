@@ -388,13 +388,15 @@ pub mod module {
 			let allowed = match blueprint.registration_hook {
 				ServiceRegistrationHook::None => true,
 				ServiceRegistrationHook::Evm(contract) => {
-					// TODO: call into EVM here.
 					let call_info = T::EvmRunner::call(
 						contract,
 						contract,
 						Default::default(),
 						U256::from(0),
-						0,
+						// TODO: set the gas limit.
+						// for now, we are setting it to the max
+						// gas limit.
+						30000000u64,
 						None,
 						None,
 						None,
