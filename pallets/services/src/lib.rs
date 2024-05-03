@@ -51,12 +51,7 @@ pub use weights::WeightInfo;
 pub mod module {
 	use super::*;
 	use sp_core::U256;
-	use sp_runtime::traits::Zero;
-	use tangle_primitives::jobs::v2::{
-		ApprovalPrefrence, ApprovalState, Field, JobCall, JobCallResult, MaxFields,
-		MaxPermittedCallers, MaxProvidersPerService, Service, ServiceBlueprint,
-		ServiceProviderPrefrences, ServiceRegistrationHook, ServiceRequest, TypeCheckError,
-	};
+	use tangle_primitives::jobs::v2::*;
 
 	use traits::*;
 
@@ -390,11 +385,11 @@ pub mod module {
 			let already_registered = ServiceProviders::<T>::contains_key(blueprint_id, &caller);
 			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
 			// TODO: check if the caller has the valid requirements to be a service provider.
-			let res = match blueprint.registration_hook {
-				ServiceRegistrationHook::None => Ok(true),
+			let allowed = match blueprint.registration_hook {
+				ServiceRegistrationHook::None => true,
 				ServiceRegistrationHook::Evm(contract) => {
 					// TODO: call into EVM here.
-					T::EvmRunner::call(
+					let call_info = T::EvmRunner::call(
 						contract,
 						contract,
 						Default::default(),
@@ -408,12 +403,16 @@ pub mod module {
 						true,
 						None,
 						None,
-						&(),
 					)
-					.map_err(Into::into)?;
-					Ok(true)
+					.map_err(|r| r.error.into())?;
+					call_info.exit_reason.is_succeed()
 				},
 			};
+
+			if !allowed {
+				return Err(Error::<T>::InvalidRegistrationInput.into());
+			}
+
 			blueprint
 				.type_check_registration(&registration_args)
 				.map_err(Error::<T>::TypeCheck)?;

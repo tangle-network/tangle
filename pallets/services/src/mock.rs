@@ -274,11 +274,52 @@ parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"py/servs");
 }
 
+pub struct MockedEvmRunner;
+
+impl pallet_services::traits::EvmRunner<Runtime> for MockedEvmRunner {
+	type Error = pallet_evm::Error<Runtime>;
+
+	fn call(
+		source: sp_core::H160,
+		target: sp_core::H160,
+		input: Vec<u8>,
+		value: sp_core::U256,
+		gas_limit: u64,
+		max_fee_per_gas: Option<sp_core::U256>,
+		max_priority_fee_per_gas: Option<sp_core::U256>,
+		nonce: Option<sp_core::U256>,
+		access_list: Vec<(sp_core::H160, Vec<H256>)>,
+		is_transactional: bool,
+		validate: bool,
+		weight_limit: Option<Weight>,
+		proof_size_base_cost: Option<u64>,
+	) -> Result<fp_evm::CallInfo, pallet_services::traits::RunnerError<Self::Error>> {
+		<<Runtime as pallet_evm::Config>::Runner as pallet_evm::Runner<Runtime>>::call(
+			source,
+			target,
+			input,
+			value,
+			gas_limit,
+			max_fee_per_gas,
+			max_priority_fee_per_gas,
+			nonce,
+			access_list,
+			is_transactional,
+			validate,
+			weight_limit,
+			proof_size_base_cost,
+			<Runtime as pallet_evm::Config>::config(),
+		)
+		.map_err(|o| pallet_services::traits::RunnerError { error: o.error, weight: o.weight })
+	}
+}
+
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
 	type PalletId = ServicesPalletId;
+	type EvmRunner = MockedEvmRunner;
 	type WeightInfo = ();
 }
 
