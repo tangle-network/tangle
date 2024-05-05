@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 #[cfg(not(feature = "std"))]
-use alloc::string::String;
+use alloc::{string::String, string::ToString, vec::Vec};
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -233,19 +233,19 @@ impl<AccountId: Clone> From<Field<AccountId>> for FieldType {
 	}
 }
 
-impl<AccountId: Encode> From<Field<AccountId>> for ethabi::Token {
-	fn from(value: Field<AccountId>) -> Self {
+impl<'a, AccountId: Encode> From<&'a Field<AccountId>> for ethabi::Token {
+	fn from(value: &'a Field<AccountId>) -> Self {
 		match value {
 			Field::None => ethabi::Token::Tuple(Vec::new()),
-			Field::Bool(val) => ethabi::Token::Bool(val),
-			Field::Uint8(val) => ethabi::Token::Uint(val.into()),
-			Field::Int8(val) => ethabi::Token::Int(val.into()),
-			Field::Uint16(val) => ethabi::Token::Uint(val.into()),
-			Field::Int16(val) => ethabi::Token::Int(val.into()),
-			Field::Uint32(val) => ethabi::Token::Uint(val.into()),
-			Field::Int32(val) => ethabi::Token::Int(val.into()),
-			Field::Uint64(val) => ethabi::Token::Uint(val.into()),
-			Field::Int64(val) => ethabi::Token::Int(val.into()),
+			Field::Bool(val) => ethabi::Token::Bool(*val),
+			Field::Uint8(val) => ethabi::Token::Uint((*val).into()),
+			Field::Int8(val) => ethabi::Token::Int((*val).into()),
+			Field::Uint16(val) => ethabi::Token::Uint((*val).into()),
+			Field::Int16(val) => ethabi::Token::Int((*val).into()),
+			Field::Uint32(val) => ethabi::Token::Uint((*val).into()),
+			Field::Int32(val) => ethabi::Token::Int((*val).into()),
+			Field::Uint64(val) => ethabi::Token::Uint((*val).into()),
+			Field::Int64(val) => ethabi::Token::Int((*val).into()),
 			Field::String(val) => ethabi::Token::String(val.to_string()),
 			Field::Bytes(val) => ethabi::Token::FixedBytes(val.to_vec()),
 			Field::Array(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
@@ -255,11 +255,28 @@ impl<AccountId: Encode> From<Field<AccountId>> for ethabi::Token {
 	}
 }
 
+impl<AccountId: Encode> From<Field<AccountId>> for ethabi::Token {
+	fn from(value: Field<AccountId>) -> Self {
+		(&value).into()
+	}
+}
+
 impl<AccountId: Encode> Field<AccountId> {
 	/// Convrts the field to a `ethabi::Token`.
 	/// This is useful for converting the field to a type that can be used in an Ethereum transaction.
 	pub fn into_ethabi_token(self) -> ethabi::Token {
 		self.into()
+	}
+
+	/// Same as [`Self::into_ethabi_token`] but for references.
+	pub fn to_ethabi_token(&self) -> ethabi::Token {
+		self.into()
+	}
+
+	/// Encode the fields to ethabi bytes.
+	pub fn encode_to_ethabi(fields: &[Self]) -> ethabi::Bytes {
+		let tokens: Vec<ethabi::Token> = fields.iter().map(Self::to_ethabi_token).collect();
+		ethabi::encode(&tokens)
 	}
 }
 

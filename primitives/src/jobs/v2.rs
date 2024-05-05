@@ -122,7 +122,7 @@ pub struct JobCallResult<AccountId> {
 impl<AccountId: Clone> JobCallResult<AccountId> {
 	/// Check if the supplied result match the job definition types.
 	pub fn type_check(&self, job_def: &JobDefinition) -> Result<(), TypeCheckError> {
-		type_checker(&job_def.params, &self.result)
+		type_checker(&job_def.result, &self.result)
 	}
 }
 

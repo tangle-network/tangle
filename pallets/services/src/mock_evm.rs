@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate as pallet_services;
 use crate::mock::{
 	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
@@ -162,6 +163,46 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 			},
 			_ => None,
 		}
+	}
+}
+
+pub struct MockedEvmRunner;
+
+impl pallet_services::EvmRunner<Runtime> for MockedEvmRunner {
+	type Error = pallet_evm::Error<Runtime>;
+
+	fn call(
+		source: sp_core::H160,
+		target: sp_core::H160,
+		input: Vec<u8>,
+		value: sp_core::U256,
+		gas_limit: u64,
+		is_transactional: bool,
+		validate: bool,
+	) -> Result<fp_evm::CallInfo, pallet_services::traits::RunnerError<Self::Error>> {
+		let max_fee_per_gas = FixedGasPrice::min_gas_price().0;
+		let max_priority_fee_per_gas = max_fee_per_gas.saturating_mul(U256::from(2));
+		let nonce = None;
+		let access_list = Default::default();
+		let weight_limit = None;
+		let proof_size_base_cost = None;
+		<<Runtime as pallet_evm::Config>::Runner as pallet_evm::Runner<Runtime>>::call(
+			source,
+			target,
+			input,
+			value,
+			gas_limit,
+			Some(max_fee_per_gas),
+			Some(max_priority_fee_per_gas),
+			nonce,
+			access_list,
+			is_transactional,
+			validate,
+			weight_limit,
+			proof_size_base_cost,
+			<Runtime as pallet_evm::Config>::config(),
+		)
+		.map_err(|o| pallet_services::traits::RunnerError { error: o.error, weight: o.weight })
 	}
 }
 

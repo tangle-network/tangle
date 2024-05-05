@@ -45,6 +45,7 @@ mod benchmarking;
 pub mod weights;
 
 pub use module::*;
+pub use traits::*;
 pub use weights::WeightInfo;
 
 #[frame_support::pallet(dev_mode)]
@@ -52,8 +53,6 @@ pub mod module {
 	use super::*;
 	use sp_core::U256;
 	use tangle_primitives::jobs::v2::*;
-
-	use traits::*;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -384,32 +383,9 @@ pub mod module {
 			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
 			let already_registered = ServiceProviders::<T>::contains_key(blueprint_id, &caller);
 			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
-			// TODO: check if the caller has the valid requirements to be a service provider.
-			let allowed = match blueprint.registration_hook {
-				ServiceRegistrationHook::None => true,
-				ServiceRegistrationHook::Evm(contract) => {
-					let call_info = T::EvmRunner::call(
-						contract,
-						contract,
-						Default::default(),
-						U256::from(0),
-						// TODO: set the gas limit.
-						// for now, we are setting it to the max
-						// gas limit.
-						30000000u64,
-						None,
-						None,
-						None,
-						Default::default(),
-						true,
-						true,
-						None,
-						None,
-					)
-					.map_err(|r| r.error.into())?;
-					call_info.exit_reason.is_succeed()
-				},
-			};
+
+			let allowed = Self::check_registeration_hook(&blueprint, &registration_args)
+				.map_err(|e| e.error)?;
 
 			if !allowed {
 				return Err(Error::<T>::InvalidRegistrationInput.into());
@@ -496,7 +472,6 @@ pub mod module {
 			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
 
 			blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
-			// TODO: check if any of the service providers are required approval.
 			let mut pending_approvals = Vec::new();
 			let mut approved = Vec::new();
 			for provider in &service_providers {
@@ -707,7 +682,7 @@ pub mod module {
 				job,
 				args: args.into(),
 			});
-			todo!()
+			Ok(())
 		}
 
 		/// Submit the job result by using the service ID and call ID.
@@ -721,17 +696,17 @@ pub mod module {
 			let job_call = JobCalls::<T>::get(service_id, call_id)?;
 			let service = Instances::<T>::get(job_call.service_id)?;
 			let (_, blueprint) = Blueprints::<T>::get(service.blueprint)?;
+
+			let is_provider = service.providers.iter().any(|v| v == &caller);
+			ensure!(is_provider, DispatchError::BadOrigin);
 			let job_def = blueprint
 				.jobs
 				.get(usize::from(job_call.job))
 				.ok_or(Error::<T>::JobDefinitionNotFound)?;
 
-			let is_provider = service.providers.iter().any(|v| v == &caller);
-			ensure!(is_provider, DispatchError::BadOrigin);
-
 			let job_result = JobCallResult { service_id, call_id, result: result.clone() };
 			job_result.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
-			// TODO: verify the job result.
+			// TODO: verify the job result using verification hook.
 			JobResults::<T>::insert(service_id, call_id, job_result);
 			Self::deposit_event(Event::JobResultSubmitted {
 				provider: caller.clone(),

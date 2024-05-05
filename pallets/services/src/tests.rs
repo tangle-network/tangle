@@ -57,7 +57,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint {
 				verifier: JobResultVerifier::None,
 			},
 		],
-		registration_hook: ServiceRegistrationHook::None,
+		registration_hook: ServiceRegistrationHook::Evm(H160::random()),
 		registration_params: bounded_vec![],
 		request_hook: ServiceRequestHook::None,
 		request_params: bounded_vec![],
