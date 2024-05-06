@@ -96,12 +96,17 @@ fn register_on_blueprint() {
 
 		let bob = mock_pub_key(BOB);
 
-		assert_ok!(Services::register(
+		let registeration_call = Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
 			ServiceProviderPrefrences { key: zero_key(), approval: ApprovalPrefrence::default() },
 			Default::default(),
-		));
+		);
+		// print all events.
+		System::events().into_iter().for_each(|event| {
+			eprintln!("{:#?}", event.event);
+		});
+		assert_ok!(registeration_call);
 
 		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
 			provider: bob.clone(),

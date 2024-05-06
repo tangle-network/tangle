@@ -275,8 +275,16 @@ impl<AccountId: Encode> Field<AccountId> {
 
 	/// Encode the fields to ethabi bytes.
 	pub fn encode_to_ethabi(fields: &[Self]) -> ethabi::Bytes {
+		if fields.is_empty() {
+			return Default::default();
+		}
 		let tokens: Vec<ethabi::Token> = fields.iter().map(Self::to_ethabi_token).collect();
 		ethabi::encode(&tokens)
+	}
+
+	/// Encode the fields to ethabi tokens.
+	pub fn to_ethabi(fields: &[Self]) -> Vec<ethabi::Token> {
+		fields.iter().map(Self::to_ethabi_token).collect()
 	}
 }
 

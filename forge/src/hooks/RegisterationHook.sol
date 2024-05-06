@@ -3,9 +3,9 @@ pragma solidity >=0.8.3;
 
 /// @dev Created by the service blueprint designer (gadget developer)
 contract RegistrationHook {
-    /// @dev Only allow the contract to call itself
-    modifier onlySelf() {
-      require(msg.sender == address(this), "RegistrationHook: Only self");
+    /// @dev Only allow the runtime to call this function.
+    modifier onlyRuntime() {
+      require(msg.sender == address(0xf1), "RegistrationHook: Only Runtime");
       _;
     }
 
@@ -17,5 +17,5 @@ contract RegistrationHook {
     function onRegister(
       bytes calldata participant,
       bytes calldata registrationInputs
-    ) public virtual payable onlySelf {}
+    ) public virtual payable onlyRuntime {}
 }

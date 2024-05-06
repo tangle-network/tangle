@@ -368,12 +368,12 @@ pub struct ServiceProviderPrefrences {
 
 impl ServiceProviderPrefrences {
 	/// Encode the fields to ethabi bytes.
-	pub fn encode_to_ethabi(&self) -> ethabi::Bytes {
+	pub fn to_ethabi(&self) -> Vec<ethabi::Token> {
 		let tokens: Vec<ethabi::Token> = vec![
 			ethabi::Token::Bytes(self.key.0.to_vec()),
 			// TODO: Add ApprovalPrefrence to ethabi.
 		];
-		ethabi::encode(&tokens)
+		tokens
 	}
 }
 

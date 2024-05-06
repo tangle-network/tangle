@@ -19,6 +19,7 @@ sp-std = { workspace = true }
 tangle-crypto-primitives = { workspace = true, default-features = false }
 tangle-primitives = { workspace = true, default-features = false }
 fp-evm = { workspace = true }
+ethabi = { workspace = true }
 
 [dev-dependencies]
 ethereum = { workspace = true, features = ["with-codec"] }
@@ -81,6 +82,7 @@ std = [
   "fp-rpc/std",
   "fp-self-contained/std",
   "fp-storage/std",
+  "ethabi/std",
   "pallet-base-fee/std",
   "pallet-dynamic-fee/std",
   "pallet-ethereum/std",

@@ -65,6 +65,10 @@ pub mod module {
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;
 
+		/// The EVM address for the runtime.
+		#[pallet::constant]
+		type RuntimeEvmAddress: Get<sp_core::H160>;
+
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
 
@@ -104,6 +108,8 @@ pub mod module {
 		ServiceOrJobCallNotFound,
 		/// The result of the job call was not found.
 		JobCallResultNotFound,
+		/// An error occurred while encoding the EVM ABI.
+		EVMAbiEncode,
 	}
 
 	#[pallet::event]

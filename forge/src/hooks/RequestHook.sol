@@ -3,9 +3,9 @@ pragma solidity >=0.8.3;
 
 /// @dev Created by the service blueprint designer (gadget developer)
 contract RequestHook {
-    /// @dev Only allow the contract to call itself
-    modifier onlySelf() {
-      require(msg.sender == address(this), "RequestHook: Only self");
+    /// @dev Only allow the runtime to call this function.
+    modifier onlyRuntime() {
+      require(msg.sender == address(0xf1), "RegistrationHook: Only Runtime");
       _;
     }
 
@@ -18,7 +18,7 @@ contract RequestHook {
       uint64 serviceId,
       bytes[] calldata participants,
       bytes calldata requestInputs
-    ) public virtual payable onlySelf {}
+    ) public virtual payable onlyRuntime {}
 
     /// @dev A Hook that gets called by the runtime when a User call a job on a the service.
     /// @param serviceId The id of the service.
@@ -32,5 +32,5 @@ contract RequestHook {
       uint8 job,
       uint64 jobCallId,
       bytes calldata inputs
-    ) public virtual payable onlySelf {}
+    ) public virtual payable onlyRuntime {}
 }

@@ -16,7 +16,7 @@ contract CGGMP21RegistrationHook is RegistrationHook {
     function onRegister(
       bytes calldata participant,
       bytes calldata registrationInputs
-    ) public override payable onlySelf {
+    ) public override payable onlyRuntime {
         // The inputs are empty, we don't need them.
         require(registrationInputs.length == 0, "CGGMP21RegistrationHook: Invalid registrationInputs");
         address addr = address(uint160(uint256(keccak256(participant))));
@@ -42,7 +42,7 @@ contract CGGMP21RequestHook is RequestHook {
       uint64 serviceId,
       bytes[] calldata participants,
       bytes calldata requestInputs
-    ) public override payable onlySelf {
+    ) public override payable onlyRuntime {
       // The requestInputs are empty, we don't need them.
       require(requestInputs.length == 0, "CGGMP21RequestHook: Invalid requestInputs");
       // initialize the service
@@ -62,7 +62,7 @@ contract CGGMP21RequestHook is RequestHook {
       uint8 job,
       uint64 jobCallId,
       bytes calldata inputs
-    ) public override payable onlySelf {
+    ) public override payable onlyRuntime {
       // Job 0 is the Keygen Job
       if (job == 0) {
         // The inputs are the DKG threshold

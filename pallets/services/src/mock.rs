@@ -274,6 +274,7 @@ impl pallet_roles::Config for Runtime {
 
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"py/servs");
+	pub const RuntimeEvmAddress: H160 = H160(hex_literal::hex!("00000000000000000000000000000000000000f1"));
 }
 
 impl Config for Runtime {
@@ -281,6 +282,7 @@ impl Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
 	type PalletId = ServicesPalletId;
+	type RuntimeEvmAddress = RuntimeEvmAddress;
 	type EvmRunner = MockedEvmRunner;
 	type WeightInfo = ();
 }
