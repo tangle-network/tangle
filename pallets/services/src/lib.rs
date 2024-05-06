@@ -85,6 +85,10 @@ pub mod module {
 		AlreadyRegistered,
 		/// The caller does not have the requirements to be a service provider.
 		InvalidRegistrationInput,
+		/// The caller does not have the requirements to request a service.
+		InvalidRequestInput,
+		/// The caller does not have the requirements to call a job.
+		InvalidJobCallInput,
 		/// The caller is not registered as a service provider.
 		NotRegistered,
 		/// The service request was not found.
@@ -393,9 +397,7 @@ pub mod module {
 				Self::check_registeration_hook(&blueprint, &preferences, &registration_args)
 					.map_err(|e| e.error)?;
 
-			if !allowed {
-				return Err(Error::<T>::InvalidRegistrationInput.into());
-			}
+			ensure!(allowed, Error::<T>::InvalidRegistrationInput);
 
 			blueprint
 				.type_check_registration(&registration_args)
@@ -478,6 +480,7 @@ pub mod module {
 			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
 
 			blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
+			let mut prefrences = Vec::new();
 			let mut pending_approvals = Vec::new();
 			let mut approved = Vec::new();
 			for provider in &service_providers {
@@ -487,7 +490,15 @@ pub mod module {
 				} else {
 					approved.push(provider.clone());
 				}
+				prefrences.push(preferences);
 			}
+
+			let service_id = NextInstanceId::<T>::get();
+			let allowed =
+				Self::check_request_hook(&blueprint, service_id, &prefrences, &request_args)
+					.map_err(|e| e.error)?;
+
+			ensure!(allowed, Error::<T>::InvalidRequestInput);
 
 			let permitted_callers =
 				BoundedVec::<_, MaxPermittedCallers>::try_from(permitted_callers)
@@ -496,7 +507,6 @@ pub mod module {
 				// No approval is required, initiate the service immediately.
 				let providers = BoundedVec::<_, MaxProvidersPerService>::try_from(approved)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
-				let service_id = NextInstanceId::<T>::get();
 				let service = Service {
 					blueprint: blueprint_id,
 					owner: caller.clone(),
@@ -678,9 +688,14 @@ pub mod module {
 
 			job_call.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
 			let call_id = NextJobCallId::<T>::get();
+
+			let allowed = Self::check_job_call_hook(&blueprint, service_id, job, call_id, &args)
+				.map_err(|e| e.error)?;
+
+			ensure!(allowed, Error::<T>::InvalidJobCallInput);
+
 			JobCalls::<T>::insert(service_id, call_id, job_call);
 			NextJobCallId::<T>::set(call_id.saturating_add(1));
-			// TODO: call request hook.
 			Self::deposit_event(Event::JobCalled {
 				caller: caller.clone(),
 				service_id,

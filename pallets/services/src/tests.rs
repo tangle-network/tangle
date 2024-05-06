@@ -102,10 +102,6 @@ fn register_on_blueprint() {
 			ServiceProviderPrefrences { key: zero_key(), approval: ApprovalPrefrence::default() },
 			Default::default(),
 		);
-		// print all events.
-		System::events().into_iter().for_each(|event| {
-			eprintln!("{:#?}", event.event);
-		});
 		assert_ok!(registeration_call);
 
 		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
@@ -362,5 +358,138 @@ fn request_service_with_approval_process() {
 				blueprint_id: 0,
 			}),
 		]);
+	});
+}
+
+#[test]
+fn job_calls() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		let bob = mock_pub_key(BOB);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			ServiceProviderPrefrences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			Default::default(),
+		));
+		let charlie = mock_pub_key(CHARLIE);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			ServiceProviderPrefrences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			Default::default(),
+		));
+		let dave = mock_pub_key(DAVE);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			ServiceProviderPrefrences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			Default::default(),
+		));
+
+		let eve = mock_pub_key(EVE);
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			0,
+			vec![alice.clone()],
+			vec![bob.clone(), charlie.clone(), dave.clone()],
+			100,
+			Default::default(),
+		));
+		// this service gets immediately accepted by all providers.
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+		assert_eq!(Instances::<Runtime>::contains_key(0), true);
+		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
+			owner: eve.clone(),
+			request_id: None,
+			service_id: 0,
+			blueprint_id: 0,
+		})]);
+
+		// now we can call the jobs
+		let job_call_id = 0;
+		assert_ok!(Services::job_call(
+			RuntimeOrigin::signed(eve.clone()),
+			0,
+			0,
+			bounded_vec![Field::Uint8(2)],
+		));
+
+		assert_eq!(JobCalls::<Runtime>::contains_key(0, job_call_id), true);
+		assert_events(vec![RuntimeEvent::Services(crate::Event::JobCalled {
+			caller: eve,
+			service_id: 0,
+			job: 0,
+			call_id: job_call_id,
+			args: vec![Field::Uint8(2)],
+		})]);
+	});
+}
+
+#[test]
+fn job_calls_fails_with_invalid_input() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		let bob = mock_pub_key(BOB);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			ServiceProviderPrefrences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			Default::default(),
+		));
+		let charlie = mock_pub_key(CHARLIE);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			ServiceProviderPrefrences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			Default::default(),
+		));
+		let dave = mock_pub_key(DAVE);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			ServiceProviderPrefrences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			Default::default(),
+		));
+
+		let eve = mock_pub_key(EVE);
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			0,
+			vec![alice.clone()],
+			vec![bob.clone(), charlie.clone(), dave.clone()],
+			100,
+			Default::default(),
+		));
+		// this service gets immediately accepted by all providers.
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+		assert_eq!(Instances::<Runtime>::contains_key(0), true);
+		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
+			owner: eve.clone(),
+			request_id: None,
+			service_id: 0,
+			blueprint_id: 0,
+		})]);
+
+		// now we can call the jobs
+		let job_call_id = 0;
+		assert_err!(
+			Services::job_call(
+				RuntimeOrigin::signed(eve.clone()),
+				0,
+				0,
+				// t > n
+				bounded_vec![Field::Uint8(4)],
+			),
+			crate::Error::<Runtime>::InvalidJobCallInput
+		);
+
+		assert_eq!(!JobCalls::<Runtime>::contains_key(0, job_call_id), true);
 	});
 }
