@@ -1405,7 +1405,7 @@ export default {
    * Lookup123: tangle_primitives::roles::tss::ThresholdSignatureRoleType
    **/
   TanglePrimitivesRolesTssThresholdSignatureRoleType: {
-    _enum: ['DfnsCGGMP21Secp256k1', 'DfnsCGGMP21Secp256r1', 'DfnsCGGMP21Stark', 'SilentShardDKLS23Secp256k1', 'ZcashFrostP256', 'ZcashFrostP384', 'ZcashFrostSecp256k1', 'ZcashFrostRistretto255', 'ZcashFrostEd25519', 'ZcashFrostEd448', 'GennaroDKGBls381']
+    _enum: ['DfnsCGGMP21Secp256k1', 'DfnsCGGMP21Secp256r1', 'DfnsCGGMP21Stark', 'SilentShardDKLS23Secp256k1', 'ZcashFrostP256', 'ZcashFrostP384', 'ZcashFrostSecp256k1', 'ZcashFrostRistretto255', 'ZcashFrostEd25519', 'ZcashFrostEd448', 'GennaroDKGBls381', 'WstsV2']
   },
   /**
    * Lookup124: tangle_primitives::roles::zksaas::ZeroKnowledgeRoleType
@@ -3552,7 +3552,7 @@ export default {
    * Lookup413: tangle_primitives::jobs::tss::DigitalSignatureScheme
    **/
   TanglePrimitivesJobsTssDigitalSignatureScheme: {
-    _enum: ['EcdsaSecp256k1', 'EcdsaSecp256r1', 'EcdsaStark', 'SchnorrP256', 'SchnorrP384', 'SchnorrSecp256k1', 'SchnorrSr25519', 'SchnorrRistretto255', 'SchnorrRedJubJub', 'SchnorrEd25519', 'SchnorrEd448', 'Bls381']
+    _enum: ['EcdsaSecp256k1', 'EcdsaSecp256r1', 'EcdsaStark', 'SchnorrP256', 'SchnorrP384', 'SchnorrSecp256k1', 'SchnorrSr25519', 'SchnorrRistretto255', 'SchnorrEd25519', 'SchnorrEd448', 'SchnorrTaproot', 'Bls381']
   },
   /**
    * Lookup420: tangle_primitives::jobs::tss::DKGTSSSignatureResult<tangle_testnet_runtime::MaxDataLen, tangle_testnet_runtime::MaxKeyLen, tangle_testnet_runtime::MaxSignatureLen, tangle_testnet_runtime::MaxAdditionalParamsLen>

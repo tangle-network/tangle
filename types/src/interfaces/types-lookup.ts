@@ -1530,7 +1530,8 @@ declare module '@polkadot/types/lookup' {
     readonly isZcashFrostEd25519: boolean;
     readonly isZcashFrostEd448: boolean;
     readonly isGennaroDKGBls381: boolean;
-    readonly type: 'DfnsCGGMP21Secp256k1' | 'DfnsCGGMP21Secp256r1' | 'DfnsCGGMP21Stark' | 'SilentShardDKLS23Secp256k1' | 'ZcashFrostP256' | 'ZcashFrostP384' | 'ZcashFrostSecp256k1' | 'ZcashFrostRistretto255' | 'ZcashFrostEd25519' | 'ZcashFrostEd448' | 'GennaroDKGBls381';
+    readonly isWstsV2: boolean;
+    readonly type: 'DfnsCGGMP21Secp256k1' | 'DfnsCGGMP21Secp256r1' | 'DfnsCGGMP21Stark' | 'SilentShardDKLS23Secp256k1' | 'ZcashFrostP256' | 'ZcashFrostP384' | 'ZcashFrostSecp256k1' | 'ZcashFrostRistretto255' | 'ZcashFrostEd25519' | 'ZcashFrostEd448' | 'GennaroDKGBls381' | 'WstsV2';
   }
 
   /** @name TanglePrimitivesRolesZksaasZeroKnowledgeRoleType (124) */
@@ -3717,11 +3718,11 @@ declare module '@polkadot/types/lookup' {
     readonly isSchnorrSecp256k1: boolean;
     readonly isSchnorrSr25519: boolean;
     readonly isSchnorrRistretto255: boolean;
-    readonly isSchnorrRedJubJub: boolean;
     readonly isSchnorrEd25519: boolean;
     readonly isSchnorrEd448: boolean;
+    readonly isSchnorrTaproot: boolean;
     readonly isBls381: boolean;
-    readonly type: 'EcdsaSecp256k1' | 'EcdsaSecp256r1' | 'EcdsaStark' | 'SchnorrP256' | 'SchnorrP384' | 'SchnorrSecp256k1' | 'SchnorrSr25519' | 'SchnorrRistretto255' | 'SchnorrRedJubJub' | 'SchnorrEd25519' | 'SchnorrEd448' | 'Bls381';
+    readonly type: 'EcdsaSecp256k1' | 'EcdsaSecp256r1' | 'EcdsaStark' | 'SchnorrP256' | 'SchnorrP384' | 'SchnorrSecp256k1' | 'SchnorrSr25519' | 'SchnorrRistretto255' | 'SchnorrEd25519' | 'SchnorrEd448' | 'SchnorrTaproot' | 'Bls381';
   }
 
   /** @name TanglePrimitivesJobsTssDkgtssSignatureResult (420) */
