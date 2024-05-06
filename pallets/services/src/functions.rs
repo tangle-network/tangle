@@ -1,22 +1,28 @@
 use sp_core::{H160, U256};
 use sp_runtime::DispatchResultWithInfo;
-use tangle_primitives::jobs::v2::{Field, ServiceBlueprint, ServiceRegistrationHook};
+use tangle_primitives::jobs::v2::{
+	Field, ServiceBlueprint, ServiceProviderPrefrences, ServiceRegistrationHook,
+};
 
 use super::*;
 
 impl<T: Config> Pallet<T> {
 	pub fn check_registeration_hook(
 		blueprint: &ServiceBlueprint,
+		prefrences: &ServiceProviderPrefrences,
 		registration_args: &[Field<T::AccountId>],
 	) -> DispatchResultWithInfo<bool> {
-		// keccak256("onRegister(bytes)")[0..4]
-		const FUNCTION_SELECTOR: [u8; 4] = [0x6c, 0xb9, 0xd7, 0xe1];
+		// keccak256("onRegister(bytes,bytes)")[0..4] = 0xa7c66f86
+		const FUNCTION_SELECTOR: [u8; 4] = [0xa7, 0xc6, 0x6f, 0x86];
+
 		let allowed = match blueprint.registration_hook {
 			ServiceRegistrationHook::None => true,
 			ServiceRegistrationHook::Evm(contract) => {
 				let mut data = Vec::new();
 				// write the function that will be called on the contract.
 				data.extend_from_slice(&FUNCTION_SELECTOR);
+				// write the `public_key` argument.
+				data.extend_from_slice(&prefrences.encode_to_ethabi());
 				// write the arguments that will be passed to the function.
 				let args_encoded = Field::encode_to_ethabi(registration_args);
 				data.extend_from_slice(&args_encoded);

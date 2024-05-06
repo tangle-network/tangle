@@ -26,7 +26,7 @@ use frame_support::{
 };
 use mock_evm::MockedEvmRunner;
 use pallet_session::historical as pallet_session_historical;
-use sp_core::{sr25519, H256};
+use sp_core::{sr25519, H160, H256};
 use sp_runtime::{
 	app_crypto::ecdsa::Public,
 	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
@@ -36,6 +36,7 @@ use sp_staking::{
 	offence::{OffenceError, ReportOffence},
 	SessionIndex,
 };
+use std::collections::BTreeMap;
 
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
@@ -327,6 +328,9 @@ pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
 	new_test_ext_raw_authorities(mock_authorities(ids))
 }
 
+pub const CGGMP21_REGISTRATION_HOOK: H160 = H160([0x21; 20]);
+pub const CGGMP21_REQUEST_HOOK: H160 = H160([0x22; 20]);
+
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext_raw_authorities(
@@ -372,6 +376,57 @@ pub fn new_test_ext_raw_authorities(
 	};
 
 	staking_config.assimilate_storage(&mut t).unwrap();
+
+	let mut evm_accounts = BTreeMap::new();
+
+	let cggmp21_registration_hook_json: serde_json::Value = serde_json::from_str(include_str!(
+		"../../../forge/out/CGGMP21Hooks.sol/CGGMP21RegistrationHook.json"
+	))
+	.unwrap();
+	let cggmp21_registration_hook_code = hex::decode(
+		cggmp21_registration_hook_json["deployedBytecode"]["object"]
+			.as_str()
+			.unwrap()
+			.replace("0x", ""),
+	)
+	.unwrap();
+	evm_accounts.insert(
+		CGGMP21_REGISTRATION_HOOK,
+		fp_evm::GenesisAccount {
+			code: cggmp21_registration_hook_code,
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Default::default(),
+		},
+	);
+
+	let cggmp21_request_hook_json: serde_json::Value = serde_json::from_str(include_str!(
+		"../../../forge/out/CGGMP21Hooks.sol/CGGMP21RequestHook.json"
+	))
+	.unwrap();
+
+	let cggmp21_request_hook_code = hex::decode(
+		cggmp21_request_hook_json["deployedBytecode"]["object"]
+			.as_str()
+			.unwrap()
+			.replace("0x", ""),
+	)
+	.unwrap();
+
+	evm_accounts.insert(
+		CGGMP21_REQUEST_HOOK,
+		fp_evm::GenesisAccount {
+			code: cggmp21_request_hook_code,
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Default::default(),
+		},
+	);
+
+	let evm_config =
+		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
+
+	evm_config.assimilate_storage(&mut t).unwrap();
 
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.execute_with(|| System::set_block_number(1));

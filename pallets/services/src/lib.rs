@@ -51,7 +51,6 @@ pub use weights::WeightInfo;
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
-	use sp_core::U256;
 	use tangle_primitives::jobs::v2::*;
 
 	#[pallet::config]
@@ -384,8 +383,9 @@ pub mod module {
 			let already_registered = ServiceProviders::<T>::contains_key(blueprint_id, &caller);
 			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
 
-			let allowed = Self::check_registeration_hook(&blueprint, &registration_args)
-				.map_err(|e| e.error)?;
+			let allowed =
+				Self::check_registeration_hook(&blueprint, &preferences, &registration_args)
+					.map_err(|e| e.error)?;
 
 			if !allowed {
 				return Err(Error::<T>::InvalidRegistrationInput.into());

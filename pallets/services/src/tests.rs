@@ -47,7 +47,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint {
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint8],
-				result: bounded_vec![FieldType::Array(33, Box::new(FieldType::Uint8))],
+				result: bounded_vec![FieldType::Bytes],
 				verifier: JobResultVerifier::None,
 			},
 			JobDefinition {
@@ -57,9 +57,9 @@ fn cggmp21_blueprint() -> ServiceBlueprint {
 				verifier: JobResultVerifier::None,
 			},
 		],
-		registration_hook: ServiceRegistrationHook::Evm(H160::random()),
+		registration_hook: ServiceRegistrationHook::Evm(CGGMP21_REGISTRATION_HOOK),
 		registration_params: bounded_vec![],
-		request_hook: ServiceRequestHook::None,
+		request_hook: ServiceRequestHook::Evm(CGGMP21_REQUEST_HOOK),
 		request_params: bounded_vec![],
 		gadget: Default::default(),
 	}

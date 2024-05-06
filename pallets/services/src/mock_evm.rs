@@ -23,7 +23,10 @@ use fp_ethereum::Transaction;
 use fp_evm::FeeCalculator;
 use frame_support::{parameter_types, traits::FindAuthor, weights::Weight, PalletId};
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
-use pallet_evm::{AddressMapping, EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping};
+use pallet_evm::{
+	AddressMapping, EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping,
+	OnChargeEVMTransaction,
+};
 use sp_core::{keccak_256, ConstU32, H160, H256, U256};
 use sp_runtime::{
 	traits::{BlakeTwo256, DispatchInfoOf, Dispatchable},
@@ -75,6 +78,30 @@ parameter_types! {
 	pub SuicideQuickClearLimit: u32 = 0;
 }
 
+pub struct FreeEVMExecution;
+
+impl OnChargeEVMTransaction<Runtime> for FreeEVMExecution {
+	type LiquidityInfo = ();
+
+	fn withdraw_fee(
+		who: &H160,
+		fee: U256,
+	) -> Result<Self::LiquidityInfo, pallet_evm::Error<Runtime>> {
+		Ok(())
+	}
+
+	fn correct_and_deposit_fee(
+		who: &H160,
+		corrected_fee: U256,
+		base_fee: U256,
+		already_withdrawn: Self::LiquidityInfo,
+	) -> Self::LiquidityInfo {
+		already_withdrawn
+	}
+
+	fn pay_priority_fee(tip: Self::LiquidityInfo) {}
+}
+
 impl pallet_evm::Config for Runtime {
 	type FeeCalculator = FixedGasPrice;
 	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
@@ -90,7 +117,7 @@ impl pallet_evm::Config for Runtime {
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
-	type OnChargeTransaction = ();
+	type OnChargeTransaction = FreeEVMExecution;
 	type OnCreate = ();
 	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type FindAuthor = FindAuthorTruncated;

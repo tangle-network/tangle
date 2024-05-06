@@ -14,5 +14,8 @@ contract RegistrationHook {
     ///
     /// Unless this function reverts, the Operator will be registered on this blueprint.
     /// @custom:hook
-    function onRegister(bytes calldata registrationInputs) public payable onlySelf {}
+    function onRegister(
+      bytes calldata participant,
+      bytes calldata registrationInputs
+    ) public virtual payable onlySelf {}
 }
