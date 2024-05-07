@@ -17,7 +17,6 @@ use ethers::providers::{Http, Provider};
 use ethers::signers::LocalWallet;
 use ethers::signers::Signer as EthSigner;
 use ethers::types::{Address, Bytes};
-use parity_scale_codec::Encode;
 use serde_json::Value;
 use sp_core::{Pair, H256, U256};
 use std::str::FromStr;
@@ -187,7 +186,6 @@ async fn main() -> Result<(), String> {
 	let client = Arc::new(provider.clone());
 	let contract = VotableSigningRules::new(Address::from(contract_address), client);
 	let phase_1_job_id = 0u64;
-	let phase_1_job_details: Bytes = dkg_phase_one.job_type.encode().into();
 	let threshold = 2;
 	let use_democracy = false;
 	let voters = vec![
@@ -196,14 +194,9 @@ async fn main() -> Result<(), String> {
 		H160::from_str("0xb65EA4E162188d199b14da8bc747F24042c36E2C").unwrap(),
 	];
 	let expiry = 5000;
-	let fn_call: FunctionCall<_, _, _> = contract.initialize(
-		phase_1_job_id,
-		phase_1_job_details.clone(),
-		threshold,
-		use_democracy,
-		voters,
-		expiry,
-	);
+	let ttl = 5000;
+	let fn_call: FunctionCall<_, _, _> =
+		contract.initialize(phase_1_job_id, threshold, use_democracy, voters, expiry, ttl);
 
 	let init_tx_call = RuntimeCall::EVM(TangleApi::evm::Call::call {
 		source: H160::from_str("0x6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b").unwrap(),
@@ -231,11 +224,8 @@ async fn main() -> Result<(), String> {
 
 	// Step 6: Vote on the proposal to submit the phase 2 job.
 	let phase_2_job_details: Bytes = b"phase2".into();
-	let vote_proposal_fn_call: FunctionCall<_, _, _> = contract.vote_proposal(
-		phase_1_job_id,
-		phase_1_job_details.clone(),
-		phase_2_job_details.clone(),
-	);
+	let vote_proposal_fn_call: FunctionCall<_, _, _> =
+		contract.vote_proposal(phase_1_job_id, phase_2_job_details.clone());
 
 	let relayer_wallet1 =
 		LocalWallet::from_str("99b3c12287537e38c90a9219d4cb074a89a16e9cdb20bf85728ebd97c343e342")

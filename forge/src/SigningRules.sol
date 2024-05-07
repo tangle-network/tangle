@@ -14,14 +14,14 @@ struct Proposal {
 }
 
 abstract contract SigningRules {
-    mapping (bytes32 => mapping (address => bool)) public isValidForwarder;
-    mapping (bytes32 => address) public admins;
-    mapping (bytes32 => address[]) public voters;
-    mapping (bytes32 => uint8) public threshold;
-    mapping (bytes32 => uint64) public expiry;
-    mapping (bytes32 => uint64) public ttl;
-    mapping (bytes32 => bool) public useDemocracy;
-    mapping (bytes32 => bool) public useValidators;
+    mapping (uint64 => mapping (address => bool)) public isValidForwarder;
+    mapping (uint64 => address) public admins;
+    mapping (uint64 => address[]) public voters;
+    mapping (uint64 => uint8) public threshold;
+    mapping (uint64 => uint64) public expiry;
+    mapping (uint64 => uint64) public ttl;
+    mapping (uint64 => bool) public useDemocracy;
+    mapping (uint64 => bool) public useValidators;
 
     // keccak256(proposalId, phase2JobHash) => Proposal
     mapping(bytes32 => Proposal) public _proposals;
@@ -32,34 +32,30 @@ abstract contract SigningRules {
 
     event ProposalEvent(
         ProposalStatus status,
-        bytes32 proposalId,
+        uint64 phase1JobId,
         bytes32 phase2JobHash
     );
     event ProposalVote(
         ProposalStatus status,
-        bytes32 proposalId,
+        uint64 phase1JobId,
         bytes32 phase2JobHash
     );
     event FailedHandlerExecution(
         bytes lowLevelData
     );
 
-    modifier onlyAdmin(bytes32 id) {
+    modifier onlyAdmin(uint64 id) {
         require(admins[id] == msg.sender, "Only admin can call this function");
         _;
     }
 
-    function calculatePhase1ProposalId(uint64 phase1JobId, bytes memory phase1JobDetails) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked(phase1JobId, phase1JobDetails));
-    }
 
-    function calculatePhase2JobHash(bytes32 proposalId, bytes memory phase2JobDetails) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked(proposalId, phase2JobDetails));
+    function calculatePhase2JobHash(uint64 phase1JobId, bytes memory phase2JobDetails) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(phase1JobId, phase2JobDetails));
     }
 
     function initialize(
         uint64 phase1JobId,
-        bytes memory phase1JobDetails,
         uint8 _threshold,
         bool _useDemocracy,
         address[] memory _voters,
@@ -71,53 +67,51 @@ abstract contract SigningRules {
         initialized = true;
 
         // Hash the job data to get the an ID for the job
-        bytes32 phase1ProposalId = keccak256(abi.encodePacked(phase1JobId, phase1JobDetails));
-        threshold[phase1ProposalId] = _threshold;
-        useDemocracy[phase1ProposalId] = _useDemocracy;
-        expiry[phase1ProposalId] = _expiry;
-        ttl[phase1ProposalId] = _ttl;
-        admins[phase1ProposalId] = msg.sender;
+        threshold[phase1JobId] = _threshold;
+        useDemocracy[phase1JobId] = _useDemocracy;
+        expiry[phase1JobId] = _expiry;
+        ttl[phase1JobId] = _ttl;
+        admins[phase1JobId] = msg.sender;
 
         // If we have voters, add them to the list.
         if (_voters.length > 0) {
-            voters[phase1ProposalId] = _voters;
+            voters[phase1JobId] = _voters;
         } else {
             // Otherwise, use the default list of being all validators ECDSA keys.
-            useValidators[phase1ProposalId] = true;
-            _refreshVoters(phase1ProposalId);
+            useValidators[phase1JobId] = true;
+            _refreshVoters(phase1JobId);
         }
     }
 
     /// @notice Refresh the list of voters for a proposal w/ validators
-    /// @param phase1ProposalId ID of the proposal to refresh voters for.
-    function refreshVoters(bytes32 phase1ProposalId) public onlyAdmin(phase1ProposalId) {
-        _refreshVoters(phase1ProposalId);
+    /// @param phase1JobId ID of the proposal to refresh voters for.
+    function refreshVoters(uint64 phase1JobId) public onlyAdmin(phase1JobId) {
+        _refreshVoters(phase1JobId);
     }
 
     /// @notice Set a forwarder to be used.
     /// @notice Only callable by an address that currently has the admin role.
     /// @param forwarder Forwarder address to be added.
     /// @param valid Decision for the specific forwarder.
-    function adminSetForwarder(bytes32 proposalId, address forwarder, bool valid) external onlyAdmin(proposalId) {
-        isValidForwarder[proposalId][forwarder] = valid;
+    function adminSetForwarder(uint64 phase1JobId, address forwarder, bool valid) external onlyAdmin(phase1JobId) {
+        isValidForwarder[phase1JobId][forwarder] = valid;
     }
 
-	function submitGovernanceProposal(uint64 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) public {
+	function submitGovernanceProposal(uint64 phase1JobId, bytes memory phase2JobDetails) public {
 		// Validate the governance proposal
-        bytes32 proposalId = keccak256(abi.encodePacked(phase1JobId, phase1JobDetails));
-        bytes32 phase2JobHash = keccak256(abi.encodePacked(proposalId, phase2JobDetails));
+        bytes32 phase2JobHash = keccak256(abi.encodePacked(phase1JobId, phase2JobDetails));
         require(_proposals[phase2JobHash]._status != ProposalStatus.Executed, "Proposal must have been executed");
-        require(useDemocracy[proposalId], "Proposal must allow using governance");
+        require(useDemocracy[phase1JobId], "Proposal must allow using governance");
 		// Submit the proposal to governance pallet
-        _submitToDemocracyPallet(phase1JobId, phase1JobDetails, phase2JobDetails);
+        _submitToDemocracyPallet(phase1JobId, phase2JobDetails);
 	}
 
-	function voteProposal(uint64 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) public {
+	function voteProposal(uint64 phase1JobId, bytes memory phase2JobDetails) public {
 		// Validate the job/details are AUP
-		require(_isVotableProposal(phase1JobId, phase1JobDetails, phase2JobDetails), "Proposal must be votable");
+		require(_isVotableProposal(phase1JobId, phase2JobDetails), "Proposal must be votable");
 		// Check that we have received enough votes for the anchor update proposal.
         // Execute the proposal happens in `_voteProposal` if this vote tips the balance.
-        _voteProposal(phase1JobId, phase1JobDetails, phase2JobDetails );
+        _voteProposal(phase1JobId, phase2JobDetails );
 	}
 
     /// --------------------------------------------------------------------------------------- ///
@@ -129,19 +123,18 @@ abstract contract SigningRules {
     /// @notice {_msgSender()} must not have already voted on proposal.
     /// @notice Emits {ProposalEvent} event with status indicating the proposal status.
     /// @notice Emits {ProposalVote} event.
-    function _voteProposal(uint64 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) internal {
-        bytes32 phase1ProposalId = keccak256(abi.encodePacked(phase1JobId, phase1JobDetails));
-        bytes32 phase2JobHash = keccak256(abi.encodePacked(phase1ProposalId, phase2JobDetails));
+    function _voteProposal(uint64 phase1JobId, bytes memory phase2JobDetails) internal {
+        bytes32 phase2JobHash = keccak256(abi.encodePacked(phase1JobId, phase2JobDetails));
         Proposal storage proposal = _proposals[phase2JobHash];
         if (proposal._status == ProposalStatus.Passed) {
-            _executeProposal(phase1ProposalId, phase1JobId, phase2JobHash, phase2JobDetails );
+            _executeProposal( phase1JobId, phase2JobHash, phase2JobDetails );
             return;
         }
         
-        address sender = _msgSender(phase1ProposalId);
+        address sender = _msgSender(phase1JobId);
         
         require(uint(proposal._status) <= 1, "proposal already executed/cancelled");
-        require(!_hasVoted(phase1ProposalId, phase2JobHash, sender), "relayer already voted");
+        require(!_hasVoted(phase1JobId, phase2JobHash, sender), "relayer already voted");
 
         if (proposal._status == ProposalStatus.Inactive) {
             _proposals[phase2JobHash] = Proposal({
@@ -151,70 +144,70 @@ abstract contract SigningRules {
                 _proposedBlock : uint40(block.number) // Overflow is desired.
             });
 
-            emit ProposalEvent(ProposalStatus.Active, phase1ProposalId, phase2JobHash);
-        } else if (uint40(block.number - proposal._proposedBlock) > expiry[phase1ProposalId]) {
+            emit ProposalEvent(ProposalStatus.Active, phase1JobId, phase2JobHash);
+        } else if (uint40(block.number - proposal._proposedBlock) > expiry[phase1JobId]) {
             // if the number of blocks that has passed since this proposal was
             // submitted exceeds the expiry threshold set, cancel the proposal
             proposal._status = ProposalStatus.Cancelled;
 
-            emit ProposalEvent(ProposalStatus.Cancelled, phase1ProposalId, phase2JobHash);
+            emit ProposalEvent(ProposalStatus.Cancelled, phase1JobId, phase2JobHash);
         }
 
         if (proposal._status != ProposalStatus.Cancelled) {
-            proposal._yesVotes = (proposal._yesVotes | _voterBit(phase1ProposalId, sender));
+            proposal._yesVotes = (proposal._yesVotes | _voterBit(phase1JobId, sender));
             proposal._yesVotesTotal++; // TODO: check if bit counting is cheaper.
 
-            emit ProposalVote(proposal._status, phase1ProposalId, phase2JobHash);
+            emit ProposalVote(proposal._status, phase1JobId, phase2JobHash);
 
             // Finalize if _relayerThreshold has been reached
-            if (proposal._yesVotesTotal >= threshold[phase1ProposalId]) {
+            if (proposal._yesVotesTotal >= threshold[phase1JobId]) {
                 proposal._status = ProposalStatus.Passed;
-                emit ProposalEvent(ProposalStatus.Passed, phase1ProposalId, phase2JobHash);
+                emit ProposalEvent(ProposalStatus.Passed, phase1JobId, phase2JobHash);
             }
         }
         _proposals[phase2JobHash] = proposal;
 
         if (proposal._status == ProposalStatus.Passed) {
-            _executeProposal(phase1ProposalId, phase1JobId, phase2JobHash, phase2JobDetails );
+            _executeProposal(phase1JobId, phase2JobHash, phase2JobDetails );
         }
     }
 
     /// @notice Execute a proposal.
-    /// @param phase1ProposalId ID of the proposal to execute.
+    /// @param phase1JobId ID of the job that the proposal is associated with.
     /// @notice Proposal must have Passed status.
     /// @notice Emits {ProposalEvent} event with status {Executed}.
     /// @notice Emits {FailedExecution} event with the failed reason.
-    function _executeProposal(bytes32 phase1ProposalId, uint64 phase1JobId, bytes32 phase2JobHash, bytes memory phase2JobDetails) internal {
+    function _executeProposal(uint64 phase1JobId, bytes32 phase2JobHash, bytes memory phase2JobDetails) internal {
         Proposal storage proposal = _proposals[phase2JobHash];
         require(proposal._status == ProposalStatus.Passed, "Proposal must have Passed status");
         
-        JOBS_CONTRACT.submitDkgPhaseTwoJob(expiry[phase1ProposalId], ttl[phase1ProposalId], phase1JobId, phase2JobDetails, bytes(""));
+        JOBS_CONTRACT.submitDkgPhaseTwoJob(expiry[phase1JobId], ttl[phase1JobId], phase1JobId, phase2JobDetails, bytes(""));
         
         proposal._status = ProposalStatus.Executed;
-        emit ProposalEvent(ProposalStatus.Executed, phase1ProposalId, phase2JobHash);
+        emit ProposalEvent(ProposalStatus.Executed, phase1JobId, phase2JobHash);
     }
 
-    function _voterIndex(bytes32 phase1ProposalId, address voter) internal view returns (uint) {
-        for (uint i = 0; i < voters[phase1ProposalId].length; i++) {
-            if (voters[phase1ProposalId][i] == voter) {
+    function _voterIndex(uint64 phase1JobId, address voter) internal view returns (uint) {
+        for (uint i = 0; i < voters[phase1JobId].length; i++) {
+            if (voters[phase1JobId][i] == voter) {
                 return i + 1;
             }
         }
         return MAX_VOTERS;
     }
 
-    function _voterBit(bytes32 phase1ProposalId, address voter) internal view returns(uint) {
-        return uint(1) << (_voterIndex(phase1ProposalId, voter) - 1);
+    function _voterBit(uint64 phase1JobId, address voter) internal view returns(uint) {
+        return uint(1) << (_voterIndex(phase1JobId, voter) - 1);
     }
 
-    function _hasVoted(bytes32 phase1ProposalId, bytes32 phase2JobHash, address voter) internal view returns(bool) {
+    function _hasVoted(uint64 phase1JobId, bytes32 phase2JobHash, address voter) internal view returns(bool) {
         Proposal storage proposal = _proposals[phase2JobHash];
-        return (_voterBit(phase1ProposalId, voter) & uint(proposal._yesVotes)) > 0;
+        return (_voterBit(phase1JobId, voter) & uint(proposal._yesVotes)) > 0;
     }
 
-    function _msgSender(bytes32 proposalId) internal view returns (address) {
+    function _msgSender(uint64 phase1JobId) internal view returns (address) {
         address signer = msg.sender;
-        if (msg.data.length >= 20 && isValidForwarder[proposalId][signer]) {
+        if (msg.data.length >= 20 && isValidForwarder[phase1JobId][signer]) {
             assembly {
                 signer := shr(96, calldataload(sub(calldatasize(), 20)))
             }
@@ -226,9 +219,9 @@ abstract contract SigningRules {
     /// -------------------------------------- Virtuals --------------------------------------- ///
     /// --------------------------------------------------------------------------------------- ///
 
-    function _isVotableProposal(uint64 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) internal virtual returns (bool);
-    function _refreshVoters(bytes32 proposalId) internal virtual;
-    function _submitToDemocracyPallet(uint64 phase1JobId, bytes memory phase1JobDetails, bytes memory phase2JobDetails) internal virtual;
+    function _isVotableProposal(uint64 phase1JobId, bytes memory phase2JobDetails) internal virtual returns (bool);
+    function _refreshVoters(uint64 phase1JobId) internal virtual;
+    function _submitToDemocracyPallet(uint64 phase1JobId, bytes memory phase2JobDetails) internal virtual;
 
     /// --------------------------------------------------------------------------------------- ///
     /// -------------------------------------- Helpers ---------------------------------------- ///
