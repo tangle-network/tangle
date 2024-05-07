@@ -15,17 +15,18 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 #[cfg(not(feature = "std"))]
-use alloc::string::String;
+use alloc::{string::String, string::ToString, vec::Vec};
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
-use sp_runtime::traits::Get;
 use sp_std::boxed::Box;
+
+use super::MaxFieldsSize;
 
 macro_rules! impl_from {
     ($from:ty, $variant:ident) => {
-        impl<AccountId, MaxSize: Get<u32>> From<$from> for Field<AccountId, MaxSize> {
+        impl<AccountId> From<$from> for Field<AccountId> {
             fn from(val: $from) -> Self {
                 Self::$variant(val)
             }
@@ -33,7 +34,7 @@ macro_rules! impl_from {
     };
 
     ($from:ty, $variant:ident, $conv:expr) => {
-        impl<AccountId, MaxSize: Get<u32>> From<$from> for Field<AccountId, MaxSize> {
+        impl<AccountId> From<$from> for Field<AccountId> {
             fn from(val: $from) -> Self {
                 Self::$variant($conv(val))
             }
@@ -45,9 +46,9 @@ macro_rules! impl_from {
     };
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Eq, PartialEq, Encode, Decode, RuntimeDebug, Clone, TypeInfo, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum Field<AccountId, MaxSize: Get<u32>> {
+pub enum Field<AccountId> {
 	/// Represents a field of null value.
 	#[codec(index = 0)]
 	None,
@@ -80,17 +81,17 @@ pub enum Field<AccountId, MaxSize: Get<u32>> {
 	Int64(i64),
 	/// Represents a UTF-8 string.
 	#[codec(index = 10)]
-	String(BoundedString<MaxSize>),
+	String(BoundedString<MaxFieldsSize>),
 	/// Represents a Raw Bytes.
 	#[codec(index = 11)]
-	Bytes(BoundedVec<u8, MaxSize>),
+	Bytes(BoundedVec<u8, MaxFieldsSize>),
 	/// Represents an array of values
 	/// Fixed Length of values.
 	#[codec(index = 12)]
-	Array(BoundedVec<Self, MaxSize>),
+	Array(BoundedVec<Self, MaxFieldsSize>),
 	/// Represents a list of values
 	#[codec(index = 13)]
-	List(BoundedVec<Self, MaxSize>),
+	List(BoundedVec<Self, MaxFieldsSize>),
 
 	// NOTE: Special types starts from 100
 	/// A sepcial type for AccountId
@@ -108,18 +109,16 @@ impl_from! {
 	i32 => Int32,
 	u64 => Uint64,
 	i64 => Int64,
-	BoundedVec<u8, MaxSize> => Bytes,
-	BoundedString<MaxSize> => String,
-	BoundedVec<Self, MaxSize> => List
+	BoundedVec<u8, MaxFieldsSize> => Bytes,
+	BoundedString<MaxFieldsSize> => String,
+	BoundedVec<Self, MaxFieldsSize> => List
 }
 
-impl<AccountId: Clone, MaxSize: Get<u32> + Clone, const N: usize> TryFrom<[Self; N]>
-	for Field<AccountId, MaxSize>
-{
+impl<AccountId: Clone, const N: usize> TryFrom<[Self; N]> for Field<AccountId> {
 	type Error = [Self; N];
 
 	fn try_from(value: [Self; N]) -> Result<Self, Self::Error> {
-		if N > MaxSize::get() as usize {
+		if N > <MaxFieldsSize as Get<u32>>::get() as usize {
 			return Err(value);
 		}
 		let vec = value.to_vec().try_into().map_err(|_| value)?;
@@ -182,7 +181,7 @@ pub enum FieldType {
 	AccountId,
 }
 
-impl<AccountId, MaxSize: Get<u32>> PartialEq<FieldType> for Field<AccountId, MaxSize> {
+impl<AccountId> PartialEq<FieldType> for Field<AccountId> {
 	fn eq(&self, other: &FieldType) -> bool {
 		match (self, other) {
 			(Self::None, FieldType::Optional(_)) => true,
@@ -207,8 +206,8 @@ impl<AccountId, MaxSize: Get<u32>> PartialEq<FieldType> for Field<AccountId, Max
 	}
 }
 
-impl<AccountId: Clone, MaxSize: Get<u32> + Clone> From<Field<AccountId, MaxSize>> for FieldType {
-	fn from(val: Field<AccountId, MaxSize>) -> Self {
+impl<AccountId: Clone> From<Field<AccountId>> for FieldType {
+	fn from(val: Field<AccountId>) -> Self {
 		match val {
 			Field::None => FieldType::Optional(Box::new(FieldType::Void)),
 			Field::Bool(_) => FieldType::Bool,
@@ -234,11 +233,72 @@ impl<AccountId: Clone, MaxSize: Get<u32> + Clone> From<Field<AccountId, MaxSize>
 	}
 }
 
+impl<'a, AccountId: Encode> From<&'a Field<AccountId>> for ethabi::Token {
+	fn from(value: &'a Field<AccountId>) -> Self {
+		match value {
+			Field::None => ethabi::Token::Tuple(Vec::new()),
+			Field::Bool(val) => ethabi::Token::Bool(*val),
+			Field::Uint8(val) => ethabi::Token::Uint((*val).into()),
+			Field::Int8(val) => ethabi::Token::Int((*val).into()),
+			Field::Uint16(val) => ethabi::Token::Uint((*val).into()),
+			Field::Int16(val) => ethabi::Token::Int((*val).into()),
+			Field::Uint32(val) => ethabi::Token::Uint((*val).into()),
+			Field::Int32(val) => ethabi::Token::Int((*val).into()),
+			Field::Uint64(val) => ethabi::Token::Uint((*val).into()),
+			Field::Int64(val) => ethabi::Token::Int((*val).into()),
+			Field::String(val) => ethabi::Token::String(val.to_string()),
+			Field::Bytes(val) => ethabi::Token::FixedBytes(val.to_vec()),
+			Field::Array(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
+			Field::List(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
+			Field::AccountId(val) => ethabi::Token::Bytes(val.encode()),
+		}
+	}
+}
+
+impl<AccountId: Encode> From<Field<AccountId>> for ethabi::Token {
+	fn from(value: Field<AccountId>) -> Self {
+		(&value).into()
+	}
+}
+
+impl<AccountId: Encode> Field<AccountId> {
+	/// Convrts the field to a `ethabi::Token`.
+	/// This is useful for converting the field to a type that can be used in an Ethereum transaction.
+	pub fn into_ethabi_token(self) -> ethabi::Token {
+		self.into()
+	}
+
+	/// Same as [`Self::into_ethabi_token`] but for references.
+	pub fn to_ethabi_token(&self) -> ethabi::Token {
+		self.into()
+	}
+
+	/// Encode the fields to ethabi bytes.
+	pub fn encode_to_ethabi(fields: &[Self]) -> ethabi::Bytes {
+		if fields.is_empty() {
+			return Default::default();
+		}
+		let tokens: Vec<ethabi::Token> = fields.iter().map(Self::to_ethabi_token).collect();
+		ethabi::encode(&tokens)
+	}
+
+	/// Encode the fields to ethabi tokens.
+	pub fn to_ethabi(fields: &[Self]) -> Vec<ethabi::Token> {
+		fields.iter().map(Self::to_ethabi_token).collect()
+	}
+}
+
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo, MaxEncodedLen)]
 #[scale_info(skip_type_params(S))]
 #[cfg_attr(feature = "std", derive(Serialize), serde(transparent), serde(bound = ""))]
 #[repr(transparent)]
 pub struct BoundedString<S: Get<u32>>(pub(crate) BoundedVec<u8, S>);
+
+impl<S: Get<u32>> Default for BoundedString<S> {
+	fn default() -> Self {
+		Self(Default::default())
+	}
+}
 
 impl<S: Get<u32>> Clone for BoundedString<S> {
 	fn clone(&self) -> Self {
@@ -265,6 +325,9 @@ impl<S: Get<u32>> TryFrom<String> for BoundedString<S> {
 impl<S: Get<u32>> TryFrom<&str> for BoundedString<S> {
 	type Error = String;
 	fn try_from(value: &str) -> Result<Self, Self::Error> {
+		#[cfg(not(feature = "std"))]
+		use alloc::string::ToString;
+
 		Self::try_from(value.to_string())
 	}
 }
@@ -315,6 +378,13 @@ impl<'de, S: Get<u32>> serde::Deserialize<'de> for BoundedString<S> {
 
 			fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
 				formatter.write_str("a string")
+			}
+
+			fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+			where
+				E: serde::de::Error,
+			{
+				Self::visit_string(self, v.to_owned())
 			}
 
 			fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
