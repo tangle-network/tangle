@@ -173,7 +173,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1001, // v1.0.1
+	spec_version: 1002, // v1.0.2
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1041,9 +1041,9 @@ impl pallet_tx_pause::Config for Runtime {
 }
 
 parameter_types! {
-	pub const BasicDeposit: Balance = deposit(0, 100); // purposely set low, do not copy for mainnet
-	pub const ByteDeposit: Balance = deposit(0, 100); // purposely set low, do not copy for mainnet
-	pub const SubAccountDeposit: Balance = deposit(1, 1); // purposely set low, do not copy for mainnet
+	pub const BasicDeposit: Balance = deposit(0, 100);
+	pub const ByteDeposit: Balance = deposit(0, 100);
+	pub const SubAccountDeposit: Balance = deposit(1, 1);
 	pub const MaxSubAccounts: u32 = 100;
 	#[derive(Serialize, Deserialize)]
 	pub const MaxAdditionalFields: u32 = 100;

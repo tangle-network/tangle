@@ -51,7 +51,7 @@ use sp_io::{
 use sp_runtime::{
 	traits::{CheckedSub, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
-	RuntimeDebug,
+	AccountId32, RuntimeDebug,
 };
 use sp_std::{convert::TryInto, prelude::*, vec};
 use utils::Sr25519Signature;
@@ -418,6 +418,19 @@ pub mod pallet {
 		) -> DispatchResult {
 			T::ForceOrigin::ensure_origin(origin)?;
 			ExpiryConfig::<T>::set(Some((expiry_block, dest)));
+			Ok(())
+		}
+
+		/// Claim from signed origin
+		#[pallet::weight(T::WeightInfo::claim())]
+		#[pallet::call_index(6)]
+		pub fn claim_signed(origin: OriginFor<T>, dest: Option<MultiAddress>) -> DispatchResult {
+			let origin = ensure_signed(origin)?;
+			let account_id_32 = AccountId32::decode(&mut origin.encode().as_ref())
+				.map_err(|_| Error::<T>::InvalidNativeAccount)?;
+			let signer = MultiAddress::Native(account_id_32);
+			ensure!(Signing::<T>::get(&signer).is_none(), Error::<T>::InvalidStatement);
+			Self::process_claim(signer, dest)?;
 			Ok(())
 		}
 	}
