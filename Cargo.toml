@@ -37,6 +37,7 @@ members = [
  "precompiles/proxy",
  "precompiles/preimage",
  "precompiles/jobs",
+ "precompiles/services",
  "precompiles/balances-erc20",
  "precompiles/assets-erc20",
  "tangle-subxt",
@@ -116,6 +117,7 @@ ethabi = { version = "15.0.0", default-features = false }
 # Tangle Dependencies
 pallet-airdrop-claims = { path = "pallets/claims", default-features = false }
 pallet-jobs = { path = "pallets/jobs", default-features = false }
+pallet-services = { path = "pallets/services", default-features = false }
 pallet-roles = { path = "pallets/roles", default-features = false }
 pallet-dkg = { path = "pallets/dkg", default-features = false }
 pallet-zksaas = { path = "pallets/zksaas", default-features = false }
@@ -309,6 +311,7 @@ pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-featur
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
 pallet-evm-precompile-jobs = { path = "precompiles/jobs", default-features = false }
+pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
 pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features = false }
 
 # EVM & Ethereum

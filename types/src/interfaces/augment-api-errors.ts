@@ -1652,6 +1652,69 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    services: {
+      /**
+       * The caller is already registered as a service provider.
+       **/
+      AlreadyRegistered: AugmentedError<ApiType>;
+      /**
+       * The approval is not requested for the service provider (the caller).
+       **/
+      ApprovalNotRequested: AugmentedError<ApiType>;
+      /**
+       * The service blueprint was not found.
+       **/
+      BlueprintNotFound: AugmentedError<ApiType>;
+      /**
+       * The caller does not have the requirements to be a service provider.
+       **/
+      InvalidRegistrationInput: AugmentedError<ApiType>;
+      /**
+       * The result of the job call was not found.
+       **/
+      JobCallResultNotFound: AugmentedError<ApiType>;
+      /**
+       * The requested job definition does not exist.
+       * This error is returned when the requested job definition does not exist in the service blueprint.
+       **/
+      JobDefinitionNotFound: AugmentedError<ApiType>;
+      /**
+       * The maximum number of fields per request has been exceeded.
+       **/
+      MaxFieldsExceeded: AugmentedError<ApiType>;
+      /**
+       * The maximum number of permitted callers per service has been exceeded.
+       **/
+      MaxPermittedCallersExceeded: AugmentedError<ApiType>;
+      /**
+       * The maximum number of service providers per service has been exceeded.
+       **/
+      MaxServiceProvidersExceeded: AugmentedError<ApiType>;
+      /**
+       * The caller is not registered as a service provider.
+       **/
+      NotRegistered: AugmentedError<ApiType>;
+      /**
+       * The service was not found.
+       **/
+      ServiceNotFound: AugmentedError<ApiType>;
+      /**
+       * Either the service or the job call was not found.
+       **/
+      ServiceOrJobCallNotFound: AugmentedError<ApiType>;
+      /**
+       * The service request was not found.
+       **/
+      ServiceRequestNotFound: AugmentedError<ApiType>;
+      /**
+       * An error occurred while type checking the provided input input.
+       **/
+      TypeCheck: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     session: {
       /**
        * Registered duplicate key.
