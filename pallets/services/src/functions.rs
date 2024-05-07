@@ -7,7 +7,7 @@ use ethabi::Token;
 use sp_core::{H160, U256};
 use sp_runtime::DispatchResultWithInfo;
 use tangle_primitives::jobs::v2::{
-	Field, ServiceBlueprint, ServiceProviderPrefrences, ServiceRegistrationHook, ServiceRequestHook,
+	Field, OperatorPreferences, ServiceBlueprint, ServiceRegistrationHook, ServiceRequestHook,
 };
 
 use super::*;
@@ -15,7 +15,7 @@ use super::*;
 impl<T: Config> Pallet<T> {
 	pub fn check_registeration_hook(
 		blueprint: &ServiceBlueprint,
-		prefrences: &ServiceProviderPrefrences,
+		prefrences: &OperatorPreferences,
 		registration_args: &[Field<T::AccountId>],
 	) -> DispatchResultWithInfo<bool> {
 		let allowed = match blueprint.registration_hook {
@@ -66,7 +66,7 @@ impl<T: Config> Pallet<T> {
 	pub fn check_request_hook(
 		blueprint: &ServiceBlueprint,
 		service_id: u64,
-		participants: &[ServiceProviderPrefrences],
+		participants: &[OperatorPreferences],
 		request_args: &[Field<T::AccountId>],
 	) -> DispatchResultWithInfo<bool> {
 		let allowed = match blueprint.request_hook {
@@ -98,7 +98,7 @@ impl<T: Config> Pallet<T> {
 				};
 				let service_id = Token::Uint(ethabi::Uint::from(service_id));
 				let participants = Token::Array(
-					participants.iter().flat_map(ServiceProviderPrefrences::to_ethabi).collect(),
+					participants.iter().flat_map(OperatorPreferences::to_ethabi).collect(),
 				);
 				let request_args = Token::Bytes(Field::encode_to_ethabi(request_args));
 				let data = call

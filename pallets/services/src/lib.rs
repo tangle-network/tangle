@@ -81,15 +81,15 @@ pub mod module {
 	pub enum Error<T> {
 		/// The service blueprint was not found.
 		BlueprintNotFound,
-		/// The caller is already registered as a service provider.
+		/// The caller is already registered as a operator.
 		AlreadyRegistered,
-		/// The caller does not have the requirements to be a service provider.
+		/// The caller does not have the requirements to be a operator.
 		InvalidRegistrationInput,
 		/// The caller does not have the requirements to request a service.
 		InvalidRequestInput,
 		/// The caller does not have the requirements to call a job.
 		InvalidJobCallInput,
-		/// The caller is not registered as a service provider.
+		/// The caller is not registered as a operator.
 		NotRegistered,
 		/// The service request was not found.
 		ServiceRequestNotFound,
@@ -99,11 +99,11 @@ pub mod module {
 		TypeCheck(TypeCheckError),
 		/// The maximum number of permitted callers per service has been exceeded.
 		MaxPermittedCallersExceeded,
-		/// The maximum number of service providers per service has been exceeded.
+		/// The maximum number of operators per service has been exceeded.
 		MaxServiceProvidersExceeded,
 		/// The maximum number of fields per request has been exceeded.
 		MaxFieldsExceeded,
-		/// The approval is not requested for the service provider (the caller).
+		/// The approval is not requested for the operator (the caller).
 		ApprovalNotRequested,
 		/// The requested job definition does not exist.
 		/// This error is returned when the requested job definition does not exist in the service blueprint.
@@ -126,28 +126,28 @@ pub mod module {
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 		},
-		/// A new service provider has been registered.
+		/// An new operator has been registered.
 		Registered {
-			/// The account that registered as a service provider.
+			/// The account that registered as a operator.
 			provider: T::AccountId,
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
-			/// The preferences for the service provider for this specific blueprint.
-			preferences: ServiceProviderPrefrences,
+			/// The preferences for the operator for this specific blueprint.
+			preferences: OperatorPreferences,
 			/// The arguments used for registration.
 			registration_args: Vec<Field<T::AccountId>>,
 		},
-		/// A service provider has been deregistered.
-		Deregistered {
-			/// The account that deregistered as a service provider.
-			provider: T::AccountId,
+		/// An operator has been unregistered.
+		Unregistered {
+			/// The account that unregistered as am operator.
+			operator: T::AccountId,
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 		},
-		/// The approval preference for a service provider has been updated.
+		/// The approval preference for an operator has been updated.
 		ApprovalPreferenceUpdated {
 			/// The account that updated the approval preference.
-			provider: T::AccountId,
+			operator: T::AccountId,
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 			/// The new approval preference.
@@ -162,28 +162,28 @@ pub mod module {
 			request_id: u64,
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
-			/// The list of service providers that need to approve the service.
+			/// The list of operators that need to approve the service.
 			pending_approvals: Vec<T::AccountId>,
-			/// The list of service providers that atomaticaly approved the service.
+			/// The list of operators that atomaticaly approved the service.
 			approved: Vec<T::AccountId>,
 		},
 		/// A service request has been approved.
 		ServiceRequestApproved {
 			/// The account that approved the service.
-			provider: T::AccountId,
+			operator: T::AccountId,
 			/// The ID of the service request.
 			request_id: u64,
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
-			/// The list of service providers that need to approve the service.
+			/// The list of operators that need to approve the service.
 			pending_approvals: Vec<T::AccountId>,
-			/// The list of service providers that atomaticaly approved the service.
+			/// The list of operators that atomaticaly approved the service.
 			approved: Vec<T::AccountId>,
 		},
 		/// A service request has been rejected.
 		ServiceRequestRejected {
 			/// The account that rejected the service.
-			provider: T::AccountId,
+			operator: T::AccountId,
 			/// The ID of the service request.
 			request_id: u64,
 			/// The ID of the service blueprint.
@@ -198,9 +198,9 @@ pub mod module {
 			request_id: u64,
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
-			/// The list of service providers that need to approve the service.
+			/// The list of operators that need to approve the service.
 			pending_approvals: Vec<T::AccountId>,
-			/// The list of service providers that atomaticaly approved the service.
+			/// The list of operators that atomaticaly approved the service.
 			approved: Vec<T::AccountId>,
 		},
 		/// A service has been initiated.
@@ -242,7 +242,7 @@ pub mod module {
 		/// A job result has been submitted.
 		JobResultSubmitted {
 			/// The account that submitted the job result.
-			provider: T::AccountId,
+			operator: T::AccountId,
 			/// The ID of the service.
 			service_id: u64,
 			/// The ID of the call.
@@ -290,16 +290,16 @@ pub mod module {
 		ResultQuery<Error<T>::BlueprintNotFound>,
 	>;
 
-	/// The service providers for a specific service blueprint.
+	/// The operators for a specific service blueprint.
 	#[pallet::storage]
 	#[pallet::getter(fn service_providers)]
-	pub type ServiceProviders<T: Config> = StorageDoubleMap<
+	pub type Operators<T: Config> = StorageDoubleMap<
 		_,
 		Identity,
 		u64,
 		Identity,
 		T::AccountId,
-		ServiceProviderPrefrences,
+		OperatorPreferences,
 		ResultQuery<Error<T>::NotRegistered>,
 	>;
 
@@ -378,19 +378,19 @@ pub mod module {
 			Ok(())
 		}
 
-		/// Register the caller as a service provider for a specific blueprint.
+		/// Register the caller as an operator for a specific blueprint.
 		///
 		/// The caller may require an approval first before they can accept to provide the service
 		/// for the users.
 		pub fn register(
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: u64,
-			preferences: ServiceProviderPrefrences,
+			preferences: OperatorPreferences,
 			registration_args: Vec<Field<T::AccountId>>,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
-			let already_registered = ServiceProviders::<T>::contains_key(blueprint_id, &caller);
+			let already_registered = Operators::<T>::contains_key(blueprint_id, &caller);
 			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
 
 			let allowed =
@@ -402,7 +402,7 @@ pub mod module {
 			blueprint
 				.type_check_registration(&registration_args)
 				.map_err(Error::<T>::TypeCheck)?;
-			ServiceProviders::<T>::insert(blueprint_id, &caller, preferences);
+			Operators::<T>::insert(blueprint_id, &caller, preferences);
 
 			Self::deposit_event(Event::Registered {
 				provider: caller.clone(),
@@ -414,23 +414,23 @@ pub mod module {
 			Ok(())
 		}
 
-		/// Deregister the caller from being a service provider for the service blueprint
+		/// Unregister the caller from being an operator for the service blueprint
 		/// so that, no more services will assigned to the caller for this specific blueprint.
 		/// Note that, the caller needs to keep providing service for other active service
 		/// that uses this blueprint, until the end of service time, otherwise they may get reported
 		/// and slashed.
-		pub fn deregister(
+		pub fn unregister(
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: u64,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			ensure!(Blueprints::<T>::contains_key(blueprint_id), Error::<T>::BlueprintNotFound);
-			let registered = ServiceProviders::<T>::contains_key(blueprint_id, &caller);
+			let registered = Operators::<T>::contains_key(blueprint_id, &caller);
 			ensure!(registered, Error::<T>::NotRegistered);
 			// TODO: check if the caller is not providing any service for the blueprint.
-			ServiceProviders::<T>::remove(blueprint_id, &caller);
+			Operators::<T>::remove(blueprint_id, &caller);
 
-			Self::deposit_event(Event::Deregistered { provider: caller.clone(), blueprint_id });
+			Self::deposit_event(Event::Unregistered { operator: caller.clone(), blueprint_id });
 			Ok(())
 		}
 
@@ -444,26 +444,22 @@ pub mod module {
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			ensure!(Blueprints::<T>::contains_key(blueprint_id), Error::<T>::BlueprintNotFound);
-			ServiceProviders::<T>::try_mutate_exists(
-				blueprint_id,
-				&caller,
-				|current_preferences| {
-					current_preferences
-						.as_mut()
-						.map(|v| v.approval = approval_preference)
-						.ok_or(Error::<T>::NotRegistered)
-				},
-			)?;
+			Operators::<T>::try_mutate_exists(blueprint_id, &caller, |current_preferences| {
+				current_preferences
+					.as_mut()
+					.map(|v| v.approval = approval_preference)
+					.ok_or(Error::<T>::NotRegistered)
+			})?;
 
 			Self::deposit_event(Event::ApprovalPreferenceUpdated {
-				provider: caller.clone(),
+				operator: caller.clone(),
 				blueprint_id,
 				approval_preference,
 			});
 			Ok(())
 		}
 		/// Request a new service to be initiated using the provided blueprint with a list of
-		/// service providers that will run your service. Optionally, you can specifiy who is permitted caller
+		/// operators that will run your service. Optionally, you can specifiy who is permitted caller
 		/// of this service, by default anyone could use this service.
 		///
 		/// Note that, if anyone of the participants set their [`ApprovalPreference`] to `ApprovalPreference::Required`
@@ -480,22 +476,22 @@ pub mod module {
 			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
 
 			blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
-			let mut prefrences = Vec::new();
+			let mut preferences = Vec::new();
 			let mut pending_approvals = Vec::new();
 			let mut approved = Vec::new();
 			for provider in &service_providers {
-				let preferences = ServiceProviders::<T>::get(blueprint_id, provider)?;
-				if preferences.approval == ApprovalPrefrence::Required {
+				let prefs = Operators::<T>::get(blueprint_id, provider)?;
+				if prefs.approval == ApprovalPrefrence::Required {
 					pending_approvals.push(provider.clone());
 				} else {
 					approved.push(provider.clone());
 				}
-				prefrences.push(preferences);
+				preferences.push(prefs);
 			}
 
 			let service_id = NextInstanceId::<T>::get();
 			let allowed =
-				Self::check_request_hook(&blueprint, service_id, &prefrences, &request_args)
+				Self::check_request_hook(&blueprint, service_id, &preferences, &request_args)
 					.map_err(|e| e.error)?;
 
 			ensure!(allowed, Error::<T>::InvalidRequestInput);
@@ -505,13 +501,13 @@ pub mod module {
 					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
 			if pending_approvals.is_empty() {
 				// No approval is required, initiate the service immediately.
-				let providers = BoundedVec::<_, MaxProvidersPerService>::try_from(approved)
+				let operators = BoundedVec::<_, MaxOperatorsPerService>::try_from(approved)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
 					blueprint: blueprint_id,
 					owner: caller.clone(),
 					permitted_callers,
-					providers,
+					operators,
 					ttl,
 				};
 				Instances::<T>::insert(service_id, service);
@@ -526,7 +522,7 @@ pub mod module {
 				Ok(())
 			} else {
 				let request_id = NextServiceRequestId::<T>::get();
-				let providers = pending_approvals
+				let operators = pending_approvals
 					.iter()
 					.cloned()
 					.map(|v| (v, ApprovalState::Pending))
@@ -536,8 +532,8 @@ pub mod module {
 				let args = BoundedVec::<_, MaxFields>::try_from(request_args)
 					.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
 
-				let providers_with_approval_state =
-					BoundedVec::<_, MaxProvidersPerService>::try_from(providers)
+				let operators_with_approval_state =
+					BoundedVec::<_, MaxOperatorsPerService>::try_from(operators)
 						.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service_request = ServiceRequest {
 					blueprint: blueprint_id,
@@ -545,7 +541,7 @@ pub mod module {
 					ttl,
 					args,
 					permitted_callers,
-					providers_with_approval_state,
+					operators_with_approval_state,
 				};
 				ServiceRequests::<T>::insert(request_id, service_request);
 				NextServiceRequestId::<T>::set(request_id.saturating_add(1));
@@ -567,20 +563,20 @@ pub mod module {
 			let caller = ensure_signed(origin)?;
 			let mut request = ServiceRequests::<T>::get(request_id)?;
 			let updated = request
-				.providers_with_approval_state
+				.operators_with_approval_state
 				.iter_mut()
 				.find(|(v, _)| v == &caller)
 				.map(|(_, s)| *s = ApprovalState::Approved);
 			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
 
 			let approved = request
-				.providers_with_approval_state
+				.operators_with_approval_state
 				.iter()
 				.filter(|(_, s)| *s == ApprovalState::Approved)
 				.map(|(v, _)| v.clone())
 				.collect::<Vec<_>>();
 			let pending_approvals = request
-				.providers_with_approval_state
+				.operators_with_approval_state
 				.iter()
 				.filter(|(_, s)| *s == ApprovalState::Pending)
 				.map(|(v, _)| v.clone())
@@ -588,7 +584,7 @@ pub mod module {
 
 			// we emit this event regardless of the outcome of the approval.
 			Self::deposit_event(Event::ServiceRequestApproved {
-				provider: caller.clone(),
+				operator: caller.clone(),
 				request_id,
 				blueprint_id: request.blueprint,
 				pending_approvals,
@@ -600,18 +596,18 @@ pub mod module {
 				ServiceRequests::<T>::remove(request_id);
 
 				let service_id = NextInstanceId::<T>::get();
-				let providers = request
-					.providers_with_approval_state
+				let operators = request
+					.operators_with_approval_state
 					.into_iter()
 					.map(|(v, _)| v)
 					.collect::<Vec<_>>();
-				let providers = BoundedVec::<_, MaxProvidersPerService>::try_from(providers)
+				let operators = BoundedVec::<_, MaxOperatorsPerService>::try_from(operators)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
 					blueprint: request.blueprint,
 					owner: request.owner.clone(),
 					permitted_callers: request.permitted_callers.clone(),
-					providers,
+					operators,
 					ttl: request.ttl,
 				};
 				Instances::<T>::insert(service_id, service);
@@ -636,14 +632,14 @@ pub mod module {
 			let caller = ensure_signed(origin)?;
 			let mut request = ServiceRequests::<T>::get(request_id)?;
 			let updated = request
-				.providers_with_approval_state
+				.operators_with_approval_state
 				.iter_mut()
 				.find(|(v, _)| v == &caller)
 				.map(|(_, s)| *s = ApprovalState::Rejected);
 			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
 
 			Self::deposit_event(Event::ServiceRequestRejected {
-				provider: caller.clone(),
+				operator: caller.clone(),
 				request_id,
 				blueprint_id: request.blueprint,
 			});
@@ -657,6 +653,7 @@ pub mod module {
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			let service = Instances::<T>::get(service_id)?;
+			// TODO: allow permissioned callers to terminate the service?
 			ensure!(service.owner == caller, DispatchError::BadOrigin);
 			Instances::<T>::remove(service_id);
 
@@ -670,7 +667,7 @@ pub mod module {
 
 		/// Call a Job in the service.
 		/// The caller needs to be the owner of the service, or a permitted caller.
-		pub fn job_call(
+		pub fn call(
 			origin: OriginFor<T>,
 			#[pallet::compact] service_id: u64,
 			#[pallet::compact] job: u8,
@@ -707,7 +704,7 @@ pub mod module {
 		}
 
 		/// Submit the job result by using the service ID and call ID.
-		pub fn job_submit(
+		pub fn submit_result(
 			origin: OriginFor<T>,
 			#[pallet::compact] service_id: u64,
 			#[pallet::compact] call_id: u64,
@@ -718,7 +715,7 @@ pub mod module {
 			let service = Instances::<T>::get(job_call.service_id)?;
 			let (_, blueprint) = Blueprints::<T>::get(service.blueprint)?;
 
-			let is_provider = service.providers.iter().any(|v| v == &caller);
+			let is_provider = service.operators.iter().any(|v| v == &caller);
 			ensure!(is_provider, DispatchError::BadOrigin);
 			let job_def = blueprint
 				.jobs
@@ -730,7 +727,7 @@ pub mod module {
 			// TODO: verify the job result using verification hook.
 			JobResults::<T>::insert(service_id, call_id, job_result);
 			Self::deposit_event(Event::JobResultSubmitted {
-				provider: caller.clone(),
+				operator: caller.clone(),
 				service_id,
 				call_id,
 				job: job_call.job,

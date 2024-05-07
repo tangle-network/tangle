@@ -32,8 +32,8 @@ pub type MaxFieldsSize = ConstU32<1024>;
 pub type MaxMetadataLength = ConstU32<1024>;
 /// Maximum number of jobs per service.
 pub type MaxJobsPerService = ConstU32<32>;
-/// Maximum number of service providers per service.
-pub type MaxProvidersPerService = ConstU32<512>;
+/// Maximum number of Operators per service.
+pub type MaxOperatorsPerService = ConstU32<512>;
 /// Maximum number of permitted callers per service.
 pub type MaxPermittedCallers = ConstU32<32>;
 
@@ -177,7 +177,7 @@ impl frame_support::traits::PalletError for TypeCheckError {
 // -*** Service ***-
 
 /// Service Registration hook is a hook that will be called before registering the restaker as
-/// a service provider.
+/// an operator for the service.
 #[derive(
 	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen,
 )]
@@ -280,29 +280,29 @@ pub struct ServiceRequest<AccountId, BlockNumber> {
 	pub ttl: BlockNumber,
 	/// The supplied arguments for the service request.
 	pub args: BoundedVec<Field<AccountId>, MaxFields>,
-	/// The Selected Service Provider(s) with their approval state.
-	pub providers_with_approval_state:
-		BoundedVec<(AccountId, ApprovalState), MaxProvidersPerService>,
+	/// The Selected Operator(s) with their approval state.
+	pub operators_with_approval_state:
+		BoundedVec<(AccountId, ApprovalState), MaxOperatorsPerService>,
 }
 
 impl<AccountId, BlockNumber> ServiceRequest<AccountId, BlockNumber> {
-	/// Returns true if all the service providers are [ApprovalState::Approved].
+	/// Returns true if all the operators are [ApprovalState::Approved].
 	pub fn is_approved(&self) -> bool {
-		self.providers_with_approval_state
+		self.operators_with_approval_state
 			.iter()
 			.all(|(_, state)| state == &ApprovalState::Approved)
 	}
 
-	/// Returns true if any the service providers are [ApprovalState::Pending].
+	/// Returns true if any the operators are [ApprovalState::Pending].
 	pub fn is_pending(&self) -> bool {
-		self.providers_with_approval_state
+		self.operators_with_approval_state
 			.iter()
 			.any(|(_, state)| state == &ApprovalState::Pending)
 	}
 
-	/// Returns true if any the service providers are [ApprovalState::Rejected].
+	/// Returns true if any the operators are [ApprovalState::Rejected].
 	pub fn is_rejected(&self) -> bool {
-		self.providers_with_approval_state
+		self.operators_with_approval_state
 			.iter()
 			.any(|(_, state)| state == &ApprovalState::Rejected)
 	}
@@ -319,13 +319,13 @@ pub struct Service<AccountId, BlockNumber> {
 	pub owner: AccountId,
 	/// The Permitted caller(s) of the service.
 	pub permitted_callers: BoundedVec<AccountId, MaxPermittedCallers>,
-	/// The Selected Service Provider(s) for this service.
-	pub providers: BoundedVec<AccountId, MaxProvidersPerService>,
+	/// The Selected operators(s) for this service.
+	pub operators: BoundedVec<AccountId, MaxOperatorsPerService>,
 	/// The Lifetime of the service.
 	pub ttl: BlockNumber,
 }
 
-/// Service Provider Approval Prefrence.
+/// Operator's Approval Prefrence.
 #[derive(
 	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
 )]
@@ -345,28 +345,28 @@ pub enum ApprovalPrefrence {
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ApprovalState {
-	/// The service provider is pending approval.
+	/// The operator is pending approval.
 	#[codec(index = 0)]
 	#[default]
 	Pending,
-	/// The service provider is approved to provide the service.
+	/// The operator is approved to provide the service.
 	#[codec(index = 1)]
 	Approved,
-	/// The service provider is rejected to provide the service.
+	/// The operator is rejected to provide the service.
 	#[codec(index = 2)]
 	Rejected,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ServiceProviderPrefrences {
-	/// The service provider ECDSA public key.
+pub struct OperatorPreferences {
+	/// The operator ECDSA public key.
 	pub key: ecdsa::Public,
-	/// The approval prefrence of the service provider.
+	/// The approval prefrence of the operator.
 	pub approval: ApprovalPrefrence,
 }
 
-impl ServiceProviderPrefrences {
+impl OperatorPreferences {
 	/// Encode the fields to ethabi bytes.
 	pub fn to_ethabi(&self) -> Vec<ethabi::Token> {
 		let tokens: Vec<ethabi::Token> = vec![

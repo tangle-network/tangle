@@ -8618,7 +8618,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "ethabi 15.0.0",
  "ethereum",
