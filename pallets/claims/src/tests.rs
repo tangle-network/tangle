@@ -6,6 +6,7 @@ use hex_literal::hex;
 use parity_scale_codec::Encode;
 use secp_utils::*;
 use sp_core::ConstU32;
+use sp_core::Pair;
 use sp_runtime::{BoundedVec, TokenError::Frozen};
 
 // The testing primitives are very useful for avoiding having to work with signatures
@@ -895,6 +896,21 @@ fn test_claim_from_substrate_address_to_evm() {
 			),
 			Error::<Test>::PotUnderflow
 		);
+	});
+}
+
+#[test]
+fn test_claim_alice_signed_extrinsic() {
+	new_test_ext().execute_with(|| {
+		let original_total_claims = Total::<Test>::get();
+		let claim_of_alice = 500;
+		let alice_account_id_32 = AccountId32::from(alice_sr25519().public());
+		assert_ok!(ClaimsPallet::claim_signed(
+			RuntimeOrigin::signed(alice_account_id_32.clone()),
+			None,
+		));
+		assert_eq!(Total::<Test>::get(), original_total_claims - claim_of_alice);
+		assert_eq!(Balances::free_balance(alice_account_id_32), 500);
 	});
 }
 

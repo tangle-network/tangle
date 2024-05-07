@@ -180,7 +180,6 @@ fn test_signing_rules() {
 		let contract = SigningRules::new(Address::from(signing_rules_address), client);
 
 		let phase_1_job_id = 0u64;
-		let phase_1_job_details: Bytes = submission.job_type.encode().into();
 		let threshold = 3;
 		let use_democracy = false;
 		let voters = vec![
@@ -191,14 +190,9 @@ fn test_signing_rules() {
 			pairs[4].address,
 		];
 		let expiry = 1000;
-		let ethers_call: FunctionCall<_, _, _> = contract.initialize(
-			phase_1_job_id,
-			phase_1_job_details.clone(),
-			threshold,
-			use_democracy,
-			voters,
-			expiry,
-		);
+		let ttl = 1000;
+		let ethers_call: FunctionCall<_, _, _> =
+			contract.initialize(phase_1_job_id, threshold, use_democracy, voters, expiry, ttl);
 		let initialize_tx = eip1559_contract_call_unsigned_transaction(
 			signing_rules_address,
 			ethers_call.calldata().unwrap().to_vec(),
@@ -209,7 +203,7 @@ fn test_signing_rules() {
 
 		let phase_2_job_details: Bytes = b"phase2".into();
 		let vote_proposal_call: FunctionCall<_, _, _> =
-			contract.vote_proposal(phase_1_job_id, phase_1_job_details, phase_2_job_details);
+			contract.vote_proposal(phase_1_job_id, phase_2_job_details);
 		let vote_proposal_tx = eip1559_contract_call_unsigned_transaction(
 			signing_rules_address,
 			vote_proposal_call.calldata().unwrap().to_vec(),

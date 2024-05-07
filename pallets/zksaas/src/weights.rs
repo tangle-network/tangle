@@ -45,16 +45,6 @@ pub trait WeightInfo {
 	fn set_fee() -> Weight;
 }
 
-/// Weights for pallet_dkg using the Acala node and recommended hardware.
-pub struct AcalaWeight<T>(PhantomData<T>);
-impl<T: frame_system::Config> WeightInfo for AcalaWeight<T> {
-	fn set_fee() -> Weight {
-		Weight::from_parts(32_778_000, 0)
-			.saturating_add(T::DbWeight::get().reads(1_u64))
-			.saturating_add(T::DbWeight::get().writes(1_u64))
-	}
-}
-
 // For backwards compatibility and tests
 impl WeightInfo for () {
 	fn set_fee() -> Weight {

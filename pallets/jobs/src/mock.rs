@@ -22,7 +22,7 @@ use frame_election_provider_support::{
 };
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU128, ConstU32, ConstU64, Contains, Everything},
+	traits::{ConstU128, ConstU32, ConstU64, Contains},
 };
 use pallet_session::historical as pallet_session_historical;
 use sp_core::{
@@ -65,7 +65,7 @@ impl frame_system::Config for Runtime {
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type DbWeight = ();
-	type BaseCallFilter = Everything;
+	type BaseCallFilter = BaseFilter;
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
