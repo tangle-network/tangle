@@ -17,7 +17,6 @@ use ethers::providers::{Http, Provider};
 use ethers::signers::LocalWallet;
 use ethers::signers::Signer as EthSigner;
 use ethers::types::{Address, Bytes};
-use parity_scale_codec::Encode;
 use serde_json::Value;
 use sp_core::{Pair, H256, U256};
 use std::str::FromStr;
