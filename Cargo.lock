@@ -8369,6 +8369,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-evm-precompile-services"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "ethereum",
+ "ethers",
+ "fp-account",
+ "fp-consensus",
+ "fp-dynamic-fee",
+ "fp-ethereum",
+ "fp-evm",
+ "fp-rpc",
+ "fp-self-contained",
+ "fp-storage",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "hex-literal 0.4.1",
+ "libsecp256k1",
+ "log",
+ "num_enum 0.5.11",
+ "pallet-balances",
+ "pallet-base-fee",
+ "pallet-dynamic-fee",
+ "pallet-ethereum",
+ "pallet-evm",
+ "pallet-evm-chain-id",
+ "pallet-services",
+ "pallet-timestamp",
+ "parity-scale-codec 3.6.9",
+ "precompile-utils",
+ "rustc-hex",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sha3 0.10.8",
+ "smallvec",
+ "sp-core",
+ "sp-io",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-evm-precompile-sha3fips"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier.git?branch=polkadot-v1.7.0#c5d6daa9ffd46c0a85915526aa26d200fd635e30"
@@ -8797,6 +8843,53 @@ dependencies = [
  "sp-runtime",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
  "sp-weights",
+]
+
+[[package]]
+name = "pallet-services"
+version = "1.0.2"
+dependencies = [
+ "ethabi 15.0.0",
+ "ethereum",
+ "ethers",
+ "fp-account",
+ "fp-consensus",
+ "fp-dynamic-fee",
+ "fp-ethereum",
+ "fp-evm",
+ "fp-rpc",
+ "fp-self-contained",
+ "fp-storage",
+ "frame-benchmarking",
+ "frame-election-provider-support",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "hex-literal 0.4.1",
+ "libsecp256k1",
+ "pallet-balances",
+ "pallet-base-fee",
+ "pallet-dynamic-fee",
+ "pallet-ethereum",
+ "pallet-evm",
+ "pallet-evm-chain-id",
+ "pallet-roles",
+ "pallet-session",
+ "pallet-staking",
+ "pallet-timestamp",
+ "parity-scale-codec 3.6.9",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "smallvec",
+ "sp-core",
+ "sp-io",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-staking",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+ "tangle-crypto-primitives",
+ "tangle-primitives",
 ]
 
 [[package]]
@@ -15344,6 +15437,7 @@ dependencies = [
  "pallet-evm-precompile-preimage",
  "pallet-evm-precompile-proxy",
  "pallet-evm-precompile-registry",
+ "pallet-evm-precompile-services",
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-evm-precompile-staking",
@@ -15363,6 +15457,7 @@ dependencies = [
  "pallet-proxy",
  "pallet-roles",
  "pallet-scheduler",
+ "pallet-services",
  "pallet-session",
  "pallet-staking 28.0.0",
  "pallet-staking-reward-curve",

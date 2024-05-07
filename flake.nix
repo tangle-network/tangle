@@ -11,12 +11,20 @@
         flake-utils.follows = "flake-utils";
       };
     };
+    # EVM dev tools
+    foundry = {
+      url = "github:shazow/foundry.nix/monthly";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
   };
 
-  outputs = { self, nixpkgs, rust-overlay, flake-utils }:
+  outputs = { self, nixpkgs, rust-overlay, foundry, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        overlays = [ (import rust-overlay) ];
+        overlays = [ (import rust-overlay) foundry.overlay ];
         pkgs = import nixpkgs {
           inherit system overlays;
         };
@@ -49,6 +57,7 @@
             pkgs.nodePackages.yarn
             # Finally the toolchain
             toolchain
+            pkgs.foundry-bin
           ];
           packages = [
             pkgs.taplo
