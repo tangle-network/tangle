@@ -87,6 +87,7 @@ pallet-vesting = { workspace = true }
 pallet-airdrop-claims = { workspace = true }
 pallet-dkg = { workspace = true }
 pallet-jobs = { workspace = true }
+pallet-services = { workspace = true }
 pallet-jobs-rpc-runtime-api = { workspace = true }
 pallet-roles = { workspace = true }
 pallet-zksaas = { workspace = true }
@@ -122,6 +123,7 @@ pallet-evm-precompile-batch = { workspace = true }
 pallet-evm-precompile-call-permit = { workspace = true }
 pallet-evm-precompile-democracy = { workspace = true }
 pallet-evm-precompile-jobs = { workspace = true }
+pallet-evm-precompile-services = { workspace = true }
 pallet-evm-precompile-preimage = { workspace = true }
 pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
@@ -157,6 +159,7 @@ runtime-benchmarks = [
   # Tangle
   "pallet-roles/runtime-benchmarks",
   "pallet-jobs/runtime-benchmarks",
+  "pallet-services/runtime-benchmarks",
   "pallet-airdrop-claims/runtime-benchmarks",
 ]
 
@@ -222,6 +225,7 @@ std = [
   "tangle-primitives/std",
   "tangle-crypto-primitives/std",
   "pallet-jobs/std",
+  "pallet-services/std",
   "pallet-roles/std",
   "pallet-dkg/std",
   "pallet-zksaas/std",
@@ -264,6 +268,7 @@ std = [
   "pallet-evm-precompile-registry/std",
   "pallet-evm-precompile-staking/std",
   "pallet-evm-precompile-jobs/std",
+  "pallet-evm-precompile-services/std",
   "pallet-evm-precompile-vesting/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]

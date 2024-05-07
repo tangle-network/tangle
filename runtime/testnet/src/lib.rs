@@ -38,6 +38,7 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
+use frontier_evm::DefaultBaseFeePerGas;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
@@ -1296,6 +1297,60 @@ pallet_staking_reward_curve::build! {
 }
 
 parameter_types! {
+	pub const ServicesPalletId: PalletId = PalletId(*b"py/srvcs");
+}
+
+pub struct PalletEvmRunner;
+
+impl pallet_services::EvmRunner<Runtime> for PalletEvmRunner {
+	type Error = pallet_evm::Error<Runtime>;
+
+	fn call(
+		source: sp_core::H160,
+		target: sp_core::H160,
+		input: Vec<u8>,
+		value: sp_core::U256,
+		gas_limit: u64,
+		is_transactional: bool,
+		validate: bool,
+	) -> Result<fp_evm::CallInfo, pallet_services::traits::RunnerError<Self::Error>> {
+		let max_fee_per_gas = DefaultBaseFeePerGas::get();
+		let max_priority_fee_per_gas =
+			max_fee_per_gas.saturating_mul(U256::from(3) / U256::from(2));
+		let nonce = None;
+		let access_list = Default::default();
+		let weight_limit = None;
+		let proof_size_base_cost = None;
+		<<Runtime as pallet_evm::Config>::Runner as pallet_evm::Runner<Runtime>>::call(
+			source,
+			target,
+			input,
+			value,
+			gas_limit,
+			Some(max_fee_per_gas),
+			Some(max_priority_fee_per_gas),
+			nonce,
+			access_list,
+			is_transactional,
+			validate,
+			weight_limit,
+			proof_size_base_cost,
+			<Runtime as pallet_evm::Config>::config(),
+		)
+		.map_err(|o| pallet_services::traits::RunnerError { error: o.error, weight: o.weight })
+	}
+}
+
+impl pallet_services::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
+	type Currency = Balances;
+	type PalletId = ServicesPalletId;
+	type EvmRunner = PalletEvmRunner;
+	type WeightInfo = ();
+}
+
+parameter_types! {
 	pub const MaxValidators : u32 = 1000;
 	pub MaxRestake: Percent = Percent::from_percent(50);
 	pub const RestakerRewardCurve: &'static PiecewiseLinear<'static> = &RESTAKER_REWARD_CURVE;
@@ -1482,6 +1537,7 @@ construct_runtime!(
 		Claims: pallet_airdrop_claims,
 		Roles: pallet_roles,
 		Jobs: pallet_jobs,
+		Services: pallet_services,
 		Dkg: pallet_dkg,
 		ZkSaaS: pallet_zksaas,
 		Proxy: pallet_proxy,

@@ -18,6 +18,30 @@
         "type": "github"
       }
     },
+    "foundry": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1714727549,
+        "narHash": "sha256-CWXRTxxcgMfQubJugpeg3yVWIfm70MYTtgaKWKgD60U=",
+        "owner": "shazow",
+        "repo": "foundry.nix",
+        "rev": "47cf189ec395eda4b3e0623179d1075c8027ca97",
+        "type": "github"
+      },
+      "original": {
+        "owner": "shazow",
+        "ref": "monthly",
+        "repo": "foundry.nix",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1713254108,
@@ -37,6 +61,7 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
+        "foundry": "foundry",
         "nixpkgs": "nixpkgs",
         "rust-overlay": "rust-overlay"
       }

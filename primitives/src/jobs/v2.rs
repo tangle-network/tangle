@@ -19,122 +19,111 @@
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::RuntimeDebug;
-use sp_runtime::traits::Get;
+use sp_core::{ecdsa, RuntimeDebug};
 
 mod field;
 pub use field::*;
 
+/// Maximum number of fields in a job call.
+pub type MaxFields = ConstU32<64>;
+/// Maximum size of a field in a job call.
+pub type MaxFieldsSize = ConstU32<1024>;
+/// Maximum length of metadata string length.
+pub type MaxMetadataLength = ConstU32<1024>;
+/// Maximum number of jobs per service.
+pub type MaxJobsPerService = ConstU32<32>;
+/// Maximum number of Operators per service.
+pub type MaxOperatorsPerService = ConstU32<512>;
+/// Maximum number of permitted callers per service.
+pub type MaxPermittedCallers = ConstU32<32>;
+
 /// A Job Definition is a definition of a job that can be called.
 /// It contains the input and output fields of the job with the permitted caller.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobDefinition<AccountId, MaxFields: Get<u32>, MaxMetadataLength: Get<u32>> {
+pub struct JobDefinition {
 	/// The metadata of the job.
-	pub metadata: JobMetadata<MaxMetadataLength>,
+	pub metadata: JobMetadata,
 	/// These are parameters that are required for this job.
 	/// i.e. the input.
 	pub params: BoundedVec<FieldType, MaxFields>,
 	/// These are the result, the return values of this job.
 	/// i.e. the output.
 	pub result: BoundedVec<FieldType, MaxFields>,
-	/// The caller who can trigger this submission of this job type
-	pub permitted_caller: Option<AccountId>,
 	/// The verifier of the job result.
 	pub verifier: JobResultVerifier,
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobMetadata<MaxLength: Get<u32>> {
+pub struct JobMetadata {
 	/// The Job name.
-	pub name: BoundedString<MaxLength>,
+	pub name: BoundedString<MaxMetadataLength>,
 	/// The Job description.
-	pub description: Option<BoundedString<MaxLength>>,
+	pub description: Option<BoundedString<MaxMetadataLength>>,
 }
 
 /// A Job Call is a call to execute a job using it's job definition.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobCall<AccountId, MaxFieldsSize: Get<u32>, MaxFields: Get<u32>> {
+pub struct JobCall<AccountId> {
 	/// The Service ID that this call is for.
 	pub service_id: u64,
 	/// The job definition index in the service that this call is for.
-	pub job_index: u64,
+	pub job: u8,
 	/// The supplied arguments for this job call.
-	pub args: BoundedVec<Field<AccountId, MaxFieldsSize>, MaxFields>,
+	pub args: BoundedVec<Field<AccountId>, MaxFields>,
 }
 
-impl<AccountId: Clone, MaxFieldsSize: Get<u32> + Clone, MaxFields: Get<u32> + Clone>
-	JobCall<AccountId, MaxFieldsSize, MaxFields>
-{
-	/// Check if the supplied arguments match the job definition types.
-	pub fn type_check<MaxMetadataLength: Get<u32>>(
-		&self,
-		job_def: &JobDefinition<AccountId, MaxFields, MaxMetadataLength>,
-	) -> Result<(), TypeCheckError> {
-		if job_def.params.len() != self.args.len() {
-			return Err(TypeCheckError::NotEnoughArguments {
-				expected: job_def.params.len() as u8,
-				actual: self.args.len() as u8,
-			});
-		}
-
-		for i in 0..self.args.len() {
-			let arg = &self.args[i];
-			let expected = &job_def.params[i];
-			if arg != expected {
-				return Err(TypeCheckError::ArgumentTypeMismatch {
-					index: i as u8,
-					expected: expected.clone(),
-					actual: arg.clone().into(),
-				});
-			}
-		}
-
-		Ok(())
+/// Type checks the supplied arguments against the parameters.
+pub fn type_checker<AccountId: Clone>(
+	params: &[FieldType],
+	args: &[Field<AccountId>],
+) -> Result<(), TypeCheckError> {
+	if params.len() != args.len() {
+		return Err(TypeCheckError::NotEnoughArguments {
+			expected: params.len() as u8,
+			actual: args.len() as u8,
+		});
 	}
-}
-
-impl<AccountId: Clone, MaxFieldsSize: Get<u32> + Clone, MaxFields: Get<u32> + Clone>
-	JobCallResult<AccountId, MaxFieldsSize, MaxFields>
-{
-	/// Check if the supplied result match the job definition types.
-	pub fn type_check<MaxMetadataLength: Get<u32>>(
-		&self,
-		job_def: &JobDefinition<AccountId, MaxFields, MaxMetadataLength>,
-	) -> Result<(), TypeCheckError> {
-		if job_def.result.len() != self.result.len() {
-			return Err(TypeCheckError::NotEnoughArguments {
-				expected: job_def.result.len() as u8,
-				actual: self.result.len() as u8,
+	for i in 0..args.len() {
+		let arg = &args[i];
+		let expected = &params[i];
+		if arg != expected {
+			return Err(TypeCheckError::ArgumentTypeMismatch {
+				index: i as u8,
+				expected: expected.clone(),
+				actual: arg.clone().into(),
 			});
 		}
+	}
+	Ok(())
+}
 
-		for i in 0..self.result.len() {
-			let arg = &self.result[i];
-			let expected = &job_def.result[i];
-			if arg != expected {
-				return Err(TypeCheckError::ResultTypeMismatch {
-					index: i as u8,
-					expected: expected.clone(),
-					actual: arg.clone().into(),
-				});
-			}
-		}
-
-		Ok(())
+impl<AccountId: Clone> JobCall<AccountId> {
+	/// Check if the supplied arguments match the job definition types.
+	pub fn type_check(&self, job_def: &JobDefinition) -> Result<(), TypeCheckError> {
+		type_checker(&job_def.params, &self.args)
 	}
 }
 
 /// A Job Call Result is the result of a job call.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobCallResult<AccountId, MaxFieldsSize: Get<u32>, MaxFields: Get<u32>> {
+pub struct JobCallResult<AccountId> {
+	/// The id of the service.
+	pub service_id: u64,
 	/// The id of the job call.
 	pub call_id: u64,
 	/// The result of the job call.
-	pub result: BoundedVec<Field<AccountId, MaxFieldsSize>, MaxFields>,
+	pub result: BoundedVec<Field<AccountId>, MaxFields>,
+}
+
+impl<AccountId: Clone> JobCallResult<AccountId> {
+	/// Check if the supplied result match the job definition types.
+	pub fn type_check(&self, job_def: &JobDefinition) -> Result<(), TypeCheckError> {
+		type_checker(&job_def.result, &self.result)
+	}
 }
 
 /// A Job Result verifier is a verifier that will verify the result of a job call
@@ -181,73 +170,211 @@ pub enum TypeCheckError {
 	},
 }
 
+impl frame_support::traits::PalletError for TypeCheckError {
+	const MAX_ENCODED_SIZE: usize = 2;
+}
+
 // -*** Service ***-
 
 /// Service Registration hook is a hook that will be called before registering the restaker as
-/// a service provider.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen)]
+/// an operator for the service.
+#[derive(
+	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ServiceRegistrationHook {
 	/// No hook is needed, the restaker will be registered immediately.
+	#[default]
 	None,
 	/// A Smart contract that will be called to determine if the restaker will be registered.
 	Evm(sp_core::H160),
 }
 
 /// Service Request hook is a hook that will be called before creating a service from the service blueprint.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen)]
+#[derive(
+	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ServiceRequestHook {
 	/// No hook is needed, the caller will get the service created immediately.
+	#[default]
 	None,
 	/// A Smart contract that will be called to determine if the caller meets the requirements to create a service.
 	Evm(sp_core::H160),
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ServiceMetadata<MaxLength: Get<u32>> {
+pub struct ServiceMetadata {
 	/// The Service name.
-	pub name: BoundedString<MaxLength>,
+	pub name: BoundedString<MaxMetadataLength>,
 	/// The Service description.
-	pub description: Option<BoundedString<MaxLength>>,
+	pub description: Option<BoundedString<MaxMetadataLength>>,
 	/// The Service author.
 	/// Could be a company or a person.
-	pub author: Option<BoundedString<MaxLength>>,
+	pub author: Option<BoundedString<MaxMetadataLength>>,
 	/// The Job category.
-	pub category: Option<BoundedString<MaxLength>>,
+	pub category: Option<BoundedString<MaxMetadataLength>>,
 	/// Code Repository URL.
 	/// Could be a github, gitlab, or any other code repository.
-	pub code_repository: Option<BoundedString<MaxLength>>,
+	pub code_repository: Option<BoundedString<MaxMetadataLength>>,
 	/// Service Logo URL.
-	pub logo: Option<BoundedString<MaxLength>>,
+	pub logo: Option<BoundedString<MaxMetadataLength>>,
 	/// Service Website URL.
-	pub website: Option<BoundedString<MaxLength>>,
+	pub website: Option<BoundedString<MaxMetadataLength>>,
 	/// Service License.
-	pub license: Option<BoundedString<MaxLength>>,
+	pub license: Option<BoundedString<MaxMetadataLength>>,
 }
 
 /// A Service Blueprint is a the main definition of a service.
 /// it contains the metadata of the service, the job definitions, and other hooks, along with the
 /// gadget that will be executed when one of the jobs is calling this service.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ServiceBlueprint<
-	AccountId,
-	MaxJobs: Get<u32>,
-	MaxFields: Get<u32>,
-	MaxMetadataLength: Get<u32>,
-> {
+pub struct ServiceBlueprint {
 	/// The metadata of the service.
-	pub metadata: ServiceMetadata<MaxMetadataLength>,
+	pub metadata: ServiceMetadata,
 	/// The job definitions that are available in this service.
-	pub jobs: BoundedVec<JobDefinition<AccountId, MaxFields, MaxMetadataLength>, MaxJobs>,
+	pub jobs: BoundedVec<JobDefinition, MaxJobsPerService>,
 	/// The registration hook that will be called before restaker registration.
 	pub registration_hook: ServiceRegistrationHook,
+	/// The parameters that are required for the service registration.
+	pub registration_params: BoundedVec<FieldType, MaxFields>,
 	/// The request hook that will be called before creating a service from the service blueprint.
 	pub request_hook: ServiceRequestHook,
+	/// The parameters that are required for the service request.
+	pub request_params: BoundedVec<FieldType, MaxFields>,
 	/// The gadget that will be executed for the service.
 	pub gadget: Gadget,
+}
+
+impl ServiceBlueprint {
+	/// Check if the supplied arguments match the registration parameters.
+	pub fn type_check_registration<AccountId: Clone>(
+		&self,
+		args: &[Field<AccountId>],
+	) -> Result<(), TypeCheckError> {
+		type_checker(&self.registration_params, args)
+	}
+
+	/// Check if the supplied arguments match the request parameters.
+	pub fn type_check_request<AccountId: Clone>(
+		&self,
+		args: &[Field<AccountId>],
+	) -> Result<(), TypeCheckError> {
+		type_checker(&self.request_params, args)
+	}
+}
+
+/// A service request is a request to create a service from a service blueprint.
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct ServiceRequest<AccountId, BlockNumber> {
+	/// The service blueprint ID.
+	pub blueprint: u64,
+	/// The owner of the service.
+	pub owner: AccountId,
+	/// The permitted caller(s) of the service.
+	pub permitted_callers: BoundedVec<AccountId, MaxPermittedCallers>,
+	/// The Lifetime of the service.
+	pub ttl: BlockNumber,
+	/// The supplied arguments for the service request.
+	pub args: BoundedVec<Field<AccountId>, MaxFields>,
+	/// The Selected Operator(s) with their approval state.
+	pub operators_with_approval_state:
+		BoundedVec<(AccountId, ApprovalState), MaxOperatorsPerService>,
+}
+
+impl<AccountId, BlockNumber> ServiceRequest<AccountId, BlockNumber> {
+	/// Returns true if all the operators are [ApprovalState::Approved].
+	pub fn is_approved(&self) -> bool {
+		self.operators_with_approval_state
+			.iter()
+			.all(|(_, state)| state == &ApprovalState::Approved)
+	}
+
+	/// Returns true if any the operators are [ApprovalState::Pending].
+	pub fn is_pending(&self) -> bool {
+		self.operators_with_approval_state
+			.iter()
+			.any(|(_, state)| state == &ApprovalState::Pending)
+	}
+
+	/// Returns true if any the operators are [ApprovalState::Rejected].
+	pub fn is_rejected(&self) -> bool {
+		self.operators_with_approval_state
+			.iter()
+			.any(|(_, state)| state == &ApprovalState::Rejected)
+	}
+}
+
+/// A Service is an instance of a service blueprint.
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[scale_info(skip_type_params(AccountId, BlockNumber))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct Service<AccountId, BlockNumber> {
+	/// The Blueprint ID of the service.
+	pub blueprint: u64,
+	/// The owner of the service.
+	pub owner: AccountId,
+	/// The Permitted caller(s) of the service.
+	pub permitted_callers: BoundedVec<AccountId, MaxPermittedCallers>,
+	/// The Selected operators(s) for this service.
+	pub operators: BoundedVec<AccountId, MaxOperatorsPerService>,
+	/// The Lifetime of the service.
+	pub ttl: BlockNumber,
+}
+
+/// Operator's Approval Prefrence.
+#[derive(
+	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
+)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum ApprovalPrefrence {
+	/// No approval is required to provide the service.
+	#[codec(index = 0)]
+	#[default]
+	None,
+	/// The approval is required to provide the service.
+	#[codec(index = 1)]
+	Required,
+}
+
+#[derive(
+	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
+)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum ApprovalState {
+	/// The operator is pending approval.
+	#[codec(index = 0)]
+	#[default]
+	Pending,
+	/// The operator is approved to provide the service.
+	#[codec(index = 1)]
+	Approved,
+	/// The operator is rejected to provide the service.
+	#[codec(index = 2)]
+	Rejected,
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct OperatorPreferences {
+	/// The operator ECDSA public key.
+	pub key: ecdsa::Public,
+	/// The approval prefrence of the operator.
+	pub approval: ApprovalPrefrence,
+}
+
+impl OperatorPreferences {
+	/// Encode the fields to ethabi bytes.
+	pub fn to_ethabi(&self) -> Vec<ethabi::Token> {
+		let tokens: Vec<ethabi::Token> = vec![
+			ethabi::Token::Bytes(self.key.0.to_vec()),
+			// TODO: Add ApprovalPrefrence to ethabi.
+		];
+		tokens
+	}
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
@@ -262,6 +389,12 @@ pub enum Gadget {
 	/// A Gadget that is a container that will be executed.
 	/// inside the shell using the container runtime (e.g. Docker, Podman, etc.)
 	Container(ContainerGadget),
+}
+
+impl Default for Gadget {
+	fn default() -> Self {
+		Gadget::Wasm(WasmGadget::IPFS(Default::default()))
+	}
 }
 
 /// A WASM binary that is stored in the Github release.
@@ -310,10 +443,13 @@ pub struct ImageRegistryFetcher {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum WasmGadget {
 	/// A WASM binary that is stored in the IPFS.
+	#[codec(index = 0)]
 	IPFS(BoundedVec<u8, ConstU32<64>>),
 	/// A WASM binary that is stored in the Github release.
+	#[codec(index = 1)]
 	Github(GithubFetcher),
 	/// A WASM binary that is stored in the remote server.
+	#[codec(index = 2)]
 	Remote(RemoteFetcher),
 }
 
@@ -322,10 +458,13 @@ pub enum WasmGadget {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum NativeGadget {
 	/// A Native binary that is stored in the IPFS.
+	#[codec(index = 0)]
 	IPFS(BoundedVec<u8, ConstU32<64>>),
 	/// A Native binary that is stored in the Github release.
+	#[codec(index = 1)]
 	Github(GithubFetcher),
 	/// A Native binary that is stored in the remote server.
+	#[codec(index = 2)]
 	Remote(RemoteFetcher),
 }
 
@@ -333,7 +472,9 @@ pub enum NativeGadget {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ContainerGadget {
 	/// An Image that is stored in the IPFS.
+	#[codec(index = 0)]
 	IPFS(BoundedVec<u8, ConstU32<64>>),
 	/// An Image that is stored in a remote container registry.
+	#[codec(index = 1)]
 	Registry(ImageRegistryFetcher),
 }
