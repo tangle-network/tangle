@@ -1043,10 +1043,9 @@ impl pallet_tx_pause::Config for Runtime {
 }
 
 parameter_types! {
-	pub const BasicDeposit: Balance = deposit(0, 200);
-	pub const ByteDeposit: Balance = deposit(0, 50);
-	pub const FieldDeposit: Balance = deposit(0, 33);
-	pub const SubAccountDeposit: Balance = deposit(1, 53);
+	pub const BasicDeposit: Balance = deposit(0, 100);
+	pub const ByteDeposit: Balance = deposit(0, 100);
+	pub const SubAccountDeposit: Balance = deposit(1, 1);
 	pub const MaxSubAccounts: u32 = 100;
 	#[derive(Serialize, Deserialize)]
 	pub const MaxAdditionalFields: u32 = 100;
