@@ -123,16 +123,6 @@ impl From<TestAccount> for H160 {
 		}
 	}
 }
-pub trait H160Conversion {
-	fn to_h160(&self) -> H160;
-}
-
-impl H160Conversion for AccountId32 {
-	fn to_h160(&self) -> H160 {
-		let x = self.encode()[31];
-		H160::repeat_byte(x)
-	}
-}
 
 impl From<TestAccount> for AccountId32 {
 	fn from(x: TestAccount) -> Self {

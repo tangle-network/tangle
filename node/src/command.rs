@@ -23,6 +23,7 @@ use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 use tangle_primitives::types::Block;
 
+#[allow(dead_code)]
 trait IdentifyChain {
 	fn is_mainnet(&self) -> bool;
 	fn is_testnet(&self) -> bool;
