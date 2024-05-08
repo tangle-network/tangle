@@ -23,3 +23,11 @@ pub trait EvmRunner<T: crate::Config> {
 		validate: bool,
 	) -> Result<CallInfo, RunnerError<Self::Error>>;
 }
+
+/// A mapping function that converts EVM gas to Substrate weight and vice versa
+pub trait EvmGasWeightMapping {
+    /// Convert EVM gas to Substrate weight
+	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight;
+    /// Convert Substrate weight to EVM gas
+	fn weight_to_gas(weight: Weight) -> u64;
+}

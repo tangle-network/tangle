@@ -4,8 +4,9 @@ use core::iter;
 use alloc::{string::String, vec, vec::Vec};
 
 use ethabi::Token;
+use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use sp_core::{H160, U256};
-use sp_runtime::DispatchResultWithInfo;
+use sp_runtime::{traits::AccountIdConversion, traits::UniqueSaturatedInto};
 use tangle_primitives::jobs::v2::{
 	Field, OperatorPreferences, ServiceBlueprint, ServiceRegistrationHook, ServiceRequestHook,
 };
@@ -13,13 +14,26 @@ use tangle_primitives::jobs::v2::{
 use super::*;
 
 impl<T: Config> Pallet<T> {
+	/// Returns the account id of the pallet.
+	pub fn account_id() -> T::AccountId {
+		T::PalletId::get().into_account_truncating()
+	}
+
+	/// Returns the address of the pallet.
+	pub fn address() -> H160 {
+		// Convert the account id to bytes.
+		let account_id = Self::account_id().encode();
+		// Convert the first 20 bytes to an H160.
+		H160::from_slice(&account_id[0..20])
+	}
+
 	pub fn check_registeration_hook(
 		blueprint: &ServiceBlueprint,
 		prefrences: &OperatorPreferences,
 		registration_args: &[Field<T::AccountId>],
-	) -> DispatchResultWithInfo<bool> {
-		let allowed = match blueprint.registration_hook {
-			ServiceRegistrationHook::None => true,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		let (allowed, weight) = match blueprint.registration_hook {
+			ServiceRegistrationHook::None => (true, Weight::zero()),
 			ServiceRegistrationHook::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
@@ -49,18 +63,12 @@ impl<T: Config> Pallet<T> {
 				let data = call.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 
-				let call_info = Self::evm_call(
-					T::RuntimeEvmAddress::get(),
-					contract,
-					U256::from(0),
-					data,
-					gas_limit,
-				)
-				.map_err(|r| r.error.into())?;
-				call_info.exit_reason.is_succeed()
+				let info =
+					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
+				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
 		};
-		Ok(allowed)
+		Ok((allowed, weight))
 	}
 
 	pub fn check_request_hook(
@@ -68,9 +76,9 @@ impl<T: Config> Pallet<T> {
 		service_id: u64,
 		participants: &[OperatorPreferences],
 		request_args: &[Field<T::AccountId>],
-	) -> DispatchResultWithInfo<bool> {
-		let allowed = match blueprint.request_hook {
-			ServiceRequestHook::None => true,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		let (allowed, weight) = match blueprint.request_hook {
+			ServiceRequestHook::None => (true, Weight::zero()),
 			ServiceRequestHook::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
@@ -106,18 +114,13 @@ impl<T: Config> Pallet<T> {
 					.map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 
-				let call_info = Self::evm_call(
-					T::RuntimeEvmAddress::get(),
-					contract,
-					U256::from(0),
-					data,
-					gas_limit,
-				)
-				.map_err(|r| r.error.into())?;
-				call_info.exit_reason.is_succeed()
+				let info =
+					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
+				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
 		};
-		Ok(allowed)
+
+		Ok((allowed, weight))
 	}
 
 	pub fn check_job_call_hook(
@@ -126,9 +129,9 @@ impl<T: Config> Pallet<T> {
 		job: u8,
 		job_call_id: u64,
 		inputs: &[Field<T::AccountId>],
-	) -> DispatchResultWithInfo<bool> {
-		let allowed = match blueprint.request_hook {
-			ServiceRequestHook::None => true,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		let (allowed, weight) = match blueprint.request_hook {
+			ServiceRequestHook::None => (true, Weight::zero()),
 			ServiceRequestHook::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
@@ -168,18 +171,12 @@ impl<T: Config> Pallet<T> {
 					.map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 
-				let call_info = Self::evm_call(
-					T::RuntimeEvmAddress::get(),
-					contract,
-					U256::from(0),
-					data,
-					gas_limit,
-				)
-				.map_err(|r| r.error.into())?;
-				call_info.exit_reason.is_succeed()
+				let info =
+					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
+				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
 		};
-		Ok(allowed)
+		Ok((allowed, weight))
 	}
 
 	pub fn evm_call(
@@ -188,9 +185,35 @@ impl<T: Config> Pallet<T> {
 		value: U256,
 		data: Vec<u8>,
 		gas_limit: u64,
-	) -> Result<fp_evm::CallInfo, RunnerError<<T::EvmRunner as EvmRunner<T>>::Error>> {
+	) -> Result<fp_evm::CallInfo, DispatchErrorWithPostInfo> {
 		let transactional = true;
 		let validate = false;
-		T::EvmRunner::call(from, to, data, value, gas_limit, transactional, validate)
+		let result = T::EvmRunner::call(from, to, data, value, gas_limit, transactional, validate);
+		match result {
+			Ok(info) => Ok(info),
+			Err(e) => {
+				return Err(DispatchErrorWithPostInfo {
+					post_info: PostDispatchInfo {
+						actual_weight: Some(e.weight),
+						pays_fee: Pays::Yes,
+					},
+					error: e.error.into(),
+				})
+			},
+		}
+	}
+
+	/// Convert the gas used in the call info to weight.
+	pub fn weight_from_call_info(info: &fp_evm::CallInfo) -> Weight {
+		let mut gas_to_weight = T::EvmGasWeightMapping::gas_to_weight(
+			info.used_gas.standard.unique_saturated_into(),
+			true,
+		);
+		if let Some(weight_info) = info.weight_info {
+			if let Some(proof_size_usage) = weight_info.proof_size_usage {
+				*gas_to_weight.proof_size_mut() = proof_size_usage;
+			}
+		}
+		gas_to_weight
 	}
 }
