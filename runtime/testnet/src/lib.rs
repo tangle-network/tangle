@@ -1298,6 +1298,7 @@ pallet_staking_reward_curve::build! {
 
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"py/srvcs");
+	pub const RuntimeEvmAddress: H160 = H160(hex_literal::hex!("00000000000000000000000000000000000000f1"));
 }
 
 pub struct PalletEvmRunner;
@@ -1313,7 +1314,7 @@ impl pallet_services::EvmRunner<Runtime> for PalletEvmRunner {
 		gas_limit: u64,
 		is_transactional: bool,
 		validate: bool,
-	) -> Result<fp_evm::CallInfo, pallet_services::traits::RunnerError<Self::Error>> {
+	) -> Result<fp_evm::CallInfo, pallet_services::RunnerError<Self::Error>> {
 		let max_fee_per_gas = DefaultBaseFeePerGas::get();
 		let max_priority_fee_per_gas =
 			max_fee_per_gas.saturating_mul(U256::from(3) / U256::from(2));
@@ -1337,7 +1338,7 @@ impl pallet_services::EvmRunner<Runtime> for PalletEvmRunner {
 			proof_size_base_cost,
 			<Runtime as pallet_evm::Config>::config(),
 		)
-		.map_err(|o| pallet_services::traits::RunnerError { error: o.error, weight: o.weight })
+		.map_err(|o| pallet_services::RunnerError { error: o.error, weight: o.weight })
 	}
 }
 
@@ -1346,6 +1347,7 @@ impl pallet_services::Config for Runtime {
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
 	type PalletId = ServicesPalletId;
+	type RuntimeEvmAddress = RuntimeEvmAddress;
 	type EvmRunner = PalletEvmRunner;
 	type WeightInfo = ();
 }

@@ -63,10 +63,9 @@ where
 		blueprint_id: u64,
 	) -> EvmResult<Vec<BoundedBytes<ConstU32<33>>>> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let service_providers =
-			pallet_services::ServiceProviders::<Runtime>::iter_prefix(blueprint_id)
-				.map(|(_, prefs)| BoundedBytes::from(prefs.key.0))
-				.collect::<Vec<_>>();
+		let service_providers = pallet_services::Operators::<Runtime>::iter_prefix(blueprint_id)
+			.map(|(_, prefs)| BoundedBytes::from(prefs.key.0))
+			.collect::<Vec<_>>();
 		Ok(service_providers)
 	}
 }
