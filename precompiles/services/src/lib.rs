@@ -18,19 +18,18 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::too_many_arguments)]
 
-use fp_evm::{ExitRevert, PrecompileFailure, PrecompileHandle};
+use fp_evm::PrecompileHandle;
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	traits::ConstU32,
+	traits::Get,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
-use pallet_evm::AddressMapping;
 use pallet_services::Call as ServicesCall;
 use precompile_utils::prelude::*;
 use sp_core::H256;
 use sp_runtime::traits::Dispatchable;
 use sp_std::{marker::PhantomData, vec::Vec};
-use tangle_primitives::{jobs::v2::ServiceBlueprint, types::BlockNumber};
 
 // #[cfg(test)]
 // mod mock;
