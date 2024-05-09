@@ -8570,6 +8570,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-restaking-delegation"
+version = "1.0.2"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "log",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-vesting",
+ "parity-scale-codec 3.6.9",
+ "rustc-hex",
+ "scale-info",
+ "schnorrkel",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+ "substrate-fixed",
+]
+
+[[package]]
 name = "pallet-roles"
 version = "1.0.2"
 dependencies = [
@@ -14143,6 +14168,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "substrate-fixed"
+version = "0.5.9"
+source = "git+https://github.com/encointer/substrate-fixed#879c58bcc6fd676a74315dcd38b598f28708b0b5"
+dependencies = [
+ "parity-scale-codec 3.6.9",
+ "scale-info",
+ "substrate-typenum",
+]
+
+[[package]]
 name = "substrate-frame-rpc-system"
 version = "28.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0#162c6796bac740802fe11c9e39f3094677d1f08f"
@@ -14197,6 +14232,16 @@ source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot
 dependencies = [
  "futures 0.3.30",
  "tokio",
+]
+
+[[package]]
+name = "substrate-typenum"
+version = "1.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0f0091e93c2c75b233ae39424c52cb8a662c0811fb68add149e20e5d7e8a788"
+dependencies = [
+ "parity-scale-codec 3.6.9",
+ "scale-info",
 ]
 
 [[package]]
