@@ -191,15 +191,10 @@ impl<T: Config> Pallet<T> {
 		let result = T::EvmRunner::call(from, to, data, value, gas_limit, transactional, validate);
 		match result {
 			Ok(info) => Ok(info),
-			Err(e) => {
-				return Err(DispatchErrorWithPostInfo {
-					post_info: PostDispatchInfo {
-						actual_weight: Some(e.weight),
-						pays_fee: Pays::Yes,
-					},
-					error: e.error.into(),
-				})
-			},
+			Err(e) => Err(DispatchErrorWithPostInfo {
+				post_info: PostDispatchInfo { actual_weight: Some(e.weight), pays_fee: Pays::Yes },
+				error: e.error.into(),
+			}),
 		}
 	}
 

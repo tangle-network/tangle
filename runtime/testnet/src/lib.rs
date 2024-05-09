@@ -38,9 +38,9 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
-use pallet_evm::GasWeightMapping;
 use frontier_evm::DefaultBaseFeePerGas;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
+use pallet_evm::GasWeightMapping;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -1345,13 +1345,13 @@ impl pallet_services::EvmRunner<Runtime> for PalletEvmRunner {
 pub struct PalletEVMGasWeightMapping;
 
 impl pallet_services::EvmGasWeightMapping for PalletEVMGasWeightMapping {
-    fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight {
-        pallet_evm::FixedGasWeightMapping::<Runtime>::gas_to_weight(gas, without_base_weight)
-    }
+	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight {
+		pallet_evm::FixedGasWeightMapping::<Runtime>::gas_to_weight(gas, without_base_weight)
+	}
 
-    fn weight_to_gas(weight: Weight) -> u64 {
-        pallet_evm::FixedGasWeightMapping::<Runtime>::weight_to_gas(weight)
-    }
+	fn weight_to_gas(weight: Weight) -> u64 {
+		pallet_evm::FixedGasWeightMapping::<Runtime>::weight_to_gas(weight)
+	}
 }
 
 impl pallet_services::Config for Runtime {
