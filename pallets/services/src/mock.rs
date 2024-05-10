@@ -27,7 +27,8 @@ use frame_support::{
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
-use sp_core::{sr25519, H160, H256};
+use sp_core::{ecdsa, sr25519, H160, H256};
+use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	app_crypto::ecdsa::Public,
 	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
@@ -38,6 +39,7 @@ use sp_staking::{
 	SessionIndex,
 };
 use std::collections::BTreeMap;
+use std::sync::Arc;
 
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
@@ -344,6 +346,7 @@ pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
 
 pub const CGGMP21_REGISTRATION_HOOK: H160 = H160([0x21; 20]);
 pub const CGGMP21_REQUEST_HOOK: H160 = H160([0x22; 20]);
+pub const CGGMP21_JOB_RESULT_VERIFIER: H160 = H160([0x23; 20]);
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -437,12 +440,36 @@ pub fn new_test_ext_raw_authorities(
 		},
 	);
 
+	let cggmp21_job_result_verifier_json: serde_json::Value = serde_json::from_str(include_str!(
+		"../../../forge/out/CGGMP21Hooks.sol/CGGMP21JobResultVerifier.json"
+	))
+	.unwrap();
+
+	let cggmp21_job_result_verifier_code = hex::decode(
+		cggmp21_job_result_verifier_json["deployedBytecode"]["object"]
+			.as_str()
+			.unwrap()
+			.replace("0x", ""),
+	)
+	.unwrap();
+
+	evm_accounts.insert(
+		CGGMP21_JOB_RESULT_VERIFIER,
+		fp_evm::GenesisAccount {
+			code: cggmp21_job_result_verifier_code,
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Default::default(),
+		},
+	);
+
 	let evm_config =
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
 
 	evm_config.assimilate_storage(&mut t).unwrap();
 
 	let mut ext = sp_io::TestExternalities::new(t);
+	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
 	ext.execute_with(|| System::set_block_number(1));
 	ext.execute_with(|| {
 		System::set_block_number(1);

@@ -8,7 +8,8 @@ use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use sp_core::{H160, U256};
 use sp_runtime::{traits::AccountIdConversion, traits::UniqueSaturatedInto};
 use tangle_primitives::jobs::v2::{
-	Field, OperatorPreferences, ServiceBlueprint, ServiceRegistrationHook, ServiceRequestHook,
+	Field, JobDefinition, JobResultVerifier, OperatorPreferences, ServiceBlueprint,
+	ServiceRegistrationHook, ServiceRequestHook,
 };
 
 use super::*;
@@ -173,6 +174,79 @@ impl<T: Config> Pallet<T> {
 
 				let info =
 					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
+				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
+			},
+		};
+		Ok((allowed, weight))
+	}
+
+	pub fn check_job_call_result_hook(
+		job_def: &JobDefinition,
+		service_id: u64,
+		job: u8,
+		job_call_id: u64,
+		prefrences: &OperatorPreferences,
+		inputs: &[Field<T::AccountId>],
+		outputs: &[Field<T::AccountId>],
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		let (allowed, weight) = match job_def.verifier {
+			JobResultVerifier::None => (true, Weight::zero()),
+			JobResultVerifier::Evm(contract) => {
+				#[allow(deprecated)]
+				let call = ethabi::Function {
+					name: String::from("verify"),
+					inputs: vec![
+						ethabi::Param {
+							name: String::from("serviceId"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("jobIndex"),
+							kind: ethabi::ParamType::Uint(8),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("jobCallId"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("participant"),
+							kind: ethabi::ParamType::Bytes,
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("inputs"),
+							kind: ethabi::ParamType::Bytes,
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("outputs"),
+							kind: ethabi::ParamType::Bytes,
+							internal_type: None,
+						},
+					],
+					outputs: Default::default(),
+					constant: false,
+					state_mutability: ethabi::StateMutability::NonPayable,
+				};
+				let service_id = Token::Uint(ethabi::Uint::from(service_id));
+				let job = Token::Uint(ethabi::Uint::from(job));
+				let job_call_id = Token::Uint(ethabi::Uint::from(job_call_id));
+				let participant = prefrences.to_ethabi().first().unwrap().clone();
+				let inputs = Token::Bytes(Field::encode_to_ethabi(inputs));
+				let outputs = Token::Bytes(Field::encode_to_ethabi(outputs));
+				eprintln!("inputs: {}", inputs);
+				eprintln!("outputs: {}", outputs);
+				let data = call
+					.encode_input(&[service_id, job, job_call_id, participant, inputs, outputs])
+					.map_err(|_| Error::<T>::EVMAbiEncode)?;
+				let gas_limit = 300_000;
+
+				let info =
+					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
+				eprintln!("info: {:?}", info);
 				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
 		};
