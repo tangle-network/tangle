@@ -24,3 +24,12 @@ impl<T: Config> traits::EvmRunner<T> for () {
 		})
 	}
 }
+
+impl traits::EvmGasWeightMapping for () {
+	fn gas_to_weight(_gas: u64, _without_base_weight: bool) -> Weight {
+		Default::default()
+	}
+	fn weight_to_gas(_weight: Weight) -> u64 {
+		Default::default()
+	}
+}
