@@ -25,6 +25,7 @@ ethabi = { workspace = true }
 ethereum = { workspace = true, features = ["with-codec"] }
 ethers = "2.0"
 hex = { workspace = true }
+num_enum = { workspace = true }
 hex-literal = { workspace = true }
 libsecp256k1 = { workspace = true }
 pallet-balances = { workspace = true }
@@ -50,6 +51,16 @@ pallet-dynamic-fee = { workspace = true }
 pallet-ethereum = { workspace = true }
 pallet-evm = { workspace = true }
 pallet-evm-chain-id = { workspace = true }
+
+pallet-evm-precompile-blake2 = { workspace = true }
+pallet-evm-precompile-bn128 = { workspace = true }
+pallet-evm-precompile-curve25519 = { workspace = true }
+pallet-evm-precompile-ed25519 = { workspace = true }
+pallet-evm-precompile-modexp = { workspace = true }
+pallet-evm-precompile-sha3fips = { workspace = true }
+pallet-evm-precompile-simple = { workspace = true }
+
+precompile-utils = { workspace = true }
 
 pallet-roles = { workspace = true }
 pallet-session = { workspace = true }
@@ -88,6 +99,15 @@ std = [
   "pallet-ethereum/std",
   "pallet-evm/std",
   "pallet-evm-chain-id/std",
+
+  "pallet-evm-precompile-modexp/std",
+  "pallet-evm-precompile-sha3fips/std",
+  "pallet-evm-precompile-simple/std",
+  "pallet-evm-precompile-blake2/std",
+  "pallet-evm-precompile-bn128/std",
+  "pallet-evm-precompile-curve25519/std",
+  "pallet-evm-precompile-ed25519/std",
+  "precompile-utils/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
