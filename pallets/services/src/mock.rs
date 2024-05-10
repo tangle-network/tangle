@@ -25,6 +25,7 @@ use frame_support::{
 	traits::{ConstU128, ConstU32, ConstU64, Contains, Everything},
 };
 use mock_evm::MockedEvmRunner;
+use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
 use sp_core::{sr25519, H160, H256};
 use sp_runtime::{
@@ -274,7 +275,18 @@ impl pallet_roles::Config for Runtime {
 
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"py/servs");
-	pub const RuntimeEvmAddress: H160 = H160(hex_literal::hex!("00000000000000000000000000000000000000f1"));
+}
+
+pub struct PalletEVMGasWeightMapping;
+
+impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
+	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight {
+		pallet_evm::FixedGasWeightMapping::<Runtime>::gas_to_weight(gas, without_base_weight)
+	}
+
+	fn weight_to_gas(weight: Weight) -> u64 {
+		pallet_evm::FixedGasWeightMapping::<Runtime>::weight_to_gas(weight)
+	}
 }
 
 impl Config for Runtime {
@@ -282,8 +294,8 @@ impl Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
 	type PalletId = ServicesPalletId;
-	type RuntimeEvmAddress = RuntimeEvmAddress;
 	type EvmRunner = MockedEvmRunner;
+	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type WeightInfo = ();
 }
 

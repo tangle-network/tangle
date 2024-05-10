@@ -43,6 +43,7 @@ use frame_support::{
 use frame_system::{EnsureSigned, EnsureSignedBy};
 use frontier_evm::DefaultBaseFeePerGas;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
+use pallet_evm::GasWeightMapping;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -1316,7 +1317,6 @@ pallet_staking_reward_curve::build! {
 
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"py/srvcs");
-	pub const RuntimeEvmAddress: H160 = H160(hex_literal::hex!("00000000000000000000000000000000000000f1"));
 }
 
 pub struct PalletEvmRunner;
@@ -1360,13 +1360,25 @@ impl pallet_services::EvmRunner<Runtime> for PalletEvmRunner {
 	}
 }
 
+pub struct PalletEVMGasWeightMapping;
+
+impl pallet_services::EvmGasWeightMapping for PalletEVMGasWeightMapping {
+	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight {
+		pallet_evm::FixedGasWeightMapping::<Runtime>::gas_to_weight(gas, without_base_weight)
+	}
+
+	fn weight_to_gas(weight: Weight) -> u64 {
+		pallet_evm::FixedGasWeightMapping::<Runtime>::weight_to_gas(weight)
+	}
+}
+
 impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
 	type PalletId = ServicesPalletId;
-	type RuntimeEvmAddress = RuntimeEvmAddress;
 	type EvmRunner = PalletEvmRunner;
+	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type WeightInfo = ();
 }
 

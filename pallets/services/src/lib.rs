@@ -51,6 +51,7 @@ pub use weights::WeightInfo;
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
+	use frame_support::dispatch::PostDispatchInfo;
 	use tangle_primitives::jobs::v2::*;
 
 	#[pallet::config]
@@ -65,16 +66,16 @@ pub mod module {
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;
 
-		/// The EVM address for the runtime.
-		#[pallet::constant]
-		type RuntimeEvmAddress: Get<sp_core::H160>;
-
-		/// Weight information for the extrinsics in this module.
-		type WeightInfo: WeightInfo;
-
 		/// A type that implements the `EvmRunner` trait for the execution of EVM
 		/// transactions.
 		type EvmRunner: traits::EvmRunner<Self>;
+
+		/// A type that implements the `EvmGasWeightMapping` trait for the conversion of EVM gas to
+		/// Substrate weight and vice versa.
+		type EvmGasWeightMapping: traits::EvmGasWeightMapping;
+
+		/// Weight information for the extrinsics in this module.
+		type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::error]
@@ -387,15 +388,14 @@ pub mod module {
 			#[pallet::compact] blueprint_id: u64,
 			preferences: OperatorPreferences,
 			registration_args: Vec<Field<T::AccountId>>,
-		) -> DispatchResult {
+		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
 			let already_registered = Operators::<T>::contains_key(blueprint_id, &caller);
 			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
 
-			let allowed =
-				Self::check_registeration_hook(&blueprint, &preferences, &registration_args)
-					.map_err(|e| e.error)?;
+			let (allowed, weight) =
+				Self::check_registeration_hook(&blueprint, &preferences, &registration_args)?;
 
 			ensure!(allowed, Error::<T>::InvalidRegistrationInput);
 
@@ -411,7 +411,9 @@ pub mod module {
 				registration_args,
 			});
 
-			Ok(())
+			// TODO: add weight for the registration.
+
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
 		/// Unregister the caller from being an operator for the service blueprint
@@ -471,7 +473,7 @@ pub mod module {
 			service_providers: Vec<T::AccountId>,
 			#[pallet::compact] ttl: BlockNumberFor<T>,
 			request_args: Vec<Field<T::AccountId>>,
-		) -> DispatchResult {
+		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
 
@@ -490,9 +492,8 @@ pub mod module {
 			}
 
 			let service_id = NextInstanceId::<T>::get();
-			let allowed =
-				Self::check_request_hook(&blueprint, service_id, &preferences, &request_args)
-					.map_err(|e| e.error)?;
+			let (allowed, weight) =
+				Self::check_request_hook(&blueprint, service_id, &preferences, &request_args)?;
 
 			ensure!(allowed, Error::<T>::InvalidRequestInput);
 
@@ -519,7 +520,8 @@ pub mod module {
 					blueprint_id,
 				});
 
-				Ok(())
+				// TODO: add weight for the request to the total weight.
+				Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 			} else {
 				let request_id = NextServiceRequestId::<T>::get();
 				let operators = pending_approvals
@@ -554,7 +556,8 @@ pub mod module {
 					approved,
 				});
 
-				Ok(())
+				// TODO: add weight for the request to the total weight.
+				Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 			}
 		}
 
@@ -672,7 +675,7 @@ pub mod module {
 			#[pallet::compact] service_id: u64,
 			#[pallet::compact] job: u8,
 			args: BoundedVec<Field<T::AccountId>, MaxFields>,
-		) -> DispatchResult {
+		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let service = Instances::<T>::get(service_id)?;
 			let (_, blueprint) = Blueprints::<T>::get(service.blueprint)?;
@@ -686,8 +689,8 @@ pub mod module {
 			job_call.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
 			let call_id = NextJobCallId::<T>::get();
 
-			let allowed = Self::check_job_call_hook(&blueprint, service_id, job, call_id, &args)
-				.map_err(|e| e.error)?;
+			let (allowed, weight) =
+				Self::check_job_call_hook(&blueprint, service_id, job, call_id, &args)?;
 
 			ensure!(allowed, Error::<T>::InvalidJobCallInput);
 
@@ -700,7 +703,8 @@ pub mod module {
 				job,
 				args: args.into(),
 			});
-			Ok(())
+			// TODO: add weight for the call to the total weight.
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
 		/// Submit the job result by using the service ID and call ID.
