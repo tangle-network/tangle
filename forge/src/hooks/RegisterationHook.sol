@@ -5,7 +5,7 @@ pragma solidity >=0.8.3;
 contract RegistrationHook {
     /// @dev Only allow the runtime to call this function.
     modifier onlyRuntime() {
-      require(msg.sender == address(0xf1), "RegistrationHook: Only Runtime");
+      require(msg.sender == address(0x6D6F646c70792F73657276730000000000000000), "RegistrationHook: Only Runtime");
       _;
     }
 
