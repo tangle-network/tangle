@@ -90,6 +90,8 @@ pub mod module {
 		InvalidRequestInput,
 		/// The caller does not have the requirements to call a job.
 		InvalidJobCallInput,
+		/// The caller provided an invalid job result.
+		InvalidJobResult,
 		/// The caller is not registered as a operator.
 		NotRegistered,
 		/// The service request was not found.
@@ -320,7 +322,7 @@ pub mod module {
 	/// Service ID -> Service
 	#[pallet::storage]
 	#[pallet::getter(fn services)]
-	pub type Instances<T: Config> = StorageMap<
+	pub type is_operator<T: Config> = StorageMap<
 		_,
 		Identity,
 		u64,
@@ -511,7 +513,7 @@ pub mod module {
 					operators,
 					ttl,
 				};
-				Instances::<T>::insert(service_id, service);
+				is_operator::<T>::insert(service_id, service);
 				NextInstanceId::<T>::set(service_id.saturating_add(1));
 				Self::deposit_event(Event::ServiceInitiated {
 					owner: caller.clone(),
@@ -613,7 +615,7 @@ pub mod module {
 					operators,
 					ttl: request.ttl,
 				};
-				Instances::<T>::insert(service_id, service);
+				is_operator::<T>::insert(service_id, service);
 				NextInstanceId::<T>::set(service_id.saturating_add(1));
 
 				Self::deposit_event(Event::ServiceInitiated {
@@ -655,10 +657,10 @@ pub mod module {
 			#[pallet::compact] service_id: u64,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			let service = Instances::<T>::get(service_id)?;
+			let service = is_operator::<T>::get(service_id)?;
 			// TODO: allow permissioned callers to terminate the service?
 			ensure!(service.owner == caller, DispatchError::BadOrigin);
-			Instances::<T>::remove(service_id);
+			is_operator::<T>::remove(service_id);
 
 			Self::deposit_event(Event::ServiceTerminated {
 				owner: caller.clone(),
@@ -677,7 +679,7 @@ pub mod module {
 			args: BoundedVec<Field<T::AccountId>, MaxFields>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let service = Instances::<T>::get(service_id)?;
+			let service = is_operator::<T>::get(service_id)?;
 			let (_, blueprint) = Blueprints::<T>::get(service.blueprint)?;
 			let is_permitted_caller = service.permitted_callers.iter().any(|v| v == &caller);
 			ensure!(service.owner == caller || is_permitted_caller, DispatchError::BadOrigin);
@@ -713,14 +715,16 @@ pub mod module {
 			#[pallet::compact] service_id: u64,
 			#[pallet::compact] call_id: u64,
 			result: BoundedVec<Field<T::AccountId>, MaxFields>,
-		) -> DispatchResult {
+		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let job_call = JobCalls::<T>::get(service_id, call_id)?;
-			let service = Instances::<T>::get(job_call.service_id)?;
+			let service = is_operator::<T>::get(job_call.service_id)?;
 			let (_, blueprint) = Blueprints::<T>::get(service.blueprint)?;
 
-			let is_provider = service.operators.iter().any(|v| v == &caller);
-			ensure!(is_provider, DispatchError::BadOrigin);
+			let is_operator = service.operators.iter().any(|v| v == &caller);
+			ensure!(is_operator, DispatchError::BadOrigin);
+			let operator_preferences = Operators::<T>::get(service.blueprint, &caller)?;
+
 			let job_def = blueprint
 				.jobs
 				.get(usize::from(job_call.job))
@@ -728,7 +732,19 @@ pub mod module {
 
 			let job_result = JobCallResult { service_id, call_id, result: result.clone() };
 			job_result.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
-			// TODO: verify the job result using verification hook.
+
+			let (allowed, weight) = Self::check_job_call_result_hook(
+				job_def,
+				service_id,
+				job_call.job,
+				call_id,
+				&operator_preferences,
+				&job_call.args,
+				&result,
+			)?;
+
+			ensure!(allowed, Error::<T>::InvalidJobResult);
+
 			JobResults::<T>::insert(service_id, call_id, job_result);
 			Self::deposit_event(Event::JobResultSubmitted {
 				operator: caller.clone(),
@@ -737,7 +753,8 @@ pub mod module {
 				job: job_call.job,
 				result: result.into(),
 			});
-			Ok(())
+			// TODO: add weight for the call to the total weight.
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 	}
 }

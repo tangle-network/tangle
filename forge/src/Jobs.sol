@@ -12,7 +12,6 @@ Jobs constant JOBS_CONTRACT = Jobs(JOBS_ADDRESS);
 /// @title The interface through which solidity contracts will interact with the jobs pallet
 /// @custom:address 0x0000000000000000000000000000000000000814
 interface Jobs {
-
     /// Submit a DKG phase one job
     /// @custom:selector <selector_hash>
     ///
@@ -77,9 +76,5 @@ interface Jobs {
     /// to initiate the specified job. It is important for the caller to ensure that the provided parameters
     /// align with the ongoing processes and permissions within the contract.
     ///
-    function setPermittedCaller(
-        uint16 roleType,
-        uint32 jobId,
-        address newPermittedCaller
-    ) external;
+    function setPermittedCaller(uint16 roleType, uint32 jobId, address newPermittedCaller) external;
 }
