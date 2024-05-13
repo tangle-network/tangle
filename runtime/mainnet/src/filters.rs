@@ -33,10 +33,6 @@ impl Contains<RuntimeCall> for MainnetCallFilter {
 		}
 
 		match call {
-			// Filter democracy proposals creation
-			RuntimeCall::Democracy(_) |
-			// disallow council
-			RuntimeCall::Council(_) |
 			// Block jobs and roles pallet
 			RuntimeCall::Roles(_) |
 			RuntimeCall::Jobs(_) => false,
