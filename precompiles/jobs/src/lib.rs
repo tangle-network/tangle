@@ -35,7 +35,7 @@ use tangle_primitives::{
 		DKGTSSPhaseOneJobType, DKGTSSPhaseTwoJobType, FallbackOptions, JobId, JobSubmission,
 		JobType,
 	},
-	roles::RoleType,
+	roles::{RoleType, ThresholdSignatureRoleType},
 	types::BlockNumber,
 };
 
@@ -82,6 +82,9 @@ where
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
 	#[precompile::public("submitDkgPhaseOneJob(uint64,uint64,address[],uint8,uint16,address,bool)")]
+	#[precompile::public(
+		"submit_dkg_phase_one_job(uint64,uint64,address[],uint8,uint16,address,bool)"
+	)]
 	fn submit_dkg_phase_one_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: BlockNumber,
@@ -173,6 +176,7 @@ where
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
 	#[precompile::public("submitDkgPhaseTwoJob(uint64,uint64,uint64,bytes,bytes)")]
+	#[precompile::public("submit_dkg_phase_two_job(uint64,uint64,uint64,bytes,bytes)")]
 	fn submit_dkg_phase_two_job(
 		handle: &mut impl PrecompileHandle,
 		expiry: BlockNumber,
@@ -194,52 +198,36 @@ where
 		let ttl_block: BlockNumberFor<Runtime> = ttl.into();
 
 		// Create DKG signature job type with the provided parameters
-		match pallet_jobs::SubmittedJobsRole::<Runtime>::get(phase_one_id) {
-			Some(role_type) => {
-				// Parse the inner role type. It should be a TSS role.
-				let threshold_signature_role = match role_type {
-					RoleType::Tss(role) => role,
-					_ => {
-						return Err(PrecompileFailure::Revert {
-							exit_status: ExitRevert::Reverted,
-							output: revert_as_bytes("Invalid role type!"),
-						})
-					},
-				};
 
-				// Construct the phase 2 job type.
-				let job_type = DKGTSSPhaseTwoJobType {
-					role_type: threshold_signature_role,
-					phase_one_id,
-					submission: submission.try_into().unwrap(),
-					derivation_path: if derivation_path.is_empty() {
-						None
-					} else {
-						Some(derivation_path.try_into().unwrap())
-					},
-				};
+		let threshold_signature_role = ThresholdSignatureRoleType::DfnsCGGMP21Secp256k1;
 
-				// Create job submission object
-				let job = JobSubmission {
-					expiry: expiry_block,
-					ttl: ttl_block,
-					job_type: JobType::DKGTSSPhaseTwo(job_type),
-					fallback: FallbackOptions::Destroy,
-				};
-
-				// Create the call to the Jobs module's submit_job function
-				let call = JobsCall::<Runtime>::submit_job { job };
-
-				// Dispatch the call using the RuntimeHelper
-				<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
-
-				Ok(())
+		// Construct the phase 2 job type.
+		let job_type = DKGTSSPhaseTwoJobType {
+			role_type: threshold_signature_role,
+			phase_one_id,
+			submission: submission.try_into().unwrap(),
+			derivation_path: if derivation_path.is_empty() {
+				None
+			} else {
+				Some(derivation_path.try_into().unwrap())
 			},
-			None => Err(PrecompileFailure::Revert {
-				exit_status: ExitRevert::Reverted,
-				output: revert_as_bytes("Invalid job ID!"),
-			}),
-		}
+		};
+
+		// Create job submission object
+		let job = JobSubmission {
+			expiry: expiry_block,
+			ttl: ttl_block,
+			job_type: JobType::DKGTSSPhaseTwo(job_type),
+			fallback: FallbackOptions::Destroy,
+		};
+
+		// Create the call to the Jobs module's submit_job function
+		let call = JobsCall::<Runtime>::submit_job { job };
+
+		// Dispatch the call using the RuntimeHelper
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
 	}
 
 	/// Sets a new permitted caller for a specific job type identified by the given key and job ID.
@@ -258,6 +246,7 @@ where
 	///
 	/// Returns an `EvmResult`, indicating the success or failure of the operation.
 	#[precompile::public("setPermittedCaller(uint16,uint64,address)")]
+	#[precompile::public("set_permitted_caller(uint16,uint64,address)")]
 	fn set_permitted_caller(
 		handle: &mut impl PrecompileHandle,
 		role_type: u16,

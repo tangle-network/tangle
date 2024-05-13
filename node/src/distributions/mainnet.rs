@@ -18,7 +18,13 @@ use super::{
 	get_git_root, read_contents, read_contents_to_evm_accounts,
 	read_contents_to_substrate_accounts_list,
 };
+
+#[cfg(not(feature = "testnet"))]
 use crate::mainnet_fixtures::{get_initial_authorities, get_root_key};
+
+#[cfg(feature = "testnet")]
+use crate::testnet_fixtures::{get_initial_authorities, get_testnet_root_key as get_root_key};
+
 use hex_literal::hex;
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};
 use sp_core::H160;
@@ -138,7 +144,7 @@ pub const TWO_YEARS_BLOCKS: u64 = (2 * 365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
 
 pub const ONE_HUNDRED_POINTS: u64 = 100;
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Default)]
 pub struct DistributionResult {
 	pub claims: Vec<(MultiAddress, Balance, Option<StatementKind>)>,
 	pub vesting: Vec<(MultiAddress, Vec<(Balance, Balance, BlockNumber)>)>,
