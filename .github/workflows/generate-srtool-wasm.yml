@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   push:
-    branches: [main, update-democracy]
+    branches: [main]
 
 jobs:
   srtool:
@@ -38,12 +38,6 @@ jobs:
           echo '${{ steps.srtool_build.outputs.json }}' | jq . > ${{ matrix.chain }}-srtool-digest.json
           cat ${{ matrix.chain }}-srtool-digest.json
           echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
-
-          echo Summary:
-          echo - version: ${{ steps.srtool_build.outputs.version }}
-          echo - info: ${{ steps.srtool_build.outputs.info }}
-          echo - prop: ${{ steps.srtool_build.outputs.proposal_hash }}
-          echo - json: ${{ steps.srtool_build.outputs.json }}
 
       - name: Archive Runtime
         uses: actions/upload-artifact@v2
