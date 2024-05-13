@@ -506,7 +506,6 @@ pub mod module {
 			});
 			Ok(())
 		}
-
 		/// Request a new service to be initiated using the provided blueprint with a list of
 		/// operators that will run your service. Optionally, you can specifiy who is permitted caller
 		/// of this service, by default anyone could use this service.
