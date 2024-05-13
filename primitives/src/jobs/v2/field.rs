@@ -312,6 +312,18 @@ impl<S: Get<u32>> PartialEq for BoundedString<S> {
 	}
 }
 
+impl<S: Get<u32>> PartialOrd for BoundedString<S> {
+	fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+		self.0.partial_cmp(&other.0)
+	}
+}
+
+impl<S: Get<u32>> Ord for BoundedString<S> {
+	fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+		self.0.cmp(&other.0)
+	}
+}
+
 impl<S: Get<u32>> Eq for BoundedString<S> {}
 
 impl<S: Get<u32>> TryFrom<String> for BoundedString<S> {

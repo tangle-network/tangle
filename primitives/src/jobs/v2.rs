@@ -412,7 +412,7 @@ impl Default for Gadget {
 	}
 }
 
-/// A WASM binary that is stored in the Github release.
+/// A binary that is stored in the Github release.
 /// this will constuct the URL to the release and download the binary.
 /// The URL will be in the following format:
 /// https://github.com/<owner>/<repo>/releases/download/v<tag>/<path>
@@ -426,19 +426,111 @@ pub struct GithubFetcher {
 	/// The release tag of the repository.
 	/// NOTE: The tag should be a valid semver tag.
 	pub tag: BoundedString<ConstU32<512>>,
-	/// The path to the WASM binary in the release.
-	pub path: BoundedString<ConstU32<512>>,
+	/// The names of the binary in the release by the arch and the os.
+	pub binaries: BoundedBTreeSet<GadgetBinary, ConstU32<32>>,
 	/// The sha256 hash of the WASM binary.
 	/// your service will check if the downloaded binary matches this hash.
 	pub sha256: BoundedVec<u8, ConstU32<32>>,
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+/// The CPU or System architecture.
+#[derive(
+	PartialEq,
+	PartialOrd,
+	Ord,
+	Eq,
+	Encode,
+	Decode,
+	RuntimeDebug,
+	TypeInfo,
+	Clone,
+	Copy,
+	MaxEncodedLen,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct RemoteFetcher {
-	/// The URL of the remote server.
-	pub url: BoundedString<ConstU32<1024>>,
+pub enum Architecture {
+	/// WebAssembly architecture (32-bit).
+	#[codec(index = 0)]
+	Wasm,
+	/// WebAssembly architecture (64-bit).
+	#[codec(index = 1)]
+	Wasm64,
+	/// WASI architecture (32-bit).
+	#[codec(index = 2)]
+	Wasi,
+	/// WASI architecture (64-bit).
+	#[codec(index = 3)]
+	Wasi64,
+	/// Amd architecture (32-bit).
+	#[codec(index = 4)]
+	Amd,
+	/// Amd64 architecture (x86_64).
+	#[codec(index = 5)]
+	Amd64,
+	/// Arm architecture (32-bit).
+	#[codec(index = 6)]
+	Arm,
+	/// Arm64 architecture (64-bit).
+	#[codec(index = 7)]
+	Arm64,
+	/// Risc-V architecture (32-bit).
+	#[codec(index = 8)]
+	RiscV,
+	/// Risc-V architecture (64-bit).
+	#[codec(index = 9)]
+	RiscV64,
+}
+
+/// Operating System that the binary is compiled for.
+#[derive(
+	Default,
+	PartialEq,
+	PartialOrd,
+	Ord,
+	Eq,
+	Encode,
+	Decode,
+	RuntimeDebug,
+	TypeInfo,
+	Clone,
+	Copy,
+	MaxEncodedLen,
+)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum OperatingSystem {
+	/// Unknown operating system.
+	/// This is used when the operating system is not known
+	/// for example, for WASM, where the OS is not relevant.
+	#[default]
+	#[codec(index = 0)]
+	Unknown,
+	/// Linux operating system.
+	#[codec(index = 1)]
+	Linux,
+	/// Windows operating system.
+	#[codec(index = 2)]
+	Windows,
+	/// MacOS operating system.
+	#[codec(index = 3)]
+	MacOS,
+	/// BSD operating system.
+	#[codec(index = 4)]
+	BSD,
+}
+
+#[derive(
+	Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen,
+)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct GadgetBinary {
+	/// CPU or System architecture.
+	pub arch: Architecture,
+	/// Operating System that the binary is compiled for.
+	pub os: OperatingSystem,
+	/// The name of the binary.
+	pub name: BoundedString<ConstU32<256>>,
 	/// The sha256 hash of the binary.
+	/// used to verify the downloaded binary.
 	pub sha256: BoundedVec<u8, ConstU32<32>>,
 }
 
@@ -463,9 +555,6 @@ pub enum WasmGadget {
 	/// A WASM binary that is stored in the Github release.
 	#[codec(index = 1)]
 	Github(GithubFetcher),
-	/// A WASM binary that is stored in the remote server.
-	#[codec(index = 2)]
-	Remote(RemoteFetcher),
 }
 
 /// A Native binary that contains all the gadget code.
@@ -478,9 +567,6 @@ pub enum NativeGadget {
 	/// A Native binary that is stored in the Github release.
 	#[codec(index = 1)]
 	Github(GithubFetcher),
-	/// A Native binary that is stored in the remote server.
-	#[codec(index = 2)]
-	Remote(RemoteFetcher),
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
