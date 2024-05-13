@@ -114,6 +114,10 @@ fn register_on_blueprint() {
 			registration_args: Default::default(),
 		})]);
 
+		// The blueprint should be added to my blueprints in my profile.
+		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
+		assert!(profile.blueprints.contains(&0));
+
 		// if we try to register again, it should fail.
 		assert_err!(
 			Services::register(
@@ -210,6 +214,10 @@ fn unregister_from_blueprint() {
 		assert_ok!(Services::unregister(RuntimeOrigin::signed(bob.clone()), 0));
 		assert_eq!(Operators::<Runtime>::contains_key(0, &bob), false);
 
+		// The blueprint should be removed from my blueprints in my profile.
+		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
+		assert!(!profile.blueprints.contains(&0));
+
 		assert_events(vec![RuntimeEvent::Services(crate::Event::Unregistered {
 			operator: bob,
 			blueprint_id: 0,
@@ -265,6 +273,14 @@ fn request_service() {
 		// this service gets immediately accepted by all providers.
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
 		assert_eq!(Instances::<Runtime>::contains_key(0), true);
+		// The service should also be added to the services for each operator.
+		let profile = OperatorsProfile::<Runtime>::get(bob).unwrap();
+		assert!(profile.services.contains(&0));
+		let profile = OperatorsProfile::<Runtime>::get(charlie).unwrap();
+		assert!(profile.services.contains(&0));
+		let profile = OperatorsProfile::<Runtime>::get(dave).unwrap();
+		assert!(profile.services.contains(&0));
+
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve,
 			request_id: None,
@@ -326,6 +342,13 @@ fn request_service_with_approval_process() {
 			pending_approvals: vec![charlie.clone(), dave.clone()],
 		})]);
 
+		// it should not be added, until all providers approve.
+		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
+		assert!(!profile.services.contains(&0));
+		let profile = OperatorsProfile::<Runtime>::get(charlie.clone()).unwrap();
+		assert!(!profile.services.contains(&0));
+		let profile = OperatorsProfile::<Runtime>::get(dave.clone()).unwrap();
+		assert!(!profile.services.contains(&0));
 		// charlie approves the service
 		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0));
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceRequestApproved {
@@ -340,6 +363,15 @@ fn request_service_with_approval_process() {
 		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0));
 		assert_eq!(ServiceRequests::<Runtime>::contains_key(0), false);
 		assert_eq!(Instances::<Runtime>::contains_key(0), true);
+
+		// The service should also be added to the services for each operator.
+		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
+		assert!(profile.services.contains(&0));
+		let profile = OperatorsProfile::<Runtime>::get(charlie.clone()).unwrap();
+		assert!(profile.services.contains(&0));
+		let profile = OperatorsProfile::<Runtime>::get(dave.clone()).unwrap();
+		assert!(profile.services.contains(&0));
+
 		assert_events(vec![
 			RuntimeEvent::Services(crate::Event::ServiceRequestApproved {
 				operator: dave.clone(),

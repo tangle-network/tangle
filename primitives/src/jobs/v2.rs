@@ -36,6 +36,10 @@ pub type MaxJobsPerService = ConstU32<32>;
 pub type MaxOperatorsPerService = ConstU32<512>;
 /// Maximum number of permitted callers per service.
 pub type MaxPermittedCallers = ConstU32<32>;
+/// Maximum number of services per operator.
+pub type MaxServicesPerOperator = ConstU32<32>;
+/// Maximum number of blueprints per operator.
+pub type MaxBlueprintsPerOperator = ConstU32<32>;
 
 /// A Job Definition is a definition of a job that can be called.
 /// It contains the input and output fields of the job with the permitted caller.
@@ -375,6 +379,17 @@ impl OperatorPreferences {
 		];
 		tokens
 	}
+}
+
+/// Operator Profile is a profile of an operator that
+/// contains metadata about the services that the operator is providing.
+#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct OperatorProfile {
+	/// The Service IDs that I'm currently providing.
+	pub services: BoundedBTreeSet<u64, MaxServicesPerOperator>,
+	/// The Blueprint IDs that I'm currently registered for.
+	pub blueprints: BoundedBTreeSet<u64, MaxBlueprintsPerOperator>,
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]

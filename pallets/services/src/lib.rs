@@ -117,6 +117,10 @@ pub mod module {
 		JobCallResultNotFound,
 		/// An error occurred while encoding the EVM ABI.
 		EVMAbiEncode,
+		/// Operator profile not found.
+		OperatorProfileNotFound,
+		/// Maximum number of services per Provider reached.
+		MaxServicesPerProviderExceeded,
 	}
 
 	#[pallet::event]
@@ -359,6 +363,18 @@ pub mod module {
 		ResultQuery<Error<T>::ServiceOrJobCallNotFound>,
 	>;
 
+	// auxiliary storage and maps
+
+	#[pallet::storage]
+	#[pallet::getter(fn operator_profile)]
+	pub type OperatorsProfile<T: Config> = StorageMap<
+		_,
+		Identity,
+		T::AccountId,
+		OperatorProfile,
+		ResultQuery<Error<T>::OperatorProfileNotFound>,
+	>;
+
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Create a new service blueprint.
@@ -396,16 +412,34 @@ pub mod module {
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 			let already_registered = Operators::<T>::contains_key(blueprint_id, &caller);
 			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
+			blueprint
+				.type_check_registration(&registration_args)
+				.map_err(Error::<T>::TypeCheck)?;
 
 			let (allowed, weight) =
 				Self::check_registeration_hook(&blueprint, &preferences, &registration_args)?;
 
 			ensure!(allowed, Error::<T>::InvalidRegistrationInput);
 
-			blueprint
-				.type_check_registration(&registration_args)
-				.map_err(Error::<T>::TypeCheck)?;
 			Operators::<T>::insert(blueprint_id, &caller, preferences);
+
+			OperatorsProfile::<T>::try_mutate(&caller, |profile| {
+				match profile {
+					Ok(p) => {
+						p.blueprints
+							.try_insert(blueprint_id)
+							.map_err(|_| Error::<T>::MaxServicesPerProviderExceeded)?;
+					},
+					Err(_) => {
+						let mut blueprints = BoundedBTreeSet::new();
+						blueprints
+							.try_insert(blueprint_id)
+							.map_err(|_| Error::<T>::MaxServicesPerProviderExceeded)?;
+						*profile = Ok(OperatorProfile { blueprints, ..Default::default() });
+					},
+				};
+				Result::<_, Error<T>>::Ok(())
+			})?;
 
 			Self::deposit_event(Event::Registered {
 				provider: caller.clone(),
@@ -435,6 +469,15 @@ pub mod module {
 			// TODO: check if the caller is not providing any service for the blueprint.
 			Operators::<T>::remove(blueprint_id, &caller);
 
+			// TODO: also remove all the services that uses this blueprint?
+			let removed = OperatorsProfile::<T>::try_mutate_exists(&caller, |profile| {
+				profile
+					.as_mut()
+					.map(|p| p.blueprints.remove(&blueprint_id))
+					.ok_or(Error::<T>::NotRegistered)
+			})?;
+
+			ensure!(removed, Error::<T>::NotRegistered);
 			Self::deposit_event(Event::Unregistered { operator: caller.clone(), blueprint_id });
 			Ok(())
 		}
@@ -463,6 +506,7 @@ pub mod module {
 			});
 			Ok(())
 		}
+
 		/// Request a new service to be initiated using the provided blueprint with a list of
 		/// operators that will run your service. Optionally, you can specifiy who is permitted caller
 		/// of this service, by default anyone could use this service.
@@ -477,6 +521,7 @@ pub mod module {
 			#[pallet::compact] ttl: BlockNumberFor<T>,
 			request_args: Vec<Field<T::AccountId>>,
 		) -> DispatchResultWithPostInfo {
+			// TODO(@shekohex): split this function into smaller functions.
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 
@@ -505,6 +550,15 @@ pub mod module {
 					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
 			if pending_approvals.is_empty() {
 				// No approval is required, initiate the service immediately.
+				for operator in &approved {
+					// add the service id to the list of services for each operator's profile.
+					OperatorsProfile::<T>::try_mutate_exists(&operator, |profile| {
+						profile
+							.as_mut()
+							.and_then(|p| p.services.try_insert(service_id).ok())
+							.ok_or(Error::<T>::NotRegistered)
+					})?;
+				}
 				let operators = BoundedVec::<_, MaxOperatorsPerService>::try_from(approved)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
@@ -609,6 +663,16 @@ pub mod module {
 					.into_iter()
 					.map(|(v, _)| v)
 					.collect::<Vec<_>>();
+
+				// add the service id to the list of services for each operator's profile.
+				for operator in &operators {
+					OperatorsProfile::<T>::try_mutate_exists(&operator, |profile| {
+						profile
+							.as_mut()
+							.and_then(|p| p.services.try_insert(service_id).ok())
+							.ok_or(Error::<T>::NotRegistered)
+					})?;
+				}
 				let operators = BoundedVec::<_, MaxOperatorsPerService>::try_from(operators)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
@@ -664,6 +728,15 @@ pub mod module {
 			// TODO: allow permissioned callers to terminate the service?
 			ensure!(service.owner == caller, DispatchError::BadOrigin);
 			Instances::<T>::remove(service_id);
+			// Remove the service from the operator's profile.
+			for operator in &service.operators {
+				OperatorsProfile::<T>::try_mutate_exists(&operator, |profile| {
+					profile
+						.as_mut()
+						.map(|p| p.services.remove(&service_id))
+						.ok_or(Error::<T>::NotRegistered)
+				})?;
+			}
 
 			Self::deposit_event(Event::ServiceTerminated {
 				owner: caller.clone(),
