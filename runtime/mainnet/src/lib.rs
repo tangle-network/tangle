@@ -886,7 +886,7 @@ parameter_types! {
 	pub const TermDuration: BlockNumber = TERM_DURATION;
 	pub const DesiredMembers: u32 = DESIRED_MEMBERS;
 	pub const DesiredRunnersUp: u32 = DESIRED_RUNNERS_UP;
-	pub const MaxCandidates: u32 = MAX_CANDIDATES;
+	pub const MaxOperators: u32 = MAX_CANDIDATES;
 	pub const MaxVoters: u32 = MAX_VOTERS;
 	pub const MaxVotesPerVoter: u32 = MAX_VOTES_PER_VOTER;
 	pub const ElectionsPhragmenPalletId: LockIdentifier = ELECTIONS_PHRAGMEN_PALLET_ID;
@@ -909,10 +909,10 @@ impl pallet_elections_phragmen::Config for Runtime {
 	// must come from this module.
 	type InitializeMembers = Council;
 	type KickedMember = ();
-	type LoserCandidate = ();
+	type LoserOperator = ();
 	type PalletId = ElectionsPhragmenPalletId;
 	type TermDuration = TermDuration;
-	type MaxCandidates = MaxCandidates;
+	type MaxOperators = MaxOperators;
 	type MaxVoters = MaxVoters;
 	type VotingBondBase = VotingBondBase;
 	type VotingBondFactor = VotingBondFactor;

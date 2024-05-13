@@ -76,7 +76,7 @@ services:
     image: grafana/promtail:2.5.0
     network_mode: host
     volumes:
-      - /root/collator_logs:/var/log
+      - /root/operator_logs:/var/log
       - ./loki/promtail-config.yaml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
 

@@ -120,7 +120,7 @@ pub fn insert_dev_account_keys_into_keystore<TPublic: Public>(
 
 	match seed {
 		// When running the chain in dev or local test net, we insert the sr25519 account keys for
-		// collator accounts or validator accounts into the keystore Only if the node running is one
+		// operator accounts or validator accounts into the keystore Only if the node running is one
 		// of the predefined nodes Alice, Bob, Charlie, Dave, Eve or Ferdie
 		"Alice" | "Bob" | "Charlie" | "Dave" | "Eve" | "Ferdie" => {
 			if chain_type == ChainType::Development || chain_type == ChainType::Local {

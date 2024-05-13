@@ -37,16 +37,6 @@ impl<AccountId, Balance> OnOperatorPayout<AccountId, Balance> for () {
 		Weight::zero()
 	}
 }
-
-pub trait OnNewRound {
-	fn on_new_round(round_index: crate::RoundIndex) -> Weight;
-}
-impl OnNewRound for () {
-	fn on_new_round(_round_index: crate::RoundIndex) -> Weight {
-		Weight::zero()
-	}
-}
-
 /// Defines the behavior to payout the operator's reward.
 pub trait PayoutOperatorReward<Runtime: crate::Config> {
 	fn payout_operator_reward(
@@ -81,6 +71,6 @@ impl<Runtime: crate::Config> OnInactiveOperator<Runtime> for () {
 		_round: crate::RoundIndex,
 	) -> Result<Weight, DispatchErrorWithPostInfo<PostDispatchInfo>> {
 		crate::Pallet::<Runtime>::go_offline_inner(operator_id)?;
-		Ok(<Runtime as crate::Config>::WeightInfo::go_offline(crate::MAX_CANDIDATES))
+		Ok(<Runtime as crate::Config>::WeightInfo::go_offline(crate::MAX_OPERATORS))
 	}
 }

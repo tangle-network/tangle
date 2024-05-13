@@ -19,7 +19,6 @@ members = [
  "client/evm-tracing",
  "client/rpc/*",
  "client/rpc-core/*",
- "client/voter",
  "node",
  "runtime/testnet",
  "runtime/mainnet",

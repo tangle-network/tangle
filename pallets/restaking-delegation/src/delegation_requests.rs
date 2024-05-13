@@ -17,7 +17,7 @@
 //! Scheduled requests functionality for delegators
 
 use crate::pallet::{
-	BalanceOf, CandidateInfo, Config, DelegationScheduledRequests, DelegatorState, Error, Event,
+	BalanceOf, Config, DelegationScheduledRequests, DelegatorState, Error, Event, OperatorInfo,
 	Pallet, Round, RoundIndex, Total,
 };
 use crate::weights::WeightInfo;
@@ -112,7 +112,7 @@ impl<T: Config> Pallet<T> {
 		Self::deposit_event(Event::DelegationRevocationScheduled {
 			round: now,
 			delegator,
-			candidate: operator,
+			operator,
 			scheduled_exit: when,
 		});
 		Ok(().into())
@@ -189,7 +189,7 @@ impl<T: Config> Pallet<T> {
 
 		Self::deposit_event(Event::DelegationDecreaseScheduled {
 			delegator,
-			candidate: operator,
+			operator,
 			amount_to_decrease: decrease_amount,
 			execute_round: when,
 		});
@@ -229,7 +229,7 @@ impl<T: Config> Pallet<T> {
 		state: &mut Delegator<T::AccountId, BalanceOf<T>>,
 		scheduled_requests: &mut BoundedVec<
 			ScheduledRequest<T::AccountId, BalanceOf<T>>,
-			AddGet<T::MaxTopDelegationsPerCandidate, T::MaxBottomDelegationsPerCandidate>,
+			AddGet<T::MaxTopDelegationsPerOperator, T::MaxBottomDelegationsPerOperator>,
 		>,
 	) -> Option<ScheduledRequest<T::AccountId, BalanceOf<T>>> {
 		let request_idx = scheduled_requests.iter().position(|req| &req.delegator == delegator)?;
@@ -286,14 +286,14 @@ impl<T: Config> Pallet<T> {
 				<AutoCompoundDelegations<T>>::remove_auto_compound(&operator, &delegator);
 
 				// remove delegation from operator state delegations
-				Self::delegator_leaves_candidate(operator.clone(), delegator.clone(), amount)
+				Self::delegator_leaves_operator(operator.clone(), delegator.clone(), amount)
 					.map_err(|err| DispatchErrorWithPostInfo {
 						post_info: Some(actual_weight).into(),
 						error: err,
 					})?;
 				Self::deposit_event(Event::DelegationRevoked {
 					delegator: delegator.clone(),
-					candidate: operator.clone(),
+					operator: operator.clone(),
 					unstaked_amount: amount,
 				});
 
@@ -323,8 +323,8 @@ impl<T: Config> Pallet<T> {
 						return if bond.amount > amount {
 							let amount_before: BalanceOf<T> = bond.amount.into();
 							bond.amount = bond.amount.saturating_sub(amount);
-							let mut operator_info = <CandidateInfo<T>>::get(&operator)
-								.ok_or(<Error<T>>::CandidateDNE)
+							let mut operator_info = <OperatorInfo<T>>::get(&operator)
+								.ok_or(<Error<T>>::OperatorDNE)
 								.map_err(|err| DispatchErrorWithPostInfo {
 									post_info: Some(actual_weight).into(),
 									error: err.into(),
@@ -357,7 +357,7 @@ impl<T: Config> Pallet<T> {
 									post_info: Some(actual_weight).into(),
 									error: err,
 								})?;
-							<CandidateInfo<T>>::insert(&operator, operator_info);
+							<OperatorInfo<T>>::insert(&operator, operator_info);
 							let new_total_staked = <Total<T>>::get().saturating_sub(amount);
 							<Total<T>>::put(new_total_staked);
 
@@ -368,7 +368,7 @@ impl<T: Config> Pallet<T> {
 							<DelegatorState<T>>::insert(delegator.clone(), state);
 							Self::deposit_event(Event::DelegationDecreased {
 								delegator,
-								candidate: operator.clone(),
+								operator: operator.clone(),
 								amount,
 								in_top,
 							});

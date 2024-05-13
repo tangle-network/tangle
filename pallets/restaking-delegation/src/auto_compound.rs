@@ -17,8 +17,8 @@
 //! Auto-compounding functionality for staking rewards
 
 use crate::pallet::{
-	AddGet, AutoCompoundingDelegations as AutoCompoundingDelegationsStorage, BalanceOf,
-	CandidateInfo, Config, DelegatorState, Error, Event, Pallet, Total,
+	AddGet, AutoCompoundingDelegations as AutoCompoundingDelegationsStorage, BalanceOf, Config,
+	DelegatorState, Error, Event, OperatorInfo, Pallet, Total,
 };
 use crate::types::{Bond, BondAdjust, Delegator};
 use frame_support::dispatch::DispatchResultWithPostInfo;
@@ -42,7 +42,7 @@ pub struct AutoCompoundConfig<AccountId> {
 pub struct AutoCompoundDelegations<T: Config>(
 	BoundedVec<
 		AutoCompoundConfig<T::AccountId>,
-		AddGet<T::MaxTopDelegationsPerCandidate, T::MaxBottomDelegationsPerCandidate>,
+		AddGet<T::MaxTopDelegationsPerOperator, T::MaxBottomDelegationsPerOperator>,
 	>,
 );
 
@@ -56,24 +56,24 @@ where
 	pub fn new(
 		sorted_delegations: BoundedVec<
 			AutoCompoundConfig<T::AccountId>,
-			AddGet<T::MaxTopDelegationsPerCandidate, T::MaxBottomDelegationsPerCandidate>,
+			AddGet<T::MaxTopDelegationsPerOperator, T::MaxBottomDelegationsPerOperator>,
 		>,
 	) -> Self {
 		Self(sorted_delegations)
 	}
 
-	pub fn get_auto_compounding_delegation_count(candidate: &T::AccountId) -> usize {
-		<AutoCompoundingDelegationsStorage<T>>::decode_len(candidate).unwrap_or_default()
+	pub fn get_auto_compounding_delegation_count(operator: &T::AccountId) -> usize {
+		<AutoCompoundingDelegationsStorage<T>>::decode_len(operator).unwrap_or_default()
 	}
 
 	/// Retrieves an instance of [AutoCompoundingDelegations] storage as [AutoCompoundDelegations].
-	pub fn get_storage(candidate: &T::AccountId) -> Self {
-		Self(<AutoCompoundingDelegationsStorage<T>>::get(candidate))
+	pub fn get_storage(operator: &T::AccountId) -> Self {
+		Self(<AutoCompoundingDelegationsStorage<T>>::get(operator))
 	}
 
 	/// Inserts the current state to [AutoCompoundingDelegations] storage.
-	pub fn set_storage(self, candidate: &T::AccountId) {
-		<AutoCompoundingDelegationsStorage<T>>::insert(candidate, self.0)
+	pub fn set_storage(self, operator: &T::AccountId) {
+		<AutoCompoundingDelegationsStorage<T>>::insert(operator, self.0)
 	}
 
 	/// Retrieves the auto-compounding value for a delegation. The `delegations_config` must be a
@@ -134,7 +134,7 @@ where
 		&self,
 	) -> &BoundedVec<
 		AutoCompoundConfig<T::AccountId>,
-		AddGet<T::MaxTopDelegationsPerCandidate, T::MaxBottomDelegationsPerCandidate>,
+		AddGet<T::MaxTopDelegationsPerOperator, T::MaxBottomDelegationsPerOperator>,
 	> {
 		&self.0
 	}
@@ -145,7 +145,7 @@ where
 		self,
 	) -> BoundedVec<
 		AutoCompoundConfig<T::AccountId>,
-		AddGet<T::MaxTopDelegationsPerCandidate, T::MaxBottomDelegationsPerCandidate>,
+		AddGet<T::MaxTopDelegationsPerOperator, T::MaxBottomDelegationsPerOperator>,
 	> {
 		self.0
 	}
@@ -155,12 +155,12 @@ where
 	/// Delegates and sets the auto-compounding config. The function skips inserting auto-compound
 	/// storage and validation, if the auto-compound value is 0%.
 	pub(crate) fn delegate_with_auto_compound(
-		candidate: T::AccountId,
+		operator: T::AccountId,
 		delegator: T::AccountId,
 		amount: BalanceOf<T>,
 		auto_compound: Percent,
-		candidate_delegation_count_hint: u32,
-		candidate_auto_compounding_delegation_count_hint: u32,
+		operator_delegation_count_hint: u32,
+		operator_auto_compounding_delegation_count_hint: u32,
 		delegation_count_hint: u32,
 	) -> DispatchResultWithPostInfo {
 		// check that caller can lock the amount before any changes to storage
@@ -181,33 +181,33 @@ where
 				Error::<T>::ExceedMaxDelegationsPerDelegator
 			);
 			ensure!(
-				state.add_delegation(Bond { owner: candidate.clone(), amount }),
-				Error::<T>::AlreadyDelegatedCandidate
+				state.add_delegation(Bond { owner: operator.clone(), amount }),
+				Error::<T>::AlreadyDelegatedOperator
 			);
 			state
 		} else {
 			// first delegation
-			ensure!(!<Pallet<T>>::is_candidate(&delegator), Error::<T>::CandidateExists);
-			Delegator::new(delegator.clone(), candidate.clone(), amount)
+			ensure!(!<Pallet<T>>::is_operator(&delegator), Error::<T>::OperatorExists);
+			Delegator::new(delegator.clone(), operator.clone(), amount)
 		};
-		let mut candidate_state =
-			<CandidateInfo<T>>::get(&candidate).ok_or(Error::<T>::CandidateDNE)?;
+		let mut operator_state =
+			<OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
 		ensure!(
-			candidate_delegation_count_hint >= candidate_state.delegation_count,
-			Error::<T>::TooLowCandidateDelegationCountToDelegate
+			operator_delegation_count_hint >= operator_state.delegation_count,
+			Error::<T>::TooLowOperatorDelegationCountToDelegate
 		);
 
 		if !auto_compound.is_zero() {
 			ensure!(
-				Self::get_auto_compounding_delegation_count(&candidate) as u32
-					<= candidate_auto_compounding_delegation_count_hint,
-				<Error<T>>::TooLowCandidateAutoCompoundingDelegationCountToDelegate,
+				Self::get_auto_compounding_delegation_count(&operator) as u32
+					<= operator_auto_compounding_delegation_count_hint,
+				<Error<T>>::TooLowOperatorAutoCompoundingDelegationCountToDelegate,
 			);
 		}
 
-		// add delegation to candidate
-		let (delegator_position, less_total_staked) = candidate_state
-			.add_delegation::<T>(&candidate, Bond { owner: delegator.clone(), amount })?;
+		// add delegation to operator
+		let (delegator_position, less_total_staked) = operator_state
+			.add_delegation::<T>(&operator, Bond { owner: delegator.clone(), amount })?;
 
 		// lock delegator amount
 		delegator_state.adjust_bond_lock::<T>(BondAdjust::Increase(amount))?;
@@ -220,18 +220,18 @@ where
 
 		// set auto-compound config if the percent is non-zero
 		if !auto_compound.is_zero() {
-			let mut auto_compounding_state = Self::get_storage(&candidate);
+			let mut auto_compounding_state = Self::get_storage(&operator);
 			auto_compounding_state.set_for_delegator(delegator.clone(), auto_compound.clone())?;
-			auto_compounding_state.set_storage(&candidate);
+			auto_compounding_state.set_storage(&operator);
 		}
 
 		<Total<T>>::put(new_total_locked);
-		<CandidateInfo<T>>::insert(&candidate, candidate_state);
+		<OperatorInfo<T>>::insert(&operator, operator_state);
 		<DelegatorState<T>>::insert(&delegator, delegator_state);
 		<Pallet<T>>::deposit_event(Event::Delegation {
 			delegator,
 			locked_amount: amount,
-			candidate,
+			operator,
 			delegator_position,
 			auto_compound,
 		});
@@ -241,10 +241,10 @@ where
 
 	/// Sets the auto-compounding value for a delegation. The config is removed if value is zero.
 	pub(crate) fn set_auto_compound(
-		candidate: T::AccountId,
+		operator: T::AccountId,
 		delegator: T::AccountId,
 		value: Percent,
-		candidate_auto_compounding_delegation_count_hint: u32,
+		operator_auto_compounding_delegation_count_hint: u32,
 		delegation_count_hint: u32,
 	) -> DispatchResultWithPostInfo {
 		let delegator_state =
@@ -254,14 +254,14 @@ where
 			<Error<T>>::TooLowDelegationCountToAutoCompound,
 		);
 		ensure!(
-			delegator_state.delegations.0.iter().any(|b| b.owner == candidate),
+			delegator_state.delegations.0.iter().any(|b| b.owner == operator),
 			<Error<T>>::DelegationDNE,
 		);
 
-		let mut auto_compounding_state = Self::get_storage(&candidate);
+		let mut auto_compounding_state = Self::get_storage(&operator);
 		ensure!(
-			auto_compounding_state.len() <= candidate_auto_compounding_delegation_count_hint,
-			<Error<T>>::TooLowCandidateAutoCompoundingDelegationCountToAutoCompound,
+			auto_compounding_state.len() <= operator_auto_compounding_delegation_count_hint,
+			<Error<T>>::TooLowOperatorAutoCompoundingDelegationCountToAutoCompound,
 		);
 		let state_updated = if value.is_zero() {
 			auto_compounding_state.remove_for_delegator(&delegator)
@@ -269,26 +269,26 @@ where
 			auto_compounding_state.set_for_delegator(delegator.clone(), value)?
 		};
 		if state_updated {
-			auto_compounding_state.set_storage(&candidate);
+			auto_compounding_state.set_storage(&operator);
 		}
 
-		<Pallet<T>>::deposit_event(Event::AutoCompoundSet { candidate, delegator, value });
+		<Pallet<T>>::deposit_event(Event::AutoCompoundSet { operator, delegator, value });
 
 		Ok(().into())
 	}
 
 	/// Removes the auto-compounding value for a delegation. This should be called when the
 	/// delegation is revoked to cleanup storage. Storage is only written iff the entry existed.
-	pub(crate) fn remove_auto_compound(candidate: &T::AccountId, delegator: &T::AccountId) {
-		let mut auto_compounding_state = Self::get_storage(candidate);
+	pub(crate) fn remove_auto_compound(operator: &T::AccountId, delegator: &T::AccountId) {
+		let mut auto_compounding_state = Self::get_storage(operator);
 		if auto_compounding_state.remove_for_delegator(delegator) {
-			auto_compounding_state.set_storage(&candidate);
+			auto_compounding_state.set_storage(&operator);
 		}
 	}
 
 	/// Returns the value of auto-compound, if it exists for a given delegation, zero otherwise.
-	pub(crate) fn auto_compound(candidate: &T::AccountId, delegator: &T::AccountId) -> Percent {
-		let delegations_config = Self::get_storage(candidate);
+	pub(crate) fn auto_compound(operator: &T::AccountId, delegator: &T::AccountId) -> Percent {
+		let delegations_config = Self::get_storage(operator);
 		delegations_config
 			.get_for_delegator(&delegator)
 			.unwrap_or_else(|| Percent::zero())

@@ -29,24 +29,24 @@
 //! At the start of every round,
 //! * issuance is calculated for operators (and their delegators) for block authoring
 //! `T::RewardPaymentDelay` rounds ago
-//! * a new set of operators is chosen from the candidates
+//! * a new set of operators is chosen from the operators
 //!
 //! Immediately following a round change, payments are made once-per-block until all payments have
 //! been made. In each such block, one operator is chosen for a rewards payment and is paid along
-//! with each of its top `T::MaxTopDelegationsPerCandidate` delegators.
+//! with each of its top `T::MaxTopDelegationsPerOperator` delegators.
 //!
-//! To join the set of candidates, call `join_candidates` with `bond >= MinCandidateStk`.
-//! To leave the set of candidates, call `schedule_leave_candidates`. If the call succeeds,
-//! the operator is removed from the pool of candidates so they cannot be selected for future
+//! To join the set of operators, call `join_operators` with `bond >= MinOperatorStk`.
+//! To leave the set of operators, call `schedule_leave_operators`. If the call succeeds,
+//! the operator is removed from the pool of operators so they cannot be selected for future
 //! operator sets, but they are not unbonded until their exit request is executed. Any signed
-//! account may trigger the exit `T::LeaveCandidatesDelay` rounds after the round in which the
+//! account may trigger the exit `T::LeaveOperatorsDelay` rounds after the round in which the
 //! original request was made.
 //!
 //! To join the set of delegators, call `delegate` and pass in an account that is
-//! already an operator candidate and `bond >= MinDelegation`. Each delegator can delegate up to
-//! `T::MaxDelegationsPerDelegator` operator candidates by calling `delegate`.
+//! already an operator operator and `bond >= MinDelegation`. Each delegator can delegate up to
+//! `T::MaxDelegationsPerDelegator` operator operators by calling `delegate`.
 //!
-//! To revoke a delegation, call `revoke_delegation` with the operator candidate's account.
+//! To revoke a delegation, call `revoke_delegation` with the operator operator's account.
 //! To leave the set of delegators and revoke all delegations, call `leave_delegators`. Leaving
 //! delegations is only possible if no Blueprint Instance is renting the delegator's stake for
 //! economic security.
@@ -55,8 +55,6 @@
 
 mod auto_compound;
 mod delegation_requests;
-pub mod inflation;
-pub mod migrations;
 pub mod traits;
 pub mod types;
 pub mod weights;
@@ -69,8 +67,7 @@ mod set;
 #[cfg(test)]
 mod tests;
 
-use frame_support::pallet;
-pub use inflation::{InflationInfo, Range};
+use frame_support::{pallet, traits::OneSessionHandler};
 pub use weights::WeightInfo;
 
 pub use auto_compound::{AutoCompoundConfig, AutoCompoundDelegations};
@@ -85,7 +82,7 @@ pub mod pallet {
 	use crate::delegation_requests::{
 		CancelledScheduledRequest, DelegationAction, ScheduledRequest,
 	};
-	use crate::{set::BoundedOrderedSet, traits::*, types::*, InflationInfo, Range, WeightInfo};
+	use crate::{set::BoundedOrderedSet, traits::*, types::*, WeightInfo};
 	use crate::{AutoCompoundConfig, AutoCompoundDelegations};
 	use frame_support::fail;
 	use frame_support::pallet_prelude::*;
@@ -94,13 +91,15 @@ pub mod pallet {
 		ReservableCurrency,
 	};
 	use frame_system::pallet_prelude::*;
+	use sp_core::ecdsa;
+	use sp_runtime::RuntimeAppPublic;
 	use sp_runtime::{
 		traits::{Saturating, Zero},
 		DispatchErrorWithPostInfo, Perbill, Percent,
 	};
 	use sp_std::{collections::btree_map::BTreeMap, prelude::*};
 
-	/// Pallet for parachain staking
+	/// Pallet for restaking delegation
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
@@ -113,9 +112,9 @@ pub mod pallet {
 	pub const OPERATOR_LOCK_ID: LockIdentifier = *b"stkngcol";
 	pub const DELEGATOR_LOCK_ID: LockIdentifier = *b"stkngdel";
 
-	/// A hard limit for weight computation purposes for the max candidates that _could_
+	/// A hard limit for weight computation purposes for the max operators that _could_
 	/// theoretically exist.
-	pub const MAX_CANDIDATES: u32 = 200;
+	pub const MAX_OPERATORS: u32 = 10000;
 
 	/// Configuration trait of this pallet.
 	#[pallet::config]
@@ -126,6 +125,17 @@ pub mod pallet {
 		type Currency: Currency<Self::AccountId>
 			+ ReservableCurrency<Self::AccountId>
 			+ LockableCurrency<Self::AccountId>;
+
+		/// Authority identifier type
+		type RoleKeyId: Member
+			+ Parameter
+			+ RuntimeAppPublic
+			+ MaybeSerializeDeserialize
+			+ AsRef<[u8]>
+			+ Into<ecdsa::Public>
+			+ From<ecdsa::Public>
+			+ MaxEncodedLen;
+
 		/// The origin for monetary governance
 		type MonetaryGovernanceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// Minimum number of blocks per round
@@ -135,12 +145,12 @@ pub mod pallet {
 		/// This value must be less than or equal to RewardPaymentDelay.
 		#[pallet::constant]
 		type MaxOfflineRounds: Get<u32>;
-		/// Number of rounds that candidates remain bonded before exit request is executable
+		/// Number of rounds that operators remain bonded before exit request is executable
 		#[pallet::constant]
-		type LeaveCandidatesDelay: Get<RoundIndex>;
-		/// Number of rounds candidate requests to decrease self-bond must wait to be executable
+		type LeaveOperatorsDelay: Get<RoundIndex>;
+		/// Number of rounds operator requests to decrease self-bond must wait to be executable
 		#[pallet::constant]
-		type CandidateBondLessDelay: Get<RoundIndex>;
+		type OperatorBondLessDelay: Get<RoundIndex>;
 		/// Number of rounds that delegators remain bonded before exit request is executable
 		#[pallet::constant]
 		type LeaveDelegatorsDelay: Get<RoundIndex>;
@@ -153,21 +163,21 @@ pub mod pallet {
 		/// Number of rounds after which block authors are rewarded
 		#[pallet::constant]
 		type RewardPaymentDelay: Get<RoundIndex>;
-		/// Minimum number of selected candidates every round
+		/// Minimum number of selected operators every round
 		#[pallet::constant]
-		type MinSelectedCandidates: Get<u32>;
-		/// Maximum top delegations counted per candidate
+		type MinSelectedOperators: Get<u32>;
+		/// Maximum top delegations counted per operator
 		#[pallet::constant]
-		type MaxTopDelegationsPerCandidate: Get<u32>;
-		/// Maximum bottom delegations (not counted) per candidate
+		type MaxTopDelegationsPerOperator: Get<u32>;
+		/// Maximum bottom delegations (not counted) per operator
 		#[pallet::constant]
-		type MaxBottomDelegationsPerCandidate: Get<u32>;
+		type MaxBottomDelegationsPerOperator: Get<u32>;
 		/// Maximum delegations per delegator
 		#[pallet::constant]
 		type MaxDelegationsPerDelegator: Get<u32>;
-		/// Minimum stake required for any account to be an operator candidate
+		/// Minimum stake required for any account to be an operator operator
 		#[pallet::constant]
-		type MinCandidateStk: Get<BalanceOf<Self>>;
+		type MinOperatorStk: Get<BalanceOf<Self>>;
 		/// Minimum stake for any registered on-chain account to delegate
 		#[pallet::constant]
 		type MinDelegation: Get<BalanceOf<Self>>;
@@ -182,9 +192,6 @@ pub mod pallet {
 		/// The default behavior is to mark the operator as offline.
 		/// If you need to use the default implementation, specify the type `()`.
 		type OnInactiveOperator: OnInactiveOperator<Self>;
-		/// Handler to notify the runtime when a new round begin.
-		/// If you don't need it, you can specify the type `()`.
-		type OnNewRound: OnNewRound;
 
 		/// Get the slot duration in milliseconds
 		#[pallet::constant]
@@ -192,9 +199,9 @@ pub mod pallet {
 		/// Get the average time beetween 2 blocks in milliseconds
 		#[pallet::constant]
 		type BlockTime: Get<u64>;
-		/// Maximum candidates
+		/// Maximum operators
 		#[pallet::constant]
-		type MaxCandidates: Get<u32>;
+		type MaxOperators: Get<u32>;
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 	}
@@ -204,11 +211,11 @@ pub mod pallet {
 		DelegatorDNE,
 		DelegatorDNEinTopNorBottom,
 		DelegatorDNEInDelegatorSet,
-		CandidateDNE,
+		OperatorDNE,
 		DelegationDNE,
 		DelegatorExists,
-		CandidateExists,
-		CandidateBondBelowMin,
+		OperatorExists,
+		OperatorBondBelowMin,
 		InsufficientBalance,
 		DelegatorBondBelowMin,
 		DelegationBelowMin,
@@ -218,41 +225,41 @@ pub mod pallet {
 		DelegatorNotLeaving,
 		DelegatorCannotLeaveYet,
 		CannotDelegateIfLeaving,
-		CandidateAlreadyLeaving,
-		CandidateNotLeaving,
-		CandidateCannotLeaveYet,
+		OperatorAlreadyLeaving,
+		OperatorNotLeaving,
+		OperatorCannotLeaveYet,
 		CannotGoOnlineIfLeaving,
 		ExceedMaxDelegationsPerDelegator,
-		AlreadyDelegatedCandidate,
+		AlreadyDelegatedOperator,
 		InvalidSchedule,
 		CannotSetBelowMin,
 		RoundLengthMustBeGreaterThanTotalSelectedOperators,
 		NoWritingSameValue,
-		TooLowCandidateCountWeightHintJoinCandidates,
-		TooLowCandidateCountWeightHintCancelLeaveCandidates,
-		TooLowCandidateCountToLeaveCandidates,
+		TooLowOperatorCountWeightHintJoinOperators,
+		TooLowOperatorCountWeightHintCancelLeaveOperators,
+		TooLowOperatorCountToLeaveOperators,
 		TooLowDelegationCountToDelegate,
-		TooLowCandidateDelegationCountToDelegate,
-		TooLowCandidateDelegationCountToLeaveCandidates,
+		TooLowOperatorDelegationCountToDelegate,
+		TooLowOperatorDelegationCountToLeaveOperators,
 		TooLowDelegationCountToLeaveDelegators,
-		PendingCandidateRequestsDNE,
-		PendingCandidateRequestAlreadyExists,
-		PendingCandidateRequestNotDueYet,
+		PendingOperatorRequestsDNE,
+		PendingOperatorRequestAlreadyExists,
+		PendingOperatorRequestNotDueYet,
 		PendingDelegationRequestDNE,
 		PendingDelegationRequestAlreadyExists,
 		PendingDelegationRequestNotDueYet,
 		CannotDelegateLessThanOrEqualToLowestBottomWhenFull,
 		PendingDelegationRevoke,
 		TooLowDelegationCountToAutoCompound,
-		TooLowCandidateAutoCompoundingDelegationCountToAutoCompound,
-		TooLowCandidateAutoCompoundingDelegationCountToDelegate,
+		TooLowOperatorAutoCompoundingDelegationCountToAutoCompound,
+		TooLowOperatorAutoCompoundingDelegationCountToDelegate,
 		TooLowOperatorCountToNotifyAsInactive,
 		CannotBeNotifiedAsInactive,
-		TooLowCandidateAutoCompoundingDelegationCountToLeaveCandidates,
-		TooLowCandidateCountWeightHint,
-		TooLowCandidateCountWeightHintGoOffline,
-		CandidateLimitReached,
-		CannotSetAboveMaxCandidates,
+		TooLowOperatorAutoCompoundingDelegationCountToLeaveOperators,
+		TooLowOperatorCountWeightHint,
+		TooLowOperatorCountWeightHintGoOffline,
+		OperatorLimitReached,
+		CannotSetAboveMaxOperators,
 		RemovedCall,
 		MarkingOfflineNotEnabled,
 		CurrentRoundTooLow,
@@ -268,78 +275,74 @@ pub mod pallet {
 			selected_operators_number: u32,
 			total_balance: BalanceOf<T>,
 		},
-		/// Account joined the set of operator candidates.
-		JoinedOperatorCandidates {
+		/// Account joined the set of operator operators.
+		JoinedOperatorOperators {
 			account: T::AccountId,
 			amount_locked: BalanceOf<T>,
 			new_total_amt_locked: BalanceOf<T>,
 		},
-		/// Candidate selected for operators. Total Exposed Amount includes all delegations.
+		/// Operator selected for operators. Total Exposed Amount includes all delegations.
 		OperatorChosen {
 			round: RoundIndex,
 			operator_account: T::AccountId,
 			total_exposed_amount: BalanceOf<T>,
 		},
-		/// Candidate requested to decrease a self bond.
-		CandidateBondLessRequested {
-			candidate: T::AccountId,
+		/// Operator requested to decrease a self bond.
+		OperatorBondLessRequested {
+			operator: T::AccountId,
 			amount_to_decrease: BalanceOf<T>,
 			execute_round: RoundIndex,
 		},
-		/// Candidate has increased a self bond.
-		CandidateBondedMore {
-			candidate: T::AccountId,
+		/// Operator has increased a self bond.
+		OperatorBondedMore {
+			operator: T::AccountId,
 			amount: BalanceOf<T>,
 			new_total_bond: BalanceOf<T>,
 		},
-		/// Candidate has decreased a self bond.
-		CandidateBondedLess {
-			candidate: T::AccountId,
-			amount: BalanceOf<T>,
-			new_bond: BalanceOf<T>,
-		},
-		/// Candidate temporarily leave the set of operator candidates without unbonding.
-		CandidateWentOffline { candidate: T::AccountId },
-		/// Candidate rejoins the set of operator candidates.
-		CandidateBackOnline { candidate: T::AccountId },
-		/// Candidate has requested to leave the set of candidates.
-		CandidateScheduledExit {
+		/// Operator has decreased a self bond.
+		OperatorBondedLess { operator: T::AccountId, amount: BalanceOf<T>, new_bond: BalanceOf<T> },
+		/// Operator temporarily leave the set of operator operators without unbonding.
+		OperatorWentOffline { operator: T::AccountId },
+		/// Operator rejoins the set of operator operators.
+		OperatorBackOnline { operator: T::AccountId },
+		/// Operator has requested to leave the set of operators.
+		OperatorScheduledExit {
 			exit_allowed_round: RoundIndex,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			scheduled_exit: RoundIndex,
 		},
-		/// Cancelled request to leave the set of candidates.
-		CancelledCandidateExit { candidate: T::AccountId },
-		/// Cancelled request to decrease candidate's bond.
-		CancelledCandidateBondLess {
-			candidate: T::AccountId,
+		/// Cancelled request to leave the set of operators.
+		CancelledOperatorExit { operator: T::AccountId },
+		/// Cancelled request to decrease operator's bond.
+		CancelledOperatorBondLess {
+			operator: T::AccountId,
 			amount: BalanceOf<T>,
 			execute_round: RoundIndex,
 		},
-		/// Candidate has left the set of candidates.
-		CandidateLeft {
-			ex_candidate: T::AccountId,
+		/// Operator has left the set of operators.
+		OperatorLeft {
+			ex_operator: T::AccountId,
 			unlocked_amount: BalanceOf<T>,
 			new_total_amt_locked: BalanceOf<T>,
 		},
-		/// Delegator requested to decrease a bond for the operator candidate.
+		/// Delegator requested to decrease a bond for the operator operator.
 		DelegationDecreaseScheduled {
 			delegator: T::AccountId,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			amount_to_decrease: BalanceOf<T>,
 			execute_round: RoundIndex,
 		},
 		// Delegation increased.
 		DelegationIncreased {
 			delegator: T::AccountId,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			amount: BalanceOf<T>,
 			in_top: bool,
 		},
 		// Delegation decreased.
 		DelegationDecreased {
 			delegator: T::AccountId,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			amount: BalanceOf<T>,
 			in_top: bool,
 		},
@@ -353,7 +356,7 @@ pub mod pallet {
 		DelegationRevocationScheduled {
 			round: RoundIndex,
 			delegator: T::AccountId,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			scheduled_exit: RoundIndex,
 		},
 		/// Delegator has left the set of delegators.
@@ -361,13 +364,13 @@ pub mod pallet {
 		/// Delegation revoked.
 		DelegationRevoked {
 			delegator: T::AccountId,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			unstaked_amount: BalanceOf<T>,
 		},
 		/// Delegation kicked.
 		DelegationKicked {
 			delegator: T::AccountId,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			unstaked_amount: BalanceOf<T>,
 		},
 		/// Cancelled a pending request to exit the set of delegators.
@@ -382,58 +385,27 @@ pub mod pallet {
 		Delegation {
 			delegator: T::AccountId,
 			locked_amount: BalanceOf<T>,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			delegator_position: DelegatorAdded<BalanceOf<T>>,
 			auto_compound: Percent,
 		},
-		/// Delegation from candidate state has been remove.
-		DelegatorLeftCandidate {
+		/// Delegation from operator state has been remove.
+		DelegatorLeftOperator {
 			delegator: T::AccountId,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			unstaked_amount: BalanceOf<T>,
-			total_candidate_staked: BalanceOf<T>,
+			total_operator_staked: BalanceOf<T>,
 		},
 		/// Paid the account (delegator or operator) the balance as liquid rewards.
 		Rewarded { account: T::AccountId, rewards: BalanceOf<T> },
-		/// Transferred to account which holds funds reserved for parachain bond.
-		ReservedForParachainBond { account: T::AccountId, value: BalanceOf<T> },
-		/// Account (re)set for parachain bond treasury.
-		ParachainBondAccountSet { old: T::AccountId, new: T::AccountId },
-		/// Percent of inflation reserved for parachain bond (re)set.
-		ParachainBondReservePercentSet { old: Percent, new: Percent },
-		/// Annual inflation input (first 3) was used to derive new per-round inflation (last 3)
-		InflationSet {
-			annual_min: Perbill,
-			annual_ideal: Perbill,
-			annual_max: Perbill,
-			round_min: Perbill,
-			round_ideal: Perbill,
-			round_max: Perbill,
-		},
-		/// Staking expectations set.
-		StakeExpectationsSet {
-			expect_min: BalanceOf<T>,
-			expect_ideal: BalanceOf<T>,
-			expect_max: BalanceOf<T>,
-		},
-		/// Set total selected candidates to this value.
+		/// Set total selected operators to this value.
 		TotalSelectedSet { old: u32, new: u32 },
 		/// Set operator commission to this value.
 		OperatorCommissionSet { old: Perbill, new: Perbill },
-		/// Set blocks per round
-		BlocksPerRoundSet {
-			current_round: RoundIndex,
-			first_block: BlockNumberFor<T>,
-			old: u32,
-			new: u32,
-			new_per_round_inflation_min: Perbill,
-			new_per_round_inflation_ideal: Perbill,
-			new_per_round_inflation_max: Perbill,
-		},
 		/// Auto-compounding reward percent was set for a delegation.
-		AutoCompoundSet { candidate: T::AccountId, delegator: T::AccountId, value: Percent },
+		AutoCompoundSet { operator: T::AccountId, delegator: T::AccountId, value: Percent },
 		/// Compounded a portion of rewards towards the delegation.
-		Compounded { candidate: T::AccountId, delegator: T::AccountId, amount: BalanceOf<T> },
+		Compounded { operator: T::AccountId, delegator: T::AccountId, amount: BalanceOf<T> },
 	}
 
 	#[pallet::hooks]
@@ -444,10 +416,11 @@ pub mod pallet {
 			let mut round = <Round<T>>::get();
 			if round.should_update(n) {
 				// fetch current slot number
-				let current_slot: u64 = T::SlotProvider::get().into();
+				// TODO: FIX
+				let current_slot: u64 = 0u64;
 
-				// account for SlotProvider read
-				weight = weight.saturating_add(T::DbWeight::get().reads_writes(1, 0));
+				// // account for SlotProvider read
+				// weight = weight.saturating_add(T::DbWeight::get().reads_writes(1, 0));
 
 				// Compute round duration in slots
 				let round_duration = (current_slot.saturating_sub(round.first_slot))
@@ -455,14 +428,15 @@ pub mod pallet {
 
 				// mutate round
 				round.update(n, current_slot);
-				// notify that new round begin
-				weight = weight.saturating_add(T::OnNewRound::on_new_round(round.current));
+				// // notify that new round begin
+				// weight = weight.saturating_add(T::OnNewRound::on_new_round(round.current));
 				// pay all stakers for T::RewardPaymentDelay rounds ago
 				weight =
 					weight.saturating_add(Self::prepare_staking_payouts(round, round_duration));
-				// select top operator candidates for next round
+
+				// select top operator operators for next round
 				let (extra_weight, operator_count, _delegation_count, total_staked) =
-					Self::select_top_candidates(round.current);
+					Self::select_top_operators(round.current);
 				weight = weight.saturating_add(extra_weight);
 				// start next round
 				<Round<T>>::put(round);
@@ -484,9 +458,6 @@ pub mod pallet {
 			weight = weight.saturating_add(T::DbWeight::get().reads_writes(3, 2));
 			weight
 		}
-		fn on_finalize(_n: BlockNumberFor<T>) {
-			Self::award_points_to_block_author();
-		}
 	}
 
 	#[pallet::storage]
@@ -496,14 +467,8 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn total_selected)]
-	/// The total candidates selected every round
+	/// The total operators selected every round
 	pub(crate) type TotalSelected<T: Config> = StorageValue<_, u32, ValueQuery>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn parachain_bond_info)]
-	/// Parachain bond config info { account, percent_of_inflation }
-	pub(crate) type ParachainBondInfo<T: Config> =
-		StorageValue<_, ParachainBondConfig<T::AccountId>, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn round)]
@@ -522,10 +487,10 @@ pub mod pallet {
 	>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn candidate_info)]
-	/// Get operator candidate info associated with an account if account is candidate else None
-	pub(crate) type CandidateInfo<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, CandidateMetadata<BalanceOf<T>>, OptionQuery>;
+	#[pallet::getter(fn operator_info)]
+	/// Get operator operator info associated with an account if account is operator else None
+	pub(crate) type OperatorInfo<T: Config> =
+		StorageMap<_, Twox64Concat, T::AccountId, OperatorMetadata<BalanceOf<T>>, OptionQuery>;
 
 	pub struct AddGet<T, R> {
 		_phantom: PhantomData<(T, R)>,
@@ -549,7 +514,7 @@ pub mod pallet {
 		T::AccountId,
 		BoundedVec<
 			ScheduledRequest<T::AccountId, BalanceOf<T>>,
-			AddGet<T::MaxTopDelegationsPerCandidate, T::MaxBottomDelegationsPerCandidate>,
+			AddGet<T::MaxTopDelegationsPerOperator, T::MaxBottomDelegationsPerOperator>,
 		>,
 		ValueQuery,
 	>;
@@ -563,14 +528,14 @@ pub mod pallet {
 		T::AccountId,
 		BoundedVec<
 			AutoCompoundConfig<T::AccountId>,
-			AddGet<T::MaxTopDelegationsPerCandidate, T::MaxBottomDelegationsPerCandidate>,
+			AddGet<T::MaxTopDelegationsPerOperator, T::MaxBottomDelegationsPerOperator>,
 		>,
 		ValueQuery,
 	>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn top_delegations)]
-	/// Top delegations for operator candidate
+	/// Top delegations for operator operator
 	pub(crate) type TopDelegations<T: Config> = StorageMap<
 		_,
 		Twox64Concat,
@@ -581,7 +546,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn bottom_delegations)]
-	/// Bottom delegations for operator candidate
+	/// Bottom delegations for operator operator
 	pub(crate) type BottomDelegations<T: Config> = StorageMap<
 		_,
 		Twox64Concat,
@@ -591,10 +556,10 @@ pub mod pallet {
 	>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn selected_candidates)]
-	/// The operator candidates selected for the current round
-	type SelectedCandidates<T: Config> =
-		StorageValue<_, BoundedVec<T::AccountId, T::MaxCandidates>, ValueQuery>;
+	#[pallet::getter(fn selected_operator)]
+	/// The operator operators selected for the current round
+	type SelectedOperators<T: Config> =
+		StorageValue<_, BoundedVec<T::AccountId, T::MaxOperators>, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn total)]
@@ -602,11 +567,11 @@ pub mod pallet {
 	pub(crate) type Total<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn candidate_pool)]
-	/// The pool of operator candidates, each with their total backing stake
-	pub(crate) type CandidatePool<T: Config> = StorageValue<
+	#[pallet::getter(fn operator_pool)]
+	/// The pool of operator operators, each with their total backing stake
+	pub(crate) type OperatorPool<T: Config> = StorageValue<
 		_,
-		BoundedOrderedSet<Bond<T::AccountId, BalanceOf<T>>, T::MaxCandidates>,
+		BoundedOrderedSet<Bond<T::AccountId, BalanceOf<T>>, T::MaxOperators>,
 		ValueQuery,
 	>;
 
@@ -628,11 +593,6 @@ pub mod pallet {
 	/// Delayed payouts
 	pub type DelayedPayouts<T: Config> =
 		StorageMap<_, Twox64Concat, RoundIndex, DelayedPayout<BalanceOf<T>>, OptionQuery>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn inflation_config)]
-	/// Inflation configuration
-	pub type InflationConfig<T: Config> = StorageValue<_, InflationInfo<BalanceOf<T>>, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn points)]
@@ -660,56 +620,38 @@ pub mod pallet {
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
 		/// Initialize balance and register all as operators: `(operator AccountId, balance Amount)`
-		pub candidates: Vec<(T::AccountId, BalanceOf<T>)>,
+		pub operators: Vec<(T::AccountId, BalanceOf<T>)>,
 		/// Initialize balance and make delegations:
 		/// `(delegator AccountId, operator AccountId, delegation Amount, auto-compounding Percent)`
 		pub delegations: Vec<(T::AccountId, T::AccountId, BalanceOf<T>, Percent)>,
-		/// Inflation configuration
-		pub inflation_config: InflationInfo<BalanceOf<T>>,
 		/// Default fixed percent an operator takes off the top of due rewards
 		pub operator_commission: Perbill,
-		/// Default percent of inflation set aside for parachain bond every round
-		pub parachain_bond_reserve_percent: Percent,
-		/// Default number of blocks in a round
-		pub blocks_per_round: u32,
-		/// Number of selected candidates every round. Cannot be lower than MinSelectedCandidates
-		pub num_selected_candidates: u32,
 	}
 
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
-			Self {
-				candidates: vec![],
-				delegations: vec![],
-				inflation_config: Default::default(),
-				operator_commission: Default::default(),
-				parachain_bond_reserve_percent: Default::default(),
-				blocks_per_round: 1u32,
-				num_selected_candidates: T::MinSelectedCandidates::get(),
-			}
+			Self { delegations: vec![], operators: vec![], operator_commission: Default::default() }
 		}
 	}
 
 	#[pallet::genesis_build]
 	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
-			assert!(self.blocks_per_round > 0, "Blocks per round must be > 0");
-			<InflationConfig<T>>::put(self.inflation_config.clone());
-			let mut candidate_count = 0u32;
-			// Initialize the candidates
-			for &(ref candidate, balance) in &self.candidates {
+			let mut operator_count = 0u32;
+			// Initialize the operators
+			for &(ref operator, balance) in &self.operators {
 				assert!(
-					<Pallet<T>>::get_operator_stakable_free_balance(candidate) >= balance,
-					"Account does not have enough balance to bond as a candidate."
+					<Pallet<T>>::get_operator_stakable_free_balance(operator) >= balance,
+					"Account does not have enough balance to bond as a operator."
 				);
-				if let Err(error) = <Pallet<T>>::join_candidates(
-					T::RuntimeOrigin::from(Some(candidate.clone()).into()),
+				if let Err(error) = <Pallet<T>>::join_operators(
+					T::RuntimeOrigin::from(Some(operator.clone()).into()),
 					balance,
-					candidate_count,
+					operator_count,
 				) {
-					log::warn!("Join candidates failed in genesis with error {:?}", error);
+					log::warn!("Join operators failed in genesis with error {:?}", error);
 				} else {
-					candidate_count = candidate_count.saturating_add(1u32);
+					operator_count = operator_count.saturating_add(1u32);
 				}
 			}
 
@@ -760,31 +702,13 @@ pub mod pallet {
 			}
 			// Set operator commission to default config
 			<OperatorCommission<T>>::put(self.operator_commission);
-			// Set parachain bond config to default config
-			<ParachainBondInfo<T>>::put(ParachainBondConfig {
-				// must be set soon; if not => due inflation will be sent to operators/delegators
-				account: T::AccountId::decode(&mut sp_runtime::traits::TrailingZeroInput::zeroes())
-					.expect("infinite length input; no invalid inputs for type; qed"),
-				percent: self.parachain_bond_reserve_percent,
-			});
-			// Set total selected candidates to value from config
-			assert!(
-				self.num_selected_candidates >= T::MinSelectedCandidates::get(),
-				"{:?}",
-				Error::<T>::CannotSetBelowMin
-			);
-			assert!(
-				self.num_selected_candidates <= T::MaxCandidates::get(),
-				"{:?}",
-				Error::<T>::CannotSetAboveMaxCandidates
-			);
-			<TotalSelected<T>>::put(self.num_selected_candidates);
-			// Choose top TotalSelected operator candidates
-			let (_, v_count, _, total_staked) = <Pallet<T>>::select_top_candidates(1u32);
-			// Start Round 1 at Block 0
-			let round: RoundInfo<BlockNumberFor<T>> =
-				RoundInfo::new(1u32, Zero::zero(), self.blocks_per_round, 0);
-			<Round<T>>::put(round);
+
+			// Choose top TotalSelected operator operators
+			let (_, v_count, _, total_staked) = <Pallet<T>>::select_top_operators(1u32);
+			// // Start Round 1 at Block 0
+			// let round: RoundInfo<BlockNumberFor<T>> =
+			// 	RoundInfo::new(1u32, Zero::zero(), self.blocks_per_round, 0);
+			// <Round<T>>::put(round);
 			<Pallet<T>>::deposit_event(Event::NewRound {
 				starting_block: Zero::zero(),
 				round: 1u32,
@@ -811,160 +735,186 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// Join the set of operator candidates
+		/// Join the set of operator operators
 		#[pallet::call_index(7)]
-		#[pallet::weight(<T as Config>::WeightInfo::join_candidates(*candidate_count))]
-		pub fn join_candidates(
+		#[pallet::weight(<T as Config>::WeightInfo::join_operators(*operator_count))]
+		pub fn join_operators(
 			origin: OriginFor<T>,
 			bond: BalanceOf<T>,
-			candidate_count: u32,
+			operator_count: u32,
 		) -> DispatchResultWithPostInfo {
 			let acc = ensure_signed(origin)?;
-			ensure!(bond >= T::MinCandidateStk::get(), Error::<T>::CandidateBondBelowMin);
-			Self::join_candidates_inner(acc, bond, candidate_count)
+			ensure!(bond >= T::MinOperatorStk::get(), Error::<T>::OperatorBondBelowMin);
+			Self::join_operators_inner(acc, bond, operator_count)
 		}
 
-		/// Request to leave the set of candidates. If successful, the account is immediately
-		/// removed from the candidate pool to prevent selection as an operator.
+		/// Request to leave the set of operators. If successful, the account is immediately
+		/// removed from the operator pool to prevent selection as an operator.
 		#[pallet::call_index(8)]
-		#[pallet::weight(<T as Config>::WeightInfo::schedule_leave_candidates(*candidate_count))]
-		pub fn schedule_leave_candidates(
+		#[pallet::weight(<T as Config>::WeightInfo::schedule_leave_operators(*operator_count))]
+		pub fn schedule_leave_operators(
 			origin: OriginFor<T>,
-			candidate_count: u32,
+			operator_count: u32,
 		) -> DispatchResultWithPostInfo {
 			let operator = ensure_signed(origin)?;
-			let mut state = <CandidateInfo<T>>::get(&operator).ok_or(Error::<T>::CandidateDNE)?;
+			let mut state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
 			let (now, when) = state.schedule_leave::<T>()?;
-			let mut candidates = <CandidatePool<T>>::get();
+			let mut operators = <OperatorPool<T>>::get();
 			ensure!(
-				candidate_count >= candidates.0.len() as u32,
-				Error::<T>::TooLowCandidateCountToLeaveCandidates
+				operator_count >= operators.0.len() as u32,
+				Error::<T>::TooLowOperatorCountToLeaveOperators
 			);
-			if candidates.remove(&Bond::from_owner(operator.clone())) {
-				<CandidatePool<T>>::put(candidates);
+			if operators.remove(&Bond::from_owner(operator.clone())) {
+				<OperatorPool<T>>::put(operators);
 			}
-			<CandidateInfo<T>>::insert(&operator, state);
-			Self::deposit_event(Event::CandidateScheduledExit {
+			<OperatorInfo<T>>::insert(&operator, state);
+			Self::deposit_event(Event::OperatorScheduledExit {
 				exit_allowed_round: now,
-				candidate: operator,
+				operator,
 				scheduled_exit: when,
 			});
 			Ok(().into())
 		}
 
-		/// Execute leave candidates request
+		/// Execute leave operators request
 		#[pallet::call_index(9)]
 		#[pallet::weight(
-			<T as Config>::WeightInfo::execute_leave_candidates_worst_case(*candidate_delegation_count)
+			<T as Config>::WeightInfo::execute_leave_operators_worst_case(*operator_delegation_count)
 		)]
-		pub fn execute_leave_candidates(
+		pub fn execute_leave_operators(
 			origin: OriginFor<T>,
-			candidate: T::AccountId,
-			candidate_delegation_count: u32,
+			operator: T::AccountId,
+			operator_delegation_count: u32,
 		) -> DispatchResultWithPostInfo {
 			ensure_signed(origin)?;
-			let state = <CandidateInfo<T>>::get(&candidate).ok_or(Error::<T>::CandidateDNE)?;
+			let state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
 			ensure!(
-				state.delegation_count <= candidate_delegation_count,
-				Error::<T>::TooLowCandidateDelegationCountToLeaveCandidates
+				state.delegation_count <= operator_delegation_count,
+				Error::<T>::TooLowOperatorDelegationCountToLeaveOperators
 			);
-			<Pallet<T>>::execute_leave_candidates_inner(candidate)
+			<Pallet<T>>::execute_leave_operators_inner(operator)
 		}
 
-		/// Cancel open request to leave candidates
+		/// Cancel open request to leave operators
 		/// - only callable by operator account
-		/// - result upon successful call is the candidate is active in the candidate pool
+		/// - result upon successful call is the operator is active in the operator pool
 		#[pallet::call_index(10)]
-		#[pallet::weight(<T as Config>::WeightInfo::cancel_leave_candidates(*candidate_count))]
-		pub fn cancel_leave_candidates(
+		#[pallet::weight(<T as Config>::WeightInfo::cancel_leave_operators(*operator_count))]
+		pub fn cancel_leave_operators(
 			origin: OriginFor<T>,
-			candidate_count: u32,
+			operator_count: u32,
 		) -> DispatchResultWithPostInfo {
 			let operator = ensure_signed(origin)?;
-			let mut state = <CandidateInfo<T>>::get(&operator).ok_or(Error::<T>::CandidateDNE)?;
-			ensure!(state.is_leaving(), Error::<T>::CandidateNotLeaving);
+			let mut state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
+			ensure!(state.is_leaving(), Error::<T>::OperatorNotLeaving);
 			state.go_online();
-			let mut candidates = <CandidatePool<T>>::get();
+			let mut operators = <OperatorPool<T>>::get();
 			ensure!(
-				candidates.0.len() as u32 <= candidate_count,
-				Error::<T>::TooLowCandidateCountWeightHintCancelLeaveCandidates
+				operators.0.len() as u32 <= operator_count,
+				Error::<T>::TooLowOperatorCountWeightHintCancelLeaveOperators
 			);
-			let maybe_inserted_candidate = candidates
+			let maybe_inserted_operator = operators
 				.try_insert(Bond { owner: operator.clone(), amount: state.total_counted })
-				.map_err(|_| Error::<T>::CandidateLimitReached)?;
-			ensure!(maybe_inserted_candidate, Error::<T>::AlreadyActive);
-			<CandidatePool<T>>::put(candidates);
-			<CandidateInfo<T>>::insert(&operator, state);
-			Self::deposit_event(Event::CancelledCandidateExit { candidate: operator });
+				.map_err(|_| Error::<T>::OperatorLimitReached)?;
+			ensure!(maybe_inserted_operator, Error::<T>::AlreadyActive);
+			<OperatorPool<T>>::put(operators);
+			<OperatorInfo<T>>::insert(&operator, state);
+			Self::deposit_event(Event::CancelledOperatorExit { operator });
 			Ok(().into())
 		}
 
-		/// Temporarily leave the set of operator candidates without unbonding
+		/// Temporarily leave the set of operator operators without unbonding
 		#[pallet::call_index(11)]
-		#[pallet::weight(<T as Config>::WeightInfo::go_offline(MAX_CANDIDATES))]
+		#[pallet::weight(<T as Config>::WeightInfo::go_offline(MAX_OPERATORS))]
 		pub fn go_offline(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let operator = ensure_signed(origin)?;
 			<Pallet<T>>::go_offline_inner(operator)
 		}
 
-		/// Rejoin the set of operator candidates if previously had called `go_offline`
+		/// Rejoin the set of operator operators if previously had called `go_offline`
 		#[pallet::call_index(12)]
-		#[pallet::weight(<T as Config>::WeightInfo::go_online(MAX_CANDIDATES))]
+		#[pallet::weight(<T as Config>::WeightInfo::go_online(MAX_OPERATORS))]
 		pub fn go_online(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let operator = ensure_signed(origin)?;
 			<Pallet<T>>::go_online_inner(operator)
 		}
 
-		/// Increase operator candidate self bond by `more`
+		/// Increase operator operator self bond by `more`
 		#[pallet::call_index(13)]
-		#[pallet::weight(<T as Config>::WeightInfo::candidate_bond_more(MAX_CANDIDATES))]
-		pub fn candidate_bond_more(
+		#[pallet::weight(<T as Config>::WeightInfo::operator_bond_more(MAX_OPERATORS))]
+		pub fn operator_bond_more(
 			origin: OriginFor<T>,
 			more: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
-			let candidate = ensure_signed(origin)?;
-			<Pallet<T>>::candidate_bond_more_inner(candidate, more)
+			let operator = ensure_signed(origin)?;
+			<Pallet<T>>::operator_bond_more_inner(operator, more)
 		}
 
-		/// Request by operator candidate to decrease self bond by `less`
+		/// Request by operator operator to decrease self bond by `less`
 		#[pallet::call_index(14)]
-		#[pallet::weight(<T as Config>::WeightInfo::schedule_candidate_bond_less())]
-		pub fn schedule_candidate_bond_less(
+		#[pallet::weight(<T as Config>::WeightInfo::schedule_operator_bond_less())]
+		pub fn schedule_operator_bond_less(
 			origin: OriginFor<T>,
 			less: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let operator = ensure_signed(origin)?;
-			let mut state = <CandidateInfo<T>>::get(&operator).ok_or(Error::<T>::CandidateDNE)?;
+			let mut state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
 			let when = state.schedule_bond_less::<T>(less)?;
-			<CandidateInfo<T>>::insert(&operator, state);
-			Self::deposit_event(Event::CandidateBondLessRequested {
-				candidate: operator,
+			<OperatorInfo<T>>::insert(&operator, state);
+			Self::deposit_event(Event::OperatorBondLessRequested {
+				operator,
 				amount_to_decrease: less,
 				execute_round: when,
 			});
 			Ok(().into())
 		}
 
-		/// Execute pending request to adjust the operator candidate self bond
+		/// Execute pending request to adjust the operator operator self bond
 		#[pallet::call_index(15)]
-		#[pallet::weight(<T as Config>::WeightInfo::execute_candidate_bond_less(MAX_CANDIDATES))]
-		pub fn execute_candidate_bond_less(
+		#[pallet::weight(<T as Config>::WeightInfo::execute_operator_bond_less(MAX_OPERATORS))]
+		pub fn execute_operator_bond_less(
 			origin: OriginFor<T>,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 		) -> DispatchResultWithPostInfo {
-			ensure_signed(origin)?; // we may want to reward this if caller != candidate
-			<Pallet<T>>::execute_candidate_bond_less_inner(candidate)
+			ensure_signed(origin)?; // we may want to reward this if caller != operator
+			<Pallet<T>>::execute_operator_bond_less_inner(operator)
 		}
 
-		/// Cancel pending request to adjust the operator candidate self bond
+		/// Cancel pending request to adjust the operator operator self bond
 		#[pallet::call_index(16)]
-		#[pallet::weight(<T as Config>::WeightInfo::cancel_candidate_bond_less())]
-		pub fn cancel_candidate_bond_less(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
+		#[pallet::weight(<T as Config>::WeightInfo::cancel_operator_bond_less())]
+		pub fn cancel_operator_bond_less(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let operator = ensure_signed(origin)?;
-			let mut state = <CandidateInfo<T>>::get(&operator).ok_or(Error::<T>::CandidateDNE)?;
+			let mut state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
 			state.cancel_bond_less::<T>(operator.clone())?;
-			<CandidateInfo<T>>::insert(&operator, state);
+			<OperatorInfo<T>>::insert(&operator, state);
 			Ok(().into())
+		}
+
+		/// DEPRECATED use delegateWithAutoCompound
+		/// If caller is not a delegator and not a collator, then join the set of delegators
+		/// If caller is a delegator, then makes delegation to change their delegation state
+		#[pallet::call_index(17)]
+		#[pallet::weight(
+			<T as Config>::WeightInfo::delegate_with_auto_compound_worst()
+		)]
+		pub fn delegate(
+			origin: OriginFor<T>,
+			candidate: T::AccountId,
+			amount: BalanceOf<T>,
+			candidate_delegation_count: u32,
+			delegation_count: u32,
+		) -> DispatchResultWithPostInfo {
+			let delegator = ensure_signed(origin)?;
+			<AutoCompoundDelegations<T>>::delegate_with_auto_compound(
+				candidate,
+				delegator,
+				amount,
+				Percent::zero(),
+				candidate_delegation_count,
+				0,
+				delegation_count,
+			)
 		}
 
 		/// If caller is not a delegator and not an operator, then join the set of delegators
@@ -973,53 +923,32 @@ pub mod pallet {
 		#[pallet::call_index(18)]
 		#[pallet::weight(
 			<T as Config>::WeightInfo::delegate_with_auto_compound(
-				*candidate_delegation_count,
-				*candidate_auto_compounding_delegation_count,
+				*operator_delegation_count,
+				*operator_auto_compounding_delegation_count,
 				*delegation_count,
 			)
 		)]
 		pub fn delegate_with_auto_compound(
 			origin: OriginFor<T>,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			amount: BalanceOf<T>,
 			// asset_id: AssetId,
 			auto_compound: Percent,
-			candidate_delegation_count: u32,
-			candidate_auto_compounding_delegation_count: u32,
+			operator_delegation_count: u32,
+			operator_auto_compounding_delegation_count: u32,
 			delegation_count: u32,
 		) -> DispatchResultWithPostInfo {
 			let delegator = ensure_signed(origin)?;
 			<AutoCompoundDelegations<T>>::delegate_with_auto_compound(
-				candidate,
+				operator,
 				delegator,
 				amount,
 				// asset_id,
 				auto_compound,
-				candidate_delegation_count,
-				candidate_auto_compounding_delegation_count,
+				operator_delegation_count,
+				operator_auto_compounding_delegation_count,
 				delegation_count,
 			)
-		}
-
-		/// REMOVED, was schedule_leave_delegators
-		#[pallet::call_index(19)]
-		#[pallet::weight(<T as Config>::WeightInfo::set_staking_expectations())]
-		pub fn removed_call_19(_origin: OriginFor<T>) -> DispatchResultWithPostInfo {
-			fail!(Error::<T>::RemovedCall)
-		}
-
-		/// REMOVED, was execute_leave_delegators
-		#[pallet::call_index(20)]
-		#[pallet::weight(<T as Config>::WeightInfo::set_staking_expectations())]
-		pub fn removed_call_20(_origin: OriginFor<T>) -> DispatchResultWithPostInfo {
-			fail!(Error::<T>::RemovedCall)
-		}
-
-		/// REMOVED, was cancel_leave_delegators
-		#[pallet::call_index(21)]
-		#[pallet::weight(<T as Config>::WeightInfo::set_staking_expectations())]
-		pub fn removed_call_21(_origin: OriginFor<T>) -> DispatchResultWithPostInfo {
-			fail!(Error::<T>::RemovedCall)
 		}
 
 		/// Request to revoke an existing delegation. If successful, the delegation is scheduled
@@ -1028,7 +957,7 @@ pub mod pallet {
 		/// A revoke may not be performed if any other scheduled request is pending.
 		#[pallet::call_index(22)]
 		#[pallet::weight(<T as Config>::WeightInfo::schedule_revoke_delegation(
-			T::MaxTopDelegationsPerCandidate::get() + T::MaxBottomDelegationsPerCandidate::get()
+			T::MaxTopDelegationsPerOperator::get() + T::MaxBottomDelegationsPerOperator::get()
 		))]
 		pub fn schedule_revoke_delegation(
 			origin: OriginFor<T>,
@@ -1038,25 +967,25 @@ pub mod pallet {
 			Self::delegation_schedule_revoke(operator, delegator)
 		}
 
-		/// Bond more for delegators wrt a specific operator candidate.
+		/// Bond more for delegators wrt a specific operator operator.
 		#[pallet::call_index(23)]
 		#[pallet::weight(<T as Config>::WeightInfo::delegator_bond_more(
-			T::MaxTopDelegationsPerCandidate::get() + T::MaxBottomDelegationsPerCandidate::get()
+			T::MaxTopDelegationsPerOperator::get() + T::MaxBottomDelegationsPerOperator::get()
 		))]
 		pub fn delegator_bond_more(
 			origin: OriginFor<T>,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			more: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let delegator = ensure_signed(origin)?;
 			let (in_top, weight) = Self::delegation_bond_more_without_event(
 				delegator.clone(),
-				candidate.clone(),
+				operator.clone(),
 				more.clone(),
 			)?;
 			Pallet::<T>::deposit_event(Event::DelegationIncreased {
 				delegator,
-				candidate,
+				operator,
 				amount: more,
 				in_top,
 			});
@@ -1064,20 +993,20 @@ pub mod pallet {
 			Ok(Some(weight).into())
 		}
 
-		/// Request bond less for delegators wrt a specific operator candidate. The delegation's
+		/// Request bond less for delegators wrt a specific operator operator. The delegation's
 		/// rewards for rounds while the request is pending use the reduced bonded amount.
 		/// A bond less may not be performed if any other scheduled request is pending.
 		#[pallet::call_index(24)]
 		#[pallet::weight(<T as Config>::WeightInfo::schedule_delegator_bond_less(
-			T::MaxTopDelegationsPerCandidate::get() + T::MaxBottomDelegationsPerCandidate::get()
+			T::MaxTopDelegationsPerOperator::get() + T::MaxBottomDelegationsPerOperator::get()
 		))]
 		pub fn schedule_delegator_bond_less(
 			origin: OriginFor<T>,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			less: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let delegator = ensure_signed(origin)?;
-			Self::delegation_schedule_bond_decrease(candidate, delegator, less)
+			Self::delegation_schedule_bond_decrease(operator, delegator, less)
 		}
 
 		/// Execute pending request to change an existing delegation
@@ -1086,10 +1015,10 @@ pub mod pallet {
 		pub fn execute_delegation_request(
 			origin: OriginFor<T>,
 			delegator: T::AccountId,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 		) -> DispatchResultWithPostInfo {
 			ensure_signed(origin)?; // we may want to reward caller if caller != delegator
-			Self::delegation_execute_scheduled_request(candidate, delegator)
+			Self::delegation_execute_scheduled_request(operator, delegator)
 		}
 
 		/// Cancel request to change an existing delegation.
@@ -1097,59 +1026,59 @@ pub mod pallet {
 		#[pallet::weight(<T as Config>::WeightInfo::cancel_delegation_request(350))]
 		pub fn cancel_delegation_request(
 			origin: OriginFor<T>,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 		) -> DispatchResultWithPostInfo {
 			let delegator = ensure_signed(origin)?;
-			Self::delegation_cancel_request(candidate, delegator)
+			Self::delegation_cancel_request(operator, delegator)
 		}
 
 		/// Sets the auto-compounding reward percentage for a delegation.
 		#[pallet::call_index(27)]
 		#[pallet::weight(<T as Config>::WeightInfo::set_auto_compound(
-			*candidate_auto_compounding_delegation_count_hint,
+			*operator_auto_compounding_delegation_count_hint,
 			*delegation_count_hint,
 		))]
 		pub fn set_auto_compound(
 			origin: OriginFor<T>,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			value: Percent,
-			candidate_auto_compounding_delegation_count_hint: u32,
+			operator_auto_compounding_delegation_count_hint: u32,
 			delegation_count_hint: u32,
 		) -> DispatchResultWithPostInfo {
 			let delegator = ensure_signed(origin)?;
 			<AutoCompoundDelegations<T>>::set_auto_compound(
-				candidate,
+				operator,
 				delegator,
 				value,
-				candidate_auto_compounding_delegation_count_hint,
+				operator_auto_compounding_delegation_count_hint,
 				delegation_count_hint,
 			)
 		}
 
-		/// Hotfix to remove existing empty entries for candidates that have left.
+		/// Hotfix to remove existing empty entries for operators that have left.
 		#[pallet::call_index(28)]
 		#[pallet::weight(
-			T::DbWeight::get().reads_writes(2 * candidates.len() as u64, candidates.len() as u64)
+			T::DbWeight::get().reads_writes(2 * operators.len() as u64, operators.len() as u64)
 		)]
-		pub fn hotfix_remove_delegation_requests_exited_candidates(
+		pub fn hotfix_remove_delegation_requests_exited_operator(
 			origin: OriginFor<T>,
-			candidates: Vec<T::AccountId>,
+			operators: Vec<T::AccountId>,
 		) -> DispatchResult {
 			ensure_signed(origin)?;
-			ensure!(candidates.len() < 100, <Error<T>>::InsufficientBalance);
-			for candidate in &candidates {
+			ensure!(operators.len() < 100, <Error<T>>::InsufficientBalance);
+			for operator in &operators {
 				ensure!(
-					<CandidateInfo<T>>::get(&candidate).is_none(),
-					<Error<T>>::CandidateNotLeaving
+					<OperatorInfo<T>>::get(&operator).is_none(),
+					<Error<T>>::OperatorNotLeaving
 				);
 				ensure!(
-					<DelegationScheduledRequests<T>>::get(&candidate).is_empty(),
-					<Error<T>>::CandidateNotLeaving
+					<DelegationScheduledRequests<T>>::get(&operator).is_empty(),
+					<Error<T>>::OperatorNotLeaving
 				);
 			}
 
-			for candidate in candidates {
-				<DelegationScheduledRequests<T>>::remove(candidate);
+			for operator in operators {
+				<DelegationScheduledRequests<T>>::remove(operator);
 			}
 
 			Ok(().into())
@@ -1166,17 +1095,17 @@ pub mod pallet {
 			ensure_signed(origin)?;
 
 			let mut operators_len = 0usize;
-			let max_operators = <TotalSelected<T>>::get();
+			let max_candidates = <TotalSelected<T>>::get();
 
-			if let Some(len) = <SelectedCandidates<T>>::decode_len() {
+			if let Some(len) = <SelectedOperators<T>>::decode_len() {
 				operators_len = len;
 			};
 
-			// Check operators length is not below or eq to 66% of max_operators.
+			// Check operators length is not below or eq to 66% of max_candidates.
 			// We use saturating logic here with (2/3)
 			// as it is dangerous to use floating point numbers directly.
 			ensure!(
-				operators_len * 3 > (max_operators * 2) as usize,
+				operators_len * 3 > (max_candidates * 2) as usize,
 				<Error<T>>::TooLowOperatorCountToNotifyAsInactive
 			);
 
@@ -1234,18 +1163,18 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Force join the set of operator candidates.
+		/// Force join the set of operator operators.
 		/// It will skip the minimum required bond check.
 		#[pallet::call_index(31)]
-		#[pallet::weight(<T as Config>::WeightInfo::join_candidates(*candidate_count))]
-		pub fn force_join_candidates(
+		#[pallet::weight(<T as Config>::WeightInfo::join_operators(*operator_count))]
+		pub fn force_join_operators(
 			origin: OriginFor<T>,
 			account: T::AccountId,
 			bond: BalanceOf<T>,
-			candidate_count: u32,
+			operator_count: u32,
 		) -> DispatchResultWithPostInfo {
 			T::MonetaryGovernanceOrigin::ensure_origin(origin.clone())?;
-			Self::join_candidates_inner(account, bond, candidate_count)
+			Self::join_operators_inner(account, bond, operator_count)
 		}
 	}
 
@@ -1261,12 +1190,12 @@ pub mod pallet {
 	}
 
 	impl<T: Config> Pallet<T> {
-		pub fn set_candidate_bond_to_zero(acc: &T::AccountId) -> Weight {
+		pub fn set_operator_bond_to_zero(acc: &T::AccountId) -> Weight {
 			let actual_weight =
-				<T as Config>::WeightInfo::set_candidate_bond_to_zero(T::MaxCandidates::get());
-			if let Some(mut state) = <CandidateInfo<T>>::get(&acc) {
+				<T as Config>::WeightInfo::set_operator_bond_to_zero(T::MaxOperators::get());
+			if let Some(mut state) = <OperatorInfo<T>>::get(&acc) {
 				state.bond_less::<T>(acc.clone(), state.bond);
-				<CandidateInfo<T>>::insert(&acc, state);
+				<OperatorInfo<T>>::insert(&acc, state);
 			}
 			actual_weight
 		}
@@ -1275,48 +1204,48 @@ pub mod pallet {
 			<DelegatorState<T>>::get(acc).is_some()
 		}
 
-		pub fn is_candidate(acc: &T::AccountId) -> bool {
-			<CandidateInfo<T>>::get(acc).is_some()
+		pub fn is_operator(acc: &T::AccountId) -> bool {
+			<OperatorInfo<T>>::get(acc).is_some()
 		}
 
-		pub fn is_selected_candidate(acc: &T::AccountId) -> bool {
-			<SelectedCandidates<T>>::get().binary_search(acc).is_ok()
+		pub fn is_selected_operator(acc: &T::AccountId) -> bool {
+			<SelectedOperators<T>>::get().binary_search(acc).is_ok()
 		}
 
-		pub fn join_candidates_inner(
+		pub fn join_operators_inner(
 			acc: T::AccountId,
 			bond: BalanceOf<T>,
-			candidate_count: u32,
+			operator_count: u32,
 		) -> DispatchResultWithPostInfo {
-			ensure!(!Self::is_candidate(&acc), Error::<T>::CandidateExists);
+			ensure!(!Self::is_operator(&acc), Error::<T>::OperatorExists);
 			ensure!(!Self::is_delegator(&acc), Error::<T>::DelegatorExists);
-			let mut candidates = <CandidatePool<T>>::get();
-			let old_count = candidates.0.len() as u32;
+			let mut operators = <OperatorPool<T>>::get();
+			let old_count = operators.0.len() as u32;
 			ensure!(
-				candidate_count >= old_count,
-				Error::<T>::TooLowCandidateCountWeightHintJoinCandidates
+				operator_count >= old_count,
+				Error::<T>::TooLowOperatorCountWeightHintJoinOperators
 			);
-			let maybe_inserted_candidate = candidates
+			let maybe_inserted_operator = operators
 				.try_insert(Bond { owner: acc.clone(), amount: bond })
-				.map_err(|_| Error::<T>::CandidateLimitReached)?;
-			ensure!(maybe_inserted_candidate, Error::<T>::CandidateExists);
+				.map_err(|_| Error::<T>::OperatorLimitReached)?;
+			ensure!(maybe_inserted_operator, Error::<T>::OperatorExists);
 
 			ensure!(
 				Self::get_operator_stakable_free_balance(&acc) >= bond,
 				Error::<T>::InsufficientBalance,
 			);
 			T::Currency::set_lock(OPERATOR_LOCK_ID, &acc, bond, WithdrawReasons::all());
-			let candidate = CandidateMetadata::new(bond);
-			<CandidateInfo<T>>::insert(&acc, candidate);
+			let operator = OperatorMetadata::new(bond);
+			<OperatorInfo<T>>::insert(&acc, operator);
 			let empty_delegations: Delegations<T::AccountId, BalanceOf<T>> = Default::default();
 			// insert empty top delegations
 			<TopDelegations<T>>::insert(&acc, empty_delegations.clone());
 			// insert empty bottom delegations
 			<BottomDelegations<T>>::insert(&acc, empty_delegations);
-			<CandidatePool<T>>::put(candidates);
+			<OperatorPool<T>>::put(operators);
 			let new_total = <Total<T>>::get().saturating_add(bond);
 			<Total<T>>::put(new_total);
-			Self::deposit_event(Event::JoinedOperatorCandidates {
+			Self::deposit_event(Event::JoinedOperatorOperators {
 				account: acc,
 				amount_locked: bond,
 				new_total_amt_locked: new_total,
@@ -1325,9 +1254,9 @@ pub mod pallet {
 		}
 
 		pub fn go_offline_inner(operator: T::AccountId) -> DispatchResultWithPostInfo {
-			let mut state = <CandidateInfo<T>>::get(&operator).ok_or(Error::<T>::CandidateDNE)?;
-			let mut candidates = <CandidatePool<T>>::get();
-			let actual_weight = <T as Config>::WeightInfo::go_offline(candidates.0.len() as u32);
+			let mut state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
+			let mut operators = <OperatorPool<T>>::get();
+			let actual_weight = <T as Config>::WeightInfo::go_offline(operators.0.len() as u32);
 
 			ensure!(
 				state.is_active(),
@@ -1338,18 +1267,18 @@ pub mod pallet {
 			);
 			state.go_offline();
 
-			if candidates.remove(&Bond::from_owner(operator.clone())) {
-				<CandidatePool<T>>::put(candidates);
+			if operators.remove(&Bond::from_owner(operator.clone())) {
+				<OperatorPool<T>>::put(operators);
 			}
-			<CandidateInfo<T>>::insert(&operator, state);
-			Self::deposit_event(Event::CandidateWentOffline { candidate: operator });
+			<OperatorInfo<T>>::insert(&operator, state);
+			Self::deposit_event(Event::OperatorWentOffline { operator });
 			Ok(Some(actual_weight).into())
 		}
 
 		pub fn go_online_inner(operator: T::AccountId) -> DispatchResultWithPostInfo {
-			let mut state = <CandidateInfo<T>>::get(&operator).ok_or(Error::<T>::CandidateDNE)?;
-			let mut candidates = <CandidatePool<T>>::get();
-			let actual_weight = <T as Config>::WeightInfo::go_online(candidates.0.len() as u32);
+			let mut state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
+			let mut operators = <OperatorPool<T>>::get();
+			let actual_weight = <T as Config>::WeightInfo::go_online(operators.0.len() as u32);
 
 			ensure!(
 				!state.is_active(),
@@ -1367,66 +1296,64 @@ pub mod pallet {
 			);
 			state.go_online();
 
-			let maybe_inserted_candidate = candidates
+			let maybe_inserted_operator = operators
 				.try_insert(Bond { owner: operator.clone(), amount: state.total_counted })
-				.map_err(|_| Error::<T>::CandidateLimitReached)?;
+				.map_err(|_| Error::<T>::OperatorLimitReached)?;
 			ensure!(
-				maybe_inserted_candidate,
+				maybe_inserted_operator,
 				DispatchErrorWithPostInfo {
 					post_info: Some(actual_weight).into(),
 					error: <Error<T>>::AlreadyActive.into(),
 				},
 			);
 
-			<CandidatePool<T>>::put(candidates);
-			<CandidateInfo<T>>::insert(&operator, state);
-			Self::deposit_event(Event::CandidateBackOnline { candidate: operator });
+			<OperatorPool<T>>::put(operators);
+			<OperatorInfo<T>>::insert(&operator, state);
+			Self::deposit_event(Event::OperatorBackOnline { operator });
 			Ok(Some(actual_weight).into())
 		}
 
-		pub fn candidate_bond_more_inner(
+		pub fn operator_bond_more_inner(
 			operator: T::AccountId,
 			more: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
-			let mut state = <CandidateInfo<T>>::get(&operator).ok_or(Error::<T>::CandidateDNE)?;
+			let mut state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
 			let actual_weight =
-				<T as Config>::WeightInfo::candidate_bond_more(T::MaxCandidates::get());
+				<T as Config>::WeightInfo::operator_bond_more(T::MaxOperators::get());
 
 			state.bond_more::<T>(operator.clone(), more).map_err(|err| {
 				DispatchErrorWithPostInfo { post_info: Some(actual_weight).into(), error: err }
 			})?;
 			let (is_active, total_counted) = (state.is_active(), state.total_counted);
-			<CandidateInfo<T>>::insert(&operator, state);
+			<OperatorInfo<T>>::insert(&operator, state);
 			if is_active {
 				Self::update_active(operator, total_counted);
 			}
 			Ok(Some(actual_weight).into())
 		}
 
-		pub fn execute_candidate_bond_less_inner(
-			candidate: T::AccountId,
+		pub fn execute_operator_bond_less_inner(
+			operator: T::AccountId,
 		) -> DispatchResultWithPostInfo {
-			let mut state = <CandidateInfo<T>>::get(&candidate).ok_or(Error::<T>::CandidateDNE)?;
+			let mut state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
 			let actual_weight =
-				<T as Config>::WeightInfo::execute_candidate_bond_less(T::MaxCandidates::get());
+				<T as Config>::WeightInfo::execute_operator_bond_less(T::MaxOperators::get());
 
-			state.execute_bond_less::<T>(candidate.clone()).map_err(|err| {
+			state.execute_bond_less::<T>(operator.clone()).map_err(|err| {
 				DispatchErrorWithPostInfo { post_info: Some(actual_weight).into(), error: err }
 			})?;
-			<CandidateInfo<T>>::insert(&candidate, state);
+			<OperatorInfo<T>>::insert(&operator, state);
 			Ok(Some(actual_weight).into())
 		}
 
-		pub fn execute_leave_candidates_inner(
-			candidate: T::AccountId,
-		) -> DispatchResultWithPostInfo {
-			let state = <CandidateInfo<T>>::get(&candidate).ok_or(Error::<T>::CandidateDNE)?;
+		pub fn execute_leave_operators_inner(operator: T::AccountId) -> DispatchResultWithPostInfo {
+			let state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
 			let actual_auto_compound_delegation_count =
-				<AutoCompoundingDelegations<T>>::decode_len(&candidate).unwrap_or_default() as u32;
+				<AutoCompoundingDelegations<T>>::decode_len(&operator).unwrap_or_default() as u32;
 
-			// TODO use these to return actual weight used via `execute_leave_candidates_ideal`
+			// TODO use these to return actual weight used via `execute_leave_operators`
 			let actual_delegation_count = state.delegation_count;
-			let actual_weight = <T as Config>::WeightInfo::execute_leave_candidates_ideal(
+			let actual_weight = <T as Config>::WeightInfo::execute_leave_operators_ideal(
 				actual_delegation_count,
 				actual_auto_compound_delegation_count,
 			);
@@ -1443,13 +1370,13 @@ pub mod pallet {
 						Delegator state also has a record. qed.",
 				);
 
-				if let Some(remaining) = delegator.rm_delegation::<T>(&candidate) {
+				if let Some(remaining) = delegator.rm_delegation::<T>(&operator) {
 					Self::delegation_remove_request_with_state(
-						&candidate,
+						&operator,
 						&bond.owner,
 						&mut delegator,
 					);
-					<AutoCompoundDelegations<T>>::remove_auto_compound(&candidate, &bond.owner);
+					<AutoCompoundDelegations<T>>::remove_auto_compound(&operator, &bond.owner);
 
 					if remaining.is_zero() {
 						// we do not remove the scheduled delegation requests from other operators
@@ -1466,33 +1393,33 @@ pub mod pallet {
 					T::Currency::remove_lock(DELEGATOR_LOCK_ID, &bond.owner);
 				}
 			};
-			// total backing stake is at least the candidate self bond
+			// total backing stake is at least the operator self bond
 			let mut total_backing = state.bond;
 			// return all top delegations
 			let top_delegations =
-				<TopDelegations<T>>::take(&candidate).expect("CandidateInfo existence checked");
+				<TopDelegations<T>>::take(&operator).expect("OperatorInfo existence checked");
 			for bond in top_delegations.delegations {
 				return_stake(bond);
 			}
 			total_backing = total_backing.saturating_add(top_delegations.total);
 			// return all bottom delegations
 			let bottom_delegations =
-				<BottomDelegations<T>>::take(&candidate).expect("CandidateInfo existence checked");
+				<BottomDelegations<T>>::take(&operator).expect("OperatorInfo existence checked");
 			for bond in bottom_delegations.delegations {
 				return_stake(bond);
 			}
 			total_backing = total_backing.saturating_add(bottom_delegations.total);
 			// return stake to operator
-			T::Currency::remove_lock(OPERATOR_LOCK_ID, &candidate);
-			<CandidateInfo<T>>::remove(&candidate);
-			<DelegationScheduledRequests<T>>::remove(&candidate);
-			<AutoCompoundingDelegations<T>>::remove(&candidate);
-			<TopDelegations<T>>::remove(&candidate);
-			<BottomDelegations<T>>::remove(&candidate);
+			T::Currency::remove_lock(OPERATOR_LOCK_ID, &operator);
+			<OperatorInfo<T>>::remove(&operator);
+			<DelegationScheduledRequests<T>>::remove(&operator);
+			<AutoCompoundingDelegations<T>>::remove(&operator);
+			<TopDelegations<T>>::remove(&operator);
+			<BottomDelegations<T>>::remove(&operator);
 			let new_total_staked = <Total<T>>::get().saturating_sub(total_backing);
 			<Total<T>>::put(new_total_staked);
-			Self::deposit_event(Event::CandidateLeft {
-				ex_candidate: candidate,
+			Self::deposit_event(Event::OperatorLeft {
+				ex_operator: operator,
 				unlocked_amount: total_backing,
 				new_total_amt_locked: new_total_staked,
 			});
@@ -1511,7 +1438,7 @@ pub mod pallet {
 		/// Returns an account's free balance which is not locked in operator staking
 		pub fn get_operator_stakable_free_balance(acc: &T::AccountId) -> BalanceOf<T> {
 			let mut balance = T::Currency::free_balance(acc);
-			if let Some(info) = <CandidateInfo<T>>::get(acc) {
+			if let Some(info) = <OperatorInfo<T>>::get(acc) {
 				balance = balance.saturating_sub(info.bond);
 			}
 			balance
@@ -1519,53 +1446,40 @@ pub mod pallet {
 
 		/// Returns a delegations auto-compound value.
 		pub fn delegation_auto_compound(
-			candidate: &T::AccountId,
+			operator: &T::AccountId,
 			delegator: &T::AccountId,
 		) -> Percent {
-			<AutoCompoundDelegations<T>>::auto_compound(candidate, delegator)
+			<AutoCompoundDelegations<T>>::auto_compound(operator, delegator)
 		}
 
-		/// Caller must ensure candidate is active before calling
-		pub(crate) fn update_active(candidate: T::AccountId, total: BalanceOf<T>) {
-			let mut candidates = <CandidatePool<T>>::get();
-			candidates.remove(&Bond::from_owner(candidate.clone()));
-			candidates.try_insert(Bond { owner: candidate, amount: total }).expect(
-				"the candidate is removed in previous step so the length cannot increase; qed",
+		/// Caller must ensure operator is active before calling
+		pub(crate) fn update_active(operator: T::AccountId, total: BalanceOf<T>) {
+			let mut operators = <OperatorPool<T>>::get();
+			operators.remove(&Bond::from_owner(operator.clone()));
+			operators.try_insert(Bond { owner: operator, amount: total }).expect(
+				"the operator is removed in previous step so the length cannot increase; qed",
 			);
-			<CandidatePool<T>>::put(candidates);
+			<OperatorPool<T>>::put(operators);
 		}
 
-		/// Compute round issuance based on duration of the given round
-		fn compute_issuance(round_duration: u64, round_length: u32) -> BalanceOf<T> {
-			let ideal_duration: BalanceOf<T> =
-				round_length.saturating_mul(T::BlockTime::get() as u32).into();
-			let config = <InflationConfig<T>>::get();
-			let round_issuance = crate::inflation::round_issuance_range::<T>(config.round);
-
-			// Initial formula: (round_duration / ideal_duration) * ideal_issuance
-			// We multiply before the division to reduce rounding effects
-			BalanceOf::<T>::from(round_duration as u32).saturating_mul(round_issuance.ideal)
-				/ (ideal_duration)
-		}
-
-		/// Remove delegation from candidate state
+		/// Remove delegation from operator state
 		/// Amount input should be retrieved from delegator and it informs the storage lookups
-		pub(crate) fn delegator_leaves_candidate(
-			candidate: T::AccountId,
+		pub(crate) fn delegator_leaves_operator(
+			operator: T::AccountId,
 			delegator: T::AccountId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
-			let mut state = <CandidateInfo<T>>::get(&candidate).ok_or(Error::<T>::CandidateDNE)?;
-			state.rm_delegation_if_exists::<T>(&candidate, delegator.clone(), amount)?;
+			let mut state = <OperatorInfo<T>>::get(&operator).ok_or(Error::<T>::OperatorDNE)?;
+			state.rm_delegation_if_exists::<T>(&operator, delegator.clone(), amount)?;
 			let new_total_locked = <Total<T>>::get().saturating_sub(amount);
 			<Total<T>>::put(new_total_locked);
 			let new_total = state.total_counted;
-			<CandidateInfo<T>>::insert(&candidate, state);
-			Self::deposit_event(Event::DelegatorLeftCandidate {
+			<OperatorInfo<T>>::insert(&operator, state);
+			Self::deposit_event(Event::DelegatorLeftOperator {
 				delegator,
-				candidate,
+				operator,
 				unstaked_amount: amount,
-				total_candidate_staked: new_total,
+				total_operator_staked: new_total,
 			});
 			Ok(())
 		}
@@ -1585,32 +1499,6 @@ pub mod pallet {
 			if <Points<T>>::get(prepare_payout_for_round).is_zero() {
 				return Weight::zero();
 			}
-
-			// Compute total issuance based on round duration
-			let total_issuance = Self::compute_issuance(round_duration, round_length);
-
-			// reserve portion of issuance for parachain bond account
-			let mut left_issuance = total_issuance;
-			let bond_config = <ParachainBondInfo<T>>::get();
-			let parachain_bond_reserve = bond_config.percent * total_issuance;
-			if let Ok(imb) =
-				T::Currency::deposit_into_existing(&bond_config.account, parachain_bond_reserve)
-			{
-				// update round issuance if transfer succeeds
-				left_issuance = left_issuance.saturating_sub(imb.peek());
-				Self::deposit_event(Event::ReservedForParachainBond {
-					account: bond_config.account,
-					value: imb.peek(),
-				});
-			}
-
-			let payout = DelayedPayout {
-				round_issuance: total_issuance,
-				total_staking_reward: left_issuance,
-				operator_commission: <OperatorCommission<T>>::get(),
-			};
-
-			<DelayedPayouts<T>>::insert(prepare_payout_for_round, payout);
 
 			<T as Config>::WeightInfo::prepare_staking_payouts()
 		}
@@ -1766,24 +1654,24 @@ pub mod pallet {
 			}
 		}
 
-		/// Compute the top `TotalSelected` candidates in the CandidatePool and return
+		/// Compute the top `TotalSelected` operators in the OperatorPool and return
 		/// a vec of their AccountIds (sorted by AccountId).
 		///
-		/// If the returned vec is empty, the previous candidates should be used.
-		pub fn compute_top_candidates() -> Vec<T::AccountId> {
+		/// If the returned vec is empty, the previous operators should be used.
+		pub fn compute_top_operator() -> Vec<T::AccountId> {
 			let top_n = <TotalSelected<T>>::get() as usize;
 			if top_n == 0 {
 				return vec![];
 			}
 
-			let candidates = <CandidatePool<T>>::get().0;
+			let operators = <OperatorPool<T>>::get().0;
 
-			// If the number of candidates is greater than top_n, select the candidates with higher
-			// amount. Otherwise, return all the candidates.
-			if candidates.len() > top_n {
-				// Partially sort candidates such that element at index `top_n - 1` is sorted, and
+			// If the number of operators is greater than top_n, select the operators with higher
+			// amount. Otherwise, return all the operators.
+			if operators.len() > top_n {
+				// Partially sort operators such that element at index `top_n - 1` is sorted, and
 				// all the elements in the range 0..top_n are the top n elements.
-				let sorted_candidates = candidates
+				let sorted_operator = operators
 					.try_mutate(|inner| {
 						inner.select_nth_unstable_by(top_n - 1, |a, b| {
 							// Order by amount, then owner. The owner is needed to ensure a stable order
@@ -1794,58 +1682,58 @@ pub mod pallet {
 					.expect("sort cannot increase item count; qed");
 
 				let mut operators =
-					sorted_candidates.into_iter().take(top_n).map(|x| x.owner).collect::<Vec<_>>();
+					sorted_operator.into_iter().take(top_n).map(|x| x.owner).collect::<Vec<_>>();
 
 				// Sort operators by AccountId
 				operators.sort();
 
 				operators
 			} else {
-				// Return all candidates
-				// The candidates are already sorted by AccountId, so no need to sort again
-				candidates.into_iter().map(|x| x.owner).collect::<Vec<_>>()
+				// Return all operators
+				// The operators are already sorted by AccountId, so no need to sort again
+				operators.into_iter().map(|x| x.owner).collect::<Vec<_>>()
 			}
 		}
 		/// Best as in most cumulatively supported in terms of stake
 		/// Returns [operator_count, delegation_count, total staked]
-		pub(crate) fn select_top_candidates(now: RoundIndex) -> (Weight, u32, u32, BalanceOf<T>) {
+		pub(crate) fn select_top_operators(now: RoundIndex) -> (Weight, u32, u32, BalanceOf<T>) {
 			let (mut operator_count, mut delegation_count, mut total) =
 				(0u32, 0u32, BalanceOf::<T>::zero());
-			// choose the top TotalSelected qualified candidates, ordered by stake
-			let operators = Self::compute_top_candidates();
+			// choose the top TotalSelected qualified operators, ordered by stake
+			let operators = Self::compute_top_operator();
 			if operators.is_empty() {
 				// SELECTION FAILED TO SELECT >=1 operator => select operators from previous round
 				let last_round = now.saturating_sub(1u32);
-				let mut total_per_candidate: BTreeMap<T::AccountId, BalanceOf<T>> = BTreeMap::new();
+				let mut total_per_operator: BTreeMap<T::AccountId, BalanceOf<T>> = BTreeMap::new();
 				// set this round AtStake to last round AtStake
 				for (account, snapshot) in <AtStake<T>>::iter_prefix(last_round) {
 					operator_count = operator_count.saturating_add(1u32);
 					delegation_count =
 						delegation_count.saturating_add(snapshot.delegations.len() as u32);
 					total = total.saturating_add(snapshot.total);
-					total_per_candidate.insert(account.clone(), snapshot.total);
+					total_per_operator.insert(account.clone(), snapshot.total);
 					<AtStake<T>>::insert(now, account, snapshot);
 				}
-				// `SelectedCandidates` remains unchanged from last round
+				// `SelectedOperators` remains unchanged from last round
 				// emit OperatorChosen event for tools that use this event
-				for candidate in <SelectedCandidates<T>>::get() {
-					let snapshot_total = total_per_candidate
-						.get(&candidate)
-						.expect("all selected candidates have snapshots");
+				for operator in <SelectedOperators<T>>::get() {
+					let snapshot_total = total_per_operator
+						.get(&operator)
+						.expect("all selected operators have snapshots");
 					Self::deposit_event(Event::OperatorChosen {
 						round: now,
-						operator_account: candidate,
+						operator_account: operator,
 						total_exposed_amount: *snapshot_total,
 					})
 				}
-				let weight = <T as Config>::WeightInfo::select_top_candidates(0, 0);
+				let weight = <T as Config>::WeightInfo::select_top_operators(0, 0);
 				return (weight, operator_count, delegation_count, total);
 			}
 
 			// snapshot exposure for round for weighting reward distribution
 			for account in operators.iter() {
-				let state = <CandidateInfo<T>>::get(account)
-					.expect("all members of CandidateQ must be candidates");
+				let state = <OperatorInfo<T>>::get(account)
+					.expect("all members of OperatorQ must be operators");
 
 				operator_count = operator_count.saturating_add(1u32);
 				delegation_count = delegation_count.saturating_add(state.delegation_count);
@@ -1883,13 +1771,13 @@ pub mod pallet {
 				});
 			}
 			// insert canonical operator set
-			<SelectedCandidates<T>>::put(
+			<SelectedOperators<T>>::put(
 				BoundedVec::try_from(operators)
-					.expect("subset of operators is always less than or equal to max candidates"),
+					.expect("subset of operators is always less than or equal to max operators"),
 			);
 
 			let avg_delegator_count = delegation_count.checked_div(operator_count).unwrap_or(0);
-			let weight = <T as Config>::WeightInfo::select_top_candidates(
+			let weight = <T as Config>::WeightInfo::select_top_operators(
 				operator_count,
 				avg_delegator_count,
 			);
@@ -1912,7 +1800,7 @@ pub mod pallet {
 				.collect::<BTreeMap<_, _>>();
 			let mut uncounted_stake = BalanceOf::<T>::zero();
 			let rewardable_delegations = <TopDelegations<T>>::get(operator)
-				.expect("all members of CandidateQ must be candidates")
+				.expect("all members of OperatorQ must be operators")
 				.delegations
 				.into_iter()
 				.map(|mut bond| {
@@ -1941,7 +1829,7 @@ pub mod pallet {
 		/// Any feature-specific events must be emitted after this function is invoked.
 		pub fn delegation_bond_more_without_event(
 			delegator: T::AccountId,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			more: BalanceOf<T>,
 		) -> Result<
 			(bool, Weight),
@@ -1949,17 +1837,16 @@ pub mod pallet {
 		> {
 			let mut state = <DelegatorState<T>>::get(&delegator).ok_or(Error::<T>::DelegatorDNE)?;
 			ensure!(
-				!Self::delegation_request_revoke_exists(&candidate, &delegator),
+				!Self::delegation_request_revoke_exists(&operator, &delegator),
 				Error::<T>::PendingDelegationRevoke
 			);
 
 			let actual_weight = <T as Config>::WeightInfo::delegator_bond_more(
-				<DelegationScheduledRequests<T>>::decode_len(&candidate).unwrap_or_default() as u32,
+				<DelegationScheduledRequests<T>>::decode_len(&operator).unwrap_or_default() as u32,
 			);
-			let in_top =
-				state.increase_delegation::<T>(candidate.clone(), more).map_err(|err| {
-					DispatchErrorWithPostInfo { post_info: Some(actual_weight).into(), error: err }
-				})?;
+			let in_top = state.increase_delegation::<T>(operator.clone(), more).map_err(|err| {
+				DispatchErrorWithPostInfo { post_info: Some(actual_weight).into(), error: err }
+			})?;
 
 			Ok((in_top, actual_weight))
 		}
@@ -1996,7 +1883,7 @@ pub mod pallet {
 		pub fn mint_and_compound(
 			amt: BalanceOf<T>,
 			compound_percent: Percent,
-			candidate: T::AccountId,
+			operator: T::AccountId,
 			delegator: T::AccountId,
 		) {
 			if let Ok(amount_transferred) =
@@ -2014,12 +1901,12 @@ pub mod pallet {
 
 				if let Err(err) = Self::delegation_bond_more_without_event(
 					delegator.clone(),
-					candidate.clone(),
+					operator.clone(),
 					compound_amount.clone(),
 				) {
 					log::debug!(
-						"skipped compounding staking reward towards candidate '{:?}' for delegator '{:?}': {:?}",
-						candidate,
+						"skipped compounding staking reward towards operator '{:?}' for delegator '{:?}': {:?}",
+						operator,
 						delegator,
 						err
 					);
@@ -2028,28 +1915,45 @@ pub mod pallet {
 
 				Pallet::<T>::deposit_event(Event::Compounded {
 					delegator,
-					candidate,
+					operator,
 					amount: compound_amount.clone(),
 				});
 			};
 		}
 	}
 
-	/// Add reward points to block authors:
-	/// * 20 points to the block producer for producing a block in the chain
-	impl<T: Config> Pallet<T> {
-		fn award_points_to_block_author() {
-			let author = T::BlockAuthor::get();
-			let now = <Round<T>>::get().current;
-			let score_plus_20 = <AwardedPts<T>>::get(now, &author).saturating_add(20);
-			<AwardedPts<T>>::insert(now, author, score_plus_20);
-			<Points<T>>::mutate(now, |x| *x = x.saturating_add(20));
-		}
-	}
-
 	impl<T: Config> Get<Vec<T::AccountId>> for Pallet<T> {
 		fn get() -> Vec<T::AccountId> {
-			Self::selected_candidates().into_inner()
+			Self::selected_operator().into_inner()
 		}
+	}
+}
+
+impl<T: Config> sp_runtime::BoundToRuntimeAppPublic for Pallet<T> {
+	type Public = T::RoleKeyId;
+}
+
+impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
+	type Key = T::RoleKeyId;
+
+	fn on_genesis_session<'a, I: 'a>(validators: I)
+	where
+		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
+	{
+	}
+
+	fn on_new_session<'a, I: 'a>(_changed: bool, validators: I, _queued_validators: I)
+	where
+		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
+	{
+	}
+
+	fn on_disabled(_i: u32) {
+		// ignore
+	}
+
+	// Distribute the inflation rewards
+	fn on_before_session_ending() {
+		// ignore
 	}
 }

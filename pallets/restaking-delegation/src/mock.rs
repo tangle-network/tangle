@@ -15,10 +15,10 @@
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Test utilities
-use crate as pallet_parachain_staking;
+use crate as pallet_restaking_delegation;
 use crate::{
-	pallet, AwardedPts, Config, Event as RestakingDelegationEvent, InflationInfo, Points, Range,
-	DELEGATOR_LOCK_ID, OPERATOR_LOCK_ID,
+	pallet, AwardedPts, Config, Event as RestakingDelegationEvent, Points, DELEGATOR_LOCK_ID,
+	OPERATOR_LOCK_ID,
 };
 use block_author::BlockAuthor as BlockAuthorMap;
 use frame_support::{
@@ -27,7 +27,6 @@ use frame_support::{
 	weights::{constants::RocksDbWeight, Weight},
 };
 use frame_system::pallet_prelude::BlockNumberFor;
-use sp_consensus_slots::Slot;
 use sp_core::H256;
 use sp_io;
 use sp_runtime::BuildStorage;
@@ -35,6 +34,7 @@ use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
 	Perbill, Percent,
 };
+use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 
 pub type AccountId = u64;
 pub type Balance = u128;
@@ -48,7 +48,7 @@ construct_runtime!(
 	{
 		System: frame_system,
 		Balances: pallet_balances,
-		RestakingDelegation: pallet_parachain_staking,
+		RestakingDelegation: pallet_restaking_delegation,
 		BlockAuthor: block_author,
 	}
 );
@@ -106,33 +106,25 @@ impl pallet_balances::Config for Test {
 }
 impl block_author::Config for Test {}
 const GENESIS_BLOCKS_PER_ROUND: BlockNumber = 5;
-const GENESIS_operator_commission: Perbill = Perbill::from_percent(20);
+const GENESIS_OPERATOR_COMMISSION: Perbill = Perbill::from_percent(20);
 const GENESIS_PARACHAIN_BOND_RESERVE_PERCENT: Percent = Percent::from_percent(30);
-const GENESIS_NUM_SELECTED_CANDIDATES: u32 = 5;
+const GENESIS_NUM_SELECTED_OPERATORS: u32 = 5;
 parameter_types! {
 	pub const MinBlocksPerRound: u32 = 3;
 	pub const MaxOfflineRounds: u32 = 1;
-	pub const LeaveCandidatesDelay: u32 = 2;
-	pub const CandidateBondLessDelay: u32 = 2;
+	pub const LeaveOperatorsDelay: u32 = 2;
+	pub const OperatorBondLessDelay: u32 = 2;
 	pub const LeaveDelegatorsDelay: u32 = 2;
 	pub const RevokeDelegationDelay: u32 = 2;
 	pub const DelegationBondLessDelay: u32 = 2;
 	pub const RewardPaymentDelay: u32 = 2;
-	pub const MinSelectedCandidates: u32 = GENESIS_NUM_SELECTED_CANDIDATES;
-	pub const MaxTopDelegationsPerCandidate: u32 = 4;
-	pub const MaxBottomDelegationsPerCandidate: u32 = 4;
+	pub const MinSelectedOperators: u32 = GENESIS_NUM_SELECTED_OPERATORS;
+	pub const MaxTopDelegationsPerOperator: u32 = 4;
+	pub const MaxBottomDelegationsPerOperator: u32 = 4;
 	pub const MaxDelegationsPerDelegator: u32 = 4;
-	pub const MinCandidateStk: u128 = 10;
+	pub const MinOperatorStk: u128 = 10;
 	pub const MinDelegation: u128 = 3;
-	pub const MaxCandidates: u32 = 200;
-}
-
-pub struct StakingRoundSlotProvider;
-impl Get<Slot> for StakingRoundSlotProvider {
-	fn get() -> Slot {
-		let block_number: u64 = System::block_number().into();
-		Slot::from(block_number)
-	}
+	pub const MaxOperators: u32 = 200;
 }
 
 impl Config for Test {
@@ -141,26 +133,24 @@ impl Config for Test {
 	type MonetaryGovernanceOrigin = frame_system::EnsureRoot<AccountId>;
 	type MinBlocksPerRound = MinBlocksPerRound;
 	type MaxOfflineRounds = MaxOfflineRounds;
-	type LeaveCandidatesDelay = LeaveCandidatesDelay;
-	type CandidateBondLessDelay = CandidateBondLessDelay;
+	type LeaveOperatorsDelay = LeaveOperatorsDelay;
+	type OperatorBondLessDelay = OperatorBondLessDelay;
 	type LeaveDelegatorsDelay = LeaveDelegatorsDelay;
 	type RevokeDelegationDelay = RevokeDelegationDelay;
 	type DelegationBondLessDelay = DelegationBondLessDelay;
 	type RewardPaymentDelay = RewardPaymentDelay;
-	type MinSelectedCandidates = MinSelectedCandidates;
-	type MaxTopDelegationsPerCandidate = MaxTopDelegationsPerCandidate;
-	type MaxBottomDelegationsPerCandidate = MaxBottomDelegationsPerCandidate;
+	type MinSelectedOperators = MinSelectedOperators;
+	type MaxTopDelegationsPerOperator = MaxTopDelegationsPerOperator;
+	type MaxBottomDelegationsPerOperator = MaxBottomDelegationsPerOperator;
 	type MaxDelegationsPerDelegator = MaxDelegationsPerDelegator;
-	type MinCandidateStk = MinCandidateStk;
+	type MinOperatorStk = MinOperatorStk;
 	type MinDelegation = MinDelegation;
-	type BlockAuthor = BlockAuthor;
 	type OnOperatorPayout = ();
 	type PayoutOperatorReward = ();
 	type OnInactiveOperator = ();
-	type OnNewRound = ();
-	type SlotProvider = StakingRoundSlotProvider;
 	type WeightInfo = ();
-	type MaxCandidates = MaxCandidates;
+	type MaxOperators = MaxOperators;
+	type RoleKeyId = RoleKeyId;
 	type SlotDuration = frame_support::traits::ConstU64<6_000>;
 	type BlockTime = frame_support::traits::ConstU64<6_000>;
 }
@@ -168,36 +158,15 @@ impl Config for Test {
 pub(crate) struct ExtBuilder {
 	// endowed accounts with balances
 	balances: Vec<(AccountId, Balance)>,
-	// [collator, amount]
-	collators: Vec<(AccountId, Balance)>,
-	// [delegator, collator, delegation_amount, auto_compound_percent]
+	// [operator, amount]
+	operators: Vec<(AccountId, Balance)>,
+	// [delegator, operator, delegation_amount, auto_compound_percent]
 	delegations: Vec<(AccountId, AccountId, Balance, Percent)>,
-	// inflation config
-	inflation: InflationInfo<Balance>,
 }
 
 impl Default for ExtBuilder {
 	fn default() -> ExtBuilder {
-		ExtBuilder {
-			balances: vec![],
-			delegations: vec![],
-			collators: vec![],
-			inflation: InflationInfo {
-				expect: Range { min: 700, ideal: 700, max: 700 },
-				// not used
-				annual: Range {
-					min: Perbill::from_percent(50),
-					ideal: Perbill::from_percent(50),
-					max: Perbill::from_percent(50),
-				},
-				// unrealistically high parameterization, only for testing
-				round: Range {
-					min: Perbill::from_percent(5),
-					ideal: Perbill::from_percent(5),
-					max: Perbill::from_percent(5),
-				},
-			},
-		}
+		ExtBuilder { balances: vec![], delegations: vec![], operators: vec![] }
 	}
 }
 
@@ -207,8 +176,8 @@ impl ExtBuilder {
 		self
 	}
 
-	pub(crate) fn with_candidates(mut self, collators: Vec<(AccountId, Balance)>) -> Self {
-		self.collators = collators;
+	pub(crate) fn with_operators(mut self, operators: Vec<(AccountId, Balance)>) -> Self {
+		self.operators = operators;
 		self
 	}
 
@@ -229,12 +198,6 @@ impl ExtBuilder {
 		self
 	}
 
-	#[allow(dead_code)]
-	pub(crate) fn with_inflation(mut self, inflation: InflationInfo<Balance>) -> Self {
-		self.inflation = inflation;
-		self
-	}
-
 	pub(crate) fn build(self) -> sp_io::TestExternalities {
 		let mut t = frame_system::GenesisConfig::<Test>::default()
 			.build_storage()
@@ -243,14 +206,10 @@ impl ExtBuilder {
 		pallet_balances::GenesisConfig::<Test> { balances: self.balances }
 			.assimilate_storage(&mut t)
 			.expect("Pallet balances storage can be assimilated");
-		pallet_parachain_staking::GenesisConfig::<Test> {
-			candidates: self.collators,
+		pallet_restaking_delegation::GenesisConfig::<Test> {
+			operators: self.operators,
 			delegations: self.delegations,
-			inflation_config: self.inflation,
-			operator_commission: GENESIS_operator_commission,
-			parachain_bond_reserve_percent: GENESIS_PARACHAIN_BOND_RESERVE_PERCENT,
-			blocks_per_round: GENESIS_BLOCKS_PER_ROUND,
-			num_selected_candidates: GENESIS_NUM_SELECTED_CANDIDATES,
+			operator_commission: GENESIS_OPERATOR_COMMISSION,
 		}
 		.assimilate_storage(&mut t)
 		.expect("Parachain Staking's storage can be assimilated");
@@ -551,18 +510,18 @@ fn geneses() {
 			(8, 9),
 			(9, 4),
 		])
-		.with_candidates(vec![(1, 500), (2, 200)])
+		.with_operators(vec![(1, 500), (2, 200)])
 		.with_delegations(vec![(3, 1, 100), (4, 1, 100), (5, 2, 100), (6, 2, 100)])
 		.build()
 		.execute_with(|| {
 			assert!(System::events().is_empty());
-			// collators
+			// operators
 			assert_eq!(RestakingDelegation::get_operator_stakable_free_balance(&1), 500);
 			assert_eq!(query_lock_amount(1, OPERATOR_LOCK_ID), Some(500));
-			assert!(RestakingDelegation::is_candidate(&1));
+			assert!(RestakingDelegation::is_operator(&1));
 			assert_eq!(query_lock_amount(2, OPERATOR_LOCK_ID), Some(200));
 			assert_eq!(RestakingDelegation::get_operator_stakable_free_balance(&2), 100);
-			assert!(RestakingDelegation::is_candidate(&2));
+			assert!(RestakingDelegation::is_operator(&2));
 			// delegators
 			for x in 3..7 {
 				assert!(RestakingDelegation::is_delegator(&x));
@@ -580,7 +539,7 @@ fn geneses() {
 			assert_eq!(RestakingDelegation::get_delegator_stakable_free_balance(&8), 9);
 			assert_eq!(query_lock_amount(9, DELEGATOR_LOCK_ID), None);
 			assert_eq!(RestakingDelegation::get_delegator_stakable_free_balance(&9), 4);
-			// no collator staking locks
+			// no operator staking locks
 			assert_eq!(RestakingDelegation::get_operator_stakable_free_balance(&7), 100);
 			assert_eq!(RestakingDelegation::get_operator_stakable_free_balance(&8), 9);
 			assert_eq!(RestakingDelegation::get_operator_stakable_free_balance(&9), 4);
@@ -598,18 +557,18 @@ fn geneses() {
 			(9, 100),
 			(10, 100),
 		])
-		.with_candidates(vec![(1, 20), (2, 20), (3, 20), (4, 20), (5, 10)])
+		.with_operators(vec![(1, 20), (2, 20), (3, 20), (4, 20), (5, 10)])
 		.with_delegations(vec![(6, 1, 10), (7, 1, 10), (8, 2, 10), (9, 2, 10), (10, 1, 10)])
 		.build()
 		.execute_with(|| {
 			assert!(System::events().is_empty());
-			// collators
+			// operators
 			for x in 1..5 {
-				assert!(RestakingDelegation::is_candidate(&x));
+				assert!(RestakingDelegation::is_operator(&x));
 				assert_eq!(query_lock_amount(x, OPERATOR_LOCK_ID), Some(20));
 				assert_eq!(RestakingDelegation::get_operator_stakable_free_balance(&x), 80);
 			}
-			assert!(RestakingDelegation::is_candidate(&5));
+			assert!(RestakingDelegation::is_operator(&5));
 			assert_eq!(query_lock_amount(5, OPERATOR_LOCK_ID), Some(10));
 			assert_eq!(RestakingDelegation::get_operator_stakable_free_balance(&5), 90);
 			// delegators
@@ -691,15 +650,15 @@ fn test_assert_events_eq_fails_if_event_missing() {
 		inject_test_events();
 
 		assert_events_eq!(
-			RestakingDelegationEvent::CollatorChosen {
+			RestakingDelegationEvent::OperatorChosen {
 				round: 2,
-				collator_account: 1,
+				operator_account: 1,
 				total_exposed_amount: 10,
 			},
 			RestakingDelegationEvent::NewRound {
 				starting_block: 10,
 				round: 2,
-				selected_collators_number: 1,
+				selected_operators_number: 1,
 				total_balance: 10,
 			},
 		);
@@ -713,15 +672,15 @@ fn test_assert_events_eq_fails_if_event_extra() {
 		inject_test_events();
 
 		assert_events_eq!(
-			RestakingDelegationEvent::CollatorChosen {
+			RestakingDelegationEvent::OperatorChosen {
 				round: 2,
-				collator_account: 1,
+				operator_account: 1,
 				total_exposed_amount: 10,
 			},
 			RestakingDelegationEvent::NewRound {
 				starting_block: 10,
 				round: 2,
-				selected_collators_number: 1,
+				selected_operators_number: 1,
 				total_balance: 10,
 			},
 			RestakingDelegationEvent::Rewarded { account: 1, rewards: 100 },
@@ -738,15 +697,15 @@ fn test_assert_events_eq_fails_if_event_wrong_order() {
 
 		assert_events_eq!(
 			RestakingDelegationEvent::Rewarded { account: 1, rewards: 100 },
-			RestakingDelegationEvent::CollatorChosen {
+			RestakingDelegationEvent::OperatorChosen {
 				round: 2,
-				collator_account: 1,
+				operator_account: 1,
 				total_exposed_amount: 10,
 			},
 			RestakingDelegationEvent::NewRound {
 				starting_block: 10,
 				round: 2,
-				selected_collators_number: 1,
+				selected_operators_number: 1,
 				total_balance: 10,
 			},
 		);
@@ -760,15 +719,15 @@ fn test_assert_events_eq_fails_if_event_wrong_value() {
 		inject_test_events();
 
 		assert_events_eq!(
-			RestakingDelegationEvent::CollatorChosen {
+			RestakingDelegationEvent::OperatorChosen {
 				round: 2,
-				collator_account: 1,
+				operator_account: 1,
 				total_exposed_amount: 10,
 			},
 			RestakingDelegationEvent::NewRound {
 				starting_block: 10,
 				round: 2,
-				selected_collators_number: 1,
+				selected_operators_number: 1,
 				total_balance: 10,
 			},
 			RestakingDelegationEvent::Rewarded { account: 1, rewards: 50 },
@@ -791,15 +750,15 @@ fn test_assert_events_eq_passes_if_all_events_present_multiple() {
 		inject_test_events();
 
 		assert_events_eq!(
-			RestakingDelegationEvent::CollatorChosen {
+			RestakingDelegationEvent::OperatorChosen {
 				round: 2,
-				collator_account: 1,
+				operator_account: 1,
 				total_exposed_amount: 10,
 			},
 			RestakingDelegationEvent::NewRound {
 				starting_block: 10,
 				round: 2,
-				selected_collators_number: 1,
+				selected_operators_number: 1,
 				total_balance: 10,
 			},
 			RestakingDelegationEvent::Rewarded { account: 1, rewards: 100 },
@@ -846,9 +805,9 @@ fn test_assert_events_emitted_passes_if_all_events_present_multiple() {
 		inject_test_events();
 
 		assert_events_emitted!(
-			RestakingDelegationEvent::CollatorChosen {
+			RestakingDelegationEvent::OperatorChosen {
 				round: 2,
-				collator_account: 1,
+				operator_account: 1,
 				total_exposed_amount: 10,
 			},
 			RestakingDelegationEvent::Rewarded { account: 1, rewards: 100 },
@@ -863,7 +822,7 @@ fn test_assert_events_eq_match_fails_if_event_missing() {
 		inject_test_events();
 
 		assert_events_eq_match!(
-			RestakingDelegationEvent::CollatorChosen { .. },
+			RestakingDelegationEvent::OperatorChosen { .. },
 			RestakingDelegationEvent::NewRound { .. },
 		);
 	});
@@ -876,7 +835,7 @@ fn test_assert_events_eq_match_fails_if_event_extra() {
 		inject_test_events();
 
 		assert_events_eq_match!(
-			RestakingDelegationEvent::CollatorChosen { .. },
+			RestakingDelegationEvent::OperatorChosen { .. },
 			RestakingDelegationEvent::NewRound { .. },
 			RestakingDelegationEvent::Rewarded { .. },
 			RestakingDelegationEvent::Rewarded { .. },
@@ -892,7 +851,7 @@ fn test_assert_events_eq_match_fails_if_event_wrong_order() {
 
 		assert_events_eq_match!(
 			RestakingDelegationEvent::Rewarded { .. },
-			RestakingDelegationEvent::CollatorChosen { .. },
+			RestakingDelegationEvent::OperatorChosen { .. },
 			RestakingDelegationEvent::NewRound { .. },
 		);
 	});
@@ -905,7 +864,7 @@ fn test_assert_events_eq_match_fails_if_event_wrong_value() {
 		inject_test_events();
 
 		assert_events_eq_match!(
-			RestakingDelegationEvent::CollatorChosen { .. },
+			RestakingDelegationEvent::OperatorChosen { .. },
 			RestakingDelegationEvent::NewRound { .. },
 			RestakingDelegationEvent::Rewarded { rewards: 50, .. },
 		);
@@ -927,7 +886,7 @@ fn test_assert_events_eq_match_passes_if_all_events_present_multiple() {
 		inject_test_events();
 
 		assert_events_eq_match!(
-			RestakingDelegationEvent::CollatorChosen { round: 2, collator_account: 1, .. },
+			RestakingDelegationEvent::OperatorChosen { round: 2, operator_account: 1, .. },
 			RestakingDelegationEvent::NewRound { starting_block: 10, .. },
 			RestakingDelegationEvent::Rewarded { account: 1, rewards: 100 },
 		);
@@ -972,7 +931,7 @@ fn test_assert_events_emitted_match_passes_if_all_events_present_multiple() {
 		inject_test_events();
 
 		assert_events_emitted_match!(
-			RestakingDelegationEvent::CollatorChosen { total_exposed_amount: 10, .. },
+			RestakingDelegationEvent::OperatorChosen { total_exposed_amount: 10, .. },
 			RestakingDelegationEvent::Rewarded { account: 1, rewards: 100 },
 		);
 	});
@@ -980,15 +939,15 @@ fn test_assert_events_emitted_match_passes_if_all_events_present_multiple() {
 
 fn inject_test_events() {
 	[
-		RestakingDelegationEvent::CollatorChosen {
+		RestakingDelegationEvent::OperatorChosen {
 			round: 2,
-			collator_account: 1,
+			operator_account: 1,
 			total_exposed_amount: 10,
 		},
 		RestakingDelegationEvent::NewRound {
 			starting_block: 10,
 			round: 2,
-			selected_collators_number: 1,
+			selected_operators_number: 1,
 			total_balance: 10,
 		},
 		RestakingDelegationEvent::Rewarded { account: 1, rewards: 100 },

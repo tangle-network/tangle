@@ -59,18 +59,18 @@ pub trait WeightInfo {
 	fn set_total_selected() -> Weight;
 	fn set_operator_commission() -> Weight;
 	fn set_blocks_per_round() -> Weight;
-	fn join_candidates(x: u32, ) -> Weight;
-	fn schedule_leave_candidates(x: u32, ) -> Weight;
-	fn execute_leave_candidates_worst_case(x: u32, ) -> Weight;
-	fn execute_leave_candidates_ideal(x: u32, y: u32, ) -> Weight;
-	fn cancel_leave_candidates(x: u32, ) -> Weight;
+	fn join_operators(x: u32, ) -> Weight;
+	fn schedule_leave_operators(x: u32, ) -> Weight;
+	fn execute_leave_operators_worst_case(x: u32, ) -> Weight;
+	fn execute_leave_operators_ideal(x: u32, y: u32, ) -> Weight;
+	fn cancel_leave_operators(x: u32, ) -> Weight;
 	fn go_offline(x: u32, ) -> Weight;
 	fn go_online(x: u32, ) -> Weight;
-	fn candidate_bond_more(x: u32, ) -> Weight;
-	fn schedule_candidate_bond_less() -> Weight;
-	fn execute_candidate_bond_less(x: u32, ) -> Weight;
-	fn cancel_candidate_bond_less() -> Weight;
-	fn set_candidate_bond_to_zero(x: u32, ) -> Weight;
+	fn operator_bond_more(x: u32, ) -> Weight;
+	fn schedule_operator_bond_less() -> Weight;
+	fn execute_operator_bond_less(x: u32, ) -> Weight;
+	fn cancel_operator_bond_less() -> Weight;
+	fn set_operator_bond_to_zero(x: u32, ) -> Weight;
 	fn delegate(x: u32, y: u32, ) -> Weight;
 	fn schedule_revoke_delegation(x: u32, ) -> Weight;
 	fn delegator_bond_more(x: u32, ) -> Weight;
@@ -81,7 +81,7 @@ pub trait WeightInfo {
 	fn cancel_delegation_request(x: u32, ) -> Weight;
 	fn prepare_staking_payouts() -> Weight;
 	fn get_rewardable_delegators(y: u32, ) -> Weight;
-	fn select_top_candidates(x: u32, y: u32, ) -> Weight;
+	fn select_top_operators(x: u32, y: u32, ) -> Weight;
 	fn pay_one_operator_reward_best(x: u32, y: u32, z: u32, ) -> Weight;
 	fn pay_one_operator_reward(y: u32, ) -> Weight;
 	fn base_on_initialize() -> Weight;
@@ -174,12 +174,12 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(2_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation DelegatorState (r:1 w:0)
 	/// Proof Skipped: RestakingDelegation DelegatorState (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: System Account (r:1 w:1)
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: Balances Locks (r:1 w:1)
@@ -193,7 +193,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Storage: RestakingDelegation BottomDelegations (r:0 w:1)
 	/// Proof Skipped: RestakingDelegation BottomDelegations (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `x` is `[3, 200]`.
-	fn join_candidates(x: u32, ) -> Weight {
+	fn join_operators(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1421 + x * (38 ±0)`
 		//  Estimated: `4752 + x * (41 ±0)`
@@ -205,12 +205,12 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(7_u64))
 			.saturating_add(Weight::from_parts(0, 41).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[3, 200]`.
-	fn schedule_leave_candidates(x: u32, ) -> Weight {
+	fn schedule_leave_operators(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `702 + x * (37 ±0)`
 		//  Estimated: `4060 + x * (38 ±0)`
@@ -222,8 +222,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 			.saturating_add(Weight::from_parts(0, 38).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
@@ -243,7 +243,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[2, 350]`.
-	fn execute_leave_candidates_worst_case(x: u32, ) -> Weight {
+	fn execute_leave_operators_worst_case(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1157 + x * (431 ±0)`
 		//  Estimated: `4696 + x * (3762 ±0)`
@@ -257,8 +257,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes((3_u64).saturating_mul(x.into())))
 			.saturating_add(Weight::from_parts(0, 3762).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
@@ -279,7 +279,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[2, 350]`.
 	/// The range of component `y` is `[2, 350]`.
-	fn execute_leave_candidates_ideal(x: u32, _y: u32, ) -> Weight {
+	fn execute_leave_operators_ideal(x: u32, _y: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1149 + x * (431 ±0)`
 		//  Estimated: `4696 + x * (3762 ±0)`
@@ -293,12 +293,12 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes((3_u64).saturating_mul(x.into())))
 			.saturating_add(Weight::from_parts(0, 3762).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[3, 200]`.
-	fn cancel_leave_candidates(x: u32, ) -> Weight {
+	fn cancel_leave_operators(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `670 + x * (37 ±0)`
 		//  Estimated: `4028 + x * (38 ±0)`
@@ -310,10 +310,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 			.saturating_add(Weight::from_parts(0, 38).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[1, 200]`.
 	fn go_offline(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
@@ -327,10 +327,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 			.saturating_add(Weight::from_parts(0, 39).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[1, 200]`.
 	fn go_online(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
@@ -344,10 +344,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 			.saturating_add(Weight::from_parts(0, 39).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: System Account (r:1 w:1)
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
@@ -357,7 +357,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Storage: Balances Freezes (r:1 w:0)
 	/// Proof: Balances Freezes (max_values: None, max_size: Some(37), added: 2512, mode: MaxEncodedLen)
 	/// The range of component `x` is `[1, 200]`.
-	fn candidate_bond_more(x: u32, ) -> Weight {
+	fn operator_bond_more(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1270 + x * (42 ±0)`
 		//  Estimated: `4752 + x * (44 ±0)`
@@ -369,9 +369,9 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 			.saturating_add(Weight::from_parts(0, 44).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	fn schedule_candidate_bond_less() -> Weight {
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	fn schedule_operator_bond_less() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `171`
 		//  Estimated: `3636`
@@ -380,10 +380,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: Balances Locks (r:1 w:1)
@@ -393,7 +393,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Storage: System Account (r:1 w:1)
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// The range of component `x` is `[1, 200]`.
-	fn execute_candidate_bond_less(x: u32, ) -> Weight {
+	fn execute_operator_bond_less(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1322 + x * (42 ±0)`
 		//  Estimated: `4752 + x * (43 ±0)`
@@ -405,9 +405,9 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 			.saturating_add(Weight::from_parts(0, 43).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	fn cancel_candidate_bond_less() -> Weight {
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	fn cancel_operator_bond_less() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `191`
 		//  Estimated: `3656`
@@ -416,7 +416,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
-	fn set_candidate_bond_to_zero(x: u32, ) -> Weight {
+	fn set_operator_bond_to_zero(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1322 + x * (42 ±0)`
 		//  Estimated: `4752 + x * (43 ±0)`
@@ -432,12 +432,12 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation DelegatorState (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation DelegatorState (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: Balances Locks (r:1 w:1)
 	/// Proof: Balances Locks (max_values: None, max_size: Some(1287), added: 3762, mode: MaxEncodedLen)
 	/// Storage: Balances Freezes (r:1 w:0)
@@ -488,12 +488,12 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: Balances Locks (max_values: None, max_size: Some(1287), added: 3762, mode: MaxEncodedLen)
 	/// Storage: Balances Freezes (r:1 w:0)
 	/// Proof: Balances Freezes (max_values: None, max_size: Some(37), added: 2512, mode: MaxEncodedLen)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[0, 349]`.
@@ -538,12 +538,12 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:0)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	fn execute_revoke_delegation() -> Weight {
@@ -567,14 +567,14 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation BottomDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation BottomDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	fn execute_delegator_revoke_delegation_worst() -> Weight {
@@ -590,8 +590,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof Skipped: RestakingDelegation DelegatorState (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation DelegationScheduledRequests (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation DelegationScheduledRequests (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: Balances Locks (r:1 w:1)
 	/// Proof: Balances Locks (max_values: None, max_size: Some(1287), added: 3762, mode: MaxEncodedLen)
 	/// Storage: Balances Freezes (r:1 w:0)
@@ -602,8 +602,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation BottomDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation BottomDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	fn execute_delegator_bond_less_worst() -> Weight {
@@ -673,23 +673,23 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	}
 	/// Storage: RestakingDelegation TotalSelected (r:1 w:0)
 	/// Proof Skipped: RestakingDelegation TotalSelected (max_values: Some(1), max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:0)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:51 w:0)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:0)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:51 w:0)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation DelegationScheduledRequests (r:51 w:0)
 	/// Proof Skipped: RestakingDelegation DelegationScheduledRequests (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:51 w:0)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:51 w:0)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation SelectedCandidates (r:0 w:1)
-	/// Proof Skipped: RestakingDelegation SelectedCandidates (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation SelectedOperators (r:0 w:1)
+	/// Proof Skipped: RestakingDelegation SelectedOperators (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AtStake (r:0 w:51)
 	/// Proof Skipped: RestakingDelegation AtStake (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `x` is `[0, 50]`.
 	/// The range of component `y` is `[0, 100]`.
-	fn select_top_candidates(x: u32, y: u32, ) -> Weight {
+	fn select_top_operators(x: u32, y: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `0 + x * (3816 ±0) + y * (1800 ±0)`
 		//  Estimated: `3730 + x * (3975 ±39) + y * (639 ±19)`
@@ -716,12 +716,12 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: Balances Locks (max_values: None, max_size: Some(1287), added: 3762, mode: MaxEncodedLen)
 	/// Storage: Balances Freezes (r:349 w:0)
 	/// Proof: Balances Freezes (max_values: None, max_size: Some(37), added: 2512, mode: MaxEncodedLen)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation BottomDelegations (r:1 w:1)
@@ -808,16 +808,16 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation DelegatorState (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation DelegatorState (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation BottomDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation BottomDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: Balances Locks (r:1 w:1)
 	/// Proof: Balances Locks (max_values: None, max_size: Some(1287), added: 3762, mode: MaxEncodedLen)
 	/// Storage: Balances Freezes (r:1 w:0)
@@ -847,8 +847,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation DelegatorState (r:2 w:2)
 	/// Proof Skipped: RestakingDelegation DelegatorState (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
@@ -861,8 +861,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: Balances Freezes (max_values: None, max_size: Some(37), added: 2512, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation DelegationScheduledRequests (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation DelegationScheduledRequests (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	fn delegate_with_auto_compound_worst() -> Weight {
@@ -889,18 +889,18 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof Skipped: RestakingDelegation EnableMarkingOffline (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TotalSelected (r:1 w:0)
 	/// Proof Skipped: RestakingDelegation TotalSelected (max_values: Some(1), max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation SelectedCandidates (r:1 w:0)
-	/// Proof Skipped: RestakingDelegation SelectedCandidates (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation SelectedOperators (r:1 w:0)
+	/// Proof Skipped: RestakingDelegation SelectedOperators (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AtStake (r:2 w:0)
 	/// Proof Skipped: RestakingDelegation AtStake (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AwardedPts (r:2 w:0)
 	/// Proof Skipped: RestakingDelegation AwardedPts (max_values: None, max_size: None, mode: Measured)
 	/// Storage: MoonbeamOrbiters OrbiterPerRound (r:1 w:0)
 	/// Proof Skipped: MoonbeamOrbiters OrbiterPerRound (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	fn notify_inactive_operator() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `11494`
@@ -994,12 +994,12 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().reads(2_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation DelegatorState (r:1 w:0)
 	/// Proof Skipped: RestakingDelegation DelegatorState (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: System Account (r:1 w:1)
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: Balances Locks (r:1 w:1)
@@ -1013,7 +1013,7 @@ impl WeightInfo for () {
 	/// Storage: RestakingDelegation BottomDelegations (r:0 w:1)
 	/// Proof Skipped: RestakingDelegation BottomDelegations (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `x` is `[3, 200]`.
-	fn join_candidates(x: u32, ) -> Weight {
+	fn join_operators(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1421 + x * (38 ±0)`
 		//  Estimated: `4752 + x * (41 ±0)`
@@ -1025,12 +1025,12 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(7_u64))
 			.saturating_add(Weight::from_parts(0, 41).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[3, 200]`.
-	fn schedule_leave_candidates(x: u32, ) -> Weight {
+	fn schedule_leave_operators(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `702 + x * (37 ±0)`
 		//  Estimated: `4060 + x * (38 ±0)`
@@ -1042,8 +1042,8 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
 			.saturating_add(Weight::from_parts(0, 38).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
@@ -1063,7 +1063,7 @@ impl WeightInfo for () {
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[2, 350]`.
-	fn execute_leave_candidates_worst_case(x: u32, ) -> Weight {
+	fn execute_leave_operators_worst_case(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1157 + x * (431 ±0)`
 		//  Estimated: `4696 + x * (3762 ±0)`
@@ -1077,8 +1077,8 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes((3_u64).saturating_mul(x.into())))
 			.saturating_add(Weight::from_parts(0, 3762).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
@@ -1099,7 +1099,7 @@ impl WeightInfo for () {
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[2, 350]`.
 	/// The range of component `y` is `[2, 350]`.
-	fn execute_leave_candidates_ideal(x: u32, _y: u32, ) -> Weight {
+	fn execute_leave_operators_ideal(x: u32, _y: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1149 + x * (431 ±0)`
 		//  Estimated: `4696 + x * (3762 ±0)`
@@ -1113,12 +1113,12 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes((3_u64).saturating_mul(x.into())))
 			.saturating_add(Weight::from_parts(0, 3762).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[3, 200]`.
-	fn cancel_leave_candidates(x: u32, ) -> Weight {
+	fn cancel_leave_operators(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `670 + x * (37 ±0)`
 		//  Estimated: `4028 + x * (38 ±0)`
@@ -1130,10 +1130,10 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
 			.saturating_add(Weight::from_parts(0, 38).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[1, 200]`.
 	fn go_offline(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
@@ -1147,10 +1147,10 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
 			.saturating_add(Weight::from_parts(0, 39).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[1, 200]`.
 	fn go_online(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
@@ -1164,10 +1164,10 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
 			.saturating_add(Weight::from_parts(0, 39).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: System Account (r:1 w:1)
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
@@ -1177,7 +1177,7 @@ impl WeightInfo for () {
 	/// Storage: Balances Freezes (r:1 w:0)
 	/// Proof: Balances Freezes (max_values: None, max_size: Some(37), added: 2512, mode: MaxEncodedLen)
 	/// The range of component `x` is `[1, 200]`.
-	fn candidate_bond_more(x: u32, ) -> Weight {
+	fn operator_bond_more(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1270 + x * (42 ±0)`
 		//  Estimated: `4752 + x * (44 ±0)`
@@ -1189,9 +1189,9 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(5_u64))
 			.saturating_add(Weight::from_parts(0, 44).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	fn schedule_candidate_bond_less() -> Weight {
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	fn schedule_operator_bond_less() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `171`
 		//  Estimated: `3636`
@@ -1200,10 +1200,10 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: Balances Locks (r:1 w:1)
@@ -1213,7 +1213,7 @@ impl WeightInfo for () {
 	/// Storage: System Account (r:1 w:1)
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// The range of component `x` is `[1, 200]`.
-	fn execute_candidate_bond_less(x: u32, ) -> Weight {
+	fn execute_operator_bond_less(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1322 + x * (42 ±0)`
 		//  Estimated: `4752 + x * (43 ±0)`
@@ -1225,9 +1225,9 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(5_u64))
 			.saturating_add(Weight::from_parts(0, 43).saturating_mul(x.into()))
 	}
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	fn cancel_candidate_bond_less() -> Weight {
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	fn cancel_operator_bond_less() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `191`
 		//  Estimated: `3656`
@@ -1236,7 +1236,7 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
-	fn set_candidate_bond_to_zero(x: u32, ) -> Weight {
+	fn set_operator_bond_to_zero(x: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `1322 + x * (42 ±0)`
 		//  Estimated: `4752 + x * (43 ±0)`
@@ -1252,12 +1252,12 @@ impl WeightInfo for () {
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation DelegatorState (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation DelegatorState (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: Balances Locks (r:1 w:1)
 	/// Proof: Balances Locks (max_values: None, max_size: Some(1287), added: 3762, mode: MaxEncodedLen)
 	/// Storage: Balances Freezes (r:1 w:0)
@@ -1308,12 +1308,12 @@ impl WeightInfo for () {
 	/// Proof: Balances Locks (max_values: None, max_size: Some(1287), added: 3762, mode: MaxEncodedLen)
 	/// Storage: Balances Freezes (r:1 w:0)
 	/// Proof: Balances Freezes (max_values: None, max_size: Some(37), added: 2512, mode: MaxEncodedLen)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `x` is `[0, 349]`.
@@ -1358,12 +1358,12 @@ impl WeightInfo for () {
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:0)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	fn execute_revoke_delegation() -> Weight {
@@ -1387,14 +1387,14 @@ impl WeightInfo for () {
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation BottomDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation BottomDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	fn execute_delegator_revoke_delegation_worst() -> Weight {
@@ -1410,8 +1410,8 @@ impl WeightInfo for () {
 	/// Proof Skipped: RestakingDelegation DelegatorState (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation DelegationScheduledRequests (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation DelegationScheduledRequests (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: Balances Locks (r:1 w:1)
 	/// Proof: Balances Locks (max_values: None, max_size: Some(1287), added: 3762, mode: MaxEncodedLen)
 	/// Storage: Balances Freezes (r:1 w:0)
@@ -1422,8 +1422,8 @@ impl WeightInfo for () {
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation BottomDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation BottomDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	fn execute_delegator_bond_less_worst() -> Weight {
@@ -1493,23 +1493,23 @@ impl WeightInfo for () {
 	}
 	/// Storage: RestakingDelegation TotalSelected (r:1 w:0)
 	/// Proof Skipped: RestakingDelegation TotalSelected (max_values: Some(1), max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:0)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:51 w:0)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:0)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:51 w:0)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation DelegationScheduledRequests (r:51 w:0)
 	/// Proof Skipped: RestakingDelegation DelegationScheduledRequests (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:51 w:0)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:51 w:0)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation SelectedCandidates (r:0 w:1)
-	/// Proof Skipped: RestakingDelegation SelectedCandidates (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation SelectedOperators (r:0 w:1)
+	/// Proof Skipped: RestakingDelegation SelectedOperators (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AtStake (r:0 w:51)
 	/// Proof Skipped: RestakingDelegation AtStake (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `x` is `[0, 50]`.
 	/// The range of component `y` is `[0, 100]`.
-	fn select_top_candidates(x: u32, y: u32, ) -> Weight {
+	fn select_top_operators(x: u32, y: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `0 + x * (3816 ±0) + y * (1800 ±0)`
 		//  Estimated: `3730 + x * (3975 ±39) + y * (639 ±19)`
@@ -1536,12 +1536,12 @@ impl WeightInfo for () {
 	/// Proof: Balances Locks (max_values: None, max_size: Some(1287), added: 3762, mode: MaxEncodedLen)
 	/// Storage: Balances Freezes (r:349 w:0)
 	/// Proof: Balances Freezes (max_values: None, max_size: Some(37), added: 2512, mode: MaxEncodedLen)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation BottomDelegations (r:1 w:1)
@@ -1628,16 +1628,16 @@ impl WeightInfo for () {
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation DelegatorState (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation DelegatorState (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation TopDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation BottomDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation BottomDelegations (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: Balances Locks (r:1 w:1)
 	/// Proof: Balances Locks (max_values: None, max_size: Some(1287), added: 3762, mode: MaxEncodedLen)
 	/// Storage: Balances Freezes (r:1 w:0)
@@ -1667,8 +1667,8 @@ impl WeightInfo for () {
 	/// Proof: System Account (max_values: None, max_size: Some(116), added: 2591, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation DelegatorState (r:2 w:2)
 	/// Proof Skipped: RestakingDelegation DelegatorState (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AutoCompoundingDelegations (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation AutoCompoundingDelegations (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TopDelegations (r:1 w:1)
@@ -1681,8 +1681,8 @@ impl WeightInfo for () {
 	/// Proof: Balances Freezes (max_values: None, max_size: Some(37), added: 2512, mode: MaxEncodedLen)
 	/// Storage: RestakingDelegation DelegationScheduledRequests (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation DelegationScheduledRequests (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation Total (r:1 w:1)
 	/// Proof Skipped: RestakingDelegation Total (max_values: Some(1), max_size: None, mode: Measured)
 	fn delegate_with_auto_compound_worst() -> Weight {
@@ -1709,18 +1709,18 @@ impl WeightInfo for () {
 	/// Proof Skipped: RestakingDelegation EnableMarkingOffline (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation TotalSelected (r:1 w:0)
 	/// Proof Skipped: RestakingDelegation TotalSelected (max_values: Some(1), max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation SelectedCandidates (r:1 w:0)
-	/// Proof Skipped: RestakingDelegation SelectedCandidates (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation SelectedOperators (r:1 w:0)
+	/// Proof Skipped: RestakingDelegation SelectedOperators (max_values: Some(1), max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AtStake (r:2 w:0)
 	/// Proof Skipped: RestakingDelegation AtStake (max_values: None, max_size: None, mode: Measured)
 	/// Storage: RestakingDelegation AwardedPts (r:2 w:0)
 	/// Proof Skipped: RestakingDelegation AwardedPts (max_values: None, max_size: None, mode: Measured)
 	/// Storage: MoonbeamOrbiters OrbiterPerRound (r:1 w:0)
 	/// Proof Skipped: MoonbeamOrbiters OrbiterPerRound (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidateInfo (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidateInfo (max_values: None, max_size: None, mode: Measured)
-	/// Storage: RestakingDelegation CandidatePool (r:1 w:1)
-	/// Proof Skipped: RestakingDelegation CandidatePool (max_values: Some(1), max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorInfo (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorInfo (max_values: None, max_size: None, mode: Measured)
+	/// Storage: RestakingDelegation OperatorPool (r:1 w:1)
+	/// Proof Skipped: RestakingDelegation OperatorPool (max_values: Some(1), max_size: None, mode: Measured)
 	fn notify_inactive_operator() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `11494`
