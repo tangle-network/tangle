@@ -237,13 +237,13 @@ impl<T: Config> Pallet<T> {
 				let participant = prefrences.to_ethabi().first().unwrap().clone();
 				let inputs = Token::Bytes(Field::encode_to_ethabi(inputs));
 				let outputs = Token::Bytes(Field::encode_to_ethabi(outputs));
-				eprintln!("inputs: {}", inputs);
-				eprintln!("outputs: {}", outputs);
 				let data = call
 					.encode_input(&[service_id, job, job_call_id, participant, inputs, outputs])
 					.map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 
+				#[cfg(test)]
+				eprintln!("evm_call: 0x{}", hex::encode(&data));
 				let info =
 					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
 				eprintln!("info: {:?}", info);
