@@ -40,6 +40,8 @@ pub type MaxPermittedCallers = ConstU32<32>;
 pub type MaxServicesPerOperator = ConstU32<32>;
 /// Maximum number of blueprints per operator.
 pub type MaxBlueprintsPerOperator = ConstU32<32>;
+/// Maximum number of services per user.
+pub type MaxServicesPerUser = ConstU32<1024>;
 
 /// A Job Definition is a definition of a job that can be called.
 /// It contains the input and output fields of the job with the permitted caller.

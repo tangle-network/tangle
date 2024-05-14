@@ -104,6 +104,8 @@ pub mod module {
 		MaxPermittedCallersExceeded,
 		/// The maximum number of operators per service has been exceeded.
 		MaxServiceProvidersExceeded,
+		/// The maximum number of services per user has been exceeded.
+		MaxServicesPerUserExceeded,
 		/// The maximum number of fields per request has been exceeded.
 		MaxFieldsExceeded,
 		/// The approval is not requested for the operator (the caller).
@@ -333,6 +335,18 @@ pub mod module {
 		u64,
 		Service<T::AccountId, BlockNumberFor<T>>,
 		ResultQuery<Error<T>::ServiceNotFound>,
+	>;
+
+	/// User Service Instances
+	/// User Account ID -> Service ID
+	#[pallet::storage]
+	#[pallet::getter(fn user_services)]
+	pub type UserServices<T: Config> = StorageMap<
+		_,
+		Identity,
+		T::AccountId,
+		BoundedBTreeSet<u64, MaxServicesPerOperator>,
+		ValueQuery,
 	>;
 
 	/// The Service Job Calls
@@ -567,8 +581,14 @@ pub mod module {
 					operators,
 					ttl,
 				};
-				Instances::<T>::insert(service_id, service);
-				NextInstanceId::<T>::set(service_id.saturating_add(1));
+
+				UserServices::<T>::try_mutate(&caller, |service_ids| {
+					Instances::<T>::insert(service_id, service);
+					NextInstanceId::<T>::set(service_id.saturating_add(1));
+					service_ids
+						.try_insert(service_id)
+						.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
+				})?;
 				Self::deposit_event(Event::ServiceInitiated {
 					owner: caller.clone(),
 					request_id: None,
@@ -681,8 +701,14 @@ pub mod module {
 					operators,
 					ttl: request.ttl,
 				};
-				Instances::<T>::insert(service_id, service);
-				NextInstanceId::<T>::set(service_id.saturating_add(1));
+
+				UserServices::<T>::try_mutate(&request.owner, |service_ids| {
+					Instances::<T>::insert(service_id, service);
+					NextInstanceId::<T>::set(service_id.saturating_add(1));
+					service_ids
+						.try_insert(service_id)
+						.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
+				})?;
 
 				Self::deposit_event(Event::ServiceInitiated {
 					owner: request.owner,
@@ -701,19 +727,30 @@ pub mod module {
 		/// The service will not be initiated, and the requester will need to update the service request.
 		pub fn reject(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			let mut request = Self::service_requests(request_id)?;
-			let updated = request
-				.operators_with_approval_state
-				.iter_mut()
-				.find(|(v, _)| v == &caller)
-				.map(|(_, s)| *s = ApprovalState::Rejected);
-			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
+			let updated = ServiceRequests::<T>::try_mutate_exists(request_id, |maybe_request| {
+				maybe_request
+					.as_mut()
+					.map(|r| {
+						r.operators_with_approval_state.iter_mut().find_map(|(v, s)| {
+							if v == &caller {
+								*s = ApprovalState::Rejected;
+								Some(r.blueprint)
+							} else {
+								None
+							}
+						})
+					})
+					.ok_or(Error::<T>::ServiceRequestNotFound)
+			})?;
+			match updated {
+				Some(blueprint_id) => Self::deposit_event(Event::ServiceRequestRejected {
+					operator: caller.clone(),
+					request_id,
+					blueprint_id,
+				}),
+				None => return Err(Error::<T>::ApprovalNotRequested.into()),
+			};
 
-			Self::deposit_event(Event::ServiceRequestRejected {
-				operator: caller.clone(),
-				request_id,
-				blueprint_id: request.blueprint,
-			});
 			Ok(())
 		}
 
@@ -726,6 +763,10 @@ pub mod module {
 			let service = Self::services(service_id)?;
 			// TODO: allow permissioned callers to terminate the service?
 			ensure!(service.owner == caller, DispatchError::BadOrigin);
+			let removed = UserServices::<T>::try_mutate(&caller, |service_ids| {
+				Result::<_, Error<T>>::Ok(service_ids.remove(&service_id))
+			})?;
+			ensure!(removed, Error::<T>::ServiceNotFound);
 			Instances::<T>::remove(service_id);
 			// Remove the service from the operator's profile.
 			for operator in &service.operators {
