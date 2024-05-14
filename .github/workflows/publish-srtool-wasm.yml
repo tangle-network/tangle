@@ -38,6 +38,12 @@ jobs:
           cat ${{ matrix.chain }}-srtool-digest.json
           echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
 
+          echo Summary:
+          echo - version: ${{ steps.srtool_build.outputs.version }}
+          echo - info: ${{ steps.srtool_build.outputs.info }}
+          echo - prop: ${{ steps.srtool_build.outputs.proposal_hash }}
+          echo - json: ${{ steps.srtool_build.outputs.json }}
+
       - name: Upload ${{ matrix.chain }} wasm to release
         if: matrix.chain == 'mainnet'
         uses: svenstaro/upload-release-action@v2
