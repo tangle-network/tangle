@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// DO NOT USE THIS IN PRODUCTION, IT IS JUST FOR TESTING.
 pragma solidity >=0.8.3;
 
 import "../hooks/RegisterationHook.sol";

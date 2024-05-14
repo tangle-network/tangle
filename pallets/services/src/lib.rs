@@ -104,6 +104,8 @@ pub mod module {
 		MaxPermittedCallersExceeded,
 		/// The maximum number of operators per service has been exceeded.
 		MaxServiceProvidersExceeded,
+		/// The maximum number of services per user has been exceeded.
+		MaxServicesPerUserExceeded,
 		/// The maximum number of fields per request has been exceeded.
 		MaxFieldsExceeded,
 		/// The approval is not requested for the operator (the caller).
@@ -117,6 +119,10 @@ pub mod module {
 		JobCallResultNotFound,
 		/// An error occurred while encoding the EVM ABI.
 		EVMAbiEncode,
+		/// Operator profile not found.
+		OperatorProfileNotFound,
+		/// Maximum number of services per Provider reached.
+		MaxServicesPerProviderExceeded,
 	}
 
 	#[pallet::event]
@@ -294,8 +300,9 @@ pub mod module {
 	>;
 
 	/// The operators for a specific service blueprint.
+	/// Blueprint ID -> Operator -> Operator Preferences
 	#[pallet::storage]
-	#[pallet::getter(fn service_providers)]
+	#[pallet::getter(fn operators)]
 	pub type Operators<T: Config> = StorageDoubleMap<
 		_,
 		Identity,
@@ -322,12 +329,24 @@ pub mod module {
 	/// Service ID -> Service
 	#[pallet::storage]
 	#[pallet::getter(fn services)]
-	pub type is_operator<T: Config> = StorageMap<
+	pub type Instances<T: Config> = StorageMap<
 		_,
 		Identity,
 		u64,
 		Service<T::AccountId, BlockNumberFor<T>>,
 		ResultQuery<Error<T>::ServiceNotFound>,
+	>;
+
+	/// User Service Instances
+	/// User Account ID -> Service ID
+	#[pallet::storage]
+	#[pallet::getter(fn user_services)]
+	pub type UserServices<T: Config> = StorageMap<
+		_,
+		Identity,
+		T::AccountId,
+		BoundedBTreeSet<u64, MaxServicesPerOperator>,
+		ValueQuery,
 	>;
 
 	/// The Service Job Calls
@@ -358,6 +377,18 @@ pub mod module {
 		ResultQuery<Error<T>::ServiceOrJobCallNotFound>,
 	>;
 
+	// auxiliary storage and maps
+
+	#[pallet::storage]
+	#[pallet::getter(fn operator_profile)]
+	pub type OperatorsProfile<T: Config> = StorageMap<
+		_,
+		Identity,
+		T::AccountId,
+		OperatorProfile,
+		ResultQuery<Error<T>::OperatorProfileNotFound>,
+	>;
+
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Create a new service blueprint.
@@ -373,7 +404,7 @@ pub mod module {
 			blueprint: ServiceBlueprint,
 		) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
-			let blueprint_id = NextBlueprintId::<T>::get();
+			let blueprint_id = Self::next_blueprint_id();
 			Blueprints::<T>::insert(blueprint_id, (owner.clone(), blueprint));
 			NextBlueprintId::<T>::set(blueprint_id.saturating_add(1));
 
@@ -392,19 +423,37 @@ pub mod module {
 			registration_args: Vec<Field<T::AccountId>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 			let already_registered = Operators::<T>::contains_key(blueprint_id, &caller);
 			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
+			blueprint
+				.type_check_registration(&registration_args)
+				.map_err(Error::<T>::TypeCheck)?;
 
 			let (allowed, weight) =
 				Self::check_registeration_hook(&blueprint, &preferences, &registration_args)?;
 
 			ensure!(allowed, Error::<T>::InvalidRegistrationInput);
 
-			blueprint
-				.type_check_registration(&registration_args)
-				.map_err(Error::<T>::TypeCheck)?;
 			Operators::<T>::insert(blueprint_id, &caller, preferences);
+
+			OperatorsProfile::<T>::try_mutate(&caller, |profile| {
+				match profile {
+					Ok(p) => {
+						p.blueprints
+							.try_insert(blueprint_id)
+							.map_err(|_| Error::<T>::MaxServicesPerProviderExceeded)?;
+					},
+					Err(_) => {
+						let mut blueprints = BoundedBTreeSet::new();
+						blueprints
+							.try_insert(blueprint_id)
+							.map_err(|_| Error::<T>::MaxServicesPerProviderExceeded)?;
+						*profile = Ok(OperatorProfile { blueprints, ..Default::default() });
+					},
+				};
+				Result::<_, Error<T>>::Ok(())
+			})?;
 
 			Self::deposit_event(Event::Registered {
 				provider: caller.clone(),
@@ -434,6 +483,15 @@ pub mod module {
 			// TODO: check if the caller is not providing any service for the blueprint.
 			Operators::<T>::remove(blueprint_id, &caller);
 
+			// TODO: also remove all the services that uses this blueprint?
+			let removed = OperatorsProfile::<T>::try_mutate_exists(&caller, |profile| {
+				profile
+					.as_mut()
+					.map(|p| p.blueprints.remove(&blueprint_id))
+					.ok_or(Error::<T>::NotRegistered)
+			})?;
+
+			ensure!(removed, Error::<T>::NotRegistered);
 			Self::deposit_event(Event::Unregistered { operator: caller.clone(), blueprint_id });
 			Ok(())
 		}
@@ -476,15 +534,16 @@ pub mod module {
 			#[pallet::compact] ttl: BlockNumberFor<T>,
 			request_args: Vec<Field<T::AccountId>>,
 		) -> DispatchResultWithPostInfo {
+			// TODO(@shekohex): split this function into smaller functions.
 			let caller = ensure_signed(origin)?;
-			let (_, blueprint) = Blueprints::<T>::get(blueprint_id)?;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 
 			blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
 			let mut preferences = Vec::new();
 			let mut pending_approvals = Vec::new();
 			let mut approved = Vec::new();
 			for provider in &service_providers {
-				let prefs = Operators::<T>::get(blueprint_id, provider)?;
+				let prefs = Self::operators(blueprint_id, provider)?;
 				if prefs.approval == ApprovalPrefrence::Required {
 					pending_approvals.push(provider.clone());
 				} else {
@@ -493,7 +552,7 @@ pub mod module {
 				preferences.push(prefs);
 			}
 
-			let service_id = NextInstanceId::<T>::get();
+			let service_id = Self::next_instance_id();
 			let (allowed, weight) =
 				Self::check_request_hook(&blueprint, service_id, &preferences, &request_args)?;
 
@@ -504,6 +563,15 @@ pub mod module {
 					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
 			if pending_approvals.is_empty() {
 				// No approval is required, initiate the service immediately.
+				for operator in &approved {
+					// add the service id to the list of services for each operator's profile.
+					OperatorsProfile::<T>::try_mutate_exists(&operator, |profile| {
+						profile
+							.as_mut()
+							.and_then(|p| p.services.try_insert(service_id).ok())
+							.ok_or(Error::<T>::NotRegistered)
+					})?;
+				}
 				let operators = BoundedVec::<_, MaxOperatorsPerService>::try_from(approved)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
@@ -513,8 +581,14 @@ pub mod module {
 					operators,
 					ttl,
 				};
-				is_operator::<T>::insert(service_id, service);
-				NextInstanceId::<T>::set(service_id.saturating_add(1));
+
+				UserServices::<T>::try_mutate(&caller, |service_ids| {
+					Instances::<T>::insert(service_id, service);
+					NextInstanceId::<T>::set(service_id.saturating_add(1));
+					service_ids
+						.try_insert(service_id)
+						.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
+				})?;
 				Self::deposit_event(Event::ServiceInitiated {
 					owner: caller.clone(),
 					request_id: None,
@@ -566,7 +640,7 @@ pub mod module {
 		/// Approve a service request, so that the service can be initiated.
 		pub fn approve(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			let mut request = ServiceRequests::<T>::get(request_id)?;
+			let mut request = Self::service_requests(request_id)?;
 			let updated = request
 				.operators_with_approval_state
 				.iter_mut()
@@ -577,14 +651,16 @@ pub mod module {
 			let approved = request
 				.operators_with_approval_state
 				.iter()
-				.filter(|(_, s)| *s == ApprovalState::Approved)
-				.map(|(v, _)| v.clone())
+				.filter_map(
+					|(v, s)| if *s == ApprovalState::Approved { Some(v.clone()) } else { None },
+				)
 				.collect::<Vec<_>>();
 			let pending_approvals = request
 				.operators_with_approval_state
 				.iter()
-				.filter(|(_, s)| *s == ApprovalState::Pending)
-				.map(|(v, _)| v.clone())
+				.filter_map(
+					|(v, s)| if *s == ApprovalState::Pending { Some(v.clone()) } else { None },
+				)
 				.collect::<Vec<_>>();
 
 			// we emit this event regardless of the outcome of the approval.
@@ -600,12 +676,22 @@ pub mod module {
 				// remove the service request.
 				ServiceRequests::<T>::remove(request_id);
 
-				let service_id = NextInstanceId::<T>::get();
+				let service_id = Self::next_instance_id();
 				let operators = request
 					.operators_with_approval_state
 					.into_iter()
 					.map(|(v, _)| v)
 					.collect::<Vec<_>>();
+
+				// add the service id to the list of services for each operator's profile.
+				for operator in &operators {
+					OperatorsProfile::<T>::try_mutate_exists(&operator, |profile| {
+						profile
+							.as_mut()
+							.and_then(|p| p.services.try_insert(service_id).ok())
+							.ok_or(Error::<T>::NotRegistered)
+					})?;
+				}
 				let operators = BoundedVec::<_, MaxOperatorsPerService>::try_from(operators)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
@@ -615,8 +701,14 @@ pub mod module {
 					operators,
 					ttl: request.ttl,
 				};
-				is_operator::<T>::insert(service_id, service);
-				NextInstanceId::<T>::set(service_id.saturating_add(1));
+
+				UserServices::<T>::try_mutate(&request.owner, |service_ids| {
+					Instances::<T>::insert(service_id, service);
+					NextInstanceId::<T>::set(service_id.saturating_add(1));
+					service_ids
+						.try_insert(service_id)
+						.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
+				})?;
 
 				Self::deposit_event(Event::ServiceInitiated {
 					owner: request.owner,
@@ -635,19 +727,30 @@ pub mod module {
 		/// The service will not be initiated, and the requester will need to update the service request.
 		pub fn reject(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			let mut request = ServiceRequests::<T>::get(request_id)?;
-			let updated = request
-				.operators_with_approval_state
-				.iter_mut()
-				.find(|(v, _)| v == &caller)
-				.map(|(_, s)| *s = ApprovalState::Rejected);
-			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
+			let updated = ServiceRequests::<T>::try_mutate_exists(request_id, |maybe_request| {
+				maybe_request
+					.as_mut()
+					.map(|r| {
+						r.operators_with_approval_state.iter_mut().find_map(|(v, s)| {
+							if v == &caller {
+								*s = ApprovalState::Rejected;
+								Some(r.blueprint)
+							} else {
+								None
+							}
+						})
+					})
+					.ok_or(Error::<T>::ServiceRequestNotFound)
+			})?;
+			match updated {
+				Some(blueprint_id) => Self::deposit_event(Event::ServiceRequestRejected {
+					operator: caller.clone(),
+					request_id,
+					blueprint_id,
+				}),
+				None => return Err(Error::<T>::ApprovalNotRequested.into()),
+			};
 
-			Self::deposit_event(Event::ServiceRequestRejected {
-				operator: caller.clone(),
-				request_id,
-				blueprint_id: request.blueprint,
-			});
 			Ok(())
 		}
 
@@ -657,10 +760,23 @@ pub mod module {
 			#[pallet::compact] service_id: u64,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
-			let service = is_operator::<T>::get(service_id)?;
+			let service = Self::services(service_id)?;
 			// TODO: allow permissioned callers to terminate the service?
 			ensure!(service.owner == caller, DispatchError::BadOrigin);
-			is_operator::<T>::remove(service_id);
+			let removed = UserServices::<T>::try_mutate(&caller, |service_ids| {
+				Result::<_, Error<T>>::Ok(service_ids.remove(&service_id))
+			})?;
+			ensure!(removed, Error::<T>::ServiceNotFound);
+			Instances::<T>::remove(service_id);
+			// Remove the service from the operator's profile.
+			for operator in &service.operators {
+				OperatorsProfile::<T>::try_mutate_exists(&operator, |profile| {
+					profile
+						.as_mut()
+						.map(|p| p.services.remove(&service_id))
+						.ok_or(Error::<T>::NotRegistered)
+				})?;
+			}
 
 			Self::deposit_event(Event::ServiceTerminated {
 				owner: caller.clone(),
@@ -679,8 +795,8 @@ pub mod module {
 			args: BoundedVec<Field<T::AccountId>, MaxFields>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let service = is_operator::<T>::get(service_id)?;
-			let (_, blueprint) = Blueprints::<T>::get(service.blueprint)?;
+			let service = Self::services(service_id)?;
+			let (_, blueprint) = Self::blueprints(service.blueprint)?;
 			let is_permitted_caller = service.permitted_callers.iter().any(|v| v == &caller);
 			ensure!(service.owner == caller || is_permitted_caller, DispatchError::BadOrigin);
 
@@ -689,7 +805,7 @@ pub mod module {
 			let job_call = JobCall { service_id, job, args: args.clone() };
 
 			job_call.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
-			let call_id = NextJobCallId::<T>::get();
+			let call_id = Self::next_job_call_id();
 
 			let (allowed, weight) =
 				Self::check_job_call_hook(&blueprint, service_id, job, call_id, &args)?;
@@ -717,9 +833,9 @@ pub mod module {
 			result: BoundedVec<Field<T::AccountId>, MaxFields>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let job_call = JobCalls::<T>::get(service_id, call_id)?;
-			let service = is_operator::<T>::get(job_call.service_id)?;
-			let (_, blueprint) = Blueprints::<T>::get(service.blueprint)?;
+			let job_call = Self::job_calls(service_id, call_id)?;
+			let service = Self::services(job_call.service_id)?;
+			let (_, blueprint) = Self::blueprints(service.blueprint)?;
 
 			let is_operator = service.operators.iter().any(|v| v == &caller);
 			ensure!(is_operator, DispatchError::BadOrigin);
