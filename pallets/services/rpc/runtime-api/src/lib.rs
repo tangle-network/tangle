@@ -19,32 +19,29 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::type_complexity)]
 use parity_scale_codec::Codec;
-use sp_runtime::{
-	traits::{MaybeDisplay},
-	Serialize,
-};
+use sp_runtime::{traits::MaybeDisplay, Serialize};
 use sp_std::vec::Vec;
-use tangle_primitives;
+use tangle_primitives::jobs::v2::RpcServicesWithBlueprint;
 
 pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
 
 sp_api::decl_runtime_apis! {
-	pub trait ServicesApi<AccountId> where AccountId: Codec + MaybeDisplay + Serialize {
-		/// Query jobs associated with a specific validator.
+	pub trait ServicesApi<AccountId>
+	where
+		AccountId: Codec + MaybeDisplay + Serialize,
+	{
+		/// Query all the services that this operator is providing along with their blueprints.
 		///
-		/// This function takes a `validator` parameter of type `AccountId` and attempts
-		/// to retrieve a list of jobs associated with the provided validator. If successful,
-		/// it constructs a vector of `RpcResponseJobsData` containing information
-		/// about the jobs and returns it as a `Result`.
-		///
-		/// # Arguments
-		///
-		/// * `validator` - The account ID of the validator whose jobs are to be queried.
-		///
-		/// # Returns
-		///
-		/// An optional vec of `RpcResponseJobsData` of jobs assigned to validator
-		fn query_jobs_by_validator(validator: AccountId) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>>>;
+		/// ## Arguments
+		/// - `operator`: The operator account id.
+		/// ## Return
+		/// - [`RpcServicesWithBlueprint`]: A list of services with their blueprints.
+		fn query_services_with_blueprints_by_operator(
+			operator: AccountId,
+		) -> Result<
+			Vec<RpcServicesWithBlueprint<AccountId, BlockNumberOf<Block>>>,
+			sp_runtime::DispatchError,
+		>;
 	}
 }

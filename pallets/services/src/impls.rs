@@ -1,3 +1,8 @@
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+#[cfg(feature = "std")]
+use std::vec::Vec;
+
 use super::*;
 
 impl<T: Config> traits::EvmRunner<T> for () {

@@ -1,7 +1,10 @@
 use core::iter;
 
 #[cfg(not(feature = "std"))]
-use alloc::{string::String, vec, vec::Vec};
+use alloc::{boxed::Box, string::String, vec, vec::Vec};
+
+#[cfg(feature = "std")]
+use std::{boxed::Box, string::String, vec::Vec};
 
 use ethabi::Token;
 use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
@@ -242,11 +245,8 @@ impl<T: Config> Pallet<T> {
 					.map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 
-				#[cfg(test)]
-				eprintln!("evm_call: 0x{}", hex::encode(&data));
 				let info =
 					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
-				eprintln!("info: {:?}", info);
 				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
 		};

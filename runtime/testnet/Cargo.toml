@@ -89,6 +89,7 @@ pallet-dkg = { workspace = true }
 pallet-jobs = { workspace = true }
 pallet-services = { workspace = true }
 pallet-jobs-rpc-runtime-api = { workspace = true }
+pallet-services-rpc-runtime-api = { workspace = true }
 pallet-roles = { workspace = true }
 pallet-zksaas = { workspace = true }
 tangle-crypto-primitives = { workspace = true }
@@ -229,6 +230,7 @@ std = [
   "pallet-dkg/std",
   "pallet-zksaas/std",
   "pallet-jobs-rpc-runtime-api/std",
+  "pallet-services-rpc-runtime-api/std",
 
 
   # Frontier

@@ -55,6 +55,7 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", b
 substrate-build-script-utils = "3.0.0"
 subtle = { version = "2.2", default-features = false }
 hex-literal = "0.4.1"
+itertools = { version = "0.12.1", default-features = false }
 log = { version = "0.4.20", default-features = false }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 serde = { version = "1.0.197", default-features = false, features = ["derive"] }
@@ -122,6 +123,8 @@ pallet-dkg = { path = "pallets/dkg", default-features = false }
 pallet-zksaas = { path = "pallets/zksaas", default-features = false }
 pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-features = false }
 pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
+pallet-services-rpc-runtime-api = { path = "pallets/services/rpc/runtime-api", default-features = false }
+pallet-services-rpc = { path = "pallets/services/rpc" }
 
 k256 = { version = "0.13.0", default-features = false }
 p256 = { version = "0.13.0", default-features = false }

@@ -17,6 +17,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
 
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+
 use frame_support::{
 	pallet_prelude::*,
 	traits::{Currency, ReservableCurrency},
@@ -24,7 +27,6 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 use sp_runtime::{traits::Get, DispatchResult};
-use sp_std::prelude::*;
 
 mod functions;
 mod impls;
@@ -52,6 +54,7 @@ pub use weights::WeightInfo;
 pub mod module {
 	use super::*;
 	use frame_support::dispatch::PostDispatchInfo;
+	use sp_std::vec::Vec;
 	use tangle_primitives::jobs::v2::*;
 
 	#[pallet::config]
@@ -575,6 +578,7 @@ pub mod module {
 				let operators = BoundedVec::<_, MaxOperatorsPerService>::try_from(approved)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
+					id: service_id,
 					blueprint: blueprint_id,
 					owner: caller.clone(),
 					permitted_callers,
@@ -695,6 +699,7 @@ pub mod module {
 				let operators = BoundedVec::<_, MaxOperatorsPerService>::try_from(operators)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
+					id: service_id,
 					blueprint: request.blueprint,
 					owner: request.owner.clone(),
 					permitted_callers: request.permitted_callers.clone(),
