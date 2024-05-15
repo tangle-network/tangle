@@ -26,6 +26,8 @@ members = [
  "pallets/*",
  "pallets/jobs/rpc",
  "pallets/jobs/rpc/runtime-api",
+ "pallets/services/rpc",
+ "pallets/services/rpc/runtime-api",
  "pallets/dkg/frost",
  "pallets/dkg/frost/frost-*",
  "precompiles/utils",
