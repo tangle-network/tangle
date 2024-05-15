@@ -82,9 +82,9 @@ import {
   PalletNominationPoolsConfigOpAccountId32,
   TangleTestnetRuntimeProxyType,
   PalletRolesProfile,
-  TanglePrimitivesJobsV2ServiceBlueprint,
   TanglePrimitivesJobsV2Field,
-  TanglePrimitivesJobsV2ServiceProviderPrefrences,
+  TanglePrimitivesJobsV2ServiceBlueprint,
+  TanglePrimitivesJobsV2OperatorPreferences,
   TanglePrimitivesJobsV2ApprovalPrefrence,
   TangleTestnetRuntimeOpaqueSessionKeys,
   PalletStakingRewardDestination,
@@ -642,7 +642,7 @@ declare module "@polkadot/api-base/types/submittable" {
         [
           Option<PalletAirdropClaimsUtilsMultiAddress>,
           Option<PalletAirdropClaimsUtilsMultiAddress>,
-          PalletAirdropClaimsUtilsMultiAddressSignature
+          PalletAirdropClaimsUtilsMultiAddressSignature,
         ]
       >;
       /**
@@ -678,8 +678,24 @@ declare module "@polkadot/api-base/types/submittable" {
           Option<PalletAirdropClaimsUtilsMultiAddress>,
           Option<PalletAirdropClaimsUtilsMultiAddress>,
           PalletAirdropClaimsUtilsMultiAddressSignature,
-          Bytes
+          Bytes,
         ]
+      >;
+      /**
+       * See [`Pallet::claim_signed`].
+       **/
+      claimSigned: AugmentedSubmittable<
+        (
+          dest:
+            | Option<PalletAirdropClaimsUtilsMultiAddress>
+            | null
+            | Uint8Array
+            | PalletAirdropClaimsUtilsMultiAddress
+            | { EVM: any }
+            | { Native: any }
+            | string
+        ) => SubmittableExtrinsic<ApiType>,
+        [Option<PalletAirdropClaimsUtilsMultiAddress>]
       >;
       /**
        * See [`Pallet::force_set_expiry_config`].
@@ -716,7 +732,7 @@ declare module "@polkadot/api-base/types/submittable" {
             | [
                 u128 | AnyNumber | Uint8Array,
                 u128 | AnyNumber | Uint8Array,
-                u64 | AnyNumber | Uint8Array
+                u64 | AnyNumber | Uint8Array,
               ][],
           statement:
             | Option<PalletAirdropClaimsStatementKind>
@@ -731,7 +747,7 @@ declare module "@polkadot/api-base/types/submittable" {
           PalletAirdropClaimsUtilsMultiAddress,
           u128,
           Option<Vec<ITuple<[u128, u128, u64]>>>,
-          Option<PalletAirdropClaimsStatementKind>
+          Option<PalletAirdropClaimsStatementKind>,
         ]
       >;
       /**
@@ -754,7 +770,7 @@ declare module "@polkadot/api-base/types/submittable" {
         ) => SubmittableExtrinsic<ApiType>,
         [
           PalletAirdropClaimsUtilsMultiAddress,
-          PalletAirdropClaimsUtilsMultiAddress
+          PalletAirdropClaimsUtilsMultiAddress,
         ]
       >;
       /**
@@ -1148,7 +1164,7 @@ declare module "@polkadot/api-base/types/submittable" {
                   | { total?: any; voters?: any }
                   | string
                   | Uint8Array
-                )
+                ),
               ][]
         ) => SubmittableExtrinsic<ApiType>,
         [Vec<ITuple<[AccountId32, SpNposElectionsSupport]>>]
@@ -1199,7 +1215,7 @@ declare module "@polkadot/api-base/types/submittable" {
         ) => SubmittableExtrinsic<ApiType>,
         [
           PalletElectionProviderMultiPhaseRawSolution,
-          PalletElectionProviderMultiPhaseSolutionOrSnapshotSize
+          PalletElectionProviderMultiPhaseSolutionOrSnapshotSize,
         ]
       >;
       /**
@@ -1327,7 +1343,7 @@ declare module "@polkadot/api-base/types/submittable" {
             | Vec<ITuple<[H160, Vec<H256>]>>
             | [
                 H160 | string | Uint8Array,
-                Vec<H256> | (H256 | string | Uint8Array)[]
+                Vec<H256> | (H256 | string | Uint8Array)[],
               ][]
         ) => SubmittableExtrinsic<ApiType>,
         [
@@ -1339,7 +1355,7 @@ declare module "@polkadot/api-base/types/submittable" {
           U256,
           Option<U256>,
           Option<U256>,
-          Vec<ITuple<[H160, Vec<H256>]>>
+          Vec<ITuple<[H160, Vec<H256>]>>,
         ]
       >;
       /**
@@ -1363,7 +1379,7 @@ declare module "@polkadot/api-base/types/submittable" {
             | Vec<ITuple<[H160, Vec<H256>]>>
             | [
                 H160 | string | Uint8Array,
-                Vec<H256> | (H256 | string | Uint8Array)[]
+                Vec<H256> | (H256 | string | Uint8Array)[],
               ][]
         ) => SubmittableExtrinsic<ApiType>,
         [
@@ -1374,7 +1390,7 @@ declare module "@polkadot/api-base/types/submittable" {
           U256,
           Option<U256>,
           Option<U256>,
-          Vec<ITuple<[H160, Vec<H256>]>>
+          Vec<ITuple<[H160, Vec<H256>]>>,
         ]
       >;
       /**
@@ -1399,7 +1415,7 @@ declare module "@polkadot/api-base/types/submittable" {
             | Vec<ITuple<[H160, Vec<H256>]>>
             | [
                 H160 | string | Uint8Array,
-                Vec<H256> | (H256 | string | Uint8Array)[]
+                Vec<H256> | (H256 | string | Uint8Array)[],
               ][]
         ) => SubmittableExtrinsic<ApiType>,
         [
@@ -1411,7 +1427,7 @@ declare module "@polkadot/api-base/types/submittable" {
           U256,
           Option<U256>,
           Option<U256>,
-          Vec<ITuple<[H160, Vec<H256>]>>
+          Vec<ITuple<[H160, Vec<H256>]>>,
         ]
       >;
       /**
@@ -1806,7 +1822,7 @@ declare module "@polkadot/api-base/types/submittable" {
                   | { ShaThree256: any }
                   | string
                   | Uint8Array
-                )
+                ),
               ][]
         ) => SubmittableExtrinsic<ApiType>,
         [Vec<ITuple<[AccountId32, Data]>>]
@@ -1982,7 +1998,7 @@ declare module "@polkadot/api-base/types/submittable" {
           u64,
           AccountId32,
           TanglePrimitivesJobsValidatorOffenceType,
-          Vec<Bytes>
+          Vec<Bytes>,
         ]
       >;
       /**
@@ -2109,7 +2125,7 @@ declare module "@polkadot/api-base/types/submittable" {
           Vec<AccountId32>,
           Option<PalletMultisigTimepoint>,
           U8aFixed,
-          SpWeightsWeightV2Weight
+          SpWeightsWeightV2Weight,
         ]
       >;
       /**
@@ -2140,7 +2156,7 @@ declare module "@polkadot/api-base/types/submittable" {
           Vec<AccountId32>,
           Option<PalletMultisigTimepoint>,
           Call,
-          SpWeightsWeightV2Weight
+          SpWeightsWeightV2Weight,
         ]
       >;
       /**
@@ -2385,7 +2401,7 @@ declare module "@polkadot/api-base/types/submittable" {
             | ITuple<[Perbill, AccountId32]>
             | [
                 Perbill | AnyNumber | Uint8Array,
-                AccountId32 | string | Uint8Array
+                AccountId32 | string | Uint8Array,
               ]
         ) => SubmittableExtrinsic<ApiType>,
         [u32, Option<ITuple<[Perbill, AccountId32]>>]
@@ -2485,7 +2501,7 @@ declare module "@polkadot/api-base/types/submittable" {
           PalletNominationPoolsConfigOpU32,
           PalletNominationPoolsConfigOpU32,
           PalletNominationPoolsConfigOpU32,
-          PalletNominationPoolsConfigOpPerbill
+          PalletNominationPoolsConfigOpPerbill,
         ]
       >;
       /**
@@ -2564,7 +2580,7 @@ declare module "@polkadot/api-base/types/submittable" {
           u32,
           PalletNominationPoolsConfigOpAccountId32,
           PalletNominationPoolsConfigOpAccountId32,
-          PalletNominationPoolsConfigOpAccountId32
+          PalletNominationPoolsConfigOpAccountId32,
         ]
       >;
       /**
@@ -2727,7 +2743,7 @@ declare module "@polkadot/api-base/types/submittable" {
           TangleTestnetRuntimeProxyType,
           u16,
           Compact<u64>,
-          Compact<u32>
+          Compact<u32>,
         ]
       >;
       /**
@@ -2797,7 +2813,7 @@ declare module "@polkadot/api-base/types/submittable" {
           MultiAddress,
           MultiAddress,
           Option<TangleTestnetRuntimeProxyType>,
-          Call
+          Call,
         ]
       >;
       /**
@@ -3059,39 +3075,9 @@ declare module "@polkadot/api-base/types/submittable" {
         [Compact<u64>]
       >;
       /**
-       * See `Pallet::create_blueprint`.
+       * See `Pallet::call`.
        **/
-      createBlueprint: AugmentedSubmittable<
-        (
-          blueprint:
-            | TanglePrimitivesJobsV2ServiceBlueprint
-            | {
-                metadata?: any;
-                jobs?: any;
-                registrationHook?: any;
-                registrationParams?: any;
-                requestHook?: any;
-                requestParams?: any;
-                gadget?: any;
-              }
-            | string
-            | Uint8Array
-        ) => SubmittableExtrinsic<ApiType>,
-        [TanglePrimitivesJobsV2ServiceBlueprint]
-      >;
-      /**
-       * See `Pallet::deregister`.
-       **/
-      deregister: AugmentedSubmittable<
-        (
-          blueprintId: Compact<u64> | AnyNumber | Uint8Array
-        ) => SubmittableExtrinsic<ApiType>,
-        [Compact<u64>]
-      >;
-      /**
-       * See `Pallet::job_call`.
-       **/
-      jobCall: AugmentedSubmittable<
+      call: AugmentedSubmittable<
         (
           serviceId: Compact<u64> | AnyNumber | Uint8Array,
           job: Compact<u8> | AnyNumber | Uint8Array,
@@ -3121,36 +3107,25 @@ declare module "@polkadot/api-base/types/submittable" {
         [Compact<u64>, Compact<u8>, Vec<TanglePrimitivesJobsV2Field>]
       >;
       /**
-       * See `Pallet::job_submit`.
+       * See `Pallet::create_blueprint`.
        **/
-      jobSubmit: AugmentedSubmittable<
+      createBlueprint: AugmentedSubmittable<
         (
-          serviceId: Compact<u64> | AnyNumber | Uint8Array,
-          callId: Compact<u64> | AnyNumber | Uint8Array,
-          result:
-            | Vec<TanglePrimitivesJobsV2Field>
-            | (
-                | TanglePrimitivesJobsV2Field
-                | { None: any }
-                | { Bool: any }
-                | { Uint8: any }
-                | { Int8: any }
-                | { Uint16: any }
-                | { Int16: any }
-                | { Uint32: any }
-                | { Int32: any }
-                | { Uint64: any }
-                | { Int64: any }
-                | { String: any }
-                | { Bytes: any }
-                | { Array: any }
-                | { List: any }
-                | { AccountId: any }
-                | string
-                | Uint8Array
-              )[]
+          blueprint:
+            | TanglePrimitivesJobsV2ServiceBlueprint
+            | {
+                metadata?: any;
+                jobs?: any;
+                registrationHook?: any;
+                registrationParams?: any;
+                requestHook?: any;
+                requestParams?: any;
+                gadget?: any;
+              }
+            | string
+            | Uint8Array
         ) => SubmittableExtrinsic<ApiType>,
-        [Compact<u64>, Compact<u64>, Vec<TanglePrimitivesJobsV2Field>]
+        [TanglePrimitivesJobsV2ServiceBlueprint]
       >;
       /**
        * See `Pallet::register`.
@@ -3159,7 +3134,7 @@ declare module "@polkadot/api-base/types/submittable" {
         (
           blueprintId: Compact<u64> | AnyNumber | Uint8Array,
           preferences:
-            | TanglePrimitivesJobsV2ServiceProviderPrefrences
+            | TanglePrimitivesJobsV2OperatorPreferences
             | { key?: any; approval?: any }
             | string
             | Uint8Array,
@@ -3188,8 +3163,8 @@ declare module "@polkadot/api-base/types/submittable" {
         ) => SubmittableExtrinsic<ApiType>,
         [
           Compact<u64>,
-          TanglePrimitivesJobsV2ServiceProviderPrefrences,
-          Vec<TanglePrimitivesJobsV2Field>
+          TanglePrimitivesJobsV2OperatorPreferences,
+          Vec<TanglePrimitivesJobsV2Field>,
         ]
       >;
       /**
@@ -3242,8 +3217,40 @@ declare module "@polkadot/api-base/types/submittable" {
           Vec<AccountId32>,
           Vec<AccountId32>,
           Compact<u64>,
-          Vec<TanglePrimitivesJobsV2Field>
+          Vec<TanglePrimitivesJobsV2Field>,
         ]
+      >;
+      /**
+       * See `Pallet::submit_result`.
+       **/
+      submitResult: AugmentedSubmittable<
+        (
+          serviceId: Compact<u64> | AnyNumber | Uint8Array,
+          callId: Compact<u64> | AnyNumber | Uint8Array,
+          result:
+            | Vec<TanglePrimitivesJobsV2Field>
+            | (
+                | TanglePrimitivesJobsV2Field
+                | { None: any }
+                | { Bool: any }
+                | { Uint8: any }
+                | { Int8: any }
+                | { Uint16: any }
+                | { Int16: any }
+                | { Uint32: any }
+                | { Int32: any }
+                | { Uint64: any }
+                | { Int64: any }
+                | { String: any }
+                | { Bytes: any }
+                | { Array: any }
+                | { List: any }
+                | { AccountId: any }
+                | string
+                | Uint8Array
+              )[]
+        ) => SubmittableExtrinsic<ApiType>,
+        [Compact<u64>, Compact<u64>, Vec<TanglePrimitivesJobsV2Field>]
       >;
       /**
        * See `Pallet::terminate`.
@@ -3251,6 +3258,15 @@ declare module "@polkadot/api-base/types/submittable" {
       terminate: AugmentedSubmittable<
         (
           serviceId: Compact<u64> | AnyNumber | Uint8Array
+        ) => SubmittableExtrinsic<ApiType>,
+        [Compact<u64>]
+      >;
+      /**
+       * See `Pallet::unregister`.
+       **/
+      unregister: AugmentedSubmittable<
+        (
+          blueprintId: Compact<u64> | AnyNumber | Uint8Array
         ) => SubmittableExtrinsic<ApiType>,
         [Compact<u64>]
       >;
@@ -3594,7 +3610,7 @@ declare module "@polkadot/api-base/types/submittable" {
           PalletStakingPalletConfigOpU32,
           PalletStakingPalletConfigOpU32,
           PalletStakingPalletConfigOpPercent,
-          PalletStakingPalletConfigOpPerbill
+          PalletStakingPalletConfigOpPerbill,
         ]
       >;
       /**

@@ -8618,7 +8618,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "ethabi 15.0.0",
  "ethereum",
@@ -8637,6 +8637,7 @@ dependencies = [
  "frame-system",
  "hex",
  "hex-literal 0.4.1",
+ "itertools 0.12.1",
  "libsecp256k1",
  "num_enum 0.5.11",
  "pallet-balances",
@@ -8669,6 +8670,33 @@ dependencies = [
  "sp-staking",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
  "tangle-crypto-primitives",
+ "tangle-primitives",
+]
+
+[[package]]
+name = "pallet-services-rpc"
+version = "1.0.3"
+dependencies = [
+ "jsonrpsee 0.20.3",
+ "pallet-services-rpc-runtime-api",
+ "parity-scale-codec 3.6.9",
+ "sp-api",
+ "sp-blockchain",
+ "sp-core",
+ "sp-rpc",
+ "sp-runtime",
+ "sp-weights",
+ "tangle-primitives",
+]
+
+[[package]]
+name = "pallet-services-rpc-runtime-api"
+version = "1.0.3"
+dependencies = [
+ "parity-scale-codec 3.6.9",
+ "sp-api",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
  "tangle-primitives",
 ]
 
@@ -14472,6 +14500,7 @@ dependencies = [
  "pallet-airdrop-claims",
  "pallet-im-online",
  "pallet-jobs-rpc",
+ "pallet-services-rpc",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec 3.6.9",
@@ -14772,6 +14801,7 @@ dependencies = [
  "pallet-roles",
  "pallet-scheduler",
  "pallet-services",
+ "pallet-services-rpc-runtime-api",
  "pallet-session",
  "pallet-staking",
  "pallet-staking-reward-curve",
