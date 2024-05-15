@@ -21,6 +21,9 @@ use frame_support::pallet_prelude::*;
 use serde::{Deserialize, Serialize};
 use sp_core::{ecdsa, RuntimeDebug};
 
+#[cfg(not(feature = "std"))]
+use alloc::{vec, vec::Vec};
+
 mod field;
 pub use field::*;
 
@@ -319,6 +322,8 @@ impl<AccountId, BlockNumber> ServiceRequest<AccountId, BlockNumber> {
 #[scale_info(skip_type_params(AccountId, BlockNumber))]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Service<AccountId, BlockNumber> {
+	/// The service ID.
+	pub id: u64,
 	/// The Blueprint ID of the service.
 	pub blueprint: u64,
 	/// The owner of the service.
@@ -580,4 +585,18 @@ pub enum ContainerGadget {
 	/// An Image that is stored in a remote container registry.
 	#[codec(index = 1)]
 	Registry(ImageRegistryFetcher),
+}
+
+// -***- RPC -***-
+
+/// RPC Response for query the blueprint along with the services instances of that blueprint.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct RpcServicesWithBlueprint<AccountId, BlockNumber> {
+	/// The blueprint ID.
+	pub blueprint_id: u64,
+	/// The service blueprint.
+	pub blueprint: ServiceBlueprint,
+	/// The services instances of that blueprint.
+	pub services: Vec<Service<AccountId, BlockNumber>>,
 }

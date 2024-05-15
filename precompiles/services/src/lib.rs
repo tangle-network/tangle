@@ -22,7 +22,6 @@ use fp_evm::PrecompileHandle;
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	traits::ConstU32,
-	traits::Get,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_services::Call as ServicesCall;

@@ -55,7 +55,7 @@ import {
   TangleTestnetRuntimeProxyType,
   TanglePrimitivesJobsV2ApprovalPrefrence,
   TanglePrimitivesJobsV2Field,
-  TanglePrimitivesJobsV2ServiceProviderPrefrences,
+  TanglePrimitivesJobsV2OperatorPreferences,
   PalletStakingForcing,
   PalletStakingRewardDestination,
   PalletStakingValidatorPrefs,
@@ -182,7 +182,7 @@ declare module "@polkadot/api-base/types/events" {
           from: AccountId32,
           to: AccountId32,
           amount: u128,
-          destinationStatus: FrameSupportTokensMiscBalanceStatus
+          destinationStatus: FrameSupportTokensMiscBalanceStatus,
         ],
         {
           from: AccountId32;
@@ -410,7 +410,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           recipient: AccountId32,
           source: PalletAirdropClaimsUtilsMultiAddress,
-          amount: u128
+          amount: u128,
         ],
         {
           recipient: AccountId32;
@@ -474,7 +474,7 @@ declare module "@polkadot/api-base/types/events" {
           account: AccountId32,
           proposalIndex: u32,
           proposalHash: H256,
-          threshold: u32
+          threshold: u32,
         ],
         {
           account: AccountId32;
@@ -494,7 +494,7 @@ declare module "@polkadot/api-base/types/events" {
           proposalHash: H256,
           voted: bool,
           yes: u32,
-          no: u32
+          no: u32,
         ],
         {
           account: AccountId32;
@@ -558,7 +558,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           prevOwner: PalletDemocracyMetadataOwner,
           owner: PalletDemocracyMetadataOwner,
-          hash_: H256
+          hash_: H256,
         ],
         {
           prevOwner: PalletDemocracyMetadataOwner;
@@ -638,7 +638,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           voter: AccountId32,
           refIndex: u32,
-          vote: PalletDemocracyVoteAccountVote
+          vote: PalletDemocracyVoteAccountVote,
         ],
         {
           voter: AccountId32;
@@ -683,7 +683,7 @@ declare module "@polkadot/api-base/types/events" {
         ApiType,
         [
           compute: PalletElectionProviderMultiPhaseElectionCompute,
-          score: SpNposElectionsElectionScore
+          score: SpNposElectionsElectionScore,
         ],
         {
           compute: PalletElectionProviderMultiPhaseElectionCompute;
@@ -698,7 +698,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           from: PalletElectionProviderMultiPhasePhase,
           to: PalletElectionProviderMultiPhasePhase,
-          round: u32
+          round: u32,
         ],
         {
           from: PalletElectionProviderMultiPhasePhase;
@@ -736,7 +736,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           compute: PalletElectionProviderMultiPhaseElectionCompute,
           origin: Option<AccountId32>,
-          prevEjected: bool
+          prevEjected: bool,
         ],
         {
           compute: PalletElectionProviderMultiPhaseElectionCompute;
@@ -823,7 +823,7 @@ declare module "@polkadot/api-base/types/events" {
           to: H160,
           transactionHash: H256,
           exitReason: EvmCoreErrorExitReason,
-          extraData: Bytes
+          extraData: Bytes,
         ],
         {
           from: H160;
@@ -1099,7 +1099,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           jobId: u64,
           roleType: TanglePrimitivesRolesRoleType,
-          details: TanglePrimitivesJobsJobInfo
+          details: TanglePrimitivesJobsJobInfo,
         ],
         {
           jobId: u64;
@@ -1124,7 +1124,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           jobId: u64,
           roleType: TanglePrimitivesRolesRoleType,
-          details: TanglePrimitivesJobsJobInfo
+          details: TanglePrimitivesJobsJobInfo,
         ],
         {
           jobId: u64;
@@ -1156,7 +1156,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           jobId: u64,
           roleType: TanglePrimitivesRolesRoleType,
-          details: TanglePrimitivesJobsJobSubmission
+          details: TanglePrimitivesJobsJobSubmission,
         ],
         {
           jobId: u64;
@@ -1187,7 +1187,7 @@ declare module "@polkadot/api-base/types/events" {
           approving: AccountId32,
           timepoint: PalletMultisigTimepoint,
           multisig: AccountId32,
-          callHash: U8aFixed
+          callHash: U8aFixed,
         ],
         {
           approving: AccountId32;
@@ -1205,7 +1205,7 @@ declare module "@polkadot/api-base/types/events" {
           cancelling: AccountId32,
           timepoint: PalletMultisigTimepoint,
           multisig: AccountId32,
-          callHash: U8aFixed
+          callHash: U8aFixed,
         ],
         {
           cancelling: AccountId32;
@@ -1224,7 +1224,7 @@ declare module "@polkadot/api-base/types/events" {
           timepoint: PalletMultisigTimepoint,
           multisig: AccountId32,
           callHash: U8aFixed,
-          result: Result<Null, SpRuntimeDispatchError>
+          result: Result<Null, SpRuntimeDispatchError>,
         ],
         {
           approving: AccountId32;
@@ -1325,7 +1325,7 @@ declare module "@polkadot/api-base/types/events" {
         ApiType,
         [
           poolId: u32,
-          permission: Option<PalletNominationPoolsCommissionClaimPermission>
+          permission: Option<PalletNominationPoolsCommissionClaimPermission>,
         ],
         {
           poolId: u32;
@@ -1365,7 +1365,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           root: Option<AccountId32>,
           bouncer: Option<AccountId32>,
-          nominator: Option<AccountId32>
+          nominator: Option<AccountId32>,
         ],
         {
           root: Option<AccountId32>;
@@ -1401,7 +1401,7 @@ declare module "@polkadot/api-base/types/events" {
           poolId: u32,
           balance: u128,
           points: u128,
-          era: u32
+          era: u32,
         ],
         {
           member: AccountId32;
@@ -1489,7 +1489,7 @@ declare module "@polkadot/api-base/types/events" {
           delegator: AccountId32,
           delegatee: AccountId32,
           proxyType: TangleTestnetRuntimeProxyType,
-          delay: u64
+          delay: u64,
         ],
         {
           delegator: AccountId32;
@@ -1515,7 +1515,7 @@ declare module "@polkadot/api-base/types/events" {
           delegator: AccountId32,
           delegatee: AccountId32,
           proxyType: TangleTestnetRuntimeProxyType,
-          delay: u64
+          delay: u64,
         ],
         {
           delegator: AccountId32;
@@ -1534,7 +1534,7 @@ declare module "@polkadot/api-base/types/events" {
           pure: AccountId32,
           who: AccountId32,
           proxyType: TangleTestnetRuntimeProxyType,
-          disambiguationIndex: u16
+          disambiguationIndex: u16,
         ],
         {
           pure: AccountId32;
@@ -1581,7 +1581,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           account: AccountId32,
           totalProfileRestake: u128,
-          roles: Vec<TanglePrimitivesRolesRoleType>
+          roles: Vec<TanglePrimitivesRolesRoleType>,
         ],
         {
           account: AccountId32;
@@ -1605,7 +1605,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           account: AccountId32,
           totalProfileRestake: u128,
-          roles: Vec<TanglePrimitivesRolesRoleType>
+          roles: Vec<TanglePrimitivesRolesRoleType>,
         ],
         {
           account: AccountId32;
@@ -1683,7 +1683,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           task: ITuple<[u64, u32]>,
           id: Option<U8aFixed>,
-          result: Result<Null, SpRuntimeDispatchError>
+          result: Result<Null, SpRuntimeDispatchError>,
         ],
         {
           task: ITuple<[u64, u32]>;
@@ -1722,17 +1722,17 @@ declare module "@polkadot/api-base/types/events" {
     };
     services: {
       /**
-       * The approval preference for a service provider has been updated.
+       * The approval preference for an operator has been updated.
        **/
       ApprovalPreferenceUpdated: AugmentedEvent<
         ApiType,
         [
-          provider: AccountId32,
+          operator: AccountId32,
           blueprintId: u64,
-          approvalPreference: TanglePrimitivesJobsV2ApprovalPrefrence
+          approvalPreference: TanglePrimitivesJobsV2ApprovalPrefrence,
         ],
         {
-          provider: AccountId32;
+          operator: AccountId32;
           blueprintId: u64;
           approvalPreference: TanglePrimitivesJobsV2ApprovalPrefrence;
         }
@@ -1746,14 +1746,6 @@ declare module "@polkadot/api-base/types/events" {
         { owner: AccountId32; blueprintId: u64 }
       >;
       /**
-       * A service provider has been deregistered.
-       **/
-      Deregistered: AugmentedEvent<
-        ApiType,
-        [provider: AccountId32, blueprintId: u64],
-        { provider: AccountId32; blueprintId: u64 }
-      >;
-      /**
        * A job has been called.
        **/
       JobCalled: AugmentedEvent<
@@ -1763,7 +1755,7 @@ declare module "@polkadot/api-base/types/events" {
           serviceId: u64,
           callId: u64,
           job: u8,
-          args: Vec<TanglePrimitivesJobsV2Field>
+          args: Vec<TanglePrimitivesJobsV2Field>,
         ],
         {
           caller: AccountId32;
@@ -1779,14 +1771,14 @@ declare module "@polkadot/api-base/types/events" {
       JobResultSubmitted: AugmentedEvent<
         ApiType,
         [
-          provider: AccountId32,
+          operator: AccountId32,
           serviceId: u64,
           callId: u64,
           job: u8,
-          result: Vec<TanglePrimitivesJobsV2Field>
+          result: Vec<TanglePrimitivesJobsV2Field>,
         ],
         {
-          provider: AccountId32;
+          operator: AccountId32;
           serviceId: u64;
           callId: u64;
           job: u8;
@@ -1794,20 +1786,20 @@ declare module "@polkadot/api-base/types/events" {
         }
       >;
       /**
-       * A new service provider has been registered.
+       * An new operator has been registered.
        **/
       Registered: AugmentedEvent<
         ApiType,
         [
           provider: AccountId32,
           blueprintId: u64,
-          preferences: TanglePrimitivesJobsV2ServiceProviderPrefrences,
-          registrationArgs: Vec<TanglePrimitivesJobsV2Field>
+          preferences: TanglePrimitivesJobsV2OperatorPreferences,
+          registrationArgs: Vec<TanglePrimitivesJobsV2Field>,
         ],
         {
           provider: AccountId32;
           blueprintId: u64;
-          preferences: TanglePrimitivesJobsV2ServiceProviderPrefrences;
+          preferences: TanglePrimitivesJobsV2OperatorPreferences;
           registrationArgs: Vec<TanglePrimitivesJobsV2Field>;
         }
       >;
@@ -1820,7 +1812,7 @@ declare module "@polkadot/api-base/types/events" {
           owner: AccountId32,
           requestId: Option<u64>,
           serviceId: u64,
-          blueprintId: u64
+          blueprintId: u64,
         ],
         {
           owner: AccountId32;
@@ -1835,14 +1827,14 @@ declare module "@polkadot/api-base/types/events" {
       ServiceRequestApproved: AugmentedEvent<
         ApiType,
         [
-          provider: AccountId32,
+          operator: AccountId32,
           requestId: u64,
           blueprintId: u64,
           pendingApprovals: Vec<AccountId32>,
-          approved: Vec<AccountId32>
+          approved: Vec<AccountId32>,
         ],
         {
-          provider: AccountId32;
+          operator: AccountId32;
           requestId: u64;
           blueprintId: u64;
           pendingApprovals: Vec<AccountId32>;
@@ -1859,7 +1851,7 @@ declare module "@polkadot/api-base/types/events" {
           requestId: u64,
           blueprintId: u64,
           pendingApprovals: Vec<AccountId32>,
-          approved: Vec<AccountId32>
+          approved: Vec<AccountId32>,
         ],
         {
           owner: AccountId32;
@@ -1874,8 +1866,8 @@ declare module "@polkadot/api-base/types/events" {
        **/
       ServiceRequestRejected: AugmentedEvent<
         ApiType,
-        [provider: AccountId32, requestId: u64, blueprintId: u64],
-        { provider: AccountId32; requestId: u64; blueprintId: u64 }
+        [operator: AccountId32, requestId: u64, blueprintId: u64],
+        { operator: AccountId32; requestId: u64; blueprintId: u64 }
       >;
       /**
        * A service request has been updated or modified.
@@ -1887,7 +1879,7 @@ declare module "@polkadot/api-base/types/events" {
           requestId: u64,
           blueprintId: u64,
           pendingApprovals: Vec<AccountId32>,
-          approved: Vec<AccountId32>
+          approved: Vec<AccountId32>,
         ],
         {
           owner: AccountId32;
@@ -1904,6 +1896,14 @@ declare module "@polkadot/api-base/types/events" {
         ApiType,
         [owner: AccountId32, serviceId: u64, blueprintId: u64],
         { owner: AccountId32; serviceId: u64; blueprintId: u64 }
+      >;
+      /**
+       * An operator has been unregistered.
+       **/
+      Unregistered: AugmentedEvent<
+        ApiType,
+        [operator: AccountId32, blueprintId: u64],
+        { operator: AccountId32; blueprintId: u64 }
       >;
       /**
        * Generic event
@@ -1995,7 +1995,7 @@ declare module "@polkadot/api-base/types/events" {
         [
           stash: AccountId32,
           dest: PalletStakingRewardDestination,
-          amount: u128
+          amount: u128,
         ],
         {
           stash: AccountId32;
@@ -2120,7 +2120,7 @@ declare module "@polkadot/api-base/types/events" {
         ApiType,
         [
           dispatchError: SpRuntimeDispatchError,
-          dispatchInfo: FrameSupportDispatchDispatchInfo
+          dispatchInfo: FrameSupportDispatchDispatchInfo,
         ],
         {
           dispatchError: SpRuntimeDispatchError;
@@ -2199,7 +2199,7 @@ declare module "@polkadot/api-base/types/events" {
           amount: u128,
           beneficiary: AccountId32,
           validFrom: u64,
-          expireAt: u64
+          expireAt: u64,
         ],
         {
           index: u32;
