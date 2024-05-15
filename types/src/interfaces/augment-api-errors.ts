@@ -1654,11 +1654,11 @@ declare module '@polkadot/api-base/types/errors' {
     };
     services: {
       /**
-       * The caller is already registered as a service provider.
+       * The caller is already registered as a operator.
        **/
       AlreadyRegistered: AugmentedError<ApiType>;
       /**
-       * The approval is not requested for the service provider (the caller).
+       * The approval is not requested for the operator (the caller).
        **/
       ApprovalNotRequested: AugmentedError<ApiType>;
       /**
@@ -1666,9 +1666,25 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       BlueprintNotFound: AugmentedError<ApiType>;
       /**
-       * The caller does not have the requirements to be a service provider.
+       * An error occurred while encoding the EVM ABI.
+       **/
+      EVMAbiEncode: AugmentedError<ApiType>;
+      /**
+       * The caller does not have the requirements to call a job.
+       **/
+      InvalidJobCallInput: AugmentedError<ApiType>;
+      /**
+       * The caller provided an invalid job result.
+       **/
+      InvalidJobResult: AugmentedError<ApiType>;
+      /**
+       * The caller does not have the requirements to be a operator.
        **/
       InvalidRegistrationInput: AugmentedError<ApiType>;
+      /**
+       * The caller does not have the requirements to request a service.
+       **/
+      InvalidRequestInput: AugmentedError<ApiType>;
       /**
        * The result of the job call was not found.
        **/
@@ -1687,13 +1703,25 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       MaxPermittedCallersExceeded: AugmentedError<ApiType>;
       /**
-       * The maximum number of service providers per service has been exceeded.
+       * The maximum number of operators per service has been exceeded.
        **/
       MaxServiceProvidersExceeded: AugmentedError<ApiType>;
       /**
-       * The caller is not registered as a service provider.
+       * Maximum number of services per Provider reached.
+       **/
+      MaxServicesPerProviderExceeded: AugmentedError<ApiType>;
+      /**
+       * The maximum number of services per user has been exceeded.
+       **/
+      MaxServicesPerUserExceeded: AugmentedError<ApiType>;
+      /**
+       * The caller is not registered as a operator.
        **/
       NotRegistered: AugmentedError<ApiType>;
+      /**
+       * Operator profile not found.
+       **/
+      OperatorProfileNotFound: AugmentedError<ApiType>;
       /**
        * The service was not found.
        **/

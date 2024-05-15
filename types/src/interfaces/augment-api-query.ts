@@ -13,6 +13,7 @@ import type {
 import type { Data } from "@polkadot/types";
 import type {
   BTreeMap,
+  BTreeSet,
   Bytes,
   Null,
   Option,
@@ -105,6 +106,13 @@ import {
   PalletStakingEraRewardPoints,
   PalletRolesRestakingLedger,
   PalletSchedulerScheduled,
+  TanglePrimitivesJobsV2ServiceBlueprint,
+  TanglePrimitivesJobsV2Service,
+  TanglePrimitivesJobsV2JobCall,
+  TanglePrimitivesJobsV2JobCallResult,
+  TanglePrimitivesJobsV2OperatorPreferences,
+  TanglePrimitivesJobsV2OperatorProfile,
+  TanglePrimitivesJobsV2ServiceRequest,
   SpCoreCryptoKeyTypeId,
   TangleTestnetRuntimeOpaqueSessionKeys,
   SpStakingExposure,
@@ -2111,19 +2119,26 @@ declare module "@polkadot/api-base/types/storage" {
       nextServiceRequestId: AugmentedQuery<ApiType, () => Observable<u64>, []> &
         QueryableStorageEntry<ApiType, []>;
       /**
-       * The service providers for a specific service blueprint.
+       * The operators for a specific service blueprint.
+       * Blueprint ID -> Operator -> Operator Preferences
        **/
-      serviceProviders: AugmentedQuery<
+      operators: AugmentedQuery<
         ApiType,
         (
           arg1: u64 | AnyNumber | Uint8Array,
           arg2: AccountId32 | string | Uint8Array
-        ) => Observable<
-          Option<TanglePrimitivesJobsV2ServiceProviderPrefrences>
-        >,
+        ) => Observable<Option<TanglePrimitivesJobsV2OperatorPreferences>>,
         [u64, AccountId32]
       > &
         QueryableStorageEntry<ApiType, [u64, AccountId32]>;
+      operatorsProfile: AugmentedQuery<
+        ApiType,
+        (
+          arg: AccountId32 | string | Uint8Array
+        ) => Observable<Option<TanglePrimitivesJobsV2OperatorProfile>>,
+        [AccountId32]
+      > &
+        QueryableStorageEntry<ApiType, [AccountId32]>;
       /**
        * The service requests along with their owner.
        * Request ID -> Service Request
@@ -2136,6 +2151,16 @@ declare module "@polkadot/api-base/types/storage" {
         [u64]
       > &
         QueryableStorageEntry<ApiType, [u64]>;
+      /**
+       * User Service Instances
+       * User Account ID -> Service ID
+       **/
+      userServices: AugmentedQuery<
+        ApiType,
+        (arg: AccountId32 | string | Uint8Array) => Observable<BTreeSet<u64>>,
+        [AccountId32]
+      > &
+        QueryableStorageEntry<ApiType, [AccountId32]>;
       /**
        * Generic query
        **/

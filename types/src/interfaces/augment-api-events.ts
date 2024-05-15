@@ -53,6 +53,9 @@ import {
   PalletNominationPoolsCommissionClaimPermission,
   PalletNominationPoolsPoolState,
   TangleTestnetRuntimeProxyType,
+  TanglePrimitivesJobsV2ApprovalPrefrence,
+  TanglePrimitivesJobsV2Field,
+  TanglePrimitivesJobsV2OperatorPreferences,
   PalletStakingForcing,
   PalletStakingRewardDestination,
   PalletStakingValidatorPrefs,
@@ -2127,17 +2130,17 @@ declare module "@polkadot/api-base/types/events" {
     };
     services: {
       /**
-       * The approval preference for a service provider has been updated.
+       * The approval preference for an operator has been updated.
        **/
       ApprovalPreferenceUpdated: AugmentedEvent<
         ApiType,
         [
-          provider: AccountId32,
+          operator: AccountId32,
           blueprintId: u64,
           approvalPreference: TanglePrimitivesJobsV2ApprovalPrefrence,
         ],
         {
-          provider: AccountId32;
+          operator: AccountId32;
           blueprintId: u64;
           approvalPreference: TanglePrimitivesJobsV2ApprovalPrefrence;
         }
@@ -2149,14 +2152,6 @@ declare module "@polkadot/api-base/types/events" {
         ApiType,
         [owner: AccountId32, blueprintId: u64],
         { owner: AccountId32; blueprintId: u64 }
-      >;
-      /**
-       * A service provider has been deregistered.
-       **/
-      Deregistered: AugmentedEvent<
-        ApiType,
-        [provider: AccountId32, blueprintId: u64],
-        { provider: AccountId32; blueprintId: u64 }
       >;
       /**
        * A job has been called.
@@ -2184,14 +2179,14 @@ declare module "@polkadot/api-base/types/events" {
       JobResultSubmitted: AugmentedEvent<
         ApiType,
         [
-          provider: AccountId32,
+          operator: AccountId32,
           serviceId: u64,
           callId: u64,
           job: u8,
           result: Vec<TanglePrimitivesJobsV2Field>,
         ],
         {
-          provider: AccountId32;
+          operator: AccountId32;
           serviceId: u64;
           callId: u64;
           job: u8;
@@ -2199,20 +2194,20 @@ declare module "@polkadot/api-base/types/events" {
         }
       >;
       /**
-       * A new service provider has been registered.
+       * An new operator has been registered.
        **/
       Registered: AugmentedEvent<
         ApiType,
         [
           provider: AccountId32,
           blueprintId: u64,
-          preferences: TanglePrimitivesJobsV2ServiceProviderPrefrences,
+          preferences: TanglePrimitivesJobsV2OperatorPreferences,
           registrationArgs: Vec<TanglePrimitivesJobsV2Field>,
         ],
         {
           provider: AccountId32;
           blueprintId: u64;
-          preferences: TanglePrimitivesJobsV2ServiceProviderPrefrences;
+          preferences: TanglePrimitivesJobsV2OperatorPreferences;
           registrationArgs: Vec<TanglePrimitivesJobsV2Field>;
         }
       >;
@@ -2240,14 +2235,14 @@ declare module "@polkadot/api-base/types/events" {
       ServiceRequestApproved: AugmentedEvent<
         ApiType,
         [
-          provider: AccountId32,
+          operator: AccountId32,
           requestId: u64,
           blueprintId: u64,
           pendingApprovals: Vec<AccountId32>,
           approved: Vec<AccountId32>,
         ],
         {
-          provider: AccountId32;
+          operator: AccountId32;
           requestId: u64;
           blueprintId: u64;
           pendingApprovals: Vec<AccountId32>;
@@ -2279,8 +2274,8 @@ declare module "@polkadot/api-base/types/events" {
        **/
       ServiceRequestRejected: AugmentedEvent<
         ApiType,
-        [provider: AccountId32, requestId: u64, blueprintId: u64],
-        { provider: AccountId32; requestId: u64; blueprintId: u64 }
+        [operator: AccountId32, requestId: u64, blueprintId: u64],
+        { operator: AccountId32; requestId: u64; blueprintId: u64 }
       >;
       /**
        * A service request has been updated or modified.
@@ -2309,6 +2304,14 @@ declare module "@polkadot/api-base/types/events" {
         ApiType,
         [owner: AccountId32, serviceId: u64, blueprintId: u64],
         { owner: AccountId32; serviceId: u64; blueprintId: u64 }
+      >;
+      /**
+       * An operator has been unregistered.
+       **/
+      Unregistered: AugmentedEvent<
+        ApiType,
+        [operator: AccountId32, blueprintId: u64],
+        { operator: AccountId32; blueprintId: u64 }
       >;
       /**
        * Generic event

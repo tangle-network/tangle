@@ -66,16 +66,6 @@ import type {
   PalletAirdropClaimsUtilsMultiAddress,
   PalletAirdropClaimsUtilsMultiAddressSignature,
   PalletAirdropClaimsUtilsSr25519Signature,
-  PalletAssetsAccountStatus,
-  PalletAssetsApproval,
-  PalletAssetsAssetAccount,
-  PalletAssetsAssetDetails,
-  PalletAssetsAssetMetadata,
-  PalletAssetsAssetStatus,
-  PalletAssetsCall,
-  PalletAssetsError,
-  PalletAssetsEvent,
-  PalletAssetsExistenceReason,
   PalletBabeCall,
   PalletBabeError,
   PalletBagsListCall,
@@ -180,21 +170,6 @@ import type {
   PalletJobsModuleCall,
   PalletJobsModuleError,
   PalletJobsModuleEvent,
-  PalletMultiAssetDelegationCall,
-  PalletMultiAssetDelegationDelegatorBondInfoDelegator,
-  PalletMultiAssetDelegationDelegatorBondLessRequest,
-  PalletMultiAssetDelegationDelegatorDelegatorMetadata,
-  PalletMultiAssetDelegationDelegatorDelegatorStatus,
-  PalletMultiAssetDelegationDelegatorUnstakeRequest,
-  PalletMultiAssetDelegationError,
-  PalletMultiAssetDelegationEvent,
-  PalletMultiAssetDelegationOperatorDelegatorBond,
-  PalletMultiAssetDelegationOperatorOperatorBondLessRequest,
-  PalletMultiAssetDelegationOperatorOperatorMetadata,
-  PalletMultiAssetDelegationOperatorOperatorSnapshot,
-  PalletMultiAssetDelegationOperatorOperatorStatus,
-  PalletMultiAssetDelegationRewardsRewardConfig,
-  PalletMultiAssetDelegationRewardsRewardConfigForAsset,
   PalletMultisigCall,
   PalletMultisigError,
   PalletMultisigEvent,
@@ -246,6 +221,9 @@ import type {
   PalletSchedulerError,
   PalletSchedulerEvent,
   PalletSchedulerScheduled,
+  PalletServicesModuleCall,
+  PalletServicesModuleError,
+  PalletServicesModuleEvent,
   PalletSessionCall,
   PalletSessionError,
   PalletSessionEvent,
@@ -338,33 +316,6 @@ import type {
   SpVersionRuntimeVersion,
   SpWeightsRuntimeDbWeight,
   SpWeightsWeightV2Weight,
-  StagingXcmV4Asset,
-  StagingXcmV4AssetAssetId,
-  StagingXcmV4AssetAssetInstance,
-  StagingXcmV4AssetFungibility,
-  StagingXcmV4Junction,
-  StagingXcmV4JunctionNetworkId,
-  StagingXcmV4Junctions,
-  StagingXcmV4Location,
-  SygmaAccessSegregatorCall,
-  SygmaAccessSegregatorError,
-  SygmaAccessSegregatorEvent,
-  SygmaBasicFeehandlerCall,
-  SygmaBasicFeehandlerError,
-  SygmaBasicFeehandlerEvent,
-  SygmaBridgeCall,
-  SygmaBridgeError,
-  SygmaBridgeEvent,
-  SygmaBridgeProposal,
-  SygmaFeeHandlerRouterCall,
-  SygmaFeeHandlerRouterError,
-  SygmaFeeHandlerRouterEvent,
-  SygmaFeeHandlerRouterFeeHandlerType,
-  SygmaPercentageFeehandlerCall,
-  SygmaPercentageFeehandlerError,
-  SygmaPercentageFeehandlerEvent,
-  SygmaTraitsMpcAddress,
-  SygmaTraitsTransferType,
   TangleCryptoPrimitivesCryptoPublic,
   TanglePrimitivesJobsFallbackOptions,
   TanglePrimitivesJobsJobInfo,
@@ -381,6 +332,33 @@ import type {
   TanglePrimitivesJobsTssDkgtssPhaseThreeJobType,
   TanglePrimitivesJobsTssDkgtssPhaseTwoJobType,
   TanglePrimitivesJobsTssDkgtssSignatureResult,
+  TanglePrimitivesJobsV2ApprovalPrefrence,
+  TanglePrimitivesJobsV2ApprovalState,
+  TanglePrimitivesJobsV2Architecture,
+  TanglePrimitivesJobsV2ContainerGadget,
+  TanglePrimitivesJobsV2Field,
+  TanglePrimitivesJobsV2FieldFieldType,
+  TanglePrimitivesJobsV2Gadget,
+  TanglePrimitivesJobsV2GadgetBinary,
+  TanglePrimitivesJobsV2GithubFetcher,
+  TanglePrimitivesJobsV2ImageRegistryFetcher,
+  TanglePrimitivesJobsV2JobCall,
+  TanglePrimitivesJobsV2JobCallResult,
+  TanglePrimitivesJobsV2JobDefinition,
+  TanglePrimitivesJobsV2JobMetadata,
+  TanglePrimitivesJobsV2JobResultVerifier,
+  TanglePrimitivesJobsV2NativeGadget,
+  TanglePrimitivesJobsV2OperatingSystem,
+  TanglePrimitivesJobsV2OperatorPreferences,
+  TanglePrimitivesJobsV2OperatorProfile,
+  TanglePrimitivesJobsV2Service,
+  TanglePrimitivesJobsV2ServiceBlueprint,
+  TanglePrimitivesJobsV2ServiceMetadata,
+  TanglePrimitivesJobsV2ServiceRegistrationHook,
+  TanglePrimitivesJobsV2ServiceRequest,
+  TanglePrimitivesJobsV2ServiceRequestHook,
+  TanglePrimitivesJobsV2TypeCheckError,
+  TanglePrimitivesJobsV2WasmGadget,
   TanglePrimitivesJobsValidatorOffenceType,
   TanglePrimitivesJobsZksaasArkworksProofResult,
   TanglePrimitivesJobsZksaasCircomProofResult,
@@ -424,8 +402,6 @@ import type {
   TangleTestnetRuntimeRuntime,
   TangleTestnetRuntimeRuntimeFreezeReason,
   TangleTestnetRuntimeRuntimeHoldReason,
-  XcmV3JunctionBodyId,
-  XcmV3JunctionBodyPart,
 } from "@polkadot/types/lookup";
 
 declare module "@polkadot/types/types/registry" {
@@ -810,10 +786,12 @@ declare module "@polkadot/types/types/registry" {
     TanglePrimitivesJobsTssDkgtssSignatureResult: TanglePrimitivesJobsTssDkgtssSignatureResult;
     TanglePrimitivesJobsV2ApprovalPrefrence: TanglePrimitivesJobsV2ApprovalPrefrence;
     TanglePrimitivesJobsV2ApprovalState: TanglePrimitivesJobsV2ApprovalState;
+    TanglePrimitivesJobsV2Architecture: TanglePrimitivesJobsV2Architecture;
     TanglePrimitivesJobsV2ContainerGadget: TanglePrimitivesJobsV2ContainerGadget;
     TanglePrimitivesJobsV2Field: TanglePrimitivesJobsV2Field;
     TanglePrimitivesJobsV2FieldFieldType: TanglePrimitivesJobsV2FieldFieldType;
     TanglePrimitivesJobsV2Gadget: TanglePrimitivesJobsV2Gadget;
+    TanglePrimitivesJobsV2GadgetBinary: TanglePrimitivesJobsV2GadgetBinary;
     TanglePrimitivesJobsV2GithubFetcher: TanglePrimitivesJobsV2GithubFetcher;
     TanglePrimitivesJobsV2ImageRegistryFetcher: TanglePrimitivesJobsV2ImageRegistryFetcher;
     TanglePrimitivesJobsV2JobCall: TanglePrimitivesJobsV2JobCall;
@@ -822,11 +800,12 @@ declare module "@polkadot/types/types/registry" {
     TanglePrimitivesJobsV2JobMetadata: TanglePrimitivesJobsV2JobMetadata;
     TanglePrimitivesJobsV2JobResultVerifier: TanglePrimitivesJobsV2JobResultVerifier;
     TanglePrimitivesJobsV2NativeGadget: TanglePrimitivesJobsV2NativeGadget;
-    TanglePrimitivesJobsV2RemoteFetcher: TanglePrimitivesJobsV2RemoteFetcher;
+    TanglePrimitivesJobsV2OperatingSystem: TanglePrimitivesJobsV2OperatingSystem;
+    TanglePrimitivesJobsV2OperatorPreferences: TanglePrimitivesJobsV2OperatorPreferences;
+    TanglePrimitivesJobsV2OperatorProfile: TanglePrimitivesJobsV2OperatorProfile;
     TanglePrimitivesJobsV2Service: TanglePrimitivesJobsV2Service;
     TanglePrimitivesJobsV2ServiceBlueprint: TanglePrimitivesJobsV2ServiceBlueprint;
     TanglePrimitivesJobsV2ServiceMetadata: TanglePrimitivesJobsV2ServiceMetadata;
-    TanglePrimitivesJobsV2ServiceProviderPrefrences: TanglePrimitivesJobsV2ServiceProviderPrefrences;
     TanglePrimitivesJobsV2ServiceRegistrationHook: TanglePrimitivesJobsV2ServiceRegistrationHook;
     TanglePrimitivesJobsV2ServiceRequest: TanglePrimitivesJobsV2ServiceRequest;
     TanglePrimitivesJobsV2ServiceRequestHook: TanglePrimitivesJobsV2ServiceRequestHook;

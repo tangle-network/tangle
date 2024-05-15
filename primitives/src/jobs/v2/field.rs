@@ -314,7 +314,7 @@ impl<S: Get<u32>> PartialEq for BoundedString<S> {
 
 impl<S: Get<u32>> PartialOrd for BoundedString<S> {
 	fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
-		self.0.partial_cmp(&other.0)
+		Some(self.cmp(other))
 	}
 }
 

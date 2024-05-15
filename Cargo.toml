@@ -6,9 +6,7 @@ license = "Unlicense"
 homepage = "https://webb.tools"
 repository = "https://github.com/webb-tools/tangle"
 
-exclude = [
-    "examples"
-]
+exclude = ["examples"]
 
 [workspace]
 members = [
@@ -26,6 +24,8 @@ members = [
  "pallets/*",
  "pallets/jobs/rpc",
  "pallets/jobs/rpc/runtime-api",
+ "pallets/services/rpc",
+ "pallets/services/rpc/runtime-api",
  "pallets/dkg/frost",
  "pallets/dkg/frost/frost-*",
  "precompiles/utils",
@@ -42,7 +42,7 @@ members = [
  "precompiles/assets-erc20",
  "tangle-subxt",
  "examples/*",
- "evm-tracer"
+ "evm-tracer",
  # "relayer-gadget",
  # "relayer-gadget/cli",
 ]
@@ -54,6 +54,7 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", b
 substrate-build-script-utils = "3.0.0"
 subtle = { version = "2.2", default-features = false }
 hex-literal = "0.4.1"
+itertools = { version = "0.12.1", default-features = false }
 log = { version = "0.4.20", default-features = false }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 serde = { version = "1.0.197", default-features = false, features = ["derive"] }
@@ -93,7 +94,7 @@ byteorder = { version = "1", default-features = false }
 schnorrkel = { version = "0.11.4", default-features = false }
 snowbridge-milagro-bls = { git = "https://github.com/Snowfork/milagro_bls", default-features = false, rev = "43a5d480ed6e3b83de4cf54888680d51604199e6" }
 primitive-types = { version = "0.12.2", default-features = false, features = ["scale-info", "serde_no_std"] }
-fixed = {version = "1.23.0", default-features = false }
+fixed = { version = "1.23.0", default-features = false }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
@@ -123,12 +124,14 @@ pallet-dkg = { path = "pallets/dkg", default-features = false }
 pallet-zksaas = { path = "pallets/zksaas", default-features = false }
 pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-features = false }
 pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
+pallet-services-rpc-runtime-api = { path = "pallets/services/rpc/runtime-api", default-features = false }
+pallet-services-rpc = { path = "pallets/services/rpc" }
 pallet-multi-asset-delegation = { path = "pallets/multi-asset-delegation", default-features = false }
 
 k256 = { version = "0.13.0", default-features = false }
 p256 = { version = "0.13.0", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
-starknet-crypto = { version = "0.6.1", default-features = false, features = ["signature-display","alloc"] }
+starknet-crypto = { version = "0.6.1", default-features = false, features = ["signature-display", "alloc"] }
 frost-core = { path = "pallets/dkg/frost", default-features = false }
 frost-ed25519 = { path = "pallets/dkg/frost/frost-ed25519", default-features = false }
 frost-ed448 = { path = "pallets/dkg/frost/frost-ed448", default-features = false }
@@ -335,7 +338,7 @@ tangle-crypto-primitives = { path = "primitives/crypto", default-features = fals
 pallet-staking = { path = "pallets/staking", default-features = false }
 pallet-staking-reward-curve = { path = "pallets/staking/reward-curve", default-features = false }
 
-webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false , branch = "salman/polkadot-v1.7.0"}
+webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false, branch = "salman/polkadot-v1.7.0" }
 
 
 primitives-ext = { path = "primitives/ext", default-features = false }

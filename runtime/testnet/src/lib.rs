@@ -90,6 +90,7 @@ use sygma_traits::{
 };
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
+	jobs::v2::RpcServicesWithBlueprint,
 	jobs::{JobId, PhaseResult, RpcResponseJobsData},
 	roles::RoleType,
 };
@@ -2329,6 +2330,17 @@ impl_runtime_apis! {
 			Roles::get_validator_role_key(address)
 		}
 
+	}
+
+	impl pallet_services_rpc_runtime_api::ServicesApi<Block, AccountId> for Runtime {
+		fn query_services_with_blueprints_by_operator(
+			operator: AccountId,
+		) -> Result<
+			Vec<RpcServicesWithBlueprint<AccountId, BlockNumberOf<Block>>>,
+			sp_runtime::DispatchError,
+		> {
+			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
+		}
 	}
 
 	impl fp_rpc::EthereumRuntimeRPCApi<Block> for Runtime {
