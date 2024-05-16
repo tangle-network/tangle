@@ -43,10 +43,10 @@
 //! original request was made.
 //!
 //! To join the set of delegators, call `delegate` and pass in an account that is
-//! already an operator operator and `bond >= MinDelegation`. Each delegator can delegate up to
-//! `T::MaxDelegationsPerDelegator` operator operators by calling `delegate`.
+//! already an operator and `bond >= MinDelegation`. Each delegator can delegate up to
+//! `T::MaxDelegationsPerDelegator` operators by calling `delegate`.
 //!
-//! To revoke a delegation, call `revoke_delegation` with the operator operator's account.
+//! To revoke a delegation, call `revoke_delegation` with the operator's account.
 //! To leave the set of delegators and revoke all delegations, call `leave_delegators`. Leaving
 //! delegations is only possible if no Blueprint Instance is renting the delegator's stake for
 //! economic security.
@@ -175,7 +175,7 @@ pub mod pallet {
 		/// Maximum delegations per delegator
 		#[pallet::constant]
 		type MaxDelegationsPerDelegator: Get<u32>;
-		/// Minimum stake required for any account to be an operator operator
+		/// Minimum stake required for any account to be an operator
 		#[pallet::constant]
 		type MinOperatorStk: Get<BalanceOf<Self>>;
 		/// Minimum stake for any registered on-chain account to delegate
@@ -275,7 +275,7 @@ pub mod pallet {
 			selected_operators_number: u32,
 			total_balance: BalanceOf<T>,
 		},
-		/// Account joined the set of operator operators.
+		/// Account joined the set of operators.
 		JoinedOperatorOperators {
 			account: T::AccountId,
 			amount_locked: BalanceOf<T>,
@@ -301,9 +301,9 @@ pub mod pallet {
 		},
 		/// Operator has decreased a self bond.
 		OperatorBondedLess { operator: T::AccountId, amount: BalanceOf<T>, new_bond: BalanceOf<T> },
-		/// Operator temporarily leave the set of operator operators without unbonding.
+		/// Operator temporarily leave the set of operators without unbonding.
 		OperatorWentOffline { operator: T::AccountId },
-		/// Operator rejoins the set of operator operators.
+		/// Operator rejoins the set of operators.
 		OperatorBackOnline { operator: T::AccountId },
 		/// Operator has requested to leave the set of operators.
 		OperatorScheduledExit {
@@ -325,7 +325,7 @@ pub mod pallet {
 			unlocked_amount: BalanceOf<T>,
 			new_total_amt_locked: BalanceOf<T>,
 		},
-		/// Delegator requested to decrease a bond for the operator operator.
+		/// Delegator requested to decrease a bond for the operator.
 		DelegationDecreaseScheduled {
 			delegator: T::AccountId,
 			operator: T::AccountId,
@@ -434,7 +434,7 @@ pub mod pallet {
 				weight =
 					weight.saturating_add(Self::prepare_staking_payouts(round, round_duration));
 
-				// select top operator operators for next round
+				// select top operators for next round
 				let (extra_weight, operator_count, _delegation_count, total_staked) =
 					Self::select_top_operators(round.current);
 				weight = weight.saturating_add(extra_weight);
@@ -488,7 +488,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn operator_info)]
-	/// Get operator operator info associated with an account if account is operator else None
+	/// Get operator info associated with an account if account is operator else None
 	pub(crate) type OperatorInfo<T: Config> =
 		StorageMap<_, Twox64Concat, T::AccountId, OperatorMetadata<BalanceOf<T>>, OptionQuery>;
 
@@ -535,7 +535,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn top_delegations)]
-	/// Top delegations for operator operator
+	/// Top delegations for operator
 	pub(crate) type TopDelegations<T: Config> = StorageMap<
 		_,
 		Twox64Concat,
@@ -546,7 +546,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn bottom_delegations)]
-	/// Bottom delegations for operator operator
+	/// Bottom delegations for operator
 	pub(crate) type BottomDelegations<T: Config> = StorageMap<
 		_,
 		Twox64Concat,
@@ -557,7 +557,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn selected_operator)]
-	/// The operator operators selected for the current round
+	/// The operators selected for the current round
 	type SelectedOperators<T: Config> =
 		StorageValue<_, BoundedVec<T::AccountId, T::MaxOperators>, ValueQuery>;
 
@@ -568,7 +568,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn operator_pool)]
-	/// The pool of operator operators, each with their total backing stake
+	/// The pool of operators, each with their total backing stake
 	pub(crate) type OperatorPool<T: Config> = StorageValue<
 		_,
 		BoundedOrderedSet<Bond<T::AccountId, BalanceOf<T>>, T::MaxOperators>,
@@ -703,7 +703,7 @@ pub mod pallet {
 			// Set operator commission to default config
 			<OperatorCommission<T>>::put(self.operator_commission);
 
-			// Choose top TotalSelected operator operators
+			// Choose top TotalSelected operators
 			let (_, v_count, _, total_staked) = <Pallet<T>>::select_top_operators(1u32);
 			// // Start Round 1 at Block 0
 			let round: RoundInfo<BlockNumberFor<T>> = RoundInfo::new(1u32, Zero::zero(), 5, 0);
@@ -734,7 +734,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// Join the set of operator operators
+		/// Join the set of operators
 		#[pallet::call_index(7)]
 		#[pallet::weight(<T as Config>::WeightInfo::join_operators(*operator_count))]
 		pub fn join_operators(
@@ -822,7 +822,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// Temporarily leave the set of operator operators without unbonding
+		/// Temporarily leave the set of operators without unbonding
 		#[pallet::call_index(11)]
 		#[pallet::weight(<T as Config>::WeightInfo::go_offline(MAX_OPERATORS))]
 		pub fn go_offline(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
@@ -830,7 +830,7 @@ pub mod pallet {
 			<Pallet<T>>::go_offline_inner(operator)
 		}
 
-		/// Rejoin the set of operator operators if previously had called `go_offline`
+		/// Rejoin the set of operators if previously had called `go_offline`
 		#[pallet::call_index(12)]
 		#[pallet::weight(<T as Config>::WeightInfo::go_online(MAX_OPERATORS))]
 		pub fn go_online(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
@@ -838,7 +838,7 @@ pub mod pallet {
 			<Pallet<T>>::go_online_inner(operator)
 		}
 
-		/// Increase operator operator self bond by `more`
+		/// Increase operator self bond by `more`
 		#[pallet::call_index(13)]
 		#[pallet::weight(<T as Config>::WeightInfo::operator_bond_more(MAX_OPERATORS))]
 		pub fn operator_bond_more(
@@ -849,7 +849,7 @@ pub mod pallet {
 			<Pallet<T>>::operator_bond_more_inner(operator, more)
 		}
 
-		/// Request by operator operator to decrease self bond by `less`
+		/// Request by operator to decrease self bond by `less`
 		#[pallet::call_index(14)]
 		#[pallet::weight(<T as Config>::WeightInfo::schedule_operator_bond_less())]
 		pub fn schedule_operator_bond_less(
@@ -868,7 +868,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// Execute pending request to adjust the operator operator self bond
+		/// Execute pending request to adjust the operator self bond
 		#[pallet::call_index(15)]
 		#[pallet::weight(<T as Config>::WeightInfo::execute_operator_bond_less(MAX_OPERATORS))]
 		pub fn execute_operator_bond_less(
@@ -879,7 +879,7 @@ pub mod pallet {
 			<Pallet<T>>::execute_operator_bond_less_inner(operator)
 		}
 
-		/// Cancel pending request to adjust the operator operator self bond
+		/// Cancel pending request to adjust the operator self bond
 		#[pallet::call_index(16)]
 		#[pallet::weight(<T as Config>::WeightInfo::cancel_operator_bond_less())]
 		pub fn cancel_operator_bond_less(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
@@ -966,7 +966,7 @@ pub mod pallet {
 			Self::delegation_schedule_revoke(operator, delegator)
 		}
 
-		/// Bond more for delegators wrt a specific operator operator.
+		/// Bond more for delegators wrt a specific operator.
 		#[pallet::call_index(23)]
 		#[pallet::weight(<T as Config>::WeightInfo::delegator_bond_more(
 			T::MaxTopDelegationsPerOperator::get() + T::MaxBottomDelegationsPerOperator::get()
@@ -992,7 +992,7 @@ pub mod pallet {
 			Ok(Some(weight).into())
 		}
 
-		/// Request bond less for delegators wrt a specific operator operator. The delegation's
+		/// Request bond less for delegators wrt a specific operator. The delegation's
 		/// rewards for rounds while the request is pending use the reduced bonded amount.
 		/// A bond less may not be performed if any other scheduled request is pending.
 		#[pallet::call_index(24)]
@@ -1052,35 +1052,6 @@ pub mod pallet {
 				operator_auto_compounding_delegation_count_hint,
 				delegation_count_hint,
 			)
-		}
-
-		/// Hotfix to remove existing empty entries for operators that have left.
-		#[pallet::call_index(28)]
-		#[pallet::weight(
-			T::DbWeight::get().reads_writes(2 * operators.len() as u64, operators.len() as u64)
-		)]
-		pub fn hotfix_remove_delegation_requests_exited_operator(
-			origin: OriginFor<T>,
-			operators: Vec<T::AccountId>,
-		) -> DispatchResult {
-			ensure_signed(origin)?;
-			ensure!(operators.len() < 100, <Error<T>>::InsufficientBalance);
-			for operator in &operators {
-				ensure!(
-					<OperatorInfo<T>>::get(&operator).is_none(),
-					<Error<T>>::OperatorNotLeaving
-				);
-				ensure!(
-					<DelegationScheduledRequests<T>>::get(&operator).is_empty(),
-					<Error<T>>::OperatorNotLeaving
-				);
-			}
-
-			for operator in operators {
-				<DelegationScheduledRequests<T>>::remove(operator);
-			}
-
-			Ok(().into())
 		}
 
 		/// Notify an operator is inactive during MaxOfflineRounds
@@ -1162,7 +1133,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Force join the set of operator operators.
+		/// Force join the set of operators.
 		/// It will skip the minimum required bond check.
 		#[pallet::call_index(31)]
 		#[pallet::weight(<T as Config>::WeightInfo::join_operators(*operator_count))]
