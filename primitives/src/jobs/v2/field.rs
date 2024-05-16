@@ -16,17 +16,18 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, string::ToString, vec::Vec};
+use educe::Educe;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
 use sp_std::boxed::Box;
 
-use super::MaxFieldsSize;
+use super::Constraints;
 
 macro_rules! impl_from {
     ($from:ty, $variant:ident) => {
-        impl<AccountId> From<$from> for Field<AccountId> {
+        impl<C: Constraints> From<$from> for Field<C> {
             fn from(val: $from) -> Self {
                 Self::$variant(val)
             }
@@ -34,7 +35,7 @@ macro_rules! impl_from {
     };
 
     ($from:ty, $variant:ident, $conv:expr) => {
-        impl<AccountId> From<$from> for Field<AccountId> {
+        impl<C: Constraints> From<$from> for Field<C> {
             fn from(val: $from) -> Self {
                 Self::$variant($conv(val))
             }
@@ -46,9 +47,11 @@ macro_rules! impl_from {
     };
 }
 
-#[derive(Eq, PartialEq, Encode, Decode, RuntimeDebug, Clone, TypeInfo, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum Field<AccountId> {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub enum Field<C: Constraints> {
 	/// Represents a field of null value.
 	#[codec(index = 0)]
 	None,
@@ -81,22 +84,22 @@ pub enum Field<AccountId> {
 	Int64(i64),
 	/// Represents a UTF-8 string.
 	#[codec(index = 10)]
-	String(BoundedString<MaxFieldsSize>),
+	String(BoundedString<C::MaxFieldsSize>),
 	/// Represents a Raw Bytes.
 	#[codec(index = 11)]
-	Bytes(BoundedVec<u8, MaxFieldsSize>),
+	Bytes(BoundedVec<u8, C::MaxFieldsSize>),
 	/// Represents an array of values
 	/// Fixed Length of values.
 	#[codec(index = 12)]
-	Array(BoundedVec<Self, MaxFieldsSize>),
+	Array(BoundedVec<Self, C::MaxFieldsSize>),
 	/// Represents a list of values
 	#[codec(index = 13)]
-	List(BoundedVec<Self, MaxFieldsSize>),
+	List(BoundedVec<Self, C::MaxFieldsSize>),
 
 	// NOTE: Special types starts from 100
 	/// A sepcial type for AccountId
 	#[codec(index = 100)]
-	AccountId(AccountId),
+	AccountId(C::AccountId),
 }
 
 impl_from! {
@@ -109,16 +112,16 @@ impl_from! {
 	i32 => Int32,
 	u64 => Uint64,
 	i64 => Int64,
-	BoundedVec<u8, MaxFieldsSize> => Bytes,
-	BoundedString<MaxFieldsSize> => String,
-	BoundedVec<Self, MaxFieldsSize> => List
+	BoundedVec<u8, C::MaxFieldsSize> => Bytes,
+	BoundedString<C::MaxFieldsSize> => String,
+	BoundedVec<Self, C::MaxFieldsSize> => List
 }
 
-impl<AccountId: Clone, const N: usize> TryFrom<[Self; N]> for Field<AccountId> {
+impl<C: Constraints, const N: usize> TryFrom<[Self; N]> for Field<C> {
 	type Error = [Self; N];
 
 	fn try_from(value: [Self; N]) -> Result<Self, Self::Error> {
-		if N > <MaxFieldsSize as Get<u32>>::get() as usize {
+		if N > <C::MaxFieldsSize as Get<u32>>::get() as usize {
 			return Err(value);
 		}
 		let vec = value.to_vec().try_into().map_err(|_| value)?;
@@ -181,7 +184,7 @@ pub enum FieldType {
 	AccountId,
 }
 
-impl<AccountId> PartialEq<FieldType> for Field<AccountId> {
+impl<C: Constraints> PartialEq<FieldType> for Field<C> {
 	fn eq(&self, other: &FieldType) -> bool {
 		match (self, other) {
 			(Self::None, FieldType::Optional(_)) => true,
@@ -197,17 +200,17 @@ impl<AccountId> PartialEq<FieldType> for Field<AccountId> {
 			(Self::String(_), FieldType::String) => true,
 			(Self::Bytes(_), FieldType::Bytes) => true,
 			(Self::Array(a), FieldType::Array(len, b)) => {
-				a.len() == *len as usize && a.iter().all(|f| f.eq(b))
+				a.len() == *len as usize && a.iter().all(|f| f.eq(b.as_ref()))
 			},
-			(Self::List(a), FieldType::List(b)) => a.iter().all(|f| f.eq(b)),
+			(Self::List(a), FieldType::List(b)) => a.iter().all(|f| f.eq(b.as_ref())),
 			(Self::AccountId(_), FieldType::AccountId) => true,
 			_ => false,
 		}
 	}
 }
 
-impl<AccountId: Clone> From<Field<AccountId>> for FieldType {
-	fn from(val: Field<AccountId>) -> Self {
+impl<C: Constraints> From<Field<C>> for FieldType {
+	fn from(val: Field<C>) -> Self {
 		match val {
 			Field::None => FieldType::Optional(Box::new(FieldType::Void)),
 			Field::Bool(_) => FieldType::Bool,
@@ -233,8 +236,8 @@ impl<AccountId: Clone> From<Field<AccountId>> for FieldType {
 	}
 }
 
-impl<'a, AccountId: Encode> From<&'a Field<AccountId>> for ethabi::Token {
-	fn from(value: &'a Field<AccountId>) -> Self {
+impl<'a, C: Constraints> From<&'a Field<C>> for ethabi::Token {
+	fn from(value: &'a Field<C>) -> Self {
 		match value {
 			Field::None => ethabi::Token::Tuple(Vec::new()),
 			Field::Bool(val) => ethabi::Token::Bool(*val),
@@ -255,13 +258,13 @@ impl<'a, AccountId: Encode> From<&'a Field<AccountId>> for ethabi::Token {
 	}
 }
 
-impl<AccountId: Encode> From<Field<AccountId>> for ethabi::Token {
-	fn from(value: Field<AccountId>) -> Self {
+impl<C: Constraints> From<Field<C>> for ethabi::Token {
+	fn from(value: Field<C>) -> Self {
 		(&value).into()
 	}
 }
 
-impl<AccountId: Encode> Field<AccountId> {
+impl<C: Constraints> Field<C> {
 	/// Convrts the field to a `ethabi::Token`.
 	/// This is useful for converting the field to a type that can be used in an Ethereum transaction.
 	pub fn into_ethabi_token(self) -> ethabi::Token {

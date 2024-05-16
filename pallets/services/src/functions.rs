@@ -15,6 +15,8 @@ use tangle_primitives::jobs::v2::{
 	ServiceRegistrationHook, ServiceRequestHook,
 };
 
+use self::types::ConstraintsOf;
+
 use super::*;
 
 impl<T: Config> Pallet<T> {
@@ -32,8 +34,8 @@ impl<T: Config> Pallet<T> {
 	}
 
 	pub fn check_registeration_hook(
-		blueprint: &ServiceBlueprint,
-		prefrences: &OperatorPreferences,
+		blueprint: &ServiceBlueprint<ConstraintsOf<T>>,
+		prefrences: &OperatorPreferences<ConstraintsOf<T>>,
 		registration_args: &[Field<T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.registration_hook {

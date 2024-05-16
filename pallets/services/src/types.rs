@@ -17,3 +17,9 @@ use super::*;
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+
+pub type ConstraintsFor<T> = <T as Config>::Constraints;
+
+/// Extract the constraints from the runtime.
+pub struct ConstraintsOf<T>(sp_std::marker::PhantomData<T>);
+
