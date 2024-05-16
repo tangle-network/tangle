@@ -706,9 +706,8 @@ pub mod pallet {
 			// Choose top TotalSelected operator operators
 			let (_, v_count, _, total_staked) = <Pallet<T>>::select_top_operators(1u32);
 			// // Start Round 1 at Block 0
-			// let round: RoundInfo<BlockNumberFor<T>> =
-			// 	RoundInfo::new(1u32, Zero::zero(), self.blocks_per_round, 0);
-			// <Round<T>>::put(round);
+			let round: RoundInfo<BlockNumberFor<T>> = RoundInfo::new(1u32, Zero::zero(), 5, 0);
+			<Round<T>>::put(round);
 			<Pallet<T>>::deposit_event(Event::NewRound {
 				starting_block: Zero::zero(),
 				round: 1u32,
