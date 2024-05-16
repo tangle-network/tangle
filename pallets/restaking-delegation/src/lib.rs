@@ -1185,16 +1185,12 @@ pub mod pallet {
 		pub fn join_operators_inner(
 			acc: T::AccountId,
 			bond: BalanceOf<T>,
-			operator_count: u32,
 		) -> DispatchResultWithPostInfo {
 			ensure!(!Self::is_operator(&acc), Error::<T>::OperatorExists);
 			ensure!(!Self::is_delegator(&acc), Error::<T>::DelegatorExists);
 			let mut operators = <OperatorPool<T>>::get();
 			let old_count = operators.0.len() as u32;
-			ensure!(
-				operator_count >= old_count,
-				Error::<T>::TooLowOperatorCountWeightHintJoinOperators
-			);
+
 			let maybe_inserted_operator = operators
 				.try_insert(Bond { owner: acc.clone(), amount: bond })
 				.map_err(|_| Error::<T>::OperatorLimitReached)?;
