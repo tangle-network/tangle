@@ -33,6 +33,21 @@ ark-groth16 = { workspace = true, default-features = false, optional = true }
 ark-serialize = { workspace = true, default-features = false, optional = true }
 ark-std = { workspace = true, default-features = false, optional = true }
 
+[dependencies.educe]
+version = "0.5.11"
+features = [
+  "Debug",
+  "Clone",
+  "Copy",
+  "PartialEq",
+  "Eq",
+  "PartialOrd",
+  "Ord",
+  "Hash",
+  "Default"
+]
+default-features = false
+
 [dev-dependencies]
 hex = { workspace = true }
 
