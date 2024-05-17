@@ -291,6 +291,84 @@ impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
 	}
 }
 
+parameter_types! {
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxFields: u32 = 256;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxFieldsSize: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxMetadataLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxJobsPerService: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxOperatorsPerService: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxPermittedCallers: u32 = 256;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxServicesPerOperator: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxBlueprintsPerOperator: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxServicesPerUser: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxBinariesPerGadget: u32 = 64;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxSourcesPerGadget: u32 = 64;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxGitOwnerLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxGitRepoLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxGitTagLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxBinaryNameLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxIpfsHashLength: u32 = 46;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxContainerRegistryLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxContainerImageNameLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxContainerImageTagLength: u32 = 1024;
+}
+
 impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -298,6 +376,26 @@ impl Config for Runtime {
 	type PalletId = ServicesPalletId;
 	type EvmRunner = MockedEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
+	type MaxFields = MaxFields;
+	type MaxFieldsSize = MaxFieldsSize;
+	type MaxMetadataLength = MaxMetadataLength;
+	type MaxJobsPerService = MaxJobsPerService;
+	type MaxOperatorsPerService = MaxOperatorsPerService;
+	type MaxPermittedCallers = MaxPermittedCallers;
+	type MaxServicesPerOperator = MaxServicesPerOperator;
+	type MaxBlueprintsPerOperator = MaxBlueprintsPerOperator;
+	type MaxServicesPerUser = MaxServicesPerUser;
+	type MaxBinariesPerGadget = MaxBinariesPerGadget;
+	type MaxSourcesPerGadget = MaxSourcesPerGadget;
+	type MaxGitOwnerLength = MaxGitOwnerLength;
+	type MaxGitRepoLength = MaxGitRepoLength;
+	type MaxGitTagLength = MaxGitTagLength;
+	type MaxBinaryNameLength = MaxBinaryNameLength;
+	type MaxIpfsHashLength = MaxIpfsHashLength;
+	type MaxContainerRegistryLength = MaxContainerRegistryLength;
+	type MaxContainerImageNameLength = MaxContainerImageNameLength;
+	type MaxContainerImageTagLength = MaxContainerImageTagLength;
+	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type WeightInfo = ();
 }
 

@@ -21,14 +21,15 @@
 use parity_scale_codec::Codec;
 use sp_runtime::{traits::MaybeDisplay, Serialize};
 use sp_std::vec::Vec;
-use tangle_primitives::jobs::v2::RpcServicesWithBlueprint;
+use tangle_primitives::jobs::v2::{Constraints, RpcServicesWithBlueprint};
 
 pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
 
 sp_api::decl_runtime_apis! {
-	pub trait ServicesApi<AccountId>
+	pub trait ServicesApi<C, AccountId>
 	where
+		C: Constraints,
 		AccountId: Codec + MaybeDisplay + Serialize,
 	{
 		/// Query all the services that this operator is providing along with their blueprints.
@@ -40,7 +41,7 @@ sp_api::decl_runtime_apis! {
 		fn query_services_with_blueprints_by_operator(
 			operator: AccountId,
 		) -> Result<
-			Vec<RpcServicesWithBlueprint<AccountId, BlockNumberOf<Block>>>,
+			Vec<RpcServicesWithBlueprint<C, AccountId, BlockNumberOf<Block>>>,
 			sp_runtime::DispatchError,
 		>;
 	}
