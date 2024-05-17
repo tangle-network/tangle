@@ -2,6 +2,7 @@
 use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::vec::Vec;
+use tangle_primitives::jobs::v2;
 
 use super::*;
 
@@ -28,6 +29,46 @@ impl<T: Config> traits::EvmRunner<T> for () {
 			logs: Default::default(),
 		})
 	}
+}
+
+impl<T: Config> v2::Constraints for types::ConstraintsOf<T> {
+	type MaxFields = T::MaxFields;
+
+	type MaxFieldsSize = T::MaxFieldsSize;
+
+	type MaxMetadataLength = T::MaxMetadataLength;
+
+	type MaxJobsPerService = T::MaxJobsPerService;
+
+	type MaxOperatorsPerService = T::MaxOperatorsPerService;
+
+	type MaxPermittedCallers = T::MaxPermittedCallers;
+
+	type MaxServicesPerOperator = T::MaxServicesPerOperator;
+
+	type MaxBlueprintsPerOperator = T::MaxBlueprintsPerOperator;
+
+	type MaxServicesPerUser = T::MaxServicesPerUser;
+
+	type MaxBinariesPerGadget = T::MaxBinariesPerGadget;
+
+	type MaxSourcesPerGadget = T::MaxSourcesPerGadget;
+
+	type MaxGitOwnerLength = T::MaxGitOwnerLength;
+
+	type MaxGitRepoLength = T::MaxGitRepoLength;
+
+	type MaxGitTagLength = T::MaxGitTagLength;
+
+	type MaxBinaryNameLength = T::MaxBinaryNameLength;
+
+	type MaxIpfsHashLength = T::MaxIpfsHashLength;
+
+	type MaxContainerRegistryLength = T::MaxContainerRegistryLength;
+
+	type MaxContainerImageNameLength = T::MaxContainerImageNameLength;
+
+	type MaxContainerImageTagLength = T::MaxContainerImageTagLength;
 }
 
 impl traits::EvmGasWeightMapping for () {

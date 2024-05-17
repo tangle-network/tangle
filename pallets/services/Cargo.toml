@@ -21,6 +21,7 @@ tangle-primitives = { workspace = true, default-features = false }
 fp-evm = { workspace = true }
 ethabi = { workspace = true }
 itertools = { workspace = true, features = ["use_alloc"] }
+serde = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
 ethereum = { workspace = true, features = ["with-codec"] }
@@ -110,6 +111,7 @@ std = [
   "pallet-evm-precompile-curve25519/std",
   "pallet-evm-precompile-ed25519/std",
   "precompile-utils/std",
+  "serde/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [

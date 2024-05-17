@@ -16,6 +16,7 @@
 
 //! Jobs v2 module.
 
+use educe::Educe;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -27,67 +28,117 @@ use alloc::{vec, vec::Vec};
 mod field;
 pub use field::*;
 
-/// Maximum number of fields in a job call.
-pub type MaxFields = ConstU32<64>;
-/// Maximum size of a field in a job call.
-pub type MaxFieldsSize = ConstU32<1024>;
-/// Maximum length of metadata string length.
-pub type MaxMetadataLength = ConstU32<1024>;
-/// Maximum number of jobs per service.
-pub type MaxJobsPerService = ConstU32<32>;
-/// Maximum number of Operators per service.
-pub type MaxOperatorsPerService = ConstU32<512>;
-/// Maximum number of permitted callers per service.
-pub type MaxPermittedCallers = ConstU32<32>;
-/// Maximum number of services per operator.
-pub type MaxServicesPerOperator = ConstU32<32>;
-/// Maximum number of blueprints per operator.
-pub type MaxBlueprintsPerOperator = ConstU32<32>;
-/// Maximum number of services per user.
-pub type MaxServicesPerUser = ConstU32<1024>;
+/// A Higher level abstraction of all the constraints.
+pub trait Constraints {
+	/// Maximum number of fields in a job call.
+	type MaxFields: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum size of a field in a job call.
+	type MaxFieldsSize: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum length of metadata string length.
+	type MaxMetadataLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of jobs per service.
+	type MaxJobsPerService: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of Operators per service.
+	type MaxOperatorsPerService: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of permitted callers per service.
+	type MaxPermittedCallers: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of services per operator.
+	type MaxServicesPerOperator: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of blueprints per operator.
+	type MaxBlueprintsPerOperator: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of services per user.
+	type MaxServicesPerUser: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of binaries per gadget.
+	type MaxBinariesPerGadget: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of sources per gadget.
+	type MaxSourcesPerGadget: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Git owner maximum length.
+	type MaxGitOwnerLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Git repository maximum length.
+	type MaxGitRepoLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Git tag maximum length.
+	type MaxGitTagLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// binary name maximum length.
+	type MaxBinaryNameLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// IPFS hash maximum length.
+	type MaxIpfsHashLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Container registry maximum length.
+	type MaxContainerRegistryLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Container image name maximum length.
+	type MaxContainerImageNameLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Container image tag maximum length.
+	type MaxContainerImageTagLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+}
 
 /// A Job Definition is a definition of a job that can be called.
 /// It contains the input and output fields of the job with the permitted caller.
-#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobDefinition {
+
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Default(bound()), Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct JobDefinition<C: Constraints> {
 	/// The metadata of the job.
-	pub metadata: JobMetadata,
+	pub metadata: JobMetadata<C>,
 	/// These are parameters that are required for this job.
 	/// i.e. the input.
-	pub params: BoundedVec<FieldType, MaxFields>,
+	pub params: BoundedVec<FieldType, C::MaxFields>,
 	/// These are the result, the return values of this job.
 	/// i.e. the output.
-	pub result: BoundedVec<FieldType, MaxFields>,
+	pub result: BoundedVec<FieldType, C::MaxFields>,
 	/// The verifier of the job result.
 	pub verifier: JobResultVerifier,
 }
 
-#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobMetadata {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Default(bound()), Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct JobMetadata<C: Constraints> {
 	/// The Job name.
-	pub name: BoundedString<MaxMetadataLength>,
+	pub name: BoundedString<C::MaxMetadataLength>,
 	/// The Job description.
-	pub description: Option<BoundedString<MaxMetadataLength>>,
+	pub description: Option<BoundedString<C::MaxMetadataLength>>,
 }
 
 /// A Job Call is a call to execute a job using it's job definition.
-#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobCall<AccountId> {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(
+    Default(bound(AccountId: Default)),
+    Clone(bound(AccountId: Clone)),
+    PartialEq(bound(AccountId: PartialEq)),
+    Eq
+)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
+#[cfg_attr(
+	feature = "std",
+	derive(Serialize, Deserialize),
+	serde(bound(serialize = "AccountId: Serialize", deserialize = "AccountId: Deserialize<'de>")),
+    educe(Debug(bound(AccountId: core::fmt::Debug)))
+)]
+pub struct JobCall<C: Constraints, AccountId> {
 	/// The Service ID that this call is for.
 	pub service_id: u64,
 	/// The job definition index in the service that this call is for.
 	pub job: u8,
 	/// The supplied arguments for this job call.
-	pub args: BoundedVec<Field<AccountId>, MaxFields>,
+	pub args: BoundedVec<Field<C, AccountId>, C::MaxFields>,
 }
 
 /// Type checks the supplied arguments against the parameters.
-pub fn type_checker<AccountId: Clone>(
+pub fn type_checker<C: Constraints, AccountId: Encode + Clone>(
 	params: &[FieldType],
-	args: &[Field<AccountId>],
+	args: &[Field<C, AccountId>],
 ) -> Result<(), TypeCheckError> {
 	if params.len() != args.len() {
 		return Err(TypeCheckError::NotEnoughArguments {
@@ -109,28 +160,44 @@ pub fn type_checker<AccountId: Clone>(
 	Ok(())
 }
 
-impl<AccountId: Clone> JobCall<AccountId> {
+impl<C: Constraints, AccountId: Encode + Clone> JobCall<C, AccountId> {
 	/// Check if the supplied arguments match the job definition types.
-	pub fn type_check(&self, job_def: &JobDefinition) -> Result<(), TypeCheckError> {
+	pub fn type_check(&self, job_def: &JobDefinition<C>) -> Result<(), TypeCheckError> {
 		type_checker(&job_def.params, &self.args)
 	}
 }
 
 /// A Job Call Result is the result of a job call.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct JobCallResult<AccountId> {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(
+    Default(bound(AccountId: Default)),
+    Clone(bound(AccountId: Clone)),
+    PartialEq(bound(AccountId: PartialEq)),
+    Eq
+)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
+#[cfg_attr(
+	feature = "std",
+	derive(Serialize, Deserialize),
+	serde(bound(serialize = "AccountId: Serialize", deserialize = "AccountId: Deserialize<'de>")),
+    educe(Debug(bound(AccountId: core::fmt::Debug)))
+)]
+pub struct JobCallResult<C: Constraints, AccountId> {
 	/// The id of the service.
 	pub service_id: u64,
 	/// The id of the job call.
 	pub call_id: u64,
 	/// The result of the job call.
-	pub result: BoundedVec<Field<AccountId>, MaxFields>,
+	pub result: BoundedVec<Field<C, AccountId>, C::MaxFields>,
 }
 
-impl<AccountId: Clone> JobCallResult<AccountId> {
+impl<C: Constraints, AccountId: Encode + Clone> JobCallResult<C, AccountId> {
 	/// Check if the supplied result match the job definition types.
-	pub fn type_check(&self, job_def: &JobDefinition) -> Result<(), TypeCheckError> {
+	pub fn type_check(&self, job_def: &JobDefinition<C>) -> Result<(), TypeCheckError> {
 		type_checker(&job_def.result, &self.result)
 	}
 }
@@ -212,89 +279,118 @@ pub enum ServiceRequestHook {
 	Evm(sp_core::H160),
 }
 
-#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ServiceMetadata {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Default(bound()), Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct ServiceMetadata<C: Constraints> {
 	/// The Service name.
-	pub name: BoundedString<MaxMetadataLength>,
+	pub name: BoundedString<C::MaxMetadataLength>,
 	/// The Service description.
-	pub description: Option<BoundedString<MaxMetadataLength>>,
+	pub description: Option<BoundedString<C::MaxMetadataLength>>,
 	/// The Service author.
 	/// Could be a company or a person.
-	pub author: Option<BoundedString<MaxMetadataLength>>,
+	pub author: Option<BoundedString<C::MaxMetadataLength>>,
 	/// The Job category.
-	pub category: Option<BoundedString<MaxMetadataLength>>,
+	pub category: Option<BoundedString<C::MaxMetadataLength>>,
 	/// Code Repository URL.
 	/// Could be a github, gitlab, or any other code repository.
-	pub code_repository: Option<BoundedString<MaxMetadataLength>>,
+	pub code_repository: Option<BoundedString<C::MaxMetadataLength>>,
 	/// Service Logo URL.
-	pub logo: Option<BoundedString<MaxMetadataLength>>,
+	pub logo: Option<BoundedString<C::MaxMetadataLength>>,
 	/// Service Website URL.
-	pub website: Option<BoundedString<MaxMetadataLength>>,
+	pub website: Option<BoundedString<C::MaxMetadataLength>>,
 	/// Service License.
-	pub license: Option<BoundedString<MaxMetadataLength>>,
+	pub license: Option<BoundedString<C::MaxMetadataLength>>,
 }
 
 /// A Service Blueprint is a the main definition of a service.
 /// it contains the metadata of the service, the job definitions, and other hooks, along with the
 /// gadget that will be executed when one of the jobs is calling this service.
-#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ServiceBlueprint {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Default(bound()), Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct ServiceBlueprint<C: Constraints> {
 	/// The metadata of the service.
-	pub metadata: ServiceMetadata,
+	pub metadata: ServiceMetadata<C>,
 	/// The job definitions that are available in this service.
-	pub jobs: BoundedVec<JobDefinition, MaxJobsPerService>,
+	pub jobs: BoundedVec<JobDefinition<C>, C::MaxJobsPerService>,
 	/// The registration hook that will be called before restaker registration.
 	pub registration_hook: ServiceRegistrationHook,
 	/// The parameters that are required for the service registration.
-	pub registration_params: BoundedVec<FieldType, MaxFields>,
+	pub registration_params: BoundedVec<FieldType, C::MaxFields>,
 	/// The request hook that will be called before creating a service from the service blueprint.
 	pub request_hook: ServiceRequestHook,
 	/// The parameters that are required for the service request.
-	pub request_params: BoundedVec<FieldType, MaxFields>,
+	pub request_params: BoundedVec<FieldType, C::MaxFields>,
 	/// The gadget that will be executed for the service.
-	pub gadget: Gadget,
+	pub gadget: Gadget<C>,
 }
 
-impl ServiceBlueprint {
+impl<C: Constraints> ServiceBlueprint<C> {
 	/// Check if the supplied arguments match the registration parameters.
-	pub fn type_check_registration<AccountId: Clone>(
+	pub fn type_check_registration<AccountId: Encode + Clone>(
 		&self,
-		args: &[Field<AccountId>],
+		args: &[Field<C, AccountId>],
 	) -> Result<(), TypeCheckError> {
 		type_checker(&self.registration_params, args)
 	}
 
 	/// Check if the supplied arguments match the request parameters.
-	pub fn type_check_request<AccountId: Clone>(
+	pub fn type_check_request<AccountId: Encode + Clone>(
 		&self,
-		args: &[Field<AccountId>],
+		args: &[Field<C, AccountId>],
 	) -> Result<(), TypeCheckError> {
 		type_checker(&self.request_params, args)
 	}
 }
 
 /// A service request is a request to create a service from a service blueprint.
-#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ServiceRequest<AccountId, BlockNumber> {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(
+    Default(bound(AccountId: Default, BlockNumber: Default)),
+    Clone(bound(AccountId: Clone, BlockNumber: Clone)),
+    PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq)),
+    Eq
+)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
+#[cfg_attr(
+	feature = "std",
+	derive(Serialize, Deserialize),
+	serde(bound(
+        serialize = "AccountId: Serialize, BlockNumber: Serialize",
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>",
+    )),
+    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug)))
+)]
+pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber> {
 	/// The service blueprint ID.
 	pub blueprint: u64,
 	/// The owner of the service.
 	pub owner: AccountId,
 	/// The permitted caller(s) of the service.
-	pub permitted_callers: BoundedVec<AccountId, MaxPermittedCallers>,
+	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
 	/// The Lifetime of the service.
 	pub ttl: BlockNumber,
 	/// The supplied arguments for the service request.
-	pub args: BoundedVec<Field<AccountId>, MaxFields>,
+	pub args: BoundedVec<Field<C, AccountId>, C::MaxFields>,
 	/// The Selected Operator(s) with their approval state.
 	pub operators_with_approval_state:
-		BoundedVec<(AccountId, ApprovalState), MaxOperatorsPerService>,
+		BoundedVec<(AccountId, ApprovalState), C::MaxOperatorsPerService>,
 }
 
-impl<AccountId, BlockNumber> ServiceRequest<AccountId, BlockNumber> {
+impl<C: Constraints, AccountId, BlockNumber> ServiceRequest<C, AccountId, BlockNumber> {
 	/// Returns true if all the operators are [ApprovalState::Approved].
 	pub fn is_approved(&self) -> bool {
 		self.operators_with_approval_state
@@ -318,10 +414,28 @@ impl<AccountId, BlockNumber> ServiceRequest<AccountId, BlockNumber> {
 }
 
 /// A Service is an instance of a service blueprint.
-#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[scale_info(skip_type_params(AccountId, BlockNumber))]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct Service<AccountId, BlockNumber> {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(
+    Default(bound(AccountId: Default, BlockNumber: Default)),
+    Clone(bound(AccountId: Clone, BlockNumber: Clone)),
+    PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq)),
+    Eq
+)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
+#[cfg_attr(
+	feature = "std",
+	derive(Serialize, Deserialize),
+	serde(bound(
+        serialize = "AccountId: Serialize, BlockNumber: Serialize",
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>",
+    )),
+    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug)))
+)]
+pub struct Service<C: Constraints, AccountId, BlockNumber> {
 	/// The service ID.
 	pub id: u64,
 	/// The Blueprint ID of the service.
@@ -329,9 +443,9 @@ pub struct Service<AccountId, BlockNumber> {
 	/// The owner of the service.
 	pub owner: AccountId,
 	/// The Permitted caller(s) of the service.
-	pub permitted_callers: BoundedVec<AccountId, MaxPermittedCallers>,
+	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
 	/// The Selected operators(s) for this service.
-	pub operators: BoundedVec<AccountId, MaxOperatorsPerService>,
+	pub operators: BoundedVec<AccountId, C::MaxOperatorsPerService>,
 	/// The Lifetime of the service.
 	pub ttl: BlockNumber,
 }
@@ -390,32 +504,42 @@ impl OperatorPreferences {
 
 /// Operator Profile is a profile of an operator that
 /// contains metadata about the services that the operator is providing.
-#[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct OperatorProfile {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Default(bound()), Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct OperatorProfile<C: Constraints> {
 	/// The Service IDs that I'm currently providing.
-	pub services: BoundedBTreeSet<u64, MaxServicesPerOperator>,
+	pub services: BoundedBTreeSet<u64, C::MaxServicesPerOperator>,
 	/// The Blueprint IDs that I'm currently registered for.
-	pub blueprints: BoundedBTreeSet<u64, MaxBlueprintsPerOperator>,
+	pub blueprints: BoundedBTreeSet<u64, C::MaxBlueprintsPerOperator>,
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum Gadget {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub enum Gadget<C: Constraints> {
 	/// A Gadget that is a WASM binary that will be executed.
 	/// inside the shell using the wasm runtime.
-	Wasm(WasmGadget),
+	Wasm(WasmGadget<C>),
 	/// A Gadget that is a native binary that will be executed.
 	/// inside the shell using the OS.
-	Native(NativeGadget),
+	Native(NativeGadget<C>),
 	/// A Gadget that is a container that will be executed.
 	/// inside the shell using the container runtime (e.g. Docker, Podman, etc.)
-	Container(ContainerGadget),
+	Container(ContainerGadget<C>),
 }
 
-impl Default for Gadget {
+impl<C: Constraints> Default for Gadget<C> {
 	fn default() -> Self {
-		Gadget::Wasm(WasmGadget::IPFS(Default::default()))
+		Gadget::Wasm(WasmGadget { runtime: WasmRuntime::Wasmtime, soruces: Default::default() })
 	}
 }
 
@@ -423,21 +547,23 @@ impl Default for Gadget {
 /// this will constuct the URL to the release and download the binary.
 /// The URL will be in the following format:
 /// https://github.com/<owner>/<repo>/releases/download/v<tag>/<path>
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct GithubFetcher {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct GithubFetcher<C: Constraints> {
 	/// The owner of the repository.
-	pub owner: BoundedString<ConstU32<512>>,
+	pub owner: BoundedString<C::MaxGitOwnerLength>,
 	/// The repository name.
-	pub repo: BoundedString<ConstU32<512>>,
+	pub repo: BoundedString<C::MaxGitRepoLength>,
 	/// The release tag of the repository.
 	/// NOTE: The tag should be a valid semver tag.
-	pub tag: BoundedString<ConstU32<512>>,
+	pub tag: BoundedString<C::MaxGitTagLength>,
 	/// The names of the binary in the release by the arch and the os.
-	pub binaries: BoundedBTreeSet<GadgetBinary, ConstU32<32>>,
-	/// The sha256 hash of the WASM binary.
-	/// your service will check if the downloaded binary matches this hash.
-	pub sha256: BoundedVec<u8, ConstU32<32>>,
+	pub binaries: BoundedVec<GadgetBinary<C>, C::MaxBinariesPerGadget>,
 }
 
 /// The CPU or System architecture.
@@ -525,78 +651,159 @@ pub enum OperatingSystem {
 	BSD,
 }
 
-#[derive(
-	Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen,
-)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct GadgetBinary {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct GadgetBinary<C: Constraints> {
 	/// CPU or System architecture.
 	pub arch: Architecture,
 	/// Operating System that the binary is compiled for.
 	pub os: OperatingSystem,
 	/// The name of the binary.
-	pub name: BoundedString<ConstU32<256>>,
+	pub name: BoundedString<C::MaxBinaryNameLength>,
 	/// The sha256 hash of the binary.
 	/// used to verify the downloaded binary.
-	pub sha256: BoundedVec<u8, ConstU32<32>>,
+	pub sha256: [u8; 32],
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct ImageRegistryFetcher {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct GadgetSource<C: Constraints> {
+	/// The fetcher that will fetch the gadget from a remote source.
+	fetcher: GadgetSourceFetcher<C>,
+}
+
+/// A Gadget Source Fetcher is a fetcher that will fetch the gadget
+/// from a remote source.
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub enum GadgetSourceFetcher<C: Constraints> {
+	/// A Gadget that will be fetched from the IPFS.
+	#[codec(index = 0)]
+	IPFS(BoundedVec<u8, C::MaxIpfsHashLength>),
+	/// A Gadget that will be fetched from the Github release.
+	#[codec(index = 1)]
+	Github(GithubFetcher<C>),
+	/// A Gadgets that will be fetched from the container registry.
+	#[codec(index = 2)]
+	ContainerImage(ImageRegistryFetcher<C>),
+}
+
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct ImageRegistryFetcher<C: Constraints> {
 	/// The URL of the container registry.
-	registry: BoundedString<ConstU32<256>>,
+	registry: BoundedString<C::MaxContainerRegistryLength>,
 	/// The name of the image.
-	image: BoundedString<ConstU32<256>>,
+	image: BoundedString<C::MaxContainerImageNameLength>,
 	/// The tag of the image.
-	tag: BoundedString<ConstU32<256>>,
+	tag: BoundedString<C::MaxContainerImageTagLength>,
 }
 
 /// A WASM binary that contains all the compiled gadget code.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum WasmGadget {
-	/// A WASM binary that is stored in the IPFS.
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct WasmGadget<C: Constraints> {
+	/// Which runtime to use to execute the WASM binary.
+	pub runtime: WasmRuntime,
+	/// Where the WASM binary is stored.
+	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
+}
+
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub enum WasmRuntime {
+	/// The WASM binary will be executed using the WASMtime runtime.
 	#[codec(index = 0)]
-	IPFS(BoundedVec<u8, ConstU32<64>>),
-	/// A WASM binary that is stored in the Github release.
+	Wasmtime,
+	/// The WASM binary will be executed using the Wasmer runtime.
 	#[codec(index = 1)]
-	Github(GithubFetcher),
+	Wasmer,
 }
 
 /// A Native binary that contains all the gadget code.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum NativeGadget {
-	/// A Native binary that is stored in the IPFS.
-	#[codec(index = 0)]
-	IPFS(BoundedVec<u8, ConstU32<64>>),
-	/// A Native binary that is stored in the Github release.
-	#[codec(index = 1)]
-	Github(GithubFetcher),
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct NativeGadget<C: Constraints> {
+	/// Where the WASM binary is stored.
+	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum ContainerGadget {
-	/// An Image that is stored in the IPFS.
-	#[codec(index = 0)]
-	IPFS(BoundedVec<u8, ConstU32<64>>),
-	/// An Image that is stored in a remote container registry.
-	#[codec(index = 1)]
-	Registry(ImageRegistryFetcher),
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct ContainerGadget<C: Constraints> {
+	/// Where the Image of the gadget binary is stored.
+	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
 }
 
 // -***- RPC -***-
 
 /// RPC Response for query the blueprint along with the services instances of that blueprint.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct RpcServicesWithBlueprint<AccountId, BlockNumber> {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(
+    Default(bound(AccountId: Default, BlockNumber: Default)),
+    Clone(bound(AccountId: Clone, BlockNumber: Clone)),
+    PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq)),
+    Eq
+)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
+#[cfg_attr(
+	feature = "std",
+	derive(Serialize, Deserialize),
+	serde(bound(
+        serialize = "AccountId: Serialize, BlockNumber: Serialize",
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>",
+    )),
+    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug)))
+)]
+pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber> {
 	/// The blueprint ID.
 	pub blueprint_id: u64,
 	/// The service blueprint.
-	pub blueprint: ServiceBlueprint,
+	pub blueprint: ServiceBlueprint<C>,
 	/// The services instances of that blueprint.
-	pub services: Vec<Service<AccountId, BlockNumber>>,
+	pub services: Vec<Service<C, AccountId, BlockNumber>>,
 }

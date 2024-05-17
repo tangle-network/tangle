@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![cfg(test)]
+use crate::types::ConstraintsOf;
+
 use super::*;
 use crate::mock_evm::address_build;
 use ethers::prelude::*;
@@ -40,7 +42,7 @@ fn zero_key() -> ecdsa::Public {
 	ecdsa::Public([0; 33])
 }
 
-fn cggmp21_blueprint() -> ServiceBlueprint {
+fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
 		jobs: bounded_vec![

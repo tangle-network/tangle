@@ -44,7 +44,7 @@ use tangle_runtime::{AccountId, Balance, Hash, Index};
 #[cfg(feature = "testnet")]
 use tangle_testnet_runtime::{
 	AccountId, Balance, Hash, Index, MaxAdditionalParamsLen, MaxDataLen, MaxKeyLen,
-	MaxParticipants, MaxProofLen, MaxSignatureLen, MaxSubmissionLen,
+	MaxParticipants, MaxProofLen, MaxSignatureLen, MaxSubmissionLen, PalletServicesConstraints,
 };
 
 pub mod eth;
@@ -130,7 +130,7 @@ where
 		MaxProofLen,
 		MaxAdditionalParamsLen,
 	>,
-	C::Api: pallet_services_rpc::ServicesRuntimeApi<Block, AccountId>,
+	C::Api: pallet_services_rpc::ServicesRuntimeApi<Block, PalletServicesConstraints, AccountId>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,

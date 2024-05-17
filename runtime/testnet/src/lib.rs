@@ -25,6 +25,7 @@ mod filters;
 pub mod frontier_evm;
 pub mod impls;
 pub mod precompiles;
+pub mod tangle_services;
 pub mod voter_bags;
 
 use fixed::{types::extra::U16, FixedU128 as DecimalFixedU128};
@@ -171,6 +172,7 @@ use tangle_primitives::{
 		TIP_REPORT_DEPOSIT_BASE, TREASURY_PALLET_ID,
 	},
 };
+pub use tangle_services::PalletServicesConstraints;
 
 // Precompiles
 pub type Precompiles = WebbPrecompiles<Runtime>;
@@ -1317,73 +1319,6 @@ pallet_staking_reward_curve::build! {
 }
 
 parameter_types! {
-	pub const ServicesPalletId: PalletId = PalletId(*b"py/srvcs");
-}
-
-pub struct PalletEvmRunner;
-
-impl pallet_services::EvmRunner<Runtime> for PalletEvmRunner {
-	type Error = pallet_evm::Error<Runtime>;
-
-	fn call(
-		source: sp_core::H160,
-		target: sp_core::H160,
-		input: Vec<u8>,
-		value: sp_core::U256,
-		gas_limit: u64,
-		is_transactional: bool,
-		validate: bool,
-	) -> Result<fp_evm::CallInfo, pallet_services::RunnerError<Self::Error>> {
-		let max_fee_per_gas = DefaultBaseFeePerGas::get();
-		let max_priority_fee_per_gas =
-			max_fee_per_gas.saturating_mul(U256::from(3) / U256::from(2));
-		let nonce = None;
-		let access_list = Default::default();
-		let weight_limit = None;
-		let proof_size_base_cost = None;
-		<<Runtime as pallet_evm::Config>::Runner as pallet_evm::Runner<Runtime>>::call(
-			source,
-			target,
-			input,
-			value,
-			gas_limit,
-			Some(max_fee_per_gas),
-			Some(max_priority_fee_per_gas),
-			nonce,
-			access_list,
-			is_transactional,
-			validate,
-			weight_limit,
-			proof_size_base_cost,
-			<Runtime as pallet_evm::Config>::config(),
-		)
-		.map_err(|o| pallet_services::RunnerError { error: o.error, weight: o.weight })
-	}
-}
-
-pub struct PalletEVMGasWeightMapping;
-
-impl pallet_services::EvmGasWeightMapping for PalletEVMGasWeightMapping {
-	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight {
-		pallet_evm::FixedGasWeightMapping::<Runtime>::gas_to_weight(gas, without_base_weight)
-	}
-
-	fn weight_to_gas(weight: Weight) -> u64 {
-		pallet_evm::FixedGasWeightMapping::<Runtime>::weight_to_gas(weight)
-	}
-}
-
-impl pallet_services::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type ForceOrigin = EnsureRootOrHalfCouncil;
-	type Currency = Balances;
-	type PalletId = ServicesPalletId;
-	type EvmRunner = PalletEvmRunner;
-	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
-	type WeightInfo = ();
-}
-
-parameter_types! {
 	pub const MaxValidators : u32 = 1000;
 	pub MaxRestake: Percent = Percent::from_percent(50);
 	pub const RestakerRewardCurve: &'static PiecewiseLinear<'static> = &RESTAKER_REWARD_CURVE;
@@ -2128,6 +2063,7 @@ mod benches {
 }
 
 use pallet_jobs_rpc_runtime_api::BlockNumberOf;
+
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {
 		fn version() -> RuntimeVersion {
@@ -2209,11 +2145,11 @@ impl_runtime_apis! {
 
 	}
 
-	impl pallet_services_rpc_runtime_api::ServicesApi<Block, AccountId> for Runtime {
+	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId> for Runtime {
 		fn query_services_with_blueprints_by_operator(
 			operator: AccountId,
 		) -> Result<
-			Vec<RpcServicesWithBlueprint<AccountId, BlockNumberOf<Block>>>,
+			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>>>,
 			sp_runtime::DispatchError,
 		> {
 			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
