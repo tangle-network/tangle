@@ -50,6 +50,8 @@ pub trait Constraints {
 	type MaxServicesPerUser: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 	/// Maximum number of binaries per gadget.
 	type MaxBinariesPerGadget: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of sources per gadget.
+	type MaxSourcesPerGadget: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 	/// Git owner maximum length.
 	type MaxGitOwnerLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 	/// Git repository maximum length.
@@ -537,7 +539,7 @@ pub enum Gadget<C: Constraints> {
 
 impl<C: Constraints> Default for Gadget<C> {
 	fn default() -> Self {
-		Gadget::Wasm(WasmGadget::IPFS(Default::default()))
+		Gadget::Wasm(WasmGadget { runtime: WasmRuntime::Wasmtime, soruces: Default::default() })
 	}
 }
 
@@ -675,6 +677,39 @@ pub struct GadgetBinary<C: Constraints> {
 #[codec(decode_bound(skip_type_params(C)))]
 #[codec(mel_bound(skip_type_params(C)))]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct GadgetSource<C: Constraints> {
+	/// The fetcher that will fetch the gadget from a remote source.
+	fetcher: GadgetSourceFetcher<C>,
+}
+
+/// A Gadget Source Fetcher is a fetcher that will fetch the gadget
+/// from a remote source.
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub enum GadgetSourceFetcher<C: Constraints> {
+	/// A Gadget that will be fetched from the IPFS.
+	#[codec(index = 0)]
+	IPFS(BoundedVec<u8, C::MaxIpfsHashLength>),
+	/// A Gadget that will be fetched from the Github release.
+	#[codec(index = 1)]
+	Github(GithubFetcher<C>),
+	/// A Gadgets that will be fetched from the container registry.
+	#[codec(index = 2)]
+	ContainerImage(ImageRegistryFetcher<C>),
+}
+
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
 pub struct ImageRegistryFetcher<C: Constraints> {
 	/// The URL of the container registry.
 	registry: BoundedString<C::MaxContainerRegistryLength>,
@@ -692,13 +727,27 @@ pub struct ImageRegistryFetcher<C: Constraints> {
 #[codec(decode_bound(skip_type_params(C)))]
 #[codec(mel_bound(skip_type_params(C)))]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
-pub enum WasmGadget<C: Constraints> {
-	/// A WASM binary that is stored in the IPFS.
+pub struct WasmGadget<C: Constraints> {
+	/// Which runtime to use to execute the WASM binary.
+	pub runtime: WasmRuntime,
+	/// Where the WASM binary is stored.
+	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
+}
+
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub enum WasmRuntime {
+	/// The WASM binary will be executed using the WASMtime runtime.
 	#[codec(index = 0)]
-	IPFS(BoundedVec<u8, C::MaxIpfsHashLength>),
-	/// A WASM binary that is stored in the Github release.
+	Wasmtime,
+	/// The WASM binary will be executed using the Wasmer runtime.
 	#[codec(index = 1)]
-	Github(GithubFetcher<C>),
+	Wasmer,
 }
 
 /// A Native binary that contains all the gadget code.
@@ -709,13 +758,9 @@ pub enum WasmGadget<C: Constraints> {
 #[codec(decode_bound(skip_type_params(C)))]
 #[codec(mel_bound(skip_type_params(C)))]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
-pub enum NativeGadget<C: Constraints> {
-	/// A Native binary that is stored in the IPFS.
-	#[codec(index = 0)]
-	IPFS(BoundedVec<u8, C::MaxIpfsHashLength>),
-	/// A Native binary that is stored in the Github release.
-	#[codec(index = 1)]
-	Github(GithubFetcher<C>),
+pub struct NativeGadget<C: Constraints> {
+	/// Where the WASM binary is stored.
+	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
 }
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
@@ -725,13 +770,9 @@ pub enum NativeGadget<C: Constraints> {
 #[codec(decode_bound(skip_type_params(C)))]
 #[codec(mel_bound(skip_type_params(C)))]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
-pub enum ContainerGadget<C: Constraints> {
-	/// An Image that is stored in the IPFS.
-	#[codec(index = 0)]
-	IPFS(BoundedVec<u8, C::MaxIpfsHashLength>),
-	/// An Image that is stored in a remote container registry.
-	#[codec(index = 1)]
-	Registry(ImageRegistryFetcher<C>),
+pub struct ContainerGadget<C: Constraints> {
+	/// Where the Image of the gadget binary is stored.
+	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
 }
 
 // -***- RPC -***-

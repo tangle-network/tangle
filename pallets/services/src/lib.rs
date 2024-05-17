@@ -108,6 +108,9 @@ pub mod module {
 		/// Maximum number of binaries per gadget.
 		#[pallet::constant]
 		type MaxBinariesPerGadget: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+		/// Maximum number of sources per gadget.
+		#[pallet::constant]
+		type MaxSourcesPerGadget: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 		/// Git owner maximum length.
 		#[pallet::constant]
 		type MaxGitOwnerLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;

@@ -334,6 +334,10 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxSourcesPerGadget: u32 = 64;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxGitOwnerLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
@@ -382,6 +386,7 @@ impl Config for Runtime {
 	type MaxBlueprintsPerOperator = MaxBlueprintsPerOperator;
 	type MaxServicesPerUser = MaxServicesPerUser;
 	type MaxBinariesPerGadget = MaxBinariesPerGadget;
+	type MaxSourcesPerGadget = MaxSourcesPerGadget;
 	type MaxGitOwnerLength = MaxGitOwnerLength;
 	type MaxGitRepoLength = MaxGitRepoLength;
 	type MaxGitTagLength = MaxGitTagLength;

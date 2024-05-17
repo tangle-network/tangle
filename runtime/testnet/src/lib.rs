@@ -1387,6 +1387,9 @@ parameter_types! {
 	pub const MaxBinariesPerGadget: u32 = 64;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxSourcesPerGadget: u32 = 64;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxGitOwnerLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
@@ -1430,6 +1433,7 @@ impl pallet_services::Config for Runtime {
 	type MaxBlueprintsPerOperator = MaxBlueprintsPerOperator;
 	type MaxServicesPerUser = MaxServicesPerUser;
 	type MaxBinariesPerGadget = MaxBinariesPerGadget;
+	type MaxSourcesPerGadget = MaxSourcesPerGadget;
 	type MaxGitOwnerLength = MaxGitOwnerLength;
 	type MaxGitRepoLength = MaxGitRepoLength;
 	type MaxGitTagLength = MaxGitTagLength;

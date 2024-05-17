@@ -52,6 +52,8 @@ impl<T: Config> v2::Constraints for types::ConstraintsOf<T> {
 
 	type MaxBinariesPerGadget = T::MaxBinariesPerGadget;
 
+	type MaxSourcesPerGadget = T::MaxSourcesPerGadget;
+
 	type MaxGitOwnerLength = T::MaxGitOwnerLength;
 
 	type MaxGitRepoLength = T::MaxGitRepoLength;
