@@ -32,7 +32,7 @@ mod functions;
 mod impls;
 mod rpc;
 mod traits;
-mod types;
+pub mod types;
 
 #[cfg(test)]
 mod mock;
@@ -56,7 +56,7 @@ pub mod module {
 	use frame_support::dispatch::PostDispatchInfo;
 	use sp_std::vec::Vec;
 	use tangle_primitives::jobs::v2::*;
-	use types::ConstraintsFor;
+	use types::*;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -207,7 +207,7 @@ pub mod module {
 			/// The preferences for the operator for this specific blueprint.
 			preferences: OperatorPreferences,
 			/// The arguments used for registration.
-			registration_args: Vec<Field<T::Constraints>>,
+			registration_args: Vec<Field<T::Constraints, T::AccountId>>,
 		},
 		/// An operator has been unregistered.
 		Unregistered {
@@ -308,7 +308,7 @@ pub mod module {
 			/// The index of the job.
 			job: u8,
 			/// The arguments of the job.
-			args: Vec<Field<T::Constraints>>,
+			args: Vec<Field<T::Constraints, T::AccountId>>,
 		},
 
 		/// A job result has been submitted.
@@ -322,7 +322,7 @@ pub mod module {
 			/// The index of the job.
 			job: u8,
 			/// The result of the job.
-			result: Vec<Field<T::Constraints>>,
+			result: Vec<Field<T::Constraints, T::AccountId>>,
 		},
 	}
 
@@ -384,7 +384,7 @@ pub mod module {
 		_,
 		Identity,
 		u64,
-		ServiceRequest<T::Constraints>,
+		ServiceRequest<T::Constraints, T::AccountId, BlockNumberFor<T>>,
 		ResultQuery<Error<T>::ServiceRequestNotFound>,
 	>;
 
@@ -396,7 +396,7 @@ pub mod module {
 		_,
 		Identity,
 		u64,
-		Service<T::Constraints>,
+		Service<T::Constraints, T::AccountId, BlockNumberFor<T>>,
 		ResultQuery<Error<T>::ServiceNotFound>,
 	>;
 
@@ -408,7 +408,7 @@ pub mod module {
 		_,
 		Identity,
 		T::AccountId,
-		BoundedBTreeSet<u64, ConstraintsFor<T>::MaxServicesPerUser>,
+		BoundedBTreeSet<u64, MaxServicesPerUserOf<T>>,
 		ValueQuery,
 	>;
 
@@ -422,7 +422,7 @@ pub mod module {
 		u64,
 		Identity,
 		u64,
-		JobCall<T::Constraints>,
+		JobCall<T::Constraints, T::AccountId>,
 		ResultQuery<Error<T>::ServiceOrJobCallNotFound>,
 	>;
 
@@ -436,7 +436,7 @@ pub mod module {
 		u64,
 		Identity,
 		u64,
-		JobCallResult<T::Constraints>,
+		JobCallResult<T::Constraints, T::AccountId>,
 		ResultQuery<Error<T>::ServiceOrJobCallNotFound>,
 	>;
 
@@ -483,7 +483,7 @@ pub mod module {
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: u64,
 			preferences: OperatorPreferences,
-			registration_args: Vec<Field<T::Constraints>>,
+			registration_args: Vec<Field<T::Constraints, T::AccountId>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
@@ -595,7 +595,7 @@ pub mod module {
 			permitted_callers: Vec<T::AccountId>,
 			service_providers: Vec<T::AccountId>,
 			#[pallet::compact] ttl: BlockNumberFor<T>,
-			request_args: Vec<Field<T::Constraints>>,
+			request_args: Vec<Field<T::Constraints, T::AccountId>>,
 		) -> DispatchResultWithPostInfo {
 			// TODO(@shekohex): split this function into smaller functions.
 			let caller = ensure_signed(origin)?;
@@ -622,10 +622,8 @@ pub mod module {
 			ensure!(allowed, Error::<T>::InvalidRequestInput);
 
 			let permitted_callers =
-				BoundedVec::<_, ConstraintsFor<T>::MaxPermittedCallers>::try_from(
-					permitted_callers,
-				)
-				.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
+				BoundedVec::<_, MaxPermittedCallersOf<T>>::try_from(permitted_callers)
+					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
 			if pending_approvals.is_empty() {
 				// No approval is required, initiate the service immediately.
 				for operator in &approved {
@@ -637,7 +635,7 @@ pub mod module {
 							.ok_or(Error::<T>::NotRegistered)
 					})?;
 				}
-				let operators = BoundedVec::<_, MaxOperatorsPerService>::try_from(approved)
+				let operators = BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(approved)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
 					id: service_id,
@@ -673,11 +671,11 @@ pub mod module {
 					.chain(approved.iter().cloned().map(|v| (v, ApprovalState::Approved)))
 					.collect::<Vec<_>>();
 
-				let args = BoundedVec::<_, MaxFields>::try_from(request_args)
+				let args = BoundedVec::<_, MaxFieldsOf<T>>::try_from(request_args)
 					.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
 
 				let operators_with_approval_state =
-					BoundedVec::<_, MaxOperatorsPerService>::try_from(operators)
+					BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
 						.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service_request = ServiceRequest {
 					blueprint: blueprint_id,
@@ -758,7 +756,7 @@ pub mod module {
 							.ok_or(Error::<T>::NotRegistered)
 					})?;
 				}
-				let operators = BoundedVec::<_, MaxOperatorsPerService>::try_from(operators)
+				let operators = BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 				let service = Service {
 					id: service_id,
@@ -837,7 +835,7 @@ pub mod module {
 			Instances::<T>::remove(service_id);
 			// Remove the service from the operator's profile.
 			for operator in &service.operators {
-				OperatorsProfile::<T>::try_mutate_exists(&operator, |profile| {
+				OperatorsProfile::<T>::try_mutate_exists(operator, |profile| {
 					profile
 						.as_mut()
 						.map(|p| p.services.remove(&service_id))
@@ -859,7 +857,7 @@ pub mod module {
 			origin: OriginFor<T>,
 			#[pallet::compact] service_id: u64,
 			#[pallet::compact] job: u8,
-			args: BoundedVec<Field<T::AccountId>, MaxFields>,
+			args: Vec<Field<T::Constraints, T::AccountId>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let service = Self::services(service_id)?;
@@ -869,7 +867,9 @@ pub mod module {
 
 			let job_def =
 				blueprint.jobs.get(usize::from(job)).ok_or(Error::<T>::JobDefinitionNotFound)?;
-			let job_call = JobCall { service_id, job, args: args.clone() };
+			let bounded_args = BoundedVec::<_, MaxFieldsOf<T>>::try_from(args.clone())
+				.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
+			let job_call = JobCall { service_id, job, args: bounded_args };
 
 			job_call.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
 			let call_id = Self::next_job_call_id();
@@ -897,7 +897,7 @@ pub mod module {
 			origin: OriginFor<T>,
 			#[pallet::compact] service_id: u64,
 			#[pallet::compact] call_id: u64,
-			result: BoundedVec<Field<T::AccountId>, MaxFields>,
+			result: Vec<Field<T::Constraints, T::AccountId>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let job_call = Self::job_calls(service_id, call_id)?;
@@ -913,7 +913,10 @@ pub mod module {
 				.get(usize::from(job_call.job))
 				.ok_or(Error::<T>::JobDefinitionNotFound)?;
 
-			let job_result = JobCallResult { service_id, call_id, result: result.clone() };
+			let bounded_result = BoundedVec::<_, MaxFieldsOf<T>>::try_from(result.clone())
+				.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
+
+			let job_result = JobCallResult { service_id, call_id, result: bounded_result };
 			job_result.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
 
 			let (allowed, weight) = Self::check_job_call_result_hook(

@@ -32,10 +32,6 @@ impl<T: Config> traits::EvmRunner<T> for () {
 }
 
 impl<T: Config> v2::Constraints for types::ConstraintsOf<T> {
-	type AccountId = T::AccountId;
-
-	type BlockNumber = BlockNumberFor<T>;
-
 	type MaxFields = T::MaxFields;
 
 	type MaxFieldsSize = T::MaxFieldsSize;

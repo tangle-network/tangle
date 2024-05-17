@@ -29,20 +29,25 @@ use sp_runtime::{
 	DispatchError, Serialize,
 };
 use std::sync::Arc;
-use tangle_primitives::jobs::v2::RpcServicesWithBlueprint;
+use tangle_primitives::jobs::v2::{Constraints, RpcServicesWithBlueprint};
 
 type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
 
 /// ServicesClient RPC methods.
 #[rpc(client, server)]
-pub trait ServicesApi<BlockHash, AccountId, BlockNumber> {
+pub trait ServicesApi<BlockHash, X, AccountId, BlockNumber>
+where
+	X: Constraints,
+	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+	BlockNumber: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+{
 	#[method(name = "services_queryServicesWithBlueprintsByOperator")]
 	fn query_services_with_blueprints_by_operator(
 		&self,
 		operator: AccountId,
 		at: Option<BlockHash>,
-	) -> RpcResult<Vec<RpcServicesWithBlueprint<AccountId, BlockNumber>>>;
+	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumber>>>;
 }
 
 /// A struct that implements the `ServicesApi`.
@@ -58,20 +63,21 @@ impl<C, M, P> ServicesClient<C, M, P> {
 	}
 }
 
-impl<C, Block, AccountId>
-	ServicesApiServer<<Block as BlockT>::Hash, AccountId, BlockNumberOf<Block>>
+impl<C, X, Block, AccountId>
+	ServicesApiServer<<Block as BlockT>::Hash, X, AccountId, BlockNumberOf<Block>>
 	for ServicesClient<C, Block, AccountId>
 where
 	Block: BlockT,
-	AccountId: Codec + MaybeDisplay + Send + Sync + 'static + Serialize,
+	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+	X: Constraints,
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
-	C::Api: ServicesRuntimeApi<Block, AccountId>,
+	C::Api: ServicesRuntimeApi<Block, X, AccountId>,
 {
 	fn query_services_with_blueprints_by_operator(
 		&self,
 		operator: AccountId,
 		at: Option<<Block as BlockT>::Hash>,
-	) -> RpcResult<Vec<RpcServicesWithBlueprint<AccountId, BlockNumberOf<Block>>>> {
+	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumberOf<Block>>>> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 

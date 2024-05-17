@@ -15,8 +15,6 @@ use tangle_primitives::jobs::v2::{
 	ServiceRegistrationHook, ServiceRequestHook,
 };
 
-use self::types::ConstraintsOf;
-
 use super::*;
 
 impl<T: Config> Pallet<T> {
@@ -34,9 +32,9 @@ impl<T: Config> Pallet<T> {
 	}
 
 	pub fn check_registeration_hook(
-		blueprint: &ServiceBlueprint<ConstraintsOf<T>>,
-		prefrences: &OperatorPreferences<ConstraintsOf<T>>,
-		registration_args: &[Field<T::AccountId>],
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		prefrences: &OperatorPreferences,
+		registration_args: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.registration_hook {
 			ServiceRegistrationHook::None => (true, Weight::zero()),
@@ -78,10 +76,10 @@ impl<T: Config> Pallet<T> {
 	}
 
 	pub fn check_request_hook(
-		blueprint: &ServiceBlueprint,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		service_id: u64,
 		participants: &[OperatorPreferences],
-		request_args: &[Field<T::AccountId>],
+		request_args: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.request_hook {
 			ServiceRequestHook::None => (true, Weight::zero()),
@@ -130,11 +128,11 @@ impl<T: Config> Pallet<T> {
 	}
 
 	pub fn check_job_call_hook(
-		blueprint: &ServiceBlueprint,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		service_id: u64,
 		job: u8,
 		job_call_id: u64,
-		inputs: &[Field<T::AccountId>],
+		inputs: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.request_hook {
 			ServiceRequestHook::None => (true, Weight::zero()),
@@ -186,13 +184,13 @@ impl<T: Config> Pallet<T> {
 	}
 
 	pub fn check_job_call_result_hook(
-		job_def: &JobDefinition,
+		job_def: &JobDefinition<T::Constraints>,
 		service_id: u64,
 		job: u8,
 		job_call_id: u64,
 		prefrences: &OperatorPreferences,
-		inputs: &[Field<T::AccountId>],
-		outputs: &[Field<T::AccountId>],
+		inputs: &[Field<T::Constraints, T::AccountId>],
+		outputs: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match job_def.verifier {
 			JobResultVerifier::None => (true, Weight::zero()),

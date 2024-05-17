@@ -13,13 +13,28 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
 use super::*;
+use tangle_primitives::jobs::v2::Constraints;
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 pub type ConstraintsFor<T> = <T as Config>::Constraints;
 
-/// Extract the constraints from the runtime.
-pub struct ConstraintsOf<T>(sp_std::marker::PhantomData<T>);
+pub type MaxPermittedCallersOf<T> = <ConstraintsFor<T> as Constraints>::MaxPermittedCallers;
 
+pub type MaxServicesPerUserOf<T> = <ConstraintsFor<T> as Constraints>::MaxServicesPerUser;
+
+pub type MaxFieldsOf<T> = <ConstraintsFor<T> as Constraints>::MaxFields;
+
+pub type MaxOperatorsPerServiceOf<T> = <ConstraintsFor<T> as Constraints>::MaxOperatorsPerService;
+
+/// Extract the constraints from the runtime.
+#[derive(RuntimeDebugNoBound, CloneNoBound, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[scale_info(skip_type_params(T))]
+#[codec(encode_bound(skip_type_params(T)))]
+#[codec(decode_bound(skip_type_params(T)))]
+#[codec(mel_bound(skip_type_params(T)))]
+#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+pub struct ConstraintsOf<T>(sp_std::marker::PhantomData<T>);

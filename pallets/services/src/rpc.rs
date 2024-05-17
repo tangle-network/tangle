@@ -10,7 +10,10 @@ impl<T: Config> Pallet<T> {
 	#[allow(clippy::type_complexity)]
 	pub fn services_with_blueprints_by_operator(
 		operator: T::AccountId,
-	) -> Result<Vec<RpcServicesWithBlueprint<T::AccountId, BlockNumberFor<T>>>, Error<T>> {
+	) -> Result<
+		Vec<RpcServicesWithBlueprint<T::Constraints, T::AccountId, BlockNumberFor<T>>>,
+		Error<T>,
+	> {
 		let profile = Self::operator_profile(operator)?;
 		let mut result = Vec::with_capacity(profile.services.len());
 		let services = profile

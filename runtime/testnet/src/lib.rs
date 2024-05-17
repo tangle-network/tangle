@@ -1355,6 +1355,64 @@ impl pallet_services::EvmGasWeightMapping for PalletEVMGasWeightMapping {
 	}
 }
 
+parameter_types! {
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxFields: u32 = 256;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxFieldsSize: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxMetadataLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxJobsPerService: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxOperatorsPerService: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxPermittedCallers: u32 = 256;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxServicesPerOperator: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxBlueprintsPerOperator: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxServicesPerUser: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxBinariesPerGadget: u32 = 64;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxGitOwnerLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxGitRepoLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxGitTagLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxBinaryNameLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxIpfsHashLength: u32 = 46;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxContainerRegistryLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxContainerImageNameLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxContainerImageTagLength: u32 = 1024;
+}
+
+pub type PalletServicesConstraints = pallet_services::types::ConstraintsOf<Runtime>;
+
 impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
@@ -1362,6 +1420,25 @@ impl pallet_services::Config for Runtime {
 	type PalletId = ServicesPalletId;
 	type EvmRunner = PalletEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
+	type MaxFields = MaxFields;
+	type MaxFieldsSize = MaxFieldsSize;
+	type MaxMetadataLength = MaxMetadataLength;
+	type MaxJobsPerService = MaxJobsPerService;
+	type MaxOperatorsPerService = MaxOperatorsPerService;
+	type MaxPermittedCallers = MaxPermittedCallers;
+	type MaxServicesPerOperator = MaxServicesPerOperator;
+	type MaxBlueprintsPerOperator = MaxBlueprintsPerOperator;
+	type MaxServicesPerUser = MaxServicesPerUser;
+	type MaxBinariesPerGadget = MaxBinariesPerGadget;
+	type MaxGitOwnerLength = MaxGitOwnerLength;
+	type MaxGitRepoLength = MaxGitRepoLength;
+	type MaxGitTagLength = MaxGitTagLength;
+	type MaxBinaryNameLength = MaxBinaryNameLength;
+	type MaxIpfsHashLength = MaxIpfsHashLength;
+	type MaxContainerRegistryLength = MaxContainerRegistryLength;
+	type MaxContainerImageNameLength = MaxContainerImageNameLength;
+	type MaxContainerImageTagLength = MaxContainerImageTagLength;
+	type Constraints = PalletServicesConstraints;
 	type WeightInfo = ();
 }
 
@@ -1699,6 +1776,7 @@ mod benches {
 }
 
 use pallet_jobs_rpc_runtime_api::BlockNumberOf;
+
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {
 		fn version() -> RuntimeVersion {
@@ -1774,11 +1852,11 @@ impl_runtime_apis! {
 
 	}
 
-	impl pallet_services_rpc_runtime_api::ServicesApi<Block, AccountId> for Runtime {
+	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId> for Runtime {
 		fn query_services_with_blueprints_by_operator(
 			operator: AccountId,
 		) -> Result<
-			Vec<RpcServicesWithBlueprint<AccountId, BlockNumberOf<Block>>>,
+			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>>>,
 			sp_runtime::DispatchError,
 		> {
 			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)

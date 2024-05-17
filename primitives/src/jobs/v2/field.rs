@@ -16,7 +16,6 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, string::ToString, vec::Vec};
-use educe::Educe;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -27,7 +26,7 @@ use super::Constraints;
 
 macro_rules! impl_from {
     ($from:ty, $variant:ident) => {
-        impl<C: Constraints> From<$from> for Field<C> {
+        impl<C: Constraints, AccountId> From<$from> for Field<C, AccountId> {
             fn from(val: $from) -> Self {
                 Self::$variant(val)
             }
@@ -35,7 +34,7 @@ macro_rules! impl_from {
     };
 
     ($from:ty, $variant:ident, $conv:expr) => {
-        impl<C: Constraints> From<$from> for Field<C> {
+        impl<C: Constraints, AccountId> From<$from> for Field<C, AccountId> {
             fn from(val: $from) -> Self {
                 Self::$variant($conv(val))
             }
@@ -47,11 +46,17 @@ macro_rules! impl_from {
     };
 }
 
-#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
-#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
-#[scale_info(skip_type_params(C))]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
-pub enum Field<C: Constraints> {
+#[derive(Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[scale_info(bounds(AccountId: TypeInfo), skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(
+	feature = "std",
+	derive(Serialize, Deserialize),
+	serde(bound(serialize = "AccountId: Serialize", deserialize = "AccountId: Deserialize<'de>"))
+)]
+pub enum Field<C: Constraints, AccountId> {
 	/// Represents a field of null value.
 	#[codec(index = 0)]
 	None,
@@ -99,7 +104,86 @@ pub enum Field<C: Constraints> {
 	// NOTE: Special types starts from 100
 	/// A sepcial type for AccountId
 	#[codec(index = 100)]
-	AccountId(C::AccountId),
+	AccountId(AccountId),
+}
+
+#[cfg(feature = "std")]
+impl<C: Constraints, AccountId: core::fmt::Debug> core::fmt::Debug for Field<C, AccountId> {
+	fn fmt(
+		&self,
+		f: &mut scale_info::prelude::fmt::Formatter<'_>,
+	) -> scale_info::prelude::fmt::Result {
+		match self {
+			Self::None => write!(f, "nil"),
+			Self::Bool(arg0) => f.debug_tuple("bool").field(arg0).finish(),
+			Self::Uint8(arg0) => f.debug_tuple("uint8").field(arg0).finish(),
+			Self::Int8(arg0) => f.debug_tuple("int8").field(arg0).finish(),
+			Self::Uint16(arg0) => f.debug_tuple("uint16").field(arg0).finish(),
+			Self::Int16(arg0) => f.debug_tuple("int16").field(arg0).finish(),
+			Self::Uint32(arg0) => f.debug_tuple("uint32").field(arg0).finish(),
+			Self::Int32(arg0) => f.debug_tuple("int32").field(arg0).finish(),
+			Self::Uint64(arg0) => f.debug_tuple("uint64").field(arg0).finish(),
+			Self::Int64(arg0) => f.debug_tuple("int64").field(arg0).finish(),
+			Self::String(arg0) => f.debug_tuple("string").field(arg0).finish(),
+			Self::Bytes(arg0) => f.debug_tuple("bytes").field(arg0).finish(),
+			Self::Array(arg0) => f.debug_tuple("array").field(arg0).finish(),
+			Self::List(arg0) => f.debug_tuple("list").field(arg0).finish(),
+			Self::AccountId(arg0) => f.debug_tuple("account").field(arg0).finish(),
+		}
+	}
+}
+
+impl<C: Constraints, AccountId: Eq> Eq for Field<C, AccountId> {}
+
+impl<C: Constraints, AccountId: PartialEq> PartialEq for Field<C, AccountId> {
+	fn eq(&self, other: &Self) -> bool {
+		match (self, other) {
+			(Self::Bool(l0), Self::Bool(r0)) => l0 == r0,
+			(Self::Uint8(l0), Self::Uint8(r0)) => l0 == r0,
+			(Self::Int8(l0), Self::Int8(r0)) => l0 == r0,
+			(Self::Uint16(l0), Self::Uint16(r0)) => l0 == r0,
+			(Self::Int16(l0), Self::Int16(r0)) => l0 == r0,
+			(Self::Uint32(l0), Self::Uint32(r0)) => l0 == r0,
+			(Self::Int32(l0), Self::Int32(r0)) => l0 == r0,
+			(Self::Uint64(l0), Self::Uint64(r0)) => l0 == r0,
+			(Self::Int64(l0), Self::Int64(r0)) => l0 == r0,
+			(Self::String(l0), Self::String(r0)) => l0 == r0,
+			(Self::Bytes(l0), Self::Bytes(r0)) => l0 == r0,
+			(Self::Array(l0), Self::Array(r0)) => l0 == r0,
+			(Self::List(l0), Self::List(r0)) => l0 == r0,
+			(Self::AccountId(l0), Self::AccountId(r0)) => l0 == r0,
+			_ => core::mem::discriminant(self) == core::mem::discriminant(other),
+		}
+	}
+}
+
+impl<C: Constraints, AccountId: Clone> Clone for Field<C, AccountId> {
+	fn clone(&self) -> Self {
+		match self {
+			Self::None => Self::None,
+			Self::Bool(arg0) => Self::Bool(*arg0),
+			Self::Uint8(arg0) => Self::Uint8(*arg0),
+			Self::Int8(arg0) => Self::Int8(*arg0),
+			Self::Uint16(arg0) => Self::Uint16(*arg0),
+			Self::Int16(arg0) => Self::Int16(*arg0),
+			Self::Uint32(arg0) => Self::Uint32(*arg0),
+			Self::Int32(arg0) => Self::Int32(*arg0),
+			Self::Uint64(arg0) => Self::Uint64(*arg0),
+			Self::Int64(arg0) => Self::Int64(*arg0),
+			Self::String(arg0) => Self::String(arg0.clone()),
+			Self::Bytes(arg0) => Self::Bytes(arg0.clone()),
+			Self::Array(arg0) => Self::Array(arg0.clone()),
+			Self::List(arg0) => Self::List(arg0.clone()),
+			Self::AccountId(arg0) => Self::AccountId(arg0.clone()),
+		}
+	}
+}
+
+#[cfg(not(feature = "std"))]
+impl<C: Constraints, AccountId> core::fmt::Debug for Field<C, AccountId> {
+	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+		f.write_str("<wasm:stripped>")
+	}
 }
 
 impl_from! {
@@ -115,18 +199,6 @@ impl_from! {
 	BoundedVec<u8, C::MaxFieldsSize> => Bytes,
 	BoundedString<C::MaxFieldsSize> => String,
 	BoundedVec<Self, C::MaxFieldsSize> => List
-}
-
-impl<C: Constraints, const N: usize> TryFrom<[Self; N]> for Field<C> {
-	type Error = [Self; N];
-
-	fn try_from(value: [Self; N]) -> Result<Self, Self::Error> {
-		if N > <C::MaxFieldsSize as Get<u32>>::get() as usize {
-			return Err(value);
-		}
-		let vec = value.to_vec().try_into().map_err(|_| value)?;
-		Ok(Self::Array(vec))
-	}
 }
 
 #[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
@@ -184,7 +256,7 @@ pub enum FieldType {
 	AccountId,
 }
 
-impl<C: Constraints> PartialEq<FieldType> for Field<C> {
+impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 	fn eq(&self, other: &FieldType) -> bool {
 		match (self, other) {
 			(Self::None, FieldType::Optional(_)) => true,
@@ -209,8 +281,8 @@ impl<C: Constraints> PartialEq<FieldType> for Field<C> {
 	}
 }
 
-impl<C: Constraints> From<Field<C>> for FieldType {
-	fn from(val: Field<C>) -> Self {
+impl<C: Constraints, AccountId: Clone> From<Field<C, AccountId>> for FieldType {
+	fn from(val: Field<C, AccountId>) -> Self {
 		match val {
 			Field::None => FieldType::Optional(Box::new(FieldType::Void)),
 			Field::Bool(_) => FieldType::Bool,
@@ -236,8 +308,8 @@ impl<C: Constraints> From<Field<C>> for FieldType {
 	}
 }
 
-impl<'a, C: Constraints> From<&'a Field<C>> for ethabi::Token {
-	fn from(value: &'a Field<C>) -> Self {
+impl<'a, C: Constraints, AccountId: Encode> From<&'a Field<C, AccountId>> for ethabi::Token {
+	fn from(value: &'a Field<C, AccountId>) -> Self {
 		match value {
 			Field::None => ethabi::Token::Tuple(Vec::new()),
 			Field::Bool(val) => ethabi::Token::Bool(*val),
@@ -258,13 +330,13 @@ impl<'a, C: Constraints> From<&'a Field<C>> for ethabi::Token {
 	}
 }
 
-impl<C: Constraints> From<Field<C>> for ethabi::Token {
-	fn from(value: Field<C>) -> Self {
+impl<C: Constraints, AccountId: Encode> From<Field<C, AccountId>> for ethabi::Token {
+	fn from(value: Field<C, AccountId>) -> Self {
 		(&value).into()
 	}
 }
 
-impl<C: Constraints> Field<C> {
+impl<C: Constraints, AccountId: Encode> Field<C, AccountId> {
 	/// Convrts the field to a `ethabi::Token`.
 	/// This is useful for converting the field to a type that can be used in an Ethereum transaction.
 	pub fn into_ethabi_token(self) -> ethabi::Token {
