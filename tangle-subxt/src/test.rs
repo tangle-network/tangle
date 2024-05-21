@@ -13,6 +13,7 @@ use crate::tangle_testnet_runtime::api::{
 };
 
 #[tokio::test]
+#[cfg(not(feature = "wasm"))]
 #[ignore = "need to be run manually"]
 async fn test_job_submission_event() {
 	let subxt_client = OnlineClient::<PolkadotConfig>::new().await.unwrap();

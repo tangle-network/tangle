@@ -19,3 +19,8 @@ std = [
   "scale-info/std",
   "sp-application-crypto/std",
 ]
+wasm = [
+  "parity-scale-codec/serde",
+  "scale-info/serde",
+  "sp-application-crypto/serde",
+]

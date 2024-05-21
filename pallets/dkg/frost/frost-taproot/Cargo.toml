@@ -33,6 +33,7 @@ subtle = { workspace = true }
 [features]
 default = ["std"]
 std = [
+    "frost-core/std",
     "parity-scale-codec/std",
     "rand_core/std",
     "k256/std",

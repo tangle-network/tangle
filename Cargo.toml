@@ -310,6 +310,7 @@ pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features
 evm = { version = "0.41.0", default-features = false }
 ethereum-types = { version = "0.14.1", default-features = false }
 ethereum = { version = "0.15.0", default-features = false }
+getrandom = { version = "0.2.12", default-features = false }
 
 evm-gasometer = { version = "0.41.0", default-features = false }
 evm-runtime = { version = "0.41.0", default-features = false }
