@@ -1,11 +1,8 @@
-use crate::types::ConstraintsOf;
 use crate::{Call, Config, Pallet};
-use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
-use frame_support::traits::Currency;
+use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
 use frame_system::RawOrigin;
 use parity_scale_codec::Decode;
-use sp_core::{bounded_vec, ecdsa, H160, U256};
-use sp_runtime::traits::Bounded;
+use sp_core::{ecdsa, H160};
 use sp_runtime::KeyTypeId;
 use sp_std::vec;
 use tangle_primitives::jobs::v2::*;
@@ -26,24 +23,26 @@ pub const CGGMP21_JOB_RESULT_VERIFIER: H160 = H160([0x23; 20]);
 fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<T::Constraints> {
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
-		jobs: bounded_vec![
+		jobs: vec![
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
-				params: bounded_vec![FieldType::Uint8],
-				result: bounded_vec![FieldType::Bytes],
+				params: vec![FieldType::Uint8].try_into().unwrap(),
+				result: vec![FieldType::Bytes].try_into().unwrap(),
 				verifier: JobResultVerifier::Evm(CGGMP21_JOB_RESULT_VERIFIER),
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
-				params: bounded_vec![FieldType::Uint64, FieldType::Bytes],
-				result: bounded_vec![FieldType::Bytes],
+				params: vec![FieldType::Uint64, FieldType::Bytes].try_into().unwrap(),
+				result: vec![FieldType::Bytes].try_into().unwrap(),
 				verifier: JobResultVerifier::Evm(CGGMP21_JOB_RESULT_VERIFIER),
 			},
-		],
+		]
+		.try_into()
+		.unwrap(),
 		registration_hook: ServiceRegistrationHook::Evm(CGGMP21_REGISTRATION_HOOK),
-		registration_params: bounded_vec![],
+		registration_params: vec![].try_into().unwrap(),
 		request_hook: ServiceRequestHook::Evm(CGGMP21_REQUEST_HOOK),
-		request_params: bounded_vec![],
+		request_params: vec![].try_into().unwrap(),
 		gadget: Default::default(),
 	}
 }
@@ -246,7 +245,7 @@ benchmarks! {
 			RawOrigin::Signed(eve.clone()),
 			0,
 			0,
-			bounded_vec![Field::Uint8(2)]
+			vec![Field::Uint8(2)].try_into().unwrap()
 		)
 
 
@@ -280,7 +279,7 @@ benchmarks! {
 			RawOrigin::Signed(eve.clone()).into(),
 			0,
 			0,
-			bounded_vec![Field::Uint8(2)]
+			vec![Field::Uint8(2)].try_into().unwrap()
 		);
 
 		let keygen_job_call_id = 0;
@@ -291,7 +290,7 @@ benchmarks! {
 			RawOrigin::Signed(bob.clone()),
 			0,
 			keygen_job_call_id,
-			bounded_vec![Field::Bytes(dkg.to_raw_vec().try_into().unwrap())]
+			vec![Field::Bytes(dkg.0.to_vec().try_into().unwrap())].try_into().unwrap()
 		)
 
 }

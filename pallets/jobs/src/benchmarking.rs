@@ -2,7 +2,7 @@ use crate::{
 	BalanceOf, Call, Config, JobSubmissionOf, KnownResults, Pallet, PhaseResult,
 	ValidatorOffenceType, ValidatorRewards,
 };
-use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
+use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
 use frame_support::traits::Currency;
 use frame_system::RawOrigin;
 use parity_scale_codec::Decode;
