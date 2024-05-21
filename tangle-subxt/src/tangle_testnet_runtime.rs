@@ -6,7 +6,7 @@ pub mod api {
 	mod root_mod {
 		pub use super::*;
 	}
-	pub static PALLETS: [&str; 43usize] = [
+	pub static PALLETS: [&str; 44usize] = [
 		"System",
 		"Timestamp",
 		"Sudo",
@@ -47,15 +47,17 @@ pub mod api {
 		"Claims",
 		"Roles",
 		"Jobs",
+		"Services",
 		"Dkg",
 		"ZkSaaS",
 		"Proxy",
 	];
-	pub static RUNTIME_APIS: [&str; 15usize] = [
+	pub static RUNTIME_APIS: [&str; 16usize] = [
 		"Core",
 		"Metadata",
 		"BlockBuilder",
 		"JobsApi",
+		"ServicesApi",
 		"EthereumRuntimeRPCApi",
 		"ConvertTransactionRuntimeApi",
 		"TaggedTransactionQueue",
@@ -105,6 +107,9 @@ pub mod api {
 			}
 			pub fn jobs_api(&self) -> jobs_api::JobsApi {
 				jobs_api::JobsApi
+			}
+			pub fn services_api(&self) -> services_api::ServicesApi {
+				services_api::ServicesApi
 			}
 			pub fn ethereum_runtime_rpc_api(
 				&self,
@@ -907,6 +912,64 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 				pub struct QueryRestakerRoleKey {
 					pub address: query_restaker_role_key::Address,
+				}
+			}
+		}
+		pub mod services_api {
+			use super::root_mod;
+			use super::runtime_types;
+			pub struct ServicesApi;
+			impl ServicesApi {
+				#[doc = " Query all the services that this operator is providing along with their blueprints."]
+				#[doc = ""]
+				#[doc = " ## Arguments"]
+				#[doc = " - `operator`: The operator account id."]
+				#[doc = " ## Return"]
+				#[doc = " - [`RpcServicesWithBlueprint`]: A list of services with their blueprints."]
+				pub fn query_services_with_blueprints_by_operator(
+					&self,
+					operator: types::query_services_with_blueprints_by_operator::Operator,
+				) -> ::subxt::runtime_api::Payload<
+					types::QueryServicesWithBlueprintsByOperator,
+					types::query_services_with_blueprints_by_operator::output::Output,
+				> {
+					::subxt::runtime_api::Payload::new_static(
+						"ServicesApi",
+						"query_services_with_blueprints_by_operator",
+						types::QueryServicesWithBlueprintsByOperator { operator },
+						[
+							207u8, 187u8, 6u8, 247u8, 80u8, 141u8, 64u8, 246u8, 156u8, 39u8, 28u8,
+							166u8, 120u8, 12u8, 140u8, 251u8, 55u8, 247u8, 48u8, 225u8, 226u8,
+							60u8, 69u8, 188u8, 96u8, 8u8, 85u8, 103u8, 149u8, 34u8, 20u8, 28u8,
+						],
+					)
+				}
+			}
+			pub mod types {
+				use super::runtime_types;
+				pub mod query_services_with_blueprints_by_operator {
+					use super::runtime_types;
+					pub type Operator = ::subxt::utils::AccountId32;
+					pub mod output {
+						use super::runtime_types;
+						pub type Output = :: core :: result :: Result < :: std :: vec :: Vec < runtime_types :: tangle_primitives :: jobs :: v2 :: RpcServicesWithBlueprint < :: subxt :: utils :: AccountId32 , :: core :: primitive :: u64 > > , runtime_types :: sp_runtime :: DispatchError > ;
+					}
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				pub struct QueryServicesWithBlueprintsByOperator {
+					pub operator: query_services_with_blueprints_by_operator::Operator,
 				}
 			}
 		}
@@ -3005,6 +3068,9 @@ pub mod api {
 		pub fn jobs(&self) -> jobs::constants::ConstantsApi {
 			jobs::constants::ConstantsApi
 		}
+		pub fn services(&self) -> services::constants::ConstantsApi {
+			services::constants::ConstantsApi
+		}
 		pub fn proxy(&self) -> proxy::constants::ConstantsApi {
 			proxy::constants::ConstantsApi
 		}
@@ -3129,6 +3195,9 @@ pub mod api {
 		pub fn jobs(&self) -> jobs::storage::StorageApi {
 			jobs::storage::StorageApi
 		}
+		pub fn services(&self) -> services::storage::StorageApi {
+			services::storage::StorageApi
+		}
 		pub fn dkg(&self) -> dkg::storage::StorageApi {
 			dkg::storage::StorageApi
 		}
@@ -3245,6 +3314,9 @@ pub mod api {
 		pub fn jobs(&self) -> jobs::calls::TransactionApi {
 			jobs::calls::TransactionApi
 		}
+		pub fn services(&self) -> services::calls::TransactionApi {
+			services::calls::TransactionApi
+		}
 		pub fn dkg(&self) -> dkg::calls::TransactionApi {
 			dkg::calls::TransactionApi
 		}
@@ -3264,9 +3336,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				149u8, 214u8, 8u8, 231u8, 254u8, 81u8, 203u8, 202u8, 50u8, 142u8, 242u8, 188u8,
-				226u8, 191u8, 222u8, 251u8, 149u8, 152u8, 200u8, 169u8, 136u8, 65u8, 118u8, 72u8,
-				247u8, 195u8, 153u8, 84u8, 155u8, 46u8, 108u8, 171u8,
+				237u8, 140u8, 182u8, 70u8, 24u8, 236u8, 116u8, 216u8, 137u8, 156u8, 123u8, 67u8,
+				200u8, 225u8, 81u8, 60u8, 33u8, 189u8, 20u8, 130u8, 101u8, 15u8, 162u8, 237u8,
+				130u8, 19u8, 182u8, 4u8, 136u8, 11u8, 171u8, 224u8,
 			]
 	}
 	pub mod system {
@@ -4302,9 +4374,9 @@ pub mod api {
 						"Events",
 						vec![],
 						[
-							51u8, 44u8, 2u8, 2u8, 138u8, 203u8, 20u8, 162u8, 131u8, 48u8, 177u8,
-							45u8, 119u8, 66u8, 139u8, 204u8, 149u8, 234u8, 64u8, 89u8, 35u8, 21u8,
-							233u8, 21u8, 49u8, 81u8, 148u8, 77u8, 44u8, 133u8, 136u8, 148u8,
+							118u8, 184u8, 14u8, 105u8, 88u8, 16u8, 154u8, 210u8, 140u8, 60u8,
+							123u8, 78u8, 91u8, 220u8, 203u8, 36u8, 93u8, 81u8, 200u8, 246u8, 126u8,
+							234u8, 139u8, 56u8, 230u8, 205u8, 132u8, 9u8, 254u8, 21u8, 53u8, 108u8,
 						],
 					)
 				}
@@ -4894,10 +4966,10 @@ pub mod api {
 						"sudo",
 						types::Sudo { call: ::std::boxed::Box::new(call) },
 						[
-							6u8, 255u8, 161u8, 153u8, 68u8, 192u8, 179u8, 163u8, 251u8, 122u8,
-							198u8, 86u8, 172u8, 131u8, 201u8, 131u8, 4u8, 187u8, 106u8, 154u8,
-							188u8, 156u8, 174u8, 217u8, 101u8, 37u8, 225u8, 136u8, 197u8, 118u8,
-							3u8, 216u8,
+							172u8, 46u8, 200u8, 70u8, 44u8, 47u8, 188u8, 59u8, 192u8, 245u8, 5u8,
+							5u8, 57u8, 205u8, 204u8, 131u8, 197u8, 143u8, 128u8, 239u8, 241u8,
+							152u8, 243u8, 159u8, 193u8, 170u8, 108u8, 50u8, 20u8, 221u8, 138u8,
+							79u8,
 						],
 					)
 				}
@@ -4912,10 +4984,10 @@ pub mod api {
 						"sudo_unchecked_weight",
 						types::SudoUncheckedWeight { call: ::std::boxed::Box::new(call), weight },
 						[
-							136u8, 120u8, 233u8, 226u8, 166u8, 126u8, 122u8, 179u8, 87u8, 55u8,
-							94u8, 105u8, 168u8, 133u8, 195u8, 74u8, 199u8, 201u8, 151u8, 165u8,
-							219u8, 236u8, 19u8, 171u8, 60u8, 2u8, 17u8, 146u8, 113u8, 201u8, 158u8,
-							154u8,
+							199u8, 138u8, 154u8, 113u8, 235u8, 21u8, 177u8, 71u8, 15u8, 143u8,
+							177u8, 90u8, 70u8, 158u8, 223u8, 162u8, 250u8, 14u8, 236u8, 153u8,
+							141u8, 121u8, 149u8, 108u8, 192u8, 24u8, 159u8, 156u8, 78u8, 83u8,
+							20u8, 248u8,
 						],
 					)
 				}
@@ -4947,9 +5019,10 @@ pub mod api {
 						"sudo_as",
 						types::SudoAs { who, call: ::std::boxed::Box::new(call) },
 						[
-							59u8, 90u8, 251u8, 6u8, 127u8, 206u8, 5u8, 249u8, 165u8, 33u8, 71u8,
-							184u8, 108u8, 99u8, 254u8, 44u8, 186u8, 62u8, 92u8, 40u8, 61u8, 60u8,
-							179u8, 103u8, 94u8, 215u8, 164u8, 50u8, 244u8, 136u8, 116u8, 148u8,
+							211u8, 213u8, 18u8, 93u8, 125u8, 216u8, 216u8, 211u8, 5u8, 192u8,
+							254u8, 180u8, 176u8, 67u8, 246u8, 93u8, 102u8, 33u8, 167u8, 153u8,
+							53u8, 2u8, 113u8, 20u8, 223u8, 83u8, 163u8, 36u8, 95u8, 82u8, 67u8,
+							226u8,
 						],
 					)
 				}
@@ -10708,10 +10781,10 @@ pub mod api {
 						"execute",
 						types::Execute { proposal: ::std::boxed::Box::new(proposal), length_bound },
 						[
-							22u8, 78u8, 9u8, 145u8, 152u8, 81u8, 163u8, 85u8, 42u8, 165u8, 213u8,
-							150u8, 123u8, 143u8, 248u8, 93u8, 244u8, 152u8, 21u8, 137u8, 237u8,
-							197u8, 53u8, 21u8, 230u8, 245u8, 129u8, 215u8, 235u8, 202u8, 24u8,
-							169u8,
+							142u8, 53u8, 213u8, 197u8, 13u8, 220u8, 181u8, 253u8, 59u8, 96u8,
+							106u8, 202u8, 10u8, 99u8, 163u8, 44u8, 236u8, 172u8, 151u8, 11u8, 91u8,
+							21u8, 152u8, 105u8, 16u8, 199u8, 152u8, 116u8, 239u8, 76u8, 180u8,
+							81u8,
 						],
 					)
 				}
@@ -10731,9 +10804,9 @@ pub mod api {
 							length_bound,
 						},
 						[
-							215u8, 79u8, 0u8, 43u8, 229u8, 31u8, 126u8, 176u8, 39u8, 190u8, 148u8,
-							35u8, 233u8, 235u8, 33u8, 137u8, 133u8, 233u8, 154u8, 183u8, 158u8,
-							143u8, 22u8, 111u8, 120u8, 73u8, 138u8, 35u8, 113u8, 29u8, 252u8, 92u8,
+							89u8, 188u8, 204u8, 79u8, 77u8, 222u8, 50u8, 74u8, 109u8, 3u8, 35u8,
+							58u8, 159u8, 186u8, 28u8, 152u8, 153u8, 145u8, 199u8, 176u8, 178u8,
+							201u8, 217u8, 80u8, 248u8, 112u8, 186u8, 22u8, 120u8, 41u8, 22u8, 72u8,
 						],
 					)
 				}
@@ -11074,10 +11147,9 @@ pub mod api {
 						"ProposalOf",
 						vec![],
 						[
-							166u8, 44u8, 128u8, 34u8, 141u8, 243u8, 130u8, 180u8, 115u8, 162u8,
-							166u8, 217u8, 172u8, 137u8, 208u8, 23u8, 124u8, 204u8, 217u8, 162u8,
-							192u8, 112u8, 76u8, 252u8, 169u8, 103u8, 165u8, 204u8, 15u8, 136u8,
-							138u8, 23u8,
+							158u8, 53u8, 128u8, 135u8, 214u8, 20u8, 6u8, 229u8, 114u8, 84u8, 125u8,
+							12u8, 127u8, 92u8, 148u8, 149u8, 143u8, 239u8, 85u8, 201u8, 68u8, 10u8,
+							246u8, 26u8, 233u8, 49u8, 47u8, 34u8, 166u8, 183u8, 146u8, 105u8,
 						],
 					)
 				}
@@ -11097,10 +11169,9 @@ pub mod api {
 						"ProposalOf",
 						vec![::subxt::storage::address::make_static_storage_map_key(_0.borrow())],
 						[
-							166u8, 44u8, 128u8, 34u8, 141u8, 243u8, 130u8, 180u8, 115u8, 162u8,
-							166u8, 217u8, 172u8, 137u8, 208u8, 23u8, 124u8, 204u8, 217u8, 162u8,
-							192u8, 112u8, 76u8, 252u8, 169u8, 103u8, 165u8, 204u8, 15u8, 136u8,
-							138u8, 23u8,
+							158u8, 53u8, 128u8, 135u8, 214u8, 20u8, 6u8, 229u8, 114u8, 84u8, 125u8,
+							12u8, 127u8, 92u8, 148u8, 149u8, 143u8, 239u8, 85u8, 201u8, 68u8, 10u8,
+							246u8, 26u8, 233u8, 49u8, 47u8, 34u8, 166u8, 183u8, 146u8, 105u8,
 						],
 					)
 				}
@@ -23972,9 +24043,9 @@ pub mod api {
 							call: ::std::boxed::Box::new(call),
 						},
 						[
-							10u8, 138u8, 95u8, 56u8, 12u8, 6u8, 96u8, 136u8, 189u8, 31u8, 189u8,
-							154u8, 12u8, 4u8, 72u8, 177u8, 24u8, 194u8, 28u8, 155u8, 69u8, 177u8,
-							181u8, 102u8, 32u8, 80u8, 138u8, 227u8, 51u8, 138u8, 104u8, 89u8,
+							87u8, 89u8, 233u8, 145u8, 163u8, 36u8, 221u8, 85u8, 164u8, 127u8, 22u8,
+							79u8, 19u8, 43u8, 114u8, 110u8, 84u8, 44u8, 178u8, 85u8, 168u8, 107u8,
+							206u8, 115u8, 207u8, 190u8, 65u8, 46u8, 98u8, 214u8, 17u8, 124u8,
 						],
 					)
 				}
@@ -24016,9 +24087,9 @@ pub mod api {
 							call: ::std::boxed::Box::new(call),
 						},
 						[
-							142u8, 224u8, 167u8, 71u8, 146u8, 167u8, 121u8, 13u8, 172u8, 119u8,
-							41u8, 128u8, 45u8, 201u8, 254u8, 173u8, 3u8, 177u8, 138u8, 75u8, 158u8,
-							51u8, 244u8, 38u8, 8u8, 53u8, 236u8, 203u8, 10u8, 227u8, 143u8, 153u8,
+							72u8, 92u8, 34u8, 229u8, 15u8, 22u8, 18u8, 108u8, 66u8, 136u8, 36u8,
+							78u8, 147u8, 237u8, 100u8, 62u8, 234u8, 33u8, 7u8, 141u8, 64u8, 247u8,
+							176u8, 206u8, 234u8, 219u8, 95u8, 251u8, 117u8, 197u8, 129u8, 94u8,
 						],
 					)
 				}
@@ -24056,9 +24127,9 @@ pub mod api {
 							call: ::std::boxed::Box::new(call),
 						},
 						[
-							80u8, 197u8, 9u8, 135u8, 49u8, 106u8, 19u8, 148u8, 105u8, 47u8, 166u8,
-							67u8, 75u8, 235u8, 110u8, 127u8, 18u8, 160u8, 94u8, 41u8, 87u8, 11u8,
-							68u8, 65u8, 125u8, 16u8, 128u8, 75u8, 4u8, 47u8, 43u8, 211u8,
+							144u8, 210u8, 6u8, 191u8, 202u8, 69u8, 118u8, 87u8, 112u8, 0u8, 7u8,
+							130u8, 15u8, 121u8, 157u8, 213u8, 226u8, 168u8, 24u8, 37u8, 119u8,
+							146u8, 182u8, 99u8, 4u8, 88u8, 4u8, 71u8, 53u8, 87u8, 124u8, 125u8,
 						],
 					)
 				}
@@ -24082,10 +24153,9 @@ pub mod api {
 							call: ::std::boxed::Box::new(call),
 						},
 						[
-							163u8, 187u8, 199u8, 245u8, 57u8, 176u8, 124u8, 214u8, 215u8, 112u8,
-							93u8, 166u8, 70u8, 252u8, 82u8, 155u8, 88u8, 4u8, 125u8, 230u8, 112u8,
-							238u8, 176u8, 80u8, 119u8, 109u8, 59u8, 93u8, 139u8, 41u8, 186u8,
-							195u8,
+							253u8, 19u8, 35u8, 53u8, 70u8, 43u8, 165u8, 38u8, 187u8, 213u8, 6u8,
+							107u8, 123u8, 140u8, 199u8, 111u8, 176u8, 173u8, 138u8, 244u8, 135u8,
+							91u8, 215u8, 157u8, 197u8, 250u8, 9u8, 39u8, 223u8, 36u8, 25u8, 99u8,
 						],
 					)
 				}
@@ -28012,9 +28082,10 @@ pub mod api {
 						"batch",
 						types::Batch { calls },
 						[
-							62u8, 43u8, 9u8, 106u8, 124u8, 59u8, 211u8, 166u8, 191u8, 73u8, 76u8,
-							60u8, 29u8, 20u8, 215u8, 32u8, 199u8, 22u8, 97u8, 129u8, 87u8, 245u8,
-							127u8, 236u8, 143u8, 218u8, 195u8, 73u8, 202u8, 103u8, 87u8, 26u8,
+							104u8, 181u8, 240u8, 76u8, 48u8, 13u8, 125u8, 220u8, 78u8, 157u8, 26u8,
+							104u8, 170u8, 105u8, 235u8, 103u8, 200u8, 195u8, 56u8, 135u8, 127u8,
+							125u8, 189u8, 112u8, 99u8, 22u8, 243u8, 66u8, 241u8, 228u8, 50u8,
+							249u8,
 						],
 					)
 				}
@@ -28029,10 +28100,9 @@ pub mod api {
 						"as_derivative",
 						types::AsDerivative { index, call: ::std::boxed::Box::new(call) },
 						[
-							221u8, 169u8, 148u8, 60u8, 104u8, 109u8, 91u8, 237u8, 163u8, 216u8,
-							220u8, 149u8, 51u8, 103u8, 152u8, 37u8, 29u8, 79u8, 120u8, 186u8,
-							214u8, 69u8, 85u8, 19u8, 110u8, 49u8, 81u8, 96u8, 114u8, 135u8, 64u8,
-							69u8,
+							226u8, 28u8, 40u8, 139u8, 143u8, 210u8, 210u8, 22u8, 91u8, 231u8, 3u8,
+							131u8, 109u8, 244u8, 94u8, 18u8, 35u8, 237u8, 201u8, 34u8, 6u8, 78u8,
+							13u8, 102u8, 152u8, 227u8, 136u8, 208u8, 42u8, 251u8, 186u8, 197u8,
 						],
 					)
 				}
@@ -28046,10 +28116,10 @@ pub mod api {
 						"batch_all",
 						types::BatchAll { calls },
 						[
-							210u8, 217u8, 88u8, 142u8, 95u8, 197u8, 75u8, 77u8, 111u8, 127u8,
-							138u8, 69u8, 188u8, 254u8, 62u8, 53u8, 135u8, 87u8, 146u8, 89u8, 50u8,
-							213u8, 152u8, 159u8, 140u8, 131u8, 138u8, 59u8, 226u8, 19u8, 149u8,
-							234u8,
+							152u8, 155u8, 91u8, 224u8, 61u8, 0u8, 243u8, 250u8, 99u8, 191u8, 170u8,
+							146u8, 232u8, 187u8, 65u8, 235u8, 154u8, 119u8, 158u8, 133u8, 173u8,
+							237u8, 156u8, 105u8, 176u8, 233u8, 120u8, 91u8, 156u8, 164u8, 48u8,
+							186u8,
 						],
 					)
 				}
@@ -28067,9 +28137,10 @@ pub mod api {
 							call: ::std::boxed::Box::new(call),
 						},
 						[
-							94u8, 181u8, 193u8, 74u8, 24u8, 197u8, 75u8, 13u8, 182u8, 68u8, 163u8,
-							74u8, 152u8, 172u8, 54u8, 74u8, 248u8, 24u8, 9u8, 107u8, 83u8, 73u8,
-							141u8, 104u8, 4u8, 193u8, 119u8, 109u8, 12u8, 41u8, 47u8, 107u8,
+							213u8, 1u8, 163u8, 244u8, 109u8, 221u8, 14u8, 222u8, 149u8, 54u8,
+							242u8, 85u8, 125u8, 133u8, 50u8, 216u8, 89u8, 104u8, 94u8, 44u8, 249u8,
+							137u8, 219u8, 250u8, 100u8, 86u8, 77u8, 57u8, 30u8, 137u8, 171u8,
+							141u8,
 						],
 					)
 				}
@@ -28083,9 +28154,9 @@ pub mod api {
 						"force_batch",
 						types::ForceBatch { calls },
 						[
-							50u8, 78u8, 131u8, 32u8, 39u8, 134u8, 176u8, 87u8, 223u8, 250u8, 193u8,
-							76u8, 127u8, 34u8, 197u8, 69u8, 201u8, 54u8, 224u8, 84u8, 17u8, 72u8,
-							28u8, 102u8, 217u8, 61u8, 56u8, 229u8, 206u8, 126u8, 229u8, 251u8,
+							11u8, 2u8, 31u8, 83u8, 45u8, 19u8, 61u8, 236u8, 19u8, 63u8, 199u8,
+							209u8, 14u8, 69u8, 54u8, 240u8, 230u8, 176u8, 246u8, 88u8, 100u8, 4u8,
+							30u8, 167u8, 43u8, 139u8, 159u8, 107u8, 117u8, 75u8, 231u8, 67u8,
 						],
 					)
 				}
@@ -28100,9 +28171,10 @@ pub mod api {
 						"with_weight",
 						types::WithWeight { call: ::std::boxed::Box::new(call), weight },
 						[
-							195u8, 93u8, 219u8, 30u8, 118u8, 40u8, 148u8, 213u8, 55u8, 98u8, 20u8,
-							204u8, 174u8, 41u8, 37u8, 70u8, 210u8, 114u8, 188u8, 156u8, 246u8,
-							89u8, 59u8, 160u8, 39u8, 107u8, 251u8, 197u8, 203u8, 13u8, 101u8, 44u8,
+							61u8, 208u8, 72u8, 163u8, 77u8, 21u8, 16u8, 196u8, 139u8, 171u8, 155u8,
+							255u8, 52u8, 143u8, 177u8, 103u8, 49u8, 187u8, 30u8, 247u8, 163u8,
+							199u8, 248u8, 183u8, 12u8, 242u8, 127u8, 177u8, 59u8, 109u8, 236u8,
+							239u8,
 						],
 					)
 				}
@@ -28430,10 +28502,9 @@ pub mod api {
 							call: ::std::boxed::Box::new(call),
 						},
 						[
-							117u8, 143u8, 137u8, 135u8, 46u8, 42u8, 170u8, 171u8, 91u8, 242u8,
-							96u8, 4u8, 107u8, 69u8, 36u8, 87u8, 163u8, 94u8, 102u8, 184u8, 87u8,
-							207u8, 100u8, 202u8, 234u8, 253u8, 27u8, 162u8, 17u8, 129u8, 88u8,
-							185u8,
+							162u8, 94u8, 67u8, 240u8, 29u8, 20u8, 26u8, 199u8, 42u8, 50u8, 245u8,
+							19u8, 9u8, 54u8, 239u8, 55u8, 110u8, 204u8, 122u8, 13u8, 8u8, 173u8,
+							109u8, 196u8, 167u8, 205u8, 10u8, 66u8, 117u8, 156u8, 188u8, 124u8,
 						],
 					)
 				}
@@ -28457,10 +28528,9 @@ pub mod api {
 							max_weight,
 						},
 						[
-							195u8, 190u8, 6u8, 110u8, 35u8, 207u8, 206u8, 207u8, 109u8, 238u8,
-							26u8, 156u8, 109u8, 94u8, 72u8, 186u8, 206u8, 44u8, 216u8, 8u8, 52u8,
-							216u8, 119u8, 213u8, 249u8, 117u8, 170u8, 213u8, 177u8, 80u8, 11u8,
-							88u8,
+							68u8, 82u8, 239u8, 221u8, 185u8, 125u8, 216u8, 99u8, 57u8, 14u8, 220u8,
+							120u8, 137u8, 30u8, 50u8, 217u8, 130u8, 223u8, 99u8, 47u8, 221u8, 47u8,
+							155u8, 90u8, 222u8, 61u8, 162u8, 52u8, 61u8, 239u8, 171u8, 136u8,
 						],
 					)
 				}
@@ -30056,10 +30126,9 @@ pub mod api {
 						"BaseFeePerGas",
 						vec![],
 						[
-							72u8, 143u8, 208u8, 233u8, 10u8, 122u8, 20u8, 183u8, 203u8, 61u8,
-							240u8, 154u8, 28u8, 65u8, 239u8, 220u8, 205u8, 19u8, 227u8, 113u8,
-							146u8, 90u8, 234u8, 209u8, 113u8, 169u8, 216u8, 194u8, 189u8, 0u8,
-							154u8, 144u8,
+							23u8, 173u8, 98u8, 22u8, 131u8, 239u8, 122u8, 219u8, 222u8, 84u8,
+							207u8, 52u8, 213u8, 196u8, 3u8, 24u8, 152u8, 146u8, 63u8, 77u8, 22u8,
+							153u8, 2u8, 75u8, 11u8, 89u8, 89u8, 173u8, 123u8, 33u8, 247u8, 9u8,
 						],
 					)
 				}
@@ -30077,9 +30146,9 @@ pub mod api {
 						"Elasticity",
 						vec![],
 						[
-							219u8, 23u8, 184u8, 17u8, 59u8, 152u8, 197u8, 61u8, 167u8, 131u8,
-							124u8, 42u8, 70u8, 42u8, 101u8, 54u8, 11u8, 206u8, 96u8, 165u8, 30u8,
-							76u8, 2u8, 64u8, 58u8, 49u8, 74u8, 97u8, 109u8, 222u8, 75u8, 234u8,
+							196u8, 184u8, 245u8, 90u8, 25u8, 50u8, 66u8, 69u8, 140u8, 128u8, 179u8,
+							63u8, 197u8, 133u8, 135u8, 141u8, 56u8, 0u8, 143u8, 241u8, 200u8,
+							114u8, 73u8, 157u8, 85u8, 190u8, 1u8, 2u8, 208u8, 235u8, 62u8, 16u8,
 						],
 					)
 				}
@@ -30322,6 +30391,33 @@ pub mod api {
 					const PALLET: &'static str = "Claims";
 					const CALL: &'static str = "force_set_expiry_config";
 				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See [`Pallet::claim_signed`]."]
+				pub struct ClaimSigned {
+					pub dest: claim_signed::Dest,
+				}
+				pub mod claim_signed {
+					use super::runtime_types;
+					pub type Dest = ::core::option::Option<
+						runtime_types::pallet_airdrop_claims::utils::MultiAddress,
+					>;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for ClaimSigned {
+					const PALLET: &'static str = "Claims";
+					const CALL: &'static str = "claim_signed";
+				}
 			}
 			pub struct TransactionApi;
 			impl TransactionApi {
@@ -30414,6 +30510,23 @@ pub mod api {
 							123u8, 91u8, 3u8, 149u8, 37u8, 92u8, 153u8, 156u8, 210u8, 174u8, 145u8,
 							192u8, 149u8, 238u8, 53u8, 217u8, 190u8, 157u8, 224u8, 188u8, 7u8,
 							92u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::claim_signed`]."]
+				pub fn claim_signed(
+					&self,
+					dest: types::claim_signed::Dest,
+				) -> ::subxt::tx::Payload<types::ClaimSigned> {
+					::subxt::tx::Payload::new_static(
+						"Claims",
+						"claim_signed",
+						types::ClaimSigned { dest },
+						[
+							123u8, 242u8, 127u8, 158u8, 93u8, 47u8, 145u8, 109u8, 101u8, 8u8, 53u8,
+							129u8, 183u8, 214u8, 245u8, 158u8, 191u8, 186u8, 66u8, 55u8, 44u8,
+							254u8, 130u8, 197u8, 44u8, 39u8, 48u8, 194u8, 241u8, 45u8, 253u8,
+							176u8,
 						],
 					)
 				}
@@ -32615,6 +32728,1814 @@ pub mod api {
 			}
 		}
 	}
+	pub mod services {
+		use super::root_mod;
+		use super::runtime_types;
+		#[doc = "The `Error` enum of this pallet."]
+		pub type Error = runtime_types::pallet_services::module::Error;
+		#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
+		pub type Call = runtime_types::pallet_services::module::Call;
+		pub mod calls {
+			use super::root_mod;
+			use super::runtime_types;
+			type DispatchError = runtime_types::sp_runtime::DispatchError;
+			pub mod types {
+				use super::runtime_types;
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See `Pallet::create_blueprint`."]
+				pub struct CreateBlueprint {
+					pub blueprint: create_blueprint::Blueprint,
+				}
+				pub mod create_blueprint {
+					use super::runtime_types;
+					pub type Blueprint =
+						runtime_types::tangle_primitives::jobs::v2::ServiceBlueprint;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for CreateBlueprint {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "create_blueprint";
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See `Pallet::register`."]
+				pub struct Register {
+					#[codec(compact)]
+					pub blueprint_id: register::BlueprintId,
+					pub preferences: register::Preferences,
+					pub registration_args: register::RegistrationArgs,
+				}
+				pub mod register {
+					use super::runtime_types;
+					pub type BlueprintId = ::core::primitive::u64;
+					pub type Preferences =
+						runtime_types::tangle_primitives::jobs::v2::OperatorPreferences;
+					pub type RegistrationArgs = ::std::vec::Vec<
+						runtime_types::tangle_primitives::jobs::v2::field::Field<
+							::subxt::utils::AccountId32,
+						>,
+					>;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for Register {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "register";
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See `Pallet::unregister`."]
+				pub struct Unregister {
+					#[codec(compact)]
+					pub blueprint_id: unregister::BlueprintId,
+				}
+				pub mod unregister {
+					use super::runtime_types;
+					pub type BlueprintId = ::core::primitive::u64;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for Unregister {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "unregister";
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See `Pallet::update_approval_preference`."]
+				pub struct UpdateApprovalPreference {
+					#[codec(compact)]
+					pub blueprint_id: update_approval_preference::BlueprintId,
+					pub approval_preference: update_approval_preference::ApprovalPreference,
+				}
+				pub mod update_approval_preference {
+					use super::runtime_types;
+					pub type BlueprintId = ::core::primitive::u64;
+					pub type ApprovalPreference =
+						runtime_types::tangle_primitives::jobs::v2::ApprovalPrefrence;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for UpdateApprovalPreference {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "update_approval_preference";
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See `Pallet::request`."]
+				pub struct Request {
+					#[codec(compact)]
+					pub blueprint_id: request::BlueprintId,
+					pub permitted_callers: request::PermittedCallers,
+					pub service_providers: request::ServiceProviders,
+					#[codec(compact)]
+					pub ttl: request::Ttl,
+					pub request_args: request::RequestArgs,
+				}
+				pub mod request {
+					use super::runtime_types;
+					pub type BlueprintId = ::core::primitive::u64;
+					pub type PermittedCallers = ::std::vec::Vec<::subxt::utils::AccountId32>;
+					pub type ServiceProviders = ::std::vec::Vec<::subxt::utils::AccountId32>;
+					pub type Ttl = ::core::primitive::u64;
+					pub type RequestArgs = ::std::vec::Vec<
+						runtime_types::tangle_primitives::jobs::v2::field::Field<
+							::subxt::utils::AccountId32,
+						>,
+					>;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for Request {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "request";
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See `Pallet::approve`."]
+				pub struct Approve {
+					#[codec(compact)]
+					pub request_id: approve::RequestId,
+				}
+				pub mod approve {
+					use super::runtime_types;
+					pub type RequestId = ::core::primitive::u64;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for Approve {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "approve";
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See `Pallet::reject`."]
+				pub struct Reject {
+					#[codec(compact)]
+					pub request_id: reject::RequestId,
+				}
+				pub mod reject {
+					use super::runtime_types;
+					pub type RequestId = ::core::primitive::u64;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for Reject {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "reject";
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See `Pallet::terminate`."]
+				pub struct Terminate {
+					#[codec(compact)]
+					pub service_id: terminate::ServiceId,
+				}
+				pub mod terminate {
+					use super::runtime_types;
+					pub type ServiceId = ::core::primitive::u64;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for Terminate {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "terminate";
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See `Pallet::call`."]
+				pub struct Call {
+					#[codec(compact)]
+					pub service_id: call::ServiceId,
+					#[codec(compact)]
+					pub job: call::Job,
+					pub args: call::Args,
+				}
+				pub mod call {
+					use super::runtime_types;
+					pub type ServiceId = ::core::primitive::u64;
+					pub type Job = ::core::primitive::u8;
+					pub type Args = ::std::vec::Vec<
+						runtime_types::tangle_primitives::jobs::v2::field::Field<
+							::subxt::utils::AccountId32,
+						>,
+					>;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for Call {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "call";
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "See `Pallet::submit_result`."]
+				pub struct SubmitResult {
+					#[codec(compact)]
+					pub service_id: submit_result::ServiceId,
+					#[codec(compact)]
+					pub call_id: submit_result::CallId,
+					pub result: submit_result::Result,
+				}
+				pub mod submit_result {
+					use super::runtime_types;
+					pub type ServiceId = ::core::primitive::u64;
+					pub type CallId = ::core::primitive::u64;
+					pub type Result = ::std::vec::Vec<
+						runtime_types::tangle_primitives::jobs::v2::field::Field<
+							::subxt::utils::AccountId32,
+						>,
+					>;
+				}
+				impl ::subxt::blocks::StaticExtrinsic for SubmitResult {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "submit_result";
+				}
+			}
+			pub struct TransactionApi;
+			impl TransactionApi {
+				#[doc = "See `Pallet::create_blueprint`."]
+				pub fn create_blueprint(
+					&self,
+					blueprint: types::create_blueprint::Blueprint,
+				) -> ::subxt::tx::Payload<types::CreateBlueprint> {
+					::subxt::tx::Payload::new_static(
+						"Services",
+						"create_blueprint",
+						types::CreateBlueprint { blueprint },
+						[
+							214u8, 105u8, 127u8, 26u8, 39u8, 27u8, 180u8, 210u8, 8u8, 141u8, 230u8,
+							77u8, 55u8, 181u8, 198u8, 253u8, 66u8, 99u8, 160u8, 124u8, 5u8, 112u8,
+							211u8, 42u8, 106u8, 193u8, 32u8, 210u8, 150u8, 56u8, 163u8, 138u8,
+						],
+					)
+				}
+				#[doc = "See `Pallet::register`."]
+				pub fn register(
+					&self,
+					blueprint_id: types::register::BlueprintId,
+					preferences: types::register::Preferences,
+					registration_args: types::register::RegistrationArgs,
+				) -> ::subxt::tx::Payload<types::Register> {
+					::subxt::tx::Payload::new_static(
+						"Services",
+						"register",
+						types::Register { blueprint_id, preferences, registration_args },
+						[
+							202u8, 12u8, 19u8, 47u8, 154u8, 166u8, 68u8, 28u8, 253u8, 137u8, 127u8,
+							80u8, 8u8, 80u8, 113u8, 249u8, 80u8, 206u8, 108u8, 249u8, 40u8, 48u8,
+							21u8, 178u8, 254u8, 30u8, 186u8, 148u8, 48u8, 131u8, 24u8, 15u8,
+						],
+					)
+				}
+				#[doc = "See `Pallet::unregister`."]
+				pub fn unregister(
+					&self,
+					blueprint_id: types::unregister::BlueprintId,
+				) -> ::subxt::tx::Payload<types::Unregister> {
+					::subxt::tx::Payload::new_static(
+						"Services",
+						"unregister",
+						types::Unregister { blueprint_id },
+						[
+							159u8, 137u8, 225u8, 1u8, 158u8, 129u8, 192u8, 17u8, 9u8, 163u8, 73u8,
+							108u8, 130u8, 155u8, 196u8, 141u8, 203u8, 128u8, 3u8, 198u8, 23u8,
+							48u8, 174u8, 104u8, 254u8, 98u8, 29u8, 51u8, 187u8, 122u8, 203u8, 14u8,
+						],
+					)
+				}
+				#[doc = "See `Pallet::update_approval_preference`."]
+				pub fn update_approval_preference(
+					&self,
+					blueprint_id: types::update_approval_preference::BlueprintId,
+					approval_preference: types::update_approval_preference::ApprovalPreference,
+				) -> ::subxt::tx::Payload<types::UpdateApprovalPreference> {
+					::subxt::tx::Payload::new_static(
+						"Services",
+						"update_approval_preference",
+						types::UpdateApprovalPreference { blueprint_id, approval_preference },
+						[
+							150u8, 101u8, 19u8, 2u8, 197u8, 0u8, 109u8, 208u8, 93u8, 192u8, 3u8,
+							1u8, 129u8, 181u8, 28u8, 50u8, 249u8, 87u8, 137u8, 22u8, 63u8, 189u8,
+							220u8, 24u8, 120u8, 130u8, 181u8, 203u8, 253u8, 107u8, 4u8, 159u8,
+						],
+					)
+				}
+				#[doc = "See `Pallet::request`."]
+				pub fn request(
+					&self,
+					blueprint_id: types::request::BlueprintId,
+					permitted_callers: types::request::PermittedCallers,
+					service_providers: types::request::ServiceProviders,
+					ttl: types::request::Ttl,
+					request_args: types::request::RequestArgs,
+				) -> ::subxt::tx::Payload<types::Request> {
+					::subxt::tx::Payload::new_static(
+						"Services",
+						"request",
+						types::Request {
+							blueprint_id,
+							permitted_callers,
+							service_providers,
+							ttl,
+							request_args,
+						},
+						[
+							31u8, 232u8, 63u8, 221u8, 95u8, 148u8, 171u8, 48u8, 237u8, 110u8,
+							216u8, 155u8, 113u8, 80u8, 20u8, 212u8, 138u8, 232u8, 145u8, 208u8,
+							174u8, 209u8, 93u8, 255u8, 113u8, 77u8, 192u8, 21u8, 168u8, 172u8,
+							73u8, 133u8,
+						],
+					)
+				}
+				#[doc = "See `Pallet::approve`."]
+				pub fn approve(
+					&self,
+					request_id: types::approve::RequestId,
+				) -> ::subxt::tx::Payload<types::Approve> {
+					::subxt::tx::Payload::new_static(
+						"Services",
+						"approve",
+						types::Approve { request_id },
+						[
+							248u8, 232u8, 185u8, 96u8, 244u8, 127u8, 41u8, 179u8, 130u8, 237u8,
+							105u8, 221u8, 26u8, 83u8, 199u8, 91u8, 0u8, 241u8, 218u8, 78u8, 209u8,
+							104u8, 40u8, 141u8, 68u8, 89u8, 213u8, 52u8, 20u8, 255u8, 120u8, 109u8,
+						],
+					)
+				}
+				#[doc = "See `Pallet::reject`."]
+				pub fn reject(
+					&self,
+					request_id: types::reject::RequestId,
+				) -> ::subxt::tx::Payload<types::Reject> {
+					::subxt::tx::Payload::new_static(
+						"Services",
+						"reject",
+						types::Reject { request_id },
+						[
+							119u8, 137u8, 83u8, 229u8, 178u8, 252u8, 111u8, 82u8, 34u8, 195u8,
+							132u8, 26u8, 136u8, 69u8, 244u8, 124u8, 138u8, 82u8, 249u8, 95u8,
+							177u8, 91u8, 236u8, 63u8, 153u8, 82u8, 50u8, 207u8, 145u8, 86u8, 135u8,
+							202u8,
+						],
+					)
+				}
+				#[doc = "See `Pallet::terminate`."]
+				pub fn terminate(
+					&self,
+					service_id: types::terminate::ServiceId,
+				) -> ::subxt::tx::Payload<types::Terminate> {
+					::subxt::tx::Payload::new_static(
+						"Services",
+						"terminate",
+						types::Terminate { service_id },
+						[
+							80u8, 226u8, 169u8, 82u8, 37u8, 5u8, 44u8, 217u8, 228u8, 230u8, 40u8,
+							144u8, 149u8, 62u8, 225u8, 232u8, 222u8, 111u8, 67u8, 78u8, 31u8,
+							209u8, 89u8, 183u8, 19u8, 187u8, 250u8, 1u8, 230u8, 160u8, 252u8, 91u8,
+						],
+					)
+				}
+				#[doc = "See `Pallet::call`."]
+				pub fn call(
+					&self,
+					service_id: types::call::ServiceId,
+					job: types::call::Job,
+					args: types::call::Args,
+				) -> ::subxt::tx::Payload<types::Call> {
+					::subxt::tx::Payload::new_static(
+						"Services",
+						"call",
+						types::Call { service_id, job, args },
+						[
+							211u8, 128u8, 33u8, 122u8, 27u8, 241u8, 107u8, 16u8, 144u8, 85u8, 29u8,
+							152u8, 143u8, 161u8, 22u8, 130u8, 101u8, 107u8, 17u8, 145u8, 106u8,
+							198u8, 184u8, 238u8, 202u8, 173u8, 195u8, 0u8, 248u8, 230u8, 13u8,
+							53u8,
+						],
+					)
+				}
+				#[doc = "See `Pallet::submit_result`."]
+				pub fn submit_result(
+					&self,
+					service_id: types::submit_result::ServiceId,
+					call_id: types::submit_result::CallId,
+					result: types::submit_result::Result,
+				) -> ::subxt::tx::Payload<types::SubmitResult> {
+					::subxt::tx::Payload::new_static(
+						"Services",
+						"submit_result",
+						types::SubmitResult { service_id, call_id, result },
+						[
+							65u8, 66u8, 115u8, 54u8, 48u8, 16u8, 67u8, 120u8, 239u8, 41u8, 202u8,
+							127u8, 211u8, 253u8, 112u8, 134u8, 0u8, 13u8, 68u8, 221u8, 118u8,
+							204u8, 33u8, 191u8, 204u8, 2u8, 93u8, 151u8, 200u8, 243u8, 212u8,
+							214u8,
+						],
+					)
+				}
+			}
+		}
+		#[doc = "The `Event` enum of this pallet"]
+		pub type Event = runtime_types::pallet_services::module::Event;
+		pub mod events {
+			use super::runtime_types;
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "A new service blueprint has been created."]
+			pub struct BlueprintCreated {
+				pub owner: blueprint_created::Owner,
+				pub blueprint_id: blueprint_created::BlueprintId,
+			}
+			pub mod blueprint_created {
+				use super::runtime_types;
+				pub type Owner = ::subxt::utils::AccountId32;
+				pub type BlueprintId = ::core::primitive::u64;
+			}
+			impl ::subxt::events::StaticEvent for BlueprintCreated {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "BlueprintCreated";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "An new operator has been registered."]
+			pub struct Registered {
+				pub provider: registered::Provider,
+				pub blueprint_id: registered::BlueprintId,
+				pub preferences: registered::Preferences,
+				pub registration_args: registered::RegistrationArgs,
+			}
+			pub mod registered {
+				use super::runtime_types;
+				pub type Provider = ::subxt::utils::AccountId32;
+				pub type BlueprintId = ::core::primitive::u64;
+				pub type Preferences =
+					runtime_types::tangle_primitives::jobs::v2::OperatorPreferences;
+				pub type RegistrationArgs = ::std::vec::Vec<
+					runtime_types::tangle_primitives::jobs::v2::field::Field<
+						::subxt::utils::AccountId32,
+					>,
+				>;
+			}
+			impl ::subxt::events::StaticEvent for Registered {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "Registered";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "An operator has been unregistered."]
+			pub struct Unregistered {
+				pub operator: unregistered::Operator,
+				pub blueprint_id: unregistered::BlueprintId,
+			}
+			pub mod unregistered {
+				use super::runtime_types;
+				pub type Operator = ::subxt::utils::AccountId32;
+				pub type BlueprintId = ::core::primitive::u64;
+			}
+			impl ::subxt::events::StaticEvent for Unregistered {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "Unregistered";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "The approval preference for an operator has been updated."]
+			pub struct ApprovalPreferenceUpdated {
+				pub operator: approval_preference_updated::Operator,
+				pub blueprint_id: approval_preference_updated::BlueprintId,
+				pub approval_preference: approval_preference_updated::ApprovalPreference,
+			}
+			pub mod approval_preference_updated {
+				use super::runtime_types;
+				pub type Operator = ::subxt::utils::AccountId32;
+				pub type BlueprintId = ::core::primitive::u64;
+				pub type ApprovalPreference =
+					runtime_types::tangle_primitives::jobs::v2::ApprovalPrefrence;
+			}
+			impl ::subxt::events::StaticEvent for ApprovalPreferenceUpdated {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "ApprovalPreferenceUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "A new service has been requested."]
+			pub struct ServiceRequested {
+				pub owner: service_requested::Owner,
+				pub request_id: service_requested::RequestId,
+				pub blueprint_id: service_requested::BlueprintId,
+				pub pending_approvals: service_requested::PendingApprovals,
+				pub approved: service_requested::Approved,
+			}
+			pub mod service_requested {
+				use super::runtime_types;
+				pub type Owner = ::subxt::utils::AccountId32;
+				pub type RequestId = ::core::primitive::u64;
+				pub type BlueprintId = ::core::primitive::u64;
+				pub type PendingApprovals = ::std::vec::Vec<::subxt::utils::AccountId32>;
+				pub type Approved = ::std::vec::Vec<::subxt::utils::AccountId32>;
+			}
+			impl ::subxt::events::StaticEvent for ServiceRequested {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "ServiceRequested";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "A service request has been approved."]
+			pub struct ServiceRequestApproved {
+				pub operator: service_request_approved::Operator,
+				pub request_id: service_request_approved::RequestId,
+				pub blueprint_id: service_request_approved::BlueprintId,
+				pub pending_approvals: service_request_approved::PendingApprovals,
+				pub approved: service_request_approved::Approved,
+			}
+			pub mod service_request_approved {
+				use super::runtime_types;
+				pub type Operator = ::subxt::utils::AccountId32;
+				pub type RequestId = ::core::primitive::u64;
+				pub type BlueprintId = ::core::primitive::u64;
+				pub type PendingApprovals = ::std::vec::Vec<::subxt::utils::AccountId32>;
+				pub type Approved = ::std::vec::Vec<::subxt::utils::AccountId32>;
+			}
+			impl ::subxt::events::StaticEvent for ServiceRequestApproved {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "ServiceRequestApproved";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "A service request has been rejected."]
+			pub struct ServiceRequestRejected {
+				pub operator: service_request_rejected::Operator,
+				pub request_id: service_request_rejected::RequestId,
+				pub blueprint_id: service_request_rejected::BlueprintId,
+			}
+			pub mod service_request_rejected {
+				use super::runtime_types;
+				pub type Operator = ::subxt::utils::AccountId32;
+				pub type RequestId = ::core::primitive::u64;
+				pub type BlueprintId = ::core::primitive::u64;
+			}
+			impl ::subxt::events::StaticEvent for ServiceRequestRejected {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "ServiceRequestRejected";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "A service request has been updated or modified."]
+			pub struct ServiceRequestUpdated {
+				pub owner: service_request_updated::Owner,
+				pub request_id: service_request_updated::RequestId,
+				pub blueprint_id: service_request_updated::BlueprintId,
+				pub pending_approvals: service_request_updated::PendingApprovals,
+				pub approved: service_request_updated::Approved,
+			}
+			pub mod service_request_updated {
+				use super::runtime_types;
+				pub type Owner = ::subxt::utils::AccountId32;
+				pub type RequestId = ::core::primitive::u64;
+				pub type BlueprintId = ::core::primitive::u64;
+				pub type PendingApprovals = ::std::vec::Vec<::subxt::utils::AccountId32>;
+				pub type Approved = ::std::vec::Vec<::subxt::utils::AccountId32>;
+			}
+			impl ::subxt::events::StaticEvent for ServiceRequestUpdated {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "ServiceRequestUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "A service has been initiated."]
+			pub struct ServiceInitiated {
+				pub owner: service_initiated::Owner,
+				pub request_id: service_initiated::RequestId,
+				pub service_id: service_initiated::ServiceId,
+				pub blueprint_id: service_initiated::BlueprintId,
+			}
+			pub mod service_initiated {
+				use super::runtime_types;
+				pub type Owner = ::subxt::utils::AccountId32;
+				pub type RequestId = ::core::option::Option<::core::primitive::u64>;
+				pub type ServiceId = ::core::primitive::u64;
+				pub type BlueprintId = ::core::primitive::u64;
+			}
+			impl ::subxt::events::StaticEvent for ServiceInitiated {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "ServiceInitiated";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "A service has been terminated."]
+			pub struct ServiceTerminated {
+				pub owner: service_terminated::Owner,
+				pub service_id: service_terminated::ServiceId,
+				pub blueprint_id: service_terminated::BlueprintId,
+			}
+			pub mod service_terminated {
+				use super::runtime_types;
+				pub type Owner = ::subxt::utils::AccountId32;
+				pub type ServiceId = ::core::primitive::u64;
+				pub type BlueprintId = ::core::primitive::u64;
+			}
+			impl ::subxt::events::StaticEvent for ServiceTerminated {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "ServiceTerminated";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "A job has been called."]
+			pub struct JobCalled {
+				pub caller: job_called::Caller,
+				pub service_id: job_called::ServiceId,
+				pub call_id: job_called::CallId,
+				pub job: job_called::Job,
+				pub args: job_called::Args,
+			}
+			pub mod job_called {
+				use super::runtime_types;
+				pub type Caller = ::subxt::utils::AccountId32;
+				pub type ServiceId = ::core::primitive::u64;
+				pub type CallId = ::core::primitive::u64;
+				pub type Job = ::core::primitive::u8;
+				pub type Args = ::std::vec::Vec<
+					runtime_types::tangle_primitives::jobs::v2::field::Field<
+						::subxt::utils::AccountId32,
+					>,
+				>;
+			}
+			impl ::subxt::events::StaticEvent for JobCalled {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "JobCalled";
+			}
+			#[derive(
+				:: subxt :: ext :: codec :: Decode,
+				:: subxt :: ext :: codec :: Encode,
+				:: subxt :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+			#[doc = "A job result has been submitted."]
+			pub struct JobResultSubmitted {
+				pub operator: job_result_submitted::Operator,
+				pub service_id: job_result_submitted::ServiceId,
+				pub call_id: job_result_submitted::CallId,
+				pub job: job_result_submitted::Job,
+				pub result: job_result_submitted::Result,
+			}
+			pub mod job_result_submitted {
+				use super::runtime_types;
+				pub type Operator = ::subxt::utils::AccountId32;
+				pub type ServiceId = ::core::primitive::u64;
+				pub type CallId = ::core::primitive::u64;
+				pub type Job = ::core::primitive::u8;
+				pub type Result = ::std::vec::Vec<
+					runtime_types::tangle_primitives::jobs::v2::field::Field<
+						::subxt::utils::AccountId32,
+					>,
+				>;
+			}
+			impl ::subxt::events::StaticEvent for JobResultSubmitted {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "JobResultSubmitted";
+			}
+		}
+		pub mod storage {
+			use super::runtime_types;
+			pub mod types {
+				use super::runtime_types;
+				pub mod next_blueprint_id {
+					use super::runtime_types;
+					pub type NextBlueprintId = ::core::primitive::u64;
+				}
+				pub mod next_service_request_id {
+					use super::runtime_types;
+					pub type NextServiceRequestId = ::core::primitive::u64;
+				}
+				pub mod next_instance_id {
+					use super::runtime_types;
+					pub type NextInstanceId = ::core::primitive::u64;
+				}
+				pub mod next_job_call_id {
+					use super::runtime_types;
+					pub type NextJobCallId = ::core::primitive::u64;
+				}
+				pub mod blueprints {
+					use super::runtime_types;
+					pub type Blueprints = (
+						::subxt::utils::AccountId32,
+						runtime_types::tangle_primitives::jobs::v2::ServiceBlueprint,
+					);
+					pub type Param0 = ::core::primitive::u64;
+				}
+				pub mod operators {
+					use super::runtime_types;
+					pub type Operators =
+						runtime_types::tangle_primitives::jobs::v2::OperatorPreferences;
+					pub type Param0 = ::core::primitive::u64;
+					pub type Param1 = ::subxt::utils::AccountId32;
+				}
+				pub mod service_requests {
+					use super::runtime_types;
+					pub type ServiceRequests =
+						runtime_types::tangle_primitives::jobs::v2::ServiceRequest<
+							::subxt::utils::AccountId32,
+							::core::primitive::u64,
+						>;
+					pub type Param0 = ::core::primitive::u64;
+				}
+				pub mod instances {
+					use super::runtime_types;
+					pub type Instances = runtime_types::tangle_primitives::jobs::v2::Service<
+						::subxt::utils::AccountId32,
+						::core::primitive::u64,
+					>;
+					pub type Param0 = ::core::primitive::u64;
+				}
+				pub mod user_services {
+					use super::runtime_types;
+					pub type UserServices =
+						runtime_types::bounded_collections::bounded_btree_set::BoundedBTreeSet<
+							::core::primitive::u64,
+						>;
+					pub type Param0 = ::subxt::utils::AccountId32;
+				}
+				pub mod job_calls {
+					use super::runtime_types;
+					pub type JobCalls = runtime_types::tangle_primitives::jobs::v2::JobCall<
+						::subxt::utils::AccountId32,
+					>;
+					pub type Param0 = ::core::primitive::u64;
+					pub type Param1 = ::core::primitive::u64;
+				}
+				pub mod job_results {
+					use super::runtime_types;
+					pub type JobResults = runtime_types::tangle_primitives::jobs::v2::JobCallResult<
+						::subxt::utils::AccountId32,
+					>;
+					pub type Param0 = ::core::primitive::u64;
+					pub type Param1 = ::core::primitive::u64;
+				}
+				pub mod operators_profile {
+					use super::runtime_types;
+					pub type OperatorsProfile =
+						runtime_types::tangle_primitives::jobs::v2::OperatorProfile;
+					pub type Param0 = ::subxt::utils::AccountId32;
+				}
+			}
+			pub struct StorageApi;
+			impl StorageApi {
+				#[doc = " The next free ID for a service blueprint."]
+				pub fn next_blueprint_id(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::next_blueprint_id::NextBlueprintId,
+					::subxt::storage::address::Yes,
+					::subxt::storage::address::Yes,
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"NextBlueprintId",
+						vec![],
+						[
+							35u8, 44u8, 121u8, 43u8, 47u8, 227u8, 24u8, 214u8, 105u8, 224u8, 192u8,
+							107u8, 93u8, 67u8, 237u8, 105u8, 147u8, 12u8, 106u8, 77u8, 106u8, 60u8,
+							125u8, 136u8, 29u8, 74u8, 32u8, 116u8, 169u8, 29u8, 248u8, 191u8,
+						],
+					)
+				}
+				#[doc = " The next free ID for a service request."]
+				pub fn next_service_request_id(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::next_service_request_id::NextServiceRequestId,
+					::subxt::storage::address::Yes,
+					::subxt::storage::address::Yes,
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"NextServiceRequestId",
+						vec![],
+						[
+							40u8, 205u8, 139u8, 150u8, 30u8, 95u8, 231u8, 50u8, 201u8, 122u8, 18u8,
+							86u8, 153u8, 52u8, 66u8, 18u8, 223u8, 123u8, 81u8, 25u8, 124u8, 181u8,
+							88u8, 131u8, 156u8, 54u8, 121u8, 244u8, 206u8, 54u8, 15u8, 218u8,
+						],
+					)
+				}
+				#[doc = " The next free ID for a service Instance."]
+				pub fn next_instance_id(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::next_instance_id::NextInstanceId,
+					::subxt::storage::address::Yes,
+					::subxt::storage::address::Yes,
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"NextInstanceId",
+						vec![],
+						[
+							134u8, 80u8, 72u8, 175u8, 246u8, 17u8, 135u8, 164u8, 20u8, 191u8, 89u8,
+							166u8, 9u8, 94u8, 74u8, 92u8, 98u8, 189u8, 199u8, 136u8, 27u8, 203u8,
+							96u8, 193u8, 212u8, 151u8, 83u8, 178u8, 71u8, 44u8, 229u8, 101u8,
+						],
+					)
+				}
+				#[doc = " The next free ID for a service call."]
+				pub fn next_job_call_id(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::next_job_call_id::NextJobCallId,
+					::subxt::storage::address::Yes,
+					::subxt::storage::address::Yes,
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"NextJobCallId",
+						vec![],
+						[
+							91u8, 154u8, 224u8, 213u8, 133u8, 241u8, 107u8, 25u8, 9u8, 22u8, 190u8,
+							236u8, 246u8, 67u8, 142u8, 223u8, 38u8, 184u8, 60u8, 6u8, 154u8, 229u8,
+							170u8, 195u8, 109u8, 160u8, 23u8, 104u8, 229u8, 202u8, 10u8, 76u8,
+						],
+					)
+				}
+				#[doc = " The service blueprints along with their owner."]
+				pub fn blueprints_iter(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::blueprints::Blueprints,
+					(),
+					(),
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"Blueprints",
+						vec![],
+						[
+							157u8, 79u8, 96u8, 118u8, 209u8, 72u8, 156u8, 208u8, 43u8, 242u8,
+							208u8, 21u8, 44u8, 97u8, 230u8, 165u8, 13u8, 46u8, 167u8, 111u8, 30u8,
+							188u8, 88u8, 59u8, 61u8, 237u8, 239u8, 115u8, 208u8, 218u8, 35u8,
+							164u8,
+						],
+					)
+				}
+				#[doc = " The service blueprints along with their owner."]
+				pub fn blueprints(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::blueprints::Param0>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::blueprints::Blueprints,
+					::subxt::storage::address::Yes,
+					(),
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"Blueprints",
+						vec![::subxt::storage::address::make_static_storage_map_key(_0.borrow())],
+						[
+							157u8, 79u8, 96u8, 118u8, 209u8, 72u8, 156u8, 208u8, 43u8, 242u8,
+							208u8, 21u8, 44u8, 97u8, 230u8, 165u8, 13u8, 46u8, 167u8, 111u8, 30u8,
+							188u8, 88u8, 59u8, 61u8, 237u8, 239u8, 115u8, 208u8, 218u8, 35u8,
+							164u8,
+						],
+					)
+				}
+				#[doc = " The operators for a specific service blueprint."]
+				#[doc = " Blueprint ID -> Operator -> Operator Preferences"]
+				pub fn operators_iter(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::operators::Operators,
+					(),
+					(),
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"Operators",
+						vec![],
+						[
+							175u8, 94u8, 215u8, 216u8, 65u8, 112u8, 95u8, 19u8, 154u8, 48u8, 102u8,
+							133u8, 46u8, 197u8, 71u8, 61u8, 81u8, 196u8, 91u8, 54u8, 24u8, 207u8,
+							36u8, 18u8, 55u8, 216u8, 100u8, 66u8, 39u8, 55u8, 47u8, 203u8,
+						],
+					)
+				}
+				#[doc = " The operators for a specific service blueprint."]
+				#[doc = " Blueprint ID -> Operator -> Operator Preferences"]
+				pub fn operators_iter1(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::operators::Param0>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::operators::Operators,
+					(),
+					(),
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"Operators",
+						vec![::subxt::storage::address::make_static_storage_map_key(_0.borrow())],
+						[
+							175u8, 94u8, 215u8, 216u8, 65u8, 112u8, 95u8, 19u8, 154u8, 48u8, 102u8,
+							133u8, 46u8, 197u8, 71u8, 61u8, 81u8, 196u8, 91u8, 54u8, 24u8, 207u8,
+							36u8, 18u8, 55u8, 216u8, 100u8, 66u8, 39u8, 55u8, 47u8, 203u8,
+						],
+					)
+				}
+				#[doc = " The operators for a specific service blueprint."]
+				#[doc = " Blueprint ID -> Operator -> Operator Preferences"]
+				pub fn operators(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::operators::Param0>,
+					_1: impl ::std::borrow::Borrow<types::operators::Param1>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::operators::Operators,
+					::subxt::storage::address::Yes,
+					(),
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"Operators",
+						vec![
+							::subxt::storage::address::make_static_storage_map_key(_0.borrow()),
+							::subxt::storage::address::make_static_storage_map_key(_1.borrow()),
+						],
+						[
+							175u8, 94u8, 215u8, 216u8, 65u8, 112u8, 95u8, 19u8, 154u8, 48u8, 102u8,
+							133u8, 46u8, 197u8, 71u8, 61u8, 81u8, 196u8, 91u8, 54u8, 24u8, 207u8,
+							36u8, 18u8, 55u8, 216u8, 100u8, 66u8, 39u8, 55u8, 47u8, 203u8,
+						],
+					)
+				}
+				#[doc = " The service requests along with their owner."]
+				#[doc = " Request ID -> Service Request"]
+				pub fn service_requests_iter(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::service_requests::ServiceRequests,
+					(),
+					(),
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"ServiceRequests",
+						vec![],
+						[
+							209u8, 40u8, 90u8, 166u8, 245u8, 129u8, 31u8, 68u8, 249u8, 249u8, 36u8,
+							159u8, 0u8, 43u8, 133u8, 85u8, 117u8, 104u8, 97u8, 146u8, 67u8, 58u8,
+							183u8, 202u8, 82u8, 3u8, 144u8, 9u8, 11u8, 90u8, 131u8, 237u8,
+						],
+					)
+				}
+				#[doc = " The service requests along with their owner."]
+				#[doc = " Request ID -> Service Request"]
+				pub fn service_requests(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::service_requests::Param0>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::service_requests::ServiceRequests,
+					::subxt::storage::address::Yes,
+					(),
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"ServiceRequests",
+						vec![::subxt::storage::address::make_static_storage_map_key(_0.borrow())],
+						[
+							209u8, 40u8, 90u8, 166u8, 245u8, 129u8, 31u8, 68u8, 249u8, 249u8, 36u8,
+							159u8, 0u8, 43u8, 133u8, 85u8, 117u8, 104u8, 97u8, 146u8, 67u8, 58u8,
+							183u8, 202u8, 82u8, 3u8, 144u8, 9u8, 11u8, 90u8, 131u8, 237u8,
+						],
+					)
+				}
+				#[doc = " The Services Instances"]
+				#[doc = " Service ID -> Service"]
+				pub fn instances_iter(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::instances::Instances,
+					(),
+					(),
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"Instances",
+						vec![],
+						[
+							23u8, 60u8, 55u8, 29u8, 241u8, 164u8, 199u8, 144u8, 71u8, 190u8, 14u8,
+							81u8, 133u8, 10u8, 142u8, 158u8, 126u8, 80u8, 206u8, 209u8, 174u8,
+							74u8, 246u8, 188u8, 164u8, 220u8, 105u8, 159u8, 73u8, 143u8, 85u8,
+							147u8,
+						],
+					)
+				}
+				#[doc = " The Services Instances"]
+				#[doc = " Service ID -> Service"]
+				pub fn instances(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::instances::Param0>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::instances::Instances,
+					::subxt::storage::address::Yes,
+					(),
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"Instances",
+						vec![::subxt::storage::address::make_static_storage_map_key(_0.borrow())],
+						[
+							23u8, 60u8, 55u8, 29u8, 241u8, 164u8, 199u8, 144u8, 71u8, 190u8, 14u8,
+							81u8, 133u8, 10u8, 142u8, 158u8, 126u8, 80u8, 206u8, 209u8, 174u8,
+							74u8, 246u8, 188u8, 164u8, 220u8, 105u8, 159u8, 73u8, 143u8, 85u8,
+							147u8,
+						],
+					)
+				}
+				#[doc = " User Service Instances"]
+				#[doc = " User Account ID -> Service ID"]
+				pub fn user_services_iter(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::user_services::UserServices,
+					(),
+					::subxt::storage::address::Yes,
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"UserServices",
+						vec![],
+						[
+							228u8, 80u8, 139u8, 177u8, 57u8, 117u8, 175u8, 212u8, 37u8, 201u8,
+							176u8, 12u8, 79u8, 136u8, 65u8, 250u8, 105u8, 37u8, 13u8, 176u8, 86u8,
+							119u8, 111u8, 6u8, 44u8, 109u8, 193u8, 103u8, 199u8, 195u8, 56u8,
+							235u8,
+						],
+					)
+				}
+				#[doc = " User Service Instances"]
+				#[doc = " User Account ID -> Service ID"]
+				pub fn user_services(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::user_services::Param0>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::user_services::UserServices,
+					::subxt::storage::address::Yes,
+					::subxt::storage::address::Yes,
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"UserServices",
+						vec![::subxt::storage::address::make_static_storage_map_key(_0.borrow())],
+						[
+							228u8, 80u8, 139u8, 177u8, 57u8, 117u8, 175u8, 212u8, 37u8, 201u8,
+							176u8, 12u8, 79u8, 136u8, 65u8, 250u8, 105u8, 37u8, 13u8, 176u8, 86u8,
+							119u8, 111u8, 6u8, 44u8, 109u8, 193u8, 103u8, 199u8, 195u8, 56u8,
+							235u8,
+						],
+					)
+				}
+				#[doc = " The Service Job Calls"]
+				#[doc = " Service ID -> Call ID -> Job Call"]
+				pub fn job_calls_iter(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::job_calls::JobCalls,
+					(),
+					(),
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"JobCalls",
+						vec![],
+						[
+							81u8, 153u8, 130u8, 10u8, 7u8, 145u8, 215u8, 187u8, 40u8, 251u8, 182u8,
+							5u8, 54u8, 174u8, 243u8, 163u8, 104u8, 140u8, 58u8, 84u8, 36u8, 246u8,
+							235u8, 223u8, 56u8, 242u8, 38u8, 155u8, 182u8, 252u8, 47u8, 222u8,
+						],
+					)
+				}
+				#[doc = " The Service Job Calls"]
+				#[doc = " Service ID -> Call ID -> Job Call"]
+				pub fn job_calls_iter1(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::job_calls::Param0>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::job_calls::JobCalls,
+					(),
+					(),
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"JobCalls",
+						vec![::subxt::storage::address::make_static_storage_map_key(_0.borrow())],
+						[
+							81u8, 153u8, 130u8, 10u8, 7u8, 145u8, 215u8, 187u8, 40u8, 251u8, 182u8,
+							5u8, 54u8, 174u8, 243u8, 163u8, 104u8, 140u8, 58u8, 84u8, 36u8, 246u8,
+							235u8, 223u8, 56u8, 242u8, 38u8, 155u8, 182u8, 252u8, 47u8, 222u8,
+						],
+					)
+				}
+				#[doc = " The Service Job Calls"]
+				#[doc = " Service ID -> Call ID -> Job Call"]
+				pub fn job_calls(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::job_calls::Param0>,
+					_1: impl ::std::borrow::Borrow<types::job_calls::Param1>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::job_calls::JobCalls,
+					::subxt::storage::address::Yes,
+					(),
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"JobCalls",
+						vec![
+							::subxt::storage::address::make_static_storage_map_key(_0.borrow()),
+							::subxt::storage::address::make_static_storage_map_key(_1.borrow()),
+						],
+						[
+							81u8, 153u8, 130u8, 10u8, 7u8, 145u8, 215u8, 187u8, 40u8, 251u8, 182u8,
+							5u8, 54u8, 174u8, 243u8, 163u8, 104u8, 140u8, 58u8, 84u8, 36u8, 246u8,
+							235u8, 223u8, 56u8, 242u8, 38u8, 155u8, 182u8, 252u8, 47u8, 222u8,
+						],
+					)
+				}
+				#[doc = " The Service Job Call Results"]
+				#[doc = " Service ID -> Call ID -> Job Call Result"]
+				pub fn job_results_iter(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::job_results::JobResults,
+					(),
+					(),
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"JobResults",
+						vec![],
+						[
+							73u8, 18u8, 125u8, 187u8, 92u8, 54u8, 109u8, 224u8, 218u8, 111u8, 27u8,
+							135u8, 238u8, 20u8, 109u8, 113u8, 154u8, 233u8, 37u8, 170u8, 20u8,
+							210u8, 166u8, 14u8, 68u8, 195u8, 213u8, 243u8, 157u8, 98u8, 241u8,
+							105u8,
+						],
+					)
+				}
+				#[doc = " The Service Job Call Results"]
+				#[doc = " Service ID -> Call ID -> Job Call Result"]
+				pub fn job_results_iter1(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::job_results::Param0>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::job_results::JobResults,
+					(),
+					(),
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"JobResults",
+						vec![::subxt::storage::address::make_static_storage_map_key(_0.borrow())],
+						[
+							73u8, 18u8, 125u8, 187u8, 92u8, 54u8, 109u8, 224u8, 218u8, 111u8, 27u8,
+							135u8, 238u8, 20u8, 109u8, 113u8, 154u8, 233u8, 37u8, 170u8, 20u8,
+							210u8, 166u8, 14u8, 68u8, 195u8, 213u8, 243u8, 157u8, 98u8, 241u8,
+							105u8,
+						],
+					)
+				}
+				#[doc = " The Service Job Call Results"]
+				#[doc = " Service ID -> Call ID -> Job Call Result"]
+				pub fn job_results(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::job_results::Param0>,
+					_1: impl ::std::borrow::Borrow<types::job_results::Param1>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::job_results::JobResults,
+					::subxt::storage::address::Yes,
+					(),
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"JobResults",
+						vec![
+							::subxt::storage::address::make_static_storage_map_key(_0.borrow()),
+							::subxt::storage::address::make_static_storage_map_key(_1.borrow()),
+						],
+						[
+							73u8, 18u8, 125u8, 187u8, 92u8, 54u8, 109u8, 224u8, 218u8, 111u8, 27u8,
+							135u8, 238u8, 20u8, 109u8, 113u8, 154u8, 233u8, 37u8, 170u8, 20u8,
+							210u8, 166u8, 14u8, 68u8, 195u8, 213u8, 243u8, 157u8, 98u8, 241u8,
+							105u8,
+						],
+					)
+				}
+				pub fn operators_profile_iter(
+					&self,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::operators_profile::OperatorsProfile,
+					(),
+					(),
+					::subxt::storage::address::Yes,
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"OperatorsProfile",
+						vec![],
+						[
+							187u8, 96u8, 245u8, 44u8, 238u8, 169u8, 69u8, 44u8, 209u8, 127u8,
+							169u8, 188u8, 60u8, 70u8, 17u8, 69u8, 200u8, 49u8, 27u8, 60u8, 179u8,
+							198u8, 226u8, 207u8, 151u8, 248u8, 86u8, 97u8, 149u8, 68u8, 42u8, 66u8,
+						],
+					)
+				}
+				pub fn operators_profile(
+					&self,
+					_0: impl ::std::borrow::Borrow<types::operators_profile::Param0>,
+				) -> ::subxt::storage::address::Address<
+					::subxt::storage::address::StaticStorageMapKey,
+					types::operators_profile::OperatorsProfile,
+					::subxt::storage::address::Yes,
+					(),
+					(),
+				> {
+					::subxt::storage::address::Address::new_static(
+						"Services",
+						"OperatorsProfile",
+						vec![::subxt::storage::address::make_static_storage_map_key(_0.borrow())],
+						[
+							187u8, 96u8, 245u8, 44u8, 238u8, 169u8, 69u8, 44u8, 209u8, 127u8,
+							169u8, 188u8, 60u8, 70u8, 17u8, 69u8, 200u8, 49u8, 27u8, 60u8, 179u8,
+							198u8, 226u8, 207u8, 151u8, 248u8, 86u8, 97u8, 149u8, 68u8, 42u8, 66u8,
+						],
+					)
+				}
+			}
+		}
+		pub mod constants {
+			use super::runtime_types;
+			pub struct ConstantsApi;
+			impl ConstantsApi {
+				#[doc = " `PalletId` for the services pallet."]
+				pub fn pallet_id(
+					&self,
+				) -> ::subxt::constants::Address<runtime_types::frame_support::PalletId> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"PalletId",
+						[
+							56u8, 243u8, 53u8, 83u8, 154u8, 179u8, 170u8, 80u8, 133u8, 173u8, 61u8,
+							161u8, 47u8, 225u8, 146u8, 21u8, 50u8, 229u8, 248u8, 27u8, 104u8, 58u8,
+							129u8, 197u8, 102u8, 160u8, 168u8, 205u8, 154u8, 42u8, 217u8, 53u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of fields in a job call."]
+				pub fn max_fields(&self) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxFields",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum size of a field in a job call."]
+				pub fn max_fields_size(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxFieldsSize",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum length of metadata string length."]
+				pub fn max_metadata_length(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxMetadataLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of jobs per service."]
+				pub fn max_jobs_per_service(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxJobsPerService",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of Operators per service."]
+				pub fn max_operators_per_service(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxOperatorsPerService",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of permitted callers per service."]
+				pub fn max_permitted_callers(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxPermittedCallers",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of services per operator."]
+				pub fn max_services_per_operator(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxServicesPerOperator",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of blueprints per operator."]
+				pub fn max_blueprints_per_operator(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxBlueprintsPerOperator",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of services per user."]
+				pub fn max_services_per_user(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxServicesPerUser",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of binaries per gadget."]
+				pub fn max_binaries_per_gadget(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxBinariesPerGadget",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of sources per gadget."]
+				pub fn max_sources_per_gadget(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxSourcesPerGadget",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Git owner maximum length."]
+				pub fn max_git_owner_length(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxGitOwnerLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Git repository maximum length."]
+				pub fn max_git_repo_length(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxGitRepoLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Git tag maximum length."]
+				pub fn max_git_tag_length(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxGitTagLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " binary name maximum length."]
+				pub fn max_binary_name_length(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxBinaryNameLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " IPFS hash maximum length."]
+				pub fn max_ipfs_hash_length(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxIpfsHashLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Container registry maximum length."]
+				pub fn max_container_registry_length(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxContainerRegistryLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Container image name maximum length."]
+				pub fn max_container_image_name_length(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxContainerImageNameLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Container image tag maximum length."]
+				pub fn max_container_image_tag_length(
+					&self,
+				) -> ::subxt::constants::Address<::core::primitive::u32> {
+					::subxt::constants::Address::new_static(
+						"Services",
+						"MaxContainerImageTagLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+			}
+		}
+	}
 	pub mod dkg {
 		use super::root_mod;
 		use super::runtime_types;
@@ -33231,10 +35152,10 @@ pub mod api {
 						"proxy",
 						types::Proxy { real, force_proxy_type, call: ::std::boxed::Box::new(call) },
 						[
-							191u8, 229u8, 56u8, 13u8, 187u8, 83u8, 239u8, 48u8, 253u8, 114u8, 90u8,
-							190u8, 49u8, 208u8, 84u8, 32u8, 175u8, 145u8, 217u8, 255u8, 176u8,
-							207u8, 9u8, 102u8, 249u8, 182u8, 132u8, 204u8, 32u8, 221u8, 151u8,
-							100u8,
+							164u8, 176u8, 192u8, 234u8, 48u8, 220u8, 240u8, 82u8, 46u8, 95u8,
+							233u8, 127u8, 9u8, 150u8, 180u8, 77u8, 133u8, 240u8, 254u8, 179u8,
+							224u8, 119u8, 202u8, 18u8, 75u8, 40u8, 70u8, 57u8, 209u8, 34u8, 188u8,
+							217u8,
 						],
 					)
 				}
@@ -33395,10 +35316,10 @@ pub mod api {
 							call: ::std::boxed::Box::new(call),
 						},
 						[
-							186u8, 255u8, 148u8, 227u8, 190u8, 138u8, 151u8, 61u8, 49u8, 58u8,
-							204u8, 127u8, 249u8, 30u8, 138u8, 192u8, 143u8, 39u8, 173u8, 164u8,
-							200u8, 78u8, 144u8, 101u8, 162u8, 141u8, 84u8, 171u8, 120u8, 67u8,
-							149u8, 54u8,
+							147u8, 78u8, 189u8, 98u8, 178u8, 166u8, 204u8, 122u8, 101u8, 79u8,
+							203u8, 70u8, 252u8, 25u8, 126u8, 163u8, 215u8, 110u8, 85u8, 69u8,
+							188u8, 228u8, 98u8, 57u8, 112u8, 29u8, 3u8, 196u8, 222u8, 208u8, 69u8,
+							10u8,
 						],
 					)
 				}
@@ -33807,6 +35728,23 @@ pub mod api {
 				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 				pub struct BoundedBTreeMap<_0, _1>(pub ::subxt::utils::KeyedVec<_0, _1>);
+			}
+			pub mod bounded_btree_set {
+				use super::runtime_types;
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				pub struct BoundedBTreeSet<_0>(pub ::std::vec::Vec<_0>);
 			}
 			pub mod bounded_vec {
 				use super::runtime_types;
@@ -35192,6 +37130,13 @@ pub mod api {
 					force_set_expiry_config {
 						expiry_block: ::core::primitive::u64,
 						dest: runtime_types::pallet_airdrop_claims::utils::MultiAddress,
+					},
+					#[codec(index = 6)]
+					#[doc = "See [`Pallet::claim_signed`]."]
+					claim_signed {
+						dest: ::core::option::Option<
+							runtime_types::pallet_airdrop_claims::utils::MultiAddress,
+						>,
 					},
 				}
 				#[derive(
@@ -41621,6 +43566,323 @@ pub mod api {
 				pub __ignore: ::core::marker::PhantomData<_4>,
 			}
 		}
+		pub mod pallet_services {
+			use super::runtime_types;
+			pub mod module {
+				use super::runtime_types;
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
+				pub enum Call {
+					#[codec(index = 0)]
+					#[doc = "See `Pallet::create_blueprint`."]
+					create_blueprint {
+						blueprint: runtime_types::tangle_primitives::jobs::v2::ServiceBlueprint,
+					},
+					#[codec(index = 1)]
+					#[doc = "See `Pallet::register`."]
+					register {
+						#[codec(compact)]
+						blueprint_id: ::core::primitive::u64,
+						preferences:
+							runtime_types::tangle_primitives::jobs::v2::OperatorPreferences,
+						registration_args: ::std::vec::Vec<
+							runtime_types::tangle_primitives::jobs::v2::field::Field<
+								::subxt::utils::AccountId32,
+							>,
+						>,
+					},
+					#[codec(index = 2)]
+					#[doc = "See `Pallet::unregister`."]
+					unregister {
+						#[codec(compact)]
+						blueprint_id: ::core::primitive::u64,
+					},
+					#[codec(index = 3)]
+					#[doc = "See `Pallet::update_approval_preference`."]
+					update_approval_preference {
+						#[codec(compact)]
+						blueprint_id: ::core::primitive::u64,
+						approval_preference:
+							runtime_types::tangle_primitives::jobs::v2::ApprovalPrefrence,
+					},
+					#[codec(index = 4)]
+					#[doc = "See `Pallet::request`."]
+					request {
+						#[codec(compact)]
+						blueprint_id: ::core::primitive::u64,
+						permitted_callers: ::std::vec::Vec<::subxt::utils::AccountId32>,
+						service_providers: ::std::vec::Vec<::subxt::utils::AccountId32>,
+						#[codec(compact)]
+						ttl: ::core::primitive::u64,
+						request_args: ::std::vec::Vec<
+							runtime_types::tangle_primitives::jobs::v2::field::Field<
+								::subxt::utils::AccountId32,
+							>,
+						>,
+					},
+					#[codec(index = 5)]
+					#[doc = "See `Pallet::approve`."]
+					approve {
+						#[codec(compact)]
+						request_id: ::core::primitive::u64,
+					},
+					#[codec(index = 6)]
+					#[doc = "See `Pallet::reject`."]
+					reject {
+						#[codec(compact)]
+						request_id: ::core::primitive::u64,
+					},
+					#[codec(index = 7)]
+					#[doc = "See `Pallet::terminate`."]
+					terminate {
+						#[codec(compact)]
+						service_id: ::core::primitive::u64,
+					},
+					#[codec(index = 8)]
+					#[doc = "See `Pallet::call`."]
+					call {
+						#[codec(compact)]
+						service_id: ::core::primitive::u64,
+						#[codec(compact)]
+						job: ::core::primitive::u8,
+						args: ::std::vec::Vec<
+							runtime_types::tangle_primitives::jobs::v2::field::Field<
+								::subxt::utils::AccountId32,
+							>,
+						>,
+					},
+					#[codec(index = 9)]
+					#[doc = "See `Pallet::submit_result`."]
+					submit_result {
+						#[codec(compact)]
+						service_id: ::core::primitive::u64,
+						#[codec(compact)]
+						call_id: ::core::primitive::u64,
+						result: ::std::vec::Vec<
+							runtime_types::tangle_primitives::jobs::v2::field::Field<
+								::subxt::utils::AccountId32,
+							>,
+						>,
+					},
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "The `Error` enum of this pallet."]
+				pub enum Error {
+					#[codec(index = 0)]
+					#[doc = "The service blueprint was not found."]
+					BlueprintNotFound,
+					#[codec(index = 1)]
+					#[doc = "The caller is already registered as a operator."]
+					AlreadyRegistered,
+					#[codec(index = 2)]
+					#[doc = "The caller does not have the requirements to be a operator."]
+					InvalidRegistrationInput,
+					#[codec(index = 3)]
+					#[doc = "The caller does not have the requirements to request a service."]
+					InvalidRequestInput,
+					#[codec(index = 4)]
+					#[doc = "The caller does not have the requirements to call a job."]
+					InvalidJobCallInput,
+					#[codec(index = 5)]
+					#[doc = "The caller provided an invalid job result."]
+					InvalidJobResult,
+					#[codec(index = 6)]
+					#[doc = "The caller is not registered as a operator."]
+					NotRegistered,
+					#[codec(index = 7)]
+					#[doc = "The service request was not found."]
+					ServiceRequestNotFound,
+					#[codec(index = 8)]
+					#[doc = "The service was not found."]
+					ServiceNotFound,
+					#[codec(index = 9)]
+					#[doc = "An error occurred while type checking the provided input input."]
+					TypeCheck(runtime_types::tangle_primitives::jobs::v2::TypeCheckError),
+					#[codec(index = 10)]
+					#[doc = "The maximum number of permitted callers per service has been exceeded."]
+					MaxPermittedCallersExceeded,
+					#[codec(index = 11)]
+					#[doc = "The maximum number of operators per service has been exceeded."]
+					MaxServiceProvidersExceeded,
+					#[codec(index = 12)]
+					#[doc = "The maximum number of services per user has been exceeded."]
+					MaxServicesPerUserExceeded,
+					#[codec(index = 13)]
+					#[doc = "The maximum number of fields per request has been exceeded."]
+					MaxFieldsExceeded,
+					#[codec(index = 14)]
+					#[doc = "The approval is not requested for the operator (the caller)."]
+					ApprovalNotRequested,
+					#[codec(index = 15)]
+					#[doc = "The requested job definition does not exist."]
+					#[doc = "This error is returned when the requested job definition does not exist in the service blueprint."]
+					JobDefinitionNotFound,
+					#[codec(index = 16)]
+					#[doc = "Either the service or the job call was not found."]
+					ServiceOrJobCallNotFound,
+					#[codec(index = 17)]
+					#[doc = "The result of the job call was not found."]
+					JobCallResultNotFound,
+					#[codec(index = 18)]
+					#[doc = "An error occurred while encoding the EVM ABI."]
+					EVMAbiEncode,
+					#[codec(index = 19)]
+					#[doc = "Operator profile not found."]
+					OperatorProfileNotFound,
+					#[codec(index = 20)]
+					#[doc = "Maximum number of services per Provider reached."]
+					MaxServicesPerProviderExceeded,
+				}
+				#[derive(
+					:: subxt :: ext :: codec :: Decode,
+					:: subxt :: ext :: codec :: Encode,
+					:: subxt :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+				#[doc = "The `Event` enum of this pallet"]
+				pub enum Event {
+					#[codec(index = 0)]
+					#[doc = "A new service blueprint has been created."]
+					BlueprintCreated {
+						owner: ::subxt::utils::AccountId32,
+						blueprint_id: ::core::primitive::u64,
+					},
+					#[codec(index = 1)]
+					#[doc = "An new operator has been registered."]
+					Registered {
+						provider: ::subxt::utils::AccountId32,
+						blueprint_id: ::core::primitive::u64,
+						preferences:
+							runtime_types::tangle_primitives::jobs::v2::OperatorPreferences,
+						registration_args: ::std::vec::Vec<
+							runtime_types::tangle_primitives::jobs::v2::field::Field<
+								::subxt::utils::AccountId32,
+							>,
+						>,
+					},
+					#[codec(index = 2)]
+					#[doc = "An operator has been unregistered."]
+					Unregistered {
+						operator: ::subxt::utils::AccountId32,
+						blueprint_id: ::core::primitive::u64,
+					},
+					#[codec(index = 3)]
+					#[doc = "The approval preference for an operator has been updated."]
+					ApprovalPreferenceUpdated {
+						operator: ::subxt::utils::AccountId32,
+						blueprint_id: ::core::primitive::u64,
+						approval_preference:
+							runtime_types::tangle_primitives::jobs::v2::ApprovalPrefrence,
+					},
+					#[codec(index = 4)]
+					#[doc = "A new service has been requested."]
+					ServiceRequested {
+						owner: ::subxt::utils::AccountId32,
+						request_id: ::core::primitive::u64,
+						blueprint_id: ::core::primitive::u64,
+						pending_approvals: ::std::vec::Vec<::subxt::utils::AccountId32>,
+						approved: ::std::vec::Vec<::subxt::utils::AccountId32>,
+					},
+					#[codec(index = 5)]
+					#[doc = "A service request has been approved."]
+					ServiceRequestApproved {
+						operator: ::subxt::utils::AccountId32,
+						request_id: ::core::primitive::u64,
+						blueprint_id: ::core::primitive::u64,
+						pending_approvals: ::std::vec::Vec<::subxt::utils::AccountId32>,
+						approved: ::std::vec::Vec<::subxt::utils::AccountId32>,
+					},
+					#[codec(index = 6)]
+					#[doc = "A service request has been rejected."]
+					ServiceRequestRejected {
+						operator: ::subxt::utils::AccountId32,
+						request_id: ::core::primitive::u64,
+						blueprint_id: ::core::primitive::u64,
+					},
+					#[codec(index = 7)]
+					#[doc = "A service request has been updated or modified."]
+					ServiceRequestUpdated {
+						owner: ::subxt::utils::AccountId32,
+						request_id: ::core::primitive::u64,
+						blueprint_id: ::core::primitive::u64,
+						pending_approvals: ::std::vec::Vec<::subxt::utils::AccountId32>,
+						approved: ::std::vec::Vec<::subxt::utils::AccountId32>,
+					},
+					#[codec(index = 8)]
+					#[doc = "A service has been initiated."]
+					ServiceInitiated {
+						owner: ::subxt::utils::AccountId32,
+						request_id: ::core::option::Option<::core::primitive::u64>,
+						service_id: ::core::primitive::u64,
+						blueprint_id: ::core::primitive::u64,
+					},
+					#[codec(index = 9)]
+					#[doc = "A service has been terminated."]
+					ServiceTerminated {
+						owner: ::subxt::utils::AccountId32,
+						service_id: ::core::primitive::u64,
+						blueprint_id: ::core::primitive::u64,
+					},
+					#[codec(index = 10)]
+					#[doc = "A job has been called."]
+					JobCalled {
+						caller: ::subxt::utils::AccountId32,
+						service_id: ::core::primitive::u64,
+						call_id: ::core::primitive::u64,
+						job: ::core::primitive::u8,
+						args: ::std::vec::Vec<
+							runtime_types::tangle_primitives::jobs::v2::field::Field<
+								::subxt::utils::AccountId32,
+							>,
+						>,
+					},
+					#[codec(index = 11)]
+					#[doc = "A job result has been submitted."]
+					JobResultSubmitted {
+						operator: ::subxt::utils::AccountId32,
+						service_id: ::core::primitive::u64,
+						call_id: ::core::primitive::u64,
+						job: ::core::primitive::u8,
+						result: ::std::vec::Vec<
+							runtime_types::tangle_primitives::jobs::v2::field::Field<
+								::subxt::utils::AccountId32,
+							>,
+						>,
+					},
+				}
+			}
+		}
 		pub mod pallet_session {
 			use super::runtime_types;
 			pub mod pallet {
@@ -45471,6 +47733,944 @@ pub mod api {
 						Bls381,
 					}
 				}
+				pub mod v2 {
+					use super::runtime_types;
+					pub mod field {
+						use super::runtime_types;
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub struct BoundedString(
+							pub  runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								::core::primitive::u8,
+							>,
+						);
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub struct BoundedString2(
+							pub  runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								::core::primitive::u8,
+							>,
+						);
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub struct BoundedString3(
+							pub  runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								::core::primitive::u8,
+							>,
+						);
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub struct BoundedString4(
+							pub  runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								::core::primitive::u8,
+							>,
+						);
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub struct BoundedString5(
+							pub  runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								::core::primitive::u8,
+							>,
+						);
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub struct BoundedString6(
+							pub  runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								::core::primitive::u8,
+							>,
+						);
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub struct BoundedString7(
+							pub  runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								::core::primitive::u8,
+							>,
+						);
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub struct BoundedString8(
+							pub  runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								::core::primitive::u8,
+							>,
+						);
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub struct BoundedString9(
+							pub  runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								::core::primitive::u8,
+							>,
+						);
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub enum Field<_1> {
+							#[codec(index = 0)]
+							None,
+							#[codec(index = 1)]
+							Bool(::core::primitive::bool),
+							#[codec(index = 2)]
+							Uint8(::core::primitive::u8),
+							#[codec(index = 3)]
+							Int8(::core::primitive::i8),
+							#[codec(index = 4)]
+							Uint16(::core::primitive::u16),
+							#[codec(index = 5)]
+							Int16(::core::primitive::i16),
+							#[codec(index = 6)]
+							Uint32(::core::primitive::u32),
+							#[codec(index = 7)]
+							Int32(::core::primitive::i32),
+							#[codec(index = 8)]
+							Uint64(::core::primitive::u64),
+							#[codec(index = 9)]
+							Int64(::core::primitive::i64),
+							#[codec(index = 10)]
+							String(
+								runtime_types::tangle_primitives::jobs::v2::field::BoundedString,
+							),
+							#[codec(index = 11)]
+							Bytes(
+								runtime_types::bounded_collections::bounded_vec::BoundedVec<
+									::core::primitive::u8,
+								>,
+							),
+							#[codec(index = 12)]
+							Array(
+								runtime_types::bounded_collections::bounded_vec::BoundedVec<
+									runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+								>,
+							),
+							#[codec(index = 13)]
+							List(
+								runtime_types::bounded_collections::bounded_vec::BoundedVec<
+									runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+								>,
+							),
+							#[codec(index = 100)]
+							AccountId(_1),
+						}
+						#[derive(
+							:: subxt :: ext :: codec :: Decode,
+							:: subxt :: ext :: codec :: Encode,
+							:: subxt :: ext :: scale_decode :: DecodeAsType,
+							:: subxt :: ext :: scale_encode :: EncodeAsType,
+							Clone,
+							Debug,
+							Eq,
+							PartialEq,
+						)]
+						# [codec (crate = :: subxt :: ext :: codec)]
+						#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+						#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+						pub enum FieldType {
+							#[codec(index = 0)]
+							Void,
+							#[codec(index = 1)]
+							Bool,
+							#[codec(index = 2)]
+							Uint8,
+							#[codec(index = 3)]
+							Int8,
+							#[codec(index = 4)]
+							Uint16,
+							#[codec(index = 5)]
+							Int16,
+							#[codec(index = 6)]
+							Uint32,
+							#[codec(index = 7)]
+							Int32,
+							#[codec(index = 8)]
+							Uint64,
+							#[codec(index = 9)]
+							Int64,
+							#[codec(index = 10)]
+							String,
+							#[codec(index = 11)]
+							Bytes,
+							#[codec(index = 12)]
+							Optional(
+								::std::boxed::Box<
+									runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+								>,
+							),
+							#[codec(index = 13)]
+							Array(
+								::core::primitive::u64,
+								::std::boxed::Box<
+									runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+								>,
+							),
+							#[codec(index = 14)]
+							List(
+								::std::boxed::Box<
+									runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+								>,
+							),
+							#[codec(index = 100)]
+							AccountId,
+						}
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum ApprovalPrefrence {
+						#[codec(index = 0)]
+						None,
+						#[codec(index = 1)]
+						Required,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum ApprovalState {
+						#[codec(index = 0)]
+						Pending,
+						#[codec(index = 1)]
+						Approved,
+						#[codec(index = 2)]
+						Rejected,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum Architecture {
+						#[codec(index = 0)]
+						Wasm,
+						#[codec(index = 1)]
+						Wasm64,
+						#[codec(index = 2)]
+						Wasi,
+						#[codec(index = 3)]
+						Wasi64,
+						#[codec(index = 4)]
+						Amd,
+						#[codec(index = 5)]
+						Amd64,
+						#[codec(index = 6)]
+						Arm,
+						#[codec(index = 7)]
+						Arm64,
+						#[codec(index = 8)]
+						RiscV,
+						#[codec(index = 9)]
+						RiscV64,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct ContainerGadget {
+						pub soruces: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							runtime_types::tangle_primitives::jobs::v2::GadgetSource,
+						>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum Gadget {
+						#[codec(index = 0)]
+						Wasm(runtime_types::tangle_primitives::jobs::v2::WasmGadget),
+						#[codec(index = 1)]
+						Native(runtime_types::tangle_primitives::jobs::v2::NativeGadget),
+						#[codec(index = 2)]
+						Container(runtime_types::tangle_primitives::jobs::v2::ContainerGadget),
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct GadgetBinary {
+						pub arch: runtime_types::tangle_primitives::jobs::v2::Architecture,
+						pub os: runtime_types::tangle_primitives::jobs::v2::OperatingSystem,
+						pub name: runtime_types::tangle_primitives::jobs::v2::field::BoundedString6,
+						pub sha256: [::core::primitive::u8; 32usize],
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct GadgetSource {
+						pub fetcher:
+							runtime_types::tangle_primitives::jobs::v2::GadgetSourceFetcher,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum GadgetSourceFetcher {
+						#[codec(index = 0)]
+						IPFS(
+							runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								::core::primitive::u8,
+							>,
+						),
+						#[codec(index = 1)]
+						Github(runtime_types::tangle_primitives::jobs::v2::GithubFetcher),
+						#[codec(index = 2)]
+						ContainerImage(
+							runtime_types::tangle_primitives::jobs::v2::ImageRegistryFetcher,
+						),
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct GithubFetcher {
+						pub owner:
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString3,
+						pub repo: runtime_types::tangle_primitives::jobs::v2::field::BoundedString4,
+						pub tag: runtime_types::tangle_primitives::jobs::v2::field::BoundedString5,
+						pub binaries: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							runtime_types::tangle_primitives::jobs::v2::GadgetBinary,
+						>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct ImageRegistryFetcher {
+						pub registry:
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString7,
+						pub image:
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString8,
+						pub tag: runtime_types::tangle_primitives::jobs::v2::field::BoundedString9,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct JobCall<_1> {
+						pub service_id: ::core::primitive::u64,
+						pub job: ::core::primitive::u8,
+						pub args: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+						>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct JobCallResult<_1> {
+						pub service_id: ::core::primitive::u64,
+						pub call_id: ::core::primitive::u64,
+						pub result: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+						>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct JobDefinition {
+						pub metadata: runtime_types::tangle_primitives::jobs::v2::JobMetadata,
+						pub params: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+						>,
+						pub result: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+						>,
+						pub verifier: runtime_types::tangle_primitives::jobs::v2::JobResultVerifier,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct JobMetadata {
+						pub name: runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						pub description: ::core::option::Option<
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum JobResultVerifier {
+						#[codec(index = 0)]
+						None,
+						#[codec(index = 1)]
+						Evm(::subxt::utils::H160),
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct NativeGadget {
+						pub soruces: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							runtime_types::tangle_primitives::jobs::v2::GadgetSource,
+						>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum OperatingSystem {
+						#[codec(index = 0)]
+						Unknown,
+						#[codec(index = 1)]
+						Linux,
+						#[codec(index = 2)]
+						Windows,
+						#[codec(index = 3)]
+						MacOS,
+						#[codec(index = 4)]
+						BSD,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct OperatorPreferences {
+						pub key: runtime_types::sp_core::ecdsa::Public,
+						pub approval: runtime_types::tangle_primitives::jobs::v2::ApprovalPrefrence,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct OperatorProfile {
+						pub services:
+							runtime_types::bounded_collections::bounded_btree_set::BoundedBTreeSet<
+								::core::primitive::u64,
+							>,
+						pub blueprints:
+							runtime_types::bounded_collections::bounded_btree_set::BoundedBTreeSet<
+								::core::primitive::u64,
+							>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct RpcServicesWithBlueprint<_1, _2> {
+						pub blueprint_id: ::core::primitive::u64,
+						pub blueprint: runtime_types::tangle_primitives::jobs::v2::ServiceBlueprint,
+						pub services: ::std::vec::Vec<
+							runtime_types::tangle_primitives::jobs::v2::Service<_1, _2>,
+						>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct Service<_1, _2> {
+						pub id: ::core::primitive::u64,
+						pub blueprint: ::core::primitive::u64,
+						pub owner: _1,
+						pub permitted_callers:
+							runtime_types::bounded_collections::bounded_vec::BoundedVec<_1>,
+						pub operators:
+							runtime_types::bounded_collections::bounded_vec::BoundedVec<_1>,
+						pub ttl: _2,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct ServiceBlueprint {
+						pub metadata: runtime_types::tangle_primitives::jobs::v2::ServiceMetadata,
+						pub jobs: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							runtime_types::tangle_primitives::jobs::v2::JobDefinition,
+						>,
+						pub registration_hook:
+							runtime_types::tangle_primitives::jobs::v2::ServiceRegistrationHook,
+						pub registration_params:
+							runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+							>,
+						pub request_hook:
+							runtime_types::tangle_primitives::jobs::v2::ServiceRequestHook,
+						pub request_params:
+							runtime_types::bounded_collections::bounded_vec::BoundedVec<
+								runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+							>,
+						pub gadget: runtime_types::tangle_primitives::jobs::v2::Gadget,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct ServiceMetadata {
+						pub name: runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						pub description: ::core::option::Option<
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						>,
+						pub author: ::core::option::Option<
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						>,
+						pub category: ::core::option::Option<
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						>,
+						pub code_repository: ::core::option::Option<
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						>,
+						pub logo: ::core::option::Option<
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						>,
+						pub website: ::core::option::Option<
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						>,
+						pub license: ::core::option::Option<
+							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum ServiceRegistrationHook {
+						#[codec(index = 0)]
+						None,
+						#[codec(index = 1)]
+						Evm(::subxt::utils::H160),
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct ServiceRequest<_1, _2> {
+						pub blueprint: ::core::primitive::u64,
+						pub owner: _1,
+						pub permitted_callers:
+							runtime_types::bounded_collections::bounded_vec::BoundedVec<_1>,
+						pub ttl: _2,
+						pub args: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+						>,
+						pub operators_with_approval_state:
+							runtime_types::bounded_collections::bounded_vec::BoundedVec<(
+								_1,
+								runtime_types::tangle_primitives::jobs::v2::ApprovalState,
+							)>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum ServiceRequestHook {
+						#[codec(index = 0)]
+						None,
+						#[codec(index = 1)]
+						Evm(::subxt::utils::H160),
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum TypeCheckError {
+						#[codec(index = 0)]
+						ArgumentTypeMismatch {
+							index: ::core::primitive::u8,
+							expected: runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+							actual: runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+						},
+						#[codec(index = 1)]
+						NotEnoughArguments {
+							expected: ::core::primitive::u8,
+							actual: ::core::primitive::u8,
+						},
+						#[codec(index = 2)]
+						ResultTypeMismatch {
+							index: ::core::primitive::u8,
+							expected: runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+							actual: runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+						},
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub struct WasmGadget {
+						pub runtime: runtime_types::tangle_primitives::jobs::v2::WasmRuntime,
+						pub soruces: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							runtime_types::tangle_primitives::jobs::v2::GadgetSource,
+						>,
+					}
+					#[derive(
+						:: subxt :: ext :: codec :: Decode,
+						:: subxt :: ext :: codec :: Encode,
+						:: subxt :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: codec)]
+					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					pub enum WasmRuntime {
+						#[codec(index = 0)]
+						Wasmtime,
+						#[codec(index = 1)]
+						Wasmer,
+					}
+				}
 				pub mod zksaas {
 					use super::runtime_types;
 					#[derive(
@@ -46782,10 +49982,12 @@ pub mod api {
 				#[codec(index = 39)]
 				Jobs(runtime_types::pallet_jobs::module::Call),
 				#[codec(index = 40)]
-				Dkg(runtime_types::pallet_dkg::pallet::Call),
+				Services(runtime_types::pallet_services::module::Call),
 				#[codec(index = 41)]
-				ZkSaaS(runtime_types::pallet_zksaas::pallet::Call),
+				Dkg(runtime_types::pallet_dkg::pallet::Call),
 				#[codec(index = 42)]
+				ZkSaaS(runtime_types::pallet_zksaas::pallet::Call),
+				#[codec(index = 43)]
 				Proxy(runtime_types::pallet_proxy::pallet::Call),
 			}
 			#[derive(
@@ -46867,10 +50069,12 @@ pub mod api {
 				#[codec(index = 39)]
 				Jobs(runtime_types::pallet_jobs::module::Error),
 				#[codec(index = 40)]
-				Dkg(runtime_types::pallet_dkg::pallet::Error),
+				Services(runtime_types::pallet_services::module::Error),
 				#[codec(index = 41)]
-				ZkSaaS(runtime_types::pallet_zksaas::pallet::Error),
+				Dkg(runtime_types::pallet_dkg::pallet::Error),
 				#[codec(index = 42)]
+				ZkSaaS(runtime_types::pallet_zksaas::pallet::Error),
+				#[codec(index = 43)]
 				Proxy(runtime_types::pallet_proxy::pallet::Error),
 			}
 			#[derive(
@@ -46954,10 +50158,12 @@ pub mod api {
 				#[codec(index = 39)]
 				Jobs(runtime_types::pallet_jobs::module::Event),
 				#[codec(index = 40)]
-				Dkg(runtime_types::pallet_dkg::pallet::Event),
+				Services(runtime_types::pallet_services::module::Event),
 				#[codec(index = 41)]
-				ZkSaaS(runtime_types::pallet_zksaas::pallet::Event),
+				Dkg(runtime_types::pallet_dkg::pallet::Event),
 				#[codec(index = 42)]
+				ZkSaaS(runtime_types::pallet_zksaas::pallet::Event),
+				#[codec(index = 43)]
 				Proxy(runtime_types::pallet_proxy::pallet::Event),
 			}
 			#[derive(
