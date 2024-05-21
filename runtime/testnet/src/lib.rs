@@ -2644,6 +2644,7 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_roles, Roles);
 			list_benchmark!(list, extra, pallet_jobs, Jobs);
 			list_benchmark!(list, extra, pallet_dkg, Dkg);
+			list_benchmark!(list, extra, pallet_services, Services);
 			list_benchmark!(list, extra, pallet_airdrop_claims, Claims);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
@@ -2669,6 +2670,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_roles, Roles);
 			add_benchmark!(params, batches, pallet_jobs, Jobs);
 			add_benchmark!(params, batches, pallet_dkg, Dkg);
+			add_benchmark!(params, batches, pallet_services, Services);
 			add_benchmark!(params, batches, pallet_airdrop_claims, Claims);
 
 			Ok(batches)
