@@ -1,0 +1,48 @@
+name: Srtool build Wasm
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches: [main]
+
+jobs:
+  srtool:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chain: ["testnet", "mainnet"]
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Srtool build
+        if: matrix.chain == 'mainnet'
+        id: srtool_build
+        uses: chevdor/srtool-actions@v0.8.0
+        with:
+          chain: ${{ matrix.chain }}
+          runtime_dir: runtime/${{ matrix.chain }}
+          package: tangle-runtime
+        
+      - name: Srtool build testnet
+        if: matrix.chain == 'testnet'
+        uses: chevdor/srtool-actions@v0.8.0
+        with:
+          chain: ${{ matrix.chain }}
+          runtime_dir: runtime/${{ matrix.chain }}
+          package: tangle-testnet-runtime
+
+      - name: Summary
+        run: |
+          echo '${{ steps.srtool_build.outputs.json }}' | jq . > ${{ matrix.chain }}-srtool-digest.json
+          cat ${{ matrix.chain }}-srtool-digest.json
+          echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
+
+      - name: Archive Runtime
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.chain }}-runtime-${{ github.sha }}
+          path: |
+            ${{ steps.srtool_build.outputs.wasm }}
+            ${{ matrix.chain }}-srtool-digest.json

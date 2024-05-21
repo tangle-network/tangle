@@ -248,7 +248,7 @@ pub mod pallet {
 		///   `UpdateOrigin`.
 		/// * `fee_info` - The new fee information to be set for the pallet.
 		#[pallet::call_index(0)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::set_fee())]
 		pub fn set_fee(origin: OriginFor<T>, fee_info: FeeInfoOf<T>) -> DispatchResultWithPostInfo {
 			T::UpdateOrigin::ensure_origin(origin)?;
 

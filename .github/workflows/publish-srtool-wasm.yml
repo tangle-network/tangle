@@ -1,0 +1,65 @@
+name: Srtool Wasm Publish
+
+on:
+  workflow_dispatch:
+
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  srtool:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chain: ["testnet", "mainnet"]
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Srtool build
+        if: matrix.chain == 'mainnet'
+        id: srtool_build
+        uses: chevdor/srtool-actions@v0.8.0
+        with:
+          chain: ${{ matrix.chain }}
+          runtime_dir: runtime/${{ matrix.chain }}
+          package: tangle-runtime
+        
+      - name: Srtool build testnet
+        if: matrix.chain == 'testnet'
+        uses: chevdor/srtool-actions@v0.8.0
+        with:
+          chain: ${{ matrix.chain }}
+          runtime_dir: runtime/${{ matrix.chain }}
+          package: tangle-testnet-runtime
+
+      - name: Summary
+        run: |
+          echo '${{ steps.srtool_build.outputs.json }}' | jq . > ${{ matrix.chain }}-srtool-digest.json
+          cat ${{ matrix.chain }}-srtool-digest.json
+          echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
+
+          echo Summary:
+          echo - version: ${{ steps.srtool_build.outputs.version }}
+          echo - info: ${{ steps.srtool_build.outputs.info }}
+          echo - prop: ${{ steps.srtool_build.outputs.proposal_hash }}
+          echo - json: ${{ steps.srtool_build.outputs.json }}
+
+      - name: Upload ${{ matrix.chain }} wasm to release
+        if: matrix.chain == 'mainnet'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: runtime/mainnet/target/srtool/release/wbuild/tangle-runtime/tangle_runtime.compact.compressed.wasm
+          asset_name: tangle-${{ matrix.chain }}-srtool-compact.compressed.wasm
+          tag: ${{ github.ref }}
+          overwrite: true
+
+      - name: Upload ${{ matrix.chain }} wasm to release
+        if: matrix.chain == 'testnet'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: runtime/testnet/target/srtool/release/wbuild/tangle-testnet-runtime/tangle_testnet_runtime.compact.compressed.wasm
+          asset_name: tangle-${{ matrix.chain }}-srtool-compact.compressed.wasm
+          tag: ${{ github.ref }}
+          overwrite: true

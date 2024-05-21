@@ -1,10 +1,14 @@
 [workspace.package]
-version = "0.6.7"
+version = "1.0.3"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
 homepage = "https://webb.tools"
 repository = "https://github.com/webb-tools/tangle"
+
+exclude = [
+    "examples"
+]
 
 [workspace]
 members = [
@@ -35,6 +39,7 @@ members = [
  "precompiles/jobs",
  "precompiles/balances-erc20",
  "tangle-subxt",
+ "examples/*",
  "evm-tracer"
  # "relayer-gadget",
  # "relayer-gadget/cli",

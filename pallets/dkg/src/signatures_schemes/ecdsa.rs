@@ -68,8 +68,10 @@ pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 	let signature = k256::ecdsa::Signature::from_slice(signature)
 		.map_err(|_| Error::<T>::InvalidSignatureDeserialization)?;
 
+	let message = keccak_256(msg);
+
 	ensure!(
-		verifying_key.verify_prehash(msg, &signature).map(|_| signature).is_ok(),
+		verifying_key.verify_prehash(&message, &signature).map(|_| signature).is_ok(),
 		Error::<T>::InvalidSignature
 	);
 	Ok(())
@@ -110,8 +112,10 @@ pub fn verify_secp256r1_ecdsa_signature<T: Config>(
 	let signature = p256::ecdsa::Signature::from_slice(signature)
 		.map_err(|_| Error::<T>::InvalidSignatureDeserialization)?;
 
+	let message = keccak_256(msg);
+
 	ensure!(
-		verifying_key.verify_prehash(msg, &signature).map(|_| signature).is_ok(),
+		verifying_key.verify_prehash(&message, &signature).map(|_| signature).is_ok(),
 		Error::<T>::InvalidSignature
 	);
 	Ok(())

@@ -51,6 +51,7 @@ use pallet_transaction_payment::{
 use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::MaxEncodedLen;
 use parity_scale_codec::{Decode, Encode};
+use precompiles::WebbPrecompiles;
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
@@ -150,6 +151,9 @@ use tangle_primitives::{
 	},
 };
 
+// Precompiles
+pub type Precompiles = WebbPrecompiles<Runtime>;
+
 // Frontier
 use fp_rpc::TransactionStatus;
 use pallet_ethereum::{Call::transact, Transaction as EthereumTransaction};
@@ -169,7 +173,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 607, // v0.6.7
+	spec_version: 1003, // v1.0.3
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -366,7 +370,7 @@ impl pallet_sudo::Config for Runtime {
 parameter_types! {
 	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
 	//       Attempting to do so will brick block production.
-	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS;
+	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS / 2;
 	pub const ExpectedBlockTime: Moment = MILLISECS_PER_BLOCK;
 	pub const ReportLongevity: u64 =
 		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
@@ -440,7 +444,7 @@ pallet_staking_reward_curve::build! {
 
 parameter_types! {
 	// Six sessions in an era (24 hours).
-	pub const SessionsPerEra: sp_staking::SessionIndex = SESSIONS_PER_ERA;
+	pub const SessionsPerEra: sp_staking::SessionIndex = SESSIONS_PER_ERA / 2;
 	// 28 eras for unbonding (28 days).
 	pub const BondingDuration: sp_staking::EraIndex = BONDING_DURATION;
 	// 27 eras for slash defer duration (27 days).
@@ -1037,9 +1041,9 @@ impl pallet_tx_pause::Config for Runtime {
 }
 
 parameter_types! {
-	pub const BasicDeposit: Balance = deposit(0, 100); // purposely set low, do not copy for mainnet
-	pub const ByteDeposit: Balance = deposit(0, 100); // purposely set low, do not copy for mainnet
-	pub const SubAccountDeposit: Balance = deposit(1, 1); // purposely set low, do not copy for mainnet
+	pub const BasicDeposit: Balance = deposit(0, 100);
+	pub const ByteDeposit: Balance = deposit(0, 100);
+	pub const SubAccountDeposit: Balance = deposit(1, 1);
 	pub const MaxSubAccounts: u32 = 100;
 	#[derive(Serialize, Deserialize)]
 	pub const MaxAdditionalFields: u32 = 100;
@@ -1210,7 +1214,7 @@ parameter_types! {
 parameter_types! {
 	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
 	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 32;
+	pub const MaxSubmissionLen: u32 = 60_000_000;
 }
 
 parameter_types! {

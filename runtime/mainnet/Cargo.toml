@@ -215,6 +215,7 @@ std = [
   "pallet-roles/std",
   "sp-storage/std",
   "pallet-jobs/std",
+  "pallet-jobs-rpc-runtime-api/std",
 
   # Tangle dependencies
   "tangle-primitives/std",
