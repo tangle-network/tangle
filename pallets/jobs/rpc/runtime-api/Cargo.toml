@@ -26,3 +26,7 @@ std = [
   "tangle-primitives/std",
   "sp-std/std",
 ]
+wasm = [
+  "parity-scale-codec/serde",
+  "tangle-primitives/std",
+]

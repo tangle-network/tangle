@@ -86,6 +86,12 @@ std = [
   "pallet-evm-chain-id/std",
   "pallet-roles/std"
 ]
+wasm = [
+  "sp-core/serde",
+  "sp-core/full_crypto",
+  "sp-runtime/serde",
+  "tangle-crypto-primitives/wasm",
+]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
   "frame-benchmarking/runtime-benchmarks",
