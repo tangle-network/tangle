@@ -1,0 +1,62 @@
+[package]
+name = "pallet-multi-asset-delegation"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+frame-benchmarking = { workspace = true, optional = true }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+log = { workspace = true }
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true }
+sp-core = { workspace = true }
+sp-io = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+tangle-primitives = { workspace = true, default-features = false, features = ["verifying"] }
+
+[dev-dependencies]
+pallet-balances = { workspace = true }
+smallvec = { workspace = true }
+sp-keystore = { workspace = true }
+
+# Arkworks
+ark-bn254 = { workspace = true }
+ark-crypto-primitives = { workspace = true, default-features = false }
+ark-ec = { workspace = true, default-features = false }
+ark-ff = { workspace = true, default-features = false }
+ark-groth16 = { workspace = true, default-features = false }
+ark-relations = { workspace = true, default-features = false }
+ark-serialize = { workspace = true, default-features = false }
+ark-std = { workspace = true, default-features = false }
+
+ethabi = { workspace = true }
+hex = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+  "scale-info/std",
+  "sp-runtime/std",
+  "frame-benchmarking?/std",
+  "frame-support/std",
+  "frame-system/std",
+  "sp-core/std",
+  "sp-std/std",
+  "tangle-primitives/std",
+  "pallet-balances/std",
+]
+try-runtime = ["frame-support/try-runtime"]
+runtime-benchmarks = [
+  "frame-benchmarking/runtime-benchmarks",
+  "frame-support/runtime-benchmarks",
+  "frame-system/runtime-benchmarks",
+  "sp-runtime/runtime-benchmarks",
+  "pallet-balances/runtime-benchmarks",
+]
