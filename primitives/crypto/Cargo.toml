@@ -23,4 +23,5 @@ wasm = [
   "parity-scale-codec/serde",
   "scale-info/serde",
   "sp-application-crypto/serde",
+  "sp-application-crypto/full_crypto",
 ]

@@ -28,5 +28,4 @@ std = [
 ]
 wasm = [
   "parity-scale-codec/serde",
-  "tangle-primitives/std",
 ]
