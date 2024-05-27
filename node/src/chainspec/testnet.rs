@@ -314,6 +314,7 @@ fn testnet_genesis(
 	RuntimeGenesisConfig {
 		system: SystemConfig { ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },
+		assets: Default::default(),
 		balances: BalancesConfig { balances: endowed_accounts.to_vec() },
 		vesting: VestingConfig {
 			vesting: genesis_non_airdrop
