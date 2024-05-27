@@ -34,10 +34,6 @@ const supportedDestDomains = [
     {
         domainID: 1,
         chainID: 1
-    },
-    {
-        domainID: 2,
-        chainID: 2
     }
 ]
 

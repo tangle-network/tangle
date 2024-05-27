@@ -315,7 +315,7 @@ async function registerDomain(api, domainID, chainID, finalization, sudo) {
 
 // 0x7379676d61(sygma) is general key of sygma defined in sygma substrate pallet runtime for testing
 // see SygUSDLocation definition in runtime.rs
-// 0x737967757364464323(sygusd) is general key of sygusd defined in sygma substrate pallet runtime for testing
+// 0x737967757364(sygusd) is general key of sygusd defined in sygma substrate pallet runtime for testing
 // see SygUSDLocation definition in runtime.rs
 function getSygUSDAssetId(api) {
     return api.createType('StagingXcmV4AssetAssetId', {
@@ -334,7 +334,7 @@ function getSygUSDAssetId(api) {
                 api.createType('StagingXcmV4Junction', { // sygusd
                     GeneralKey: {
                         length: 6,
-                        data: '0x7379677573644643230000000000000000000000000000000000000000000000'
+                        data: '0x7379677573640000000000000000000000000000000000000000000000000000'
                     }
                 }),
             ],
@@ -398,6 +398,25 @@ async function queryMPCAddress(api) {
     return result.toJSON()
 }
 
+// Subscribe to system events via storage
+async function subEvents (api, eventsList) {
+    api.query.system.events((events) => {
+        console.log(`\nReceived ${events.length} events:`);
+
+        // Loop through the Vec<EventRecord>
+        events.forEach((record) => {
+            // Extract the phase, event and the event types
+            const { event } = record;
+
+            console.log(`${event.section}:${event.method}`);
+
+            if (event.section.startsWith("sygmaBridge") || event.section.startsWith("sygmaBridgeForwarder")) {
+                eventsList.push(`${event.section}:${event.method}`);
+            }
+        });
+    });
+}
+
 module.exports = {
     getNativeAssetId,
     getSygUSDAssetId,
@@ -414,5 +433,6 @@ module.exports = {
     executeProposal,
     queryAssetBalance,
     queryBalance,
-    queryMPCAddress
+    queryMPCAddress,
+    subEvents
 }

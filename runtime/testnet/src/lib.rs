@@ -47,7 +47,7 @@ use xcm_builder::{
 };
 use xcm_executor::traits::{Error as ExecutionError, MatchesFungibles};
 use xcm::v4::{prelude::*, AssetId as XcmAssetId, Asset, Location};
-use xcm::v4::Junctions::{X1, X2, X3};
+use xcm::v4::Junctions::{X1, X3};
 use sp_std::sync::Arc;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::{marker::PhantomData, prelude::*, result, vec::Vec};
@@ -1794,18 +1794,16 @@ impl sygma_percentage_feehandler::Config for Runtime {
 parameter_types! {
 	// TNT
     pub NativeLocation: Location = Location::here();
-    pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000300");
+    pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000001");
 
 	// SygUSD
 	pub SygUSDLocation: Location = Location::new(
 		1,
-		X3(
-			Arc::new([
-				Parachain(1000),
-				slice_to_generalkey(b"sygma"),
-				slice_to_generalkey(b"sygusd"),
-			])
-		),
+		[
+			Parachain(1000),
+			slice_to_generalkey(b"sygma"),
+			slice_to_generalkey(b"sygusd"),
+		],
 	);
 	// SygUSDAssetId is the substrate assetID of SygUSD
 	pub SygUSDAssetId: AssetId = 2000;
@@ -1855,7 +1853,7 @@ parameter_types! {
 	pub BridgeAccounts: BTreeMap<XcmAssetId, AccountId32> = bridge_accounts_generator();
 
 	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
-    pub EIP712ChainID: ChainID = U256::from(6232);
+    pub EIP712ChainID: ChainID = U256::from(5);
 
 	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
     // When relayers signing, this address will be included in the EIP712Domain
@@ -1922,19 +1920,28 @@ pub struct DestinationDataParser;
 impl ExtractDestinationData for DestinationDataParser {
 	fn extract_dest(dest: &Location) -> Option<(Vec<u8>, DomainID)> {
 		match (dest.parents, dest.interior.clone()) {
-			(0, X2(xs)) => {
-				let [a, b] = *xs;
-				match (a, b) {
+			(0, X3(xs)) => {
+				let [a, b, c] = *xs;
+				match (a, b, c) {
 					(
-						GeneralKey { length: recipient_len, data: recipient },
-						GeneralKey { length: _domain_len, data: dest_domain_id },
-					) => {
-						let d = u8::default();
-						let domain_id = dest_domain_id.as_slice().first().unwrap_or(&d);
-						if *domain_id == d {
-							return None;
+						GeneralKey {
+							length: path_len,
+							data: sygma_path,
+						},
+						GeneralIndex(dest_domain_id),
+						GeneralKey {
+							length: recipient_len,
+							data: recipient,
 						}
-						Some((recipient[..recipient_len as usize].to_vec(), *domain_id))
+					) => {
+						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+								|domain_id| {
+									(recipient[..recipient_len as usize].to_vec(), domain_id)
+								},
+							);
+						}
+						None
 					},
 					_ => None,
 				}
