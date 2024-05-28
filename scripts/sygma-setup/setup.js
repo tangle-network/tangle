@@ -104,7 +104,7 @@ async function main() {
     console.log('🚀 Sygma substrate pallet setup is done! 🚀');
 
     // It is unnecessary to set up access segregator here since ALICE will be the sudo account and all methods with access control logic are already setup in this script.
-    // so that on Relayer, E2E test only cases about public extrinsic such as deposit, executionProposal, retry .etc
+    // so that on Relayer, E2E test only cares about public extrinsic such as deposit, executionProposal, retry .etc
 }
 
 main().catch(console.error).finally(() => process.exit());

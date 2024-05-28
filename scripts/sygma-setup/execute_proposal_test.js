@@ -1,6 +1,3 @@
-// The Licensed Work is (c) 2022 Sygma
-// SPDX-License-Identifier: LGPL-3.0-only
-
 require('dotenv').config();
 
 const {ApiPromise, WsProvider, Keyring} = require('@polkadot/api');
@@ -24,7 +21,6 @@ const proposal_native = {
 
 // signer is the mpc address 0x1c5541A79AcC662ab2D2647F3B141a3B7Cdb2Ae4
 const signature_native = [57, 218, 225, 125, 128, 217, 23, 82, 49, 217, 8, 197, 110, 174, 42, 157, 129, 43, 22, 63, 215, 213, 100, 179, 17, 170, 23, 95, 72, 80, 78, 181, 108, 176, 60, 138, 137, 29, 157, 138, 244, 0, 5, 180, 128, 243, 48, 99, 175, 53, 140, 245, 162, 111, 36, 65, 89, 208, 41, 69, 209, 149, 247, 149, 28];
-
 const mpcAddress = "0x1c5541a79acc662ab2d2647f3b141a3b7cdb2ae4";
 const aliceAddress = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
 

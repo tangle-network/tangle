@@ -314,7 +314,6 @@ async function registerDomain(api, domainID, chainID, finalization, sudo) {
 }
 
 // 0x7379676d61(sygma) is general key of sygma defined in sygma substrate pallet runtime for testing
-// see SygUSDLocation definition in runtime.rs
 // 0x737967757364(sygusd) is general key of sygusd defined in sygma substrate pallet runtime for testing
 // see SygUSDLocation definition in runtime.rs
 function getSygUSDAssetId(api) {
