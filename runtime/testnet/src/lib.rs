@@ -93,6 +93,7 @@ use tangle_primitives::{
 };
 use xcm::v4::Junctions::{X1, X3};
 use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
+#[allow(deprecated)]
 use xcm_builder::{
 	AccountId32Aliases, CurrencyAdapter as XcmCurrencyAdapter, FungiblesAdapter, IsConcrete,
 	NoChecking, ParentIsPreset, SiblingParachainConvertsVia,
