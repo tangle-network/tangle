@@ -1,3 +1,19 @@
+// This file is part of Tangle.
+// Copyright (C) 2022-2024 Webb Technologies Inc.
+//
+// Tangle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tangle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+use super::*;
 use crate as pallet_multi_asset_delegation;
 use frame_support::{
 	derive_impl,
@@ -11,9 +27,12 @@ use sp_runtime::{
 use crate::types::BalanceOf;
 use frame_support::traits::{ConstU32};
 use frame_support::parameter_types;
+use crate::Service;
+use crate::ServiceManager;
 
 type Block = frame_system::mocking::MockBlock<Test>;
 type Balance = u64;
+type AccountId = u64;
 
 pub const ALICE : u64 = 1;
 pub const BOB : u64 = 2;
@@ -73,6 +92,26 @@ impl pallet_balances::Config for Test {
 	type MaxFreezes = ();
 }
 
+pub struct MockServiceManager;
+
+impl ServiceManager<AccountId, Balance> for MockServiceManager
+{
+    fn list_active_services(account: &AccountId) -> Vec<Service> {
+        // we dont care
+        vec![]
+    }
+
+    fn list_service_reward(account: &AccountId) -> Balance {
+        // we dont care
+        Balance::default()
+    }
+
+    fn can_exit(account: &AccountId) -> bool {
+        // Mock logic to determine if the given account can exit
+        true
+    }
+}
+
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
     pub const MaxLocks: u32 = 50;
@@ -85,6 +124,12 @@ impl pallet_multi_asset_delegation::Config for Test {
     type Currency = Balances;
     type MinOperatorBondAmount = MinOperatorBondAmount;
     type BondDuration = BondDuration;
+	type ServiceManager = MockServiceManager;
+	type LeaveOperatorsDelay = ConstU32<10>;
+	type OperatorBondLessDelay = ConstU32<1>;
+	type LeaveDelegatorsDelay = ConstU32<1>;
+	type RevokeDelegationDelay = ConstU32<1>;
+	type DelegationBondLessDelay = ConstU32<1>;
     type WeightInfo = ();
 }
 
