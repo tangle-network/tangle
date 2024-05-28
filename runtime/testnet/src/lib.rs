@@ -27,36 +27,20 @@ pub mod impls;
 pub mod precompiles;
 pub mod voter_bags;
 
+use fixed::{types::extra::U16, FixedU128 as DecimalFixedU128};
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
+use frame_support::traits::{AsEnsureOriginWithArg, ContainsPair};
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
-		Contains, OnFinalize, WithdrawReasons, SortedMembers
+		Contains, OnFinalize, SortedMembers, WithdrawReasons,
 	},
 	weights::ConstantMultiplier,
 };
-use frame_support::traits::{AsEnsureOriginWithArg, ContainsPair};
-use fixed::{types::extra::U16, FixedU128 as DecimalFixedU128};
-#[allow(deprecated)]
-use xcm_builder::{
-	AccountId32Aliases, CurrencyAdapter as XcmCurrencyAdapter, FungiblesAdapter, IsConcrete, NoChecking, ParentIsPreset,
-	SiblingParachainConvertsVia,
-};
-use xcm_executor::traits::{Error as ExecutionError, MatchesFungibles};
-use xcm::v4::{prelude::*, AssetId as XcmAssetId, Asset, Location};
-use xcm::v4::Junctions::{X1, X3};
-use sp_std::sync::Arc;
-use sp_std::collections::btree_map::BTreeMap;
-use sp_std::{marker::PhantomData, prelude::*, result, vec::Vec};
-use sygma_traits::{
-	ChainID, DecimalConverter, DepositNonce, DomainID, ExtractDestinationData, ResourceId,
-	VerifyingContractAddress,
-};
-use frame_system::{EnsureSignedBy, EnsureSigned};
-use polkadot_parachain_primitives::primitives::Sibling;
+use frame_system::{EnsureSigned, EnsureSignedBy};
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
@@ -70,6 +54,7 @@ use pallet_transaction_payment::{
 use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::MaxEncodedLen;
 use parity_scale_codec::{Decode, Encode};
+use polkadot_parachain_primitives::primitives::Sibling;
 use precompiles::WebbPrecompiles;
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
@@ -80,25 +65,39 @@ use sp_runtime::{
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
 	traits::{
-		self, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto, DispatchInfoOf,
-		Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf, StaticLookup,
-		UniqueSaturatedInto, AccountIdConversion
+		self, AccountIdConversion, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto,
+		DispatchInfoOf, Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf,
+		StaticLookup, UniqueSaturatedInto,
 	},
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
-	SaturatedConversion, AccountId32
+	AccountId32, ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill,
+	RuntimeDebug, SaturatedConversion,
 };
+use sp_std::collections::btree_map::BTreeMap;
+use sp_std::sync::Arc;
+use sp_std::{marker::PhantomData, prelude::*, result, vec::Vec};
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
+use sygma_traits::{
+	ChainID, DecimalConverter, DepositNonce, DomainID, ExtractDestinationData, ResourceId,
+	VerifyingContractAddress,
+};
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	jobs::{JobId, PhaseResult, RpcResponseJobsData},
 	roles::RoleType,
 };
+use xcm::v4::Junctions::{X1, X3};
+use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
+use xcm_builder::{
+	AccountId32Aliases, CurrencyAdapter as XcmCurrencyAdapter, FungiblesAdapter, IsConcrete,
+	NoChecking, ParentIsPreset, SiblingParachainConvertsVia,
+};
+use xcm_executor::traits::{Error as ExecutionError, MatchesFungibles};
 
 pub use frame_support::{
 	construct_runtime,
@@ -1506,7 +1505,7 @@ construct_runtime!(
 		Proxy: pallet_proxy,
 
 		// Sygma
-        SygmaAccessSegregator: sygma_access_segregator,
+		SygmaAccessSegregator: sygma_access_segregator,
 		SygmaBasicFeeHandler: sygma_basic_feehandler,
 		SygmaFeeHandlerRouter: sygma_fee_handler_router,
 		SygmaPercentageFeeHandler: sygma_percentage_feehandler,
@@ -1793,8 +1792,8 @@ impl sygma_percentage_feehandler::Config for Runtime {
 
 parameter_types! {
 	// TNT
-    pub NativeLocation: Location = Location::here();
-    pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000001");
+	pub NativeLocation: Location = Location::here();
+	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000001");
 
 	// SygUSD
 	pub SygUSDLocation: Location = Location::new(
@@ -1820,26 +1819,26 @@ fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
 
 const DEST_VERIFYING_CONTRACT_ADDRESS: &str = "6CdE2Cd82a4F8B74693Ff5e194c19CA08c2d1c68";
 parameter_types! {
-    // RegisteredExtrinsics here registers all valid (pallet index, extrinsic_name) paris
-    // make sure to update this when adding new access control extrinsic
-    pub RegisteredExtrinsics: Vec<(u8, Vec<u8>)> = [
-        (SygmaAccessSegregatorPalletIndex::get(), b"grant_access".to_vec()),
-        (SygmaBasicFeeHandlerPalletIndex::get(), b"set_fee".to_vec()),
-        (SygmaBridgePalletIndex::get(), b"set_mpc_address".to_vec()),
-        (SygmaBridgePalletIndex::get(), b"pause_bridge".to_vec()),
-        (SygmaBridgePalletIndex::get(), b"unpause_bridge".to_vec()),
-        (SygmaBridgePalletIndex::get(), b"register_domain".to_vec()),
-        (SygmaBridgePalletIndex::get(), b"unregister_domain".to_vec()),
-        (SygmaBridgePalletIndex::get(), b"retry".to_vec()),
-        (SygmaFeeHandlerRouterPalletIndex::get(), b"set_fee_handler".to_vec()),
-        (SygmaPercentageFeeHandlerRouterPalletIndex::get(), b"set_fee_rate".to_vec()),
-    ].to_vec();
+	// RegisteredExtrinsics here registers all valid (pallet index, extrinsic_name) paris
+	// make sure to update this when adding new access control extrinsic
+	pub RegisteredExtrinsics: Vec<(u8, Vec<u8>)> = [
+		(SygmaAccessSegregatorPalletIndex::get(), b"grant_access".to_vec()),
+		(SygmaBasicFeeHandlerPalletIndex::get(), b"set_fee".to_vec()),
+		(SygmaBridgePalletIndex::get(), b"set_mpc_address".to_vec()),
+		(SygmaBridgePalletIndex::get(), b"pause_bridge".to_vec()),
+		(SygmaBridgePalletIndex::get(), b"unpause_bridge".to_vec()),
+		(SygmaBridgePalletIndex::get(), b"register_domain".to_vec()),
+		(SygmaBridgePalletIndex::get(), b"unregister_domain".to_vec()),
+		(SygmaBridgePalletIndex::get(), b"retry".to_vec()),
+		(SygmaFeeHandlerRouterPalletIndex::get(), b"set_fee_handler".to_vec()),
+		(SygmaPercentageFeeHandlerRouterPalletIndex::get(), b"set_fee_rate".to_vec()),
+	].to_vec();
 
 	pub const SygmaBridgePalletId: PalletId = PalletId(*b"sygma/01");
 
 	// SygmaBridgeAdminAccountKey Address: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY (Alice)
-    pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d");
-    pub SygmaBridgeAdminAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
+	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d");
+	pub SygmaBridgeAdminAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
 
 	// SygmaBridgeFeeAccount is a substrate account and used for bridging fee collection
 	// SygmaBridgeFeeAccount address: 5ELLU7ibt5ZrNEYRwohtaRBDBa3TzcWwwPELBPSWWd2mbgv3
@@ -1853,12 +1852,12 @@ parameter_types! {
 	pub BridgeAccounts: BTreeMap<XcmAssetId, AccountId32> = bridge_accounts_generator();
 
 	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
-    pub EIP712ChainID: ChainID = U256::from(5);
+	pub EIP712ChainID: ChainID = U256::from(5);
 
 	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
-    // When relayers signing, this address will be included in the EIP712Domain
-    // As long as the relayer and pallet configured with the same address, EIP712Domain should be recognized properly.
-    pub DestVerifyingContractAddress: VerifyingContractAddress = primitive_types::H160::from_slice(hex::decode(DEST_VERIFYING_CONTRACT_ADDRESS).ok().unwrap().as_slice());
+	// When relayers signing, this address will be included in the EIP712Domain
+	// As long as the relayer and pallet configured with the same address, EIP712Domain should be recognized properly.
+	pub DestVerifyingContractAddress: VerifyingContractAddress = primitive_types::H160::from_slice(hex::decode(DEST_VERIFYING_CONTRACT_ADDRESS).ok().unwrap().as_slice());
 
 	pub CheckingAccount: AccountId32 = AccountId32::new([102u8; 32]);
 
@@ -1924,15 +1923,9 @@ impl ExtractDestinationData for DestinationDataParser {
 				let [a, b, c] = *xs;
 				match (a, b, c) {
 					(
-						GeneralKey {
-							length: path_len,
-							data: sygma_path,
-						},
+						GeneralKey { length: path_len, data: sygma_path },
 						GeneralIndex(dest_domain_id),
-						GeneralKey {
-							length: recipient_len,
-							data: recipient,
-						}
+						GeneralKey { length: recipient_len, data: recipient },
 					) => {
 						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
 							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
@@ -1953,7 +1946,7 @@ impl ExtractDestinationData for DestinationDataParser {
 
 pub struct SygmaDecimalConverter<DecimalPairs>(PhantomData<DecimalPairs>);
 impl<DecimalPairs: Get<Vec<(XcmAssetId, u8)>>> DecimalConverter
-for SygmaDecimalConverter<DecimalPairs>
+	for SygmaDecimalConverter<DecimalPairs>
 {
 	fn convert_to(asset: &Asset) -> Option<u128> {
 		match (&asset.fun, &asset.id) {
