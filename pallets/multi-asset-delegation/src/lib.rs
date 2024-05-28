@@ -1,6 +1,24 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+/// Edit this file to define custom logic or remove it if it is not needed.
+/// Learn more about FRAME and the core library of Substrate FRAME pallets:
+/// <https://docs.substrate.io/v3/runtime/frame>
 pub use pallet::*;
+
+#[cfg(test)]
+mod mock;
+
+#[cfg(test)]
+mod tests;
+
+pub mod weights;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
+
+pub mod types;
+pub mod functions;
+pub use functions::*;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -12,361 +30,78 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, StaticLookup};
 	use sp_std::vec::Vec;
+	use crate::types::*;
 
+	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		/// Because this pallet emits events, it depends on the runtime's definition of an event.
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+
 		type Currency: Currency<Self::AccountId>
 			+ ReservableCurrency<Self::AccountId>
 			+ LockableCurrency<Self::AccountId>;
-		type BondAmount: Get<BalanceOf<Self>>;
-		type BondDuration: Get<Self::BlockNumber>;
+
+		type MinOperatorBondAmount: Get<BalanceOf<Self>>;
+
+		type BondDuration: Get<BlockNumberFor<Self>>;
+		/// A type representing the weights required by the dispatchables of this pallet.
+		type WeightInfo: crate::weights::WeightInfo;
 	}
 
-	pub type BalanceOf<T> =
-		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+	#[pallet::pallet]
+	#[pallet::without_storage_info]
+	pub struct Pallet<T>(_);
 
 	#[pallet::storage]
-	#[pallet::getter(fn operators)]
-	pub type Operators<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Operator<T>>;
+	#[pallet::getter(fn operator_info)]
+	pub(crate) type Operators<T: Config> =
+		StorageMap<_, Twox64Concat, T::AccountId, OperatorMetadata<BalanceOf<T>>, OptionQuery>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn operator_scheduled_leaves)]
-	pub type OperatorScheduledLeaves<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, T::BlockNumber>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn operator_bonds)]
-	pub type OperatorBonds<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, BalanceOf<T>>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn delegations)]
-	pub type Delegations<T: Config> = StorageDoubleMap<
+	#[pallet::getter(fn at_stake)]
+	/// Snapshot of collator delegation stake at the start of the round
+	pub type AtStake<T: Config> = StorageDoubleMap<
 		_,
-		Blake2_128Concat,
+		Twox64Concat,
+		RoundIndex,
+		Twox64Concat,
 		T::AccountId,
-		Blake2_128Concat,
-		T::AccountId,
-		BalanceOf<T>,
+		OperatorSnapshotOf<T>,
+		OptionQuery,
 	>;
 
-	#[pallet::storage]
-	#[pallet::getter(fn delegation_scheduled_reductions)]
-	pub type DelegationScheduledReductions<T: Config> = StorageDoubleMap<
-		_,
-		Blake2_128Concat,
-		T::AccountId,
-		Blake2_128Concat,
-		T::AccountId,
-		(BalanceOf<T>, T::BlockNumber),
-	>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn incentives)]
-	pub type Incentives<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, Incentive<BalanceOf<T>>>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn deposit_caps)]
-	pub type DepositCaps<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, BalanceOf<T>>;
-
+	// Pallets use events to inform users when important changes are made.
+	// https://docs.substrate.io/v3/runtime/events-and-errors
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		OperatorJoined(T::AccountId),
-		OperatorScheduledLeave(T::AccountId, T::BlockNumber),
-		OperatorLeaveExecuted(T::AccountId),
-		OperatorLeaveCancelled(T::AccountId),
-		OperatorBondedMore(T::AccountId, BalanceOf<T>),
-		OperatorBondReductionScheduled(T::AccountId, BalanceOf<T>, T::BlockNumber),
-		OperatorBondReductionExecuted(T::AccountId, BalanceOf<T>),
-		OperatorBondReductionCancelled(T::AccountId),
-		OperatorWentOffline(T::AccountId),
-		OperatorWentOnline(T::AccountId),
-		AssetDeposited(T::AccountId, BalanceOf<T>),
-		UnstakeScheduled(T::AccountId, BalanceOf<T>, T::BlockNumber),
-		UnstakeExecuted(T::AccountId, BalanceOf<T>),
-		UnstakeCancelled(T::AccountId),
-		Delegated(T::AccountId, T::AccountId, BalanceOf<T>),
-		DelegatorBondReductionScheduled(T::AccountId, T::AccountId, BalanceOf<T>, T::BlockNumber),
-		DelegatorBondReductionExecuted(T::AccountId, T::AccountId, BalanceOf<T>),
-		DelegatorBondReductionCancelled(T::AccountId, T::AccountId),
-		IncentiveAPYSet(T::AccountId, BalanceOf<T>),
-		DepositCapSet(T::AccountId, BalanceOf<T>),
-		ServiceWhitelistedForRewards(T::AccountId),
 	}
 
+	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T> {
 		AlreadyOperator,
-		NotAnOperator,
+		/// Errors should have helpful documentation associated with them.
 		BondTooLow,
-		NotEnoughBond,
-		NoActiveServices,
-		NotScheduledToLeave,
-		NotScheduledToReduceBond,
-		NoActiveDelegation,
-		NotScheduledToUnstake,
-		IncentiveAlreadySet,
-		CapExceeded,
-		ServiceNotWhitelisted,
 	}
+
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(10_000)]
-		pub fn join_operators(origin: OriginFor<T>) -> DispatchResult {
+
+		#[pallet::call_index(0)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn join_operators(origin: OriginFor<T>, bond_amount: BalanceOf<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			ensure!(!Operators::<T>::contains_key(&who), Error::<T>::AlreadyOperator);
-			T::Currency::reserve(&who, T::BondAmount::get())?;
-			Operators::<T>::insert(&who, Operator::default());
+
+			Self::handle_deposit_and_create_operator(who.clone(), bond_amount)?;
+	
 			Self::deposit_event(Event::OperatorJoined(who));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn schedule_leave_operators(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(Operators::<T>::contains_key(&who), Error::<T>::NotAnOperator);
-			ensure!(Self::no_active_services(&who), Error::<T>::NoActiveServices);
-			let leave_block = frame_system::Pallet::<T>::block_number() + T::BondDuration::get();
-			OperatorScheduledLeaves::<T>::insert(&who, leave_block);
-			Self::deposit_event(Event::OperatorScheduledLeave(who, leave_block));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn execute_leave_operators(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(
-				OperatorScheduledLeaves::<T>::contains_key(&who),
-				Error::<T>::NotScheduledToLeave
-			);
-			let leave_block =
-				OperatorScheduledLeaves::<T>::get(&who).ok_or(Error::<T>::NotScheduledToLeave)?;
-			ensure!(
-				frame_system::Pallet::<T>::block_number() >= leave_block,
-				Error::<T>::BondTooLow
-			);
-			OperatorScheduledLeaves::<T>::remove(&who);
-			Operators::<T>::remove(&who);
-			T::Currency::unreserve(&who, T::BondAmount::get());
-			Self::deposit_event(Event::OperatorLeaveExecuted(who));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn cancel_leave_operators(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(
-				OperatorScheduledLeaves::<T>::contains_key(&who),
-				Error::<T>::NotScheduledToLeave
-			);
-			OperatorScheduledLeaves::<T>::remove(&who);
-			Self::deposit_event(Event::OperatorLeaveCancelled(who));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn operator_bond_more(origin: OriginFor<T>, amount: BalanceOf<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(Operators::<T>::contains_key(&who), Error::<T>::NotAnOperator);
-			T::Currency::reserve(&who, amount)?;
-			let new_bond = OperatorBonds::<T>::get(&who).unwrap_or_default() + amount;
-			OperatorBonds::<T>::insert(&who, new_bond);
-			Self::deposit_event(Event::OperatorBondedMore(who, amount));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn schedule_operator_bond_less(
-			origin: OriginFor<T>,
-			amount: BalanceOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(Operators::<T>::contains_key(&who), Error::<T>::NotAnOperator);
-			ensure!(Self::no_active_services(&who), Error::<T>::NoActiveServices);
-			let current_bond = OperatorBonds::<T>::get(&who).ok_or(Error::<T>::NotEnoughBond)?;
-			ensure!(current_bond >= amount, Error::<T>::NotEnoughBond);
-			let leave_block = frame_system::Pallet::<T>::block_number() + T::BondDuration::get();
-			OperatorBonds::<T>::insert(&who, current_bond - amount);
-			Self::deposit_event(Event::OperatorBondReductionScheduled(who, amount, leave_block));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn execute_operator_bond_less(
-			origin: OriginFor<T>,
-			amount: BalanceOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(OperatorBonds::<T>::contains_key(&who), Error::<T>::NotScheduledToReduceBond);
-			let leave_block =
-				OperatorBonds::<T>::get(&who).ok_or(Error::<T>::NotScheduledToReduceBond)?;
-			ensure!(
-				frame_system::Pallet::<T>::block_number() >= leave_block,
-				Error::<T>::BondTooLow
-			);
-			let current_bond = OperatorBonds::<T>::get(&who).ok_or(Error::<T>::NotEnoughBond)?;
-			ensure!(current_bond >= amount, Error::<T>::NotEnoughBond);
-			OperatorBonds::<T>::insert(&who, current_bond - amount);
-			T::Currency::unreserve(&who, amount);
-			Self::deposit_event(Event::OperatorBondReductionExecuted(who, amount));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn cancel_operator_bond_less(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(OperatorBonds::<T>::contains_key(&who), Error::<T>::NotScheduledToReduceBond);
-			OperatorBonds::<T>::remove(&who);
-			Self::deposit_event(Event::OperatorBondReductionCancelled(who));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn go_offline(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(Operators::<T>::contains_key(&who), Error::<T>::NotAnOperator);
-			// Implement logic to mark operator as offline
-			Self::deposit_event(Event::OperatorWentOffline(who));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn go_online(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(Operators::<T>::contains_key(&who), Error::<T>::NotAnOperator);
-			// Implement logic to mark operator as online
-			Self::deposit_event(Event::OperatorWentOnline(who));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn deposit(origin: OriginFor<T>, amount: BalanceOf<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			T::Currency::reserve(&who, amount)?;
-			// Implement logic to handle deposit
-			Self::deposit_event(Event::AssetDeposited(who, amount));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn schedule_unstake(origin: OriginFor<T>, amount: BalanceOf<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			// Implement logic to schedule unstake
-			let unstake_block = frame_system::Pallet::<T>::block_number() + T::BondDuration::get();
-			Self::deposit_event(Event::UnstakeScheduled(who, amount, unstake_block));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn execute_unstake(origin: OriginFor<T>, amount: BalanceOf<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			// Implement logic to execute unstake
-			Self::deposit_event(Event::UnstakeExecuted(who, amount));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn cancel_unstake(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			// Implement logic to cancel unstake
-			Self::deposit_event(Event::UnstakeCancelled(who));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn delegate(
-			origin: OriginFor<T>,
-			operator: T::AccountId,
-			amount: BalanceOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(Operators::<T>::contains_key(&operator), Error::<T>::NotAnOperator);
-			// Implement logic to delegate
-			Self::deposit_event(Event::Delegated(who, operator, amount));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn schedule_delegator_bond_less(
-			origin: OriginFor<T>,
-			operator: T::AccountId,
-			amount: BalanceOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(Operators::<T>::contains_key(&operator), Error::<T>::NotAnOperator);
-			// Implement logic to schedule delegator bond less
-			let reduction_block =
-				frame_system::Pallet::<T>::block_number() + T::BondDuration::get();
-			Self::deposit_event(Event::DelegatorBondReductionScheduled(
-				who,
-				operator,
-				amount,
-				reduction_block,
-			));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn execute_delegator_bond_less(
-			origin: OriginFor<T>,
-			operator: T::AccountId,
-			amount: BalanceOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(Operators::<T>::contains_key(&operator), Error::<T>::NotAnOperator);
-			// Implement logic to execute delegator bond less
-			Self::deposit_event(Event::DelegatorBondReductionExecuted(who, operator, amount));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn cancel_delegator_bond_less(
-			origin: OriginFor<T>,
-			operator: T::AccountId,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(Operators::<T>::contains_key(&operator), Error::<T>::NotAnOperator);
-			// Implement logic to cancel delegator bond less
-			Self::deposit_event(Event::DelegatorBondReductionCancelled(who, operator));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn set_incentive_apy(
-			origin: OriginFor<T>,
-			pool: T::AccountId,
-			apy: BalanceOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(Incentives::<T>::contains_key(&pool), Error::<T>::IncentiveAlreadySet);
-			// Implement logic to set incentive APY
-			Self::deposit_event(Event::IncentiveAPYSet(who, apy));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn set_deposit_cap(
-			origin: OriginFor<T>,
-			pool: T::AccountId,
-			cap: BalanceOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			// Implement logic to set deposit cap
-			Self::deposit_event(Event::DepositCapSet(who, cap));
-			Ok(())
-		}
-
-		#[pallet::weight(10_000)]
-		pub fn whitelist_blueprint_for_rewards(
-			origin: OriginFor<T>,
-			blueprint: T::AccountId,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			// Implement logic to whitelist blueprint for rewards
-			Self::deposit_event(Event::ServiceWhitelistedForRewards(blueprint));
+	
 			Ok(())
 		}
 	}

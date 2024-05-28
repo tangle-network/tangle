@@ -1,315 +1,74 @@
-// This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
-//
-// Tangle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Tangle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use crate::{mock::*, types::FeeInfo, FeeInfo as FeeInfoStorage};
-use ark_crypto_primitives::snark::{CircuitSpecificSetupSNARK, SNARK};
-use ark_groth16::Groth16;
-use ark_relations::r1cs::{ConstraintSynthesizer, ConstraintSystem};
-use ark_serialize::CanonicalSerialize;
-use ark_std::{
-	rand::{Rng, RngCore, SeedableRng},
-	test_rng,
-};
-use frame_support::{assert_noop, assert_ok, error::BadOrigin};
-use tangle_primitives::{
-	jobs::{
-		ArkworksProofResult, CircomProofResult, Groth16ProveRequest, Groth16System, HyperData,
-		JobResult, JobType, JobWithResult, ZkSaaSPhaseOneJobType, ZkSaaSPhaseTwoJobType,
-		ZkSaaSPhaseTwoRequest, ZkSaaSProofResult, ZkSaaSSystem,
-	},
-	roles::ZeroKnowledgeRoleType,
-	verifier::{self, from_field_elements},
-};
-
-type E = ark_bn254::Bn254;
-type F = ark_bn254::Fr;
+use crate::{mock::*, Error};
+use frame_support::{assert_noop, assert_ok};
+use crate::{Event};
+use crate::types::OperatorStatus;
+use crate::tests::RuntimeEvent;
 
 #[test]
-fn set_fees_works() {
-	new_test_ext().execute_with(|| {
-		let new_fee =
-			FeeInfo { base_fee: 10, circuit_fee: 5, prove_fee: 5, storage_fee_per_byte: 1 };
+    fn join_operator_success() {
+        new_test_ext().execute_with(|| {
+            let bond_amount = 10_000;
 
-		// should fail for non update origin
-		assert_noop!(ZKSaaS::set_fee(RuntimeOrigin::signed(10), new_fee.clone()), BadOrigin);
+            assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 
-		// Dispatch a signed extrinsic.
-		assert_ok!(ZKSaaS::set_fee(RuntimeOrigin::signed(1), new_fee.clone()));
+            let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
+            assert_eq!(operator_info.bond, bond_amount);
+            assert_eq!(operator_info.delegation_count, 0);
+            assert_eq!(operator_info.total_counted, bond_amount);
+            assert_eq!(operator_info.request, None);
+            assert_eq!(operator_info.status, OperatorStatus::Active);
 
-		assert_eq!(FeeInfoStorage::<Runtime>::get(), new_fee);
-	});
-}
+            // Verify event
+            System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorJoined(1)));
+        });
+    }
 
-#[test]
-fn proof_verification_works() {
-	new_test_ext().execute_with(|| {
-		let new_fee =
-			FeeInfo { base_fee: 10, circuit_fee: 5, prove_fee: 5, storage_fee_per_byte: 1 };
-		// Dispatch a signed extrinsic.
-		assert_ok!(ZKSaaS::set_fee(RuntimeOrigin::signed(1), new_fee.clone()));
+    #[test]
+    fn join_operator_already_operator() {
+        new_test_ext().execute_with(|| {
+            let bond_amount = 10_000;
 
-		let mut rng = ark_std::rand::rngs::StdRng::seed_from_u64(test_rng().next_u64());
+            assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
+            assert_noop!(
+                MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount),
+                Error::<Test>::AlreadyOperator
+            );
+        });
+    }
 
-		// Generate the MiMC round constants
-		let constants = (0..mimc::MIMC_ROUNDS).map(|_| rng.gen()).collect::<Vec<_>>();
+    #[test]
+    fn join_operator_insufficient_bond() {
+        new_test_ext().execute_with(|| {
+            let insufficient_bond = 5_000;
 
-		// Create parameters for our circuit
-		let (pk, vk) = {
-			let c = mimc::MiMCDemo::<F> { xl: None, xr: None, constants: &constants };
-			Groth16::<E>::setup(c, &mut rng).unwrap()
-		};
+            assert_noop!(
+                MultiAssetDelegation::join_operators(RuntimeOrigin::signed(4), insufficient_bond),
+                Error::<Test>::BondTooLow
+            );
+        });
+    }
 
-		let mut pk_bytes = Vec::new();
-		pk.serialize_compressed(&mut pk_bytes).unwrap();
+    #[test]
+    fn join_operator_insufficient_funds() {
+        new_test_ext().execute_with(|| {
+            let bond_amount = 15_000; // User 4 has only 5_000
 
-		let mut vk_bytes = Vec::new();
-		vk.serialize_compressed(&mut vk_bytes).unwrap();
+            assert_noop!(
+                MultiAssetDelegation::join_operators(RuntimeOrigin::signed(4), bond_amount),
+                pallet_balances::Error::<Test, _>::InsufficientBalance
+            );
+        });
+    }
 
-		// Prepare the verification key (for proof verification)
-		let pvk = Groth16::<E>::process_vk(&vk).unwrap();
+    #[test]
+    fn join_operator_minimum_bond() {
+        new_test_ext().execute_with(|| {
+            let minimum_bond = 10_000;
+            let exact_bond = minimum_bond;
 
-		// Generate a random preimage and compute the image
-		let xl = rng.gen();
-		let xr = rng.gen();
-		let image = mimc::mimc(xl, xr, &constants);
+            assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), exact_bond));
 
-		// Create an instance of our circuit (with the
-		// witness)
-		let c = mimc::MiMCDemo { xl: Some(xl), xr: Some(xr), constants: &constants };
-		let cs = ConstraintSystem::<F>::new_ref();
-		c.clone().generate_constraints(cs.clone()).unwrap();
-		let num_inputs = cs.num_instance_variables();
-		let num_constraints = cs.num_constraints();
-
-		// Create a groth16 proof with our parameters.
-		let proof = Groth16::<E>::prove(&pk, c, &mut rng).unwrap();
-		// Verifiy Locally
-		assert!(Groth16::<E>::verify_with_processed_vk(&pvk, &[image], &proof).unwrap());
-
-		let mut proof_bytes = Vec::new();
-		proof.serialize_compressed(&mut proof_bytes).unwrap();
-
-		// Phase1
-		let zero_knowledge_role_type = ZeroKnowledgeRoleType::ZkSaaSGroth16;
-		let phase_one = JobType::<
-			AccountId,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxAdditionalParamsLen,
-		>::ZkSaaSPhaseOne(ZkSaaSPhaseOneJobType {
-			role_type: zero_knowledge_role_type,
-			participants: vec![1, 2, 3, 4, 5, 6, 7, 8].try_into().unwrap(),
-			system: ZkSaaSSystem::Groth16(Groth16System {
-				circuit: HyperData::Raw(vec![].try_into().unwrap()),
-				num_inputs: num_inputs as _,
-				num_constraints: num_constraints as _,
-				proving_key: HyperData::Raw(pk_bytes.try_into().unwrap()),
-				verifying_key: vk_bytes.try_into().unwrap(),
-				wasm: HyperData::Raw(vec![].try_into().unwrap()),
-			}),
-			permitted_caller: None,
-		});
-
-		let phase_two = JobType::<
-			AccountId,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxAdditionalParamsLen,
-		>::ZkSaaSPhaseTwo(ZkSaaSPhaseTwoJobType {
-			role_type: zero_knowledge_role_type,
-			phase_one_id: 0,
-			request: ZkSaaSPhaseTwoRequest::Groth16(Groth16ProveRequest {
-				public_input: from_field_elements(&[image]).unwrap().try_into().unwrap(),
-				a_shares: Default::default(),
-				ax_shares: Default::default(),
-				qap_shares: Default::default(),
-			}),
-		});
-
-		// Arkworks
-		let result = JobResult::ZkSaaSPhaseTwo(ZkSaaSProofResult::Arkworks(ArkworksProofResult {
-			proof: proof_bytes.try_into().unwrap(),
-		}));
-
-		let data = JobWithResult::<
-			AccountId,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxKeyLen,
-			MaxDataLen,
-			MaxSignatureLen,
-			MaxProofLen,
-			MaxAdditionalParamsLen,
-		> {
-			job_type: phase_two.clone(),
-			phase_one_job_type: Some(phase_one.clone()),
-			result,
-		};
-
-		assert_ok!(ZKSaaS::verify(data));
-
-		// Circom
-		let circom_proof = verifier::circom::Proof::try_from(proof).unwrap();
-
-		let result = JobResult::ZkSaaSPhaseTwo(ZkSaaSProofResult::Circom(CircomProofResult {
-			proof: circom_proof.encode().unwrap().try_into().unwrap(),
-		}));
-
-		let data = JobWithResult::<
-			AccountId,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxKeyLen,
-			MaxDataLen,
-			MaxSignatureLen,
-			MaxProofLen,
-			MaxAdditionalParamsLen,
-		> {
-			job_type: phase_two,
-			phase_one_job_type: Some(phase_one),
-			result,
-		};
-
-		assert_ok!(ZKSaaS::verify(data));
-	});
-}
-
-/// Simple circuit for testing.
-mod mimc {
-	use ark_ff::Field;
-
-	// We'll use these interfaces to construct our circuit.
-	use ark_relations::{
-		lc, ns,
-		r1cs::{ConstraintSynthesizer, ConstraintSystemRef, SynthesisError, Variable},
-	};
-
-	pub const MIMC_ROUNDS: usize = 322;
-
-	/// This is an implementation of MiMC, specifically a
-	/// variant named `LongsightF322p3` for BLS12-377.
-	/// See http://eprint.iacr.org/2016/492 for more
-	/// information about this construction.
-	///
-	/// ```
-	/// function LongsightF322p3(xL ⦂ Fp, xR ⦂ Fp) {
-	///     for i from 0 up to 321 {
-	///         xL, xR := xR + (xL + Ci)^3, xL
-	///     }
-	///     return xL
-	/// }
-	/// ```
-	pub fn mimc<F: Field>(mut xl: F, mut xr: F, constants: &[F]) -> F {
-		assert_eq!(constants.len(), MIMC_ROUNDS);
-
-		(0..MIMC_ROUNDS).for_each(|i| {
-			let mut tmp1 = xl;
-			tmp1.add_assign(&constants[i]);
-			let mut tmp2 = tmp1;
-			tmp2.square_in_place();
-			tmp2.mul_assign(&tmp1);
-			tmp2.add_assign(&xr);
-			xr = xl;
-			xl = tmp2;
-		});
-
-		xl
-	}
-
-	/// This is our demo circuit for proving knowledge of the
-	/// preimage of a MiMC hash invocation.
-	#[derive(Clone)]
-	pub struct MiMCDemo<'a, F: Field> {
-		pub xl: Option<F>,
-		pub xr: Option<F>,
-		pub constants: &'a [F],
-	}
-
-	/// Our demo circuit implements this `Circuit` trait which
-	/// is used during paramgen and proving in order to
-	/// synthesize the constraint system.
-	impl<'a, F: Field> ConstraintSynthesizer<F> for MiMCDemo<'a, F> {
-		fn generate_constraints(self, cs: ConstraintSystemRef<F>) -> Result<(), SynthesisError> {
-			assert_eq!(self.constants.len(), MIMC_ROUNDS);
-
-			// Allocate the first component of the preimage.
-			let mut xl_value = self.xl;
-			let mut xl =
-				cs.new_witness_variable(|| xl_value.ok_or(SynthesisError::AssignmentMissing))?;
-
-			// Allocate the second component of the preimage.
-			let mut xr_value = self.xr;
-			let mut xr =
-				cs.new_witness_variable(|| xr_value.ok_or(SynthesisError::AssignmentMissing))?;
-
-			for i in 0..MIMC_ROUNDS {
-				// xL, xR := xR + (xL + Ci)^3, xL
-				let ns = ns!(cs, "round");
-				let cs = ns.cs();
-
-				// tmp = (xL + Ci)^2
-				let tmp_value = xl_value.map(|mut e| {
-					e.add_assign(&self.constants[i]);
-					e.square_in_place();
-					e
-				});
-				let tmp =
-					cs.new_witness_variable(|| tmp_value.ok_or(SynthesisError::AssignmentMissing))?;
-
-				cs.enforce_constraint(
-					lc!() + xl + (self.constants[i], Variable::One),
-					lc!() + xl + (self.constants[i], Variable::One),
-					lc!() + tmp,
-				)?;
-
-				// new_xL = xR + (xL + Ci)^3
-				// new_xL = xR + tmp * (xL + Ci)
-				// new_xL - xR = tmp * (xL + Ci)
-				let new_xl_value = xl_value.map(|mut e| {
-					e.add_assign(&self.constants[i]);
-					e.mul_assign(&tmp_value.unwrap());
-					e.add_assign(&xr_value.unwrap());
-					e
-				});
-
-				let new_xl = if i == (MIMC_ROUNDS - 1) {
-					// This is the last round, xL is our image and so
-					// we allocate a public input.
-					cs.new_input_variable(|| new_xl_value.ok_or(SynthesisError::AssignmentMissing))?
-				} else {
-					cs.new_witness_variable(|| {
-						new_xl_value.ok_or(SynthesisError::AssignmentMissing)
-					})?
-				};
-
-				cs.enforce_constraint(
-					lc!() + tmp,
-					lc!() + xl + (self.constants[i], Variable::One),
-					lc!() + new_xl - xr,
-				)?;
-
-				// xR = xL
-				xr = xl;
-				xr_value = xl_value;
-
-				// xL = new_xL
-				xl = new_xl;
-				xl_value = new_xl_value;
-			}
-
-			Ok(())
-		}
-	}
-}
+            let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
+            assert_eq!(operator_info.bond, exact_bond);
+        });
+    }
