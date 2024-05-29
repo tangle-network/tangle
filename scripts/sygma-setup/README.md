@@ -1,6 +1,6 @@
-### Sygma Pallets Setup & Test
+## Sygma Pallets Setup & Test
 
-## Setup
+### Setup
 
 - Setup script should be only used for Testnet setup or local testing environment setup.  
 
@@ -34,7 +34,7 @@ MPC address is optional when setting up Sygma pallets. Normally it will be the l
 
 Alice will be the super admin in the testnet runtime which means Alice has permission to call any admin level extrinsics in `SygmaAccessSegregator` pallet.
 
-## Test
+### Test
 
 Sygma pallets provides two main functionalists: `Deposit` and `ProposalExecution`.
 
