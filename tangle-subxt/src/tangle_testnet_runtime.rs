@@ -47946,13 +47946,13 @@ pub mod api {
 							#[codec(index = 12)]
 							Array(
 								runtime_types::bounded_collections::bounded_vec::BoundedVec<
-									runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+									Field<_1>,
 								>,
 							),
 							#[codec(index = 13)]
 							List(
 								runtime_types::bounded_collections::bounded_vec::BoundedVec<
-									runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+									Field<_1>,
 								>,
 							),
 							#[codec(index = 100)]

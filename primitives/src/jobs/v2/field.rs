@@ -96,10 +96,10 @@ pub enum Field<C: Constraints, AccountId> {
 	/// Represents an array of values
 	/// Fixed Length of values.
 	#[codec(index = 12)]
-	Array(BoundedVec<Self, C::MaxFieldsSize>),
+	Array(BoundedVec<Field<C, AccountId>, C::MaxFieldsSize>),
 	/// Represents a list of values
 	#[codec(index = 13)]
-	List(BoundedVec<Self, C::MaxFieldsSize>),
+	List(BoundedVec<Field<C, AccountId>, C::MaxFieldsSize>),
 
 	// NOTE: Special types starts from 100
 	/// A sepcial type for AccountId
@@ -243,13 +243,13 @@ pub enum FieldType {
 	Bytes,
 	/// A Field of `Option<T>` type.
 	#[codec(index = 12)]
-	Optional(Box<Self>),
+	Optional(Box<FieldType>),
 	/// An array of N items of type [`FieldType`].
 	#[codec(index = 13)]
-	Array(u64, Box<Self>),
+	Array(u64, Box<FieldType>),
 	/// A List of items of type [`FieldType`].
 	#[codec(index = 14)]
-	List(Box<Self>),
+	List(Box<FieldType>),
 	// NOTE: Special types starts from 100
 	/// A special type for AccountId
 	#[codec(index = 100)]
