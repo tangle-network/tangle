@@ -15,6 +15,12 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate as pallet_multi_asset_delegation;
+use crate::types::BalanceOf;
+use crate::Service;
+use crate::ServiceManager;
+use frame_support::parameter_types;
+use frame_support::traits::AsEnsureOriginWithArg;
+use frame_support::traits::ConstU32;
 use frame_support::{
 	derive_impl,
 	traits::{ConstU16, ConstU64},
@@ -24,20 +30,16 @@ use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
 	BuildStorage,
 };
-use crate::types::BalanceOf;
-use frame_support::traits::{ConstU32};
-use frame_support::parameter_types;
-use crate::Service;
-use crate::ServiceManager;
 
 type Block = frame_system::mocking::MockBlock<Test>;
 type Balance = u64;
 type AccountId = u64;
+type AssetId = u32;
 
-pub const ALICE : u64 = 1;
-pub const BOB : u64 = 2;
-pub const CHARLIE : u64 = 3;
-pub const DAVE : u64 = 4;
+pub const ALICE: u64 = 1;
+pub const BOB: u64 = 2;
+pub const CHARLIE: u64 = 3;
+pub const DAVE: u64 = 4;
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
@@ -45,6 +47,7 @@ frame_support::construct_runtime!(
 	{
 		System: frame_system,
 		Balances: pallet_balances,
+		Assets: pallet_assets,
 		MultiAssetDelegation: pallet_multi_asset_delegation,
 	}
 );
@@ -94,46 +97,68 @@ impl pallet_balances::Config for Test {
 
 pub struct MockServiceManager;
 
-impl ServiceManager<AccountId, Balance> for MockServiceManager
-{
-    fn list_active_services(account: &AccountId) -> Vec<Service> {
-        // we dont care
-        vec![]
-    }
+impl ServiceManager<AccountId, Balance> for MockServiceManager {
+	fn list_active_services(account: &AccountId) -> Vec<Service> {
+		// we dont care
+		vec![]
+	}
 
-    fn list_service_reward(account: &AccountId) -> Balance {
-        // we dont care
-        Balance::default()
-    }
+	fn list_service_reward(account: &AccountId) -> Balance {
+		// we dont care
+		Balance::default()
+	}
 
-    fn can_exit(account: &AccountId) -> bool {
-        // Mock logic to determine if the given account can exit
-        true
-    }
+	fn can_exit(account: &AccountId) -> bool {
+		// Mock logic to determine if the given account can exit
+		true
+	}
 }
 
 parameter_types! {
-    pub const BlockHashCount: u64 = 250;
-    pub const MaxLocks: u32 = 50;
-    pub const MinOperatorBondAmount: u64 = 10_000;
-    pub const BondDuration: u64 = 1000;
+	pub const BlockHashCount: u64 = 250;
+	pub const MaxLocks: u32 = 50;
+	pub const MinOperatorBondAmount: u64 = 10_000;
+	pub const BondDuration: u64 = 1000;
 }
 
 impl pallet_multi_asset_delegation::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
-    type Currency = Balances;
-    type MinOperatorBondAmount = MinOperatorBondAmount;
-    type BondDuration = BondDuration;
+	type Currency = Balances;
+	type MinOperatorBondAmount = MinOperatorBondAmount;
+	type BondDuration = BondDuration;
 	type ServiceManager = MockServiceManager;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;
 	type LeaveDelegatorsDelay = ConstU32<1>;
 	type RevokeDelegationDelay = ConstU32<1>;
 	type DelegationBondLessDelay = ConstU32<1>;
-    type WeightInfo = ();
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type WeightInfo = ();
 }
 
-
+impl pallet_assets::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = u64;
+	type AssetId = u32;
+	type AssetIdParameter = u32;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<u64>>;
+	type ForceOrigin = frame_system::EnsureRoot<u64>;
+	type AssetDeposit = ConstU64<1>;
+	type AssetAccountDeposit = ConstU64<10>;
+	type MetadataDepositBase = ConstU64<1>;
+	type MetadataDepositPerByte = ConstU64<1>;
+	type ApprovalDeposit = ConstU64<1>;
+	type StringLimit = ConstU32<50>;
+	type Freezer = ();
+	type WeightInfo = ();
+	type CallbackHandle = ();
+	type Extra = ();
+	type RemoveItemsLimit = ConstU32<5>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkHelper = ();
+}
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
