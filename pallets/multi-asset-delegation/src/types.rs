@@ -34,7 +34,6 @@ pub type OperatorSnapshotOf<T> = OperatorSnapshot<<T as frame_system::Config>::A
 
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub enum DelegatorStatus {
-	/// Active with no scheduled exit
 	Active,
 	/// Schedule exit to revoke all ongoing delegations
 	Leaving(RoundIndex),
@@ -79,7 +78,7 @@ pub enum OperatorStatus {
 	/// Committed to be online
 	Active,
 	/// Temporarily inactive and excused for inactivity
-	Idle,
+	Inactive,
 	/// Bonded until the inner round
 	Leaving(RoundIndex),
 }

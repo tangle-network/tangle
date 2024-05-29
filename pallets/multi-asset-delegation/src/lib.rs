@@ -146,6 +146,13 @@ pub mod pallet {
 		OperatorBondLessCancelled {
 			who: T::AccountId,
 		},
+
+		OperatorWentOffline{
+			who: T::AccountId,
+		},  
+		OperatorWentOnline{
+			who: T::AccountId,
+		},   
 	}
 
 	// Errors inform users that something went wrong.
@@ -161,6 +168,8 @@ pub mod pallet {
 		NotLeavingRound,
 		NoScheduledBondLess,
 		BondLessRequestNotSatisfied,
+		NotActiveOperator,
+		NotOfflineOperator
 	}
 	
 
@@ -273,6 +282,32 @@ pub mod pallet {
 	
 			Ok(())
 		}
+
+		#[pallet::call_index(8)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn go_offline(origin: OriginFor<T>) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			Self::process_go_offline(&who)?;
+
+			// Emit an event
+			Self::deposit_event(Event::OperatorWentOffline { who });
+
+			Ok(())
+		}
+
+		#[pallet::call_index(9)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+    pub fn go_online(origin: OriginFor<T>) -> DispatchResult {
+        let who = ensure_signed(origin)?;
+
+        Self::process_go_online(&who)?;
+
+        // Emit an event
+        Self::deposit_event(Event::OperatorWentOnline { who });
+
+        Ok(())
+    }
 
 	}
 }
