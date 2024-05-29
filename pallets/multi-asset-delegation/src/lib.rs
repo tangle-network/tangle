@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use super::*;
+
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
@@ -120,6 +120,32 @@ pub mod pallet {
 		OperatorLeavingScheduled {
 			who: T::AccountId,
 		},
+
+		OperatorLeaveCancelled {
+			who: T::AccountId,
+		},
+
+		OperatorLeaveExecuted {
+			who: T::AccountId
+		},
+
+		OperatorBondMore {
+			who: T::AccountId,
+			additional_bond: BalanceOf<T>
+		},
+
+		OperatorBondLessScheduled {
+			who: T::AccountId,
+			bond_less_amount: BalanceOf<T>
+		},
+
+		OperatorBondLessExecuted {
+			who: T::AccountId,
+		},
+
+		OperatorBondLessCancelled {
+			who: T::AccountId,
+		},
 	}
 
 	// Errors inform users that something went wrong.
@@ -130,8 +156,13 @@ pub mod pallet {
 		BondTooLow,
 		NotAnOperator,
 		CannotExit,
-		AlreadyLeaving
+		AlreadyLeaving,
+		NotLeavingOperator,
+		NotLeavingRound,
+		NoScheduledBondLess,
+		BondLessRequestNotSatisfied,
 	}
+	
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
@@ -164,5 +195,84 @@ pub mod pallet {
 	
 			Ok(())
 		}
+
+		#[pallet::call_index(2)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn cancel_leave_operators(origin: OriginFor<T>) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+	
+			Self::process_cancel_leave_operator(&who)?;
+	
+			// Emit an event
+			Self::deposit_event(Event::OperatorLeaveCancelled {who});
+	
+			Ok(())
+		}
+
+		#[pallet::call_index(3)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn execute_leave_operators(origin: OriginFor<T>) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+	
+			Self::process_execute_leave_operators(&who)?;
+	
+			// Emit an event
+			Self::deposit_event(Event::OperatorLeaveExecuted {who});
+	
+			Ok(())
+		}
+
+		#[pallet::call_index(4)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn operator_bond_more(origin: OriginFor<T>, additional_bond: BalanceOf<T>) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			Self::process_operator_bond_more(&who, additional_bond)?;
+
+			// Emit an event
+			Self::deposit_event(Event::OperatorBondMore {who, additional_bond});
+
+			Ok(())
+		}
+
+		#[pallet::call_index(5)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn schedule_operator_bond_less(origin: OriginFor<T>, bond_less_amount: BalanceOf<T>) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+	
+			Self::process_schedule_operator_bond_less(&who, bond_less_amount)?;
+	
+			// Emit an event
+			Self::deposit_event(Event::OperatorBondLessScheduled {who, bond_less_amount});
+	
+			Ok(())
+		}
+
+		#[pallet::call_index(6)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn execute_operator_bond_less(origin: OriginFor<T>) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			Self::process_execute_operator_bond_less(&who)?;
+
+			// Emit an event
+			Self::deposit_event(Event::OperatorBondLessExecuted {who});
+
+			Ok(())
+		}
+
+		#[pallet::call_index(7)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn cancel_operator_bond_less(origin: OriginFor<T>) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+	
+			Self::process_cancel_operator_bond_less(&who)?;
+	
+			// Emit an event
+			Self::deposit_event(Event::OperatorBondLessCancelled {who});
+	
+			Ok(())
+		}
+
 	}
 }

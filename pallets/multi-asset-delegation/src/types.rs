@@ -94,7 +94,7 @@ impl Default for OperatorStatus {
 /// Request scheduled to change the Operator Operator self-bond
 pub struct OperatorBondLessRequest<Balance> {
 	pub amount: Balance,
-	pub when_executable: RoundIndex,
+	pub request_time: RoundIndex,
 }
 
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo, Clone, Eq, PartialEq)]
@@ -103,8 +103,6 @@ pub struct OperatorMetadata<Balance> {
 	pub bond: Balance,
 	/// Total number of delegations to this Operator
 	pub delegation_count: u32,
-	/// Self bond + sum of top delegations
-	pub total_counted: Balance,
 	/// Maximum 1 pending request to decrease Operator self bond at any given time
 	pub request: Option<OperatorBondLessRequest<Balance>>,
 	/// Current status of the Operator
