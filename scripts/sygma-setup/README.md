@@ -38,7 +38,7 @@ Alice will be the super admin in the testnet runtime which means Alice has permi
 
 Sygma pallets provides two main functionalists: `Deposit` and `ProposalExecution`.
 
-`Deposit` means sending bridging request from the current chain to other chain
+`Deposit` means sending bridging request from the current chain to other chain  
 `ProposalExecution` means accepting bridging request from other chain
 
 Here are two deposit encode data which send TNT bridging request and SygUSD bridging request respectively:
