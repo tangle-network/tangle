@@ -42,7 +42,9 @@ pub mod pallet {
 	use frame_support::{
 		dispatch::DispatchResult,
 		pallet_prelude::*,
+		sp_runtime::traits::AccountIdConversion,
 		traits::{Currency, LockableCurrency, ReservableCurrency},
+		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, StaticLookup};
@@ -61,6 +63,8 @@ pub mod pallet {
 			+ LockableCurrency<Self::AccountId>;
 
 		type MinOperatorBondAmount: Get<BalanceOf<Self>>;
+
+		type MinDelegateAmount: Get<BalanceOf<Self>>;
 
 		type BondDuration: Get<BlockNumberFor<Self>>;
 
@@ -82,9 +86,20 @@ pub mod pallet {
 		#[pallet::constant]
 		type DelegationBondLessDelay: Get<RoundIndex>;
 
-		type Fungibles: fungibles::Inspect<Self::AccountId> + fungibles::Mutate<Self::AccountId>;
+		type Fungibles: fungibles::Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
+			+ fungibles::Mutate<Self::AccountId, AssetId = Self::AssetId>;
 
-		type AssetId: Parameter + Member + Copy;
+		type AssetId: AtLeast32BitUnsigned
+			+ Parameter
+			+ Member
+			+ MaybeSerializeDeserialize
+			+ Clone
+			+ Copy
+			+ PartialOrd
+			+ MaxEncodedLen;
+
+		/// The pallets account
+		type PalletId: Get<PalletId>;
 
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: crate::weights::WeightInfo;
@@ -117,14 +132,9 @@ pub mod pallet {
 	>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn delegator_info)]
-	pub(crate) type Delegators<T: Config> = StorageMap<
-		_,
-		Twox64Concat,
-		T::AccountId,
-		DelegatorMetadata<T::AssetId, BalanceOf<T>>,
-		OptionQuery,
-	>;
+	#[pallet::getter(fn delegators)]
+	pub(crate) type Delegators<T: Config> =
+		StorageMap<_, Twox64Concat, T::AccountId, DelegatorMetadataOf<T>, OptionQuery>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://docs.substrate.io/v3/runtime/events-and-errors
@@ -150,6 +160,12 @@ pub mod pallet {
 		OperatorWentOffline { who: T::AccountId },
 		OperatorWentOnline { who: T::AccountId },
 		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset_id: Option<T::AssetId> },
+
+		ScheduledUnstake { who: T::AccountId, amount: BalanceOf<T>, asset_id: Option<T::AssetId> },
+
+		ExecutedUnstake { who: T::AccountId },
+
+		CancelledUnstake { who: T::AccountId },
 	}
 
 	// Errors inform users that something went wrong.
@@ -168,6 +184,11 @@ pub mod pallet {
 		NotActiveOperator,
 		NotOfflineOperator,
 		AlreadyDelegator,
+		NotDelegator,
+		WithdrawRequestAlreadyExists,
+		InsufficientBalance,
+		NoWithdrawRequest,
+		UnstakeNotReady,
 	}
 
 	#[pallet::hooks]
@@ -319,7 +340,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
-			Self::process_deposit(&who, asset_id, amount)?;
+			Self::process_deposit(who.clone(), asset_id, amount)?;
 
 			// Emit an event
 			Self::deposit_event(Event::Deposited { who, amount, asset_id });
@@ -335,8 +356,8 @@ pub mod pallet {
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_schedule_unstake(&who, asset_id, amount)?;
-			Self::deposit_event(Event::ScheduledUnstake(who, asset_id, amount));
+			Self::process_schedule_unstake(who.clone(), asset_id, amount)?;
+			Self::deposit_event(Event::ScheduledUnstake { who, amount, asset_id });
 			Ok(())
 		}
 
@@ -344,17 +365,17 @@ pub mod pallet {
 		#[pallet::weight(10_000)]
 		pub fn execute_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_execute_unstake(&who)?;
-			Self::deposit_event(Event::ExecutedUnstake(who));
+			Self::process_execute_unstake(who.clone())?;
+			Self::deposit_event(Event::ExecutedUnstake { who });
 			Ok(())
 		}
 
 		#[pallet::call_index(13)]
 		#[pallet::weight(10_000)]
-		pub fn cancel_unstake(origin: OriginFor<T>, asset_id: T::AssetId) -> DispatchResult {
+		pub fn cancel_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_unstake(&who, asset_id)?;
-			Self::deposit_event(Event::CancelledUnstake(who, asset_id, amount));
+			Self::process_cancel_unstake(who.clone())?;
+			Self::deposit_event(Event::CancelledUnstake { who });
 			Ok(())
 		}
 	}

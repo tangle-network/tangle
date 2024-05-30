@@ -17,7 +17,7 @@ use super::*;
 
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
 /// Snapshot of Operator state at the start of the round
-pub struct OperatorSnapshot<AccountId, Balance> {
+pub struct OperatorSnapshot<AccountId, Balance, AssetId> {
 	/// The total value locked by the Operator.
 	pub bond: Balance,
 

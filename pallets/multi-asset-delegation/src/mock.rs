@@ -21,6 +21,7 @@ use crate::ServiceManager;
 use frame_support::parameter_types;
 use frame_support::traits::AsEnsureOriginWithArg;
 use frame_support::traits::ConstU32;
+use frame_support::PalletId;
 use frame_support::{
 	derive_impl,
 	traits::{ConstU16, ConstU64},
@@ -32,14 +33,17 @@ use sp_runtime::{
 };
 
 type Block = frame_system::mocking::MockBlock<Test>;
-type Balance = u64;
-type AccountId = u64;
-type AssetId = u32;
+pub type Balance = u64;
+pub type AccountId = u64;
+pub type AssetId = u32;
 
 pub const ALICE: u64 = 1;
 pub const BOB: u64 = 2;
 pub const CHARLIE: u64 = 3;
 pub const DAVE: u64 = 4;
+
+pub const vDOT: AssetId = 1;
+pub const vUSDT: AssetId = 2;
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
@@ -119,6 +123,7 @@ parameter_types! {
 	pub const MaxLocks: u32 = 50;
 	pub const MinOperatorBondAmount: u64 = 10_000;
 	pub const BondDuration: u64 = 1000;
+	pub PID: PalletId = PalletId(*b"PotStake");
 }
 
 impl pallet_multi_asset_delegation::Config for Test {
@@ -132,15 +137,17 @@ impl pallet_multi_asset_delegation::Config for Test {
 	type LeaveDelegatorsDelay = ConstU32<1>;
 	type RevokeDelegationDelay = ConstU32<1>;
 	type DelegationBondLessDelay = ConstU32<1>;
+	type MinDelegateAmount = ConstU64<100>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
+	type PalletId = PID;
 	type WeightInfo = ();
 }
 
 impl pallet_assets::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u64;
-	type AssetId = u32;
+	type AssetId = AssetId;
 	type AssetIdParameter = u32;
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<u64>>;
@@ -167,7 +174,8 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			(ALICE, 100_000),
 			(BOB, 200_000),
 			(CHARLIE, 300_000),
-			(DAVE, 5_000), // Not enough to bond
+			(DAVE, 5_000),                                 // Not enough to bond
+			(MultiAssetDelegation::pallet_account(), 100), // give pallet some ED so it can receive tokens
 		],
 	}
 	.assimilate_storage(&mut t)

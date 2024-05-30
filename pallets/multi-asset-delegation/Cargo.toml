@@ -22,7 +22,6 @@ sp-std = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-assets = { workspace = true, default-features = false }
 
-
 [features]
 default = ["std"]
 std = [

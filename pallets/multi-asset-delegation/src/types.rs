@@ -30,12 +30,14 @@ pub use delegator::*;
 pub use operator::*;
 
 pub type RoundIndex = u32;
-pub type AssetId = u32;
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 pub type OperatorOf<T> = OperatorMetadata<BalanceOf<T>>;
 
-pub type OperatorSnapshotOf<T> =
-	OperatorSnapshot<<T as frame_system::Config>::AccountId, BalanceOf<T>>;
+pub type OperatorSnapshotOf<T: Config> =
+	OperatorSnapshot<<T as frame_system::Config>::AccountId, BalanceOf<T>, T::AssetId>;
+
+pub type DelegatorMetadataOf<T: Config> =
+	DelegatorMetadata<<T as frame_system::Config>::AccountId, BalanceOf<T>, T::AssetId>;

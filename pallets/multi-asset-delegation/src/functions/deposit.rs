@@ -18,11 +18,23 @@ use crate::types::*;
 use crate::Pallet;
 use frame_support::ensure;
 use frame_support::pallet_prelude::DispatchResult;
+use frame_support::traits::fungibles;
+use frame_support::traits::fungibles::Mutate;
+use frame_support::traits::fungibles::MutateHold;
 use frame_support::traits::Get;
-use frame_support::traits::ReservableCurrency;
+use frame_support::{
+	sp_runtime::traits::AccountIdConversion,
+	traits::{tokens::Preservation, Currency, LockableCurrency, ReservableCurrency},
+	PalletId,
+};
+use sp_runtime::traits::Zero;
 use sp_runtime::DispatchError;
 
 impl<T: Config> Pallet<T> {
+	pub fn pallet_account() -> T::AccountId {
+		T::PalletId::get().into_account_truncating()
+	}
+
 	pub fn process_deposit(
 		who: T::AccountId,
 		asset_id: Option<T::AssetId>,
@@ -31,31 +43,49 @@ impl<T: Config> Pallet<T> {
 		// Check if the user is already a delegator
 		ensure!(!Delegators::<T>::contains_key(&who), Error::<T>::AlreadyDelegator);
 
-		ensure!(amount >= T::MinOperatorBondAmount::get(), Error::<T>::BondTooLow);
+		ensure!(amount >= T::MinDelegateAmount::get(), Error::<T>::BondTooLow);
 
-		// Reserve the amount
+		// Transfer the amount to the pallet account
 		if let Some(asset_id) = asset_id {
-			T::Fungibles::reserve(asset_id, &who, amount)?;
+			T::Fungibles::transfer(
+				asset_id,
+				&who,
+				&Self::pallet_account(),
+				amount,
+				Preservation::Expendable,
+			)?; // TODO : SHould it be expendable??
 
 			// Update storage
 			Delegators::<T>::mutate(&who, |maybe_metadata| {
 				let metadata = maybe_metadata.get_or_insert_with(Default::default);
 				metadata.deposits.entry(asset_id).and_modify(|e| *e += amount).or_insert(amount);
 			});
+		} else {
+			// TODO : handle if TNT deposit
+			todo!();
 		}
 
-		// TODO : handle if TNT deposit
 		Ok(())
 	}
 
-	fn process_schedule_unstake(
-		who: &T::AccountId,
+	pub fn process_schedule_unstake(
+		who: T::AccountId,
 		asset_id: Option<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
-		// Ensure there is enough deposited balance
-		Delegators::<T>::mutate(&who, |maybe_metadata| {
-			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::InsufficientBalance)?;
+		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+
+			if asset_id.is_none() {
+				todo!(); // Handle TNT deposit
+			}
+
+			let asset_id = asset_id.unwrap();
+
+			// Ensure there is no outstanding withdraw request
+			ensure!(metadata.unstake_request.is_none(), Error::<T>::WithdrawRequestAlreadyExists);
+
+			// Ensure there is enough deposited balance
 			let balance =
 				metadata.deposits.get_mut(&asset_id).ok_or(Error::<T>::InsufficientBalance)?;
 			ensure!(*balance >= amount, Error::<T>::InsufficientBalance);
@@ -63,78 +93,79 @@ impl<T: Config> Pallet<T> {
 			// Reduce the balance in deposits
 			*balance -= amount;
 			if *balance == Zero::zero() {
-				metadata.deposits.remove(&asset_id.unwrap());
+				metadata.deposits.remove(&asset_id);
 			}
 
-			// Schedule the unstake
-			let current_block = <frame_system::Pallet<T>>::block_number();
-			UnstakingSchedules::<T>::mutate(&who, |schedules| {
-				schedules.push((
-					asset_id,
-					amount,
-					current_block + T::BlockNumber::from(2 * 7 * 14400u32),
-				)); // assuming 2 weeks delay with 14400 blocks/day // TODO : Move to config
-			});
-		});
+			// Create the withdraw request
+			let current_round = Self::current_round();
+			metadata.unstake_request =
+				Some(UnstakeRequest { asset_id, amount, requested_round: current_round });
 
-		Ok(())
+			// Update the status if the entire stake has been unstaked
+			//metadata.status = DelegatorStatus::LeavingScheduled(current_round);
+
+			Ok(())
+		})
 	}
 
-	fn process_execute_unstake(who: &T::AccountId) -> DispatchResult {
-		let current_block = <frame_system::Pallet<T>>::block_number();
+	pub fn process_execute_unstake(who: T::AccountId) -> DispatchResult {
+		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-		UnstakingSchedules::<T>::mutate(&who, |schedules| {
-			let mut remaining_schedules = vec![];
-			let mut total_unstaked = BTreeMap::new();
+			// Ensure there is an outstanding withdraw request
+			let unstake_request =
+				metadata.unstake_request.as_ref().ok_or(Error::<T>::NoWithdrawRequest)?;
 
-			for (asset_id, amount, scheduled_block) in schedules.iter() {
-				if &current_block >= scheduled_block {
-					// Track the total unstaked amount for each asset
-					*total_unstaked.entry(*asset_id).or_insert(Zero::zero()) += *amount;
-				} else {
-					remaining_schedules.push((*asset_id, *amount, *scheduled_block));
-				}
-			}
+			// Check if the requested round has been reached
+			ensure!(
+				Self::current_round()
+					>= T::LeaveDelegatorsDelay::get() + unstake_request.requested_round,
+				Error::<T>::UnstakeNotReady
+			);
 
-			// Update the schedules
-			*schedules = remaining_schedules;
+			// Get the asset ID and amount from the withdraw request
+			let asset_id = unstake_request.asset_id;
+			let amount = unstake_request.amount;
 
-			// Unreserve the amounts
-			for (asset_id, amount) in total_unstaked.into_iter() {
-				T::Asset::unreserve(asset_id, &who, amount)?;
-			}
-		});
+			// Transfer the amount back to the delegator
+			T::Fungibles::transfer(
+				asset_id,
+				&Self::pallet_account(),
+				&who,
+				amount,
+				Preservation::Expendable,
+			)?;
 
-		Ok(())
+			// Clear the withdraw request
+			metadata.unstake_request = None;
+
+			// TODO : May be remove the delegator if no more stake
+
+			Ok(())
+		})
 	}
 
-	fn process_cancel_unstake(who: &T::AccountId, asset_id: T::AssetId) -> DispatchResult {
-		UnstakingSchedules::<T>::mutate(&who, |schedules| {
-			let mut remaining_schedules = vec![];
-			let mut total_cancelled = Zero::zero();
+	pub fn process_cancel_unstake(who: T::AccountId) -> DispatchResult {
+		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			for (scheduled_asset_id, amount, scheduled_block) in schedules.iter() {
-				if *scheduled_asset_id == asset_id {
-					total_cancelled += *amount;
-				} else {
-					remaining_schedules.push((*scheduled_asset_id, *amount, *scheduled_block));
-				}
+			// Ensure there is an outstanding withdraw request
+			let unstake_request =
+				metadata.unstake_request.take().ok_or(Error::<T>::NoWithdrawRequest)?;
+
+			// Get the asset ID and amount from the withdraw request
+			let asset_id = unstake_request.asset_id;
+			let amount = unstake_request.amount;
+
+			// Add the amount back to the delegator's deposits
+			metadata.deposits.entry(asset_id).and_modify(|e| *e += amount).or_insert(amount);
+
+			// Update the status if no more delegations exist
+			if metadata.delegations.is_empty() {
+				metadata.status = DelegatorStatus::Active;
 			}
 
-			// Update the schedules
-			*schedules = remaining_schedules;
-
-			// Re-add the cancelled amount back to deposits
-			Delegators::<T>::mutate(&who, |maybe_metadata| {
-				let metadata = maybe_metadata.get_or_insert_with(Default::default);
-				metadata
-					.deposits
-					.entry(asset_id)
-					.and_modify(|e| *e += total_cancelled)
-					.or_insert(total_cancelled);
-			});
-		});
-
-		Ok(())
+			Ok(())
+		})
 	}
 }
