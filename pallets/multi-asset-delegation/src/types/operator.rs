@@ -13,55 +13,59 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
 use super::*;
 
+/// A snapshot of the operator state at the start of the round.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
-/// Snapshot of Operator state at the start of the round
 pub struct OperatorSnapshot<AccountId, Balance, AssetId> {
-	/// The total value locked by the Operator.
-	pub bond: Balance,
+    /// The total value locked by the operator.
+    pub bond: Balance,
 
-	/// The rewardable delegations. This list is a subset of total delegators, where certain
-	/// delegators are adjusted based on their scheduled
-	pub delegations: Vec<Bond<AccountId, Balance, AssetId>>,
+    /// The rewardable delegations. This list is a subset of total delegators, where certain
+    /// delegators are adjusted based on their scheduled status.
+    pub delegations: Vec<Bond<AccountId, Balance, AssetId>>,
 
-	/// The total counted value locked for the Operator, including the self bond + total staked by
-	/// top delegators.
-	pub total: Balance,
+    /// The total counted value locked for the operator, including the self bond + total staked by
+    /// top delegators.
+    pub total: Balance,
 }
 
+/// The activity status of the operator.
 #[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo)]
-/// The activity status of the Operator
 pub enum OperatorStatus {
-	/// Committed to be online
-	Active,
-	/// Temporarily inactive and excused for inactivity
-	Inactive,
-	/// Bonded until the inner round
-	Leaving(RoundIndex),
+    /// Committed to be online.
+    Active,
+    /// Temporarily inactive and excused for inactivity.
+    Inactive,
+    /// Bonded until the specified round.
+    Leaving(RoundIndex),
 }
 
 impl Default for OperatorStatus {
-	fn default() -> OperatorStatus {
-		OperatorStatus::Active
-	}
+    fn default() -> OperatorStatus {
+        OperatorStatus::Active
+    }
 }
 
+/// A request scheduled to change the operator self-bond.
 #[derive(PartialEq, Clone, Copy, Encode, Decode, RuntimeDebug, TypeInfo, Eq)]
-/// Request scheduled to change the Operator Operator self-bond
 pub struct OperatorBondLessRequest<Balance> {
-	pub amount: Balance,
-	pub request_time: RoundIndex,
+    /// The amount by which the bond is to be decreased.
+    pub amount: Balance,
+    /// The round in which the request was made.
+    pub request_time: RoundIndex,
 }
 
+/// Stores the metadata of an operator.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo, Clone, Eq, PartialEq)]
 pub struct OperatorMetadata<Balance> {
-	/// This Operator's self bond amount
-	pub bond: Balance,
-	/// Total number of delegations to this Operator
-	pub delegation_count: u32,
-	/// Maximum 1 pending request to decrease Operator self bond at any given time
-	pub request: Option<OperatorBondLessRequest<Balance>>,
-	/// Current status of the Operator
-	pub status: OperatorStatus,
+    /// The operator's self-bond amount.
+    pub bond: Balance,
+    /// The total number of delegations to this operator.
+    pub delegation_count: u32,
+    /// An optional pending request to decrease the operator's self-bond, with only one allowed at any given time.
+    pub request: Option<OperatorBondLessRequest<Balance>>,
+    /// The current status of the operator.
+    pub status: OperatorStatus,
 }
