@@ -1,5 +1,5 @@
 [package]
-name = "pallet-evm-precompile-assets-erc20"
+name = "pallet-evm-precompileset-assets-erc20"
 authors = { workspace = true }
 description = "A Precompile to expose Assets pallet through an ERC20-compliant interface."
 edition = "2021"

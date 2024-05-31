@@ -26,6 +26,8 @@ use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use pallet_evm_precompile_staking::StakingPrecompile;
 use pallet_evm_precompile_vesting::VestingPrecompile;
+use pallet_evm_precompileset_assets_erc20::Erc20AssetsPrecompileSet;
+
 
 use precompile_utils::precompile_set::{
 	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, OnlyFrom,
@@ -59,6 +61,15 @@ impl Erc20Metadata for NativeErc20Metadata {
 		true
 	}
 }
+
+/// The asset precompile address prefix. Addresses that match against this prefix will be routed
+/// to Erc20AssetsPrecompileSet being marked as foreign
+pub const ASSET_PRECOMPILE_ADDRESS_PREFIX: &[u8] = &[255u8; 4];
+
+parameter_types! {
+	pub ForeignAssetPrefix: &'static [u8] = ASSET_PRECOMPILE_ADDRESS_PREFIX;
+}
+
 
 #[precompile_utils::precompile_name_from_address]
 pub type WebbPrecompilesAt<R> = (
@@ -125,4 +136,11 @@ pub type WebbPrecompilesAt<R> = (
 pub type WebbPrecompiles<R> = PrecompileSetBuilder<
 	R,
 	(PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<2095>), WebbPrecompilesAt<R>>,),
+
+	// Prefixed precompile sets (XC20)
+	PrecompileSetStartingWith<
+	ForeignAssetPrefix,
+	Erc20AssetsPrecompileSet<R, ForeignAssetInstance>,
+	CallableByContract,
+>,
 >;
