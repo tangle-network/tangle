@@ -33,11 +33,14 @@ use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
 use sp_runtime::traits::{Bounded, Dispatchable};
 
-use sp_core::{MaxEncodedLen, H160, U256};
+use sp_core::{MaxEncodedLen, H160, H256, U256};
 use sp_std::{
 	convert::{TryFrom, TryInto},
 	marker::PhantomData,
 };
+
+mod eip2612;
+use eip2612::Eip2612;
 
 #[cfg(test)]
 mod mock;
@@ -107,7 +110,7 @@ impl<Runtime, Instance> Erc20AssetsPrecompileSet<Runtime, Instance> {
 #[precompile::test_concrete_types(mock::Runtime, pallet_assets::Instance1)]
 impl<Runtime, Instance> Erc20AssetsPrecompileSet<Runtime, Instance>
 where
-	Instance: 'static,
+	Instance: eip2612::InstanceToPrefix + 'static,
 	Runtime: pallet_assets::Config<Instance> + pallet_evm::Config + frame_system::Config,
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	Runtime::RuntimeCall: From<pallet_assets::Call<Runtime, Instance>>,
@@ -428,6 +431,42 @@ where
 		)?;
 
 		Ok(pallet_assets::Pallet::<Runtime, Instance>::decimals(asset_id))
+	}
+
+	#[precompile::public("permit(address,address,uint256,uint256,uint8,bytes32,bytes32)")]
+	fn eip2612_permit(
+		asset_id: AssetIdOf<Runtime, Instance>,
+		handle: &mut impl PrecompileHandle,
+		owner: Address,
+		spender: Address,
+		value: U256,
+		deadline: U256,
+		v: u8,
+		r: H256,
+		s: H256,
+	) -> EvmResult {
+		<Eip2612<Runtime, Instance>>::permit(
+			asset_id, handle, owner, spender, value, deadline, v, r, s,
+		)
+	}
+
+	#[precompile::public("nonces(address)")]
+	#[precompile::view]
+	fn eip2612_nonces(
+		asset_id: AssetIdOf<Runtime, Instance>,
+		handle: &mut impl PrecompileHandle,
+		owner: Address,
+	) -> EvmResult<U256> {
+		<Eip2612<Runtime, Instance>>::nonces(asset_id, handle, owner)
+	}
+
+	#[precompile::public("DOMAIN_SEPARATOR()")]
+	#[precompile::view]
+	fn eip2612_domain_separator(
+		asset_id: AssetIdOf<Runtime, Instance>,
+		handle: &mut impl PrecompileHandle,
+	) -> EvmResult<H256> {
+		<Eip2612<Runtime, Instance>>::domain_separator(asset_id, handle)
 	}
 
 	fn u256_to_amount(value: U256) -> MayRevert<BalanceOf<Runtime, Instance>> {

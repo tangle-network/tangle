@@ -16,10 +16,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{mock::*, *};
+use crate::{eip2612::Eip2612, mock::*, *};
 use frame_support::assert_ok;
+use hex_literal::hex;
+use libsecp256k1::{sign, Message, SecretKey};
 use precompile_utils::testing::*;
 use sha3::{Digest, Keccak256};
+use sp_core::H256;
 use std::str::from_utf8;
 
 fn precompiles() -> Precompiles<Runtime> {
@@ -59,6 +62,9 @@ fn selectors() {
 	assert!(ForeignPCall::name_selectors().contains(&0x06fdde03));
 	assert!(ForeignPCall::symbol_selectors().contains(&0x95d89b41));
 	assert!(ForeignPCall::decimals_selectors().contains(&0x313ce567));
+	assert!(ForeignPCall::eip2612_nonces_selectors().contains(&0x7ecebe00));
+	assert!(ForeignPCall::eip2612_permit_selectors().contains(&0xd505accf));
+	assert!(ForeignPCall::eip2612_domain_separator_selectors().contains(&0x3644e515));
 
 	assert_eq!(
 		crate::SELECTOR_LOG_TRANSFER,
@@ -96,6 +102,9 @@ fn modifiers() {
 			tester.test_view_modifier(ForeignPCall::name_selectors());
 			tester.test_view_modifier(ForeignPCall::symbol_selectors());
 			tester.test_view_modifier(ForeignPCall::decimals_selectors());
+			tester.test_view_modifier(ForeignPCall::eip2612_nonces_selectors());
+			tester.test_default_modifier(ForeignPCall::eip2612_permit_selectors());
+			tester.test_view_modifier(ForeignPCall::eip2612_domain_separator_selectors());
 		});
 }
 
@@ -857,6 +866,530 @@ fn transfer_from_overflow() {
 				.expect_cost(1756u64) // 1 weight => 1 gas in mock
 				.expect_no_logs()
 				.execute_reverts(|e| e == b"value: Value is too large for balance type");
+		});
+}
+
+#[test]
+fn permit_valid() {
+	ExtBuilder::default()
+		.with_balances(vec![(CryptoAlith.into(), 1000)])
+		.build()
+		.execute_with(|| {
+			assert_ok!(Assets::force_create(
+				RuntimeOrigin::root(),
+				0u128,
+				CryptoAlith.into(),
+				true,
+				1
+			));
+			assert_ok!(Assets::mint(
+				RuntimeOrigin::signed(CryptoAlith.into()),
+				0u128,
+				CryptoAlith.into(),
+				1000
+			));
+
+			let owner: H160 = CryptoAlith.into();
+			let spender: H160 = Bob.into();
+			let value: U256 = 500u16.into();
+			let deadline: U256 = 0u8.into(); // todo: proper timestamp
+
+			let permit = Eip2612::<Runtime, pallet_assets::Instance1>::generate_permit(
+				ForeignAssetId(0u128).into(),
+				0u128,
+				owner,
+				spender,
+				value,
+				0u8.into(), // nonce
+				deadline,
+			);
+
+			let secret_key = SecretKey::parse(&alith_secret_key()).unwrap();
+			let message = Message::parse(&permit);
+			let (rs, v) = sign(&message, &secret_key);
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u8));
+
+			precompiles()
+				.prepare_test(
+					Charlie,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_permit {
+						owner: Address(owner),
+						spender: Address(spender),
+						value,
+						deadline,
+						v: v.serialize(),
+						r: H256::from(rs.r.b32()),
+						s: H256::from(rs.s.b32()),
+					},
+				)
+				.expect_cost(34533000)
+				.expect_log(log3(
+					ForeignAssetId(0u128),
+					SELECTOR_LOG_APPROVAL,
+					CryptoAlith,
+					Bob,
+					solidity::encode_event_data(U256::from(500)),
+				))
+				.execute_returns(());
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::allowance {
+						owner: Address(CryptoAlith.into()),
+						spender: Address(Bob.into()),
+					},
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(500u16));
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(1u8));
+		});
+}
+
+#[test]
+fn permit_valid_named_asset() {
+	ExtBuilder::default()
+		.with_balances(vec![(CryptoAlith.into(), 1000)])
+		.build()
+		.execute_with(|| {
+			assert_ok!(Assets::force_create(
+				RuntimeOrigin::root(),
+				0u128,
+				CryptoAlith.into(),
+				true,
+				1
+			));
+			assert_ok!(Assets::mint(
+				RuntimeOrigin::signed(CryptoAlith.into()),
+				0u128,
+				CryptoAlith.into(),
+				1000
+			));
+			assert_ok!(Assets::set_metadata(
+				RuntimeOrigin::signed(CryptoAlith.into()),
+				0u128,
+				b"Test token".to_vec(),
+				b"TEST".to_vec(),
+				18
+			));
+
+			let owner: H160 = CryptoAlith.into();
+			let spender: H160 = Bob.into();
+			let value: U256 = 500u16.into();
+			let deadline: U256 = 0u8.into(); // todo: proper timestamp
+
+			let permit = Eip2612::<Runtime, pallet_assets::Instance1>::generate_permit(
+				ForeignAssetId(0u128).into(),
+				0u128,
+				owner,
+				spender,
+				value,
+				0u8.into(), // nonce
+				deadline,
+			);
+
+			let secret_key = SecretKey::parse(&alith_secret_key()).unwrap();
+			let message = Message::parse(&permit);
+			let (rs, v) = sign(&message, &secret_key);
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u8));
+
+			precompiles()
+				.prepare_test(
+					Charlie,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_permit {
+						owner: Address(owner),
+						spender: Address(spender),
+						value,
+						deadline,
+						v: v.serialize(),
+						r: H256::from(rs.r.b32()),
+						s: H256::from(rs.s.b32()),
+					},
+				)
+				.expect_cost(34533000)
+				.expect_log(log3(
+					ForeignAssetId(0u128),
+					SELECTOR_LOG_APPROVAL,
+					CryptoAlith,
+					Bob,
+					solidity::encode_event_data(U256::from(500)),
+				))
+				.execute_returns(());
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::allowance {
+						owner: Address(CryptoAlith.into()),
+						spender: Address(Bob.into()),
+					},
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(500u16));
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(1u8));
+		});
+}
+
+#[test]
+fn permit_invalid_nonce() {
+	ExtBuilder::default()
+		.with_balances(vec![(CryptoAlith.into(), 1000)])
+		.build()
+		.execute_with(|| {
+			assert_ok!(Assets::force_create(
+				RuntimeOrigin::root(),
+				0u128,
+				CryptoAlith.into(),
+				true,
+				1
+			));
+			assert_ok!(Assets::mint(
+				RuntimeOrigin::signed(CryptoAlith.into()),
+				0u128,
+				CryptoAlith.into(),
+				1000
+			));
+
+			let owner: H160 = CryptoAlith.into();
+			let spender: H160 = Bob.into();
+			let value: U256 = 500u16.into();
+			let deadline: U256 = 0u8.into();
+
+			let permit = Eip2612::<Runtime, pallet_assets::Instance1>::generate_permit(
+				ForeignAssetId(0u128).into(),
+				0u128,
+				owner,
+				spender,
+				value,
+				1u8.into(), // nonce
+				deadline,
+			);
+
+			let secret_key = SecretKey::parse(&alith_secret_key()).unwrap();
+			let message = Message::parse(&permit);
+			let (rs, v) = sign(&message, &secret_key);
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u8));
+
+			precompiles()
+				.prepare_test(
+					Charlie,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_permit {
+						owner: Address(owner),
+						spender: Address(spender),
+						value,
+						deadline,
+						v: v.serialize(),
+						r: H256::from(rs.r.b32()),
+						s: H256::from(rs.s.b32()),
+					},
+				)
+				.execute_reverts(|output| output == b"Invalid permit");
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::allowance {
+						owner: Address(CryptoAlith.into()),
+						spender: Address(Bob.into()),
+					},
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u16));
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u8));
+		});
+}
+
+#[test]
+fn permit_invalid_signature() {
+	ExtBuilder::default()
+		.with_balances(vec![(CryptoAlith.into(), 1000)])
+		.build()
+		.execute_with(|| {
+			assert_ok!(Assets::force_create(
+				RuntimeOrigin::root(),
+				0u128,
+				CryptoAlith.into(),
+				true,
+				1
+			));
+			assert_ok!(Assets::mint(
+				RuntimeOrigin::signed(CryptoAlith.into()),
+				0u128,
+				CryptoAlith.into(),
+				1000
+			));
+
+			let owner: H160 = CryptoAlith.into();
+			let spender: H160 = Bob.into();
+			let value: U256 = 500u16.into();
+			let deadline: U256 = 0u8.into();
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u8));
+
+			precompiles()
+				.prepare_test(
+					Charlie,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_permit {
+						owner: Address(owner),
+						spender: Address(spender),
+						value,
+						deadline,
+						v: 0,
+						r: H256::random(),
+						s: H256::random(),
+					},
+				)
+				.execute_reverts(|output| output == b"Invalid permit");
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::allowance {
+						owner: Address(CryptoAlith.into()),
+						spender: Address(Bob.into()),
+					},
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u16));
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u8));
+		});
+}
+
+#[test]
+fn permit_invalid_deadline() {
+	ExtBuilder::default()
+		.with_balances(vec![(CryptoAlith.into(), 1000)])
+		.build()
+		.execute_with(|| {
+			assert_ok!(Assets::force_create(
+				RuntimeOrigin::root(),
+				0u128,
+				CryptoAlith.into(),
+				true,
+				1
+			));
+			assert_ok!(Assets::mint(
+				RuntimeOrigin::signed(CryptoAlith.into()),
+				0u128,
+				CryptoAlith.into(),
+				1000
+			));
+
+			pallet_timestamp::Pallet::<Runtime>::set_timestamp(10_000);
+
+			let owner: H160 = CryptoAlith.into();
+			let spender: H160 = Bob.into();
+			let value: U256 = 500u16.into();
+			let deadline: U256 = 5u8.into(); // deadline < timestamp => expired
+
+			let permit = Eip2612::<Runtime, pallet_assets::Instance1>::generate_permit(
+				ForeignAssetId(0u128).into(),
+				0u128,
+				owner,
+				spender,
+				value,
+				0u8.into(), // nonce
+				deadline,
+			);
+
+			let secret_key = SecretKey::parse(&alith_secret_key()).unwrap();
+			let message = Message::parse(&permit);
+			let (rs, v) = sign(&message, &secret_key);
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u8));
+
+			precompiles()
+				.prepare_test(
+					Charlie,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_permit {
+						owner: Address(owner),
+						spender: Address(spender),
+						value,
+						deadline,
+						v: v.serialize(),
+						r: H256::from(rs.r.b32()),
+						s: H256::from(rs.s.b32()),
+					},
+				)
+				.execute_reverts(|output| output == b"Permit expired");
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::allowance {
+						owner: Address(CryptoAlith.into()),
+						spender: Address(Bob.into()),
+					},
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u16));
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					ForeignAssetId(0u128),
+					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(0u8));
+		});
+}
+
+#[test]
+fn permit_valid_with_metamask_signed_data() {
+	ExtBuilder::default()
+		.with_balances(vec![(CryptoAlith.into(), 1000)])
+		.build()
+		.execute_with(|| {
+			// assetId 1
+			assert_ok!(Assets::force_create(
+				RuntimeOrigin::root(),
+				1u128,
+				CryptoAlith.into(),
+				true,
+				1
+			));
+			assert_ok!(Assets::mint(
+				RuntimeOrigin::signed(CryptoAlith.into()),
+				1u128,
+				CryptoAlith.into(),
+				1000
+			));
+
+			let owner: H160 = CryptoAlith.into();
+			let spender: H160 = Bob.into();
+			let value: U256 = 1000u16.into();
+			let deadline: U256 = 1u16.into(); // todo: proper timestamp
+
+			let rsv = hex!(
+				"3aac886f06729d76067b6b0dbae23978fe48224b10b5648265b8f0e8c4cf25ff7625965d64bf9a6069d
+				b00ef5771b65fd24dd118531fc6e86b61a238ca76b9a11c"
+			)
+			.as_slice();
+			let (r, sv) = rsv.split_at(32);
+			let (s, v) = sv.split_at(32);
+			let v_real = v[0];
+			let r_real: [u8; 32] = r.try_into().unwrap();
+			let s_real: [u8; 32] = s.try_into().unwrap();
+
+			precompiles()
+				.prepare_test(
+					Charlie,
+					ForeignAssetId(1u128),
+					ForeignPCall::eip2612_permit {
+						owner: Address(owner),
+						spender: Address(spender),
+						value,
+						deadline,
+						v: v_real,
+						r: H256::from(r_real),
+						s: H256::from(s_real),
+					},
+				)
+				.expect_cost(34533000)
+				.expect_log(log3(
+					ForeignAssetId(1u128),
+					SELECTOR_LOG_APPROVAL,
+					CryptoAlith,
+					Bob,
+					solidity::encode_event_data(U256::from(1000)),
+				))
+				.execute_returns(());
 		});
 }
 
