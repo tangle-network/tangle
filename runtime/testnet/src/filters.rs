@@ -32,15 +32,6 @@ impl Contains<RuntimeCall> for TestnetCallFilter {
 			return false;
 		}
 
-		match call {
-			// Filter democracy proposals creation
-			RuntimeCall::Democracy(_) |
-			// disallow council
-			RuntimeCall::Council(_) => false,
-
-			// al other calls are allowed
-			_ => true
-
-		}
+		return true;
 	}
 }
