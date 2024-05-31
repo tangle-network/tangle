@@ -32,6 +32,6 @@ impl Contains<RuntimeCall> for TestnetCallFilter {
 			return false;
 		}
 
-		return true;
+		true
 	}
 }
