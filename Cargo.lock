@@ -8074,6 +8074,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-evm-precompile-assets-erc20"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "libsecp256k1",
+ "log",
+ "num_enum 0.5.11",
+ "pallet-assets",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-timestamp",
+ "parity-scale-codec 3.6.12",
+ "paste",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3 0.10.8",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+]
+
+[[package]]
 name = "pallet-evm-precompile-balances-erc20"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,27 @@
+[package]
+name = "verify-ecdsa-secp256k1-signature"
+version = "2.0.0-dev"
+license = "Apache-2.0"
+description = "Simple precompiles to verify EcdsaSecp256k1 signature"
+edition = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+
+# Substrate
+sp-io = { workspace = true }
+# Frontier
+fp-evm = { workspace = true }
+
+[dev-dependencies]
+# Frontier
+pallet-evm-test-vector-support = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+	# Substrate
+	"sp-io/std",
+	# Frontier
+	"fp-evm/std",
+]
