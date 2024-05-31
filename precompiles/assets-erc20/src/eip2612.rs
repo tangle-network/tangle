@@ -25,6 +25,7 @@ use pallet_assets::pallet::{
 	Instance1, Instance10, Instance11, Instance12, Instance13, Instance14, Instance15, Instance16,
 	Instance2, Instance3, Instance4, Instance5, Instance6, Instance7, Instance8, Instance9,
 };
+use sp_std::vec::Vec;
 use scale_info::prelude::string::ToString;
 use sp_core::H256;
 use sp_io::hashing::keccak_256;
