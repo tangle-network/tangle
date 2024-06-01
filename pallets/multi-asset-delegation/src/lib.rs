@@ -247,6 +247,8 @@ pub mod pallet {
 		BondLessRequestAlreadyExists,
 		/// There are active services using the asset.
 		ActiveServicesUsingAsset,
+
+		NoActiveDelegation,
 	}
 
 	/// Hooks for the pallet.
@@ -435,7 +437,12 @@ pub mod pallet {
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_schedule_delegator_bond_less(who.clone(), asset_id, amount)?;
+			Self::process_schedule_delegator_bond_less(
+				who.clone(),
+				operator.clone(),
+				asset_id,
+				amount,
+			)?;
 			Self::deposit_event(Event::ScheduledDelegatorBondLess {
 				who,
 				asset_id,

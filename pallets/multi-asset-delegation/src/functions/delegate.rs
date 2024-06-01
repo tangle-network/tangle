@@ -56,28 +56,38 @@ impl<T: Config> Pallet<T> {
 
 	pub fn process_schedule_delegator_bond_less(
 		who: T::AccountId,
+		operator: T::AccountId,
 		asset_id: T::AssetId,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			// Ensure no active services on this operator using this asset
-			ensure!(
-				metadata.delegations.iter().all(|d| d.asset_id != asset_id),
-				Error::<T>::ActiveServicesUsingAsset
-			);
+			// Ensure the delegator has an active delegation with the operator for the given asset
+			let delegation = metadata
+				.delegations
+				.iter()
+				.find(|d| d.operator == operator && d.asset_id == asset_id)
+				.ok_or(Error::<T>::NoActiveDelegation)?;
 
-			// Ensure no outstanding bond less request
+			// Ensure there is no outstanding bond less request
 			ensure!(
 				metadata.delegator_bond_less_request.is_none(),
 				Error::<T>::BondLessRequestAlreadyExists
 			);
 
+			// Ensure the amount to bond less is not greater than the current delegation amount
+			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
+
+			// TODO : Ensure the asset can be removed from operator
+
 			// Create the bond less request
 			let current_round = Self::current_round();
-			metadata.delegator_bond_less_request =
-				Some(BondLessRequest { asset_id, amount, requested_round: current_round });
+			metadata.delegator_bond_less_request = Some(BondLessRequest {
+				asset_id,
+				amount,
+				requested_round: current_round + T::DelegationBondLessDelay::get(),
+			});
 
 			Ok(())
 		})

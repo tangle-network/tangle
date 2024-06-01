@@ -26,7 +26,7 @@ use sp_runtime::ArithmeticError;
 use sp_runtime::DispatchError;
 
 // helper function
-fn mint_tokens(
+pub fn mint_tokens(
 	asset_id: AssetId,
 	recipient: <Test as frame_system::Config>::AccountId,
 	amount: Balance,

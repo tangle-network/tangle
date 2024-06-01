@@ -21,8 +21,10 @@ use crate::Event;
 use crate::{mock::*, Error};
 use frame_support::{assert_noop, assert_ok};
 
-pub mod delegator;
+pub mod delegate;
+pub mod deposit;
 pub mod operator;
 
-pub use delegator::*;
+pub use delegate::*;
+pub use deposit::*;
 pub use operator::*;
