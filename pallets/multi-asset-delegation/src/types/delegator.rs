@@ -63,7 +63,9 @@ pub struct DelegatorMetadata<AccountId, Balance, AssetId: Encode + Decode + Type
 	pub status: DelegatorStatus,
 }
 
-impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo> Default for DelegatorMetadata<AccountId, Balance, AssetId> {
+impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo> Default
+	for DelegatorMetadata<AccountId, Balance, AssetId>
+{
 	fn default() -> Self {
 		DelegatorMetadata {
 			deposits: BTreeMap::new(),

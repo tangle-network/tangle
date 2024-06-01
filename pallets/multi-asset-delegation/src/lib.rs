@@ -39,6 +39,7 @@ pub use traits::*;
 pub mod pallet {
 	use crate::traits::ServiceManager;
 	use crate::types::*;
+	use frame_support::traits::fungibles;
 	use frame_support::{
 		dispatch::DispatchResult,
 		pallet_prelude::*,
@@ -49,7 +50,6 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, StaticLookup};
 	use sp_std::vec::Vec;
-	use frame_support::traits::fungibles;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
@@ -183,9 +183,19 @@ pub mod pallet {
 		/// An unstake has been cancelled.
 		CancelledUnstake { who: T::AccountId },
 		/// A delegation has been made.
-		Delegated { who: T::AccountId, operator: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
+		Delegated {
+			who: T::AccountId,
+			operator: T::AccountId,
+			amount: BalanceOf<T>,
+			asset_id: T::AssetId,
+		},
 		/// A delegator bond less request has been scheduled.
-		ScheduledDelegatorBondLess { who: T::AccountId, operator: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
+		ScheduledDelegatorBondLess {
+			who: T::AccountId,
+			operator: T::AccountId,
+			amount: BalanceOf<T>,
+			asset_id: T::AssetId,
+		},
 		/// A delegator bond less request has been executed.
 		ExecutedDelegatorBondLess { who: T::AccountId },
 		/// A delegator bond less request has been cancelled.
@@ -426,7 +436,12 @@ pub mod pallet {
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_schedule_delegator_bond_less(who.clone(), asset_id, amount)?;
-			Self::deposit_event(Event::ScheduledDelegatorBondLess { who, asset_id, operator, amount });
+			Self::deposit_event(Event::ScheduledDelegatorBondLess {
+				who,
+				asset_id,
+				operator,
+				amount,
+			});
 			Ok(())
 		}
 

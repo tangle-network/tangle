@@ -4473,7 +4473,7 @@ dependencies = [
 
 [[package]]
 name = "frost-core"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "byteorder",
  "debugless-unwrap",
@@ -4490,7 +4490,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed25519"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "curve25519-dalek 4.1.2",
  "frost-core",
@@ -4502,7 +4502,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed448"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "ed448-goldilocks-plus",
  "frost-core",
@@ -4514,7 +4514,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p256"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "frost-core",
  "p256",
@@ -4526,7 +4526,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p384"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "frost-core",
  "p384",
@@ -4538,7 +4538,7 @@ dependencies = [
 
 [[package]]
 name = "frost-redjubjub"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "blake2 0.10.6",
  "frost-core",
@@ -4552,7 +4552,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ristretto255"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "curve25519-dalek 4.1.2",
  "frost-core",
@@ -4564,7 +4564,7 @@ dependencies = [
 
 [[package]]
 name = "frost-secp256k1"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "frost-core",
  "k256",
@@ -4576,7 +4576,7 @@ dependencies = [
 
 [[package]]
 name = "frost-taproot"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "frost-core",
  "k256",
@@ -7617,7 +7617,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7886,7 +7886,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-dkg"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "cggmp21",
  "derivation-path",
@@ -8577,7 +8577,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "ethereum",
  "ethers",
@@ -8623,7 +8623,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs-rpc"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "jsonrpsee 0.20.3",
  "pallet-jobs-rpc-runtime-api",
@@ -8639,7 +8639,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-jobs-rpc-runtime-api"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "parity-scale-codec 3.6.12",
  "sp-api",
@@ -8666,6 +8666,25 @@ dependencies = [
  "sp-runtime",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
  "sp-weights",
+]
+
+[[package]]
+name = "pallet-multi-asset-delegation"
+version = "1.0.5"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-assets",
+ "pallet-balances",
+ "parity-scale-codec 3.6.12",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
 ]
 
 [[package]]
@@ -8754,7 +8773,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-roles"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -9063,7 +9082,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-zksaas"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -15034,7 +15053,7 @@ dependencies = [
 
 [[package]]
 name = "tangle"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "clap",
  "fc-api",
@@ -15135,7 +15154,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "parity-scale-codec 3.6.12",
  "scale-info",
@@ -15144,7 +15163,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -15172,7 +15191,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "evm-tracer",
  "fp-account",
@@ -15278,7 +15297,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "hex",
  "parity-scale-codec 3.6.12",
@@ -15293,7 +15312,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "evm-tracer",
  "fixed",
@@ -15415,7 +15434,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-voter"
-version = "1.0.3"
+version = "1.0.5"
 dependencies = [
  "anyhow",
  "clap",
