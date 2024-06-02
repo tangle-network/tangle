@@ -97,6 +97,7 @@ pallet-roles = { workspace = true }
 pallet-zksaas = { workspace = true }
 tangle-crypto-primitives = { workspace = true }
 tangle-primitives = { workspace = true, features = ["verifying"] }
+pallet-multi-asset-delegation = { workspace = true }
 
 # Frontier dependencies
 fp-account = { workspace = true }
@@ -180,6 +181,7 @@ runtime-benchmarks = [
   "pallet-airdrop-claims/runtime-benchmarks",
 
   "xcm-builder/runtime-benchmarks",
+  "pallet-multi-asset-delegation/runtime-benchmarks"
 ]
 
 std = [
@@ -249,7 +251,7 @@ std = [
   "pallet-dkg/std",
   "pallet-zksaas/std",
   "pallet-jobs-rpc-runtime-api/std",
-
+  "pallet-multi-asset-delegation/std",
 
   # Frontier
   "fp-account/std",

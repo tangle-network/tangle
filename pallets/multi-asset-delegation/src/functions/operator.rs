@@ -117,7 +117,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns an error if the operator is not found, not in leaving state, or the leaving round has not been reached.
 	pub fn process_execute_leave_operators(who: &T::AccountId) -> Result<(), DispatchError> {
-		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
+		let operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		let current_round = Self::current_round();
 
 		match operator.status {
@@ -127,7 +127,7 @@ impl<T: Config> Pallet<T> {
 			_ => return Err(Error::<T>::NotLeavingOperator.into()),
 		};
 
-		T::Currency::unreserve(&who, operator.bond);
+		T::Currency::unreserve(who, operator.bond);
 		Operators::<T>::remove(who);
 
 		Ok(())

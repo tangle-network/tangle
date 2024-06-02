@@ -57,20 +57,15 @@ where
 }
 
 /// The activity status of the operator.
-#[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo)]
+#[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Default)]
 pub enum OperatorStatus {
 	/// Committed to be online.
+	#[default]
 	Active,
 	/// Temporarily inactive and excused for inactivity.
 	Inactive,
 	/// Bonded until the specified round.
 	Leaving(RoundIndex),
-}
-
-impl Default for OperatorStatus {
-	fn default() -> OperatorStatus {
-		OperatorStatus::Active
-	}
 }
 
 /// A request scheduled to change the operator self-bond.

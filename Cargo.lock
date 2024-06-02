@@ -15375,6 +15375,7 @@ dependencies = [
  "pallet-insecure-randomness-collective-flip",
  "pallet-jobs",
  "pallet-jobs-rpc-runtime-api",
+ "pallet-multi-asset-delegation",
  "pallet-multisig",
  "pallet-nomination-pools",
  "pallet-offences",

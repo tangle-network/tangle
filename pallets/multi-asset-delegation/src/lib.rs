@@ -95,7 +95,7 @@ pub mod pallet {
 		type MinDelegateAmount: Get<BalanceOf<Self>>;
 
 		/// The duration for which the bond is locked.
-		type BondDuration: Get<BlockNumberFor<Self>>;
+		type BondDuration: Get<RoundIndex>;
 
 		/// The service manager that manages active services.
 		type ServiceManager: ServiceManager<Self::AccountId, BalanceOf<Self>>;
@@ -430,7 +430,7 @@ pub mod pallet {
 
 		/// Schedules an unstake request.
 		#[pallet::call_index(11)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn schedule_unstake(
 			origin: OriginFor<T>,
 			asset_id: Option<T::AssetId>,
@@ -444,7 +444,7 @@ pub mod pallet {
 
 		/// Executes a scheduled unstake request.
 		#[pallet::call_index(12)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn execute_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_execute_unstake(who.clone())?;
@@ -454,7 +454,7 @@ pub mod pallet {
 
 		/// Cancels a scheduled unstake request.
 		#[pallet::call_index(13)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn cancel_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_cancel_unstake(who.clone())?;
@@ -464,7 +464,7 @@ pub mod pallet {
 
 		/// Allows a user to delegate an amount of an asset to an operator.
 		#[pallet::call_index(14)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn delegate(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
@@ -479,7 +479,7 @@ pub mod pallet {
 
 		/// Schedules a request to reduce a delegator's bond.
 		#[pallet::call_index(15)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn schedule_delegator_bond_less(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
@@ -504,7 +504,7 @@ pub mod pallet {
 
 		/// Executes a scheduled request to reduce a delegator's bond.
 		#[pallet::call_index(16)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn execute_delegator_bond_less(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_execute_delegator_bond_less(who.clone())?;
@@ -514,7 +514,7 @@ pub mod pallet {
 
 		/// Cancels a scheduled request to reduce a delegator's bond.
 		#[pallet::call_index(17)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn cancel_delegator_bond_less(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_cancel_delegator_bond_less(who.clone())?;
@@ -524,7 +524,7 @@ pub mod pallet {
 
 		/// Set the whitelisted assets allowed for delegation
 		#[pallet::call_index(18)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn set_whitelisted_assets(
 			origin: OriginFor<T>,
 			assets: Vec<T::AssetId>,
@@ -543,7 +543,7 @@ pub mod pallet {
 
 		/// Sets the APY and cap for a specific asset.
 		#[pallet::call_index(19)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn set_incentive_apy_and_cap(
 			origin: OriginFor<T>,
 			asset_id: T::AssetId,
@@ -573,7 +573,7 @@ pub mod pallet {
 
 		/// Whitelists a blueprint for rewards.
 		#[pallet::call_index(20)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn whitelist_blueprint_for_rewards(
 			origin: OriginFor<T>,
 			blueprint_id: u32,

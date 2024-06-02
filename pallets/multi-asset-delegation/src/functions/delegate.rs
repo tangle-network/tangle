@@ -19,9 +19,8 @@ use crate::Pallet;
 use frame_support::ensure;
 use frame_support::pallet_prelude::DispatchResult;
 use frame_support::traits::Get;
-use frame_support::traits::ReservableCurrency;
+
 use sp_runtime::traits::Zero;
-use sp_runtime::DispatchError;
 
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.

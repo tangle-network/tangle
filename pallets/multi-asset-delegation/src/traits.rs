@@ -16,11 +16,11 @@
 use super::*;
 use crate::types::*;
 use crate::Config;
-use frame_support::traits::Currency;
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use scale_info::TypeInfo;
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
+
+use parity_scale_codec::{Decode, Encode};
+use scale_info::prelude::vec;
+use scale_info::prelude::vec::Vec;
+
 use sp_runtime::traits::Zero;
 use sp_runtime::RuntimeDebug;
 

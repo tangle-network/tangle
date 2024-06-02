@@ -18,17 +18,15 @@ use crate::types::*;
 use crate::Pallet;
 use frame_support::ensure;
 use frame_support::pallet_prelude::DispatchResult;
-use frame_support::traits::fungibles;
+
 use frame_support::traits::fungibles::Mutate;
-use frame_support::traits::fungibles::MutateHold;
+
 use frame_support::traits::Get;
 use frame_support::{
 	sp_runtime::traits::AccountIdConversion,
-	traits::{tokens::Preservation, Currency, LockableCurrency, ReservableCurrency},
-	PalletId,
+	traits::{tokens::Preservation, Currency},
 };
 use sp_runtime::traits::Zero;
-use sp_runtime::DispatchError;
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account ID of the pallet.

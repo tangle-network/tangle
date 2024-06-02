@@ -13,15 +13,15 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use super::*;
+
 use crate::Config;
 use frame_support::traits::Currency;
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
+
 use sp_runtime::RuntimeDebug;
 use sp_std::collections::btree_map::BTreeMap;
+use sp_std::vec::Vec;
 
 pub mod delegator;
 pub mod operator;
