@@ -24,7 +24,9 @@ use frame_support::{assert_noop, assert_ok};
 pub mod delegate;
 pub mod deposit;
 pub mod operator;
+pub mod session_manager;
 
 pub use delegate::*;
 pub use deposit::*;
 pub use operator::*;
+pub use session_manager::*;

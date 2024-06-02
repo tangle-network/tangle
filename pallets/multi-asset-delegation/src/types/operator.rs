@@ -25,10 +25,35 @@ pub struct OperatorSnapshot<AccountId, Balance, AssetId> {
 	/// The rewardable delegations. This list is a subset of total delegators, where certain
 	/// delegators are adjusted based on their scheduled status.
 	pub delegations: Vec<Bond<AccountId, Balance, AssetId>>,
+}
 
-	/// The total counted value locked for the operator, including the self bond + total staked by
-	/// top delegators.
-	pub total: Balance,
+impl<AccountId, Balance, AssetId> OperatorSnapshot<AccountId, Balance, AssetId>
+where
+	AssetId: PartialEq + Ord + Copy,
+	Balance: Default + core::ops::AddAssign + Copy,
+{
+	/// Calculates the total stake for a specific asset ID from all delegations.
+	pub fn get_stake_by_asset_id(&self, asset_id: AssetId) -> Balance {
+		let mut total_stake = Balance::default();
+		for bond in &self.delegations {
+			if bond.asset_id == asset_id {
+				total_stake += bond.amount;
+			}
+		}
+		total_stake
+	}
+
+	/// Calculates the total stake for each asset and returns a list of (asset_id, total_stake).
+	pub fn get_total_stake_by_assets(&self) -> Vec<(AssetId, Balance)> {
+		let mut stake_by_asset: BTreeMap<AssetId, Balance> = BTreeMap::new();
+
+		for bond in &self.delegations {
+			let entry = stake_by_asset.entry(bond.asset_id).or_default();
+			*entry += bond.amount;
+		}
+
+		stake_by_asset.into_iter().collect()
+	}
 }
 
 /// The activity status of the operator.
@@ -59,13 +84,103 @@ pub struct OperatorBondLessRequest<Balance> {
 
 /// Stores the metadata of an operator.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo, Clone, Eq, PartialEq)]
-pub struct OperatorMetadata<Balance> {
+pub struct OperatorMetadata<AccountId, Balance, AssetId> {
 	/// The operator's self-bond amount.
 	pub bond: Balance,
 	/// The total number of delegations to this operator.
 	pub delegation_count: u32,
 	/// An optional pending request to decrease the operator's self-bond, with only one allowed at any given time.
 	pub request: Option<OperatorBondLessRequest<Balance>>,
+	/// A list of all current delegations.
+	pub delegations: Vec<Bond<AccountId, Balance, AssetId>>,
 	/// The current status of the operator.
 	pub status: OperatorStatus,
+}
+
+// ------ Test for helper functions ------ //
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use std::ops::AddAssign;
+
+	#[derive(
+		Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, PartialOrd, Ord,
+	)]
+	pub struct MockAssetId(pub u32);
+
+	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
+	pub struct MockAccountId(pub u64);
+
+	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Default)]
+	pub struct MockBalance(pub u64);
+
+	impl AddAssign for MockBalance {
+		fn add_assign(&mut self, other: Self) {
+			*self = MockBalance(self.0 + other.0);
+		}
+	}
+
+	#[test]
+	fn get_stake_by_asset_id_should_work() {
+		let snapshot = OperatorSnapshot {
+			bond: MockBalance(100),
+			delegations: vec![
+				Bond {
+					operator: MockAccountId(1),
+					amount: MockBalance(50),
+					asset_id: MockAssetId(1),
+				},
+				Bond {
+					operator: MockAccountId(2),
+					amount: MockBalance(75),
+					asset_id: MockAssetId(1),
+				},
+				Bond {
+					operator: MockAccountId(3),
+					amount: MockBalance(25),
+					asset_id: MockAssetId(2),
+				},
+			],
+		};
+
+		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(1)), MockBalance(125));
+		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(2)), MockBalance(25));
+		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(3)), MockBalance(0));
+	}
+
+	#[test]
+	fn get_total_stake_by_assets_should_work() {
+		let snapshot = OperatorSnapshot {
+			bond: MockBalance(100),
+			delegations: vec![
+				Bond {
+					operator: MockAccountId(1),
+					amount: MockBalance(50),
+					asset_id: MockAssetId(1),
+				},
+				Bond {
+					operator: MockAccountId(2),
+					amount: MockBalance(75),
+					asset_id: MockAssetId(1),
+				},
+				Bond {
+					operator: MockAccountId(3),
+					amount: MockBalance(25),
+					asset_id: MockAssetId(2),
+				},
+				Bond {
+					operator: MockAccountId(4),
+					amount: MockBalance(100),
+					asset_id: MockAssetId(2),
+				},
+			],
+		};
+
+		let result = snapshot.get_total_stake_by_assets();
+		let expected_result =
+			vec![(MockAssetId(1), MockBalance(125)), (MockAssetId(2), MockBalance(125))];
+
+		assert_eq!(result, expected_result);
+	}
 }

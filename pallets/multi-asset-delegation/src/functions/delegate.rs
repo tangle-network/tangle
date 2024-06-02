@@ -45,10 +45,28 @@ impl<T: Config> Pallet<T> {
 			}
 
 			// Create a new delegation
-			metadata.delegations.push(Bond { operator, amount, asset_id });
+			metadata.delegations.push(Bond { operator: operator.clone(), amount, asset_id });
 
 			// Update the status
 			metadata.status = DelegatorStatus::Active;
+
+			// Update the operator's metadata
+			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
+				let operator_metadata =
+					maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
+
+				// Increase the delegation count
+				operator_metadata.delegation_count += 1;
+
+				// Add the new delegation
+				operator_metadata.delegations.push(Bond {
+					operator: who.clone(),
+					amount,
+					asset_id,
+				});
+
+				Ok(())
+			})?;
 
 			Ok(())
 		})
@@ -79,15 +97,38 @@ impl<T: Config> Pallet<T> {
 			// Ensure the amount to bond less is not greater than the current delegation amount
 			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
 
-			// TODO : Ensure the asset can be removed from operator
-
 			// Create the bond less request
 			let current_round = Self::current_round();
-			metadata.delegator_bond_less_request = Some(BondLessRequest {
-				asset_id,
-				amount,
-				requested_round: current_round + T::DelegationBondLessDelay::get(),
-			});
+			metadata.delegator_bond_less_request =
+				Some(BondLessRequest { asset_id, amount, requested_round: current_round });
+
+			// Update the operator's metadata
+			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
+				let operator_metadata =
+					maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
+
+				// Ensure the operator has a matching delegation
+				let operator_delegation_index = operator_metadata
+					.delegations
+					.iter()
+					.position(|d| d.operator == who && d.asset_id == asset_id)
+					.ok_or(Error::<T>::NoActiveDelegation)?;
+
+				let operator_delegation =
+					&mut operator_metadata.delegations[operator_delegation_index];
+
+				// Reduce the amount in the operator's delegation
+				ensure!(operator_delegation.amount >= amount, Error::<T>::InsufficientBalance);
+				operator_delegation.amount -= amount;
+
+				// Remove the delegation if the remaining amount is zero
+				if operator_delegation.amount.is_zero() {
+					operator_metadata.delegations.remove(operator_delegation_index);
+					operator_metadata.delegation_count -= 1;
+				}
+
+				Ok(())
+			})?;
 
 			Ok(())
 		})
@@ -105,7 +146,8 @@ impl<T: Config> Pallet<T> {
 
 			// Check if the requested round has been reached
 			ensure!(
-				Self::current_round() >= bond_less_request.requested_round,
+				Self::current_round()
+					>= T::DelegationBondLessDelay::get() + bond_less_request.requested_round,
 				Error::<T>::BondLessNotReady
 			);
 
@@ -137,8 +179,35 @@ impl<T: Config> Pallet<T> {
 			let asset_id = bond_less_request.asset_id;
 			let amount = bond_less_request.amount;
 
+			// Find the operator associated with the bond less request
+			let operator = metadata
+				.delegations
+				.iter()
+				.find(|d| d.asset_id == asset_id && d.amount >= amount)
+				.ok_or(Error::<T>::NoActiveDelegation)?
+				.operator
+				.clone();
+
 			// Add the amount back to the delegator's deposits
 			metadata.deposits.entry(asset_id).and_modify(|e| *e += amount).or_insert(amount);
+
+			// Update the operator's metadata
+			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
+				let operator_metadata =
+					maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
+
+				// Increase the delegation count
+				operator_metadata.delegation_count += 1;
+
+				// Add the new delegation
+				operator_metadata.delegations.push(Bond {
+					operator: who.clone(),
+					amount,
+					asset_id,
+				});
+
+				Ok(())
+			})?;
 
 			Ok(())
 		})

@@ -77,6 +77,56 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo> Default
 	}
 }
 
+impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
+	DelegatorMetadata<AccountId, Balance, AssetId>
+{
+	/// Returns a reference to the unstake request, if it exists.
+	pub fn get_unstake_request(&self) -> Option<&UnstakeRequest<AssetId, Balance>> {
+		self.unstake_request.as_ref()
+	}
+
+	/// Returns a reference to the list of delegations.
+	pub fn get_delegations(&self) -> &Vec<Bond<AccountId, Balance, AssetId>> {
+		&self.delegations
+	}
+
+	/// Returns a reference to the bond less request, if it exists.
+	pub fn get_delegator_bond_less_request(&self) -> Option<&BondLessRequest<AssetId, Balance>> {
+		self.delegator_bond_less_request.as_ref()
+	}
+
+	/// Checks if the list of delegations is empty.
+	pub fn is_delegations_empty(&self) -> bool {
+		self.delegations.is_empty()
+	}
+
+	/// Calculates the total delegation amount for a specific asset.
+	pub fn calculate_delegation_by_asset(&self, asset_id: AssetId) -> Balance
+	where
+		Balance: Default + core::ops::AddAssign + Clone,
+		AssetId: Eq + PartialEq,
+	{
+		let mut total = Balance::default();
+		for bond in &self.delegations {
+			if bond.asset_id == asset_id {
+				total += bond.amount.clone();
+			}
+		}
+		total
+	}
+
+	/// Returns a list of delegations to a specific operator.
+	pub fn calculate_delegation_by_operator(
+		&self,
+		operator: AccountId,
+	) -> Vec<&Bond<AccountId, Balance, AssetId>>
+	where
+		AccountId: Eq + PartialEq,
+	{
+		self.delegations.iter().filter(|&bond| bond.operator == operator).collect()
+	}
+}
+
 /// Represents a deposit of a specific asset.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct Deposit<AssetId, Balance> {
@@ -87,7 +137,7 @@ pub struct Deposit<AssetId, Balance> {
 }
 
 /// Represents a bond between a delegator and an operator.
-#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
 pub struct Bond<AccountId, Balance, AssetId> {
 	/// The account ID of the operator.
 	pub operator: AccountId,
@@ -95,4 +145,124 @@ pub struct Bond<AccountId, Balance, AssetId> {
 	pub amount: Balance,
 	/// The ID of the bonded asset.
 	pub asset_id: AssetId,
+}
+
+// ------ Test for helper functions ------ //
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use std::collections::BTreeMap;
+	use std::ops::AddAssign;
+
+	#[derive(
+		Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, PartialOrd, Ord,
+	)]
+	pub struct MockAssetId(pub u32);
+
+	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
+	pub struct MockAccountId(pub u64);
+
+	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Default)]
+	pub struct MockBalance(pub u64);
+
+	impl AddAssign for MockBalance {
+		fn add_assign(&mut self, other: Self) {
+			*self = MockBalance(self.0 + other.0);
+		}
+	}
+
+	#[test]
+	fn get_unstake_request_should_work() {
+		let unstake_request = UnstakeRequest {
+			asset_id: MockAssetId(1),
+			amount: MockBalance(50),
+			requested_round: 1,
+		};
+		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
+			DelegatorMetadata {
+				unstake_request: Some(unstake_request.clone()),
+				..Default::default()
+			};
+
+		assert_eq!(metadata.get_unstake_request(), Some(&unstake_request));
+	}
+
+	#[test]
+	fn get_delegations_should_work() {
+		let delegations = vec![
+			Bond { operator: MockAccountId(1), amount: MockBalance(50), asset_id: MockAssetId(1) },
+			Bond { operator: MockAccountId(2), amount: MockBalance(75), asset_id: MockAssetId(2) },
+		];
+		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
+			DelegatorMetadata { delegations: delegations.clone(), ..Default::default() };
+
+		assert_eq!(metadata.get_delegations(), &delegations);
+	}
+
+	#[test]
+	fn get_delegator_bond_less_request_should_work() {
+		let bond_less_request = BondLessRequest {
+			asset_id: MockAssetId(1),
+			amount: MockBalance(50),
+			requested_round: 1,
+		};
+		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
+			DelegatorMetadata {
+				delegator_bond_less_request: Some(bond_less_request.clone()),
+				..Default::default()
+			};
+
+		assert_eq!(metadata.get_delegator_bond_less_request(), Some(&bond_less_request));
+	}
+
+	#[test]
+	fn is_delegations_empty_should_work() {
+		let metadata_with_delegations = DelegatorMetadata {
+			delegations: vec![Bond {
+				operator: MockAccountId(1),
+				amount: MockBalance(50),
+				asset_id: MockAssetId(1),
+			}],
+			..Default::default()
+		};
+
+		let metadata_without_delegations: DelegatorMetadata<
+			MockAccountId,
+			MockBalance,
+			MockAssetId,
+		> = Default::default();
+
+		assert!(!metadata_with_delegations.is_delegations_empty());
+		assert!(metadata_without_delegations.is_delegations_empty());
+	}
+
+	#[test]
+	fn calculate_delegation_by_asset_should_work() {
+		let delegations = vec![
+			Bond { operator: MockAccountId(1), amount: MockBalance(50), asset_id: MockAssetId(1) },
+			Bond { operator: MockAccountId(2), amount: MockBalance(75), asset_id: MockAssetId(1) },
+			Bond { operator: MockAccountId(3), amount: MockBalance(25), asset_id: MockAssetId(2) },
+		];
+		let metadata = DelegatorMetadata { delegations, ..Default::default() };
+
+		assert_eq!(metadata.calculate_delegation_by_asset(MockAssetId(1)), MockBalance(125));
+		assert_eq!(metadata.calculate_delegation_by_asset(MockAssetId(2)), MockBalance(25));
+		assert_eq!(metadata.calculate_delegation_by_asset(MockAssetId(3)), MockBalance(0));
+	}
+
+	#[test]
+	fn calculate_delegation_by_operator_should_work() {
+		let delegations = vec![
+			Bond { operator: MockAccountId(1), amount: MockBalance(50), asset_id: MockAssetId(1) },
+			Bond { operator: MockAccountId(1), amount: MockBalance(75), asset_id: MockAssetId(2) },
+			Bond { operator: MockAccountId(2), amount: MockBalance(25), asset_id: MockAssetId(1) },
+		];
+		let metadata = DelegatorMetadata { delegations, ..Default::default() };
+
+		let result = metadata.calculate_delegation_by_operator(MockAccountId(1));
+		assert_eq!(result.len(), 2);
+		assert_eq!(result[0].operator, MockAccountId(1));
+		assert_eq!(result[1].operator, MockAccountId(1));
+	}
 }

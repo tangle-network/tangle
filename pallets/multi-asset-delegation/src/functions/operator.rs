@@ -41,6 +41,7 @@ impl<T: Config> Pallet<T> {
 			bond: bond_amount,
 			delegation_count: 0,
 			request: None,
+			delegations: Default::default(),
 			status: OperatorStatus::Active,
 		};
 

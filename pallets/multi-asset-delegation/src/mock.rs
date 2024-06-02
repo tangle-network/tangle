@@ -41,6 +41,7 @@ pub const ALICE: u64 = 1;
 pub const BOB: u64 = 2;
 pub const CHARLIE: u64 = 3;
 pub const DAVE: u64 = 4;
+pub const EVE: u64 = 5;
 
 pub const vDOT: AssetId = 1;
 pub const vUSDT: AssetId = 2;
@@ -135,8 +136,7 @@ impl pallet_multi_asset_delegation::Config for Test {
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;
 	type LeaveDelegatorsDelay = ConstU32<1>;
-	type RevokeDelegationDelay = ConstU32<1>;
-	type DelegationBondLessDelay = ConstU32<1>;
+	type DelegationBondLessDelay = ConstU32<5>;
 	type MinDelegateAmount = ConstU64<100>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
@@ -176,6 +176,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			(CHARLIE, 300_000),
 			(DAVE, 5_000),                                 // Not enough to bond
 			(MultiAssetDelegation::pallet_account(), 100), // give pallet some ED so it can receive tokens
+			(EVE, 20_000),
 		],
 	}
 	.assimilate_storage(&mut t)

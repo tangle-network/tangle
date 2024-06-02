@@ -86,10 +86,6 @@ pub mod pallet {
 		#[pallet::constant]
 		type LeaveDelegatorsDelay: Get<RoundIndex>;
 
-		/// Number of rounds that delegations remain bonded before the revocation request is executable.
-		#[pallet::constant]
-		type RevokeDelegationDelay: Get<RoundIndex>;
-
 		/// Number of rounds that delegation bond less requests must wait before being executable.
 		#[pallet::constant]
 		type DelegationBondLessDelay: Get<RoundIndex>;
@@ -124,7 +120,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn operator_info)]
 	pub(crate) type Operators<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, OperatorMetadata<BalanceOf<T>>, OptionQuery>;
+		StorageMap<_, Twox64Concat, T::AccountId, OperatorMetadataOf<T>, OptionQuery>;
 
 	/// Storage for the current round.
 	#[pallet::storage]

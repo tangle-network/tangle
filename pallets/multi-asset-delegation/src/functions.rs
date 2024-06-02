@@ -19,8 +19,10 @@ pub mod delegate;
 pub mod deposit;
 pub mod operator;
 pub mod rewards;
+pub mod session_manager;
 
 pub use delegate::*;
 pub use deposit::*;
 pub use operator::*;
 pub use rewards::*;
+pub use session_manager::*;

@@ -34,7 +34,9 @@ fn delegate_should_work() {
 		let asset_id = vDOT;
 		let amount = 100;
 
-		mint_tokens(vDOT, who, amount);
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+
+		create_and_mint_tokens(vDOT, who, amount);
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -43,7 +45,6 @@ fn delegate_should_work() {
 			amount,
 		));
 
-		// Act
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
 			operator,
@@ -59,6 +60,15 @@ fn delegate_should_work() {
 		assert_eq!(delegation.operator, operator);
 		assert_eq!(delegation.amount, amount);
 		assert_eq!(delegation.asset_id, asset_id);
+
+		// Check the operator metadata
+		let operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 1);
+		assert_eq!(operator_metadata.delegations.len(), 1);
+		let operator_delegation = &operator_metadata.delegations[0];
+		assert_eq!(operator_delegation.operator, who);
+		assert_eq!(operator_delegation.amount, amount);
+		assert_eq!(operator_delegation.asset_id, asset_id);
 	});
 }
 
@@ -71,7 +81,9 @@ fn schedule_delegator_bond_less_should_work() {
 		let asset_id = vDOT;
 		let amount = 100;
 
-		mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(vDOT, who, amount);
+
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		// Deposit and delegate first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -86,7 +98,6 @@ fn schedule_delegator_bond_less_should_work() {
 			amount,
 		));
 
-		// Act
 		assert_ok!(MultiAssetDelegation::schedule_delegator_bond_less(
 			RuntimeOrigin::signed(who),
 			operator,
@@ -95,11 +106,17 @@ fn schedule_delegator_bond_less_should_work() {
 		));
 
 		// Assert
+		// Check the delegator metadata
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(metadata.delegator_bond_less_request.is_some());
 		let request = metadata.delegator_bond_less_request.unwrap();
 		assert_eq!(request.asset_id, asset_id);
 		assert_eq!(request.amount, amount);
+
+		// Check the operator metadata
+		let operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 0);
+		assert_eq!(operator_metadata.delegations.len(), 0);
 	});
 }
 
@@ -112,7 +129,9 @@ fn execute_delegator_bond_less_should_work() {
 		let asset_id = vDOT;
 		let amount = 100;
 
-		mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(vDOT, who, amount);
+
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		// Deposit, delegate and schedule bond less first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -134,9 +153,8 @@ fn execute_delegator_bond_less_should_work() {
 		));
 
 		// Simulate round passing
-		CurrentRound::<Test>::put(2);
+		CurrentRound::<Test>::put(10);
 
-		// Act
 		assert_ok!(MultiAssetDelegation::execute_delegator_bond_less(RuntimeOrigin::signed(who),));
 
 		// Assert
@@ -156,7 +174,9 @@ fn cancel_delegator_bond_less_should_work() {
 		let asset_id = vDOT;
 		let amount = 100;
 
-		mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(vDOT, who, amount);
+
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		// Deposit, delegate and schedule bond less first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -177,12 +197,22 @@ fn cancel_delegator_bond_less_should_work() {
 			amount,
 		));
 
-		// Act
-		assert_ok!(MultiAssetDelegation::cancel_delegator_bond_less(RuntimeOrigin::signed(who),));
+		assert_ok!(MultiAssetDelegation::cancel_delegator_bond_less(RuntimeOrigin::signed(who)));
 
 		// Assert
+		// Check the delegator metadata
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(metadata.delegator_bond_less_request.is_none());
+		assert_eq!(metadata.deposits.get(&asset_id), Some(&amount));
+
+		// Check the operator metadata
+		let operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 1);
+		assert_eq!(operator_metadata.delegations.len(), 1);
+		let operator_delegation = &operator_metadata.delegations[0];
+		assert_eq!(operator_delegation.operator, who);
+		assert_eq!(operator_delegation.amount, amount); // Amount added back
+		assert_eq!(operator_delegation.asset_id, asset_id);
 	});
 }
 
@@ -193,9 +223,11 @@ fn delegate_should_fail_if_not_enough_balance() {
 		let who = 1;
 		let operator = 2;
 		let asset_id = vDOT;
-		let amount = 1000;
+		let amount = 10_000;
 
-		mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(vDOT, who, amount);
+
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(who),
@@ -203,7 +235,6 @@ fn delegate_should_fail_if_not_enough_balance() {
 			amount - 20,
 		));
 
-		// Act & Assert
 		assert_noop!(
 			MultiAssetDelegation::delegate(RuntimeOrigin::signed(who), operator, asset_id, amount,),
 			Error::<Test>::InsufficientBalance
@@ -220,7 +251,9 @@ fn schedule_delegator_bond_less_should_fail_if_no_delegation() {
 		let asset_id = vDOT;
 		let amount = 100;
 
-		mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(vDOT, who, amount);
+
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -229,7 +262,6 @@ fn schedule_delegator_bond_less_should_fail_if_no_delegation() {
 			amount,
 		));
 
-		// Act & Assert
 		assert_noop!(
 			MultiAssetDelegation::schedule_delegator_bond_less(
 				RuntimeOrigin::signed(who),
@@ -251,7 +283,9 @@ fn execute_delegator_bond_less_should_fail_if_not_ready() {
 		let asset_id = vDOT;
 		let amount = 100;
 
-		mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(vDOT, who, amount);
+
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		// Deposit, delegate and schedule bond less first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -266,7 +300,6 @@ fn execute_delegator_bond_less_should_fail_if_not_ready() {
 			amount,
 		));
 
-		// Act & Assert
 		assert_noop!(
 			MultiAssetDelegation::cancel_delegator_bond_less(RuntimeOrigin::signed(who),),
 			Error::<Test>::NoBondLessRequest
@@ -279,7 +312,6 @@ fn execute_delegator_bond_less_should_fail_if_not_ready() {
 			amount,
 		));
 
-		// Act & Assert
 		assert_noop!(
 			MultiAssetDelegation::execute_delegator_bond_less(RuntimeOrigin::signed(who),),
 			Error::<Test>::BondLessNotReady
