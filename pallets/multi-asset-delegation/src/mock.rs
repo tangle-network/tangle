@@ -43,8 +43,7 @@ pub const CHARLIE: u64 = 3;
 pub const DAVE: u64 = 4;
 pub const EVE: u64 = 5;
 
-pub const vDOT: AssetId = 1;
-pub const vUSDT: AssetId = 2;
+pub const VDOT: AssetId = 1;
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
@@ -103,17 +102,17 @@ impl pallet_balances::Config for Test {
 pub struct MockServiceManager;
 
 impl ServiceManager<AccountId, Balance> for MockServiceManager {
-	fn list_active_services(account: &AccountId) -> Vec<Service> {
+	fn list_active_services(_account: &AccountId) -> Vec<Service> {
 		// we dont care
 		vec![]
 	}
 
-	fn list_service_reward(account: &AccountId) -> Balance {
+	fn list_service_reward(_account: &AccountId) -> Balance {
 		// we dont care
 		Balance::default()
 	}
 
-	fn can_exit(account: &AccountId) -> bool {
+	fn can_exit(_account: &AccountId) -> bool {
 		// Mock logic to determine if the given account can exit
 		true
 	}
@@ -164,8 +163,6 @@ impl pallet_assets::Config for Test {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
-	#[cfg(feature = "runtime-benchmarks")]
-	type BenchmarkHelper = ();
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {

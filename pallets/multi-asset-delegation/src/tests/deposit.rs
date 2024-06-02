@@ -35,7 +35,7 @@ pub fn create_and_mint_tokens(
 	assert_ok!(Assets::mint(RuntimeOrigin::signed(1), asset_id, recipient, amount));
 
 	// whitelist the asset
-	assert_ok!(MultiAssetDelegation::set_whitelisted_assets(RuntimeOrigin::root(), vec![vDOT]));
+	assert_ok!(MultiAssetDelegation::set_whitelisted_assets(RuntimeOrigin::root(), vec![VDOT]));
 }
 
 pub fn mint_tokens(
@@ -54,21 +54,20 @@ fn deposit_should_work_for_fungible_asset() {
 		let who = 1;
 		let amount = 200;
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(vDOT), amount,));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert_eq!(metadata.deposits.get(&vDOT), Some(&amount));
+		assert_eq!(metadata.deposits.get(&VDOT), Some(&amount));
 		assert_eq!(
 			System::events().last().unwrap().event,
 			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
 				who,
 				amount,
-				asset_id: Some(vDOT),
+				asset_id: Some(VDOT),
 			})
-			.into()
 		);
 	});
 }
@@ -80,10 +79,10 @@ fn deposit_should_fail_for_insufficient_balance() {
 		let who = 1;
 		let amount = 2000;
 
-		create_and_mint_tokens(vDOT, who, 100);
+		create_and_mint_tokens(VDOT, who, 100);
 
 		assert_noop!(
-			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(vDOT), amount,),
+			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,),
 			ArithmeticError::Underflow
 		);
 	});
@@ -96,13 +95,13 @@ fn deposit_should_fail_if_already_delegator() {
 		let who = 1;
 		let amount = 200;
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
 		// First deposit
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(vDOT), amount,));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,));
 
 		assert_noop!(
-			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(vDOT), amount,),
+			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,),
 			Error::<Test>::AlreadyDelegator
 		);
 	});
@@ -115,10 +114,10 @@ fn deposit_should_fail_for_bond_too_low() {
 		let who = 1;
 		let amount = 50; // Below the minimum bond amount
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
 		assert_noop!(
-			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(vDOT), amount,),
+			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,),
 			Error::<Test>::BondTooLow
 		);
 	});
@@ -129,10 +128,10 @@ fn schedule_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, 100);
+		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -162,10 +161,10 @@ fn schedule_unstake_should_fail_if_not_delegator() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, 100);
+		create_and_mint_tokens(VDOT, who, 100);
 
 		assert_noop!(
 			MultiAssetDelegation::schedule_unstake(
@@ -183,10 +182,10 @@ fn schedule_unstake_should_fail_for_insufficient_balance() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 200;
 
-		create_and_mint_tokens(vDOT, who, 100);
+		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(asset_id), 100,));
@@ -207,10 +206,10 @@ fn schedule_unstake_should_fail_if_withdraw_request_exists() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, 100);
+		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -242,10 +241,10 @@ fn execute_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, 100);
+		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit and schedule unstake first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -270,9 +269,9 @@ fn execute_unstake_should_work() {
 		assert!(metadata.unstake_request.is_none());
 
 		// Check event
-		System::assert_last_event(
-			RuntimeEvent::MultiAssetDelegation(crate::Event::ExecutedUnstake { who }).into(),
-		);
+		System::assert_last_event(RuntimeEvent::MultiAssetDelegation(
+			crate::Event::ExecutedUnstake { who },
+		));
 	});
 }
 
@@ -294,10 +293,10 @@ fn execute_unstake_should_fail_if_no_withdraw_request() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, 100);
+		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -318,10 +317,10 @@ fn execute_unstake_should_fail_if_unstake_not_ready() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, 100);
+		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit and schedule unstake first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -351,10 +350,10 @@ fn cancel_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, 100);
+		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit and schedule unstake first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -377,9 +376,9 @@ fn cancel_unstake_should_work() {
 		assert_eq!(metadata.status, DelegatorStatus::Active);
 
 		// Check event
-		System::assert_last_event(
-			RuntimeEvent::MultiAssetDelegation(crate::Event::CancelledUnstake { who }).into(),
-		);
+		System::assert_last_event(RuntimeEvent::MultiAssetDelegation(
+			crate::Event::CancelledUnstake { who },
+		));
 	});
 }
 
@@ -401,10 +400,10 @@ fn cancel_unstake_should_fail_if_no_withdraw_request() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, 100);
+		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(

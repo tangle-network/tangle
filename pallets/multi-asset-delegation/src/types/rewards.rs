@@ -17,7 +17,7 @@
 use super::*;
 
 /// Configuration for rewards associated with a specific asset.
-#[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct RewardConfigForAsset<Balance> {
 	// The annual percentage yield (APY) for the asset, represented as a fixed point number.
 	pub apy: u128,
@@ -26,7 +26,7 @@ pub struct RewardConfigForAsset<Balance> {
 }
 
 /// Configuration for rewards in the system.
-#[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct RewardConfig<AssetId, Balance> {
 	// A map of asset IDs to their respective reward configurations.
 	pub configs: BTreeMap<AssetId, RewardConfigForAsset<Balance>>,

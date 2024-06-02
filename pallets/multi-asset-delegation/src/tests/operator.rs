@@ -95,7 +95,6 @@ fn join_operator_minimum_bond() {
 fn schedule_leave_operator_success() {
 	new_test_ext().execute_with(|| {
 		let bond_amount = 10_000;
-		let leave_operators_delay = 10;
 
 		// Schedule leave operators without joining
 		assert_noop!(

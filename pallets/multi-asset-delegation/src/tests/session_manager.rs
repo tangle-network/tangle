@@ -27,14 +27,14 @@ fn handle_round_change_should_work() {
 		// Arrange
 		let who = 1;
 		let operator = 2;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
 		CurrentRound::<Test>::put(1);
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -72,7 +72,7 @@ fn handle_round_change_with_bond_less_should_work() {
 		let delegator2 = 2;
 		let operator1 = 3;
 		let operator2 = EVE;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount1 = 100;
 		let amount2 = 200;
 		let bond_less_amount = 50;
@@ -82,8 +82,8 @@ fn handle_round_change_with_bond_less_should_work() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator1), 10_000));
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator2), 10_000));
 
-		create_and_mint_tokens(vDOT, delegator1, amount1);
-		mint_tokens(delegator1, vDOT, delegator2, amount2);
+		create_and_mint_tokens(VDOT, delegator1, amount1);
+		mint_tokens(delegator1, VDOT, delegator2, amount2);
 
 		// Deposit and delegate first
 		assert_ok!(MultiAssetDelegation::deposit(

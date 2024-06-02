@@ -47,7 +47,7 @@ impl<T: Config> Pallet<T> {
 					// Calculate total amount and distribute rewards
 					let total_amount: BalanceOf<T> =
 						delegations.iter().fold(Zero::zero(), |acc, d| acc + d.amount);
-					let cap: BalanceOf<T> = config.cap.into();
+					let cap: BalanceOf<T> = config.cap;
 
 					if total_amount >= cap {
 						// Calculate the total reward based on the APY

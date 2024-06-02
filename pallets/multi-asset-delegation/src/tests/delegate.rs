@@ -31,12 +31,12 @@ fn delegate_should_work() {
 		// Arrange
 		let who = 1;
 		let operator = 2;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -78,10 +78,10 @@ fn schedule_delegator_bond_less_should_work() {
 		// Arrange
 		let who = 1;
 		let operator = 2;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
@@ -126,10 +126,10 @@ fn execute_delegator_bond_less_should_work() {
 		// Arrange
 		let who = 1;
 		let operator = 2;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
@@ -171,10 +171,10 @@ fn cancel_delegator_bond_less_should_work() {
 		// Arrange
 		let who = 1;
 		let operator = 2;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
@@ -222,10 +222,10 @@ fn delegate_should_fail_if_not_enough_balance() {
 		// Arrange
 		let who = 1;
 		let operator = 2;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 10_000;
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
@@ -248,10 +248,10 @@ fn schedule_delegator_bond_less_should_fail_if_no_delegation() {
 		// Arrange
 		let who = 1;
 		let operator = 2;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
@@ -280,10 +280,10 @@ fn execute_delegator_bond_less_should_fail_if_not_ready() {
 		// Arrange
 		let who = 1;
 		let operator = 2;
-		let asset_id = vDOT;
+		let asset_id = VDOT;
 		let amount = 100;
 
-		create_and_mint_tokens(vDOT, who, amount);
+		create_and_mint_tokens(VDOT, who, amount);
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 

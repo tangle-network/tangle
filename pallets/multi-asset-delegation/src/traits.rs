@@ -14,12 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
+use crate::types::*;
 use crate::Config;
 use frame_support::traits::Currency;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
+use sp_runtime::traits::Zero;
 use sp_runtime::RuntimeDebug;
 
 pub trait ServiceManager<AccountId, Balance> {
@@ -46,4 +48,46 @@ pub struct Service {
 pub enum ServiceStatus {
 	Active,
 	Inactive,
+}
+
+pub trait MultiAssetDelegationInfo<AccountId, AssetId, Balance> {
+	/// Get the current round index.
+	fn get_current_round() -> RoundIndex;
+
+	/// Get the reward configuration for a specific asset ID.
+	fn get_reward_config(asset_id: &AssetId) -> Option<RewardConfigForAsset<Balance>>;
+
+	/// Get the total delegation amount for a specific delegator and asset ID.
+	fn get_total_delegation(delegator: &AccountId, asset_id: &AssetId) -> Balance;
+
+	/// Get the delegations for a specific operator.
+	fn get_delegations_for_operator(
+		operator: &AccountId,
+	) -> Vec<DelegatorBond<AccountId, Balance, AssetId>>;
+}
+
+impl<T: Config> MultiAssetDelegationInfo<T::AccountId, T::AssetId, BalanceOf<T>> for Pallet<T> {
+	fn get_current_round() -> RoundIndex {
+		Self::current_round()
+	}
+
+	fn get_reward_config(asset_id: &T::AssetId) -> Option<RewardConfigForAsset<BalanceOf<T>>> {
+		RewardConfigStorage::<T>::get().and_then(|config| config.configs.get(asset_id).cloned())
+	}
+
+	fn get_total_delegation(delegator: &T::AccountId, asset_id: &T::AssetId) -> BalanceOf<T> {
+		Delegators::<T>::get(delegator).map_or(Zero::zero(), |metadata| {
+			metadata
+				.delegations
+				.iter()
+				.filter(|bond| &bond.asset_id == asset_id)
+				.fold(Zero::zero(), |acc, bond| acc + bond.amount)
+		})
+	}
+
+	fn get_delegations_for_operator(
+		operator: &T::AccountId,
+	) -> Vec<DelegatorBond<T::AccountId, BalanceOf<T>, T::AssetId>> {
+		Operators::<T>::get(operator).map_or(vec![], |metadata| metadata.delegations)
+	}
 }
