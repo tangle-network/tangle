@@ -24,7 +24,7 @@ pub struct OperatorSnapshot<AccountId, Balance, AssetId> {
 
 	/// The rewardable delegations. This list is a subset of total delegators, where certain
 	/// delegators are adjusted based on their scheduled status.
-	pub delegations: Vec<Bond<AccountId, Balance, AssetId>>,
+	pub delegations: Vec<DelegatorBond<AccountId, Balance, AssetId>>,
 }
 
 impl<AccountId, Balance, AssetId> OperatorSnapshot<AccountId, Balance, AssetId>
@@ -92,9 +92,20 @@ pub struct OperatorMetadata<AccountId, Balance, AssetId> {
 	/// An optional pending request to decrease the operator's self-bond, with only one allowed at any given time.
 	pub request: Option<OperatorBondLessRequest<Balance>>,
 	/// A list of all current delegations.
-	pub delegations: Vec<Bond<AccountId, Balance, AssetId>>,
+	pub delegations: Vec<DelegatorBond<AccountId, Balance, AssetId>>,
 	/// The current status of the operator.
 	pub status: OperatorStatus,
+}
+
+/// Represents a bond for an operator
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
+pub struct DelegatorBond<AccountId, Balance, AssetId> {
+	/// The account ID of the delegator.
+	pub delegator: AccountId,
+	/// The amount bonded.
+	pub amount: Balance,
+	/// The ID of the bonded asset.
+	pub asset_id: AssetId,
 }
 
 // ------ Test for helper functions ------ //
@@ -126,18 +137,18 @@ mod tests {
 		let snapshot = OperatorSnapshot {
 			bond: MockBalance(100),
 			delegations: vec![
-				Bond {
-					operator: MockAccountId(1),
+				DelegatorBond {
+					delegator: MockAccountId(1),
 					amount: MockBalance(50),
 					asset_id: MockAssetId(1),
 				},
-				Bond {
-					operator: MockAccountId(2),
+				DelegatorBond {
+					delegator: MockAccountId(2),
 					amount: MockBalance(75),
 					asset_id: MockAssetId(1),
 				},
-				Bond {
-					operator: MockAccountId(3),
+				DelegatorBond {
+					delegator: MockAccountId(3),
 					amount: MockBalance(25),
 					asset_id: MockAssetId(2),
 				},
@@ -154,23 +165,23 @@ mod tests {
 		let snapshot = OperatorSnapshot {
 			bond: MockBalance(100),
 			delegations: vec![
-				Bond {
-					operator: MockAccountId(1),
+				DelegatorBond {
+					delegator: MockAccountId(1),
 					amount: MockBalance(50),
 					asset_id: MockAssetId(1),
 				},
-				Bond {
-					operator: MockAccountId(2),
+				DelegatorBond {
+					delegator: MockAccountId(2),
 					amount: MockBalance(75),
 					asset_id: MockAssetId(1),
 				},
-				Bond {
-					operator: MockAccountId(3),
+				DelegatorBond {
+					delegator: MockAccountId(3),
 					amount: MockBalance(25),
 					asset_id: MockAssetId(2),
 				},
-				Bond {
-					operator: MockAccountId(4),
+				DelegatorBond {
+					delegator: MockAccountId(4),
 					amount: MockBalance(100),
 					asset_id: MockAssetId(2),
 				},

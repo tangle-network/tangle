@@ -56,7 +56,7 @@ pub struct DelegatorMetadata<AccountId, Balance, AssetId: Encode + Decode + Type
 	/// An optional unstake request, with only one allowed at a time.
 	pub unstake_request: Option<UnstakeRequest<AssetId, Balance>>,
 	/// A list of all current delegations.
-	pub delegations: Vec<Bond<AccountId, Balance, AssetId>>,
+	pub delegations: Vec<BondInfoDelegator<AccountId, Balance, AssetId>>,
 	/// An optional request to reduce the bonded amount, with only one allowed at a time.
 	pub delegator_bond_less_request: Option<BondLessRequest<AssetId, Balance>>,
 	/// The current status of the delegator.
@@ -86,7 +86,7 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 	}
 
 	/// Returns a reference to the list of delegations.
-	pub fn get_delegations(&self) -> &Vec<Bond<AccountId, Balance, AssetId>> {
+	pub fn get_delegations(&self) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId>> {
 		&self.delegations
 	}
 
@@ -119,7 +119,7 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 	pub fn calculate_delegation_by_operator(
 		&self,
 		operator: AccountId,
-	) -> Vec<&Bond<AccountId, Balance, AssetId>>
+	) -> Vec<&BondInfoDelegator<AccountId, Balance, AssetId>>
 	where
 		AccountId: Eq + PartialEq,
 	{
@@ -138,7 +138,7 @@ pub struct Deposit<AssetId, Balance> {
 
 /// Represents a bond between a delegator and an operator.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct Bond<AccountId, Balance, AssetId> {
+pub struct BondInfoDelegator<AccountId, Balance, AssetId> {
 	/// The account ID of the operator.
 	pub operator: AccountId,
 	/// The amount bonded.
@@ -191,8 +191,16 @@ mod tests {
 	#[test]
 	fn get_delegations_should_work() {
 		let delegations = vec![
-			Bond { operator: MockAccountId(1), amount: MockBalance(50), asset_id: MockAssetId(1) },
-			Bond { operator: MockAccountId(2), amount: MockBalance(75), asset_id: MockAssetId(2) },
+			BondInfoDelegator {
+				operator: MockAccountId(1),
+				amount: MockBalance(50),
+				asset_id: MockAssetId(1),
+			},
+			BondInfoDelegator {
+				operator: MockAccountId(2),
+				amount: MockBalance(75),
+				asset_id: MockAssetId(2),
+			},
 		];
 		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
 			DelegatorMetadata { delegations: delegations.clone(), ..Default::default() };
@@ -219,7 +227,7 @@ mod tests {
 	#[test]
 	fn is_delegations_empty_should_work() {
 		let metadata_with_delegations = DelegatorMetadata {
-			delegations: vec![Bond {
+			delegations: vec![BondInfoDelegator {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
 				asset_id: MockAssetId(1),
@@ -240,9 +248,21 @@ mod tests {
 	#[test]
 	fn calculate_delegation_by_asset_should_work() {
 		let delegations = vec![
-			Bond { operator: MockAccountId(1), amount: MockBalance(50), asset_id: MockAssetId(1) },
-			Bond { operator: MockAccountId(2), amount: MockBalance(75), asset_id: MockAssetId(1) },
-			Bond { operator: MockAccountId(3), amount: MockBalance(25), asset_id: MockAssetId(2) },
+			BondInfoDelegator {
+				operator: MockAccountId(1),
+				amount: MockBalance(50),
+				asset_id: MockAssetId(1),
+			},
+			BondInfoDelegator {
+				operator: MockAccountId(2),
+				amount: MockBalance(75),
+				asset_id: MockAssetId(1),
+			},
+			BondInfoDelegator {
+				operator: MockAccountId(3),
+				amount: MockBalance(25),
+				asset_id: MockAssetId(2),
+			},
 		];
 		let metadata = DelegatorMetadata { delegations, ..Default::default() };
 
@@ -254,9 +274,21 @@ mod tests {
 	#[test]
 	fn calculate_delegation_by_operator_should_work() {
 		let delegations = vec![
-			Bond { operator: MockAccountId(1), amount: MockBalance(50), asset_id: MockAssetId(1) },
-			Bond { operator: MockAccountId(1), amount: MockBalance(75), asset_id: MockAssetId(2) },
-			Bond { operator: MockAccountId(2), amount: MockBalance(25), asset_id: MockAssetId(1) },
+			BondInfoDelegator {
+				operator: MockAccountId(1),
+				amount: MockBalance(50),
+				asset_id: MockAssetId(1),
+			},
+			BondInfoDelegator {
+				operator: MockAccountId(1),
+				amount: MockBalance(75),
+				asset_id: MockAssetId(2),
+			},
+			BondInfoDelegator {
+				operator: MockAccountId(2),
+				amount: MockBalance(25),
+				asset_id: MockAssetId(1),
+			},
 		];
 		let metadata = DelegatorMetadata { delegations, ..Default::default() };
 

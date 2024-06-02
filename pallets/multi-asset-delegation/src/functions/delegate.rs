@@ -59,7 +59,11 @@ impl<T: Config> Pallet<T> {
 			}
 
 			// Create a new delegation
-			metadata.delegations.push(Bond { operator: operator.clone(), amount, asset_id });
+			metadata.delegations.push(BondInfoDelegator {
+				operator: operator.clone(),
+				amount,
+				asset_id,
+			});
 
 			// Update the status
 			metadata.status = DelegatorStatus::Active;
@@ -73,8 +77,8 @@ impl<T: Config> Pallet<T> {
 				operator_metadata.delegation_count += 1;
 
 				// Add the new delegation
-				operator_metadata.delegations.push(Bond {
-					operator: who.clone(),
+				operator_metadata.delegations.push(DelegatorBond {
+					delegator: who.clone(),
 					amount,
 					asset_id,
 				});
@@ -138,7 +142,7 @@ impl<T: Config> Pallet<T> {
 				let operator_delegation_index = operator_metadata
 					.delegations
 					.iter()
-					.position(|d| d.operator == who && d.asset_id == asset_id)
+					.position(|d| d.delegator == who && d.asset_id == asset_id)
 					.ok_or(Error::<T>::NoActiveDelegation)?;
 
 				let operator_delegation =
@@ -245,8 +249,8 @@ impl<T: Config> Pallet<T> {
 				operator_metadata.delegation_count += 1;
 
 				// Add the new delegation
-				operator_metadata.delegations.push(Bond {
-					operator: who.clone(),
+				operator_metadata.delegations.push(DelegatorBond {
+					delegator: who.clone(),
 					amount,
 					asset_id,
 				});

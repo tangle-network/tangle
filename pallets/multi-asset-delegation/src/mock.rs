@@ -140,6 +140,7 @@ impl pallet_multi_asset_delegation::Config for Test {
 	type MinDelegateAmount = ConstU64<100>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<u64>;
 	type PalletId = PID;
 	type WeightInfo = ();
 }

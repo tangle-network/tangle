@@ -66,7 +66,7 @@ fn delegate_should_work() {
 		assert_eq!(operator_metadata.delegation_count, 1);
 		assert_eq!(operator_metadata.delegations.len(), 1);
 		let operator_delegation = &operator_metadata.delegations[0];
-		assert_eq!(operator_delegation.operator, who);
+		assert_eq!(operator_delegation.delegator, who);
 		assert_eq!(operator_delegation.amount, amount);
 		assert_eq!(operator_delegation.asset_id, asset_id);
 	});
@@ -210,7 +210,7 @@ fn cancel_delegator_bond_less_should_work() {
 		assert_eq!(operator_metadata.delegation_count, 1);
 		assert_eq!(operator_metadata.delegations.len(), 1);
 		let operator_delegation = &operator_metadata.delegations[0];
-		assert_eq!(operator_delegation.operator, who);
+		assert_eq!(operator_delegation.delegator, who);
 		assert_eq!(operator_delegation.amount, amount); // Amount added back
 		assert_eq!(operator_delegation.asset_id, asset_id);
 	});

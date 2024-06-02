@@ -25,9 +25,11 @@ use sp_std::collections::btree_map::BTreeMap;
 
 pub mod delegator;
 pub mod operator;
+pub mod rewards;
 
 pub use delegator::*;
 pub use operator::*;
+pub use rewards::*;
 
 pub type RoundIndex = u32;
 

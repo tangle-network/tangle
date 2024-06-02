@@ -74,6 +74,7 @@ pub mod pallet {
 	};
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, StaticLookup};
+	use sp_std::collections::btree_map::BTreeMap;
 	use sp_std::vec::Vec;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -132,6 +133,9 @@ pub mod pallet {
 		/// The pallet's account ID.
 		type PalletId: Get<PalletId>;
 
+		/// The origin with privileged access
+		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: crate::weights::WeightInfo;
 	}
@@ -152,6 +156,11 @@ pub mod pallet {
 	#[pallet::getter(fn current_round)]
 	pub type CurrentRound<T: Config> = StorageValue<_, RoundIndex, ValueQuery>;
 
+	/// Whitelisted assets that are allowed to be deposited
+	#[pallet::storage]
+	#[pallet::getter(fn whitelisted_assets)]
+	pub type WhitelistedAssets<T: Config> = StorageValue<_, Vec<T::AssetId>, ValueQuery>;
+
 	/// Snapshot of collator delegation stake at the start of the round.
 	#[pallet::storage]
 	#[pallet::getter(fn at_stake)]
@@ -170,6 +179,12 @@ pub mod pallet {
 	#[pallet::getter(fn delegators)]
 	pub(crate) type Delegators<T: Config> =
 		StorageMap<_, Twox64Concat, T::AccountId, DelegatorMetadataOf<T>, OptionQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn reward_config)]
+	/// Storage for the reward configuration, which includes APY, cap for assets, and whitelisted blueprints.
+	pub type RewardConfigStorage<T: Config> =
+		StorageValue<_, RewardConfig<T::AssetId, BalanceOf<T>>, OptionQuery>;
 
 	/// Events emitted by the pallet.
 	#[pallet::event]
@@ -221,6 +236,12 @@ pub mod pallet {
 		ExecutedDelegatorBondLess { who: T::AccountId },
 		/// A delegator bond less request has been cancelled.
 		CancelledDelegatorBondLess { who: T::AccountId },
+		/// New whitelisted assets set
+		WhitelistedAssetsSet { assets: Vec<T::AssetId> },
+		/// Event emitted when an incentive APY and cap are set for an asset
+		IncentiveAPYAndCapSet { asset_id: T::AssetId, apy: u128, cap: BalanceOf<T> },
+		/// Event emitted when a blueprint is whitelisted for rewards
+		BlueprintWhitelisted { blueprint_id: u32 },
 	}
 
 	/// Errors emitted by the pallet.
@@ -268,8 +289,16 @@ pub mod pallet {
 		BondLessRequestAlreadyExists,
 		/// There are active services using the asset.
 		ActiveServicesUsingAsset,
-
+		/// There is not active delegation
 		NoActiveDelegation,
+		/// The asset is not whitelisted
+		AssetNotWhitelisted,
+		/// The origin is not authorized to perform this action
+		NotAuthorized,
+		/// The asset ID is not found
+		AssetNotFound,
+		/// The blueprint ID is already whitelisted
+		BlueprintAlreadyWhitelisted,
 	}
 
 	/// Hooks for the pallet.
@@ -490,6 +519,85 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 			Self::process_cancel_delegator_bond_less(who.clone())?;
 			Self::deposit_event(Event::CancelledDelegatorBondLess { who });
+			Ok(())
+		}
+
+		/// Set the whitelisted assets allowed for delegation
+		#[pallet::call_index(18)]
+		#[pallet::weight(10_000)]
+		pub fn set_whitelisted_assets(
+			origin: OriginFor<T>,
+			assets: Vec<T::AssetId>,
+		) -> DispatchResult {
+			// Ensure that the origin is authorized
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			// Set the whitelisted assets
+			WhitelistedAssets::<T>::put(assets.clone());
+
+			// Emit an event
+			Self::deposit_event(Event::WhitelistedAssetsSet { assets });
+
+			Ok(())
+		}
+
+		/// Sets the APY and cap for a specific asset.
+		#[pallet::call_index(19)]
+		#[pallet::weight(10_000)]
+		pub fn set_incentive_apy_and_cap(
+			origin: OriginFor<T>,
+			asset_id: T::AssetId,
+			apy: u128,
+			cap: BalanceOf<T>,
+		) -> DispatchResult {
+			// Ensure that the origin is authorized
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			// Initialize the reward config if not already initialized
+			RewardConfigStorage::<T>::mutate(|maybe_config| {
+				let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
+					configs: BTreeMap::new(),
+					whitelisted_blueprint_ids: Vec::new(),
+				});
+
+				config.configs.insert(asset_id, RewardConfigForAsset { apy, cap });
+
+				*maybe_config = Some(config);
+			});
+
+			// Emit an event
+			Self::deposit_event(Event::IncentiveAPYAndCapSet { asset_id, apy, cap });
+
+			Ok(())
+		}
+
+		/// Whitelists a blueprint for rewards.
+		#[pallet::call_index(20)]
+		#[pallet::weight(10_000)]
+		pub fn whitelist_blueprint_for_rewards(
+			origin: OriginFor<T>,
+			blueprint_id: u32,
+		) -> DispatchResult {
+			// Ensure that the origin is authorized
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			// Initialize the reward config if not already initialized
+			RewardConfigStorage::<T>::mutate(|maybe_config| {
+				let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
+					configs: BTreeMap::new(),
+					whitelisted_blueprint_ids: Vec::new(),
+				});
+
+				if !config.whitelisted_blueprint_ids.contains(&blueprint_id) {
+					config.whitelisted_blueprint_ids.push(blueprint_id);
+				}
+
+				*maybe_config = Some(config);
+			});
+
+			// Emit an event
+			Self::deposit_event(Event::BlueprintWhitelisted { blueprint_id });
+
 			Ok(())
 		}
 	}

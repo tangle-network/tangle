@@ -128,7 +128,7 @@ fn handle_round_change_with_bond_less_should_work() {
 		let snapshot1 = MultiAssetDelegation::at_stake(current_round, operator1).unwrap();
 		assert_eq!(snapshot1.bond, 10_000);
 		assert_eq!(snapshot1.delegations.len(), 1);
-		assert_eq!(snapshot1.delegations[0].operator, delegator1);
+		assert_eq!(snapshot1.delegations[0].delegator, delegator1);
 		assert_eq!(snapshot1.delegations[0].amount, amount1 - bond_less_amount); // Amount reduced by bond_less_amount
 		assert_eq!(snapshot1.delegations[0].asset_id, asset_id);
 
@@ -136,7 +136,7 @@ fn handle_round_change_with_bond_less_should_work() {
 		let snapshot2 = MultiAssetDelegation::at_stake(current_round, operator2).unwrap();
 		assert_eq!(snapshot2.bond, 10000);
 		assert_eq!(snapshot2.delegations.len(), 1);
-		assert_eq!(snapshot2.delegations[0].operator, delegator2);
+		assert_eq!(snapshot2.delegations[0].delegator, delegator2);
 		assert_eq!(snapshot2.delegations[0].amount, amount2);
 		assert_eq!(snapshot2.delegations[0].asset_id, asset_id);
 	});
