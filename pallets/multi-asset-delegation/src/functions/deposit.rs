@@ -31,10 +31,22 @@ use sp_runtime::traits::Zero;
 use sp_runtime::DispatchError;
 
 impl<T: Config> Pallet<T> {
+	/// Returns the account ID of the pallet.
 	pub fn pallet_account() -> T::AccountId {
 		T::PalletId::get().into_account_truncating()
 	}
 
+	/// Processes the deposit of assets into the pallet.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator.
+	/// * `asset_id` - The optional asset ID of the assets to be deposited.
+	/// * `amount` - The amount of assets to be deposited.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the user is already a delegator, if the bond amount is too low, or if the transfer fails.
 	pub fn process_deposit(
 		who: T::AccountId,
 		asset_id: Option<T::AssetId>,
@@ -53,7 +65,7 @@ impl<T: Config> Pallet<T> {
 				&Self::pallet_account(),
 				amount,
 				Preservation::Expendable,
-			)?; // TODO : SHould it be expendable??
+			)?; // Transfer the assets to the pallet account
 
 			// Update storage
 			Delegators::<T>::mutate(&who, |maybe_metadata| {
@@ -68,6 +80,18 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
+	/// Schedules an unstake request for a delegator.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator.
+	/// * `asset_id` - The optional asset ID of the assets to be unstaked.
+	/// * `amount` - The amount of assets to be unstaked.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the user is not a delegator, if there is an existing unstake request,
+	/// if there is insufficient balance, or if the asset is not supported.
 	pub fn process_schedule_unstake(
 		who: T::AccountId,
 		asset_id: Option<T::AssetId>,
@@ -101,13 +125,19 @@ impl<T: Config> Pallet<T> {
 			metadata.unstake_request =
 				Some(UnstakeRequest { asset_id, amount, requested_round: current_round });
 
-			// Update the status if the entire stake has been unstaked
-			//metadata.status = DelegatorStatus::LeavingScheduled(current_round);
-
 			Ok(())
 		})
 	}
 
+	/// Executes an unstake request for a delegator.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the user is not a delegator, if there is no unstake request, or if the unstake request is not ready.
 	pub fn process_execute_unstake(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -139,12 +169,19 @@ impl<T: Config> Pallet<T> {
 			// Clear the withdraw request
 			metadata.unstake_request = None;
 
-			// TODO : May be remove the delegator if no more stake
-
 			Ok(())
 		})
 	}
 
+	/// Cancels an unstake request for a delegator.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the user is not a delegator or if there is no unstake request.
 	pub fn process_cancel_unstake(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;

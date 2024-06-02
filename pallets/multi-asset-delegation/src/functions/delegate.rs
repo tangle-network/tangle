@@ -24,6 +24,20 @@ use sp_runtime::traits::Zero;
 use sp_runtime::DispatchError;
 
 impl<T: Config> Pallet<T> {
+	/// Processes the delegation of an amount of an asset to an operator.
+	/// Creates a new delegation for the delegator and updates their status to active, the deposit
+	/// of the delegator is moved to delegation.
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator.
+	/// * `operator` - The account ID of the operator.
+	/// * `asset_id` - The ID of the asset to be delegated.
+	/// * `amount` - The amount to be delegated.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the delegator does not have enough deposited balance,
+	/// or if the operator is not found.
 	pub fn process_delegate(
 		who: T::AccountId,
 		operator: T::AccountId,
@@ -72,6 +86,19 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
+	/// Schedules a bond reduction for a delegator.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator.
+	/// * `operator` - The account ID of the operator.
+	/// * `asset_id` - The ID of the asset to be reduced.
+	/// * `amount` - The amount to be reduced.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the delegator has no active delegation,
+	/// if there is an existing bond less request, or if the bond less amount is greater than the current delegation amount.
 	pub fn process_schedule_delegator_bond_less(
 		who: T::AccountId,
 		operator: T::AccountId,
@@ -134,6 +161,15 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
+	/// Executes a scheduled bond reduction for a delegator.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the delegator has no bond less request or if the bond less request is not ready.
 	pub fn process_execute_delegator_bond_less(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -165,6 +201,15 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
+	/// Cancels a scheduled bond reduction for a delegator.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the delegator has no bond less request or if there is no active delegation.
 	pub fn process_cancel_delegator_bond_less(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
