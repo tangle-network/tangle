@@ -13,9 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use super::*;
 use crate as pallet_multi_asset_delegation;
-use crate::types::BalanceOf;
 use crate::Service;
 use crate::ServiceManager;
 use frame_support::parameter_types;
@@ -122,7 +120,7 @@ parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 	pub const MaxLocks: u32 = 50;
 	pub const MinOperatorBondAmount: u64 = 10_000;
-	pub const BondDuration: u64 = 1000;
+	pub const BondDuration: u32 = 10;
 	pub PID: PalletId = PalletId(*b"PotStake");
 }
 

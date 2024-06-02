@@ -24,6 +24,7 @@ use sp_std::collections::btree_map::BTreeMap;
 use sp_std::vec::Vec;
 
 impl<T: Config> Pallet<T> {
+	#[allow(clippy::type_complexity)]
 	pub fn distribute_rewards(round: RoundIndex) -> DispatchResult {
 		let mut delegation_info: BTreeMap<
 			T::AssetId,
@@ -65,6 +66,7 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
+	#[allow(dead_code)]
 	fn calculate_total_reward(
 		_apy: u128,
 		_total_amount: BalanceOf<T>,
@@ -73,6 +75,7 @@ impl<T: Config> Pallet<T> {
 		Ok(Default::default())
 	}
 
+	#[allow(dead_code)]
 	fn distribute_reward_to_delegator(
 		_delegator: &T::AccountId,
 		_reward: BalanceOf<T>,

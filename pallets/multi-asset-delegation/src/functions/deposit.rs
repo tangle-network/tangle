@@ -22,10 +22,7 @@ use frame_support::pallet_prelude::DispatchResult;
 use frame_support::traits::fungibles::Mutate;
 
 use frame_support::traits::Get;
-use frame_support::{
-	sp_runtime::traits::AccountIdConversion,
-	traits::{tokens::Preservation, Currency},
-};
+use frame_support::{sp_runtime::traits::AccountIdConversion, traits::tokens::Preservation};
 use sp_runtime::traits::Zero;
 
 impl<T: Config> Pallet<T> {

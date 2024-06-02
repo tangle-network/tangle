@@ -152,7 +152,6 @@ pub struct BondInfoDelegator<AccountId, Balance, AssetId> {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use std::collections::BTreeMap;
 	use std::ops::AddAssign;
 
 	#[derive(

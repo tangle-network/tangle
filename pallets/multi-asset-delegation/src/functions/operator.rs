@@ -65,6 +65,7 @@ impl<T: Config> Pallet<T> {
 	/// # Errors
 	///
 	/// Returns an error if the operator is not found, already leaving, or cannot exit.
+	#[allow(clippy::single_match)]
 	pub fn process_leave_operator(who: &T::AccountId) -> DispatchResult {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 

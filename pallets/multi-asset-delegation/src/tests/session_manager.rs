@@ -14,12 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::tests::RuntimeEvent;
-use crate::types::OperatorStatus;
 use crate::CurrentRound;
-use crate::Event;
-use crate::{mock::*, Error};
-use frame_support::{assert_noop, assert_ok};
+use frame_support::assert_ok;
 
 #[test]
 fn handle_round_change_should_work() {

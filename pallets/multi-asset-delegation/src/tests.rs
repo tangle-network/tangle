@@ -14,19 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
+use crate::mock::*;
 use crate::tests::RuntimeEvent;
-use crate::types::OperatorStatus;
-use crate::CurrentRound;
-use crate::Event;
-use crate::{mock::*, Error};
-use frame_support::{assert_noop, assert_ok};
 
 pub mod delegate;
 pub mod deposit;
 pub mod operator;
 pub mod session_manager;
 
-pub use delegate::*;
-pub use deposit::*;
-pub use operator::*;
-pub use session_manager::*;
+use crate::tests::deposit::create_and_mint_tokens;
+use crate::tests::deposit::mint_tokens;

@@ -68,12 +68,11 @@ pub mod pallet {
 	use frame_support::{
 		dispatch::DispatchResult,
 		pallet_prelude::*,
-		sp_runtime::traits::AccountIdConversion,
 		traits::{Currency, LockableCurrency, ReservableCurrency},
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, StaticLookup};
+	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
 	use sp_std::collections::btree_map::BTreeMap;
 	use sp_std::vec::Vec;
 
