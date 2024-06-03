@@ -31,9 +31,8 @@ use frame_support::{
 };
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
-use sp_runtime::traits::{Bounded, Dispatchable};
-
 use sp_core::{MaxEncodedLen, H160, H256, U256};
+use sp_runtime::traits::{Bounded, Dispatchable};
 use sp_std::{
 	convert::{TryFrom, TryInto},
 	marker::PhantomData,
@@ -74,7 +73,7 @@ pub trait AddressToAssetId<AssetId> {
 /// 1024-2047 Precompiles that are not in Ethereum Mainnet but are neither Moonbeam specific
 /// 2048-4095 Moonbeam specific precompiles
 /// Asset precompiles can only fall between
-/// 	0xFFFFFFFF00000000000000000000000000000000 - 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+/// 0xFFFFFFFF00000000000000000000000000000000 - 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 /// The precompile for AssetId X, where X is a u128 (i.e.16 bytes), if 0XFFFFFFFF + Bytes(AssetId)
 /// In order to route the address to Erc20AssetsPrecompile<R>, we first check whether the AssetId
 /// exists in pallet-assets
@@ -119,7 +118,6 @@ where
 	Runtime: AddressToAssetId<AssetIdOf<Runtime, Instance>>,
 	<<Runtime as frame_system::Config>::RuntimeCall as Dispatchable>::RuntimeOrigin: OriginTrait,
 	AssetIdOf<Runtime, Instance>: Display,
-	Runtime::AccountId: Into<H160>,
 {
 	/// PrecompileSet discriminant. Allows to knows if the address maps to an asset id,
 	/// and if this is the case which one.
@@ -338,7 +336,7 @@ where
 		{
 			let caller: Runtime::AccountId =
 				Runtime::AddressMapping::into_account_id(handle.context().caller);
-			let from: Runtime::AccountId = Runtime::AddressMapping::into_account_id(from.clone());
+			let from: Runtime::AccountId = Runtime::AddressMapping::into_account_id(from);
 			let to: Runtime::AccountId = Runtime::AddressMapping::into_account_id(to);
 
 			// If caller is "from", it can spend as much as it wants from its own balance.
@@ -433,6 +431,7 @@ where
 		Ok(pallet_assets::Pallet::<Runtime, Instance>::decimals(asset_id))
 	}
 
+	#[allow(clippy::too_many_arguments)]
 	#[precompile::public("permit(address,address,uint256,uint256,uint8,bytes32,bytes32)")]
 	fn eip2612_permit(
 		asset_id: AssetIdOf<Runtime, Instance>,

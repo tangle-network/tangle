@@ -16,7 +16,7 @@
 // limitations under the License.
 
 use crate::{
-	precompiles::{PrecompileName, WebbPrecompiles},
+	precompiles::{PrecompileName, WebbPrecompiles, ASSET_PRECOMPILE_ADDRESS_PREFIX},
 	*,
 };
 use frame_support::{pallet_prelude::*, parameter_types, traits::FindAuthor, weights::Weight};
@@ -26,12 +26,33 @@ use sp_std::{marker::PhantomData, prelude::*};
 // Frontier
 use pallet_ethereum::PostLogContent;
 use pallet_evm::HashedAddressMapping;
+use pallet_evm_precompileset_assets_erc20::AddressToAssetId;
 use tangle_primitives::{
 	evm::{GAS_LIMIT_POV_SIZE_RATIO, WEIGHT_PER_GAS},
 	impl_proxy_type,
 };
 
 impl pallet_evm_chain_id::Config for Runtime {}
+
+impl AddressToAssetId<AssetId> for Runtime {
+	fn address_to_asset_id(address: H160) -> Option<AssetId> {
+		let mut data = [0u8; 16];
+		let address_bytes: [u8; 20] = address.into();
+		if ASSET_PRECOMPILE_ADDRESS_PREFIX.eq(&address_bytes[0..4]) {
+			data.copy_from_slice(&address_bytes[4..20]);
+			Some(u128::from_be_bytes(data))
+		} else {
+			None
+		}
+	}
+
+	fn asset_id_to_address(asset_id: AssetId) -> H160 {
+		let mut data = [0u8; 20];
+		data[0..4].copy_from_slice(ASSET_PRECOMPILE_ADDRESS_PREFIX);
+		data[4..20].copy_from_slice(&asset_id.to_be_bytes());
+		H160::from(data)
+	}
+}
 
 pub struct FindAuthorTruncated<F>(PhantomData<F>);
 impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {

@@ -440,8 +440,8 @@ fn transfer_not_enough_founds() {
 					ForeignPCall::transfer { to: Address(Charlie.into()), value: 50.into() },
 				)
 				.execute_reverts(|output| {
-					from_utf8(&output).unwrap().contains("Dispatched call failed with error: ")
-						&& from_utf8(&output).unwrap().contains("BalanceLow")
+					from_utf8(output).unwrap().contains("Dispatched call failed with error: ")
+						&& from_utf8(output).unwrap().contains("BalanceLow")
 				});
 		});
 }

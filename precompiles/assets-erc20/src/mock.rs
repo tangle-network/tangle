@@ -63,7 +63,7 @@ impl AddressToAssetId<AssetId> for Runtime {
 	fn address_to_asset_id(address: H160) -> Option<AssetId> {
 		let address: MockAccount = address.into();
 		if address.has_prefix_u32(ASSET_PRECOMPILE_ADDRESS_PREFIX) {
-			return Some(address.without_prefix());
+			Some(address.without_prefix())
 		} else {
 			None
 		}
@@ -253,15 +253,10 @@ construct_runtime!(
 	}
 );
 
+#[derive(Default)]
 pub(crate) struct ExtBuilder {
 	// endowed accounts with balances
 	balances: Vec<(AccountId, Balance)>,
-}
-
-impl Default for ExtBuilder {
-	fn default() -> ExtBuilder {
-		ExtBuilder { balances: vec![] }
-	}
 }
 
 impl ExtBuilder {
