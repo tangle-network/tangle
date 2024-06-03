@@ -15,7 +15,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
-#![recursion_limit = "256"]
+#![recursion_limit = "512"]
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
@@ -1504,6 +1504,7 @@ construct_runtime!(
 		Dkg: pallet_dkg,
 		ZkSaaS: pallet_zksaas,
 		Proxy: pallet_proxy,
+		MultiAssetDelegation: pallet_multi_asset_delegation,
 
 		// Sygma
 		SygmaAccessSegregator: sygma_access_segregator,
@@ -1672,6 +1673,52 @@ impl pallet_assets::Config for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
+}
+
+pub struct MockServiceManager;
+
+impl pallet_multi_asset_delegation::traits::ServiceManager<AccountId, Balance>
+	for MockServiceManager
+{
+	fn list_active_services(_account: &AccountId) -> Vec<pallet_multi_asset_delegation::Service> {
+		// we dont care
+		vec![]
+	}
+
+	fn list_service_reward(_account: &AccountId) -> Balance {
+		// we dont care
+		Balance::default()
+	}
+
+	fn can_exit(_account: &AccountId) -> bool {
+		// Mock logic to determine if the given account can exit
+		true
+	}
+}
+
+parameter_types! {
+	pub const MinOperatorBondAmount: Balance = 10_000;
+	pub const BondDuration: u32 = 10;
+	pub const MinDelegateAmount : Balance = 1000;
+	pub PID: PalletId = PalletId(*b"PotStake");
+}
+
+impl pallet_multi_asset_delegation::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type MinOperatorBondAmount = MinOperatorBondAmount;
+	type BondDuration = BondDuration;
+	type ServiceManager = MockServiceManager;
+	type LeaveOperatorsDelay = ConstU32<10>;
+	type OperatorBondLessDelay = ConstU32<1>;
+	type LeaveDelegatorsDelay = ConstU32<1>;
+	type DelegationBondLessDelay = ConstU32<5>;
+	type MinDelegateAmount = MinDelegateAmount;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type PalletId = PID;
+	type WeightInfo = ();
 }
 
 parameter_types! {
