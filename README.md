@@ -1,7 +1,7 @@
 <div align="center">
 <a href="https://www.tangle.tools/">
     
-![Alt text](<assets/Tangle Banner 4.png>)
+![Alt text](<assets/Tangle%20%20Banner.png>)
   </a>
   </div>
 <h1 align="left"> The Tangle Network </h1>
