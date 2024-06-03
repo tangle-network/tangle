@@ -1650,13 +1650,13 @@ parameter_types! {
 	pub const ExecutiveBody: BodyId = BodyId::Executive;
 }
 
-pub type AssetId = u32;
+pub type AssetId = u128;
 
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
 	type AssetId = AssetId;
-	type AssetIdParameter = parity_scale_codec::Compact<u32>;
+	type AssetIdParameter = parity_scale_codec::Compact<u128>;
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
