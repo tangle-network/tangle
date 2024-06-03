@@ -33,6 +33,7 @@ pub mod impls;
 pub mod precompiles;
 pub mod voter_bags;
 
+use fixed::{types::extra::U16, FixedU128 as DecimalFixedU128};
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
@@ -56,6 +57,7 @@ use pallet_transaction_payment::{
 };
 use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::MaxEncodedLen;
+use polkadot_parachain_primitives::primitives::Sibling;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
@@ -66,7 +68,7 @@ use sp_runtime::{
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
 	traits::{
-		self, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto, DispatchInfoOf,
+		self, AccountIdConversion, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto, DispatchInfoOf,
 		Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf, StaticLookup,
 		UniqueSaturatedInto,
 	},
@@ -82,7 +84,10 @@ use tangle_primitives::jobs::{traits::JobToFee, JobSubmission};
 use tangle_primitives::roles::ValidatorRewardDistribution;
 use tangle_primitives::verifier::arkworks::ArkworksVerifierGroth16Bn254;
 use tangle_primitives::verifier::circom::CircomVerifierGroth16Bn254;
-
+use sygma_traits::{
+	ChainID, DecimalConverter, DepositNonce, DomainID, ExtractDestinationData, ResourceId,
+	VerifyingContractAddress,
+};
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
 use sp_runtime::DispatchResult;
@@ -100,6 +105,14 @@ use tangle_primitives::{
 	jobs::{traits::MPCHandler, JobWithResult, ValidatorOffenceType},
 	misbehavior::{MisbehaviorHandler, MisbehaviorSubmission},
 };
+use xcm::v4::Junctions::{X1, X3};
+use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
+#[allow(deprecated)]
+use xcm_builder::{
+	AccountId32Aliases, CurrencyAdapter as XcmCurrencyAdapter, FungiblesAdapter, IsConcrete,
+	NoChecking, ParentIsPreset, SiblingParachainConvertsVia,
+};
+use xcm_executor::traits::{Error as ExecutionError, MatchesFungibles};
 
 pub use frame_support::{
 	construct_runtime,
@@ -1544,8 +1557,8 @@ impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
 	fn matches_fungibles(a: &Asset) -> result::Result<(AssetId, Balance), ExecutionError> {
 		match (&a.fun, &a.id) {
 			(Fungible(ref amount), AssetId(ref id)) => {
-				if id == &SygUSDLocation::get() {
-					Ok((SygUSDAssetId::get(), *amount))
+				if id == &PhaLocation::get() {
+					Ok((PhaAssetId::get(), *amount))
 				} else {
 					Err(ExecutionError::AssetNotHandled)
 				}
@@ -1590,24 +1603,25 @@ parameter_types! {
 	pub NativeLocation: Location = Location::here();
 	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000002");
 
-	// SygUSD
-	pub SygUSDLocation: Location = Location::new(
+	// Pha
+	pub PhaLocation: Location = Location::new(
 		1,
 		[
-			Parachain(1000),
-			slice_to_generalkey(b"sygUSD"),
+			Parachain(2004),
+			slice_to_generalkey(b"sygma"),
+			slice_to_generalkey(b"pha"),
 		],
 	);
-	// SygUSDAssetId is the substrate assetID of SygUSD
-	pub SygUSDAssetId: AssetId = 1984;
-	// SygUSDResourceId is the resourceID that mapping with the foreign asset SygUSD
-	pub SygUSDResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001100");
+	// PhaAssetId is the substrate assetID of Pha
+	pub PhaAssetId: AssetId = 2000;
+	// PhaResourceId is the resourceID that mapping with the foreign asset Pha
+	pub PhaResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000001");
 }
 
 fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
 	let mut account_map: BTreeMap<XcmAssetId, AccountId32> = BTreeMap::new();
 	account_map.insert(NativeLocation::get().into(), BridgeAccountNative::get());
-	account_map.insert(SygUSDLocation::get().into(), BridgeAccountOtherToken::get());
+	account_map.insert(PhaLocation::get().into(), BridgeAccountOtherToken::get());
 	account_map
 }
 
@@ -1630,13 +1644,15 @@ parameter_types! {
 
 	pub const SygmaBridgePalletId: PalletId = PalletId(*b"sygma/01");
 
-	// SygmaBridgeAdminAccountKey Address: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY (Alice)
-	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d");
+	// TODO:
+	// SygmaBridgeAdminAccountKey Address: 5D2hZnw8Z7kg5LpQiEBb6HPG4V51wYXuKhE7sVhXiUPWj8D1
+	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("2ab4c35efb6ab82377c2325467103cf46742d288ae1f8917f1d5960f4a1e9065");
 	pub SygmaBridgeAdminAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
 
+	// TODO:
 	// SygmaBridgeFeeAccount is a substrate account and used for bridging fee collection
-	// SygmaBridgeFeeAccount address: 5ELLU7ibt5ZrNEYRwohtaRBDBa3TzcWwwPELBPSWWd2mbgv3
-	pub SygmaBridgeFeeAccount: AccountId32 = AccountId32::new([100u8; 32]);
+	// SygmaBridgeFeeAccount address: 5D2hZnw8Z7kg5LpQiEBb6HPG4V51wYXuKhE7sVhXiUPWj8D1
+	pub SygmaBridgeFeeAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
 
 	// BridgeAccountNative: 5EYCAe5jLbHcAAMKvLFSXgCTbPrLgBJusvPwfKcaKzuf5X5e
 	pub BridgeAccountNative: AccountId32 = SygmaBridgePalletId::get().into_account_truncating();
@@ -1659,10 +1675,10 @@ parameter_types! {
 	// ResourcePairs is where all supported assets and their associated resourceID are binding
 	pub ResourcePairs: Vec<(XcmAssetId, ResourceId)> = vec![
 		(NativeLocation::get().into(), NativeSygmaResourceId::get()),
-		(SygUSDLocation::get().into(), SygUSDResourceId::get()),
+		(PhaLocation::get().into(), PhaResourceId::get()),
 	];
 
-	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 12u8), (SygUSDLocation::get().into(), 6u8)];
+	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 12u8), (PhaLocation::get().into(), 12u8)];
 }
 
 pub struct ReserveChecker;
@@ -1691,7 +1707,7 @@ impl ConcrateSygmaAsset {
 			match (id.parents, id.first_interior()) {
 				// Sibling parachain
 				(1, Some(Parachain(id))) => {
-					// Assume current parachain id is 1000, for production, always get proper parachain info
+					// Assume current parachain id is 1000
 					if *id == 1000 {
 						Some(Location::new(0, X1(Arc::new([slice_to_generalkey(b"sygma")]))))
 					} else {
