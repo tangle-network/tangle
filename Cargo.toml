@@ -38,6 +38,7 @@ members = [
  "precompiles/preimage",
  "precompiles/jobs",
  "precompiles/balances-erc20",
+ "precompiles/assets-erc20",
  "tangle-subxt",
  "examples/*",
  "evm-tracer"
@@ -300,6 +301,7 @@ pallet-evm-precompile-democracy = { path = "precompiles/pallet-democracy", defau
 precompile-utils = { path = "precompiles/utils", default-features = false }
 pallet-evm-precompile-batch = { path = "precompiles/batch", default-features = false }
 pallet-evm-precompile-balances-erc20 = { path = "precompiles/balances-erc20", default-features = false }
+pallet-evm-precompileset-assets-erc20 = { path = "precompiles/assets-erc20", default-features = false }
 pallet-evm-precompile-call-permit = { path = "precompiles/call-permit", default-features = false }
 pallet-evm-precompile-proxy = { path = "precompiles/proxy", default-features = false }
 pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-features = false }
