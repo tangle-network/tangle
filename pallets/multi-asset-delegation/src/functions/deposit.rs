@@ -47,9 +47,6 @@ impl<T: Config> Pallet<T> {
 		asset_id: Option<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
-		// Check if the user is already a delegator
-		ensure!(!Delegators::<T>::contains_key(&who), Error::<T>::AlreadyDelegator);
-
 		ensure!(amount >= T::MinDelegateAmount::get(), Error::<T>::BondTooLow);
 
 		// Transfer the amount to the pallet account

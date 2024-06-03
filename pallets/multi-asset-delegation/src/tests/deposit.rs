@@ -68,6 +68,45 @@ fn deposit_should_work_for_fungible_asset() {
 }
 
 #[test]
+fn multiple_deposit_should_work() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who = 1;
+		let amount = 200;
+
+		create_and_mint_tokens(VDOT, who, amount * 4);
+
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,));
+
+		// Assert
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		assert_eq!(metadata.deposits.get(&VDOT), Some(&amount));
+		assert_eq!(
+			System::events().last().unwrap().event,
+			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
+				who,
+				amount,
+				asset_id: Some(VDOT),
+			})
+		);
+
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount));
+
+		// Assert
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		assert_eq!(metadata.deposits.get(&VDOT), Some(&amount * 2).as_ref());
+		assert_eq!(
+			System::events().last().unwrap().event,
+			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
+				who,
+				amount,
+				asset_id: Some(VDOT),
+			})
+		);
+	});
+}
+
+#[test]
 fn deposit_should_fail_for_insufficient_balance() {
 	new_test_ext().execute_with(|| {
 		// Arrange
@@ -79,25 +118,6 @@ fn deposit_should_fail_for_insufficient_balance() {
 		assert_noop!(
 			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,),
 			ArithmeticError::Underflow
-		);
-	});
-}
-
-#[test]
-fn deposit_should_fail_if_already_delegator() {
-	new_test_ext().execute_with(|| {
-		// Arrange
-		let who = 1;
-		let amount = 200;
-
-		create_and_mint_tokens(VDOT, who, amount);
-
-		// First deposit
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,));
-
-		assert_noop!(
-			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,),
-			Error::<Test>::AlreadyDelegator
 		);
 	});
 }
