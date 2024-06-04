@@ -1792,7 +1792,7 @@ impl sygma_percentage_feehandler::Config for Runtime {
 }
 
 parameter_types! {
-	// TNT
+	// tTNT
 	pub NativeLocation: Location = Location::here();
 	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
 
@@ -1854,7 +1854,7 @@ parameter_types! {
 
 	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
 	// For local testing with ./scripts/sygma-setup/execute_proposal_test.js, please check it to 5
-	pub EIP712ChainID: ChainID = U256::from(6231);
+	pub EIP712ChainID: ChainID = U256::from(3799);
 
 	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
 	// When relayers signing, this address will be included in the EIP712Domain
@@ -1870,7 +1870,7 @@ parameter_types! {
 		(SygUSDLocation::get().into(), SygUSDResourceId::get()),
 	];
 
-	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 12u8), (SygUSDLocation::get().into(), 6u8)];
+	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8)];
 }
 
 pub struct ReserveChecker;
