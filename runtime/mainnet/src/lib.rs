@@ -1601,7 +1601,7 @@ impl sygma_percentage_feehandler::Config for Runtime {
 parameter_types! {
 	// TNT
 	pub NativeLocation: Location = Location::here();
-	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000002");
+	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
 
 	// Pha
 	pub PhaLocation: Location = Location::new(
@@ -1662,7 +1662,7 @@ parameter_types! {
 	pub BridgeAccounts: BTreeMap<XcmAssetId, AccountId32> = bridge_accounts_generator();
 
 	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
-	pub EIP712ChainID: ChainID = U256::from(6232);
+	pub EIP712ChainID: ChainID = U256::from(5845);
 
 	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
 	// When relayers signing, this address will be included in the EIP712Domain
@@ -1678,7 +1678,7 @@ parameter_types! {
 		(PhaLocation::get().into(), PhaResourceId::get()),
 	];
 
-	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 12u8), (PhaLocation::get().into(), 12u8)];
+	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (PhaLocation::get().into(), 12u8)];
 }
 
 pub struct ReserveChecker;
