@@ -29,7 +29,7 @@ fn precompiles() -> Precompiles<Runtime> {
 
 #[test]
 fn wrong_signature_length_returns_false() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let public = [1u8; 33];
 		let signature = hex!["0042"];
 		let message = hex!["00"];
@@ -51,7 +51,7 @@ fn wrong_signature_length_returns_false() {
 
 #[test]
 fn signature_verification_works_secp256r1_ecdsa() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let private_key = field_element_from_be_hex(
 			"0000000000000000000000000000000000000000000000000000000000000001",
 		);

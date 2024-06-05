@@ -79,11 +79,7 @@ impl<Runtime: pallet_evm::Config> EcdsaSecp256k1Precompile<Runtime> {
 		};
 
 		let is_confirmed =
-			if let Ok(_) = verifying_key.verify_prehash(&message, &signature).map(|_| signature) {
-				true
-			} else {
-				false
-			};
+			verifying_key.verify_prehash(&message, &signature).map(|_| signature).is_ok();
 
 		log::trace!(
 			target: "Ecdsa-Secp256k1-Precompile",

@@ -108,11 +108,7 @@ impl<Runtime: pallet_evm::Config> EcdsaStarkPrecompile<Runtime> {
 			return Ok(false);
 		};
 
-		let is_confirmed = if let Ok(_) = starknet_crypto::verify(&public_key, &msg, &r, &s) {
-			true
-		} else {
-			false
-		};
+		let is_confirmed = starknet_crypto::verify(&public_key, &msg, &r, &s).is_ok();
 
 		log::trace!(
 			target: "Ecdsa-Stark-Precompile",
