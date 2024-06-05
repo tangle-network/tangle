@@ -15536,6 +15536,7 @@ dependencies = [
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-evm-precompile-staking",
+ "pallet-evm-precompile-verify-ecdsa-secp256k1-signature",
  "pallet-evm-precompile-vesting",
  "pallet-grandpa",
  "pallet-hotfix-sufficients",
