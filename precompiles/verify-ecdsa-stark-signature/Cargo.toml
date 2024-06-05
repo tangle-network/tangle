@@ -1,0 +1,56 @@
+[package]
+name = "pallet-evm-precompile-verify-ecdsa-stark-signature"
+version = "0.1.0"
+authors = { workspace = true }
+edition = "2021"
+description = "A Precompile to verify ecdsa-stark signature"
+
+[dependencies]
+log = { workspace = true }
+generic-ec = { workspace = true, default-features = false, features = ["serde", "udigest", "curve-secp256k1", "curve-secp256r1", "curve-stark"] }
+generic-ec-zkp = { workspace = true, default-features = false, features = ["serde", "udigest", "alloc"] }
+starknet-crypto = { workspace = true, default-features = false }
+precompile-utils = { workspace = true }
+
+# Substrate
+sp-core = { workspace = true }
+sp-std = { workspace = true }
+parity-scale-codec = { workspace = true, features = ["max-encoded-len"] }
+
+
+
+# Frontier
+fp-evm = { workspace = true }
+pallet-evm = { workspace = true }
+
+[dev-dependencies]
+derive_more = { workspace = true }
+hex-literal = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true }
+rand_core = { workspace = true }
+hex = { workspace = true, default-features = false, features = ["serde"] }
+
+
+precompile-utils = { workspace = true, features = ["std", "testing"] }
+
+# Substrate
+pallet-balances = { workspace = true, features = ["std"] }
+pallet-timestamp = { workspace = true, features = ["std"] }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+sp-runtime = { workspace = true }
+sp-io = { workspace = true }
+
+
+[features]
+default = ["std"]
+std = [
+  "fp-evm/std",
+  "pallet-evm/std",
+  "parity-scale-codec/std",
+  "sp-core/std",
+  "precompile-utils/std",
+  "sp-std/std",
+  "starknet-crypto/std",
+]
