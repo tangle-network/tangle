@@ -18,6 +18,9 @@ use crate::mock::*;
 use hex_literal::hex;
 use precompile_utils::testing::*;
 use sp_core::{ecdsa, keccak_256, Pair, H160};
+use rand_core::OsRng;
+use p256::ecdsa::{signature::hazmat::PrehashSigner, SigningKey, VerifyingKey};
+
 
 fn precompiles() -> Precompiles<Runtime> {
 	PrecompilesValue::get()
@@ -36,7 +39,7 @@ fn wrong_signature_length_returns_false() {
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::verify {
-					public_bytes: <ecdsa::Public as AsRef<[u8]>>::as_ref(&public).into(),
+					public_bytes: public.0.to_vec().into(),
 					signature_bytes: signature.into(),
 					message: message.into(),
 				},
@@ -49,11 +52,12 @@ fn wrong_signature_length_returns_false() {
 #[test]
 fn bad_signature_returns_false() {
 	ExtBuilder::default().build().execute_with(|| {
-        let pair = ecdsa::Pair::from_seed(b"12345678901234567890123456789012");
-        let public = pair.public();
-        let message = hex!("2f8c6129d816cf51c374bc7f08c3e63ed156cf78aefb4a6550d97b87997977ee00000000000000000200d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a4500000000000000");
-        let signature = pair.sign(&message[..]);
-        assert!(ecdsa::Pair::verify(&signature, &message[..], &public));
+        let mut rng = OsRng;
+		let secret_key = SigningKey::random(&mut rng);
+		let public_key = VerifyingKey::from(&secret_key);
+		let message = b"hello world";
+		let prehash = keccak_256(message);
+		let (signature, _) = secret_key.sign_prehash(&prehash).unwrap();
 
         let bad_message = hex!["00"];
 
@@ -62,8 +66,12 @@ fn bad_signature_returns_false() {
                 TestAccount::Alex,
                 H160::from_low_u64_be(1),
                 PCall::verify {
-                    public_bytes: <ecdsa::Public as AsRef<[u8]>>::as_ref(&public).into(),
-                    signature_bytes: <ecdsa::Signature as AsRef<[u8]>>::as_ref(&signature).into(),
+                    public_bytes: public_key
+                        .to_encoded_point(true)
+                        .to_bytes()
+                        .to_vec()
+                    .   into(),
+                    signature_bytes: signature.to_vec().into(),
                     message: bad_message.into(),
                 },
             )
@@ -73,31 +81,29 @@ fn bad_signature_returns_false() {
 }
 
 #[test]
-fn signature_verification_works_secp256k1_ecdsa() {
+fn signature_verification_works_secp256r1_ecdsa() {
 	ExtBuilder::default().build().execute_with(|| {
-        let pair = ecdsa::Pair::from_seed(&hex!(
-            "1d2187216832d1ee14be2e677f9e3ebceca715510ba1460a20d6fce07ba36b1e"
-        ));
-        let public = pair.public();
-        assert_eq!(
-            public,
-            ecdsa::Public::from_raw(hex!(
-                "02071bca0b0da3cfa98d3089db224999a827fc1df1a3d6221194382872f0d1a82a"
-            ))
-        );
-        let message = hex!("2f8c6129d816cf51c374bc7f08c3e63ed156cf78aefb4a6550d97b87997977ee00000000000000000200d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a4500000000000000");
-		let hash_message = keccak_256(&message);
-        let signature = pair.sign_prehashed(&hash_message);
-        assert!(ecdsa::Pair::verify_prehashed(&signature, &hash_message, &public));
+
+        let mut rng = OsRng;
+		let secret_key = SigningKey::random(&mut rng);
+		let public_key = VerifyingKey::from(&secret_key);
+		let message = b"hello world";
+		let prehash = keccak_256(message);
+		let (signature, _) = secret_key.sign_prehash(&prehash).unwrap();
+
 
         precompiles()
             .prepare_test(
                 TestAccount::Alex,
                 H160::from_low_u64_be(1),
                 PCall::verify {
-                    public_bytes: <ecdsa::Public as AsRef<[u8]>>::as_ref(&public).into(),
-                    signature_bytes: signature.0[..64].into(),
-                    message: hash_message.into(),
+                    public_bytes: public_key
+                        .to_encoded_point(true)
+                        .to_bytes()
+                        .to_vec()
+                        .into(),
+                    signature_bytes: signature.to_vec().into(),
+                    message: prehash.into(),
                 },
             )
             .expect_no_logs()

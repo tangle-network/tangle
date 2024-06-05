@@ -42,6 +42,7 @@ members = [
  "precompiles/services",
  "precompiles/balances-erc20",
  "precompiles/verify-ecdsa-secp256k1-signature",
+ "precompiles/verify-ecdsa-secp256r1-signature",
  "tangle-subxt",
  "examples/*",
  "evm-tracer"
@@ -317,6 +318,7 @@ pallet-evm-precompile-jobs = { path = "precompiles/jobs", default-features = fal
 pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
 pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { path = "precompiles/verify-ecdsa-secp256k1-signature", default-features = false }
+pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { path = "precompiles/verify-ecdsa-secp256r1-signature", default-features = false }
 
 # EVM & Ethereum
 # (wasm)
