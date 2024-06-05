@@ -27,6 +27,7 @@ use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripe
 use pallet_evm_precompile_staking::StakingPrecompile;
 use pallet_evm_precompile_verify_ecdsa_secp256k1_signature::EcdsaSecp256k1Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precompile;
+use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
 use pallet_evm_precompile_vesting::VestingPrecompile;
 
 use precompile_utils::precompile_set::{
@@ -132,6 +133,12 @@ pub type WebbPrecompilesAt<R> = (
 	PrecompileAt<
 		AddressU64<2071>,
 		EcdsaSecp256r1Precompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Ecdsa-Stark signature verifier precompile
+	PrecompileAt<
+		AddressU64<2072>,
+		EcdsaStarkPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
 );
