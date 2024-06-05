@@ -130,7 +130,7 @@ pub type WebbPrecompilesAt<R> = (
 	>,
 	// Ecdsa-Secp256r1 signature verifier precompile
 	PrecompileAt<
-		AddressU64<2070>,
+		AddressU64<2071>,
 		EcdsaSecp256r1Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
