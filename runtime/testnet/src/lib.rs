@@ -1853,7 +1853,7 @@ parameter_types! {
 	pub BridgeAccounts: BTreeMap<XcmAssetId, AccountId32> = bridge_accounts_generator();
 
 	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
-	// For local testing with ./scripts/sygma-setup/execute_proposal_test.js, please check it to 5
+	// For local testing with ./scripts/sygma-setup/execute_proposal_test.js, please change it to 5
 	pub EIP712ChainID: ChainID = U256::from(3799);
 
 	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
