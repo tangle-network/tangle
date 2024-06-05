@@ -1,12 +1,12 @@
 <div align="center">
 <a href="https://www.tangle.tools/">
     
-![Alt text](<assets/Tangle Banner 4.png>)
+![Alt text](<assets/Tangle%20%20Banner.png>)
   </a>
   </div>
 <h1 align="left"> The Tangle Network </h1>
 <p align="left">
-    <strong>An MPC-as-a-service restaking infrastructure powering cross-chain and zero-knowledge application development. </strong>
+    <strong>An modular restaking infrastructure for complex services. </strong>
 </p>
 
 <div align="left" >
@@ -41,6 +41,7 @@ If you would like to familiarize yourself with Tangle Network check out followin
 
 - [Tangle Gadgets](https://github.com/webb-tools/gadget)
 - [Tangle Docs](https://docs.tangle.tools/docs)
+- [Tangle Blueprints](https://docs.tangle.tools/developers/blueprints)
 - [Tangle Website](https://tangle.tools/)
 
 <h2 id="prerequisites"> Prerequisites</h2>
