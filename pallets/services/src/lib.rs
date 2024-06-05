@@ -16,6 +16,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
+#![allow(clippy::type_complexity)]
 
 #[cfg(not(feature = "std"))]
 extern crate alloc;
@@ -907,7 +908,7 @@ pub mod module {
 				service_id,
 				call_id,
 				job,
-				args: args.into(),
+				args,
 			});
 			// TODO: add weight for the call to the total weight.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
@@ -960,7 +961,7 @@ pub mod module {
 				service_id,
 				call_id,
 				job: job_call.job,
-				result: result.into(),
+				result,
 			});
 			// TODO: add weight for the call to the total weight.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })

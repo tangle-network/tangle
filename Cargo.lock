@@ -8499,6 +8499,83 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-evm-precompile-verify-ecdsa-secp256k1-signature"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "k256",
+ "log",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-timestamp",
+ "parity-scale-codec 3.6.12",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+]
+
+[[package]]
+name = "pallet-evm-precompile-verify-ecdsa-secp256r1-signature"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "log",
+ "p256",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-timestamp",
+ "parity-scale-codec 3.6.12",
+ "precompile-utils",
+ "rand_core 0.6.4",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+]
+
+[[package]]
+name = "pallet-evm-precompile-verify-ecdsa-stark-signature"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "generic-ec",
+ "generic-ec-zkp",
+ "hex",
+ "hex-literal 0.4.1",
+ "log",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-timestamp",
+ "parity-scale-codec 3.6.12",
+ "precompile-utils",
+ "rand_core 0.6.4",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+ "starknet-crypto",
+]
+
+[[package]]
 name = "pallet-evm-precompile-vesting"
 version = "0.1.0"
 dependencies = [
@@ -15512,6 +15589,9 @@ dependencies = [
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-evm-precompile-staking",
+ "pallet-evm-precompile-verify-ecdsa-secp256k1-signature",
+ "pallet-evm-precompile-verify-ecdsa-secp256r1-signature",
+ "pallet-evm-precompile-verify-ecdsa-stark-signature",
  "pallet-evm-precompile-vesting",
  "pallet-grandpa",
  "pallet-hotfix-sufficients",
