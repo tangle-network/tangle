@@ -26,6 +26,7 @@ use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use pallet_evm_precompile_staking::StakingPrecompile;
 use pallet_evm_precompile_verify_ecdsa_secp256k1_signature::EcdsaSecp256k1Precompile;
+use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precompile;
 use pallet_evm_precompile_vesting::VestingPrecompile;
 
 use precompile_utils::precompile_set::{
@@ -125,6 +126,12 @@ pub type WebbPrecompilesAt<R> = (
 	PrecompileAt<
 		AddressU64<2070>,
 		EcdsaSecp256k1Precompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Ecdsa-Secp256r1 signature verifier precompile
+	PrecompileAt<
+		AddressU64<2070>,
+		EcdsaSecp256r1Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
 );
