@@ -28,6 +28,7 @@ use pallet_evm_precompile_staking::StakingPrecompile;
 use pallet_evm_precompile_verify_ecdsa_secp256k1_signature::EcdsaSecp256k1Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precompile;
 use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
+use pallet_evm_precompile_verify_schnorr_signatures::*;
 use pallet_evm_precompile_vesting::VestingPrecompile;
 
 use precompile_utils::precompile_set::{
@@ -139,6 +140,54 @@ pub type WebbPrecompilesAt<R> = (
 	PrecompileAt<
 		AddressU64<2072>,
 		EcdsaStarkPrecompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Schnorr-Sr25519 signature verifier precompile
+	PrecompileAt<
+		AddressU64<2073>,
+		SchnorrSr25519Precompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Schnorr-Secp256k1 signature verifier precompile
+	PrecompileAt<
+		AddressU64<2074>,
+		SchnorrSecp256k1Precompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Schnorr-Ed25519 signature verifier precompile
+	PrecompileAt<
+		AddressU64<2075>,
+		SchnorrEd25519Precompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Schnorr-Ed448 signature verifier precompile
+	PrecompileAt<
+		AddressU64<2076>,
+		SchnorrEd448Precompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Schnorr-P256 signature verifier precompile
+	PrecompileAt<
+		AddressU64<2077>,
+		SchnorrP256Precompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Schnorr-P384 signature verifier precompile
+	PrecompileAt<
+		AddressU64<2078>,
+		SchnorrP384Precompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Schnorr-Ristretto255 signature verifier precompile
+	PrecompileAt<
+		AddressU64<2079>,
+		SchnorrRistretto255Precompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Schnorr-Taproot signature verifier precompile
+	PrecompileAt<
+		AddressU64<2080>,
+		SchnorrTaprootPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
 );
