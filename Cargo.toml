@@ -24,8 +24,6 @@ members = [
  "runtime/testnet",
  "runtime/mainnet",
  "pallets/*",
- "pallets/jobs/rpc",
- "pallets/jobs/rpc/runtime-api",
  "pallets/services/rpc",
  "pallets/services/rpc/runtime-api",
  "frost",
@@ -38,7 +36,6 @@ members = [
  "precompiles/call-permit",
  "precompiles/proxy",
  "precompiles/preimage",
- "precompiles/jobs",
  "precompiles/services",
  "precompiles/balances-erc20",
  "precompiles/verify-ecdsa-secp256k1-signature",
@@ -123,13 +120,7 @@ ethabi = { version = "15.0.0", default-features = false }
 
 # Tangle Dependencies
 pallet-airdrop-claims = { path = "pallets/claims", default-features = false }
-pallet-jobs = { path = "pallets/jobs", default-features = false }
 pallet-services = { path = "pallets/services", default-features = false }
-pallet-roles = { path = "pallets/roles", default-features = false }
-pallet-dkg = { path = "pallets/dkg", default-features = false }
-pallet-zksaas = { path = "pallets/zksaas", default-features = false }
-pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-features = false }
-pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
 pallet-services-rpc-runtime-api = { path = "pallets/services/rpc/runtime-api", default-features = false }
 pallet-services-rpc = { path = "pallets/services/rpc" }
 
@@ -317,7 +308,6 @@ pallet-evm-precompile-proxy = { path = "precompiles/proxy", default-features = f
 pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-features = false }
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
-pallet-evm-precompile-jobs = { path = "precompiles/jobs", default-features = false }
 pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
 pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { path = "precompiles/verify-ecdsa-secp256k1-signature", default-features = false }
