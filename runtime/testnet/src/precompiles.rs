@@ -25,6 +25,7 @@ use pallet_evm_precompile_registry::PrecompileRegistry;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use pallet_evm_precompile_staking::StakingPrecompile;
+use pallet_evm_precompile_verify_bls381_signature::Bls381Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256k1_signature::EcdsaSecp256k1Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precompile;
 use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
@@ -190,6 +191,8 @@ pub type WebbPrecompilesAt<R> = (
 		SchnorrTaprootPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
+	// Bls12-381 signature verifier precompile
+	PrecompileAt<AddressU64<2081>, Bls381Precompile<R>, (CallableByContract, CallableByPrecompile)>,
 );
 
 pub type WebbPrecompiles<R> = PrecompileSetBuilder<
