@@ -2851,7 +2851,7 @@ dependencies = [
  "enum-ordinalize 4.3.0",
  "proc-macro2",
  "quote",
- "syn 2.0.60",
+ "syn 2.0.66",
 ]
 
 [[package]]
@@ -2997,7 +2997,7 @@ checksum = "0d28318a75d4aead5c4db25382e8ef717932d0346600cacae6357eb5941bc5ff"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.60",
+ "syn 2.0.66",
 ]
 
 [[package]]
@@ -8430,7 +8430,7 @@ dependencies = [
  "pallet-evm-chain-id",
  "pallet-services",
  "pallet-timestamp",
- "parity-scale-codec 3.6.9",
+ "parity-scale-codec 3.6.12",
  "precompile-utils",
  "rustc-hex",
  "scale-info",
@@ -8916,9 +8916,9 @@ dependencies = [
  "pallet-evm-precompile-simple",
  "pallet-roles",
  "pallet-session",
- "pallet-staking",
+ "pallet-staking 28.0.0",
  "pallet-timestamp",
- "parity-scale-codec 3.6.9",
+ "parity-scale-codec 3.6.12",
  "precompile-utils",
  "scale-info",
  "serde",
@@ -8940,7 +8940,7 @@ version = "1.0.3"
 dependencies = [
  "jsonrpsee 0.20.3",
  "pallet-services-rpc-runtime-api",
- "parity-scale-codec 3.6.9",
+ "parity-scale-codec 3.6.12",
  "sp-api",
  "sp-blockchain",
  "sp-core",
@@ -8954,7 +8954,7 @@ dependencies = [
 name = "pallet-services-rpc-runtime-api"
 version = "1.0.3"
 dependencies = [
- "parity-scale-codec 3.6.9",
+ "parity-scale-codec 3.6.12",
  "sp-api",
  "sp-runtime",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",

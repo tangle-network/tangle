@@ -1,0 +1,44 @@
+[package]
+name = "frost-redjubjub"
+edition = "2021"
+# When releasing to crates.io:
+# - Update html_root_url
+# - Update CHANGELOG.md
+# - Create git tag.
+version.workspace = true
+authors = [
+    "Deirdre Connolly <durumcrustulum@gmail.com>",
+    "Chelsea Komlo <me@chelseakomlo.com>",
+    "Conrado Gouvea <conradoplg@gmail.com>"
+]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+categories = ["cryptography"]
+keywords = ["cryptography", "crypto", "ed25519", "threshold", "signature"]
+description = "A Schnorr signature scheme over Ed25519 that supports FROST."
+
+[package.metadata.docs.rs]
+features = ["serde"]
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+# blake2b_simd = { version = "1", default-features = false }
+blake2 = { version = "0.10.6", default-features = false }
+parity-scale-codec = { workspace = true }
+jubjub = { version = "0.10", git = "https://github.com/LIT-Protocol/jubjub.git", features = ["alloc"], default-features = false }
+group = { version = "0.13", features = ["alloc"], default-features = false }
+frost-core = { workspace = true }
+rand_core = { workspace = true, optional = true }
+sha2 = { workspace = true }
+subtle = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+    "rand_core/std",
+    "parity-scale-codec/std",
+    "sha2/std",
+    "jubjub/std",
+    "blake2/std",
+    # "blake2b_simd/std",
+]

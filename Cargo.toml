@@ -28,8 +28,8 @@ members = [
  "pallets/jobs/rpc/runtime-api",
  "pallets/services/rpc",
  "pallets/services/rpc/runtime-api",
- "pallets/dkg/frost",
- "pallets/dkg/frost/frost-*",
+ "frost",
+ "frost/frost-*",
  "precompiles/utils",
  "precompiles/utils/macro",
  "precompiles/utils/tests-external",
@@ -132,15 +132,15 @@ k256 = { version = "0.13.0", default-features = false }
 p256 = { version = "0.13.0", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
 starknet-crypto = { version = "0.6.1", default-features = false, features = ["signature-display","alloc"] }
-frost-core = { path = "pallets/dkg/frost", default-features = false }
-frost-ed25519 = { path = "pallets/dkg/frost/frost-ed25519", default-features = false }
-frost-ed448 = { path = "pallets/dkg/frost/frost-ed448", default-features = false }
-frost-ristretto255 = { path = "pallets/dkg/frost/frost-ristretto255", default-features = false }
-frost-secp256k1 = { path = "pallets/dkg/frost/frost-secp256k1", default-features = false }
-frost-p256 = { path = "pallets/dkg/frost/frost-p256", default-features = false }
-frost-p384 = { path = "pallets/dkg/frost/frost-p384", default-features = false }
-frost-redjubjub = { path = "pallets/dkg/frost/frost-redjubjub", default-features = false }
-frost-taproot = { path = "pallets/dkg/frost/frost-taproot", default-features = false }
+frost-core = { path = "frost", default-features = false }
+frost-ed25519 = { path = "frost/frost-ed25519", default-features = false }
+frost-ed448 = { path = "frost/frost-ed448", default-features = false }
+frost-ristretto255 = { path = "frost/frost-ristretto255", default-features = false }
+frost-secp256k1 = { path = "frost/frost-secp256k1", default-features = false }
+frost-p256 = { path = "frost/frost-p256", default-features = false }
+frost-p384 = { path = "frost/frost-p384", default-features = false }
+frost-redjubjub = { path = "frost/frost-redjubjub", default-features = false }
+frost-taproot = { path = "frost/frost-taproot", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
