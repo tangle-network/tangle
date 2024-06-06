@@ -138,6 +138,8 @@ pallet-evm-precompile-vesting = { workspace = true }
 pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { workspace = true }
 pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { workspace = true }
 pallet-evm-precompile-verify-ecdsa-stark-signature = { workspace = true }
+pallet-evm-precompile-verify-schnorr-signatures = { workspace = true }
+pallet-evm-precompile-verify-bls381-signature = { workspace = true }
 
 precompile-utils = { workspace = true }
 
@@ -302,6 +304,8 @@ std = [
   "pallet-evm-precompile-verify-ecdsa-secp256k1-signature/std",
   "pallet-evm-precompile-verify-ecdsa-secp256r1-signature/std",
   "pallet-evm-precompile-verify-ecdsa-stark-signature/std",
+  "pallet-evm-precompile-verify-schnorr-signatures/std",
+  "pallet-evm-precompile-verify-bls381-signature/std",
 
 
   # Sygma
