@@ -44,7 +44,6 @@ members = [
  "precompiles/verify-schnorr-signatures",
  "precompiles/verify-bls381-signature",
  "tangle-subxt",
- "examples/*",
  "evm-tracer"
  # "relayer-gadget",
  # "relayer-gadget/cli",
