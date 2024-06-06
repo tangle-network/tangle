@@ -18,10 +18,10 @@
 
 use fp_evm::PrecompileHandle;
 use precompile_utils::prelude::*;
-use sp_core::ConstU32;
-use sp_std::marker::PhantomData;
 use sp_core::sr25519;
+use sp_core::ConstU32;
 use sp_io::{crypto::sr25519_verify, hashing::keccak_256};
+use sp_std::marker::PhantomData;
 
 use frost_core::{signature::Signature, verifying_key::VerifyingKey};
 use frost_ed25519::Ed25519Sha512;
@@ -31,7 +31,6 @@ use frost_p384::P384Sha384;
 use frost_ristretto255::Ristretto255Sha512;
 use frost_secp256k1::Secp256K1Sha256;
 use frost_taproot::Secp256K1Taproot;
-
 
 #[cfg(test)]
 mod mock;
@@ -62,8 +61,6 @@ pub fn to_slice_32(val: &[u8]) -> Option<[u8; 32]> {
 	None
 }
 
-
-
 /// A precompile to verify SchnorrSr25519 signature
 pub struct SchnorrSr25519Precompile<Runtime>(PhantomData<Runtime>);
 
@@ -83,20 +80,21 @@ impl<Runtime: pallet_evm::Config> SchnorrSr25519Precompile<Runtime> {
 		let message: Vec<u8> = message.into();
 
 		// Convert the signature from bytes to sr25519::Signature
-		let signature: sr25519::Signature = signature_bytes.as_slice().try_into().map_err(|_| revert("Invalid Signature"))?;
+		let signature: sr25519::Signature =
+			signature_bytes.as_slice().try_into().map_err(|_| revert("Invalid Signature"))?;
 
 		// Convert public key from bytes to sr25519::Public
-		let public_key: sr25519::Public = sr25519::Public(public_bytes.try_into().map_err(|_| revert("Invalid Publci Key"))?);
+		let public_key: sr25519::Public =
+			sr25519::Public(public_bytes.try_into().map_err(|_| revert("Invalid Publci Key"))?);
 
 		// Compute its keccak256 hash
 		let hash = keccak_256(&message);
 
 		// Verify the Schnorr signature using sr25519_verify
-		let is_confirmed = sr25519_verify(&signature,&hash,&public_key);
+		let is_confirmed = sr25519_verify(&signature, &hash, &public_key);
 		Ok(is_confirmed)
 	}
 }
-
 
 /// A precompile to verify SchnorrSecp256k1 signature
 pub struct SchnorrSecp256k1Precompile<Runtime>(PhantomData<Runtime>);
@@ -162,7 +160,6 @@ impl<Runtime: pallet_evm::Config> SchnorrEd25519Precompile<Runtime> {
 
 /// A precompile to verify SchnorrEd448 signature
 pub struct SchnorrEd448Precompile<Runtime>(PhantomData<Runtime>);
-
 
 #[precompile_utils::precompile]
 impl<Runtime: pallet_evm::Config> SchnorrEd448Precompile<Runtime> {

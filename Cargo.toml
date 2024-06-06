@@ -44,6 +44,7 @@ members = [
  "precompiles/verify-ecdsa-secp256k1-signature",
  "precompiles/verify-ecdsa-secp256r1-signature",
  "precompiles/verify-ecdsa-stark-signature",
+ "precompiles/verify-schnorr-signatures",
  "tangle-subxt",
  "examples/*",
  "evm-tracer"
@@ -321,6 +322,7 @@ pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features
 pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { path = "precompiles/verify-ecdsa-secp256k1-signature", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { path = "precompiles/verify-ecdsa-secp256r1-signature", default-features = false }
 pallet-evm-precompile-verify-ecdsa-stark-signature = { path = "precompiles/verify-ecdsa-stark-signature", default-features = false }
+pallet-evm-precompile-verify-schnorr-signatures  = { path = "precompiles/verify-schnorr-signatures", default-features = false }
 
 # EVM & Ethereum
 # (wasm)

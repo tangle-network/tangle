@@ -213,8 +213,9 @@ parameter_types! {
 	};
 }
 
-pub type Precompiles<R> =
-	PrecompileSetBuilder<R, (
+pub type Precompiles<R> = PrecompileSetBuilder<
+	R,
+	(
 		PrecompileAt<AddressU64<1>, SchnorrSr25519Precompile<R>>,
 		PrecompileAt<AddressU64<2>, SchnorrSecp256k1Precompile<R>>,
 		PrecompileAt<AddressU64<3>, SchnorrEd25519Precompile<R>>,
@@ -223,8 +224,8 @@ pub type Precompiles<R> =
 		PrecompileAt<AddressU64<6>, SchnorrP384Precompile<R>>,
 		PrecompileAt<AddressU64<7>, SchnorrRistretto255Precompile<R>>,
 		PrecompileAt<AddressU64<8>, SchnorrTaprootPrecompile<R>>,
-
-	)>;
+	),
+>;
 
 pub type PcallSchnorrSr25519 = SchnorrSr25519PrecompileCall<Runtime>;
 
