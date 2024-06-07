@@ -1,5 +1,5 @@
 [workspace.package]
-version = "1.0.5"
+version = "1.0.6"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
@@ -376,6 +376,7 @@ sygma-fee-handler-router = { git = "https://github.com/sygmaprotocol/sygma-subst
 sygma-percentage-feehandler = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "release-polkadot-v1.7.0", default-features = false }
 sygma-bridge = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "release-polkadot-v1.7.0", default-features = false }
 sygma-runtime-api = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "release-polkadot-v1.7.0", default-features = false }
+sygma-rpc = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "release-polkadot-v1.7.0", default-features = false }
 
 [profile.release]
 panic = "unwind"
