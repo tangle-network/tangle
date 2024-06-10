@@ -50,7 +50,7 @@ pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 }
 
 /// Tangle testnet authorities
-pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)> {
+pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)> {
 	vec![
 		// tangle-testnet 1
 		(
@@ -60,8 +60,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["71bf01524c555f1e0f6b7dc7243caf00851d3afc543422f98d3eb6bca78acd8c"]
 				.unchecked_into(),
 			hex!["2c7d0dbc639d8d52d02e9e03b6dd19b50f44a6a491ca75c9ebd6a1a29782e743"]
-				.unchecked_into(),
-			hex!["02a1af3c93d94e9b658a9aaa994bfa3fc156c9d38c60872d3dd33f63cd7aa12a6b"]
 				.unchecked_into(),
 		),
 		// tangle-testnet 2
@@ -73,8 +71,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 				.unchecked_into(),
 			hex!["ecb58b3d1eaaad8ef42c27e183e41830628ca5fee5bb06cdf13883e57c4a0770"]
 				.unchecked_into(),
-			hex!["0305c8dd5a251ed604350f50a993edc9baa66fb72b56091346316dd94052a068fa"]
-				.unchecked_into(),
 		),
 		// tangle-testnet 3
 		(
@@ -84,8 +80,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["a41a815db90b9bd3d9ec462f90ba77ba1d627a9fccc9f7847e34c9e9e9b57c90"]
 				.unchecked_into(),
 			hex!["2ef4f718a407e0b4d86913a989f749b7edfe836bae1d726b07f9c419ad94c42c"]
-				.unchecked_into(),
-			hex!["02825faaf113b15b28dfdfe52eeee66554fe2892825e146d20ac49dd7c37d6e793"]
 				.unchecked_into(),
 		),
 		// tangle-testnet 4
@@ -97,8 +91,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 				.unchecked_into(),
 			hex!["dc8be4d69084d5bb8a6a0cd48c4d3ab82def85e996b87c63176b49f70c028c35"]
 				.unchecked_into(),
-			hex!["02745849fbb4cf0f1f9f310cf67740431fd4cd1b4292bb1a3efeb93956e612e75f"]
-				.unchecked_into(),
 		),
 		// tangle-testnet 5
 		(
@@ -108,8 +100,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["d2eb206f8c7a64ce47828b33314806ac6cb915d464990eaff9f6435880c6e54f"]
 				.unchecked_into(),
 			hex!["363e33c500396cc52ef58924a005227eed67801bd376ca886fd6432ba7070711"]
-				.unchecked_into(),
-			hex!["03dd29b916c41662207e2e5b7dd7c5c7054681bef8897bd4f0634b9075463159ca"]
 				.unchecked_into(),
 		),
 	]

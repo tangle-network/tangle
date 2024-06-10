@@ -36,9 +36,9 @@ use std::{collections::BTreeMap, str::FromStr};
 use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	EVMConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, Precompiles, RoleKeyId,
-	RuntimeGenesisConfig, SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-	TreasuryPalletId, VestingConfig, UNIT, WASM_BINARY,
+	EVMConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, Precompiles, RuntimeGenesisConfig,
+	SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId,
+	VestingConfig, UNIT, WASM_BINARY,
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
@@ -64,27 +64,23 @@ where
 }
 
 /// Generate an babe authority key.
-pub fn authority_keys_from_seed(
-	stash: &str,
-) -> (AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId) {
+pub fn authority_keys_from_seed(stash: &str) -> (AccountId, BabeId, GrandpaId, ImOnlineId) {
 	(
 		get_account_id_from_seed::<sr25519::Public>(stash),
 		get_from_seed::<BabeId>(stash),
 		get_from_seed::<GrandpaId>(stash),
 		get_from_seed::<ImOnlineId>(stash),
-		get_from_seed::<RoleKeyId>(stash),
 	)
 }
 
 /// Generate authority keys for benchmarking.
 /// This is used for the `--chain dev` command.
-pub fn authority_keys_for_dev(id: u8) -> (AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId) {
+pub fn authority_keys_for_dev(id: u8) -> (AccountId, BabeId, GrandpaId, ImOnlineId) {
 	(
 		AccountPublic::from(sr25519::Public::from_raw([id; 32])).into_account(),
 		BabeId::from(sr25519::Public::from_raw([id; 32])),
 		GrandpaId::from(ed25519::Public::from_raw([id; 32])),
 		ImOnlineId::from(sr25519::Public::from_raw([id; 32])),
-		RoleKeyId::from(ecdsa::Public::from_raw([id; 33])),
 	)
 }
 /// Generate the session keys from individual elements.
@@ -95,9 +91,8 @@ fn generate_session_keys(
 	babe: BabeId,
 	grandpa: GrandpaId,
 	im_online: ImOnlineId,
-	role: RoleKeyId,
 ) -> tangle_testnet_runtime::opaque::SessionKeys {
-	tangle_testnet_runtime::opaque::SessionKeys { babe, grandpa, im_online, role }
+	tangle_testnet_runtime::opaque::SessionKeys { babe, grandpa, im_online }
 }
 
 pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -275,7 +270,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 /// Configure initial storage state for FRAME modules.
 #[allow(clippy::too_many_arguments)]
 fn testnet_genesis(
-	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
+	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)>,
 	endowed_accounts: Vec<(AccountId, Balance)>,
 	root_key: AccountId,
 	chain_id: u64,
@@ -332,7 +327,7 @@ fn testnet_genesis(
 					(
 						x.0.clone(),
 						x.0.clone(),
-						generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone(), x.4.clone()),
+						generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone()),
 					)
 				})
 				.collect::<Vec<_>>(),

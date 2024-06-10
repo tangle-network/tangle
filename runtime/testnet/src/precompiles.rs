@@ -18,18 +18,17 @@ use pallet_evm_precompile_blake2::Blake2F;
 use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
 use pallet_evm_precompile_call_permit::CallPermitPrecompile;
 use pallet_evm_precompile_democracy::DemocracyPrecompile;
-use pallet_evm_precompile_jobs::JobsPrecompile;
 use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_preimage::PreimagePrecompile;
 use pallet_evm_precompile_registry::PrecompileRegistry;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use pallet_evm_precompile_staking::StakingPrecompile;
-use pallet_evm_precompile_verify_bls381_signature::Bls381Precompile;
-use pallet_evm_precompile_verify_ecdsa_secp256k1_signature::EcdsaSecp256k1Precompile;
-use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precompile;
-use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
-use pallet_evm_precompile_verify_schnorr_signatures::*;
+// use pallet_evm_precompile_verify_bls381_signature::Bls381Precompile;
+// use pallet_evm_precompile_verify_ecdsa_secp256k1_signature::EcdsaSecp256k1Precompile;
+// use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precompile;
+// use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
+// use pallet_evm_precompile_verify_schnorr_signatures::*;
 use pallet_evm_precompile_vesting::VestingPrecompile;
 
 use precompile_utils::precompile_set::{
@@ -119,80 +118,79 @@ pub type WebbPrecompilesAt<R> = (
 		PreimagePrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	PrecompileAt<AddressU64<2068>, JobsPrecompile<R>, (CallableByContract, CallableByPrecompile)>,
 	PrecompileAt<
 		AddressU64<2069>,
 		PrecompileRegistry<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Ecdsa-Secp256k1 signature verifier precompile
-	PrecompileAt<
-		AddressU64<2070>,
-		EcdsaSecp256k1Precompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Ecdsa-Secp256r1 signature verifier precompile
-	PrecompileAt<
-		AddressU64<2071>,
-		EcdsaSecp256r1Precompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Ecdsa-Stark signature verifier precompile
-	PrecompileAt<
-		AddressU64<2072>,
-		EcdsaStarkPrecompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Schnorr-Sr25519 signature verifier precompile
-	PrecompileAt<
-		AddressU64<2073>,
-		SchnorrSr25519Precompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Schnorr-Secp256k1 signature verifier precompile
-	PrecompileAt<
-		AddressU64<2074>,
-		SchnorrSecp256k1Precompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Schnorr-Ed25519 signature verifier precompile
-	PrecompileAt<
-		AddressU64<2075>,
-		SchnorrEd25519Precompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Schnorr-Ed448 signature verifier precompile
-	PrecompileAt<
-		AddressU64<2076>,
-		SchnorrEd448Precompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Schnorr-P256 signature verifier precompile
-	PrecompileAt<
-		AddressU64<2077>,
-		SchnorrP256Precompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Schnorr-P384 signature verifier precompile
-	PrecompileAt<
-		AddressU64<2078>,
-		SchnorrP384Precompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Schnorr-Ristretto255 signature verifier precompile
-	PrecompileAt<
-		AddressU64<2079>,
-		SchnorrRistretto255Precompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Schnorr-Taproot signature verifier precompile
-	PrecompileAt<
-		AddressU64<2080>,
-		SchnorrTaprootPrecompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-	// Bls12-381 signature verifier precompile
-	PrecompileAt<AddressU64<2081>, Bls381Precompile<R>, (CallableByContract, CallableByPrecompile)>,
+	// // Ecdsa-Secp256k1 signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2070>,
+	// 	EcdsaSecp256k1Precompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Ecdsa-Secp256r1 signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2071>,
+	// 	EcdsaSecp256r1Precompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Ecdsa-Stark signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2072>,
+	// 	EcdsaStarkPrecompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Schnorr-Sr25519 signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2073>,
+	// 	SchnorrSr25519Precompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Schnorr-Secp256k1 signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2074>,
+	// 	SchnorrSecp256k1Precompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Schnorr-Ed25519 signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2075>,
+	// 	SchnorrEd25519Precompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Schnorr-Ed448 signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2076>,
+	// 	SchnorrEd448Precompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Schnorr-P256 signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2077>,
+	// 	SchnorrP256Precompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Schnorr-P384 signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2078>,
+	// 	SchnorrP384Precompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Schnorr-Ristretto255 signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2079>,
+	// 	SchnorrRistretto255Precompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Schnorr-Taproot signature verifier precompile
+	// PrecompileAt<
+	// 	AddressU64<2080>,
+	// 	SchnorrTaprootPrecompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
+	// // Bls12-381 signature verifier precompile
+	// PrecompileAt<AddressU64<2081>, Bls381Precompile<R>, (CallableByContract, CallableByPrecompile)>,
 );
 
 pub type WebbPrecompiles<R> = PrecompileSetBuilder<

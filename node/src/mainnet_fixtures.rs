@@ -20,7 +20,6 @@ use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_network::config::MultiaddrWithPeerId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::crypto::UncheckedInto;
-use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_runtime::AccountId;
 
 /// Mainnet root key
@@ -53,7 +52,7 @@ pub fn get_bootnodes() -> Vec<MultiaddrWithPeerId> {
 }
 
 /// Tangle runtime initial authorities
-pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)> {
+pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)> {
 	vec![
 		// tangle 1
 		(
@@ -63,8 +62,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["5b120ba5d2399de8ba3201d1c464973070934c570c539ddcad1318832353f7b0"]
 				.unchecked_into(),
 			hex!["1261548c9de1476e4e8e06e9dddd543ebbd7504ae502ac91a0eb8b6037334372"]
-				.unchecked_into(),
-			hex!["02320ab70b215ed1d37748d2aadae924ddb1e6042598ae9c2479684f0913cc15ae"]
 				.unchecked_into(),
 		),
 		// tangle 2
@@ -76,8 +73,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 				.unchecked_into(),
 			hex!["7c04e33631ff7ae0a453827c82c4b69179e72612f982c4d9b45393f25b4f5f48"]
 				.unchecked_into(),
-			hex!["026fa903a87d7e0e262e5c70d6dffecca3f5262f05096a1c5bcd477e8ea63813ad"]
-				.unchecked_into(),
 		),
 		// tangle 3
 		(
@@ -87,8 +82,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["a2948fb6f455ac9252ff39c59d46203dded2b0a2685e71a641942d58afc372a5"]
 				.unchecked_into(),
 			hex!["7842e1623d6a19cd267ad9b926ddb81a27c6aedc4cab58e99cd0ac3e2a53a762"]
-				.unchecked_into(),
-			hex!["02c876f99aa4361e7e81eb96ff325833452efb6eed6ae43abfbbed4106ac556829"]
 				.unchecked_into(),
 		),
 		// tangle 4
@@ -100,8 +93,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 				.unchecked_into(),
 			hex!["c0fc962bcbc623e343d0dddf9915f9c269dced366283e76e6302612d5172281d"]
 				.unchecked_into(),
-			hex!["03d1198468f5ba4f67d155a576d5b2b2823265616b7669000eab08bca538d8c34c"]
-				.unchecked_into(),
 		),
 		// tangle 5
 		(
@@ -111,8 +102,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["dcaef0b1c2e2d8fdeac4f07d60b3eb0d93564dba0c2e6bc5d0a63d775a4318da"]
 				.unchecked_into(),
 			hex!["cebebb5bf58a2a989bf8827d7360f04057835e42141162bfa17f3d12dde96a59"]
-				.unchecked_into(),
-			hex!["02596bcb7dfc93455d1e7bf93aa874d481590b37af0d43598506f9ed8609086ba0"]
 				.unchecked_into(),
 		),
 		// snowflake
@@ -124,8 +113,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 				.unchecked_into(),
 			hex!["12fd766a9916d23c125c8b2f61b3fb9d68ecaa0dea2c4119aa5d1980dbe0c442"]
 				.unchecked_into(),
-			hex!["03ace29a9b62f4aee605b74a7b44624b9d96570cd70aa5d4d6f771d5824889038b"]
-				.unchecked_into(),
 		),
 		// trident
 		(
@@ -135,8 +122,6 @@ pub fn get_initial_authorities() -> Vec<(AccountId, BabeId, GrandpaId, ImOnlineI
 			hex!["d9ceb6f89ac6fee1bb709e3e979a8d0da5e43a68debdc5fcb88a9e11705a6ae7"]
 				.unchecked_into(),
 			hex!["7c623a93a6691ecc211ea709f8eb606e2c9af5ac413b2cab88e54c2d4391872a"]
-				.unchecked_into(),
-			hex!["020acb5833e9cace29f9f94feaff71ecd854bc79c0646ef7c2a46700313b9e83c7"]
 				.unchecked_into(),
 		),
 	]

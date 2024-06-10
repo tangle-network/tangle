@@ -65,7 +65,6 @@ pallet-evm-precompile-simple = { workspace = true }
 
 precompile-utils = { workspace = true }
 
-pallet-roles = { workspace = true }
 pallet-session = { workspace = true }
 pallet-staking = { workspace = true }
 sp-staking = { workspace = true }
@@ -89,7 +88,6 @@ std = [
   "pallet-balances/std",
   "pallet-timestamp/std",
   "pallet-staking/std",
-  "pallet-roles/std",
   "fp-account/std",
   "fp-consensus/std",
   "fp-dynamic-fee/std",

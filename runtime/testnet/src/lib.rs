@@ -49,6 +49,7 @@ use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use pallet_services_rpc_runtime_api::BlockNumberOf;
 use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking::StakerStatus;
 use pallet_transaction_payment::{
@@ -90,11 +91,7 @@ use sygma_traits::{
 	VerifyingContractAddress,
 };
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::{
-	jobs::v2::RpcServicesWithBlueprint,
-	jobs::{JobId, PhaseResult, RpcResponseJobsData},
-	roles::RoleType,
-};
+use tangle_primitives::jobs::v2::RpcServicesWithBlueprint;
 use xcm::v4::Junctions::{X1, X3};
 use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
 #[allow(deprecated)]
@@ -138,12 +135,6 @@ use sp_staking::{
 pub use tangle_primitives::{
 	currency::*,
 	fee::*,
-	jobs::{
-		traits::{JobToFee, MPCHandler},
-		JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType,
-	},
-	misbehavior::{traits::MisbehaviorHandler, MisbehaviorJustification, MisbehaviorSubmission},
-	roles::ValidatorRewardDistribution,
 	time::*,
 	types::{
 		AccountId, AccountIndex, Address, Balance, BlockNumber, Hash, Header, Index, Moment,
@@ -161,7 +152,6 @@ use tangle_primitives::{
 		CANDIDACY_BOND, DESIRED_MEMBERS, DESIRED_RUNNERS_UP, ELECTIONS_PHRAGMEN_PALLET_ID,
 		MAX_CANDIDATES, MAX_VOTERS, TERM_DURATION,
 	},
-	roles::traits::RolesHandler,
 	staking::{
 		BONDING_DURATION, HISTORY_DEPTH, MAX_NOMINATOR_REWARDED_PER_VALIDATOR, OFFCHAIN_REPEAT,
 		OFFENDING_VALIDATOR_THRESHOLD, SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
@@ -238,7 +228,6 @@ pub mod opaque {
 			pub babe: Babe,
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
-			pub role: Roles,
 		}
 	}
 }
@@ -505,7 +494,6 @@ impl pallet_staking::Config for Runtime {
 	type TargetList = pallet_staking::UseValidatorsMap<Runtime>;
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type NextNewSession = Session;
-	type RolesHandler = Roles;
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
@@ -1135,173 +1123,6 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type WeightInfo = ();
 }
 
-pub struct TestnetJobToFeeHandler;
-
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>
-	for TestnetJobToFeeHandler
-{
-	type Balance = Balance;
-
-	fn job_to_fee(
-		job: &JobSubmission<
-			AccountId,
-			BlockNumber,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxAdditionalParamsLen,
-		>,
-	) -> Balance {
-		match job.job_type {
-			JobType::DKGTSSPhaseOne(_)
-			| JobType::DKGTSSPhaseTwo(_)
-			| JobType::DKGTSSPhaseThree(_)
-			| JobType::DKGTSSPhaseFour(_) => Dkg::job_to_fee(job),
-			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => ZkSaaS::job_to_fee(job),
-		}
-	}
-
-	fn calculate_result_extension_fee(result: Vec<u8>, extension_time: BlockNumber) -> Balance {
-		Dkg::calculate_result_extension_fee(result, extension_time)
-	}
-}
-
-pub struct TestnetMPCHandler;
-
-impl
-	MPCHandler<
-		AccountId,
-		BlockNumber,
-		Balance,
-		MaxParticipants,
-		MaxSubmissionLen,
-		MaxKeyLen,
-		MaxDataLen,
-		MaxSignatureLen,
-		MaxProofLen,
-		MaxAdditionalParamsLen,
-	> for TestnetMPCHandler
-{
-	fn verify(
-		data: JobWithResult<
-			AccountId,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxKeyLen,
-			MaxDataLen,
-			MaxSignatureLen,
-			MaxProofLen,
-			MaxAdditionalParamsLen,
-		>,
-	) -> DispatchResult {
-		match data.result {
-			JobResult::DKGPhaseOne(_)
-			| JobResult::DKGPhaseTwo(_)
-			| JobResult::DKGPhaseThree(_)
-			| JobResult::DKGPhaseFour(_) => Dkg::verify(data.result),
-			JobResult::ZkSaaSPhaseOne(_) | JobResult::ZkSaaSPhaseTwo(_) => ZkSaaS::verify(data),
-		}
-	}
-
-	fn verify_validator_report(
-		_validator: AccountId,
-		_offence: ValidatorOffenceType,
-		_signatures: Vec<Vec<u8>>,
-	) -> DispatchResult {
-		Ok(())
-	}
-
-	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
-		Ok(())
-	}
-}
-
-pub struct TestnetMisbehaviorHandler;
-
-impl MisbehaviorHandler for TestnetMisbehaviorHandler {
-	fn verify(data: MisbehaviorSubmission) -> DispatchResult {
-		match data.justification {
-			MisbehaviorJustification::DKGTSS(_) => Dkg::verify_misbehavior(data),
-			_ => Ok(()),
-		}
-	}
-}
-
-#[cfg(feature = "local-testing")]
-parameter_types! {
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 60_000_000;
-}
-
-#[cfg(not(feature = "local-testing"))]
-parameter_types! {
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 60_000_000;
-}
-
-parameter_types! {
-	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxParticipants: u32 = 10;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxKeyLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxDataLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSignatureLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxProofLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxActiveJobsPerValidator: u32 = 100;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxRolesPerValidator: u32 = 100;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxAdditionalParamsLen: u32 = 256;
-}
-
-impl pallet_jobs::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type ForceOrigin = EnsureRootOrHalfCouncil;
-	type Currency = Balances;
-	type JobToFee = TestnetJobToFeeHandler;
-	type RolesHandler = Roles;
-	type MPCHandler = TestnetMPCHandler;
-	type MisbehaviorHandler = TestnetMisbehaviorHandler;
-	type PalletId = JobsPalletId;
-	type MaxParticipants = MaxParticipants;
-	type MaxSubmissionLen = MaxSubmissionLen;
-	type MaxKeyLen = MaxKeyLen;
-	type MaxDataLen = MaxDataLen;
-	type MaxSignatureLen = MaxSignatureLen;
-	type MaxProofLen = MaxProofLen;
-	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
-	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
-	type WeightInfo = ();
-}
-
-type IdTuple = pallet_session::historical::IdentificationTuple<Runtime>;
-type Offence = pallet_roles::offences::ValidatorOffence<IdTuple>;
-/// A mock offence report handler.
-pub struct OffenceHandler;
-impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
-	fn report_offence(_reporters: Vec<AccountId>, _offence: Offence) -> Result<(), OffenceError> {
-		Ok(())
-	}
-
-	fn is_known_offence(_offenders: &[IdTuple], _time_slot: &SessionIndex) -> bool {
-		false
-	}
-}
-
 // ReStaking reward curve, more details at
 // https://docs.rs/pallet-staking-reward-curve/latest/pallet_staking_reward_curve/macro.build.html
 // We are aiming for a max inflation of 1%, when 25% of tokens are re-staked
@@ -1316,60 +1137,6 @@ pallet_staking_reward_curve::build! {
 		max_piece_count: 40,
 		test_precision: 0_005_000,
 	);
-}
-
-parameter_types! {
-	pub const MaxValidators : u32 = 1000;
-	pub MaxRestake: Percent = Percent::from_percent(50);
-	pub const RestakerRewardCurve: &'static PiecewiseLinear<'static> = &RESTAKER_REWARD_CURVE;
-	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
-}
-
-impl pallet_roles::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type JobsHandler = Jobs;
-	type RoleKeyId = RoleKeyId;
-	type MaxRolesPerAccount = ConstU32<2>;
-	type ValidatorSet = Historical;
-	type ReportOffences = OffenceHandler;
-	type ValidatorRewardDistribution = Reward;
-	type MaxValidators = MaxValidators;
-	type ForceOrigin = EnsureRoot<Self::AccountId>;
-	type MaxRestake = MaxRestake;
-	type MaxRolesPerValidator = MaxRolesPerValidator;
-	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
-	type MaxKeyLen = MaxKeyLen;
-	type RestakerEraPayout = pallet_staking::ConvertCurve<RewardCurve>;
-	type WeightInfo = ();
-}
-
-impl pallet_dkg::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Currency = Balances;
-	type UpdateOrigin = EnsureRootOrHalfCouncil;
-	type MaxParticipants = MaxParticipants;
-	type MaxSubmissionLen = MaxSubmissionLen;
-	type MaxKeyLen = MaxKeyLen;
-	type MaxDataLen = MaxDataLen;
-	type MaxSignatureLen = MaxSignatureLen;
-	type MaxProofLen = MaxProofLen;
-	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
-	type WeightInfo = ();
-}
-
-impl pallet_zksaas::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Currency = Balances;
-	type UpdateOrigin = EnsureRootOrHalfCouncil;
-	type Verifier = (ArkworksVerifierGroth16Bn254, CircomVerifierGroth16Bn254);
-	type MaxParticipants = MaxParticipants;
-	type MaxSubmissionLen = MaxSubmissionLen;
-	type MaxKeyLen = MaxKeyLen;
-	type MaxDataLen = MaxDataLen;
-	type MaxSignatureLen = MaxSignatureLen;
-	type MaxProofLen = MaxProofLen;
-	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
-	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -1504,11 +1271,7 @@ construct_runtime!(
 		HotfixSufficients: pallet_hotfix_sufficients,
 
 		Claims: pallet_airdrop_claims,
-		Roles: pallet_roles,
-		Jobs: pallet_jobs,
 		Services: pallet_services,
-		Dkg: pallet_dkg,
-		ZkSaaS: pallet_zksaas,
 		Proxy: pallet_proxy,
 
 		// Sygma
@@ -2062,8 +1825,6 @@ mod benches {
 	);
 }
 
-use pallet_jobs_rpc_runtime_api::BlockNumberOf;
-
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {
 		fn version() -> RuntimeVersion {
@@ -2120,30 +1881,7 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_jobs_rpc_runtime_api::JobsApi<Block, AccountId, MaxParticipants, MaxSubmissionLen, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxProofLen, MaxAdditionalParamsLen> for Runtime {
-		fn query_jobs_by_validator(
-			validator: AccountId,
-		) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>>> {
-			Jobs::query_jobs_by_validator(validator)
-		}
 
-		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>> {
-			Jobs::query_job_by_id(role_type, job_id)
-		}
-
-		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxSubmissionLen, MaxProofLen, MaxAdditionalParamsLen>> {
-			Jobs::query_job_result(role_type, job_id)
-		}
-
-		fn query_next_job_id() -> JobId {
-			Jobs::query_next_job_id()
-		}
-
-		fn query_restaker_role_key(address: AccountId) -> Option<Vec<u8>> {
-			Roles::get_validator_role_key(address)
-		}
-
-	}
 
 	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId> for Runtime {
 		fn query_services_with_blueprints_by_operator(
@@ -2641,9 +2379,6 @@ impl_runtime_apis! {
 			use baseline::Pallet as BaselineBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
-			list_benchmark!(list, extra, pallet_roles, Roles);
-			list_benchmark!(list, extra, pallet_jobs, Jobs);
-			list_benchmark!(list, extra, pallet_dkg, Dkg);
 			list_benchmark!(list, extra, pallet_services, Services);
 			list_benchmark!(list, extra, pallet_airdrop_claims, Claims);
 
@@ -2667,9 +2402,6 @@ impl_runtime_apis! {
 
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
-			add_benchmark!(params, batches, pallet_roles, Roles);
-			add_benchmark!(params, batches, pallet_jobs, Jobs);
-			add_benchmark!(params, batches, pallet_dkg, Dkg);
 			add_benchmark!(params, batches, pallet_services, Services);
 			add_benchmark!(params, batches, pallet_airdrop_claims, Claims);
 

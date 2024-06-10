@@ -272,7 +272,7 @@ pub fn get_initial_endowed_accounts(
 	endowed_accounts.push((root_account, 5000 * UNIT)); // root key gets 5000 tokens for transactions
 
 	let initial_authorities = get_initial_authorities();
-	for (acco, _, _, _, _) in initial_authorities.iter() {
+	for (acco, _, _, _) in initial_authorities.iter() {
 		endowed_accounts.push((acco.clone(), 100 * UNIT));
 	}
 
