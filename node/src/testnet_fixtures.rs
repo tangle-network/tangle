@@ -20,7 +20,6 @@ use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_network::config::MultiaddrWithPeerId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::crypto::UncheckedInto;
-use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_testnet_runtime::AccountId;
 
 /// Testnet root key

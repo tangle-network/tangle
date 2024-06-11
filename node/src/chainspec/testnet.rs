@@ -26,7 +26,7 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::{ecdsa, ed25519, sr25519, Pair, Public, H160, U256};
+use sp_core::{ed25519, sr25519, Pair, Public, H160, U256};
 use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
