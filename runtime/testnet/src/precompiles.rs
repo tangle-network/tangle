@@ -78,6 +78,7 @@ pub type WebbPrecompilesAt<R> = (
 	PrecompileAt<AddressU64<9>, Blake2F, EthereumPrecompilesChecks>,
 	PrecompileAt<AddressU64<1024>, Sha3FIPS256, (CallableByContract, CallableByPrecompile)>,
 	PrecompileAt<AddressU64<1026>, ECRecoverPublicKey, (CallableByContract, CallableByPrecompile)>,
+	// Tangle precompiles
 	PrecompileAt<
 		AddressU64<2048>,
 		StakingPrecompile<R>,
@@ -88,7 +89,6 @@ pub type WebbPrecompilesAt<R> = (
 		VestingPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Moonbeam precompiles
 	PrecompileAt<
 		AddressU64<2050>,
 		Erc20BalancesPrecompile<R, NativeErc20Metadata>,
@@ -100,7 +100,7 @@ pub type WebbPrecompilesAt<R> = (
 		(CallableByContract, CallableByPrecompile),
 	>,
 	PrecompileAt<
-		AddressU64<2056>,
+		AddressU64<2052>,
 		BatchPrecompile<R>,
 		(
 			SubcallWithMaxNesting<2>,
@@ -109,17 +109,17 @@ pub type WebbPrecompilesAt<R> = (
 		),
 	>,
 	PrecompileAt<
-		AddressU64<2058>,
+		AddressU64<2053>,
 		CallPermitPrecompile<R>,
 		(SubcallWithMaxNesting<0>, CallableByContract),
 	>,
 	PrecompileAt<
-		AddressU64<2067>,
+		AddressU64<2054>,
 		PreimagePrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
 	PrecompileAt<
-		AddressU64<2069>,
+		AddressU64<2055>,
 		PrecompileRegistry<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
