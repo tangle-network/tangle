@@ -13,6 +13,3 @@ pub mod tangle_testnet_runtime;
 pub use parity_scale_codec;
 pub use scale_info;
 pub use subxt;
-
-#[cfg(test)]
-mod test;
