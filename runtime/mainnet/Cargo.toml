@@ -89,11 +89,6 @@ pallet-vesting = { workspace = true }
 # Webb dependencies
 tangle-crypto-primitives = { workspace = true }
 tangle-primitives = { workspace = true }
-pallet-roles = { workspace = true }
-pallet-jobs = { workspace = true }
-pallet-jobs-rpc-runtime-api = { workspace = true }
-pallet-zksaas = { workspace = true }
-pallet-dkg = { workspace = true }
 
 # Frontier dependencies
 fp-account = { workspace = true }
@@ -147,6 +142,7 @@ runtime-benchmarks = [
   "pallet-vesting/runtime-benchmarks",
   "pallet-collective/runtime-benchmarks",
   "pallet-tx-pause/runtime-benchmarks",
+  "pallet-staking/runtime-benchmarks",
   "sp-runtime/runtime-benchmarks",
 
   # Frontier
@@ -212,10 +208,7 @@ std = [
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
   "frame-system-benchmarking?/std",
-  "pallet-roles/std",
   "sp-storage/std",
-  "pallet-jobs/std",
-  "pallet-jobs-rpc-runtime-api/std",
 
   # Tangle dependencies
   "tangle-primitives/std",
@@ -249,7 +242,7 @@ std = [
   "rpc-primitives-debug/std",
   "rpc-primitives-txpool/std",
 
-  # Moonbeam precompiles
+  # Tangle precompiles
   "pallet-evm-precompile-preimage/std",
   "pallet-evm-precompile-batch/std",
   "pallet-evm-precompile-call-permit/std",
