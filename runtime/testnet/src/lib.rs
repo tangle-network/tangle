@@ -1799,6 +1799,8 @@ impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
 			(Fungible(ref amount), AssetId(ref id)) => {
 				if id == &SygUSDLocation::get() {
 					Ok((SygUSDAssetId::get(), *amount))
+				} else if id == &PHALocation::get() {
+					Ok((PHAAssetId::get(), *amount))
 				} else {
 					Err(ExecutionError::AssetNotHandled)
 				}
@@ -1839,11 +1841,11 @@ impl sygma_percentage_feehandler::Config for Runtime {
 }
 
 parameter_types! {
-	// tTNT
+	// tTNT: native asset is always a reserved asset
 	pub NativeLocation: Location = Location::here();
 	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
 
-	// SygUSD
+	// SygUSD: a non-reserved asset
 	pub SygUSDLocation: Location = Location::new(
 		1,
 		[
@@ -1856,12 +1858,27 @@ parameter_types! {
 	pub SygUSDAssetId: AssetId = 2000;
 	// SygUSDResourceId is the resourceID that mapping with the foreign asset SygUSD
 	pub SygUSDResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001100");
+
+	// PHA: a reserved asset
+	pub PHALocation: Location = Location::new(
+		1,
+		[
+			Parachain(2004),
+			slice_to_generalkey(b"sygma"),
+			slice_to_generalkey(b"pha"),
+		],
+	);
+	// PHAAssetId is the substrate assetID of PHA
+	pub PHAAssetId: AssetId = 2001;
+	// PHAResourceId is the resourceID that mapping with the foreign asset PHA
+	pub PHAResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000");
 }
 
 fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
 	let mut account_map: BTreeMap<XcmAssetId, AccountId32> = BTreeMap::new();
 	account_map.insert(NativeLocation::get().into(), BridgeAccountNative::get());
 	account_map.insert(SygUSDLocation::get().into(), BridgeAccountOtherToken::get());
+	account_map.insert(PHALocation::get().into(), BridgeAccountOtherToken::get());
 	account_map
 }
 
@@ -1915,9 +1932,10 @@ parameter_types! {
 	pub ResourcePairs: Vec<(XcmAssetId, ResourceId)> = vec![
 		(NativeLocation::get().into(), NativeSygmaResourceId::get()),
 		(SygUSDLocation::get().into(), SygUSDResourceId::get()),
+		(PHALocation::get().into(), PHAResourceId::get()),
 	];
 
-	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8)];
+	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8), (PHALocation::get().into(), 12u8)];
 }
 
 pub struct ReserveChecker;
