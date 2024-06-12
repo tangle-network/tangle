@@ -91,21 +91,6 @@ fn max_nominator_count_works() {
 }
 
 #[test]
-fn is_validator_works() {
-	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
-		precompiles()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::is_restaker_with_role { validator: H160::from(TestAccount::Alex).into() },
-			)
-			.expect_cost(0)
-			.expect_no_logs()
-			.execute_returns(true);
-	});
-}
-
-#[test]
 fn eras_total_rewards_should_work() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		start_session(4);

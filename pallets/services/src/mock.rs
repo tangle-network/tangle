@@ -22,30 +22,24 @@ use frame_election_provider_support::{
 };
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU128, ConstU32, ConstU64, Contains, Everything},
+	traits::{ConstU128, ConstU32, ConstU64, Contains, Everything, OneSessionHandler},
 };
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
-use sp_core::{ecdsa, sr25519, H160, H256};
+use sp_core::{sr25519, H160, H256};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	app_crypto::ecdsa::Public,
-	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
-	AccountId32, BuildStorage, DispatchResult, Perbill, Percent,
+	testing::UintAuthorityId,
+	traits::{ConvertInto, IdentityLookup},
+	AccountId32, BuildStorage, Perbill,
 };
-use sp_staking::{
-	offence::{OffenceError, ReportOffence},
-	SessionIndex,
-};
+
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::{
-	jobs::{traits::JobsHandler, *},
-	roles::{traits::RolesHandler, ValidatorRewardDistribution},
-};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -94,28 +88,11 @@ impl pallet_balances::Config for Runtime {
 	type MaxFreezes = ();
 }
 
-type IdentificationTuple = (AccountId, AccountId);
-type Offence = pallet_roles::offences::ValidatorOffence<IdentificationTuple>;
-
 parameter_types! {
-	pub static Offences: Vec<(Vec<AccountId>, Offence)> = vec![];
 	pub ElectionBoundsOnChain: ElectionBounds = ElectionBoundsBuilder::default()
 		.voters_count(5_000.into()).targets_count(1_250.into()).build();
 	pub ElectionBoundsMultiPhase: ElectionBounds = ElectionBoundsBuilder::default()
 		.voters_count(10_000.into()).targets_count(1_500.into()).build();
-}
-
-/// A mock offence report handler.
-pub struct OffenceHandler;
-impl ReportOffence<AccountId, IdentificationTuple, Offence> for OffenceHandler {
-	fn report_offence(reporters: Vec<AccountId>, offence: Offence) -> Result<(), OffenceError> {
-		Offences::mutate(|l| l.push((reporters, offence)));
-		Ok(())
-	}
-
-	fn is_known_offence(_offenders: &[IdentificationTuple], _time_slot: &SessionIndex) -> bool {
-		false
-	}
 }
 
 impl pallet_session::historical::Config for Runtime {
@@ -153,8 +130,33 @@ impl Contains<RuntimeCall> for BaseFilter {
 
 sp_runtime::impl_opaque_keys! {
 	pub struct MockSessionKeys {
-		pub role: pallet_roles::Pallet<Runtime>,
+		pub other: MockSessionHandler,
 	}
+}
+
+pub struct MockSessionHandler;
+impl OneSessionHandler<AccountId> for MockSessionHandler {
+	type Key = UintAuthorityId;
+
+	fn on_genesis_session<'a, I: 'a>(_: I)
+	where
+		I: Iterator<Item = (&'a AccountId, Self::Key)>,
+		AccountId: 'a,
+	{
+	}
+
+	fn on_new_session<'a, I: 'a>(_: bool, _: I, _: I)
+	where
+		I: Iterator<Item = (&'a AccountId, Self::Key)>,
+		AccountId: 'a,
+	{
+	}
+
+	fn on_disabled(_validator_index: u32) {}
+}
+
+impl sp_runtime::BoundToRuntimeAppPublic for MockSessionHandler {
+	type Public = UintAuthorityId;
 }
 
 pub struct MockSessionManager;
@@ -171,23 +173,6 @@ impl pallet_session::SessionManager<AccountId> for MockSessionManager {
 	}
 }
 
-// LEGACY: This is a legacy implementation of the RolesHandler trait.
-pub struct MockedJobsHandler;
-
-impl JobsHandler<AccountId> for MockedJobsHandler {
-	fn get_active_jobs(validator: AccountId) -> Vec<(tangle_primitives::roles::RoleType, JobId)> {
-		todo!()
-	}
-
-	fn exit_from_known_set(
-		validator: AccountId,
-		role_type: tangle_primitives::roles::RoleType,
-		job_id: JobId,
-	) -> DispatchResult {
-		todo!()
-	}
-}
-
 parameter_types! {
 	pub const Period: u64 = 1;
 	pub const Offset: u64 = 0;
@@ -198,7 +183,7 @@ impl pallet_session::Config for Runtime {
 	type Keys = MockSessionKeys;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-	type SessionHandler = <MockSessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+	type SessionHandler = (MockSessionHandler,);
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
@@ -234,7 +219,6 @@ impl pallet_staking::Config for Runtime {
 	type SessionInterface = ();
 	type EraPayout = ();
 	type NextNewSession = Session;
-	type RolesHandler = Roles;
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
 	type OffendingValidatorsThreshold = ();
@@ -247,31 +231,6 @@ impl pallet_staking::Config for Runtime {
 	type EventListeners = ();
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub MaxRestake : Percent = Percent::from_percent(50);
-	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
-	#[derive(Clone, Debug, Eq, PartialEq, TypeInfo)]
-	pub const MaxActiveJobsPerValidator: u32 = 10;
-}
-
-impl pallet_roles::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type JobsHandler = MockedJobsHandler;
-	type MaxRolesPerAccount = ConstU32<2>;
-	type RoleKeyId = RoleKeyId;
-	type ValidatorRewardDistribution = Reward;
-	type ValidatorSet = Historical;
-	type ReportOffences = OffenceHandler;
-	type MaxKeyLen = ConstU32<33>;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type MaxValidators = ConstU32<100>;
-	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
-	type MaxRestake = MaxRestake;
-	type RestakerEraPayout = ();
-	type MaxRolesPerValidator = ConstU32<15>;
 	type WeightInfo = ();
 }
 
@@ -410,7 +369,6 @@ construct_runtime!(
 		Balances: pallet_balances,
 		Services: pallet_services,
 		EVM: pallet_evm,
-		Roles: pallet_roles,
 		Ethereum: pallet_ethereum,
 		Session: pallet_session,
 		Staking: pallet_staking,
@@ -455,15 +413,6 @@ pub fn new_test_ext_raw_authorities(
 	// We use default for brevity, but you can configure as desired if needed.
 	let balances: Vec<_> = authorities.iter().map(|(i, _)| (i.clone(), 20_000_u128)).collect();
 	pallet_balances::GenesisConfig::<Runtime> { balances }
-		.assimilate_storage(&mut t)
-		.unwrap();
-
-	let session_keys: Vec<_> = authorities
-		.iter()
-		.map(|(id, role_id)| (id.clone(), id.clone(), MockSessionKeys { role: role_id.clone() }))
-		.collect();
-
-	pallet_session::GenesisConfig::<Runtime> { keys: session_keys }
 		.assimilate_storage(&mut t)
 		.unwrap();
 

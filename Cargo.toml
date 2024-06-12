@@ -22,12 +22,10 @@ members = [
  "runtime/testnet",
  "runtime/mainnet",
  "pallets/*",
- "pallets/jobs/rpc",
- "pallets/jobs/rpc/runtime-api",
  "pallets/services/rpc",
  "pallets/services/rpc/runtime-api",
- "pallets/dkg/frost",
- "pallets/dkg/frost/frost-*",
+ "frost",
+ "frost/frost-*",
  "precompiles/utils",
  "precompiles/utils/macro",
  "precompiles/utils/tests-external",
@@ -36,7 +34,6 @@ members = [
  "precompiles/call-permit",
  "precompiles/proxy",
  "precompiles/preimage",
- "precompiles/jobs",
  "precompiles/services",
  "precompiles/balances-erc20",
  "precompiles/assets-erc20",
@@ -46,7 +43,6 @@ members = [
  "precompiles/verify-schnorr-signatures",
  "precompiles/verify-bls381-signature",
  "tangle-subxt",
- "examples/*",
  "evm-tracer",
  # "relayer-gadget",
  # "relayer-gadget/cli",
@@ -122,30 +118,24 @@ ethabi = { version = "15.0.0", default-features = false }
 
 # Tangle Dependencies
 pallet-airdrop-claims = { path = "pallets/claims", default-features = false }
-pallet-jobs = { path = "pallets/jobs", default-features = false }
 pallet-services = { path = "pallets/services", default-features = false }
-pallet-roles = { path = "pallets/roles", default-features = false }
-pallet-dkg = { path = "pallets/dkg", default-features = false }
-pallet-zksaas = { path = "pallets/zksaas", default-features = false }
-pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-features = false }
-pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
 pallet-services-rpc-runtime-api = { path = "pallets/services/rpc/runtime-api", default-features = false }
 pallet-services-rpc = { path = "pallets/services/rpc" }
 pallet-multi-asset-delegation = { path = "pallets/multi-asset-delegation", default-features = false }
 
-k256 = { version = "0.13.0", default-features = false }
+
 p256 = { version = "0.13.0", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
 starknet-crypto = { version = "0.6.1", default-features = false, features = ["signature-display", "alloc"] }
-frost-core = { path = "pallets/dkg/frost", default-features = false }
-frost-ed25519 = { path = "pallets/dkg/frost/frost-ed25519", default-features = false }
-frost-ed448 = { path = "pallets/dkg/frost/frost-ed448", default-features = false }
-frost-ristretto255 = { path = "pallets/dkg/frost/frost-ristretto255", default-features = false }
-frost-secp256k1 = { path = "pallets/dkg/frost/frost-secp256k1", default-features = false }
-frost-p256 = { path = "pallets/dkg/frost/frost-p256", default-features = false }
-frost-p384 = { path = "pallets/dkg/frost/frost-p384", default-features = false }
-frost-redjubjub = { path = "pallets/dkg/frost/frost-redjubjub", default-features = false }
-frost-taproot = { path = "pallets/dkg/frost/frost-taproot", default-features = false }
+frost-core = { path = "frost", default-features = false }
+frost-ed25519 = { path = "frost/frost-ed25519", default-features = false }
+frost-ed448 = { path = "frost/frost-ed448", default-features = false }
+frost-ristretto255 = { path = "frost/frost-ristretto255", default-features = false }
+frost-secp256k1 = { path = "frost/frost-secp256k1", default-features = false }
+frost-p256 = { path = "frost/frost-p256", default-features = false }
+frost-p384 = { path = "frost/frost-p384", default-features = false }
+frost-redjubjub = { path = "frost/frost-redjubjub", default-features = false }
+frost-taproot = { path = "frost/frost-taproot", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
@@ -318,14 +308,13 @@ pallet-evm-precompile-proxy = { path = "precompiles/proxy", default-features = f
 pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-features = false }
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
-pallet-evm-precompile-jobs = { path = "precompiles/jobs", default-features = false }
 pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
 pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { path = "precompiles/verify-ecdsa-secp256k1-signature", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { path = "precompiles/verify-ecdsa-secp256r1-signature", default-features = false }
 pallet-evm-precompile-verify-ecdsa-stark-signature = { path = "precompiles/verify-ecdsa-stark-signature", default-features = false }
-pallet-evm-precompile-verify-schnorr-signatures  = { path = "precompiles/verify-schnorr-signatures", default-features = false }
-pallet-evm-precompile-verify-bls381-signature  = { path = "precompiles/verify-bls381-signature", default-features = false }
+pallet-evm-precompile-verify-schnorr-signatures = { path = "precompiles/verify-schnorr-signatures", default-features = false }
+pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls381-signature", default-features = false }
 
 # EVM & Ethereum
 # (wasm)
@@ -343,11 +332,10 @@ sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", 
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
 
 # Tangle dependencies
-tangle-primitives = { path = "primitives", default-features = false }
-tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
-pallet-staking = { path = "pallets/staking", default-features = false }
-pallet-staking-reward-curve = { path = "pallets/staking/reward-curve", default-features = false }
 
+
+tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
+pallet-staking-reward-curve = { path = "pallets/staking/reward-curve", default-features = false }
 webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false, branch = "salman/polkadot-v1.7.0" }
 
 

@@ -87,10 +87,6 @@ import {
   TanglePrimitivesRolesRoleType,
   TanglePrimitivesJobsPhaseResult,
   TanglePrimitivesJobsJobInfo,
-  PalletMultiAssetDelegationOperatorOperatorSnapshot,
-  PalletMultiAssetDelegationDelegatorDelegatorMetadata,
-  PalletMultiAssetDelegationOperatorOperatorMetadata,
-  PalletMultiAssetDelegationRewardsRewardConfig,
   PalletMultisigMultisig,
   PalletNominationPoolsBondedPoolInner,
   PalletNominationPoolsClaimPermission,
@@ -159,12 +155,12 @@ declare module "@polkadot/api-base/types/storage" {
       account: AugmentedQuery<
         ApiType,
         (
-          arg1: u128 | AnyNumber | Uint8Array,
+          arg1: u32 | AnyNumber | Uint8Array,
           arg2: AccountId32 | string | Uint8Array
         ) => Observable<Option<PalletAssetsAssetAccount>>,
-        [u128, AccountId32]
+        [u32, AccountId32]
       > &
-        QueryableStorageEntry<ApiType, [u128, AccountId32]>;
+        QueryableStorageEntry<ApiType, [u32, AccountId32]>;
       /**
        * Approved balance transfers. First balance is the amount approved for transfer. Second
        * is the amount of `T::Currency` reserved for storing this.
@@ -173,35 +169,35 @@ declare module "@polkadot/api-base/types/storage" {
       approvals: AugmentedQuery<
         ApiType,
         (
-          arg1: u128 | AnyNumber | Uint8Array,
+          arg1: u32 | AnyNumber | Uint8Array,
           arg2: AccountId32 | string | Uint8Array,
           arg3: AccountId32 | string | Uint8Array
         ) => Observable<Option<PalletAssetsApproval>>,
-        [u128, AccountId32, AccountId32]
+        [u32, AccountId32, AccountId32]
       > &
-        QueryableStorageEntry<ApiType, [u128, AccountId32, AccountId32]>;
+        QueryableStorageEntry<ApiType, [u32, AccountId32, AccountId32]>;
       /**
        * Details of an asset.
        **/
       asset: AugmentedQuery<
         ApiType,
         (
-          arg: u128 | AnyNumber | Uint8Array
+          arg: u32 | AnyNumber | Uint8Array
         ) => Observable<Option<PalletAssetsAssetDetails>>,
-        [u128]
+        [u32]
       > &
-        QueryableStorageEntry<ApiType, [u128]>;
+        QueryableStorageEntry<ApiType, [u32]>;
       /**
        * Metadata of an asset.
        **/
       metadata: AugmentedQuery<
         ApiType,
         (
-          arg: u128 | AnyNumber | Uint8Array
+          arg: u32 | AnyNumber | Uint8Array
         ) => Observable<PalletAssetsAssetMetadata>,
-        [u128]
+        [u32]
       > &
-        QueryableStorageEntry<ApiType, [u128]>;
+        QueryableStorageEntry<ApiType, [u32]>;
       /**
        * Generic query
        **/
@@ -2743,6 +2739,179 @@ declare module "@polkadot/api-base/types/storage" {
        **/
       key: AugmentedQuery<ApiType, () => Observable<Option<AccountId32>>, []> &
         QueryableStorageEntry<ApiType, []>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    sygmaAccessSegregator: {
+      /**
+       * Mapping signature of extrinsic to account has access
+       * (pallet_index, extrinsic_name) => account
+       **/
+      extrinsicAccess: AugmentedQuery<
+        ApiType,
+        (
+          arg:
+            | ITuple<[u8, Bytes]>
+            | [u8 | AnyNumber | Uint8Array, Bytes | string | Uint8Array]
+        ) => Observable<Option<AccountId32>>,
+        [ITuple<[u8, Bytes]>]
+      > &
+        QueryableStorageEntry<ApiType, [ITuple<[u8, Bytes]>]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    sygmaBasicFeeHandler: {
+      /**
+       * Mapping fungible asset id to corresponding fee amount
+       **/
+      assetFees: AugmentedQuery<
+        ApiType,
+        (
+          arg:
+            | ITuple<[u8, StagingXcmV4AssetAssetId]>
+            | [
+                u8 | AnyNumber | Uint8Array,
+                (
+                  | StagingXcmV4AssetAssetId
+                  | { parents?: any; interior?: any }
+                  | string
+                  | Uint8Array
+                ),
+              ]
+        ) => Observable<Option<u128>>,
+        [ITuple<[u8, StagingXcmV4AssetAssetId]>]
+      > &
+        QueryableStorageEntry<
+          ApiType,
+          [ITuple<[u8, StagingXcmV4AssetAssetId]>]
+        >;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    sygmaBridge: {
+      /**
+       * Deposit counter of dest domain
+       **/
+      depositCounts: AugmentedQuery<
+        ApiType,
+        (arg: u8 | AnyNumber | Uint8Array) => Observable<u64>,
+        [u8]
+      > &
+        QueryableStorageEntry<ApiType, [u8]>;
+      /**
+       * Mark the pairs for supported dest domainID with its corresponding chainID
+       * The chainID is not directly used in pallet, this map is designed more about rechecking the
+       * domainID
+       **/
+      destChainIds: AugmentedQuery<
+        ApiType,
+        (arg: u8 | AnyNumber | Uint8Array) => Observable<Option<U256>>,
+        [u8]
+      > &
+        QueryableStorageEntry<ApiType, [u8]>;
+      /**
+       * Mark supported dest domainID
+       **/
+      destDomainIds: AugmentedQuery<
+        ApiType,
+        (arg: u8 | AnyNumber | Uint8Array) => Observable<bool>,
+        [u8]
+      > &
+        QueryableStorageEntry<ApiType, [u8]>;
+      /**
+       * Bridge Pause indicator
+       * Bridge is unpaused initially, until pause
+       * After mpc address setup, bridge should be paused until ready to unpause
+       **/
+      isPaused: AugmentedQuery<
+        ApiType,
+        (arg: u8 | AnyNumber | Uint8Array) => Observable<bool>,
+        [u8]
+      > &
+        QueryableStorageEntry<ApiType, [u8]>;
+      /**
+       * Pre-set MPC address
+       **/
+      mpcAddr: AugmentedQuery<ApiType, () => Observable<U8aFixed>, []> &
+        QueryableStorageEntry<ApiType, []>;
+      /**
+       * Mark whether a deposit nonce was used. Used to mark execution status of a proposal.
+       **/
+      usedNonces: AugmentedQuery<
+        ApiType,
+        (
+          arg1: u8 | AnyNumber | Uint8Array,
+          arg2: u64 | AnyNumber | Uint8Array
+        ) => Observable<u64>,
+        [u8, u64]
+      > &
+        QueryableStorageEntry<ApiType, [u8, u64]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    sygmaFeeHandlerRouter: {
+      /**
+       * Return the Fee handler type based on domainID and assetID
+       **/
+      handlerType: AugmentedQuery<
+        ApiType,
+        (
+          arg:
+            | ITuple<[u8, StagingXcmV4AssetAssetId]>
+            | [
+                u8 | AnyNumber | Uint8Array,
+                (
+                  | StagingXcmV4AssetAssetId
+                  | { parents?: any; interior?: any }
+                  | string
+                  | Uint8Array
+                ),
+              ]
+        ) => Observable<Option<SygmaFeeHandlerRouterFeeHandlerType>>,
+        [ITuple<[u8, StagingXcmV4AssetAssetId]>]
+      > &
+        QueryableStorageEntry<
+          ApiType,
+          [ITuple<[u8, StagingXcmV4AssetAssetId]>]
+        >;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    sygmaPercentageFeeHandler: {
+      /**
+       * Mapping fungible asset id with domain id to fee rate and its lower bound, upperbound
+       **/
+      assetFeeRate: AugmentedQuery<
+        ApiType,
+        (
+          arg:
+            | ITuple<[u8, StagingXcmV4AssetAssetId]>
+            | [
+                u8 | AnyNumber | Uint8Array,
+                (
+                  | StagingXcmV4AssetAssetId
+                  | { parents?: any; interior?: any }
+                  | string
+                  | Uint8Array
+                ),
+              ]
+        ) => Observable<Option<ITuple<[u32, u128, u128]>>>,
+        [ITuple<[u8, StagingXcmV4AssetAssetId]>]
+      > &
+        QueryableStorageEntry<
+          ApiType,
+          [ITuple<[u8, StagingXcmV4AssetAssetId]>]
+        >;
       /**
        * Generic query
        **/

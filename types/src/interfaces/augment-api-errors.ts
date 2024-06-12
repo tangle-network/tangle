@@ -3,13 +3,14 @@
 
 // import type lookup before we augment - in some environments
 // this is required to allow for ambient/previous definitions
-import '@polkadot/api-base/types/errors';
+import "@polkadot/api-base/types/errors";
 
-import type { ApiTypes, AugmentedError } from '@polkadot/api-base/types';
+import type { ApiTypes, AugmentedError } from "@polkadot/api-base/types";
 
-export type __AugmentedError<ApiType extends ApiTypes> = AugmentedError<ApiType>;
+export type __AugmentedError<ApiType extends ApiTypes> =
+  AugmentedError<ApiType>;
 
-declare module '@polkadot/api-base/types/errors' {
+declare module "@polkadot/api-base/types/errors" {
   interface AugmentedErrors<ApiType extends ApiTypes> {
     assets: {
       /**
@@ -610,21 +611,21 @@ declare module '@polkadot/api-base/types/errors' {
       UnknownIdentifier: AugmentedError<ApiType>;
       /**
        * The submitted decommitment data size is valid.
-       * 
+       *
        * This error is returned when the decommitment data size is valid
        * but the caller claims it is invalid!
        **/
       ValidDataSize: AugmentedError<ApiType>;
       /**
        * The submitted decommitment is valid.
-       * 
+       *
        * This error is returned when the decommitment is valid
        * but the caller claims it is invalid!
        **/
       ValidDecommitment: AugmentedError<ApiType>;
       /**
        * The submitted messages passed Feldman verification.
-       * 
+       *
        * This error is returned when the messages passed Feldman verification
        * but the caller claims it is invalid!
        **/
@@ -642,21 +643,21 @@ declare module '@polkadot/api-base/types/errors' {
       ValidFrostSignatureShare: AugmentedError<ApiType>;
       /**
        * The submitted Mod Proof is valid.
-       * 
+       *
        * This error is returned when the Mod Proof is valid
        * but the caller claims it is invalid.
        **/
       ValidModProof: AugmentedError<ApiType>;
       /**
        * The submitted ring pedersen parameters are valid.
-       * 
+       *
        * This error is returned when the ring pedersen parameters are valid
        * but the caller claims it is invalid.
        **/
       ValidRingPedersenParameters: AugmentedError<ApiType>;
       /**
        * The submitted Schnorr Proof is valid.
-       * 
+       *
        * This error is returned when the decommitment and its
        * Schnorr are valid. but the caller
        * claims it is invalid.
@@ -1399,7 +1400,7 @@ declare module '@polkadot/api-base/types/errors' {
       MetadataExceedsMaxLen: AugmentedError<ApiType>;
       /**
        * The amount does not meet the minimum bond to either join or create a pool.
-       * 
+       *
        * The depositor can never unbond to a value less than `Pallet::depositor_min_bond`. The
        * caller does not have nominating permissions for the pool. Members can never unbond to a
        * value below `MinJoinBond`.
@@ -1982,14 +1983,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Insufficient balance on sender account
        **/
       InsufficientBalance: AugmentedError<ApiType>;
-      InvalidDepositDataInvalidAmount: AugmentedError<ApiType>;
       /**
        * Deposit data not correct
        **/
-      InvalidDepositDataInvalidLength: AugmentedError<ApiType>;
-      InvalidDepositDataInvalidRecipient: AugmentedError<ApiType>;
-      InvalidDepositDataInvalidRecipientLength: AugmentedError<ApiType>;
-      InvalidDepositDataRecipientLengthNotMatch: AugmentedError<ApiType>;
+      InvalidDepositData: AugmentedError<ApiType>;
       /**
        * Fee config option missing
        **/
@@ -2013,11 +2010,7 @@ declare module '@polkadot/api-base/types/errors' {
       /**
        * Asset transactor execution failed
        **/
-      TransactFailedDeposit: AugmentedError<ApiType>;
-      TransactFailedFeeDeposit: AugmentedError<ApiType>;
-      TransactFailedHoldInReserved: AugmentedError<ApiType>;
-      TransactFailedReleaseFromReserved: AugmentedError<ApiType>;
-      TransactFailedWithdraw: AugmentedError<ApiType>;
+      TransactFailed: AugmentedError<ApiType>;
       /**
        * Transactor operation failed
        **/
@@ -2074,7 +2067,7 @@ declare module '@polkadot/api-base/types/errors' {
       CallFiltered: AugmentedError<ApiType>;
       /**
        * Failed to extract the runtime version from the new runtime.
-       * 
+       *
        * Either calling `Core_version` or decoding `RuntimeVersion` failed.
        **/
       FailedToExtractRuntimeVersion: AugmentedError<ApiType>;

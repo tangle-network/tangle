@@ -77,24 +77,24 @@ declare module "@polkadot/api-base/types/events" {
        **/
       AccountsDestroyed: AugmentedEvent<
         ApiType,
-        [assetId: u128, accountsDestroyed: u32, accountsRemaining: u32],
-        { assetId: u128; accountsDestroyed: u32; accountsRemaining: u32 }
+        [assetId: u32, accountsDestroyed: u32, accountsRemaining: u32],
+        { assetId: u32; accountsDestroyed: u32; accountsRemaining: u32 }
       >;
       /**
        * An approval for account `delegate` was cancelled by `owner`.
        **/
       ApprovalCancelled: AugmentedEvent<
         ApiType,
-        [assetId: u128, owner: AccountId32, delegate: AccountId32],
-        { assetId: u128; owner: AccountId32; delegate: AccountId32 }
+        [assetId: u32, owner: AccountId32, delegate: AccountId32],
+        { assetId: u32; owner: AccountId32; delegate: AccountId32 }
       >;
       /**
        * Approvals were destroyed for given asset.
        **/
       ApprovalsDestroyed: AugmentedEvent<
         ApiType,
-        [assetId: u128, approvalsDestroyed: u32, approvalsRemaining: u32],
-        { assetId: u128; approvalsDestroyed: u32; approvalsRemaining: u32 }
+        [assetId: u32, approvalsDestroyed: u32, approvalsRemaining: u32],
+        { assetId: u32; approvalsDestroyed: u32; approvalsRemaining: u32 }
       >;
       /**
        * (Additional) funds have been approved for transfer to a destination account.
@@ -102,13 +102,13 @@ declare module "@polkadot/api-base/types/events" {
       ApprovedTransfer: AugmentedEvent<
         ApiType,
         [
-          assetId: u128,
+          assetId: u32,
           source: AccountId32,
           delegate: AccountId32,
           amount: u128,
         ],
         {
-          assetId: u128;
+          assetId: u32;
           source: AccountId32;
           delegate: AccountId32;
           amount: u128;
@@ -117,94 +117,94 @@ declare module "@polkadot/api-base/types/events" {
       /**
        * Some asset `asset_id` was frozen.
        **/
-      AssetFrozen: AugmentedEvent<ApiType, [assetId: u128], { assetId: u128 }>;
+      AssetFrozen: AugmentedEvent<ApiType, [assetId: u32], { assetId: u32 }>;
       /**
        * The min_balance of an asset has been updated by the asset owner.
        **/
       AssetMinBalanceChanged: AugmentedEvent<
         ApiType,
-        [assetId: u128, newMinBalance: u128],
-        { assetId: u128; newMinBalance: u128 }
+        [assetId: u32, newMinBalance: u128],
+        { assetId: u32; newMinBalance: u128 }
       >;
       /**
        * An asset has had its attributes changed by the `Force` origin.
        **/
       AssetStatusChanged: AugmentedEvent<
         ApiType,
-        [assetId: u128],
-        { assetId: u128 }
+        [assetId: u32],
+        { assetId: u32 }
       >;
       /**
        * Some asset `asset_id` was thawed.
        **/
-      AssetThawed: AugmentedEvent<ApiType, [assetId: u128], { assetId: u128 }>;
+      AssetThawed: AugmentedEvent<ApiType, [assetId: u32], { assetId: u32 }>;
       /**
        * Some account `who` was blocked.
        **/
       Blocked: AugmentedEvent<
         ApiType,
-        [assetId: u128, who: AccountId32],
-        { assetId: u128; who: AccountId32 }
+        [assetId: u32, who: AccountId32],
+        { assetId: u32; who: AccountId32 }
       >;
       /**
        * Some assets were destroyed.
        **/
       Burned: AugmentedEvent<
         ApiType,
-        [assetId: u128, owner: AccountId32, balance: u128],
-        { assetId: u128; owner: AccountId32; balance: u128 }
+        [assetId: u32, owner: AccountId32, balance: u128],
+        { assetId: u32; owner: AccountId32; balance: u128 }
       >;
       /**
        * Some asset class was created.
        **/
       Created: AugmentedEvent<
         ApiType,
-        [assetId: u128, creator: AccountId32, owner: AccountId32],
-        { assetId: u128; creator: AccountId32; owner: AccountId32 }
+        [assetId: u32, creator: AccountId32, owner: AccountId32],
+        { assetId: u32; creator: AccountId32; owner: AccountId32 }
       >;
       /**
        * An asset class was destroyed.
        **/
-      Destroyed: AugmentedEvent<ApiType, [assetId: u128], { assetId: u128 }>;
+      Destroyed: AugmentedEvent<ApiType, [assetId: u32], { assetId: u32 }>;
       /**
        * An asset class is in the process of being destroyed.
        **/
       DestructionStarted: AugmentedEvent<
         ApiType,
-        [assetId: u128],
-        { assetId: u128 }
+        [assetId: u32],
+        { assetId: u32 }
       >;
       /**
        * Some asset class was force-created.
        **/
       ForceCreated: AugmentedEvent<
         ApiType,
-        [assetId: u128, owner: AccountId32],
-        { assetId: u128; owner: AccountId32 }
+        [assetId: u32, owner: AccountId32],
+        { assetId: u32; owner: AccountId32 }
       >;
       /**
        * Some account `who` was frozen.
        **/
       Frozen: AugmentedEvent<
         ApiType,
-        [assetId: u128, who: AccountId32],
-        { assetId: u128; who: AccountId32 }
+        [assetId: u32, who: AccountId32],
+        { assetId: u32; who: AccountId32 }
       >;
       /**
        * Some assets were issued.
        **/
       Issued: AugmentedEvent<
         ApiType,
-        [assetId: u128, owner: AccountId32, amount: u128],
-        { assetId: u128; owner: AccountId32; amount: u128 }
+        [assetId: u32, owner: AccountId32, amount: u128],
+        { assetId: u32; owner: AccountId32; amount: u128 }
       >;
       /**
        * Metadata has been cleared for an asset.
        **/
       MetadataCleared: AugmentedEvent<
         ApiType,
-        [assetId: u128],
-        { assetId: u128 }
+        [assetId: u32],
+        { assetId: u32 }
       >;
       /**
        * New metadata has been set for an asset.
@@ -212,14 +212,14 @@ declare module "@polkadot/api-base/types/events" {
       MetadataSet: AugmentedEvent<
         ApiType,
         [
-          assetId: u128,
+          assetId: u32,
           name: Bytes,
           symbol_: Bytes,
           decimals: u8,
           isFrozen: bool,
         ],
         {
-          assetId: u128;
+          assetId: u32;
           name: Bytes;
           symbol: Bytes;
           decimals: u8;
@@ -231,8 +231,8 @@ declare module "@polkadot/api-base/types/events" {
        **/
       OwnerChanged: AugmentedEvent<
         ApiType,
-        [assetId: u128, owner: AccountId32],
-        { assetId: u128; owner: AccountId32 }
+        [assetId: u32, owner: AccountId32],
+        { assetId: u32; owner: AccountId32 }
       >;
       /**
        * The management team changed.
@@ -240,13 +240,13 @@ declare module "@polkadot/api-base/types/events" {
       TeamChanged: AugmentedEvent<
         ApiType,
         [
-          assetId: u128,
+          assetId: u32,
           issuer: AccountId32,
           admin: AccountId32,
           freezer: AccountId32,
         ],
         {
-          assetId: u128;
+          assetId: u32;
           issuer: AccountId32;
           admin: AccountId32;
           freezer: AccountId32;
@@ -257,24 +257,24 @@ declare module "@polkadot/api-base/types/events" {
        **/
       Thawed: AugmentedEvent<
         ApiType,
-        [assetId: u128, who: AccountId32],
-        { assetId: u128; who: AccountId32 }
+        [assetId: u32, who: AccountId32],
+        { assetId: u32; who: AccountId32 }
       >;
       /**
        * Some account `who` was created with a deposit from `depositor`.
        **/
       Touched: AugmentedEvent<
         ApiType,
-        [assetId: u128, who: AccountId32, depositor: AccountId32],
-        { assetId: u128; who: AccountId32; depositor: AccountId32 }
+        [assetId: u32, who: AccountId32, depositor: AccountId32],
+        { assetId: u32; who: AccountId32; depositor: AccountId32 }
       >;
       /**
        * Some assets were transferred.
        **/
       Transferred: AugmentedEvent<
         ApiType,
-        [assetId: u128, from: AccountId32, to: AccountId32, amount: u128],
-        { assetId: u128; from: AccountId32; to: AccountId32; amount: u128 }
+        [assetId: u32, from: AccountId32, to: AccountId32, amount: u128],
+        { assetId: u32; from: AccountId32; to: AccountId32; amount: u128 }
       >;
       /**
        * An `amount` was transferred in its entirety from `owner` to `destination` by
@@ -283,14 +283,14 @@ declare module "@polkadot/api-base/types/events" {
       TransferredApproved: AugmentedEvent<
         ApiType,
         [
-          assetId: u128,
+          assetId: u32,
           owner: AccountId32,
           delegate: AccountId32,
           destination: AccountId32,
           amount: u128,
         ],
         {
-          assetId: u128;
+          assetId: u32;
           owner: AccountId32;
           delegate: AccountId32;
           destination: AccountId32;
@@ -2510,6 +2510,213 @@ declare module "@polkadot/api-base/types/events" {
         ApiType,
         [sudoResult: Result<Null, SpRuntimeDispatchError>],
         { sudoResult: Result<Null, SpRuntimeDispatchError> }
+      >;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    sygmaAccessSegregator: {
+      /**
+       * Extrinsic access grant to someone
+       * args: [pallet_index, extrinsic_name, who]
+       **/
+      AccessGranted: AugmentedEvent<
+        ApiType,
+        [palletIndex: u8, extrinsicName: Bytes, who: AccountId32],
+        { palletIndex: u8; extrinsicName: Bytes; who: AccountId32 }
+      >;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    sygmaBasicFeeHandler: {
+      /**
+       * Fee set for a specific asset
+       * args: [domain, asset, amount]
+       **/
+      FeeSet: AugmentedEvent<
+        ApiType,
+        [domain: u8, asset: StagingXcmV4AssetAssetId, amount: u128],
+        { domain: u8; asset: StagingXcmV4AssetAssetId; amount: u128 }
+      >;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    sygmaBridge: {
+      /**
+       * When all bridges are paused
+       **/
+      AllBridgePaused: AugmentedEvent<
+        ApiType,
+        [sender: AccountId32],
+        { sender: AccountId32 }
+      >;
+      /**
+       * When all bridges are unpaused
+       **/
+      AllBridgeUnpaused: AugmentedEvent<
+        ApiType,
+        [sender: AccountId32],
+        { sender: AccountId32 }
+      >;
+      /**
+       * When bridge is paused
+       * args: [dest_domain_id]
+       **/
+      BridgePaused: AugmentedEvent<
+        ApiType,
+        [destDomainId: u8],
+        { destDomainId: u8 }
+      >;
+      /**
+       * When bridge is unpaused
+       * args: [dest_domain_id]
+       **/
+      BridgeUnpaused: AugmentedEvent<
+        ApiType,
+        [destDomainId: u8],
+        { destDomainId: u8 }
+      >;
+      /**
+       * When initial bridge transfer send to dest domain
+       * args: [dest_domain_id, resource_id, deposit_nonce, sender, transfer_type,
+       * deposit_data, handler_response, ]
+       **/
+      Deposit: AugmentedEvent<
+        ApiType,
+        [
+          destDomainId: u8,
+          resourceId: U8aFixed,
+          depositNonce: u64,
+          sender: AccountId32,
+          transferType: SygmaTraitsTransferType,
+          depositData: Bytes,
+          handlerResponse: Bytes,
+        ],
+        {
+          destDomainId: u8;
+          resourceId: U8aFixed;
+          depositNonce: u64;
+          sender: AccountId32;
+          transferType: SygmaTraitsTransferType;
+          depositData: Bytes;
+          handlerResponse: Bytes;
+        }
+      >;
+      /**
+       * When proposal was faild to execute
+       **/
+      FailedHandlerExecution: AugmentedEvent<
+        ApiType,
+        [error: Bytes, originDomainId: u8, depositNonce: u64],
+        { error: Bytes; originDomainId: u8; depositNonce: u64 }
+      >;
+      /**
+       * When bridge fee is collected
+       **/
+      FeeCollected: AugmentedEvent<
+        ApiType,
+        [
+          feePayer: AccountId32,
+          destDomainId: u8,
+          resourceId: U8aFixed,
+          feeAmount: u128,
+          feeAssetId: StagingXcmV4AssetAssetId,
+        ],
+        {
+          feePayer: AccountId32;
+          destDomainId: u8;
+          resourceId: U8aFixed;
+          feeAmount: u128;
+          feeAssetId: StagingXcmV4AssetAssetId;
+        }
+      >;
+      /**
+       * When proposal was executed successfully
+       **/
+      ProposalExecution: AugmentedEvent<
+        ApiType,
+        [originDomainId: u8, depositNonce: u64, dataHash: U8aFixed],
+        { originDomainId: u8; depositNonce: u64; dataHash: U8aFixed }
+      >;
+      /**
+       * When registering a new dest domainID with its corresponding chainID
+       **/
+      RegisterDestDomain: AugmentedEvent<
+        ApiType,
+        [sender: AccountId32, domainId: u8, chainId: U256],
+        { sender: AccountId32; domainId: u8; chainId: U256 }
+      >;
+      /**
+       * When user is going to retry a bridge transfer
+       * args: [deposit_on_block_height, dest_domain_id, sender]
+       **/
+      Retry: AugmentedEvent<
+        ApiType,
+        [depositOnBlockHeight: u128, destDomainId: u8, sender: AccountId32],
+        { depositOnBlockHeight: u128; destDomainId: u8; sender: AccountId32 }
+      >;
+      /**
+       * When unregistering a dest domainID with its corresponding chainID
+       **/
+      UnregisterDestDomain: AugmentedEvent<
+        ApiType,
+        [sender: AccountId32, domainId: u8, chainId: U256],
+        { sender: AccountId32; domainId: u8; chainId: U256 }
+      >;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    sygmaFeeHandlerRouter: {
+      /**
+       * When fee handler was set for a specific (domain, asset) pair
+       * args: [dest_domain_id, asset_id, handler_type]
+       **/
+      FeeHandlerSet: AugmentedEvent<
+        ApiType,
+        [
+          domain: u8,
+          asset: StagingXcmV4AssetAssetId,
+          handlerType: SygmaFeeHandlerRouterFeeHandlerType,
+        ],
+        {
+          domain: u8;
+          asset: StagingXcmV4AssetAssetId;
+          handlerType: SygmaFeeHandlerRouterFeeHandlerType;
+        }
+      >;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    sygmaPercentageFeeHandler: {
+      /**
+       * Fee set rate for a specific asset and domain
+       * args: [domain, asset, rate_basis_point, fee_lower_bound, fee_upper_bound]
+       **/
+      FeeRateSet: AugmentedEvent<
+        ApiType,
+        [
+          domain: u8,
+          asset: StagingXcmV4AssetAssetId,
+          rateBasisPoint: u32,
+          feeLowerBound: u128,
+          feeUpperBound: u128,
+        ],
+        {
+          domain: u8;
+          asset: StagingXcmV4AssetAssetId;
+          rateBasisPoint: u32;
+          feeLowerBound: u128;
+          feeUpperBound: u128;
+        }
       >;
       /**
        * Generic event

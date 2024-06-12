@@ -28,13 +28,13 @@ import type {
   Permill,
 } from "@polkadot/types/interfaces/runtime";
 import {
-  SpWeightsWeightV2Weight,
   FrameSupportPalletId,
-  StagingXcmV4AssetAssetId,
   FrameSystemLimitsBlockLength,
   FrameSystemLimitsBlockWeights,
-  SpWeightsRuntimeDbWeight,
   SpVersionRuntimeVersion,
+  SpWeightsRuntimeDbWeight,
+  SpWeightsWeightV2Weight,
+  StagingXcmV4AssetAssetId,
 } from "@polkadot/types/lookup";
 
 export type __AugmentedConst<ApiType extends ApiTypes> =
@@ -731,7 +731,83 @@ declare module "@polkadot/api-base/types/consts" {
     };
     services: {
       /**
-       * `PalletId` for the jobs pallet.
+       * Maximum number of binaries per gadget.
+       **/
+      maxBinariesPerGadget: u32 & AugmentedConst<ApiType>;
+      /**
+       * binary name maximum length.
+       **/
+      maxBinaryNameLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum number of blueprints per operator.
+       **/
+      maxBlueprintsPerOperator: u32 & AugmentedConst<ApiType>;
+      /**
+       * Container image name maximum length.
+       **/
+      maxContainerImageNameLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Container image tag maximum length.
+       **/
+      maxContainerImageTagLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Container registry maximum length.
+       **/
+      maxContainerRegistryLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum number of fields in a job call.
+       **/
+      maxFields: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum size of a field in a job call.
+       **/
+      maxFieldsSize: u32 & AugmentedConst<ApiType>;
+      /**
+       * Git owner maximum length.
+       **/
+      maxGitOwnerLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Git repository maximum length.
+       **/
+      maxGitRepoLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Git tag maximum length.
+       **/
+      maxGitTagLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * IPFS hash maximum length.
+       **/
+      maxIpfsHashLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum number of jobs per service.
+       **/
+      maxJobsPerService: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum length of metadata string length.
+       **/
+      maxMetadataLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum number of Operators per service.
+       **/
+      maxOperatorsPerService: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum number of permitted callers per service.
+       **/
+      maxPermittedCallers: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum number of services per operator.
+       **/
+      maxServicesPerOperator: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum number of services per user.
+       **/
+      maxServicesPerUser: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum number of sources per gadget.
+       **/
+      maxSourcesPerGadget: u32 & AugmentedConst<ApiType>;
+      /**
+       * `PalletId` for the services pallet.
        **/
       palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
       /**

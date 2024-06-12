@@ -90,13 +90,8 @@ pallet-vesting = { workspace = true }
 
 # Webb dependencies
 pallet-airdrop-claims = { workspace = true }
-pallet-dkg = { workspace = true }
-pallet-jobs = { workspace = true }
 pallet-services = { workspace = true }
-pallet-jobs-rpc-runtime-api = { workspace = true }
 pallet-services-rpc-runtime-api = { workspace = true }
-pallet-roles = { workspace = true }
-pallet-zksaas = { workspace = true }
 tangle-crypto-primitives = { workspace = true }
 tangle-primitives = { workspace = true, features = ["verifying"] }
 pallet-multi-asset-delegation = { workspace = true }
@@ -126,11 +121,10 @@ pallet-evm-precompile-simple = { workspace = true }
 
 pallet-hotfix-sufficients = { workspace = true }
 
-## Moonbeam precompiles
+## Tangle precompiles
 pallet-evm-precompile-batch = { workspace = true }
 pallet-evm-precompile-call-permit = { workspace = true }
 pallet-evm-precompile-democracy = { workspace = true }
-pallet-evm-precompile-jobs = { workspace = true }
 pallet-evm-precompile-services = { workspace = true }
 pallet-evm-precompile-preimage = { workspace = true }
 pallet-evm-precompile-proxy = { workspace = true }
@@ -165,8 +159,6 @@ xcm-executor = { workspace = true }
 polkadot-parachain-primitives = { workspace = true }
 
 [features]
-default = ["std", "with-rocksdb-weights", "evm-tracing"]
-local-testing = []
 runtime-benchmarks = [
  "frame-benchmarking",
  "frame-support/runtime-benchmarks",
@@ -194,6 +186,8 @@ runtime-benchmarks = [
  "xcm-builder/runtime-benchmarks",
  "pallet-multi-asset-delegation/runtime-benchmarks",
 ]
+default = ["std", "with-rocksdb-weights", "evm-tracing"]
+local-testing = []
 
 std = [
  "serde/std",
@@ -255,9 +249,7 @@ std = [
  "frame-system-benchmarking?/std",
  "frame-metadata-hash-extension/std",
  "frame-benchmarking/std",
- "pallet-dkg/std",
  "pallet-proxy/std",
- "pallet-zksaas/std",
  "num_enum/std",
  "fixed/std",
  "hex/std",
@@ -266,15 +258,9 @@ std = [
  # Tangle dependencies
  "tangle-primitives/std",
  "tangle-crypto-primitives/std",
- "pallet-jobs/std",
  "pallet-services/std",
- "pallet-roles/std",
- "pallet-dkg/std",
- "pallet-zksaas/std",
- "pallet-jobs-rpc-runtime-api/std",
  "pallet-multi-asset-delegation/std",
  "pallet-services-rpc-runtime-api/std",
-
 
  # Frontier
  "fp-account/std",
@@ -312,7 +298,6 @@ std = [
  "pallet-evm-precompile-democracy/std",
  "pallet-evm-precompile-registry/std",
  "pallet-evm-precompile-staking/std",
- "pallet-evm-precompile-jobs/std",
  "pallet-evm-precompile-services/std",
  "pallet-evm-precompile-vesting/std",
  "pallet-evm-precompile-verify-ecdsa-secp256k1-signature/std",

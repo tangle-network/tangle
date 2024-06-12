@@ -38,14 +38,12 @@ use sp_keystore::KeystorePtr;
 use sp_runtime::traits::Block as BlockT;
 use tangle_primitives::Block;
 use tangle_runtime::BlockNumber;
+use tangle_testnet_runtime::PalletServicesConstraints;
 // Runtime
 #[cfg(not(feature = "testnet"))]
 use tangle_runtime::{AccountId, Balance, Hash, Index};
 #[cfg(feature = "testnet")]
-use tangle_testnet_runtime::{
-	AccountId, Balance, Hash, Index, MaxAdditionalParamsLen, MaxDataLen, MaxKeyLen,
-	MaxParticipants, MaxProofLen, MaxSignatureLen, MaxSubmissionLen, PalletServicesConstraints,
-};
+use tangle_testnet_runtime::{AccountId, Balance, Hash, Index};
 
 pub mod eth;
 pub mod tracing;
@@ -119,17 +117,6 @@ where
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
 	C::Api: sp_block_builder::BlockBuilder<Block>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
-	C::Api: pallet_jobs_rpc::JobsRuntimeApi<
-		Block,
-		AccountId,
-		MaxParticipants,
-		MaxSubmissionLen,
-		MaxKeyLen,
-		MaxDataLen,
-		MaxSignatureLen,
-		MaxProofLen,
-		MaxAdditionalParamsLen,
-	>,
 	C::Api: pallet_services_rpc::ServicesRuntimeApi<Block, PalletServicesConstraints, AccountId>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
@@ -150,7 +137,6 @@ where
 	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::BlakeTwo256>,
 	CIDP: sp_inherents::CreateInherentDataProviders<Block, ()> + Send + Sync + 'static,
 {
-	use pallet_jobs_rpc::{JobsApiServer, JobsClient};
 	use pallet_services_rpc::{ServicesApiServer, ServicesClient};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
@@ -173,7 +159,6 @@ where
 
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
-	io.merge(JobsClient::new(client.clone()).into_rpc())?;
 	io.merge(ServicesClient::new(client.clone()).into_rpc())?;
 
 	io.merge(

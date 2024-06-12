@@ -66,6 +66,16 @@ import type {
   PalletAirdropClaimsUtilsMultiAddress,
   PalletAirdropClaimsUtilsMultiAddressSignature,
   PalletAirdropClaimsUtilsSr25519Signature,
+  PalletAssetsAccountStatus,
+  PalletAssetsApproval,
+  PalletAssetsAssetAccount,
+  PalletAssetsAssetDetails,
+  PalletAssetsAssetMetadata,
+  PalletAssetsAssetStatus,
+  PalletAssetsCall,
+  PalletAssetsError,
+  PalletAssetsEvent,
+  PalletAssetsExistenceReason,
   PalletBabeCall,
   PalletBabeError,
   PalletBagsListCall,
@@ -316,6 +326,33 @@ import type {
   SpVersionRuntimeVersion,
   SpWeightsRuntimeDbWeight,
   SpWeightsWeightV2Weight,
+  StagingXcmV4Asset,
+  StagingXcmV4AssetAssetId,
+  StagingXcmV4AssetAssetInstance,
+  StagingXcmV4AssetFungibility,
+  StagingXcmV4Junction,
+  StagingXcmV4JunctionNetworkId,
+  StagingXcmV4Junctions,
+  StagingXcmV4Location,
+  SygmaAccessSegregatorCall,
+  SygmaAccessSegregatorError,
+  SygmaAccessSegregatorEvent,
+  SygmaBasicFeehandlerCall,
+  SygmaBasicFeehandlerError,
+  SygmaBasicFeehandlerEvent,
+  SygmaBridgeCall,
+  SygmaBridgeError,
+  SygmaBridgeEvent,
+  SygmaBridgeProposal,
+  SygmaFeeHandlerRouterCall,
+  SygmaFeeHandlerRouterError,
+  SygmaFeeHandlerRouterEvent,
+  SygmaFeeHandlerRouterFeeHandlerType,
+  SygmaPercentageFeehandlerCall,
+  SygmaPercentageFeehandlerError,
+  SygmaPercentageFeehandlerEvent,
+  SygmaTraitsMpcAddress,
+  SygmaTraitsTransferType,
   TangleCryptoPrimitivesCryptoPublic,
   TanglePrimitivesJobsFallbackOptions,
   TanglePrimitivesJobsJobInfo,
@@ -340,6 +377,8 @@ import type {
   TanglePrimitivesJobsV2FieldFieldType,
   TanglePrimitivesJobsV2Gadget,
   TanglePrimitivesJobsV2GadgetBinary,
+  TanglePrimitivesJobsV2GadgetSource,
+  TanglePrimitivesJobsV2GadgetSourceFetcher,
   TanglePrimitivesJobsV2GithubFetcher,
   TanglePrimitivesJobsV2ImageRegistryFetcher,
   TanglePrimitivesJobsV2JobCall,
@@ -359,6 +398,7 @@ import type {
   TanglePrimitivesJobsV2ServiceRequestHook,
   TanglePrimitivesJobsV2TypeCheckError,
   TanglePrimitivesJobsV2WasmGadget,
+  TanglePrimitivesJobsV2WasmRuntime,
   TanglePrimitivesJobsValidatorOffenceType,
   TanglePrimitivesJobsZksaasArkworksProofResult,
   TanglePrimitivesJobsZksaasCircomProofResult,
@@ -402,6 +442,8 @@ import type {
   TangleTestnetRuntimeRuntime,
   TangleTestnetRuntimeRuntimeFreezeReason,
   TangleTestnetRuntimeRuntimeHoldReason,
+  XcmV3JunctionBodyId,
+  XcmV3JunctionBodyPart,
 } from "@polkadot/types/lookup";
 
 declare module "@polkadot/types/types/registry" {
@@ -792,6 +834,8 @@ declare module "@polkadot/types/types/registry" {
     TanglePrimitivesJobsV2FieldFieldType: TanglePrimitivesJobsV2FieldFieldType;
     TanglePrimitivesJobsV2Gadget: TanglePrimitivesJobsV2Gadget;
     TanglePrimitivesJobsV2GadgetBinary: TanglePrimitivesJobsV2GadgetBinary;
+    TanglePrimitivesJobsV2GadgetSource: TanglePrimitivesJobsV2GadgetSource;
+    TanglePrimitivesJobsV2GadgetSourceFetcher: TanglePrimitivesJobsV2GadgetSourceFetcher;
     TanglePrimitivesJobsV2GithubFetcher: TanglePrimitivesJobsV2GithubFetcher;
     TanglePrimitivesJobsV2ImageRegistryFetcher: TanglePrimitivesJobsV2ImageRegistryFetcher;
     TanglePrimitivesJobsV2JobCall: TanglePrimitivesJobsV2JobCall;
@@ -811,6 +855,7 @@ declare module "@polkadot/types/types/registry" {
     TanglePrimitivesJobsV2ServiceRequestHook: TanglePrimitivesJobsV2ServiceRequestHook;
     TanglePrimitivesJobsV2TypeCheckError: TanglePrimitivesJobsV2TypeCheckError;
     TanglePrimitivesJobsV2WasmGadget: TanglePrimitivesJobsV2WasmGadget;
+    TanglePrimitivesJobsV2WasmRuntime: TanglePrimitivesJobsV2WasmRuntime;
     TanglePrimitivesJobsValidatorOffenceType: TanglePrimitivesJobsValidatorOffenceType;
     TanglePrimitivesJobsZksaasArkworksProofResult: TanglePrimitivesJobsZksaasArkworksProofResult;
     TanglePrimitivesJobsZksaasCircomProofResult: TanglePrimitivesJobsZksaasCircomProofResult;
