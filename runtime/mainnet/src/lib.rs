@@ -1615,7 +1615,7 @@ parameter_types! {
 	// PhaAssetId is the substrate assetID of Pha
 	pub PhaAssetId: AssetId = 2000;
 	// PhaResourceId is the resourceID that mapping with the foreign asset Pha
-	pub PhaResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000001");
+	pub PhaResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000");
 }
 
 fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
