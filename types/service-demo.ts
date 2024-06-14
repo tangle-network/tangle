@@ -172,7 +172,7 @@ import { stdin as input, stdout as output, exit } from "node:process";
   await rl.question("|- Press Enter to continue");
   console.log("|-- Eve is invoking the keygen job on the service");
   const jobCallId = await api.query.services.nextJobCallId();
-  const keygenJobTx = api.tx.services.jobCall(serviceInstanceId, 0, [
+  const keygenJobTx = api.tx.services.call(serviceInstanceId, 0, [
     { Uint8: 2 },
   ]);
   await signAndSend(EVE, keygenJobTx);
@@ -186,7 +186,7 @@ import { stdin as input, stdout as output, exit } from "node:process";
   console.log(
     "|-- Bob, Charlie, Dave are accepting the job and submitting the result",
   );
-  const jobResultTx = api.tx.services.jobSubmit(serviceInstanceId, jobCallId, [
+  const jobResultTx = api.tx.services.submitResult(serviceInstanceId, jobCallId, [
     {
       Bytes: u8aToHex(DKG.publicKey),
     },
@@ -201,7 +201,7 @@ import { stdin as input, stdout as output, exit } from "node:process";
   await rl.question("|- Press Enter to continue");
   console.log("|-- Eve is invoking the sign job on the service");
   const signJobCallId = await api.query.services.nextJobCallId();
-  const signJobTx = api.tx.services.jobCall(serviceInstanceId, 1, [
+  const signJobTx = api.tx.services.call(serviceInstanceId, 1, [
     { Bytes: "0xf00dc00ed" },
   ]);
 
@@ -218,7 +218,7 @@ import { stdin as input, stdout as output, exit } from "node:process";
   );
   const signature = DKG.sign(hexToU8a("0xf00dc00ed"));
   // Bob, Charlie, Dave will accept the job and submit the result
-  const signJobResultTx = api.tx.services.jobSubmit(
+  const signJobResultTx = api.tx.services.submitResult(
     serviceInstanceId,
     signJobCallId,
     [
