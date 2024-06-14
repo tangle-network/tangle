@@ -15,7 +15,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
-#![recursion_limit = "256"]
+#![recursion_limit = "512"]
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
@@ -191,7 +191,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1003, // v1.0.3
+	spec_version: 1008, // v1.0.8
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1504,6 +1504,7 @@ construct_runtime!(
 		Dkg: pallet_dkg,
 		ZkSaaS: pallet_zksaas,
 		Proxy: pallet_proxy,
+		MultiAssetDelegation: pallet_multi_asset_delegation,
 
 		// Sygma
 		SygmaAccessSegregator: sygma_access_segregator,
@@ -1649,13 +1650,13 @@ parameter_types! {
 	pub const ExecutiveBody: BodyId = BodyId::Executive;
 }
 
-pub type AssetId = u32;
+pub type AssetId = u128;
 
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
 	type AssetId = AssetId;
-	type AssetIdParameter = parity_scale_codec::Compact<u32>;
+	type AssetIdParameter = parity_scale_codec::Compact<u128>;
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
@@ -1672,6 +1673,52 @@ impl pallet_assets::Config for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
+}
+
+pub struct MockServiceManager;
+
+impl pallet_multi_asset_delegation::traits::ServiceManager<AccountId, Balance>
+	for MockServiceManager
+{
+	fn list_active_services(_account: &AccountId) -> Vec<pallet_multi_asset_delegation::Service> {
+		// we dont care
+		vec![]
+	}
+
+	fn list_service_reward(_account: &AccountId) -> Balance {
+		// we dont care
+		Balance::default()
+	}
+
+	fn can_exit(_account: &AccountId) -> bool {
+		// Mock logic to determine if the given account can exit
+		true
+	}
+}
+
+parameter_types! {
+	pub const MinOperatorBondAmount: Balance = 10_000;
+	pub const BondDuration: u32 = 10;
+	pub const MinDelegateAmount : Balance = 1000;
+	pub PID: PalletId = PalletId(*b"PotStake");
+}
+
+impl pallet_multi_asset_delegation::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type MinOperatorBondAmount = MinOperatorBondAmount;
+	type BondDuration = BondDuration;
+	type ServiceManager = MockServiceManager;
+	type LeaveOperatorsDelay = ConstU32<10>;
+	type OperatorBondLessDelay = ConstU32<1>;
+	type LeaveDelegatorsDelay = ConstU32<1>;
+	type DelegationBondLessDelay = ConstU32<5>;
+	type MinDelegateAmount = MinDelegateAmount;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type PalletId = PID;
+	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -1752,6 +1799,8 @@ impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
 			(Fungible(ref amount), AssetId(ref id)) => {
 				if id == &SygUSDLocation::get() {
 					Ok((SygUSDAssetId::get(), *amount))
+				} else if id == &PHALocation::get() {
+					Ok((PHAAssetId::get(), *amount))
 				} else {
 					Err(ExecutionError::AssetNotHandled)
 				}
@@ -1792,11 +1841,11 @@ impl sygma_percentage_feehandler::Config for Runtime {
 }
 
 parameter_types! {
-	// TNT
+	// tTNT: native asset is always a reserved asset
 	pub NativeLocation: Location = Location::here();
-	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000001");
+	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
 
-	// SygUSD
+	// SygUSD: a non-reserved asset
 	pub SygUSDLocation: Location = Location::new(
 		1,
 		[
@@ -1809,12 +1858,27 @@ parameter_types! {
 	pub SygUSDAssetId: AssetId = 2000;
 	// SygUSDResourceId is the resourceID that mapping with the foreign asset SygUSD
 	pub SygUSDResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001100");
+
+	// PHA: a reserved asset
+	pub PHALocation: Location = Location::new(
+		1,
+		[
+			Parachain(2004),
+			slice_to_generalkey(b"sygma"),
+			slice_to_generalkey(b"pha"),
+		],
+	);
+	// PHAAssetId is the substrate assetID of PHA
+	pub PHAAssetId: AssetId = 2001;
+	// PHAResourceId is the resourceID that mapping with the foreign asset PHA
+	pub PHAResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000");
 }
 
 fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
 	let mut account_map: BTreeMap<XcmAssetId, AccountId32> = BTreeMap::new();
 	account_map.insert(NativeLocation::get().into(), BridgeAccountNative::get());
 	account_map.insert(SygUSDLocation::get().into(), BridgeAccountOtherToken::get());
+	account_map.insert(PHALocation::get().into(), BridgeAccountOtherToken::get());
 	account_map
 }
 
@@ -1837,8 +1901,8 @@ parameter_types! {
 
 	pub const SygmaBridgePalletId: PalletId = PalletId(*b"sygma/01");
 
-	// SygmaBridgeAdminAccountKey Address: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY (Alice)
-	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d");
+	// Tangle testnet super admin: 5D2hZnw8Z7kg5LpQiEBb6HPG4V51wYXuKhE7sVhXiUPWj8D1
+	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("2ab4c35efb6ab82377c2325467103cf46742d288ae1f8917f1d5960f4a1e9065");
 	pub SygmaBridgeAdminAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
 
 	// SygmaBridgeFeeAccount is a substrate account and used for bridging fee collection
@@ -1853,7 +1917,8 @@ parameter_types! {
 	pub BridgeAccounts: BTreeMap<XcmAssetId, AccountId32> = bridge_accounts_generator();
 
 	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
-	pub EIP712ChainID: ChainID = U256::from(5);
+	// For local testing with ./scripts/sygma-setup/execute_proposal_test.js, please change it to 5
+	pub EIP712ChainID: ChainID = U256::from(3799);
 
 	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
 	// When relayers signing, this address will be included in the EIP712Domain
@@ -1867,9 +1932,10 @@ parameter_types! {
 	pub ResourcePairs: Vec<(XcmAssetId, ResourceId)> = vec![
 		(NativeLocation::get().into(), NativeSygmaResourceId::get()),
 		(SygUSDLocation::get().into(), SygUSDResourceId::get()),
+		(PHALocation::get().into(), PHAResourceId::get()),
 	];
 
-	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 12u8), (SygUSDLocation::get().into(), 12u8)];
+	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8), (PHALocation::get().into(), 12u8)];
 }
 
 pub struct ReserveChecker;
