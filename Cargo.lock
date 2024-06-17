@@ -2303,9 +2303,9 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.123"
+version = "1.0.124"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8194f089b6da4751d6c1da1ef37c17255df51f9346cdb160f8b096562ae4a85c"
+checksum = "273dcfd3acd4e1e276af13ed2a43eea7001318823e7a726a6b3ed39b4acc0b82"
 dependencies = [
  "cc",
  "cxxbridge-flags",
@@ -2315,9 +2315,9 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "1.0.123"
+version = "1.0.124"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e8df9a089caae66634d754672d5f909395f30f38af6ff19366980d8a8b57501"
+checksum = "d8b2766fbd92be34e9ed143898fce6c572dc009de39506ed6903e5a05b68914e"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -2330,15 +2330,15 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "1.0.123"
+version = "1.0.124"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25290be4751803672a70b98c68b51c1e7d0a640ab5a4377f240f9d2e70054cd1"
+checksum = "839fcd5e43464614ffaa989eaf1c139ef1f0c51672a1ed08023307fa1b909ccd"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.123"
+version = "1.0.124"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8cb317cb13604b4752416783bb25070381c36e844743e4146b7f8e55de7d140"
+checksum = "4b2c1c1776b986979be68bb2285da855f8d8a35851a769fca8740df7c3d07877"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2523,15 +2523,15 @@ dependencies = [
 
 [[package]]
 name = "derive_more"
-version = "0.99.17"
+version = "0.99.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fb810d30a7c1953f91334de7244731fc3f3c10d7fe163338a35b9f640960321"
+checksum = "5f33878137e4dafd7fa914ad4e259e18a4e8e532b9617a2d0150262bf53abfce"
 dependencies = [
  "convert_case 0.4.0",
  "proc-macro2",
  "quote",
  "rustc_version 0.4.0",
- "syn 1.0.109",
+ "syn 2.0.66",
 ]
 
 [[package]]
@@ -5137,6 +5137,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 
 [[package]]
+name = "hermit-abi"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fbf6a919d6cf397374f7dfeeea91d974c7c0a7221d0d0f4f20d859d329e53fcc"
+
+[[package]]
 name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5256,9 +5262,9 @@ checksum = "add0ab9360ddbd88cfeb3bd9574a1d85cfdfa14db10b3e21d3700dbc4328758f"
 
 [[package]]
 name = "httparse"
-version = "1.9.3"
+version = "1.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0e7a4dd27b9476dc40cb050d3632d3bba3a70ddbff012285f7f8559a1e7e545"
+checksum = "0fcc0b4a115bf80b728eb8ea024ad5bd707b615bfed49e0665b6e0f86fd082d9"
 
 [[package]]
 name = "httpdate"
@@ -5560,18 +5566,18 @@ dependencies = [
 
 [[package]]
 name = "include_dir"
-version = "0.7.3"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18762faeff7122e89e0857b02f7ce6fcc0d101d5e9ad2ad7846cc01d61b7f19e"
+checksum = "923d117408f1e49d914f1a379a309cffe4f18c05cf4e3d12e613a15fc81bd0dd"
 dependencies = [
  "include_dir_macros",
 ]
 
 [[package]]
 name = "include_dir_macros"
-version = "0.7.3"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b139284b5cf57ecfa712bcc66950bb635b31aff41c188e8a4cfc758eca374a3f"
+checksum = "7cab85a7ed0bd5f0e76d93846e0147172bed2e2d3f859bcc33a8d9699cad1a75"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5643,7 +5649,7 @@ version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eae7b9aee968036d54dce06cebaefd919e4472e753296daccd6d344e3e2df0c2"
 dependencies = [
- "hermit-abi",
+ "hermit-abi 0.3.9",
  "libc",
  "windows-sys 0.48.0",
 ]
@@ -5678,7 +5684,7 @@ version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f23ff5ef2b80d608d61efee834934d862cd92461afc0560dedf493e4c033738b"
 dependencies = [
- "hermit-abi",
+ "hermit-abi 0.3.9",
  "libc",
  "windows-sys 0.52.0",
 ]
@@ -7509,7 +7515,7 @@ version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
 dependencies = [
- "hermit-abi",
+ "hermit-abi 0.3.9",
  "libc",
 ]
 
@@ -9913,13 +9919,13 @@ dependencies = [
 
 [[package]]
 name = "polling"
-version = "3.7.1"
+version = "3.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e6a007746f34ed64099e88783b0ae369eaa3da6392868ba262e2af9b8fbaea1"
+checksum = "a3ed00ed3fbf728b5816498ecd316d1716eecaced9c0c8d2c5a6740ca214985b"
 dependencies = [
  "cfg-if",
  "concurrent-queue",
- "hermit-abi",
+ "hermit-abi 0.4.0",
  "pin-project-lite 0.2.14",
  "rustix 0.38.34",
  "tracing",
@@ -11394,9 +11400,9 @@ dependencies = [
 
 [[package]]
 name = "safe_arch"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f398075ce1e6a179b46f51bd88d0598b92b00d3551f1a2d4ac49e771b56ac354"
+checksum = "c3460605018fdc9612bce72735cba0d27efbcd9904780d44c7e3a9948f96148a"
 dependencies = [
  "bytemuck",
 ]
@@ -13695,7 +13701,7 @@ dependencies = [
 [[package]]
 name = "sp-crypto-ec-utils"
 version = "0.10.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#ae0b3bf6733e7b9e18badb16128a6b25bef1923b"
+source = "git+https://github.com/paritytech/polkadot-sdk#6cb3bd23910ec48ab37a3c95a6b03286ff2979bf"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-377-ext",
@@ -13757,7 +13763,7 @@ dependencies = [
 [[package]]
 name = "sp-debug-derive"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#ae0b3bf6733e7b9e18badb16128a6b25bef1923b"
+source = "git+https://github.com/paritytech/polkadot-sdk#6cb3bd23910ec48ab37a3c95a6b03286ff2979bf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -13778,7 +13784,7 @@ dependencies = [
 [[package]]
 name = "sp-externalities"
 version = "0.25.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#ae0b3bf6733e7b9e18badb16128a6b25bef1923b"
+source = "git+https://github.com/paritytech/polkadot-sdk#6cb3bd23910ec48ab37a3c95a6b03286ff2979bf"
 dependencies = [
  "environmental",
  "parity-scale-codec 3.6.12",
@@ -13996,7 +14002,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface"
 version = "24.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#ae0b3bf6733e7b9e18badb16128a6b25bef1923b"
+source = "git+https://github.com/paritytech/polkadot-sdk#6cb3bd23910ec48ab37a3c95a6b03286ff2979bf"
 dependencies = [
  "bytes",
  "impl-trait-for-tuples",
@@ -14028,7 +14034,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#ae0b3bf6733e7b9e18badb16128a6b25bef1923b"
+source = "git+https://github.com/paritytech/polkadot-sdk#6cb3bd23910ec48ab37a3c95a6b03286ff2979bf"
 dependencies = [
  "Inflector",
  "expander",
@@ -14121,7 +14127,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot
 [[package]]
 name = "sp-std"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#ae0b3bf6733e7b9e18badb16128a6b25bef1923b"
+source = "git+https://github.com/paritytech/polkadot-sdk#6cb3bd23910ec48ab37a3c95a6b03286ff2979bf"
 
 [[package]]
 name = "sp-storage"
@@ -14139,7 +14145,7 @@ dependencies = [
 [[package]]
 name = "sp-storage"
 version = "19.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#ae0b3bf6733e7b9e18badb16128a6b25bef1923b"
+source = "git+https://github.com/paritytech/polkadot-sdk#6cb3bd23910ec48ab37a3c95a6b03286ff2979bf"
 dependencies = [
  "impl-serde",
  "parity-scale-codec 3.6.12",
@@ -14176,7 +14182,7 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#ae0b3bf6733e7b9e18badb16128a6b25bef1923b"
+source = "git+https://github.com/paritytech/polkadot-sdk#6cb3bd23910ec48ab37a3c95a6b03286ff2979bf"
 dependencies = [
  "parity-scale-codec 3.6.12",
  "tracing",
@@ -14276,7 +14282,7 @@ dependencies = [
 [[package]]
 name = "sp-wasm-interface"
 version = "20.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#ae0b3bf6733e7b9e18badb16128a6b25bef1923b"
+source = "git+https://github.com/paritytech/polkadot-sdk#6cb3bd23910ec48ab37a3c95a6b03286ff2979bf"
 dependencies = [
  "impl-trait-for-tuples",
  "log",
@@ -14974,7 +14980,7 @@ dependencies = [
 [[package]]
 name = "sygma-access-segregator"
 version = "0.2.0"
-source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#5c95ab409d5ed553e86fb704bec38e4bd7a3a9ff"
+source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#32e9f43385bc88bdbe6ac55e5579de3a2a8ae50d"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -14987,7 +14993,7 @@ dependencies = [
 [[package]]
 name = "sygma-basic-feehandler"
 version = "0.3.0"
-source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#5c95ab409d5ed553e86fb704bec38e4bd7a3a9ff"
+source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#32e9f43385bc88bdbe6ac55e5579de3a2a8ae50d"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -15004,7 +15010,7 @@ dependencies = [
 [[package]]
 name = "sygma-bridge"
 version = "0.3.0"
-source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#5c95ab409d5ed553e86fb704bec38e4bd7a3a9ff"
+source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#32e9f43385bc88bdbe6ac55e5579de3a2a8ae50d"
 dependencies = [
  "arrayref",
  "bounded-collections 0.1.9",
@@ -15045,7 +15051,7 @@ dependencies = [
 [[package]]
 name = "sygma-bridge-forwarder"
 version = "0.3.0"
-source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#5c95ab409d5ed553e86fb704bec38e4bd7a3a9ff"
+source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#32e9f43385bc88bdbe6ac55e5579de3a2a8ae50d"
 dependencies = [
  "cumulus-pallet-xcm",
  "cumulus-primitives-core",
@@ -15068,7 +15074,7 @@ dependencies = [
 [[package]]
 name = "sygma-fee-handler-router"
 version = "0.3.0"
-source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#5c95ab409d5ed553e86fb704bec38e4bd7a3a9ff"
+source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#32e9f43385bc88bdbe6ac55e5579de3a2a8ae50d"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -15087,7 +15093,7 @@ dependencies = [
 [[package]]
 name = "sygma-percentage-feehandler"
 version = "0.3.0"
-source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#5c95ab409d5ed553e86fb704bec38e4bd7a3a9ff"
+source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#32e9f43385bc88bdbe6ac55e5579de3a2a8ae50d"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -15104,7 +15110,7 @@ dependencies = [
 [[package]]
 name = "sygma-rpc"
 version = "0.2.1"
-source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#5c95ab409d5ed553e86fb704bec38e4bd7a3a9ff"
+source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#32e9f43385bc88bdbe6ac55e5579de3a2a8ae50d"
 dependencies = [
  "jsonrpsee 0.20.3",
  "parity-scale-codec 3.6.12",
@@ -15121,7 +15127,7 @@ dependencies = [
 [[package]]
 name = "sygma-runtime-api"
 version = "0.2.1"
-source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#5c95ab409d5ed553e86fb704bec38e4bd7a3a9ff"
+source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#32e9f43385bc88bdbe6ac55e5579de3a2a8ae50d"
 dependencies = [
  "sp-api",
  "sygma-bridge",
@@ -15131,7 +15137,7 @@ dependencies = [
 [[package]]
 name = "sygma-traits"
 version = "0.2.0"
-source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#5c95ab409d5ed553e86fb704bec38e4bd7a3a9ff"
+source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#32e9f43385bc88bdbe6ac55e5579de3a2a8ae50d"
 dependencies = [
  "ethabi 18.0.0",
  "frame-support",
@@ -15146,7 +15152,7 @@ dependencies = [
 [[package]]
 name = "sygma-xcm-bridge"
 version = "0.3.0"
-source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#5c95ab409d5ed553e86fb704bec38e4bd7a3a9ff"
+source = "git+https://github.com/sygmaprotocol/sygma-substrate-pallets?branch=release-polkadot-v1.7.0#32e9f43385bc88bdbe6ac55e5579de3a2a8ae50d"
 dependencies = [
  "cumulus-pallet-xcm",
  "cumulus-primitives-core",
@@ -17888,9 +17894,9 @@ dependencies = [
 
 [[package]]
 name = "zstd-sys"
-version = "2.0.10+zstd.1.5.6"
+version = "2.0.11+zstd.1.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c253a4914af5bafc8fa8c86ee400827e83cf6ec01195ec1f1ed8441bf00d65aa"
+checksum = "75652c55c0b6f3e6f12eb786fe1bc960396bf05a1eb3bf1f3691c3610ac2e6d4"
 dependencies = [
  "cc",
  "pkg-config",
