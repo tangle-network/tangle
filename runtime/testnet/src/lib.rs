@@ -2002,7 +2002,13 @@ impl ExtractDestinationData for crate::DestinationDataParser {
 						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
 							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
 								|domain_id| {
-									let l: Location = Location::new(1, Junctions::X2(Arc::new([Parachain(parachain_id), Junction::AccountId32 { network: None, id: recipient }])));
+									let l: Location = Location::new(
+										1,
+										Junctions::X2(Arc::new([
+											Parachain(parachain_id),
+											Junction::AccountId32 { network: None, id: recipient },
+										])),
+									);
 									(l.encode(), domain_id)
 								},
 							);
@@ -2019,12 +2025,18 @@ impl ExtractDestinationData for crate::DestinationDataParser {
 					(
 						GeneralKey { length: path_len, data: sygma_path },
 						GeneralIndex(dest_domain_id),
-						Junction::AccountId32 { network: None, id: recipient},
+						Junction::AccountId32 { network: None, id: recipient },
 					) => {
 						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
 							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
 								|domain_id| {
-									let l: Location = Location::new(0, Junctions::X1(Arc::new([Junction::AccountId32 { network: None, id: recipient }])));
+									let l: Location = Location::new(
+										0,
+										Junctions::X1(Arc::new([Junction::AccountId32 {
+											network: None,
+											id: recipient,
+										}])),
+									);
 									(l.encode(), domain_id)
 								},
 							);
