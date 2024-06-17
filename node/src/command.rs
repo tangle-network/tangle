@@ -75,7 +75,7 @@ impl SubstrateCli for Cli {
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
 		Ok(match id {
 			"" | "dev" | "local" => Box::new(chainspec::testnet::local_testnet_config(
-				tangle_primitives::TESTNET_CHAIN_ID,
+				tangle_primitives::TESTNET_LOCAL_CHAIN_ID,
 			)?),
 			// generates the spec for benchmarking.
 			"benchmark" => Box::new(chainspec::testnet::local_benchmarking_config(
