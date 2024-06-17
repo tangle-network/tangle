@@ -33,7 +33,10 @@ use sp_runtime::{
 	BoundedVec,
 };
 use std::{collections::BTreeMap, str::FromStr};
-use tangle_primitives::types::{BlockNumber, Signature};
+use tangle_primitives::{
+	types::{BlockNumber, Signature},
+	TESTNET_LOCAL_SS58_PREFIX,
+};
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
 	EVMConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, Precompiles, RoleKeyId,
@@ -166,7 +169,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
-	properties.insert("ss58Format".into(), 42.into());
+	properties.insert("ss58Format".into(), TESTNET_LOCAL_SS58_PREFIX.into());
 	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		// Name
