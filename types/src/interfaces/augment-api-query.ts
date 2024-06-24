@@ -7,17 +7,41 @@ import '@polkadot/api-base/types/storage';
 
 import type { ApiTypes, AugmentedQuery, QueryableStorageEntry } from '@polkadot/api-base/types';
 import type { Data } from '@polkadot/types';
-import type { BTreeMap, Bytes, Null, Option, U256, U8aFixed, Vec, bool, u128, u32, u64 } from '@polkadot/types-codec';
+import type { BTreeMap, Bytes, Null, Option, U256, U8aFixed, Vec, bool, u128, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
 import type { Observable } from '@polkadot/types/types';
-import { SpConsensusBabeAppPublic, SpConsensusBabeBabeEpochConfiguration, SpConsensusBabeDigestsPreDigest, SpConsensusBabeDigestsNextConfigDescriptor, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesIdAmountRuntimeFreezeReason, PalletBalancesIdAmountRuntimeHoldReason, PalletBalancesBalanceLock, PalletBalancesReserveData, PalletBountiesBounty, PalletChildBountiesChildBounty, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsStatementKind, PalletCollectiveVotes, PalletDemocracyMetadataOwner, FrameSupportPreimagesBounded, PalletDemocracyVoteThreshold, PalletDemocracyReferendumInfo, PalletDemocracyVoteVoting, PalletDkgFeeInfo, PalletElectionProviderMultiPhasePhase, SpNposElectionsElectionScore, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, EthereumBlock, EthereumReceiptReceiptV3, FpRpcTransactionStatus, EthereumTransactionTransactionV2, PalletEvmCodeMetadata, SpConsensusGrandpaAppPublic, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletIdentityRegistration, PalletIdentityRegistrarInfo, PalletIdentityAuthorityProperties, PalletImOnlineSr25519AppSr25519Public, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsPhaseResult, TanglePrimitivesJobsJobInfo, PalletMultisigMultisig, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, SpStakingOffenceOffenceDetails, PalletPreimageRequestStatus, PalletPreimageOldRequestStatus, PalletProxyAnnouncement, PalletProxyProxyDefinition, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletRolesRestakingLedger, PalletSchedulerScheduled, SpCoreCryptoKeyTypeId, TangleTestnetRuntimeOpaqueSessionKeys, SpStakingExposure, SpStakingPagedExposureMetadata, SpStakingExposurePage, PalletStakingValidatorPrefs, PalletStakingForcing, PalletStakingStakingLedger, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingUnappliedSlash, FrameSystemAccountInfo, FrameSystemCodeUpgradeAuthorization, FrameSupportDispatchPerDispatchClassWeight, SpRuntimeDigest, FrameSystemEventRecord, FrameSystemPhase, FrameSystemLastRuntimeUpgradeInfo, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletTreasurySpendStatus, PalletVestingReleases, PalletVestingVestingInfo, PalletZksaasFeeInfo } from '@polkadot/types/lookup';
+import { PalletAssetsAssetAccount, PalletAssetsApproval, PalletAssetsAssetDetails, PalletAssetsAssetMetadata, SpConsensusBabeAppPublic, SpConsensusBabeBabeEpochConfiguration, SpConsensusBabeDigestsPreDigest, SpConsensusBabeDigestsNextConfigDescriptor, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesIdAmountRuntimeFreezeReason, PalletBalancesIdAmountRuntimeHoldReason, PalletBalancesBalanceLock, PalletBalancesReserveData, PalletBountiesBounty, PalletChildBountiesChildBounty, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsStatementKind, PalletCollectiveVotes, PalletDemocracyMetadataOwner, FrameSupportPreimagesBounded, PalletDemocracyVoteThreshold, PalletDemocracyReferendumInfo, PalletDemocracyVoteVoting, PalletDkgFeeInfo, PalletElectionProviderMultiPhasePhase, SpNposElectionsElectionScore, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, EthereumBlock, EthereumReceiptReceiptV3, FpRpcTransactionStatus, EthereumTransactionTransactionV2, PalletEvmCodeMetadata, SpConsensusGrandpaAppPublic, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletIdentityRegistration, PalletIdentityRegistrarInfo, PalletIdentityAuthorityProperties, PalletImOnlineSr25519AppSr25519Public, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsPhaseResult, TanglePrimitivesJobsJobInfo, PalletMultiAssetDelegationOperatorOperatorSnapshot, PalletMultiAssetDelegationDelegatorDelegatorMetadata, PalletMultiAssetDelegationOperatorOperatorMetadata, PalletMultiAssetDelegationRewardsRewardConfig, PalletMultisigMultisig, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, SpStakingOffenceOffenceDetails, PalletPreimageRequestStatus, PalletPreimageOldRequestStatus, PalletProxyAnnouncement, PalletProxyProxyDefinition, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletRolesRestakingLedger, PalletSchedulerScheduled, SpCoreCryptoKeyTypeId, TangleTestnetRuntimeOpaqueSessionKeys, SpStakingExposure, SpStakingPagedExposureMetadata, SpStakingExposurePage, PalletStakingValidatorPrefs, PalletStakingForcing, PalletStakingStakingLedger, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingUnappliedSlash, StagingXcmV4AssetAssetId, SygmaFeeHandlerRouterFeeHandlerType, FrameSystemAccountInfo, FrameSystemCodeUpgradeAuthorization, FrameSupportDispatchPerDispatchClassWeight, SpRuntimeDigest, FrameSystemEventRecord, FrameSystemPhase, FrameSystemLastRuntimeUpgradeInfo, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletTreasurySpendStatus, PalletVestingReleases, PalletVestingVestingInfo, PalletZksaasFeeInfo } from '@polkadot/types/lookup';
 
 export type __AugmentedQuery<ApiType extends ApiTypes> = AugmentedQuery<ApiType, () => unknown>;
 export type __QueryableStorageEntry<ApiType extends ApiTypes> = QueryableStorageEntry<ApiType>;
 
 declare module '@polkadot/api-base/types/storage' {
   interface AugmentedQueries<ApiType extends ApiTypes> {
+    assets: {
+      /**
+       * The holdings of a specific account for a specific asset.
+       **/
+      account: AugmentedQuery<ApiType, (arg1: u128 | AnyNumber | Uint8Array, arg2: AccountId32 | string | Uint8Array) => Observable<Option<PalletAssetsAssetAccount>>, [u128, AccountId32]> & QueryableStorageEntry<ApiType, [u128, AccountId32]>;
+      /**
+       * Approved balance transfers. First balance is the amount approved for transfer. Second
+       * is the amount of `T::Currency` reserved for storing this.
+       * First key is the asset ID, second key is the owner and third key is the delegate.
+       **/
+      approvals: AugmentedQuery<ApiType, (arg1: u128 | AnyNumber | Uint8Array, arg2: AccountId32 | string | Uint8Array, arg3: AccountId32 | string | Uint8Array) => Observable<Option<PalletAssetsApproval>>, [u128, AccountId32, AccountId32]> & QueryableStorageEntry<ApiType, [u128, AccountId32, AccountId32]>;
+      /**
+       * Details of an asset.
+       **/
+      asset: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<Option<PalletAssetsAssetDetails>>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
+      /**
+       * Metadata of an asset.
+       **/
+      metadata: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<PalletAssetsAssetMetadata>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
     authorship: {
       /**
        * Author of current block.
@@ -754,6 +778,36 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       [key: string]: QueryableStorageEntry<ApiType>;
     };
+    multiAssetDelegation: {
+      /**
+       * Snapshot of collator delegation stake at the start of the round.
+       **/
+      atStake: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: AccountId32 | string | Uint8Array) => Observable<Option<PalletMultiAssetDelegationOperatorOperatorSnapshot>>, [u32, AccountId32]> & QueryableStorageEntry<ApiType, [u32, AccountId32]>;
+      /**
+       * Storage for the current round.
+       **/
+      currentRound: AugmentedQuery<ApiType, () => Observable<u32>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Storage for delegator information.
+       **/
+      delegators: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Option<PalletMultiAssetDelegationDelegatorDelegatorMetadata>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
+       * Storage for operator information.
+       **/
+      operators: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Option<PalletMultiAssetDelegationOperatorOperatorMetadata>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
+       * Storage for the reward configuration, which includes APY, cap for assets, and whitelisted blueprints.
+       **/
+      rewardConfigStorage: AugmentedQuery<ApiType, () => Observable<Option<PalletMultiAssetDelegationRewardsRewardConfig>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Whitelisted assets that are allowed to be deposited
+       **/
+      whitelistedAssets: AugmentedQuery<ApiType, () => Observable<Vec<u128>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
     multisig: {
       /**
        * The set of open multisig operations.
@@ -1313,6 +1367,81 @@ declare module '@polkadot/api-base/types/storage' {
        * The `AccountId` of the sudo key.
        **/
       key: AugmentedQuery<ApiType, () => Observable<Option<AccountId32>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    sygmaAccessSegregator: {
+      /**
+       * Mapping signature of extrinsic to account has access
+       * (pallet_index, extrinsic_name) => account
+       **/
+      extrinsicAccess: AugmentedQuery<ApiType, (arg: ITuple<[u8, Bytes]> | [u8 | AnyNumber | Uint8Array, Bytes | string | Uint8Array]) => Observable<Option<AccountId32>>, [ITuple<[u8, Bytes]>]> & QueryableStorageEntry<ApiType, [ITuple<[u8, Bytes]>]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    sygmaBasicFeeHandler: {
+      /**
+       * Mapping fungible asset id to corresponding fee amount
+       **/
+      assetFees: AugmentedQuery<ApiType, (arg: ITuple<[u8, StagingXcmV4AssetAssetId]> | [u8 | AnyNumber | Uint8Array, StagingXcmV4AssetAssetId | { parents?: any; interior?: any } | string | Uint8Array]) => Observable<Option<u128>>, [ITuple<[u8, StagingXcmV4AssetAssetId]>]> & QueryableStorageEntry<ApiType, [ITuple<[u8, StagingXcmV4AssetAssetId]>]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    sygmaBridge: {
+      /**
+       * Deposit counter of dest domain
+       **/
+      depositCounts: AugmentedQuery<ApiType, (arg: u8 | AnyNumber | Uint8Array) => Observable<u64>, [u8]> & QueryableStorageEntry<ApiType, [u8]>;
+      /**
+       * Mark the pairs for supported dest domainID with its corresponding chainID
+       * The chainID is not directly used in pallet, this map is designed more about rechecking the
+       * domainID
+       **/
+      destChainIds: AugmentedQuery<ApiType, (arg: u8 | AnyNumber | Uint8Array) => Observable<Option<U256>>, [u8]> & QueryableStorageEntry<ApiType, [u8]>;
+      /**
+       * Mark supported dest domainID
+       **/
+      destDomainIds: AugmentedQuery<ApiType, (arg: u8 | AnyNumber | Uint8Array) => Observable<bool>, [u8]> & QueryableStorageEntry<ApiType, [u8]>;
+      /**
+       * Bridge Pause indicator
+       * Bridge is unpaused initially, until pause
+       * After mpc address setup, bridge should be paused until ready to unpause
+       **/
+      isPaused: AugmentedQuery<ApiType, (arg: u8 | AnyNumber | Uint8Array) => Observable<bool>, [u8]> & QueryableStorageEntry<ApiType, [u8]>;
+      /**
+       * Pre-set MPC address
+       **/
+      mpcAddr: AugmentedQuery<ApiType, () => Observable<U8aFixed>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Mark whether a deposit nonce was used. Used to mark execution status of a proposal.
+       **/
+      usedNonces: AugmentedQuery<ApiType, (arg1: u8 | AnyNumber | Uint8Array, arg2: u64 | AnyNumber | Uint8Array) => Observable<u64>, [u8, u64]> & QueryableStorageEntry<ApiType, [u8, u64]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    sygmaFeeHandlerRouter: {
+      /**
+       * Return the Fee handler type based on domainID and assetID
+       **/
+      handlerType: AugmentedQuery<ApiType, (arg: ITuple<[u8, StagingXcmV4AssetAssetId]> | [u8 | AnyNumber | Uint8Array, StagingXcmV4AssetAssetId | { parents?: any; interior?: any } | string | Uint8Array]) => Observable<Option<SygmaFeeHandlerRouterFeeHandlerType>>, [ITuple<[u8, StagingXcmV4AssetAssetId]>]> & QueryableStorageEntry<ApiType, [ITuple<[u8, StagingXcmV4AssetAssetId]>]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    sygmaPercentageFeeHandler: {
+      /**
+       * Mapping fungible asset id with domain id to fee rate and its lower bound, upperbound
+       **/
+      assetFeeRate: AugmentedQuery<ApiType, (arg: ITuple<[u8, StagingXcmV4AssetAssetId]> | [u8 | AnyNumber | Uint8Array, StagingXcmV4AssetAssetId | { parents?: any; interior?: any } | string | Uint8Array]) => Observable<Option<ITuple<[u32, u128, u128]>>>, [ITuple<[u8, StagingXcmV4AssetAssetId]>]> & QueryableStorageEntry<ApiType, [ITuple<[u8, StagingXcmV4AssetAssetId]>]>;
       /**
        * Generic query
        **/
