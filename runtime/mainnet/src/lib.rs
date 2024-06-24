@@ -175,6 +175,7 @@ use frame_support::traits::{AsEnsureOriginWithArg, ContainsPair, SortedMembers};
 use pallet_ethereum::{Call::transact, Transaction as EthereumTransaction};
 use pallet_evm::{Account as EVMAccount, FeeCalculator, HashedAddressMapping, Runner};
 use sp_core::crypto::AccountId32;
+use xcm::latest::Junctions::X4;
 
 pub type Nonce = u32;
 
@@ -1601,7 +1602,7 @@ impl sygma_percentage_feehandler::Config for Runtime {
 parameter_types! {
 	// TNT
 	pub NativeLocation: Location = Location::here();
-	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
+	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000002");
 
 	// Pha
 	pub PhaLocation: Location = Location::new(
@@ -1615,7 +1616,7 @@ parameter_types! {
 	// PhaAssetId is the substrate assetID of Pha
 	pub PhaAssetId: AssetId = 2000;
 	// PhaResourceId is the resourceID that mapping with the foreign asset Pha
-	pub PhaResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000");
+	pub PhaResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000001");
 }
 
 fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
@@ -1726,12 +1727,67 @@ impl ConcrateSygmaAsset {
 }
 
 pub struct DestinationDataParser;
-impl ExtractDestinationData for DestinationDataParser {
+/// Extract dest to be recipient and Dest DomainID
+/// if dest chain is substrate chain, recipient must be a encoded MultiLocation
+/// if dest chain is non-substrate chain, recipient is [u8; 32]
+impl ExtractDestinationData for crate::DestinationDataParser {
 	fn extract_dest(dest: &Location) -> Option<(Vec<u8>, DomainID)> {
 		match (dest.parents, dest.interior.clone()) {
+			// final dest is on the remote substrate chain
+			(1, X4(xs)) => {
+				let [a, b, c, d] = *xs;
+				match (a, b, c, d) {
+					(
+						GeneralKey { length: path_len, data: sygma_path },
+						GeneralIndex(dest_domain_id),
+						Parachain(parachain_id),
+						Junction::AccountId32 { network: None, id: recipient },
+					) => {
+						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+								|domain_id| {
+									let l: Location = Location::new(
+										1,
+										Junctions::X2(Arc::new([
+											Parachain(parachain_id),
+											Junction::AccountId32 { network: None, id: recipient },
+										])),
+									);
+									(l.encode(), domain_id)
+								},
+							);
+						}
+						None
+					},
+					_ => None,
+				}
+			},
 			(0, X3(xs)) => {
 				let [a, b, c] = *xs;
 				match (a, b, c) {
+					// final dest is on the local substrate chain
+					(
+						GeneralKey { length: path_len, data: sygma_path },
+						GeneralIndex(dest_domain_id),
+						Junction::AccountId32 { network: None, id: recipient },
+					) => {
+						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+								|domain_id| {
+									let l: Location = Location::new(
+										0,
+										Junctions::X1(Arc::new([Junction::AccountId32 {
+											network: None,
+											id: recipient,
+										}])),
+									);
+									(l.encode(), domain_id)
+								},
+							);
+						}
+						None
+					},
+					// final dest is on the non-substrate chain such as EVM
 					(
 						GeneralKey { length: path_len, data: sygma_path },
 						GeneralIndex(dest_domain_id),
