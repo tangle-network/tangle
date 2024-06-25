@@ -88,12 +88,15 @@ pub mod pallet {
 			+ LockableCurrency<Self::AccountId>;
 
 		/// The minimum amount of bond required for an operator.
+		#[pallet::constant]
 		type MinOperatorBondAmount: Get<BalanceOf<Self>>;
 
 		/// The minimum amount of bond required for a delegate.
+		#[pallet::constant]
 		type MinDelegateAmount: Get<BalanceOf<Self>>;
 
 		/// The duration for which the bond is locked.
+		#[pallet::constant]
 		type BondDuration: Get<RoundIndex>;
 
 		/// The service manager that manages active services.
