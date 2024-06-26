@@ -217,7 +217,12 @@ std = [
   "pallet-jobs/std",
   "pallet-jobs-rpc-runtime-api/std",
   "frame-metadata-hash-extension/std",
-
+  "frame-benchmarking/std",
+  "pallet-dkg/std",
+  "pallet-proxy/std",
+  "pallet-zksaas/std",
+  "num_enum/std",
+  
   # Tangle dependencies
   "tangle-primitives/std",
   "tangle-crypto-primitives/std",

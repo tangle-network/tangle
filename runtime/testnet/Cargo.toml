@@ -244,6 +244,14 @@ std = [
   "pallet-identity/std",
   "frame-system-benchmarking?/std",
   "frame-metadata-hash-extension/std",
+  "frame-benchmarking/std",
+  "pallet-dkg/std",
+  "pallet-proxy/std",
+  "pallet-zksaas/std",
+  "num_enum/std",
+  "fixed/std",
+  "hex/std",
+  "primitive-types/std",
 
   # Tangle dependencies
   "tangle-primitives/std",
