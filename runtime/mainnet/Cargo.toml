@@ -86,7 +86,7 @@ pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
 
-# Webb dependencies
+# Tangle dependencies
 tangle-crypto-primitives = { workspace = true }
 tangle-primitives = { workspace = true }
 pallet-roles = { workspace = true }

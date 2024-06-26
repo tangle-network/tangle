@@ -377,5 +377,10 @@ sygma-percentage-feehandler = { git = "https://github.com/sygmaprotocol/sygma-su
 sygma-bridge = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "release-polkadot-v1.7.0", default-features = false }
 sygma-runtime-api = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "release-polkadot-v1.7.0", default-features = false }
 
+# IBC
+pallet-ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/update-deps" }
+pallet-ibc-ping = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/update-deps" }
+ibc-primitives = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/update-deps" }
+
 [profile.release]
 panic = "unwind"

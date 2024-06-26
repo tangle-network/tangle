@@ -88,7 +88,7 @@ pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
 
-# Webb dependencies
+# Tangle dependencies
 pallet-airdrop-claims = { workspace = true }
 pallet-dkg = { workspace = true }
 pallet-jobs = { workspace = true }
@@ -148,6 +148,11 @@ sygma-fee-handler-router ={ workspace = true }
 sygma-percentage-feehandler = { workspace = true }
 sygma-bridge = { workspace = true }
 sygma-runtime-api = { workspace = true }
+
+# IBC
+pallet-ibc = { workspace = true }
+pallet-ibc-ping = { workspace = true }
+ibc-primitives = { workspace = true }
 
 # XCM
 xcm = { workspace = true }
@@ -301,6 +306,11 @@ std = [
   "sygma-fee-handler-router/std",
   "sygma-percentage-feehandler/std",
   "sygma-runtime-api/std",
+
+  # IBC
+  "pallet-ibc/std",
+  "pallet-ibc-ping/std",
+  "ibc-primitives/std",
 
   # XCM
   "xcm/std",
