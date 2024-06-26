@@ -40,7 +40,7 @@ sp-std = { workspace = true }
 sp-storage = { workspace = true }
 sp-transaction-pool = { workspace = true }
 sp-version = { workspace = true }
-
+frame-metadata-hash-extension = { workspace = true }
 frame-benchmarking = { workspace = true, optional = true }
 frame-election-provider-support = { workspace = true }
 frame-executive = { workspace = true }
@@ -243,6 +243,7 @@ std = [
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
   "frame-system-benchmarking?/std",
+  "frame-metadata-hash-extension/std",
 
   # Tangle dependencies
   "tangle-primitives/std",
