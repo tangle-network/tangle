@@ -34,7 +34,6 @@ members = [
  "precompiles/call-permit",
  "precompiles/proxy",
  "precompiles/preimage",
- "precompiles/services",
  "precompiles/balances-erc20",
  "precompiles/assets-erc20",
  "precompiles/verify-ecdsa-secp256k1-signature",
@@ -308,7 +307,6 @@ pallet-evm-precompile-proxy = { path = "precompiles/proxy", default-features = f
 pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-features = false }
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
-pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
 pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { path = "precompiles/verify-ecdsa-secp256k1-signature", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { path = "precompiles/verify-ecdsa-secp256r1-signature", default-features = false }

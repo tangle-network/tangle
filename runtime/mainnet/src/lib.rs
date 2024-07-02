@@ -78,7 +78,6 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 
 pub use frame_support::{
 	construct_runtime,

@@ -8251,52 +8251,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-evm-precompile-services"
-version = "0.1.0"
-dependencies = [
- "derive_more",
- "ethereum",
- "ethers",
- "fp-account",
- "fp-consensus",
- "fp-dynamic-fee",
- "fp-ethereum",
- "fp-evm",
- "fp-rpc",
- "fp-self-contained",
- "fp-storage",
- "frame-support",
- "frame-system",
- "hex",
- "hex-literal 0.4.1",
- "libsecp256k1",
- "log",
- "num_enum 0.5.11",
- "pallet-balances",
- "pallet-base-fee",
- "pallet-dynamic-fee",
- "pallet-ethereum",
- "pallet-evm",
- "pallet-evm-chain-id",
- "pallet-services",
- "pallet-timestamp",
- "parity-scale-codec 3.6.12",
- "precompile-utils",
- "rustc-hex",
- "scale-info",
- "serde",
- "serde_json",
- "sha3 0.10.8",
- "smallvec",
- "sp-core",
- "sp-io",
- "sp-keystore",
- "sp-runtime",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
- "tangle-primitives",
-]
-
-[[package]]
 name = "pallet-evm-precompile-sha3fips"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier.git?branch=polkadot-v1.7.0#c5d6daa9ffd46c0a85915526aa26d200fd635e30"
@@ -15343,7 +15297,6 @@ dependencies = [
  "pallet-evm-precompile-preimage",
  "pallet-evm-precompile-proxy",
  "pallet-evm-precompile-registry",
- "pallet-evm-precompile-services",
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-evm-precompile-staking",

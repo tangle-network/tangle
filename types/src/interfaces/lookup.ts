@@ -1829,7 +1829,7 @@ export default {
     },
   },
   /**
-   * Lookup159: tangle_primitives::jobs::v2::OperatorPreferences
+   * Lookup159: tangle_primitives::services::OperatorPreferences
    **/
   TanglePrimitivesJobsV2OperatorPreferences: {
     key: "SpCoreEcdsaPublic",
@@ -1840,13 +1840,13 @@ export default {
    **/
   SpCoreEcdsaPublic: "[u8;33]",
   /**
-   * Lookup162: tangle_primitives::jobs::v2::ApprovalPrefrence
+   * Lookup162: tangle_primitives::services::ApprovalPrefrence
    **/
   TanglePrimitivesJobsV2ApprovalPrefrence: {
     _enum: ["None", "Required"],
   },
   /**
-   * Lookup164: tangle_primitives::jobs::v2::field::Field<C, sp_core::crypto::AccountId32>
+   * Lookup164: tangle_primitives::services::field::Field<C, sp_core::crypto::AccountId32>
    **/
   TanglePrimitivesJobsV2Field: {
     _enum: {
@@ -4643,7 +4643,7 @@ export default {
     },
   },
   /**
-   * Lookup485: tangle_primitives::jobs::v2::ServiceBlueprint<C>
+   * Lookup485: tangle_primitives::services::ServiceBlueprint<C>
    **/
   TanglePrimitivesJobsV2ServiceBlueprint: {
     metadata: "TanglePrimitivesJobsV2ServiceMetadata",
@@ -4655,7 +4655,7 @@ export default {
     gadget: "TanglePrimitivesJobsV2Gadget",
   },
   /**
-   * Lookup486: tangle_primitives::jobs::v2::ServiceMetadata<C>
+   * Lookup486: tangle_primitives::services::ServiceMetadata<C>
    **/
   TanglePrimitivesJobsV2ServiceMetadata: {
     name: "Bytes",
@@ -4668,7 +4668,7 @@ export default {
     license: "Option<Bytes>",
   },
   /**
-   * Lookup491: tangle_primitives::jobs::v2::JobDefinition<C>
+   * Lookup491: tangle_primitives::services::JobDefinition<C>
    **/
   TanglePrimitivesJobsV2JobDefinition: {
     metadata: "TanglePrimitivesJobsV2JobMetadata",
@@ -4677,14 +4677,14 @@ export default {
     verifier: "TanglePrimitivesJobsV2JobResultVerifier",
   },
   /**
-   * Lookup492: tangle_primitives::jobs::v2::JobMetadata<C>
+   * Lookup492: tangle_primitives::services::JobMetadata<C>
    **/
   TanglePrimitivesJobsV2JobMetadata: {
     name: "Bytes",
     description: "Option<Bytes>",
   },
   /**
-   * Lookup494: tangle_primitives::jobs::v2::field::FieldType
+   * Lookup494: tangle_primitives::services::field::FieldType
    **/
   TanglePrimitivesJobsV2FieldFieldType: {
     _enum: {
@@ -4792,7 +4792,7 @@ export default {
     },
   },
   /**
-   * Lookup496: tangle_primitives::jobs::v2::JobResultVerifier
+   * Lookup496: tangle_primitives::services::JobResultVerifier
    **/
   TanglePrimitivesJobsV2JobResultVerifier: {
     _enum: {
@@ -4801,7 +4801,7 @@ export default {
     },
   },
   /**
-   * Lookup498: tangle_primitives::jobs::v2::ServiceRegistrationHook
+   * Lookup498: tangle_primitives::services::ServiceRegistrationHook
    **/
   TanglePrimitivesJobsV2ServiceRegistrationHook: {
     _enum: {
@@ -4810,7 +4810,7 @@ export default {
     },
   },
   /**
-   * Lookup499: tangle_primitives::jobs::v2::ServiceRequestHook
+   * Lookup499: tangle_primitives::services::ServiceRequestHook
    **/
   TanglePrimitivesJobsV2ServiceRequestHook: {
     _enum: {
@@ -4819,7 +4819,7 @@ export default {
     },
   },
   /**
-   * Lookup500: tangle_primitives::jobs::v2::Gadget<C>
+   * Lookup500: tangle_primitives::services::Gadget<C>
    **/
   TanglePrimitivesJobsV2Gadget: {
     _enum: {
@@ -4829,26 +4829,26 @@ export default {
     },
   },
   /**
-   * Lookup501: tangle_primitives::jobs::v2::WasmGadget<C>
+   * Lookup501: tangle_primitives::services::WasmGadget<C>
    **/
   TanglePrimitivesJobsV2WasmGadget: {
     runtime: "TanglePrimitivesJobsV2WasmRuntime",
     soruces: "Vec<TanglePrimitivesJobsV2GadgetSource>",
   },
   /**
-   * Lookup502: tangle_primitives::jobs::v2::WasmRuntime
+   * Lookup502: tangle_primitives::services::WasmRuntime
    **/
   TanglePrimitivesJobsV2WasmRuntime: {
     _enum: ["Wasmtime", "Wasmer"],
   },
   /**
-   * Lookup504: tangle_primitives::jobs::v2::GadgetSource<C>
+   * Lookup504: tangle_primitives::services::GadgetSource<C>
    **/
   TanglePrimitivesJobsV2GadgetSource: {
     fetcher: "TanglePrimitivesJobsV2GadgetSourceFetcher",
   },
   /**
-   * Lookup505: tangle_primitives::jobs::v2::GadgetSourceFetcher<C>
+   * Lookup505: tangle_primitives::services::GadgetSourceFetcher<C>
    **/
   TanglePrimitivesJobsV2GadgetSourceFetcher: {
     _enum: {
@@ -4858,7 +4858,7 @@ export default {
     },
   },
   /**
-   * Lookup507: tangle_primitives::jobs::v2::GithubFetcher<C>
+   * Lookup507: tangle_primitives::services::GithubFetcher<C>
    **/
   TanglePrimitivesJobsV2GithubFetcher: {
     owner: "Bytes",
@@ -4867,7 +4867,7 @@ export default {
     binaries: "Vec<TanglePrimitivesJobsV2GadgetBinary>",
   },
   /**
-   * Lookup515: tangle_primitives::jobs::v2::GadgetBinary<C>
+   * Lookup515: tangle_primitives::services::GadgetBinary<C>
    **/
   TanglePrimitivesJobsV2GadgetBinary: {
     arch: "TanglePrimitivesJobsV2Architecture",
@@ -4876,7 +4876,7 @@ export default {
     sha256: "[u8;32]",
   },
   /**
-   * Lookup516: tangle_primitives::jobs::v2::Architecture
+   * Lookup516: tangle_primitives::services::Architecture
    **/
   TanglePrimitivesJobsV2Architecture: {
     _enum: [
@@ -4893,13 +4893,13 @@ export default {
     ],
   },
   /**
-   * Lookup517: tangle_primitives::jobs::v2::OperatingSystem
+   * Lookup517: tangle_primitives::services::OperatingSystem
    **/
   TanglePrimitivesJobsV2OperatingSystem: {
     _enum: ["Unknown", "Linux", "Windows", "MacOS", "BSD"],
   },
   /**
-   * Lookup521: tangle_primitives::jobs::v2::ImageRegistryFetcher<C>
+   * Lookup521: tangle_primitives::services::ImageRegistryFetcher<C>
    **/
   TanglePrimitivesJobsV2ImageRegistryFetcher: {
     _alias: {
@@ -4907,13 +4907,13 @@ export default {
     },
   },
   /**
-   * Lookup529: tangle_primitives::jobs::v2::NativeGadget<C>
+   * Lookup529: tangle_primitives::services::NativeGadget<C>
    **/
   TanglePrimitivesJobsV2NativeGadget: {
     soruces: "Vec<TanglePrimitivesJobsV2GadgetSource>",
   },
   /**
-   * Lookup530: tangle_primitives::jobs::v2::ContainerGadget<C>
+   * Lookup530: tangle_primitives::services::ContainerGadget<C>
    **/
   TanglePrimitivesJobsV2ContainerGadget: {
     soruces: "Vec<TanglePrimitivesJobsV2GadgetSource>",
@@ -6679,7 +6679,7 @@ export default {
     ],
   },
   /**
-   * Lookup782: tangle_primitives::jobs::v2::ServiceRequest<C, sp_core::crypto::AccountId32, BlockNumber>
+   * Lookup782: tangle_primitives::services::ServiceRequest<C, sp_core::crypto::AccountId32, BlockNumber>
    **/
   TanglePrimitivesJobsV2ServiceRequest: {
     blueprint: "u64",
@@ -6691,13 +6691,13 @@ export default {
       "Vec<(AccountId32,TanglePrimitivesJobsV2ApprovalState)>",
   },
   /**
-   * Lookup787: tangle_primitives::jobs::v2::ApprovalState
+   * Lookup787: tangle_primitives::services::ApprovalState
    **/
   TanglePrimitivesJobsV2ApprovalState: {
     _enum: ["Pending", "Approved", "Rejected"],
   },
   /**
-   * Lookup789: tangle_primitives::jobs::v2::Service<C, sp_core::crypto::AccountId32, BlockNumber>
+   * Lookup789: tangle_primitives::services::Service<C, sp_core::crypto::AccountId32, BlockNumber>
    **/
   TanglePrimitivesJobsV2Service: {
     id: "u64",
@@ -6708,7 +6708,7 @@ export default {
     ttl: "u64",
   },
   /**
-   * Lookup793: tangle_primitives::jobs::v2::JobCall<C, sp_core::crypto::AccountId32>
+   * Lookup793: tangle_primitives::services::JobCall<C, sp_core::crypto::AccountId32>
    **/
   TanglePrimitivesJobsV2JobCall: {
     serviceId: "u64",
@@ -6716,7 +6716,7 @@ export default {
     args: "Vec<TanglePrimitivesJobsV2Field>",
   },
   /**
-   * Lookup794: tangle_primitives::jobs::v2::JobCallResult<C, sp_core::crypto::AccountId32>
+   * Lookup794: tangle_primitives::services::JobCallResult<C, sp_core::crypto::AccountId32>
    **/
   TanglePrimitivesJobsV2JobCallResult: {
     serviceId: "u64",
@@ -6724,7 +6724,7 @@ export default {
     result: "Vec<TanglePrimitivesJobsV2Field>",
   },
   /**
-   * Lookup795: tangle_primitives::jobs::v2::OperatorProfile<C>
+   * Lookup795: tangle_primitives::services::OperatorProfile<C>
    **/
   TanglePrimitivesJobsV2OperatorProfile: {
     services: "BTreeSet<u64>",
@@ -6759,7 +6759,7 @@ export default {
     },
   },
   /**
-   * Lookup799: tangle_primitives::jobs::v2::TypeCheckError
+   * Lookup799: tangle_primitives::services::TypeCheckError
    **/
   TanglePrimitivesJobsV2TypeCheckError: {
     _enum: {

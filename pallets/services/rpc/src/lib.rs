@@ -29,7 +29,7 @@ use sp_runtime::{
 	DispatchError, Serialize,
 };
 use std::sync::Arc;
-use tangle_primitives::jobs::v2::{Constraints, RpcServicesWithBlueprint};
+use tangle_primitives::services::{Constraints, RpcServicesWithBlueprint};
 
 type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
