@@ -123,7 +123,6 @@ pallet-hotfix-sufficients = { workspace = true }
 pallet-evm-precompile-batch = { workspace = true }
 pallet-evm-precompile-call-permit = { workspace = true }
 pallet-evm-precompile-democracy = { workspace = true }
-pallet-evm-precompile-services = { workspace = true }
 pallet-evm-precompile-preimage = { workspace = true }
 pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
@@ -285,7 +284,6 @@ std = [
   "pallet-evm-precompile-democracy/std",
   "pallet-evm-precompile-registry/std",
   "pallet-evm-precompile-staking/std",
-  "pallet-evm-precompile-services/std",
   "pallet-evm-precompile-vesting/std",
   "pallet-evm-precompile-verify-ecdsa-secp256k1-signature/std",
   "pallet-evm-precompile-verify-ecdsa-secp256r1-signature/std",

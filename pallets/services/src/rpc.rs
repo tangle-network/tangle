@@ -2,7 +2,7 @@ use itertools::Itertools;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::vec::Vec;
 
-use tangle_primitives::jobs::v2::*;
+use tangle_primitives::services::*;
 
 use super::*;
 

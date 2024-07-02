@@ -39,8 +39,6 @@ use sp_runtime::{
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-
 pub type AccountId = AccountId32;
 pub type Balance = u128;
 pub type BlockNumber = u64;
@@ -388,12 +386,8 @@ pub fn mock_pub_key(id: u8) -> AccountId {
 	sr25519::Public::from_raw([id; 32]).into()
 }
 
-pub fn mock_role_key_id(id: u8) -> RoleKeyId {
-	RoleKeyId::from(Public::from_raw([id; 33]))
-}
-
-pub fn mock_authorities(vec: Vec<u8>) -> Vec<(AccountId, RoleKeyId)> {
-	vec.into_iter().map(|id| (mock_pub_key(id), mock_role_key_id(id))).collect()
+pub fn mock_authorities(vec: Vec<u8>) -> Vec<AccountId> {
+	vec.into_iter().map(|id| mock_pub_key(id)).collect()
 }
 
 pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {

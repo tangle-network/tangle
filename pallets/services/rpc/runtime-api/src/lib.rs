@@ -21,7 +21,7 @@
 use parity_scale_codec::Codec;
 use sp_runtime::{traits::MaybeDisplay, Serialize};
 use sp_std::vec::Vec;
-use tangle_primitives::jobs::v2::{Constraints, RpcServicesWithBlueprint};
+use tangle_primitives::services::{Constraints, RpcServicesWithBlueprint};
 
 pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;

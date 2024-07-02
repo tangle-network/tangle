@@ -2,7 +2,7 @@
 use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::vec::Vec;
-use tangle_primitives::jobs::v2;
+use tangle_primitives::services::Constraints;
 
 use super::*;
 
@@ -31,7 +31,7 @@ impl<T: Config> traits::EvmRunner<T> for () {
 	}
 }
 
-impl<T: Config> v2::Constraints for types::ConstraintsOf<T> {
+impl<T: Config> Constraints for types::ConstraintsOf<T> {
 	type MaxFields = T::MaxFields;
 
 	type MaxFieldsSize = T::MaxFieldsSize;

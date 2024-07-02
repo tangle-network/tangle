@@ -30,9 +30,7 @@ use sp_runtime::{
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
-pub mod jobs;
-pub mod misbehavior;
-pub mod roles;
+pub mod services;
 pub mod types;
 pub use types::*;
 pub mod chain_identifier;

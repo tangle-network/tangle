@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use tangle_primitives::jobs::v2::Constraints;
+use tangle_primitives::services::Constraints;
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
