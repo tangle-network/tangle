@@ -185,12 +185,12 @@ fn non_vested_cannot_vest_other() {
 	});
 }
 
-// Test vested transfer.
+// Test vested transfer to evm account.
 #[test]
-fn test_vested_transfer() {
+fn test_vested_transfer_evm() {
 	ExtBuilder::default().build().execute_with(|| {
 		let schedules =
-			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Bobo)).unwrap();
+			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
 		assert!(!schedules.is_empty());
 
 		let target_evm_address = H160::repeat_byte(0x05);
@@ -201,17 +201,44 @@ fn test_vested_transfer() {
 		// Target account should be non vested account
 		assert_eq!(pallet_vesting::Pallet::<Runtime>::vesting(mapped_target_address), None);
 
-		// Lets transfer Bobo's vesting schedule to target account.
+		// Lets transfer Alex's vesting schedule to target account.
 		PrecompilesValue::get()
 			.prepare_test(
-				TestAccount::Bobo,
+				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::vested_transfer { target: target.into(), index: 0 },
 			)
 			.execute_returns(());
 
-		// Now lets check if vesting schedule has been transferred to target account
+		// Should transfer vested schedule to target account.
 		let schedules = Vesting::<Runtime>::get(mapped_target_address).unwrap();
+		assert!(!schedules.is_empty());
+	});
+}
+
+// Test vested transfer to substrate account.
+#[test]
+fn test_vested_transfer_substrate() {
+	ExtBuilder::default().build().execute_with(|| {
+		let schedules =
+			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
+		assert!(!schedules.is_empty());
+
+		let target_account = sp_core::sr25519::Public::from(TestAccount::Eve);
+		// Target account should be non vested account
+		assert_eq!(pallet_vesting::Pallet::<Runtime>::vesting(target_account), None);
+
+		// Lets transfer Alex's vesting schedule to target account.
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::vested_transfer { target: target_account.into(), index: 0 },
+			)
+			.execute_returns(());
+
+		// Should transfer vested schedule to target account.
+		let schedules = Vesting::<Runtime>::get(target_account).unwrap();
 		assert!(!schedules.is_empty());
 	});
 }
