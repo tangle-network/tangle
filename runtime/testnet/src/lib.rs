@@ -90,7 +90,6 @@ use sygma_traits::{
 	ChainID, DecimalConverter, DepositNonce, DomainID, ExtractDestinationData, ResourceId,
 	VerifyingContractAddress,
 };
-pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::services::RpcServicesWithBlueprint;
 use xcm::v4::Junctions::{X1, X3};
 use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
