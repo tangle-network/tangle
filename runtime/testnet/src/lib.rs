@@ -1877,8 +1877,6 @@ impl_runtime_apis! {
 		}
 	}
 
-
-
 	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId> for Runtime {
 		fn query_services_with_blueprints_by_operator(
 			operator: AccountId,
