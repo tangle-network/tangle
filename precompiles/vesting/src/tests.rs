@@ -154,7 +154,7 @@ fn test_vest_other_evm() {
 			.prepare_test(
 				TestAccount::Bobo,
 				H160::from_low_u64_be(1),
-				PCall::vest_other { target: target_account.into() },
+				PCall::vest_other { target: target_account },
 			)
 			.execute_returns(());
 
@@ -194,7 +194,7 @@ fn test_vested_transfer_evm() {
 		assert!(!schedules.is_empty());
 
 		let target_evm_address = H160::repeat_byte(0x05);
-		let target = convert_h160_to_h256(target_evm_address);
+		let target_account = convert_h160_to_h256(target_evm_address);
 		// AccountId mapped for target evm address
 		let mapped_target_address = sp_core::sr25519::Public::from(TestAccount::Eve);
 
@@ -206,7 +206,7 @@ fn test_vested_transfer_evm() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::vested_transfer { target: target.into(), index: 0 },
+				PCall::vested_transfer { target: target_account, index: 0 },
 			)
 			.execute_returns(());
 
