@@ -5,7 +5,7 @@ use parity_scale_codec::Decode;
 use sp_core::{ecdsa, H160};
 use sp_runtime::KeyTypeId;
 use sp_std::vec;
-use tangle_primitives::jobs::v2::*;
+use tangle_primitives::services::*;
 
 fn zero_key() -> ecdsa::Public {
 	ecdsa::Public([0; 33])

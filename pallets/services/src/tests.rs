@@ -26,7 +26,7 @@ use sp_core::{bounded_vec, ecdsa, ByteArray, U256};
 use sp_runtime::{traits::BlakeTwo256, KeyTypeId};
 use sp_std::sync::Arc;
 use std::fs;
-use tangle_primitives::jobs::v2::*;
+use tangle_primitives::services::*;
 
 const ALICE: u8 = 1;
 const BOB: u8 = 2;

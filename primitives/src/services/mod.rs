@@ -14,7 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Jobs v2 module.
+// This file is part of Tangle.
+// Copyright (C) 2022-2024 Webb Technologies Inc.
+//
+// Tangle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tangle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
+//! Services primitives.
 
 use educe::Educe;
 use frame_support::pallet_prelude::*;
@@ -25,7 +41,7 @@ use sp_core::{ecdsa, RuntimeDebug};
 #[cfg(not(feature = "std"))]
 use alloc::{vec, vec::Vec};
 
-mod field;
+pub mod field;
 pub use field::*;
 
 /// A Higher level abstraction of all the constraints.

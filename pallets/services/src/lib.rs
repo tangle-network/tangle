@@ -56,7 +56,7 @@ pub mod module {
 	use super::*;
 	use frame_support::dispatch::PostDispatchInfo;
 	use sp_std::vec::Vec;
-	use tangle_primitives::jobs::v2::*;
+	use tangle_primitives::services::*;
 	use types::*;
 
 	#[pallet::config]

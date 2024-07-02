@@ -33327,7 +33327,7 @@ pub mod api {
 				pub mod create_blueprint {
 					use super::runtime_types;
 					pub type Blueprint =
-						runtime_types::tangle_primitives::jobs::v2::ServiceBlueprint;
+						runtime_types::tangle_primitives::jobs::ServiceBlueprint;
 				}
 				impl ::subxt::blocks::StaticExtrinsic for CreateBlueprint {
 					const PALLET: &'static str = "Services";
@@ -33357,9 +33357,9 @@ pub mod api {
 					use super::runtime_types;
 					pub type BlueprintId = ::core::primitive::u64;
 					pub type Preferences =
-						runtime_types::tangle_primitives::jobs::v2::OperatorPreferences;
+						runtime_types::tangle_primitives::jobs::OperatorPreferences;
 					pub type RegistrationArgs = ::std::vec::Vec<
-						runtime_types::tangle_primitives::jobs::v2::field::Field<
+						runtime_types::tangle_primitives::jobs::field::Field<
 							::subxt::utils::AccountId32,
 						>,
 					>;
@@ -33417,7 +33417,7 @@ pub mod api {
 					use super::runtime_types;
 					pub type BlueprintId = ::core::primitive::u64;
 					pub type ApprovalPreference =
-						runtime_types::tangle_primitives::jobs::v2::ApprovalPrefrence;
+						runtime_types::tangle_primitives::jobs::ApprovalPrefrence;
 				}
 				impl ::subxt::blocks::StaticExtrinsic for UpdateApprovalPreference {
 					const PALLET: &'static str = "Services";
@@ -33453,7 +33453,7 @@ pub mod api {
 					pub type ServiceProviders = ::std::vec::Vec<::subxt::utils::AccountId32>;
 					pub type Ttl = ::core::primitive::u64;
 					pub type RequestArgs = ::std::vec::Vec<
-						runtime_types::tangle_primitives::jobs::v2::field::Field<
+						runtime_types::tangle_primitives::jobs::field::Field<
 							::subxt::utils::AccountId32,
 						>,
 					>;
@@ -33566,7 +33566,7 @@ pub mod api {
 					pub type ServiceId = ::core::primitive::u64;
 					pub type Job = ::core::primitive::u8;
 					pub type Args = ::std::vec::Vec<
-						runtime_types::tangle_primitives::jobs::v2::field::Field<
+						runtime_types::tangle_primitives::jobs::field::Field<
 							::subxt::utils::AccountId32,
 						>,
 					>;
@@ -33601,7 +33601,7 @@ pub mod api {
 					pub type ServiceId = ::core::primitive::u64;
 					pub type CallId = ::core::primitive::u64;
 					pub type Result = ::std::vec::Vec<
-						runtime_types::tangle_primitives::jobs::v2::field::Field<
+						runtime_types::tangle_primitives::jobs::field::Field<
 							::subxt::utils::AccountId32,
 						>,
 					>;
@@ -33852,9 +33852,9 @@ pub mod api {
 				pub type Provider = ::subxt::utils::AccountId32;
 				pub type BlueprintId = ::core::primitive::u64;
 				pub type Preferences =
-					runtime_types::tangle_primitives::jobs::v2::OperatorPreferences;
+					runtime_types::tangle_primitives::jobs::OperatorPreferences;
 				pub type RegistrationArgs = ::std::vec::Vec<
-					runtime_types::tangle_primitives::jobs::v2::field::Field<
+					runtime_types::tangle_primitives::jobs::field::Field<
 						::subxt::utils::AccountId32,
 					>,
 				>;
@@ -33914,7 +33914,7 @@ pub mod api {
 				pub type Operator = ::subxt::utils::AccountId32;
 				pub type BlueprintId = ::core::primitive::u64;
 				pub type ApprovalPreference =
-					runtime_types::tangle_primitives::jobs::v2::ApprovalPrefrence;
+					runtime_types::tangle_primitives::jobs::ApprovalPrefrence;
 			}
 			impl ::subxt::events::StaticEvent for ApprovalPreferenceUpdated {
 				const PALLET: &'static str = "Services";
@@ -34136,7 +34136,7 @@ pub mod api {
 				pub type CallId = ::core::primitive::u64;
 				pub type Job = ::core::primitive::u8;
 				pub type Args = ::std::vec::Vec<
-					runtime_types::tangle_primitives::jobs::v2::field::Field<
+					runtime_types::tangle_primitives::jobs::field::Field<
 						::subxt::utils::AccountId32,
 					>,
 				>;
@@ -34173,7 +34173,7 @@ pub mod api {
 				pub type CallId = ::core::primitive::u64;
 				pub type Job = ::core::primitive::u8;
 				pub type Result = ::std::vec::Vec<
-					runtime_types::tangle_primitives::jobs::v2::field::Field<
+					runtime_types::tangle_primitives::jobs::field::Field<
 						::subxt::utils::AccountId32,
 					>,
 				>;
@@ -34207,21 +34207,21 @@ pub mod api {
 					use super::runtime_types;
 					pub type Blueprints = (
 						::subxt::utils::AccountId32,
-						runtime_types::tangle_primitives::jobs::v2::ServiceBlueprint,
+						runtime_types::tangle_primitives::jobs::ServiceBlueprint,
 					);
 					pub type Param0 = ::core::primitive::u64;
 				}
 				pub mod operators {
 					use super::runtime_types;
 					pub type Operators =
-						runtime_types::tangle_primitives::jobs::v2::OperatorPreferences;
+						runtime_types::tangle_primitives::jobs::OperatorPreferences;
 					pub type Param0 = ::core::primitive::u64;
 					pub type Param1 = ::subxt::utils::AccountId32;
 				}
 				pub mod service_requests {
 					use super::runtime_types;
 					pub type ServiceRequests =
-						runtime_types::tangle_primitives::jobs::v2::ServiceRequest<
+						runtime_types::tangle_primitives::jobs::ServiceRequest<
 							::subxt::utils::AccountId32,
 							::core::primitive::u64,
 						>;
@@ -34229,7 +34229,7 @@ pub mod api {
 				}
 				pub mod instances {
 					use super::runtime_types;
-					pub type Instances = runtime_types::tangle_primitives::jobs::v2::Service<
+					pub type Instances = runtime_types::tangle_primitives::jobs::Service<
 						::subxt::utils::AccountId32,
 						::core::primitive::u64,
 					>;
@@ -34245,7 +34245,7 @@ pub mod api {
 				}
 				pub mod job_calls {
 					use super::runtime_types;
-					pub type JobCalls = runtime_types::tangle_primitives::jobs::v2::JobCall<
+					pub type JobCalls = runtime_types::tangle_primitives::jobs::JobCall<
 						::subxt::utils::AccountId32,
 					>;
 					pub type Param0 = ::core::primitive::u64;
@@ -34253,7 +34253,7 @@ pub mod api {
 				}
 				pub mod job_results {
 					use super::runtime_types;
-					pub type JobResults = runtime_types::tangle_primitives::jobs::v2::JobCallResult<
+					pub type JobResults = runtime_types::tangle_primitives::jobs::JobCallResult<
 						::subxt::utils::AccountId32,
 					>;
 					pub type Param0 = ::core::primitive::u64;
@@ -34262,7 +34262,7 @@ pub mod api {
 				pub mod operators_profile {
 					use super::runtime_types;
 					pub type OperatorsProfile =
-						runtime_types::tangle_primitives::jobs::v2::OperatorProfile;
+						runtime_types::tangle_primitives::jobs::OperatorProfile;
 					pub type Param0 = ::subxt::utils::AccountId32;
 				}
 			}
@@ -45720,7 +45720,7 @@ pub mod api {
 					#[codec(index = 0)]
 					#[doc = "See `Pallet::create_blueprint`."]
 					create_blueprint {
-						blueprint: runtime_types::tangle_primitives::jobs::v2::ServiceBlueprint,
+						blueprint: runtime_types::tangle_primitives::jobs::ServiceBlueprint,
 					},
 					#[codec(index = 1)]
 					#[doc = "See `Pallet::register`."]
@@ -45728,9 +45728,9 @@ pub mod api {
 						#[codec(compact)]
 						blueprint_id: ::core::primitive::u64,
 						preferences:
-							runtime_types::tangle_primitives::jobs::v2::OperatorPreferences,
+							runtime_types::tangle_primitives::jobs::OperatorPreferences,
 						registration_args: ::std::vec::Vec<
-							runtime_types::tangle_primitives::jobs::v2::field::Field<
+							runtime_types::tangle_primitives::jobs::field::Field<
 								::subxt::utils::AccountId32,
 							>,
 						>,
@@ -45747,7 +45747,7 @@ pub mod api {
 						#[codec(compact)]
 						blueprint_id: ::core::primitive::u64,
 						approval_preference:
-							runtime_types::tangle_primitives::jobs::v2::ApprovalPrefrence,
+							runtime_types::tangle_primitives::jobs::ApprovalPrefrence,
 					},
 					#[codec(index = 4)]
 					#[doc = "See `Pallet::request`."]
@@ -45759,7 +45759,7 @@ pub mod api {
 						#[codec(compact)]
 						ttl: ::core::primitive::u64,
 						request_args: ::std::vec::Vec<
-							runtime_types::tangle_primitives::jobs::v2::field::Field<
+							runtime_types::tangle_primitives::jobs::field::Field<
 								::subxt::utils::AccountId32,
 							>,
 						>,
@@ -45790,7 +45790,7 @@ pub mod api {
 						#[codec(compact)]
 						job: ::core::primitive::u8,
 						args: ::std::vec::Vec<
-							runtime_types::tangle_primitives::jobs::v2::field::Field<
+							runtime_types::tangle_primitives::jobs::field::Field<
 								::subxt::utils::AccountId32,
 							>,
 						>,
@@ -45803,7 +45803,7 @@ pub mod api {
 						#[codec(compact)]
 						call_id: ::core::primitive::u64,
 						result: ::std::vec::Vec<
-							runtime_types::tangle_primitives::jobs::v2::field::Field<
+							runtime_types::tangle_primitives::jobs::field::Field<
 								::subxt::utils::AccountId32,
 							>,
 						>,
@@ -45853,7 +45853,7 @@ pub mod api {
 					ServiceNotFound,
 					#[codec(index = 9)]
 					#[doc = "An error occurred while type checking the provided input input."]
-					TypeCheck(runtime_types::tangle_primitives::jobs::v2::TypeCheckError),
+					TypeCheck(runtime_types::tangle_primitives::jobs::TypeCheckError),
 					#[codec(index = 10)]
 					#[doc = "The maximum number of permitted callers per service has been exceeded."]
 					MaxPermittedCallersExceeded,
@@ -45916,9 +45916,9 @@ pub mod api {
 						provider: ::subxt::utils::AccountId32,
 						blueprint_id: ::core::primitive::u64,
 						preferences:
-							runtime_types::tangle_primitives::jobs::v2::OperatorPreferences,
+							runtime_types::tangle_primitives::jobs::OperatorPreferences,
 						registration_args: ::std::vec::Vec<
-							runtime_types::tangle_primitives::jobs::v2::field::Field<
+							runtime_types::tangle_primitives::jobs::field::Field<
 								::subxt::utils::AccountId32,
 							>,
 						>,
@@ -45935,7 +45935,7 @@ pub mod api {
 						operator: ::subxt::utils::AccountId32,
 						blueprint_id: ::core::primitive::u64,
 						approval_preference:
-							runtime_types::tangle_primitives::jobs::v2::ApprovalPrefrence,
+							runtime_types::tangle_primitives::jobs::ApprovalPrefrence,
 					},
 					#[codec(index = 4)]
 					#[doc = "A new service has been requested."]
@@ -45994,7 +45994,7 @@ pub mod api {
 						call_id: ::core::primitive::u64,
 						job: ::core::primitive::u8,
 						args: ::std::vec::Vec<
-							runtime_types::tangle_primitives::jobs::v2::field::Field<
+							runtime_types::tangle_primitives::jobs::field::Field<
 								::subxt::utils::AccountId32,
 							>,
 						>,
@@ -46007,7 +46007,7 @@ pub mod api {
 						call_id: ::core::primitive::u64,
 						job: ::core::primitive::u8,
 						result: ::std::vec::Vec<
-							runtime_types::tangle_primitives::jobs::v2::field::Field<
+							runtime_types::tangle_primitives::jobs::field::Field<
 								::subxt::utils::AccountId32,
 							>,
 						>,
@@ -50602,7 +50602,7 @@ pub mod api {
 							Int64(::core::primitive::i64),
 							#[codec(index = 10)]
 							String(
-								runtime_types::tangle_primitives::jobs::v2::field::BoundedString,
+								runtime_types::tangle_primitives::jobs::field::BoundedString,
 							),
 							#[codec(index = 11)]
 							Bytes(
@@ -50613,13 +50613,13 @@ pub mod api {
 							#[codec(index = 12)]
 							Array(
 								runtime_types::bounded_collections::bounded_vec::BoundedVec<
-									runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+									runtime_types::tangle_primitives::jobs::field::Field<_1>,
 								>,
 							),
 							#[codec(index = 13)]
 							List(
 								runtime_types::bounded_collections::bounded_vec::BoundedVec<
-									runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+									runtime_types::tangle_primitives::jobs::field::Field<_1>,
 								>,
 							),
 							#[codec(index = 100)]
@@ -50666,20 +50666,20 @@ pub mod api {
 							#[codec(index = 12)]
 							Optional(
 								::std::boxed::Box<
-									runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+									runtime_types::tangle_primitives::jobs::field::FieldType,
 								>,
 							),
 							#[codec(index = 13)]
 							Array(
 								::core::primitive::u64,
 								::std::boxed::Box<
-									runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+									runtime_types::tangle_primitives::jobs::field::FieldType,
 								>,
 							),
 							#[codec(index = 14)]
 							List(
 								::std::boxed::Box<
-									runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+									runtime_types::tangle_primitives::jobs::field::FieldType,
 								>,
 							),
 							#[codec(index = 100)]
@@ -50776,7 +50776,7 @@ pub mod api {
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct ContainerGadget {
 						pub soruces: runtime_types::bounded_collections::bounded_vec::BoundedVec<
-							runtime_types::tangle_primitives::jobs::v2::GadgetSource,
+							runtime_types::tangle_primitives::jobs::GadgetSource,
 						>,
 					}
 					#[derive(
@@ -50794,11 +50794,11 @@ pub mod api {
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub enum Gadget {
 						#[codec(index = 0)]
-						Wasm(runtime_types::tangle_primitives::jobs::v2::WasmGadget),
+						Wasm(runtime_types::tangle_primitives::jobs::WasmGadget),
 						#[codec(index = 1)]
-						Native(runtime_types::tangle_primitives::jobs::v2::NativeGadget),
+						Native(runtime_types::tangle_primitives::jobs::NativeGadget),
 						#[codec(index = 2)]
-						Container(runtime_types::tangle_primitives::jobs::v2::ContainerGadget),
+						Container(runtime_types::tangle_primitives::jobs::ContainerGadget),
 					}
 					#[derive(
 						:: subxt :: ext :: codec :: Decode,
@@ -50814,9 +50814,9 @@ pub mod api {
 					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct GadgetBinary {
-						pub arch: runtime_types::tangle_primitives::jobs::v2::Architecture,
-						pub os: runtime_types::tangle_primitives::jobs::v2::OperatingSystem,
-						pub name: runtime_types::tangle_primitives::jobs::v2::field::BoundedString6,
+						pub arch: runtime_types::tangle_primitives::jobs::Architecture,
+						pub os: runtime_types::tangle_primitives::jobs::OperatingSystem,
+						pub name: runtime_types::tangle_primitives::jobs::field::BoundedString6,
 						pub sha256: [::core::primitive::u8; 32usize],
 					}
 					#[derive(
@@ -50834,7 +50834,7 @@ pub mod api {
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct GadgetSource {
 						pub fetcher:
-							runtime_types::tangle_primitives::jobs::v2::GadgetSourceFetcher,
+							runtime_types::tangle_primitives::jobs::GadgetSourceFetcher,
 					}
 					#[derive(
 						:: subxt :: ext :: codec :: Decode,
@@ -50857,10 +50857,10 @@ pub mod api {
 							>,
 						),
 						#[codec(index = 1)]
-						Github(runtime_types::tangle_primitives::jobs::v2::GithubFetcher),
+						Github(runtime_types::tangle_primitives::jobs::GithubFetcher),
 						#[codec(index = 2)]
 						ContainerImage(
-							runtime_types::tangle_primitives::jobs::v2::ImageRegistryFetcher,
+							runtime_types::tangle_primitives::jobs::ImageRegistryFetcher,
 						),
 					}
 					#[derive(
@@ -50878,11 +50878,11 @@ pub mod api {
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct GithubFetcher {
 						pub owner:
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString3,
-						pub repo: runtime_types::tangle_primitives::jobs::v2::field::BoundedString4,
-						pub tag: runtime_types::tangle_primitives::jobs::v2::field::BoundedString5,
+							runtime_types::tangle_primitives::jobs::field::BoundedString3,
+						pub repo: runtime_types::tangle_primitives::jobs::field::BoundedString4,
+						pub tag: runtime_types::tangle_primitives::jobs::field::BoundedString5,
 						pub binaries: runtime_types::bounded_collections::bounded_vec::BoundedVec<
-							runtime_types::tangle_primitives::jobs::v2::GadgetBinary,
+							runtime_types::tangle_primitives::jobs::GadgetBinary,
 						>,
 					}
 					#[derive(
@@ -50900,10 +50900,10 @@ pub mod api {
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct ImageRegistryFetcher {
 						pub registry:
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString7,
+							runtime_types::tangle_primitives::jobs::field::BoundedString7,
 						pub image:
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString8,
-						pub tag: runtime_types::tangle_primitives::jobs::v2::field::BoundedString9,
+							runtime_types::tangle_primitives::jobs::field::BoundedString8,
+						pub tag: runtime_types::tangle_primitives::jobs::field::BoundedString9,
 					}
 					#[derive(
 						:: subxt :: ext :: codec :: Decode,
@@ -50922,7 +50922,7 @@ pub mod api {
 						pub service_id: ::core::primitive::u64,
 						pub job: ::core::primitive::u8,
 						pub args: runtime_types::bounded_collections::bounded_vec::BoundedVec<
-							runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+							runtime_types::tangle_primitives::jobs::field::Field<_1>,
 						>,
 					}
 					#[derive(
@@ -50942,7 +50942,7 @@ pub mod api {
 						pub service_id: ::core::primitive::u64,
 						pub call_id: ::core::primitive::u64,
 						pub result: runtime_types::bounded_collections::bounded_vec::BoundedVec<
-							runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+							runtime_types::tangle_primitives::jobs::field::Field<_1>,
 						>,
 					}
 					#[derive(
@@ -50959,14 +50959,14 @@ pub mod api {
 					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct JobDefinition {
-						pub metadata: runtime_types::tangle_primitives::jobs::v2::JobMetadata,
+						pub metadata: runtime_types::tangle_primitives::jobs::JobMetadata,
 						pub params: runtime_types::bounded_collections::bounded_vec::BoundedVec<
-							runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+							runtime_types::tangle_primitives::jobs::field::FieldType,
 						>,
 						pub result: runtime_types::bounded_collections::bounded_vec::BoundedVec<
-							runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+							runtime_types::tangle_primitives::jobs::field::FieldType,
 						>,
-						pub verifier: runtime_types::tangle_primitives::jobs::v2::JobResultVerifier,
+						pub verifier: runtime_types::tangle_primitives::jobs::JobResultVerifier,
 					}
 					#[derive(
 						:: subxt :: ext :: codec :: Decode,
@@ -50982,9 +50982,9 @@ pub mod api {
 					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct JobMetadata {
-						pub name: runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						pub name: runtime_types::tangle_primitives::jobs::field::BoundedString2,
 						pub description: ::core::option::Option<
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+							runtime_types::tangle_primitives::jobs::field::BoundedString2,
 						>,
 					}
 					#[derive(
@@ -51021,7 +51021,7 @@ pub mod api {
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct NativeGadget {
 						pub soruces: runtime_types::bounded_collections::bounded_vec::BoundedVec<
-							runtime_types::tangle_primitives::jobs::v2::GadgetSource,
+							runtime_types::tangle_primitives::jobs::GadgetSource,
 						>,
 					}
 					#[derive(
@@ -51064,7 +51064,7 @@ pub mod api {
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct OperatorPreferences {
 						pub key: runtime_types::sp_core::ecdsa::Public,
-						pub approval: runtime_types::tangle_primitives::jobs::v2::ApprovalPrefrence,
+						pub approval: runtime_types::tangle_primitives::jobs::ApprovalPrefrence,
 					}
 					#[derive(
 						:: subxt :: ext :: codec :: Decode,
@@ -51104,9 +51104,9 @@ pub mod api {
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct RpcServicesWithBlueprint<_1, _2> {
 						pub blueprint_id: ::core::primitive::u64,
-						pub blueprint: runtime_types::tangle_primitives::jobs::v2::ServiceBlueprint,
+						pub blueprint: runtime_types::tangle_primitives::jobs::ServiceBlueprint,
 						pub services: ::std::vec::Vec<
-							runtime_types::tangle_primitives::jobs::v2::Service<_1, _2>,
+							runtime_types::tangle_primitives::jobs::Service<_1, _2>,
 						>,
 					}
 					#[derive(
@@ -51146,23 +51146,23 @@ pub mod api {
 					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct ServiceBlueprint {
-						pub metadata: runtime_types::tangle_primitives::jobs::v2::ServiceMetadata,
+						pub metadata: runtime_types::tangle_primitives::jobs::ServiceMetadata,
 						pub jobs: runtime_types::bounded_collections::bounded_vec::BoundedVec<
-							runtime_types::tangle_primitives::jobs::v2::JobDefinition,
+							runtime_types::tangle_primitives::jobs::JobDefinition,
 						>,
 						pub registration_hook:
-							runtime_types::tangle_primitives::jobs::v2::ServiceRegistrationHook,
+							runtime_types::tangle_primitives::jobs::ServiceRegistrationHook,
 						pub registration_params:
 							runtime_types::bounded_collections::bounded_vec::BoundedVec<
-								runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+								runtime_types::tangle_primitives::jobs::field::FieldType,
 							>,
 						pub request_hook:
-							runtime_types::tangle_primitives::jobs::v2::ServiceRequestHook,
+							runtime_types::tangle_primitives::jobs::ServiceRequestHook,
 						pub request_params:
 							runtime_types::bounded_collections::bounded_vec::BoundedVec<
-								runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+								runtime_types::tangle_primitives::jobs::field::FieldType,
 							>,
-						pub gadget: runtime_types::tangle_primitives::jobs::v2::Gadget,
+						pub gadget: runtime_types::tangle_primitives::jobs::Gadget,
 					}
 					#[derive(
 						:: subxt :: ext :: codec :: Decode,
@@ -51178,27 +51178,27 @@ pub mod api {
 					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct ServiceMetadata {
-						pub name: runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+						pub name: runtime_types::tangle_primitives::jobs::field::BoundedString2,
 						pub description: ::core::option::Option<
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+							runtime_types::tangle_primitives::jobs::field::BoundedString2,
 						>,
 						pub author: ::core::option::Option<
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+							runtime_types::tangle_primitives::jobs::field::BoundedString2,
 						>,
 						pub category: ::core::option::Option<
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+							runtime_types::tangle_primitives::jobs::field::BoundedString2,
 						>,
 						pub code_repository: ::core::option::Option<
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+							runtime_types::tangle_primitives::jobs::field::BoundedString2,
 						>,
 						pub logo: ::core::option::Option<
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+							runtime_types::tangle_primitives::jobs::field::BoundedString2,
 						>,
 						pub website: ::core::option::Option<
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+							runtime_types::tangle_primitives::jobs::field::BoundedString2,
 						>,
 						pub license: ::core::option::Option<
-							runtime_types::tangle_primitives::jobs::v2::field::BoundedString2,
+							runtime_types::tangle_primitives::jobs::field::BoundedString2,
 						>,
 					}
 					#[derive(
@@ -51240,12 +51240,12 @@ pub mod api {
 							runtime_types::bounded_collections::bounded_vec::BoundedVec<_1>,
 						pub ttl: _2,
 						pub args: runtime_types::bounded_collections::bounded_vec::BoundedVec<
-							runtime_types::tangle_primitives::jobs::v2::field::Field<_1>,
+							runtime_types::tangle_primitives::jobs::field::Field<_1>,
 						>,
 						pub operators_with_approval_state:
 							runtime_types::bounded_collections::bounded_vec::BoundedVec<(
 								_1,
-								runtime_types::tangle_primitives::jobs::v2::ApprovalState,
+								runtime_types::tangle_primitives::jobs::ApprovalState,
 							)>,
 					}
 					#[derive(
@@ -51284,8 +51284,8 @@ pub mod api {
 						#[codec(index = 0)]
 						ArgumentTypeMismatch {
 							index: ::core::primitive::u8,
-							expected: runtime_types::tangle_primitives::jobs::v2::field::FieldType,
-							actual: runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+							expected: runtime_types::tangle_primitives::jobs::field::FieldType,
+							actual: runtime_types::tangle_primitives::jobs::field::FieldType,
 						},
 						#[codec(index = 1)]
 						NotEnoughArguments {
@@ -51295,8 +51295,8 @@ pub mod api {
 						#[codec(index = 2)]
 						ResultTypeMismatch {
 							index: ::core::primitive::u8,
-							expected: runtime_types::tangle_primitives::jobs::v2::field::FieldType,
-							actual: runtime_types::tangle_primitives::jobs::v2::field::FieldType,
+							expected: runtime_types::tangle_primitives::jobs::field::FieldType,
+							actual: runtime_types::tangle_primitives::jobs::field::FieldType,
 						},
 					}
 					#[derive(
@@ -51313,9 +51313,9 @@ pub mod api {
 					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
 					pub struct WasmGadget {
-						pub runtime: runtime_types::tangle_primitives::jobs::v2::WasmRuntime,
+						pub runtime: runtime_types::tangle_primitives::jobs::WasmRuntime,
 						pub soruces: runtime_types::bounded_collections::bounded_vec::BoundedVec<
-							runtime_types::tangle_primitives::jobs::v2::GadgetSource,
+							runtime_types::tangle_primitives::jobs::GadgetSource,
 						>,
 					}
 					#[derive(

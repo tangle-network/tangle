@@ -102,7 +102,7 @@ pub enum Field<C: Constraints, AccountId> {
 	List(BoundedVec<Field<C, AccountId>, C::MaxFieldsSize>),
 
 	// NOTE: Special types starts from 100
-	/// A sepcial type for AccountId
+	/// A special type for AccountId
 	#[codec(index = 100)]
 	AccountId(AccountId),
 }
