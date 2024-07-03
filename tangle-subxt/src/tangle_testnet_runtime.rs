@@ -50576,6 +50576,7 @@ pub mod api {
 					# [codec (crate = :: subxt :: ext :: codec)]
 					#[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+					#[codec(dumb_trait_bound)]
 					pub enum Field<_1> {
 						#[codec(index = 0)]
 						None,
