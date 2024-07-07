@@ -11,6 +11,95 @@ export type __AugmentedError<ApiType extends ApiTypes> = AugmentedError<ApiType>
 
 declare module '@polkadot/api-base/types/errors' {
   interface AugmentedErrors<ApiType extends ApiTypes> {
+    assets: {
+      /**
+       * The asset-account already exists.
+       **/
+      AlreadyExists: AugmentedError<ApiType>;
+      /**
+       * The asset is not live, and likely being destroyed.
+       **/
+      AssetNotLive: AugmentedError<ApiType>;
+      /**
+       * Invalid metadata given.
+       **/
+      BadMetadata: AugmentedError<ApiType>;
+      /**
+       * Invalid witness data given.
+       **/
+      BadWitness: AugmentedError<ApiType>;
+      /**
+       * Account balance must be greater than or equal to the transfer amount.
+       **/
+      BalanceLow: AugmentedError<ApiType>;
+      /**
+       * Callback action resulted in error
+       **/
+      CallbackFailed: AugmentedError<ApiType>;
+      /**
+       * The origin account is frozen.
+       **/
+      Frozen: AugmentedError<ApiType>;
+      /**
+       * The asset status is not the expected status.
+       **/
+      IncorrectStatus: AugmentedError<ApiType>;
+      /**
+       * The asset ID is already taken.
+       **/
+      InUse: AugmentedError<ApiType>;
+      /**
+       * The asset is a live asset and is actively being used. Usually emit for operations such
+       * as `start_destroy` which require the asset to be in a destroying state.
+       **/
+      LiveAsset: AugmentedError<ApiType>;
+      /**
+       * Minimum balance should be non-zero.
+       **/
+      MinBalanceZero: AugmentedError<ApiType>;
+      /**
+       * The account to alter does not exist.
+       **/
+      NoAccount: AugmentedError<ApiType>;
+      /**
+       * The asset-account doesn't have an associated deposit.
+       **/
+      NoDeposit: AugmentedError<ApiType>;
+      /**
+       * The signing account has no permission to do the operation.
+       **/
+      NoPermission: AugmentedError<ApiType>;
+      /**
+       * The asset should be frozen before the given operation.
+       **/
+      NotFrozen: AugmentedError<ApiType>;
+      /**
+       * No approval exists that would allow the transfer.
+       **/
+      Unapproved: AugmentedError<ApiType>;
+      /**
+       * Unable to increment the consumer reference counters on the account. Either no provider
+       * reference exists to allow a non-zero balance of a non-self-sufficient asset, or one
+       * fewer then the maximum number of consumers has been reached.
+       **/
+      UnavailableConsumer: AugmentedError<ApiType>;
+      /**
+       * The given asset ID is unknown.
+       **/
+      Unknown: AugmentedError<ApiType>;
+      /**
+       * The operation would result in funds being burned.
+       **/
+      WouldBurn: AugmentedError<ApiType>;
+      /**
+       * The source account would not survive the transfer and it needs to stay alive.
+       **/
+      WouldDie: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     babe: {
       /**
        * A given equivocation report is valid but already previously reported.
@@ -1064,6 +1153,116 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    multiAssetDelegation: {
+      /**
+       * There are active services using the asset.
+       **/
+      ActiveServicesUsingAsset: AugmentedError<ApiType>;
+      /**
+       * The account is already a delegator.
+       **/
+      AlreadyDelegator: AugmentedError<ApiType>;
+      /**
+       * The operator is already leaving.
+       **/
+      AlreadyLeaving: AugmentedError<ApiType>;
+      /**
+       * The account is already an operator.
+       **/
+      AlreadyOperator: AugmentedError<ApiType>;
+      /**
+       * The asset ID is not found
+       **/
+      AssetNotFound: AugmentedError<ApiType>;
+      /**
+       * The asset is not whitelisted
+       **/
+      AssetNotWhitelisted: AugmentedError<ApiType>;
+      /**
+       * The blueprint ID is already whitelisted
+       **/
+      BlueprintAlreadyWhitelisted: AugmentedError<ApiType>;
+      /**
+       * The bond less request is not ready.
+       **/
+      BondLessNotReady: AugmentedError<ApiType>;
+      /**
+       * A bond less request already exists.
+       **/
+      BondLessRequestAlreadyExists: AugmentedError<ApiType>;
+      /**
+       * The bond less request is not satisfied.
+       **/
+      BondLessRequestNotSatisfied: AugmentedError<ApiType>;
+      /**
+       * The bond amount is too low.
+       **/
+      BondTooLow: AugmentedError<ApiType>;
+      /**
+       * The account cannot exit.
+       **/
+      CannotExit: AugmentedError<ApiType>;
+      /**
+       * The account has insufficient balance.
+       **/
+      InsufficientBalance: AugmentedError<ApiType>;
+      /**
+       * There is not active delegation
+       **/
+      NoActiveDelegation: AugmentedError<ApiType>;
+      /**
+       * There is no bond less request.
+       **/
+      NoBondLessRequest: AugmentedError<ApiType>;
+      /**
+       * There is no scheduled bond less request.
+       **/
+      NoScheduledBondLess: AugmentedError<ApiType>;
+      /**
+       * The operator is not active.
+       **/
+      NotActiveOperator: AugmentedError<ApiType>;
+      /**
+       * The account is not an operator.
+       **/
+      NotAnOperator: AugmentedError<ApiType>;
+      /**
+       * The origin is not authorized to perform this action
+       **/
+      NotAuthorized: AugmentedError<ApiType>;
+      /**
+       * The account is not a delegator.
+       **/
+      NotDelegator: AugmentedError<ApiType>;
+      /**
+       * The account is not leaving as an operator.
+       **/
+      NotLeavingOperator: AugmentedError<ApiType>;
+      /**
+       * The round does not match the scheduled leave round.
+       **/
+      NotLeavingRound: AugmentedError<ApiType>;
+      /**
+       * The operator is not offline.
+       **/
+      NotOfflineOperator: AugmentedError<ApiType>;
+      /**
+       * There is no withdraw request.
+       **/
+      NoWithdrawRequest: AugmentedError<ApiType>;
+      /**
+       * The unstake is not ready.
+       **/
+      UnstakeNotReady: AugmentedError<ApiType>;
+      /**
+       * A withdraw request already exists.
+       **/
+      WithdrawRequestAlreadyExists: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     multisig: {
       /**
        * Call is already approved by this signatory.
@@ -1606,6 +1805,172 @@ declare module '@polkadot/api-base/types/errors' {
        * Sender must be the Sudo account.
        **/
       RequireSudo: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    sygmaAccessSegregator: {
+      /**
+       * Failed to grant extrinsic access permission to an account
+       **/
+      GrantAccessFailed: AugmentedError<ApiType>;
+      /**
+       * Function unimplemented
+       **/
+      Unimplemented: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    sygmaBasicFeeHandler: {
+      /**
+       * Account has not gained access permission
+       **/
+      AccessDenied: AugmentedError<ApiType>;
+      /**
+       * Function unimplemented
+       **/
+      Unimplemented: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    sygmaBridge: {
+      /**
+       * Account has not gained access permission
+       **/
+      AccessDenied: AugmentedError<ApiType>;
+      /**
+       * Asset not bound to a resource id
+       **/
+      AssetNotBound: AugmentedError<ApiType>;
+      /**
+       * Protected operation, must be performed by relayer
+       **/
+      BadMpcSignature: AugmentedError<ApiType>;
+      /**
+       * Bridge is paused
+       **/
+      BridgePaused: AugmentedError<ApiType>;
+      /**
+       * Bridge is unpaused
+       **/
+      BridgeUnpaused: AugmentedError<ApiType>;
+      /**
+       * Failed on the decimal converter
+       **/
+      DecimalConversionFail: AugmentedError<ApiType>;
+      /**
+       * Deposit nonce has reached max integer value
+       **/
+      DepositNonceOverflow: AugmentedError<ApiType>;
+      /**
+       * Dest chain id not match
+       **/
+      DestChainIDNotMatch: AugmentedError<ApiType>;
+      /**
+       * Dest domain not supported
+       **/
+      DestDomainNotSupported: AugmentedError<ApiType>;
+      /**
+       * Proposal list empty
+       **/
+      EmptyProposalList: AugmentedError<ApiType>;
+      /**
+       * Failed to extract destination data
+       **/
+      ExtractDestDataFailed: AugmentedError<ApiType>;
+      /**
+       * The withdrawn amount can not cover the fee payment
+       **/
+      FeeTooExpensive: AugmentedError<ApiType>;
+      /**
+       * Insufficient balance on sender account
+       **/
+      InsufficientBalance: AugmentedError<ApiType>;
+      InvalidDepositDataInvalidAmount: AugmentedError<ApiType>;
+      /**
+       * Deposit data not correct
+       **/
+      InvalidDepositDataInvalidLength: AugmentedError<ApiType>;
+      InvalidDepositDataInvalidRecipient: AugmentedError<ApiType>;
+      InvalidDepositDataInvalidRecipientLength: AugmentedError<ApiType>;
+      InvalidDepositDataRecipientLengthNotMatch: AugmentedError<ApiType>;
+      /**
+       * Fee config option missing
+       **/
+      MissingFeeConfig: AugmentedError<ApiType>;
+      /**
+       * MPC address not set
+       **/
+      MissingMpcAddress: AugmentedError<ApiType>;
+      /**
+       * MPC address can not be updated
+       **/
+      MpcAddrNotUpdatable: AugmentedError<ApiType>;
+      /**
+       * Asset not bound to a liquidity holder account
+       **/
+      NoLiquidityHolderAccountBound: AugmentedError<ApiType>;
+      /**
+       * Proposal has either failed or succeeded
+       **/
+      ProposalAlreadyComplete: AugmentedError<ApiType>;
+      /**
+       * Asset transactor execution failed
+       **/
+      TransactFailedDeposit: AugmentedError<ApiType>;
+      TransactFailedFeeDeposit: AugmentedError<ApiType>;
+      TransactFailedHoldInReserved: AugmentedError<ApiType>;
+      TransactFailedReleaseFromReserved: AugmentedError<ApiType>;
+      TransactFailedWithdraw: AugmentedError<ApiType>;
+      /**
+       * Transactor operation failed
+       **/
+      TransactorFailed: AugmentedError<ApiType>;
+      /**
+       * Function unimplemented
+       **/
+      Unimplemented: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    sygmaFeeHandlerRouter: {
+      /**
+       * Account has not gained access permission
+       **/
+      AccessDenied: AugmentedError<ApiType>;
+      /**
+       * Function unimplemented
+       **/
+      Unimplemented: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    sygmaPercentageFeeHandler: {
+      /**
+       * Account has not gained access permission
+       **/
+      AccessDenied: AugmentedError<ApiType>;
+      /**
+       * Fee rate is out of range [0, 10000)
+       **/
+      FeeRateOutOfRange: AugmentedError<ApiType>;
+      /**
+       * Percentage fee bound is invalid
+       **/
+      InvalidFeeBound: AugmentedError<ApiType>;
+      /**
+       * Function unimplemented
+       **/
+      Unimplemented: AugmentedError<ApiType>;
       /**
        * Generic error
        **/

@@ -54,6 +54,7 @@ pub use pallet_staking::StakerStatus;
 use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
+use sp_runtime::Either;
 use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::MaxEncodedLen;
 use parity_scale_codec::{Decode, Encode};
@@ -94,7 +95,7 @@ use tangle_primitives::{
 	jobs::{JobId, PhaseResult, RpcResponseJobsData},
 	roles::RoleType,
 };
-use xcm::v4::Junctions::{X1, X3};
+use xcm::v4::Junctions::{X1, X3, X4};
 use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
 #[allow(deprecated)]
 use xcm_builder::{
@@ -194,7 +195,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1006, // v1.0.6
+	spec_version: 1011, // v1.0.11
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -846,6 +847,7 @@ where
 			frame_system::CheckNonce::<Runtime>::from(nonce),
 			frame_system::CheckWeight::<Runtime>::new(),
 			pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+			frame_metadata_hash_extension::CheckMetadataHash::<Runtime>::new(true),
 		);
 		let raw_payload = SignedPayload::new(call, extra)
 			.map_err(|e| {
@@ -1563,6 +1565,7 @@ pub type SignedExtra = (
 	frame_system::CheckNonce<Runtime>,
 	frame_system::CheckWeight<Runtime>,
 	pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
+	frame_metadata_hash_extension::CheckMetadataHash<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic =
@@ -1806,6 +1809,8 @@ impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
 			(Fungible(ref amount), AssetId(ref id)) => {
 				if id == &SygUSDLocation::get() {
 					Ok((SygUSDAssetId::get(), *amount))
+				} else if id == &PHALocation::get() {
+					Ok((PHAAssetId::get(), *amount))
 				} else {
 					Err(ExecutionError::AssetNotHandled)
 				}
@@ -1846,11 +1851,11 @@ impl sygma_percentage_feehandler::Config for Runtime {
 }
 
 parameter_types! {
-	// tTNT
+	// tTNT: native asset is always a reserved asset
 	pub NativeLocation: Location = Location::here();
 	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
 
-	// SygUSD
+	// SygUSD: a non-reserved asset
 	pub SygUSDLocation: Location = Location::new(
 		1,
 		[
@@ -1863,12 +1868,27 @@ parameter_types! {
 	pub SygUSDAssetId: AssetId = 2000;
 	// SygUSDResourceId is the resourceID that mapping with the foreign asset SygUSD
 	pub SygUSDResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001100");
+
+	// PHA: a reserved asset
+	pub PHALocation: Location = Location::new(
+		1,
+		[
+			Parachain(2004),
+			slice_to_generalkey(b"sygma"),
+			slice_to_generalkey(b"pha"),
+		],
+	);
+	// PHAAssetId is the substrate assetID of PHA
+	pub PHAAssetId: AssetId = 2001;
+	// PHAResourceId is the resourceID that mapping with the foreign asset PHA
+	pub PHAResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000");
 }
 
 fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
 	let mut account_map: BTreeMap<XcmAssetId, AccountId32> = BTreeMap::new();
 	account_map.insert(NativeLocation::get().into(), BridgeAccountNative::get());
 	account_map.insert(SygUSDLocation::get().into(), BridgeAccountOtherToken::get());
+	account_map.insert(PHALocation::get().into(), BridgeAccountOtherToken::get());
 	account_map
 }
 
@@ -1922,9 +1942,10 @@ parameter_types! {
 	pub ResourcePairs: Vec<(XcmAssetId, ResourceId)> = vec![
 		(NativeLocation::get().into(), NativeSygmaResourceId::get()),
 		(SygUSDLocation::get().into(), SygUSDResourceId::get()),
+		(PHALocation::get().into(), PHAResourceId::get()),
 	];
 
-	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8)];
+	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8), (PHALocation::get().into(), 12u8)];
 }
 
 pub struct ReserveChecker;
@@ -1972,12 +1993,67 @@ impl ConcrateSygmaAsset {
 }
 
 pub struct DestinationDataParser;
-impl ExtractDestinationData for DestinationDataParser {
+/// Extract dest to be recipient and Dest DomainID
+/// if dest chain is substrate chain, recipient must be a encoded MultiLocation
+/// if dest chain is non-substrate chain, recipient is [u8; 32]
+impl ExtractDestinationData for crate::DestinationDataParser {
 	fn extract_dest(dest: &Location) -> Option<(Vec<u8>, DomainID)> {
 		match (dest.parents, dest.interior.clone()) {
+			// final dest is on the remote substrate chain
+			(1, X4(xs)) => {
+				let [a, b, c, d] = *xs;
+				match (a, b, c, d) {
+					(
+						GeneralKey { length: path_len, data: sygma_path },
+						GeneralIndex(dest_domain_id),
+						Parachain(parachain_id),
+						Junction::AccountId32 { network: None, id: recipient },
+					) => {
+						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+								|domain_id| {
+									let l: Location = Location::new(
+										1,
+										Junctions::X2(Arc::new([
+											Parachain(parachain_id),
+											Junction::AccountId32 { network: None, id: recipient },
+										])),
+									);
+									(l.encode(), domain_id)
+								},
+							);
+						}
+						None
+					},
+					_ => None,
+				}
+			},
 			(0, X3(xs)) => {
 				let [a, b, c] = *xs;
 				match (a, b, c) {
+					// final dest is on the local substrate chain
+					(
+						GeneralKey { length: path_len, data: sygma_path },
+						GeneralIndex(dest_domain_id),
+						Junction::AccountId32 { network: None, id: recipient },
+					) => {
+						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+								|domain_id| {
+									let l: Location = Location::new(
+										0,
+										Junctions::X1(Arc::new([Junction::AccountId32 {
+											network: None,
+											id: recipient,
+										}])),
+									);
+									(l.encode(), domain_id)
+								},
+							);
+						}
+						None
+					},
+					// final dest is on the non-substrate chain such as EVM
 					(
 						GeneralKey { length: path_len, data: sygma_path },
 						GeneralIndex(dest_domain_id),

@@ -20,6 +20,7 @@ num_enum = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 static_assertions = { workspace = true }
 primitive-types = { workspace = true }
 fixed = { workspace = true }
@@ -40,7 +41,7 @@ sp-std = { workspace = true }
 sp-storage = { workspace = true }
 sp-transaction-pool = { workspace = true }
 sp-version = { workspace = true }
-
+frame-metadata-hash-extension = { workspace = true }
 frame-benchmarking = { workspace = true, optional = true }
 frame-election-provider-support = { workspace = true }
 frame-executive = { workspace = true }
@@ -87,6 +88,10 @@ pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
+
+# ORML
+orml-traits = { workspace = true }
+orml-asset-registry = { workspace = true }
 
 # Tangle dependencies
 pallet-airdrop-claims = { workspace = true }
@@ -153,12 +158,16 @@ sygma-runtime-api = { workspace = true }
 pallet-ibc = { workspace = true }
 pallet-ibc-ping = { workspace = true }
 ibc-primitives = { workspace = true }
+ibc = { workspace = true }
+ibc-runtime-api = { workspace = true }
+light-client-common = { workspace = true }
 
 # XCM
 xcm = { workspace = true }
 xcm-builder = { workspace = true }
 xcm-executor = { workspace = true }
 polkadot-parachain-primitives = { workspace = true }
+cumulus-primitives-core = { workspace = true }
 
 [features]
 default = ["std", "with-rocksdb-weights", "evm-tracing"]
@@ -192,6 +201,7 @@ runtime-benchmarks = [
 
 std = [
   "serde/std",
+  "serde_json/std",
   "parity-scale-codec/std",
   "scale-info/std",
   "log/std",
@@ -248,6 +258,15 @@ std = [
   "pallet-airdrop-claims/std",
   "pallet-identity/std",
   "frame-system-benchmarking?/std",
+  "frame-metadata-hash-extension/std",
+  "frame-benchmarking/std",
+  "pallet-dkg/std",
+  "pallet-proxy/std",
+  "pallet-zksaas/std",
+  "num_enum/std",
+  "fixed/std",
+  "hex/std",
+  "primitive-types/std",
 
   # Tangle dependencies
   "tangle-primitives/std",
@@ -311,12 +330,19 @@ std = [
   "pallet-ibc/std",
   "pallet-ibc-ping/std",
   "ibc-primitives/std",
+  "ibc/std",
+  "light-client-common/std",
 
   # XCM
   "xcm/std",
   "xcm-builder/std",
   "xcm-executor/std",
   "polkadot-parachain-primitives/std",
+  "cumulus-primitives-core/std",
+
+  # ORML
+  "orml-traits/std",
+  "orml-asset-registry/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []

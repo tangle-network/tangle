@@ -1,7 +1,20 @@
+use ::ibc::core::ics24_host::identifier::PortId;
+use ::ibc::core::ics26_routing::context::{Module, ModuleId};
 use orml_asset_registry::{AssetMetadata, DefaultAssetMetadata};
-use pallet_ibc::routing::ModuleRouter;
+use pallet_ibc::ics20::MemoData;
+use pallet_ibc::{DenomToAssetId, LightClientProtocol};
+use pallet_ibc::{light_client_common::ChainType, routing::ModuleRouter};
 use sp_runtime::DispatchError;
+use sp_runtime::{Either, Either::Right, Either::Left};
 use ibc_primitives::{runtime_interface::ss58_to_account_id_32, IbcAccount};
+use pallet_ibc::ics20_fee::NonFlatFeeConverter;
+use pallet_ibc::ics20::SubstrateMultihopXcmHandlerNone;
+use pallet_ibc::ics20::ValidateMemo;
+use pallet_ibc::{IbcAssetIds, IbcDenoms, IbcAssets};
+use cumulus_primitives::ParaId;
+use core::convert::Infallible;
+use core::fmt::{Display, Formatter};
+use core::str::FromStr;
 
 use super::*;
 
@@ -159,7 +172,7 @@ impl DenomToAssetId<Runtime> for IbcDenomToAssetIdConversion {
 )]
 pub struct MemoMessage;
 
-impl alloc::string::ToString for MemoMessage {
+impl ToString for MemoMessage {
 	fn to_string(&self) -> String {
 		Default::default()
 	}
@@ -174,7 +187,7 @@ impl core::str::FromStr for MemoMessage {
 }
 
 parameter_types! {
-	pub const GRANDPA: LightClientProtocol = LightClientProtocol::Grandpa;
+	pub const GRANDPA: LightClientProtocol = LightClientProtocol::GrandpaStandalone;
 	pub const IbcTriePrefix : &'static [u8] = b"ibc/";
 	pub FeeAccount: <Runtime as pallet_ibc::Config>::AccountIdConversion = create_alice_key();
 	pub const CleanUpPacketsPeriod: BlockNumber = 100;
@@ -238,6 +251,17 @@ impl ValidateMemo for RawMemo {
 	}
 }
 
+use cumulus_primitives_core::ParaId;
+parameter_types! {
+	pub const ChainIdentifier: ParaId = ParaId::from(1337);
+	pub const MinimumConnectionDelay: u64 = 10;
+	pub const SpamProtectionDeposit: Balance = 0;
+	pub const ExpectedBlockTime: u64 = 6000;
+	pub const SpamProtectionDeposit: Balances = 10000;
+	pub const MinimumConnectionDelay: u64 = 300; // 5 minutes
+	pub const ChainTType: ChainType = ChainType::from_str("tangle").unwrap();
+}
+
 impl pallet_ibc::Config for Runtime {
 	type TimeProvider = Timestamp;
 	type RuntimeEvent = RuntimeEvent;
@@ -251,8 +275,6 @@ impl pallet_ibc::Config for Runtime {
 	type ExpectedBlockTime = ExpectedBlockTime;
 	type Router = Router;
 	type MinimumConnectionDelay = MinimumConnectionDelay;
-	type ParaId = parachain_info::Pallet<Runtime>;
-	type RelayChain = RelayChainId;
 	type WeightInfo = ();
 	type AdminOrigin = EnsureRoot<AccountId>;
 	type FreezeOrigin = EnsureRoot<AccountId>;
@@ -273,4 +295,7 @@ impl pallet_ibc::Config for Runtime {
 	type FlatFeeAssetId = AssetIdUSDT;
 	type FlatFeeAmount = FlatFeeUSDTAmount;
 	type SubstrateMultihopXcmHandler = SubstrateMultihopXcmHandlerNone<Runtime>;
+	
+	type ChainId = ChainIdentifier;
+	type ChainType = ChainTType;
 }

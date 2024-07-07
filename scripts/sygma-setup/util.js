@@ -313,6 +313,32 @@ async function registerDomain(api, domainID, chainID, finalization, sudo) {
     });
 }
 
+// see PHALocation definition in runtime.rs
+function getPHAAssetId(api) {
+    return api.createType('StagingXcmV4AssetAssetId', {
+        parents: 1,
+        interior: api.createType('StagingXcmV4Junctions', {
+            X3: [
+                api.createType('StagingXcmV4Junction', {
+                    Parachain: api.createType('Compact<U32>', 2004)
+                }),
+                api.createType('StagingXcmV4Junction', { // sygma
+                    GeneralKey: {
+                        length: 5,
+                        data: '0x7379676d61000000000000000000000000000000000000000000000000000000'
+                    }
+                }),
+                api.createType('StagingXcmV4Junction', { // pha
+                    GeneralKey: {
+                        length: 3,
+                        data: '0x7068610000000000000000000000000000000000000000000000000000000000'
+                    }
+                }),
+            ],
+        }),
+    })
+}
+
 // 0x7379676d61(sygma) is general key of sygma defined in sygma substrate pallet runtime for testing
 // 0x737967757364(sygusd) is general key of sygusd defined in sygma substrate pallet runtime for testing
 // see SygUSDLocation definition in runtime.rs
@@ -419,6 +445,7 @@ async function subEvents (api, eventsList) {
 module.exports = {
     getNativeAssetId,
     getSygUSDAssetId,
+    getPHAAssetId,
     registerDomain,
     mintAsset,
     setAssetMetadata,
