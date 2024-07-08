@@ -44,6 +44,7 @@ use frame_support::{
 	weights::ConstantMultiplier,
 };
 use frame_system::{EnsureSigned, EnsureSignedBy};
+use orml_traits::parameter_type_with_key;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
@@ -1519,9 +1520,9 @@ construct_runtime!(
 		SygmaBridge: sygma_bridge,
 
 		AssetRegistry: orml_asset_registry,
-		IbcPing: pallet_ibc_ping,
-		// pallet-ibc, should be the last module in your runtime
-		Ibc: pallet_ibc,
+		// IbcPing: pallet_ibc_ping,
+		// // pallet-ibc, should be the last module in your runtime
+		// Ibc: pallet_ibc,
 	}
 );
 
@@ -1684,6 +1685,50 @@ impl pallet_assets::Config for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
+}
+
+pub struct AssetAuthority;
+impl EnsureOriginWithArg<RuntimeOrigin, Option<u32>> for AssetAuthority {
+	type Success = ();
+
+	fn try_origin(origin: RuntimeOrigin, asset_id: &Option<u32>) -> Result<Self::Success, RuntimeOrigin> {
+		match asset_id {
+			// Any other `asset_id` defaults to EnsureRoot
+			_ => <EnsureRoot<AccountId> as EnsureOrigin<RuntimeOrigin>>::try_origin(origin),
+		}
+	}
+
+	#[cfg(feature = "runtime-benchmarks")]
+	fn try_successful_origin(_asset_id: &Option<u32>) -> Result<RuntimeOrigin, ()> {
+		unimplemented!()
+	}
+}
+
+#[derive(scale_info::TypeInfo, Encode, Decode, Clone, Eq, PartialEq, Debug, MaxEncodedLen)]
+pub struct CustomMetadata {
+	pub fee_per_second: u128,
+}
+
+use orml_asset_registry::impls::ExistentialDeposits as AssetRegistryExistentialDeposits;
+parameter_type_with_key! {
+	pub ExistentialDeposits: |asset_id: AssetId| -> Balance {
+		0
+	};
+}
+
+parameter_types! {
+	pub const StringLimit: u32 = 50;
+}
+
+impl orml_asset_registry::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type CustomMetadata = CustomMetadata;
+	type AssetId = AssetId;
+	type AuthorityOrigin = EnsureRoot<AccountId>;
+	type AssetProcessor = orml_asset_registry::SequentialId<Runtime>;
+	type Balance = Balance;
+	type StringLimit = StringLimit;
+	type WeightInfo = ();
 }
 
 pub struct MockServiceManager;
@@ -2743,141 +2788,141 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl ibc_runtime_api::IbcRuntimeApi<Block, AssetId> for Runtime {
-		fn para_id() -> u32 {
-			0
-		}
+	// impl ibc_runtime_api::IbcRuntimeApi<Block, AssetId> for Runtime {
+	// 	fn para_id() -> u32 {
+	// 		0
+	// 	}
 
-		fn child_trie_key() -> Vec<u8> {
-			<Runtime as pallet_ibc::Config>::PalletPrefix::get().to_vec()
-		}
+	// 	fn child_trie_key() -> Vec<u8> {
+	// 		<Runtime as pallet_ibc::Config>::PalletPrefix::get().to_vec()
+	// 	}
 
-		fn query_balance_with_address(addr: Vec<u8>, asset_id: AssetId) -> Option<u128> {
-			Ibc::query_balance_with_address(addr, asset_id).ok()
-		}
+	// 	fn query_balance_with_address(addr: Vec<u8>, asset_id: AssetId) -> Option<u128> {
+	// 		Ibc::query_balance_with_address(addr, asset_id).ok()
+	// 	}
 
-		fn query_send_packet_info(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<ibc_primitives::PacketInfo>> {
-			Ibc::get_send_packet_info(channel_id, port_id, seqs).ok()
-		}
+	// 	fn query_send_packet_info(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<ibc_primitives::PacketInfo>> {
+	// 		Ibc::get_send_packet_info(channel_id, port_id, seqs).ok()
+	// 	}
 
-		fn query_recv_packet_info(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<ibc_primitives::PacketInfo>> {
-			Ibc::get_recv_packet_info(channel_id, port_id, seqs).ok()
-		}
+	// 	fn query_recv_packet_info(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<ibc_primitives::PacketInfo>> {
+	// 		Ibc::get_recv_packet_info(channel_id, port_id, seqs).ok()
+	// 	}
 
-		fn client_update_time_and_height(client_id: Vec<u8>, revision_number: u64, revision_height: u64) -> Option<(u64, u64)>{
-			Ibc::client_update_time_and_height(client_id, revision_number, revision_height).ok()
-		}
+	// 	fn client_update_time_and_height(client_id: Vec<u8>, revision_number: u64, revision_height: u64) -> Option<(u64, u64)>{
+	// 		Ibc::client_update_time_and_height(client_id, revision_number, revision_height).ok()
+	// 	}
 
-		fn client_state(client_id: Vec<u8>) -> Option<ibc_primitives::QueryClientStateResponse> {
-			Ibc::client(client_id).ok()
-		}
+	// 	fn client_state(client_id: Vec<u8>) -> Option<ibc_primitives::QueryClientStateResponse> {
+	// 		Ibc::client(client_id).ok()
+	// 	}
 
-		fn client_consensus_state(client_id: Vec<u8>, revision_number: u64, revision_height: u64, latest_cs: bool) -> Option<ibc_primitives::QueryConsensusStateResponse> {
-			Ibc::consensus_state(client_id, revision_number, revision_height, latest_cs).ok()
-		}
+	// 	fn client_consensus_state(client_id: Vec<u8>, revision_number: u64, revision_height: u64, latest_cs: bool) -> Option<ibc_primitives::QueryConsensusStateResponse> {
+	// 		Ibc::consensus_state(client_id, revision_number, revision_height, latest_cs).ok()
+	// 	}
 
-		fn clients() -> Option<Vec<(Vec<u8>, Vec<u8>)>> {
-			Some(Ibc::clients())
-		}
+	// 	fn clients() -> Option<Vec<(Vec<u8>, Vec<u8>)>> {
+	// 		Some(Ibc::clients())
+	// 	}
 
-		fn connection(connection_id: Vec<u8>) -> Option<ibc_primitives::QueryConnectionResponse>{
-			Ibc::connection(connection_id).ok()
-		}
+	// 	fn connection(connection_id: Vec<u8>) -> Option<ibc_primitives::QueryConnectionResponse>{
+	// 		Ibc::connection(connection_id).ok()
+	// 	}
 
-		fn connections() -> Option<ibc_primitives::QueryConnectionsResponse> {
-			Ibc::connections().ok()
-		}
+	// 	fn connections() -> Option<ibc_primitives::QueryConnectionsResponse> {
+	// 		Ibc::connections().ok()
+	// 	}
 
-		fn connection_using_client(client_id: Vec<u8>) -> Option<Vec<ibc_primitives::IdentifiedConnection>>{
-			Ibc::connection_using_client(client_id).ok()
-		}
+	// 	fn connection_using_client(client_id: Vec<u8>) -> Option<Vec<ibc_primitives::IdentifiedConnection>>{
+	// 		Ibc::connection_using_client(client_id).ok()
+	// 	}
 
-		fn connection_handshake(client_id: Vec<u8>, connection_id: Vec<u8>) -> Option<ibc_primitives::ConnectionHandshake> {
-			Ibc::connection_handshake(client_id, connection_id).ok()
-		}
+	// 	fn connection_handshake(client_id: Vec<u8>, connection_id: Vec<u8>) -> Option<ibc_primitives::ConnectionHandshake> {
+	// 		Ibc::connection_handshake(client_id, connection_id).ok()
+	// 	}
 
-		fn channel(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryChannelResponse> {
-			Ibc::channel(channel_id, port_id).ok()
-		}
+	// 	fn channel(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryChannelResponse> {
+	// 		Ibc::channel(channel_id, port_id).ok()
+	// 	}
 
-		fn channel_client(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::IdentifiedClientState> {
-			Ibc::channel_client(channel_id, port_id).ok()
-		}
+	// 	fn channel_client(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::IdentifiedClientState> {
+	// 		Ibc::channel_client(channel_id, port_id).ok()
+	// 	}
 
-		fn connection_channels(connection_id: Vec<u8>) -> Option<ibc_primitives::QueryChannelsResponse> {
-			Ibc::connection_channels(connection_id).ok()
-		}
+	// 	fn connection_channels(connection_id: Vec<u8>) -> Option<ibc_primitives::QueryChannelsResponse> {
+	// 		Ibc::connection_channels(connection_id).ok()
+	// 	}
 
-		fn channels() -> Option<ibc_primitives::QueryChannelsResponse> {
-			Ibc::channels().ok()
-		}
+	// 	fn channels() -> Option<ibc_primitives::QueryChannelsResponse> {
+	// 		Ibc::channels().ok()
+	// 	}
 
-		fn packet_commitments(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryPacketCommitmentsResponse> {
-			Ibc::packet_commitments(channel_id, port_id).ok()
-		}
+	// 	fn packet_commitments(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryPacketCommitmentsResponse> {
+	// 		Ibc::packet_commitments(channel_id, port_id).ok()
+	// 	}
 
-		fn packet_acknowledgements(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryPacketAcknowledgementsResponse>{
-			Ibc::packet_acknowledgements(channel_id, port_id).ok()
-		}
+	// 	fn packet_acknowledgements(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryPacketAcknowledgementsResponse>{
+	// 		Ibc::packet_acknowledgements(channel_id, port_id).ok()
+	// 	}
 
-		fn unreceived_packets(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<u64>> {
-			Ibc::unreceived_packets(channel_id, port_id, seqs).ok()
-		}
+	// 	fn unreceived_packets(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<u64>> {
+	// 		Ibc::unreceived_packets(channel_id, port_id, seqs).ok()
+	// 	}
 
-		fn unreceived_acknowledgements(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<u64>> {
-			Ibc::unreceived_acknowledgements(channel_id, port_id, seqs).ok()
-		}
+	// 	fn unreceived_acknowledgements(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<u64>> {
+	// 		Ibc::unreceived_acknowledgements(channel_id, port_id, seqs).ok()
+	// 	}
 
-		fn next_seq_recv(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryNextSequenceReceiveResponse> {
-			Ibc::next_seq_recv(channel_id, port_id).ok()
-		}
+	// 	fn next_seq_recv(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryNextSequenceReceiveResponse> {
+	// 		Ibc::next_seq_recv(channel_id, port_id).ok()
+	// 	}
 
-		fn packet_commitment(channel_id: Vec<u8>, port_id: Vec<u8>, seq: u64) -> Option<ibc_primitives::QueryPacketCommitmentResponse> {
-			Ibc::packet_commitment(channel_id, port_id, seq).ok()
-		}
+	// 	fn packet_commitment(channel_id: Vec<u8>, port_id: Vec<u8>, seq: u64) -> Option<ibc_primitives::QueryPacketCommitmentResponse> {
+	// 		Ibc::packet_commitment(channel_id, port_id, seq).ok()
+	// 	}
 
-		fn packet_acknowledgement(channel_id: Vec<u8>, port_id: Vec<u8>, seq: u64) -> Option<ibc_primitives::QueryPacketAcknowledgementResponse> {
-			Ibc::packet_acknowledgement(channel_id, port_id, seq).ok()
-		}
+	// 	fn packet_acknowledgement(channel_id: Vec<u8>, port_id: Vec<u8>, seq: u64) -> Option<ibc_primitives::QueryPacketAcknowledgementResponse> {
+	// 		Ibc::packet_acknowledgement(channel_id, port_id, seq).ok()
+	// 	}
 
-		fn packet_receipt(channel_id: Vec<u8>, port_id: Vec<u8>, seq: u64) -> Option<ibc_primitives::QueryPacketReceiptResponse> {
-			Ibc::packet_receipt(channel_id, port_id, seq).ok()
-		}
+	// 	fn packet_receipt(channel_id: Vec<u8>, port_id: Vec<u8>, seq: u64) -> Option<ibc_primitives::QueryPacketReceiptResponse> {
+	// 		Ibc::packet_receipt(channel_id, port_id, seq).ok()
+	// 	}
 
-		fn denom_trace(asset_id: AssetId) -> Option<ibc_primitives::QueryDenomTraceResponse> {
-			Ibc::get_denom_trace(asset_id)
-		}
+	// 	fn denom_trace(asset_id: AssetId) -> Option<ibc_primitives::QueryDenomTraceResponse> {
+	// 		Ibc::get_denom_trace(asset_id)
+	// 	}
 
-		fn denom_traces(key: Option<AssetId>, offset: Option<u32>, limit: u64, count_total: bool) -> ibc_primitives::QueryDenomTracesResponse {
-			let key = key.map(Either::Left).or_else(|| offset.map(Either::Right));
-			Ibc::get_denom_traces(key, limit, count_total)
-		}
+	// 	fn denom_traces(key: Option<AssetId>, offset: Option<u32>, limit: u64, count_total: bool) -> ibc_primitives::QueryDenomTracesResponse {
+	// 		let key = key.map(Either::Left).or_else(|| offset.map(Either::Right));
+	// 		Ibc::get_denom_traces(key, limit, count_total)
+	// 	}
 
-		fn block_events(extrinsic_index: Option<u32>) -> Vec<Result<pallet_ibc::events::IbcEvent, pallet_ibc::errors::IbcError>> {
-			let mut raw_events = frame_system::Pallet::<Self>::read_events_no_consensus();
-			if let Some(idx) = extrinsic_index {
-				raw_events.find_map(|e| {
-					let frame_system::EventRecord{ event, phase, ..} = *e;
-					match (event, phase) {
-						(RuntimeEvent::Ibc(pallet_ibc::Event::Events{ events }), frame_system::Phase::ApplyExtrinsic(index)) if index == idx => Some(events),
-						_ => None
-					}
-				}).unwrap_or_default()
-			}
-			else {
-				raw_events.filter_map(|e| {
-					let frame_system::EventRecord{ event, ..} = *e;
+	// 	fn block_events(extrinsic_index: Option<u32>) -> Vec<Result<pallet_ibc::events::IbcEvent, pallet_ibc::errors::IbcError>> {
+	// 		let mut raw_events = frame_system::Pallet::<Self>::read_events_no_consensus();
+	// 		if let Some(idx) = extrinsic_index {
+	// 			raw_events.find_map(|e| {
+	// 				let frame_system::EventRecord{ event, phase, ..} = *e;
+	// 				match (event, phase) {
+	// 					(RuntimeEvent::Ibc(pallet_ibc::Event::Events{ events }), frame_system::Phase::ApplyExtrinsic(index)) if index == idx => Some(events),
+	// 					_ => None
+	// 				}
+	// 			}).unwrap_or_default()
+	// 		}
+	// 		else {
+	// 			raw_events.filter_map(|e| {
+	// 				let frame_system::EventRecord{ event, ..} = *e;
 
-					match event {
-						RuntimeEvent::Ibc(pallet_ibc::Event::Events{ events }) => {
-								Some(events)
-							},
-						_ => None
-					}
-				}).flatten().collect()
-			}
-		}
-	}
+	// 				match event {
+	// 					RuntimeEvent::Ibc(pallet_ibc::Event::Events{ events }) => {
+	// 							Some(events)
+	// 						},
+	// 					_ => None
+	// 				}
+	// 			}).flatten().collect()
+	// 		}
+	// 	}
+	// }
 
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
