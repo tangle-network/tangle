@@ -1,12 +1,12 @@
 use ::ibc::core::ics24_host::identifier::PortId;
 use ::ibc::core::ics26_routing::context::{Module, ModuleId};
-use orml_traits::asset_registry::AssetProcessor;
 use core::convert::Infallible;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
 use cumulus_primitives_core::ParaId;
 use ibc_primitives::{runtime_interface::ss58_to_account_id_32, IbcAccount};
 use orml_asset_registry::{AssetMetadata, DefaultAssetMetadata};
+use orml_traits::asset_registry::AssetProcessor;
 use pallet_ibc::ics20::MemoData;
 use pallet_ibc::ics20::SubstrateMultihopXcmHandlerNone;
 use pallet_ibc::ics20::ValidateMemo;

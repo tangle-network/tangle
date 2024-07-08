@@ -23,10 +23,10 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 mod filters;
 pub mod frontier_evm;
+pub mod ibc;
 pub mod impls;
 pub mod precompiles;
 pub mod voter_bags;
-pub mod ibc;
 
 pub use ibc::*;
 
@@ -54,7 +54,6 @@ pub use pallet_staking::StakerStatus;
 use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
-use sp_runtime::Either;
 use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::MaxEncodedLen;
 use parity_scale_codec::{Decode, Encode};
@@ -64,6 +63,7 @@ use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
+use sp_runtime::Either;
 use sp_runtime::{
 	create_runtime_str,
 	curve::PiecewiseLinear,
