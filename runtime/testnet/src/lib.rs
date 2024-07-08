@@ -1691,7 +1691,10 @@ pub struct AssetAuthority;
 impl EnsureOriginWithArg<RuntimeOrigin, Option<u32>> for AssetAuthority {
 	type Success = ();
 
-	fn try_origin(origin: RuntimeOrigin, asset_id: &Option<u32>) -> Result<Self::Success, RuntimeOrigin> {
+	fn try_origin(
+		origin: RuntimeOrigin,
+		asset_id: &Option<u32>,
+	) -> Result<Self::Success, RuntimeOrigin> {
 		match asset_id {
 			// Any other `asset_id` defaults to EnsureRoot
 			_ => <EnsureRoot<AccountId> as EnsureOrigin<RuntimeOrigin>>::try_origin(origin),
