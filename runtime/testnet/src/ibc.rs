@@ -7,6 +7,7 @@ use cumulus_primitives_core::ParaId;
 use ibc_primitives::{runtime_interface::ss58_to_account_id_32, IbcAccount};
 use orml_asset_registry::{AssetMetadata, DefaultAssetMetadata};
 use orml_traits::asset_registry::AssetProcessor;
+use orml_traits::parameter_type_with_key;
 use pallet_ibc::ics20::MemoData;
 use pallet_ibc::ics20::SubstrateMultihopXcmHandlerNone;
 use pallet_ibc::ics20::ValidateMemo;
@@ -19,8 +20,22 @@ use sp_runtime::{Either, Either::Left, Either::Right};
 
 use super::*;
 
+use orml_asset_registry::impls::ExistentialDeposits as AssetRegistryExistentialDeposits;
+parameter_type_with_key! {
+	pub ExistentialDeposits: |asset_id: AssetId| -> Balance {
+		0
+	};
+}
+
 impl orml_asset_registry::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
+	type CustomMetadata = ();
+	type AssetId = AssetId;
+	type AuthorityOrigin = EnsureRoot<AccountId>;
+	type AssetProcessor = orml_asset_registry::SequentialId<Runtime>;
+	type Balance = Balance;
+	type StringLimit = ();
+	type WeightInfo = ();
 }
 
 impl pallet_ibc_ping::Config for Runtime {

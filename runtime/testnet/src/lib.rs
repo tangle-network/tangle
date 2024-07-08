@@ -1518,6 +1518,7 @@ construct_runtime!(
 		SygmaPercentageFeeHandler: sygma_percentage_feehandler,
 		SygmaBridge: sygma_bridge,
 
+		AssetRegistry: orml_asset_registry,
 		IbcPing: pallet_ibc_ping,
 		// pallet-ibc, should be the last module in your runtime
 		Ibc: pallet_ibc,
