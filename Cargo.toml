@@ -384,12 +384,12 @@ sygma-runtime-api = { git = "https://github.com/sygmaprotocol/sygma-substrate-pa
 sygma-rpc = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "release-polkadot-v1.7.0", default-features = false }
 
 # IBC
-pallet-ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
-pallet-ibc-ping = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
-ibc-primitives = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
-ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
-light-client-common = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
-ibc-runtime-api = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
+# pallet-ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
+# pallet-ibc-ping = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
+# ibc-primitives = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
+# ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
+# light-client-common = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
+# ibc-runtime-api = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone" }
 
 [profile.release]
 panic = "unwind"

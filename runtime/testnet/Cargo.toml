@@ -155,12 +155,12 @@ sygma-bridge = { workspace = true }
 sygma-runtime-api = { workspace = true }
 
 # IBC
-pallet-ibc = { workspace = true }
-pallet-ibc-ping = { workspace = true }
-ibc-primitives = { workspace = true }
-ibc = { workspace = true }
-ibc-runtime-api = { workspace = true }
-light-client-common = { workspace = true }
+# pallet-ibc = { workspace = true }
+# pallet-ibc-ping = { workspace = true }
+# ibc-primitives = { workspace = true }
+# ibc = { workspace = true }
+# ibc-runtime-api = { workspace = true }
+# light-client-common = { workspace = true }
 
 # XCM
 xcm = { workspace = true }
@@ -327,11 +327,11 @@ std = [
   "sygma-runtime-api/std",
 
   # IBC
-  "pallet-ibc/std",
-  "pallet-ibc-ping/std",
-  "ibc-primitives/std",
-  "ibc/std",
-  "light-client-common/std",
+  # "pallet-ibc/std",
+  # "pallet-ibc-ping/std",
+  # "ibc-primitives/std",
+  # "ibc/std",
+  # "light-client-common/std",
 
   # XCM
   "xcm/std",
