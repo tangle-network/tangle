@@ -412,9 +412,6 @@ impl<S: Get<u32>> TryFrom<String> for BoundedString<S> {
 impl<S: Get<u32>> TryFrom<&str> for BoundedString<S> {
 	type Error = String;
 	fn try_from(value: &str) -> Result<Self, Self::Error> {
-		#[cfg(not(feature = "std"))]
-		use alloc::string::ToString;
-
 		Self::try_from(value.to_string())
 	}
 }

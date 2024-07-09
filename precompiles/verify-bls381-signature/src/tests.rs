@@ -26,7 +26,7 @@ fn precompiles() -> Precompiles<Runtime> {
 
 #[test]
 fn wrong_signature_length_returns_false() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		const BLS_SECRET_KEY: [u8; 32] = [
 			78, 252, 122, 126, 32, 0, 75, 89, 252, 31, 42, 130, 254, 88, 6, 90, 138, 202, 135, 194,
 			233, 117, 181, 75, 96, 238, 79, 100, 237, 59, 140, 111,
@@ -53,7 +53,7 @@ fn wrong_signature_length_returns_false() {
 
 #[test]
 fn bad_signature_returns_false() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		const BLS_SECRET_KEY: [u8; 32] = [
 			78, 252, 122, 126, 32, 0, 75, 89, 252, 31, 42, 130, 254, 88, 6, 90, 138, 202, 135, 194,
 			233, 117, 181, 75, 96, 238, 79, 100, 237, 59, 140, 111,
@@ -85,7 +85,7 @@ fn bad_signature_returns_false() {
 
 #[test]
 fn signature_verification_works_with_bls318() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		const BLS_SECRET_KEY: [u8; 32] = [
 			78, 252, 122, 126, 32, 0, 75, 89, 252, 31, 42, 130, 254, 88, 6, 90, 138, 202, 135, 194,
 			233, 117, 181, 75, 96, 238, 79, 100, 237, 59, 140, 111,
@@ -105,7 +105,7 @@ fn signature_verification_works_with_bls318() {
 				PCall::verify {
 					public_bytes: pub_key.as_uncompressed_bytes().into(),
 					signature_bytes: signature.as_bytes().to_vec().into(),
-					message: BLS_DATA_TO_SIGN.to_vec().into(),
+					message: msg_hash.to_vec().into(),
 				},
 			)
 			.expect_no_logs()

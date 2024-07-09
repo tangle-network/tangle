@@ -91,7 +91,7 @@ use sygma_traits::{
 	VerifyingContractAddress,
 };
 use tangle_primitives::services::RpcServicesWithBlueprint;
-use xcm::v4::Junctions::{X1, X3};
+use xcm::v4::Junctions::{X1, X3, X4};
 use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
 #[allow(deprecated)]
 use xcm_builder::{

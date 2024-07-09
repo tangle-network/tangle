@@ -18,9 +18,10 @@
 
 use fp_evm::PrecompileHandle;
 use precompile_utils::prelude::*;
-use sp_core::keccak_256;
+use sp_core::bytes::to_hex;
 use sp_core::ConstU32;
 use sp_std::marker::PhantomData;
+use sp_std::prelude::*;
 
 #[cfg(test)]
 mod mock;
@@ -65,14 +66,13 @@ impl<Runtime: pallet_evm::Config> Bls381Precompile<Runtime> {
 			} else {
 				return Ok(false);
 			};
-		let signed_data = keccak_256(&message);
 
-		let is_confirmed = signature.verify(&signed_data, &public_key);
+		let is_confirmed = signature.verify(&message, &public_key);
 
 		log::trace!(
 			target: "Bls-381-Precompile",
-			"Verified signature {:?} is {:?}",
-			signature, is_confirmed,
+			"Verified signature {} is {:?}",
+			to_hex(&signature.as_bytes()[..], false), is_confirmed,
 		);
 
 		Ok(is_confirmed)

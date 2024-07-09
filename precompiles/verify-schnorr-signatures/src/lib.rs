@@ -22,6 +22,7 @@ use sp_core::sr25519;
 use sp_core::ConstU32;
 use sp_io::{crypto::sr25519_verify, hashing::keccak_256};
 use sp_std::marker::PhantomData;
+use sp_std::prelude::*;
 
 use frost_core::{signature::Signature, verifying_key::VerifyingKey};
 use frost_ed25519::Ed25519Sha512;

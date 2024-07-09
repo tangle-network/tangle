@@ -21,6 +21,7 @@ use generic_ec::{coords::HasAffineX, curves::Stark, Point, Scalar};
 use precompile_utils::prelude::*;
 use sp_core::ConstU32;
 use sp_std::marker::PhantomData;
+use sp_std::prelude::*;
 
 #[cfg(test)]
 mod mock;
@@ -120,11 +121,12 @@ impl<Runtime: pallet_evm::Config> EcdsaStarkPrecompile<Runtime> {
 	}
 }
 
-pub fn convert_stark_scalar(x: &Scalar<Stark>) -> Result<starknet_crypto::FieldElement, String> {
+pub fn convert_stark_scalar(
+	x: &Scalar<Stark>,
+) -> Result<starknet_crypto::FieldElement, &'static str> {
 	let bytes = x.to_be_bytes();
 	debug_assert_eq!(bytes.len(), 32);
 	let mut buffer = [0u8; 32];
 	buffer.copy_from_slice(bytes.as_bytes());
-	starknet_crypto::FieldElement::from_bytes_be(&buffer)
-		.map_err(|_| "FieldElementError".to_string())
+	starknet_crypto::FieldElement::from_bytes_be(&buffer).map_err(|_| "FieldElementError")
 }

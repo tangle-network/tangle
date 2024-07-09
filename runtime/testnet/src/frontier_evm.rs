@@ -25,8 +25,8 @@ use sp_runtime::{traits::BlakeTwo256, ConsensusEngineId, Permill};
 use sp_std::{marker::PhantomData, prelude::*};
 // Frontier
 use pallet_ethereum::PostLogContent;
-use pallet_evm_precompileset_assets_erc20::AddressToAssetId;
 use pallet_evm::{HashedAddressMapping, OnChargeEVMTransaction};
+use pallet_evm_precompileset_assets_erc20::AddressToAssetId;
 use tangle_primitives::{
 	evm::{GAS_LIMIT_POV_SIZE_RATIO, WEIGHT_PER_GAS},
 	impl_proxy_type,

@@ -22,6 +22,8 @@ use k256::elliptic_curve::group::GroupEncoding;
 use precompile_utils::prelude::*;
 use sp_core::ConstU32;
 use sp_std::marker::PhantomData;
+use sp_std::prelude::*;
+
 #[cfg(test)]
 mod mock;
 #[cfg(test)]

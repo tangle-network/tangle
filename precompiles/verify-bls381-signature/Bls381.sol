@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
  */
 interface IBls381 {
     /**
-     * @dev Verify signed message .
+     * @dev Verify signed message hash.
      * @return A boolean confirming whether the public key is signer for the message. 
      */
     function verify(
