@@ -1904,7 +1904,8 @@ parameter_types! {
 	pub const SygmaBridgePalletId: PalletId = PalletId(*b"sygma/01");
 
 	// Tangle testnet super admin: 5D2hZnw8Z7kg5LpQiEBb6HPG4V51wYXuKhE7sVhXiUPWj8D1
-	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("2ab4c35efb6ab82377c2325467103cf46742d288ae1f8917f1d5960f4a1e9065");
+	// pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("2ab4c35efb6ab82377c2325467103cf46742d288ae1f8917f1d5960f4a1e9065");
+	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d"); // alice
 	pub SygmaBridgeAdminAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
 
 	// SygmaBridgeFeeAccount is a substrate account and used for bridging fee collection
