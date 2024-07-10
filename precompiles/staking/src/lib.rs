@@ -100,7 +100,7 @@ where
 			H256(
 				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
 			) => {
-				let ethereum_address = Address(H160::from_slice(&payee.0[10..]));
+				let ethereum_address = Address(H160::from_slice(&payee.0[12..]));
 				pallet_staking::RewardDestination::Account(
 					Runtime::AddressMapping::into_account_id(ethereum_address.0),
 				)
