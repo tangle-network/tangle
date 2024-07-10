@@ -55,12 +55,12 @@ fn max_validator_count_works() {
 fn current_era_works() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		start_session(3);
-		assert_eq!(active_era(), 2);
+		assert_eq!(active_era(), 1);
 		precompiles()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::current_era {})
 			.expect_cost(0)
 			.expect_no_logs()
-			.execute_returns(2u32);
+			.execute_returns(1u32);
 	});
 }
 
