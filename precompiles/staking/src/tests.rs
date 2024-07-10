@@ -60,7 +60,7 @@ fn current_era_works() {
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::current_era {})
 			.expect_cost(0)
 			.expect_no_logs()
-			.execute_returns(3u32);
+			.execute_returns(2u32);
 	});
 }
 
@@ -223,7 +223,7 @@ fn nominator_payout_to_stash_account_should_work() {
 
 		// Nominator will be added in next era (era1).
 		// Nominator should have 0 usable balance.
-		assert_eq!(Balances::usable_balance(&account), 0);
+		assert_eq!(Balances::usable_balance(account), 0);
 
 		// Reward payment for era 0.
 		// All the old validators should be rewarded.
@@ -239,7 +239,7 @@ fn nominator_payout_to_stash_account_should_work() {
 
 		// Stash acount is same as controller account.
 		// Therefore should receive some usable balance in same controller account.
-		assert_eq!(Balances::usable_balance(&account), 10);
+		assert_eq!(Balances::usable_balance(account), 10);
 	});
 }
 
@@ -295,7 +295,7 @@ fn nominator_payout_to_evm_account_should_work() {
 
 		// Nominator will be added in next era (era1).
 		// Nominator should have 0 usable balance.
-		assert_eq!(Balances::usable_balance(&account), 0);
+		assert_eq!(Balances::usable_balance(account), 0);
 
 		// Reward payment for era 0.
 		// All the old validators should be rewarded.
@@ -310,6 +310,6 @@ fn nominator_payout_to_evm_account_should_work() {
 		make_all_reward_payment(1);
 
 		// Mapped substrate account for above evm address which is used as reward destination.
-		assert_eq!(Balances::usable_balance(&mapped_substrate_account), 10);
+		assert_eq!(Balances::usable_balance(mapped_substrate_account), 10);
 	});
 }

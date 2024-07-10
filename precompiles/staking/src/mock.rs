@@ -632,7 +632,7 @@ pub(crate) fn make_all_reward_payment(era: EraIndex) {
 	let validators_with_reward = reward_points.individual.keys().cloned().collect::<Vec<_>>();
 	// reward validators
 	for validator_controller in validators_with_reward.iter().filter_map(Staking::bonded) {
-		let ledger = <pallet_staking::Ledger<Runtime>>::get(&validator_controller).unwrap();
+		let ledger = <pallet_staking::Ledger<Runtime>>::get(validator_controller).unwrap();
 		for page in 0..1 {
 			assert_ok!(Staking::payout_stakers_by_page(
 				RuntimeOrigin::signed(TestAccount::Alex.into()),
