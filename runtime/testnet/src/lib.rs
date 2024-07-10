@@ -29,7 +29,7 @@ pub mod precompiles;
 pub mod voter_bags;
 
 pub use ibc::*;
-
+use frame_support::traits::EnsureOriginWithArg;
 use fixed::{types::extra::U16, FixedU128 as DecimalFixedU128};
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -43,6 +43,7 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
+use frame_support::pallet_prelude::EnsureOrigin;
 use frame_system::{EnsureSigned, EnsureSignedBy};
 use orml_traits::parameter_type_with_key;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
@@ -1712,12 +1713,12 @@ pub struct CustomMetadata {
 	pub fee_per_second: u128,
 }
 
-use orml_asset_registry::impls::ExistentialDeposits as AssetRegistryExistentialDeposits;
-parameter_type_with_key! {
-	pub ExistentialDeposits: |asset_id: AssetId| -> Balance {
-		0
-	};
-}
+// use orml_asset_registry::impls::ExistentialDeposits as AssetRegistryExistentialDeposits;
+// parameter_type_with_key! {
+// 	pub ExistentialDeposits: |asset_id: AssetId| -> Balance {
+// 		0
+// 	};
+// }
 
 parameter_types! {
 	pub const StringLimit: u32 = 50;
