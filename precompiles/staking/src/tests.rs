@@ -221,19 +221,24 @@ fn nominator_payout_to_stash_account_should_work() {
 		let nominator = Nominators::<Runtime>::get(account).unwrap();
 		assert_eq!(nominator.targets.len(), 3);
 
-		// Nominator will be added in next era (era1) should have 0 usable balance.
+		// Nominator will be added in next era (era1).
+		// Nominator should have 0 usable balance.
 		assert_eq!(Balances::usable_balance(&account), 0);
 
-		// Reward payment for era 0, all the old validators should be rewarded.
+		// Reward payment for era 0.
+		// All the old validators should be rewarded.
 		reward_all_elected();
 		start_active_era(1);
 		make_all_reward_payment(0);
 
-		// Reward payment for era 1, Now the nominator should receive 10 rewards in its stash account
+		// Reward payment for era 1.
+		// Now the nominator should receive some rewards
 		reward_all_elected();
 		start_active_era(2);
 		make_all_reward_payment(1);
 
+		// Stash acount is same as controller account.
+		// Therefore should receive some usable balance in same controller account.
 		assert_eq!(Balances::usable_balance(&account), 10);
 	});
 }
@@ -288,20 +293,23 @@ fn nominator_payout_to_evm_account_should_work() {
 		let nominator = Nominators::<Runtime>::get(account).unwrap();
 		assert_eq!(nominator.targets.len(), 3);
 
-		// Nominator will be added in next era (era1) should have 0 usable balance.
+		// Nominator will be added in next era (era1).
+		// Nominator should have 0 usable balance.
 		assert_eq!(Balances::usable_balance(&account), 0);
 
-		// Reward payment for era 0, all the old validators should be rewarded.
+		// Reward payment for era 0.
+		// All the old validators should be rewarded.
 		reward_all_elected();
 		start_active_era(1);
 		make_all_reward_payment(0);
 
-		// Reward payment for era 1, Now the nominator should receive 10 rewards in its reward destination address
+		// Reward payment for era 1.
+		// Now the nominator should receive some rewards
 		reward_all_elected();
 		start_active_era(2);
 		make_all_reward_payment(1);
 
-		// Mapped substrate account evm address used for as reward destination.
+		// Mapped substrate account for above evm address which is used as reward destination.
 		assert_eq!(Balances::usable_balance(&mapped_substrate_account), 10);
 	});
 }
