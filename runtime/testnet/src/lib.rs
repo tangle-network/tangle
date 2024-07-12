@@ -23,12 +23,12 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 mod filters;
 pub mod frontier_evm;
-pub mod ibc;
+// pub mod ibc;
 pub mod impls;
 pub mod precompiles;
 pub mod voter_bags;
 
-pub use ibc::*;
+// pub use ibc::*;
 use frame_support::traits::EnsureOriginWithArg;
 use fixed::{types::extra::U16, FixedU128 as DecimalFixedU128};
 use frame_election_provider_support::{
