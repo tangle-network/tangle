@@ -21,15 +21,16 @@
 use super::*;
 use frame_election_provider_support::bounds::{ElectionBounds, ElectionBoundsBuilder};
 use frame_support::{
-	construct_runtime,
+	assert_ok, construct_runtime,
 	pallet_prelude::Hooks,
 	parameter_types,
-	traits::{ConstU64, Everything, OnFinalize, OnInitialize},
+	traits::{ConstU64, Everything, OnFinalize, OnInitialize, OnUnbalanced, OneSessionHandler},
 	weights::Weight,
 };
+use pallet_balances::PositiveImbalance;
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
-use pallet_session::{historical as pallet_session_historical, TestSessionHandler};
-use pallet_staking::EraPayout;
+use pallet_session::historical as pallet_session_historical;
+use pallet_staking::{ConvertCurve, EraPayout, SessionInterface};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use precompile_utils::precompile_set::*;
 use serde::{Deserialize, Serialize};
@@ -56,15 +57,34 @@ use tangle_primitives::jobs::ReportRestakerOffence;
 use tangle_primitives::roles::traits::RolesHandler;
 use tangle_primitives::roles::RoleType;
 
-sp_runtime::impl_opaque_keys! {
-	pub struct MockSessionKeys {
-		pub dummy: UintAuthorityId,
+pub struct MockSessionHandler;
+impl OneSessionHandler<AccountId> for MockSessionHandler {
+	type Key = UintAuthorityId;
+
+	fn on_genesis_session<'a, I: 'a>(_: I)
+	where
+		I: Iterator<Item = (&'a AccountId, Self::Key)>,
+		AccountId: 'a,
+	{
 	}
+
+	fn on_new_session<'a, I: 'a>(_: bool, _: I, _: I)
+	where
+		I: Iterator<Item = (&'a AccountId, Self::Key)>,
+		AccountId: 'a,
+	{
+	}
+
+	fn on_disabled(_validator_index: u32) {}
 }
 
-impl From<UintAuthorityId> for MockSessionKeys {
-	fn from(dummy: UintAuthorityId) -> Self {
-		Self { dummy }
+impl sp_runtime::BoundToRuntimeAppPublic for MockSessionHandler {
+	type Public = UintAuthorityId;
+}
+
+sp_runtime::impl_opaque_keys! {
+	pub struct MockSessionKeys {
+		pub dummy: MockSessionHandler,
 	}
 }
 
@@ -73,6 +93,7 @@ pub type BlockNumber = u64;
 pub type EraIndex = u32;
 pub type SessionIndex = u32;
 
+pub const INIT_TIMESTAMP: u64 = 30_000;
 pub const BLOCK_TIME: u64 = 1000;
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
@@ -345,7 +366,7 @@ impl pallet_session::Config for Runtime {
 	type Keys = MockSessionKeys;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-	type SessionHandler = TestSessionHandler;
+	type SessionHandler = (MockSessionHandler,);
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
@@ -393,6 +414,13 @@ impl RolesHandler<AccountId> for MockRolesHandler {
 	}
 }
 
+pub struct MockReward {}
+impl OnUnbalanced<PositiveImbalance<Runtime>> for MockReward {
+	fn on_unbalanced(_: PositiveImbalance<Runtime>) {
+		RewardOnUnbalanceWasCalled::set(true);
+	}
+}
+
 impl pallet_staking::Config for Runtime {
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
@@ -401,13 +429,13 @@ impl pallet_staking::Config for Runtime {
 	type RewardRemainder = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Slash = ();
-	type Reward = ();
-	type SessionsPerEra = ();
-	type SlashDeferDuration = ();
+	type Reward = MockReward;
+	type SessionsPerEra = SessionsPerEra;
+	type SlashDeferDuration = SlashDeferDuration;
 	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type BondingDuration = ();
-	type SessionInterface = ();
-	type EraPayout = ();
+	type SessionInterface = Self;
+	type EraPayout = ConvertCurve<RewardCurve>;
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
 	type NextNewSession = Session;
@@ -471,7 +499,7 @@ pub fn new_test_ext(ids: Vec<u8>) -> TestExternalities {
 pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	let balances: Vec<_> = authorities.iter().map(|i| (*i, 20_000_u128)).collect();
+	let balances: Vec<_> = authorities.iter().map(|i| (*i, 1_000_000_000u128)).collect();
 
 	pallet_balances::GenesisConfig::<Runtime> { balances }
 		.assimilate_storage(&mut t)
@@ -495,7 +523,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 			(
 				*authority,
 				*authority,
-				10_000_u128,
+				1_000_000_000u128,
 				pallet_staking::StakerStatus::<AccountId>::Validator,
 			)
 		})
@@ -520,6 +548,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		System::set_block_number(1);
 		<pallet_session::Pallet<Runtime> as OnInitialize<u64>>::on_initialize(1);
 		<Staking as Hooks<u64>>::on_initialize(1);
+		Timestamp::set_timestamp(INIT_TIMESTAMP);
 	});
 
 	ext
@@ -527,19 +556,17 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 /// Used to run to the specified block number
 pub(crate) fn run_to_block(n: BlockNumber) {
-	while System::block_number() < n {
-		<frame_system::Pallet<Runtime> as OnFinalize<u64>>::on_finalize(System::block_number());
-		<pallet_session::Pallet<Runtime> as OnFinalize<u64>>::on_finalize(System::block_number());
-		<pallet_balances::Pallet<Runtime> as OnFinalize<u64>>::on_finalize(System::block_number());
-		<pallet_staking::Pallet<Runtime> as OnFinalize<u64>>::on_finalize(System::block_number());
-
-		System::set_block_number(System::block_number() + 1);
-		<pallet_session::Pallet<Runtime> as OnInitialize<u64>>::on_initialize(
-			System::block_number(),
-		);
-		<pallet_staking::Pallet<Runtime> as OnInitialize<u64>>::on_initialize(
-			System::block_number(),
-		);
+	<pallet_staking::Pallet<Runtime> as OnFinalize<u64>>::on_finalize(System::block_number());
+	for b in (System::block_number() + 1)..=n {
+		System::set_block_number(b);
+		<pallet_session::Pallet<Runtime> as OnInitialize<u64>>::on_initialize(b);
+		<pallet_staking::Pallet<Runtime> as OnInitialize<u64>>::on_initialize(b);
+		Timestamp::set_timestamp(System::block_number() * BLOCK_TIME + INIT_TIMESTAMP);
+		if b != n {
+			<pallet_staking::Pallet<Runtime> as OnFinalize<u64>>::on_finalize(
+				System::block_number(),
+			);
+		}
 	}
 }
 
@@ -577,13 +604,44 @@ pub(crate) fn start_active_era(era_index: EraIndex) {
 }
 
 pub(crate) fn current_total_payout_for_duration(duration: u64) -> Balance {
-	let (payout, _rest) = <Runtime as Config>::EraPayout::era_payout(
+	let (payout, _rest) = <Runtime as pallet_staking::Config>::EraPayout::era_payout(
 		Staking::eras_total_stake(active_era()),
 		Balances::total_issuance(),
 		duration,
 	);
 	assert!(payout > 0);
 	payout
+}
+
+pub(crate) fn reward_all_elected() {
+	let rewards = <Runtime as Config>::SessionInterface::validators().into_iter().map(|v| (v, 1));
+
+	<pallet_staking::Pallet<Runtime>>::reward_by_ids(rewards)
+}
+
+pub(crate) fn validator_controllers() -> Vec<AccountId> {
+	Session::validators()
+		.into_iter()
+		.map(|s| Staking::bonded(&s).expect("no controller for validator"))
+		.collect()
+}
+
+/// Make all validator and nominator request their payment
+pub(crate) fn make_all_reward_payment(era: EraIndex) {
+	let reward_points = pallet_staking::ErasRewardPoints::<Runtime>::get(era);
+	let validators_with_reward = reward_points.individual.keys().cloned().collect::<Vec<_>>();
+	// reward validators
+	for validator_controller in validators_with_reward.iter().filter_map(Staking::bonded) {
+		let ledger = <pallet_staking::Ledger<Runtime>>::get(validator_controller).unwrap();
+		for page in 0..1 {
+			assert_ok!(Staking::payout_stakers_by_page(
+				RuntimeOrigin::signed(TestAccount::Alex.into()),
+				ledger.stash,
+				era,
+				page
+			));
+		}
+	}
 }
 
 pub(crate) fn maximum_payout_for_duration(duration: u64) -> Balance {
