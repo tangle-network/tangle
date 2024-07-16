@@ -1,0 +1,42 @@
+[package]
+name = "orml-traits"
+description = "Shared traits including `BasicCurrency`, `MultiCurrency`, `Auction` and more."
+repository = "https://github.com/open-web3-stack/open-runtime-module-library/tree/master/traits"
+license = "Apache-2.0"
+version = "0.13.0"
+authors = ["Laminar Developers <hello@laminar.one>"]
+edition = "2021"
+
+[dependencies]
+scale-info = { workspace = true }
+serde = { workspace = true, optional = true }
+parity-scale-codec = { workspace = true }
+num-traits = { version = "0.2.14", default-features = false }
+impl-trait-for-tuples = "0.2.2"
+paste = "1.0"
+
+sp-runtime = { workspace = true, features = ["serde"] }
+sp-core = { workspace = true }
+sp-io = { workspace = true }
+sp-std = { workspace = true }
+frame-support = { workspace = true }
+
+xcm = { workspace = true }
+
+orml-utilities = { path = "../utilities", version = "0.13.0", default-features = false }
+
+[features]
+default = [ "std" ]
+std = [
+	"frame-support/std",
+	"num-traits/std",
+	"orml-utilities/std",
+	"parity-scale-codec/std",
+	"scale-info/std",
+	"serde",
+	"sp-core/std",
+	"sp-io/std",
+	"sp-runtime/std",
+	"sp-std/std",
+	"xcm/std",
+]
