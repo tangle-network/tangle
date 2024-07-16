@@ -8812,6 +8812,7 @@ dependencies = [
  "hex-literal 0.4.1",
  "itertools 0.12.1",
  "libsecp256k1",
+ "log",
  "num_enum 0.5.11",
  "pallet-balances",
  "pallet-base-fee",

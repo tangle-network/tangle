@@ -8,6 +8,7 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
+log = { workspace = true }
 frame-benchmarking = { workspace = true, optional = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
@@ -23,6 +24,7 @@ fp-evm = { workspace = true }
 ethabi = { workspace = true }
 itertools = { workspace = true, features = ["use_alloc"] }
 serde = { workspace = true, features = ["derive"], optional = true }
+hex = { workspace = true, features = ["alloc"] }
 
 [dev-dependencies]
 ethereum = { workspace = true, features = ["with-codec"] }
@@ -73,53 +75,54 @@ frame-election-provider-support = { workspace = true }
 [features]
 default = ["std"]
 std = [
-  "itertools/use_std",
-  "scale-info/std",
-  "sp-runtime/std",
-  "frame-benchmarking?/std",
-  "frame-support/std",
-  "frame-system/std",
-  "sp-core/std",
-  "sp-std/std",
-  "sp-io/std",
-  "sp-staking/std",
-  "tangle-primitives/std",
-  "tangle-crypto-primitives/std",
-  "pallet-balances/std",
-  "pallet-timestamp/std",
-  "pallet-staking/std",
-  "fp-account/std",
-  "fp-consensus/std",
-  "fp-dynamic-fee/std",
-  "fp-ethereum/std",
-  "fp-evm/std",
-  "fp-rpc/std",
-  "fp-self-contained/std",
-  "fp-storage/std",
-  "ethabi/std",
-  "pallet-base-fee/std",
-  "pallet-dynamic-fee/std",
-  "pallet-ethereum/std",
-  "pallet-evm/std",
-  "pallet-evm-chain-id/std",
+ "hex/std",
+ "itertools/use_std",
+ "scale-info/std",
+ "sp-runtime/std",
+ "frame-benchmarking?/std",
+ "frame-support/std",
+ "frame-system/std",
+ "sp-core/std",
+ "sp-std/std",
+ "sp-io/std",
+ "sp-staking/std",
+ "tangle-primitives/std",
+ "tangle-crypto-primitives/std",
+ "pallet-balances/std",
+ "pallet-timestamp/std",
+ "pallet-staking/std",
+ "fp-account/std",
+ "fp-consensus/std",
+ "fp-dynamic-fee/std",
+ "fp-ethereum/std",
+ "fp-evm/std",
+ "fp-rpc/std",
+ "fp-self-contained/std",
+ "fp-storage/std",
+ "ethabi/std",
+ "pallet-base-fee/std",
+ "pallet-dynamic-fee/std",
+ "pallet-ethereum/std",
+ "pallet-evm/std",
+ "pallet-evm-chain-id/std",
 
-  "pallet-evm-precompile-modexp/std",
-  "pallet-evm-precompile-sha3fips/std",
-  "pallet-evm-precompile-simple/std",
-  "pallet-evm-precompile-blake2/std",
-  "pallet-evm-precompile-bn128/std",
-  "pallet-evm-precompile-curve25519/std",
-  "pallet-evm-precompile-ed25519/std",
-  "precompile-utils/std",
-  "serde/std",
+ "pallet-evm-precompile-modexp/std",
+ "pallet-evm-precompile-sha3fips/std",
+ "pallet-evm-precompile-simple/std",
+ "pallet-evm-precompile-blake2/std",
+ "pallet-evm-precompile-bn128/std",
+ "pallet-evm-precompile-curve25519/std",
+ "pallet-evm-precompile-ed25519/std",
+ "precompile-utils/std",
+ "serde/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
-  "frame-benchmarking/runtime-benchmarks",
-  "frame-support/runtime-benchmarks",
-  "frame-system/runtime-benchmarks",
-  "sp-runtime/runtime-benchmarks",
-  "pallet-balances/runtime-benchmarks",
-  "pallet-ethereum/runtime-benchmarks",
-  "pallet-evm/runtime-benchmarks",
+ "frame-benchmarking/runtime-benchmarks",
+ "frame-support/runtime-benchmarks",
+ "frame-system/runtime-benchmarks",
+ "sp-runtime/runtime-benchmarks",
+ "pallet-balances/runtime-benchmarks",
+ "pallet-ethereum/runtime-benchmarks",
+ "pallet-evm/runtime-benchmarks",
 ]

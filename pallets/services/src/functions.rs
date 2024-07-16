@@ -266,8 +266,24 @@ impl<T: Config> Pallet<T> {
 			T::EvmRunner::call(from, to, data.clone(), value, gas_limit, transactional, validate);
 		match result {
 			Ok(info) => {
+				log::debug!(
+					target: "evm",
+					"Call from: {:?}, to: {:?}, data: 0x{}, gas_limit: {:?}, result: {:?}",
+					from,
+					to,
+					hex::encode(&data),
+					gas_limit,
+					info,
+				);
 				// if we have a revert reason, emit an event
 				if info.exit_reason.is_revert() {
+					log::debug!(
+						target: "evm",
+						"Call to: {:?} with data: 0x{} Reverted with reason: 0x{}",
+						to,
+						hex::encode(&data),
+						hex::encode(&info.value),
+					);
 					Self::deposit_event(Event::<T>::EvmReverted {
 						from,
 						to,
