@@ -55,6 +55,7 @@ pub use weights::WeightInfo;
 pub mod module {
 	use super::*;
 	use frame_support::dispatch::PostDispatchInfo;
+	use sp_core::{H160, H256};
 	use sp_std::vec::Vec;
 	use tangle_primitives::services::*;
 	use types::*;
@@ -328,6 +329,18 @@ pub mod module {
 			/// The result of the job.
 			result: Vec<Field<T::Constraints, T::AccountId>>,
 		},
+
+		/// An EVM log has been emitted during an execution.
+		EvmLog {
+			/// The account that emitted the log
+			address: H160,
+			/// The topics of the log
+			topics: Vec<H256>,
+			/// The data of the log
+			data: Vec<u8>,
+		},
+		/// EVM execution reverted with a reason.
+		EvmReverted { from: H160, to: H160, data: Vec<u8>, reason: Vec<u8> },
 	}
 
 	#[pallet::pallet]

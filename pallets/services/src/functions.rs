@@ -262,9 +262,29 @@ impl<T: Config> Pallet<T> {
 	) -> Result<fp_evm::CallInfo, DispatchErrorWithPostInfo> {
 		let transactional = true;
 		let validate = false;
-		let result = T::EvmRunner::call(from, to, data, value, gas_limit, transactional, validate);
+		let result =
+			T::EvmRunner::call(from, to, data.clone(), value, gas_limit, transactional, validate);
 		match result {
-			Ok(info) => Ok(info),
+			Ok(info) => {
+				// if we have a revert reason, emit an event
+				if info.exit_reason.is_revert() {
+					Self::deposit_event(Event::<T>::EvmReverted {
+						from,
+						to,
+						data,
+						reason: info.value.clone(),
+					});
+				}
+				// Emit logs from the EVM call.
+				for log in &info.logs {
+					Self::deposit_event(Event::<T>::EvmLog {
+						address: log.address,
+						topics: log.topics.clone(),
+						data: log.data.clone(),
+					});
+				}
+				Ok(info)
+			},
 			Err(e) => Err(DispatchErrorWithPostInfo {
 				post_info: PostDispatchInfo { actual_weight: Some(e.weight), pays_fee: Pays::Yes },
 				error: e.error.into(),

@@ -3368,9 +3368,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				64u8, 198u8, 255u8, 177u8, 48u8, 34u8, 18u8, 30u8, 202u8, 43u8, 208u8, 249u8,
-				252u8, 108u8, 10u8, 210u8, 171u8, 30u8, 60u8, 14u8, 44u8, 52u8, 98u8, 72u8, 242u8,
-				225u8, 242u8, 28u8, 34u8, 135u8, 255u8, 132u8,
+				225u8, 142u8, 192u8, 174u8, 35u8, 88u8, 240u8, 105u8, 113u8, 88u8, 96u8, 169u8,
+				86u8, 13u8, 193u8, 49u8, 12u8, 39u8, 231u8, 111u8, 86u8, 146u8, 217u8, 236u8,
+				166u8, 236u8, 157u8, 82u8, 91u8, 203u8, 9u8, 163u8,
 			]
 	}
 	pub mod system {
@@ -4478,10 +4478,9 @@ pub mod api {
 						"Events",
 						(),
 						[
-							12u8, 249u8, 170u8, 252u8, 200u8, 62u8, 208u8, 109u8, 249u8, 20u8,
-							119u8, 154u8, 230u8, 180u8, 16u8, 28u8, 104u8, 181u8, 177u8, 162u8,
-							24u8, 41u8, 92u8, 235u8, 38u8, 75u8, 38u8, 141u8, 141u8, 184u8, 148u8,
-							52u8,
+							107u8, 248u8, 120u8, 128u8, 115u8, 228u8, 254u8, 254u8, 221u8, 246u8,
+							146u8, 34u8, 84u8, 30u8, 19u8, 253u8, 235u8, 22u8, 51u8, 40u8, 132u8,
+							150u8, 121u8, 43u8, 14u8, 56u8, 136u8, 87u8, 27u8, 61u8, 147u8, 81u8,
 						],
 					)
 				}
@@ -36657,6 +36656,68 @@ pub mod api {
 				const PALLET: &'static str = "Services";
 				const EVENT: &'static str = "JobResultSubmitted";
 			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "An EVM log has been emitted during an execution."]
+			pub struct EvmLog {
+				pub address: evm_log::Address,
+				pub topics: evm_log::Topics,
+				pub data: evm_log::Data,
+			}
+			pub mod evm_log {
+				use super::runtime_types;
+				pub type Address = ::subxt::ext::subxt_core::utils::H160;
+				pub type Topics = ::subxt::ext::subxt_core::alloc::vec::Vec<
+					::subxt::ext::subxt_core::utils::H256,
+				>;
+				pub type Data = ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for EvmLog {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "EvmLog";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "EVM execution reverted with a reason."]
+			pub struct EvmReverted {
+				pub from: evm_reverted::From,
+				pub to: evm_reverted::To,
+				pub data: evm_reverted::Data,
+				pub reason: evm_reverted::Reason,
+			}
+			pub mod evm_reverted {
+				use super::runtime_types;
+				pub type From = ::subxt::ext::subxt_core::utils::H160;
+				pub type To = ::subxt::ext::subxt_core::utils::H160;
+				pub type Data = ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+				pub type Reason = ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for EvmReverted {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "EvmReverted";
+			}
 		}
 		pub mod storage {
 			use super::runtime_types;
@@ -52197,6 +52258,23 @@ pub mod api {
 								::subxt::ext::subxt_core::utils::AccountId32,
 							>,
 						>,
+					},
+					#[codec(index = 12)]
+					#[doc = "An EVM log has been emitted during an execution."]
+					EvmLog {
+						address: ::subxt::ext::subxt_core::utils::H160,
+						topics: ::subxt::ext::subxt_core::alloc::vec::Vec<
+							::subxt::ext::subxt_core::utils::H256,
+						>,
+						data: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+					},
+					#[codec(index = 13)]
+					#[doc = "EVM execution reverted with a reason."]
+					EvmReverted {
+						from: ::subxt::ext::subxt_core::utils::H160,
+						to: ::subxt::ext::subxt_core::utils::H160,
+						data: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+						reason: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
 					},
 				}
 			}
