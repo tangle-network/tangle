@@ -22,6 +22,7 @@ use crate::distributions::{
 use crate::testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key};
 use hex_literal::hex;
 use pallet_airdrop_claims::MultiAddress;
+use pallet_ibc::pallet::AssetConfig;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
@@ -39,7 +40,7 @@ use tangle_primitives::{
 };
 use tangle_testnet_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	EVMConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, Precompiles, RoleKeyId,
+	EVMConfig, IbcConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, Precompiles, RoleKeyId,
 	RuntimeGenesisConfig, SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
 	TreasuryPalletId, VestingConfig, UNIT, WASM_BINARY,
 };
@@ -461,5 +462,6 @@ fn testnet_genesis(
 				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
 			)),
 		},
+		ibc: IbcConfig { assets: vec![AssetConfig { id: 1, denom: b"TNT".to_vec() }] },
 	}
 }

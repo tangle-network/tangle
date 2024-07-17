@@ -32,7 +32,7 @@ extern crate alloc;
 use crate::ics20::ValidateMemo;
 use core::fmt::Debug;
 use cumulus_primitives_core::ParaId;
-use frame_support::{traits::GenesisBuild, weights::Weight};
+use frame_support::weights::Weight;
 pub use pallet::*;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::{
@@ -465,7 +465,7 @@ pub mod pallet {
 	}
 
 	#[pallet::genesis_build]
-	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
 			for AssetConfig { id, denom } in &self.assets {
 				IbcDenoms::<T>::insert(denom.clone(), id);

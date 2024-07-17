@@ -65,6 +65,7 @@ sp-session = { workspace = true, features = ["default"] }
 sp-state-machine = { workspace = true, features = ["default"] }
 sp-timestamp = { workspace = true, features = ["default"] }
 sp-transaction-pool = { workspace = true, features = ["default"] }
+pallet-ibc = { workspace = true }
 pallet-jobs-rpc = { workspace = true }
 
 pallet-airdrop-claims = { workspace = true }

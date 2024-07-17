@@ -6,6 +6,7 @@ use core::str::FromStr;
 use cumulus_primitives_core::ParaId;
 use frame_support::traits::fungibles::metadata::Inspect;
 use ibc_primitives::{runtime_interface::ss58_to_account_id_32, IbcAccount};
+use light_client_common::StandaloneChain;
 use pallet_ibc::ics20::MemoData;
 use pallet_ibc::ics20::SubstrateMultihopXcmHandlerNone;
 use pallet_ibc::ics20::ValidateMemo;
@@ -212,11 +213,11 @@ impl ValidateMemo for RawMemo {
 
 parameter_types! {
 	pub const NativeAssetId: AssetId = 0;
-	pub const ChainIdentifier: ParaId = ParaId::from(1337);
+	pub const ChainIdentifier: ParaId = ParaId::new(1337);
 	pub const ExpectedBlockTime: u64 = 6000;
 	pub const SpamProtectionDeposit: Balance = 10000;
 	pub const MinimumConnectionDelay: u64 = 300; // 5 minutes
-	pub const ChainTType: ChainType = ChainType::from_str("tangle").unwrap();
+	pub const TangleChainType: ChainType = ChainType::StandaloneChain(StandaloneChain::Tangle);
 }
 
 impl pallet_ibc::Config for Runtime {
@@ -254,5 +255,5 @@ impl pallet_ibc::Config for Runtime {
 	type SubstrateMultihopXcmHandler = SubstrateMultihopXcmHandlerNone<Runtime>;
 
 	type ChainId = ChainIdentifier;
-	type ChainType = ChainTType;
+	type ChainType = TangleChainType;
 }
