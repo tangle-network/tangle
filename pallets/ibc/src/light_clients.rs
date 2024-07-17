@@ -171,7 +171,7 @@ impl grandpa_client_primitives::RelayHostFunctions for HostFunctionsManager {
 
 	fn insert_relay_header_hashes(new_hashes: &[<Self::Header as Header>::Hash]) {
 		if new_hashes.is_empty() {
-			return
+			return;
 		}
 
 		GrandpaHeaderHashesSetStorage::mutate(|hashes_set| {
@@ -212,7 +212,7 @@ impl grandpa_client_primitives::StandaloneHostFunctions for HostFunctionsManager
 
 	fn insert_header_hashes(new_hashes: &[<Self::Header as Header>::Hash]) {
 		if new_hashes.is_empty() {
-			return
+			return;
 		}
 
 		GrandpaHeaderHashesSetStorage::mutate(|hashes_set| {
@@ -310,14 +310,16 @@ impl AnyClientState {
 			let client_state = AnyClientState::try_from(any).ok()?;
 
 			match client_state {
-				AnyClientState::Wasm(wasm_client_state) =>
-					any = Any::decode(&*wasm_client_state.data).ok()?,
-				c =>
+				AnyClientState::Wasm(wasm_client_state) => {
+					any = Any::decode(&*wasm_client_state.data).ok()?
+				},
+				c => {
 					if f(&c) {
-						break Some(c)
+						break Some(c);
 					} else {
-						return None
-					},
+						return None;
+					}
+				},
 			};
 		}
 	}
@@ -397,13 +399,15 @@ impl AnyClientMessage {
 				ics07_tendermint::client_message::ClientMessage::Misbehaviour(_) => None,
 			},
 			Self::Beefy(inner) => match inner {
-				ics11_beefy::client_message::ClientMessage::Header(_) =>
-					unimplemented!("beefy header height"),
+				ics11_beefy::client_message::ClientMessage::Header(_) => {
+					unimplemented!("beefy header height")
+				},
 				ics11_beefy::client_message::ClientMessage::Misbehaviour(_) => None,
 			},
 			Self::GrandpaStandalone(inner) => match inner {
-				ics10_grandpa_standalone::client_message::ClientMessage::Header(h) =>
-					Some(h.height()),
+				ics10_grandpa_standalone::client_message::ClientMessage::Header(h) => {
+					Some(h.height())
+				},
 				ics10_grandpa_standalone::client_message::ClientMessage::Misbehaviour(_) => None,
 			},
 			Self::Grandpa(inner) => match inner {
@@ -411,8 +415,9 @@ impl AnyClientMessage {
 				ics10_grandpa::client_message::ClientMessage::Misbehaviour(_) => None,
 			},
 			Self::Wasm(inner) => match inner {
-				ics08_wasm::client_message::ClientMessage::Header(h) =>
-					h.inner.maybe_header_height(),
+				ics08_wasm::client_message::ClientMessage::Header(h) => {
+					h.inner.maybe_header_height()
+				},
 				ics08_wasm::client_message::ClientMessage::Misbehaviour(_) => None,
 			},
 			#[cfg(test)]
@@ -444,20 +449,24 @@ impl AnyClientMessage {
 
 	pub fn unpack_recursive(&self) -> &Self {
 		match self {
-			Self::Wasm(ics08_wasm::client_message::ClientMessage::Header(h)) =>
-				h.inner.unpack_recursive(),
-			Self::Wasm(ics08_wasm::client_message::ClientMessage::Misbehaviour(m)) =>
-				m.inner.unpack_recursive(),
+			Self::Wasm(ics08_wasm::client_message::ClientMessage::Header(h)) => {
+				h.inner.unpack_recursive()
+			},
+			Self::Wasm(ics08_wasm::client_message::ClientMessage::Misbehaviour(m)) => {
+				m.inner.unpack_recursive()
+			},
 			_ => self,
 		}
 	}
 
 	pub fn unpack_recursive_into(self) -> Self {
 		match self {
-			Self::Wasm(ics08_wasm::client_message::ClientMessage::Header(h)) =>
-				h.inner.unpack_recursive_into(),
-			Self::Wasm(ics08_wasm::client_message::ClientMessage::Misbehaviour(m)) =>
-				m.inner.unpack_recursive_into(),
+			Self::Wasm(ics08_wasm::client_message::ClientMessage::Header(h)) => {
+				h.inner.unpack_recursive_into()
+			},
+			Self::Wasm(ics08_wasm::client_message::ClientMessage::Misbehaviour(m)) => {
+				m.inner.unpack_recursive_into()
+			},
 			_ => self,
 		}
 	}
@@ -478,16 +487,18 @@ impl TryFrom<Any> for AnyClientMessage {
 				ics10_grandpa::client_message::ClientMessage::decode_vec(&value.value)
 					.map_err(ics02_client::error::Error::decode_raw_header)?,
 			)),
-			GRANDPA_HEADER_TYPE_URL =>
+			GRANDPA_HEADER_TYPE_URL => {
 				Ok(Self::Grandpa(ics10_grandpa::client_message::ClientMessage::Header(
 					ics10_grandpa::client_message::Header::decode_vec(&value.value)
 						.map_err(ics02_client::error::Error::decode_raw_header)?,
-				))),
-			GRANDPA_MISBEHAVIOUR_TYPE_URL =>
+				)))
+			},
+			GRANDPA_MISBEHAVIOUR_TYPE_URL => {
 				Ok(Self::Grandpa(ics10_grandpa::client_message::ClientMessage::Misbehaviour(
 					ics10_grandpa::client_message::Misbehaviour::decode_vec(&value.value)
 						.map_err(ics02_client::error::Error::decode_raw_header)?,
-				))),
+				)))
+			},
 			// TODO: beefy header, misbehaviour impl From<Any>
 			BEEFY_CLIENT_MESSAGE_TYPE_URL => Ok(Self::Beefy(
 				ics11_beefy::client_message::ClientMessage::decode_vec(&value.value)
@@ -497,30 +508,34 @@ impl TryFrom<Any> for AnyClientMessage {
 				ics07_tendermint::client_message::ClientMessage::decode_vec(&value.value)
 					.map_err(ics02_client::error::Error::decode_raw_header)?,
 			)),
-			TENDERMINT_HEADER_TYPE_URL =>
+			TENDERMINT_HEADER_TYPE_URL => {
 				Ok(Self::Tendermint(ics07_tendermint::client_message::ClientMessage::Header(
 					ics07_tendermint::client_message::Header::decode_vec(&value.value)
 						.map_err(ics02_client::error::Error::decode_raw_header)?,
-				))),
-			TENDERMINT_MISBEHAVIOUR_TYPE_URL =>
+				)))
+			},
+			TENDERMINT_MISBEHAVIOUR_TYPE_URL => {
 				Ok(Self::Tendermint(ics07_tendermint::client_message::ClientMessage::Misbehaviour(
 					ics07_tendermint::client_message::Misbehaviour::decode_vec(&value.value)
 						.map_err(ics02_client::error::Error::decode_raw_header)?,
-				))),
+				)))
+			},
 			WASM_CLIENT_MESSAGE_TYPE_URL => Ok(Self::Wasm(
 				ics08_wasm::client_message::ClientMessage::decode_vec(&value.value)
 					.map_err(ics02_client::error::Error::decode_raw_header)?,
 			)),
-			WASM_HEADER_TYPE_URL =>
+			WASM_HEADER_TYPE_URL => {
 				Ok(Self::Wasm(ics08_wasm::client_message::ClientMessage::Header(
 					ics08_wasm::client_message::Header::decode_vec(&value.value)
 						.map_err(ics02_client::error::Error::decode_raw_header)?,
-				))),
-			WASM_MISBEHAVIOUR_TYPE_URL =>
+				)))
+			},
+			WASM_MISBEHAVIOUR_TYPE_URL => {
 				Ok(Self::Wasm(ics08_wasm::client_message::ClientMessage::Misbehaviour(
 					ics08_wasm::client_message::Misbehaviour::decode_vec(&value.value)
 						.map_err(ics02_client::error::Error::decode_raw_header)?,
-				))),
+				)))
+			},
 			_ => Err(ics02_client::error::Error::unknown_consensus_state_type(value.type_url)),
 		}
 	}

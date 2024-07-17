@@ -184,12 +184,15 @@ where
 		PacketMsg::RecvPacket(msg) => ctx
 			.lookup_module_by_port(&msg.packet.destination_port)
 			.map_err(Error::ics05_port)?,
-		PacketMsg::AckPacket(msg) =>
-			ctx.lookup_module_by_port(&msg.packet.source_port).map_err(Error::ics05_port)?,
-		PacketMsg::ToPacket(msg) =>
-			ctx.lookup_module_by_port(&msg.packet.source_port).map_err(Error::ics05_port)?,
-		PacketMsg::ToClosePacket(msg) =>
-			ctx.lookup_module_by_port(&msg.packet.source_port).map_err(Error::ics05_port)?,
+		PacketMsg::AckPacket(msg) => {
+			ctx.lookup_module_by_port(&msg.packet.source_port).map_err(Error::ics05_port)?
+		},
+		PacketMsg::ToPacket(msg) => {
+			ctx.lookup_module_by_port(&msg.packet.source_port).map_err(Error::ics05_port)?
+		},
+		PacketMsg::ToClosePacket(msg) => {
+			ctx.lookup_module_by_port(&msg.packet.source_port).map_err(Error::ics05_port)?
+		},
 	};
 
 	if ctx.router().has_route(&module_id) {
@@ -238,7 +241,7 @@ where
 				.on_recv_packet(&ctx_clone, module_output, &mut packet, &msg.signer)
 				.map_err(|e| Error::app_module(e.to_string()))?;
 			if ack.as_ref().is_empty() {
-				return Err(Error::invalid_acknowledgement())
+				return Err(Error::invalid_acknowledgement());
 			}
 			// NOTE: IBC app modules or middlewares might have written the acknowledgement
 			// synchronously on the OnRecvPacket callback so we only write the acknowledgement if it

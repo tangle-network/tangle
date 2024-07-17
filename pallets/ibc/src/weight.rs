@@ -176,7 +176,7 @@ pub fn channel_client<T: Config>(channel_id: &[u8], port_id: &[u8]) -> Result<Cl
 			if let Some((client_id, ..)) = ConnectionClient::<T>::iter()
 				.find(|(.., connection_ids)| connection_ids.contains(&connection_id))
 			{
-				return client_id_from_bytes(client_id).map_err(|_| Error::<T>::Other)
+				return client_id_from_bytes(client_id).map_err(|_| Error::<T>::Other);
 			}
 		}
 	}

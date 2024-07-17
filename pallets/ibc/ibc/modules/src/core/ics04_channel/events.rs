@@ -172,11 +172,12 @@ fn extract_packet_and_write_ack_from_tx(
 			PKT_DST_CHANNEL_ATTRIBUTE_KEY => {
 				packet.destination_channel = value.parse().map_err(Error::identifier)?;
 			},
-			PKT_SEQ_ATTRIBUTE_KEY =>
+			PKT_SEQ_ATTRIBUTE_KEY => {
 				packet.sequence = value
 					.parse::<u64>()
 					.map_err(|e| Error::invalid_string_as_sequence(value.to_string(), e))?
-					.into(),
+					.into()
+			},
 			PKT_TIMEOUT_HEIGHT_ATTRIBUTE_KEY => {
 				packet.timeout_height =
 					value.parse().map_err(|_| Error::invalid_timeout_height())?;

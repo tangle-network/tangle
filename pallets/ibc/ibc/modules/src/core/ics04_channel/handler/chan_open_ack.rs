@@ -42,13 +42,13 @@ pub(crate) fn process<Ctx: ReaderContext>(
 
 	// Validate that the channel end is in a state where it can be ack.
 	if !channel_end.state_matches(&State::Init) && !channel_end.state_matches(&State::TryOpen) {
-		return Err(Error::invalid_channel_state(msg.channel_id, channel_end.state))
+		return Err(Error::invalid_channel_state(msg.channel_id, channel_end.state));
 	}
 
 	// An OPEN IBC connection running on the local (host) chain should exist.
 
 	if channel_end.connection_hops().len() != 1 {
-		return Err(Error::invalid_connection_hops_length(1, channel_end.connection_hops().len()))
+		return Err(Error::invalid_connection_hops_length(1, channel_end.connection_hops().len()));
 	}
 
 	let conn = ctx
@@ -56,7 +56,7 @@ pub(crate) fn process<Ctx: ReaderContext>(
 		.map_err(Error::ics03_connection)?;
 
 	if !conn.state_matches(&ConnectionState::Open) {
-		return Err(Error::connection_not_open(channel_end.connection_hops()[0].clone()))
+		return Err(Error::connection_not_open(channel_end.connection_hops()[0].clone()));
 	}
 
 	// Proof verification in two steps:

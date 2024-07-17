@@ -172,10 +172,12 @@ impl TryFrom<RawClientMessage> for ClientMessage {
 			.message
 			.ok_or_else(|| anyhow!("Must supply either Header or Misbehaviour type!"))?
 		{
-			client_message::Message::Header(raw_header) =>
-				ClientMessage::Header(Header::try_from(raw_header)?),
-			client_message::Message::Misbehaviour(raw_misbehaviour) =>
-				ClientMessage::Misbehaviour(Misbehaviour::try_from(raw_misbehaviour)?),
+			client_message::Message::Header(raw_header) => {
+				ClientMessage::Header(Header::try_from(raw_header)?)
+			},
+			client_message::Message::Misbehaviour(raw_misbehaviour) => {
+				ClientMessage::Misbehaviour(Misbehaviour::try_from(raw_misbehaviour)?)
+			},
 		};
 
 		Ok(message)
@@ -185,8 +187,9 @@ impl TryFrom<RawClientMessage> for ClientMessage {
 impl From<ClientMessage> for RawClientMessage {
 	fn from(client_message: ClientMessage) -> Self {
 		match client_message {
-			ClientMessage::Header(header) =>
-				RawClientMessage { message: Some(client_message::Message::Header(header.into())) },
+			ClientMessage::Header(header) => {
+				RawClientMessage { message: Some(client_message::Message::Header(header.into())) }
+			},
 			ClientMessage::Misbehaviour(misbehaviior) => RawClientMessage {
 				message: Some(client_message::Message::Misbehaviour(misbehaviior.into())),
 			},

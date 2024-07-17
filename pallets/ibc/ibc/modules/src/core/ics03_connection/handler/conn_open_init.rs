@@ -50,12 +50,13 @@ pub(crate) fn process<Ctx: ReaderContext>(
 	ctx.client_state(&msg.client_id).map_err(Error::ics02_client)?;
 
 	let versions = match msg.version {
-		Some(version) =>
+		Some(version) => {
 			if ctx.get_compatible_versions().contains(&version) {
 				Ok(vec![version])
 			} else {
 				Err(Error::version_not_supported(version))
-			},
+			}
+		},
 		None => Ok(ctx.get_compatible_versions()),
 	}?;
 

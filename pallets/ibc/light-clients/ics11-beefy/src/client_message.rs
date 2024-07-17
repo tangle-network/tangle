@@ -169,7 +169,7 @@ impl TryFrom<RawClientMessage> for ClientMessage {
 												return Err(Error::Custom(format!(
 													"Invalid proof item with len {}",
 													item.len()
-												)))
+												)));
 											}
 											dest.copy_from_slice(&*item);
 											Ok(dest)
@@ -207,7 +207,7 @@ impl TryFrom<RawClientMessage> for ClientMessage {
 							.iter()
 							.filter_map(|item| {
 								if item.payload_id.as_slice() != MMR_ROOT_ID {
-									return None
+									return None;
 								}
 								let mut payload_id = [0u8; 2];
 								payload_id.copy_from_slice(&item.payload_id);
@@ -235,7 +235,7 @@ impl TryFrom<RawClientMessage> for ClientMessage {
 								return Err(Error::Custom(format!(
 									"Invalid signature length: {}",
 									commitment_sig.signature.len()
-								)))
+								)));
 							}
 							Ok(SignatureWithAuthorityIndex {
 								signature: {
@@ -306,7 +306,7 @@ impl TryFrom<RawClientMessage> for ClientMessage {
 									return Err(Error::Custom(format!(
 										"Invalid authorities proof item with len: {}",
 										item.len()
-									)))
+									)));
 								}
 								let mut dest = [0u8; 32];
 								dest.copy_from_slice(&item);

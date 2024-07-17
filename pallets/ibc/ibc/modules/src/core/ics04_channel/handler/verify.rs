@@ -51,7 +51,7 @@ where
 
 	// The client must not be frozen.
 	if client_state.is_frozen(ctx, &client_id) {
-		return Err(Error::frozen_client(client_id))
+		return Err(Error::frozen_client(client_id));
 	}
 
 	let consensus_state = ctx
@@ -94,7 +94,7 @@ pub fn verify_packet_recv_proofs<Ctx: ReaderContext>(
 
 	// The client must not be frozen.
 	if client_state.is_frozen(ctx, client_id) {
-		return Err(Error::frozen_client(client_id.clone()))
+		return Err(Error::frozen_client(client_id.clone()));
 	}
 
 	let consensus_state = ctx
@@ -140,7 +140,7 @@ pub fn verify_packet_acknowledgement_proofs<Ctx: ReaderContext>(
 
 	// The client must not be frozen.
 	if client_state.is_frozen(ctx, client_id) {
-		return Err(Error::frozen_client(client_id.clone()))
+		return Err(Error::frozen_client(client_id.clone()));
 	}
 
 	let consensus_state = ctx
@@ -188,7 +188,7 @@ where
 
 	// The client must not be frozen.
 	if client_state.is_frozen(ctx, client_id) {
-		return Err(Error::frozen_client(client_id.clone()))
+		return Err(Error::frozen_client(client_id.clone()));
 	}
 
 	let consensus_state = ctx
@@ -231,7 +231,7 @@ where
 
 	// The client must not be frozen.
 	if client_state.is_frozen(ctx, client_id) {
-		return Err(Error::frozen_client(client_id.clone()))
+		return Err(Error::frozen_client(client_id.clone()));
 	}
 
 	let consensus_state = ctx

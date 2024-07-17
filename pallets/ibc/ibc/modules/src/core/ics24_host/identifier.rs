@@ -81,7 +81,7 @@ impl ChainId {
 	/// ```
 	pub fn chain_version(chain_id: &str) -> u64 {
 		if !ChainId::is_epoch_format(chain_id) {
-			return 0
+			return 0;
 		}
 
 		let split: Vec<_> = chain_id.split('-').collect();

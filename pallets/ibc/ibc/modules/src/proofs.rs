@@ -53,7 +53,7 @@ impl Proofs {
 		height: Height,
 	) -> Result<Self, ProofError> {
 		if height.is_zero() {
-			return Err(ProofError::zero_height())
+			return Err(ProofError::zero_height());
 		}
 
 		Ok(Self { object_proof, client_proof, consensus_proof, other_proof, height })
@@ -99,7 +99,7 @@ impl ConsensusProof {
 		consensus_height: Height,
 	) -> Result<Self, ProofError> {
 		if consensus_height.is_zero() {
-			return Err(ProofError::zero_height())
+			return Err(ProofError::zero_height());
 		}
 
 		Ok(Self { proof: consensus_proof, height: consensus_height })

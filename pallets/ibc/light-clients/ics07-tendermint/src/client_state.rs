@@ -86,39 +86,39 @@ impl<H> ClientState<H> {
 			return Err(Error::invalid_trusting_period(format!(
 				"ClientState trusting period ({:?}) must be greater than zero",
 				trusting_period
-			)))
+			)));
 		}
 
 		if unbonding_period <= Duration::new(0, 0) {
 			return Err(Error::invalid_unbonding_period(format!(
 				"ClientState unbonding period ({:?}) must be greater than zero",
 				unbonding_period
-			)))
+			)));
 		}
 
 		if trusting_period >= unbonding_period {
 			return Err(Error::invalid_trusting_period(format!(
 				"ClientState trusting period ({:?}) must be smaller than unbonding period ({:?})",
 				trusting_period, unbonding_period,
-			)))
+			)));
 		}
 
 		// Basic validation for the latest_height parameter.
 		if latest_height <= Height::zero() {
 			return Err(Error::validation(
 				"ClientState latest height must be greater than zero".to_string(),
-			))
+			));
 		}
 
 		// `TrustThreshold` is guaranteed to be in the range `[0, 1)`, but a `TrustThreshold::ZERO`
 		// value is invalid in this context
 		if trust_level == TrustThreshold::ZERO {
-			return Err(Error::validation("ClientState trust-level cannot be zero".to_string()))
+			return Err(Error::validation("ClientState trust-level cannot be zero".to_string()));
 		}
 
 		// Disallow empty proof-specs
 		if proof_specs.is_empty() {
-			return Err(Error::validation("ClientState proof-specs cannot be empty".to_string()))
+			return Err(Error::validation("ClientState proof-specs cannot be empty".to_string()));
 		}
 
 		Ok(Self {
@@ -153,7 +153,7 @@ impl<H> ClientState<H> {
 		if h == Height::zero() {
 			return Err(Error::validation(
 				"ClientState frozen height must be greater than zero".to_string(),
-			))
+			));
 		}
 		Ok(Self { frozen_height: Some(h), ..self })
 	}
@@ -223,12 +223,12 @@ impl<H> ClientState<H> {
 		// NOTE: delay time period is inclusive, so if current_time is earliest_time, then we
 		// return no error https://github.com/cosmos/ibc-go/blob/9ebc2f81049869bc40c443ffb72d9f3e47afb4fc/modules/light-clients/07-tendermint/client_state.go#L306
 		if current_time.nanoseconds() < earliest_time {
-			return Err(Error::not_enough_time_elapsed(current_time, earliest_time))
+			return Err(Error::not_enough_time_elapsed(current_time, earliest_time));
 		}
 
 		let earliest_height = processed_height + delay_period_blocks;
 		if current_height.revision_height < earliest_height {
-			return Err(Error::not_enough_blocks_elapsed(current_height, earliest_height))
+			return Err(Error::not_enough_blocks_elapsed(current_height, earliest_height));
 		}
 
 		Ok(())
@@ -237,12 +237,13 @@ impl<H> ClientState<H> {
 	/// Verify that the client is at a sufficient height and unfrozen at the given height
 	pub fn verify_height(&self, height: Height) -> Result<(), Error> {
 		if self.latest_height < height {
-			return Err(Error::insufficient_height(self.latest_height(), height))
+			return Err(Error::insufficient_height(self.latest_height(), height));
 		}
 
 		match self.frozen_height {
-			Some(frozen_height) if frozen_height <= height =>
-				Err(Error::client_frozen(frozen_height, height)),
+			Some(frozen_height) if frozen_height <= height => {
+				Err(Error::client_frozen(frozen_height, height))
+			},
 			_ => Ok(()),
 		}
 	}

@@ -300,7 +300,7 @@ fn process_message(
 			if old_client_state != substitute_client_state {
 				return Err(ContractError::Grandpa(
 					"subject client state does not match substitute client state".to_string(),
-				))
+				));
 			}
 			let substitute_client_state = old_client_state;
 			let height = substitute_client_state.latest_height();
@@ -344,8 +344,9 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 	match msg {
 		QueryMsg::ClientTypeMsg(_) => unimplemented!("ClientTypeMsg"),
 		QueryMsg::GetLatestHeightsMsg(_) => unimplemented!("GetLatestHeightsMsg"),
-		QueryMsg::ExportMetadata(ExportMetadataMsg {}) =>
-			to_binary(&QueryResponse::genesis_metadata(None)),
+		QueryMsg::ExportMetadata(ExportMetadataMsg {}) => {
+			to_binary(&QueryResponse::genesis_metadata(None))
+		},
 		QueryMsg::Status(StatusMsg {}) => {
 			let client_state = match get_client_state::<HostFunctions>(deps) {
 				Ok(client_state) => client_state,
@@ -381,12 +382,13 @@ where
 			ctx.store_consensus_state(client_id.clone(), height, cs)
 				.map_err(|e| ContractError::Grandpa(e.to_string()))?;
 		},
-		ConsensusUpdateResult::Batch(css) =>
+		ConsensusUpdateResult::Batch(css) => {
 			for (height, cs) in css {
 				log!(ctx, "Storing consensus state: {:?}", height);
 				ctx.store_consensus_state(client_id.clone(), height, cs)
 					.map_err(|e| ContractError::Grandpa(e.to_string()))?;
-			},
+			}
+		},
 	}
 	log!(ctx, "Storing client state with height: {:?}", height);
 	ctx.store_client_state(client_id, client_state)

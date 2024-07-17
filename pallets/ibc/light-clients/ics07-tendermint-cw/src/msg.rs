@@ -356,14 +356,14 @@ impl TryFrom<VerifyUpgradeAndUpdateStateMsgRaw> for VerifyUpgradeAndUpdateStateM
 		let any = Any::decode(&mut raw.upgrade_client_state.data.as_slice())?;
 		let upgrade_client_state: ics07_tendermint::client_state::ClientState<HostFunctions> =
 			ClientState::decode_vec(&any.value)?;
-		if upgrade_client_state.trust_level != TrustThreshold::ZERO ||
-			upgrade_client_state.trusting_period != Duration::ZERO ||
-			upgrade_client_state.max_clock_drift != Duration::ZERO ||
-			upgrade_client_state.frozen_height.is_some()
+		if upgrade_client_state.trust_level != TrustThreshold::ZERO
+			|| upgrade_client_state.trusting_period != Duration::ZERO
+			|| upgrade_client_state.max_clock_drift != Duration::ZERO
+			|| upgrade_client_state.frozen_height.is_some()
 		{
 			return ibc::prelude::Err(ContractError::Tendermint(
 				"Upgrade client state not zeroed".to_string(),
-			))
+			));
 		}
 
 		Ok(VerifyUpgradeAndUpdateStateMsg {

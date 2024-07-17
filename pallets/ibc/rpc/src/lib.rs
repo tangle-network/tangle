@@ -1661,8 +1661,9 @@ where
 					client_state: Some(client_state.into()),
 				})
 			},
-			_ =>
-				Err(runtime_error_into_rpc_error("[ibc_rpc]: Could not find client creation event")),
+			_ => {
+				Err(runtime_error_into_rpc_error("[ibc_rpc]: Could not find client creation event"))
+			},
 		}
 	}
 
@@ -1695,8 +1696,9 @@ where
 					})?;
 				Ok(connection)
 			},
-			_ =>
-				Err(runtime_error_into_rpc_error("[ibc_rpc]: Could not find client creation event")),
+			_ => {
+				Err(runtime_error_into_rpc_error("[ibc_rpc]: Could not find client creation event"))
+			},
 		}
 	}
 
@@ -1731,8 +1733,9 @@ where
 					})?;
 				Ok(channel)
 			},
-			_ =>
-				Err(runtime_error_into_rpc_error("[ibc_rpc]: Could not find client creation event")),
+			_ => {
+				Err(runtime_error_into_rpc_error("[ibc_rpc]: Could not find client creation event"))
+			},
 		}
 	}
 

@@ -27,7 +27,7 @@ use syn::{parse::Error, Ident, Path, TypePath};
 /// for `ibc` output will for example be `ibc_rs`.
 pub fn generate_crate_access_2018(def_crate: &str) -> Result<Path, Error> {
 	if std::env::var("CARGO_PKG_NAME").unwrap() == def_crate {
-		return Ok(Ident::new(&"crate", Span::call_site()).into())
+		return Ok(Ident::new(&"crate", Span::call_site()).into());
 	}
 	match crate_name(def_crate) {
 		Ok(FoundCrate::Itself) => {

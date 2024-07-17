@@ -50,14 +50,14 @@ pub(crate) fn process<Ctx: ReaderContext>(
 	// Validate the connection end.
 	let mut conn_end = ctx.connection_end(&msg.connection_id)?;
 	// A connection end must be Init or TryOpen; otherwise we return an error.
-	let state_is_consistent = conn_end.state_matches(&State::Init) &&
-		conn_end.versions().contains(&msg.version) ||
-		conn_end.state_matches(&State::TryOpen) &&
-			conn_end.versions().get(0).eq(&Some(&msg.version));
+	let state_is_consistent = conn_end.state_matches(&State::Init)
+		&& conn_end.versions().contains(&msg.version)
+		|| conn_end.state_matches(&State::TryOpen)
+			&& conn_end.versions().get(0).eq(&Some(&msg.version));
 
 	if !state_is_consistent {
 		// Old connection end is in incorrect state, propagate the error.
-		return Err(Error::connection_mismatch(msg.connection_id))
+		return Err(Error::connection_mismatch(msg.connection_id));
 	}
 
 	// Set the connection ID of the counterparty

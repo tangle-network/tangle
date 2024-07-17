@@ -27,10 +27,16 @@ fn fungibles_inspect_trait_should_work() {
 				),
 				98
 			);
+			assert_ok!(<Tokens as fungibles::Inspect<_>>::can_deposit(
+				DOT,
+				&ALICE,
+				1,
+				Provenance::Extant
+			)
+			.into_result());
 			assert_ok!(
-				<Tokens as fungibles::Inspect<_>>::can_deposit(DOT, &ALICE, 1, Provenance::Extant).into_result()
+				<Tokens as fungibles::Inspect<_>>::can_withdraw(DOT, &ALICE, 1).into_result(true)
 			);
-			assert_ok!(<Tokens as fungibles::Inspect<_>>::can_withdraw(DOT, &ALICE, 1).into_result(true));
 
 			assert!(<Tokens as fungibles::Inspect<_>>::asset_exists(DOT));
 			assert!(!<Tokens as fungibles::Inspect<_>>::asset_exists(BTC));
@@ -42,7 +48,13 @@ fn fungibles_mutate_trait_should_work() {
 	ExtBuilder::default().build().execute_with(|| {
 		assert_ok!(<Tokens as fungibles::Mutate<_>>::mint_into(DOT, &ALICE, 10));
 		assert_eq!(
-			<Tokens as fungibles::Mutate<_>>::burn_from(DOT, &ALICE, 8, Precision::Exact, Fortitude::Polite),
+			<Tokens as fungibles::Mutate<_>>::burn_from(
+				DOT,
+				&ALICE,
+				8,
+				Precision::Exact,
+				Fortitude::Polite
+			),
 			Ok(8)
 		);
 	});
@@ -251,27 +263,52 @@ fn fungibles_unbalanced_trait_should_work() {
 			// increase_balance
 			assert_ok!(<Tokens as fungibles::Unbalanced<_>>::write_balance(DOT, &ALICE, 0));
 			assert_noop!(
-				<Tokens as fungibles::Unbalanced<_>>::increase_balance(DOT, &ALICE, 1, Precision::Exact),
+				<Tokens as fungibles::Unbalanced<_>>::increase_balance(
+					DOT,
+					&ALICE,
+					1,
+					Precision::Exact
+				),
 				TokenError::BelowMinimum
 			);
 			assert_eq!(
-				<Tokens as fungibles::Unbalanced<_>>::increase_balance(DOT, &ALICE, 2, Precision::Exact),
+				<Tokens as fungibles::Unbalanced<_>>::increase_balance(
+					DOT,
+					&ALICE,
+					2,
+					Precision::Exact
+				),
 				Ok(2)
 			);
 			assert_eq!(<Tokens as fungibles::Inspect<_>>::balance(DOT, &ALICE), 2);
 			assert_noop!(
-				<Tokens as fungibles::Unbalanced<_>>::increase_balance(DOT, &ALICE, Balance::MAX, Precision::Exact),
+				<Tokens as fungibles::Unbalanced<_>>::increase_balance(
+					DOT,
+					&ALICE,
+					Balance::MAX,
+					Precision::Exact
+				),
 				ArithmeticError::Overflow
 			);
 
 			// increase_balance_at_most
 			assert_ok!(<Tokens as fungibles::Unbalanced<_>>::write_balance(DOT, &ALICE, 0));
 			assert_eq!(
-				<Tokens as fungibles::Unbalanced<_>>::increase_balance(DOT, &ALICE, 1, Precision::BestEffort),
+				<Tokens as fungibles::Unbalanced<_>>::increase_balance(
+					DOT,
+					&ALICE,
+					1,
+					Precision::BestEffort
+				),
 				Ok(0)
 			);
 			assert_eq!(
-				<Tokens as fungibles::Unbalanced<_>>::increase_balance(DOT, &ALICE, 2, Precision::BestEffort),
+				<Tokens as fungibles::Unbalanced<_>>::increase_balance(
+					DOT,
+					&ALICE,
+					2,
+					Precision::BestEffort
+				),
 				Ok(2)
 			);
 			assert_eq!(<Tokens as fungibles::Inspect<_>>::balance(DOT, &ALICE), 2);
@@ -295,7 +332,9 @@ fn fungibles_balanced_deposit_works() {
 		.execute_with(|| {
 			let amount = 42;
 			let alice_old_balance = <Tokens as fungibles::Inspect<_>>::balance(DOT, &ALICE);
-			let debt = <Tokens as fungibles::Balanced<_>>::deposit(DOT, &ALICE, amount, Precision::Exact).unwrap();
+			let debt =
+				<Tokens as fungibles::Balanced<_>>::deposit(DOT, &ALICE, amount, Precision::Exact)
+					.unwrap();
 			assert_eq!(debt.asset(), DOT);
 			assert_eq!(debt.peek(), amount);
 			let alice_new_balance = <Tokens as fungibles::Inspect<_>>::balance(DOT, &ALICE);
@@ -394,9 +433,7 @@ fn fungibles_inspect_hold_trait_should_work() {
 				0
 			);
 			assert!(<Tokens as fungibles::InspectHold<_>>::can_hold(DOT, REASON, &ALICE, 50));
-			assert!(!<Tokens as fungibles::InspectHold<_>>::can_hold(
-				DOT, REASON, &ALICE, 100
-			));
+			assert!(!<Tokens as fungibles::InspectHold<_>>::can_hold(DOT, REASON, &ALICE, 100));
 		});
 }
 
@@ -424,7 +461,13 @@ fn fungibles_mutate_hold_trait_should_work() {
 			assert_eq!(<Tokens as fungibles::Inspect<_>>::balance(DOT, &ALICE), 0);
 
 			assert_eq!(
-				<Tokens as fungibles::MutateHold<_>>::release(DOT, REASON, &ALICE, 40, Precision::Exact),
+				<Tokens as fungibles::MutateHold<_>>::release(
+					DOT,
+					REASON,
+					&ALICE,
+					40,
+					Precision::Exact
+				),
 				Ok(40)
 			);
 			assert_eq!(
@@ -435,13 +478,25 @@ fn fungibles_mutate_hold_trait_should_work() {
 
 			// exceed hold amount when not in best_effort
 			assert_noop!(
-				<Tokens as fungibles::MutateHold<_>>::release(DOT, REASON, &ALICE, 61, Precision::Exact),
+				<Tokens as fungibles::MutateHold<_>>::release(
+					DOT,
+					REASON,
+					&ALICE,
+					61,
+					Precision::Exact
+				),
 				Error::<Runtime>::BalanceTooLow
 			);
 
 			// exceed hold amount when in best_effort
 			assert_eq!(
-				<Tokens as fungibles::MutateHold<_>>::release(DOT, REASON, &ALICE, 61, Precision::BestEffort),
+				<Tokens as fungibles::MutateHold<_>>::release(
+					DOT,
+					REASON,
+					&ALICE,
+					61,
+					Precision::BestEffort
+				),
 				Ok(60)
 			);
 			assert_eq!(
@@ -557,11 +612,17 @@ fn fungibles_inspect_convert_should_work() {
 	pub struct ConvertBalanceTest;
 	impl ConvertBalance<Balance, Balance> for ConvertBalanceTest {
 		type AssetId = CurrencyId;
-		fn convert_balance(balance: Balance, _asset_id: CurrencyId) -> Result<Balance, ArithmeticError> {
+		fn convert_balance(
+			balance: Balance,
+			_asset_id: CurrencyId,
+		) -> Result<Balance, ArithmeticError> {
 			Ok(balance * 100)
 		}
 
-		fn convert_balance_back(balance: Balance, _asset_id: CurrencyId) -> Result<Balance, ArithmeticError> {
+		fn convert_balance_back(
+			balance: Balance,
+			_asset_id: CurrencyId,
+		) -> Result<Balance, ArithmeticError> {
 			Ok(balance / 100)
 		}
 	}
@@ -595,10 +656,7 @@ fn fungibles_inspect_convert_should_work() {
 				<RebaseTokens as fungibles::Inspect<AccountId>>::balance(DOT, &ALICE),
 				10000
 			);
-			assert_eq!(
-				<RebaseTokens as fungibles::Inspect<AccountId>>::total_issuance(DOT),
-				20000
-			);
+			assert_eq!(<RebaseTokens as fungibles::Inspect<AccountId>>::total_issuance(DOT), 20000);
 
 			assert!(<Tokens as fungibles::Inspect<_>>::asset_exists(DOT));
 			assert!(<Tokens as fungibles::Inspect<_>>::asset_exists(BTC));
@@ -611,11 +669,17 @@ fn fungibles_transfers_convert_should_work() {
 	pub struct ConvertBalanceTest;
 	impl ConvertBalance<Balance, Balance> for ConvertBalanceTest {
 		type AssetId = CurrencyId;
-		fn convert_balance(balance: Balance, _asset_id: CurrencyId) -> Result<Balance, ArithmeticError> {
+		fn convert_balance(
+			balance: Balance,
+			_asset_id: CurrencyId,
+		) -> Result<Balance, ArithmeticError> {
 			Ok(balance * 100)
 		}
 
-		fn convert_balance_back(balance: Balance, _asset_id: CurrencyId) -> Result<Balance, ArithmeticError> {
+		fn convert_balance_back(
+			balance: Balance,
+			_asset_id: CurrencyId,
+		) -> Result<Balance, ArithmeticError> {
 			Ok(balance / 100)
 		}
 	}
@@ -656,10 +720,7 @@ fn fungibles_transfers_convert_should_work() {
 				<RebaseTokens as fungibles::Inspect<AccountId>>::balance(DOT, &ALICE),
 				20000
 			);
-			assert_eq!(
-				<RebaseTokens as fungibles::Inspect<AccountId>>::balance(DOT, &BOB),
-				30000
-			);
+			assert_eq!(<RebaseTokens as fungibles::Inspect<AccountId>>::balance(DOT, &BOB), 30000);
 		});
 }
 
@@ -668,11 +729,17 @@ fn fungibles_mutate_convert_should_work() {
 	pub struct ConvertBalanceTest;
 	impl ConvertBalance<Balance, Balance> for ConvertBalanceTest {
 		type AssetId = CurrencyId;
-		fn convert_balance(balance: Balance, _asset_id: CurrencyId) -> Result<Balance, ArithmeticError> {
+		fn convert_balance(
+			balance: Balance,
+			_asset_id: CurrencyId,
+		) -> Result<Balance, ArithmeticError> {
 			Ok(balance * 100)
 		}
 
-		fn convert_balance_back(balance: Balance, _asset_id: CurrencyId) -> Result<Balance, ArithmeticError> {
+		fn convert_balance_back(
+			balance: Balance,
+			_asset_id: CurrencyId,
+		) -> Result<Balance, ArithmeticError> {
 			Ok(balance / 100)
 		}
 	}
@@ -716,9 +783,6 @@ fn fungibles_mutate_convert_should_work() {
 				<RebaseTokens as fungibles::Inspect<AccountId>>::balance(DOT, &ALICE),
 				40000
 			);
-			assert_eq!(
-				<RebaseTokens as fungibles::Inspect<AccountId>>::balance(DOT, &BOB),
-				10000
-			);
+			assert_eq!(<RebaseTokens as fungibles::Inspect<AccountId>>::balance(DOT, &BOB), 10000);
 		});
 }

@@ -45,8 +45,9 @@ impl<C: ClientTypes> ConsensusUpdateResult<C> {
 	{
 		match self {
 			ConsensusUpdateResult::Single(cs) => ConsensusUpdateResult::Single(f(cs)),
-			ConsensusUpdateResult::Batch(cs) =>
-				ConsensusUpdateResult::Batch(cs.into_iter().map(|(h, s)| (h, f(s))).collect()),
+			ConsensusUpdateResult::Batch(cs) => {
+				ConsensusUpdateResult::Batch(cs.into_iter().map(|(h, s)| (h, f(s))).collect())
+			},
 		}
 	}
 }

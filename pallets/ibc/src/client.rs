@@ -160,21 +160,24 @@ where
 		let timestamp = timestamp.into_tm_time().unwrap();
 
 		let consensus_state = match <T as Config>::LightClientProtocol::get() {
-			crate::LightClientProtocol::Beefy =>
+			crate::LightClientProtocol::Beefy => {
 				AnyConsensusState::Beefy(ics11_beefy::consensus_state::ConsensusState {
 					timestamp,
 					root: vec![].into(),
-				}),
-			crate::LightClientProtocol::Grandpa =>
+				})
+			},
+			crate::LightClientProtocol::Grandpa => {
 				AnyConsensusState::Grandpa(ics10_grandpa::consensus_state::ConsensusState {
 					timestamp,
 					root: vec![].into(),
-				}),
-			crate::LightClientProtocol::GrandpaStandalone =>
-				AnyConsensusState::GrandpaStandalone(ics10_grandpa_standalone::consensus_state::ConsensusState {
+				})
+			},
+			crate::LightClientProtocol::GrandpaStandalone => AnyConsensusState::GrandpaStandalone(
+				ics10_grandpa_standalone::consensus_state::ConsensusState {
 					timestamp,
 					root: vec![].into(),
-				}),
+				},
+			),
 		};
 		Ok(consensus_state)
 	}
@@ -290,13 +293,14 @@ where
 						log::trace!(target: "pallet_ibc", "in client : [host_consensus_state] >> using wasm code id" );
 						AnyConsensusState::wasm(cs).map_err(ICS02Error::encode)?
 					},
-					_ =>
+					_ => {
 						if connection_proof.code_id.is_some() {
 							log::trace!(target: "pallet_ibc", "in client : [host_consensus_state] >> using wasm code id");
 							AnyConsensusState::wasm(cs).map_err(ICS02Error::encode)?
 						} else {
 							cs
-						},
+						}
+					},
 				}
 			},
 			crate::LightClientProtocol::GrandpaStandalone => {
@@ -311,13 +315,14 @@ where
 						log::trace!(target: "pallet_ibc", "in client : [host_consensus_state] >> using wasm code id" );
 						AnyConsensusState::wasm(cs).map_err(ICS02Error::encode)?
 					},
-					_ =>
+					_ => {
 						if connection_proof.code_id.is_some() {
 							log::trace!(target: "pallet_ibc", "in client : [host_consensus_state] >> using wasm code id");
 							AnyConsensusState::wasm(cs).map_err(ICS02Error::encode)?
 						} else {
 							cs
-						},
+						}
+					},
 				}
 			},
 		};
@@ -387,8 +392,8 @@ impl<T: Config + Send + Sync> ClientKeeper for Context<T> {
 		// todo: pruning
 		ConsensusStates::<T>::insert(client_id.clone(), height, data);
 		// We do not need this hack for neither beefy nor grandpa clients
-		if !client_id.as_str().starts_with("10-grandpa") &&
-			!client_id.as_str().starts_with("11-beefy")
+		if !client_id.as_str().starts_with("10-grandpa")
+			&& !client_id.as_str().starts_with("11-beefy")
 		{
 			let mut stored_heights = ConsensusHeights::<T>::get(client_id.as_bytes().to_vec());
 			if let Err(val) = stored_heights.try_insert(height) {

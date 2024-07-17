@@ -159,7 +159,7 @@ where
 			for header in parachain_headers.headers {
 				// Skip genesis block of parachains since it has no timestamp or ibc root
 				if header.parachain_header.number == 0 {
-					continue
+					continue;
 				}
 				if latest_para_height < header.parachain_header.number {
 					latest_para_height = header.parachain_header.number;
@@ -168,7 +168,7 @@ where
 					Height::new(client_state.para_id as u64, header.parachain_header.number as u64);
 				// Skip duplicate consensus states
 				if ctx.consensus_state(&client_id, height).is_ok() {
-					continue
+					continue;
 				}
 				parachain_cs_states.push((
 					height,
@@ -224,7 +224,7 @@ where
 
 								if cs != consensus_state {
 									// Houston we have a problem
-									return Ok(true)
+									return Ok(true);
 								}
 							},
 							None => {},

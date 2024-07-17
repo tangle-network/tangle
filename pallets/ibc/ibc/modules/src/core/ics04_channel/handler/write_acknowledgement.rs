@@ -47,7 +47,7 @@ pub fn process<Ctx: ReaderContext>(
 		ctx.channel_end(&(packet.destination_port.clone(), packet.destination_channel))?;
 
 	if !dest_channel_end.state_matches(&State::Open) {
-		return Err(Error::invalid_channel_state(packet.source_channel, dest_channel_end.state))
+		return Err(Error::invalid_channel_state(packet.source_channel, dest_channel_end.state));
 	}
 
 	// NOTE: IBC app modules might have written the acknowledgement synchronously on
@@ -65,7 +65,7 @@ pub fn process<Ctx: ReaderContext>(
 	}
 
 	if ack.is_empty() {
-		return Err(Error::invalid_acknowledgement())
+		return Err(Error::invalid_acknowledgement());
 	}
 
 	let result = PacketResult::WriteAck(WriteAckPacketResult {

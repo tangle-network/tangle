@@ -397,10 +397,10 @@ where
 						Decode::decode(&mut parachain_header_bytes.as_ref())?;
 					let para_block_number = para_header.number();
 					// skip genesis header or any unknown headers
-					if para_block_number == Zero::zero() ||
-						!header_numbers.contains(&para_block_number)
+					if para_block_number == Zero::zero()
+						|| !header_numbers.contains(&para_block_number)
 					{
-						return Ok(None)
+						return Ok(None);
 					}
 
 					let state_proof = LegacyRpcMethods::<T>::new(client.relay_rpc_client.clone())

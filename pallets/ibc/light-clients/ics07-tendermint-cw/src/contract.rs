@@ -259,11 +259,12 @@ fn process_message(
 							ctx.store_consensus_state(client_id.clone(), height, cs)
 								.map_err(|e| ContractError::Tendermint(e.to_string()))?;
 						},
-						ConsensusUpdateResult::Batch(css) =>
+						ConsensusUpdateResult::Batch(css) => {
 							for (height, cs) in css {
 								ctx.store_consensus_state(client_id.clone(), height, cs)
 									.map_err(|e| ContractError::Tendermint(e.to_string()))?;
-							},
+							}
+						},
 					}
 					if cs.latest_height().revision_height > latest_revision_height {
 						ctx.store_client_state(client_id, cs)
@@ -272,7 +273,7 @@ fn process_message(
 					Ok(to_json_binary(&ContractResult::success()))
 				})
 		},
-		ExecuteMsg::CheckSubstituteAndUpdateState(_msg) =>
+		ExecuteMsg::CheckSubstituteAndUpdateState(_msg) => {
 			check_substitute_and_update_state::<HostFunctions>(ctx)
 				.map_err(|e| ContractError::Tendermint(e.to_string()))
 				.and_then(|(cs, cu)| {
@@ -281,7 +282,8 @@ fn process_message(
 					ctx.store_client_state_prefixed(cs, SUBJECT_PREFIX)
 						.map_err(|e| ContractError::Tendermint(e.to_string()))?;
 					Ok(to_json_binary(&ContractResult::success()))
-				}),
+				})
+		},
 		ExecuteMsg::VerifyUpgradeAndUpdateState(msg) => {
 			let old_client_state = ctx
 				.client_state(&client_id)
@@ -338,7 +340,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
 						let tp = client_state.trusting_period.as_secs();
 						let now = env.block.time.seconds();
 						if (last_update + tp) < now {
-							return to_json_binary(&QueryResponse::status("Expired".to_string()))
+							return to_json_binary(&QueryResponse::status("Expired".to_string()));
 						}
 						to_json_binary(&QueryResponse::status("Active".to_string()))
 					},

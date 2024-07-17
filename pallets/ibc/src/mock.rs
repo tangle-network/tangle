@@ -253,7 +253,7 @@ impl TryFrom<RawMemo> for MemoData {
 impl ValidateMemo for RawMemo {
 	fn validate(&self) -> Result<(), String> {
 		if self.0 == "invalid memo" {
-			return Err(self.0.clone())
+			return Err(self.0.clone());
 		} else {
 			Ok(())
 		}
@@ -308,7 +308,7 @@ impl<T: Config> FlatFeeConverter for FlatFeeConverterDummy<T> {
 		_fee_asset_amount: Self::Balance,
 	) -> Option<u128> {
 		if asset_id == 3 {
-			return Some(1000)
+			return Some(1000);
 		}
 		None
 	}
@@ -415,10 +415,10 @@ where
 
 	fn from_asset_id_to_denom(id: T::AssetId) -> Option<String> {
 		if id == 1u128.into() {
-			return Some("TNT".to_string())
+			return Some("TNT".to_string());
 		}
 		if id == 3u128.into() {
-			return Some("TNTFLATFEE".to_string())
+			return Some("TNTFLATFEE".to_string());
 		}
 		Some("TNT".to_string())
 	}
@@ -463,14 +463,16 @@ impl ModuleRouter for Router {
 		port_id: &ibc::core::ics24_host::identifier::PortId,
 	) -> Option<ibc::core::ics26_routing::context::ModuleId> {
 		match port_id.as_str() {
-			pallet_ibc_ping::PORT_ID =>
+			pallet_ibc_ping::PORT_ID => {
 				ibc::core::ics26_routing::context::ModuleId::from_str(pallet_ibc_ping::MODULE_ID)
-					.ok(),
-			ibc::applications::transfer::PORT_ID_STR =>
+					.ok()
+			},
+			ibc::applications::transfer::PORT_ID_STR => {
 				ibc::core::ics26_routing::context::ModuleId::from_str(
 					ibc::applications::transfer::MODULE_ID_STR,
 				)
-				.ok(),
+				.ok()
+			},
 			_ => None,
 		}
 	}

@@ -150,10 +150,7 @@ impl ChangeMembers<AccountId> for TestChangeMembers {
 		new_plus_outgoing.extend_from_slice(outgoing);
 		new_plus_outgoing.sort();
 
-		assert_eq!(
-			old_plus_incoming, new_plus_outgoing,
-			"change members call is incorrect!"
-		);
+		assert_eq!(old_plus_incoming, new_plus_outgoing, "change members call is incorrect!");
 
 		MEMBERS.with(|m| *m.borrow_mut() = new.to_vec());
 		PRIME.with(|p| *p.borrow_mut() = None);
@@ -298,7 +295,11 @@ impl<T: Config> OnSlashHook<T> {
 
 pub struct PreDeposit<T>(marker::PhantomData<T>);
 impl<T: Config> OnDeposit<T::AccountId, T::CurrencyId, T::Balance> for PreDeposit<T> {
-	fn on_deposit(_currency_id: T::CurrencyId, _account_id: &T::AccountId, _amount: T::Balance) -> DispatchResult {
+	fn on_deposit(
+		_currency_id: T::CurrencyId,
+		_account_id: &T::AccountId,
+		_amount: T::Balance,
+	) -> DispatchResult {
 		ON_DEPOSIT_PREHOOK_CALLS.with(|cell| *cell.borrow_mut() += 1);
 		Ok(())
 	}
@@ -311,10 +312,16 @@ impl<T: Config> PreDeposit<T> {
 
 pub struct PostDeposit<T>(marker::PhantomData<T>);
 impl<T: Config> OnDeposit<T::AccountId, T::CurrencyId, T::Balance> for PostDeposit<T> {
-	fn on_deposit(currency_id: T::CurrencyId, account_id: &T::AccountId, amount: T::Balance) -> DispatchResult {
+	fn on_deposit(
+		currency_id: T::CurrencyId,
+		account_id: &T::AccountId,
+		amount: T::Balance,
+	) -> DispatchResult {
 		ON_DEPOSIT_POSTHOOK_CALLS.with(|cell| *cell.borrow_mut() += 1);
-		let account_balance: AccountData<T::Balance> =
-			tokens::Pallet::<T>::accounts::<T::AccountId, T::CurrencyId>(account_id.clone(), currency_id);
+		let account_balance: AccountData<T::Balance> = tokens::Pallet::<T>::accounts::<
+			T::AccountId,
+			T::CurrencyId,
+		>(account_id.clone(), currency_id);
 		assert!(
 			account_balance.free.ge(&amount),
 			"Posthook must run after the account balance is updated."
@@ -429,15 +436,11 @@ impl ExtBuilder {
 	}
 
 	pub fn build(self) -> sp_io::TestExternalities {
-		let mut t = frame_system::GenesisConfig::<Runtime>::default()
-			.build_storage()
-			.unwrap();
+		let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 
-		tokens::GenesisConfig::<Runtime> {
-			balances: self.balances,
-		}
-		.assimilate_storage(&mut t)
-		.unwrap();
+		tokens::GenesisConfig::<Runtime> { balances: self.balances }
+			.assimilate_storage(&mut t)
+			.unwrap();
 
 		if self.treasury_genesis {
 			pallet_treasury::GenesisConfig::<Runtime>::default()

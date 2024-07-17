@@ -61,7 +61,7 @@ impl<T: Config> Acknowledgements<T> {
 			if let Path::Acks(AcksPath { port_id, channel_id, sequence }) =
 				Path::from_str(&path).ok()?
 			{
-				return Some(((port_id, channel_id, sequence), value))
+				return Some(((port_id, channel_id, sequence), value));
 			}
 			None
 		})

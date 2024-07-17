@@ -67,7 +67,7 @@ where
 	H: hash_db::Hasher<Out = H256> + Debug + 'static,
 {
 	if root.as_bytes().len() != 32 {
-		return Err(anyhow!("invalid commitment root length: {}", root.as_bytes().len()))
+		return Err(anyhow!("invalid commitment root length: {}", root.as_bytes().len()));
 	}
 	let path: Path = path.into();
 	let path = path.to_string();
@@ -100,7 +100,7 @@ where
 	H: hash_db::Hasher<Out = H256> + Debug + 'static,
 {
 	if root.as_bytes().len() != 32 {
-		return Err(anyhow!("invalid commitment root length: {}", root.as_bytes().len()))
+		return Err(anyhow!("invalid commitment root length: {}", root.as_bytes().len()));
 	}
 	let path: Path = path.into();
 	let path = path.to_string();
@@ -287,7 +287,7 @@ where
 	if !(current_time == earliest_time || current_time.after(&earliest_time)) {
 		return Err(anyhow!(
 			"Not enough time elapsed current time: {current_time}, earliest time: {earliest_time}"
-		))
+		));
 	}
 
 	let earliest_height = processed_height.add(delay_period_blocks);

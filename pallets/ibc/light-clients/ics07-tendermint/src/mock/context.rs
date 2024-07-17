@@ -123,8 +123,9 @@ pub fn with_client_parametrized_history(
 
 	let prev_consensus_state = match client_type.clone() {
 		// If it's a mock client, create the corresponding mock states.
-		client_type if client_type == MockClientState::client_type() =>
-			MockConsensusState::new(MockHeader::new(prev_cs_height)).into(),
+		client_type if client_type == MockClientState::client_type() => {
+			MockConsensusState::new(MockHeader::new(prev_cs_height)).into()
+		},
 		client_type if client_type == ClientState::<()>::client_type() => {
 			let light_block = MockHostBlock::generate_tm_block(
 				ctx.host_chain_id.clone(),

@@ -158,7 +158,7 @@ fn check_integrity<T: Ord, V>(node_ref: &NodeRef<T, V>) -> bool {
 		if let Some(ref left) = node.left {
 			if left.key >= node.key {
 				println!("[AVL]: Left child should have a smaller key");
-				return false
+				return false;
 			}
 			left_height = left.height;
 			is_leaf = false;
@@ -166,7 +166,7 @@ fn check_integrity<T: Ord, V>(node_ref: &NodeRef<T, V>) -> bool {
 		if let Some(ref right) = node.right {
 			if right.key <= node.key {
 				println!("[AVL]: Right child should have a bigger key");
-				return false
+				return false;
 			}
 			right_height = right.height;
 			is_leaf = false;
@@ -174,15 +174,15 @@ fn check_integrity<T: Ord, V>(node_ref: &NodeRef<T, V>) -> bool {
 		let balance_factor = (left_height as i32) - (right_height as i32);
 		if balance_factor <= -2 {
 			println!("[AVL] Balance factor <= -2");
-			return false
+			return false;
 		} else if balance_factor >= 2 {
 			println!("[AVL] Balance factor >= 2");
-			return false
+			return false;
 		}
 		let bonus_height = if is_leaf { 0 } else { 1 };
 		if node.height != std::cmp::max(left_height, right_height) + bonus_height {
 			println!("[AVL] Heights are inconsistent");
-			return false
+			return false;
 		}
 		check_integrity(&node.left) && check_integrity(&node.right)
 	} else {

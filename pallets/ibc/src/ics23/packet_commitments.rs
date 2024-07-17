@@ -65,7 +65,7 @@ impl<T: Config> PacketCommitment<T> {
 			if let Path::Commitments(CommitmentsPath { port_id, channel_id, sequence }) =
 				Path::from_str(&path).ok()?
 			{
-				return Some(((port_id, channel_id, sequence), value))
+				return Some(((port_id, channel_id, sequence), value));
 			}
 			None
 		})

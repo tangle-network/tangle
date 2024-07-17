@@ -248,8 +248,8 @@ pub fn generate_tendermint_header(
 
 		commit_sigs.push(commit_sig)
 	}
-	let time = core::time::Duration::from_millis(TENDERMINT_TIMESTAMP.saturating_mul(1000)) -
-		core::time::Duration::from_secs(10 * 60);
+	let time = core::time::Duration::from_millis(TENDERMINT_TIMESTAMP.saturating_mul(1000))
+		- core::time::Duration::from_secs(10 * 60);
 	let tm_consensus_state = ics07_tendermint::consensus_state::ConsensusState {
 		timestamp: Timestamp::from_nanoseconds(time.as_nanos() as u64)
 			.unwrap()

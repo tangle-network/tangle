@@ -137,7 +137,7 @@ where
 		let para_block_number = para_header.number();
 		// skip genesis header or any unknown headers
 		if para_block_number == Zero::zero() || !header_numbers.contains(&para_block_number) {
-			continue
+			continue;
 		}
 
 		let block_number = header.number().into().saturated_into::<u32>();

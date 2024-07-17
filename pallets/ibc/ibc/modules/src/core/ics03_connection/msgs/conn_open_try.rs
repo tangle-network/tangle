@@ -129,7 +129,7 @@ where
 			.collect::<Result<Vec<_>, _>>()?;
 
 		if counterparty_versions.is_empty() {
-			return Err(Error::empty_versions())
+			return Err(Error::empty_versions());
 		}
 
 		Ok(Self {

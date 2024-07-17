@@ -52,7 +52,7 @@ pub fn process<Ctx: ReaderContext>(
 		return Err(Error::invalid_packet_counterparty(
 			packet.destination_port.clone(),
 			packet.destination_channel,
-		))
+		));
 	}
 
 	let connection_end = ctx
@@ -69,7 +69,7 @@ pub fn process<Ctx: ReaderContext>(
 	let expected_commitment =
 		ctx.packet_commitment(packet.data.clone(), packet.timeout_height, packet.timeout_timestamp);
 	if packet_commitment != expected_commitment {
-		return Err(Error::incorrect_packet_commitment(packet.sequence))
+		return Err(Error::incorrect_packet_commitment(packet.sequence));
 	}
 
 	let expected_counterparty =
@@ -104,7 +104,7 @@ pub fn process<Ctx: ReaderContext>(
 
 	let result = if source_channel_end.order_matches(&Order::Ordered) {
 		if packet.sequence < msg.next_sequence_recv {
-			return Err(Error::invalid_packet_sequence(packet.sequence, msg.next_sequence_recv))
+			return Err(Error::invalid_packet_sequence(packet.sequence, msg.next_sequence_recv));
 		}
 		verify_next_sequence_recv::<Ctx>(
 			ctx,

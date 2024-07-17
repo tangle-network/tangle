@@ -17,7 +17,9 @@ fn currency_adapter_ensure_currency_adapter_should_work() {
 			assert_eq!(Tokens::reserved_balance(DOT, &TREASURY_ACCOUNT), 0);
 			assert_eq!(Tokens::free_balance(DOT, &TREASURY_ACCOUNT), 100);
 			assert_eq!(
-				<Runtime as pallet_elections_phragmen::Config>::Currency::total_balance(&TREASURY_ACCOUNT),
+				<Runtime as pallet_elections_phragmen::Config>::Currency::total_balance(
+					&TREASURY_ACCOUNT
+				),
 				100
 			);
 			assert!(<Runtime as pallet_elections_phragmen::Config>::Currency::can_slash(
@@ -63,7 +65,9 @@ fn currency_adapter_ensure_currency_adapter_should_work() {
 
 			// transfer
 			assert_eq!(
-				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(&TREASURY_ACCOUNT),
+				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(
+					&TREASURY_ACCOUNT
+				),
 				100
 			);
 			assert_ok!(
@@ -81,7 +85,9 @@ fn currency_adapter_ensure_currency_adapter_should_work() {
 				ExistenceRequirement::KeepAlive
 			));
 			assert_eq!(
-				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(&TREASURY_ACCOUNT),
+				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(
+					&TREASURY_ACCOUNT
+				),
 				89
 			);
 
@@ -92,7 +98,9 @@ fn currency_adapter_ensure_currency_adapter_should_work() {
 			);
 			let imbalance = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 11);
 			assert_eq!(
-				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(&TREASURY_ACCOUNT),
+				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(
+					&TREASURY_ACCOUNT
+				),
 				100
 			);
 			assert_eq!(
@@ -101,7 +109,9 @@ fn currency_adapter_ensure_currency_adapter_should_work() {
 			);
 			drop(imbalance);
 			assert_eq!(
-				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(&TREASURY_ACCOUNT),
+				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(
+					&TREASURY_ACCOUNT
+				),
 				100
 			);
 			assert_eq!(
@@ -117,7 +127,9 @@ fn currency_adapter_ensure_currency_adapter_should_work() {
 				ExistenceRequirement::KeepAlive,
 			);
 			assert_eq!(
-				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(&TREASURY_ACCOUNT),
+				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(
+					&TREASURY_ACCOUNT
+				),
 				90
 			);
 			assert_eq!(
@@ -126,7 +138,9 @@ fn currency_adapter_ensure_currency_adapter_should_work() {
 			);
 			drop(imbalance);
 			assert_eq!(
-				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(&TREASURY_ACCOUNT),
+				<Runtime as pallet_elections_phragmen::Config>::Currency::free_balance(
+					&TREASURY_ACCOUNT
+				),
 				90
 			);
 			assert_eq!(
@@ -207,7 +221,12 @@ fn currency_adapter_balance_transfer_when_reserved_should_not_work() {
 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 111);
 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 69));
 		assert_noop!(
-			TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 69, ExistenceRequirement::AllowDeath),
+			TreasuryCurrencyAdapter::transfer(
+				&TREASURY_ACCOUNT,
+				&ALICE,
+				69,
+				ExistenceRequirement::AllowDeath
+			),
 			Error::<Runtime>::BalanceTooLow,
 		);
 	});
@@ -267,7 +286,12 @@ fn currency_adapter_basic_locking_should_work() {
 			assert_eq!(TreasuryCurrencyAdapter::free_balance(&TREASURY_ACCOUNT), 100);
 			TreasuryCurrencyAdapter::set_lock(ID_1, &TREASURY_ACCOUNT, 91, WithdrawReasons::all());
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 10, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					10,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
 		});
@@ -295,7 +319,12 @@ fn currency_adapter_lock_removal_should_work() {
 		.balances(vec![(TREASURY_ACCOUNT, DOT, 100)])
 		.build()
 		.execute_with(|| {
-			TreasuryCurrencyAdapter::set_lock(ID_1, &TREASURY_ACCOUNT, u64::max_value(), WithdrawReasons::all());
+			TreasuryCurrencyAdapter::set_lock(
+				ID_1,
+				&TREASURY_ACCOUNT,
+				u64::max_value(),
+				WithdrawReasons::all(),
+			);
 			TreasuryCurrencyAdapter::remove_lock(ID_1, &TREASURY_ACCOUNT);
 			assert_ok!(TreasuryCurrencyAdapter::transfer(
 				&TREASURY_ACCOUNT,
@@ -312,7 +341,12 @@ fn currency_adapter_lock_replacement_should_work() {
 		.balances(vec![(TREASURY_ACCOUNT, DOT, 100)])
 		.build()
 		.execute_with(|| {
-			TreasuryCurrencyAdapter::set_lock(ID_1, &TREASURY_ACCOUNT, u64::max_value(), WithdrawReasons::all());
+			TreasuryCurrencyAdapter::set_lock(
+				ID_1,
+				&TREASURY_ACCOUNT,
+				u64::max_value(),
+				WithdrawReasons::all(),
+			);
 			TreasuryCurrencyAdapter::set_lock(ID_1, &TREASURY_ACCOUNT, 5, WithdrawReasons::all());
 			assert_ok!(TreasuryCurrencyAdapter::transfer(
 				&TREASURY_ACCOUNT,
@@ -347,10 +381,20 @@ fn currency_adapter_combination_locking_should_work() {
 		.build()
 		.execute_with(|| {
 			// withdrawReasons not work
-			TreasuryCurrencyAdapter::set_lock(ID_1, &TREASURY_ACCOUNT, u64::max_value(), WithdrawReasons::empty());
+			TreasuryCurrencyAdapter::set_lock(
+				ID_1,
+				&TREASURY_ACCOUNT,
+				u64::max_value(),
+				WithdrawReasons::empty(),
+			);
 			TreasuryCurrencyAdapter::set_lock(ID_2, &TREASURY_ACCOUNT, 0, WithdrawReasons::all());
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 2, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					2,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
 		});
@@ -364,17 +408,42 @@ fn currency_adapter_lock_value_extension_should_work() {
 		.execute_with(|| {
 			TreasuryCurrencyAdapter::set_lock(ID_1, &TREASURY_ACCOUNT, 100, WithdrawReasons::all());
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 6, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					6,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
-			TreasuryCurrencyAdapter::extend_lock(ID_1, &TREASURY_ACCOUNT, 2, WithdrawReasons::all());
+			TreasuryCurrencyAdapter::extend_lock(
+				ID_1,
+				&TREASURY_ACCOUNT,
+				2,
+				WithdrawReasons::all(),
+			);
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 6, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					6,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
-			TreasuryCurrencyAdapter::extend_lock(ID_1, &TREASURY_ACCOUNT, 8, WithdrawReasons::all());
+			TreasuryCurrencyAdapter::extend_lock(
+				ID_1,
+				&TREASURY_ACCOUNT,
+				8,
+				WithdrawReasons::all(),
+			);
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 3, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					3,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
 		});
@@ -388,18 +457,43 @@ fn currency_adapter_lock_block_number_extension_should_work() {
 		.execute_with(|| {
 			TreasuryCurrencyAdapter::set_lock(ID_1, &TREASURY_ACCOUNT, 200, WithdrawReasons::all());
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 6, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					6,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
-			TreasuryCurrencyAdapter::extend_lock(ID_1, &TREASURY_ACCOUNT, 90, WithdrawReasons::all());
+			TreasuryCurrencyAdapter::extend_lock(
+				ID_1,
+				&TREASURY_ACCOUNT,
+				90,
+				WithdrawReasons::all(),
+			);
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 6, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					6,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
 			System::set_block_number(2);
-			TreasuryCurrencyAdapter::extend_lock(ID_1, &TREASURY_ACCOUNT, 90, WithdrawReasons::all());
+			TreasuryCurrencyAdapter::extend_lock(
+				ID_1,
+				&TREASURY_ACCOUNT,
+				90,
+				WithdrawReasons::all(),
+			);
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 3, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					3,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
 		});
@@ -411,19 +505,49 @@ fn currency_adapter_lock_reasons_extension_should_work() {
 		.balances(vec![(TREASURY_ACCOUNT, DOT, 100)])
 		.build()
 		.execute_with(|| {
-			TreasuryCurrencyAdapter::set_lock(ID_1, &TREASURY_ACCOUNT, 90, WithdrawReasons::TRANSFER);
+			TreasuryCurrencyAdapter::set_lock(
+				ID_1,
+				&TREASURY_ACCOUNT,
+				90,
+				WithdrawReasons::TRANSFER,
+			);
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 11, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					11,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
-			TreasuryCurrencyAdapter::extend_lock(ID_1, &TREASURY_ACCOUNT, 90, WithdrawReasons::empty());
+			TreasuryCurrencyAdapter::extend_lock(
+				ID_1,
+				&TREASURY_ACCOUNT,
+				90,
+				WithdrawReasons::empty(),
+			);
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 11, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					11,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
-			TreasuryCurrencyAdapter::extend_lock(ID_1, &TREASURY_ACCOUNT, 90, WithdrawReasons::RESERVE);
+			TreasuryCurrencyAdapter::extend_lock(
+				ID_1,
+				&TREASURY_ACCOUNT,
+				90,
+				WithdrawReasons::RESERVE,
+			);
 			assert_noop!(
-				TreasuryCurrencyAdapter::transfer(&TREASURY_ACCOUNT, &ALICE, 11, ExistenceRequirement::AllowDeath),
+				TreasuryCurrencyAdapter::transfer(
+					&TREASURY_ACCOUNT,
+					&ALICE,
+					11,
+					ExistenceRequirement::AllowDeath
+				),
 				Error::<Runtime>::LiquidityRestrictions
 			);
 		});
@@ -476,7 +600,9 @@ fn currency_adapter_reward_should_work() {
 		.execute_with(|| {
 			assert_eq!(TreasuryCurrencyAdapter::total_issuance(), 100);
 			assert_eq!(TreasuryCurrencyAdapter::total_balance(&TREASURY_ACCOUNT), 100);
-			assert_ok!(TreasuryCurrencyAdapter::deposit_into_existing(&TREASURY_ACCOUNT, 10).map(drop));
+			assert_ok!(
+				TreasuryCurrencyAdapter::deposit_into_existing(&TREASURY_ACCOUNT, 10).map(drop)
+			);
 			assert_eq!(TreasuryCurrencyAdapter::total_balance(&TREASURY_ACCOUNT), 110);
 			assert_eq!(TreasuryCurrencyAdapter::total_issuance(), 110);
 		});
@@ -515,7 +641,12 @@ fn currency_adapter_repatriating_reserved_balance_should_work() {
 		let _ = TreasuryCurrencyAdapter::deposit_creating(&ALICE, 2);
 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 110));
 		assert_ok!(
-			TreasuryCurrencyAdapter::repatriate_reserved(&TREASURY_ACCOUNT, &ALICE, 41, Status::Free),
+			TreasuryCurrencyAdapter::repatriate_reserved(
+				&TREASURY_ACCOUNT,
+				&ALICE,
+				41,
+				Status::Free
+			),
 			0
 		);
 		assert_eq!(TreasuryCurrencyAdapter::reserved_balance(&TREASURY_ACCOUNT), 69);
@@ -532,7 +663,12 @@ fn currency_adapter_transferring_reserved_balance_should_work() {
 		let _ = TreasuryCurrencyAdapter::deposit_creating(&ALICE, 2);
 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 110));
 		assert_ok!(
-			TreasuryCurrencyAdapter::repatriate_reserved(&TREASURY_ACCOUNT, &ALICE, 41, Status::Reserved),
+			TreasuryCurrencyAdapter::repatriate_reserved(
+				&TREASURY_ACCOUNT,
+				&ALICE,
+				41,
+				Status::Reserved
+			),
 			0
 		);
 		assert_eq!(TreasuryCurrencyAdapter::reserved_balance(&TREASURY_ACCOUNT), 69);
@@ -563,7 +699,12 @@ fn currency_adapter_transferring_incomplete_reserved_balance_should_work() {
 		let _ = TreasuryCurrencyAdapter::deposit_creating(&ALICE, 2);
 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 41));
 		assert_ok!(
-			TreasuryCurrencyAdapter::repatriate_reserved(&TREASURY_ACCOUNT, &ALICE, 69, Status::Free),
+			TreasuryCurrencyAdapter::repatriate_reserved(
+				&TREASURY_ACCOUNT,
+				&ALICE,
+				69,
+				Status::Free
+			),
 			28
 		);
 		assert_eq!(TreasuryCurrencyAdapter::reserved_balance(&TREASURY_ACCOUNT), 0);
@@ -589,10 +730,7 @@ fn currency_adapter_transferring_too_high_value_should_not_panic() {
 			ArithmeticError::Overflow,
 		);
 
-		assert_eq!(
-			TreasuryCurrencyAdapter::free_balance(&TREASURY_ACCOUNT),
-			u64::max_value()
-		);
+		assert_eq!(TreasuryCurrencyAdapter::free_balance(&TREASURY_ACCOUNT), u64::max_value());
 		assert_eq!(TreasuryCurrencyAdapter::free_balance(&ALICE), 2);
 	});
 }
@@ -625,10 +763,7 @@ fn currency_adapter_slashing_named_reserved_balance_should_work() {
 			TreasuryCurrencyAdapter::slash_reserved_named(&RID_1, &TREASURY_ACCOUNT, 42).1,
 			0
 		);
-		assert_eq!(
-			TreasuryCurrencyAdapter::reserved_balance_named(&RID_1, &TREASURY_ACCOUNT),
-			69
-		);
+		assert_eq!(TreasuryCurrencyAdapter::reserved_balance_named(&RID_1, &TREASURY_ACCOUNT), 69);
 		assert_eq!(TreasuryCurrencyAdapter::free_balance(&TREASURY_ACCOUNT), 0);
 		assert_eq!(TreasuryCurrencyAdapter::total_issuance(), 69);
 	});
@@ -645,10 +780,7 @@ fn currency_adapter_named_slashing_incomplete_reserved_balance_should_work() {
 			27
 		);
 		assert_eq!(TreasuryCurrencyAdapter::free_balance(&TREASURY_ACCOUNT), 69);
-		assert_eq!(
-			TreasuryCurrencyAdapter::reserved_balance_named(&RID_1, &TREASURY_ACCOUNT),
-			0
-		);
+		assert_eq!(TreasuryCurrencyAdapter::reserved_balance_named(&RID_1, &TREASURY_ACCOUNT), 0);
 		assert_eq!(TreasuryCurrencyAdapter::total_issuance(), 69);
 	});
 }
@@ -660,13 +792,16 @@ fn currency_adapter_repatriating_named_reserved_balance_should_work() {
 		let _ = TreasuryCurrencyAdapter::deposit_creating(&ALICE, 2);
 		assert_ok!(TreasuryCurrencyAdapter::reserve_named(&RID_1, &TREASURY_ACCOUNT, 110));
 		assert_ok!(
-			TreasuryCurrencyAdapter::repatriate_reserved_named(&RID_1, &TREASURY_ACCOUNT, &ALICE, 41, Status::Free),
+			TreasuryCurrencyAdapter::repatriate_reserved_named(
+				&RID_1,
+				&TREASURY_ACCOUNT,
+				&ALICE,
+				41,
+				Status::Free
+			),
 			0
 		);
-		assert_eq!(
-			TreasuryCurrencyAdapter::reserved_balance_named(&RID_1, &TREASURY_ACCOUNT),
-			69
-		);
+		assert_eq!(TreasuryCurrencyAdapter::reserved_balance_named(&RID_1, &TREASURY_ACCOUNT), 69);
 		assert_eq!(TreasuryCurrencyAdapter::free_balance(&TREASURY_ACCOUNT), 0);
 		assert_eq!(TreasuryCurrencyAdapter::reserved_balance_named(&RID_1, &ALICE), 0);
 		assert_eq!(TreasuryCurrencyAdapter::free_balance(&ALICE), 43);

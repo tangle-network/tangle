@@ -52,7 +52,7 @@ where
 		ctx.channel_end(&(packet.source_port.clone(), packet.source_channel))?;
 
 	if !source_channel_end.state_matches(&State::Open) {
-		return Err(Error::channel_closed(packet.source_channel))
+		return Err(Error::channel_closed(packet.source_channel));
 	}
 
 	let counterparty =
@@ -62,7 +62,7 @@ where
 		return Err(Error::invalid_packet_counterparty(
 			packet.destination_port.clone(),
 			packet.destination_channel,
-		))
+		));
 	}
 
 	let connection_end = ctx
@@ -86,7 +86,7 @@ where
 			proof_height,
 			packet.timeout_timestamp,
 			proof_timestamp,
-		))
+		));
 	}
 
 	//verify packet commitment
@@ -99,12 +99,12 @@ where
 	let expected_commitment =
 		ctx.packet_commitment(packet.data.clone(), packet.timeout_height, packet.timeout_timestamp);
 	if packet_commitment != expected_commitment {
-		return Err(Error::incorrect_packet_commitment(packet.sequence))
+		return Err(Error::incorrect_packet_commitment(packet.sequence));
 	}
 
 	let result = if source_channel_end.order_matches(&Order::Ordered) {
 		if packet.sequence < msg.next_sequence_recv {
-			return Err(Error::invalid_packet_sequence(packet.sequence, msg.next_sequence_recv))
+			return Err(Error::invalid_packet_sequence(packet.sequence, msg.next_sequence_recv));
 		}
 		verify_next_sequence_recv::<Ctx>(
 			ctx,

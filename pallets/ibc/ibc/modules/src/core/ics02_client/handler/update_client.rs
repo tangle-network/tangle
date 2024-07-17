@@ -68,7 +68,7 @@ where
 	let client_def = client_state.client_def();
 
 	if client_state.is_frozen(ctx, &client_id) {
-		return Err(Error::client_frozen(client_id))
+		return Err(Error::client_frozen(client_id));
 	}
 
 	// Read consensus state from the host chain store.
@@ -90,7 +90,7 @@ where
 	})?;
 
 	if client_state.expired(duration) {
-		return Err(Error::header_not_within_trust_period(last_update_timestamp, now))
+		return Err(Error::header_not_within_trust_period(last_update_timestamp, now));
 	}
 
 	client_def
@@ -128,7 +128,7 @@ where
 			processed_height: ctx.host_height(),
 		});
 		output.emit(IbcEvent::ClientMisbehaviour(event_attributes.into()));
-		return Ok(output.with_result(result))
+		return Ok(output.with_result(result));
 	}
 	// Use client_state to validate the new header against the latest consensus_state.
 	// This function will return the new client_state (its latest_height changed) and a

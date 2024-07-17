@@ -193,9 +193,9 @@ impl Packet {
 	/// instead of the common-case where it results in
 	/// [`MsgRecvPacket`](crate::core::ics04_channel::msgs::recv_packet::MsgRecvPacket).
 	pub fn timed_out(&self, dst_chain_ts: &Timestamp, dst_chain_height: Height) -> bool {
-		(self.timeout_height != Height::zero() && self.timeout_height <= dst_chain_height) ||
-			(self.timeout_timestamp != Timestamp::none() &&
-				dst_chain_ts.check_expiry(&self.timeout_timestamp) == Expired)
+		(self.timeout_height != Height::zero() && self.timeout_height <= dst_chain_height)
+			|| (self.timeout_timestamp != Timestamp::none()
+				&& dst_chain_ts.check_expiry(&self.timeout_timestamp) == Expired)
 	}
 
 	pub fn timeout_variant(
@@ -205,8 +205,8 @@ impl Packet {
 	) -> Option<TimeoutVariant> {
 		let height_timeout =
 			packet.timeout_height != Height::zero() && packet.timeout_height <= dst_chain_height;
-		let timestamp_timeout = packet.timeout_timestamp != Timestamp::none() &&
-			(dst_chain_ts.check_expiry(&packet.timeout_timestamp) == Expired);
+		let timestamp_timeout = packet.timeout_timestamp != Timestamp::none()
+			&& (dst_chain_ts.check_expiry(&packet.timeout_timestamp) == Expired);
 		if height_timeout && !timestamp_timeout {
 			Some(TimeoutVariant::Height)
 		} else if timestamp_timeout && !height_timeout {
@@ -241,13 +241,13 @@ impl TryFrom<RawPacket> for Packet {
 
 	fn try_from(raw_pkt: RawPacket) -> Result<Self, Self::Error> {
 		if Sequence::from(raw_pkt.sequence).is_zero() {
-			return Err(Error::zero_packet_sequence())
+			return Err(Error::zero_packet_sequence());
 		}
 		let packet_timeout_height: Height =
 			raw_pkt.timeout_height.ok_or_else(Error::missing_height)?.into();
 
 		if raw_pkt.data.is_empty() {
-			return Err(Error::zero_packet_data())
+			return Err(Error::zero_packet_data());
 		}
 
 		let timeout_timestamp = Timestamp::from_nanoseconds(raw_pkt.timeout_timestamp)

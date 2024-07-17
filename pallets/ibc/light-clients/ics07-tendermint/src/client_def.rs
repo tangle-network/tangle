@@ -89,7 +89,7 @@ where
 							header.height().revision_number,
 						)
 						.to_string(),
-					))
+					));
 				}
 
 				if header.height().revision_number != header.trusted_height.revision_number {
@@ -100,7 +100,7 @@ where
 							header.height().revision_number,
 						)
 						.to_string(),
-					))
+					));
 				}
 
 				// Check if a consensus state is already installed; if so skip
@@ -117,7 +117,7 @@ where
 						if cs == header_consensus_state {
 							// Header is already installed and matches the incoming
 							// header (already verified)
-							return Ok(())
+							return Ok(());
 						}
 						Some(cs)
 					},
@@ -137,7 +137,7 @@ where
 				{
 					return Err(Ics02Error::header_verification_failure(
 						"next val set mismatch".to_string(),
-					))
+					));
 				}
 
 				let trusted_state = TrustedBlockState {
@@ -176,14 +176,16 @@ where
 
 				match verdict {
 					Verdict::Success => {},
-					Verdict::NotEnoughTrust(voting_power_tally) =>
+					Verdict::NotEnoughTrust(voting_power_tally) => {
 						return Err(Error::not_enough_trusted_vals_signed(format!(
 							"voting power tally: {}",
 							voting_power_tally
 						))
-						.into()),
-					Verdict::Invalid(detail) =>
-						return Err(Error::verification_error(detail).into()),
+						.into())
+					},
+					Verdict::Invalid(detail) => {
+						return Err(Error::verification_error(detail).into())
+					},
 				}
 			},
 			ClientMessage::Misbehaviour(misbehaviour) => {
@@ -265,7 +267,7 @@ where
 							if header_consensus_state.eq(&cs) {
 								// Header is already installed and matches the incoming
 								// header (already verified)
-								return Ok(false)
+								return Ok(false);
 							}
 							Some(cs)
 						},
@@ -277,14 +279,14 @@ where
 				// client and return the installed consensus state.
 				if let Some(cs) = existing_consensus_state {
 					if cs.ne(&header_consensus_state) {
-						return Ok(true)
+						return Ok(true);
 					}
 				}
 
 				if let Ok(maybe_next_cs) = ctx.next_consensus_state(&client_id, header.height()) {
 					if let Some(next_cs) = maybe_next_cs {
 						if next_cs.timestamp().nanoseconds() < header.timestamp().nanoseconds() {
-							return Ok(true)
+							return Ok(true);
 						}
 					}
 				}
@@ -292,20 +294,20 @@ where
 				match ctx.prev_consensus_state(&client_id, header.height())? {
 					Some(prev_cs) => {
 						if prev_cs.timestamp().nanoseconds() > header.timestamp().nanoseconds() {
-							return Ok(true)
+							return Ok(true);
 						}
 					},
 					None => {},
 				};
 			},
 			ClientMessage::Misbehaviour(misbehaviour) => {
-				if misbehaviour.header1.height().revision_height ==
-					misbehaviour.header2.height().revision_height
+				if misbehaviour.header1.height().revision_height
+					== misbehaviour.header2.height().revision_height
 				{
 					let block_id1 = misbehaviour.header1.signed_header.commit.block_id;
 					let block_id2 = misbehaviour.header2.signed_header.commit.block_id;
 					if block_id1.hash.ne(&block_id2.hash) {
-						return Ok(true)
+						return Ok(true);
 					}
 				} else if misbehaviour.header1.signed_header.header.time.le(&misbehaviour
 					.header2
@@ -313,7 +315,7 @@ where
 					.header
 					.time)
 				{
-					return Ok(true)
+					return Ok(true);
 				}
 			},
 		};
@@ -640,7 +642,7 @@ fn verify_misbehaviour_header<Ctx: ReaderContext, H: HostFunctionsProvider>(
 					if cs == header_consensus_state {
 						// Header is already installed and matches the incoming
 						// header (already verified)
-						return Ok(())
+						return Ok(());
 					}
 					Some(cs)
 				},
@@ -660,14 +662,14 @@ fn verify_misbehaviour_header<Ctx: ReaderContext, H: HostFunctionsProvider>(
 			{
 				return Err(Ics02Error::header_verification_failure(
 					"next val set mismatch".to_string(),
-				))
+				));
 			}
 
 			let chain_id = client_state.chain_id();
 			if !ChainId::is_epoch_format(chain_id.as_str()) {
 				return Err(Ics02Error::header_verification_failure(
 					"client state chain id not in epoch format".to_string(),
-				))
+				));
 			}
 
 			let split: Vec<_> = chain_id.as_str().split('-').collect();
@@ -675,7 +677,9 @@ fn verify_misbehaviour_header<Ctx: ReaderContext, H: HostFunctionsProvider>(
 			let chain_id = ChainId::new(chain_name, header.height().revision_number);
 			let tm_chain_id = tendermint::chain::Id::from_str(chain_id.as_str()).unwrap();
 			if tm_chain_id != header.signed_header.header.chain_id {
-				return Err(Ics02Error::header_verification_failure("chain id mismatch".to_string()))
+				return Err(Ics02Error::header_verification_failure(
+					"chain id mismatch".to_string(),
+				));
 			}
 
 			let trusted_state = TrustedBlockState {
@@ -708,12 +712,13 @@ fn verify_misbehaviour_header<Ctx: ReaderContext, H: HostFunctionsProvider>(
 
 			match verdict {
 				Verdict::Success => {},
-				Verdict::NotEnoughTrust(voting_power_tally) =>
+				Verdict::NotEnoughTrust(voting_power_tally) => {
 					return Err(Error::not_enough_trusted_vals_signed(format!(
 						"voting power tally: {}",
 						voting_power_tally
 					))
-					.into()),
+					.into())
+				},
 				Verdict::Invalid(detail) => return Err(Error::verification_error(detail).into()),
 			}
 
@@ -722,12 +727,13 @@ fn verify_misbehaviour_header<Ctx: ReaderContext, H: HostFunctionsProvider>(
 
 			match verdict {
 				Verdict::Success => {},
-				Verdict::NotEnoughTrust(voting_power_tally) =>
+				Verdict::NotEnoughTrust(voting_power_tally) => {
 					return Err(Error::not_enough_trusted_vals_signed(format!(
 						"voting power tally: {}",
 						voting_power_tally
 					))
-					.into()),
+					.into())
+				},
 				Verdict::Invalid(detail) => return Err(Error::verification_error(detail).into()),
 			}
 
@@ -735,23 +741,24 @@ fn verify_misbehaviour_header<Ctx: ReaderContext, H: HostFunctionsProvider>(
 
 			match verdict {
 				Verdict::Success => {},
-				Verdict::NotEnoughTrust(voting_power_tally) =>
+				Verdict::NotEnoughTrust(voting_power_tally) => {
 					return Err(Error::not_enough_trusted_vals_signed(format!(
 						"voting power tally: {}",
 						voting_power_tally
 					))
-					.into()),
+					.into())
+				},
 				Verdict::Invalid(detail) => return Err(Error::verification_error(detail).into()),
 			}
 
 			if let Ok(expires_at) = trusted_state.header_time + options.trusting_period {
 				if expires_at < ctx.host_timestamp().into_tm_time().unwrap() {
-					return Err(Ics02Error::header_verification_failure("Expired".to_string()))
+					return Err(Ics02Error::header_verification_failure("Expired".to_string()));
 				}
 			} else {
 				return Err(Ics02Error::header_verification_failure(
 					"Can't get expire time".to_string(),
-				))
+				));
 			}
 		},
 		ClientMessage::Misbehaviour(_misbehaviour) => {},

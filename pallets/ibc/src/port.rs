@@ -16,7 +16,7 @@ impl<T: Config + Sync + Send> PortReader for Context<T> {
 	fn lookup_module_by_port(&self, port_id: &PortId) -> Result<ModuleId, ICS05Error> {
 		// check if the user has defined any custom modules
 		if let Some(module_id) = T::Router::lookup_module_by_port(port_id) {
-			return Ok(module_id)
+			return Ok(module_id);
 		}
 
 		match port_id.as_str() {

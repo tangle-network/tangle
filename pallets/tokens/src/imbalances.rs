@@ -55,7 +55,9 @@ impl<T: Config, GetCurrencyId: Get<T::CurrencyId>> TryDrop for PositiveImbalance
 	}
 }
 
-impl<T: Config, GetCurrencyId: Get<T::CurrencyId>> Imbalance<T::Balance> for PositiveImbalance<T, GetCurrencyId> {
+impl<T: Config, GetCurrencyId: Get<T::CurrencyId>> Imbalance<T::Balance>
+	for PositiveImbalance<T, GetCurrencyId>
+{
 	type Opposite = NegativeImbalance<T, GetCurrencyId>;
 
 	fn zero() -> Self {
@@ -116,7 +118,9 @@ impl<T: Config, GetCurrencyId: Get<T::CurrencyId>> TryDrop for NegativeImbalance
 	}
 }
 
-impl<T: Config, GetCurrencyId: Get<T::CurrencyId>> Imbalance<T::Balance> for NegativeImbalance<T, GetCurrencyId> {
+impl<T: Config, GetCurrencyId: Get<T::CurrencyId>> Imbalance<T::Balance>
+	for NegativeImbalance<T, GetCurrencyId>
+{
 	type Opposite = PositiveImbalance<T, GetCurrencyId>;
 
 	fn zero() -> Self {

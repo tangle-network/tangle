@@ -38,7 +38,7 @@ pub(crate) fn process<Ctx: ReaderContext>(
 	let mut output = HandlerOutput::builder();
 
 	if msg.channel.connection_hops().len() != 1 {
-		return Err(Error::invalid_connection_hops_length(1, msg.channel.connection_hops().len()))
+		return Err(Error::invalid_connection_hops_length(1, msg.channel.connection_hops().len()));
 	}
 
 	// An IBC connection running on the local (host) chain should exist.
@@ -53,7 +53,7 @@ pub(crate) fn process<Ctx: ReaderContext>(
 
 	let channel_feature = msg.channel.ordering().to_string();
 	if !version.is_supported_feature(channel_feature) {
-		return Err(Error::channel_feature_not_suported_by_connection())
+		return Err(Error::channel_feature_not_suported_by_connection());
 	}
 
 	// Channel identifier construction.

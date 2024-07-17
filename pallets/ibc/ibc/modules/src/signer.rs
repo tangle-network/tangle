@@ -52,7 +52,7 @@ impl FromStr for Signer {
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		let s = s.to_string();
 		if s.trim().is_empty() {
-			return Err(SignerError::empty_signer())
+			return Err(SignerError::empty_signer());
 		}
 		Ok(Self(s))
 	}

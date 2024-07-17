@@ -73,7 +73,7 @@ pub async fn fetch_timestamp_extrinsic_with_proof<T: Config>(
 	let extrinsics = block.block.extrinsics.into_iter().map(|e| e.0.encode()).collect::<Vec<_>>();
 	let (ext, proof) = {
 		if extrinsics.is_empty() {
-			return Err(From::from("Block has no extrinsics".to_string()))
+			return Err(From::from("Block has no extrinsics".to_string()));
 		}
 		let timestamp_ext = extrinsics[0].clone();
 

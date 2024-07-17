@@ -41,7 +41,7 @@ impl<T: Config> ClientStates<T> {
 			.filter_map(move |(remaining_key, value)| {
 				let path = format!("{prefix_path}{}", String::from_utf8(remaining_key).ok()?);
 				if let Path::ClientState(ClientStatePath(client_id)) = Path::from_str(&path).ok()? {
-					return Some((client_id, value))
+					return Some((client_id, value));
 				}
 				None
 			})

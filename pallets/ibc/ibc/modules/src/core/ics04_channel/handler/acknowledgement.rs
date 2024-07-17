@@ -52,7 +52,7 @@ pub fn process<Ctx: ReaderContext>(
 		ctx.channel_end(&(packet.source_port.clone(), packet.source_channel))?;
 
 	if !source_channel_end.state_matches(&State::Open) {
-		return Err(Error::channel_closed(packet.source_channel))
+		return Err(Error::channel_closed(packet.source_channel));
 	}
 
 	let counterparty =
@@ -62,7 +62,7 @@ pub fn process<Ctx: ReaderContext>(
 		return Err(Error::invalid_packet_counterparty(
 			packet.destination_port.clone(),
 			packet.destination_channel,
-		))
+		));
 	}
 
 	let connection_end = ctx
@@ -70,7 +70,7 @@ pub fn process<Ctx: ReaderContext>(
 		.map_err(Error::ics03_connection)?;
 
 	if !connection_end.state_matches(&ConnectionState::Open) {
-		return Err(Error::connection_not_open(source_channel_end.connection_hops()[0].clone()))
+		return Err(Error::connection_not_open(source_channel_end.connection_hops()[0].clone()));
 	}
 
 	// Verify packet commitment
@@ -80,13 +80,13 @@ pub fn process<Ctx: ReaderContext>(
 		packet.sequence,
 	))?;
 
-	if packet_commitment !=
-		ctx.packet_commitment(
+	if packet_commitment
+		!= ctx.packet_commitment(
 			packet.data.clone(),
 			packet.timeout_height,
 			packet.timeout_timestamp,
 		) {
-		return Err(Error::incorrect_packet_commitment(packet.sequence))
+		return Err(Error::incorrect_packet_commitment(packet.sequence));
 	}
 
 	// Verify the acknowledgement proof
@@ -104,7 +104,7 @@ pub fn process<Ctx: ReaderContext>(
 			ctx.get_next_sequence_ack(&(packet.source_port.clone(), packet.source_channel))?;
 
 		if packet.sequence != next_seq_ack {
-			return Err(Error::invalid_packet_sequence(packet.sequence, next_seq_ack))
+			return Err(Error::invalid_packet_sequence(packet.sequence, next_seq_ack));
 		}
 
 		PacketResult::Ack(AckPacketResult {

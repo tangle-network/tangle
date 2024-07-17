@@ -44,11 +44,11 @@ impl TryFrom<RawVersion> for Version {
 	type Error = Error;
 	fn try_from(value: RawVersion) -> Result<Self, Self::Error> {
 		if value.identifier.trim().is_empty() {
-			return Err(Error::empty_versions())
+			return Err(Error::empty_versions());
 		}
 		for feature in value.features.iter() {
 			if feature.trim().is_empty() {
-				return Err(Error::empty_features())
+				return Err(Error::empty_features());
 			}
 		}
 		Ok(Version { identifier: value.identifier, features: value.features })
@@ -93,11 +93,11 @@ pub fn pick_version(
 	for s in supported_versions.iter() {
 		for c in counterparty_versions.iter() {
 			if c.identifier != s.identifier {
-				continue
+				continue;
 			}
 			for feature in c.features.iter() {
 				if feature.trim().is_empty() {
-					return Err(Error::empty_features())
+					return Err(Error::empty_features());
 				}
 			}
 			intersection.append(&mut vec![s.clone()]);
@@ -105,7 +105,7 @@ pub fn pick_version(
 	}
 	intersection.sort_by(|a, b| a.identifier.cmp(&b.identifier));
 	if intersection.is_empty() {
-		return Err(Error::no_common_version())
+		return Err(Error::no_common_version());
 	}
 	Ok(intersection[0].clone())
 }

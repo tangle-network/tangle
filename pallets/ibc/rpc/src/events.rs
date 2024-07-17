@@ -129,10 +129,10 @@ where
 			ev.packet = packet;
 			Some(event)
 		},
-		RawIbcEvent::NewBlock(_) |
-		RawIbcEvent::AppModule(_) |
-		RawIbcEvent::Empty(_) |
-		RawIbcEvent::ChainError(_) => None,
+		RawIbcEvent::NewBlock(_)
+		| RawIbcEvent::AppModule(_)
+		| RawIbcEvent::Empty(_)
+		| RawIbcEvent::ChainError(_) => None,
 		_ => Some(event),
 	}
 }

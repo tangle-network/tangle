@@ -53,7 +53,7 @@ impl<'a, H: HostFunctionsProvider + 'static> ClientReader for Context<'a, H> {
 	fn client_type(&self, client_id: &ClientId) -> Result<ClientType, Error> {
 		let clients = ReadonlyClients::new(self.storage());
 		if !clients.contains_key(client_id) {
-			return Err(Error::client_not_found(client_id.clone()))
+			return Err(Error::client_not_found(client_id.clone()));
 		}
 
 		let data = clients

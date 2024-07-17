@@ -91,21 +91,21 @@ impl<H: HostFunctionsProvider> MerkleProof<H> {
 	) -> Result<(), Error> {
 		// validate arguments
 		if self.proofs.is_empty() {
-			return Err(Error::empty_merkle_proof())
+			return Err(Error::empty_merkle_proof());
 		}
 		if root.hash.is_empty() {
-			return Err(Error::empty_merkle_root())
+			return Err(Error::empty_merkle_root());
 		}
 		let num = self.proofs.len();
 		let ics23_specs = Vec::<ics23::ProofSpec>::from(specs.clone());
 		if ics23_specs.len() != num {
-			return Err(Error::number_of_specs_mismatch())
+			return Err(Error::number_of_specs_mismatch());
 		}
 		if keys.key_path.len() != num {
-			return Err(Error::number_of_keys_mismatch())
+			return Err(Error::number_of_keys_mismatch());
 		}
 		if value.is_empty() {
-			return Err(Error::empty_verified_value())
+			return Err(Error::empty_verified_value());
 		}
 
 		let mut subroot = value.clone();
@@ -124,7 +124,7 @@ impl<H: HostFunctionsProvider> MerkleProof<H> {
 						.map_err(|_| Error::invalid_merkle_proof())?;
 
 					if !verify_membership::<H>(proof, spec, &subroot, key.as_bytes(), &value) {
-						return Err(Error::verification_failure())
+						return Err(Error::verification_failure());
 					}
 					value = subroot.clone();
 				},
@@ -133,7 +133,7 @@ impl<H: HostFunctionsProvider> MerkleProof<H> {
 		}
 
 		if root.hash != subroot {
-			return Err(Error::verification_failure())
+			return Err(Error::verification_failure());
 		}
 
 		Ok(())
@@ -147,18 +147,18 @@ impl<H: HostFunctionsProvider> MerkleProof<H> {
 	) -> Result<(), Error> {
 		// validate arguments
 		if self.proofs.is_empty() {
-			return Err(Error::empty_merkle_proof())
+			return Err(Error::empty_merkle_proof());
 		}
 		if root.hash.is_empty() {
-			return Err(Error::empty_merkle_root())
+			return Err(Error::empty_merkle_root());
 		}
 		let num = self.proofs.len();
 		let ics23_specs = Vec::<ics23::ProofSpec>::from(specs.clone());
 		if ics23_specs.len() != num {
-			return Err(Error::number_of_specs_mismatch())
+			return Err(Error::number_of_specs_mismatch());
 		}
 		if keys.key_path.len() != num {
-			return Err(Error::number_of_keys_mismatch())
+			return Err(Error::number_of_keys_mismatch());
 		}
 
 		// verify the absence of key in lowest subtree
@@ -170,7 +170,7 @@ impl<H: HostFunctionsProvider> MerkleProof<H> {
 			Some(Proof::Nonexist(non_existence_proof)) => {
 				let subroot = calculate_non_existence_root::<H>(non_existence_proof)?;
 				if !verify_non_membership::<H>(proof, spec, &subroot, key.as_bytes()) {
-					return Err(Error::verification_failure())
+					return Err(Error::verification_failure());
 				}
 				// verify membership proofs starting from index 1 with value = subroot
 				self.verify_membership(specs, root, keys, subroot, 1)

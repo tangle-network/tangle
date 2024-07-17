@@ -77,9 +77,9 @@ where
 
 		match finality_grandpa::validate_commit(&self.commit, voters, &ancestry_chain) {
 			Ok(ref result) if result.is_valid() => {
-				if result.num_duplicated_precommits() > 0 ||
-					result.num_invalid_voters() > 0 ||
-					result.num_equivocations() > 0
+				if result.num_duplicated_precommits() > 0
+					|| result.num_invalid_voters() > 0
+					|| result.num_equivocations() > 0
 				{
 					Err(anyhow!("Invalid commit, found one of `duplicate precommits`, `invalid voters`, or `equivocations` {result:?}"))?
 				}
@@ -122,7 +122,7 @@ where
 			)?;
 
 			if base_hash == signed.precommit.target_hash {
-				continue
+				continue;
 			}
 
 			let route = ancestry_chain
@@ -272,10 +272,10 @@ where
 	macro_rules! check {
 		( $equivocation:expr, $message:expr ) => {
 			// if both votes have the same target the equivocation is invalid.
-			if $equivocation.first.0.target_hash == $equivocation.second.0.target_hash &&
-				$equivocation.first.0.target_number == $equivocation.second.0.target_number
+			if $equivocation.first.0.target_hash == $equivocation.second.0.target_hash
+				&& $equivocation.first.0.target_number == $equivocation.second.0.target_number
 			{
-				return Err(anyhow!("both votes have the same target!"))
+				return Err(anyhow!("both votes have the same target!"));
 			}
 
 			// check signatures on both votes are valid

@@ -108,7 +108,7 @@ where
 	for (hash, proofs) in parachain_headers {
 		if finalized.binary_search(&hash).is_err() {
 			// seems relay hash isn't in the finalized chain.
-			continue
+			continue;
 		}
 		let relay_chain_header =
 			headers.header(&hash).expect("Headers have been checked by AncestryChain; qed");

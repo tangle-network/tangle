@@ -137,7 +137,7 @@ where
 				ics4_packet_msg_dispatcher::<_>(ctx, &msg).map_err(Error::ics04_channel)?;
 
 			if matches!(packet_result, PacketResult::Recv(RecvPacketResult::NoOp)) {
-				return Ok(handler_builder.with_result(()))
+				return Ok(handler_builder.with_result(()));
 			}
 
 			let mut module_output = ModuleOutputBuilder::new();

@@ -7,7 +7,9 @@ use frame_support::traits::{
 use sp_arithmetic::{traits::Bounded, ArithmeticError};
 use sp_runtime::DispatchError;
 
-pub struct Combiner<AccountId, TestKey, A, B>(sp_std::marker::PhantomData<(AccountId, TestKey, A, B)>);
+pub struct Combiner<AccountId, TestKey, A, B>(
+	sp_std::marker::PhantomData<(AccountId, TestKey, A, B)>,
+);
 
 impl<AccountId, TestKey, A, B> fungibles::Inspect<AccountId> for Combiner<AccountId, TestKey, A, B>
 where
@@ -145,7 +147,8 @@ where
 	}
 }
 
-impl<AccountId, TestKey, A, B> fungibles::Unbalanced<AccountId> for Combiner<AccountId, TestKey, A, B>
+impl<AccountId, TestKey, A, B> fungibles::Unbalanced<AccountId>
+	for Combiner<AccountId, TestKey, A, B>
 where
 	TestKey: Contains<<B as fungibles::Inspect<AccountId>>::AssetId>,
 	A: fungible::Mutate<AccountId, Balance = <B as fungibles::Inspect<AccountId>>::Balance>,
@@ -199,8 +202,11 @@ pub trait ConvertBalance<A: Bounded, B: Bounded> {
 	}
 }
 
-pub struct Mapper<AccountId, T, C, B, GetCurrencyId>(sp_std::marker::PhantomData<(AccountId, T, C, B, GetCurrencyId)>);
-impl<AccountId, T, C, B, GetCurrencyId> fungible::Inspect<AccountId> for Mapper<AccountId, T, C, B, GetCurrencyId>
+pub struct Mapper<AccountId, T, C, B, GetCurrencyId>(
+	sp_std::marker::PhantomData<(AccountId, T, C, B, GetCurrencyId)>,
+);
+impl<AccountId, T, C, B, GetCurrencyId> fungible::Inspect<AccountId>
+	for Mapper<AccountId, T, C, B, GetCurrencyId>
 where
 	T: fungibles::Inspect<AccountId>,
 	C: ConvertBalance<
@@ -226,17 +232,28 @@ where
 	}
 
 	fn total_balance(who: &AccountId) -> Self::Balance {
-		C::convert_balance_saturated(T::total_balance(GetCurrencyId::get(), who), GetCurrencyId::get())
+		C::convert_balance_saturated(
+			T::total_balance(GetCurrencyId::get(), who),
+			GetCurrencyId::get(),
+		)
 	}
 
-	fn reducible_balance(who: &AccountId, preservation: Preservation, fortitude: Fortitude) -> Self::Balance {
+	fn reducible_balance(
+		who: &AccountId,
+		preservation: Preservation,
+		fortitude: Fortitude,
+	) -> Self::Balance {
 		C::convert_balance_saturated(
 			T::reducible_balance(GetCurrencyId::get(), who, preservation, fortitude),
 			GetCurrencyId::get(),
 		)
 	}
 
-	fn can_deposit(who: &AccountId, amount: Self::Balance, provenance: Provenance) -> DepositConsequence {
+	fn can_deposit(
+		who: &AccountId,
+		amount: Self::Balance,
+		provenance: Provenance,
+	) -> DepositConsequence {
 		let amount = C::convert_balance_back(amount, GetCurrencyId::get());
 		let amount = match amount {
 			Ok(amount) => amount,
@@ -258,9 +275,9 @@ where
 
 		let res = T::can_withdraw(GetCurrencyId::get(), who, amount);
 		match res {
-			WithdrawConsequence::ReducedToZero(b) => {
-				WithdrawConsequence::ReducedToZero(C::convert_balance_saturated(b, GetCurrencyId::get()))
-			}
+			WithdrawConsequence::ReducedToZero(b) => WithdrawConsequence::ReducedToZero(
+				C::convert_balance_saturated(b, GetCurrencyId::get()),
+			),
 			BalanceLow => BalanceLow,
 			WouldDie => WouldDie,
 			UnknownAsset => UnknownAsset,
@@ -272,7 +289,8 @@ where
 	}
 }
 
-impl<AccountId, T, C, B, GetCurrencyId> fungible::Mutate<AccountId> for Mapper<AccountId, T, C, B, GetCurrencyId>
+impl<AccountId, T, C, B, GetCurrencyId> fungible::Mutate<AccountId>
+	for Mapper<AccountId, T, C, B, GetCurrencyId>
 where
 	T: fungibles::Mutate<AccountId, Balance = B>,
 	C: ConvertBalance<
@@ -323,7 +341,8 @@ where
 	}
 }
 
-impl<AccountId, T, C, B, GetCurrencyId> fungible::Unbalanced<AccountId> for Mapper<AccountId, T, C, B, GetCurrencyId>
+impl<AccountId, T, C, B, GetCurrencyId> fungible::Unbalanced<AccountId>
+	for Mapper<AccountId, T, C, B, GetCurrencyId>
 where
 	T: fungibles::Unbalanced<AccountId, Balance = B>,
 	C: ConvertBalance<
@@ -339,7 +358,10 @@ where
 		// not balanced
 	}
 
-	fn write_balance(who: &AccountId, amount: Self::Balance) -> Result<Option<Self::Balance>, DispatchError> {
+	fn write_balance(
+		who: &AccountId,
+		amount: Self::Balance,
+	) -> Result<Option<Self::Balance>, DispatchError> {
 		T::write_balance(GetCurrencyId::get(), who, amount)
 	}
 

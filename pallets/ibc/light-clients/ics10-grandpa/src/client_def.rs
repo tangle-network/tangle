@@ -89,7 +89,7 @@ where
 						"Para id mismatch: expected {}, got {}",
 						client_state.para_id, header.height.revision_number
 					))
-					.into())
+					.into());
 				}
 				let headers_with_finality_proof = ParachainHeadersWithFinalityProof {
 					finality_proof: header.finality_proof,
@@ -110,7 +110,7 @@ where
 				if first_proof.block == second_proof.block {
 					return Err(
 						Error::Custom("Misbehaviour proofs are for the same block".into()).into()
-					)
+					);
 				}
 
 				let first_headers =
@@ -127,13 +127,13 @@ where
 						|| Error::Custom("Unknown headers can't be empty!".to_string()),
 					)?;
 
-				if first_target.hash() != first_proof.block ||
-					second_target.hash() != second_proof.block
+				if first_target.hash() != first_proof.block
+					|| second_target.hash() != second_proof.block
 				{
 					return Err(Error::Custom(
 						"Misbehaviour proofs are not for the same chain".into(),
 					)
-					.into())
+					.into());
 				}
 
 				let first_base =
@@ -159,7 +159,7 @@ where
 					return Err(Error::Custom(
 						"Misbehaviour proofs are not for the same ancestor".into(),
 					)
-					.into())
+					.into());
 				}
 
 				// TODO: should we handle genesis block here somehow?
@@ -178,8 +178,8 @@ where
 				)
 				.map_err(|_| Error::Custom("Could not decode second justification".to_string()))?;
 
-				if first_proof.block != first_justification.commit.target_hash ||
-					second_proof.block != second_justification.commit.target_hash
+				if first_proof.block != first_justification.commit.target_hash
+					|| second_proof.block != second_justification.commit.target_hash
 				{
 					Err(Error::Custom(
 						"First or second finality proof block hash does not match justification target hash"
@@ -234,7 +234,7 @@ where
 			// we really shouldn't set consensus states for parachain headers not in the finalized
 			// chain.
 			if finalized_sorted.binary_search(&relay_hash).is_err() {
-				continue
+				continue;
 			}
 
 			let header = ancestry.header(&relay_hash).ok_or_else(|| {
@@ -249,7 +249,7 @@ where
 
 			// Skip duplicate consensus states
 			if ctx.consensus_state(&client_id, height).is_ok() {
-				continue
+				continue;
 			}
 
 			let wrapped = Ctx::AnyConsensusState::wrap(&consensus_state)
@@ -320,7 +320,7 @@ where
 		client_message: Self::ClientMessage,
 	) -> Result<bool, Ics02Error> {
 		if matches!(client_message, ClientMessage::Misbehaviour(_)) {
-			return Ok(true)
+			return Ok(true);
 		}
 
 		// we also check that this update doesn't include competing consensus states for heights we
@@ -340,7 +340,7 @@ where
 			})?;
 
 			if find_forced_change(header).is_some() {
-				return Ok(true)
+				return Ok(true);
 			}
 
 			let (height, consensus_state) = ConsensusState::from_header::<H>(
@@ -357,7 +357,7 @@ where
 
 					if cs != consensus_state {
 						// Houston we have a problem
-						return Ok(true)
+						return Ok(true);
 					}
 				},
 				None => {},

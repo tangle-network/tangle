@@ -289,7 +289,7 @@ pub fn calculate_block_delay(
 	max_expected_time_per_block: Duration,
 ) -> u64 {
 	if max_expected_time_per_block.is_zero() {
-		return 0
+		return 0;
 	}
 
 	FloatCore::ceil(delay_period_time.as_secs_f64() / max_expected_time_per_block.as_secs_f64())

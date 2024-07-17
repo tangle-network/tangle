@@ -145,20 +145,20 @@ fn validate_transfer_channel_params(
 	version: &Version,
 ) -> Result<(), Ics20Error> {
 	if channel_id.sequence() > (u32::MAX as u64) {
-		return Err(Ics20Error::chan_seq_exceeds_limit(channel_id.sequence()))
+		return Err(Ics20Error::chan_seq_exceeds_limit(channel_id.sequence()));
 	}
 
 	if order != Order::Unordered {
-		return Err(Ics20Error::channel_not_unordered(order))
+		return Err(Ics20Error::channel_not_unordered(order));
 	}
 
 	let bound_port = ctx.get_port()?;
 	if port_id != &bound_port {
-		return Err(Ics20Error::invalid_port(port_id.clone(), bound_port))
+		return Err(Ics20Error::invalid_port(port_id.clone(), bound_port));
 	}
 
 	if version != &Version::ics20() {
-		return Err(Ics20Error::invalid_version(version.clone()))
+		return Err(Ics20Error::invalid_version(version.clone()));
 	}
 
 	Ok(())

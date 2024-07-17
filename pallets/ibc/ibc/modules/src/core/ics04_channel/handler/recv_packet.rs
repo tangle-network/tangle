@@ -64,7 +64,7 @@ pub fn process<Ctx: ReaderContext>(
 		ctx.channel_end(&(packet.destination_port.clone(), packet.destination_channel))?;
 
 	if !dest_channel_end.state_matches(&State::Open) {
-		return Err(Error::invalid_channel_state(packet.source_channel, dest_channel_end.state))
+		return Err(Error::invalid_channel_state(packet.source_channel, dest_channel_end.state));
 	}
 
 	let counterparty = Counterparty::new(packet.source_port.clone(), Some(packet.source_channel));
@@ -73,7 +73,7 @@ pub fn process<Ctx: ReaderContext>(
 		return Err(Error::invalid_packet_counterparty(
 			packet.source_port.clone(),
 			packet.source_channel,
-		))
+		));
 	}
 
 	let connection_end = ctx
@@ -81,17 +81,17 @@ pub fn process<Ctx: ReaderContext>(
 		.map_err(Error::ics03_connection)?;
 
 	if !connection_end.state_matches(&ConnectionState::Open) {
-		return Err(Error::connection_not_open(dest_channel_end.connection_hops()[0].clone()))
+		return Err(Error::connection_not_open(dest_channel_end.connection_hops()[0].clone()));
 	}
 
 	let latest_height = ctx.host_height();
 	if (!packet.timeout_height.is_zero()) && (packet.timeout_height <= latest_height) {
-		return Err(Error::low_packet_height(latest_height, packet.timeout_height))
+		return Err(Error::low_packet_height(latest_height, packet.timeout_height));
 	}
 
 	let latest_timestamp = ctx.host_timestamp();
 	if let Expiry::Expired = latest_timestamp.check_expiry(&packet.timeout_timestamp) {
-		return Err(Error::low_packet_timestamp())
+		return Err(Error::low_packet_timestamp());
 	}
 
 	verify_packet_recv_proofs::<Ctx>(
@@ -113,9 +113,9 @@ pub fn process<Ctx: ReaderContext>(
 				height: Height::zero(),
 				packet: msg.packet.clone(),
 			}));
-			return Ok(output.with_result(PacketResult::Recv(RecvPacketResult::NoOp)))
+			return Ok(output.with_result(PacketResult::Recv(RecvPacketResult::NoOp)));
 		} else if packet.sequence != next_seq_recv {
-			return Err(Error::invalid_packet_sequence(packet.sequence, next_seq_recv))
+			return Err(Error::invalid_packet_sequence(packet.sequence, next_seq_recv));
 		}
 
 		PacketResult::Recv(RecvPacketResult::Ordered {
@@ -137,7 +137,7 @@ pub fn process<Ctx: ReaderContext>(
 					height: Height::zero(),
 					packet: msg.packet.clone(),
 				}));
-				return Ok(output.with_result(PacketResult::Recv(RecvPacketResult::NoOp)))
+				return Ok(output.with_result(PacketResult::Recv(RecvPacketResult::NoOp)));
 			},
 			Err(e) if e.detail() == Error::packet_receipt_not_found(packet.sequence).detail() => {
 				// store a receipt that does not contain any data

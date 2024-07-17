@@ -55,10 +55,10 @@ where
 	let validator_set_id = mmr_update.signed_commitment.commitment.validator_set_id;
 
 	// If signature threshold is not satisfied, return
-	if !validate_sigs_against_threshold(current_authority_set, signatures_len) &&
-		!validate_sigs_against_threshold(next_authority_set, signatures_len)
+	if !validate_sigs_against_threshold(current_authority_set, signatures_len)
+		&& !validate_sigs_against_threshold(next_authority_set, signatures_len)
 	{
-		return Err(BeefyClientError::IncompleteSignatureThreshold)
+		return Err(BeefyClientError::IncompleteSignatureThreshold);
 	}
 
 	if current_authority_set.id != validator_set_id && next_authority_set.id != validator_set_id {
@@ -66,7 +66,7 @@ where
 			current_set_id: current_authority_set.id,
 			next_set_id: next_authority_set.id,
 			commitment_set_id: validator_set_id,
-		})
+		});
 	}
 
 	// Extract root hash from signed commitment and validate it
@@ -78,10 +78,10 @@ where
 				return Err(BeefyClientError::InvalidRootHash {
 					root_hash: root.clone(),
 					len: root.len() as u64,
-				})
+				});
 			}
 		} else {
-			return Err(BeefyClientError::MmrRootHashNotFound)
+			return Err(BeefyClientError::MmrRootHashNotFound);
 		}
 	};
 
@@ -124,7 +124,7 @@ where
 				&authority_leaves,
 				current_authority_set.len as usize,
 			) {
-				return Err(BeefyClientError::InvalidAuthorityProof)
+				return Err(BeefyClientError::InvalidAuthorityProof);
 			}
 		},
 		id if id == next_authority_set.id => {
@@ -135,16 +135,17 @@ where
 				&authority_leaves,
 				next_authority_set.len as usize,
 			) {
-				return Err(BeefyClientError::InvalidAuthorityProof)
+				return Err(BeefyClientError::InvalidAuthorityProof);
 			}
 			authorities_changed = true;
 		},
-		_ =>
+		_ => {
 			return Err(BeefyClientError::AuthoritySetMismatch {
 				current_set_id: current_authority_set.id,
 				next_set_id: next_authority_set.id,
 				commitment_set_id: validator_set_id,
-			}),
+			})
+		},
 	}
 
 	let latest_beefy_height = trusted_client_state.latest_beefy_height;
@@ -154,7 +155,7 @@ where
 		return Err(BeefyClientError::OutdatedCommitment {
 			latest_beefy_height,
 			commitment_block_number,
-		})
+		});
 	}
 
 	// Move on to verify mmr_proof
@@ -182,7 +183,7 @@ where
 			expected: mmr_root_hash,
 			found: root,
 			location: "verifying_latest_mmr_leaf",
-		})
+		});
 	}
 
 	trusted_client_state.latest_beefy_height = mmr_update.signed_commitment.commitment.block_number;
@@ -273,7 +274,7 @@ where
 			expected: trusted_client_state.mmr_root_hash,
 			found: root,
 			location: "verifying_parachain_headers_inclusion",
-		})
+		});
 	}
 	Ok(())
 }

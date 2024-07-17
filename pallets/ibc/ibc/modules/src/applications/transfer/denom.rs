@@ -112,7 +112,7 @@ impl<'a> TryFrom<Vec<&'a str>> for TracePath {
 
 	fn try_from(v: Vec<&'a str>) -> Result<Self, Self::Error> {
 		if v.len() % 2 != 0 {
-			return Err(Error::invalid_trace_length(v.len()))
+			return Err(Error::invalid_trace_length(v.len()));
 		}
 
 		let mut trace = vec![];

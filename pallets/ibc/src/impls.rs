@@ -551,8 +551,8 @@ where
 					log::trace!(target: "pallet_ibc", "Failed to run packet clean up");
 					(Error::<T>::Other, removed_count)
 				})?;
-			let range = (last_removed_send + 1)..
-				(last_removed_send + PACKET_CLEANUP_PER_CYCLE).min(next_seq_send.into());
+			let range = (last_removed_send + 1)
+				..(last_removed_send + PACKET_CLEANUP_PER_CYCLE).min(next_seq_send.into());
 			for seq in range {
 				if !PacketCommitment::<T>::contains_key((port_id.clone(), channel_id, seq.into())) {
 					let key = Pallet::<T>::send_packet_key(
@@ -603,8 +603,8 @@ where
 					log::trace!(target: "pallet_ibc", "Failed to run packet clean up");
 					(Error::<T>::Other, removed_count)
 				})?;
-			let range = (last_removed_ack + 1)..
-				(last_removed_ack + PACKET_CLEANUP_PER_CYCLE).min(next_seq_recv.into());
+			let range = (last_removed_ack + 1)
+				..(last_removed_ack + PACKET_CLEANUP_PER_CYCLE).min(next_seq_recv.into());
 			for seq in range {
 				if !Acknowledgements::<T>::contains_key((port_id.clone(), channel_id, seq.into())) {
 					let key = Pallet::<T>::recv_packet_key(
@@ -764,18 +764,22 @@ where
 		msg: HandlerMessage<<T as frame_system::Config>::AccountId>,
 	) -> Result<(), IbcHandlerError> {
 		match msg {
-			HandlerMessage::OpenChannel { port_id, channel_end } =>
-				Pallet::<T>::open_channel(port_id, channel_end),
-			HandlerMessage::CloseChannel { channel_id, port_id } =>
-				Pallet::<T>::close_channel(port_id, channel_id),
+			HandlerMessage::OpenChannel { port_id, channel_end } => {
+				Pallet::<T>::open_channel(port_id, channel_end)
+			},
+			HandlerMessage::CloseChannel { channel_id, port_id } => {
+				Pallet::<T>::close_channel(port_id, channel_id)
+			},
 			HandlerMessage::Transfer { timeout, to, from, channel_id, coin, memo } => {
 				let msg = Pallet::<T>::to_msg_transfer(coin, from, to, timeout, channel_id, memo)?;
 				Pallet::<T>::send_transfer(msg)
 			},
-			HandlerMessage::SendPacket { data, timeout, port_id, channel_id } =>
-				Pallet::<T>::send_packet(data, timeout, port_id, channel_id),
-			HandlerMessage::WriteAck { ack, packet } =>
-				Pallet::<T>::write_acknowledgement(packet, ack),
+			HandlerMessage::SendPacket { data, timeout, port_id, channel_id } => {
+				Pallet::<T>::send_packet(data, timeout, port_id, channel_id)
+			},
+			HandlerMessage::WriteAck { ack, packet } => {
+				Pallet::<T>::write_acknowledgement(packet, ack)
+			},
 		}
 	}
 
@@ -894,8 +898,8 @@ where
 				(timeout_height, timeout_timestamp)
 			},
 			Timeout::Offset { timestamp, height } => {
-				let timeout_timestamp = (latest_timestamp +
-					Duration::from_nanos(timestamp.ok_or_else(|| {
+				let timeout_timestamp = (latest_timestamp
+					+ Duration::from_nanos(timestamp.ok_or_else(|| {
 						IbcHandlerError::TimeoutError {
 							msg: Some("Timeout timestamp is missing".to_string()),
 						}
@@ -1006,8 +1010,8 @@ where
 				(timeout_height, timeout_timestamp)
 			},
 			Timeout::Offset { timestamp, height } => {
-				let timeout_timestamp = (latest_timestamp +
-					Duration::from_nanos(timestamp.ok_or_else(|| {
+				let timeout_timestamp = (latest_timestamp
+					+ Duration::from_nanos(timestamp.ok_or_else(|| {
 						IbcHandlerError::TimeoutError {
 							msg: Some("Timeout timestamp is missing".to_string()),
 						}

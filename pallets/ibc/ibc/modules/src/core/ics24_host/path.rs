@@ -211,7 +211,7 @@ fn parse_client_paths(components: &[&str]) -> Option<Path> {
 	};
 
 	if first != "clients" {
-		return None
+		return None;
 	}
 
 	let client_id = match ClientId::from_str(components[1]) {
@@ -228,7 +228,7 @@ fn parse_client_paths(components: &[&str]) -> Option<Path> {
 		}
 	} else if components.len() == 4 {
 		if "consensusStates" != components[2] {
-			return None
+			return None;
 		}
 
 		let epoch_height = match components.last() {
@@ -239,7 +239,7 @@ fn parse_client_paths(components: &[&str]) -> Option<Path> {
 		let epoch_height: Vec<&str> = epoch_height.split('-').collect();
 
 		if epoch_height.len() != 2 {
-			return None
+			return None;
 		}
 
 		let epoch = epoch_height[0];
@@ -263,7 +263,7 @@ fn parse_client_paths(components: &[&str]) -> Option<Path> {
 
 fn parse_connections(components: &[&str]) -> Option<Path> {
 	if components.len() != 2 {
-		return None
+		return None;
 	}
 
 	let first = match components.first() {
@@ -272,7 +272,7 @@ fn parse_connections(components: &[&str]) -> Option<Path> {
 	};
 
 	if first != "connections" {
-		return None
+		return None;
 	}
 
 	let connection_id = match components.last() {
@@ -290,7 +290,7 @@ fn parse_connections(components: &[&str]) -> Option<Path> {
 
 fn parse_ports(components: &[&str]) -> Option<Path> {
 	if components.len() != 2 {
-		return None
+		return None;
 	}
 
 	let first = match components.first() {
@@ -299,7 +299,7 @@ fn parse_ports(components: &[&str]) -> Option<Path> {
 	};
 
 	if first != "ports" {
-		return None
+		return None;
 	}
 
 	let port_id = match components.last() {
@@ -317,7 +317,7 @@ fn parse_ports(components: &[&str]) -> Option<Path> {
 
 fn parse_channels(components: &[&str]) -> Option<SubPath> {
 	if components.len() != 2 {
-		return None
+		return None;
 	}
 
 	let first = match components.first() {
@@ -326,7 +326,7 @@ fn parse_channels(components: &[&str]) -> Option<SubPath> {
 	};
 
 	if first != "channels" {
-		return None
+		return None;
 	}
 
 	let channel_id = match components.last() {
@@ -344,7 +344,7 @@ fn parse_channels(components: &[&str]) -> Option<SubPath> {
 
 fn parse_sequences(components: &[&str]) -> Option<SubPath> {
 	if components.len() != 2 {
-		return None
+		return None;
 	}
 
 	let first = match components.first() {
@@ -353,7 +353,7 @@ fn parse_sequences(components: &[&str]) -> Option<SubPath> {
 	};
 
 	if first != "sequences" {
-		return None
+		return None;
 	}
 
 	let sequence_number = match components.last() {
@@ -369,7 +369,7 @@ fn parse_sequences(components: &[&str]) -> Option<SubPath> {
 
 fn parse_channel_ends(components: &[&str]) -> Option<Path> {
 	if components.len() != 5 {
-		return None
+		return None;
 	}
 
 	let first = match components.first() {
@@ -378,7 +378,7 @@ fn parse_channel_ends(components: &[&str]) -> Option<Path> {
 	};
 
 	if first != "channelEnds" {
-		return None
+		return None;
 	}
 
 	let port = parse_ports(&components[1..=2]);
@@ -395,7 +395,7 @@ fn parse_channel_ends(components: &[&str]) -> Option<Path> {
 
 fn parse_seqs(components: &[&str]) -> Option<Path> {
 	if components.len() != 5 {
-		return None
+		return None;
 	}
 
 	let first = match components.first() {
@@ -422,7 +422,7 @@ fn parse_seqs(components: &[&str]) -> Option<Path> {
 
 fn parse_commitments(components: &[&str]) -> Option<Path> {
 	if components.len() != 7 {
-		return None
+		return None;
 	}
 
 	let first = match components.first() {
@@ -431,7 +431,7 @@ fn parse_commitments(components: &[&str]) -> Option<Path> {
 	};
 
 	if first != "commitments" {
-		return None
+		return None;
 	}
 
 	let port = parse_ports(&components[1..=2]);
@@ -451,7 +451,7 @@ fn parse_commitments(components: &[&str]) -> Option<Path> {
 
 fn parse_acks(components: &[&str]) -> Option<Path> {
 	if components.len() != 7 {
-		return None
+		return None;
 	}
 
 	let first = match components.first() {
@@ -460,7 +460,7 @@ fn parse_acks(components: &[&str]) -> Option<Path> {
 	};
 
 	if first != "acks" {
-		return None
+		return None;
 	}
 
 	let port = parse_ports(&components[1..=2]);
@@ -480,7 +480,7 @@ fn parse_acks(components: &[&str]) -> Option<Path> {
 
 fn parse_receipts(components: &[&str]) -> Option<Path> {
 	if components.len() != 7 {
-		return None
+		return None;
 	}
 
 	let first = match components.first() {
@@ -489,7 +489,7 @@ fn parse_receipts(components: &[&str]) -> Option<Path> {
 	};
 
 	if first != "receipts" {
-		return None
+		return None;
 	}
 
 	let port = parse_ports(&components[1..=2]);
@@ -509,7 +509,7 @@ fn parse_receipts(components: &[&str]) -> Option<Path> {
 
 fn parse_upgrades(components: &[&str]) -> Option<Path> {
 	if components.len() != 3 {
-		return None
+		return None;
 	}
 
 	let first = match components.first() {
@@ -518,7 +518,7 @@ fn parse_upgrades(components: &[&str]) -> Option<Path> {
 	};
 
 	if first != UPGRADED_IBC_STATE {
-		return None
+		return None;
 	}
 
 	let last = match components.last() {
@@ -533,8 +533,9 @@ fn parse_upgrades(components: &[&str]) -> Option<Path> {
 
 	match last {
 		UPGRADED_CLIENT_STATE => Some(ClientUpgradePath::UpgradedClientState(height).into()),
-		UPGRADED_CLIENT_CONSENSUS_STATE =>
-			Some(ClientUpgradePath::UpgradedClientConsensusState(height).into()),
+		UPGRADED_CLIENT_CONSENSUS_STATE => {
+			Some(ClientUpgradePath::UpgradedClientConsensusState(height).into())
+		},
 		_ => None,
 	}
 }

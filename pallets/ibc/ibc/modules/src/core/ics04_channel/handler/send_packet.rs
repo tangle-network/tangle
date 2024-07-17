@@ -51,7 +51,7 @@ pub fn send_packet<Ctx: ReaderContext>(
 		ctx.channel_end(&(packet.source_port.clone(), packet.source_channel))?;
 
 	if source_channel_end.state_matches(&State::Closed) {
-		return Err(Error::channel_closed(packet.source_channel))
+		return Err(Error::channel_closed(packet.source_channel));
 	}
 
 	let counterparty =
@@ -61,7 +61,7 @@ pub fn send_packet<Ctx: ReaderContext>(
 		return Err(Error::invalid_packet_counterparty(
 			packet.destination_port.clone(),
 			packet.destination_channel,
-		))
+		));
 	}
 
 	let connection_end = ctx
@@ -76,13 +76,13 @@ pub fn send_packet<Ctx: ReaderContext>(
 
 	// prevent accidental sends with clients that cannot be updated
 	if client_state.is_frozen(ctx, &client_id) {
-		return Err(Error::frozen_client(connection_end.client_id().clone()))
+		return Err(Error::frozen_client(connection_end.client_id().clone()));
 	}
 
 	let latest_height = client_state.latest_height();
 
 	if !packet.timeout_height.is_zero() && packet.timeout_height <= latest_height {
-		return Err(Error::low_packet_height(latest_height, packet.timeout_height))
+		return Err(Error::low_packet_height(latest_height, packet.timeout_height));
 	}
 
 	let consensus_state = ctx
@@ -91,14 +91,14 @@ pub fn send_packet<Ctx: ReaderContext>(
 	let latest_timestamp = consensus_state.timestamp();
 	let packet_timestamp = packet.timeout_timestamp;
 	if let Expiry::Expired = latest_timestamp.check_expiry(&packet_timestamp) {
-		return Err(Error::low_packet_timestamp())
+		return Err(Error::low_packet_timestamp());
 	}
 
 	let next_seq_send =
 		ctx.get_next_sequence_send(&(packet.source_port.clone(), packet.source_channel))?;
 
 	if packet.sequence != next_seq_send {
-		return Err(Error::invalid_packet_sequence(packet.sequence, next_seq_send))
+		return Err(Error::invalid_packet_sequence(packet.sequence, next_seq_send));
 	}
 
 	output.log("success: packet send ");

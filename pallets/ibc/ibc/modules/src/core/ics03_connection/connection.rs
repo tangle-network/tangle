@@ -119,10 +119,10 @@ impl TryFrom<RawConnectionEnd> for ConnectionEnd {
 	fn try_from(value: RawConnectionEnd) -> Result<Self, Self::Error> {
 		let state = value.state.try_into()?;
 		if state == State::Uninitialized {
-			return Ok(ConnectionEnd::default())
+			return Ok(ConnectionEnd::default());
 		}
 		if value.client_id.is_empty() {
-			return Err(Error::empty_proto_connection_end())
+			return Err(Error::empty_proto_connection_end());
 		}
 
 		Ok(Self::new(

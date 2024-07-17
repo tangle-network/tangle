@@ -108,7 +108,7 @@ impl<T: light_client_common::config::Config> Prover<T> {
 						"baa93c7834125ee3120bac6e3342bd3f28611110ad21ab6075367abdffefeb09"
 					)),
 				},
-			}
+			};
 		}
 		// Get initial validator set
 		// In development mode validators are the same for all sessions only validator set_id

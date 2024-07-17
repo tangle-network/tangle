@@ -76,7 +76,7 @@ impl ClientDef for MockClient {
 			return Err(Error::low_header_height(
 				client_message.height(),
 				client_state.latest_height(),
-			))
+			));
 		}
 
 		let header = client_message.header();

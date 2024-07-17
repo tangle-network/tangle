@@ -62,14 +62,14 @@ where
 
 	// An IBC connection running on the local (host) chain should exist.
 	if msg.channel.connection_hops().len() != 1 {
-		return Err(Error::invalid_connection_hops_length(1, msg.channel.connection_hops().len()))
+		return Err(Error::invalid_connection_hops_length(1, msg.channel.connection_hops().len()));
 	}
 
 	let conn = ctx
 		.connection_end(&msg.channel.connection_hops()[0])
 		.map_err(Error::ics03_connection)?;
 	if !conn.state_matches(&ConnectionState::Open) {
-		return Err(Error::connection_not_open(msg.channel.connection_hops()[0].clone()))
+		return Err(Error::connection_not_open(msg.channel.connection_hops()[0].clone()));
 	}
 
 	let get_versions = conn.versions();
@@ -80,7 +80,7 @@ where
 
 	let channel_feature = msg.channel.ordering().to_string();
 	if !version.is_supported_feature(channel_feature) {
-		return Err(Error::channel_feature_not_suported_by_connection())
+		return Err(Error::channel_feature_not_suported_by_connection());
 	}
 
 	// Proof verification in two steps:

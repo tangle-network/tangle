@@ -111,9 +111,7 @@ fn pallet_multi_reservable_currency_deposit_events() {
 		.balances(vec![(ALICE, DOT, 1000), (BOB, DOT, 1000)])
 		.build()
 		.execute_with(|| {
-			assert_ok!(<Tokens as MultiReservableCurrency<AccountId>>::reserve(
-				DOT, &ALICE, 500
-			));
+			assert_ok!(<Tokens as MultiReservableCurrency<AccountId>>::reserve(DOT, &ALICE, 500));
 			System::assert_last_event(RuntimeEvent::Tokens(crate::Event::Reserved {
 				currency_id: DOT,
 				who: ALICE,
@@ -238,9 +236,7 @@ fn pallet_fungibles_mutate_hold_deposit_events() {
 		.balances(vec![(ALICE, DOT, 100), (BOB, DOT, 100)])
 		.build()
 		.execute_with(|| {
-			assert_ok!(<Tokens as fungibles::MutateHold<AccountId>>::hold(
-				DOT, REASON, &ALICE, 50
-			));
+			assert_ok!(<Tokens as fungibles::MutateHold<AccountId>>::hold(DOT, REASON, &ALICE, 50));
 			System::assert_last_event(RuntimeEvent::Tokens(crate::Event::Reserved {
 				currency_id: DOT,
 				who: ALICE,
@@ -266,7 +262,13 @@ fn pallet_fungibles_mutate_hold_deposit_events() {
 			}));
 			System::reset_events();
 			assert_eq!(
-				<Tokens as fungibles::MutateHold<AccountId>>::release(DOT, REASON, &BOB, 50, Precision::Exact),
+				<Tokens as fungibles::MutateHold<AccountId>>::release(
+					DOT,
+					REASON,
+					&BOB,
+					50,
+					Precision::Exact
+				),
 				Ok(50)
 			);
 			System::assert_last_event(RuntimeEvent::Tokens(crate::Event::Unreserved {
@@ -318,7 +320,9 @@ fn currency_adapter_pallet_currency_deposit_events() {
 				reserved_amount: 10,
 			}));
 
-			std::mem::forget(<MockCurrencyAdapter as PalletCurrency<AccountId>>::make_free_balance_be(&BOB, 200));
+			std::mem::forget(
+				<MockCurrencyAdapter as PalletCurrency<AccountId>>::make_free_balance_be(&BOB, 200),
+			);
 			System::assert_last_event(RuntimeEvent::Tokens(crate::Event::BalanceSet {
 				currency_id: DOT,
 				who: BOB,
@@ -363,8 +367,12 @@ fn pallet_change_locks_events() {
 		assert_ok!(Tokens::set_lock(ID_2, DOT, &ALICE, 10));
 		for event in events() {
 			match event {
-				RuntimeEvent::Tokens(crate::Event::Locked { .. }) => assert!(false, "unexpected lock event"),
-				RuntimeEvent::Tokens(crate::Event::Unlocked { .. }) => assert!(false, "unexpected unlock event"),
+				RuntimeEvent::Tokens(crate::Event::Locked { .. }) => {
+					assert!(false, "unexpected lock event")
+				},
+				RuntimeEvent::Tokens(crate::Event::Unlocked { .. }) => {
+					assert!(false, "unexpected unlock event")
+				},
 				_ => continue,
 			}
 		}
@@ -373,8 +381,12 @@ fn pallet_change_locks_events() {
 		assert_ok!(Tokens::set_lock(ID_2, DOT, &ALICE, 12));
 		for event in events() {
 			match event {
-				RuntimeEvent::Tokens(crate::Event::Locked { .. }) => assert!(false, "unexpected lock event"),
-				RuntimeEvent::Tokens(crate::Event::Unlocked { .. }) => assert!(false, "unexpected unlock event"),
+				RuntimeEvent::Tokens(crate::Event::Locked { .. }) => {
+					assert!(false, "unexpected lock event")
+				},
+				RuntimeEvent::Tokens(crate::Event::Unlocked { .. }) => {
+					assert!(false, "unexpected unlock event")
+				},
 				_ => continue,
 			}
 		}
@@ -383,8 +395,12 @@ fn pallet_change_locks_events() {
 		assert_ok!(Tokens::set_lock(ID_2, DOT, &ALICE, 10));
 		for event in events() {
 			match event {
-				RuntimeEvent::Tokens(crate::Event::Locked { .. }) => assert!(false, "unexpected lock event"),
-				RuntimeEvent::Tokens(crate::Event::Unlocked { .. }) => assert!(false, "unexpected unlock event"),
+				RuntimeEvent::Tokens(crate::Event::Locked { .. }) => {
+					assert!(false, "unexpected lock event")
+				},
+				RuntimeEvent::Tokens(crate::Event::Unlocked { .. }) => {
+					assert!(false, "unexpected unlock event")
+				},
 				_ => continue,
 			}
 		}

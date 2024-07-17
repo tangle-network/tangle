@@ -98,8 +98,9 @@ impl TryFrom<Any> for AnyClientMessage {
 
 	fn try_from(value: Any) -> Result<Self, Self::Error> {
 		match value.type_url.as_str() {
-			MOCK_CLIENT_MESSAGE_TYPE_URL =>
-				Ok(Self::Mock(panic!("MockClientMessage doesn't implement Protobuf"))),
+			MOCK_CLIENT_MESSAGE_TYPE_URL => {
+				Ok(Self::Mock(panic!("MockClientMessage doesn't implement Protobuf")))
+			},
 			TENDERMINT_CLIENT_MESSAGE_TYPE_URL => Ok(Self::Tendermint(
 				ClientMessage::decode_vec(&value.value)
 					.map_err(ics02_client::error::Error::decode_raw_header)?,

@@ -75,7 +75,7 @@ impl<'a, H> Context<'a, H> {
 
 	pub fn insert_relay_header_hashes(&mut self, headers: &[H256]) {
 		if headers.is_empty() {
-			return
+			return;
 		}
 
 		let mut xs = GRANDPA_HEADER_HASHES_STORAGE.load(self.storage()).unwrap_or_default();

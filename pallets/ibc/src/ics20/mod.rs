@@ -429,7 +429,7 @@ where
 		use sp_core::Get;
 		let sequence: u64 = packet.sequence.into();
 		if !SequenceFee::<T>::contains_key(sequence) {
-			return Ok(()) //there is nothing to refund.
+			return Ok(()); //there is nothing to refund.
 		}
 		let fee = SequenceFee::<T>::take(sequence);
 
@@ -633,7 +633,7 @@ impl Forward {
 	pub fn get_memo(&self) -> Result<MemoType, Ics20Error> {
 		if self.substrate.unwrap_or_default() {
 			let xcm = MemoXcm { receiver: self.receiver.clone(), para_id: self.para_id };
-			return Ok(MemoType::XCM(xcm))
+			return Ok(MemoType::XCM(xcm));
 		}
 		Ok(MemoType::IBC(MemoIbc {
 			receiver: self.receiver.clone(),
@@ -688,7 +688,7 @@ where
 
 		//Handle only memo with IBC forward.
 		if packet_data.memo.is_empty() {
-			return Ok(())
+			return Ok(());
 		}
 
 		crate::Pallet::<T>::deposit_event(Event::<T>::ExecuteMemoStarted {
@@ -805,7 +805,7 @@ where
 					asset_id: asset_id.clone(),
 				});
 
-				return Ok(())
+				return Ok(());
 			},
 		};
 

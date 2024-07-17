@@ -35,7 +35,7 @@ where
 	C: TryInto<PrefixedCoin>,
 {
 	if !ctx.is_send_enabled() {
-		return Err(Error::send_disabled())
+		return Err(Error::send_disabled());
 	}
 
 	let source_channel_end = ctx

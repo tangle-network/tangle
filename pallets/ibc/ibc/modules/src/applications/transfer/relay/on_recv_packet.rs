@@ -28,7 +28,7 @@ pub fn process_recv_packet<Ctx: 'static + Ics20Context>(
 	data: PacketData,
 ) -> Result<(), Ics20Error> {
 	if !ctx.is_receive_enabled() {
-		return Err(Ics20Error::receive_disabled())
+		return Err(Ics20Error::receive_disabled());
 	}
 
 	let receiver_account = data

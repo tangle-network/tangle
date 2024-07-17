@@ -77,8 +77,9 @@ impl HostBlock for MockHostBlock {
 	fn timestamp(&self) -> Timestamp {
 		match self {
 			MockHostBlock::Mock(header) => header.timestamp,
-			MockHostBlock::SyntheticTendermint(light_block) =>
-				light_block.signed_header.header.time.into(),
+			MockHostBlock::SyntheticTendermint(light_block) => {
+				light_block.signed_header.header.time.into()
+			},
 		}
 	}
 
@@ -132,8 +133,9 @@ impl From<MockHostBlock> for AnyConsensusState {
 impl From<MockHostBlock> for AnyClientMessage {
 	fn from(any_block: MockHostBlock) -> Self {
 		match any_block {
-			MockHostBlock::Mock(mock_header) =>
-				AnyClientMessage::Mock(MockClientMessage::Header(mock_header.into())),
+			MockHostBlock::Mock(mock_header) => {
+				AnyClientMessage::Mock(MockClientMessage::Header(mock_header.into()))
+			},
 			MockHostBlock::SyntheticTendermint(light_block_box) => {
 				// Conversion from TMLightBlock to AnyHeader
 				AnyClientMessage::Tendermint(ClientMessage::Header((*light_block_box).into()))

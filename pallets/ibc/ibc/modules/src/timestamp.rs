@@ -156,12 +156,13 @@ impl Timestamp {
 	/// `other` timestamp. Returns an [`Expiry`] result.
 	pub fn check_expiry(&self, other: &Timestamp) -> Expiry {
 		match (self.time, other.time) {
-			(Some(time1), Some(time2)) =>
+			(Some(time1), Some(time2)) => {
 				if time1 >= time2 {
 					Expiry::Expired
 				} else {
 					Expiry::NotExpired
-				},
+				}
+			},
 			_ => Expiry::InvalidTimestamp,
 		}
 	}

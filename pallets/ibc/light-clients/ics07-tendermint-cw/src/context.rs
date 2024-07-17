@@ -92,8 +92,9 @@ where
 		let processed_state = ReadonlyProcessedStates::new(self.storage());
 		match processed_state.get_processed_height(height, &mut Vec::new()) {
 			Some(p_height) => Ok(p_height),
-			None =>
-				Err(Error::implementation_specific("problem getting processed height".to_string())),
+			None => {
+				Err(Error::implementation_specific("problem getting processed height".to_string()))
+			},
 		}
 	}
 

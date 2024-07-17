@@ -606,7 +606,7 @@ fn on_deliver_ics20_recv_packet_incorrect_memo() {
 				.filter(|a| {
 					if let RuntimeEvent::Ibc(ibc_event) = &a.event {
 						if let Event::<Test>::ExecuteMemoStarted { memo, .. } = ibc_event {
-							return memo.as_ref().map_or(false, |m| m == &incorrect_memo)
+							return memo.as_ref().map_or(false, |m| m == &incorrect_memo);
 						}
 					}
 					false
@@ -626,7 +626,7 @@ fn on_deliver_ics20_recv_packet_incorrect_memo() {
 							from,
 						} = ibc_event
 						{
-							return memo == &incorrect_memo && *reason == 0 && from == &reciever
+							return memo == &incorrect_memo && *reason == 0 && from == &reciever;
 						}
 					}
 					false

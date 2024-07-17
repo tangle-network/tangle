@@ -104,14 +104,14 @@ pub fn verify_upgrade_and_update_state<H: HostFunctionsProvider + 'static>(
 	proof_upgrade_consensus_state: CommitmentProofBytes,
 ) -> Result<(ClientState<H>, ConsensusState), Ics02Error> {
 	if old_client_state.upgrade_path.is_empty() {
-		return Err(Ics02Error::implementation_specific("No upgrade path set".to_string()))
+		return Err(Ics02Error::implementation_specific("No upgrade path set".to_string()));
 	}
 
 	let latest_height = old_client_state.latest_height;
 	if upgrade_client_state.latest_height.lt(&latest_height) {
 		return Err(Ics02Error::implementation_specific(
 			"upgrade cs is less than current height".to_string(),
-		))
+		));
 	}
 
 	let consensus_state = ctx.consensus_state(&client_id, latest_height)?;
@@ -189,13 +189,13 @@ pub fn check_substitute_and_update_state<H: HostFunctionsProvider + 'static>(
 		Ics02Error::implementation_specific("substitute client state not found".to_string())
 	})?;
 
-	if subject_client_state.trust_level != substitute_client_state.trust_level ||
-		subject_client_state.unbonding_period != substitute_client_state.unbonding_period ||
-		subject_client_state.max_clock_drift != substitute_client_state.max_clock_drift ||
-		subject_client_state.proof_specs != substitute_client_state.proof_specs ||
-		subject_client_state.upgrade_path != substitute_client_state.upgrade_path
+	if subject_client_state.trust_level != substitute_client_state.trust_level
+		|| subject_client_state.unbonding_period != substitute_client_state.unbonding_period
+		|| subject_client_state.max_clock_drift != substitute_client_state.max_clock_drift
+		|| subject_client_state.proof_specs != substitute_client_state.proof_specs
+		|| subject_client_state.upgrade_path != substitute_client_state.upgrade_path
 	{
-		return Err(Ics02Error::implementation_specific("Clients do not match".to_string()))
+		return Err(Ics02Error::implementation_specific("Clients do not match".to_string()));
 	}
 
 	let height = substitute_client_state.latest_height();

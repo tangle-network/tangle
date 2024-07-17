@@ -61,7 +61,7 @@ impl<'a, H: RelayHostFunctions<Header = RelayChainHeader>> ClientReader for Cont
 		let clients = ReadonlyClients::new(self.storage());
 		if !clients.contains_key(client_id) {
 			log!(self, "in client : [client_type] >> read client_type is None");
-			return Err(Error::client_not_found(client_id.clone()))
+			return Err(Error::client_not_found(client_id.clone()));
 		}
 
 		let data = clients

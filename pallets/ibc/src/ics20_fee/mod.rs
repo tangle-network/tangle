@@ -349,7 +349,7 @@ where
 		));
 
 		if is_feeless_channels {
-			return Ok(())
+			return Ok(());
 		}
 
 		let percent = ServiceChargeIn::<T>::get().unwrap_or(T::ServiceChargeIn::get());

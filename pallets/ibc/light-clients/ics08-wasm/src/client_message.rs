@@ -90,8 +90,9 @@ where
 
 	fn try_from(any: Any) -> Result<Self, Self::Error> {
 		let msg = match &*any.type_url {
-			WASM_HEADER_TYPE_URL =>
-				Self::Header(Header::decode(&*any.value).map_err(Error::decode_raw_header)?),
+			WASM_HEADER_TYPE_URL => {
+				Self::Header(Header::decode(&*any.value).map_err(Error::decode_raw_header)?)
+			},
 			WASM_MISBEHAVIOUR_TYPE_URL => Self::Misbehaviour(
 				Misbehaviour::decode(&*any.value).map_err(Error::decode_raw_misbehaviour)?,
 			),

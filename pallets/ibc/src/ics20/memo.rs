@@ -164,7 +164,7 @@ impl<T: Config + Send + Sync, S: Module + Clone + Default + PartialEq + Eq + Deb
 		// does not contain an error
 
 		if !ics20_ack.is_successful() {
-			return Ok(ack)
+			return Ok(ack);
 		}
 
 		// We want the whole chain of calls to fail only if the ics20 transfer fails, because

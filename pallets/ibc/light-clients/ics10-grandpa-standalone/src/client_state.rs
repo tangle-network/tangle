@@ -90,12 +90,13 @@ impl<H: Clone> ClientState<H> {
 		if latest_height < height {
 			return Err(Error::Custom(format!(
 				"Insufficient height, known height: {latest_height}, given height: {height}"
-			)))
+			)));
 		}
 
 		match self.frozen_height {
-			Some(frozen_height) if frozen_height <= height =>
-				Err(Error::Custom(format!("Client has been frozen at height {frozen_height}"))),
+			Some(frozen_height) if frozen_height <= height => {
+				Err(Error::Custom(format!("Client has been frozen at height {frozen_height}")))
+			},
 			_ => Ok(()),
 		}
 	}
@@ -148,7 +149,7 @@ impl<H> ClientState<H> {
 		if h == Height::zero() {
 			return Err(Error::Custom(
 				"ClientState frozen height must be greater than zero".to_string(),
-			))
+			));
 		}
 		Ok(Self { frozen_height: Some(h), ..self })
 	}
@@ -179,7 +180,7 @@ where
 
 	fn status<Ctx: ReaderContext>(&self, ctx: &Ctx, client_id: &ClientId) -> Status {
 		if self.frozen_height.is_some() {
-			return Status::Frozen
+			return Status::Frozen;
 		}
 
 		// get latest consensus state from clientStore to check for expiry
@@ -188,7 +189,7 @@ where
 			Err(_) => {
 				// if the client state does not have an associated consensus state for its latest
 				// height then it must be expired
-				return Status::Expired
+				return Status::Expired;
 			},
 		};
 
@@ -198,7 +199,7 @@ where
 			.unwrap_or_else(|| Duration::from_secs(0));
 
 		if self.expired(elapsed) {
-			return Status::Expired
+			return Status::Expired;
 		}
 
 		Status::Active

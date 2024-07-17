@@ -46,7 +46,7 @@ pub fn verify_connection_proof<Ctx: ReaderContext>(
 
 	// The client must not be frozen.
 	if client_state.is_frozen(ctx, client_id) {
-		return Err(Error::frozen_client(client_id.clone()))
+		return Err(Error::frozen_client(client_id.clone()));
 	}
 
 	// The client must have the consensus state for the height where this proof was created.
@@ -99,7 +99,7 @@ pub fn verify_client_proof<Ctx: ReaderContext>(
 	let client_state = ctx.client_state(client_id).map_err(Error::ics02_client)?;
 
 	if client_state.is_frozen(ctx, client_id) {
-		return Err(Error::frozen_client(client_id.clone()))
+		return Err(Error::frozen_client(client_id.clone()));
 	}
 
 	let consensus_state = ctx
@@ -134,7 +134,7 @@ pub fn verify_consensus_proof<Ctx: ReaderContext>(
 	let client_state = ctx.client_state(client_id).map_err(Error::ics02_client)?;
 
 	if client_state.is_frozen(ctx, client_id) {
-		return Err(Error::frozen_client(client_id.clone()))
+		return Err(Error::frozen_client(client_id.clone()));
 	}
 
 	let consensus_state = ctx
@@ -179,12 +179,12 @@ pub fn check_client_consensus_height<Ctx: ReaderContext>(
 ) -> Result<(), Error> {
 	if claimed_height > ctx.host_height() {
 		// Fail if the consensus height is too advanced.
-		return Err(Error::invalid_consensus_height(claimed_height, ctx.host_height()))
+		return Err(Error::invalid_consensus_height(claimed_height, ctx.host_height()));
 	}
 
 	if claimed_height < ctx.host_oldest_height() {
 		// Fail if the consensus height is too old (has been pruned).
-		return Err(Error::stale_consensus_height(claimed_height, ctx.host_oldest_height()))
+		return Err(Error::stale_consensus_height(claimed_height, ctx.host_oldest_height()));
 	}
 
 	// Height check is within normal bounds, check passes.

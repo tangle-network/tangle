@@ -729,7 +729,7 @@ pub mod pallet {
 	{
 		fn on_idle(n: BlockNumberFor<T>, remaining_weight: Weight) -> Weight {
 			if n % T::CleanUpPacketsPeriod::get() != BlockNumberFor::<T>::zero() {
-				return remaining_weight
+				return remaining_weight;
 			}
 			log::trace!(target: "pallet_ibc", "Cleaning up packets");
 			let removed_packets_count = Pallet::<T>::packet_cleanup()
@@ -771,9 +771,9 @@ pub mod pallet {
 				.map(|message| {
 					if matches!(
 						message.type_url.as_str(),
-						create_client::TYPE_URL |
-							conn_open_init::TYPE_URL |
-							ibc::core::ics04_channel::msgs::chan_open_init::TYPE_URL
+						create_client::TYPE_URL
+							| conn_open_init::TYPE_URL
+							| ibc::core::ics04_channel::msgs::chan_open_init::TYPE_URL
 					) {
 						reserve_count += 1;
 					}
@@ -824,8 +824,9 @@ pub mod pallet {
 					hex_string.insert_str(0, "0x");
 					hex_string
 				},
-				MultiAddress::Raw(bytes) =>
-					String::from_utf8(bytes).map_err(|_| Error::<T>::Utf8Error)?,
+				MultiAddress::Raw(bytes) => {
+					String::from_utf8(bytes).map_err(|_| Error::<T>::Utf8Error)?
+				},
 			};
 			let denom =
 				PrefixedDenom::from_str(&denom).map_err(|_| Error::<T>::PrefixedDenomParse)?;
@@ -869,7 +870,7 @@ pub mod pallet {
 			};
 
 			if timeout_height.is_zero() && timeout_timestamp.nanoseconds() == 0 {
-				return Err(Error::<T>::InvalidTimestamp.into())
+				return Err(Error::<T>::InvalidTimestamp.into());
 			}
 
 			let mut ctx = Context::<T>::default();

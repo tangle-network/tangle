@@ -199,7 +199,7 @@ impl ChannelEnd {
 
 	pub fn validate_basic(&self) -> Result<(), Error> {
 		if self.connection_hops.len() != 1 {
-			return Err(Error::invalid_connection_hops_length(1, self.connection_hops.len()))
+			return Err(Error::invalid_connection_hops_length(1, self.connection_hops.len()));
 		}
 		self.counterparty().validate_basic()
 	}

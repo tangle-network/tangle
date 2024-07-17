@@ -484,7 +484,7 @@ impl TryFrom<ModuleEvent> for AbciEvent {
 
 	fn try_from(event: ModuleEvent) -> Result<Self, Self::Error> {
 		if IbcEventType::from_str(event.kind.as_str()).is_ok() {
-			return Err(Error::malformed_module_event(event))
+			return Err(Error::malformed_module_event(event));
 		}
 
 		let attributes = event.attributes.into_iter().map(Into::into).collect();
@@ -545,9 +545,9 @@ pub fn extract_events(
 ) -> Result<(), Error> {
 	if let Some(message_action) = events.get("message.action") {
 		if message_action.contains(&action_string.to_owned()) {
-			return Ok(())
+			return Ok(());
 		}
-		return Err(Error::missing_action_string())
+		return Err(Error::missing_action_string());
 	}
 	Err(Error::incorrect_event_type(action_string.to_string()))
 }

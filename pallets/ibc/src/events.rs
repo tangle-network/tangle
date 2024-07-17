@@ -466,10 +466,11 @@ impl TryFrom<IbcEvent> for RawIbcEvent {
 	type Error = &'static str;
 	fn try_from(ev: IbcEvent) -> Result<Self, Self::Error> {
 		match ev {
-			IbcEvent::NewBlock { revision_height, revision_number } =>
+			IbcEvent::NewBlock { revision_height, revision_number } => {
 				Ok(RawIbcEvent::NewBlock(NewBlock {
 					height: Height::new(revision_number, revision_height),
-				})),
+				}))
+			},
 			IbcEvent::CreateClient {
 				client_id,
 				client_type,
@@ -543,8 +544,9 @@ impl TryFrom<IbcEvent> for RawIbcEvent {
 					consensus_height: Height::new(consensus_revision_number, consensus_height),
 				},
 			))),
-			IbcEvent::PushWasmCode { wasm_code_id } =>
-				Ok(RawIbcEvent::PushWasmCode(ClientEvents::PushWasmCode(wasm_code_id))),
+			IbcEvent::PushWasmCode { wasm_code_id } => {
+				Ok(RawIbcEvent::PushWasmCode(ClientEvents::PushWasmCode(wasm_code_id)))
+			},
 			IbcEvent::OpenInitConnection {
 				revision_height,
 				revision_number,
