@@ -4,10 +4,8 @@ use core::convert::Infallible;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
 use cumulus_primitives_core::ParaId;
+use frame_support::traits::fungibles::metadata::Inspect;
 use ibc_primitives::{runtime_interface::ss58_to_account_id_32, IbcAccount};
-use orml_asset_registry::{AssetMetadata, DefaultAssetMetadata};
-use orml_traits::asset_registry::AssetProcessor;
-use orml_traits::parameter_type_with_key;
 use pallet_ibc::ics20::MemoData;
 use pallet_ibc::ics20::SubstrateMultihopXcmHandlerNone;
 use pallet_ibc::ics20::ValidateMemo;
@@ -15,6 +13,7 @@ use pallet_ibc::ics20_fee::NonFlatFeeConverter;
 use pallet_ibc::{light_client_common::ChainType, routing::ModuleRouter};
 use pallet_ibc::{DenomToAssetId, LightClientProtocol};
 use pallet_ibc::{IbcAssetIds, IbcAssets, IbcDenoms};
+use sp_core::keccak_256;
 use sp_runtime::DispatchError;
 use sp_runtime::{Either, Either::Left, Either::Right};
 
@@ -52,49 +51,6 @@ impl ModuleRouter for Router {
 
 pub struct IbcDenomToAssetIdConversion;
 
-// generate new asset id
-fn generate_asset_id() -> Result<AssetId, DispatchError> {
-	let (asset_id, ..) = <orml_asset_registry::SequentialId<Runtime> as AssetProcessor<
-		AssetId,
-		DefaultAssetMetadata<Runtime>,
-	>>::pre_register(
-		None,
-		// Metadata is not useful to this call so we can use default values
-		AssetMetadata {
-			decimals: Default::default(),
-			name: Default::default(),
-			symbol: Default::default(),
-			existential_deposit: Default::default(),
-			location: None,
-			additional: (),
-		},
-	)
-	.map_err(|_| DispatchError::Other("Failed to generate asset id"))?;
-	let asset_id = if asset_id == 1 {
-		let (asset_id, ..) = <orml_asset_registry::SequentialId<Runtime> as AssetProcessor<
-			AssetId,
-			DefaultAssetMetadata<Runtime>,
-		>>::pre_register(
-			None,
-			// Metadata is not useful to this call so we can use default values
-			AssetMetadata {
-				decimals: Default::default(),
-				name: Default::default(),
-				symbol: Default::default(),
-				existential_deposit: Default::default(),
-				location: None,
-				additional: (),
-			},
-		)
-		.map_err(|_| DispatchError::Other("Failed to generate asset id"))?;
-		asset_id
-	} else {
-		asset_id
-	};
-
-	Ok(asset_id)
-}
-
 impl DenomToAssetId<Runtime> for IbcDenomToAssetIdConversion {
 	type Error = DispatchError;
 
@@ -114,7 +70,8 @@ impl DenomToAssetId<Runtime> for IbcDenomToAssetIdConversion {
 			.ok_or(DispatchError::Other("denom missing a name"))?
 			.as_bytes()
 			.to_vec();
-		let asset_id = generate_asset_id()?;
+		let asset_id_256 = U256::from_big_endian(&keccak_256(&symbol)[..]);
+		let asset_id: u128 = asset_id_256.as_u128();
 
 		IbcDenoms::<Runtime>::insert(denom_bytes.clone(), asset_id);
 		IbcAssetIds::<Runtime>::insert(asset_id, denom_bytes.clone());
@@ -131,14 +88,14 @@ impl DenomToAssetId<Runtime> for IbcDenomToAssetIdConversion {
 			&pallet_id,
 			denom_bytes,
 			symbol,
-			12,
+			18,
 		)?;
 
 		Ok(asset_id)
 	}
 
 	fn from_asset_id_to_denom(id: AssetId) -> Option<String> {
-		let name = <pallet_assets::Pallet<Runtime> as InspectMetadata<AccountId>>::name(id);
+		let name = <pallet_assets::Pallet<Runtime> as Inspect<AccountId>>::name(id);
 		String::from_utf8(name).ok()
 	}
 
