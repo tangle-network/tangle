@@ -1,0 +1,277 @@
+// Copyright 2022 ComposableFi
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use crate::{
+	core::{
+		ics04_channel::{channel::ChannelEnd, error::Error as ChannelError, Version},
+		ics24_host::{error::ValidationError, identifier::PortId},
+	},
+	prelude::*,
+	proofs::Proofs,
+	signer::Signer,
+	tx_msg::Msg,
+};
+
+use ibc_proto::ibc::core::channel::v1::MsgChannelOpenTry as RawMsgChannelOpenTry;
+use tendermint_proto::Protobuf;
+
+pub const TYPE_URL: &str = "/ibc.core.channel.v1.MsgChannelOpenTry";
+
+///
+/// Message definition for the second step in the channel open handshake (`ChanOpenTry` datagram).
+#[derive(Clone, Debug, PartialEq)]
+pub struct MsgChannelOpenTry {
+	pub port_id: PortId,
+	pub channel: ChannelEnd,
+	pub counterparty_version: Version,
+	pub proofs: Proofs,
+	pub signer: Signer,
+}
+
+impl MsgChannelOpenTry {
+	pub fn new(
+		port_id: PortId,
+		channel: ChannelEnd,
+		counterparty_version: Version,
+		proofs: Proofs,
+		signer: Signer,
+	) -> Self {
+		Self { port_id, channel, counterparty_version, proofs, signer }
+	}
+}
+
+impl Msg for MsgChannelOpenTry {
+	type ValidationError = ChannelError;
+	type Raw = RawMsgChannelOpenTry;
+
+	fn route(&self) -> String {
+		crate::keys::ROUTER_KEY.to_string()
+	}
+
+	fn type_url(&self) -> String {
+		TYPE_URL.to_string()
+	}
+
+	fn validate_basic(&self) -> Result<(), ValidationError> {
+		match self.channel.counterparty().channel_id() {
+			None => Err(ValidationError::invalid_counterparty_channel_id()),
+			Some(_c) => Ok(()),
+		}
+	}
+}
+
+impl Protobuf<RawMsgChannelOpenTry> for MsgChannelOpenTry {}
+
+impl TryFrom<RawMsgChannelOpenTry> for MsgChannelOpenTry {
+	type Error = ChannelError;
+
+	fn try_from(raw_msg: RawMsgChannelOpenTry) -> Result<Self, Self::Error> {
+		let proofs = Proofs::new(
+			raw_msg.proof_init.try_into().map_err(ChannelError::invalid_proof)?,
+			None,
+			None,
+			None,
+			raw_msg.proof_height.ok_or_else(ChannelError::missing_height)?.into(),
+		)
+		.map_err(ChannelError::invalid_proof)?;
+
+		let msg = MsgChannelOpenTry {
+			port_id: raw_msg.port_id.parse().map_err(ChannelError::identifier)?,
+			channel: raw_msg.channel.ok_or_else(ChannelError::missing_channel)?.try_into()?,
+			counterparty_version: raw_msg.counterparty_version.into(),
+			proofs,
+			signer: raw_msg.signer.parse().map_err(ChannelError::signer)?,
+		};
+
+		msg.validate_basic().map_err(ChannelError::invalid_counterparty_channel_id)?;
+
+		Ok(msg)
+	}
+}
+
+impl From<MsgChannelOpenTry> for RawMsgChannelOpenTry {
+	fn from(domain_msg: MsgChannelOpenTry) -> Self {
+		RawMsgChannelOpenTry {
+			port_id: domain_msg.port_id.to_string(),
+			channel: Some(domain_msg.channel.into()),
+			counterparty_version: domain_msg.counterparty_version.to_string(),
+			proof_init: domain_msg.proofs.object_proof().clone().into(),
+			proof_height: Some(domain_msg.proofs.height().into()),
+			signer: domain_msg.signer.to_string(),
+			..Default::default()
+		}
+	}
+}
+
+#[cfg(test)]
+pub mod test_util {
+	use crate::prelude::*;
+	use ibc_proto::ibc::core::channel::v1::MsgChannelOpenTry as RawMsgChannelOpenTry;
+
+	use crate::{
+		core::{
+			ics04_channel::channel::test_util::get_dummy_raw_channel_end,
+			ics24_host::identifier::PortId,
+		},
+		test_utils::{get_dummy_bech32_account, get_dummy_proof},
+	};
+	use ibc_proto::ibc::core::client::v1::Height;
+
+	/// Returns a dummy `RawMsgChannelOpenTry`, for testing only!
+	pub fn get_dummy_raw_msg_chan_open_try(proof_height: u64) -> RawMsgChannelOpenTry {
+		RawMsgChannelOpenTry {
+			port_id: PortId::default().to_string(),
+			channel: Some(get_dummy_raw_channel_end()),
+			counterparty_version: "".to_string(),
+			proof_init: get_dummy_proof(),
+			proof_height: Some(Height { revision_number: 0, revision_height: proof_height }),
+			signer: get_dummy_bech32_account(),
+			..Default::default()
+		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use crate::{
+		core::ics04_channel::msgs::chan_open_try::{
+			test_util::get_dummy_raw_msg_chan_open_try, MsgChannelOpenTry,
+		},
+		prelude::*,
+	};
+
+	use ibc_proto::ibc::core::{
+		channel::v1::MsgChannelOpenTry as RawMsgChannelOpenTry, client::v1::Height,
+	};
+	use test_log::test;
+
+	#[test]
+	fn channel_open_try_from_raw() {
+		struct Test {
+			name: String,
+			raw: RawMsgChannelOpenTry,
+			want_pass: bool,
+		}
+
+		let proof_height = 10;
+		let default_raw_msg = get_dummy_raw_msg_chan_open_try(proof_height);
+
+		let tests: Vec<Test> = vec![
+            Test {
+                name: "Good parameters".to_string(),
+                raw: default_raw_msg.clone(),
+                want_pass: true,
+            },
+            Test {
+                name: "Correct port".to_string(),
+                raw: RawMsgChannelOpenTry {
+                    port_id: "p34".to_string(),
+                    ..default_raw_msg.clone()
+                },
+                want_pass: true,
+            },
+            Test {
+                name: "Bad port, name too short".to_string(),
+                raw: RawMsgChannelOpenTry {
+                    port_id: "p".to_string(),
+                    ..default_raw_msg.clone()
+                },
+                want_pass: false,
+            },
+            Test {
+                name: "Bad port, name too long".to_string(),
+                raw: RawMsgChannelOpenTry {
+                    port_id: "abcdefghijasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfadgasgasdfasdfaabcdefghijasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfadgasgasdfasdfa".to_string(),
+                    ..default_raw_msg.clone()
+                },
+                want_pass: false,
+            },
+            Test {
+                name: "Correct channel identifier".to_string(),
+                raw: RawMsgChannelOpenTry {
+                    ..default_raw_msg.clone()
+                },
+                want_pass: true,
+            },
+            Test {
+                name: "Empty counterparty version (valid choice)".to_string(),
+                raw: RawMsgChannelOpenTry {
+                    counterparty_version: " ".to_string(),
+                    ..default_raw_msg.clone()
+                },
+                want_pass: true,
+            },
+            Test {
+                name: "Arbitrary counterparty version (valid choice)".to_string(),
+                raw: RawMsgChannelOpenTry {
+                    counterparty_version: "anyversion".to_string(),
+                    ..default_raw_msg.clone()
+                },
+                want_pass: true,
+            },
+            Test {
+                name: "Bad proof height, height = 0".to_string(),
+                raw: RawMsgChannelOpenTry {
+                    proof_height: Some(Height {
+                        revision_number: 0,
+                        revision_height: 0,
+                    }),
+                    ..default_raw_msg.clone()
+                },
+                want_pass: false,
+            },
+            Test {
+                name: "Missing proof height".to_string(),
+                raw: RawMsgChannelOpenTry {
+                    proof_height: None,
+                    ..default_raw_msg.clone()
+                },
+                want_pass: false,
+            },
+            Test {
+                name: "Missing proof init (object proof)".to_string(),
+                raw: RawMsgChannelOpenTry {
+                    proof_init: Vec::new(),
+                    ..default_raw_msg
+                },
+                want_pass: false,
+            },
+        ]
+            .into_iter()
+            .collect();
+
+		for test in tests {
+			let res_msg = MsgChannelOpenTry::try_from(test.raw.clone());
+
+			assert_eq!(
+				test.want_pass,
+				res_msg.is_ok(),
+				"MsgChanOpenTry::try_from failed for test {}, \nraw msg {:?} with error {:?}",
+				test.name,
+				test.raw,
+				res_msg.err(),
+			);
+		}
+	}
+
+	#[test]
+	fn to_and_from() {
+		let raw = get_dummy_raw_msg_chan_open_try(10);
+		let msg = MsgChannelOpenTry::try_from(raw.clone()).unwrap();
+		let raw_back = RawMsgChannelOpenTry::from(msg.clone());
+		let msg_back = MsgChannelOpenTry::try_from(raw_back.clone()).unwrap();
+		assert_eq!(raw, raw_back);
+		assert_eq!(msg, msg_back);
+	}
+}

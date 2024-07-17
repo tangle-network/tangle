@@ -1,0 +1,34 @@
+[package]
+name = "simple-iavl"
+version = "0.1.0"
+edition = "2018"
+license = "Apache-2.0"
+readme = "README.md"
+categories = ["cryptography::cryptocurrencies"]
+repository = "https://github.com/informalsystems/basecoin-rs"
+authors = ["Informal Systems <hello@informal.systems>"]
+description = """
+    An simple in memory iavl
+"""
+
+[dependencies]
+bytes = { workspace = true }
+ics23 = { workspace = true }
+sha2 = { workspace = true }
+tendermint = { workspace = true }
+
+[dev-dependencies]
+proptest = "*"
+rand = "*"
+ics23 = { workspace = true, features = ["host-functions"] }
+
+[features]
+default = ['std']
+std = [
+	"bytes/std",
+	"ics23/std",
+	"sha2/std",
+	"tendermint/std",
+	"proptest/std",
+	"rand/std"
+]

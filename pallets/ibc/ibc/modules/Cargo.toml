@@ -1,0 +1,89 @@
+[package]
+name         = "ibc"
+version      = "0.15.0"
+edition      = "2021"
+license      = "Apache-2.0"
+readme       = "README.md"
+keywords     = ["blockchain", "consensus", "cosmos", "ibc", "tendermint"]
+repository   = "https://github.com/composableFi/composable"
+authors      = ["Informal Systems <hello@informal.systems>", "Seun Lanlege <seun@composable.finance>", "David Salami <david@composable.finance>"]
+description  = """
+    Implementation of the Inter-Blockchain Communication Protocol (IBC).
+    This crate comprises the main data structures and on-chain logic.
+"""
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std"]
+std = [
+	"flex-error/std",
+	"flex-error/eyre_tracer",
+	"ibc-proto/std",
+	"ics23/std",
+	"clock",
+	"sp-std/std",
+	"parity-scale-codec/std",
+	"scale-info/std",
+	"log/std",
+	"hex/std",
+	"num-traits/std",
+	"prost/std",
+	"serde/std",
+	"serde_json/std",
+	"sha2?/std",
+	"sha3/std",
+	"sp-core/std",
+	"subtle-encoding/std",
+	"tendermint/std",
+	"time/std",
+	"tracing/std",
+	"tracing-subscriber/std",
+	"uint/std"
+]
+clock = ["tendermint/clock", "time/std"]
+cosmwasm = ["cosmwasm-schema"]
+
+# This feature grants access to development-time mocking libraries, such as `MockContext` or `MockHeader`.
+# Depends on the `testgen` suite for generating Tendermint light blocks.
+mocks = ["clock", "std", "sha2"]
+
+[dependencies]
+# Proto definitions for all IBC-related interfaces, e.g., connections or channels.
+ibc-proto = { workspace = true, default-features = false }
+ibc-derive = { workspace = true, default-features = false }
+ics23 = { workspace = true }
+time = { workspace = true }
+serde_derive = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+prost = { workspace = true }
+safe-regex = { workspace = true, default-features = false }
+subtle-encoding = { workspace = true, default-features = false }
+flex-error = { workspace = true, default-features = false }
+num-traits = { workspace = true, default-features = false }
+derive_more = { workspace = true, default-features = false, features = ["from", "into", "display"] }
+uint = { workspace = true, default-features = false }
+hex = { workspace = true, default-features = false }
+primitive-types = { workspace = true, default-features = false, features = ["serde_no_std"] }
+parity-scale-codec = { workspace = true }
+sha2 = { workspace = true, optional = true }
+tendermint = { workspace = true }
+tendermint-proto = { workspace = true }
+scale-info = { workspace = true }
+log = { workspace = true }
+cosmwasm-schema = { workspace = true, default-features = false, optional = true }
+
+[dev-dependencies]
+env_logger = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["fmt", "env-filter", "json"]}
+test-log = { workspace = true, features = ["trace"] }
+modelator = "0.4.2"
+sha2 = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+serde_json = { workspace = true }
+sha3 = { workspace = true }
+sp-core = { workspace = true }
+sp-std = { workspace = true }

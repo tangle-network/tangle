@@ -1,0 +1,44 @@
+[package]
+name = "grandpa-light-client-primitives"
+version = "0.1.0"
+edition = "2021"
+authors = ["Seun Lanlege <seunlanlege@gmail.com>"]
+
+[dependencies]
+# crates.io
+anyhow = { workspace = true, default-features = false }
+hash-db = { workspace = true, default-features = false }
+derive_more = { workspace = true, default-features = false, features = ["display"] }
+sp-storage = { workspace = true, default-features = false }
+finality-grandpa = { workspace = true, features = ["derive-codec"], default-features = false }
+parity-scale-codec = { workspace = true }
+log = { workspace = true }
+# substrate
+sp-core = { workspace = true, default-features = false }
+sp-runtime = { workspace = true, default-features = false }
+sp-io = { workspace = true, default-features = false }
+frame-support = { workspace = true }
+sp-consensus-grandpa = { workspace = true }
+sp-std = { workspace = true }
+sp-trie = { workspace = true }
+
+light-client-common = { workspace = true, default-features = false }
+
+[features]
+default = ["std"]
+std = [
+	"anyhow/std",
+	"hash-db/std",
+	"sp-storage/std",
+	"finality-grandpa/std",
+	"parity-scale-codec/std",
+	"sp-core/std",
+	"sp-runtime/std",
+	"sp-io/std",
+	"frame-support/std",
+	"sp-consensus-grandpa/std",
+	"sp-std/std",
+	"sp-trie/std",
+	"light-client-common/std",
+	"log/std"
+]

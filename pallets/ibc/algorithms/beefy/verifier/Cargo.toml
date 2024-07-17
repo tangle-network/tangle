@@ -1,0 +1,72 @@
+[package]
+name = "beefy-light-client"
+version = "0.1.0"
+edition = "2021"
+authors = ["Seun Lanlege <seunlanlege@gmail.com>", "David Salami <wizdave97@gmail.com>"]
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+# crates.io
+parity-scale-codec = { workspace = true }
+rs_merkle = { workspace = true, default-features = false }
+ckb-merkle-mountain-range = { workspace = true, default-features = false }
+derive_more = { workspace = true, default-features = false, features = ["from"]  }
+
+# substrate
+sp-std = { workspace = true, default-features = false }
+sp-runtime = { workspace = true, default-features = false }
+sp-core = { workspace = true, default-features = false }
+sp-core-hashing = { workspace = true, default-features = false }
+frame-support = { workspace = true }
+pallet-beefy-mmr = { workspace = true, default-features = false }
+pallet-mmr = { workspace = true, default-features = false }
+sp-mmr-primitives = { workspace = true }
+sp-consensus-beefy = { workspace = true, default-features = false }
+sp-trie = { workspace = true }
+
+# local
+beefy-light-client-primitives = { workspace = true, default-features = false }
+light-client-common = { workspace = true, default-features = false }
+
+[dev-dependencies]
+tokio = { workspace = true }
+subxt = { workspace = true }
+hex-literal = { workspace = true }
+serde_json = { workspace = true }
+mmr-rpc = { workspace = true }
+frame-support = { workspace = true }
+sp-io = { workspace = true }
+sp-trie = { workspace = true }
+beefy-prover = { workspace = true }
+hex = { workspace = true }
+futures = { workspace = true }
+sc-consensus-beefy = { workspace = true, default-features = false }
+# hyperspace-core = { workspace = true, features = ["testing", "build-metadata-from-ws"] }
+
+
+[features]
+default = ["std"]
+std = [
+	"parity-scale-codec/std",
+	"sp-std/std",
+	"sp-runtime/std",
+	"sp-core/std",
+	"sp-core/std",
+	"sp-io/std",
+	"pallet-beefy-mmr/std",
+	"sp-consensus-beefy/std",
+	"pallet-mmr/std",
+	"sp-mmr-primitives/std",
+	"rs_merkle/std",
+	"ckb-merkle-mountain-range/std",
+	"frame-support/std",
+	"beefy-light-client-primitives/std",
+	"sp-trie/std",
+	"light-client-common/std",
+	"futures/std",
+	"hex/std",
+	"serde_json/std",
+	"sp-core-hashing/std"
+]

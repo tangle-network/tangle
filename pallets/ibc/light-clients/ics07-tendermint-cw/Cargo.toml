@@ -1,0 +1,87 @@
+[package]
+name = "ics07-tendermint-cw"
+version = "0.1.0"
+authors = ["Composable, Strangelove Developers"]
+edition = "2021"
+
+exclude = [
+  # Those files are rust-optimizer artifacts. You might want to commit them for convenience but they should not be part of the source code publication.
+  "contract.wasm",
+  "hash.txt",
+]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[package.metadata.scripts]
+optimize = """docker run --rm -v "$(pwd)":/code \
+  --mount type=volume,source="$(basename "$(pwd)")_cache",target=/code/target \
+  --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry \
+  cosmwasm/rust-optimizer:0.12.6
+"""
+
+[dependencies]
+cosmwasm-schema = "1.1.3"
+cosmwasm-std = "1.1.3"
+schemars = "0.8.10"
+serde = { workspace = true }
+thiserror = { version = "1.0.31" }
+sha2 = "0.10"
+sha3 = "0.10"
+derive_more = { workspace = true }
+
+ed25519 = { version = "1.5", default-features = false }
+ed25519-consensus = { version = "2", optional = true, default-features = false }
+ibc = { path = "../../ibc/modules", default-features = false }
+ibc-derive = { path = "../../ibc/derive", default-features = false }
+ibc-proto = { path = "../../ibc/proto", default-features = false, features = ["json-schema"] }
+ics23 = { workspace = true }
+ics07-tendermint = { path = "../ics07-tendermint", default-features = false }
+ics08-wasm = { path = "../ics08-wasm", default-features = false, features = ["cosmwasm"] }
+prost = { workspace = true }
+ed25519-zebra = { version = "3.1.0", default-features = false }
+byteorder = { version = "1.3.2", default-features = false }
+digest = { version = "0.10.3", default-features = false }
+hex = { workspace = true }
+tendermint = { workspace = true } # cannot be defined as optional in workspace
+tendermint-proto = { workspace = true }
+tendermint-light-client-verifier = { git = "https://github.com/informalsystems/tendermint-rs", rev = "e81f7bf23d63ffbcd242381d1ce5e35da3515ff1", default-features = false }
+
+[dev-dependencies]
+cw-multi-test = "0.15.1"
+hex = { workspace = true }
+pallet-ibc = { workspace = true }
+serde-json-wasm = { version = "0.5.0", default-features = false }
+serde_json = { version = "1.0.93", default-features = false }
+tendermint = { workspace = true }
+
+[features]
+# for more explicit tests, cargo test --features=backtraces
+backtraces = ["cosmwasm-std/backtraces"]
+# use library feature to disable all instantiate/execute/query exports
+library = []
+default = ["rust-crypto"]
+rust-crypto = ["ed25519-consensus"]
+std = [
+	"byteorder/std",
+	"digest/std",
+	"ed25519/std",
+	"ed25519-consensus?/std",
+	"ed25519-zebra/std",
+	"hex/std",
+	"ibc/std",
+	"ibc-proto/std",
+	"ics07-tendermint/std",
+	"ics08-wasm/std",
+	"ics23/std",
+	"pallet-ibc/std",
+	"prost/std",
+	"serde/std",
+	"serde_json/std",
+	"sha2/std",
+	"sha3/std",
+	"tendermint/std"
+]
+test = [
+  "std"
+]

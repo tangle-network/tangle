@@ -1,0 +1,120 @@
+// Copyright (C) 2022 ComposableFi.
+// SPDX-License-Identifier: Apache-2.0
+
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package ibc.lightclients.grandpa.v1;
+
+import "google/protobuf/timestamp.proto";
+
+enum RelayChain {
+  POLKADOT = 0;
+  KUSAMA = 1;
+  ROCOCO = 2;
+}
+
+message Authority {
+  // ed25519 public key of the authority
+  bytes public_key = 1;
+  // authority weight
+  uint64 weight = 2;
+}
+
+// ClientState for the grandpa client
+message ClientState {
+  // Latest relay chain block hash
+  bytes latest_relay_hash = 1;
+
+  // Latest relay chain height
+  uint32 latest_relay_height = 2;
+
+  // current grandpa authority set id
+  uint64 current_set_id = 3;
+
+  // Block height when the client was frozen due to a misbehaviour
+  optional uint64 frozen_height = 4;
+
+  // Known relay chains
+  RelayChain relay_chain = 5;
+
+  // ParaId of associated parachain
+  uint32 para_id = 6;
+
+  // latest parachain height
+  uint32 latest_para_height = 7;
+
+  // Current grandpa authorities
+  repeated Authority current_authorities = 8;
+}
+
+message ParachainHeaderWithRelayHash {
+  bytes relay_hash = 1;
+  ParachainHeaderProofs parachain_header = 2;
+}
+
+// Grandpa finality proof
+message FinalityProof {
+  // The hash of block F for which justification is provided.
+  bytes block = 1;
+  // Justification of the block F.
+  bytes justification = 2;
+  // The set of headers in the range (B; F] that we believe are unknown to the caller. Ordered.
+  repeated bytes unknown_headers = 3;
+}
+
+// Holds relavant parachain proofs for both header and timestamp extrinsic.
+message ParachainHeaderProofs {
+  // State proofs that prove a parachain header exists at a given relay chain height
+  repeated bytes state_proof = 1;
+  // Timestamp extrinsic for ibc
+  bytes extrinsic = 2;
+  // Timestamp extrinsic proof for previously proven parachain header.
+  repeated bytes extrinsic_proof = 3;
+}
+
+// ConsensusState defines the consensus state from Tendermint.
+message ConsensusState {
+  // timestamp that corresponds to the block height in which the ConsensusState
+  // was stored.
+  google.protobuf.Timestamp timestamp = 1;
+  // packet commitment root
+  bytes root = 2;
+}
+
+// GRANDPA finality proof and parachain headers
+message Header {
+  // GRANDPA finality proof
+  FinalityProof finality_proof = 1;
+  // new parachain headers finalized by the GRANDPA finality proof
+  repeated ParachainHeaderWithRelayHash parachain_headers = 2;
+  uint32 para_id = 3;
+  uint32 para_height = 4;
+}
+
+// GRANDPA misbehaviour type
+message Misbehaviour {
+  // First SCALE-encoded finality proof.
+  bytes first_finality_proof = 1;
+  // Second SCALE-encoded finality proof.
+  bytes second_finality_proof = 2;
+}
+
+// ClientMessage for ics10-GRANDPA
+message ClientMessage {
+  oneof message {
+    Header header = 1;
+    Misbehaviour misbehaviour = 2;
+  }
+}

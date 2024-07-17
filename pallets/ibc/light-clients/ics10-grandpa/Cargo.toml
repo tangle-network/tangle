@@ -1,0 +1,86 @@
+[package]
+name = "ics10-grandpa"
+version = "0.1.0"
+edition = "2021"
+authors = ["Seun Lanlege <seunlanlege@gmail.com>"]
+
+
+[features]
+default = ["std"]
+std = [
+	"ibc/std",
+	"ibc-proto/std",
+	"grandpa-client/std",
+	"grandpa-client-primitives/std",
+	"light-client-common/std",
+	"prost/std",
+	"prost-types/std",
+	"parity-scale-codec/std",
+	"anyhow/std",
+	"serde/std",
+	"sp-core/std",
+	"sp-runtime/std",
+	"sp-trie/std",
+	"sp-consensus-grandpa/std",
+	"finality-grandpa/std",
+	"frame-support/std",
+	"futures/std",
+	"hex/std",
+	"log/std",
+	"serde_json/std",
+	"sp-state-machine/std",
+	"tendermint/std"
+]
+
+[build-dependencies]
+prost-build = "0.11.1"
+
+[dependencies]
+# ibc deps
+ibc = { workspace = true, default-features = false }
+ibc-proto = { workspace = true, default-features = false }
+
+# local deps
+grandpa-client = { package = "grandpa-light-client-verifier", path = "../../algorithms/grandpa/verifier",  default-features = false }
+grandpa-client-primitives = { workspace = true }
+light-client-common = { path = "../common", default-features = false }
+
+# crates.io
+prost = { workspace = true }
+prost-types = { version = "0.11", default-features = false }
+parity-scale-codec = { workspace = true }
+anyhow = { version = "1.0.65", default-features = false }
+derive_more = { version = "0.99.17", default-features = false, features = ["from"] }
+serde = { workspace = true, default-features = false, features = ["derive"] }
+
+# substrate deps
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+sp-trie = { workspace = true }
+sp-consensus-grandpa = { workspace = true }
+finality-grandpa = { workspace = true, default-features = false }
+
+tendermint = { workspace = true }
+tendermint-proto = { workspace = true }
+
+[dev-dependencies]
+hex = { workspace = true }
+log = { workspace = true }
+futures = { workspace = true }
+env_logger = { workspace = true }
+serde = { workspace = true }
+beefy-prover = { workspace = true }
+grandpa-prover = { workspace = true }
+ibc = { workspace = true, features = ["mocks"] }
+ibc-derive = { workspace = true }
+subxt = { workspace = true }
+tokio = { workspace = true, features = ["macros"] }
+sp-state-machine = { workspace = true, default-features = false }
+sp-trie = { workspace = true }
+sp-core = { workspace = true }
+serde_json = { workspace = true }
+frame-support = { workspace = true }
+sc-consensus-grandpa-rpc = { workspace = true }
+jsonrpsee-ws-client = { workspace = true }
+# hyperspace-core = { workspace = true, features = ["testing", "build-metadata-from-ws"] }
+light-client-common = { workspace = true, features = ["std"] }

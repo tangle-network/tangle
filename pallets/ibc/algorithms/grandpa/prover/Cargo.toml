@@ -1,0 +1,30 @@
+[package]
+name = "grandpa-prover"
+version = "0.1.0"
+edition = "2021"
+authors = ["Seun Lanlege <seunlanlege@gmail.com>"]
+
+[dependencies]
+hex = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true }
+subxt = { workspace = true }
+parity-scale-codec = { workspace = true }
+derive_more = { workspace = true }
+downcast-rs = { workspace = true }
+jsonrpsee = { workspace = true, features = ["async-client", "jsonrpsee-ws-client"] }
+jsonrpsee-ws-client = { workspace = true }
+finality-grandpa = { workspace = true }
+rand = { workspace = true }
+
+sc-consensus-grandpa-rpc = { workspace = true }
+sp-runtime = { workspace = true }
+sp-core = { workspace = true }
+sp-trie = { workspace = true }
+sp-state-machine = { workspace = true, default-features = false }
+sp-consensus-grandpa = { workspace = true }
+
+beefy-prover = { workspace = true }
+grandpa-light-client-primitives = { workspace = true }
+light-client-common = { workspace = true }
+tokio = { workspace = true }

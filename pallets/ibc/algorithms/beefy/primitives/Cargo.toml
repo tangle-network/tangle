@@ -1,0 +1,35 @@
+[package]
+name = "beefy-light-client-primitives"
+version = "0.1.0"
+edition = "2021"
+authors = ["Seun Lanlege <seunlanlege@gmail.com>", "David Salami <wizdave97@gmail.com>"]
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+sp-std = { workspace = true }
+sp-core = { workspace = true }
+sp-consensus-beefy = { workspace = true }
+parity-scale-codec = { workspace = true }
+rs_merkle = { workspace = true }
+ckb-merkle-mountain-range = { workspace = true }
+sp-mmr-primitives = { workspace = true }
+derive_more = { workspace = true, default-features = false, features = ["from"]  }
+light-client-common = { workspace = true }
+serde = { workspace = true, optional = true }
+
+[features]
+default = ["std"]
+std = [
+	"sp-std/std",
+	"sp-core/std",
+	"sp-consensus-beefy/std",
+	"parity-scale-codec/std",
+	"rs_merkle/std",
+	"ckb-merkle-mountain-range/std",
+	"sp-mmr-primitives/std",
+	"light-client-common/std",
+	"serde",
+	"serde/std"
+]

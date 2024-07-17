@@ -1,0 +1,184 @@
+[package]
+edition = "2021"
+homepage = "https://composable.finance"
+name = "pallet-ibc"
+version = "0.0.1"
+authors = [
+	"Seun Lanlege <seunlanlege@gmail.com>",
+	"David Salami <wizdave97@gmail.com>",
+]
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[package.metadata.cargo-udeps.ignore]
+normal = [
+	"frame-benchmarking",
+	"pallet-ibc-ping",
+	"balances",
+	"pallet-assets",
+	"simple-iavl",
+]
+
+[dependencies]
+# crates.io
+log = { workspace = true, default-features = false }
+serde = { workspace = true, default-features = false }
+scale-info = { workspace = true, default-features = false }
+serde_json = { workspace = true, default-features = false }
+sha2 = { workspace = true, default-features = false }
+derive_more = { workspace = true, default-features = false, features = [
+	"from",
+	"display",
+] }
+# substrate
+frame-support = { workspace = true, default-features = false }
+frame-system = { workspace = true, default-features = false }
+parachain-info = { workspace = true, default-features = false }
+cumulus-primitives-core = { workspace = true, default-features = false }
+sp-core = { workspace = true, default-features = false }
+sp-io = { workspace = true, default-features = false }
+sp-runtime = { workspace = true, default-features = false }
+sp-std = { workspace = true, default-features = false }
+sp-trie = { workspace = true, default-features = false }
+
+# ibc
+ibc-proto = { workspace = true, default-features = false }
+tendermint = { workspace = true, default-features = false }       # cannot be defined as optional in workspace
+tendermint-proto = { workspace = true, default-features = false }
+ics23 = { workspace = true, default-features = false }
+
+grandpa-client-primitives = { workspace = true, default-features = false }
+beefy-client-primitives = { workspace = true, default-features = false }
+light-client-common = { workspace = true, default-features = false }
+ics08-wasm = { workspace = true, default-features = false }
+ics10-grandpa = { workspace = true, default-features = false }
+ics10-grandpa-standalone = { workspace = true, default-features = false }
+ics11-beefy = { workspace = true, default-features = false }
+ics07-tendermint = { workspace = true, default-features = false }
+hex = { workspace = true, default-features = false }
+# local deps
+ibc-primitives = { workspace = true }
+
+# optional
+hex-literal = { workspace = true, optional = true }
+prost = { workspace = true, default-features = false }
+frame-benchmarking = { workspace = true, default-features = false, optional = true }
+pallet-ibc-ping = { workspace = true, default-features = false, optional = true }
+pallet-timestamp = { workspace = true, default-features = false }
+pallet-aura = { workspace = true, default-features = false, optional = true }
+pallet-membership = { workspace = true, default-features = false, optional = true }
+pallet-assets = { workspace = true, default-features = false, optional = true }
+pallet-balances = { workspace = true, default-features = false, optional = true }
+sp-consensus-slots = { workspace = true, default-features = false, optional = true }
+sp-consensus-aura = { workspace = true, default-features = false, optional = true }
+simple-iavl = { workspace = true, default-features = false }
+sp-consensus-grandpa = { workspace = true, default-features = false, optional = true }
+finality-grandpa = { workspace = true, features = ["derive-codec"], default-features = false, optional = true }
+
+parity-scale-codec = { workspace = true, features = ["derive", "full"] }
+ibc = { workspace = true, default-features = false }
+ibc-derive = { workspace = true, default-features = false }
+tendermint-light-client-verifier = { workspace = true, default-features = false }
+
+[dev-dependencies]
+chrono = { workspace = true }
+hex = { workspace = true }
+hex-literal = { workspace = true }
+orml-tokens = { workspace = true, default-features = false }
+orml-traits = { workspace = true, default-features = false }
+pallet-aura = { workspace = true }
+pallet-membership = { workspace = true }
+frame-support = { workspace = true }
+sp-consensus-slots = { workspace = true }
+sp-consensus-aura = { workspace = true }
+prost = { workspace = true }
+#simple-iavl = { path = "simple-iavl" }
+sp-keyring = { workspace = true }
+tendermint = { workspace = true }
+pallet-ibc-ping = { workspace = true, default-features = false }
+sp-keystore = { workspace = true }
+env_logger = { workspace = true }
+ibc = { workspace = true, features = ["mocks"] }
+
+[features]
+default = ["std"]
+testing = []
+std = [
+	"parity-scale-codec/std",
+	"log/std",
+	"scale-info/std",
+	"serde/std",
+	"serde_json/std",
+	"sha2/std",
+	"frame-benchmarking/std",
+	"frame-support/std",
+	"frame-system/std",
+	"sp-runtime/std",
+	"sp-core/std",
+	"sp-std/std",
+	"sp-io/std",
+	"sp-trie/std",
+	"pallet-balances/std",
+	"cumulus-primitives-core/std",
+	"pallet-assets/std",
+	"ibc/std",
+	"ibc-proto/std",
+	"ibc-primitives/std",
+	"parachain-info/std",
+	"grandpa-client-primitives/std",
+	"beefy-client-primitives/std",
+	"light-client-common/std",
+	"ics10-grandpa/std",
+	"ics10-grandpa-standalone/std",
+	"ics11-beefy/std",
+	"ics07-tendermint/std",
+	"sp-consensus-grandpa/std",
+	"sp-consensus-grandpa/std",
+	"finality-grandpa/std",
+	"hex/std",
+	"pallet-timestamp/std",
+	"ics08-wasm/std",
+	"pallet-ibc-ping?/std",
+	"simple-iavl/std",
+	"chrono/std",
+	"ics23/std",
+	"orml-tokens/std",
+	"orml-traits/std",
+	"pallet-aura?/std",
+	"pallet-membership?/std",
+	"prost/std",
+	"sp-consensus-aura?/std",
+	"sp-consensus-slots?/std",
+	"sp-keystore/std",
+	"tendermint/std",
+]
+
+runtime-benchmarks = [
+	"frame-benchmarking",
+	"pallet-ibc-ping",
+	"frame-system/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+	"hex-literal",
+	"pallet-assets/runtime-benchmarks",
+	"pallet-timestamp/runtime-benchmarks",
+	"pallet-aura",
+	"pallet-membership",
+	"pallet-assets",
+	"pallet-balances",
+	"sp-consensus-slots",
+	"sp-consensus-aura/serde",
+	"sp-consensus-aura/std",
+	"ibc-primitives/runtime-benchmarks",
+	"sp-consensus-grandpa",
+	"finality-grandpa",
+	"pallet-ibc-ping/runtime-benchmarks",
+	"frame-benchmarking?/runtime-benchmarks",
+	"orml-tokens/runtime-benchmarks",
+	"pallet-assets?/runtime-benchmarks",
+	"pallet-balances?/runtime-benchmarks",
+	"pallet-membership?/runtime-benchmarks",
+	"sp-runtime/runtime-benchmarks"
+]
+
+try-runtime = ["frame-support/try-runtime"]

@@ -1520,9 +1520,9 @@ construct_runtime!(
 		SygmaPercentageFeeHandler: sygma_percentage_feehandler,
 		SygmaBridge: sygma_bridge,
 
-		AssetRegistry: orml_asset_registry,
-		IbcPing: pallet_ibc_ping,
-		Ibc: pallet_ibc,
+		// AssetRegistry: orml_asset_registry,
+		// IbcPing: pallet_ibc_ping,
+		// Ibc: pallet_ibc,
 	}
 );
 
@@ -1723,16 +1723,16 @@ parameter_types! {
 	pub const StringLimit: u32 = 50;
 }
 
-impl orml_asset_registry::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type CustomMetadata = CustomMetadata;
-	type AssetId = AssetId;
-	type AuthorityOrigin = EnsureRoot<AccountId>;
-	type AssetProcessor = orml_asset_registry::SequentialId<Runtime>;
-	type Balance = Balance;
-	type StringLimit = StringLimit;
-	type WeightInfo = ();
-}
+// impl orml_asset_registry::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type CustomMetadata = CustomMetadata;
+// 	type AssetId = AssetId;
+// 	type AuthorityOrigin = EnsureRoot<AccountId>;
+// 	type AssetProcessor = orml_asset_registry::SequentialId<Runtime>;
+// 	type Balance = Balance;
+// 	type StringLimit = StringLimit;
+// 	type WeightInfo = ();
+// }
 
 pub struct MockServiceManager;
 

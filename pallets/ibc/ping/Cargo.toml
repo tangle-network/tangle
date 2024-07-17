@@ -1,0 +1,40 @@
+[package]
+name = "pallet-ibc-ping"
+edition = "2021"
+version = "0.0.1"
+authors = ["David Salami <wizdave97@gmail.com>"]
+
+[dependencies]
+log = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true }
+
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+ibc = { workspace = true, default-features = false }
+
+ibc-primitives = { workspace = true }
+
+parity-scale-codec = { workspace = true }
+
+
+[features]
+default = ['std']
+std = [
+  "parity-scale-codec/std",
+  "log/std",
+  "serde/std",
+  "scale-info/std",
+  "sp-core/std",
+  "sp-runtime/std",
+  "frame-system/std",
+  "frame-support/std",
+  "sp-std/std",
+  "ibc/std",
+  "ibc-primitives/std",
+]
+
+runtime-benchmarks = []

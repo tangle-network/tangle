@@ -1,0 +1,68 @@
+[package]
+name = "grandpa-light-client-verifier"
+version = "0.1.0"
+edition = "2021"
+authors = ["Seun Lanlege <seunlanlege@gmail.com>"]
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+parity-scale-codec = { workspace = true }
+anyhow = { workspace = true, default-features = false }
+finality-grandpa = { workspace = true, features = ["derive-codec"], default-features = false }
+hash-db = { workspace = true, default-features = false }
+
+frame-support = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+sp-trie = { workspace = true }
+sp-consensus-grandpa = { workspace = true }
+sp-state-machine = { workspace = true, default-features = false }
+sp-io = { workspace = true, default-features = false }
+sp-core = { workspace = true }
+
+grandpa-light-client-primitives = { workspace = true, default-features = false }
+light-client-common = { workspace = true, default-features = false }
+
+[dev-dependencies]
+subxt = { workspace = true }
+futures = { workspace = true }
+hex = { workspace = true }
+serde = { workspace = true }
+env_logger = { workspace = true }
+log = { workspace = true }
+polkadot-core-primitives = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+sc-consensus-grandpa-rpc = { workspace = true }
+hex-literal = { workspace = true }
+grandpa-prover = { path = "../prover" }
+sp-core = { workspace = true }
+jsonrpsee-ws-client = { workspace = true }
+jsonrpsee-core = { workspace = true }
+# hyperspace-core = { workspace = true, features = ["testing", "build-metadata-from-ws"] }
+light-client-common = { workspace = true, features = ["std"] }
+
+[features]
+default = ["std"]
+std = [
+	"parity-scale-codec/std",
+	"anyhow/std",
+	"finality-grandpa/std",
+	"hash-db/std",
+	"frame-support/std",
+	"sp-runtime/std",
+	"sp-std/std",
+	"sp-trie/std",
+	"sp-consensus-grandpa/std",
+	"sp-state-machine/std",
+	"sp-io/std",
+	"grandpa-light-client-primitives/std",
+	"light-client-common/std",
+	"futures/std",
+	"hex/std",
+	"log/std",
+	"polkadot-core-primitives/std",
+	"serde/std",
+	"sp-core/std"
+]

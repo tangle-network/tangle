@@ -1,0 +1,84 @@
+[package]
+name = "ics13-near"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std"]
+std = [
+	"flex-error/std",
+	"flex-error/eyre_tracer",
+	"ibc-proto/std",
+	"ics23/std",
+	"clock",
+	"parity-scale-codec/std",
+	"ibc/std",
+	"sp-core/std",
+	"borsh/std",
+	"bytes/std",
+	"num-traits/std",
+	"prost/std",
+	"ripemd?/std",
+	"serde/std",
+	"serde_json/std",
+	"sha2/std",
+	"sha3?/std",
+	"subtle-encoding/std",
+	"tendermint/std",
+	"time/std",
+	"tracing/std",
+	"tracing-subscriber/std",
+	"uint/std"
+]
+clock = ["tendermint/clock", "time/std", "ibc/clock"]
+
+# This feature grants access to development-time mocking libraries, such as `MockContext` or `MockHeader`.
+# Depends on the `testgen` suite for generating Tendermint light blocks.
+mocks = ["clock", "std", "sha3", "ripemd", "ibc/mocks"]
+
+[dependencies]
+# Proto definitions for all IBC-related interfaces, e.g., connections or channels.
+borsh = { workspace = true, default-features = false }
+ibc = { workspace = true, default-features = false }
+ibc-proto = { workspace = true }
+ibc-derive = { workspace = true, default-features = false }
+ics23 = { workspace = true }
+time = { workspace = true }
+serde_derive = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+prost = { workspace = true }
+bytes = { workspace = true }
+safe-regex = { workspace = true, default-features = false }
+subtle-encoding = { workspace = true, default-features = false }
+sha2 = { workspace = true, default-features = false }
+flex-error = { workspace = true, default-features = false }
+num-traits = { workspace = true, default-features = false }
+derive_more = { workspace = true, default-features = false, features = ["from", "into", "display"] }
+uint = { workspace = true, default-features = false }
+parity-scale-codec = { workspace = true }
+sp-core = { workspace = true }
+sha3 = { workspace = true, optional = true }
+ripemd = { workspace = true, optional = true }
+tendermint = { workspace = true }
+tendermint-proto = { workspace = true }
+
+[dev-dependencies]
+ibc = { workspace = true, features = ['mocks'] }
+env_logger = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["fmt", "env-filter", "json"]}
+test-log = { workspace = true, features = ["trace"] }
+modelator = { workspace = true }
+sha2 = { workspace = true }
+tendermint-rpc = { workspace = true, features = ["http-client", "websocket-client"] }
+tendermint-testgen = { workspace = true } # Needed for generating (synthetic) light blocks.
+tokio = { workspace = true, features = ["full"] }
+serde_json = { workspace = true }
+sha3 = { workspace = true }
+ripemd = { workspace = true }
+parity-scale-codec = { workspace = true }
+sp-core = { workspace = true }

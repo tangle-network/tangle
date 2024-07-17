@@ -1,0 +1,47 @@
+[package]
+name = "light-client-common"
+version = "0.1.0"
+edition = "2021"
+authors = ["Seun Lanlege <seunlanlege@gmail.com>"]
+
+[features]
+default = ["std"]
+std = [
+	"anyhow/std",
+	"parity-scale-codec/std",
+	"serde/std",
+	"hash-db/std",
+	"ibc/std",
+	"sp-storage/std",
+	"sp-trie/std",
+	"ibc-proto/std",
+	"sp-consensus-beefy/std",
+	"sp-core/std",
+	"sp-runtime/std"
+]
+enable-subxt = ["subxt", "subxt-core", "scale-decode"]
+
+[dependencies]
+# crates.io
+anyhow = { workspace = true, default-features = false }
+parity-scale-codec = { workspace = true }
+serde = { workspace = true, default-features = false, features = ["derive"] }
+derive_more = { workspace = true, default-features = false, features = ["from"] }
+hash-db = { workspace = true, default-features = false }
+async-trait = { workspace = true, default-features = false }
+
+# substrate
+sp-core = { workspace = true }
+
+# ibc
+ibc = { workspace = true, default-features = false }
+ibc-proto = { workspace = true }
+
+# substrate
+sp-storage = { workspace = true, default-features = false }
+sp-trie = { workspace = true }
+sp-runtime = { workspace = true }
+sp-consensus-beefy = { workspace = true, default-features = false }
+subxt = { workspace = true, optional = true }
+subxt-core = { workspace = true, optional = true }
+scale-decode = { workspace = true, optional = true }
