@@ -38,6 +38,9 @@ pub type AccountIndex = u32;
 /// Balance of an account.
 pub type Balance = u128;
 
+/// Asset Id
+pub type AssetId = u128;
+
 /// Index of a transaction in the chain.
 pub type Index = u32;
 

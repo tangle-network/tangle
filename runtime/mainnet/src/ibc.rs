@@ -1,4 +1,3 @@
-use super::*;
 use ::ibc::core::ics24_host::identifier::PortId;
 use ::ibc::core::ics26_routing::context::{Module, ModuleId};
 use core::convert::Infallible;
@@ -19,6 +18,8 @@ use sp_core::keccak_256;
 use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::DispatchError;
 use sp_runtime::{Either, Either::Left, Either::Right};
+
+use super::*;
 
 impl pallet_ibc_ping::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;

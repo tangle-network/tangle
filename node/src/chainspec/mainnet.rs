@@ -24,6 +24,7 @@ use crate::{
 };
 use hex_literal::hex;
 use pallet_airdrop_claims::MultiAddress;
+use pallet_ibc::AssetConfig;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use parity_scale_codec::alloc::collections::BTreeMap;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
@@ -39,9 +40,9 @@ use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::EVMConfig;
 use tangle_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId, RuntimeGenesisConfig, SessionConfig,
-	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig, UNIT,
-	WASM_BINARY,
+	IbcConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId, RuntimeGenesisConfig,
+	SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId,
+	VestingConfig, UNIT, WASM_BINARY,
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
@@ -240,6 +241,7 @@ fn mainnet_genesis(
 	RuntimeGenesisConfig {
 		system: SystemConfig { ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },
+		assets: Default::default(),
 		balances: BalancesConfig { balances: endowed_accounts.to_vec() },
 		vesting: VestingConfig {
 			vesting: genesis_non_airdrop
@@ -315,5 +317,6 @@ fn mainnet_genesis(
 				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
 			)),
 		},
+		ibc: IbcConfig { assets: vec![AssetConfig { id: 1, denom: b"TNT".to_vec() }] },
 	}
 }

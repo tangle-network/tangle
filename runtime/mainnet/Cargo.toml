@@ -20,6 +20,7 @@ num_enum = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 static_assertions = { workspace = true }
 
 # Webb Substrate Dependencies
@@ -74,6 +75,7 @@ pallet-treasury = { workspace = true }
 
 pallet-authorship = { workspace = true }
 pallet-balances = { workspace = true }
+pallet-assets = { workspace = true }
 pallet-identity = { workspace = true }
 pallet-proxy = { workspace = true }
 pallet-randomness-collective-flip = { workspace = true }
@@ -134,6 +136,17 @@ evm-tracer = { workspace = true }
 rpc-primitives-debug = { workspace = true }
 rpc-primitives-txpool = { workspace = true }
 
+# IBC
+pallet-ibc = { workspace = true }
+pallet-ibc-ping = { workspace = true }
+ibc-primitives = { workspace = true }
+ibc = { workspace = true }
+ibc-runtime-api = { workspace = true }
+light-client-common = { workspace = true }
+
+# XCM
+cumulus-primitives-core = { workspace = true }
+
 [features]
 default = ["std", "with-rocksdb-weights", "evm-tracing"]
 runtime-benchmarks = [
@@ -158,6 +171,7 @@ runtime-benchmarks = [
 
 std = [
   "serde/std",
+  "serde_json/std",
   "parity-scale-codec/std",
   "scale-info/std",
   "log/std",
@@ -186,6 +200,7 @@ std = [
   "pallet-bounties/std",
   "pallet-child-bounties/std",
   "pallet-balances/std",
+  "pallet-assets/std",
   "pallet-vesting/std",
   "pallet-grandpa/std",
   "pallet-indices/std",
@@ -264,6 +279,16 @@ std = [
   "pallet-evm-precompile-registry/std",
   "pallet-evm-precompile-staking/std",
   "pallet-evm-precompile-vesting/std",
+
+  # IBC
+  "pallet-ibc/std",
+  "pallet-ibc-ping/std",
+  "ibc-primitives/std",
+  "ibc/std",
+  "light-client-common/std",
+
+  # XCM
+  "cumulus-primitives-core/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []

@@ -29,6 +29,7 @@ pub mod precompiles;
 pub mod voter_bags;
 pub use ibc::*;
 
+use cumulus_primitives_core::BodyId;
 use fixed::{types::extra::U16, FixedU128 as DecimalFixedU128};
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -95,6 +96,7 @@ pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	jobs::{JobId, PhaseResult, RpcResponseJobsData},
 	roles::RoleType,
+	AssetId,
 };
 use xcm::v4::Junctions::{X1, X3, X4};
 use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
@@ -1659,8 +1661,6 @@ parameter_types! {
 	pub const MetadataDepositPerByte: Balance = deposit(0, 1);
 	pub const ExecutiveBody: BodyId = BodyId::Executive;
 }
-
-pub type AssetId = u128;
 
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;

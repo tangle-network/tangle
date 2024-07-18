@@ -462,6 +462,6 @@ fn testnet_genesis(
 				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
 			)),
 		},
-		ibc: IbcConfig { assets: vec![AssetConfig { id: 1, denom: b"TNT".to_vec() }] },
+		ibc: IbcConfig { assets: vec![AssetConfig { id: 1, denom: b"tTNT".to_vec() }] },
 	}
 }

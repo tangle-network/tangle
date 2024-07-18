@@ -507,6 +507,8 @@ pub async fn new_full(
 			Some(shared_authority_set.clone()),
 		);
 
+		let chain_props = config.chain_spec.properties().clone();
+
 		Box::new(
 			move |deny_unsafe, subscription_task_executor: sc_rpc::SubscriptionTaskExecutor| {
 				let deps = crate::rpc::FullDeps {
@@ -526,6 +528,7 @@ pub async fn new_full(
 						subscription_executor: subscription_task_executor.clone(),
 						finality_provider: finality_proof_provider.clone(),
 					},
+					chain_props: chain_props.clone(),
 				};
 
 				crate::rpc::create_full(

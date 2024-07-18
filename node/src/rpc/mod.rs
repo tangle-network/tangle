@@ -16,6 +16,7 @@
 //! A collection of node-specific RPC methods.
 
 use jsonrpsee::RpcModule;
+use sc_chain_spec::Properties;
 use std::sync::Arc;
 // Substrate
 use ibc_runtime_api::IbcRuntimeApi;
@@ -37,6 +38,7 @@ use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
 use sp_keystore::KeystorePtr;
 use sp_runtime::traits::Block as BlockT;
+use tangle_primitives::AssetId;
 use tangle_primitives::Block;
 use tangle_runtime::BlockNumber;
 
@@ -91,6 +93,8 @@ pub struct FullDeps<C, P, A: ChainApi, CT, SC, B, CIDP> {
 	pub select_chain: SC,
 	/// GRANDPA specific dependencies.
 	pub grandpa: GrandpaDeps<B>,
+	/// Chain properties
+	pub chain_props: Properties,
 }
 
 pub struct DefaultEthConfig<C, BE>(std::marker::PhantomData<(C, BE)>);
@@ -203,8 +207,6 @@ where
 		pubsub_notification_sinks,
 	)?;
 
-	io.merge(IbcRpcHandler::new(client, chain_props).into_rpc())?;
-
 	Ok(io)
 }
 
@@ -229,6 +231,7 @@ where
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
 	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
 	C::Api: BabeApi<Block>,
+	C::Api: IbcRuntimeApi<Block, AssetId>,
 	C: BlockchainEvents<Block> + 'static,
 	C: HeaderBackend<Block>
 		+ HeaderMetadata<Block, Error = BlockChainError>
@@ -242,13 +245,15 @@ where
 	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::BlakeTwo256>,
 	CIDP: sp_inherents::CreateInherentDataProviders<Block, ()> + Send + Sync + 'static,
 {
+	use ibc_rpc::{IbcApiServer, IbcRpcHandler};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
 	use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
-	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa } = deps;
+	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa, chain_props } =
+		deps;
 
 	let BabeDeps { keystore, babe_worker_handle } = babe;
 
@@ -278,6 +283,8 @@ where
 		)
 		.into_rpc(),
 	)?;
+
+	io.merge(IbcRpcHandler::new(client, chain_props).into_rpc())?;
 
 	// Ethereum compatibility RPCs
 	let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(

@@ -25,9 +25,12 @@ pub use tangle_primitives::jobs::JobResult;
 
 mod filters;
 pub mod frontier_evm;
+pub mod ibc;
 pub mod impls;
 pub mod precompiles;
 pub mod voter_bags;
+
+pub use ibc::*;
 
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -36,7 +39,7 @@ use frame_election_provider_support::{
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
-		Contains, OnFinalize, WithdrawReasons,
+		AsEnsureOriginWithArg, Contains, OnFinalize, WithdrawReasons,
 	},
 	weights::ConstantMultiplier,
 };
@@ -69,15 +72,15 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
+	ApplyExtrinsicResult, Either, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
 	SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
-use tangle_primitives::jobs::JobType;
 use tangle_primitives::jobs::{traits::JobToFee, JobSubmission};
 use tangle_primitives::roles::ValidatorRewardDistribution;
 use tangle_primitives::verifier::arkworks::ArkworksVerifierGroth16Bn254;
 use tangle_primitives::verifier::circom::CircomVerifierGroth16Bn254;
+use tangle_primitives::{jobs::JobType, AssetId};
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -114,7 +117,7 @@ pub use frame_support::{
 	},
 	PalletId, StorageValue,
 };
-use frame_system::{EnsureRoot, EnsureWithSuccess};
+use frame_system::{EnsureRoot, EnsureSigned, EnsureWithSuccess};
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 use sp_runtime::generic::Era;
@@ -122,6 +125,7 @@ use sp_runtime::generic::Era;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 
+use cumulus_primitives_core::BodyId;
 pub use tangle_primitives::{
 	currency::*,
 	fee::*,
@@ -1427,6 +1431,39 @@ impl pallet_proxy::Config for Runtime {
 	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
+parameter_types! {
+	pub const AssetDeposit: Balance = 10 * UNIT;
+	pub const AssetAccountDeposit: Balance = DOLLAR;
+	pub const ApprovalDeposit: Balance = ExistentialDeposit::get();
+	pub const AssetsStringLimit: u32 = 50;
+	pub const MetadataDepositBase: Balance = deposit(1, 68);
+	pub const MetadataDepositPerByte: Balance = deposit(0, 1);
+	pub const ExecutiveBody: BodyId = BodyId::Executive;
+}
+
+impl pallet_assets::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = Balance;
+	type AssetId = AssetId;
+	type AssetIdParameter = parity_scale_codec::Compact<u128>;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type AssetDeposit = AssetDeposit;
+	type AssetAccountDeposit = AssetAccountDeposit;
+	type MetadataDepositBase = MetadataDepositBase;
+	type MetadataDepositPerByte = MetadataDepositPerByte;
+	type ApprovalDeposit = ApprovalDeposit;
+	type StringLimit = AssetsStringLimit;
+	type RemoveItemsLimit = ConstU32<1000>;
+	type Freezer = ();
+	type Extra = ();
+	type CallbackHandle = ();
+	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkHelper = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1436,6 +1473,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip,
 
+		Assets: pallet_assets,
 		Balances: pallet_balances,
 		TransactionPayment: pallet_transaction_payment,
 
@@ -1482,6 +1520,9 @@ construct_runtime!(
 		Jobs: pallet_jobs,
 		Dkg: pallet_dkg,
 		ZkSaaS: pallet_zksaas,
+
+		IbcPing: pallet_ibc_ping,
+		Ibc: pallet_ibc,
 	}
 );
 
@@ -2144,6 +2185,142 @@ impl_runtime_apis! {
 						_ => None,
 					})
 					.collect(),
+			}
+		}
+	}
+
+	impl ibc_runtime_api::IbcRuntimeApi<Block, AssetId> for Runtime {
+		fn para_id() -> u32 {
+			0
+		}
+
+		fn child_trie_key() -> Vec<u8> {
+			<Runtime as pallet_ibc::Config>::PalletPrefix::get().to_vec()
+		}
+
+		fn query_balance_with_address(addr: Vec<u8>, asset_id: AssetId) -> Option<u128> {
+			Ibc::query_balance_with_address(addr, asset_id).ok()
+		}
+
+		fn query_send_packet_info(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<ibc_primitives::PacketInfo>> {
+			Ibc::get_send_packet_info(channel_id, port_id, seqs).ok()
+		}
+
+		fn query_recv_packet_info(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<ibc_primitives::PacketInfo>> {
+			Ibc::get_recv_packet_info(channel_id, port_id, seqs).ok()
+		}
+
+		fn client_update_time_and_height(client_id: Vec<u8>, revision_number: u64, revision_height: u64) -> Option<(u64, u64)>{
+			Ibc::client_update_time_and_height(client_id, revision_number, revision_height).ok()
+		}
+
+		fn client_state(client_id: Vec<u8>) -> Option<ibc_primitives::QueryClientStateResponse> {
+			Ibc::client(client_id).ok()
+		}
+
+		fn client_consensus_state(client_id: Vec<u8>, revision_number: u64, revision_height: u64, latest_cs: bool) -> Option<ibc_primitives::QueryConsensusStateResponse> {
+			Ibc::consensus_state(client_id, revision_number, revision_height, latest_cs).ok()
+		}
+
+		fn clients() -> Option<Vec<(Vec<u8>, Vec<u8>)>> {
+			Some(Ibc::clients())
+		}
+
+		fn connection(connection_id: Vec<u8>) -> Option<ibc_primitives::QueryConnectionResponse>{
+			Ibc::connection(connection_id).ok()
+		}
+
+		fn connections() -> Option<ibc_primitives::QueryConnectionsResponse> {
+			Ibc::connections().ok()
+		}
+
+		fn connection_using_client(client_id: Vec<u8>) -> Option<Vec<ibc_primitives::IdentifiedConnection>>{
+			Ibc::connection_using_client(client_id).ok()
+		}
+
+		fn connection_handshake(client_id: Vec<u8>, connection_id: Vec<u8>) -> Option<ibc_primitives::ConnectionHandshake> {
+			Ibc::connection_handshake(client_id, connection_id).ok()
+		}
+
+		fn channel(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryChannelResponse> {
+			Ibc::channel(channel_id, port_id).ok()
+		}
+
+		fn channel_client(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::IdentifiedClientState> {
+			Ibc::channel_client(channel_id, port_id).ok()
+		}
+
+		fn connection_channels(connection_id: Vec<u8>) -> Option<ibc_primitives::QueryChannelsResponse> {
+			Ibc::connection_channels(connection_id).ok()
+		}
+
+		fn channels() -> Option<ibc_primitives::QueryChannelsResponse> {
+			Ibc::channels().ok()
+		}
+
+		fn packet_commitments(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryPacketCommitmentsResponse> {
+			Ibc::packet_commitments(channel_id, port_id).ok()
+		}
+
+		fn packet_acknowledgements(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryPacketAcknowledgementsResponse>{
+			Ibc::packet_acknowledgements(channel_id, port_id).ok()
+		}
+
+		fn unreceived_packets(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<u64>> {
+			Ibc::unreceived_packets(channel_id, port_id, seqs).ok()
+		}
+
+		fn unreceived_acknowledgements(channel_id: Vec<u8>, port_id: Vec<u8>, seqs: Vec<u64>) -> Option<Vec<u64>> {
+			Ibc::unreceived_acknowledgements(channel_id, port_id, seqs).ok()
+		}
+
+		fn next_seq_recv(channel_id: Vec<u8>, port_id: Vec<u8>) -> Option<ibc_primitives::QueryNextSequenceReceiveResponse> {
+			Ibc::next_seq_recv(channel_id, port_id).ok()
+		}
+
+		fn packet_commitment(channel_id: Vec<u8>, port_id: Vec<u8>, seq: u64) -> Option<ibc_primitives::QueryPacketCommitmentResponse> {
+			Ibc::packet_commitment(channel_id, port_id, seq).ok()
+		}
+
+		fn packet_acknowledgement(channel_id: Vec<u8>, port_id: Vec<u8>, seq: u64) -> Option<ibc_primitives::QueryPacketAcknowledgementResponse> {
+			Ibc::packet_acknowledgement(channel_id, port_id, seq).ok()
+		}
+
+		fn packet_receipt(channel_id: Vec<u8>, port_id: Vec<u8>, seq: u64) -> Option<ibc_primitives::QueryPacketReceiptResponse> {
+			Ibc::packet_receipt(channel_id, port_id, seq).ok()
+		}
+
+		fn denom_trace(asset_id: AssetId) -> Option<ibc_primitives::QueryDenomTraceResponse> {
+			Ibc::get_denom_trace(asset_id)
+		}
+
+		fn denom_traces(key: Option<AssetId>, offset: Option<u32>, limit: u64, count_total: bool) -> ibc_primitives::QueryDenomTracesResponse {
+			let key = key.map(Either::Left).or_else(|| offset.map(Either::Right));
+			Ibc::get_denom_traces(key, limit, count_total)
+		}
+
+		fn block_events(extrinsic_index: Option<u32>) -> Vec<Result<pallet_ibc::events::IbcEvent, pallet_ibc::errors::IbcError>> {
+			let mut raw_events = frame_system::Pallet::<Self>::read_events_no_consensus();
+			if let Some(idx) = extrinsic_index {
+				raw_events.find_map(|e| {
+					let frame_system::EventRecord{ event, phase, ..} = *e;
+					match (event, phase) {
+						(RuntimeEvent::Ibc(pallet_ibc::Event::Events{ events }), frame_system::Phase::ApplyExtrinsic(index)) if index == idx => Some(events),
+						_ => None
+					}
+				}).unwrap_or_default()
+			}
+			else {
+				raw_events.filter_map(|e| {
+					let frame_system::EventRecord{ event, ..} = *e;
+
+					match event {
+						RuntimeEvent::Ibc(pallet_ibc::Event::Events{ events }) => {
+								Some(events)
+							},
+						_ => None
+					}
+				}).flatten().collect()
 			}
 		}
 	}
