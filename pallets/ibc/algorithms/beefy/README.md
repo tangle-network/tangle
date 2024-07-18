@@ -1,3 +1,0 @@
-# BEEFY Light Client
-
-TODO

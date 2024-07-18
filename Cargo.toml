@@ -19,28 +19,6 @@ members = [
 	"client/evm-tracing",
 	"client/rpc/*",
 	"client/rpc-core/*",
-
-	"pallets/ibc/ping",
-	"pallets/ibc/primitives",
-	"pallets/ibc/rpc",
-	"pallets/ibc/runtime-api",
-	"pallets/ibc",
-	"pallets/ibc/simple-iavl",
-    "pallets/ibc/light-clients/common",
-    "pallets/ibc/light-clients/ics07-tendermint",
-    "pallets/ibc/light-clients/ics07-tendermint-cw",
-    "pallets/ibc/light-clients/ics08-wasm",
-    "pallets/ibc/light-clients/ics10-grandpa",
-    "pallets/ibc/light-clients/ics10-grandpa-cw",
-    "pallets/ibc/light-clients/ics10-grandpa-standalone",
-    "pallets/ibc/light-clients/ics11-beefy",
-	"pallets/ibc/algorithms/beefy/verifier",
-    "pallets/ibc/algorithms/beefy/prover",
-    "pallets/ibc/algorithms/beefy/primitives",
-    "pallets/ibc/algorithms/grandpa/verifier",
-    "pallets/ibc/algorithms/grandpa/prover",
-    "pallets/ibc/algorithms/grandpa/primitives",
-
 	"node",
 	"runtime/testnet",
 	"runtime/mainnet",
@@ -69,44 +47,18 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
-ibc-rpc                                    = { path = "pallets/ibc/rpc" }
-ibc-runtime-api                            = { path = "pallets/ibc/runtime-api" }
-simple-iavl                                = { path = "pallets/ibc/simple-iavl" }
-ibc-primitives                             = { path = "pallets/ibc/primitives" }
-pallet-ibc                                 = { path = "pallets/ibc" }
-pallet-ibc-ping                            = { path = "pallets/ibc/ping" }
-ics11-beefy                                = { path = "pallets/ibc/light-clients/ics11-beefy" }
-ics07-tendermint                           = { path = "pallets/ibc/light-clients/ics07-tendermint", features = ["std"] }
-ics08-wasm                                 = { path = "pallets/ibc/light-clients/ics08-wasm", features = ["std"] }
-light-client-common                        = { path = "pallets/ibc/light-clients/common" }
-ics10-grandpa                              = { path = "pallets/ibc/light-clients/ics10-grandpa" }
-ics10-grandpa-standalone                   = { path = "pallets/ibc/light-clients/ics10-grandpa-standalone" }
-ibc                                        = { path = "pallets/ibc/ibc/modules", features = [] }
-ibc-proto                                  = { path = "pallets/ibc/ibc/proto" }
-ibc-proto-compiler                         = { path = "pallets/ibc/ibc/proto-compiler" }
-ibc-derive                                 = { path = "pallets/ibc/ibc/derive" }
-ics23                                      = { git = "https://github.com/cosmos/ics23", rev = "74ce807b7be39a7e0afb4e2efb8e28a57965f57b", default-features = false }
-tendermint-proto                           = { git = "https://github.com/informalsystems/tendermint-rs", rev = "e81f7bf23d63ffbcd242381d1ce5e35da3515ff1", default-features = false }
-tendermint                                 = { git = "https://github.com/informalsystems/tendermint-rs", rev = "e81f7bf23d63ffbcd242381d1ce5e35da3515ff1", default-features = false }
-tendermint-testgen                         = { git = "https://github.com/informalsystems/tendermint-rs", rev = "e81f7bf23d63ffbcd242381d1ce5e35da3515ff1" }
-tendermint-rpc                             = { git = "https://github.com/informalsystems/tendermint-rs", rev = "e81f7bf23d63ffbcd242381d1ce5e35da3515ff1", default-features = false }
-tendermint-light-client                    = { git = "https://github.com/informalsystems/tendermint-rs", rev = "e81f7bf23d63ffbcd242381d1ce5e35da3515ff1", default-features = false }
-tendermint-light-client-verifier           = { git = "https://github.com/informalsystems/tendermint-rs", rev = "e81f7bf23d63ffbcd242381d1ce5e35da3515ff1", default-features = false }
-grandpa-client-primitives                  = { package = "grandpa-light-client-primitives", path = "pallets/ibc/algorithms/grandpa/primitives", default-features = false }
-beefy-client-primitives                    = { package = "beefy-light-client-primitives", path = "pallets/ibc/algorithms/beefy/primitives", default-features = false }
-beefy-prover                               = { path = "pallets/ibc/algorithms/beefy/prover" }
-beefy-light-client                         = { path = "pallets/ibc/algorithms/beefy/verifier" }
-beefy-light-client-primitives              = { path = "pallets/ibc/algorithms/beefy/primitives" }
-grandpa-prover                             = { path = "pallets/ibc/algorithms/grandpa/prover" }
-grandpa-light-client-primitives            = { path = "pallets/ibc/algorithms/grandpa/primitives" }
-finality-grandpa                           = { version = "0.16.2", default-features = false }
-scale-decode                               = { version = "0.13.0", default-features = false }
-scale-encode                               = { version = "0.7.0", default-features = false }
+pallet-ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
+pallet-ibc-ping = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
+ibc-primitives = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
+ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
+ibc-runtime-api = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
+ibc-rpc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
+light-client-common = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
+
 subxt                                      = { git = "https://github.com/paritytech/subxt",  tag = "v0.37.0", features = ["substrate-compat"] }
 subxt-core                                 = { git = "https://github.com/paritytech/subxt",  tag = "v0.37.0", features = ["substrate-compat"] }
 subxt-metadata                             = { git = "https://github.com/paritytech/subxt",  tag = "v0.37.0", features = ["substrate-compat"] }
 
-sp-mmr-primitives                          = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 cumulus-client-collator                    = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 cumulus-client-consensus-proposer          = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 cumulus-pallet-aura-ext                    = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
@@ -127,7 +79,6 @@ frame-system                               = { git = "https://github.com/parityt
 frame-system-benchmarking                  = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 frame-system-rpc-runtime-api               = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 frame-try-runtime                          = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
-mmr-rpc                                    = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-assets                              = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-aura                                = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-authority-discovery                 = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
@@ -135,7 +86,6 @@ pallet-authorship                          = { git = "https://github.com/parityt
 pallet-babe                                = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-balances                            = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-bounties                            = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
-pallet-beefy-mmr                           = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-collator-selection                  = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-collective                          = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-conviction-voting                   = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }

@@ -18,6 +18,7 @@
 use jsonrpsee::RpcModule;
 use std::sync::Arc;
 // Substrate
+use ibc_runtime_api::IbcRuntimeApi;
 use sc_client_api::{
 	backend::{Backend, StorageProvider},
 	client::BlockchainEvents,
@@ -38,6 +39,7 @@ use sp_keystore::KeystorePtr;
 use sp_runtime::traits::Block as BlockT;
 use tangle_primitives::Block;
 use tangle_runtime::BlockNumber;
+
 // Runtime
 #[cfg(not(feature = "testnet"))]
 use tangle_runtime::{AccountId, Balance, Hash, Index};
@@ -130,6 +132,7 @@ where
 		MaxProofLen,
 		MaxAdditionalParamsLen,
 	>,
+	C::Api: IbcRuntimeApi<Block, AssetId>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
@@ -149,6 +152,7 @@ where
 	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::BlakeTwo256>,
 	CIDP: sp_inherents::CreateInherentDataProviders<Block, ()> + Send + Sync + 'static,
 {
+	use ibc_rpc::{IbcApiServer, IbcRpcHandler};
 	use pallet_jobs_rpc::{JobsApiServer, JobsClient};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
@@ -198,6 +202,8 @@ where
 		subscription_task_executor,
 		pubsub_notification_sinks,
 	)?;
+
+	io.merge(IbcRpcHandler::new(client, chain_props).into_rpc())?;
 
 	Ok(io)
 }

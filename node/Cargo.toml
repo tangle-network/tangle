@@ -66,6 +66,8 @@ sp-state-machine = { workspace = true, features = ["default"] }
 sp-timestamp = { workspace = true, features = ["default"] }
 sp-transaction-pool = { workspace = true, features = ["default"] }
 pallet-ibc = { workspace = true }
+ibc-runtime-api = { workspace = true }
+ibc-rpc = { workspace = true }
 pallet-jobs-rpc = { workspace = true }
 
 pallet-airdrop-claims = { workspace = true }
@@ -101,7 +103,6 @@ fp-evm = { workspace = true, features = ["default"] }
 fp-rpc = { workspace = true, features = ["default"] }
 
 frame-system-rpc-runtime-api = { workspace = true }
-mmr-rpc = { workspace = true }
 primitives-ext = { workspace = true }
 rpc-debug = { workspace = true }
 rpc-primitives-debug = { workspace = true }

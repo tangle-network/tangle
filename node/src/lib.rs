@@ -2,6 +2,7 @@ pub mod chainspec;
 pub mod cli;
 pub mod distributions;
 pub mod eth;
+pub mod ibc;
 pub mod mainnet_fixtures;
 pub mod rpc;
 pub mod service;
