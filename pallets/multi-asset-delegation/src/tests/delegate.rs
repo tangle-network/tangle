@@ -101,15 +101,15 @@ fn schedule_delegator_bond_less_should_work() {
 		// Assert
 		// Check the delegator metadata
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegator_bond_less_request.is_some());
-		let request = metadata.delegator_bond_less_request.unwrap();
+		assert!(!metadata.delegator_bond_less_requests.is_empty());
+		let request = &metadata.delegator_bond_less_requests[0];
 		assert_eq!(request.asset_id, asset_id);
 		assert_eq!(request.amount, amount);
 
 		// Check the operator metadata
 		let operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
-		assert_eq!(operator_metadata.delegation_count, 0);
-		assert_eq!(operator_metadata.delegations.len(), 0);
+		assert_eq!(operator_metadata.delegation_count, 1);
+		assert_eq!(operator_metadata.delegations.len(), 1);
 	});
 }
 
@@ -152,7 +152,7 @@ fn execute_delegator_bond_less_should_work() {
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegator_bond_less_request.is_none());
+		assert!(metadata.delegator_bond_less_requests.is_empty());
 		assert!(metadata.deposits.get(&asset_id).is_some());
 		assert_eq!(metadata.deposits.get(&asset_id).unwrap(), &amount);
 	});
@@ -195,7 +195,7 @@ fn cancel_delegator_bond_less_should_work() {
 		// Assert
 		// Check the delegator metadata
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegator_bond_less_request.is_none());
+		assert!(metadata.delegator_bond_less_requests.is_empty());
 		assert_eq!(metadata.deposits.get(&asset_id), Some(&amount));
 
 		// Check the operator metadata

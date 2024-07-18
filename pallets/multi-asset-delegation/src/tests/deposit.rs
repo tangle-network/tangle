@@ -164,8 +164,8 @@ fn schedule_unstake_should_work() {
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert_eq!(metadata.deposits.get(&asset_id), None);
-		assert!(metadata.unstake_request.is_some());
-		let request = metadata.unstake_request.unwrap();
+		assert!(metadata.unstake_requests.is_some());
+		let request = metadata.unstake_requests.unwrap();
 		assert_eq!(request.asset_id, asset_id);
 		assert_eq!(request.amount, amount);
 	});
@@ -281,7 +281,7 @@ fn execute_unstake_should_work() {
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.unstake_request.is_none());
+		assert!(metadata.unstake_requests.is_none());
 
 		// Check event
 		System::assert_last_event(RuntimeEvent::MultiAssetDelegation(
@@ -386,7 +386,7 @@ fn cancel_unstake_should_work() {
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.unstake_request.is_none());
+		assert!(metadata.unstake_requests.is_none());
 		assert_eq!(metadata.deposits.get(&asset_id), Some(&amount));
 		assert_eq!(metadata.status, DelegatorStatus::Active);
 
