@@ -89,10 +89,6 @@ pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
 
-# ORML
-orml-traits = { workspace = true }
-orml-asset-registry = { workspace = true }
-
 # Tangle dependencies
 pallet-airdrop-claims = { workspace = true }
 pallet-dkg = { workspace = true }
@@ -339,10 +335,6 @@ std = [
   "xcm-executor/std",
   "polkadot-parachain-primitives/std",
   "cumulus-primitives-core/std",
-
-  # ORML
-  "orml-traits/std",
-  "orml-asset-registry/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []

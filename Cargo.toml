@@ -356,14 +356,6 @@ pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-f
 pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
 pallet-multi-asset-delegation = { path = "pallets/multi-asset-delegation", default-features = false }
 
-# ORML Dependencies
-# orml-traits = { git = "https://github.com/webb-tools/open-runtime-module-library", branch = "polkadot-v1.7.0", default-features = false }
-# orml-asset-registry = { git = "https://github.com/webb-tools/open-runtime-module-library", branch = "polkadot-v1.7.0", default-features = false }
-orml-asset-registry = { path = "pallets/asset-registry", default-features = false }
-orml-tokens = { path = "pallets/tokens", default-features = false }
-orml-traits = { path = "pallets/traits", default-features = false }
-orml-utilities = { path = "pallets/utilities", default-features = false }
-
 k256 = { version = "0.13.0", default-features = false }
 p256 = { version = "0.13.0", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
