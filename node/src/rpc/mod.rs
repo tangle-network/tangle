@@ -24,6 +24,7 @@ use sc_client_api::{
 	backend::{Backend, StorageProvider},
 	client::BlockchainEvents,
 };
+use sc_client_api::{BlockBackend, ProofProvider};
 use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_grandpa::{
 	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState,
@@ -146,7 +147,9 @@ where
 	C: BlockchainEvents<Block> + 'static,
 	C: HeaderBackend<Block>
 		+ HeaderMetadata<Block, Error = BlockChainError>
-		+ StorageProvider<Block, BE>,
+		+ StorageProvider<Block, BE>
+		+ ProofProvider<Block>
+		+ BlockBackend<Block>,
 	BE: Backend<Block> + 'static,
 	P: TransactionPool<Block = Block> + 'static,
 	A: ChainApi<Block = Block> + 'static,
@@ -235,7 +238,9 @@ where
 	C: BlockchainEvents<Block> + 'static,
 	C: HeaderBackend<Block>
 		+ HeaderMetadata<Block, Error = BlockChainError>
-		+ StorageProvider<Block, BE>,
+		+ StorageProvider<Block, BE>
+		+ ProofProvider<Block>
+		+ BlockBackend<Block>,
 	BE: Backend<Block> + 'static,
 	P: TransactionPool<Block = Block> + 'static,
 	A: ChainApi<Block = Block> + 'static,
