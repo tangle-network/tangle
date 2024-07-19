@@ -239,7 +239,7 @@ impl<T: Config> Pallet<T> {
 			let operator = metadata
 				.delegations
 				.iter()
-				.find(|d| d.asset_id == asset_id && d.amount >= amount)
+				.find(|d| d.asset_id == asset_id)
 				.ok_or(Error::<T>::NoActiveDelegation)?
 				.operator
 				.clone();
@@ -253,7 +253,7 @@ impl<T: Config> Pallet<T> {
 				let delegation = operator_metadata
 					.delegations
 					.iter_mut()
-					.find(|d| d.delegator == who && d.asset_id == asset_id)
+					.find(|d| d.asset_id == asset_id)
 					.ok_or(Error::<T>::NoActiveDelegation)?;
 
 				delegation.amount += amount;

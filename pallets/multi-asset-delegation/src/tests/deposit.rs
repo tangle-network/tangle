@@ -164,8 +164,8 @@ fn schedule_unstake_should_work() {
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert_eq!(metadata.deposits.get(&asset_id), None);
-		assert!(metadata.unstake_requests.is_some());
-		let request = metadata.unstake_requests.unwrap();
+		assert!(!metadata.unstake_requests.is_empty());
+		let request = metadata.unstake_requests.first().unwrap();
 		assert_eq!(request.asset_id, asset_id);
 		assert_eq!(request.amount, amount);
 	});
@@ -280,8 +280,8 @@ fn execute_unstake_should_work() {
 		assert_ok!(MultiAssetDelegation::execute_unstake(RuntimeOrigin::signed(who),));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.unstake_requests.is_none());
+		let metadata = MultiAssetDelegation::delegators(who);
+		assert!(metadata.unwrap().unstake_requests.is_empty());
 
 		// Check event
 		System::assert_last_event(RuntimeEvent::MultiAssetDelegation(
@@ -382,11 +382,15 @@ fn cancel_unstake_should_work() {
 			amount,
 		));
 
-		assert_ok!(MultiAssetDelegation::cancel_unstake(RuntimeOrigin::signed(who),));
+		assert_ok!(MultiAssetDelegation::cancel_unstake(
+			RuntimeOrigin::signed(who),
+			asset_id,
+			amount
+		));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.unstake_requests.is_none());
+		assert!(metadata.unstake_requests.is_empty());
 		assert_eq!(metadata.deposits.get(&asset_id), Some(&amount));
 		assert_eq!(metadata.status, DelegatorStatus::Active);
 
@@ -404,7 +408,7 @@ fn cancel_unstake_should_fail_if_not_delegator() {
 		let who = 1;
 
 		assert_noop!(
-			MultiAssetDelegation::cancel_unstake(RuntimeOrigin::signed(who),),
+			MultiAssetDelegation::cancel_unstake(RuntimeOrigin::signed(who), 1, 1),
 			Error::<Test>::NotDelegator
 		);
 	});
@@ -428,7 +432,7 @@ fn cancel_unstake_should_fail_if_no_withdraw_request() {
 		));
 
 		assert_noop!(
-			MultiAssetDelegation::cancel_unstake(RuntimeOrigin::signed(who),),
+			MultiAssetDelegation::cancel_unstake(RuntimeOrigin::signed(who), asset_id, amount),
 			Error::<Test>::NoWithdrawRequest
 		);
 	});

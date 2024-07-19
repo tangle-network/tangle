@@ -301,6 +301,10 @@ pub mod pallet {
 		AssetNotFound,
 		/// The blueprint ID is already whitelisted
 		BlueprintAlreadyWhitelisted,
+		/// No unstake requests found
+		NoUnstakeRequests,
+		/// No matching unstake reqests found
+		NoMatchingUnstakeRequest,
 	}
 
 	/// Hooks for the pallet.
@@ -457,9 +461,13 @@ pub mod pallet {
 		/// Cancels a scheduled unstake request.
 		#[pallet::call_index(13)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn cancel_unstake(origin: OriginFor<T>) -> DispatchResult {
+		pub fn cancel_unstake(
+			origin: OriginFor<T>,
+			asset_id: T::AssetId,
+			amount: BalanceOf<T>,
+		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_unstake(who.clone())?;
+			Self::process_cancel_unstake(who.clone(), asset_id, amount)?;
 			Self::deposit_event(Event::CancelledUnstake { who });
 			Ok(())
 		}
@@ -517,9 +525,13 @@ pub mod pallet {
 		/// Cancels a scheduled request to reduce a delegator's bond.
 		#[pallet::call_index(17)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn cancel_delegator_bond_less(origin: OriginFor<T>) -> DispatchResult {
+		pub fn cancel_delegator_bond_less(
+			origin: OriginFor<T>,
+			asset_id: T::AssetId,
+			amount: BalanceOf<T>,
+		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_delegator_bond_less(who.clone())?;
+			Self::process_cancel_delegator_bond_less(who.clone(), asset_id, amount)?;
 			Self::deposit_event(Event::CancelledDelegatorBondLess { who });
 			Ok(())
 		}

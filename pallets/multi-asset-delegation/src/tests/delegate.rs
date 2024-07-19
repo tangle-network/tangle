@@ -190,7 +190,11 @@ fn cancel_delegator_bond_less_should_work() {
 			amount,
 		));
 
-		assert_ok!(MultiAssetDelegation::cancel_delegator_bond_less(RuntimeOrigin::signed(who)));
+		assert_ok!(MultiAssetDelegation::cancel_delegator_bond_less(
+			RuntimeOrigin::signed(who),
+			asset_id,
+			amount
+		));
 
 		// Assert
 		// Check the delegator metadata
@@ -294,7 +298,11 @@ fn execute_delegator_bond_less_should_fail_if_not_ready() {
 		));
 
 		assert_noop!(
-			MultiAssetDelegation::cancel_delegator_bond_less(RuntimeOrigin::signed(who),),
+			MultiAssetDelegation::cancel_delegator_bond_less(
+				RuntimeOrigin::signed(who),
+				asset_id,
+				amount
+			),
 			Error::<Test>::NoBondLessRequest
 		);
 
