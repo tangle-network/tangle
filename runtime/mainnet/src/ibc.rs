@@ -103,10 +103,10 @@ impl DenomToAssetId<Runtime> for IbcDenomToAssetIdConversion {
 
 	fn ibc_assets(start_key: Option<Either<AssetId, u32>>, limit: u64) -> IbcAssets<AssetId> {
 		let mut iterator = match start_key {
-			None => IbcAssetIds::<Runtime>::iter().skip(0),
+			None => IbcAssetIds::<Runtime>::iter().skip(1),
 			Some(Left(asset_id)) => {
 				let raw_key = asset_id.encode();
-				IbcAssetIds::<Runtime>::iter_from(raw_key).skip(0)
+				IbcAssetIds::<Runtime>::iter_from(raw_key).skip(1)
 			},
 			Some(Right(offset)) => IbcAssetIds::<Runtime>::iter().skip(offset as usize),
 		};

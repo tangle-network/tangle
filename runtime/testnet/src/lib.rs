@@ -35,7 +35,6 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
-use frame_support::pallet_prelude::EnsureOrigin;
 use frame_support::traits::EnsureOriginWithArg;
 use frame_support::traits::{AsEnsureOriginWithArg, ContainsPair};
 use frame_support::{
@@ -1683,26 +1682,6 @@ impl pallet_assets::Config for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
-}
-
-pub struct AssetAuthority;
-impl EnsureOriginWithArg<RuntimeOrigin, Option<u32>> for AssetAuthority {
-	type Success = ();
-
-	fn try_origin(
-		origin: RuntimeOrigin,
-		asset_id: &Option<u32>,
-	) -> Result<Self::Success, RuntimeOrigin> {
-		match asset_id {
-			// Any other `asset_id` defaults to EnsureRoot
-			_ => <EnsureRoot<AccountId> as EnsureOrigin<RuntimeOrigin>>::try_origin(origin),
-		}
-	}
-
-	#[cfg(feature = "runtime-benchmarks")]
-	fn try_successful_origin(_asset_id: &Option<u32>) -> Result<RuntimeOrigin, ()> {
-		unimplemented!()
-	}
 }
 
 #[derive(scale_info::TypeInfo, Encode, Decode, Clone, Eq, PartialEq, Debug, MaxEncodedLen)]
