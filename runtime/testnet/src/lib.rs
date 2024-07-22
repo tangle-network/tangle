@@ -35,7 +35,6 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
-use frame_support::traits::EnsureOriginWithArg;
 use frame_support::traits::{AsEnsureOriginWithArg, ContainsPair};
 use frame_support::{
 	traits::{
