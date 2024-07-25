@@ -268,14 +268,6 @@ benchmarks! {
 		assert!(metadata.delegator_bond_less_requests.is_none());
 	}
 
-	set_whitelisted_assets {
-		let caller: T::AccountId = whitelisted_caller();
-		let assets: Vec<T::AssetId> = vec![1u32.into()];
-	}: _(RawOrigin::Root, assets.clone())
-	verify {
-		assert_eq!(WhitelistedAssets::<T>::get(), assets);
-	}
-
 	set_incentive_apy_and_cap {
 
 		let caller: T::AccountId = whitelisted_caller();

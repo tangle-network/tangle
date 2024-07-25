@@ -28,9 +28,6 @@ pub fn create_and_mint_tokens(
 ) {
 	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset_id, 1, false, 1));
 	assert_ok!(Assets::mint(RuntimeOrigin::signed(1), asset_id, recipient, amount));
-
-	// whitelist the asset
-	assert_ok!(MultiAssetDelegation::set_whitelisted_assets(RuntimeOrigin::root(), vec![VDOT]));
 }
 
 pub fn mint_tokens(

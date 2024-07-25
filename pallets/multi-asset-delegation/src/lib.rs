@@ -168,11 +168,6 @@ pub mod pallet {
 	#[pallet::getter(fn current_round)]
 	pub type CurrentRound<T: Config> = StorageValue<_, RoundIndex, ValueQuery>;
 
-	/// Whitelisted assets that are allowed to be deposited
-	#[pallet::storage]
-	#[pallet::getter(fn whitelisted_assets)]
-	pub type WhitelistedAssets<T: Config> = StorageValue<_, Vec<T::AssetId>, ValueQuery>;
-
 	/// Snapshot of collator delegation stake at the start of the round.
 	#[pallet::storage]
 	#[pallet::getter(fn at_stake)]
@@ -254,8 +249,6 @@ pub mod pallet {
 		ExecutedDelegatorBondLess { who: T::AccountId },
 		/// A delegator bond less request has been cancelled.
 		CancelledDelegatorBondLess { who: T::AccountId },
-		/// New whitelisted assets set
-		WhitelistedAssetsSet { assets: Vec<T::AssetId> },
 		/// Event emitted when an incentive APY and cap are set for a reward pool
 		IncentiveAPYAndCapSet { pool_id: T::PoolId, apy: u128, cap: BalanceOf<T> },
 		/// Event emitted when a blueprint is whitelisted for rewards
@@ -549,25 +542,6 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 			Self::process_cancel_delegator_bond_less(who.clone(), asset_id, amount)?;
 			Self::deposit_event(Event::CancelledDelegatorBondLess { who });
-			Ok(())
-		}
-
-		/// Set the whitelisted assets allowed for delegation
-		#[pallet::call_index(18)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn set_whitelisted_assets(
-			origin: OriginFor<T>,
-			assets: Vec<T::AssetId>,
-		) -> DispatchResult {
-			// Ensure that the origin is authorized
-			T::ForceOrigin::ensure_origin(origin)?;
-
-			// Set the whitelisted assets
-			WhitelistedAssets::<T>::put(assets.clone());
-
-			// Emit an event
-			Self::deposit_event(Event::WhitelistedAssetsSet { assets });
-
 			Ok(())
 		}
 

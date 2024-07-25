@@ -51,11 +51,6 @@ impl<T: Config> Pallet<T> {
 
 		// Transfer the amount to the pallet account
 		if let Some(asset_id) = asset_id {
-			// ensure the asset is whitelisted
-			ensure!(
-				WhitelistedAssets::<T>::get().contains(&asset_id),
-				Error::<T>::AssetNotWhitelisted
-			);
 
 			T::Fungibles::transfer(
 				asset_id,
