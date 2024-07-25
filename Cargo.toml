@@ -45,13 +45,13 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
-pallet-ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
-pallet-ibc-ping = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
-ibc-primitives = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
-ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
-ibc-runtime-api = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
-ibc-rpc = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
-light-client-common = { git = "https://github.com/webb-tools/composable-ibc", branch = "drew/grandpa-standalone", default-features = false }
+pallet-ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "polkadot-v1.7.0", default-features = false }
+pallet-ibc-ping = { git = "https://github.com/webb-tools/composable-ibc", branch = "polkadot-v1.7.0", default-features = false }
+ibc-primitives = { git = "https://github.com/webb-tools/composable-ibc", branch = "polkadot-v1.7.0", default-features = false }
+ibc = { git = "https://github.com/webb-tools/composable-ibc", branch = "polkadot-v1.7.0", default-features = false }
+ibc-runtime-api = { git = "https://github.com/webb-tools/composable-ibc", branch = "polkadot-v1.7.0", default-features = false }
+ibc-rpc = { git = "https://github.com/webb-tools/composable-ibc", branch = "polkadot-v1.7.0", default-features = false }
+light-client-common = { git = "https://github.com/webb-tools/composable-ibc", branch = "polkadot-v1.7.0", default-features = false }
 
 subxt                                      = { git = "https://github.com/paritytech/subxt",  tag = "v0.37.0", features = ["substrate-compat"] }
 subxt-core                                 = { git = "https://github.com/paritytech/subxt",  tag = "v0.37.0", features = ["substrate-compat"] }
