@@ -192,8 +192,6 @@ impl pallet_evm::Config for Runtime {
 	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
 }
 
-type ForeignAssetInstance = pallet_assets::Instance1;
-
 // Required for runtime benchmarks
 pallet_assets::runtime_benchmarks_enabled! {
 	pub struct BenchmarkHelper;
@@ -218,7 +216,7 @@ parameter_types! {
 	pub const AssetAccountDeposit: Balance = 0;
 }
 
-impl pallet_assets::Config<ForeignAssetInstance> for Runtime {
+impl pallet_assets::Config<pallet_assets::Instance1> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
 	type AssetId = AssetId;

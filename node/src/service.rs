@@ -277,6 +277,8 @@ pub fn new_partial(
 		),
 	})
 }
+
+#[allow(dead_code)]
 pub struct RunFullParams {
 	pub config: Configuration,
 	pub eth_config: EthConfiguration,

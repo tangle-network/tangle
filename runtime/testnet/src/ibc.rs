@@ -138,9 +138,9 @@ impl DenomToAssetId<Runtime> for IbcDenomToAssetIdConversion {
 )]
 pub struct MemoMessage;
 
-impl ToString for MemoMessage {
-	fn to_string(&self) -> String {
-		Default::default()
+impl Display for MemoMessage {
+	fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+		write!(f, "")
 	}
 }
 

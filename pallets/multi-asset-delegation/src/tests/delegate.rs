@@ -46,7 +46,7 @@ fn delegate_should_work() {
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.deposits.get(&asset_id).is_none());
+		assert!(!metadata.deposits.contains_key(&asset_id));
 		assert_eq!(metadata.delegations.len(), 1);
 		let delegation = &metadata.delegations[0];
 		assert_eq!(delegation.operator, operator);
@@ -152,7 +152,7 @@ fn execute_delegator_bond_less_should_work() {
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(metadata.delegator_bond_less_request.is_none());
-		assert!(metadata.deposits.get(&asset_id).is_some());
+		assert!(metadata.deposits.contains_key(&asset_id));
 		assert_eq!(metadata.deposits.get(&asset_id).unwrap(), &amount);
 	});
 }

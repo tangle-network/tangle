@@ -25,7 +25,7 @@ benchmarks! {
 	// Benchmark submit_job function
 	submit_job {
 		let caller: T::AccountId = mock_account_id::<T>(1u8);
-		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
+		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::MAX);
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
 			ttl: 100u32.into(),
@@ -45,7 +45,7 @@ benchmarks! {
 	submit_job_result {
 		let caller: T::AccountId = mock_account_id::<T>(1u8);
 		let validator2: T::AccountId = mock_account_id::<T>(2u8);
-		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
+		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::MAX);
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
 			ttl: 100u32.into(),
@@ -75,7 +75,7 @@ benchmarks! {
 	withdraw_rewards {
 		let caller: T::AccountId = mock_account_id::<T>(1u8);
 		let pallet_account = Pallet::<T>::rewards_account_id();
-		let _ = T::Currency::make_free_balance_be(&pallet_account, BalanceOf::<T>::max_value());
+		let _ = T::Currency::make_free_balance_be(&pallet_account, BalanceOf::<T>::MAX);
 		let reward_amount: BalanceOf<T> = 100u32.into(); // Set a reward amount for testing
 		ValidatorRewards::<T>::insert(caller.clone(), reward_amount);
 	}: _(RawOrigin::Signed(caller.clone()))
@@ -85,7 +85,7 @@ benchmarks! {
 		let caller: T::AccountId = mock_account_id::<T>(1u8);
 		let validator2: T::AccountId = mock_account_id::<T>(2u8);
 		let validator3: T::AccountId = mock_account_id::<T>(3u8);
-		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
+		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::MAX);
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
 			ttl: 100u32.into(),
@@ -142,7 +142,7 @@ benchmarks! {
 	set_time_fee {
 		let caller: T::AccountId = mock_account_id::<T>(1u8);
 		let new_time_fee: BalanceOf<T> = 100u32.into();
-		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
+		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::MAX);
 	}: _(RawOrigin::Root, new_time_fee)
 
 
@@ -150,7 +150,7 @@ benchmarks! {
 	extend_job_result_ttl {
 		let caller: T::AccountId = mock_account_id::<T>(1u8);
 		let validator2: T::AccountId = mock_account_id::<T>(2u8);
-		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
+		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::MAX);
 		let job =  JobSubmissionOf::<T> {
 			expiry: 100u32.into(),
 			ttl: 100u32.into(),

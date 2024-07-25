@@ -295,7 +295,7 @@ benchmarks! {
 		add_slashing_spans::<T>(&stash, s);
 		let amount = T::Currency::minimum_balance() * 5u32.into(); // Half of total
 		Staking::<T>::unbond(RawOrigin::Signed(controller.clone()).into(), amount)?;
-		CurrentEra::<T>::put(EraIndex::max_value());
+		CurrentEra::<T>::put(EraIndex::MAX);
 		let ledger = Ledger::<T>::get(&controller).ok_or("ledger not created before")?;
 		let original_total: BalanceOf<T> = ledger.total;
 		whitelist_account!(controller);
@@ -327,7 +327,7 @@ benchmarks! {
 		let mut ledger = Ledger::<T>::get(&controller).unwrap();
 		ledger.active = ed - One::one();
 		Ledger::<T>::insert(&controller, ledger);
-		CurrentEra::<T>::put(EraIndex::max_value());
+		CurrentEra::<T>::put(EraIndex::MAX);
 
 		whitelist_account!(controller);
 	}: withdraw_unbonded(RawOrigin::Signed(controller.clone()), s)
@@ -850,15 +850,15 @@ benchmarks! {
 	set_staking_configs_all_set {
 	}: set_staking_configs(
 		RawOrigin::Root,
-		ConfigOp::Set(BalanceOf::<T>::max_value()),
-		ConfigOp::Set(BalanceOf::<T>::max_value()),
+		ConfigOp::Set(BalanceOf::<T>::MAX),
+		ConfigOp::Set(BalanceOf::<T>::MAX),
 		ConfigOp::Set(u32::MAX),
 		ConfigOp::Set(u32::MAX),
-		ConfigOp::Set(Percent::max_value()),
-		ConfigOp::Set(Perbill::max_value())
+		ConfigOp::Set(Percent::MAX),
+		ConfigOp::Set(Perbill::MAX)
 	) verify {
-		assert_eq!(MinNominatorBond::<T>::get(), BalanceOf::<T>::max_value());
-		assert_eq!(MinValidatorBond::<T>::get(), BalanceOf::<T>::max_value());
+		assert_eq!(MinNominatorBond::<T>::get(), BalanceOf::<T>::MAX);
+		assert_eq!(MinValidatorBond::<T>::get(), BalanceOf::<T>::MAX);
 		assert_eq!(MaxNominatorsCount::<T>::get(), Some(u32::MAX));
 		assert_eq!(MaxValidatorsCount::<T>::get(), Some(u32::MAX));
 		assert_eq!(ChillThreshold::<T>::get(), Some(Percent::from_percent(100)));
@@ -898,8 +898,8 @@ benchmarks! {
 
 		Staking::<T>::set_staking_configs(
 			RawOrigin::Root.into(),
-			ConfigOp::Set(BalanceOf::<T>::max_value()),
-			ConfigOp::Set(BalanceOf::<T>::max_value()),
+			ConfigOp::Set(BalanceOf::<T>::MAX),
+			ConfigOp::Set(BalanceOf::<T>::MAX),
 			ConfigOp::Set(0),
 			ConfigOp::Set(0),
 			ConfigOp::Set(Percent::from_percent(0)),
@@ -942,7 +942,7 @@ benchmarks! {
 	}
 
 	set_min_commission {
-		let min_commission = Perbill::max_value();
+		let min_commission = Perbill::MAX;
 	}: _(RawOrigin::Root, min_commission)
 	verify {
 		assert_eq!(MinCommission::<T>::get(), Perbill::from_percent(100));

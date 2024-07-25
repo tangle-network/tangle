@@ -108,11 +108,12 @@ async fn main() -> Result<(), String> {
 		.sign_and_submit_then_watch_default(&sudo_create2_call, &alice)
 		.await
 		.unwrap()
-		.wait_for_finalized_success()
+		.wait_for_finalized()
 		.await
 		.unwrap();
 
-	let deployed_contract = result.find_first::<TangleApi::evm::events::Created>().unwrap();
+	let rresult = result.wait_for_success().await.unwrap();
+	let deployed_contract = rresult.find_first::<TangleApi::evm::events::Created>().unwrap();
 
 	let contract_address = match deployed_contract {
 		Some(contract) => {
@@ -220,7 +221,7 @@ async fn main() -> Result<(), String> {
 		.sign_and_submit_then_watch_default(&sudo_init_tx_call, &alice)
 		.await
 		.unwrap()
-		.wait_for_finalized_success()
+		.wait_for_finalized()
 		.await
 		.unwrap();
 

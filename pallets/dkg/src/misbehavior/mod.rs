@@ -33,8 +33,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Arguments
 	///
-	/// * `data` - The misbehavior report, which could be of different types depending on the
-	/// round.
+	/// * `data` - The misbehavior report, which could be of different types depending on the round.
 	///
 	/// # Returns
 	///

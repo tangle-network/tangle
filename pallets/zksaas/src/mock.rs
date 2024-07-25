@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-#![cfg(test)]
 
 use super::*;
 use crate as pallet_zksaas;

@@ -246,8 +246,7 @@ parameter_types! {
 	pub static AbsoluteMaxNominations: u32 = 16;
 }
 
-type VoterBagsListInstance = pallet_bags_list::Instance1;
-impl pallet_bags_list::Config<VoterBagsListInstance> for Test {
+impl pallet_bags_list::Config<pallet_bags_list::Instance1> for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 	// Staking is the source of truth for voter bags list, since they are not kept up to date.
