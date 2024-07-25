@@ -14,9 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
+use crate::types::*;
 use crate::CurrentRound;
 use crate::Error;
 use frame_support::{assert_noop, assert_ok};
+use std::collections::BTreeMap;
 
 #[test]
 fn delegate_should_work() {
@@ -391,5 +393,135 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 		assert_eq!(updated_operator_delegation.delegator, who);
 		assert_eq!(updated_operator_delegation.amount, amount + additional_amount);
 		assert_eq!(updated_operator_delegation.asset_id, asset_id);
+	});
+}
+
+#[test]
+fn distribute_rewards_should_work() {
+	new_test_ext().execute_with(|| {
+		let round = 1;
+		let operator = 1;
+		let delegator = 2;
+		let asset_id = 1;
+		let amount = 100;
+		let cap = 50;
+		let apy = 10; // 10%
+
+		let initial_balance = Balances::free_balance(&delegator);
+
+		// Set up reward configuration
+		let reward_config = RewardConfig {
+			configs: {
+				let mut map = BTreeMap::new();
+				map.insert(asset_id, RewardConfigForAssetPool { apy, cap });
+				map
+			},
+			whitelisted_blueprint_ids: vec![],
+		};
+		RewardConfigStorage::<Test>::put(reward_config);
+
+		// Set up asset pool lookup
+		AssetLookupRewardPools::<Test>::insert(asset_id, asset_id);
+
+		// Add delegation information
+		AtStake::<Test>::insert(
+			round,
+			operator,
+			OperatorSnapshot {
+				delegations: vec![DelegatorBond { delegator, amount, asset_id }],
+				bond: amount,
+			},
+		);
+
+		// Distribute rewards
+		assert_ok!(MultiAssetDelegation::distribute_rewards(round));
+
+		// Check if rewards were distributed correctly
+		let balance = Balances::free_balance(&delegator);
+		let apy_as_u64: u64 = apy.into();
+		assert_eq!(balance - initial_balance, amount * apy_as_u64 / 100);
+	});
+}
+
+#[test]
+fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
+	new_test_ext().execute_with(|| {
+		let round = 1;
+
+		let operator1 = 1;
+		let operator2 = 2;
+		let delegator1 = 3;
+		let delegator2 = 4;
+
+		let asset_id1 = 1;
+		let asset_id2 = 2;
+
+		let amount1 = 100;
+		let amount2 = 200;
+
+		let cap1 = 50;
+		let cap2 = 150;
+
+		let apy1 = 10; // 10%
+		let apy2 = 20; // 20%
+
+		let initial_balance1 = Balances::free_balance(&delegator1);
+		let initial_balance2 = Balances::free_balance(&delegator2);
+
+		// Set up reward configuration
+		let reward_config = RewardConfig {
+			configs: {
+				let mut map = BTreeMap::new();
+				map.insert(asset_id1, RewardConfigForAssetPool { apy: apy1, cap: cap1 });
+				map.insert(asset_id2, RewardConfigForAssetPool { apy: apy2, cap: cap2 });
+				map
+			},
+			whitelisted_blueprint_ids: vec![],
+		};
+		RewardConfigStorage::<Test>::put(reward_config);
+
+		// Set up asset pool lookup
+		AssetLookupRewardPools::<Test>::insert(asset_id1, asset_id1);
+		AssetLookupRewardPools::<Test>::insert(asset_id2, asset_id2);
+
+		// Add delegation information
+		AtStake::<Test>::insert(
+			round,
+			operator1,
+			OperatorSnapshot {
+				delegations: vec![DelegatorBond {
+					delegator: delegator1,
+					amount: amount1,
+					asset_id: asset_id1,
+				}],
+				bond: amount1,
+			},
+		);
+
+		AtStake::<Test>::insert(
+			round,
+			operator2,
+			OperatorSnapshot {
+				delegations: vec![DelegatorBond {
+					delegator: delegator2,
+					amount: amount2,
+					asset_id: asset_id2,
+				}],
+				bond: amount2,
+			},
+		);
+
+		// Distribute rewards
+		assert_ok!(MultiAssetDelegation::distribute_rewards(round));
+
+		// Check if rewards were distributed correctly
+		let balance1 = Balances::free_balance(&delegator1);
+		let balance2 = Balances::free_balance(&delegator2);
+
+		let apy1_as_u64: u64 = apy1.into();
+		let apy2_as_u64: u64 = apy2.into();
+
+		assert_eq!(balance1 - initial_balance1, amount1 * apy1_as_u64 / 100);
+		assert_eq!(balance2 - initial_balance2, amount2 * apy2_as_u64 / 100);
 	});
 }

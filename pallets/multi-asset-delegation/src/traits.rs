@@ -66,7 +66,9 @@ pub trait MultiAssetDelegationInfo<AccountId, AssetId, PoolId, Balance> {
 	) -> Vec<DelegatorBond<AccountId, Balance, AssetId>>;
 }
 
-impl<T: Config> MultiAssetDelegationInfo<T::AccountId, T::AssetId, T::PoolId, BalanceOf<T>> for Pallet<T> {
+impl<T: Config> MultiAssetDelegationInfo<T::AccountId, T::AssetId, T::PoolId, BalanceOf<T>>
+	for Pallet<T>
+{
 	fn get_current_round() -> RoundIndex {
 		Self::current_round()
 	}

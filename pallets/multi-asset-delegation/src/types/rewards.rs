@@ -20,7 +20,7 @@ use super::*;
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct RewardConfigForAssetPool<Balance> {
 	// The annual percentage yield (APY) for the asset, represented as a fixed point number.
-	pub apy: u128,
+	pub apy: u32,
 	// The minimum amount required before the asset can be rewarded.
 	pub cap: Balance,
 }
@@ -32,4 +32,11 @@ pub struct RewardConfig<PoolId, Balance> {
 	pub configs: BTreeMap<PoolId, RewardConfigForAssetPool<Balance>>,
 	// A list of blueprint IDs that are whitelisted for rewards.
 	pub whitelisted_blueprint_ids: Vec<u32>,
+}
+
+/// Asset action for pools
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
+pub enum AssetAction {
+	Add,
+	Remove,
 }

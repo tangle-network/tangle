@@ -51,7 +51,6 @@ impl<T: Config> Pallet<T> {
 
 		// Transfer the amount to the pallet account
 		if let Some(asset_id) = asset_id {
-
 			T::Fungibles::transfer(
 				asset_id,
 				&who,

@@ -194,6 +194,12 @@ pub mod pallet {
 		StorageMap<_, Twox64Concat, T::PoolId, Vec<T::AssetId>, OptionQuery>;
 
 	#[pallet::storage]
+	#[pallet::getter(fn asset_reward_pool_lookup)]
+	/// Storage for the reward pools
+	pub type AssetLookupRewardPools<T: Config> =
+		StorageMap<_, Twox64Concat, T::AssetId, T::PoolId, OptionQuery>;
+
+	#[pallet::storage]
 	#[pallet::getter(fn reward_config)]
 	/// Storage for the reward configuration, which includes APY, cap for assets, and whitelisted blueprints.
 	pub type RewardConfigStorage<T: Config> =
@@ -250,9 +256,16 @@ pub mod pallet {
 		/// A delegator bond less request has been cancelled.
 		CancelledDelegatorBondLess { who: T::AccountId },
 		/// Event emitted when an incentive APY and cap are set for a reward pool
-		IncentiveAPYAndCapSet { pool_id: T::PoolId, apy: u128, cap: BalanceOf<T> },
+		IncentiveAPYAndCapSet { pool_id: T::PoolId, apy: u32, cap: BalanceOf<T> },
 		/// Event emitted when a blueprint is whitelisted for rewards
 		BlueprintWhitelisted { blueprint_id: u32 },
+		/// Asset has been updated to reward pool
+		AssetUpdatedInPool {
+			who: T::AccountId,
+			pool_id: T::PoolId,
+			asset_id: T::AssetId,
+			action: AssetAction,
+		},
 	}
 
 	/// Errors emitted by the pallet.
@@ -314,6 +327,12 @@ pub mod pallet {
 		NoUnstakeRequests,
 		/// No matching unstake reqests found
 		NoMatchingUnstakeRequest,
+		/// Asset already exists in a reward pool
+		AssetAlreadyInPool,
+		/// Asset not found in reward pool
+		AssetNotInPool,
+		/// The reward pool does not exist
+		PoolNotFound,
 	}
 
 	/// Hooks for the pallet.
@@ -551,7 +570,7 @@ pub mod pallet {
 		pub fn set_incentive_apy_and_cap(
 			origin: OriginFor<T>,
 			pool_id: T::PoolId,
-			apy: u128,
+			apy: u32,
 			cap: BalanceOf<T>,
 		) -> DispatchResult {
 			// Ensure that the origin is authorized
@@ -601,6 +620,27 @@ pub mod pallet {
 
 			// Emit an event
 			Self::deposit_event(Event::BlueprintWhitelisted { blueprint_id });
+
+			Ok(())
+		}
+
+		/// Manage asset id to pool rewards
+		#[pallet::call_index(21)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn manage_asset_in_pool(
+			origin: OriginFor<T>,
+			pool_id: T::PoolId,
+			asset_id: T::AssetId,
+			action: AssetAction,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			match action {
+				AssetAction::Add => Self::add_asset_to_pool(&pool_id, &asset_id)?,
+				AssetAction::Remove => Self::remove_asset_from_pool(&pool_id, &asset_id)?,
+			}
+
+			Self::deposit_event(Event::AssetUpdatedInPool { who, pool_id, asset_id, action });
 
 			Ok(())
 		}
