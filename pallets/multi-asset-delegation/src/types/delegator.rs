@@ -39,7 +39,9 @@ pub struct UnstakeRequest<AssetId, Balance> {
 
 /// Represents a request to reduce the bonded amount of a specific asset.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct BondLessRequest<AssetId, Balance> {
+pub struct BondLessRequest<AccountId, AssetId, Balance> {
+	/// The account ID of the operator.
+	pub operator: AccountId,
 	/// The ID of the asset to reduce the bond of.
 	pub asset_id: AssetId,
 	/// The amount by which to reduce the bond.
@@ -58,7 +60,7 @@ pub struct DelegatorMetadata<AccountId, Balance, AssetId: Encode + Decode + Type
 	/// A list of all current delegations.
 	pub delegations: Vec<BondInfoDelegator<AccountId, Balance, AssetId>>,
 	/// A vector of requests to reduce the bonded amount.
-	pub delegator_bond_less_requests: Vec<BondLessRequest<AssetId, Balance>>,
+	pub delegator_bond_less_requests: Vec<BondLessRequest<AccountId, AssetId, Balance>>,
 	/// The current status of the delegator.
 	pub status: DelegatorStatus,
 }
@@ -91,7 +93,9 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 	}
 
 	/// Returns a reference to the vector of bond less requests.
-	pub fn get_delegator_bond_less_requests(&self) -> &Vec<BondLessRequest<AssetId, Balance>> {
+	pub fn get_delegator_bond_less_requests(
+		&self,
+	) -> &Vec<BondLessRequest<AccountId, AssetId, Balance>> {
 		&self.delegator_bond_less_requests
 	}
 
@@ -218,11 +222,13 @@ mod tests {
 				asset_id: MockAssetId(1),
 				amount: MockBalance(50),
 				requested_round: 1,
+				operator: MockAccountId(1),
 			},
 			BondLessRequest {
 				asset_id: MockAssetId(2),
 				amount: MockBalance(75),
 				requested_round: 2,
+				operator: MockAccountId(1),
 			},
 		];
 		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =

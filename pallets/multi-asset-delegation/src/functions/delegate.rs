@@ -124,6 +124,7 @@ impl<T: Config> Pallet<T> {
 			// Create the bond less request
 			let current_round = Self::current_round();
 			metadata.delegator_bond_less_requests.push(BondLessRequest {
+				operator: delegation.operator.clone(),
 				asset_id,
 				amount,
 				requested_round: current_round,
@@ -235,31 +236,41 @@ impl<T: Config> Pallet<T> {
 
 			let bond_less_request = metadata.delegator_bond_less_requests.remove(request_index);
 
-			// Find the operator associated with the bond less request
-			let operator = metadata
-				.delegations
-				.iter()
-				.find(|d| d.asset_id == asset_id)
-				.ok_or(Error::<T>::NoActiveDelegation)?
-				.operator
-				.clone();
-
 			// Update the operator's metadata
-			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
-				let operator_metadata =
-					maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
+			Operators::<T>::try_mutate(
+				&bond_less_request.operator,
+				|maybe_operator_metadata| -> DispatchResult {
+					let operator_metadata =
+						maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
 
-				// Find the matching delegation and increase its amount
-				let delegation = operator_metadata
-					.delegations
-					.iter_mut()
-					.find(|d| d.asset_id == asset_id)
-					.ok_or(Error::<T>::NoActiveDelegation)?;
+					// Find the matching delegation and increase its amount, or insert a new delegation if not found
+					if let Some(delegation) = operator_metadata
+						.delegations
+						.iter_mut()
+						.find(|d| d.asset_id == asset_id && d.delegator == who.clone())
+					{
+						delegation.amount += amount;
+					} else {
+						operator_metadata.delegations.push(DelegatorBond {
+							delegator: who.clone(),
+							amount,
+							asset_id,
+						});
 
-				delegation.amount += amount;
+						// Increase the delegation count
+						operator_metadata.delegation_count += 1;
+					}
 
-				Ok(())
-			})?;
+					Ok(())
+				},
+			)?;
+
+			// Create a new delegation
+			metadata.delegations.push(BondInfoDelegator {
+				operator: bond_less_request.operator,
+				amount,
+				asset_id,
+			});
 
 			Ok(())
 		})

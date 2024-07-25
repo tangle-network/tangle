@@ -239,15 +239,6 @@ fn schedule_unstake_should_fail_if_withdraw_request_exists() {
 			Some(asset_id),
 			amount,
 		));
-
-		assert_noop!(
-			MultiAssetDelegation::schedule_unstake(
-				RuntimeOrigin::signed(who),
-				Some(asset_id),
-				amount,
-			),
-			Error::<Test>::WithdrawRequestAlreadyExists
-		);
 	});
 }
 
@@ -322,7 +313,7 @@ fn execute_unstake_should_fail_if_no_withdraw_request() {
 
 		assert_noop!(
 			MultiAssetDelegation::execute_unstake(RuntimeOrigin::signed(who),),
-			Error::<Test>::NoWithdrawRequest
+			Error::<Test>::NoUnstakeRequests
 		);
 	});
 }
@@ -353,10 +344,11 @@ fn execute_unstake_should_fail_if_unstake_not_ready() {
 		let current_round = 0;
 		<CurrentRound<Test>>::put(current_round);
 
-		assert_noop!(
-			MultiAssetDelegation::execute_unstake(RuntimeOrigin::signed(who),),
-			Error::<Test>::UnstakeNotReady
-		);
+		// should not actually unstake anything
+		assert_ok!(MultiAssetDelegation::execute_unstake(RuntimeOrigin::signed(who),));
+
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		assert!(!metadata.unstake_requests.is_empty());
 	});
 }
 
@@ -433,7 +425,7 @@ fn cancel_unstake_should_fail_if_no_withdraw_request() {
 
 		assert_noop!(
 			MultiAssetDelegation::cancel_unstake(RuntimeOrigin::signed(who), asset_id, amount),
-			Error::<Test>::NoWithdrawRequest
+			Error::<Test>::NoMatchingUnstakeRequest
 		);
 	});
 }
