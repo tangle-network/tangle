@@ -128,24 +128,18 @@ pub fn schnorr_proof<T: Config>(
 		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 	match role {
-		ThresholdSignatureRoleType::ZcashFrostP256 => {
-			verify_invalid_schnorr_proof::<T, P256Sha256>(index, &round1_msg)?
-		},
-		ThresholdSignatureRoleType::ZcashFrostP384 => {
-			verify_invalid_schnorr_proof::<T, P384Sha384>(index, &round1_msg)?
-		},
-		ThresholdSignatureRoleType::ZcashFrostSecp256k1 => {
-			verify_invalid_schnorr_proof::<T, Secp256K1Sha256>(index, &round1_msg)?
-		},
-		ThresholdSignatureRoleType::ZcashFrostRistretto255 => {
-			verify_invalid_schnorr_proof::<T, Ristretto255Sha512>(index, &round1_msg)?
-		},
-		ThresholdSignatureRoleType::ZcashFrostEd25519 => {
-			verify_invalid_schnorr_proof::<T, Ed25519Sha512>(index, &round1_msg)?
-		},
-		ThresholdSignatureRoleType::ZcashFrostEd448 => {
-			verify_invalid_schnorr_proof::<T, Ed448Shake256>(index, &round1_msg)?
-		},
+		ThresholdSignatureRoleType::ZcashFrostP256 =>
+			verify_invalid_schnorr_proof::<T, P256Sha256>(index, &round1_msg)?,
+		ThresholdSignatureRoleType::ZcashFrostP384 =>
+			verify_invalid_schnorr_proof::<T, P384Sha384>(index, &round1_msg)?,
+		ThresholdSignatureRoleType::ZcashFrostSecp256k1 =>
+			verify_invalid_schnorr_proof::<T, Secp256K1Sha256>(index, &round1_msg)?,
+		ThresholdSignatureRoleType::ZcashFrostRistretto255 =>
+			verify_invalid_schnorr_proof::<T, Ristretto255Sha512>(index, &round1_msg)?,
+		ThresholdSignatureRoleType::ZcashFrostEd25519 =>
+			verify_invalid_schnorr_proof::<T, Ed25519Sha512>(index, &round1_msg)?,
+		ThresholdSignatureRoleType::ZcashFrostEd448 =>
+			verify_invalid_schnorr_proof::<T, Ed448Shake256>(index, &round1_msg)?,
 		_ => Err(Error::<T>::InvalidFrostSignatureScheme)?,
 	};
 
@@ -210,24 +204,18 @@ pub fn invalid_secret_share<T: Config>(
 		.map_err(|_| Error::<T>::MalformedRoundMessage)?;
 
 	match role {
-		ThresholdSignatureRoleType::ZcashFrostP256 => {
-			verify_invalid_secret_share::<T, P256Sha256>(index, &round1_msg, &round2_msg)?
-		},
-		ThresholdSignatureRoleType::ZcashFrostP384 => {
-			verify_invalid_secret_share::<T, P384Sha384>(index, &round1_msg, &round2_msg)?
-		},
-		ThresholdSignatureRoleType::ZcashFrostSecp256k1 => {
-			verify_invalid_secret_share::<T, Secp256K1Sha256>(index, &round1_msg, &round2_msg)?
-		},
-		ThresholdSignatureRoleType::ZcashFrostRistretto255 => {
-			verify_invalid_secret_share::<T, Ristretto255Sha512>(index, &round1_msg, &round2_msg)?
-		},
-		ThresholdSignatureRoleType::ZcashFrostEd25519 => {
-			verify_invalid_secret_share::<T, Ed25519Sha512>(index, &round1_msg, &round2_msg)?
-		},
-		ThresholdSignatureRoleType::ZcashFrostEd448 => {
-			verify_invalid_secret_share::<T, Ed448Shake256>(index, &round1_msg, &round2_msg)?
-		},
+		ThresholdSignatureRoleType::ZcashFrostP256 =>
+			verify_invalid_secret_share::<T, P256Sha256>(index, &round1_msg, &round2_msg)?,
+		ThresholdSignatureRoleType::ZcashFrostP384 =>
+			verify_invalid_secret_share::<T, P384Sha384>(index, &round1_msg, &round2_msg)?,
+		ThresholdSignatureRoleType::ZcashFrostSecp256k1 =>
+			verify_invalid_secret_share::<T, Secp256K1Sha256>(index, &round1_msg, &round2_msg)?,
+		ThresholdSignatureRoleType::ZcashFrostRistretto255 =>
+			verify_invalid_secret_share::<T, Ristretto255Sha512>(index, &round1_msg, &round2_msg)?,
+		ThresholdSignatureRoleType::ZcashFrostEd25519 =>
+			verify_invalid_secret_share::<T, Ed25519Sha512>(index, &round1_msg, &round2_msg)?,
+		ThresholdSignatureRoleType::ZcashFrostEd448 =>
+			verify_invalid_secret_share::<T, Ed448Shake256>(index, &round1_msg, &round2_msg)?,
 		_ => Err(Error::<T>::InvalidFrostSignatureScheme)?,
 	};
 

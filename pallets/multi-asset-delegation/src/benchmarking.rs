@@ -14,17 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::types::*;
-use crate::Pallet as MultiAssetDelegation;
+use crate::{types::*, Pallet as MultiAssetDelegation};
 use frame_benchmarking::{account, benchmarks, whitelisted_caller};
-use frame_support::ensure;
-use frame_support::pallet_prelude::DispatchResult;
-use frame_support::traits::Currency;
-use frame_support::traits::Get;
-use frame_support::traits::ReservableCurrency;
+use frame_support::{
+	ensure,
+	pallet_prelude::DispatchResult,
+	traits::{Currency, Get, ReservableCurrency},
+};
 use frame_system::RawOrigin;
-use sp_runtime::traits::Zero;
-use sp_runtime::DispatchError;
+use sp_runtime::{traits::Zero, DispatchError};
 
 const SEED: u32 = 0;
 

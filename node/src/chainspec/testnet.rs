@@ -15,11 +15,13 @@
 
 #![allow(clippy::type_complexity)]
 
-use crate::distributions::{
-	combine_distributions, get_unique_distribution_results,
-	mainnet::{self, DistributionResult},
+use crate::{
+	distributions::{
+		combine_distributions, get_unique_distribution_results,
+		mainnet::{self, DistributionResult},
+	},
+	testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key},
 };
-use crate::testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key};
 use hex_literal::hex;
 use pallet_airdrop_claims::MultiAddress;
 use pallet_ibc::pallet::AssetConfig;
@@ -28,9 +30,8 @@ use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{ecdsa, ed25519, sr25519, Pair, Public, H160, U256};
-use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::{
-	traits::{IdentifyAccount, Verify},
+	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
 };
 use std::{collections::BTreeMap, str::FromStr};
@@ -397,7 +398,8 @@ fn testnet_genesis(
 					// Derived from SS58 (42 prefix) address
 					// SS58: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
 					// hex: 0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d
-					// Using the full hex key, truncating to the first 20 bytes (the first 40 hex chars)
+					// Using the full hex key, truncating to the first 20 bytes (the first 40 hex
+					// chars)
 					H160::from_str("8efcaf2c4ebbf88bf07f3bb44a2869c4c675ad7a")
 						.expect("internal H160 is valid; qed"),
 					fp_evm::GenesisAccount {

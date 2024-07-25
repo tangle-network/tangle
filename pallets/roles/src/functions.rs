@@ -1,17 +1,12 @@
 /// Functions for the pallet.
 use super::*;
 use crate::{offences::ValidatorOffence, types::*};
-use frame_support::traits::DefensiveSaturating;
-use frame_support::traits::UnixTime;
 use frame_support::{
 	pallet_prelude::DispatchResult,
-	traits::{DefensiveResult, Imbalance, OnUnbalanced},
+	traits::{DefensiveResult, DefensiveSaturating, Imbalance, OnUnbalanced, UnixTime},
 };
-use pallet_staking::ActiveEra;
-use pallet_staking::EraPayout;
-use sp_runtime::SaturatedConversion;
-use sp_runtime::Saturating;
-use sp_runtime::{traits::Convert, Perbill};
+use pallet_staking::{ActiveEra, EraPayout};
+use sp_runtime::{traits::Convert, Perbill, SaturatedConversion, Saturating};
 use sp_staking::offence::Offence;
 use sp_std::collections::btree_map::BTreeMap;
 use tangle_primitives::jobs::{traits::JobsHandler, JobId, ReportRestakerOffence};
@@ -95,8 +90,8 @@ impl<T: Config> Pallet<T> {
 					.find_map(|record| if record.role == *role { record.amount } else { None })
 					.unwrap_or_else(|| Zero::zero());
 				ensure!(
-					updated_role_restaking_amount
-						>= current_ledger.profile.get_total_profile_restake(),
+					updated_role_restaking_amount >=
+						current_ledger.profile.get_total_profile_restake(),
 					Error::<T>::InsufficientRestakingBond
 				);
 			}
@@ -109,27 +104,25 @@ impl<T: Config> Pallet<T> {
 		let min_restaking_bond = MinRestakingBond::<T>::get();
 		for record in updated_profile.clone().get_records() {
 			match updated_profile.clone() {
-				Profile::Independent(_) => {
+				Profile::Independent(_) =>
 					if roles_with_active_jobs.contains(&record.role) {
 						ensure!(
 							record.amount.unwrap_or_default() >= min_restaking_bond,
 							Error::<T>::InsufficientRestakingBond
 						);
 						ensure!(
-							record.amount.unwrap_or_default()
-								>= current_ledger.restake_for(&record.role),
+							record.amount.unwrap_or_default() >=
+								current_ledger.restake_for(&record.role),
 							Error::<T>::InsufficientRestakingBond
 						);
-					}
-				},
-				Profile::Shared(profile) => {
+					},
+				Profile::Shared(profile) =>
 					if roles_with_active_jobs.contains(&record.role) {
 						ensure!(
 							profile.amount >= current_ledger.profile.get_total_profile_restake(),
 							Error::<T>::InsufficientRestakingBond
 						);
-					}
-				},
+					},
 			}
 		}
 		Ok(())
@@ -402,8 +395,8 @@ impl<T: Config> Pallet<T> {
 		);
 
 		let missing_restake_ratio =
-			Perbill::from_percent(T::MaxRestake::get().deconstruct().into())
-				- restake_to_stake_ratio;
+			Perbill::from_percent(T::MaxRestake::get().deconstruct().into()) -
+				restake_to_stake_ratio;
 		log::debug!(
 			target: "pallet-roles",
 			"EraIndex {:?} missing_restake_ratio {:?}",

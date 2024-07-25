@@ -23,8 +23,8 @@ use ibc_runtime_api::IbcRuntimeApi;
 use sc_client_api::{
 	backend::{Backend, StorageProvider},
 	client::BlockchainEvents,
+	BlockBackend, ProofProvider,
 };
-use sc_client_api::{BlockBackend, ProofProvider};
 use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_grandpa::{
 	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState,
@@ -39,8 +39,7 @@ use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
 use sp_keystore::KeystorePtr;
 use sp_runtime::traits::Block as BlockT;
-use tangle_primitives::AssetId;
-use tangle_primitives::Block;
+use tangle_primitives::{AssetId, Block};
 use tangle_runtime::BlockNumber;
 
 // Runtime

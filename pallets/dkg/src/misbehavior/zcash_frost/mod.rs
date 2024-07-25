@@ -37,12 +37,10 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		let role = validate_frost_role::<T>(data.role_type)?;
 		match justification {
-			ZCashFrostJustification::Keygen { participants, t, reason } => {
-				Self::verify_zcash_frost_keygen_misbehavior(role, data, participants, *t, reason)
-			},
-			ZCashFrostJustification::Signing { participants, t, reason } => {
-				Self::verify_zcash_frost_signing_misbehavior(role, data, participants, *t, reason)
-			},
+			ZCashFrostJustification::Keygen { participants, t, reason } =>
+				Self::verify_zcash_frost_keygen_misbehavior(role, data, participants, *t, reason),
+			ZCashFrostJustification::Signing { participants, t, reason } =>
+				Self::verify_zcash_frost_signing_misbehavior(role, data, participants, *t, reason),
 		}
 	}
 
@@ -56,12 +54,10 @@ impl<T: Config> Pallet<T> {
 		reason: &KeygenAborted,
 	) -> DispatchResult {
 		match reason {
-			KeygenAborted::InvalidProofOfKnowledge { round1 } => {
-				keygen::schnorr_proof::<T>(role, data, participants, round1)
-			},
-			KeygenAborted::InvalidSecretShare { round1, round2 } => {
-				keygen::invalid_secret_share::<T>(role, data, participants, round1, round2)
-			},
+			KeygenAborted::InvalidProofOfKnowledge { round1 } =>
+				keygen::schnorr_proof::<T>(role, data, participants, round1),
+			KeygenAborted::InvalidSecretShare { round1, round2 } =>
+				keygen::invalid_secret_share::<T>(role, data, participants, round1, round2),
 		}
 	}
 
@@ -80,7 +76,7 @@ impl<T: Config> Pallet<T> {
 		let group_pubkey = &[];
 
 		match reason {
-			SigningAborted::InvalidSignatureShare { round1, round2 } => {
+			SigningAborted::InvalidSignatureShare { round1, round2 } =>
 				sign::invalid_signature_share::<T>(
 					role,
 					data,
@@ -89,8 +85,7 @@ impl<T: Config> Pallet<T> {
 					round2,
 					group_pubkey,
 					msg_to_sign,
-				)
-			},
+				),
 		}
 	}
 }
@@ -100,12 +95,12 @@ pub fn validate_frost_role<T: Config>(
 ) -> Result<ThresholdSignatureRoleType, Error<T>> {
 	match role {
 		RoleType::Tss(inner) => match inner {
-			ThresholdSignatureRoleType::ZcashFrostEd25519
-			| ThresholdSignatureRoleType::ZcashFrostEd448
-			| ThresholdSignatureRoleType::ZcashFrostP256
-			| ThresholdSignatureRoleType::ZcashFrostP384
-			| ThresholdSignatureRoleType::ZcashFrostRistretto255
-			| ThresholdSignatureRoleType::ZcashFrostSecp256k1 => Ok(inner),
+			ThresholdSignatureRoleType::ZcashFrostEd25519 |
+			ThresholdSignatureRoleType::ZcashFrostEd448 |
+			ThresholdSignatureRoleType::ZcashFrostP256 |
+			ThresholdSignatureRoleType::ZcashFrostP384 |
+			ThresholdSignatureRoleType::ZcashFrostRistretto255 |
+			ThresholdSignatureRoleType::ZcashFrostSecp256k1 => Ok(inner),
 			_ => Err(Error::<T>::InvalidRoleType),
 		},
 		_ => Err(Error::<T>::InvalidRoleType),
@@ -116,15 +111,12 @@ pub fn convert_error<T: Config>(err: frost_core::error::Error) -> Error<T> {
 	match err {
 		frost_core::error::Error::Field(_field_err) => Error::<T>::FrostFieldError,
 		frost_core::error::Error::Group(_group_err) => Error::<T>::FrostGroupError,
-		frost_core::error::Error::SerializationError => {
-			Error::<T>::InvalidFrostMessageSerialization
-		},
-		frost_core::error::Error::DeserializationError => {
-			Error::<T>::InvalidFrostMessageDeserialization
-		},
-		frost_core::error::Error::IdentifierDerivationNotSupported => {
-			Error::<T>::IdentifierDerivationNotSupported
-		},
+		frost_core::error::Error::SerializationError =>
+			Error::<T>::InvalidFrostMessageSerialization,
+		frost_core::error::Error::DeserializationError =>
+			Error::<T>::InvalidFrostMessageDeserialization,
+		frost_core::error::Error::IdentifierDerivationNotSupported =>
+			Error::<T>::IdentifierDerivationNotSupported,
 		frost_core::error::Error::MalformedSignature => Error::<T>::MalformedFrostSignature,
 		frost_core::error::Error::InvalidSignature => Error::<T>::InvalidFrostSignature,
 		frost_core::error::Error::MalformedVerifyingKey => Error::<T>::MalformedFrostVerifyingKey,
@@ -133,9 +125,8 @@ pub fn convert_error<T: Config>(err: frost_core::error::Error) -> Error<T> {
 		frost_core::error::Error::InvalidSignatureShare => Error::<T>::InvalidFrostSignatureShare,
 		frost_core::error::Error::DuplicatedIdentifier => Error::<T>::DuplicateIdentifier,
 		frost_core::error::Error::UnknownIdentifier => Error::<T>::UnknownIdentifier,
-		frost_core::error::Error::IncorrectNumberOfIdentifiers => {
-			Error::<T>::IncorrectNumberOfIdentifiers
-		},
+		frost_core::error::Error::IncorrectNumberOfIdentifiers =>
+			Error::<T>::IncorrectNumberOfIdentifiers,
 		frost_core::error::Error::IdentityCommitment => Error::<T>::IdentityCommitment,
 		_ => Error::<T>::InvalidSignatureData,
 	}

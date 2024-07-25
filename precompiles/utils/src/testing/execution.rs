@@ -165,7 +165,7 @@ impl<'p, P: PrecompileSet> PrecompilesTester<'p, P> {
 			Some(Ok(PrecompileOutput {
 				exit_status: ExitSucceed::Returned,
 				output: execution_output,
-			})) => {
+			})) =>
 				if execution_output != output {
 					eprintln!(
 						"Output (bytes): {:?}",
@@ -176,8 +176,7 @@ impl<'p, P: PrecompileSet> PrecompilesTester<'p, P> {
 						core::str::from_utf8(&execution_output).ok()
 					);
 					panic!("Output doesn't match");
-				}
-			},
+				},
 			other => panic!("Unexpected result: {other:?}"),
 		}
 

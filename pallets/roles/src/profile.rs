@@ -16,8 +16,7 @@
 
 use crate::{BalanceOf, Config};
 use frame_support::pallet_prelude::*;
-use sp_runtime::traits::Zero;
-use sp_runtime::Saturating;
+use sp_runtime::{traits::Zero, Saturating};
 use sp_std::vec::Vec;
 use tangle_primitives::roles::RoleType;
 
@@ -98,11 +97,10 @@ impl<T: Config> Profile<T> {
 	/// Returns the total profile restake.
 	pub fn get_total_profile_restake(&self) -> BalanceOf<T> {
 		match self {
-			Profile::Independent(profile) => {
+			Profile::Independent(profile) =>
 				profile.records.iter().fold(Zero::zero(), |acc, record| {
 					acc.saturating_add(record.amount.unwrap_or_default())
-				})
-			},
+				}),
 			Profile::Shared(profile) => profile.amount,
 		}
 	}
@@ -118,9 +116,8 @@ impl<T: Config> Profile<T> {
 	/// Returns roles in the profile.
 	pub fn get_roles(&self) -> Vec<RoleType> {
 		match self {
-			Profile::Independent(profile) => {
-				profile.records.iter().map(|record| record.role).collect()
-			},
+			Profile::Independent(profile) =>
+				profile.records.iter().map(|record| record.role).collect(),
 			Profile::Shared(profile) => profile.records.iter().map(|record| record.role).collect(),
 		}
 	}
@@ -128,12 +125,10 @@ impl<T: Config> Profile<T> {
 	/// Checks if the profile contains given role.
 	pub fn has_role(&self, role_type: RoleType) -> bool {
 		match self {
-			Profile::Independent(profile) => {
-				profile.records.iter().any(|record| record.role == role_type)
-			},
-			Profile::Shared(profile) => {
-				profile.records.iter().any(|record| record.role == role_type)
-			},
+			Profile::Independent(profile) =>
+				profile.records.iter().any(|record| record.role == role_type),
+			Profile::Shared(profile) =>
+				profile.records.iter().any(|record| record.role == role_type),
 		}
 	}
 

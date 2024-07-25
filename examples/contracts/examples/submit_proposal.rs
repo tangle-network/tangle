@@ -1,30 +1,34 @@
-use std::fs;
-use std::sync::Arc;
-use std::time::Duration;
+use std::{fs, sync::Arc, time::Duration};
 
-use crate::tangle_testnet_runtime::api::runtime_types::pallet_roles::profile::Record;
 use crate::tangle_testnet_runtime::api::{
 	self as TangleApi,
 	runtime_types::{
 		bounded_collections::bounded_vec::BoundedVec,
+		pallet_roles::profile::Record,
 		tangle_primitives::{jobs, roles},
 	},
 };
-use ethers::contract::{abigen, FunctionCall};
-use ethers::middleware::Middleware;
-use ethers::middleware::SignerMiddleware;
-use ethers::providers::{Http, Provider};
-use ethers::signers::LocalWallet;
-use ethers::signers::Signer as EthSigner;
-use ethers::types::{Address, Bytes};
+use ethers::{
+	contract::{abigen, FunctionCall},
+	middleware::{Middleware, SignerMiddleware},
+	providers::{Http, Provider},
+	signers::{LocalWallet, Signer as EthSigner},
+	types::{Address, Bytes},
+};
 use serde_json::Value;
 use sp_core::{Pair, H256, U256};
 use std::str::FromStr;
-use tangle_subxt::subxt::OnlineClient;
-use tangle_subxt::subxt::{tx::Signer, utils::AccountId32, utils::H160, PolkadotConfig};
-use tangle_subxt::tangle_testnet_runtime;
-use tangle_subxt::tangle_testnet_runtime::api::runtime_types::primitive_types::U256 as WebbU256;
-use tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_testnet_runtime::RuntimeCall;
+use tangle_subxt::{
+	subxt::{
+		tx::Signer,
+		utils::{AccountId32, H160},
+		OnlineClient, PolkadotConfig,
+	},
+	tangle_testnet_runtime,
+	tangle_testnet_runtime::api::runtime_types::{
+		primitive_types::U256 as WebbU256, tangle_testnet_runtime::RuntimeCall,
+	},
+};
 use tokio::time::sleep;
 
 fn get_signing_rules_abi() -> (Value, Value) {

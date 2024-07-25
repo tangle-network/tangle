@@ -33,19 +33,17 @@ use frame_support::{
 use frame_system::{EnsureRoot, EnsureSignedBy};
 use sp_core::H256;
 use sp_io;
-use sp_runtime::DispatchResult;
 use sp_runtime::{
 	curve::PiecewiseLinear,
 	testing::UintAuthorityId,
 	traits::{IdentityLookup, Zero},
-	BuildStorage,
+	BuildStorage, DispatchResult,
 };
 use sp_staking::{
 	offence::{DisableStrategy, OffenceDetails, OnOffenceHandler},
 	OnStakingUpdate,
 };
-use tangle_primitives::jobs::ReportRestakerOffence;
-use tangle_primitives::roles::RoleType;
+use tangle_primitives::{jobs::ReportRestakerOffence, roles::RoleType};
 
 pub const INIT_TIMESTAMP: u64 = 30_000;
 pub const BLOCK_TIME: u64 = 1000;

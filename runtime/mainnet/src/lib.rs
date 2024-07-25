@@ -54,8 +54,7 @@ use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use pallet_tx_pause::RuntimeCallNameOf;
-use parity_scale_codec::MaxEncodedLen;
-use parity_scale_codec::{Decode, Encode};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
@@ -76,11 +75,12 @@ use sp_runtime::{
 	SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
-use tangle_primitives::jobs::{traits::JobToFee, JobSubmission};
-use tangle_primitives::roles::ValidatorRewardDistribution;
-use tangle_primitives::verifier::arkworks::ArkworksVerifierGroth16Bn254;
-use tangle_primitives::verifier::circom::CircomVerifierGroth16Bn254;
-use tangle_primitives::{jobs::JobType, AssetId};
+use tangle_primitives::{
+	jobs::{traits::JobToFee, JobSubmission, JobType},
+	roles::ValidatorRewardDistribution,
+	verifier::{arkworks::ArkworksVerifierGroth16Bn254, circom::CircomVerifierGroth16Bn254},
+	AssetId,
+};
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -669,8 +669,8 @@ impl Get<Option<BalancingConfig>> for OffchainRandomBalancing {
 			max => {
 				let seed = sp_io::offchain::random_seed();
 				let random = <u32>::decode(&mut TrailingZeroInput::new(&seed))
-					.expect("input is padded with zeroes; qed")
-					% max.saturating_add(1);
+					.expect("input is padded with zeroes; qed") %
+					max.saturating_add(1);
 				random as usize
 			},
 		};
@@ -1156,10 +1156,10 @@ impl
 		>,
 	) -> DispatchResult {
 		match data.result {
-			JobResult::DKGPhaseOne(_)
-			| JobResult::DKGPhaseTwo(_)
-			| JobResult::DKGPhaseThree(_)
-			| JobResult::DKGPhaseFour(_) => Dkg::verify(data.result),
+			JobResult::DKGPhaseOne(_) |
+			JobResult::DKGPhaseTwo(_) |
+			JobResult::DKGPhaseThree(_) |
+			JobResult::DKGPhaseFour(_) => Dkg::verify(data.result),
 			JobResult::ZkSaaSPhaseOne(_) | JobResult::ZkSaaSPhaseTwo(_) => ZkSaaS::verify(data),
 		}
 	}
@@ -1249,10 +1249,10 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAddi
 		>,
 	) -> Balance {
 		match job.job_type {
-			JobType::DKGTSSPhaseOne(_)
-			| JobType::DKGTSSPhaseTwo(_)
-			| JobType::DKGTSSPhaseThree(_)
-			| JobType::DKGTSSPhaseFour(_) => Dkg::job_to_fee(job),
+			JobType::DKGTSSPhaseOne(_) |
+			JobType::DKGTSSPhaseTwo(_) |
+			JobType::DKGTSSPhaseThree(_) |
+			JobType::DKGTSSPhaseFour(_) => Dkg::job_to_fee(job),
 			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => ZkSaaS::job_to_fee(job),
 		}
 	}
@@ -1390,15 +1390,15 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
 			ProxyType::Any => true,
 			ProxyType::NonTransfer => !matches!(
 				c,
-				RuntimeCall::Balances(..)
-					| RuntimeCall::Vesting(pallet_vesting::Call::vested_transfer { .. })
+				RuntimeCall::Balances(..) |
+					RuntimeCall::Vesting(pallet_vesting::Call::vested_transfer { .. })
 			),
 			ProxyType::Governance => matches!(
 				c,
-				RuntimeCall::Democracy(..)
-					| RuntimeCall::Council(..)
-					| RuntimeCall::Elections(..)
-					| RuntimeCall::Treasury(..)
+				RuntimeCall::Democracy(..) |
+					RuntimeCall::Council(..) |
+					RuntimeCall::Elections(..) |
+					RuntimeCall::Treasury(..)
 			),
 			ProxyType::Staking => {
 				matches!(c, RuntimeCall::Staking(..))
@@ -1630,9 +1630,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		len: usize,
 	) -> Option<Result<(), TransactionValidityError>> {
 		match self {
-			RuntimeCall::Ethereum(call) => {
-				call.pre_dispatch_self_contained(info, dispatch_info, len)
-			},
+			RuntimeCall::Ethereum(call) =>
+				call.pre_dispatch_self_contained(info, dispatch_info, len),
 			_ => None,
 		}
 	}
@@ -1642,11 +1641,10 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		info: Self::SignedInfo,
 	) -> Option<sp_runtime::DispatchResultWithInfo<PostDispatchInfoOf<Self>>> {
 		match self {
-			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) => {
+			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) =>
 				Some(call.dispatch(RuntimeOrigin::from(
 					pallet_ethereum::RawOrigin::EthereumTransaction(info),
-				)))
-			},
+				))),
 			_ => None,
 		}
 	}

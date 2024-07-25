@@ -309,7 +309,8 @@ impl<
 		MaxSubmissionLen,
 		MaxProofLen,
 		MaxAdditionalParamsLen,
-	> where
+	>
+where
 	AccountId: Clone,
 {
 	pub fn participants(&self) -> Option<BoundedVec<AccountId, MaxParticipants>> {

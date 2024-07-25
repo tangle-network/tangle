@@ -1,8 +1,9 @@
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 //
-// This file is part of pallet-evm-precompileset-assets-erc20 package, originally developed by Purestake
-// Inc. pallet-evm-precompileset-assets-erc20 package used in Tangle Network in terms of GPLv3.
+// This file is part of pallet-evm-precompileset-assets-erc20 package, originally developed by
+// Purestake Inc. pallet-evm-precompileset-assets-erc20 package used in Tangle Network in terms of
+// GPLv3.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -440,8 +441,8 @@ fn transfer_not_enough_founds() {
 					ForeignPCall::transfer { to: Address(Charlie.into()), value: 50.into() },
 				)
 				.execute_reverts(|output| {
-					from_utf8(output).unwrap().contains("Dispatched call failed with error: ")
-						&& from_utf8(output).unwrap().contains("BalanceLow")
+					from_utf8(output).unwrap().contains("Dispatched call failed with error: ") &&
+						from_utf8(output).unwrap().contains("BalanceLow")
 				});
 		});
 }
@@ -679,7 +680,8 @@ fn transfer_from_self() {
 
 			precompiles()
 				.prepare_test(
-					CryptoAlith, // CryptoAlith sending transferFrom herself, no need for allowance.
+					CryptoAlith, /* CryptoAlith sending transferFrom herself, no need for
+					              * allowance. */
 					ForeignAssetId(0u128),
 					ForeignPCall::transfer_from {
 						from: Address(CryptoAlith.into()),

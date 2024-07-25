@@ -20,8 +20,7 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 
 use sp_runtime::RuntimeDebug;
-use sp_std::collections::btree_map::BTreeMap;
-use sp_std::vec::Vec;
+use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 
 pub mod delegator;
 pub mod operator;

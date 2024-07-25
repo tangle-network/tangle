@@ -1,14 +1,15 @@
 use crate::tangle_testnet_runtime::api::runtime_types::pallet_roles::profile::Record;
 use sp_core::Pair;
-use subxt::OnlineClient;
-use subxt::{self, tx::Signer, utils::AccountId32, PolkadotConfig};
+use subxt::{self, tx::Signer, utils::AccountId32, OnlineClient, PolkadotConfig};
 
-use crate::tangle_testnet_runtime;
-use crate::tangle_testnet_runtime::api::{
-	self,
-	runtime_types::{
-		bounded_collections::bounded_vec::BoundedVec,
-		tangle_primitives::{jobs, roles},
+use crate::{
+	tangle_testnet_runtime,
+	tangle_testnet_runtime::api::{
+		self,
+		runtime_types::{
+			bounded_collections::bounded_vec::BoundedVec,
+			tangle_primitives::{jobs, roles},
+		},
 	},
 };
 

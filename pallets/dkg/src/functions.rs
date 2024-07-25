@@ -178,16 +178,15 @@ impl<T: Config> Pallet<T> {
 				&data.signature,
 				&data.verifying_key,
 			),
-			DigitalSignatureScheme::Bls381 => {
-				verify_bls12_381_signature::<T>(&data.data, &data.signature, &data.verifying_key)
-			},
-			DigitalSignatureScheme::SchnorrEd25519
-			| DigitalSignatureScheme::SchnorrEd448
-			| DigitalSignatureScheme::SchnorrP256
-			| DigitalSignatureScheme::SchnorrP384
-			| DigitalSignatureScheme::SchnorrSecp256k1
-			| DigitalSignatureScheme::SchnorrTaproot
-			| DigitalSignatureScheme::SchnorrRistretto255 => verify_dkg_signature_schnorr_frost::<T>(
+			DigitalSignatureScheme::Bls381 =>
+				verify_bls12_381_signature::<T>(&data.data, &data.signature, &data.verifying_key),
+			DigitalSignatureScheme::SchnorrEd25519 |
+			DigitalSignatureScheme::SchnorrEd448 |
+			DigitalSignatureScheme::SchnorrP256 |
+			DigitalSignatureScheme::SchnorrP384 |
+			DigitalSignatureScheme::SchnorrSecp256k1 |
+			DigitalSignatureScheme::SchnorrTaproot |
+			DigitalSignatureScheme::SchnorrRistretto255 => verify_dkg_signature_schnorr_frost::<T>(
 				data.signature_scheme,
 				&data.data,
 				&data.signature,

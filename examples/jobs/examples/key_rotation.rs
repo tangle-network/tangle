@@ -1,15 +1,17 @@
-use crate::tangle_testnet_runtime::api::runtime_types::pallet_roles::profile::Record;
 use crate::tangle_testnet_runtime::api::{
 	self as TangleApi,
 	runtime_types::{
 		bounded_collections::bounded_vec::BoundedVec,
+		pallet_roles::profile::Record,
 		tangle_primitives::{jobs, roles},
 	},
 };
 
 use sp_core::{ByteArray, Pair};
-use tangle_subxt::subxt::{tx::Signer, utils::AccountId32, OnlineClient, PolkadotConfig};
-use tangle_subxt::tangle_testnet_runtime;
+use tangle_subxt::{
+	subxt::{tx::Signer, utils::AccountId32, OnlineClient, PolkadotConfig},
+	tangle_testnet_runtime,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), String> {

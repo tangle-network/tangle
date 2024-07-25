@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::types::*;
-use crate::Pallet;
-use frame_support::ensure;
-use frame_support::pallet_prelude::DispatchResult;
+use crate::{types::*, Pallet};
+use frame_support::{ensure, pallet_prelude::DispatchResult};
 
 use frame_support::traits::fungibles::Mutate;
 
-use frame_support::traits::Get;
-use frame_support::{sp_runtime::traits::AccountIdConversion, traits::tokens::Preservation};
+use frame_support::{
+	sp_runtime::traits::AccountIdConversion,
+	traits::{tokens::Preservation, Get},
+};
 use sp_runtime::traits::Zero;
 
 impl<T: Config> Pallet<T> {
@@ -41,7 +41,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the user is already a delegator, if the bond amount is too low, or if the transfer fails.
+	/// Returns an error if the user is already a delegator, if the bond amount is too low, or if
+	/// the transfer fails.
 	pub fn process_deposit(
 		who: T::AccountId,
 		asset_id: Option<T::AssetId>,
@@ -135,7 +136,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the user is not a delegator, if there is no unstake request, or if the unstake request is not ready.
+	/// Returns an error if the user is not a delegator, if there is no unstake request, or if the
+	/// unstake request is not ready.
 	pub fn process_execute_unstake(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -146,8 +148,8 @@ impl<T: Config> Pallet<T> {
 
 			// Check if the requested round has been reached
 			ensure!(
-				Self::current_round()
-					>= T::LeaveDelegatorsDelay::get() + unstake_request.requested_round,
+				Self::current_round() >=
+					T::LeaveDelegatorsDelay::get() + unstake_request.requested_round,
 				Error::<T>::UnstakeNotReady
 			);
 

@@ -1,23 +1,29 @@
-use ::ibc::core::ics24_host::identifier::PortId;
-use ::ibc::core::ics26_routing::context::{Module, ModuleId};
-use core::convert::Infallible;
-use core::fmt::{Display, Formatter};
-use core::str::FromStr;
+use ::ibc::core::{
+	ics24_host::identifier::PortId,
+	ics26_routing::context::{Module, ModuleId},
+};
+use core::{
+	convert::Infallible,
+	fmt::{Display, Formatter},
+	str::FromStr,
+};
 use cumulus_primitives_core::ParaId;
 use frame_support::traits::fungibles::metadata::Inspect;
 use ibc_primitives::{runtime_interface::ss58_to_account_id_32, IbcAccount};
 use light_client_common::StandaloneChain;
-use pallet_ibc::ics20::MemoData;
-use pallet_ibc::ics20::SubstrateMultihopXcmHandlerNone;
-use pallet_ibc::ics20::ValidateMemo;
-use pallet_ibc::ics20_fee::NonFlatFeeConverter;
-use pallet_ibc::{light_client_common::ChainType, routing::ModuleRouter};
-use pallet_ibc::{DenomToAssetId, LightClientProtocol};
-use pallet_ibc::{IbcAssetIds, IbcAssets, IbcDenoms};
+use pallet_ibc::{
+	ics20::{MemoData, SubstrateMultihopXcmHandlerNone, ValidateMemo},
+	ics20_fee::NonFlatFeeConverter,
+	light_client_common::ChainType,
+	routing::ModuleRouter,
+	DenomToAssetId, IbcAssetIds, IbcAssets, IbcDenoms, LightClientProtocol,
+};
 use sp_core::keccak_256;
-use sp_runtime::traits::AccountIdConversion;
-use sp_runtime::DispatchError;
-use sp_runtime::{Either, Either::Left, Either::Right};
+use sp_runtime::{
+	traits::AccountIdConversion,
+	DispatchError, Either,
+	Either::{Left, Right},
+};
 
 use super::*;
 

@@ -53,9 +53,8 @@ pub fn verify_secp256k1_ecdsa_signature<T: Config>(
 ) -> DispatchResult {
 	use k256::elliptic_curve::group::GroupEncoding;
 	let pub_key = match derivation_path.as_ref().zip(chain_code) {
-		Some((path, chain_code)) => {
-			derive_child_public_key::<T, Secp256k1>(expected_key, path, chain_code)?
-		},
+		Some((path, chain_code)) =>
+			derive_child_public_key::<T, Secp256k1>(expected_key, path, chain_code)?,
 		None => expected_key.to_vec(),
 	};
 
@@ -97,9 +96,8 @@ pub fn verify_secp256r1_ecdsa_signature<T: Config>(
 ) -> DispatchResult {
 	use p256::elliptic_curve::group::GroupEncoding;
 	let pub_key = match derivation_path.as_ref().zip(chain_code) {
-		Some((path, chain_code)) => {
-			derive_child_public_key::<T, Secp256r1>(expected_key, path, chain_code)?
-		},
+		Some((path, chain_code)) =>
+			derive_child_public_key::<T, Secp256r1>(expected_key, path, chain_code)?,
 		None => expected_key.to_vec(),
 	};
 
@@ -160,9 +158,8 @@ pub fn verify_stark_ecdsa_signature<T: Config>(
 
 	let (r, s) = parse_signature(signature)?;
 	let pub_key = match derivation_path.as_ref().zip(chain_code) {
-		Some((path, chain_code)) => {
-			derive_child_public_key::<T, Stark>(expected_key, path, chain_code)?
-		},
+		Some((path, chain_code)) =>
+			derive_child_public_key::<T, Stark>(expected_key, path, chain_code)?,
 		None => expected_key.to_vec(),
 	};
 	let public_key_x: Scalar<Stark> = Point::from_bytes(pub_key)

@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::types::OperatorStatus;
-use crate::CurrentRound;
-use crate::Error;
+use crate::{types::OperatorStatus, CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
 
 #[test]
@@ -285,8 +283,8 @@ fn schedule_operator_bond_less_not_an_operator() {
 
 //         // Attempt to schedule bond less with active services
 //         assert_noop!(
-//             MultiAssetDelegation::schedule_operator_bond_less(RuntimeOrigin::signed(1), bond_less_amount),
-//             Error::<Test>::ActiveServicesUsingTNT
+//             MultiAssetDelegation::schedule_operator_bond_less(RuntimeOrigin::signed(1),
+// bond_less_amount),             Error::<Test>::ActiveServicesUsingTNT
 //         );
 //     });
 // }

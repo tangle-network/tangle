@@ -16,29 +16,44 @@
 
 //! # Tangle Multi Asset Delegation Pallet
 //!
-//! This crate provides the delegation framework for the Tangle network, enabling the delegation of assets to operators for earning rewards.
+//! This crate provides the delegation framework for the Tangle network, enabling the delegation of
+//! assets to operators for earning rewards.
 //!
 //! ## Key Components
 //!
-//! - **Operators**: Operators are entities within the Tangle network that can receive delegated assets from delegators. They manage these assets, perform jobs and generate rewards for delegators.
-//! - **Deposits**: Depositors must first reserve (deposit) their assets before they can delegate them to operators. This ensures that the assets are locked and available for delegation.
-//! - **Delegation**: Delegation is the process where delegators assign their deposited assets to operators to earn rewards.
+//! - **Operators**: Operators are entities within the Tangle network that can receive delegated
+//!   assets from delegators. They manage these assets, perform jobs and generate rewards for
+//!   delegators.
+//! - **Deposits**: Depositors must first reserve (deposit) their assets before they can delegate
+//!   them to operators. This ensures that the assets are locked and available for delegation.
+//! - **Delegation**: Delegation is the process where delegators assign their deposited assets to
+//!   operators to earn rewards.
 //!
 //! ## Workflow for Delegators
 //!
-//! 1. **Deposit**: Before a delegator can delegate assets to an operator, they must first deposit the desired amount of assets. This reserves the assets in the delegator's account.
-//! 2. **Delegate**: After depositing assets, the delegator can delegate these assets to an operator. The operator then manages these assets, and the delegator can earn rewards from the operator's activities.
-//! 3. **Bond Less Request**: If a delegator wants to reduce their delegation, they can schedule a bond less request. This request will be executed after a specified delay, ensuring network stability.
-//! 4. **Unstake Request**: To completely remove assets from delegation, a delegator must submit an unstake request. Similar to bond less requests, unstake requests also have a delay before they can be executed.
+//! 1. **Deposit**: Before a delegator can delegate assets to an operator, they must first deposit
+//!    the desired amount of assets. This reserves the assets in the delegator's account.
+//! 2. **Delegate**: After depositing assets, the delegator can delegate these assets to an
+//!    operator. The operator then manages these assets, and the delegator can earn rewards from the
+//!    operator's activities.
+//! 3. **Bond Less Request**: If a delegator wants to reduce their delegation, they can schedule a
+//!    bond less request. This request will be executed after a specified delay, ensuring network
+//!    stability.
+//! 4. **Unstake Request**: To completely remove assets from delegation, a delegator must submit an
+//!    unstake request. Similar to bond less requests, unstake requests also have a delay before
+//!    they can be executed.
 //!
 //! ## Workflow for Operators
 //!
-//! - **Join Operators**: An account can join as an operator by depositing a minimum bond amount. This bond is reserved and ensures that the operator has a stake in the network.
-//! - **Leave Operators**: Operators can leave the network by scheduling a leave request. This request is subject to a delay, during which the operator's status changes to 'Leaving'.
+//! - **Join Operators**: An account can join as an operator by depositing a minimum bond amount.
+//!   This bond is reserved and ensures that the operator has a stake in the network.
+//! - **Leave Operators**: Operators can leave the network by scheduling a leave request. This
+//!   request is subject to a delay, during which the operator's status changes to 'Leaving'.
 //! - **Bond More**: Operators can increase their bond to strengthen their stake in the network.
-//! - **Bond Less**: Operators can schedule a bond reduction request, which is executed after a delay.
-//! - **Go Offline/Online**: Operators can change their status to offline if they need to temporarily stop participating in the network, and can come back online when ready.
-//!
+//! - **Bond Less**: Operators can schedule a bond reduction request, which is executed after a
+//!   delay.
+//! - **Go Offline/Online**: Operators can change their status to offline if they need to
+//!   temporarily stop participating in the network, and can come back online when ready.
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
@@ -62,19 +77,16 @@ pub use traits::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-	use crate::traits::ServiceManager;
-	use crate::types::*;
-	use frame_support::traits::fungibles;
+	use crate::{traits::ServiceManager, types::*};
 	use frame_support::{
 		dispatch::DispatchResult,
 		pallet_prelude::*,
-		traits::{Currency, LockableCurrency, ReservableCurrency},
+		traits::{fungibles, Currency, LockableCurrency, ReservableCurrency},
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
-	use sp_std::collections::btree_map::BTreeMap;
-	use sp_std::vec::Vec;
+	use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
@@ -184,7 +196,8 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn reward_config)]
-	/// Storage for the reward configuration, which includes APY, cap for assets, and whitelisted blueprints.
+	/// Storage for the reward configuration, which includes APY, cap for assets, and whitelisted
+	/// blueprints.
 	pub type RewardConfigStorage<T: Config> =
 		StorageValue<_, RewardConfig<T::AssetId, BalanceOf<T>>, OptionQuery>;
 

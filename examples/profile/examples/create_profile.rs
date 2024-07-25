@@ -1,11 +1,14 @@
-use crate::tangle_testnet_runtime::api::runtime_types::pallet_roles::profile::Record;
 use crate::tangle_testnet_runtime::api::{
 	self as TangleApi,
-	runtime_types::{bounded_collections::bounded_vec::BoundedVec, tangle_primitives::roles},
+	runtime_types::{
+		bounded_collections::bounded_vec::BoundedVec, pallet_roles::profile::Record,
+		tangle_primitives::roles,
+	},
 };
-use tangle_subxt::subxt::OnlineClient;
-use tangle_subxt::subxt::PolkadotConfig;
-use tangle_subxt::tangle_testnet_runtime;
+use tangle_subxt::{
+	subxt::{OnlineClient, PolkadotConfig},
+	tangle_testnet_runtime,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), String> {

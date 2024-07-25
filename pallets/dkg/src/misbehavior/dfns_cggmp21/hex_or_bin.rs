@@ -15,12 +15,12 @@
 /// work well sometimes due to limitations.
 ///
 /// # Limitations
-/// * Only works with byte arrays that have staticly-known size. `Array::default()`
-///   should return `Array` filled with zeroes
-/// * Using `HexOrBin` compiles, but deseralization basically always fails except for
-///   deserializing empty arrays
-/// * Only defined for arrays that implement [`Default`] trait. Note that `[u8; N]`
-///   implements this trait only for limited amount of `N`.
+/// * Only works with byte arrays that have staticly-known size. `Array::default()` should return
+///   `Array` filled with zeroes
+/// * Using `HexOrBin` compiles, but deseralization basically always fails except for deserializing
+///   empty arrays
+/// * Only defined for arrays that implement [`Default`] trait. Note that `[u8; N]` implements this
+///   trait only for limited amount of `N`.
 pub struct HexOrBin;
 
 impl<T> serde_with::SerializeAs<T> for HexOrBin

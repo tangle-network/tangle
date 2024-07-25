@@ -214,13 +214,12 @@ impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAddi
 		>,
 	) -> Balance {
 		match job.job_type {
-			JobType::DKGTSSPhaseOne(_)
-			| JobType::DKGTSSPhaseTwo(_)
-			| JobType::DKGTSSPhaseThree(_)
-			| JobType::DKGTSSPhaseFour(_) => MockDKGPallet::job_to_fee(job),
-			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => {
-				MockZkSaasPallet::job_to_fee(job)
-			},
+			JobType::DKGTSSPhaseOne(_) |
+			JobType::DKGTSSPhaseTwo(_) |
+			JobType::DKGTSSPhaseThree(_) |
+			JobType::DKGTSSPhaseFour(_) => MockDKGPallet::job_to_fee(job),
+			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) =>
+				MockZkSaasPallet::job_to_fee(job),
 		}
 	}
 

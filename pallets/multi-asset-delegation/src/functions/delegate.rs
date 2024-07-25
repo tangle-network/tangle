@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::types::*;
-use crate::Pallet;
-use frame_support::ensure;
-use frame_support::pallet_prelude::DispatchResult;
-use frame_support::traits::Get;
+use crate::{types::*, Pallet};
+use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
 
 use sp_runtime::traits::Zero;
 
@@ -101,7 +98,8 @@ impl<T: Config> Pallet<T> {
 	/// # Errors
 	///
 	/// Returns an error if the delegator has no active delegation,
-	/// if there is an existing bond less request, or if the bond less amount is greater than the current delegation amount.
+	/// if there is an existing bond less request, or if the bond less amount is greater than the
+	/// current delegation amount.
 	pub fn process_schedule_delegator_bond_less(
 		who: T::AccountId,
 		operator: T::AccountId,
@@ -172,7 +170,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator has no bond less request or if the bond less request is not ready.
+	/// Returns an error if the delegator has no bond less request or if the bond less request is
+	/// not ready.
 	pub fn process_execute_delegator_bond_less(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -185,8 +184,8 @@ impl<T: Config> Pallet<T> {
 
 			// Check if the requested round has been reached
 			ensure!(
-				Self::current_round()
-					>= T::DelegationBondLessDelay::get() + bond_less_request.requested_round,
+				Self::current_round() >=
+					T::DelegationBondLessDelay::get() + bond_less_request.requested_round,
 				Error::<T>::BondLessNotReady
 			);
 
@@ -212,7 +211,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator has no bond less request or if there is no active delegation.
+	/// Returns an error if the delegator has no bond less request or if there is no active
+	/// delegation.
 	pub fn process_cancel_delegator_bond_less(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;

@@ -89,8 +89,8 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 // EDG Genesis Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // EDG Snapshot Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // Leaderboard airdrop : 2% (5% immediate release)(95% vested over two years, with one month cliff)
-// Polkadot validator airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
-// ***
+// Polkadot validator airdrop : 1% (5% immediate release)(95% vested over two years, with one month
+// cliff) ***
 
 pub fn get_edgeware_genesis_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/edgeware_genesis_participants.json")
@@ -377,7 +377,8 @@ pub fn get_distribution_for(
 		let remaining_fraction = 1.0 - cliff_fraction;
 
 		// the entire value is claimable here
-		// the claims pallet will lock all the vesting balance so in effect only claimable-amount is usable
+		// the claims pallet will lock all the vesting balance so in effect only claimable-amount is
+		// usable
 		claims.push((address.clone(), value, statement_kind));
 		let amount_on_cliff = (vested_amount as f64 * cliff_fraction) as u128;
 		let amount_after_cliff = (vested_amount as f64 * remaining_fraction) as u128;
@@ -632,16 +633,16 @@ fn test_distribution_shares() {
 	); // 0.95%
 
 	// Test total claims
-	let total_claims = edgeware_genesis_list.claims.len()
-		+ edgeware_snapshot_list.claims.len()
-		+ polkadot_genesis_list.claims.len()
-		+ leaderboard_genesis_list.claims.len();
+	let total_claims = edgeware_genesis_list.claims.len() +
+		edgeware_snapshot_list.claims.len() +
+		polkadot_genesis_list.claims.len() +
+		leaderboard_genesis_list.claims.len();
 	assert_eq!(total_claims, 29452);
 
-	let total_vesting = edgeware_genesis_list.vesting.len()
-		+ edgeware_snapshot_list.vesting.len()
-		+ polkadot_genesis_list.vesting.len()
-		+ leaderboard_genesis_list.vesting.len();
+	let total_vesting = edgeware_genesis_list.vesting.len() +
+		edgeware_snapshot_list.vesting.len() +
+		polkadot_genesis_list.vesting.len() +
+		leaderboard_genesis_list.vesting.len();
 	assert_eq!(total_vesting, 29452);
 
 	let unique_dist = crate::distributions::get_unique_distribution_results(vec![
@@ -660,7 +661,8 @@ fn test_distribution_shares() {
 		.map(|(_, amount, _, _, _)| amount)
 		.sum();
 
-	//println!("Remaining total team amount {:?}", 30000000000000000000000000 - total_team_claims_amount - total_direct_team_amount - 5000 * UNIT);
+	//println!("Remaining total team amount {:?}", 30000000000000000000000000 -
+	// total_team_claims_amount - total_direct_team_amount - 5000 * UNIT);
 	assert_eq!(total_team_claims_amount, 29856849309999998760386560); // 29856849 TNT
 	assert_eq!(
 		Perbill::from_rational(total_team_claims_amount, TOTAL_SUPPLY),
@@ -672,16 +674,16 @@ fn test_distribution_shares() {
 	// 	get_initial_endowed_accounts().0.into_iter().map(|(_, amount)| amount).sum();
 	// assert_eq!(total_endowmwnent - total_treasury_amount, 8900000000000000000000); // 8900 TNT
 
-	let total_genesis_endowment = total_investor_amount
-		+ total_direct_team_amount
-		+ foundation_total_amount
-		+ total_edgeware_claims_amount
-		+ total_edgeware_snapshot_claims_amount
-		+ total_leaderboard_claims_amount
-		+ total_polkadot_claims_amount
-		+ total_treasury_amount
-		+ 5000 * UNIT
-		+ total_team_claims_amount;
+	let total_genesis_endowment = total_investor_amount +
+		total_direct_team_amount +
+		foundation_total_amount +
+		total_edgeware_claims_amount +
+		total_edgeware_snapshot_claims_amount +
+		total_leaderboard_claims_amount +
+		total_polkadot_claims_amount +
+		total_treasury_amount +
+		5000 * UNIT +
+		total_team_claims_amount;
 	//+ total_endowmwnent;
 
 	assert_eq!(total_genesis_endowment, 100000000000000006345897383); // 100000000 TNT

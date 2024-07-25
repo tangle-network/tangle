@@ -26,13 +26,12 @@ use sp_core::U256;
 use sp_runtime::traits::BlakeTwo256;
 use sp_std::sync::Arc;
 use std::fs;
-use tangle_primitives::jobs::FallbackOptions;
 use tangle_primitives::{
 	jobs::{
 		DKGTSSKeyRefreshResult, DKGTSSKeyRotationResult, DKGTSSPhaseFourJobType,
 		DKGTSSPhaseOneJobType, DKGTSSPhaseThreeJobType, DKGTSSPhaseTwoJobType,
-		DKGTSSSignatureResult, DigitalSignatureScheme, Groth16ProveRequest, Groth16System,
-		HyperData, JobSubmission, JobType, RpcResponseJobsData, ZkSaaSCircuitResult,
+		DKGTSSSignatureResult, DigitalSignatureScheme, FallbackOptions, Groth16ProveRequest,
+		Groth16System, HyperData, JobSubmission, JobType, RpcResponseJobsData, ZkSaaSCircuitResult,
 		ZkSaaSPhaseOneJobType, ZkSaaSPhaseTwoJobType, ZkSaaSPhaseTwoRequest, ZkSaaSSystem,
 	},
 	roles::{RoleType, ThresholdSignatureRoleType, ZeroKnowledgeRoleType},

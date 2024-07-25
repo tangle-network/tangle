@@ -15,8 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use malachite_base::num::conversion::traits::FromStringBase;
-use parity_scale_codec::alloc::vec;
-use parity_scale_codec::{Decode, Encode};
+use parity_scale_codec::{alloc::vec, Decode, Encode};
 use scale_info::TypeInfo;
 use sp_core::RuntimeDebug;
 use sp_std::prelude::*;

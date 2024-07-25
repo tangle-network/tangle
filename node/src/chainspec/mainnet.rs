@@ -30,19 +30,17 @@ use parity_scale_codec::alloc::collections::BTreeMap;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::H160;
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::{
 	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
 };
 use tangle_primitives::types::{BlockNumber, Signature};
-use tangle_runtime::EVMConfig;
 use tangle_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	IbcConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId, RuntimeGenesisConfig,
-	SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId,
-	VestingConfig, UNIT, WASM_BINARY,
+	EVMConfig, IbcConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId,
+	RuntimeGenesisConfig, SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
+	TreasuryPalletId, VestingConfig, UNIT, WASM_BINARY,
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.

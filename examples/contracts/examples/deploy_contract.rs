@@ -1,13 +1,13 @@
 use serde_json::Value;
 use sp_core::{H256, U256};
-use tangle_subxt::subxt::OnlineClient;
-use tangle_subxt::subxt::{utils::H160, PolkadotConfig};
-use tangle_subxt::tangle_testnet_runtime;
-use tangle_subxt::tangle_testnet_runtime::api::runtime_types::primitive_types::U256 as WebbU256;
+use tangle_subxt::{
+	subxt::{utils::H160, OnlineClient, PolkadotConfig},
+	tangle_testnet_runtime,
+	tangle_testnet_runtime::api::runtime_types::primitive_types::U256 as WebbU256,
+};
 
 use crate::tangle_testnet_runtime::api as TangleApi;
-use std::fs;
-use std::str::FromStr;
+use std::{fs, str::FromStr};
 use tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_testnet_runtime::RuntimeCall;
 
 fn get_signing_rules_abi() -> (Value, Value) {

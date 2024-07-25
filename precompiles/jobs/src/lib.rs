@@ -119,12 +119,11 @@ where
 
 		let threshold_signature_role = match role_type {
 			Some(RoleType::Tss(role)) => role,
-			_ => {
+			_ =>
 				return Err(PrecompileFailure::Revert {
 					exit_status: ExitRevert::Reverted,
 					output: revert_as_bytes("Invalid role type!"),
-				})
-			},
+				}),
 		};
 
 		// Create DKG job type with the provided parameters

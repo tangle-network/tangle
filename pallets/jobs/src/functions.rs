@@ -3,8 +3,7 @@ use crate::types::{
 	DKGTSSKeyRotationResultOf, DKGTSSKeySubmissionResultOf, DKGTSSSignatureResultOf,
 	ParticipantKeyOf, ParticipantKeysOf, ZkSaaSCircuitResultOf, ZkSaaSProofResultOf,
 };
-use sp_runtime::traits::Zero;
-use sp_runtime::Saturating;
+use sp_runtime::{traits::Zero, Saturating};
 use tangle_primitives::{
 	jobs::{
 		DKGTSSKeyRefreshResult, DKGTSSPhaseOneJobType, FallbackOptions, JobType, JobWithResult,
@@ -197,8 +196,8 @@ impl<T: Config> Pallet<T> {
 					FallbackOptions::Destroy => {
 						// if the role is TSS, then destory only if signing is impossible
 						if matches!(role_type, RoleType::Tss(_)) {
-							if new_participants.len()
-								>= job_info
+							if new_participants.len() >=
+								job_info
 									.job_type
 									.clone()
 									.get_threshold()

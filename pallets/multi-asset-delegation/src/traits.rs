@@ -14,15 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::types::*;
-use crate::Config;
+use crate::{types::*, Config};
 
 use parity_scale_codec::{Decode, Encode};
-use scale_info::prelude::vec;
-use scale_info::prelude::vec::Vec;
+use scale_info::prelude::{vec, vec::Vec};
 
-use sp_runtime::traits::Zero;
-use sp_runtime::RuntimeDebug;
+use sp_runtime::{traits::Zero, RuntimeDebug};
 
 pub trait ServiceManager<AccountId, Balance> {
 	/// List active services for the given account ID.

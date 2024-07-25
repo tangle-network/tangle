@@ -46,16 +46,16 @@ use std::vec;
 use frame_election_provider_support::{onchain, SequentialPhragmen};
 use pallet_staking::Config;
 use sp_io::TestExternalities;
-use sp_runtime::DispatchResult;
 use sp_runtime::{
 	curve::PiecewiseLinear,
 	testing::TestXt,
 	traits::{self, Extrinsic as ExtrinsicT, IdentifyAccount, IdentityLookup, Verify, Zero},
-	AccountId32, BuildStorage, Perbill,
+	AccountId32, BuildStorage, DispatchResult, Perbill,
 };
-use tangle_primitives::jobs::ReportRestakerOffence;
-use tangle_primitives::roles::traits::RolesHandler;
-use tangle_primitives::roles::RoleType;
+use tangle_primitives::{
+	jobs::ReportRestakerOffence,
+	roles::{traits::RolesHandler, RoleType},
+};
 
 pub struct MockSessionHandler;
 impl OneSessionHandler<AccountId> for MockSessionHandler {

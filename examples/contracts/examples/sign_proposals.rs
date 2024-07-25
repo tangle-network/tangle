@@ -5,9 +5,10 @@ use crate::tangle_testnet_runtime::api::runtime_types::{
 
 use sp_core::Pair;
 
-use tangle_subxt::subxt::OnlineClient;
-use tangle_subxt::subxt::PolkadotConfig;
-use tangle_subxt::tangle_testnet_runtime;
+use tangle_subxt::{
+	subxt::{OnlineClient, PolkadotConfig},
+	tangle_testnet_runtime,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), String> {
