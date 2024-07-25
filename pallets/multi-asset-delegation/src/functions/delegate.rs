@@ -57,12 +57,20 @@ impl<T: Config> Pallet<T> {
 				metadata.deposits.remove(&asset_id);
 			}
 
-			// Create a new delegation
-			metadata.delegations.push(BondInfoDelegator {
-				operator: operator.clone(),
-				amount,
-				asset_id,
-			});
+			// Check if the delegation exists and update it, otherwise create a new delegation
+			if let Some(delegation) = metadata
+				.delegations
+				.iter_mut()
+				.find(|d| d.operator == operator && d.asset_id == asset_id)
+			{
+				delegation.amount += amount;
+			} else {
+				metadata.delegations.push(BondInfoDelegator {
+					operator: operator.clone(),
+					amount,
+					asset_id,
+				});
+			}
 
 			// Update the status
 			metadata.status = DelegatorStatus::Active;
@@ -72,15 +80,22 @@ impl<T: Config> Pallet<T> {
 				let operator_metadata =
 					maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
 
-				// Increase the delegation count
-				operator_metadata.delegation_count += 1;
-
-				// Add the new delegation
-				operator_metadata.delegations.push(DelegatorBond {
-					delegator: who.clone(),
-					amount,
-					asset_id,
-				});
+				// Check if the delegation exists and update it, otherwise create a new delegation
+				if let Some(delegation) = operator_metadata
+					.delegations
+					.iter_mut()
+					.find(|d| d.delegator == who && d.asset_id == asset_id)
+				{
+					delegation.amount += amount;
+				} else {
+					operator_metadata.delegations.push(DelegatorBond {
+						delegator: who.clone(),
+						amount,
+						asset_id,
+					});
+					// Increase the delegation count only when a new delegation is added
+					operator_metadata.delegation_count += 1;
+				}
 
 				Ok(())
 			})?;

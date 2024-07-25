@@ -318,3 +318,78 @@ fn execute_delegator_bond_less_should_fail_if_not_ready() {
 		);
 	});
 }
+
+#[test]
+fn delegate_should_not_create_multiple_on_repeat_delegation() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who = 1;
+		let operator = 2;
+		let asset_id = VDOT;
+		let amount = 100;
+		let additional_amount = 50;
+
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+
+		create_and_mint_tokens(VDOT, who, amount + additional_amount);
+
+		// Deposit first
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who),
+			Some(asset_id),
+			amount + additional_amount,
+		));
+
+		// Delegate first time
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(who),
+			operator,
+			asset_id,
+			amount,
+		));
+
+		// Assert first delegation
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		assert!(metadata.deposits.get(&asset_id).is_some());
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.operator, operator);
+		assert_eq!(delegation.amount, amount);
+		assert_eq!(delegation.asset_id, asset_id);
+
+		// Check the operator metadata
+		let operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 1);
+		assert_eq!(operator_metadata.delegations.len(), 1);
+		let operator_delegation = &operator_metadata.delegations[0];
+		assert_eq!(operator_delegation.delegator, who);
+		assert_eq!(operator_delegation.amount, amount);
+		assert_eq!(operator_delegation.asset_id, asset_id);
+
+		// Delegate additional amount
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(who),
+			operator,
+			asset_id,
+			additional_amount,
+		));
+
+		// Assert updated delegation
+		let updated_metadata = MultiAssetDelegation::delegators(who).unwrap();
+		assert!(updated_metadata.deposits.get(&asset_id).is_none());
+		assert_eq!(updated_metadata.delegations.len(), 1);
+		let updated_delegation = &updated_metadata.delegations[0];
+		assert_eq!(updated_delegation.operator, operator);
+		assert_eq!(updated_delegation.amount, amount + additional_amount);
+		assert_eq!(updated_delegation.asset_id, asset_id);
+
+		// Check the updated operator metadata
+		let updated_operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
+		assert_eq!(updated_operator_metadata.delegation_count, 1);
+		assert_eq!(updated_operator_metadata.delegations.len(), 1);
+		let updated_operator_delegation = &updated_operator_metadata.delegations[0];
+		assert_eq!(updated_operator_delegation.delegator, who);
+		assert_eq!(updated_operator_delegation.amount, amount + additional_amount);
+		assert_eq!(updated_operator_delegation.asset_id, asset_id);
+	});
+}
