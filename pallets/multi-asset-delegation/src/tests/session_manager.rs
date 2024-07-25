@@ -33,11 +33,7 @@ fn handle_round_change_should_work() {
 		create_and_mint_tokens(VDOT, who, amount);
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
@@ -84,7 +80,7 @@ fn handle_round_change_with_bond_less_should_work() {
 		// Deposit and delegate first
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator1),
-			Some(asset_id),
+			asset_id,
 			amount1,
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
@@ -96,7 +92,7 @@ fn handle_round_change_with_bond_less_should_work() {
 
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator2),
-			Some(asset_id),
+			asset_id,
 			amount2,
 		));
 		assert_ok!(MultiAssetDelegation::delegate(

@@ -44,30 +44,25 @@ impl<T: Config> Pallet<T> {
 	/// Returns an error if the user is already a delegator, if the bond amount is too low, or if the transfer fails.
 	pub fn process_deposit(
 		who: T::AccountId,
-		asset_id: Option<T::AssetId>,
+		asset_id: T::AssetId,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		ensure!(amount >= T::MinDelegateAmount::get(), Error::<T>::BondTooLow);
 
 		// Transfer the amount to the pallet account
-		if let Some(asset_id) = asset_id {
-			T::Fungibles::transfer(
-				asset_id,
-				&who,
-				&Self::pallet_account(),
-				amount,
-				Preservation::Expendable,
-			)?; // Transfer the assets to the pallet account
+		T::Fungibles::transfer(
+			asset_id,
+			&who,
+			&Self::pallet_account(),
+			amount,
+			Preservation::Expendable,
+		)?; // Transfer the assets to the pallet account
 
-			// Update storage
-			Delegators::<T>::mutate(&who, |maybe_metadata| {
-				let metadata = maybe_metadata.get_or_insert_with(Default::default);
-				metadata.deposits.entry(asset_id).and_modify(|e| *e += amount).or_insert(amount);
-			});
-		} else {
-			// TODO : handle if TNT deposit
-			todo!();
-		}
+		// Update storage
+		Delegators::<T>::mutate(&who, |maybe_metadata| {
+			let metadata = maybe_metadata.get_or_insert_with(Default::default);
+			metadata.deposits.entry(asset_id).and_modify(|e| *e += amount).or_insert(amount);
+		});
 
 		Ok(())
 	}
@@ -85,17 +80,11 @@ impl<T: Config> Pallet<T> {
 	/// Returns an error if the user is not a delegator, if there is insufficient balance, or if the asset is not supported.
 	pub fn process_schedule_unstake(
 		who: T::AccountId,
-		asset_id: Option<T::AssetId>,
+		asset_id: T::AssetId,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
-
-			if asset_id.is_none() {
-				todo!(); // Handle TNT deposit
-			}
-
-			let asset_id = asset_id.unwrap();
 
 			// Ensure there is enough deposited balance
 			let balance =

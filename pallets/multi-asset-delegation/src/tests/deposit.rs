@@ -48,7 +48,7 @@ fn deposit_should_work_for_fungible_asset() {
 
 		create_and_mint_tokens(VDOT, who, amount);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), VDOT, amount,));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
@@ -58,7 +58,7 @@ fn deposit_should_work_for_fungible_asset() {
 			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
 				who,
 				amount,
-				asset_id: Some(VDOT),
+				asset_id: VDOT,
 			})
 		);
 	});
@@ -73,7 +73,7 @@ fn multiple_deposit_should_work() {
 
 		create_and_mint_tokens(VDOT, who, amount * 4);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), VDOT, amount,));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
@@ -83,11 +83,11 @@ fn multiple_deposit_should_work() {
 			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
 				who,
 				amount,
-				asset_id: Some(VDOT),
+				asset_id: VDOT,
 			})
 		);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), VDOT, amount));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
@@ -97,7 +97,7 @@ fn multiple_deposit_should_work() {
 			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
 				who,
 				amount,
-				asset_id: Some(VDOT),
+				asset_id: VDOT,
 			})
 		);
 	});
@@ -113,7 +113,7 @@ fn deposit_should_fail_for_insufficient_balance() {
 		create_and_mint_tokens(VDOT, who, 100);
 
 		assert_noop!(
-			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,),
+			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), VDOT, amount,),
 			ArithmeticError::Underflow
 		);
 	});
@@ -129,7 +129,7 @@ fn deposit_should_fail_for_bond_too_low() {
 		create_and_mint_tokens(VDOT, who, amount);
 
 		assert_noop!(
-			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(VDOT), amount,),
+			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), VDOT, amount,),
 			Error::<Test>::BondTooLow
 		);
 	});
@@ -146,15 +146,11 @@ fn schedule_unstake_should_work() {
 		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 
 		assert_ok!(MultiAssetDelegation::schedule_unstake(
 			RuntimeOrigin::signed(who),
-			Some(asset_id),
+			asset_id,
 			amount,
 		));
 
@@ -179,11 +175,7 @@ fn schedule_unstake_should_fail_if_not_delegator() {
 		create_and_mint_tokens(VDOT, who, 100);
 
 		assert_noop!(
-			MultiAssetDelegation::schedule_unstake(
-				RuntimeOrigin::signed(who),
-				Some(asset_id),
-				amount,
-			),
+			MultiAssetDelegation::schedule_unstake(RuntimeOrigin::signed(who), asset_id, amount,),
 			Error::<Test>::NotDelegator
 		);
 	});
@@ -200,14 +192,10 @@ fn schedule_unstake_should_fail_for_insufficient_balance() {
 		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), Some(asset_id), 100,));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, 100,));
 
 		assert_noop!(
-			MultiAssetDelegation::schedule_unstake(
-				RuntimeOrigin::signed(who),
-				Some(asset_id),
-				amount,
-			),
+			MultiAssetDelegation::schedule_unstake(RuntimeOrigin::signed(who), asset_id, amount,),
 			Error::<Test>::InsufficientBalance
 		);
 	});
@@ -224,16 +212,12 @@ fn schedule_unstake_should_fail_if_withdraw_request_exists() {
 		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 
 		// Schedule the first unstake
 		assert_ok!(MultiAssetDelegation::schedule_unstake(
 			RuntimeOrigin::signed(who),
-			Some(asset_id),
+			asset_id,
 			amount,
 		));
 	});
@@ -250,14 +234,10 @@ fn execute_unstake_should_work() {
 		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit and schedule unstake first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 		assert_ok!(MultiAssetDelegation::schedule_unstake(
 			RuntimeOrigin::signed(who),
-			Some(asset_id),
+			asset_id,
 			amount,
 		));
 
@@ -302,11 +282,7 @@ fn execute_unstake_should_fail_if_no_withdraw_request() {
 		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 
 		assert_noop!(
 			MultiAssetDelegation::execute_unstake(RuntimeOrigin::signed(who),),
@@ -326,14 +302,10 @@ fn execute_unstake_should_fail_if_unstake_not_ready() {
 		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit and schedule unstake first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 		assert_ok!(MultiAssetDelegation::schedule_unstake(
 			RuntimeOrigin::signed(who),
-			Some(asset_id),
+			asset_id,
 			amount,
 		));
 
@@ -360,14 +332,10 @@ fn cancel_unstake_should_work() {
 		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit and schedule unstake first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 		assert_ok!(MultiAssetDelegation::schedule_unstake(
 			RuntimeOrigin::signed(who),
-			Some(asset_id),
+			asset_id,
 			amount,
 		));
 
@@ -414,11 +382,7 @@ fn cancel_unstake_should_fail_if_no_withdraw_request() {
 		create_and_mint_tokens(VDOT, who, 100);
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 
 		assert_noop!(
 			MultiAssetDelegation::cancel_unstake(RuntimeOrigin::signed(who), asset_id, amount),

@@ -34,11 +34,7 @@ fn delegate_should_work() {
 		create_and_mint_tokens(VDOT, who, amount);
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
@@ -81,11 +77,7 @@ fn schedule_delegator_bond_less_should_work() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		// Deposit and delegate first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
 			operator,
@@ -129,11 +121,7 @@ fn execute_delegator_bond_less_should_work() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		// Deposit, delegate and schedule bond less first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
 			operator,
@@ -174,11 +162,7 @@ fn cancel_delegator_bond_less_should_work() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		// Deposit, delegate and schedule bond less first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
 			operator,
@@ -229,7 +213,7 @@ fn delegate_should_fail_if_not_enough_balance() {
 
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(who),
-			Some(asset_id),
+			asset_id,
 			amount - 20,
 		));
 
@@ -254,11 +238,7 @@ fn schedule_delegator_bond_less_should_fail_if_no_delegation() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 
 		assert_noop!(
 			MultiAssetDelegation::schedule_delegator_bond_less(
@@ -286,11 +266,7 @@ fn execute_delegator_bond_less_should_fail_if_not_ready() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
 		// Deposit, delegate and schedule bond less first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
 			operator,
@@ -338,7 +314,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(who),
-			Some(asset_id),
+			asset_id,
 			amount + additional_amount,
 		));
 

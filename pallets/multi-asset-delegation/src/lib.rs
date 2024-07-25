@@ -230,9 +230,9 @@ pub mod pallet {
 		/// An operator has gone online.
 		OperatorWentOnline { who: T::AccountId },
 		/// A deposit has been made.
-		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset_id: Option<T::AssetId> },
+		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
 		/// An unstake has been scheduled.
-		ScheduledUnstake { who: T::AccountId, amount: BalanceOf<T>, asset_id: Option<T::AssetId> },
+		ScheduledUnstake { who: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
 		/// An unstake has been executed.
 		ExecutedUnstake { who: T::AccountId },
 		/// An unstake has been cancelled.
@@ -453,7 +453,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn deposit(
 			origin: OriginFor<T>,
-			asset_id: Option<T::AssetId>,
+			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -467,7 +467,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn schedule_unstake(
 			origin: OriginFor<T>,
-			asset_id: Option<T::AssetId>,
+			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
