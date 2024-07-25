@@ -6322,12 +6322,12 @@ declare module '@polkadot/types/lookup' {
 
   /** @name PalletMultiAssetDelegationRewardsRewardConfig (753) */
   interface PalletMultiAssetDelegationRewardsRewardConfig extends Struct {
-    readonly configs: BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAsset>;
+    readonly configs: BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAssetPool>;
     readonly whitelistedBlueprintIds: Vec<u32>;
   }
 
-  /** @name PalletMultiAssetDelegationRewardsRewardConfigForAsset (755) */
-  interface PalletMultiAssetDelegationRewardsRewardConfigForAsset extends Struct {
+  /** @name PalletMultiAssetDelegationRewardsRewardConfigForAssetPool (755) */
+  interface PalletMultiAssetDelegationRewardsRewardConfigForAssetPool extends Struct {
     readonly apy: u128;
     readonly cap: u128;
   }

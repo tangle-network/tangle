@@ -18,7 +18,7 @@ use super::*;
 
 /// Configuration for rewards associated with a specific asset.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct RewardConfigForAsset<Balance> {
+pub struct RewardConfigForAssetPool<Balance> {
 	// The annual percentage yield (APY) for the asset, represented as a fixed point number.
 	pub apy: u128,
 	// The minimum amount required before the asset can be rewarded.
@@ -27,9 +27,9 @@ pub struct RewardConfigForAsset<Balance> {
 
 /// Configuration for rewards in the system.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct RewardConfig<AssetId, Balance> {
+pub struct RewardConfig<PoolId, Balance> {
 	// A map of asset IDs to their respective reward configurations.
-	pub configs: BTreeMap<AssetId, RewardConfigForAsset<Balance>>,
+	pub configs: BTreeMap<PoolId, RewardConfigForAssetPool<Balance>>,
 	// A list of blueprint IDs that are whitelisted for rewards.
 	pub whitelisted_blueprint_ids: Vec<u32>,
 }

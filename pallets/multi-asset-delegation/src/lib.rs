@@ -132,6 +132,16 @@ pub mod pallet {
 			+ PartialOrd
 			+ MaxEncodedLen;
 
+		/// The pool ID type.
+		type PoolId: AtLeast32BitUnsigned
+			+ Parameter
+			+ Member
+			+ MaybeSerializeDeserialize
+			+ Clone
+			+ Copy
+			+ PartialOrd
+			+ MaxEncodedLen;
+
 		/// The pallet's account ID.
 		type PalletId: Get<PalletId>;
 
@@ -183,10 +193,16 @@ pub mod pallet {
 		StorageMap<_, Twox64Concat, T::AccountId, DelegatorMetadataOf<T>, OptionQuery>;
 
 	#[pallet::storage]
+	#[pallet::getter(fn reward_pools)]
+	/// Storage for the reward pools
+	pub type RewardPools<T: Config> =
+		StorageMap<_, Twox64Concat, T::PoolId, Vec<T::AssetId>, OptionQuery>;
+
+	#[pallet::storage]
 	#[pallet::getter(fn reward_config)]
 	/// Storage for the reward configuration, which includes APY, cap for assets, and whitelisted blueprints.
 	pub type RewardConfigStorage<T: Config> =
-		StorageValue<_, RewardConfig<T::AssetId, BalanceOf<T>>, OptionQuery>;
+		StorageValue<_, RewardConfig<T::PoolId, BalanceOf<T>>, OptionQuery>;
 
 	/// Events emitted by the pallet.
 	#[pallet::event]
@@ -240,8 +256,8 @@ pub mod pallet {
 		CancelledDelegatorBondLess { who: T::AccountId },
 		/// New whitelisted assets set
 		WhitelistedAssetsSet { assets: Vec<T::AssetId> },
-		/// Event emitted when an incentive APY and cap are set for an asset
-		IncentiveAPYAndCapSet { asset_id: T::AssetId, apy: u128, cap: BalanceOf<T> },
+		/// Event emitted when an incentive APY and cap are set for a reward pool
+		IncentiveAPYAndCapSet { pool_id: T::PoolId, apy: u128, cap: BalanceOf<T> },
 		/// Event emitted when a blueprint is whitelisted for rewards
 		BlueprintWhitelisted { blueprint_id: u32 },
 	}
@@ -560,7 +576,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn set_incentive_apy_and_cap(
 			origin: OriginFor<T>,
-			asset_id: T::AssetId,
+			pool_id: T::PoolId,
 			apy: u128,
 			cap: BalanceOf<T>,
 		) -> DispatchResult {
@@ -574,13 +590,13 @@ pub mod pallet {
 					whitelisted_blueprint_ids: Vec::new(),
 				});
 
-				config.configs.insert(asset_id, RewardConfigForAsset { apy, cap });
+				config.configs.insert(pool_id, RewardConfigForAssetPool { apy, cap });
 
 				*maybe_config = Some(config);
 			});
 
 			// Emit an event
-			Self::deposit_event(Event::IncentiveAPYAndCapSet { asset_id, apy, cap });
+			Self::deposit_event(Event::IncentiveAPYAndCapSet { pool_id, apy, cap });
 
 			Ok(())
 		}
