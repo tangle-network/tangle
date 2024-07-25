@@ -195,8 +195,6 @@ where
 /// to the given xj.
 ///
 /// If `x` is None, it uses 0 for it (since Identifiers can't be 0)
-#[cfg_attr(feature = "internals", visibility::make(pub))]
-#[cfg_attr(docsrs, doc(cfg(feature = "internals")))]
 fn compute_lagrange_coefficient<C: Ciphersuite>(
 	x_set: &BTreeSet<Identifier<C>>,
 	x: Option<Identifier<C>>,
@@ -263,12 +261,9 @@ pub struct SigningPackage<C: Ciphersuite> {
 	///
 	/// Each signer should perform protocol-specific verification on the
 	/// message.
-	#[cfg_attr(
-		feature = "serde",
-		serde(
-			serialize_with = "serdect::slice::serialize_hex_lower_or_bin",
-			deserialize_with = "serdect::slice::deserialize_hex_or_bin_vec"
-		)
+	#[serde(
+		serialize_with = "serdect::slice::serialize_hex_lower_or_bin",
+		deserialize_with = "serdect::slice::deserialize_hex_or_bin_vec"
 	)]
 	pub message: Vec<u8>,
 }
@@ -297,8 +292,6 @@ where
 
 	/// Compute the preimages to H1 to compute the per-signer binding factors
 	// We separate this out into its own method so it can be tested
-	#[cfg_attr(feature = "internals", visibility::make(pub))]
-	#[cfg_attr(docsrs, doc(cfg(feature = "internals")))]
 	pub fn binding_factor_preimages(
 		&self,
 		verifying_key: &VerifyingKey<C>,

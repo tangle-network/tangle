@@ -142,6 +142,7 @@ where
 	}
 }
 
+#[allow(uncovered_param_in_projection)]
 impl<C> core::ops::MulAssign<Identifier<C>> for Scalar<C>
 where
 	C: Ciphersuite,

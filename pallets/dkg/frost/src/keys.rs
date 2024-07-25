@@ -396,22 +396,6 @@ where
 	}
 }
 
-#[cfg(feature = "serialization")]
-impl<C> SecretShare<C>
-where
-	C: Ciphersuite,
-{
-	/// Serialize the struct into a Vec.
-	pub fn serialize(&self) -> Result<Vec<u8>, Error> {
-		Serialize::serialize(&self)
-	}
-
-	/// Deserialize the struct from a slice of bytes.
-	pub fn deserialize(bytes: &[u8]) -> Result<Self, Error> {
-		Deserialize::deserialize(bytes)
-	}
-}
-
 #[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(bound = "C: Ciphersuite")]
 #[serde(deny_unknown_fields)]
@@ -437,42 +421,6 @@ where
 	/// Deserialize the struct from a slice of bytes.
 	pub fn deserialize(bytes: &[u8]) -> Result<Self, Error> {
 		Deserialize::deserialize(bytes)
-	}
-}
-
-// Default byte-oriented serialization for structs that need to be communicated.
-//
-// Note that we still manually implement these methods in each applicable type,
-// instead of making these traits `pub` and asking users to import the traits.
-// The reason is that ciphersuite traits would need to re-export these traits,
-// parametrized with the ciphersuite, but trait aliases are not currently
-// supported: <https://github.com/rust-lang/rust/issues/41517>
-
-#[cfg(feature = "serialization")]
-pub trait Serialize<C: Ciphersuite> {
-	/// Serialize the struct into a Vec.
-	fn serialize(&self) -> Result<Vec<u8>, Error>;
-}
-
-#[cfg(feature = "serialization")]
-pub trait Deserialize<C: Ciphersuite> {
-	/// Deserialize the struct from a slice of bytes.
-	fn deserialize(bytes: &[u8]) -> Result<Self, Error>
-	where
-		Self: core::marker::Sized;
-}
-
-#[cfg(feature = "serialization")]
-impl<T: serde::Serialize, C: Ciphersuite> Serialize<C> for T {
-	fn serialize(&self) -> Result<Vec<u8>, Error> {
-		postcard::to_allocvec(self).map_err(|_| Error::SerializationError)
-	}
-}
-
-#[cfg(feature = "serialization")]
-impl<T: for<'de> serde::Deserialize<'de>, C: Ciphersuite> Deserialize<C> for T {
-	fn deserialize(bytes: &[u8]) -> Result<Self, Error> {
-		postcard::from_bytes(bytes).map_err(|_| Error::DeserializationError)
 	}
 }
 

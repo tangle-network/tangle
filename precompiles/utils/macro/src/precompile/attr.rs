@@ -54,6 +54,7 @@ pub mod keyword {
 }
 
 /// Attributes for methods.
+#[allow(dead_code)]
 pub enum MethodAttr {
 	Public(Span, syn::LitStr),
 	Fallback(Span),
@@ -98,6 +99,7 @@ impl syn::parse::Parse for MethodAttr {
 }
 
 /// Attributes for the main impl Block.
+#[allow(dead_code)]
 pub enum ImplAttr {
 	PrecompileSet(Span),
 	TestConcreteTypes(Span, Vec<syn::Type>),

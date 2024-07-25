@@ -29,22 +29,6 @@ pub mod round1 {
 			Self { header: Header::default(), commitment, proof_of_knowledge }
 		}
 	}
-
-	#[cfg(feature = "serialization")]
-	impl<C> Package<C>
-	where
-		C: Ciphersuite,
-	{
-		/// Serialize the struct into a Vec.
-		pub fn serialize(&self) -> Result<Vec<u8>, Error<C>> {
-			Serialize::serialize(&self)
-		}
-
-		/// Deserialize the struct from a slice of bytes.
-		pub fn deserialize(bytes: &[u8]) -> Result<Self, Error<C>> {
-			Deserialize::deserialize(bytes)
-		}
-	}
 }
 
 pub mod round2 {
@@ -74,22 +58,6 @@ pub mod round2 {
 		/// Create a new [`Package`] instance.
 		pub fn new(signing_share: SigningShare<C>) -> Self {
 			Self { header: Header::default(), signing_share }
-		}
-	}
-
-	#[cfg(feature = "serialization")]
-	impl<C> Package<C>
-	where
-		C: Ciphersuite,
-	{
-		/// Serialize the struct into a Vec.
-		pub fn serialize(&self) -> Result<Vec<u8>, Error<C>> {
-			Serialize::serialize(&self)
-		}
-
-		/// Deserialize the struct from a slice of bytes.
-		pub fn deserialize(bytes: &[u8]) -> Result<Self, Error<C>> {
-			Deserialize::deserialize(bytes)
 		}
 	}
 }
