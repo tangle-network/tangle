@@ -49,7 +49,7 @@ fn handle_round_change_should_work() {
 		assert_eq!(current_round, 2);
 
 		let snapshot1 = MultiAssetDelegation::at_stake(current_round, operator).unwrap();
-		assert_eq!(snapshot1.bond, 10_000);
+		assert_eq!(snapshot1.stake, 10_000);
 		assert_eq!(snapshot1.delegations.len(), 1);
 		assert_eq!(snapshot1.delegations[0].amount, amount);
 		assert_eq!(snapshot1.delegations[0].asset_id, asset_id);
@@ -118,7 +118,7 @@ fn handle_round_change_with_unstake_should_work() {
 
 		// Check the snapshot for operator1
 		let snapshot1 = MultiAssetDelegation::at_stake(current_round, operator1).unwrap();
-		assert_eq!(snapshot1.bond, 10_000);
+		assert_eq!(snapshot1.stake, 10_000);
 		assert_eq!(snapshot1.delegations.len(), 1);
 		assert_eq!(snapshot1.delegations[0].delegator, delegator1);
 		assert_eq!(snapshot1.delegations[0].amount, amount1 - unstake_amount); // Amount reduced by unstake_amount
@@ -126,7 +126,7 @@ fn handle_round_change_with_unstake_should_work() {
 
 		// Check the snapshot for operator2
 		let snapshot2 = MultiAssetDelegation::at_stake(current_round, operator2).unwrap();
-		assert_eq!(snapshot2.bond, 10000);
+		assert_eq!(snapshot2.stake, 10000);
 		assert_eq!(snapshot2.delegations.len(), 1);
 		assert_eq!(snapshot2.delegations[0].delegator, delegator2);
 		assert_eq!(snapshot2.delegations[0].amount, amount2);

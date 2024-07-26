@@ -41,7 +41,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the user is already a delegator, if the bond amount is too low, or if the transfer fails.
+	/// Returns an error if the user is already a delegator, if the stake amount is too low, or if the transfer fails.
 	pub fn process_deposit(
 		who: T::AccountId,
 		asset_id: T::AssetId,

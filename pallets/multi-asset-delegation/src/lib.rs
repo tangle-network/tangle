@@ -33,10 +33,10 @@
 //!
 //! ## Workflow for Operators
 //!
-//! - **Join Operators**: An account can join as an operator by depositing a minimum bond amount. This bond is reserved and ensures that the operator has a stake in the network.
+//! - **Join Operators**: An account can join as an operator by depositing a minimum stake amount. This stake is reserved and ensures that the operator has a stake in the network.
 //! - **Leave Operators**: Operators can leave the network by scheduling a leave request. This request is subject to a delay, during which the operator's status changes to 'Leaving'.
-//! - **Bond More**: Operators can increase their bond to strengthen their stake in the network.
-//! - **Bond Less**: Operators can schedule a bond reduction request, which is executed after a delay.
+//! - **Stake More**: Operators can increase their stake to strengthen their stake in the network.
+//! - **Stake Less**: Operators can schedule a stake reduction request, which is executed after a delay.
 //! - **Go Offline/Online**: Operators can change their status to offline if they need to temporarily stop participating in the network, and can come back online when ready.
 //!
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -87,15 +87,15 @@ pub mod pallet {
 			+ ReservableCurrency<Self::AccountId>
 			+ LockableCurrency<Self::AccountId>;
 
-		/// The minimum amount of bond required for an operator.
+		/// The minimum amount of stake required for an operator.
 		#[pallet::constant]
 		type MinOperatorBondAmount: Get<BalanceOf<Self>>;
 
-		/// The minimum amount of bond required for a delegate.
+		/// The minimum amount of stake required for a delegate.
 		#[pallet::constant]
 		type MinDelegateAmount: Get<BalanceOf<Self>>;
 
-		/// The duration for which the bond is locked.
+		/// The duration for which the stake is locked.
 		#[pallet::constant]
 		type BondDuration: Get<RoundIndex>;
 
@@ -106,7 +106,7 @@ pub mod pallet {
 		#[pallet::constant]
 		type LeaveOperatorsDelay: Get<RoundIndex>;
 
-		/// Number of rounds operator requests to decrease self-bond must wait to be executable.
+		/// Number of rounds operator requests to decrease self-stake must wait to be executable.
 		#[pallet::constant]
 		type OperatorBondLessDelay: Get<RoundIndex>;
 
@@ -217,13 +217,13 @@ pub mod pallet {
 		OperatorLeaveCancelled { who: T::AccountId },
 		/// An operator has executed their leave request.
 		OperatorLeaveExecuted { who: T::AccountId },
-		/// An operator has increased their bond.
+		/// An operator has increased their stake.
 		OperatorBondMore { who: T::AccountId, additional_bond: BalanceOf<T> },
-		/// An operator has scheduled to decrease their bond.
+		/// An operator has scheduled to decrease their stake.
 		OperatorBondLessScheduled { who: T::AccountId, unstake_amount: BalanceOf<T> },
-		/// An operator has executed their bond decrease.
+		/// An operator has executed their stake decrease.
 		OperatorBondLessExecuted { who: T::AccountId },
-		/// An operator has cancelled their bond decrease request.
+		/// An operator has cancelled their stake decrease request.
 		OperatorBondLessCancelled { who: T::AccountId },
 		/// An operator has gone offline.
 		OperatorWentOffline { who: T::AccountId },
@@ -273,7 +273,7 @@ pub mod pallet {
 	pub enum Error<T> {
 		/// The account is already an operator.
 		AlreadyOperator,
-		/// The bond amount is too low.
+		/// The stake amount is too low.
 		BondTooLow,
 		/// The account is not an operator.
 		NotAnOperator,
@@ -340,7 +340,7 @@ pub mod pallet {
 	/// The callable functions (extrinsics) of the pallet.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Allows an account to join as an operator by providing a bond.
+		/// Allows an account to join as an operator by providing a stake.
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn join_operators(origin: OriginFor<T>, bond_amount: BalanceOf<T>) -> DispatchResult {
@@ -380,7 +380,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Allows an operator to increase their bond.
+		/// Allows an operator to increase their stake.
 		#[pallet::call_index(4)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn operator_bond_more(
@@ -393,7 +393,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Schedules an operator to decrease their bond.
+		/// Schedules an operator to decrease their stake.
 		#[pallet::call_index(5)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn schedule_operator_unstake(
@@ -406,7 +406,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Executes a scheduled bond decrease for an operator.
+		/// Executes a scheduled stake decrease for an operator.
 		#[pallet::call_index(6)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn execute_operator_unstake(origin: OriginFor<T>) -> DispatchResult {
@@ -416,7 +416,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Cancels a scheduled bond decrease for an operator.
+		/// Cancels a scheduled stake decrease for an operator.
 		#[pallet::call_index(7)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn cancel_operator_unstake(origin: OriginFor<T>) -> DispatchResult {
@@ -513,7 +513,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Schedules a request to reduce a delegator's bond.
+		/// Schedules a request to reduce a delegator's stake.
 		#[pallet::call_index(15)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn schedule_delegator_unstake(
@@ -538,7 +538,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Executes a scheduled request to reduce a delegator's bond.
+		/// Executes a scheduled request to reduce a delegator's stake.
 		#[pallet::call_index(16)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn execute_delegator_unstake(origin: OriginFor<T>) -> DispatchResult {
@@ -548,7 +548,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Cancels a scheduled request to reduce a delegator's bond.
+		/// Cancels a scheduled request to reduce a delegator's stake.
 		#[pallet::call_index(17)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn cancel_delegator_unstake(

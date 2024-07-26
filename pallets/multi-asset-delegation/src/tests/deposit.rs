@@ -124,7 +124,7 @@ fn deposit_should_fail_for_bond_too_low() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
-		let amount = 50; // Below the minimum bond amount
+		let amount = 50; // Below the minimum stake amount
 
 		create_and_mint_tokens(VDOT, who, amount);
 

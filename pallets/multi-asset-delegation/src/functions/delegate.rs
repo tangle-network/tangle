@@ -104,7 +104,7 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-	/// Schedules a bond reduction for a delegator.
+	/// Schedules a stake reduction for a delegator.
 	///
 	/// # Arguments
 	///
@@ -177,7 +177,7 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-	/// Executes scheduled bond reductions for a delegator.
+	/// Executes scheduled stake reductions for a delegator.
 	///
 	/// # Arguments
 	///
@@ -220,7 +220,7 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-	/// Cancels a scheduled bond reduction for a delegator.
+	/// Cancels a scheduled stake reduction for a delegator.
 	///
 	/// # Arguments
 	///

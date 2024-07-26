@@ -86,7 +86,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), additional_bond)
 	verify {
 		let operator = Operators::<T>::get(&caller).unwrap();
-		assert_eq!(operator.bond, bond_amount + additional_bond);
+		assert_eq!(operator.stake, bond_amount + additional_bond);
 	}
 
 	schedule_operator_unstake {
@@ -114,7 +114,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let operator = Operators::<T>::get(&caller).unwrap();
-		assert_eq!(operator.bond, bond_amount - unstake_amount);
+		assert_eq!(operator.stake, bond_amount - unstake_amount);
 	}
 
 	cancel_operator_unstake {

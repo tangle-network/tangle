@@ -42,11 +42,11 @@ pub struct WithdrawRequest<AssetId, Balance> {
 pub struct BondLessRequest<AccountId, AssetId, Balance> {
 	/// The account ID of the operator.
 	pub operator: AccountId,
-	/// The ID of the asset to reduce the bond of.
+	/// The ID of the asset to reduce the stake of.
 	pub asset_id: AssetId,
-	/// The amount by which to reduce the bond.
+	/// The amount by which to reduce the stake.
 	pub amount: Balance,
-	/// The round in which the bond reduction was requested.
+	/// The round in which the stake reduction was requested.
 	pub requested_round: RoundIndex,
 }
 
@@ -111,9 +111,9 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 		AssetId: Eq + PartialEq,
 	{
 		let mut total = Balance::default();
-		for bond in &self.delegations {
-			if bond.asset_id == asset_id {
-				total += bond.amount.clone();
+		for stake in &self.delegations {
+			if stake.asset_id == asset_id {
+				total += stake.amount.clone();
 			}
 		}
 		total
@@ -127,7 +127,7 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 	where
 		AccountId: Eq + PartialEq,
 	{
-		self.delegations.iter().filter(|&bond| bond.operator == operator).collect()
+		self.delegations.iter().filter(|&stake| stake.operator == operator).collect()
 	}
 }
 
@@ -140,7 +140,7 @@ pub struct Deposit<AssetId, Balance> {
 	pub asset_id: AssetId,
 }
 
-/// Represents a bond between a delegator and an operator.
+/// Represents a stake between a delegator and an operator.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
 pub struct BondInfoDelegator<AccountId, Balance, AssetId> {
 	/// The account ID of the operator.

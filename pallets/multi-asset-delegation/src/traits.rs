@@ -82,8 +82,8 @@ impl<T: Config> MultiAssetDelegationInfo<T::AccountId, T::AssetId, T::PoolId, Ba
 			metadata
 				.delegations
 				.iter()
-				.filter(|bond| &bond.asset_id == asset_id)
-				.fold(Zero::zero(), |acc, bond| acc + bond.amount)
+				.filter(|stake| &stake.asset_id == asset_id)
+				.fold(Zero::zero(), |acc, stake| acc + stake.amount)
 		})
 	}
 

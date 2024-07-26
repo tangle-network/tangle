@@ -405,7 +405,7 @@ fn distribute_rewards_should_work() {
 			operator,
 			OperatorSnapshot {
 				delegations: vec![DelegatorBond { delegator, amount, asset_id }],
-				bond: amount,
+				stake: amount,
 			},
 		);
 
@@ -476,7 +476,7 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 					amount: amount1,
 					asset_id: asset_id1,
 				}],
-				bond: amount1,
+				stake: amount1,
 			},
 		);
 
@@ -489,7 +489,7 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 					amount: amount2,
 					asset_id: asset_id2,
 				}],
-				bond: amount2,
+				stake: amount2,
 			},
 		);
 

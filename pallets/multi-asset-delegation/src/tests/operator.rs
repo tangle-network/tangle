@@ -27,7 +27,7 @@ fn join_operator_success() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 
 		let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
-		assert_eq!(operator_info.bond, bond_amount);
+		assert_eq!(operator_info.stake, bond_amount);
 		assert_eq!(operator_info.delegation_count, 0);
 		assert_eq!(operator_info.request, None);
 		assert_eq!(operator_info.status, OperatorStatus::Active);
@@ -85,7 +85,7 @@ fn join_operator_minimum_bond() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), exact_bond));
 
 		let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
-		assert_eq!(operator_info.bond, exact_bond);
+		assert_eq!(operator_info.stake, exact_bond);
 	});
 }
 
@@ -176,7 +176,7 @@ fn operator_bond_more_success() {
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 
-		// Bond more TNT
+		// stake more TNT
 		assert_ok!(MultiAssetDelegation::operator_bond_more(
 			RuntimeOrigin::signed(1),
 			additional_bond
@@ -184,7 +184,7 @@ fn operator_bond_more_success() {
 
 		// Verify operator metadata
 		let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
-		assert_eq!(operator_info.bond, bond_amount + additional_bond);
+		assert_eq!(operator_info.stake, bond_amount + additional_bond);
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorBondMore {
@@ -199,7 +199,7 @@ fn operator_bond_more_not_an_operator() {
 	new_test_ext().execute_with(|| {
 		let additional_bond = 5_000;
 
-		// Attempt to bond more without being an operator
+		// Attempt to stake more without being an operator
 		assert_noop!(
 			MultiAssetDelegation::operator_bond_more(RuntimeOrigin::signed(1), additional_bond),
 			Error::<Test>::NotAnOperator
@@ -216,7 +216,7 @@ fn operator_bond_more_insufficient_balance() {
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 
-		// Attempt to bond more with insufficient balance
+		// Attempt to stake more with insufficient balance
 		assert_noop!(
 			MultiAssetDelegation::operator_bond_more(RuntimeOrigin::signed(1), additional_bond),
 			pallet_balances::Error::<Test>::InsufficientBalance
@@ -314,7 +314,7 @@ fn execute_operator_unstake_success() {
 
 		// Verify operator metadata
 		let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
-		assert_eq!(operator_info.bond, bond_amount - unstake_amount);
+		assert_eq!(operator_info.stake, bond_amount - unstake_amount);
 		assert_eq!(operator_info.request, None);
 
 		// Verify event
