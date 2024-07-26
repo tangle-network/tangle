@@ -11,9 +11,9 @@ repository = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 subxt = { version = "0.37.0", default-features = false, features = ["jsonrpsee", "native"] }
+subxt-signer = { version = "0.37.0", default-features = false, features = ["subxt", "sr25519"] }
 
 [dev-dependencies]
-subxt-signer = { version = "0.37.0", default-features = false, features = ["subxt", "sr25519"] }
 sp-core = { workspace = true }
 sp-io = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
