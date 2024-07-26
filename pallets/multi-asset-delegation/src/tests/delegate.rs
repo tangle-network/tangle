@@ -384,7 +384,7 @@ fn distribute_rewards_should_work() {
 		let cap = 50;
 		let apy = Percent::from_percent(10); // 10%
 
-		let initial_balance = Balances::free_balance(&delegator);
+		let initial_balance = Balances::free_balance(delegator);
 
 		// Set up reward configuration
 		let reward_config = RewardConfig {
@@ -414,13 +414,13 @@ fn distribute_rewards_should_work() {
 		assert_ok!(MultiAssetDelegation::distribute_rewards(round));
 
 		// Check if rewards were distributed correctly
-		let balance = Balances::free_balance(&delegator);
+		let balance = Balances::free_balance(delegator);
 
 		// Calculate the percentage of the cap that the user is staking
 		let staking_percentage = amount.saturating_mul(100) / cap;
 		// Calculate the expected reward based on the staking percentage
 		let expected_reward = apy.mul_floor(amount);
-		let calculated_reward = expected_reward.saturating_mul(staking_percentage.into()) / 100;
+		let calculated_reward = expected_reward.saturating_mul(staking_percentage) / 100;
 
 		assert_eq!(balance - initial_balance, calculated_reward);
 	});
@@ -448,8 +448,8 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 		let apy1 = Percent::from_percent(10); // 10%
 		let apy2 = Percent::from_percent(20); // 20%
 
-		let initial_balance1 = Balances::free_balance(&delegator1);
-		let initial_balance2 = Balances::free_balance(&delegator2);
+		let initial_balance1 = Balances::free_balance(delegator1);
+		let initial_balance2 = Balances::free_balance(delegator2);
 
 		// Set up reward configuration
 		let reward_config = RewardConfig {
@@ -498,8 +498,8 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 		assert_ok!(MultiAssetDelegation::distribute_rewards(round));
 
 		// Check if rewards were distributed correctly
-		let balance1 = Balances::free_balance(&delegator1);
-		let balance2 = Balances::free_balance(&delegator2);
+		let balance1 = Balances::free_balance(delegator1);
+		let balance2 = Balances::free_balance(delegator2);
 
 		// Calculate the percentage of the cap that each user is staking
 		let staking_percentage1 = amount1.saturating_mul(100) / cap1;
@@ -507,10 +507,10 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 
 		// Calculate the expected rewards based on the staking percentages
 		let expected_reward1 = apy1.mul_floor(amount1);
-		let calculated_reward1 = expected_reward1.saturating_mul(staking_percentage1.into()) / 100;
+		let calculated_reward1 = expected_reward1.saturating_mul(staking_percentage1) / 100;
 
 		let expected_reward2 = apy2.mul_floor(amount2);
-		let calculated_reward2 = expected_reward2.saturating_mul(staking_percentage2.into()) / 100;
+		let calculated_reward2 = expected_reward2.saturating_mul(staking_percentage2) / 100;
 
 		assert_eq!(balance1 - initial_balance1, calculated_reward1);
 		assert_eq!(balance2 - initial_balance2, calculated_reward2);
