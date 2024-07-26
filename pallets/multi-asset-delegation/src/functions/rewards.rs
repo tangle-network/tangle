@@ -81,11 +81,10 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn calculate_total_reward(
-		apy: u32,
+		apy: sp_runtime::Percent,
 		total_amount: BalanceOf<T>,
 	) -> Result<BalanceOf<T>, DispatchError> {
-		// Assume APY is given as a percentage (e.g., 5 for 5%)
-		let total_reward = total_amount.saturating_mul(apy.into()) / 100u32.into();
+		let total_reward = apy.mul_floor(total_amount);
 		Ok(total_reward)
 	}
 

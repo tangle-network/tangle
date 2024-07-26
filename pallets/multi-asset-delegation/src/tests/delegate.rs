@@ -18,6 +18,7 @@ use crate::types::*;
 use crate::CurrentRound;
 use crate::Error;
 use frame_support::{assert_noop, assert_ok};
+use sp_runtime::Percent;
 use std::collections::BTreeMap;
 
 #[test]
@@ -381,7 +382,7 @@ fn distribute_rewards_should_work() {
 		let asset_id = 1;
 		let amount = 100;
 		let cap = 50;
-		let apy = 10; // 10%
+		let apy = Percent::from_percent(10); // 10%
 
 		let initial_balance = Balances::free_balance(&delegator);
 
@@ -418,7 +419,7 @@ fn distribute_rewards_should_work() {
 		// Calculate the percentage of the cap that the user is staking
 		let staking_percentage = amount.saturating_mul(100) / cap;
 		// Calculate the expected reward based on the staking percentage
-		let expected_reward = amount.saturating_mul(apy as u64) / 100;
+		let expected_reward = apy.mul_floor(amount);
 		let calculated_reward = expected_reward.saturating_mul(staking_percentage.into()) / 100;
 
 		assert_eq!(balance - initial_balance, calculated_reward);
@@ -444,8 +445,8 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 		let cap1 = 50;
 		let cap2 = 150;
 
-		let apy1 = 10; // 10%
-		let apy2 = 20; // 20%
+		let apy1 = Percent::from_percent(10); // 10%
+		let apy2 = Percent::from_percent(20); // 20%
 
 		let initial_balance1 = Balances::free_balance(&delegator1);
 		let initial_balance2 = Balances::free_balance(&delegator2);
@@ -505,10 +506,10 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 		let staking_percentage2 = amount2.saturating_mul(100) / cap2;
 
 		// Calculate the expected rewards based on the staking percentages
-		let expected_reward1 = amount1.saturating_mul(apy1 as u64) / 100;
+		let expected_reward1 = apy1.mul_floor(amount1);
 		let calculated_reward1 = expected_reward1.saturating_mul(staking_percentage1.into()) / 100;
 
-		let expected_reward2 = amount2.saturating_mul(apy2 as u64) / 100;
+		let expected_reward2 = apy2.mul_floor(amount2);
 		let calculated_reward2 = expected_reward2.saturating_mul(staking_percentage2.into()) / 100;
 
 		assert_eq!(balance1 - initial_balance1, calculated_reward1);

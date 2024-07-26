@@ -256,7 +256,7 @@ pub mod pallet {
 		/// A delegator unstake request has been cancelled.
 		CancelledDelegatorBondLess { who: T::AccountId },
 		/// Event emitted when an incentive APY and cap are set for a reward pool
-		IncentiveAPYAndCapSet { pool_id: T::PoolId, apy: u32, cap: BalanceOf<T> },
+		IncentiveAPYAndCapSet { pool_id: T::PoolId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
 		/// Event emitted when a blueprint is whitelisted for rewards
 		BlueprintWhitelisted { blueprint_id: u32 },
 		/// Asset has been updated to reward pool
@@ -568,7 +568,7 @@ pub mod pallet {
 		pub fn set_incentive_apy_and_cap(
 			origin: OriginFor<T>,
 			pool_id: T::PoolId,
-			apy: u32,
+			apy: sp_runtime::Percent,
 			cap: BalanceOf<T>,
 		) -> DispatchResult {
 			// Ensure that the origin is authorized

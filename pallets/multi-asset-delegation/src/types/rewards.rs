@@ -15,12 +15,13 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
+use sp_runtime::Percent;
 
 /// Configuration for rewards associated with a specific asset.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct RewardConfigForAssetPool<Balance> {
-	// The annual percentage yield (APY) for the asset, represented as a fixed point number.
-	pub apy: u32,
+	// The annual percentage yield (APY) for the asset, represented as a Percent
+	pub apy: Percent,
 	// The minimum amount required before the asset can be rewarded.
 	pub cap: Balance,
 }
