@@ -731,7 +731,7 @@ declare module '@polkadot/api-base/types/events' {
        **/
       BlueprintWhitelisted: AugmentedEvent<ApiType, [blueprintId: u32], { blueprintId: u32 }>;
       /**
-       * A delegator bond less request has been cancelled.
+       * A delegator unstake request has been cancelled.
        **/
       CancelledDelegatorBondLess: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
       /**
@@ -747,7 +747,7 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Deposited: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, assetId: Option<u128>], { who: AccountId32, amount: u128, assetId: Option<u128> }>;
       /**
-       * A delegator bond less request has been executed.
+       * A delegator unstake request has been executed.
        **/
       ExecutedDelegatorBondLess: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
       /**
@@ -799,7 +799,7 @@ declare module '@polkadot/api-base/types/events' {
        **/
       OperatorWentOnline: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
       /**
-       * A delegator bond less request has been scheduled.
+       * A delegator unstake request has been scheduled.
        **/
       ScheduledDelegatorBondLess: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, amount: u128, assetId: u128], { who: AccountId32, operator: AccountId32, amount: u128, assetId: u128 }>;
       /**

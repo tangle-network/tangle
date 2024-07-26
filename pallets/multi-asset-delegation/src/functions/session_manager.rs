@@ -28,8 +28,10 @@ impl<T: Config> Pallet<T> {
 		// Iterate through all operators and build their snapshots
 		for (operator, metadata) in Operators::<T>::iter() {
 			// Create the operator snapshot
-			let snapshot =
-				OperatorSnapshot { bond: metadata.bond, delegations: metadata.delegations.clone() };
+			let snapshot = OperatorSnapshot {
+				stake: metadata.stake,
+				delegations: metadata.delegations.clone(),
+			};
 
 			// Store the snapshot in AtStake storage
 			AtStake::<T>::insert(current_round, operator.clone(), snapshot);

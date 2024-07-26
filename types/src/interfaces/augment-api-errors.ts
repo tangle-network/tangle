@@ -1183,15 +1183,15 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       BlueprintAlreadyWhitelisted: AugmentedError<ApiType>;
       /**
-       * The bond less request is not ready.
+       * The unstake request is not ready.
        **/
       BondLessNotReady: AugmentedError<ApiType>;
       /**
-       * A bond less request already exists.
+       * A unstake request already exists.
        **/
       BondLessRequestAlreadyExists: AugmentedError<ApiType>;
       /**
-       * The bond less request is not satisfied.
+       * The unstake request is not satisfied.
        **/
       BondLessRequestNotSatisfied: AugmentedError<ApiType>;
       /**
@@ -1211,11 +1211,11 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NoActiveDelegation: AugmentedError<ApiType>;
       /**
-       * There is no bond less request.
+       * There is no unstake request.
        **/
       NoBondLessRequest: AugmentedError<ApiType>;
       /**
-       * There is no scheduled bond less request.
+       * There is no scheduled unstake request.
        **/
       NoScheduledBondLess: AugmentedError<ApiType>;
       /**
