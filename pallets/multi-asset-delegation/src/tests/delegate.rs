@@ -64,7 +64,7 @@ fn delegate_should_work() {
 }
 
 #[test]
-fn schedule_delegator_bond_less_should_work() {
+fn schedule_delegator_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
@@ -85,7 +85,7 @@ fn schedule_delegator_bond_less_should_work() {
 			amount,
 		));
 
-		assert_ok!(MultiAssetDelegation::schedule_delegator_bond_less(
+		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who),
 			operator,
 			asset_id,
@@ -95,8 +95,8 @@ fn schedule_delegator_bond_less_should_work() {
 		// Assert
 		// Check the delegator metadata
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(!metadata.delegator_bond_less_requests.is_empty());
-		let request = &metadata.delegator_bond_less_requests[0];
+		assert!(!metadata.delegator_unstake_requests.is_empty());
+		let request = &metadata.delegator_unstake_requests[0];
 		assert_eq!(request.asset_id, asset_id);
 		assert_eq!(request.amount, amount);
 
@@ -108,7 +108,7 @@ fn schedule_delegator_bond_less_should_work() {
 }
 
 #[test]
-fn execute_delegator_bond_less_should_work() {
+fn execute_delegator_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
@@ -128,7 +128,7 @@ fn execute_delegator_bond_less_should_work() {
 			asset_id,
 			amount,
 		));
-		assert_ok!(MultiAssetDelegation::schedule_delegator_bond_less(
+		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who),
 			operator,
 			asset_id,
@@ -138,18 +138,18 @@ fn execute_delegator_bond_less_should_work() {
 		// Simulate round passing
 		CurrentRound::<Test>::put(10);
 
-		assert_ok!(MultiAssetDelegation::execute_delegator_bond_less(RuntimeOrigin::signed(who),));
+		assert_ok!(MultiAssetDelegation::execute_delegator_unstake(RuntimeOrigin::signed(who),));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegator_bond_less_requests.is_empty());
+		assert!(metadata.delegator_unstake_requests.is_empty());
 		assert!(metadata.deposits.get(&asset_id).is_some());
 		assert_eq!(metadata.deposits.get(&asset_id).unwrap(), &amount);
 	});
 }
 
 #[test]
-fn cancel_delegator_bond_less_should_work() {
+fn cancel_delegator_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
@@ -169,14 +169,14 @@ fn cancel_delegator_bond_less_should_work() {
 			asset_id,
 			amount,
 		));
-		assert_ok!(MultiAssetDelegation::schedule_delegator_bond_less(
+		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who),
 			operator,
 			asset_id,
 			amount,
 		));
 
-		assert_ok!(MultiAssetDelegation::cancel_delegator_bond_less(
+		assert_ok!(MultiAssetDelegation::cancel_delegator_unstake(
 			RuntimeOrigin::signed(who),
 			asset_id,
 			amount
@@ -185,7 +185,7 @@ fn cancel_delegator_bond_less_should_work() {
 		// Assert
 		// Check the delegator metadata
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegator_bond_less_requests.is_empty());
+		assert!(metadata.delegator_unstake_requests.is_empty());
 
 		// Check the operator metadata
 		let operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
@@ -225,7 +225,7 @@ fn delegate_should_fail_if_not_enough_balance() {
 }
 
 #[test]
-fn schedule_delegator_bond_less_should_fail_if_no_delegation() {
+fn schedule_delegator_unstake_should_fail_if_no_delegation() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
@@ -241,7 +241,7 @@ fn schedule_delegator_bond_less_should_fail_if_no_delegation() {
 		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 
 		assert_noop!(
-			MultiAssetDelegation::schedule_delegator_bond_less(
+			MultiAssetDelegation::schedule_delegator_unstake(
 				RuntimeOrigin::signed(who),
 				operator,
 				asset_id,
@@ -253,7 +253,7 @@ fn schedule_delegator_bond_less_should_fail_if_no_delegation() {
 }
 
 #[test]
-fn execute_delegator_bond_less_should_fail_if_not_ready() {
+fn execute_delegator_unstake_should_fail_if_not_ready() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who = 1;
@@ -275,7 +275,7 @@ fn execute_delegator_bond_less_should_fail_if_not_ready() {
 		));
 
 		assert_noop!(
-			MultiAssetDelegation::cancel_delegator_bond_less(
+			MultiAssetDelegation::cancel_delegator_unstake(
 				RuntimeOrigin::signed(who),
 				asset_id,
 				amount
@@ -283,7 +283,7 @@ fn execute_delegator_bond_less_should_fail_if_not_ready() {
 			Error::<Test>::NoBondLessRequest
 		);
 
-		assert_ok!(MultiAssetDelegation::schedule_delegator_bond_less(
+		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who),
 			operator,
 			asset_id,
@@ -291,7 +291,7 @@ fn execute_delegator_bond_less_should_fail_if_not_ready() {
 		));
 
 		assert_noop!(
-			MultiAssetDelegation::execute_delegator_bond_less(RuntimeOrigin::signed(who),),
+			MultiAssetDelegation::execute_delegator_unstake(RuntimeOrigin::signed(who),),
 			Error::<Test>::BondLessNotReady
 		);
 	});

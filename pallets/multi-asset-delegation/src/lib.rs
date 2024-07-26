@@ -28,8 +28,8 @@
 //!
 //! 1. **Deposit**: Before a delegator can delegate assets to an operator, they must first deposit the desired amount of assets. This reserves the assets in the delegator's account.
 //! 2. **Delegate**: After depositing assets, the delegator can delegate these assets to an operator. The operator then manages these assets, and the delegator can earn rewards from the operator's activities.
-//! 3. **Bond Less Request**: If a delegator wants to reduce their delegation, they can schedule a bond less request. This request will be executed after a specified delay, ensuring network stability.
-//! 4. **Unstake Request**: To completely remove assets from delegation, a delegator must submit an unstake request. Similar to bond less requests, unstake requests also have a delay before they can be executed.
+//! 3. **Unstake**: If a delegator wants to reduce their delegation, they can schedule a bond less request. This request will be executed after a specified delay, ensuring network stability.
+//! 4. **withdraw Request**: To completely remove assets from delegation, a delegator must submit an withdraw request. Similar to bond less requests, withdraw requests also have a delay before they can be executed.
 //!
 //! ## Workflow for Operators
 //!
@@ -220,7 +220,7 @@ pub mod pallet {
 		/// An operator has increased their bond.
 		OperatorBondMore { who: T::AccountId, additional_bond: BalanceOf<T> },
 		/// An operator has scheduled to decrease their bond.
-		OperatorBondLessScheduled { who: T::AccountId, bond_less_amount: BalanceOf<T> },
+		OperatorBondLessScheduled { who: T::AccountId, unstake_amount: BalanceOf<T> },
 		/// An operator has executed their bond decrease.
 		OperatorBondLessExecuted { who: T::AccountId },
 		/// An operator has cancelled their bond decrease request.
@@ -231,12 +231,12 @@ pub mod pallet {
 		OperatorWentOnline { who: T::AccountId },
 		/// A deposit has been made.
 		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
-		/// An unstake has been scheduled.
-		ScheduledUnstake { who: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
-		/// An unstake has been executed.
-		ExecutedUnstake { who: T::AccountId },
-		/// An unstake has been cancelled.
-		CancelledUnstake { who: T::AccountId },
+		/// An withdraw has been scheduled.
+		Scheduledwithdraw { who: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
+		/// An withdraw has been executed.
+		Executedwithdraw { who: T::AccountId },
+		/// An withdraw has been cancelled.
+		Cancelledwithdraw { who: T::AccountId },
 		/// A delegation has been made.
 		Delegated {
 			who: T::AccountId,
@@ -303,8 +303,6 @@ pub mod pallet {
 		InsufficientBalance,
 		/// There is no withdraw request.
 		NoWithdrawRequest,
-		/// The unstake is not ready.
-		UnstakeNotReady,
 		/// There is no bond less request.
 		NoBondLessRequest,
 		/// The bond less request is not ready.
@@ -323,10 +321,10 @@ pub mod pallet {
 		AssetNotFound,
 		/// The blueprint ID is already whitelisted
 		BlueprintAlreadyWhitelisted,
-		/// No unstake requests found
-		NoUnstakeRequests,
-		/// No matching unstake reqests found
-		NoMatchingUnstakeRequest,
+		/// No withdraw requests found
+		NowithdrawRequests,
+		/// No matching withdraw reqests found
+		NoMatchingwithdrawRequest,
 		/// Asset already exists in a reward pool
 		AssetAlreadyInPool,
 		/// Asset not found in reward pool
@@ -398,22 +396,22 @@ pub mod pallet {
 		/// Schedules an operator to decrease their bond.
 		#[pallet::call_index(5)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn schedule_operator_bond_less(
+		pub fn schedule_operator_unstake(
 			origin: OriginFor<T>,
-			bond_less_amount: BalanceOf<T>,
+			unstake_amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_schedule_operator_bond_less(&who, bond_less_amount)?;
-			Self::deposit_event(Event::OperatorBondLessScheduled { who, bond_less_amount });
+			Self::process_schedule_operator_unstake(&who, unstake_amount)?;
+			Self::deposit_event(Event::OperatorBondLessScheduled { who, unstake_amount });
 			Ok(())
 		}
 
 		/// Executes a scheduled bond decrease for an operator.
 		#[pallet::call_index(6)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn execute_operator_bond_less(origin: OriginFor<T>) -> DispatchResult {
+		pub fn execute_operator_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_execute_operator_bond_less(&who)?;
+			Self::process_execute_operator_unstake(&who)?;
 			Self::deposit_event(Event::OperatorBondLessExecuted { who });
 			Ok(())
 		}
@@ -421,9 +419,9 @@ pub mod pallet {
 		/// Cancels a scheduled bond decrease for an operator.
 		#[pallet::call_index(7)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn cancel_operator_bond_less(origin: OriginFor<T>) -> DispatchResult {
+		pub fn cancel_operator_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_operator_bond_less(&who)?;
+			Self::process_cancel_operator_unstake(&who)?;
 			Self::deposit_event(Event::OperatorBondLessCancelled { who });
 			Ok(())
 		}
@@ -462,41 +460,41 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Schedules an unstake request.
+		/// Schedules an withdraw request.
 		#[pallet::call_index(11)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn schedule_unstake(
+		pub fn schedule_withdraw(
 			origin: OriginFor<T>,
 			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_schedule_unstake(who.clone(), asset_id, amount)?;
-			Self::deposit_event(Event::ScheduledUnstake { who, amount, asset_id });
+			Self::process_schedule_withdraw(who.clone(), asset_id, amount)?;
+			Self::deposit_event(Event::Scheduledwithdraw { who, amount, asset_id });
 			Ok(())
 		}
 
-		/// Executes a scheduled unstake request.
+		/// Executes a scheduled withdraw request.
 		#[pallet::call_index(12)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn execute_unstake(origin: OriginFor<T>) -> DispatchResult {
+		pub fn execute_withdraw(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_execute_unstake(who.clone())?;
-			Self::deposit_event(Event::ExecutedUnstake { who });
+			Self::process_execute_withdraw(who.clone())?;
+			Self::deposit_event(Event::Executedwithdraw { who });
 			Ok(())
 		}
 
-		/// Cancels a scheduled unstake request.
+		/// Cancels a scheduled withdraw request.
 		#[pallet::call_index(13)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn cancel_unstake(
+		pub fn cancel_withdraw(
 			origin: OriginFor<T>,
 			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_unstake(who.clone(), asset_id, amount)?;
-			Self::deposit_event(Event::CancelledUnstake { who });
+			Self::process_cancel_withdraw(who.clone(), asset_id, amount)?;
+			Self::deposit_event(Event::Cancelledwithdraw { who });
 			Ok(())
 		}
 
@@ -518,14 +516,14 @@ pub mod pallet {
 		/// Schedules a request to reduce a delegator's bond.
 		#[pallet::call_index(15)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn schedule_delegator_bond_less(
+		pub fn schedule_delegator_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
 			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_schedule_delegator_bond_less(
+			Self::process_schedule_delegator_unstake(
 				who.clone(),
 				operator.clone(),
 				asset_id,
@@ -543,9 +541,9 @@ pub mod pallet {
 		/// Executes a scheduled request to reduce a delegator's bond.
 		#[pallet::call_index(16)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn execute_delegator_bond_less(origin: OriginFor<T>) -> DispatchResult {
+		pub fn execute_delegator_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_execute_delegator_bond_less(who.clone())?;
+			Self::process_execute_delegator_unstake(who.clone())?;
 			Self::deposit_event(Event::ExecutedDelegatorBondLess { who });
 			Ok(())
 		}
@@ -553,13 +551,13 @@ pub mod pallet {
 		/// Cancels a scheduled request to reduce a delegator's bond.
 		#[pallet::call_index(17)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn cancel_delegator_bond_less(
+		pub fn cancel_delegator_unstake(
 			origin: OriginFor<T>,
 			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_delegator_bond_less(who.clone(), asset_id, amount)?;
+			Self::process_cancel_delegator_unstake(who.clone(), asset_id, amount)?;
 			Self::deposit_event(Event::CancelledDelegatorBondLess { who });
 			Ok(())
 		}

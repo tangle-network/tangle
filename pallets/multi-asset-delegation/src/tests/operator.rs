@@ -225,41 +225,41 @@ fn operator_bond_more_insufficient_balance() {
 }
 
 #[test]
-fn schedule_operator_bond_less_success() {
+fn schedule_operator_unstake_success() {
 	new_test_ext().execute_with(|| {
 		let bond_amount = 10_000;
-		let bond_less_amount = 5_000;
+		let unstake_amount = 5_000;
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 
 		// Schedule bond less
-		assert_ok!(MultiAssetDelegation::schedule_operator_bond_less(
+		assert_ok!(MultiAssetDelegation::schedule_operator_unstake(
 			RuntimeOrigin::signed(1),
-			bond_less_amount
+			unstake_amount
 		));
 
 		// Verify operator metadata
 		let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
-		assert_eq!(operator_info.request.unwrap().amount, bond_less_amount);
+		assert_eq!(operator_info.request.unwrap().amount, unstake_amount);
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(
-			Event::OperatorBondLessScheduled { who: 1, bond_less_amount },
+			Event::OperatorBondLessScheduled { who: 1, unstake_amount },
 		));
 	});
 }
 
 #[test]
-fn schedule_operator_bond_less_not_an_operator() {
+fn schedule_operator_unstake_not_an_operator() {
 	new_test_ext().execute_with(|| {
-		let bond_less_amount = 5_000;
+		let unstake_amount = 5_000;
 
 		// Attempt to schedule bond less without being an operator
 		assert_noop!(
-			MultiAssetDelegation::schedule_operator_bond_less(
+			MultiAssetDelegation::schedule_operator_unstake(
 				RuntimeOrigin::signed(1),
-				bond_less_amount
+				unstake_amount
 			),
 			Error::<Test>::NotAnOperator
 		);
@@ -268,10 +268,10 @@ fn schedule_operator_bond_less_not_an_operator() {
 
 // TO DO
 // #[test]
-// fn schedule_operator_bond_less_active_services() {
+// fn schedule_operator_unstake_active_services() {
 //     new_test_ext().execute_with(|| {
 //         let bond_amount = 10_000;
-//         let bond_less_amount = 5_000;
+//         let unstake_amount = 5_000;
 
 //         // Join operator first
 //         assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
@@ -285,36 +285,36 @@ fn schedule_operator_bond_less_not_an_operator() {
 
 //         // Attempt to schedule bond less with active services
 //         assert_noop!(
-//             MultiAssetDelegation::schedule_operator_bond_less(RuntimeOrigin::signed(1), bond_less_amount),
+//             MultiAssetDelegation::schedule_operator_unstake(RuntimeOrigin::signed(1), unstake_amount),
 //             Error::<Test>::ActiveServicesUsingTNT
 //         );
 //     });
 // }
 
 #[test]
-fn execute_operator_bond_less_success() {
+fn execute_operator_unstake_success() {
 	new_test_ext().execute_with(|| {
 		let bond_amount = 10_000;
-		let bond_less_amount = 5_000;
+		let unstake_amount = 5_000;
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 
 		// Schedule bond less
-		assert_ok!(MultiAssetDelegation::schedule_operator_bond_less(
+		assert_ok!(MultiAssetDelegation::schedule_operator_unstake(
 			RuntimeOrigin::signed(1),
-			bond_less_amount
+			unstake_amount
 		));
 
 		// Set the current round to simulate passage of time
 		<CurrentRound<Test>>::put(15);
 
 		// Execute bond less
-		assert_ok!(MultiAssetDelegation::execute_operator_bond_less(RuntimeOrigin::signed(1)));
+		assert_ok!(MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(1)));
 
 		// Verify operator metadata
 		let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
-		assert_eq!(operator_info.bond, bond_amount - bond_less_amount);
+		assert_eq!(operator_info.bond, bond_amount - unstake_amount);
 		assert_eq!(operator_info.request, None);
 
 		// Verify event
@@ -325,18 +325,18 @@ fn execute_operator_bond_less_success() {
 }
 
 #[test]
-fn execute_operator_bond_less_not_an_operator() {
+fn execute_operator_unstake_not_an_operator() {
 	new_test_ext().execute_with(|| {
 		// Attempt to execute bond less without being an operator
 		assert_noop!(
-			MultiAssetDelegation::execute_operator_bond_less(RuntimeOrigin::signed(1)),
+			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(1)),
 			Error::<Test>::NotAnOperator
 		);
 	});
 }
 
 #[test]
-fn execute_operator_bond_less_no_scheduled_bond_less() {
+fn execute_operator_unstake_no_scheduled_unstake() {
 	new_test_ext().execute_with(|| {
 		let bond_amount = 10_000;
 
@@ -345,52 +345,52 @@ fn execute_operator_bond_less_no_scheduled_bond_less() {
 
 		// Attempt to execute bond less without scheduling it
 		assert_noop!(
-			MultiAssetDelegation::execute_operator_bond_less(RuntimeOrigin::signed(1)),
+			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(1)),
 			Error::<Test>::NoScheduledBondLess
 		);
 	});
 }
 
 #[test]
-fn execute_operator_bond_less_request_not_satisfied() {
+fn execute_operator_unstake_request_not_satisfied() {
 	new_test_ext().execute_with(|| {
 		let bond_amount = 10_000;
-		let bond_less_amount = 5_000;
+		let unstake_amount = 5_000;
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 
 		// Schedule bond less
-		assert_ok!(MultiAssetDelegation::schedule_operator_bond_less(
+		assert_ok!(MultiAssetDelegation::schedule_operator_unstake(
 			RuntimeOrigin::signed(1),
-			bond_less_amount
+			unstake_amount
 		));
 
 		// Attempt to execute bond less before request is satisfied
 		assert_noop!(
-			MultiAssetDelegation::execute_operator_bond_less(RuntimeOrigin::signed(1)),
+			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(1)),
 			Error::<Test>::BondLessRequestNotSatisfied
 		);
 	});
 }
 
 #[test]
-fn cancel_operator_bond_less_success() {
+fn cancel_operator_unstake_success() {
 	new_test_ext().execute_with(|| {
 		let bond_amount = 10_000;
-		let bond_less_amount = 5_000;
+		let unstake_amount = 5_000;
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 
 		// Schedule bond less
-		assert_ok!(MultiAssetDelegation::schedule_operator_bond_less(
+		assert_ok!(MultiAssetDelegation::schedule_operator_unstake(
 			RuntimeOrigin::signed(1),
-			bond_less_amount
+			unstake_amount
 		));
 
 		// Cancel bond less
-		assert_ok!(MultiAssetDelegation::cancel_operator_bond_less(RuntimeOrigin::signed(1)));
+		assert_ok!(MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(1)));
 
 		// Verify operator metadata
 		let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
@@ -404,18 +404,18 @@ fn cancel_operator_bond_less_success() {
 }
 
 #[test]
-fn cancel_operator_bond_less_not_an_operator() {
+fn cancel_operator_unstake_not_an_operator() {
 	new_test_ext().execute_with(|| {
 		// Attempt to cancel bond less without being an operator
 		assert_noop!(
-			MultiAssetDelegation::cancel_operator_bond_less(RuntimeOrigin::signed(1)),
+			MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(1)),
 			Error::<Test>::NotAnOperator
 		);
 	});
 }
 
 #[test]
-fn cancel_operator_bond_less_no_scheduled_bond_less() {
+fn cancel_operator_unstake_no_scheduled_unstake() {
 	new_test_ext().execute_with(|| {
 		let bond_amount = 10_000;
 
@@ -424,7 +424,7 @@ fn cancel_operator_bond_less_no_scheduled_bond_less() {
 
 		// Attempt to cancel bond less without scheduling it
 		assert_noop!(
-			MultiAssetDelegation::cancel_operator_bond_less(RuntimeOrigin::signed(1)),
+			MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(1)),
 			Error::<Test>::NoScheduledBondLess
 		);
 	});

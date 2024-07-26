@@ -162,20 +162,20 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `who` - The account ID of the operator.
-	/// * `bond_less_amount` - The amount to be reduced from the operator's bond.
+	/// * `unstake_amount` - The amount to be reduced from the operator's bond.
 	///
 	/// # Errors
 	///
 	/// Returns an error if the operator is not found, has active services, or cannot exit.
-	pub fn process_schedule_operator_bond_less(
+	pub fn process_schedule_operator_unstake(
 		who: &T::AccountId,
-		bond_less_amount: BalanceOf<T>,
+		unstake_amount: BalanceOf<T>,
 	) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		ensure!(T::ServiceManager::can_exit(who), Error::<T>::CannotExit);
 
 		operator.request = Some(OperatorBondLessRequest {
-			amount: bond_less_amount,
+			amount: unstake_amount,
 			request_time: Self::current_round(),
 		});
 		Operators::<T>::insert(who, operator);
@@ -192,7 +192,7 @@ impl<T: Config> Pallet<T> {
 	/// # Errors
 	///
 	/// Returns an error if the operator is not found, has no scheduled bond reduction, or the request is not satisfied.
-	pub fn process_execute_operator_bond_less(who: &T::AccountId) -> Result<(), DispatchError> {
+	pub fn process_execute_operator_unstake(who: &T::AccountId) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		let request = operator.request.as_ref().ok_or(Error::<T>::NoScheduledBondLess)?;
 		let current_round = Self::current_round();
@@ -218,7 +218,7 @@ impl<T: Config> Pallet<T> {
 	/// # Errors
 	///
 	/// Returns an error if the operator is not found or has no scheduled bond reduction.
-	pub fn process_cancel_operator_bond_less(who: &T::AccountId) -> Result<(), DispatchError> {
+	pub fn process_cancel_operator_unstake(who: &T::AccountId) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		ensure!(operator.request.is_some(), Error::<T>::NoScheduledBondLess);
 

@@ -117,7 +117,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns an error if the delegator has no active delegation,
 	/// or if the bond less amount is greater than the current delegation amount.
-	pub fn process_schedule_delegator_bond_less(
+	pub fn process_schedule_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
 		asset_id: T::AssetId,
@@ -138,7 +138,7 @@ impl<T: Config> Pallet<T> {
 
 			// Create the bond less request
 			let current_round = Self::current_round();
-			metadata.delegator_bond_less_requests.push(BondLessRequest {
+			metadata.delegator_unstake_requests.push(BondLessRequest {
 				operator: delegation.operator.clone(),
 				asset_id,
 				amount,
@@ -186,13 +186,13 @@ impl<T: Config> Pallet<T> {
 	/// # Errors
 	///
 	/// Returns an error if the delegator has no bond less requests or if none of the bond less requests are ready.
-	pub fn process_execute_delegator_bond_less(who: T::AccountId) -> DispatchResult {
+	pub fn process_execute_delegator_unstake(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
 			// Ensure there are outstanding bond less requests
 			ensure!(
-				!metadata.delegator_bond_less_requests.is_empty(),
+				!metadata.delegator_unstake_requests.is_empty(),
 				Error::<T>::NoBondLessRequest
 			);
 
@@ -201,7 +201,7 @@ impl<T: Config> Pallet<T> {
 
 			// Process all ready bond less requests
 			let mut executed_requests = Vec::new();
-			metadata.delegator_bond_less_requests.retain(|request| {
+			metadata.delegator_unstake_requests.retain(|request| {
 				if current_round >= delay + request.requested_round {
 					// Add the amount back to the delegator's deposits
 					metadata
@@ -234,7 +234,7 @@ impl<T: Config> Pallet<T> {
 	/// # Errors
 	///
 	/// Returns an error if the delegator has no matching bond less request or if there is no active delegation.
-	pub fn process_cancel_delegator_bond_less(
+	pub fn process_cancel_delegator_unstake(
 		who: T::AccountId,
 		asset_id: T::AssetId,
 		amount: BalanceOf<T>,
@@ -244,16 +244,16 @@ impl<T: Config> Pallet<T> {
 
 			// Find and remove the matching bond less request
 			let request_index = metadata
-				.delegator_bond_less_requests
+				.delegator_unstake_requests
 				.iter()
 				.position(|r| r.asset_id == asset_id && r.amount == amount)
 				.ok_or(Error::<T>::NoBondLessRequest)?;
 
-			let bond_less_request = metadata.delegator_bond_less_requests.remove(request_index);
+			let unstake_request = metadata.delegator_unstake_requests.remove(request_index);
 
 			// Update the operator's metadata
 			Operators::<T>::try_mutate(
-				&bond_less_request.operator,
+				&unstake_request.operator,
 				|maybe_operator_metadata| -> DispatchResult {
 					let operator_metadata =
 						maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
@@ -282,7 +282,7 @@ impl<T: Config> Pallet<T> {
 
 			// Create a new delegation
 			metadata.delegations.push(BondInfoDelegator {
-				operator: bond_less_request.operator,
+				operator: unstake_request.operator,
 				amount,
 				asset_id,
 			});
