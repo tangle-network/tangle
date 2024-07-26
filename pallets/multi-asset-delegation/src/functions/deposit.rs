@@ -97,7 +97,7 @@ impl<T: Config> Pallet<T> {
 				metadata.deposits.remove(&asset_id);
 			}
 
-			// Create the withdraw request
+			// Create the unstake request
 			let current_round = Self::current_round();
 			metadata.withdraw_requests.push(WithdrawRequest {
 				asset_id,
@@ -114,6 +114,8 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `who` - The account ID of the delegator.
+	/// * `asset_id` - The asset ID of the unstake request to cancel.
+	/// * `amount` - The amount of the unstake request to cancel.
 	///
 	/// # Errors
 	///
