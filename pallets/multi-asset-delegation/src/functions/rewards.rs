@@ -34,7 +34,7 @@ impl<T: Config> Pallet<T> {
 		> = BTreeMap::new();
 
 		// Iterate through all operator snapshots for the given round
-		// TODO : Could be dangerous with many operators
+		// TODO: Could be dangerous with many operators
 		for (_, operator_snapshot) in AtStake::<T>::iter_prefix(round) {
 			for delegation in &operator_snapshot.delegations {
 				delegation_info.entry(delegation.asset_id).or_default().push(delegation.clone());
@@ -45,7 +45,7 @@ impl<T: Config> Pallet<T> {
 		if let Some(reward_config) = RewardConfigStorage::<T>::get() {
 			// Distribute rewards for each asset
 			for (asset_id, delegations) in delegation_info.iter() {
-				// we only reward asset in a reward pool
+				// We only reward asset in a reward pool
 				if let Some(pool_id) = AssetLookupRewardPools::<T>::get(asset_id) {
 					if let Some(config) = reward_config.configs.get(&pool_id) {
 						// Calculate total amount and distribute rewards
@@ -59,8 +59,13 @@ impl<T: Config> Pallet<T> {
 								Self::calculate_total_reward(config.apy, total_amount)?;
 
 							for delegation in delegations {
-								let reward = total_reward * delegation.amount / total_amount;
-								// Logic to distribute reward to the delegator (e.g., mint or transfer tokens)
+								// Calculate the percentage of the cap that the user is staking
+								let staking_percentage =
+									delegation.amount.saturating_mul(100u32.into()) / cap;
+								// Calculate the reward based on the staking percentage
+								let reward =
+									total_reward.saturating_mul(staking_percentage) / 100u32.into();
+								// Distribute the reward to the delegator
 								Self::distribute_reward_to_delegator(
 									&delegation.delegator,
 									reward,
