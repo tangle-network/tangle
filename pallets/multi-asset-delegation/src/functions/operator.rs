@@ -25,7 +25,7 @@ use frame_support::{
 use sp_runtime::DispatchError;
 
 impl<T: Config> Pallet<T> {
-	/// Handles the deposit of bond amount and creation of an operator.
+	/// Handles the deposit of stake amount and creation of an operator.
 	///
 	/// # Arguments
 	///
@@ -34,7 +34,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the user is already an operator or if the bond amount is too low.
+	/// Returns an error if the user is already an operator or if the stake amount is too low.
 	pub fn handle_deposit_and_create_operator(
 		who: T::AccountId,
 		bond_amount: BalanceOf<T>,
@@ -44,7 +44,7 @@ impl<T: Config> Pallet<T> {
 		T::Currency::reserve(&who, bond_amount)?;
 
 		let operator_metadata = OperatorMetadata {
-			bond: bond_amount,
+			stake: bond_amount,
 			delegation_count: 0,
 			request: None,
 			delegations: Default::default(),
@@ -129,13 +129,13 @@ impl<T: Config> Pallet<T> {
 			_ => return Err(Error::<T>::NotLeavingOperator.into()),
 		};
 
-		T::Currency::unreserve(who, operator.bond);
+		T::Currency::unreserve(who, operator.stake);
 		Operators::<T>::remove(who);
 
 		Ok(())
 	}
 
-	/// Processes an additional bond for an operator.
+	/// Processes an additional stake for an operator.
 	///
 	/// # Arguments
 	///
@@ -152,31 +152,31 @@ impl<T: Config> Pallet<T> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		T::Currency::reserve(who, additional_bond)?;
 
-		operator.bond += additional_bond;
+		operator.stake += additional_bond;
 		Operators::<T>::insert(who, operator);
 
 		Ok(())
 	}
 
-	/// Schedules a bond reduction for an operator.
+	/// Schedules a stake reduction for an operator.
 	///
 	/// # Arguments
 	///
 	/// * `who` - The account ID of the operator.
-	/// * `bond_less_amount` - The amount to be reduced from the operator's bond.
+	/// * `unstake_amount` - The amount to be reduced from the operator's stake.
 	///
 	/// # Errors
 	///
 	/// Returns an error if the operator is not found, has active services, or cannot exit.
-	pub fn process_schedule_operator_bond_less(
+	pub fn process_schedule_operator_unstake(
 		who: &T::AccountId,
-		bond_less_amount: BalanceOf<T>,
+		unstake_amount: BalanceOf<T>,
 	) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		ensure!(T::ServiceManager::can_exit(who), Error::<T>::CannotExit);
 
 		operator.request = Some(OperatorBondLessRequest {
-			amount: bond_less_amount,
+			amount: unstake_amount,
 			request_time: Self::current_round(),
 		});
 		Operators::<T>::insert(who, operator);
@@ -184,7 +184,7 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	/// Executes a scheduled bond reduction for an operator.
+	/// Executes a scheduled stake reduction for an operator.
 	///
 	/// # Arguments
 	///
@@ -192,9 +192,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the operator is not found, has no scheduled bond reduction, or the
-	/// request is not satisfied.
-	pub fn process_execute_operator_bond_less(who: &T::AccountId) -> Result<(), DispatchError> {
+	/// Returns an error if the operator is not found, has no scheduled stake reduction, or the request is not satisfied.
+	pub fn process_execute_operator_unstake(who: &T::AccountId) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		let request = operator.request.as_ref().ok_or(Error::<T>::NoScheduledBondLess)?;
 		let current_round = Self::current_round();
@@ -204,14 +203,14 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::BondLessRequestNotSatisfied
 		);
 
-		operator.bond -= request.amount;
+		operator.stake -= request.amount;
 		operator.request = None;
 		Operators::<T>::insert(who, operator);
 
 		Ok(())
 	}
 
-	/// Cancels a scheduled bond reduction for an operator.
+	/// Cancels a scheduled stake reduction for an operator.
 	///
 	/// # Arguments
 	///
@@ -219,8 +218,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the operator is not found or has no scheduled bond reduction.
-	pub fn process_cancel_operator_bond_less(who: &T::AccountId) -> Result<(), DispatchError> {
+	/// Returns an error if the operator is not found or has no scheduled stake reduction.
+	pub fn process_cancel_operator_unstake(who: &T::AccountId) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		ensure!(operator.request.is_some(), Error::<T>::NoScheduledBondLess);
 

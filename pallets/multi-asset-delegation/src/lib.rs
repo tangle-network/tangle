@@ -31,29 +31,19 @@
 //!
 //! ## Workflow for Delegators
 //!
-//! 1. **Deposit**: Before a delegator can delegate assets to an operator, they must first deposit
-//!    the desired amount of assets. This reserves the assets in the delegator's account.
-//! 2. **Delegate**: After depositing assets, the delegator can delegate these assets to an
-//!    operator. The operator then manages these assets, and the delegator can earn rewards from the
-//!    operator's activities.
-//! 3. **Bond Less Request**: If a delegator wants to reduce their delegation, they can schedule a
-//!    bond less request. This request will be executed after a specified delay, ensuring network
-//!    stability.
-//! 4. **Unstake Request**: To completely remove assets from delegation, a delegator must submit an
-//!    unstake request. Similar to bond less requests, unstake requests also have a delay before
-//!    they can be executed.
+//! 1. **Deposit**: Before a delegator can delegate assets to an operator, they must first deposit the desired amount of assets. This reserves the assets in the delegator's account.
+//! 2. **Delegate**: After depositing assets, the delegator can delegate these assets to an operator. The operator then manages these assets, and the delegator can earn rewards from the operator's activities.
+//! 3. **Unstake**: If a delegator wants to reduce their delegation, they can schedule a unstake request. This request will be executed after a specified delay, ensuring network stability.
+//! 4. **withdraw Request**: To completely remove assets from delegation, a delegator must submit an withdraw request. Similar to unstake requests, withdraw requests also have a delay before they can be executed.
 //!
 //! ## Workflow for Operators
 //!
-//! - **Join Operators**: An account can join as an operator by depositing a minimum bond amount.
-//!   This bond is reserved and ensures that the operator has a stake in the network.
-//! - **Leave Operators**: Operators can leave the network by scheduling a leave request. This
-//!   request is subject to a delay, during which the operator's status changes to 'Leaving'.
-//! - **Bond More**: Operators can increase their bond to strengthen their stake in the network.
-//! - **Bond Less**: Operators can schedule a bond reduction request, which is executed after a
-//!   delay.
-//! - **Go Offline/Online**: Operators can change their status to offline if they need to
-//!   temporarily stop participating in the network, and can come back online when ready.
+//! - **Join Operators**: An account can join as an operator by depositing a minimum stake amount. This stake is reserved and ensures that the operator has a stake in the network.
+//! - **Leave Operators**: Operators can leave the network by scheduling a leave request. This request is subject to a delay, during which the operator's status changes to 'Leaving'.
+//! - **Stake More**: Operators can increase their stake to strengthen their stake in the network.
+//! - **Stake Less**: Operators can schedule a stake reduction request, which is executed after a delay.
+//! - **Go Offline/Online**: Operators can change their status to offline if they need to temporarily stop participating in the network, and can come back online when ready.
+//!
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
@@ -99,15 +89,15 @@ pub mod pallet {
 			+ ReservableCurrency<Self::AccountId>
 			+ LockableCurrency<Self::AccountId>;
 
-		/// The minimum amount of bond required for an operator.
+		/// The minimum amount of stake required for an operator.
 		#[pallet::constant]
 		type MinOperatorBondAmount: Get<BalanceOf<Self>>;
 
-		/// The minimum amount of bond required for a delegate.
+		/// The minimum amount of stake required for a delegate.
 		#[pallet::constant]
 		type MinDelegateAmount: Get<BalanceOf<Self>>;
 
-		/// The duration for which the bond is locked.
+		/// The duration for which the stake is locked.
 		#[pallet::constant]
 		type BondDuration: Get<RoundIndex>;
 
@@ -118,7 +108,7 @@ pub mod pallet {
 		#[pallet::constant]
 		type LeaveOperatorsDelay: Get<RoundIndex>;
 
-		/// Number of rounds operator requests to decrease self-bond must wait to be executable.
+		/// Number of rounds operator requests to decrease self-stake must wait to be executable.
 		#[pallet::constant]
 		type OperatorBondLessDelay: Get<RoundIndex>;
 
@@ -126,7 +116,7 @@ pub mod pallet {
 		#[pallet::constant]
 		type LeaveDelegatorsDelay: Get<RoundIndex>;
 
-		/// Number of rounds that delegation bond less requests must wait before being executable.
+		/// Number of rounds that delegation unstake requests must wait before being executable.
 		#[pallet::constant]
 		type DelegationBondLessDelay: Get<RoundIndex>;
 
@@ -136,6 +126,16 @@ pub mod pallet {
 
 		/// The asset ID type.
 		type AssetId: AtLeast32BitUnsigned
+			+ Parameter
+			+ Member
+			+ MaybeSerializeDeserialize
+			+ Clone
+			+ Copy
+			+ PartialOrd
+			+ MaxEncodedLen;
+
+		/// The pool ID type.
+		type PoolId: AtLeast32BitUnsigned
 			+ Parameter
 			+ Member
 			+ MaybeSerializeDeserialize
@@ -170,11 +170,6 @@ pub mod pallet {
 	#[pallet::getter(fn current_round)]
 	pub type CurrentRound<T: Config> = StorageValue<_, RoundIndex, ValueQuery>;
 
-	/// Whitelisted assets that are allowed to be deposited
-	#[pallet::storage]
-	#[pallet::getter(fn whitelisted_assets)]
-	pub type WhitelistedAssets<T: Config> = StorageValue<_, Vec<T::AssetId>, ValueQuery>;
-
 	/// Snapshot of collator delegation stake at the start of the round.
 	#[pallet::storage]
 	#[pallet::getter(fn at_stake)]
@@ -195,11 +190,23 @@ pub mod pallet {
 		StorageMap<_, Twox64Concat, T::AccountId, DelegatorMetadataOf<T>, OptionQuery>;
 
 	#[pallet::storage]
+	#[pallet::getter(fn reward_pools)]
+	/// Storage for the reward pools
+	pub type RewardPools<T: Config> =
+		StorageMap<_, Twox64Concat, T::PoolId, Vec<T::AssetId>, OptionQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn asset_reward_pool_lookup)]
+	/// Storage for the reward pools
+	pub type AssetLookupRewardPools<T: Config> =
+		StorageMap<_, Twox64Concat, T::AssetId, T::PoolId, OptionQuery>;
+
+	#[pallet::storage]
 	#[pallet::getter(fn reward_config)]
 	/// Storage for the reward configuration, which includes APY, cap for assets, and whitelisted
 	/// blueprints.
 	pub type RewardConfigStorage<T: Config> =
-		StorageValue<_, RewardConfig<T::AssetId, BalanceOf<T>>, OptionQuery>;
+		StorageValue<_, RewardConfig<T::PoolId, BalanceOf<T>>, OptionQuery>;
 
 	/// Events emitted by the pallet.
 	#[pallet::event]
@@ -213,26 +220,26 @@ pub mod pallet {
 		OperatorLeaveCancelled { who: T::AccountId },
 		/// An operator has executed their leave request.
 		OperatorLeaveExecuted { who: T::AccountId },
-		/// An operator has increased their bond.
+		/// An operator has increased their stake.
 		OperatorBondMore { who: T::AccountId, additional_bond: BalanceOf<T> },
-		/// An operator has scheduled to decrease their bond.
-		OperatorBondLessScheduled { who: T::AccountId, bond_less_amount: BalanceOf<T> },
-		/// An operator has executed their bond decrease.
+		/// An operator has scheduled to decrease their stake.
+		OperatorBondLessScheduled { who: T::AccountId, unstake_amount: BalanceOf<T> },
+		/// An operator has executed their stake decrease.
 		OperatorBondLessExecuted { who: T::AccountId },
-		/// An operator has cancelled their bond decrease request.
+		/// An operator has cancelled their stake decrease request.
 		OperatorBondLessCancelled { who: T::AccountId },
 		/// An operator has gone offline.
 		OperatorWentOffline { who: T::AccountId },
 		/// An operator has gone online.
 		OperatorWentOnline { who: T::AccountId },
 		/// A deposit has been made.
-		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset_id: Option<T::AssetId> },
-		/// An unstake has been scheduled.
-		ScheduledUnstake { who: T::AccountId, amount: BalanceOf<T>, asset_id: Option<T::AssetId> },
-		/// An unstake has been executed.
-		ExecutedUnstake { who: T::AccountId },
-		/// An unstake has been cancelled.
-		CancelledUnstake { who: T::AccountId },
+		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
+		/// An withdraw has been scheduled.
+		Scheduledwithdraw { who: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
+		/// An withdraw has been executed.
+		Executedwithdraw { who: T::AccountId },
+		/// An withdraw has been cancelled.
+		Cancelledwithdraw { who: T::AccountId },
 		/// A delegation has been made.
 		Delegated {
 			who: T::AccountId,
@@ -240,23 +247,28 @@ pub mod pallet {
 			amount: BalanceOf<T>,
 			asset_id: T::AssetId,
 		},
-		/// A delegator bond less request has been scheduled.
+		/// A delegator unstake request has been scheduled.
 		ScheduledDelegatorBondLess {
 			who: T::AccountId,
 			operator: T::AccountId,
 			amount: BalanceOf<T>,
 			asset_id: T::AssetId,
 		},
-		/// A delegator bond less request has been executed.
+		/// A delegator unstake request has been executed.
 		ExecutedDelegatorBondLess { who: T::AccountId },
-		/// A delegator bond less request has been cancelled.
+		/// A delegator unstake request has been cancelled.
 		CancelledDelegatorBondLess { who: T::AccountId },
-		/// New whitelisted assets set
-		WhitelistedAssetsSet { assets: Vec<T::AssetId> },
-		/// Event emitted when an incentive APY and cap are set for an asset
-		IncentiveAPYAndCapSet { asset_id: T::AssetId, apy: u128, cap: BalanceOf<T> },
+		/// Event emitted when an incentive APY and cap are set for a reward pool
+		IncentiveAPYAndCapSet { pool_id: T::PoolId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
 		/// Event emitted when a blueprint is whitelisted for rewards
 		BlueprintWhitelisted { blueprint_id: u32 },
+		/// Asset has been updated to reward pool
+		AssetUpdatedInPool {
+			who: T::AccountId,
+			pool_id: T::PoolId,
+			asset_id: T::AssetId,
+			action: AssetAction,
+		},
 	}
 
 	/// Errors emitted by the pallet.
@@ -264,7 +276,7 @@ pub mod pallet {
 	pub enum Error<T> {
 		/// The account is already an operator.
 		AlreadyOperator,
-		/// The bond amount is too low.
+		/// The stake amount is too low.
 		BondTooLow,
 		/// The account is not an operator.
 		NotAnOperator,
@@ -276,9 +288,9 @@ pub mod pallet {
 		NotLeavingOperator,
 		/// The round does not match the scheduled leave round.
 		NotLeavingRound,
-		/// There is no scheduled bond less request.
+		/// There is no scheduled unstake request.
 		NoScheduledBondLess,
-		/// The bond less request is not satisfied.
+		/// The unstake request is not satisfied.
 		BondLessRequestNotSatisfied,
 		/// The operator is not active.
 		NotActiveOperator,
@@ -294,13 +306,11 @@ pub mod pallet {
 		InsufficientBalance,
 		/// There is no withdraw request.
 		NoWithdrawRequest,
-		/// The unstake is not ready.
-		UnstakeNotReady,
-		/// There is no bond less request.
+		/// There is no unstake request.
 		NoBondLessRequest,
-		/// The bond less request is not ready.
+		/// The unstake request is not ready.
 		BondLessNotReady,
-		/// A bond less request already exists.
+		/// A unstake request already exists.
 		BondLessRequestAlreadyExists,
 		/// There are active services using the asset.
 		ActiveServicesUsingAsset,
@@ -314,6 +324,16 @@ pub mod pallet {
 		AssetNotFound,
 		/// The blueprint ID is already whitelisted
 		BlueprintAlreadyWhitelisted,
+		/// No withdraw requests found
+		NowithdrawRequests,
+		/// No matching withdraw reqests found
+		NoMatchingwithdrawRequest,
+		/// Asset already exists in a reward pool
+		AssetAlreadyInPool,
+		/// Asset not found in reward pool
+		AssetNotInPool,
+		/// The reward pool does not exist
+		PoolNotFound,
 	}
 
 	/// Hooks for the pallet.
@@ -323,7 +343,7 @@ pub mod pallet {
 	/// The callable functions (extrinsics) of the pallet.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Allows an account to join as an operator by providing a bond.
+		/// Allows an account to join as an operator by providing a stake.
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn join_operators(origin: OriginFor<T>, bond_amount: BalanceOf<T>) -> DispatchResult {
@@ -363,7 +383,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Allows an operator to increase their bond.
+		/// Allows an operator to increase their stake.
 		#[pallet::call_index(4)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn operator_bond_more(
@@ -376,35 +396,35 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Schedules an operator to decrease their bond.
+		/// Schedules an operator to decrease their stake.
 		#[pallet::call_index(5)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn schedule_operator_bond_less(
+		pub fn schedule_operator_unstake(
 			origin: OriginFor<T>,
-			bond_less_amount: BalanceOf<T>,
+			unstake_amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_schedule_operator_bond_less(&who, bond_less_amount)?;
-			Self::deposit_event(Event::OperatorBondLessScheduled { who, bond_less_amount });
+			Self::process_schedule_operator_unstake(&who, unstake_amount)?;
+			Self::deposit_event(Event::OperatorBondLessScheduled { who, unstake_amount });
 			Ok(())
 		}
 
-		/// Executes a scheduled bond decrease for an operator.
+		/// Executes a scheduled stake decrease for an operator.
 		#[pallet::call_index(6)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn execute_operator_bond_less(origin: OriginFor<T>) -> DispatchResult {
+		pub fn execute_operator_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_execute_operator_bond_less(&who)?;
+			Self::process_execute_operator_unstake(&who)?;
 			Self::deposit_event(Event::OperatorBondLessExecuted { who });
 			Ok(())
 		}
 
-		/// Cancels a scheduled bond decrease for an operator.
+		/// Cancels a scheduled stake decrease for an operator.
 		#[pallet::call_index(7)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn cancel_operator_bond_less(origin: OriginFor<T>) -> DispatchResult {
+		pub fn cancel_operator_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_operator_bond_less(&who)?;
+			Self::process_cancel_operator_unstake(&who)?;
 			Self::deposit_event(Event::OperatorBondLessCancelled { who });
 			Ok(())
 		}
@@ -434,7 +454,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn deposit(
 			origin: OriginFor<T>,
-			asset_id: Option<T::AssetId>,
+			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -443,37 +463,41 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Schedules an unstake request.
+		/// Schedules an withdraw request.
 		#[pallet::call_index(11)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn schedule_unstake(
+		pub fn schedule_withdraw(
 			origin: OriginFor<T>,
-			asset_id: Option<T::AssetId>,
+			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_schedule_unstake(who.clone(), asset_id, amount)?;
-			Self::deposit_event(Event::ScheduledUnstake { who, amount, asset_id });
+			Self::process_schedule_withdraw(who.clone(), asset_id, amount)?;
+			Self::deposit_event(Event::Scheduledwithdraw { who, amount, asset_id });
 			Ok(())
 		}
 
-		/// Executes a scheduled unstake request.
+		/// Executes a scheduled withdraw request.
 		#[pallet::call_index(12)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn execute_unstake(origin: OriginFor<T>) -> DispatchResult {
+		pub fn execute_withdraw(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_execute_unstake(who.clone())?;
-			Self::deposit_event(Event::ExecutedUnstake { who });
+			Self::process_execute_withdraw(who.clone())?;
+			Self::deposit_event(Event::Executedwithdraw { who });
 			Ok(())
 		}
 
-		/// Cancels a scheduled unstake request.
+		/// Cancels a scheduled withdraw request.
 		#[pallet::call_index(13)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn cancel_unstake(origin: OriginFor<T>) -> DispatchResult {
+		pub fn cancel_withdraw(
+			origin: OriginFor<T>,
+			asset_id: T::AssetId,
+			amount: BalanceOf<T>,
+		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_unstake(who.clone())?;
-			Self::deposit_event(Event::CancelledUnstake { who });
+			Self::process_cancel_withdraw(who.clone(), asset_id, amount)?;
+			Self::deposit_event(Event::Cancelledwithdraw { who });
 			Ok(())
 		}
 
@@ -492,17 +516,17 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Schedules a request to reduce a delegator's bond.
+		/// Schedules a request to reduce a delegator's stake.
 		#[pallet::call_index(15)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn schedule_delegator_bond_less(
+		pub fn schedule_delegator_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
 			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_schedule_delegator_bond_less(
+			Self::process_schedule_delegator_unstake(
 				who.clone(),
 				operator.clone(),
 				asset_id,
@@ -517,42 +541,27 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Executes a scheduled request to reduce a delegator's bond.
+		/// Executes a scheduled request to reduce a delegator's stake.
 		#[pallet::call_index(16)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn execute_delegator_bond_less(origin: OriginFor<T>) -> DispatchResult {
+		pub fn execute_delegator_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_execute_delegator_bond_less(who.clone())?;
+			Self::process_execute_delegator_unstake(who.clone())?;
 			Self::deposit_event(Event::ExecutedDelegatorBondLess { who });
 			Ok(())
 		}
 
-		/// Cancels a scheduled request to reduce a delegator's bond.
+		/// Cancels a scheduled request to reduce a delegator's stake.
 		#[pallet::call_index(17)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn cancel_delegator_bond_less(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			Self::process_cancel_delegator_bond_less(who.clone())?;
-			Self::deposit_event(Event::CancelledDelegatorBondLess { who });
-			Ok(())
-		}
-
-		/// Set the whitelisted assets allowed for delegation
-		#[pallet::call_index(18)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn set_whitelisted_assets(
+		pub fn cancel_delegator_unstake(
 			origin: OriginFor<T>,
-			assets: Vec<T::AssetId>,
+			asset_id: T::AssetId,
+			amount: BalanceOf<T>,
 		) -> DispatchResult {
-			// Ensure that the origin is authorized
-			T::ForceOrigin::ensure_origin(origin)?;
-
-			// Set the whitelisted assets
-			WhitelistedAssets::<T>::put(assets.clone());
-
-			// Emit an event
-			Self::deposit_event(Event::WhitelistedAssetsSet { assets });
-
+			let who = ensure_signed(origin)?;
+			Self::process_cancel_delegator_unstake(who.clone(), asset_id, amount)?;
+			Self::deposit_event(Event::CancelledDelegatorBondLess { who });
 			Ok(())
 		}
 
@@ -561,8 +570,8 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn set_incentive_apy_and_cap(
 			origin: OriginFor<T>,
-			asset_id: T::AssetId,
-			apy: u128,
+			pool_id: T::PoolId,
+			apy: sp_runtime::Percent,
 			cap: BalanceOf<T>,
 		) -> DispatchResult {
 			// Ensure that the origin is authorized
@@ -575,13 +584,13 @@ pub mod pallet {
 					whitelisted_blueprint_ids: Vec::new(),
 				});
 
-				config.configs.insert(asset_id, RewardConfigForAsset { apy, cap });
+				config.configs.insert(pool_id, RewardConfigForAssetPool { apy, cap });
 
 				*maybe_config = Some(config);
 			});
 
 			// Emit an event
-			Self::deposit_event(Event::IncentiveAPYAndCapSet { asset_id, apy, cap });
+			Self::deposit_event(Event::IncentiveAPYAndCapSet { pool_id, apy, cap });
 
 			Ok(())
 		}
@@ -612,6 +621,27 @@ pub mod pallet {
 
 			// Emit an event
 			Self::deposit_event(Event::BlueprintWhitelisted { blueprint_id });
+
+			Ok(())
+		}
+
+		/// Manage asset id to pool rewards
+		#[pallet::call_index(21)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn manage_asset_in_pool(
+			origin: OriginFor<T>,
+			pool_id: T::PoolId,
+			asset_id: T::AssetId,
+			action: AssetAction,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			match action {
+				AssetAction::Add => Self::add_asset_to_pool(&pool_id, &asset_id)?,
+				AssetAction::Remove => Self::remove_asset_from_pool(&pool_id, &asset_id)?,
+			}
+
+			Self::deposit_event(Event::AssetUpdatedInPool { who, pool_id, asset_id, action });
 
 			Ok(())
 		}

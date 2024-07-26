@@ -133,6 +133,7 @@ impl pallet_multi_asset_delegation::Config for Test {
 	type MinDelegateAmount = ConstU64<100>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
+	type PoolId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<u64>;
 	type PalletId = PID;
 	type WeightInfo = ();
@@ -166,9 +167,8 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			(ALICE, 100_000),
 			(BOB, 200_000),
 			(CHARLIE, 300_000),
-			(DAVE, 5_000), // Not enough to bond
-			(MultiAssetDelegation::pallet_account(), 100), /* give pallet some ED so it can
-			                * receive tokens */
+			(DAVE, 5_000),                                 // Not enough to stake
+			(MultiAssetDelegation::pallet_account(), 100), // give pallet some ED so it can receive tokens
 			(EVE, 20_000),
 		],
 	}

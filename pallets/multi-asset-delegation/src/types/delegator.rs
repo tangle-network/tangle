@@ -26,25 +26,27 @@ pub enum DelegatorStatus {
 	LeavingScheduled(RoundIndex),
 }
 
-/// Represents a request to unstake a specific amount of an asset.
+/// Represents a request to withdraw a specific amount of an asset.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct UnstakeRequest<AssetId, Balance> {
-	/// The ID of the asset to be unstaked.
+pub struct WithdrawRequest<AssetId, Balance> {
+	/// The ID of the asset to be withdrawd.
 	pub asset_id: AssetId,
-	/// The amount of the asset to be unstaked.
+	/// The amount of the asset to be withdrawd.
 	pub amount: Balance,
-	/// The round in which the unstake was requested.
+	/// The round in which the withdraw was requested.
 	pub requested_round: RoundIndex,
 }
 
 /// Represents a request to reduce the bonded amount of a specific asset.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct BondLessRequest<AssetId, Balance> {
-	/// The ID of the asset to reduce the bond of.
+pub struct BondLessRequest<AccountId, AssetId, Balance> {
+	/// The account ID of the operator.
+	pub operator: AccountId,
+	/// The ID of the asset to reduce the stake of.
 	pub asset_id: AssetId,
-	/// The amount by which to reduce the bond.
+	/// The amount by which to reduce the stake.
 	pub amount: Balance,
-	/// The round in which the bond reduction was requested.
+	/// The round in which the stake reduction was requested.
 	pub requested_round: RoundIndex,
 }
 
@@ -53,12 +55,12 @@ pub struct BondLessRequest<AssetId, Balance> {
 pub struct DelegatorMetadata<AccountId, Balance, AssetId: Encode + Decode + TypeInfo> {
 	/// A map of deposited assets and their respective amounts.
 	pub deposits: BTreeMap<AssetId, Balance>,
-	/// An optional unstake request, with only one allowed at a time.
-	pub unstake_request: Option<UnstakeRequest<AssetId, Balance>>,
+	/// A vector of withdraw requests.
+	pub withdraw_requests: Vec<WithdrawRequest<AssetId, Balance>>,
 	/// A list of all current delegations.
 	pub delegations: Vec<BondInfoDelegator<AccountId, Balance, AssetId>>,
-	/// An optional request to reduce the bonded amount, with only one allowed at a time.
-	pub delegator_bond_less_request: Option<BondLessRequest<AssetId, Balance>>,
+	/// A vector of requests to reduce the bonded amount.
+	pub delegator_unstake_requests: Vec<BondLessRequest<AccountId, AssetId, Balance>>,
 	/// The current status of the delegator.
 	pub status: DelegatorStatus,
 }
@@ -71,8 +73,8 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo> Default
 			deposits: BTreeMap::new(),
 			delegations: Vec::new(),
 			status: DelegatorStatus::default(),
-			unstake_request: None,
-			delegator_bond_less_request: None,
+			withdraw_requests: Vec::new(),
+			delegator_unstake_requests: Vec::new(),
 		}
 	}
 }
@@ -80,9 +82,9 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo> Default
 impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 	DelegatorMetadata<AccountId, Balance, AssetId>
 {
-	/// Returns a reference to the unstake request, if it exists.
-	pub fn get_unstake_request(&self) -> Option<&UnstakeRequest<AssetId, Balance>> {
-		self.unstake_request.as_ref()
+	/// Returns a reference to the vector of withdraw requests.
+	pub fn get_withdraw_requests(&self) -> &Vec<WithdrawRequest<AssetId, Balance>> {
+		&self.withdraw_requests
 	}
 
 	/// Returns a reference to the list of delegations.
@@ -90,9 +92,11 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 		&self.delegations
 	}
 
-	/// Returns a reference to the bond less request, if it exists.
-	pub fn get_delegator_bond_less_request(&self) -> Option<&BondLessRequest<AssetId, Balance>> {
-		self.delegator_bond_less_request.as_ref()
+	/// Returns a reference to the vector of unstake requests.
+	pub fn get_delegator_unstake_requests(
+		&self,
+	) -> &Vec<BondLessRequest<AccountId, AssetId, Balance>> {
+		&self.delegator_unstake_requests
 	}
 
 	/// Checks if the list of delegations is empty.
@@ -107,9 +111,9 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 		AssetId: Eq + PartialEq,
 	{
 		let mut total = Balance::default();
-		for bond in &self.delegations {
-			if bond.asset_id == asset_id {
-				total += bond.amount.clone();
+		for stake in &self.delegations {
+			if stake.asset_id == asset_id {
+				total += stake.amount.clone();
 			}
 		}
 		total
@@ -123,7 +127,7 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 	where
 		AccountId: Eq + PartialEq,
 	{
-		self.delegations.iter().filter(|&bond| bond.operator == operator).collect()
+		self.delegations.iter().filter(|&stake| stake.operator == operator).collect()
 	}
 }
 
@@ -136,7 +140,7 @@ pub struct Deposit<AssetId, Balance> {
 	pub asset_id: AssetId,
 }
 
-/// Represents a bond between a delegator and an operator.
+/// Represents a stake between a delegator and an operator.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
 pub struct BondInfoDelegator<AccountId, Balance, AssetId> {
 	/// The account ID of the operator.
@@ -172,19 +176,26 @@ mod tests {
 	}
 
 	#[test]
-	fn get_unstake_request_should_work() {
-		let unstake_request = UnstakeRequest {
-			asset_id: MockAssetId(1),
-			amount: MockBalance(50),
-			requested_round: 1,
-		};
+	fn get_withdraw_requests_should_work() {
+		let withdraw_requests = vec![
+			WithdrawRequest {
+				asset_id: MockAssetId(1),
+				amount: MockBalance(50),
+				requested_round: 1,
+			},
+			WithdrawRequest {
+				asset_id: MockAssetId(2),
+				amount: MockBalance(75),
+				requested_round: 2,
+			},
+		];
 		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
 			DelegatorMetadata {
-				unstake_request: Some(unstake_request.clone()),
+				withdraw_requests: withdraw_requests.clone(),
 				..Default::default()
 			};
 
-		assert_eq!(metadata.get_unstake_request(), Some(&unstake_request));
+		assert_eq!(metadata.get_withdraw_requests(), &withdraw_requests);
 	}
 
 	#[test]
@@ -208,19 +219,28 @@ mod tests {
 	}
 
 	#[test]
-	fn get_delegator_bond_less_request_should_work() {
-		let bond_less_request = BondLessRequest {
-			asset_id: MockAssetId(1),
-			amount: MockBalance(50),
-			requested_round: 1,
-		};
+	fn get_delegator_unstake_requests_should_work() {
+		let unstake_requests = vec![
+			BondLessRequest {
+				asset_id: MockAssetId(1),
+				amount: MockBalance(50),
+				requested_round: 1,
+				operator: MockAccountId(1),
+			},
+			BondLessRequest {
+				asset_id: MockAssetId(2),
+				amount: MockBalance(75),
+				requested_round: 2,
+				operator: MockAccountId(1),
+			},
+		];
 		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
 			DelegatorMetadata {
-				delegator_bond_less_request: Some(bond_less_request.clone()),
+				delegator_unstake_requests: unstake_requests.clone(),
 				..Default::default()
 			};
 
-		assert_eq!(metadata.get_delegator_bond_less_request(), Some(&bond_less_request));
+		assert_eq!(metadata.get_delegator_unstake_requests(), &unstake_requests);
 	}
 
 	#[test]

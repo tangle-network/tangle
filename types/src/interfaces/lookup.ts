@@ -5831,13 +5831,13 @@ export default {
    * Lookup753: pallet_multi_asset_delegation::types::rewards::RewardConfig<AssetId, Balance>
    **/
   PalletMultiAssetDelegationRewardsRewardConfig: {
-    configs: 'BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAsset>',
+    configs: 'BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAssetPool>',
     whitelistedBlueprintIds: 'Vec<u32>'
   },
   /**
-   * Lookup755: pallet_multi_asset_delegation::types::rewards::RewardConfigForAsset<Balance>
+   * Lookup755: pallet_multi_asset_delegation::types::rewards::RewardConfigForAssetPool<Balance>
    **/
-  PalletMultiAssetDelegationRewardsRewardConfigForAsset: {
+  PalletMultiAssetDelegationRewardsRewardConfigForAssetPool: {
     apy: 'u128',
     cap: 'u128'
   },

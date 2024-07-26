@@ -47,12 +47,12 @@ pub enum ServiceStatus {
 	Inactive,
 }
 
-pub trait MultiAssetDelegationInfo<AccountId, AssetId, Balance> {
+pub trait MultiAssetDelegationInfo<AccountId, AssetId, PoolId, Balance> {
 	/// Get the current round index.
 	fn get_current_round() -> RoundIndex;
 
 	/// Get the reward configuration for a specific asset ID.
-	fn get_reward_config(asset_id: &AssetId) -> Option<RewardConfigForAsset<Balance>>;
+	fn get_reward_config(pool_id: &PoolId) -> Option<RewardConfigForAssetPool<Balance>>;
 
 	/// Get the total delegation amount for a specific delegator and asset ID.
 	fn get_total_delegation(delegator: &AccountId, asset_id: &AssetId) -> Balance;
@@ -63,13 +63,15 @@ pub trait MultiAssetDelegationInfo<AccountId, AssetId, Balance> {
 	) -> Vec<DelegatorBond<AccountId, Balance, AssetId>>;
 }
 
-impl<T: Config> MultiAssetDelegationInfo<T::AccountId, T::AssetId, BalanceOf<T>> for Pallet<T> {
+impl<T: Config> MultiAssetDelegationInfo<T::AccountId, T::AssetId, T::PoolId, BalanceOf<T>>
+	for Pallet<T>
+{
 	fn get_current_round() -> RoundIndex {
 		Self::current_round()
 	}
 
-	fn get_reward_config(asset_id: &T::AssetId) -> Option<RewardConfigForAsset<BalanceOf<T>>> {
-		RewardConfigStorage::<T>::get().and_then(|config| config.configs.get(asset_id).cloned())
+	fn get_reward_config(pool_id: &T::PoolId) -> Option<RewardConfigForAssetPool<BalanceOf<T>>> {
+		RewardConfigStorage::<T>::get().and_then(|config| config.configs.get(pool_id).cloned())
 	}
 
 	fn get_total_delegation(delegator: &T::AccountId, asset_id: &T::AssetId) -> BalanceOf<T> {
@@ -77,8 +79,8 @@ impl<T: Config> MultiAssetDelegationInfo<T::AccountId, T::AssetId, BalanceOf<T>>
 			metadata
 				.delegations
 				.iter()
-				.filter(|bond| &bond.asset_id == asset_id)
-				.fold(Zero::zero(), |acc, bond| acc + bond.amount)
+				.filter(|stake| &stake.asset_id == asset_id)
+				.fold(Zero::zero(), |acc, stake| acc + stake.amount)
 		})
 	}
 

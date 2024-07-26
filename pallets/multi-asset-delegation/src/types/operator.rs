@@ -20,7 +20,7 @@ use super::*;
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct OperatorSnapshot<AccountId, Balance, AssetId> {
 	/// The total value locked by the operator.
-	pub bond: Balance,
+	pub stake: Balance,
 
 	/// The rewardable delegations. This list is a subset of total delegators, where certain
 	/// delegators are adjusted based on their scheduled status.
@@ -35,9 +35,9 @@ where
 	/// Calculates the total stake for a specific asset ID from all delegations.
 	pub fn get_stake_by_asset_id(&self, asset_id: AssetId) -> Balance {
 		let mut total_stake = Balance::default();
-		for bond in &self.delegations {
-			if bond.asset_id == asset_id {
-				total_stake += bond.amount;
+		for stake in &self.delegations {
+			if stake.asset_id == asset_id {
+				total_stake += stake.amount;
 			}
 		}
 		total_stake
@@ -47,9 +47,9 @@ where
 	pub fn get_total_stake_by_assets(&self) -> Vec<(AssetId, Balance)> {
 		let mut stake_by_asset: BTreeMap<AssetId, Balance> = BTreeMap::new();
 
-		for bond in &self.delegations {
-			let entry = stake_by_asset.entry(bond.asset_id).or_default();
-			*entry += bond.amount;
+		for stake in &self.delegations {
+			let entry = stake_by_asset.entry(stake.asset_id).or_default();
+			*entry += stake.amount;
 		}
 
 		stake_by_asset.into_iter().collect()
@@ -68,10 +68,10 @@ pub enum OperatorStatus {
 	Leaving(RoundIndex),
 }
 
-/// A request scheduled to change the operator self-bond.
+/// A request scheduled to change the operator self-stake.
 #[derive(PartialEq, Clone, Copy, Encode, Decode, RuntimeDebug, TypeInfo, Eq)]
 pub struct OperatorBondLessRequest<Balance> {
-	/// The amount by which the bond is to be decreased.
+	/// The amount by which the stake is to be decreased.
 	pub amount: Balance,
 	/// The round in which the request was made.
 	pub request_time: RoundIndex,
@@ -80,12 +80,11 @@ pub struct OperatorBondLessRequest<Balance> {
 /// Stores the metadata of an operator.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo, Clone, Eq, PartialEq)]
 pub struct OperatorMetadata<AccountId, Balance, AssetId> {
-	/// The operator's self-bond amount.
-	pub bond: Balance,
+	/// The operator's self-stake amount.
+	pub stake: Balance,
 	/// The total number of delegations to this operator.
 	pub delegation_count: u32,
-	/// An optional pending request to decrease the operator's self-bond, with only one allowed at
-	/// any given time.
+	/// An optional pending request to decrease the operator's self-stake, with only one allowed at any given time.
 	pub request: Option<OperatorBondLessRequest<Balance>>,
 	/// A list of all current delegations.
 	pub delegations: Vec<DelegatorBond<AccountId, Balance, AssetId>>,
@@ -93,7 +92,7 @@ pub struct OperatorMetadata<AccountId, Balance, AssetId> {
 	pub status: OperatorStatus,
 }
 
-/// Represents a bond for an operator
+/// Represents a stake for an operator
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
 pub struct DelegatorBond<AccountId, Balance, AssetId> {
 	/// The account ID of the delegator.
@@ -131,7 +130,7 @@ mod tests {
 	#[test]
 	fn get_stake_by_asset_id_should_work() {
 		let snapshot = OperatorSnapshot {
-			bond: MockBalance(100),
+			stake: MockBalance(100),
 			delegations: vec![
 				DelegatorBond {
 					delegator: MockAccountId(1),
@@ -159,7 +158,7 @@ mod tests {
 	#[test]
 	fn get_total_stake_by_assets_should_work() {
 		let snapshot = OperatorSnapshot {
-			bond: MockBalance(100),
+			stake: MockBalance(100),
 			delegations: vec![
 				DelegatorBond {
 					delegator: MockAccountId(1),

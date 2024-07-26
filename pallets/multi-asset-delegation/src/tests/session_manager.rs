@@ -33,11 +33,7 @@ fn handle_round_change_should_work() {
 		create_and_mint_tokens(VDOT, who, amount);
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
-			Some(asset_id),
-			amount,
-		));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
@@ -53,7 +49,7 @@ fn handle_round_change_should_work() {
 		assert_eq!(current_round, 2);
 
 		let snapshot1 = MultiAssetDelegation::at_stake(current_round, operator).unwrap();
-		assert_eq!(snapshot1.bond, 10_000);
+		assert_eq!(snapshot1.stake, 10_000);
 		assert_eq!(snapshot1.delegations.len(), 1);
 		assert_eq!(snapshot1.delegations[0].amount, amount);
 		assert_eq!(snapshot1.delegations[0].asset_id, asset_id);
@@ -61,7 +57,7 @@ fn handle_round_change_should_work() {
 }
 
 #[test]
-fn handle_round_change_with_bond_less_should_work() {
+fn handle_round_change_with_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let delegator1 = 1;
@@ -71,7 +67,7 @@ fn handle_round_change_with_bond_less_should_work() {
 		let asset_id = VDOT;
 		let amount1 = 100;
 		let amount2 = 200;
-		let bond_less_amount = 50;
+		let unstake_amount = 50;
 
 		CurrentRound::<Test>::put(1);
 
@@ -84,7 +80,7 @@ fn handle_round_change_with_bond_less_should_work() {
 		// Deposit and delegate first
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator1),
-			Some(asset_id),
+			asset_id,
 			amount1,
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
@@ -96,7 +92,7 @@ fn handle_round_change_with_bond_less_should_work() {
 
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator2),
-			Some(asset_id),
+			asset_id,
 			amount2,
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
@@ -106,12 +102,12 @@ fn handle_round_change_with_bond_less_should_work() {
 			amount2,
 		));
 
-		// Delegator1 schedules bond less
-		assert_ok!(MultiAssetDelegation::schedule_delegator_bond_less(
+		// Delegator1 schedules unstake
+		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(delegator1),
 			operator1,
 			asset_id,
-			bond_less_amount,
+			unstake_amount,
 		));
 
 		assert_ok!(Pallet::<Test>::handle_round_change());
@@ -122,15 +118,15 @@ fn handle_round_change_with_bond_less_should_work() {
 
 		// Check the snapshot for operator1
 		let snapshot1 = MultiAssetDelegation::at_stake(current_round, operator1).unwrap();
-		assert_eq!(snapshot1.bond, 10_000);
+		assert_eq!(snapshot1.stake, 10_000);
 		assert_eq!(snapshot1.delegations.len(), 1);
 		assert_eq!(snapshot1.delegations[0].delegator, delegator1);
-		assert_eq!(snapshot1.delegations[0].amount, amount1 - bond_less_amount); // Amount reduced by bond_less_amount
+		assert_eq!(snapshot1.delegations[0].amount, amount1 - unstake_amount); // Amount reduced by unstake_amount
 		assert_eq!(snapshot1.delegations[0].asset_id, asset_id);
 
 		// Check the snapshot for operator2
 		let snapshot2 = MultiAssetDelegation::at_stake(current_round, operator2).unwrap();
-		assert_eq!(snapshot2.bond, 10000);
+		assert_eq!(snapshot2.stake, 10000);
 		assert_eq!(snapshot2.delegations.len(), 1);
 		assert_eq!(snapshot2.delegations[0].delegator, delegator2);
 		assert_eq!(snapshot2.delegations[0].amount, amount2);
