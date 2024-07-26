@@ -190,7 +190,10 @@ mod tests {
 			},
 		];
 		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
-			DelegatorMetadata { withdraw_requests: withdraw_requests.clone(), ..Default::default() };
+			DelegatorMetadata {
+				withdraw_requests: withdraw_requests.clone(),
+				..Default::default()
+			};
 
 		assert_eq!(metadata.get_withdraw_requests(), &withdraw_requests);
 	}

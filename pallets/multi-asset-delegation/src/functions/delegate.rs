@@ -191,10 +191,7 @@ impl<T: Config> Pallet<T> {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
 			// Ensure there are outstanding bond less requests
-			ensure!(
-				!metadata.delegator_unstake_requests.is_empty(),
-				Error::<T>::NoBondLessRequest
-			);
+			ensure!(!metadata.delegator_unstake_requests.is_empty(), Error::<T>::NoBondLessRequest);
 
 			let current_round = Self::current_round();
 			let delay = T::DelegationBondLessDelay::get();
