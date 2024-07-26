@@ -102,7 +102,7 @@ fn handle_round_change_with_unstake_should_work() {
 			amount2,
 		));
 
-		// Delegator1 schedules bond less
+		// Delegator1 schedules unstake
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(delegator1),
 			operator1,

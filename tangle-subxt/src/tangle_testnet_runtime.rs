@@ -40676,7 +40676,7 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "A delegator bond less request has been scheduled."]
+			#[doc = "A delegator unstake request has been scheduled."]
 			pub struct ScheduledDelegatorBondLess {
 				pub who: scheduled_delegator_bond_less::Who,
 				pub operator: scheduled_delegator_bond_less::Operator,
@@ -40707,7 +40707,7 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "A delegator bond less request has been executed."]
+			#[doc = "A delegator unstake request has been executed."]
 			pub struct ExecutedDelegatorBondLess {
 				pub who: executed_delegator_bond_less::Who,
 			}
@@ -40732,7 +40732,7 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "A delegator bond less request has been cancelled."]
+			#[doc = "A delegator unstake request has been cancelled."]
 			pub struct CancelledDelegatorBondLess {
 				pub who: cancelled_delegator_bond_less::Who,
 			}
@@ -41214,7 +41214,7 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Number of rounds that delegation bond less requests must wait before being executable."]
+				#[doc = " Number of rounds that delegation unstake requests must wait before being executable."]
 				pub fn delegation_bond_less_delay(
 					&self,
 				) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
@@ -50848,10 +50848,10 @@ pub mod api {
 					#[doc = "The round does not match the scheduled leave round."]
 					NotLeavingRound,
 					#[codec(index = 7)]
-					#[doc = "There is no scheduled bond less request."]
+					#[doc = "There is no scheduled unstake request."]
 					NoScheduledBondLess,
 					#[codec(index = 8)]
-					#[doc = "The bond less request is not satisfied."]
+					#[doc = "The unstake request is not satisfied."]
 					BondLessRequestNotSatisfied,
 					#[codec(index = 9)]
 					#[doc = "The operator is not active."]
@@ -50878,13 +50878,13 @@ pub mod api {
 					#[doc = "The unstake is not ready."]
 					UnstakeNotReady,
 					#[codec(index = 17)]
-					#[doc = "There is no bond less request."]
+					#[doc = "There is no unstake request."]
 					NoBondLessRequest,
 					#[codec(index = 18)]
-					#[doc = "The bond less request is not ready."]
+					#[doc = "The unstake request is not ready."]
 					BondLessNotReady,
 					#[codec(index = 19)]
-					#[doc = "A bond less request already exists."]
+					#[doc = "A unstake request already exists."]
 					BondLessRequestAlreadyExists,
 					#[codec(index = 20)]
 					#[doc = "There are active services using the asset."]
@@ -50989,7 +50989,7 @@ pub mod api {
 						asset_id: ::core::primitive::u128,
 					},
 					#[codec(index = 15)]
-					#[doc = "A delegator bond less request has been scheduled."]
+					#[doc = "A delegator unstake request has been scheduled."]
 					ScheduledDelegatorBondLess {
 						who: ::subxt::ext::subxt_core::utils::AccountId32,
 						operator: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -50997,10 +50997,10 @@ pub mod api {
 						asset_id: ::core::primitive::u128,
 					},
 					#[codec(index = 16)]
-					#[doc = "A delegator bond less request has been executed."]
+					#[doc = "A delegator unstake request has been executed."]
 					ExecutedDelegatorBondLess { who: ::subxt::ext::subxt_core::utils::AccountId32 },
 					#[codec(index = 17)]
-					#[doc = "A delegator bond less request has been cancelled."]
+					#[doc = "A delegator unstake request has been cancelled."]
 					CancelledDelegatorBondLess { who: ::subxt::ext::subxt_core::utils::AccountId32 },
 					#[codec(index = 18)]
 					#[doc = "New whitelisted assets set"]

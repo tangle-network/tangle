@@ -92,7 +92,7 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 		&self.delegations
 	}
 
-	/// Returns a reference to the vector of bond less requests.
+	/// Returns a reference to the vector of unstake requests.
 	pub fn get_delegator_unstake_requests(
 		&self,
 	) -> &Vec<BondLessRequest<AccountId, AssetId, Balance>> {

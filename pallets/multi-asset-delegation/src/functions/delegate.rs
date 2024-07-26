@@ -116,7 +116,7 @@ impl<T: Config> Pallet<T> {
 	/// # Errors
 	///
 	/// Returns an error if the delegator has no active delegation,
-	/// or if the bond less amount is greater than the current delegation amount.
+	/// or if the unstake amount is greater than the current delegation amount.
 	pub fn process_schedule_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
@@ -133,10 +133,10 @@ impl<T: Config> Pallet<T> {
 				.find(|d| d.operator == operator && d.asset_id == asset_id)
 				.ok_or(Error::<T>::NoActiveDelegation)?;
 
-			// Ensure the amount to bond less is not greater than the current delegation amount
+			// Ensure the amount to unstake is not greater than the current delegation amount
 			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
 
-			// Create the bond less request
+			// Create the unstake request
 			let current_round = Self::current_round();
 			metadata.delegator_unstake_requests.push(BondLessRequest {
 				operator: delegation.operator.clone(),
@@ -185,18 +185,18 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator has no bond less requests or if none of the bond less requests are ready.
+	/// Returns an error if the delegator has no unstake requests or if none of the unstake requests are ready.
 	pub fn process_execute_delegator_unstake(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			// Ensure there are outstanding bond less requests
+			// Ensure there are outstanding unstake requests
 			ensure!(!metadata.delegator_unstake_requests.is_empty(), Error::<T>::NoBondLessRequest);
 
 			let current_round = Self::current_round();
 			let delay = T::DelegationBondLessDelay::get();
 
-			// Process all ready bond less requests
+			// Process all ready unstake requests
 			let mut executed_requests = Vec::new();
 			metadata.delegator_unstake_requests.retain(|request| {
 				if current_round >= delay + request.requested_round {
@@ -225,12 +225,12 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `who` - The account ID of the delegator.
-	/// * `asset_id` - The ID of the asset for which to cancel the bond less request.
-	/// * `amount` - The amount of the bond less request to cancel.
+	/// * `asset_id` - The ID of the asset for which to cancel the unstake request.
+	/// * `amount` - The amount of the unstake request to cancel.
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator has no matching bond less request or if there is no active delegation.
+	/// Returns an error if the delegator has no matching unstake request or if there is no active delegation.
 	pub fn process_cancel_delegator_unstake(
 		who: T::AccountId,
 		asset_id: T::AssetId,
@@ -239,7 +239,7 @@ impl<T: Config> Pallet<T> {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			// Find and remove the matching bond less request
+			// Find and remove the matching unstake request
 			let request_index = metadata
 				.delegator_unstake_requests
 				.iter()

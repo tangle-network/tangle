@@ -28,8 +28,8 @@
 //!
 //! 1. **Deposit**: Before a delegator can delegate assets to an operator, they must first deposit the desired amount of assets. This reserves the assets in the delegator's account.
 //! 2. **Delegate**: After depositing assets, the delegator can delegate these assets to an operator. The operator then manages these assets, and the delegator can earn rewards from the operator's activities.
-//! 3. **Unstake**: If a delegator wants to reduce their delegation, they can schedule a bond less request. This request will be executed after a specified delay, ensuring network stability.
-//! 4. **withdraw Request**: To completely remove assets from delegation, a delegator must submit an withdraw request. Similar to bond less requests, withdraw requests also have a delay before they can be executed.
+//! 3. **Unstake**: If a delegator wants to reduce their delegation, they can schedule a unstake request. This request will be executed after a specified delay, ensuring network stability.
+//! 4. **withdraw Request**: To completely remove assets from delegation, a delegator must submit an withdraw request. Similar to unstake requests, withdraw requests also have a delay before they can be executed.
 //!
 //! ## Workflow for Operators
 //!
@@ -114,7 +114,7 @@ pub mod pallet {
 		#[pallet::constant]
 		type LeaveDelegatorsDelay: Get<RoundIndex>;
 
-		/// Number of rounds that delegation bond less requests must wait before being executable.
+		/// Number of rounds that delegation unstake requests must wait before being executable.
 		#[pallet::constant]
 		type DelegationBondLessDelay: Get<RoundIndex>;
 
@@ -244,16 +244,16 @@ pub mod pallet {
 			amount: BalanceOf<T>,
 			asset_id: T::AssetId,
 		},
-		/// A delegator bond less request has been scheduled.
+		/// A delegator unstake request has been scheduled.
 		ScheduledDelegatorBondLess {
 			who: T::AccountId,
 			operator: T::AccountId,
 			amount: BalanceOf<T>,
 			asset_id: T::AssetId,
 		},
-		/// A delegator bond less request has been executed.
+		/// A delegator unstake request has been executed.
 		ExecutedDelegatorBondLess { who: T::AccountId },
-		/// A delegator bond less request has been cancelled.
+		/// A delegator unstake request has been cancelled.
 		CancelledDelegatorBondLess { who: T::AccountId },
 		/// Event emitted when an incentive APY and cap are set for a reward pool
 		IncentiveAPYAndCapSet { pool_id: T::PoolId, apy: u32, cap: BalanceOf<T> },
@@ -285,9 +285,9 @@ pub mod pallet {
 		NotLeavingOperator,
 		/// The round does not match the scheduled leave round.
 		NotLeavingRound,
-		/// There is no scheduled bond less request.
+		/// There is no scheduled unstake request.
 		NoScheduledBondLess,
-		/// The bond less request is not satisfied.
+		/// The unstake request is not satisfied.
 		BondLessRequestNotSatisfied,
 		/// The operator is not active.
 		NotActiveOperator,
@@ -303,11 +303,11 @@ pub mod pallet {
 		InsufficientBalance,
 		/// There is no withdraw request.
 		NoWithdrawRequest,
-		/// There is no bond less request.
+		/// There is no unstake request.
 		NoBondLessRequest,
-		/// The bond less request is not ready.
+		/// The unstake request is not ready.
 		BondLessNotReady,
-		/// A bond less request already exists.
+		/// A unstake request already exists.
 		BondLessRequestAlreadyExists,
 		/// There are active services using the asset.
 		ActiveServicesUsingAsset,

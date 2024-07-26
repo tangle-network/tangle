@@ -120,7 +120,7 @@ fn execute_delegator_unstake_should_work() {
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
-		// Deposit, delegate and schedule bond less first
+		// Deposit, delegate and schedule unstake first
 		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
@@ -161,7 +161,7 @@ fn cancel_delegator_unstake_should_work() {
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
-		// Deposit, delegate and schedule bond less first
+		// Deposit, delegate and schedule unstake first
 		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
@@ -265,7 +265,7 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
-		// Deposit, delegate and schedule bond less first
+		// Deposit, delegate and schedule unstake first
 		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
