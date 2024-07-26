@@ -173,7 +173,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), Some(asset_id), amount)
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.unstake_request.is_some());
+		assert!(metadata.unstake_requests.is_some());
 	}
 
 	execute_unstake {
@@ -188,7 +188,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.unstake_request.is_none());
+		assert!(metadata.unstake_requests.is_none());
 	}
 
 	cancel_unstake {
@@ -201,7 +201,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.unstake_request.is_none());
+		assert!(metadata.unstake_requests.is_none());
 	}
 
 	delegate {
@@ -231,7 +231,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset_id, amount)
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.delegator_bond_less_request.is_some());
+		assert!(metadata.delegator_bond_less_requests.is_some());
 	}
 
 	execute_delegator_bond_less {
@@ -249,7 +249,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.delegator_bond_less_request.is_none());
+		assert!(metadata.delegator_bond_less_requests.is_none());
 	}
 
 	cancel_delegator_bond_less {
@@ -265,7 +265,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.delegator_bond_less_request.is_none());
+		assert!(metadata.delegator_bond_less_requests.is_none());
 	}
 
 	set_whitelisted_assets {

@@ -88,8 +88,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the user is not a delegator, if there is an existing unstake request,
-	/// if there is insufficient balance, or if the asset is not supported.
+	/// Returns an error if the user is not a delegator, if there is insufficient balance, or if the asset is not supported.
 	pub fn process_schedule_unstake(
 		who: T::AccountId,
 		asset_id: Option<T::AssetId>,
@@ -104,9 +103,6 @@ impl<T: Config> Pallet<T> {
 
 			let asset_id = asset_id.unwrap();
 
-			// Ensure there is no outstanding withdraw request
-			ensure!(metadata.unstake_request.is_none(), Error::<T>::WithdrawRequestAlreadyExists);
-
 			// Ensure there is enough deposited balance
 			let balance =
 				metadata.deposits.get_mut(&asset_id).ok_or(Error::<T>::InsufficientBalance)?;
@@ -118,10 +114,13 @@ impl<T: Config> Pallet<T> {
 				metadata.deposits.remove(&asset_id);
 			}
 
-			// Create the withdraw request
+			// Create the unstake request
 			let current_round = Self::current_round();
-			metadata.unstake_request =
-				Some(UnstakeRequest { asset_id, amount, requested_round: current_round });
+			metadata.unstake_requests.push(UnstakeRequest {
+				asset_id,
+				amount,
+				requested_round: current_round,
+			});
 
 			Ok(())
 		})
@@ -135,37 +134,35 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the user is not a delegator, if there is no unstake request, or if the unstake request is not ready.
+	/// Returns an error if the user is not a delegator, if there are no unstake requests, or if the unstake request is not ready.
 	pub fn process_execute_unstake(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			// Ensure there is an outstanding withdraw request
-			let unstake_request =
-				metadata.unstake_request.as_ref().ok_or(Error::<T>::NoWithdrawRequest)?;
+			// Ensure there are outstanding unstake requests
+			ensure!(!metadata.unstake_requests.is_empty(), Error::<T>::NoUnstakeRequests);
 
-			// Check if the requested round has been reached
-			ensure!(
-				Self::current_round()
-					>= T::LeaveDelegatorsDelay::get() + unstake_request.requested_round,
-				Error::<T>::UnstakeNotReady
-			);
+			let current_round = Self::current_round();
+			let delay = T::LeaveDelegatorsDelay::get();
 
-			// Get the asset ID and amount from the withdraw request
-			let asset_id = unstake_request.asset_id;
-			let amount = unstake_request.amount;
+			// Process all ready unstake requests
+			metadata.unstake_requests.retain(|request| {
+				if current_round >= delay + request.requested_round {
+					// Transfer the amount back to the delegator
+					T::Fungibles::transfer(
+						request.asset_id,
+						&Self::pallet_account(),
+						&who,
+						request.amount,
+						Preservation::Expendable,
+					)
+					.expect("Transfer should not fail");
 
-			// Transfer the amount back to the delegator
-			T::Fungibles::transfer(
-				asset_id,
-				&Self::pallet_account(),
-				&who,
-				amount,
-				Preservation::Expendable,
-			)?;
-
-			// Clear the withdraw request
-			metadata.unstake_request = None;
+					false // Remove this request
+				} else {
+					true // Keep this request
+				}
+			});
 
 			Ok(())
 		})
@@ -176,24 +173,35 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `who` - The account ID of the delegator.
+	/// * `asset_id` - The asset ID of the unstake request to cancel.
+	/// * `amount` - The amount of the unstake request to cancel.
 	///
 	/// # Errors
 	///
-	/// Returns an error if the user is not a delegator or if there is no unstake request.
-	pub fn process_cancel_unstake(who: T::AccountId) -> DispatchResult {
+	/// Returns an error if the user is not a delegator or if there is no matching unstake request.
+	pub fn process_cancel_unstake(
+		who: T::AccountId,
+		asset_id: T::AssetId,
+		amount: BalanceOf<T>,
+	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			// Ensure there is an outstanding withdraw request
-			let unstake_request =
-				metadata.unstake_request.take().ok_or(Error::<T>::NoWithdrawRequest)?;
+			// Find and remove the matching unstake request
+			let request_index = metadata
+				.unstake_requests
+				.iter()
+				.position(|r| r.asset_id == asset_id && r.amount == amount)
+				.ok_or(Error::<T>::NoMatchingUnstakeRequest)?;
 
-			// Get the asset ID and amount from the withdraw request
-			let asset_id = unstake_request.asset_id;
-			let amount = unstake_request.amount;
+			let unstake_request = metadata.unstake_requests.remove(request_index);
 
 			// Add the amount back to the delegator's deposits
-			metadata.deposits.entry(asset_id).and_modify(|e| *e += amount).or_insert(amount);
+			metadata
+				.deposits
+				.entry(asset_id)
+				.and_modify(|e| *e += unstake_request.amount)
+				.or_insert(unstake_request.amount);
 
 			// Update the status if no more delegations exist
 			if metadata.delegations.is_empty() {

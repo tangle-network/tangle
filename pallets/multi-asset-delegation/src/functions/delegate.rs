@@ -19,8 +19,8 @@ use crate::Pallet;
 use frame_support::ensure;
 use frame_support::pallet_prelude::DispatchResult;
 use frame_support::traits::Get;
-
 use sp_runtime::traits::Zero;
+use sp_std::vec::Vec;
 
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.
@@ -57,12 +57,20 @@ impl<T: Config> Pallet<T> {
 				metadata.deposits.remove(&asset_id);
 			}
 
-			// Create a new delegation
-			metadata.delegations.push(BondInfoDelegator {
-				operator: operator.clone(),
-				amount,
-				asset_id,
-			});
+			// Check if the delegation exists and update it, otherwise create a new delegation
+			if let Some(delegation) = metadata
+				.delegations
+				.iter_mut()
+				.find(|d| d.operator == operator && d.asset_id == asset_id)
+			{
+				delegation.amount += amount;
+			} else {
+				metadata.delegations.push(BondInfoDelegator {
+					operator: operator.clone(),
+					amount,
+					asset_id,
+				});
+			}
 
 			// Update the status
 			metadata.status = DelegatorStatus::Active;
@@ -72,15 +80,22 @@ impl<T: Config> Pallet<T> {
 				let operator_metadata =
 					maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
 
-				// Increase the delegation count
-				operator_metadata.delegation_count += 1;
-
-				// Add the new delegation
-				operator_metadata.delegations.push(DelegatorBond {
-					delegator: who.clone(),
-					amount,
-					asset_id,
-				});
+				// Check if the delegation exists and update it, otherwise create a new delegation
+				if let Some(delegation) = operator_metadata
+					.delegations
+					.iter_mut()
+					.find(|d| d.delegator == who && d.asset_id == asset_id)
+				{
+					delegation.amount += amount;
+				} else {
+					operator_metadata.delegations.push(DelegatorBond {
+						delegator: who.clone(),
+						amount,
+						asset_id,
+					});
+					// Increase the delegation count only when a new delegation is added
+					operator_metadata.delegation_count += 1;
+				}
 
 				Ok(())
 			})?;
@@ -101,7 +116,7 @@ impl<T: Config> Pallet<T> {
 	/// # Errors
 	///
 	/// Returns an error if the delegator has no active delegation,
-	/// if there is an existing bond less request, or if the bond less amount is greater than the current delegation amount.
+	/// or if the bond less amount is greater than the current delegation amount.
 	pub fn process_schedule_delegator_bond_less(
 		who: T::AccountId,
 		operator: T::AccountId,
@@ -118,19 +133,17 @@ impl<T: Config> Pallet<T> {
 				.find(|d| d.operator == operator && d.asset_id == asset_id)
 				.ok_or(Error::<T>::NoActiveDelegation)?;
 
-			// Ensure there is no outstanding bond less request
-			ensure!(
-				metadata.delegator_bond_less_request.is_none(),
-				Error::<T>::BondLessRequestAlreadyExists
-			);
-
 			// Ensure the amount to bond less is not greater than the current delegation amount
 			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
 
 			// Create the bond less request
 			let current_round = Self::current_round();
-			metadata.delegator_bond_less_request =
-				Some(BondLessRequest { asset_id, amount, requested_round: current_round });
+			metadata.delegator_bond_less_requests.push(BondLessRequest {
+				operator: delegation.operator.clone(),
+				asset_id,
+				amount,
+				requested_round: current_round,
+			});
 
 			// Update the operator's metadata
 			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
@@ -164,7 +177,7 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-	/// Executes a scheduled bond reduction for a delegator.
+	/// Executes scheduled bond reductions for a delegator.
 	///
 	/// # Arguments
 	///
@@ -172,33 +185,39 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator has no bond less request or if the bond less request is not ready.
+	/// Returns an error if the delegator has no bond less requests or if none of the bond less requests are ready.
 	pub fn process_execute_delegator_bond_less(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			// Ensure there is an outstanding bond less request
-			let bond_less_request = metadata
-				.delegator_bond_less_request
-				.as_ref()
-				.ok_or(Error::<T>::NoBondLessRequest)?;
-
-			// Check if the requested round has been reached
+			// Ensure there are outstanding bond less requests
 			ensure!(
-				Self::current_round()
-					>= T::DelegationBondLessDelay::get() + bond_less_request.requested_round,
-				Error::<T>::BondLessNotReady
+				!metadata.delegator_bond_less_requests.is_empty(),
+				Error::<T>::NoBondLessRequest
 			);
 
-			// Get the asset ID and amount from the bond less request
-			let asset_id = bond_less_request.asset_id;
-			let amount = bond_less_request.amount;
+			let current_round = Self::current_round();
+			let delay = T::DelegationBondLessDelay::get();
 
-			// Add the amount back to the delegator's deposits
-			metadata.deposits.entry(asset_id).and_modify(|e| *e += amount).or_insert(amount);
+			// Process all ready bond less requests
+			let mut executed_requests = Vec::new();
+			metadata.delegator_bond_less_requests.retain(|request| {
+				if current_round >= delay + request.requested_round {
+					// Add the amount back to the delegator's deposits
+					metadata
+						.deposits
+						.entry(request.asset_id)
+						.and_modify(|e| *e += request.amount)
+						.or_insert(request.amount);
+					executed_requests.push(request.clone());
+					false // Remove this request
+				} else {
+					true // Keep this request
+				}
+			});
 
-			// Clear the bond less request
-			metadata.delegator_bond_less_request = None;
+			// If no requests were executed, return an error
+			ensure!(!executed_requests.is_empty(), Error::<T>::BondLessNotReady);
 
 			Ok(())
 		})
@@ -209,53 +228,64 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `who` - The account ID of the delegator.
+	/// * `asset_id` - The ID of the asset for which to cancel the bond less request.
+	/// * `amount` - The amount of the bond less request to cancel.
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator has no bond less request or if there is no active delegation.
-	pub fn process_cancel_delegator_bond_less(who: T::AccountId) -> DispatchResult {
+	/// Returns an error if the delegator has no matching bond less request or if there is no active delegation.
+	pub fn process_cancel_delegator_bond_less(
+		who: T::AccountId,
+		asset_id: T::AssetId,
+		amount: BalanceOf<T>,
+	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			// Ensure there is an outstanding bond less request
-			let bond_less_request = metadata
-				.delegator_bond_less_request
-				.take()
+			// Find and remove the matching bond less request
+			let request_index = metadata
+				.delegator_bond_less_requests
+				.iter()
+				.position(|r| r.asset_id == asset_id && r.amount == amount)
 				.ok_or(Error::<T>::NoBondLessRequest)?;
 
-			// Get the asset ID and amount from the bond less request
-			let asset_id = bond_less_request.asset_id;
-			let amount = bond_less_request.amount;
-
-			// Find the operator associated with the bond less request
-			let operator = metadata
-				.delegations
-				.iter()
-				.find(|d| d.asset_id == asset_id && d.amount >= amount)
-				.ok_or(Error::<T>::NoActiveDelegation)?
-				.operator
-				.clone();
-
-			// Add the amount back to the delegator's deposits
-			metadata.deposits.entry(asset_id).and_modify(|e| *e += amount).or_insert(amount);
+			let bond_less_request = metadata.delegator_bond_less_requests.remove(request_index);
 
 			// Update the operator's metadata
-			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
-				let operator_metadata =
-					maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
+			Operators::<T>::try_mutate(
+				&bond_less_request.operator,
+				|maybe_operator_metadata| -> DispatchResult {
+					let operator_metadata =
+						maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
 
-				// Increase the delegation count
-				operator_metadata.delegation_count += 1;
+					// Find the matching delegation and increase its amount, or insert a new delegation if not found
+					if let Some(delegation) = operator_metadata
+						.delegations
+						.iter_mut()
+						.find(|d| d.asset_id == asset_id && d.delegator == who.clone())
+					{
+						delegation.amount += amount;
+					} else {
+						operator_metadata.delegations.push(DelegatorBond {
+							delegator: who.clone(),
+							amount,
+							asset_id,
+						});
 
-				// Add the new delegation
-				operator_metadata.delegations.push(DelegatorBond {
-					delegator: who.clone(),
-					amount,
-					asset_id,
-				});
+						// Increase the delegation count
+						operator_metadata.delegation_count += 1;
+					}
 
-				Ok(())
-			})?;
+					Ok(())
+				},
+			)?;
+
+			// Create a new delegation
+			metadata.delegations.push(BondInfoDelegator {
+				operator: bond_less_request.operator,
+				amount,
+				asset_id,
+			});
 
 			Ok(())
 		})
