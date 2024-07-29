@@ -8,7 +8,7 @@ use crate::tangle_testnet_runtime::api::{
 };
 
 use sp_core::{ByteArray, Pair};
-use tangle_subxt::subxt::{tx::Signer, utils::AccountId32, OnlineClient, PolkadotConfig};
+use tangle_subxt::subxt::{utils::AccountId32, OnlineClient, PolkadotConfig};
 use tangle_subxt::tangle_testnet_runtime;
 
 #[tokio::main]
@@ -16,10 +16,8 @@ async fn main() -> Result<(), String> {
 	let subxt_client = OnlineClient::<PolkadotConfig>::new().await.unwrap();
 	let alice = subxt_signer::sr25519::dev::alice();
 	let bob = subxt_signer::sr25519::dev::bob();
-	let alice_account_id =
-		<subxt_signer::sr25519::Keypair as Signer<PolkadotConfig>>::account_id(&alice);
-	let bob_account_id =
-		<subxt_signer::sr25519::Keypair as Signer<PolkadotConfig>>::account_id(&bob);
+	let alice_account_id = alice.public_key().to_account_id();
+	let bob_account_id = bob.public_key().to_account_id();
 	let alice_role_key = sp_core::ecdsa::Pair::from_string("//Alice", None).unwrap();
 	let bob_role_key = sp_core::ecdsa::Pair::from_string("//Bob", None).unwrap();
 

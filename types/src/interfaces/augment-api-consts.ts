@@ -6,15 +6,53 @@
 import '@polkadot/api-base/types/consts';
 
 import type { ApiTypes, AugmentedConst } from '@polkadot/api-base/types';
-import type { Bytes, Option, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
-import type { Codec } from '@polkadot/types-codec/types';
-import type { Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import { SpWeightsWeightV2Weight, FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpWeightsRuntimeDbWeight, SpVersionRuntimeVersion } from '@polkadot/types/lookup';
+import type { BTreeMap, Bytes, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
+import type { Codec, ITuple } from '@polkadot/types-codec/types';
+import type { AccountId32, H160, Perbill, Permill } from '@polkadot/types/interfaces/runtime';
+import { SpWeightsWeightV2Weight, FrameSupportPalletId, StagingXcmV4AssetAssetId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpWeightsRuntimeDbWeight, SpVersionRuntimeVersion } from '@polkadot/types/lookup';
 
 export type __AugmentedConst<ApiType extends ApiTypes> = AugmentedConst<ApiType>;
 
 declare module '@polkadot/api-base/types/consts' {
   interface AugmentedConsts<ApiType extends ApiTypes> {
+    assets: {
+      /**
+       * The amount of funds that must be reserved when creating a new approval.
+       **/
+      approvalDeposit: u128 & AugmentedConst<ApiType>;
+      /**
+       * The amount of funds that must be reserved for a non-provider asset account to be
+       * maintained.
+       **/
+      assetAccountDeposit: u128 & AugmentedConst<ApiType>;
+      /**
+       * The basic amount of funds that must be reserved for an asset.
+       **/
+      assetDeposit: u128 & AugmentedConst<ApiType>;
+      /**
+       * The basic amount of funds that must be reserved when adding metadata to your asset.
+       **/
+      metadataDepositBase: u128 & AugmentedConst<ApiType>;
+      /**
+       * The additional funds that must be reserved for the number of bytes you store in your
+       * metadata.
+       **/
+      metadataDepositPerByte: u128 & AugmentedConst<ApiType>;
+      /**
+       * Max number of items to destroy per `destroy_accounts` and `destroy_approvals` call.
+       * 
+       * Must be configured to result in a weight that makes each call fit in a block.
+       **/
+      removeItemsLimit: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum length of a name or symbol stored on-chain.
+       **/
+      stringLimit: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
     babe: {
       /**
        * The amount of time, in slots, that each epoch should last.
@@ -505,6 +543,40 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
+    multiAssetDelegation: {
+      /**
+       * The duration for which the bond is locked.
+       **/
+      bondDuration: u32 & AugmentedConst<ApiType>;
+      /**
+       * Number of rounds that delegation unstake requests must wait before being executable.
+       **/
+      delegationBondLessDelay: u32 & AugmentedConst<ApiType>;
+      /**
+       * Number of rounds that delegators remain bonded before the exit request is executable.
+       **/
+      leaveDelegatorsDelay: u32 & AugmentedConst<ApiType>;
+      /**
+       * Number of rounds that operators remain bonded before the exit request is executable.
+       **/
+      leaveOperatorsDelay: u32 & AugmentedConst<ApiType>;
+      /**
+       * The minimum amount of bond required for a delegate.
+       **/
+      minDelegateAmount: u128 & AugmentedConst<ApiType>;
+      /**
+       * The minimum amount of bond required for an operator.
+       **/
+      minOperatorBondAmount: u128 & AugmentedConst<ApiType>;
+      /**
+       * Number of rounds operator requests to decrease self-bond must wait to be executable.
+       **/
+      operatorBondLessDelay: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
     multisig: {
       /**
        * The base amount of currency needed to reserve for creating a multisig execution or to
@@ -696,6 +768,34 @@ declare module '@polkadot/api-base/types/consts' {
        * should be applied immediately, without opportunity for intervention.
        **/
       slashDeferDuration: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    sygmaBridge: {
+      /**
+       * EIP712 Verifying contract address
+       * This is used in EIP712 typed data domain
+       **/
+      destVerifyingContractAddress: H160 & AugmentedConst<ApiType>;
+      /**
+       * Pallet ChainID
+       * This is used in EIP712 typed data domain
+       **/
+      eip712ChainID: U256 & AugmentedConst<ApiType>;
+      /**
+       * Fee reserve account
+       **/
+      feeReserveAccount: AccountId32 & AugmentedConst<ApiType>;
+      /**
+       * AssetId and ResourceId pairs
+       **/
+      resourcePairs: Vec<ITuple<[StagingXcmV4AssetAssetId, U8aFixed]>> & AugmentedConst<ApiType>;
+      /**
+       * Bridge transfer reserve accounts mapping with designated assets
+       **/
+      transferReserveAccounts: BTreeMap<StagingXcmV4AssetAssetId, AccountId32> & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/

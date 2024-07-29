@@ -86,44 +86,44 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), additional_bond)
 	verify {
 		let operator = Operators::<T>::get(&caller).unwrap();
-		assert_eq!(operator.bond, bond_amount + additional_bond);
+		assert_eq!(operator.stake, bond_amount + additional_bond);
 	}
 
-	schedule_operator_bond_less {
+	schedule_operator_unstake {
 
 		let caller: T::AccountId = whitelisted_caller();
 		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
-		let bond_less_amount: BalanceOf<T> = T::Currency::minimum_balance() * 5u32.into();
-	}: _(RawOrigin::Signed(caller.clone()), bond_less_amount)
+		let unstake_amount: BalanceOf<T> = T::Currency::minimum_balance() * 5u32.into();
+	}: _(RawOrigin::Signed(caller.clone()), unstake_amount)
 	verify {
 		let operator = Operators::<T>::get(&caller).unwrap();
 		let request = operator.request.unwrap();
-		assert_eq!(request.amount, bond_less_amount);
+		assert_eq!(request.amount, unstake_amount);
 	}
 
-	execute_operator_bond_less {
+	execute_operator_unstake {
 
 		let caller: T::AccountId = whitelisted_caller();
 		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
-		let bond_less_amount: BalanceOf<T> = T::Currency::minimum_balance() * 5u32.into();
-		MultiAssetDelegation::<T>::schedule_operator_bond_less(RawOrigin::Signed(caller.clone()).into(), bond_less_amount)?;
+		let unstake_amount: BalanceOf<T> = T::Currency::minimum_balance() * 5u32.into();
+		MultiAssetDelegation::<T>::schedule_operator_unstake(RawOrigin::Signed(caller.clone()).into(), unstake_amount)?;
 		let current_round = Pallet::<T>::current_round();
 		CurrentRound::<T>::put(current_round + T::OperatorBondLessDelay::get());
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let operator = Operators::<T>::get(&caller).unwrap();
-		assert_eq!(operator.bond, bond_amount - bond_less_amount);
+		assert_eq!(operator.stake, bond_amount - unstake_amount);
 	}
 
-	cancel_operator_bond_less {
+	cancel_operator_unstake {
 
 		let caller: T::AccountId = whitelisted_caller();
 		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
-		let bond_less_amount: BalanceOf<T> = T::Currency::minimum_balance() * 5u32.into();
-		MultiAssetDelegation::<T>::schedule_operator_bond_less(RawOrigin::Signed(caller.clone()).into(), bond_less_amount)?;
+		let unstake_amount: BalanceOf<T> = T::Currency::minimum_balance() * 5u32.into();
+		MultiAssetDelegation::<T>::schedule_operator_unstake(RawOrigin::Signed(caller.clone()).into(), unstake_amount)?;
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let operator = Operators::<T>::get(&caller).unwrap();
@@ -164,7 +164,7 @@ benchmarks! {
 		assert_eq!(metadata.deposits.get(&asset_id).unwrap(), &amount);
 	}
 
-	schedule_unstake {
+	schedule_withdraw {
 
 		let caller: T::AccountId = whitelisted_caller();
 		let asset_id: T::AssetId = 1_u32.into();
@@ -173,35 +173,35 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), Some(asset_id), amount)
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.unstake_request.is_some());
+		assert!(metadata.withdraw_requests.is_some());
 	}
 
-	execute_unstake {
+	execute_withdraw {
 
 		let caller: T::AccountId = whitelisted_caller();
 		let asset_id: T::AssetId = 1_u32.into();
 		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		MultiAssetDelegation::<T>::deposit(RawOrigin::Signed(caller.clone()).into(), Some(asset_id), amount)?;
-		MultiAssetDelegation::<T>::schedule_unstake(RawOrigin::Signed(caller.clone()).into(), Some(asset_id), amount)?;
+		MultiAssetDelegation::<T>::schedule_withdraw(RawOrigin::Signed(caller.clone()).into(), Some(asset_id), amount)?;
 		let current_round = Pallet::<T>::current_round();
 		CurrentRound::<T>::put(current_round + T::LeaveDelegatorsDelay::get());
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.unstake_request.is_none());
+		assert!(metadata.withdraw_requests.is_none());
 	}
 
-	cancel_unstake {
+	cancel_withdraw {
 
 		let caller: T::AccountId = whitelisted_caller();
 		let asset_id: T::AssetId = 1_u32.into();
 		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		MultiAssetDelegation::<T>::deposit(RawOrigin::Signed(caller.clone()).into(), Some(asset_id), amount)?;
-		MultiAssetDelegation::<T>::schedule_unstake(RawOrigin::Signed(caller.clone()).into(), Some(asset_id), amount)?;
+		MultiAssetDelegation::<T>::schedule_withdraw(RawOrigin::Signed(caller.clone()).into(), Some(asset_id), amount)?;
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.unstake_request.is_none());
+		assert!(metadata.withdraw_requests.is_none());
 	}
 
 	delegate {
@@ -219,7 +219,7 @@ benchmarks! {
 		assert_eq!(delegation.amount, amount);
 	}
 
-	schedule_delegator_bond_less {
+	schedule_delegator_unstake {
 
 		let caller: T::AccountId = whitelisted_caller();
 		let operator: T::AccountId = account("operator", 1, SEED);
@@ -231,10 +231,10 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset_id, amount)
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.delegator_bond_less_request.is_some());
+		assert!(metadata.delegator_unstake_requests.is_some());
 	}
 
-	execute_delegator_bond_less {
+	execute_delegator_unstake {
 
 		let caller: T::AccountId = whitelisted_caller();
 		let operator: T::AccountId = account("operator", 1, SEED);
@@ -243,16 +243,16 @@ benchmarks! {
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(operator.clone()).into(), T::Currency::minimum_balance() * 20u32.into())?;
 		MultiAssetDelegation::<T>::deposit(RawOrigin::Signed(caller.clone()).into(), Some(asset_id), amount)?;
 		MultiAssetDelegation::<T>::delegate(RawOrigin::Signed(caller.clone()).into(), operator.clone(), asset_id, amount)?;
-		MultiAssetDelegation::<T>::schedule_delegator_bond_less(RawOrigin::Signed(caller.clone()).into(), operator.clone(), asset_id, amount)?;
+		MultiAssetDelegation::<T>::schedule_delegator_unstake(RawOrigin::Signed(caller.clone()).into(), operator.clone(), asset_id, amount)?;
 		let current_round = Pallet::<T>::current_round();
 		CurrentRound::<T>::put(current_round + T::DelegationBondLessDelay::get());
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.delegator_bond_less_request.is_none());
+		assert!(metadata.delegator_unstake_requests.is_none());
 	}
 
-	cancel_delegator_bond_less {
+	cancel_delegator_unstake {
 
 		let caller: T::AccountId = whitelisted_caller();
 		let operator: T::AccountId = account("operator", 1, SEED);
@@ -261,19 +261,11 @@ benchmarks! {
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(operator.clone()).into(), T::Currency::minimum_balance() * 20u32.into())?;
 		MultiAssetDelegation::<T>::deposit(RawOrigin::Signed(caller.clone()).into(), Some(asset_id), amount)?;
 		MultiAssetDelegation::<T>::delegate(RawOrigin::Signed(caller.clone()).into(), operator.clone(), asset_id, amount)?;
-		MultiAssetDelegation::<T>::schedule_delegator_bond_less(RawOrigin::Signed(caller.clone()).into(), operator.clone(), asset_id, amount)?;
+		MultiAssetDelegation::<T>::schedule_delegator_unstake(RawOrigin::Signed(caller.clone()).into(), operator.clone(), asset_id, amount)?;
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let metadata = Delegators::<T>::get(&caller).unwrap();
-		assert!(metadata.delegator_bond_less_request.is_none());
-	}
-
-	set_whitelisted_assets {
-		let caller: T::AccountId = whitelisted_caller();
-		let assets: Vec<T::AssetId> = vec![1u32.into()];
-	}: _(RawOrigin::Root, assets.clone())
-	verify {
-		assert_eq!(WhitelistedAssets::<T>::get(), assets);
+		assert!(metadata.delegator_unstake_requests.is_none());
 	}
 
 	set_incentive_apy_and_cap {

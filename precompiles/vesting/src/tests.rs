@@ -22,7 +22,13 @@ use crate::mock::{
 
 use pallet_vesting::Vesting;
 use precompile_utils::testing::*;
-use sp_core::H160;
+use sp_core::{H160, H256};
+
+pub fn convert_h160_to_h256(address: H160) -> H256 {
+	let mut bytes = [0u8; 32];
+	bytes[12..32].copy_from_slice(&address.0);
+	H256(bytes)
+}
 
 #[test]
 fn test_selector_less_than_four_bytes_reverts() {
@@ -46,13 +52,25 @@ fn test_unimplemented_selector_reverts() {
 #[test]
 fn test_claim_vesting_schedule() {
 	ExtBuilder::default().build().execute_with(|| {
-		let schedules =
-			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
+		let account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		let schedules = Vesting::<Runtime>::get(account).unwrap();
 		assert!(!schedules.is_empty());
-		roll_to(1000);
+		// VestingInfo { locked: 500000, per_block: 5000, starting_block: 10 }
+		// Account is initially funded with 1_000_000 tokens and 500000 tokens are vested
+		// Therefore total usable balance should be 500000 tokens
+		let balance = pallet_balances::Pallet::<Runtime>::usable_balance(account);
+		assert_eq!(balance, 500000u64);
+
+		// Now lets roll block to 110.
+		// Account should be fully vested after 110 blocks.
+		roll_to(110);
 		PrecompilesValue::get()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::vest {})
 			.execute_returns(());
+
+		// Total usable balance after vesting should be 1_000_000 tokens.
+		let balance = pallet_balances::Pallet::<Runtime>::usable_balance(account);
+		assert_eq!(balance, 1_000_000u64);
 	});
 }
 
@@ -76,23 +94,73 @@ fn non_vested_cannot_vest() {
 	});
 }
 
-// Test unlocking any vested funds of a target account.
+// Test unlocking any vested funds of a target account(substrate account).
 #[test]
-fn test_vest_other() {
+fn test_vest_other_substrate() {
 	ExtBuilder::default().build().execute_with(|| {
-		let schedules =
-			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
+		let target_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
+		let schedules = Vesting::<Runtime>::get(target_account).unwrap();
 		assert!(!schedules.is_empty());
 
+		// VestingInfo { locked: 500000, per_block: 5000, starting_block: 10 }
+		// Account is initially funded with 1_000_000 tokens and 500000 tokens are vested
+		// Therefore total usable balance should be 500000 tokens
+		let balance = pallet_balances::Pallet::<Runtime>::usable_balance(target_account);
+		assert_eq!(balance, 500000u64);
+
+		// Now lets roll block to 110.
+		// Account should be fully vested after 110 blocks.
+		// We will use Alex to vest Bobo's account
+
+		roll_to(110);
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::vest_other { target: target_account.into() },
+			)
+			.execute_returns(());
+
+		// Total usable balance after vesting should be 1_000_000 tokens.
+		let balance = pallet_balances::Pallet::<Runtime>::usable_balance(target_account);
+		assert_eq!(balance, 1_000_000u64);
+	});
+}
+
+// Test unlocking any vested funds of a target account(evm account).
+#[test]
+fn test_vest_other_evm() {
+	ExtBuilder::default().build().execute_with(|| {
+		let target_evm_address = H160::repeat_byte(0x03);
+		let target_account = convert_h160_to_h256(target_evm_address);
+		// AccountId mapped for target evm address
+		let mapped_target_address = sp_core::sr25519::Public::from(TestAccount::Charlie);
+
+		let schedules = Vesting::<Runtime>::get(mapped_target_address).unwrap();
+		assert!(!schedules.is_empty());
+
+		// VestingInfo { locked: 500000, per_block: 5000, starting_block: 10 }
+		// Account is initially funded with 1_000_000 tokens and 500000 tokens are vested
+		// Therefore total usable balance should be 500000 tokens
+		let balance = pallet_balances::Pallet::<Runtime>::usable_balance(mapped_target_address);
+		assert_eq!(balance, 500000u64);
+
+		// Now lets roll block to 110.
+		// Account should be fully vested after 110 blocks.
+		// We will use Alex to vest target account
+
+		roll_to(110);
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Bobo,
 				H160::from_low_u64_be(1),
-				PCall::vest_other {
-					target: sp_core::sr25519::Public::from(TestAccount::Alex).into(),
-				},
+				PCall::vest_other { target: target_account },
 			)
 			.execute_returns(());
+
+		// Total usable balance after vesting should be 1_000_000 tokens.
+		let balance = pallet_balances::Pallet::<Runtime>::usable_balance(mapped_target_address);
+		assert_eq!(balance, 1_000_000u64);
 	});
 }
 
@@ -117,26 +185,61 @@ fn non_vested_cannot_vest_other() {
 	});
 }
 
-// Test vested transfer.
+// Test vested transfer to evm account.
 #[test]
-fn test_vested_transfer() {
+fn test_vested_transfer_evm() {
 	ExtBuilder::default().build().execute_with(|| {
 		let schedules =
 			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
 		assert!(!schedules.is_empty());
-		let target = mock_pub_key(5);
 
+		let target_evm_address = H160::repeat_byte(0x05);
+		let target_account = convert_h160_to_h256(target_evm_address);
+		// AccountId mapped for target evm address
+		let mapped_target_address = sp_core::sr25519::Public::from(TestAccount::Eve);
+
+		// Target account should be non vested account
+		assert_eq!(pallet_vesting::Pallet::<Runtime>::vesting(mapped_target_address), None);
+
+		// Lets transfer Alex's vesting schedule to target account.
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::vested_transfer { target: target.into(), index: 0 },
+				PCall::vested_transfer { target: target_account, index: 0 },
 			)
 			.execute_returns(());
 
 		// Should transfer vested schedule to target account.
-		let vesting_info = pallet_vesting::Pallet::<Runtime>::vesting(target);
-		assert_eq!(vesting_info, Some(schedules));
+		let schedules = Vesting::<Runtime>::get(mapped_target_address).unwrap();
+		assert!(!schedules.is_empty());
+	});
+}
+
+// Test vested transfer to substrate account.
+#[test]
+fn test_vested_transfer_substrate() {
+	ExtBuilder::default().build().execute_with(|| {
+		let schedules =
+			Vesting::<Runtime>::get(sp_core::sr25519::Public::from(TestAccount::Alex)).unwrap();
+		assert!(!schedules.is_empty());
+
+		let target_account = sp_core::sr25519::Public::from(TestAccount::Eve);
+		// Target account should be non vested account
+		assert_eq!(pallet_vesting::Pallet::<Runtime>::vesting(target_account), None);
+
+		// Lets transfer Alex's vesting schedule to target account.
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::vested_transfer { target: target_account.into(), index: 0 },
+			)
+			.execute_returns(());
+
+		// Should transfer vested schedule to target account.
+		let schedules = Vesting::<Runtime>::get(target_account).unwrap();
+		assert!(!schedules.is_empty());
 	});
 }
 
