@@ -1720,6 +1720,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type AssetId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
+	type PoolId = AssetId;
 	type WeightInfo = ();
 }
 
