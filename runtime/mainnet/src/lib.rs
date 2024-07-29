@@ -21,10 +21,10 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use std::collections::BTreeMap;
-use std::marker::PhantomData;
-use std::result;
-use std::sync::Arc;
+use sp_std::collections::btree_map::BTreeMap;
+use sp_std::marker::PhantomData;
+use sp_std::result;
+use sp_std::sync::Arc;
 pub use tangle_primitives::jobs::JobResult;
 
 mod filters;
@@ -45,7 +45,6 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
-#[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_grandpa::{
