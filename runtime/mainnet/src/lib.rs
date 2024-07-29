@@ -1600,15 +1600,18 @@ impl sygma_percentage_feehandler::Config for Runtime {
 }
 
 parameter_types! {
-	// TNT
+	// TNT: offline the TNT for the init mainnet launch
 	pub NativeLocation: Location = Location::here();
-	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000002");
+	// pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000002");
 
-	// Pha
+	// Note: Pha token is a reserved asset on Phala/Khala as native asset, but we configure it as
+	// non-reserved asset here so that we don't need to manage the liquidity as we will be the asset
+	// management team, as applies to USDC and USDT
+	// Pha: a non-reserved asset
 	pub PhaLocation: Location = Location::new(
 		1,
 		[
-			Parachain(2004),
+			Parachain(1000),
 			slice_to_generalkey(b"sygma"),
 			slice_to_generalkey(b"pha"),
 		],
@@ -1617,12 +1620,41 @@ parameter_types! {
 	pub PhaAssetId: AssetId = 2000;
 	// PhaResourceId is the resourceID that mapping with the foreign asset Pha
 	pub PhaResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000001");
+
+	// USDC: a non-reserved asset
+	pub USDCLocation: Location = Location::new(
+		1,
+		[
+			Parachain(1000),
+			slice_to_generalkey(b"sygma"),
+			slice_to_generalkey(b"usdc"),
+		],
+	);
+	// USDCAssetId is the substrate assetID of USDC
+	pub USDCAssetId: AssetId = 1337;
+	// USDCResourceId is the resourceID that mapping with the foreign asset USDC
+	pub USDCResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000002");
+
+	// USDT: a non-reserved asset
+	pub USDTLocation: Location = Location::new(
+		1,
+		[
+			Parachain(1000),
+			slice_to_generalkey(b"sygma"),
+			slice_to_generalkey(b"usdt"),
+		],
+	);
+	// USDTAssetId is the substrate assetID of USDT
+	pub USDTAssetId: AssetId = 1984;
+	// USDTResourceId is the resourceID that mapping with the foreign asset USDT
+	pub USDTResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000000003");
 }
 
 fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
 	let mut account_map: BTreeMap<XcmAssetId, AccountId32> = BTreeMap::new();
-	account_map.insert(NativeLocation::get().into(), BridgeAccountNative::get());
 	account_map.insert(PhaLocation::get().into(), BridgeAccountOtherToken::get());
+	account_map.insert(USDCLocation::get().into(), BridgeAccountOtherToken::get());
+	account_map.insert(USDTLocation::get().into(), BridgeAccountOtherToken::get());
 	account_map
 }
 
@@ -1675,11 +1707,12 @@ parameter_types! {
 	pub RelayNetwork: NetworkId = NetworkId::Polkadot;
 	// ResourcePairs is where all supported assets and their associated resourceID are binding
 	pub ResourcePairs: Vec<(XcmAssetId, ResourceId)> = vec![
-		(NativeLocation::get().into(), NativeSygmaResourceId::get()),
+		(USDTLocation::get().into(), USDTResourceId::get()),
+		(USDCLocation::get().into(), USDCResourceId::get()),
 		(PhaLocation::get().into(), PhaResourceId::get()),
 	];
 
-	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (PhaLocation::get().into(), 12u8)];
+	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(USDTLocation::get().into(), 6u8), (USDCLocation::get().into(), 6u8), (PhaLocation::get().into(), 12u8)];
 }
 
 pub struct ReserveChecker;
@@ -1708,7 +1741,7 @@ impl ConcrateSygmaAsset {
 			match (id.parents, id.first_interior()) {
 				// Sibling parachain
 				(1, Some(Parachain(id))) => {
-					// Assume current parachain id is 1000
+					// Assume current parachain id is 1000, any asset with parachainID 1000 will be configured as non-reserved asset
 					if *id == 1000 {
 						Some(Location::new(0, X1(Arc::new([slice_to_generalkey(b"sygma")]))))
 					} else {
