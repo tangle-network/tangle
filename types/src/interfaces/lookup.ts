@@ -5831,13 +5831,13 @@ export default {
    * Lookup753: pallet_multi_asset_delegation::types::rewards::RewardConfig<AssetId, Balance>
    **/
   PalletMultiAssetDelegationRewardsRewardConfig: {
-    configs: 'BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAssetPool>',
+    configs: 'BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAsset>',
     whitelistedBlueprintIds: 'Vec<u32>'
   },
   /**
-   * Lookup755: pallet_multi_asset_delegation::types::rewards::RewardConfigForAssetPool<Balance>
+   * Lookup755: pallet_multi_asset_delegation::types::rewards::RewardConfigForAsset<Balance>
    **/
-  PalletMultiAssetDelegationRewardsRewardConfigForAssetPool: {
+  PalletMultiAssetDelegationRewardsRewardConfigForAsset: {
     apy: 'u128',
     cap: 'u128'
   },
@@ -5906,7 +5906,19 @@ export default {
    **/
   PalletTransactionPaymentChargeTransactionPayment: 'Compact<u128>',
   /**
-   * Lookup785: tangle_testnet_runtime::Runtime
+   * Lookup784: frame_metadata_hash_extension::CheckMetadataHash<T>
+   **/
+  FrameMetadataHashExtensionCheckMetadataHash: {
+    mode: 'FrameMetadataHashExtensionMode'
+  },
+  /**
+   * Lookup785: frame_metadata_hash_extension::Mode
+   **/
+  FrameMetadataHashExtensionMode: {
+    _enum: ['Disabled', 'Enabled']
+  },
+  /**
+   * Lookup787: tangle_testnet_runtime::Runtime
    **/
   TangleTestnetRuntimeRuntime: 'Null'
 };

@@ -549,7 +549,7 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       bondDuration: u32 & AugmentedConst<ApiType>;
       /**
-       * Number of rounds that delegation unstake requests must wait before being executable.
+       * Number of rounds that delegation bond less requests must wait before being executable.
        **/
       delegationBondLessDelay: u32 & AugmentedConst<ApiType>;
       /**

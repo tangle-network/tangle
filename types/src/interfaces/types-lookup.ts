@@ -6322,12 +6322,12 @@ declare module '@polkadot/types/lookup' {
 
   /** @name PalletMultiAssetDelegationRewardsRewardConfig (753) */
   interface PalletMultiAssetDelegationRewardsRewardConfig extends Struct {
-    readonly configs: BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAssetPool>;
+    readonly configs: BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAsset>;
     readonly whitelistedBlueprintIds: Vec<u32>;
   }
 
-  /** @name PalletMultiAssetDelegationRewardsRewardConfigForAssetPool (755) */
-  interface PalletMultiAssetDelegationRewardsRewardConfigForAssetPool extends Struct {
+  /** @name PalletMultiAssetDelegationRewardsRewardConfigForAsset (755) */
+  interface PalletMultiAssetDelegationRewardsRewardConfigForAsset extends Struct {
     readonly apy: u128;
     readonly cap: u128;
   }
@@ -6449,7 +6449,19 @@ declare module '@polkadot/types/lookup' {
   /** @name PalletTransactionPaymentChargeTransactionPayment (783) */
   interface PalletTransactionPaymentChargeTransactionPayment extends Compact<u128> {}
 
-  /** @name TangleTestnetRuntimeRuntime (785) */
+  /** @name FrameMetadataHashExtensionCheckMetadataHash (784) */
+  interface FrameMetadataHashExtensionCheckMetadataHash extends Struct {
+    readonly mode: FrameMetadataHashExtensionMode;
+  }
+
+  /** @name FrameMetadataHashExtensionMode (785) */
+  interface FrameMetadataHashExtensionMode extends Enum {
+    readonly isDisabled: boolean;
+    readonly isEnabled: boolean;
+    readonly type: 'Disabled' | 'Enabled';
+  }
+
+  /** @name TangleTestnetRuntimeRuntime (787) */
   type TangleTestnetRuntimeRuntime = Null;
 
 } // declare module
