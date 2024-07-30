@@ -50170,7 +50170,7 @@ pub mod api {
 				}
 			}
 		}
-		pub mod pallet_multisig {
+		pub mod pallet_multi_asset_delegation {
 			use super::runtime_types;
 			pub mod pallet {
 				use super::runtime_types;

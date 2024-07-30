@@ -8232,6 +8232,18 @@ declare module "@polkadot/types/lookup" {
   interface PalletTransactionPaymentChargeTransactionPayment
     extends Compact<u128> {}
 
-  /** @name TangleTestnetRuntimeRuntime (837) */
+  /** @name FrameMetadataHashExtensionCheckMetadataHash (784) */
+  interface FrameMetadataHashExtensionCheckMetadataHash extends Struct {
+    readonly mode: FrameMetadataHashExtensionMode;
+  }
+
+  /** @name FrameMetadataHashExtensionMode (785) */
+  interface FrameMetadataHashExtensionMode extends Enum {
+    readonly isDisabled: boolean;
+    readonly isEnabled: boolean;
+    readonly type: 'Disabled' | 'Enabled';
+  }
+
+  /** @name TangleTestnetRuntimeRuntime (787) */
   type TangleTestnetRuntimeRuntime = Null;
 } // declare module

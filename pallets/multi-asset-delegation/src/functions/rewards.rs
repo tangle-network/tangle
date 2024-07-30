@@ -16,10 +16,12 @@
 use super::*;
 use crate::types::*;
 use crate::Pallet;
-
+use frame_support::ensure;
 use frame_support::pallet_prelude::DispatchResult;
-
+use frame_support::traits::Currency;
+use sp_runtime::traits::Zero;
 use sp_runtime::DispatchError;
+use sp_runtime::Saturating;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::vec::Vec;
 
@@ -32,7 +34,7 @@ impl<T: Config> Pallet<T> {
 		> = BTreeMap::new();
 
 		// Iterate through all operator snapshots for the given round
-		// TODO: Add limits on number of rewards to process/payout
+		// TODO: Could be dangerous with many operators
 		for (_, operator_snapshot) in AtStake::<T>::iter_prefix(round) {
 			for delegation in &operator_snapshot.delegations {
 				delegation_info.entry(delegation.asset_id).or_default().push(delegation.clone());
@@ -40,47 +42,102 @@ impl<T: Config> Pallet<T> {
 		}
 
 		// Get the reward configuration
-		// if let Some(reward_config) = RewardConfigStorage::<T>::get() {
-		// 	// Distribute rewards for each asset
-		// 	for (asset_id, delegations) in delegation_info.iter() {
-		// 		if let Some(config) = reward_config.configs.get(asset_id) {
-		// 			// Calculate total amount and distribute rewards
-		// 			let total_amount: BalanceOf<T> =
-		// 				delegations.iter().fold(Zero::zero(), |acc, d| acc + d.amount);
-		// 			let cap: BalanceOf<T> = config.cap.into();
+		if let Some(reward_config) = RewardConfigStorage::<T>::get() {
+			// Distribute rewards for each asset
+			for (asset_id, delegations) in delegation_info.iter() {
+				// We only reward asset in a reward pool
+				if let Some(pool_id) = AssetLookupRewardPools::<T>::get(asset_id) {
+					if let Some(config) = reward_config.configs.get(&pool_id) {
+						// Calculate total amount and distribute rewards
+						let total_amount: BalanceOf<T> =
+							delegations.iter().fold(Zero::zero(), |acc, d| acc + d.amount);
+						let cap: BalanceOf<T> = config.cap;
 
-		// 			if total_amount >= cap {
-		// 				// Calculate the total reward based on the APY
-		// 				let total_reward = Self::calculate_total_reward(config.apy, total_amount)?;
+						if total_amount >= cap {
+							// Calculate the total reward based on the APY
+							let total_reward =
+								Self::calculate_total_reward(config.apy, total_amount)?;
 
-		// 				for delegation in delegations {
-		// 					let reward = total_reward * delegation.amount / total_amount;
-		// 					// Logic to distribute reward to the delegator (e.g., mint or transfer tokens)
-		// 					Self::distribute_reward_to_delegator(&delegation.delegator, reward)?;
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
+							for delegation in delegations {
+								// Calculate the percentage of the cap that the user is staking
+								let staking_percentage =
+									delegation.amount.saturating_mul(100u32.into()) / cap;
+								// Calculate the reward based on the staking percentage
+								let reward =
+									total_reward.saturating_mul(staking_percentage) / 100u32.into();
+								// Distribute the reward to the delegator
+								Self::distribute_reward_to_delegator(
+									&delegation.delegator,
+									reward,
+								)?;
+							}
+						}
+					}
+				}
+			}
+		}
 
 		Ok(())
 	}
 
-	#[allow(dead_code)]
 	fn calculate_total_reward(
-		_apy: u128,
-		_total_amount: BalanceOf<T>,
+		apy: sp_runtime::Percent,
+		total_amount: BalanceOf<T>,
 	) -> Result<BalanceOf<T>, DispatchError> {
-		//let total_reward = total_amount as u128 * apy / 100u32.into();
-		Ok(Default::default())
+		let total_reward = apy.mul_floor(total_amount);
+		Ok(total_reward)
 	}
 
-	#[allow(dead_code)]
 	fn distribute_reward_to_delegator(
-		_delegator: &T::AccountId,
-		_reward: BalanceOf<T>,
+		delegator: &T::AccountId,
+		reward: BalanceOf<T>,
 	) -> DispatchResult {
-		// TODO : Implement the logic to distribute reward to the delegator
+		// mint rewards to delegator
+		let _ = T::Currency::deposit_creating(delegator, reward);
+		Ok(())
+	}
+
+	pub fn add_asset_to_pool(pool_id: &T::PoolId, asset_id: &T::AssetId) -> DispatchResult {
+		// Ensure the asset is not already associated with any pool
+		ensure!(
+			!AssetLookupRewardPools::<T>::contains_key(asset_id),
+			Error::<T>::AssetAlreadyInPool
+		);
+
+		// Update RewardPools storage
+		RewardPools::<T>::try_mutate(pool_id, |maybe_assets| -> DispatchResult {
+			let assets = maybe_assets.get_or_insert_with(Vec::new);
+
+			// Ensure the asset is not already in the pool
+			ensure!(!assets.contains(asset_id), Error::<T>::AssetAlreadyInPool);
+
+			assets.push(*asset_id);
+
+			Ok(())
+		})?;
+
+		// Update AssetLookupRewardPools storage
+		AssetLookupRewardPools::<T>::insert(asset_id, pool_id);
+
+		Ok(())
+	}
+
+	pub fn remove_asset_from_pool(pool_id: &T::PoolId, asset_id: &T::AssetId) -> DispatchResult {
+		// Update RewardPools storage
+		RewardPools::<T>::try_mutate(pool_id, |maybe_assets| -> DispatchResult {
+			let assets = maybe_assets.as_mut().ok_or(Error::<T>::PoolNotFound)?;
+
+			// Ensure the asset is in the pool
+			ensure!(assets.contains(asset_id), Error::<T>::AssetNotInPool);
+
+			assets.retain(|id| id != asset_id);
+
+			Ok(())
+		})?;
+
+		// Update AssetLookupRewardPools storage
+		AssetLookupRewardPools::<T>::remove(asset_id);
+
 		Ok(())
 	}
 }

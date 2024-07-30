@@ -7159,7 +7159,19 @@ export default {
    **/
   PalletTransactionPaymentChargeTransactionPayment: "Compact<u128>",
   /**
-   * Lookup785: tangle_testnet_runtime::Runtime
+   * Lookup784: frame_metadata_hash_extension::CheckMetadataHash<T>
+   **/
+  FrameMetadataHashExtensionCheckMetadataHash: {
+    mode: 'FrameMetadataHashExtensionMode'
+  },
+  /**
+   * Lookup785: frame_metadata_hash_extension::Mode
+   **/
+  FrameMetadataHashExtensionMode: {
+    _enum: ['Disabled', 'Enabled']
+  },
+  /**
+   * Lookup787: tangle_testnet_runtime::Runtime
    **/
   TangleTestnetRuntimeRuntime: "Null",
 };
