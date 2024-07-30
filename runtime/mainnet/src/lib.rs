@@ -1560,6 +1560,10 @@ impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
 			(Fungible(ref amount), AssetId(ref id)) => {
 				if id == &PhaLocation::get() {
 					Ok((PhaAssetId::get(), *amount))
+				} else if id == &USDCLocation::get() {
+					Ok((USDCAssetId::get(), *amount))
+				} else if id == &USDTLocation::get() {
+					Ok((USDTAssetId::get(), *amount))
 				} else {
 					Err(ExecutionError::AssetNotHandled)
 				}
