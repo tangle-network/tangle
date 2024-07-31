@@ -24,7 +24,7 @@ fn precompiles() -> Precompiles<Runtime> {
 
 #[test]
 fn signature_verification_works_sr25519_schnorr() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let pair = sr25519::Pair::from_seed(b"12345678901234567890123456789012");
 		let public = pair.public();
 		let message = b"hello world";

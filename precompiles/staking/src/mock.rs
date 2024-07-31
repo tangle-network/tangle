@@ -24,10 +24,9 @@ use frame_support::{
 	assert_ok, construct_runtime,
 	pallet_prelude::Hooks,
 	parameter_types,
-	traits::{ConstU64, Everything, OnFinalize, OnInitialize, OnUnbalanced, OneSessionHandler},
+	traits::{ConstU64, Everything, OnFinalize, OnInitialize, OneSessionHandler},
 	weights::Weight,
 };
-use pallet_balances::PositiveImbalance;
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
 use pallet_session::historical as pallet_session_historical;
 use pallet_staking::{ConvertCurve, EraPayout, SessionInterface};
@@ -381,6 +380,15 @@ impl onchain::Config for OnChainSeqPhragmen {
 
 /// Upper limit on the number of NPOS nominations.
 const MAX_QUOTA_NOMINATIONS: u32 = 16;
+
+pub struct MockReward {}
+impl frame_support::traits::OnUnbalanced<pallet_balances::PositiveImbalance<Runtime>>
+	for MockReward
+{
+	fn on_unbalanced(_: pallet_balances::PositiveImbalance<Runtime>) {
+		RewardOnUnbalanceWasCalled::set(true);
+	}
+}
 
 impl pallet_staking::Config for Runtime {
 	type Currency = Balances;

@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-
+#![allow(clippy::all)]
 use super::*;
 use crate::{self as pallet_services};
 use frame_election_provider_support::{
@@ -400,9 +400,7 @@ pub const CGGMP21_JOB_RESULT_VERIFIER: H160 = H160([0x23; 20]);
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
-pub fn new_test_ext_raw_authorities(
-	authorities: Vec<(AccountId, RoleKeyId)>,
-) -> sp_io::TestExternalities {
+pub fn new_test_ext_raw_authorities(authorities: Vec<(AccountId)>) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
 	let balances: Vec<_> = authorities.iter().map(|(i, _)| (i.clone(), 20_000_u128)).collect();

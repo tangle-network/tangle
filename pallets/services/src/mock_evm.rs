@@ -18,8 +18,6 @@ use crate as pallet_services;
 use crate::mock::{
 	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
-use ethereum::TransactionAction;
-use fp_ethereum::Transaction;
 use fp_evm::FeeCalculator;
 use frame_support::traits::{
 	Currency, ExistenceRequirement, OnUnbalanced, SignedImbalance, WithdrawReasons,
@@ -46,7 +44,7 @@ use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripe
 
 use precompile_utils::precompile_set::{
 	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, OnlyFrom,
-	PrecompileAt, PrecompileSetBuilder, PrecompilesInRangeInclusive, SubcallWithMaxNesting,
+	PrecompileAt, PrecompileSetBuilder, PrecompilesInRangeInclusive,
 };
 
 type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, CallableByPrecompile);

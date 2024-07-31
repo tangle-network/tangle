@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/console.sol";
-import {JOBS_CONTRACT} from "./Jobs.sol";
+// import {JOBS_CONTRACT} from "./Jobs.sol";
 
 enum ProposalStatus {
     Inactive,
@@ -176,9 +176,9 @@ abstract contract SigningRules {
         Proposal storage proposal = _proposals[phase2JobHash];
         require(proposal._status == ProposalStatus.Passed, "Proposal must have Passed status");
 
-        JOBS_CONTRACT.submitDkgPhaseTwoJob(
-            expiry[phase1JobId], ttl[phase1JobId], phase1JobId, phase2JobDetails, bytes("")
-        );
+        // JOBS_CONTRACT.submitDkgPhaseTwoJob(
+        //     expiry[phase1JobId], ttl[phase1JobId], phase1JobId, phase2JobDetails, bytes("")
+        // );
 
         proposal._status = ProposalStatus.Executed;
         emit ProposalEvent(ProposalStatus.Executed, phase1JobId, phase2JobHash);
