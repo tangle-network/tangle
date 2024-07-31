@@ -10,7 +10,7 @@ import type { Data } from '@polkadot/types';
 import type { Bytes, Compact, Null, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, IMethod, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, MultiAddress, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import { SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusSlotsEquivocationProof, SpSessionMembershipProof, PalletBalancesAdjustmentDirection, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletAirdropClaimsStatementKind, SpWeightsWeightV2Weight, PalletDemocracyConviction, FrameSupportPreimagesBounded, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDkgFeeInfo, SpNposElectionsSupport, SpNposElectionsElectionScore, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, EthereumTransactionTransactionV2, SpConsensusGrandpaEquivocationProof, SpCoreVoid, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, SpRuntimeMultiSignature, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsValidatorOffenceType, TanglePrimitivesJobsJobSubmission, TanglePrimitivesJobsJobResult, TanglePrimitivesMisbehaviorMisbehaviorSubmission, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsPoolState, PalletNominationPoolsConfigOpAccountId32, TangleTestnetRuntimeProxyType, PalletRolesProfile, TangleTestnetRuntimeOpaqueSessionKeys, PalletStakingRewardDestination, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpPerbill, PalletStakingValidatorPrefs, StagingXcmV4AssetAssetId, StagingXcmV4Asset, StagingXcmV4Location, SygmaBridgeProposal, SygmaTraitsMpcAddress, SygmaFeeHandlerRouterFeeHandlerType, TangleTestnetRuntimeOriginCaller, PalletVestingVestingInfo, PalletZksaasFeeInfo } from '@polkadot/types/lookup';
+import { SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusSlotsEquivocationProof, SpSessionMembershipProof, PalletBalancesAdjustmentDirection, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletAirdropClaimsStatementKind, SpWeightsWeightV2Weight, PalletDemocracyConviction, FrameSupportPreimagesBounded, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDkgFeeInfo, SpNposElectionsSupport, SpNposElectionsElectionScore, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, EthereumTransactionTransactionV2, SpConsensusGrandpaEquivocationProof, SpCoreVoid, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, SpRuntimeMultiSignature, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsValidatorOffenceType, TanglePrimitivesJobsJobSubmission, TanglePrimitivesJobsJobResult, TanglePrimitivesMisbehaviorMisbehaviorSubmission, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsPoolState, PalletNominationPoolsConfigOpAccountId32, TangleTestnetRuntimeProxyType, PalletRolesProfile, TangleTestnetRuntimeOpaqueSessionKeys, PalletStakingRewardDestination, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpPerbill, PalletStakingValidatorPrefs, StagingXcmV4AssetAssetId, StagingXcmV4Asset, StagingXcmV4Location, SygmaBridgeProposal, SygmaTraitsMpcAddress, SygmaFeeHandlerRouterFeeHandlerType, TangleTestnetRuntimeOriginCaller, PalletVestingVestingInfo, PalletZksaasFeeInfo } from '@polkadot/types/lookup';
 
 export type __AugmentedSubmittable = AugmentedSubmittable<() => unknown>;
 export type __SubmittableExtrinsic<ApiType extends ApiTypes> = SubmittableExtrinsic<ApiType>;
@@ -764,21 +764,21 @@ declare module '@polkadot/api-base/types/submittable' {
     };
     multiAssetDelegation: {
       /**
-       * See [`Pallet::cancel_delegator_bond_less`].
+       * See [`Pallet::cancel_delegator_unstake`].
        **/
-      cancelDelegatorBondLess: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
+      cancelDelegatorUnstake: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
       /**
        * See [`Pallet::cancel_leave_operators`].
        **/
       cancelLeaveOperators: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
-       * See [`Pallet::cancel_operator_bond_less`].
+       * See [`Pallet::cancel_operator_unstake`].
        **/
-      cancelOperatorBondLess: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
+      cancelOperatorUnstake: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
-       * See [`Pallet::cancel_unstake`].
+       * See [`Pallet::cancel_withdraw`].
        **/
-      cancelUnstake: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
+      cancelWithdraw: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
       /**
        * See [`Pallet::delegate`].
        **/
@@ -786,23 +786,23 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * See [`Pallet::deposit`].
        **/
-      deposit: AugmentedSubmittable<(assetId: Option<u128> | null | Uint8Array | u128 | AnyNumber, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Option<u128>, u128]>;
+      deposit: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
       /**
-       * See [`Pallet::execute_delegator_bond_less`].
+       * See [`Pallet::execute_delegator_unstake`].
        **/
-      executeDelegatorBondLess: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
+      executeDelegatorUnstake: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
        * See [`Pallet::execute_leave_operators`].
        **/
       executeLeaveOperators: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
-       * See [`Pallet::execute_operator_bond_less`].
+       * See [`Pallet::execute_operator_unstake`].
        **/
-      executeOperatorBondLess: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
+      executeOperatorUnstake: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
-       * See [`Pallet::execute_unstake`].
+       * See [`Pallet::execute_withdraw`].
        **/
-      executeUnstake: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
+      executeWithdraw: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
        * See [`Pallet::go_offline`].
        **/
@@ -816,33 +816,33 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       joinOperators: AugmentedSubmittable<(bondAmount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
       /**
+       * See [`Pallet::manage_asset_in_pool`].
+       **/
+      manageAssetInPool: AugmentedSubmittable<(poolId: u128 | AnyNumber | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, action: PalletMultiAssetDelegationRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128, PalletMultiAssetDelegationRewardsAssetAction]>;
+      /**
        * See [`Pallet::operator_bond_more`].
        **/
       operatorBondMore: AugmentedSubmittable<(additionalBond: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
       /**
-       * See [`Pallet::schedule_delegator_bond_less`].
+       * See [`Pallet::schedule_delegator_unstake`].
        **/
-      scheduleDelegatorBondLess: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, u128, u128]>;
+      scheduleDelegatorUnstake: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, u128, u128]>;
       /**
        * See [`Pallet::schedule_leave_operators`].
        **/
       scheduleLeaveOperators: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
-       * See [`Pallet::schedule_operator_bond_less`].
+       * See [`Pallet::schedule_operator_unstake`].
        **/
-      scheduleOperatorBondLess: AugmentedSubmittable<(bondLessAmount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
+      scheduleOperatorUnstake: AugmentedSubmittable<(unstakeAmount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
       /**
-       * See [`Pallet::schedule_unstake`].
+       * See [`Pallet::schedule_withdraw`].
        **/
-      scheduleUnstake: AugmentedSubmittable<(assetId: Option<u128> | null | Uint8Array | u128 | AnyNumber, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Option<u128>, u128]>;
+      scheduleWithdraw: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
       /**
        * See [`Pallet::set_incentive_apy_and_cap`].
        **/
-      setIncentiveApyAndCap: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, apy: u128 | AnyNumber | Uint8Array, cap: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128, u128]>;
-      /**
-       * See [`Pallet::set_whitelisted_assets`].
-       **/
-      setWhitelistedAssets: AugmentedSubmittable<(assets: Vec<u128> | (u128 | AnyNumber | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Vec<u128>]>;
+      setIncentiveApyAndCap: AugmentedSubmittable<(poolId: u128 | AnyNumber | Uint8Array, apy: Percent | AnyNumber | Uint8Array, cap: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, Percent, u128]>;
       /**
        * See [`Pallet::whitelist_blueprint_for_rewards`].
        **/

@@ -1171,9 +1171,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       AlreadyOperator: AugmentedError<ApiType>;
       /**
+       * Asset already exists in a reward pool
+       **/
+      AssetAlreadyInPool: AugmentedError<ApiType>;
+      /**
        * The asset ID is not found
        **/
       AssetNotFound: AugmentedError<ApiType>;
+      /**
+       * Asset not found in reward pool
+       **/
+      AssetNotInPool: AugmentedError<ApiType>;
       /**
        * The asset is not whitelisted
        **/
@@ -1183,19 +1191,19 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       BlueprintAlreadyWhitelisted: AugmentedError<ApiType>;
       /**
-       * The bond less request is not ready.
+       * The unstake request is not ready.
        **/
       BondLessNotReady: AugmentedError<ApiType>;
       /**
-       * A bond less request already exists.
+       * A unstake request already exists.
        **/
       BondLessRequestAlreadyExists: AugmentedError<ApiType>;
       /**
-       * The bond less request is not satisfied.
+       * The unstake request is not satisfied.
        **/
       BondLessRequestNotSatisfied: AugmentedError<ApiType>;
       /**
-       * The bond amount is too low.
+       * The stake amount is too low.
        **/
       BondTooLow: AugmentedError<ApiType>;
       /**
@@ -1211,11 +1219,15 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NoActiveDelegation: AugmentedError<ApiType>;
       /**
-       * There is no bond less request.
+       * There is no unstake request.
        **/
       NoBondLessRequest: AugmentedError<ApiType>;
       /**
-       * There is no scheduled bond less request.
+       * No matching withdraw reqests found
+       **/
+      NoMatchingwithdrawRequest: AugmentedError<ApiType>;
+      /**
+       * There is no scheduled unstake request.
        **/
       NoScheduledBondLess: AugmentedError<ApiType>;
       /**
@@ -1251,9 +1263,13 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NoWithdrawRequest: AugmentedError<ApiType>;
       /**
-       * The unstake is not ready.
+       * No withdraw requests found
        **/
-      UnstakeNotReady: AugmentedError<ApiType>;
+      NowithdrawRequests: AugmentedError<ApiType>;
+      /**
+       * The reward pool does not exist
+       **/
+      PoolNotFound: AugmentedError<ApiType>;
       /**
        * A withdraw request already exists.
        **/
