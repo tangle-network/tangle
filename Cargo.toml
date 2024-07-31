@@ -41,10 +41,8 @@ members = [
  "precompiles/verify-ecdsa-stark-signature",
  "precompiles/verify-schnorr-signatures",
  "precompiles/verify-bls381-signature",
- "tangle-subxt",
+#  "tangle-subxt",
  "evm-tracer",
- # "relayer-gadget",
- # "relayer-gadget/cli",
 ]
 resolver = "2"
 
