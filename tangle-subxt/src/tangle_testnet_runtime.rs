@@ -3368,9 +3368,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				225u8, 142u8, 192u8, 174u8, 35u8, 88u8, 240u8, 105u8, 113u8, 88u8, 96u8, 169u8,
-				86u8, 13u8, 193u8, 49u8, 12u8, 39u8, 231u8, 111u8, 86u8, 146u8, 217u8, 236u8,
-				166u8, 236u8, 157u8, 82u8, 91u8, 203u8, 9u8, 163u8,
+				115u8, 26u8, 128u8, 61u8, 249u8, 187u8, 129u8, 248u8, 219u8, 24u8, 125u8, 92u8,
+				42u8, 203u8, 246u8, 191u8, 120u8, 195u8, 119u8, 3u8, 59u8, 247u8, 53u8, 95u8, 47u8,
+				114u8, 125u8, 174u8, 37u8, 162u8, 23u8, 237u8,
 			]
 	}
 	pub mod system {
@@ -4478,9 +4478,10 @@ pub mod api {
 						"Events",
 						(),
 						[
-							107u8, 248u8, 120u8, 128u8, 115u8, 228u8, 254u8, 254u8, 221u8, 246u8,
-							146u8, 34u8, 84u8, 30u8, 19u8, 253u8, 235u8, 22u8, 51u8, 40u8, 132u8,
-							150u8, 121u8, 43u8, 14u8, 56u8, 136u8, 87u8, 27u8, 61u8, 147u8, 81u8,
+							115u8, 97u8, 205u8, 172u8, 93u8, 80u8, 191u8, 235u8, 169u8, 210u8,
+							168u8, 23u8, 44u8, 204u8, 28u8, 110u8, 187u8, 105u8, 206u8, 81u8,
+							175u8, 182u8, 93u8, 5u8, 180u8, 187u8, 64u8, 9u8, 236u8, 34u8, 97u8,
+							53u8,
 						],
 					)
 				}
@@ -5122,9 +5123,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							149u8, 176u8, 172u8, 175u8, 62u8, 202u8, 143u8, 70u8, 26u8, 224u8,
-							199u8, 147u8, 105u8, 9u8, 44u8, 200u8, 95u8, 92u8, 139u8, 131u8, 181u8,
-							81u8, 3u8, 52u8, 152u8, 154u8, 99u8, 177u8, 210u8, 165u8, 169u8, 157u8,
+							107u8, 197u8, 156u8, 243u8, 56u8, 70u8, 138u8, 113u8, 87u8, 132u8,
+							14u8, 203u8, 68u8, 208u8, 189u8, 227u8, 49u8, 224u8, 127u8, 170u8,
+							102u8, 115u8, 175u8, 126u8, 255u8, 209u8, 238u8, 26u8, 153u8, 253u8,
+							182u8, 250u8,
 						],
 					)
 				}
@@ -5143,10 +5145,10 @@ pub mod api {
 							weight,
 						},
 						[
-							22u8, 216u8, 31u8, 137u8, 250u8, 104u8, 221u8, 185u8, 190u8, 185u8,
-							171u8, 79u8, 179u8, 193u8, 210u8, 219u8, 171u8, 101u8, 40u8, 30u8,
-							43u8, 169u8, 118u8, 221u8, 4u8, 1u8, 199u8, 88u8, 47u8, 97u8, 26u8,
-							130u8,
+							10u8, 235u8, 43u8, 53u8, 132u8, 246u8, 143u8, 7u8, 222u8, 247u8, 197u8,
+							72u8, 73u8, 212u8, 227u8, 251u8, 191u8, 251u8, 157u8, 122u8, 136u8,
+							180u8, 113u8, 42u8, 87u8, 222u8, 163u8, 24u8, 124u8, 232u8, 28u8,
+							182u8,
 						],
 					)
 				}
@@ -5181,9 +5183,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							243u8, 181u8, 11u8, 26u8, 3u8, 167u8, 27u8, 95u8, 253u8, 198u8, 148u8,
-							96u8, 213u8, 103u8, 10u8, 44u8, 52u8, 245u8, 220u8, 200u8, 97u8, 66u8,
-							101u8, 184u8, 239u8, 68u8, 114u8, 18u8, 107u8, 226u8, 7u8, 158u8,
+							237u8, 170u8, 121u8, 217u8, 155u8, 204u8, 236u8, 227u8, 181u8, 29u8,
+							233u8, 79u8, 248u8, 152u8, 251u8, 17u8, 89u8, 69u8, 217u8, 102u8, 38u8,
+							164u8, 253u8, 92u8, 37u8, 234u8, 140u8, 143u8, 142u8, 88u8, 250u8,
+							83u8,
 						],
 					)
 				}
@@ -14215,10 +14218,10 @@ pub mod api {
 							length_bound,
 						},
 						[
-							56u8, 152u8, 189u8, 83u8, 82u8, 217u8, 248u8, 56u8, 174u8, 165u8,
-							149u8, 227u8, 62u8, 25u8, 151u8, 184u8, 70u8, 66u8, 94u8, 187u8, 20u8,
-							170u8, 251u8, 168u8, 226u8, 39u8, 19u8, 225u8, 210u8, 230u8, 140u8,
-							35u8,
+							129u8, 161u8, 152u8, 90u8, 68u8, 134u8, 153u8, 169u8, 93u8, 124u8,
+							241u8, 160u8, 110u8, 34u8, 213u8, 119u8, 161u8, 156u8, 20u8, 42u8,
+							213u8, 243u8, 87u8, 65u8, 110u8, 217u8, 254u8, 62u8, 87u8, 76u8, 181u8,
+							22u8,
 						],
 					)
 				}
@@ -14238,10 +14241,9 @@ pub mod api {
 							length_bound,
 						},
 						[
-							43u8, 25u8, 148u8, 171u8, 87u8, 253u8, 176u8, 161u8, 197u8, 207u8,
-							148u8, 171u8, 15u8, 203u8, 238u8, 250u8, 101u8, 7u8, 128u8, 159u8,
-							179u8, 200u8, 141u8, 249u8, 251u8, 165u8, 245u8, 81u8, 82u8, 112u8,
-							159u8, 249u8,
+							132u8, 38u8, 89u8, 245u8, 38u8, 101u8, 38u8, 205u8, 210u8, 64u8, 165u8,
+							234u8, 57u8, 20u8, 11u8, 41u8, 54u8, 220u8, 72u8, 209u8, 21u8, 54u8,
+							28u8, 131u8, 62u8, 70u8, 65u8, 65u8, 248u8, 177u8, 175u8, 176u8,
 						],
 					)
 				}
@@ -14585,9 +14587,10 @@ pub mod api {
 						"ProposalOf",
 						(),
 						[
-							76u8, 6u8, 233u8, 22u8, 70u8, 71u8, 227u8, 6u8, 162u8, 134u8, 93u8,
-							254u8, 175u8, 116u8, 227u8, 10u8, 238u8, 119u8, 199u8, 72u8, 211u8,
-							62u8, 142u8, 102u8, 34u8, 99u8, 14u8, 7u8, 235u8, 82u8, 228u8, 232u8,
+							2u8, 132u8, 188u8, 202u8, 224u8, 194u8, 133u8, 78u8, 38u8, 5u8, 205u8,
+							25u8, 231u8, 25u8, 87u8, 229u8, 201u8, 92u8, 229u8, 184u8, 129u8,
+							150u8, 77u8, 111u8, 127u8, 181u8, 129u8, 76u8, 180u8, 130u8, 127u8,
+							35u8,
 						],
 					)
 				}
@@ -14611,9 +14614,10 @@ pub mod api {
 							_0.borrow(),
 						),
 						[
-							76u8, 6u8, 233u8, 22u8, 70u8, 71u8, 227u8, 6u8, 162u8, 134u8, 93u8,
-							254u8, 175u8, 116u8, 227u8, 10u8, 238u8, 119u8, 199u8, 72u8, 211u8,
-							62u8, 142u8, 102u8, 34u8, 99u8, 14u8, 7u8, 235u8, 82u8, 228u8, 232u8,
+							2u8, 132u8, 188u8, 202u8, 224u8, 194u8, 133u8, 78u8, 38u8, 5u8, 205u8,
+							25u8, 231u8, 25u8, 87u8, 229u8, 201u8, 92u8, 229u8, 184u8, 129u8,
+							150u8, 77u8, 111u8, 127u8, 181u8, 129u8, 76u8, 180u8, 130u8, 127u8,
+							35u8,
 						],
 					)
 				}
@@ -28450,9 +28454,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							0u8, 208u8, 54u8, 204u8, 175u8, 108u8, 161u8, 199u8, 55u8, 242u8, 4u8,
-							196u8, 203u8, 220u8, 60u8, 93u8, 71u8, 25u8, 61u8, 91u8, 87u8, 192u8,
-							200u8, 191u8, 255u8, 216u8, 164u8, 75u8, 178u8, 214u8, 209u8, 181u8,
+							163u8, 224u8, 13u8, 232u8, 204u8, 231u8, 107u8, 88u8, 47u8, 196u8,
+							198u8, 179u8, 66u8, 95u8, 70u8, 184u8, 176u8, 143u8, 91u8, 179u8, 39u8,
+							36u8, 245u8, 111u8, 158u8, 153u8, 216u8, 207u8, 106u8, 214u8, 95u8,
+							78u8,
 						],
 					)
 				}
@@ -28494,9 +28499,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							7u8, 254u8, 120u8, 252u8, 100u8, 203u8, 145u8, 43u8, 47u8, 131u8, 80u8,
-							35u8, 51u8, 125u8, 245u8, 253u8, 23u8, 137u8, 23u8, 236u8, 119u8, 95u8,
-							252u8, 28u8, 101u8, 158u8, 217u8, 158u8, 21u8, 242u8, 22u8, 213u8,
+							171u8, 63u8, 241u8, 46u8, 1u8, 216u8, 178u8, 114u8, 149u8, 28u8, 128u8,
+							157u8, 53u8, 229u8, 99u8, 234u8, 130u8, 183u8, 238u8, 254u8, 45u8,
+							63u8, 221u8, 81u8, 109u8, 141u8, 83u8, 128u8, 69u8, 37u8, 142u8, 6u8,
 						],
 					)
 				}
@@ -28534,9 +28539,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							92u8, 28u8, 153u8, 39u8, 107u8, 177u8, 57u8, 3u8, 7u8, 233u8, 202u8,
-							238u8, 226u8, 47u8, 238u8, 235u8, 92u8, 231u8, 18u8, 66u8, 245u8,
-							247u8, 17u8, 89u8, 71u8, 205u8, 222u8, 145u8, 29u8, 229u8, 168u8, 14u8,
+							144u8, 85u8, 178u8, 85u8, 168u8, 90u8, 147u8, 230u8, 194u8, 150u8,
+							36u8, 90u8, 67u8, 243u8, 162u8, 186u8, 130u8, 100u8, 6u8, 226u8, 180u8,
+							68u8, 109u8, 185u8, 221u8, 234u8, 132u8, 140u8, 54u8, 18u8, 204u8,
+							148u8,
 						],
 					)
 				}
@@ -28561,9 +28567,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							43u8, 98u8, 40u8, 90u8, 159u8, 113u8, 174u8, 22u8, 254u8, 64u8, 8u8,
-							40u8, 110u8, 162u8, 82u8, 32u8, 242u8, 99u8, 26u8, 112u8, 121u8, 131u8,
-							6u8, 98u8, 170u8, 78u8, 70u8, 63u8, 144u8, 68u8, 155u8, 133u8,
+							177u8, 89u8, 242u8, 102u8, 59u8, 195u8, 234u8, 220u8, 62u8, 203u8,
+							246u8, 77u8, 114u8, 108u8, 56u8, 151u8, 170u8, 115u8, 205u8, 136u8,
+							126u8, 133u8, 68u8, 76u8, 17u8, 148u8, 174u8, 215u8, 241u8, 231u8,
+							102u8, 184u8,
 						],
 					)
 				}
@@ -32810,9 +32817,10 @@ pub mod api {
 						"batch",
 						types::Batch { calls },
 						[
-							58u8, 208u8, 209u8, 201u8, 22u8, 46u8, 19u8, 60u8, 46u8, 92u8, 239u8,
-							71u8, 216u8, 241u8, 227u8, 36u8, 61u8, 128u8, 193u8, 50u8, 64u8, 165u8,
-							153u8, 45u8, 205u8, 116u8, 103u8, 150u8, 227u8, 235u8, 182u8, 58u8,
+							131u8, 27u8, 113u8, 67u8, 49u8, 22u8, 195u8, 92u8, 104u8, 243u8, 73u8,
+							191u8, 232u8, 104u8, 159u8, 175u8, 101u8, 254u8, 232u8, 14u8, 252u8,
+							220u8, 170u8, 246u8, 112u8, 71u8, 252u8, 255u8, 218u8, 3u8, 193u8,
+							67u8,
 						],
 					)
 				}
@@ -32830,9 +32838,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							147u8, 221u8, 246u8, 145u8, 234u8, 92u8, 21u8, 3u8, 33u8, 215u8, 12u8,
-							119u8, 45u8, 190u8, 171u8, 82u8, 214u8, 143u8, 85u8, 246u8, 8u8, 42u8,
-							181u8, 37u8, 40u8, 33u8, 239u8, 182u8, 103u8, 34u8, 228u8, 252u8,
+							134u8, 135u8, 212u8, 156u8, 156u8, 164u8, 64u8, 8u8, 138u8, 182u8,
+							187u8, 16u8, 185u8, 137u8, 7u8, 27u8, 15u8, 153u8, 85u8, 33u8, 124u8,
+							39u8, 248u8, 240u8, 204u8, 198u8, 158u8, 179u8, 239u8, 92u8, 45u8,
+							247u8,
 						],
 					)
 				}
@@ -32846,9 +32855,9 @@ pub mod api {
 						"batch_all",
 						types::BatchAll { calls },
 						[
-							38u8, 31u8, 22u8, 173u8, 68u8, 184u8, 134u8, 175u8, 224u8, 221u8, 46u8,
-							16u8, 96u8, 126u8, 79u8, 26u8, 105u8, 188u8, 83u8, 125u8, 12u8, 99u8,
-							25u8, 91u8, 211u8, 111u8, 240u8, 20u8, 9u8, 167u8, 36u8, 189u8,
+							55u8, 219u8, 75u8, 16u8, 48u8, 159u8, 139u8, 111u8, 165u8, 155u8,
+							118u8, 59u8, 2u8, 170u8, 218u8, 61u8, 244u8, 143u8, 183u8, 45u8, 146u8,
+							204u8, 108u8, 71u8, 29u8, 40u8, 74u8, 27u8, 38u8, 32u8, 206u8, 219u8,
 						],
 					)
 				}
@@ -32866,9 +32875,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							84u8, 225u8, 134u8, 170u8, 243u8, 135u8, 178u8, 21u8, 8u8, 49u8, 113u8,
-							99u8, 154u8, 27u8, 106u8, 186u8, 12u8, 194u8, 100u8, 48u8, 84u8, 189u8,
-							200u8, 114u8, 155u8, 173u8, 211u8, 175u8, 50u8, 61u8, 46u8, 21u8,
+							237u8, 62u8, 148u8, 199u8, 229u8, 17u8, 116u8, 37u8, 207u8, 101u8,
+							248u8, 160u8, 49u8, 250u8, 87u8, 236u8, 28u8, 5u8, 164u8, 98u8, 94u8,
+							112u8, 131u8, 253u8, 114u8, 209u8, 25u8, 131u8, 75u8, 164u8, 19u8,
+							46u8,
 						],
 					)
 				}
@@ -32882,10 +32892,10 @@ pub mod api {
 						"force_batch",
 						types::ForceBatch { calls },
 						[
-							180u8, 155u8, 12u8, 169u8, 97u8, 164u8, 135u8, 115u8, 47u8, 108u8,
-							235u8, 219u8, 60u8, 254u8, 38u8, 139u8, 213u8, 2u8, 105u8, 183u8,
-							214u8, 176u8, 187u8, 122u8, 235u8, 208u8, 246u8, 154u8, 57u8, 246u8,
-							43u8, 203u8,
+							214u8, 241u8, 204u8, 55u8, 116u8, 163u8, 138u8, 111u8, 176u8, 195u8,
+							50u8, 14u8, 63u8, 163u8, 32u8, 155u8, 235u8, 179u8, 158u8, 198u8,
+							196u8, 1u8, 95u8, 189u8, 235u8, 187u8, 48u8, 169u8, 208u8, 194u8,
+							135u8, 74u8,
 						],
 					)
 				}
@@ -32903,9 +32913,10 @@ pub mod api {
 							weight,
 						},
 						[
-							126u8, 59u8, 131u8, 135u8, 120u8, 209u8, 174u8, 143u8, 228u8, 189u8,
-							184u8, 196u8, 236u8, 200u8, 30u8, 210u8, 84u8, 134u8, 14u8, 168u8, 3u8,
-							219u8, 25u8, 98u8, 29u8, 45u8, 152u8, 188u8, 223u8, 161u8, 55u8, 218u8,
+							81u8, 126u8, 120u8, 100u8, 128u8, 200u8, 22u8, 187u8, 16u8, 131u8,
+							203u8, 248u8, 53u8, 71u8, 147u8, 193u8, 192u8, 47u8, 80u8, 197u8,
+							157u8, 123u8, 98u8, 51u8, 167u8, 49u8, 250u8, 160u8, 12u8, 214u8, 89u8,
+							187u8,
 						],
 					)
 				}
@@ -33261,9 +33272,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							2u8, 64u8, 38u8, 188u8, 195u8, 147u8, 203u8, 146u8, 139u8, 48u8, 127u8,
-							52u8, 241u8, 158u8, 146u8, 160u8, 73u8, 35u8, 246u8, 112u8, 84u8, 81u8,
-							142u8, 109u8, 213u8, 150u8, 61u8, 116u8, 142u8, 37u8, 88u8, 75u8,
+							115u8, 70u8, 119u8, 122u8, 151u8, 83u8, 241u8, 26u8, 136u8, 235u8,
+							127u8, 149u8, 205u8, 181u8, 197u8, 166u8, 231u8, 109u8, 78u8, 223u8,
+							45u8, 225u8, 126u8, 202u8, 20u8, 72u8, 178u8, 188u8, 47u8, 79u8, 39u8,
+							138u8,
 						],
 					)
 				}
@@ -33287,10 +33299,9 @@ pub mod api {
 							max_weight,
 						},
 						[
-							26u8, 83u8, 123u8, 136u8, 215u8, 30u8, 133u8, 119u8, 161u8, 141u8,
-							79u8, 116u8, 172u8, 169u8, 160u8, 102u8, 177u8, 82u8, 212u8, 136u8,
-							22u8, 179u8, 27u8, 130u8, 182u8, 123u8, 132u8, 54u8, 194u8, 188u8,
-							186u8, 182u8,
+							37u8, 248u8, 115u8, 174u8, 103u8, 75u8, 159u8, 167u8, 110u8, 82u8,
+							160u8, 115u8, 167u8, 99u8, 188u8, 195u8, 125u8, 54u8, 6u8, 18u8, 112u8,
+							69u8, 0u8, 229u8, 20u8, 178u8, 91u8, 179u8, 73u8, 230u8, 2u8, 153u8,
 						],
 					)
 				}
@@ -38128,10 +38139,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							63u8, 224u8, 186u8, 123u8, 44u8, 48u8, 41u8, 255u8, 21u8, 69u8, 80u8,
-							227u8, 155u8, 248u8, 123u8, 255u8, 7u8, 169u8, 42u8, 166u8, 103u8,
-							193u8, 190u8, 51u8, 122u8, 124u8, 124u8, 23u8, 66u8, 10u8, 120u8,
-							135u8,
+							142u8, 194u8, 254u8, 83u8, 118u8, 51u8, 20u8, 105u8, 144u8, 219u8,
+							216u8, 158u8, 67u8, 92u8, 108u8, 54u8, 187u8, 90u8, 233u8, 29u8, 153u8,
+							203u8, 105u8, 238u8, 122u8, 174u8, 243u8, 163u8, 61u8, 109u8, 29u8,
+							82u8,
 						],
 					)
 				}
@@ -38296,10 +38307,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							209u8, 239u8, 134u8, 42u8, 112u8, 159u8, 125u8, 100u8, 110u8, 49u8,
-							197u8, 147u8, 54u8, 116u8, 18u8, 39u8, 231u8, 15u8, 234u8, 109u8, 21u8,
-							172u8, 70u8, 76u8, 174u8, 115u8, 31u8, 139u8, 110u8, 242u8, 42u8,
-							243u8,
+							35u8, 124u8, 140u8, 18u8, 1u8, 16u8, 155u8, 91u8, 182u8, 153u8, 249u8,
+							170u8, 208u8, 210u8, 29u8, 104u8, 159u8, 240u8, 104u8, 19u8, 198u8,
+							230u8, 136u8, 131u8, 196u8, 190u8, 150u8, 89u8, 81u8, 0u8, 37u8, 181u8,
 						],
 					)
 				}
@@ -38869,40 +38879,17 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
-				#[doc = "See [`Pallet::schedule_operator_bond_less`]."]
-				pub struct ScheduleOperatorBondLess {
-					pub bond_less_amount: schedule_operator_bond_less::BondLessAmount,
+				#[doc = "See [`Pallet::schedule_operator_unstake`]."]
+				pub struct ScheduleOperatorUnstake {
+					pub unstake_amount: schedule_operator_unstake::UnstakeAmount,
 				}
-				pub mod schedule_operator_bond_less {
+				pub mod schedule_operator_unstake {
 					use super::runtime_types;
-					pub type BondLessAmount = ::core::primitive::u128;
+					pub type UnstakeAmount = ::core::primitive::u128;
 				}
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ScheduleOperatorBondLess {
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ScheduleOperatorUnstake {
 					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "schedule_operator_bond_less";
-				}
-				#[derive(
-					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-					Clone,
-					Debug,
-					Eq,
-					PartialEq,
-				)]
-				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-				#[decode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-				)]
-				#[encode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-				)]
-				#[doc = "See [`Pallet::execute_operator_bond_less`]."]
-				pub struct ExecuteOperatorBondLess;
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ExecuteOperatorBondLess {
-					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "execute_operator_bond_less";
+					const CALL: &'static str = "schedule_operator_unstake";
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -38921,11 +38908,34 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
-				#[doc = "See [`Pallet::cancel_operator_bond_less`]."]
-				pub struct CancelOperatorBondLess;
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CancelOperatorBondLess {
+				#[doc = "See [`Pallet::execute_operator_unstake`]."]
+				pub struct ExecuteOperatorUnstake;
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ExecuteOperatorUnstake {
 					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "cancel_operator_bond_less";
+					const CALL: &'static str = "execute_operator_unstake";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::cancel_operator_unstake`]."]
+				pub struct CancelOperatorUnstake;
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CancelOperatorUnstake {
+					const PALLET: &'static str = "MultiAssetDelegation";
+					const CALL: &'static str = "cancel_operator_unstake";
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -38997,7 +39007,7 @@ pub mod api {
 				}
 				pub mod deposit {
 					use super::runtime_types;
-					pub type AssetId = ::core::option::Option<::core::primitive::u128>;
+					pub type AssetId = ::core::primitive::u128;
 					pub type Amount = ::core::primitive::u128;
 				}
 				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for Deposit {
@@ -39021,19 +39031,19 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
-				#[doc = "See [`Pallet::schedule_unstake`]."]
-				pub struct ScheduleUnstake {
-					pub asset_id: schedule_unstake::AssetId,
-					pub amount: schedule_unstake::Amount,
+				#[doc = "See [`Pallet::schedule_withdraw`]."]
+				pub struct ScheduleWithdraw {
+					pub asset_id: schedule_withdraw::AssetId,
+					pub amount: schedule_withdraw::Amount,
 				}
-				pub mod schedule_unstake {
+				pub mod schedule_withdraw {
 					use super::runtime_types;
-					pub type AssetId = ::core::option::Option<::core::primitive::u128>;
+					pub type AssetId = ::core::primitive::u128;
 					pub type Amount = ::core::primitive::u128;
 				}
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ScheduleUnstake {
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ScheduleWithdraw {
 					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "schedule_unstake";
+					const CALL: &'static str = "schedule_withdraw";
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -39052,11 +39062,11 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
-				#[doc = "See [`Pallet::execute_unstake`]."]
-				pub struct ExecuteUnstake;
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ExecuteUnstake {
+				#[doc = "See [`Pallet::execute_withdraw`]."]
+				pub struct ExecuteWithdraw;
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ExecuteWithdraw {
 					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "execute_unstake";
+					const CALL: &'static str = "execute_withdraw";
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -39075,11 +39085,19 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
-				#[doc = "See [`Pallet::cancel_unstake`]."]
-				pub struct CancelUnstake;
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CancelUnstake {
+				#[doc = "See [`Pallet::cancel_withdraw`]."]
+				pub struct CancelWithdraw {
+					pub asset_id: cancel_withdraw::AssetId,
+					pub amount: cancel_withdraw::Amount,
+				}
+				pub mod cancel_withdraw {
+					use super::runtime_types;
+					pub type AssetId = ::core::primitive::u128;
+					pub type Amount = ::core::primitive::u128;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CancelWithdraw {
 					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "cancel_unstake";
+					const CALL: &'static str = "cancel_withdraw";
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -39131,21 +39149,21 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
-				#[doc = "See [`Pallet::schedule_delegator_bond_less`]."]
-				pub struct ScheduleDelegatorBondLess {
-					pub operator: schedule_delegator_bond_less::Operator,
-					pub asset_id: schedule_delegator_bond_less::AssetId,
-					pub amount: schedule_delegator_bond_less::Amount,
+				#[doc = "See [`Pallet::schedule_delegator_unstake`]."]
+				pub struct ScheduleDelegatorUnstake {
+					pub operator: schedule_delegator_unstake::Operator,
+					pub asset_id: schedule_delegator_unstake::AssetId,
+					pub amount: schedule_delegator_unstake::Amount,
 				}
-				pub mod schedule_delegator_bond_less {
+				pub mod schedule_delegator_unstake {
 					use super::runtime_types;
 					pub type Operator = ::subxt::ext::subxt_core::utils::AccountId32;
 					pub type AssetId = ::core::primitive::u128;
 					pub type Amount = ::core::primitive::u128;
 				}
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ScheduleDelegatorBondLess {
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ScheduleDelegatorUnstake {
 					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "schedule_delegator_bond_less";
+					const CALL: &'static str = "schedule_delegator_unstake";
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -39164,11 +39182,11 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
-				#[doc = "See [`Pallet::execute_delegator_bond_less`]."]
-				pub struct ExecuteDelegatorBondLess;
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ExecuteDelegatorBondLess {
+				#[doc = "See [`Pallet::execute_delegator_unstake`]."]
+				pub struct ExecuteDelegatorUnstake;
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ExecuteDelegatorUnstake {
 					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "execute_delegator_bond_less";
+					const CALL: &'static str = "execute_delegator_unstake";
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -39187,41 +39205,19 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
-				#[doc = "See [`Pallet::cancel_delegator_bond_less`]."]
-				pub struct CancelDelegatorBondLess;
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CancelDelegatorBondLess {
-					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "cancel_delegator_bond_less";
+				#[doc = "See [`Pallet::cancel_delegator_unstake`]."]
+				pub struct CancelDelegatorUnstake {
+					pub asset_id: cancel_delegator_unstake::AssetId,
+					pub amount: cancel_delegator_unstake::Amount,
 				}
-				#[derive(
-					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-					Clone,
-					Debug,
-					Eq,
-					PartialEq,
-				)]
-				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-				#[decode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-				)]
-				#[encode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-				)]
-				#[doc = "See [`Pallet::set_whitelisted_assets`]."]
-				pub struct SetWhitelistedAssets {
-					pub assets: set_whitelisted_assets::Assets,
-				}
-				pub mod set_whitelisted_assets {
+				pub mod cancel_delegator_unstake {
 					use super::runtime_types;
-					pub type Assets =
-						::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u128>;
+					pub type AssetId = ::core::primitive::u128;
+					pub type Amount = ::core::primitive::u128;
 				}
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetWhitelistedAssets {
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CancelDelegatorUnstake {
 					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "set_whitelisted_assets";
+					const CALL: &'static str = "cancel_delegator_unstake";
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -39242,14 +39238,14 @@ pub mod api {
 				)]
 				#[doc = "See [`Pallet::set_incentive_apy_and_cap`]."]
 				pub struct SetIncentiveApyAndCap {
-					pub asset_id: set_incentive_apy_and_cap::AssetId,
+					pub pool_id: set_incentive_apy_and_cap::PoolId,
 					pub apy: set_incentive_apy_and_cap::Apy,
 					pub cap: set_incentive_apy_and_cap::Cap,
 				}
 				pub mod set_incentive_apy_and_cap {
 					use super::runtime_types;
-					pub type AssetId = ::core::primitive::u128;
-					pub type Apy = ::core::primitive::u128;
+					pub type PoolId = ::core::primitive::u128;
+					pub type Apy = runtime_types::sp_arithmetic::per_things::Percent;
 					pub type Cap = ::core::primitive::u128;
 				}
 				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetIncentiveApyAndCap {
@@ -39284,6 +39280,40 @@ pub mod api {
 				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for WhitelistBlueprintForRewards {
 					const PALLET: &'static str = "MultiAssetDelegation";
 					const CALL: &'static str = "whitelist_blueprint_for_rewards";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::manage_asset_in_pool`]."]
+				pub struct ManageAssetInPool {
+					pub pool_id: manage_asset_in_pool::PoolId,
+					pub asset_id: manage_asset_in_pool::AssetId,
+					pub action: manage_asset_in_pool::Action,
+				}
+				pub mod manage_asset_in_pool {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u128;
+					pub type AssetId = ::core::primitive::u128;
+					pub type Action =
+						runtime_types::pallet_multi_asset_delegation::types::rewards::AssetAction;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ManageAssetInPool {
+					const PALLET: &'static str = "MultiAssetDelegation";
+					const CALL: &'static str = "manage_asset_in_pool";
 				}
 			}
 			pub struct TransactionApi;
@@ -39373,57 +39403,55 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "See [`Pallet::schedule_operator_bond_less`]."]
-				pub fn schedule_operator_bond_less(
+				#[doc = "See [`Pallet::schedule_operator_unstake`]."]
+				pub fn schedule_operator_unstake(
 					&self,
-					bond_less_amount: types::schedule_operator_bond_less::BondLessAmount,
+					unstake_amount: types::schedule_operator_unstake::UnstakeAmount,
 				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
-					types::ScheduleOperatorBondLess,
+					types::ScheduleOperatorUnstake,
 				> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
-						"schedule_operator_bond_less",
-						types::ScheduleOperatorBondLess { bond_less_amount },
+						"schedule_operator_unstake",
+						types::ScheduleOperatorUnstake { unstake_amount },
 						[
-							221u8, 206u8, 7u8, 82u8, 56u8, 222u8, 84u8, 233u8, 255u8, 170u8, 90u8,
-							78u8, 48u8, 196u8, 247u8, 45u8, 86u8, 87u8, 72u8, 103u8, 94u8, 137u8,
-							63u8, 146u8, 45u8, 151u8, 224u8, 227u8, 208u8, 234u8, 134u8, 233u8,
+							34u8, 99u8, 195u8, 190u8, 177u8, 99u8, 126u8, 217u8, 214u8, 187u8,
+							152u8, 53u8, 223u8, 100u8, 68u8, 17u8, 188u8, 148u8, 25u8, 21u8, 75u8,
+							48u8, 52u8, 208u8, 221u8, 62u8, 146u8, 65u8, 60u8, 209u8, 206u8, 44u8,
 						],
 					)
 				}
-				#[doc = "See [`Pallet::execute_operator_bond_less`]."]
-				pub fn execute_operator_bond_less(
+				#[doc = "See [`Pallet::execute_operator_unstake`]."]
+				pub fn execute_operator_unstake(
 					&self,
 				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
-					types::ExecuteOperatorBondLess,
+					types::ExecuteOperatorUnstake,
 				> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
-						"execute_operator_bond_less",
-						types::ExecuteOperatorBondLess {},
+						"execute_operator_unstake",
+						types::ExecuteOperatorUnstake {},
 						[
-							217u8, 107u8, 87u8, 164u8, 114u8, 104u8, 78u8, 24u8, 205u8, 164u8,
-							171u8, 191u8, 238u8, 76u8, 94u8, 193u8, 55u8, 254u8, 167u8, 42u8,
-							107u8, 222u8, 67u8, 38u8, 241u8, 73u8, 88u8, 12u8, 133u8, 135u8, 104u8,
-							145u8,
+							22u8, 7u8, 144u8, 170u8, 57u8, 205u8, 226u8, 10u8, 36u8, 245u8, 197u8,
+							184u8, 137u8, 7u8, 252u8, 56u8, 186u8, 50u8, 30u8, 179u8, 244u8, 203u8,
+							242u8, 90u8, 93u8, 130u8, 82u8, 225u8, 192u8, 92u8, 211u8, 14u8,
 						],
 					)
 				}
-				#[doc = "See [`Pallet::cancel_operator_bond_less`]."]
-				pub fn cancel_operator_bond_less(
+				#[doc = "See [`Pallet::cancel_operator_unstake`]."]
+				pub fn cancel_operator_unstake(
 					&self,
 				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
-					types::CancelOperatorBondLess,
+					types::CancelOperatorUnstake,
 				> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
-						"cancel_operator_bond_less",
-						types::CancelOperatorBondLess {},
+						"cancel_operator_unstake",
+						types::CancelOperatorUnstake {},
 						[
-							197u8, 50u8, 218u8, 234u8, 28u8, 186u8, 243u8, 22u8, 240u8, 137u8,
-							36u8, 185u8, 125u8, 201u8, 147u8, 81u8, 16u8, 170u8, 246u8, 126u8,
-							235u8, 52u8, 122u8, 61u8, 120u8, 167u8, 180u8, 147u8, 252u8, 19u8,
-							143u8, 200u8,
+							9u8, 153u8, 57u8, 25u8, 35u8, 233u8, 83u8, 162u8, 125u8, 240u8, 57u8,
+							179u8, 110u8, 131u8, 115u8, 69u8, 96u8, 139u8, 228u8, 20u8, 33u8, 30u8,
+							207u8, 176u8, 175u8, 233u8, 141u8, 152u8, 197u8, 134u8, 78u8, 40u8,
 						],
 					)
 				}
@@ -39470,59 +39498,60 @@ pub mod api {
 						"deposit",
 						types::Deposit { asset_id, amount },
 						[
-							109u8, 175u8, 182u8, 203u8, 142u8, 22u8, 205u8, 225u8, 68u8, 221u8,
-							253u8, 86u8, 33u8, 127u8, 183u8, 165u8, 181u8, 26u8, 29u8, 66u8, 179u8,
-							99u8, 127u8, 5u8, 104u8, 162u8, 190u8, 51u8, 96u8, 193u8, 140u8, 207u8,
+							25u8, 39u8, 77u8, 183u8, 182u8, 45u8, 116u8, 55u8, 125u8, 104u8, 78u8,
+							42u8, 142u8, 86u8, 182u8, 200u8, 101u8, 149u8, 90u8, 22u8, 156u8,
+							217u8, 246u8, 111u8, 114u8, 255u8, 241u8, 215u8, 111u8, 223u8, 141u8,
+							76u8,
 						],
 					)
 				}
-				#[doc = "See [`Pallet::schedule_unstake`]."]
-				pub fn schedule_unstake(
+				#[doc = "See [`Pallet::schedule_withdraw`]."]
+				pub fn schedule_withdraw(
 					&self,
-					asset_id: types::schedule_unstake::AssetId,
-					amount: types::schedule_unstake::Amount,
-				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ScheduleUnstake> {
+					asset_id: types::schedule_withdraw::AssetId,
+					amount: types::schedule_withdraw::Amount,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ScheduleWithdraw> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
-						"schedule_unstake",
-						types::ScheduleUnstake { asset_id, amount },
+						"schedule_withdraw",
+						types::ScheduleWithdraw { asset_id, amount },
 						[
-							43u8, 31u8, 22u8, 55u8, 105u8, 92u8, 90u8, 86u8, 44u8, 175u8, 156u8,
-							115u8, 177u8, 108u8, 104u8, 87u8, 139u8, 57u8, 174u8, 72u8, 88u8,
-							112u8, 143u8, 130u8, 41u8, 238u8, 8u8, 227u8, 169u8, 131u8, 180u8,
-							182u8,
+							40u8, 210u8, 230u8, 206u8, 225u8, 11u8, 174u8, 19u8, 194u8, 166u8,
+							107u8, 100u8, 26u8, 173u8, 183u8, 29u8, 19u8, 216u8, 240u8, 58u8, 39u8,
+							135u8, 143u8, 252u8, 235u8, 221u8, 152u8, 255u8, 108u8, 134u8, 78u8,
+							103u8,
 						],
 					)
 				}
-				#[doc = "See [`Pallet::execute_unstake`]."]
-				pub fn execute_unstake(
+				#[doc = "See [`Pallet::execute_withdraw`]."]
+				pub fn execute_withdraw(
 					&self,
-				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ExecuteUnstake> {
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ExecuteWithdraw> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
-						"execute_unstake",
-						types::ExecuteUnstake {},
+						"execute_withdraw",
+						types::ExecuteWithdraw {},
 						[
-							209u8, 178u8, 220u8, 148u8, 64u8, 107u8, 116u8, 42u8, 55u8, 179u8,
-							233u8, 56u8, 246u8, 139u8, 83u8, 241u8, 217u8, 132u8, 50u8, 70u8,
-							245u8, 220u8, 182u8, 120u8, 227u8, 161u8, 13u8, 132u8, 198u8, 176u8,
-							18u8, 174u8,
+							113u8, 223u8, 166u8, 138u8, 53u8, 85u8, 30u8, 76u8, 4u8, 251u8, 52u8,
+							29u8, 41u8, 224u8, 40u8, 64u8, 67u8, 230u8, 19u8, 43u8, 114u8, 166u8,
+							56u8, 18u8, 19u8, 208u8, 3u8, 93u8, 131u8, 140u8, 223u8, 28u8,
 						],
 					)
 				}
-				#[doc = "See [`Pallet::cancel_unstake`]."]
-				pub fn cancel_unstake(
+				#[doc = "See [`Pallet::cancel_withdraw`]."]
+				pub fn cancel_withdraw(
 					&self,
-				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CancelUnstake> {
+					asset_id: types::cancel_withdraw::AssetId,
+					amount: types::cancel_withdraw::Amount,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CancelWithdraw> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
-						"cancel_unstake",
-						types::CancelUnstake {},
+						"cancel_withdraw",
+						types::CancelWithdraw { asset_id, amount },
 						[
-							125u8, 191u8, 138u8, 157u8, 197u8, 239u8, 240u8, 105u8, 239u8, 139u8,
-							203u8, 113u8, 227u8, 122u8, 224u8, 106u8, 120u8, 160u8, 33u8, 203u8,
-							113u8, 113u8, 53u8, 220u8, 212u8, 41u8, 75u8, 164u8, 0u8, 178u8, 122u8,
-							163u8,
+							153u8, 92u8, 147u8, 28u8, 101u8, 84u8, 56u8, 240u8, 202u8, 89u8, 138u8,
+							195u8, 166u8, 73u8, 49u8, 48u8, 119u8, 135u8, 221u8, 36u8, 92u8, 223u8,
+							46u8, 152u8, 252u8, 193u8, 43u8, 214u8, 175u8, 33u8, 128u8, 110u8,
 						],
 					)
 				}
@@ -39544,82 +39573,66 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "See [`Pallet::schedule_delegator_bond_less`]."]
-				pub fn schedule_delegator_bond_less(
+				#[doc = "See [`Pallet::schedule_delegator_unstake`]."]
+				pub fn schedule_delegator_unstake(
 					&self,
-					operator: types::schedule_delegator_bond_less::Operator,
-					asset_id: types::schedule_delegator_bond_less::AssetId,
-					amount: types::schedule_delegator_bond_less::Amount,
+					operator: types::schedule_delegator_unstake::Operator,
+					asset_id: types::schedule_delegator_unstake::AssetId,
+					amount: types::schedule_delegator_unstake::Amount,
 				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
-					types::ScheduleDelegatorBondLess,
+					types::ScheduleDelegatorUnstake,
 				> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
-						"schedule_delegator_bond_less",
-						types::ScheduleDelegatorBondLess { operator, asset_id, amount },
+						"schedule_delegator_unstake",
+						types::ScheduleDelegatorUnstake { operator, asset_id, amount },
 						[
-							200u8, 201u8, 197u8, 147u8, 249u8, 179u8, 18u8, 136u8, 249u8, 188u8,
-							198u8, 210u8, 3u8, 255u8, 87u8, 70u8, 114u8, 77u8, 153u8, 107u8, 125u8,
-							239u8, 130u8, 51u8, 9u8, 10u8, 114u8, 79u8, 232u8, 206u8, 217u8, 203u8,
+							59u8, 253u8, 25u8, 246u8, 47u8, 194u8, 135u8, 112u8, 106u8, 76u8, 33u8,
+							166u8, 129u8, 10u8, 202u8, 94u8, 0u8, 22u8, 17u8, 52u8, 93u8, 95u8,
+							136u8, 18u8, 216u8, 102u8, 20u8, 20u8, 183u8, 199u8, 55u8, 116u8,
 						],
 					)
 				}
-				#[doc = "See [`Pallet::execute_delegator_bond_less`]."]
-				pub fn execute_delegator_bond_less(
+				#[doc = "See [`Pallet::execute_delegator_unstake`]."]
+				pub fn execute_delegator_unstake(
 					&self,
 				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
-					types::ExecuteDelegatorBondLess,
+					types::ExecuteDelegatorUnstake,
 				> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
-						"execute_delegator_bond_less",
-						types::ExecuteDelegatorBondLess {},
+						"execute_delegator_unstake",
+						types::ExecuteDelegatorUnstake {},
 						[
-							144u8, 251u8, 240u8, 33u8, 69u8, 238u8, 25u8, 43u8, 16u8, 246u8, 148u8,
-							135u8, 115u8, 149u8, 6u8, 191u8, 133u8, 173u8, 162u8, 129u8, 73u8,
-							141u8, 3u8, 193u8, 138u8, 137u8, 215u8, 2u8, 157u8, 96u8, 0u8, 249u8,
+							122u8, 83u8, 15u8, 157u8, 106u8, 98u8, 132u8, 80u8, 95u8, 3u8, 89u8,
+							166u8, 247u8, 83u8, 9u8, 238u8, 2u8, 100u8, 2u8, 49u8, 99u8, 203u8,
+							99u8, 139u8, 21u8, 210u8, 78u8, 212u8, 47u8, 214u8, 38u8, 29u8,
 						],
 					)
 				}
-				#[doc = "See [`Pallet::cancel_delegator_bond_less`]."]
-				pub fn cancel_delegator_bond_less(
+				#[doc = "See [`Pallet::cancel_delegator_unstake`]."]
+				pub fn cancel_delegator_unstake(
 					&self,
+					asset_id: types::cancel_delegator_unstake::AssetId,
+					amount: types::cancel_delegator_unstake::Amount,
 				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
-					types::CancelDelegatorBondLess,
+					types::CancelDelegatorUnstake,
 				> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
-						"cancel_delegator_bond_less",
-						types::CancelDelegatorBondLess {},
+						"cancel_delegator_unstake",
+						types::CancelDelegatorUnstake { asset_id, amount },
 						[
-							63u8, 243u8, 247u8, 78u8, 123u8, 163u8, 78u8, 97u8, 70u8, 77u8, 175u8,
-							111u8, 59u8, 192u8, 117u8, 121u8, 61u8, 22u8, 43u8, 32u8, 80u8, 74u8,
-							62u8, 236u8, 188u8, 255u8, 209u8, 163u8, 140u8, 218u8, 50u8, 21u8,
-						],
-					)
-				}
-				#[doc = "See [`Pallet::set_whitelisted_assets`]."]
-				pub fn set_whitelisted_assets(
-					&self,
-					assets: types::set_whitelisted_assets::Assets,
-				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetWhitelistedAssets>
-				{
-					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-						"MultiAssetDelegation",
-						"set_whitelisted_assets",
-						types::SetWhitelistedAssets { assets },
-						[
-							206u8, 117u8, 163u8, 226u8, 67u8, 11u8, 170u8, 142u8, 186u8, 71u8,
-							242u8, 35u8, 162u8, 22u8, 211u8, 16u8, 180u8, 170u8, 45u8, 11u8, 87u8,
-							200u8, 237u8, 225u8, 48u8, 86u8, 100u8, 23u8, 161u8, 212u8, 16u8,
-							200u8,
+							210u8, 14u8, 186u8, 64u8, 217u8, 34u8, 226u8, 34u8, 62u8, 186u8, 72u8,
+							112u8, 218u8, 19u8, 216u8, 249u8, 62u8, 68u8, 34u8, 12u8, 123u8, 63u8,
+							150u8, 154u8, 34u8, 179u8, 31u8, 254u8, 117u8, 44u8, 98u8, 62u8,
 						],
 					)
 				}
 				#[doc = "See [`Pallet::set_incentive_apy_and_cap`]."]
 				pub fn set_incentive_apy_and_cap(
 					&self,
-					asset_id: types::set_incentive_apy_and_cap::AssetId,
+					pool_id: types::set_incentive_apy_and_cap::PoolId,
 					apy: types::set_incentive_apy_and_cap::Apy,
 					cap: types::set_incentive_apy_and_cap::Cap,
 				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
@@ -39628,12 +39641,12 @@ pub mod api {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
 						"set_incentive_apy_and_cap",
-						types::SetIncentiveApyAndCap { asset_id, apy, cap },
+						types::SetIncentiveApyAndCap { pool_id, apy, cap },
 						[
-							230u8, 216u8, 229u8, 146u8, 250u8, 201u8, 231u8, 242u8, 247u8, 104u8,
-							164u8, 85u8, 87u8, 245u8, 24u8, 10u8, 24u8, 175u8, 41u8, 177u8, 155u8,
-							81u8, 253u8, 222u8, 218u8, 241u8, 115u8, 52u8, 230u8, 246u8, 199u8,
-							214u8,
+							14u8, 124u8, 76u8, 147u8, 132u8, 187u8, 69u8, 246u8, 153u8, 108u8,
+							236u8, 19u8, 141u8, 104u8, 228u8, 176u8, 13u8, 231u8, 149u8, 132u8,
+							226u8, 11u8, 170u8, 90u8, 3u8, 159u8, 241u8, 193u8, 97u8, 196u8, 212u8,
+							241u8,
 						],
 					)
 				}
@@ -39653,6 +39666,26 @@ pub mod api {
 							103u8, 240u8, 211u8, 39u8, 0u8, 197u8, 101u8, 62u8, 27u8, 237u8, 182u8,
 							179u8, 251u8, 81u8, 142u8, 195u8, 213u8, 24u8, 123u8, 134u8, 80u8,
 							187u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::manage_asset_in_pool`]."]
+				pub fn manage_asset_in_pool(
+					&self,
+					pool_id: types::manage_asset_in_pool::PoolId,
+					asset_id: types::manage_asset_in_pool::AssetId,
+					action: types::manage_asset_in_pool::Action,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ManageAssetInPool>
+				{
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"MultiAssetDelegation",
+						"manage_asset_in_pool",
+						types::ManageAssetInPool { pool_id, asset_id, action },
+						[
+							144u8, 244u8, 190u8, 106u8, 70u8, 105u8, 245u8, 42u8, 187u8, 243u8,
+							43u8, 73u8, 15u8, 92u8, 193u8, 21u8, 58u8, 142u8, 169u8, 139u8, 164u8,
+							7u8, 151u8, 182u8, 188u8, 214u8, 193u8, 162u8, 151u8, 16u8, 166u8,
+							43u8,
 						],
 					)
 				}
@@ -39775,7 +39808,7 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "An operator has increased their bond."]
+			#[doc = "An operator has increased their stake."]
 			pub struct OperatorBondMore {
 				pub who: operator_bond_more::Who,
 				pub additional_bond: operator_bond_more::AdditionalBond,
@@ -39802,15 +39835,15 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "An operator has scheduled to decrease their bond."]
+			#[doc = "An operator has scheduled to decrease their stake."]
 			pub struct OperatorBondLessScheduled {
 				pub who: operator_bond_less_scheduled::Who,
-				pub bond_less_amount: operator_bond_less_scheduled::BondLessAmount,
+				pub unstake_amount: operator_bond_less_scheduled::UnstakeAmount,
 			}
 			pub mod operator_bond_less_scheduled {
 				use super::runtime_types;
 				pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
-				pub type BondLessAmount = ::core::primitive::u128;
+				pub type UnstakeAmount = ::core::primitive::u128;
 			}
 			impl ::subxt::ext::subxt_core::events::StaticEvent for OperatorBondLessScheduled {
 				const PALLET: &'static str = "MultiAssetDelegation";
@@ -39829,7 +39862,7 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "An operator has executed their bond decrease."]
+			#[doc = "An operator has executed their stake decrease."]
 			pub struct OperatorBondLessExecuted {
 				pub who: operator_bond_less_executed::Who,
 			}
@@ -39854,7 +39887,7 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "An operator has cancelled their bond decrease request."]
+			#[doc = "An operator has cancelled their stake decrease request."]
 			pub struct OperatorBondLessCancelled {
 				pub who: operator_bond_less_cancelled::Who,
 			}
@@ -39939,7 +39972,7 @@ pub mod api {
 				use super::runtime_types;
 				pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
 				pub type Amount = ::core::primitive::u128;
-				pub type AssetId = ::core::option::Option<::core::primitive::u128>;
+				pub type AssetId = ::core::primitive::u128;
 			}
 			impl ::subxt::ext::subxt_core::events::StaticEvent for Deposited {
 				const PALLET: &'static str = "MultiAssetDelegation";
@@ -39958,21 +39991,21 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "An unstake has been scheduled."]
-			pub struct ScheduledUnstake {
-				pub who: scheduled_unstake::Who,
-				pub amount: scheduled_unstake::Amount,
-				pub asset_id: scheduled_unstake::AssetId,
+			#[doc = "An withdraw has been scheduled."]
+			pub struct Scheduledwithdraw {
+				pub who: scheduledwithdraw::Who,
+				pub amount: scheduledwithdraw::Amount,
+				pub asset_id: scheduledwithdraw::AssetId,
 			}
-			pub mod scheduled_unstake {
+			pub mod scheduledwithdraw {
 				use super::runtime_types;
 				pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
 				pub type Amount = ::core::primitive::u128;
-				pub type AssetId = ::core::option::Option<::core::primitive::u128>;
+				pub type AssetId = ::core::primitive::u128;
 			}
-			impl ::subxt::ext::subxt_core::events::StaticEvent for ScheduledUnstake {
+			impl ::subxt::ext::subxt_core::events::StaticEvent for Scheduledwithdraw {
 				const PALLET: &'static str = "MultiAssetDelegation";
-				const EVENT: &'static str = "ScheduledUnstake";
+				const EVENT: &'static str = "Scheduledwithdraw";
 			}
 			#[derive(
 				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -39987,17 +40020,17 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "An unstake has been executed."]
-			pub struct ExecutedUnstake {
-				pub who: executed_unstake::Who,
+			#[doc = "An withdraw has been executed."]
+			pub struct Executedwithdraw {
+				pub who: executedwithdraw::Who,
 			}
-			pub mod executed_unstake {
+			pub mod executedwithdraw {
 				use super::runtime_types;
 				pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
 			}
-			impl ::subxt::ext::subxt_core::events::StaticEvent for ExecutedUnstake {
+			impl ::subxt::ext::subxt_core::events::StaticEvent for Executedwithdraw {
 				const PALLET: &'static str = "MultiAssetDelegation";
-				const EVENT: &'static str = "ExecutedUnstake";
+				const EVENT: &'static str = "Executedwithdraw";
 			}
 			#[derive(
 				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -40012,17 +40045,17 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "An unstake has been cancelled."]
-			pub struct CancelledUnstake {
-				pub who: cancelled_unstake::Who,
+			#[doc = "An withdraw has been cancelled."]
+			pub struct Cancelledwithdraw {
+				pub who: cancelledwithdraw::Who,
 			}
-			pub mod cancelled_unstake {
+			pub mod cancelledwithdraw {
 				use super::runtime_types;
 				pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
 			}
-			impl ::subxt::ext::subxt_core::events::StaticEvent for CancelledUnstake {
+			impl ::subxt::ext::subxt_core::events::StaticEvent for Cancelledwithdraw {
 				const PALLET: &'static str = "MultiAssetDelegation";
-				const EVENT: &'static str = "CancelledUnstake";
+				const EVENT: &'static str = "Cancelledwithdraw";
 			}
 			#[derive(
 				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -40068,7 +40101,7 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "A delegator bond less request has been scheduled."]
+			#[doc = "A delegator unstake request has been scheduled."]
 			pub struct ScheduledDelegatorBondLess {
 				pub who: scheduled_delegator_bond_less::Who,
 				pub operator: scheduled_delegator_bond_less::Operator,
@@ -40099,7 +40132,7 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "A delegator bond less request has been executed."]
+			#[doc = "A delegator unstake request has been executed."]
 			pub struct ExecutedDelegatorBondLess {
 				pub who: executed_delegator_bond_less::Who,
 			}
@@ -40124,7 +40157,7 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "A delegator bond less request has been cancelled."]
+			#[doc = "A delegator unstake request has been cancelled."]
 			pub struct CancelledDelegatorBondLess {
 				pub who: cancelled_delegator_bond_less::Who,
 			}
@@ -40149,42 +40182,16 @@ pub mod api {
 			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "New whitelisted assets set"]
-			pub struct WhitelistedAssetsSet {
-				pub assets: whitelisted_assets_set::Assets,
-			}
-			pub mod whitelisted_assets_set {
-				use super::runtime_types;
-				pub type Assets =
-					::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u128>;
-			}
-			impl ::subxt::ext::subxt_core::events::StaticEvent for WhitelistedAssetsSet {
-				const PALLET: &'static str = "MultiAssetDelegation";
-				const EVENT: &'static str = "WhitelistedAssetsSet";
-			}
-			#[derive(
-				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-				Clone,
-				Debug,
-				Eq,
-				PartialEq,
-			)]
-			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
-			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-			#[doc = "Event emitted when an incentive APY and cap are set for an asset"]
+			#[doc = "Event emitted when an incentive APY and cap are set for a reward pool"]
 			pub struct IncentiveAPYAndCapSet {
-				pub asset_id: incentive_apy_and_cap_set::AssetId,
+				pub pool_id: incentive_apy_and_cap_set::PoolId,
 				pub apy: incentive_apy_and_cap_set::Apy,
 				pub cap: incentive_apy_and_cap_set::Cap,
 			}
 			pub mod incentive_apy_and_cap_set {
 				use super::runtime_types;
-				pub type AssetId = ::core::primitive::u128;
-				pub type Apy = ::core::primitive::u128;
+				pub type PoolId = ::core::primitive::u128;
+				pub type Apy = runtime_types::sp_arithmetic::per_things::Percent;
 				pub type Cap = ::core::primitive::u128;
 			}
 			impl ::subxt::ext::subxt_core::events::StaticEvent for IncentiveAPYAndCapSet {
@@ -40216,6 +40223,38 @@ pub mod api {
 				const PALLET: &'static str = "MultiAssetDelegation";
 				const EVENT: &'static str = "BlueprintWhitelisted";
 			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "Asset has been updated to reward pool"]
+			pub struct AssetUpdatedInPool {
+				pub who: asset_updated_in_pool::Who,
+				pub pool_id: asset_updated_in_pool::PoolId,
+				pub asset_id: asset_updated_in_pool::AssetId,
+				pub action: asset_updated_in_pool::Action,
+			}
+			pub mod asset_updated_in_pool {
+				use super::runtime_types;
+				pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+				pub type PoolId = ::core::primitive::u128;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Action =
+					runtime_types::pallet_multi_asset_delegation::types::rewards::AssetAction;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for AssetUpdatedInPool {
+				const PALLET: &'static str = "MultiAssetDelegation";
+				const EVENT: &'static str = "AssetUpdatedInPool";
+			}
 		}
 		pub mod storage {
 			use super::runtime_types;
@@ -40230,11 +40269,6 @@ pub mod api {
 					use super::runtime_types;
 					pub type CurrentRound = ::core::primitive::u32;
 				}
-				pub mod whitelisted_assets {
-					use super::runtime_types;
-					pub type WhitelistedAssets =
-						::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u128>;
-				}
 				pub mod at_stake {
 					use super::runtime_types;
 					pub type AtStake = runtime_types :: pallet_multi_asset_delegation :: types :: operator :: OperatorSnapshot < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u128 , :: core :: primitive :: u128 > ;
@@ -40245,6 +40279,17 @@ pub mod api {
 					use super::runtime_types;
 					pub type Delegators = runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorMetadata < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u128 , :: core :: primitive :: u128 > ;
 					pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
+				}
+				pub mod reward_pools {
+					use super::runtime_types;
+					pub type RewardPools =
+						::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u128>;
+					pub type Param0 = ::core::primitive::u128;
+				}
+				pub mod asset_lookup_reward_pools {
+					use super::runtime_types;
+					pub type AssetLookupRewardPools = ::core::primitive::u128;
+					pub type Param0 = ::core::primitive::u128;
 				}
 				pub mod reward_config_storage {
 					use super::runtime_types;
@@ -40272,9 +40317,10 @@ pub mod api {
 						"Operators",
 						(),
 						[
-							118u8, 148u8, 197u8, 187u8, 30u8, 176u8, 70u8, 75u8, 173u8, 23u8, 30u8,
-							57u8, 99u8, 30u8, 217u8, 104u8, 226u8, 202u8, 93u8, 149u8, 27u8, 22u8,
-							35u8, 88u8, 119u8, 251u8, 32u8, 185u8, 158u8, 222u8, 79u8, 242u8,
+							142u8, 248u8, 178u8, 68u8, 67u8, 114u8, 211u8, 90u8, 106u8, 188u8,
+							23u8, 230u8, 72u8, 190u8, 46u8, 12u8, 223u8, 19u8, 242u8, 35u8, 177u8,
+							191u8, 117u8, 194u8, 48u8, 233u8, 80u8, 102u8, 34u8, 147u8, 125u8,
+							68u8,
 						],
 					)
 				}
@@ -40298,9 +40344,10 @@ pub mod api {
 							_0.borrow(),
 						),
 						[
-							118u8, 148u8, 197u8, 187u8, 30u8, 176u8, 70u8, 75u8, 173u8, 23u8, 30u8,
-							57u8, 99u8, 30u8, 217u8, 104u8, 226u8, 202u8, 93u8, 149u8, 27u8, 22u8,
-							35u8, 88u8, 119u8, 251u8, 32u8, 185u8, 158u8, 222u8, 79u8, 242u8,
+							142u8, 248u8, 178u8, 68u8, 67u8, 114u8, 211u8, 90u8, 106u8, 188u8,
+							23u8, 230u8, 72u8, 190u8, 46u8, 12u8, 223u8, 19u8, 242u8, 35u8, 177u8,
+							191u8, 117u8, 194u8, 48u8, 233u8, 80u8, 102u8, 34u8, 147u8, 125u8,
+							68u8,
 						],
 					)
 				}
@@ -40326,27 +40373,6 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Whitelisted assets that are allowed to be deposited"]
-				pub fn whitelisted_assets(
-					&self,
-				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-					(),
-					types::whitelisted_assets::WhitelistedAssets,
-					::subxt::ext::subxt_core::utils::Yes,
-					::subxt::ext::subxt_core::utils::Yes,
-					(),
-				> {
-					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
-						"MultiAssetDelegation",
-						"WhitelistedAssets",
-						(),
-						[
-							81u8, 117u8, 12u8, 62u8, 120u8, 16u8, 11u8, 75u8, 89u8, 78u8, 165u8,
-							191u8, 63u8, 170u8, 239u8, 164u8, 159u8, 88u8, 67u8, 138u8, 232u8,
-							26u8, 69u8, 66u8, 115u8, 216u8, 22u8, 49u8, 70u8, 237u8, 231u8, 11u8,
-						],
-					)
-				}
 				#[doc = " Snapshot of collator delegation stake at the start of the round."]
 				pub fn at_stake_iter(
 					&self,
@@ -40362,9 +40388,9 @@ pub mod api {
 						"AtStake",
 						(),
 						[
-							57u8, 195u8, 11u8, 189u8, 76u8, 62u8, 182u8, 27u8, 1u8, 2u8, 114u8,
-							133u8, 209u8, 146u8, 6u8, 148u8, 71u8, 209u8, 142u8, 41u8, 106u8,
-							221u8, 14u8, 228u8, 126u8, 254u8, 82u8, 139u8, 35u8, 168u8, 4u8, 81u8,
+							103u8, 69u8, 78u8, 81u8, 1u8, 242u8, 233u8, 40u8, 135u8, 38u8, 63u8,
+							65u8, 146u8, 83u8, 53u8, 208u8, 85u8, 157u8, 223u8, 47u8, 202u8, 190u8,
+							203u8, 231u8, 129u8, 125u8, 152u8, 27u8, 181u8, 53u8, 195u8, 153u8,
 						],
 					)
 				}
@@ -40388,9 +40414,9 @@ pub mod api {
 							_0.borrow(),
 						),
 						[
-							57u8, 195u8, 11u8, 189u8, 76u8, 62u8, 182u8, 27u8, 1u8, 2u8, 114u8,
-							133u8, 209u8, 146u8, 6u8, 148u8, 71u8, 209u8, 142u8, 41u8, 106u8,
-							221u8, 14u8, 228u8, 126u8, 254u8, 82u8, 139u8, 35u8, 168u8, 4u8, 81u8,
+							103u8, 69u8, 78u8, 81u8, 1u8, 242u8, 233u8, 40u8, 135u8, 38u8, 63u8,
+							65u8, 146u8, 83u8, 53u8, 208u8, 85u8, 157u8, 223u8, 47u8, 202u8, 190u8,
+							203u8, 231u8, 129u8, 125u8, 152u8, 27u8, 181u8, 53u8, 195u8, 153u8,
 						],
 					)
 				}
@@ -40425,9 +40451,9 @@ pub mod api {
 							),
 						),
 						[
-							57u8, 195u8, 11u8, 189u8, 76u8, 62u8, 182u8, 27u8, 1u8, 2u8, 114u8,
-							133u8, 209u8, 146u8, 6u8, 148u8, 71u8, 209u8, 142u8, 41u8, 106u8,
-							221u8, 14u8, 228u8, 126u8, 254u8, 82u8, 139u8, 35u8, 168u8, 4u8, 81u8,
+							103u8, 69u8, 78u8, 81u8, 1u8, 242u8, 233u8, 40u8, 135u8, 38u8, 63u8,
+							65u8, 146u8, 83u8, 53u8, 208u8, 85u8, 157u8, 223u8, 47u8, 202u8, 190u8,
+							203u8, 231u8, 129u8, 125u8, 152u8, 27u8, 181u8, 53u8, 195u8, 153u8,
 						],
 					)
 				}
@@ -40446,9 +40472,10 @@ pub mod api {
 						"Delegators",
 						(),
 						[
-							157u8, 244u8, 22u8, 217u8, 147u8, 134u8, 79u8, 165u8, 145u8, 56u8,
-							173u8, 180u8, 72u8, 207u8, 47u8, 239u8, 143u8, 57u8, 227u8, 44u8, 92u8,
-							58u8, 208u8, 81u8, 178u8, 37u8, 41u8, 213u8, 98u8, 220u8, 54u8, 135u8,
+							188u8, 252u8, 192u8, 65u8, 173u8, 39u8, 31u8, 73u8, 153u8, 225u8,
+							224u8, 38u8, 87u8, 15u8, 139u8, 12u8, 211u8, 11u8, 132u8, 3u8, 176u8,
+							156u8, 116u8, 243u8, 181u8, 134u8, 30u8, 157u8, 92u8, 1u8, 110u8,
+							235u8,
 						],
 					)
 				}
@@ -40472,9 +40499,104 @@ pub mod api {
 							_0.borrow(),
 						),
 						[
-							157u8, 244u8, 22u8, 217u8, 147u8, 134u8, 79u8, 165u8, 145u8, 56u8,
-							173u8, 180u8, 72u8, 207u8, 47u8, 239u8, 143u8, 57u8, 227u8, 44u8, 92u8,
-							58u8, 208u8, 81u8, 178u8, 37u8, 41u8, 213u8, 98u8, 220u8, 54u8, 135u8,
+							188u8, 252u8, 192u8, 65u8, 173u8, 39u8, 31u8, 73u8, 153u8, 225u8,
+							224u8, 38u8, 87u8, 15u8, 139u8, 12u8, 211u8, 11u8, 132u8, 3u8, 176u8,
+							156u8, 116u8, 243u8, 181u8, 134u8, 30u8, 157u8, 92u8, 1u8, 110u8,
+							235u8,
+						],
+					)
+				}
+				#[doc = " Storage for the reward pools"]
+				pub fn reward_pools_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::reward_pools::RewardPools,
+					(),
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"MultiAssetDelegation",
+						"RewardPools",
+						(),
+						[
+							144u8, 56u8, 52u8, 17u8, 82u8, 26u8, 196u8, 227u8, 117u8, 83u8, 117u8,
+							67u8, 76u8, 9u8, 130u8, 255u8, 238u8, 252u8, 64u8, 130u8, 82u8, 30u8,
+							169u8, 33u8, 246u8, 206u8, 249u8, 141u8, 220u8, 28u8, 51u8, 40u8,
+						],
+					)
+				}
+				#[doc = " Storage for the reward pools"]
+				pub fn reward_pools(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::reward_pools::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::reward_pools::Param0,
+					>,
+					types::reward_pools::RewardPools,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"MultiAssetDelegation",
+						"RewardPools",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							144u8, 56u8, 52u8, 17u8, 82u8, 26u8, 196u8, 227u8, 117u8, 83u8, 117u8,
+							67u8, 76u8, 9u8, 130u8, 255u8, 238u8, 252u8, 64u8, 130u8, 82u8, 30u8,
+							169u8, 33u8, 246u8, 206u8, 249u8, 141u8, 220u8, 28u8, 51u8, 40u8,
+						],
+					)
+				}
+				#[doc = " Storage for the reward pools"]
+				pub fn asset_lookup_reward_pools_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::asset_lookup_reward_pools::AssetLookupRewardPools,
+					(),
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"MultiAssetDelegation",
+						"AssetLookupRewardPools",
+						(),
+						[
+							9u8, 54u8, 14u8, 131u8, 23u8, 116u8, 24u8, 89u8, 217u8, 68u8, 226u8,
+							247u8, 101u8, 208u8, 45u8, 22u8, 94u8, 240u8, 85u8, 31u8, 220u8, 28u8,
+							126u8, 67u8, 143u8, 135u8, 123u8, 214u8, 10u8, 208u8, 114u8, 138u8,
+						],
+					)
+				}
+				#[doc = " Storage for the reward pools"]
+				pub fn asset_lookup_reward_pools(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::asset_lookup_reward_pools::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::asset_lookup_reward_pools::Param0,
+					>,
+					types::asset_lookup_reward_pools::AssetLookupRewardPools,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"MultiAssetDelegation",
+						"AssetLookupRewardPools",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							9u8, 54u8, 14u8, 131u8, 23u8, 116u8, 24u8, 89u8, 217u8, 68u8, 226u8,
+							247u8, 101u8, 208u8, 45u8, 22u8, 94u8, 240u8, 85u8, 31u8, 220u8, 28u8,
+							126u8, 67u8, 143u8, 135u8, 123u8, 214u8, 10u8, 208u8, 114u8, 138u8,
 						],
 					)
 				}
@@ -40493,10 +40615,9 @@ pub mod api {
 						"RewardConfigStorage",
 						(),
 						[
-							166u8, 35u8, 196u8, 90u8, 23u8, 23u8, 174u8, 197u8, 152u8, 161u8,
-							244u8, 68u8, 83u8, 114u8, 18u8, 212u8, 22u8, 71u8, 158u8, 94u8, 9u8,
-							224u8, 202u8, 186u8, 73u8, 95u8, 26u8, 184u8, 249u8, 203u8, 203u8,
-							200u8,
+							84u8, 15u8, 156u8, 11u8, 42u8, 78u8, 242u8, 92u8, 45u8, 18u8, 105u8,
+							60u8, 16u8, 109u8, 236u8, 33u8, 98u8, 177u8, 156u8, 43u8, 57u8, 209u8,
+							178u8, 168u8, 230u8, 248u8, 155u8, 87u8, 135u8, 180u8, 29u8, 192u8,
 						],
 					)
 				}
@@ -40506,7 +40627,7 @@ pub mod api {
 			use super::runtime_types;
 			pub struct ConstantsApi;
 			impl ConstantsApi {
-				#[doc = " The minimum amount of bond required for an operator."]
+				#[doc = " The minimum amount of stake required for an operator."]
 				pub fn min_operator_bond_amount(
 					&self,
 				) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
@@ -40522,7 +40643,7 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " The minimum amount of bond required for a delegate."]
+				#[doc = " The minimum amount of stake required for a delegate."]
 				pub fn min_delegate_amount(
 					&self,
 				) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
@@ -40538,7 +40659,7 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " The duration for which the bond is locked."]
+				#[doc = " The duration for which the stake is locked."]
 				pub fn bond_duration(
 					&self,
 				) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
@@ -40572,7 +40693,7 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Number of rounds operator requests to decrease self-bond must wait to be executable."]
+				#[doc = " Number of rounds operator requests to decrease self-stake must wait to be executable."]
 				pub fn operator_bond_less_delay(
 					&self,
 				) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
@@ -40606,7 +40727,7 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Number of rounds that delegation bond less requests must wait before being executable."]
+				#[doc = " Number of rounds that delegation unstake requests must wait before being executable."]
 				pub fn delegation_bond_less_delay(
 					&self,
 				) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
@@ -49611,90 +49732,7 @@ pub mod api {
 				)]
 				#[doc = "The callable functions (extrinsics) of the pallet."]
 				pub enum Call {
-					#[codec(index = 0)]
-					#[doc = "See [`Pallet::join_operators`]."]
-					join_operators { bond_amount: ::core::primitive::u128 },
-					#[codec(index = 1)]
-					#[doc = "See [`Pallet::schedule_leave_operators`]."]
-					schedule_leave_operators,
-					#[codec(index = 2)]
-					#[doc = "See [`Pallet::cancel_leave_operators`]."]
-					cancel_leave_operators,
-					#[codec(index = 3)]
-					#[doc = "See [`Pallet::execute_leave_operators`]."]
-					execute_leave_operators,
-					#[codec(index = 4)]
-					#[doc = "See [`Pallet::operator_bond_more`]."]
-					operator_bond_more { additional_bond: ::core::primitive::u128 },
-					#[codec(index = 5)]
-					#[doc = "See [`Pallet::schedule_operator_bond_less`]."]
-					schedule_operator_bond_less { bond_less_amount: ::core::primitive::u128 },
-					#[codec(index = 6)]
-					#[doc = "See [`Pallet::execute_operator_bond_less`]."]
-					execute_operator_bond_less,
-					#[codec(index = 7)]
-					#[doc = "See [`Pallet::cancel_operator_bond_less`]."]
-					cancel_operator_bond_less,
-					#[codec(index = 8)]
-					#[doc = "See [`Pallet::go_offline`]."]
-					go_offline,
-					#[codec(index = 9)]
-					#[doc = "See [`Pallet::go_online`]."]
-					go_online,
-					#[codec(index = 10)]
-					#[doc = "See [`Pallet::deposit`]."]
-					deposit {
-						asset_id: ::core::option::Option<::core::primitive::u128>,
-						amount: ::core::primitive::u128,
-					},
-					#[codec(index = 11)]
-					#[doc = "See [`Pallet::schedule_unstake`]."]
-					schedule_unstake {
-						asset_id: ::core::option::Option<::core::primitive::u128>,
-						amount: ::core::primitive::u128,
-					},
-					#[codec(index = 12)]
-					#[doc = "See [`Pallet::execute_unstake`]."]
-					execute_unstake,
-					#[codec(index = 13)]
-					#[doc = "See [`Pallet::cancel_unstake`]."]
-					cancel_unstake,
-					#[codec(index = 14)]
-					#[doc = "See [`Pallet::delegate`]."]
-					delegate {
-						operator: ::subxt::ext::subxt_core::utils::AccountId32,
-						asset_id: ::core::primitive::u128,
-						amount: ::core::primitive::u128,
-					},
-					#[codec(index = 15)]
-					#[doc = "See [`Pallet::schedule_delegator_bond_less`]."]
-					schedule_delegator_bond_less {
-						operator: ::subxt::ext::subxt_core::utils::AccountId32,
-						asset_id: ::core::primitive::u128,
-						amount: ::core::primitive::u128,
-					},
-					#[codec(index = 16)]
-					#[doc = "See [`Pallet::execute_delegator_bond_less`]."]
-					execute_delegator_bond_less,
-					#[codec(index = 17)]
-					#[doc = "See [`Pallet::cancel_delegator_bond_less`]."]
-					cancel_delegator_bond_less,
-					#[codec(index = 18)]
-					#[doc = "See [`Pallet::set_whitelisted_assets`]."]
-					set_whitelisted_assets {
-						assets: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u128>,
-					},
-					#[codec(index = 19)]
-					#[doc = "See [`Pallet::set_incentive_apy_and_cap`]."]
-					set_incentive_apy_and_cap {
-						asset_id: ::core::primitive::u128,
-						apy: ::core::primitive::u128,
-						cap: ::core::primitive::u128,
-					},
-					#[codec(index = 20)]
-					#[doc = "See [`Pallet::whitelist_blueprint_for_rewards`]."]
-					whitelist_blueprint_for_rewards { blueprint_id: ::core::primitive::u32 },
-				}
+					# [codec (index = 0)] # [doc = "See [`Pallet::join_operators`]."] join_operators { bond_amount : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "See [`Pallet::schedule_leave_operators`]."] schedule_leave_operators , # [codec (index = 2)] # [doc = "See [`Pallet::cancel_leave_operators`]."] cancel_leave_operators , # [codec (index = 3)] # [doc = "See [`Pallet::execute_leave_operators`]."] execute_leave_operators , # [codec (index = 4)] # [doc = "See [`Pallet::operator_bond_more`]."] operator_bond_more { additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "See [`Pallet::schedule_operator_unstake`]."] schedule_operator_unstake { unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "See [`Pallet::execute_operator_unstake`]."] execute_operator_unstake , # [codec (index = 7)] # [doc = "See [`Pallet::cancel_operator_unstake`]."] cancel_operator_unstake , # [codec (index = 8)] # [doc = "See [`Pallet::go_offline`]."] go_offline , # [codec (index = 9)] # [doc = "See [`Pallet::go_online`]."] go_online , # [codec (index = 10)] # [doc = "See [`Pallet::deposit`]."] deposit { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "See [`Pallet::schedule_withdraw`]."] schedule_withdraw { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "See [`Pallet::execute_withdraw`]."] execute_withdraw , # [codec (index = 13)] # [doc = "See [`Pallet::cancel_withdraw`]."] cancel_withdraw { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 14)] # [doc = "See [`Pallet::delegate`]."] delegate { operator : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 15)] # [doc = "See [`Pallet::schedule_delegator_unstake`]."] schedule_delegator_unstake { operator : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "See [`Pallet::execute_delegator_unstake`]."] execute_delegator_unstake , # [codec (index = 17)] # [doc = "See [`Pallet::cancel_delegator_unstake`]."] cancel_delegator_unstake { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "See [`Pallet::set_incentive_apy_and_cap`]."] set_incentive_apy_and_cap { pool_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 20)] # [doc = "See [`Pallet::whitelist_blueprint_for_rewards`]."] whitelist_blueprint_for_rewards { blueprint_id : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "See [`Pallet::manage_asset_in_pool`]."] manage_asset_in_pool { pool_id : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , }
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -49718,7 +49756,7 @@ pub mod api {
 					#[doc = "The account is already an operator."]
 					AlreadyOperator,
 					#[codec(index = 1)]
-					#[doc = "The bond amount is too low."]
+					#[doc = "The stake amount is too low."]
 					BondTooLow,
 					#[codec(index = 2)]
 					#[doc = "The account is not an operator."]
@@ -49736,10 +49774,10 @@ pub mod api {
 					#[doc = "The round does not match the scheduled leave round."]
 					NotLeavingRound,
 					#[codec(index = 7)]
-					#[doc = "There is no scheduled bond less request."]
+					#[doc = "There is no scheduled unstake request."]
 					NoScheduledBondLess,
 					#[codec(index = 8)]
-					#[doc = "The bond less request is not satisfied."]
+					#[doc = "The unstake request is not satisfied."]
 					BondLessRequestNotSatisfied,
 					#[codec(index = 9)]
 					#[doc = "The operator is not active."]
@@ -49763,35 +49801,47 @@ pub mod api {
 					#[doc = "There is no withdraw request."]
 					NoWithdrawRequest,
 					#[codec(index = 16)]
-					#[doc = "The unstake is not ready."]
-					UnstakeNotReady,
-					#[codec(index = 17)]
-					#[doc = "There is no bond less request."]
+					#[doc = "There is no unstake request."]
 					NoBondLessRequest,
-					#[codec(index = 18)]
-					#[doc = "The bond less request is not ready."]
+					#[codec(index = 17)]
+					#[doc = "The unstake request is not ready."]
 					BondLessNotReady,
-					#[codec(index = 19)]
-					#[doc = "A bond less request already exists."]
+					#[codec(index = 18)]
+					#[doc = "A unstake request already exists."]
 					BondLessRequestAlreadyExists,
-					#[codec(index = 20)]
+					#[codec(index = 19)]
 					#[doc = "There are active services using the asset."]
 					ActiveServicesUsingAsset,
-					#[codec(index = 21)]
+					#[codec(index = 20)]
 					#[doc = "There is not active delegation"]
 					NoActiveDelegation,
-					#[codec(index = 22)]
+					#[codec(index = 21)]
 					#[doc = "The asset is not whitelisted"]
 					AssetNotWhitelisted,
-					#[codec(index = 23)]
+					#[codec(index = 22)]
 					#[doc = "The origin is not authorized to perform this action"]
 					NotAuthorized,
-					#[codec(index = 24)]
+					#[codec(index = 23)]
 					#[doc = "The asset ID is not found"]
 					AssetNotFound,
-					#[codec(index = 25)]
+					#[codec(index = 24)]
 					#[doc = "The blueprint ID is already whitelisted"]
 					BlueprintAlreadyWhitelisted,
+					#[codec(index = 25)]
+					#[doc = "No withdraw requests found"]
+					NowithdrawRequests,
+					#[codec(index = 26)]
+					#[doc = "No matching withdraw reqests found"]
+					NoMatchingwithdrawRequest,
+					#[codec(index = 27)]
+					#[doc = "Asset already exists in a reward pool"]
+					AssetAlreadyInPool,
+					#[codec(index = 28)]
+					#[doc = "Asset not found in reward pool"]
+					AssetNotInPool,
+					#[codec(index = 29)]
+					#[doc = "The reward pool does not exist"]
+					PoolNotFound,
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -49812,100 +49862,7 @@ pub mod api {
 				)]
 				#[doc = "Events emitted by the pallet."]
 				pub enum Event {
-					#[codec(index = 0)]
-					#[doc = "An operator has joined."]
-					OperatorJoined { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 1)]
-					#[doc = "An operator has scheduled to leave."]
-					OperatorLeavingScheduled { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 2)]
-					#[doc = "An operator has cancelled their leave request."]
-					OperatorLeaveCancelled { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 3)]
-					#[doc = "An operator has executed their leave request."]
-					OperatorLeaveExecuted { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 4)]
-					#[doc = "An operator has increased their bond."]
-					OperatorBondMore {
-						who: ::subxt::ext::subxt_core::utils::AccountId32,
-						additional_bond: ::core::primitive::u128,
-					},
-					#[codec(index = 5)]
-					#[doc = "An operator has scheduled to decrease their bond."]
-					OperatorBondLessScheduled {
-						who: ::subxt::ext::subxt_core::utils::AccountId32,
-						bond_less_amount: ::core::primitive::u128,
-					},
-					#[codec(index = 6)]
-					#[doc = "An operator has executed their bond decrease."]
-					OperatorBondLessExecuted { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 7)]
-					#[doc = "An operator has cancelled their bond decrease request."]
-					OperatorBondLessCancelled { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 8)]
-					#[doc = "An operator has gone offline."]
-					OperatorWentOffline { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 9)]
-					#[doc = "An operator has gone online."]
-					OperatorWentOnline { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 10)]
-					#[doc = "A deposit has been made."]
-					Deposited {
-						who: ::subxt::ext::subxt_core::utils::AccountId32,
-						amount: ::core::primitive::u128,
-						asset_id: ::core::option::Option<::core::primitive::u128>,
-					},
-					#[codec(index = 11)]
-					#[doc = "An unstake has been scheduled."]
-					ScheduledUnstake {
-						who: ::subxt::ext::subxt_core::utils::AccountId32,
-						amount: ::core::primitive::u128,
-						asset_id: ::core::option::Option<::core::primitive::u128>,
-					},
-					#[codec(index = 12)]
-					#[doc = "An unstake has been executed."]
-					ExecutedUnstake { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 13)]
-					#[doc = "An unstake has been cancelled."]
-					CancelledUnstake { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 14)]
-					#[doc = "A delegation has been made."]
-					Delegated {
-						who: ::subxt::ext::subxt_core::utils::AccountId32,
-						operator: ::subxt::ext::subxt_core::utils::AccountId32,
-						amount: ::core::primitive::u128,
-						asset_id: ::core::primitive::u128,
-					},
-					#[codec(index = 15)]
-					#[doc = "A delegator bond less request has been scheduled."]
-					ScheduledDelegatorBondLess {
-						who: ::subxt::ext::subxt_core::utils::AccountId32,
-						operator: ::subxt::ext::subxt_core::utils::AccountId32,
-						amount: ::core::primitive::u128,
-						asset_id: ::core::primitive::u128,
-					},
-					#[codec(index = 16)]
-					#[doc = "A delegator bond less request has been executed."]
-					ExecutedDelegatorBondLess { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 17)]
-					#[doc = "A delegator bond less request has been cancelled."]
-					CancelledDelegatorBondLess { who: ::subxt::ext::subxt_core::utils::AccountId32 },
-					#[codec(index = 18)]
-					#[doc = "New whitelisted assets set"]
-					WhitelistedAssetsSet {
-						assets: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u128>,
-					},
-					#[codec(index = 19)]
-					#[doc = "Event emitted when an incentive APY and cap are set for an asset"]
-					IncentiveAPYAndCapSet {
-						asset_id: ::core::primitive::u128,
-						apy: ::core::primitive::u128,
-						cap: ::core::primitive::u128,
-					},
-					#[codec(index = 20)]
-					#[doc = "Event emitted when a blueprint is whitelisted for rewards"]
-					BlueprintWhitelisted { blueprint_id: ::core::primitive::u32 },
-				}
+					# [codec (index = 0)] # [doc = "An operator has joined."] OperatorJoined { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 1)] # [doc = "An operator has scheduled to leave."] OperatorLeavingScheduled { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 2)] # [doc = "An operator has cancelled their leave request."] OperatorLeaveCancelled { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 3)] # [doc = "An operator has executed their leave request."] OperatorLeaveExecuted { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 4)] # [doc = "An operator has increased their stake."] OperatorBondMore { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "An operator has scheduled to decrease their stake."] OperatorBondLessScheduled { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "An operator has executed their stake decrease."] OperatorBondLessExecuted { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 7)] # [doc = "An operator has cancelled their stake decrease request."] OperatorBondLessCancelled { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "An operator has gone offline."] OperatorWentOffline { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 9)] # [doc = "An operator has gone online."] OperatorWentOnline { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 10)] # [doc = "A deposit has been made."] Deposited { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "An withdraw has been scheduled."] Scheduledwithdraw { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "An withdraw has been executed."] Executedwithdraw { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 13)] # [doc = "An withdraw has been cancelled."] Cancelledwithdraw { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 14)] # [doc = "A delegation has been made."] Delegated { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , operator : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 15)] # [doc = "A delegator unstake request has been scheduled."] ScheduledDelegatorBondLess { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , operator : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "A delegator unstake request has been executed."] ExecutedDelegatorBondLess { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 17)] # [doc = "A delegator unstake request has been cancelled."] CancelledDelegatorBondLess { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 18)] # [doc = "Event emitted when an incentive APY and cap are set for a reward pool"] IncentiveAPYAndCapSet { pool_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "Event emitted when a blueprint is whitelisted for rewards"] BlueprintWhitelisted { blueprint_id : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Asset has been updated to reward pool"] AssetUpdatedInPool { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , }
 			}
 			pub mod types {
 				use super::runtime_types;
@@ -49950,9 +49907,10 @@ pub mod api {
 					#[encode_as_type(
 						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 					)]
-					pub struct BondLessRequest<_0, _1> {
-						pub asset_id: _0,
-						pub amount: _1,
+					pub struct BondLessRequest<_0, _1, _2> {
+						pub operator: _0,
+						pub asset_id: _1,
+						pub amount: _2,
 						pub requested_round: ::core::primitive::u32,
 					}
 					#[derive(
@@ -49972,7 +49930,7 @@ pub mod api {
 					#[encode_as_type(
 						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 					)]
-					pub struct DelegatorMetadata < _0 , _1 , _2 > { pub deposits : :: subxt :: ext :: subxt_core :: utils :: KeyedVec < _1 , _1 > , pub unstake_request : :: core :: option :: Option < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: UnstakeRequest < _1 , _1 > > , pub delegations : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: BondInfoDelegator < _0 , _1 , _1 > > , pub delegator_bond_less_request : :: core :: option :: Option < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: BondLessRequest < _1 , _1 > > , pub status : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorStatus , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _2 > }
+					pub struct DelegatorMetadata < _0 , _1 , _2 > { pub deposits : :: subxt :: ext :: subxt_core :: utils :: KeyedVec < _1 , _1 > , pub withdraw_requests : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: WithdrawRequest < _1 , _1 > > , pub delegations : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: BondInfoDelegator < _0 , _1 , _1 > > , pub delegator_unstake_requests : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: BondLessRequest < _0 , _1 , _1 > > , pub status : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorStatus , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _2 > }
 					#[derive(
 						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
 						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -50013,7 +49971,7 @@ pub mod api {
 					#[encode_as_type(
 						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 					)]
-					pub struct UnstakeRequest<_0, _1> {
+					pub struct WithdrawRequest<_0, _1> {
 						pub asset_id: _0,
 						pub amount: _1,
 						pub requested_round: ::core::primitive::u32,
@@ -50081,7 +50039,7 @@ pub mod api {
 					#[encode_as_type(
 						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 					)]
-					pub struct OperatorMetadata < _0 , _1 , _2 > { pub bond : _1 , pub delegation_count : :: core :: primitive :: u32 , pub request : :: core :: option :: Option < runtime_types :: pallet_multi_asset_delegation :: types :: operator :: OperatorBondLessRequest < _1 > > , pub delegations : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: pallet_multi_asset_delegation :: types :: operator :: DelegatorBond < _0 , _1 , _1 > > , pub status : runtime_types :: pallet_multi_asset_delegation :: types :: operator :: OperatorStatus , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _2 > }
+					pub struct OperatorMetadata < _0 , _1 , _2 > { pub stake : _1 , pub delegation_count : :: core :: primitive :: u32 , pub request : :: core :: option :: Option < runtime_types :: pallet_multi_asset_delegation :: types :: operator :: OperatorBondLessRequest < _1 > > , pub delegations : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: pallet_multi_asset_delegation :: types :: operator :: DelegatorBond < _0 , _1 , _1 > > , pub status : runtime_types :: pallet_multi_asset_delegation :: types :: operator :: OperatorStatus , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _2 > }
 					#[derive(
 						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
 						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -50099,7 +50057,7 @@ pub mod api {
 					#[encode_as_type(
 						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 					)]
-					pub struct OperatorSnapshot < _0 , _1 , _2 > { pub bond : _1 , pub delegations : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: pallet_multi_asset_delegation :: types :: operator :: DelegatorBond < _0 , _1 , _1 > > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _2 > }
+					pub struct OperatorSnapshot < _0 , _1 , _2 > { pub stake : _1 , pub delegations : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: pallet_multi_asset_delegation :: types :: operator :: DelegatorBond < _0 , _1 , _1 > > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _2 > }
 					#[derive(
 						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
 						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -50145,7 +50103,12 @@ pub mod api {
 					#[encode_as_type(
 						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 					)]
-					pub struct RewardConfig < _0 , _1 > { pub configs : :: subxt :: ext :: subxt_core :: utils :: KeyedVec < _0 , runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: RewardConfigForAsset < _0 > > , pub whitelisted_blueprint_ids : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u32 > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _1 > }
+					pub enum AssetAction {
+						#[codec(index = 0)]
+						Add,
+						#[codec(index = 1)]
+						Remove,
+					}
 					#[derive(
 						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
 						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -50163,14 +50126,32 @@ pub mod api {
 					#[encode_as_type(
 						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 					)]
-					pub struct RewardConfigForAsset<_0> {
-						pub apy: ::core::primitive::u128,
+					pub struct RewardConfig < _0 , _1 > { pub configs : :: subxt :: ext :: subxt_core :: utils :: KeyedVec < _0 , runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: RewardConfigForAssetPool < _0 > > , pub whitelisted_blueprint_ids : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u32 > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _1 > }
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub struct RewardConfigForAssetPool<_0> {
+						pub apy: runtime_types::sp_arithmetic::per_things::Percent,
 						pub cap: _0,
 					}
 				}
 			}
 		}
-		pub mod pallet_multi_asset_delegation {
+		pub mod pallet_multisig {
 			use super::runtime_types;
 			pub mod pallet {
 				use super::runtime_types;
