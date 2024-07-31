@@ -1,2 +1,2 @@
 #!/bin/bash
-./target/release/tangle build-spec --chain mainnet --raw > ./chainspecs/mainnet/tangle-mainnet.json
+./target/release/tangle build-spec --chain testnet --raw > ./chainspecs/testnet/tangle-testnet.json

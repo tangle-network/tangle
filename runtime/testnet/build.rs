@@ -1,15 +1,16 @@
-use substrate_wasm_builder::WasmBuilder;
-
+#[cfg(all(feature = "std", feature = "metadata-hash"))]
 fn main() {
-	// don't run the wasm gen when it is running under rust-analyzer
-	// it takes too long, and we don't need it anyway while checking.
-	match std::env::var("RUSTC_WRAPPER") {
-		Ok(val) if val == "rust-analyzer" => return,
-		_ => {},
-	}
-	WasmBuilder::new()
-		.with_current_project()
-		.import_memory()
-		.export_heap_base()
-		.build()
+	substrate_wasm_builder::WasmBuilder::init_with_defaults()
+		.enable_metadata_hash("tTNT", 18)
+		.build();
 }
+
+#[cfg(all(feature = "std", not(feature = "metadata-hash")))]
+fn main() {
+	substrate_wasm_builder::WasmBuilder::build_using_defaults();
+}
+
+/// The wasm builder is deactivated when compiling
+/// this crate for wasm to speed up the compilation.
+#[cfg(not(feature = "std"))]
+fn main() {}

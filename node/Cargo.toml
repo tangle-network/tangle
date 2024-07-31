@@ -66,6 +66,7 @@ sp-state-machine = { workspace = true, features = ["default"] }
 sp-timestamp = { workspace = true, features = ["default"] }
 sp-transaction-pool = { workspace = true, features = ["default"] }
 pallet-jobs-rpc = { workspace = true }
+frame-metadata-hash-extension = { workspace = true, default-features = true }
 
 pallet-airdrop-claims = { workspace = true }
 sc-chain-spec = { workspace = true }
@@ -154,3 +155,4 @@ sql = ["fc-db/sql", "fc-mapping-sync/sql"]
 testnet = ["tangle-testnet-runtime"]
 txpool = ["fc-rpc/txpool"]
 fast-runtime = ["tangle-testnet-runtime/fast-runtime", "tangle-runtime/fast-runtime"]
+metadata-hash = ["tangle-testnet-runtime?/metadata-hash", "tangle-runtime/metadata-hash"]
