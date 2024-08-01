@@ -127,19 +127,27 @@ impl<T: Config> Pallet<T> {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
 			// Ensure the delegator has an active delegation with the operator for the given asset
-			let delegation = metadata
+			let delegation_index = metadata
 				.delegations
 				.iter()
-				.find(|d| d.operator == operator && d.asset_id == asset_id)
+				.position(|d| d.operator == operator && d.asset_id == asset_id)
 				.ok_or(Error::<T>::NoActiveDelegation)?;
 
 			// Ensure the amount to unstake is not greater than the current delegation amount
+			let delegation = &mut metadata.delegations[delegation_index];
 			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
+
+			delegation.amount -= amount;
+
+			// Remove the delegation if the remaining amount is zero
+			if delegation.amount.is_zero() {
+				metadata.delegations.remove(delegation_index);
+			}
 
 			// Create the unstake request
 			let current_round = Self::current_round();
 			metadata.delegator_unstake_requests.push(BondLessRequest {
-				operator: delegation.operator.clone(),
+				operator: operator.clone(),
 				asset_id,
 				amount,
 				requested_round: current_round,
@@ -233,6 +241,7 @@ impl<T: Config> Pallet<T> {
 	/// Returns an error if the delegator has no matching unstake request or if there is no active delegation.
 	pub fn process_cancel_delegator_unstake(
 		who: T::AccountId,
+		operator: T::AccountId,
 		asset_id: T::AssetId,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
@@ -243,7 +252,9 @@ impl<T: Config> Pallet<T> {
 			let request_index = metadata
 				.delegator_unstake_requests
 				.iter()
-				.position(|r| r.asset_id == asset_id && r.amount == amount)
+				.position(|r| {
+					r.asset_id == asset_id && r.amount == amount && r.operator == operator
+				})
 				.ok_or(Error::<T>::NoBondLessRequest)?;
 
 			let unstake_request = metadata.delegator_unstake_requests.remove(request_index);
@@ -277,12 +288,21 @@ impl<T: Config> Pallet<T> {
 				},
 			)?;
 
-			// Create a new delegation
-			metadata.delegations.push(BondInfoDelegator {
-				operator: unstake_request.operator,
-				amount,
-				asset_id,
-			});
+			// If a similar delegation exists, increase the amount
+			if let Some(delegation) = metadata
+				.delegations
+				.iter_mut()
+				.find(|d| d.operator == unstake_request.operator && d.asset_id == asset_id)
+			{
+				delegation.amount += amount;
+			} else {
+				// Create a new delegation
+				metadata.delegations.push(BondInfoDelegator {
+					operator: unstake_request.operator,
+					amount,
+					asset_id,
+				});
+			}
 
 			Ok(())
 		})
