@@ -553,11 +553,12 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn cancel_delegator_unstake(
 			origin: OriginFor<T>,
+			operator: T::AccountId,
 			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_delegator_unstake(who.clone(), asset_id, amount)?;
+			Self::process_cancel_delegator_unstake(who.clone(), operator, asset_id, amount)?;
 			Self::deposit_event(Event::CancelledDelegatorBondLess { who });
 			Ok(())
 		}

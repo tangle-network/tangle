@@ -195,6 +195,7 @@ fn cancel_delegator_unstake_should_work() {
 
 		assert_ok!(MultiAssetDelegation::cancel_delegator_unstake(
 			RuntimeOrigin::signed(who),
+			operator,
 			asset_id,
 			amount
 		));
@@ -265,6 +266,7 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 
 		assert_ok!(MultiAssetDelegation::cancel_delegator_unstake(
 			RuntimeOrigin::signed(who),
+			operator,
 			asset_id,
 			10
 		));
@@ -364,6 +366,7 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 		assert_noop!(
 			MultiAssetDelegation::cancel_delegator_unstake(
 				RuntimeOrigin::signed(who),
+				operator,
 				asset_id,
 				amount
 			),
