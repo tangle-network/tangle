@@ -187,7 +187,7 @@ fn cancel_delegator_unstake_should_work() {
 			amount,
 		));
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegations.len() == 0);
+		assert!(metadata.delegations.is_empty());
 
 		// ensure the storage is correct
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
