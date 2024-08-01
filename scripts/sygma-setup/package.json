@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "@polkadot/api": "^10.11.2",
+    "@polkadot/api": "^12.1.1",
     "@polkadot/api-augment": "^10.11.2",
     "@polkadot/keyring": "^12.6.2",
     "@polkadot/rpc-provider": "^10.11.2",
