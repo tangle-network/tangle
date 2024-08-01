@@ -1538,6 +1538,10 @@ declare module "@polkadot/api-base/types/storage" {
     };
     multiAssetDelegation: {
       /**
+       * Storage for the reward pools
+       **/
+      assetLookupRewardPools: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<Option<u128>>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
+      /**
        * Snapshot of collator delegation stake at the start of the round.
        **/
       atStake: AugmentedQuery<
@@ -1592,14 +1596,9 @@ declare module "@polkadot/api-base/types/storage" {
       > &
         QueryableStorageEntry<ApiType, []>;
       /**
-       * Whitelisted assets that are allowed to be deposited
+       * Storage for the reward pools
        **/
-      whitelistedAssets: AugmentedQuery<
-        ApiType,
-        () => Observable<Vec<u128>>,
-        []
-      > &
-        QueryableStorageEntry<ApiType, []>;
+      rewardPools: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<Option<Vec<u128>>>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
       /**
        * Generic query
        **/

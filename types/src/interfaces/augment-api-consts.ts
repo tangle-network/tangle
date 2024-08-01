@@ -572,11 +572,11 @@ declare module "@polkadot/api-base/types/consts" {
     };
     multiAssetDelegation: {
       /**
-       * The duration for which the bond is locked.
+       * The duration for which the stake is locked.
        **/
       bondDuration: u32 & AugmentedConst<ApiType>;
       /**
-       * Number of rounds that delegation bond less requests must wait before being executable.
+       * Number of rounds that delegation unstake requests must wait before being executable.
        **/
       delegationBondLessDelay: u32 & AugmentedConst<ApiType>;
       /**
@@ -588,15 +588,15 @@ declare module "@polkadot/api-base/types/consts" {
        **/
       leaveOperatorsDelay: u32 & AugmentedConst<ApiType>;
       /**
-       * The minimum amount of bond required for a delegate.
+       * The minimum amount of stake required for a delegate.
        **/
       minDelegateAmount: u128 & AugmentedConst<ApiType>;
       /**
-       * The minimum amount of bond required for an operator.
+       * The minimum amount of stake required for an operator.
        **/
       minOperatorBondAmount: u128 & AugmentedConst<ApiType>;
       /**
-       * Number of rounds operator requests to decrease self-bond must wait to be executable.
+       * Number of rounds operator requests to decrease self-stake must wait to be executable.
        **/
       operatorBondLessDelay: u32 & AugmentedConst<ApiType>;
       /**

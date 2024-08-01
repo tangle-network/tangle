@@ -5,66 +5,11 @@
 // this is required to allow for ambient/previous definitions
 import "@polkadot/api-base/types/events";
 
-import type { ApiTypes, AugmentedEvent } from "@polkadot/api-base/types";
-import type {
-  Bytes,
-  Null,
-  Option,
-  Result,
-  U256,
-  U8aFixed,
-  Vec,
-  bool,
-  u128,
-  u16,
-  u32,
-  u64,
-  u8,
-} from "@polkadot/types-codec";
-import type { ITuple } from "@polkadot/types-codec/types";
-import type {
-  AccountId32,
-  H160,
-  H256,
-  Perbill,
-  Permill,
-} from "@polkadot/types/interfaces/runtime";
-import {
-  FrameSupportTokensMiscBalanceStatus,
-  PalletAirdropClaimsUtilsMultiAddress,
-  SpRuntimeDispatchError,
-  PalletDemocracyMetadataOwner,
-  PalletDemocracyVoteThreshold,
-  PalletDemocracyVoteAccountVote,
-  PalletDkgFeeInfo,
-  PalletElectionProviderMultiPhaseElectionCompute,
-  SpNposElectionsElectionScore,
-  PalletElectionProviderMultiPhasePhase,
-  EvmCoreErrorExitReason,
-  EthereumLog,
-  SpConsensusGrandpaAppPublic,
-  PalletImOnlineSr25519AppSr25519Public,
-  SpStakingExposure,
-  TanglePrimitivesRolesRoleType,
-  TanglePrimitivesJobsJobInfo,
-  TanglePrimitivesJobsJobSubmission,
-  PalletMultisigTimepoint,
-  PalletNominationPoolsCommissionChangeRate,
-  PalletNominationPoolsCommissionClaimPermission,
-  PalletNominationPoolsPoolState,
-  TangleTestnetRuntimeProxyType,
-  TanglePrimitivesJobsV2ApprovalPrefrence,
-  TanglePrimitivesJobsV2Field,
-  TanglePrimitivesJobsV2OperatorPreferences,
-  PalletStakingForcing,
-  PalletStakingRewardDestination,
-  PalletStakingValidatorPrefs,
-  StagingXcmV4AssetAssetId,
-  SygmaTraitsTransferType,
-  SygmaFeeHandlerRouterFeeHandlerType,
-  FrameSupportDispatchDispatchInfo,
-  PalletZksaasFeeInfo,
-} from "@polkadot/types/lookup";
+import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
+import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
+import type { ITuple } from '@polkadot/types-codec/types';
+import type { AccountId32, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
+import { FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, SpRuntimeDispatchError, PalletDemocracyMetadataOwner, PalletDemocracyVoteThreshold, PalletDemocracyVoteAccountVote, PalletDkgFeeInfo, PalletElectionProviderMultiPhaseElectionCompute, SpNposElectionsElectionScore, PalletElectionProviderMultiPhasePhase, EvmCoreErrorExitReason, EthereumLog, SpConsensusGrandpaAppPublic, PalletImOnlineSr25519AppSr25519Public, SpStakingExposure, TanglePrimitivesRolesRoleType, TanglePrimitivesJobsJobInfo, TanglePrimitivesJobsJobSubmission, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, TangleTestnetRuntimeProxyType, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, StagingXcmV4AssetAssetId, SygmaTraitsTransferType, SygmaFeeHandlerRouterFeeHandlerType, FrameSupportDispatchDispatchInfo, PalletZksaasFeeInfo } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> =
   AugmentedEvent<ApiType>;
@@ -1413,6 +1358,10 @@ declare module "@polkadot/api-base/types/events" {
     };
     multiAssetDelegation: {
       /**
+       * Asset has been updated to reward pool
+       **/
+      AssetUpdatedInPool: AugmentedEvent<ApiType, [who: AccountId32, poolId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction], { who: AccountId32, poolId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction }>;
+      /**
        * Event emitted when a blueprint is whitelisted for rewards
        **/
       BlueprintWhitelisted: AugmentedEvent<
@@ -1421,7 +1370,7 @@ declare module "@polkadot/api-base/types/events" {
         { blueprintId: u32 }
       >;
       /**
-       * A delegator bond less request has been cancelled.
+       * A delegator unstake request has been cancelled.
        **/
       CancelledDelegatorBondLess: AugmentedEvent<
         ApiType,
@@ -1429,13 +1378,9 @@ declare module "@polkadot/api-base/types/events" {
         { who: AccountId32 }
       >;
       /**
-       * An unstake has been cancelled.
+       * An withdraw has been cancelled.
        **/
-      CancelledUnstake: AugmentedEvent<
-        ApiType,
-        [who: AccountId32],
-        { who: AccountId32 }
-      >;
+      Cancelledwithdraw: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
       /**
        * A delegation has been made.
        **/
@@ -1447,13 +1392,9 @@ declare module "@polkadot/api-base/types/events" {
       /**
        * A deposit has been made.
        **/
-      Deposited: AugmentedEvent<
-        ApiType,
-        [who: AccountId32, amount: u128, assetId: Option<u128>],
-        { who: AccountId32; amount: u128; assetId: Option<u128> }
-      >;
+      Deposited: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, assetId: u128], { who: AccountId32, amount: u128, assetId: u128 }>;
       /**
-       * A delegator bond less request has been executed.
+       * A delegator unstake request has been executed.
        **/
       ExecutedDelegatorBondLess: AugmentedEvent<
         ApiType,
@@ -1461,23 +1402,15 @@ declare module "@polkadot/api-base/types/events" {
         { who: AccountId32 }
       >;
       /**
-       * An unstake has been executed.
+       * An withdraw has been executed.
        **/
-      ExecutedUnstake: AugmentedEvent<
-        ApiType,
-        [who: AccountId32],
-        { who: AccountId32 }
-      >;
+      Executedwithdraw: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
       /**
-       * Event emitted when an incentive APY and cap are set for an asset
+       * Event emitted when an incentive APY and cap are set for a reward pool
        **/
-      IncentiveAPYAndCapSet: AugmentedEvent<
-        ApiType,
-        [assetId: u128, apy: u128, cap: u128],
-        { assetId: u128; apy: u128; cap: u128 }
-      >;
+      IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [poolId: u128, apy: Percent, cap: u128], { poolId: u128, apy: Percent, cap: u128 }>;
       /**
-       * An operator has cancelled their bond decrease request.
+       * An operator has cancelled their stake decrease request.
        **/
       OperatorBondLessCancelled: AugmentedEvent<
         ApiType,
@@ -1485,7 +1418,7 @@ declare module "@polkadot/api-base/types/events" {
         { who: AccountId32 }
       >;
       /**
-       * An operator has executed their bond decrease.
+       * An operator has executed their stake decrease.
        **/
       OperatorBondLessExecuted: AugmentedEvent<
         ApiType,
@@ -1493,15 +1426,11 @@ declare module "@polkadot/api-base/types/events" {
         { who: AccountId32 }
       >;
       /**
-       * An operator has scheduled to decrease their bond.
+       * An operator has scheduled to decrease their stake.
        **/
-      OperatorBondLessScheduled: AugmentedEvent<
-        ApiType,
-        [who: AccountId32, bondLessAmount: u128],
-        { who: AccountId32; bondLessAmount: u128 }
-      >;
+      OperatorBondLessScheduled: AugmentedEvent<ApiType, [who: AccountId32, unstakeAmount: u128], { who: AccountId32, unstakeAmount: u128 }>;
       /**
-       * An operator has increased their bond.
+       * An operator has increased their stake.
        **/
       OperatorBondMore: AugmentedEvent<
         ApiType,
@@ -1557,7 +1486,7 @@ declare module "@polkadot/api-base/types/events" {
         { who: AccountId32 }
       >;
       /**
-       * A delegator bond less request has been scheduled.
+       * A delegator unstake request has been scheduled.
        **/
       ScheduledDelegatorBondLess: AugmentedEvent<
         ApiType,
@@ -1565,21 +1494,9 @@ declare module "@polkadot/api-base/types/events" {
         { who: AccountId32; operator: AccountId32; amount: u128; assetId: u128 }
       >;
       /**
-       * An unstake has been scheduled.
+       * An withdraw has been scheduled.
        **/
-      ScheduledUnstake: AugmentedEvent<
-        ApiType,
-        [who: AccountId32, amount: u128, assetId: Option<u128>],
-        { who: AccountId32; amount: u128; assetId: Option<u128> }
-      >;
-      /**
-       * New whitelisted assets set
-       **/
-      WhitelistedAssetsSet: AugmentedEvent<
-        ApiType,
-        [assets: Vec<u128>],
-        { assets: Vec<u128> }
-      >;
+      Scheduledwithdraw: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, assetId: u128], { who: AccountId32, amount: u128, assetId: u128 }>;
       /**
        * Generic event
        **/
