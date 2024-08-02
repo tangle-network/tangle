@@ -52,7 +52,6 @@ use crate::{
 	Nominations, NominationsQuota, PositiveImbalanceOf, RewardDestination, SessionInterface,
 	StakingLedger, UnappliedSlash, UnlockChunk, ValidatorPrefs,
 };
-use tangle_primitives::roles::traits::RolesHandler;
 
 // The speculative number of spans are used as an input of the weight annotation of
 // [`Call::unbond`], as the post dipatch weight may depend on the number of slashing span on the
@@ -281,9 +280,6 @@ pub mod pallet {
 
 		/// Some parameters of the benchmarking.
 		type BenchmarkingConfig: BenchmarkingConfig;
-
-		/// The restaker roles handler interface
-		type RolesHandler: RolesHandler<Self::AccountId>;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -1030,8 +1026,6 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			let controller = ensure_signed(origin)?;
 
-			ensure!(!T::RolesHandler::is_restaker(controller.clone()), Error::<T>::RestakeActive);
-
 			let unlocking =
 				Self::ledger(Controller(controller.clone())).map(|l| l.unlocking.len())?;
 
@@ -1144,8 +1138,6 @@ pub mod pallet {
 			num_slashing_spans: u32,
 		) -> DispatchResultWithPostInfo {
 			let controller = ensure_signed(origin)?;
-
-			ensure!(!T::RolesHandler::is_restaker(controller.clone()), Error::<T>::RestakeActive);
 
 			let actual_weight = Self::do_withdraw_unbonded(&controller, num_slashing_spans)?;
 			Ok(Some(actual_weight).into())

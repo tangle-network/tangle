@@ -3,13 +3,14 @@
 
 // import type lookup before we augment - in some environments
 // this is required to allow for ambient/previous definitions
-import '@polkadot/api-base/types/errors';
+import "@polkadot/api-base/types/errors";
 
-import type { ApiTypes, AugmentedError } from '@polkadot/api-base/types';
+import type { ApiTypes, AugmentedError } from "@polkadot/api-base/types";
 
-export type __AugmentedError<ApiType extends ApiTypes> = AugmentedError<ApiType>;
+export type __AugmentedError<ApiType extends ApiTypes> =
+  AugmentedError<ApiType>;
 
-declare module '@polkadot/api-base/types/errors' {
+declare module "@polkadot/api-base/types/errors" {
   interface AugmentedErrors<ApiType extends ApiTypes> {
     assets: {
       /**
@@ -610,21 +611,21 @@ declare module '@polkadot/api-base/types/errors' {
       UnknownIdentifier: AugmentedError<ApiType>;
       /**
        * The submitted decommitment data size is valid.
-       * 
+       *
        * This error is returned when the decommitment data size is valid
        * but the caller claims it is invalid!
        **/
       ValidDataSize: AugmentedError<ApiType>;
       /**
        * The submitted decommitment is valid.
-       * 
+       *
        * This error is returned when the decommitment is valid
        * but the caller claims it is invalid!
        **/
       ValidDecommitment: AugmentedError<ApiType>;
       /**
        * The submitted messages passed Feldman verification.
-       * 
+       *
        * This error is returned when the messages passed Feldman verification
        * but the caller claims it is invalid!
        **/
@@ -642,21 +643,21 @@ declare module '@polkadot/api-base/types/errors' {
       ValidFrostSignatureShare: AugmentedError<ApiType>;
       /**
        * The submitted Mod Proof is valid.
-       * 
+       *
        * This error is returned when the Mod Proof is valid
        * but the caller claims it is invalid.
        **/
       ValidModProof: AugmentedError<ApiType>;
       /**
        * The submitted ring pedersen parameters are valid.
-       * 
+       *
        * This error is returned when the ring pedersen parameters are valid
        * but the caller claims it is invalid.
        **/
       ValidRingPedersenParameters: AugmentedError<ApiType>;
       /**
        * The submitted Schnorr Proof is valid.
-       * 
+       *
        * This error is returned when the decommitment and its
        * Schnorr are valid. but the caller
        * claims it is invalid.
@@ -1415,7 +1416,7 @@ declare module '@polkadot/api-base/types/errors' {
       MetadataExceedsMaxLen: AugmentedError<ApiType>;
       /**
        * The amount does not meet the minimum bond to either join or create a pool.
-       * 
+       *
        * The depositor can never unbond to a value less than `Pallet::depositor_min_bond`. The
        * caller does not have nominating permissions for the pool. Members can never unbond to a
        * value below `MinJoinBond`.
@@ -1668,6 +1669,97 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    services: {
+      /**
+       * The caller is already registered as a operator.
+       **/
+      AlreadyRegistered: AugmentedError<ApiType>;
+      /**
+       * The approval is not requested for the operator (the caller).
+       **/
+      ApprovalNotRequested: AugmentedError<ApiType>;
+      /**
+       * The service blueprint was not found.
+       **/
+      BlueprintNotFound: AugmentedError<ApiType>;
+      /**
+       * An error occurred while encoding the EVM ABI.
+       **/
+      EVMAbiEncode: AugmentedError<ApiType>;
+      /**
+       * The caller does not have the requirements to call a job.
+       **/
+      InvalidJobCallInput: AugmentedError<ApiType>;
+      /**
+       * The caller provided an invalid job result.
+       **/
+      InvalidJobResult: AugmentedError<ApiType>;
+      /**
+       * The caller does not have the requirements to be a operator.
+       **/
+      InvalidRegistrationInput: AugmentedError<ApiType>;
+      /**
+       * The caller does not have the requirements to request a service.
+       **/
+      InvalidRequestInput: AugmentedError<ApiType>;
+      /**
+       * The result of the job call was not found.
+       **/
+      JobCallResultNotFound: AugmentedError<ApiType>;
+      /**
+       * The requested job definition does not exist.
+       * This error is returned when the requested job definition does not exist in the service blueprint.
+       **/
+      JobDefinitionNotFound: AugmentedError<ApiType>;
+      /**
+       * The maximum number of fields per request has been exceeded.
+       **/
+      MaxFieldsExceeded: AugmentedError<ApiType>;
+      /**
+       * The maximum number of permitted callers per service has been exceeded.
+       **/
+      MaxPermittedCallersExceeded: AugmentedError<ApiType>;
+      /**
+       * The maximum number of operators per service has been exceeded.
+       **/
+      MaxServiceProvidersExceeded: AugmentedError<ApiType>;
+      /**
+       * Maximum number of services per Provider reached.
+       **/
+      MaxServicesPerProviderExceeded: AugmentedError<ApiType>;
+      /**
+       * The maximum number of services per user has been exceeded.
+       **/
+      MaxServicesPerUserExceeded: AugmentedError<ApiType>;
+      /**
+       * The caller is not registered as a operator.
+       **/
+      NotRegistered: AugmentedError<ApiType>;
+      /**
+       * Operator profile not found.
+       **/
+      OperatorProfileNotFound: AugmentedError<ApiType>;
+      /**
+       * The service was not found.
+       **/
+      ServiceNotFound: AugmentedError<ApiType>;
+      /**
+       * Either the service or the job call was not found.
+       **/
+      ServiceOrJobCallNotFound: AugmentedError<ApiType>;
+      /**
+       * The service request was not found.
+       **/
+      ServiceRequestNotFound: AugmentedError<ApiType>;
+      /**
+       * An error occurred while type checking the provided input input.
+       **/
+      TypeCheck: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     session: {
       /**
        * Registered duplicate key.
@@ -1907,14 +1999,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Insufficient balance on sender account
        **/
       InsufficientBalance: AugmentedError<ApiType>;
-      InvalidDepositDataInvalidAmount: AugmentedError<ApiType>;
       /**
        * Deposit data not correct
        **/
-      InvalidDepositDataInvalidLength: AugmentedError<ApiType>;
-      InvalidDepositDataInvalidRecipient: AugmentedError<ApiType>;
-      InvalidDepositDataInvalidRecipientLength: AugmentedError<ApiType>;
-      InvalidDepositDataRecipientLengthNotMatch: AugmentedError<ApiType>;
+      InvalidDepositData: AugmentedError<ApiType>;
       /**
        * Fee config option missing
        **/
@@ -1938,11 +2026,7 @@ declare module '@polkadot/api-base/types/errors' {
       /**
        * Asset transactor execution failed
        **/
-      TransactFailedDeposit: AugmentedError<ApiType>;
-      TransactFailedFeeDeposit: AugmentedError<ApiType>;
-      TransactFailedHoldInReserved: AugmentedError<ApiType>;
-      TransactFailedReleaseFromReserved: AugmentedError<ApiType>;
-      TransactFailedWithdraw: AugmentedError<ApiType>;
+      TransactFailed: AugmentedError<ApiType>;
       /**
        * Transactor operation failed
        **/
@@ -1999,7 +2083,7 @@ declare module '@polkadot/api-base/types/errors' {
       CallFiltered: AugmentedError<ApiType>;
       /**
        * Failed to extract the runtime version from the new runtime.
-       * 
+       *
        * Either calling `Core_version` or decoding `RuntimeVersion` failed.
        **/
       FailedToExtractRuntimeVersion: AugmentedError<ApiType>;

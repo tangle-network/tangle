@@ -1,6 +1,6 @@
 [package]
 name = "tangle-subxt"
-version ={ workspace = true }
+version = "0.1.4"
 authors = { workspace = true }
 edition = { workspace = true }
 homepage = { workspace = true }
@@ -10,13 +10,13 @@ repository = { workspace = true }
 [dependencies]
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
-subxt = { version = "0.37.0" }
+subxt = { version = "0.37.0", default-features = false, features = ["jsonrpsee", "native"] }
+subxt-signer = { version = "0.37.0", default-features = false, features = ["subxt", "sr25519"] }
 
 [dev-dependencies]
-subxt-signer = { version = "0.37.0", default-features = false, features = ["subxt", "sr25519"] }
-sp-core = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0"  }
-sp-io = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0"  }
-tokio = { version = "1.32.0", features = ["full"] }
+sp-core = { workspace = true }
+sp-io = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
 tangle-crypto-primitives = { path = "../primitives/crypto"}
-hex = {workspace = true }
+hex = { workspace = true }
 
