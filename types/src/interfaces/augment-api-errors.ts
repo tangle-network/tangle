@@ -1171,9 +1171,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       AlreadyOperator: AugmentedError<ApiType>;
       /**
+       * Asset already exists in a reward pool
+       **/
+      AssetAlreadyInPool: AugmentedError<ApiType>;
+      /**
        * The asset ID is not found
        **/
       AssetNotFound: AugmentedError<ApiType>;
+      /**
+       * Asset not found in reward pool
+       **/
+      AssetNotInPool: AugmentedError<ApiType>;
       /**
        * The asset is not whitelisted
        **/
@@ -1195,7 +1203,7 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       BondLessRequestNotSatisfied: AugmentedError<ApiType>;
       /**
-       * The bond amount is too low.
+       * The stake amount is too low.
        **/
       BondTooLow: AugmentedError<ApiType>;
       /**
@@ -1214,6 +1222,10 @@ declare module '@polkadot/api-base/types/errors' {
        * There is no unstake request.
        **/
       NoBondLessRequest: AugmentedError<ApiType>;
+      /**
+       * No matching withdraw reqests found
+       **/
+      NoMatchingwithdrawRequest: AugmentedError<ApiType>;
       /**
        * There is no scheduled unstake request.
        **/
@@ -1251,9 +1263,13 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NoWithdrawRequest: AugmentedError<ApiType>;
       /**
-       * The unstake is not ready.
+       * No withdraw requests found
        **/
-      UnstakeNotReady: AugmentedError<ApiType>;
+      NowithdrawRequests: AugmentedError<ApiType>;
+      /**
+       * The reward pool does not exist
+       **/
+      PoolNotFound: AugmentedError<ApiType>;
       /**
        * A withdraw request already exists.
        **/
