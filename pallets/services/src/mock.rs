@@ -403,14 +403,14 @@ pub const CGGMP21_JOB_RESULT_VERIFIER: H160 = H160([0x23; 20]);
 pub fn new_test_ext_raw_authorities(authorities: Vec<(AccountId)>) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	let balances: Vec<_> = authorities.iter().map(|(i, _)| (i.clone(), 20_000_u128)).collect();
+	let balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 20_000_u128)).collect();
 	pallet_balances::GenesisConfig::<Runtime> { balances }
 		.assimilate_storage(&mut t)
 		.unwrap();
 
 	let stakers: Vec<_> = authorities
 		.iter()
-		.map(|(authority, _)| {
+		.map(|authority| {
 			(
 				authority.clone(),
 				authority.clone(),

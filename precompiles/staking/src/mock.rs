@@ -18,6 +18,7 @@
 
 //! Test utilities
 #![allow(dead_code)]
+#![allow(clippy::all)]
 use super::*;
 use frame_election_provider_support::bounds::{ElectionBounds, ElectionBoundsBuilder};
 use frame_support::{

@@ -51,7 +51,7 @@ fn evm_call(input: Vec<u8>) -> EvmCall<Runtime> {
 		target: Precompile1.into(),
 		input,
 		value: U256::zero(), // No value sent in EVM
-		gas_limit: u64::max_value(),
+		gas_limit: u64::MAX,
 		max_fee_per_gas: 0.into(),
 		max_priority_fee_per_gas: Some(U256::zero()),
 		nonce: None, // Use the next nonce
@@ -992,7 +992,7 @@ fn note_preimage_works() {
 				target: Precompile1.into(),
 				input,
 				value: U256::zero(), // No value sent in EVM
-				gas_limit: u64::max_value(),
+				gas_limit: u64::MAX,
 				max_fee_per_gas: U256::zero(),
 				max_priority_fee_per_gas: Some(U256::zero()),
 				nonce: None, // Use the next nonce
@@ -1065,7 +1065,7 @@ fn note_preimage_works_with_real_data() {
 				target: Precompile1.into(),
 				input,
 				value: U256::zero(), // No value sent in EVM
-				gas_limit: u64::max_value(),
+				gas_limit: u64::MAX,
 				max_fee_per_gas: U256::zero(),
 				max_priority_fee_per_gas: Some(U256::zero()),
 				nonce: None, // Use the next nonce
@@ -1130,7 +1130,7 @@ fn cannot_note_duplicate_preimage() {
 				target: Precompile1.into(),
 				input: input.clone(),
 				value: U256::zero(), // No value sent in EVM
-				gas_limit: u64::max_value(),
+				gas_limit: u64::MAX,
 				max_fee_per_gas: U256::zero(),
 				max_priority_fee_per_gas: Some(U256::zero()),
 				nonce: None, // Use the next nonce
@@ -1144,7 +1144,7 @@ fn cannot_note_duplicate_preimage() {
 				target: Precompile1.into(),
 				input,
 				value: U256::zero(), // No value sent in EVM
-				gas_limit: u64::max_value(),
+				gas_limit: u64::MAX,
 				max_fee_per_gas: U256::zero(),
 				max_priority_fee_per_gas: Some(U256::zero()),
 				nonce: None, // Use the next nonce
@@ -1184,7 +1184,7 @@ fn cannot_note_imminent_preimage_before_it_is_actually_imminent() {
 				target: Precompile1.into(),
 				input,
 				value: U256::zero(), // No value sent in EVM
-				gas_limit: u64::max_value(),
+				gas_limit: u64::MAX,
 				max_fee_per_gas: 0.into(),
 				max_priority_fee_per_gas: Some(U256::zero()),
 				nonce: None, // Use the next nonce

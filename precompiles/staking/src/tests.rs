@@ -15,7 +15,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#![allow(clippy::all)]
 use crate::mock::{
 	active_era, make_all_reward_payment, mock_pub_key, new_test_ext, reward_all_elected,
 	start_active_era, start_session, Balances, PCall, Precompiles, PrecompilesValue, Runtime,

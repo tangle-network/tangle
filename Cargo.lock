@@ -4690,7 +4690,7 @@ dependencies = [
  "futures-sink",
  "futures-util",
  "http",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "slab",
  "tokio",
  "tokio-util",
@@ -6377,7 +6377,7 @@ checksum = "f313fcff1d2a4bcaa2deeaa00bf7530d77d5f7bd0467a117dde2e29a75a7a17a"
 dependencies = [
  "array-bytes 6.2.3",
  "blake3",
- "frame-metadata 16.0.0",
+ "frame-metadata",
  "parity-scale-codec 3.6.12",
  "scale-decode",
  "scale-info",
@@ -7413,63 +7413,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-dkg"
-version = "1.1.0"
-dependencies = [
- "cggmp21",
- "derivation-path",
- "digest 0.10.7",
- "ecdsa",
- "elliptic-curve",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "frost-core",
- "frost-ed25519",
- "frost-ed448",
- "frost-p256",
- "frost-p384",
- "frost-ristretto255",
- "frost-secp256k1",
- "frost-taproot",
- "generic-array 0.14.7",
- "generic-ec",
- "generic-ec-zkp",
- "hex",
- "k256",
- "malachite-base",
- "malachite-nz",
- "p256",
- "paillier-zk",
- "pallet-balances",
- "pallet-jobs",
- "parity-scale-codec 3.6.12",
- "paste",
- "postcard",
- "rand_chacha 0.3.1",
- "rand_core 0.6.4",
- "round-based",
- "scale-info",
- "serde",
- "serde_with 3.9.0",
- "serdect",
- "sha2 0.10.8",
- "slip-10",
- "smallvec",
- "snowbridge-milagro-bls",
- "sp-core",
- "sp-io",
- "sp-keystore",
- "sp-runtime",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
- "starknet-crypto",
- "subtle 2.6.1",
- "tangle-crypto-primitives",
- "tangle-primitives",
- "udigest",
-]
-
-[[package]]
 name = "pallet-dynamic-fee"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/frontier.git?branch=polkadot-v1.7.0#c5d6daa9ffd46c0a85915526aa26d200fd635e30"
@@ -8220,79 +8163,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-jobs"
-version = "1.1.0"
-dependencies = [
- "ethereum",
- "ethers",
- "fp-account",
- "fp-consensus",
- "fp-dynamic-fee",
- "fp-ethereum",
- "fp-evm",
- "fp-rpc",
- "fp-self-contained",
- "fp-storage",
- "frame-benchmarking",
- "frame-election-provider-support",
- "frame-support",
- "frame-system",
- "hex",
- "hex-literal 0.4.1",
- "libsecp256k1",
- "pallet-balances",
- "pallet-base-fee",
- "pallet-dynamic-fee",
- "pallet-ethereum",
- "pallet-evm",
- "pallet-evm-chain-id",
- "pallet-roles",
- "pallet-session",
- "pallet-staking 28.0.0",
- "pallet-timestamp",
- "parity-scale-codec 3.6.12",
- "scale-info",
- "serde",
- "serde_json",
- "smallvec",
- "sp-core",
- "sp-io",
- "sp-keystore",
- "sp-runtime",
- "sp-staking",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
- "tangle-crypto-primitives",
- "tangle-primitives",
-]
-
-[[package]]
-name = "pallet-jobs-rpc"
-version = "1.1.0"
-dependencies = [
- "jsonrpsee 0.20.3",
- "pallet-jobs-rpc-runtime-api",
- "parity-scale-codec 3.6.12",
- "sp-api",
- "sp-blockchain",
- "sp-core",
- "sp-rpc",
- "sp-runtime",
- "sp-weights",
- "tangle-primitives",
-]
-
-[[package]]
-name = "pallet-jobs-rpc-runtime-api"
-version = "1.1.0"
-dependencies = [
- "parity-scale-codec 3.6.12",
- "sp-api",
- "sp-runtime",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
- "tangle-primitives",
-]
-
-[[package]]
 name = "pallet-message-queue"
 version = "31.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0#851c824dc7a8e7e6db2d0c9fb29d232f2f45198a"
@@ -8416,35 +8286,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-roles"
-version = "1.1.0"
-dependencies = [
- "frame-benchmarking",
- "frame-election-provider-support",
- "frame-support",
- "frame-system",
- "hex",
- "hex-literal 0.4.1",
- "log",
- "pallet-balances",
- "pallet-jobs",
- "pallet-session",
- "pallet-staking 28.0.0",
- "pallet-timestamp",
- "parity-scale-codec 3.6.12",
- "scale-info",
- "serde",
- "serde_json",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-staking",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
- "tangle-crypto-primitives",
- "tangle-primitives",
-]
-
-[[package]]
 name = "pallet-scheduler"
 version = "29.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0#851c824dc7a8e7e6db2d0c9fb29d232f2f45198a"
@@ -8464,7 +8305,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services"
-version = "1.0.12"
+version = "1.1.0"
 dependencies = [
  "ethabi 15.0.0",
  "ethereum",
@@ -8521,7 +8362,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc"
-version = "1.0.12"
+version = "1.1.0"
 dependencies = [
  "jsonrpsee",
  "pallet-services-rpc-runtime-api",
@@ -8537,7 +8378,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc-runtime-api"
-version = "1.0.12"
+version = "1.1.0"
 dependencies = [
  "parity-scale-codec 3.6.12",
  "sp-api",
@@ -8806,37 +8647,6 @@ dependencies = [
  "staging-xcm",
  "staging-xcm-builder",
  "staging-xcm-executor",
-]
-
-[[package]]
-name = "pallet-zksaas"
-version = "1.1.0"
-dependencies = [
- "ark-bn254",
- "ark-crypto-primitives",
- "ark-ec",
- "ark-ff",
- "ark-groth16",
- "ark-relations",
- "ark-serialize",
- "ark-std",
- "ethabi 15.0.0",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "hex",
- "log",
- "pallet-balances",
- "parity-scale-codec 3.6.12",
- "scale-info",
- "serde",
- "smallvec",
- "sp-core",
- "sp-io",
- "sp-keystore",
- "sp-runtime",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
- "tangle-primitives",
 ]
 
 [[package]]
@@ -11998,6 +11808,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "scale-bits"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e57b1e7f6b65ed1f04e79a85a57d755ad56d76fdf1e9bddcc9ae14f71fcdcf54"
+dependencies = [
+ "parity-scale-codec 3.6.12",
+ "scale-type-resolver",
+]
+
+[[package]]
+name = "scale-decode"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e98f3262c250d90e700bb802eb704e1f841e03331c2eb815e46516c4edbf5b27"
+dependencies = [
+ "derive_more",
+ "parity-scale-codec 3.6.12",
+ "scale-bits",
+ "scale-type-resolver",
+ "smallvec",
+]
+
+[[package]]
 name = "scale-info"
 version = "2.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12022,6 +11855,12 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "scale-type-resolver"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0cded6518aa0bd6c1be2b88ac81bf7044992f0f154bfbabd5ad34f43512abcb"
 
 [[package]]
 name = "schannel"
@@ -13982,7 +13821,7 @@ dependencies = [
  "cargo_metadata 0.15.4",
  "console",
  "filetime",
- "frame-metadata 16.0.0",
+ "frame-metadata",
  "merkleized-metadata",
  "parity-scale-codec 3.6.12",
  "parity-wasm",
@@ -14544,21 +14383,6 @@ dependencies = [
  "substrate-wasm-builder",
  "tangle-crypto-primitives",
  "tangle-primitives",
-]
-
-[[package]]
-name = "tangle-subxt"
-version = "1.1.0"
-dependencies = [
- "hex",
- "parity-scale-codec 3.6.12",
- "scale-info",
- "sp-core",
- "sp-io",
- "subxt",
- "subxt-signer",
- "tangle-crypto-primitives",
- "tokio",
 ]
 
 [[package]]
@@ -15172,7 +14996,6 @@ dependencies = [
  "sharded-slab",
  "smallvec",
  "thread_local",
- "time",
  "tracing",
  "tracing-core",
  "tracing-log 0.2.0",
