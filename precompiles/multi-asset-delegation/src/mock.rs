@@ -33,7 +33,7 @@ use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBu
 use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
-	sr25519::{self, Public as sr25519Public, Signature},
+	sr25519::{Public as sr25519Public, Signature},
 	ConstU32, H160, H256, U256,
 };
 use sp_runtime::{

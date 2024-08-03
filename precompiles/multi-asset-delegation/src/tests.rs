@@ -22,7 +22,7 @@ use frame_support::assert_ok;
 use frame_support::traits::Currency;
 use pallet_multi_asset_delegation::{Delegators, Operators};
 use precompile_utils::testing::*;
-use sp_core::{H160, H256};
+use sp_core::H160;
 
 // helper function
 pub fn create_and_mint_tokens(

@@ -777,7 +777,7 @@ impl Convert<Balance, sp_core::U256> for BalanceToU256 {
 pub struct U256ToBalance;
 impl Convert<sp_core::U256, Balance> for U256ToBalance {
 	fn convert(n: sp_core::U256) -> Balance {
-		n.try_into().unwrap_or(Balance::max_value())
+		n.try_into().unwrap_or(Balance::MAX)
 	}
 }
 
@@ -798,9 +798,9 @@ impl pallet_nomination_pools::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
+	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::MAX;
 	/// We prioritize im-online heartbeats over election solution submission.
-	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::max_value() / 2;
+	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::MAX / 2;
 }
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime

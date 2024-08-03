@@ -13,23 +13,19 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-
+#![allow(clippy::all)]
 use crate as pallet_services;
 use crate::mock::{
 	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
 use fp_evm::FeeCalculator;
-use frame_support::traits::{
-	Currency, ExistenceRequirement, OnUnbalanced, SignedImbalance, WithdrawReasons,
-};
+use frame_support::traits::{Currency, OnUnbalanced};
 use frame_support::{parameter_types, traits::FindAuthor, weights::Weight, PalletId};
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
 use pallet_evm::{
-	AddressMapping, EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping,
-	OnChargeEVMTransaction,
+	EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping, OnChargeEVMTransaction,
 };
 use sp_core::{keccak_256, ConstU32, H160, H256, U256};
-use sp_runtime::traits::UniqueSaturatedInto;
 use sp_runtime::{
 	traits::{BlakeTwo256, DispatchInfoOf, Dispatchable},
 	transaction_validity::{TransactionValidity, TransactionValidityError},
@@ -43,8 +39,8 @@ use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 
 use precompile_utils::precompile_set::{
-	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, OnlyFrom,
-	PrecompileAt, PrecompileSetBuilder, PrecompilesInRangeInclusive,
+	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, PrecompileAt,
+	PrecompileSetBuilder, PrecompilesInRangeInclusive,
 };
 
 type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, CallableByPrecompile);
@@ -118,7 +114,7 @@ parameter_types! {
 
 pub struct DealWithFees;
 impl OnUnbalanced<RuntimeNegativeImbalance> for DealWithFees {
-	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = RuntimeNegativeImbalance>) {
+	fn on_unbalanceds<B>(_fees_then_tips: impl Iterator<Item = RuntimeNegativeImbalance>) {
 		// whatever
 	}
 }
@@ -128,22 +124,22 @@ impl OnChargeEVMTransaction<Runtime> for FreeEVMExecution {
 	type LiquidityInfo = ();
 
 	fn withdraw_fee(
-		who: &H160,
-		fee: U256,
+		_who: &H160,
+		_fee: U256,
 	) -> Result<Self::LiquidityInfo, pallet_evm::Error<Runtime>> {
 		Ok(())
 	}
 
 	fn correct_and_deposit_fee(
-		who: &H160,
-		corrected_fee: U256,
-		base_fee: U256,
+		_who: &H160,
+		_corrected_fee: U256,
+		_base_fee: U256,
 		already_withdrawn: Self::LiquidityInfo,
 	) -> Self::LiquidityInfo {
 		already_withdrawn
 	}
 
-	fn pay_priority_fee(tip: Self::LiquidityInfo) {}
+	fn pay_priority_fee(_tip: Self::LiquidityInfo) {}
 }
 
 /// Type alias for negative imbalance during fees
@@ -328,8 +324,6 @@ impl pallet_services::EvmRunner<Runtime> for MockedEvmRunner {
 
 pub struct AccountInfo {
 	pub address: H160,
-	pub account_id: AccountId,
-	pub private_key: H256,
 }
 
 pub fn address_build(seed: u8) -> AccountInfo {
@@ -338,9 +332,5 @@ pub fn address_build(seed: u8) -> AccountInfo {
 	let public_key = &libsecp256k1::PublicKey::from_secret_key(&secret_key).serialize()[1..65];
 	let address = H160::from(H256::from(keccak_256(public_key)));
 
-	AccountInfo {
-		private_key,
-		account_id: HashedAddressMapping::<BlakeTwo256>::into_account_id(address),
-		address,
-	}
+	AccountInfo { address }
 }

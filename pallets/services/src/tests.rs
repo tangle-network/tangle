@@ -13,19 +13,13 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-#![cfg(test)]
 use crate::types::ConstraintsOf;
 
 use super::*;
-use crate::mock_evm::address_build;
-use ethers::prelude::*;
-use frame_support::{assert_err, assert_noop, assert_ok};
+use frame_support::{assert_err, assert_ok};
 use mock::*;
-use serde_json::Value;
-use sp_core::{bounded_vec, ecdsa, ByteArray, U256};
-use sp_runtime::{traits::BlakeTwo256, KeyTypeId};
-use sp_std::sync::Arc;
-use std::fs;
+use sp_core::{bounded_vec, ecdsa, ByteArray};
+use sp_runtime::KeyTypeId;
 use tangle_primitives::services::*;
 
 const ALICE: u8 = 1;
@@ -33,10 +27,6 @@ const BOB: u8 = 2;
 const CHARLIE: u8 = 3;
 const DAVE: u8 = 4;
 const EVE: u8 = 5;
-
-const TEN: u8 = 10;
-const TWENTY: u8 = 20;
-const HUNDRED: u8 = 100;
 
 fn zero_key() -> ecdsa::Public {
 	ecdsa::Public([0; 33])
@@ -214,7 +204,7 @@ fn unregister_from_blueprint() {
 			Default::default(),
 		));
 		assert_ok!(Services::unregister(RuntimeOrigin::signed(bob.clone()), 0));
-		assert_eq!(Operators::<Runtime>::contains_key(0, &bob), false);
+		assert!(!Operators::<Runtime>::contains_key(0, &bob));
 
 		// The blueprint should be removed from my blueprints in my profile.
 		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
@@ -274,7 +264,7 @@ fn request_service() {
 		));
 		// this service gets immediately accepted by all providers.
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
-		assert_eq!(Instances::<Runtime>::contains_key(0), true);
+		assert!(Instances::<Runtime>::contains_key(0));
 		// The service should also be added to the services for each operator.
 		let profile = OperatorsProfile::<Runtime>::get(bob).unwrap();
 		assert!(profile.services.contains(&0));
@@ -335,7 +325,7 @@ fn request_service_with_approval_process() {
 		));
 
 		// the service should be pending approval from charlie and dave.
-		assert_eq!(ServiceRequests::<Runtime>::contains_key(0), true);
+		assert!(ServiceRequests::<Runtime>::contains_key(0));
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceRequested {
 			owner: eve.clone(),
 			request_id: 0,
@@ -363,8 +353,8 @@ fn request_service_with_approval_process() {
 
 		// dave approves the service, and the service is initiated.
 		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0));
-		assert_eq!(ServiceRequests::<Runtime>::contains_key(0), false);
-		assert_eq!(Instances::<Runtime>::contains_key(0), true);
+		assert!(!ServiceRequests::<Runtime>::contains_key(0));
+		assert!(Instances::<Runtime>::contains_key(0));
 
 		// The service should also be added to the services for each operator.
 		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
@@ -432,7 +422,7 @@ fn job_calls() {
 		));
 		// this service gets immediately accepted by all providers.
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
-		assert_eq!(Instances::<Runtime>::contains_key(0), true);
+		assert!(Instances::<Runtime>::contains_key(0));
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
 			request_id: None,
@@ -449,7 +439,7 @@ fn job_calls() {
 			bounded_vec![Field::Uint8(2)],
 		));
 
-		assert_eq!(JobCalls::<Runtime>::contains_key(0, job_call_id), true);
+		assert!(JobCalls::<Runtime>::contains_key(0, job_call_id));
 		assert_events(vec![RuntimeEvent::Services(crate::Event::JobCalled {
 			caller: eve,
 			service_id: 0,
@@ -500,7 +490,7 @@ fn job_calls_fails_with_invalid_input() {
 		));
 		// this service gets immediately accepted by all providers.
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
-		assert_eq!(Instances::<Runtime>::contains_key(0), true);
+		assert!(Instances::<Runtime>::contains_key(0));
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
 			request_id: None,
@@ -521,7 +511,7 @@ fn job_calls_fails_with_invalid_input() {
 			crate::Error::<Runtime>::InvalidJobCallInput
 		);
 
-		assert_eq!(JobCalls::<Runtime>::contains_key(0, job_call_id), false);
+		assert!(!JobCalls::<Runtime>::contains_key(0, job_call_id));
 	});
 }
 
@@ -565,7 +555,7 @@ fn job_result() {
 		));
 		// this service gets immediately accepted by all providers.
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
-		assert_eq!(Instances::<Runtime>::contains_key(0), true);
+		assert!(Instances::<Runtime>::contains_key(0));
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
 			request_id: None,
@@ -583,7 +573,7 @@ fn job_result() {
 			bounded_vec![Field::Uint8(2)]
 		));
 
-		assert_eq!(JobCalls::<Runtime>::contains_key(0, keygen_job_call_id), true);
+		assert!(JobCalls::<Runtime>::contains_key(0, keygen_job_call_id));
 		// now we can set the job result
 		let key_type = KeyTypeId(*b"mdkg");
 		let dkg = sp_io::crypto::ecdsa_generate(key_type, None);
@@ -595,7 +585,7 @@ fn job_result() {
 		));
 
 		// submit signing job
-		let signing_job_call_id = 1;
+		let _signing_job_call_id = 1;
 		let data_hash = sp_core::keccak_256(&[1; 32]);
 
 		assert_ok!(Services::call(

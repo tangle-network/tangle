@@ -22,7 +22,7 @@ use frame_election_provider_support::{
 };
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU128, ConstU32, ConstU64, Contains, Everything, OneSessionHandler},
+	traits::{ConstU128, ConstU32, ConstU64, Everything, OneSessionHandler},
 };
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
@@ -30,7 +30,6 @@ use pallet_session::historical as pallet_session_historical;
 use sp_core::{sr25519, H160, H256};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
-	app_crypto::ecdsa::Public,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
@@ -41,7 +40,6 @@ use std::sync::Arc;
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
-pub type BlockNumber = u64;
 
 impl frame_system::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
@@ -96,34 +94,6 @@ parameter_types! {
 impl pallet_session::historical::Config for Runtime {
 	type FullIdentification = AccountId;
 	type FullIdentificationOf = ConvertInto;
-}
-
-pub struct BaseFilter;
-impl Contains<RuntimeCall> for BaseFilter {
-	fn contains(call: &RuntimeCall) -> bool {
-		let is_stake_unbond_call =
-			matches!(call, RuntimeCall::Staking(pallet_staking::Call::unbond { .. }));
-
-		if is_stake_unbond_call {
-			// no unbond call
-			return false;
-		}
-
-		// no chill call
-		if matches!(call, RuntimeCall::Staking(pallet_staking::Call::chill { .. })) {
-			return false;
-		}
-
-		// no withdraw_unbonded call
-		let is_stake_withdraw_call =
-			matches!(call, RuntimeCall::Staking(pallet_staking::Call::withdraw_unbonded { .. }));
-
-		if is_stake_withdraw_call {
-			return false;
-		}
-
-		true
-	}
 }
 
 sp_runtime::impl_opaque_keys! {
@@ -358,7 +328,6 @@ impl Config for Runtime {
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
 
-#[allow(non_camel_case_types)]
 construct_runtime!(
 	pub enum Runtime
 	{
@@ -400,7 +369,7 @@ pub const CGGMP21_JOB_RESULT_VERIFIER: H160 = H160([0x23; 20]);
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
-pub fn new_test_ext_raw_authorities(authorities: Vec<(AccountId)>) -> sp_io::TestExternalities {
+pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
 	let balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 20_000_u128)).collect();
@@ -456,10 +425,8 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<(AccountId)>) -> sp_io::Tes
 		},
 	);
 
-	let cggmp21_request_hook_json: serde_json::Value = serde_json::from_str(include_str!(
-		"../../../forge/out/CGGMP21Hooks.sol/CGGMP21RequestHook.json"
-	))
-	.unwrap();
+	let cggmp21_request_hook_json: serde_json::Value =
+		serde_json::from_str(include_str!("./test-artifacts/CGGMP21RequestHook.json")).unwrap();
 
 	let cggmp21_request_hook_code = hex::decode(
 		cggmp21_request_hook_json["deployedBytecode"]["object"]
@@ -479,28 +446,28 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<(AccountId)>) -> sp_io::Tes
 		},
 	);
 
-	let cggmp21_job_result_verifier_json: serde_json::Value = serde_json::from_str(include_str!(
-		"../../../forge/out/CGGMP21Hooks.sol/CGGMP21JobResultVerifier.json"
-	))
-	.unwrap();
+	// let cggmp21_job_result_verifier_json: serde_json::Value = serde_json::from_str(include_str!(
+	// 	"../../../forge/out/CGGMP21Hooks.sol/CGGMP21JobResultVerifier.json"
+	// ))
+	// .unwrap();
 
-	let cggmp21_job_result_verifier_code = hex::decode(
-		cggmp21_job_result_verifier_json["deployedBytecode"]["object"]
-			.as_str()
-			.unwrap()
-			.replace("0x", ""),
-	)
-	.unwrap();
+	// let cggmp21_job_result_verifier_code = hex::decode(
+	// 	cggmp21_job_result_verifier_json["deployedBytecode"]["object"]
+	// 		.as_str()
+	// 		.unwrap()
+	// 		.replace("0x", ""),
+	// )
+	// .unwrap();
 
-	evm_accounts.insert(
-		CGGMP21_JOB_RESULT_VERIFIER,
-		fp_evm::GenesisAccount {
-			code: cggmp21_job_result_verifier_code,
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: Default::default(),
-		},
-	);
+	// evm_accounts.insert(
+	// 	CGGMP21_JOB_RESULT_VERIFIER,
+	// 	fp_evm::GenesisAccount {
+	// 		code: cggmp21_job_result_verifier_code,
+	// 		storage: Default::default(),
+	// 		nonce: Default::default(),
+	// 		balance: Default::default(),
+	// 	},
+	// );
 
 	let evm_config =
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
