@@ -39,6 +39,7 @@ members = [
     "precompiles/jobs",
     "precompiles/balances-erc20",
     "precompiles/assets-erc20",
+    "precompiles/multi-asset-delegation",
     "tangle-subxt",
     "examples/*",
     "evm-tracer"
@@ -308,6 +309,7 @@ pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", def
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
 pallet-evm-precompile-jobs = { path = "precompiles/jobs", default-features = false }
 pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features = false }
+pallet-evm-precompile-multi-asset-delegation = { path = "precompiles/multi-asset-delegation", default-features = false }
 
 # EVM & Ethereum
 # (wasm)

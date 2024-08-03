@@ -116,7 +116,7 @@ pallet-evm-precompile-ed25519 = { workspace = true }
 pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
-
+pallet-evm-precompile-multi-asset-delegation = { workspace = true }
 pallet-hotfix-sufficients = { workspace = true }
 
 ## Moonbeam precompiles
@@ -264,6 +264,7 @@ std = [
   "pallet-evm-precompile-registry/std",
   "pallet-evm-precompile-staking/std",
   "pallet-evm-precompile-vesting/std",
+  "pallet-evm-precompile-multi-asset-delegation/std"
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []

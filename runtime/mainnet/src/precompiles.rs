@@ -25,6 +25,7 @@ use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use pallet_evm_precompile_staking::StakingPrecompile;
 use pallet_evm_precompile_vesting::VestingPrecompile;
+use pallet_evm_precompile_multi_asset_delegation::MultiAssetDelegationPrecompile;
 
 use precompile_utils::precompile_set::{
 	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, OnlyFrom,
@@ -116,6 +117,11 @@ pub type WebbPrecompilesAt<R> = (
 	PrecompileAt<
 		AddressU64<2069>,
 		PrecompileRegistry<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	PrecompileAt<
+		AddressU64<2070>,
+		MultiAssetDelegationPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
 );
