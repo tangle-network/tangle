@@ -42,7 +42,7 @@ use fp_evm::PrecompileFailure;
 
 // pub use data::{solidity::Codec, Reader, Writer};
 pub use fp_evm::Precompile;
-pub use precompile_utils_macro::{keccak256, precompile, precompile_name_from_address};
+pub use precompile_utils_macro::{keccak256, precompile, precompile_name_from_address, Codec};
 
 /// Alias for Result returning an EVM precompile error.
 pub type EvmResult<T = ()> = Result<T, PrecompileFailure>;

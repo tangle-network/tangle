@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@types/websocket": "^1.0.10",
+    "prettier": "3.2.5",
     "rimraf": "5.0.5",
     "ts-node": "10.9.2",
     "tsconfig-paths": "^4.2.0",

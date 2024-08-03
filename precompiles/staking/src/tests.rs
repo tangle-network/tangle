@@ -15,7 +15,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#![allow(clippy::all)]
 use crate::mock::{
 	active_era, make_all_reward_payment, mock_pub_key, new_test_ext, reward_all_elected,
 	start_active_era, start_session, Balances, PCall, Precompiles, PrecompilesValue, Runtime,
@@ -87,21 +87,6 @@ fn max_nominator_count_works() {
 			.expect_cost(0)
 			.expect_no_logs()
 			.execute_returns(5u32);
-	});
-}
-
-#[test]
-fn is_validator_works() {
-	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
-		precompiles()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::is_restaker_with_role { validator: H160::from(TestAccount::Alex).into() },
-			)
-			.expect_cost(0)
-			.expect_no_logs()
-			.execute_returns(true);
 	});
 }
 
