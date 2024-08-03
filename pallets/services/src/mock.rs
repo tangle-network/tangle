@@ -404,10 +404,9 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 	let mut evm_accounts = BTreeMap::new();
 
-	let cggmp21_registration_hook_json: serde_json::Value = serde_json::from_str(include_str!(
-		"../../../forge/out/CGGMP21Hooks.sol/CGGMP21RegistrationHook.json"
-	))
-	.unwrap();
+	let cggmp21_registration_hook_json: serde_json::Value =
+		serde_json::from_str(include_str!("./test-artifacts/CGGMP21RegistrationHook.json"))
+			.unwrap();
 	let cggmp21_registration_hook_code = hex::decode(
 		cggmp21_registration_hook_json["deployedBytecode"]["object"]
 			.as_str()
