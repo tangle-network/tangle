@@ -19,6 +19,7 @@ use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
 use pallet_evm_precompile_call_permit::CallPermitPrecompile;
 use pallet_evm_precompile_democracy::DemocracyPrecompile;
 use pallet_evm_precompile_modexp::Modexp;
+use pallet_evm_precompile_multi_asset_delegation::MultiAssetDelegationPrecompile;
 use pallet_evm_precompile_preimage::PreimagePrecompile;
 use pallet_evm_precompile_registry::PrecompileRegistry;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
@@ -30,7 +31,6 @@ use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precom
 use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
 use pallet_evm_precompile_verify_schnorr_signatures::*;
 use pallet_evm_precompile_vesting::VestingPrecompile;
-use pallet_evm_precompile_multi_asset_delegation::MultiAssetDelegationPrecompile;
 use pallet_evm_precompileset_assets_erc20::Erc20AssetsPrecompileSet;
 
 use frame_support::parameter_types;

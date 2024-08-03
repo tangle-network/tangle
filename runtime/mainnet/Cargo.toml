@@ -111,7 +111,7 @@ pallet-evm-precompile-ed25519 = { workspace = true }
 pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
-pallet-evm-precompile-multi-asset-delegation = { workspace = true }
+
 pallet-hotfix-sufficients = { workspace = true }
 
 ## Moonbeam precompiles
@@ -123,6 +123,7 @@ pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
 pallet-evm-precompile-staking = { workspace = true }
 pallet-evm-precompile-vesting = { workspace = true }
+pallet-evm-precompile-multi-asset-delegation = { workspace = true }
 precompile-utils = { workspace = true }
 
 evm-tracer = { workspace = true }
@@ -241,16 +242,16 @@ std = [
  "rpc-primitives-debug/std",
  "rpc-primitives-txpool/std",
 
-  # Moonbeam precompiles
-  "pallet-evm-precompile-preimage/std",
-  "pallet-evm-precompile-batch/std",
-  "pallet-evm-precompile-call-permit/std",
-  "pallet-evm-precompile-proxy/std",
-  "pallet-evm-precompile-democracy/std",
-  "pallet-evm-precompile-registry/std",
-  "pallet-evm-precompile-staking/std",
-  "pallet-evm-precompile-vesting/std",
-  "pallet-evm-precompile-multi-asset-delegation/std"
+ # Tangle precompiles
+ "pallet-evm-precompile-preimage/std",
+ "pallet-evm-precompile-batch/std",
+ "pallet-evm-precompile-call-permit/std",
+ "pallet-evm-precompile-proxy/std",
+ "pallet-evm-precompile-democracy/std",
+ "pallet-evm-precompile-registry/std",
+ "pallet-evm-precompile-staking/std",
+ "pallet-evm-precompile-vesting/std",
+ "pallet-evm-precompile-multi-asset-delegation/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
