@@ -21,7 +21,7 @@ use frame_support::traits::AsEnsureOriginWithArg;
 use frame_support::PalletId;
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU64, Everything, Hooks},
+	traits::{ConstU64, Everything},
 	weights::Weight,
 };
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
@@ -43,7 +43,6 @@ use sp_runtime::{
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u64;
-pub type BlockNumber = u64;
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
 type AssetId = u32;
@@ -389,15 +388,5 @@ impl ExtBuilder {
 			System::set_block_number(1);
 		});
 		ext
-	}
-}
-
-pub(crate) fn roll_to(n: BlockNumber) {
-	while System::block_number() < n {
-		Balances::on_finalize(System::block_number());
-		System::on_finalize(System::block_number());
-		System::set_block_number(System::block_number() + 1);
-		System::on_initialize(System::block_number());
-		Balances::on_initialize(System::block_number());
 	}
 }
