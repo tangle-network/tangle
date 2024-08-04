@@ -38,7 +38,7 @@ fn test_unimplemented_selector_reverts() {
 fn test_join_operators() {
 	ExtBuilder::default().build().execute_with(|| {
 		let account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let initial_balance = Balances::free_balance(&account);
+		let initial_balance = Balances::free_balance(account);
 		assert!(Operators::<Runtime>::get(account).is_none());
 
 		PrecompilesValue::get()
@@ -51,7 +51,7 @@ fn test_join_operators() {
 
 		assert!(Operators::<Runtime>::get(account).is_some());
 		let expected_balance = initial_balance - 10_000;
-		assert_eq!(Balances::free_balance(&account), expected_balance);
+		assert_eq!(Balances::free_balance(account), expected_balance);
 	});
 }
 
@@ -69,7 +69,7 @@ fn test_join_operators_insufficient_balance() {
 			)
 			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 1, error: [2, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
 
-		assert_eq!(Balances::free_balance(&account), 500);
+		assert_eq!(Balances::free_balance(account), 500);
 	});
 }
 
@@ -95,7 +95,7 @@ fn test_delegate_assets_invalid_operator() {
 			)
 			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 5, error: [2, 0, 0, 0], message: Some(\"NotAnOperator\") })");
 
-		assert_eq!(Balances::free_balance(&delegator_account), 500);
+		assert_eq!(Balances::free_balance(delegator_account), 500);
 	});
 }
 
@@ -115,7 +115,7 @@ fn test_delegate_assets() {
 
 		create_and_mint_tokens(1, delegator_account, 500);
 		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), 1, 200));
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -129,7 +129,7 @@ fn test_delegate_assets() {
 			)
 			.execute_returns(());
 
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // no change when delegating
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // no change when delegating
 	});
 }
 
@@ -163,7 +163,7 @@ fn test_delegate_assets_insufficient_balance() {
 			)
 			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 5, error: [14, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
 
-		assert_eq!(Balances::free_balance(&delegator_account), 500);
+		assert_eq!(Balances::free_balance(delegator_account), 500);
 	});
 }
 
@@ -191,7 +191,7 @@ fn test_schedule_withdraw() {
 			)
 			.execute_returns(());
 
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -219,7 +219,7 @@ fn test_schedule_withdraw() {
 		assert_eq!(metadata.deposits.get(&1), None);
 		assert!(!metadata.withdraw_requests.is_empty());
 
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // no change
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // no change
 	});
 }
 
@@ -244,7 +244,7 @@ fn test_execute_withdraw() {
 				PCall::deposit { asset_id: U256::from(1), amount: U256::from(200) },
 			)
 			.execute_returns(());
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -282,7 +282,7 @@ fn test_execute_withdraw() {
 		assert_eq!(metadata.deposits.get(&1), None);
 		assert!(metadata.withdraw_requests.is_empty());
 
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 100); // deposited 200, withdrew 100
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 100); // deposited 200, withdrew 100
 	});
 }
 
@@ -308,7 +308,7 @@ fn test_execute_withdraw_before_due() {
 				PCall::deposit { asset_id: U256::from(1), amount: U256::from(200) },
 			)
 			.execute_returns(());
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -323,7 +323,7 @@ fn test_execute_withdraw_before_due() {
 			.execute_returns(());
 
 		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // delegate should not change balance
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // delegate should not change balance
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -341,7 +341,7 @@ fn test_execute_withdraw_before_due() {
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})
 			.execute_returns(()); // should not fail
 
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // not expired so should not change balance
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // not expired so should not change balance
 	});
 }
 
@@ -366,7 +366,7 @@ fn test_cancel_withdraw() {
 				PCall::deposit { asset_id: U256::from(1), amount: U256::from(200) },
 			)
 			.execute_returns(());
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -403,10 +403,10 @@ fn test_cancel_withdraw() {
 			.execute_returns(());
 
 		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert!(metadata.deposits.get(&1).is_some());
+		assert!(metadata.deposits.contains_key(&1));
 		assert!(metadata.withdraw_requests.is_empty());
 
-		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // no change
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // no change
 	});
 }
 
@@ -439,6 +439,6 @@ fn test_operator_go_offline_and_online() {
 				== OperatorStatus::Active
 		);
 
-		assert_eq!(Balances::free_balance(&operator_account), 20_000 - 10_000);
+		assert_eq!(Balances::free_balance(operator_account), 20_000 - 10_000);
 	});
 }
