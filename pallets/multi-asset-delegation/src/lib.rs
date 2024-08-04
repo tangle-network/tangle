@@ -160,7 +160,7 @@ pub mod pallet {
 	/// Storage for operator information.
 	#[pallet::storage]
 	#[pallet::getter(fn operator_info)]
-	pub(crate) type Operators<T: Config> =
+	pub type Operators<T: Config> =
 		StorageMap<_, Twox64Concat, T::AccountId, OperatorMetadataOf<T>, OptionQuery>;
 
 	/// Storage for the current round.
@@ -184,7 +184,7 @@ pub mod pallet {
 	/// Storage for delegator information.
 	#[pallet::storage]
 	#[pallet::getter(fn delegators)]
-	pub(crate) type Delegators<T: Config> =
+	pub type Delegators<T: Config> =
 		StorageMap<_, Twox64Concat, T::AccountId, DelegatorMetadataOf<T>, OptionQuery>;
 
 	#[pallet::storage]

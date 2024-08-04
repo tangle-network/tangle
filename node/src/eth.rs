@@ -148,6 +148,7 @@ impl std::str::FromStr for EthApi {
 	}
 }
 
+#[allow(dead_code)]
 pub struct RpcConfig {
 	pub ethapi: Vec<EthApi>,
 	pub ethapi_max_permits: u32,

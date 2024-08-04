@@ -135,7 +135,7 @@ pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { workspace = true }
 pallet-evm-precompile-verify-ecdsa-stark-signature = { workspace = true }
 pallet-evm-precompile-verify-schnorr-signatures = { workspace = true }
 pallet-evm-precompile-verify-bls381-signature = { workspace = true }
-
+pallet-evm-precompile-multi-asset-delegation = { workspace = true }
 precompile-utils = { workspace = true }
 
 evm-tracer = { workspace = true }
@@ -295,6 +295,7 @@ std = [
  "pallet-evm-precompile-registry/std",
  "pallet-evm-precompile-staking/std",
  "pallet-evm-precompile-vesting/std",
+ "pallet-evm-precompile-multi-asset-delegation/std",
  "pallet-evm-precompile-verify-ecdsa-secp256k1-signature/std",
  "pallet-evm-precompile-verify-ecdsa-secp256r1-signature/std",
  "pallet-evm-precompile-verify-ecdsa-stark-signature/std",

@@ -41,6 +41,7 @@ members = [
  "precompiles/verify-ecdsa-stark-signature",
  "precompiles/verify-schnorr-signatures",
  "precompiles/verify-bls381-signature",
+ "precompiles/multi-asset-delegation",
 #  "tangle-subxt",
  "evm-tracer",
 ]
@@ -307,6 +308,7 @@ pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-featur
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
 pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features = false }
+pallet-evm-precompile-multi-asset-delegation = { path = "precompiles/multi-asset-delegation", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { path = "precompiles/verify-ecdsa-secp256k1-signature", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { path = "precompiles/verify-ecdsa-secp256r1-signature", default-features = false }
 pallet-evm-precompile-verify-ecdsa-stark-signature = { path = "precompiles/verify-ecdsa-stark-signature", default-features = false }
