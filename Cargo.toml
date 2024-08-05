@@ -381,5 +381,8 @@ sygma-bridge = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets
 sygma-runtime-api = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "release-polkadot-v1.7.0", default-features = false }
 sygma-rpc = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "release-polkadot-v1.7.0", default-features = false }
 
+# Hyperbridge
+pallet-ismp = { git = "https://github.com/polytope-labs/hyperbridge", version = "1.6.2" }
+
 [profile.release]
 panic = "unwind"

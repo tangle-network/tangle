@@ -1216,6 +1216,10 @@ impl pallet_proxy::Config for Runtime {
 	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
+impl pallet_ismp::Config for Runtime {
+	
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1285,6 +1289,8 @@ construct_runtime!(
 		SygmaPercentageFeeHandler: sygma_percentage_feehandler = 49,
 		SygmaBridge: sygma_bridge = 50,
 
+		// Hyperbridge
+		ISMP: pallet_ismp = 52,
 	}
 );
 
