@@ -28,10 +28,8 @@ pallet-session = { workspace = true, default-features = false, features = [
 	"historical",
 ] }
 pallet-authorship = { workspace = true }
-sp-application-crypto = { workspace = true, default-features = false, features = ["serde"]  }
 frame-election-provider-support = { workspace = true }
 log = { workspace = true }
-tangle-primitives = { workspace = true, default-features = false }
 
 # Optional imports for benchmarking
 frame-benchmarking = { workspace = true, default-features = false, optional = true }
@@ -66,7 +64,6 @@ std = [
 	"pallet-timestamp/std",
 	"scale-info/std",
 	"serde/std",
-	"sp-application-crypto/std",
 	"sp-core/std",
 	"sp-io/std",
 	"sp-npos-elections/std",
@@ -74,7 +71,6 @@ std = [
 	"sp-staking/std",
 	"sp-std/std",
 	"sp-tracing/std",
-	"tangle-primitives/std"
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",

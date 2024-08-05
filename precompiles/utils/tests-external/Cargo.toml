@@ -8,11 +8,8 @@ edition = "2021"
 path = "./lib.rs"
 
 [dependencies]
-derive_more = { workspace = true }
 hex-literal = { workspace = true }
 precompile-utils = { workspace = true, features = ["testing"] }
-serde = { workspace = true }
-sha3 = { workspace = true }
 
 frame-support = { workspace = true }
 frame-system = { workspace = true }
@@ -25,6 +22,5 @@ sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 
-evm = { workspace = true, features = ["with-codec"] }
 fp-evm = { workspace = true }
 pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
