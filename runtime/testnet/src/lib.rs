@@ -1449,27 +1449,6 @@ impl pallet_assets::Config for Runtime {
 	type BenchmarkHelper = ();
 }
 
-pub struct MockServiceManager;
-
-impl pallet_multi_asset_delegation::traits::ServiceManager<AccountId, Balance>
-	for MockServiceManager
-{
-	fn list_active_services(_account: &AccountId) -> Vec<pallet_multi_asset_delegation::Service> {
-		// we dont care
-		vec![]
-	}
-
-	fn list_service_reward(_account: &AccountId) -> Balance {
-		// we dont care
-		Balance::default()
-	}
-
-	fn can_exit(_account: &AccountId) -> bool {
-		// Mock logic to determine if the given account can exit
-		true
-	}
-}
-
 parameter_types! {
 	pub const MinOperatorBondAmount: Balance = 10_000;
 	pub const BondDuration: u32 = 10;
@@ -1482,7 +1461,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
-	type ServiceManager = MockServiceManager;
+	type ServiceManager = Services;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;
 	type LeaveDelegatorsDelay = ConstU32<1>;

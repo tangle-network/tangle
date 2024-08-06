@@ -120,6 +120,17 @@ fn register_on_blueprint() {
 			),
 			crate::Error::<Runtime>::AlreadyRegistered
 		);
+
+		// if we try to register with a non active operator, should fail
+		assert_err!(
+			Services::register(
+				RuntimeOrigin::signed(mock_pub_key(10)),
+				0,
+				OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+				Default::default(),
+			),
+			crate::Error::<Runtime>::OperatorNotActive
+		);
 	});
 }
 
