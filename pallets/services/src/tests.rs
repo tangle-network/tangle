@@ -135,10 +135,7 @@ fn pre_register_on_blueprint() {
 
 		let bob = mock_pub_key(BOB);
 
-		let pre_registration_call = Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-		);
+		let pre_registration_call = Services::pre_register(RuntimeOrigin::signed(bob.clone()), 0);
 		assert_ok!(pre_registration_call);
 
 		assert_events(vec![RuntimeEvent::Services(crate::Event::PreRegistration {
