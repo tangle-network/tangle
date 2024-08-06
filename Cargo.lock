@@ -14679,6 +14679,7 @@ dependencies = [
  "hex",
  "parity-scale-codec 3.6.12",
  "scale-info",
+ "serde",
  "sp-core",
  "sp-io",
  "subxt",
