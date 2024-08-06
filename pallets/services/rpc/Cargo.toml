@@ -16,8 +16,5 @@ pallet-services-rpc-runtime-api = { path = "./runtime-api", default-features = f
 parity-scale-codec = { workspace = true }
 sp-api = { workspace = true }
 sp-blockchain = { workspace = true }
-sp-core = { workspace = true }
-sp-rpc = { workspace = true }
 sp-runtime = { workspace = true }
-sp-weights = { workspace = true }
 tangle-primitives = { workspace = true }

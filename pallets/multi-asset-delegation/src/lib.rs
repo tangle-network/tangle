@@ -58,11 +58,9 @@ pub mod functions;
 pub mod traits;
 pub mod types;
 pub use functions::*;
-pub use traits::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-	use crate::traits::ServiceManager;
 	use crate::types::*;
 	use frame_support::traits::fungibles;
 	use frame_support::{
@@ -75,6 +73,8 @@ pub mod pallet {
 	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
 	use sp_std::collections::btree_map::BTreeMap;
 	use sp_std::vec::Vec;
+	use tangle_primitives::traits::ServiceManager;
+	use tangle_primitives::RoundIndex;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]

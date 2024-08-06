@@ -218,6 +218,40 @@ impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
 	}
 }
 
+pub struct MockDelegationManager;
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
+	for MockDelegationManager
+{
+	type AssetId = u32;
+
+	fn get_current_round() -> tangle_primitives::types::RoundIndex {
+		Default::default()
+	}
+
+	fn is_operator(_operator: &AccountId) -> bool {
+		// dont care
+		true
+	}
+
+	fn is_operator_active(operator: &AccountId) -> bool {
+		if operator == &mock_pub_key(10) {
+			return false;
+		}
+		true
+	}
+
+	fn get_operator_stake(_operator: &AccountId) -> Balance {
+		Default::default()
+	}
+
+	fn get_total_delegation_by_asset_id(
+		_operator: &AccountId,
+		_asset_id: &Self::AssetId,
+	) -> Balance {
+		Default::default()
+	}
+}
+
 parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
@@ -323,6 +357,7 @@ impl Config for Runtime {
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
+	type OperatorDelegationManager = MockDelegationManager;
 	type WeightInfo = ();
 }
 
