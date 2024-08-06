@@ -203,6 +203,13 @@ pub mod module {
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 		},
+		/// An operator has pre-registered for a service blueprint.
+		PreRegistration {
+			/// The account that pre-registered as an operator.
+			operator: T::AccountId,
+			/// The ID of the service blueprint.
+			blueprint_id: u64,
+		},
 		/// An new operator has been registered.
 		Registered {
 			/// The account that registered as a operator.
@@ -491,6 +498,32 @@ pub mod module {
 			NextBlueprintId::<T>::set(blueprint_id.saturating_add(1));
 
 			Self::deposit_event(Event::BlueprintCreated { owner, blueprint_id });
+			Ok(())
+		}
+
+		/// Pre-register the caller as an operator for a specific blueprint.
+		///
+		/// The caller can pre-register for a blueprint, which will emit a `PreRegistration` event.
+		/// This event can be listened to by the operator node to execute the custom blueprint's
+		/// registration function.
+		///
+		/// # Parameters
+		/// - `origin`: The account that is pre-registering for the service blueprint.
+		/// - `blueprint_id`: The ID of the service blueprint.
+		#[pallet::call_index(2)]
+		#[pallet::weight(T::WeightInfo::pre_register())]
+		pub fn pre_register(
+			origin: OriginFor<T>,
+			#[pallet::compact] blueprint_id: u64,
+		) -> DispatchResult {
+			let operator_controller = ensure_signed(origin)?;
+
+			// Emit the PreRegistration event
+			Self::deposit_event(Event::PreRegistration {
+				operator: operator_controller.clone(),
+				blueprint_id,
+			});
+
 			Ok(())
 		}
 
