@@ -57207,6 +57207,7 @@ pub mod api {
 					#[encode_as_type(
 						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 					)]
+          #[codec(dumb_trait_bound)]
 					pub enum Field<_1> {
 						#[codec(index = 0)]
 						None,
