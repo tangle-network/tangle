@@ -41,6 +41,7 @@ members = [
     "precompiles/verify-schnorr-signatures",
     "precompiles/verify-bls381-signature",
     "precompiles/multi-asset-delegation",
+    "tangle-subxt",
     "evm-tracer",
 ]
 resolver = "2"

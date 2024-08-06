@@ -54,6 +54,16 @@ benchmarks! {
 		let blueprint = cggmp21_blueprint::<T>();
 	}: _(RawOrigin::Signed(alice.clone()), blueprint)
 
+	pre_register {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+
+	}: _(RawOrigin::Signed(bob.clone()), 0)
+
+
 	register {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
