@@ -1228,7 +1228,7 @@ fn bond_extra_works() {
 		);
 
 		// Call the bond_extra function with a large number, should handle it
-		assert_ok!(Staking::bond_extra(RuntimeOrigin::signed(11), Balance::max_value()));
+		assert_ok!(Staking::bond_extra(RuntimeOrigin::signed(11), Balance::MAX));
 		// The full amount of the funds should now be in the total and active
 		assert_eq!(
 			Staking::ledger(11.into()).unwrap(),

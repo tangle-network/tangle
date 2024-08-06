@@ -39,7 +39,7 @@ use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::EVMConfig;
 use tangle_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	ImOnlineConfig, MaxVestingSchedules, Perbill, RoleKeyId, RuntimeGenesisConfig, SessionConfig,
+	ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig, SessionConfig,
 	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig, UNIT,
 	WASM_BINARY,
 };
@@ -65,15 +65,12 @@ where
 }
 
 /// Generate an babe authority key.
-pub fn authority_keys_from_seed(
-	stash: &str,
-) -> (AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId) {
+pub fn authority_keys_from_seed(stash: &str) -> (AccountId, BabeId, GrandpaId, ImOnlineId) {
 	(
 		get_account_id_from_seed::<sr25519::Public>(stash),
 		get_from_seed::<BabeId>(stash),
 		get_from_seed::<GrandpaId>(stash),
 		get_from_seed::<ImOnlineId>(stash),
-		get_from_seed::<RoleKeyId>(stash),
 	)
 }
 
@@ -85,9 +82,8 @@ fn generate_session_keys(
 	babe: BabeId,
 	grandpa: GrandpaId,
 	im_online: ImOnlineId,
-	role: RoleKeyId,
 ) -> tangle_runtime::opaque::SessionKeys {
-	tangle_runtime::opaque::SessionKeys { babe, grandpa, im_online, role }
+	tangle_runtime::opaque::SessionKeys { babe, grandpa, im_online }
 }
 
 pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -209,7 +205,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 /// Configure initial storage state for FRAME modules.
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
-	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
+	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)>,
 	endowed_accounts: Vec<(AccountId, Balance)>,
 	root_key: AccountId,
 	chain_id: u64,
@@ -258,7 +254,7 @@ fn mainnet_genesis(
 					(
 						x.0.clone(),
 						x.0.clone(),
-						generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone(), x.4.clone()),
+						generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone()),
 					)
 				})
 				.collect::<Vec<_>>(),

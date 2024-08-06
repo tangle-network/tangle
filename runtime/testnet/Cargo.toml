@@ -88,19 +88,15 @@ pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
 
-# Webb dependencies
+# Tangle dependencies
 pallet-airdrop-claims = { workspace = true }
-pallet-dkg = { workspace = true }
-pallet-jobs = { workspace = true }
-pallet-jobs-rpc-runtime-api = { workspace = true }
-pallet-roles = { workspace = true }
-pallet-zksaas = { workspace = true }
-tangle-crypto-primitives = { workspace = true }
+pallet-services = { workspace = true }
+pallet-services-rpc-runtime-api = { workspace = true }
 tangle-primitives = { workspace = true, features = ["verifying"] }
+tangle-crypto-primitives = { workspace = true }
 pallet-multi-asset-delegation = { workspace = true }
 
 # Frontier dependencies
-fp-account = { workspace = true }
 fp-evm = { workspace = true }
 fp-rpc = { workspace = true }
 fp-self-contained = { workspace = true }
@@ -124,16 +120,21 @@ pallet-evm-precompile-simple = { workspace = true }
 
 pallet-hotfix-sufficients = { workspace = true }
 
-## Moonbeam precompiles
+## Tangle precompiles
 pallet-evm-precompile-batch = { workspace = true }
 pallet-evm-precompile-call-permit = { workspace = true }
 pallet-evm-precompile-democracy = { workspace = true }
-pallet-evm-precompile-jobs = { workspace = true }
 pallet-evm-precompile-preimage = { workspace = true }
 pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
 pallet-evm-precompile-staking = { workspace = true }
 pallet-evm-precompile-vesting = { workspace = true }
+pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { workspace = true }
+pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { workspace = true }
+pallet-evm-precompile-verify-ecdsa-stark-signature = { workspace = true }
+pallet-evm-precompile-verify-schnorr-signatures = { workspace = true }
+pallet-evm-precompile-verify-bls381-signature = { workspace = true }
+pallet-evm-precompile-multi-asset-delegation = { workspace = true }
 precompile-utils = { workspace = true }
 
 evm-tracer = { workspace = true }
@@ -144,7 +145,7 @@ rpc-primitives-txpool = { workspace = true }
 sygma-access-segregator = { workspace = true }
 sygma-basic-feehandler = { workspace = true }
 sygma-traits = { workspace = true }
-sygma-fee-handler-router ={ workspace = true }
+sygma-fee-handler-router = { workspace = true }
 sygma-percentage-feehandler = { workspace = true }
 sygma-bridge = { workspace = true }
 sygma-runtime-api = { workspace = true }
@@ -156,166 +157,163 @@ xcm-executor = { workspace = true }
 polkadot-parachain-primitives = { workspace = true }
 
 [features]
+runtime-benchmarks = [
+    "frame-benchmarking",
+    "frame-support/runtime-benchmarks",
+    "frame-system/runtime-benchmarks",
+    "frame-system-benchmarking/runtime-benchmarks",
+    "pallet-balances/runtime-benchmarks",
+    "pallet-assets/runtime-benchmarks",
+    "pallet-vesting/runtime-benchmarks",
+    "pallet-collective/runtime-benchmarks",
+    "pallet-timestamp/runtime-benchmarks",
+    "pallet-tx-pause/runtime-benchmarks",
+    "sp-runtime/runtime-benchmarks",
+
+    # Frontier
+    "pallet-ethereum/runtime-benchmarks",
+    "pallet-evm/runtime-benchmarks",
+    "pallet-hotfix-sufficients/runtime-benchmarks",
+
+    # Tangle
+    "pallet-services/runtime-benchmarks",
+    "pallet-airdrop-claims/runtime-benchmarks",
+
+    "xcm-builder/runtime-benchmarks",
+    "pallet-multi-asset-delegation/runtime-benchmarks",
+]
 default = ["std", "with-rocksdb-weights", "evm-tracing"]
 local-testing = []
-runtime-benchmarks = [
-  "frame-benchmarking",
-  "frame-support/runtime-benchmarks",
-  "frame-system/runtime-benchmarks",
-  "frame-system-benchmarking/runtime-benchmarks",
-  "pallet-balances/runtime-benchmarks",
-  "pallet-assets/runtime-benchmarks",
-  "pallet-vesting/runtime-benchmarks",
-  "pallet-collective/runtime-benchmarks",
-  "pallet-timestamp/runtime-benchmarks",
-  "pallet-tx-pause/runtime-benchmarks",
-  "sp-runtime/runtime-benchmarks",
-
-  # Frontier
-  "pallet-ethereum/runtime-benchmarks",
-  "pallet-evm/runtime-benchmarks",
-  "pallet-hotfix-sufficients/runtime-benchmarks",
-
-  # Tangle
-  "pallet-roles/runtime-benchmarks",
-  "pallet-jobs/runtime-benchmarks",
-  "pallet-airdrop-claims/runtime-benchmarks",
-
-  "xcm-builder/runtime-benchmarks",
-  "pallet-multi-asset-delegation/runtime-benchmarks"
-]
 
 std = [
-  "serde/std",
-  "parity-scale-codec/std",
-  "scale-info/std",
-  "log/std",
-  "sp-api/std",
-  "sp-std/std",
-  "sp-io/std",
-  "sp-core/std",
-  "sp-runtime/std",
-  "sp-version/std",
-  "sp-staking/std",
-  "sp-offchain/std",
-  "sp-session/std",
-  "sp-block-builder/std",
-  "sp-transaction-pool/std",
-  "sp-inherents/std",
-  "sp-consensus-babe/std",
-  "frame-support/std",
-  "sp-storage/std",
-  "frame-executive/std",
-  "frame-system/std",
-  "frame-system-rpc-runtime-api/std",
-  "frame-system-benchmarking?/std",
-  "frame-election-provider-support/std",
-  "pallet-authorship/std",
-  "pallet-babe/std",
-  "pallet-bags-list/std",
-  "pallet-bounties/std",
-  "pallet-child-bounties/std",
-  "pallet-balances/std",
-  "pallet-assets/std",
-  "pallet-vesting/std",
-  "pallet-grandpa/std",
-  "pallet-indices/std",
-  "pallet-randomness-collective-flip/std",
-  "pallet-session/std",
-  "pallet-sudo/std",
-  "pallet-timestamp/std",
-  "pallet-transaction-payment/std",
-  "pallet-transaction-payment-rpc-runtime-api/std",
-  "pallet-tx-pause/std",
-  "pallet-utility/std",
-  "pallet-multisig/std",
-  "pallet-collective/std",
-  "pallet-democracy/std",
-  "pallet-election-provider-multi-phase/std",
-  "pallet-elections-phragmen/std",
-  "pallet-im-online/std",
-  "pallet-offences/std",
-  "pallet-staking/std",
-  "pallet-scheduler/std",
-  "pallet-preimage/std",
-  "pallet-nomination-pools/std",
-  "pallet-treasury/std",
-  "pallet-airdrop-claims/std",
-  "pallet-identity/std",
-  "frame-system-benchmarking?/std",
-  "frame-metadata-hash-extension/std",
-  "frame-benchmarking/std",
-  "pallet-dkg/std",
-  "pallet-proxy/std",
-  "pallet-zksaas/std",
-  "num_enum/std",
-  "fixed/std",
-  "hex/std",
-  "primitive-types/std",
+    "serde/std",
+    "num_enum/std",
+    "parity-scale-codec/std",
+    "scale-info/std",
+    "log/std",
+    "sp-api/std",
+    "sp-std/std",
+    "sp-io/std",
+    "sp-core/std",
+    "sp-runtime/std",
+    "sp-version/std",
+    "sp-staking/std",
+    "sp-offchain/std",
+    "sp-session/std",
+    "sp-block-builder/std",
+    "sp-transaction-pool/std",
+    "sp-inherents/std",
+    "sp-consensus-babe/std",
+    "frame-support/std",
+    "sp-storage/std",
+    "frame-executive/std",
+    "frame-system/std",
+    "frame-system-rpc-runtime-api/std",
+    "frame-system-benchmarking?/std",
+    "frame-election-provider-support/std",
+    "pallet-authorship/std",
+    "pallet-babe/std",
+    "pallet-bags-list/std",
+    "pallet-bounties/std",
+    "pallet-child-bounties/std",
+    "pallet-balances/std",
+    "pallet-assets/std",
+    "pallet-vesting/std",
+    "pallet-grandpa/std",
+    "pallet-indices/std",
+    "pallet-randomness-collective-flip/std",
+    "pallet-session/std",
+    "pallet-sudo/std",
+    "pallet-timestamp/std",
+    "pallet-transaction-payment/std",
+    "pallet-transaction-payment-rpc-runtime-api/std",
+    "pallet-tx-pause/std",
+    "pallet-utility/std",
+    "pallet-multisig/std",
+    "pallet-collective/std",
+    "pallet-democracy/std",
+    "pallet-election-provider-multi-phase/std",
+    "pallet-elections-phragmen/std",
+    "pallet-im-online/std",
+    "pallet-offences/std",
+    "pallet-staking/std",
+    "pallet-scheduler/std",
+    "pallet-preimage/std",
+    "pallet-nomination-pools/std",
+    "pallet-treasury/std",
+    "pallet-airdrop-claims/std",
+    "pallet-identity/std",
+    "frame-system-benchmarking?/std",
+    "frame-metadata-hash-extension/std",
+    "frame-benchmarking/std",
+    "pallet-proxy/std",
+    "fixed/std",
+    "hex/std",
+    "primitive-types/std",
 
-  # Tangle dependencies
-  "tangle-primitives/std",
-  "tangle-crypto-primitives/std",
-  "pallet-jobs/std",
-  "pallet-roles/std",
-  "pallet-dkg/std",
-  "pallet-zksaas/std",
-  "pallet-jobs-rpc-runtime-api/std",
-  "pallet-multi-asset-delegation/std",
+    # Tangle dependencies
+    "tangle-primitives/std",
+    "tangle-crypto-primitives/std",
+    "pallet-services/std",
+    "pallet-multi-asset-delegation/std",
+    "pallet-services-rpc-runtime-api/std",
 
-  # Frontier
-  "fp-account/std",
-  "fp-evm/std",
-  "fp-rpc/std",
-  "fp-self-contained/std",
+    # Frontier
+    "fp-evm/std",
+    "fp-rpc/std",
+    "fp-self-contained/std",
 
-  # Frontier FRAME
-  "pallet-base-fee/std",
-  "pallet-dynamic-fee/std",
-  "pallet-ethereum/std",
-  "pallet-evm/std",
-  "pallet-evm-chain-id/std",
-  "pallet-evm-precompile-modexp/std",
-  "pallet-evm-precompile-balances-erc20/std",
-  "pallet-evm-precompileset-assets-erc20/std",
-  "pallet-evm-precompile-sha3fips/std",
-  "pallet-evm-precompile-simple/std",
-  "pallet-evm-precompile-blake2/std",
-  "pallet-evm-precompile-bn128/std",
-  "pallet-evm-precompile-curve25519/std",
-  "pallet-evm-precompile-dispatch/std",
-  "pallet-evm-precompile-ed25519/std",
-  "pallet-hotfix-sufficients/std",
-  "precompile-utils/std",
-  "evm-tracer/std",
-  "rpc-primitives-debug/std",
-  "rpc-primitives-txpool/std",
+    # Frontier FRAME
+    "pallet-base-fee/std",
+    "pallet-dynamic-fee/std",
+    "pallet-ethereum/std",
+    "pallet-evm/std",
+    "pallet-evm-chain-id/std",
+    "pallet-evm-precompile-modexp/std",
+    "pallet-evm-precompile-balances-erc20/std",
+    "pallet-evm-precompile-sha3fips/std",
+    "pallet-evm-precompile-simple/std",
+    "pallet-evm-precompile-blake2/std",
+    "pallet-evm-precompile-bn128/std",
+    "pallet-evm-precompile-curve25519/std",
+    "pallet-evm-precompile-dispatch/std",
+    "pallet-evm-precompile-ed25519/std",
+    "pallet-hotfix-sufficients/std",
+    "precompile-utils/std",
+    "evm-tracer/std",
+    "rpc-primitives-debug/std",
+    "rpc-primitives-txpool/std",
 
-  # Moonbeam precompiles
-  "pallet-evm-precompile-preimage/std",
-  "pallet-evm-precompile-batch/std",
-  "pallet-evm-precompile-call-permit/std",
-  "pallet-evm-precompile-proxy/std",
-  "pallet-evm-precompile-democracy/std",
-  "pallet-evm-precompile-registry/std",
-  "pallet-evm-precompile-staking/std",
-  "pallet-evm-precompile-jobs/std",
-  "pallet-evm-precompile-vesting/std",
+    # Tangle precompiles
+    "pallet-evm-precompile-preimage/std",
+    "pallet-evm-precompile-batch/std",
+    "pallet-evm-precompile-call-permit/std",
+    "pallet-evm-precompile-proxy/std",
+    "pallet-evm-precompile-democracy/std",
+    "pallet-evm-precompile-registry/std",
+    "pallet-evm-precompile-staking/std",
+    "pallet-evm-precompile-vesting/std",
+    "pallet-evm-precompile-multi-asset-delegation/std",
+    "pallet-evm-precompile-verify-ecdsa-secp256k1-signature/std",
+    "pallet-evm-precompile-verify-ecdsa-secp256r1-signature/std",
+    "pallet-evm-precompile-verify-ecdsa-stark-signature/std",
+    "pallet-evm-precompile-verify-schnorr-signatures/std",
+    "pallet-evm-precompile-verify-bls381-signature/std",
 
-  # Sygma
-  "sygma-basic-feehandler/std",
-  "sygma-traits/std",
-  "sygma-bridge/std",
-  "sygma-access-segregator/std",
-  "sygma-fee-handler-router/std",
-  "sygma-percentage-feehandler/std",
-  "sygma-runtime-api/std",
+    # Sygma
+    "sygma-basic-feehandler/std",
+    "sygma-traits/std",
+    "sygma-bridge/std",
+    "sygma-access-segregator/std",
+    "sygma-fee-handler-router/std",
+    "sygma-percentage-feehandler/std",
+    "sygma-runtime-api/std",
 
-  # XCM
-  "xcm/std",
-  "xcm-builder/std",
-  "xcm-executor/std",
-  "polkadot-parachain-primitives/std",
+    # XCM
+    "xcm/std",
+    "xcm-builder/std",
+    "xcm-executor/std",
+    "polkadot-parachain-primitives/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []

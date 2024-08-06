@@ -1,0 +1,20 @@
+[package]
+name = "pallet-services-rpc"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+jsonrpsee = { workspace = true, features = ["client-core", "server", "macros"] }
+pallet-services-rpc-runtime-api = { path = "./runtime-api", default-features = false }
+parity-scale-codec = { workspace = true }
+sp-api = { workspace = true }
+sp-blockchain = { workspace = true }
+sp-runtime = { workspace = true }
+tangle-primitives = { workspace = true }
