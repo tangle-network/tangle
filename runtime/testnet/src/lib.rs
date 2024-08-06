@@ -24,6 +24,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 mod filters;
 pub mod frontier_evm;
 pub mod impls;
+pub mod native_bridge;
 pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
@@ -1276,7 +1277,6 @@ construct_runtime!(
 
 		Proxy: pallet_proxy = 44,
 		MultiAssetDelegation: pallet_multi_asset_delegation = 45,
-		Services: pallet_services = 51,
 
 		// Sygma
 		SygmaAccessSegregator: sygma_access_segregator = 46,
@@ -1285,6 +1285,11 @@ construct_runtime!(
 		SygmaPercentageFeeHandler: sygma_percentage_feehandler = 49,
 		SygmaBridge: sygma_bridge = 50,
 
+		// Services
+		Services: pallet_services = 51,
+
+		BridgeGrandpa: pallet_bridge_grandpa::<Instance1>::{Pallet, Event<T>},
+		BridgeParachains: pallet_bridge_parachains::{Call, Pallet, Event<T>},
 	}
 );
 

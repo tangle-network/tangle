@@ -25,7 +25,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 # blake2b_simd = { version = "1", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
 parity-scale-codec = { workspace = true }
-jubjub = { version = "0.10", git = "https://github.com/LIT-Protocol/jubjub.git", features = ["alloc"], default-features = false }
+jubjub = { package = "jubjub-plus", git = "https://github.com/LIT-Protocol/jubjub.git", features = ["alloc"], default-features = false }
 group = { version = "0.13", features = ["alloc"], default-features = false }
 frost-core = { workspace = true }
 rand_core = { workspace = true, optional = true }
