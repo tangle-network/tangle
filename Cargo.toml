@@ -1,5 +1,5 @@
 [workspace.package]
-version = "1.1.0"
+version = "2.0.0"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
@@ -41,6 +41,7 @@ members = [
     "precompiles/verify-schnorr-signatures",
     "precompiles/verify-bls381-signature",
     "precompiles/multi-asset-delegation",
+    "tangle-subxt",
     "evm-tracer",
 ]
 resolver = "2"

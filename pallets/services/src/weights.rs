@@ -37,6 +37,7 @@ use core::marker::PhantomData;
 /// Weight functions needed for `pallet_services`.
 pub trait WeightInfo {
 	fn create_blueprint() -> Weight;
+	fn pre_register() -> Weight;
 	fn register() -> Weight;
 	fn unregister() -> Weight;
 	fn update_approval_preference() -> Weight;
@@ -63,6 +64,9 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		Weight::from_parts(10_000_000, 1594)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
+	fn pre_register() -> Weight {
+		Weight::from_parts(1_000_000, 7010)
 	}
 	/// Storage: `Services::Blueprints` (r:1 w:0)
 	/// Proof: `Services::Blueprints` (`max_values`: None, `max_size`: None, mode: `Measured`)
@@ -249,6 +253,9 @@ impl WeightInfo for () {
 		Weight::from_parts(10_000_000, 1594)
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
+	fn pre_register() -> Weight {
+		Weight::from_parts(1_000_000, 7010)
 	}
 	/// Storage: `Services::Blueprints` (r:1 w:0)
 	/// Proof: `Services::Blueprints` (`max_values`: None, `max_size`: None, mode: `Measured`)
