@@ -1,14 +1,12 @@
 [workspace.package]
-version = "1.1.0"
+version = "2.0.0"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
 homepage = "https://webb.tools"
 repository = "https://github.com/webb-tools/tangle"
 
-exclude = [
-    "examples"
-]
+exclude = ["examples"]
 
 [workspace]
 members = [
@@ -19,15 +17,14 @@ members = [
     "client/evm-tracing",
     "client/rpc/*",
     "client/rpc-core/*",
-    "client/voter",
     "node",
     "runtime/testnet",
     "runtime/mainnet",
     "pallets/*",
-    "pallets/jobs/rpc",
-    "pallets/jobs/rpc/runtime-api",
-    "pallets/dkg/frost",
-    "pallets/dkg/frost/frost-*",
+    "pallets/services/rpc",
+    "pallets/services/rpc/runtime-api",
+    "frost",
+    "frost/frost-*",
     "precompiles/utils",
     "precompiles/utils/macro",
     "precompiles/utils/tests-external",
@@ -36,12 +33,16 @@ members = [
     "precompiles/call-permit",
     "precompiles/proxy",
     "precompiles/preimage",
-    "precompiles/jobs",
     "precompiles/balances-erc20",
     "precompiles/assets-erc20",
+    "precompiles/verify-ecdsa-secp256k1-signature",
+    "precompiles/verify-ecdsa-secp256r1-signature",
+    "precompiles/verify-ecdsa-stark-signature",
+    "precompiles/verify-schnorr-signatures",
+    "precompiles/verify-bls381-signature",
+    "precompiles/multi-asset-delegation",
     "tangle-subxt",
-    "examples/*",
-    "evm-tracer"
+    "evm-tracer",
 ]
 resolver = "2"
 
@@ -51,6 +52,7 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", b
 substrate-build-script-utils = "3.0.0"
 subtle = { version = "2.2", default-features = false }
 hex-literal = "0.4.1"
+itertools = { version = "0.12.1", default-features = false }
 log = { version = "0.4.20", default-features = false }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 serde = { version = "1.0.197", default-features = false, features = ["derive"] }
@@ -90,7 +92,7 @@ byteorder = { version = "1", default-features = false }
 schnorrkel = { version = "0.11.4", default-features = false }
 snowbridge-milagro-bls = { git = "https://github.com/Snowfork/milagro_bls", default-features = false, rev = "43a5d480ed6e3b83de4cf54888680d51604199e6" }
 primitive-types = { version = "0.12.2", default-features = false, features = ["scale-info", "serde_no_std"] }
-fixed = {version = "1.23.0", default-features = false }
+fixed = { version = "1.23.0", default-features = false }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
@@ -113,27 +115,25 @@ ethabi = { version = "15.0.0", default-features = false }
 
 # Tangle Dependencies
 pallet-airdrop-claims = { path = "pallets/claims", default-features = false }
-pallet-jobs = { path = "pallets/jobs", default-features = false }
-pallet-roles = { path = "pallets/roles", default-features = false }
-pallet-dkg = { path = "pallets/dkg", default-features = false }
-pallet-zksaas = { path = "pallets/zksaas", default-features = false }
-pallet-jobs-rpc-runtime-api = { path = "pallets/jobs/rpc/runtime-api", default-features = false }
-pallet-jobs-rpc = { path = "pallets/jobs/rpc" }
+pallet-services = { path = "pallets/services", default-features = false }
+pallet-services-rpc-runtime-api = { path = "pallets/services/rpc/runtime-api", default-features = false }
+pallet-services-rpc = { path = "pallets/services/rpc" }
 pallet-multi-asset-delegation = { path = "pallets/multi-asset-delegation", default-features = false }
+
 
 k256 = { version = "0.13.0", default-features = false }
 p256 = { version = "0.13.0", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
-starknet-crypto = { version = "0.6.1", default-features = false, features = ["signature-display","alloc"] }
-frost-core = { path = "pallets/dkg/frost", default-features = false }
-frost-ed25519 = { path = "pallets/dkg/frost/frost-ed25519", default-features = false }
-frost-ed448 = { path = "pallets/dkg/frost/frost-ed448", default-features = false }
-frost-ristretto255 = { path = "pallets/dkg/frost/frost-ristretto255", default-features = false }
-frost-secp256k1 = { path = "pallets/dkg/frost/frost-secp256k1", default-features = false }
-frost-p256 = { path = "pallets/dkg/frost/frost-p256", default-features = false }
-frost-p384 = { path = "pallets/dkg/frost/frost-p384", default-features = false }
-frost-redjubjub = { path = "pallets/dkg/frost/frost-redjubjub", default-features = false }
-frost-taproot = { path = "pallets/dkg/frost/frost-taproot", default-features = false }
+starknet-crypto = { version = "0.6.1", default-features = false, features = ["signature-display", "alloc"] }
+frost-core = { path = "frost", default-features = false }
+frost-ed25519 = { path = "frost/frost-ed25519", default-features = false }
+frost-ed448 = { path = "frost/frost-ed448", default-features = false }
+frost-ristretto255 = { path = "frost/frost-ristretto255", default-features = false }
+frost-secp256k1 = { path = "frost/frost-secp256k1", default-features = false }
+frost-p256 = { path = "frost/frost-p256", default-features = false }
+frost-p384 = { path = "frost/frost-p384", default-features = false }
+frost-redjubjub = { path = "frost/frost-redjubjub", default-features = false }
+frost-taproot = { path = "frost/frost-taproot", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
@@ -306,8 +306,18 @@ pallet-evm-precompile-proxy = { path = "precompiles/proxy", default-features = f
 pallet-evm-precompile-preimage = { path = "precompiles/preimage", default-features = false }
 pallet-evm-precompile-registry = { path = "precompiles/precompile-registry", default-features = false }
 pallet-evm-precompile-staking = { path = "precompiles/staking", default-features = false }
-pallet-evm-precompile-jobs = { path = "precompiles/jobs", default-features = false }
 pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features = false }
+pallet-evm-precompile-multi-asset-delegation = { path = "precompiles/multi-asset-delegation", default-features = false }
+pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { path = "precompiles/verify-ecdsa-secp256k1-signature", default-features = false }
+pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { path = "precompiles/verify-ecdsa-secp256r1-signature", default-features = false }
+pallet-evm-precompile-verify-ecdsa-stark-signature = { path = "precompiles/verify-ecdsa-stark-signature", default-features = false }
+pallet-evm-precompile-verify-schnorr-signatures = { path = "precompiles/verify-schnorr-signatures", default-features = false }
+pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls381-signature", default-features = false }
+
+# Precompiles utils
+postcard = { version = "1", default-features = false }
+generic-ec = { version = "0.2", default-features = false }
+signature = { version = "2.2", default-features = false }
 
 # EVM & Ethereum
 # (wasm)
@@ -330,9 +340,6 @@ tangle-crypto-primitives = { path = "primitives/crypto", default-features = fals
 pallet-staking = { path = "pallets/staking", default-features = false }
 pallet-staking-reward-curve = { path = "pallets/staking/reward-curve", default-features = false }
 
-webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false , branch = "salman/polkadot-v1.7.0"}
-
-
 primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }
 rpc-primitives-debug = { path = "primitives/rpc/debug", default-features = false }
@@ -347,19 +354,6 @@ rpc-debug = { path = "client/rpc/debug" }
 rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
 evm-tracer = { path = "evm-tracer", default-features = false }
-
-# MPC
-malachite-base = { version = "0.4", default-features = false }
-malachite-nz = { version = "0.4", default-features = false, features = ["32_bit_limbs"] }
-postcard = { version = "1", default-features = false }
-dfns-cggmp21 = { package = "cggmp21", version = "0.2.0", default-features = false }
-udigest = { version = "0.1.0", default-features = false }
-generic-ec = { version = "0.2", default-features = false }
-generic-ec-zkp = { version = "0.2", default-features = false }
-round-based = { version = "0.2", default-features = false }
-paillier-zk = { version = "0.2", default-features = false }
-derivation-path = { version = "0.2.0", default-features = false }
-signature = { version = "2.2", default-features = false }
 
 # Polkadot XCM
 xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }

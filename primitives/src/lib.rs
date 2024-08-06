@@ -27,13 +27,16 @@ use sp_runtime::{
 	MultiAddress, MultiSignature, Perbill,
 };
 
-pub mod jobs;
-pub mod misbehavior;
-pub mod roles;
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+
+pub mod services;
 pub mod types;
 pub use types::*;
 pub mod chain_identifier;
 pub mod impls;
+pub mod traits;
+pub use traits::*;
 
 #[cfg(feature = "verifying")]
 pub mod verifier;

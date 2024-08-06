@@ -14,7 +14,7 @@
 // limitations under the License.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-// `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
+// `construct_runtime!` does a lot of recursion and requires us to increase the limit to 512.
 #![recursion_limit = "512"]
 
 // Make the WASM binary available.
@@ -24,7 +24,9 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 mod filters;
 pub mod frontier_evm;
 pub mod impls;
+pub mod migrations;
 pub mod precompiles;
+pub mod tangle_services;
 pub mod voter_bags;
 
 use fixed::{types::extra::U16, FixedU128 as DecimalFixedU128};
@@ -41,11 +43,14 @@ use frame_support::{
 	weights::ConstantMultiplier,
 };
 use frame_system::{EnsureSigned, EnsureSignedBy};
+use frontier_evm::DefaultBaseFeePerGas;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
+use pallet_evm::GasWeightMapping;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use pallet_services_rpc_runtime_api::BlockNumberOf;
 use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking::StakerStatus;
 use pallet_transaction_payment::{
@@ -72,8 +77,8 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	AccountId32, ApplyExtrinsicResult, DispatchResult, FixedPointNumber, FixedU128, Perquintill,
-	RuntimeDebug, SaturatedConversion,
+	AccountId32, ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
+	SaturatedConversion,
 };
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::sync::Arc;
@@ -86,11 +91,7 @@ use sygma_traits::{
 	ChainID, DecimalConverter, DepositNonce, DomainID, ExtractDestinationData, ResourceId,
 	VerifyingContractAddress,
 };
-pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::{
-	jobs::{JobId, PhaseResult, RpcResponseJobsData},
-	roles::RoleType,
-};
+use tangle_primitives::services::RpcServicesWithBlueprint;
 use xcm::v4::Junctions::{X1, X3, X4};
 use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
 #[allow(deprecated)]
@@ -126,20 +127,10 @@ use sp_runtime::generic::Era;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
-use sp_staking::{
-	currency_to_vote::U128CurrencyToVote,
-	offence::{OffenceError, ReportOffence},
-	SessionIndex,
-};
+use sp_staking::currency_to_vote::U128CurrencyToVote;
 pub use tangle_primitives::{
 	currency::*,
 	fee::*,
-	jobs::{
-		traits::{JobToFee, MPCHandler},
-		JobResult, JobSubmission, JobType, JobWithResult, ValidatorOffenceType,
-	},
-	misbehavior::{traits::MisbehaviorHandler, MisbehaviorJustification, MisbehaviorSubmission},
-	roles::ValidatorRewardDistribution,
 	time::*,
 	types::{
 		AccountId, AccountIndex, Address, Balance, BlockNumber, Hash, Header, Index, Moment,
@@ -157,7 +148,6 @@ use tangle_primitives::{
 		CANDIDACY_BOND, DESIRED_MEMBERS, DESIRED_RUNNERS_UP, ELECTIONS_PHRAGMEN_PALLET_ID,
 		MAX_CANDIDATES, MAX_VOTERS, TERM_DURATION,
 	},
-	roles::traits::RolesHandler,
 	staking::{
 		BONDING_DURATION, HISTORY_DEPTH, MAX_NOMINATOR_REWARDED_PER_VALIDATOR, OFFCHAIN_REPEAT,
 		OFFENDING_VALIDATOR_THRESHOLD, SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
@@ -168,6 +158,7 @@ use tangle_primitives::{
 		TIP_REPORT_DEPOSIT_BASE, TREASURY_PALLET_ID,
 	},
 };
+pub use tangle_services::PalletServicesConstraints;
 
 // Precompiles
 pub type Precompiles = WebbPrecompiles<Runtime>;
@@ -191,7 +182,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1100, // v1.1.0
+	spec_version: 2000, // v2.0.0
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -233,7 +224,6 @@ pub mod opaque {
 			pub babe: Babe,
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
-			pub role: Roles,
 		}
 	}
 }
@@ -500,7 +490,6 @@ impl pallet_staking::Config for Runtime {
 	type TargetList = pallet_staking::UseValidatorsMap<Runtime>;
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type NextNewSession = Session;
-	type RolesHandler = Roles;
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
@@ -789,7 +778,7 @@ impl Convert<Balance, sp_core::U256> for BalanceToU256 {
 pub struct U256ToBalance;
 impl Convert<sp_core::U256, Balance> for U256ToBalance {
 	fn convert(n: sp_core::U256) -> Balance {
-		n.try_into().unwrap_or(Balance::max_value())
+		n.try_into().unwrap_or(Balance::MAX)
 	}
 }
 
@@ -810,9 +799,9 @@ impl pallet_nomination_pools::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
+	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::MAX;
 	/// We prioritize im-online heartbeats over election solution submission.
-	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::max_value() / 2;
+	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::MAX / 2;
 }
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
@@ -1131,173 +1120,6 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type WeightInfo = ();
 }
 
-pub struct TestnetJobToFeeHandler;
-
-impl JobToFee<AccountId, BlockNumber, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>
-	for TestnetJobToFeeHandler
-{
-	type Balance = Balance;
-
-	fn job_to_fee(
-		job: &JobSubmission<
-			AccountId,
-			BlockNumber,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxAdditionalParamsLen,
-		>,
-	) -> Balance {
-		match job.job_type {
-			JobType::DKGTSSPhaseOne(_)
-			| JobType::DKGTSSPhaseTwo(_)
-			| JobType::DKGTSSPhaseThree(_)
-			| JobType::DKGTSSPhaseFour(_) => Dkg::job_to_fee(job),
-			JobType::ZkSaaSPhaseOne(_) | JobType::ZkSaaSPhaseTwo(_) => ZkSaaS::job_to_fee(job),
-		}
-	}
-
-	fn calculate_result_extension_fee(result: Vec<u8>, extension_time: BlockNumber) -> Balance {
-		Dkg::calculate_result_extension_fee(result, extension_time)
-	}
-}
-
-pub struct TestnetMPCHandler;
-
-impl
-	MPCHandler<
-		AccountId,
-		BlockNumber,
-		Balance,
-		MaxParticipants,
-		MaxSubmissionLen,
-		MaxKeyLen,
-		MaxDataLen,
-		MaxSignatureLen,
-		MaxProofLen,
-		MaxAdditionalParamsLen,
-	> for TestnetMPCHandler
-{
-	fn verify(
-		data: JobWithResult<
-			AccountId,
-			MaxParticipants,
-			MaxSubmissionLen,
-			MaxKeyLen,
-			MaxDataLen,
-			MaxSignatureLen,
-			MaxProofLen,
-			MaxAdditionalParamsLen,
-		>,
-	) -> DispatchResult {
-		match data.result {
-			JobResult::DKGPhaseOne(_)
-			| JobResult::DKGPhaseTwo(_)
-			| JobResult::DKGPhaseThree(_)
-			| JobResult::DKGPhaseFour(_) => Dkg::verify(data.result),
-			JobResult::ZkSaaSPhaseOne(_) | JobResult::ZkSaaSPhaseTwo(_) => ZkSaaS::verify(data),
-		}
-	}
-
-	fn verify_validator_report(
-		_validator: AccountId,
-		_offence: ValidatorOffenceType,
-		_signatures: Vec<Vec<u8>>,
-	) -> DispatchResult {
-		Ok(())
-	}
-
-	fn validate_authority_key(_validator: AccountId, _authority_key: Vec<u8>) -> DispatchResult {
-		Ok(())
-	}
-}
-
-pub struct TestnetMisbehaviorHandler;
-
-impl MisbehaviorHandler for TestnetMisbehaviorHandler {
-	fn verify(data: MisbehaviorSubmission) -> DispatchResult {
-		match data.justification {
-			MisbehaviorJustification::DKGTSS(_) => Dkg::verify_misbehavior(data),
-			_ => Ok(()),
-		}
-	}
-}
-
-#[cfg(feature = "local-testing")]
-parameter_types! {
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 60_000_000;
-}
-
-#[cfg(not(feature = "local-testing"))]
-parameter_types! {
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSubmissionLen: u32 = 60_000_000;
-}
-
-parameter_types! {
-	pub const JobsPalletId: PalletId = PalletId(*b"py/jobss");
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxParticipants: u32 = 10;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxKeyLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxDataLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxSignatureLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxProofLen: u32 = 256;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxActiveJobsPerValidator: u32 = 100;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxRolesPerValidator: u32 = 100;
-	#[derive(Clone, RuntimeDebug, Eq, PartialEq, TypeInfo, Encode, Decode)]
-	#[derive(Serialize, Deserialize)]
-	pub const MaxAdditionalParamsLen: u32 = 256;
-}
-
-impl pallet_jobs::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type ForceOrigin = EnsureRootOrHalfCouncil;
-	type Currency = Balances;
-	type JobToFee = TestnetJobToFeeHandler;
-	type RolesHandler = Roles;
-	type MPCHandler = TestnetMPCHandler;
-	type MisbehaviorHandler = TestnetMisbehaviorHandler;
-	type PalletId = JobsPalletId;
-	type MaxParticipants = MaxParticipants;
-	type MaxSubmissionLen = MaxSubmissionLen;
-	type MaxKeyLen = MaxKeyLen;
-	type MaxDataLen = MaxDataLen;
-	type MaxSignatureLen = MaxSignatureLen;
-	type MaxProofLen = MaxProofLen;
-	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
-	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
-	type WeightInfo = ();
-}
-
-type IdTuple = pallet_session::historical::IdentificationTuple<Runtime>;
-type Offence = pallet_roles::offences::ValidatorOffence<IdTuple>;
-/// A mock offence report handler.
-pub struct OffenceHandler;
-impl ReportOffence<AccountId, IdTuple, Offence> for OffenceHandler {
-	fn report_offence(_reporters: Vec<AccountId>, _offence: Offence) -> Result<(), OffenceError> {
-		Ok(())
-	}
-
-	fn is_known_offence(_offenders: &[IdTuple], _time_slot: &SessionIndex) -> bool {
-		false
-	}
-}
-
 // ReStaking reward curve, more details at
 // https://docs.rs/pallet-staking-reward-curve/latest/pallet_staking_reward_curve/macro.build.html
 // We are aiming for a max inflation of 1%, when 25% of tokens are re-staked
@@ -1312,60 +1134,6 @@ pallet_staking_reward_curve::build! {
 		max_piece_count: 40,
 		test_precision: 0_005_000,
 	);
-}
-
-parameter_types! {
-	pub const MaxValidators : u32 = 1000;
-	pub MaxRestake: Percent = Percent::from_percent(50);
-	pub const RestakerRewardCurve: &'static PiecewiseLinear<'static> = &RESTAKER_REWARD_CURVE;
-	pub Reward : ValidatorRewardDistribution = ValidatorRewardDistribution::try_new(Percent::from_rational(1_u32,2_u32), Percent::from_rational(1_u32,2_u32)).unwrap();
-}
-
-impl pallet_roles::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type JobsHandler = Jobs;
-	type RoleKeyId = RoleKeyId;
-	type MaxRolesPerAccount = ConstU32<2>;
-	type ValidatorSet = Historical;
-	type ReportOffences = OffenceHandler;
-	type ValidatorRewardDistribution = Reward;
-	type MaxValidators = MaxValidators;
-	type ForceOrigin = EnsureRoot<Self::AccountId>;
-	type MaxRestake = MaxRestake;
-	type MaxRolesPerValidator = MaxRolesPerValidator;
-	type MaxActiveJobsPerValidator = MaxActiveJobsPerValidator;
-	type MaxKeyLen = MaxKeyLen;
-	type RestakerEraPayout = pallet_staking::ConvertCurve<RewardCurve>;
-	type WeightInfo = ();
-}
-
-impl pallet_dkg::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Currency = Balances;
-	type UpdateOrigin = EnsureRootOrHalfCouncil;
-	type MaxParticipants = MaxParticipants;
-	type MaxSubmissionLen = MaxSubmissionLen;
-	type MaxKeyLen = MaxKeyLen;
-	type MaxDataLen = MaxDataLen;
-	type MaxSignatureLen = MaxSignatureLen;
-	type MaxProofLen = MaxProofLen;
-	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
-	type WeightInfo = ();
-}
-
-impl pallet_zksaas::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Currency = Balances;
-	type UpdateOrigin = EnsureRootOrHalfCouncil;
-	type Verifier = (ArkworksVerifierGroth16Bn254, CircomVerifierGroth16Bn254);
-	type MaxParticipants = MaxParticipants;
-	type MaxSubmissionLen = MaxSubmissionLen;
-	type MaxKeyLen = MaxKeyLen;
-	type MaxDataLen = MaxDataLen;
-	type MaxSignatureLen = MaxSignatureLen;
-	type MaxProofLen = MaxProofLen;
-	type MaxAdditionalParamsLen = MaxAdditionalParamsLen;
-	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -1452,67 +1220,72 @@ impl pallet_proxy::Config for Runtime {
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
-		System: frame_system,
-		Timestamp: pallet_timestamp,
+		System: frame_system = 1,
+		Timestamp: pallet_timestamp = 2,
 
-		Sudo: pallet_sudo,
-		RandomnessCollectiveFlip: pallet_randomness_collective_flip,
+		Sudo: pallet_sudo = 3,
+		RandomnessCollectiveFlip: pallet_randomness_collective_flip = 4,
 
-		Assets: pallet_assets,
-		Balances: pallet_balances,
-		TransactionPayment: pallet_transaction_payment,
+		Assets: pallet_assets = 5,
+		Balances: pallet_balances = 6,
+		TransactionPayment: pallet_transaction_payment = 7,
 
-		Authorship: pallet_authorship,
-		Babe: pallet_babe,
-		Grandpa: pallet_grandpa,
+		Authorship: pallet_authorship = 8,
+		Babe: pallet_babe = 9,
+		Grandpa: pallet_grandpa = 10,
 
-		Indices: pallet_indices,
-		Democracy: pallet_democracy,
-		Council: pallet_collective::<Instance1>,
-		Vesting: pallet_vesting,
+		Indices: pallet_indices = 11,
+		Democracy: pallet_democracy = 12,
+		Council: pallet_collective::<Instance1> = 13,
+		Vesting: pallet_vesting = 14,
 
-		Elections: pallet_elections_phragmen,
-		ElectionProviderMultiPhase: pallet_election_provider_multi_phase,
-		Staking: pallet_staking,
-		Session: pallet_session,
-		Historical: pallet_session_historical,
-		Treasury: pallet_treasury,
-		Bounties: pallet_bounties,
-		ChildBounties: pallet_child_bounties,
-		BagsList: pallet_bags_list,
-		NominationPools: pallet_nomination_pools,
+		Elections: pallet_elections_phragmen = 15,
+		ElectionProviderMultiPhase: pallet_election_provider_multi_phase = 16,
+		Staking: pallet_staking = 17,
+		Session: pallet_session = 18,
+		Historical: pallet_session_historical = 19,
+		Treasury: pallet_treasury = 20,
+		Bounties: pallet_bounties = 21,
+		ChildBounties: pallet_child_bounties = 22,
+		BagsList: pallet_bags_list = 23,
+		NominationPools: pallet_nomination_pools = 24,
 
-		Scheduler: pallet_scheduler,
-		Preimage: pallet_preimage,
-		Offences: pallet_offences,
+		Scheduler: pallet_scheduler = 25,
+		Preimage: pallet_preimage = 26,
+		Offences: pallet_offences = 27,
 
-		TxPause: pallet_tx_pause,
-		ImOnline: pallet_im_online,
-		Identity: pallet_identity,
-		Utility: pallet_utility,
-		Multisig: pallet_multisig,
+		TxPause: pallet_tx_pause = 28,
+		ImOnline: pallet_im_online = 29,
+		Identity: pallet_identity = 30,
+		Utility: pallet_utility = 31,
+		Multisig: pallet_multisig = 32,
 
-		Ethereum: pallet_ethereum,
-		EVM: pallet_evm,
-		EVMChainId: pallet_evm_chain_id,
-		DynamicFee: pallet_dynamic_fee,
-		BaseFee: pallet_base_fee,
-		HotfixSufficients: pallet_hotfix_sufficients,
+		Ethereum: pallet_ethereum = 33,
+		EVM: pallet_evm = 34,
+		EVMChainId: pallet_evm_chain_id = 35,
+		DynamicFee: pallet_dynamic_fee = 36,
+		BaseFee: pallet_base_fee = 37,
+		HotfixSufficients: pallet_hotfix_sufficients = 38,
 
-		Claims: pallet_airdrop_claims,
-		Roles: pallet_roles,
-		Jobs: pallet_jobs,
-		Dkg: pallet_dkg,
-		ZkSaaS: pallet_zksaas,
-		Proxy: pallet_proxy,
-		MultiAssetDelegation: pallet_multi_asset_delegation,
+		Claims: pallet_airdrop_claims = 39,
+
+		// DO NOT USE below indexes
+		// Roles: pallet_roles = 40,
+		// Jobs: pallet_jobs = 41,
+		// Dkg: pallet_dkg = 42,
+		// ZkSaaS: pallet_zksaas = 43,
+
+		Proxy: pallet_proxy = 44,
+		MultiAssetDelegation: pallet_multi_asset_delegation = 45,
+		Services: pallet_services = 51,
 
 		// Sygma
-		SygmaAccessSegregator: sygma_access_segregator,
-		SygmaBasicFeeHandler: sygma_basic_feehandler,
-		SygmaFeeHandlerRouter: sygma_fee_handler_router,
-		SygmaPercentageFeeHandler: sygma_percentage_feehandler,
-		SygmaBridge: sygma_bridge,
+		SygmaAccessSegregator: sygma_access_segregator = 46,
+		SygmaBasicFeeHandler: sygma_basic_feehandler = 47,
+		SygmaFeeHandlerRouter: sygma_fee_handler_router = 48,
+		SygmaPercentageFeeHandler: sygma_percentage_feehandler = 49,
+		SygmaBridge: sygma_bridge = 50,
+
 	}
 );
 
@@ -1574,15 +1347,8 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	OnRuntimeUpgrade,
+	migrations::MigrateSessionKeys<Runtime>,
 >;
-
-pub struct OnRuntimeUpgrade;
-impl frame_support::traits::OnRuntimeUpgrade for OnRuntimeUpgrade {
-	fn on_runtime_upgrade() -> Weight {
-		Weight::from_parts(0u64, 0u64)
-	}
-}
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {
 	type SignedInfo = H160;
@@ -1677,27 +1443,6 @@ impl pallet_assets::Config for Runtime {
 	type BenchmarkHelper = ();
 }
 
-pub struct MockServiceManager;
-
-impl pallet_multi_asset_delegation::traits::ServiceManager<AccountId, Balance>
-	for MockServiceManager
-{
-	fn list_active_services(_account: &AccountId) -> Vec<pallet_multi_asset_delegation::Service> {
-		// we dont care
-		vec![]
-	}
-
-	fn list_service_reward(_account: &AccountId) -> Balance {
-		// we dont care
-		Balance::default()
-	}
-
-	fn can_exit(_account: &AccountId) -> bool {
-		// Mock logic to determine if the given account can exit
-		true
-	}
-}
-
 parameter_types! {
 	pub const MinOperatorBondAmount: Balance = 10_000;
 	pub const BondDuration: u32 = 10;
@@ -1710,7 +1455,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
-	type ServiceManager = MockServiceManager;
+	type ServiceManager = Services;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;
 	type LeaveDelegatorsDelay = ConstU32<1>;
@@ -2180,7 +1925,6 @@ mod benches {
 	);
 }
 
-use pallet_jobs_rpc_runtime_api::BlockNumberOf;
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {
 		fn version() -> RuntimeVersion {
@@ -2237,29 +1981,15 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_jobs_rpc_runtime_api::JobsApi<Block, AccountId, MaxParticipants, MaxSubmissionLen, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxProofLen, MaxAdditionalParamsLen> for Runtime {
-		fn query_jobs_by_validator(
-			validator: AccountId,
-		) -> Option<Vec<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>>> {
-			Jobs::query_jobs_by_validator(validator)
+	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId> for Runtime {
+		fn query_services_with_blueprints_by_operator(
+			operator: AccountId,
+		) -> Result<
+			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>>>,
+			sp_runtime::DispatchError,
+		> {
+			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
 		}
-
-		fn query_job_by_id(role_type: RoleType, job_id: JobId) -> Option<RpcResponseJobsData<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxSubmissionLen, MaxAdditionalParamsLen>> {
-			Jobs::query_job_by_id(role_type, job_id)
-		}
-
-		fn query_job_result(role_type: RoleType, job_id: JobId) -> Option<PhaseResult<AccountId, BlockNumberOf<Block>, MaxParticipants, MaxKeyLen, MaxDataLen, MaxSignatureLen, MaxSubmissionLen, MaxProofLen, MaxAdditionalParamsLen>> {
-			Jobs::query_job_result(role_type, job_id)
-		}
-
-		fn query_next_job_id() -> JobId {
-			Jobs::query_next_job_id()
-		}
-
-		fn query_restaker_role_key(address: AccountId) -> Option<Vec<u8>> {
-			Roles::get_validator_role_key(address)
-		}
-
 	}
 
 	impl fp_rpc::EthereumRuntimeRPCApi<Block> for Runtime {
@@ -2747,9 +2477,7 @@ impl_runtime_apis! {
 			use baseline::Pallet as BaselineBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
-			list_benchmark!(list, extra, pallet_roles, Roles);
-			list_benchmark!(list, extra, pallet_jobs, Jobs);
-			list_benchmark!(list, extra, pallet_dkg, Dkg);
+			list_benchmark!(list, extra, pallet_services, Services);
 			list_benchmark!(list, extra, pallet_airdrop_claims, Claims);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
@@ -2772,9 +2500,7 @@ impl_runtime_apis! {
 
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
-			add_benchmark!(params, batches, pallet_roles, Roles);
-			add_benchmark!(params, batches, pallet_jobs, Jobs);
-			add_benchmark!(params, batches, pallet_dkg, Dkg);
+			add_benchmark!(params, batches, pallet_services, Services);
 			add_benchmark!(params, batches, pallet_airdrop_claims, Claims);
 
 			Ok(batches)

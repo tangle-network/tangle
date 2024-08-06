@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
+use crate::types::DelegatorBond;
 use crate::types::*;
 use crate::Pallet;
 use frame_support::ensure;
@@ -24,6 +25,7 @@ use sp_runtime::DispatchError;
 use sp_runtime::Saturating;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::vec::Vec;
+use tangle_primitives::RoundIndex;
 
 impl<T: Config> Pallet<T> {
 	#[allow(clippy::type_complexity)]

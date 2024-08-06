@@ -6,10 +6,6 @@ edition = "2021"
 description = "A Precompile to dispatch a call with a ERC712 permit."
 
 [dependencies]
-log = { workspace = true }
-num_enum = { workspace = true }
-paste = { workspace = true }
-slices = { workspace = true }
 
 # Moonbeam
 precompile-utils = { workspace = true }

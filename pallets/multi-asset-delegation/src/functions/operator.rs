@@ -23,6 +23,7 @@ use frame_support::pallet_prelude::DispatchResult;
 use frame_support::traits::Get;
 use frame_support::traits::ReservableCurrency;
 use sp_runtime::DispatchError;
+use tangle_primitives::ServiceManager;
 
 impl<T: Config> Pallet<T> {
 	/// Handles the deposit of stake amount and creation of an operator.

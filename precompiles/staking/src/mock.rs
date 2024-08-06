@@ -18,16 +18,16 @@
 
 //! Test utilities
 #![allow(dead_code)]
+#![allow(clippy::all)]
 use super::*;
 use frame_election_provider_support::bounds::{ElectionBounds, ElectionBoundsBuilder};
 use frame_support::{
 	assert_ok, construct_runtime,
 	pallet_prelude::Hooks,
 	parameter_types,
-	traits::{ConstU64, Everything, OnFinalize, OnInitialize, OnUnbalanced, OneSessionHandler},
+	traits::{ConstU64, Everything, OnFinalize, OnInitialize, OneSessionHandler},
 	weights::Weight,
 };
-use pallet_balances::PositiveImbalance;
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
 use pallet_session::historical as pallet_session_historical;
 use pallet_staking::{ConvertCurve, EraPayout, SessionInterface};
@@ -46,16 +46,12 @@ use std::vec;
 use frame_election_provider_support::{onchain, SequentialPhragmen};
 use pallet_staking::Config;
 use sp_io::TestExternalities;
-use sp_runtime::DispatchResult;
 use sp_runtime::{
 	curve::PiecewiseLinear,
 	testing::TestXt,
 	traits::{self, Extrinsic as ExtrinsicT, IdentifyAccount, IdentityLookup, Verify, Zero},
 	AccountId32, BuildStorage, Perbill,
 };
-use tangle_primitives::jobs::ReportRestakerOffence;
-use tangle_primitives::roles::traits::RolesHandler;
-use tangle_primitives::roles::RoleType;
 
 pub struct MockSessionHandler;
 impl OneSessionHandler<AccountId> for MockSessionHandler {
@@ -386,37 +382,11 @@ impl onchain::Config for OnChainSeqPhragmen {
 /// Upper limit on the number of NPOS nominations.
 const MAX_QUOTA_NOMINATIONS: u32 = 16;
 
-pub struct MockRolesHandler;
-impl RolesHandler<AccountId> for MockRolesHandler {
-	type Balance = Balance;
-	fn is_restaker_with_role(_address: AccountId, _role_type: RoleType) -> bool {
-		false
-	}
-
-	fn is_restaker(_address: AccountId) -> bool {
-		false
-	}
-
-	fn get_validator_role_key(_address: AccountId) -> Option<Vec<u8>> {
-		None
-	}
-
-	fn report_offence(_offence_report: ReportRestakerOffence<AccountId>) -> DispatchResult {
-		Ok(())
-	}
-
-	fn record_job_by_validators(_validators: Vec<AccountId>) -> DispatchResult {
-		Ok(())
-	}
-
-	fn get_max_active_service_for_restaker(_restaker: AccountId) -> Option<u32> {
-		None
-	}
-}
-
 pub struct MockReward {}
-impl OnUnbalanced<PositiveImbalance<Runtime>> for MockReward {
-	fn on_unbalanced(_: PositiveImbalance<Runtime>) {
+impl frame_support::traits::OnUnbalanced<pallet_balances::PositiveImbalance<Runtime>>
+	for MockReward
+{
+	fn on_unbalanced(_: pallet_balances::PositiveImbalance<Runtime>) {
 		RewardOnUnbalanceWasCalled::set(true);
 	}
 }
@@ -447,7 +417,6 @@ impl pallet_staking::Config for Runtime {
 	type MaxUnlockingChunks = ConstU32<32>;
 	type HistoryDepth = ConstU32<84>;
 	type EventListeners = ();
-	type RolesHandler = MockRolesHandler;
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();

@@ -25,7 +25,7 @@ use sp_runtime::{traits::BlakeTwo256, ConsensusEngineId, Permill};
 use sp_std::{marker::PhantomData, prelude::*};
 // Frontier
 use pallet_ethereum::PostLogContent;
-use pallet_evm::HashedAddressMapping;
+use pallet_evm::{HashedAddressMapping, OnChargeEVMTransaction};
 use pallet_evm_precompileset_assets_erc20::AddressToAssetId;
 use tangle_primitives::{
 	evm::{GAS_LIMIT_POV_SIZE_RATIO, WEIGHT_PER_GAS},
@@ -80,6 +80,55 @@ parameter_types! {
 	pub PrecompilesValue: WebbPrecompiles<Runtime> = WebbPrecompiles::<_>::new();
 }
 
+/// Type alias for negative imbalance during fees
+type RuntimeNegativeImbalance =
+	<Balances as Currency<<Runtime as frame_system::Config>::AccountId>>::NegativeImbalance;
+
+/// See: [`pallet_evm::EVMCurrencyAdapter`]
+pub struct CustomEVMCurrencyAdapter;
+
+impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
+	type LiquidityInfo = Option<RuntimeNegativeImbalance>;
+
+	fn withdraw_fee(
+		who: &H160,
+		fee: U256,
+	) -> Result<Self::LiquidityInfo, pallet_evm::Error<Runtime>> {
+		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
+		// Make pallet services account free to use
+		if who == &pallet_services_address {
+			return Ok(None);
+		}
+		// fallback to the default implementation
+		<pallet_evm::EVMCurrencyAdapter<Balances, impls::DealWithFees<Runtime>> as OnChargeEVMTransaction<
+			Runtime,
+		>>::withdraw_fee(who, fee)
+	}
+
+	fn correct_and_deposit_fee(
+		who: &H160,
+		corrected_fee: U256,
+		base_fee: U256,
+		already_withdrawn: Self::LiquidityInfo,
+	) -> Self::LiquidityInfo {
+		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
+		// Make pallet services account free to use
+		if who == &pallet_services_address {
+			return already_withdrawn;
+		}
+		// fallback to the default implementation
+		<pallet_evm::EVMCurrencyAdapter<Balances, impls::DealWithFees<Runtime>> as OnChargeEVMTransaction<
+			Runtime,
+		>>::correct_and_deposit_fee(who, corrected_fee, base_fee, already_withdrawn)
+	}
+
+	fn pay_priority_fee(tip: Self::LiquidityInfo) {
+		<pallet_evm::EVMCurrencyAdapter<Balances, impls::DealWithFees<Runtime>> as OnChargeEVMTransaction<
+			Runtime,
+		>>::pay_priority_fee(tip)
+	}
+}
+
 impl pallet_evm::Config for Runtime {
 	type FeeCalculator = BaseFee;
 	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
@@ -95,8 +144,7 @@ impl pallet_evm::Config for Runtime {
 	type ChainId = EVMChainId;
 	type BlockGasLimit = BlockGasLimit;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
-	type OnChargeTransaction =
-		pallet_evm::EVMCurrencyAdapter<Balances, impls::DealWithFees<Runtime>>;
+	type OnChargeTransaction = CustomEVMCurrencyAdapter;
 	type OnCreate = ();
 	type SuicideQuickClearLimit = ConstU32<0>;
 	type FindAuthor = FindAuthorTruncated<Babe>;
