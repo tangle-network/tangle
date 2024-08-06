@@ -3065,7 +3065,6 @@ checksum = "e79e5973c26d4baf0ce55520bd732314328cabe53193286671b47144145b9649"
 dependencies = [
  "chrono",
  "ethers-core",
- "ethers-solc",
  "reqwest",
  "semver 1.0.23",
  "serde",
@@ -14544,20 +14543,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tangle-voter"
-version = "1.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "hex",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "webb",
-]
-
-[[package]]
 name = "tap"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -16024,22 +16009,6 @@ checksum = "77afa9a11836342370f4817622a2f0f418b134426d91a82dfb48f532d2ec13ef"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "webb"
-version = "0.8.4"
-source = "git+https://github.com/webb-tools/webb-rs.git?branch=salman/polkadot-v1.7.0#ff1816060b5aae982690676dfad4ac4870d8cb08"
-dependencies = [
- "async-trait",
- "ethers",
- "hex",
- "prettyplease 0.2.20",
- "rand 0.8.5",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror",
 ]
 
 [[package]]

@@ -510,7 +510,7 @@ pub mod module {
 		/// # Parameters
 		/// - `origin`: The account that is pre-registering for the service blueprint.
 		/// - `blueprint_id`: The ID of the service blueprint.
-		#[pallet::call_index(2)]
+		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::pre_register())]
 		pub fn pre_register(
 			origin: OriginFor<T>,
@@ -531,7 +531,7 @@ pub mod module {
 		///
 		/// The caller may require an approval first before they can accept to provide the service
 		/// for the users.
-		#[pallet::call_index(1)]
+		#[pallet::call_index(2)]
 		#[pallet::weight(T::WeightInfo::register())]
 		pub fn register(
 			origin: OriginFor<T>,
@@ -589,7 +589,7 @@ pub mod module {
 		/// Note that, the caller needs to keep providing service for other active service
 		/// that uses this blueprint, until the end of service time, otherwise they may get reported
 		/// and slashed.
-		#[pallet::call_index(2)]
+		#[pallet::call_index(3)]
 		#[pallet::weight(T::WeightInfo::unregister())]
 		pub fn unregister(
 			origin: OriginFor<T>,
@@ -618,7 +618,7 @@ pub mod module {
 		/// Update the approval preference for the caller for a specific service blueprint.
 		///
 		/// See [`Self::register`] for more information.
-		#[pallet::call_index(3)]
+		#[pallet::call_index(4)]
 		#[pallet::weight(T::WeightInfo::update_approval_preference())]
 		pub fn update_approval_preference(
 			origin: OriginFor<T>,
@@ -647,7 +647,7 @@ pub mod module {
 		///
 		/// Note that, if anyone of the participants set their [`ApprovalPreference`] to `ApprovalPreference::Required`
 		/// you will need to wait until they are approve your request, otherwise (if none), the service is initiated immediately.
-		#[pallet::call_index(4)]
+		#[pallet::call_index(5)]
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request(
 			origin: OriginFor<T>,
@@ -762,7 +762,7 @@ pub mod module {
 		}
 
 		/// Approve a service request, so that the service can be initiated.
-		#[pallet::call_index(5)]
+		#[pallet::call_index(6)]
 		#[pallet::weight(T::WeightInfo::approve())]
 		pub fn approve(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
@@ -852,7 +852,7 @@ pub mod module {
 
 		/// Reject a service request.
 		/// The service will not be initiated, and the requester will need to update the service request.
-		#[pallet::call_index(6)]
+		#[pallet::call_index(7)]
 		#[pallet::weight(T::WeightInfo::reject())]
 		pub fn reject(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
@@ -884,7 +884,7 @@ pub mod module {
 		}
 
 		/// Terminates the service by the owner of the service.
-		#[pallet::call_index(7)]
+		#[pallet::call_index(8)]
 		#[pallet::weight(T::WeightInfo::terminate())]
 		pub fn terminate(
 			origin: OriginFor<T>,
@@ -919,7 +919,7 @@ pub mod module {
 
 		/// Call a Job in the service.
 		/// The caller needs to be the owner of the service, or a permitted caller.
-		#[pallet::call_index(8)]
+		#[pallet::call_index(9)]
 		#[pallet::weight(T::WeightInfo::call())]
 		pub fn call(
 			origin: OriginFor<T>,
@@ -961,7 +961,7 @@ pub mod module {
 		}
 
 		/// Submit the job result by using the service ID and call ID.
-		#[pallet::call_index(9)]
+		#[pallet::call_index(10)]
 		#[pallet::weight(T::WeightInfo::submit_result())]
 		pub fn submit_result(
 			origin: OriginFor<T>,
