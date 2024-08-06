@@ -24,6 +24,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 mod filters;
 pub mod frontier_evm;
 pub mod impls;
+pub mod migrations;
 pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
@@ -181,7 +182,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1100, // v1.1.0
+	spec_version: 2000, // v2.0.0
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1346,15 +1347,8 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	OnRuntimeUpgrade,
+	migrations::MigrateSessionKeys<Runtime>,
 >;
-
-pub struct OnRuntimeUpgrade;
-impl frame_support::traits::OnRuntimeUpgrade for OnRuntimeUpgrade {
-	fn on_runtime_upgrade() -> Weight {
-		Weight::from_parts(0u64, 0u64)
-	}
-}
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {
 	type SignedInfo = H160;
@@ -1449,27 +1443,6 @@ impl pallet_assets::Config for Runtime {
 	type BenchmarkHelper = ();
 }
 
-pub struct MockServiceManager;
-
-impl pallet_multi_asset_delegation::traits::ServiceManager<AccountId, Balance>
-	for MockServiceManager
-{
-	fn list_active_services(_account: &AccountId) -> Vec<pallet_multi_asset_delegation::Service> {
-		// we dont care
-		vec![]
-	}
-
-	fn list_service_reward(_account: &AccountId) -> Balance {
-		// we dont care
-		Balance::default()
-	}
-
-	fn can_exit(_account: &AccountId) -> bool {
-		// Mock logic to determine if the given account can exit
-		true
-	}
-}
-
 parameter_types! {
 	pub const MinOperatorBondAmount: Balance = 10_000;
 	pub const BondDuration: u32 = 10;
@@ -1482,7 +1455,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
-	type ServiceManager = MockServiceManager;
+	type ServiceManager = Services;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;
 	type LeaveDelegatorsDelay = ConstU32<1>;

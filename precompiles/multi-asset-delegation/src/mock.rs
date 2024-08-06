@@ -25,10 +25,9 @@ use frame_support::{
 	weights::Weight,
 };
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
-use pallet_multi_asset_delegation::Service;
-use pallet_multi_asset_delegation::ServiceManager;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
+use tangle_primitives::ServiceManager;
 
 use serde::{Deserialize, Serialize};
 use sp_core::{
@@ -307,14 +306,14 @@ impl pallet_assets::Config for Runtime {
 pub struct MockServiceManager;
 
 impl ServiceManager<AccountId, Balance> for MockServiceManager {
-	fn list_active_services(_account: &AccountId) -> Vec<Service> {
+	fn get_active_blueprints_count(_account: &AccountId) -> usize {
 		// we dont care
-		vec![]
+		Default::default()
 	}
 
-	fn list_service_reward(_account: &AccountId) -> Balance {
+	fn get_active_services_count(_account: &AccountId) -> usize {
 		// we dont care
-		Balance::default()
+		Default::default()
 	}
 
 	fn can_exit(_account: &AccountId) -> bool {

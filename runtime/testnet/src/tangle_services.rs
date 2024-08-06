@@ -145,5 +145,6 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type Constraints = PalletServicesConstraints;
+	type OperatorDelegationManager = MultiAssetDelegation;
 	type WeightInfo = ();
 }

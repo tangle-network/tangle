@@ -1,10 +1,11 @@
+use super::*;
+use crate::types::BalanceOf;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::vec::Vec;
 use tangle_primitives::services::Constraints;
-
-use super::*;
+use tangle_primitives::traits::ServiceManager;
 
 impl<T: Config> traits::EvmRunner<T> for () {
 	type Error = crate::Error<T>;
@@ -77,5 +78,23 @@ impl traits::EvmGasWeightMapping for () {
 	}
 	fn weight_to_gas(_weight: Weight) -> u64 {
 		Default::default()
+	}
+}
+
+impl<T: crate::Config> ServiceManager<T::AccountId, BalanceOf<T>> for crate::Pallet<T> {
+	fn get_active_services_count(operator: &T::AccountId) -> usize {
+		OperatorsProfile::<T>::get(operator)
+			.map_or(Default::default(), |profile| profile.services.len())
+	}
+
+	fn get_active_blueprints_count(operator: &T::AccountId) -> usize {
+		OperatorsProfile::<T>::get(operator)
+			.map_or(Default::default(), |profile| profile.blueprints.len())
+	}
+
+	/// Operator can exit if no active services or blueprints
+	fn can_exit(operator: &T::AccountId) -> bool {
+		OperatorsProfile::<T>::get(operator)
+			.map_or(false, |profile| profile.services.is_empty() && profile.blueprints.is_empty())
 	}
 }

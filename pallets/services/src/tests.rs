@@ -88,13 +88,13 @@ fn register_on_blueprint() {
 
 		let bob = mock_pub_key(BOB);
 
-		let registeration_call = Services::register(
+		let registration_call = Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
 			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
 			Default::default(),
 		);
-		assert_ok!(registeration_call);
+		assert_ok!(registration_call);
 
 		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
 			provider: bob.clone(),
@@ -120,6 +120,39 @@ fn register_on_blueprint() {
 			),
 			crate::Error::<Runtime>::AlreadyRegistered
 		);
+
+		// if we try to register with a non active operator, should fail
+		assert_err!(
+			Services::register(
+				RuntimeOrigin::signed(mock_pub_key(10)),
+				0,
+				OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+				Default::default(),
+			),
+			crate::Error::<Runtime>::OperatorNotActive
+		);
+	});
+}
+
+#[test]
+fn pre_register_on_blueprint() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let alice = mock_pub_key(ALICE);
+
+		let blueprint = cggmp21_blueprint();
+
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		let bob = mock_pub_key(BOB);
+
+		let pre_registration_call = Services::pre_register(RuntimeOrigin::signed(bob.clone()), 0);
+		assert_ok!(pre_registration_call);
+
+		assert_events(vec![RuntimeEvent::Services(crate::Event::PreRegistration {
+			operator: bob.clone(),
+			blueprint_id: 0,
+		})]);
 	});
 }
 
