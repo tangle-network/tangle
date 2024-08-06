@@ -4519,6 +4519,7 @@ export default {
       },
       execute_delegator_unstake: 'Null',
       cancel_delegator_unstake: {
+        operator: 'AccountId32',
         assetId: 'u128',
         amount: 'u128',
       },

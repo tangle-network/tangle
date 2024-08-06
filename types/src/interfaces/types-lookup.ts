@@ -4797,6 +4797,7 @@ declare module '@polkadot/types/lookup' {
     readonly isExecuteDelegatorUnstake: boolean;
     readonly isCancelDelegatorUnstake: boolean;
     readonly asCancelDelegatorUnstake: {
+      readonly operator: AccountId32;
       readonly assetId: u128;
       readonly amount: u128;
     } & Struct;

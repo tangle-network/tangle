@@ -766,7 +766,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * See [`Pallet::cancel_delegator_unstake`].
        **/
-      cancelDelegatorUnstake: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
+      cancelDelegatorUnstake: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, u128, u128]>;
       /**
        * See [`Pallet::cancel_leave_operators`].
        **/
