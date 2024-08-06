@@ -6,9 +6,6 @@ edition = "2021"
 description = "A Precompile to make pallet-multi-asset-delegation calls encoding accessible to pallet-evm"
 
 [dependencies]
-log = { workspace = true }
-num_enum = { workspace = true }
-rustc-hex = { workspace = true }
 
 # Moonbeam
 precompile-utils = { workspace = true }
@@ -24,7 +21,6 @@ sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 
 # Frontier
-evm = { workspace = true, features = ["with-codec"] }
 fp-evm = { workspace = true }
 pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
 

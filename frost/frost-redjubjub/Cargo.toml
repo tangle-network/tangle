@@ -29,7 +29,6 @@ jubjub = { version = "0.10", git = "https://github.com/LIT-Protocol/jubjub.git",
 group = { version = "0.13", features = ["alloc"], default-features = false }
 frost-core = { workspace = true }
 rand_core = { workspace = true, optional = true }
-sha2 = { workspace = true }
 subtle = { workspace = true }
 
 [features]
@@ -37,7 +36,6 @@ default = ["std"]
 std = [
     "rand_core/std",
     "parity-scale-codec/std",
-    "sha2/std",
     "jubjub/std",
     "blake2/std",
     # "blake2b_simd/std",
