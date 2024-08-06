@@ -132,7 +132,6 @@ frost-ristretto255 = { path = "frost/frost-ristretto255", default-features = fal
 frost-secp256k1 = { path = "frost/frost-secp256k1", default-features = false }
 frost-p256 = { path = "frost/frost-p256", default-features = false }
 frost-p384 = { path = "frost/frost-p384", default-features = false }
-frost-redjubjub = { path = "frost/frost-redjubjub", default-features = false }
 frost-taproot = { path = "frost/frost-taproot", default-features = false }
 
 # Substrate dependencies
