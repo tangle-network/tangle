@@ -22,8 +22,6 @@ sp-std = { workspace = true }
 sp-staking = { workspace = true }
 ethabi = { workspace = true }
 
-frost-core = { workspace = true }
-
 # Arkworks
 ark-bn254 = { workspace = true, optional = true }
 ark-crypto-primitives = { workspace = true, default-features = false, optional = true }

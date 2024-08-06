@@ -13,10 +13,9 @@ ethereum = { workspace = true, features = ["with-codec"] }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 sp-api = { workspace = true }
-sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 
 [features]
 default = ["std"]
-std = ["ethereum/std", "sp-api/std", "sp-io/std", "sp-runtime/std", "sp-std/std"]
+std = ["ethereum/std", "sp-api/std", "sp-runtime/std", "sp-std/std"]

@@ -18,7 +18,6 @@ sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-io = { workspace = true }
 sp-std = { workspace = true }
-tangle-crypto-primitives = { workspace = true, default-features = false }
 tangle-primitives = { workspace = true, default-features = false }
 fp-evm = { workspace = true }
 ethabi = { workspace = true }
@@ -87,7 +86,6 @@ std = [
  "sp-io/std",
  "sp-staking/std",
  "tangle-primitives/std",
- "tangle-crypto-primitives/std",
  "pallet-balances/std",
  "pallet-timestamp/std",
  "pallet-staking/std",

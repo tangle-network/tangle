@@ -314,6 +314,11 @@ pallet-evm-precompile-verify-ecdsa-stark-signature = { path = "precompiles/verif
 pallet-evm-precompile-verify-schnorr-signatures = { path = "precompiles/verify-schnorr-signatures", default-features = false }
 pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls381-signature", default-features = false }
 
+# Precompiles utils
+postcard = { version = "1", default-features = false }
+generic-ec = { version = "0.2", default-features = false }
+signature = { version = "2.2", default-features = false }
+
 # EVM & Ethereum
 # (wasm)
 evm = { version = "0.41.0", default-features = false }
@@ -334,8 +339,6 @@ tangle-primitives = { path = "primitives", default-features = false }
 tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
 pallet-staking = { path = "pallets/staking", default-features = false }
 pallet-staking-reward-curve = { path = "pallets/staking/reward-curve", default-features = false }
-webb = { git = "https://github.com/webb-tools/webb-rs.git", default-features = false, branch = "salman/polkadot-v1.7.0" }
-
 
 primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }
@@ -351,19 +354,6 @@ rpc-debug = { path = "client/rpc/debug" }
 rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
 evm-tracer = { path = "evm-tracer", default-features = false }
-
-# MPC
-malachite-base = { version = "0.4", default-features = false }
-malachite-nz = { version = "0.4", default-features = false, features = ["32_bit_limbs"] }
-postcard = { version = "1", default-features = false }
-dfns-cggmp21 = { package = "cggmp21", version = "0.2.0", default-features = false }
-udigest = { version = "0.1.0", default-features = false }
-generic-ec = { version = "0.2", default-features = false }
-generic-ec-zkp = { version = "0.2", default-features = false }
-round-based = { version = "0.2", default-features = false }
-paillier-zk = { version = "0.2", default-features = false }
-derivation-path = { version = "0.2.0", default-features = false }
-signature = { version = "2.2", default-features = false }
 
 # Polkadot XCM
 xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.7.0", default-features = false }
