@@ -534,7 +534,7 @@ fn test_nested_evm_bypass_proxy_should_allow_elevating_proxy_type() {
 				target: Precompile1.into(),
 				input: add_proxy_precompile,
 				value: U256::zero(),
-				gas_limit: u64::max_value(),
+				gas_limit: u64::MAX,
 				max_fee_per_gas: 0.into(),
 				max_priority_fee_per_gas: Some(U256::zero()),
 				nonce: None,

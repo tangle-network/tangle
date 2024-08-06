@@ -7,7 +7,6 @@ description = "A Precompile to make Substrate's pallet-democracy accessible to p
 
 [dependencies]
 log = { workspace = true }
-num_enum = { workspace = true }
 
 # Moonbeam
 precompile-utils = { workspace = true }

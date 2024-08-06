@@ -6,18 +6,12 @@ edition = "2021"
 description = "Utils to write EVM precompiles."
 
 [dependencies]
-affix = { workspace = true }
 derive_more = { workspace = true, optional = true }
 environmental = { workspace = true }
-hex = { workspace = true }
 hex-literal = { workspace = true, optional = true }
 impl-trait-for-tuples = { workspace = true }
-log = { workspace = true }
-num_enum = { workspace = true }
-paste = { workspace = true }
 scale-info = { workspace = true, optional = true, features = ["derive"] }
 serde = { workspace = true, optional = true }
-sha3 = { workspace = true }
 similar-asserts = { workspace = true, optional = true }
 
 # Moonbeam

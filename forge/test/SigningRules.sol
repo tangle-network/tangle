@@ -4,20 +4,24 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "../src/SigningRules.sol";
-import { Proposal, ProposalStatus } from "../src/SigningRules.sol";
-
+import {Proposal, ProposalStatus} from "../src/SigningRules.sol";
 
 contract VotableSigningRules is SigningRules {
-    function _isVotableProposal(uint64 phase1JobId, bytes memory phase2JobDetails) override pure internal returns (bool) {
+    function _isVotableProposal(uint64 phase1JobId, bytes memory phase2JobDetails)
+        internal
+        pure
+        override
+        returns (bool)
+    {
         require(phase2JobDetails.length != 0, "Job details must be non-empty");
         return true;
     }
 
-    function _refreshVoters(uint64 phase1JobId) override internal {
+    function _refreshVoters(uint64 phase1JobId) internal override {
         // Do nothing
     }
 
-    function _submitToDemocracyPallet(uint64 phase1JobId, bytes memory phase2JobDetails) override internal {
+    function _submitToDemocracyPallet(uint64 phase1JobId, bytes memory phase2JobDetails) internal override {
         // Do nothing
     }
 }
@@ -105,7 +109,7 @@ contract SigningRulesTest is Test {
         voters[1] = vm.addr(2);
         uint40 expiry = 10;
         uint64 ttl = 10;
-        uint nowBlockNumber = block.number;
+        uint256 nowBlockNumber = block.number;
         bytes32 phase2JobHash = rules.calculatePhase2JobHash(phase1JobId, phase2JobDetails);
 
         rules.initialize(phase1JobId, threshold, useDemocracy, voters, expiry, ttl);
@@ -132,7 +136,7 @@ contract SigningRulesTest is Test {
         uint40 expiry = 1000;
         uint64 ttl = 1000;
         rules.initialize(phase1JobId, threshold, useDemocracy, voters, expiry, ttl);
-        
+
         rules.adminSetForwarder(phase1JobId, vm.addr(100), true);
         assertTrue(rules.isValidForwarder(phase1JobId, vm.addr(100)));
         assertFalse(rules.isValidForwarder(phase1JobId, vm.addr(101)));

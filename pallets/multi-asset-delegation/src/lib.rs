@@ -160,7 +160,7 @@ pub mod pallet {
 	/// Storage for operator information.
 	#[pallet::storage]
 	#[pallet::getter(fn operator_info)]
-	pub(crate) type Operators<T: Config> =
+	pub type Operators<T: Config> =
 		StorageMap<_, Twox64Concat, T::AccountId, OperatorMetadataOf<T>, OptionQuery>;
 
 	/// Storage for the current round.
@@ -184,7 +184,7 @@ pub mod pallet {
 	/// Storage for delegator information.
 	#[pallet::storage]
 	#[pallet::getter(fn delegators)]
-	pub(crate) type Delegators<T: Config> =
+	pub type Delegators<T: Config> =
 		StorageMap<_, Twox64Concat, T::AccountId, DelegatorMetadataOf<T>, OptionQuery>;
 
 	#[pallet::storage]
@@ -553,11 +553,12 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn cancel_delegator_unstake(
 			origin: OriginFor<T>,
+			operator: T::AccountId,
 			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_delegator_unstake(who.clone(), asset_id, amount)?;
+			Self::process_cancel_delegator_unstake(who.clone(), operator, asset_id, amount)?;
 			Self::deposit_event(Event::CancelledDelegatorBondLess { who });
 			Ok(())
 		}
