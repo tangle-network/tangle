@@ -47,6 +47,9 @@ pub type Hash = sp_core::H256;
 /// An index to a block.
 pub type BlockNumber = u64;
 
+/// Round index for sessions
+pub type RoundIndex = u32;
+
 /// The address format for describing accounts.
 pub type Address = MultiAddress<AccountId, Index>;
 

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use crate as pallet_multi_asset_delegation;
-use crate::Service;
-use crate::ServiceManager;
 use frame_support::parameter_types;
 use frame_support::traits::AsEnsureOriginWithArg;
 use frame_support::traits::ConstU32;
@@ -32,7 +30,6 @@ use sp_runtime::{
 
 type Block = frame_system::mocking::MockBlock<Test>;
 pub type Balance = u64;
-pub type AccountId = u64;
 pub type AssetId = u32;
 
 pub const ALICE: u64 = 1;
@@ -99,18 +96,18 @@ impl pallet_balances::Config for Test {
 
 pub struct MockServiceManager;
 
-impl ServiceManager<AccountId, Balance> for MockServiceManager {
-	fn list_active_services(_account: &AccountId) -> Vec<Service> {
+impl tangle_primitives::ServiceManager<u64, Balance> for MockServiceManager {
+	fn get_active_blueprints_count(_account: &u64) -> usize {
 		// we dont care
-		vec![]
+		Default::default()
 	}
 
-	fn list_service_reward(_account: &AccountId) -> Balance {
+	fn get_active_services_count(_account: &u64) -> usize {
 		// we dont care
-		Balance::default()
+		Default::default()
 	}
 
-	fn can_exit(_account: &AccountId) -> bool {
+	fn can_exit(_account: &u64) -> bool {
 		// Mock logic to determine if the given account can exit
 		true
 	}

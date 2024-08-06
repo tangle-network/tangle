@@ -58,6 +58,7 @@ pub mod module {
 	use sp_core::{H160, H256};
 	use sp_std::vec::Vec;
 	use tangle_primitives::services::*;
+	use tangle_primitives::MultiAssetDelegationInfo;
 	use types::*;
 
 	#[pallet::config]
@@ -142,6 +143,12 @@ pub mod module {
 		/// use [crate::types::ConstraintsOf] with `Self` to implement this trait.
 		type Constraints: Constraints;
 
+		/// Manager for getting operator stake and delegation info
+		type OperatorDelegationManager: tangle_primitives::traits::MultiAssetDelegationInfo<
+			Self::AccountId,
+			BalanceOf<Self>,
+		>;
+
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
 	}
@@ -191,6 +198,8 @@ pub mod module {
 		OperatorProfileNotFound,
 		/// Maximum number of services per Provider reached.
 		MaxServicesPerProviderExceeded,
+		/// The operator is not active, ensure operator status is ACTIVE in multi-asset-delegation
+		OperatorNotActive,
 	}
 
 	#[pallet::event]
@@ -541,6 +550,12 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
+
+			ensure!(
+				T::OperatorDelegationManager::is_operator_active(&caller),
+				Error::<T>::OperatorNotActive
+			);
+
 			let already_registered = Operators::<T>::contains_key(blueprint_id, &caller);
 			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
 			blueprint
