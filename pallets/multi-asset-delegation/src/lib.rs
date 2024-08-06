@@ -58,7 +58,6 @@ pub mod functions;
 pub mod traits;
 pub mod types;
 pub use functions::*;
-pub use traits::*;
 
 #[frame_support::pallet]
 pub mod pallet {

@@ -16,11 +16,7 @@
 use super::*;
 use crate::types::BalanceOf;
 use crate::types::OperatorStatus;
-use parity_scale_codec::{Decode, Encode};
-use scale_info::prelude::vec;
-use scale_info::prelude::vec::Vec;
 use sp_runtime::traits::Zero;
-use sp_runtime::RuntimeDebug;
 use tangle_primitives::traits::MultiAssetDelegationInfo;
 use tangle_primitives::RoundIndex;
 
