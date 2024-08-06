@@ -29,6 +29,7 @@ pub use tangle_primitives::jobs::JobResult;
 mod filters;
 pub mod frontier_evm;
 pub mod impls;
+pub mod migrations;
 pub mod precompiles;
 pub mod voter_bags;
 
@@ -194,7 +195,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle"),
 	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
-	spec_version: 1100, // v1.1.0
+	spec_version: 2000, // v2.0.0
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1869,15 +1870,8 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	OnRuntimeUpgrade,
+	migrations::MigrateSessionKeys<Runtime>,
 >;
-
-pub struct OnRuntimeUpgrade;
-impl frame_support::traits::OnRuntimeUpgrade for OnRuntimeUpgrade {
-	fn on_runtime_upgrade() -> Weight {
-		Weight::from_parts(0u64, 0u64)
-	}
-}
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {
 	type SignedInfo = H160;
