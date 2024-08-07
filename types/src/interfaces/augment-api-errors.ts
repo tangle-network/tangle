@@ -3,14 +3,13 @@
 
 // import type lookup before we augment - in some environments
 // this is required to allow for ambient/previous definitions
-import "@polkadot/api-base/types/errors";
+import '@polkadot/api-base/types/errors';
 
-import type { ApiTypes, AugmentedError } from "@polkadot/api-base/types";
+import type { ApiTypes, AugmentedError } from '@polkadot/api-base/types';
 
-export type __AugmentedError<ApiType extends ApiTypes> =
-  AugmentedError<ApiType>;
+export type __AugmentedError<ApiType extends ApiTypes> = AugmentedError<ApiType>;
 
-declare module "@polkadot/api-base/types/errors" {
+declare module '@polkadot/api-base/types/errors' {
   interface AugmentedErrors<ApiType extends ApiTypes> {
     assets: {
       /**
@@ -448,226 +447,6 @@ declare module "@polkadot/api-base/types/errors" {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
-    dkg: {
-      /**
-       * Cannot retreive signers from the signature
-       **/
-      CannotRetreiveSigner: AugmentedError<ApiType>;
-      /**
-       * Duplicate identifier
-       **/
-      DuplicateIdentifier: AugmentedError<ApiType>;
-      /**
-       * Duplicate signature found in submission
-       **/
-      DuplicateSignature: AugmentedError<ApiType>;
-      /**
-       * Field element error
-       **/
-      FieldElementError: AugmentedError<ApiType>;
-      /**
-       * FROST Field scalar error
-       **/
-      FrostFieldError: AugmentedError<ApiType>;
-      /**
-       * FROST Group element error
-       **/
-      FrostGroupError: AugmentedError<ApiType>;
-      /**
-       * Identifier derivation not supported
-       **/
-      IdentifierDerivationNotSupported: AugmentedError<ApiType>;
-      /**
-       * Invalid FROST commitment
-       **/
-      IdentityCommitment: AugmentedError<ApiType>;
-      /**
-       * Incorrect number of identifiers
-       **/
-      IncorrectNumberOfIdentifiers: AugmentedError<ApiType>;
-      /**
-       * Invalid BLS public key
-       **/
-      InvalidBlsPublicKey: AugmentedError<ApiType>;
-      /**
-       * Invalid FROST message deserialization
-       **/
-      InvalidFrostMessageDeserialization: AugmentedError<ApiType>;
-      /**
-       * Invalid FROST message serialization
-       **/
-      InvalidFrostMessageSerialization: AugmentedError<ApiType>;
-      /**
-       * Invalid FROST signature
-       **/
-      InvalidFrostSignature: AugmentedError<ApiType>;
-      /**
-       * Invalid FROST signature scheme
-       **/
-      InvalidFrostSignatureScheme: AugmentedError<ApiType>;
-      /**
-       * Invalid FROST signature share
-       **/
-      InvalidFrostSignatureShare: AugmentedError<ApiType>;
-      /**
-       * Invalid identifier deserialization
-       **/
-      InvalidIdentifierDeserialization: AugmentedError<ApiType>;
-      /**
-       * Unexpected job type
-       **/
-      InvalidJobType: AugmentedError<ApiType>;
-      /**
-       * Invalid Justification type.
-       **/
-      InvalidJustification: AugmentedError<ApiType>;
-      /**
-       * Invalid message
-       **/
-      InvalidMessage: AugmentedError<ApiType>;
-      /**
-       * Invalid participant public key
-       **/
-      InvalidParticipantPublicKey: AugmentedError<ApiType>;
-      /**
-       * Invalid public key error
-       **/
-      InvalidPublicKey: AugmentedError<ApiType>;
-      /**
-       * Invalid Misbehavior Role type.
-       **/
-      InvalidRoleType: AugmentedError<ApiType>;
-      /**
-       * Invalid signature submitted
-       **/
-      InvalidSignature: AugmentedError<ApiType>;
-      /**
-       * The signers have signed different data
-       **/
-      InvalidSignatureData: AugmentedError<ApiType>;
-      /**
-       * Invalid signature deserialization
-       **/
-      InvalidSignatureDeserialization: AugmentedError<ApiType>;
-      /**
-       * Invalid signature scheme
-       **/
-      InvalidSignatureScheme: AugmentedError<ApiType>;
-      /**
-       * Invalid verifying key submitted
-       **/
-      InvalidVerifyingKey: AugmentedError<ApiType>;
-      /**
-       * Invalid verifying key deserialization
-       **/
-      InvalidVerifyingKeyDeserialization: AugmentedError<ApiType>;
-      /**
-       * Malformed signature
-       **/
-      MalformedFrostSignature: AugmentedError<ApiType>;
-      /**
-       * Malformed FROST signing key
-       **/
-      MalformedFrostSigningKey: AugmentedError<ApiType>;
-      /**
-       * Malformed FROST verifying key
-       **/
-      MalformedFrostVerifyingKey: AugmentedError<ApiType>;
-      /**
-       * Could not deserialize the round message.
-       **/
-      MalformedRoundMessage: AugmentedError<ApiType>;
-      /**
-       * Malformed Stark signature
-       **/
-      MalformedStarkSignature: AugmentedError<ApiType>;
-      /**
-       * Missing FROST commitment
-       **/
-      MissingFrostCommitment: AugmentedError<ApiType>;
-      /**
-       * No participants found
-       **/
-      NoParticipantsFound: AugmentedError<ApiType>;
-      /**
-       * No signatures found
-       **/
-      NoSignaturesFound: AugmentedError<ApiType>;
-      /**
-       * Not enough signers for threshold
-       **/
-      NotEnoughSigners: AugmentedError<ApiType>;
-      /**
-       * Signed Round Message not signed by the offender.
-       **/
-      NotSignedByOffender: AugmentedError<ApiType>;
-      /**
-       * Signed with a different key
-       **/
-      SigningKeyMismatch: AugmentedError<ApiType>;
-      /**
-       * Unknown identifier
-       **/
-      UnknownIdentifier: AugmentedError<ApiType>;
-      /**
-       * The submitted decommitment data size is valid.
-       *
-       * This error is returned when the decommitment data size is valid
-       * but the caller claims it is invalid!
-       **/
-      ValidDataSize: AugmentedError<ApiType>;
-      /**
-       * The submitted decommitment is valid.
-       *
-       * This error is returned when the decommitment is valid
-       * but the caller claims it is invalid!
-       **/
-      ValidDecommitment: AugmentedError<ApiType>;
-      /**
-       * The submitted messages passed Feldman verification.
-       *
-       * This error is returned when the messages passed Feldman verification
-       * but the caller claims it is invalid!
-       **/
-      ValidFeldmanVerification: AugmentedError<ApiType>;
-      /**
-       * Valid FROST signature error for a misbehavior report
-       **/
-      ValidFrostSignature: AugmentedError<ApiType>;
-      /**
-       * ------------------------------------------------------------ ///
-       * FROST ERRORS                         ///
-       * ------------------------------------------------------------ ///
-       * Valid FROST signature share
-       **/
-      ValidFrostSignatureShare: AugmentedError<ApiType>;
-      /**
-       * The submitted Mod Proof is valid.
-       *
-       * This error is returned when the Mod Proof is valid
-       * but the caller claims it is invalid.
-       **/
-      ValidModProof: AugmentedError<ApiType>;
-      /**
-       * The submitted ring pedersen parameters are valid.
-       *
-       * This error is returned when the ring pedersen parameters are valid
-       * but the caller claims it is invalid.
-       **/
-      ValidRingPedersenParameters: AugmentedError<ApiType>;
-      /**
-       * The submitted Schnorr Proof is valid.
-       *
-       * This error is returned when the decommitment and its
-       * Schnorr are valid. but the caller
-       * claims it is invalid.
-       **/
-      ValidSchnorrProof: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
     electionProviderMultiPhase: {
       /**
        * Some bound not met
@@ -1076,84 +855,6 @@ declare module "@polkadot/api-base/types/errors" {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
-    jobs: {
-      /**
-       * empty job
-       **/
-      EmptyJob: AugmentedError<ApiType>;
-      /**
-       * empty result
-       **/
-      EmptyResult: AugmentedError<ApiType>;
-      /**
-       * Invalid Key size
-       **/
-      ExceedsMaxKeySize: AugmentedError<ApiType>;
-      /**
-       * invalid params, cannot execute jobs
-       **/
-      InvalidJobParams: AugmentedError<ApiType>;
-      /**
-       * invalid phase provided
-       **/
-      InvalidJobPhase: AugmentedError<ApiType>;
-      /**
-       * Given validator not valid for job type
-       **/
-      InvalidValidator: AugmentedError<ApiType>;
-      /**
-       * Invalid job expiry input
-       **/
-      JobAlreadyExpired: AugmentedError<ApiType>;
-      /**
-       * The requested job was not found
-       **/
-      JobNotFound: AugmentedError<ApiType>;
-      /**
-       * No permission to change permitted caller
-       **/
-      NoPermission: AugmentedError<ApiType>;
-      /**
-       * no rewards found for validator
-       **/
-      NoRewards: AugmentedError<ApiType>;
-      /**
-       * Not enough validators to exit
-       **/
-      NotEnoughValidators: AugmentedError<ApiType>;
-      /**
-       * P1 result not found
-       **/
-      PhaseOneResultNotFound: AugmentedError<ApiType>;
-      /**
-       * cannot find phase 1 result
-       **/
-      PreviousResultNotFound: AugmentedError<ApiType>;
-      /**
-       * The previous result expired
-       **/
-      ResultExpired: AugmentedError<ApiType>;
-      /**
-       * Unexpected result provided
-       **/
-      ResultNotExpectedType: AugmentedError<ApiType>;
-      /**
-       * Validator exceeds limit of max active jobs
-       **/
-      TooManyJobsForValidator: AugmentedError<ApiType>;
-      /**
-       * Exceeds max participant limits
-       **/
-      TooManyParticipants: AugmentedError<ApiType>;
-      /**
-       * Validator role key not found.
-       **/
-      ValidatorRoleKeyNotFound: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
     multiAssetDelegation: {
       /**
        * There are active services using the asset.
@@ -1416,7 +1117,7 @@ declare module "@polkadot/api-base/types/errors" {
       MetadataExceedsMaxLen: AugmentedError<ApiType>;
       /**
        * The amount does not meet the minimum bond to either join or create a pool.
-       *
+       * 
        * The depositor can never unbond to a value less than `Pallet::depositor_min_bond`. The
        * caller does not have nominating permissions for the pool. Members can never unbond to a
        * value below `MinJoinBond`.
@@ -1560,89 +1261,6 @@ declare module "@polkadot/api-base/types/errors" {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
-    roles: {
-      /**
-       * Rewards already claimed
-       **/
-      AlreadyClaimed: AugmentedError<ApiType>;
-      /**
-       * Out of bounds input
-       **/
-      BoundNotMet: AugmentedError<ApiType>;
-      /**
-       * Cannot find Current era
-       **/
-      CannotGetCurrentEra: AugmentedError<ApiType>;
-      /**
-       * Invalid Restaking amount, should not exceed total staked amount.
-       **/
-      ExceedsMaxRestakeValue: AugmentedError<ApiType>;
-      /**
-       * Validator has active role assigned.
-       **/
-      HasRoleAssigned: AugmentedError<ApiType>;
-      /**
-       * Re staking amount should be greater than minimum Restaking bond requirement.
-       **/
-      InsufficientRestakingBond: AugmentedError<ApiType>;
-      /**
-       * Invalid era info
-       **/
-      InvalidEraToReward: AugmentedError<ApiType>;
-      /**
-       * Key size exceeded
-       **/
-      KeySizeExceeded: AugmentedError<ApiType>;
-      /**
-       * Max role limit reached for the account.
-       **/
-      MaxRoles: AugmentedError<ApiType>;
-      /**
-       * Unlock chunks already filled
-       **/
-      NoMoreChunks: AugmentedError<ApiType>;
-      /**
-       * Stash controller account not found in Roles Ledger.
-       **/
-      NoProfileFound: AugmentedError<ApiType>;
-      /**
-       * Not a validator.
-       **/
-      NotValidator: AugmentedError<ApiType>;
-      /**
-       * Profile already exists for given validator account.
-       **/
-      ProfileAlreadyExists: AugmentedError<ApiType>;
-      /**
-       * Profile delete request failed due to pending jobs, which can't be opted out at the
-       * moment.
-       **/
-      ProfileDeleteRequestFailed: AugmentedError<ApiType>;
-      /**
-       * Profile Update failed.
-       **/
-      ProfileUpdateFailed: AugmentedError<ApiType>;
-      /**
-       * Restaking amount cannot be lowered if there are any pending jobs. You can only add more
-       **/
-      RestakingAmountCannotBeUpdated: AugmentedError<ApiType>;
-      /**
-       * Role cannot due to pending jobs, which can't be opted out at the moment.
-       **/
-      RoleCannotBeRemoved: AugmentedError<ApiType>;
-      /**
-       * Given role is not assigned to the validator.
-       **/
-      RoleNotAssigned: AugmentedError<ApiType>;
-      /**
-       * SessionKeys not provided
-       **/
-      SessionKeysNotProvided: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
     scheduler: {
       /**
        * Failed to schedule a call
@@ -1735,6 +1353,10 @@ declare module "@polkadot/api-base/types/errors" {
        * The caller is not registered as a operator.
        **/
       NotRegistered: AugmentedError<ApiType>;
+      /**
+       * The operator is not active, ensure operator status is ACTIVE in multi-asset-delegation
+       **/
+      OperatorNotActive: AugmentedError<ApiType>;
       /**
        * Operator profile not found.
        **/
@@ -1999,10 +1621,14 @@ declare module "@polkadot/api-base/types/errors" {
        * Insufficient balance on sender account
        **/
       InsufficientBalance: AugmentedError<ApiType>;
+      InvalidDepositDataInvalidAmount: AugmentedError<ApiType>;
       /**
        * Deposit data not correct
        **/
-      InvalidDepositData: AugmentedError<ApiType>;
+      InvalidDepositDataInvalidLength: AugmentedError<ApiType>;
+      InvalidDepositDataInvalidRecipient: AugmentedError<ApiType>;
+      InvalidDepositDataInvalidRecipientLength: AugmentedError<ApiType>;
+      InvalidDepositDataRecipientLengthNotMatch: AugmentedError<ApiType>;
       /**
        * Fee config option missing
        **/
@@ -2026,7 +1652,11 @@ declare module "@polkadot/api-base/types/errors" {
       /**
        * Asset transactor execution failed
        **/
-      TransactFailed: AugmentedError<ApiType>;
+      TransactFailedDeposit: AugmentedError<ApiType>;
+      TransactFailedFeeDeposit: AugmentedError<ApiType>;
+      TransactFailedHoldInReserved: AugmentedError<ApiType>;
+      TransactFailedReleaseFromReserved: AugmentedError<ApiType>;
+      TransactFailedWithdraw: AugmentedError<ApiType>;
       /**
        * Transactor operation failed
        **/
@@ -2083,7 +1713,7 @@ declare module "@polkadot/api-base/types/errors" {
       CallFiltered: AugmentedError<ApiType>;
       /**
        * Failed to extract the runtime version from the new runtime.
-       *
+       * 
        * Either calling `Core_version` or decoding `RuntimeVersion` failed.
        **/
       FailedToExtractRuntimeVersion: AugmentedError<ApiType>;
@@ -2224,25 +1854,6 @@ declare module "@polkadot/api-base/types/errors" {
        * An index was out of bounds of the vesting schedules.
        **/
       ScheduleIndexOutOfBounds: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    zkSaaS: {
-      /**
-       * Unexpected job type
-       **/
-      InvalidJobType: AugmentedError<ApiType>;
-      /**
-       * Invalid proof
-       **/
-      InvalidProof: AugmentedError<ApiType>;
-      /**
-       * Malformed Proof
-       * if the proof bytes is not correct.
-       **/
-      MalformedProof: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
