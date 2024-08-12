@@ -1,11 +1,14 @@
 [package]
 name = "tangle-subxt"
 version = "0.1.4"
+description = "Rust bindings and interface to interact with Tangle Network using subxt"
 authors = { workspace = true }
 edition = { workspace = true }
 homepage = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
+keywards = ["blockchain", "tangle", "subxt"]
+categories = ["cryptography", "cryptography::cryptocurrencies"]
 
 [dependencies]
 parity-scale-codec = { workspace = true }
