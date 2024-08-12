@@ -9,6 +9,8 @@ license = { workspace = true }
 repository = { workspace = true }
 keywards = ["blockchain", "tangle", "subxt"]
 categories = ["cryptography", "cryptography::cryptocurrencies"]
+exclude = ["./metadata"]
+readme = "README.md"
 
 [dependencies]
 parity-scale-codec = { workspace = true }
