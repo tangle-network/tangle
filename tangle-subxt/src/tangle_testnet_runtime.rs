@@ -27542,7 +27542,7 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Maximum number of nomination pools that can exist. If `None`, then an unbounded number of"]
+				#[doc = " Maximum number of tangle-lst that can exist. If `None`, then an unbounded number of"]
 				#[doc = " pools can exist."]
 				pub fn max_pools(
 					&self,
