@@ -17,7 +17,10 @@ use pallet_evm_precompile_batch::BatchPrecompile;
 use pallet_evm_precompile_blake2::Blake2F;
 use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
 use pallet_evm_precompile_call_permit::CallPermitPrecompile;
+use pallet_evm_precompile_curve25519::{Curve25519Add, Curve25519ScalarMul};
 use pallet_evm_precompile_democracy::DemocracyPrecompile;
+use pallet_evm_precompile_dispatch::Dispatch;
+use pallet_evm_precompile_ed25519::Ed25519Verify;
 use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_multi_asset_delegation::MultiAssetDelegationPrecompile;
 use pallet_evm_precompile_preimage::PreimagePrecompile;
@@ -85,7 +88,11 @@ pub type WebbPrecompilesAt<R> = (
 	PrecompileAt<AddressU64<8>, Bn128Pairing, EthereumPrecompilesChecks>,
 	PrecompileAt<AddressU64<9>, Blake2F, EthereumPrecompilesChecks>,
 	PrecompileAt<AddressU64<1024>, Sha3FIPS256, (CallableByContract, CallableByPrecompile)>,
+	PrecompileAt<AddressU64<1025>, Dispatch<R>, (CallableByContract, CallableByPrecompile)>,
 	PrecompileAt<AddressU64<1026>, ECRecoverPublicKey, (CallableByContract, CallableByPrecompile)>,
+	PrecompileAt<AddressU64<1027>, Curve25519Add, (CallableByContract, CallableByPrecompile)>,
+	PrecompileAt<AddressU64<1028>, Curve25519ScalarMul, (CallableByContract, CallableByPrecompile)>,
+	PrecompileAt<AddressU64<1029>, Ed25519Verify, (CallableByContract, CallableByPrecompile)>,
 	// Tangle precompiles
 	PrecompileAt<
 		AddressU64<2048>,
@@ -197,8 +204,8 @@ pub type WebbPrecompilesAt<R> = (
 		SchnorrTaprootPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Bls12-381 signature verifier precompile
 	PrecompileAt<AddressU64<2081>, Bls381Precompile<R>, (CallableByContract, CallableByPrecompile)>,
+	// MultiAsset Delegation precompile
 	PrecompileAt<
 		AddressU64<2082>,
 		MultiAssetDelegationPrecompile<R>,
