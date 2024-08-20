@@ -1,16 +1,15 @@
 [package]
-name = "pallet-tangle-lst-test-staking"
+name = "pallet-nomination-pools-test-staking"
 version = "1.0.0"
 authors.workspace = true
 edition.workspace = true
 license = "Apache-2.0"
 homepage = "https://substrate.io"
 repository.workspace = true
-description = "Pallet tangle lst pallet tests with the staking pallet"
+description = "FRAME nomination pools pallet tests with the staking pallet"
 publish = false
 
-[lints]
-workspace = true
+
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -19,22 +18,22 @@ targets = ["x86_64-unknown-linux-gnu"]
 codec = { package = "parity-scale-codec", version = "3.6.1", features = ["derive"] }
 scale-info = { version = "2.10.0", features = ["derive"] }
 
-sp-runtime = { path = "../../../primitives/runtime" }
-sp-io = { path = "../../../primitives/io" }
-sp-std = { path = "../../../primitives/std" }
-sp-staking = { path = "../../../primitives/staking" }
-sp-core = { path = "../../../primitives/core" }
+sp-runtime = { workspace = true }
+sp-io = { workspace = true }
+sp-std = { workspace = true }
+sp-staking = { workspace = true }
+sp-core = { workspace = true }
 
-frame-system = { path = "../../system" }
-frame-support = { path = "../../support" }
-frame-election-provider-support = { path = "../../election-provider-support" }
+frame-system = { workspace = true }
+frame-support = { workspace = true }
+frame-election-provider-support = { workspace = true }
 
-pallet-timestamp = { path = "../../timestamp" }
-pallet-balances = { path = "../../balances" }
-pallet-staking = { path = "../../staking" }
-pallet-bags-list = { path = "../../bags-list" }
-pallet-staking-reward-curve = { path = "../../staking/reward-curve" }
-pallet-tangle-lst = { path = ".." }
+pallet-timestamp = { workspace = true }
+pallet-balances = { workspace = true }
+pallet-staking = { workspace = true }
+pallet-bags-list = { workspace = true }
+pallet-staking-reward-curve = { workspace = true }
+pallet-nomination-pools = { workspace = true }
 
-sp-tracing = { path = "../../../primitives/tracing" }
+sp-tracing = { workspace = true }
 log = { version = "0.4.0" }

@@ -6,7 +6,7 @@ edition.workspace = true
 license = "Apache-2.0"
 homepage = "https://substrate.io"
 repository.workspace = true
-description = "Pallet tangle lst pallet"
+description = "FRAME nomination pools pallet"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -21,14 +21,14 @@ scale-info = { version = "2.10.0", default-features = false, features = [
 ] }
 
 # FRAME
-frame-support = { workspace = true }
-frame-system = { workspace = true }
-sp-runtime = { workspace = true }
-sp-std = { workspace = true }
-sp-staking = { workspace = true }
-sp-core = { workspace = true }
-sp-io = { workspace = true }
-log = { workspace = true }
+frame-support = { workspace = true, default-features = false }
+frame-system = { workspace = true, default-features = false }
+sp-runtime = { workspace = true, default-features = false }
+sp-std = { workspace = true, default-features = false }
+sp-staking = { workspace = true, default-features = false }
+sp-core = { workspace = true, default-features = false }
+sp-io = { workspace = true, default-features = false }
+log = { version = "0.4.0", default-features = false }
 
 # Optional: use for testing and/or fuzzing
 pallet-balances = { workspace = true, optional = true }
