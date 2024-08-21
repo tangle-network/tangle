@@ -100,7 +100,14 @@ pub enum Field<C: Constraints, AccountId> {
 	/// Represents a list of values
 	#[codec(index = 13)]
 	List(BoundedVec<Field<C, AccountId>, C::MaxFieldsSize>),
-
+	/// Represents a named struct
+	///
+	/// The struct is represented as a list of fields, where each field is a tuple of a name and a value.
+	#[codec(index = 14)]
+	Struct(
+		BoundedString<C::MaxFieldsSize>,
+		BoundedVec<(BoundedString<C::MaxFieldsSize>, Box<Field<C, AccountId>>), C::MaxFieldsSize>,
+	),
 	// NOTE: Special types starts from 100
 	/// A special type for AccountId
 	#[codec(index = 100)]
@@ -129,6 +136,13 @@ impl<C: Constraints, AccountId: core::fmt::Debug> core::fmt::Debug for Field<C, 
 			Self::Array(arg0) => f.debug_tuple("array").field(arg0).finish(),
 			Self::List(arg0) => f.debug_tuple("list").field(arg0).finish(),
 			Self::AccountId(arg0) => f.debug_tuple("account").field(arg0).finish(),
+			Self::Struct(name, fields) => {
+				let mut debug_struct = f.debug_struct(&format!("struct({})", name));
+				for (field_name, field_value) in fields.iter() {
+					debug_struct.field(field_name.as_str(), field_value);
+				}
+				debug_struct.finish()
+			},
 		}
 	}
 }
@@ -152,6 +166,19 @@ impl<C: Constraints, AccountId: PartialEq> PartialEq for Field<C, AccountId> {
 			(Self::Array(l0), Self::Array(r0)) => l0 == r0,
 			(Self::List(l0), Self::List(r0)) => l0 == r0,
 			(Self::AccountId(l0), Self::AccountId(r0)) => l0 == r0,
+			(Self::Struct(l_name, l_fields), Self::Struct(r_name, r_fields)) => {
+				if l_name != r_name || l_fields.len() != r_fields.len() {
+					return false;
+				}
+				for ((l_field_name, l_field_value), (r_field_name, r_field_value)) in
+					l_fields.iter().zip(r_fields.iter())
+				{
+					if l_field_name != r_field_name || l_field_value != r_field_value {
+						return false;
+					}
+				}
+				true
+			},
 			_ => core::mem::discriminant(self) == core::mem::discriminant(other),
 		}
 	}
@@ -174,6 +201,7 @@ impl<C: Constraints, AccountId: Clone> Clone for Field<C, AccountId> {
 			Self::Bytes(arg0) => Self::Bytes(arg0.clone()),
 			Self::Array(arg0) => Self::Array(arg0.clone()),
 			Self::List(arg0) => Self::List(arg0.clone()),
+			Self::Struct(arg0, arg1) => Self::Struct(arg0.clone(), arg1.clone()),
 			Self::AccountId(arg0) => Self::AccountId(arg0.clone()),
 		}
 	}
@@ -250,6 +278,9 @@ pub enum FieldType {
 	/// A List of items of type [`FieldType`].
 	#[codec(index = 14)]
 	List(Box<FieldType>),
+	/// A Struct of items of type [`FieldType`].
+	#[codec(index = 15)]
+	Struct(Box<FieldType>, BoundedVec<(Box<FieldType>, Box<FieldType>), ConstU32<20>>),
 	// NOTE: Special types starts from 100
 	/// A special type for AccountId
 	#[codec(index = 100)]
@@ -276,6 +307,13 @@ impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 			},
 			(Self::List(a), FieldType::List(b)) => a.iter().all(|f| f.eq(b.as_ref())),
 			(Self::AccountId(_), FieldType::AccountId) => true,
+			(Self::Struct(_, fields_a), FieldType::Struct(_, fields_b)) => {
+				fields_a.into_iter().len() == fields_b.into_iter().len()
+					&& fields_a
+						.into_iter()
+						.zip(fields_b.into_iter())
+						.all(|((_, v_a), (_, v_b))| v_a.as_ref().eq(v_b))
+			},
 			_ => false,
 		}
 	}
@@ -304,11 +342,27 @@ impl<C: Constraints, AccountId: Clone> From<Field<C, AccountId>> for FieldType {
 				a.first().cloned().map(Into::into).unwrap_or(FieldType::Void),
 			)),
 			Field::AccountId(_) => FieldType::AccountId,
+			Field::Struct(_, fields) => FieldType::Struct(
+				Box::new(FieldType::String),
+				fields
+					.iter()
+					.map(|(_, field_value)| {
+						(
+							Box::new(FieldType::String),
+							Box::new(FieldType::from(field_value.as_ref().clone())),
+						)
+					})
+					.collect::<Vec<_>>()
+					.try_into()
+					.expect("Field count should not exceed MaxFieldsSize"),
+			),
 		}
 	}
 }
 
-impl<'a, C: Constraints, AccountId: Encode> From<&'a Field<C, AccountId>> for ethabi::Token {
+impl<'a, C: Constraints, AccountId: Encode + Clone> From<&'a Field<C, AccountId>>
+	for ethabi::Token
+{
 	fn from(value: &'a Field<C, AccountId>) -> Self {
 		match value {
 			Field::None => ethabi::Token::Tuple(Vec::new()),
@@ -326,17 +380,28 @@ impl<'a, C: Constraints, AccountId: Encode> From<&'a Field<C, AccountId>> for et
 			Field::Array(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
 			Field::List(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
 			Field::AccountId(val) => ethabi::Token::Bytes(val.encode()),
+			Field::Struct(_, fields) => ethabi::Token::Array(
+				fields
+					.into_iter()
+					.map(|(field_name, field_value)| {
+						ethabi::Token::Tuple(vec![
+							ethabi::Token::String(field_name.to_string()),
+							field_value.as_ref().clone().into(),
+						])
+					})
+					.collect(),
+			),
 		}
 	}
 }
 
-impl<C: Constraints, AccountId: Encode> From<Field<C, AccountId>> for ethabi::Token {
+impl<C: Constraints, AccountId: Clone + Encode> From<Field<C, AccountId>> for ethabi::Token {
 	fn from(value: Field<C, AccountId>) -> Self {
 		(&value).into()
 	}
 }
 
-impl<C: Constraints, AccountId: Encode> Field<C, AccountId> {
+impl<C: Constraints, AccountId: Clone + Encode> Field<C, AccountId> {
 	/// Convrts the field to a `ethabi::Token`.
 	/// This is useful for converting the field to a type that can be used in an Ethereum transaction.
 	pub fn into_ethabi_token(self) -> ethabi::Token {
