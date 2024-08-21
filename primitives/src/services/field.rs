@@ -279,8 +279,9 @@ pub enum FieldType {
 	#[codec(index = 14)]
 	List(Box<FieldType>),
 	/// A Struct of items of type [`FieldType`].
+	/// A limit of 32 fields is set for the struct.
 	#[codec(index = 15)]
-	Struct(Box<FieldType>, BoundedVec<(Box<FieldType>, Box<FieldType>), ConstU32<20>>),
+	Struct(Box<FieldType>, BoundedVec<(Box<FieldType>, Box<FieldType>), ConstU32<32>>),
 	// NOTE: Special types starts from 100
 	/// A special type for AccountId
 	#[codec(index = 100)]
