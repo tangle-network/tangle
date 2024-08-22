@@ -20,7 +20,7 @@ use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
-use sp_std::boxed::Box;
+use sp_std::{vec, boxed::Box};
 
 use super::Constraints;
 
@@ -45,6 +45,9 @@ macro_rules! impl_from {
         $( impl_from!($from, $variant); )*
     };
 }
+
+
+pub type StructFieldItem<C, M, AccountId> = (BoundedString<M>, Box<Field<C, AccountId>>);
 
 #[derive(Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[scale_info(bounds(AccountId: TypeInfo), skip_type_params(C))]
@@ -103,6 +106,7 @@ pub enum Field<C: Constraints, AccountId> {
 	/// Represents a named struct
 	///
 	/// The struct is represented as a list of fields, where each field is a tuple of a name and a value.
+	#[allow(clippy::type_complexity)]
 	#[codec(index = 14)]
 	Struct(
 		BoundedString<C::MaxFieldsSize>,
@@ -312,7 +316,7 @@ impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 				fields_a.into_iter().len() == fields_b.into_iter().len()
 					&& fields_a
 						.into_iter()
-						.zip(fields_b.into_iter())
+						.zip(fields_b)
 						.all(|((_, v_a), (_, v_b))| v_a.as_ref().eq(v_b))
 			},
 			_ => false,
