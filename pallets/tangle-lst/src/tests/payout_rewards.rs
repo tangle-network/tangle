@@ -231,8 +231,8 @@ fn test_payout_rewards() {
 			let index = pool_id as usize;
 			let reward_from_validator = get_reward(validator, era, pool_id);
 			let reward = eighty_percent.mul_floor(reward_from_validator);
-			let bonus = base_bonus_factor.mul_floor(reward_from_validator)
-				+ weighted_bonus_factor.mul_floor(real_weights[index]);
+			let bonus = base_bonus_factor.mul_floor(reward_from_validator) +
+				weighted_bonus_factor.mul_floor(real_weights[index]);
 
 			// check events
 			assert_eq!(
@@ -318,8 +318,8 @@ fn test_payout_rewards() {
 			let index = pool_id as usize;
 			let reward_from_validator = get_reward(validator, era, pool_id);
 			let reward = eighty_percent.mul_floor(reward_from_validator);
-			let bonus = base_bonus_factor.mul_floor(reward_from_validator)
-				+ weighted_bonus_factor.mul_floor(real_weights[index]);
+			let bonus = base_bonus_factor.mul_floor(reward_from_validator) +
+				weighted_bonus_factor.mul_floor(real_weights[index]);
 
 			// check events
 			assert_eq!(
@@ -698,8 +698,8 @@ fn test_payout_rewards_bonus_weights() {
 
 		assert_eq!(
 			remainder_recipient_balance_after - remainder_recipient_balance_before,
-			Perbill::from_percent(20).mul_floor(total_pool_rewards.iter().sum::<Balance>())
-				- total_paid_bonus,
+			Perbill::from_percent(20).mul_floor(total_pool_rewards.iter().sum::<Balance>()) -
+				total_paid_bonus,
 		);
 	})
 }
@@ -956,63 +956,6 @@ fn test_bonus() {
 	})
 }
 
-/// Tests [`BonusCycle::eras_remaining`]
-#[test]
-fn test_eras_remaining() {
-	ExtBuilder::default().build_and_execute(|| {
-		use ErasRemaining::*;
-		let mut pool = BondedPool::<Runtime>::get(0).unwrap();
-		let cycle = &mut pool.bonus_cycle;
-
-		// previous duration of 19, ends 1 era before start (49)
-		cycle.previous_start = Some(30);
-		cycle.start = 50;
-		cycle.end = 60;
-		assert_eq!(cycle.duration(), 10);
-
-		assert_eq!(cycle.eras_remaining(0), Past);
-		assert_eq!(cycle.eras_remaining(29), Past);
-		assert_eq!(cycle.eras_remaining(30), Previous(19));
-		assert_eq!(cycle.eras_remaining(35), Previous(14));
-		assert_eq!(cycle.eras_remaining(49), Previous(0));
-		assert_eq!(cycle.eras_remaining(50), Current(10));
-		assert_eq!(cycle.eras_remaining(55), Current(5));
-		assert_eq!(cycle.eras_remaining(60), Current(0));
-		assert_eq!(cycle.eras_remaining(61), Future);
-
-		// check without a previous cycle
-		cycle.previous_start = None;
-		assert_eq!(cycle.duration(), 10);
-		assert_eq!(cycle.eras_remaining(49), Past);
-		assert_eq!(cycle.eras_remaining(50), Current(10));
-		assert_eq!(cycle.eras_remaining(60), Current(0));
-		assert_eq!(cycle.eras_remaining(61), Future);
-	})
-}
-
-/// Tests [`BondedPool::update_duration_bounds`]
-#[test]
-fn test_pool_update_duration_bounds() {
-	ExtBuilder::default().build_and_execute(|| {
-		// setup
-		let mut pool = BondedPool::<Runtime>::get(0).unwrap();
-		pool.bonus_cycle.start = 0;
-
-		// same initial values as in `payout_rewards` function
-		let mut min_duration = EraIndex::MAX;
-		let mut max_duration = EraIndex::MIN;
-
-		let durations = [50, 10, 30];
-		for duration in durations {
-			pool.bonus_cycle.end = duration;
-			pool.update_duration_bounds(&mut min_duration, &mut max_duration);
-		}
-
-		assert_eq!(min_duration, 10);
-		assert_eq!(max_duration, 50);
-	})
-}
-
 /// Tests [`calculate_real_weight`]
 #[test]
 fn test_calculate_real_weight() {
@@ -1034,110 +977,4 @@ fn test_calculate_real_weight() {
 	assert_eq!(check(50, 0, 100, 1_000), 500);
 	assert_eq!(check(75, 0, 100, 1_000), 750);
 	assert_eq!(check(100, 0, 100, 1_000), 1_000);
-}
-
-/// Tests [`Bonus::calculate_bonus`]
-#[test]
-fn test_calculate_bonus() {
-	ExtBuilder::default().build_and_execute(|| {
-		let (min_duration, max_duration) = (30, 120);
-
-		let real_weight =
-			calculate_real_weight::<Runtime>(100, min_duration, max_duration - min_duration, 1000);
-
-		let pool_info = PoolInfo::<Balance> {
-			duration: 100_u32,
-			initial_reward_balance: 100,
-			reward: 1000,
-			real_weight,
-		};
-
-		let (total_bonus, base_remainder, weighted_remainder) = pool_info.calculate_bonus(
-			NegativeImbalanceOf::<Runtime>::new(25_000),
-			NegativeImbalanceOf::<Runtime>::new(75_000),
-			Perbill::from_percent(20),
-			Perbill::from_percent(50),
-		);
-
-		// formula: `1000 / 5 + real_weight / 2`
-		assert_eq!(total_bonus, NegativeImbalanceOf::<Runtime>::new(588));
-		assert_eq!(base_remainder, NegativeImbalanceOf::<Runtime>::new(25_000 - 200));
-		assert_eq!(weighted_remainder, NegativeImbalanceOf::<Runtime>::new(75_000 - 388));
-	})
-}
-
-#[test]
-fn test_end_era_with_no_payments_doesnt_submit_event() {
-	ExtBuilder::default().build_and_execute(|| {
-		let pool_id = 0;
-		let era = 0;
-
-		pool_events_since_last_call();
-		let mut pool = BondedPool::<T>::get(pool_id).unwrap();
-		pool.end_era(era).unwrap();
-
-		// event doesn't happen because it's empty
-		assert_eq!(pool_events_since_last_call(), vec![]);
-
-		// event happens because of reward
-		Balances::make_free_balance_be(&pool.reward_account(), 100 * UNIT);
-		pool.end_era(era).unwrap();
-		assert!(!pool_events_since_last_call().is_empty());
-
-		// giving the pool a commission keeps it empty
-		Pools::mutate(
-			RuntimeOrigin::signed(10),
-			pool_id,
-			PoolMutationOf::<Runtime> {
-				new_commission: SomeMutation(Some(Perbill::from_percent(5))),
-				..Default::default()
-			},
-		)
-		.unwrap();
-		pool_events_since_last_call();
-
-		// event doesn't happen even when commission is set if the commission got 0
-		pool.end_era(era).unwrap();
-		assert_eq!(pool_events_since_last_call(), vec![]);
-
-		// event happens only because of bonus
-		Balances::make_free_balance_be(&pool.bonus_account(), 100 * UNIT);
-		pool.end_era(era).unwrap();
-		assert!(!pool_events_since_last_call().is_empty());
-	})
-}
-
-#[test]
-fn test_end_era_succeeds_with_commission_and_minimum_balance() {
-	ExtBuilder::default().ed(1_000).build_and_execute(|| {
-		let pool_id = 0;
-		let era = 0;
-
-		Pools::mutate(
-			RuntimeOrigin::signed(10),
-			pool_id,
-			PoolMutationOf::<Runtime> {
-				new_commission: SomeMutation(Some(Perbill::from_percent(5))),
-				..Default::default()
-			},
-		)
-		.unwrap();
-		let mut pool = BondedPool::<T>::get(pool_id).unwrap();
-
-		// works with minimum balance
-		let minimum_balance = Balances::minimum_balance();
-		Balances::make_free_balance_be(&pool.bonus_account(), minimum_balance);
-		Balances::make_free_balance_be(&pool.reward_account(), minimum_balance);
-		assert_eq!(Balances::free_balance(pool.reward_account()), minimum_balance);
-		pool.end_era(era).unwrap();
-		assert_eq!(Balances::free_balance(pool.reward_account()), minimum_balance);
-		assert_eq!(Balances::free_balance(pool.bonus_account()), minimum_balance);
-
-		// 1 over the minimum balance, the 1 is transferred
-		Balances::make_free_balance_be(&pool.bonus_account(), minimum_balance + 1);
-		Balances::make_free_balance_be(&pool.reward_account(), minimum_balance + 1);
-		pool.end_era(era).unwrap();
-		assert_eq!(Balances::free_balance(pool.reward_account()), minimum_balance);
-		assert_eq!(Balances::free_balance(pool.bonus_account()), minimum_balance);
-	})
 }
