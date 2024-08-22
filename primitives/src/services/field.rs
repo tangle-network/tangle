@@ -20,7 +20,7 @@ use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
-use sp_std::{vec, boxed::Box};
+use sp_std::{boxed::Box, vec};
 
 use super::Constraints;
 
@@ -45,7 +45,6 @@ macro_rules! impl_from {
         $( impl_from!($from, $variant); )*
     };
 }
-
 
 pub type StructFieldItem<C, M, AccountId> = (BoundedString<M>, Box<Field<C, AccountId>>);
 
