@@ -437,7 +437,7 @@ fn get_fully_funded_accounts_for<'a, T: AsRef<[&'a str]>>(
 	addrs
 		.as_ref()
 		.iter()
-		.map(|acc| generate_fully_loaded_evm_account_for(*acc))
+		.map(|acc| generate_fully_loaded_evm_account_for(acc))
 		.collect()
 }
 
