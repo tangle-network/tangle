@@ -105,8 +105,6 @@ pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
 
-	let preloaded_custom_evm_accounts = get_testing_default_fully_funded_accounts();
-
 	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -143,7 +141,7 @@ pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
 				chain_id,
 				Default::default(),
 				Default::default(),
-				preloaded_custom_evm_accounts,
+				get_testing_default_fully_funded_accounts(),
 			)
 		},
 		// Bootnodes
@@ -169,8 +167,6 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), TESTNET_LOCAL_SS58_PREFIX.into());
-
-	let preloaded_custom_evm_accounts = get_testing_default_fully_funded_accounts();
 
 	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
@@ -202,7 +198,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				chain_id,
 				Default::default(),
 				Default::default(),
-				preloaded_custom_evm_accounts,
+				get_testing_default_fully_funded_accounts(),
 			)
 		},
 		// Bootnodes
@@ -228,8 +224,6 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
-
-	let preloaded_custom_evm_accounts = get_testing_default_fully_funded_accounts();
 
 	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
@@ -261,7 +255,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					mainnet::get_foundation_balance_distribution(),
 				]),
 				// endowed evm accounts
-				preloaded_custom_evm_accounts,
+				get_testing_default_fully_funded_accounts(),
 			)
 		},
 		// Bootnodes
@@ -437,11 +431,13 @@ fn generate_fully_loaded_evm_account_for(acc: &str) -> (H160, fp_evm::GenesisAcc
 	)
 }
 
-fn get_fully_funded_accounts_for<T: AsRef<[str]>>(addrs: T) -> Vec<(H160, fp_evm::GenesisAccount)> {
+fn get_fully_funded_accounts_for<'a, T: AsRef<[&'a str]>>(
+	addrs: T,
+) -> Vec<(H160, fp_evm::GenesisAccount)> {
 	addrs
 		.as_ref()
 		.iter()
-		.map(|acc| generate_fully_loaded_evm_account_for(acc))
+		.map(|acc| generate_fully_loaded_evm_account_for(*acc))
 		.collect()
 }
 
