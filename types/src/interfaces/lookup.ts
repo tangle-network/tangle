@@ -4282,7 +4282,7 @@ export default {
    **/
   TanglePrimitivesServicesWasmGadget: {
     runtime: 'TanglePrimitivesServicesWasmRuntime',
-    soruces: 'Vec<TanglePrimitivesServicesGadgetSource>'
+    sources: 'Vec<TanglePrimitivesServicesGadgetSource>'
   },
   /**
    * Lookup418: tangle_primitives::services::WasmRuntime
@@ -4351,13 +4351,13 @@ export default {
    * Lookup445: tangle_primitives::services::NativeGadget<C>
    **/
   TanglePrimitivesServicesNativeGadget: {
-    soruces: 'Vec<TanglePrimitivesServicesGadgetSource>'
+    sources: 'Vec<TanglePrimitivesServicesGadgetSource>'
   },
   /**
    * Lookup446: tangle_primitives::services::ContainerGadget<C>
    **/
   TanglePrimitivesServicesContainerGadget: {
-    soruces: 'Vec<TanglePrimitivesServicesGadgetSource>'
+    sources: 'Vec<TanglePrimitivesServicesGadgetSource>'
   },
   /**
    * Lookup448: sygma_access_segregator::pallet::Call<T>

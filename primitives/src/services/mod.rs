@@ -555,7 +555,7 @@ pub enum Gadget<C: Constraints> {
 
 impl<C: Constraints> Default for Gadget<C> {
 	fn default() -> Self {
-		Gadget::Wasm(WasmGadget { runtime: WasmRuntime::Wasmtime, soruces: Default::default() })
+		Gadget::Wasm(WasmGadget { runtime: WasmRuntime::Wasmtime, sources: Default::default() })
 	}
 }
 
@@ -747,7 +747,7 @@ pub struct WasmGadget<C: Constraints> {
 	/// Which runtime to use to execute the WASM binary.
 	pub runtime: WasmRuntime,
 	/// Where the WASM binary is stored.
-	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
+	pub sources: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
 }
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
@@ -776,7 +776,7 @@ pub enum WasmRuntime {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
 pub struct NativeGadget<C: Constraints> {
 	/// Where the WASM binary is stored.
-	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
+	pub sources: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
 }
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
@@ -788,7 +788,7 @@ pub struct NativeGadget<C: Constraints> {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
 pub struct ContainerGadget<C: Constraints> {
 	/// Where the Image of the gadget binary is stored.
-	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
+	pub sources: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
 }
 
 // -***- RPC -***-

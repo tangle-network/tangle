@@ -57410,7 +57410,7 @@ pub mod api {
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
 				pub struct ContainerGadget {
-					pub soruces: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+					pub sources: runtime_types::bounded_collections::bounded_vec::BoundedVec<
 						runtime_types::tangle_primitives::services::GadgetSource,
 					>,
 				}
@@ -57719,7 +57719,7 @@ pub mod api {
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
 				pub struct NativeGadget {
-					pub soruces: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+					pub sources: runtime_types::bounded_collections::bounded_vec::BoundedVec<
 						runtime_types::tangle_primitives::services::GadgetSource,
 					>,
 				}
@@ -58071,7 +58071,7 @@ pub mod api {
 				)]
 				pub struct WasmGadget {
 					pub runtime: runtime_types::tangle_primitives::services::WasmRuntime,
-					pub soruces: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+					pub sources: runtime_types::bounded_collections::bounded_vec::BoundedVec<
 						runtime_types::tangle_primitives::services::GadgetSource,
 					>,
 				}
