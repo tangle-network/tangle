@@ -1,60 +1,29 @@
-#![macro_use]
-use crate::{
-	self as pools,
-	tests::DEFAULT_DURATION,
-	types::{AccountType, CurrencyOf},
-	BondedPools, Config, NegativeImbalanceOf, NextPoolId, Pallet, PoolId, PoolState,
-};
-use frame_election_provider_support::VoteWeight;
-use frame_support::{
-	assert_ok, derive_impl,
-	dispatch::DispatchResult,
-	parameter_types,
-	traits::{Currency, Hooks, OnFinalize, OnUnbalanced},
-	PalletId,
-};
-use sp_runtime::BuildStorage;
-use sp_staking::currency_to_vote::SaturatingCurrencyToVote;
+// This file is part of Substrate.
 
+use super::*;
+use crate::{self as pools};
+use frame_support::{assert_ok, derive_impl, parameter_types, traits::fungible::Mutate, PalletId};
 use frame_system::RawOrigin;
-use polkadot_runtime_common::{BalanceToU256, U256ToBalance};
-use sp_core::{bounded::BoundedBTreeMap, ConstU128, ConstU32, ConstU64, ConstU8, Get, U256};
-use sp_runtime::{
-	traits::{AccountIdConversion, Convert, Zero},
-	DispatchError, FixedU128, Perbill,
-};
-use sp_staking::{EraIndex, Stake};
-use sp_std::collections::btree_map::BTreeMap;
+use sp_runtime::{BuildStorage, FixedU128};
+use sp_staking::{OnStakingUpdate, Stake};
 
+pub type BlockNumber = u64;
 pub type AccountId = u128;
+pub type Balance = u128;
 pub type RewardCounter = FixedU128;
 // This sneaky little hack allows us to write code exactly as we would do in the pallet in the tests
 // as well, e.g. `StorageItem::<T>::get()`.
 pub type T = Runtime;
+pub type Currency = <T as Config>::Currency;
 
 // Ext builder creates a pool with id 1.
 pub fn default_bonded_account() -> AccountId {
-	Pools::compute_pool_account_id(0, AccountType::Bonded)
+	Pools::create_bonded_account(1)
 }
 
 // Ext builder creates a pool with id 1.
 pub fn default_reward_account() -> AccountId {
-	Pools::compute_pool_account_id(0, AccountType::Reward)
-}
-
-pub struct MockOnUnbalancedHandler<T>(sp_std::marker::PhantomData<T>);
-
-impl<T: Config> OnUnbalanced<NegativeImbalanceOf<T>> for MockOnUnbalancedHandler<T>
-where
-	T: crate::Config + pallet_balances::Config,
-{
-	fn on_nonzero_unbalanced(amount: NegativeImbalanceOf<T>) {
-		// Must resolve into existing but better to be safe.
-		CurrencyOf::<T>::resolve_creating(
-			&<T as crate::Config>::LstCollectionOwner::get(),
-			amount,
-		);
-	}
+	Pools::create_reward_account(1)
 }
 
 parameter_types! {
@@ -62,19 +31,33 @@ parameter_types! {
 	pub static CurrentEra: EraIndex = 0;
 	pub static BondingDuration: EraIndex = 3;
 	pub storage BondedBalanceMap: BTreeMap<AccountId, Balance> = Default::default();
-	pub storage UnbondingBalanceMap: BTreeMap<AccountId, Balance> = Default::default();
+	// map from a user to a vec of eras and amounts being unlocked in each era.
+	pub storage UnbondingBalanceMap: BTreeMap<AccountId, Vec<(EraIndex, Balance)>> = Default::default();
 	#[derive(Clone, PartialEq)]
 	pub static MaxUnbonding: u32 = 8;
 	pub static StakingMinBond: Balance = 10;
 	pub storage Nominations: Option<Vec<AccountId>> = None;
 }
-
 pub struct StakingMock;
+
 impl StakingMock {
 	pub(crate) fn set_bonded_balance(who: AccountId, bonded: Balance) {
 		let mut x = BondedBalanceMap::get();
 		x.insert(who, bonded);
 		BondedBalanceMap::set(&x)
+	}
+	/// Mimics a slash towards a pool specified by `pool_id`.
+	/// This reduces the bonded balance of a pool by `amount` and calls [`Pools::on_slash`] to
+	/// enact changes in the nomination-pool pallet.
+	///
+	/// Does not modify any [`SubPools`] of the pool as [`Default::default`] is passed for
+	/// `slashed_unlocking`.
+	pub fn slash_by(pool_id: PoolId, amount: Balance) {
+		let acc = Pools::create_bonded_account(pool_id);
+		let bonded = BondedBalanceMap::get();
+		let pre_total = bonded.get(&acc).unwrap();
+		Self::set_bonded_balance(acc, pre_total - amount);
+		Pools::on_slash(&acc, pre_total - amount, &Default::default(), amount);
 	}
 }
 
@@ -106,15 +89,13 @@ impl sp_staking::StakingInterface for StakingMock {
 		_: &Self::AccountId,
 	) -> Result<sp_staking::StakerStatus<Self::AccountId>, DispatchError> {
 		Nominations::get()
-			.map(sp_staking::StakerStatus::Nominator)
+			.map(|noms| sp_staking::StakerStatus::Nominator(noms))
 			.ok_or(DispatchError::Other("NotStash"))
 	}
 
 	fn bond_extra(who: &Self::AccountId, extra: Self::Balance) -> DispatchResult {
 		let mut x = BondedBalanceMap::get();
-		if let Some(v) = x.get_mut(who) {
-			*v += extra;
-		}
+		x.get_mut(who).map(|v| *v += extra);
 		BondedBalanceMap::set(&x);
 		Ok(())
 	}
@@ -123,8 +104,11 @@ impl sp_staking::StakingInterface for StakingMock {
 		let mut x = BondedBalanceMap::get();
 		*x.get_mut(who).unwrap() = x.get_mut(who).unwrap().saturating_sub(amount);
 		BondedBalanceMap::set(&x);
+
+		let era = Self::current_era();
+		let unlocking_at = era + Self::bonding_duration();
 		let mut y = UnbondingBalanceMap::get();
-		*y.entry(*who).or_insert(Self::Balance::zero()) += amount;
+		y.entry(*who).or_insert(Default::default()).push((unlocking_at, amount));
 		UnbondingBalanceMap::set(&y);
 		Ok(())
 	}
@@ -134,11 +118,13 @@ impl sp_staking::StakingInterface for StakingMock {
 	}
 
 	fn withdraw_unbonded(who: Self::AccountId, _: u32) -> Result<bool, DispatchError> {
-		// Simulates removing unlocking chunks and only having the bonded balance locked
-		let mut x = UnbondingBalanceMap::get();
-		x.remove(&who);
-		UnbondingBalanceMap::set(&x);
+		let mut unbonding_map = UnbondingBalanceMap::get();
+		let staker_map = unbonding_map.get_mut(&who).ok_or("Nothing to unbond")?;
 
+		let current_era = Self::current_era();
+		staker_map.retain(|(unlocking_at, _amount)| *unlocking_at > current_era);
+
+		UnbondingBalanceMap::set(&unbonding_map);
 		Ok(UnbondingBalanceMap::get().is_empty() && BondedBalanceMap::get().is_empty())
 	}
 
@@ -153,7 +139,7 @@ impl sp_staking::StakingInterface for StakingMock {
 	}
 
 	#[cfg(feature = "runtime-benchmarks")]
-	fn nominations(_pool_stash: &Self::AccountId) -> Option<Vec<Self::AccountId>> {
+	fn nominations(_: &Self::AccountId) -> Option<Vec<Self::AccountId>> {
 		Nominations::get()
 	}
 
@@ -162,14 +148,17 @@ impl sp_staking::StakingInterface for StakingMock {
 	}
 
 	fn stake(who: &Self::AccountId) -> Result<Stake<Balance>, DispatchError> {
-		match (
-			UnbondingBalanceMap::get().get(who).copied(),
-			BondedBalanceMap::get().get(who).copied(),
-		) {
+		match (UnbondingBalanceMap::get().get(who), BondedBalanceMap::get().get(who).copied()) {
 			(None, None) => Err(DispatchError::Other("balance not found")),
-			(Some(v), None) => Ok(Stake { total: v, active: 0 }),
+			(Some(v), None) => Ok(Stake {
+				total: v.into_iter().fold(0u128, |acc, &x| acc.saturating_add(x.1)),
+				active: 0,
+			}),
 			(None, Some(v)) => Ok(Stake { total: v, active: v }),
-			(Some(a), Some(b)) => Ok(Stake { total: a + b, active: b }),
+			(Some(a), Some(b)) => Ok(Stake {
+				total: a.into_iter().fold(0u128, |acc, &x| acc.saturating_add(x.1)) + b,
+				active: b,
+			}),
 		}
 	}
 
@@ -210,13 +199,13 @@ impl frame_system::Config for Runtime {
 	type SS58Prefix = ();
 	type BaseCallFilter = frame_support::traits::Everything;
 	type RuntimeOrigin = RuntimeOrigin;
-	type Nonce = u32;
-	type Block = Block;
+	type Nonce = u64;
 	type RuntimeCall = RuntimeCall;
 	type Hash = sp_core::H256;
 	type Hashing = sp_runtime::traits::BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = sp_runtime::traits::IdentityLookup<Self::AccountId>;
+	type Block = Block;
 	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = ();
 	type DbWeight = ();
@@ -230,7 +219,6 @@ impl frame_system::Config for Runtime {
 	type SystemWeightInfo = ();
 	type OnSetCode = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
-	type RuntimeTask = RuntimeTask;
 }
 
 parameter_types! {
@@ -239,7 +227,7 @@ parameter_types! {
 
 impl pallet_balances::Config for Runtime {
 	type MaxLocks = frame_support::traits::ConstU32<1024>;
-	type MaxReserves = ConstU32<1024>;
+	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type Balance = Balance;
 	type RuntimeEvent = RuntimeEvent;
@@ -247,76 +235,10 @@ impl pallet_balances::Config for Runtime {
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = System;
 	type WeightInfo = ();
-	type FreezeIdentifier = ();
-	type MaxFreezes = ();
-	type RuntimeHoldReason = RuntimeHoldReason;
-	type RuntimeFreezeReason = RuntimeFreezeReason;
-}
-
-impl pallet_timestamp::Config for Runtime {
-	type Moment = u64;
-	type OnTimestampSet = ();
-	type MinimumPeriod = ConstU64<5>;
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub static BagThresholds: &'static [VoteWeight] = &[10, 20, 30, 40, 50, 60, 1_000, 2_000, 10_000];
-}
-
-impl pallet_bags_list::Config<pallet_bags_list::Instance1> for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = ();
-	type BagThresholds = BagThresholds;
-	type ScoreProvider = Staking;
-	type Score = VoteWeight;
-}
-
-// this staking pallet is not actually used in the test, its implemented to satisfy the
-// requirement of pallet_staking::Config for the pallet
-impl pallet_staking::Config for Runtime {
-	type Currency = Balances;
-	type NominationsQuota = pallet_staking::FixedNominationsQuota<16>;
-	type CurrencyBalance = Balance;
-	type UnixTime = pallet_timestamp::Pallet<Self>;
-	type CurrencyToVote = SaturatingCurrencyToVote;
-	type RewardRemainder = MockOnUnbalancedHandler<Self>;
-	type RuntimeEvent = RuntimeEvent;
-	type Slash = ();
-	type Reward = ();
-	type SessionsPerEra = ();
-	type SlashDeferDuration = ();
-	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
-	type BondingDuration = BondingDuration;
-	type SessionInterface = ();
-	type EraPayout = ();
-	type NextNewSession = ();
-	type MaxExposurePageSize = ConstU32<512>;
-	type MaxControllersInDeprecationBatch = ConstU32<5314>;
-	type OffendingValidatorsThreshold = ();
-	type ElectionProvider =
-		frame_election_provider_support::NoElection<(AccountId, BlockNumber, Staking, ())>;
-	type GenesisElectionProvider = Self::ElectionProvider;
-	type VoterList = VoterList;
-	type TargetList = pallet_staking::UseValidatorsMap<Self>;
-	type MaxUnlockingChunks = ConstU32<32>;
-	type HistoryDepth = ConstU32<84>;
-	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
-	type EventListeners = Pools;
-
-}
-
-parameter_types! {
-	pub static PostUnbondingPoolsWindow: u32 = 2;
-	pub static MaxMetadataLen: u32 = 2;
-	pub static CheckLevel: u8 = 255;
-	pub const PoolsPalletId: PalletId = PalletId(*b"py/nopls");
-	pub const CollatorRewardPool: PalletId = PalletId(*b"py/colrp");
-	pub LstCollectionOwner: AccountId = PoolsPalletId::get().into_account_truncating();
-	pub const BonusPercentage: Perbill = parameters::nomination_pools::BONUS_PERCENTAGE;
-	pub const BaseBonusRewardPercentage: Perbill = parameters::nomination_pools::BASE_BONUS_REWARD_PERCENTAGE;
-	pub static UnclaimedBalanceReceiver: AccountId = 7534908;
-	pub const CapacityMutationPeriod: EraIndex = 14;
+	type FreezeIdentifier = RuntimeFreezeReason;
+	type MaxFreezes = ConstU32<1>;
+	type RuntimeHoldReason = ();
+	type RuntimeFreezeReason = ();
 }
 
 pub struct BalanceToU256;
@@ -333,47 +255,34 @@ impl Convert<U256, Balance> for U256ToBalance {
 	}
 }
 
+parameter_types! {
+	pub static PostUnbondingPoolsWindow: u32 = 2;
+	pub static MaxMetadataLen: u32 = 2;
+	pub static CheckLevel: u8 = 255;
+	pub const PoolsPalletId: PalletId = PalletId(*b"py/nopls");
+}
 impl pools::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
+	type Currency = Balances;
+	type RuntimeFreezeReason = RuntimeFreezeReason;
 	type RewardCounter = RewardCounter;
 	type BalanceToU256 = BalanceToU256;
 	type U256ToBalance = U256ToBalance;
 	type Staking = StakingMock;
 	type PostUnbondingPoolsWindow = PostUnbondingPoolsWindow;
 	type PalletId = PoolsPalletId;
-	type CollatorRewardPool = CollatorRewardPool;
+	type MaxMetadataLen = MaxMetadataLen;
 	type MaxUnbonding = MaxUnbonding;
 	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
-	type Fungibles = Fungibles;
-	type MinDuration = ConstU32<{ parameters::nomination_pools::MIN_POOL_DURATION }>;
-	type MaxDuration = ConstU32<{ parameters::nomination_pools::MAX_POOL_DURATION }>;
-	type PoolCollectionId = ConstU128<{ parameters::nomination_pools::DEGEN_COLLECTION_ID }>;
-	type LstCollectionId =
-		ConstU128<{ parameters::nomination_pools::STAKED_LST_COLLECTION_ID }>;
-	type LstCollectionOwner = LstCollectionOwner;
-	type BonusPercentage = BonusPercentage;
-	type BaseBonusRewardPercentage = BaseBonusRewardPercentage;
-	type UnclaimedBalanceReceiver = UnclaimedBalanceReceiver;
-	type CapacityMutationPeriod = CapacityMutationPeriod;
-	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
-	type BlockNumberToBalance = BalanceToU256;
-	type GlobalMaxCapacity = GlobalMaxCapacity;
-	type DefaultMaxCapacity = DefaultMaxCapacity;
-	type AttributeKeyMaxLength = AttributeKeyMaxLength;
-	type AttributeValueMaxLength = AttributeValueMaxLength;
-	type MaxCapacityAttributeKey = MaxCapacityAttributeKey;
 }
 
-type Block = frame_system::mocking::MockBlockU32<Runtime>;
+type Block = frame_system::mocking::MockBlock<Runtime>;
 frame_support::construct_runtime!(
-	pub struct Runtime {
+	pub enum Runtime {
 		System: frame_system,
 		Balances: pallet_balances,
 		Pools: pools,
-		Timestamp: pallet_timestamp,
-		Staking: pallet_staking,
-		VoterList: pallet_bags_list::<Instance1>,
 	}
 );
 
@@ -381,11 +290,7 @@ pub struct ExtBuilder {
 	members: Vec<(AccountId, Balance)>,
 	max_members: Option<u32>,
 	max_members_per_pool: Option<u32>,
-	min_validator_commission: Option<Perbill>,
-	capacity: Balance,
-	duration: EraIndex,
 	global_max_commission: Option<Perbill>,
-	create_pool: bool,
 }
 
 impl Default for ExtBuilder {
@@ -394,15 +299,12 @@ impl Default for ExtBuilder {
 			members: Default::default(),
 			max_members: Some(4),
 			max_members_per_pool: Some(3),
-			min_validator_commission: Some(Perbill::from_percent(1)),
-			capacity: 1_000,
-			duration: DEFAULT_DURATION,
-			global_max_commission: Some(Perbill::from_percent(10)),
-			create_pool: true,
+			global_max_commission: Some(Perbill::from_percent(90)),
 		}
 	}
 }
 
+#[cfg_attr(feature = "fuzzing", allow(dead_code))]
 impl ExtBuilder {
 	// Add members to pool 0.
 	pub fn add_members(mut self, members: Vec<(AccountId, Balance)>) -> Self {
@@ -440,18 +342,8 @@ impl ExtBuilder {
 		self
 	}
 
-	pub fn set_duration(mut self, duration: EraIndex) -> Self {
-		self.duration = duration;
-		self
-	}
-
-	pub fn set_capacity(mut self, capacity: Balance) -> Self {
-		self.capacity = capacity;
-		self
-	}
-
-	pub fn without_pool(mut self) -> Self {
-		self.create_pool = false;
+	pub fn global_max_commission(mut self, commission: Option<Perbill>) -> Self {
+		self.global_max_commission = commission;
 		self
 	}
 
@@ -466,7 +358,6 @@ impl ExtBuilder {
 			max_pools: Some(2),
 			max_members_per_pool: self.max_members_per_pool,
 			max_members: self.max_members,
-			min_validator_commission: self.min_validator_commission,
 			global_max_commission: self.global_max_commission,
 		}
 		.assimilate_storage(&mut storage);
@@ -477,40 +368,15 @@ impl ExtBuilder {
 			// for events to be deposited.
 			frame_system::Pallet::<Runtime>::set_block_number(1);
 
-			// create collection and token
-			let token_id = crate::tests::DEFAULT_TOKEN_ID;
-
 			// make a pool
 			let amount_to_bond = Pools::depositor_min_bond();
-			Balances::make_free_balance_be(&10, 10_000_000 * UNIT);
-			Balances::make_free_balance_be(
-				&<Runtime as Config>::LstCollectionOwner::get(),
-				10_000_000 * UNIT,
-			);
-
-			let pool_id = NextPoolId::<Runtime>::get();
-			if self.create_pool {
-				setup_multi_tokens(vec![token_id]);
-				assert_ok!(Pools::create(
-					RawOrigin::Signed(crate::tests::DEFAULT_MANAGER).into(),
-					token_id,
-					amount_to_bond,
-					self.capacity,
-					self.duration,
-					Default::default(),
-				));
-			} else {
-				setup_multi_tokens(vec![]);
-			}
-
+			Currency::set_balance(&10, amount_to_bond * 5);
+			assert_ok!(Pools::create(RawOrigin::Signed(10).into(), amount_to_bond, 900, 901, 902));
+			assert_ok!(Pools::set_metadata(RuntimeOrigin::signed(900), 1, vec![1, 1]));
+			let last_pool = LastPoolId::<Runtime>::get();
 			for (account_id, bonded) in self.members {
-				Balances::make_free_balance_be(&account_id, bonded * 2);
-
-				assert_ok!(Pools::bond(
-					RawOrigin::Signed(account_id).into(),
-					pool_id,
-					bonded.into()
-				));
+				<Runtime as Config>::Currency::set_balance(&account_id, bonded * 2);
+				assert_ok!(Pools::join(RawOrigin::Signed(account_id).into(), bonded, last_pool));
 			}
 		});
 
@@ -522,45 +388,6 @@ impl ExtBuilder {
 			test();
 			Pools::do_try_state(CheckLevel::get()).unwrap();
 		})
-	}
-}
-
-/// Creates the pool's NFT collection and lst collection, mints pool NFTs for each `token_id` and
-/// sets the pool's config.
-fn setup_multi_tokens(token_ids: Vec<AssetId>) {
-	// create the nft collection
-	let pool_collection_id = <Runtime as Config>::PoolCollectionId::get();
-	let lst_collection_id = <Runtime as Config>::LstCollectionId::get();
-
-	Fungibles::force_create_collection(
-		RawOrigin::Root.into(),
-		10,
-		pool_collection_id,
-		Box::new(DefaultCollectionDescriptor {
-			policy: DefaultCollectionPolicyDescriptor {
-				mint: DefaultMintPolicyDescriptor {
-					max_token_count: None,
-					max_token_supply: Some(1),
-					force_collapsing_supply: false
-				},
-				..Default::default()
-			},
-			..Default::default()
-		}),
-	)
-	.unwrap();
-
-	// mint collection for `lst` tokens
-	Fungibles::force_create_collection(
-		RawOrigin::Root.into(),
-		<Runtime as Config>::LstCollectionOwner::get(),
-		lst_collection_id,
-		Default::default(),
-	)
-	.unwrap();
-
-	for token_id in token_ids {
-		mint_pool_token(token_id, 10);
 	}
 }
 
@@ -576,10 +403,23 @@ pub fn unsafe_set_state(pool_id: PoolId, state: PoolState) {
 parameter_types! {
 	storage PoolsEvents: u32 = 0;
 	storage BalancesEvents: u32 = 0;
-	/// Bound for `MockRewards` storage
-	pub const MockRewardsBound: u32 = 50;
-	/// Storage used for mocking rewards in [`Pallet::payout_rewards`]
-	pub storage MockRewards: BoundedBTreeMap<(AccountId, EraIndex), BoundedBTreeMap<PoolId, Balance, MockRewardsBound>, MockRewardsBound> = Default::default();
+}
+
+/// Helper to run a specified amount of blocks.
+pub fn run_blocks(n: u64) {
+	let current_block = System::block_number();
+	run_to_block(n + current_block);
+}
+
+/// Helper to run to a specific block.
+pub fn run_to_block(n: u64) {
+	let current_block = System::block_number();
+	assert!(n > current_block);
+	while System::block_number() < n {
+		Pools::on_finalize(System::block_number());
+		System::set_block_number(System::block_number() + 1);
+		Pools::on_initialize(System::block_number());
+	}
 }
 
 /// All events of this pallet.
@@ -592,17 +432,6 @@ pub fn pool_events_since_last_call() -> Vec<super::Event<Runtime>> {
 	let already_seen = PoolsEvents::get();
 	PoolsEvents::set(&(events.len() as u32));
 	events.into_iter().skip(already_seen as usize).collect()
-}
-
-/// filters `$events` by `$event_pattern`
-macro_rules! filter_events {
-	($events: expr, $event_pattern:pat_param) => {
-		$events
-			.iter()
-			.filter(|e| matches!(e, $event_pattern))
-			.cloned()
-			.collect::<Vec<super::Event<Runtime>>>()
-	};
 }
 
 /// All events of the `Balances` pallet.
@@ -618,55 +447,63 @@ pub fn balances_events_since_last_call() -> Vec<pallet_balances::Event<Runtime>>
 }
 
 /// Same as `fully_unbond`, in permissioned setting.
-pub fn fully_unbond_permissioned(pool_id: PoolId, member: AccountId) -> DispatchResult {
-	let points = Pools::member_points(pool_id, member);
-	let result = Pools::unbond(RuntimeOrigin::signed(member), pool_id, member, points);
-	if result.is_ok() {
-		assert_eq!(Pools::member_points(pool_id, member), 0);
+pub fn fully_unbond_permissioned(member: AccountId) -> DispatchResult {
+	let points = PoolMembers::<Runtime>::get(member)
+		.map(|d| d.active_points())
+		.unwrap_or_default();
+	Pools::unbond(RuntimeOrigin::signed(member), member, points)
+}
+
+pub fn pending_rewards_for_delegator(delegator: AccountId) -> Balance {
+	let member = PoolMembers::<T>::get(delegator).unwrap();
+	let bonded_pool = BondedPools::<T>::get(member.pool_id).unwrap();
+	let reward_pool = RewardPools::<T>::get(member.pool_id).unwrap();
+
+	assert!(!bonded_pool.points.is_zero());
+
+	let commission = bonded_pool.commission.current();
+	let current_rc = reward_pool
+		.current_reward_counter(member.pool_id, bonded_pool.points, commission)
+		.unwrap()
+		.0;
+
+	member.pending_rewards(current_rc).unwrap_or_default()
+}
+
+#[derive(PartialEq, Debug)]
+pub enum RewardImbalance {
+	// There is no reward deficit.
+	Surplus(Balance),
+	// There is a reward deficit.
+	Deficit(Balance),
+}
+
+pub fn pool_pending_rewards(pool: PoolId) -> Result<BalanceOf<T>, sp_runtime::DispatchError> {
+	let bonded_pool = BondedPools::<T>::get(pool).ok_or(Error::<T>::PoolNotFound)?;
+	let reward_pool = RewardPools::<T>::get(pool).ok_or(Error::<T>::PoolNotFound)?;
+
+	let current_rc = if !bonded_pool.points.is_zero() {
+		let commission = bonded_pool.commission.current();
+		reward_pool.current_reward_counter(pool, bonded_pool.points, commission)?.0
+	} else {
+		Default::default()
+	};
+
+	Ok(PoolMembers::<T>::iter()
+		.filter(|(_, d)| d.pool_id == pool)
+		.map(|(_, d)| d.pending_rewards(current_rc).unwrap_or_default())
+		.fold(0u32.into(), |acc: BalanceOf<T>, x| acc.saturating_add(x)))
+}
+
+pub fn reward_imbalance(pool: PoolId) -> RewardImbalance {
+	let pending_rewards = pool_pending_rewards(pool).expect("pool should exist");
+	let current_balance = RewardPool::<Runtime>::current_balance(pool);
+
+	if pending_rewards > current_balance {
+		RewardImbalance::Deficit(pending_rewards - current_balance)
+	} else {
+		RewardImbalance::Surplus(current_balance - pending_rewards)
 	}
-	result
-}
-
-/// Helper to run a specified amount of blocks.
-pub fn run_blocks(n: u32) {
-	let current_block = System::block_number();
-	run_to_block(n + current_block);
-}
-
-/// Helper to run to a specific block.
-pub fn run_to_block(n: u32) {
-	let current_block = System::block_number();
-	assert!(n > current_block);
-	while System::block_number() < n {
-		<Pallet<Runtime> as OnFinalize<BlockNumber>>::on_finalize(System::block_number());
-		System::set_block_number(System::block_number() + 1);
-		Pools::on_initialize(System::block_number());
-	}
-}
-
-/// Sets a mock reward for [`Pallet::payout_rewards`]
-pub fn set_reward(validator: AccountId, era: EraIndex, pool_id: PoolId, amount: Balance) {
-	let mut rewards = MockRewards::get().into_inner();
-	let pool_rewards = rewards.entry((validator, era)).or_default();
-	pool_rewards.try_insert(pool_id, amount).unwrap();
-	MockRewards::set(&rewards.try_into().unwrap());
-}
-
-/// Gets a mock reward for [`Pallet::payout_rewards`]
-pub fn get_reward(validator: AccountId, era: EraIndex, pool_id: PoolId) -> Balance {
-	MockRewards::get()
-		.get(&(validator, era))
-		.and_then(|rewards| rewards.get(&pool_id))
-		.copied()
-		.unwrap_or_default()
-}
-
-/// Gets the total mock reward for all pools in `era`
-pub fn get_total_reward(validator: AccountId, era: EraIndex) -> Balance {
-	MockRewards::get()
-		.get(&(validator, era))
-		.map(|rewards| rewards.values().sum())
-		.unwrap_or_default()
 }
 
 #[cfg(test)]
@@ -675,18 +512,18 @@ mod test {
 	#[test]
 	fn u256_to_balance_convert_works() {
 		assert_eq!(U256ToBalance::convert(0u32.into()), Zero::zero());
-		assert_eq!(U256ToBalance::convert(Balance::MAX.into()), Balance::MAX)
+		assert_eq!(U256ToBalance::convert(Balance::max_value().into()), Balance::max_value())
 	}
 
 	#[test]
 	#[should_panic]
 	fn u256_to_balance_convert_panics_correctly() {
-		U256ToBalance::convert(U256::from(Balance::MAX).saturating_add(1u32.into()));
+		U256ToBalance::convert(U256::from(Balance::max_value()).saturating_add(1u32.into()));
 	}
 
 	#[test]
 	fn balance_to_u256_convert_works() {
 		assert_eq!(BalanceToU256::convert(0u32.into()), U256::zero());
-		assert_eq!(BalanceToU256::convert(Balance::MAX), Balance::MAX.into())
+		assert_eq!(BalanceToU256::convert(Balance::max_value()), Balance::max_value().into())
 	}
 }
