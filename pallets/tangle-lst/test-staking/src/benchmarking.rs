@@ -13,8 +13,8 @@ use frame_system::{
 use pallet_nomination_pools::{
 	AccountType, BalanceOf, BondedPools, Call, CollectionIdOf, Commission,
 	CommissionChangeRate, ConfigOp, EraPayout, EraPayoutInfo,
-	GlobalMaxCommission, MinCreateBond, MinJoinBond, NextPoolId, Pallet as Pools, PoolBonusInfoOf,
-	PoolBonusInfos, PoolId, PoolMutationOf, PoolState, SubPoolsStorage, TokenBalanceOf, TokenIdOf,
+	GlobalMaxCommission, MinCreateBond, MinJoinBond, NextPoolId, Pallet as Pools,
+	PoolId, PoolMutationOf, PoolState, SubPoolsStorage, TokenBalanceOf, AssetIdOf,
 	UnbondingMembers,
 };
 use pallet_staking::{Exposure, IndividualExposure, MaxNominationsOf, Pallet as Staking};
@@ -53,9 +53,9 @@ where
 
 fn pool_creator<
 	T: pallet_nomination_pools::Config
-		+ FungibleHandlerConfig<
+		+ FungiblesConfig<
 			CollectionId = CollectionIdOf<T>,
-			TokenId = TokenIdOf<T>,
+			AssetId = AssetIdOf<T>,
 			TokenBalance = TokenBalanceOf<T>,
 			CollectionPolicy = DefaultCollectionPolicyOf<T>,
 			TokenMetadata = DefaultTokenMetadataOf<T>,
@@ -74,7 +74,7 @@ fn pool_creator<
 			BalanceOf::<T>::max_value() / 100_u32.saturated_into(),
 		);
 
-		FungibleHandler::<T>::force_create_collection(
+		Fungibles::<T>::force_create_collection(
 			RuntimeOrigin::Root.into(),
 			T::LstCollectionOwner::get(),
 			lst_collection_id,
@@ -91,7 +91,7 @@ fn pool_creator<
 			0,
 			BalanceOf::<T>::max_value() / 4u32.saturated_into(),
 		);
-		FungibleHandler::<T>::force_create_collection(
+		Fungibles::<T>::force_create_collection(
 			RuntimeOrigin::Root.into(),
 			pool_creator.clone(),
 			collection_id,
@@ -127,9 +127,9 @@ fn create_funded_user_with_balance<T: pallet_nomination_pools::Config>(
 // balance.
 fn create_pool_account<
 	T: pallet_nomination_pools::Config
-		+ FungibleHandlerConfig<
+		+ FungiblesConfig<
 			CollectionId = CollectionIdOf<T>,
-			TokenId = TokenIdOf<T>,
+			AssetId = AssetIdOf<T>,
 			TokenBalance = TokenBalanceOf<T>,
 			CollectionPolicy = DefaultCollectionPolicyOf<T>,
 			TokenMetadata = DefaultTokenMetadataOf<T>,
@@ -150,16 +150,16 @@ fn create_pool_account<
 
 fn create_pool<
 	T: pallet_nomination_pools::Config
-		+ FungibleHandlerConfig<
+		+ FungiblesConfig<
 			CollectionId = CollectionIdOf<T>,
-			TokenId = TokenIdOf<T>,
+			AssetId = AssetIdOf<T>,
 			TokenBalance = TokenBalanceOf<T>,
 			CollectionPolicy = DefaultCollectionPolicyOf<T>,
 			TokenMetadata = DefaultTokenMetadataOf<T>,
 		>,
 >(
 	pool_creator: T::AccountId,
-	token_id: T::TokenId,
+	token_id: T::AssetId,
 	balance: BalanceOf<T>,
 	capacity: Option<BalanceOf<T>>,
 ) -> (T::AccountId, T::AccountId) {
@@ -203,9 +203,9 @@ fn create_pool_at_block<T>(
 	token_id: u128,
 ) -> PoolId
 where
-	T: FungibleHandlerConfig<
+	T: FungiblesConfig<
 			CollectionId = CollectionIdOf<T>,
-			TokenId = TokenIdOf<T>,
+			AssetId = AssetIdOf<T>,
 			TokenBalance = TokenBalanceOf<T>,
 			CollectionPolicy = DefaultCollectionPolicyOf<T>,
 			TokenMetadata = DefaultTokenMetadataOf<T>,
@@ -219,7 +219,7 @@ where
 	}
 
 	let pool_id = pallet_nomination_pools::NextPoolId::<T>::get();
-	let token_id = TokenIdOf::<T>::from(token_id.try_into().unwrap());
+	let token_id = AssetIdOf::<T>::from(token_id.try_into().unwrap());
 	let minimum_bond = Pools::<T>::depositor_min_bond() + One::one();
 
 	let min_duration = <T::MinDuration as Get<EraIndex>>::get();
@@ -261,9 +261,9 @@ struct ListScenario<T: pallet_nomination_pools::Config> {
 
 impl<
 		T: Config
-			+ FungibleHandlerConfig<
+			+ FungiblesConfig<
 				CollectionId = CollectionIdOf<T>,
-				TokenId = TokenIdOf<T>,
+				AssetId = AssetIdOf<T>,
 				TokenBalance = TokenBalanceOf<T>,
 				CollectionPolicy = DefaultCollectionPolicyOf<T>,
 				TokenMetadata = DefaultTokenMetadataOf<T>,
@@ -303,7 +303,7 @@ impl<
 			let pool_creator: T::AccountId =
 				create_funded_user_with_balance::<T>("pool_creator", 100, ed * 200_0000_u32.into());
 
-			assert_ok!(FungibleHandler::<T>::force_create_collection(
+			assert_ok!(Fungibles::<T>::force_create_collection(
 				RuntimeOrigin::Root.into(),
 				pool_creator,
 				pool_collection_id,
@@ -321,7 +321,7 @@ impl<
 		// if the benchmark is run as test, the pool token should already exist
 		// but when run to generate weights, the pool token will not exist and will be created here
 		if pallet_multi_tokens::Collections::<T>::get(lst_collection_id).is_none() {
-			FungibleHandler::<T>::force_create_collection(
+			Fungibles::<T>::force_create_collection(
 				RuntimeOrigin::Root.into(),
 				<<T as pallet_nomination_pools::Config>::PalletId as Get<
 					frame_support::PalletId,
@@ -410,7 +410,7 @@ impl<
 		T::Staking::unbond(&self.origin1, amount).expect("the pool was created in `Self::new`.");
 
 		// Account pool points for the unbonded balance.
-		T::FungibleHandler::burn(
+		T::Fungibles::burn(
 			self.origin1.clone(),
 			T::LstCollectionId::get(),
 			false,
@@ -538,9 +538,9 @@ mod rewards {
 	#[allow(clippy::type_complexity)]
 	pub(super) fn create_validator_with_nominators<
 		T: Config
-			+ FungibleHandlerConfig<
+			+ FungiblesConfig<
 				CollectionId = CollectionIdOf<T>,
-				TokenId = TokenIdOf<T>,
+				AssetId = AssetIdOf<T>,
 				TokenBalance = TokenBalanceOf<T>,
 				CollectionPolicy = DefaultCollectionPolicyOf<T>,
 				TokenMetadata = DefaultTokenMetadataOf<T>,
@@ -636,9 +636,9 @@ mod rewards {
 }
 
 #[benchmarks(
-	where T: FungibleHandlerConfig<
+	where T: FungiblesConfig<
 		CollectionId = CollectionIdOf<T>,
-		TokenId = TokenIdOf<T>,
+		AssetId = AssetIdOf<T>,
 		TokenBalance = TokenBalanceOf<T>,
 		CollectionPolicy = DefaultCollectionPolicyOf<T>,
 		TokenMetadata = DefaultTokenMetadataOf<T>,
@@ -941,7 +941,7 @@ mod benchmarks {
 		let min_create_bond = Pools::<T>::depositor_min_bond();
 		let depositor: T::AccountId = account("depositor", USER_SEED, 0);
 		let capacity = min_create_bond * 4u32.into();
-		let token_id: T::TokenId = (TOKEN_SEED + 1).saturated_into();
+		let token_id: T::AssetId = (TOKEN_SEED + 1).saturated_into();
 
 		mint_pool_token::<T>(token_id, depositor.clone());
 

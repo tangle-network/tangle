@@ -36,9 +36,9 @@ fn member_unbond_open() {
 
 			// token account should be destroyed when the user has unbonded fully aka no more lst
 			// tokens
-			assert!(FungibleHandler::token_account_of((
+			assert!(Fungibles::token_account_of((
 				staked_collection_id(),
-				pool_id as TokenId,
+				pool_id as AssetId,
 				20
 			))
 			.is_none());
@@ -792,7 +792,7 @@ fn unbonding_burns_lst() {
 			assert_eq!(Pools::member_points(pool_id, *member), balance / 2);
 
 			// check events
-			assert_event_deposited!(FungibleHandlerEvent::Burned {
+			assert_event_deposited!(FungiblesEvent::Burned {
 				collection_id: LST_COLLECTION_ID,
 				token_id: pool_id as u128,
 				account_id: *member,
@@ -804,7 +804,7 @@ fn unbonding_burns_lst() {
 			assert_eq!(Pools::member_points(pool_id, *member), 0);
 
 			// check events
-			assert_event_deposited!(FungibleHandlerEvent::Burned {
+			assert_event_deposited!(FungiblesEvent::Burned {
 				collection_id: LST_COLLECTION_ID,
 				token_id: pool_id as u128,
 				account_id: *member,

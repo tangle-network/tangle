@@ -303,7 +303,7 @@ impl pallet_staking::Config for Runtime {
 	type HistoryDepth = ConstU32<84>;
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type EventListeners = Pools;
-	type WeightInfo = ();
+
 }
 
 parameter_types! {
@@ -345,7 +345,7 @@ impl pools::Config for Runtime {
 	type CollatorRewardPool = CollatorRewardPool;
 	type MaxUnbonding = MaxUnbonding;
 	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
-	type FungibleHandler = FungibleHandler;
+	type Fungibles = Fungibles;
 	type MinDuration = ConstU32<{ parameters::nomination_pools::MIN_POOL_DURATION }>;
 	type MaxDuration = ConstU32<{ parameters::nomination_pools::MAX_POOL_DURATION }>;
 	type PoolCollectionId = ConstU128<{ parameters::nomination_pools::DEGEN_COLLECTION_ID }>;
@@ -363,7 +363,6 @@ impl pools::Config for Runtime {
 	type AttributeKeyMaxLength = AttributeKeyMaxLength;
 	type AttributeValueMaxLength = AttributeValueMaxLength;
 	type MaxCapacityAttributeKey = MaxCapacityAttributeKey;
-	type MaxPoolNameLength = MaxPoolNameLength;
 }
 
 type Block = frame_system::mocking::MockBlockU32<Runtime>;
@@ -528,12 +527,12 @@ impl ExtBuilder {
 
 /// Creates the pool's NFT collection and lst collection, mints pool NFTs for each `token_id` and
 /// sets the pool's config.
-fn setup_multi_tokens(token_ids: Vec<TokenId>) {
+fn setup_multi_tokens(token_ids: Vec<AssetId>) {
 	// create the nft collection
 	let pool_collection_id = <Runtime as Config>::PoolCollectionId::get();
 	let lst_collection_id = <Runtime as Config>::LstCollectionId::get();
 
-	FungibleHandler::force_create_collection(
+	Fungibles::force_create_collection(
 		RawOrigin::Root.into(),
 		10,
 		pool_collection_id,
@@ -552,7 +551,7 @@ fn setup_multi_tokens(token_ids: Vec<TokenId>) {
 	.unwrap();
 
 	// mint collection for `lst` tokens
-	FungibleHandler::force_create_collection(
+	Fungibles::force_create_collection(
 		RawOrigin::Root.into(),
 		<Runtime as Config>::LstCollectionOwner::get(),
 		lst_collection_id,

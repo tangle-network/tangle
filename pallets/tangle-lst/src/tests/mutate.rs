@@ -798,7 +798,7 @@ fn test_mutate_capacity_with_attributes() {
 		);
 
 		// non number capacity attribute should fail
-		assert_ok!(<Runtime as Config>::FungibleHandler::set_attribute(
+		assert_ok!(<Runtime as Config>::Fungibles::set_attribute(
 			RuntimeOrigin::signed(10),
 			<<Runtime as Config>::PoolCollectionId as Get<CollectionIdOf<Runtime>>>::get(),
 			Some(token_id),
@@ -818,7 +818,7 @@ fn test_mutate_capacity_with_attributes() {
 		);
 
 		// set max_pool_capacity attribute to exceed global 20M TNT
-		assert_ok!(<Runtime as Config>::FungibleHandler::set_attribute(
+		assert_ok!(<Runtime as Config>::Fungibles::set_attribute(
 			RuntimeOrigin::signed(10),
 			<<Runtime as Config>::PoolCollectionId as Get<CollectionIdOf<Runtime>>>::get(),
 			Some(token_id),
@@ -838,7 +838,7 @@ fn test_mutate_capacity_with_attributes() {
 		);
 
 		// set max_pool_capacity attribute to 1M TNT
-		assert_ok!(<Runtime as Config>::FungibleHandler::set_attribute(
+		assert_ok!(<Runtime as Config>::Fungibles::set_attribute(
 			RuntimeOrigin::signed(10),
 			<<Runtime as Config>::PoolCollectionId as Get<CollectionIdOf<Runtime>>>::get(),
 			Some(token_id),
@@ -867,21 +867,4 @@ fn test_mutate_capacity_with_attributes() {
 			PoolMutationOf::<Runtime> { capacity: Some(1_000_000 * UNIT), ..Default::default() }
 		));
 	})
-}
-
-#[test]
-fn test_mutate_name() {
-	ExtBuilder::default().build_and_execute(|| {
-		let pool_id = 0;
-		let name: PoolNameOf<Runtime> = b"new_name".to_vec().try_into().unwrap();
-
-		Pools::mutate(
-			RuntimeOrigin::signed(DEFAULT_MANAGER),
-			pool_id,
-			PoolMutation { name: Some(name.clone()), ..Default::default() },
-		)
-		.unwrap();
-
-		assert_eq!(BondedPool::<Runtime>::get(pool_id).unwrap().name, name);
-	});
 }

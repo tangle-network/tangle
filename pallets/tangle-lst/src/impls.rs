@@ -2,7 +2,7 @@
 
 use crate::{
 	BalanceOf, BondedPool, Config, Event, Pallet, Perbill, ReversePoolIdLookup, SubPoolsStorage,
-	TokenIdOf,
+	AssetIdOf,
 };
 use frame_support::traits::Defensive;
 use sp_runtime::{traits::Zero, SaturatedConversion, Saturating};

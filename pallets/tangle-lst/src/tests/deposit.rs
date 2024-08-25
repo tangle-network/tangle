@@ -104,11 +104,11 @@ fn test_withdraw_deposit() {
 		CurrentEra::set(3);
 
 		// unbonding entire balance kills the token storage
-		assert!(FungibleHandler::token_of(staked_collection_id(), pool_id as TokenId).is_none());
+		assert!(Fungibles::token_of(staked_collection_id(), pool_id as AssetId).is_none());
 
 		// withdraw the unbonded deposit
 		assert_ok!(Pools::withdraw_deposit(RuntimeOrigin::signed(123), pool_id));
-		assert!(FungibleHandler::token_of(staked_collection_id(), pool_id as TokenId).is_none());
+		assert!(Fungibles::token_of(staked_collection_id(), pool_id as AssetId).is_none());
 
 		// check events
 		let depositor = Pallet::<Runtime>::deposit_account_id(pool_id);
@@ -152,11 +152,11 @@ fn test_unbond_deposit_owner_changed() {
 		let pool_id = 0;
 
 		// now send token to 421
-		assert_ok!(<Runtime as Config>::FungibleHandler::transfer(
+		assert_ok!(<Runtime as Config>::Fungibles::transfer(
 			RuntimeOrigin::signed(10),
 			421,
 			<<Runtime as Config>::PoolCollectionId as Get<_>>::get(),
-			<FungibleHandler as FungibleHandlerBalances>::TransferParams::try_from(
+			<Fungibles as Fungibles>::TransferParams::try_from(
 				ConsolidatedTransferParams {
 					token_id: pool_token_id,
 					amount: 1,
@@ -241,11 +241,11 @@ fn test_withdraw_deposit_owner_changed() {
 		CurrentEra::set(3);
 
 		// now change the owner to 421
-		assert_ok!(<Runtime as Config>::FungibleHandler::transfer(
+		assert_ok!(<Runtime as Config>::Fungibles::transfer(
 			RuntimeOrigin::signed(10),
 			421,
 			<<Runtime as Config>::PoolCollectionId as Get<_>>::get(),
-			<FungibleHandler as FungibleHandlerBalances>::TransferParams::try_from(
+			<Fungibles as Fungibles>::TransferParams::try_from(
 				ConsolidatedTransferParams {
 					token_id: DEFAULT_TOKEN_ID,
 					amount: 1,
@@ -307,7 +307,7 @@ fn test_unbond_deposit_burned_pool_token() {
 		let pool_id = NextPoolId::<Runtime>::get() - 1;
 
 		// burn the pool token
-		assert_ok!(<Runtime as Config>::FungibleHandler::burn(
+		assert_ok!(<Runtime as Config>::Fungibles::burn(
 			RuntimeOrigin::signed(10),
 			<<Runtime as Config>::PoolCollectionId as Get<_>>::get(),
 		));

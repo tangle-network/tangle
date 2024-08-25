@@ -48,7 +48,7 @@ fn test_destroy_burned_pool_token() {
 		);
 
 		// burn the pool token
-		assert_ok!(<Runtime as Config>::FungibleHandler::burn(
+		assert_ok!(<Runtime as Config>::Fungibles::burn(
 			RuntimeOrigin::signed(10),
 			<<Runtime as Config>::PoolCollectionId as Get<_>>::get(),
 		));

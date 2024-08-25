@@ -46,7 +46,7 @@ fn prepare_era(validator: AccountId, era: EraIndex, set_to_current: bool) {
 pub(crate) struct PoolInfo {
 	pub pool_id: PoolId,
 	pub creator: AccountId,
-	pub token_id: TokenId,
+	pub token_id: AssetId,
 	pub duration: EraIndex,
 	pub commission: Option<Perbill>,
 }
@@ -619,7 +619,7 @@ fn test_payout_rewards_bonus_weights() {
 				let pool_info = PoolInfo {
 					pool_id: index as PoolId,
 					creator: index as Balance + 31,
-					token_id: index as TokenId + 1,
+					token_id: index as AssetId + 1,
 					duration,
 					commission: None, // no commission to simplify the test
 				};

@@ -119,12 +119,12 @@ fn withdraw_unbonded_works_against_slashed_no_era_sub_pool() {
 			current_era += 3;
 			CurrentEra::set(current_era);
 
-			assert_eq!(UsedPoolTokenIds::<Runtime>::get(DEFAULT_TOKEN_ID), Some(pool_id));
+			assert_eq!(UsedPoolAssetIds::<Runtime>::get(DEFAULT_TOKEN_ID), Some(pool_id));
 
 			// token should be destroyed as everyone has withdrawn
-			assert!(FungibleHandler::token_of(staked_collection_id(), pool_id as TokenId).is_none());
+			assert!(Fungibles::token_of(staked_collection_id(), pool_id as AssetId).is_none());
 			assert_ok!(Pools::withdraw_deposit(RuntimeOrigin::signed(10), pool_id));
-			assert!(FungibleHandler::token_of(staked_collection_id(), pool_id as TokenId).is_none());
+			assert!(Fungibles::token_of(staked_collection_id(), pool_id as AssetId).is_none());
 			assert_eq!(
 				pool_events_since_last_call(),
 				vec![
@@ -155,7 +155,7 @@ fn withdraw_unbonded_works_against_slashed_no_era_sub_pool() {
 
 			// pool was dissolved
 			assert!(BondedPool::<Runtime>::get(pool_id).is_none());
-			assert!(UsedPoolTokenIds::<Runtime>::get(DEFAULT_TOKEN_ID).is_none())
+			assert!(UsedPoolAssetIds::<Runtime>::get(DEFAULT_TOKEN_ID).is_none())
 		});
 }
 

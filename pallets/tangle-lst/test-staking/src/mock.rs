@@ -270,7 +270,7 @@ impl pallet_nomination_pools::Config for Runtime {
 	type PalletId = PoolsPalletId;
 	type CollatorRewardPool = CollatorRewardPool;
 	type MaxPointsToBalance = MaxPointsToBalance;
-	type FungibleHandler = FungibleHandler;
+	type Fungibles = Fungibles;
 	type MinDuration = ConstU32<{ parameters::nomination_pools::MIN_POOL_DURATION }>;
 	type MaxDuration = ConstU32<{ parameters::nomination_pools::MAX_POOL_DURATION }>;
 	type PoolCollectionId = ConstU128<{ parameters::nomination_pools::DEGEN_COLLECTION_ID }>;
@@ -287,7 +287,6 @@ impl pallet_nomination_pools::Config for Runtime {
 	type AttributeKeyMaxLength = AttributeKeyMaxLength;
 	type AttributeValueMaxLength = AttributeValueMaxLength;
 	type MaxCapacityAttributeKey = MaxCapacityAttributeKey;
-	type MaxPoolNameLength = MaxPoolNameLength;
 }
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -305,7 +304,7 @@ frame_support::construct_runtime!(
 		Session: pallet_session,
 		Historical: pallet_session::historical,
 		VoterList: pallet_bags_list::<Instance1>::{Pallet, Call, Storage, Event<T>},
-		FungibleHandler: pallet_multi_tokens,
+		Fungibles: pallet_multi_tokens,
 		Pools: pallet_nomination_pools::{Pallet, Call, Storage, Event<T>},
 	}
 );
@@ -369,7 +368,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 /// Creates the pool's nft collection, mints NFT for each `token_id` and sets the pool's config
-fn setup_multi_tokens(token_ids: Vec<TokenId>) {
+fn setup_multi_tokens(token_ids: Vec<AssetId>) {
 	// create the nft collection
 	let pool_collection_id =
 		<<Runtime as pallet_nomination_pools::Config>::PoolCollectionId as Get<
@@ -382,7 +381,7 @@ fn setup_multi_tokens(token_ids: Vec<TokenId>) {
 			CollectionIdOf<Runtime>,
 		>>::get();
 
-	FungibleHandler::force_create_collection(
+	Fungibles::force_create_collection(
 		RawOrigin::Root.into(),
 		10,
 		pool_collection_id,
@@ -391,7 +390,7 @@ fn setup_multi_tokens(token_ids: Vec<TokenId>) {
 	.unwrap();
 
 	// mint collection for `lst` tokens
-	FungibleHandler::force_create_collection(
+	Fungibles::force_create_collection(
 		RawOrigin::Root.into(),
 		<<Runtime as pallet_nomination_pools::Config>::PalletId as Get<PalletId>>::get()
 			.into_account_truncating(),

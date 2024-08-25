@@ -47,7 +47,7 @@ pub fn run_to_era(era: EraIndex) {
 	}
 }
 
-pub const DEFAULT_TOKEN_ID: TokenId = 3521;
+pub const DEFAULT_TOKEN_ID: AssetId = 3521;
 const DEFAULT_DURATION: EraIndex = 30;
 
 /// Result of `Pools::compute_pool_account_id(0, AccountType::Bonded)`
@@ -63,7 +63,7 @@ fn nominator_avg_commission_is_calculated() {
 
 		// create the pool, we know this has id 1.
 		let pool_id = NextPoolId::<Test>::get();
-		let token_id = pool_id as TokenId;
+		let token_id = pool_id as AssetId;
 		assert_eq!(pool_id, 0);
 
 		assert_ok!(Pools::create(

@@ -23,7 +23,7 @@ pub mod unbond;
 pub mod unbond_pool;
 pub mod withdraw_unbonded;
 
-type FungibleHandlerTrait = <Runtime as Config>::FungibleHandler;
+type FungiblesTrait = <Runtime as Config>::Fungibles;
 
 #[macro_export]
 macro_rules! unbonding_pools_with_era {
@@ -42,7 +42,7 @@ macro_rules! member_unbonding_eras {
 	}};
 }
 
-pub const DEFAULT_TOKEN_ID: TokenId = 14;
+pub const DEFAULT_TOKEN_ID: AssetId = 14;
 /// The manager for the default pool that is created
 pub const DEFAULT_MANAGER: AccountId = 10;
 pub const DEFAULT_DURATION: EraIndex = 100;
@@ -89,11 +89,11 @@ fn get_pool(pool_id: PoolId) -> Option<BondedPool<Runtime>> {
 
 /// Mints lst for a pool that does not exist in storage.
 fn mint_points(pool_id: PoolId, amount: Balance) {
-	let token_id = pool_id as TokenId;
+	let token_id = pool_id as AssetId;
 	let collection_id = staked_collection_id();
 	let owner = <Runtime as Config>::LstCollectionOwner::get();
 
-	let mint_params = if FungibleHandler::token_of(collection_id, token_id).is_none() {
+	let mint_params = if Fungibles::token_of(collection_id, token_id).is_none() {
 		DefaultMintParams::CreateToken {
 			token_id,
 			initial_supply: amount,
@@ -115,7 +115,7 @@ fn mint_points(pool_id: PoolId, amount: Balance) {
 	} else {
 		DefaultMintParams::Mint { token_id, amount, depositor: None }
 	};
-	<<Runtime as Config>::FungibleHandler as FungibleHandlerBalances>::mint(
+	<<Runtime as Config>::Fungibles as Fungibles>::mint(
 		owner,
 		owner,
 		collection_id,
@@ -126,7 +126,7 @@ fn mint_points(pool_id: PoolId, amount: Balance) {
 
 /// Burns lst for a pool that does not exist in storage.
 fn burn_points(pool_id: PoolId, amount: Balance) {
-	<<Runtime as Config>::FungibleHandler as FungibleHandlerBalances>::burn(
+	<<Runtime as Config>::Fungibles as Fungibles>::burn(
 		<Runtime as Config>::LstCollectionOwner::get(),
 		staked_collection_id(),
 		false,
@@ -160,7 +160,7 @@ fn test_setup() {
 		assert_eq!(pool.points(), 10);
 		assert!(UnbondingMembers::<Runtime>::get(pool_id, 10).is_none());
 		assert_eq!(
-			<Runtime as Config>::FungibleHandler::owner_of(
+			<Runtime as Config>::Fungibles::owner_of(
 				&pool_token_collection_id(),
 				&pool.token_id
 			),
@@ -194,9 +194,9 @@ fn test_setup_without_default_pool() {
 		assert!(!BondedPools::<Runtime>::contains_key(next_pool_id));
 
 		// pool token is not minted, but collection exists
-		assert!(FungibleHandler::collection_owner_of(pool_token_collection_id()).is_some());
+		assert!(Fungibles::collection_owner_of(pool_token_collection_id()).is_some());
 		assert_eq!(
-			FungibleHandler::balance_of(pool_token_collection_id(), DEFAULT_TOKEN_ID, 10),
+			Fungibles::balance_of(pool_token_collection_id(), DEFAULT_TOKEN_ID, 10),
 			0
 		);
 	})

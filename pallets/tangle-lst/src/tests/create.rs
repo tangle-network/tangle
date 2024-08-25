@@ -80,14 +80,6 @@ fn test_create() {
 		// give account (11) NFT allowing to create pools
 		mint_pool_token(token_id, 11);
 
-		// cannot create with name length above maximum
-		let mut name = String::new();
-		for _ in 0..<Runtime as Config>::MaxPoolNameLength::get() + 1 {
-			name.push('0');
-		}
-		let name: Option<PoolNameOf<Runtime>> = name.as_bytes().to_vec().try_into().ok();
-		assert!(name.is_none());
-
 		assert_ok!(Pools::create(
 			RuntimeOrigin::signed(11),
 			token_id,
@@ -113,7 +105,7 @@ fn test_create() {
 		let second_pool_id = NextPoolId::<Runtime>::get() - 1;
 
 		// make sure reverse token_id -> pool_id lookup was stored
-		assert_eq!(UsedPoolTokenIds::<Runtime>::get(token_id), Some(second_pool_id));
+		assert_eq!(UsedPoolAssetIds::<Runtime>::get(token_id), Some(second_pool_id));
 
 		// make sure the funds where bonded and recored
 		assert_eq!(Balances::free_balance(11), 0);
@@ -233,7 +225,7 @@ fn test_create_with_capacity() {
 		);
 
 		// non number capacity attribute should fail
-		assert_ok!(<Runtime as Config>::FungibleHandler::set_attribute(
+		assert_ok!(<Runtime as Config>::Fungibles::set_attribute(
 			RuntimeOrigin::signed(10),
 			<<Runtime as Config>::PoolCollectionId as Get<CollectionIdOf<Runtime>>>::get(),
 			Some(token_id),
@@ -256,7 +248,7 @@ fn test_create_with_capacity() {
 		);
 
 		// set max_pool_capacity attribute to exceed global 20M TNT
-		assert_ok!(<Runtime as Config>::FungibleHandler::set_attribute(
+		assert_ok!(<Runtime as Config>::Fungibles::set_attribute(
 			RuntimeOrigin::signed(10),
 			<<Runtime as Config>::PoolCollectionId as Get<CollectionIdOf<Runtime>>>::get(),
 			Some(token_id),
@@ -279,7 +271,7 @@ fn test_create_with_capacity() {
 		);
 
 		// set max_pool_capacity attribute to decimal value
-		assert_ok!(<Runtime as Config>::FungibleHandler::set_attribute(
+		assert_ok!(<Runtime as Config>::Fungibles::set_attribute(
 			RuntimeOrigin::signed(10),
 			<<Runtime as Config>::PoolCollectionId as Get<CollectionIdOf<Runtime>>>::get(),
 			Some(token_id),
@@ -302,7 +294,7 @@ fn test_create_with_capacity() {
 		);
 
 		// set max_pool_capacity attribute to 1M TNT
-		assert_ok!(<Runtime as Config>::FungibleHandler::set_attribute(
+		assert_ok!(<Runtime as Config>::Fungibles::set_attribute(
 			RuntimeOrigin::signed(10),
 			<<Runtime as Config>::PoolCollectionId as Get<CollectionIdOf<Runtime>>>::get(),
 			Some(token_id),
@@ -361,15 +353,15 @@ fn create_lst_token_works() {
 		bond_extra(11, second_pool_id, StakingMock::minimum_nominator_bond());
 
 		// new token is created with `token_id` of `pool_id`
-		let token = FungibleHandler::token_of(LST_COLLECTION_ID, second_pool_id as u128).unwrap();
+		let token = Fungibles::token_of(LST_COLLECTION_ID, second_pool_id as u128).unwrap();
 
 		assert_eq!(token.supply, StakingMock::minimum_nominator_bond() * 2);
 		assert_eq!(token.cap, None);
 
 		assert_eq!(Pools::member_points(second_pool_id, 11), StakingMock::minimum_nominator_bond());
 
-		// check `FungibleHandlerEvent::TokenCreated`
-		assert_event_deposited!(FungibleHandlerEvent::TokenCreated {
+		// check `FungiblesEvent::TokenCreated`
+		assert_event_deposited!(FungiblesEvent::TokenCreated {
 			collection_id: LST_COLLECTION_ID,
 			token_id: second_pool_id as u128,
 			issuer: RootOrSigned::Signed(<Runtime as Config>::LstCollectionOwner::get()),
@@ -394,8 +386,8 @@ fn create_lst_token_works() {
 			Default::default(),
 		));
 
-		// check `FungibleHandlerEvent::TokenCreated`
-		assert_event_deposited!(FungibleHandlerEvent::TokenCreated {
+		// check `FungiblesEvent::TokenCreated`
+		assert_event_deposited!(FungiblesEvent::TokenCreated {
 			collection_id: LST_COLLECTION_ID,
 			token_id: third_pool_id as u128,
 			issuer: RootOrSigned::Signed(<Runtime as Config>::LstCollectionOwner::get()),
@@ -403,7 +395,7 @@ fn create_lst_token_works() {
 		});
 
 		// new token is created with `token_id` of `pool_id`
-		let token = FungibleHandler::token_of(LST_COLLECTION_ID, third_pool_id as u128).unwrap();
+		let token = Fungibles::token_of(LST_COLLECTION_ID, third_pool_id as u128).unwrap();
 
 		assert_eq!(token.supply, StakingMock::minimum_nominator_bond());
 		assert_eq!(token.cap, None);

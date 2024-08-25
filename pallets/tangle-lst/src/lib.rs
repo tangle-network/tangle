@@ -310,7 +310,7 @@ use frame_support::{
 	DefaultNoBound,
 };
 use frame_system::{ensure_signed, pallet_prelude::*};
-use parity_scale_codec::{Codec, FullCodec};
+use codec::{Codec, FullCodec};
 use scale_info::TypeInfo;
 use sp_core::U256;
 #[cfg(feature = "try-runtime")]
@@ -319,9 +319,18 @@ use sp_runtime::{
 	traits::{AccountIdConversion, Convert, Saturating, StaticLookup, Zero},
 	FixedPointNumber, Perbill,
 };
+use frame_support::traits::ReservableCurrency;
+use frame_support::traits::LockableCurrency;
+
+use frame_support::traits::fungible::MutateFreeze;
+use frame_support::traits::fungibles::Inspect;
+use frame_support::traits::fungibles::Mutate;
 use sp_staking::{EraIndex, StakingInterface};
 use sp_std::{fmt::Debug, ops::Div, vec::Vec};
 pub use types::*;
+use frame_support::traits::fungibles;
+use frame_support::traits::fungible;
+use sp_runtime::traits::AtLeast32BitUnsigned;
 
 mod functions;
 mod impls;
@@ -370,9 +379,10 @@ pub mod pallet {
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: weights::WeightInfo;
 
-		/// The currency type used for nomination pool.
-		type Currency: Mutate<Self::AccountId>
-			+ MutateFreeze<Self::AccountId, Id = Self::RuntimeFreezeReason>;
+		/// The currency type used for managing balances.
+		type Currency: Currency<Self::AccountId>
+			+ ReservableCurrency<Self::AccountId>
+			+ LockableCurrency<Self::AccountId>;
 
 		/// The overarching freeze reason.
 		type RuntimeFreezeReason: From<FreezeReason>;
@@ -447,8 +457,8 @@ pub mod pallet {
 			+ PartialOrd
 			+ MaxEncodedLen;
 
-		/// The LST collection id.
-		type LstCollectionId: Get<AssetId>;
+		/// The origin with privileged access
+		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 	}
 
 	/// Minimum amount to bond to join a pool.
@@ -493,6 +503,12 @@ pub mod pallet {
 	pub type BondedPools<T: Config> =
 		CountedStorageMap<_, Twox64Concat, PoolId, BondedPoolInner<T>>;
 
+	/// Reward pools. This is where there rewards for each pool accumulate. When a members payout is
+	/// claimed, the balance comes out fo the reward pool. Keyed by the bonded pools account.
+	#[pallet::storage]
+	pub type RewardPools<T: Config> = CountedStorageMap<_, Twox64Concat, PoolId, RewardPool<T>>;
+
+
 	/// Groups of unbonding pools. Each group of unbonding pools belongs to a bonded pool,
 	/// hence the name sub-pools. Keyed by the bonded pools account.
 	#[pallet::storage]
@@ -515,8 +531,8 @@ pub mod pallet {
 	///
 	/// This is used for making sure the same token is not used to create multiple pools
 	#[pallet::storage]
-	pub type UsedPoolTokenIds<T: Config> =
-		StorageMap<_, Twox64Concat, TokenIdOf<T>, PoolId, OptionQuery>;
+	pub type UsedPoolAssetIds<T: Config> =
+		StorageMap<_, Twox64Concat, AssetIdOf<T>, PoolId, OptionQuery>;
 
 	/// The maximum commission that can be charged by a pool. Used on commission payouts to bound
 	/// pool commissions that are > `GlobalMaxCommission`, necessary if a future
@@ -526,6 +542,10 @@ pub mod pallet {
 	/// The general staking parameters
 	#[pallet::storage]
 	pub type StakingInformation<T: Config> = StorageValue<_, StakingInfo, OptionQuery>;
+
+	/// Ever increasing number of all pools created so far.
+	#[pallet::storage]
+	pub type LastPoolId<T: Config> = StorageValue<_, u32, ValueQuery>;
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
@@ -557,23 +577,28 @@ pub mod pallet {
 		fn build(&self) {
 			MinJoinBond::<T>::put(self.min_join_bond);
 			MinCreateBond::<T>::put(self.min_create_bond);
-			if let Some(min_validator_commission) = self.min_validator_commission {
-				pallet_staking::MinCommission::<T>::put(min_validator_commission);
-			}
 			if let Some(global_max_commission) = self.global_max_commission {
 				GlobalMaxCommission::<T>::put(global_max_commission);
 			}
 		}
 	}
 
+		/// A reason for freezing funds.
+		#[pallet::composite_enum]
+		pub enum FreezeReason {
+			/// Pool reward account is restricted from going below Existential Deposit.
+			#[codec(index = 0)]
+			PoolMinBalance,
+		}
+
 	/// Events of this pallet.
 	#[pallet::event]
 	#[pallet::generate_deposit(pub fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// A pool has been created.
-		Created { creator: T::AccountId, pool_id: PoolId, capacity: BalanceOf<T> },
-		/// A member has became bonded in a pool.
-		Bonded { member: T::AccountId, pool_id: PoolId, bonded: BalanceOf<T> },
+		Created { depositor: T::AccountId, pool_id: PoolId },
+/// A member has became bonded in a pool.
+Bonded { member: T::AccountId, pool_id: PoolId, bonded: BalanceOf<T>, joined: bool },
 		/// A member has unbonded from their pool.
 		Unbonded {
 			/// The member that unbonded
@@ -642,8 +667,6 @@ pub mod pallet {
 			/// The amount that was added to the pool's bonus account
 			bonus: BalanceOf<T>,
 		},
-		/// Pool has been mutated.
-		PoolMutated { pool_id: PoolId, mutation: PoolMutationOf<T> },
 		/// A nomination took place
 		Nominated {
 			/// The id of the pool
@@ -785,35 +808,51 @@ pub mod pallet {
 		/// * This call will *not* dust the member account, so the member must have at least
 		///   `existential deposit + amount` in their account.
 		/// * Only a pool with [`PoolState::Open`] can be joined
+		/// Stake funds with a pool. The amount to bond is transferred from the member to the
+		/// pools account and immediately increases the pools bond.
+		///
+		/// # Note
+		///
+		/// * An account can only be a member of a single pool.
+		/// * An account cannot join the same pool multiple times.
+		/// * This call will *not* dust the member account, so the member must have at least
+		///   `existential deposit + amount` in their account.
+		/// * Only a pool with [`PoolState::Open`] can be joined
 		#[pallet::call_index(0)]
-		#[pallet::weight(WeightInfoOf::<T>::bond())]
-		pub fn bond(
+		#[pallet::weight(T::WeightInfo::join())]
+		pub fn join(
 			origin: OriginFor<T>,
+			#[pallet::compact] amount: BalanceOf<T>,
 			pool_id: PoolId,
-			amount: BondValueOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
-			let mut bonded_pool = BondedPool::<T>::get(pool_id).ok_or(Error::<T>::PoolNotFound)?;
+			ensure!(amount >= MinJoinBond::<T>::get(), Error::<T>::MinimumBondNotMet);
 
+			let mut bonded_pool = BondedPool::<T>::get(pool_id).ok_or(Error::<T>::PoolNotFound)?;
 			bonded_pool.ok_to_join()?;
 
-			let amount = match amount {
-				BondValue::Amount(amount) => amount,
-				BondValue::Fill => bonded_pool.points_to_balance(bonded_pool.available_points()),
-			};
-			ensure!(amount >= MinJoinBond::<T>::get(), Error::<T>::MinimumBondNotMet);
+			let mut reward_pool = RewardPools::<T>::get(pool_id)
+				.defensive_ok_or::<Error<T>>(DefensiveError::RewardPoolNotFound.into())?;
+
+			// IMPORTANT: reward pool records must be updated with the old points.
+			reward_pool.update_records(
+				pool_id,
+				bonded_pool.points,
+				bonded_pool.commission.current(),
+			)?;
 
 			let points_issued = bonded_pool.try_bond_funds(&who, amount, BondType::Later)?;
 
-			// Mint tokens
-			Self::mint_lst(who.clone(), bonded_pool.id, points_issued, false)?;
-
-			bonded_pool.ok_to_be_open()?;
-
-			Self::deposit_event(Event::<T>::Bonded { member: who, pool_id, bonded: amount });
+			Self::deposit_event(Event::<T>::Bonded {
+				member: who,
+				pool_id,
+				bonded: amount,
+				joined: true,
+			});
 
 			bonded_pool.put();
+			RewardPools::<T>::insert(pool_id, reward_pool);
 
 			Ok(())
 		}
@@ -935,24 +974,22 @@ pub mod pallet {
 		/// pool's accounts; so the caller needs at have at least `deposit + existential_deposit *
 		/// 2` transferable.
 		#[pallet::call_index(6)]
-		#[pallet::weight(WeightInfoOf::<T>::create())]
+		#[pallet::weight(T::WeightInfo::create())]
 		pub fn create(
 			origin: OriginFor<T>,
-			token_id: TokenIdOf<T>,
-			#[pallet::compact] deposit: BalanceOf<T>,
-			#[pallet::compact] capacity: BalanceOf<T>,
-			#[pallet::compact] duration: EraIndex,
-			name: PoolNameOf<T>,
+			#[pallet::compact] amount: BalanceOf<T>,
+			root: AccountIdLookupOf<T>,
+			nominator: AccountIdLookupOf<T>,
+			bouncer: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			let creator = ensure_signed(origin)?;
+			let depositor = ensure_signed(origin)?;
 
-			let pool_id = NextPoolId::<T>::try_mutate::<_, Error<T>, _>(|next_id| {
-				let current_id = *next_id;
-				*next_id = next_id.checked_add(1).ok_or(Error::<T>::OverflowRisk)?;
-				Ok(current_id)
+			let pool_id = LastPoolId::<T>::try_mutate::<_, Error<T>, _>(|id| {
+				*id = id.checked_add(1).ok_or(Error::<T>::OverflowRisk)?;
+				Ok(*id)
 			})?;
 
-			Self::do_create(creator, pool_id, token_id, deposit, capacity, duration, name)
+			Self::do_create(depositor, amount, root, nominator, bouncer, pool_id)
 		}
 
 		/// Nominate on behalf of the pool.
@@ -1009,17 +1046,6 @@ pub mod pallet {
 			config_op_exp!(MinCreateBond::<T>, min_create_bond);
 			config_op_exp!(GlobalMaxCommission::<T>, global_max_commission);
 
-			// required_payout_count is not stored by itself, so it can't use the macro
-			match required_payout_count {
-				ConfigOp::Noop => (),
-				ConfigOp::Set(value) => {
-					EraPayoutInfo::<T>::mutate(|storage| storage.required_payments_percent = value)
-				},
-				// for removal, set it to zero percent
-				ConfigOp::Remove => EraPayoutInfo::<T>::mutate(|storage| {
-					storage.required_payments_percent = Perbill::from_percent(0)
-				}),
-			}
 			Ok(())
 		}
 
@@ -1080,7 +1106,7 @@ pub mod pallet {
 		///    to the bonus account
 		#[pallet::call_index(18)]
 		#[pallet::weight(
-			WeightInfoOf::<T>::payout_rewards(T::MaxExposurePageSize::get())
+			WeightInfoOf::<T>::payout_rewards()
 		)]
 		pub fn payout_rewards(
 			origin: OriginFor<T>,
@@ -1109,97 +1135,92 @@ pub mod pallet {
 			Self::do_process_payouts(pool_count)
 		}
 
-		/// Mutate the nomination pool data.
-		///
-		/// The dispatch origin of this call must be signed by the account holding the pool token
-		/// of the given pool_id.
-		#[pallet::call_index(19)]
-		#[pallet::weight(WeightInfoOf::<T>::mutate())]
-		pub fn mutate(
-			origin: OriginFor<T>,
-			pool_id: PoolId,
-			mutation: PoolMutationOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(!mutation.is_noop(), Error::<T>::NoopMutation);
+		// /// Mutate the nomination pool data.
+		// ///
+		// /// The dispatch origin of this call must be signed by the account holding the pool token
+		// /// of the given pool_id.
+		// #[pallet::call_index(19)]
+		// #[pallet::weight(WeightInfoOf::<T>::mutate())]
+		// pub fn mutate(
+		// 	origin: OriginFor<T>,
+		// 	pool_id: PoolId,
+		// 	mutation: PoolMutationOf<T>,
+		// ) -> DispatchResult {
+		// 	let who = ensure_signed(origin)?;
+		// 	ensure!(!mutation.is_noop(), Error::<T>::NoopMutation);
 
-			let mut bonded_pool = BondedPool::<T>::get(pool_id).ok_or(Error::<T>::PoolNotFound)?;
-			let is_manager = bonded_pool.has_pool_token(&who);
-			ensure!(is_manager, Error::<T>::DoesNotHavePermission);
+		// 	let mut bonded_pool = BondedPool::<T>::get(pool_id).ok_or(Error::<T>::PoolNotFound)?;
+		// 	let is_manager = bonded_pool.has_pool_token(&who);
+		// 	ensure!(is_manager, Error::<T>::DoesNotHavePermission);
 
-			if let Some(duration) = mutation.duration {
-				ensure!(duration >= T::MinDuration::get(), Error::<T>::DurationOutOfBounds);
-				ensure!(duration <= T::MaxDuration::get(), Error::<T>::DurationOutOfBounds);
-				bonded_pool.bonus_cycle.pending_duration = Some(duration);
-			}
+		// 	if let Some(duration) = mutation.duration {
+		// 		ensure!(duration >= T::MinDuration::get(), Error::<T>::DurationOutOfBounds);
+		// 		ensure!(duration <= T::MaxDuration::get(), Error::<T>::DurationOutOfBounds);
+		// 		bonded_pool.bonus_cycle.pending_duration = Some(duration);
+		// 	}
 
-			if let ShouldMutate::SomeMutation(new_commission) = mutation.new_commission {
-				ensure!(bonded_pool.can_manage_commission(&who), Error::<T>::DoesNotHavePermission);
-				bonded_pool.commission.try_update_current(&new_commission)?;
-			}
+		// 	if let Some(max_commission) = mutation.max_commission {
+		// 		ensure!(bonded_pool.can_manage_commission(&who), Error::<T>::DoesNotHavePermission);
+		// 		bonded_pool.commission.try_update_max(pool_id, max_commission)?;
+		// 	}
 
-			if let Some(max_commission) = mutation.max_commission {
-				ensure!(bonded_pool.can_manage_commission(&who), Error::<T>::DoesNotHavePermission);
-				bonded_pool.commission.try_update_max(pool_id, max_commission)?;
-			}
+		// 	if let Some(change_rate) = mutation.change_rate {
+		// 		ensure!(bonded_pool.can_manage_commission(&who), Error::<T>::DoesNotHavePermission);
+		// 		bonded_pool.commission.try_update_change_rate(change_rate)?;
+		// 	}
 
-			if let Some(change_rate) = mutation.change_rate {
-				ensure!(bonded_pool.can_manage_commission(&who), Error::<T>::DoesNotHavePermission);
-				bonded_pool.commission.try_update_change_rate(change_rate)?;
-			}
+		// 	if let Some(capacity) = mutation.capacity {
+		// 		let max_pool_capacity = Self::get_max_pool_capacity(bonded_pool.token_id)?;
 
-			if let Some(capacity) = mutation.capacity {
-				let max_pool_capacity = Self::get_max_pool_capacity(bonded_pool.token_id)?;
+		// 		// ensure capacity doesnt exceed the limit
+		// 		ensure!(
+		// 			max_pool_capacity <= T::GlobalMaxCapacity::get(),
+		// 			Error::<T>::AttributeCapacityExceedsGlobalCapacity
+		// 		);
+		// 		ensure!(capacity <= max_pool_capacity, Error::<T>::CapacityExceeded);
 
-				// ensure capacity doesnt exceed the limit
-				ensure!(
-					max_pool_capacity <= T::GlobalMaxCapacity::get(),
-					Error::<T>::AttributeCapacityExceedsGlobalCapacity
-				);
-				ensure!(capacity <= max_pool_capacity, Error::<T>::CapacityExceeded);
+		// 		// capacity can only be mutated for the first 14 eras of a cycle
+		// 		let era = <<T as Config>::Staking as StakingInterface>::current_era();
+		// 		ensure!(
+		// 			era <= bonded_pool
+		// 				.bonus_cycle
+		// 				.start
+		// 				.saturating_add(T::CapacityMutationPeriod::get()),
+		// 			Error::<T>::CapacityMutationRestricted
+		// 		);
 
-				// capacity can only be mutated for the first 14 eras of a cycle
-				let era = <<T as Config>::Staking as StakingInterface>::current_era();
-				ensure!(
-					era <= bonded_pool
-						.bonus_cycle
-						.start
-						.saturating_add(T::CapacityMutationPeriod::get()),
-					Error::<T>::CapacityMutationRestricted
-				);
+		// 		// capacity can not be set lower than the current points in the pool
+		// 		ensure!(capacity >= bonded_pool.points(), Error::<T>::CapacityExceeded);
 
-				// capacity can not be set lower than the current points in the pool
-				ensure!(capacity >= bonded_pool.points(), Error::<T>::CapacityExceeded);
+		// 		// capacity can not be set below `num of pool validators x min validator stake`
+		// 		if let Some(num_validators) =
+		// 			pallet_staking::Nominators::<T>::get(&bonded_pool.bonded_account())
+		// 				.map(|n| n.targets.len() as u32)
+		// 		{
+		// 			let min_validator_capacity =
+		// 				<<T as Config>::Staking as StakingInterface>::minimum_validator_bond()
+		// 					.saturating_mul(num_validators.into());
 
-				// capacity can not be set below `num of pool validators x min validator stake`
-				if let Some(num_validators) =
-					pallet_staking::Nominators::<T>::get(&bonded_pool.bonded_account())
-						.map(|n| n.targets.len() as u32)
-				{
-					let min_validator_capacity =
-						<<T as Config>::Staking as StakingInterface>::minimum_validator_bond()
-							.saturating_mul(num_validators.into());
+		// 			let min_validator_capacity =
+		// 				bonded_pool.balance_to_point(min_validator_capacity);
 
-					let min_validator_capacity =
-						bonded_pool.balance_to_point(min_validator_capacity);
+		// 			if min_validator_capacity >= bonded_pool.points() {
+		// 				ensure!(capacity >= min_validator_capacity, Error::<T>::CapacityExceeded);
+		// 			}
+		// 		}
 
-					if min_validator_capacity >= bonded_pool.points() {
-						ensure!(capacity >= min_validator_capacity, Error::<T>::CapacityExceeded);
-					}
-				}
+		// 		bonded_pool.capacity = capacity;
+		// 	}
 
-				bonded_pool.capacity = capacity;
-			}
+		// 	if let Some(name) = mutation.name.as_ref() {
+		// 		bonded_pool.name = name.clone();
+		// 	}
 
-			if let Some(name) = mutation.name.as_ref() {
-				bonded_pool.name = name.clone();
-			}
+		// 	bonded_pool.put();
 
-			bonded_pool.put();
-
-			Self::deposit_event(Event::<T>::PoolMutated { pool_id, mutation });
-			Ok(())
-		}
+		// 	Self::deposit_event(Event::<T>::PoolMutated { pool_id, mutation });
+		// 	Ok(())
+		// }
 
 		/// Unbonds the deposit
 		///

@@ -259,7 +259,7 @@ fn join_mints_lst() {
 			assert_eq!(Balances::free_balance(account), Balances::minimum_balance());
 
 			// assert event is emitted
-			assert_event_deposited!(FungibleHandlerEvent::Minted {
+			assert_event_deposited!(FungiblesEvent::Minted {
 				issuer: RootOrSigned::Signed(<Runtime as Config>::LstCollectionOwner::get()),
 				recipient: account,
 				collection_id: LST_COLLECTION_ID,
@@ -291,7 +291,7 @@ fn join_slashed_pool_mints_extra_lst() {
 			assert_eq!(Balances::free_balance(account), Balances::minimum_balance());
 
 			// assert event is emitted
-			assert_event_deposited!(FungibleHandlerEvent::Minted {
+			assert_event_deposited!(FungiblesEvent::Minted {
 				issuer: RootOrSigned::Signed(<Runtime as Config>::LstCollectionOwner::get()),
 				recipient: account,
 				collection_id: LST_COLLECTION_ID,
@@ -498,13 +498,13 @@ fn test_second_time_bond_mints_lst() {
 
 			assert_eq!(Pools::member_points(pool_id, account), 1000);
 			assert_eq!(
-				FungibleHandlerTrait::balance_of(LST_COLLECTION_ID, pool_id as TokenId, account,),
+				FungiblesTrait::balance_of(LST_COLLECTION_ID, pool_id as AssetId, account,),
 				1000
 			);
 			assert_eq!(Balances::free_balance(account), 100 + Balances::minimum_balance());
 
 			// assert event is emitted
-			assert_event_deposited!(FungibleHandlerEvent::Minted {
+			assert_event_deposited!(FungiblesEvent::Minted {
 				issuer: RootOrSigned::Signed(<Runtime as Config>::LstCollectionOwner::get()),
 				recipient: account,
 				collection_id: LST_COLLECTION_ID,
@@ -518,7 +518,7 @@ fn test_second_time_bond_mints_lst() {
 			assert_eq!(Balances::free_balance(account), Balances::minimum_balance());
 
 			// assert event is emitted
-			assert_event_deposited!(FungibleHandlerEvent::Minted {
+			assert_event_deposited!(FungiblesEvent::Minted {
 				issuer: RootOrSigned::Signed(<Runtime as Config>::LstCollectionOwner::get()),
 				recipient: account,
 				collection_id: LST_COLLECTION_ID,

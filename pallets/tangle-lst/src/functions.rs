@@ -12,6 +12,13 @@ use sp_runtime::{
 	traits::{CheckedDiv, One},
 	ArithmeticError, Perquintill, SaturatedConversion,
 };
+use frame_support::traits::tokens::Preservation;
+use frame_support::traits::fungibles::Inspect;
+use frame_support::traits::fungibles::Mutate;
+use frame_support::traits::tokens::Fortitude;
+use frame_support::traits::tokens::Precision;
+use frame_support::traits::fungible::Inspect as FungibleInspect;
+use frame_support::traits::fungible::Mutate as FungibleMutate;
 
 /// Calculate the real weight of a pool.
 /// The weight is calculated as:
@@ -53,8 +60,9 @@ impl<T: Config> Pallet<T> {
 		let bonded_account = bonded_pool.bonded_account();
 		let bonus_account = bonded_pool.bonus_account();
 
+		let pool_asset_id : T::AssetId = bonded_pool.id.into();
 		ReversePoolIdLookup::<T>::remove(&bonded_account);
-		UsedPoolTokenIds::<T>::remove(bonded_pool.token_id);
+		UsedPoolAssetIds::<T>::remove(pool_asset_id);
 		SubPoolsStorage::<T>::remove(bonded_pool.id);
 
 		// Kill accounts from storage by making their balance go below ED. We assume that the
@@ -82,12 +90,12 @@ impl<T: Config> Pallet<T> {
 		);
 
 		let remaining = CurrencyOf::<T>::free_balance(&bonus_account);
-		let _ = CurrencyOf::<T>::transfer(
-			&bonus_account,
-			&T::UnclaimedBalanceReceiver::get(),
-			remaining,
-			ExistenceRequirement::AllowDeath,
-		);
+		// let _ = CurrencyOf::<T>::transfer(
+		// 	&bonus_account,
+		// 	&T::UnclaimedBalanceReceiver::get(),
+		// 	remaining,
+		// 	ExistenceRequirement::AllowDeath,
+		// );
 
 		// NOTE: this is purely defensive.
 		CurrencyOf::<T>::make_free_balance_be(&reward_account, Zero::zero());
@@ -95,11 +103,10 @@ impl<T: Config> Pallet<T> {
 		CurrencyOf::<T>::make_free_balance_be(&bonus_account, Zero::zero());
 
 		// remove the token storage if needed
-		let collection_id = T::LstCollectionId::get();
-		let token_id = bonded_pool.id.saturated_into();
-		if !T::FungibleHandler::total_supply_of(collection_id, token_id).is_zero() {
-			T::FungibleHandler::burn(T::LstCollectionOwner::get(), collection_id, true)?;
-		}
+		// let token_id = bonded_pool.id.saturated_into();
+		// if !T::Fungibles::total_issuance(collection_id, token_id).is_zero() {
+		// 	T::Fungibles::burn(T::LstCollectionOwner::get(), collection_id, true)?;
+		// }
 
 		Self::deposit_event(Event::<T>::Destroyed { pool_id: bonded_pool.id });
 
@@ -168,77 +175,68 @@ impl<T: Config> Pallet<T> {
 		)
 	}
 
-	/// See [`Pallet::create`].
-	#[allow(clippy::too_many_arguments)]
-	pub(crate) fn do_create(
+	pub fn do_create(
 		who: T::AccountId,
+		amount: BalanceOf<T>,
+		root: AccountIdLookupOf<T>,
+		nominator: AccountIdLookupOf<T>,
+		bouncer: AccountIdLookupOf<T>,
 		pool_id: PoolId,
-		token_id: TokenIdOf<T>,
-		deposit: BalanceOf<T>,
-		capacity: BalanceOf<T>,
-		duration: EraIndex,
-		name: PoolNameOf<T>,
 	) -> DispatchResult {
-		ensure!(duration >= T::MinDuration::get(), Error::<T>::DurationOutOfBounds);
-		ensure!(duration <= T::MaxDuration::get(), Error::<T>::DurationOutOfBounds);
-		ensure!(deposit >= Pallet::<T>::depositor_min_bond(), Error::<T>::MinimumBondNotMet);
-		ensure!(
-			T::FungibleHandler::balance_of(T::PoolCollectionId::get(), token_id, who.clone())
-				.is_one(),
-			Error::<T>::TokenRequired
+		let root = T::Lookup::lookup(root)?;
+		let nominator = T::Lookup::lookup(nominator)?;
+		let bouncer = T::Lookup::lookup(bouncer)?;
+
+		ensure!(amount >= Pallet::<T>::depositor_min_bond(), Error::<T>::MinimumBondNotMet);
+		// ensure!(
+		// 	MaxPools::<T>::get().map_or(true, |max_pools| BondedPools::<T>::count() < max_pools),
+		// 	Error::<T>::MaxPools
+		// );
+
+		let mut bonded_pool = BondedPool::<T>::new(
+			pool_id,
+			PoolRoles {
+				root: root,
+				nominator: Some(nominator),
+				bouncer: Some(bouncer),
+				depositor: who.clone(),
+			},
 		);
 
-		// make sure the pool for token_id doesn't already exist
-		ensure!(!UsedPoolTokenIds::<T>::contains_key(token_id), Error::<T>::PoolTokenAlreadyInUse);
+		let points = bonded_pool.try_bond_funds(&who, amount, BondType::Create)?;
 
-		let max_pool_capacity = Self::get_max_pool_capacity(token_id)?;
-
-		// ensure capacity doesnt exceed the limit
-		ensure!(
-			max_pool_capacity <= T::GlobalMaxCapacity::get(),
-			Error::<T>::AttributeCapacityExceedsGlobalCapacity
-		);
-		ensure!(capacity <= max_pool_capacity, Error::<T>::CapacityExceeded);
-
-		let current_era = CurrentEra::<T>::get().unwrap_or_default();
-
-		let mut bonded_pool = BondedPool::<T> {
-			id: pool_id,
-			inner: BondedPoolInner { state: PoolState::Open, token_id, capacity },
-		};
-
-		let points = bonded_pool.try_bond_funds(&who, deposit, BondType::Create)?;
-
-		// transfer minimum balance to reward account
-		CurrencyOf::<T>::transfer(
+		// Transfer the minimum balance for the reward account.
+		T::Currency::transfer(
 			&who,
 			&bonded_pool.reward_account(),
-			CurrencyOf::<T>::minimum_balance(),
+			T::Currency::minimum_balance(),
 			ExistenceRequirement::AllowDeath,
 		)?;
 
-		// transfer minimum balance to bonus account
-		CurrencyOf::<T>::transfer(
-			&who,
-			&bonded_pool.bonus_account(),
-			CurrencyOf::<T>::minimum_balance(),
-			ExistenceRequirement::AllowDeath,
-		)?;
+		// Restrict reward account balance from going below ED.
+		// Self::freeze_pool_deposit(&bonded_pool.reward_account())?;
 
+		RewardPools::<T>::insert(
+			pool_id,
+			RewardPool::<T> {
+				last_recorded_reward_counter: Zero::zero(),
+				last_recorded_total_payouts: Zero::zero(),
+				total_rewards_claimed: Zero::zero(),
+				total_commission_pending: Zero::zero(),
+				total_commission_claimed: Zero::zero(),
+			},
+		);
 		ReversePoolIdLookup::<T>::insert(bonded_pool.bonded_account(), pool_id);
-		UsedPoolTokenIds::<T>::insert(token_id, pool_id);
 
-		Self::deposit_event(Event::<T>::Created { creator: who.clone(), pool_id, capacity });
+		Self::deposit_event(Event::<T>::Created { depositor: who.clone(), pool_id });
 
 		Self::deposit_event(Event::<T>::Bonded {
-			member: Self::deposit_account_id(pool_id),
+			member: who,
 			pool_id,
-			bonded: deposit,
+			bonded: amount,
+			joined: true,
 		});
-
 		bonded_pool.put();
-
-		Self::mint_lst(who.clone(), pool_id, points, true)?;
 
 		Ok(())
 	}
@@ -372,56 +370,57 @@ impl<T: Config> Pallet<T> {
 			// order to ensure members can leave the pool and it can be destroyed.
 			.min(bonded_pool.transferrable_balance());
 
-		let recipient = if is_withdrawing_deposit {
-			// if this is deposit withdrawal, we send the funds to the owner of the pool's token.
-			// if the owner is missing, i.e token is burned, funds are sent to the treasury.
-			bonded_pool
-				.token_owner()
-				.map_or(T::UnclaimedBalanceReceiver::get(), |owner| owner)
-		} else {
-			// If the member is withdrawing their unbonded funds, then we send the funds to the
-			// member's account.
-			member_account.clone()
-		};
+		// let recipient = if is_withdrawing_deposit {
+		// 	// if this is deposit withdrawal, we send the funds to the owner of the pool's token.
+		// 	// if the owner is missing, i.e token is burned, funds are sent to the treasury.
+		// 	// bonded_pool
+		// 	// 	.token_owner()
+		// 	// 	.map_or(T::UnclaimedBalanceReceiver::get(), |owner| owner)
+		// } else {
+		// 	// If the member is withdrawing their unbonded funds, then we send the funds to the
+		// 	// member's account.
+		// 	member_account.clone()
+		// };
 
-		CurrencyOf::<T>::transfer(
-			&bonded_pool.bonded_account(),
-			&recipient,
-			balance_to_unbond,
-			ExistenceRequirement::AllowDeath,
-		)
-		.defensive()?;
+		// CurrencyOf::<T>::transfer(
+		// 	&bonded_pool.bonded_account(),
+		// 	&recipient,
+		// 	balance_to_unbond,
+		// 	ExistenceRequirement::AllowDeath,
+		// )
+		// .defensive()?;
 
-		Self::deposit_event(Event::<T>::Withdrawn {
-			member: recipient.clone(),
-			pool_id,
-			points: sum_unlocked_points,
-			balance: balance_to_unbond,
-		});
+		// Self::deposit_event(Event::<T>::Withdrawn {
+		// 	member: recipient.clone(),
+		// 	pool_id,
+		// 	points: sum_unlocked_points,
+		// 	balance: balance_to_unbond,
+		// });
 
-		let post_info_weight = if member.total_points(pool_id, member_account.clone()).is_zero() {
-			// member being reaped.
-			UnbondingMembers::<T>::remove(pool_id, &member_account);
+		// let post_info_weight = if member.total_points(pool_id, member_account.clone()).is_zero() {
+		// 	// member being reaped.
+		// 	UnbondingMembers::<T>::remove(pool_id, &member_account);
 
-			if is_withdrawing_deposit {
-				// also remove the owner of the pool's token.
-				if let Some(owner) = bonded_pool.token_owner() {
-					UnbondingMembers::<T>::remove(pool_id, &owner);
-				}
-				Pallet::<T>::dissolve_pool(bonded_pool, &recipient)?;
-				None
-			} else {
-				SubPoolsStorage::<T>::insert(pool_id, sub_pools);
-				Some(WeightInfoOf::<T>::withdraw_unbonded_update(num_slashing_spans))
-			}
-		} else {
-			// we certainly don't need to delete any pools, because no one is being removed.
-			SubPoolsStorage::<T>::insert(pool_id, sub_pools);
-			UnbondingMembers::<T>::insert(pool_id, &member_account, member);
-			Some(WeightInfoOf::<T>::withdraw_unbonded_update(num_slashing_spans))
-		};
+		// 	if is_withdrawing_deposit {
+		// 		// also remove the owner of the pool's token.
+		// 		if let Some(owner) = bonded_pool.token_owner() {
+		// 			UnbondingMembers::<T>::remove(pool_id, &owner);
+		// 		}
+		// 		Pallet::<T>::dissolve_pool(bonded_pool, &recipient)?;
+		// 		None
+		// 	} else {
+		// 		SubPoolsStorage::<T>::insert(pool_id, sub_pools);
+		// 		Some(WeightInfoOf::<T>::withdraw_unbonded_update(num_slashing_spans))
+		// 	}
+		// } else {
+		// 	// we certainly don't need to delete any pools, because no one is being removed.
+		// 	SubPoolsStorage::<T>::insert(pool_id, sub_pools);
+		// 	UnbondingMembers::<T>::insert(pool_id, &member_account, member);
+		// 	Some(WeightInfoOf::<T>::withdraw_unbonded_update(num_slashing_spans))
+		// };
 
-		Ok(post_info_weight.into())
+		//Ok(post_info_weight.into())
+		Ok(Default::default())
 	}
 
 	/// See ['payout_rewards'](Self::payout_rewards)
@@ -431,270 +430,242 @@ impl<T: Config> Pallet<T> {
 		era: EraIndex,
 	) -> DispatchResultWithPostInfo {
 		// get timing data
-		let current_era = CurrentEra::<T>::get().ok_or_else(|| {
-			StakingError::<T>::InvalidEraToReward.with_weight(WeightInfoOf::<T>::payout_rewards(0))
-		})?;
-		let history_depth = T::HistoryDepth::get();
+		// let current_era = CurrentEra::<T>::get().ok_or_else(|| {
+		// 	StakingError::<T>::InvalidEraToReward.with_weight(WeightInfoOf::<T>::payout_rewards(0))
+		// })?;
+		// let history_depth = T::HistoryDepth::get();
 
-		// checks for exiting early (same checks as pallet_staking::payout_stakers)
-		ensure!(
-			era <= current_era && era >= current_era.saturating_sub(history_depth),
-			StakingError::<T>::InvalidEraToReward.with_weight(WeightInfoOf::<T>::payout_rewards(0))
-		);
-		ensure!(
-			pallet_staking::ErasValidatorReward::<T>::contains_key(era),
-			StakingError::<T>::InvalidEraToReward.with_weight(WeightInfoOf::<T>::payout_rewards(0))
-		);
-		let controller = pallet_staking::Bonded::<T>::get(&validator_stash).ok_or_else(|| {
-			StakingError::<T>::NotStash.with_weight(WeightInfoOf::<T>::payout_rewards(0))
-		})?;
-		ensure!(
-			pallet_staking::Ledger::<T>::contains_key(&controller),
-			StakingError::<T>::NotController.with_weight(WeightInfoOf::<T>::payout_rewards(0))
-		);
+		// // checks for exiting early (same checks as pallet_staking::payout_stakers)
+		// ensure!(
+		// 	era <= current_era && era >= current_era.saturating_sub(history_depth),
+		// 	StakingError::<T>::InvalidEraToReward.with_weight(WeightInfoOf::<T>::payout_rewards(0))
+		// );
+		// ensure!(
+		// 	pallet_staking::ErasValidatorReward::<T>::contains_key(era),
+		// 	StakingError::<T>::InvalidEraToReward.with_weight(WeightInfoOf::<T>::payout_rewards(0))
+		// );
+		// let controller = pallet_staking::Bonded::<T>::get(&validator_stash).ok_or_else(|| {
+		// 	StakingError::<T>::NotStash.with_weight(WeightInfoOf::<T>::payout_rewards(0))
+		// })?;
+		// ensure!(
+		// 	pallet_staking::Ledger::<T>::contains_key(&controller),
+		// 	StakingError::<T>::NotController.with_weight(WeightInfoOf::<T>::payout_rewards(0))
+		// );
 
-		let mut pool_infos = Vec::default();
+		// let mut pool_infos = Vec::default();
 
-		// minimum and maximum duration of all pools, used for min-max normalization
-		let mut min_duration = EraIndex::MAX;
-		let mut max_duration = EraIndex::MIN;
+		// // minimum and maximum duration of all pools, used for min-max normalization
+		// let mut min_duration = EraIndex::MAX;
+		// let mut max_duration = EraIndex::MIN;
 
-		// NOTE: if we ever have more than 512 nominators for a validator, the page will need to be
-		// calculated properly
-		let page = 0;
+		// // NOTE: if we ever have more than 512 nominators for a validator, the page will need to be
+		// // calculated properly
+		// let page = 0;
 
-		let exposure =
-			pallet_staking::EraInfo::<T>::get_paged_exposure(era, &validator_stash, page)
-				.ok_or_else(|| {
-					pallet_staking::Error::<T>::InvalidEraToReward
-						.with_weight(WeightInfoOf::<T>::payout_rewards(0))
-				})?;
+		// let exposure =
+		// 	pallet_staking::EraInfo::<T>::get_paged_exposure(era, &validator_stash, page)
+		// 		.ok_or_else(|| {
+		// 			pallet_staking::Error::<T>::InvalidEraToReward
+		// 				.with_weight(WeightInfoOf::<T>::payout_rewards(0))
+		// 		})?;
 
-		// iterate nominators to do once per era calls and store relevant data in `pool_infos`
-		for nominator in exposure.others() {
-			if let Some(pool_id) = ReversePoolIdLookup::<T>::get(&nominator.who) {
-				// bonus payments are delayed by one era because we need to have all of the
-				// reward payments first, and they may occur over multiple transactions
+		// // iterate nominators to do once per era calls and store relevant data in `pool_infos`
+		// for nominator in exposure.others() {
+		// 	if let Some(pool_id) = ReversePoolIdLookup::<T>::get(&nominator.who) {
+		// 		// bonus payments are delayed by one era because we need to have all of the
+		// 		// reward payments first, and they may occur over multiple transactions
 
-				// use a cfg here because it is difficult to change era for benchmarks
-				let check_bonus = {
-					cfg_if::cfg_if! {
-						if #[cfg(all(feature = "runtime-benchmarks", not(test)))] {
-							// always pay bonus for benchmarks when not testing
-							true
-						} else {
-							// normal behavior is to skip zero (because 0 - 1 isn't possible)
-							!era.is_zero()
-						}
-					}
-				};
+		// 		// use a cfg here because it is difficult to change era for benchmarks
+		// 		let check_bonus = {
+		// 			cfg_if::cfg_if! {
+		// 				if #[cfg(all(feature = "runtime-benchmarks", not(test)))] {
+		// 					// always pay bonus for benchmarks when not testing
+		// 					true
+		// 				} else {
+		// 					// normal behavior is to skip zero (because 0 - 1 isn't possible)
+		// 					!era.is_zero()
+		// 				}
+		// 			}
+		// 		};
 
-				let mut pool = BondedPool::<T>::get(pool_id).ok_or(Error::<T>::PoolNotFound)?;
-				let duration = pool.inner.bonus_cycle.duration();
+		// 		let mut pool = BondedPool::<T>::get(pool_id).ok_or(Error::<T>::PoolNotFound)?;
+		// 		let duration = pool.inner.bonus_cycle.duration();
 
-				// update duration bounds if needed
-				pool.update_duration_bounds(&mut min_duration, &mut max_duration);
+		// 		// update duration bounds if needed
+		// 		pool.update_duration_bounds(&mut min_duration, &mut max_duration);
 
-				if check_bonus {
-					// end the previous era if bonuses have not been paid already
-					pool.maybe_end_era(current_era, era.saturating_sub(One::one()), history_depth)?;
-					pool.put();
-				}
+		// 		if check_bonus {
+		// 			// end the previous era if bonuses have not been paid already
+		// 			pool.maybe_end_era(current_era, era.saturating_sub(One::one()), history_depth)?;
+		// 			pool.put();
+		// 		}
 
-				// store initial reward balances
-				let reward_account = Self::compute_pool_account_id(pool_id, AccountType::Reward);
+		// 		// store initial reward balances
+		// 		let reward_account = Self::compute_pool_account_id(pool_id, AccountType::Reward);
 
-				pool_infos.push(PoolInfo {
-					initial_reward_balance: CurrencyOf::<T>::free_balance(&reward_account),
-					duration,
-					reward: Zero::zero(),
-					real_weight: Zero::zero(),
-				});
-			}
-		}
+		// 		pool_infos.push(PoolInfo {
+		// 			initial_reward_balance: CurrencyOf::<T>::free_balance(&reward_account),
+		// 			duration,
+		// 			reward: Zero::zero(),
+		// 			real_weight: Zero::zero(),
+		// 		});
+		// 	}
+		// }
 
-		// pay stakers from staking pallet
-		cfg_if::cfg_if! {
-			if #[cfg(test)] {
-				// when testing, simulate the payout using mock rewards
-				let converted_validator_stash = Decode::decode(&mut &validator_stash.encode()[..]).unwrap();
-				crate::tests::payout_rewards::simulate(converted_validator_stash, era);
-			} else {
-				// when not testing, pay out the stakers
-				pallet_staking::Pallet::<T>::payout_stakers(_origin, validator_stash.clone(), era)?;
-			}
-		}
+		// // pay stakers from staking pallet
+		// cfg_if::cfg_if! {
+		// 	if #[cfg(test)] {
+		// 		// when testing, simulate the payout using mock rewards
+		// 		let converted_validator_stash = Decode::decode(&mut &validator_stash.encode()[..]).unwrap();
+		// 		crate::tests::payout_rewards::simulate(converted_validator_stash, era);
+		// 	} else {
+		// 		// when not testing, pay out the stakers
+		// 		pallet_staking::Pallet::<T>::payout_stakers(_origin, validator_stash.clone(), era)?;
+		// 	}
+		// }
 
-		// increment payout count
-		EraPayoutInfo::<T>::mutate(|info| {
-			if info.era == current_era {
-				info.payout_count.saturating_inc();
-			} else {
-				info.era = current_era;
-				info.payout_count = 1;
-				info.payouts_processed = false;
-			}
-		});
+		// // the bonus weights for each pool
+		// // the bonus for all pools with this validator
+		// let mut total_bonus = <NegativeImbalanceOf<T> as Imbalance<BalanceOf<T>>>::zero();
 
-		// the bonus weights for each pool
-		// the bonus for all pools with this validator
-		let mut total_bonus = <NegativeImbalanceOf<T> as Imbalance<BalanceOf<T>>>::zero();
+		// // values that will be used to calculate the bonus weights
+		// let mut total_rewards = BalanceOf::<T>::zero();
+		// let mut total_real_weight = BalanceOf::<T>::zero();
 
-		// values that will be used to calculate the bonus weights
-		let mut total_rewards = BalanceOf::<T>::zero();
-		let mut total_real_weight = BalanceOf::<T>::zero();
+		// let duration_bounds_difference = max_duration.saturating_sub(min_duration);
 
-		let duration_bounds_difference = max_duration.saturating_sub(min_duration);
+		// let pool_infos_count = pool_infos.len();
 
-		let pool_infos_count = pool_infos.len();
+		// // iterate pools and transfer part of reward to total_bonus
+		// let mut pool_count = 0;
+		// let bonus_percentage = T::BonusPercentage::get();
+		// for nominator in exposure.others() {
+		// 	if let Some(pool_id) = ReversePoolIdLookup::<T>::get(&nominator.who) {
+		// 		let pool_info = &mut pool_infos[pool_count];
 
-		// iterate pools and transfer part of reward to total_bonus
-		let mut pool_count = 0;
-		let bonus_percentage = T::BonusPercentage::get();
-		for nominator in exposure.others() {
-			if let Some(pool_id) = ReversePoolIdLookup::<T>::get(&nominator.who) {
-				let pool_info = &mut pool_infos[pool_count];
+		// 		// get the reward balance from the reward account
+		// 		let reward_account = Self::compute_pool_account_id(pool_id, AccountType::Reward);
+		// 		let mut reward_amount = CurrencyOf::<T>::free_balance(&reward_account)
+		// 			.saturating_sub(pool_info.initial_reward_balance);
 
-				// get the reward balance from the reward account
-				let reward_account = Self::compute_pool_account_id(pool_id, AccountType::Reward);
-				let mut reward_amount = CurrencyOf::<T>::free_balance(&reward_account)
-					.saturating_sub(pool_info.initial_reward_balance);
+		// 		if !reward_amount.is_zero() {
+		// 			// distribute a portion to the bonus
+		// 			let to_bonus = bonus_percentage.mul_floor(reward_amount);
+		// 			reward_amount.saturating_reduce(to_bonus);
 
-				if !reward_amount.is_zero() {
-					// distribute a portion to the bonus
-					let to_bonus = bonus_percentage.mul_floor(reward_amount);
-					reward_amount.saturating_reduce(to_bonus);
+		// 			// imbalance is added to total_bonus
+		// 			let imbalance = CurrencyOf::<T>::withdraw(
+		// 				&reward_account,
+		// 				to_bonus,
+		// 				WithdrawReasons::TRANSFER,
+		// 				ExistenceRequirement::KeepAlive,
+		// 			)?;
+		// 			total_bonus.subsume(imbalance);
+		// 		}
 
-					// imbalance is added to total_bonus
-					let imbalance = CurrencyOf::<T>::withdraw(
-						&reward_account,
-						to_bonus,
-						WithdrawReasons::TRANSFER,
-						ExistenceRequirement::KeepAlive,
-					)?;
-					total_bonus.subsume(imbalance);
-				}
+		// 		// calculate real weight, keeping in mind that duration bounds may be 0
+		// 		let real_weight = if duration_bounds_difference.is_zero() {
+		// 			// if duration bounds are 0, then all pools have the same weight that adds up to
+		// 			// 1
+		// 			Perbill::from_rational(1, pool_infos_count as u32).mul_floor(reward_amount)
+		// 		} else {
+		// 			calculate_real_weight::<T>(
+		// 				pool_info.duration,
+		// 				min_duration,
+		// 				duration_bounds_difference,
+		// 				reward_amount,
+		// 			)
+		// 		};
 
-				// calculate real weight, keeping in mind that duration bounds may be 0
-				let real_weight = if duration_bounds_difference.is_zero() {
-					// if duration bounds are 0, then all pools have the same weight that adds up to
-					// 1
-					Perbill::from_rational(1, pool_infos_count as u32).mul_floor(reward_amount)
-				} else {
-					calculate_real_weight::<T>(
-						pool_info.duration,
-						min_duration,
-						duration_bounds_difference,
-						reward_amount,
-					)
-				};
+		// 		pool_info.reward = reward_amount;
+		// 		pool_info.real_weight = real_weight;
 
-				pool_info.reward = reward_amount;
-				pool_info.real_weight = real_weight;
+		// 		// update total values
+		// 		total_rewards.saturating_accrue(reward_amount);
+		// 		total_real_weight.saturating_accrue(real_weight);
 
-				// update total values
-				total_rewards.saturating_accrue(reward_amount);
-				total_real_weight.saturating_accrue(real_weight);
+		// 		pool_count.saturating_inc();
+		// 	}
+		// }
 
-				pool_count.saturating_inc();
-			}
-		}
+		// let total_base_bonus_amount =
+		// 	T::BaseBonusRewardPercentage::get().mul_floor(total_bonus.peek());
 
-		let total_base_bonus_amount =
-			T::BaseBonusRewardPercentage::get().mul_floor(total_bonus.peek());
+		// let (mut total_base_bonus, mut total_weighted_bonus) =
+		// 	total_bonus.split(total_base_bonus_amount);
 
-		let (mut total_base_bonus, mut total_weighted_bonus) =
-			total_bonus.split(total_base_bonus_amount);
+		// // need to have this original value since `total_weighted_bonus` will be consumed by each
+		// // iteration
+		// let total_weighted_bonus_amount = total_weighted_bonus.peek();
 
-		// need to have this original value since `total_weighted_bonus` will be consumed by each
-		// iteration
-		let total_weighted_bonus_amount = total_weighted_bonus.peek();
+		// // calculate base and weighted bonus factors
+		// let base_bonus_factor = Perbill::from_rational(total_base_bonus_amount, total_rewards);
+		// let weighted_bonus_factor =
+		// 	Perbill::from_rational(total_weighted_bonus_amount, total_real_weight);
 
-		// calculate base and weighted bonus factors
-		let base_bonus_factor = Perbill::from_rational(total_base_bonus_amount, total_rewards);
-		let weighted_bonus_factor =
-			Perbill::from_rational(total_weighted_bonus_amount, total_real_weight);
+		// // counter for `pool_bonus_weights`
+		// let mut pool_index = 0;
+		// for nominator in exposure.others() {
+		// 	if let Some(pool_id) = ReversePoolIdLookup::<T>::get(&nominator.who) {
+		// 		let pool_info = &pool_infos[pool_index];
 
-		// counter for `pool_bonus_weights`
-		let mut pool_index = 0;
-		for nominator in exposure.others() {
-			if let Some(pool_id) = ReversePoolIdLookup::<T>::get(&nominator.who) {
-				let pool_info = &pool_infos[pool_index];
+		// 		pool_index.saturating_inc();
 
-				pool_index.saturating_inc();
+		// 		// calculate bonus for this pool
+		// 		let (bonus, base_remainder, weighted_remainder) = pool_info.calculate_bonus(
+		// 			total_base_bonus,
+		// 			total_weighted_bonus,
+		// 			base_bonus_factor,
+		// 			weighted_bonus_factor,
+		// 		);
 
-				// calculate bonus for this pool
-				let (bonus, base_remainder, weighted_remainder) = pool_info.calculate_bonus(
-					total_base_bonus,
-					total_weighted_bonus,
-					base_bonus_factor,
-					weighted_bonus_factor,
-				);
+		// 		let bonus_amount = bonus.peek();
+		// 		total_base_bonus = base_remainder;
+		// 		total_weighted_bonus = weighted_remainder;
 
-				let bonus_amount = bonus.peek();
-				total_base_bonus = base_remainder;
-				total_weighted_bonus = weighted_remainder;
+		// 		CurrencyOf::<T>::resolve_into_existing(
+		// 			&Self::compute_pool_account_id(pool_id, AccountType::Bonus),
+		// 			bonus,
+		// 		)
+		// 		.ok();
 
-				CurrencyOf::<T>::resolve_into_existing(
-					&Self::compute_pool_account_id(pool_id, AccountType::Bonus),
-					bonus,
-				)
-				.ok();
+		// 		pool_count.saturating_inc();
 
-				pool_count.saturating_inc();
+		// 		Self::deposit_event(Event::<T>::RewardPaid {
+		// 			pool_id,
+		// 			era,
+		// 			validator_stash: validator_stash.clone(),
+		// 			reward: pool_info.reward,
+		// 			bonus: bonus_amount,
+		// 		});
+		// 	}
+		// }
 
-				Self::deposit_event(Event::<T>::RewardPaid {
-					pool_id,
-					era,
-					validator_stash: validator_stash.clone(),
-					reward: pool_info.reward,
-					bonus: bonus_amount,
-				});
-			}
-		}
+		// let remainder = total_base_bonus.merge(total_weighted_bonus);
 
-		let remainder = total_base_bonus.merge(total_weighted_bonus);
-
-		// if any unhandled reward remains, handle it with pallet_staking's reward remainder
-		T::RewardRemainder::on_unbalanced(remainder);
+		// // if any unhandled reward remains, handle it with pallet_staking's reward remainder
+		// T::RewardRemainder::on_unbalanced(remainder);
 
 		Ok(().into())
 	}
 
 	/// See ['process_payouts'](Self::process_payouts)
 	pub(crate) fn do_process_payouts(pool_count: u32) -> DispatchResult {
-		// check pool count
-		ensure!(pool_count >= BondedPools::<T>::count(), Error::<T>::WrongPoolCount);
+		// // check pool count
+		// ensure!(pool_count >= BondedPools::<T>::count(), Error::<T>::WrongPoolCount);
 
-		let era = CurrentEra::<T>::get().ok_or(StakingError::<T>::InvalidEraToReward)?;
-		let history_depth = T::HistoryDepth::get();
+		// let era = CurrentEra::<T>::get().ok_or(StakingError::<T>::InvalidEraToReward)?;
+		// let history_depth = T::HistoryDepth::get();
+		
+		// // we need to mutate each pool, so first get all of the pool ids
+		// let pool_ids = BondedPools::<T>::iter_keys().collect::<Vec<_>>();
 
-		// check and update payout info
-		EraPayoutInfo::<T>::try_mutate(|payout_info| -> DispatchResult {
-			// use the minimum of actual validator count and ideal validator count
-			let validator_count = pallet_staking::Validators::<T>::count()
-				.min(pallet_staking::ValidatorCount::<T>::get());
-			let required_count = payout_info.required_payments_percent.mul_ceil(validator_count);
-
-			ensure!(
-				payout_info.era == era && payout_info.payout_count >= required_count,
-				Error::<T>::MissingPayouts
-			);
-			// error if payouts were already processed
-			ensure!(!payout_info.payouts_processed, Error::<T>::PayoutsAlreadyProcessed);
-			payout_info.payouts_processed = true;
-			Ok(())
-		})?;
-
-		// we need to mutate each pool, so first get all of the pool ids
-		let pool_ids = BondedPools::<T>::iter_keys().collect::<Vec<_>>();
-
-		// process the payouts for each pool
-		for pool_id in pool_ids {
-			let mut pool = BondedPool::<T>::get(pool_id).ok_or(Error::<T>::PoolNotFound)?;
-			pool.maybe_end_era(era, era, history_depth)?;
-			pool.put();
-		}
+		// // process the payouts for each pool
+		// for pool_id in pool_ids {
+		// 	let mut pool = BondedPool::<T>::get(pool_id).ok_or(Error::<T>::PoolNotFound)?;
+		// 	pool.maybe_end_era(era, era, history_depth)?;
+		// 	pool.put();
+		// }
 
 		Ok(())
 	}
@@ -814,32 +785,11 @@ impl<T: Config> Pallet<T> {
 		points: BalanceOf<T>,
 		is_new_pool: bool,
 	) -> DispatchResult {
-		let (mint_params, recipient) = {
-			if is_new_pool {
-				let mint_params =
-					<T::FungibleHandler as FungibleHandlerBalances>::MintParams::try_from()
-						.map_err(|_| Error::<T>::MintParamsCreationFailed)?;
 
-				(mint_params, Self::deposit_account_id(pool_id))
-			} else {
-				let mint_params =
-					<T::FungibleHandler as FungibleHandlerBalances>::MintParams::try_from(
-						DefaultMintParams::Mint {
-							token_id: pool_id.saturated_into(),
-							amount: points,
-							depositor: Some(who.clone()),
-						},
-					)
-					.map_err(|_| Error::<T>::MintParamsCreationFailed)?;
-				(mint_params, who)
-			}
-		};
-
-		<T::FungibleHandler as FungibleHandlerBalances>::mint(
-			T::LstCollectionOwner::get(),
-			recipient,
-			T::LstCollectionId::get(),
-			mint_params,
+		<T::Fungibles as Mutate<T::AccountId>>::mint_into(
+			pool_id.into(),
+			&who,
+			points
 		)?;
 
 		Ok(())
@@ -863,18 +813,13 @@ impl<T: Config> Pallet<T> {
 		pool_id: PoolId,
 		points: BalanceOf<T>,
 	) -> DispatchResult {
-		// if this is the last remaining tokens of the pool, then destroy the token
-		let remaining_pool_tokens =
-			<T::FungibleHandler as FungibleHandlerBalances>::total_supply_of(
-				T::LstCollectionId::get(),
-				pool_id.saturated_into(),
-			);
-		let destroy_token_storage = remaining_pool_tokens == points;
 
-		<T::FungibleHandler as FungibleHandlerBalances>::burn(
-			who,
-			T::LstCollectionId::get(),
-			true,
+		<T::Fungibles as Mutate<T::AccountId>>::burn_from(
+			pool_id.into(),
+			&who,
+			points,
+			Precision::BestEffort,
+			Fortitude::Polite,
 		)?;
 
 		Ok(())
@@ -882,10 +827,9 @@ impl<T: Config> Pallet<T> {
 
 	/// Get the amount of points (lst) for `member`
 	pub fn member_points(pool_id: PoolId, member: T::AccountId) -> BalanceOf<T> {
-		T::FungibleHandler::total_balance_of(
-			T::LstCollectionId::get(),
+		T::Fungibles::total_balance(
 			pool_id.saturated_into(),
-			member,
+			&member,
 		)
 	}
 }
@@ -905,9 +849,7 @@ impl<T: Config> BondedPool<T> {
 				return Ok(None);
 			}
 
-			let beneficiary =
-				T::FungibleHandler::owner_of(&T::PoolCollectionId::get(), &self.token_id)
-					.unwrap_or(T::UnclaimedBalanceReceiver::get());
+			let beneficiary = self.inner.roles.root.clone();
 
 			// payout the commission
 			CurrencyOf::<T>::transfer(
@@ -923,33 +865,28 @@ impl<T: Config> BondedPool<T> {
 		}
 	}
 
-	/// Updates `bonuses_paid` and calls [`Self::end_era`] if it should be called
-	pub(crate) fn maybe_end_era(
-		&mut self,
-		current_era: EraIndex,
-		era: EraIndex,
-		history_depth: u32,
-	) -> DispatchResult {
-		// trim history early only if we are out of space (it's expensive)
-		if self.bonuses_paid.len() >= history_depth as usize - 1 {
-			self.bonuses_paid.retain(|&x| x > current_era.saturating_sub(history_depth));
-		}
+	// /// Updates `bonuses_paid` and calls [`Self::end_era`] if it should be called
+	// pub(crate) fn maybe_end_era(
+	// 	&mut self,
+	// 	current_era: EraIndex,
+	// 	era: EraIndex,
+	// 	history_depth: u32,
+	// ) -> DispatchResult {
+	// 	// check if this is first time pool is being called this era
+	// 	if let Err(position) = self.bonuses_paid.binary_search(&era) {
+	// 		// insert era into history
+	// 		self.bonuses_paid
+	// 			.try_insert(position, era)
+	// 			.map_err(|_| Error::<T>::BoundExceeded)?;
 
-		// check if this is first time pool is being called this era
-		if let Err(position) = self.bonuses_paid.binary_search(&era) {
-			// insert era into history
-			self.bonuses_paid
-				.try_insert(position, era)
-				.map_err(|_| Error::<T>::BoundExceeded)?;
+	// 		// trim history
+	// 		self.bonuses_paid.retain(|&x| x >= current_era.saturating_sub(history_depth));
 
-			// trim history
-			self.bonuses_paid.retain(|&x| x >= current_era.saturating_sub(history_depth));
-
-			// actually end the era for the pool
-			self.end_era(era)?;
-		}
-		Ok(())
-	}
+	// 		// actually end the era for the pool
+	// 		self.end_era(era)?;
+	// 	}
+	// 	Ok(())
+	// }
 
 	/// This should be called once per pool per era. It performs four tasks.
 	/// 1. If the pool has reached the end of its cycle, it cycles the pool.
@@ -957,70 +894,70 @@ impl<T: Config> BondedPool<T> {
 	/// 3. Sends reward commission to the depositor.
 	/// 4. It bonds the pool's reward balance.
 	pub(crate) fn end_era(&mut self, era: EraIndex) -> DispatchResult {
-		// calculate bonus
-		let (mut bonus_amount, cycle_ended) = self.maybe_cycle_and_calculate_bonus(era)?;
+		// // calculate bonus
+		// let (mut bonus_amount, cycle_ended) = self.maybe_cycle_and_calculate_bonus(era)?;
 
-		// get accounts
-		let reward_account_id = self.reward_account();
-		let bonus_account_id = self.bonus_account();
+		// // get accounts
+		// let reward_account_id = self.reward_account();
+		// let bonus_account_id = self.bonus_account();
 
-		// transfer the bonus balance to rewards account
-		if !bonus_amount.is_zero() {
-			let bonus_balance = CurrencyOf::<T>::free_balance(&bonus_account_id);
-			// ensure that the bonus account will still have the minimum balance
-			if bonus_balance.saturating_sub(bonus_amount) < CurrencyOf::<T>::minimum_balance() {
-				bonus_amount = bonus_balance.saturating_sub(CurrencyOf::<T>::minimum_balance());
-			}
-			if !bonus_amount.is_zero() {
-				CurrencyOf::<T>::transfer(
-					&bonus_account_id,
-					&reward_account_id,
-					bonus_amount,
-					ExistenceRequirement::KeepAlive,
-				)?;
-			}
-		}
+		// // transfer the bonus balance to rewards account
+		// if !bonus_amount.is_zero() {
+		// 	let bonus_balance = CurrencyOf::<T>::free_balance(&bonus_account_id);
+		// 	// ensure that the bonus account will still have the minimum balance
+		// 	if bonus_balance.saturating_sub(bonus_amount) < CurrencyOf::<T>::minimum_balance() {
+		// 		bonus_amount = bonus_balance.saturating_sub(CurrencyOf::<T>::minimum_balance());
+		// 	}
+		// 	if !bonus_amount.is_zero() {
+		// 		CurrencyOf::<T>::transfer(
+		// 			&bonus_account_id,
+		// 			&reward_account_id,
+		// 			bonus_amount,
+		// 			ExistenceRequirement::KeepAlive,
+		// 		)?;
+		// 	}
+		// }
 
-		// send commission to pool token holder
-		let commission_payment = self.claim_commission()?;
+		// // send commission to pool token holder
+		// let commission_payment = self.claim_commission()?;
 
-		// transfer rewards to bonded account
-		let reward_balance = CurrencyOf::<T>::free_balance(&reward_account_id);
-		let minimum_balance = CurrencyOf::<T>::minimum_balance();
-		let bond_amount = if reward_balance > minimum_balance {
-			let bonded_account_id = self.bonded_account();
-			let reward_amount = reward_balance.saturating_sub(minimum_balance);
+		// // transfer rewards to bonded account
+		// let reward_balance = CurrencyOf::<T>::free_balance(&reward_account_id);
+		// let minimum_balance = CurrencyOf::<T>::minimum_balance();
+		// let bond_amount = if reward_balance > minimum_balance {
+		// 	let bonded_account_id = self.bonded_account();
+		// 	let reward_amount = reward_balance.saturating_sub(minimum_balance);
 
-			if !reward_amount.is_zero() {
-				CurrencyOf::<T>::transfer(
-					&reward_account_id,
-					&bonded_account_id,
-					reward_amount,
-					ExistenceRequirement::KeepAlive,
-				)?;
+		// 	if !reward_amount.is_zero() {
+		// 		CurrencyOf::<T>::transfer(
+		// 			&reward_account_id,
+		// 			&bonded_account_id,
+		// 			reward_amount,
+		// 			ExistenceRequirement::KeepAlive,
+		// 		)?;
 
-				// bond the reward
-				T::Staking::bond_extra(&bonded_account_id, reward_amount)?;
-			}
-			reward_amount
-		} else {
-			Zero::zero()
-		};
+		// 		// bond the reward
+		// 		T::Staking::bond_extra(&bonded_account_id, reward_amount)?;
+		// 	}
+		// 	reward_amount
+		// } else {
+		// 	Zero::zero()
+		// };
 
-		if commission_payment.as_ref().map(|x| !x.amount.is_zero()).unwrap_or_default()
-			|| !bonus_amount.is_zero()
-			|| !bond_amount.is_zero()
-			|| cycle_ended
-		{
-			Pallet::<T>::deposit_event(Event::<T>::EraRewardsProcessed {
-				pool_id: self.id,
-				era,
-				commission: commission_payment,
-				bonus: bonus_amount,
-				reinvested: bond_amount,
-				bonus_cycle_ended: cycle_ended,
-			});
-		}
+		// if commission_payment.as_ref().map(|x| !x.amount.is_zero()).unwrap_or_default()
+		// 	|| !bonus_amount.is_zero()
+		// 	|| !bond_amount.is_zero()
+		// 	|| cycle_ended
+		// {
+		// 	Pallet::<T>::deposit_event(Event::<T>::EraRewardsProcessed {
+		// 		pool_id: self.id,
+		// 		era,
+		// 		commission: commission_payment,
+		// 		bonus: bonus_amount,
+		// 		reinvested: bond_amount,
+		// 		bonus_cycle_ended: cycle_ended,
+		// 	});
+		// }
 		Ok(())
 	}
 }
