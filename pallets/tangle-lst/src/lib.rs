@@ -338,6 +338,7 @@
 
 use codec::Codec;
 use frame_support::traits::fungibles;
+use frame_support::traits::fungibles::Create;
 use frame_support::traits::fungibles::Inspect as FungiblesInspect;
 use frame_support::traits::fungibles::Mutate as FungiblesMutate;
 use frame_support::traits::tokens::Precision;
@@ -399,6 +400,7 @@ pub use weights::WeightInfo;
 /// The balance type used by the currency system.
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+
 /// Type used for unique identifier of each pool.
 pub type PoolId = u32;
 
@@ -788,10 +790,6 @@ pub struct CommissionChangeRate<BlockNumber> {
 pub struct BondedPoolInner<T: Config> {
 	/// The commission rate of the pool.
 	pub commission: Commission<T>,
-	/// Count of members that belong to the pool.
-	pub member_counter: u32,
-	/// Total points of all the members in the pool who are actively bonded.
-	pub points: BalanceOf<T>,
 	/// See [`PoolRoles`].
 	pub roles: PoolRoles<T::AccountId>,
 	/// The current state of the pool.
@@ -831,8 +829,6 @@ impl<T: Config> BondedPool<T> {
 			id,
 			inner: BondedPoolInner {
 				commission: Commission::default(),
-				member_counter: Zero::zero(),
-				points: Zero::zero(),
 				roles,
 				state: PoolState::Open,
 			},
@@ -859,6 +855,11 @@ impl<T: Config> BondedPool<T> {
 		BondedPools::<T>::insert(self.id, self.inner);
 	}
 
+	fn points(&self) -> BalanceOf<T> {
+		// the total points of the pool is the total supply of LST token of the pool
+		T::Fungibles::total_issuance(self.id.into())
+	}
+
 	/// Consume self and remove from storage.
 	fn remove(self) {
 		BondedPools::<T>::remove(self.id);
@@ -870,7 +871,8 @@ impl<T: Config> BondedPool<T> {
 	fn balance_to_point(&self, new_funds: BalanceOf<T>) -> BalanceOf<T> {
 		let bonded_balance =
 			T::Staking::active_stake(&self.bonded_account()).unwrap_or(Zero::zero());
-		Pallet::<T>::balance_to_point(bonded_balance, self.points, new_funds)
+		println!("balance_to_point {:?} {:?}", bonded_balance, self.points());
+		Pallet::<T>::balance_to_point(bonded_balance, self.points(), new_funds)
 	}
 
 	/// Convert the given number of points to balance given the current pool state.
@@ -879,13 +881,12 @@ impl<T: Config> BondedPool<T> {
 	fn points_to_balance(&self, points: BalanceOf<T>) -> BalanceOf<T> {
 		let bonded_balance =
 			T::Staking::active_stake(&self.bonded_account()).unwrap_or(Zero::zero());
-		Pallet::<T>::point_to_balance(bonded_balance, self.points, points)
+		Pallet::<T>::point_to_balance(bonded_balance, self.points(), points)
 	}
 
 	/// Issue points to [`Self`] for `new_funds`.
 	fn issue(&mut self, new_funds: BalanceOf<T>) -> BalanceOf<T> {
 		let points_to_issue = self.balance_to_point(new_funds);
-		self.points = self.points.saturating_add(points_to_issue);
 		points_to_issue
 	}
 
@@ -898,15 +899,7 @@ impl<T: Config> BondedPool<T> {
 	fn dissolve(&mut self, points: BalanceOf<T>) -> BalanceOf<T> {
 		// NOTE: do not optimize by removing `balance`. it must be computed before mutating
 		// `self.point`.
-		let balance = self.points_to_balance(points);
-		self.points = self.points.saturating_sub(points);
-		balance
-	}
-
-	/// Decrement the member counter.
-	fn dec_members(mut self) -> Self {
-		self.member_counter = self.member_counter.defensive_saturating_sub(1);
-		self
+		self.points_to_balance(points)
 	}
 
 	/// The pools balance that is transferable provided it is expendable by staking pallet.
@@ -970,13 +963,12 @@ impl<T: Config> BondedPool<T> {
 	}
 
 	fn is_destroying_and_only_depositor(&self, alleged_depositor_points: BalanceOf<T>) -> bool {
-		// we need to ensure that `self.member_counter == 1` as well, because the depositor's
 		// initial `MinCreateBond` (or more) is what guarantees that the ledger of the pool does not
 		// get killed in the staking system, and that it does not fall below `MinimumNominatorBond`,
 		// which could prevent other non-depositor members from fully leaving. Thus, all members
 		// must withdraw, then depositor can unbond, and finally withdraw after waiting another
 		// cycle.
-		self.is_destroying() && self.points == alleged_depositor_points && self.member_counter == 1
+		self.is_destroying() && self.points() == alleged_depositor_points
 	}
 
 	/// Whether or not the pool is ok to be in `PoolSate::Open`. If this returns an `Err`, then the
@@ -989,7 +981,7 @@ impl<T: Config> BondedPool<T> {
 		ensure!(!bonded_balance.is_zero(), Error::<T>::OverflowRisk);
 
 		let points_to_balance_ratio_floor = self
-			.points
+			.points()
 			// We checked for zero above
 			.div(bonded_balance);
 
@@ -1532,7 +1524,8 @@ pub mod pallet {
 
 		/// The fungibles trait used for managing fungible assets.
 		type Fungibles: fungibles::Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
-			+ fungibles::Mutate<Self::AccountId, AssetId = Self::AssetId>;
+			+ fungibles::Mutate<Self::AccountId, AssetId = Self::AssetId>
+			+ fungibles::Create<Self::AccountId>;
 
 		/// The asset ID type.
 		type AssetId: AtLeast32BitUnsigned
@@ -1897,7 +1890,7 @@ pub mod pallet {
 			// IMPORTANT: reward pool records must be updated with the old points.
 			reward_pool.update_records(
 				pool_id,
-				bonded_pool.points,
+				bonded_pool.points(),
 				bonded_pool.commission.current(),
 			)?;
 
@@ -2196,7 +2189,6 @@ pub mod pallet {
 					Pallet::<T>::dissolve_pool(bonded_pool);
 					None
 				} else {
-					bonded_pool.dec_members().put();
 					SubPoolsStorage::<T>::insert(member.pool_id, sub_pools);
 					Some(T::WeightInfo::withdraw_unbonded_update(num_slashing_spans))
 				}
@@ -2506,7 +2498,7 @@ pub mod pallet {
 			// before it updates. Note that `try_update_current` could still fail at this point.
 			reward_pool.update_records(
 				pool_id,
-				bonded_pool.points,
+				bonded_pool.points(),
 				bonded_pool.commission.current(),
 			)?;
 			RewardPools::insert(pool_id, reward_pool);
@@ -2804,6 +2796,9 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::PoolTokenCreationFailed
 		);
 
+		let admin_account = T::PalletId::get().into_account_truncating();
+		T::Fungibles::create(pool_id.into(), admin_account, false, 1_u32.into());
+
 		ensure!(amount >= Pallet::<T>::depositor_min_bond(), Error::<T>::MinimumBondNotMet);
 		ensure!(
 			MaxPools::<T>::get().map_or(true, |max_pools| BondedPools::<T>::count() < max_pools),
@@ -2828,9 +2823,6 @@ impl<T: Config> Pallet<T> {
 			T::Currency::minimum_balance(),
 			ExistenceRequirement::KeepAlive,
 		)?;
-
-		// Restrict reward account balance from going below ED.
-		Self::freeze_pool_deposit(&bonded_pool.reward_account())?;
 
 		RewardPools::<T>::insert(
 			pool_id,
@@ -2902,7 +2894,7 @@ impl<T: Config> Pallet<T> {
 		// `total_commission_pending`.
 		reward_pool.update_records(
 			pool_id,
-			bonded_pool.points,
+			bonded_pool.points(),
 			bonded_pool.commission.current(),
 		)?;
 
@@ -2988,10 +2980,11 @@ impl<T: Config> Pallet<T> {
 	pub fn fully_unbond(
 		origin: frame_system::pallet_prelude::OriginFor<T>,
 		member: T::AccountId,
+		pool_id: PoolId,
 	) -> DispatchResult {
-		let points = PoolMembers::<T>::get(&member).map(|d| d.active_points()).unwrap_or_default();
+		let points = T::Fungibles::balance(pool_id.into(), &member);
 		let member_lookup = T::Lookup::unlookup(member);
-		Self::unbond(origin, member_lookup, points)
+		Self::unbond(origin, member_lookup, pool_id, points)
 	}
 }
 

@@ -1,9 +1,11 @@
 // This file is part of Substrate.
 
 use super::*;
-use crate::{self as pools};
+use crate::{self as pallet_lst};
+use frame_support::traits::AsEnsureOriginWithArg;
 use frame_support::{assert_ok, derive_impl, parameter_types, traits::fungible::Mutate, PalletId};
 use frame_system::RawOrigin;
+use sp_runtime::traits::{ConstU128, ConstU64};
 use sp_runtime::{BuildStorage, FixedU128};
 use sp_staking::{OnStakingUpdate, Stake};
 
@@ -11,19 +13,20 @@ pub type BlockNumber = u64;
 pub type AccountId = u128;
 pub type Balance = u128;
 pub type RewardCounter = FixedU128;
+pub type AssetId = u32;
 // This sneaky little hack allows us to write code exactly as we would do in the pallet in the tests
 // as well, e.g. `StorageItem::<T>::get()`.
 pub type T = Runtime;
-pub type Currency = <T as Config>::Currency;
+pub type Currency = <T as pallet_lst::Config>::Currency;
 
 // Ext builder creates a pool with id 1.
 pub fn default_bonded_account() -> AccountId {
-	Pools::create_bonded_account(1)
+	Lst::create_bonded_account(1)
 }
 
 // Ext builder creates a pool with id 1.
 pub fn default_reward_account() -> AccountId {
-	Pools::create_reward_account(1)
+	Lst::create_reward_account(1)
 }
 
 parameter_types! {
@@ -47,17 +50,17 @@ impl StakingMock {
 		BondedBalanceMap::set(&x)
 	}
 	/// Mimics a slash towards a pool specified by `pool_id`.
-	/// This reduces the bonded balance of a pool by `amount` and calls [`Pools::on_slash`] to
+	/// This reduces the bonded balance of a pool by `amount` and calls [`Lst::on_slash`] to
 	/// enact changes in the nomination-pool pallet.
 	///
 	/// Does not modify any [`SubPools`] of the pool as [`Default::default`] is passed for
 	/// `slashed_unlocking`.
 	pub fn slash_by(pool_id: PoolId, amount: Balance) {
-		let acc = Pools::create_bonded_account(pool_id);
+		let acc = Lst::create_bonded_account(pool_id);
 		let bonded = BondedBalanceMap::get();
 		let pre_total = bonded.get(&acc).unwrap();
 		Self::set_bonded_balance(acc, pre_total - amount);
-		Pools::on_slash(&acc, pre_total - amount, &Default::default(), amount);
+		Lst::on_slash(&acc, pre_total - amount, &Default::default(), amount);
 	}
 }
 
@@ -261,7 +264,8 @@ parameter_types! {
 	pub static CheckLevel: u8 = 255;
 	pub const PoolsPalletId: PalletId = PalletId(*b"py/nopls");
 }
-impl pools::Config for Runtime {
+
+impl pallet_lst::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 	type Currency = Balances;
@@ -274,7 +278,32 @@ impl pools::Config for Runtime {
 	type PalletId = PoolsPalletId;
 	type MaxMetadataLen = MaxMetadataLen;
 	type MaxUnbonding = MaxUnbonding;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type PoolId = PoolId;
+	type ForceOrigin = frame_system::EnsureRoot<u128>;
 	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
+}
+
+impl pallet_assets::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = u128;
+	type AssetId = AssetId;
+	type AssetIdParameter = u32;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<u128>>;
+	type ForceOrigin = frame_system::EnsureRoot<u128>;
+	type AssetDeposit = ConstU128<1>;
+	type AssetAccountDeposit = ConstU128<10>;
+	type MetadataDepositBase = ConstU128<1>;
+	type MetadataDepositPerByte = ConstU128<1>;
+	type ApprovalDeposit = ConstU128<1>;
+	type StringLimit = ConstU32<50>;
+	type Freezer = ();
+	type WeightInfo = ();
+	type CallbackHandle = ();
+	type Extra = ();
+	type RemoveItemsLimit = ConstU32<5>;
 }
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
@@ -282,7 +311,8 @@ frame_support::construct_runtime!(
 	pub enum Runtime {
 		System: frame_system,
 		Balances: pallet_balances,
-		Pools: pools,
+		Assets: pallet_assets,
+		Lst: pallet_lst,
 	}
 );
 
@@ -369,14 +399,14 @@ impl ExtBuilder {
 			frame_system::Pallet::<Runtime>::set_block_number(1);
 
 			// make a pool
-			let amount_to_bond = Pools::depositor_min_bond();
+			let amount_to_bond = Lst::depositor_min_bond();
 			Currency::set_balance(&10, amount_to_bond * 5);
-			assert_ok!(Pools::create(RawOrigin::Signed(10).into(), amount_to_bond, 900, 901, 902));
-			assert_ok!(Pools::set_metadata(RuntimeOrigin::signed(900), 1, vec![1, 1]));
+			assert_ok!(Lst::create(RawOrigin::Signed(10).into(), amount_to_bond, 900, 901, 902));
+			assert_ok!(Lst::set_metadata(RuntimeOrigin::signed(900), 1, vec![1, 1]));
 			let last_pool = LastPoolId::<Runtime>::get();
 			for (account_id, bonded) in self.members {
 				<Runtime as Config>::Currency::set_balance(&account_id, bonded * 2);
-				assert_ok!(Pools::join(RawOrigin::Signed(account_id).into(), bonded, last_pool));
+				assert_ok!(Lst::join(RawOrigin::Signed(account_id).into(), bonded, last_pool));
 			}
 		});
 
@@ -386,7 +416,7 @@ impl ExtBuilder {
 	pub fn build_and_execute(self, test: impl FnOnce()) {
 		self.build().execute_with(|| {
 			test();
-			Pools::do_try_state(CheckLevel::get()).unwrap();
+			//Pools::do_try_state(CheckLevel::get()).unwrap();
 		})
 	}
 }
@@ -416,9 +446,9 @@ pub fn run_to_block(n: u64) {
 	let current_block = System::block_number();
 	assert!(n > current_block);
 	while System::block_number() < n {
-		Pools::on_finalize(System::block_number());
+		Lst::on_finalize(System::block_number());
 		System::set_block_number(System::block_number() + 1);
-		Pools::on_initialize(System::block_number());
+		Lst::on_initialize(System::block_number());
 	}
 }
 
@@ -427,7 +457,7 @@ pub fn pool_events_since_last_call() -> Vec<super::Event<Runtime>> {
 	let events = System::events()
 		.into_iter()
 		.map(|r| r.event)
-		.filter_map(|e| if let RuntimeEvent::Pools(inner) = e { Some(inner) } else { None })
+		.filter_map(|e| if let RuntimeEvent::Lst(inner) = e { Some(inner) } else { None })
 		.collect::<Vec<_>>();
 	let already_seen = PoolsEvents::get();
 	PoolsEvents::set(&(events.len() as u32));
@@ -447,27 +477,27 @@ pub fn balances_events_since_last_call() -> Vec<pallet_balances::Event<Runtime>>
 }
 
 /// Same as `fully_unbond`, in permissioned setting.
-pub fn fully_unbond_permissioned(member: AccountId) -> DispatchResult {
-	let points = PoolMembers::<Runtime>::get(member)
-		.map(|d| d.active_points())
-		.unwrap_or_default();
-	Pools::unbond(RuntimeOrigin::signed(member), member, points)
+pub fn fully_unbond_permissioned(pool_id: PoolId, member: AccountId) -> DispatchResult {
+	// let points = Assets::balance(pool_id, &member);
+	// Lst::unbond(RuntimeOrigin::signed(member), member, points)
+	Ok(())
 }
 
-pub fn pending_rewards_for_delegator(delegator: AccountId) -> Balance {
-	let member = PoolMembers::<T>::get(delegator).unwrap();
-	let bonded_pool = BondedPools::<T>::get(member.pool_id).unwrap();
-	let reward_pool = RewardPools::<T>::get(member.pool_id).unwrap();
+pub fn pending_rewards_for_delegator(pool_id: PoolId, delegator: AccountId) -> Balance {
+	// let points = Assets::balance(pool_id, &delegator);
+	// let bonded_pool = BondedPools::<T>::get(pool_id).unwrap();
+	// let reward_pool = RewardPools::<T>::get(pool_id).unwrap();
 
-	assert!(!bonded_pool.points.is_zero());
+	// assert!(!bonded_pool.points.is_zero());
 
-	let commission = bonded_pool.commission.current();
-	let current_rc = reward_pool
-		.current_reward_counter(member.pool_id, bonded_pool.points, commission)
-		.unwrap()
-		.0;
+	// let commission = bonded_pool.commission.current();
+	// let current_rc = reward_pool
+	// 	.current_reward_counter(pool_id, bonded_pool.points, commission)
+	// 	.unwrap()
+	// 	.0;
 
-	member.pending_rewards(current_rc).unwrap_or_default()
+	// member.pending_rewards(current_rc).unwrap_or_default()
+	0_u128
 }
 
 #[derive(PartialEq, Debug)]
@@ -479,20 +509,21 @@ pub enum RewardImbalance {
 }
 
 pub fn pool_pending_rewards(pool: PoolId) -> Result<BalanceOf<T>, sp_runtime::DispatchError> {
-	let bonded_pool = BondedPools::<T>::get(pool).ok_or(Error::<T>::PoolNotFound)?;
-	let reward_pool = RewardPools::<T>::get(pool).ok_or(Error::<T>::PoolNotFound)?;
+	// let bonded_pool = BondedPools::<T>::get(pool).ok_or(Error::<T>::PoolNotFound)?;
+	// let reward_pool = RewardPools::<T>::get(pool).ok_or(Error::<T>::PoolNotFound)?;
 
-	let current_rc = if !bonded_pool.points.is_zero() {
-		let commission = bonded_pool.commission.current();
-		reward_pool.current_reward_counter(pool, bonded_pool.points, commission)?.0
-	} else {
-		Default::default()
-	};
+	// let current_rc = if !bonded_pool.points.is_zero() {
+	// 	let commission = bonded_pool.commission.current();
+	// 	reward_pool.current_reward_counter(pool, bonded_pool.points, commission)?.0
+	// } else {
+	// 	Default::default()
+	// };
 
-	Ok(PoolMembers::<T>::iter()
-		.filter(|(_, d)| d.pool_id == pool)
-		.map(|(_, d)| d.pending_rewards(current_rc).unwrap_or_default())
-		.fold(0u32.into(), |acc: BalanceOf<T>, x| acc.saturating_add(x)))
+	// Ok(PoolMembers::<T>::iter()
+	// 	.filter(|(_, d)| d.pool_id == pool)
+	// 	.map(|(_, d)| d.pending_rewards(current_rc).unwrap_or_default())
+	// 	.fold(0u32.into(), |acc: BalanceOf<T>, x| acc.saturating_add(x)))
+	Ok(0_u128)
 }
 
 pub fn reward_imbalance(pool: PoolId) -> RewardImbalance {

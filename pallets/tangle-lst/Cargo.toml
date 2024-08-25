@@ -35,10 +35,12 @@ pallet-staking = { workspace = true }
 
 # Optional: use for testing and/or fuzzing
 pallet-balances = { workspace = true, optional = true }
+pallet-assets = { workspace = true, optional = true }
 sp-tracing = { workspace = true, optional = true }
 
 [dev-dependencies]
 pallet-balances = { workspace = true }
+pallet-assets = { workspace = true }
 sp-tracing = { workspace = true }
 
 [features]
@@ -50,6 +52,7 @@ std = [
 	"frame-system/std",
 	"log/std",
 	"pallet-balances?/std",
+	"pallet-assets?/std",
 	"scale-info/std",
 	"sp-core/std",
 	"sp-io/std",
