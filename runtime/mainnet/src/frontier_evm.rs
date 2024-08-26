@@ -16,7 +16,7 @@
 // limitations under the License.
 
 use crate::{
-	precompiles::{PrecompileName, WebbPrecompiles},
+	precompiles::{PrecompileName, TanglePrecompiles},
 	*,
 };
 use frame_support::{pallet_prelude::*, parameter_types, traits::FindAuthor, weights::Weight};
@@ -151,7 +151,7 @@ parameter_types! {
 	/// )
 	pub const GasLimitPovSizeRatio: u64 = 4;
 	pub WeightPerGas: Weight = Weight::from_parts(WEIGHT_PER_GAS, 0);
-	pub PrecompilesValue: WebbPrecompiles<Runtime> = WebbPrecompiles::<_>::new();
+	pub PrecompilesValue: TanglePrecompiles<Runtime> = TanglePrecompiles::<_>::new();
 	pub SuicideQuickClearLimit: u32 = 0;
 }
 
@@ -165,7 +165,7 @@ impl pallet_evm::Config for Runtime {
 	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
-	type PrecompilesType = WebbPrecompiles<Self>;
+	type PrecompilesType = TanglePrecompiles<Self>;
 	type PrecompilesValue = PrecompilesValue;
 	type ChainId = EVMChainId;
 	type BlockGasLimit = BlockGasLimit;

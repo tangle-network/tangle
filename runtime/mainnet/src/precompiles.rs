@@ -79,7 +79,7 @@ parameter_types! {
 }
 
 #[precompile_utils::precompile_name_from_address]
-pub type WebbPrecompilesAt<R> = (
+pub type TanglePrecompilesAt<R> = (
 	// Ethereum precompiles:
 	PrecompileAt<AddressU64<1>, ECRecover, EthereumPrecompilesChecks>,
 	PrecompileAt<AddressU64<2>, Sha256, EthereumPrecompilesChecks>,
@@ -216,10 +216,10 @@ pub type WebbPrecompilesAt<R> = (
 	>,
 );
 
-pub type WebbPrecompiles<R> = PrecompileSetBuilder<
+pub type TanglePrecompiles<R> = PrecompileSetBuilder<
 	R,
 	(
-		PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<2095>), WebbPrecompilesAt<R>>,
+		PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<2095>), TanglePrecompilesAt<R>>,
 		// Prefixed precompile sets (XC20)
 		PrecompileSetStartingWith<
 			ForeignAssetPrefix,

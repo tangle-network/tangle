@@ -60,7 +60,7 @@ use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::MaxEncodedLen;
 use parity_scale_codec::{Decode, Encode};
 use polkadot_parachain_primitives::primitives::Sibling;
-use precompiles::WebbPrecompiles;
+use precompiles::TanglePrecompiles;
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
@@ -161,7 +161,7 @@ use tangle_primitives::{
 pub use tangle_services::PalletServicesConstraints;
 
 // Precompiles
-pub type Precompiles = WebbPrecompiles<Runtime>;
+pub type Precompiles = TanglePrecompiles<Runtime>;
 
 // Frontier
 use fp_rpc::TransactionStatus;
