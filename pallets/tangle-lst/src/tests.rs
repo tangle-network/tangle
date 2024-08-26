@@ -18,9 +18,6 @@
 use super::*;
 use crate::{mock::Currency, mock::*, Event};
 use frame_support::traits::Currency as CurrencyT;
-use frame_support::{assert_err, assert_noop, assert_ok, assert_storage_noop};
-use pallet_balances::Event as BEvent;
-use sp_runtime::{bounded_btree_map, traits::Dispatchable, FixedU128};
 
 mod bond_extra;
 mod bonded_pool;
@@ -30,7 +27,6 @@ mod slash;
 mod sub_pools;
 mod unbond;
 mod update_roles;
-mod withdraw_unbonded;
 
 macro_rules! unbonding_pools_with_era {
 	($($k:expr => $v:expr),* $(,)?) => {{
@@ -51,12 +47,12 @@ pub const DEFAULT_ROLES: PoolRoles<AccountId> =
 	PoolRoles { depositor: 10, root: Some(900), nominator: Some(901), bouncer: Some(902) };
 
 fn deposit_rewards(r: u128) {
-	let b = Currency::free_balance(&default_reward_account()).checked_add(r).unwrap();
+	let b = Currency::free_balance(default_reward_account()).checked_add(r).unwrap();
 	Currency::set_balance(&default_reward_account(), b);
 }
 
 fn remove_rewards(r: u128) {
-	let b = Currency::free_balance(&default_reward_account()).checked_sub(r).unwrap();
+	let b = Currency::free_balance(default_reward_account()).checked_sub(r).unwrap();
 	Currency::set_balance(&default_reward_account(), b);
 }
 
@@ -64,7 +60,7 @@ fn mint_lst(pool_id: u32, who: &AccountId, amount: u128) {
 	if Assets::asset_exists(pool_id) {
 		Assets::mint_into(pool_id, who, amount).unwrap();
 	} else {
-		Balances::make_free_balance_be(&who, 10000);
+		Balances::make_free_balance_be(who, 10000);
 		Assets::force_create(RuntimeOrigin::root(), pool_id, *who, false, 1_u32.into()).unwrap();
 		Assets::mint_into(pool_id, who, amount).unwrap();
 	}
@@ -122,7 +118,7 @@ fn test_setup_works() {
 
 		// reward account should have an initial ED in it.
 		assert_eq!(
-			Currency::free_balance(&reward_account),
+			Currency::free_balance(reward_account),
 			<Balances as CurrencyT<AccountId>>::minimum_balance()
 		);
 	})

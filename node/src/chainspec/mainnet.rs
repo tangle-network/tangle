@@ -312,5 +312,6 @@ fn mainnet_genesis(
 				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
 			)),
 		},
+		lst: Default::default(),
 	}
 }

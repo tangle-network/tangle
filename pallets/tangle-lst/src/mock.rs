@@ -5,7 +5,7 @@ use crate::{self as pallet_lst};
 use frame_support::traits::AsEnsureOriginWithArg;
 use frame_support::{assert_ok, derive_impl, parameter_types, traits::fungible::Mutate, PalletId};
 use frame_system::RawOrigin;
-use sp_runtime::traits::{ConstU128, ConstU64};
+use sp_runtime::traits::ConstU128;
 use sp_runtime::{BuildStorage, FixedU128};
 use sp_staking::{OnStakingUpdate, Stake};
 
@@ -92,7 +92,7 @@ impl sp_staking::StakingInterface for StakingMock {
 		_: &Self::AccountId,
 	) -> Result<sp_staking::StakerStatus<Self::AccountId>, DispatchError> {
 		Nominations::get()
-			.map(|noms| sp_staking::StakerStatus::Nominator(noms))
+			.map(sp_staking::StakerStatus::Nominator)
 			.ok_or(DispatchError::Other("NotStash"))
 	}
 
@@ -111,7 +111,7 @@ impl sp_staking::StakingInterface for StakingMock {
 		let era = Self::current_era();
 		let unlocking_at = era + Self::bonding_duration();
 		let mut y = UnbondingBalanceMap::get();
-		y.entry(*who).or_insert(Default::default()).push((unlocking_at, amount));
+		y.entry(*who).or_default().push((unlocking_at, amount));
 		UnbondingBalanceMap::set(&y);
 		Ok(())
 	}
@@ -154,12 +154,12 @@ impl sp_staking::StakingInterface for StakingMock {
 		match (UnbondingBalanceMap::get().get(who), BondedBalanceMap::get().get(who).copied()) {
 			(None, None) => Err(DispatchError::Other("balance not found")),
 			(Some(v), None) => Ok(Stake {
-				total: v.into_iter().fold(0u128, |acc, &x| acc.saturating_add(x.1)),
+				total: v.iter().fold(0u128, |acc, &x| acc.saturating_add(x.1)),
 				active: 0,
 			}),
 			(None, Some(v)) => Ok(Stake { total: v, active: v }),
 			(Some(a), Some(b)) => Ok(Stake {
-				total: a.into_iter().fold(0u128, |acc, &x| acc.saturating_add(x.1)) + b,
+				total: a.iter().fold(0u128, |acc, &x| acc.saturating_add(x.1)) + b,
 				active: b,
 			}),
 		}

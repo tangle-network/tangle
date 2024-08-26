@@ -26,7 +26,7 @@ fn create_works() {
 		));
 		assert_eq!(TotalValueLocked::<T>::get(), 10 + StakingMock::minimum_nominator_bond());
 
-		assert_eq!(Currency::free_balance(&11), 0);
+		assert_eq!(Currency::free_balance(11), 0);
 		assert_eq!(
 			BondedPool::<Runtime>::get(2).unwrap(),
 			BondedPool {
@@ -144,7 +144,7 @@ fn create_with_pool_id_works() {
 			789
 		));
 
-		assert_eq!(Currency::free_balance(&11), 0);
+		assert_eq!(Currency::free_balance(11), 0);
 		// delete the initial pool created, then pool_Id `1` will be free
 
 		assert_noop!(

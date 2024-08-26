@@ -1,7 +1,7 @@
 use super::*;
-use crate::{mock::Currency, mock::*, Event};
+use crate::mock::Currency;
 use frame_support::traits::Currency as CurrencyT;
-use frame_support::{assert_err, assert_noop, assert_ok, assert_storage_noop};
+use frame_support::{assert_noop, assert_ok};
 
 #[test]
 fn test_setup_works() {
@@ -51,7 +51,7 @@ fn test_setup_works() {
 
 		// reward account should have an initial ED in it.
 		assert_eq!(
-			Currency::free_balance(&reward_account),
+			Currency::free_balance(reward_account),
 			<Balances as CurrencyT<AccountId>>::minimum_balance()
 		);
 	})
@@ -62,7 +62,7 @@ mod bonded_pool {
 	#[test]
 	fn balance_to_point_works() {
 		ExtBuilder::default().build_and_execute(|| {
-			let mut bonded_pool = BondedPool::<Runtime> {
+			let bonded_pool = BondedPool::<Runtime> {
 				id: 123123,
 				inner: BondedPoolInner {
 					commission: Commission::default(),
@@ -117,7 +117,7 @@ mod bonded_pool {
 	fn points_to_balance_works() {
 		ExtBuilder::default().build_and_execute(|| {
 			// 1 balance : 1 points ratio
-			let mut bonded_pool = BondedPool::<Runtime> {
+			let bonded_pool = BondedPool::<Runtime> {
 				id: 123123,
 				inner: BondedPoolInner {
 					commission: Commission::default(),

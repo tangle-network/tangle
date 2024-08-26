@@ -1221,26 +1221,27 @@ parameter_types! {
 	pub static PostUnbondingPoolsWindow: u32 = 2;
 	pub static MaxMetadataLen: u32 = 2;
 	pub static CheckLevel: u8 = 255;
-	pub const PoolsPalletId: PalletId = PalletId(*b"py/nopls");
+	pub const LstPalletId: PalletId = PalletId(*b"py/tnlst");
 }
 
-impl pallet_lst::Config for Runtime {
+impl pallet_tangle_lst::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 	type Currency = Balances;
 	type RuntimeFreezeReason = RuntimeFreezeReason;
-	type RewardCounter = RewardCounter;
+	type RewardCounter = FixedU128;
 	type BalanceToU256 = BalanceToU256;
 	type U256ToBalance = U256ToBalance;
-	type Staking = StakingMock;
-	type PostUnbondingPoolsWindow = PostUnbondingPoolsWindow;
-	type PalletId = PoolsPalletId;
+	type Staking = Staking;
+	type PostUnbondingPoolsWindow = ConstU32<4>;
+	type PalletId = LstPalletId;
 	type MaxMetadataLen = MaxMetadataLen;
-	type MaxUnbonding = MaxUnbonding;
+	// we use the same number of allowed unlocking chunks as with staking.
+	type MaxUnbonding = <Self as pallet_staking::Config>::MaxUnlockingChunks;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type PoolId = PoolId;
-	type ForceOrigin = frame_system::EnsureRoot<u128>;
+	type PoolId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
 }
 

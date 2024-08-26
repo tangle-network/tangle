@@ -1,8 +1,6 @@
 use super::*;
-use crate::{mock::Currency, mock::*, Event};
-use frame_support::traits::Currency as CurrencyT;
-use frame_support::{assert_err, assert_noop, assert_ok, assert_storage_noop};
-use sp_runtime::TokenError;
+use crate::{mock::Currency, Event};
+use frame_support::{assert_noop, assert_ok};
 
 #[test]
 fn join_works() {
@@ -33,7 +31,7 @@ fn join_works() {
 		);
 		assert_eq!(TotalValueLocked::<T>::get(), 12);
 
-		assert_eq!(Assets::balance(1, &11), 2);
+		assert_eq!(Assets::balance(1, 11), 2);
 
 		assert_eq!(BondedPool::<Runtime>::get(1).unwrap(), bonded(12, 2));
 

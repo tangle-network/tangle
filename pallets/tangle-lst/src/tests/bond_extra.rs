@@ -1,6 +1,5 @@
 use super::*;
 use crate::Event;
-use frame_support::assert_noop;
 use frame_support::assert_ok;
 
 #[test]
@@ -10,13 +9,13 @@ fn bond_extra_from_free_balance_creator() {
 		Currency::set_balance(&10, 100);
 
 		// given
-		assert_eq!(Currency::free_balance(&10), 100);
+		assert_eq!(Currency::free_balance(10), 100);
 
 		// when
 		assert_ok!(Lst::bond_extra(RuntimeOrigin::signed(10), 1, BondExtra::FreeBalance(10)));
 
 		// then
-		assert_eq!(Currency::free_balance(&10), 90);
+		assert_eq!(Currency::free_balance(10), 90);
 
 		assert_eq!(
 			pool_events_since_last_call(),
@@ -31,7 +30,7 @@ fn bond_extra_from_free_balance_creator() {
 		assert_ok!(Lst::bond_extra(RuntimeOrigin::signed(10), 1, BondExtra::FreeBalance(20)));
 
 		// then
-		assert_eq!(Currency::free_balance(&10), 70);
+		assert_eq!(Currency::free_balance(10), 70);
 
 		assert_eq!(
 			pool_events_since_last_call(),

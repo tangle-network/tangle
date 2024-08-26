@@ -1,7 +1,4 @@
 use super::*;
-use crate::{mock::Currency, mock::*, Event};
-use frame_support::traits::Currency as CurrencyT;
-use frame_support::{assert_err, assert_noop, assert_ok, assert_storage_noop};
 
 macro_rules! unbonding_pools_with_era {
 	($($k:expr => $v:expr),* $(,)?) => {{

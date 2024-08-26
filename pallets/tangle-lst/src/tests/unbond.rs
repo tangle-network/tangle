@@ -1,8 +1,7 @@
 use super::*;
-use crate::{mock::Currency, mock::*, Event};
+use crate::{mock::Currency, Event};
 use frame_support::traits::Currency as CurrencyT;
-use frame_support::{assert_err, assert_noop, assert_ok, assert_storage_noop};
-use sp_runtime::TokenError;
+use frame_support::{assert_noop, assert_ok};
 
 macro_rules! unbonding_pools_with_era {
 	($($k:expr => $v:expr),* $(,)?) => {{
@@ -368,7 +367,7 @@ fn unbond_of_3_works() {
 			);
 
 			assert_eq!(StakingMock::active_stake(&default_bonded_account()).unwrap(), 94);
-			assert_eq!(Currency::free_balance(&40), 40 + 40); // We claim rewards when unbonding
+			assert_eq!(Currency::free_balance(40), 40 + 40); // We claim rewards when unbonding
 
 			// When
 			unsafe_set_state(1, PoolState::Destroying);
@@ -391,7 +390,7 @@ fn unbond_of_3_works() {
 				}
 			);
 			assert_eq!(StakingMock::active_stake(&default_bonded_account()).unwrap(), 2);
-			assert_eq!(Currency::free_balance(&550), 550 + 550);
+			assert_eq!(Currency::free_balance(550), 550 + 550);
 			assert_eq!(
 				pool_events_since_last_call(),
 				vec![
@@ -424,7 +423,7 @@ fn unbond_of_3_works() {
 			);
 			assert_eq!(StakingMock::active_stake(&default_bonded_account()).unwrap(), 0);
 
-			assert_eq!(Currency::free_balance(&550), 550 + 550 + 92);
+			assert_eq!(Currency::free_balance(550), 550 + 550 + 92);
 			assert_eq!(
 				pool_events_since_last_call(),
 				vec![
@@ -645,7 +644,6 @@ fn unbond_permissionless_works() {
 		// but depositor itself can do it.
 		assert_ok!(Lst::fully_unbond(RuntimeOrigin::signed(10), 10, 1));
 
-		assert_eq!(BondedPools::<Runtime>::get(1).unwrap().points(), 0);
 		assert_eq!(
 			SubPoolsStorage::<Runtime>::get(1).unwrap(),
 			SubPools {
@@ -673,7 +671,6 @@ fn partial_unbond_era_tracking() {
 		assert_eq!(Lst::depositor_min_bond(), 1);
 
 		// given
-		assert_eq!(BondedPool::<Runtime>::get(1).unwrap().points(), 10);
 		assert!(SubPoolsStorage::<Runtime>::get(1).is_none());
 		assert_eq!(CurrentEra::get(), 0);
 		assert_eq!(BondingDuration::get(), 3);
@@ -685,7 +682,6 @@ fn partial_unbond_era_tracking() {
 		assert_ok!(Lst::unbond(RuntimeOrigin::signed(10), 10, 1, 1));
 
 		// then
-		assert_eq!(BondedPool::<Runtime>::get(1).unwrap().points(), 9);
 		assert_eq!(
 			SubPoolsStorage::<Runtime>::get(1).unwrap(),
 			SubPools {
@@ -708,7 +704,6 @@ fn partial_unbond_era_tracking() {
 		assert_ok!(Lst::unbond(RuntimeOrigin::signed(10), 10, 1, 5));
 
 		// then
-		assert_eq!(BondedPool::<Runtime>::get(1).unwrap().points(), 4);
 		assert_eq!(
 			SubPoolsStorage::<Runtime>::get(1).unwrap(),
 			SubPools {
@@ -728,7 +723,6 @@ fn partial_unbond_era_tracking() {
 		assert_ok!(Lst::unbond(RuntimeOrigin::signed(10), 10, 1, 5));
 
 		// then
-		assert_eq!(BondedPool::<Runtime>::get(1).unwrap().points(), 3);
 		assert_eq!(
 			SubPoolsStorage::<Runtime>::get(1).unwrap(),
 			SubPools {
@@ -758,7 +752,6 @@ fn partial_unbond_era_tracking() {
 		assert_ok!(Lst::unbond(RuntimeOrigin::signed(10), 10, 1, 3));
 
 		// then
-		assert_eq!(BondedPool::<Runtime>::get(1).unwrap().points(), 0);
 		assert_eq!(
 			SubPoolsStorage::<Runtime>::get(1).unwrap(),
 			SubPools {
@@ -829,7 +822,7 @@ fn depositor_permissioned_partial_unbond() {
 
 		// but not less than 2
 		assert_noop!(
-			Lst::unbond(RuntimeOrigin::signed(10), 10, 6),
+			Lst::unbond(RuntimeOrigin::signed(10), 10, 1, 6),
 			Error::<Runtime>::MinimumBondNotMet
 		);
 

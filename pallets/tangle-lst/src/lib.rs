@@ -351,8 +351,8 @@ use frame_support::{
 	pallet_prelude::{MaxEncodedLen, *},
 	storage::bounded_btree_map::BoundedBTreeMap,
 	traits::{
-		fungible::{Inspect, InspectFreeze, Mutate, MutateFreeze},
-		tokens::{Fortitude, Preservation},
+		fungible::{Inspect, Mutate},
+		tokens::Fortitude,
 		Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating, Get,
 	},
 	DefaultNoBound, PalletError,
@@ -370,9 +370,6 @@ use sp_runtime::{
 };
 use sp_staking::{EraIndex, StakingInterface};
 use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, ops::Div, vec::Vec};
-
-#[cfg(any(feature = "try-runtime", feature = "fuzzing", test, debug_assertions))]
-use sp_runtime::TryRuntimeError;
 
 /// The log target of this pallet.
 pub const LOG_TARGET: &str = "runtime::nomination-pools";
@@ -457,10 +454,6 @@ pub enum ClaimPermission {
 impl ClaimPermission {
 	fn can_bond_extra(&self) -> bool {
 		matches!(self, ClaimPermission::PermissionlessAll | ClaimPermission::PermissionlessCompound)
-	}
-
-	fn can_claim_payout(&self) -> bool {
-		matches!(self, ClaimPermission::PermissionlessAll | ClaimPermission::PermissionlessWithdraw)
 	}
 }
 
@@ -886,8 +879,7 @@ impl<T: Config> BondedPool<T> {
 
 	/// Issue points to [`Self`] for `new_funds`.
 	fn issue(&mut self, new_funds: BalanceOf<T>) -> BalanceOf<T> {
-		let points_to_issue = self.balance_to_point(new_funds);
-		points_to_issue
+		self.balance_to_point(new_funds)
 	}
 
 	/// Dissolve some points from the pool i.e. unbond the given amount of points from this pool.
@@ -1127,7 +1119,7 @@ impl<T: Config> BondedPool<T> {
 		});
 
 		// finally mint the pool token
-		T::Fungibles::mint_into(self.id.into(), &who, points_issued)?;
+		T::Fungibles::mint_into(self.id.into(), who, points_issued)?;
 
 		Ok(points_issued)
 	}
@@ -2028,7 +2020,7 @@ pub mod pallet {
 			UnbondingMembers::<T>::try_mutate(
 				member_account.clone(),
 				|member| -> DispatchResult {
-					let mut member = member.get_or_insert_with(Default::default);
+					let member = member.get_or_insert_with(Default::default);
 					member
 						.unbonding_eras
 						.try_insert(unbond_era, points_unbonded)
