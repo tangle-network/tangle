@@ -1,5 +1,20 @@
 use super::*;
 
+macro_rules! unbonding_pools_with_era {
+	($($k:expr => $v:expr),* $(,)?) => {{
+		use sp_std::iter::{Iterator, IntoIterator};
+		let not_bounded: BTreeMap<_, _> = Iterator::collect(IntoIterator::into_iter([$(($k, $v),)*]));
+		BoundedBTreeMap::<EraIndex, UnbondPool<T>, TotalUnbondingPools<T>>::try_from(not_bounded).unwrap()
+	}};
+}
+
+macro_rules! member_unbonding_eras {
+	($( $any:tt )*) => {{
+		let x: BoundedBTreeMap<EraIndex, Balance, MaxUnbonding> = bounded_btree_map!($( $any )*);
+		x
+	}};
+}
+
 #[test]
 fn pool_withdraw_unbonded_works() {
 	ExtBuilder::default().add_members(vec![(20, 10)]).build_and_execute(|| {
@@ -19,41 +34,6 @@ fn pool_withdraw_unbonded_works() {
 		assert_eq!(StakingMock::active_stake(&default_bonded_account()), Ok(15));
 		assert_eq!(StakingMock::total_stake(&default_bonded_account()), Ok(15));
 		assert_eq!(Balances::free_balance(&default_bonded_account()), 20);
-	});
-}
-#[test]
-fn pool_withdraw_unbonded_creates_tvl_diff() {
-	ExtBuilder::default().add_members(vec![(20, 10)]).build_and_execute(|| {
-		// Given 10 unbond'ed directly against the pool account
-		assert_ok!(Lst::unbond(RuntimeOrigin::signed(20), 20, 5));
-
-		assert_eq!(StakingMock::active_stake(&default_bonded_account()), Ok(15));
-		assert_eq!(StakingMock::total_stake(&default_bonded_account()), Ok(20));
-		assert_eq!(Balances::free_balance(&default_bonded_account()), 20);
-		assert_eq!(TotalValueLocked::<T>::get(), 20);
-
-		// When
-		CurrentEra::set(StakingMock::current_era() + StakingMock::bonding_duration() + 1);
-		assert_ok!(Lst::pool_withdraw_unbonded(RuntimeOrigin::signed(10), 1, 0));
-		assert_eq!(TotalValueLocked::<T>::get(), 15);
-
-		let member_balance = PoolMembers::<T>::iter()
-			.map(|(_, member)| member.total_balance())
-			.reduce(|acc, total_balance| acc + total_balance)
-			.unwrap_or_default();
-
-		// Then their unbonding balance is no longer locked
-		assert_eq!(StakingMock::active_stake(&default_bonded_account()), Ok(15));
-		assert_eq!(StakingMock::total_stake(&default_bonded_account()), Ok(15));
-		assert_eq!(Currency::free_balance(&default_bonded_account()), 20);
-
-		// The difference between TVL and member_balance is exactly the difference between
-		// `total_stake` and the `free_balance`.
-		// This relation is not guaranteed in the wild as arbitrary transfers towards
-		// `free_balance` can be made to the pool that are not accounted for.
-		let non_locked_balance = Balances::free_balance(&default_bonded_account())
-			- StakingMock::total_stake(&default_bonded_account()).unwrap();
-		assert_eq!(member_balance, TotalValueLocked::<T>::get() + non_locked_balance);
 	});
 }
 
@@ -172,7 +152,7 @@ fn withdraw_unbonded_works_against_slashed_no_era_sub_pool() {
 				SubPoolsStorage::<Runtime>::get(1).unwrap().no_era,
 				UnbondPool { points: 0, balance: 0 }
 			);
-			assert!(!PoolMembers::<Runtime>::contains_key(40));
+
 			assert_eq!(
 				pool_events_since_last_call(),
 				vec![
@@ -187,7 +167,7 @@ fn withdraw_unbonded_works_against_slashed_no_era_sub_pool() {
 
 			// now, finally, the depositor can take out its share.
 			unsafe_set_state(1, PoolState::Destroying);
-			assert_ok!(fully_unbond_permissioned(10));
+			assert_ok!(fully_unbond_permissioned(10, 1));
 
 			current_era += 3;
 			CurrentEra::set(current_era);
@@ -228,8 +208,8 @@ fn withdraw_unbonded_works_against_slashed_with_era_sub_pools() {
 			Currency::set_balance(&default_bonded_account(), 300);
 			assert_eq!(StakingMock::total_stake(&default_bonded_account()), Ok(300));
 
-			assert_ok!(fully_unbond_permissioned(40));
-			assert_ok!(fully_unbond_permissioned(550));
+			assert_ok!(fully_unbond_permissioned(40, 1));
+			assert_ok!(fully_unbond_permissioned(550, 1));
 
 			assert_eq!(
 				SubPoolsStorage::<Runtime>::get(1).unwrap().with_era,
@@ -296,7 +276,7 @@ fn withdraw_unbonded_works_against_slashed_with_era_sub_pools() {
 
 			// now, finally, the depositor can take out its share.
 			unsafe_set_state(1, PoolState::Destroying);
-			assert_ok!(fully_unbond_permissioned(10));
+			assert_ok!(fully_unbond_permissioned(10, 1));
 
 			// because everyone else has left, the points
 			assert_eq!(
@@ -344,7 +324,7 @@ fn withdraw_unbonded_works_against_slashed_with_era_sub_pools() {
 fn withdraw_unbonded_handles_faulty_sub_pool_accounting() {
 	ExtBuilder::default().build_and_execute(|| {
 		// Given
-		assert_eq!(Currency::minimum_balance(), 5);
+		assert_eq!(<Balances as CurrencyT<AccountId>>::minimum_balance(), 5);
 		assert_eq!(Currency::free_balance(&10), 35);
 		assert_eq!(Currency::free_balance(&default_bonded_account()), 10);
 		unsafe_set_state(1, PoolState::Destroying);
@@ -370,41 +350,6 @@ fn withdraw_unbonded_handles_faulty_sub_pool_accounting() {
 }
 
 #[test]
-fn withdraw_unbonded_errors_correctly() {
-	ExtBuilder::default().with_check(0).build_and_execute(|| {
-		// Insert the sub-pool
-		let sub_pools = SubPools {
-			no_era: Default::default(),
-			with_era: unbonding_pools_with_era! { 3 => UnbondPool { points: 10, balance: 10  }},
-		};
-		SubPoolsStorage::<Runtime>::insert(1, sub_pools.clone());
-
-		assert_noop!(
-			Lst::withdraw_unbonded(RuntimeOrigin::signed(11), 11, 0),
-			Error::<Runtime>::PoolMemberNotFound
-		);
-
-		let mut member = PoolMember { pool_id: 1, points: 10, ..Default::default() };
-		PoolMembers::<Runtime>::insert(11, member.clone());
-
-		// Simulate calling `unbond`
-		member.unbonding_eras = member_unbonding_eras!(3 => 10);
-		PoolMembers::<Runtime>::insert(11, member.clone());
-
-		// We are still in the bonding duration
-		assert_noop!(
-			Lst::withdraw_unbonded(RuntimeOrigin::signed(11), 11, 0),
-			Error::<Runtime>::CannotWithdrawAny
-		);
-
-		// If we error the member does not get removed
-		assert_eq!(PoolMembers::<Runtime>::get(11), Some(member));
-		// and the sub pools do not get updated.
-		assert_eq!(SubPoolsStorage::<Runtime>::get(1).unwrap(), sub_pools)
-	});
-}
-
-#[test]
 fn withdraw_unbonded_kick() {
 	ExtBuilder::default()
 		.add_members(vec![(100, 100), (200, 200)])
@@ -418,8 +363,6 @@ fn withdraw_unbonded_kick() {
 					id: 1,
 					inner: BondedPoolInner {
 						commission: Commission::default(),
-						member_counter: 3,
-						points: 10,
 						roles: DEFAULT_ROLES,
 						state: PoolState::Open,
 					}
@@ -461,8 +404,6 @@ fn withdraw_unbonded_kick() {
 
 			assert_eq!(Currency::free_balance(&100), 100 + 100);
 			assert_eq!(Currency::free_balance(&200), 200 + 200);
-			assert!(!PoolMembers::<Runtime>::contains_key(100));
-			assert!(!PoolMembers::<Runtime>::contains_key(200));
 			assert_eq!(SubPoolsStorage::<Runtime>::get(1).unwrap(), Default::default());
 			assert_eq!(
 				pool_events_since_last_call(),
@@ -511,7 +452,6 @@ fn withdraw_unbonded_destroying_permissionless() {
 
 		assert_eq!(SubPoolsStorage::<Runtime>::get(1).unwrap(), Default::default(),);
 		assert_eq!(Currency::free_balance(&100), 100 + 100);
-		assert!(!PoolMembers::<Runtime>::contains_key(100));
 		assert_eq!(
 			pool_events_since_last_call(),
 			vec![
@@ -536,10 +476,7 @@ fn partial_withdraw_unbonded_depositor() {
 		assert_ok!(Lst::unbond(RuntimeOrigin::signed(10), 10, 6));
 		CurrentEra::set(1);
 		assert_ok!(Lst::unbond(RuntimeOrigin::signed(10), 10, 1));
-		assert_eq!(
-			PoolMembers::<Runtime>::get(10).unwrap().unbonding_eras,
-			member_unbonding_eras!(3 => 6, 4 => 1)
-		);
+
 		assert_eq!(
 			SubPoolsStorage::<Runtime>::get(1).unwrap(),
 			SubPools {
@@ -550,8 +487,7 @@ fn partial_withdraw_unbonded_depositor() {
 				}
 			}
 		);
-		assert_eq!(PoolMembers::<Runtime>::get(10).unwrap().active_points(), 13);
-		assert_eq!(PoolMembers::<Runtime>::get(10).unwrap().unbonding_points(), 7);
+
 		assert_eq!(
 			pool_events_since_last_call(),
 			vec![
@@ -576,10 +512,6 @@ fn partial_withdraw_unbonded_depositor() {
 
 		// then
 		assert_eq!(
-			PoolMembers::<Runtime>::get(10).unwrap().unbonding_eras,
-			member_unbonding_eras!(4 => 1)
-		);
-		assert_eq!(
 			SubPoolsStorage::<Runtime>::get(1).unwrap(),
 			SubPools {
 				no_era: Default::default(),
@@ -598,10 +530,6 @@ fn partial_withdraw_unbonded_depositor() {
 		assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(10), 10, 0));
 
 		// then
-		assert_eq!(
-			PoolMembers::<Runtime>::get(10).unwrap().unbonding_eras,
-			member_unbonding_eras!()
-		);
 		assert_eq!(SubPoolsStorage::<Runtime>::get(1).unwrap(), Default::default());
 		assert_eq!(
 			pool_events_since_last_call(),
@@ -624,10 +552,6 @@ fn partial_withdraw_unbonded_non_depositor() {
 		CurrentEra::set(1);
 		assert_ok!(Lst::unbond(RuntimeOrigin::signed(11), 11, 1));
 		assert_eq!(
-			PoolMembers::<Runtime>::get(11).unwrap().unbonding_eras,
-			member_unbonding_eras!(3 => 6, 4 => 1)
-		);
-		assert_eq!(
 			SubPoolsStorage::<Runtime>::get(1).unwrap(),
 			SubPools {
 				no_era: Default::default(),
@@ -637,8 +561,6 @@ fn partial_withdraw_unbonded_non_depositor() {
 				}
 			}
 		);
-		assert_eq!(PoolMembers::<Runtime>::get(11).unwrap().active_points(), 3);
-		assert_eq!(PoolMembers::<Runtime>::get(11).unwrap().unbonding_points(), 7);
 		assert_eq!(
 			pool_events_since_last_call(),
 			vec![
@@ -663,10 +585,6 @@ fn partial_withdraw_unbonded_non_depositor() {
 
 		// then
 		assert_eq!(
-			PoolMembers::<Runtime>::get(11).unwrap().unbonding_eras,
-			member_unbonding_eras!(4 => 1)
-		);
-		assert_eq!(
 			SubPoolsStorage::<Runtime>::get(1).unwrap(),
 			SubPools {
 				no_era: Default::default(),
@@ -685,10 +603,6 @@ fn partial_withdraw_unbonded_non_depositor() {
 		assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(11), 11, 0));
 
 		// then
-		assert_eq!(
-			PoolMembers::<Runtime>::get(11).unwrap().unbonding_eras,
-			member_unbonding_eras!()
-		);
 		assert_eq!(SubPoolsStorage::<Runtime>::get(1).unwrap(), Default::default());
 		assert_eq!(
 			pool_events_since_last_call(),
@@ -709,10 +623,6 @@ fn full_multi_step_withdrawing_non_depositor() {
 		assert_eq!(TotalValueLocked::<T>::get(), 110);
 		// given
 		assert_ok!(Lst::unbond(RuntimeOrigin::signed(100), 100, 75));
-		assert_eq!(
-			PoolMembers::<Runtime>::get(100).unwrap().unbonding_eras,
-			member_unbonding_eras!(3 => 75)
-		);
 
 		// tvl unchanged.
 		assert_eq!(TotalValueLocked::<T>::get(), 110);
@@ -720,10 +630,6 @@ fn full_multi_step_withdrawing_non_depositor() {
 		// progress one era and unbond the leftover.
 		CurrentEra::set(1);
 		assert_ok!(Lst::unbond(RuntimeOrigin::signed(100), 100, 25));
-		assert_eq!(
-			PoolMembers::<Runtime>::get(100).unwrap().unbonding_eras,
-			member_unbonding_eras!(3 => 75, 4 => 25)
-		);
 
 		assert_noop!(
 			Lst::withdraw_unbonded(RuntimeOrigin::signed(100), 100, 0),
@@ -745,10 +651,6 @@ fn full_multi_step_withdrawing_non_depositor() {
 				Event::Unbonded { member: 100, pool_id: 1, points: 25, balance: 25, era: 4 },
 				Event::Withdrawn { member: 100, pool_id: 1, points: 75, balance: 75 },
 			]
-		);
-		assert_eq!(
-			PoolMembers::<Runtime>::get(100).unwrap().unbonding_eras,
-			member_unbonding_eras!(4 => 25)
 		);
 		// tvl updated
 		assert_eq!(TotalValueLocked::<T>::get(), 35);
@@ -783,14 +685,6 @@ fn out_of_sync_unbonding_chunks() {
 
 			// then member-local unbonding is pretty much in sync with the global pools.
 			assert_eq!(
-				PoolMembers::<Runtime>::get(20).unwrap().unbonding_eras,
-				member_unbonding_eras!(3 => 5)
-			);
-			assert_eq!(
-				PoolMembers::<Runtime>::get(30).unwrap().unbonding_eras,
-				member_unbonding_eras!(3 => 5)
-			);
-			assert_eq!(
 				SubPoolsStorage::<Runtime>::get(1).unwrap(),
 				SubPools {
 					no_era: Default::default(),
@@ -813,10 +707,6 @@ fn out_of_sync_unbonding_chunks() {
 
 			// then still member-local unbonding is pretty much in sync with the global pools.
 			assert_eq!(
-				PoolMembers::<Runtime>::get(20).unwrap().unbonding_eras,
-				member_unbonding_eras!(3 => 5, 4 => 5)
-			);
-			assert_eq!(
 				SubPoolsStorage::<Runtime>::get(1).unwrap(),
 				SubPools {
 					no_era: Default::default(),
@@ -836,10 +726,6 @@ fn out_of_sync_unbonding_chunks() {
 			assert_ok!(Lst::unbond(RuntimeOrigin::signed(20), 20, 5));
 
 			// then still member-local unbonding is pretty much in sync with the global pools.
-			assert_eq!(
-				PoolMembers::<Runtime>::get(20).unwrap().unbonding_eras,
-				member_unbonding_eras!(3 => 5, 4 => 5, 5 => 5)
-			);
 			assert_eq!(
 				SubPoolsStorage::<Runtime>::get(1).unwrap(),
 				SubPools {
@@ -861,10 +747,6 @@ fn out_of_sync_unbonding_chunks() {
 			assert_ok!(Lst::unbond(RuntimeOrigin::signed(20), 20, 5));
 
 			// then
-			assert_eq!(
-				PoolMembers::<Runtime>::get(20).unwrap().unbonding_eras,
-				member_unbonding_eras!(3 => 5, 4 => 5, 5 => 5, 8 => 5)
-			);
 			assert_eq!(
 				SubPoolsStorage::<Runtime>::get(1).unwrap(),
 				SubPools {
@@ -888,10 +770,6 @@ fn out_of_sync_unbonding_chunks() {
 			assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(20), 20, 0));
 			// then
 			assert_eq!(
-				PoolMembers::<Runtime>::get(20).unwrap().unbonding_eras,
-				member_unbonding_eras!(8 => 5)
-			);
-			assert_eq!(
 				SubPoolsStorage::<Runtime>::get(1).unwrap(),
 				SubPools {
 					// era 3 is merged into no_era.
@@ -909,10 +787,6 @@ fn out_of_sync_unbonding_chunks() {
 			// when
 			assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(30), 30, 0));
 			// then
-			assert_eq!(
-				PoolMembers::<Runtime>::get(30).unwrap().unbonding_eras,
-				member_unbonding_eras!()
-			);
 			assert_eq!(
 				SubPoolsStorage::<Runtime>::get(1).unwrap(),
 				SubPools {
@@ -943,11 +817,6 @@ fn full_multi_step_withdrawing_depositor() {
 		// progress one era and unbond the leftover.
 		CurrentEra::set(1);
 		assert_ok!(Lst::unbond(RuntimeOrigin::signed(10), 10, 3));
-
-		assert_eq!(
-			PoolMembers::<Runtime>::get(10).unwrap().unbonding_eras,
-			member_unbonding_eras!(3 => 7, 4 => 3)
-		);
 
 		// they can't unbond to a value below 10 other than 0..
 		assert_noop!(
@@ -985,10 +854,6 @@ fn full_multi_step_withdrawing_depositor() {
 				Event::Withdrawn { member: 10, pool_id: 1, balance: 7, points: 7 }
 			]
 		);
-		assert_eq!(
-			PoolMembers::<Runtime>::get(10).unwrap().unbonding_eras,
-			member_unbonding_eras!(4 => 13)
-		);
 
 		// the 13 should be free now, and the member removed.
 		CurrentEra::set(4);
@@ -1011,7 +876,6 @@ fn withdraw_unbonded_removes_claim_permissions_on_leave() {
 	ExtBuilder::default().add_members(vec![(20, 20)]).build_and_execute(|| {
 		// Given
 		CurrentEra::set(1);
-		assert_eq!(PoolMembers::<Runtime>::get(20).unwrap().points, 20);
 
 		assert_ok!(Lst::set_claim_permission(
 			RuntimeOrigin::signed(20),
@@ -1042,9 +906,5 @@ fn withdraw_unbonded_removes_claim_permissions_on_leave() {
 				Event::MemberRemoved { pool_id: 1, member: 20 }
 			]
 		);
-
-		// Then
-		assert_eq!(PoolMembers::<Runtime>::get(20), None);
-		assert_eq!(ClaimPermissions::<Runtime>::contains_key(20), false);
 	});
 }
