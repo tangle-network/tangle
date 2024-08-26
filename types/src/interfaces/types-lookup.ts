@@ -4394,7 +4394,7 @@ declare module '@polkadot/types/lookup' {
   /** @name TanglePrimitivesServicesWasmGadget (417) */
   interface TanglePrimitivesServicesWasmGadget extends Struct {
     readonly runtime: TanglePrimitivesServicesWasmRuntime;
-    readonly soruces: Vec<TanglePrimitivesServicesGadgetSource>;
+    readonly sources: Vec<TanglePrimitivesServicesGadgetSource>;
   }
 
   /** @name TanglePrimitivesServicesWasmRuntime (418) */
@@ -4470,12 +4470,12 @@ declare module '@polkadot/types/lookup' {
 
   /** @name TanglePrimitivesServicesNativeGadget (445) */
   interface TanglePrimitivesServicesNativeGadget extends Struct {
-    readonly soruces: Vec<TanglePrimitivesServicesGadgetSource>;
+    readonly sources: Vec<TanglePrimitivesServicesGadgetSource>;
   }
 
   /** @name TanglePrimitivesServicesContainerGadget (446) */
   interface TanglePrimitivesServicesContainerGadget extends Struct {
-    readonly soruces: Vec<TanglePrimitivesServicesGadgetSource>;
+    readonly sources: Vec<TanglePrimitivesServicesGadgetSource>;
   }
 
   /** @name SygmaAccessSegregatorCall (448) */
