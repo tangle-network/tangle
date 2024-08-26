@@ -1,7 +1,9 @@
 use super::*;
+use frame_support::assert_err;
+use frame_support::assert_noop;
+use frame_support::assert_ok;
+use frame_support::traits::fungible::InspectFreeze;
 
-mod nominate {
-	use super::*;
 
 	#[test]
 	fn nominate_works() {
@@ -33,10 +35,7 @@ mod nominate {
 			);
 		});
 	}
-}
 
-mod set_state {
-	use super::*;
 
 	#[test]
 	fn set_state_works() {
@@ -122,10 +121,7 @@ mod set_state {
 			);
 		});
 	}
-}
 
-mod set_metadata {
-	use super::*;
 
 	#[test]
 	fn set_metadata_works() {
@@ -157,4 +153,3 @@ mod set_metadata {
 			);
 		});
 	}
-}

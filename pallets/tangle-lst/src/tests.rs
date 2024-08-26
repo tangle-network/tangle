@@ -31,7 +31,6 @@ mod sub_pools;
 mod unbond;
 mod update_roles;
 mod withdraw_unbonded;
-mod withdraw_unbonded;
 
 macro_rules! unbonding_pools_with_era {
 	($($k:expr => $v:expr),* $(,)?) => {{

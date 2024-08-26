@@ -1,4 +1,8 @@
 use super::*;
+use frame_support::assert_err;
+use frame_support::assert_noop;
+use frame_support::assert_ok;
+use frame_support::traits::fungible::InspectFreeze;
 
 #[test]
 fn slash_no_subpool_is_tracked() {
