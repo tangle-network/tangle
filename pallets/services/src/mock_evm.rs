@@ -61,7 +61,7 @@ pub type DefaultPrecompiles = (
 	PrecompileAt<AddressU64<1026>, ECRecoverPublicKey, (CallableByContract, CallableByPrecompile)>,
 );
 
-pub type WebbPrecompiles<R> = PrecompileSetBuilder<
+pub type TanglePrecompiles<R> = PrecompileSetBuilder<
 	R,
 	(PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<2095>), DefaultPrecompiles>,),
 >;
@@ -69,7 +69,7 @@ pub type WebbPrecompiles<R> = PrecompileSetBuilder<
 parameter_types! {
 	pub const MinimumPeriod: u64 = 6000 / 2;
 
-	pub PrecompilesValue: WebbPrecompiles<Runtime> = WebbPrecompiles::<_>::new();
+	pub PrecompilesValue: TanglePrecompiles<Runtime> = TanglePrecompiles::<_>::new();
 }
 
 impl pallet_timestamp::Config for Runtime {
@@ -201,7 +201,7 @@ impl pallet_evm::Config for Runtime {
 	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
-	type PrecompilesType = WebbPrecompiles<Runtime>;
+	type PrecompilesType = TanglePrecompiles<Runtime>;
 	type PrecompilesValue = PrecompilesValue;
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;

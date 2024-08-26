@@ -2,7 +2,7 @@
 pragma solidity >=0.8.3;
 
 /// @dev The MultiAssetDelegation contract's address.
-address constant MULTI_ASSET_DELEGATION = 0x0000000000000000000000000000000000000809;
+address constant MULTI_ASSET_DELEGATION = 0x0000000000000000000000000000000000000822;
 
 /// @dev The MultiAssetDelegation contract's instance.
 MultiAssetDelegation constant MULTI_ASSET_DELEGATION_CONTRACT = MultiAssetDelegation(MULTI_ASSET_DELEGATION);
@@ -10,7 +10,7 @@ MultiAssetDelegation constant MULTI_ASSET_DELEGATION_CONTRACT = MultiAssetDelega
 /// @author The Tangle Team
 /// @title Pallet MultiAssetDelegation Interface
 /// @title The interface through which solidity contracts will interact with the MultiAssetDelegation pallet
-/// @custom:address 0x0000000000000000000000000000000000000809
+/// @custom:address 0x0000000000000000000000000000000000000822
 interface MultiAssetDelegation {
     /// @dev Join as an operator with a bond amount.
     /// @param bondAmount The amount to bond as an operator.

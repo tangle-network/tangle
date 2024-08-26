@@ -26,12 +26,14 @@ pub mod frontier_evm;
 pub mod impls;
 pub mod migrations;
 pub mod precompiles;
+pub mod tangle_services;
 pub mod voter_bags;
 
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
+use frame_support::traits::AsEnsureOriginWithArg;
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
@@ -39,11 +41,13 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
+use frame_system::EnsureSigned;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use pallet_services_rpc_runtime_api::BlockNumberOf;
 use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking::StakerStatus;
 use pallet_transaction_payment::{
@@ -71,6 +75,8 @@ use sp_runtime::{
 	SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
+use tangle_primitives::services::RpcServicesWithBlueprint;
+pub use tangle_services::PalletServicesConstraints;
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -1201,6 +1207,66 @@ impl pallet_proxy::Config for Runtime {
 	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
+parameter_types! {
+	pub const AssetDeposit: Balance = 10 * UNIT;
+	pub const AssetAccountDeposit: Balance = DOLLAR;
+	pub const ApprovalDeposit: Balance = ExistentialDeposit::get();
+	pub const AssetsStringLimit: u32 = 50;
+	pub const MetadataDepositBase: Balance = deposit(1, 68);
+	pub const MetadataDepositPerByte: Balance = deposit(0, 1);
+}
+
+pub type AssetId = u128;
+
+impl pallet_assets::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = Balance;
+	type AssetId = AssetId;
+	type AssetIdParameter = parity_scale_codec::Compact<u128>;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type AssetDeposit = AssetDeposit;
+	type AssetAccountDeposit = AssetAccountDeposit;
+	type MetadataDepositBase = MetadataDepositBase;
+	type MetadataDepositPerByte = MetadataDepositPerByte;
+	type ApprovalDeposit = ApprovalDeposit;
+	type StringLimit = AssetsStringLimit;
+	type RemoveItemsLimit = ConstU32<1000>;
+	type Freezer = ();
+	type Extra = ();
+	type CallbackHandle = ();
+	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkHelper = ();
+}
+
+parameter_types! {
+	pub const MinOperatorBondAmount: Balance = 10_000;
+	pub const BondDuration: u32 = 10;
+	pub const MinDelegateAmount : Balance = 1000;
+	pub PID: PalletId = PalletId(*b"PotStake");
+}
+
+impl pallet_multi_asset_delegation::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type MinOperatorBondAmount = MinOperatorBondAmount;
+	type BondDuration = BondDuration;
+	type ServiceManager = Services;
+	type LeaveOperatorsDelay = ConstU32<10>;
+	type OperatorBondLessDelay = ConstU32<1>;
+	type LeaveDelegatorsDelay = ConstU32<1>;
+	type DelegationBondLessDelay = ConstU32<5>;
+	type MinDelegateAmount = MinDelegateAmount;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type PalletId = PID;
+	type PoolId = AssetId;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1257,7 +1323,9 @@ construct_runtime!(
 		// Jobs: pallet_jobs = 41,
 		// Dkg: pallet_dkg = 42,
 		// ZkSaaS: pallet_zksaas = 43,
-
+		Assets: pallet_assets = 44,
+		MultiAssetDelegation: pallet_multi_asset_delegation = 45,
+		Services: pallet_services = 46,
 	}
 );
 
@@ -1779,6 +1847,17 @@ impl_runtime_apis! {
 		}
 		fn query_length_to_fee(length: u32) -> Balance {
 			TransactionPayment::length_to_fee(length)
+		}
+	}
+
+	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId> for Runtime {
+		fn query_services_with_blueprints_by_operator(
+			operator: AccountId,
+		) -> Result<
+			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>>>,
+			sp_runtime::DispatchError,
+		> {
+			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
 		}
 	}
 
