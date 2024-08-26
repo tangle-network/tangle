@@ -21,9 +21,6 @@ scale-info = { workspace = true }
 serde = { workspace = true }
 static_assertions = { workspace = true }
 
-# Webb Substrate Dependencies
-pallet-airdrop-claims = { workspace = true }
-
 # Substrate dependencies
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
@@ -70,7 +67,7 @@ pallet-scheduler = { workspace = true }
 pallet-staking = { workspace = true }
 pallet-staking-reward-curve = { workspace = true }
 pallet-treasury = { workspace = true }
-
+pallet-assets = { workspace = true }
 pallet-authorship = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-identity = { workspace = true }
@@ -87,12 +84,17 @@ pallet-vesting = { workspace = true }
 pallet-tangle-lst = { workspace = true }
 
 # Tangle dependencies
-tangle-primitives = { workspace = true }
+pallet-airdrop-claims = { workspace = true }
+pallet-services = { workspace = true }
+pallet-services-rpc-runtime-api = { workspace = true }
+tangle-primitives = { workspace = true, features = ["verifying"] }
 tangle-crypto-primitives = { workspace = true }
+pallet-multi-asset-delegation = { workspace = true }
 
 # Frontier dependencies
 fp-rpc = { workspace = true }
 fp-self-contained = { workspace = true }
+fp-evm = { workspace = true }
 
 # Frontier FRAME dependencies
 pallet-base-fee = { workspace = true }
@@ -109,10 +111,10 @@ pallet-evm-precompile-ed25519 = { workspace = true }
 pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
-
+pallet-evm-precompileset-assets-erc20 = { workspace = true }
 pallet-hotfix-sufficients = { workspace = true }
 
-## Moonbeam precompiles
+## Tangle precompiles
 pallet-evm-precompile-batch = { workspace = true }
 pallet-evm-precompile-call-permit = { workspace = true }
 pallet-evm-precompile-democracy = { workspace = true }
@@ -121,6 +123,11 @@ pallet-evm-precompile-proxy = { workspace = true }
 pallet-evm-precompile-registry = { workspace = true }
 pallet-evm-precompile-staking = { workspace = true }
 pallet-evm-precompile-vesting = { workspace = true }
+pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { workspace = true }
+pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { workspace = true }
+pallet-evm-precompile-verify-ecdsa-stark-signature = { workspace = true }
+pallet-evm-precompile-verify-schnorr-signatures = { workspace = true }
+pallet-evm-precompile-verify-bls381-signature = { workspace = true }
 pallet-evm-precompile-multi-asset-delegation = { workspace = true }
 precompile-utils = { workspace = true }
 
@@ -209,15 +216,19 @@ std = [
     "frame-system-benchmarking?/std",
     "sp-storage/std",
     "pallet-tangle-lst/std",
+    "pallet-assets/std",
 
-    # Tangle dependencies
+     # Tangle dependencies
     "tangle-primitives/std",
     "tangle-crypto-primitives/std",
-
+    "pallet-services/std",
+    "pallet-multi-asset-delegation/std",
+    "pallet-services-rpc-runtime-api/std",
 
     # Frontier
     "fp-rpc/std",
     "fp-self-contained/std",
+    "fp-evm/std",
 
     # Frontier FRAME
     "pallet-base-fee/std",
@@ -239,6 +250,7 @@ std = [
     "evm-tracer/std",
     "rpc-primitives-debug/std",
     "rpc-primitives-txpool/std",
+    "pallet-evm-precompileset-assets-erc20/std",
 
     # Tangle precompiles
     "pallet-evm-precompile-preimage/std",
@@ -250,6 +262,11 @@ std = [
     "pallet-evm-precompile-staking/std",
     "pallet-evm-precompile-vesting/std",
     "pallet-evm-precompile-multi-asset-delegation/std",
+    "pallet-evm-precompile-verify-ecdsa-secp256k1-signature/std",
+    "pallet-evm-precompile-verify-ecdsa-secp256r1-signature/std",
+    "pallet-evm-precompile-verify-ecdsa-stark-signature/std",
+    "pallet-evm-precompile-verify-schnorr-signatures/std",
+    "pallet-evm-precompile-verify-bls381-signature/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []

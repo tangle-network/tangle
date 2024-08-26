@@ -14559,6 +14559,7 @@ name = "tangle-runtime"
 version = "2.0.0"
 dependencies = [
  "evm-tracer",
+ "fp-evm",
  "fp-rpc",
  "fp-self-contained",
  "frame-benchmarking",
@@ -14572,6 +14573,7 @@ dependencies = [
  "log",
  "num_enum 0.5.11",
  "pallet-airdrop-claims",
+ "pallet-assets",
  "pallet-authorship",
  "pallet-babe",
  "pallet-bags-list",
@@ -14604,19 +14606,28 @@ dependencies = [
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-evm-precompile-staking",
+ "pallet-evm-precompile-verify-bls381-signature",
+ "pallet-evm-precompile-verify-ecdsa-secp256k1-signature",
+ "pallet-evm-precompile-verify-ecdsa-secp256r1-signature",
+ "pallet-evm-precompile-verify-ecdsa-stark-signature",
+ "pallet-evm-precompile-verify-schnorr-signatures",
  "pallet-evm-precompile-vesting",
+ "pallet-evm-precompileset-assets-erc20",
  "pallet-grandpa",
  "pallet-hotfix-sufficients",
  "pallet-identity",
  "pallet-im-online",
  "pallet-indices",
  "pallet-insecure-randomness-collective-flip",
+ "pallet-multi-asset-delegation",
  "pallet-multisig",
  "pallet-nomination-pools",
  "pallet-offences",
  "pallet-preimage",
  "pallet-proxy",
  "pallet-scheduler",
+ "pallet-services",
+ "pallet-services-rpc-runtime-api",
  "pallet-session",
  "pallet-staking 28.0.0",
  "pallet-staking-reward-curve",
@@ -14656,7 +14667,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "parity-scale-codec 3.6.12",
  "scale-info",

@@ -118,7 +118,6 @@ pallet-evm-precompile-ed25519 = { workspace = true }
 pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
-
 pallet-hotfix-sufficients = { workspace = true }
 
 ## Tangle precompiles

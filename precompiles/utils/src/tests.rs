@@ -918,3 +918,10 @@ fn evm_data_solidity_types() {
 	// Struct encode like tuples
 	assert_eq!(MultiLocation::signature(), "(uint8,bytes[])");
 }
+
+// #[test]
+// fn calculate_precompile_address() {
+// 	use crate::precompile_set::AddressU64;
+// 	let address = H160::from_low_u64_be(2082);
+// 	println!("Address {:?}", address);
+// }
