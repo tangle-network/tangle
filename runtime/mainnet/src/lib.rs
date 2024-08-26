@@ -1201,6 +1201,33 @@ impl pallet_proxy::Config for Runtime {
 	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
+parameter_types! {
+	pub static PostUnbondingPoolsWindow: u32 = 2;
+	pub static MaxMetadataLen: u32 = 2;
+	pub static CheckLevel: u8 = 255;
+	pub const PoolsPalletId: PalletId = PalletId(*b"py/nopls");
+}
+
+impl pallet_lst::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = ();
+	type Currency = Balances;
+	type RuntimeFreezeReason = RuntimeFreezeReason;
+	type RewardCounter = RewardCounter;
+	type BalanceToU256 = BalanceToU256;
+	type U256ToBalance = U256ToBalance;
+	type Staking = StakingMock;
+	type PostUnbondingPoolsWindow = PostUnbondingPoolsWindow;
+	type PalletId = PoolsPalletId;
+	type MaxMetadataLen = MaxMetadataLen;
+	type MaxUnbonding = MaxUnbonding;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type PoolId = PoolId;
+	type ForceOrigin = frame_system::EnsureRoot<u128>;
+	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1252,6 +1279,7 @@ construct_runtime!(
 		HotfixSufficients: pallet_hotfix_sufficients = 38,
 
 		Claims: pallet_airdrop_claims = 39,
+		Lst: pallet_tangle_lst = 40,
 		// DO NOT USE below indexes
 		// Roles: pallet_roles = 40,
 		// Jobs: pallet_jobs = 41,

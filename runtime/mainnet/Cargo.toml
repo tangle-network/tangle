@@ -84,6 +84,7 @@ pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
+pallet-tangle-lst = { workspace = true }
 
 # Tangle dependencies
 tangle-primitives = { workspace = true }
@@ -207,6 +208,7 @@ std = [
     "pallet-identity/std",
     "frame-system-benchmarking?/std",
     "sp-storage/std",
+    "pallet-tangle-lst/std",
 
     # Tangle dependencies
     "tangle-primitives/std",
