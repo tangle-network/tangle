@@ -16,7 +16,7 @@
 // limitations under the License.
 
 use crate::{
-	precompiles::{PrecompileName, WebbPrecompiles, ASSET_PRECOMPILE_ADDRESS_PREFIX},
+	precompiles::{PrecompileName, TanglePrecompiles, ASSET_PRECOMPILE_ADDRESS_PREFIX},
 	*,
 };
 use frame_support::{pallet_prelude::*, parameter_types, traits::FindAuthor, weights::Weight};
@@ -77,7 +77,7 @@ parameter_types! {
 	);
 	pub const GasLimitPovSizeRatio: u64 = GAS_LIMIT_POV_SIZE_RATIO;
 	pub WeightPerGas: Weight = Weight::from_parts(WEIGHT_PER_GAS, 0);
-	pub PrecompilesValue: WebbPrecompiles<Runtime> = WebbPrecompiles::<_>::new();
+	pub PrecompilesValue: TanglePrecompiles<Runtime> = TanglePrecompiles::<_>::new();
 }
 
 /// Type alias for negative imbalance during fees
@@ -139,7 +139,7 @@ impl pallet_evm::Config for Runtime {
 	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
-	type PrecompilesType = WebbPrecompiles<Runtime>;
+	type PrecompilesType = TanglePrecompiles<Runtime>;
 	type PrecompilesValue = PrecompilesValue;
 	type ChainId = EVMChainId;
 	type BlockGasLimit = BlockGasLimit;
