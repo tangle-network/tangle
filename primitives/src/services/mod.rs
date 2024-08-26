@@ -582,6 +582,23 @@ pub struct GithubFetcher<C: Constraints> {
 	pub binaries: BoundedVec<GadgetBinary<C>, C::MaxBinariesPerGadget>,
 }
 
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct TestFetcher<C: Constraints> {
+    /// The cargo package name that contains the blueprint logic
+    pub cargo_package: BoundedString<C::MaxBinaryNameLength>,
+    /// The specific binary name that contains the blueprint logic.
+    /// Should match up what is in the Cargo.toml file under [[bin]]/name
+    pub cargo_bin: BoundedString<C::MaxBinaryNameLength>,
+    /// The base path to the workspace/crate
+    pub base_path: BoundedString<C::MaxMetadataLength>,
+}
+
 /// The CPU or System architecture.
 #[derive(
 	PartialEq,
@@ -717,6 +734,9 @@ pub enum GadgetSourceFetcher<C: Constraints> {
 	/// A Gadgets that will be fetched from the container registry.
 	#[codec(index = 2)]
 	ContainerImage(ImageRegistryFetcher<C>),
+    /// For tests only
+    #[codec(index = 3)]
+    Testing(TestFetcher<C>)
 }
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]

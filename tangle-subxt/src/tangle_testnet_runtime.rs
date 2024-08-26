@@ -57520,6 +57520,8 @@ pub mod api {
 					ContainerImage(
 						runtime_types::tangle_primitives::services::ImageRegistryFetcher,
 					),
+                    #[codec(index = 3)]
+                    Testing(runtime_types::tangle_primitives::services::TestFetcher),
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -57548,6 +57550,30 @@ pub mod api {
 						runtime_types::tangle_primitives::services::GadgetBinary,
 					>,
 				}
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    serde :: Deserialize,
+                    serde :: Serialize,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct TestFetcher {
+                    pub cargo_package: runtime_types::tangle_primitives::services::field::BoundedString,
+                    pub cargo_bin: runtime_types::tangle_primitives::services::field::BoundedString,
+                    pub base_path: runtime_types::tangle_primitives::services::field::BoundedString,
+                }
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
