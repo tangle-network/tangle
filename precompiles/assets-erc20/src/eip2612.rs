@@ -1,8 +1,9 @@
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 //
-// This file is part of pallet-evm-precompileset-assets-erc20 package, originally developed by Purestake
-// Inc. pallet-evm-precompileset-assets-erc20 package used in Tangle Network in terms of GPLv3.
+// This file is part of pallet-evm-precompileset-assets-erc20 package, originally developed by
+// Purestake Inc. pallet-evm-precompileset-assets-erc20 package used in Tangle Network in terms of
+// GPLv3.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

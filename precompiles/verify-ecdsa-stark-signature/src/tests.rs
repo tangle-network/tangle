@@ -15,9 +15,11 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::mock::*;
-use generic_ec::coords::{Coordinate, HasAffineXAndParity, Parity};
-use generic_ec::curves::Stark;
-use generic_ec::Point;
+use generic_ec::{
+	coords::{Coordinate, HasAffineXAndParity, Parity},
+	curves::Stark,
+	Point,
+};
 use hex_literal::hex;
 use precompile_utils::testing::*;
 use sp_core::H160;

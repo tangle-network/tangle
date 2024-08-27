@@ -15,11 +15,13 @@
 
 #![allow(clippy::type_complexity)]
 
-use crate::distributions::{
-	combine_distributions, get_unique_distribution_results,
-	mainnet::{self, DistributionResult},
+use crate::{
+	distributions::{
+		combine_distributions, get_unique_distribution_results,
+		mainnet::{self, DistributionResult},
+	},
+	testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key},
 };
-use crate::testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key};
 use hex_literal::hex;
 use pallet_airdrop_claims::MultiAddress;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -27,9 +29,8 @@ use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{ed25519, sr25519, Pair, Public, H160, U256};
-use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::{
-	traits::{IdentifyAccount, Verify},
+	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
 };
 use std::{collections::BTreeMap, str::FromStr};

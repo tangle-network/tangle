@@ -104,7 +104,8 @@ pub enum Field<C: Constraints, AccountId> {
 	List(BoundedVec<Field<C, AccountId>, C::MaxFieldsSize>),
 	/// Represents a named struct
 	///
-	/// The struct is represented as a list of fields, where each field is a tuple of a name and a value.
+	/// The struct is represented as a list of fields, where each field is a tuple of a name and a
+	/// value.
 	#[allow(clippy::type_complexity)]
 	#[codec(index = 14)]
 	Struct(
@@ -407,7 +408,8 @@ impl<C: Constraints, AccountId: Clone + Encode> From<Field<C, AccountId>> for et
 
 impl<C: Constraints, AccountId: Clone + Encode> Field<C, AccountId> {
 	/// Convrts the field to a `ethabi::Token`.
-	/// This is useful for converting the field to a type that can be used in an Ethereum transaction.
+	/// This is useful for converting the field to a type that can be used in an Ethereum
+	/// transaction.
 	pub fn into_ethabi_token(self) -> ethabi::Token {
 		self.into()
 	}

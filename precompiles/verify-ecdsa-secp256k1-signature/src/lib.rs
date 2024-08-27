@@ -17,12 +17,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use fp_evm::PrecompileHandle;
-use k256::ecdsa::signature::hazmat::PrehashVerifier;
-use k256::elliptic_curve::group::GroupEncoding;
+use k256::{ecdsa::signature::hazmat::PrehashVerifier, elliptic_curve::group::GroupEncoding};
 use precompile_utils::prelude::*;
 use sp_core::ConstU32;
-use sp_std::marker::PhantomData;
-use sp_std::prelude::*;
+use sp_std::{marker::PhantomData, prelude::*};
 
 #[cfg(test)]
 mod mock;

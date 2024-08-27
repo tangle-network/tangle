@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::types::*;
-use crate::Pallet;
-use frame_support::ensure;
-use frame_support::pallet_prelude::DispatchResult;
-use frame_support::traits::Get;
+use crate::{types::*, Pallet};
+use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
 use sp_runtime::traits::Zero;
 use sp_std::vec::Vec;
 
@@ -193,7 +190,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator has no unstake requests or if none of the unstake requests are ready.
+	/// Returns an error if the delegator has no unstake requests or if none of the unstake requests
+	/// are ready.
 	pub fn process_execute_delegator_unstake(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -238,7 +236,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator has no matching unstake request or if there is no active delegation.
+	/// Returns an error if the delegator has no matching unstake request or if there is no active
+	/// delegation.
 	pub fn process_cancel_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
@@ -266,7 +265,8 @@ impl<T: Config> Pallet<T> {
 					let operator_metadata =
 						maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
 
-					// Find the matching delegation and increase its amount, or insert a new delegation if not found
+					// Find the matching delegation and increase its amount, or insert a new
+					// delegation if not found
 					if let Some(delegation) = operator_metadata
 						.delegations
 						.iter_mut()

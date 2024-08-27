@@ -33,11 +33,10 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
-use frame_support::traits::AsEnsureOriginWithArg;
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
-		Contains, OnFinalize, WithdrawReasons,
+		AsEnsureOriginWithArg, Contains, OnFinalize, WithdrawReasons,
 	},
 	weights::ConstantMultiplier,
 };
@@ -54,8 +53,7 @@ use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use pallet_tx_pause::RuntimeCallNameOf;
-use parity_scale_codec::MaxEncodedLen;
-use parity_scale_codec::{Decode, Encode};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
