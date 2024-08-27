@@ -73,11 +73,6 @@ fn create_works() {
 #[test]
 fn create_errors_correctly() {
 	ExtBuilder::default().with_check(0).build_and_execute(|| {
-		assert_noop!(
-			Lst::create(RuntimeOrigin::signed(10), 420, 123, 456, 789),
-			Error::<Runtime>::AccountBelongsToOtherPool
-		);
-
 		// Given
 		assert_eq!(MinCreateBond::<Runtime>::get(), 2);
 		assert_eq!(StakingMock::minimum_nominator_bond(), 10);

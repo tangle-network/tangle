@@ -1751,9 +1751,6 @@ pub mod pallet {
 		RewardPoolNotFound,
 		/// A sub pool does not exist.
 		SubPoolsNotFound,
-		/// An account is already delegating in another pool. An account may only belong to one
-		/// pool at a time.
-		AccountBelongsToOtherPool,
 		/// The member is fully unbonded (and thus cannot access the bonded and reward pool
 		/// anymore to, for example, collect rewards).
 		FullyUnbonding,
