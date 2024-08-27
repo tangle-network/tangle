@@ -6,6 +6,7 @@ use frame_support::traits::AsEnsureOriginWithArg;
 use frame_support::{assert_ok, derive_impl, parameter_types, traits::fungible::Mutate, PalletId};
 use frame_system::RawOrigin;
 use sp_runtime::traits::ConstU128;
+use sp_runtime::Perbill;
 use sp_runtime::{BuildStorage, FixedU128};
 use sp_staking::{OnStakingUpdate, Stake};
 
@@ -395,17 +396,18 @@ impl ExtBuilder {
 		let mut ext = sp_io::TestExternalities::from(storage);
 
 		ext.execute_with(|| {
+			use frame_support::traits::Currency;
 			// for events to be deposited.
 			frame_system::Pallet::<Runtime>::set_block_number(1);
 
 			// make a pool
 			let amount_to_bond = Lst::depositor_min_bond();
-			Currency::set_balance(&10, amount_to_bond * 5);
+			<Runtime as Config>::Currency::make_free_balance_be(&10u32.into(), amount_to_bond * 5);
 			assert_ok!(Lst::create(RawOrigin::Signed(10).into(), amount_to_bond, 900, 901, 902));
 			assert_ok!(Lst::set_metadata(RuntimeOrigin::signed(900), 1, vec![1, 1]));
 			let last_pool = LastPoolId::<Runtime>::get();
 			for (account_id, bonded) in self.members {
-				<Runtime as Config>::Currency::set_balance(&account_id, bonded * 2);
+				<Runtime as Config>::Currency::make_free_balance_be(&account_id, bonded * 2);
 				assert_ok!(Lst::join(RawOrigin::Signed(account_id).into(), bonded, last_pool));
 			}
 		});

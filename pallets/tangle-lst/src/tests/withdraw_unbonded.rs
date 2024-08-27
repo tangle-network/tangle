@@ -80,7 +80,7 @@ fn withdraw_unbonded_works_against_slashed_no_era_sub_pool() {
 					.1 /= 2;
 				UnbondingBalanceMap::set(&x);
 
-				Currency::set_balance(
+				Currency::make_free_balance_be(
 					&default_bonded_account(),
 					Currency::free_balance(&default_bonded_account()) / 2, // 300
 				);
@@ -205,7 +205,7 @@ fn withdraw_unbonded_works_against_slashed_with_era_sub_pools() {
 			// Given
 			// current bond is 600, we slash it all to 300.
 			StakingMock::slash_by(1, 300);
-			Currency::set_balance(&default_bonded_account(), 300);
+			Currency::make_free_balance_be(&default_bonded_account(), 300);
 			assert_eq!(StakingMock::total_stake(&default_bonded_account()), Ok(300));
 
 			assert_ok!(fully_unbond_permissioned(40, 1));
@@ -331,7 +331,7 @@ fn withdraw_unbonded_handles_faulty_sub_pool_accounting() {
 		assert_ok!(Lst::fully_unbond(RuntimeOrigin::signed(10), 10));
 
 		// Simulate a slash that is not accounted for in the sub pools.
-		Currency::set_balance(&default_bonded_account(), 5);
+		Currency::make_free_balance_be(&default_bonded_account(), 5);
 		assert_eq!(
 			SubPoolsStorage::<Runtime>::get(1).unwrap().with_era,
 			//------------------------------balance decrease is not account for
@@ -428,8 +428,6 @@ fn withdraw_unbonded_destroying_permissionless() {
 				id: 1,
 				inner: BondedPoolInner {
 					commission: Commission::default(),
-					member_counter: 2,
-					points: 10,
 					roles: DEFAULT_ROLES,
 					state: PoolState::Open,
 				}

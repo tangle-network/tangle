@@ -8754,13 +8754,13 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
-				#[doc = "See [`Pallet::force_set_balance`]."]
+				#[doc = "See [`Pallet::force_make_free_balance_be`]."]
 				pub struct ForceSetBalance {
-					pub who: force_set_balance::Who,
+					pub who: force_make_free_balance_be::Who,
 					#[codec(compact)]
-					pub new_free: force_set_balance::NewFree,
+					pub new_free: force_make_free_balance_be::NewFree,
 				}
-				pub mod force_set_balance {
+				pub mod force_make_free_balance_be {
 					use super::runtime_types;
 					pub type Who = ::subxt::ext::subxt_core::utils::MultiAddress<
 						::subxt::ext::subxt_core::utils::AccountId32,
@@ -8770,7 +8770,7 @@ pub mod api {
 				}
 				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ForceSetBalance {
 					const PALLET: &'static str = "Balances";
-					const CALL: &'static str = "force_set_balance";
+					const CALL: &'static str = "force_make_free_balance_be";
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -8914,15 +8914,15 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "See [`Pallet::force_set_balance`]."]
-				pub fn force_set_balance(
+				#[doc = "See [`Pallet::force_make_free_balance_be`]."]
+				pub fn force_make_free_balance_be(
 					&self,
-					who: types::force_set_balance::Who,
-					new_free: types::force_set_balance::NewFree,
+					who: types::force_make_free_balance_be::Who,
+					new_free: types::force_make_free_balance_be::NewFree,
 				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceSetBalance> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"Balances",
-						"force_set_balance",
+						"force_make_free_balance_be",
 						types::ForceSetBalance { who, new_free },
 						[
 							101u8, 181u8, 86u8, 32u8, 61u8, 75u8, 34u8, 164u8, 142u8, 250u8, 7u8,
@@ -39811,8 +39811,8 @@ pub mod api {
 						>,
 					},
 					#[codec(index = 8)]
-					#[doc = "See [`Pallet::force_set_balance`]."]
-					force_set_balance {
+					#[doc = "See [`Pallet::force_make_free_balance_be`]."]
+					force_make_free_balance_be {
 						who: ::subxt::ext::subxt_core::utils::MultiAddress<
 							::subxt::ext::subxt_core::utils::AccountId32,
 							::core::primitive::u32,

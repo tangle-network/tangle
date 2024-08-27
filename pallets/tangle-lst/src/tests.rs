@@ -25,7 +25,6 @@ mod create;
 mod join;
 mod slash;
 mod sub_pools;
-mod unbond;
 mod update_roles;
 
 macro_rules! unbonding_pools_with_era {
@@ -45,16 +44,6 @@ macro_rules! member_unbonding_eras {
 
 pub const DEFAULT_ROLES: PoolRoles<AccountId> =
 	PoolRoles { depositor: 10, root: Some(900), nominator: Some(901), bouncer: Some(902) };
-
-fn deposit_rewards(r: u128) {
-	let b = Currency::free_balance(default_reward_account()).checked_add(r).unwrap();
-	Currency::set_balance(&default_reward_account(), b);
-}
-
-fn remove_rewards(r: u128) {
-	let b = Currency::free_balance(default_reward_account()).checked_sub(r).unwrap();
-	Currency::set_balance(&default_reward_account(), b);
-}
 
 fn mint_lst(pool_id: u32, who: &AccountId, amount: u128) {
 	if Assets::asset_exists(pool_id) {

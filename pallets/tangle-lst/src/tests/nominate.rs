@@ -95,7 +95,7 @@ use frame_support::traits::fungible::InspectFreeze;
 			assert_eq!(BondedPool::<Runtime>::get(1).unwrap().state, PoolState::Destroying);
 
 			// Given
-			Currency::set_balance(&default_bonded_account(), Balance::MAX / 10);
+			Currency::make_free_balance_be(&default_bonded_account(), Balance::MAX / 10);
 			unsafe_set_state(1, PoolState::Open);
 			// When
 			assert_ok!(Lst::set_state(RuntimeOrigin::signed(11), 1, PoolState::Destroying));

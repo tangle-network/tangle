@@ -11,7 +11,7 @@ fn ed_change_causes_reward_deficit() {
 		ExistentialDeposit::set(5);
 
 		// 11 joins the pool
-		Currency::set_balance(&11, 500);
+		Currency::make_free_balance_be(&11, 500);
 		assert_ok!(Lst::join(RuntimeOrigin::signed(11), 90, 1));
 
 		// new delegator does not have any pending rewards
@@ -26,7 +26,7 @@ fn ed_change_causes_reward_deficit() {
 		assert_eq!(reward_imbalance(1), Surplus(0));
 
 		// 12 joins the pool.
-		Currency::set_balance(&12, 500);
+		Currency::make_free_balance_be(&12, 500);
 		assert_ok!(Lst::join(RuntimeOrigin::signed(12), 100, 1));
 
 		// Current reward balance is committed to last recorded reward counter of
@@ -51,7 +51,7 @@ fn ed_change_causes_reward_deficit() {
 		assert_eq!(reward_imbalance(1), Deficit(45));
 
 		// 13 joins the pool which commits the reward counter to reward pool.
-		Currency::set_balance(&13, 500);
+		Currency::make_free_balance_be(&13, 500);
 		assert_ok!(Lst::join(RuntimeOrigin::signed(13), 100, 1));
 
 		// still a deficit
@@ -90,14 +90,14 @@ fn ed_adjust_fixes_reward_deficit() {
 		ExistentialDeposit::set(5);
 
 		// 11 joins the pool
-		Currency::set_balance(&11, 500);
+		Currency::make_free_balance_be(&11, 500);
 		assert_ok!(Lst::join(RuntimeOrigin::signed(11), 90, 1));
 
 		// Pool some rewards
 		deposit_rewards(100);
 
 		// 12 joins the pool.
-		Currency::set_balance(&12, 500);
+		Currency::make_free_balance_be(&12, 500);
 		assert_ok!(Lst::join(RuntimeOrigin::signed(12), 10, 1));
 
 		// When: pool ends up in reward deficit
@@ -151,7 +151,7 @@ fn ed_adjust_fixes_reward_deficit() {
 fn topping_up_does_not_work_for_pools_with_no_deficit() {
 	ExtBuilder::default().max_members_per_pool(Some(5)).build_and_execute(|| {
 		// 11 joins the pool
-		Currency::set_balance(&11, 500);
+		Currency::make_free_balance_be(&11, 500);
 		assert_ok!(Lst::join(RuntimeOrigin::signed(11), 90, 1));
 
 		// Pool some rewards

@@ -176,7 +176,7 @@ fn reward_counter_update_can_fail_if_pool_is_highly_slashed() {
 		// overflow. This test is actually a bit too lenient because all the reward counters are
 		// set to zero. In other tests that we want to assert a scenario won't fail, we should
 		// also set the reward counters to some large value.
-		Currency::set_balance(&20, pool_bond * 2);
+		Currency::make_free_balance_be(&20, pool_bond * 2);
 		assert_err!(Lst::join(RuntimeOrigin::signed(20), pool_bond, 1), Error::<T>::OverflowRisk);
 	})
 }

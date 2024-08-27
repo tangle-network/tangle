@@ -332,7 +332,7 @@ fn unbond_of_3_works() {
 			StakingMock::slash_by(1, 500);
 
 			// and unclaimed rewards of 600.
-			Currency::set_balance(&default_reward_account(), ed + 600);
+			Currency::make_free_balance_be(&default_reward_account(), ed + 600);
 
 			// When
 			assert_ok!(fully_unbond_permissioned(40, 1));

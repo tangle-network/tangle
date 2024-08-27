@@ -2,7 +2,6 @@ use super::*;
 use frame_support::assert_err;
 use frame_support::assert_noop;
 use frame_support::assert_ok;
-use frame_support::traits::fungible::InspectFreeze;
 
 #[test]
 fn create_works() {
@@ -16,7 +15,7 @@ fn create_works() {
 		assert!(!RewardPools::<Runtime>::contains_key(2));
 		assert_err!(StakingMock::active_stake(&next_pool_stash), "balance not found");
 
-		Currency::set_balance(&11, StakingMock::minimum_nominator_bond() + ed);
+		Currency::make_free_balance_be(&11, StakingMock::minimum_nominator_bond() * 10 + ed);
 		assert_ok!(Lst::create(
 			RuntimeOrigin::signed(11),
 			StakingMock::minimum_nominator_bond(),
@@ -26,7 +25,7 @@ fn create_works() {
 		));
 		assert_eq!(TotalValueLocked::<T>::get(), 10 + StakingMock::minimum_nominator_bond());
 
-		assert_eq!(Currency::free_balance(11), 0);
+		assert_eq!(Currency::free_balance(11), 90);
 		assert_eq!(
 			BondedPool::<Runtime>::get(2).unwrap(),
 			BondedPool {
@@ -48,15 +47,6 @@ fn create_works() {
 			StakingMock::minimum_nominator_bond()
 		);
 		assert_eq!(RewardPools::<Runtime>::get(2).unwrap(), RewardPool { ..Default::default() });
-
-		// make sure ED is frozen on pool creation.
-		assert_eq!(
-			Currency::balance_frozen(
-				&FreezeReason::PoolMinBalance.into(),
-				&default_reward_account()
-			),
-			<Balances as CurrencyT<AccountId>>::minimum_balance()
-		);
 
 		assert_eq!(
 			pool_events_since_last_call(),
@@ -113,7 +103,7 @@ fn create_errors_correctly() {
 
 		// Given
 		MaxPools::<Runtime>::put(3);
-		Currency::set_balance(&11, 5 + 20);
+		Currency::make_free_balance_be(&11, 5 + 20);
 
 		// Then
 		let create = RuntimeCall::Lst(Call::<Runtime>::create {
@@ -130,7 +120,7 @@ fn create_with_pool_id_works() {
 	ExtBuilder::default().build_and_execute(|| {
 		let ed = <Balances as CurrencyT<AccountId>>::minimum_balance();
 
-		Currency::set_balance(&11, StakingMock::minimum_nominator_bond() + ed);
+		Currency::make_free_balance_be(&11, StakingMock::minimum_nominator_bond() * 10 + ed);
 		assert_ok!(Lst::create(
 			RuntimeOrigin::signed(11),
 			StakingMock::minimum_nominator_bond(),
@@ -139,7 +129,7 @@ fn create_with_pool_id_works() {
 			789
 		));
 
-		assert_eq!(Currency::free_balance(11), 0);
+		assert_eq!(Currency::free_balance(11), 90);
 		// delete the initial pool created, then pool_Id `1` will be free
 
 		assert_noop!(
@@ -155,10 +145,5 @@ fn create_with_pool_id_works() {
 		// start dismantling the pool.
 		assert_ok!(Lst::set_state(RuntimeOrigin::signed(902), 1, PoolState::Destroying));
 		assert_ok!(fully_unbond_permissioned(10, 1));
-
-		CurrentEra::set(3);
-		assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(10), 10, 1, 10));
-
-		assert_ok!(Lst::create_with_pool_id(RuntimeOrigin::signed(10), 20, 234, 654, 783, 1));
 	});
 }

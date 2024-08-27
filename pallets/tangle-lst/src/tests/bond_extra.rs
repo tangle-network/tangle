@@ -6,7 +6,7 @@ use frame_support::assert_ok;
 fn bond_extra_from_free_balance_creator() {
 	ExtBuilder::default().build_and_execute(|| {
 		// 10 is the owner and a member in pool 1, give them some more funds.
-		Currency::set_balance(&10, 100);
+		Currency::make_free_balance_be(&10, 100);
 
 		// given
 		assert_eq!(Currency::free_balance(10), 100);

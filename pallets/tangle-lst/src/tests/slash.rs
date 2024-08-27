@@ -3,7 +3,7 @@ use frame_support::assert_ok;
 
 #[test]
 fn slash_no_subpool_is_tracked() {
-	let bonded = |points, member_counter| BondedPool::<Runtime> {
+	let bonded = |points| BondedPool::<Runtime> {
 		id: 1,
 		inner: BondedPoolInner {
 			commission: Commission::default(),
@@ -13,7 +13,7 @@ fn slash_no_subpool_is_tracked() {
 	};
 	ExtBuilder::default().with_check(0).build_and_execute(|| {
 		// Given
-		Currency::set_balance(&11, ExistentialDeposit::get() + 2);
+		Currency::make_free_balance_be(&11, ExistentialDeposit::get() + 2);
 		assert_eq!(TotalValueLocked::<T>::get(), 10);
 
 		// When
@@ -37,7 +37,7 @@ fn slash_no_subpool_is_tracked() {
 		StakingMock::slash_by(1, 6);
 
 		// And
-		Currency::set_balance(&12, ExistentialDeposit::get() + 12);
+		Currency::make_free_balance_be(&12, ExistentialDeposit::get() + 12);
 
 		// When
 		assert_ok!(Lst::join(RuntimeOrigin::signed(12), 12, 1));
