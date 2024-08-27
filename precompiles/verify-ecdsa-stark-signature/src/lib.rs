@@ -20,8 +20,7 @@ use fp_evm::PrecompileHandle;
 use generic_ec::{coords::HasAffineX, curves::Stark, Point, Scalar};
 use precompile_utils::prelude::*;
 use sp_core::ConstU32;
-use sp_std::marker::PhantomData;
-use sp_std::prelude::*;
+use sp_std::{marker::PhantomData, prelude::*};
 
 #[cfg(test)]
 mod mock;

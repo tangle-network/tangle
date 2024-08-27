@@ -29,17 +29,15 @@ use parity_scale_codec::alloc::collections::BTreeMap;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::H160;
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::{
 	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
 };
 use tangle_primitives::types::{BlockNumber, Signature};
-use tangle_runtime::EVMConfig;
 use tangle_runtime::{
 	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig, SessionConfig,
+	EVMConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig, SessionConfig,
 	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig, UNIT,
 	WASM_BINARY,
 };

@@ -19,8 +19,12 @@ use crate::mock::{
 	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
 use fp_evm::FeeCalculator;
-use frame_support::traits::{Currency, OnUnbalanced};
-use frame_support::{parameter_types, traits::FindAuthor, weights::Weight, PalletId};
+use frame_support::{
+	parameter_types,
+	traits::{Currency, FindAuthor, OnUnbalanced},
+	weights::Weight,
+	PalletId,
+};
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
 use pallet_evm::{
 	EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping, OnChargeEVMTransaction,
@@ -262,9 +266,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		len: usize,
 	) -> Option<Result<(), TransactionValidityError>> {
 		match self {
-			RuntimeCall::Ethereum(call) => {
-				call.pre_dispatch_self_contained(info, dispatch_info, len)
-			},
+			RuntimeCall::Ethereum(call) =>
+				call.pre_dispatch_self_contained(info, dispatch_info, len),
 			_ => None,
 		}
 	}
@@ -274,9 +277,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		info: Self::SignedInfo,
 	) -> Option<sp_runtime::DispatchResultWithInfo<sp_runtime::traits::PostDispatchInfoOf<Self>>> {
 		match self {
-			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) => {
-				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info))))
-			},
+			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) =>
+				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info)))),
 			_ => None,
 		}
 	}

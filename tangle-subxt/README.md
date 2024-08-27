@@ -20,7 +20,7 @@ cargo install subxt-cli@0.37.0 --force
 Run the release build of the `tangle` node, then on another terminal run:
 
 ```bash
-subxt metadata -f bytes > ./metadata/tangle-mainnet-runtime.scale
+subxt metadata -f bytes > ./metadata/tangle-testnet-runtime.scale
 ```
 
 3. Generating the subxt code from the metadata:

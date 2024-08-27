@@ -124,9 +124,8 @@ mod tests {
 				},
 			) {
 				(ExitReason::Succeed(_), _) => Ok(()),
-				(ExitReason::Revert(_), v) => {
-					Err(PrecompileFailure::Revert { exit_status: ExitRevert::Reverted, output: v })
-				},
+				(ExitReason::Revert(_), v) =>
+					Err(PrecompileFailure::Revert { exit_status: ExitRevert::Reverted, output: v }),
 				_ => Err(revert("unexpected error")),
 			}
 		}

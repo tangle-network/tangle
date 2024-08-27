@@ -121,16 +121,14 @@ pub fn get_selectors(filename: &str) -> Vec<SolidityFunction> {
 /// Attempts to lookup a custom struct and returns its primitive signature
 fn try_lookup_custom_type(word: &str, custom_types: &HashMap<String, SolidityStruct>) -> String {
 	match word.strip_suffix("[]") {
-		Some(word) => {
+		Some(word) =>
 			if let Some(t) = custom_types.get(word) {
 				return format!("{}[]", t.signature());
-			}
-		},
-		None => {
+			},
+		None =>
 			if let Some(t) = custom_types.get(word) {
 				return t.signature();
-			}
-		},
+			},
 	};
 
 	word.to_string()

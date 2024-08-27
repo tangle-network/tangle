@@ -5,8 +5,7 @@ use frame_support::pallet_prelude::DispatchError;
 use hex_literal::hex;
 use parity_scale_codec::Encode;
 use secp_utils::*;
-use sp_core::ConstU32;
-use sp_core::Pair;
+use sp_core::{ConstU32, Pair};
 use sp_runtime::{BoundedVec, TokenError::Frozen};
 
 // The testing primitives are very useful for avoiding having to work with signatures

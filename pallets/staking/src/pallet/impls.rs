@@ -399,8 +399,8 @@ impl<T: Config> Pallet<T> {
 
 			// New era.
 			let maybe_new_era_validators = Self::try_trigger_new_era(session_index, is_genesis);
-			if maybe_new_era_validators.is_some()
-				&& matches!(ForceEra::<T>::get(), Forcing::ForceNew)
+			if maybe_new_era_validators.is_some() &&
+				matches!(ForceEra::<T>::get(), Forcing::ForceNew)
 			{
 				Self::set_force_era(Forcing::NotForcing);
 			}
@@ -836,8 +836,8 @@ impl<T: Config> Pallet<T> {
 		let mut min_active_stake = u64::MAX;
 
 		let mut sorted_voters = T::VoterList::iter();
-		while all_voters.len() < final_predicted_len as usize
-			&& voters_seen < (NPOS_MAX_ITERATIONS_COEFFICIENT * final_predicted_len)
+		while all_voters.len() < final_predicted_len as usize &&
+			voters_seen < (NPOS_MAX_ITERATIONS_COEFFICIENT * final_predicted_len)
 		{
 			let voter = match sorted_voters.next() {
 				Some(voter) => {
@@ -944,8 +944,8 @@ impl<T: Config> Pallet<T> {
 		let mut targets_seen = 0;
 
 		let mut targets_iter = T::TargetList::iter();
-		while all_targets.len() < final_predicted_len as usize
-			&& targets_seen < (NPOS_MAX_ITERATIONS_COEFFICIENT * final_predicted_len)
+		while all_targets.len() < final_predicted_len as usize &&
+			targets_seen < (NPOS_MAX_ITERATIONS_COEFFICIENT * final_predicted_len)
 		{
 			let target = match targets_iter.next() {
 				Some(target) => {
@@ -1841,8 +1841,8 @@ impl<T: Config> Pallet<T> {
 		}
 
 		ensure!(
-			(Ledger::<T>::iter().count() == Payee::<T>::iter().count())
-				&& (Ledger::<T>::iter().count() == Bonded::<T>::iter().count()),
+			(Ledger::<T>::iter().count() == Payee::<T>::iter().count()) &&
+				(Ledger::<T>::iter().count() == Bonded::<T>::iter().count()),
 			"number of entries in payee storage items does not match the number of bonded ledgers",
 		);
 
@@ -1851,8 +1851,8 @@ impl<T: Config> Pallet<T> {
 
 	fn check_count() -> Result<(), TryRuntimeError> {
 		ensure!(
-			<T as Config>::VoterList::count()
-				== Nominators::<T>::count() + Validators::<T>::count(),
+			<T as Config>::VoterList::count() ==
+				Nominators::<T>::count() + Validators::<T>::count(),
 			"wrong external count"
 		);
 		ensure!(
@@ -1890,10 +1890,9 @@ impl<T: Config> Pallet<T> {
 		ErasStakers::<T>::iter_prefix_values(era)
 			.map(|expo| {
 				ensure!(
-					expo.total
-						== expo.own
-							+ expo
-								.others
+					expo.total ==
+						expo.own +
+							expo.others
 								.iter()
 								.map(|e| e.value)
 								.fold(Zero::zero(), |acc, x| acc + x),
@@ -1922,8 +1921,8 @@ impl<T: Config> Pallet<T> {
 		ErasStakersPaged::<T>::iter_prefix((era,))
 			.map(|((validator, _page), expo)| {
 				ensure!(
-					expo.page_total
-						== expo.others.iter().map(|e| e.value).fold(Zero::zero(), |acc, x| acc + x),
+					expo.page_total ==
+						expo.others.iter().map(|e| e.value).fold(Zero::zero(), |acc, x| acc + x),
 					"wrong total exposure for the page.",
 				);
 
@@ -2002,11 +2001,10 @@ impl<T: Config> Pallet<T> {
 						match len {
 							0 => { /* not supporting this validator at all. */ },
 							1 => sum += individual[0].value,
-							_ => {
+							_ =>
 								return Err(
 									"nominator cannot back a validator more than once.".into()
-								)
-							},
+								),
 						};
 						Ok(())
 					})

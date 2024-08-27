@@ -117,21 +117,20 @@ impl pallet_evm_precompile_proxy::EvmProxyCallFilter for ProxyType {
 	) -> precompile_utils::EvmResult<bool> {
 		Ok(match self {
 			ProxyType::Any => true,
-			ProxyType::Governance => {
-				call.value == U256::zero()
-					&& matches!(
+			ProxyType::Governance =>
+				call.value == U256::zero() &&
+					matches!(
 						PrecompileName::from_address(call.to.0),
 						Some(ref precompile) if is_governance_precompile(precompile)
-					)
-			},
+					),
 			// The proxy precompile does not contain method cancel_proxy
 			ProxyType::CancelProxy => false,
 			ProxyType::Balances => {
 				// Allow only "simple" accounts as recipient (no code nor precompile).
 				// Note: Checking the presence of the code is not enough because some precompiles
 				// have no code.
-				!recipient_has_code
-					&& !precompile_utils::precompile_set::is_precompile_or_fail::<Runtime>(
+				!recipient_has_code &&
+					!precompile_utils::precompile_set::is_precompile_or_fail::<Runtime>(
 						call.to.0, gas,
 					)?
 			},

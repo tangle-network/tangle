@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use crate as pallet_multi_asset_delegation;
-use frame_support::parameter_types;
-use frame_support::traits::AsEnsureOriginWithArg;
-use frame_support::traits::ConstU32;
-use frame_support::PalletId;
 use frame_support::{
-	derive_impl,
-	traits::{ConstU16, ConstU64},
+	derive_impl, parameter_types,
+	traits::{AsEnsureOriginWithArg, ConstU16, ConstU32, ConstU64},
+	PalletId,
 };
 use sp_core::H256;
 use sp_runtime::{
@@ -169,7 +166,8 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			(BOB, 200_000),
 			(CHARLIE, 300_000),
 			(DAVE, 5_000),                                 // Not enough to stake
-			(MultiAssetDelegation::pallet_account(), 100), // give pallet some ED so it can receive tokens
+			(MultiAssetDelegation::pallet_account(), 100), /* give pallet some ED so it can
+			                                                * receive tokens */
 			(EVE, 20_000),
 		],
 	}

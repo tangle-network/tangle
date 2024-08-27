@@ -9,7 +9,7 @@ use std::{boxed::Box, string::String, vec::Vec};
 use ethabi::Token;
 use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use sp_core::{H160, U256};
-use sp_runtime::{traits::AccountIdConversion, traits::UniqueSaturatedInto};
+use sp_runtime::traits::{AccountIdConversion, UniqueSaturatedInto};
 use tangle_primitives::services::{
 	Field, JobDefinition, JobResultVerifier, OperatorPreferences, ServiceBlueprint,
 	ServiceRegistrationHook, ServiceRequestHook,

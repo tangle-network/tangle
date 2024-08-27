@@ -35,8 +35,7 @@ use sp_runtime::{
 	AccountId32, BuildStorage, Perbill,
 };
 
-use std::collections::BTreeMap;
-use std::sync::Arc;
+use std::{collections::BTreeMap, sync::Arc};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -531,11 +530,10 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 	for evt in expected {
 		let next = actual.pop().expect("RuntimeEvent expected");
 		match (&next, &evt) {
-			(left_val, right_val) => {
+			(left_val, right_val) =>
 				if !(*left_val == *right_val) {
 					panic!("Events don't match\nactual: {next:#?}\nexpected: {evt:#?}");
-				}
-			},
+				},
 		};
 	}
 }

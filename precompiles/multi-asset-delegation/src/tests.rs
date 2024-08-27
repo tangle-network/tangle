@@ -1,7 +1,5 @@
-use crate::mock::*;
-use crate::U256;
-use frame_support::assert_ok;
-use frame_support::traits::Currency;
+use crate::{mock::*, U256};
+use frame_support::{assert_ok, traits::Currency};
 use pallet_multi_asset_delegation::{types::OperatorStatus, CurrentRound, Delegators, Operators};
 use precompile_utils::testing::*;
 use sp_core::H160;
@@ -341,7 +339,8 @@ fn test_execute_withdraw_before_due() {
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})
 			.execute_returns(()); // should not fail
 
-		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // not expired so should not change balance
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // not expired so should not change
+		                                                        // balance
 	});
 }
 
@@ -426,8 +425,8 @@ fn test_operator_go_offline_and_online() {
 			.execute_returns(());
 
 		assert!(
-			MultiAssetDelegation::operator_info(operator_account).unwrap().status
-				== OperatorStatus::Inactive
+			MultiAssetDelegation::operator_info(operator_account).unwrap().status ==
+				OperatorStatus::Inactive
 		);
 
 		PrecompilesValue::get()
@@ -435,8 +434,8 @@ fn test_operator_go_offline_and_online() {
 			.execute_returns(());
 
 		assert!(
-			MultiAssetDelegation::operator_info(operator_account).unwrap().status
-				== OperatorStatus::Active
+			MultiAssetDelegation::operator_info(operator_account).unwrap().status ==
+				OperatorStatus::Active
 		);
 
 		assert_eq!(Balances::free_balance(operator_account), 20_000 - 10_000);
