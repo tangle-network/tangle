@@ -88,7 +88,6 @@ impl<T: Config> BondedPool<T> {
 	pub fn balance_to_point(&self, new_funds: BalanceOf<T>) -> BalanceOf<T> {
 		let bonded_balance =
 			T::Staking::active_stake(&self.bonded_account()).unwrap_or(Zero::zero());
-		println!("balance_to_point {:?} {:?}", bonded_balance, self.points());
 		Pallet::<T>::balance_to_point(bonded_balance, self.points(), new_funds)
 	}
 
