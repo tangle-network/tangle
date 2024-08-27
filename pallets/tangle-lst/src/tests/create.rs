@@ -100,18 +100,6 @@ fn create_errors_correctly() {
 			Lst::create(RuntimeOrigin::signed(11), 20, 123, 456, 789),
 			Error::<Runtime>::MaxPools
 		);
-
-		// Given
-		MaxPools::<Runtime>::put(3);
-		Currency::make_free_balance_be(&11, 5 + 20);
-
-		// Then
-		let create = RuntimeCall::Lst(Call::<Runtime>::create {
-			amount: 20,
-			root: 11,
-			nominator: 11,
-			bouncer: 11,
-		});
 	});
 }
 

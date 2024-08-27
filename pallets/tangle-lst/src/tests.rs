@@ -27,21 +27,6 @@ mod slash;
 mod sub_pools;
 mod update_roles;
 
-macro_rules! unbonding_pools_with_era {
-	($($k:expr => $v:expr),* $(,)?) => {{
-		use sp_std::iter::{Iterator, IntoIterator};
-		let not_bounded: BTreeMap<_, _> = Iterator::collect(IntoIterator::into_iter([$(($k, $v),)*]));
-		BoundedBTreeMap::<EraIndex, UnbondPool<T>, TotalUnbondingPools<T>>::try_from(not_bounded).unwrap()
-	}};
-}
-
-macro_rules! member_unbonding_eras {
-	($( $any:tt )*) => {{
-		let x: BoundedBTreeMap<EraIndex, Balance, MaxUnbonding> = bounded_btree_map!($( $any )*);
-		x
-	}};
-}
-
 pub const DEFAULT_ROLES: PoolRoles<AccountId> =
 	PoolRoles { depositor: 10, root: Some(900), nominator: Some(901), bouncer: Some(902) };
 

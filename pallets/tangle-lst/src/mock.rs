@@ -3,7 +3,7 @@
 use super::*;
 use crate::{self as pallet_lst};
 use frame_support::traits::AsEnsureOriginWithArg;
-use frame_support::{assert_ok, derive_impl, parameter_types, traits::fungible::Mutate, PalletId};
+use frame_support::{assert_ok, derive_impl, parameter_types, PalletId};
 use frame_system::RawOrigin;
 use sp_runtime::traits::ConstU128;
 use sp_runtime::Perbill;
@@ -97,6 +97,7 @@ impl sp_staking::StakingInterface for StakingMock {
 			.ok_or(DispatchError::Other("NotStash"))
 	}
 
+	#[allow(clippy::option_map_unit_fn)]
 	fn bond_extra(who: &Self::AccountId, extra: Self::Balance) -> DispatchResult {
 		let mut x = BondedBalanceMap::get();
 		x.get_mut(who).map(|v| *v += extra);
@@ -480,26 +481,8 @@ pub fn balances_events_since_last_call() -> Vec<pallet_balances::Event<Runtime>>
 
 /// Same as `fully_unbond`, in permissioned setting.
 pub fn fully_unbond_permissioned(pool_id: PoolId, member: AccountId) -> DispatchResult {
-	// let points = Assets::balance(pool_id, &member);
-	// Lst::unbond(RuntimeOrigin::signed(member), member, points)
-	Ok(())
-}
-
-pub fn pending_rewards_for_delegator(pool_id: PoolId, delegator: AccountId) -> Balance {
-	// let points = Assets::balance(pool_id, &delegator);
-	// let bonded_pool = BondedPools::<T>::get(pool_id).unwrap();
-	// let reward_pool = RewardPools::<T>::get(pool_id).unwrap();
-
-	// assert!(!bonded_pool.points.is_zero());
-
-	// let commission = bonded_pool.commission.current();
-	// let current_rc = reward_pool
-	// 	.current_reward_counter(pool_id, bonded_pool.points, commission)
-	// 	.unwrap()
-	// 	.0;
-
-	// member.pending_rewards(current_rc).unwrap_or_default()
-	0_u128
+	let points = Assets::balance(pool_id, member);
+	Lst::unbond(RuntimeOrigin::signed(member), member, pool_id, points)
 }
 
 #[derive(PartialEq, Debug)]
@@ -510,53 +493,24 @@ pub enum RewardImbalance {
 	Deficit(Balance),
 }
 
-pub fn pool_pending_rewards(pool: PoolId) -> Result<BalanceOf<T>, sp_runtime::DispatchError> {
-	// let bonded_pool = BondedPools::<T>::get(pool).ok_or(Error::<T>::PoolNotFound)?;
-	// let reward_pool = RewardPools::<T>::get(pool).ok_or(Error::<T>::PoolNotFound)?;
-
-	// let current_rc = if !bonded_pool.points.is_zero() {
-	// 	let commission = bonded_pool.commission.current();
-	// 	reward_pool.current_reward_counter(pool, bonded_pool.points, commission)?.0
-	// } else {
-	// 	Default::default()
-	// };
-
-	// Ok(PoolMembers::<T>::iter()
-	// 	.filter(|(_, d)| d.pool_id == pool)
-	// 	.map(|(_, d)| d.pending_rewards(current_rc).unwrap_or_default())
-	// 	.fold(0u32.into(), |acc: BalanceOf<T>, x| acc.saturating_add(x)))
-	Ok(0_u128)
-}
-
-pub fn reward_imbalance(pool: PoolId) -> RewardImbalance {
-	let pending_rewards = pool_pending_rewards(pool).expect("pool should exist");
-	let current_balance = RewardPool::<Runtime>::current_balance(pool);
-
-	if pending_rewards > current_balance {
-		RewardImbalance::Deficit(pending_rewards - current_balance)
-	} else {
-		RewardImbalance::Surplus(current_balance - pending_rewards)
-	}
-}
-
 #[cfg(test)]
 mod test {
 	use super::*;
 	#[test]
 	fn u256_to_balance_convert_works() {
 		assert_eq!(U256ToBalance::convert(0u32.into()), Zero::zero());
-		assert_eq!(U256ToBalance::convert(Balance::max_value().into()), Balance::max_value())
+		assert_eq!(U256ToBalance::convert(Balance::MAX.into()), Balance::MAX)
 	}
 
 	#[test]
 	#[should_panic]
 	fn u256_to_balance_convert_panics_correctly() {
-		U256ToBalance::convert(U256::from(Balance::max_value()).saturating_add(1u32.into()));
+		U256ToBalance::convert(U256::from(Balance::MAX).saturating_add(1u32.into()));
 	}
 
 	#[test]
 	fn balance_to_u256_convert_works() {
 		assert_eq!(BalanceToU256::convert(0u32.into()), U256::zero());
-		assert_eq!(BalanceToU256::convert(Balance::max_value()), Balance::max_value().into())
+		assert_eq!(BalanceToU256::convert(Balance::MAX), Balance::MAX.into())
 	}
 }

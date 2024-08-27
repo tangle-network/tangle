@@ -3,7 +3,7 @@ use frame_support::assert_ok;
 
 #[test]
 fn slash_no_subpool_is_tracked() {
-	let bonded = |points| BondedPool::<Runtime> {
+	let bonded = |_points| BondedPool::<Runtime> {
 		id: 1,
 		inner: BondedPoolInner {
 			commission: Commission::default(),
@@ -30,7 +30,7 @@ fn slash_no_subpool_is_tracked() {
 		);
 		assert_eq!(TotalValueLocked::<T>::get(), 12);
 
-		assert_eq!(BondedPool::<Runtime>::get(1).unwrap(), bonded(12, 2));
+		assert_eq!(BondedPool::<Runtime>::get(1).unwrap(), bonded(12));
 
 		// Given
 		// The bonded balance is slashed in half
@@ -51,6 +51,6 @@ fn slash_no_subpool_is_tracked() {
 			]
 		);
 		assert_eq!(TotalValueLocked::<T>::get(), 18);
-		assert_eq!(BondedPool::<Runtime>::get(1).unwrap(), bonded(12 + 24, 3));
+		assert_eq!(BondedPool::<Runtime>::get(1).unwrap(), bonded(12 + 24));
 	});
 }

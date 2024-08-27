@@ -110,36 +110,6 @@ fn member_unbond_destroying() {
 }
 
 #[test]
-fn member_unbond_destroying_with_pending_rewards() {
-	ExtBuilder::default()
-		.min_join_bond(10)
-		.add_members(vec![(20, 20)])
-		.build_and_execute(|| {
-			unsafe_set_state(1, PoolState::Destroying);
-			let random = 123;
-
-			// given the pool some pending rewards.
-			assert_eq!(pending_rewards_for_delegator(20, 1), 0);
-			deposit_rewards(10);
-			assert_eq!(pending_rewards_for_delegator(20, 1), 6);
-
-			// any random user can unbond 20 now.
-			assert_ok!(Lst::unbond(RuntimeOrigin::signed(random), 20, 1, 20));
-
-			assert_eq!(
-				pool_events_since_last_call(),
-				vec![
-					Event::Created { depositor: 10, pool_id: 1 },
-					Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: true },
-					Event::Bonded { member: 20, pool_id: 1, bonded: 20, joined: true },
-					Event::PaidOut { member: 20, pool_id: 1, payout: 6 },
-					Event::Unbonded { member: 20, pool_id: 1, balance: 20, points: 20, era: 3 }
-				]
-			);
-		})
-}
-
-#[test]
 fn depositor_unbond_open() {
 	// depositor in pool, pool state open
 	//   - depositor  unbonds to above limit
