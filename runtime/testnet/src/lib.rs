@@ -34,11 +34,10 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
-use frame_support::traits::{AsEnsureOriginWithArg, ContainsPair};
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
-		Contains, OnFinalize, SortedMembers, WithdrawReasons,
+		AsEnsureOriginWithArg, Contains, ContainsPair, OnFinalize, SortedMembers, WithdrawReasons,
 	},
 	weights::ConstantMultiplier,
 };
@@ -57,8 +56,7 @@ use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use pallet_tx_pause::RuntimeCallNameOf;
-use parity_scale_codec::MaxEncodedLen;
-use parity_scale_codec::{Decode, Encode};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_parachain_primitives::primitives::Sibling;
 use precompiles::TanglePrecompiles;
 use scale_info::TypeInfo;
@@ -80,9 +78,9 @@ use sp_runtime::{
 	AccountId32, ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
 	SaturatedConversion,
 };
-use sp_std::collections::btree_map::BTreeMap;
-use sp_std::sync::Arc;
-use sp_std::{marker::PhantomData, prelude::*, result, vec::Vec};
+use sp_std::{
+	collections::btree_map::BTreeMap, marker::PhantomData, prelude::*, result, sync::Arc, vec::Vec,
+};
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -92,8 +90,12 @@ use sygma_traits::{
 	VerifyingContractAddress,
 };
 use tangle_primitives::services::RpcServicesWithBlueprint;
-use xcm::v4::Junctions::{X1, X3, X4};
-use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
+use xcm::v4::{
+	prelude::*,
+	Asset, AssetId as XcmAssetId,
+	Junctions::{X1, X3, X4},
+	Location,
+};
 #[allow(deprecated)]
 use xcm_builder::{
 	AccountId32Aliases, CurrencyAdapter as XcmCurrencyAdapter, FungiblesAdapter, IsConcrete,
@@ -1711,7 +1713,8 @@ impl ConcrateSygmaAsset {
 			match (id.parents, id.first_interior()) {
 				// Sibling parachain
 				(1, Some(Parachain(id))) => {
-					// Assume current parachain id is 1000, for production, always get proper parachain info
+					// Assume current parachain id is 1000, for production, always get proper
+					// parachain info
 					if *id == 1000 {
 						Some(Location::new(0, X1(Arc::new([slice_to_generalkey(b"sygma")]))))
 					} else {

@@ -4,8 +4,7 @@ use crate::types::BalanceOf;
 use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::vec::Vec;
-use tangle_primitives::services::Constraints;
-use tangle_primitives::traits::ServiceManager;
+use tangle_primitives::{services::Constraints, traits::ServiceManager};
 
 impl<T: Config> traits::EvmRunner<T> for () {
 	type Error = crate::Error<T>;

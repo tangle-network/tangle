@@ -89,8 +89,8 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 // EDG Genesis Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // EDG Snapshot Airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
 // Leaderboard airdrop : 2% (5% immediate release)(95% vested over two years, with one month cliff)
-// Polkadot validator airdrop : 1% (5% immediate release)(95% vested over two years, with one month cliff)
-// ***
+// Polkadot validator airdrop : 1% (5% immediate release)(95% vested over two years, with one month
+// cliff) ***
 
 pub fn get_edgeware_genesis_list() -> Vec<H160> {
 	read_contents_to_evm_accounts("node/src/distributions/data/edgeware_genesis_participants.json")
@@ -377,7 +377,8 @@ pub fn get_distribution_for(
 		let remaining_fraction = 1.0 - cliff_fraction;
 
 		// the entire value is claimable here
-		// the claims pallet will lock all the vesting balance so in effect only claimable-amount is usable
+		// the claims pallet will lock all the vesting balance so in effect only claimable-amount is
+		// usable
 		claims.push((address.clone(), value, statement_kind));
 		let amount_on_cliff = (vested_amount as f64 * cliff_fraction) as u128;
 		let amount_after_cliff = (vested_amount as f64 * remaining_fraction) as u128;
@@ -660,7 +661,8 @@ fn test_distribution_shares() {
 		.map(|(_, amount, _, _, _)| amount)
 		.sum();
 
-	//println!("Remaining total team amount {:?}", 30000000000000000000000000 - total_team_claims_amount - total_direct_team_amount - 5000 * UNIT);
+	//println!("Remaining total team amount {:?}", 30000000000000000000000000 -
+	// total_team_claims_amount - total_direct_team_amount - 5000 * UNIT);
 	assert_eq!(total_team_claims_amount, 29856849309999998760386560); // 29856849 TNT
 	assert_eq!(
 		Perbill::from_rational(total_team_claims_amount, TOTAL_SUPPLY),

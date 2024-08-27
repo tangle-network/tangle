@@ -36,11 +36,10 @@ use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
 use pallet_evm_precompile_verify_schnorr_signatures::*;
 use pallet_evm_precompile_vesting::VestingPrecompile;
 use pallet_evm_precompileset_assets_erc20::Erc20AssetsPrecompileSet;
-use precompile_utils::precompile_set::PrecompileSetStartingWith;
-use precompile_utils::precompile_set::PrecompilesInRangeInclusive;
 use precompile_utils::precompile_set::{
 	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, OnlyFrom,
-	PrecompileAt, PrecompileSetBuilder, SubcallWithMaxNesting,
+	PrecompileAt, PrecompileSetBuilder, PrecompileSetStartingWith, PrecompilesInRangeInclusive,
+	SubcallWithMaxNesting,
 };
 type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, CallableByPrecompile);
 
