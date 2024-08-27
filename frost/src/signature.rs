@@ -210,8 +210,8 @@ where
 		lambda_i: Scalar<C>,
 		challenge: &Challenge<C>,
 	) -> Result<(), Error> {
-		if (<C::Group>::generator() * self.share) !=
-			(group_commitment_share.0 + (verifying_share.0 * challenge.0 * lambda_i))
+		if (<C::Group>::generator() * self.share)
+			!= (group_commitment_share.0 + (verifying_share.0 * challenge.0 * lambda_i))
 		{
 			return Err(Error::InvalidSignatureShare);
 		}

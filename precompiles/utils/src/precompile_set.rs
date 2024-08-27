@@ -114,10 +114,12 @@ pub enum DiscriminantResult<T> {
 impl<T> Into<IsPrecompileResult> for DiscriminantResult<T> {
 	fn into(self) -> IsPrecompileResult {
 		match self {
-			Self::Some(_, extra_cost) =>
-				IsPrecompileResult::Answer { is_precompile: true, extra_cost },
-			Self::None(extra_cost) =>
-				IsPrecompileResult::Answer { is_precompile: false, extra_cost },
+			Self::Some(_, extra_cost) => {
+				IsPrecompileResult::Answer { is_precompile: true, extra_cost }
+			},
+			Self::None(extra_cost) => {
+				IsPrecompileResult::Answer { is_precompile: false, extra_cost }
+			},
 			Self::OutOfGas => IsPrecompileResult::OutOfGas,
 		}
 	}
@@ -392,8 +394,9 @@ fn common_checks<R: pallet_evm::Config, C: PrecompileChecks>(
 pub fn is_precompile_or_fail<R: pallet_evm::Config>(address: H160, gas: u64) -> EvmResult<bool> {
 	match <R as pallet_evm::Config>::PrecompilesValue::get().is_precompile(address, gas) {
 		IsPrecompileResult::Answer { is_precompile, .. } => Ok(is_precompile),
-		IsPrecompileResult::OutOfGas =>
-			Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas }),
+		IsPrecompileResult::OutOfGas => {
+			Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
+		},
 	}
 }
 

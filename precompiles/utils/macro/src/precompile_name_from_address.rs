@@ -66,16 +66,18 @@ pub fn main(_: TokenStream, input: TokenStream) -> TokenStream {
 
 fn extract_precompile_name_and_prefix(type_: &Type) -> Option<(Ident, u64)> {
 	match type_ {
-		Type::Path(type_path) =>
+		Type::Path(type_path) => {
 			if let Some(path_segment) = type_path.path.segments.last() {
 				match path_segment.ident.to_string().as_ref() {
-					"PrecompileAt" =>
-						extract_precompile_name_and_prefix_for_precompile_at(path_segment),
+					"PrecompileAt" => {
+						extract_precompile_name_and_prefix_for_precompile_at(path_segment)
+					},
 					_ => None,
 				}
 			} else {
 				None
-			},
+			}
+		},
 		_ => None,
 	}
 }

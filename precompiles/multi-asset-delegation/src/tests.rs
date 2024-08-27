@@ -340,7 +340,7 @@ fn test_execute_withdraw_before_due() {
 			.execute_returns(()); // should not fail
 
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // not expired so should not change
-		                                                        // balance
+		                                                      // balance
 	});
 }
 
@@ -425,8 +425,8 @@ fn test_operator_go_offline_and_online() {
 			.execute_returns(());
 
 		assert!(
-			MultiAssetDelegation::operator_info(operator_account).unwrap().status ==
-				OperatorStatus::Inactive
+			MultiAssetDelegation::operator_info(operator_account).unwrap().status
+				== OperatorStatus::Inactive
 		);
 
 		PrecompilesValue::get()
@@ -434,8 +434,8 @@ fn test_operator_go_offline_and_online() {
 			.execute_returns(());
 
 		assert!(
-			MultiAssetDelegation::operator_info(operator_account).unwrap().status ==
-				OperatorStatus::Active
+			MultiAssetDelegation::operator_info(operator_account).unwrap().status
+				== OperatorStatus::Active
 		);
 
 		assert_eq!(Balances::free_balance(operator_account), 20_000 - 10_000);

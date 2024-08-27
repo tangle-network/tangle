@@ -163,8 +163,7 @@ pub mod api {
 				#[doc = " Returns the version of the runtime."]
 				pub fn version(
 					&self,
-				) -> ::subxt::runtime_api::Payload<types::Version, types::version::output::Output>
-				{
+				) -> ::subxt::runtime_api::Payload<types::Version, types::version::output::Output> {
 					::subxt::runtime_api::Payload::new_static(
 						"Core",
 						"version",
@@ -808,8 +807,7 @@ pub mod api {
 				#[doc = " Returns the converted FindAuthor::find_author authority id."]
 				pub fn author(
 					&self,
-				) -> ::subxt::runtime_api::Payload<types::Author, types::author::output::Output>
-				{
+				) -> ::subxt::runtime_api::Payload<types::Author, types::author::output::Output> {
 					::subxt::runtime_api::Payload::new_static(
 						"EthereumRuntimeRPCApi",
 						"author",
@@ -888,8 +886,7 @@ pub mod api {
 					nonce: types::create::Nonce,
 					estimate: types::create::Estimate,
 					access_list: types::create::AccessList,
-				) -> ::subxt::runtime_api::Payload<types::Create, types::create::output::Output>
-				{
+				) -> ::subxt::runtime_api::Payload<types::Create, types::create::output::Output> {
 					::subxt::runtime_api::Payload::new_static(
 						"EthereumRuntimeRPCApi",
 						"create",
@@ -3103,8 +3100,8 @@ pub mod api {
 			.only_these_pallets(&PALLETS)
 			.only_these_runtime_apis(&RUNTIME_APIS)
 			.hash();
-		runtime_metadata_hash ==
-			[
+		runtime_metadata_hash
+			== [
 				128u8, 134u8, 9u8, 124u8, 117u8, 221u8, 39u8, 155u8, 192u8, 9u8, 116u8, 151u8,
 				32u8, 230u8, 50u8, 201u8, 252u8, 122u8, 123u8, 162u8, 202u8, 241u8, 118u8, 192u8,
 				51u8, 88u8, 212u8, 212u8, 87u8, 103u8, 96u8, 238u8,
@@ -4362,8 +4359,7 @@ pub mod api {
 				#[doc = " The maximum length of a block (in bytes)."]
 				pub fn block_length(
 					&self,
-				) -> ::subxt::constants::Address<runtime_types::frame_system::limits::BlockLength>
-				{
+				) -> ::subxt::constants::Address<runtime_types::frame_system::limits::BlockLength> {
 					::subxt::constants::Address::new_static(
 						"System",
 						"BlockLength",
@@ -21614,8 +21610,7 @@ pub mod api {
 				#[doc = " Maximum amount of funds that should be placed in a deposit for making a proposal."]
 				pub fn proposal_bond_maximum(
 					&self,
-				) -> ::subxt::constants::Address<::core::option::Option<::core::primitive::u128>>
-				{
+				) -> ::subxt::constants::Address<::core::option::Option<::core::primitive::u128>> {
 					::subxt::constants::Address::new_static(
 						"Treasury",
 						"ProposalBondMaximum",
@@ -22649,8 +22644,7 @@ pub mod api {
 				#[doc = " Maximum amount of funds that should be placed in a deposit for making a proposal."]
 				pub fn curator_deposit_max(
 					&self,
-				) -> ::subxt::constants::Address<::core::option::Option<::core::primitive::u128>>
-				{
+				) -> ::subxt::constants::Address<::core::option::Option<::core::primitive::u128>> {
 					::subxt::constants::Address::new_static(
 						"Bounties",
 						"CuratorDepositMax",
@@ -22665,8 +22659,7 @@ pub mod api {
 				#[doc = " Minimum amount of funds that should be placed in a deposit for making a proposal."]
 				pub fn curator_deposit_min(
 					&self,
-				) -> ::subxt::constants::Address<::core::option::Option<::core::primitive::u128>>
-				{
+				) -> ::subxt::constants::Address<::core::option::Option<::core::primitive::u128>> {
 					::subxt::constants::Address::new_static(
 						"Bounties",
 						"CuratorDepositMin",

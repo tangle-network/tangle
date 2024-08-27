@@ -204,8 +204,9 @@ pub fn run() -> sc_cli::Result<()> {
 					},
 					BenchmarkCmd::Overhead(_cmd) => Err("Unsupported benchmarking command".into()),
 					BenchmarkCmd::Extrinsic(_cmd) => Err("Unsupported benchmarking command".into()),
-					BenchmarkCmd::Machine(cmd) =>
-						cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),
+					BenchmarkCmd::Machine(cmd) => {
+						cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone())
+					},
 				}
 			})
 		},

@@ -165,9 +165,9 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			(ALICE, 100_000),
 			(BOB, 200_000),
 			(CHARLIE, 300_000),
-			(DAVE, 5_000),                                 // Not enough to stake
+			(DAVE, 5_000), // Not enough to stake
 			(MultiAssetDelegation::pallet_account(), 100), /* give pallet some ED so it can
-			                                                * receive tokens */
+			                * receive tokens */
 			(EVE, 20_000),
 		],
 	}

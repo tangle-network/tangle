@@ -216,8 +216,9 @@ where
 		match reason {
 			ExitReason::Error(exit_status) => Err(PrecompileFailure::Error { exit_status }),
 			ExitReason::Fatal(exit_status) => Err(PrecompileFailure::Fatal { exit_status }),
-			ExitReason::Revert(_) =>
-				Err(PrecompileFailure::Revert { exit_status: ExitRevert::Reverted, output }),
+			ExitReason::Revert(_) => {
+				Err(PrecompileFailure::Revert { exit_status: ExitRevert::Reverted, output })
+			},
 			ExitReason::Succeed(_) => Ok(output.into()),
 		}
 	}
