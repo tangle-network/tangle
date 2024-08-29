@@ -1219,6 +1219,34 @@ impl pallet_proxy::Config for Runtime {
 	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
+parameter_types! {
+	pub static PostUnbondingPoolsWindow: u32 = 2;
+	pub static MaxMetadataLen: u32 = 2;
+	pub static CheckLevel: u8 = 255;
+	pub const LstPalletId: PalletId = PalletId(*b"py/tnlst");
+}
+
+impl pallet_tangle_lst::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = ();
+	type Currency = Balances;
+	type RuntimeFreezeReason = RuntimeFreezeReason;
+	type RewardCounter = FixedU128;
+	type BalanceToU256 = BalanceToU256;
+	type U256ToBalance = U256ToBalance;
+	type Staking = Staking;
+	type PostUnbondingPoolsWindow = ConstU32<4>;
+	type PalletId = LstPalletId;
+	type MaxMetadataLen = MaxMetadataLen;
+	// we use the same number of allowed unlocking chunks as with staking.
+	type MaxUnbonding = <Self as pallet_staking::Config>::MaxUnlockingChunks;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type PoolId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1280,6 +1308,7 @@ construct_runtime!(
 		Proxy: pallet_proxy = 44,
 		MultiAssetDelegation: pallet_multi_asset_delegation = 45,
 		Services: pallet_services = 51,
+		Lst: pallet_tangle_lst = 52,
 
 		// Sygma
 		SygmaAccessSegregator: sygma_access_segregator = 46,

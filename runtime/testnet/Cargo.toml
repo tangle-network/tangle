@@ -95,6 +95,7 @@ pallet-services-rpc-runtime-api = { workspace = true }
 tangle-primitives = { workspace = true, features = ["verifying"] }
 tangle-crypto-primitives = { workspace = true }
 pallet-multi-asset-delegation = { workspace = true }
+pallet-tangle-lst = { workspace = true }
 
 # Frontier dependencies
 fp-evm = { workspace = true }
@@ -255,6 +256,7 @@ std = [
     "tangle-crypto-primitives/std",
     "pallet-services/std",
     "pallet-multi-asset-delegation/std",
+    "pallet-tangle-lst/std",
     "pallet-services-rpc-runtime-api/std",
 
     # Frontier

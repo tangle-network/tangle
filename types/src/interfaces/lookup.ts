@@ -2403,7 +2403,7 @@ export default {
         who: 'Vec<AccountId32>',
       },
       __Unused7: 'Null',
-      force_set_balance: {
+      force_make_free_balance_be: {
         who: 'MultiAddress',
         newFree: 'Compact<u128>',
       },
