@@ -1266,9 +1266,9 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 }
 
 parameter_types! {
-	pub static PostUnbondingPoolsWindow: u32 = 2;
-	pub static MaxMetadataLen: u32 = 2;
-	pub static CheckLevel: u8 = 255;
+	pub const PostUnbondingPoolsWindow: u32 = 2;
+	pub const MaxMetadataLen: u32 = 2;
+	pub const CheckLevel: u8 = 255;
 	pub const LstPalletId: PalletId = PalletId(*b"py/tnlst");
 }
 
