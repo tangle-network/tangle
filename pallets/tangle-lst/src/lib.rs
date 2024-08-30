@@ -748,7 +748,10 @@ pub mod pallet {
 			UnbondingMembers::<T>::try_mutate(
 				member_account.clone(),
 				|member| -> DispatchResult {
-					let member = member.get_or_insert_with(Default::default);
+					let member = member.get_or_insert_with(|| PoolMember {
+						pool_id,
+						unbonding_eras: Default::default(),
+					});
 					member
 						.unbonding_eras
 						.try_insert(unbond_era, points_unbonded)

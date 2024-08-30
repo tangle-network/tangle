@@ -41,9 +41,9 @@ use tangle_runtime::BlockNumber;
 
 // Runtime
 #[cfg(not(feature = "testnet"))]
-use tangle_runtime::{AccountId, Balance, Hash, Index};
+use tangle_runtime::{AccountId, Balance, Hash, Index, PalletServicesConstraints};
 #[cfg(feature = "testnet")]
-use tangle_testnet_runtime::{AccountId, Balance, Hash, Index};
+use tangle_testnet_runtime::{AccountId, Balance, Hash, Index, PalletServicesConstraints};
 
 pub mod eth;
 pub mod tracing;
