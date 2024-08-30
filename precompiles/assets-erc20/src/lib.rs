@@ -1,8 +1,9 @@
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 //
-// This file is part of pallet-evm-precompileset-assets-erc20 package, originally developed by Purestake
-// Inc. pallet-evm-precompileset-assets-erc20 package used in Tangle Network in terms of GPLv3.
+// This file is part of pallet-evm-precompileset-assets-erc20 package, originally developed by
+// Purestake Inc. pallet-evm-precompileset-assets-erc20 package used in Tangle Network in terms of
+// GPLv3.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,14 +21,15 @@
 
 use core::fmt::Display;
 use fp_evm::{ExitError, PrecompileHandle};
-use frame_support::traits::fungibles::Inspect;
-use frame_support::traits::fungibles::{
-	approvals::Inspect as ApprovalInspect, metadata::Inspect as MetadataInspect,
-};
-use frame_support::traits::{Get, OriginTrait};
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	sp_runtime::traits::StaticLookup,
+	traits::{
+		fungibles::{
+			approvals::Inspect as ApprovalInspect, metadata::Inspect as MetadataInspect, Inspect,
+		},
+		Get, OriginTrait,
+	},
 };
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;

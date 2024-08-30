@@ -1,9 +1,7 @@
 use super::*;
 use frame_support::traits::OnRuntimeUpgrade;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use sp_runtime::BoundToRuntimeAppPublic;
-use sp_runtime::RuntimeAppPublic;
-use sp_runtime::RuntimeDebug;
+use sp_runtime::{BoundToRuntimeAppPublic, RuntimeAppPublic, RuntimeDebug};
 
 /// Old session keys structure.
 ///
@@ -63,8 +61,9 @@ pub struct MigrateSessionKeys<T>(sp_std::marker::PhantomData<T>);
 impl<T: pallet_session::Config> OnRuntimeUpgrade for MigrateSessionKeys<T> {
 	/// Perform the runtime upgrade.
 	///
-	/// This function upgrades the session keys by transforming them from the old structure to the new
-	/// structure using the `transform_session_keys` function. It reads and writes to the database as needed.
+	/// This function upgrades the session keys by transforming them from the old structure to the
+	/// new structure using the `transform_session_keys` function. It reads and writes to the
+	/// database as needed.
 	fn on_runtime_upgrade() -> Weight {
 		Session::upgrade_keys::<OldSessionKeys, _>(transform_session_keys);
 		T::DbWeight::get().reads_writes(10, 10)

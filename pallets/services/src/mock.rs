@@ -35,8 +35,7 @@ use sp_runtime::{
 	AccountId32, BuildStorage, Perbill,
 };
 
-use std::collections::BTreeMap;
-use std::sync::Arc;
+use std::{collections::BTreeMap, sync::Arc};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;

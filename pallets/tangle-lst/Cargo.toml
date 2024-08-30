@@ -1,0 +1,77 @@
+[package]
+name = "pallet-tangle-lst"
+version = "25.0.0"
+authors.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+homepage = "https://substrate.io"
+repository.workspace = true
+description = "FRAME nomination pools pallet"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+# parity
+scale-info = { version = "2.10.0", default-features = false, features = [
+	"derive",
+] }
+codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = [
+	"derive",
+] }
+cfg-if = "1.0"
+smart-default = "0.6.0"
+
+# FRAME
+frame-support = { workspace = true, default-features = false }
+frame-system = { workspace = true, default-features = false }
+sp-runtime = { workspace = true, default-features = false }
+sp-std = { workspace = true, default-features = false }
+sp-staking = { workspace = true, default-features = false }
+sp-core = { workspace = true, default-features = false }
+sp-io = { workspace = true, default-features = false }
+log = { version = "0.4.0", default-features = false }
+pallet-staking = { workspace = true }
+
+# Optional: use for testing and/or fuzzing
+pallet-balances = { workspace = true, optional = true }
+pallet-assets = { workspace = true, optional = true }
+sp-tracing = { workspace = true, optional = true }
+
+[dev-dependencies]
+pallet-balances = { workspace = true }
+pallet-assets = { workspace = true }
+sp-tracing = { workspace = true }
+
+[features]
+default = ["std"]
+fuzzing = ["pallet-balances", "sp-tracing"]
+std = [
+	"codec/std",
+	"frame-support/std",
+	"frame-system/std",
+	"log/std",
+	"pallet-balances?/std",
+	"pallet-assets?/std",
+	"scale-info/std",
+	"sp-core/std",
+	"sp-io/std",
+	"sp-runtime/std",
+	"sp-staking/std",
+	"sp-std/std",
+	"sp-tracing?/std",
+	"pallet-staking/std",
+]
+runtime-benchmarks = [
+	"frame-support/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
+	"pallet-balances?/runtime-benchmarks",
+	"sp-runtime/runtime-benchmarks",
+	"sp-staking/runtime-benchmarks",
+]
+try-runtime = [
+	"frame-support/try-runtime",
+	"frame-system/try-runtime",
+	"pallet-balances?/try-runtime",
+	"sp-runtime/try-runtime",
+]

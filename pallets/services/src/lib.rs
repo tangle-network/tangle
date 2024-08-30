@@ -57,8 +57,7 @@ pub mod module {
 	use frame_support::dispatch::PostDispatchInfo;
 	use sp_core::{H160, H256};
 	use sp_std::vec::Vec;
-	use tangle_primitives::services::*;
-	use tangle_primitives::MultiAssetDelegationInfo;
+	use tangle_primitives::{services::*, MultiAssetDelegationInfo};
 	use types::*;
 
 	#[pallet::config]
@@ -186,7 +185,8 @@ pub mod module {
 		/// The approval is not requested for the operator (the caller).
 		ApprovalNotRequested,
 		/// The requested job definition does not exist.
-		/// This error is returned when the requested job definition does not exist in the service blueprint.
+		/// This error is returned when the requested job definition does not exist in the service
+		/// blueprint.
 		JobDefinitionNotFound,
 		/// Either the service or the job call was not found.
 		ServiceOrJobCallNotFound,
@@ -657,11 +657,12 @@ pub mod module {
 			Ok(())
 		}
 		/// Request a new service to be initiated using the provided blueprint with a list of
-		/// operators that will run your service. Optionally, you can specifiy who is permitted caller
-		/// of this service, by default anyone could use this service.
+		/// operators that will run your service. Optionally, you can specifiy who is permitted
+		/// caller of this service, by default anyone could use this service.
 		///
-		/// Note that, if anyone of the participants set their [`ApprovalPreference`] to `ApprovalPreference::Required`
-		/// you will need to wait until they are approve your request, otherwise (if none), the service is initiated immediately.
+		/// Note that, if anyone of the participants set their [`ApprovalPreference`] to
+		/// `ApprovalPreference::Required` you will need to wait until they are approve your
+		/// request, otherwise (if none), the service is initiated immediately.
 		#[pallet::call_index(5)]
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request(
@@ -866,7 +867,8 @@ pub mod module {
 		}
 
 		/// Reject a service request.
-		/// The service will not be initiated, and the requester will need to update the service request.
+		/// The service will not be initiated, and the requester will need to update the service
+		/// request.
 		#[pallet::call_index(7)]
 		#[pallet::weight(T::WeightInfo::reject())]
 		pub fn reject(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {

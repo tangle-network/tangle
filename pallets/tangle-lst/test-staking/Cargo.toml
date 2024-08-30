@@ -1,0 +1,92 @@
+[package]
+name = "pallet-tangle-lst-test-staking"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[dependencies]
+# FRAME
+frame-benchmarking = { workspace = true, optional = true }
+frame-election-provider-support = { workspace = true, optional = true }
+frame-support = { workspace = true, optional = true }
+frame-system = { workspace = true, optional = true }
+log = { workspace = true, optional = true }
+pallet-bags-list = { workspace = true, optional = true }
+pallet-balances = { workspace = true, optional = true }
+pallet-nomination-pools = { workspace = true, optional = true }
+pallet-staking = { workspace = true, optional = true }
+parity-scale-codec = { workspace = true, default-features = true }
+cfg-if = "1.0"
+smart-default = "0.6.0"
+
+# Substrate Primitives
+sp-runtime = { workspace = true, optional = true }
+sp-staking = { workspace = true, optional = true }
+sp-std = { workspace = true, optional = true }
+
+[dev-dependencies]
+frame-election-provider-support = { workspace = true, default-features = true }
+frame-support = { workspace = true, default-features = true }
+frame-system = { workspace = true, default-features = true }
+pallet-bags-list = { workspace = true, default-features = true }
+pallet-balances = { workspace = true, default-features = true }
+pallet-tangle-lst = { workspace = true, default-features = true }
+pallet-session = { workspace = true, default-features = true }
+pallet-staking = { workspace = true, default-features = true }
+pallet-staking-reward-curve = { workspace = true, default-features = true }
+pallet-timestamp = { workspace = true, default-features = true }
+
+scale-info = { workspace = true, default-features = true }
+sp-core = { workspace = true, default-features = true }
+sp-io = { workspace = true, default-features = true }
+sp-runtime = { workspace = true, default-features = true }
+sp-staking = { workspace = true, default-features = true }
+sp-std = { workspace = true, default-features = true }
+sp-tracing = { workspace = true, default-features = true }
+
+[features]
+default = ["std"]
+
+std = [
+  "frame-benchmarking?/std",
+  "frame-election-provider-support?/std",
+  "frame-support?/std",
+  "frame-system?/std",
+  "pallet-bags-list?/std",
+  "pallet-staking?/std",
+  "pallet-nomination-pools?/std",
+  "sp-runtime?/std",
+  "sp-staking?/std",
+  "sp-std?/std",
+]
+
+runtime-benchmarks = [
+  "frame-benchmarking",
+  "frame-election-provider-support/runtime-benchmarks",
+  "frame-system/runtime-benchmarks",
+  "frame-benchmarking/runtime-benchmarks",
+  "sp-runtime/runtime-benchmarks",
+  "sp-staking/runtime-benchmarks",
+  "frame-support/runtime-benchmarks",
+  "pallet-staking/runtime-benchmarks",
+  "pallet-nomination-pools/runtime-benchmarks",
+  "pallet-bags-list/runtime-benchmarks",
+  "pallet-balances/runtime-benchmarks",
+  "pallet-timestamp/runtime-benchmarks",
+  "sp-std",
+  "log",
+]
+
+try-runtime = [
+  "frame-system?/try-runtime",
+  "sp-runtime?/try-runtime",
+  "frame-support?/try-runtime",
+  "pallet-staking?/try-runtime",
+  "pallet-nomination-pools?/try-runtime",
+  "pallet-bags-list?/try-runtime",
+  "pallet-balances?/try-runtime",
+  "pallet-timestamp/try-runtime",
+  "frame-election-provider-support/try-runtime",
+]

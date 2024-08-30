@@ -1,6 +1,5 @@
 use itertools::Itertools;
-use sp_std::collections::btree_map::BTreeMap;
-use sp_std::vec::Vec;
+use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 
 use tangle_primitives::services::*;
 

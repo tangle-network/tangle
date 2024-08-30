@@ -34,11 +34,10 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
-use frame_support::traits::{AsEnsureOriginWithArg, ContainsPair};
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
-		Contains, OnFinalize, SortedMembers, WithdrawReasons,
+		AsEnsureOriginWithArg, Contains, ContainsPair, OnFinalize, SortedMembers, WithdrawReasons,
 	},
 	weights::ConstantMultiplier,
 };
@@ -57,10 +56,9 @@ use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use pallet_tx_pause::RuntimeCallNameOf;
-use parity_scale_codec::MaxEncodedLen;
-use parity_scale_codec::{Decode, Encode};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_parachain_primitives::primitives::Sibling;
-use precompiles::WebbPrecompiles;
+use precompiles::TanglePrecompiles;
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
@@ -80,9 +78,9 @@ use sp_runtime::{
 	AccountId32, ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
 	SaturatedConversion,
 };
-use sp_std::collections::btree_map::BTreeMap;
-use sp_std::sync::Arc;
-use sp_std::{marker::PhantomData, prelude::*, result, vec::Vec};
+use sp_std::{
+	collections::btree_map::BTreeMap, marker::PhantomData, prelude::*, result, sync::Arc, vec::Vec,
+};
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -92,8 +90,12 @@ use sygma_traits::{
 	VerifyingContractAddress,
 };
 use tangle_primitives::services::RpcServicesWithBlueprint;
-use xcm::v4::Junctions::{X1, X3, X4};
-use xcm::v4::{prelude::*, Asset, AssetId as XcmAssetId, Location};
+use xcm::v4::{
+	prelude::*,
+	Asset, AssetId as XcmAssetId,
+	Junctions::{X1, X3, X4},
+	Location,
+};
 #[allow(deprecated)]
 use xcm_builder::{
 	AccountId32Aliases, CurrencyAdapter as XcmCurrencyAdapter, FungiblesAdapter, IsConcrete,
@@ -161,7 +163,7 @@ use tangle_primitives::{
 pub use tangle_services::PalletServicesConstraints;
 
 // Precompiles
-pub type Precompiles = WebbPrecompiles<Runtime>;
+pub type Precompiles = TanglePrecompiles<Runtime>;
 
 // Frontier
 use fp_rpc::TransactionStatus;
@@ -1217,6 +1219,34 @@ impl pallet_proxy::Config for Runtime {
 	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
+parameter_types! {
+	pub static PostUnbondingPoolsWindow: u32 = 2;
+	pub static MaxMetadataLen: u32 = 2;
+	pub static CheckLevel: u8 = 255;
+	pub const LstPalletId: PalletId = PalletId(*b"py/tnlst");
+}
+
+impl pallet_tangle_lst::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = ();
+	type Currency = Balances;
+	type RuntimeFreezeReason = RuntimeFreezeReason;
+	type RewardCounter = FixedU128;
+	type BalanceToU256 = BalanceToU256;
+	type U256ToBalance = U256ToBalance;
+	type Staking = Staking;
+	type PostUnbondingPoolsWindow = ConstU32<4>;
+	type PalletId = LstPalletId;
+	type MaxMetadataLen = MaxMetadataLen;
+	// we use the same number of allowed unlocking chunks as with staking.
+	type MaxUnbonding = <Self as pallet_staking::Config>::MaxUnlockingChunks;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type PoolId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1278,6 +1308,7 @@ construct_runtime!(
 		Proxy: pallet_proxy = 44,
 		MultiAssetDelegation: pallet_multi_asset_delegation = 45,
 		Services: pallet_services = 51,
+		Lst: pallet_tangle_lst = 52,
 
 		// Sygma
 		SygmaAccessSegregator: sygma_access_segregator = 46,
@@ -1415,7 +1446,6 @@ parameter_types! {
 	pub const AssetsStringLimit: u32 = 50;
 	pub const MetadataDepositBase: Balance = deposit(1, 68);
 	pub const MetadataDepositPerByte: Balance = deposit(0, 1);
-	pub const ExecutiveBody: BodyId = BodyId::Executive;
 }
 
 pub type AssetId = u128;
@@ -1712,7 +1742,8 @@ impl ConcrateSygmaAsset {
 			match (id.parents, id.first_interior()) {
 				// Sibling parachain
 				(1, Some(Parachain(id))) => {
-					// Assume current parachain id is 1000, for production, always get proper parachain info
+					// Assume current parachain id is 1000, for production, always get proper
+					// parachain info
 					if *id == 1000 {
 						Some(Location::new(0, X1(Arc::new([slice_to_generalkey(b"sygma")]))))
 					} else {

@@ -282,7 +282,8 @@ pub enum ServiceRegistrationHook {
 	Evm(sp_core::H160),
 }
 
-/// Service Request hook is a hook that will be called before creating a service from the service blueprint.
+/// Service Request hook is a hook that will be called before creating a service from the service
+/// blueprint.
 #[derive(
 	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen,
 )]
@@ -291,7 +292,8 @@ pub enum ServiceRequestHook {
 	/// No hook is needed, the caller will get the service created immediately.
 	#[default]
 	None,
-	/// A Smart contract that will be called to determine if the caller meets the requirements to create a service.
+	/// A Smart contract that will be called to determine if the caller meets the requirements to
+	/// create a service.
 	Evm(sp_core::H160),
 }
 
@@ -555,7 +557,7 @@ pub enum Gadget<C: Constraints> {
 
 impl<C: Constraints> Default for Gadget<C> {
 	fn default() -> Self {
-		Gadget::Wasm(WasmGadget { runtime: WasmRuntime::Wasmtime, soruces: Default::default() })
+		Gadget::Wasm(WasmGadget { runtime: WasmRuntime::Wasmtime, sources: Default::default() })
 	}
 }
 
@@ -580,6 +582,23 @@ pub struct GithubFetcher<C: Constraints> {
 	pub tag: BoundedString<C::MaxGitTagLength>,
 	/// The names of the binary in the release by the arch and the os.
 	pub binaries: BoundedVec<GadgetBinary<C>, C::MaxBinariesPerGadget>,
+}
+
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
+#[scale_info(skip_type_params(C))]
+#[codec(encode_bound(skip_type_params(C)))]
+#[codec(decode_bound(skip_type_params(C)))]
+#[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub struct TestFetcher<C: Constraints> {
+	/// The cargo package name that contains the blueprint logic
+	pub cargo_package: BoundedString<C::MaxBinaryNameLength>,
+	/// The specific binary name that contains the blueprint logic.
+	/// Should match up what is in the Cargo.toml file under [[bin]]/name
+	pub cargo_bin: BoundedString<C::MaxBinaryNameLength>,
+	/// The base path to the workspace/crate
+	pub base_path: BoundedString<C::MaxMetadataLength>,
 }
 
 /// The CPU or System architecture.
@@ -717,6 +736,9 @@ pub enum GadgetSourceFetcher<C: Constraints> {
 	/// A Gadgets that will be fetched from the container registry.
 	#[codec(index = 2)]
 	ContainerImage(ImageRegistryFetcher<C>),
+	/// For tests only
+	#[codec(index = 3)]
+	Testing(TestFetcher<C>),
 }
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
@@ -747,7 +769,7 @@ pub struct WasmGadget<C: Constraints> {
 	/// Which runtime to use to execute the WASM binary.
 	pub runtime: WasmRuntime,
 	/// Where the WASM binary is stored.
-	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
+	pub sources: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
 }
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
@@ -776,7 +798,7 @@ pub enum WasmRuntime {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
 pub struct NativeGadget<C: Constraints> {
 	/// Where the WASM binary is stored.
-	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
+	pub sources: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
 }
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
@@ -788,7 +810,7 @@ pub struct NativeGadget<C: Constraints> {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
 pub struct ContainerGadget<C: Constraints> {
 	/// Where the Image of the gadget binary is stored.
-	pub soruces: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
+	pub sources: BoundedVec<GadgetSource<C>, C::MaxSourcesPerGadget>,
 }
 
 // -***- RPC -***-

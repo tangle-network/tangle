@@ -417,7 +417,8 @@ fn transfer_from_self() {
 		.execute_with(|| {
 			precompiles()
 				.prepare_test(
-					CryptoAlith, // CryptoAlith sending transferFrom herself, no need for allowance.
+					CryptoAlith, /* CryptoAlith sending transferFrom herself, no need for
+					              * allowance. */
 					Precompile1,
 					PCall::transfer_from {
 						from: Address(CryptoAlith.into()),

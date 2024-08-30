@@ -15,11 +15,13 @@
 
 #![allow(clippy::type_complexity)]
 
-use crate::distributions::{
-	combine_distributions, get_unique_distribution_results,
-	mainnet::{self, DistributionResult},
+use crate::{
+	distributions::{
+		combine_distributions, get_unique_distribution_results,
+		mainnet::{self, DistributionResult},
+	},
+	testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key},
 };
-use crate::testnet_fixtures::{get_bootnodes, get_initial_authorities, get_testnet_root_key};
 use hex_literal::hex;
 use pallet_airdrop_claims::MultiAddress;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -27,9 +29,8 @@ use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{ed25519, sr25519, Pair, Public, H160, U256};
-use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::{
-	traits::{IdentifyAccount, Verify},
+	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
 };
 use std::{collections::BTreeMap, str::FromStr};
@@ -104,6 +105,7 @@ pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
+
 	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -140,7 +142,7 @@ pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
 				chain_id,
 				Default::default(),
 				Default::default(),
-				Default::default(),
+				get_testing_default_fully_funded_accounts(),
 			)
 		},
 		// Bootnodes
@@ -162,9 +164,11 @@ pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
 pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
+
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), TESTNET_LOCAL_SS58_PREFIX.into());
+
 	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -195,7 +199,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				chain_id,
 				Default::default(),
 				Default::default(),
-				Default::default(),
+				get_testing_default_fully_funded_accounts(),
 			)
 		},
 		// Bootnodes
@@ -221,6 +225,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
+
 	#[allow(deprecated)]
 	Ok(ChainSpec::from_genesis(
 		"Tangle Testnet",
@@ -251,7 +256,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 					mainnet::get_foundation_balance_distribution(),
 				]),
 				// endowed evm accounts
-				vec![],
+				get_testing_default_fully_funded_accounts(),
 			)
 		},
 		// Bootnodes
@@ -370,6 +375,7 @@ fn testnet_genesis(
 		evm: EVMConfig {
 			accounts: {
 				let mut map = BTreeMap::new();
+
 				for (address, account) in genesis_evm_distribution {
 					map.insert(address, account);
 				}
@@ -386,61 +392,15 @@ fn testnet_genesis(
 					);
 				});
 
-				map.insert(
-					// H160 address of Alice dev account
-					// Derived from SS58 (42 prefix) address
-					// SS58: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
-					// hex: 0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d
-					// Using the full hex key, truncating to the first 20 bytes (the first 40 hex chars)
-					H160::from_str("8efcaf2c4ebbf88bf07f3bb44a2869c4c675ad7a")
-						.expect("internal H160 is valid; qed"),
-					fp_evm::GenesisAccount {
-						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
-							.expect("internal U256 is valid; qed"),
-						code: Default::default(),
-						nonce: Default::default(),
-						storage: Default::default(),
-					},
-				);
+				let fully_loaded_accounts = get_fully_funded_accounts_for([
+					"8efcaf2c4ebbf88bf07f3bb44a2869c4c675ad7a",
+					"6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b",
+					"5D4ff00Bf77F97E93131a448379f7808D7373026",
+					"b65EA4E162188d199b14da8bc747F24042c36E2C",
+				]);
 
-				map.insert(
-					// Relayer 1
-					H160::from_str("6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b")
-						.expect("internal H160 is valid; qed"),
-					fp_evm::GenesisAccount {
-						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
-							.expect("internal U256 is valid; qed"),
-						code: Default::default(),
-						nonce: Default::default(),
-						storage: Default::default(),
-					},
-				);
+				map.extend(fully_loaded_accounts);
 
-				map.insert(
-					// Relayer 2
-					H160::from_str("5D4ff00Bf77F97E93131a448379f7808D7373026")
-						.expect("internal H160 is valid; qed"),
-					fp_evm::GenesisAccount {
-						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
-							.expect("internal U256 is valid; qed"),
-						code: Default::default(),
-						nonce: Default::default(),
-						storage: Default::default(),
-					},
-				);
-
-				map.insert(
-					// Relayer 3
-					H160::from_str("b65EA4E162188d199b14da8bc747F24042c36E2C")
-						.expect("internal H160 is valid; qed"),
-					fp_evm::GenesisAccount {
-						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
-							.expect("internal U256 is valid; qed"),
-						code: Default::default(),
-						nonce: Default::default(),
-						storage: Default::default(),
-					},
-				);
 				map
 			},
 			..Default::default()
@@ -456,5 +416,44 @@ fn testnet_genesis(
 				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
 			)),
 		},
+		lst: Default::default(),
 	}
+}
+
+fn generate_fully_loaded_evm_account_for(acc: &str) -> (H160, fp_evm::GenesisAccount) {
+	(
+		H160::from_str(acc).expect("internal H160 is valid; qed"),
+		fp_evm::GenesisAccount {
+			balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
+				.expect("internal U256 is valid; qed"),
+			code: Default::default(),
+			nonce: Default::default(),
+			storage: Default::default(),
+		},
+	)
+}
+
+fn get_fully_funded_accounts_for<'a, T: AsRef<[&'a str]>>(
+	addrs: T,
+) -> Vec<(H160, fp_evm::GenesisAccount)> {
+	addrs
+		.as_ref()
+		.iter()
+		.map(|acc| generate_fully_loaded_evm_account_for(acc))
+		.collect()
+}
+
+fn get_testing_default_fully_funded_accounts() -> Vec<(H160, fp_evm::GenesisAccount)> {
+	get_fully_funded_accounts_for([
+		// Alice
+		"E04CC55ebEE1cBCE552f250e85c57B70B2E2625b",
+		// Bob
+		"25451A4de12dcCc2D166922fA938E900fCc4ED24",
+		// Charlie
+		"5630a480727CD7799073b36472d9b1A6031F840b",
+		// Dave
+		"4BB32a4263E369acbB6C020FFA89a41FD9722894",
+		// Eve
+		"362855F7C9C5c9D00A84157CDEfE889FeA436741",
+	])
 }

@@ -16,12 +16,12 @@
 
 /// Functions for the pallet.
 use super::*;
-use crate::types::*;
-use crate::Pallet;
-use frame_support::ensure;
-use frame_support::pallet_prelude::DispatchResult;
-use frame_support::traits::Get;
-use frame_support::traits::ReservableCurrency;
+use crate::{types::*, Pallet};
+use frame_support::{
+	ensure,
+	pallet_prelude::DispatchResult,
+	traits::{Get, ReservableCurrency},
+};
 use sp_runtime::DispatchError;
 use tangle_primitives::ServiceManager;
 
@@ -117,7 +117,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the operator is not found, not in leaving state, or the leaving round has not been reached.
+	/// Returns an error if the operator is not found, not in leaving state, or the leaving round
+	/// has not been reached.
 	pub fn process_execute_leave_operators(who: &T::AccountId) -> Result<(), DispatchError> {
 		let operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		let current_round = Self::current_round();
@@ -192,7 +193,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Errors
 	///
-	/// Returns an error if the operator is not found, has no scheduled stake reduction, or the request is not satisfied.
+	/// Returns an error if the operator is not found, has no scheduled stake reduction, or the
+	/// request is not satisfied.
 	pub fn process_execute_operator_unstake(who: &T::AccountId) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		let request = operator.request.as_ref().ok_or(Error::<T>::NoScheduledBondLess)?;

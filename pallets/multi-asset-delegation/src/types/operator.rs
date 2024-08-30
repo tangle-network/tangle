@@ -84,7 +84,8 @@ pub struct OperatorMetadata<AccountId, Balance, AssetId> {
 	pub stake: Balance,
 	/// The total number of delegations to this operator.
 	pub delegation_count: u32,
-	/// An optional pending request to decrease the operator's self-stake, with only one allowed at any given time.
+	/// An optional pending request to decrease the operator's self-stake, with only one allowed at
+	/// any given time.
 	pub request: Option<OperatorBondLessRequest<Balance>>,
 	/// A list of all current delegations.
 	pub delegations: Vec<DelegatorBond<AccountId, Balance, AssetId>>,

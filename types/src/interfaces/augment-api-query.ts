@@ -853,7 +853,7 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       maxPoolMembersPerPool: AugmentedQuery<ApiType, () => Observable<Option<u32>>, []> & QueryableStorageEntry<ApiType, []>;
       /**
-       * Maximum number of nomination pools that can exist. If `None`, then an unbounded number of
+       * Maximum number of tangle-lst that can exist. If `None`, then an unbounded number of
        * pools can exist.
        **/
       maxPools: AugmentedQuery<ApiType, () => Observable<Option<u32>>, []> & QueryableStorageEntry<ApiType, []>;

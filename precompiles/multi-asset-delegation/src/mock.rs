@@ -17,12 +17,11 @@
 //! Test utilities
 use super::*;
 use crate::{MultiAssetDelegationPrecompile, MultiAssetDelegationPrecompileCall};
-use frame_support::traits::AsEnsureOriginWithArg;
-use frame_support::PalletId;
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU64, Everything},
+	traits::{AsEnsureOriginWithArg, ConstU64, Everything},
 	weights::Weight,
+	PalletId,
 };
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -372,7 +371,8 @@ impl ExtBuilder {
 						(TestAccount::Alex.into(), 1_000_000),
 						(TestAccount::Bobo.into(), 1_000_000),
 						(TestAccount::Charlie.into(), 1_000_000),
-						(MultiAssetDelegation::pallet_account(), 100), // give pallet some ED so it can receive tokens
+						(MultiAssetDelegation::pallet_account(), 100), /* give pallet some ED so
+						                                                * it can receive tokens */
 					]
 					.iter(),
 				)
