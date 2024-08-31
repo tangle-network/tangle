@@ -500,6 +500,25 @@ pub enum ApprovalState {
 	Rejected,
 }
 
+/// Represents the pricing structure for various hardware resources.
+/// All prices are specified in USD/hr, calculated based on the average block time.
+#[derive(
+	PartialEq, Eq, Default, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
+)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct PriceTargets {
+	/// Price per vCPU per hour
+	pub cpu: u64,
+	/// Price per MB of memory per hour
+	pub mem: u64,
+	/// Price per GB of HDD storage per hour
+	pub storage_hdd: u64,
+	/// Price per GB of SSD storage per hour
+	pub storage_ssd: u64,
+	/// Price per GB of NVMe storage per hour
+	pub storage_nvme: u64,
+}
+
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct OperatorPreferences {
@@ -507,6 +526,8 @@ pub struct OperatorPreferences {
 	pub key: ecdsa::Public,
 	/// The approval prefrence of the operator.
 	pub approval: ApprovalPrefrence,
+	/// The pricing targets for the operator's resources.
+	pub price_targets: PriceTargets,
 }
 
 impl OperatorPreferences {

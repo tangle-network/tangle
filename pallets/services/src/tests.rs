@@ -32,6 +32,36 @@ fn zero_key() -> ecdsa::Public {
 	ecdsa::Public([0; 33])
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MachineKind {
+	T4Large,
+	T4Medium,
+	T4Small,
+}
+
+/// All prices are specified in USD/hr (in u64, so 1e6 = 1$)
+fn price_targets(kind: MachineKind) -> PriceTargets {
+	match kind {
+		MachineKind::T4Large => PriceTargets {
+			cpu: 2_000,
+			mem: 1_000,
+			storage_hdd: 100,
+			storage_ssd: 200,
+			storage_nvme: 300,
+		},
+		MachineKind::T4Medium => PriceTargets {
+			cpu: 1_000,
+			mem: 500,
+			storage_hdd: 50,
+			storage_ssd: 100,
+			storage_nvme: 150,
+		},
+		MachineKind::T4Small => {
+			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 }
+		},
+	}
+}
+
 fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
@@ -91,7 +121,11 @@ fn register_on_blueprint() {
 		let registration_call = Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: price_targets(MachineKind::T4Large),
+			},
 			Default::default(),
 		);
 		assert_ok!(registration_call);
@@ -102,6 +136,7 @@ fn register_on_blueprint() {
 			preferences: OperatorPreferences {
 				key: zero_key(),
 				approval: ApprovalPrefrence::default(),
+				price_targets: price_targets(MachineKind::T4Large),
 			},
 			registration_args: Default::default(),
 		})]);
@@ -115,7 +150,11 @@ fn register_on_blueprint() {
 			Services::register(
 				RuntimeOrigin::signed(bob),
 				0,
-				OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+				OperatorPreferences {
+					key: zero_key(),
+					approval: ApprovalPrefrence::default(),
+					price_targets: Default::default()
+				},
 				Default::default(),
 			),
 			crate::Error::<Runtime>::AlreadyRegistered
@@ -126,7 +165,11 @@ fn register_on_blueprint() {
 			Services::register(
 				RuntimeOrigin::signed(mock_pub_key(10)),
 				0,
-				OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+				OperatorPreferences {
+					key: zero_key(),
+					approval: ApprovalPrefrence::default(),
+					price_targets: Default::default()
+				},
 				Default::default(),
 			),
 			crate::Error::<Runtime>::OperatorNotActive
@@ -171,13 +214,21 @@ fn update_approval_preference() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: price_targets(MachineKind::T4Small)
+			},
 			Default::default(),
 		));
 
 		assert_eq!(
 			Operators::<Runtime>::get(0, &bob).unwrap(),
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: price_targets(MachineKind::T4Small)
+			}
 		);
 
 		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
@@ -186,6 +237,7 @@ fn update_approval_preference() {
 			preferences: OperatorPreferences {
 				key: zero_key(),
 				approval: ApprovalPrefrence::default(),
+				price_targets: price_targets(MachineKind::T4Small),
 			},
 			registration_args: Default::default(),
 		})]);
@@ -233,7 +285,11 @@ fn unregister_from_blueprint() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 		assert_ok!(Services::unregister(RuntimeOrigin::signed(bob.clone()), 0));
@@ -268,21 +324,33 @@ fn request_service() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 
@@ -327,7 +395,11 @@ fn request_service_with_approval_process() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 
@@ -335,7 +407,11 @@ fn request_service_with_approval_process() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::Required },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::Required,
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 
@@ -343,7 +419,11 @@ fn request_service_with_approval_process() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::Required },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::Required,
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 
@@ -426,21 +506,33 @@ fn job_calls() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 
@@ -494,21 +586,33 @@ fn job_calls_fails_with_invalid_input() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 
@@ -559,21 +663,33 @@ fn job_result() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: Default::default()
+			},
 			Default::default(),
 		));
 
