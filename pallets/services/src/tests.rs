@@ -274,6 +274,80 @@ fn update_approval_preference() {
 }
 
 #[test]
+fn update_price_targets() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let alice = mock_pub_key(ALICE);
+
+		let blueprint = cggmp21_blueprint();
+
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		let bob = mock_pub_key(BOB);
+
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: price_targets(MachineKind::T4Small)
+			},
+			Default::default(),
+		));
+
+		assert_eq!(
+			Operators::<Runtime>::get(0, &bob).unwrap(),
+			OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: price_targets(MachineKind::T4Small)
+			}
+		);
+
+		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
+			provider: bob.clone(),
+			blueprint_id: 0,
+			preferences: OperatorPreferences {
+				key: zero_key(),
+				approval: ApprovalPrefrence::default(),
+				price_targets: price_targets(MachineKind::T4Small),
+			},
+			registration_args: Default::default(),
+		})]);
+
+		// update price targets
+		assert_ok!(Services::update_price_targets(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			price_targets(MachineKind::T4Medium),
+		));
+
+		assert_eq!(
+			Operators::<Runtime>::get(0, &bob).unwrap().price_targets,
+			price_targets(MachineKind::T4Medium)
+		);
+
+		assert_events(vec![RuntimeEvent::Services(crate::Event::PriceTargetsUpdated {
+			operator: bob,
+			blueprint_id: 0,
+			price_targets: price_targets(MachineKind::T4Medium),
+		})]);
+
+		// try to update price targets when not registered
+		let charlie = mock_pub_key(CHARLIE);
+		assert_err!(
+			Services::update_price_targets(
+				RuntimeOrigin::signed(charlie),
+				0,
+				price_targets(MachineKind::T4Medium)
+			),
+			crate::Error::<Runtime>::NotRegistered
+		);
+	});
+}
+
+#[test]
 fn unregister_from_blueprint() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
