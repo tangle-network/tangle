@@ -6,7 +6,7 @@ pub mod api {
 	mod root_mod {
 		pub use super::*;
 	}
-	pub static PALLETS: [&str; 47usize] = [
+	pub static PALLETS: [&str; 48usize] = [
 		"System",
 		"Timestamp",
 		"Sudo",
@@ -49,6 +49,7 @@ pub mod api {
 		"Proxy",
 		"MultiAssetDelegation",
 		"Services",
+		"Lst",
 		"SygmaAccessSegregator",
 		"SygmaBasicFeeHandler",
 		"SygmaFeeHandlerRouter",
@@ -3081,6 +3082,9 @@ pub mod api {
 		pub fn services(&self) -> services::constants::ConstantsApi {
 			services::constants::ConstantsApi
 		}
+		pub fn lst(&self) -> lst::constants::ConstantsApi {
+			lst::constants::ConstantsApi
+		}
 		pub fn sygma_bridge(&self) -> sygma_bridge::constants::ConstantsApi {
 			sygma_bridge::constants::ConstantsApi
 		}
@@ -3210,6 +3214,9 @@ pub mod api {
 		}
 		pub fn services(&self) -> services::storage::StorageApi {
 			services::storage::StorageApi
+		}
+		pub fn lst(&self) -> lst::storage::StorageApi {
+			lst::storage::StorageApi
 		}
 		pub fn sygma_access_segregator(&self) -> sygma_access_segregator::storage::StorageApi {
 			sygma_access_segregator::storage::StorageApi
@@ -3341,6 +3348,9 @@ pub mod api {
 		pub fn services(&self) -> services::calls::TransactionApi {
 			services::calls::TransactionApi
 		}
+		pub fn lst(&self) -> lst::calls::TransactionApi {
+			lst::calls::TransactionApi
+		}
 		pub fn sygma_access_segregator(&self) -> sygma_access_segregator::calls::TransactionApi {
 			sygma_access_segregator::calls::TransactionApi
 		}
@@ -3368,9 +3378,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				128u8, 134u8, 9u8, 124u8, 117u8, 221u8, 39u8, 155u8, 192u8, 9u8, 116u8, 151u8,
-				32u8, 230u8, 50u8, 201u8, 252u8, 122u8, 123u8, 162u8, 202u8, 241u8, 118u8, 192u8,
-				51u8, 88u8, 212u8, 212u8, 87u8, 103u8, 96u8, 238u8,
+				77u8, 32u8, 11u8, 79u8, 216u8, 97u8, 42u8, 114u8, 253u8, 48u8, 54u8, 186u8, 211u8,
+				80u8, 235u8, 176u8, 209u8, 215u8, 142u8, 6u8, 137u8, 112u8, 246u8, 154u8, 32u8,
+				136u8, 139u8, 164u8, 246u8, 32u8, 107u8, 193u8,
 			]
 	}
 	pub mod system {
@@ -4478,10 +4488,9 @@ pub mod api {
 						"Events",
 						(),
 						[
-							228u8, 116u8, 110u8, 111u8, 244u8, 120u8, 88u8, 210u8, 39u8, 111u8,
-							15u8, 221u8, 26u8, 224u8, 16u8, 59u8, 80u8, 4u8, 240u8, 208u8, 0u8,
-							94u8, 13u8, 246u8, 233u8, 231u8, 182u8, 86u8, 135u8, 199u8, 192u8,
-							224u8,
+							156u8, 8u8, 199u8, 70u8, 240u8, 56u8, 34u8, 196u8, 75u8, 150u8, 233u8,
+							114u8, 47u8, 113u8, 63u8, 121u8, 206u8, 248u8, 222u8, 4u8, 223u8, 41u8,
+							91u8, 74u8, 133u8, 56u8, 9u8, 168u8, 107u8, 130u8, 206u8, 130u8,
 						],
 					)
 				}
@@ -5123,10 +5132,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							117u8, 98u8, 165u8, 228u8, 188u8, 83u8, 90u8, 189u8, 192u8, 12u8,
-							118u8, 203u8, 99u8, 221u8, 9u8, 155u8, 215u8, 99u8, 117u8, 128u8, 37u8,
-							242u8, 199u8, 63u8, 228u8, 84u8, 124u8, 151u8, 125u8, 126u8, 74u8,
-							130u8,
+							111u8, 193u8, 188u8, 116u8, 87u8, 85u8, 23u8, 4u8, 252u8, 226u8, 165u8,
+							136u8, 111u8, 132u8, 252u8, 66u8, 208u8, 165u8, 195u8, 116u8, 46u8,
+							69u8, 156u8, 58u8, 56u8, 56u8, 135u8, 179u8, 235u8, 252u8, 58u8, 235u8,
 						],
 					)
 				}
@@ -5145,9 +5153,9 @@ pub mod api {
 							weight,
 						},
 						[
-							15u8, 210u8, 52u8, 143u8, 79u8, 53u8, 133u8, 220u8, 81u8, 32u8, 213u8,
-							38u8, 36u8, 23u8, 108u8, 61u8, 124u8, 103u8, 188u8, 155u8, 34u8, 250u8,
-							7u8, 133u8, 22u8, 221u8, 106u8, 194u8, 233u8, 111u8, 8u8, 47u8,
+							139u8, 204u8, 187u8, 133u8, 233u8, 44u8, 119u8, 198u8, 97u8, 232u8,
+							110u8, 47u8, 21u8, 207u8, 186u8, 41u8, 165u8, 210u8, 44u8, 184u8, 89u8,
+							93u8, 27u8, 167u8, 138u8, 31u8, 47u8, 151u8, 246u8, 38u8, 90u8, 87u8,
 						],
 					)
 				}
@@ -5182,10 +5190,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							26u8, 167u8, 225u8, 135u8, 233u8, 156u8, 106u8, 222u8, 72u8, 22u8,
-							169u8, 166u8, 62u8, 33u8, 169u8, 251u8, 141u8, 124u8, 113u8, 251u8,
-							113u8, 86u8, 40u8, 3u8, 123u8, 4u8, 178u8, 10u8, 43u8, 80u8, 176u8,
-							202u8,
+							76u8, 6u8, 45u8, 31u8, 21u8, 30u8, 102u8, 214u8, 128u8, 208u8, 18u8,
+							188u8, 147u8, 2u8, 236u8, 213u8, 197u8, 140u8, 76u8, 195u8, 137u8, 1u8,
+							144u8, 103u8, 86u8, 27u8, 63u8, 123u8, 18u8, 66u8, 211u8, 70u8,
 						],
 					)
 				}
@@ -8558,13 +8565,13 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
-				#[doc = "See [`Pallet::force_make_free_balance_be`]."]
+				#[doc = "See [`Pallet::force_set_balance`]."]
 				pub struct ForceSetBalance {
-					pub who: force_make_free_balance_be::Who,
+					pub who: force_set_balance::Who,
 					#[codec(compact)]
-					pub new_free: force_make_free_balance_be::NewFree,
+					pub new_free: force_set_balance::NewFree,
 				}
-				pub mod force_make_free_balance_be {
+				pub mod force_set_balance {
 					use super::runtime_types;
 					pub type Who = ::subxt::ext::subxt_core::utils::MultiAddress<
 						::subxt::ext::subxt_core::utils::AccountId32,
@@ -8574,7 +8581,7 @@ pub mod api {
 				}
 				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ForceSetBalance {
 					const PALLET: &'static str = "Balances";
-					const CALL: &'static str = "force_make_free_balance_be";
+					const CALL: &'static str = "force_set_balance";
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -8718,15 +8725,15 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "See [`Pallet::force_make_free_balance_be`]."]
-				pub fn force_make_free_balance_be(
+				#[doc = "See [`Pallet::force_set_balance`]."]
+				pub fn force_set_balance(
 					&self,
-					who: types::force_make_free_balance_be::Who,
-					new_free: types::force_make_free_balance_be::NewFree,
+					who: types::force_set_balance::Who,
+					new_free: types::force_set_balance::NewFree,
 				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceSetBalance> {
 					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
 						"Balances",
-						"force_make_free_balance_be",
+						"force_set_balance",
 						types::ForceSetBalance { who, new_free },
 						[
 							101u8, 181u8, 86u8, 32u8, 61u8, 75u8, 34u8, 164u8, 142u8, 250u8, 7u8,
@@ -9717,9 +9724,9 @@ pub mod api {
 						"Freezes",
 						(),
 						[
-							251u8, 45u8, 163u8, 52u8, 152u8, 182u8, 26u8, 38u8, 143u8, 138u8, 9u8,
-							249u8, 58u8, 31u8, 124u8, 3u8, 194u8, 161u8, 148u8, 250u8, 53u8, 166u8,
-							90u8, 150u8, 37u8, 246u8, 110u8, 43u8, 114u8, 71u8, 180u8, 237u8,
+							17u8, 244u8, 16u8, 167u8, 197u8, 87u8, 174u8, 75u8, 172u8, 154u8,
+							157u8, 40u8, 70u8, 169u8, 39u8, 30u8, 253u8, 1u8, 74u8, 227u8, 122u8,
+							163u8, 192u8, 2u8, 101u8, 4u8, 164u8, 187u8, 127u8, 117u8, 41u8, 192u8,
 						],
 					)
 				}
@@ -9743,9 +9750,9 @@ pub mod api {
 							_0.borrow(),
 						),
 						[
-							251u8, 45u8, 163u8, 52u8, 152u8, 182u8, 26u8, 38u8, 143u8, 138u8, 9u8,
-							249u8, 58u8, 31u8, 124u8, 3u8, 194u8, 161u8, 148u8, 250u8, 53u8, 166u8,
-							90u8, 150u8, 37u8, 246u8, 110u8, 43u8, 114u8, 71u8, 180u8, 237u8,
+							17u8, 244u8, 16u8, 167u8, 197u8, 87u8, 174u8, 75u8, 172u8, 154u8,
+							157u8, 40u8, 70u8, 169u8, 39u8, 30u8, 253u8, 1u8, 74u8, 227u8, 122u8,
+							163u8, 192u8, 2u8, 101u8, 4u8, 164u8, 187u8, 127u8, 117u8, 41u8, 192u8,
 						],
 					)
 				}
@@ -14217,10 +14224,9 @@ pub mod api {
 							length_bound,
 						},
 						[
-							182u8, 137u8, 121u8, 246u8, 71u8, 74u8, 57u8, 133u8, 52u8, 202u8,
-							215u8, 129u8, 209u8, 142u8, 137u8, 107u8, 16u8, 74u8, 137u8, 211u8,
-							29u8, 151u8, 86u8, 54u8, 91u8, 69u8, 35u8, 38u8, 211u8, 60u8, 106u8,
-							108u8,
+							11u8, 99u8, 230u8, 108u8, 197u8, 212u8, 209u8, 117u8, 107u8, 223u8,
+							227u8, 213u8, 81u8, 143u8, 138u8, 41u8, 192u8, 8u8, 4u8, 172u8, 84u8,
+							167u8, 213u8, 7u8, 222u8, 224u8, 240u8, 75u8, 190u8, 48u8, 69u8, 72u8,
 						],
 					)
 				}
@@ -14240,10 +14246,9 @@ pub mod api {
 							length_bound,
 						},
 						[
-							228u8, 220u8, 81u8, 202u8, 74u8, 47u8, 205u8, 176u8, 199u8, 63u8,
-							228u8, 198u8, 113u8, 115u8, 243u8, 240u8, 150u8, 63u8, 177u8, 127u8,
-							188u8, 190u8, 159u8, 172u8, 105u8, 114u8, 95u8, 235u8, 163u8, 170u8,
-							10u8, 211u8,
+							82u8, 124u8, 185u8, 152u8, 9u8, 24u8, 6u8, 160u8, 229u8, 238u8, 170u8,
+							75u8, 111u8, 70u8, 32u8, 251u8, 108u8, 98u8, 143u8, 31u8, 229u8, 129u8,
+							50u8, 40u8, 202u8, 228u8, 65u8, 101u8, 31u8, 245u8, 157u8, 133u8,
 						],
 					)
 				}
@@ -14587,9 +14592,9 @@ pub mod api {
 						"ProposalOf",
 						(),
 						[
-							121u8, 61u8, 152u8, 60u8, 41u8, 249u8, 72u8, 84u8, 176u8, 240u8, 131u8,
-							79u8, 80u8, 98u8, 206u8, 204u8, 235u8, 207u8, 237u8, 32u8, 77u8, 142u8,
-							175u8, 87u8, 215u8, 105u8, 239u8, 193u8, 202u8, 165u8, 93u8, 182u8,
+							0u8, 127u8, 95u8, 6u8, 29u8, 131u8, 253u8, 26u8, 170u8, 150u8, 188u8,
+							140u8, 206u8, 250u8, 16u8, 248u8, 57u8, 55u8, 23u8, 130u8, 119u8, 46u8,
+							29u8, 191u8, 121u8, 87u8, 100u8, 162u8, 158u8, 228u8, 5u8, 230u8,
 						],
 					)
 				}
@@ -14613,9 +14618,9 @@ pub mod api {
 							_0.borrow(),
 						),
 						[
-							121u8, 61u8, 152u8, 60u8, 41u8, 249u8, 72u8, 84u8, 176u8, 240u8, 131u8,
-							79u8, 80u8, 98u8, 206u8, 204u8, 235u8, 207u8, 237u8, 32u8, 77u8, 142u8,
-							175u8, 87u8, 215u8, 105u8, 239u8, 193u8, 202u8, 165u8, 93u8, 182u8,
+							0u8, 127u8, 95u8, 6u8, 29u8, 131u8, 253u8, 26u8, 170u8, 150u8, 188u8,
+							140u8, 206u8, 250u8, 16u8, 248u8, 57u8, 55u8, 23u8, 130u8, 119u8, 46u8,
+							29u8, 191u8, 121u8, 87u8, 100u8, 162u8, 158u8, 228u8, 5u8, 230u8,
 						],
 					)
 				}
@@ -27545,7 +27550,7 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Maximum number of tangle-lst that can exist. If `None`, then an unbounded number of"]
+				#[doc = " Maximum number of nomination pools that can exist. If `None`, then an unbounded number of"]
 				#[doc = " pools can exist."]
 				pub fn max_pools(
 					&self,
@@ -28452,9 +28457,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							102u8, 60u8, 114u8, 209u8, 7u8, 157u8, 180u8, 228u8, 231u8, 41u8,
-							137u8, 253u8, 217u8, 129u8, 105u8, 46u8, 84u8, 47u8, 234u8, 73u8, 55u8,
-							213u8, 81u8, 62u8, 36u8, 117u8, 48u8, 121u8, 119u8, 92u8, 55u8, 51u8,
+							44u8, 175u8, 41u8, 120u8, 179u8, 53u8, 169u8, 36u8, 243u8, 56u8, 118u8,
+							10u8, 27u8, 225u8, 122u8, 42u8, 226u8, 197u8, 86u8, 3u8, 9u8, 29u8,
+							204u8, 52u8, 195u8, 145u8, 88u8, 88u8, 124u8, 57u8, 5u8, 115u8,
 						],
 					)
 				}
@@ -28496,9 +28501,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							6u8, 118u8, 29u8, 79u8, 40u8, 29u8, 82u8, 147u8, 28u8, 124u8, 41u8,
-							46u8, 153u8, 117u8, 232u8, 207u8, 104u8, 134u8, 12u8, 221u8, 61u8,
-							49u8, 228u8, 67u8, 81u8, 193u8, 251u8, 26u8, 204u8, 134u8, 239u8, 30u8,
+							147u8, 255u8, 199u8, 72u8, 153u8, 127u8, 10u8, 37u8, 186u8, 58u8,
+							157u8, 11u8, 142u8, 99u8, 48u8, 79u8, 53u8, 163u8, 3u8, 138u8, 51u8,
+							139u8, 157u8, 233u8, 115u8, 179u8, 95u8, 229u8, 240u8, 130u8, 101u8,
+							102u8,
 						],
 					)
 				}
@@ -28536,9 +28542,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							79u8, 68u8, 66u8, 156u8, 11u8, 18u8, 212u8, 223u8, 252u8, 208u8, 8u8,
-							88u8, 119u8, 249u8, 73u8, 181u8, 77u8, 152u8, 47u8, 206u8, 43u8, 146u8,
-							245u8, 125u8, 83u8, 139u8, 143u8, 170u8, 172u8, 182u8, 27u8, 209u8,
+							91u8, 76u8, 132u8, 188u8, 222u8, 94u8, 27u8, 20u8, 190u8, 185u8, 88u8,
+							173u8, 166u8, 94u8, 231u8, 87u8, 8u8, 58u8, 252u8, 33u8, 156u8, 146u8,
+							173u8, 76u8, 65u8, 135u8, 202u8, 47u8, 76u8, 128u8, 188u8, 168u8,
 						],
 					)
 				}
@@ -28563,10 +28569,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							52u8, 82u8, 211u8, 68u8, 235u8, 176u8, 192u8, 175u8, 221u8, 19u8,
-							163u8, 99u8, 185u8, 212u8, 116u8, 66u8, 68u8, 119u8, 224u8, 94u8,
-							200u8, 97u8, 190u8, 71u8, 239u8, 1u8, 65u8, 65u8, 230u8, 137u8, 165u8,
-							148u8,
+							34u8, 209u8, 132u8, 153u8, 129u8, 245u8, 232u8, 7u8, 167u8, 194u8,
+							66u8, 104u8, 56u8, 85u8, 56u8, 0u8, 45u8, 88u8, 32u8, 108u8, 61u8,
+							163u8, 117u8, 106u8, 86u8, 119u8, 47u8, 25u8, 0u8, 65u8, 174u8, 85u8,
 						],
 					)
 				}
@@ -32813,10 +32818,9 @@ pub mod api {
 						"batch",
 						types::Batch { calls },
 						[
-							98u8, 67u8, 186u8, 176u8, 91u8, 249u8, 198u8, 125u8, 104u8, 112u8,
-							218u8, 61u8, 213u8, 16u8, 106u8, 93u8, 1u8, 5u8, 151u8, 112u8, 239u8,
-							82u8, 221u8, 100u8, 234u8, 131u8, 223u8, 134u8, 20u8, 10u8, 40u8,
-							132u8,
+							191u8, 44u8, 136u8, 1u8, 55u8, 65u8, 35u8, 104u8, 66u8, 126u8, 4u8,
+							68u8, 175u8, 161u8, 68u8, 222u8, 195u8, 131u8, 31u8, 20u8, 77u8, 132u8,
+							2u8, 188u8, 13u8, 240u8, 71u8, 93u8, 83u8, 161u8, 23u8, 28u8,
 						],
 					)
 				}
@@ -32834,9 +32838,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							75u8, 131u8, 234u8, 115u8, 53u8, 214u8, 29u8, 7u8, 1u8, 112u8, 9u8,
-							23u8, 88u8, 44u8, 143u8, 219u8, 73u8, 24u8, 189u8, 81u8, 93u8, 11u8,
-							43u8, 57u8, 9u8, 198u8, 139u8, 63u8, 12u8, 141u8, 160u8, 230u8,
+							32u8, 82u8, 110u8, 173u8, 207u8, 120u8, 94u8, 55u8, 191u8, 11u8, 146u8,
+							127u8, 189u8, 210u8, 195u8, 200u8, 45u8, 216u8, 60u8, 8u8, 35u8, 180u8,
+							11u8, 11u8, 113u8, 230u8, 246u8, 107u8, 121u8, 233u8, 158u8, 14u8,
 						],
 					)
 				}
@@ -32850,9 +32854,9 @@ pub mod api {
 						"batch_all",
 						types::BatchAll { calls },
 						[
-							101u8, 190u8, 197u8, 138u8, 148u8, 55u8, 81u8, 234u8, 43u8, 82u8, 56u8,
-							191u8, 46u8, 197u8, 51u8, 223u8, 206u8, 71u8, 176u8, 93u8, 8u8, 124u8,
-							37u8, 252u8, 246u8, 157u8, 75u8, 171u8, 4u8, 30u8, 153u8, 53u8,
+							123u8, 254u8, 176u8, 135u8, 4u8, 47u8, 95u8, 163u8, 112u8, 134u8, 80u8,
+							105u8, 101u8, 23u8, 62u8, 160u8, 149u8, 184u8, 54u8, 90u8, 194u8, 20u8,
+							7u8, 40u8, 6u8, 210u8, 50u8, 168u8, 30u8, 159u8, 225u8, 209u8,
 						],
 					)
 				}
@@ -32870,10 +32874,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							219u8, 119u8, 100u8, 222u8, 47u8, 65u8, 243u8, 186u8, 13u8, 171u8,
-							149u8, 136u8, 211u8, 136u8, 150u8, 45u8, 23u8, 80u8, 231u8, 248u8,
-							88u8, 120u8, 131u8, 204u8, 55u8, 71u8, 43u8, 25u8, 170u8, 204u8, 110u8,
-							144u8,
+							199u8, 251u8, 59u8, 77u8, 110u8, 117u8, 53u8, 93u8, 28u8, 208u8, 245u8,
+							90u8, 201u8, 188u8, 14u8, 109u8, 151u8, 158u8, 252u8, 47u8, 184u8,
+							250u8, 244u8, 179u8, 13u8, 125u8, 188u8, 186u8, 15u8, 83u8, 167u8,
+							246u8,
 						],
 					)
 				}
@@ -32887,9 +32891,9 @@ pub mod api {
 						"force_batch",
 						types::ForceBatch { calls },
 						[
-							231u8, 68u8, 90u8, 79u8, 223u8, 178u8, 249u8, 188u8, 0u8, 144u8, 238u8,
-							238u8, 189u8, 207u8, 203u8, 160u8, 25u8, 245u8, 141u8, 44u8, 0u8, 50u8,
-							51u8, 214u8, 5u8, 9u8, 175u8, 7u8, 207u8, 60u8, 143u8, 192u8,
+							49u8, 76u8, 129u8, 56u8, 79u8, 193u8, 115u8, 93u8, 203u8, 248u8, 13u8,
+							156u8, 82u8, 255u8, 168u8, 8u8, 86u8, 163u8, 105u8, 219u8, 7u8, 91u8,
+							94u8, 27u8, 134u8, 54u8, 38u8, 120u8, 73u8, 119u8, 24u8, 85u8,
 						],
 					)
 				}
@@ -32907,10 +32911,9 @@ pub mod api {
 							weight,
 						},
 						[
-							160u8, 136u8, 231u8, 133u8, 221u8, 89u8, 163u8, 148u8, 112u8, 59u8,
-							59u8, 89u8, 0u8, 19u8, 90u8, 94u8, 206u8, 25u8, 111u8, 12u8, 73u8,
-							31u8, 188u8, 112u8, 198u8, 4u8, 77u8, 207u8, 121u8, 195u8, 124u8,
-							132u8,
+							203u8, 140u8, 65u8, 33u8, 29u8, 188u8, 76u8, 25u8, 45u8, 164u8, 245u8,
+							15u8, 67u8, 216u8, 216u8, 182u8, 224u8, 242u8, 213u8, 230u8, 172u8,
+							97u8, 205u8, 3u8, 33u8, 181u8, 154u8, 153u8, 148u8, 31u8, 88u8, 90u8,
 						],
 					)
 				}
@@ -33266,10 +33269,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							81u8, 207u8, 134u8, 129u8, 34u8, 205u8, 197u8, 109u8, 114u8, 87u8,
-							223u8, 190u8, 28u8, 29u8, 55u8, 76u8, 183u8, 249u8, 11u8, 239u8, 20u8,
-							144u8, 177u8, 201u8, 153u8, 19u8, 122u8, 30u8, 105u8, 188u8, 57u8,
-							23u8,
+							178u8, 110u8, 214u8, 138u8, 190u8, 242u8, 150u8, 110u8, 201u8, 15u8,
+							175u8, 3u8, 179u8, 216u8, 226u8, 158u8, 52u8, 6u8, 45u8, 240u8, 225u8,
+							119u8, 200u8, 32u8, 12u8, 100u8, 98u8, 27u8, 153u8, 197u8, 223u8, 82u8,
 						],
 					)
 				}
@@ -33293,9 +33295,9 @@ pub mod api {
 							max_weight,
 						},
 						[
-							187u8, 96u8, 66u8, 149u8, 4u8, 237u8, 86u8, 108u8, 35u8, 35u8, 203u8,
-							87u8, 165u8, 117u8, 99u8, 59u8, 94u8, 170u8, 244u8, 34u8, 38u8, 33u8,
-							19u8, 99u8, 117u8, 164u8, 218u8, 1u8, 48u8, 2u8, 110u8, 14u8,
+							248u8, 174u8, 81u8, 191u8, 117u8, 81u8, 32u8, 253u8, 48u8, 46u8, 172u8,
+							83u8, 250u8, 100u8, 152u8, 206u8, 233u8, 48u8, 227u8, 141u8, 229u8,
+							153u8, 98u8, 42u8, 94u8, 135u8, 90u8, 80u8, 212u8, 50u8, 114u8, 16u8,
 						],
 					)
 				}
@@ -36098,10 +36100,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							229u8, 63u8, 145u8, 255u8, 229u8, 113u8, 81u8, 85u8, 83u8, 23u8, 48u8,
-							71u8, 206u8, 226u8, 44u8, 205u8, 113u8, 145u8, 212u8, 219u8, 213u8,
-							109u8, 117u8, 206u8, 99u8, 190u8, 35u8, 12u8, 169u8, 241u8, 221u8,
-							82u8,
+							34u8, 211u8, 106u8, 127u8, 58u8, 41u8, 20u8, 186u8, 95u8, 110u8, 6u8,
+							119u8, 44u8, 208u8, 20u8, 196u8, 188u8, 97u8, 21u8, 109u8, 134u8,
+							123u8, 47u8, 121u8, 212u8, 192u8, 243u8, 189u8, 15u8, 188u8, 132u8,
+							104u8,
 						],
 					)
 				}
@@ -36266,9 +36268,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							179u8, 199u8, 52u8, 65u8, 83u8, 147u8, 22u8, 126u8, 113u8, 199u8, 61u8,
-							72u8, 81u8, 241u8, 32u8, 134u8, 9u8, 53u8, 175u8, 28u8, 68u8, 180u8,
-							255u8, 116u8, 26u8, 131u8, 145u8, 4u8, 198u8, 148u8, 40u8, 216u8,
+							106u8, 253u8, 204u8, 27u8, 204u8, 202u8, 166u8, 77u8, 104u8, 244u8,
+							52u8, 200u8, 199u8, 196u8, 204u8, 169u8, 29u8, 33u8, 124u8, 86u8, 79u8,
+							231u8, 157u8, 209u8, 225u8, 130u8, 254u8, 255u8, 16u8, 21u8, 97u8,
+							47u8,
 						],
 					)
 				}
@@ -38563,7 +38566,8 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Storage for the reward configuration, which includes APY, cap for assets, and whitelisted blueprints."]
+				#[doc = " Storage for the reward configuration, which includes APY, cap for assets, and whitelisted"]
+				#[doc = " blueprints."]
 				pub fn reward_config_storage(
 					&self,
 				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
@@ -38902,6 +38906,39 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
+				#[doc = "See `Pallet::update_price_targets`."]
+				pub struct UpdatePriceTargets {
+					#[codec(compact)]
+					pub blueprint_id: update_price_targets::BlueprintId,
+					pub price_targets: update_price_targets::PriceTargets,
+				}
+				pub mod update_price_targets {
+					use super::runtime_types;
+					pub type BlueprintId = ::core::primitive::u64;
+					pub type PriceTargets =
+						runtime_types::tangle_primitives::services::PriceTargets;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for UpdatePriceTargets {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "update_price_targets";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
 				#[doc = "See `Pallet::request`."]
 				pub struct Request {
 					#[codec(compact)]
@@ -39147,10 +39184,9 @@ pub mod api {
 						"register",
 						types::Register { blueprint_id, preferences, registration_args },
 						[
-							204u8, 245u8, 91u8, 161u8, 225u8, 220u8, 59u8, 68u8, 189u8, 32u8,
-							170u8, 218u8, 247u8, 143u8, 130u8, 136u8, 73u8, 156u8, 60u8, 154u8,
-							135u8, 35u8, 244u8, 12u8, 137u8, 55u8, 63u8, 108u8, 154u8, 230u8,
-							218u8, 26u8,
+							32u8, 150u8, 193u8, 155u8, 84u8, 57u8, 93u8, 144u8, 60u8, 57u8, 21u8,
+							120u8, 98u8, 99u8, 182u8, 114u8, 70u8, 55u8, 52u8, 123u8, 117u8, 117u8,
+							210u8, 232u8, 61u8, 174u8, 71u8, 189u8, 69u8, 240u8, 198u8, 80u8,
 						],
 					)
 				}
@@ -39186,6 +39222,25 @@ pub mod api {
 							150u8, 101u8, 19u8, 2u8, 197u8, 0u8, 109u8, 208u8, 93u8, 192u8, 3u8,
 							1u8, 129u8, 181u8, 28u8, 50u8, 249u8, 87u8, 137u8, 22u8, 63u8, 189u8,
 							220u8, 24u8, 120u8, 130u8, 181u8, 203u8, 253u8, 107u8, 4u8, 159u8,
+						],
+					)
+				}
+				#[doc = "See `Pallet::update_price_targets`."]
+				pub fn update_price_targets(
+					&self,
+					blueprint_id: types::update_price_targets::BlueprintId,
+					price_targets: types::update_price_targets::PriceTargets,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::UpdatePriceTargets>
+				{
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Services",
+						"update_price_targets",
+						types::UpdatePriceTargets { blueprint_id, price_targets },
+						[
+							64u8, 243u8, 239u8, 182u8, 174u8, 160u8, 96u8, 140u8, 62u8, 187u8,
+							247u8, 111u8, 78u8, 96u8, 33u8, 159u8, 95u8, 203u8, 204u8, 31u8, 254u8,
+							57u8, 114u8, 219u8, 245u8, 19u8, 201u8, 6u8, 205u8, 145u8, 138u8,
+							100u8,
 						],
 					)
 				}
@@ -39455,6 +39510,35 @@ pub mod api {
 			impl ::subxt::ext::subxt_core::events::StaticEvent for ApprovalPreferenceUpdated {
 				const PALLET: &'static str = "Services";
 				const EVENT: &'static str = "ApprovalPreferenceUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "The approval preference for an operator has been updated."]
+			pub struct PriceTargetsUpdated {
+				pub operator: price_targets_updated::Operator,
+				pub blueprint_id: price_targets_updated::BlueprintId,
+				pub price_targets: price_targets_updated::PriceTargets,
+			}
+			pub mod price_targets_updated {
+				use super::runtime_types;
+				pub type Operator = ::subxt::ext::subxt_core::utils::AccountId32;
+				pub type BlueprintId = ::core::primitive::u64;
+				pub type PriceTargets = runtime_types::tangle_primitives::services::PriceTargets;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for PriceTargetsUpdated {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "PriceTargetsUpdated";
 			}
 			#[derive(
 				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -40025,9 +40109,10 @@ pub mod api {
 						"Operators",
 						(),
 						[
-							175u8, 94u8, 215u8, 216u8, 65u8, 112u8, 95u8, 19u8, 154u8, 48u8, 102u8,
-							133u8, 46u8, 197u8, 71u8, 61u8, 81u8, 196u8, 91u8, 54u8, 24u8, 207u8,
-							36u8, 18u8, 55u8, 216u8, 100u8, 66u8, 39u8, 55u8, 47u8, 203u8,
+							146u8, 167u8, 203u8, 100u8, 197u8, 156u8, 220u8, 145u8, 216u8, 131u8,
+							75u8, 161u8, 39u8, 130u8, 161u8, 217u8, 239u8, 47u8, 24u8, 151u8,
+							227u8, 219u8, 186u8, 51u8, 105u8, 181u8, 163u8, 25u8, 121u8, 57u8,
+							59u8, 142u8,
 						],
 					)
 				}
@@ -40052,9 +40137,10 @@ pub mod api {
 							_0.borrow(),
 						),
 						[
-							175u8, 94u8, 215u8, 216u8, 65u8, 112u8, 95u8, 19u8, 154u8, 48u8, 102u8,
-							133u8, 46u8, 197u8, 71u8, 61u8, 81u8, 196u8, 91u8, 54u8, 24u8, 207u8,
-							36u8, 18u8, 55u8, 216u8, 100u8, 66u8, 39u8, 55u8, 47u8, 203u8,
+							146u8, 167u8, 203u8, 100u8, 197u8, 156u8, 220u8, 145u8, 216u8, 131u8,
+							75u8, 161u8, 39u8, 130u8, 161u8, 217u8, 239u8, 47u8, 24u8, 151u8,
+							227u8, 219u8, 186u8, 51u8, 105u8, 181u8, 163u8, 25u8, 121u8, 57u8,
+							59u8, 142u8,
 						],
 					)
 				}
@@ -40090,9 +40176,10 @@ pub mod api {
 							),
 						),
 						[
-							175u8, 94u8, 215u8, 216u8, 65u8, 112u8, 95u8, 19u8, 154u8, 48u8, 102u8,
-							133u8, 46u8, 197u8, 71u8, 61u8, 81u8, 196u8, 91u8, 54u8, 24u8, 207u8,
-							36u8, 18u8, 55u8, 216u8, 100u8, 66u8, 39u8, 55u8, 47u8, 203u8,
+							146u8, 167u8, 203u8, 100u8, 197u8, 156u8, 220u8, 145u8, 216u8, 131u8,
+							75u8, 161u8, 39u8, 130u8, 161u8, 217u8, 239u8, 47u8, 24u8, 151u8,
+							227u8, 219u8, 186u8, 51u8, 105u8, 181u8, 163u8, 25u8, 121u8, 57u8,
+							59u8, 142u8,
 						],
 					)
 				}
@@ -40809,6 +40896,2411 @@ pub mod api {
 					::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
 						"Services",
 						"MaxContainerImageTagLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+			}
+		}
+	}
+	pub mod lst {
+		use super::root_mod;
+		use super::runtime_types;
+		#[doc = "The `Error` enum of this pallet."]
+		pub type Error = runtime_types::pallet_tangle_lst::pallet::Error;
+		#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
+		pub type Call = runtime_types::pallet_tangle_lst::pallet::Call;
+		pub mod calls {
+			use super::root_mod;
+			use super::runtime_types;
+			type DispatchError = runtime_types::sp_runtime::DispatchError;
+			pub mod types {
+				use super::runtime_types;
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::join`]."]
+				pub struct Join {
+					#[codec(compact)]
+					pub amount: join::Amount,
+					pub pool_id: join::PoolId,
+				}
+				pub mod join {
+					use super::runtime_types;
+					pub type Amount = ::core::primitive::u128;
+					pub type PoolId = ::core::primitive::u32;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for Join {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "join";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::bond_extra`]."]
+				pub struct BondExtra {
+					pub pool_id: bond_extra::PoolId,
+					pub extra: bond_extra::Extra,
+				}
+				pub mod bond_extra {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+					pub type Extra =
+						runtime_types::pallet_tangle_lst::types::BondExtra<::core::primitive::u128>;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for BondExtra {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "bond_extra";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::unbond`]."]
+				pub struct Unbond {
+					pub member_account: unbond::MemberAccount,
+					pub pool_id: unbond::PoolId,
+					#[codec(compact)]
+					pub unbonding_points: unbond::UnbondingPoints,
+				}
+				pub mod unbond {
+					use super::runtime_types;
+					pub type MemberAccount = ::subxt::ext::subxt_core::utils::MultiAddress<
+						::subxt::ext::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type PoolId = ::core::primitive::u32;
+					pub type UnbondingPoints = ::core::primitive::u128;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for Unbond {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "unbond";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::pool_withdraw_unbonded`]."]
+				pub struct PoolWithdrawUnbonded {
+					pub pool_id: pool_withdraw_unbonded::PoolId,
+					pub num_slashing_spans: pool_withdraw_unbonded::NumSlashingSpans,
+				}
+				pub mod pool_withdraw_unbonded {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+					pub type NumSlashingSpans = ::core::primitive::u32;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for PoolWithdrawUnbonded {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "pool_withdraw_unbonded";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::withdraw_unbonded`]."]
+				pub struct WithdrawUnbonded {
+					pub member_account: withdraw_unbonded::MemberAccount,
+					pub pool_id: withdraw_unbonded::PoolId,
+					pub num_slashing_spans: withdraw_unbonded::NumSlashingSpans,
+				}
+				pub mod withdraw_unbonded {
+					use super::runtime_types;
+					pub type MemberAccount = ::subxt::ext::subxt_core::utils::MultiAddress<
+						::subxt::ext::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type PoolId = ::core::primitive::u32;
+					pub type NumSlashingSpans = ::core::primitive::u32;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for WithdrawUnbonded {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "withdraw_unbonded";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::create`]."]
+				pub struct Create {
+					#[codec(compact)]
+					pub amount: create::Amount,
+					pub root: create::Root,
+					pub nominator: create::Nominator,
+					pub bouncer: create::Bouncer,
+				}
+				pub mod create {
+					use super::runtime_types;
+					pub type Amount = ::core::primitive::u128;
+					pub type Root = ::subxt::ext::subxt_core::utils::MultiAddress<
+						::subxt::ext::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Nominator = ::subxt::ext::subxt_core::utils::MultiAddress<
+						::subxt::ext::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Bouncer = ::subxt::ext::subxt_core::utils::MultiAddress<
+						::subxt::ext::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for Create {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "create";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::create_with_pool_id`]."]
+				pub struct CreateWithPoolId {
+					#[codec(compact)]
+					pub amount: create_with_pool_id::Amount,
+					pub root: create_with_pool_id::Root,
+					pub nominator: create_with_pool_id::Nominator,
+					pub bouncer: create_with_pool_id::Bouncer,
+					pub pool_id: create_with_pool_id::PoolId,
+				}
+				pub mod create_with_pool_id {
+					use super::runtime_types;
+					pub type Amount = ::core::primitive::u128;
+					pub type Root = ::subxt::ext::subxt_core::utils::MultiAddress<
+						::subxt::ext::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Nominator = ::subxt::ext::subxt_core::utils::MultiAddress<
+						::subxt::ext::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Bouncer = ::subxt::ext::subxt_core::utils::MultiAddress<
+						::subxt::ext::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type PoolId = ::core::primitive::u32;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CreateWithPoolId {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "create_with_pool_id";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::nominate`]."]
+				pub struct Nominate {
+					pub pool_id: nominate::PoolId,
+					pub validators: nominate::Validators,
+				}
+				pub mod nominate {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+					pub type Validators = ::subxt::ext::subxt_core::alloc::vec::Vec<
+						::subxt::ext::subxt_core::utils::AccountId32,
+					>;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for Nominate {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "nominate";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::set_state`]."]
+				pub struct SetState {
+					pub pool_id: set_state::PoolId,
+					pub state: set_state::State,
+				}
+				pub mod set_state {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+					pub type State = runtime_types::pallet_tangle_lst::types::pools::PoolState;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetState {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "set_state";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::set_metadata`]."]
+				pub struct SetMetadata {
+					pub pool_id: set_metadata::PoolId,
+					pub metadata: set_metadata::Metadata,
+				}
+				pub mod set_metadata {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+					pub type Metadata =
+						::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetMetadata {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "set_metadata";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::set_configs`]."]
+				pub struct SetConfigs {
+					pub min_join_bond: set_configs::MinJoinBond,
+					pub min_create_bond: set_configs::MinCreateBond,
+					pub max_pools: set_configs::MaxPools,
+					pub global_max_commission: set_configs::GlobalMaxCommission,
+				}
+				pub mod set_configs {
+					use super::runtime_types;
+					pub type MinJoinBond =
+						runtime_types::pallet_tangle_lst::types::ConfigOp<::core::primitive::u128>;
+					pub type MinCreateBond =
+						runtime_types::pallet_tangle_lst::types::ConfigOp<::core::primitive::u128>;
+					pub type MaxPools =
+						runtime_types::pallet_tangle_lst::types::ConfigOp<::core::primitive::u32>;
+					pub type GlobalMaxCommission =
+						runtime_types::pallet_tangle_lst::types::ConfigOp<
+							runtime_types::sp_arithmetic::per_things::Perbill,
+						>;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetConfigs {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "set_configs";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::update_roles`]."]
+				pub struct UpdateRoles {
+					pub pool_id: update_roles::PoolId,
+					pub new_root: update_roles::NewRoot,
+					pub new_nominator: update_roles::NewNominator,
+					pub new_bouncer: update_roles::NewBouncer,
+				}
+				pub mod update_roles {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+					pub type NewRoot = runtime_types::pallet_tangle_lst::types::ConfigOp<
+						::subxt::ext::subxt_core::utils::AccountId32,
+					>;
+					pub type NewNominator = runtime_types::pallet_tangle_lst::types::ConfigOp<
+						::subxt::ext::subxt_core::utils::AccountId32,
+					>;
+					pub type NewBouncer = runtime_types::pallet_tangle_lst::types::ConfigOp<
+						::subxt::ext::subxt_core::utils::AccountId32,
+					>;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for UpdateRoles {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "update_roles";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::chill`]."]
+				pub struct Chill {
+					pub pool_id: chill::PoolId,
+				}
+				pub mod chill {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for Chill {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "chill";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::bond_extra_other`]."]
+				pub struct BondExtraOther {
+					pub member: bond_extra_other::Member,
+					pub pool_id: bond_extra_other::PoolId,
+					pub extra: bond_extra_other::Extra,
+				}
+				pub mod bond_extra_other {
+					use super::runtime_types;
+					pub type Member = ::subxt::ext::subxt_core::utils::MultiAddress<
+						::subxt::ext::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type PoolId = ::core::primitive::u32;
+					pub type Extra =
+						runtime_types::pallet_tangle_lst::types::BondExtra<::core::primitive::u128>;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for BondExtraOther {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "bond_extra_other";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::set_commission`]."]
+				pub struct SetCommission {
+					pub pool_id: set_commission::PoolId,
+					pub new_commission: set_commission::NewCommission,
+				}
+				pub mod set_commission {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+					pub type NewCommission = ::core::option::Option<(
+						runtime_types::sp_arithmetic::per_things::Perbill,
+						::subxt::ext::subxt_core::utils::AccountId32,
+					)>;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetCommission {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "set_commission";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::set_commission_max`]."]
+				pub struct SetCommissionMax {
+					pub pool_id: set_commission_max::PoolId,
+					pub max_commission: set_commission_max::MaxCommission,
+				}
+				pub mod set_commission_max {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+					pub type MaxCommission = runtime_types::sp_arithmetic::per_things::Perbill;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetCommissionMax {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "set_commission_max";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::set_commission_change_rate`]."]
+				pub struct SetCommissionChangeRate {
+					pub pool_id: set_commission_change_rate::PoolId,
+					pub change_rate: set_commission_change_rate::ChangeRate,
+				}
+				pub mod set_commission_change_rate {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+					pub type ChangeRate =
+						runtime_types::pallet_tangle_lst::types::commission::CommissionChangeRate<
+							::core::primitive::u64,
+						>;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetCommissionChangeRate {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "set_commission_change_rate";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::claim_commission`]."]
+				pub struct ClaimCommission {
+					pub pool_id: claim_commission::PoolId,
+				}
+				pub mod claim_commission {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ClaimCommission {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "claim_commission";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::adjust_pool_deposit`]."]
+				pub struct AdjustPoolDeposit {
+					pub pool_id: adjust_pool_deposit::PoolId,
+				}
+				pub mod adjust_pool_deposit {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for AdjustPoolDeposit {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "adjust_pool_deposit";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "See [`Pallet::set_commission_claim_permission`]."]
+				pub struct SetCommissionClaimPermission {
+					pub pool_id: set_commission_claim_permission::PoolId,
+					pub permission: set_commission_claim_permission::Permission,
+				}
+				pub mod set_commission_claim_permission {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+					pub type Permission = :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > > ;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetCommissionClaimPermission {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "set_commission_claim_permission";
+				}
+			}
+			pub struct TransactionApi;
+			impl TransactionApi {
+				#[doc = "See [`Pallet::join`]."]
+				pub fn join(
+					&self,
+					amount: types::join::Amount,
+					pool_id: types::join::PoolId,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Join> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"join",
+						types::Join { amount, pool_id },
+						[
+							9u8, 24u8, 209u8, 117u8, 242u8, 76u8, 192u8, 40u8, 196u8, 136u8, 158u8,
+							182u8, 117u8, 140u8, 164u8, 64u8, 184u8, 160u8, 146u8, 143u8, 173u8,
+							180u8, 6u8, 242u8, 203u8, 130u8, 41u8, 176u8, 158u8, 96u8, 94u8, 175u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::bond_extra`]."]
+				pub fn bond_extra(
+					&self,
+					pool_id: types::bond_extra::PoolId,
+					extra: types::bond_extra::Extra,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::BondExtra> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"bond_extra",
+						types::BondExtra { pool_id, extra },
+						[
+							207u8, 223u8, 241u8, 142u8, 14u8, 243u8, 19u8, 200u8, 33u8, 143u8,
+							71u8, 169u8, 109u8, 253u8, 165u8, 4u8, 122u8, 75u8, 223u8, 219u8, 97u8,
+							115u8, 92u8, 219u8, 50u8, 219u8, 65u8, 236u8, 210u8, 74u8, 189u8, 23u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::unbond`]."]
+				pub fn unbond(
+					&self,
+					member_account: types::unbond::MemberAccount,
+					pool_id: types::unbond::PoolId,
+					unbonding_points: types::unbond::UnbondingPoints,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Unbond> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"unbond",
+						types::Unbond { member_account, pool_id, unbonding_points },
+						[
+							189u8, 203u8, 137u8, 121u8, 75u8, 69u8, 213u8, 105u8, 104u8, 118u8,
+							109u8, 167u8, 88u8, 203u8, 168u8, 218u8, 229u8, 43u8, 69u8, 124u8,
+							33u8, 139u8, 170u8, 102u8, 63u8, 150u8, 91u8, 103u8, 77u8, 50u8, 9u8,
+							187u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::pool_withdraw_unbonded`]."]
+				pub fn pool_withdraw_unbonded(
+					&self,
+					pool_id: types::pool_withdraw_unbonded::PoolId,
+					num_slashing_spans: types::pool_withdraw_unbonded::NumSlashingSpans,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PoolWithdrawUnbonded>
+				{
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"pool_withdraw_unbonded",
+						types::PoolWithdrawUnbonded { pool_id, num_slashing_spans },
+						[
+							145u8, 39u8, 154u8, 109u8, 24u8, 233u8, 144u8, 66u8, 28u8, 252u8,
+							180u8, 5u8, 54u8, 123u8, 28u8, 182u8, 26u8, 156u8, 69u8, 105u8, 226u8,
+							208u8, 154u8, 34u8, 22u8, 201u8, 139u8, 104u8, 198u8, 195u8, 247u8,
+							49u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::withdraw_unbonded`]."]
+				pub fn withdraw_unbonded(
+					&self,
+					member_account: types::withdraw_unbonded::MemberAccount,
+					pool_id: types::withdraw_unbonded::PoolId,
+					num_slashing_spans: types::withdraw_unbonded::NumSlashingSpans,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::WithdrawUnbonded> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"withdraw_unbonded",
+						types::WithdrawUnbonded { member_account, pool_id, num_slashing_spans },
+						[
+							179u8, 221u8, 113u8, 60u8, 166u8, 26u8, 168u8, 219u8, 3u8, 250u8,
+							196u8, 76u8, 24u8, 109u8, 8u8, 191u8, 202u8, 111u8, 119u8, 184u8, 26u8,
+							96u8, 53u8, 104u8, 71u8, 115u8, 173u8, 91u8, 200u8, 213u8, 209u8,
+							100u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::create`]."]
+				pub fn create(
+					&self,
+					amount: types::create::Amount,
+					root: types::create::Root,
+					nominator: types::create::Nominator,
+					bouncer: types::create::Bouncer,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Create> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"create",
+						types::Create { amount, root, nominator, bouncer },
+						[
+							178u8, 5u8, 192u8, 56u8, 49u8, 78u8, 47u8, 174u8, 224u8, 191u8, 143u8,
+							247u8, 33u8, 141u8, 180u8, 96u8, 236u8, 234u8, 181u8, 72u8, 254u8,
+							148u8, 228u8, 85u8, 30u8, 187u8, 8u8, 24u8, 255u8, 247u8, 196u8, 229u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::create_with_pool_id`]."]
+				pub fn create_with_pool_id(
+					&self,
+					amount: types::create_with_pool_id::Amount,
+					root: types::create_with_pool_id::Root,
+					nominator: types::create_with_pool_id::Nominator,
+					bouncer: types::create_with_pool_id::Bouncer,
+					pool_id: types::create_with_pool_id::PoolId,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CreateWithPoolId> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"create_with_pool_id",
+						types::CreateWithPoolId { amount, root, nominator, bouncer, pool_id },
+						[
+							3u8, 35u8, 125u8, 15u8, 31u8, 212u8, 98u8, 154u8, 127u8, 158u8, 202u8,
+							73u8, 141u8, 248u8, 238u8, 102u8, 183u8, 24u8, 69u8, 211u8, 128u8,
+							152u8, 205u8, 19u8, 215u8, 167u8, 221u8, 77u8, 210u8, 219u8, 69u8,
+							246u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::nominate`]."]
+				pub fn nominate(
+					&self,
+					pool_id: types::nominate::PoolId,
+					validators: types::nominate::Validators,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Nominate> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"nominate",
+						types::Nominate { pool_id, validators },
+						[
+							118u8, 80u8, 137u8, 47u8, 102u8, 9u8, 20u8, 136u8, 76u8, 164u8, 161u8,
+							114u8, 33u8, 159u8, 204u8, 49u8, 233u8, 199u8, 246u8, 67u8, 144u8,
+							169u8, 211u8, 67u8, 12u8, 68u8, 198u8, 149u8, 87u8, 62u8, 226u8, 72u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::set_state`]."]
+				pub fn set_state(
+					&self,
+					pool_id: types::set_state::PoolId,
+					state: types::set_state::State,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetState> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"set_state",
+						types::SetState { pool_id, state },
+						[
+							39u8, 221u8, 24u8, 65u8, 144u8, 230u8, 228u8, 24u8, 191u8, 53u8, 171u8,
+							148u8, 131u8, 45u8, 10u8, 22u8, 222u8, 240u8, 13u8, 87u8, 123u8, 182u8,
+							102u8, 26u8, 124u8, 205u8, 23u8, 31u8, 25u8, 43u8, 12u8, 140u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::set_metadata`]."]
+				pub fn set_metadata(
+					&self,
+					pool_id: types::set_metadata::PoolId,
+					metadata: types::set_metadata::Metadata,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetMetadata> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"set_metadata",
+						types::SetMetadata { pool_id, metadata },
+						[
+							221u8, 189u8, 15u8, 232u8, 0u8, 49u8, 187u8, 67u8, 124u8, 26u8, 114u8,
+							191u8, 81u8, 14u8, 253u8, 75u8, 88u8, 182u8, 136u8, 18u8, 238u8, 119u8,
+							215u8, 248u8, 133u8, 160u8, 154u8, 193u8, 177u8, 140u8, 1u8, 16u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::set_configs`]."]
+				pub fn set_configs(
+					&self,
+					min_join_bond: types::set_configs::MinJoinBond,
+					min_create_bond: types::set_configs::MinCreateBond,
+					max_pools: types::set_configs::MaxPools,
+					global_max_commission: types::set_configs::GlobalMaxCommission,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetConfigs> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"set_configs",
+						types::SetConfigs {
+							min_join_bond,
+							min_create_bond,
+							max_pools,
+							global_max_commission,
+						},
+						[
+							162u8, 185u8, 108u8, 89u8, 8u8, 208u8, 236u8, 194u8, 219u8, 228u8,
+							157u8, 105u8, 247u8, 228u8, 145u8, 127u8, 91u8, 0u8, 1u8, 92u8, 231u8,
+							183u8, 162u8, 241u8, 247u8, 148u8, 44u8, 68u8, 22u8, 220u8, 189u8,
+							81u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::update_roles`]."]
+				pub fn update_roles(
+					&self,
+					pool_id: types::update_roles::PoolId,
+					new_root: types::update_roles::NewRoot,
+					new_nominator: types::update_roles::NewNominator,
+					new_bouncer: types::update_roles::NewBouncer,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::UpdateRoles> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"update_roles",
+						types::UpdateRoles { pool_id, new_root, new_nominator, new_bouncer },
+						[
+							48u8, 253u8, 39u8, 205u8, 196u8, 231u8, 254u8, 76u8, 238u8, 70u8, 2u8,
+							192u8, 188u8, 240u8, 206u8, 91u8, 213u8, 98u8, 226u8, 51u8, 167u8,
+							205u8, 120u8, 128u8, 40u8, 175u8, 238u8, 57u8, 147u8, 96u8, 116u8,
+							133u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::chill`]."]
+				pub fn chill(
+					&self,
+					pool_id: types::chill::PoolId,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Chill> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"chill",
+						types::Chill { pool_id },
+						[
+							65u8, 206u8, 54u8, 53u8, 37u8, 97u8, 161u8, 104u8, 62u8, 9u8, 93u8,
+							236u8, 61u8, 185u8, 204u8, 245u8, 234u8, 218u8, 213u8, 40u8, 154u8,
+							29u8, 244u8, 19u8, 207u8, 172u8, 142u8, 221u8, 38u8, 70u8, 39u8, 10u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::bond_extra_other`]."]
+				pub fn bond_extra_other(
+					&self,
+					member: types::bond_extra_other::Member,
+					pool_id: types::bond_extra_other::PoolId,
+					extra: types::bond_extra_other::Extra,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::BondExtraOther> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"bond_extra_other",
+						types::BondExtraOther { member, pool_id, extra },
+						[
+							209u8, 101u8, 203u8, 149u8, 91u8, 1u8, 60u8, 191u8, 154u8, 70u8, 66u8,
+							221u8, 33u8, 38u8, 239u8, 209u8, 23u8, 80u8, 87u8, 226u8, 121u8, 15u8,
+							242u8, 80u8, 69u8, 127u8, 116u8, 25u8, 157u8, 233u8, 22u8, 40u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::set_commission`]."]
+				pub fn set_commission(
+					&self,
+					pool_id: types::set_commission::PoolId,
+					new_commission: types::set_commission::NewCommission,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetCommission> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"set_commission",
+						types::SetCommission { pool_id, new_commission },
+						[
+							77u8, 139u8, 221u8, 210u8, 51u8, 57u8, 243u8, 96u8, 25u8, 0u8, 42u8,
+							81u8, 80u8, 7u8, 145u8, 28u8, 17u8, 44u8, 123u8, 28u8, 130u8, 194u8,
+							153u8, 139u8, 222u8, 166u8, 169u8, 184u8, 46u8, 178u8, 236u8, 246u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::set_commission_max`]."]
+				pub fn set_commission_max(
+					&self,
+					pool_id: types::set_commission_max::PoolId,
+					max_commission: types::set_commission_max::MaxCommission,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetCommissionMax> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"set_commission_max",
+						types::SetCommissionMax { pool_id, max_commission },
+						[
+							198u8, 127u8, 255u8, 230u8, 96u8, 142u8, 9u8, 220u8, 204u8, 82u8,
+							192u8, 76u8, 140u8, 52u8, 94u8, 80u8, 153u8, 30u8, 162u8, 21u8, 71u8,
+							31u8, 218u8, 160u8, 254u8, 180u8, 160u8, 219u8, 163u8, 30u8, 193u8,
+							6u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::set_commission_change_rate`]."]
+				pub fn set_commission_change_rate(
+					&self,
+					pool_id: types::set_commission_change_rate::PoolId,
+					change_rate: types::set_commission_change_rate::ChangeRate,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+					types::SetCommissionChangeRate,
+				> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"set_commission_change_rate",
+						types::SetCommissionChangeRate { pool_id, change_rate },
+						[
+							253u8, 128u8, 246u8, 46u8, 81u8, 204u8, 114u8, 21u8, 245u8, 99u8, 88u8,
+							98u8, 194u8, 103u8, 85u8, 231u8, 181u8, 61u8, 146u8, 184u8, 225u8,
+							175u8, 175u8, 99u8, 63u8, 141u8, 112u8, 218u8, 160u8, 226u8, 251u8,
+							185u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::claim_commission`]."]
+				pub fn claim_commission(
+					&self,
+					pool_id: types::claim_commission::PoolId,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ClaimCommission> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"claim_commission",
+						types::ClaimCommission { pool_id },
+						[
+							51u8, 64u8, 163u8, 230u8, 2u8, 119u8, 68u8, 5u8, 154u8, 4u8, 84u8,
+							149u8, 9u8, 195u8, 173u8, 37u8, 98u8, 48u8, 188u8, 65u8, 81u8, 11u8,
+							64u8, 254u8, 126u8, 62u8, 29u8, 204u8, 92u8, 230u8, 240u8, 91u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::adjust_pool_deposit`]."]
+				pub fn adjust_pool_deposit(
+					&self,
+					pool_id: types::adjust_pool_deposit::PoolId,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AdjustPoolDeposit>
+				{
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"adjust_pool_deposit",
+						types::AdjustPoolDeposit { pool_id },
+						[
+							5u8, 203u8, 109u8, 141u8, 29u8, 58u8, 216u8, 21u8, 219u8, 139u8, 129u8,
+							33u8, 49u8, 196u8, 255u8, 49u8, 79u8, 218u8, 24u8, 250u8, 254u8, 64u8,
+							215u8, 33u8, 223u8, 205u8, 117u8, 209u8, 138u8, 115u8, 174u8, 181u8,
+						],
+					)
+				}
+				#[doc = "See [`Pallet::set_commission_claim_permission`]."]
+				pub fn set_commission_claim_permission(
+					&self,
+					pool_id: types::set_commission_claim_permission::PoolId,
+					permission: types::set_commission_claim_permission::Permission,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+					types::SetCommissionClaimPermission,
+				> {
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"set_commission_claim_permission",
+						types::SetCommissionClaimPermission { pool_id, permission },
+						[
+							2u8, 140u8, 135u8, 31u8, 180u8, 2u8, 245u8, 33u8, 34u8, 204u8, 192u8,
+							30u8, 131u8, 4u8, 108u8, 194u8, 154u8, 65u8, 104u8, 252u8, 84u8, 58u8,
+							10u8, 47u8, 238u8, 185u8, 91u8, 162u8, 190u8, 239u8, 74u8, 38u8,
+						],
+					)
+				}
+			}
+		}
+		#[doc = "Events of this pallet."]
+		pub type Event = runtime_types::pallet_tangle_lst::pallet::Event;
+		pub mod events {
+			use super::runtime_types;
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "A pool has been created."]
+			pub struct Created {
+				pub depositor: created::Depositor,
+				pub pool_id: created::PoolId,
+			}
+			pub mod created {
+				use super::runtime_types;
+				pub type Depositor = ::subxt::ext::subxt_core::utils::AccountId32;
+				pub type PoolId = ::core::primitive::u32;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for Created {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "Created";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "A member has became bonded in a pool."]
+			pub struct Bonded {
+				pub member: bonded::Member,
+				pub pool_id: bonded::PoolId,
+				pub bonded: bonded::Bonded,
+				pub joined: bonded::Joined,
+			}
+			pub mod bonded {
+				use super::runtime_types;
+				pub type Member = ::subxt::ext::subxt_core::utils::AccountId32;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Bonded = ::core::primitive::u128;
+				pub type Joined = ::core::primitive::bool;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for Bonded {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "Bonded";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "A payout has been made to a member."]
+			pub struct PaidOut {
+				pub member: paid_out::Member,
+				pub pool_id: paid_out::PoolId,
+				pub payout: paid_out::Payout,
+			}
+			pub mod paid_out {
+				use super::runtime_types;
+				pub type Member = ::subxt::ext::subxt_core::utils::AccountId32;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Payout = ::core::primitive::u128;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for PaidOut {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "PaidOut";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "A member has unbonded from their pool."]
+			#[doc = ""]
+			#[doc = "- `balance` is the corresponding balance of the number of points that has been"]
+			#[doc = "  requested to be unbonded (the argument of the `unbond` transaction) from the bonded"]
+			#[doc = "  pool."]
+			#[doc = "- `points` is the number of points that are issued as a result of `balance` being"]
+			#[doc = "dissolved into the corresponding unbonding pool."]
+			#[doc = "- `era` is the era in which the balance will be unbonded."]
+			#[doc = "In the absence of slashing, these values will match. In the presence of slashing, the"]
+			#[doc = "number of points that are issued in the unbonding pool will be less than the amount"]
+			#[doc = "requested to be unbonded."]
+			pub struct Unbonded {
+				pub member: unbonded::Member,
+				pub pool_id: unbonded::PoolId,
+				pub balance: unbonded::Balance,
+				pub points: unbonded::Points,
+				pub era: unbonded::Era,
+			}
+			pub mod unbonded {
+				use super::runtime_types;
+				pub type Member = ::subxt::ext::subxt_core::utils::AccountId32;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Balance = ::core::primitive::u128;
+				pub type Points = ::core::primitive::u128;
+				pub type Era = ::core::primitive::u32;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for Unbonded {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "Unbonded";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "A member has withdrawn from their pool."]
+			#[doc = ""]
+			#[doc = "The given number of `points` have been dissolved in return of `balance`."]
+			#[doc = ""]
+			#[doc = "Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance"]
+			#[doc = "will be 1."]
+			pub struct Withdrawn {
+				pub member: withdrawn::Member,
+				pub pool_id: withdrawn::PoolId,
+				pub balance: withdrawn::Balance,
+				pub points: withdrawn::Points,
+			}
+			pub mod withdrawn {
+				use super::runtime_types;
+				pub type Member = ::subxt::ext::subxt_core::utils::AccountId32;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Balance = ::core::primitive::u128;
+				pub type Points = ::core::primitive::u128;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for Withdrawn {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "Withdrawn";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "A pool has been destroyed."]
+			pub struct Destroyed {
+				pub pool_id: destroyed::PoolId,
+			}
+			pub mod destroyed {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for Destroyed {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "Destroyed";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "The state of a pool has changed"]
+			pub struct StateChanged {
+				pub pool_id: state_changed::PoolId,
+				pub new_state: state_changed::NewState,
+			}
+			pub mod state_changed {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type NewState = runtime_types::pallet_tangle_lst::types::pools::PoolState;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for StateChanged {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "StateChanged";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "A member has been removed from a pool."]
+			#[doc = ""]
+			#[doc = "The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked)."]
+			pub struct MemberRemoved {
+				pub pool_id: member_removed::PoolId,
+				pub member: member_removed::Member,
+			}
+			pub mod member_removed {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Member = ::subxt::ext::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for MemberRemoved {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "MemberRemoved";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"]
+			#[doc = "can never change."]
+			pub struct RolesUpdated {
+				pub root: roles_updated::Root,
+				pub bouncer: roles_updated::Bouncer,
+				pub nominator: roles_updated::Nominator,
+			}
+			pub mod roles_updated {
+				use super::runtime_types;
+				pub type Root =
+					::core::option::Option<::subxt::ext::subxt_core::utils::AccountId32>;
+				pub type Bouncer =
+					::core::option::Option<::subxt::ext::subxt_core::utils::AccountId32>;
+				pub type Nominator =
+					::core::option::Option<::subxt::ext::subxt_core::utils::AccountId32>;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for RolesUpdated {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "RolesUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "The active balance of pool `pool_id` has been slashed to `balance`."]
+			pub struct PoolSlashed {
+				pub pool_id: pool_slashed::PoolId,
+				pub balance: pool_slashed::Balance,
+			}
+			pub mod pool_slashed {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Balance = ::core::primitive::u128;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for PoolSlashed {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "PoolSlashed";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."]
+			pub struct UnbondingPoolSlashed {
+				pub pool_id: unbonding_pool_slashed::PoolId,
+				pub era: unbonding_pool_slashed::Era,
+				pub balance: unbonding_pool_slashed::Balance,
+			}
+			pub mod unbonding_pool_slashed {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Era = ::core::primitive::u32;
+				pub type Balance = ::core::primitive::u128;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for UnbondingPoolSlashed {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "UnbondingPoolSlashed";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "A pool's commission setting has been changed."]
+			pub struct PoolCommissionUpdated {
+				pub pool_id: pool_commission_updated::PoolId,
+				pub current: pool_commission_updated::Current,
+			}
+			pub mod pool_commission_updated {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Current = ::core::option::Option<(
+					runtime_types::sp_arithmetic::per_things::Perbill,
+					::subxt::ext::subxt_core::utils::AccountId32,
+				)>;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for PoolCommissionUpdated {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "PoolCommissionUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "A pool's maximum commission setting has been changed."]
+			pub struct PoolMaxCommissionUpdated {
+				pub pool_id: pool_max_commission_updated::PoolId,
+				pub max_commission: pool_max_commission_updated::MaxCommission,
+			}
+			pub mod pool_max_commission_updated {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type MaxCommission = runtime_types::sp_arithmetic::per_things::Perbill;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for PoolMaxCommissionUpdated {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "PoolMaxCommissionUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "A pool's commission `change_rate` has been changed."]
+			pub struct PoolCommissionChangeRateUpdated {
+				pub pool_id: pool_commission_change_rate_updated::PoolId,
+				pub change_rate: pool_commission_change_rate_updated::ChangeRate,
+			}
+			pub mod pool_commission_change_rate_updated {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type ChangeRate =
+					runtime_types::pallet_tangle_lst::types::commission::CommissionChangeRate<
+						::core::primitive::u64,
+					>;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for PoolCommissionChangeRateUpdated {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "PoolCommissionChangeRateUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "Pool commission claim permission has been updated."]
+			pub struct PoolCommissionClaimPermissionUpdated {
+				pub pool_id: pool_commission_claim_permission_updated::PoolId,
+				pub permission: pool_commission_claim_permission_updated::Permission,
+			}
+			pub mod pool_commission_claim_permission_updated {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Permission = ::core::option::Option<
+					runtime_types::pallet_tangle_lst::types::commission::CommissionClaimPermission<
+						::subxt::ext::subxt_core::utils::AccountId32,
+					>,
+				>;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for PoolCommissionClaimPermissionUpdated {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "PoolCommissionClaimPermissionUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "Pool commission has been claimed."]
+			pub struct PoolCommissionClaimed {
+				pub pool_id: pool_commission_claimed::PoolId,
+				pub commission: pool_commission_claimed::Commission,
+			}
+			pub mod pool_commission_claimed {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Commission = ::core::primitive::u128;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for PoolCommissionClaimed {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "PoolCommissionClaimed";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "Topped up deficit in frozen ED of the reward pool."]
+			pub struct MinBalanceDeficitAdjusted {
+				pub pool_id: min_balance_deficit_adjusted::PoolId,
+				pub amount: min_balance_deficit_adjusted::Amount,
+			}
+			pub mod min_balance_deficit_adjusted {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Amount = ::core::primitive::u128;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for MinBalanceDeficitAdjusted {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "MinBalanceDeficitAdjusted";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "Claimed excess frozen ED of af the reward pool."]
+			pub struct MinBalanceExcessAdjusted {
+				pub pool_id: min_balance_excess_adjusted::PoolId,
+				pub amount: min_balance_excess_adjusted::Amount,
+			}
+			pub mod min_balance_excess_adjusted {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+				pub type Amount = ::core::primitive::u128;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for MinBalanceExcessAdjusted {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "MinBalanceExcessAdjusted";
+			}
+		}
+		pub mod storage {
+			use super::runtime_types;
+			pub mod types {
+				use super::runtime_types;
+				pub mod total_value_locked {
+					use super::runtime_types;
+					pub type TotalValueLocked = ::core::primitive::u128;
+				}
+				pub mod min_join_bond {
+					use super::runtime_types;
+					pub type MinJoinBond = ::core::primitive::u128;
+				}
+				pub mod min_create_bond {
+					use super::runtime_types;
+					pub type MinCreateBond = ::core::primitive::u128;
+				}
+				pub mod max_pools {
+					use super::runtime_types;
+					pub type MaxPools = ::core::primitive::u32;
+				}
+				pub mod global_max_commission {
+					use super::runtime_types;
+					pub type GlobalMaxCommission =
+						runtime_types::sp_arithmetic::per_things::Perbill;
+				}
+				pub mod bonded_pools {
+					use super::runtime_types;
+					pub type BondedPools =
+						runtime_types::pallet_tangle_lst::types::bonded_pool::BondedPoolInner;
+					pub type Param0 = ::core::primitive::u32;
+				}
+				pub mod counter_for_bonded_pools {
+					use super::runtime_types;
+					pub type CounterForBondedPools = ::core::primitive::u32;
+				}
+				pub mod reward_pools {
+					use super::runtime_types;
+					pub type RewardPools =
+						runtime_types::pallet_tangle_lst::types::sub_pools::RewardPool;
+					pub type Param0 = ::core::primitive::u32;
+				}
+				pub mod counter_for_reward_pools {
+					use super::runtime_types;
+					pub type CounterForRewardPools = ::core::primitive::u32;
+				}
+				pub mod sub_pools_storage {
+					use super::runtime_types;
+					pub type SubPoolsStorage =
+						runtime_types::pallet_tangle_lst::types::sub_pools::SubPools;
+					pub type Param0 = ::core::primitive::u32;
+				}
+				pub mod counter_for_sub_pools_storage {
+					use super::runtime_types;
+					pub type CounterForSubPoolsStorage = ::core::primitive::u32;
+				}
+				pub mod metadata {
+					use super::runtime_types;
+					pub type Metadata = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+						::core::primitive::u8,
+					>;
+					pub type Param0 = ::core::primitive::u32;
+				}
+				pub mod counter_for_metadata {
+					use super::runtime_types;
+					pub type CounterForMetadata = ::core::primitive::u32;
+				}
+				pub mod last_pool_id {
+					use super::runtime_types;
+					pub type LastPoolId = ::core::primitive::u32;
+				}
+				pub mod unbonding_members {
+					use super::runtime_types;
+					pub type UnbondingMembers =
+						runtime_types::pallet_tangle_lst::types::pools::PoolMember;
+					pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
+				}
+				pub mod counter_for_unbonding_members {
+					use super::runtime_types;
+					pub type CounterForUnbondingMembers = ::core::primitive::u32;
+				}
+				pub mod reverse_pool_id_lookup {
+					use super::runtime_types;
+					pub type ReversePoolIdLookup = ::core::primitive::u32;
+					pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
+				}
+				pub mod counter_for_reverse_pool_id_lookup {
+					use super::runtime_types;
+					pub type CounterForReversePoolIdLookup = ::core::primitive::u32;
+				}
+				pub mod claim_permissions {
+					use super::runtime_types;
+					pub type ClaimPermissions =
+						runtime_types::pallet_tangle_lst::types::ClaimPermission;
+					pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
+				}
+			}
+			pub struct StorageApi;
+			impl StorageApi {
+				#[doc = " The sum of funds across all pools."]
+				#[doc = ""]
+				#[doc = " This might be lower but never higher than the sum of `total_balance` of all [`PoolMembers`]"]
+				#[doc = " because calling `pool_withdraw_unbonded` might decrease the total stake of the pool's"]
+				#[doc = " `bonded_account` without adjusting the pallet-internal `UnbondingPool`'s."]
+				pub fn total_value_locked(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::total_value_locked::TotalValueLocked,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"TotalValueLocked",
+						(),
+						[
+							141u8, 23u8, 101u8, 59u8, 165u8, 8u8, 41u8, 252u8, 239u8, 72u8, 142u8,
+							19u8, 186u8, 29u8, 131u8, 8u8, 113u8, 64u8, 82u8, 158u8, 26u8, 87u8,
+							142u8, 39u8, 80u8, 231u8, 46u8, 40u8, 71u8, 186u8, 35u8, 104u8,
+						],
+					)
+				}
+				#[doc = " Minimum amount to bond to join a pool."]
+				pub fn min_join_bond(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::min_join_bond::MinJoinBond,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"MinJoinBond",
+						(),
+						[
+							64u8, 180u8, 71u8, 185u8, 81u8, 46u8, 155u8, 26u8, 251u8, 84u8, 108u8,
+							80u8, 128u8, 44u8, 163u8, 118u8, 107u8, 79u8, 250u8, 211u8, 194u8,
+							71u8, 87u8, 16u8, 247u8, 9u8, 76u8, 95u8, 103u8, 227u8, 180u8, 231u8,
+						],
+					)
+				}
+				#[doc = " Minimum bond required to create a pool."]
+				#[doc = ""]
+				#[doc = " This is the amount that the depositor must put as their initial stake in the pool, as an"]
+				#[doc = " indication of \"skin in the game\"."]
+				#[doc = ""]
+				#[doc = " This is the value that will always exist in the staking ledger of the pool bonded account"]
+				#[doc = " while all other accounts leave."]
+				pub fn min_create_bond(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::min_create_bond::MinCreateBond,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"MinCreateBond",
+						(),
+						[
+							210u8, 67u8, 92u8, 230u8, 231u8, 105u8, 54u8, 249u8, 154u8, 192u8,
+							29u8, 217u8, 233u8, 79u8, 170u8, 126u8, 133u8, 98u8, 253u8, 153u8,
+							248u8, 189u8, 63u8, 107u8, 170u8, 224u8, 12u8, 42u8, 198u8, 185u8,
+							85u8, 46u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of nomination pools that can exist. If `None`, then an unbounded number of"]
+				#[doc = " pools can exist."]
+				pub fn max_pools(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::max_pools::MaxPools,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"MaxPools",
+						(),
+						[
+							230u8, 184u8, 242u8, 91u8, 118u8, 111u8, 90u8, 204u8, 136u8, 61u8,
+							228u8, 50u8, 212u8, 40u8, 83u8, 49u8, 121u8, 161u8, 245u8, 80u8, 46u8,
+							184u8, 105u8, 134u8, 249u8, 225u8, 39u8, 3u8, 123u8, 137u8, 156u8,
+							240u8,
+						],
+					)
+				}
+				#[doc = " The maximum commission that can be charged by a pool. Used on commission payouts to bound"]
+				#[doc = " pool commissions that are > `GlobalMaxCommission`, necessary if a future"]
+				#[doc = " `GlobalMaxCommission` is lower than some current pool commissions."]
+				pub fn global_max_commission(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::global_max_commission::GlobalMaxCommission,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"GlobalMaxCommission",
+						(),
+						[
+							2u8, 112u8, 8u8, 116u8, 114u8, 97u8, 250u8, 106u8, 170u8, 215u8, 218u8,
+							217u8, 80u8, 235u8, 149u8, 81u8, 85u8, 185u8, 201u8, 127u8, 107u8,
+							251u8, 191u8, 231u8, 142u8, 74u8, 8u8, 70u8, 151u8, 238u8, 117u8,
+							173u8,
+						],
+					)
+				}
+				#[doc = " Storage for bonded pools."]
+				pub fn bonded_pools_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::bonded_pools::BondedPools,
+					(),
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"BondedPools",
+						(),
+						[
+							73u8, 70u8, 85u8, 166u8, 147u8, 233u8, 221u8, 180u8, 201u8, 84u8, 90u8,
+							116u8, 240u8, 145u8, 234u8, 29u8, 7u8, 55u8, 182u8, 214u8, 88u8, 187u8,
+							6u8, 127u8, 205u8, 221u8, 33u8, 203u8, 65u8, 25u8, 158u8, 204u8,
+						],
+					)
+				}
+				#[doc = " Storage for bonded pools."]
+				pub fn bonded_pools(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::bonded_pools::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::bonded_pools::Param0,
+					>,
+					types::bonded_pools::BondedPools,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"BondedPools",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							73u8, 70u8, 85u8, 166u8, 147u8, 233u8, 221u8, 180u8, 201u8, 84u8, 90u8,
+							116u8, 240u8, 145u8, 234u8, 29u8, 7u8, 55u8, 182u8, 214u8, 88u8, 187u8,
+							6u8, 127u8, 205u8, 221u8, 33u8, 203u8, 65u8, 25u8, 158u8, 204u8,
+						],
+					)
+				}
+				#[doc = "Counter for the related counted storage map"]
+				pub fn counter_for_bonded_pools(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::counter_for_bonded_pools::CounterForBondedPools,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"CounterForBondedPools",
+						(),
+						[
+							198u8, 6u8, 213u8, 92u8, 4u8, 114u8, 164u8, 244u8, 51u8, 55u8, 157u8,
+							20u8, 224u8, 183u8, 40u8, 236u8, 115u8, 86u8, 171u8, 207u8, 31u8,
+							111u8, 0u8, 210u8, 48u8, 198u8, 243u8, 153u8, 5u8, 216u8, 107u8, 113u8,
+						],
+					)
+				}
+				#[doc = " Reward pools. This is where there rewards for each pool accumulate. When a members payout is"]
+				#[doc = " claimed, the balance comes out fo the reward pool. Keyed by the bonded pools account."]
+				pub fn reward_pools_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::reward_pools::RewardPools,
+					(),
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"RewardPools",
+						(),
+						[
+							9u8, 12u8, 53u8, 236u8, 133u8, 154u8, 71u8, 150u8, 220u8, 31u8, 130u8,
+							126u8, 208u8, 240u8, 214u8, 66u8, 16u8, 43u8, 202u8, 222u8, 94u8,
+							136u8, 76u8, 60u8, 174u8, 197u8, 130u8, 138u8, 253u8, 239u8, 89u8,
+							46u8,
+						],
+					)
+				}
+				#[doc = " Reward pools. This is where there rewards for each pool accumulate. When a members payout is"]
+				#[doc = " claimed, the balance comes out fo the reward pool. Keyed by the bonded pools account."]
+				pub fn reward_pools(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::reward_pools::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::reward_pools::Param0,
+					>,
+					types::reward_pools::RewardPools,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"RewardPools",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							9u8, 12u8, 53u8, 236u8, 133u8, 154u8, 71u8, 150u8, 220u8, 31u8, 130u8,
+							126u8, 208u8, 240u8, 214u8, 66u8, 16u8, 43u8, 202u8, 222u8, 94u8,
+							136u8, 76u8, 60u8, 174u8, 197u8, 130u8, 138u8, 253u8, 239u8, 89u8,
+							46u8,
+						],
+					)
+				}
+				#[doc = "Counter for the related counted storage map"]
+				pub fn counter_for_reward_pools(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::counter_for_reward_pools::CounterForRewardPools,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"CounterForRewardPools",
+						(),
+						[
+							218u8, 186u8, 28u8, 97u8, 205u8, 249u8, 187u8, 10u8, 127u8, 190u8,
+							213u8, 152u8, 103u8, 20u8, 157u8, 183u8, 86u8, 104u8, 186u8, 236u8,
+							84u8, 159u8, 117u8, 78u8, 5u8, 242u8, 193u8, 59u8, 112u8, 200u8, 34u8,
+							166u8,
+						],
+					)
+				}
+				#[doc = " Groups of unbonding pools. Each group of unbonding pools belongs to a"]
+				#[doc = " bonded pool, hence the name sub-pools. Keyed by the bonded pools account."]
+				pub fn sub_pools_storage_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::sub_pools_storage::SubPoolsStorage,
+					(),
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"SubPoolsStorage",
+						(),
+						[
+							43u8, 35u8, 94u8, 197u8, 201u8, 86u8, 21u8, 118u8, 230u8, 10u8, 66u8,
+							180u8, 104u8, 146u8, 250u8, 207u8, 159u8, 153u8, 203u8, 58u8, 20u8,
+							247u8, 102u8, 155u8, 47u8, 58u8, 136u8, 150u8, 167u8, 83u8, 81u8, 44u8,
+						],
+					)
+				}
+				#[doc = " Groups of unbonding pools. Each group of unbonding pools belongs to a"]
+				#[doc = " bonded pool, hence the name sub-pools. Keyed by the bonded pools account."]
+				pub fn sub_pools_storage(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::sub_pools_storage::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::sub_pools_storage::Param0,
+					>,
+					types::sub_pools_storage::SubPoolsStorage,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"SubPoolsStorage",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							43u8, 35u8, 94u8, 197u8, 201u8, 86u8, 21u8, 118u8, 230u8, 10u8, 66u8,
+							180u8, 104u8, 146u8, 250u8, 207u8, 159u8, 153u8, 203u8, 58u8, 20u8,
+							247u8, 102u8, 155u8, 47u8, 58u8, 136u8, 150u8, 167u8, 83u8, 81u8, 44u8,
+						],
+					)
+				}
+				#[doc = "Counter for the related counted storage map"]
+				pub fn counter_for_sub_pools_storage(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::counter_for_sub_pools_storage::CounterForSubPoolsStorage,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"CounterForSubPoolsStorage",
+						(),
+						[
+							137u8, 162u8, 32u8, 44u8, 163u8, 30u8, 54u8, 158u8, 169u8, 118u8,
+							196u8, 101u8, 78u8, 28u8, 184u8, 78u8, 185u8, 225u8, 226u8, 207u8,
+							14u8, 119u8, 0u8, 116u8, 140u8, 141u8, 116u8, 106u8, 71u8, 161u8,
+							200u8, 228u8,
+						],
+					)
+				}
+				#[doc = " Metadata for the pool."]
+				pub fn metadata_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::metadata::Metadata,
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"Metadata",
+						(),
+						[
+							10u8, 171u8, 251u8, 5u8, 72u8, 74u8, 86u8, 144u8, 59u8, 67u8, 92u8,
+							111u8, 217u8, 111u8, 175u8, 107u8, 119u8, 206u8, 199u8, 78u8, 182u8,
+							84u8, 12u8, 102u8, 10u8, 124u8, 103u8, 9u8, 86u8, 199u8, 233u8, 54u8,
+						],
+					)
+				}
+				#[doc = " Metadata for the pool."]
+				pub fn metadata(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::metadata::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::metadata::Param0,
+					>,
+					types::metadata::Metadata,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"Metadata",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							10u8, 171u8, 251u8, 5u8, 72u8, 74u8, 86u8, 144u8, 59u8, 67u8, 92u8,
+							111u8, 217u8, 111u8, 175u8, 107u8, 119u8, 206u8, 199u8, 78u8, 182u8,
+							84u8, 12u8, 102u8, 10u8, 124u8, 103u8, 9u8, 86u8, 199u8, 233u8, 54u8,
+						],
+					)
+				}
+				#[doc = "Counter for the related counted storage map"]
+				pub fn counter_for_metadata(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::counter_for_metadata::CounterForMetadata,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"CounterForMetadata",
+						(),
+						[
+							49u8, 76u8, 175u8, 236u8, 99u8, 120u8, 156u8, 116u8, 153u8, 173u8,
+							10u8, 102u8, 194u8, 139u8, 25u8, 149u8, 109u8, 195u8, 150u8, 21u8,
+							43u8, 24u8, 196u8, 180u8, 231u8, 101u8, 69u8, 98u8, 82u8, 159u8, 183u8,
+							174u8,
+						],
+					)
+				}
+				#[doc = " Ever increasing number of all pools created so far."]
+				pub fn last_pool_id(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::last_pool_id::LastPoolId,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"LastPoolId",
+						(),
+						[
+							178u8, 198u8, 245u8, 157u8, 176u8, 45u8, 214u8, 86u8, 73u8, 154u8,
+							217u8, 39u8, 191u8, 53u8, 233u8, 145u8, 57u8, 100u8, 31u8, 13u8, 202u8,
+							122u8, 115u8, 16u8, 205u8, 69u8, 157u8, 250u8, 216u8, 180u8, 113u8,
+							30u8,
+						],
+					)
+				}
+				#[doc = " Unbonding members."]
+				#[doc = ""]
+				#[doc = " TWOX-NOTE: SAFE since `AccountId` is a secure hash."]
+				pub fn unbonding_members_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::unbonding_members::UnbondingMembers,
+					(),
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"UnbondingMembers",
+						(),
+						[
+							12u8, 3u8, 231u8, 163u8, 207u8, 37u8, 152u8, 52u8, 81u8, 171u8, 162u8,
+							70u8, 37u8, 199u8, 254u8, 172u8, 124u8, 50u8, 6u8, 69u8, 166u8, 184u8,
+							38u8, 230u8, 198u8, 153u8, 181u8, 33u8, 180u8, 137u8, 75u8, 62u8,
+						],
+					)
+				}
+				#[doc = " Unbonding members."]
+				#[doc = ""]
+				#[doc = " TWOX-NOTE: SAFE since `AccountId` is a secure hash."]
+				pub fn unbonding_members(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::unbonding_members::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::unbonding_members::Param0,
+					>,
+					types::unbonding_members::UnbondingMembers,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"UnbondingMembers",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							12u8, 3u8, 231u8, 163u8, 207u8, 37u8, 152u8, 52u8, 81u8, 171u8, 162u8,
+							70u8, 37u8, 199u8, 254u8, 172u8, 124u8, 50u8, 6u8, 69u8, 166u8, 184u8,
+							38u8, 230u8, 198u8, 153u8, 181u8, 33u8, 180u8, 137u8, 75u8, 62u8,
+						],
+					)
+				}
+				#[doc = "Counter for the related counted storage map"]
+				pub fn counter_for_unbonding_members(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::counter_for_unbonding_members::CounterForUnbondingMembers,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"CounterForUnbondingMembers",
+						(),
+						[
+							35u8, 214u8, 51u8, 61u8, 101u8, 166u8, 164u8, 204u8, 50u8, 204u8,
+							242u8, 138u8, 241u8, 35u8, 149u8, 204u8, 180u8, 250u8, 178u8, 148u8,
+							199u8, 139u8, 206u8, 218u8, 200u8, 76u8, 130u8, 213u8, 186u8, 30u8,
+							68u8, 79u8,
+						],
+					)
+				}
+				#[doc = " A reverse lookup from the pool's account id to its id."]
+				#[doc = ""]
+				#[doc = " This is only used for slashing. In all other instances, the pool id is used, and the"]
+				#[doc = " accounts are deterministically derived from it."]
+				pub fn reverse_pool_id_lookup_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::reverse_pool_id_lookup::ReversePoolIdLookup,
+					(),
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"ReversePoolIdLookup",
+						(),
+						[
+							76u8, 76u8, 150u8, 33u8, 64u8, 81u8, 90u8, 75u8, 212u8, 221u8, 59u8,
+							83u8, 178u8, 45u8, 86u8, 206u8, 196u8, 221u8, 117u8, 94u8, 229u8,
+							160u8, 52u8, 54u8, 11u8, 64u8, 0u8, 103u8, 85u8, 86u8, 5u8, 71u8,
+						],
+					)
+				}
+				#[doc = " A reverse lookup from the pool's account id to its id."]
+				#[doc = ""]
+				#[doc = " This is only used for slashing. In all other instances, the pool id is used, and the"]
+				#[doc = " accounts are deterministically derived from it."]
+				pub fn reverse_pool_id_lookup(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::reverse_pool_id_lookup::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::reverse_pool_id_lookup::Param0,
+					>,
+					types::reverse_pool_id_lookup::ReversePoolIdLookup,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"ReversePoolIdLookup",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							76u8, 76u8, 150u8, 33u8, 64u8, 81u8, 90u8, 75u8, 212u8, 221u8, 59u8,
+							83u8, 178u8, 45u8, 86u8, 206u8, 196u8, 221u8, 117u8, 94u8, 229u8,
+							160u8, 52u8, 54u8, 11u8, 64u8, 0u8, 103u8, 85u8, 86u8, 5u8, 71u8,
+						],
+					)
+				}
+				#[doc = "Counter for the related counted storage map"]
+				pub fn counter_for_reverse_pool_id_lookup(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::counter_for_reverse_pool_id_lookup::CounterForReversePoolIdLookup,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"CounterForReversePoolIdLookup",
+						(),
+						[
+							135u8, 72u8, 203u8, 197u8, 101u8, 135u8, 114u8, 202u8, 122u8, 231u8,
+							128u8, 17u8, 81u8, 70u8, 22u8, 146u8, 100u8, 138u8, 16u8, 74u8, 31u8,
+							250u8, 110u8, 184u8, 250u8, 75u8, 249u8, 71u8, 171u8, 77u8, 95u8,
+							251u8,
+						],
+					)
+				}
+				#[doc = " Map from a pool member account to their opted claim permission."]
+				pub fn claim_permissions_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::claim_permissions::ClaimPermissions,
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"ClaimPermissions",
+						(),
+						[
+							98u8, 241u8, 185u8, 102u8, 61u8, 53u8, 215u8, 105u8, 2u8, 148u8, 197u8,
+							17u8, 107u8, 253u8, 74u8, 159u8, 14u8, 30u8, 213u8, 38u8, 35u8, 163u8,
+							249u8, 19u8, 140u8, 201u8, 182u8, 106u8, 0u8, 21u8, 102u8, 15u8,
+						],
+					)
+				}
+				#[doc = " Map from a pool member account to their opted claim permission."]
+				pub fn claim_permissions(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::claim_permissions::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::claim_permissions::Param0,
+					>,
+					types::claim_permissions::ClaimPermissions,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Lst",
+						"ClaimPermissions",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							98u8, 241u8, 185u8, 102u8, 61u8, 53u8, 215u8, 105u8, 2u8, 148u8, 197u8,
+							17u8, 107u8, 253u8, 74u8, 159u8, 14u8, 30u8, 213u8, 38u8, 35u8, 163u8,
+							249u8, 19u8, 140u8, 201u8, 182u8, 106u8, 0u8, 21u8, 102u8, 15u8,
+						],
+					)
+				}
+			}
+		}
+		pub mod constants {
+			use super::runtime_types;
+			pub struct ConstantsApi;
+			impl ConstantsApi {
+				#[doc = " The nomination pool's pallet id."]
+				pub fn pallet_id(
+					&self,
+				) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+					runtime_types::frame_support::PalletId,
+				> {
+					::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+						"Lst",
+						"PalletId",
+						[
+							56u8, 243u8, 53u8, 83u8, 154u8, 179u8, 170u8, 80u8, 133u8, 173u8, 61u8,
+							161u8, 47u8, 225u8, 146u8, 21u8, 50u8, 229u8, 248u8, 27u8, 104u8, 58u8,
+							129u8, 197u8, 102u8, 160u8, 168u8, 205u8, 154u8, 42u8, 217u8, 53u8,
+						],
+					)
+				}
+				#[doc = " The maximum pool points-to-balance ratio that an `open` pool can have."]
+				#[doc = ""]
+				#[doc = " This is important in the event slashing takes place and the pool's points-to-balance"]
+				#[doc = " ratio becomes disproportional."]
+				#[doc = ""]
+				#[doc = " Moreover, this relates to the `RewardCounter` type as well, as the arithmetic operations"]
+				#[doc = " are a function of number of points, and by setting this value to e.g. 10, you ensure"]
+				#[doc = " that the total number of points in the system are at most 10 times the total_issuance of"]
+				#[doc = " the chain, in the absolute worse case."]
+				#[doc = ""]
+				#[doc = " For a value of 10, the threshold would be a pool points-to-balance ratio of 10:1."]
+				#[doc = " Such a scenario would also be the equivalent of the pool being 90% slashed."]
+				pub fn max_points_to_balance(
+					&self,
+				) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+					::core::primitive::u8,
+				> {
+					::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+						"Lst",
+						"MaxPointsToBalance",
+						[
+							141u8, 130u8, 11u8, 35u8, 226u8, 114u8, 92u8, 179u8, 168u8, 110u8,
+							28u8, 91u8, 221u8, 64u8, 4u8, 148u8, 201u8, 193u8, 185u8, 66u8, 226u8,
+							114u8, 97u8, 79u8, 62u8, 212u8, 202u8, 114u8, 237u8, 228u8, 183u8,
+							165u8,
+						],
+					)
+				}
+				#[doc = " The maximum number of simultaneous unbonding chunks that can exist per member."]
+				pub fn max_unbonding(
+					&self,
+				) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+					::core::primitive::u32,
+				> {
+					::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+						"Lst",
+						"MaxUnbonding",
 						[
 							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
 							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
@@ -45952,8 +48444,8 @@ pub mod api {
 						>,
 					},
 					#[codec(index = 8)]
-					#[doc = "See [`Pallet::force_make_free_balance_be`]."]
-					force_make_free_balance_be {
+					#[doc = "See [`Pallet::force_set_balance`]."]
+					force_set_balance {
 						who: ::subxt::ext::subxt_core::utils::MultiAddress<
 							::subxt::ext::subxt_core::utils::AccountId32,
 							::core::primitive::u32,
@@ -52035,6 +54527,13 @@ pub mod api {
 							runtime_types::tangle_primitives::services::ApprovalPrefrence,
 					},
 					#[codec(index = 5)]
+					#[doc = "See `Pallet::update_price_targets`."]
+					update_price_targets {
+						#[codec(compact)]
+						blueprint_id: ::core::primitive::u64,
+						price_targets: runtime_types::tangle_primitives::services::PriceTargets,
+					},
+					#[codec(index = 6)]
 					#[doc = "See `Pallet::request`."]
 					request {
 						#[codec(compact)]
@@ -52053,25 +54552,25 @@ pub mod api {
 							>,
 						>,
 					},
-					#[codec(index = 6)]
+					#[codec(index = 7)]
 					#[doc = "See `Pallet::approve`."]
 					approve {
 						#[codec(compact)]
 						request_id: ::core::primitive::u64,
 					},
-					#[codec(index = 7)]
+					#[codec(index = 8)]
 					#[doc = "See `Pallet::reject`."]
 					reject {
 						#[codec(compact)]
 						request_id: ::core::primitive::u64,
 					},
-					#[codec(index = 8)]
+					#[codec(index = 9)]
 					#[doc = "See `Pallet::terminate`."]
 					terminate {
 						#[codec(compact)]
 						service_id: ::core::primitive::u64,
 					},
-					#[codec(index = 9)]
+					#[codec(index = 10)]
 					#[doc = "See `Pallet::call`."]
 					call {
 						#[codec(compact)]
@@ -52084,7 +54583,7 @@ pub mod api {
 							>,
 						>,
 					},
-					#[codec(index = 10)]
+					#[codec(index = 11)]
 					#[doc = "See `Pallet::submit_result`."]
 					submit_result {
 						#[codec(compact)]
@@ -52164,7 +54663,8 @@ pub mod api {
 					ApprovalNotRequested,
 					#[codec(index = 15)]
 					#[doc = "The requested job definition does not exist."]
-					#[doc = "This error is returned when the requested job definition does not exist in the service blueprint."]
+					#[doc = "This error is returned when the requested job definition does not exist in the service"]
+					#[doc = "blueprint."]
 					JobDefinitionNotFound,
 					#[codec(index = 16)]
 					#[doc = "Either the service or the job call was not found."]
@@ -52244,6 +54744,13 @@ pub mod api {
 							runtime_types::tangle_primitives::services::ApprovalPrefrence,
 					},
 					#[codec(index = 5)]
+					#[doc = "The approval preference for an operator has been updated."]
+					PriceTargetsUpdated {
+						operator: ::subxt::ext::subxt_core::utils::AccountId32,
+						blueprint_id: ::core::primitive::u64,
+						price_targets: runtime_types::tangle_primitives::services::PriceTargets,
+					},
+					#[codec(index = 6)]
 					#[doc = "A new service has been requested."]
 					ServiceRequested {
 						owner: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -52256,7 +54763,7 @@ pub mod api {
 							::subxt::ext::subxt_core::utils::AccountId32,
 						>,
 					},
-					#[codec(index = 6)]
+					#[codec(index = 7)]
 					#[doc = "A service request has been approved."]
 					ServiceRequestApproved {
 						operator: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -52269,14 +54776,14 @@ pub mod api {
 							::subxt::ext::subxt_core::utils::AccountId32,
 						>,
 					},
-					#[codec(index = 7)]
+					#[codec(index = 8)]
 					#[doc = "A service request has been rejected."]
 					ServiceRequestRejected {
 						operator: ::subxt::ext::subxt_core::utils::AccountId32,
 						request_id: ::core::primitive::u64,
 						blueprint_id: ::core::primitive::u64,
 					},
-					#[codec(index = 8)]
+					#[codec(index = 9)]
 					#[doc = "A service request has been updated or modified."]
 					ServiceRequestUpdated {
 						owner: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -52289,7 +54796,7 @@ pub mod api {
 							::subxt::ext::subxt_core::utils::AccountId32,
 						>,
 					},
-					#[codec(index = 9)]
+					#[codec(index = 10)]
 					#[doc = "A service has been initiated."]
 					ServiceInitiated {
 						owner: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -52297,14 +54804,14 @@ pub mod api {
 						service_id: ::core::primitive::u64,
 						blueprint_id: ::core::primitive::u64,
 					},
-					#[codec(index = 10)]
+					#[codec(index = 11)]
 					#[doc = "A service has been terminated."]
 					ServiceTerminated {
 						owner: ::subxt::ext::subxt_core::utils::AccountId32,
 						service_id: ::core::primitive::u64,
 						blueprint_id: ::core::primitive::u64,
 					},
-					#[codec(index = 11)]
+					#[codec(index = 12)]
 					#[doc = "A job has been called."]
 					JobCalled {
 						caller: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -52317,7 +54824,7 @@ pub mod api {
 							>,
 						>,
 					},
-					#[codec(index = 12)]
+					#[codec(index = 13)]
 					#[doc = "A job result has been submitted."]
 					JobResultSubmitted {
 						operator: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -52330,7 +54837,7 @@ pub mod api {
 							>,
 						>,
 					},
-					#[codec(index = 13)]
+					#[codec(index = 14)]
 					#[doc = "An EVM log has been emitted during an execution."]
 					EvmLog {
 						address: ::subxt::ext::subxt_core::utils::H160,
@@ -52339,7 +54846,7 @@ pub mod api {
 						>,
 						data: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
 					},
-					#[codec(index = 14)]
+					#[codec(index = 15)]
 					#[doc = "EVM execution reverted with a reason."]
 					EvmReverted {
 						from: ::subxt::ext::subxt_core::utils::H160,
@@ -53259,6 +55766,547 @@ pub mod api {
 						sudo_result:
 							::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
 					},
+				}
+			}
+		}
+		pub mod pallet_tangle_lst {
+			use super::runtime_types;
+			pub mod pallet {
+				use super::runtime_types;
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
+				pub enum Call {
+					# [codec (index = 0)] # [doc = "See [`Pallet::join`]."] join { # [codec (compact)] amount : :: core :: primitive :: u128 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "See [`Pallet::bond_extra`]."] bond_extra { pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 3)] # [doc = "See [`Pallet::unbond`]."] unbond { member_account : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , # [codec (compact)] unbonding_points : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "See [`Pallet::pool_withdraw_unbonded`]."] pool_withdraw_unbonded { pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "See [`Pallet::withdraw_unbonded`]."] withdraw_unbonded { member_account : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "See [`Pallet::create`]."] create { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , } , # [codec (index = 7)] # [doc = "See [`Pallet::create_with_pool_id`]."] create_with_pool_id { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 8)] # [doc = "See [`Pallet::nominate`]."] nominate { pool_id : :: core :: primitive :: u32 , validators : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "See [`Pallet::set_state`]."] set_state { pool_id : :: core :: primitive :: u32 , state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 10)] # [doc = "See [`Pallet::set_metadata`]."] set_metadata { pool_id : :: core :: primitive :: u32 , metadata : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 11)] # [doc = "See [`Pallet::set_configs`]."] set_configs { min_join_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , min_create_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , max_pools : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u32 > , global_max_commission : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Perbill > , } , # [codec (index = 12)] # [doc = "See [`Pallet::update_roles`]."] update_roles { pool_id : :: core :: primitive :: u32 , new_root : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , new_nominator : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , new_bouncer : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 13)] # [doc = "See [`Pallet::chill`]."] chill { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "See [`Pallet::bond_extra_other`]."] bond_extra_other { member : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 17)] # [doc = "See [`Pallet::set_commission`]."] set_commission { pool_id : :: core :: primitive :: u32 , new_commission : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt :: ext :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 18)] # [doc = "See [`Pallet::set_commission_max`]."] set_commission_max { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 19)] # [doc = "See [`Pallet::set_commission_change_rate`]."] set_commission_change_rate { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 20)] # [doc = "See [`Pallet::claim_commission`]."] claim_commission { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "See [`Pallet::adjust_pool_deposit`]."] adjust_pool_deposit { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "See [`Pallet::set_commission_claim_permission`]."] set_commission_claim_permission { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > > , } , }
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				pub enum DefensiveError {
+					#[codec(index = 0)]
+					NotEnoughSpaceInUnbondPool,
+					#[codec(index = 1)]
+					PoolNotFound,
+					#[codec(index = 2)]
+					RewardPoolNotFound,
+					#[codec(index = 3)]
+					SubPoolsNotFound,
+					#[codec(index = 4)]
+					BondedStashKilledPrematurely,
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "The `Error` enum of this pallet."]
+				pub enum Error {
+					#[codec(index = 0)]
+					#[doc = "A (bonded) pool id does not exist."]
+					PoolNotFound,
+					#[codec(index = 1)]
+					#[doc = "An account is not a member."]
+					PoolMemberNotFound,
+					#[codec(index = 2)]
+					#[doc = "A reward pool does not exist. In all cases this is a system logic error."]
+					RewardPoolNotFound,
+					#[codec(index = 3)]
+					#[doc = "A sub pool does not exist."]
+					SubPoolsNotFound,
+					#[codec(index = 4)]
+					#[doc = "The member is fully unbonded (and thus cannot access the bonded and reward pool"]
+					#[doc = "anymore to, for example, collect rewards)."]
+					FullyUnbonding,
+					#[codec(index = 5)]
+					#[doc = "The member cannot unbond further chunks due to reaching the limit."]
+					MaxUnbondingLimit,
+					#[codec(index = 6)]
+					#[doc = "None of the funds can be withdrawn yet because the bonding duration has not passed."]
+					CannotWithdrawAny,
+					#[codec(index = 7)]
+					#[doc = "The amount does not meet the minimum bond to either join or create a pool."]
+					#[doc = ""]
+					#[doc = "The depositor can never unbond to a value less than `Pallet::depositor_min_bond`. The"]
+					#[doc = "caller does not have nominating permissions for the pool. Members can never unbond to a"]
+					#[doc = "value below `MinJoinBond`."]
+					MinimumBondNotMet,
+					#[codec(index = 8)]
+					#[doc = "The transaction could not be executed due to overflow risk for the pool."]
+					OverflowRisk,
+					#[codec(index = 9)]
+					#[doc = "A pool must be in [`PoolState::Destroying`] in order for the depositor to unbond or for"]
+					#[doc = "other members to be permissionlessly unbonded."]
+					NotDestroying,
+					#[codec(index = 10)]
+					#[doc = "The caller does not have nominating permissions for the pool."]
+					NotNominator,
+					#[codec(index = 11)]
+					#[doc = "Either a) the caller cannot make a valid kick or b) the pool is not destroying."]
+					NotKickerOrDestroying,
+					#[codec(index = 12)]
+					#[doc = "The pool is not open to join"]
+					NotOpen,
+					#[codec(index = 13)]
+					#[doc = "The system is maxed out on pools."]
+					MaxPools,
+					#[codec(index = 14)]
+					#[doc = "Too many members in the pool or system."]
+					MaxPoolMembers,
+					#[codec(index = 15)]
+					#[doc = "The pools state cannot be changed."]
+					CanNotChangeState,
+					#[codec(index = 16)]
+					#[doc = "The caller does not have adequate permissions."]
+					DoesNotHavePermission,
+					#[codec(index = 17)]
+					#[doc = "Metadata exceeds [`Config::MaxMetadataLen`]"]
+					MetadataExceedsMaxLen,
+					#[codec(index = 18)]
+					#[doc = "Some error occurred that should never happen. This should be reported to the"]
+					#[doc = "maintainers."]
+					Defensive(runtime_types::pallet_tangle_lst::pallet::DefensiveError),
+					#[codec(index = 19)]
+					#[doc = "Partial unbonding now allowed permissionlessly."]
+					PartialUnbondNotAllowedPermissionlessly,
+					#[codec(index = 20)]
+					#[doc = "The pool's max commission cannot be set higher than the existing value."]
+					MaxCommissionRestricted,
+					#[codec(index = 21)]
+					#[doc = "The supplied commission exceeds the max allowed commission."]
+					CommissionExceedsMaximum,
+					#[codec(index = 22)]
+					#[doc = "The supplied commission exceeds global maximum commission."]
+					CommissionExceedsGlobalMaximum,
+					#[codec(index = 23)]
+					#[doc = "Not enough blocks have surpassed since the last commission update."]
+					CommissionChangeThrottled,
+					#[codec(index = 24)]
+					#[doc = "The submitted changes to commission change rate are not allowed."]
+					CommissionChangeRateNotAllowed,
+					#[codec(index = 25)]
+					#[doc = "There is no pending commission to claim."]
+					NoPendingCommission,
+					#[codec(index = 26)]
+					#[doc = "No commission current has been set."]
+					NoCommissionCurrentSet,
+					#[codec(index = 27)]
+					#[doc = "Pool id currently in use."]
+					PoolIdInUse,
+					#[codec(index = 28)]
+					#[doc = "Pool id provided is not correct/usable."]
+					InvalidPoolId,
+					#[codec(index = 29)]
+					#[doc = "Bonding extra is restricted to the exact pending reward amount."]
+					BondExtraRestricted,
+					#[codec(index = 30)]
+					#[doc = "No imbalance in the ED deposit for the pool."]
+					NothingToAdjust,
+					#[codec(index = 31)]
+					#[doc = "Pool token creation failed."]
+					PoolTokenCreationFailed,
+					#[codec(index = 32)]
+					#[doc = "No balance to unbond."]
+					NoBalanceToUnbond,
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "Events of this pallet."]
+				pub enum Event {
+					# [codec (index = 0)] # [doc = "A pool has been created."] Created { depositor : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "A member has became bonded in a pool."] Bonded { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , bonded : :: core :: primitive :: u128 , joined : :: core :: primitive :: bool , } , # [codec (index = 2)] # [doc = "A payout has been made to a member."] PaidOut { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , payout : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "A member has unbonded from their pool."] # [doc = ""] # [doc = "- `balance` is the corresponding balance of the number of points that has been"] # [doc = "  requested to be unbonded (the argument of the `unbond` transaction) from the bonded"] # [doc = "  pool."] # [doc = "- `points` is the number of points that are issued as a result of `balance` being"] # [doc = "dissolved into the corresponding unbonding pool."] # [doc = "- `era` is the era in which the balance will be unbonded."] # [doc = "In the absence of slashing, these values will match. In the presence of slashing, the"] # [doc = "number of points that are issued in the unbonding pool will be less than the amount"] # [doc = "requested to be unbonded."] Unbonded { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , era : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "A member has withdrawn from their pool."] # [doc = ""] # [doc = "The given number of `points` have been dissolved in return of `balance`."] # [doc = ""] # [doc = "Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance"] # [doc = "will be 1."] Withdrawn { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "A pool has been destroyed."] Destroyed { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "The state of a pool has changed"] StateChanged { pool_id : :: core :: primitive :: u32 , new_state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 7)] # [doc = "A member has been removed from a pool."] # [doc = ""] # [doc = "The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked)."] MemberRemoved { pool_id : :: core :: primitive :: u32 , member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"] # [doc = "can never change."] RolesUpdated { root : :: core :: option :: Option < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , bouncer : :: core :: option :: Option < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , nominator : :: core :: option :: Option < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "The active balance of pool `pool_id` has been slashed to `balance`."] PoolSlashed { pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 10)] # [doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."] UnbondingPoolSlashed { pool_id : :: core :: primitive :: u32 , era : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "A pool's commission setting has been changed."] PoolCommissionUpdated { pool_id : :: core :: primitive :: u32 , current : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt :: ext :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 12)] # [doc = "A pool's maximum commission setting has been changed."] PoolMaxCommissionUpdated { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 13)] # [doc = "A pool's commission `change_rate` has been changed."] PoolCommissionChangeRateUpdated { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 14)] # [doc = "Pool commission claim permission has been updated."] PoolCommissionClaimPermissionUpdated { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 15)] # [doc = "Pool commission has been claimed."] PoolCommissionClaimed { pool_id : :: core :: primitive :: u32 , commission : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Topped up deficit in frozen ED of the reward pool."] MinBalanceDeficitAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 17)] # [doc = "Claimed excess frozen ED of af the reward pool."] MinBalanceExcessAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , }
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				pub enum FreezeReason {
+					#[codec(index = 0)]
+					PoolMinBalance,
+				}
+			}
+			pub mod types {
+				use super::runtime_types;
+				pub mod bonded_pool {
+					use super::runtime_types;
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub struct BondedPoolInner {
+						pub commission:
+							runtime_types::pallet_tangle_lst::types::commission::Commission,
+						pub roles: runtime_types::pallet_tangle_lst::types::pools::PoolRoles<
+							::subxt::ext::subxt_core::utils::AccountId32,
+						>,
+						pub state: runtime_types::pallet_tangle_lst::types::pools::PoolState,
+					}
+				}
+				pub mod commission {
+					use super::runtime_types;
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub struct Commission { pub current : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt :: ext :: subxt_core :: utils :: AccountId32 ,) > , pub max : :: core :: option :: Option < runtime_types :: sp_arithmetic :: per_things :: Perbill > , pub change_rate : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > > , pub throttle_from : :: core :: option :: Option < :: core :: primitive :: u64 > , pub claim_permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > > , }
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub struct CommissionChangeRate<_0> {
+						pub max_increase: runtime_types::sp_arithmetic::per_things::Perbill,
+						pub min_delay: _0,
+					}
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub enum CommissionClaimPermission<_0> {
+						#[codec(index = 0)]
+						Permissionless,
+						#[codec(index = 1)]
+						Account(_0),
+					}
+				}
+				pub mod pools {
+					use super::runtime_types;
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub struct PoolMember {
+						pub pool_id: ::core::primitive::u32,
+						pub unbonding_eras:
+							runtime_types::bounded_collections::bounded_btree_map::BoundedBTreeMap<
+								::core::primitive::u32,
+								::core::primitive::u128,
+							>,
+					}
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub struct PoolRoles<_0> {
+						pub depositor: _0,
+						pub root: ::core::option::Option<_0>,
+						pub nominator: ::core::option::Option<_0>,
+						pub bouncer: ::core::option::Option<_0>,
+					}
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub enum PoolState {
+						#[codec(index = 0)]
+						Open,
+						#[codec(index = 1)]
+						Blocked,
+						#[codec(index = 2)]
+						Destroying,
+					}
+				}
+				pub mod sub_pools {
+					use super::runtime_types;
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub struct RewardPool {
+						pub last_recorded_reward_counter:
+							runtime_types::sp_arithmetic::fixed_point::FixedU128,
+						pub last_recorded_total_payouts: ::core::primitive::u128,
+						pub total_rewards_claimed: ::core::primitive::u128,
+						pub total_commission_pending: ::core::primitive::u128,
+						pub total_commission_claimed: ::core::primitive::u128,
+					}
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub struct SubPools {
+						pub no_era: runtime_types::pallet_tangle_lst::types::sub_pools::UnbondPool,
+						pub with_era:
+							runtime_types::bounded_collections::bounded_btree_map::BoundedBTreeMap<
+								::core::primitive::u32,
+								runtime_types::pallet_tangle_lst::types::sub_pools::UnbondPool,
+							>,
+					}
+					#[derive(
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+						:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+						:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+					#[decode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+					)]
+					#[encode_as_type(
+						crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+					)]
+					pub struct UnbondPool {
+						pub points: ::core::primitive::u128,
+						pub balance: ::core::primitive::u128,
+					}
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				pub enum BondExtra<_0> {
+					#[codec(index = 0)]
+					FreeBalance(_0),
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				pub enum ClaimPermission {
+					#[codec(index = 0)]
+					Permissioned,
+					#[codec(index = 1)]
+					PermissionlessCompound,
+					#[codec(index = 2)]
+					PermissionlessWithdraw,
+					#[codec(index = 3)]
+					PermissionlessAll,
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				pub enum ConfigOp<_0> {
+					#[codec(index = 0)]
+					Noop,
+					#[codec(index = 1)]
+					Set(_0),
+					#[codec(index = 2)]
+					Remove,
 				}
 			}
 		}
@@ -57773,6 +60821,7 @@ pub mod api {
 				pub struct OperatorPreferences {
 					pub key: runtime_types::sp_core::ecdsa::Public,
 					pub approval: runtime_types::tangle_primitives::services::ApprovalPrefrence,
+					pub price_targets: runtime_types::tangle_primitives::services::PriceTargets,
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -57800,6 +60849,30 @@ pub mod api {
 						runtime_types::bounded_collections::bounded_btree_set::BoundedBTreeSet<
 							::core::primitive::u64,
 						>,
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				pub struct PriceTargets {
+					pub cpu: ::core::primitive::u64,
+					pub mem: ::core::primitive::u64,
+					pub storage_hdd: ::core::primitive::u64,
+					pub storage_ssd: ::core::primitive::u64,
+					pub storage_nvme: ::core::primitive::u64,
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -58478,6 +61551,8 @@ pub mod api {
 				MultiAssetDelegation(runtime_types::pallet_multi_asset_delegation::pallet::Call),
 				#[codec(index = 51)]
 				Services(runtime_types::pallet_services::module::Call),
+				#[codec(index = 52)]
+				Lst(runtime_types::pallet_tangle_lst::pallet::Call),
 				#[codec(index = 46)]
 				SygmaAccessSegregator(runtime_types::sygma_access_segregator::pallet::Call),
 				#[codec(index = 47)]
@@ -58571,6 +61646,8 @@ pub mod api {
 				MultiAssetDelegation(runtime_types::pallet_multi_asset_delegation::pallet::Error),
 				#[codec(index = 51)]
 				Services(runtime_types::pallet_services::module::Error),
+				#[codec(index = 52)]
+				Lst(runtime_types::pallet_tangle_lst::pallet::Error),
 				#[codec(index = 46)]
 				SygmaAccessSegregator(runtime_types::sygma_access_segregator::pallet::Error),
 				#[codec(index = 47)]
@@ -58668,6 +61745,8 @@ pub mod api {
 				MultiAssetDelegation(runtime_types::pallet_multi_asset_delegation::pallet::Event),
 				#[codec(index = 51)]
 				Services(runtime_types::pallet_services::module::Event),
+				#[codec(index = 52)]
+				Lst(runtime_types::pallet_tangle_lst::pallet::Event),
 				#[codec(index = 46)]
 				SygmaAccessSegregator(runtime_types::sygma_access_segregator::pallet::Event),
 				#[codec(index = 47)]
@@ -58697,6 +61776,8 @@ pub mod api {
 			pub enum RuntimeFreezeReason {
 				#[codec(index = 24)]
 				NominationPools(runtime_types::pallet_nomination_pools::pallet::FreezeReason),
+				#[codec(index = 52)]
+				Lst(runtime_types::pallet_tangle_lst::pallet::FreezeReason),
 			}
 			#[derive(
 				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
