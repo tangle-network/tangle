@@ -34,29 +34,29 @@ fn zero_key() -> ecdsa::Public {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MachineKind {
-	T4Large,
-	T4Medium,
-	T4Small,
+	Large,
+	Medium,
+	Small,
 }
 
 /// All prices are specified in USD/hr (in u64, so 1e6 = 1$)
 fn price_targets(kind: MachineKind) -> PriceTargets {
 	match kind {
-		MachineKind::T4Large => PriceTargets {
+		MachineKind::Large => PriceTargets {
 			cpu: 2_000,
 			mem: 1_000,
 			storage_hdd: 100,
 			storage_ssd: 200,
 			storage_nvme: 300,
 		},
-		MachineKind::T4Medium => PriceTargets {
+		MachineKind::Medium => PriceTargets {
 			cpu: 1_000,
 			mem: 500,
 			storage_hdd: 50,
 			storage_ssd: 100,
 			storage_nvme: 150,
 		},
-		MachineKind::T4Small => {
+		MachineKind::Small => {
 			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 }
 		},
 	}
@@ -124,7 +124,7 @@ fn register_on_blueprint() {
 			OperatorPreferences {
 				key: zero_key(),
 				approval: ApprovalPrefrence::default(),
-				price_targets: price_targets(MachineKind::T4Large),
+				price_targets: price_targets(MachineKind::Large),
 			},
 			Default::default(),
 		);
@@ -136,7 +136,7 @@ fn register_on_blueprint() {
 			preferences: OperatorPreferences {
 				key: zero_key(),
 				approval: ApprovalPrefrence::default(),
-				price_targets: price_targets(MachineKind::T4Large),
+				price_targets: price_targets(MachineKind::Large),
 			},
 			registration_args: Default::default(),
 		})]);
@@ -217,7 +217,7 @@ fn update_approval_preference() {
 			OperatorPreferences {
 				key: zero_key(),
 				approval: ApprovalPrefrence::default(),
-				price_targets: price_targets(MachineKind::T4Small)
+				price_targets: price_targets(MachineKind::Small)
 			},
 			Default::default(),
 		));
@@ -227,7 +227,7 @@ fn update_approval_preference() {
 			OperatorPreferences {
 				key: zero_key(),
 				approval: ApprovalPrefrence::default(),
-				price_targets: price_targets(MachineKind::T4Small)
+				price_targets: price_targets(MachineKind::Small)
 			}
 		);
 
@@ -237,7 +237,7 @@ fn update_approval_preference() {
 			preferences: OperatorPreferences {
 				key: zero_key(),
 				approval: ApprovalPrefrence::default(),
-				price_targets: price_targets(MachineKind::T4Small),
+				price_targets: price_targets(MachineKind::Small),
 			},
 			registration_args: Default::default(),
 		})]);
@@ -291,7 +291,7 @@ fn update_price_targets() {
 			OperatorPreferences {
 				key: zero_key(),
 				approval: ApprovalPrefrence::default(),
-				price_targets: price_targets(MachineKind::T4Small)
+				price_targets: price_targets(MachineKind::Small)
 			},
 			Default::default(),
 		));
@@ -301,7 +301,7 @@ fn update_price_targets() {
 			OperatorPreferences {
 				key: zero_key(),
 				approval: ApprovalPrefrence::default(),
-				price_targets: price_targets(MachineKind::T4Small)
+				price_targets: price_targets(MachineKind::Small)
 			}
 		);
 
@@ -311,7 +311,7 @@ fn update_price_targets() {
 			preferences: OperatorPreferences {
 				key: zero_key(),
 				approval: ApprovalPrefrence::default(),
-				price_targets: price_targets(MachineKind::T4Small),
+				price_targets: price_targets(MachineKind::Small),
 			},
 			registration_args: Default::default(),
 		})]);
@@ -320,18 +320,18 @@ fn update_price_targets() {
 		assert_ok!(Services::update_price_targets(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			price_targets(MachineKind::T4Medium),
+			price_targets(MachineKind::Medium),
 		));
 
 		assert_eq!(
 			Operators::<Runtime>::get(0, &bob).unwrap().price_targets,
-			price_targets(MachineKind::T4Medium)
+			price_targets(MachineKind::Medium)
 		);
 
 		assert_events(vec![RuntimeEvent::Services(crate::Event::PriceTargetsUpdated {
 			operator: bob,
 			blueprint_id: 0,
-			price_targets: price_targets(MachineKind::T4Medium),
+			price_targets: price_targets(MachineKind::Medium),
 		})]);
 
 		// try to update price targets when not registered
@@ -340,7 +340,7 @@ fn update_price_targets() {
 			Services::update_price_targets(
 				RuntimeOrigin::signed(charlie),
 				0,
-				price_targets(MachineKind::T4Medium)
+				price_targets(MachineKind::Medium)
 			),
 			crate::Error::<Runtime>::NotRegistered
 		);
