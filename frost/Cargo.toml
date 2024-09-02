@@ -8,14 +8,14 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-zeroize = { version = "1.5.4", default-features = false, features = ["derive"] }
+zeroize = { version = "1.8.1", default-features = false, features = ["derive"] }
 byteorder = { workspace = true }
 parity-scale-codec = { workspace = true }
 serde = { workspace = true }
 serdect = { workspace = true, features = ["alloc"] }
 sp-std = { workspace = true }
 subtle = { workspace = true }
-postcard = { version = "1.0.0", default-features = false, features = ["alloc"] }
+postcard = { version = "1.0.10", default-features = false, features = ["alloc"] }
 hex = { workspace = true, features = ["alloc"] }
 rand_core = { workspace = true, optional = true }
 debugless-unwrap = "0.0.4"

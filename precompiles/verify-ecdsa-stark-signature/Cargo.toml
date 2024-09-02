@@ -21,7 +21,7 @@ fp-evm = { workspace = true }
 pallet-evm = { workspace = true }
 
 [dev-dependencies]
-derive_more = { workspace = true }
+derive_more = { workspace = true, features = ["full"] }
 hex-literal = { workspace = true }
 scale-info = { workspace = true }
 serde = { workspace = true }
