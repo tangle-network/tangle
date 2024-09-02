@@ -1122,22 +1122,6 @@ impl pallet_airdrop_claims::Config for Runtime {
 	type WeightInfo = ();
 }
 
-// ReStaking reward curve, more details at
-// https://docs.rs/pallet-staking-reward-curve/latest/pallet_staking_reward_curve/macro.build.html
-// We are aiming for a max inflation of 1%, when 25% of tokens are re-staked
-// In practical sense, our reward rate will fluctuate between 0.5%-1% since the restaked token count
-// varies
-pallet_staking_reward_curve::build! {
-	const RESTAKER_REWARD_CURVE: PiecewiseLinear<'static> = curve!(
-		min_inflation: 0_001_000, // min inflation of 0.01%
-		max_inflation: 0_020_000, // max inflation of 2% (acheived only at ideal stake)
-		ideal_stake: 0_250_000, // ideal stake (60% of total supply)
-		falloff: 0_025_000,
-		max_piece_count: 40,
-		test_precision: 0_005_000,
-	);
-}
-
 parameter_types! {
 	// One storage item; key size 32, value size 8; .
 	pub const ProxyDepositBase: Balance = deposit(1, 8);
