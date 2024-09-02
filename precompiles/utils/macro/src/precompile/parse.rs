@@ -395,11 +395,7 @@ impl Precompile {
 	}
 
 	/// Process the discriminant function.
-	fn parse_discriminant_fn(
-		&mut self,
-		span: Span,
-		method: &syn::ImplItemFn,
-	) -> syn::Result<()> {
+	fn parse_discriminant_fn(&mut self, span: Span, method: &syn::ImplItemFn) -> syn::Result<()> {
 		if !self.tagged_as_precompile_set {
 			let msg = "The impl block must be tagged with `#[precompile::precompile_set]` for
 			the discriminant attribute to be used";

@@ -102,9 +102,7 @@ impl<Runtime: pallet_evm::Config> EcdsaStarkPrecompile<Runtime> {
 	}
 }
 
-pub fn convert_stark_scalar(
-	x: &Scalar<Stark>,
-) -> starknet_crypto::Felt {
+pub fn convert_stark_scalar(x: &Scalar<Stark>) -> starknet_crypto::Felt {
 	let bytes = x.to_be_bytes();
 	debug_assert_eq!(bytes.len(), 32);
 	let mut buffer = [0u8; 32];
