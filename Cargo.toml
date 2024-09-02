@@ -337,8 +337,8 @@ sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk",
 # Tangle dependencies
 tangle-primitives = { path = "primitives", default-features = false }
 tangle-crypto-primitives = { path = "primitives/crypto", default-features = false }
-pallet-staking = { path = "pallets/staking", default-features = false }
-pallet-staking-reward-curve = { path = "pallets/staking/reward-curve", default-features = false }
+pallet-staking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
+pallet-staking-reward-curve = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-tangle-lst = { path = "pallets/tangle-lst", default-features = false }
 primitives-ext = { path = "primitives/ext", default-features = false }
 evm-tracing-events = { path = "primitives/rpc/evm-tracing-events", default-features = false }
