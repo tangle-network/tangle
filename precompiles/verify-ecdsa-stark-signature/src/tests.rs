@@ -23,7 +23,7 @@ use generic_ec::{
 use hex_literal::hex;
 use precompile_utils::testing::*;
 use sp_core::H160;
-use starknet_crypto::FieldElement;
+use starknet_crypto::Felt;
 
 fn precompiles() -> Precompiles<Runtime> {
 	PrecompilesValue::get()
@@ -89,7 +89,7 @@ fn signature_verification_works_secp256r1_ecdsa() {
 	});
 }
 
-pub fn field_element_from_be_hex(hex: &str) -> FieldElement {
+pub fn field_element_from_be_hex(hex: &str) -> Felt {
 	let decoded = hex::decode(hex.trim_start_matches("0x")).unwrap();
 
 	if decoded.len() > 32 {
@@ -99,5 +99,5 @@ pub fn field_element_from_be_hex(hex: &str) -> FieldElement {
 	let mut buffer = [0u8; 32];
 	buffer[(32 - decoded.len())..].copy_from_slice(&decoded[..]);
 
-	FieldElement::from_bytes_be(&buffer).unwrap()
+	Felt::from_bytes_be(&buffer)
 }

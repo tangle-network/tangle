@@ -83,30 +83,12 @@ impl<Runtime: pallet_evm::Config> EcdsaStarkPrecompile<Runtime> {
 			return Ok(false);
 		};
 
-		let public_key = if let Ok(x) = convert_stark_scalar(&public_key_x) {
-			x
-		} else {
-			return Ok(false);
-		};
-		let msg = if let Ok(x) =
-			convert_stark_scalar(&Scalar::<Stark>::from_be_bytes_mod_order(message))
-		{
-			x
-		} else {
-			return Ok(false);
-		};
+		let public_key = convert_stark_scalar(&public_key_x);
+		let msg = convert_stark_scalar(&Scalar::<Stark>::from_be_bytes_mod_order(message));
 
-		let r = if let Ok(x) = convert_stark_scalar(&r) {
-			x
-		} else {
-			return Ok(false);
-		};
+		let r = convert_stark_scalar(&r);
 
-		let s = if let Ok(x) = convert_stark_scalar(&s) {
-			x
-		} else {
-			return Ok(false);
-		};
+		let s = convert_stark_scalar(&s);
 
 		let is_confirmed = starknet_crypto::verify(&public_key, &msg, &r, &s).is_ok();
 
@@ -120,12 +102,10 @@ impl<Runtime: pallet_evm::Config> EcdsaStarkPrecompile<Runtime> {
 	}
 }
 
-pub fn convert_stark_scalar(
-	x: &Scalar<Stark>,
-) -> Result<starknet_crypto::FieldElement, &'static str> {
+pub fn convert_stark_scalar(x: &Scalar<Stark>) -> starknet_crypto::Felt {
 	let bytes = x.to_be_bytes();
 	debug_assert_eq!(bytes.len(), 32);
 	let mut buffer = [0u8; 32];
 	buffer.copy_from_slice(bytes.as_bytes());
-	starknet_crypto::FieldElement::from_bytes_be(&buffer).map_err(|_| "FieldElementError")
+	starknet_crypto::Felt::from_bytes_be(&buffer)
 }

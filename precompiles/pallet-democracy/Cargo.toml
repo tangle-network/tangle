@@ -27,7 +27,7 @@ sp-std = { workspace = true }
 pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
 
 [dev-dependencies]
-derive_more = { workspace = true }
+derive_more = { workspace = true, features = ["full"] }
 hex-literal = { workspace = true }
 serde = { workspace = true }
 

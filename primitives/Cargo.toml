@@ -32,7 +32,7 @@ ark-serialize = { workspace = true, default-features = false, optional = true }
 ark-std = { workspace = true, default-features = false, optional = true }
 
 [dependencies.educe]
-version = "0.5.11"
+workspace = true
 features = [
   "Debug",
   "Clone",
@@ -44,7 +44,6 @@ features = [
   "Hash",
   "Default"
 ]
-default-features = false
 
 [dev-dependencies]
 hex = { workspace = true }

@@ -7,7 +7,7 @@ edition = { workspace = true }
 homepage = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
-keywards = ["blockchain", "tangle", "subxt"]
+keywords = ["blockchain", "tangle", "subxt"]
 categories = ["cryptography", "cryptography::cryptocurrencies"]
 exclude = ["./metadata"]
 readme = "README.md"
