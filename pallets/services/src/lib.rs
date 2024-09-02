@@ -251,7 +251,7 @@ pub mod module {
 			approval_preference: ApprovalPrefrence,
 		},
 
-		/// The approval preference for an operator has been updated.
+		/// The price targets for an operator has been updated.
 		PriceTargetsUpdated {
 			/// The account that updated the approval preference.
 			operator: T::AccountId,
