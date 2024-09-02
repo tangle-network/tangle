@@ -47,61 +47,62 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
-smallvec = "1.6.1"
+smallvec = "1.13.2"
 substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
-substrate-build-script-utils = "3.0.0"
-subtle = { version = "2.2", default-features = false }
+substrate-build-script-utils = "11.0.0"
+subtle = { version = "2.6", default-features = false }
 hex-literal = "0.4.1"
-itertools = { version = "0.12.1", default-features = false }
-log = { version = "0.4.20", default-features = false }
-scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
-serde = { version = "1.0.197", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.85", default-features = false }
-serde_with = { version = "3.6", default-features = false }
+itertools = { version = "0.13.0", default-features = false }
+log = { version = "0.4.22", default-features = false }
+scale-info = { version = "2.11.3", default-features = false, features = ["derive"] }
+serde = { version = "1.0.209", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.127", default-features = false }
+serde_with = { version = "3.9", default-features = false }
 serdect = { version = "0.2.0", default-features = false }
 static_assertions = "1.1.0"
-clap = { version = "4.4.2", features = ["derive"] }
-parity-scale-codec = { version = "3.6.4", default-features = false, features = ["derive", "max-encoded-len"] }
+clap = { version = "4.5.16", features = ["derive"] }
+parity-scale-codec = { version = "3.6.12", default-features = false, features = ["derive", "max-encoded-len"] }
 rlp = { version = "0.5", default-features = false }
-tracing = "0.1.34"
-tokio = { version = "1.13" }
-futures = { version = "0.3.16" }
+tracing = "0.1.40"
+tokio = { version = "1.39" }
+futures = { version = "0.3.30" }
 rand_core = { version = "0.6", default-features = false }
 rand_chacha = { version = "0.3", default-features = false }
-rand = { version = "0.7.2", default-features = false }
-async-trait = "0.1.59"
-libsecp256k1 = { version = "0.7.0", default-features = false }
+rand = { version = "0.8.5", default-features = false }
+async-trait = "0.1.81"
+libsecp256k1 = { version = "0.7.1", default-features = false }
 rustc-hex = { version = "2.1.0", default-features = false }
-num_enum = { version = "0.5.3", default-features = false }
-derive_more = "0.99"
+num_enum = { version = "0.7.3", default-features = false }
+derive_more = "1.0.0"
 affix = "0.1.2"
 environmental = { version = "1.1.4", default-features = false }
-assert_matches = "1.3.0"
+assert_matches = "1.5.0"
 impl-trait-for-tuples = "0.2.2"
-sha2 = { version = "0.10.2", default-features = false }
-sha3 = { version = "0.10.1", default-features = false }
-digest = { version = "0.10.1", default-features = false }
-similar-asserts = { version = "1.1.0" }
+sha2 = { version = "0.10.8", default-features = false }
+sha3 = { version = "0.10.8", default-features = false }
+digest = { version = "0.10.7", default-features = false }
+similar-asserts = { version = "1.5.0" }
 proc-macro2 = "1.0"
 quote = "1.0"
-syn = { version = "1.0" }
+syn = { version = "2.0.76" }
 hex = { version = "0.4.3", default-features = false }
-paste = "1.0.6"
+paste = "1.0.15"
 slices = "0.2.0"
 byteorder = { version = "1", default-features = false }
 schnorrkel = { version = "0.11.4", default-features = false }
 snowbridge-milagro-bls = { git = "https://github.com/Snowfork/milagro_bls", default-features = false, rev = "43a5d480ed6e3b83de4cf54888680d51604199e6" }
 primitive-types = { version = "0.12.2", default-features = false, features = ["scale-info", "serde_no_std"] }
-fixed = { version = "1.23.0", default-features = false }
+fixed = { version = "1.28.0", default-features = false }
+educe = { version = "0.6.0", default-features = false }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
 
 # Arkworks
-ark-ec = { version = "^0.4.0", default-features = false }
-ark-ff = { version = "^0.4.0", default-features = false }
+ark-ec = { version = "^0.4.2", default-features = false }
+ark-ff = { version = "^0.4.2", default-features = false }
 ark-relations = { version = "^0.4.0", default-features = false }
-ark-serialize = { version = "^0.4.0", default-features = false, features = ["derive"] }
+ark-serialize = { version = "^0.4.2", default-features = false, features = ["derive"] }
 ark-std = { version = "^0.4.0", default-features = false }
 ark-groth16 = { version = "0.4.0", default-features = false }
 
@@ -111,7 +112,7 @@ ark-bn254 = { version = "^0.4.0", default-features = false, features = ["curve"]
 
 ark-crypto-primitives = { version = "^0.4.0", default-features = false }
 
-ethabi = { version = "15.0.0", default-features = false }
+ethabi = { version = "18.0.0", default-features = false }
 
 # Tangle Dependencies
 pallet-airdrop-claims = { path = "pallets/claims", default-features = false }
@@ -121,10 +122,10 @@ pallet-services-rpc = { path = "pallets/services/rpc" }
 pallet-multi-asset-delegation = { path = "pallets/multi-asset-delegation", default-features = false }
 
 
-k256 = { version = "0.13.0", default-features = false }
-p256 = { version = "0.13.0", default-features = false }
+k256 = { version = "0.13.3", default-features = false }
+p256 = { version = "0.13.2", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
-starknet-crypto = { version = "0.6.1", default-features = false, features = ["signature-display", "alloc"] }
+starknet-crypto = { version = "0.7.1", default-features = false, features = ["signature-display", "alloc"] }
 frost-core = { path = "frost", default-features = false }
 frost-ed25519 = { path = "frost/frost-ed25519", default-features = false }
 frost-ed448 = { path = "frost/frost-ed448", default-features = false }
@@ -315,12 +316,12 @@ pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls
 
 # Precompiles utils
 postcard = { version = "1", default-features = false }
-generic-ec = { version = "0.2", default-features = false }
+generic-ec = { version = "0.4.1", default-features = false }
 signature = { version = "2.2", default-features = false }
 
 # EVM & Ethereum
 # (wasm)
-evm = { version = "0.41.0", default-features = false }
+evm = { version = "0.41.1", default-features = false }
 ethereum-types = { version = "0.14.1", default-features = false }
 ethereum = { version = "0.15.0", default-features = false }
 
@@ -328,7 +329,7 @@ evm-gasometer = { version = "0.41.0", default-features = false }
 evm-runtime = { version = "0.41.0", default-features = false }
 
 # RPC related dependencies
-jsonrpsee = { version = "0.20.3", features = ["server"] }
+jsonrpsee = { version = "0.20.4", features = ["server"] }
 pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
 sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0" }
