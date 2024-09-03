@@ -14603,6 +14603,7 @@ dependencies = [
  "scale-info",
  "serde",
  "subxt",
+ "subxt-core",
  "subxt-signer",
 ]
 

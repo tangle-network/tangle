@@ -27,6 +27,7 @@ subxt metadata -f bytes > ./metadata/tangle-testnet-runtime.scale
 
 ```bash
 subxt codegen --file metadata/tangle-testnet-runtime.scale \
+    --crate "::subxt_core" \
     --derive Clone \
     --derive Eq \
     --derive PartialEq \
