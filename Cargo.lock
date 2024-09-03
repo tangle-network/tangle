@@ -14597,12 +14597,13 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.1.6"
+version = "0.2.0"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
  "serde",
  "subxt",
+ "subxt-core",
  "subxt-signer",
 ]
 
