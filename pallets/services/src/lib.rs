@@ -197,6 +197,8 @@ pub mod module {
 		JobCallResultNotFound,
 		/// An error occurred while encoding the EVM ABI.
 		EVMAbiEncode,
+		/// An error occurred while decoding the EVM ABI.
+		EVMAbiDecode,
 		/// Operator profile not found.
 		OperatorProfileNotFound,
 		/// Maximum number of services per Provider reached.

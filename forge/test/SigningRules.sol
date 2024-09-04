@@ -3,8 +3,8 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
-import "../src/SigningRules.sol";
-import {Proposal, ProposalStatus} from "../src/SigningRules.sol";
+import "@/SigningRules.sol";
+import {Proposal, ProposalStatus} from "@/SigningRules.sol";
 
 contract VotableSigningRules is SigningRules {
     function _isVotableProposal(uint64 phase1JobId, bytes memory phase2JobDetails)

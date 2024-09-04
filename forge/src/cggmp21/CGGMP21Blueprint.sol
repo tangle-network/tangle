@@ -2,47 +2,26 @@
 // DO NOT USE THIS IN PRODUCTION, IT IS JUST FOR TESTING.
 pragma solidity >=0.8.3;
 
-import "../hooks/RegisterationHook.sol";
-import "../hooks/RequestHook.sol";
-// import "../JobResultVerifier.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "core/BlueprintServiceManager.sol";
 
-contract CGGMP21RegistrationHook is RegistrationHook {
-    /// A Simple List of all Participants Ecdsa Public Keys
-    struct Participant {
+contract CGGMP21Blueprint is BlueprintServiceManager {
+    /// A Simple List of all Operator Ecdsa Public Keys
+    struct Operator {
         address addr;
         bytes publicKey;
     }
 
-    Participant[] public participants;
-
-    error InvalidRegistrationInputs();
-
-    function onRegister(bytes calldata participant, bytes calldata registrationInputs)
-        public
-        payable
-        override
-        onlyRuntime
-    {
-        // The inputs are empty, we don't need them.
-        if (registrationInputs.length != 0) {
-            revert InvalidRegistrationInputs();
-        }
-        address addr = address(uint160(uint256(keccak256(participant))));
-        // add the participant to the list
-        participants.push(Participant(addr, participant));
-    }
-}
-
-contract CGGMP21RequestHook is RequestHook {
     uint8 constant KEYGEN_JOB = 0;
     uint8 constant SIGNING_JOB = 1;
+
+    Operator[] public blueprintOperators;
 
     struct Service {
         /// The id of the service
         uint64 id;
-        /// The public keys of participants of the service
-        bytes[] participants;
+        /// The list of participants of the service
+        Operator[] operators;
     }
 
     // Keygens
@@ -57,38 +36,48 @@ contract CGGMP21RequestHook is RequestHook {
     error KeygenJobNotFound();
     error InvalidJob();
 
-    /// Stores the list of services that are requested
-    function onRequest(uint64 serviceId, bytes[] calldata participants, bytes calldata requestInputs)
+    function onRegister(bytes calldata operator, bytes calldata registrationInputs)
         public
         payable
         override
-        onlyRuntime
+        onlyFromRootChain
+    {
+        address addr = operatorAddressFromPublicKey(operator);
+        // add the participant to the list
+        blueprintOperators.push(Operator(addr, operator));
+    }
+
+    function onRequest(uint64 serviceId, bytes[] calldata operators, bytes calldata requestInputs)
+        public
+        payable
+        override
+        onlyFromRootChain
     {
         // The requestInputs are empty, we don't need them.
         if (requestInputs.length != 0) {
             revert InvalidRequestInputs();
         }
-        // initialize the service
-        Service memory service;
-        // set the id of the service
+        // Create the service
+        Service storage service = services[serviceId];
         service.id = serviceId;
-        // set the participants of the service
-        service.participants = participants;
-        // store the service
-        services[serviceId] = service;
+
+        for (uint256 i = 0; i < operators.length; i++) {
+            address addr = operatorAddressFromPublicKey(operators[i]);
+            service.operators.push(Operator(addr, operators[i]));
+        }
     }
 
     function onJobCall(uint64 serviceId, uint8 job, uint64 jobCallId, bytes calldata inputs)
         public
         payable
         override
-        onlyRuntime
+        onlyFromRootChain
     {
         // Job 0 is the Keygen Job
         if (job == KEYGEN_JOB) {
             // The inputs are the DKG threshold
             (uint8 t) = abi.decode(inputs, (uint8));
-            uint256 n = services[serviceId].participants.length;
+            uint256 n = services[serviceId].operators.length;
             // verify the DKG threshold is valid
             if (t == 0 || t > n) {
                 revert InvalidDKGThreshold();
@@ -97,7 +86,7 @@ contract CGGMP21RequestHook is RequestHook {
             keygens[serviceId][jobCallId] = t;
         } else if (job == SIGNING_JOB) {
             // inputs are keygenJobCallId and message hash (32 bytes)
-            (uint64 keygenJobCallId, bytes32 message) = abi.decode(inputs, (uint64, bytes32));
+            (uint64 keygenJobCallId, bytes32 _message) = abi.decode(inputs, (uint64, bytes32));
             // verify the keygen job exists
             if (keygens[serviceId][keygenJobCallId] == 0) {
                 revert KeygenJobNotFound();
@@ -105,6 +94,10 @@ contract CGGMP21RequestHook is RequestHook {
         } else {
             revert InvalidJob();
         }
+    }
+
+    function operatorAddressFromPublicKey(bytes calldata publicKey) public pure returns (address) {
+        return address(uint160(uint256(keccak256(publicKey))));
     }
 }
 
