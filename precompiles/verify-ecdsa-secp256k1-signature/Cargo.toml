@@ -7,7 +7,7 @@ description = "A Precompile to verify ecdsa secp256k1 signature"
 
 [dependencies]
 log = { workspace = true }
-k256 = { workspace = true, default-features = false, features = ["hash2curve", "alloc", "ecdsa"] }
+k256 = { workspace = true, default-features = false, features = ["hash2curve", "alloc", "ecdsa", "pkcs8"] }
 precompile-utils = { workspace = true }
 
 # Substrate
@@ -22,7 +22,7 @@ fp-evm = { workspace = true }
 pallet-evm = { workspace = true }
 
 [dev-dependencies]
-derive_more = { workspace = true }
+derive_more = { workspace = true, features = ["full"] }
 hex-literal = { workspace = true }
 scale-info = { workspace = true }
 serde = { workspace = true }

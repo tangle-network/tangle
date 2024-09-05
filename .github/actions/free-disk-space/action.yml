@@ -1,0 +1,16 @@
+name: Free disk space
+description: We've run into out-of-disk error when compiling Rust projects, so we free up some space this way.
+
+runs:
+  using: "composite"
+  steps:
+    - name: Free Disk Space
+      uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # 1.3.1
+      with:
+        android: true # This alone is a 12 GB save.
+        # We disable the rest because it caused some problems. (they're enabled by default)
+        # The Android removal is enough.
+        dotnet: false
+        haskell: false
+        large-packages: false
+        swap-storage: false

@@ -4,9 +4,11 @@ out = "out"
 libs = ["lib"]
 
 remappings = [
-  "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-  "ds-test/=lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/",
-  "forge-std/=lib/forge-std/src/",
+ "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+ "ds-test/=lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/",
+ "forge-std/=lib/forge-std/src/",
+ "core/=lib/tnt-core/src/",
+ "@/=src/",
 ]
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

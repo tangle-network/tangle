@@ -18,10 +18,10 @@ num_enum = { workspace = true }
 proc-macro2 = "1.0"
 quote = "1.0"
 sha3 = "0.10"
-syn = { version = "1.0", features = ["extra-traits", "fold", "full", "visit"] }
+syn = { workspace = true, features = ["extra-traits", "fold", "full", "visit"] }
 
 [dev-dependencies]
-macrotest = "1.0.9"
+macrotest = "1.0.13"
 trybuild = "1.0"
 
 precompile-utils = { path = "../", features = ["testing"] }

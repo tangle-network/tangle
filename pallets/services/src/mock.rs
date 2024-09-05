@@ -202,7 +202,7 @@ impl pallet_staking::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ServicesPalletId: PalletId = PalletId(*b"py/servs");
+	pub const ServicesPalletId: PalletId = PalletId(*b"py/srvcs");
 }
 
 pub struct PalletEVMGasWeightMapping;
@@ -397,9 +397,7 @@ pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
 	new_test_ext_raw_authorities(mock_authorities(ids))
 }
 
-pub const CGGMP21_REGISTRATION_HOOK: H160 = H160([0x21; 20]);
-pub const CGGMP21_REQUEST_HOOK: H160 = H160([0x22; 20]);
-pub const CGGMP21_JOB_RESULT_VERIFIER: H160 = H160([0x23; 20]);
+pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -438,69 +436,24 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 	let mut evm_accounts = BTreeMap::new();
 
-	let cggmp21_registration_hook_json: serde_json::Value =
-		serde_json::from_str(include_str!("./test-artifacts/CGGMP21RegistrationHook.json"))
-			.unwrap();
-	let cggmp21_registration_hook_code = hex::decode(
-		cggmp21_registration_hook_json["deployedBytecode"]["object"]
+	let cggmp21_blueprint_json: serde_json::Value =
+		serde_json::from_str(include_str!("./test-artifacts/CGGMP21Blueprint.json")).unwrap();
+	let cggmp21_blueprint_code = hex::decode(
+		cggmp21_blueprint_json["deployedBytecode"]["object"]
 			.as_str()
 			.unwrap()
 			.replace("0x", ""),
 	)
 	.unwrap();
 	evm_accounts.insert(
-		CGGMP21_REGISTRATION_HOOK,
+		CGGMP21_BLUEPRINT,
 		fp_evm::GenesisAccount {
-			code: cggmp21_registration_hook_code,
+			code: cggmp21_blueprint_code,
 			storage: Default::default(),
 			nonce: Default::default(),
 			balance: Default::default(),
 		},
 	);
-
-	let cggmp21_request_hook_json: serde_json::Value =
-		serde_json::from_str(include_str!("./test-artifacts/CGGMP21RequestHook.json")).unwrap();
-
-	let cggmp21_request_hook_code = hex::decode(
-		cggmp21_request_hook_json["deployedBytecode"]["object"]
-			.as_str()
-			.unwrap()
-			.replace("0x", ""),
-	)
-	.unwrap();
-
-	evm_accounts.insert(
-		CGGMP21_REQUEST_HOOK,
-		fp_evm::GenesisAccount {
-			code: cggmp21_request_hook_code,
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: Default::default(),
-		},
-	);
-
-	// let cggmp21_job_result_verifier_json: serde_json::Value = serde_json::from_str(include_str!(
-	// 	"../../../forge/out/CGGMP21Hooks.sol/CGGMP21JobResultVerifier.json"
-	// ))
-	// .unwrap();
-
-	// let cggmp21_job_result_verifier_code = hex::decode(
-	// 	cggmp21_job_result_verifier_json["deployedBytecode"]["object"]
-	// 		.as_str()
-	// 		.unwrap()
-	// 		.replace("0x", ""),
-	// )
-	// .unwrap();
-
-	// evm_accounts.insert(
-	// 	CGGMP21_JOB_RESULT_VERIFIER,
-	// 	fp_evm::GenesisAccount {
-	// 		code: cggmp21_job_result_verifier_code,
-	// 		storage: Default::default(),
-	// 		nonce: Default::default(),
-	// 		balance: Default::default(),
-	// 	},
-	// );
 
 	let evm_config =
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };

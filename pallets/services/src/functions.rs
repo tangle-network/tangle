@@ -44,7 +44,7 @@ impl<T: Config> Pallet<T> {
 					name: String::from("onRegister"),
 					inputs: vec![
 						ethabi::Param {
-							name: String::from("participant"),
+							name: String::from("operator"),
 							kind: ethabi::ParamType::Bytes,
 							internal_type: None,
 						},
@@ -55,7 +55,7 @@ impl<T: Config> Pallet<T> {
 						},
 					],
 					outputs: Default::default(),
-					constant: false,
+					constant: None,
 					state_mutability: ethabi::StateMutability::Payable,
 				};
 				let args = prefrences
@@ -105,7 +105,7 @@ impl<T: Config> Pallet<T> {
 						},
 					],
 					outputs: Default::default(),
-					constant: false,
+					constant: None,
 					state_mutability: ethabi::StateMutability::Payable,
 				};
 				let service_id = Token::Uint(ethabi::Uint::from(service_id));
@@ -163,7 +163,7 @@ impl<T: Config> Pallet<T> {
 						},
 					],
 					outputs: Default::default(),
-					constant: false,
+					constant: None,
 					state_mutability: ethabi::StateMutability::Payable,
 				};
 				let service_id = Token::Uint(ethabi::Uint::from(service_id));
@@ -197,7 +197,7 @@ impl<T: Config> Pallet<T> {
 			JobResultVerifier::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
-					name: String::from("verify"),
+					name: String::from("onJobCallResult"),
 					inputs: vec![
 						ethabi::Param {
 							name: String::from("serviceId"),
@@ -231,7 +231,7 @@ impl<T: Config> Pallet<T> {
 						},
 					],
 					outputs: Default::default(),
-					constant: false,
+					constant: None,
 					state_mutability: ethabi::StateMutability::NonPayable,
 				};
 				let service_id = Token::Uint(ethabi::Uint::from(service_id));
@@ -248,6 +248,93 @@ impl<T: Config> Pallet<T> {
 				let info =
 					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
 				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
+			},
+		};
+		Ok((allowed, weight))
+	}
+
+	pub fn verify_job_call_result_hook(
+		job_def: &JobDefinition<T::Constraints>,
+		service_id: u64,
+		job: u8,
+		job_call_id: u64,
+		prefrences: &OperatorPreferences,
+		inputs: &[Field<T::Constraints, T::AccountId>],
+		outputs: &[Field<T::Constraints, T::AccountId>],
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		let (allowed, weight) = match job_def.verifier {
+			JobResultVerifier::None => (true, Weight::zero()),
+			JobResultVerifier::Evm(contract) => {
+				#[allow(deprecated)]
+				let call = ethabi::Function {
+					name: String::from("verifyJobCallResult"),
+					inputs: vec![
+						ethabi::Param {
+							name: String::from("serviceId"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("jobIndex"),
+							kind: ethabi::ParamType::Uint(8),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("jobCallId"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("participant"),
+							kind: ethabi::ParamType::Bytes,
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("inputs"),
+							kind: ethabi::ParamType::Bytes,
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("outputs"),
+							kind: ethabi::ParamType::Bytes,
+							internal_type: None,
+						},
+					],
+					outputs: vec![ethabi::Param {
+						name: String::from("allowed"),
+						kind: ethabi::ParamType::Bool,
+						internal_type: None,
+					}],
+					constant: None,
+					state_mutability: ethabi::StateMutability::NonPayable,
+				};
+				let service_id = Token::Uint(ethabi::Uint::from(service_id));
+				let job = Token::Uint(ethabi::Uint::from(job));
+				let job_call_id = Token::Uint(ethabi::Uint::from(job_call_id));
+				let participant = prefrences.to_ethabi().first().unwrap().clone();
+				let inputs = Token::Bytes(Field::encode_to_ethabi(inputs));
+				let outputs = Token::Bytes(Field::encode_to_ethabi(outputs));
+				let data = call
+					.encode_input(&[service_id, job, job_call_id, participant, inputs, outputs])
+					.map_err(|_| Error::<T>::EVMAbiEncode)?;
+				let gas_limit = 300_000;
+
+				let info =
+					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
+				// decode the result
+				let allowed = match info.exit_reason.is_succeed().then_some(&info.value) {
+					Some(data) => {
+						let result =
+							call.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+						let allowed = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+						match allowed {
+							Token::Bool(allowed) => *allowed,
+							_ => return Err(Error::<T>::EVMAbiDecode.into()),
+						}
+					},
+					None => false,
+				};
+				(allowed, Self::weight_from_call_info(&info))
 			},
 		};
 		Ok((allowed, weight))
@@ -279,7 +366,7 @@ impl<T: Config> Pallet<T> {
 				if info.exit_reason.is_revert() {
 					log::debug!(
 						target: "evm",
-						"Call to: {:?} with data: 0x{} Reverted with reason: 0x{}",
+						"Call to: {:?} with data: 0x{} Reverted with reason: (0x{})",
 						to,
 						hex::encode(&data),
 						hex::encode(&info.value),

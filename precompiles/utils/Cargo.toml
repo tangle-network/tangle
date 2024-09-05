@@ -6,7 +6,7 @@ edition = "2021"
 description = "Utils to write EVM precompiles."
 
 [dependencies]
-derive_more = { workspace = true, optional = true }
+derive_more = { workspace = true, optional = true, features = ["full"] }
 environmental = { workspace = true }
 hex-literal = { workspace = true, optional = true }
 impl-trait-for-tuples = { workspace = true }

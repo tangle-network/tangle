@@ -19,7 +19,7 @@ impl<T: Config> Pallet<T> {
 			.services
 			.into_iter()
 			.flat_map(Self::services)
-			.group_by(|service| service.blueprint);
+			.chunk_by(|service| service.blueprint);
 
 		let blueprints = profile
 			.blueprints
