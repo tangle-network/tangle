@@ -339,8 +339,8 @@ fn test_execute_withdraw_before_due() {
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})
 			.execute_returns(()); // should not fail
 
-		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // not expired so should not change
-		                                                      // balance
+		// not expired so should not change balance
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200);
 	});
 }
 
