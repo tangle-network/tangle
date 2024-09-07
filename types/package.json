@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/tangle-substrate-types",
-  "version": "0.5.11",
+  "version": "0.5.12",
   "description": "Polkadot.js type definitions required for interacting with Webb's tangle network",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -69,5 +69,6 @@
     "clean": "rm -rf build && rm -rf ts-types",
     "publish-types": "node ./scripts/publish-types.js",
     "update:metadata": "npx ts-node ./scripts/updateMetadata.ts"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
