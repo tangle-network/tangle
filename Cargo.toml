@@ -313,6 +313,7 @@ pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { path = "precompiles/v
 pallet-evm-precompile-verify-ecdsa-stark-signature = { path = "precompiles/verify-ecdsa-stark-signature", default-features = false }
 pallet-evm-precompile-verify-schnorr-signatures = { path = "precompiles/verify-schnorr-signatures", default-features = false }
 pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls381-signature", default-features = false }
+pallet-evm-precompile-tangle-lst = { path = "precompiles/tangle-lst", default-features = false }
 
 # Precompiles utils
 postcard = { version = "1", default-features = false }

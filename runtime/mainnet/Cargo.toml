@@ -129,6 +129,7 @@ pallet-evm-precompile-verify-ecdsa-stark-signature = { workspace = true }
 pallet-evm-precompile-verify-schnorr-signatures = { workspace = true }
 pallet-evm-precompile-verify-bls381-signature = { workspace = true }
 pallet-evm-precompile-multi-asset-delegation = { workspace = true }
+pallet-evm-precompile-tangle-lst = { workspace = true }
 precompile-utils = { workspace = true }
 
 evm-tracer = { workspace = true }
@@ -267,6 +268,7 @@ std = [
     "pallet-evm-precompile-verify-ecdsa-stark-signature/std",
     "pallet-evm-precompile-verify-schnorr-signatures/std",
     "pallet-evm-precompile-verify-bls381-signature/std",
+    "pallet-evm-precompile-tangle-lst/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
