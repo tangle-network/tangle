@@ -6,50 +6,49 @@ use frame_support::{assert_noop, assert_ok};
 #[test]
 fn test_setup_works() {
 	ExtBuilder::default().build_and_execute(|| {
+		// Check counts
 		assert_eq!(BondedPools::<Runtime>::count(), 1);
 		assert_eq!(RewardPools::<Runtime>::count(), 1);
 		assert_eq!(SubPoolsStorage::<Runtime>::count(), 0);
 		assert_eq!(UnbondingMembers::<Runtime>::count(), 0);
+
+		// Check staking duration
 		assert_eq!(StakingMock::bonding_duration(), 3);
+
+		// Check metadata
 		assert!(Metadata::<T>::contains_key(1));
 
-		// initial member.
+		// Check total value locked
 		assert_eq!(TotalValueLocked::<T>::get(), 10);
 
 		let last_pool = LastPoolId::<Runtime>::get();
-		assert_eq!(
-			BondedPool::<Runtime>::get(last_pool).unwrap(),
-			BondedPool::<Runtime> {
-				id: last_pool,
-				inner: BondedPoolInner {
-					commission: Commission::default(),
-					roles: DEFAULT_ROLES,
-					state: PoolState::Open,
-				},
-			}
-		);
-		assert_eq!(
-			RewardPools::<Runtime>::get(last_pool).unwrap(),
-			RewardPool::<Runtime> {
-				last_recorded_reward_counter: Zero::zero(),
-				last_recorded_total_payouts: 0,
-				total_rewards_claimed: 0,
-				total_commission_claimed: 0,
-				total_commission_pending: 0,
-			}
-		);
+
+		// Check BondedPool
+		let bonded_pool = BondedPool::<Runtime>::get(last_pool).unwrap();
+		assert_eq!(bonded_pool.id, last_pool);
+		assert_eq!(bonded_pool.inner.commission, Commission::default());
+		assert_eq!(bonded_pool.inner.roles, DEFAULT_ROLES);
+		assert_eq!(bonded_pool.inner.state, PoolState::Open);
+
+		// Check RewardPool
+		let reward_pool = RewardPools::<Runtime>::get(last_pool).unwrap();
+		assert_eq!(reward_pool.last_recorded_reward_counter, Zero::zero());
+		assert_eq!(reward_pool.last_recorded_total_payouts, 0);
+		assert_eq!(reward_pool.total_rewards_claimed, 0);
+		assert_eq!(reward_pool.total_commission_claimed, 0);
+		assert_eq!(reward_pool.total_commission_pending, 0);
 
 		let bonded_account = Lst::create_bonded_account(last_pool);
 		let reward_account = Lst::create_reward_account(last_pool);
 
-		// the bonded_account should be bonded by the depositor's funds.
+		// Check bonded account stake
 		assert_eq!(StakingMock::active_stake(&bonded_account).unwrap(), 10);
 		assert_eq!(StakingMock::total_stake(&bonded_account).unwrap(), 10);
 
-		// but not nominating yet.
+		// Check nominations
 		assert!(Nominations::get().is_none());
 
-		// reward account should have an initial ED in it.
+		// Check reward account balance
 		assert_eq!(
 			Currency::free_balance(reward_account),
 			<Balances as CurrencyT<AccountId>>::minimum_balance()
@@ -66,6 +65,7 @@ fn balance_to_point_works() {
 				commission: Commission::default(),
 				roles: DEFAULT_ROLES,
 				state: PoolState::Open,
+				metadata: PoolMetadata { name: BoundedVec::default() },
 			},
 		};
 
@@ -121,6 +121,7 @@ fn points_to_balance_works() {
 				commission: Commission::default(),
 				roles: DEFAULT_ROLES,
 				state: PoolState::Open,
+				metadata: PoolMetadata { name: BoundedVec::default() },
 			},
 		};
 
@@ -169,6 +170,7 @@ fn ok_to_join_with_works() {
 				commission: Commission::default(),
 				roles: DEFAULT_ROLES,
 				state: PoolState::Open,
+				metadata: PoolMetadata { name: BoundedVec::default() },
 			},
 		};
 
