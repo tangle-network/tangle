@@ -1,7 +1,7 @@
 use super::*;
 
 /// Pool permissions and state
-#[derive(Encode, Decode, MaxEncodedLen, TypeInfo, DebugNoBound, PartialEq, Clone)]
+#[derive(Encode, Decode, MaxEncodedLen, TypeInfo, DebugNoBound, Clone)]
 #[codec(mel_bound(T: Config))]
 #[scale_info(skip_type_params(T))]
 pub struct BondedPoolInner<T: Config> {
@@ -11,6 +11,16 @@ pub struct BondedPoolInner<T: Config> {
 	pub roles: PoolRoles<T::AccountId>,
 	/// The current state of the pool.
 	pub state: PoolState,
+	/// pool metadata
+	pub metadata: PoolMetadata<T>,
+}
+
+#[derive(Encode, Decode, MaxEncodedLen, TypeInfo, DebugNoBound, Clone)]
+#[codec(mel_bound(T: Config))]
+#[scale_info(skip_type_params(T))]
+pub struct PoolMetadata<T: Config> {
+	/// pool name
+	pub name: BoundedVec<u8, T::MaxNameLength>,
 }
 
 /// A wrapper for bonded pools, with utility functions.
@@ -18,7 +28,7 @@ pub struct BondedPoolInner<T: Config> {
 /// The main purpose of this is to wrap a [`BondedPoolInner`], with the account
 /// + id of the pool, for easier access.
 #[derive(RuntimeDebugNoBound)]
-#[cfg_attr(feature = "std", derive(Clone, PartialEq))]
+#[cfg_attr(feature = "std", derive(Clone))]
 pub struct BondedPool<T: Config> {
 	/// The identifier of the pool.
 	pub id: PoolId,
@@ -41,13 +51,18 @@ impl<T: Config> sp_std::ops::DerefMut for BondedPool<T> {
 
 impl<T: Config> BondedPool<T> {
 	/// Create a new bonded pool with the given roles and identifier.
-	pub fn new(id: PoolId, roles: PoolRoles<T::AccountId>) -> Self {
+	pub fn new(
+		id: PoolId,
+		roles: PoolRoles<T::AccountId>,
+		name: BoundedVec<u8, T::MaxNameLength>,
+	) -> Self {
 		Self {
 			id,
 			inner: BondedPoolInner {
 				commission: Commission::default(),
 				roles,
 				state: PoolState::Open,
+				metadata: PoolMetadata { name },
 			},
 		}
 	}
