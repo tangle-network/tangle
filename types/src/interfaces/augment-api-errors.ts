@@ -855,6 +855,151 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    lst: {
+      /**
+       * Bonding extra is restricted to the exact pending reward amount.
+       **/
+      BondExtraRestricted: AugmentedError<ApiType>;
+      /**
+       * The pools state cannot be changed.
+       **/
+      CanNotChangeState: AugmentedError<ApiType>;
+      /**
+       * None of the funds can be withdrawn yet because the bonding duration has not passed.
+       **/
+      CannotWithdrawAny: AugmentedError<ApiType>;
+      /**
+       * The submitted changes to commission change rate are not allowed.
+       **/
+      CommissionChangeRateNotAllowed: AugmentedError<ApiType>;
+      /**
+       * Not enough blocks have surpassed since the last commission update.
+       **/
+      CommissionChangeThrottled: AugmentedError<ApiType>;
+      /**
+       * The supplied commission exceeds global maximum commission.
+       **/
+      CommissionExceedsGlobalMaximum: AugmentedError<ApiType>;
+      /**
+       * The supplied commission exceeds the max allowed commission.
+       **/
+      CommissionExceedsMaximum: AugmentedError<ApiType>;
+      /**
+       * Some error occurred that should never happen. This should be reported to the
+       * maintainers.
+       **/
+      Defensive: AugmentedError<ApiType>;
+      /**
+       * The caller does not have adequate permissions.
+       **/
+      DoesNotHavePermission: AugmentedError<ApiType>;
+      /**
+       * The member is fully unbonded (and thus cannot access the bonded and reward pool
+       * anymore to, for example, collect rewards).
+       **/
+      FullyUnbonding: AugmentedError<ApiType>;
+      /**
+       * Pool id provided is not correct/usable.
+       **/
+      InvalidPoolId: AugmentedError<ApiType>;
+      /**
+       * The pool's max commission cannot be set higher than the existing value.
+       **/
+      MaxCommissionRestricted: AugmentedError<ApiType>;
+      /**
+       * Too many members in the pool or system.
+       **/
+      MaxPoolMembers: AugmentedError<ApiType>;
+      /**
+       * The system is maxed out on pools.
+       **/
+      MaxPools: AugmentedError<ApiType>;
+      /**
+       * The member cannot unbond further chunks due to reaching the limit.
+       **/
+      MaxUnbondingLimit: AugmentedError<ApiType>;
+      /**
+       * Metadata exceeds [`Config::MaxMetadataLen`]
+       **/
+      MetadataExceedsMaxLen: AugmentedError<ApiType>;
+      /**
+       * The amount does not meet the minimum bond to either join or create a pool.
+       * 
+       * The depositor can never unbond to a value less than `Pallet::depositor_min_bond`. The
+       * caller does not have nominating permissions for the pool. Members can never unbond to a
+       * value below `MinJoinBond`.
+       **/
+      MinimumBondNotMet: AugmentedError<ApiType>;
+      /**
+       * No balance to unbond.
+       **/
+      NoBalanceToUnbond: AugmentedError<ApiType>;
+      /**
+       * No commission current has been set.
+       **/
+      NoCommissionCurrentSet: AugmentedError<ApiType>;
+      /**
+       * There is no pending commission to claim.
+       **/
+      NoPendingCommission: AugmentedError<ApiType>;
+      /**
+       * A pool must be in [`PoolState::Destroying`] in order for the depositor to unbond or for
+       * other members to be permissionlessly unbonded.
+       **/
+      NotDestroying: AugmentedError<ApiType>;
+      /**
+       * No imbalance in the ED deposit for the pool.
+       **/
+      NothingToAdjust: AugmentedError<ApiType>;
+      /**
+       * Either a) the caller cannot make a valid kick or b) the pool is not destroying.
+       **/
+      NotKickerOrDestroying: AugmentedError<ApiType>;
+      /**
+       * The caller does not have nominating permissions for the pool.
+       **/
+      NotNominator: AugmentedError<ApiType>;
+      /**
+       * The pool is not open to join
+       **/
+      NotOpen: AugmentedError<ApiType>;
+      /**
+       * The transaction could not be executed due to overflow risk for the pool.
+       **/
+      OverflowRisk: AugmentedError<ApiType>;
+      /**
+       * Partial unbonding now allowed permissionlessly.
+       **/
+      PartialUnbondNotAllowedPermissionlessly: AugmentedError<ApiType>;
+      /**
+       * Pool id currently in use.
+       **/
+      PoolIdInUse: AugmentedError<ApiType>;
+      /**
+       * An account is not a member.
+       **/
+      PoolMemberNotFound: AugmentedError<ApiType>;
+      /**
+       * A (bonded) pool id does not exist.
+       **/
+      PoolNotFound: AugmentedError<ApiType>;
+      /**
+       * Pool token creation failed.
+       **/
+      PoolTokenCreationFailed: AugmentedError<ApiType>;
+      /**
+       * A reward pool does not exist. In all cases this is a system logic error.
+       **/
+      RewardPoolNotFound: AugmentedError<ApiType>;
+      /**
+       * A sub pool does not exist.
+       **/
+      SubPoolsNotFound: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     multiAssetDelegation: {
       /**
        * There are active services using the asset.
@@ -1301,6 +1446,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       BlueprintNotFound: AugmentedError<ApiType>;
       /**
+       * An error occurred while decoding the EVM ABI.
+       **/
+      EVMAbiDecode: AugmentedError<ApiType>;
+      /**
        * An error occurred while encoding the EVM ABI.
        **/
       EVMAbiEncode: AugmentedError<ApiType>;
@@ -1326,7 +1475,8 @@ declare module '@polkadot/api-base/types/errors' {
       JobCallResultNotFound: AugmentedError<ApiType>;
       /**
        * The requested job definition does not exist.
-       * This error is returned when the requested job definition does not exist in the service blueprint.
+       * This error is returned when the requested job definition does not exist in the service
+       * blueprint.
        **/
       JobDefinitionNotFound: AugmentedError<ApiType>;
       /**
@@ -1507,10 +1657,6 @@ declare module '@polkadot/api-base/types/errors' {
        * Can not rebond without unlocking chunks.
        **/
       NoUnlockChunk: AugmentedError<ApiType>;
-      /**
-       * The user has active restake
-       **/
-      RestakeActive: AugmentedError<ApiType>;
       /**
        * There are too many nominators in the system. Governance needs to adjust the staking
        * settings to keep things safe for the runtime.
