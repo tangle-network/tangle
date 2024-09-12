@@ -41,6 +41,7 @@ members = [
     "precompiles/verify-schnorr-signatures",
     "precompiles/verify-bls381-signature",
     "precompiles/multi-asset-delegation",
+    "precompiles/services",
     "tangle-subxt",
     "evm-tracer",
 ]

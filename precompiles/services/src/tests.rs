@@ -1,7 +1,7 @@
 use crate::mock::*;
 use crate::U256;
 use frame_support::assert_ok;
-use pallet_service_blueprint::{Blueprints, Operators, UserServices};
+use pallet_services::{Blueprints, Operators, UserServices};
 use precompile_utils::testing::*;
 use sp_core::H160;
 

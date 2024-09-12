@@ -7902,6 +7902,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-evm-precompile-services"
+version = "0.1.0"
+dependencies = [
+ "derive_more 1.0.0",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "pallet-assets",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-multi-asset-delegation",
+ "pallet-services",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-evm-precompile-sha3fips"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier.git?branch=polkadot-v1.7.0#c5d6daa9ffd46c0a85915526aa26d200fd635e30"
@@ -7946,6 +7973,32 @@ dependencies = [
  "sp-runtime",
  "sp-staking",
  "sp-state-machine",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
+ "tangle-primitives",
+]
+
+[[package]]
+name = "pallet-evm-precompile-tangle-lst"
+version = "0.1.0"
+dependencies = [
+ "derive_more 1.0.0",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "pallet-assets",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-multi-asset-delegation",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.7.0)",
  "tangle-primitives",
 ]
@@ -14535,6 +14588,7 @@ dependencies = [
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-evm-precompile-staking",
+ "pallet-evm-precompile-tangle-lst",
  "pallet-evm-precompile-verify-bls381-signature",
  "pallet-evm-precompile-verify-ecdsa-secp256k1-signature",
  "pallet-evm-precompile-verify-ecdsa-secp256r1-signature",
@@ -14662,6 +14716,7 @@ dependencies = [
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-evm-precompile-staking",
+ "pallet-evm-precompile-tangle-lst",
  "pallet-evm-precompile-verify-bls381-signature",
  "pallet-evm-precompile-verify-ecdsa-secp256k1-signature",
  "pallet-evm-precompile-verify-ecdsa-secp256r1-signature",
