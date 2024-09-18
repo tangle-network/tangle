@@ -4213,7 +4213,7 @@ dependencies = [
 
 [[package]]
 name = "frost-core"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "byteorder",
  "debugless-unwrap",
@@ -4230,7 +4230,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed25519"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "curve25519-dalek 4.1.3",
  "frost-core",
@@ -4242,7 +4242,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed448"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "ed448-goldilocks-plus",
  "frost-core",
@@ -4254,7 +4254,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p256"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "frost-core",
  "p256",
@@ -4266,7 +4266,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p384"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "frost-core",
  "p384",
@@ -4278,7 +4278,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ristretto255"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "curve25519-dalek 4.1.3",
  "frost-core",
@@ -4290,7 +4290,7 @@ dependencies = [
 
 [[package]]
 name = "frost-secp256k1"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "frost-core",
  "k256",
@@ -4302,7 +4302,7 @@ dependencies = [
 
 [[package]]
 name = "frost-taproot"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "frost-core",
  "k256",
@@ -7247,7 +7247,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -8280,7 +8280,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-multi-asset-delegation"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -8400,7 +8400,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -8456,7 +8456,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "jsonrpsee 0.20.4",
  "pallet-services-rpc-runtime-api",
@@ -8469,7 +8469,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc-runtime-api"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -14367,7 +14367,7 @@ dependencies = [
 
 [[package]]
 name = "tangle"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "clap",
  "fc-api",
@@ -14448,7 +14448,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -14457,7 +14457,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -14485,7 +14485,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "evm-tracer",
  "fp-evm",
@@ -14609,7 +14609,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "2.0.0"
+version = "1.1.1"
 dependencies = [
  "evm-tracer",
  "fixed",
