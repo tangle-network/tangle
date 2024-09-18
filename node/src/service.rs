@@ -109,6 +109,7 @@ type GrandpaLinkHalf<Client> = sc_consensus_grandpa::LinkHalf<Block, Client, Ful
 type BoxBlockImport = sc_consensus::BoxBlockImport<Block>;
 
 #[allow(clippy::type_complexity)]
+#[cfg(not(feature="instant-seal"))]
 pub fn new_partial(
 	config: &Configuration,
 	eth_config: &EthConfiguration,
@@ -679,6 +680,183 @@ pub async fn new_full(
 
 	network_starter.start_network();
 	Ok(task_manager)
+}
+
+#[allow(clippy::type_complexity)]
+#[cfg(feature="instant-seal")]
+pub fn new_partial(
+	config: &Configuration,
+	eth_config: &EthConfiguration,
+) -> Result<
+	sc_service::PartialComponents<
+		FullClient,
+		FullBackend,
+		FullSelectChain,
+		sc_consensus::DefaultImportQueue<Block>,
+		sc_transaction_pool::FullPool<Block, FullClient>,
+		(
+			Option<Telemetry>,
+			BoxBlockImport,
+			GrandpaLinkHalf<FullClient>,
+			sc_consensus_babe::BabeLink<Block>,
+			FrontierBackend,
+			Arc<fc_rpc::OverrideHandle<Block>>,
+			BabeWorkerHandle<Block>,
+		),
+	>,
+	ServiceError,
+> {
+	println!("    ++++++++++++++++++++++++                                                                          
+	+++++++++++++++++++++++++++                                                                        
+	+++++++++++++++++++++++++++                                                                        
+	+++        ++++++      +++         @%%%%%%%%%%%                                     %%%
+	++++++      ++++      +++++        %%%%%%%%%%%%                                     %%%@
+	++++++++++++++++++++++++++            %%%%      %%%%@     %%% %%@       @%%%%%%%   %%%@    %%%%@
+	       ++++++++                       %%%%    @%%%%%%%@   %%%%%%%%%   @%%%%%%%%%   %%%@  %%%%%%%%%
+	       ++++++++                       %%%%    %%%%%%%%%   %%%% @%%%@  %%%%  %%%%   %%%@  %%%%%%%%%%
+	++++++++++++++++++++++++++            %%%%    %%%%%%%%%   %%%   %%%%  %%%   @%%%   %%%@ @%%%%%  %%%%%
+	++++++      ++++      ++++++          %%%%    %%%%%%%%%   %%%   %%%%  %%%%%%%%%%   %%%@  %%%%%%%%%@
+	+++        ++++++        +++          %%%%    %%%%%%%%%   %%%   %%%@   %%%%%%%%%   %%%    %%%%%%%@
+	++++      +++++++++      +++                                           %%%%  %%%%               
+	++++++++++++++++++++++++++++                                           %%%%%%%%%         
+	  +++++++++++++++++++++++                                                 %%%%% \n");
+
+	let telemetry = config
+		.telemetry_endpoints
+		.clone()
+		.filter(|x| !x.is_empty())
+		.map(|endpoints| -> Result<_, sc_telemetry::Error> {
+			let worker = TelemetryWorker::new(16)?;
+			let telemetry = worker.handle().new_telemetry(endpoints);
+			Ok((worker, telemetry))
+		})
+		.transpose()?;
+
+	let executor = sc_service::new_native_or_wasm_executor(config);
+
+	let (client, backend, keystore_container, task_manager) =
+		sc_service::new_full_parts::<Block, RuntimeApi, _>(
+			config,
+			telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
+			executor,
+		)?;
+	let client = Arc::new(client);
+
+	let telemetry = telemetry.map(|(worker, telemetry)| {
+		task_manager.spawn_handle().spawn("telemetry", None, worker.run());
+		telemetry
+	});
+
+	let select_chain = sc_consensus::LongestChain::new(backend.clone());
+
+	let transaction_pool = sc_transaction_pool::BasicPool::new_full(
+		config.transaction_pool.clone(),
+		config.role.is_authority().into(),
+		config.prometheus_registry(),
+		task_manager.spawn_essential_handle(),
+		client.clone(),
+	);
+
+	let (grandpa_block_import, grandpa_link) = sc_consensus_grandpa::block_import(
+		client.clone(),
+		GRANDPA_JUSTIFICATION_PERIOD,
+		&client,
+		select_chain.clone(),
+		telemetry.as_ref().map(|x| x.handle()),
+	)?;
+
+	let overrides = crate::rpc::overrides_handle(client.clone());
+	let frontier_backend = match eth_config.frontier_backend_type {
+		BackendType::KeyValue => FrontierBackend::KeyValue(fc_db::kv::Backend::open(
+			Arc::clone(&client),
+			&config.database,
+			&db_config_dir(config),
+		)?),
+		BackendType::Sql => {
+			let db_path = db_config_dir(config).join("sql");
+			std::fs::create_dir_all(&db_path).expect("failed creating sql db directory");
+			let backend = futures::executor::block_on(fc_db::sql::Backend::new(
+				fc_db::sql::BackendConfig::Sqlite(fc_db::sql::SqliteBackendConfig {
+					path: Path::new("sqlite:///")
+						.join(db_path)
+						.join("frontier.db3")
+						.to_str()
+						.unwrap(),
+					create_if_missing: true,
+					thread_count: eth_config.frontier_sql_backend_thread_count,
+					cache_size: eth_config.frontier_sql_backend_cache_size,
+				}),
+				eth_config.frontier_sql_backend_pool_size,
+				std::num::NonZeroU32::new(eth_config.frontier_sql_backend_num_ops_timeout),
+				overrides.clone(),
+			))
+			.unwrap_or_else(|err| panic!("failed creating sql backend: {:?}", err));
+			FrontierBackend::Sql(backend)
+		},
+	};
+
+	let (block_import, babe_link) = sc_consensus_babe::block_import(
+		sc_consensus_babe::configuration(&*client)?,
+		grandpa_block_import.clone(),
+		client.clone(),
+	)?;
+
+	let import_queue = sc_consensus_manual_seal::import_queue(
+		Box::new(client.clone()),
+		&task_manager.spawn_essential_handle(),
+		config.prometheus_registry(),
+	);
+
+	let slot_duration = babe_link.config().slot_duration();
+
+	let target_gas_price = eth_config.target_gas_price;
+
+	let frontier_block_import = FrontierBlockImport::new(block_import.clone(), client.clone());
+
+	let (import_queue, babe_worker_handle) =
+		sc_consensus_babe::import_queue(sc_consensus_babe::ImportQueueParams {
+			link: babe_link.clone(),
+			block_import: frontier_block_import.clone(),
+			justification_import: Some(Box::new(grandpa_block_import.clone())),
+			client: client.clone(),
+			select_chain: select_chain.clone(),
+			create_inherent_data_providers: move |_, ()| async move {
+				let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
+
+				let slot =
+				sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+					*timestamp,
+					slot_duration,
+				);
+
+				let _dynamic_fee =
+					fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
+				Ok((slot, timestamp))
+			},
+			spawner: &task_manager.spawn_essential_handle(),
+			registry: config.prometheus_registry(),
+			telemetry: telemetry.as_ref().map(|x| x.handle()),
+			offchain_tx_pool_factory: OffchainTransactionPoolFactory::new(transaction_pool.clone()),
+		})?;
+
+	Ok(sc_service::PartialComponents {
+		client,
+		backend,
+		keystore_container,
+		task_manager,
+		select_chain,
+		import_queue,
+		transaction_pool,
+		other: (
+			telemetry,
+			Box::new(frontier_block_import),
+			grandpa_link,
+			babe_link,
+			frontier_backend,
+			overrides,
+			babe_worker_handle,
+		),
+	})
 }
 
 #[cfg(feature = "instant-seal")]
