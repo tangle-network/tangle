@@ -100,7 +100,7 @@ rpc-txpool = { workspace = true }
 sc-consensus-babe-rpc = { workspace = true }
 sc-consensus-grandpa-rpc = { workspace = true }
 sc-consensus-slots = { workspace = true }
-
+sc-consensus-manual-seal = { workspace = true }
 sp-consensus = { workspace = true }
 
 sp-transaction-storage-proof = { workspace = true }
@@ -137,3 +137,4 @@ testnet = ["tangle-testnet-runtime"]
 txpool = ["fc-rpc/txpool"]
 fast-runtime = ["tangle-testnet-runtime/fast-runtime", "tangle-runtime/fast-runtime"]
 metadata-hash = ["tangle-testnet-runtime?/metadata-hash", "tangle-runtime/metadata-hash"]
+instant-seal = []
