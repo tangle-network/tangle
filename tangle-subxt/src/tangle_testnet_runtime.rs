@@ -35058,13 +35058,13 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "See [`Pallet::set_incentive_apy_and_cap`]."]
 				pub struct SetIncentiveApyAndCap {
-					pub pool_id: set_incentive_apy_and_cap::PoolId,
+					pub vault_id: set_incentive_apy_and_cap::VaultId,
 					pub apy: set_incentive_apy_and_cap::Apy,
 					pub cap: set_incentive_apy_and_cap::Cap,
 				}
 				pub mod set_incentive_apy_and_cap {
 					use super::runtime_types;
-					pub type PoolId = ::core::primitive::u128;
+					pub type VaultId = ::core::primitive::u128;
 					pub type Apy = runtime_types::sp_arithmetic::per_things::Percent;
 					pub type Cap = ::core::primitive::u128;
 				}
@@ -35110,22 +35110,22 @@ pub mod api {
 				# [codec (crate = :: subxt_core :: ext :: codec)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "See [`Pallet::manage_asset_in_pool`]."]
-				pub struct ManageAssetInPool {
-					pub pool_id: manage_asset_in_pool::PoolId,
-					pub asset_id: manage_asset_in_pool::AssetId,
-					pub action: manage_asset_in_pool::Action,
+				#[doc = "See [`Pallet::manage_asset_in_vault`]."]
+				pub struct ManageAssetInVault {
+					pub vault_id: manage_asset_in_vault::VaultId,
+					pub asset_id: manage_asset_in_vault::AssetId,
+					pub action: manage_asset_in_vault::Action,
 				}
-				pub mod manage_asset_in_pool {
+				pub mod manage_asset_in_vault {
 					use super::runtime_types;
-					pub type PoolId = ::core::primitive::u128;
+					pub type VaultId = ::core::primitive::u128;
 					pub type AssetId = ::core::primitive::u128;
 					pub type Action =
 						runtime_types::pallet_multi_asset_delegation::types::rewards::AssetAction;
 				}
-				impl ::subxt_core::blocks::StaticExtrinsic for ManageAssetInPool {
+				impl ::subxt_core::blocks::StaticExtrinsic for ManageAssetInVault {
 					const PALLET: &'static str = "MultiAssetDelegation";
-					const CALL: &'static str = "manage_asset_in_pool";
+					const CALL: &'static str = "manage_asset_in_vault";
 				}
 			}
 			pub struct TransactionApi;
@@ -35429,14 +35429,14 @@ pub mod api {
 				#[doc = "See [`Pallet::set_incentive_apy_and_cap`]."]
 				pub fn set_incentive_apy_and_cap(
 					&self,
-					pool_id: types::set_incentive_apy_and_cap::PoolId,
+					vault_id: types::set_incentive_apy_and_cap::VaultId,
 					apy: types::set_incentive_apy_and_cap::Apy,
 					cap: types::set_incentive_apy_and_cap::Cap,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::SetIncentiveApyAndCap> {
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
 						"set_incentive_apy_and_cap",
-						types::SetIncentiveApyAndCap { pool_id, apy, cap },
+						types::SetIncentiveApyAndCap { vault_id, apy, cap },
 						[
 							14u8, 124u8, 76u8, 147u8, 132u8, 187u8, 69u8, 246u8, 153u8, 108u8,
 							236u8, 19u8, 141u8, 104u8, 228u8, 176u8, 13u8, 231u8, 149u8, 132u8,
@@ -35462,17 +35462,17 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "See [`Pallet::manage_asset_in_pool`]."]
-				pub fn manage_asset_in_pool(
+				#[doc = "See [`Pallet::manage_asset_in_vault`]."]
+				pub fn manage_asset_in_vault(
 					&self,
-					pool_id: types::manage_asset_in_pool::PoolId,
-					asset_id: types::manage_asset_in_pool::AssetId,
-					action: types::manage_asset_in_pool::Action,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::ManageAssetInPool> {
+					vault_id: types::manage_asset_in_vault::VaultId,
+					asset_id: types::manage_asset_in_vault::AssetId,
+					action: types::manage_asset_in_vault::Action,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ManageAssetInVault> {
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
-						"manage_asset_in_pool",
-						types::ManageAssetInPool { pool_id, asset_id, action },
+						"manage_asset_in_vault",
+						types::ManageAssetInVault { vault_id, asset_id, action },
 						[
 							144u8, 244u8, 190u8, 106u8, 70u8, 105u8, 245u8, 42u8, 187u8, 243u8,
 							43u8, 73u8, 15u8, 92u8, 193u8, 21u8, 58u8, 142u8, 169u8, 139u8, 164u8,
@@ -35974,15 +35974,15 @@ pub mod api {
 			# [codec (crate = :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-			#[doc = "Event emitted when an incentive APY and cap are set for a reward pool"]
+			#[doc = "Event emitted when an incentive APY and cap are set for a reward vault"]
 			pub struct IncentiveAPYAndCapSet {
-				pub pool_id: incentive_apy_and_cap_set::PoolId,
+				pub vault_id: incentive_apy_and_cap_set::VaultId,
 				pub apy: incentive_apy_and_cap_set::Apy,
 				pub cap: incentive_apy_and_cap_set::Cap,
 			}
 			pub mod incentive_apy_and_cap_set {
 				use super::runtime_types;
-				pub type PoolId = ::core::primitive::u128;
+				pub type VaultId = ::core::primitive::u128;
 				pub type Apy = runtime_types::sp_arithmetic::per_things::Percent;
 				pub type Cap = ::core::primitive::u128;
 			}
@@ -36028,24 +36028,24 @@ pub mod api {
 			# [codec (crate = :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-			#[doc = "Asset has been updated to reward pool"]
-			pub struct AssetUpdatedInPool {
-				pub who: asset_updated_in_pool::Who,
-				pub pool_id: asset_updated_in_pool::PoolId,
-				pub asset_id: asset_updated_in_pool::AssetId,
-				pub action: asset_updated_in_pool::Action,
+			#[doc = "Asset has been updated to reward vault"]
+			pub struct AssetUpdatedInVault {
+				pub who: asset_updated_in_vault::Who,
+				pub vault_id: asset_updated_in_vault::VaultId,
+				pub asset_id: asset_updated_in_vault::AssetId,
+				pub action: asset_updated_in_vault::Action,
 			}
-			pub mod asset_updated_in_pool {
+			pub mod asset_updated_in_vault {
 				use super::runtime_types;
 				pub type Who = ::subxt_core::utils::AccountId32;
-				pub type PoolId = ::core::primitive::u128;
+				pub type VaultId = ::core::primitive::u128;
 				pub type AssetId = ::core::primitive::u128;
 				pub type Action =
 					runtime_types::pallet_multi_asset_delegation::types::rewards::AssetAction;
 			}
-			impl ::subxt_core::events::StaticEvent for AssetUpdatedInPool {
+			impl ::subxt_core::events::StaticEvent for AssetUpdatedInVault {
 				const PALLET: &'static str = "MultiAssetDelegation";
-				const EVENT: &'static str = "AssetUpdatedInPool";
+				const EVENT: &'static str = "AssetUpdatedInVault";
 			}
 		}
 		pub mod storage {
@@ -36072,14 +36072,14 @@ pub mod api {
 					pub type Delegators = runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorMetadata < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u128 , :: core :: primitive :: u128 > ;
 					pub type Param0 = ::subxt_core::utils::AccountId32;
 				}
-				pub mod reward_pools {
+				pub mod reward_vaults {
 					use super::runtime_types;
-					pub type RewardPools = ::subxt_core::alloc::vec::Vec<::core::primitive::u128>;
+					pub type RewardVaults = ::subxt_core::alloc::vec::Vec<::core::primitive::u128>;
 					pub type Param0 = ::core::primitive::u128;
 				}
-				pub mod asset_lookup_reward_pools {
+				pub mod asset_lookup_reward_vaults {
 					use super::runtime_types;
-					pub type AssetLookupRewardPools = ::core::primitive::u128;
+					pub type AssetLookupRewardVaults = ::core::primitive::u128;
 					pub type Param0 = ::core::primitive::u128;
 				}
 				pub mod reward_config_storage {
@@ -36277,19 +36277,19 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Storage for the reward pools"]
-				pub fn reward_pools_iter(
+				#[doc = " Storage for the reward vaults"]
+				pub fn reward_vaults_iter(
 					&self,
 				) -> ::subxt_core::storage::address::StaticAddress<
 					(),
-					types::reward_pools::RewardPools,
+					types::reward_vaults::RewardVaults,
 					(),
 					(),
 					::subxt_core::utils::Yes,
 				> {
 					::subxt_core::storage::address::StaticAddress::new_static(
 						"MultiAssetDelegation",
-						"RewardPools",
+						"RewardVaults",
 						(),
 						[
 							144u8, 56u8, 52u8, 17u8, 82u8, 26u8, 196u8, 227u8, 117u8, 83u8, 117u8,
@@ -36298,20 +36298,20 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Storage for the reward pools"]
-				pub fn reward_pools(
+				#[doc = " Storage for the reward vaults"]
+				pub fn reward_vaults(
 					&self,
-					_0: impl ::core::borrow::Borrow<types::reward_pools::Param0>,
+					_0: impl ::core::borrow::Borrow<types::reward_vaults::Param0>,
 				) -> ::subxt_core::storage::address::StaticAddress<
-					::subxt_core::storage::address::StaticStorageKey<types::reward_pools::Param0>,
-					types::reward_pools::RewardPools,
+					::subxt_core::storage::address::StaticStorageKey<types::reward_vaults::Param0>,
+					types::reward_vaults::RewardVaults,
 					::subxt_core::utils::Yes,
 					(),
 					(),
 				> {
 					::subxt_core::storage::address::StaticAddress::new_static(
 						"MultiAssetDelegation",
-						"RewardPools",
+						"RewardVaults",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
 							144u8, 56u8, 52u8, 17u8, 82u8, 26u8, 196u8, 227u8, 117u8, 83u8, 117u8,
@@ -36320,19 +36320,19 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Storage for the reward pools"]
-				pub fn asset_lookup_reward_pools_iter(
+				#[doc = " Storage for the reward vaults"]
+				pub fn asset_lookup_reward_vaults_iter(
 					&self,
 				) -> ::subxt_core::storage::address::StaticAddress<
 					(),
-					types::asset_lookup_reward_pools::AssetLookupRewardPools,
+					types::asset_lookup_reward_vaults::AssetLookupRewardVaults,
 					(),
 					(),
 					::subxt_core::utils::Yes,
 				> {
 					::subxt_core::storage::address::StaticAddress::new_static(
 						"MultiAssetDelegation",
-						"AssetLookupRewardPools",
+						"AssetLookupRewardVaults",
 						(),
 						[
 							9u8, 54u8, 14u8, 131u8, 23u8, 116u8, 24u8, 89u8, 217u8, 68u8, 226u8,
@@ -36341,22 +36341,22 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Storage for the reward pools"]
-				pub fn asset_lookup_reward_pools(
+				#[doc = " Storage for the reward vaults"]
+				pub fn asset_lookup_reward_vaults(
 					&self,
-					_0: impl ::core::borrow::Borrow<types::asset_lookup_reward_pools::Param0>,
+					_0: impl ::core::borrow::Borrow<types::asset_lookup_reward_vaults::Param0>,
 				) -> ::subxt_core::storage::address::StaticAddress<
 					::subxt_core::storage::address::StaticStorageKey<
-						types::asset_lookup_reward_pools::Param0,
+						types::asset_lookup_reward_vaults::Param0,
 					>,
-					types::asset_lookup_reward_pools::AssetLookupRewardPools,
+					types::asset_lookup_reward_vaults::AssetLookupRewardVaults,
 					::subxt_core::utils::Yes,
 					(),
 					(),
 				> {
 					::subxt_core::storage::address::StaticAddress::new_static(
 						"MultiAssetDelegation",
-						"AssetLookupRewardPools",
+						"AssetLookupRewardVaults",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
 							9u8, 54u8, 14u8, 131u8, 23u8, 116u8, 24u8, 89u8, 217u8, 68u8, 226u8,
@@ -49082,7 +49082,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The callable functions (extrinsics) of the pallet."]
 				pub enum Call {
-					# [codec (index = 0)] # [doc = "See [`Pallet::join_operators`]."] join_operators { bond_amount : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "See [`Pallet::schedule_leave_operators`]."] schedule_leave_operators , # [codec (index = 2)] # [doc = "See [`Pallet::cancel_leave_operators`]."] cancel_leave_operators , # [codec (index = 3)] # [doc = "See [`Pallet::execute_leave_operators`]."] execute_leave_operators , # [codec (index = 4)] # [doc = "See [`Pallet::operator_bond_more`]."] operator_bond_more { additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "See [`Pallet::schedule_operator_unstake`]."] schedule_operator_unstake { unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "See [`Pallet::execute_operator_unstake`]."] execute_operator_unstake , # [codec (index = 7)] # [doc = "See [`Pallet::cancel_operator_unstake`]."] cancel_operator_unstake , # [codec (index = 8)] # [doc = "See [`Pallet::go_offline`]."] go_offline , # [codec (index = 9)] # [doc = "See [`Pallet::go_online`]."] go_online , # [codec (index = 10)] # [doc = "See [`Pallet::deposit`]."] deposit { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "See [`Pallet::schedule_withdraw`]."] schedule_withdraw { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "See [`Pallet::execute_withdraw`]."] execute_withdraw , # [codec (index = 13)] # [doc = "See [`Pallet::cancel_withdraw`]."] cancel_withdraw { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 14)] # [doc = "See [`Pallet::delegate`]."] delegate { operator : :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 15)] # [doc = "See [`Pallet::schedule_delegator_unstake`]."] schedule_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "See [`Pallet::execute_delegator_unstake`]."] execute_delegator_unstake , # [codec (index = 17)] # [doc = "See [`Pallet::cancel_delegator_unstake`]."] cancel_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "See [`Pallet::set_incentive_apy_and_cap`]."] set_incentive_apy_and_cap { pool_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 20)] # [doc = "See [`Pallet::whitelist_blueprint_for_rewards`]."] whitelist_blueprint_for_rewards { blueprint_id : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "See [`Pallet::manage_asset_in_pool`]."] manage_asset_in_pool { pool_id : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , }
+					# [codec (index = 0)] # [doc = "See [`Pallet::join_operators`]."] join_operators { bond_amount : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "See [`Pallet::schedule_leave_operators`]."] schedule_leave_operators , # [codec (index = 2)] # [doc = "See [`Pallet::cancel_leave_operators`]."] cancel_leave_operators , # [codec (index = 3)] # [doc = "See [`Pallet::execute_leave_operators`]."] execute_leave_operators , # [codec (index = 4)] # [doc = "See [`Pallet::operator_bond_more`]."] operator_bond_more { additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "See [`Pallet::schedule_operator_unstake`]."] schedule_operator_unstake { unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "See [`Pallet::execute_operator_unstake`]."] execute_operator_unstake , # [codec (index = 7)] # [doc = "See [`Pallet::cancel_operator_unstake`]."] cancel_operator_unstake , # [codec (index = 8)] # [doc = "See [`Pallet::go_offline`]."] go_offline , # [codec (index = 9)] # [doc = "See [`Pallet::go_online`]."] go_online , # [codec (index = 10)] # [doc = "See [`Pallet::deposit`]."] deposit { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "See [`Pallet::schedule_withdraw`]."] schedule_withdraw { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "See [`Pallet::execute_withdraw`]."] execute_withdraw , # [codec (index = 13)] # [doc = "See [`Pallet::cancel_withdraw`]."] cancel_withdraw { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 14)] # [doc = "See [`Pallet::delegate`]."] delegate { operator : :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 15)] # [doc = "See [`Pallet::schedule_delegator_unstake`]."] schedule_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "See [`Pallet::execute_delegator_unstake`]."] execute_delegator_unstake , # [codec (index = 17)] # [doc = "See [`Pallet::cancel_delegator_unstake`]."] cancel_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "See [`Pallet::set_incentive_apy_and_cap`]."] set_incentive_apy_and_cap { vault_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 20)] # [doc = "See [`Pallet::whitelist_blueprint_for_rewards`]."] whitelist_blueprint_for_rewards { blueprint_id : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "See [`Pallet::manage_asset_in_vault`]."] manage_asset_in_vault { vault_id : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , }
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
 					:: subxt_core :: ext :: codec :: Encode,
@@ -49180,14 +49180,14 @@ pub mod api {
 					#[doc = "No matching withdraw reqests found"]
 					NoMatchingwithdrawRequest,
 					#[codec(index = 27)]
-					#[doc = "Asset already exists in a reward pool"]
-					AssetAlreadyInPool,
+					#[doc = "Asset already exists in a reward vault"]
+					AssetAlreadyInVault,
 					#[codec(index = 28)]
-					#[doc = "Asset not found in reward pool"]
-					AssetNotInPool,
+					#[doc = "Asset not found in reward vault"]
+					AssetNotInVault,
 					#[codec(index = 29)]
-					#[doc = "The reward pool does not exist"]
-					PoolNotFound,
+					#[doc = "The reward vault does not exist"]
+					VaultNotFound,
 				}
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
@@ -49204,7 +49204,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Events emitted by the pallet."]
 				pub enum Event {
-					# [codec (index = 0)] # [doc = "An operator has joined."] OperatorJoined { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 1)] # [doc = "An operator has scheduled to leave."] OperatorLeavingScheduled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 2)] # [doc = "An operator has cancelled their leave request."] OperatorLeaveCancelled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 3)] # [doc = "An operator has executed their leave request."] OperatorLeaveExecuted { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 4)] # [doc = "An operator has increased their stake."] OperatorBondMore { who : :: subxt_core :: utils :: AccountId32 , additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "An operator has scheduled to decrease their stake."] OperatorBondLessScheduled { who : :: subxt_core :: utils :: AccountId32 , unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "An operator has executed their stake decrease."] OperatorBondLessExecuted { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 7)] # [doc = "An operator has cancelled their stake decrease request."] OperatorBondLessCancelled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "An operator has gone offline."] OperatorWentOffline { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 9)] # [doc = "An operator has gone online."] OperatorWentOnline { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 10)] # [doc = "A deposit has been made."] Deposited { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "An withdraw has been scheduled."] Scheduledwithdraw { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "An withdraw has been executed."] Executedwithdraw { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 13)] # [doc = "An withdraw has been cancelled."] Cancelledwithdraw { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 14)] # [doc = "A delegation has been made."] Delegated { who : :: subxt_core :: utils :: AccountId32 , operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 15)] # [doc = "A delegator unstake request has been scheduled."] ScheduledDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "A delegator unstake request has been executed."] ExecutedDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 17)] # [doc = "A delegator unstake request has been cancelled."] CancelledDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 18)] # [doc = "Event emitted when an incentive APY and cap are set for a reward pool"] IncentiveAPYAndCapSet { pool_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "Event emitted when a blueprint is whitelisted for rewards"] BlueprintWhitelisted { blueprint_id : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Asset has been updated to reward pool"] AssetUpdatedInPool { who : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , }
+					# [codec (index = 0)] # [doc = "An operator has joined."] OperatorJoined { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 1)] # [doc = "An operator has scheduled to leave."] OperatorLeavingScheduled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 2)] # [doc = "An operator has cancelled their leave request."] OperatorLeaveCancelled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 3)] # [doc = "An operator has executed their leave request."] OperatorLeaveExecuted { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 4)] # [doc = "An operator has increased their stake."] OperatorBondMore { who : :: subxt_core :: utils :: AccountId32 , additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "An operator has scheduled to decrease their stake."] OperatorBondLessScheduled { who : :: subxt_core :: utils :: AccountId32 , unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "An operator has executed their stake decrease."] OperatorBondLessExecuted { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 7)] # [doc = "An operator has cancelled their stake decrease request."] OperatorBondLessCancelled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "An operator has gone offline."] OperatorWentOffline { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 9)] # [doc = "An operator has gone online."] OperatorWentOnline { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 10)] # [doc = "A deposit has been made."] Deposited { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "An withdraw has been scheduled."] Scheduledwithdraw { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "An withdraw has been executed."] Executedwithdraw { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 13)] # [doc = "An withdraw has been cancelled."] Cancelledwithdraw { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 14)] # [doc = "A delegation has been made."] Delegated { who : :: subxt_core :: utils :: AccountId32 , operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 15)] # [doc = "A delegator unstake request has been scheduled."] ScheduledDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "A delegator unstake request has been executed."] ExecutedDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 17)] # [doc = "A delegator unstake request has been cancelled."] CancelledDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 18)] # [doc = "Event emitted when an incentive APY and cap are set for a reward vault"] IncentiveAPYAndCapSet { vault_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "Event emitted when a blueprint is whitelisted for rewards"] BlueprintWhitelisted { blueprint_id : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Asset has been updated to reward vault"] AssetUpdatedInVault { who : :: subxt_core :: utils :: AccountId32 , vault_id : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , }
 			}
 			pub mod types {
 				use super::runtime_types;
@@ -49420,7 +49420,7 @@ pub mod api {
 					# [codec (crate = :: subxt_core :: ext :: codec)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-					pub struct RewardConfig < _0 , _1 > { pub configs : :: subxt_core :: utils :: KeyedVec < _0 , runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: RewardConfigForAssetPool < _0 > > , pub whitelisted_blueprint_ids : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u32 > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _1 > }
+					pub struct RewardConfig < _0 , _1 > { pub configs : :: subxt_core :: utils :: KeyedVec < _0 , runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: RewardConfigForAssetVault < _0 > > , pub whitelisted_blueprint_ids : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u32 > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _1 > }
 					#[derive(
 						:: subxt_core :: ext :: codec :: Decode,
 						:: subxt_core :: ext :: codec :: Encode,
@@ -49434,7 +49434,7 @@ pub mod api {
 					# [codec (crate = :: subxt_core :: ext :: codec)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-					pub struct RewardConfigForAssetPool<_0> {
+					pub struct RewardConfigForAssetVault<_0> {
 						pub apy: runtime_types::sp_arithmetic::per_things::Percent,
 						pub cap: _0,
 					}

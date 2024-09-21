@@ -342,7 +342,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinDelegateAmount = ConstU64<100>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type PoolId = AssetId;
+	type VaultId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type PalletId = PID;
 	type WeightInfo = ();

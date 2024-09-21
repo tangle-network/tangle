@@ -19,7 +19,7 @@ use sp_runtime::Percent;
 
 /// Configuration for rewards associated with a specific asset.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct RewardConfigForAssetPool<Balance> {
+pub struct RewardConfigForAssetVault<Balance> {
 	// The annual percentage yield (APY) for the asset, represented as a Percent
 	pub apy: Percent,
 	// The minimum amount required before the asset can be rewarded.
@@ -28,14 +28,14 @@ pub struct RewardConfigForAssetPool<Balance> {
 
 /// Configuration for rewards in the system.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct RewardConfig<PoolId, Balance> {
+pub struct RewardConfig<VaultId, Balance> {
 	// A map of asset IDs to their respective reward configurations.
-	pub configs: BTreeMap<PoolId, RewardConfigForAssetPool<Balance>>,
+	pub configs: BTreeMap<VaultId, RewardConfigForAssetVault<Balance>>,
 	// A list of blueprint IDs that are whitelisted for rewards.
 	pub whitelisted_blueprint_ids: Vec<u32>,
 }
 
-/// Asset action for pools
+/// Asset action for vaults
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
 pub enum AssetAction {
 	Add,
