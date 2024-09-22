@@ -87,6 +87,7 @@ pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
+pallet-tangle-lst = { workspace = true }
 
 # Tangle dependencies
 pallet-airdrop-claims = { workspace = true }
@@ -95,7 +96,6 @@ pallet-services-rpc-runtime-api = { workspace = true }
 tangle-primitives = { workspace = true, features = ["verifying"] }
 tangle-crypto-primitives = { workspace = true }
 pallet-multi-asset-delegation = { workspace = true }
-pallet-tangle-lst = { workspace = true }
 
 # Frontier dependencies
 fp-evm = { workspace = true }
@@ -135,7 +135,7 @@ pallet-evm-precompile-verify-ecdsa-stark-signature = { workspace = true }
 pallet-evm-precompile-verify-schnorr-signatures = { workspace = true }
 pallet-evm-precompile-verify-bls381-signature = { workspace = true }
 pallet-evm-precompile-multi-asset-delegation = { workspace = true }
-pallet-evm-precompile-tangle-lst = { workspace = true }
+pallet-evm-precompile-services = { workspace = true }
 precompile-utils = { workspace = true }
 
 evm-tracer = { workspace = true }
@@ -301,8 +301,7 @@ std = [
     "pallet-evm-precompile-verify-ecdsa-stark-signature/std",
     "pallet-evm-precompile-verify-schnorr-signatures/std",
     "pallet-evm-precompile-verify-bls381-signature/std",
-    "pallet-evm-precompile-tangle-lst/std",
-
+    "pallet-evm-precompile-services/std",
 
     # Sygma
     "sygma-basic-feehandler/std",

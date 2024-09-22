@@ -15,7 +15,6 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
 use super::*;
-use crate::{ServicesPrecompile, ServicesPrecompileCall};
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
@@ -36,9 +35,7 @@ use scale_info::TypeInfo;
 use serde::Deserialize;
 use serde::Serialize;
 use sp_core::{
-	self, ecdsa, sr25519,
-	sr25519::{Public as sr25519Public, Signature},
-	ConstU32, RuntimeDebug, H160, H256, U256,
+	self, sr25519, sr25519::Public as sr25519Public, ConstU32, RuntimeDebug, H160, H256,
 };
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
@@ -47,10 +44,6 @@ use sp_runtime::{
 	AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
-use tangle_primitives::services::FieldType;
-use tangle_primitives::services::JobDefinition;
-use tangle_primitives::services::JobMetadata;
-use tangle_primitives::services::PriceTargets;
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -512,10 +505,6 @@ pub fn mock_authorities(vec: Vec<u8>) -> Vec<AccountId> {
 	vec.into_iter().map(|id| mock_pub_key(id)).collect()
 }
 
-pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
-	new_test_ext_raw_authorities(mock_authorities(ids))
-}
-
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles
@@ -603,24 +592,4 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	});
 
 	ext
-}
-
-// Checks events against the latest. A contiguous set of events must be
-// provided. They must include the most recent RuntimeEvent, but do not have to include
-// every past RuntimeEvent.
-#[track_caller]
-pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
-	let mut actual: Vec<RuntimeEvent> = System::events().iter().map(|e| e.event.clone()).collect();
-
-	expected.reverse();
-	for evt in expected {
-		let next = actual.pop().expect("RuntimeEvent expected");
-		match (&next, &evt) {
-			(left_val, right_val) => {
-				if !(*left_val == *right_val) {
-					panic!("Events don't match\nactual: {next:#?}\nexpected: {evt:#?}");
-				}
-			},
-		};
-	}
 }

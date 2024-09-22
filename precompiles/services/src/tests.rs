@@ -1,9 +1,6 @@
 use crate::mock::*;
 use crate::mock_evm::PCall;
 use crate::mock_evm::PrecompilesValue;
-use frame_support::pallet_prelude::Hooks;
-use frame_support::traits::Currency;
-use frame_support::{assert_err, assert_ok};
 use pallet_services::types::ConstraintsOf;
 use pallet_services::Instances;
 use pallet_services::Operators;
@@ -23,14 +20,13 @@ use tangle_primitives::services::PriceTargets;
 use tangle_primitives::services::ServiceMetadata;
 use tangle_primitives::services::ServiceRegistrationHook;
 use tangle_primitives::services::ServiceRequestHook;
-use tangle_primitives::services::{
-	ApprovalPrefrence, Field, OperatorPreferences, ServiceBlueprint,
-};
+use tangle_primitives::services::{ApprovalPrefrence, OperatorPreferences, ServiceBlueprint};
 
 fn zero_key() -> ecdsa::Public {
 	ecdsa::Public([0; 33])
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MachineKind {
 	Large,
@@ -88,7 +84,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 
 #[test]
 fn test_create_blueprint() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let blueprint_data = cggmp21_blueprint();
 
 		PrecompilesValue::get()
@@ -107,7 +103,7 @@ fn test_create_blueprint() {
 
 #[test]
 fn test_register_operator() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let preferences_data = OperatorPreferences {
 			key: zero_key(),
 			approval: ApprovalPrefrence::default(),
@@ -128,14 +124,13 @@ fn test_register_operator() {
 			.execute_returns(());
 
 		let account: AccountId32 = TestAccount::Bob.into();
-		let value = OperatorsProfile::<Runtime>::iter().next();
 		assert!(OperatorsProfile::<Runtime>::get(account).is_ok());
 	});
 }
 
 #[test]
 fn test_request_service() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
 		let service_providers_data: Vec<AccountId32> = vec![TestAccount::Bob.into()];
 		let request_args_data = vec![];
@@ -159,7 +154,7 @@ fn test_request_service() {
 
 #[test]
 fn test_unregister_operator() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		PrecompilesValue::get()
 			.prepare_test(
 				Bob,
@@ -169,13 +164,13 @@ fn test_unregister_operator() {
 			.execute_returns(());
 
 		let bob_account: AccountId32 = TestAccount::Bob.into();
-		assert!(!Operators::<Runtime>::contains_key(0, &bob_account));
+		assert!(!Operators::<Runtime>::contains_key(0, bob_account));
 	});
 }
 
 #[test]
 fn test_terminate_service() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,

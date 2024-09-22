@@ -1,17 +1,14 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use fp_evm::PrecompileHandle;
-use frame_support::dispatch::{DispatchResult, GetDispatchInfo, PostDispatchInfo};
+use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
 use pallet_evm::AddressMapping;
 use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
-use sp_core::{H160, U256};
+use sp_core::U256;
 use sp_runtime::traits::Dispatchable;
 use sp_std::{marker::PhantomData, vec::Vec};
-use tangle_primitives::services::{
-	Field, JobDefinition, JobResultVerifier, OperatorPreferences, ServiceBlueprint,
-	ServiceRegistrationHook, ServiceRequestHook,
-};
+use tangle_primitives::services::{Field, OperatorPreferences, ServiceBlueprint};
 
 #[cfg(test)]
 mod mock;

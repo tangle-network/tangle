@@ -27,13 +27,10 @@ use frame_support::{
 	PalletId,
 };
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
-use pallet_evm::{
-	EnsureAddressNever, EnsureAddressOrigin, EnsureAddressRoot, HashedAddressMapping,
-	OnChargeEVMTransaction,
-};
+use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, OnChargeEVMTransaction};
 use sp_core::{keccak_256, ConstU32, H160, H256, U256};
 use sp_runtime::{
-	traits::{BlakeTwo256, DispatchInfoOf, Dispatchable},
+	traits::{DispatchInfoOf, Dispatchable},
 	transaction_validity::{TransactionValidity, TransactionValidityError},
 	ConsensusEngineId,
 };
