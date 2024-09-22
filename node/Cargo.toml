@@ -110,8 +110,8 @@ tangle-crypto-primitives = { workspace = true }
 tangle-primitives = { workspace = true, features = ["std"] }
 tangle-runtime = { workspace = true, features = ["std"] }
 tangle-testnet-runtime = { workspace = true, optional = true }
-sygma-rpc = { workspace = true }
-sygma-runtime-api = { workspace = true }
+# sygma-rpc = { workspace = true }
+# sygma-runtime-api = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]

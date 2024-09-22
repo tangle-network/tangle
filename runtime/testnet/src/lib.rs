@@ -1295,11 +1295,11 @@ construct_runtime!(
 		Lst: pallet_tangle_lst = 52,
 
 		// Sygma
-		SygmaAccessSegregator: sygma_access_segregator = 46,
-		SygmaBasicFeeHandler: sygma_basic_feehandler = 47,
-		SygmaFeeHandlerRouter: sygma_fee_handler_router = 48,
-		SygmaPercentageFeeHandler: sygma_percentage_feehandler = 49,
-		SygmaBridge: sygma_bridge = 50,
+		// SygmaAccessSegregator: sygma_access_segregator = 46,
+		// SygmaBasicFeeHandler: sygma_basic_feehandler = 47,
+		// SygmaFeeHandlerRouter: sygma_fee_handler_router = 48,
+		// SygmaPercentageFeeHandler: sygma_percentage_feehandler = 49,
+		// SygmaBridge: sygma_bridge = 50,
 
 	}
 );
@@ -1483,37 +1483,37 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type WeightInfo = ();
 }
 
-parameter_types! {
-	pub const SygmaAccessSegregatorPalletIndex: u8 = 90;
-	pub const SygmaBasicFeeHandlerPalletIndex: u8 = 91;
-	pub const SygmaFeeHandlerRouterPalletIndex: u8 = 92;
-	pub const SygmaPercentageFeeHandlerRouterPalletIndex: u8 = 93;
-	pub const SygmaBridgePalletIndex: u8 = 94;
-}
+// parameter_types! {
+// 	pub const SygmaAccessSegregatorPalletIndex: u8 = 90;
+// 	pub const SygmaBasicFeeHandlerPalletIndex: u8 = 91;
+// 	pub const SygmaFeeHandlerRouterPalletIndex: u8 = 92;
+// 	pub const SygmaPercentageFeeHandlerRouterPalletIndex: u8 = 93;
+// 	pub const SygmaBridgePalletIndex: u8 = 94;
+// }
 
-pub struct SygmaAdminMembers;
-impl SortedMembers<AccountId> for SygmaAdminMembers {
-	fn sorted_members() -> Vec<AccountId> {
-		[SygmaBridgeAdminAccount::get()].to_vec()
-	}
-}
+// pub struct SygmaAdminMembers;
+// impl SortedMembers<AccountId> for SygmaAdminMembers {
+// 	fn sorted_members() -> Vec<AccountId> {
+// 		[SygmaBridgeAdminAccount::get()].to_vec()
+// 	}
+// }
 
-impl sygma_bridge::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type TransferReserveAccounts = BridgeAccounts;
-	type FeeReserveAccount = SygmaBridgeFeeAccount;
-	type EIP712ChainID = EIP712ChainID;
-	type DestVerifyingContractAddress = DestVerifyingContractAddress;
-	type FeeHandler = SygmaFeeHandlerRouter;
-	type AssetTransactor = (CurrencyTransactor, FungiblesTransactor);
-	type ResourcePairs = ResourcePairs;
-	type IsReserve = ReserveChecker;
-	type ExtractDestData = DestinationDataParser;
-	type PalletId = SygmaBridgePalletId;
-	type PalletIndex = SygmaBridgePalletIndex;
-	type DecimalConverter = SygmaDecimalConverter<AssetDecimalPairs>;
-	type WeightInfo = sygma_bridge::weights::SygmaWeightInfo<Runtime>;
-}
+// impl sygma_bridge::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type TransferReserveAccounts = BridgeAccounts;
+// 	type FeeReserveAccount = SygmaBridgeFeeAccount;
+// 	type EIP712ChainID = EIP712ChainID;
+// 	type DestVerifyingContractAddress = DestVerifyingContractAddress;
+// 	type FeeHandler = SygmaFeeHandlerRouter;
+// 	type AssetTransactor = (CurrencyTransactor, FungiblesTransactor);
+// 	type ResourcePairs = ResourcePairs;
+// 	type IsReserve = ReserveChecker;
+// 	type ExtractDestData = DestinationDataParser;
+// 	type PalletId = SygmaBridgePalletId;
+// 	type PalletIndex = SygmaBridgePalletIndex;
+// 	type DecimalConverter = SygmaDecimalConverter<AssetDecimalPairs>;
+// 	type WeightInfo = sygma_bridge::weights::SygmaWeightInfo<Runtime>;
+// }
 
 pub type LocationToAccountId = (
 	// The parent (Relay-chain) origin converts to the parent `AccountId`.
@@ -1572,35 +1572,35 @@ impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
 	}
 }
 
-impl sygma_access_segregator::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type BridgeCommitteeOrigin = EnsureSignedBy<SygmaAdminMembers, AccountId>;
-	type PalletIndex = SygmaAccessSegregatorPalletIndex;
-	type Extrinsics = RegisteredExtrinsics;
-	type WeightInfo = sygma_access_segregator::weights::SygmaWeightInfo<Runtime>;
-}
+// impl sygma_access_segregator::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type BridgeCommitteeOrigin = EnsureSignedBy<SygmaAdminMembers, AccountId>;
+// 	type PalletIndex = SygmaAccessSegregatorPalletIndex;
+// 	type Extrinsics = RegisteredExtrinsics;
+// 	type WeightInfo = sygma_access_segregator::weights::SygmaWeightInfo<Runtime>;
+// }
 
-impl sygma_basic_feehandler::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type PalletIndex = SygmaBasicFeeHandlerPalletIndex;
-	type WeightInfo = sygma_basic_feehandler::weights::SygmaWeightInfo<Runtime>;
-}
+// impl sygma_basic_feehandler::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type PalletIndex = SygmaBasicFeeHandlerPalletIndex;
+// 	type WeightInfo = sygma_basic_feehandler::weights::SygmaWeightInfo<Runtime>;
+// }
 
-impl sygma_fee_handler_router::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type BasicFeeHandler = SygmaBasicFeeHandler;
-	type DynamicFeeHandler = ();
+// impl sygma_fee_handler_router::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type BasicFeeHandler = SygmaBasicFeeHandler;
+// 	type DynamicFeeHandler = ();
 
-	type PercentageFeeHandler = SygmaPercentageFeeHandler;
-	type PalletIndex = SygmaFeeHandlerRouterPalletIndex;
-	type WeightInfo = sygma_fee_handler_router::weights::SygmaWeightInfo<Runtime>;
-}
+// 	type PercentageFeeHandler = SygmaPercentageFeeHandler;
+// 	type PalletIndex = SygmaFeeHandlerRouterPalletIndex;
+// 	type WeightInfo = sygma_fee_handler_router::weights::SygmaWeightInfo<Runtime>;
+// }
 
-impl sygma_percentage_feehandler::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type PalletIndex = SygmaPercentageFeeHandlerRouterPalletIndex;
-	type WeightInfo = sygma_percentage_feehandler::weights::SygmaWeightInfo<Runtime>;
-}
+// impl sygma_percentage_feehandler::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type PalletIndex = SygmaPercentageFeeHandlerRouterPalletIndex;
+// 	type WeightInfo = sygma_percentage_feehandler::weights::SygmaWeightInfo<Runtime>;
+// }
 
 parameter_types! {
 	// tTNT: native asset is always a reserved asset
