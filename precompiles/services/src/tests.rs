@@ -81,10 +81,10 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 		gadget: Default::default(),
 	}
 }
-
 #[test]
 fn test_create_blueprint() {
 	ExtBuilder.build().execute_with(|| {
+		// Create blueprint
 		let blueprint_data = cggmp21_blueprint();
 
 		PrecompilesValue::get()
@@ -97,6 +97,7 @@ fn test_create_blueprint() {
 			)
 			.execute_returns(());
 
+		// Ensure the blueprint was created successfully
 		assert_eq!(Services::next_blueprint_id(), 1);
 	});
 }
@@ -104,6 +105,62 @@ fn test_create_blueprint() {
 #[test]
 fn test_register_operator() {
 	ExtBuilder.build().execute_with(|| {
+		// First create the blueprint
+		let blueprint_data = cggmp21_blueprint();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::create_blueprint {
+					blueprint_data: UnboundedBytes::from(blueprint_data.encode()),
+				},
+			)
+			.execute_returns(());
+
+		// Now register operator
+		let preferences_data = OperatorPreferences {
+			key: zero_key(),
+			approval: ApprovalPrefrence::default(),
+			price_targets: price_targets(MachineKind::Large),
+		}
+		.encode();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bob,
+				H160::from_low_u64_be(1),
+				PCall::register_operator {
+					blueprint_id: U256::from(0), // We use the first blueprint
+					preferences: UnboundedBytes::from(preferences_data),
+					registration_args: UnboundedBytes::from(vec![0u8]),
+				},
+			)
+			.execute_returns(());
+
+		// Check that the operator profile exists
+		let account: AccountId32 = TestAccount::Bob.into();
+		assert!(OperatorsProfile::<Runtime>::get(account).is_ok());
+	});
+}
+
+#[test]
+fn test_request_service() {
+	ExtBuilder.build().execute_with(|| {
+		// First create the blueprint
+		let blueprint_data = cggmp21_blueprint();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::create_blueprint {
+					blueprint_data: UnboundedBytes::from(blueprint_data.encode()),
+				},
+			)
+			.execute_returns(());
+
+		// Now register operator
 		let preferences_data = OperatorPreferences {
 			key: zero_key(),
 			approval: ApprovalPrefrence::default(),
@@ -118,22 +175,122 @@ fn test_register_operator() {
 				PCall::register_operator {
 					blueprint_id: U256::from(0),
 					preferences: UnboundedBytes::from(preferences_data),
-					registration_args: UnboundedBytes::from(vec![]),
+					registration_args: UnboundedBytes::from(vec![0u8]),
 				},
 			)
 			.execute_returns(());
 
-		let account: AccountId32 = TestAccount::Bob.into();
-		assert!(OperatorsProfile::<Runtime>::get(account).is_ok());
+		// Finally, request the service
+		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
+		let service_providers_data: Vec<AccountId32> = vec![TestAccount::Bob.into()];
+		let request_args_data = vec![0u8];
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::request_service {
+					blueprint_id: U256::from(0), // Use the first blueprint
+					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
+					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
+					request_args_data: UnboundedBytes::from(request_args_data),
+				},
+			)
+			.execute_returns(());
+
+		// Ensure the service instance is created
+		assert!(Instances::<Runtime>::contains_key(0));
 	});
 }
 
 #[test]
-fn test_request_service() {
+fn test_unregister_operator() {
 	ExtBuilder.build().execute_with(|| {
+		// First register operator (after blueprint creation)
+		let blueprint_data = cggmp21_blueprint();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::create_blueprint {
+					blueprint_data: UnboundedBytes::from(blueprint_data.encode()),
+				},
+			)
+			.execute_returns(());
+
+		let preferences_data = OperatorPreferences {
+			key: zero_key(),
+			approval: ApprovalPrefrence::default(),
+			price_targets: price_targets(MachineKind::Large),
+		}
+		.encode();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bob,
+				H160::from_low_u64_be(1),
+				PCall::register_operator {
+					blueprint_id: U256::from(0),
+					preferences: UnboundedBytes::from(preferences_data),
+					registration_args: UnboundedBytes::from(vec![0u8]),
+				},
+			)
+			.execute_returns(());
+
+		// Now unregister operator
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bob,
+				H160::from_low_u64_be(1),
+				PCall::unregister_operator { blueprint_id: U256::from(0) },
+			)
+			.execute_returns(());
+
+		// Ensure the operator is removed
+		let bob_account: AccountId32 = TestAccount::Bob.into();
+		assert!(!Operators::<Runtime>::contains_key(0, bob_account));
+	});
+}
+
+#[test]
+fn test_terminate_service() {
+	ExtBuilder.build().execute_with(|| {
+		// First request a service
+		let blueprint_data = cggmp21_blueprint();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::create_blueprint {
+					blueprint_data: UnboundedBytes::from(blueprint_data.encode()),
+				},
+			)
+			.execute_returns(());
+
+		let preferences_data = OperatorPreferences {
+			key: zero_key(),
+			approval: ApprovalPrefrence::default(),
+			price_targets: price_targets(MachineKind::Large),
+		}
+		.encode();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bob,
+				H160::from_low_u64_be(1),
+				PCall::register_operator {
+					blueprint_id: U256::from(0),
+					preferences: UnboundedBytes::from(preferences_data),
+					registration_args: UnboundedBytes::from(vec![0u8]),
+				},
+			)
+			.execute_returns(());
+
 		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
 		let service_providers_data: Vec<AccountId32> = vec![TestAccount::Bob.into()];
-		let request_args_data = vec![];
+		let request_args_data = vec![0u8];
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -148,29 +305,7 @@ fn test_request_service() {
 			)
 			.execute_returns(());
 
-		assert!(Instances::<Runtime>::contains_key(0));
-	});
-}
-
-#[test]
-fn test_unregister_operator() {
-	ExtBuilder.build().execute_with(|| {
-		PrecompilesValue::get()
-			.prepare_test(
-				Bob,
-				H160::from_low_u64_be(1),
-				PCall::unregister_operator { blueprint_id: U256::from(0) },
-			)
-			.execute_returns(());
-
-		let bob_account: AccountId32 = TestAccount::Bob.into();
-		assert!(!Operators::<Runtime>::contains_key(0, bob_account));
-	});
-}
-
-#[test]
-fn test_terminate_service() {
-	ExtBuilder.build().execute_with(|| {
+		// Now terminate the service
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
@@ -179,6 +314,7 @@ fn test_terminate_service() {
 			)
 			.execute_returns(());
 
+		// Ensure the service is removed
 		assert!(!Instances::<Runtime>::contains_key(0));
 	});
 }

@@ -28,6 +28,7 @@ use frame_support::{
 };
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, OnChargeEVMTransaction};
+use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
 use sp_core::{keccak_256, ConstU32, H160, H256, U256};
 use sp_runtime::{
 	traits::{DispatchInfoOf, Dispatchable},
@@ -35,50 +36,13 @@ use sp_runtime::{
 	ConsensusEngineId,
 };
 
-use pallet_evm_precompile_blake2::Blake2F;
-use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
-use pallet_evm_precompile_modexp::Modexp;
-use pallet_evm_precompile_sha3fips::Sha3FIPS256;
-use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
-
-use precompile_utils::precompile_set::{
-	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, PrecompileAt,
-	PrecompileSetBuilder, PrecompilesInRangeInclusive,
-};
-
-type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, CallableByPrecompile);
-
-#[precompile_utils::precompile_name_from_address]
-pub type DefaultPrecompiles = (
-	// Ethereum precompiles:
-	PrecompileAt<AddressU64<1>, ECRecover, EthereumPrecompilesChecks>,
-	PrecompileAt<AddressU64<2>, Sha256, EthereumPrecompilesChecks>,
-	PrecompileAt<AddressU64<3>, Ripemd160, EthereumPrecompilesChecks>,
-	PrecompileAt<AddressU64<4>, Identity, EthereumPrecompilesChecks>,
-	PrecompileAt<AddressU64<5>, Modexp, EthereumPrecompilesChecks>,
-	PrecompileAt<AddressU64<6>, Bn128Add, EthereumPrecompilesChecks>,
-	PrecompileAt<AddressU64<7>, Bn128Mul, EthereumPrecompilesChecks>,
-	PrecompileAt<AddressU64<8>, Bn128Pairing, EthereumPrecompilesChecks>,
-	PrecompileAt<AddressU64<9>, Blake2F, EthereumPrecompilesChecks>,
-	PrecompileAt<AddressU64<1024>, Sha3FIPS256, (CallableByContract, CallableByPrecompile)>,
-	PrecompileAt<AddressU64<1026>, ECRecoverPublicKey, (CallableByContract, CallableByPrecompile)>,
-	PrecompileAt<
-		AddressU64<2048>,
-		ServicesPrecompile<Runtime>,
-		(CallableByContract, CallableByPrecompile),
-	>,
-);
+pub type Precompiles<R> =
+	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, ServicesPrecompile<R>>,)>;
 
 pub type PCall = ServicesPrecompileCall<Runtime>;
 
-pub type TanglePrecompiles<R> = PrecompileSetBuilder<
-	R,
-	(PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<2095>), DefaultPrecompiles>,),
->;
-
 parameter_types! {
 	pub const MinimumPeriod: u64 = 6000 / 2;
-	pub PrecompilesValue: TanglePrecompiles<Runtime> = TanglePrecompiles::<_>::new();
 }
 
 impl pallet_timestamp::Config for Runtime {
@@ -131,6 +95,7 @@ parameter_types! {
 	pub const TransactionByteFee: u64 = 1;
 	pub const ChainId: u64 = 42;
 	pub const EVMModuleId: PalletId = PalletId(*b"py/evmpa");
+	pub PrecompilesValue: Precompiles<Runtime> = Precompiles::new();
 	pub BlockGasLimit: U256 = U256::from(BLOCK_GAS_LIMIT);
 	pub const GasLimitPovSizeRatio: u64 = BLOCK_GAS_LIMIT.saturating_div(MAX_POV_SIZE);
 	pub const WeightPerGas: Weight = Weight::from_parts(20_000, 0);
@@ -229,7 +194,7 @@ impl pallet_evm::Config for Runtime {
 	type AddressMapping = crate::mock::TestAccount;
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
-	type PrecompilesType = TanglePrecompiles<Runtime>;
+	type PrecompilesType = Precompiles<Self>;
 	type PrecompilesValue = PrecompilesValue;
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;
