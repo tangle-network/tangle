@@ -226,6 +226,12 @@ pub fn new_partial(
 		client.clone(),
 	)?;
 
+	let import_queue = sc_consensus_manual_seal::import_queue(
+		Box::new(client.clone()),
+		&task_manager.spawn_essential_handle(),
+		config.prometheus_registry(),
+	);
+
 	let slot_duration = babe_link.config().slot_duration();
 
 	let target_gas_price = eth_config.target_gas_price;
@@ -278,16 +284,6 @@ pub fn new_partial(
 	})
 }
 
-#[allow(dead_code)]
-pub struct RunFullParams {
-	pub config: Configuration,
-	pub eth_config: EthConfiguration,
-	pub rpc_config: RpcConfig,
-	pub debug_output: Option<std::path::PathBuf>,
-	pub auto_insert_keys: bool,
-}
-
-/// Builds a new service for a full client.
 pub async fn new_full(
 	RunFullParams { mut config, eth_config, rpc_config, debug_output: _, auto_insert_keys }: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
@@ -310,49 +306,6 @@ pub async fn new_full(
 				babe_worker_handle,
 			),
 	} = new_partial(&config, &eth_config)?;
-
-	if config.role.is_authority() {
-		if config.chain_spec.chain_type() == ChainType::Development
-			|| config.chain_spec.chain_type() == ChainType::Local
-		{
-			if auto_insert_keys {
-				crate::utils::insert_controller_account_keys_into_keystore(
-					&config,
-					Some(keystore_container.local_keystore()),
-				);
-			} else {
-				crate::utils::insert_dev_controller_account_keys_into_keystore(
-					&config,
-					Some(keystore_container.local_keystore()),
-				);
-			}
-		}
-
-		// finally check if keys are inserted correctly
-		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore()).is_err() {
-			if config.chain_spec.chain_type() == ChainType::Development
-				|| config.chain_spec.chain_type() == ChainType::Local
-			{
-				println!("   
-			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
-				Validator keys not found, validator keys are essential to run a validator on
-				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
-				how to generate and insert keys. OR start the node with --auto-insert-keys to automatically generate the keys in testnet.
-			++++++++++++++++++++++++++++++++++++++++++++++++
-			\n");
-				panic!("Keys not detected!")
-			} else {
-				println!("   
-			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
-				Validator keys not found, validator keys are essential to run a validator on
-				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
-				how to generate and insert keys.
-			++++++++++++++++++++++++++++++++++++++++++++++++
-			\n");
-				panic!("Keys not detected!")
-			}
-		}
-	}
 
 	let FrontierPartialComponents { filter_pool, fee_history_cache, fee_history_cache_limit } =
 		new_frontier_partial(&eth_config)?;
@@ -572,7 +525,7 @@ pub async fn new_full(
 	let _rpc_handlers = sc_service::spawn_tasks(params)?;
 
 	if role.is_authority() {
-		let proposer_factory = sc_basic_authorship::ProposerFactory::new(
+		let proposer = sc_basic_authorship::ProposerFactory::new(
 			task_manager.spawn_handle(),
 			client.clone(),
 			transaction_pool.clone(),
@@ -580,54 +533,24 @@ pub async fn new_full(
 			telemetry.as_ref().map(|x| x.handle()),
 		);
 
-		let backoff_authoring_blocks =
-			Some(sc_consensus_slots::BackoffAuthoringOnFinalizedHeadLagging::default());
-
-		let babe_config = sc_consensus_babe::BabeParams {
-			keystore: keystore_container.keystore(),
-			client: client.clone(),
+		let params = sc_consensus_manual_seal::InstantSealParams {
+			block_import: client.clone(),
+			env: proposer,
+			client,
+			pool: transaction_pool.clone(),
 			select_chain,
-			env: proposer_factory,
-			block_import,
-			sync_oracle: sync_service.clone(),
-			justification_sync_link: sync_service.clone(),
-			create_inherent_data_providers: move |parent, ()| {
-				let client_clone = client.clone();
-				async move {
-					let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
-
-					let slot =
-						sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
-							*timestamp,
-							slot_duration,
-						);
-
-					let storage_proof =
-						sp_transaction_storage_proof::registration::new_data_provider(
-							&*client_clone,
-							&parent,
-						)?;
-					let _dynamic_fee =
-						fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
-					Ok((slot, timestamp, storage_proof))
-				}
+			consensus_data_provider: None,
+			create_inherent_data_providers: move |_, ()| async move {
+				Ok(sp_timestamp::InherentDataProvider::from_system_time())
 			},
-			force_authoring,
-			backoff_authoring_blocks,
-			babe_link,
-			block_proposal_slot_portion: SlotProportion::new(0.5),
-			max_block_proposal_slot_portion: None,
-			telemetry: telemetry.as_ref().map(|x| x.handle()),
 		};
 
-		let babe = sc_consensus_babe::start_babe(babe_config)?;
+		let authorship_future = sc_consensus_manual_seal::run_instant_seal(params);
 
-		// the BABE authoring task is considered essential, i.e. if it
-		// fails we take down the service with it.
 		task_manager.spawn_essential_handle().spawn_blocking(
-			"babe-proposer",
-			Some("block-authoring"),
-			babe,
+			"manual-seal",
+			None,
+			authorship_future,
 		);
 	}
 

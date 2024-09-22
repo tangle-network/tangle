@@ -17,6 +17,16 @@ use sc_cli::RunCmd;
 
 use crate::service::EthConfiguration;
 
+/// Available Sealing methods.
+#[derive(Copy, Clone, Debug, Default, clap::ValueEnum)]
+pub enum Sealing {
+	/// Seal using rpc method.
+	#[default]
+	Manual,
+	/// Seal when transaction is executed.
+	Instant,
+}
+
 #[derive(Debug, clap::Parser)]
 pub struct Cli {
 	#[command(subcommand)]
@@ -34,6 +44,11 @@ pub struct Cli {
 
 	#[arg(short, long)]
 	pub auto_insert_keys: bool,
+
+	/// Choose sealing method.
+	#[cfg(feature = "manual-seal")]
+	#[arg(long, value_enum, ignore_case = true)]
+	pub sealing: Option<Sealing>,
 }
 
 #[derive(Debug, clap::Subcommand)]
