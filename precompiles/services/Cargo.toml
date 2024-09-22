@@ -31,6 +31,14 @@ derive_more = { workspace = true }
 hex-literal = { workspace = true }
 serde = { workspace = true }
 sha3 = { workspace = true }
+ethereum = { workspace = true, features = ["with-codec"] }
+ethers = "2.0"
+hex = { workspace = true }
+num_enum = { workspace = true }
+libsecp256k1 = { workspace = true }
+serde_json = { workspace = true }
+smallvec = { workspace = true }
+sp-keystore = { workspace = true }
 
 # Moonbeam
 precompile-utils = { workspace = true, features = ["std", "testing"] }
@@ -41,6 +49,35 @@ pallet-assets = { workspace = true, features = ["std"] }
 pallet-timestamp = { workspace = true, features = ["std"] }
 scale-info = { workspace = true, features = ["derive", "std"] }
 sp-io = { workspace = true, features = ["std"] }
+
+# Frontier Primitive
+fp-account = { workspace = true }
+fp-consensus = { workspace = true }
+fp-dynamic-fee = { workspace = true }
+fp-ethereum = { workspace = true }
+fp-rpc = { workspace = true }
+fp-self-contained = { workspace = true }
+fp-storage = { workspace = true }
+
+# Frontier FRAME
+pallet-base-fee = { workspace = true }
+pallet-dynamic-fee = { workspace = true }
+pallet-ethereum = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-evm-chain-id = { workspace = true }
+
+pallet-evm-precompile-blake2 = { workspace = true }
+pallet-evm-precompile-bn128 = { workspace = true }
+pallet-evm-precompile-curve25519 = { workspace = true }
+pallet-evm-precompile-ed25519 = { workspace = true }
+pallet-evm-precompile-modexp = { workspace = true }
+pallet-evm-precompile-sha3fips = { workspace = true }
+pallet-evm-precompile-simple = { workspace = true }
+
+pallet-session = { workspace = true }
+pallet-staking = { workspace = true }
+sp-staking = { workspace = true }
+frame-election-provider-support = { workspace = true }
 
 [features]
 default = ["std"]
@@ -59,4 +96,42 @@ std = [
   "tangle-primitives/std",
   "pallet-assets/std",
   "pallet-services/std",
+  "hex/std",
+  "scale-info/std",
+  "sp-runtime/std",
+  "frame-support/std",
+  "frame-system/std",
+  "sp-core/std",
+  "sp-std/std",
+  "sp-io/std",
+  "tangle-primitives/std",
+  "pallet-balances/std",
+  "pallet-timestamp/std",
+  "fp-account/std",
+  "fp-consensus/std",
+  "fp-dynamic-fee/std",
+  "fp-ethereum/std",
+  "fp-evm/std",
+  "fp-rpc/std",
+  "fp-self-contained/std",
+  "fp-storage/std",
+  "pallet-base-fee/std",
+  "pallet-dynamic-fee/std",
+  "pallet-ethereum/std",
+  "pallet-evm/std",
+  "pallet-evm-chain-id/std",
+
+  "pallet-evm-precompile-modexp/std",
+  "pallet-evm-precompile-sha3fips/std",
+  "pallet-evm-precompile-simple/std",
+  "pallet-evm-precompile-blake2/std",
+  "pallet-evm-precompile-bn128/std",
+  "pallet-evm-precompile-curve25519/std",
+  "pallet-evm-precompile-ed25519/std",
+  "precompile-utils/std",
+  "serde/std",
+  "pallet-session/std",
+  "pallet-staking/std",
+  "sp-staking/std",
+  "frame-election-provider-support/std",
 ]

@@ -1,77 +1,52 @@
-// SPDX-License-Identifier: GPL-3.0-only
-pragma solidity >=0.8.3;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.0;
 
-/// @dev The ServiceBlueprint precompile contract's address.
-address constant SERVICE_BLUEPRINT = 0x0000000000000000000000000000000000000819;
+/// @title ServicesPrecompile Interface
+/// @dev This interface is meant to interact with the ServicesPrecompile in the Tangle network.
+interface ServicesPrecompile {
 
-/// @dev The ServiceBlueprint contract's instance.
-ServiceBlueprint constant SERVICE_BLUEPRINT_CONTRACT = ServiceBlueprint(SERVICE_BLUEPRINT);
+    /// @notice Create a new service blueprint
+    /// @param blueprint_data The blueprint data encoded as bytes
+    function createBlueprint(bytes calldata blueprint_data) external;
 
-/// @author Your Team
-/// @title Pallet ServiceBlueprint Interface
-/// @title The interface through which Solidity contracts will interact with the ServiceBlueprint pallet
-/// @custom:address 0x000000000000000000000000000000000000080A
-interface ServiceBlueprint {
-    
-    /// @dev Create a new blueprint.
-    /// @param blueprintData The data related to the service blueprint.
-    function createBlueprint(bytes calldata blueprintData) external returns (uint8);
+    /// @notice Register an operator for a specific blueprint
+    /// @param blueprint_id The ID of the blueprint to register for
+    /// @param preferences The operator's preferences encoded as bytes
+    /// @param registration_args The registration arguments encoded as bytes
+    function registerOperator(uint256 blueprint_id, bytes calldata preferences, bytes calldata registration_args) external;
 
-    /// @dev Register as an operator for a specific blueprint.
-    /// @param blueprintId The ID of the blueprint to register as an operator.
-    /// @param preferences The preferences of the operator.
-    /// @param registrationArgs Additional registration arguments.
-    function register(
-        uint256 blueprintId, 
-        bytes calldata preferences, 
-        bytes[] calldata registrationArgs
-    ) external returns (uint8);
+    /// @notice Unregister an operator from a specific blueprint
+    /// @param blueprint_id The ID of the blueprint to unregister from
+    function unregisterOperator(uint256 blueprint_id) external;
 
-    /// @dev Unregister as an operator for a specific blueprint.
-    /// @param blueprintId The ID of the blueprint from which to unregister.
-    function unregister(uint256 blueprintId) external returns (uint8);
+    /// @notice Request a service from a specific blueprint
+    /// @param blueprint_id The ID of the blueprint
+    /// @param permitted_callers_data The permitted callers for the service encoded as bytes
+    /// @param service_providers_data The service providers encoded as bytes
+    /// @param request_args_data The request arguments encoded as bytes
+    function requestService(uint256 blueprint_id, bytes calldata permitted_callers_data, bytes calldata service_providers_data, bytes calldata request_args_data) external;
 
-    /// @dev Request a new service using a blueprint.
-    /// @param blueprintId The ID of the blueprint to use for the service.
-    /// @param permittedCallers A list of accounts permitted to call the service.
-    /// @param serviceProviders A list of service providers for the service.
-    /// @param ttl The time-to-live for the service in blocks.
-    /// @param requestArgs Additional arguments for the service request.
-    function requestService(
-        uint256 blueprintId, 
-        address[] calldata permittedCallers, 
-        address[] calldata serviceProviders, 
-        uint256 ttl, 
-        bytes[] calldata requestArgs
-    ) external returns (uint8);
+    /// @notice Terminate a service
+    /// @param service_id The ID of the service to terminate
+    function terminateService(uint256 service_id) external;
 
-    /// @dev Call a job in the service.
-    /// @param serviceId The ID of the service.
-    /// @param job The ID of the job to execute.
-    /// @param args The arguments for the job call.
-    function callServiceJob(
-        uint256 serviceId, 
-        uint256 job, 
-        bytes[] calldata args
-    ) external returns (uint8);
+    /// @notice Approve a service request
+    /// @param request_id The ID of the service request to approve
+    function approve(uint256 request_id) external;
 
-    /// @dev Terminate an existing service.
-    /// @param serviceId The ID of the service to terminate.
-    function terminateService(uint256 serviceId) external returns (uint8);
+    /// @notice Reject a service request
+    /// @param request_id The ID of the service request to reject
+    function reject(uint256 request_id) external;
 
-    /// @dev Update operator preferences for a blueprint.
-    /// @param blueprintId The ID of the blueprint to update preferences for.
-    /// @param approvalPreference The new approval preferences.
-    function updateApprovalPreference(
-        uint256 blueprintId, 
-        bytes calldata approvalPreference
-    ) external returns (uint8);
+    /// @notice Call a job in the service
+    /// @param service_id The ID of the service
+    /// @param job The job index (as uint8)
+    /// @param args_data The arguments of the job encoded as bytes
+    function callJob(uint256 service_id, uint8 job, bytes calldata args_data) external;
 
-    /// @dev Update the price targets for a blueprint.
-    /// @param blueprintId The ID of the blueprint to update price targets for.
-    /// @param priceTargets The new price targets.
-    function updatePriceTargets(
-        uint256 blueprintId, 
-        bytes calldata priceTargets
-    ) external returns (uint8);
+    /// @notice Submit the result of a job call
+    /// @param service_id The ID of the service
+    /// @param call_id The ID of the call
+    /// @param result_data The result data encoded as bytes
+    function submitResult(uint256 service_id, uint256 call_id, bytes calldata result_data) external;
 }

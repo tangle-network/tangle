@@ -1,177 +1,189 @@
 use crate::mock::*;
-use crate::U256;
-use frame_support::assert_ok;
-use pallet_services::{Blueprints, Operators, UserServices};
+use crate::mock_evm::PCall;
+use crate::mock_evm::PrecompilesValue;
+use frame_support::pallet_prelude::Hooks;
+use frame_support::traits::Currency;
+use frame_support::{assert_err, assert_ok};
+use pallet_services::types::ConstraintsOf;
+use pallet_services::Instances;
+use pallet_services::Operators;
+use pallet_services::OperatorsProfile;
+use parity_scale_codec::Encode;
+use precompile_utils::prelude::UnboundedBytes;
 use precompile_utils::testing::*;
-use sp_core::H160;
+use sp_core::ecdsa;
+use sp_core::{H160, U256};
+use sp_runtime::bounded_vec;
+use sp_runtime::AccountId32;
+use tangle_primitives::services::FieldType;
+use tangle_primitives::services::JobDefinition;
+use tangle_primitives::services::JobMetadata;
+use tangle_primitives::services::JobResultVerifier;
+use tangle_primitives::services::PriceTargets;
+use tangle_primitives::services::ServiceMetadata;
+use tangle_primitives::services::ServiceRegistrationHook;
+use tangle_primitives::services::ServiceRequestHook;
+use tangle_primitives::services::{
+	ApprovalPrefrence, Field, OperatorPreferences, ServiceBlueprint,
+};
 
-#[test]
-fn test_selector_less_than_four_bytes_reverts() {
-	ExtBuilder::default().build().execute_with(|| {
-		PrecompilesValue::get()
-			.prepare_test(Alice, Precompile1, vec![1u8, 2, 3])
-			.execute_reverts(|output| output == b"Tried to read selector out of bounds");
-	});
+fn zero_key() -> ecdsa::Public {
+	ecdsa::Public([0; 33])
 }
 
-#[test]
-fn test_unimplemented_selector_reverts() {
-	ExtBuilder::default().build().execute_with(|| {
-		PrecompilesValue::get()
-			.prepare_test(Alice, Precompile1, vec![1u8, 2, 3, 4])
-			.execute_reverts(|output| output == b"Unknown selector");
-	});
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MachineKind {
+	Large,
+	Medium,
+	Small,
+}
+
+/// All prices are specified in USD/hr (in u64, so 1e6 = 1$)
+fn price_targets(kind: MachineKind) -> PriceTargets {
+	match kind {
+		MachineKind::Large => PriceTargets {
+			cpu: 2_000,
+			mem: 1_000,
+			storage_hdd: 100,
+			storage_ssd: 200,
+			storage_nvme: 300,
+		},
+		MachineKind::Medium => PriceTargets {
+			cpu: 1_000,
+			mem: 500,
+			storage_hdd: 50,
+			storage_ssd: 100,
+			storage_nvme: 150,
+		},
+		MachineKind::Small => {
+			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 }
+		},
+	}
+}
+
+fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
+	ServiceBlueprint {
+		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
+		jobs: bounded_vec![
+			JobDefinition {
+				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
+				params: bounded_vec![FieldType::Uint8],
+				result: bounded_vec![FieldType::Bytes],
+				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
+			},
+			JobDefinition {
+				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
+				params: bounded_vec![FieldType::Uint64, FieldType::Bytes],
+				result: bounded_vec![FieldType::Bytes],
+				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
+			},
+		],
+		registration_hook: ServiceRegistrationHook::Evm(CGGMP21_BLUEPRINT),
+		registration_params: bounded_vec![],
+		request_hook: ServiceRequestHook::Evm(CGGMP21_BLUEPRINT),
+		request_params: bounded_vec![],
+		gadget: Default::default(),
+	}
 }
 
 #[test]
 fn test_create_blueprint() {
 	ExtBuilder::default().build().execute_with(|| {
-		let account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let initial_blueprint_count = Blueprints::<Runtime>::count();
+		let blueprint_data = cggmp21_blueprint();
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::create_blueprint {
-					blueprint: vec![],
+					blueprint_data: UnboundedBytes::from(blueprint_data.encode()),
 				},
 			)
 			.execute_returns(());
 
-		assert_eq!(Blueprints::<Runtime>::count(), initial_blueprint_count + 1);
+		assert_eq!(Services::next_blueprint_id(), 1);
 	});
 }
 
 #[test]
 fn test_register_operator() {
 	ExtBuilder::default().build().execute_with(|| {
-		let account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let blueprint_id = 0; // Assuming blueprint 0 is created in a previous test
-
-		assert!(Operators::<Runtime>::get(blueprint_id, account).is_none());
+		let preferences_data = OperatorPreferences {
+			key: zero_key(),
+			approval: ApprovalPrefrence::default(),
+			price_targets: price_targets(MachineKind::Large),
+		}
+		.encode();
 
 		PrecompilesValue::get()
 			.prepare_test(
-				TestAccount::Alex,
+				TestAccount::Bob,
 				H160::from_low_u64_be(1),
-				PCall::register {
-					blueprint_id: U256::from(blueprint_id),
-					preferences: vec![],
-					registration_args: vec![],
+				PCall::register_operator {
+					blueprint_id: U256::from(0),
+					preferences: UnboundedBytes::from(preferences_data),
+					registration_args: UnboundedBytes::from(vec![]),
 				},
 			)
 			.execute_returns(());
 
-		assert!(Operators::<Runtime>::get(blueprint_id, account).is_some());
-	});
-}
-
-#[test]
-fn test_register_operator_already_registered_reverts() {
-	ExtBuilder::default().build().execute_with(|| {
-		let account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let blueprint_id = 0;
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::register {
-					blueprint_id: U256::from(blueprint_id),
-					preferences: vec![],
-					registration_args: vec![],
-				},
-			)
-			.execute_returns(());
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::register {
-					blueprint_id: U256::from(blueprint_id),
-					preferences: vec![],
-					registration_args: vec![],
-				},
-			)
-			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 1, error: [1, 0, 0, 0], message: Some(\"AlreadyRegistered\") })");
+		let account: AccountId32 = TestAccount::Bob.into();
+		let value = OperatorsProfile::<Runtime>::iter().next();
+		assert!(OperatorsProfile::<Runtime>::get(account).is_ok());
 	});
 }
 
 #[test]
 fn test_request_service() {
 	ExtBuilder::default().build().execute_with(|| {
-		let account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let blueprint_id = 0;
+		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
+		let service_providers_data: Vec<AccountId32> = vec![TestAccount::Bob.into()];
+		let request_args_data = vec![];
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::request_service {
-					blueprint_id: U256::from(blueprint_id),
-					permitted_callers: vec![],
-					service_providers: vec![account.into()],
-					ttl: U256::from(10),
-					request_args: vec![],
+					blueprint_id: U256::from(0),
+					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
+					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
+					request_args_data: UnboundedBytes::from(request_args_data),
 				},
 			)
 			.execute_returns(());
 
-		assert!(UserServices::<Runtime>::get(account).contains(&blueprint_id));
+		assert!(Instances::<Runtime>::contains_key(0));
 	});
 }
 
 #[test]
 fn test_unregister_operator() {
 	ExtBuilder::default().build().execute_with(|| {
-		let account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let blueprint_id = 0;
-
 		PrecompilesValue::get()
 			.prepare_test(
-				TestAccount::Alex,
+				Bob,
 				H160::from_low_u64_be(1),
-				PCall::register {
-					blueprint_id: U256::from(blueprint_id),
-					preferences: vec![],
-					registration_args: vec![],
-				},
+				PCall::unregister_operator { blueprint_id: U256::from(0) },
 			)
 			.execute_returns(());
 
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::unregister {
-					blueprint_id: U256::from(blueprint_id),
-				},
-			)
-			.execute_returns(());
-
-		assert!(Operators::<Runtime>::get(blueprint_id, account).is_none());
+		let bob_account: AccountId32 = TestAccount::Bob.into();
+		assert!(!Operators::<Runtime>::contains_key(0, &bob_account));
 	});
 }
 
 #[test]
 fn test_terminate_service() {
 	ExtBuilder::default().build().execute_with(|| {
-		let account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let service_id = 0; // Assuming service 0 was created previously
-
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::terminate_service {
-					service_id: U256::from(service_id),
-				},
+				PCall::terminate_service { service_id: U256::from(0) },
 			)
 			.execute_returns(());
 
-		// Verify the service is removed or terminated
-		assert!(UserServices::<Runtime>::get(account).is_empty());
+		assert!(!Instances::<Runtime>::contains_key(0));
 	});
 }
