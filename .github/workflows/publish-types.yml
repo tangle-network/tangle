@@ -30,6 +30,6 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "Github Actions"
       - name: Publish the package
-        run: cd types && yarn publish-types
+        run: cd types && yarn publish-types --ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
