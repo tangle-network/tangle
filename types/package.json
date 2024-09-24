@@ -33,24 +33,19 @@
     "build:interfaces:defs": "tsx node_modules/.bin/polkadot-types-from-defs --input ./src/interfaces --package @webb-tools/tangle-substrate-types --endpoint ws://127.0.0.1:9944",
     "build:interfaces:chain": "tsx node_modules/.bin/polkadot-types-from-chain --output ./src/interfaces --package @webb-tools/tangle-substrate-types --endpoint ws://127.0.0.1:9944",
     "clean": "rm -rf build",
-    "publish-types": "node ./scripts/publish-types.js"
+    "publish-types": "release-it --ci patch"
   },
   "dependencies": {
     "@polkadot/api": "^13.2.1",
     "@polkadot/typegen": "^13.2.1",
     "@polkadot/types": "^13.2.1",
     "ecpair": "^2.1.0",
-    "fs-extra": "^11.2.0",
-    "glob2base": "^0.0.12",
-    "minimatch": "^9.0.3",
-    "mkdirp": "^3.0.1",
     "tiny-secp256k1": "^2.2.3"
   },
   "devDependencies": {
     "bunchee": "^5.4.0",
     "prettier": "3.2.5",
-    "rimraf": "5.0.5",
-    "tsconfig-paths": "^4.2.0",
+    "release-it": "^17.6.0",
     "tsx": "^4.19.1",
     "typescript": "5.4.2"
   },
