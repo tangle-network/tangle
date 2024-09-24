@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Definitions } from '@polkadot/types/types'
-import lookup from '../lookup'
 
 export default {
   rpc: {

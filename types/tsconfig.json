@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "types": ["node"],
     "baseUrl": ".",
     "declaration": true,
     "emitDeclarationOnly": true,
@@ -19,14 +18,11 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true
   },
+  "include": ["scripts/**/*", "src/**/*", "playground.ts", "service-demo.ts"],
   "exclude": [
     "build/**/*",
     "**/build/**/*",
-    "scripts",
     "node_modules/**/*",
     "**/node_modules/**/*"
-  ],
-  "ts-node": {
-    "files": true
-  }
+  ]
 }
