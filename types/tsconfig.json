@@ -5,15 +5,11 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "paths": {
-      // here we replace the @polkadot/api augmentation with our own, generated from chain
       "@polkadot/api/augment": ["src/interfaces/augment-api.ts"],
-      // replace the augmented types with our own, as generated from definitions
       "@polkadot/types/augment": ["src/interfaces/augment-types.ts"],
       "@polkadot/types/lookup": ["src/interfaces/types-lookup.ts"],
-      "typeRoots": [
-        "./node_modules/@polkadot/ts",
-        "./node_modules/@types",
-      ]
+      "@webb-tools/tangle-substrate-types": ["./src/interfaces/index.ts"],
+      "@webb-tools/tangle-substrate-types/*": ["./src/interfaces/*"]
     },
     "outDir": "build",
     "composite": true,
@@ -28,9 +24,9 @@
     "**/build/**/*",
     "scripts",
     "node_modules/**/*",
-    "**/node_modules/**/*",
+    "**/node_modules/**/*"
   ],
   "ts-node": {
     "files": true
-  },
+  }
 }
