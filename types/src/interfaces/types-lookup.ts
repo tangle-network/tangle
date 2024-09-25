@@ -1720,7 +1720,7 @@ declare module '@polkadot/types/lookup' {
     } & Struct;
     readonly isIncentiveAPYAndCapSet: boolean;
     readonly asIncentiveAPYAndCapSet: {
-      readonly vaultId: u128;
+      readonly poolId: u128;
       readonly apy: Percent;
       readonly cap: u128;
     } & Struct;
@@ -1728,14 +1728,14 @@ declare module '@polkadot/types/lookup' {
     readonly asBlueprintWhitelisted: {
       readonly blueprintId: u32;
     } & Struct;
-    readonly isAssetUpdatedInVault: boolean;
-    readonly asAssetUpdatedInVault: {
+    readonly isAssetUpdatedInPool: boolean;
+    readonly asAssetUpdatedInPool: {
       readonly who: AccountId32;
-      readonly vaultId: u128;
+      readonly poolId: u128;
       readonly assetId: u128;
       readonly action: PalletMultiAssetDelegationRewardsAssetAction;
     } & Struct;
-    readonly type: 'OperatorJoined' | 'OperatorLeavingScheduled' | 'OperatorLeaveCancelled' | 'OperatorLeaveExecuted' | 'OperatorBondMore' | 'OperatorBondLessScheduled' | 'OperatorBondLessExecuted' | 'OperatorBondLessCancelled' | 'OperatorWentOffline' | 'OperatorWentOnline' | 'Deposited' | 'Scheduledwithdraw' | 'Executedwithdraw' | 'Cancelledwithdraw' | 'Delegated' | 'ScheduledDelegatorBondLess' | 'ExecutedDelegatorBondLess' | 'CancelledDelegatorBondLess' | 'IncentiveAPYAndCapSet' | 'BlueprintWhitelisted' | 'AssetUpdatedInVault';
+    readonly type: 'OperatorJoined' | 'OperatorLeavingScheduled' | 'OperatorLeaveCancelled' | 'OperatorLeaveExecuted' | 'OperatorBondMore' | 'OperatorBondLessScheduled' | 'OperatorBondLessExecuted' | 'OperatorBondLessCancelled' | 'OperatorWentOffline' | 'OperatorWentOnline' | 'Deposited' | 'Scheduledwithdraw' | 'Executedwithdraw' | 'Cancelledwithdraw' | 'Delegated' | 'ScheduledDelegatorBondLess' | 'ExecutedDelegatorBondLess' | 'CancelledDelegatorBondLess' | 'IncentiveAPYAndCapSet' | 'BlueprintWhitelisted' | 'AssetUpdatedInPool';
   }
 
   /** @name PalletMultiAssetDelegationRewardsAssetAction (127) */
@@ -4362,7 +4362,7 @@ declare module '@polkadot/types/lookup' {
     } & Struct;
     readonly isSetIncentiveApyAndCap: boolean;
     readonly asSetIncentiveApyAndCap: {
-      readonly vaultId: u128;
+      readonly poolId: u128;
       readonly apy: Percent;
       readonly cap: u128;
     } & Struct;
@@ -4370,13 +4370,13 @@ declare module '@polkadot/types/lookup' {
     readonly asWhitelistBlueprintForRewards: {
       readonly blueprintId: u32;
     } & Struct;
-    readonly isManageAssetInVault: boolean;
-    readonly asManageAssetInVault: {
-      readonly vaultId: u128;
+    readonly isManageAssetInPool: boolean;
+    readonly asManageAssetInPool: {
+      readonly poolId: u128;
       readonly assetId: u128;
       readonly action: PalletMultiAssetDelegationRewardsAssetAction;
     } & Struct;
-    readonly type: 'JoinOperators' | 'ScheduleLeaveOperators' | 'CancelLeaveOperators' | 'ExecuteLeaveOperators' | 'OperatorBondMore' | 'ScheduleOperatorUnstake' | 'ExecuteOperatorUnstake' | 'CancelOperatorUnstake' | 'GoOffline' | 'GoOnline' | 'Deposit' | 'ScheduleWithdraw' | 'ExecuteWithdraw' | 'CancelWithdraw' | 'Delegate' | 'ScheduleDelegatorUnstake' | 'ExecuteDelegatorUnstake' | 'CancelDelegatorUnstake' | 'SetIncentiveApyAndCap' | 'WhitelistBlueprintForRewards' | 'ManageAssetInVault';
+    readonly type: 'JoinOperators' | 'ScheduleLeaveOperators' | 'CancelLeaveOperators' | 'ExecuteLeaveOperators' | 'OperatorBondMore' | 'ScheduleOperatorUnstake' | 'ExecuteOperatorUnstake' | 'CancelOperatorUnstake' | 'GoOffline' | 'GoOnline' | 'Deposit' | 'ScheduleWithdraw' | 'ExecuteWithdraw' | 'CancelWithdraw' | 'Delegate' | 'ScheduleDelegatorUnstake' | 'ExecuteDelegatorUnstake' | 'CancelDelegatorUnstake' | 'SetIncentiveApyAndCap' | 'WhitelistBlueprintForRewards' | 'ManageAssetInPool';
   }
 
   /** @name PalletServicesModuleCall (409) */
@@ -6193,12 +6193,12 @@ declare module '@polkadot/types/lookup' {
 
   /** @name PalletMultiAssetDelegationRewardsRewardConfig (729) */
   interface PalletMultiAssetDelegationRewardsRewardConfig extends Struct {
-    readonly configs: BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAssetVault>;
+    readonly configs: BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAssetPool>;
     readonly whitelistedBlueprintIds: Vec<u32>;
   }
 
-  /** @name PalletMultiAssetDelegationRewardsRewardConfigForAssetVault (731) */
-  interface PalletMultiAssetDelegationRewardsRewardConfigForAssetVault extends Struct {
+  /** @name PalletMultiAssetDelegationRewardsRewardConfigForAssetPool (731) */
+  interface PalletMultiAssetDelegationRewardsRewardConfigForAssetPool extends Struct {
     readonly apy: Percent;
     readonly cap: u128;
   }
@@ -6232,10 +6232,10 @@ declare module '@polkadot/types/lookup' {
     readonly isBlueprintAlreadyWhitelisted: boolean;
     readonly isNowithdrawRequests: boolean;
     readonly isNoMatchingwithdrawRequest: boolean;
-    readonly isAssetAlreadyInVault: boolean;
-    readonly isAssetNotInVault: boolean;
-    readonly isVaultNotFound: boolean;
-    readonly type: 'AlreadyOperator' | 'BondTooLow' | 'NotAnOperator' | 'CannotExit' | 'AlreadyLeaving' | 'NotLeavingOperator' | 'NotLeavingRound' | 'NoScheduledBondLess' | 'BondLessRequestNotSatisfied' | 'NotActiveOperator' | 'NotOfflineOperator' | 'AlreadyDelegator' | 'NotDelegator' | 'WithdrawRequestAlreadyExists' | 'InsufficientBalance' | 'NoWithdrawRequest' | 'NoBondLessRequest' | 'BondLessNotReady' | 'BondLessRequestAlreadyExists' | 'ActiveServicesUsingAsset' | 'NoActiveDelegation' | 'AssetNotWhitelisted' | 'NotAuthorized' | 'AssetNotFound' | 'BlueprintAlreadyWhitelisted' | 'NowithdrawRequests' | 'NoMatchingwithdrawRequest' | 'AssetAlreadyInVault' | 'AssetNotInVault' | 'VaultNotFound';
+    readonly isAssetAlreadyInPool: boolean;
+    readonly isAssetNotInPool: boolean;
+    readonly isPoolNotFound: boolean;
+    readonly type: 'AlreadyOperator' | 'BondTooLow' | 'NotAnOperator' | 'CannotExit' | 'AlreadyLeaving' | 'NotLeavingOperator' | 'NotLeavingRound' | 'NoScheduledBondLess' | 'BondLessRequestNotSatisfied' | 'NotActiveOperator' | 'NotOfflineOperator' | 'AlreadyDelegator' | 'NotDelegator' | 'WithdrawRequestAlreadyExists' | 'InsufficientBalance' | 'NoWithdrawRequest' | 'NoBondLessRequest' | 'BondLessNotReady' | 'BondLessRequestAlreadyExists' | 'ActiveServicesUsingAsset' | 'NoActiveDelegation' | 'AssetNotWhitelisted' | 'NotAuthorized' | 'AssetNotFound' | 'BlueprintAlreadyWhitelisted' | 'NowithdrawRequests' | 'NoMatchingwithdrawRequest' | 'AssetAlreadyInPool' | 'AssetNotInPool' | 'PoolNotFound';
   }
 
   /** @name TanglePrimitivesServicesServiceRequest (737) */

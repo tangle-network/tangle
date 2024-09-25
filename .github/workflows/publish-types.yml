@@ -1,13 +1,13 @@
 name: Publish Types
 
-# If changes are made to the types package.json,
+# If changes are made to the types/src/** files
 # Issue a new release to npm for the types package.
 on:
   push:
     branches:
       - main
     paths:
-      - "types/package.json"
+      - 'types/src/**'
 
 jobs:
   build:
@@ -21,17 +21,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
-          registry-url: "https://registry.npmjs.org"
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org'
       - name: Install npm dependencies
         run: cd types && yarn install
       - name: Configure Github Actions user
         run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "Github Actions"
-      - name: Run a build
-        run: cd types && yarn build
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
       - name: Publish the package
-        run: cd types && yarn publish-types
+        run: cd types && yarn publish-types --ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

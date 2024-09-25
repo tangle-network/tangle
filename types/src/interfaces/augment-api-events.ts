@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import { FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, SpRuntimeDispatchError, PalletDemocracyMetadataOwner, PalletDemocracyVoteThreshold, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseElectionCompute, SpNposElectionsElectionScore, PalletElectionProviderMultiPhasePhase, EvmCoreErrorExitReason, EthereumLog, SpConsensusGrandpaAppPublic, PalletImOnlineSr25519AppSr25519Public, SpStakingExposure, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, TangleTestnetRuntimeProxyType, TanglePrimitivesServicesApprovalPrefrence, TanglePrimitivesServicesField, TanglePrimitivesServicesPriceTargets, TanglePrimitivesServicesOperatorPreferences, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, StagingXcmV4AssetAssetId, SygmaTraitsTransferType, SygmaFeeHandlerRouterFeeHandlerType, FrameSupportDispatchDispatchInfo } from '@polkadot/types/lookup';
+import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, StagingXcmV4AssetAssetId, SygmaFeeHandlerRouterFeeHandlerType, SygmaTraitsTransferType, TanglePrimitivesServicesApprovalPrefrence, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -774,9 +774,9 @@ declare module '@polkadot/api-base/types/events' {
     };
     multiAssetDelegation: {
       /**
-       * Asset has been updated to reward vault
+       * Asset has been updated to reward pool
        **/
-      AssetUpdatedInVault: AugmentedEvent<ApiType, [who: AccountId32, vaultId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction], { who: AccountId32, vaultId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction }>;
+      AssetUpdatedInPool: AugmentedEvent<ApiType, [who: AccountId32, poolId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction], { who: AccountId32, poolId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction }>;
       /**
        * Event emitted when a blueprint is whitelisted for rewards
        **/
@@ -806,9 +806,9 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Executedwithdraw: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
       /**
-       * Event emitted when an incentive APY and cap are set for a reward vault
+       * Event emitted when an incentive APY and cap are set for a reward pool
        **/
-      IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [vaultId: u128, apy: Percent, cap: u128], { vaultId: u128, apy: Percent, cap: u128 }>;
+      IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [poolId: u128, apy: Percent, cap: u128], { poolId: u128, apy: Percent, cap: u128 }>;
       /**
        * An operator has cancelled their stake decrease request.
        **/
