@@ -774,7 +774,7 @@ declare module '@polkadot/api-base/types/events' {
     };
     multiAssetDelegation: {
       /**
-       * Asset has been updated to reward pool
+       * Asset has been updated to reward vault
        **/
       AssetUpdatedInPool: AugmentedEvent<ApiType, [who: AccountId32, poolId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction], { who: AccountId32, poolId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction }>;
       /**
@@ -806,7 +806,7 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Executedwithdraw: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
       /**
-       * Event emitted when an incentive APY and cap are set for a reward pool
+       * Event emitted when an incentive APY and cap are set for a reward vault
        **/
       IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [poolId: u128, apy: Percent, cap: u128], { poolId: u128, apy: Percent, cap: u128 }>;
       /**

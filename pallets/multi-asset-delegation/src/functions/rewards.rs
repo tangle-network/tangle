@@ -43,9 +43,9 @@ impl<T: Config> Pallet<T> {
 		if let Some(reward_config) = RewardConfigStorage::<T>::get() {
 			// Distribute rewards for each asset
 			for (asset_id, delegations) in delegation_info.iter() {
-				// We only reward asset in a reward pool
-				if let Some(pool_id) = AssetLookupRewardPools::<T>::get(asset_id) {
-					if let Some(config) = reward_config.configs.get(&pool_id) {
+				// We only reward asset in a reward vault
+				if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(asset_id) {
+					if let Some(config) = reward_config.configs.get(&vault_id) {
 						// Calculate total amount and distribute rewards
 						let total_amount: BalanceOf<T> =
 							delegations.iter().fold(Zero::zero(), |acc, d| acc + d.amount);
@@ -95,46 +95,46 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	pub fn add_asset_to_pool(pool_id: &T::PoolId, asset_id: &T::AssetId) -> DispatchResult {
-		// Ensure the asset is not already associated with any pool
+	pub fn add_asset_to_vault(vault_id: &T::VaultId, asset_id: &T::AssetId) -> DispatchResult {
+		// Ensure the asset is not already associated with any vault
 		ensure!(
-			!AssetLookupRewardPools::<T>::contains_key(asset_id),
-			Error::<T>::AssetAlreadyInPool
+			!AssetLookupRewardVaults::<T>::contains_key(asset_id),
+			Error::<T>::AssetAlreadyInVault
 		);
 
-		// Update RewardPools storage
-		RewardPools::<T>::try_mutate(pool_id, |maybe_assets| -> DispatchResult {
+		// Update RewardVaults storage
+		RewardVaults::<T>::try_mutate(vault_id, |maybe_assets| -> DispatchResult {
 			let assets = maybe_assets.get_or_insert_with(Vec::new);
 
-			// Ensure the asset is not already in the pool
-			ensure!(!assets.contains(asset_id), Error::<T>::AssetAlreadyInPool);
+			// Ensure the asset is not already in the vault
+			ensure!(!assets.contains(asset_id), Error::<T>::AssetAlreadyInVault);
 
 			assets.push(*asset_id);
 
 			Ok(())
 		})?;
 
-		// Update AssetLookupRewardPools storage
-		AssetLookupRewardPools::<T>::insert(asset_id, pool_id);
+		// Update AssetLookupRewardVaults storage
+		AssetLookupRewardVaults::<T>::insert(asset_id, vault_id);
 
 		Ok(())
 	}
 
-	pub fn remove_asset_from_pool(pool_id: &T::PoolId, asset_id: &T::AssetId) -> DispatchResult {
-		// Update RewardPools storage
-		RewardPools::<T>::try_mutate(pool_id, |maybe_assets| -> DispatchResult {
-			let assets = maybe_assets.as_mut().ok_or(Error::<T>::PoolNotFound)?;
+	pub fn remove_asset_from_vault(vault_id: &T::VaultId, asset_id: &T::AssetId) -> DispatchResult {
+		// Update RewardVaults storage
+		RewardVaults::<T>::try_mutate(vault_id, |maybe_assets| -> DispatchResult {
+			let assets = maybe_assets.as_mut().ok_or(Error::<T>::VaultNotFound)?;
 
-			// Ensure the asset is in the pool
-			ensure!(assets.contains(asset_id), Error::<T>::AssetNotInPool);
+			// Ensure the asset is in the vault
+			ensure!(assets.contains(asset_id), Error::<T>::AssetNotInVault);
 
 			assets.retain(|id| id != asset_id);
 
 			Ok(())
 		})?;
 
-		// Update AssetLookupRewardPools storage
-		AssetLookupRewardPools::<T>::remove(asset_id);
+		// Update AssetLookupRewardVaults storage
+		AssetLookupRewardVaults::<T>::remove(asset_id);
 
 		Ok(())
 	}
