@@ -1018,17 +1018,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       AlreadyOperator: AugmentedError<ApiType>;
       /**
-       * Asset already exists in a reward vault
+       * Asset already exists in a reward pool
        **/
-      AssetAlreadyInVault: AugmentedError<ApiType>;
+      AssetAlreadyInPool: AugmentedError<ApiType>;
       /**
        * The asset ID is not found
        **/
       AssetNotFound: AugmentedError<ApiType>;
       /**
-       * Asset not found in reward vault
+       * Asset not found in reward pool
        **/
-      AssetNotInVault: AugmentedError<ApiType>;
+      AssetNotInPool: AugmentedError<ApiType>;
       /**
        * The asset is not whitelisted
        **/
@@ -1114,9 +1114,9 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NowithdrawRequests: AugmentedError<ApiType>;
       /**
-       * The reward vault does not exist
+       * The reward pool does not exist
        **/
-      VaultNotFound: AugmentedError<ApiType>;
+      PoolNotFound: AugmentedError<ApiType>;
       /**
        * A withdraw request already exists.
        **/
