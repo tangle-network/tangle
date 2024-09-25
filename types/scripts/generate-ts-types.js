@@ -11,15 +11,14 @@
 // Copyright (C) 2022-2024 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-const WebSocket = require('ws')
-const { execSync, spawn } = require('node:child_process')
+const { exec, execSync, spawn } = require('node:child_process')
 const { readFileSync } = require('node:fs')
 const { join, resolve } = require('node:path')
 
 const CWD = process.cwd()
 const TYPES_DIR = join(CWD, 'types')
 const METADATA_PATH = resolve(CWD, 'types/src/metadata.json')
-const WS_ENDPOINT = 'ws://127.0.0.1:9944'
+const ENDPOINT = 'http://127.0.0.1:9944/'
 
 let nodeProcess
 
@@ -106,14 +105,17 @@ function getCurrentMetadata() {
 function fetchMetadata() {
   logStep('Fetching metadata from the node...')
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(WS_ENDPOINT)
-    ws.on('error', reject)
-    ws.on('open', () =>
-      ws.send(
-        '{"id":"1","jsonrpc":"2.0","method":"state_getMetadata","params":[]}'
-      )
+    exec(
+      `curl -H "Content-Type: application/json" -d \'{"id":"1","jsonrpc":"2.0","method":"state_getMetadata","params":[]}\' ${ENDPOINT}`,
+      (error, stdout) => {
+        if (error) {
+          reject(error)
+          return
+        }
+
+        resolve(JSON.parse(stdout.toString()))
+      }
     )
-    ws.on('message', msg => resolve(JSON.parse(msg.toString())))
   })
 }
 
@@ -150,11 +152,11 @@ async function main() {
   await generateNewTypes()
 }
 
-process.on('exit', stopTangleNode)
 process.on('SIGINT', () => {
   stopTangleNode()
   process.exit()
 })
+
 process.on('SIGTERM', () => {
   stopTangleNode()
   process.exit()
