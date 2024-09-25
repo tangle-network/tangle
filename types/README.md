@@ -14,7 +14,7 @@ To update the types after modifying the Tangle APIs, follow these steps:
    cargo build --release --package tangle --features testnet
    ```
 
-2. Ensure you have ![Node.js](https://nodejs.org/) version 18 or higher installed.
+2. Ensure you have [Node.js](https://nodejs.org/) version 18 or higher installed.
 
 3. Generate the updated TypeScript types by running the `generate-ts-types.js` script:
 
