@@ -571,7 +571,7 @@ impl<T: Config> Pallet<T> {
 			MultiAddress::Native(a) => {
 				let mut bytes = [0u8; 32];
 				bytes.copy_from_slice(&a.encode());
-				Public(bytes)
+				Public::from_raw(bytes)
 			},
 		};
 

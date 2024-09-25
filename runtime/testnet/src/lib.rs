@@ -1644,61 +1644,61 @@ fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
 	account_map
 }
 
-const DEST_VERIFYING_CONTRACT_ADDRESS: &str = "6CdE2Cd82a4F8B74693Ff5e194c19CA08c2d1c68";
-parameter_types! {
-	// RegisteredExtrinsics here registers all valid (pallet index, extrinsic_name) paris
-	// make sure to update this when adding new access control extrinsic
-	pub RegisteredExtrinsics: Vec<(u8, Vec<u8>)> = [
-		(SygmaAccessSegregatorPalletIndex::get(), b"grant_access".to_vec()),
-		(SygmaBasicFeeHandlerPalletIndex::get(), b"set_fee".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"set_mpc_address".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"pause_bridge".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"unpause_bridge".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"register_domain".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"unregister_domain".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"retry".to_vec()),
-		(SygmaFeeHandlerRouterPalletIndex::get(), b"set_fee_handler".to_vec()),
-		(SygmaPercentageFeeHandlerRouterPalletIndex::get(), b"set_fee_rate".to_vec()),
-	].to_vec();
+// const DEST_VERIFYING_CONTRACT_ADDRESS: &str = "6CdE2Cd82a4F8B74693Ff5e194c19CA08c2d1c68";
+// parameter_types! {
+// 	// RegisteredExtrinsics here registers all valid (pallet index, extrinsic_name) paris
+// 	// make sure to update this when adding new access control extrinsic
+// 	pub RegisteredExtrinsics: Vec<(u8, Vec<u8>)> = [
+// 		(SygmaAccessSegregatorPalletIndex::get(), b"grant_access".to_vec()),
+// 		(SygmaBasicFeeHandlerPalletIndex::get(), b"set_fee".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"set_mpc_address".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"pause_bridge".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"unpause_bridge".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"register_domain".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"unregister_domain".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"retry".to_vec()),
+// 		(SygmaFeeHandlerRouterPalletIndex::get(), b"set_fee_handler".to_vec()),
+// 		(SygmaPercentageFeeHandlerRouterPalletIndex::get(), b"set_fee_rate".to_vec()),
+// 	].to_vec();
 
-	pub const SygmaBridgePalletId: PalletId = PalletId(*b"sygma/01");
+// 	pub const SygmaBridgePalletId: PalletId = PalletId(*b"sygma/01");
 
-	// Tangle testnet super admin: 5D2hZnw8Z7kg5LpQiEBb6HPG4V51wYXuKhE7sVhXiUPWj8D1
-	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("2ab4c35efb6ab82377c2325467103cf46742d288ae1f8917f1d5960f4a1e9065");
-	pub SygmaBridgeAdminAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
+// 	// Tangle testnet super admin: 5D2hZnw8Z7kg5LpQiEBb6HPG4V51wYXuKhE7sVhXiUPWj8D1
+// 	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("2ab4c35efb6ab82377c2325467103cf46742d288ae1f8917f1d5960f4a1e9065");
+// 	pub SygmaBridgeAdminAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
 
-	// SygmaBridgeFeeAccount is a substrate account and used for bridging fee collection
-	// SygmaBridgeFeeAccount address: 5ELLU7ibt5ZrNEYRwohtaRBDBa3TzcWwwPELBPSWWd2mbgv3
-	pub SygmaBridgeFeeAccount: AccountId32 = AccountId32::new([100u8; 32]);
+// 	// SygmaBridgeFeeAccount is a substrate account and used for bridging fee collection
+// 	// SygmaBridgeFeeAccount address: 5ELLU7ibt5ZrNEYRwohtaRBDBa3TzcWwwPELBPSWWd2mbgv3
+// 	pub SygmaBridgeFeeAccount: AccountId32 = AccountId32::new([100u8; 32]);
 
-	// BridgeAccountNative: 5EYCAe5jLbHcAAMKvLFSXgCTbPrLgBJusvPwfKcaKzuf5X5e
-	pub BridgeAccountNative: AccountId32 = SygmaBridgePalletId::get().into_account_truncating();
-	// BridgeAccountOtherToken  5EYCAe5jLbHcAAMKvLFiGhk3htXY8jQncbLTDGJQnpnPMAVp
-	pub BridgeAccountOtherToken: AccountId32 = SygmaBridgePalletId::get().into_sub_account_truncating(1u32);
-	// BridgeAccounts is a list of accounts for holding transferred asset collection
-	pub BridgeAccounts: BTreeMap<XcmAssetId, AccountId32> = bridge_accounts_generator();
+// 	// BridgeAccountNative: 5EYCAe5jLbHcAAMKvLFSXgCTbPrLgBJusvPwfKcaKzuf5X5e
+// 	pub BridgeAccountNative: AccountId32 = SygmaBridgePalletId::get().into_account_truncating();
+// 	// BridgeAccountOtherToken  5EYCAe5jLbHcAAMKvLFiGhk3htXY8jQncbLTDGJQnpnPMAVp
+// 	pub BridgeAccountOtherToken: AccountId32 = SygmaBridgePalletId::get().into_sub_account_truncating(1u32);
+// 	// BridgeAccounts is a list of accounts for holding transferred asset collection
+// 	pub BridgeAccounts: BTreeMap<XcmAssetId, AccountId32> = bridge_accounts_generator();
 
-	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
-	// For local testing with ./scripts/sygma-setup/execute_proposal_test.js, please change it to 5
-	pub EIP712ChainID: ChainID = U256::from(3799);
+// 	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
+// 	// For local testing with ./scripts/sygma-setup/execute_proposal_test.js, please change it to 5
+// 	pub EIP712ChainID: ChainID = U256::from(3799);
 
-	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
-	// When relayers signing, this address will be included in the EIP712Domain
-	// As long as the relayer and pallet configured with the same address, EIP712Domain should be recognized properly.
-	pub DestVerifyingContractAddress: VerifyingContractAddress = primitive_types::H160::from_slice(hex::decode(DEST_VERIFYING_CONTRACT_ADDRESS).ok().unwrap().as_slice());
+// 	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
+// 	// When relayers signing, this address will be included in the EIP712Domain
+// 	// As long as the relayer and pallet configured with the same address, EIP712Domain should be recognized properly.
+// 	pub DestVerifyingContractAddress: VerifyingContractAddress = primitive_types::H160::from_slice(hex::decode(DEST_VERIFYING_CONTRACT_ADDRESS).ok().unwrap().as_slice());
 
-	pub CheckingAccount: AccountId32 = AccountId32::new([102u8; 32]);
+// 	pub CheckingAccount: AccountId32 = AccountId32::new([102u8; 32]);
 
-	pub RelayNetwork: NetworkId = NetworkId::Polkadot;
-	// ResourcePairs is where all supported assets and their associated resourceID are binding
-	pub ResourcePairs: Vec<(XcmAssetId, ResourceId)> = vec![
-		(NativeLocation::get().into(), NativeSygmaResourceId::get()),
-		(SygUSDLocation::get().into(), SygUSDResourceId::get()),
-		(PHALocation::get().into(), PHAResourceId::get()),
-	];
+// 	pub RelayNetwork: NetworkId = NetworkId::Polkadot;
+// 	// ResourcePairs is where all supported assets and their associated resourceID are binding
+// 	pub ResourcePairs: Vec<(XcmAssetId, ResourceId)> = vec![
+// 		(NativeLocation::get().into(), NativeSygmaResourceId::get()),
+// 		(SygUSDLocation::get().into(), SygUSDResourceId::get()),
+// 		(PHALocation::get().into(), PHAResourceId::get()),
+// 	];
 
-	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8), (PHALocation::get().into(), 12u8)];
-}
+// 	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8), (PHALocation::get().into(), 12u8)];
+// }
 
 pub struct ReserveChecker;
 impl ContainsPair<Asset, Location> for ReserveChecker {

@@ -104,7 +104,7 @@ where
 		// storage item: PublicPropCount
 		// max encoded len: u32(4)
 		handle.record_db_read::<Runtime>(4)?;
-		let prop_count = DemocracyOf::<Runtime>::public_prop_count();
+		let prop_count = pallet_democracy::PublicPropCount::<Runtime>::get();
 		log::trace!(target: "democracy-precompile", "Prop count from pallet is {:?}", prop_count);
 
 		Ok(prop_count.into())
@@ -124,7 +124,7 @@ where
 		// max encoded len: Twox64(8) + PropIndex u32(4) +
 		// BalanceOf(16) + BoundedVec<AccountId, MaxDeposits> (20 * MaxDeposits)
 		handle.record_db_read::<Runtime>((20 * <Runtime::MaxDeposits>::get() as usize) + 28)?;
-		let deposit = DemocracyOf::<Runtime>::deposit_of(prop_index)
+		let deposit = pallet_democracy::DepositOf::<Runtime>::get(prop_index)
 			.ok_or_else(|| revert("No such proposal in pallet democracy"))?
 			.1;
 
@@ -144,7 +144,7 @@ where
 		// storage item: LowestUnbaked
 		// max encoded len: ReferendumIndex u32(4)
 		handle.record_db_read::<Runtime>(4)?;
-		let lowest_unbaked = DemocracyOf::<Runtime>::lowest_unbaked();
+		let lowest_unbaked = pallet_democracy::LowestUnbaked::<Runtime>::get();
 		log::trace!(
 			target: "democracy-precompile",
 			"lowest unbaked referendum is {:?}", lowest_unbaked
@@ -163,7 +163,7 @@ where
 		// max encoded len: Twox64(8) + ReferendumIndex u32(4) +
 		// ReferendumInfo (enum(1) + end(4) + proposal(128) + threshold(1) + delay(4) + tally(3*16))
 		handle.record_db_read::<Runtime>(186)?;
-		let ref_status = match DemocracyOf::<Runtime>::referendum_info(ref_index) {
+		let ref_status = match pallet_democracy::ReferendumInfoOf::<Runtime>::get(ref_index) {
 			Some(ReferendumInfo::Ongoing(ref_status)) => ref_status,
 			Some(ReferendumInfo::Finished { .. }) => Err(revert("Referendum is finished"))?,
 			None => Err(revert("Unknown referendum"))?,
@@ -196,7 +196,7 @@ where
 		// max encoded len: Twox64(8) + ReferendumIndex u32(4) +
 		// ReferendumInfo (enum(1) + end(4) + proposal(128) + threshold(1) + delay(4) + tally(3*16))
 		handle.record_db_read::<Runtime>(186)?;
-		let (approved, end) = match DemocracyOf::<Runtime>::referendum_info(ref_index) {
+		let (approved, end) = match pallet_democracy::ReferendumInfoOf::<Runtime>::get(ref_index) {
 			Some(ReferendumInfo::Ongoing(_)) => Err(revert("Referendum is ongoing"))?,
 			Some(ReferendumInfo::Finished { approved, end }) => (approved, end),
 			None => Err(revert("Unknown referendum"))?,
@@ -214,7 +214,7 @@ where
 		// storage item: PublicPropCount
 		// max encoded len: PropIndex u32(4)
 		handle.record_db_read::<Runtime>(4)?;
-		let prop_count = DemocracyOf::<Runtime>::public_prop_count();
+		let prop_count = pallet_democracy::PublicPropCount::<Runtime>::get();
 
 		let value = Self::u256_to_amount(value).in_field("value")?;
 
