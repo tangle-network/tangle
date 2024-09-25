@@ -143,8 +143,8 @@ pub mod pallet {
 			+ PartialOrd
 			+ MaxEncodedLen;
 
-		/// The pool ID type.
-		type PoolId: AtLeast32BitUnsigned
+		/// The vault ID type.
+		type VaultId: AtLeast32BitUnsigned
 			+ Parameter
 			+ Member
 			+ MaybeSerializeDeserialize
@@ -199,23 +199,23 @@ pub mod pallet {
 		StorageMap<_, Twox64Concat, T::AccountId, DelegatorMetadataOf<T>, OptionQuery>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn reward_pools)]
-	/// Storage for the reward pools
-	pub type RewardPools<T: Config> =
-		StorageMap<_, Twox64Concat, T::PoolId, Vec<T::AssetId>, OptionQuery>;
+	#[pallet::getter(fn reward_vaults)]
+	/// Storage for the reward vaults
+	pub type RewardVaults<T: Config> =
+		StorageMap<_, Twox64Concat, T::VaultId, Vec<T::AssetId>, OptionQuery>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn asset_reward_pool_lookup)]
-	/// Storage for the reward pools
-	pub type AssetLookupRewardPools<T: Config> =
-		StorageMap<_, Twox64Concat, T::AssetId, T::PoolId, OptionQuery>;
+	#[pallet::getter(fn asset_reward_vault_lookup)]
+	/// Storage for the reward vaults
+	pub type AssetLookupRewardVaults<T: Config> =
+		StorageMap<_, Twox64Concat, T::AssetId, T::VaultId, OptionQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn reward_config)]
 	/// Storage for the reward configuration, which includes APY, cap for assets, and whitelisted
 	/// blueprints.
 	pub type RewardConfigStorage<T: Config> =
-		StorageValue<_, RewardConfig<T::PoolId, BalanceOf<T>>, OptionQuery>;
+		StorageValue<_, RewardConfig<T::VaultId, BalanceOf<T>>, OptionQuery>;
 
 	/// Events emitted by the pallet.
 	#[pallet::event]
@@ -267,14 +267,14 @@ pub mod pallet {
 		ExecutedDelegatorBondLess { who: T::AccountId },
 		/// A delegator unstake request has been cancelled.
 		CancelledDelegatorBondLess { who: T::AccountId },
-		/// Event emitted when an incentive APY and cap are set for a reward pool
-		IncentiveAPYAndCapSet { pool_id: T::PoolId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
+		/// Event emitted when an incentive APY and cap are set for a reward vault
+		IncentiveAPYAndCapSet { vault_id: T::VaultId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
 		/// Event emitted when a blueprint is whitelisted for rewards
 		BlueprintWhitelisted { blueprint_id: u32 },
-		/// Asset has been updated to reward pool
-		AssetUpdatedInPool {
+		/// Asset has been updated to reward vault
+		AssetUpdatedInVault {
 			who: T::AccountId,
-			pool_id: T::PoolId,
+			vault_id: T::VaultId,
 			asset_id: T::AssetId,
 			action: AssetAction,
 		},
@@ -337,12 +337,12 @@ pub mod pallet {
 		NowithdrawRequests,
 		/// No matching withdraw reqests found
 		NoMatchingwithdrawRequest,
-		/// Asset already exists in a reward pool
-		AssetAlreadyInPool,
-		/// Asset not found in reward pool
-		AssetNotInPool,
-		/// The reward pool does not exist
-		PoolNotFound,
+		/// Asset already exists in a reward vault
+		AssetAlreadyInVault,
+		/// Asset not found in reward vault
+		AssetNotInVault,
+		/// The reward vault does not exist
+		VaultNotFound,
 	}
 
 	/// Hooks for the pallet.
@@ -580,7 +580,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn set_incentive_apy_and_cap(
 			origin: OriginFor<T>,
-			pool_id: T::PoolId,
+			vault_id: T::VaultId,
 			apy: sp_runtime::Percent,
 			cap: BalanceOf<T>,
 		) -> DispatchResult {
@@ -594,13 +594,13 @@ pub mod pallet {
 					whitelisted_blueprint_ids: Vec::new(),
 				});
 
-				config.configs.insert(pool_id, RewardConfigForAssetPool { apy, cap });
+				config.configs.insert(vault_id, RewardConfigForAssetVault { apy, cap });
 
 				*maybe_config = Some(config);
 			});
 
 			// Emit an event
-			Self::deposit_event(Event::IncentiveAPYAndCapSet { pool_id, apy, cap });
+			Self::deposit_event(Event::IncentiveAPYAndCapSet { vault_id, apy, cap });
 
 			Ok(())
 		}
@@ -635,23 +635,23 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Manage asset id to pool rewards
+		/// Manage asset id to vault rewards
 		#[pallet::call_index(21)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn manage_asset_in_pool(
+		pub fn manage_asset_in_vault(
 			origin: OriginFor<T>,
-			pool_id: T::PoolId,
+			vault_id: T::VaultId,
 			asset_id: T::AssetId,
 			action: AssetAction,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
 			match action {
-				AssetAction::Add => Self::add_asset_to_pool(&pool_id, &asset_id)?,
-				AssetAction::Remove => Self::remove_asset_from_pool(&pool_id, &asset_id)?,
+				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset_id)?,
+				AssetAction::Remove => Self::remove_asset_from_vault(&vault_id, &asset_id)?,
 			}
 
-			Self::deposit_event(Event::AssetUpdatedInPool { who, pool_id, asset_id, action });
+			Self::deposit_event(Event::AssetUpdatedInVault { who, vault_id, asset_id, action });
 
 			Ok(())
 		}
