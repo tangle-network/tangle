@@ -6,11 +6,12 @@ export default {
   },
   git: {
     commitMessage: 'Release `tangle-substrate-types` v${version}',
-    tag: false,
-    push: false,
+    tagName: '${npm.name}/v${version}',
+    tagAnnotation: 'Release ${npm.name} v${version}',
   },
   github: {
-    release: false,
+    release: true,
+    releaseName: 'Release ${npm.name} v${version}',
   },
   npm: {
     publish: true,
