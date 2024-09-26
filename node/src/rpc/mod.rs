@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 //! A collection of node-specific RPC methods.
-
+#![allow(unused_imports)]
 use jsonrpsee::RpcModule;
 use std::sync::Arc;
 // Substrate

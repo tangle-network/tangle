@@ -1227,6 +1227,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PoolId = AssetId;
+	type MaxNameLength = ConstU32<50>;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
 }
@@ -1479,7 +1480,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type AssetId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
-	type PoolId = AssetId;
+	type VaultId = AssetId;
 	type WeightInfo = ();
 }
 

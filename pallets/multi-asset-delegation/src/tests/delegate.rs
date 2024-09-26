@@ -478,15 +478,15 @@ fn distribute_rewards_should_work() {
 		let reward_config = RewardConfig {
 			configs: {
 				let mut map = BTreeMap::new();
-				map.insert(asset_id, RewardConfigForAssetPool { apy, cap });
+				map.insert(asset_id, RewardConfigForAssetVault { apy, cap });
 				map
 			},
 			whitelisted_blueprint_ids: vec![],
 		};
 		RewardConfigStorage::<Test>::put(reward_config);
 
-		// Set up asset pool lookup
-		AssetLookupRewardPools::<Test>::insert(asset_id, asset_id);
+		// Set up asset vault lookup
+		AssetLookupRewardVaults::<Test>::insert(asset_id, asset_id);
 
 		// Add delegation information
 		AtStake::<Test>::insert(
@@ -543,17 +543,17 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 		let reward_config = RewardConfig {
 			configs: {
 				let mut map = BTreeMap::new();
-				map.insert(asset_id1, RewardConfigForAssetPool { apy: apy1, cap: cap1 });
-				map.insert(asset_id2, RewardConfigForAssetPool { apy: apy2, cap: cap2 });
+				map.insert(asset_id1, RewardConfigForAssetVault { apy: apy1, cap: cap1 });
+				map.insert(asset_id2, RewardConfigForAssetVault { apy: apy2, cap: cap2 });
 				map
 			},
 			whitelisted_blueprint_ids: vec![],
 		};
 		RewardConfigStorage::<Test>::put(reward_config);
 
-		// Set up asset pool lookup
-		AssetLookupRewardPools::<Test>::insert(asset_id1, asset_id1);
-		AssetLookupRewardPools::<Test>::insert(asset_id2, asset_id2);
+		// Set up asset vault lookup
+		AssetLookupRewardVaults::<Test>::insert(asset_id1, asset_id1);
+		AssetLookupRewardVaults::<Test>::insert(asset_id2, asset_id2);
 
 		// Add delegation information
 		AtStake::<Test>::insert(

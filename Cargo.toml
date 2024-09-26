@@ -41,6 +41,7 @@ members = [
     "precompiles/verify-schnorr-signatures",
     "precompiles/verify-bls381-signature",
     "precompiles/multi-asset-delegation",
+    "precompiles/services",
     "tangle-subxt",
     "evm-tracer",
 ]
@@ -215,6 +216,9 @@ mmr-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "releas
 sc-rpc-spec-v2 = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 substrate-state-trie-migration-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 sc-sync-state-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
+subxt = { version = "0.37.0", default-features = false }
+subxt-core = { version = "0.37.0", default-features = false }
+subxt-signer = { version = "0.37.0", default-features = false }
 
 pallet-babe = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
 pallet-bags-list = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.7.0", default-features = false }
@@ -313,6 +317,7 @@ pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { path = "precompiles/v
 pallet-evm-precompile-verify-ecdsa-stark-signature = { path = "precompiles/verify-ecdsa-stark-signature", default-features = false }
 pallet-evm-precompile-verify-schnorr-signatures = { path = "precompiles/verify-schnorr-signatures", default-features = false }
 pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls381-signature", default-features = false }
+pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
 
 # Precompiles utils
 postcard = { version = "1", default-features = false }

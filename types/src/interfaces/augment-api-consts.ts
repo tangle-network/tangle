@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedConst } from '@polkadot/api-base/types';
 import type { BTreeMap, Bytes, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { Codec, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import { SpWeightsWeightV2Weight, FrameSupportPalletId, StagingXcmV4AssetAssetId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpWeightsRuntimeDbWeight, SpVersionRuntimeVersion } from '@polkadot/types/lookup';
+import type { FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, SpWeightsRuntimeDbWeight, SpWeightsWeightV2Weight, StagingXcmV4AssetAssetId } from '@polkadot/types/lookup';
 
 export type __AugmentedConst<ApiType extends ApiTypes> = AugmentedConst<ApiType>;
 
@@ -528,6 +528,39 @@ declare module '@polkadot/api-base/types/consts' {
        * The deposit needed for reserving an index.
        **/
       deposit: u128 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    lst: {
+      /**
+       * The maximum length of a pool name.
+       **/
+      maxNameLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum pool points-to-balance ratio that an `open` pool can have.
+       * 
+       * This is important in the event slashing takes place and the pool's points-to-balance
+       * ratio becomes disproportional.
+       * 
+       * Moreover, this relates to the `RewardCounter` type as well, as the arithmetic operations
+       * are a function of number of points, and by setting this value to e.g. 10, you ensure
+       * that the total number of points in the system are at most 10 times the total_issuance of
+       * the chain, in the absolute worse case.
+       * 
+       * For a value of 10, the threshold would be a pool points-to-balance ratio of 10:1.
+       * Such a scenario would also be the equivalent of the pool being 90% slashed.
+       **/
+      maxPointsToBalance: u8 & AugmentedConst<ApiType>;
+      /**
+       * The maximum number of simultaneous unbonding chunks that can exist per member.
+       **/
+      maxUnbonding: u32 & AugmentedConst<ApiType>;
+      /**
+       * The nomination pool's pallet id.
+       **/
+      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/

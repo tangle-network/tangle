@@ -8,8 +8,7 @@
 	clippy::exhaustive_enums
 )]
 #![allow(clippy::all, clippy::exhaustive_enums)]
-// pub mod tangle_mainnet_runtime;
-pub mod tangle_testnet_runtime;
+
 pub use parity_scale_codec;
 pub use scale_info;
 #[cfg(any(feature = "std", feature = "web"))]
@@ -18,3 +17,8 @@ pub use subxt_signer;
 // `subxt` already re-exports `subxt-core`
 #[cfg(not(any(feature = "std", feature = "web")))]
 pub use subxt_core;
+
+// #[cfg_attr(rustfmt, rustfmt::skip)]
+// pub mod tangle_mainnet_runtime;
+#[cfg_attr(rustfmt, rustfmt::skip)]
+pub mod tangle_testnet_runtime;
