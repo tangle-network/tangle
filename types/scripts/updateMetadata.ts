@@ -20,7 +20,7 @@ const main = (): void => {
     ws.send(
       '{"id":"1","jsonrpc":"2.0","method":"state_getMetadata","params":[]}'
     )
-    console.log('data send')
+    console.log('data send!')
   })
 
   ws.on('message', msg => {

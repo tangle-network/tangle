@@ -33,4 +33,4 @@ jobs:
         run: cd types && yarn publish-types --ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_IT_GITHUB_TOKEN }}
