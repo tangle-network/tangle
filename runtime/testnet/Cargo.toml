@@ -280,7 +280,8 @@ std = [
     "pallet-evm-precompile-dispatch/std",
     "pallet-evm-precompile-ed25519/std",
     "pallet-hotfix-sufficients/std",
-    "precompile-utils/std",
+
+
     "evm-tracer/std",
     "rpc-primitives-debug/std",
     "rpc-primitives-txpool/std",
@@ -300,6 +301,7 @@ std = [
     "pallet-evm-precompile-verify-ecdsa-stark-signature/std",
     "pallet-evm-precompile-verify-schnorr-signatures/std",
     "pallet-evm-precompile-verify-bls381-signature/std",
+     "precompile-utils/std",
 
 
     # Sygma

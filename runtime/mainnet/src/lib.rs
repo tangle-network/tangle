@@ -28,7 +28,7 @@ pub mod migrations;
 pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
-
+use pallet_evm::GasWeightMapping;
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
@@ -1911,6 +1911,7 @@ impl_runtime_apis! {
 		fn trace_transaction(
 			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
 			traced_transaction: &EthereumTransaction,
+			header: &<Block as BlockT>::Header,
 		) -> Result<
 			(),
 			sp_runtime::DispatchError,
@@ -1918,6 +1919,11 @@ impl_runtime_apis! {
 			#[cfg(feature = "evm-tracing")]
 			{
 				use evm_tracer::tracer::EvmTracer;
+
+				// Initialize block: calls the "on_initialize" hook on every pallet
+				// in AllPalletsWithSystem.
+				Executive::initialize_block(header);
+
 				// Apply the a subset of extrinsics: all the substrate-specific or ethereum
 				// transactions that preceded the requested transaction.
 				for ext in extrinsics.into_iter() {
@@ -1944,6 +1950,7 @@ impl_runtime_apis! {
 		fn trace_block(
 			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
 			known_transactions: Vec<H256>,
+			header: &<Block as BlockT>::Header,
 		) -> Result<
 			(),
 			sp_runtime::DispatchError,
@@ -1954,6 +1961,10 @@ impl_runtime_apis! {
 
 				let mut config = <Runtime as pallet_evm::Config>::config().clone();
 				config.estimate = true;
+
+				// Initialize block: calls the "on_initialize" hook on every pallet
+				// in AllPalletsWithSystem.
+				Executive::initialize_block(header);
 
 				// Apply all extrinsics. Ethereum extrinsics are traced.
 				for ext in extrinsics.into_iter() {
@@ -1973,6 +1984,91 @@ impl_runtime_apis! {
 					};
 				}
 
+				Ok(())
+			}
+			#[cfg(not(feature = "evm-tracing"))]
+			Err(sp_runtime::DispatchError::Other(
+				"Missing `evm-tracing` compile time feature flag.",
+			))
+		}
+
+		fn trace_call(
+			header: &<Block as BlockT>::Header,
+			from: H160,
+			to: H160,
+			data: Vec<u8>,
+			value: U256,
+			gas_limit: U256,
+			max_fee_per_gas: Option<U256>,
+			max_priority_fee_per_gas: Option<U256>,
+			nonce: Option<U256>,
+			access_list: Option<Vec<(H160, Vec<H256>)>>,
+		) -> Result<(), sp_runtime::DispatchError> {
+			#[cfg(feature = "evm-tracing")]
+			{
+				use evm_tracer::tracer::EvmTracer;
+
+				// Initialize block: calls the "on_initialize" hook on every pallet
+				// in AllPalletsWithSystem.
+				Executive::initialize_block(header);
+
+				EvmTracer::new().trace(|| {
+					let is_transactional = false;
+					let validate = true;
+					let without_base_extrinsic_weight = true;
+
+
+					// Estimated encoded transaction size must be based on the heaviest transaction
+					// type (EIP1559Transaction) to be compatible with all transaction types.
+					let mut estimated_transaction_len = data.len() +
+					// pallet ethereum index: 1
+					// transact call index: 1
+					// Transaction enum variant: 1
+					// chain_id 8 bytes
+					// nonce: 32
+					// max_priority_fee_per_gas: 32
+					// max_fee_per_gas: 32
+					// gas_limit: 32
+					// action: 21 (enum varianrt + call address)
+					// value: 32
+					// access_list: 1 (empty vec size)
+					// 65 bytes signature
+					258;
+
+					if access_list.is_some() {
+						estimated_transaction_len += access_list.encoded_size();
+					}
+
+					let gas_limit = gas_limit.min(u64::MAX.into()).low_u64();
+
+					let (weight_limit, proof_size_base_cost) =
+						match <Runtime as pallet_evm::Config>::GasWeightMapping::gas_to_weight(
+							gas_limit,
+							without_base_extrinsic_weight
+						) {
+							weight_limit if weight_limit.proof_size() > 0 => {
+								(Some(weight_limit), Some(estimated_transaction_len as u64))
+							}
+							_ => (None, None),
+						};
+
+					let _ = <Runtime as pallet_evm::Config>::Runner::call(
+						from,
+						to,
+						data,
+						value,
+						gas_limit,
+						max_fee_per_gas,
+						max_priority_fee_per_gas,
+						nonce,
+						access_list.unwrap_or_default(),
+						is_transactional,
+						validate,
+						weight_limit,
+						proof_size_base_cost,
+						<Runtime as pallet_evm::Config>::config(),
+					);
+				});
 				Ok(())
 			}
 			#[cfg(not(feature = "evm-tracing"))]

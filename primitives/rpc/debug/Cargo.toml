@@ -15,7 +15,6 @@ parity-scale-codec = { workspace = true }
 sp-api = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
-fc-api = { workspace = true }
 
 [features]
 default = ["std"]

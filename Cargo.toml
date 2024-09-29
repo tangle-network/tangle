@@ -257,7 +257,7 @@ fc-mapping-sync = { git = "https://github.com/paritytech/frontier.git", branch =
 fc-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fc-rpc-core = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407" }
 fc-storage = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407" }
-fc-api = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407" }
+fc-api = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 
 # Frontier Primitive
 fp-account = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
@@ -322,9 +322,9 @@ ethereum-types = { version = "0.14.1", default-features = false }
 ethereum = { version = "0.15.0", default-features = false, features = [
 	"with-codec",
 ] }
-evm = { git = "https://github.com/moonbeam-foundation/evm", branch = "moonbeam-polkadot-v1.11.0", default-features = false }
-evm-gasometer = { git = "https://github.com/moonbeam-foundation/evm", branch = "moonbeam-polkadot-v1.11.0", default-features = false }
-evm-runtime = { git = "https://github.com/moonbeam-foundation/evm", branch = "moonbeam-polkadot-v1.11.0", default-features = false }
+evm = { version = "0.41.1", default-features = false }
+evm-gasometer = { version = "0.41.0", default-features = false }
+evm-runtime = { version = "0.41.0", default-features = false }
 
 # RPC related dependencies
 jsonrpsee = { version = "0.23.2", default-features = false }

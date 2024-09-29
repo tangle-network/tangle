@@ -3026,29 +3026,9 @@ dependencies = [
  "auto_impl",
  "environmental",
  "ethereum",
- "evm-core 0.41.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "evm-gasometer 0.41.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "evm-runtime 0.41.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "log",
- "parity-scale-codec",
- "primitive-types",
- "rlp",
- "scale-info",
- "serde",
- "sha3",
-]
-
-[[package]]
-name = "evm"
-version = "0.41.1"
-source = "git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0#25cf24198458187c96cdf1138c11b244f9e35f6f"
-dependencies = [
- "auto_impl",
- "environmental",
- "ethereum",
- "evm-core 0.41.0 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
- "evm-gasometer 0.41.0 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
- "evm-runtime 0.41.0 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
+ "evm-core",
+ "evm-gasometer",
+ "evm-runtime",
  "log",
  "parity-scale-codec",
  "primitive-types",
@@ -3071,36 +3051,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "evm-core"
-version = "0.41.0"
-source = "git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0#25cf24198458187c96cdf1138c11b244f9e35f6f"
-dependencies = [
- "parity-scale-codec",
- "primitive-types",
- "scale-info",
- "serde",
-]
-
-[[package]]
 name = "evm-gasometer"
 version = "0.41.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1dc0eb591abc5cd7b05bef6a036c2bb6c66ab6c5e0c5ce94bfe377ab670b1fd7"
 dependencies = [
  "environmental",
- "evm-core 0.41.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "evm-runtime 0.41.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "primitive-types",
-]
-
-[[package]]
-name = "evm-gasometer"
-version = "0.41.0"
-source = "git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0#25cf24198458187c96cdf1138c11b244f9e35f6f"
-dependencies = [
- "environmental",
- "evm-core 0.41.0 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
- "evm-runtime 0.41.0 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
+ "evm-core",
+ "evm-runtime",
  "primitive-types",
 ]
 
@@ -3112,19 +3070,7 @@ checksum = "84bbe09b64ae13a29514048c1bb6fda6374ac0b4f6a1f15a443348ab88ef42cd"
 dependencies = [
  "auto_impl",
  "environmental",
- "evm-core 0.41.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "primitive-types",
- "sha3",
-]
-
-[[package]]
-name = "evm-runtime"
-version = "0.41.0"
-source = "git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0#25cf24198458187c96cdf1138c11b244f9e35f6f"
-dependencies = [
- "auto_impl",
- "environmental",
- "evm-core 0.41.0 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
+ "evm-core",
  "primitive-types",
  "sha3",
 ]
@@ -3133,9 +3079,9 @@ dependencies = [
 name = "evm-tracer"
 version = "0.1.0"
 dependencies = [
- "evm 0.41.1 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
- "evm-gasometer 0.41.0 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
- "evm-runtime 0.41.0 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
+ "evm",
+ "evm-gasometer",
+ "evm-runtime",
  "evm-tracing-events",
  "parity-scale-codec",
  "primitives-ext",
@@ -3148,9 +3094,9 @@ version = "0.1.0"
 dependencies = [
  "environmental",
  "ethereum-types",
- "evm 0.41.1 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
- "evm-gasometer 0.41.0 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
- "evm-runtime 0.41.0 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
+ "evm",
+ "evm-gasometer",
+ "evm-runtime",
  "parity-scale-codec",
  "sp-runtime-interface",
 ]
@@ -3313,7 +3259,7 @@ source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219
 dependencies = [
  "ethereum",
  "ethereum-types",
- "evm 0.41.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "evm",
  "fc-api",
  "fc-mapping-sync",
  "fc-rpc-core",
@@ -3660,7 +3606,7 @@ name = "fp-evm"
 version = "3.0.0-dev"
 source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
- "evm 0.41.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "evm",
  "frame-support",
  "num_enum",
  "parity-scale-codec",
@@ -7582,7 +7528,7 @@ source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219
 dependencies = [
  "ethereum",
  "ethereum-types",
- "evm 0.41.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "evm",
  "fp-consensus",
  "fp-ethereum",
  "fp-evm",
@@ -7603,7 +7549,7 @@ version = "6.0.0-dev"
 source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "environmental",
- "evm 0.41.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "evm",
  "fp-account",
  "fp-evm",
  "frame-benchmarking",
@@ -7661,7 +7607,7 @@ name = "pallet-evm-precompile-batch"
 version = "0.1.0"
 dependencies = [
  "derive_more 1.0.0",
- "evm 0.41.1 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
+ "evm",
  "fp-evm",
  "frame-support",
  "frame-system",
@@ -7703,7 +7649,7 @@ name = "pallet-evm-precompile-call-permit"
 version = "0.1.0"
 dependencies = [
  "derive_more 1.0.0",
- "evm 0.41.1 (git+https://github.com/moonbeam-foundation/evm?branch=moonbeam-polkadot-v1.11.0)",
+ "evm",
  "fp-evm",
  "frame-support",
  "frame-system",
@@ -9215,7 +9161,7 @@ source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219
 dependencies = [
  "derive_more 0.99.18",
  "environmental",
- "evm 0.41.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "evm",
  "fp-evm",
  "frame-support",
  "frame-system",
@@ -10225,7 +10171,6 @@ version = "0.1.0"
 dependencies = [
  "ethereum",
  "ethereum-types",
- "fc-api",
  "parity-scale-codec",
  "sp-api",
  "sp-runtime",

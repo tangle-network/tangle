@@ -252,6 +252,8 @@ std = [
     "rpc-primitives-debug/std",
     "rpc-primitives-txpool/std",
     "pallet-evm-precompileset-assets-erc20/std",
+    "frame-metadata-hash-extension/std",
+    "frame-benchmarking?/std",
 
     # Tangle precompiles
     "pallet-evm-precompile-preimage/std",
