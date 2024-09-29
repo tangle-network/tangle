@@ -217,6 +217,7 @@ std = [
     "sp-storage/std",
     "pallet-tangle-lst/std",
     "pallet-assets/std",
+    "pallet-proxy/std",
 
      # Tangle dependencies
     "tangle-primitives/std",
@@ -261,13 +262,14 @@ std = [
     "pallet-evm-precompile-registry/std",
     "pallet-evm-precompile-staking/std",
     "pallet-evm-precompile-vesting/std",
-    "pallet-evm-precompile-multi-asset-delegation/std",
     "pallet-evm-precompile-verify-ecdsa-secp256k1-signature/std",
     "pallet-evm-precompile-verify-ecdsa-secp256r1-signature/std",
     "pallet-evm-precompile-verify-ecdsa-stark-signature/std",
     "pallet-evm-precompile-verify-schnorr-signatures/std",
     "pallet-evm-precompile-verify-bls381-signature/std",
+    "pallet-evm-precompile-multi-asset-delegation/std",
 ]
+
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
 with-paritydb-weights = []

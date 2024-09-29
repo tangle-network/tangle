@@ -33,7 +33,11 @@ pub struct Transfer {
 
 impl From<evm_runtime::Transfer> for Transfer {
 	fn from(i: evm_runtime::Transfer) -> Self {
-		Self { source: i.source, target: i.target, value: i.value }
+		Self {
+			source: i.source,
+			target: i.target,
+			value: i.value,
+		}
 	}
 }
 
@@ -61,8 +65,14 @@ impl From<evm_runtime::CreateScheme> for CreateScheme {
 	fn from(i: evm_runtime::CreateScheme) -> Self {
 		match i {
 			evm_runtime::CreateScheme::Legacy { caller } => Self::Legacy { caller },
-			evm_runtime::CreateScheme::Create2 { caller, code_hash, salt } => {
-				Self::Create2 { caller, code_hash, salt }
+			evm_runtime::CreateScheme::Create2 {
+				caller,
+				code_hash,
+				salt,
+			} => Self::Create2 {
+				caller,
+				code_hash,
+				salt,
 			},
 			evm_runtime::CreateScheme::Fixed(address) => Self::Fixed(address),
 		}
@@ -126,6 +136,11 @@ pub enum EvmEvent {
 		is_static: bool,
 		context: super::Context,
 	},
+	Log {
+		address: H160,
+		topics: Vec<H256>,
+		data: Vec<u8>,
+	},
 }
 
 #[cfg(feature = "evm-tracing")]
@@ -141,7 +156,11 @@ impl<'a> From<evm::tracing::Event<'a>> for EvmEvent {
 				context,
 			} => Self::Call {
 				code_address,
-				transfer: transfer.as_ref().map(|transfer| transfer.clone().into()),
+				transfer: if let Some(transfer) = transfer {
+					Some(transfer.clone().into())
+				} else {
+					None
+				},
 				input: input.to_vec(),
 				target_gas,
 				is_static,
@@ -162,14 +181,34 @@ impl<'a> From<evm::tracing::Event<'a>> for EvmEvent {
 				init_code: init_code.to_vec(),
 				target_gas,
 			},
-			evm::tracing::Event::Suicide { address, target, balance } => {
-				Self::Suicide { address, target, balance }
+			evm::tracing::Event::Suicide {
+				address,
+				target,
+				balance,
+			} => Self::Suicide {
+				address,
+				target,
+				balance,
 			},
-			evm::tracing::Event::Exit { reason, return_value } => {
-				Self::Exit { reason: reason.clone(), return_value: return_value.to_vec() }
+			evm::tracing::Event::Exit {
+				reason,
+				return_value,
+			} => Self::Exit {
+				reason: reason.clone(),
+				return_value: return_value.to_vec(),
 			},
-			evm::tracing::Event::TransactCall { caller, address, value, data, gas_limit } => {
-				Self::TransactCall { caller, address, value, data: data.to_vec(), gas_limit }
+			evm::tracing::Event::TransactCall {
+				caller,
+				address,
+				value,
+				data,
+				gas_limit,
+			} => Self::TransactCall {
+				caller,
+				address,
+				value,
+				data: data.to_vec(),
+				gas_limit,
 			},
 			evm::tracing::Event::TransactCreate {
 				caller,
@@ -208,11 +247,24 @@ impl<'a> From<evm::tracing::Event<'a>> for EvmEvent {
 				context,
 			} => Self::PrecompileSubcall {
 				code_address,
-				transfer: transfer.as_ref().map(|transfer| transfer.clone().into()),
+				transfer: if let Some(transfer) = transfer {
+					Some(transfer.clone().into())
+				} else {
+					None
+				},
 				input: input.to_vec(),
 				target_gas,
 				is_static,
 				context: context.clone().into(),
+			},
+			evm::tracing::Event::Log {
+				address,
+				topics,
+				data,
+			} => Self::Log {
+				address,
+				topics: topics.to_vec(),
+				data: data.to_vec(),
 			},
 		}
 	}

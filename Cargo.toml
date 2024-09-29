@@ -318,15 +318,16 @@ signature = { version = "2.2", default-features = false }
 
 # EVM & Ethereum
 # (wasm)
-evm = { version = "0.41.1", default-features = false }
 ethereum-types = { version = "0.14.1", default-features = false }
-ethereum = { version = "0.15.0", default-features = false }
-
-evm-gasometer = { version = "0.41.0", default-features = false }
-evm-runtime = { version = "0.41.0", default-features = false }
+ethereum = { version = "0.15.0", default-features = false, features = [
+	"with-codec",
+] }
+evm = { git = "https://github.com/moonbeam-foundation/evm", branch = "moonbeam-polkadot-v1.11.0", default-features = false }
+evm-gasometer = { git = "https://github.com/moonbeam-foundation/evm", branch = "moonbeam-polkadot-v1.11.0", default-features = false }
+evm-runtime = { git = "https://github.com/moonbeam-foundation/evm", branch = "moonbeam-polkadot-v1.11.0", default-features = false }
 
 # RPC related dependencies
-jsonrpsee = { version = "0.20.4", features = ["server"] }
+jsonrpsee = { version = "0.23.2", default-features = false }
 pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407" }
 sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407" }
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407" }

@@ -17,7 +17,9 @@
 use ethereum_types::{H160, H256, U256};
 use fc_rpc::{internal_err, public_key};
 use jsonrpsee::core::RpcResult;
-pub use rpc_core_txpool::{GetT, Summary, Transaction, TransactionMap, TxPoolResult, TxPoolServer};
+pub use rpc_core_txpool::{
+	GetT, Summary, Transaction, TransactionMap, TxPoolResult, TxPoolServer,
+};
 use sc_transaction_pool::{ChainApi, Pool};
 use sc_transaction_pool_api::InPoolTransaction;
 use serde::Serialize;
@@ -25,9 +27,12 @@ use sha3::{Digest, Keccak256};
 use sp_api::{ApiExt, ProvideRuntimeApi};
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_runtime::traits::Block as BlockT;
+use std::collections::HashMap;
 use std::{marker::PhantomData, sync::Arc};
 
-use rpc_primitives_txpool::{Transaction as TransactionV2, TxPoolResponse, TxPoolRuntimeApi};
+use rpc_primitives_txpool::{
+	Transaction as TransactionV2, TxPoolResponse, TxPoolRuntimeApi,
+};
 
 pub struct TxPool<B: BlockT, C, A: ChainApi> {
 	client: Arc<C>,
@@ -74,22 +79,33 @@ where
 			if let Ok(Some(api_version)) = api.api_version::<dyn TxPoolRuntimeApi<B>>(best_block) {
 				api_version
 			} else {
-				return Err(internal_err("failed to retrieve Runtime Api version".to_string()));
+				return Err(internal_err(
+					"failed to retrieve Runtime Api version".to_string(),
+				));
 			};
 		let ethereum_txns: TxPoolResponse = if api_version == 1 {
 			#[allow(deprecated)]
 			let res = api.extrinsic_filter_before_version_2(best_block, txs_ready, txs_future)
 				.map_err(|err| {
-					internal_err(format!("fetch runtime extrinsic filter failed: {err:?}"))
+					internal_err(format!("fetch runtime extrinsic filter failed: {:?}", err))
 				})?;
 			TxPoolResponse {
-				ready: res.ready.iter().map(|t| TransactionV2::Legacy(t.clone())).collect(),
-				future: res.future.iter().map(|t| TransactionV2::Legacy(t.clone())).collect(),
+				ready: res
+					.ready
+					.iter()
+					.map(|t| TransactionV2::Legacy(t.clone()))
+					.collect(),
+				future: res
+					.future
+					.iter()
+					.map(|t| TransactionV2::Legacy(t.clone()))
+					.collect(),
 			}
 		} else {
-			api.extrinsic_filter(best_block, txs_ready, txs_future).map_err(|err| {
-				internal_err(format!("fetch runtime extrinsic filter failed: {err:?}"))
-			})?
+			api.extrinsic_filter(best_block, txs_ready, txs_future)
+				.map_err(|err| {
+					internal_err(format!("fetch runtime extrinsic filter failed: {:?}", err))
+				})?
 		};
 		// Build the T response.
 		let mut pending = TransactionMap::<T>::new();
@@ -101,12 +117,12 @@ where
 				TransactionV2::EIP1559(t) => t.nonce,
 			};
 			let from_address = match public_key(txn) {
-				Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(pk).as_slice())),
+				Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(&pk).as_slice())),
 				Err(_e) => H160::default(),
 			};
 			pending
 				.entry(from_address)
-				.or_default()
+				.or_insert_with(HashMap::new)
 				.insert(nonce, T::get(hash, from_address, txn));
 		}
 		let mut queued = TransactionMap::<T>::new();
@@ -118,12 +134,12 @@ where
 				TransactionV2::EIP1559(t) => t.nonce,
 			};
 			let from_address = match public_key(txn) {
-				Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(pk).as_slice())),
+				Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(&pk).as_slice())),
 				Err(_e) => H160::default(),
 			};
 			queued
 				.entry(from_address)
-				.or_default()
+				.or_insert_with(HashMap::new)
 				.insert(nonce, T::get(hash, from_address, txn));
 		}
 		Ok(TxPoolResult { pending, queued })
@@ -132,7 +148,11 @@ where
 
 impl<B: BlockT, C, A: ChainApi> TxPool<B, C, A> {
 	pub fn new(client: Arc<C>, graph: Arc<Pool<A>>) -> Self {
-		Self { client, graph, _marker: PhantomData }
+		Self {
+			client,
+			graph,
+			_marker: PhantomData,
+		}
 	}
 }
 
@@ -155,6 +175,15 @@ where
 
 	fn status(&self) -> RpcResult<TxPoolResult<U256>> {
 		let status = self.graph.validated_pool().status();
-		Ok(TxPoolResult { pending: U256::from(status.ready), queued: U256::from(status.future) })
+		Ok(TxPoolResult {
+			pending: U256::from(status.ready),
+			queued: U256::from(status.future),
+		})
+	}
+}
+
+impl<B: BlockT, C, A: ChainApi> Clone for TxPool<B, C, A> {
+	fn clone(&self) -> Self {
+		Self::new(self.client.clone(), self.graph.clone())
 	}
 }

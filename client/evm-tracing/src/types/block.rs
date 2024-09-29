@@ -30,7 +30,7 @@ pub struct TransactionTrace {
 	pub action: TransactionTraceAction,
 	#[serde(serialize_with = "h256_0x_serialize")]
 	pub block_hash: H256,
-	pub block_number: u64,
+	pub block_number: u32,
 	#[serde(flatten)]
 	pub output: TransactionTraceOutput,
 	pub subtraces: u32,
@@ -63,7 +63,11 @@ pub enum TransactionTraceAction {
 		value: U256,
 	},
 	#[serde(rename_all = "camelCase")]
-	Suicide { address: H160, balance: U256, refund_address: H160 },
+	Suicide {
+		address: H160,
+		balance: U256,
+		refund_address: H160,
+	},
 }
 
 #[derive(Clone, Eq, PartialEq, Debug, Encode, Decode, Serialize)]

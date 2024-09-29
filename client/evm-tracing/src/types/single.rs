@@ -20,15 +20,14 @@
 //! the whole block tracing output.
 
 use super::serialization::*;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-use ethereum_types::{H256, U256};
+use ethereum_types::{H160, H256, U256};
 use parity_scale_codec::{Decode, Encode};
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 
 #[derive(Clone, Eq, PartialEq, Debug, Encode, Decode, Serialize)]
 #[serde(rename_all = "camelCase", untagged)]
-#[allow(clippy::large_enum_variant)]
 pub enum Call {
 	Blockscout(crate::formatters::blockscout::BlockscoutCall),
 	CallTracer(crate::formatters::call_tracer::CallTracerCall),
@@ -37,7 +36,11 @@ pub enum Call {
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Encode, Decode)]
 pub enum TraceType {
 	/// Classic geth with no javascript based tracing.
-	Raw { disable_storage: bool, disable_memory: bool, disable_stack: bool },
+	Raw {
+		disable_storage: bool,
+		disable_memory: bool,
+		disable_stack: bool,
+	},
 	/// List of calls and subcalls formatted with an input tracer (i.e. callTracer or Blockscout).
 	CallList,
 	/// A single block trace. Use in `debug_traceTransactionByNumber` / `traceTransactionByHash`.
@@ -76,7 +79,10 @@ pub struct RawStepLog {
 	#[serde(serialize_with = "u256_serialize")]
 	pub gas_cost: U256,
 
-	#[serde(serialize_with = "seq_h256_serialize", skip_serializing_if = "Option::is_none")]
+	#[serde(
+		serialize_with = "seq_h256_serialize",
+		skip_serializing_if = "Option::is_none"
+	)]
 	pub memory: Option<Vec<H256>>,
 
 	#[serde(serialize_with = "opcode_serialize")]
@@ -85,9 +91,34 @@ pub struct RawStepLog {
 	#[serde(serialize_with = "u256_serialize")]
 	pub pc: U256,
 
-	#[serde(serialize_with = "seq_h256_serialize", skip_serializing_if = "Option::is_none")]
+	#[serde(
+		serialize_with = "seq_h256_serialize",
+		skip_serializing_if = "Option::is_none"
+	)]
 	pub stack: Option<Vec<H256>>,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub storage: Option<BTreeMap<H256, H256>>,
+}
+
+#[derive(Clone, Eq, PartialEq, Debug, Encode, Decode, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TraceCallConfig {
+	pub with_log: bool,
+}
+
+impl Default for TraceCallConfig {
+	fn default() -> Self {
+		Self { with_log: false }
+	}
+}
+
+#[derive(Clone, Debug, Encode, Decode, PartialEq, Eq, Serialize)]
+pub struct Log {
+	/// Event address.
+	pub address: H160,
+	/// Event topics
+	pub topics: Vec<H256>,
+	/// Event data
+	pub data: Vec<u8>,
 }
