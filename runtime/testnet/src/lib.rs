@@ -34,6 +34,7 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
+use frame_support::derive_impl;
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
@@ -41,7 +42,6 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
-use frame_support::derive_impl;
 use frame_system::{EnsureSigned, EnsureSignedBy};
 use frontier_evm::DefaultBaseFeePerGas;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};

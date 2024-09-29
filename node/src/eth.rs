@@ -21,13 +21,14 @@ use std::{
 
 use futures::{future, prelude::*};
 // Substrate
+pub use fc_storage::{StorageOverride, StorageOverrideHandler};
 use sc_client_api::BlockchainEvents;
 use sc_network_sync::SyncingService;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 
 // Frontier
 pub use fc_consensus::FrontierBlockImport;
-use fc_rpc::{EthTask, OverrideHandle};
+use fc_rpc::EthTask;
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 // Local
 use tangle_primitives::Block;
@@ -35,7 +36,7 @@ use tangle_primitives::Block;
 use crate::service::{FullBackend, FullClient};
 
 /// Frontier DB backend type.
-pub type FrontierBackend = fc_db::Backend<Block>;
+pub type FrontierBackend = fc_db::Backend<Block, FullClient>;
 
 pub fn db_config_dir(config: &Configuration) -> PathBuf {
 	config.base_path.config_dir(config.chain_spec.id())
@@ -198,9 +199,9 @@ pub async fn spawn_frontier_tasks(
 	task_manager: &TaskManager,
 	client: Arc<FullClient>,
 	backend: Arc<FullBackend>,
-	frontier_backend: FrontierBackend,
+	frontier_backend: Arc<FrontierBackend>,
 	filter_pool: Option<FilterPool>,
-	overrides: Arc<OverrideHandle<Block>>,
+	storage_override: Arc<dyn StorageOverride<Block>>,
 	fee_history_cache: FeeHistoryCache,
 	fee_history_cache_limit: FeeHistoryCacheLimit,
 	sync: Arc<SyncingService<Block>>,
@@ -211,7 +212,7 @@ pub async fn spawn_frontier_tasks(
 	>,
 ) {
 	// Spawn main mapping sync worker background task.
-	match frontier_backend {
+	match &*frontier_backend {
 		fc_db::Backend::KeyValue(b) => {
 			task_manager.spawn_essential_handle().spawn(
 				"frontier-mapping-sync-worker",
@@ -221,8 +222,8 @@ pub async fn spawn_frontier_tasks(
 					Duration::new(6, 0),
 					client.clone(),
 					backend,
-					overrides.clone(),
-					Arc::new(b),
+					storage_override.clone(),
+					b.clone(),
 					3,
 					0,
 					fc_mapping_sync::SyncStrategy::Normal,
@@ -239,7 +240,7 @@ pub async fn spawn_frontier_tasks(
 				fc_mapping_sync::sql::SyncWorker::run(
 					client.clone(),
 					backend,
-					Arc::new(b),
+					b.clone(),
 					client.import_notification_stream(),
 					fc_mapping_sync::sql::SyncWorkerConfig {
 						read_notification_timeout: Duration::from_secs(10),
@@ -268,6 +269,11 @@ pub async fn spawn_frontier_tasks(
 	task_manager.spawn_essential_handle().spawn(
 		"frontier-fee-history",
 		Some("frontier"),
-		EthTask::fee_history_task(client, overrides, fee_history_cache, fee_history_cache_limit),
+		EthTask::fee_history_task(
+			client,
+			storage_override,
+			fee_history_cache,
+			fee_history_cache_limit,
+		),
 	);
 }

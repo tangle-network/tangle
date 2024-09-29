@@ -28,11 +28,11 @@ pub mod migrations;
 pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
-use pallet_evm::GasWeightMapping;
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
+use frame_support::derive_impl;
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
@@ -40,9 +40,9 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
-use frame_support::derive_impl;
 use frame_system::EnsureSigned;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
+use pallet_evm::GasWeightMapping;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };

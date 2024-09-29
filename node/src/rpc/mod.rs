@@ -47,7 +47,7 @@ use tangle_testnet_runtime::{AccountId, Balance, Hash, Index, PalletServicesCons
 
 pub mod eth;
 pub mod tracing;
-pub use self::eth::{create_eth, overrides_handle, EthDeps};
+pub use self::eth::{create_eth, EthDeps};
 
 /// Extra dependencies for BABE.
 pub struct BabeDeps {

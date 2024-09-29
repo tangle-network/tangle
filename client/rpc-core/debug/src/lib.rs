@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
+use client_evm_tracing::types::single;
 use ethereum::AccessListItem;
 use ethereum_types::{H160, H256, U256};
 use fc_rpc_core::types::Bytes;
 use jsonrpsee::{core::RpcResult, proc_macros::rpc};
-use client_evm_tracing::types::single;
 use rpc_core_types::RequestBlockId;
 use serde::Deserialize;
 

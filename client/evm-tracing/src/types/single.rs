@@ -36,11 +36,7 @@ pub enum Call {
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Encode, Decode)]
 pub enum TraceType {
 	/// Classic geth with no javascript based tracing.
-	Raw {
-		disable_storage: bool,
-		disable_memory: bool,
-		disable_stack: bool,
-	},
+	Raw { disable_storage: bool, disable_memory: bool, disable_stack: bool },
 	/// List of calls and subcalls formatted with an input tracer (i.e. callTracer or Blockscout).
 	CallList,
 	/// A single block trace. Use in `debug_traceTransactionByNumber` / `traceTransactionByHash`.
@@ -79,10 +75,7 @@ pub struct RawStepLog {
 	#[serde(serialize_with = "u256_serialize")]
 	pub gas_cost: U256,
 
-	#[serde(
-		serialize_with = "seq_h256_serialize",
-		skip_serializing_if = "Option::is_none"
-	)]
+	#[serde(serialize_with = "seq_h256_serialize", skip_serializing_if = "Option::is_none")]
 	pub memory: Option<Vec<H256>>,
 
 	#[serde(serialize_with = "opcode_serialize")]
@@ -91,10 +84,7 @@ pub struct RawStepLog {
 	#[serde(serialize_with = "u256_serialize")]
 	pub pc: U256,
 
-	#[serde(
-		serialize_with = "seq_h256_serialize",
-		skip_serializing_if = "Option::is_none"
-	)]
+	#[serde(serialize_with = "seq_h256_serialize", skip_serializing_if = "Option::is_none")]
 	pub stack: Option<Vec<H256>>,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
