@@ -41,6 +41,7 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
+use frame_support::derive_impl;
 use frame_system::{EnsureSigned, EnsureSignedBy};
 use frontier_evm::DefaultBaseFeePerGas;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
@@ -85,10 +86,10 @@ use sp_std::{
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-use sygma_traits::{
-	ChainID, DecimalConverter, DepositNonce, DomainID, ExtractDestinationData, ResourceId,
-	VerifyingContractAddress,
-};
+// use sygma_traits::{
+// 	ChainID, DecimalConverter, DepositNonce, DomainID, ExtractDestinationData, ResourceId,
+// 	VerifyingContractAddress,
+// };
 use tangle_primitives::services::RpcServicesWithBlueprint;
 use xcm::v4::{
 	prelude::*,
@@ -230,6 +231,7 @@ pub mod opaque {
 	}
 }
 
+#[derive_impl(frame_system::config_preludes::SolochainDefaultConfig)]
 impl frame_system::Config for Runtime {
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type AccountId = AccountId;
@@ -461,7 +463,7 @@ parameter_types! {
 	pub const SlashDeferDuration: sp_staking::EraIndex = SLASH_DEFER_DURATION;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 	pub const MaxNominatorRewardedPerValidator: u32 = MAX_NOMINATOR_REWARDED_PER_VALIDATOR;
-	pub const OffendingValidatorsThreshold: Perbill = OFFENDING_VALIDATOR_THRESHOLD;
+	//pub const OffendingValidatorsThreshold: Perbill = OFFENDING_VALIDATOR_THRESHOLD;
 	pub OffchainRepeat: BlockNumber = OFFCHAIN_REPEAT;
 	pub const HistoryDepth: u32 = HISTORY_DEPTH;
 }
@@ -494,7 +496,6 @@ impl pallet_staking::Config for Runtime {
 	type NextNewSession = Session;
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
-	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
 	type ElectionProvider = ElectionProviderMultiPhase;
 	type GenesisElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type VoterList = BagsList;
@@ -504,6 +505,7 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
+	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
 }
 
 parameter_types! {
@@ -791,13 +793,14 @@ impl pallet_nomination_pools::Config for Runtime {
 	type RewardCounter = FixedU128;
 	type BalanceToU256 = BalanceToU256;
 	type U256ToBalance = U256ToBalance;
-	type Staking = Staking;
 	type PostUnbondingPoolsWindow = PostUnbondPoolsWindow;
 	type MaxMetadataLen = ConstU32<256>;
 	type MaxUnbonding = ConstU32<8>;
 	type PalletId = NominationPoolsPalletId;
 	type MaxPointsToBalance = MaxPointsToBalance;
 	type RuntimeFreezeReason = RuntimeFreezeReason;
+	type AdminOrigin = EnsureRoot<AccountId>;
+	type StakeAdapter = pallet_nomination_pools::adapter::TransferStake<Self, Staking>;
 }
 
 parameter_types! {
@@ -946,25 +949,17 @@ parameter_types! {
 impl pallet_treasury::Config for Runtime {
 	type PalletId = TreasuryPalletId;
 	type Currency = Balances;
-	type ApproveOrigin = EitherOfDiverse<
-		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 5>,
-	>;
 	type RejectOrigin = EitherOfDiverse<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 	>;
 	type RuntimeEvent = RuntimeEvent;
-	type OnSlash = ();
 	type AssetKind = ();
 	type Beneficiary = AccountId;
 	type BeneficiaryLookup = IdentityLookup<AccountId>;
 	type Paymaster = PayFromAccount<Balances, TreasuryAccount>;
 	type BalanceConverter = UnityAssetBalanceConversion;
 	type PayoutPeriod = PayoutPeriod;
-	type ProposalBond = ProposalBond;
-	type ProposalBondMinimum = ProposalBondMinimum;
-	type ProposalBondMaximum = ();
 	type SpendPeriod = SpendPeriod;
 	type Burn = Burn;
 	type BurnDestination = ();
@@ -997,6 +992,7 @@ impl pallet_bounties::Config for Runtime {
 	type DataDepositPerByte = DataDepositPerByte;
 	type MaximumReasonLength = MaximumReasonLength;
 	type WeightInfo = pallet_bounties::weights::SubstrateWeight<Runtime>;
+	type OnSlash = Treasury;
 	type ChildBountyManager = ChildBounties;
 }
 
@@ -1515,62 +1511,62 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 // 	type WeightInfo = sygma_bridge::weights::SygmaWeightInfo<Runtime>;
 // }
 
-pub type LocationToAccountId = (
-	// The parent (Relay-chain) origin converts to the parent `AccountId`.
-	ParentIsPreset<sp_core::crypto::AccountId32>,
-	// Sibling parachain origins convert to AccountId via the `ParaId::into`.
-	SiblingParachainConvertsVia<Sibling, sp_core::crypto::AccountId32>,
-	// Straight up local `AccountId32` origins just alias directly to `AccountId`.
-	AccountId32Aliases<RelayNetwork, sp_core::crypto::AccountId32>,
-);
+// pub type LocationToAccountId = (
+// 	// The parent (Relay-chain) origin converts to the parent `AccountId`.
+// 	ParentIsPreset<sp_core::crypto::AccountId32>,
+// 	// Sibling parachain origins convert to AccountId via the `ParaId::into`.
+// 	SiblingParachainConvertsVia<Sibling, sp_core::crypto::AccountId32>,
+// 	// Straight up local `AccountId32` origins just alias directly to `AccountId`.
+// 	AccountId32Aliases<RelayNetwork, sp_core::crypto::AccountId32>,
+// );
 
-#[allow(deprecated)]
-pub type CurrencyTransactor = XcmCurrencyAdapter<
-	// Use this currency:
-	Balances,
-	// Use this currency when it is a fungible asset matching the given location or name:
-	IsConcrete<NativeLocation>,
-	// Convert an XCM Location into a local account id:
-	LocationToAccountId,
-	// Our chain's account ID type (we can't get away without mentioning it explicitly):
-	AccountId32,
-	// We don't track any teleports of `Balances`.
-	(),
->;
+// #[allow(deprecated)]
+// pub type CurrencyTransactor = XcmCurrencyAdapter<
+// 	// Use this currency:
+// 	Balances,
+// 	// Use this currency when it is a fungible asset matching the given location or name:
+// 	IsConcrete<NativeLocation>,
+// 	// Convert an XCM Location into a local account id:
+// 	LocationToAccountId,
+// 	// Our chain's account ID type (we can't get away without mentioning it explicitly):
+// 	AccountId32,
+// 	// We don't track any teleports of `Balances`.
+// 	(),
+// >;
 
-/// Means for transacting assets besides the native currency on this chain.
-pub type FungiblesTransactor = FungiblesAdapter<
-	// Use this fungibles implementation:
-	Assets,
-	// Use this currency when it is a fungible asset matching the given location or name:
-	SimpleForeignAssetConverter,
-	// Convert an XCM Location into a local account id:
-	LocationToAccountId,
-	// Our chain's account ID type (we can't get away without mentioning it explicitly):
-	AccountId32,
-	// Disable teleport.
-	NoChecking,
-	// The account to use for tracking teleports.
-	CheckingAccount,
->;
+// /// Means for transacting assets besides the native currency on this chain.
+// pub type FungiblesTransactor = FungiblesAdapter<
+// 	// Use this fungibles implementation:
+// 	Assets,
+// 	// Use this currency when it is a fungible asset matching the given location or name:
+// 	SimpleForeignAssetConverter,
+// 	// Convert an XCM Location into a local account id:
+// 	LocationToAccountId,
+// 	// Our chain's account ID type (we can't get away without mentioning it explicitly):
+// 	AccountId32,
+// 	// Disable teleport.
+// 	NoChecking,
+// 	// The account to use for tracking teleports.
+// 	CheckingAccount,
+// >;
 
-pub struct SimpleForeignAssetConverter(PhantomData<()>);
-impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
-	fn matches_fungibles(a: &Asset) -> result::Result<(AssetId, Balance), ExecutionError> {
-		match (&a.fun, &a.id) {
-			(Fungible(ref amount), AssetId(ref id)) => {
-				if id == &SygUSDLocation::get() {
-					Ok((SygUSDAssetId::get(), *amount))
-				} else if id == &PHALocation::get() {
-					Ok((PHAAssetId::get(), *amount))
-				} else {
-					Err(ExecutionError::AssetNotHandled)
-				}
-			},
-			_ => Err(ExecutionError::AssetNotHandled),
-		}
-	}
-}
+// pub struct SimpleForeignAssetConverter(PhantomData<()>);
+// impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
+// 	fn matches_fungibles(a: &Asset) -> result::Result<(AssetId, Balance), ExecutionError> {
+// 		match (&a.fun, &a.id) {
+// 			(Fungible(ref amount), AssetId(ref id)) => {
+// 				if id == &SygUSDLocation::get() {
+// 					Ok((SygUSDAssetId::get(), *amount))
+// 				} else if id == &PHALocation::get() {
+// 					Ok((PHAAssetId::get(), *amount))
+// 				} else {
+// 					Err(ExecutionError::AssetNotHandled)
+// 				}
+// 			},
+// 			_ => Err(ExecutionError::AssetNotHandled),
+// 		}
+// 	}
+// }
 
 // impl sygma_access_segregator::Config for Runtime {
 // 	type RuntimeEvent = RuntimeEvent;
@@ -1602,47 +1598,47 @@ impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
 // 	type WeightInfo = sygma_percentage_feehandler::weights::SygmaWeightInfo<Runtime>;
 // }
 
-parameter_types! {
-	// tTNT: native asset is always a reserved asset
-	pub NativeLocation: Location = Location::here();
-	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
+// parameter_types! {
+// 	// tTNT: native asset is always a reserved asset
+// 	pub NativeLocation: Location = Location::here();
+// 	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
 
-	// SygUSD: a non-reserved asset
-	pub SygUSDLocation: Location = Location::new(
-		1,
-		[
-			Parachain(1000),
-			slice_to_generalkey(b"sygma"),
-			slice_to_generalkey(b"sygusd"),
-		],
-	);
-	// SygUSDAssetId is the substrate assetID of SygUSD
-	pub SygUSDAssetId: AssetId = 2000;
-	// SygUSDResourceId is the resourceID that mapping with the foreign asset SygUSD
-	pub SygUSDResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001100");
+// 	// SygUSD: a non-reserved asset
+// 	pub SygUSDLocation: Location = Location::new(
+// 		1,
+// 		[
+// 			Parachain(1000),
+// 			slice_to_generalkey(b"sygma"),
+// 			slice_to_generalkey(b"sygusd"),
+// 		],
+// 	);
+// 	// SygUSDAssetId is the substrate assetID of SygUSD
+// 	pub SygUSDAssetId: AssetId = 2000;
+// 	// SygUSDResourceId is the resourceID that mapping with the foreign asset SygUSD
+// 	pub SygUSDResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001100");
 
-	// PHA: a reserved asset
-	pub PHALocation: Location = Location::new(
-		1,
-		[
-			Parachain(2004),
-			slice_to_generalkey(b"sygma"),
-			slice_to_generalkey(b"pha"),
-		],
-	);
-	// PHAAssetId is the substrate assetID of PHA
-	pub PHAAssetId: AssetId = 2001;
-	// PHAResourceId is the resourceID that mapping with the foreign asset PHA
-	pub PHAResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000");
-}
+// 	// PHA: a reserved asset
+// 	pub PHALocation: Location = Location::new(
+// 		1,
+// 		[
+// 			Parachain(2004),
+// 			slice_to_generalkey(b"sygma"),
+// 			slice_to_generalkey(b"pha"),
+// 		],
+// 	);
+// 	// PHAAssetId is the substrate assetID of PHA
+// 	pub PHAAssetId: AssetId = 2001;
+// 	// PHAResourceId is the resourceID that mapping with the foreign asset PHA
+// 	pub PHAResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000");
+// }
 
-fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
-	let mut account_map: BTreeMap<XcmAssetId, AccountId32> = BTreeMap::new();
-	account_map.insert(NativeLocation::get().into(), BridgeAccountNative::get());
-	account_map.insert(SygUSDLocation::get().into(), BridgeAccountOtherToken::get());
-	account_map.insert(PHALocation::get().into(), BridgeAccountOtherToken::get());
-	account_map
-}
+// fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
+// 	let mut account_map: BTreeMap<XcmAssetId, AccountId32> = BTreeMap::new();
+// 	account_map.insert(NativeLocation::get().into(), BridgeAccountNative::get());
+// 	account_map.insert(SygUSDLocation::get().into(), BridgeAccountOtherToken::get());
+// 	account_map.insert(PHALocation::get().into(), BridgeAccountOtherToken::get());
+// 	account_map
+// }
 
 // const DEST_VERIFYING_CONTRACT_ADDRESS: &str = "6CdE2Cd82a4F8B74693Ff5e194c19CA08c2d1c68";
 // parameter_types! {
@@ -1700,231 +1696,231 @@ fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
 // 	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8), (PHALocation::get().into(), 12u8)];
 // }
 
-pub struct ReserveChecker;
-impl ContainsPair<Asset, Location> for ReserveChecker {
-	fn contains(asset: &Asset, origin: &Location) -> bool {
-		if let Some(ref id) = ConcrateSygmaAsset::origin(asset) {
-			if id == origin {
-				return true;
-			}
-		}
-		false
-	}
-}
+// pub struct ReserveChecker;
+// impl ContainsPair<Asset, Location> for ReserveChecker {
+// 	fn contains(asset: &Asset, origin: &Location) -> bool {
+// 		if let Some(ref id) = ConcrateSygmaAsset::origin(asset) {
+// 			if id == origin {
+// 				return true;
+// 			}
+// 		}
+// 		false
+// 	}
+// }
 
-pub struct ConcrateSygmaAsset;
-impl ConcrateSygmaAsset {
-	pub fn id(asset: &Asset) -> Option<Location> {
-		match (&asset.id, &asset.fun) {
-			(AssetId(ref id), Fungible(_)) => Some(id.clone()),
-			_ => None,
-		}
-	}
+// pub struct ConcrateSygmaAsset;
+// impl ConcrateSygmaAsset {
+// 	pub fn id(asset: &Asset) -> Option<Location> {
+// 		match (&asset.id, &asset.fun) {
+// 			(AssetId(ref id), Fungible(_)) => Some(id.clone()),
+// 			_ => None,
+// 		}
+// 	}
 
-	pub fn origin(asset: &Asset) -> Option<Location> {
-		Self::id(asset).and_then(|id| {
-			match (id.parents, id.first_interior()) {
-				// Sibling parachain
-				(1, Some(Parachain(id))) => {
-					// Assume current parachain id is 1000, for production, always get proper
-					// parachain info
-					if *id == 1000 {
-						Some(Location::new(0, X1(Arc::new([slice_to_generalkey(b"sygma")]))))
-					} else {
-						Some(Location::here())
-					}
-				},
-				(1, _) => Some(Location::here()),
-				// Children parachain
-				(0, Some(Parachain(id))) => Some(Location::new(0, X1(Arc::new([Parachain(*id)])))),
-				// Local: (0, Here)
-				(0, None) => Some(id),
-				_ => None,
-			}
-		})
-	}
-}
+// 	pub fn origin(asset: &Asset) -> Option<Location> {
+// 		Self::id(asset).and_then(|id| {
+// 			match (id.parents, id.first_interior()) {
+// 				// Sibling parachain
+// 				(1, Some(Parachain(id))) => {
+// 					// Assume current parachain id is 1000, for production, always get proper
+// 					// parachain info
+// 					if *id == 1000 {
+// 						Some(Location::new(0, X1(Arc::new([slice_to_generalkey(b"sygma")]))))
+// 					} else {
+// 						Some(Location::here())
+// 					}
+// 				},
+// 				(1, _) => Some(Location::here()),
+// 				// Children parachain
+// 				(0, Some(Parachain(id))) => Some(Location::new(0, X1(Arc::new([Parachain(*id)])))),
+// 				// Local: (0, Here)
+// 				(0, None) => Some(id),
+// 				_ => None,
+// 			}
+// 		})
+// 	}
+// }
 
-pub struct DestinationDataParser;
-/// Extract dest to be recipient and Dest DomainID
-/// if dest chain is substrate chain, recipient must be a encoded MultiLocation
-/// if dest chain is non-substrate chain, recipient is [u8; 32]
-impl ExtractDestinationData for crate::DestinationDataParser {
-	fn extract_dest(dest: &Location) -> Option<(Vec<u8>, DomainID)> {
-		match (dest.parents, dest.interior.clone()) {
-			// final dest is on the remote substrate chain
-			(1, X4(xs)) => {
-				let [a, b, c, d] = *xs;
-				match (a, b, c, d) {
-					(
-						GeneralKey { length: path_len, data: sygma_path },
-						GeneralIndex(dest_domain_id),
-						Parachain(parachain_id),
-						Junction::AccountId32 { network: None, id: recipient },
-					) => {
-						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
-							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
-								|domain_id| {
-									let l: Location = Location::new(
-										1,
-										Junctions::X2(Arc::new([
-											Parachain(parachain_id),
-											Junction::AccountId32 { network: None, id: recipient },
-										])),
-									);
-									(l.encode(), domain_id)
-								},
-							);
-						}
-						None
-					},
-					_ => None,
-				}
-			},
-			(0, X3(xs)) => {
-				let [a, b, c] = *xs;
-				match (a, b, c) {
-					// final dest is on the local substrate chain
-					(
-						GeneralKey { length: path_len, data: sygma_path },
-						GeneralIndex(dest_domain_id),
-						Junction::AccountId32 { network: None, id: recipient },
-					) => {
-						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
-							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
-								|domain_id| {
-									let l: Location = Location::new(
-										0,
-										Junctions::X1(Arc::new([Junction::AccountId32 {
-											network: None,
-											id: recipient,
-										}])),
-									);
-									(l.encode(), domain_id)
-								},
-							);
-						}
-						None
-					},
-					// final dest is on the non-substrate chain such as EVM
-					(
-						GeneralKey { length: path_len, data: sygma_path },
-						GeneralIndex(dest_domain_id),
-						GeneralKey { length: recipient_len, data: recipient },
-					) => {
-						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
-							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
-								|domain_id| {
-									(recipient[..recipient_len as usize].to_vec(), domain_id)
-								},
-							);
-						}
-						None
-					},
-					_ => None,
-				}
-			},
-			_ => None,
-		}
-	}
-}
+// pub struct DestinationDataParser;
+// /// Extract dest to be recipient and Dest DomainID
+// /// if dest chain is substrate chain, recipient must be a encoded MultiLocation
+// /// if dest chain is non-substrate chain, recipient is [u8; 32]
+// impl ExtractDestinationData for crate::DestinationDataParser {
+// 	fn extract_dest(dest: &Location) -> Option<(Vec<u8>, DomainID)> {
+// 		match (dest.parents, dest.interior.clone()) {
+// 			// final dest is on the remote substrate chain
+// 			(1, X4(xs)) => {
+// 				let [a, b, c, d] = *xs;
+// 				match (a, b, c, d) {
+// 					(
+// 						GeneralKey { length: path_len, data: sygma_path },
+// 						GeneralIndex(dest_domain_id),
+// 						Parachain(parachain_id),
+// 						Junction::AccountId32 { network: None, id: recipient },
+// 					) => {
+// 						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+// 							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+// 								|domain_id| {
+// 									let l: Location = Location::new(
+// 										1,
+// 										Junctions::X2(Arc::new([
+// 											Parachain(parachain_id),
+// 											Junction::AccountId32 { network: None, id: recipient },
+// 										])),
+// 									);
+// 									(l.encode(), domain_id)
+// 								},
+// 							);
+// 						}
+// 						None
+// 					},
+// 					_ => None,
+// 				}
+// 			},
+// 			(0, X3(xs)) => {
+// 				let [a, b, c] = *xs;
+// 				match (a, b, c) {
+// 					// final dest is on the local substrate chain
+// 					(
+// 						GeneralKey { length: path_len, data: sygma_path },
+// 						GeneralIndex(dest_domain_id),
+// 						Junction::AccountId32 { network: None, id: recipient },
+// 					) => {
+// 						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+// 							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+// 								|domain_id| {
+// 									let l: Location = Location::new(
+// 										0,
+// 										Junctions::X1(Arc::new([Junction::AccountId32 {
+// 											network: None,
+// 											id: recipient,
+// 										}])),
+// 									);
+// 									(l.encode(), domain_id)
+// 								},
+// 							);
+// 						}
+// 						None
+// 					},
+// 					// final dest is on the non-substrate chain such as EVM
+// 					(
+// 						GeneralKey { length: path_len, data: sygma_path },
+// 						GeneralIndex(dest_domain_id),
+// 						GeneralKey { length: recipient_len, data: recipient },
+// 					) => {
+// 						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+// 							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+// 								|domain_id| {
+// 									(recipient[..recipient_len as usize].to_vec(), domain_id)
+// 								},
+// 							);
+// 						}
+// 						None
+// 					},
+// 					_ => None,
+// 				}
+// 			},
+// 			_ => None,
+// 		}
+// 	}
+// }
 
-pub struct SygmaDecimalConverter<DecimalPairs>(PhantomData<DecimalPairs>);
-impl<DecimalPairs: Get<Vec<(XcmAssetId, u8)>>> DecimalConverter
-	for SygmaDecimalConverter<DecimalPairs>
-{
-	fn convert_to(asset: &Asset) -> Option<u128> {
-		match (&asset.fun, &asset.id) {
-			(Fungible(amount), _) => {
-				for (asset_id, decimal) in DecimalPairs::get().iter() {
-					if *asset_id == asset.id {
-						return if *decimal == 18 {
-							Some(*amount)
-						} else {
-							type U112F16 = DecimalFixedU128<U16>;
-							if *decimal > 18 {
-								let a =
-									U112F16::from_num(10u128.saturating_pow(*decimal as u32 - 18));
-								let b = U112F16::from_num(*amount).checked_div(a);
-								let r: u128 = b.unwrap_or_else(|| U112F16::from_num(0)).to_num();
-								if r == 0 {
-									return None;
-								}
-								Some(r)
-							} else {
-								// Max is 5192296858534827628530496329220095
-								// if source asset decimal is 12, the max amount sending to sygma
-								// relayer is 5192296858534827.628530496329
-								if *amount > U112F16::MAX {
-									return None;
-								}
-								let a =
-									U112F16::from_num(10u128.saturating_pow(18 - *decimal as u32));
-								let b = U112F16::from_num(*amount).saturating_mul(a);
-								Some(b.to_num())
-							}
-						};
-					}
-				}
-				None
-			},
-			_ => None,
-		}
-	}
+// pub struct SygmaDecimalConverter<DecimalPairs>(PhantomData<DecimalPairs>);
+// impl<DecimalPairs: Get<Vec<(XcmAssetId, u8)>>> DecimalConverter
+// 	for SygmaDecimalConverter<DecimalPairs>
+// {
+// 	fn convert_to(asset: &Asset) -> Option<u128> {
+// 		match (&asset.fun, &asset.id) {
+// 			(Fungible(amount), _) => {
+// 				for (asset_id, decimal) in DecimalPairs::get().iter() {
+// 					if *asset_id == asset.id {
+// 						return if *decimal == 18 {
+// 							Some(*amount)
+// 						} else {
+// 							type U112F16 = DecimalFixedU128<U16>;
+// 							if *decimal > 18 {
+// 								let a =
+// 									U112F16::from_num(10u128.saturating_pow(*decimal as u32 - 18));
+// 								let b = U112F16::from_num(*amount).checked_div(a);
+// 								let r: u128 = b.unwrap_or_else(|| U112F16::from_num(0)).to_num();
+// 								if r == 0 {
+// 									return None;
+// 								}
+// 								Some(r)
+// 							} else {
+// 								// Max is 5192296858534827628530496329220095
+// 								// if source asset decimal is 12, the max amount sending to sygma
+// 								// relayer is 5192296858534827.628530496329
+// 								if *amount > U112F16::MAX {
+// 									return None;
+// 								}
+// 								let a =
+// 									U112F16::from_num(10u128.saturating_pow(18 - *decimal as u32));
+// 								let b = U112F16::from_num(*amount).saturating_mul(a);
+// 								Some(b.to_num())
+// 							}
+// 						};
+// 					}
+// 				}
+// 				None
+// 			},
+// 			_ => None,
+// 		}
+// 	}
 
-	fn convert_from(asset: &Asset) -> Option<Asset> {
-		match (&asset.fun, &asset.id) {
-			(Fungible(amount), _) => {
-				for (asset_id, decimal) in DecimalPairs::get().iter() {
-					if *asset_id == asset.id {
-						return if *decimal == 18 {
-							Some((asset.id.clone(), *amount).into())
-						} else {
-							type U112F16 = DecimalFixedU128<U16>;
-							if *decimal > 18 {
-								// Max is 5192296858534827628530496329220095
-								// if dest asset decimal is 24, the max amount coming from sygma
-								// relayer is 5192296858.534827628530496329
-								if *amount > U112F16::MAX {
-									return None;
-								}
-								let a =
-									U112F16::from_num(10u128.saturating_pow(*decimal as u32 - 18));
-								let b = U112F16::from_num(*amount).saturating_mul(a);
-								let r: u128 = b.to_num();
-								Some((asset.id.clone(), r).into())
-							} else {
-								let a =
-									U112F16::from_num(10u128.saturating_pow(18 - *decimal as u32));
-								let b = U112F16::from_num(*amount).checked_div(a);
-								let r: u128 = b.unwrap_or_else(|| U112F16::from_num(0)).to_num();
-								if r == 0 {
-									return None;
-								}
-								Some((asset.id.clone(), r).into())
-							}
-						};
-					}
-				}
-				None
-			},
-			_ => None,
-		}
-	}
-}
+// 	fn convert_from(asset: &Asset) -> Option<Asset> {
+// 		match (&asset.fun, &asset.id) {
+// 			(Fungible(amount), _) => {
+// 				for (asset_id, decimal) in DecimalPairs::get().iter() {
+// 					if *asset_id == asset.id {
+// 						return if *decimal == 18 {
+// 							Some((asset.id.clone(), *amount).into())
+// 						} else {
+// 							type U112F16 = DecimalFixedU128<U16>;
+// 							if *decimal > 18 {
+// 								// Max is 5192296858534827628530496329220095
+// 								// if dest asset decimal is 24, the max amount coming from sygma
+// 								// relayer is 5192296858.534827628530496329
+// 								if *amount > U112F16::MAX {
+// 									return None;
+// 								}
+// 								let a =
+// 									U112F16::from_num(10u128.saturating_pow(*decimal as u32 - 18));
+// 								let b = U112F16::from_num(*amount).saturating_mul(a);
+// 								let r: u128 = b.to_num();
+// 								Some((asset.id.clone(), r).into())
+// 							} else {
+// 								let a =
+// 									U112F16::from_num(10u128.saturating_pow(18 - *decimal as u32));
+// 								let b = U112F16::from_num(*amount).checked_div(a);
+// 								let r: u128 = b.unwrap_or_else(|| U112F16::from_num(0)).to_num();
+// 								if r == 0 {
+// 									return None;
+// 								}
+// 								Some((asset.id.clone(), r).into())
+// 							}
+// 						};
+// 					}
+// 				}
+// 				None
+// 			},
+// 			_ => None,
+// 		}
+// 	}
+// }
 
-pub fn slice_to_generalkey(key: &[u8]) -> Junction {
-	let len = key.len();
-	assert!(len <= 32);
-	GeneralKey {
-		length: len as u8,
-		data: {
-			let mut data = [0u8; 32];
-			data[..len].copy_from_slice(key);
-			data
-		},
-	}
-}
+// pub fn slice_to_generalkey(key: &[u8]) -> Junction {
+// 	let len = key.len();
+// 	assert!(len <= 32);
+// 	GeneralKey {
+// 		length: len as u8,
+// 		data: {
+// 			let mut data = [0u8; 32];
+// 			data[..len].copy_from_slice(key);
+// 			data
+// 		},
+// 	}
+// }
 
 #[cfg(feature = "runtime-benchmarks")]
 #[macro_use]
@@ -1950,7 +1946,7 @@ impl_runtime_apis! {
 			Executive::execute_block(block)
 		}
 
-		fn initialize_block(header: &<Block as BlockT>::Header) {
+		fn initialize_block(header: &<Block as BlockT>::Header) -> sp_runtime::ExtrinsicInclusionMode {
 			Executive::initialize_block(header)
 		}
 	}
@@ -1990,11 +1986,11 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl sygma_runtime_api::SygmaBridgeApi<Block> for Runtime {
-		fn is_proposal_executed(nonce: DepositNonce, domain_id: DomainID) -> bool {
-			SygmaBridge::is_proposal_executed(nonce, domain_id)
-		}
-	}
+	// impl sygma_runtime_api::SygmaBridgeApi<Block> for Runtime {
+	// 	fn is_proposal_executed(nonce: DepositNonce, domain_id: DomainID) -> bool {
+	// 		SygmaBridge::is_proposal_executed(nonce, domain_id)
+	// 	}
+	// }
 
 	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId> for Runtime {
 		fn query_services_with_blueprints_by_operator(
@@ -2233,6 +2229,10 @@ impl_runtime_apis! {
 				pallet_ethereum::CurrentBlock::<Runtime>::get(),
 				pallet_ethereum::CurrentTransactionStatuses::<Runtime>::get()
 			)
+		}
+
+		fn initialize_pending_block(header: &<Block as BlockT>::Header) {
+			Executive::initialize_block(header);
 		}
 	}
 
