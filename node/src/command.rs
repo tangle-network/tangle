@@ -116,6 +116,7 @@ pub fn run() -> sc_cli::Result<()> {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
 		},
+		#[cfg(not(feature = "manual-seal"))]
 		Some(Subcommand::CheckBlock(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|config| {
@@ -124,6 +125,16 @@ pub fn run() -> sc_cli::Result<()> {
 				Ok((cmd.run(client, import_queue), task_manager))
 			})
 		},
+		#[cfg(feature = "manual-seal")]
+		Some(Subcommand::CheckBlock(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			runner.async_run(|mut config| {
+				let (client, _, import_queue, task_manager, _) =
+					service::new_chain_ops(&mut config, &cli.eth)?;
+				Ok((cmd.run(client, import_queue), task_manager))
+			})
+		},
+		#[cfg(not(feature = "manual-seal"))]
 		Some(Subcommand::ExportBlocks(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|config| {
@@ -132,6 +143,16 @@ pub fn run() -> sc_cli::Result<()> {
 				Ok((cmd.run(client, config.database), task_manager))
 			})
 		},
+		#[cfg(feature = "manual-seal")]
+		Some(Subcommand::ExportBlocks(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			runner.async_run(|mut config| {
+				let (client, _, import_queue, task_manager, _) =
+					service::new_chain_ops(&mut config, &cli.eth)?;
+				Ok((cmd.run(client, config.database), task_manager))
+			})
+		},
+		#[cfg(not(feature = "manual-seal"))]
 		Some(Subcommand::ExportState(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|config| {
@@ -140,6 +161,16 @@ pub fn run() -> sc_cli::Result<()> {
 				Ok((cmd.run(client, config.chain_spec), task_manager))
 			})
 		},
+		#[cfg(feature = "manual-seal")]
+		Some(Subcommand::ExportState(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			runner.async_run(|mut config| {
+				let (client, _, import_queue, task_manager, _) =
+					service::new_chain_ops(&mut config, &cli.eth)?;
+				Ok((cmd.run(client, config.chain_spec), task_manager))
+			})
+		},
+		#[cfg(not(feature = "manual-seal"))]
 		Some(Subcommand::ImportBlocks(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|config| {
@@ -148,10 +179,20 @@ pub fn run() -> sc_cli::Result<()> {
 				Ok((cmd.run(client, import_queue), task_manager))
 			})
 		},
+		#[cfg(feature = "manual-seal")]
+		Some(Subcommand::ImportBlocks(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			runner.async_run(|mut config| {
+				let (client, _, import_queue, task_manager, _) =
+					service::new_chain_ops(&mut config, &cli.eth)?;
+				Ok((cmd.run(client, import_queue), task_manager))
+			})
+		},
 		Some(Subcommand::PurgeChain(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|config| cmd.run(config.database))
 		},
+		#[cfg(not(feature = "manual-seal"))]
 		Some(Subcommand::Revert(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|config| {
@@ -164,6 +205,20 @@ pub fn run() -> sc_cli::Result<()> {
 				Ok((cmd.run(client, backend, Some(aux_revert)), task_manager))
 			})
 		},
+		#[cfg(feature = "manual-seal")]
+		Some(Subcommand::Revert(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			runner.async_run(|mut config| {
+				let (client, backend, import_queue, task_manager, _) =
+					service::new_chain_ops(&mut config, &cli.eth)?;
+				let aux_revert = Box::new(|client, _, blocks| {
+					sc_consensus_grandpa::revert(client, blocks)?;
+					Ok(())
+				});
+				Ok((cmd.run(client, backend, Some(aux_revert)), task_manager))
+			})
+		},
+		#[cfg(not(feature = "manual-seal"))]
 		Some(Subcommand::Benchmark(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 
@@ -212,6 +267,11 @@ pub fn run() -> sc_cli::Result<()> {
 				}
 			})
 		},
+		#[cfg(feature = "manual-seal")]
+		Some(Subcommand::Benchmark(cmd)) => {
+			unimplemented!()
+		},
+		#[cfg(feature = "manual-seal")]
 		Some(Subcommand::FrontierDb(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|mut config| {
@@ -268,6 +328,7 @@ pub fn run() -> sc_cli::Result<()> {
 					eth_config: cli.eth,
 					debug_output: cli.output_path,
 					auto_insert_keys: cli.auto_insert_keys,
+					sealing: cli.sealing,
 				})
 				.map_err(Into::into)
 				.await
