@@ -271,7 +271,6 @@ pub fn run() -> sc_cli::Result<()> {
 		Some(Subcommand::Benchmark(cmd)) => {
 			unimplemented!()
 		},
-		#[cfg(feature = "manual-seal")]
 		Some(Subcommand::FrontierDb(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|mut config| {
@@ -328,6 +327,7 @@ pub fn run() -> sc_cli::Result<()> {
 					eth_config: cli.eth,
 					debug_output: cli.output_path,
 					auto_insert_keys: cli.auto_insert_keys,
+					#[cfg(feature = "manual-seal")]
 					sealing: cli.sealing,
 				})
 				.map_err(Into::into)
