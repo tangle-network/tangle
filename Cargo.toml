@@ -249,6 +249,7 @@ pallet-identity = { git = "https://github.com/paritytech/polkadot-sdk", branch =
 pallet-vesting = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 pallet-proxy = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 sp-state-machine = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
+sp-genesis-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 
 # Frontier Client
 fc-cli = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }

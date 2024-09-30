@@ -328,17 +328,17 @@ fn testnet_genesis(
 			.collect::<Vec<_>>(),
 		},
 		"staking": {
-			"validator_count": initial_authorities.len() as u32,
-			"minimum_validator_count": initial_authorities.len() as u32 - 1,
+			"validatorCount": initial_authorities.len() as u32,
+			"minimumValidatorCount": initial_authorities.len() as u32 - 1,
 			"invulnerables": initial_authorities.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
-			"slash_reward_fraction": Perbill::from_percent(10),
+			"slashRewardFraction": Perbill::from_percent(10),
 			"stakers" : stakers,
 		},
 		"council": {
 			"members": council_members,
 		},
 		"babe": {
-			"epoch_config": tangle_runtime::BABE_GENESIS_EPOCH_CONFIG,
+			"epochConfig": tangle_runtime::BABE_GENESIS_EPOCH_CONFIG,
 		},
 		"evm" : {
 			"accounts": evm_accounts
