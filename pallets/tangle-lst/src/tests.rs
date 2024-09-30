@@ -45,7 +45,7 @@ fn burn_lst(pool_id: u32, who: &AccountId, amount: u128) {
 		pool_id,
 		who,
 		amount,
-		Preservation::Preserve,
+		Preservation::Expendable,
 		Precision::Exact,
 		Fortitude::Force,
 	)
