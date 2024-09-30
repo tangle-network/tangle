@@ -290,6 +290,7 @@ impl ExtBuilder {
 	}
 }
 
+#[allow(dead_code)]
 pub(crate) fn events() -> Vec<RuntimeEvent> {
 	System::events().into_iter().map(|r| r.event).collect::<Vec<_>>()
 }

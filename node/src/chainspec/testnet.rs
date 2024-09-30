@@ -259,7 +259,7 @@ fn testnet_genesis(
 	// contract often automatically adds a check that the contract bytecode is non-empty.
 	// For that reason a dummy code (0x60006000fd) can be inserted at the precompile address
 	// to pass that check.
-	let revert_bytecode = [0x60, 0x00, 0x60, 0x00, 0xFD];
+	let _revert_bytecode = [0x60, 0x00, 0x60, 0x00, 0xFD];
 
 	let evm_accounts = {
 		let mut map = BTreeMap::new();

@@ -37,7 +37,7 @@ use frame_support::derive_impl;
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
-		AsEnsureOriginWithArg, Contains, ContainsPair, OnFinalize, SortedMembers, WithdrawReasons,
+		AsEnsureOriginWithArg, Contains, OnFinalize, WithdrawReasons,
 	},
 	weights::ConstantMultiplier,
 };
@@ -52,6 +52,7 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_services_rpc_runtime_api::BlockNumberOf;
 use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking::StakerStatus;
+#[allow(deprecated)]
 use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
@@ -309,6 +310,7 @@ parameter_types! {
 
 impl pallet_transaction_payment::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	#[allow(deprecated)]
 	type OnChargeTransaction = CurrencyAdapter<Balances, impls::DealWithFees<Runtime>>;
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 	type WeightToFee = IdentityFee<Balance>;

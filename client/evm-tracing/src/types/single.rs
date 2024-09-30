@@ -18,7 +18,7 @@
 //! Structure from "raw" debug_trace and a "call list" matching
 //! Blockscout formatter. This "call list" is also used to build
 //! the whole block tracing output.
-
+#![allow(clippy::all)]
 use super::serialization::*;
 use serde::{Deserialize, Serialize};
 

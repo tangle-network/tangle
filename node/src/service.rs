@@ -25,6 +25,7 @@ use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
+#[allow(deprecated)]
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_service::{error::Error as ServiceError, ChainType, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
@@ -43,9 +44,6 @@ use tangle_testnet_runtime::{self, RuntimeApi, TransactionConverter};
 /// The minimum period of blocks on which justifications will be
 /// imported and generated.
 const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
-
-pub type HostFunctions =
-	(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
 
 #[cfg(not(feature = "testnet"))]
 pub mod tangle {
@@ -96,10 +94,12 @@ pub mod testnet {
 }
 
 #[cfg(not(feature = "testnet"))]
+#[allow(deprecated)]
 pub(crate) type FullClient =
 	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<tangle::ExecutorDispatch>>;
 
 #[cfg(feature = "testnet")]
+#[allow(deprecated)]
 pub(crate) type FullClient =
 	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<testnet::ExecutorDispatch>>;
 
@@ -158,6 +158,7 @@ pub fn new_partial(
 		})
 		.transpose()?;
 
+	#[allow(deprecated)]
 	let executor = sc_service::new_native_or_wasm_executor(config);
 
 	let (client, backend, keystore_container, task_manager) =
