@@ -60,8 +60,6 @@ sp-inherents = { workspace = true, features = ["std"] }
 sp-keystore = { workspace = true, features = ["std"] }
 sp-runtime = { workspace = true, features = ["std"] }
 sp-timestamp = { workspace = true, features = ["std"] }
-sp-consensus-aura = { workspace = true }
-sc-consensus-aura = { workspace = true }
 pallet-services-rpc = { workspace = true }
 sp-consensus-grandpa = { workspace = true }
 sp-offchain = { workspace = true }

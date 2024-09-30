@@ -213,8 +213,6 @@ mmr-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable
 sc-rpc-spec-v2 = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 substrate-state-trie-migration-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 sc-sync-state-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
-sp-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
-sc-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 
 pallet-babe = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 pallet-bags-list = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
