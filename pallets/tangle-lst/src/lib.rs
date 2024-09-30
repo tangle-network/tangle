@@ -112,6 +112,7 @@ use frame_support::traits::fungibles::Create;
 use frame_support::traits::fungibles::Inspect as FungiblesInspect;
 use frame_support::traits::fungibles::Mutate as FungiblesMutate;
 use frame_support::traits::tokens::Precision;
+use frame_support::traits::tokens::Preservation;
 use frame_support::traits::Currency;
 use frame_support::traits::ExistenceRequirement;
 use frame_support::traits::LockableCurrency;
@@ -712,6 +713,7 @@ pub mod pallet {
 				pool_id.into(),
 				&member_account,
 				unbonding_points,
+				Preservation::Preserve,
 				Precision::Exact,
 				Fortitude::Force,
 			)?;

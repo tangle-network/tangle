@@ -28,11 +28,13 @@ pub mod migrations;
 pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
-
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
+use frame_support::derive_impl;
+use frame_support::genesis_builder_helper::build_state;
+use frame_support::genesis_builder_helper::get_preset;
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
@@ -42,6 +44,7 @@ use frame_support::{
 };
 use frame_system::EnsureSigned;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
+use pallet_evm::GasWeightMapping;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -49,6 +52,7 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_services_rpc_runtime_api::BlockNumberOf;
 use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking::StakerStatus;
+#[allow(deprecated)]
 use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
@@ -57,6 +61,7 @@ use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
+use sp_genesis_builder::PresetId;
 use sp_runtime::{
 	create_runtime_str,
 	curve::PiecewiseLinear,
@@ -130,7 +135,7 @@ use tangle_primitives::{
 	},
 	staking::{
 		BONDING_DURATION, HISTORY_DEPTH, MAX_NOMINATOR_REWARDED_PER_VALIDATOR, OFFCHAIN_REPEAT,
-		OFFENDING_VALIDATOR_THRESHOLD, SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
+		SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
 	},
 	treasury::{
 		BURN, DATA_DEPOSIT_PER_BYTE, MAXIMUM_REASON_LENGTH, MAX_APPROVALS, PROPOSAL_BOND,
@@ -204,6 +209,7 @@ pub mod opaque {
 	}
 }
 
+#[derive_impl(frame_system::config_preludes::SolochainDefaultConfig)]
 impl frame_system::Config for Runtime {
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type AccountId = AccountId;
@@ -298,6 +304,7 @@ parameter_types! {
 
 impl pallet_transaction_payment::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	#[allow(deprecated)]
 	type OnChargeTransaction = CurrencyAdapter<Balances, impls::DealWithFees<Runtime>>;
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 	type WeightToFee = IdentityFee<Balance>;
@@ -436,7 +443,6 @@ parameter_types! {
 	pub const SlashDeferDuration: sp_staking::EraIndex = SLASH_DEFER_DURATION;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 	pub const MaxNominatorRewardedPerValidator: u32 = MAX_NOMINATOR_REWARDED_PER_VALIDATOR;
-	pub const OffendingValidatorsThreshold: Perbill = OFFENDING_VALIDATOR_THRESHOLD;
 	pub OffchainRepeat: BlockNumber = OFFCHAIN_REPEAT;
 	pub const HistoryDepth: u32 = HISTORY_DEPTH;
 	pub const MaxControllersInDeprecationBatch: u32 = 500;
@@ -471,7 +477,6 @@ impl pallet_staking::Config for Runtime {
 	type NextNewSession = Session;
 	type MaxExposurePageSize = MaxExposurePageSize;
 	type MaxControllersInDeprecationBatch = MaxControllersInDeprecationBatch;
-	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
 	type ElectionProvider = ElectionProviderMultiPhase;
 	type GenesisElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type VoterList = BagsList;
@@ -481,6 +486,7 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
+	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
 }
 
 parameter_types! {
@@ -768,13 +774,14 @@ impl pallet_nomination_pools::Config for Runtime {
 	type RewardCounter = FixedU128;
 	type BalanceToU256 = BalanceToU256;
 	type U256ToBalance = U256ToBalance;
-	type Staking = Staking;
 	type PostUnbondingPoolsWindow = PostUnbondPoolsWindow;
 	type MaxMetadataLen = ConstU32<256>;
 	type MaxUnbonding = ConstU32<8>;
 	type PalletId = NominationPoolsPalletId;
 	type MaxPointsToBalance = MaxPointsToBalance;
 	type RuntimeFreezeReason = RuntimeFreezeReason;
+	type AdminOrigin = EnsureRoot<AccountId>;
+	type StakeAdapter = pallet_nomination_pools::adapter::TransferStake<Self, Staking>;
 }
 
 parameter_types! {
@@ -925,25 +932,17 @@ parameter_types! {
 impl pallet_treasury::Config for Runtime {
 	type PalletId = TreasuryPalletId;
 	type Currency = Balances;
-	type ApproveOrigin = EitherOfDiverse<
-		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 5>,
-	>;
 	type RejectOrigin = EitherOfDiverse<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 	>;
 	type RuntimeEvent = RuntimeEvent;
-	type OnSlash = Treasury;
 	type AssetKind = ();
 	type Beneficiary = AccountId;
 	type BeneficiaryLookup = IdentityLookup<AccountId>;
 	type Paymaster = PayFromAccount<Balances, TreasuryAccount>;
 	type BalanceConverter = UnityAssetBalanceConversion;
 	type PayoutPeriod = PayoutPeriod;
-	type ProposalBond = ProposalBond;
-	type ProposalBondMinimum = ProposalBondMinimum;
-	type ProposalBondMaximum = ();
 	type SpendPeriod = SpendPeriod;
 	type Burn = Burn;
 	type BurnDestination = ();
@@ -975,6 +974,7 @@ impl pallet_bounties::Config for Runtime {
 	type DataDepositPerByte = DataDepositPerByte;
 	type MaximumReasonLength = MaximumReasonLength;
 	type WeightInfo = pallet_bounties::weights::SubstrateWeight<Runtime>;
+	type OnSlash = Treasury;
 	type ChildBountyManager = ChildBounties;
 }
 
@@ -1484,7 +1484,7 @@ impl_runtime_apis! {
 			Executive::execute_block(block)
 		}
 
-		fn initialize_block(header: &<Block as BlockT>::Header) {
+		fn initialize_block(header: &<Block as BlockT>::Header) -> sp_runtime::ExtrinsicInclusionMode {
 			Executive::initialize_block(header)
 		}
 	}
@@ -1751,6 +1751,10 @@ impl_runtime_apis! {
 				pallet_ethereum::CurrentTransactionStatuses::<Runtime>::get()
 			)
 		}
+
+		fn initialize_pending_block(header: &<Block as BlockT>::Header) {
+			Executive::initialize_block(header);
+		}
 	}
 
 	impl fp_rpc::ConvertTransactionRuntimeApi<Block> for Runtime {
@@ -1913,6 +1917,7 @@ impl_runtime_apis! {
 		fn trace_transaction(
 			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
 			traced_transaction: &EthereumTransaction,
+			header: &<Block as BlockT>::Header,
 		) -> Result<
 			(),
 			sp_runtime::DispatchError,
@@ -1920,6 +1925,11 @@ impl_runtime_apis! {
 			#[cfg(feature = "evm-tracing")]
 			{
 				use evm_tracer::tracer::EvmTracer;
+
+				// Initialize block: calls the "on_initialize" hook on every pallet
+				// in AllPalletsWithSystem.
+				Executive::initialize_block(header);
+
 				// Apply the a subset of extrinsics: all the substrate-specific or ethereum
 				// transactions that preceded the requested transaction.
 				for ext in extrinsics.into_iter() {
@@ -1946,6 +1956,7 @@ impl_runtime_apis! {
 		fn trace_block(
 			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
 			known_transactions: Vec<H256>,
+			header: &<Block as BlockT>::Header,
 		) -> Result<
 			(),
 			sp_runtime::DispatchError,
@@ -1956,6 +1967,10 @@ impl_runtime_apis! {
 
 				let mut config = <Runtime as pallet_evm::Config>::config().clone();
 				config.estimate = true;
+
+				// Initialize block: calls the "on_initialize" hook on every pallet
+				// in AllPalletsWithSystem.
+				Executive::initialize_block(header);
 
 				// Apply all extrinsics. Ethereum extrinsics are traced.
 				for ext in extrinsics.into_iter() {
@@ -1975,6 +1990,91 @@ impl_runtime_apis! {
 					};
 				}
 
+				Ok(())
+			}
+			#[cfg(not(feature = "evm-tracing"))]
+			Err(sp_runtime::DispatchError::Other(
+				"Missing `evm-tracing` compile time feature flag.",
+			))
+		}
+
+		fn trace_call(
+			header: &<Block as BlockT>::Header,
+			from: H160,
+			to: H160,
+			data: Vec<u8>,
+			value: U256,
+			gas_limit: U256,
+			max_fee_per_gas: Option<U256>,
+			max_priority_fee_per_gas: Option<U256>,
+			nonce: Option<U256>,
+			access_list: Option<Vec<(H160, Vec<H256>)>>,
+		) -> Result<(), sp_runtime::DispatchError> {
+			#[cfg(feature = "evm-tracing")]
+			{
+				use evm_tracer::tracer::EvmTracer;
+
+				// Initialize block: calls the "on_initialize" hook on every pallet
+				// in AllPalletsWithSystem.
+				Executive::initialize_block(header);
+
+				EvmTracer::new().trace(|| {
+					let is_transactional = false;
+					let validate = true;
+					let without_base_extrinsic_weight = true;
+
+
+					// Estimated encoded transaction size must be based on the heaviest transaction
+					// type (EIP1559Transaction) to be compatible with all transaction types.
+					let mut estimated_transaction_len = data.len() +
+					// pallet ethereum index: 1
+					// transact call index: 1
+					// Transaction enum variant: 1
+					// chain_id 8 bytes
+					// nonce: 32
+					// max_priority_fee_per_gas: 32
+					// max_fee_per_gas: 32
+					// gas_limit: 32
+					// action: 21 (enum varianrt + call address)
+					// value: 32
+					// access_list: 1 (empty vec size)
+					// 65 bytes signature
+					258;
+
+					if access_list.is_some() {
+						estimated_transaction_len += access_list.encoded_size();
+					}
+
+					let gas_limit = gas_limit.min(u64::MAX.into()).low_u64();
+
+					let (weight_limit, proof_size_base_cost) =
+						match <Runtime as pallet_evm::Config>::GasWeightMapping::gas_to_weight(
+							gas_limit,
+							without_base_extrinsic_weight
+						) {
+							weight_limit if weight_limit.proof_size() > 0 => {
+								(Some(weight_limit), Some(estimated_transaction_len as u64))
+							}
+							_ => (None, None),
+						};
+
+					let _ = <Runtime as pallet_evm::Config>::Runner::call(
+						from,
+						to,
+						data,
+						value,
+						gas_limit,
+						max_fee_per_gas,
+						max_priority_fee_per_gas,
+						nonce,
+						access_list.unwrap_or_default(),
+						is_transactional,
+						validate,
+						weight_limit,
+						proof_size_base_cost,
+						<Runtime as pallet_evm::Config>::config(),
+					);
+				});
 				Ok(())
 			}
 			#[cfg(not(feature = "evm-tracing"))]
@@ -2005,6 +2105,20 @@ impl_runtime_apis! {
 					})
 					.collect(),
 			}
+		}
+	}
+
+	impl sp_genesis_builder::GenesisBuilder<Block> for Runtime {
+		fn build_state(config: Vec<u8>) -> sp_genesis_builder::Result {
+			build_state::<RuntimeGenesisConfig>(config)
+		}
+
+		fn get_preset(id: &Option<PresetId>) -> Option<Vec<u8>> {
+			get_preset::<RuntimeGenesisConfig>(id, |_| None)
+		}
+
+		fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
+			vec![]
 		}
 	}
 

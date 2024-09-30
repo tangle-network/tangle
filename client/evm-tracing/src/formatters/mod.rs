@@ -13,7 +13,6 @@
 
 // You should have received a copy of the GNU General Public License
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
-
 pub mod blockscout;
 pub mod call_tracer;
 pub mod raw;

@@ -13,10 +13,10 @@
 
 // You should have received a copy of the GNU General Public License
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
-
+#[allow(clippy::all)]
 use super::blockscout::BlockscoutCallInner;
 use crate::types::{
-	single::{Call, TransactionTrace},
+	single::{Call, Log, TransactionTrace},
 	CallResult, CallType, CreateResult,
 };
 
@@ -54,8 +54,8 @@ impl super::ResponseFormatter for Formatter {
 						from,
 						gas,
 						gas_used,
-						trace_address: Some(trace_address),
-						inner: match inner {
+						trace_address: Some(trace_address.clone()),
+						inner: match inner.clone() {
 							BlockscoutCallInner::Call { input, to, res, call_type } => {
 								CallTracerInner::Call {
 									call_type: match call_type {
@@ -68,8 +68,12 @@ impl super::ResponseFormatter for Formatter {
 									},
 									to,
 									input,
-									res,
+									res: res.clone(),
 									value: Some(value),
+									logs: match res {
+										CallResult::Output { .. } => it.logs.clone(),
+										CallResult::Error { .. } => Vec::new(),
+									},
 								}
 							},
 							BlockscoutCallInner::Create { init, res } => CallTracerInner::Create {
@@ -150,7 +154,7 @@ impl super::ResponseFormatter for Formatter {
 				//
 				// We consider an item to be `Ordering::Less` when:
 				// 	- Is closer to the root or
-				// 	- Is greater than its sibling.
+				//	- Is greater than its sibling.
 				result.sort_by(|a, b| match (a, b) {
 					(
 						Call::CallTracer(CallTracerCall { trace_address: Some(a), .. }),
@@ -160,10 +164,12 @@ impl super::ResponseFormatter for Formatter {
 						let b_len = b.len();
 						let sibling_greater_than = |a: &Vec<u32>, b: &Vec<u32>| -> bool {
 							for (i, a_value) in a.iter().enumerate() {
-								match a_value.cmp(&b[i]) {
-									Ordering::Greater => return true,
-									Ordering::Less => return false,
-									Ordering::Equal => continue,
+								if a_value > &b[i] {
+									return true;
+								} else if a_value < &b[i] {
+									return false;
+								} else {
+									continue;
 								}
 							}
 							false
@@ -264,6 +270,9 @@ pub enum CallTracerInner {
 
 		#[serde(skip_serializing_if = "Option::is_none")]
 		value: Option<U256>,
+
+		#[serde(skip_serializing_if = "Vec::is_empty")]
+		logs: Vec<Log>,
 	},
 	Create {
 		#[serde(rename = "type", serialize_with = "opcode_serialize")]

@@ -15,7 +15,7 @@
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Runtime API allowing to debug/trace Ethereum
-
+#![allow(clippy::all)]
 extern crate alloc;
 
 use ethereum_types::{H160, H256};

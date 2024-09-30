@@ -19,12 +19,13 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
 };
+use frame_support::derive_impl;
 use frame_support::pallet_prelude::Hooks;
 use frame_support::pallet_prelude::Weight;
 use frame_support::PalletId;
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU128, ConstU64, Everything, OneSessionHandler},
+	traits::{ConstU128, OneSessionHandler},
 };
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
@@ -34,14 +35,10 @@ use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde::Deserialize;
 use serde::Serialize;
-use sp_core::{
-	self, sr25519, sr25519::Public as sr25519Public, ConstU32, RuntimeDebug, H160, H256,
-};
+use sp_core::{self, sr25519, sr25519::Public as sr25519Public, ConstU32, RuntimeDebug, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
-	testing::UintAuthorityId,
-	traits::{ConvertInto, IdentityLookup},
-	AccountId32, BuildStorage, Perbill,
+	testing::UintAuthorityId, traits::ConvertInto, AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
 
@@ -54,31 +51,31 @@ const CHARLIE: u8 = 3;
 const DAVE: u8 = 4;
 const EVE: u8 = 5;
 
+#[derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
+	type SS58Prefix = ();
+	type BaseCallFilter = frame_support::traits::Everything;
 	type RuntimeOrigin = RuntimeOrigin;
 	type Nonce = u64;
 	type RuntimeCall = RuntimeCall;
-	type Hash = H256;
-	type Hashing = ::sp_runtime::traits::BlakeTwo256;
+	type Hash = sp_core::H256;
+	type Hashing = sp_runtime::traits::BlakeTwo256;
 	type AccountId = AccountId;
+	type Lookup = sp_runtime::traits::IdentityLookup<Self::AccountId>;
 	type Block = Block;
-	type Lookup = IdentityLookup<Self::AccountId>;
 	type RuntimeEvent = RuntimeEvent;
-	type BlockHashCount = ConstU64<250>;
-	type BlockWeights = ();
+	type BlockHashCount = ();
+	type DbWeight = ();
 	type BlockLength = ();
+	type BlockWeights = ();
 	type Version = ();
 	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
-	type DbWeight = ();
-	type BaseCallFilter = Everything;
 	type SystemWeightInfo = ();
-	type SS58Prefix = ();
 	type OnSetCode = ();
-	type RuntimeTask = ();
-	type MaxConsumers = ConstU32<16>;
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 impl pallet_balances::Config for Runtime {
@@ -202,7 +199,6 @@ impl pallet_staking::Config for Runtime {
 	type NextNewSession = Session;
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
-	type OffendingValidatorsThreshold = ();
 	type ElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type GenesisElectionProvider = Self::ElectionProvider;
 	type VoterList = pallet_staking::UseNominatorsAndValidatorsMap<Self>;
@@ -213,6 +209,7 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
+	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
 }
 
 parameter_types! {

@@ -41,7 +41,15 @@ fn mint_lst(pool_id: u32, who: &AccountId, amount: u128) {
 }
 
 fn burn_lst(pool_id: u32, who: &AccountId, amount: u128) {
-	Assets::burn_from(pool_id, who, amount, Precision::Exact, Fortitude::Force).unwrap();
+	Assets::burn_from(
+		pool_id,
+		who,
+		amount,
+		Preservation::Expendable,
+		Precision::Exact,
+		Fortitude::Force,
+	)
+	.unwrap();
 }
 
 #[test]

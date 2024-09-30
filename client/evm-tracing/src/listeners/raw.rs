@@ -164,7 +164,7 @@ impl Listener {
 								return;
 							}
 
-							Some(memory.data)
+							Some(memory.data.clone())
 						},
 						stack: if self.disable_stack {
 							None
@@ -179,7 +179,7 @@ impl Listener {
 								return;
 							}
 
-							Some(stack.data)
+							Some(stack.data.clone())
 						},
 					});
 				}
@@ -243,8 +243,7 @@ impl Listener {
 										.global_storage_changes
 										.insert(context.address, context.storage_cache);
 
-									// Apply storage changes to parent, either updating its cache or
-									// map of changes.
+									// Apply storage changes to parent, either updating its cache or map of changes.
 									for (address, mut storage) in
 										context.global_storage_changes.into_iter()
 									{

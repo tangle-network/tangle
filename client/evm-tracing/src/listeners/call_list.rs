@@ -14,10 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-	formatters::blockscout::{BlockscoutCall as Call, BlockscoutCallInner as CallInner},
-	types::{CallResult, CallType, ContextType, CreateResult},
-};
+use crate::formatters::blockscout::BlockscoutCall as Call;
+use crate::formatters::blockscout::BlockscoutCallInner as CallInner;
+use crate::types::{single::Log, CallResult, CallType, ContextType, CreateResult};
 use ethereum_types::{H160, U256};
 use evm_tracing_events::{
 	runtime::{Capture, ExitError, ExitReason, ExitSucceed},
@@ -51,7 +50,7 @@ pub struct Listener {
 	// Next index to use.
 	entries_next_index: u32,
 	// Stack of contexts with data to keep between events.
-	context_stack: Vec<Context>,
+	pub(crate) context_stack: Vec<Context>,
 
 	// Type of the next call.
 	// By default is None and corresponds to the root call, which
@@ -80,9 +79,12 @@ pub struct Listener {
 	/// True if only the `GasometerEvent::RecordTransaction` event has been received.
 	/// Allow to correctly handle transactions that cannot pay for the tx data in Legacy mode.
 	record_transaction_event_only: bool,
+
+	/// If true the listener will collect EvmEvent::Log events.
+	pub with_log: bool,
 }
 
-struct Context {
+pub struct Context {
 	entries_index: u32,
 
 	context_type: ContextType,
@@ -99,6 +101,8 @@ struct Context {
 	data: Vec<u8>,
 	// to / create address
 	to: H160,
+
+	logs: Vec<Log>,
 }
 
 impl Default for Listener {
@@ -117,6 +121,7 @@ impl Default for Listener {
 			skip_next_context: false,
 			call_list_first_transaction: true,
 			record_transaction_event_only: false,
+			with_log: false,
 		}
 	}
 }
@@ -161,6 +166,7 @@ impl Listener {
 							input: context.data,
 							res,
 						},
+						logs: context.logs,
 					}
 				},
 				ContextType::Create => {
@@ -176,6 +182,7 @@ impl Listener {
 						gas_used: gas_used.into(),
 						from: context.from,
 						inner: CallInner::Create { init: context.data, res },
+						logs: context.logs,
 					}
 				},
 			};
@@ -206,6 +213,7 @@ impl Listener {
 					input: vec![],
 					res,
 				},
+				logs: Vec::<Log>::new(),
 			};
 
 			self.insert_entry(self.entries_next_index, entry);
@@ -286,6 +294,8 @@ impl Listener {
 
 					data,
 					to: address,
+
+					logs: Vec::new(),
 				});
 
 				self.entries_next_index += 1;
@@ -310,6 +320,8 @@ impl Listener {
 
 					data: init_code,
 					to: address,
+
+					logs: Vec::new(),
 				});
 
 				self.entries_next_index += 1;
@@ -334,6 +346,8 @@ impl Listener {
 
 					data: init_code,
 					to: address,
+
+					logs: Vec::new(),
 				});
 
 				self.entries_next_index += 1;
@@ -383,6 +397,8 @@ impl Listener {
 
 						data: input.to_vec(),
 						to: code_address,
+
+						logs: Vec::new(),
 					});
 
 					self.entries_next_index += 1;
@@ -426,6 +442,8 @@ impl Listener {
 
 						data: init_code.to_vec(),
 						to: address,
+
+						logs: Vec::new(),
 					});
 
 					self.entries_next_index += 1;
@@ -453,6 +471,7 @@ impl Listener {
 						gas: 0.into(),
 						gas_used: 0.into(),
 						inner: CallInner::SelfDestruct { to: target, balance },
+						logs: Vec::<Log>::new(),
 					},
 				);
 				self.entries_next_index += 1;
@@ -476,6 +495,13 @@ impl Listener {
 				// we need this new event. Precompile subcall might use non-standard call
 				// behavior (like batch precompile does) thus we simply consider this a call.
 				self.call_type = Some(CallType::Call);
+			},
+			EvmEvent::Log { address, topics, data } => {
+				if self.with_log {
+					if let Some(stack) = self.context_stack.last_mut() {
+						stack.logs.push(Log { address, topics, data });
+					}
+				}
 			},
 
 			// We ignore other kinds of message if any (new ones may be added in the future).
@@ -535,6 +561,7 @@ impl Listener {
 								input: context.data,
 								res,
 							},
+							logs: context.logs,
 						}
 					},
 					ContextType::Create => {
@@ -560,6 +587,7 @@ impl Listener {
 							gas_used: gas_used.into(),
 							from: context.from,
 							inner: CallInner::Create { init: context.data, res },
+							logs: context.logs,
 						}
 					},
 				},
@@ -617,6 +645,7 @@ impl ListenerT for Listener {
 #[allow(unused)]
 mod tests {
 	use super::*;
+	use crate::formatters::blockscout::BlockscoutCallInner;
 	use ethereum_types::H256;
 	use evm_tracing_events::{
 		evm::CreateScheme,
@@ -633,6 +662,7 @@ mod tests {
 		TransactCall,
 		TransactCreate,
 		TransactCreate2,
+		Log,
 	}
 
 	enum TestRuntimeEvent {
@@ -642,7 +672,6 @@ mod tests {
 		SStore,
 	}
 
-	#[allow(clippy::enum_variant_names)]
 	enum TestGasometerEvent {
 		RecordCost,
 		RecordRefund,
@@ -727,6 +756,9 @@ mod tests {
 				gas_limit: 0u64,
 				address: H160::default(),
 			},
+			TestEvmEvent::Log => {
+				EvmEvent::Log { address: H160::default(), topics: Vec::new(), data: Vec::new() }
+			},
 		}
 	}
 
@@ -808,6 +840,10 @@ mod tests {
 
 	fn do_evm_suicide_event(listener: &mut Listener) {
 		listener.evm_event(test_emit_evm_event(TestEvmEvent::Suicide, false, None));
+	}
+
+	fn do_evm_log_event(listener: &mut Listener) {
+		listener.evm_event(test_emit_evm_event(TestEvmEvent::Log, false, None));
 	}
 
 	fn do_runtime_step_event(listener: &mut Listener) {
@@ -1058,8 +1094,50 @@ mod tests {
 		listener.finish_transaction();
 		assert_eq!(listener.entries.len(), 1);
 		// Each nested call contains 11 elements in the callstack (main + 10 subcalls).
-		// There are 5 main nested calls for a total of 56 elements in the callstack: 1 main + 55
-		// nested.
+		// There are 5 main nested calls for a total of 56 elements in the callstack: 1 main + 55 nested.
 		assert_eq!(listener.entries[0].len(), (depth * (subdepth + 1)) + 1);
+	}
+
+	#[test]
+	fn call_log_event() {
+		let mut listener = Listener::default();
+		listener.with_log = true;
+		do_transact_create_event(&mut listener);
+		do_gasometer_event(&mut listener);
+		do_evm_create_event(&mut listener);
+		do_evm_call_event(&mut listener);
+		do_evm_log_event(&mut listener);
+		do_exit_event(&mut listener);
+		listener.finish_transaction();
+		assert_eq!(listener.entries.len(), 1);
+		assert_eq!(listener.entries[0].len(), 2);
+		assert_eq!(listener.entries[0].get(&1).unwrap().logs.len(), 1);
+	}
+
+	#[test]
+	fn call_multiple_logs_event() {
+		let mut listener = Listener::default();
+		listener.with_log = true;
+		do_evm_call_event(&mut listener);
+		do_evm_log_event(&mut listener);
+		do_evm_log_event(&mut listener);
+		do_exit_event(&mut listener);
+		listener.finish_transaction();
+		assert_eq!(listener.entries.len(), 1);
+		assert_eq!(listener.entries[0].len(), 1);
+		assert_eq!(listener.entries[0].get(&0).unwrap().logs.len(), 2);
+	}
+
+	#[test]
+	fn call_log_event_not_recorder_when_with_log_is_false() {
+		let mut listener = Listener::default();
+		do_evm_call_event(&mut listener);
+		do_evm_log_event(&mut listener);
+		do_evm_log_event(&mut listener);
+		do_exit_event(&mut listener);
+		listener.finish_transaction();
+		assert_eq!(listener.entries.len(), 1);
+		assert_eq!(listener.entries[0].len(), 1);
+		assert_eq!(listener.entries[0].get(&0).unwrap().logs.len(), 0);
 	}
 }

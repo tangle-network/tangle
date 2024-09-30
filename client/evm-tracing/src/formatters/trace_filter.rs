@@ -15,15 +15,12 @@
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::blockscout::BlockscoutCallInner as CallInner;
-use crate::{
-	listeners::call_list::Listener,
-	types::{
-		block::{
-			TransactionTrace, TransactionTraceAction, TransactionTraceOutput,
-			TransactionTraceResult,
-		},
-		CallResult, CreateResult, CreateType,
+use crate::listeners::call_list::Listener;
+use crate::types::{
+	block::{
+		TransactionTrace, TransactionTraceAction, TransactionTraceOutput, TransactionTraceResult,
 	},
+	CallResult, CreateResult, CreateType,
 };
 use ethereum_types::H256;
 
