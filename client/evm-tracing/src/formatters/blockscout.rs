@@ -14,13 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-	listeners::call_list::Listener,
-	types::{
-		serialization::*,
-		single::{Call, TransactionTrace},
-		CallResult, CallType, CreateResult,
-	},
+use crate::listeners::call_list::Listener;
+use crate::types::serialization::*;
+use crate::types::{
+	single::{Call, TransactionTrace},
+	CallResult, CallType, CreateResult,
 };
 use ethereum_types::{H160, U256};
 use parity_scale_codec::{Decode, Encode};
@@ -88,4 +86,5 @@ pub struct BlockscoutCall {
 	pub gas_used: U256,
 	#[serde(flatten)]
 	pub inner: BlockscoutCallInner,
+	pub logs: Vec<crate::types::single::Log>,
 }

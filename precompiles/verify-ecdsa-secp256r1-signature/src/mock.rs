@@ -16,17 +16,14 @@
 #![allow(clippy::all)]
 //! Test utilities
 use super::*;
-use frame_support::{construct_runtime, parameter_types, traits::Everything, weights::Weight};
+use frame_support::derive_impl;
+use frame_support::{construct_runtime, parameter_types, weights::Weight};
 use pallet_evm::{AddressMapping, EnsureAddressNever, EnsureAddressRoot};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use precompile_utils::{precompile_set::*, testing::MockAccount};
 use serde::{Deserialize, Serialize};
-use sp_core::{sr25519::Public as sr25519Public, H160, H256, U256};
-use sp_runtime::{
-	traits::{BlakeTwo256, IdentityLookup},
-	AccountId32, BuildStorage, Perbill,
-};
-
+use sp_core::{sr25519::Public as sr25519Public, H160, U256};
+use sp_runtime::{AccountId32, BuildStorage, Perbill};
 pub type AccountId = MockAccount;
 pub type Balance = u128;
 
@@ -156,32 +153,33 @@ parameter_types! {
 	pub const SS58Prefix: u8 = 42;
 }
 
+#[derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
-	type BaseCallFilter = Everything;
-	type DbWeight = ();
+	type SS58Prefix = ();
+	type BaseCallFilter = frame_support::traits::Everything;
 	type RuntimeOrigin = RuntimeOrigin;
 	type Nonce = u64;
-	type Block = Block;
 	type RuntimeCall = RuntimeCall;
-	type Hash = H256;
-	type Hashing = BlakeTwo256;
+	type Hash = sp_core::H256;
+	type Hashing = sp_runtime::traits::BlakeTwo256;
 	type AccountId = AccountId;
-	type Lookup = IdentityLookup<AccountId>;
+	type Lookup = sp_runtime::traits::IdentityLookup<Self::AccountId>;
+	type Block = Block;
 	type RuntimeEvent = RuntimeEvent;
-	type BlockHashCount = BlockHashCount;
+	type BlockHashCount = ();
+	type DbWeight = ();
+	type BlockLength = ();
+	type BlockWeights = ();
 	type Version = ();
 	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
-	type BlockWeights = ();
-	type BlockLength = ();
-	type SS58Prefix = SS58Prefix;
 	type OnSetCode = ();
-	type RuntimeTask = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
+
 parameter_types! {
 	pub const ExistentialDeposit: u128 = 1;
 }

@@ -7,13 +7,16 @@ license = "GPL-3.0-only"
 repository = { workspace = true }
 
 [dependencies]
-ethereum-types = { workspace = true, features = ["std"] }
-hex = { workspace = true, features = ["serde"] }
-serde = { workspace = true, features = ["derive", "std"] }
+ethereum-types = { workspace = true, features = [ "std" ] }
+hex = { workspace = true, features = [ "serde" ] }
+serde = { workspace = true, features = [ "derive", "std" ] }
+serde_json = { workspace = true }
 
 # Moonbeam
-evm-tracing-events = { workspace = true, features = ["std"] }
+evm-tracing-events = { workspace = true, features = [ "std" ] }
+rpc-primitives-debug = { workspace = true, features = [ "std" ] }
 
 # Substrate
-parity-scale-codec = { workspace = true, features = ["std"] }
-sp-std = { workspace = true, features = ["std"] }
+parity-scale-codec = { workspace = true, features = [ "std" ] }
+sp-std = { workspace = true, features = [ "std" ] }
+sp-runtime = { workspace = true, features = [ "std" ] }

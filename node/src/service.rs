@@ -17,21 +17,23 @@
 pub use crate::eth::{db_config_dir, EthConfiguration};
 use crate::eth::{
 	new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, FrontierBackend,
-	FrontierBlockImport, FrontierPartialComponents, RpcConfig,
+	FrontierBlockImport, FrontierPartialComponents, RpcConfig, StorageOverride,
+	StorageOverrideHandler,
 };
 use futures::FutureExt;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
+#[allow(deprecated)]
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_service::{error::Error as ServiceError, ChainType, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_core::U256;
-use tangle_primitives::Block;
-
+use sp_runtime::traits::Block as BlockT;
 use std::{path::Path, sync::Arc, time::Duration};
+use tangle_primitives::Block;
 
 #[cfg(not(feature = "testnet"))]
 use tangle_runtime::{self, RuntimeApi, TransactionConverter};
@@ -42,9 +44,6 @@ use tangle_testnet_runtime::{self, RuntimeApi, TransactionConverter};
 /// The minimum period of blocks on which justifications will be
 /// imported and generated.
 const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
-
-pub type HostFunctions =
-	(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
 
 #[cfg(not(feature = "testnet"))]
 pub mod tangle {
@@ -95,10 +94,12 @@ pub mod testnet {
 }
 
 #[cfg(not(feature = "testnet"))]
+#[allow(deprecated)]
 pub(crate) type FullClient =
 	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<tangle::ExecutorDispatch>>;
 
 #[cfg(feature = "testnet")]
+#[allow(deprecated)]
 pub(crate) type FullClient =
 	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<testnet::ExecutorDispatch>>;
 
@@ -125,7 +126,7 @@ pub fn new_partial(
 			GrandpaLinkHalf<FullClient>,
 			sc_consensus_babe::BabeLink<Block>,
 			FrontierBackend,
-			Arc<fc_rpc::OverrideHandle<Block>>,
+			Arc<dyn StorageOverride<Block>>,
 			BabeWorkerHandle<Block>,
 		),
 	>,
@@ -157,6 +158,7 @@ pub fn new_partial(
 		})
 		.transpose()?;
 
+	#[allow(deprecated)]
 	let executor = sc_service::new_native_or_wasm_executor(config);
 
 	let (client, backend, keystore_container, task_manager) =
@@ -190,13 +192,13 @@ pub fn new_partial(
 		telemetry.as_ref().map(|x| x.handle()),
 	)?;
 
-	let overrides = crate::rpc::overrides_handle(client.clone());
+	let storage_override = Arc::new(StorageOverrideHandler::<Block, _, _>::new(client.clone()));
 	let frontier_backend = match eth_config.frontier_backend_type {
-		BackendType::KeyValue => FrontierBackend::KeyValue(fc_db::kv::Backend::open(
+		BackendType::KeyValue => FrontierBackend::KeyValue(Arc::new(fc_db::kv::Backend::open(
 			Arc::clone(&client),
 			&config.database,
 			&db_config_dir(config),
-		)?),
+		)?)),
 		BackendType::Sql => {
 			let db_path = db_config_dir(config).join("sql");
 			std::fs::create_dir_all(&db_path).expect("failed creating sql db directory");
@@ -213,10 +215,10 @@ pub fn new_partial(
 				}),
 				eth_config.frontier_sql_backend_pool_size,
 				std::num::NonZeroU32::new(eth_config.frontier_sql_backend_num_ops_timeout),
-				overrides.clone(),
+				storage_override.clone(),
 			))
 			.unwrap_or_else(|err| panic!("failed creating sql backend: {:?}", err));
-			FrontierBackend::Sql(backend)
+			FrontierBackend::Sql(Arc::new(backend))
 		},
 	};
 
@@ -272,7 +274,7 @@ pub fn new_partial(
 			grandpa_link,
 			babe_link,
 			frontier_backend,
-			overrides,
+			storage_override,
 			babe_worker_handle,
 		),
 	})
@@ -288,8 +290,7 @@ pub struct RunFullParams {
 }
 
 /// Builds a new service for a full client.
-#[cfg(not(feature = "instant-seal"))]
-pub async fn new_full(
+pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as BlockT>::Hash>>(
 	RunFullParams { mut config, eth_config, rpc_config, debug_output: _, auto_insert_keys }: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
@@ -307,7 +308,7 @@ pub async fn new_full(
 				grandpa_link,
 				babe_link,
 				frontier_backend,
-				overrides,
+				storage_override,
 				babe_worker_handle,
 			),
 	} = new_partial(&config, &eth_config)?;
@@ -358,7 +359,16 @@ pub async fn new_full(
 	let FrontierPartialComponents { filter_pool, fee_history_cache, fee_history_cache_limit } =
 		new_frontier_partial(&eth_config)?;
 
-	let mut net_config = sc_network::config::FullNetworkConfiguration::new(&config.network);
+	let mut net_config = sc_network::config::FullNetworkConfiguration::<
+		Block,
+		<Block as BlockT>::Hash,
+		Network,
+	>::new(&config.network);
+
+	let peer_store_handle = net_config.peer_store_handle();
+	let metrics = Network::register_notification_metrics(
+		config.prometheus_config.as_ref().map(|cfg| &cfg.registry),
+	);
 
 	let grandpa_protocol_name = sc_consensus_grandpa::protocol_standard_name(
 		&client.block_hash(0).ok().flatten().expect("Genesis block exists; qed"),
@@ -366,7 +376,11 @@ pub async fn new_full(
 	);
 
 	let (grandpa_protocol_config, grandpa_notification_service) =
-		sc_consensus_grandpa::grandpa_peers_set_config(grandpa_protocol_name.clone());
+		sc_consensus_grandpa::grandpa_peers_set_config::<_, Network>(
+			grandpa_protocol_name.clone(),
+			metrics.clone(),
+			peer_store_handle,
+		);
 
 	net_config.add_notification_protocol(grandpa_protocol_config);
 
@@ -387,6 +401,7 @@ pub async fn new_full(
 			block_announce_validator_builder: None,
 			warp_sync_params: Some(sc_service::WarpSyncParams::WithProvider(warp_sync)),
 			block_relay: None,
+			metrics,
 		})?;
 
 	let role = config.role.clone();
@@ -406,7 +421,7 @@ pub async fn new_full(
 				transaction_pool: Some(OffchainTransactionPoolFactory::new(
 					transaction_pool.clone(),
 				)),
-				network_provider: network.clone(),
+				network_provider: Arc::new(network.clone()),
 				is_validator: role.is_authority(),
 				enable_http_requests: true,
 				custom_extensions: move |_| vec![],
@@ -431,6 +446,7 @@ pub async fn new_full(
 
 	let slot_duration = babe_link.config().slot_duration();
 	let target_gas_price = eth_config.target_gas_price;
+	let frontier_backend = Arc::new(frontier_backend);
 
 	let ethapi_cmd = rpc_config.ethapi.clone();
 	let tracing_requesters =
@@ -440,7 +456,7 @@ pub async fn new_full(
 				client.clone(),
 				backend.clone(),
 				frontier_backend.clone(),
-				overrides.clone(),
+				storage_override.clone(),
 				&rpc_config,
 				prometheus_registry.clone(),
 			)
@@ -461,6 +477,8 @@ pub async fn new_full(
 		Ok((slot, timestamp, dynamic_fee))
 	};
 
+	let network_clone = network.clone();
+
 	let eth_rpc_params = crate::rpc::EthDeps {
 		client: client.clone(),
 		pool: transaction_pool.clone(),
@@ -468,16 +486,16 @@ pub async fn new_full(
 		converter: Some(TransactionConverter),
 		is_authority: config.role.is_authority(),
 		enable_dev_signer: eth_config.enable_dev_signer,
-		network: network.clone(),
+		network: network_clone,
 		sync: sync_service.clone(),
-		frontier_backend: match frontier_backend.clone() {
-			fc_db::Backend::KeyValue(b) => Arc::new(b),
-			fc_db::Backend::Sql(b) => Arc::new(b),
+		frontier_backend: match &*frontier_backend {
+			fc_db::Backend::KeyValue(b) => b.clone(),
+			fc_db::Backend::Sql(b) => b.clone(),
 		},
-		overrides: overrides.clone(),
+		storage_override: storage_override.clone(),
 		block_data_cache: Arc::new(fc_rpc::EthBlockDataCacheTask::new(
 			task_manager.spawn_handle(),
-			overrides.clone(),
+			storage_override.clone(),
 			eth_config.eth_log_block_cache,
 			eth_config.eth_statuses_cache,
 			prometheus_registry.clone(),
@@ -548,7 +566,7 @@ pub async fn new_full(
 		backend.clone(),
 		frontier_backend,
 		filter_pool,
-		overrides,
+		storage_override.clone(),
 		fee_history_cache,
 		fee_history_cache_limit,
 		sync_service.clone(),

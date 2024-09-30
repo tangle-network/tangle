@@ -21,11 +21,12 @@
 #![allow(clippy::all)]
 use super::*;
 use frame_election_provider_support::bounds::{ElectionBounds, ElectionBoundsBuilder};
+use frame_support::derive_impl;
 use frame_support::{
 	assert_ok, construct_runtime,
 	pallet_prelude::Hooks,
 	parameter_types,
-	traits::{ConstU64, Everything, OnFinalize, OnInitialize, OneSessionHandler},
+	traits::{ConstU64, OnFinalize, OnInitialize, OneSessionHandler},
 	weights::Weight,
 };
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
@@ -37,10 +38,9 @@ use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
 	sr25519::{self, Public as sr25519Public, Signature},
-	ConstU32, Get, H160, H256, U256,
+	ConstU32, Get, H160, U256,
 };
 use sp_runtime::testing::UintAuthorityId;
-
 use std::vec;
 
 use frame_election_provider_support::{onchain, SequentialPhragmen};
@@ -49,7 +49,7 @@ use sp_io::TestExternalities;
 use sp_runtime::{
 	curve::PiecewiseLinear,
 	testing::TestXt,
-	traits::{self, Extrinsic as ExtrinsicT, IdentifyAccount, IdentityLookup, Verify, Zero},
+	traits::{self, Extrinsic as ExtrinsicT, IdentifyAccount, Verify, Zero},
 	AccountId32, BuildStorage, Perbill,
 };
 
@@ -232,31 +232,31 @@ parameter_types! {
 	pub static Offset: BlockNumber = 0;
 }
 
+#[derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
+	type SS58Prefix = ();
+	type BaseCallFilter = frame_support::traits::Everything;
 	type RuntimeOrigin = RuntimeOrigin;
 	type Nonce = u64;
 	type RuntimeCall = RuntimeCall;
-	type Hash = H256;
-	type Hashing = ::sp_runtime::traits::BlakeTwo256;
+	type Hash = sp_core::H256;
+	type Hashing = sp_runtime::traits::BlakeTwo256;
 	type AccountId = AccountId;
+	type Lookup = sp_runtime::traits::IdentityLookup<Self::AccountId>;
 	type Block = Block;
-	type Lookup = IdentityLookup<AccountId>;
 	type RuntimeEvent = RuntimeEvent;
-	type BlockHashCount = ConstU64<250>;
-	type BlockWeights = ();
+	type BlockHashCount = ();
+	type DbWeight = ();
 	type BlockLength = ();
+	type BlockWeights = ();
 	type Version = ();
 	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
-	type DbWeight = ();
-	type BaseCallFilter = Everything;
 	type SystemWeightInfo = ();
-	type SS58Prefix = ();
-	type RuntimeTask = ();
 	type OnSetCode = ();
-	type MaxConsumers = ConstU32<16>;
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 impl pallet_balances::Config for Runtime {
@@ -301,7 +301,6 @@ pallet_staking_reward_curve::build! {
 parameter_types! {
 	pub const BondingDuration: EraIndex = 3;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
-	pub const OffendingValidatorsThreshold: Perbill = Perbill::from_percent(17);
 }
 
 pub type Precompiles<R> =
@@ -409,7 +408,6 @@ impl pallet_staking::Config for Runtime {
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
 	type NextNewSession = Session;
-	type OffendingValidatorsThreshold = ();
 	type ElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type GenesisElectionProvider = Self::ElectionProvider;
 	type VoterList = pallet_staking::UseNominatorsAndValidatorsMap<Self>;
@@ -420,6 +418,7 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
+	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
 }
 
 type Extrinsic = TestXt<RuntimeCall, ()>;

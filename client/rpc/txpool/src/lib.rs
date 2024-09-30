@@ -80,7 +80,7 @@ where
 			#[allow(deprecated)]
 			let res = api.extrinsic_filter_before_version_2(best_block, txs_ready, txs_future)
 				.map_err(|err| {
-					internal_err(format!("fetch runtime extrinsic filter failed: {err:?}"))
+					internal_err(format!("fetch runtime extrinsic filter failed: {:?}", err))
 				})?;
 			TxPoolResponse {
 				ready: res.ready.iter().map(|t| TransactionV2::Legacy(t.clone())).collect(),
@@ -88,7 +88,7 @@ where
 			}
 		} else {
 			api.extrinsic_filter(best_block, txs_ready, txs_future).map_err(|err| {
-				internal_err(format!("fetch runtime extrinsic filter failed: {err:?}"))
+				internal_err(format!("fetch runtime extrinsic filter failed: {:?}", err))
 			})?
 		};
 		// Build the T response.
@@ -156,5 +156,11 @@ where
 	fn status(&self) -> RpcResult<TxPoolResult<U256>> {
 		let status = self.graph.validated_pool().status();
 		Ok(TxPoolResult { pending: U256::from(status.ready), queued: U256::from(status.future) })
+	}
+}
+
+impl<B: BlockT, C, A: ChainApi> Clone for TxPool<B, C, A> {
+	fn clone(&self) -> Self {
+		Self::new(self.client.clone(), self.graph.clone())
 	}
 }
