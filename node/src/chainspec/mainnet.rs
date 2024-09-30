@@ -36,9 +36,7 @@ use sp_runtime::{
 };
 use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
-	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	EVMConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig, SessionConfig,
-	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig, UNIT,
+	AccountId, Balance, MaxVestingSchedules, Perbill, StakerStatus, TreasuryPalletId, UNIT,
 	WASM_BINARY,
 };
 

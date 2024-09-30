@@ -28,7 +28,7 @@ use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapp
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
 use tangle_primitives::ServiceManager;
-
+use frame_support::derive_impl;
 use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
@@ -168,31 +168,32 @@ parameter_types! {
 	pub const SS58Prefix: u8 = 42;
 	pub static ExistentialDeposit: Balance = 1;
 }
+
+#[derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
+	type SS58Prefix = ();
+	type BaseCallFilter = frame_support::traits::Everything;
 	type RuntimeOrigin = RuntimeOrigin;
 	type Nonce = u64;
 	type RuntimeCall = RuntimeCall;
-	type Hash = H256;
-	type Hashing = ::sp_runtime::traits::BlakeTwo256;
+	type Hash = sp_core::H256;
+	type Hashing = sp_runtime::traits::BlakeTwo256;
 	type AccountId = AccountId;
+	type Lookup = sp_runtime::traits::IdentityLookup<Self::AccountId>;
 	type Block = Block;
-	type Lookup = IdentityLookup<AccountId>;
 	type RuntimeEvent = RuntimeEvent;
-	type BlockHashCount = ConstU64<250>;
-	type BlockWeights = ();
+	type BlockHashCount = ();
+	type DbWeight = ();
 	type BlockLength = ();
+	type BlockWeights = ();
 	type Version = ();
 	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
-	type DbWeight = ();
-	type BaseCallFilter = Everything;
 	type SystemWeightInfo = ();
-	type SS58Prefix = ();
 	type OnSetCode = ();
-	type RuntimeTask = ();
-	type MaxConsumers = ConstU32<16>;
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 impl pallet_balances::Config for Runtime {

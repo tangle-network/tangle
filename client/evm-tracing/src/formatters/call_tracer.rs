@@ -42,7 +42,7 @@ impl super::ResponseFormatter for Formatter {
 		let mut traces = Vec::new();
 		for entry in listener.entries.iter() {
 			let mut result: Vec<Call> = entry
-				.into_iter()
+				.iter()
 				.map(|(_, it)| {
 					let from = it.from;
 					let trace_address = it.trace_address.clone();
@@ -172,9 +172,9 @@ impl super::ResponseFormatter for Formatter {
 									continue;
 								}
 							}
-							return false;
+							false
 						};
-						if b_len > a_len || (a_len == b_len && sibling_greater_than(&a, &b)) {
+						if b_len > a_len || (a_len == b_len && sibling_greater_than(a, b)) {
 							Ordering::Less
 						} else {
 							Ordering::Greater
@@ -230,7 +230,7 @@ impl super::ResponseFormatter for Formatter {
 		if traces.is_empty() {
 			return None;
 		}
-		return Some(traces);
+		Some(traces)
 	}
 }
 

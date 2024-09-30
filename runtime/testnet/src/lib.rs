@@ -29,7 +29,6 @@ pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
 
-use fixed::{types::extra::U16, FixedU128 as DecimalFixedU128};
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
@@ -42,7 +41,7 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
-use frame_system::{EnsureSigned, EnsureSignedBy};
+use frame_system::EnsureSigned;
 use frontier_evm::DefaultBaseFeePerGas;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_evm::GasWeightMapping;
@@ -58,7 +57,6 @@ use pallet_transaction_payment::{
 };
 use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use polkadot_parachain_primitives::primitives::Sibling;
 use precompiles::TanglePrecompiles;
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
@@ -69,19 +67,17 @@ use sp_runtime::{
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
 	traits::{
-		self, AccountIdConversion, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto,
-		DispatchInfoOf, Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf,
-		StaticLookup, UniqueSaturatedInto,
+		self, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto, DispatchInfoOf,
+		Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf, StaticLookup,
+		UniqueSaturatedInto,
 	},
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	AccountId32, ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
+	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
 	SaturatedConversion,
 };
-use sp_std::{
-	collections::btree_map::BTreeMap, marker::PhantomData, prelude::*, result, sync::Arc, vec::Vec,
-};
+use sp_std::{prelude::*, vec::Vec};
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -91,18 +87,6 @@ use static_assertions::const_assert;
 // 	VerifyingContractAddress,
 // };
 use tangle_primitives::services::RpcServicesWithBlueprint;
-use xcm::v4::{
-	prelude::*,
-	Asset, AssetId as XcmAssetId,
-	Junctions::{X1, X3, X4},
-	Location,
-};
-#[allow(deprecated)]
-use xcm_builder::{
-	AccountId32Aliases, CurrencyAdapter as XcmCurrencyAdapter, FungiblesAdapter, IsConcrete,
-	NoChecking, ParentIsPreset, SiblingParachainConvertsVia,
-};
-use xcm_executor::traits::{Error as ExecutionError, MatchesFungibles};
 
 pub use frame_support::{
 	construct_runtime,
@@ -153,7 +137,7 @@ use tangle_primitives::{
 	},
 	staking::{
 		BONDING_DURATION, HISTORY_DEPTH, MAX_NOMINATOR_REWARDED_PER_VALIDATOR, OFFCHAIN_REPEAT,
-		OFFENDING_VALIDATOR_THRESHOLD, SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
+		SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
 	},
 	treasury::{
 		BURN, DATA_DEPOSIT_PER_BYTE, MAXIMUM_REASON_LENGTH, MAX_APPROVALS, PROPOSAL_BOND,

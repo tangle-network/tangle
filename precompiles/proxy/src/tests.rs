@@ -16,6 +16,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::mock;
 use crate::mock::{
 	AccountId, ExtBuilder, PCall, PrecompilesValue, ProxyType, Runtime, RuntimeCall, RuntimeEvent,
 	RuntimeOrigin,

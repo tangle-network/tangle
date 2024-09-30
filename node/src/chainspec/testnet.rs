@@ -39,10 +39,8 @@ use tangle_primitives::{
 	TESTNET_LOCAL_SS58_PREFIX,
 };
 use tangle_testnet_runtime::{
-	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	EVMConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, Precompiles, RuntimeGenesisConfig,
-	SessionConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId,
-	VestingConfig, UNIT, WASM_BINARY,
+	AccountId, Balance, MaxVestingSchedules, Perbill, StakerStatus, TreasuryPalletId, UNIT,
+	WASM_BINARY,
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
@@ -261,7 +259,7 @@ fn testnet_genesis(
 	// contract often automatically adds a check that the contract bytecode is non-empty.
 	// For that reason a dummy code (0x60006000fd) can be inserted at the precompile address
 	// to pass that check.
-	let revert_bytecode = vec![0x60, 0x00, 0x60, 0x00, 0xFD];
+	let revert_bytecode = [0x60, 0x00, 0x60, 0x00, 0xFD];
 
 	let evm_accounts = {
 		let mut map = BTreeMap::new();
