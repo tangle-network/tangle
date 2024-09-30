@@ -4,21 +4,28 @@ This package is meant to be updated alongside changes to the tangle runtime.
 
 The package builds the types against the tangle standalone runtime.
 
-### Update Types
+### Updating Types
 
-In order to update types after making changes to the tangle api do the following:
+To update the types after modifying the Tangle APIs, follow these steps:
 
-- Run a local instance of the appropriate runtime. The types in this package correspond to the tangle standalone runtime.
+1. Build the `tangle` project with the testnet feature:
 
-- Run the following yarn scripts:
-```
-yarn update:metadata
-yarn build:interfaces
-```
+   ```bash
+   cargo build --release --package tangle --features testnet
+   ```
 
-### Building the types package
+2. Ensure you have [Node.js](https://nodejs.org/) version 18 or higher installed.
 
-After updating the types, run a build for the package with
-```
-yarn build
-```
+3. Generate the updated TypeScript types by running the `generate-ts-types.js` script:
+
+   ```bash
+   node types/scripts/generate-ts-types.js
+   ```
+
+This process will automatically update the TypeScript types to reflect the latest changes in the Tangle APIs.
+
+### Publishing and consuming types package
+
+Once the types have been updated, open a new PR on this repository to submit your changes. Remember to update the types package's version. Once the PR is merged into the `master`, a GitHub Actions workflow will automatically publish them to NPM.
+
+In case that you need to use or prototype the types before they are officially published to NPM, consider installing the package locally and using the local package until its updated version is published to NPM.

@@ -292,6 +292,7 @@ impl pallet_lst::Config for Runtime {
 	type PalletId = PoolsPalletId;
 	type MaxMetadataLen = MaxMetadataLen;
 	type MaxUnbonding = MaxUnbonding;
+	type MaxNameLength = ConstU32<50>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PoolId = PoolId;
@@ -416,7 +417,14 @@ impl ExtBuilder {
 			// make a pool
 			let amount_to_bond = Lst::depositor_min_bond();
 			<Runtime as Config>::Currency::make_free_balance_be(&10u32.into(), amount_to_bond * 5);
-			assert_ok!(Lst::create(RawOrigin::Signed(10).into(), amount_to_bond, 900, 901, 902));
+			assert_ok!(Lst::create(
+				RawOrigin::Signed(10).into(),
+				amount_to_bond,
+				900,
+				901,
+				902,
+				Default::default()
+			));
 			assert_ok!(Lst::set_metadata(RuntimeOrigin::signed(900), 1, vec![1, 1]));
 			let last_pool = LastPoolId::<Runtime>::get();
 			for (account_id, bonded) in self.members {

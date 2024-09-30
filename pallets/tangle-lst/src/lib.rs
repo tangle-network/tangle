@@ -229,6 +229,10 @@ pub mod pallet {
 		#[pallet::constant]
 		type MaxUnbonding: Get<u32>;
 
+		/// The maximum length of a pool name.
+		#[pallet::constant]
+		type MaxNameLength: Get<u32> + Clone;
+
 		/// Infallible method for converting `Currency::Balance` to `U256`.
 		type BalanceToU256: Convert<BalanceOf<Self>, U256>;
 
@@ -952,6 +956,7 @@ pub mod pallet {
 			root: AccountIdLookupOf<T>,
 			nominator: AccountIdLookupOf<T>,
 			bouncer: AccountIdLookupOf<T>,
+			name: BoundedVec<u8, T::MaxNameLength>,
 		) -> DispatchResult {
 			let depositor = ensure_signed(origin)?;
 
@@ -960,7 +965,7 @@ pub mod pallet {
 				Ok(*id)
 			})?;
 
-			Self::do_create(depositor, amount, root, nominator, bouncer, pool_id)
+			Self::do_create(depositor, amount, root, nominator, bouncer, pool_id, name)
 		}
 
 		/// Create a new delegation pool with a previously used pool id
@@ -978,13 +983,14 @@ pub mod pallet {
 			nominator: AccountIdLookupOf<T>,
 			bouncer: AccountIdLookupOf<T>,
 			pool_id: PoolId,
+			name: BoundedVec<u8, T::MaxNameLength>,
 		) -> DispatchResult {
 			let depositor = ensure_signed(origin)?;
 
 			ensure!(!BondedPools::<T>::contains_key(pool_id), Error::<T>::PoolIdInUse);
 			ensure!(pool_id < LastPoolId::<T>::get(), Error::<T>::InvalidPoolId);
 
-			Self::do_create(depositor, amount, root, nominator, bouncer, pool_id)
+			Self::do_create(depositor, amount, root, nominator, bouncer, pool_id, name)
 		}
 
 		/// Nominate on behalf of the pool.
@@ -1509,6 +1515,7 @@ impl<T: Config> Pallet<T> {
 		nominator: AccountIdLookupOf<T>,
 		bouncer: AccountIdLookupOf<T>,
 		pool_id: PoolId,
+		name: BoundedVec<u8, T::MaxNameLength>,
 	) -> DispatchResult {
 		let root = T::Lookup::lookup(root)?;
 		let nominator = T::Lookup::lookup(nominator)?;
@@ -1537,6 +1544,7 @@ impl<T: Config> Pallet<T> {
 				bouncer: Some(bouncer),
 				depositor: who.clone(),
 			},
+			name,
 		);
 
 		bonded_pool.try_bond_funds(&who, amount, BondType::Create)?;

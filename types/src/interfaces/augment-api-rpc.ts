@@ -29,6 +29,7 @@ import type { AccountId, BlockNumber, H160, H256, H64, Hash, Header, Index, Just
 import type { MigrationStatusResult, ReadProof, RuntimeVersion, TraceBlockResponse } from '@polkadot/types/interfaces/state';
 import type { ApplyExtrinsicResult, ChainProperties, ChainType, Health, NetworkState, NodeRole, PeerInfo, SyncState } from '@polkadot/types/interfaces/system';
 import type { IExtrinsic, Observable } from '@polkadot/types/types';
+import type { RpcServicesWithBlueprint } from '@webb-tools/tangle-substrate-types/services';
 
 export type __AugmentedRpc = AugmentedRpc<() => unknown>;
 
@@ -430,6 +431,12 @@ declare module '@polkadot/rpc-core/types/jsonrpc' {
        * Retrieves the list of RPC methods that are exposed by the node
        **/
       methods: AugmentedRpc<() => Observable<RpcMethods>>;
+    };
+    services: {
+      /**
+       * Query all the services that this operator is providing along with their blueprints.
+       **/
+      queryServicesWithBlueprintsByOperator: AugmentedRpc<(operator: AccountId | string | Uint8Array) => Observable<Vec<RpcServicesWithBlueprint>>>;
     };
     state: {
       /**

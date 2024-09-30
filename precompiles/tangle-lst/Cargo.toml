@@ -23,7 +23,7 @@ sp-std = { workspace = true }
 # Frontier
 fp-evm = { workspace = true }
 pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
-
+pallet-tangle-lst = { workspace = true }
 tangle-primitives = { workspace = true }
 
 [dev-dependencies]
@@ -57,5 +57,6 @@ std = [
   "sp-runtime/std",
   "sp-std/std",
   "tangle-primitives/std",
-  "pallet-assets/std"
+  "pallet-assets/std",
+  "pallet-tangle-lst/std",
 ]

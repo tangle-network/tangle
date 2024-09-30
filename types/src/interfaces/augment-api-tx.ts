@@ -10,7 +10,7 @@ import type { Data } from '@polkadot/types';
 import type { Bytes, Compact, Null, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, IMethod, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, MultiAddress, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import { SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusSlotsEquivocationProof, SpSessionMembershipProof, PalletBalancesAdjustmentDirection, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletAirdropClaimsStatementKind, SpWeightsWeightV2Weight, PalletDemocracyConviction, FrameSupportPreimagesBounded, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, SpNposElectionsSupport, SpNposElectionsElectionScore, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, EthereumTransactionTransactionV2, SpConsensusGrandpaEquivocationProof, SpCoreVoid, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, SpRuntimeMultiSignature, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsPoolState, PalletNominationPoolsConfigOpAccountId32, TangleTestnetRuntimeProxyType, TanglePrimitivesServicesField, TanglePrimitivesServicesServiceBlueprint, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesApprovalPrefrence, TangleTestnetRuntimeOpaqueSessionKeys, PalletStakingRewardDestination, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpPerbill, PalletStakingValidatorPrefs, StagingXcmV4AssetAssetId, StagingXcmV4Asset, StagingXcmV4Location, SygmaBridgeProposal, SygmaTraitsMpcAddress, SygmaFeeHandlerRouterFeeHandlerType, TangleTestnetRuntimeOriginCaller, PalletVestingVestingInfo } from '@polkadot/types/lookup';
+import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, StagingXcmV4Asset, StagingXcmV4AssetAssetId, StagingXcmV4Location, SygmaBridgeProposal, SygmaFeeHandlerRouterFeeHandlerType, SygmaTraitsMpcAddress, TanglePrimitivesServicesApprovalPrefrence, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TanglePrimitivesServicesServiceBlueprint, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedSubmittable = AugmentedSubmittable<() => unknown>;
 export type __SubmittableExtrinsic<ApiType extends ApiTypes> = SubmittableExtrinsic<ApiType>;
@@ -194,7 +194,7 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       forceAdjustTotalIssuance: AugmentedSubmittable<(direction: PalletBalancesAdjustmentDirection | 'Increase' | 'Decrease' | number | Uint8Array, delta: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletBalancesAdjustmentDirection, Compact<u128>]>;
       /**
-       * See [`Pallet::force_make_free_balance_be`].
+       * See [`Pallet::force_set_balance`].
        **/
       forceSetBalance: AugmentedSubmittable<(who: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, newFree: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, Compact<u128>]>;
       /**
@@ -714,6 +714,92 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       [key: string]: SubmittableExtrinsicFunction<ApiType>;
     };
+    lst: {
+      /**
+       * See [`Pallet::adjust_pool_deposit`].
+       **/
+      adjustPoolDeposit: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
+      /**
+       * See [`Pallet::bond_extra`].
+       **/
+      bondExtra: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, extra: PalletTangleLstBondExtra | { FreeBalance: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletTangleLstBondExtra]>;
+      /**
+       * See [`Pallet::bond_extra_other`].
+       **/
+      bondExtraOther: AugmentedSubmittable<(member: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, poolId: u32 | AnyNumber | Uint8Array, extra: PalletTangleLstBondExtra | { FreeBalance: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, u32, PalletTangleLstBondExtra]>;
+      /**
+       * See [`Pallet::chill`].
+       **/
+      chill: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
+      /**
+       * See [`Pallet::claim_commission`].
+       **/
+      claimCommission: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
+      /**
+       * See [`Pallet::create`].
+       **/
+      create: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array, root: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, nominator: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, bouncer: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, name: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>, MultiAddress, MultiAddress, MultiAddress, Bytes]>;
+      /**
+       * See [`Pallet::create_with_pool_id`].
+       **/
+      createWithPoolId: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array, root: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, nominator: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, bouncer: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, poolId: u32 | AnyNumber | Uint8Array, name: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>, MultiAddress, MultiAddress, MultiAddress, u32, Bytes]>;
+      /**
+       * See [`Pallet::join`].
+       **/
+      join: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array, poolId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>, u32]>;
+      /**
+       * See [`Pallet::nominate`].
+       **/
+      nominate: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, validators: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [u32, Vec<AccountId32>]>;
+      /**
+       * See [`Pallet::pool_withdraw_unbonded`].
+       **/
+      poolWithdrawUnbonded: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, numSlashingSpans: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u32]>;
+      /**
+       * See [`Pallet::set_commission`].
+       **/
+      setCommission: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, newCommission: Option<ITuple<[Perbill, AccountId32]>> | null | Uint8Array | ITuple<[Perbill, AccountId32]> | [Perbill | AnyNumber | Uint8Array, AccountId32 | string | Uint8Array]) => SubmittableExtrinsic<ApiType>, [u32, Option<ITuple<[Perbill, AccountId32]>>]>;
+      /**
+       * See [`Pallet::set_commission_change_rate`].
+       **/
+      setCommissionChangeRate: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, changeRate: PalletTangleLstCommissionCommissionChangeRate | { maxIncrease?: any; minDelay?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletTangleLstCommissionCommissionChangeRate]>;
+      /**
+       * See [`Pallet::set_commission_claim_permission`].
+       **/
+      setCommissionClaimPermission: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, permission: Option<PalletTangleLstCommissionCommissionClaimPermission> | null | Uint8Array | PalletTangleLstCommissionCommissionClaimPermission | { Permissionless: any } | { Account: any } | string) => SubmittableExtrinsic<ApiType>, [u32, Option<PalletTangleLstCommissionCommissionClaimPermission>]>;
+      /**
+       * See [`Pallet::set_commission_max`].
+       **/
+      setCommissionMax: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, maxCommission: Perbill | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Perbill]>;
+      /**
+       * See [`Pallet::set_configs`].
+       **/
+      setConfigs: AugmentedSubmittable<(minJoinBond: PalletTangleLstConfigOpU128 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, minCreateBond: PalletTangleLstConfigOpU128 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, maxPools: PalletTangleLstConfigOpU32 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, globalMaxCommission: PalletTangleLstConfigOpPerbill | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstConfigOpPerbill]>;
+      /**
+       * See [`Pallet::set_metadata`].
+       **/
+      setMetadata: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, metadata: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Bytes]>;
+      /**
+       * See [`Pallet::set_state`].
+       **/
+      setState: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, state: PalletTangleLstPoolsPoolState | 'Open' | 'Blocked' | 'Destroying' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletTangleLstPoolsPoolState]>;
+      /**
+       * See [`Pallet::unbond`].
+       **/
+      unbond: AugmentedSubmittable<(memberAccount: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, poolId: u32 | AnyNumber | Uint8Array, unbondingPoints: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, u32, Compact<u128>]>;
+      /**
+       * See [`Pallet::update_roles`].
+       **/
+      updateRoles: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, newRoot: PalletTangleLstConfigOpAccountId32 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, newNominator: PalletTangleLstConfigOpAccountId32 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, newBouncer: PalletTangleLstConfigOpAccountId32 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpAccountId32]>;
+      /**
+       * See [`Pallet::withdraw_unbonded`].
+       **/
+      withdrawUnbonded: AugmentedSubmittable<(memberAccount: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, poolId: u32 | AnyNumber | Uint8Array, numSlashingSpans: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, u32, u32]>;
+      /**
+       * Generic tx
+       **/
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
     multiAssetDelegation: {
       /**
        * See [`Pallet::cancel_delegator_unstake`].
@@ -1034,7 +1120,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * See `Pallet::call`.
        **/
-      call: AugmentedSubmittable<(serviceId: Compact<u64> | AnyNumber | Uint8Array, job: Compact<u8> | AnyNumber | Uint8Array, args: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { AccountId: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Compact<u8>, Vec<TanglePrimitivesServicesField>]>;
+      call: AugmentedSubmittable<(serviceId: Compact<u64> | AnyNumber | Uint8Array, job: Compact<u8> | AnyNumber | Uint8Array, args: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Compact<u8>, Vec<TanglePrimitivesServicesField>]>;
       /**
        * See `Pallet::create_blueprint`.
        **/
@@ -1046,7 +1132,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * See `Pallet::register`.
        **/
-      register: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, preferences: TanglePrimitivesServicesOperatorPreferences | { key?: any; approval?: any } | string | Uint8Array, registrationArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { AccountId: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Compact<u64>, TanglePrimitivesServicesOperatorPreferences, Vec<TanglePrimitivesServicesField>]>;
+      register: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, preferences: TanglePrimitivesServicesOperatorPreferences | { key?: any; approval?: any; priceTargets?: any } | string | Uint8Array, registrationArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Compact<u64>, TanglePrimitivesServicesOperatorPreferences, Vec<TanglePrimitivesServicesField>]>;
       /**
        * See `Pallet::reject`.
        **/
@@ -1054,11 +1140,11 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * See `Pallet::request`.
        **/
-      request: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, permittedCallers: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], serviceProviders: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], ttl: Compact<u64> | AnyNumber | Uint8Array, requestArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { AccountId: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Vec<AccountId32>, Vec<AccountId32>, Compact<u64>, Vec<TanglePrimitivesServicesField>]>;
+      request: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, permittedCallers: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], serviceProviders: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], ttl: Compact<u64> | AnyNumber | Uint8Array, requestArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Vec<AccountId32>, Vec<AccountId32>, Compact<u64>, Vec<TanglePrimitivesServicesField>]>;
       /**
        * See `Pallet::submit_result`.
        **/
-      submitResult: AugmentedSubmittable<(serviceId: Compact<u64> | AnyNumber | Uint8Array, callId: Compact<u64> | AnyNumber | Uint8Array, result: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { AccountId: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Compact<u64>, Vec<TanglePrimitivesServicesField>]>;
+      submitResult: AugmentedSubmittable<(serviceId: Compact<u64> | AnyNumber | Uint8Array, callId: Compact<u64> | AnyNumber | Uint8Array, result: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Compact<u64>, Vec<TanglePrimitivesServicesField>]>;
       /**
        * See `Pallet::terminate`.
        **/
@@ -1071,6 +1157,10 @@ declare module '@polkadot/api-base/types/submittable' {
        * See `Pallet::update_approval_preference`.
        **/
       updateApprovalPreference: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, approvalPreference: TanglePrimitivesServicesApprovalPrefrence | 'None' | 'Required' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, TanglePrimitivesServicesApprovalPrefrence]>;
+      /**
+       * See `Pallet::update_price_targets`.
+       **/
+      updatePriceTargets: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, priceTargets: TanglePrimitivesServicesPriceTargets | { cpu?: any; mem?: any; storageHdd?: any; storageSsd?: any; storageNvme?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, TanglePrimitivesServicesPriceTargets]>;
       /**
        * Generic tx
        **/

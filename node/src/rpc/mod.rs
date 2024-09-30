@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 //! A collection of node-specific RPC methods.
-
+#![allow(unused_imports)]
 use jsonrpsee::RpcModule;
 use std::sync::Arc;
 // Substrate
@@ -41,7 +41,7 @@ use tangle_runtime::BlockNumber;
 
 // Runtime
 #[cfg(not(feature = "testnet"))]
-use tangle_runtime::{AccountId, Balance, Hash, Index};
+use tangle_runtime::{AccountId, Balance, Hash, Index, PalletServicesConstraints};
 #[cfg(feature = "testnet")]
 use tangle_testnet_runtime::{AccountId, Balance, Hash, Index, PalletServicesConstraints};
 
