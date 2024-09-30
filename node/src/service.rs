@@ -289,7 +289,7 @@ pub struct RunFullParams {
 }
 
 /// Builds a new service for a full client.
-pub async fn new_full(
+pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as BlockT>::Hash>>(
 	RunFullParams { mut config, eth_config, rpc_config, debug_output: _, auto_insert_keys }: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
@@ -358,15 +358,16 @@ pub async fn new_full(
 	let FrontierPartialComponents { filter_pool, fee_history_cache, fee_history_cache_limit } =
 		new_frontier_partial(&eth_config)?;
 
-	let mut net_config =
-		sc_network::config::FullNetworkConfiguration::<_, _, sc_network::NetworkWorker<_, _>>::new(
-			&config.network,
-		);
+	let mut net_config = sc_network::config::FullNetworkConfiguration::<
+		Block,
+		<Block as BlockT>::Hash,
+		Network,
+	>::new(&config.network);
+
 	let peer_store_handle = net_config.peer_store_handle();
-	let metrics =
-		sc_network::NetworkBackend::<Block, <Block as BlockT>::Hash>::register_notification_metrics(
-			config.prometheus_config.as_ref().map(|cfg| &cfg.registry),
-		);
+	let metrics = Network::register_notification_metrics(
+		config.prometheus_config.as_ref().map(|cfg| &cfg.registry),
+	);
 
 	let grandpa_protocol_name = sc_consensus_grandpa::protocol_standard_name(
 		&client.block_hash(0).ok().flatten().expect("Genesis block exists; qed"),
@@ -374,7 +375,7 @@ pub async fn new_full(
 	);
 
 	let (grandpa_protocol_config, grandpa_notification_service) =
-		sc_consensus_grandpa::grandpa_peers_set_config(
+		sc_consensus_grandpa::grandpa_peers_set_config::<_, Network>(
 			grandpa_protocol_name.clone(),
 			metrics.clone(),
 			peer_store_handle,

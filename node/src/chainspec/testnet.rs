@@ -46,7 +46,7 @@ use tangle_testnet_runtime::{
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
-pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
+pub type ChainSpec = sc_service::GenericChainSpec;
 
 pub const ENDOWMENT: Balance = 10_000_000 * UNIT;
 
@@ -99,13 +99,13 @@ fn generate_session_keys(
 	tangle_testnet_runtime::opaque::SessionKeys { babe, grandpa, im_online }
 }
 
-pub fn local_benchmarking_config(chain_id: u64) -> ChainSpec {
+pub fn local_benchmarking_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
 
-	ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
+	Ok(ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
 		.with_name("Local Testnet")
 		.with_id("local_testnet")
 		.with_chain_type(ChainType::Local)
@@ -140,17 +140,17 @@ pub fn local_benchmarking_config(chain_id: u64) -> ChainSpec {
 			Default::default(),
 			get_testing_default_fully_funded_accounts(),
 		))
-		.build()
+		.build())
 }
 
-pub fn local_testnet_config(chain_id: u64) -> ChainSpec {
+pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let mut properties = sc_chain_spec::Properties::new();
 
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), TESTNET_LOCAL_SS58_PREFIX.into());
 
-	ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
+	Ok(ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
 		.with_name("Local Testnet")
 		.with_id("local_testnet")
 		.with_chain_type(ChainType::Local)
@@ -179,17 +179,17 @@ pub fn local_testnet_config(chain_id: u64) -> ChainSpec {
 			Default::default(),
 			get_testing_default_fully_funded_accounts(),
 		))
-		.build()
+		.build())
 }
 
-pub fn tangle_testnet_config(chain_id: u64) -> ChainSpec {
+pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	let boot_nodes = get_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), 42.into());
 
-	ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
+	Ok(ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
 		.with_name("Tangle Testnet")
 		.with_id("tangle-testnet")
 		.with_chain_type(ChainType::Live)
@@ -220,7 +220,7 @@ pub fn tangle_testnet_config(chain_id: u64) -> ChainSpec {
 			// endowed evm accounts
 			get_testing_default_fully_funded_accounts(),
 		))
-		.build()
+		.build())
 }
 
 /// Configure initial storage state for FRAME modules.
@@ -294,6 +294,16 @@ fn testnet_genesis(
 		map
 	};
 
+	let council_members: Vec<AccountId> = vec![
+		hex!["483b466832e094f01b1779a7ed07025df319c492dac5160aca89a3be117a7b6d"].into(),
+		hex!["86d08e7bbe77bc74e3d88ee22edc53368bc13d619e05b66fe6c4b8e2d5c7015a"].into(),
+		hex!["e421301e5aa5dddee51f0d8c73e794df16673e53157c5ea657be742e35b1793f"].into(),
+		hex!["4ce3a4da3a7c1ce65f7edeff864dc3dd42e8f47eecc2726d99a0a80124698217"].into(),
+		hex!["dcd9b70a0409b7626cba1a4016d8da19f4df5ce9fc5e8d16b789e71bb1161d73"].into(),
+	]
+	.into_iter()
+	.collect();
+
 	serde_json::json!({
 		"sudo": { "key": Some(root_key) },
 		"balances": {
@@ -327,13 +337,7 @@ fn testnet_genesis(
 			"stakers" : stakers,
 		},
 		"council": {
-			"members": vec![
-				hex!["483b466832e094f01b1779a7ed07025df319c492dac5160aca89a3be117a7b6d"].into(),
-				hex!["86d08e7bbe77bc74e3d88ee22edc53368bc13d619e05b66fe6c4b8e2d5c7015a"].into(),
-				hex!["e421301e5aa5dddee51f0d8c73e794df16673e53157c5ea657be742e35b1793f"].into(),
-				hex!["4ce3a4da3a7c1ce65f7edeff864dc3dd42e8f47eecc2726d99a0a80124698217"].into(),
-				hex!["dcd9b70a0409b7626cba1a4016d8da19f4df5ce9fc5e8d16b789e71bb1161d73"].into(),
-			],
+			"members": council_members,
 		},
 		"babe": {
 			"epoch_config": tangle_runtime::BABE_GENESIS_EPOCH_CONFIG,

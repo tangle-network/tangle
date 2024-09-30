@@ -180,7 +180,9 @@ pub fn run() -> sc_cli::Result<()> {
 							);
 						}
 
-						cmd.run::<Block, service::HostFunctions>(config)
+						cmd.run_with_spec::<sp_runtime::traits::HashingFor<Block>, ()>(Some(
+							config.chain_spec,
+						))
 					},
 					BenchmarkCmd::Block(cmd) => {
 						let PartialComponents { client, .. } =
@@ -216,7 +218,7 @@ pub fn run() -> sc_cli::Result<()> {
 				let (client, _, _, _, frontier_backend) =
 					service::new_chain_ops(&mut config, &cli.eth)?;
 				let frontier_backend = match frontier_backend {
-					fc_db::Backend::KeyValue(kv) => std::sync::Arc::new(kv),
+					fc_db::Backend::KeyValue(kv) => kv,
 					_ => panic!("Only fc_db::Backend::KeyValue supported"),
 				};
 				cmd.run(client, frontier_backend)
@@ -258,7 +260,9 @@ pub fn run() -> sc_cli::Result<()> {
 			let runner = cli.create_runner(&cli.run)?;
 
 			runner.run_node_until_exit(|config| async move {
-				service::new_full(service::RunFullParams {
+				service::new_full::<
+					sc_network::NetworkWorker<Block, <Block as sp_runtime::traits::Block>::Hash>,
+				>(service::RunFullParams {
 					config,
 					rpc_config,
 					eth_config: cli.eth,
