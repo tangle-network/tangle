@@ -50,8 +50,6 @@ type BalanceOf<Runtime> = <<Runtime as pallet_democracy::Config>::Currency as Cu
 	<Runtime as frame_system::Config>::AccountId,
 >>::Balance;
 
-type DemocracyOf<Runtime> = pallet_democracy::Pallet<Runtime>;
-
 pub const ENCODED_PROPOSAL_SIZE_LIMIT: u32 = 2u32.pow(16);
 type GetEncodedProposalSizeLimit = ConstU32<ENCODED_PROPOSAL_SIZE_LIMIT>;
 

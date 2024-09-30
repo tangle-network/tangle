@@ -17,16 +17,13 @@
 //! Test utilities
 use super::*;
 use frame_support::derive_impl;
-use frame_support::{construct_runtime, parameter_types, traits::Everything, weights::Weight};
+use frame_support::{construct_runtime, parameter_types, weights::Weight};
 use pallet_evm::{AddressMapping, EnsureAddressNever, EnsureAddressRoot};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use precompile_utils::{precompile_set::*, testing::MockAccount};
 use serde::{Deserialize, Serialize};
-use sp_core::{sr25519::Public as sr25519Public, H160, H256, U256};
-use sp_runtime::{
-	traits::{BlakeTwo256, IdentityLookup},
-	AccountId32, BuildStorage, Perbill,
-};
+use sp_core::{sr25519::Public as sr25519Public, H160, U256};
+use sp_runtime::{AccountId32, BuildStorage, Perbill};
 pub type AccountId = MockAccount;
 pub type Balance = u128;
 

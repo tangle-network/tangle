@@ -23,7 +23,7 @@ use tangle_primitives::services::ServiceRequestHook;
 use tangle_primitives::services::{ApprovalPrefrence, OperatorPreferences, ServiceBlueprint};
 
 fn zero_key() -> ecdsa::Public {
-	ecdsa::Public([0; 33])
+	ecdsa::Public::from([0; 33])
 }
 
 #[allow(dead_code)]

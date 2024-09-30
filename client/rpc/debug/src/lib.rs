@@ -42,6 +42,7 @@ use sp_runtime::{
 };
 use std::{future::Future, marker::PhantomData, sync::Arc};
 
+#[allow(clippy::large_enum_variant)]
 pub enum RequesterInput {
 	Call((RequestBlockId, TraceCallParams)),
 	Transaction(H256),

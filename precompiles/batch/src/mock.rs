@@ -18,15 +18,11 @@
 
 //! Test utilities
 use super::*;
-use frame_support::{construct_runtime, parameter_types, traits::Everything, weights::Weight};
+use frame_support::derive_impl;
+use frame_support::{construct_runtime, parameter_types, weights::Weight};
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
 use precompile_utils::{mock_account, precompile_set::*, testing::MockAccount};
-use sp_core::H256;
-use sp_runtime::{
-	traits::{BlakeTwo256, IdentityLookup},
-	BuildStorage, Perbill,
-};
-
+use sp_runtime::{BuildStorage, Perbill};
 pub type AccountId = MockAccount;
 pub type Balance = u128;
 

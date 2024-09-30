@@ -19,11 +19,7 @@
 //! Test utilities
 use crate::{ProxyPrecompile, ProxyPrecompileCall};
 use frame_support::derive_impl;
-use frame_support::{
-	construct_runtime, parameter_types,
-	traits::{Everything, InstanceFilter},
-	weights::Weight,
-};
+use frame_support::{construct_runtime, parameter_types, traits::InstanceFilter, weights::Weight};
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
 use precompile_utils::{
 	precompile_set::{
@@ -33,10 +29,10 @@ use precompile_utils::{
 	testing::MockAccount,
 };
 use scale_info::TypeInfo;
-use sp_core::{H160, H256, U256};
+use sp_core::{H160, U256};
 use sp_runtime::{
 	codec::{Decode, Encode, MaxEncodedLen},
-	traits::{BlakeTwo256, IdentityLookup},
+	traits::BlakeTwo256,
 	BuildStorage,
 };
 pub type AccountId = MockAccount;

@@ -19,14 +19,11 @@
 use super::*;
 
 use frame_support::derive_impl;
-use frame_support::{construct_runtime, parameter_types, traits::Everything, weights::Weight};
+use frame_support::{construct_runtime, parameter_types, weights::Weight};
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
 use precompile_utils::{precompile_set::*, testing::MockAccount};
-use sp_core::{ConstU32, H256, U256};
-use sp_runtime::{
-	traits::{BlakeTwo256, IdentityLookup},
-	BuildStorage,
-};
+use sp_core::{ConstU32, U256};
+use sp_runtime::BuildStorage;
 pub type AccountId = MockAccount;
 pub type Balance = u128;
 pub type Block = frame_system::mocking::MockBlockU32<Runtime>;

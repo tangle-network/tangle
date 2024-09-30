@@ -181,7 +181,7 @@ pub fn local_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 }
 
 pub fn tangle_testnet_config(chain_id: u64) -> Result<ChainSpec, String> {
-	let boot_nodes = get_bootnodes();
+	let _boot_nodes = get_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
