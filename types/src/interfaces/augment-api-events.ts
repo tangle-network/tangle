@@ -774,9 +774,9 @@ declare module '@polkadot/api-base/types/events' {
     };
     multiAssetDelegation: {
       /**
-       * Asset has been updated to reward pool
+       * Asset has been updated to reward vault
        **/
-      AssetUpdatedInPool: AugmentedEvent<ApiType, [who: AccountId32, poolId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction], { who: AccountId32, poolId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction }>;
+      AssetUpdatedInVault: AugmentedEvent<ApiType, [who: AccountId32, vaultId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction], { who: AccountId32, vaultId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction }>;
       /**
        * Event emitted when a blueprint is whitelisted for rewards
        **/
@@ -806,9 +806,9 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Executedwithdraw: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
       /**
-       * Event emitted when an incentive APY and cap are set for a reward pool
+       * Event emitted when an incentive APY and cap are set for a reward vault
        **/
-      IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [poolId: u128, apy: Percent, cap: u128], { poolId: u128, apy: Percent, cap: u128 }>;
+      IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [vaultId: u128, apy: Percent, cap: u128], { vaultId: u128, apy: Percent, cap: u128 }>;
       /**
        * An operator has cancelled their stake decrease request.
        **/

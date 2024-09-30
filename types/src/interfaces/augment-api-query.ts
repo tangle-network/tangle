@@ -859,9 +859,9 @@ declare module '@polkadot/api-base/types/storage' {
     };
     multiAssetDelegation: {
       /**
-       * Storage for the reward pools
+       * Storage for the reward vaults
        **/
-      assetLookupRewardPools: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<Option<u128>>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
+      assetLookupRewardVaults: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<Option<u128>>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
       /**
        * Snapshot of collator delegation stake at the start of the round.
        **/
@@ -884,9 +884,9 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       rewardConfigStorage: AugmentedQuery<ApiType, () => Observable<Option<PalletMultiAssetDelegationRewardsRewardConfig>>, []> & QueryableStorageEntry<ApiType, []>;
       /**
-       * Storage for the reward pools
+       * Storage for the reward vaults
        **/
-      rewardPools: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<Option<Vec<u128>>>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
+      rewardVaults: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<Option<Vec<u128>>>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
       /**
        * Generic query
        **/

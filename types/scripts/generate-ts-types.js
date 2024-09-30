@@ -18,7 +18,7 @@ const { join, resolve } = require('node:path')
 const CWD = process.cwd()
 const TYPES_DIR = join(CWD, 'types')
 const METADATA_PATH = resolve(CWD, 'types/src/metadata.json')
-const ENDPOINT = 'http://127.0.0.1:9944/'
+const ENDPOINT = 'http://127.0.0.1:9944'
 
 let nodeProcess
 
@@ -102,20 +102,31 @@ function getCurrentMetadata() {
   return JSON.parse(readFileSync(METADATA_PATH, 'utf8'))
 }
 
-function fetchMetadata() {
+function fetchMetadata(retryTimes = 3) {
   logStep('Fetching metadata from the node...')
   return new Promise((resolve, reject) => {
-    exec(
-      `curl -H "Content-Type: application/json" -d \'{"id":"1","jsonrpc":"2.0","method":"state_getMetadata","params":[]}\' ${ENDPOINT}`,
-      (error, stdout) => {
-        if (error) {
-          reject(error)
-          return
-        }
+    const fetchAttempt = attemptsLeft => {
+      exec(
+        `curl -H "Content-Type: application/json" -d \'{"id":"1","jsonrpc":"2.0","method":"state_getMetadata","params":[]}\' ${ENDPOINT}`,
+        (error, stdout) => {
+          if (error) {
+            if (attemptsLeft > 0) {
+              console.log(
+                `Fetch attempt failed. Retrying... (${attemptsLeft} attempts left)`
+              )
+              fetchAttempt(attemptsLeft - 1)
+            } else {
+              reject(error)
+            }
+            return
+          }
 
-        resolve(JSON.parse(stdout.toString()))
-      }
-    )
+          resolve(JSON.parse(stdout.toString()))
+        }
+      )
+    }
+
+    fetchAttempt(retryTimes)
   })
 }
 
@@ -158,6 +169,11 @@ process.on('SIGINT', () => {
 })
 
 process.on('SIGTERM', () => {
+  stopTangleNode()
+  process.exit()
+})
+
+process.on('exit', () => {
   stopTangleNode()
   process.exit()
 })

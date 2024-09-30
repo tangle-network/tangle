@@ -1569,16 +1569,16 @@ export default {
         who: 'AccountId32',
       },
       IncentiveAPYAndCapSet: {
-        poolId: 'u128',
+        vaultId: 'u128',
         apy: 'Percent',
         cap: 'u128',
       },
       BlueprintWhitelisted: {
         blueprintId: 'u32',
       },
-      AssetUpdatedInPool: {
+      AssetUpdatedInVault: {
         who: 'AccountId32',
-        poolId: 'u128',
+        vaultId: 'u128',
         assetId: 'u128',
         action: 'PalletMultiAssetDelegationRewardsAssetAction'
       }
@@ -4152,15 +4152,15 @@ export default {
       },
       __Unused18: 'Null',
       set_incentive_apy_and_cap: {
-        poolId: 'u128',
+        vaultId: 'u128',
         apy: 'Percent',
         cap: 'u128',
       },
       whitelist_blueprint_for_rewards: {
         blueprintId: 'u32',
       },
-      manage_asset_in_pool: {
-        poolId: 'u128',
+      manage_asset_in_vault: {
+        vaultId: 'u128',
         assetId: 'u128',
         action: 'PalletMultiAssetDelegationRewardsAssetAction'
       }
@@ -5938,16 +5938,16 @@ export default {
     }
   },
   /**
-   * Lookup729: pallet_multi_asset_delegation::types::rewards::RewardConfig<PoolId, Balance>
+   * Lookup729: pallet_multi_asset_delegation::types::rewards::RewardConfig<VaultId, Balance>
    **/
   PalletMultiAssetDelegationRewardsRewardConfig: {
-    configs: 'BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAssetPool>',
+    configs: 'BTreeMap<u128, PalletMultiAssetDelegationRewardsRewardConfigForAssetVault>',
     whitelistedBlueprintIds: 'Vec<u32>'
   },
   /**
-   * Lookup731: pallet_multi_asset_delegation::types::rewards::RewardConfigForAssetPool<Balance>
+   * Lookup731: pallet_multi_asset_delegation::types::rewards::RewardConfigForAssetVault<Balance>
    **/
-  PalletMultiAssetDelegationRewardsRewardConfigForAssetPool: {
+  PalletMultiAssetDelegationRewardsRewardConfigForAssetVault: {
     apy: 'Percent',
     cap: 'u128'
   },
@@ -5955,7 +5955,7 @@ export default {
    * Lookup734: pallet_multi_asset_delegation::pallet::Error<T>
    **/
   PalletMultiAssetDelegationError: {
-    _enum: ['AlreadyOperator', 'BondTooLow', 'NotAnOperator', 'CannotExit', 'AlreadyLeaving', 'NotLeavingOperator', 'NotLeavingRound', 'NoScheduledBondLess', 'BondLessRequestNotSatisfied', 'NotActiveOperator', 'NotOfflineOperator', 'AlreadyDelegator', 'NotDelegator', 'WithdrawRequestAlreadyExists', 'InsufficientBalance', 'NoWithdrawRequest', 'NoBondLessRequest', 'BondLessNotReady', 'BondLessRequestAlreadyExists', 'ActiveServicesUsingAsset', 'NoActiveDelegation', 'AssetNotWhitelisted', 'NotAuthorized', 'AssetNotFound', 'BlueprintAlreadyWhitelisted', 'NowithdrawRequests', 'NoMatchingwithdrawRequest', 'AssetAlreadyInPool', 'AssetNotInPool', 'PoolNotFound']
+    _enum: ['AlreadyOperator', 'BondTooLow', 'NotAnOperator', 'CannotExit', 'AlreadyLeaving', 'NotLeavingOperator', 'NotLeavingRound', 'NoScheduledBondLess', 'BondLessRequestNotSatisfied', 'NotActiveOperator', 'NotOfflineOperator', 'AlreadyDelegator', 'NotDelegator', 'WithdrawRequestAlreadyExists', 'InsufficientBalance', 'NoWithdrawRequest', 'NoBondLessRequest', 'BondLessNotReady', 'BondLessRequestAlreadyExists', 'ActiveServicesUsingAsset', 'NoActiveDelegation', 'AssetNotWhitelisted', 'NotAuthorized', 'AssetNotFound', 'BlueprintAlreadyWhitelisted', 'NowithdrawRequests', 'NoMatchingwithdrawRequest', 'AssetAlreadyInVault', 'AssetNotInVault', 'VaultNotFound']
   },
   /**
    * Lookup737: tangle_primitives::services::ServiceRequest<C, sp_core::crypto::AccountId32, BlockNumber>

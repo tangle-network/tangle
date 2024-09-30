@@ -854,9 +854,9 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       joinOperators: AugmentedSubmittable<(bondAmount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
       /**
-       * See [`Pallet::manage_asset_in_pool`].
+       * See [`Pallet::manage_asset_in_vault`].
        **/
-      manageAssetInPool: AugmentedSubmittable<(poolId: u128 | AnyNumber | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, action: PalletMultiAssetDelegationRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128, PalletMultiAssetDelegationRewardsAssetAction]>;
+      manageAssetInVault: AugmentedSubmittable<(vaultId: u128 | AnyNumber | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, action: PalletMultiAssetDelegationRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128, PalletMultiAssetDelegationRewardsAssetAction]>;
       /**
        * See [`Pallet::operator_bond_more`].
        **/
@@ -880,7 +880,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * See [`Pallet::set_incentive_apy_and_cap`].
        **/
-      setIncentiveApyAndCap: AugmentedSubmittable<(poolId: u128 | AnyNumber | Uint8Array, apy: Percent | AnyNumber | Uint8Array, cap: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, Percent, u128]>;
+      setIncentiveApyAndCap: AugmentedSubmittable<(vaultId: u128 | AnyNumber | Uint8Array, apy: Percent | AnyNumber | Uint8Array, cap: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, Percent, u128]>;
       /**
        * See [`Pallet::whitelist_blueprint_for_rewards`].
        **/
