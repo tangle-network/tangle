@@ -7,8 +7,14 @@ license = "GPL-3.0-only"
 repository = { workspace = true }
 
 [dependencies]
+ethereum = { workspace = true, features = [ "with-codec" ] }
+ethereum-types = { workspace = true, features = [ "std" ] }
+futures = { workspace = true, features = [ "compat" ] }
+jsonrpsee = { workspace = true, features = [ "macros", "server" ] }
 client-evm-tracing = { workspace = true }
-ethereum-types = { workspace = true, features = ["std"] }
-jsonrpsee = { workspace = true, features = ["macros", "server"] }
 rpc-core-types = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
+serde = { workspace = true, features = [ "derive" ] }
+serde_json = { workspace = true }
+sp-core = { workspace = true, features = [ "std" ] }
+fc-rpc-core = { workspace = true }
+

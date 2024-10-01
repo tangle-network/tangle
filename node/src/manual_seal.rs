@@ -14,13 +14,16 @@
 // limitations under the License.
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
+use crate::cli::Sealing;
 pub use crate::eth::{db_config_dir, EthConfiguration};
 use crate::eth::{
 	new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, FrontierBackend,
 	FrontierBlockImport, FrontierPartialComponents, RpcConfig, StorageOverride,
 	StorageOverrideHandler,
 };
+use futures::future;
 use futures::FutureExt;
+use futures::{channel::mpsc, prelude::*};
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
@@ -28,11 +31,15 @@ use sc_consensus_grandpa::SharedVoterState;
 #[allow(deprecated)]
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_service::{error::Error as ServiceError, ChainType, Configuration, TaskManager};
+use sc_telemetry::TelemetryHandle;
 use sc_telemetry::{Telemetry, TelemetryWorker};
+use sc_transaction_pool::FullPool;
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_core::U256;
 use sp_runtime::traits::Block as BlockT;
+use std::cell::RefCell;
 use std::{path::Path, sync::Arc, time::Duration};
+use substrate_prometheus_endpoint::Registry;
 use tangle_primitives::Block;
 
 #[cfg(not(feature = "testnet"))]
@@ -108,11 +115,14 @@ type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
 type GrandpaLinkHalf<Client> = sc_consensus_grandpa::LinkHalf<Block, Client, FullSelectChain>;
 type BoxBlockImport = sc_consensus::BoxBlockImport<Block>;
+type GrandpaBlockImport =
+	sc_consensus_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>;
 
 #[allow(clippy::type_complexity)]
-pub fn new_partial(
+pub fn new_partial<BIQ>(
 	config: &Configuration,
 	eth_config: &EthConfiguration,
+	build_import_queue: BIQ,
 ) -> Result<
 	sc_service::PartialComponents<
 		FullClient,
@@ -127,11 +137,21 @@ pub fn new_partial(
 			sc_consensus_babe::BabeLink<Block>,
 			FrontierBackend,
 			Arc<dyn StorageOverride<Block>>,
-			BabeWorkerHandle<Block>,
+			Option<BabeWorkerHandle<Block>>,
 		),
 	>,
 	ServiceError,
-> {
+>
+where
+	BIQ: FnOnce(
+		Arc<FullClient>,
+		&Configuration,
+		&EthConfiguration,
+		&TaskManager,
+		Option<TelemetryHandle>,
+		GrandpaBlockImport,
+	) -> Result<(BasicQueue<Block>, BoxBlockImport), ServiceError>,
+{
 	println!("    ++++++++++++++++++++++++                                                                          
 	+++++++++++++++++++++++++++                                                                        
 	+++++++++++++++++++++++++++                                                                        
@@ -232,33 +252,14 @@ pub fn new_partial(
 
 	let target_gas_price = eth_config.target_gas_price;
 
-	let frontier_block_import = FrontierBlockImport::new(block_import.clone(), client.clone());
-
-	let (import_queue, babe_worker_handle) =
-		sc_consensus_babe::import_queue(sc_consensus_babe::ImportQueueParams {
-			link: babe_link.clone(),
-			block_import: frontier_block_import.clone(),
-			justification_import: Some(Box::new(grandpa_block_import.clone())),
-			client: client.clone(),
-			select_chain: select_chain.clone(),
-			create_inherent_data_providers: move |_, ()| async move {
-				let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
-
-				let slot =
-				sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
-					*timestamp,
-					slot_duration,
-				);
-
-				let _dynamic_fee =
-					fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
-				Ok((slot, timestamp))
-			},
-			spawner: &task_manager.spawn_essential_handle(),
-			registry: config.prometheus_registry(),
-			telemetry: telemetry.as_ref().map(|x| x.handle()),
-			offchain_tx_pool_factory: OffchainTransactionPoolFactory::new(transaction_pool.clone()),
-		})?;
+	let (import_queue, block_import) = build_import_queue(
+		client.clone(),
+		config,
+		eth_config,
+		&task_manager,
+		telemetry.as_ref().map(|x| x.handle()),
+		grandpa_block_import,
+	)?;
 
 	Ok(sc_service::PartialComponents {
 		client,
@@ -270,12 +271,12 @@ pub fn new_partial(
 		transaction_pool,
 		other: (
 			telemetry,
-			Box::new(frontier_block_import),
+			block_import,
 			grandpa_link,
 			babe_link,
 			frontier_backend,
 			storage_override,
-			babe_worker_handle,
+			None,
 		),
 	})
 }
@@ -287,11 +288,38 @@ pub struct RunFullParams {
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
 	pub auto_insert_keys: bool,
+	pub sealing: Sealing,
+}
+
+pub fn build_manual_seal_import_queue(
+	client: Arc<FullClient>,
+	config: &Configuration,
+	_eth_config: &EthConfiguration,
+	task_manager: &TaskManager,
+	_telemetry: Option<TelemetryHandle>,
+	_grandpa_block_import: GrandpaBlockImport,
+) -> Result<(BasicQueue<Block>, BoxBlockImport), ServiceError> {
+	let frontier_block_import = FrontierBlockImport::new(client.clone(), client);
+	Ok((
+		sc_consensus_manual_seal::import_queue(
+			Box::new(frontier_block_import.clone()),
+			&task_manager.spawn_essential_handle(),
+			config.prometheus_registry(),
+		),
+		Box::new(frontier_block_import),
+	))
 }
 
 /// Builds a new service for a full client.
 pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as BlockT>::Hash>>(
-	RunFullParams { mut config, eth_config, rpc_config, debug_output: _, auto_insert_keys }: RunFullParams,
+	RunFullParams {
+		mut config,
+		eth_config,
+		rpc_config,
+		debug_output: _,
+		auto_insert_keys,
+		sealing,
+	}: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -311,7 +339,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 				storage_override,
 				babe_worker_handle,
 			),
-	} = new_partial(&config, &eth_config)?;
+	} = new_partial(&config, &eth_config, build_manual_seal_import_queue)?;
 
 	if config.role.is_authority() {
 		if config.chain_spec.chain_type() == ChainType::Development
@@ -536,10 +564,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 					pool: pool.clone(),
 					deny_unsafe,
 					eth: eth_rpc_params.clone(),
-					babe: Some(crate::rpc::BabeDeps {
-						keystore: keystore.clone(),
-						babe_worker_handle: babe_worker_handle.clone(),
-					}),
+					babe: None,
 					select_chain: select_chain_clone.clone(),
 					grandpa: crate::rpc::GrandpaDeps {
 						shared_voter_state: shared_voter_state.clone(),
@@ -590,64 +615,26 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	};
 	let _rpc_handlers = sc_service::spawn_tasks(params)?;
 
+	// Channel for the rpc handler to communicate with the authorship task.
+	let (command_sink, commands_stream) = mpsc::channel(1000);
+
 	if role.is_authority() {
-		let proposer_factory = sc_basic_authorship::ProposerFactory::new(
-			task_manager.spawn_handle(),
-			client.clone(),
-			transaction_pool.clone(),
-			prometheus_registry.as_ref(),
-			telemetry.as_ref().map(|x| x.handle()),
-		);
-
-		let backoff_authoring_blocks =
-			Some(sc_consensus_slots::BackoffAuthoringOnFinalizedHeadLagging::default());
-
-		let babe_config = sc_consensus_babe::BabeParams {
-			keystore: keystore_container.keystore(),
-			client: client.clone(),
+		run_manual_seal_authorship(
+			&eth_config,
+			sealing,
+			client,
+			transaction_pool,
 			select_chain,
-			env: proposer_factory,
 			block_import,
-			sync_oracle: sync_service.clone(),
-			justification_sync_link: sync_service.clone(),
-			create_inherent_data_providers: move |parent, ()| {
-				let client_clone = client.clone();
-				async move {
-					let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
+			&task_manager,
+			prometheus_registry.as_ref(),
+			telemetry.as_ref(),
+			commands_stream,
+		)?;
 
-					let slot =
-						sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
-							*timestamp,
-							slot_duration,
-						);
-
-					let storage_proof =
-						sp_transaction_storage_proof::registration::new_data_provider(
-							&*client_clone,
-							&parent,
-						)?;
-					let _dynamic_fee =
-						fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
-					Ok((slot, timestamp, storage_proof))
-				}
-			},
-			force_authoring,
-			backoff_authoring_blocks,
-			babe_link,
-			block_proposal_slot_portion: SlotProportion::new(0.5),
-			max_block_proposal_slot_portion: None,
-			telemetry: telemetry.as_ref().map(|x| x.handle()),
-		};
-
-		let babe = sc_consensus_babe::start_babe(babe_config)?;
-
-		// the BABE authoring task is considered essential, i.e. if it
-		// fails we take down the service with it.
-		task_manager.spawn_essential_handle().spawn_blocking(
-			"babe-proposer",
-			Some("block-authoring"),
-			babe,
-		);
+		network_starter.start_network();
+		log::info!("Manual Seal Ready");
+		return Ok(task_manager);
 	}
 
 	// if the node isn't actively participating in consensus then it doesn't
@@ -699,6 +686,96 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	Ok(task_manager)
 }
 
+fn run_manual_seal_authorship(
+	eth_config: &EthConfiguration,
+	sealing: Sealing,
+	client: Arc<FullClient>,
+	transaction_pool: Arc<FullPool<Block, FullClient>>,
+	select_chain: FullSelectChain,
+	block_import: BoxBlockImport,
+	task_manager: &TaskManager,
+	prometheus_registry: Option<&Registry>,
+	telemetry: Option<&Telemetry>,
+	commands_stream: mpsc::Receiver<
+		sc_consensus_manual_seal::rpc::EngineCommand<<Block as BlockT>::Hash>,
+	>,
+) -> Result<(), ServiceError> {
+	let proposer_factory = sc_basic_authorship::ProposerFactory::new(
+		task_manager.spawn_handle(),
+		client.clone(),
+		transaction_pool.clone(),
+		prometheus_registry,
+		telemetry.as_ref().map(|x| x.handle()),
+	);
+
+	thread_local!(static TIMESTAMP: RefCell<u64> = const { RefCell::new(0) });
+
+	/// Provide a mock duration starting at 0 in millisecond for timestamp inherent.
+	/// Each call will increment timestamp by slot_duration making Aura think time has passed.
+	struct MockTimestampInherentDataProvider;
+
+	#[async_trait::async_trait]
+	impl sp_inherents::InherentDataProvider for MockTimestampInherentDataProvider {
+		async fn provide_inherent_data(
+			&self,
+			inherent_data: &mut sp_inherents::InherentData,
+		) -> Result<(), sp_inherents::Error> {
+			TIMESTAMP.with(|x| {
+				*x.borrow_mut() += tangle_testnet_runtime::SLOT_DURATION;
+				inherent_data.put_data(sp_timestamp::INHERENT_IDENTIFIER, &*x.borrow())
+			})
+		}
+
+		async fn try_handle_error(
+			&self,
+			_identifier: &sp_inherents::InherentIdentifier,
+			_error: &[u8],
+		) -> Option<Result<(), sp_inherents::Error>> {
+			// The pallet never reports error.
+			None
+		}
+	}
+
+	let target_gas_price = eth_config.target_gas_price;
+	let create_inherent_data_providers = move |_, ()| async move {
+		let timestamp = MockTimestampInherentDataProvider;
+		let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
+		Ok((timestamp, dynamic_fee))
+	};
+
+	let manual_seal = match sealing {
+		Sealing::Manual => future::Either::Left(sc_consensus_manual_seal::run_manual_seal(
+			sc_consensus_manual_seal::ManualSealParams {
+				block_import,
+				env: proposer_factory,
+				client,
+				pool: transaction_pool,
+				commands_stream,
+				select_chain,
+				consensus_data_provider: None,
+				create_inherent_data_providers,
+			},
+		)),
+		Sealing::Instant => future::Either::Right(sc_consensus_manual_seal::run_instant_seal(
+			sc_consensus_manual_seal::InstantSealParams {
+				block_import,
+				env: proposer_factory,
+				client,
+				pool: transaction_pool,
+				select_chain,
+				consensus_data_provider: None,
+				create_inherent_data_providers,
+			},
+		)),
+	};
+
+	// we spawn the future on a background thread managed by service.
+	task_manager
+		.spawn_essential_handle()
+		.spawn_blocking("manual-seal", None, manual_seal);
+	Ok(())
+}
+
 #[allow(clippy::type_complexity)]
 pub fn new_chain_ops(
 	config: &mut Configuration,
@@ -710,6 +787,6 @@ pub fn new_chain_ops(
 	config.keystore = sc_service::config::KeystoreConfig::InMemory;
 	let sc_service::PartialComponents {
 		client, backend, import_queue, task_manager, other, ..
-	} = new_partial(config, eth_config)?;
+	} = new_partial(config, eth_config, build_manual_seal_import_queue)?;
 	Ok((client, backend, import_queue, task_manager, other.4))
 }

@@ -47,7 +47,7 @@ use tangle_testnet_runtime::{AccountId, Balance, Hash, Index, PalletServicesCons
 
 pub mod eth;
 pub mod tracing;
-pub use self::eth::{create_eth, overrides_handle, EthDeps};
+pub use self::eth::{create_eth, EthDeps};
 
 /// Extra dependencies for BABE.
 pub struct BabeDeps {
@@ -82,7 +82,7 @@ pub struct FullDeps<C, P, A: ChainApi, CT, SC, B, CIDP> {
 	/// Ethereum-compatibility specific dependencies.
 	pub eth: EthDeps<C, P, A, CT, Block, CIDP>,
 	/// BABE specific dependencies.
-	pub babe: BabeDeps,
+	pub babe: Option<BabeDeps>,
 	/// The SelectChain Strategy
 	pub select_chain: SC,
 	/// GRANDPA specific dependencies.
@@ -232,7 +232,13 @@ where
 	let mut io = RpcModule::new(());
 	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa } = deps;
 
-	let BabeDeps { keystore, babe_worker_handle } = babe;
+	if let Some(babe) = babe {
+		let BabeDeps { babe_worker_handle, keystore } = babe;
+		io.merge(
+			Babe::new(client.clone(), babe_worker_handle, keystore, select_chain, deny_unsafe)
+				.into_rpc(),
+		)?;
+	}
 
 	let GrandpaDeps {
 		shared_voter_state,
@@ -244,11 +250,6 @@ where
 
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
-
-	io.merge(
-		Babe::new(client.clone(), babe_worker_handle.clone(), keystore, select_chain, deny_unsafe)
-			.into_rpc(),
-	)?;
 
 	io.merge(
 		Grandpa::new(

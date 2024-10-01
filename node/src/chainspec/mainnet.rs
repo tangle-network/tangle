@@ -36,14 +36,12 @@ use sp_runtime::{
 };
 use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
-	AccountId, BabeConfig, Balance, BalancesConfig, ClaimsConfig, CouncilConfig, EVMChainIdConfig,
-	EVMConfig, ImOnlineConfig, MaxVestingSchedules, Perbill, RuntimeGenesisConfig, SessionConfig,
-	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TreasuryPalletId, VestingConfig, UNIT,
+	AccountId, Balance, MaxVestingSchedules, Perbill, StakerStatus, TreasuryPalletId, UNIT,
 	WASM_BINARY,
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
-pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
+pub type ChainSpec = sc_service::GenericChainSpec;
 
 /// Generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -85,122 +83,91 @@ fn generate_session_keys(
 }
 
 pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "TNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), tangle_primitives::MAINNET_SS58_PREFIX.into());
 
 	let endowment: Balance = 10_000_000 * UNIT;
-	#[allow(deprecated)]
-	Ok(ChainSpec::from_genesis(
-		"Local Tangle Mainnet",
-		"local-tangle-mainnet",
-		ChainType::Local,
-		move || {
-			mainnet_genesis(
-				// Initial validators
-				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
-				// Endowed accounts
-				vec![
-					(get_account_id_from_seed::<sr25519::Public>("Alice"), endowment),
-					(get_account_id_from_seed::<sr25519::Public>("Bob"), endowment),
-					(get_account_id_from_seed::<sr25519::Public>("Charlie"), endowment),
-					(get_account_id_from_seed::<sr25519::Public>("Alice//stash"), endowment),
-					(get_account_id_from_seed::<sr25519::Public>("Bob//stash"), endowment),
-					(get_account_id_from_seed::<sr25519::Public>("Charlie//stash"), endowment),
-				],
-				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				// EVM chain ID
-				chain_id,
-				// Genesis airdrop distribution (pallet-claims)
-				get_unique_distribution_results(vec![
-					mainnet::get_edgeware_genesis_balance_distribution(),
-					mainnet::get_leaderboard_balance_distribution(),
-					mainnet::get_edgeware_snapshot_distribution(),
-				]),
-				// Genesis investor / team distribution (pallet-balances + pallet-vesting)
-				combine_distributions(vec![
-					mainnet::get_team_balance_distribution(),
-					mainnet::get_investor_balance_distribution(),
-					mainnet::get_team_direct_vesting_distribution(),
-				]),
-				Default::default(),
-			)
-		},
-		// Bootnodes
-		vec![],
-		// Telemetry
-		None,
-		// Protocol ID
-		None,
-		// Fork id
-		None,
-		// Properties
-		Some(properties),
-		// Extensions
-		None,
-		wasm_binary,
-	))
+	Ok(ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
+		.with_name("Local Tangle Mainnet")
+		.with_id("local-tangle-mainnet")
+		.with_chain_type(ChainType::Local)
+		.with_properties(properties)
+		.with_genesis_config_patch(mainnet_genesis(
+			// Initial validators
+			vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
+			// Endowed accounts
+			vec![
+				(get_account_id_from_seed::<sr25519::Public>("Alice"), endowment),
+				(get_account_id_from_seed::<sr25519::Public>("Bob"), endowment),
+				(get_account_id_from_seed::<sr25519::Public>("Charlie"), endowment),
+				(get_account_id_from_seed::<sr25519::Public>("Alice//stash"), endowment),
+				(get_account_id_from_seed::<sr25519::Public>("Bob//stash"), endowment),
+				(get_account_id_from_seed::<sr25519::Public>("Charlie//stash"), endowment),
+			],
+			// Sudo account
+			get_account_id_from_seed::<sr25519::Public>("Alice"),
+			// EVM chain ID
+			chain_id,
+			// Genesis airdrop distribution (pallet-claims)
+			get_unique_distribution_results(vec![
+				mainnet::get_edgeware_genesis_balance_distribution(),
+				mainnet::get_leaderboard_balance_distribution(),
+				mainnet::get_edgeware_snapshot_distribution(),
+			]),
+			// Genesis investor / team distribution (pallet-balances + pallet-vesting)
+			combine_distributions(vec![
+				mainnet::get_team_balance_distribution(),
+				mainnet::get_investor_balance_distribution(),
+				mainnet::get_team_direct_vesting_distribution(),
+			]),
+			Default::default(),
+		))
+		.build())
 }
 
 pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "tangle wasm not available".to_string())?;
+	let _boot_nodes = get_bootnodes();
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "TNT".into());
+	properties.insert("tokenSymbol".into(), "tTNT".into());
 	properties.insert("tokenDecimals".into(), 18u32.into());
-	properties.insert("ss58Format".into(), tangle_primitives::MAINNET_SS58_PREFIX.into());
-	#[allow(deprecated)]
-	Ok(ChainSpec::from_genesis(
-		"Tangle Mainnet",
-		"tangle-mainnet",
-		ChainType::Live,
-		move || {
-			mainnet_genesis(
-				// Initial validators
-				get_initial_authorities(),
-				// Endowed accounts
-				mainnet::get_initial_endowed_accounts().0,
-				// Sudo account
-				get_root_key(),
-				// EVM chain ID
-				chain_id,
-				// Genesis airdrop distribution (pallet-claims)
-				get_unique_distribution_results(vec![
-					mainnet::get_edgeware_genesis_balance_distribution(),
-					mainnet::get_leaderboard_balance_distribution(),
-					mainnet::get_edgeware_snapshot_distribution(),
-					mainnet::get_polkadot_validator_distribution(),
-				]),
-				// Genesis investor / team distribution (pallet-balances + pallet-vesting)
-				combine_distributions(vec![
-					mainnet::get_team_balance_distribution(),
-					mainnet::get_team_direct_vesting_distribution(),
-					mainnet::get_investor_balance_distribution(),
-					mainnet::get_foundation_balance_distribution(),
-				]),
-				// endowed evm accounts
-				vec![],
-			)
-		},
-		// Bootnodes
-		get_bootnodes(),
-		// Telemetry
-		None,
-		// Protocol ID
-		None,
-		// Fork id
-		None,
-		// Properties
-		Some(properties),
-		// Extensions
-		None,
-		wasm_binary,
-	))
+	properties.insert("ss58Format".into(), 42.into());
+
+	Ok(ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
+		.with_name("Tangle Mainnet")
+		.with_id("tangle-mainnet")
+		.with_chain_type(ChainType::Live)
+		.with_properties(properties)
+		.with_genesis_config_patch(mainnet_genesis(
+			// Initial validators
+			get_initial_authorities(),
+			// Endowed accounts
+			mainnet::get_initial_endowed_accounts().0,
+			// Sudo account
+			get_root_key(),
+			// EVM chain ID
+			chain_id,
+			// Genesis airdrop distribution (pallet-claims)
+			get_unique_distribution_results(vec![
+				mainnet::get_edgeware_genesis_balance_distribution(),
+				mainnet::get_leaderboard_balance_distribution(),
+				mainnet::get_edgeware_snapshot_distribution(),
+				mainnet::get_polkadot_validator_distribution(),
+			]),
+			// Genesis investor / team distribution (pallet-balances + pallet-vesting)
+			combine_distributions(vec![
+				mainnet::get_team_balance_distribution(),
+				mainnet::get_team_direct_vesting_distribution(),
+				mainnet::get_investor_balance_distribution(),
+				mainnet::get_foundation_balance_distribution(),
+			]),
+			// endowed evm accounts
+			vec![],
+		))
+		.build())
 }
 
-/// Configure initial storage state for FRAME modules.
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
 	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)>,
@@ -210,12 +177,13 @@ fn mainnet_genesis(
 	genesis_airdrop: DistributionResult,
 	genesis_non_airdrop: Vec<(MultiAddress, u128, u64, u64, u128)>,
 	genesis_evm_distribution: Vec<(H160, fp_evm::GenesisAccount)>,
-) -> RuntimeGenesisConfig {
+) -> serde_json::Value {
 	// stakers: all validators and nominators.
-	let stakers = initial_authorities
-		.iter()
-		.map(|x| (x.0.clone(), x.0.clone(), 100 * UNIT, StakerStatus::Validator))
-		.collect();
+	let stakers: Vec<(AccountId, AccountId, Balance, StakerStatus<AccountId>)> =
+		initial_authorities
+			.iter()
+			.map(|x| (x.0.clone(), x.0.clone(), 100 * UNIT, StakerStatus::<AccountId>::Validator))
+			.collect();
 
 	let vesting_claims: Vec<(
 		MultiAddress,
@@ -231,85 +199,75 @@ fn mainnet_genesis(
 			(x, bounded_vec)
 		})
 		.collect();
-	RuntimeGenesisConfig {
-		system: SystemConfig { ..Default::default() },
-		assets: Default::default(),
-		sudo: SudoConfig { key: Some(root_key) },
-		balances: BalancesConfig { balances: endowed_accounts.to_vec() },
-		vesting: VestingConfig {
-			vesting: genesis_non_airdrop
-				.iter()
-				.map(|(address, _value, begin, end, liquid)| {
-					(address.clone().to_account_id_32(), *begin, *end, *liquid)
-				})
-				.collect(),
+
+	let evm_accounts = {
+		let mut map = BTreeMap::new();
+
+		for (address, account) in genesis_evm_distribution {
+			map.insert(address, account);
+		}
+		map
+	};
+
+	let council_members: Vec<AccountId> = vec![
+		hex!["483b466832e094f01b1779a7ed07025df319c492dac5160aca89a3be117a7b6d"].into(),
+		hex!["86d08e7bbe77bc74e3d88ee22edc53368bc13d619e05b66fe6c4b8e2d5c7015a"].into(),
+		hex!["e421301e5aa5dddee51f0d8c73e794df16673e53157c5ea657be742e35b1793f"].into(),
+		hex!["4ce3a4da3a7c1ce65f7edeff864dc3dd42e8f47eecc2726d99a0a80124698217"].into(),
+		hex!["dcd9b70a0409b7626cba1a4016d8da19f4df5ce9fc5e8d16b789e71bb1161d73"].into(),
+	]
+	.into_iter()
+	.collect();
+
+	serde_json::json!({
+		"sudo": { "key": Some(root_key) },
+		"balances": {
+			"balances": endowed_accounts.to_vec(),
 		},
-		indices: Default::default(),
-		session: SessionConfig {
-			keys: initial_authorities
+		"session": {
+			"keys": initial_authorities
 				.iter()
 				.map(|x| {
-					(
-						x.0.clone(),
-						x.0.clone(),
-						generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone()),
-					)
+			(
+				x.0.clone(),
+				x.0.clone(),
+				generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone()),
+			)
 				})
-				.collect::<Vec<_>>(),
+				.collect::<Vec<_>>()
 		},
-		staking: StakingConfig {
-			validator_count: initial_authorities.len() as u32,
-			minimum_validator_count: initial_authorities.len() as u32 - 1,
-			invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-			slash_reward_fraction: Perbill::from_percent(10),
-			stakers,
-			..Default::default()
+		"vesting": {
+			"vesting": genesis_non_airdrop
+				.iter()
+				.map(|(address, _value, begin, end, liquid)| {
+				(address.clone().to_account_id_32(), *begin, *end, *liquid)
+			})
+			.collect::<Vec<_>>(),
 		},
-		democracy: Default::default(),
-		council: CouncilConfig {
-			members: vec![
-				hex!["483b466832e094f01b1779a7ed07025df319c492dac5160aca89a3be117a7b6d"].into(),
-				hex!["86d08e7bbe77bc74e3d88ee22edc53368bc13d619e05b66fe6c4b8e2d5c7015a"].into(),
-				hex!["e421301e5aa5dddee51f0d8c73e794df16673e53157c5ea657be742e35b1793f"].into(),
-				hex!["4ce3a4da3a7c1ce65f7edeff864dc3dd42e8f47eecc2726d99a0a80124698217"].into(),
-				hex!["dcd9b70a0409b7626cba1a4016d8da19f4df5ce9fc5e8d16b789e71bb1161d73"].into(),
-			],
-			..Default::default()
+		"staking": {
+			"validatorCount": initial_authorities.len() as u32,
+			"minimumValidatorCount": initial_authorities.len() as u32 - 1,
+			"invulnerables": initial_authorities.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
+			"slashRewardFraction": Perbill::from_percent(10),
+			"stakers" : stakers,
 		},
-		elections: Default::default(),
-		treasury: Default::default(),
-		babe: BabeConfig {
-			epoch_config: Some(tangle_runtime::BABE_GENESIS_EPOCH_CONFIG),
-			..Default::default()
+		"council": {
+			"members": council_members,
 		},
-		grandpa: Default::default(),
-		im_online: ImOnlineConfig { keys: vec![] },
-		nomination_pools: Default::default(),
-		transaction_payment: Default::default(),
-		tx_pause: Default::default(),
-		// EVM compatibility
-		evm_chain_id: EVMChainIdConfig { chain_id, ..Default::default() },
-		evm: EVMConfig {
-			accounts: {
-				let mut map = BTreeMap::new();
-				for (address, account) in genesis_evm_distribution {
-					map.insert(address, account);
-				}
-				map
-			},
-			..Default::default()
+		"babe": {
+			"epochConfig": tangle_runtime::BABE_GENESIS_EPOCH_CONFIG,
 		},
-		ethereum: Default::default(),
-		dynamic_fee: Default::default(),
-		base_fee: Default::default(),
-		claims: ClaimsConfig {
-			claims: genesis_airdrop.claims,
-			vesting: vesting_claims,
-			expiry: Some((
+		"evm" : {
+			"accounts": evm_accounts
+		},
+		"claims": {
+			"claims": genesis_airdrop.claims,
+			"vesting": vesting_claims,
+			"expiry": Some((
 				5_265_000u64, // 1 year
 				MultiAddress::Native(TreasuryPalletId::get().into_account_truncating()),
 			)),
 		},
-		lst: Default::default(),
-	}
+		"evmChainId": { "chainId": chain_id },
+	})
 }

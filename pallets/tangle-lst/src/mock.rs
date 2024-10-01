@@ -197,6 +197,18 @@ impl sp_staking::StakingInterface for StakingMock {
 	fn max_exposure_page_size() -> sp_staking::Page {
 		unimplemented!("method currently not used in testing")
 	}
+
+	fn update_payee(_stash: &Self::AccountId, _reward_acc: &Self::AccountId) -> DispatchResult {
+		unimplemented!("method currently not used in testing")
+	}
+
+	fn is_virtual_staker(_who: &Self::AccountId) -> bool {
+		false
+	}
+
+	fn slash_reward_fraction() -> Perbill {
+		unimplemented!("method currently not used in testing")
+	}
 }
 
 #[derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]

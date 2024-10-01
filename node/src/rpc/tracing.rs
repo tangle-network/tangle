@@ -23,7 +23,7 @@ use crate::{
 
 use super::*;
 
-use fc_storage::OverrideHandle;
+use fc_storage::StorageOverride;
 use rpc_debug::{DebugHandler, DebugRequester};
 use rpc_trace::{CacheRequester as TraceFilterCacheRequester, CacheTask};
 use sc_service::TaskManager;
@@ -41,8 +41,8 @@ pub fn spawn_tracing_tasks(
 	task_manager: &TaskManager,
 	client: Arc<FullClient>,
 	backend: Arc<FullBackend>,
-	frontier_backend: FrontierBackend,
-	overrides: Arc<OverrideHandle<Block>>,
+	frontier_backend: Arc<FrontierBackend>,
+	overrides: Arc<dyn StorageOverride<Block>>,
 	rpc_config: &RpcConfig,
 	prometheus: Option<PrometheusRegistry>,
 ) -> RpcRequesters {
@@ -67,7 +67,10 @@ pub fn spawn_tracing_tasks(
 		let (debug_task, debug_requester) = DebugHandler::task(
 			Arc::clone(&client),
 			Arc::clone(&backend),
-			frontier_backend,
+			match *frontier_backend {
+				fc_db::Backend::KeyValue(ref b) => b.clone(),
+				fc_db::Backend::Sql(ref b) => b.clone(),
+			},
 			Arc::clone(&permit_pool),
 			Arc::clone(&overrides),
 			rpc_config.tracing_raw_max_memory_usage,

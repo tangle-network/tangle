@@ -32,6 +32,8 @@ rand = { workspace = true, features = ["std"]  }
 serde_json = { workspace = true }
 tokio = { workspace = true }
 hex = {workspace = true }
+async-trait = { workspace = true }
+log = { workspace = true }
 
 # Substrate dependencies
 frame-benchmarking = { workspace = true }
@@ -52,15 +54,15 @@ sc-telemetry = { workspace = true }
 sc-transaction-pool = { workspace = true }
 sp-consensus-babe = { workspace = true }
 sp-keyring = { workspace = true }
-
+sp-transaction-pool = { workspace = true }
 sp-core = { workspace = true, features = ["std"] }
 sp-inherents = { workspace = true, features = ["std"] }
 sp-keystore = { workspace = true, features = ["std"] }
 sp-runtime = { workspace = true, features = ["std"] }
 sp-timestamp = { workspace = true, features = ["std"] }
-
 pallet-services-rpc = { workspace = true }
-
+sp-consensus-grandpa = { workspace = true }
+sp-offchain = { workspace = true }
 pallet-airdrop-claims = { workspace = true }
 sc-chain-spec = { workspace = true }
 sc-rpc = { workspace = true }
@@ -70,12 +72,16 @@ sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
 substrate-prometheus-endpoint = { workspace = true }
+sp-session = { workspace = true }
+frame-system-rpc-runtime-api = { workspace = true }
+sp-io = { workspace = true }
 
 # RPC related dependencies
 jsonrpsee = { workspace = true }
 pallet-im-online = { workspace = true }
 pallet-transaction-payment = { workspace = true }
 pallet-transaction-payment-rpc = { workspace = true }
+pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 sc-transaction-pool-api = { workspace = true }
 
 # Frontier
@@ -102,15 +108,14 @@ sc-consensus-grandpa-rpc = { workspace = true }
 sc-consensus-slots = { workspace = true }
 sc-consensus-manual-seal = { workspace = true }
 sp-consensus = { workspace = true }
-
 sp-transaction-storage-proof = { workspace = true }
 
 tangle-crypto-primitives = { workspace = true }
 tangle-primitives = { workspace = true, features = ["std"] }
 tangle-runtime = { workspace = true, features = ["std"] }
 tangle-testnet-runtime = { workspace = true, optional = true }
-sygma-rpc = { workspace = true }
-sygma-runtime-api = { workspace = true }
+# sygma-rpc = { workspace = true }
+# sygma-runtime-api = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
@@ -137,4 +142,4 @@ testnet = ["tangle-testnet-runtime"]
 txpool = ["fc-rpc/txpool"]
 fast-runtime = ["tangle-testnet-runtime/fast-runtime", "tangle-runtime/fast-runtime"]
 metadata-hash = ["tangle-testnet-runtime?/metadata-hash", "tangle-runtime/metadata-hash"]
-instant-seal = []
+manual-seal = []
