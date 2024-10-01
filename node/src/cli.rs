@@ -48,7 +48,7 @@ pub struct Cli {
 	/// Choose sealing method.
 	#[cfg(feature = "manual-seal")]
 	#[arg(long, value_enum, ignore_case = true)]
-	pub sealing: Option<Sealing>,
+	pub sealing: Sealing,
 }
 
 #[derive(Debug, clap::Subcommand)]
