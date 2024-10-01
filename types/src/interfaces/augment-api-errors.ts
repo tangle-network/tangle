@@ -21,6 +21,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       AssetNotLive: AugmentedError<ApiType>;
       /**
+       * The asset ID must be equal to the [`NextAssetId`].
+       **/
+      BadAssetId: AugmentedError<ApiType>;
+      /**
        * Invalid metadata given.
        **/
       BadMetadata: AugmentedError<ApiType>;
@@ -473,7 +477,7 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       OcwCallWrongEra: AugmentedError<ApiType>;
       /**
-       * Sumission was prepared for a different round.
+       * Submission was prepared for a different round.
        **/
       PreDispatchDifferentRound: AugmentedError<ApiType>;
       /**
@@ -1195,6 +1199,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       AccountBelongsToOtherPool: AugmentedError<ApiType>;
       /**
+       * The pool or member delegation has already migrated to delegate stake.
+       **/
+      AlreadyMigrated: AugmentedError<ApiType>;
+      /**
        * Bonding extra is restricted to the exact pending reward amount.
        **/
       BondExtraRestricted: AugmentedError<ApiType>;
@@ -1286,9 +1294,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NothingToAdjust: AugmentedError<ApiType>;
       /**
+       * No slash pending that can be applied to the member.
+       **/
+      NothingToSlash: AugmentedError<ApiType>;
+      /**
        * Either a) the caller cannot make a valid kick or b) the pool is not destroying.
        **/
       NotKickerOrDestroying: AugmentedError<ApiType>;
+      /**
+       * The pool or member delegation has not migrated yet to delegate stake.
+       **/
+      NotMigrated: AugmentedError<ApiType>;
       /**
        * The caller does not have nominating permissions for the pool.
        **/
@@ -1297,6 +1313,10 @@ declare module '@polkadot/api-base/types/errors' {
        * The pool is not open to join
        **/
       NotOpen: AugmentedError<ApiType>;
+      /**
+       * This call is not allowed in the current state of the pallet.
+       **/
+      NotSupported: AugmentedError<ApiType>;
       /**
        * The transaction could not be executed due to overflow risk for the pool.
        **/
@@ -1335,6 +1355,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Preimage has already been noted on-chain.
        **/
       AlreadyNoted: AugmentedError<ApiType>;
+      /**
+       * No ticket with a cost was returned by [`Config::Consideration`] to store the preimage.
+       **/
+      NoCost: AugmentedError<ApiType>;
       /**
        * The user is not authorized to perform this action.
        **/
@@ -1588,6 +1612,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       CannotChillOther: AugmentedError<ApiType>;
       /**
+       * Cannot reset a ledger.
+       **/
+      CannotRestoreLedger: AugmentedError<ApiType>;
+      /**
        * Commission is too low. Must be at least `MinCommission`.
        **/
       CommissionTooLow: AugmentedError<ApiType>;
@@ -1646,6 +1674,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NotController: AugmentedError<ApiType>;
       /**
+       * Not enough funds available to withdraw.
+       **/
+      NotEnoughFunds: AugmentedError<ApiType>;
+      /**
        * Items are not sorted and unique.
        **/
       NotSortedAndUnique: AugmentedError<ApiType>;
@@ -1657,6 +1689,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Can not rebond without unlocking chunks.
        **/
       NoUnlockChunk: AugmentedError<ApiType>;
+      /**
+       * Provided reward destination is not allowed.
+       **/
+      RewardDestinationRestricted: AugmentedError<ApiType>;
       /**
        * There are too many nominators in the system. Governance needs to adjust the staking
        * settings to keep things safe for the runtime.
@@ -1672,6 +1708,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       TooManyValidators: AugmentedError<ApiType>;
       /**
+       * Operation not allowed for virtual stakers.
+       **/
+      VirtualStakerNotAllowed: AugmentedError<ApiType>;
+      /**
        * Generic error
        **/
       [key: string]: AugmentedError<ApiType>;
@@ -1681,172 +1721,6 @@ declare module '@polkadot/api-base/types/errors' {
        * Sender must be the Sudo account.
        **/
       RequireSudo: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    sygmaAccessSegregator: {
-      /**
-       * Failed to grant extrinsic access permission to an account
-       **/
-      GrantAccessFailed: AugmentedError<ApiType>;
-      /**
-       * Function unimplemented
-       **/
-      Unimplemented: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    sygmaBasicFeeHandler: {
-      /**
-       * Account has not gained access permission
-       **/
-      AccessDenied: AugmentedError<ApiType>;
-      /**
-       * Function unimplemented
-       **/
-      Unimplemented: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    sygmaBridge: {
-      /**
-       * Account has not gained access permission
-       **/
-      AccessDenied: AugmentedError<ApiType>;
-      /**
-       * Asset not bound to a resource id
-       **/
-      AssetNotBound: AugmentedError<ApiType>;
-      /**
-       * Protected operation, must be performed by relayer
-       **/
-      BadMpcSignature: AugmentedError<ApiType>;
-      /**
-       * Bridge is paused
-       **/
-      BridgePaused: AugmentedError<ApiType>;
-      /**
-       * Bridge is unpaused
-       **/
-      BridgeUnpaused: AugmentedError<ApiType>;
-      /**
-       * Failed on the decimal converter
-       **/
-      DecimalConversionFail: AugmentedError<ApiType>;
-      /**
-       * Deposit nonce has reached max integer value
-       **/
-      DepositNonceOverflow: AugmentedError<ApiType>;
-      /**
-       * Dest chain id not match
-       **/
-      DestChainIDNotMatch: AugmentedError<ApiType>;
-      /**
-       * Dest domain not supported
-       **/
-      DestDomainNotSupported: AugmentedError<ApiType>;
-      /**
-       * Proposal list empty
-       **/
-      EmptyProposalList: AugmentedError<ApiType>;
-      /**
-       * Failed to extract destination data
-       **/
-      ExtractDestDataFailed: AugmentedError<ApiType>;
-      /**
-       * The withdrawn amount can not cover the fee payment
-       **/
-      FeeTooExpensive: AugmentedError<ApiType>;
-      /**
-       * Insufficient balance on sender account
-       **/
-      InsufficientBalance: AugmentedError<ApiType>;
-      InvalidDepositDataInvalidAmount: AugmentedError<ApiType>;
-      /**
-       * Deposit data not correct
-       **/
-      InvalidDepositDataInvalidLength: AugmentedError<ApiType>;
-      InvalidDepositDataInvalidRecipient: AugmentedError<ApiType>;
-      InvalidDepositDataInvalidRecipientLength: AugmentedError<ApiType>;
-      InvalidDepositDataRecipientLengthNotMatch: AugmentedError<ApiType>;
-      /**
-       * Fee config option missing
-       **/
-      MissingFeeConfig: AugmentedError<ApiType>;
-      /**
-       * MPC address not set
-       **/
-      MissingMpcAddress: AugmentedError<ApiType>;
-      /**
-       * MPC address can not be updated
-       **/
-      MpcAddrNotUpdatable: AugmentedError<ApiType>;
-      /**
-       * Asset not bound to a liquidity holder account
-       **/
-      NoLiquidityHolderAccountBound: AugmentedError<ApiType>;
-      /**
-       * Proposal has either failed or succeeded
-       **/
-      ProposalAlreadyComplete: AugmentedError<ApiType>;
-      /**
-       * Asset transactor execution failed
-       **/
-      TransactFailedDeposit: AugmentedError<ApiType>;
-      TransactFailedFeeDeposit: AugmentedError<ApiType>;
-      TransactFailedHoldInReserved: AugmentedError<ApiType>;
-      TransactFailedReleaseFromReserved: AugmentedError<ApiType>;
-      TransactFailedWithdraw: AugmentedError<ApiType>;
-      /**
-       * Transactor operation failed
-       **/
-      TransactorFailed: AugmentedError<ApiType>;
-      /**
-       * Function unimplemented
-       **/
-      Unimplemented: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    sygmaFeeHandlerRouter: {
-      /**
-       * Account has not gained access permission
-       **/
-      AccessDenied: AugmentedError<ApiType>;
-      /**
-       * Function unimplemented
-       **/
-      Unimplemented: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    sygmaPercentageFeeHandler: {
-      /**
-       * Account has not gained access permission
-       **/
-      AccessDenied: AugmentedError<ApiType>;
-      /**
-       * Fee rate is out of range [0, 10000)
-       **/
-      FeeRateOutOfRange: AugmentedError<ApiType>;
-      /**
-       * Percentage fee bound is invalid
-       **/
-      InvalidFeeBound: AugmentedError<ApiType>;
-      /**
-       * Function unimplemented
-       **/
-      Unimplemented: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -1868,6 +1742,10 @@ declare module '@polkadot/api-base/types/errors' {
        * and the new runtime.
        **/
       InvalidSpecName: AugmentedError<ApiType>;
+      /**
+       * A multi-block migration is ongoing and prevents the current code from being replaced.
+       **/
+      MultiBlockMigrationsOngoing: AugmentedError<ApiType>;
       /**
        * Suicide called when the account has non-default composite data.
        **/
@@ -1916,10 +1794,6 @@ declare module '@polkadot/api-base/types/errors' {
        * amount to be spent.
        **/
       InsufficientPermission: AugmentedError<ApiType>;
-      /**
-       * Proposer's balance is too low.
-       **/
-      InsufficientProposersBalance: AugmentedError<ApiType>;
       /**
        * No proposal, bounty or spend at that index.
        **/

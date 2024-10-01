@@ -6,10 +6,10 @@
 import '@polkadot/api-base/types/consts';
 
 import type { ApiTypes, AugmentedConst } from '@polkadot/api-base/types';
-import type { BTreeMap, Bytes, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
-import type { Codec, ITuple } from '@polkadot/types-codec/types';
-import type { AccountId32, H160, Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import type { FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, SpWeightsRuntimeDbWeight, SpWeightsWeightV2Weight, StagingXcmV4AssetAssetId } from '@polkadot/types/lookup';
+import type { Bytes, Option, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
+import type { Codec } from '@polkadot/types-codec/types';
+import type { Perbill, Permill } from '@polkadot/types/interfaces/runtime';
+import type { FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, SpWeightsRuntimeDbWeight, SpWeightsWeightV2Weight } from '@polkadot/types/lookup';
 
 export type __AugmentedConst<ApiType extends ApiTypes> = AugmentedConst<ApiType>;
 
@@ -152,10 +152,14 @@ declare module '@polkadot/api-base/types/consts' {
       /**
        * The maximum number of locks that should exist on an account.
        * Not strictly enforced, but used for weight estimation.
+       * 
+       * Use of locks is deprecated in favour of freezes. See `https://github.com/paritytech/substrate/pull/12951/`
        **/
       maxLocks: u32 & AugmentedConst<ApiType>;
       /**
        * The maximum number of named reserves that can exist on an account.
+       * 
+       * Use of reserves is deprecated in favour of holds. See `https://github.com/paritytech/substrate/pull/12951/`
        **/
       maxReserves: u32 & AugmentedConst<ApiType>;
       /**
@@ -366,17 +370,9 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       signedMaxWeight: SpWeightsWeightV2Weight & AugmentedConst<ApiType>;
       /**
-       * Duration of the signed phase.
-       **/
-      signedPhase: u64 & AugmentedConst<ApiType>;
-      /**
        * Base reward for a signed solution
        **/
       signedRewardBase: u128 & AugmentedConst<ApiType>;
-      /**
-       * Duration of the unsigned phase.
-       **/
-      unsignedPhase: u64 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -479,7 +475,7 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       byteDeposit: u128 & AugmentedConst<ApiType>;
       /**
-       * Maxmimum number of registrars allowed in the system. Needed to bound the complexity
+       * Maximum number of registrars allowed in the system. Needed to bound the complexity
        * of, e.g., updating judgements.
        **/
       maxRegistrars: u32 & AugmentedConst<ApiType>;
@@ -872,34 +868,6 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
-    sygmaBridge: {
-      /**
-       * EIP712 Verifying contract address
-       * This is used in EIP712 typed data domain
-       **/
-      destVerifyingContractAddress: H160 & AugmentedConst<ApiType>;
-      /**
-       * Pallet ChainID
-       * This is used in EIP712 typed data domain
-       **/
-      eip712ChainID: U256 & AugmentedConst<ApiType>;
-      /**
-       * Fee reserve account
-       **/
-      feeReserveAccount: AccountId32 & AugmentedConst<ApiType>;
-      /**
-       * AssetId and ResourceId pairs
-       **/
-      resourcePairs: Vec<ITuple<[StagingXcmV4AssetAssetId, U8aFixed]>> & AugmentedConst<ApiType>;
-      /**
-       * Bridge transfer reserve accounts mapping with designated assets
-       **/
-      transferReserveAccounts: BTreeMap<StagingXcmV4AssetAssetId, AccountId32> & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
     system: {
       /**
        * Maximum number of block number to block hash mappings to keep (oldest pruned first).
@@ -926,7 +894,7 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       ss58Prefix: u16 & AugmentedConst<ApiType>;
       /**
-       * Get the chain's current version.
+       * Get the chain's in-code version.
        **/
       version: SpVersionRuntimeVersion & AugmentedConst<ApiType>;
       /**
@@ -998,19 +966,6 @@ declare module '@polkadot/api-base/types/consts' {
        * The period during which an approved treasury spend has to be claimed.
        **/
       payoutPeriod: u64 & AugmentedConst<ApiType>;
-      /**
-       * Fraction of a proposal's value that should be bonded in order to place the proposal.
-       * An accepted proposal gets these back. A rejected proposal does not.
-       **/
-      proposalBond: Permill & AugmentedConst<ApiType>;
-      /**
-       * Maximum amount of funds that should be placed in a deposit for making a proposal.
-       **/
-      proposalBondMaximum: Option<u128> & AugmentedConst<ApiType>;
-      /**
-       * Minimum amount of funds that should be placed in a deposit for making a proposal.
-       **/
-      proposalBondMinimum: u128 & AugmentedConst<ApiType>;
       /**
        * Period between successive spends.
        **/
