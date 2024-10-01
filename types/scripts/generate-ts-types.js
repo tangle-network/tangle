@@ -102,7 +102,7 @@ function getCurrentMetadata() {
   return JSON.parse(readFileSync(METADATA_PATH, 'utf8'))
 }
 
-function fetchMetadata(retryTimes = 3) {
+function fetchMetadata(retryTimes = 3, retryDelaySecond = 5) {
   logStep('Fetching metadata from the node...')
   return new Promise((resolve, reject) => {
     const fetchAttempt = attemptsLeft => {
@@ -112,9 +112,12 @@ function fetchMetadata(retryTimes = 3) {
           if (error) {
             if (attemptsLeft > 0) {
               console.log(
-                `Fetch attempt failed. Retrying... (${attemptsLeft} attempts left)`
+                `Fetch attempt failed. Retrying in ${retryDelaySecond} seconds... (${attemptsLeft} attempts left)`
               )
-              fetchAttempt(attemptsLeft - 1)
+              setTimeout(
+                () => fetchAttempt(attemptsLeft - 1),
+                retryDelaySecond * 1000
+              )
             } else {
               reject(error)
             }
