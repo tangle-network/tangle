@@ -147,7 +147,7 @@ async function generateNewTypes() {
 
 async function main() {
   runTangleNode()
-  await sleep(10)
+  await sleep(15)
 
   const [metadataFromNode, currentMetadata] = await Promise.all([
     fetchMetadata(),
