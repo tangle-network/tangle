@@ -3,6 +3,8 @@ name: Publish Types
 # If changes are made to the types/src/** files
 # Issue a new release to npm for the types package.
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - main

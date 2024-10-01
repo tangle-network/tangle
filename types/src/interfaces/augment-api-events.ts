@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, StagingXcmV4AssetAssetId, SygmaFeeHandlerRouterFeeHandlerType, SygmaTraitsTransferType, TanglePrimitivesServicesApprovalPrefrence, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
+import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesServicesApprovalPrefrence, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -60,6 +60,10 @@ declare module '@polkadot/api-base/types/events' {
        * Some asset class was created.
        **/
       Created: AugmentedEvent<ApiType, [assetId: u128, creator: AccountId32, owner: AccountId32], { assetId: u128, creator: AccountId32, owner: AccountId32 }>;
+      /**
+       * Some assets were deposited (e.g. for transaction fees).
+       **/
+      Deposited: AugmentedEvent<ApiType, [assetId: u128, who: AccountId32, amount: u128], { assetId: u128, who: AccountId32, amount: u128 }>;
       /**
        * An asset class was destroyed.
        **/
@@ -113,6 +117,10 @@ declare module '@polkadot/api-base/types/events' {
        * the approved `delegate`.
        **/
       TransferredApproved: AugmentedEvent<ApiType, [assetId: u128, owner: AccountId32, delegate: AccountId32, destination: AccountId32, amount: u128], { assetId: u128, owner: AccountId32, delegate: AccountId32, destination: AccountId32, amount: u128 }>;
+      /**
+       * Some assets were withdrawn from the account (e.g. for transaction fees).
+       **/
+      Withdrawn: AugmentedEvent<ApiType, [assetId: u128, who: AccountId32, amount: u128], { assetId: u128, who: AccountId32, amount: u128 }>;
       /**
        * Generic event
        **/
@@ -401,7 +409,7 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Proposed: AugmentedEvent<ApiType, [proposalIndex: u32, deposit: u128], { proposalIndex: u32, deposit: u128 }>;
       /**
-       * An account has secconded a proposal
+       * An account has seconded a proposal
        **/
       Seconded: AugmentedEvent<ApiType, [seconder: AccountId32, propIndex: u32], { seconder: AccountId32, propIndex: u32 }>;
       /**
@@ -456,7 +464,7 @@ declare module '@polkadot/api-base/types/events' {
        * A solution was stored with the given compute.
        * 
        * The `origin` indicates the origin of the solution. If `origin` is `Some(AccountId)`,
-       * the stored solution was submited in the signed phase by a miner with the `AccountId`.
+       * the stored solution was submitted in the signed phase by a miner with the `AccountId`.
        * Otherwise, the solution was stored either during the unsigned phase or by
        * `T::ForceOrigin`. The `bool` is `true` when a previous solution was ejected to make
        * room for this one.
@@ -774,9 +782,9 @@ declare module '@polkadot/api-base/types/events' {
     };
     multiAssetDelegation: {
       /**
-       * Asset has been updated to reward pool
+       * Asset has been updated to reward vault
        **/
-      AssetUpdatedInPool: AugmentedEvent<ApiType, [who: AccountId32, poolId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction], { who: AccountId32, poolId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction }>;
+      AssetUpdatedInVault: AugmentedEvent<ApiType, [who: AccountId32, vaultId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction], { who: AccountId32, vaultId: u128, assetId: u128, action: PalletMultiAssetDelegationRewardsAssetAction }>;
       /**
        * Event emitted when a blueprint is whitelisted for rewards
        **/
@@ -806,9 +814,9 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Executedwithdraw: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
       /**
-       * Event emitted when an incentive APY and cap are set for a reward pool
+       * Event emitted when an incentive APY and cap are set for a reward vault
        **/
-      IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [poolId: u128, apy: Percent, cap: u128], { poolId: u128, apy: Percent, cap: u128 }>;
+      IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [vaultId: u128, apy: Percent, cap: u128], { vaultId: u128, apy: Percent, cap: u128 }>;
       /**
        * An operator has cancelled their stake decrease request.
        **/
@@ -1059,6 +1067,19 @@ declare module '@polkadot/api-base/types/events' {
        **/
       PermanentlyOverweight: AugmentedEvent<ApiType, [task: ITuple<[u64, u32]>, id: Option<U8aFixed>], { task: ITuple<[u64, u32]>, id: Option<U8aFixed> }>;
       /**
+       * Cancel a retry configuration for some task.
+       **/
+      RetryCancelled: AugmentedEvent<ApiType, [task: ITuple<[u64, u32]>, id: Option<U8aFixed>], { task: ITuple<[u64, u32]>, id: Option<U8aFixed> }>;
+      /**
+       * The given task was unable to be retried since the agenda is full at that block or there
+       * was not enough weight to reschedule it.
+       **/
+      RetryFailed: AugmentedEvent<ApiType, [task: ITuple<[u64, u32]>, id: Option<U8aFixed>], { task: ITuple<[u64, u32]>, id: Option<U8aFixed> }>;
+      /**
+       * Set a retry configuration for some task.
+       **/
+      RetrySet: AugmentedEvent<ApiType, [task: ITuple<[u64, u32]>, id: Option<U8aFixed>, period: u64, retries: u8], { task: ITuple<[u64, u32]>, id: Option<U8aFixed>, period: u64, retries: u8 }>;
+      /**
        * Scheduled some task.
        **/
       Scheduled: AugmentedEvent<ApiType, [when: u64, index: u32], { when: u64, index: u32 }>;
@@ -1161,6 +1182,10 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Chilled: AugmentedEvent<ApiType, [stash: AccountId32], { stash: AccountId32 }>;
       /**
+       * Report of a controller batch deprecation.
+       **/
+      ControllerBatchDeprecated: AugmentedEvent<ApiType, [failures: u32], { failures: u32 }>;
+      /**
        * The era payout has been set; the first balance is the validator-payout; the second is
        * the remainder from the maximum amount of reward.
        **/
@@ -1251,105 +1276,6 @@ declare module '@polkadot/api-base/types/events' {
        **/
       [key: string]: AugmentedEvent<ApiType>;
     };
-    sygmaAccessSegregator: {
-      /**
-       * Extrinsic access grant to someone
-       * args: [pallet_index, extrinsic_name, who]
-       **/
-      AccessGranted: AugmentedEvent<ApiType, [palletIndex: u8, extrinsicName: Bytes, who: AccountId32], { palletIndex: u8, extrinsicName: Bytes, who: AccountId32 }>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    sygmaBasicFeeHandler: {
-      /**
-       * Fee set for a specific asset
-       * args: [domain, asset, amount]
-       **/
-      FeeSet: AugmentedEvent<ApiType, [domain: u8, asset: StagingXcmV4AssetAssetId, amount: u128], { domain: u8, asset: StagingXcmV4AssetAssetId, amount: u128 }>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    sygmaBridge: {
-      /**
-       * When all bridges are paused
-       **/
-      AllBridgePaused: AugmentedEvent<ApiType, [sender: AccountId32], { sender: AccountId32 }>;
-      /**
-       * When all bridges are unpaused
-       **/
-      AllBridgeUnpaused: AugmentedEvent<ApiType, [sender: AccountId32], { sender: AccountId32 }>;
-      /**
-       * When bridge is paused
-       * args: [dest_domain_id]
-       **/
-      BridgePaused: AugmentedEvent<ApiType, [destDomainId: u8], { destDomainId: u8 }>;
-      /**
-       * When bridge is unpaused
-       * args: [dest_domain_id]
-       **/
-      BridgeUnpaused: AugmentedEvent<ApiType, [destDomainId: u8], { destDomainId: u8 }>;
-      /**
-       * When initial bridge transfer send to dest domain
-       * args: [dest_domain_id, resource_id, deposit_nonce, sender, transfer_type,
-       * deposit_data, handler_response, ]
-       **/
-      Deposit: AugmentedEvent<ApiType, [destDomainId: u8, resourceId: U8aFixed, depositNonce: u64, sender: AccountId32, transferType: SygmaTraitsTransferType, depositData: Bytes, handlerResponse: Bytes], { destDomainId: u8, resourceId: U8aFixed, depositNonce: u64, sender: AccountId32, transferType: SygmaTraitsTransferType, depositData: Bytes, handlerResponse: Bytes }>;
-      /**
-       * When proposal was faild to execute
-       **/
-      FailedHandlerExecution: AugmentedEvent<ApiType, [error: Bytes, originDomainId: u8, depositNonce: u64], { error: Bytes, originDomainId: u8, depositNonce: u64 }>;
-      /**
-       * When bridge fee is collected
-       **/
-      FeeCollected: AugmentedEvent<ApiType, [feePayer: AccountId32, destDomainId: u8, resourceId: U8aFixed, feeAmount: u128, feeAssetId: StagingXcmV4AssetAssetId], { feePayer: AccountId32, destDomainId: u8, resourceId: U8aFixed, feeAmount: u128, feeAssetId: StagingXcmV4AssetAssetId }>;
-      /**
-       * When proposal was executed successfully
-       **/
-      ProposalExecution: AugmentedEvent<ApiType, [originDomainId: u8, depositNonce: u64, dataHash: U8aFixed], { originDomainId: u8, depositNonce: u64, dataHash: U8aFixed }>;
-      /**
-       * When registering a new dest domainID with its corresponding chainID
-       **/
-      RegisterDestDomain: AugmentedEvent<ApiType, [sender: AccountId32, domainId: u8, chainId: U256], { sender: AccountId32, domainId: u8, chainId: U256 }>;
-      /**
-       * When user is going to retry a bridge transfer
-       * args: [deposit_on_block_height, dest_domain_id, sender]
-       **/
-      Retry: AugmentedEvent<ApiType, [depositOnBlockHeight: u128, destDomainId: u8, sender: AccountId32], { depositOnBlockHeight: u128, destDomainId: u8, sender: AccountId32 }>;
-      /**
-       * When unregistering a dest domainID with its corresponding chainID
-       **/
-      UnregisterDestDomain: AugmentedEvent<ApiType, [sender: AccountId32, domainId: u8, chainId: U256], { sender: AccountId32, domainId: u8, chainId: U256 }>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    sygmaFeeHandlerRouter: {
-      /**
-       * When fee handler was set for a specific (domain, asset) pair
-       * args: [dest_domain_id, asset_id, handler_type]
-       **/
-      FeeHandlerSet: AugmentedEvent<ApiType, [domain: u8, asset: StagingXcmV4AssetAssetId, handlerType: SygmaFeeHandlerRouterFeeHandlerType], { domain: u8, asset: StagingXcmV4AssetAssetId, handlerType: SygmaFeeHandlerRouterFeeHandlerType }>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    sygmaPercentageFeeHandler: {
-      /**
-       * Fee set rate for a specific asset and domain
-       * args: [domain, asset, rate_basis_point, fee_lower_bound, fee_upper_bound]
-       **/
-      FeeRateSet: AugmentedEvent<ApiType, [domain: u8, asset: StagingXcmV4AssetAssetId, rateBasisPoint: u32, feeLowerBound: u128, feeUpperBound: u128], { domain: u8, asset: StagingXcmV4AssetAssetId, rateBasisPoint: u32, feeLowerBound: u128, feeUpperBound: u128 }>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
     system: {
       /**
        * `:code` was updated.
@@ -1424,14 +1350,6 @@ declare module '@polkadot/api-base/types/events' {
        * A payment failed and can be retried.
        **/
       PaymentFailed: AugmentedEvent<ApiType, [index: u32, paymentId: Null], { index: u32, paymentId: Null }>;
-      /**
-       * New proposal.
-       **/
-      Proposed: AugmentedEvent<ApiType, [proposalIndex: u32], { proposalIndex: u32 }>;
-      /**
-       * A proposal was rejected; funds were slashed.
-       **/
-      Rejected: AugmentedEvent<ApiType, [proposalIndex: u32, slashed: u128], { proposalIndex: u32, slashed: u128 }>;
       /**
        * Spending has finished; this is the amount that rolls over until next spend.
        **/

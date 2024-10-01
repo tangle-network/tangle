@@ -12,13 +12,14 @@ import type { BabeEquivocationProof, BabeGenesisConfiguration, Epoch, OpaqueKeyO
 import type { CheckInherentsResult, InherentData } from '@polkadot/types/interfaces/blockbuilder';
 import type { BlockHash } from '@polkadot/types/interfaces/chain';
 import type { AuthorityId } from '@polkadot/types/interfaces/consensus';
-import type { BlockV2, EthReceiptV3, EthTransaction, EthTransactionStatus, TransactionV2 } from '@polkadot/types/interfaces/eth';
+import type { BlockV2, EthReceiptV3, EthTransactionStatus, TransactionV2 } from '@polkadot/types/interfaces/eth';
 import type { EvmAccount, EvmCallInfoV2, EvmCreateInfoV2 } from '@polkadot/types/interfaces/evm';
 import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
+import type { GenesisBuildErr } from '@polkadot/types/interfaces/genesisBuilder';
 import type { AuthorityList, GrandpaEquivocationProof, SetId } from '@polkadot/types/interfaces/grandpa';
 import type { OpaqueMetadata } from '@polkadot/types/interfaces/metadata';
 import type { FeeDetails, RuntimeDispatchInfo } from '@polkadot/types/interfaces/payment';
-import type { AccountId, Balance, Block, H160, H256, Header, Index, KeyTypeId, Permill, Slot, Weight } from '@polkadot/types/interfaces/runtime';
+import type { AccountId, Balance, Block, ExtrinsicInclusionMode, H160, H256, Header, Index, KeyTypeId, Permill, Slot, Weight } from '@polkadot/types/interfaces/runtime';
 import type { RuntimeVersion } from '@polkadot/types/interfaces/state';
 import type { ApplyExtrinsicResult, DispatchError } from '@polkadot/types/interfaces/system';
 import type { TransactionSource, TransactionValidity } from '@polkadot/types/interfaces/txqueue';
@@ -105,7 +106,7 @@ declare module '@polkadot/api-base/types/calls' {
        **/
       [key: string]: DecoratedCallBase<ApiType>;
     };
-    /** 0xdf6acb689907609b/4 */
+    /** 0xdf6acb689907609b/5 */
     core: {
       /**
        * Execute the given block.
@@ -114,26 +115,11 @@ declare module '@polkadot/api-base/types/calls' {
       /**
        * Initialize a block with the given header.
        **/
-      initializeBlock: AugmentedCall<ApiType, (header: Header | { parentHash?: any; number?: any; stateRoot?: any; extrinsicsRoot?: any; digest?: any } | string | Uint8Array) => Observable<Null>>;
+      initializeBlock: AugmentedCall<ApiType, (header: Header | { parentHash?: any; number?: any; stateRoot?: any; extrinsicsRoot?: any; digest?: any } | string | Uint8Array) => Observable<ExtrinsicInclusionMode>>;
       /**
        * Returns the version of the runtime.
        **/
       version: AugmentedCall<ApiType, () => Observable<RuntimeVersion>>;
-      /**
-       * Generic call
-       **/
-      [key: string]: DecoratedCallBase<ApiType>;
-    };
-    /** 0xbd78255d4feeea1f/4 */
-    debugRuntimeApi: {
-      /**
-       * Trace all block extrinsics
-       **/
-      traceBlock: AugmentedCall<ApiType, (extrinsics: Vec<Extrinsic> | (Extrinsic | IExtrinsic | string | Uint8Array)[], knownTransactions: Vec<H256> | (H256 | string | Uint8Array)[]) => Observable<Result<ITuple<[]>, DispatchError>>>;
-      /**
-       * Trace transaction extrinsics
-       **/
-      traceTransaction: AugmentedCall<ApiType, (extrinsics: Vec<Extrinsic> | (Extrinsic | IExtrinsic | string | Uint8Array)[], transaction: EthTransaction | { hash?: any; nonce?: any; blockHash?: any; blockNumber?: any; transactionIndex?: any; from?: any; to?: any; value?: any; gasPrice?: any; maxFeePerGas?: any; maxPriorityFeePerGas?: any; gas?: any; input?: any; creates?: any; raw?: any; publicKey?: any; chainId?: any; standardV?: any; v?: any; r?: any; s?: any; accessList?: any; transactionType?: any } | string | Uint8Array) => Observable<Result<ITuple<[]>, DispatchError>>>;
       /**
        * Generic call
        **/
@@ -197,6 +183,21 @@ declare module '@polkadot/api-base/types/calls' {
        * For a given account address and index, returns pallet_evm::AccountStorages.
        **/
       storageAt: AugmentedCall<ApiType, (address: H160 | string | Uint8Array, index: u256 | AnyNumber | Uint8Array) => Observable<H256>>;
+      /**
+       * Generic call
+       **/
+      [key: string]: DecoratedCallBase<ApiType>;
+    };
+    /** 0xfbc577b9d747efd6/1 */
+    genesisBuilder: {
+      /**
+       * Build `RuntimeGenesisConfig` from a JSON blob not using any defaults and store it in the storage.
+       **/
+      buildConfig: AugmentedCall<ApiType, (json: Bytes | string | Uint8Array) => Observable<Result<ITuple<[]>, GenesisBuildErr>>>;
+      /**
+       * Creates the default `RuntimeGenesisConfig` and returns it as a JSON blob.
+       **/
+      createDefaultConfig: AugmentedCall<ApiType, () => Observable<Bytes>>;
       /**
        * Generic call
        **/

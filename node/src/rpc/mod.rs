@@ -123,7 +123,7 @@ where
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
 	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
 	C::Api: BabeApi<Block>,
-	C::Api: sygma_runtime_api::SygmaBridgeApi<Block>,
+	// C::Api: sygma_runtime_api::SygmaBridgeApi<Block>,
 	C: BlockchainEvents<Block> + 'static,
 	C: HeaderBackend<Block>
 		+ HeaderMetadata<Block, Error = BlockChainError>
@@ -142,12 +142,12 @@ where
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
 	use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
-	use sygma_rpc::{SygmaBridgeRpcServer, SygmaBridgeStorage};
+	// use sygma_rpc::{SygmaBridgeRpcServer, SygmaBridgeStorage};
 
 	let mut io = RpcModule::new(());
 	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa } = deps;
 
-	let BabeDeps { keystore, babe_worker_handle } = babe;
+	let Some(BabeDeps { keystore, babe_worker_handle }) = babe else { todo!() };
 
 	let GrandpaDeps {
 		shared_voter_state,
@@ -177,7 +177,7 @@ where
 		.into_rpc(),
 	)?;
 
-	io.merge(SygmaBridgeStorage::new(client.clone()).into_rpc())?;
+	// io.merge(SygmaBridgeStorage::new(client.clone()).into_rpc())?;
 
 	// Ethereum compatibility RPCs
 	let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
