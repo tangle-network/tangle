@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - 'types/src/**'
+      - 'types/package.json'
 
 jobs:
   build:
