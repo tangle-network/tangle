@@ -671,6 +671,7 @@ pub mod module {
 		/// Update the price targets for the caller for a specific service blueprint.
 		///
 		/// See [`Self::register`] for more information.
+		#[pallet::weight(T::WeightInfo::update_price_targets())]
 		pub fn update_price_targets(
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: u64,
