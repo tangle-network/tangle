@@ -97,3 +97,39 @@ impl<T: crate::Config> ServiceManager<T::AccountId, BalanceOf<T>> for crate::Pal
 			.map_or(false, |profile| profile.services.is_empty() && profile.blueprints.is_empty())
 	}
 }
+
+#[cfg(feature = "runtime-benchmarks")]
+pub struct BenchmarkingOperatorDelegationManager<T: crate::Config, Balance: Default, AssetId>(
+	core::marker::PhantomData<(T, Balance, AssetId)>,
+);
+
+#[cfg(feature = "runtime-benchmarks")]
+impl<T: crate::Config, Balance: Default, AssetId>
+	tangle_primitives::traits::MultiAssetDelegationInfo<T::AccountId, Balance>
+	for BenchmarkingOperatorDelegationManager<T, Balance, AssetId>
+{
+	type AssetId = AssetId;
+
+	fn get_current_round() -> tangle_primitives::types::RoundIndex {
+		Default::default()
+	}
+
+	fn is_operator(_operator: &T::AccountId) -> bool {
+		true
+	}
+
+	fn is_operator_active(_operator: &T::AccountId) -> bool {
+		true
+	}
+
+	fn get_operator_stake(_operator: &T::AccountId) -> Balance {
+		Default::default()
+	}
+
+	fn get_total_delegation_by_asset_id(
+		_operator: &T::AccountId,
+		_asset_id: &Self::AssetId,
+	) -> Balance {
+		Default::default()
+	}
+}

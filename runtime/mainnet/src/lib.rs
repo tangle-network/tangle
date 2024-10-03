@@ -1198,13 +1198,17 @@ parameter_types! {
 	pub const MetadataDepositPerByte: Balance = deposit(0, 1);
 }
 
+#[cfg(not(feature = "runtime-benchmarks"))]
 pub type AssetId = u128;
+
+#[cfg(feature = "runtime-benchmarks")]
+pub type AssetId = u32;
 
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
 	type AssetId = AssetId;
-	type AssetIdParameter = parity_scale_codec::Compact<u128>;
+	type AssetIdParameter = parity_scale_codec::Compact<AssetId>;
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;

@@ -1418,13 +1418,17 @@ parameter_types! {
 	pub const MetadataDepositPerByte: Balance = deposit(0, 1);
 }
 
+#[cfg(not(feature = "runtime-benchmarks"))]
 pub type AssetId = u128;
+
+#[cfg(feature = "runtime-benchmarks")]
+pub type AssetId = u32;
 
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
 	type AssetId = AssetId;
-	type AssetIdParameter = parity_scale_codec::Compact<u128>;
+	type AssetIdParameter = parity_scale_codec::Compact<AssetId>;
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
@@ -1923,6 +1927,7 @@ mod benches {
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
+		[pallet_services, Services]
 	);
 }
 
@@ -2586,10 +2591,8 @@ impl_runtime_apis! {
 			Vec<frame_benchmarking::BenchmarkList>,
 			Vec<frame_support::traits::StorageInfo>,
 		) {
-			use frame_benchmarking::{baseline, Benchmarking, BenchmarkList};
+			use frame_benchmarking::{Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
-			use frame_system_benchmarking::Pallet as SystemBench;
-			use baseline::Pallet as BaselineBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
 			list_benchmark!(list, extra, pallet_services, Services);
@@ -2605,8 +2608,6 @@ impl_runtime_apis! {
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
 			use frame_benchmarking::{baseline, Benchmarking, BenchmarkBatch};
 			use sp_storage::TrackedStorageKey;
-			use frame_system_benchmarking::Pallet as SystemBench;
-			use baseline::Pallet as BaselineBench;
 			impl frame_system_benchmarking::Config for Runtime {}
 			impl baseline::Config for Runtime {}
 

@@ -51,6 +51,9 @@ pub use module::*;
 pub use traits::*;
 pub use weights::WeightInfo;
 
+#[cfg(feature = "runtime-benchmarks")]
+pub use impls::BenchmarkingOperatorDelegationManager;
+
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;

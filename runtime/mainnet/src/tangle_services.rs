@@ -148,6 +148,10 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type Constraints = PalletServicesConstraints;
+	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
+	#[cfg(feature = "runtime-benchmarks")]
+	type OperatorDelegationManager =
+		pallet_services::BenchmarkingOperatorDelegationManager<Runtime, Balance, AssetId>;
 	type WeightInfo = ();
 }
