@@ -20,7 +20,7 @@ fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
 fn operator_preferences<T: Config>() -> OperatorPreferences {
 	OperatorPreferences {
 		key: zero_key(),
-		approval: ApprovalPrefrence::default(),
+		approval: ApprovalPreference::default(),
 		price_targets: Default::default(),
 	}
 }
@@ -162,7 +162,7 @@ benchmarks! {
 			Default::default()
 		);
 
-		let operator_preference = OperatorPreferences { approval: ApprovalPrefrence::Required, ..operator_preference };
+		let operator_preference = OperatorPreferences { approval: ApprovalPreference::Required, ..operator_preference };
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
 		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
@@ -197,7 +197,7 @@ benchmarks! {
 			Default::default()
 		);
 
-		let operator_preference = OperatorPreferences { approval: ApprovalPrefrence::Required, ..operator_preference };
+		let operator_preference = OperatorPreferences { approval: ApprovalPreference::Required, ..operator_preference };
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
 		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
