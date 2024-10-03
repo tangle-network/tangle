@@ -473,7 +473,7 @@ pub struct Service<C: Constraints, AccountId, BlockNumber> {
 	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum ApprovalPrefrence {
+pub enum ApprovalPreference {
 	/// No approval is required to provide the service.
 	#[codec(index = 0)]
 	#[default]
@@ -525,7 +525,7 @@ pub struct OperatorPreferences {
 	/// The operator ECDSA public key.
 	pub key: ecdsa::Public,
 	/// The approval prefrence of the operator.
-	pub approval: ApprovalPrefrence,
+	pub approval: ApprovalPreference,
 	/// The pricing targets for the operator's resources.
 	pub price_targets: PriceTargets,
 }
@@ -535,7 +535,7 @@ impl OperatorPreferences {
 	pub fn to_ethabi(&self) -> Vec<ethabi::Token> {
 		let tokens: Vec<ethabi::Token> = vec![
 			ethabi::Token::Bytes(self.key.0.to_vec()),
-			// TODO: Add ApprovalPrefrence to ethabi.
+			// TODO: Add ApprovalPreference to ethabi.
 		];
 		tokens
 	}

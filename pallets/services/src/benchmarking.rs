@@ -70,7 +70,7 @@ benchmarks! {
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() };
+		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPreference::default() };
 
 	}: _(RawOrigin::Signed(bob.clone()), 0, operator_preference, Default::default())
 
@@ -81,7 +81,7 @@ benchmarks! {
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() };
+		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPreference::default() };
 
 		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
 
@@ -94,11 +94,11 @@ benchmarks! {
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() };
+		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPreference::default() };
 
 		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
 
-	}: _(RawOrigin::Signed(bob.clone()), 0, ApprovalPrefrence::Required)
+	}: _(RawOrigin::Signed(bob.clone()), 0, ApprovalPreference::Required)
 
 
 	request {
@@ -106,7 +106,7 @@ benchmarks! {
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
-		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() };
+		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPreference::default() };
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
 
@@ -137,11 +137,11 @@ benchmarks! {
 		let _= Pallet::<T>::register(
 			RawOrigin::Signed(bob.clone()).into(),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences { key: zero_key(), approval: ApprovalPreference::default() },
 			Default::default()
 		);
 
-		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::Required };
+		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPreference::Required };
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
 		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
@@ -171,11 +171,11 @@ benchmarks! {
 		let _= Pallet::<T>::register(
 			RawOrigin::Signed(bob.clone()).into(),
 			0,
-			OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() },
+			OperatorPreferences { key: zero_key(), approval: ApprovalPreference::default() },
 			Default::default()
 		);
 
-		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::Required };
+		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPreference::Required };
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
 		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
@@ -201,7 +201,7 @@ benchmarks! {
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
-		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() };
+		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPreference::default() };
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
@@ -230,7 +230,7 @@ benchmarks! {
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
-		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() };
+		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPreference::default() };
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
@@ -264,7 +264,7 @@ benchmarks! {
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
-		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPrefrence::default() };
+		let operator_preference = OperatorPreferences { key: zero_key(), approval: ApprovalPreference::default() };
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
