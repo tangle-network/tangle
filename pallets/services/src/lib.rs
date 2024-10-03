@@ -51,6 +51,9 @@ pub use module::*;
 pub use traits::*;
 pub use weights::WeightInfo;
 
+#[cfg(feature = "runtime-benchmarks")]
+pub use impls::BenchmarkingOperatorDelegationManager;
+
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
@@ -671,6 +674,7 @@ pub mod module {
 		/// Update the price targets for the caller for a specific service blueprint.
 		///
 		/// See [`Self::register`] for more information.
+		#[pallet::weight(T::WeightInfo::update_price_targets())]
 		pub fn update_price_targets(
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: u64,

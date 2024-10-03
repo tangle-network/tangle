@@ -70,7 +70,7 @@ pub mod tangle {
 }
 
 #[cfg(feature = "testnet")]
-pub mod testnet {
+pub mod tangle {
 	// Our native executor instance.
 	pub struct ExecutorDispatch;
 
@@ -93,15 +93,9 @@ pub mod testnet {
 	}
 }
 
-#[cfg(not(feature = "testnet"))]
 #[allow(deprecated)]
 pub(crate) type FullClient =
 	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<tangle::ExecutorDispatch>>;
-
-#[cfg(feature = "testnet")]
-#[allow(deprecated)]
-pub(crate) type FullClient =
-	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<testnet::ExecutorDispatch>>;
 
 pub(crate) type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
@@ -132,9 +126,9 @@ pub fn new_partial(
 	>,
 	ServiceError,
 > {
-	println!("    ++++++++++++++++++++++++                                                                          
-	+++++++++++++++++++++++++++                                                                        
-	+++++++++++++++++++++++++++                                                                        
+	println!("    ++++++++++++++++++++++++
+	+++++++++++++++++++++++++++
+	+++++++++++++++++++++++++++
 	+++        ++++++      +++         @%%%%%%%%%%%                                     %%%
 	++++++      ++++      +++++        %%%%%%%%%%%%                                     %%%@
 	++++++++++++++++++++++++++            %%%%      %%%%@     %%% %%@       @%%%%%%%   %%%@    %%%%@
@@ -143,8 +137,8 @@ pub fn new_partial(
 	++++++++++++++++++++++++++            %%%%    %%%%%%%%%   %%%   %%%%  %%%   @%%%   %%%@ @%%%%%  %%%%%
 	++++++      ++++      ++++++          %%%%    %%%%%%%%%   %%%   %%%%  %%%%%%%%%%   %%%@  %%%%%%%%%@
 	+++        ++++++        +++          %%%%    %%%%%%%%%   %%%   %%%@   %%%%%%%%%   %%%    %%%%%%%@
-	++++      +++++++++      +++                                           %%%%  %%%%               
-	++++++++++++++++++++++++++++                                           %%%%%%%%%         
+	++++      +++++++++      +++                                           %%%%  %%%%
+	++++++++++++++++++++++++++++                                           %%%%%%%%%
 	  +++++++++++++++++++++++                                                 %%%%% \n");
 
 	let telemetry = config
@@ -335,8 +329,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			if config.chain_spec.chain_type() == ChainType::Development
 				|| config.chain_spec.chain_type() == ChainType::Local
 			{
-				println!("   
-			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
+				println!("
+			++++++++++++++++++++++++++++++++++++++++++++++++
 				Validator keys not found, validator keys are essential to run a validator on
 				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
 				how to generate and insert keys. OR start the node with --auto-insert-keys to automatically generate the keys in testnet.
@@ -344,13 +338,15 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			\n");
 				panic!("Keys not detected!")
 			} else {
-				println!("   
-			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
+				println!(
+					"
+			++++++++++++++++++++++++++++++++++++++++++++++++
 				Validator keys not found, validator keys are essential to run a validator on
 				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
 				how to generate and insert keys.
 			++++++++++++++++++++++++++++++++++++++++++++++++
-			\n");
+			\n"
+				);
 				panic!("Keys not detected!")
 			}
 		}

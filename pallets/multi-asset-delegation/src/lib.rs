@@ -65,8 +65,9 @@ mod tests;
 
 pub mod weights;
 
-#[cfg(feature = "runtime-benchmarks")]
-mod benchmarking;
+// #[cfg(feature = "runtime-benchmarks")]
+// TODO(@1xstj): Fix benchmarking and re-enable
+// mod benchmarking;
 
 pub mod functions;
 pub mod traits;

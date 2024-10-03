@@ -28,10 +28,10 @@ clap = { workspace = true }
 futures = { workspace = true }
 hex-literal = { workspace = true }
 parity-scale-codec = { workspace = true }
-rand = { workspace = true, features = ["std"]  }
+rand = { workspace = true, features = ["std"] }
 serde_json = { workspace = true }
 tokio = { workspace = true }
-hex = {workspace = true }
+hex = { workspace = true }
 async-trait = { workspace = true }
 log = { workspace = true }
 
@@ -39,6 +39,7 @@ log = { workspace = true }
 frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 frame-system = { workspace = true }
+frame-metadata-hash-extension = { workspace = true }
 sc-basic-authorship = { workspace = true }
 sc-cli = { workspace = true }
 sc-client-api = { workspace = true }
@@ -120,22 +121,22 @@ tangle-testnet-runtime = { workspace = true, optional = true }
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
 runtime-benchmarks = [
-  "frame-benchmarking-cli/runtime-benchmarks",
-  "frame-benchmarking/runtime-benchmarks",
-  "frame-system/runtime-benchmarks",
-  "tangle-runtime/runtime-benchmarks",
-  "tangle-testnet-runtime?/runtime-benchmarks",
-  "sc-service/runtime-benchmarks",
+ "frame-benchmarking-cli/runtime-benchmarks",
+ "frame-benchmarking/runtime-benchmarks",
+ "frame-system/runtime-benchmarks",
+ "tangle-runtime/runtime-benchmarks",
+ "tangle-testnet-runtime?/runtime-benchmarks",
+ "sc-service/runtime-benchmarks",
 ]
 with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-testnet-runtime/with-paritydb-weights"]
 rocksdb = [
-  "sc-cli/rocksdb",
-  "sc-service/rocksdb",
-  "fc-cli/rocksdb",
-  "fc-db/rocksdb",
-  "fc-mapping-sync/rocksdb",
-  "fc-rpc/rocksdb",
+ "sc-cli/rocksdb",
+ "sc-service/rocksdb",
+ "fc-cli/rocksdb",
+ "fc-db/rocksdb",
+ "fc-mapping-sync/rocksdb",
+ "fc-rpc/rocksdb",
 ]
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]
 testnet = ["tangle-testnet-runtime"]

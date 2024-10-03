@@ -147,6 +147,7 @@ runtime-benchmarks = [
     "pallet-grandpa/runtime-benchmarks",
     "pallet-timestamp/runtime-benchmarks",
     "pallet-vesting/runtime-benchmarks",
+    "pallet-assets/runtime-benchmarks",
     "pallet-collective/runtime-benchmarks",
     "pallet-tx-pause/runtime-benchmarks",
     "pallet-staking/runtime-benchmarks",
@@ -156,6 +157,8 @@ runtime-benchmarks = [
     "pallet-ethereum/runtime-benchmarks",
     "pallet-evm/runtime-benchmarks",
     "pallet-hotfix-sufficients/runtime-benchmarks",
+    # Tangle
+    "pallet-services/runtime-benchmarks",
 ]
 
 std = [
