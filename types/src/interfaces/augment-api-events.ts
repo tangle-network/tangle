@@ -54,7 +54,7 @@ import {
   PalletNominationPoolsCommissionClaimPermission,
   PalletNominationPoolsPoolState,
   TangleTestnetRuntimeProxyType,
-  TanglePrimitivesServicesApprovalPrefrence,
+  TanglePrimitivesServicesApprovalPreference,
   TanglePrimitivesServicesField,
   TanglePrimitivesServicesPriceTargets,
   TanglePrimitivesServicesOperatorPreferences,
@@ -2129,12 +2129,12 @@ declare module "@polkadot/api-base/types/events" {
         [
           operator: AccountId32,
           blueprintId: u64,
-          approvalPreference: TanglePrimitivesServicesApprovalPrefrence,
+          approvalPreference: TanglePrimitivesServicesApprovalPreference,
         ],
         {
           operator: AccountId32;
           blueprintId: u64;
-          approvalPreference: TanglePrimitivesServicesApprovalPrefrence;
+          approvalPreference: TanglePrimitivesServicesApprovalPreference;
         }
       >;
       /**

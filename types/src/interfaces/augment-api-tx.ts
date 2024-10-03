@@ -87,7 +87,7 @@ import {
   TanglePrimitivesServicesField,
   TanglePrimitivesServicesServiceBlueprint,
   TanglePrimitivesServicesOperatorPreferences,
-  TanglePrimitivesServicesApprovalPrefrence,
+  TanglePrimitivesServicesApprovalPreference,
   TanglePrimitivesServicesPriceTargets,
   TangleTestnetRuntimeOpaqueSessionKeys,
   PalletStakingRewardDestination,
@@ -4169,13 +4169,13 @@ declare module "@polkadot/api-base/types/submittable" {
         (
           blueprintId: Compact<u64> | AnyNumber | Uint8Array,
           approvalPreference:
-            | TanglePrimitivesServicesApprovalPrefrence
+            | TanglePrimitivesServicesApprovalPreference
             | "None"
             | "Required"
             | number
             | Uint8Array
         ) => SubmittableExtrinsic<ApiType>,
-        [Compact<u64>, TanglePrimitivesServicesApprovalPrefrence]
+        [Compact<u64>, TanglePrimitivesServicesApprovalPreference]
       >;
       /**
        * See `Pallet::update_price_targets`.

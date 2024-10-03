@@ -1773,7 +1773,7 @@ declare module '@polkadot/types/lookup' {
     readonly asApprovalPreferenceUpdated: {
       readonly operator: AccountId32;
       readonly blueprintId: u64;
-      readonly approvalPreference: TanglePrimitivesServicesApprovalPrefrence;
+      readonly approvalPreference: TanglePrimitivesServicesApprovalPreference;
     } & Struct;
     readonly isPriceTargetsUpdated: boolean;
     readonly asPriceTargetsUpdated: {
@@ -1859,15 +1859,15 @@ declare module '@polkadot/types/lookup' {
   /** @name TanglePrimitivesServicesOperatorPreferences (129) */
   interface TanglePrimitivesServicesOperatorPreferences extends Struct {
     readonly key: SpCoreEcdsaPublic;
-    readonly approval: TanglePrimitivesServicesApprovalPrefrence;
+    readonly approval: TanglePrimitivesServicesApprovalPreference;
     readonly priceTargets: TanglePrimitivesServicesPriceTargets;
   }
 
   /** @name SpCoreEcdsaPublic (130) */
   interface SpCoreEcdsaPublic extends U8aFixed {}
 
-  /** @name TanglePrimitivesServicesApprovalPrefrence (132) */
-  interface TanglePrimitivesServicesApprovalPrefrence extends Enum {
+  /** @name TanglePrimitivesServicesApprovalPreference (132) */
+  interface TanglePrimitivesServicesApprovalPreference extends Enum {
     readonly isNone: boolean;
     readonly isRequired: boolean;
     readonly type: 'None' | 'Required';
@@ -4402,7 +4402,7 @@ declare module '@polkadot/types/lookup' {
     readonly isUpdateApprovalPreference: boolean;
     readonly asUpdateApprovalPreference: {
       readonly blueprintId: Compact<u64>;
-      readonly approvalPreference: TanglePrimitivesServicesApprovalPrefrence;
+      readonly approvalPreference: TanglePrimitivesServicesApprovalPreference;
     } & Struct;
     readonly isUpdatePriceTargets: boolean;
     readonly asUpdatePriceTargets: {

@@ -36648,7 +36648,7 @@ pub mod api {
 					use super::runtime_types;
 					pub type BlueprintId = ::core::primitive::u64;
 					pub type ApprovalPreference =
-						runtime_types::tangle_primitives::services::ApprovalPrefrence;
+						runtime_types::tangle_primitives::services::ApprovalPreference;
 				}
 				impl ::subxt_core::blocks::StaticExtrinsic for UpdateApprovalPreference {
 					const PALLET: &'static str = "Services";
@@ -37237,7 +37237,7 @@ pub mod api {
 				pub type Operator = ::subxt_core::utils::AccountId32;
 				pub type BlueprintId = ::core::primitive::u64;
 				pub type ApprovalPreference =
-					runtime_types::tangle_primitives::services::ApprovalPrefrence;
+					runtime_types::tangle_primitives::services::ApprovalPreference;
 			}
 			impl ::subxt_core::events::StaticEvent for ApprovalPreferenceUpdated {
 				const PALLET: &'static str = "Services";
@@ -51155,7 +51155,7 @@ pub mod api {
 						#[codec(compact)]
 						blueprint_id: ::core::primitive::u64,
 						approval_preference:
-							runtime_types::tangle_primitives::services::ApprovalPrefrence,
+							runtime_types::tangle_primitives::services::ApprovalPreference,
 					},
 					#[codec(index = 5)]
 					#[doc = "See `Pallet::update_price_targets`."]
@@ -51362,7 +51362,7 @@ pub mod api {
 						operator: ::subxt_core::utils::AccountId32,
 						blueprint_id: ::core::primitive::u64,
 						approval_preference:
-							runtime_types::tangle_primitives::services::ApprovalPrefrence,
+							runtime_types::tangle_primitives::services::ApprovalPreference,
 					},
 					#[codec(index = 5)]
 					#[doc = "The price targets for an operator has been updated."]
@@ -56515,7 +56515,7 @@ pub mod api {
 				# [codec (crate = :: subxt_core :: ext :: codec)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				pub enum ApprovalPrefrence {
+				pub enum ApprovalPreference {
 					#[codec(index = 0)]
 					None,
 					#[codec(index = 1)]
@@ -56904,7 +56904,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct OperatorPreferences {
 					pub key: runtime_types::sp_core::ecdsa::Public,
-					pub approval: runtime_types::tangle_primitives::services::ApprovalPrefrence,
+					pub approval: runtime_types::tangle_primitives::services::ApprovalPreference,
 					pub price_targets: runtime_types::tangle_primitives::services::PriceTargets,
 				}
 				#[derive(
