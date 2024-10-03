@@ -1628,7 +1628,7 @@ export default {
       ApprovalPreferenceUpdated: {
         operator: 'AccountId32',
         blueprintId: 'u64',
-        approvalPreference: 'TanglePrimitivesServicesApprovalPrefrence',
+        approvalPreference: 'TanglePrimitivesServicesApprovalPreference',
       },
       PriceTargetsUpdated: {
         operator: 'AccountId32',
@@ -1704,13 +1704,13 @@ export default {
    **/
   TanglePrimitivesServicesOperatorPreferences: {
     key: '[u8;33]',
-    approval: 'TanglePrimitivesServicesApprovalPrefrence',
+    approval: 'TanglePrimitivesServicesApprovalPreference',
     priceTargets: 'TanglePrimitivesServicesPriceTargets'
   },
   /**
-   * Lookup129: tangle_primitives::services::ApprovalPrefrence
+   * Lookup129: tangle_primitives::services::ApprovalPreference
    **/
-  TanglePrimitivesServicesApprovalPrefrence: {
+  TanglePrimitivesServicesApprovalPreference: {
     _enum: ['None', 'Required']
   },
   /**
@@ -3975,7 +3975,7 @@ export default {
       },
       update_approval_preference: {
         blueprintId: 'Compact<u64>',
-        approvalPreference: 'TanglePrimitivesServicesApprovalPrefrence',
+        approvalPreference: 'TanglePrimitivesServicesApprovalPreference',
       },
       update_price_targets: {
         blueprintId: 'Compact<u64>',

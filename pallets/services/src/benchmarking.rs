@@ -103,7 +103,7 @@ benchmarks! {
 
 		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
 
-	}: _(RawOrigin::Signed(bob.clone()), 0, ApprovalPrefrence::Required)
+	}: _(RawOrigin::Signed(bob.clone()), 0, ApprovalPreference::Required)
 
 
 	update_price_targets {

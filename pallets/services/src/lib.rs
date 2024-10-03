@@ -253,7 +253,7 @@ pub mod module {
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 			/// The new approval preference.
-			approval_preference: ApprovalPrefrence,
+			approval_preference: ApprovalPreference,
 		},
 
 		/// The price targets for an operator has been updated.
@@ -652,7 +652,7 @@ pub mod module {
 		pub fn update_approval_preference(
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: u64,
-			approval_preference: ApprovalPrefrence,
+			approval_preference: ApprovalPreference,
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			ensure!(Blueprints::<T>::contains_key(blueprint_id), Error::<T>::BlueprintNotFound);
@@ -723,7 +723,7 @@ pub mod module {
 			let mut approved = Vec::new();
 			for provider in &service_providers {
 				let prefs = Self::operators(blueprint_id, provider)?;
-				if prefs.approval == ApprovalPrefrence::Required {
+				if prefs.approval == ApprovalPreference::Required {
 					pending_approvals.push(provider.clone());
 				} else {
 					approved.push(provider.clone());
