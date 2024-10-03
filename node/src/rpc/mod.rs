@@ -47,7 +47,7 @@ use tangle_testnet_runtime::{AccountId, Balance, Hash, Index, PalletServicesCons
 
 pub mod eth;
 pub mod tracing;
-pub use self::eth::{create_eth, overrides_handle, EthDeps};
+pub use self::eth::{create_eth, EthDeps};
 
 /// Extra dependencies for BABE.
 pub struct BabeDeps {
@@ -82,7 +82,7 @@ pub struct FullDeps<C, P, A: ChainApi, CT, SC, B, CIDP> {
 	/// Ethereum-compatibility specific dependencies.
 	pub eth: EthDeps<C, P, A, CT, Block, CIDP>,
 	/// BABE specific dependencies.
-	pub babe: BabeDeps,
+	pub babe: Option<BabeDeps>,
 	/// The SelectChain Strategy
 	pub select_chain: SC,
 	/// GRANDPA specific dependencies.
@@ -123,7 +123,7 @@ where
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
 	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
 	C::Api: BabeApi<Block>,
-	C::Api: sygma_runtime_api::SygmaBridgeApi<Block>,
+	// C::Api: sygma_runtime_api::SygmaBridgeApi<Block>,
 	C: BlockchainEvents<Block> + 'static,
 	C: HeaderBackend<Block>
 		+ HeaderMetadata<Block, Error = BlockChainError>
@@ -142,12 +142,12 @@ where
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
 	use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
-	use sygma_rpc::{SygmaBridgeRpcServer, SygmaBridgeStorage};
+	// use sygma_rpc::{SygmaBridgeRpcServer, SygmaBridgeStorage};
 
 	let mut io = RpcModule::new(());
 	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa } = deps;
 
-	let BabeDeps { keystore, babe_worker_handle } = babe;
+	let Some(BabeDeps { keystore, babe_worker_handle }) = babe else { todo!() };
 
 	let GrandpaDeps {
 		shared_voter_state,
@@ -177,7 +177,7 @@ where
 		.into_rpc(),
 	)?;
 
-	io.merge(SygmaBridgeStorage::new(client.clone()).into_rpc())?;
+	// io.merge(SygmaBridgeStorage::new(client.clone()).into_rpc())?;
 
 	// Ethereum compatibility RPCs
 	let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
@@ -232,7 +232,13 @@ where
 	let mut io = RpcModule::new(());
 	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa } = deps;
 
-	let BabeDeps { keystore, babe_worker_handle } = babe;
+	if let Some(babe) = babe {
+		let BabeDeps { babe_worker_handle, keystore } = babe;
+		io.merge(
+			Babe::new(client.clone(), babe_worker_handle, keystore, select_chain, deny_unsafe)
+				.into_rpc(),
+		)?;
+	}
 
 	let GrandpaDeps {
 		shared_voter_state,
@@ -244,11 +250,6 @@ where
 
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
-
-	io.merge(
-		Babe::new(client.clone(), babe_worker_handle.clone(), keystore, select_chain, deny_unsafe)
-			.into_rpc(),
-	)?;
 
 	io.merge(
 		Grandpa::new(

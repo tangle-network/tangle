@@ -32,7 +32,7 @@ use sp_runtime::{traits::Get, DispatchResult};
 mod functions;
 mod impls;
 mod rpc;
-mod traits;
+pub mod traits;
 pub mod types;
 
 #[cfg(test)]

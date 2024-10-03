@@ -20,14 +20,15 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
 };
+use frame_support::derive_impl;
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU128, ConstU32, ConstU64, Everything, OneSessionHandler},
+	traits::{ConstU128, ConstU32, OneSessionHandler},
 };
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
-use sp_core::{sr25519, H160, H256};
+use sp_core::{sr25519, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	testing::UintAuthorityId,
@@ -39,32 +40,33 @@ use std::{collections::BTreeMap, sync::Arc};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
+type Nonce = u32;
 
+#[frame_support::derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
-	type RuntimeOrigin = RuntimeOrigin;
-	type Nonce = u64;
-	type RuntimeCall = RuntimeCall;
-	type Hash = H256;
-	type Hashing = ::sp_runtime::traits::BlakeTwo256;
-	type AccountId = AccountId;
-	type Block = Block;
-	type Lookup = IdentityLookup<Self::AccountId>;
-	type RuntimeEvent = RuntimeEvent;
-	type BlockHashCount = ConstU64<250>;
+	type BaseCallFilter = frame_support::traits::Everything;
 	type BlockWeights = ();
 	type BlockLength = ();
+	type DbWeight = ();
+	type RuntimeOrigin = RuntimeOrigin;
+	type Nonce = Nonce;
+	type RuntimeCall = RuntimeCall;
+	type Hash = sp_core::H256;
+	type Hashing = sp_runtime::traits::BlakeTwo256;
+	type AccountId = AccountId;
+	type Lookup = IdentityLookup<Self::AccountId>;
+	type Block = Block;
+	type RuntimeEvent = RuntimeEvent;
+	type BlockHashCount = ();
 	type Version = ();
 	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
-	type DbWeight = ();
-	type BaseCallFilter = Everything;
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
-	type RuntimeTask = ();
-	type MaxConsumers = ConstU32<16>;
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 impl pallet_balances::Config for Runtime {
@@ -188,7 +190,6 @@ impl pallet_staking::Config for Runtime {
 	type NextNewSession = Session;
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
-	type OffendingValidatorsThreshold = ();
 	type ElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type GenesisElectionProvider = Self::ElectionProvider;
 	type VoterList = pallet_staking::UseNominatorsAndValidatorsMap<Self>;
@@ -199,6 +200,7 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
+	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
 }
 
 parameter_types! {

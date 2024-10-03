@@ -25,6 +25,7 @@ use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_multi_asset_delegation::MultiAssetDelegationPrecompile;
 use pallet_evm_precompile_preimage::PreimagePrecompile;
 use pallet_evm_precompile_registry::PrecompileRegistry;
+use pallet_evm_precompile_services::ServicesPrecompile;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use pallet_evm_precompile_staking::StakingPrecompile;
@@ -211,8 +212,12 @@ pub type TanglePrecompilesAt<R> = (
 		MultiAssetDelegationPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
+	PrecompileAt<
+		AddressU64<2083>,
+		ServicesPrecompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
 );
-
 pub type TanglePrecompiles<R> = PrecompileSetBuilder<
 	R,
 	(

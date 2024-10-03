@@ -29,7 +29,7 @@ const DAVE: u8 = 4;
 const EVE: u8 = 5;
 
 fn zero_key() -> ecdsa::Public {
-	ecdsa::Public([0; 33])
+	ecdsa::Public::try_from([0; 33].as_slice()).unwrap()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

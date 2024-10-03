@@ -83,8 +83,9 @@ impl<Runtime: pallet_evm::Config> SchnorrSr25519Precompile<Runtime> {
 			signature_bytes.as_slice().try_into().map_err(|_| revert("Invalid Signature"))?;
 
 		// Convert public key from bytes to sr25519::Public
-		let public_key: sr25519::Public =
-			sr25519::Public(public_bytes.try_into().map_err(|_| revert("Invalid Publci Key"))?);
+		let public_key: sr25519::Public = sr25519::Public::from_raw(
+			public_bytes.try_into().map_err(|_| revert("Invalid Publci Key"))?,
+		);
 
 		// Compute its keccak256 hash
 		let hash = keccak_256(&message);

@@ -29,19 +29,21 @@ pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
 
-use fixed::{types::extra::U16, FixedU128 as DecimalFixedU128};
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
+use frame_support::derive_impl;
+use frame_support::genesis_builder_helper::build_state;
+use frame_support::genesis_builder_helper::get_preset;
 use frame_support::{
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
-		AsEnsureOriginWithArg, Contains, ContainsPair, OnFinalize, SortedMembers, WithdrawReasons,
+		AsEnsureOriginWithArg, Contains, OnFinalize, WithdrawReasons,
 	},
 	weights::ConstantMultiplier,
 };
-use frame_system::{EnsureSigned, EnsureSignedBy};
+use frame_system::EnsureSigned;
 use frontier_evm::DefaultBaseFeePerGas;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_evm::GasWeightMapping;
@@ -52,56 +54,43 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_services_rpc_runtime_api::BlockNumberOf;
 use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking::StakerStatus;
+#[allow(deprecated)]
 use pallet_transaction_payment::{
 	CurrencyAdapter, FeeDetails, Multiplier, RuntimeDispatchInfo, TargetedFeeAdjustment,
 };
 use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use polkadot_parachain_primitives::primitives::Sibling;
 use precompiles::TanglePrecompiles;
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
+use sp_genesis_builder::PresetId;
 use sp_runtime::{
 	create_runtime_str,
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
 	traits::{
-		self, AccountIdConversion, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto,
-		DispatchInfoOf, Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf,
-		StaticLookup, UniqueSaturatedInto,
+		self, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto, DispatchInfoOf,
+		Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf, StaticLookup,
+		UniqueSaturatedInto,
 	},
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	AccountId32, ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
+	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
 	SaturatedConversion,
 };
-use sp_std::{
-	collections::btree_map::BTreeMap, marker::PhantomData, prelude::*, result, sync::Arc, vec::Vec,
-};
+use sp_std::{prelude::*, vec::Vec};
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-use sygma_traits::{
-	ChainID, DecimalConverter, DepositNonce, DomainID, ExtractDestinationData, ResourceId,
-	VerifyingContractAddress,
-};
+// use sygma_traits::{
+// 	ChainID, DecimalConverter, DepositNonce, DomainID, ExtractDestinationData, ResourceId,
+// 	VerifyingContractAddress,
+// };
 use tangle_primitives::services::RpcServicesWithBlueprint;
-use xcm::v4::{
-	prelude::*,
-	Asset, AssetId as XcmAssetId,
-	Junctions::{X1, X3, X4},
-	Location,
-};
-#[allow(deprecated)]
-use xcm_builder::{
-	AccountId32Aliases, CurrencyAdapter as XcmCurrencyAdapter, FungiblesAdapter, IsConcrete,
-	NoChecking, ParentIsPreset, SiblingParachainConvertsVia,
-};
-use xcm_executor::traits::{Error as ExecutionError, MatchesFungibles};
 
 pub use frame_support::{
 	construct_runtime,
@@ -152,7 +141,7 @@ use tangle_primitives::{
 	},
 	staking::{
 		BONDING_DURATION, HISTORY_DEPTH, MAX_NOMINATOR_REWARDED_PER_VALIDATOR, OFFCHAIN_REPEAT,
-		OFFENDING_VALIDATOR_THRESHOLD, SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
+		SESSIONS_PER_ERA, SLASH_DEFER_DURATION,
 	},
 	treasury::{
 		BURN, DATA_DEPOSIT_PER_BYTE, MAXIMUM_REASON_LENGTH, MAX_APPROVALS, PROPOSAL_BOND,
@@ -230,6 +219,7 @@ pub mod opaque {
 	}
 }
 
+#[derive_impl(frame_system::config_preludes::SolochainDefaultConfig)]
 impl frame_system::Config for Runtime {
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type AccountId = AccountId;
@@ -323,6 +313,7 @@ parameter_types! {
 
 impl pallet_transaction_payment::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	#[allow(deprecated)]
 	type OnChargeTransaction = CurrencyAdapter<Balances, impls::DealWithFees<Runtime>>;
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 	type WeightToFee = IdentityFee<Balance>;
@@ -461,7 +452,7 @@ parameter_types! {
 	pub const SlashDeferDuration: sp_staking::EraIndex = SLASH_DEFER_DURATION;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 	pub const MaxNominatorRewardedPerValidator: u32 = MAX_NOMINATOR_REWARDED_PER_VALIDATOR;
-	pub const OffendingValidatorsThreshold: Perbill = OFFENDING_VALIDATOR_THRESHOLD;
+	//pub const OffendingValidatorsThreshold: Perbill = OFFENDING_VALIDATOR_THRESHOLD;
 	pub OffchainRepeat: BlockNumber = OFFCHAIN_REPEAT;
 	pub const HistoryDepth: u32 = HISTORY_DEPTH;
 }
@@ -494,7 +485,6 @@ impl pallet_staking::Config for Runtime {
 	type NextNewSession = Session;
 	type MaxExposurePageSize = ConstU32<64>;
 	type MaxControllersInDeprecationBatch = ConstU32<100>;
-	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
 	type ElectionProvider = ElectionProviderMultiPhase;
 	type GenesisElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
 	type VoterList = BagsList;
@@ -504,6 +494,7 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
+	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
 }
 
 parameter_types! {
@@ -791,13 +782,14 @@ impl pallet_nomination_pools::Config for Runtime {
 	type RewardCounter = FixedU128;
 	type BalanceToU256 = BalanceToU256;
 	type U256ToBalance = U256ToBalance;
-	type Staking = Staking;
 	type PostUnbondingPoolsWindow = PostUnbondPoolsWindow;
 	type MaxMetadataLen = ConstU32<256>;
 	type MaxUnbonding = ConstU32<8>;
 	type PalletId = NominationPoolsPalletId;
 	type MaxPointsToBalance = MaxPointsToBalance;
 	type RuntimeFreezeReason = RuntimeFreezeReason;
+	type AdminOrigin = EnsureRoot<AccountId>;
+	type StakeAdapter = pallet_nomination_pools::adapter::TransferStake<Self, Staking>;
 }
 
 parameter_types! {
@@ -946,25 +938,17 @@ parameter_types! {
 impl pallet_treasury::Config for Runtime {
 	type PalletId = TreasuryPalletId;
 	type Currency = Balances;
-	type ApproveOrigin = EitherOfDiverse<
-		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 5>,
-	>;
 	type RejectOrigin = EitherOfDiverse<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 	>;
 	type RuntimeEvent = RuntimeEvent;
-	type OnSlash = ();
 	type AssetKind = ();
 	type Beneficiary = AccountId;
 	type BeneficiaryLookup = IdentityLookup<AccountId>;
 	type Paymaster = PayFromAccount<Balances, TreasuryAccount>;
 	type BalanceConverter = UnityAssetBalanceConversion;
 	type PayoutPeriod = PayoutPeriod;
-	type ProposalBond = ProposalBond;
-	type ProposalBondMinimum = ProposalBondMinimum;
-	type ProposalBondMaximum = ();
 	type SpendPeriod = SpendPeriod;
 	type Burn = Burn;
 	type BurnDestination = ();
@@ -997,6 +981,7 @@ impl pallet_bounties::Config for Runtime {
 	type DataDepositPerByte = DataDepositPerByte;
 	type MaximumReasonLength = MaximumReasonLength;
 	type WeightInfo = pallet_bounties::weights::SubstrateWeight<Runtime>;
+	type OnSlash = Treasury;
 	type ChildBountyManager = ChildBounties;
 }
 
@@ -1296,11 +1281,11 @@ construct_runtime!(
 		Lst: pallet_tangle_lst = 52,
 
 		// Sygma
-		SygmaAccessSegregator: sygma_access_segregator = 46,
-		SygmaBasicFeeHandler: sygma_basic_feehandler = 47,
-		SygmaFeeHandlerRouter: sygma_fee_handler_router = 48,
-		SygmaPercentageFeeHandler: sygma_percentage_feehandler = 49,
-		SygmaBridge: sygma_bridge = 50,
+		// SygmaAccessSegregator: sygma_access_segregator = 46,
+		// SygmaBasicFeeHandler: sygma_basic_feehandler = 47,
+		// SygmaFeeHandlerRouter: sygma_fee_handler_router = 48,
+		// SygmaPercentageFeeHandler: sygma_percentage_feehandler = 49,
+		// SygmaBridge: sygma_bridge = 50,
 
 	}
 );
@@ -1480,452 +1465,452 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type AssetId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
-	type PoolId = AssetId;
+	type VaultId = AssetId;
 	type WeightInfo = ();
 }
 
-parameter_types! {
-	pub const SygmaAccessSegregatorPalletIndex: u8 = 90;
-	pub const SygmaBasicFeeHandlerPalletIndex: u8 = 91;
-	pub const SygmaFeeHandlerRouterPalletIndex: u8 = 92;
-	pub const SygmaPercentageFeeHandlerRouterPalletIndex: u8 = 93;
-	pub const SygmaBridgePalletIndex: u8 = 94;
-}
+// parameter_types! {
+// 	pub const SygmaAccessSegregatorPalletIndex: u8 = 90;
+// 	pub const SygmaBasicFeeHandlerPalletIndex: u8 = 91;
+// 	pub const SygmaFeeHandlerRouterPalletIndex: u8 = 92;
+// 	pub const SygmaPercentageFeeHandlerRouterPalletIndex: u8 = 93;
+// 	pub const SygmaBridgePalletIndex: u8 = 94;
+// }
 
-pub struct SygmaAdminMembers;
-impl SortedMembers<AccountId> for SygmaAdminMembers {
-	fn sorted_members() -> Vec<AccountId> {
-		[SygmaBridgeAdminAccount::get()].to_vec()
-	}
-}
+// pub struct SygmaAdminMembers;
+// impl SortedMembers<AccountId> for SygmaAdminMembers {
+// 	fn sorted_members() -> Vec<AccountId> {
+// 		[SygmaBridgeAdminAccount::get()].to_vec()
+// 	}
+// }
 
-impl sygma_bridge::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type TransferReserveAccounts = BridgeAccounts;
-	type FeeReserveAccount = SygmaBridgeFeeAccount;
-	type EIP712ChainID = EIP712ChainID;
-	type DestVerifyingContractAddress = DestVerifyingContractAddress;
-	type FeeHandler = SygmaFeeHandlerRouter;
-	type AssetTransactor = (CurrencyTransactor, FungiblesTransactor);
-	type ResourcePairs = ResourcePairs;
-	type IsReserve = ReserveChecker;
-	type ExtractDestData = DestinationDataParser;
-	type PalletId = SygmaBridgePalletId;
-	type PalletIndex = SygmaBridgePalletIndex;
-	type DecimalConverter = SygmaDecimalConverter<AssetDecimalPairs>;
-	type WeightInfo = sygma_bridge::weights::SygmaWeightInfo<Runtime>;
-}
+// impl sygma_bridge::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type TransferReserveAccounts = BridgeAccounts;
+// 	type FeeReserveAccount = SygmaBridgeFeeAccount;
+// 	type EIP712ChainID = EIP712ChainID;
+// 	type DestVerifyingContractAddress = DestVerifyingContractAddress;
+// 	type FeeHandler = SygmaFeeHandlerRouter;
+// 	type AssetTransactor = (CurrencyTransactor, FungiblesTransactor);
+// 	type ResourcePairs = ResourcePairs;
+// 	type IsReserve = ReserveChecker;
+// 	type ExtractDestData = DestinationDataParser;
+// 	type PalletId = SygmaBridgePalletId;
+// 	type PalletIndex = SygmaBridgePalletIndex;
+// 	type DecimalConverter = SygmaDecimalConverter<AssetDecimalPairs>;
+// 	type WeightInfo = sygma_bridge::weights::SygmaWeightInfo<Runtime>;
+// }
 
-pub type LocationToAccountId = (
-	// The parent (Relay-chain) origin converts to the parent `AccountId`.
-	ParentIsPreset<sp_core::crypto::AccountId32>,
-	// Sibling parachain origins convert to AccountId via the `ParaId::into`.
-	SiblingParachainConvertsVia<Sibling, sp_core::crypto::AccountId32>,
-	// Straight up local `AccountId32` origins just alias directly to `AccountId`.
-	AccountId32Aliases<RelayNetwork, sp_core::crypto::AccountId32>,
-);
+// pub type LocationToAccountId = (
+// 	// The parent (Relay-chain) origin converts to the parent `AccountId`.
+// 	ParentIsPreset<sp_core::crypto::AccountId32>,
+// 	// Sibling parachain origins convert to AccountId via the `ParaId::into`.
+// 	SiblingParachainConvertsVia<Sibling, sp_core::crypto::AccountId32>,
+// 	// Straight up local `AccountId32` origins just alias directly to `AccountId`.
+// 	AccountId32Aliases<RelayNetwork, sp_core::crypto::AccountId32>,
+// );
 
-#[allow(deprecated)]
-pub type CurrencyTransactor = XcmCurrencyAdapter<
-	// Use this currency:
-	Balances,
-	// Use this currency when it is a fungible asset matching the given location or name:
-	IsConcrete<NativeLocation>,
-	// Convert an XCM Location into a local account id:
-	LocationToAccountId,
-	// Our chain's account ID type (we can't get away without mentioning it explicitly):
-	AccountId32,
-	// We don't track any teleports of `Balances`.
-	(),
->;
+// #[allow(deprecated)]
+// pub type CurrencyTransactor = XcmCurrencyAdapter<
+// 	// Use this currency:
+// 	Balances,
+// 	// Use this currency when it is a fungible asset matching the given location or name:
+// 	IsConcrete<NativeLocation>,
+// 	// Convert an XCM Location into a local account id:
+// 	LocationToAccountId,
+// 	// Our chain's account ID type (we can't get away without mentioning it explicitly):
+// 	AccountId32,
+// 	// We don't track any teleports of `Balances`.
+// 	(),
+// >;
 
-/// Means for transacting assets besides the native currency on this chain.
-pub type FungiblesTransactor = FungiblesAdapter<
-	// Use this fungibles implementation:
-	Assets,
-	// Use this currency when it is a fungible asset matching the given location or name:
-	SimpleForeignAssetConverter,
-	// Convert an XCM Location into a local account id:
-	LocationToAccountId,
-	// Our chain's account ID type (we can't get away without mentioning it explicitly):
-	AccountId32,
-	// Disable teleport.
-	NoChecking,
-	// The account to use for tracking teleports.
-	CheckingAccount,
->;
+// /// Means for transacting assets besides the native currency on this chain.
+// pub type FungiblesTransactor = FungiblesAdapter<
+// 	// Use this fungibles implementation:
+// 	Assets,
+// 	// Use this currency when it is a fungible asset matching the given location or name:
+// 	SimpleForeignAssetConverter,
+// 	// Convert an XCM Location into a local account id:
+// 	LocationToAccountId,
+// 	// Our chain's account ID type (we can't get away without mentioning it explicitly):
+// 	AccountId32,
+// 	// Disable teleport.
+// 	NoChecking,
+// 	// The account to use for tracking teleports.
+// 	CheckingAccount,
+// >;
 
-pub struct SimpleForeignAssetConverter(PhantomData<()>);
-impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
-	fn matches_fungibles(a: &Asset) -> result::Result<(AssetId, Balance), ExecutionError> {
-		match (&a.fun, &a.id) {
-			(Fungible(ref amount), AssetId(ref id)) => {
-				if id == &SygUSDLocation::get() {
-					Ok((SygUSDAssetId::get(), *amount))
-				} else if id == &PHALocation::get() {
-					Ok((PHAAssetId::get(), *amount))
-				} else {
-					Err(ExecutionError::AssetNotHandled)
-				}
-			},
-			_ => Err(ExecutionError::AssetNotHandled),
-		}
-	}
-}
+// pub struct SimpleForeignAssetConverter(PhantomData<()>);
+// impl MatchesFungibles<AssetId, Balance> for SimpleForeignAssetConverter {
+// 	fn matches_fungibles(a: &Asset) -> result::Result<(AssetId, Balance), ExecutionError> {
+// 		match (&a.fun, &a.id) {
+// 			(Fungible(ref amount), AssetId(ref id)) => {
+// 				if id == &SygUSDLocation::get() {
+// 					Ok((SygUSDAssetId::get(), *amount))
+// 				} else if id == &PHALocation::get() {
+// 					Ok((PHAAssetId::get(), *amount))
+// 				} else {
+// 					Err(ExecutionError::AssetNotHandled)
+// 				}
+// 			},
+// 			_ => Err(ExecutionError::AssetNotHandled),
+// 		}
+// 	}
+// }
 
-impl sygma_access_segregator::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type BridgeCommitteeOrigin = EnsureSignedBy<SygmaAdminMembers, AccountId>;
-	type PalletIndex = SygmaAccessSegregatorPalletIndex;
-	type Extrinsics = RegisteredExtrinsics;
-	type WeightInfo = sygma_access_segregator::weights::SygmaWeightInfo<Runtime>;
-}
+// impl sygma_access_segregator::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type BridgeCommitteeOrigin = EnsureSignedBy<SygmaAdminMembers, AccountId>;
+// 	type PalletIndex = SygmaAccessSegregatorPalletIndex;
+// 	type Extrinsics = RegisteredExtrinsics;
+// 	type WeightInfo = sygma_access_segregator::weights::SygmaWeightInfo<Runtime>;
+// }
 
-impl sygma_basic_feehandler::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type PalletIndex = SygmaBasicFeeHandlerPalletIndex;
-	type WeightInfo = sygma_basic_feehandler::weights::SygmaWeightInfo<Runtime>;
-}
+// impl sygma_basic_feehandler::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type PalletIndex = SygmaBasicFeeHandlerPalletIndex;
+// 	type WeightInfo = sygma_basic_feehandler::weights::SygmaWeightInfo<Runtime>;
+// }
 
-impl sygma_fee_handler_router::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type BasicFeeHandler = SygmaBasicFeeHandler;
-	type DynamicFeeHandler = ();
+// impl sygma_fee_handler_router::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type BasicFeeHandler = SygmaBasicFeeHandler;
+// 	type DynamicFeeHandler = ();
 
-	type PercentageFeeHandler = SygmaPercentageFeeHandler;
-	type PalletIndex = SygmaFeeHandlerRouterPalletIndex;
-	type WeightInfo = sygma_fee_handler_router::weights::SygmaWeightInfo<Runtime>;
-}
+// 	type PercentageFeeHandler = SygmaPercentageFeeHandler;
+// 	type PalletIndex = SygmaFeeHandlerRouterPalletIndex;
+// 	type WeightInfo = sygma_fee_handler_router::weights::SygmaWeightInfo<Runtime>;
+// }
 
-impl sygma_percentage_feehandler::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type PalletIndex = SygmaPercentageFeeHandlerRouterPalletIndex;
-	type WeightInfo = sygma_percentage_feehandler::weights::SygmaWeightInfo<Runtime>;
-}
+// impl sygma_percentage_feehandler::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type PalletIndex = SygmaPercentageFeeHandlerRouterPalletIndex;
+// 	type WeightInfo = sygma_percentage_feehandler::weights::SygmaWeightInfo<Runtime>;
+// }
 
-parameter_types! {
-	// tTNT: native asset is always a reserved asset
-	pub NativeLocation: Location = Location::here();
-	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
+// parameter_types! {
+// 	// tTNT: native asset is always a reserved asset
+// 	pub NativeLocation: Location = Location::here();
+// 	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
 
-	// SygUSD: a non-reserved asset
-	pub SygUSDLocation: Location = Location::new(
-		1,
-		[
-			Parachain(1000),
-			slice_to_generalkey(b"sygma"),
-			slice_to_generalkey(b"sygusd"),
-		],
-	);
-	// SygUSDAssetId is the substrate assetID of SygUSD
-	pub SygUSDAssetId: AssetId = 2000;
-	// SygUSDResourceId is the resourceID that mapping with the foreign asset SygUSD
-	pub SygUSDResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001100");
+// 	// SygUSD: a non-reserved asset
+// 	pub SygUSDLocation: Location = Location::new(
+// 		1,
+// 		[
+// 			Parachain(1000),
+// 			slice_to_generalkey(b"sygma"),
+// 			slice_to_generalkey(b"sygusd"),
+// 		],
+// 	);
+// 	// SygUSDAssetId is the substrate assetID of SygUSD
+// 	pub SygUSDAssetId: AssetId = 2000;
+// 	// SygUSDResourceId is the resourceID that mapping with the foreign asset SygUSD
+// 	pub SygUSDResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001100");
 
-	// PHA: a reserved asset
-	pub PHALocation: Location = Location::new(
-		1,
-		[
-			Parachain(2004),
-			slice_to_generalkey(b"sygma"),
-			slice_to_generalkey(b"pha"),
-		],
-	);
-	// PHAAssetId is the substrate assetID of PHA
-	pub PHAAssetId: AssetId = 2001;
-	// PHAResourceId is the resourceID that mapping with the foreign asset PHA
-	pub PHAResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000");
-}
+// 	// PHA: a reserved asset
+// 	pub PHALocation: Location = Location::new(
+// 		1,
+// 		[
+// 			Parachain(2004),
+// 			slice_to_generalkey(b"sygma"),
+// 			slice_to_generalkey(b"pha"),
+// 		],
+// 	);
+// 	// PHAAssetId is the substrate assetID of PHA
+// 	pub PHAAssetId: AssetId = 2001;
+// 	// PHAResourceId is the resourceID that mapping with the foreign asset PHA
+// 	pub PHAResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000");
+// }
 
-fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
-	let mut account_map: BTreeMap<XcmAssetId, AccountId32> = BTreeMap::new();
-	account_map.insert(NativeLocation::get().into(), BridgeAccountNative::get());
-	account_map.insert(SygUSDLocation::get().into(), BridgeAccountOtherToken::get());
-	account_map.insert(PHALocation::get().into(), BridgeAccountOtherToken::get());
-	account_map
-}
+// fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
+// 	let mut account_map: BTreeMap<XcmAssetId, AccountId32> = BTreeMap::new();
+// 	account_map.insert(NativeLocation::get().into(), BridgeAccountNative::get());
+// 	account_map.insert(SygUSDLocation::get().into(), BridgeAccountOtherToken::get());
+// 	account_map.insert(PHALocation::get().into(), BridgeAccountOtherToken::get());
+// 	account_map
+// }
 
-const DEST_VERIFYING_CONTRACT_ADDRESS: &str = "6CdE2Cd82a4F8B74693Ff5e194c19CA08c2d1c68";
-parameter_types! {
-	// RegisteredExtrinsics here registers all valid (pallet index, extrinsic_name) paris
-	// make sure to update this when adding new access control extrinsic
-	pub RegisteredExtrinsics: Vec<(u8, Vec<u8>)> = [
-		(SygmaAccessSegregatorPalletIndex::get(), b"grant_access".to_vec()),
-		(SygmaBasicFeeHandlerPalletIndex::get(), b"set_fee".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"set_mpc_address".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"pause_bridge".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"unpause_bridge".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"register_domain".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"unregister_domain".to_vec()),
-		(SygmaBridgePalletIndex::get(), b"retry".to_vec()),
-		(SygmaFeeHandlerRouterPalletIndex::get(), b"set_fee_handler".to_vec()),
-		(SygmaPercentageFeeHandlerRouterPalletIndex::get(), b"set_fee_rate".to_vec()),
-	].to_vec();
+// const DEST_VERIFYING_CONTRACT_ADDRESS: &str = "6CdE2Cd82a4F8B74693Ff5e194c19CA08c2d1c68";
+// parameter_types! {
+// 	// RegisteredExtrinsics here registers all valid (pallet index, extrinsic_name) paris
+// 	// make sure to update this when adding new access control extrinsic
+// 	pub RegisteredExtrinsics: Vec<(u8, Vec<u8>)> = [
+// 		(SygmaAccessSegregatorPalletIndex::get(), b"grant_access".to_vec()),
+// 		(SygmaBasicFeeHandlerPalletIndex::get(), b"set_fee".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"set_mpc_address".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"pause_bridge".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"unpause_bridge".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"register_domain".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"unregister_domain".to_vec()),
+// 		(SygmaBridgePalletIndex::get(), b"retry".to_vec()),
+// 		(SygmaFeeHandlerRouterPalletIndex::get(), b"set_fee_handler".to_vec()),
+// 		(SygmaPercentageFeeHandlerRouterPalletIndex::get(), b"set_fee_rate".to_vec()),
+// 	].to_vec();
 
-	pub const SygmaBridgePalletId: PalletId = PalletId(*b"sygma/01");
+// 	pub const SygmaBridgePalletId: PalletId = PalletId(*b"sygma/01");
 
-	// Tangle testnet super admin: 5D2hZnw8Z7kg5LpQiEBb6HPG4V51wYXuKhE7sVhXiUPWj8D1
-	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("2ab4c35efb6ab82377c2325467103cf46742d288ae1f8917f1d5960f4a1e9065");
-	pub SygmaBridgeAdminAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
+// 	// Tangle testnet super admin: 5D2hZnw8Z7kg5LpQiEBb6HPG4V51wYXuKhE7sVhXiUPWj8D1
+// 	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("2ab4c35efb6ab82377c2325467103cf46742d288ae1f8917f1d5960f4a1e9065");
+// 	pub SygmaBridgeAdminAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
 
-	// SygmaBridgeFeeAccount is a substrate account and used for bridging fee collection
-	// SygmaBridgeFeeAccount address: 5ELLU7ibt5ZrNEYRwohtaRBDBa3TzcWwwPELBPSWWd2mbgv3
-	pub SygmaBridgeFeeAccount: AccountId32 = AccountId32::new([100u8; 32]);
+// 	// SygmaBridgeFeeAccount is a substrate account and used for bridging fee collection
+// 	// SygmaBridgeFeeAccount address: 5ELLU7ibt5ZrNEYRwohtaRBDBa3TzcWwwPELBPSWWd2mbgv3
+// 	pub SygmaBridgeFeeAccount: AccountId32 = AccountId32::new([100u8; 32]);
 
-	// BridgeAccountNative: 5EYCAe5jLbHcAAMKvLFSXgCTbPrLgBJusvPwfKcaKzuf5X5e
-	pub BridgeAccountNative: AccountId32 = SygmaBridgePalletId::get().into_account_truncating();
-	// BridgeAccountOtherToken  5EYCAe5jLbHcAAMKvLFiGhk3htXY8jQncbLTDGJQnpnPMAVp
-	pub BridgeAccountOtherToken: AccountId32 = SygmaBridgePalletId::get().into_sub_account_truncating(1u32);
-	// BridgeAccounts is a list of accounts for holding transferred asset collection
-	pub BridgeAccounts: BTreeMap<XcmAssetId, AccountId32> = bridge_accounts_generator();
+// 	// BridgeAccountNative: 5EYCAe5jLbHcAAMKvLFSXgCTbPrLgBJusvPwfKcaKzuf5X5e
+// 	pub BridgeAccountNative: AccountId32 = SygmaBridgePalletId::get().into_account_truncating();
+// 	// BridgeAccountOtherToken  5EYCAe5jLbHcAAMKvLFiGhk3htXY8jQncbLTDGJQnpnPMAVp
+// 	pub BridgeAccountOtherToken: AccountId32 = SygmaBridgePalletId::get().into_sub_account_truncating(1u32);
+// 	// BridgeAccounts is a list of accounts for holding transferred asset collection
+// 	pub BridgeAccounts: BTreeMap<XcmAssetId, AccountId32> = bridge_accounts_generator();
 
-	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
-	// For local testing with ./scripts/sygma-setup/execute_proposal_test.js, please change it to 5
-	pub EIP712ChainID: ChainID = U256::from(3799);
+// 	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
+// 	// For local testing with ./scripts/sygma-setup/execute_proposal_test.js, please change it to 5
+// 	pub EIP712ChainID: ChainID = U256::from(3799);
 
-	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
-	// When relayers signing, this address will be included in the EIP712Domain
-	// As long as the relayer and pallet configured with the same address, EIP712Domain should be recognized properly.
-	pub DestVerifyingContractAddress: VerifyingContractAddress = primitive_types::H160::from_slice(hex::decode(DEST_VERIFYING_CONTRACT_ADDRESS).ok().unwrap().as_slice());
+// 	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
+// 	// When relayers signing, this address will be included in the EIP712Domain
+// 	// As long as the relayer and pallet configured with the same address, EIP712Domain should be recognized properly.
+// 	pub DestVerifyingContractAddress: VerifyingContractAddress = primitive_types::H160::from_slice(hex::decode(DEST_VERIFYING_CONTRACT_ADDRESS).ok().unwrap().as_slice());
 
-	pub CheckingAccount: AccountId32 = AccountId32::new([102u8; 32]);
+// 	pub CheckingAccount: AccountId32 = AccountId32::new([102u8; 32]);
 
-	pub RelayNetwork: NetworkId = NetworkId::Polkadot;
-	// ResourcePairs is where all supported assets and their associated resourceID are binding
-	pub ResourcePairs: Vec<(XcmAssetId, ResourceId)> = vec![
-		(NativeLocation::get().into(), NativeSygmaResourceId::get()),
-		(SygUSDLocation::get().into(), SygUSDResourceId::get()),
-		(PHALocation::get().into(), PHAResourceId::get()),
-	];
+// 	pub RelayNetwork: NetworkId = NetworkId::Polkadot;
+// 	// ResourcePairs is where all supported assets and their associated resourceID are binding
+// 	pub ResourcePairs: Vec<(XcmAssetId, ResourceId)> = vec![
+// 		(NativeLocation::get().into(), NativeSygmaResourceId::get()),
+// 		(SygUSDLocation::get().into(), SygUSDResourceId::get()),
+// 		(PHALocation::get().into(), PHAResourceId::get()),
+// 	];
 
-	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8), (PHALocation::get().into(), 12u8)];
-}
+// 	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8), (PHALocation::get().into(), 12u8)];
+// }
 
-pub struct ReserveChecker;
-impl ContainsPair<Asset, Location> for ReserveChecker {
-	fn contains(asset: &Asset, origin: &Location) -> bool {
-		if let Some(ref id) = ConcrateSygmaAsset::origin(asset) {
-			if id == origin {
-				return true;
-			}
-		}
-		false
-	}
-}
+// pub struct ReserveChecker;
+// impl ContainsPair<Asset, Location> for ReserveChecker {
+// 	fn contains(asset: &Asset, origin: &Location) -> bool {
+// 		if let Some(ref id) = ConcrateSygmaAsset::origin(asset) {
+// 			if id == origin {
+// 				return true;
+// 			}
+// 		}
+// 		false
+// 	}
+// }
 
-pub struct ConcrateSygmaAsset;
-impl ConcrateSygmaAsset {
-	pub fn id(asset: &Asset) -> Option<Location> {
-		match (&asset.id, &asset.fun) {
-			(AssetId(ref id), Fungible(_)) => Some(id.clone()),
-			_ => None,
-		}
-	}
+// pub struct ConcrateSygmaAsset;
+// impl ConcrateSygmaAsset {
+// 	pub fn id(asset: &Asset) -> Option<Location> {
+// 		match (&asset.id, &asset.fun) {
+// 			(AssetId(ref id), Fungible(_)) => Some(id.clone()),
+// 			_ => None,
+// 		}
+// 	}
 
-	pub fn origin(asset: &Asset) -> Option<Location> {
-		Self::id(asset).and_then(|id| {
-			match (id.parents, id.first_interior()) {
-				// Sibling parachain
-				(1, Some(Parachain(id))) => {
-					// Assume current parachain id is 1000, for production, always get proper
-					// parachain info
-					if *id == 1000 {
-						Some(Location::new(0, X1(Arc::new([slice_to_generalkey(b"sygma")]))))
-					} else {
-						Some(Location::here())
-					}
-				},
-				(1, _) => Some(Location::here()),
-				// Children parachain
-				(0, Some(Parachain(id))) => Some(Location::new(0, X1(Arc::new([Parachain(*id)])))),
-				// Local: (0, Here)
-				(0, None) => Some(id),
-				_ => None,
-			}
-		})
-	}
-}
+// 	pub fn origin(asset: &Asset) -> Option<Location> {
+// 		Self::id(asset).and_then(|id| {
+// 			match (id.parents, id.first_interior()) {
+// 				// Sibling parachain
+// 				(1, Some(Parachain(id))) => {
+// 					// Assume current parachain id is 1000, for production, always get proper
+// 					// parachain info
+// 					if *id == 1000 {
+// 						Some(Location::new(0, X1(Arc::new([slice_to_generalkey(b"sygma")]))))
+// 					} else {
+// 						Some(Location::here())
+// 					}
+// 				},
+// 				(1, _) => Some(Location::here()),
+// 				// Children parachain
+// 				(0, Some(Parachain(id))) => Some(Location::new(0, X1(Arc::new([Parachain(*id)])))),
+// 				// Local: (0, Here)
+// 				(0, None) => Some(id),
+// 				_ => None,
+// 			}
+// 		})
+// 	}
+// }
 
-pub struct DestinationDataParser;
-/// Extract dest to be recipient and Dest DomainID
-/// if dest chain is substrate chain, recipient must be a encoded MultiLocation
-/// if dest chain is non-substrate chain, recipient is [u8; 32]
-impl ExtractDestinationData for crate::DestinationDataParser {
-	fn extract_dest(dest: &Location) -> Option<(Vec<u8>, DomainID)> {
-		match (dest.parents, dest.interior.clone()) {
-			// final dest is on the remote substrate chain
-			(1, X4(xs)) => {
-				let [a, b, c, d] = *xs;
-				match (a, b, c, d) {
-					(
-						GeneralKey { length: path_len, data: sygma_path },
-						GeneralIndex(dest_domain_id),
-						Parachain(parachain_id),
-						Junction::AccountId32 { network: None, id: recipient },
-					) => {
-						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
-							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
-								|domain_id| {
-									let l: Location = Location::new(
-										1,
-										Junctions::X2(Arc::new([
-											Parachain(parachain_id),
-											Junction::AccountId32 { network: None, id: recipient },
-										])),
-									);
-									(l.encode(), domain_id)
-								},
-							);
-						}
-						None
-					},
-					_ => None,
-				}
-			},
-			(0, X3(xs)) => {
-				let [a, b, c] = *xs;
-				match (a, b, c) {
-					// final dest is on the local substrate chain
-					(
-						GeneralKey { length: path_len, data: sygma_path },
-						GeneralIndex(dest_domain_id),
-						Junction::AccountId32 { network: None, id: recipient },
-					) => {
-						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
-							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
-								|domain_id| {
-									let l: Location = Location::new(
-										0,
-										Junctions::X1(Arc::new([Junction::AccountId32 {
-											network: None,
-											id: recipient,
-										}])),
-									);
-									(l.encode(), domain_id)
-								},
-							);
-						}
-						None
-					},
-					// final dest is on the non-substrate chain such as EVM
-					(
-						GeneralKey { length: path_len, data: sygma_path },
-						GeneralIndex(dest_domain_id),
-						GeneralKey { length: recipient_len, data: recipient },
-					) => {
-						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
-							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
-								|domain_id| {
-									(recipient[..recipient_len as usize].to_vec(), domain_id)
-								},
-							);
-						}
-						None
-					},
-					_ => None,
-				}
-			},
-			_ => None,
-		}
-	}
-}
+// pub struct DestinationDataParser;
+// /// Extract dest to be recipient and Dest DomainID
+// /// if dest chain is substrate chain, recipient must be a encoded MultiLocation
+// /// if dest chain is non-substrate chain, recipient is [u8; 32]
+// impl ExtractDestinationData for crate::DestinationDataParser {
+// 	fn extract_dest(dest: &Location) -> Option<(Vec<u8>, DomainID)> {
+// 		match (dest.parents, dest.interior.clone()) {
+// 			// final dest is on the remote substrate chain
+// 			(1, X4(xs)) => {
+// 				let [a, b, c, d] = *xs;
+// 				match (a, b, c, d) {
+// 					(
+// 						GeneralKey { length: path_len, data: sygma_path },
+// 						GeneralIndex(dest_domain_id),
+// 						Parachain(parachain_id),
+// 						Junction::AccountId32 { network: None, id: recipient },
+// 					) => {
+// 						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+// 							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+// 								|domain_id| {
+// 									let l: Location = Location::new(
+// 										1,
+// 										Junctions::X2(Arc::new([
+// 											Parachain(parachain_id),
+// 											Junction::AccountId32 { network: None, id: recipient },
+// 										])),
+// 									);
+// 									(l.encode(), domain_id)
+// 								},
+// 							);
+// 						}
+// 						None
+// 					},
+// 					_ => None,
+// 				}
+// 			},
+// 			(0, X3(xs)) => {
+// 				let [a, b, c] = *xs;
+// 				match (a, b, c) {
+// 					// final dest is on the local substrate chain
+// 					(
+// 						GeneralKey { length: path_len, data: sygma_path },
+// 						GeneralIndex(dest_domain_id),
+// 						Junction::AccountId32 { network: None, id: recipient },
+// 					) => {
+// 						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+// 							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+// 								|domain_id| {
+// 									let l: Location = Location::new(
+// 										0,
+// 										Junctions::X1(Arc::new([Junction::AccountId32 {
+// 											network: None,
+// 											id: recipient,
+// 										}])),
+// 									);
+// 									(l.encode(), domain_id)
+// 								},
+// 							);
+// 						}
+// 						None
+// 					},
+// 					// final dest is on the non-substrate chain such as EVM
+// 					(
+// 						GeneralKey { length: path_len, data: sygma_path },
+// 						GeneralIndex(dest_domain_id),
+// 						GeneralKey { length: recipient_len, data: recipient },
+// 					) => {
+// 						if sygma_path[..path_len as usize] == [0x73, 0x79, 0x67, 0x6d, 0x61] {
+// 							return TryInto::<DomainID>::try_into(dest_domain_id).ok().map(
+// 								|domain_id| {
+// 									(recipient[..recipient_len as usize].to_vec(), domain_id)
+// 								},
+// 							);
+// 						}
+// 						None
+// 					},
+// 					_ => None,
+// 				}
+// 			},
+// 			_ => None,
+// 		}
+// 	}
+// }
 
-pub struct SygmaDecimalConverter<DecimalPairs>(PhantomData<DecimalPairs>);
-impl<DecimalPairs: Get<Vec<(XcmAssetId, u8)>>> DecimalConverter
-	for SygmaDecimalConverter<DecimalPairs>
-{
-	fn convert_to(asset: &Asset) -> Option<u128> {
-		match (&asset.fun, &asset.id) {
-			(Fungible(amount), _) => {
-				for (asset_id, decimal) in DecimalPairs::get().iter() {
-					if *asset_id == asset.id {
-						return if *decimal == 18 {
-							Some(*amount)
-						} else {
-							type U112F16 = DecimalFixedU128<U16>;
-							if *decimal > 18 {
-								let a =
-									U112F16::from_num(10u128.saturating_pow(*decimal as u32 - 18));
-								let b = U112F16::from_num(*amount).checked_div(a);
-								let r: u128 = b.unwrap_or_else(|| U112F16::from_num(0)).to_num();
-								if r == 0 {
-									return None;
-								}
-								Some(r)
-							} else {
-								// Max is 5192296858534827628530496329220095
-								// if source asset decimal is 12, the max amount sending to sygma
-								// relayer is 5192296858534827.628530496329
-								if *amount > U112F16::MAX {
-									return None;
-								}
-								let a =
-									U112F16::from_num(10u128.saturating_pow(18 - *decimal as u32));
-								let b = U112F16::from_num(*amount).saturating_mul(a);
-								Some(b.to_num())
-							}
-						};
-					}
-				}
-				None
-			},
-			_ => None,
-		}
-	}
+// pub struct SygmaDecimalConverter<DecimalPairs>(PhantomData<DecimalPairs>);
+// impl<DecimalPairs: Get<Vec<(XcmAssetId, u8)>>> DecimalConverter
+// 	for SygmaDecimalConverter<DecimalPairs>
+// {
+// 	fn convert_to(asset: &Asset) -> Option<u128> {
+// 		match (&asset.fun, &asset.id) {
+// 			(Fungible(amount), _) => {
+// 				for (asset_id, decimal) in DecimalPairs::get().iter() {
+// 					if *asset_id == asset.id {
+// 						return if *decimal == 18 {
+// 							Some(*amount)
+// 						} else {
+// 							type U112F16 = DecimalFixedU128<U16>;
+// 							if *decimal > 18 {
+// 								let a =
+// 									U112F16::from_num(10u128.saturating_pow(*decimal as u32 - 18));
+// 								let b = U112F16::from_num(*amount).checked_div(a);
+// 								let r: u128 = b.unwrap_or_else(|| U112F16::from_num(0)).to_num();
+// 								if r == 0 {
+// 									return None;
+// 								}
+// 								Some(r)
+// 							} else {
+// 								// Max is 5192296858534827628530496329220095
+// 								// if source asset decimal is 12, the max amount sending to sygma
+// 								// relayer is 5192296858534827.628530496329
+// 								if *amount > U112F16::MAX {
+// 									return None;
+// 								}
+// 								let a =
+// 									U112F16::from_num(10u128.saturating_pow(18 - *decimal as u32));
+// 								let b = U112F16::from_num(*amount).saturating_mul(a);
+// 								Some(b.to_num())
+// 							}
+// 						};
+// 					}
+// 				}
+// 				None
+// 			},
+// 			_ => None,
+// 		}
+// 	}
 
-	fn convert_from(asset: &Asset) -> Option<Asset> {
-		match (&asset.fun, &asset.id) {
-			(Fungible(amount), _) => {
-				for (asset_id, decimal) in DecimalPairs::get().iter() {
-					if *asset_id == asset.id {
-						return if *decimal == 18 {
-							Some((asset.id.clone(), *amount).into())
-						} else {
-							type U112F16 = DecimalFixedU128<U16>;
-							if *decimal > 18 {
-								// Max is 5192296858534827628530496329220095
-								// if dest asset decimal is 24, the max amount coming from sygma
-								// relayer is 5192296858.534827628530496329
-								if *amount > U112F16::MAX {
-									return None;
-								}
-								let a =
-									U112F16::from_num(10u128.saturating_pow(*decimal as u32 - 18));
-								let b = U112F16::from_num(*amount).saturating_mul(a);
-								let r: u128 = b.to_num();
-								Some((asset.id.clone(), r).into())
-							} else {
-								let a =
-									U112F16::from_num(10u128.saturating_pow(18 - *decimal as u32));
-								let b = U112F16::from_num(*amount).checked_div(a);
-								let r: u128 = b.unwrap_or_else(|| U112F16::from_num(0)).to_num();
-								if r == 0 {
-									return None;
-								}
-								Some((asset.id.clone(), r).into())
-							}
-						};
-					}
-				}
-				None
-			},
-			_ => None,
-		}
-	}
-}
+// 	fn convert_from(asset: &Asset) -> Option<Asset> {
+// 		match (&asset.fun, &asset.id) {
+// 			(Fungible(amount), _) => {
+// 				for (asset_id, decimal) in DecimalPairs::get().iter() {
+// 					if *asset_id == asset.id {
+// 						return if *decimal == 18 {
+// 							Some((asset.id.clone(), *amount).into())
+// 						} else {
+// 							type U112F16 = DecimalFixedU128<U16>;
+// 							if *decimal > 18 {
+// 								// Max is 5192296858534827628530496329220095
+// 								// if dest asset decimal is 24, the max amount coming from sygma
+// 								// relayer is 5192296858.534827628530496329
+// 								if *amount > U112F16::MAX {
+// 									return None;
+// 								}
+// 								let a =
+// 									U112F16::from_num(10u128.saturating_pow(*decimal as u32 - 18));
+// 								let b = U112F16::from_num(*amount).saturating_mul(a);
+// 								let r: u128 = b.to_num();
+// 								Some((asset.id.clone(), r).into())
+// 							} else {
+// 								let a =
+// 									U112F16::from_num(10u128.saturating_pow(18 - *decimal as u32));
+// 								let b = U112F16::from_num(*amount).checked_div(a);
+// 								let r: u128 = b.unwrap_or_else(|| U112F16::from_num(0)).to_num();
+// 								if r == 0 {
+// 									return None;
+// 								}
+// 								Some((asset.id.clone(), r).into())
+// 							}
+// 						};
+// 					}
+// 				}
+// 				None
+// 			},
+// 			_ => None,
+// 		}
+// 	}
+// }
 
-pub fn slice_to_generalkey(key: &[u8]) -> Junction {
-	let len = key.len();
-	assert!(len <= 32);
-	GeneralKey {
-		length: len as u8,
-		data: {
-			let mut data = [0u8; 32];
-			data[..len].copy_from_slice(key);
-			data
-		},
-	}
-}
+// pub fn slice_to_generalkey(key: &[u8]) -> Junction {
+// 	let len = key.len();
+// 	assert!(len <= 32);
+// 	GeneralKey {
+// 		length: len as u8,
+// 		data: {
+// 			let mut data = [0u8; 32];
+// 			data[..len].copy_from_slice(key);
+// 			data
+// 		},
+// 	}
+// }
 
 #[cfg(feature = "runtime-benchmarks")]
 #[macro_use]
@@ -1951,7 +1936,7 @@ impl_runtime_apis! {
 			Executive::execute_block(block)
 		}
 
-		fn initialize_block(header: &<Block as BlockT>::Header) {
+		fn initialize_block(header: &<Block as BlockT>::Header) -> sp_runtime::ExtrinsicInclusionMode {
 			Executive::initialize_block(header)
 		}
 	}
@@ -1991,11 +1976,11 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl sygma_runtime_api::SygmaBridgeApi<Block> for Runtime {
-		fn is_proposal_executed(nonce: DepositNonce, domain_id: DomainID) -> bool {
-			SygmaBridge::is_proposal_executed(nonce, domain_id)
-		}
-	}
+	// impl sygma_runtime_api::SygmaBridgeApi<Block> for Runtime {
+	// 	fn is_proposal_executed(nonce: DepositNonce, domain_id: DomainID) -> bool {
+	// 		SygmaBridge::is_proposal_executed(nonce, domain_id)
+	// 	}
+	// }
 
 	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId> for Runtime {
 		fn query_services_with_blueprints_by_operator(
@@ -2235,6 +2220,10 @@ impl_runtime_apis! {
 				pallet_ethereum::CurrentTransactionStatuses::<Runtime>::get()
 			)
 		}
+
+		fn initialize_pending_block(header: &<Block as BlockT>::Header) {
+			Executive::initialize_block(header);
+		}
 	}
 
 	impl fp_rpc::ConvertTransactionRuntimeApi<Block> for Runtime {
@@ -2386,6 +2375,7 @@ impl_runtime_apis! {
 		fn trace_transaction(
 			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
 			traced_transaction: &EthereumTransaction,
+			header: &<Block as BlockT>::Header,
 		) -> Result<
 			(),
 			sp_runtime::DispatchError,
@@ -2393,6 +2383,11 @@ impl_runtime_apis! {
 			#[cfg(feature = "evm-tracing")]
 			{
 				use evm_tracer::tracer::EvmTracer;
+
+				// Initialize block: calls the "on_initialize" hook on every pallet
+				// in AllPalletsWithSystem.
+				Executive::initialize_block(header);
+
 				// Apply the a subset of extrinsics: all the substrate-specific or ethereum
 				// transactions that preceded the requested transaction.
 				for ext in extrinsics.into_iter() {
@@ -2419,6 +2414,7 @@ impl_runtime_apis! {
 		fn trace_block(
 			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
 			known_transactions: Vec<H256>,
+			header: &<Block as BlockT>::Header,
 		) -> Result<
 			(),
 			sp_runtime::DispatchError,
@@ -2429,6 +2425,10 @@ impl_runtime_apis! {
 
 				let mut config = <Runtime as pallet_evm::Config>::config().clone();
 				config.estimate = true;
+
+				// Initialize block: calls the "on_initialize" hook on every pallet
+				// in AllPalletsWithSystem.
+				Executive::initialize_block(header);
 
 				// Apply all extrinsics. Ethereum extrinsics are traced.
 				for ext in extrinsics.into_iter() {
@@ -2448,6 +2448,91 @@ impl_runtime_apis! {
 					};
 				}
 
+				Ok(())
+			}
+			#[cfg(not(feature = "evm-tracing"))]
+			Err(sp_runtime::DispatchError::Other(
+				"Missing `evm-tracing` compile time feature flag.",
+			))
+		}
+
+		fn trace_call(
+			header: &<Block as BlockT>::Header,
+			from: H160,
+			to: H160,
+			data: Vec<u8>,
+			value: U256,
+			gas_limit: U256,
+			max_fee_per_gas: Option<U256>,
+			max_priority_fee_per_gas: Option<U256>,
+			nonce: Option<U256>,
+			access_list: Option<Vec<(H160, Vec<H256>)>>,
+		) -> Result<(), sp_runtime::DispatchError> {
+			#[cfg(feature = "evm-tracing")]
+			{
+				use evm_tracer::tracer::EvmTracer;
+
+				// Initialize block: calls the "on_initialize" hook on every pallet
+				// in AllPalletsWithSystem.
+				Executive::initialize_block(header);
+
+				EvmTracer::new().trace(|| {
+					let is_transactional = false;
+					let validate = true;
+					let without_base_extrinsic_weight = true;
+
+
+					// Estimated encoded transaction size must be based on the heaviest transaction
+					// type (EIP1559Transaction) to be compatible with all transaction types.
+					let mut estimated_transaction_len = data.len() +
+					// pallet ethereum index: 1
+					// transact call index: 1
+					// Transaction enum variant: 1
+					// chain_id 8 bytes
+					// nonce: 32
+					// max_priority_fee_per_gas: 32
+					// max_fee_per_gas: 32
+					// gas_limit: 32
+					// action: 21 (enum varianrt + call address)
+					// value: 32
+					// access_list: 1 (empty vec size)
+					// 65 bytes signature
+					258;
+
+					if access_list.is_some() {
+						estimated_transaction_len += access_list.encoded_size();
+					}
+
+					let gas_limit = gas_limit.min(u64::MAX.into()).low_u64();
+
+					let (weight_limit, proof_size_base_cost) =
+						match <Runtime as pallet_evm::Config>::GasWeightMapping::gas_to_weight(
+							gas_limit,
+							without_base_extrinsic_weight
+						) {
+							weight_limit if weight_limit.proof_size() > 0 => {
+								(Some(weight_limit), Some(estimated_transaction_len as u64))
+							}
+							_ => (None, None),
+						};
+
+					let _ = <Runtime as pallet_evm::Config>::Runner::call(
+						from,
+						to,
+						data,
+						value,
+						gas_limit,
+						max_fee_per_gas,
+						max_priority_fee_per_gas,
+						nonce,
+						access_list.unwrap_or_default(),
+						is_transactional,
+						validate,
+						weight_limit,
+						proof_size_base_cost,
+						<Runtime as pallet_evm::Config>::config(),
+					);
+				});
 				Ok(())
 			}
 			#[cfg(not(feature = "evm-tracing"))]
@@ -2478,6 +2563,20 @@ impl_runtime_apis! {
 					})
 					.collect(),
 			}
+		}
+	}
+
+	impl sp_genesis_builder::GenesisBuilder<Block> for Runtime {
+		fn build_state(config: Vec<u8>) -> sp_genesis_builder::Result {
+			build_state::<RuntimeGenesisConfig>(config)
+		}
+
+		fn get_preset(id: &Option<PresetId>) -> Option<Vec<u8>> {
+			get_preset::<RuntimeGenesisConfig>(id, |_| None)
+		}
+
+		fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
+			vec![]
 		}
 	}
 
