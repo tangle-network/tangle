@@ -1877,12 +1877,12 @@ declare module '@polkadot/types/lookup' {
   /** @name TanglePrimitivesServicesOperatorPreferences (127) */
   interface TanglePrimitivesServicesOperatorPreferences extends Struct {
     readonly key: U8aFixed;
-    readonly approval: TanglePrimitivesServicesApprovalPrefrence;
+    readonly approval: TanglePrimitivesServicesApprovalPreference;
     readonly priceTargets: TanglePrimitivesServicesPriceTargets;
   }
 
-  /** @name TanglePrimitivesServicesApprovalPrefrence (129) */
-  interface TanglePrimitivesServicesApprovalPrefrence extends Enum {
+  /** @name TanglePrimitivesServicesApprovalPreference (129) */
+  interface TanglePrimitivesServicesApprovalPreference extends Enum {
     readonly isNone: boolean;
     readonly isRequired: boolean;
     readonly type: 'None' | 'Required';

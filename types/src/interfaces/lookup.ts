@@ -1704,11 +1704,11 @@ export default {
    **/
   TanglePrimitivesServicesOperatorPreferences: {
     key: '[u8;33]',
-    approval: 'TanglePrimitivesServicesApprovalPrefrence',
+    approval: 'TanglePrimitivesServicesApprovalPreference',
     priceTargets: 'TanglePrimitivesServicesPriceTargets'
   },
   /**
-   * Lookup129: tangle_primitives::services::ApprovalPrefrence
+   * Lookup129: tangle_primitives::services::ApprovalPreference
    **/
   TanglePrimitivesServicesApprovalPreference: {
     _enum: ['None', 'Required']

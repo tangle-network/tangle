@@ -56820,7 +56820,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct OperatorPreferences {
 					pub key: runtime_types::sp_core::ecdsa::Public,
-					pub approval: runtime_types::tangle_primitives::services::ApprovalPrefrence,
+					pub approval: runtime_types::tangle_primitives::services::ApprovalPreference,
 				}
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
