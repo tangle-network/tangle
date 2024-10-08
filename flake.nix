@@ -61,6 +61,7 @@
           packages = [
             pkgs.taplo
             pkgs.cargo-nextest
+            pkgs.cargo-tarpaulin
           ];
           # Environment variables
           RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
