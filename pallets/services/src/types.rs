@@ -30,6 +30,8 @@ pub type MaxFieldsOf<T> = <ConstraintsFor<T> as Constraints>::MaxFields;
 
 pub type MaxOperatorsPerServiceOf<T> = <ConstraintsFor<T> as Constraints>::MaxOperatorsPerService;
 
+pub type MaxAssetsPerServiceOf<T> = <ConstraintsFor<T> as Constraints>::MaxAssetsPerService;
+
 /// Extract the constraints from the runtime.
 #[derive(RuntimeDebugNoBound, CloneNoBound, Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[scale_info(skip_type_params(T))]

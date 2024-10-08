@@ -69,6 +69,8 @@ impl<T: Config> Constraints for types::ConstraintsOf<T> {
 	type MaxContainerImageNameLength = T::MaxContainerImageNameLength;
 
 	type MaxContainerImageTagLength = T::MaxContainerImageTagLength;
+
+	type MaxAssetsPerService = T::MaxAssetsPerService;
 }
 
 impl traits::EvmGasWeightMapping for () {

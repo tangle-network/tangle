@@ -21,10 +21,11 @@ interface ServicesPrecompile {
 
     /// @notice Request a service from a specific blueprint
     /// @param blueprint_id The ID of the blueprint
+    /// @param assets The list of assets to use for the service
     /// @param permitted_callers_data The permitted callers for the service encoded as bytes
     /// @param service_providers_data The service providers encoded as bytes
     /// @param request_args_data The request arguments encoded as bytes
-    function requestService(uint256 blueprint_id, bytes calldata permitted_callers_data, bytes calldata service_providers_data, bytes calldata request_args_data) external;
+    function requestService(uint256 blueprint_id, uint256[] assets, bytes calldata permitted_callers_data, bytes calldata service_providers_data, bytes calldata request_args_data) external;
 
     /// @notice Terminate a service
     /// @param service_id The ID of the service to terminate
