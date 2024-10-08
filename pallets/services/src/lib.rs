@@ -824,8 +824,6 @@ pub mod module {
 					BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
 						.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 
-				let assets = BoundedVec::<_, MaxAssetsPerServiceOf<T>>::try_from(assets)
-					.map_err(|_| Error::<T>::MaxAssetsPerServiceExceeded)?;
 				let service_request = ServiceRequest {
 					blueprint: blueprint_id,
 					owner: caller.clone(),
