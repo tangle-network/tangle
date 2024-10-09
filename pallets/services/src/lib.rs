@@ -59,6 +59,7 @@ pub mod module {
 	use super::*;
 	use frame_support::dispatch::PostDispatchInfo;
 	use sp_core::{H160, H256};
+	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
 	use sp_std::vec::Vec;
 	use tangle_primitives::{
 		services::{PriceTargets, *},
@@ -85,6 +86,16 @@ pub mod module {
 		/// A type that implements the `EvmGasWeightMapping` trait for the conversion of EVM gas to
 		/// Substrate weight and vice versa.
 		type EvmGasWeightMapping: traits::EvmGasWeightMapping;
+
+		/// The asset ID type.
+		type AssetId: AtLeast32BitUnsigned
+			+ Parameter
+			+ Member
+			+ MaybeSerializeDeserialize
+			+ Clone
+			+ Copy
+			+ PartialOrd
+			+ MaxEncodedLen;
 
 		/// Maximum number of fields in a job call.
 		#[pallet::constant]
@@ -143,6 +154,9 @@ pub mod module {
 		/// Container image tag maximum length.
 		#[pallet::constant]
 		type MaxContainerImageTagLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+		/// Maximum number of assets per service.
+		#[pallet::constant]
+		type MaxAssetsPerService: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 
 		/// The constraints for the service module.
 		/// use [crate::types::ConstraintsOf] with `Self` to implement this trait.
@@ -208,6 +222,10 @@ pub mod module {
 		MaxServicesPerProviderExceeded,
 		/// The operator is not active, ensure operator status is ACTIVE in multi-asset-delegation
 		OperatorNotActive,
+		/// No assets provided for the service, at least one asset is required.
+		NoAssetsProvided,
+		/// The maximum number of assets per service has been exceeded.
+		MaxAssetsPerServiceExceeded,
 	}
 
 	#[pallet::event]
@@ -278,6 +296,8 @@ pub mod module {
 			pending_approvals: Vec<T::AccountId>,
 			/// The list of operators that atomaticaly approved the service.
 			approved: Vec<T::AccountId>,
+			/// The list of asset IDs that are being used to secure the service.
+			assets: Vec<T::AssetId>,
 		},
 		/// A service request has been approved.
 		ServiceRequestApproved {
@@ -325,6 +345,8 @@ pub mod module {
 			service_id: u64,
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
+			/// The list of asset IDs that are being used to secure the service.
+			assets: Vec<T::AssetId>,
 		},
 
 		/// A service has been terminated.
@@ -436,7 +458,7 @@ pub mod module {
 		_,
 		Identity,
 		u64,
-		ServiceRequest<T::Constraints, T::AccountId, BlockNumberFor<T>>,
+		ServiceRequest<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>,
 		ResultQuery<Error<T>::ServiceRequestNotFound>,
 	>;
 
@@ -448,7 +470,7 @@ pub mod module {
 		_,
 		Identity,
 		u64,
-		Service<T::Constraints, T::AccountId, BlockNumberFor<T>>,
+		Service<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>,
 		ResultQuery<Error<T>::ServiceNotFound>,
 	>;
 
@@ -710,14 +732,18 @@ pub mod module {
 			#[pallet::compact] blueprint_id: u64,
 			permitted_callers: Vec<T::AccountId>,
 			service_providers: Vec<T::AccountId>,
-			#[pallet::compact] ttl: BlockNumberFor<T>,
 			request_args: Vec<Field<T::Constraints, T::AccountId>>,
+			assets: Vec<T::AssetId>,
+			#[pallet::compact] ttl: BlockNumberFor<T>,
 		) -> DispatchResultWithPostInfo {
 			// TODO(@shekohex): split this function into smaller functions.
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 
 			blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
+			// ensure we at least have one asset
+			ensure!(!assets.is_empty(), Error::<T>::NoAssetsProvided);
+
 			let mut preferences = Vec::new();
 			let mut pending_approvals = Vec::new();
 			let mut approved = Vec::new();
@@ -740,6 +766,8 @@ pub mod module {
 			let permitted_callers =
 				BoundedVec::<_, MaxPermittedCallersOf<T>>::try_from(permitted_callers)
 					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
+			let assets = BoundedVec::<_, MaxAssetsPerServiceOf<T>>::try_from(assets)
+				.map_err(|_| Error::<T>::MaxAssetsPerServiceExceeded)?;
 			if pending_approvals.is_empty() {
 				// No approval is required, initiate the service immediately.
 				for operator in &approved {
@@ -757,6 +785,7 @@ pub mod module {
 					id: service_id,
 					blueprint: blueprint_id,
 					owner: caller.clone(),
+					assets: assets.clone(),
 					permitted_callers,
 					operators,
 					ttl,
@@ -774,6 +803,7 @@ pub mod module {
 					request_id: None,
 					service_id,
 					blueprint_id,
+					assets: assets.to_vec(),
 				});
 
 				// TODO: add weight for the request to the total weight.
@@ -793,9 +823,11 @@ pub mod module {
 				let operators_with_approval_state =
 					BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
 						.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
+
 				let service_request = ServiceRequest {
 					blueprint: blueprint_id,
 					owner: caller.clone(),
+					assets: assets.clone(),
 					ttl,
 					args,
 					permitted_callers,
@@ -810,6 +842,7 @@ pub mod module {
 					blueprint_id,
 					pending_approvals,
 					approved,
+					assets: assets.to_vec(),
 				});
 
 				// TODO: add weight for the request to the total weight.
@@ -879,6 +912,7 @@ pub mod module {
 					id: service_id,
 					blueprint: request.blueprint,
 					owner: request.owner.clone(),
+					assets: request.assets.clone(),
 					permitted_callers: request.permitted_callers.clone(),
 					operators,
 					ttl: request.ttl,
@@ -895,6 +929,7 @@ pub mod module {
 				Self::deposit_event(Event::ServiceInitiated {
 					owner: request.owner,
 					request_id: Some(request_id),
+					assets: request.assets.to_vec(),
 					service_id,
 					blueprint_id: request.blueprint,
 				});

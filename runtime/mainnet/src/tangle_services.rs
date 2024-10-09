@@ -117,6 +117,9 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxContainerImageTagLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxAssetsPerService: u32 = 64;
 }
 
 pub type PalletServicesConstraints = pallet_services::types::ConstraintsOf<Runtime>;
@@ -128,6 +131,7 @@ impl pallet_services::Config for Runtime {
 	type PalletId = ServicesPalletId;
 	type EvmRunner = PalletEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
+	type AssetId = AssetId;
 	type MaxFields = MaxFields;
 	type MaxFieldsSize = MaxFieldsSize;
 	type MaxMetadataLength = MaxMetadataLength;
@@ -147,6 +151,7 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerRegistryLength = MaxContainerRegistryLength;
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
+	type MaxAssetsPerService = MaxAssetsPerService;
 	type Constraints = PalletServicesConstraints;
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;

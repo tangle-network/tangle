@@ -10,7 +10,7 @@ impl<T: Config> Pallet<T> {
 	pub fn services_with_blueprints_by_operator(
 		operator: T::AccountId,
 	) -> Result<
-		Vec<RpcServicesWithBlueprint<T::Constraints, T::AccountId, BlockNumberFor<T>>>,
+		Vec<RpcServicesWithBlueprint<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>>,
 		Error<T>,
 	> {
 		let profile = Self::operator_profile(operator)?;

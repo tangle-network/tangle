@@ -27,10 +27,11 @@ pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
 
 sp_api::decl_runtime_apis! {
-	pub trait ServicesApi<C, AccountId>
+	pub trait ServicesApi<C, AccountId, AssetId>
 	where
 		C: Constraints,
 		AccountId: Codec + MaybeDisplay + Serialize,
+		AssetId: Codec + MaybeDisplay + Serialize,
 	{
 		/// Query all the services that this operator is providing along with their blueprints.
 		///
@@ -41,7 +42,7 @@ sp_api::decl_runtime_apis! {
 		fn query_services_with_blueprints_by_operator(
 			operator: AccountId,
 		) -> Result<
-			Vec<RpcServicesWithBlueprint<C, AccountId, BlockNumberOf<Block>>>,
+			Vec<RpcServicesWithBlueprint<C, AccountId, BlockNumberOf<Block>, AssetId>>,
 			sp_runtime::DispatchError,
 		>;
 	}
