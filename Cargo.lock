@@ -8508,6 +8508,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-tangle-lst-benchmarking"
+version = "35.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-election-provider-support",
+ "frame-support",
+ "frame-system",
+ "pallet-assets",
+ "pallet-bags-list",
+ "pallet-balances",
+ "pallet-staking",
+ "pallet-staking-reward-curve",
+ "pallet-tangle-lst",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-runtime-interface",
+ "sp-staking",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-timestamp"
 version = "36.0.1"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#51a1705d9ce56a5513241b9a3a770fb788812da9"
@@ -14242,6 +14267,7 @@ dependencies = [
  "pallet-staking-reward-curve",
  "pallet-sudo",
  "pallet-tangle-lst",
+ "pallet-tangle-lst-benchmarking",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
@@ -14371,6 +14397,7 @@ dependencies = [
  "pallet-staking-reward-curve",
  "pallet-sudo",
  "pallet-tangle-lst",
+ "pallet-tangle-lst-benchmarking",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
