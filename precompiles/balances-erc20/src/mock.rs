@@ -33,15 +33,31 @@ use sp_runtime::AccountId32;
 use parity_scale_codec::Decode;
 use sp_runtime::traits::IdentifyAccount;
 use sp_runtime::traits::Verify;
+use sp_runtime::traits::BlakeTwo256;
 use sp_core::{
 	self,
 	sr25519::{Public as sr25519Public, Signature},
 	ConstU32, H160, U256,
 };
 
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+pub type AccountId = AccountId32;
 pub type Balance = u128;
 pub type Block = frame_system::mocking::MockBlockU32<Runtime>;
+
+pub const ALICE_ACCOUNT_ID: AccountId = AccountId32::new([1u8; 32]);
+pub const BOB_ACCOUNT_ID: AccountId = AccountId32::new([2u8; 32]);
+pub const CHARLIE_ACCOUNT_ID: AccountId = AccountId32::new([3u8; 32]);
+
+pub fn convert_account_id_to_h160(id: AccountId32) -> H160 {
+	let bytes: [u8; 32] = id.into();
+	H160::from_slice(&bytes[..20])
+}
+
+pub fn convert_h160_to_account_id(h160: H160) -> AccountId32 {
+	let mut data = [0u8; 32];
+	data[0..20].copy_from_slice(&h160.to_fixed_bytes()[..]);
+	AccountId32::from(data)
+}
 
 parameter_types! {
 	pub const BlockHashCount: u32 = 250;
@@ -137,7 +153,7 @@ impl pallet_evm::Config for Runtime {
 	type WeightPerGas = WeightPerGas;
 	type CallOrigin = EnsureAddressRoot<AccountId>;
 	type WithdrawOrigin = EnsureAddressNever<AccountId>;
-	type AddressMapping = HashedAddressMapping;
+	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;

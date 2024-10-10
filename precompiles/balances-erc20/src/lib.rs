@@ -38,6 +38,7 @@ use sp_std::{
 	convert::{TryFrom, TryInto},
 	marker::PhantomData,
 };
+use sp_std::vec::Vec;
 
 mod eip2612;
 use eip2612::Eip2612;
