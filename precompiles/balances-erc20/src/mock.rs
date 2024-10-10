@@ -20,11 +20,83 @@ use super::*;
 
 use frame_support::derive_impl;
 use frame_support::{construct_runtime, parameter_types, weights::Weight};
+use pallet_evm::AddressMapping;
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
+use precompile_utils::testing::{Bob, CryptoAlith, CryptoBaltathar, Precompile1};
 use precompile_utils::{precompile_set::*, testing::MockAccount};
+use scale_info::TypeInfo;
+use serde::{Deserialize, Serialize};
 use sp_core::{ConstU32, U256};
+use sp_core::{Decode, Encode, MaxEncodedLen, H160};
 use sp_runtime::BuildStorage;
-pub type AccountId = MockAccount;
+use sp_std::ops::Deref;
+
+/// Wrapper around MockAccount to implement AddressMapping
+#[derive(
+	Copy,
+	Clone,
+	Eq,
+	PartialEq,
+	Ord,
+	PartialOrd,
+	Debug,
+	Serialize,
+	Deserialize,
+	derive_more::Display,
+	Encode,
+	Decode,
+	MaxEncodedLen,
+	TypeInfo,
+)]
+pub struct WrappedMockAccount(pub MockAccount);
+
+impl Deref for WrappedMockAccount {
+	type Target = MockAccount;
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
+}
+
+impl AddressMapping<WrappedMockAccount> for WrappedMockAccount {
+	fn into_account_id(address: H160) -> WrappedMockAccount {
+		WrappedMockAccount(address.into())
+	}
+}
+
+impl From<AccountId32> for WrappedMockAccount {
+	fn from(account_id: AccountId32) -> Self {
+		let account_id_bytes: [u8; 32] = account_id.into();
+		let evm_address = H160::from_slice(&account_id_bytes[0..20]);
+		WrappedMockAccount(MockAccount(evm_address))
+	}
+}
+
+impl From<CryptoAlith> for WrappedMockAccount {
+	fn from(account: CryptoAlith) -> Self {
+		WrappedMockAccount(MockAccount(account.into()))
+	}
+}
+
+impl From<Bob> for WrappedMockAccount {
+	fn from(account: Bob) -> Self {
+		WrappedMockAccount(MockAccount(account.into()))
+	}
+}
+
+impl From<Precompile1> for WrappedMockAccount {
+	fn from(account: Precompile1) -> Self {
+		WrappedMockAccount(MockAccount(account.into()))
+	}
+}
+
+impl From<CryptoBaltathar> for WrappedMockAccount {
+	fn from(account: CryptoBaltathar) -> Self {
+		WrappedMockAccount(MockAccount(account.into()))
+	}
+}
+
+pub type AccountId = WrappedMockAccount;
 pub type Balance = u128;
 pub type Block = frame_system::mocking::MockBlockU32<Runtime>;
 
