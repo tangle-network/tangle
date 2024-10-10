@@ -26,6 +26,8 @@ pallet-tangle-lst.workspace = true
 sp-runtime.workspace = true
 sp-runtime-interface.workspace = true
 sp-staking.workspace = true
+pallet-assets.workspace = true
+sp-std.workspace = true
 
 [dev-dependencies]
 pallet-balances = { workspace = true }
@@ -50,6 +52,8 @@ std = [
 	"sp-runtime-interface/std",
 	"sp-runtime/std",
 	"sp-staking/std",
+	"pallet-assets/std",
+	"sp-std/std",
 ]
 
 runtime-benchmarks = [
@@ -62,4 +66,5 @@ runtime-benchmarks = [
 	"pallet-staking/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 	"sp-staking/runtime-benchmarks",
+	"pallet-assets/runtime-benchmarks",
 ]

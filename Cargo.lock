@@ -8515,6 +8515,7 @@ dependencies = [
  "frame-election-provider-support",
  "frame-support",
  "frame-system",
+ "pallet-assets",
  "pallet-bags-list",
  "pallet-balances",
  "pallet-staking",
@@ -8528,6 +8529,7 @@ dependencies = [
  "sp-runtime",
  "sp-runtime-interface",
  "sp-staking",
+ "sp-std",
 ]
 
 [[package]]
