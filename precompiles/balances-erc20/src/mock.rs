@@ -20,11 +20,26 @@ use super::*;
 
 use frame_support::derive_impl;
 use frame_support::{construct_runtime, parameter_types, weights::Weight};
-use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
+use pallet_evm::{EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping};
 use precompile_utils::{precompile_set::*, testing::MockAccount};
-use sp_core::{ConstU32, U256};
 use sp_runtime::BuildStorage;
-pub type AccountId = MockAccount;
+use derive_more::Deref;
+use scale_info::TypeInfo;
+use serde::Serialize;
+use serde::Deserialize;
+use parity_scale_codec::MaxEncodedLen;
+use parity_scale_codec::Encode;
+use sp_runtime::AccountId32;
+use parity_scale_codec::Decode;
+use sp_runtime::traits::IdentifyAccount;
+use sp_runtime::traits::Verify;
+use sp_core::{
+	self,
+	sr25519::{Public as sr25519Public, Signature},
+	ConstU32, H160, U256,
+};
+
+pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u128;
 pub type Block = frame_system::mocking::MockBlockU32<Runtime>;
 
@@ -122,7 +137,7 @@ impl pallet_evm::Config for Runtime {
 	type WeightPerGas = WeightPerGas;
 	type CallOrigin = EnsureAddressRoot<AccountId>;
 	type WithdrawOrigin = EnsureAddressNever<AccountId>;
-	type AddressMapping = AccountId;
+	type AddressMapping = HashedAddressMapping;
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;

@@ -7600,6 +7600,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+ "tangle-primitives",
 ]
 
 [[package]]
