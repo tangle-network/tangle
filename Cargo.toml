@@ -23,6 +23,7 @@ members = [
     "pallets/*",
     "pallets/services/rpc",
     "pallets/services/rpc/runtime-api",
+    "pallets/tangle-lst/benchmarking",
     "frost",
     "frost/frost-*",
     "precompiles/pallet-democracy",

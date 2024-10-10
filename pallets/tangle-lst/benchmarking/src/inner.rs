@@ -12,7 +12,7 @@ use frame_support::{
 	},
 };
 use frame_system::RawOrigin as RuntimeOrigin;
-use pallet_nomination_pools::{
+use pallet_tangle_lst::{
 	adapter::{Member, Pool, StakeStrategy, StakeStrategyType},
 	BalanceOf, BondExtra, BondedPoolInner, BondedPools, ClaimPermission, ClaimPermissions,
 	Commission, CommissionChangeRate, CommissionClaimPermission, ConfigOp, GlobalMaxCommission,
@@ -26,16 +26,16 @@ use sp_runtime::{
 };
 use sp_staking::EraIndex;
 // `frame_benchmarking::benchmarks!` macro needs this
-use pallet_nomination_pools::Call;
+use pallet_tangle_lst::Call;
 
-type CurrencyOf<T> = <T as pallet_nomination_pools::Config>::Currency;
+type CurrencyOf<T> = <T as pallet_tangle_lst::Config>::Currency;
 
 const USER_SEED: u32 = 0;
 const MAX_SPANS: u32 = 100;
 
 pub(crate) type VoterBagsListInstance = pallet_bags_list::Instance1;
 pub trait Config:
-	pallet_nomination_pools::Config
+	pallet_tangle_lst::Config
 	+ pallet_staking::Config
 	+ pallet_bags_list::Config<VoterBagsListInstance>
 {
@@ -43,7 +43,7 @@ pub trait Config:
 
 pub struct Pallet<T: Config>(Pools<T>);
 
-fn create_funded_user_with_balance<T: pallet_nomination_pools::Config>(
+fn create_funded_user_with_balance<T: pallet_tangle_lst::Config>(
 	string: &'static str,
 	n: u32,
 	balance: BalanceOf<T>,
@@ -55,7 +55,7 @@ fn create_funded_user_with_balance<T: pallet_nomination_pools::Config>(
 
 // Create a bonded pool account, bonding `balance` and giving the account `balance * 2` free
 // balance.
-fn create_pool_account<T: pallet_nomination_pools::Config>(
+fn create_pool_account<T: pallet_tangle_lst::Config>(
 	n: u32,
 	balance: BalanceOf<T>,
 	commission: Option<Perbill>,
@@ -75,7 +75,7 @@ fn create_pool_account<T: pallet_nomination_pools::Config>(
 	.unwrap();
 
 	if let Some(c) = commission {
-		let pool_id = pallet_nomination_pools::LastPoolId::<T>::get();
+		let pool_id = pallet_tangle_lst::LastPoolId::<T>::get();
 		Pools::<T>::set_commission(
 			RuntimeOrigin::Signed(pool_creator.clone()).into(),
 			pool_id,
@@ -84,7 +84,7 @@ fn create_pool_account<T: pallet_nomination_pools::Config>(
 		.expect("pool just created, commission can be set by root; qed");
 	}
 
-	let pool_account = pallet_nomination_pools::BondedPools::<T>::iter()
+	let pool_account = pallet_tangle_lst::BondedPools::<T>::iter()
 		.find(|(_, bonded_pool)| bonded_pool.roles.depositor == pool_creator)
 		.map(|(pool_id, _)| Pools::<T>::generate_bonded_account(pool_id))
 		.expect("pool_creator created a pool above");
@@ -106,7 +106,7 @@ fn migrate_to_transfer_stake<T: Config>(pool_id: PoolId) {
 		.filter(|(_, member)| member.pool_id == pool_id)
 		.for_each(|(member_acc, member)| {
 			let member_balance = member.total_balance();
-			<T as pallet_nomination_pools::Config>::Currency::transfer(
+			<T as pallet_tangle_lst::Config>::Currency::transfer(
 				&member_acc,
 				&pool_acc,
 				member_balance,
@@ -116,7 +116,7 @@ fn migrate_to_transfer_stake<T: Config>(pool_id: PoolId) {
 		});
 }
 
-fn vote_to_balance<T: pallet_nomination_pools::Config>(
+fn vote_to_balance<T: pallet_tangle_lst::Config>(
 	vote: u64,
 ) -> Result<BalanceOf<T>, &'static str> {
 	vote.try_into().map_err(|_| "could not convert u64 to Balance")
@@ -124,14 +124,14 @@ fn vote_to_balance<T: pallet_nomination_pools::Config>(
 
 /// `assertion` should strictly be true if the adapter is using `Delegate` strategy and strictly
 /// false if the adapter is not using `Delegate` strategy.
-fn assert_if_delegate<T: pallet_nomination_pools::Config>(assertion: bool) {
+fn assert_if_delegate<T: pallet_tangle_lst::Config>(assertion: bool) {
 	let legacy_adapter_used = T::StakeAdapter::strategy_type() != StakeStrategyType::Delegate;
 	// one and only one of the two should be true.
 	assert!(assertion ^ legacy_adapter_used);
 }
 
 #[allow(unused)]
-struct ListScenario<T: pallet_nomination_pools::Config> {
+struct ListScenario<T: pallet_tangle_lst::Config> {
 	/// Stash/Controller that is expected to be moved.
 	origin1: T::AccountId,
 	creator1: T::AccountId,
@@ -157,7 +157,7 @@ impl<T: Config> ListScenario<T> {
 		ensure!(!origin_weight.is_zero(), "origin weight must be greater than 0");
 
 		ensure!(
-			pallet_nomination_pools::MaxPools::<T>::get().unwrap_or(0) >= 3,
+			pallet_tangle_lst::MaxPools::<T>::get().unwrap_or(0) >= 3,
 			"must allow at least three pools for benchmarks"
 		);
 
@@ -646,7 +646,7 @@ frame_benchmarking::benchmarks! {
 	}
 
 	set_metadata {
-		let n in 1 .. <T as pallet_nomination_pools::Config>::MaxMetadataLen::get();
+		let n in 1 .. <T as pallet_tangle_lst::Config>::MaxMetadataLen::get();
 
 		// Create a pool
 		let (depositor, pool_account) = create_pool_account::<T>(0, Pools::<T>::depositor_min_bond() * 2u32.into(), None);
@@ -679,7 +679,7 @@ frame_benchmarking::benchmarks! {
 	}
 
 	update_roles {
-		let first_id = pallet_nomination_pools::LastPoolId::<T>::get() + 1;
+		let first_id = pallet_tangle_lst::LastPoolId::<T>::get() + 1;
 		let (root, _) = create_pool_account::<T>(0, Pools::<T>::depositor_min_bond() * 2u32.into(), None);
 		let random: T::AccountId = account("but is anything really random in computers..?", 0, USER_SEED);
 	}:_(
@@ -690,8 +690,8 @@ frame_benchmarking::benchmarks! {
 		ConfigOp::Set(random.clone())
 	) verify {
 		assert_eq!(
-			pallet_nomination_pools::BondedPools::<T>::get(first_id).unwrap().roles,
-			pallet_nomination_pools::PoolRoles {
+			pallet_tangle_lst::BondedPools::<T>::get(first_id).unwrap().roles,
+			pallet_tangle_lst::PoolRoles {
 				depositor: root,
 				nominator: Some(random.clone()),
 				bouncer: Some(random.clone()),

@@ -71,7 +71,7 @@ impl pallet_staking::Config for Runtime {
 	type GenesisElectionProvider = Self::ElectionProvider;
 	type VoterList = VoterList;
 	type TargetList = pallet_staking::UseValidatorsMap<Self>;
-	type EventListeners = (Pools, DelegatedStaking);
+	type EventListeners = (Pools);
 }
 
 parameter_types! {
@@ -106,7 +106,7 @@ parameter_types! {
 	pub const MaxPointsToBalance: u8 = 10;
 }
 
-impl pallet_nomination_pools::Config for Runtime {
+impl pallet_tangle_lst::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 	type Currency = Balances;
@@ -115,27 +115,13 @@ impl pallet_nomination_pools::Config for Runtime {
 	type BalanceToU256 = BalanceToU256;
 	type U256ToBalance = U256ToBalance;
 	type StakeAdapter =
-		pallet_nomination_pools::adapter::DelegateStake<Self, Staking, DelegatedStaking>;
+		pallet_tangle_lst::adapter::DelegateStake<Self, Staking, DelegatedStaking>;
 	type PostUnbondingPoolsWindow = PostUnbondingPoolsWindow;
 	type MaxMetadataLen = ConstU32<256>;
 	type MaxUnbonding = ConstU32<8>;
 	type PalletId = PoolsPalletId;
 	type MaxPointsToBalance = MaxPointsToBalance;
 	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
-}
-
-parameter_types! {
-	pub const DelegatedStakingPalletId: PalletId = PalletId(*b"py/dlstk");
-	pub const SlashRewardFraction: Perbill = Perbill::from_percent(1);
-}
-impl pallet_delegated_staking::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type PalletId = DelegatedStakingPalletId;
-	type Currency = Balances;
-	type OnSlash = ();
-	type SlashRewardFraction = SlashRewardFraction;
-	type RuntimeHoldReason = RuntimeHoldReason;
-	type CoreStaking = Staking;
 }
 
 impl crate::Config for Runtime {}
@@ -149,14 +135,14 @@ frame_support::construct_runtime!(
 		Balances: pallet_balances,
 		Staking: pallet_staking,
 		VoterList: pallet_bags_list::<Instance1>,
-		Pools: pallet_nomination_pools,
+		Pools: pallet_tangle_lst,
 		DelegatedStaking: pallet_delegated_staking,
 	}
 );
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut storage = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
-	let _ = pallet_nomination_pools::GenesisConfig::<Runtime> {
+	let _ = pallet_tangle_lst::GenesisConfig::<Runtime> {
 		min_join_bond: 2,
 		min_create_bond: 2,
 		max_pools: Some(3),
