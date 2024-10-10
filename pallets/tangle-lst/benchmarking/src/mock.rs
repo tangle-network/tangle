@@ -114,8 +114,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	type RewardCounter = FixedU128;
 	type BalanceToU256 = BalanceToU256;
 	type U256ToBalance = U256ToBalance;
-	type StakeAdapter =
-		pallet_tangle_lst::adapter::DelegateStake<Self, Staking, DelegatedStaking>;
+	type StakeAdapter = pallet_tangle_lst::adapter::DelegateStake<Self, Staking, DelegatedStaking>;
 	type PostUnbondingPoolsWindow = PostUnbondingPoolsWindow;
 	type MaxMetadataLen = ConstU32<256>;
 	type MaxUnbonding = ConstU32<8>;

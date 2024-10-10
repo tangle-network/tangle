@@ -12,6 +12,7 @@ use frame_support::{
 	},
 };
 use frame_system::RawOrigin as RuntimeOrigin;
+use pallet_staking::MaxNominationsOf;
 use pallet_tangle_lst::{
 	adapter::{Member, Pool, StakeStrategy, StakeStrategyType},
 	BalanceOf, BondExtra, BondedPoolInner, BondedPools, ClaimPermission, ClaimPermissions,
@@ -19,7 +20,6 @@ use pallet_tangle_lst::{
 	MaxPoolMembers, MaxPoolMembersPerPool, MaxPools, Metadata, MinCreateBond, MinJoinBond,
 	Pallet as Pools, PoolId, PoolMembers, PoolRoles, PoolState, RewardPools, SubPoolsStorage,
 };
-use pallet_staking::MaxNominationsOf;
 use sp_runtime::{
 	traits::{Bounded, StaticLookup, Zero},
 	Perbill,
@@ -35,9 +35,7 @@ const MAX_SPANS: u32 = 100;
 
 pub(crate) type VoterBagsListInstance = pallet_bags_list::Instance1;
 pub trait Config:
-	pallet_tangle_lst::Config
-	+ pallet_staking::Config
-	+ pallet_bags_list::Config<VoterBagsListInstance>
+	pallet_tangle_lst::Config + pallet_staking::Config + pallet_bags_list::Config<VoterBagsListInstance>
 {
 }
 
@@ -116,9 +114,7 @@ fn migrate_to_transfer_stake<T: Config>(pool_id: PoolId) {
 		});
 }
 
-fn vote_to_balance<T: pallet_tangle_lst::Config>(
-	vote: u64,
-) -> Result<BalanceOf<T>, &'static str> {
+fn vote_to_balance<T: pallet_tangle_lst::Config>(vote: u64) -> Result<BalanceOf<T>, &'static str> {
 	vote.try_into().map_err(|_| "could not convert u64 to Balance")
 }
 
