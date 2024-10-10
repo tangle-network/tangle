@@ -1,4 +1,4 @@
-//! Benchmarks for the nomination pools coupled with the staking and bags list pallets.
+//! Benchmarks for the nomination Lst coupled with the staking and bags list pallets.
 
 use alloc::{vec, vec::Vec};
 use frame_benchmarking::v1::{account, whitelist_account};
@@ -17,7 +17,7 @@ use pallet_staking::MaxNominationsOf;
 use pallet_tangle_lst::{
 	BalanceOf, BondExtra, BondedPoolInner, BondedPools, ClaimPermission, ClaimPermissions,
 	Commission, CommissionChangeRate, CommissionClaimPermission, ConfigOp, GlobalMaxCommission,
-	MaxPools, Metadata, MinCreateBond, MinJoinBond, Pallet as Pools, PoolId, PoolRoles, PoolState,
+	MaxPools, Metadata, MinCreateBond, MinJoinBond, Pallet as Lst, PoolId, PoolRoles, PoolState,
 	RewardPools, SubPoolsStorage,
 };
 use sp_runtime::{
@@ -25,6 +25,7 @@ use sp_runtime::{
 	Perbill,
 };
 use sp_staking::EraIndex;
+use sp_staking::StakingInterface;
 // `frame_benchmarking::benchmarks!` macro needs this
 use pallet_tangle_lst::Call;
 
@@ -39,7 +40,7 @@ pub trait Config:
 {
 }
 
-pub struct Pallet<T: Config>(Pools<T>);
+pub struct Pallet<T: Config>(Lst<T>);
 
 fn create_funded_user_with_balance<T: pallet_tangle_lst::Config>(
 	string: &'static str,
@@ -63,7 +64,7 @@ fn create_pool_account<T: pallet_tangle_lst::Config>(
 		create_funded_user_with_balance::<T>("pool_creator", n, ed + balance * 2u32.into());
 	let pool_creator_lookup = T::Lookup::unlookup(pool_creator.clone());
 
-	Pools::<T>::create(
+	Lst::<T>::create(
 		RuntimeOrigin::Signed(pool_creator.clone()).into(),
 		balance,
 		pool_creator_lookup.clone(),
@@ -75,7 +76,7 @@ fn create_pool_account<T: pallet_tangle_lst::Config>(
 
 	if let Some(c) = commission {
 		let pool_id = pallet_tangle_lst::LastPoolId::<T>::get();
-		Pools::<T>::set_commission(
+		Lst::<T>::set_commission(
 			RuntimeOrigin::Signed(pool_creator.clone()).into(),
 			pool_id,
 			Some((c, pool_creator.clone())),
@@ -85,7 +86,7 @@ fn create_pool_account<T: pallet_tangle_lst::Config>(
 
 	let pool_account = pallet_tangle_lst::BondedPools::<T>::iter()
 		.find(|(_, bonded_pool)| bonded_pool.roles.depositor == pool_creator)
-		.map(|(pool_id, _)| Pools::<T>::create_bonded_account(pool_id))
+		.map(|(pool_id, _)| Lst::<T>::create_bonded_account(pool_id))
 		.expect("pool_creator created a pool above");
 
 	(pool_creator, pool_account)
@@ -104,7 +105,7 @@ frame_benchmarking::benchmarks! {
 	}
 
 	join {
-		let origin_weight = Pools::<T>::depositor_min_bond() * 2u32.into();
+		let origin_weight = Lst::<T>::depositor_min_bond() * 2u32.into();
 
 		// setup the worst case list scenario.
 		let joiner_free = CurrencyOf::<T>::minimum_balance() * 100u32.into();
@@ -118,138 +119,37 @@ frame_benchmarking::benchmarks! {
 		assert_eq!(CurrencyOf::<T>::free_balance(&joiner), joiner_free);
 	}
 
-	bond_extra_transfer {
-		let origin_weight = Pools::<T>::depositor_min_bond() * 2u32.into();
-		let scenario = ListScenario::<T>::new(origin_weight, true)?;
-		let extra = scenario.dest_weight - origin_weight;
-
-		// creator of the src pool will bond-extra, bumping itself to dest bag.
-
-	}: bond_extra(RuntimeOrigin::Signed(scenario.creator1.clone()), BondExtra::FreeBalance(extra))
-	verify {
-		assert!(
-			T::StakeAdapter::active_stake(Pool::from(scenario.origin1)) >=
-			scenario.dest_weight
-		);
-	}
-
-	bond_extra_other {
-		let claimer: T::AccountId = account("claimer", USER_SEED + 4, 0);
-
-		let origin_weight = Pools::<T>::depositor_min_bond() * 2u32.into();
-		let scenario = ListScenario::<T>::new(origin_weight, true)?;
-		let extra = (scenario.dest_weight - origin_weight).max(CurrencyOf::<T>::minimum_balance());
-
-		// set claim preferences to `PermissionlessAll` to any account to bond extra on member's behalf.
-		let _ = Pools::<T>::set_claim_permission(RuntimeOrigin::Signed(scenario.creator1.clone()).into(), ClaimPermission::PermissionlessAll);
-
-		// transfer exactly `extra` to the depositor of the src pool (1),
-		let reward_account1 = Pools::<T>::generate_reward_account(1);
-		assert!(extra >= CurrencyOf::<T>::minimum_balance());
-		let _ = CurrencyOf::<T>::mint_into(&reward_account1, extra);
-
-	}: _(RuntimeOrigin::Signed(claimer), T::Lookup::unlookup(scenario.creator1.clone()), BondExtra::Rewards)
-	verify {
-		 // commission of 50% deducted here.
-		assert!(
-			T::StakeAdapter::active_stake(Pool::from(scenario.origin1)) >=
-			scenario.dest_weight / 2u32.into()
-		);
-	}
-
-	claim_payout {
-		let claimer: T::AccountId = account("claimer", USER_SEED + 4, 0);
-		let commission = Perbill::from_percent(50);
-		let origin_weight = Pools::<T>::depositor_min_bond() * 2u32.into();
-		let ed = CurrencyOf::<T>::minimum_balance();
-		let (depositor, pool_account) = create_pool_account::<T>(0, origin_weight, Some(commission));
-		let reward_account = Pools::<T>::generate_reward_account(1);
-
-		// Send funds to the reward account of the pool
-		CurrencyOf::<T>::set_balance(&reward_account, ed + origin_weight);
-
-		// set claim preferences to `PermissionlessAll` so any account can claim rewards on member's
-		// behalf.
-		let _ = Pools::<T>::set_claim_permission(RuntimeOrigin::Signed(depositor.clone()).into(), ClaimPermission::PermissionlessAll);
-
-		// Sanity check
-		assert_eq!(
-			CurrencyOf::<T>::balance(&depositor),
-			origin_weight
-		);
-
-		whitelist_account!(depositor);
-	}:claim_payout_other(RuntimeOrigin::Signed(claimer), depositor.clone())
-	verify {
-		assert_eq!(
-			CurrencyOf::<T>::balance(&depositor),
-			origin_weight + commission * origin_weight
-		);
-		assert_eq!(
-			CurrencyOf::<T>::balance(&reward_account),
-			ed + commission * origin_weight
-		);
-	}
-
-
 	unbond {
-		// The weight the nominator will start at. The value used here is expected to be
-		// significantly higher than the first position in a list (e.g. the first bag threshold).
-		let origin_weight = Pools::<T>::depositor_min_bond() * 200u32.into();
-		let scenario = ListScenario::<T>::new(origin_weight, false)?;
-		let amount = origin_weight - scenario.dest_weight;
-
-		let scenario = scenario.add_joiner(amount);
-		let member_id = scenario.origin1_member.unwrap().clone();
-		let member_id_lookup = T::Lookup::unlookup(member_id.clone());
-		let all_points = PoolMembers::<T>::get(&member_id).unwrap().points;
+		let member_id : T::AccountId = account("member", USER_SEED, 0);
 		whitelist_account!(member_id);
-	}: _(RuntimeOrigin::Signed(member_id.clone()), member_id_lookup, all_points)
-	verify {
-		let bonded_after = T::StakeAdapter::active_stake(Pool::from(scenario.origin1));
-		// We at least went down to the destination bag
-		assert!(bonded_after <= scenario.dest_weight);
-		let member = PoolMembers::<T>::get(
-			&member_id
-		)
-		.unwrap();
-		assert_eq!(
-			member.unbonding_eras.keys().cloned().collect::<Vec<_>>(),
-			vec![0 + T::StakeAdapter::bonding_duration()]
-		);
-		assert_eq!(
-			member.unbonding_eras.values().cloned().collect::<Vec<_>>(),
-			vec![all_points]
-		);
-	}
+		// create a pool with a single member
+		let min_join_bond = MinJoinBond::<T>::get().max(CurrencyOf::<T>::minimum_balance());
+		let min_create_bond = Lst::<T>::depositor_min_bond();
+		let (depositor, pool_account) = create_pool_account::<T>(0, min_create_bond, None);
+		Lst::<T>::join(RuntimeOrigin::Signed(member_id.clone()).into(), min_join_bond, 1)
+			.unwrap();
+		let member_id_lookup = T::Lookup::unlookup(member_id.clone());
+	}: _(RuntimeOrigin::Signed(member_id.clone()), member_id_lookup, 1_u32.into(), 100_u32.into())
 
 	pool_withdraw_unbonded {
 		let s in 0 .. MAX_SPANS;
 
-		let min_create_bond = Pools::<T>::depositor_min_bond();
+		let min_create_bond = Lst::<T>::depositor_min_bond();
 		let (depositor, pool_account) = create_pool_account::<T>(0, min_create_bond, None);
 
 		// Add a new member
 		let min_join_bond = MinJoinBond::<T>::get().max(CurrencyOf::<T>::minimum_balance());
 		let joiner = create_funded_user_with_balance::<T>("joiner", 0, min_join_bond * 2u32.into());
-		Pools::<T>::join(RuntimeOrigin::Signed(joiner.clone()).into(), min_join_bond, 1)
+		Lst::<T>::join(RuntimeOrigin::Signed(joiner.clone()).into(), min_join_bond, 1)
 			.unwrap();
 
 		// Sanity check join worked
-		assert_eq!(
-			T::StakeAdapter::active_stake(Pool::from(pool_account.clone())),
-			min_create_bond + min_join_bond
-		);
-		assert_eq!(CurrencyOf::<T>::balance(&joiner), min_join_bond);
+		assert_eq!(CurrencyOf::<T>::free_balance(&joiner), min_join_bond);
 
 		// Unbond the new member
-		Pools::<T>::fully_unbond(RuntimeOrigin::Signed(joiner.clone()).into(), joiner.clone()).unwrap();
+		Lst::<T>::fully_unbond(RuntimeOrigin::Signed(joiner.clone()).into(), joiner.clone(), 1_u32.into()).unwrap();
 
 		// Sanity check that unbond worked
-		assert_eq!(
-			T::StakeAdapter::active_stake(Pool::from(pool_account.clone())),
-			min_create_bond
-		);
 		assert_eq!(pallet_staking::Ledger::<T>::get(&pool_account).unwrap().unlocking.len(), 1);
 		// Set the current era
 		pallet_staking::CurrentEra::<T>::put(EraIndex::max_value());
@@ -260,20 +160,20 @@ frame_benchmarking::benchmarks! {
 	}: _(RuntimeOrigin::Signed(pool_account.clone()), 1, s)
 	verify {
 		// The joiners funds didn't change
-		assert_eq!(CurrencyOf::<T>::balance(&joiner), min_join_bond);
+		assert_eq!(CurrencyOf::<T>::free_balance(&joiner), min_join_bond);
 		// The unlocking chunk was removed
 		assert_eq!(pallet_staking::Ledger::<T>::get(pool_account).unwrap().unlocking.len(), 0);
 	}
 
 	create {
-		let min_create_bond = Pools::<T>::depositor_min_bond();
+		let min_create_bond = Lst::<T>::depositor_min_bond();
 		let depositor: T::AccountId = account("depositor", USER_SEED, 0);
 		let depositor_lookup = T::Lookup::unlookup(depositor.clone());
 
 		// Give the depositor some balance to bond
 		// it needs to transfer min balance to reward account as well so give additional min balance.
-		CurrencyOf::<T>::set_balance(&depositor, min_create_bond + CurrencyOf::<T>::minimum_balance() * 2u32.into());
-		// Make sure no Pools exist at a pre-condition for our verify checks
+		CurrencyOf::<T>::make_free_balance_be(&depositor, min_create_bond + CurrencyOf::<T>::minimum_balance() * 2u32.into());
+		// Make sure no Lst exist at a pre-condition for our verify checks
 		assert_eq!(RewardPools::<T>::count(), 0);
 		assert_eq!(BondedPools::<T>::count(), 0);
 
@@ -293,8 +193,6 @@ frame_benchmarking::benchmarks! {
 			new_pool,
 			BondedPoolInner {
 				commission: Commission::default(),
-				member_counter: 1,
-				points: min_create_bond,
 				roles: PoolRoles {
 					depositor: depositor.clone(),
 					root: Some(depositor.clone()),
@@ -302,11 +200,8 @@ frame_benchmarking::benchmarks! {
 					bouncer: Some(depositor.clone()),
 				},
 				state: PoolState::Open,
+				metadata: Default::default(),
 			}
-		);
-		assert_eq!(
-			T::StakeAdapter::active_stake(Pool::from(Pools::<T>::generate_bonded_account(1))),
-			min_create_bond
 		);
 	}
 
@@ -314,7 +209,7 @@ frame_benchmarking::benchmarks! {
 		let n in 1 .. MaxNominationsOf::<T>::get();
 
 		// Create a pool
-		let min_create_bond = Pools::<T>::depositor_min_bond() * 2u32.into();
+		let min_create_bond = Lst::<T>::depositor_min_bond() * 2u32.into();
 		let (depositor, pool_account) = create_pool_account::<T>(0, min_create_bond, None);
 
 		// Create some accounts to nominate. For the sake of benchmarking they don't need to be
@@ -333,8 +228,6 @@ frame_benchmarking::benchmarks! {
 			new_pool,
 			BondedPoolInner {
 				commission: Commission::default(),
-				member_counter: 1,
-				points: min_create_bond,
 				roles: PoolRoles {
 					depositor: depositor.clone(),
 					root: Some(depositor.clone()),
@@ -342,35 +235,16 @@ frame_benchmarking::benchmarks! {
 					bouncer: Some(depositor.clone()),
 				},
 				state: PoolState::Open,
+				metadata: Default::default(),
 			}
 		);
-		assert_eq!(
-			T::StakeAdapter::active_stake(Pool::from(Pools::<T>::generate_bonded_account(1))),
-			min_create_bond
-		);
-	}
-
-	set_state {
-		// Create a pool
-		let min_create_bond = Pools::<T>::depositor_min_bond();
-		let (depositor, pool_account) = create_pool_account::<T>(0, min_create_bond, None);
-		BondedPools::<T>::mutate(&1, |maybe_pool| {
-			// Force the pool into an invalid state
-			maybe_pool.as_mut().map(|pool| pool.points = min_create_bond * 10u32.into());
-		});
-
-		let caller = account("caller", 0, USER_SEED);
-		whitelist_account!(caller);
-	}:_(RuntimeOrigin::Signed(caller), 1, PoolState::Destroying)
-	verify {
-		assert_eq!(BondedPools::<T>::get(1).unwrap().state, PoolState::Destroying);
 	}
 
 	set_metadata {
 		let n in 1 .. <T as pallet_tangle_lst::Config>::MaxMetadataLen::get();
 
 		// Create a pool
-		let (depositor, pool_account) = create_pool_account::<T>(0, Pools::<T>::depositor_min_bond() * 2u32.into(), None);
+		let (depositor, pool_account) = create_pool_account::<T>(0, Lst::<T>::depositor_min_bond() * 2u32.into(), None);
 
 		// Create metadata of the max possible size
 		let metadata: Vec<u8> = (0..n).map(|_| 42).collect();
@@ -395,13 +269,13 @@ frame_benchmarking::benchmarks! {
 		assert_eq!(MinCreateBond::<T>::get(), BalanceOf::<T>::max_value());
 		assert_eq!(MaxPools::<T>::get(), Some(u32::MAX));
 		assert_eq!(MaxPoolMembers::<T>::get(), Some(u32::MAX));
-		assert_eq!(MaxPoolMembersPerPool::<T>::get(), Some(u32::MAX));
+		assert_eq!(MaxPoolMembersPerLst::<T>::get(), Some(u32::MAX));
 		assert_eq!(GlobalMaxCommission::<T>::get(), Some(Perbill::max_value()));
 	}
 
 	update_roles {
 		let first_id = pallet_tangle_lst::LastPoolId::<T>::get() + 1;
-		let (root, _) = create_pool_account::<T>(0, Pools::<T>::depositor_min_bond() * 2u32.into(), None);
+		let (root, _) = create_pool_account::<T>(0, Lst::<T>::depositor_min_bond() * 2u32.into(), None);
 		let random: T::AccountId = account("but is anything really random in computers..?", 0, USER_SEED);
 	}:_(
 		RuntimeOrigin::Signed(root.clone()),
@@ -423,34 +297,33 @@ frame_benchmarking::benchmarks! {
 
 	chill {
 		// Create a pool
-		let (depositor, pool_account) = create_pool_account::<T>(0, Pools::<T>::depositor_min_bond() * 2u32.into(), None);
+		let (depositor, pool_account) = create_pool_account::<T>(0, Lst::<T>::depositor_min_bond() * 2u32.into(), None);
 
 		// Nominate with the pool.
 		 let validators: Vec<_> = (0..MaxNominationsOf::<T>::get())
 			.map(|i| account("stash", USER_SEED, i))
 			.collect();
 
-		assert_ok!(T::StakeAdapter::nominate(Pool::from(pool_account.clone()), validators));
-		assert!(T::StakeAdapter::nominations(Pool::from(pool_account.clone())).is_some());
+		assert!(T::Staking::nominations(Lst::from(pool_account.clone())).is_some());
 
 		whitelist_account!(depositor);
 	}:_(RuntimeOrigin::Signed(depositor.clone()), 1)
 	verify {
-		assert!(T::StakeAdapter::nominations(Pool::from(pool_account.clone())).is_none());
+		assert!(T::Staking::nominations(Lst::from(pool_account.clone())).is_none());
 	}
 
 	set_commission {
 		// Create a pool - do not set a commission yet.
-		let (depositor, pool_account) = create_pool_account::<T>(0, Pools::<T>::depositor_min_bond() * 2u32.into(), None);
+		let (depositor, pool_account) = create_pool_account::<T>(0, Lst::<T>::depositor_min_bond() * 2u32.into(), None);
 		// set a max commission
-		Pools::<T>::set_commission_max(RuntimeOrigin::Signed(depositor.clone()).into(), 1u32.into(), Perbill::from_percent(50)).unwrap();
+		Lst::<T>::set_commission_max(RuntimeOrigin::Signed(depositor.clone()).into(), 1u32.into(), Perbill::from_percent(50)).unwrap();
 		// set a change rate
-		Pools::<T>::set_commission_change_rate(RuntimeOrigin::Signed(depositor.clone()).into(), 1u32.into(), CommissionChangeRate {
+		Lst::<T>::set_commission_change_rate(RuntimeOrigin::Signed(depositor.clone()).into(), 1u32.into(), CommissionChangeRate {
 			max_increase: Perbill::from_percent(20),
 			min_delay: 0u32.into(),
 		}).unwrap();
 		// set a claim permission to an account.
-		Pools::<T>::set_commission_claim_permission(
+		Lst::<T>::set_commission_claim_permission(
 			RuntimeOrigin::Signed(depositor.clone()).into(),
 			1u32.into(),
 			Some(CommissionClaimPermission::Account(depositor.clone()))
