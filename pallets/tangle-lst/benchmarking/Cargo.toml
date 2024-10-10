@@ -1,0 +1,70 @@
+[package]
+name = "pallet-tangle-lst-benchmarking"
+version = "35.0.0"
+authors.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+homepage = "https://substrate.io"
+repository.workspace = true
+description = "FRAME nomination pools pallet benchmarking (polkadot v1.15.0)"
+readme = "README.md"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+# parity
+parity-scale-codec = { features = ["derive"], workspace = true }
+scale-info = { features = ["derive"], workspace = true }
+frame-benchmarking.workspace = true
+frame-election-provider-support.workspace = true
+frame-support.workspace = true
+frame-system.workspace = true
+pallet-bags-list.workspace = true
+pallet-staking.workspace = true
+pallet-tangle-lst.workspace = true
+sp-runtime.workspace = true
+sp-runtime-interface.workspace = true
+sp-staking.workspace = true
+pallet-assets.workspace = true
+sp-std.workspace = true
+
+[dev-dependencies]
+pallet-balances = { workspace = true }
+pallet-timestamp = { workspace = true }
+pallet-staking-reward-curve = { workspace = true }
+sp-core = { workspace = true }
+sp-io = { workspace = true }
+
+[features]
+default = ["std"]
+
+std = [
+	"parity-scale-codec/std",
+	"frame-benchmarking/std",
+	"frame-election-provider-support/std",
+	"frame-support/std",
+	"frame-system/std",
+	"pallet-bags-list/std",
+	"pallet-tangle-lst/std",
+	"pallet-staking/std",
+	"scale-info/std",
+	"sp-runtime-interface/std",
+	"sp-runtime/std",
+	"sp-staking/std",
+	"pallet-assets/std",
+	"sp-std/std",
+]
+
+runtime-benchmarks = [
+	"frame-benchmarking/runtime-benchmarks",
+	"frame-election-provider-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
+	"pallet-bags-list/runtime-benchmarks",
+	"pallet-tangle-lst/runtime-benchmarks",
+	"pallet-staking/runtime-benchmarks",
+	"sp-runtime/runtime-benchmarks",
+	"sp-staking/runtime-benchmarks",
+	"pallet-assets/runtime-benchmarks",
+]

@@ -34,6 +34,8 @@ use sp_runtime::AccountId32;
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
+use sp_runtime::AccountId32;
+use sp_std::vec::Vec;
 use sp_std::{
 	convert::{TryFrom, TryInto},
 	marker::PhantomData,
@@ -58,6 +60,9 @@ pub const SELECTOR_LOG_DEPOSIT: [u8; 32] = keccak256!("Deposit(address,uint256)"
 
 /// Solidity selector of the Withdraw log, which is the Keccak of the Log signature.
 pub const SELECTOR_LOG_WITHDRAWAL: [u8; 32] = keccak256!("Withdrawal(address,uint256)");
+
+/// Solidity selector of the TransferNative log, which is the Keccak of the Log signature.
+pub const SELECTOR_LOG_TRANSFER_NATIVE: [u8; 32] = keccak256!("TransferNative(bytes32,uint256)");
 
 /// Associates pallet Instance to a prefix used for the Approves storage.
 /// This trait is implemented for () and the 16 substrate Instance.
@@ -306,11 +311,15 @@ where
 
 	// Same as transfer but takes an account id instead of an address
 	// This allows the caller to specify the substrate address as the destination
-	#[precompile::public("transfer_to_account_id(bytes32,uint256)")]
-	fn transfer_to_account_id(handle: &mut impl PrecompileHandle, to: H256, value: U256) -> EvmResult<bool> {
+	#[precompile::public("transferNative(bytes32,uint256)")]
+	fn transfer_native(
+		handle: &mut impl PrecompileHandle,
+		to: H256,
+		value: U256,
+	) -> EvmResult<bool> {
 		handle.record_log_costs_manual(3, 32)?;
 
-		let to: Runtime::AccountId = Self::parse_32byte_address(to.0.to_vec())?;
+		let to_account_id: Runtime::AccountId = Self::parse_32byte_address(to.0.to_vec())?;
 
 		// Build call with origin.
 		{
@@ -322,20 +331,20 @@ where
 				handle,
 				Some(origin).into(),
 				pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
-					dest: Runtime::Lookup::unlookup(to),
+					dest: Runtime::Lookup::unlookup(to_account_id),
 					value,
 				},
 			)?;
 		}
 
-		// log3(
-		// 	handle.context().address,
-		// 	SELECTOR_LOG_TRANSFER,
-		// 	handle.context().caller,
-		// 	to,
-		// 	solidity::encode_event_data(value),
-		// )
-		// .record(handle)?;
+		log3(
+			handle.context().address,
+			SELECTOR_LOG_TRANSFER_NATIVE,
+			handle.context().caller,
+			to,
+			solidity::encode_event_data(value),
+		)
+		.record(handle)?;
 
 		Ok(true)
 	}
@@ -536,7 +545,6 @@ where
 			32 => {
 				let mut addr_bytes = [0_u8; 32];
 				addr_bytes[..].clone_from_slice(&addr[0..32]);
-
 				sp_runtime::AccountId32::new(addr_bytes).into()
 			},
 			_ => {

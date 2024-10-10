@@ -21,7 +21,7 @@ use crate::{eip2612::Eip2612, mock::*, *};
 use libsecp256k1::{sign, Message, SecretKey};
 use precompile_utils::testing::*;
 use sha3::{Digest, Keccak256};
-use sp_core::{H256, U256};
+use sp_core::{sr25519, H256, U256};
 
 // No test of invalid selectors since we have a fallback behavior (deposit).
 fn precompiles() -> Precompiles<Runtime> {
@@ -1228,4 +1228,52 @@ fn test_solidity_interface_has_all_function_selectors_documented_and_implemented
 		&["ERC20.sol", "Permit.sol"],
 		PCall::supports_selector,
 	)
+}
+
+#[test]
+fn transfer_native() {
+	ExtBuilder::default()
+		.with_balances(vec![(CryptoAlith.into(), 1000)])
+		.build()
+		.execute_with(|| {
+			let account_id_h256: H256 = H256::from(sr25519::Public::from_raw([1; 32]));
+			let account_id_h160: H160 =
+				H160::from_slice(&sr25519::Public::from_raw([1; 32])[0..20]);
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					Precompile1,
+					PCall::transfer_native { to: account_id_h256, value: 400.into() },
+				)
+				.expect_cost(173364756) // 1 weight => 1 gas in mock
+				.expect_log(log3(
+					Precompile1,
+					SELECTOR_LOG_TRANSFER_NATIVE,
+					CryptoAlith,
+					account_id_h256,
+					solidity::encode_event_data(U256::from(400)),
+				))
+				.execute_returns(true);
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					Precompile1,
+					PCall::balance_of { owner: Address(CryptoAlith.into()) },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(600));
+
+			precompiles()
+				.prepare_test(
+					CryptoAlith,
+					Precompile1,
+					PCall::balance_of { owner: account_id_h160.into() },
+				)
+				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_no_logs()
+				.execute_returns(U256::from(400));
+		});
 }
