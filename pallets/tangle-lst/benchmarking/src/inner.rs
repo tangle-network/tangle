@@ -183,7 +183,8 @@ frame_benchmarking::benchmarks! {
 			min_create_bond,
 			depositor_lookup.clone(),
 			depositor_lookup.clone(),
-			depositor_lookup
+			depositor_lookup,
+			Default::default()
 		)
 	verify {
 		assert_eq!(RewardPools::<T>::count(), 1);
