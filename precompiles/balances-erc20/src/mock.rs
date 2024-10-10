@@ -27,7 +27,7 @@ use precompile_utils::{precompile_set::*, testing::MockAccount};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_core::{ConstU32, U256};
-use sp_core::{Decode, Encode, MaxEncodedLen, H160, H256};
+use sp_core::{Decode, Encode, MaxEncodedLen, H160};
 use sp_runtime::BuildStorage;
 use sp_std::ops::Deref;
 
