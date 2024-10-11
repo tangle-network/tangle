@@ -11,7 +11,7 @@ export default {
     pushRepo: 'git@github.com:tangle-network/tangle.git',
   },
   github: {
-    release: false,
+    release: true,
     releaseName: 'Release ${npm.name} v${version}',
     releaseNotes(context) {
       return `Release ${context.npm.name} version ${context.version}`
