@@ -713,6 +713,10 @@ declare module '@polkadot/api-base/types/consts' {
     };
     services: {
       /**
+       * Maximum number of assets per service.
+       **/
+      maxAssetsPerService: u32 & AugmentedConst<ApiType>;
+      /**
        * Maximum number of binaries per gadget.
        **/
       maxBinariesPerGadget: u32 & AugmentedConst<ApiType>;

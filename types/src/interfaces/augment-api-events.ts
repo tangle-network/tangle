@@ -1128,7 +1128,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * A service has been initiated.
        **/
-      ServiceInitiated: AugmentedEvent<ApiType, [owner: AccountId32, requestId: Option<u64>, serviceId: u64, blueprintId: u64], { owner: AccountId32, requestId: Option<u64>, serviceId: u64, blueprintId: u64 }>;
+      ServiceInitiated: AugmentedEvent<ApiType, [owner: AccountId32, requestId: Option<u64>, serviceId: u64, blueprintId: u64, assets: Vec<u128>], { owner: AccountId32, requestId: Option<u64>, serviceId: u64, blueprintId: u64, assets: Vec<u128> }>;
       /**
        * A service request has been approved.
        **/
@@ -1136,7 +1136,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * A new service has been requested.
        **/
-      ServiceRequested: AugmentedEvent<ApiType, [owner: AccountId32, requestId: u64, blueprintId: u64, pendingApprovals: Vec<AccountId32>, approved: Vec<AccountId32>], { owner: AccountId32, requestId: u64, blueprintId: u64, pendingApprovals: Vec<AccountId32>, approved: Vec<AccountId32> }>;
+      ServiceRequested: AugmentedEvent<ApiType, [owner: AccountId32, requestId: u64, blueprintId: u64, pendingApprovals: Vec<AccountId32>, approved: Vec<AccountId32>, assets: Vec<u128>], { owner: AccountId32, requestId: u64, blueprintId: u64, pendingApprovals: Vec<AccountId32>, approved: Vec<AccountId32>, assets: Vec<u128> }>;
       /**
        * A service request has been rejected.
        **/
