@@ -7,17 +7,18 @@
   "repository": "https://github.com/webb-tools/tangle.git",
   "homepage": "https://github.com/webb-tools/tangle",
   "files": [
-    "build"
+    "build",
+    "src"
   ],
-  "main": "./build/index.cjs",
-  "module": "./build/index.mjs",
-  "types": "./build/index.d.ts",
+  "main": "./build/cjs/index.js",
+  "module": "./build/esm/index.js",
+  "types": "./build/types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./build/index.d.ts",
-      "require": "./build/index.cjs",
-      "import": "./build/index.mjs",
-      "module": "./build/index.mjs"
+      "types": "./build/types/index.d.ts",
+      "require": "./build/cjs/index.js",
+      "import": "./build/esm/index.js",
+      "module": "./build/esm/index.js"
     }
   },
   "publishConfig": {
@@ -28,7 +29,10 @@
     "url": "https://github.com/webb-tools/tangle/issues"
   },
   "scripts": {
-    "build": "bunchee",
+    "build": "yarn run build:cjs && yarn run build:esm && yarn run build:types",
+    "build:cjs": "tspc --module commonjs --outDir build/cjs",
+    "build:esm": "tspc --module esnext --outDir build/esm",
+    "build:types": "tspc --declaration --emitDeclarationOnly --outDir build/types",
     "build:interfaces": "yarn build:interfaces:defs && yarn build:interfaces:chain",
     "build:interfaces:defs": "tsx node_modules/.bin/polkadot-types-from-defs --input ./src/interfaces --package @webb-tools/tangle-substrate-types --endpoint ws://127.0.0.1:9944",
     "build:interfaces:chain": "tsx node_modules/.bin/polkadot-types-from-chain --output ./src/interfaces --package @webb-tools/tangle-substrate-types --endpoint ws://127.0.0.1:9944",
@@ -46,11 +50,12 @@
   "devDependencies": {
     "@types/node": "^22.6.1",
     "@types/ws": "^8.5.12",
-    "bunchee": "^5.4.0",
     "prettier": "3.2.5",
     "release-it": "^17.6.0",
+    "ts-patch": "^3.2.1",
     "tsx": "^4.19.1",
     "typescript": "5.4.2",
+    "typescript-transform-paths": "^3.5.1",
     "ws": "^8.18.0"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
