@@ -26,6 +26,7 @@ chainspecs/standalone-local.json
 
 # NodeJS
 **/node_modules/
+**.npmrc
 types/build
 types/ts-types
 

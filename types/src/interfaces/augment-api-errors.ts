@@ -1504,6 +1504,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       JobDefinitionNotFound: AugmentedError<ApiType>;
       /**
+       * The maximum number of assets per service has been exceeded.
+       **/
+      MaxAssetsPerServiceExceeded: AugmentedError<ApiType>;
+      /**
        * The maximum number of fields per request has been exceeded.
        **/
       MaxFieldsExceeded: AugmentedError<ApiType>;
@@ -1523,6 +1527,10 @@ declare module '@polkadot/api-base/types/errors' {
        * The maximum number of services per user has been exceeded.
        **/
       MaxServicesPerUserExceeded: AugmentedError<ApiType>;
+      /**
+       * No assets provided for the service, at least one asset is required.
+       **/
+      NoAssetsProvided: AugmentedError<ApiType>;
       /**
        * The caller is not registered as a operator.
        **/
