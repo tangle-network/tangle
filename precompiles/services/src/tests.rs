@@ -26,6 +26,8 @@ fn zero_key() -> ecdsa::Public {
 	ecdsa::Public::from([0; 33])
 }
 
+const WETH: AssetId = 1;
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MachineKind {
@@ -194,6 +196,7 @@ fn test_request_service() {
 					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
+					assets: [WETH].into_iter().map(Into::into).collect(),
 				},
 			)
 			.execute_returns(());
@@ -301,6 +304,7 @@ fn test_terminate_service() {
 					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
+					assets: [WETH].into_iter().map(Into::into).collect(),
 				},
 			)
 			.execute_returns(());

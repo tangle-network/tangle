@@ -163,7 +163,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle"),
 	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
-	spec_version: 2000, // v2.0.0
+	spec_version: 1200, // v1.2.0
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1870,11 +1870,11 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId> for Runtime {
+	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId, AssetId> for Runtime {
 		fn query_services_with_blueprints_by_operator(
 			operator: AccountId,
 		) -> Result<
-			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>>>,
+			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>, AssetId>>,
 			sp_runtime::DispatchError,
 		> {
 			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)

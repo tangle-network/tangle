@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   srtool:
@@ -41,7 +41,7 @@ jobs:
           echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
 
       - name: Archive Runtime
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.chain }}-runtime-${{ github.sha }}
           path: |

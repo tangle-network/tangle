@@ -173,7 +173,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 2000, // v2.0.0
+	spec_version: 1200, // v1.2.0
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1928,6 +1928,7 @@ mod benches {
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
 		[pallet_services, Services]
+		[pallet_tangle_lst_benchmarking, LstBench]
 	);
 }
 
@@ -1987,11 +1988,11 @@ impl_runtime_apis! {
 	// 	}
 	// }
 
-	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId> for Runtime {
+	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId, AssetId> for Runtime {
 		fn query_services_with_blueprints_by_operator(
 			operator: AccountId,
 		) -> Result<
-			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>>>,
+			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>, AssetId>>,
 			sp_runtime::DispatchError,
 		> {
 			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
@@ -2593,6 +2594,7 @@ impl_runtime_apis! {
 		) {
 			use frame_benchmarking::{Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
+			use pallet_tangle_lst_benchmarking::Pallet as LstBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
 			list_benchmark!(list, extra, pallet_services, Services);
@@ -2610,6 +2612,7 @@ impl_runtime_apis! {
 			use sp_storage::TrackedStorageKey;
 			impl frame_system_benchmarking::Config for Runtime {}
 			impl baseline::Config for Runtime {}
+			use pallet_tangle_lst_benchmarking::Pallet as LstBench;
 
 			use frame_support::traits::WhitelistedStorageKeys;
 			let whitelist: Vec<TrackedStorageKey> = AllPalletsWithSystem::whitelisted_storage_keys();

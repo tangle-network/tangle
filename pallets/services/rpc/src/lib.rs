@@ -36,18 +36,19 @@ type BlockNumberOf<Block> =
 
 /// ServicesClient RPC methods.
 #[rpc(client, server)]
-pub trait ServicesApi<BlockHash, X, AccountId, BlockNumber>
+pub trait ServicesApi<BlockHash, X, AccountId, BlockNumber, AssetId>
 where
 	X: Constraints,
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
 	BlockNumber: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+	AssetId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
 {
 	#[method(name = "services_queryServicesWithBlueprintsByOperator")]
 	fn query_services_with_blueprints_by_operator(
 		&self,
 		operator: AccountId,
 		at: Option<BlockHash>,
-	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumber>>>;
+	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumber, AssetId>>>;
 }
 
 /// A struct that implements the `ServicesApi`.
@@ -63,21 +64,22 @@ impl<C, M, P> ServicesClient<C, M, P> {
 	}
 }
 
-impl<C, X, Block, AccountId>
-	ServicesApiServer<<Block as BlockT>::Hash, X, AccountId, BlockNumberOf<Block>>
+impl<C, X, Block, AccountId, AssetId>
+	ServicesApiServer<<Block as BlockT>::Hash, X, AccountId, BlockNumberOf<Block>, AssetId>
 	for ServicesClient<C, Block, AccountId>
 where
 	Block: BlockT,
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+	AssetId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
 	X: Constraints,
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
-	C::Api: ServicesRuntimeApi<Block, X, AccountId>,
+	C::Api: ServicesRuntimeApi<Block, X, AccountId, AssetId>,
 {
 	fn query_services_with_blueprints_by_operator(
 		&self,
 		operator: AccountId,
 		at: Option<<Block as BlockT>::Hash>,
-	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumberOf<Block>>>> {
+	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumberOf<Block>, AssetId>>> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 

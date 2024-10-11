@@ -22,6 +22,7 @@ use frame_support::{
 use sp_core::H256;
 use sp_io::hashing::keccak_256;
 use sp_runtime::traits::UniqueSaturatedInto;
+use sp_runtime::AccountId32;
 use sp_std::vec::Vec;
 
 /// EIP2612 permit typehash.
@@ -45,6 +46,7 @@ where
 	BalanceOf<Runtime, Instance>: TryFrom<U256> + Into<U256>,
 	Metadata: Erc20Metadata,
 	Instance: InstanceToPrefix + 'static,
+	Runtime::AccountId: From<AccountId32>,
 {
 	pub fn compute_domain_separator(address: H160) -> [u8; 32] {
 		let name: H256 = keccak_256(Metadata::name().as_bytes()).into();

@@ -97,10 +97,11 @@ where
 	}
 
 	/// Request a new service.
-	#[precompile::public("requestService(uint256,bytes,bytes,bytes)")]
+	#[precompile::public("requestService(uint256,uint256[],bytes,bytes,bytes)")]
 	fn request_service(
 		handle: &mut impl PrecompileHandle,
 		blueprint_id: U256,
+		assets: Vec<U256>,
 		permitted_callers_data: UnboundedBytes,
 		service_providers_data: UnboundedBytes,
 		request_args_data: UnboundedBytes,
@@ -124,12 +125,15 @@ where
 		let request_args: Vec<Field<Runtime::Constraints, Runtime::AccountId>> =
 			Decode::decode(&mut &request_args_data[..])
 				.map_err(|_| revert("Invalid request arguments data"))?;
+		let assets: Vec<Runtime::AssetId> =
+			assets.into_iter().map(|asset| asset.as_u32().into()).collect();
 
 		let call = pallet_services::Call::<Runtime>::request {
 			blueprint_id,
 			permitted_callers,
 			service_providers,
 			ttl: 10000_u32.into(),
+			assets,
 			request_args,
 		};
 

@@ -84,6 +84,8 @@ pub trait Constraints {
 	type MaxContainerImageNameLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 	/// Container image tag maximum length.
 	type MaxContainerImageTagLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of assets per service.
+	type MaxAssetsPerService: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 }
 
 /// A Job Definition is a definition of a job that can be called.
@@ -373,9 +375,9 @@ impl<C: Constraints> ServiceBlueprint<C> {
 /// A service request is a request to create a service from a service blueprint.
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[educe(
-    Default(bound(AccountId: Default, BlockNumber: Default)),
-    Clone(bound(AccountId: Clone, BlockNumber: Clone)),
-    PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq)),
+    Default(bound(AccountId: Default, BlockNumber: Default, AssetId: Default)),
+    Clone(bound(AccountId: Clone, BlockNumber: Clone, AssetId: Clone)),
+    PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq, AssetId: PartialEq)),
     Eq
 )]
 #[scale_info(skip_type_params(C))]
@@ -387,18 +389,20 @@ impl<C: Constraints> ServiceBlueprint<C> {
 	feature = "std",
 	derive(Serialize, Deserialize),
 	serde(bound(
-        serialize = "AccountId: Serialize, BlockNumber: Serialize",
-        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>",
+        serialize = "AccountId: Serialize, BlockNumber: Serialize, AssetId: Serialize",
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: Deserialize<'de>"
     )),
-    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug)))
+    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: core::fmt::Debug)))
 )]
-pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber> {
+pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber, AssetId> {
 	/// The service blueprint ID.
 	pub blueprint: u64,
 	/// The owner of the service.
 	pub owner: AccountId,
 	/// The permitted caller(s) of the service.
 	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
+	/// Asset(s) used to secure the service instance.
+	pub assets: BoundedVec<AssetId, C::MaxAssetsPerService>,
 	/// The Lifetime of the service.
 	pub ttl: BlockNumber,
 	/// The supplied arguments for the service request.
@@ -408,7 +412,9 @@ pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber> {
 		BoundedVec<(AccountId, ApprovalState), C::MaxOperatorsPerService>,
 }
 
-impl<C: Constraints, AccountId, BlockNumber> ServiceRequest<C, AccountId, BlockNumber> {
+impl<C: Constraints, AccountId, BlockNumber, AssetId>
+	ServiceRequest<C, AccountId, BlockNumber, AssetId>
+{
 	/// Returns true if all the operators are [ApprovalState::Approved].
 	pub fn is_approved(&self) -> bool {
 		self.operators_with_approval_state
@@ -434,9 +440,9 @@ impl<C: Constraints, AccountId, BlockNumber> ServiceRequest<C, AccountId, BlockN
 /// A Service is an instance of a service blueprint.
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[educe(
-    Default(bound(AccountId: Default, BlockNumber: Default)),
-    Clone(bound(AccountId: Clone, BlockNumber: Clone)),
-    PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq)),
+    Default(bound(AccountId: Default, BlockNumber: Default, AssetId: Default)),
+    Clone(bound(AccountId: Clone, BlockNumber: Clone, AssetId: Clone)),
+    PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq, AssetId: PartialEq)),
     Eq
 )]
 #[scale_info(skip_type_params(C))]
@@ -448,12 +454,12 @@ impl<C: Constraints, AccountId, BlockNumber> ServiceRequest<C, AccountId, BlockN
 	feature = "std",
 	derive(Serialize, Deserialize),
 	serde(bound(
-        serialize = "AccountId: Serialize, BlockNumber: Serialize",
-        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>",
+        serialize = "AccountId: Serialize, BlockNumber: Serialize, AssetId: Serialize",
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: Deserialize<'de>",
     )),
-    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug)))
+    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: core::fmt::Debug)))
 )]
-pub struct Service<C: Constraints, AccountId, BlockNumber> {
+pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId> {
 	/// The service ID.
 	pub id: u64,
 	/// The Blueprint ID of the service.
@@ -464,6 +470,8 @@ pub struct Service<C: Constraints, AccountId, BlockNumber> {
 	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
 	/// The Selected operators(s) for this service.
 	pub operators: BoundedVec<AccountId, C::MaxOperatorsPerService>,
+	/// Asset(s) used to secure the service instance.
+	pub assets: BoundedVec<AssetId, C::MaxAssetsPerService>,
 	/// The Lifetime of the service.
 	pub ttl: BlockNumber,
 }
@@ -839,9 +847,9 @@ pub struct ContainerGadget<C: Constraints> {
 /// RPC Response for query the blueprint along with the services instances of that blueprint.
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[educe(
-    Default(bound(AccountId: Default, BlockNumber: Default)),
-    Clone(bound(AccountId: Clone, BlockNumber: Clone)),
-    PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq)),
+    Default(bound(AccountId: Default, BlockNumber: Default, AssetId: Default)),
+    Clone(bound(AccountId: Clone, BlockNumber: Clone, AssetId: Clone)),
+    PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq, AssetId: PartialEq)),
     Eq
 )]
 #[scale_info(skip_type_params(C))]
@@ -853,16 +861,16 @@ pub struct ContainerGadget<C: Constraints> {
 	feature = "std",
 	derive(Serialize, Deserialize),
 	serde(bound(
-        serialize = "AccountId: Serialize, BlockNumber: Serialize",
-        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>",
+        serialize = "AccountId: Serialize, BlockNumber: Serialize, AssetId: Serialize",
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: Deserialize<'de>",
     )),
-    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug)))
+    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: core::fmt::Debug)))
 )]
-pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber> {
+pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, AssetId> {
 	/// The blueprint ID.
 	pub blueprint_id: u64,
 	/// The service blueprint.
 	pub blueprint: ServiceBlueprint<C>,
 	/// The services instances of that blueprint.
-	pub services: Vec<Service<C, AccountId, BlockNumber>>,
+	pub services: Vec<Service<C, AccountId, BlockNumber, AssetId>>,
 }

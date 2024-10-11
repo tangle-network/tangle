@@ -33,6 +33,8 @@ use pallet_balances::pallet::{
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
+use sp_runtime::AccountId32;
+use sp_std::vec::Vec;
 use sp_std::{
 	convert::{TryFrom, TryInto},
 	marker::PhantomData,
@@ -57,6 +59,9 @@ pub const SELECTOR_LOG_DEPOSIT: [u8; 32] = keccak256!("Deposit(address,uint256)"
 
 /// Solidity selector of the Withdraw log, which is the Keccak of the Log signature.
 pub const SELECTOR_LOG_WITHDRAWAL: [u8; 32] = keccak256!("Withdrawal(address,uint256)");
+
+/// Solidity selector of the TransferNative log, which is the Keccak of the Log signature.
+pub const SELECTOR_LOG_TRANSFER_NATIVE: [u8; 32] = keccak256!("TransferNative(bytes32,uint256)");
 
 /// Associates pallet Instance to a prefix used for the Approves storage.
 /// This trait is implemented for () and the 16 substrate Instance.
@@ -187,6 +192,7 @@ where
 	BalanceOf<Runtime, Instance>: TryFrom<U256> + Into<U256>,
 	Metadata: Erc20Metadata,
 	Instance: InstanceToPrefix + 'static,
+	Runtime::AccountId: From<AccountId32>,
 {
 	#[precompile::public("totalSupply()")]
 	#[precompile::view]
@@ -293,6 +299,46 @@ where
 		log3(
 			handle.context().address,
 			SELECTOR_LOG_TRANSFER,
+			handle.context().caller,
+			to,
+			solidity::encode_event_data(value),
+		)
+		.record(handle)?;
+
+		Ok(true)
+	}
+
+	// Same as transfer but takes an account id instead of an address
+	// This allows the caller to specify the substrate address as the destination
+	#[precompile::public("transferNative(bytes32,uint256)")]
+	fn transfer_native(
+		handle: &mut impl PrecompileHandle,
+		to: H256,
+		value: U256,
+	) -> EvmResult<bool> {
+		handle.record_log_costs_manual(3, 32)?;
+
+		let to_account_id: Runtime::AccountId = Self::parse_32byte_address(to.0.to_vec())?;
+
+		// Build call with origin.
+		{
+			let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+			let value = Self::u256_to_amount(value).in_field("value")?;
+
+			// Dispatch call (if enough gas).
+			RuntimeHelper::<Runtime>::try_dispatch(
+				handle,
+				Some(origin).into(),
+				pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
+					dest: Runtime::Lookup::unlookup(to_account_id),
+					value,
+				},
+			)?;
+		}
+
+		log3(
+			handle.context().address,
+			SELECTOR_LOG_TRANSFER_NATIVE,
 			handle.context().caller,
 			to,
 			solidity::encode_event_data(value),
@@ -489,5 +535,23 @@ where
 		value
 			.try_into()
 			.map_err(|_| RevertReason::value_is_too_large("balance type").into())
+	}
+
+	/// Helper method to parse SS58 address
+	fn parse_32byte_address(addr: Vec<u8>) -> EvmResult<Runtime::AccountId> {
+		let addr: Runtime::AccountId = match addr.len() {
+			// public address of the ss58 account has 32 bytes
+			32 => {
+				let mut addr_bytes = [0_u8; 32];
+				addr_bytes[..].clone_from_slice(&addr[0..32]);
+				sp_runtime::AccountId32::new(addr_bytes).into()
+			},
+			_ => {
+				// Return err if account length is wrong
+				return Err(revert("Error while parsing staker's address"));
+			},
+		};
+
+		Ok(addr)
 	}
 }

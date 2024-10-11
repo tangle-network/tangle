@@ -25,6 +25,7 @@ sp-std = { workspace = true }
 # Frontier
 fp-evm = { workspace = true }
 pallet-evm = { workspace = true, features = [ "forbid-evm-reentrancy" ] }
+tangle-primitives = { workspace = true }
 
 [dev-dependencies]
 derive_more = { workspace = true, features = ["full"] }
@@ -53,4 +54,5 @@ std = [
 	"sp-core/std",
 	"sp-io/std",
 	"sp-std/std",
+	"tangle-primitives/std",
 ]

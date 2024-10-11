@@ -1,5 +1,5 @@
 [workspace.package]
-version = "2.0.0"
+version = "1.2.0"
 authors = ["Webb Technologies Inc."]
 edition = "2021"
 license = "Unlicense"
@@ -23,6 +23,7 @@ members = [
     "pallets/*",
     "pallets/services/rpc",
     "pallets/services/rpc/runtime-api",
+    "pallets/tangle-lst/benchmarking",
     "frost",
     "frost/frost-*",
     "precompiles/pallet-democracy",
@@ -118,7 +119,7 @@ pallet-services = { path = "pallets/services", default-features = false }
 pallet-services-rpc-runtime-api = { path = "pallets/services/rpc/runtime-api", default-features = false }
 pallet-services-rpc = { path = "pallets/services/rpc" }
 pallet-multi-asset-delegation = { path = "pallets/multi-asset-delegation", default-features = false }
-
+pallet-tangle-lst-benchmarking = { path = "pallets/tangle-lst/benchmarking", default-features = false }
 
 k256 = { version = "0.13.3", default-features = false }
 p256 = { version = "0.13.2", default-features = false }

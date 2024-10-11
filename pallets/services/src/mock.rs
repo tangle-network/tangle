@@ -219,11 +219,13 @@ impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
 	}
 }
 
+pub type AssetId = u32;
+
 pub struct MockDelegationManager;
 impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 	for MockDelegationManager
 {
-	type AssetId = u32;
+	type AssetId = AssetId;
 
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
@@ -329,6 +331,10 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxContainerImageTagLength: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxAssetsPerService: u32 = 64;
 }
 
 impl Config for Runtime {
@@ -336,6 +342,7 @@ impl Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
 	type PalletId = ServicesPalletId;
+	type AssetId = AssetId;
 	type EvmRunner = MockedEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type MaxFields = MaxFields;
@@ -357,6 +364,7 @@ impl Config for Runtime {
 	type MaxContainerRegistryLength = MaxContainerRegistryLength;
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
+	type MaxAssetsPerService = MaxAssetsPerService;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MockDelegationManager;
 	type WeightInfo = ();

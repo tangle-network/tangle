@@ -51,6 +51,13 @@ interface IERC20 {
     /// @return true if the transfer was succesful, revert otherwise.
     function transfer(address to, uint256 value) external returns (bool);
 
+    /// @dev Transfer token for a specified address, same as transfer but accepts an accountid32 instead of an address
+    /// @custom:selector bd91453c
+    /// @param to The address to transfer to.
+    /// @param value The amount to be transferred.
+    /// @return true if the transfer was succesful, revert otherwise.
+    function transferNative(bytes32 to, uint256 value) external returns (bool);
+
     /// @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
     /// Beware that changing an allowance with this method brings the risk that someone may use both the old
     /// and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
