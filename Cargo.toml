@@ -141,6 +141,7 @@ sp-consensus-babe = { git = "https://github.com/paritytech/polkadot-sdk", branch
 sp-core = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 sp-inherents = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 sp-io = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
+sp-mmr-primitives = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 sp-offchain = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 sc-offchain = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
@@ -359,7 +360,7 @@ evm-tracer = { path = "evm-tracer", default-features = false }
 
 # Polkadot XCM
 xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
-xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
+xcm-builder = { version = "16.0.1", package = "staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
 xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
 polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
 
@@ -368,15 +369,12 @@ subxt = { version = "0.37.0", default-features = false }
 subxt-core = { version = "0.37.0", default-features = false }
 subxt-signer = { version = "0.37.0", default-features = false }
 
-# Sygma
-# sygma-access-segregator = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-basic-feehandler = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-traits = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-fee-handler-router = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-percentage-feehandler = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-bridge = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-runtime-api = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-rpc = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
+# Hyperbridge (ISMP)
+ismp = { version = "0.2.0", default-features = false }
+pallet-ismp = { version = "1.15.0", default-features = false }
+ismp-grandpa = { version = "1.15.0", default-features = false }
+pallet-ismp-runtime-api = { version = "1.15.0", default-features = false }
+pallet-ismp-rpc = { version = "1.15.0" }
 
 [profile.release]
 panic = "unwind"

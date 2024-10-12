@@ -32,6 +32,7 @@ sp-consensus-babe = { workspace = true }
 sp-core = { workspace = true }
 sp-inherents = { workspace = true }
 sp-io = { workspace = true }
+sp-mmr-primitives = { workspace = true }
 sp-offchain = { workspace = true }
 sp-runtime = { workspace = true }
 sp-session = { workspace = true }
@@ -144,14 +145,11 @@ evm-tracer = { workspace = true }
 rpc-primitives-debug = { workspace = true }
 rpc-primitives-txpool = { workspace = true }
 
-# Sygma
-# sygma-access-segregator = { workspace = true }
-# sygma-basic-feehandler = { workspace = true }
-# sygma-traits = { workspace = true }
-# sygma-fee-handler-router = { workspace = true }
-# sygma-percentage-feehandler = { workspace = true }
-# sygma-bridge = { workspace = true }
-# sygma-runtime-api = { workspace = true }
+# Hyperbridge (ISMP)
+pallet-ismp = { workspace = true, features = ["unsigned"] }
+pallet-ismp-runtime-api = { workspace = true }
+ismp-grandpa = { workspace = true }
+ismp = { workspace = true }
 
 # XCM
 xcm = { workspace = true }
@@ -173,6 +171,7 @@ runtime-benchmarks = [
     "pallet-timestamp/runtime-benchmarks",
     "pallet-tx-pause/runtime-benchmarks",
     "sp-runtime/runtime-benchmarks",
+    "xcm-builder/runtime-benchmarks",
 
     # Frontier
     "pallet-ethereum/runtime-benchmarks",
@@ -181,11 +180,12 @@ runtime-benchmarks = [
 
     # Tangle
     "pallet-services/runtime-benchmarks",
-    "pallet-airdrop-claims/runtime-benchmarks",
-
-    "xcm-builder/runtime-benchmarks",
     "pallet-multi-asset-delegation/runtime-benchmarks",
     "pallet-tangle-lst-benchmarking/runtime-benchmarks",
+    "pallet-airdrop-claims/runtime-benchmarks",
+
+    # ISMP
+    "pallet-ismp/runtime-benchmarks",
 ]
 default = ["std", "with-rocksdb-weights", "evm-tracing"]
 local-testing = []
@@ -199,6 +199,7 @@ std = [
     "sp-api/std",
     "sp-std/std",
     "sp-io/std",
+    "sp-mmr-primitives/std",
     "sp-core/std",
     "sp-runtime/std",
     "sp-version/std",
@@ -310,14 +311,11 @@ std = [
     "precompile-utils/std",
     "pallet-evm-precompile-services/std",
 
-    # Sygma
-    # "sygma-basic-feehandler/std",
-    # "sygma-traits/std",
-    # "sygma-bridge/std",
-    # "sygma-access-segregator/std",
-    # "sygma-fee-handler-router/std",
-    # "sygma-percentage-feehandler/std",
-    # "sygma-runtime-api/std",
+    # ISMP
+    "pallet-ismp/std",
+    "pallet-ismp-runtime-api/std",
+    "ismp-grandpa/std",
+    "ismp/std",
 
     # XCM
     "xcm/std",
