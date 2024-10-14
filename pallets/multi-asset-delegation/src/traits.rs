@@ -50,4 +50,16 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for 
 				.fold(Zero::zero(), |acc, stake| acc + stake.amount)
 		})
 	}
+
+	fn get_delegators_for_operator(
+		operator: &T::AccountId,
+	) -> Vec<(T::AccountId, BalanceOf<T>, Self::AssetId)> {
+		Operators::<T>::get(operator).map_or(Vec::new(), |metadata| {
+			metadata
+				.delegations
+				.iter()
+				.map(|stake| (stake.delegator.clone(), stake.amount, stake.asset_id))
+				.collect()
+		})
+	}
 }

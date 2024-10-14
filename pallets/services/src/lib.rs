@@ -60,6 +60,7 @@ pub mod module {
 	use frame_support::dispatch::PostDispatchInfo;
 	use sp_core::{H160, H256};
 	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
+	use sp_runtime::Percent;
 	use sp_std::vec::Vec;
 	use tangle_primitives::{
 		services::{PriceTargets, *},
@@ -168,6 +169,18 @@ pub mod module {
 			BalanceOf<Self>,
 		>;
 
+		/// Number of eras that slashes are deferred by, after computation.
+		///
+		/// This should be less than the bonding duration. Set to 0 if slashes
+		/// should be applied immediately, without opportunity for intervention.
+		#[pallet::constant]
+		type SlashDeferDuration: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+
+		/// The origin which can manage Slashing actions.
+		///
+		/// Supported actions:
+		/// 1. cancel deferred slash.
+		type SlashOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
 	}
@@ -226,6 +239,10 @@ pub mod module {
 		NoAssetsProvided,
 		/// The maximum number of assets per service has been exceeded.
 		MaxAssetsPerServiceExceeded,
+		/// Offender is not a registered operator.
+		OffenderNotOperator,
+		/// Offender is not an active operator.
+		OffenderNotActiveOperator,
 	}
 
 	#[pallet::event]
@@ -398,6 +415,17 @@ pub mod module {
 		},
 		/// EVM execution reverted with a reason.
 		EvmReverted { from: H160, to: H160, data: Vec<u8>, reason: Vec<u8> },
+		/// An Operator has an unapplied slash.
+		UnappliedSlash {
+			/// The account that has an unapplied slash.
+			operator: T::AccountId,
+			/// The amount of the slash.
+			amount: BalanceOf<T>,
+			/// Service ID
+			service_id: u64,
+			/// Blueprint ID
+			blueprint_id: u64,
+		},
 	}
 
 	#[pallet::pallet]
@@ -514,8 +542,21 @@ pub mod module {
 		ResultQuery<Error<T>::ServiceOrJobCallNotFound>,
 	>;
 
-	// auxiliary storage and maps
+	/// All unapplied slashes that are queued for later.
+	///
+	/// EraIndex -> Vec<UnappliedSlash>
+	#[pallet::storage]
+	#[pallet::unbounded]
+	#[pallet::getter(fn unapplied_slashes)]
+	pub type UnappliedSlashes<T: Config> = StorageMap<
+		_,
+		Twox64Concat,
+		u32,
+		Vec<UnappliedSlash<T::AccountId, BalanceOf<T>>>,
+		ValueQuery,
+	>;
 
+	// *** auxiliary storage and maps ***
 	#[pallet::storage]
 	#[pallet::getter(fn operator_profile)]
 	pub type OperatorsProfile<T: Config> = StorageMap<
@@ -1098,6 +1139,52 @@ pub mod module {
 			});
 			// TODO: add weight for the call to the total weight.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+		}
+
+		pub fn slash(
+			origin: OriginFor<T>,
+			offender: T::AccountId,
+			#[pallet::compact] service_id: u64,
+			#[pallet::compact] percent: Percent,
+		) -> DispatchResult {
+			let caller = ensure_signed(origin)?;
+			let service = Self::services(service_id)?;
+			// TODO: add EVM hook to query for the slashing permission.
+			ensure!(service.owner == caller, DispatchError::BadOrigin);
+			let is_service_operator = service.operators.iter().any(|v| v == &offender);
+			ensure!(is_service_operator, Error::<T>::OffenderNotOperator);
+
+			let operator_is_active = T::OperatorDelegationManager::is_operator_active(&offender);
+			ensure!(operator_is_active, Error::<T>::OffenderNotActiveOperator);
+
+			let own_stake = T::OperatorDelegationManager::get_operator_stake(&offender);
+			let delegators = T::OperatorDelegationManager::get_delegators_for_operator(&offender);
+			let own_slash = percent.mul_floor(own_stake);
+			let others_slash = delegators
+				.into_iter()
+				.map(|(delegator, stake, _asset_id)| (delegator, percent.mul_floor(stake)))
+				.collect::<Vec<_>>();
+			let total_slash = others_slash.iter().fold(own_slash, |acc, (_, slash)| acc + *slash);
+			// TODO: take into account the delegators' asset kind.
+			// for now, we treat all assets equally, which is not the case in reality.
+			let unapplied_slash = UnappliedSlash {
+				operator: offender.clone(),
+				own: own_slash,
+				others: others_slash,
+				reporters: Vec::from([caller]),
+				payout: total_slash,
+			};
+
+			let current_era = T::OperatorDelegationManager::get_current_round();
+			UnappliedSlashes::<T>::mutate(current_era, |v| v.push(unapplied_slash));
+
+			Self::deposit_event(Event::<T>::UnappliedSlash {
+				operator: offender.clone(),
+				blueprint_id: service.blueprint,
+				service_id,
+				amount: total_slash,
+			});
+			Ok(())
 		}
 	}
 }

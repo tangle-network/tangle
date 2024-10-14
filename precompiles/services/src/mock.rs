@@ -368,6 +368,12 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 	) -> Balance {
 		Default::default()
 	}
+
+	fn get_delegators_for_operator(
+		_operator: &AccountId,
+	) -> Vec<(AccountId, Balance, Self::AssetId)> {
+		Default::default()
+	}
 }
 
 parameter_types! {
