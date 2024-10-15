@@ -144,14 +144,12 @@ evm-tracer = { workspace = true }
 rpc-primitives-debug = { workspace = true }
 rpc-primitives-txpool = { workspace = true }
 
-# Sygma
-# sygma-access-segregator = { workspace = true }
-# sygma-basic-feehandler = { workspace = true }
-# sygma-traits = { workspace = true }
-# sygma-fee-handler-router = { workspace = true }
-# sygma-percentage-feehandler = { workspace = true }
-# sygma-bridge = { workspace = true }
-# sygma-runtime-api = { workspace = true }
+bp-header-chain = { workspace = true }
+bp-parachains = { workspace = true }
+bp-polkadot-core = { workspace = true }
+bp-runtime = { workspace = true }
+pallet-bridge-grandpa = { workspace = true }
+pallet-bridge-parachains = { workspace = true }
 
 # XCM
 xcm = { workspace = true }
@@ -310,14 +308,12 @@ std = [
     "precompile-utils/std",
     "pallet-evm-precompile-services/std",
 
-    # Sygma
-    # "sygma-basic-feehandler/std",
-    # "sygma-traits/std",
-    # "sygma-bridge/std",
-    # "sygma-access-segregator/std",
-    # "sygma-fee-handler-router/std",
-    # "sygma-percentage-feehandler/std",
-    # "sygma-runtime-api/std",
+    "bp-header-chain/std",
+    "bp-parachains/std",
+    "bp-polkadot-core/std",
+    "bp-runtime/std",
+    "pallet-bridge-grandpa/std",
+    "pallet-bridge-parachains/std",
 
     # XCM
     "xcm/std",
