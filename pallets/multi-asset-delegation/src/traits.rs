@@ -16,6 +16,7 @@
 use super::*;
 use crate::types::{BalanceOf, OperatorStatus};
 use sp_runtime::traits::Zero;
+use sp_std::prelude::*;
 use tangle_primitives::{traits::MultiAssetDelegationInfo, RoundIndex};
 
 impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for crate::Pallet<T> {

@@ -281,16 +281,6 @@ pub mod module {
 			blueprint_id: u64,
 		},
 
-		/// The approval preference for an operator has been updated.
-		ApprovalPreferenceUpdated {
-			/// The account that updated the approval preference.
-			operator: T::AccountId,
-			/// The ID of the service blueprint.
-			blueprint_id: u64,
-			/// The new approval preference.
-			approval_preference: ApprovalPreference,
-		},
-
 		/// The price targets for an operator has been updated.
 		PriceTargetsUpdated {
 			/// The account that updated the approval preference.
@@ -338,26 +328,12 @@ pub mod module {
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 		},
-
-		/// A service request has been updated or modified.
-		ServiceRequestUpdated {
-			/// The account that requested the service.
-			owner: T::AccountId,
-			/// The ID of the service request.
-			request_id: u64,
-			/// The ID of the service blueprint.
-			blueprint_id: u64,
-			/// The list of operators that need to approve the service.
-			pending_approvals: Vec<T::AccountId>,
-			/// The list of operators that atomaticaly approved the service.
-			approved: Vec<T::AccountId>,
-		},
 		/// A service has been initiated.
 		ServiceInitiated {
 			/// The owner of the service.
 			owner: T::AccountId,
-			/// The ID of the service request that got approved (if required).
-			request_id: Option<u64>,
+			/// The ID of the service request that got approved.
+			request_id: u64,
 			/// The ID of the service.
 			service_id: u64,
 			/// The ID of the service blueprint.
@@ -673,7 +649,7 @@ pub mod module {
 				registration_args,
 			});
 
-			// TODO: add weight for the registration.
+			// TODO: update weight for the registration.
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
@@ -708,32 +684,6 @@ pub mod module {
 			Ok(())
 		}
 
-		/// Update the approval preference for the caller for a specific service blueprint.
-		///
-		/// See [`Self::register`] for more information.
-		#[pallet::weight(T::WeightInfo::update_approval_preference())]
-		pub fn update_approval_preference(
-			origin: OriginFor<T>,
-			#[pallet::compact] blueprint_id: u64,
-			approval_preference: ApprovalPreference,
-		) -> DispatchResult {
-			let caller = ensure_signed(origin)?;
-			ensure!(Blueprints::<T>::contains_key(blueprint_id), Error::<T>::BlueprintNotFound);
-			Operators::<T>::try_mutate_exists(blueprint_id, &caller, |current_preferences| {
-				current_preferences
-					.as_mut()
-					.map(|v| v.approval = approval_preference)
-					.ok_or(Error::<T>::NotRegistered)
-			})?;
-
-			Self::deposit_event(Event::ApprovalPreferenceUpdated {
-				operator: caller.clone(),
-				blueprint_id,
-				approval_preference,
-			});
-			Ok(())
-		}
-
 		/// Update the price targets for the caller for a specific service blueprint.
 		///
 		/// See [`Self::register`] for more information.
@@ -762,22 +712,17 @@ pub mod module {
 
 		/// Request a new service to be initiated using the provided blueprint with a list of
 		/// operators that will run your service. Optionally, you can specifiy who is permitted
-		/// caller of this service, by default anyone could use this service.
-		///
-		/// Note that, if anyone of the participants set their [`ApprovalPreference`] to
-		/// `ApprovalPreference::Required` you will need to wait until they are approve your
-		/// request, otherwise (if none), the service is initiated immediately.
+		/// caller of this service, by default only the caller is allowed to call the service.
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request(
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: u64,
 			permitted_callers: Vec<T::AccountId>,
-			service_providers: Vec<T::AccountId>,
+			operators: Vec<T::AccountId>,
 			request_args: Vec<Field<T::Constraints, T::AccountId>>,
 			assets: Vec<T::AssetId>,
 			#[pallet::compact] ttl: BlockNumberFor<T>,
 		) -> DispatchResultWithPostInfo {
-			// TODO(@shekohex): split this function into smaller functions.
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 
@@ -787,14 +732,9 @@ pub mod module {
 
 			let mut preferences = Vec::new();
 			let mut pending_approvals = Vec::new();
-			let mut approved = Vec::new();
-			for provider in &service_providers {
+			for provider in &operators {
 				let prefs = Self::operators(blueprint_id, provider)?;
-				if prefs.approval == ApprovalPreference::Required {
-					pending_approvals.push(provider.clone());
-				} else {
-					approved.push(provider.clone());
-				}
+				pending_approvals.push(provider.clone());
 				preferences.push(prefs);
 			}
 
@@ -809,106 +749,74 @@ pub mod module {
 					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
 			let assets = BoundedVec::<_, MaxAssetsPerServiceOf<T>>::try_from(assets)
 				.map_err(|_| Error::<T>::MaxAssetsPerServiceExceeded)?;
-			if pending_approvals.is_empty() {
-				// No approval is required, initiate the service immediately.
-				for operator in &approved {
-					// add the service id to the list of services for each operator's profile.
-					OperatorsProfile::<T>::try_mutate_exists(&operator, |profile| {
-						profile
-							.as_mut()
-							.and_then(|p| p.services.try_insert(service_id).ok())
-							.ok_or(Error::<T>::NotRegistered)
-					})?;
-				}
-				let operators = BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(approved)
+			let request_id = NextServiceRequestId::<T>::get();
+			let operators = pending_approvals
+				.iter()
+				.cloned()
+				.map(|v| (v, ApprovalState::Pending))
+				.collect::<Vec<_>>();
+
+			let args = BoundedVec::<_, MaxFieldsOf<T>>::try_from(request_args)
+				.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
+
+			let operators_with_approval_state =
+				BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
 					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
-				let service = Service {
-					id: service_id,
-					blueprint: blueprint_id,
-					owner: caller.clone(),
-					assets: assets.clone(),
-					permitted_callers,
-					operators,
-					ttl,
-				};
 
-				UserServices::<T>::try_mutate(&caller, |service_ids| {
-					Instances::<T>::insert(service_id, service);
-					NextInstanceId::<T>::set(service_id.saturating_add(1));
-					service_ids
-						.try_insert(service_id)
-						.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
-				})?;
-				Self::deposit_event(Event::ServiceInitiated {
-					owner: caller.clone(),
-					request_id: None,
-					service_id,
-					blueprint_id,
-					assets: assets.to_vec(),
-				});
+			let service_request = ServiceRequest {
+				blueprint: blueprint_id,
+				owner: caller.clone(),
+				assets: assets.clone(),
+				ttl,
+				args,
+				permitted_callers,
+				operators_with_approval_state,
+			};
+			ServiceRequests::<T>::insert(request_id, service_request);
+			NextServiceRequestId::<T>::set(request_id.saturating_add(1));
 
-				// TODO: add weight for the request to the total weight.
-				Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
-			} else {
-				let request_id = NextServiceRequestId::<T>::get();
-				let operators = pending_approvals
-					.iter()
-					.cloned()
-					.map(|v| (v, ApprovalState::Pending))
-					.chain(approved.iter().cloned().map(|v| (v, ApprovalState::Approved)))
-					.collect::<Vec<_>>();
+			Self::deposit_event(Event::ServiceRequested {
+				owner: caller.clone(),
+				request_id,
+				blueprint_id,
+				pending_approvals,
+				approved: Default::default(),
+				assets: assets.to_vec(),
+			});
 
-				let args = BoundedVec::<_, MaxFieldsOf<T>>::try_from(request_args)
-					.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
-
-				let operators_with_approval_state =
-					BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
-						.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
-
-				let service_request = ServiceRequest {
-					blueprint: blueprint_id,
-					owner: caller.clone(),
-					assets: assets.clone(),
-					ttl,
-					args,
-					permitted_callers,
-					operators_with_approval_state,
-				};
-				ServiceRequests::<T>::insert(request_id, service_request);
-				NextServiceRequestId::<T>::set(request_id.saturating_add(1));
-
-				Self::deposit_event(Event::ServiceRequested {
-					owner: caller.clone(),
-					request_id,
-					blueprint_id,
-					pending_approvals,
-					approved,
-					assets: assets.to_vec(),
-				});
-
-				// TODO: add weight for the request to the total weight.
-				Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
-			}
+			// TODO: add weight for the request to the total weight.
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
 		/// Approve a service request, so that the service can be initiated.
+		///
+		/// The `restaking_percent` is the percentage of the restaked tokens that will be exposed to
+		/// the service.
 		#[pallet::weight(T::WeightInfo::approve())]
-		pub fn approve(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
+		pub fn approve(
+			origin: OriginFor<T>,
+			#[pallet::compact] request_id: u64,
+			#[pallet::compact] restaking_percent: Percent,
+		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			let mut request = Self::service_requests(request_id)?;
 			let updated = request
 				.operators_with_approval_state
 				.iter_mut()
 				.find(|(v, _)| v == &caller)
-				.map(|(_, s)| *s = ApprovalState::Approved);
+				.map(|(_, s)| *s = ApprovalState::Approved { restaking_percent });
 			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
 
 			let approved = request
 				.operators_with_approval_state
 				.iter()
-				.filter_map(
-					|(v, s)| if *s == ApprovalState::Approved { Some(v.clone()) } else { None },
-				)
+				.filter_map(|(v, s)| {
+					if matches!(*s, ApprovalState::Approved { .. }) {
+						Some(v.clone())
+					} else {
+						None
+					}
+				})
 				.collect::<Vec<_>>();
 			let pending_approvals = request
 				.operators_with_approval_state
@@ -935,12 +843,18 @@ pub mod module {
 				let operators = request
 					.operators_with_approval_state
 					.into_iter()
-					.map(|(v, _)| v)
+					.filter_map(|(v, state)| match state {
+						ApprovalState::Approved { restaking_percent } => {
+							Some((v, restaking_percent))
+						},
+						// N.B: this should not happen, as all operators are approved and checked above.
+						_ => None,
+					})
 					.collect::<Vec<_>>();
 
 				// add the service id to the list of services for each operator's profile.
-				for operator in &operators {
-					OperatorsProfile::<T>::try_mutate_exists(&operator, |profile| {
+				for (operator, _) in &operators {
+					OperatorsProfile::<T>::try_mutate_exists(operator, |profile| {
 						profile
 							.as_mut()
 							.and_then(|p| p.services.try_insert(service_id).ok())
@@ -969,7 +883,7 @@ pub mod module {
 
 				Self::deposit_event(Event::ServiceInitiated {
 					owner: request.owner,
-					request_id: Some(request_id),
+					request_id,
 					assets: request.assets.to_vec(),
 					service_id,
 					blueprint_id: request.blueprint,
@@ -1030,7 +944,7 @@ pub mod module {
 			ensure!(removed, Error::<T>::ServiceNotFound);
 			Instances::<T>::remove(service_id);
 			// Remove the service from the operator's profile.
-			for operator in &service.operators {
+			for (operator, _) in &service.operators {
 				OperatorsProfile::<T>::try_mutate_exists(operator, |profile| {
 					profile
 						.as_mut()
@@ -1102,7 +1016,7 @@ pub mod module {
 			let service = Self::services(job_call.service_id)?;
 			let (_, blueprint) = Self::blueprints(service.blueprint)?;
 
-			let is_operator = service.operators.iter().any(|v| v == &caller);
+			let is_operator = service.operators.iter().any(|(v, _)| v == &caller);
 			ensure!(is_operator, DispatchError::BadOrigin);
 			let operator_preferences = Operators::<T>::get(service.blueprint, &caller)?;
 
@@ -1151,13 +1065,21 @@ pub mod module {
 			let service = Self::services(service_id)?;
 			// TODO: add EVM hook to query for the slashing permission.
 			ensure!(service.owner == caller, DispatchError::BadOrigin);
-			let is_service_operator = service.operators.iter().any(|v| v == &offender);
-			ensure!(is_service_operator, Error::<T>::OffenderNotOperator);
+			let service_operator =
+				service.operators.iter().find(|(operator, _)| operator == &offender);
+			let (operator, restake_percent) = match service_operator {
+				Some((operator, restake_percent)) => (operator, restake_percent),
+				None => return Err(Error::<T>::OffenderNotOperator.into()),
+			};
+			// sanity check
+			ensure!(operator == &offender, Error::<T>::OffenderNotOperator);
 
 			let operator_is_active = T::OperatorDelegationManager::is_operator_active(&offender);
 			ensure!(operator_is_active, Error::<T>::OffenderNotActiveOperator);
 
-			let own_stake = T::OperatorDelegationManager::get_operator_stake(&offender);
+			let total_own_stake = T::OperatorDelegationManager::get_operator_stake(&offender);
+			// Only take the exposed restake percentage for this service.
+			let own_stake = restake_percent.mul_floor(total_own_stake);
 			let delegators = T::OperatorDelegationManager::get_delegators_for_operator(&offender);
 			let own_slash = percent.mul_floor(own_stake);
 			let others_slash = delegators

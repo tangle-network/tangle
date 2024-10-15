@@ -117,6 +117,9 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxAssetsPerService: u32 = 64;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const SlashDeferDuration: u32 = 7;
 }
 
 pub type PalletServicesConstraints = pallet_services::types::ConstraintsOf<Runtime>;
@@ -150,6 +153,8 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type Constraints = PalletServicesConstraints;
+	type SlashDeferDuration = SlashDeferDuration;
+	type SlashOrigin = EnsureRootOrHalfCouncil;
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
 	#[cfg(feature = "runtime-benchmarks")]

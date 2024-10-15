@@ -19,7 +19,7 @@ use super::*;
 use frame_support::{assert_err, assert_ok};
 use mock::*;
 use sp_core::{bounded_vec, ecdsa, ByteArray};
-use sp_runtime::KeyTypeId;
+use sp_runtime::{KeyTypeId, Percent};
 use tangle_primitives::services::*;
 
 const ALICE: u8 = 1;
@@ -126,7 +126,6 @@ fn register_on_blueprint() {
 			0,
 			OperatorPreferences {
 				key: zero_key(),
-				approval: ApprovalPreference::default(),
 				price_targets: price_targets(MachineKind::Large),
 			},
 			Default::default(),
@@ -138,7 +137,6 @@ fn register_on_blueprint() {
 			blueprint_id: 0,
 			preferences: OperatorPreferences {
 				key: zero_key(),
-				approval: ApprovalPreference::default(),
 				price_targets: price_targets(MachineKind::Large),
 			},
 			registration_args: Default::default(),
@@ -153,11 +151,7 @@ fn register_on_blueprint() {
 			Services::register(
 				RuntimeOrigin::signed(bob),
 				0,
-				OperatorPreferences {
-					key: zero_key(),
-					approval: ApprovalPreference::default(),
-					price_targets: Default::default()
-				},
+				OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 				Default::default(),
 			),
 			crate::Error::<Runtime>::AlreadyRegistered
@@ -168,11 +162,7 @@ fn register_on_blueprint() {
 			Services::register(
 				RuntimeOrigin::signed(mock_pub_key(10)),
 				0,
-				OperatorPreferences {
-					key: zero_key(),
-					approval: ApprovalPreference::default(),
-					price_targets: Default::default()
-				},
+				OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 				Default::default(),
 			),
 			crate::Error::<Runtime>::OperatorNotActive
@@ -203,80 +193,6 @@ fn pre_register_on_blueprint() {
 }
 
 #[test]
-fn update_approval_preference() {
-	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
-		System::set_block_number(1);
-		let alice = mock_pub_key(ALICE);
-
-		let blueprint = cggmp21_blueprint();
-
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-
-		let bob = mock_pub_key(BOB);
-
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: price_targets(MachineKind::Small)
-			},
-			Default::default(),
-		));
-
-		assert_eq!(
-			Operators::<Runtime>::get(0, &bob).unwrap(),
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: price_targets(MachineKind::Small)
-			}
-		);
-
-		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
-			provider: bob.clone(),
-			blueprint_id: 0,
-			preferences: OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: price_targets(MachineKind::Small),
-			},
-			registration_args: Default::default(),
-		})]);
-
-		// update approval preference
-		assert_ok!(Services::update_approval_preference(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			ApprovalPreference::Required,
-		));
-
-		assert_eq!(
-			Operators::<Runtime>::get(0, &bob).unwrap().approval,
-			ApprovalPreference::Required
-		);
-
-		assert_events(vec![RuntimeEvent::Services(crate::Event::ApprovalPreferenceUpdated {
-			operator: bob,
-			blueprint_id: 0,
-			approval_preference: ApprovalPreference::Required,
-		})]);
-
-		// try to update approval preference when not registered
-		let charlie = mock_pub_key(CHARLIE);
-		assert_err!(
-			Services::update_approval_preference(
-				RuntimeOrigin::signed(charlie),
-				0,
-				ApprovalPreference::Required
-			),
-			crate::Error::<Runtime>::NotRegistered
-		);
-	});
-}
-
-#[test]
 fn update_price_targets() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
@@ -293,7 +209,6 @@ fn update_price_targets() {
 			0,
 			OperatorPreferences {
 				key: zero_key(),
-				approval: ApprovalPreference::default(),
 				price_targets: price_targets(MachineKind::Small)
 			},
 			Default::default(),
@@ -303,7 +218,6 @@ fn update_price_targets() {
 			Operators::<Runtime>::get(0, &bob).unwrap(),
 			OperatorPreferences {
 				key: zero_key(),
-				approval: ApprovalPreference::default(),
 				price_targets: price_targets(MachineKind::Small)
 			}
 		);
@@ -313,7 +227,6 @@ fn update_price_targets() {
 			blueprint_id: 0,
 			preferences: OperatorPreferences {
 				key: zero_key(),
-				approval: ApprovalPreference::default(),
 				price_targets: price_targets(MachineKind::Small),
 			},
 			registration_args: Default::default(),
@@ -362,11 +275,7 @@ fn unregister_from_blueprint() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 		assert_ok!(Services::unregister(RuntimeOrigin::signed(bob.clone()), 0));
@@ -401,33 +310,21 @@ fn request_service() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 
@@ -441,9 +338,68 @@ fn request_service() {
 			vec![USDC, WETH],
 			100,
 		));
-		// this service gets immediately accepted by all providers.
+
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		// Bob approves the request
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+
+		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceRequestApproved {
+			operator: bob.clone(),
+			request_id: 0,
+			blueprint_id: 0,
+			approved: vec![bob.clone()],
+			pending_approvals: vec![charlie.clone(), dave.clone()],
+		})]);
+		// Charlie approves the request
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			Percent::from_percent(20)
+		));
+
+		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceRequestApproved {
+			operator: charlie.clone(),
+			request_id: 0,
+			blueprint_id: 0,
+			approved: vec![bob.clone(), charlie.clone()],
+			pending_approvals: vec![dave.clone()],
+		})]);
+
+		// Dave approves the request
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			Percent::from_percent(30)
+		));
+
+		assert_events(vec![
+			RuntimeEvent::Services(crate::Event::ServiceRequestApproved {
+				operator: dave.clone(),
+				request_id: 0,
+				blueprint_id: 0,
+				approved: vec![bob.clone(), charlie.clone(), dave.clone()],
+				pending_approvals: vec![],
+			}),
+			RuntimeEvent::Services(crate::Event::ServiceInitiated {
+				owner: eve,
+				request_id: 0,
+				service_id: 0,
+				blueprint_id: 0,
+				assets: vec![USDC, WETH],
+			}),
+		]);
+
+		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+
+		// Now the service should be initiated
 		assert!(Instances::<Runtime>::contains_key(0));
+
 		// The service should also be added to the services for each operator.
 		let profile = OperatorsProfile::<Runtime>::get(bob).unwrap();
 		assert!(profile.services.contains(&0));
@@ -451,129 +407,6 @@ fn request_service() {
 		assert!(profile.services.contains(&0));
 		let profile = OperatorsProfile::<Runtime>::get(dave).unwrap();
 		assert!(profile.services.contains(&0));
-
-		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
-			owner: eve,
-			request_id: None,
-			service_id: 0,
-			blueprint_id: 0,
-			assets: vec![USDC, WETH],
-		})]);
-	});
-}
-
-#[test]
-fn request_service_with_approval_process() {
-	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
-		System::set_block_number(1);
-		let alice = mock_pub_key(ALICE);
-		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-
-		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
-			Default::default(),
-		));
-
-		let charlie = mock_pub_key(CHARLIE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
-			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::Required,
-				price_targets: Default::default()
-			},
-			Default::default(),
-		));
-
-		let dave = mock_pub_key(DAVE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::Required,
-				price_targets: Default::default()
-			},
-			Default::default(),
-		));
-
-		let eve = mock_pub_key(EVE);
-		assert_ok!(Services::request(
-			RuntimeOrigin::signed(eve.clone()),
-			0,
-			vec![alice.clone()],
-			vec![bob.clone(), charlie.clone(), dave.clone()],
-			Default::default(),
-			vec![WETH],
-			100,
-		));
-
-		// the service should be pending approval from charlie and dave.
-		assert!(ServiceRequests::<Runtime>::contains_key(0));
-		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceRequested {
-			owner: eve.clone(),
-			request_id: 0,
-			blueprint_id: 0,
-			approved: vec![bob.clone()],
-			pending_approvals: vec![charlie.clone(), dave.clone()],
-			assets: vec![WETH],
-		})]);
-
-		// it should not be added, until all providers approve.
-		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
-		assert!(!profile.services.contains(&0));
-		let profile = OperatorsProfile::<Runtime>::get(charlie.clone()).unwrap();
-		assert!(!profile.services.contains(&0));
-		let profile = OperatorsProfile::<Runtime>::get(dave.clone()).unwrap();
-		assert!(!profile.services.contains(&0));
-		// charlie approves the service
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0));
-		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceRequestApproved {
-			operator: charlie.clone(),
-			request_id: 0,
-			blueprint_id: 0,
-			approved: vec![charlie.clone(), bob.clone()],
-			pending_approvals: vec![dave.clone()],
-		})]);
-
-		// dave approves the service, and the service is initiated.
-		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0));
-		assert!(!ServiceRequests::<Runtime>::contains_key(0));
-		assert!(Instances::<Runtime>::contains_key(0));
-
-		// The service should also be added to the services for each operator.
-		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
-		assert!(profile.services.contains(&0));
-		let profile = OperatorsProfile::<Runtime>::get(charlie.clone()).unwrap();
-		assert!(profile.services.contains(&0));
-		let profile = OperatorsProfile::<Runtime>::get(dave.clone()).unwrap();
-		assert!(profile.services.contains(&0));
-
-		assert_events(vec![
-			RuntimeEvent::Services(crate::Event::ServiceRequestApproved {
-				operator: dave.clone(),
-				request_id: 0,
-				blueprint_id: 0,
-				approved: vec![charlie.clone(), dave.clone(), bob.clone()],
-				pending_approvals: vec![],
-			}),
-			RuntimeEvent::Services(crate::Event::ServiceInitiated {
-				owner: eve,
-				request_id: Some(0),
-				service_id: 0,
-				blueprint_id: 0,
-				assets: vec![WETH],
-			}),
-		]);
 	});
 }
 
@@ -588,11 +421,7 @@ fn request_service_with_no_assets() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 		let eve = mock_pub_key(EVE);
@@ -622,33 +451,21 @@ fn job_calls() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 
@@ -662,12 +479,29 @@ fn job_calls() {
 			vec![WETH],
 			100,
 		));
-		// this service gets immediately accepted by all providers.
-		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			Percent::from_percent(10)
+		));
 		assert!(Instances::<Runtime>::contains_key(0));
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
-			request_id: None,
+			request_id: 0,
 			service_id: 0,
 			blueprint_id: 0,
 			assets: vec![WETH],
@@ -704,33 +538,21 @@ fn job_calls_fails_with_invalid_input() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 
@@ -745,11 +567,28 @@ fn job_calls_fails_with_invalid_input() {
 			100,
 		));
 		// this service gets immediately accepted by all providers.
-		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			Percent::from_percent(10)
+		));
 		assert!(Instances::<Runtime>::contains_key(0));
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
-			request_id: None,
+			request_id: 0,
 			service_id: 0,
 			blueprint_id: 0,
 			assets: vec![WETH],
@@ -783,33 +622,21 @@ fn job_result() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences {
-				key: zero_key(),
-				approval: ApprovalPreference::default(),
-				price_targets: Default::default()
-			},
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
 		));
 
@@ -823,12 +650,29 @@ fn job_result() {
 			vec![WETH],
 			100,
 		));
-		// this service gets immediately accepted by all providers.
-		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			Percent::from_percent(10)
+		));
 		assert!(Instances::<Runtime>::contains_key(0));
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
-			request_id: None,
+			request_id: 0,
 			service_id: 0,
 			blueprint_id: 0,
 			assets: vec![WETH],
