@@ -21,6 +21,7 @@ use mock::*;
 use sp_core::{bounded_vec, ecdsa, ByteArray};
 use sp_runtime::{KeyTypeId, Percent};
 use tangle_primitives::services::*;
+use tangle_primitives::MultiAssetDelegationInfo;
 
 const ALICE: u8 = 1;
 const BOB: u8 = 2;
@@ -30,6 +31,9 @@ const EVE: u8 = 5;
 
 const USDC: AssetId = 1;
 const WETH: AssetId = 2;
+
+const KEYGEN_JOB_ID: u8 = 0;
+const SIGN_JOB_ID: u8 = 1;
 
 fn zero_key() -> ecdsa::Public {
 	ecdsa::Public::try_from([0; 33].as_slice()).unwrap()
@@ -706,7 +710,7 @@ fn job_result() {
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(eve.clone()),
 			0,
-			1,
+			SIGN_JOB_ID,
 			bounded_vec![
 				Field::Uint64(keygen_job_call_id),
 				Field::Bytes(data_hash.to_vec().try_into().unwrap())
@@ -729,5 +733,84 @@ fn job_result() {
 		// 	signing_job_call_id,
 		// 	bounded_vec![Field::Bytes(signature_bytes.try_into().unwrap())],
 		// ));
+	});
+}
+
+#[test]
+fn unapplied_slash() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		let blueprint_id = Services::next_blueprint_id();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		let bob = mock_pub_key(BOB);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			blueprint_id,
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			Default::default(),
+		));
+
+		let eve = mock_pub_key(EVE);
+		let service_id = Services::next_instance_id();
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			blueprint_id,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![WETH],
+			100,
+		));
+
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+		let bob_exposed_restake_percentage = Percent::from_percent(10);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			bob_exposed_restake_percentage,
+		));
+
+		assert!(Instances::<Runtime>::contains_key(service_id));
+		// now we can call the jobs
+		let job_call_id = Services::next_job_call_id();
+		assert_ok!(Services::call(
+			RuntimeOrigin::signed(eve.clone()),
+			service_id,
+			KEYGEN_JOB_ID,
+			bounded_vec![Field::Uint8(1)],
+		));
+		// sumbit an invalid result
+		let mut dkg = vec![0; 33];
+		dkg[32] = 1;
+		assert_ok!(Services::submit_result(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			job_call_id,
+			bounded_vec![Field::Bytes(dkg.try_into().unwrap())],
+		));
+
+		// Slash the operator for the invalid result
+		let slash_percent = Percent::from_percent(50);
+		assert_ok!(Services::slash(
+			RuntimeOrigin::signed(eve.clone()),
+			bob.clone(),
+			service_id,
+			slash_percent
+		));
+
+		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		let bob_slash = <Runtime as Config>::OperatorDelegationManager::get_operator_stake(&bob);
+		let expected_slash_amount =
+			(slash_percent * bob_exposed_restake_percentage).mul_floor(bob_slash);
+
+		assert_events(vec![RuntimeEvent::Services(crate::Event::UnappliedSlash {
+			operator: bob.clone(),
+			blueprint_id,
+			service_id,
+			amount: expected_slash_amount,
+		})]);
 	});
 }

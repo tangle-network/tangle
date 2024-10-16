@@ -1055,6 +1055,11 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
+		/// Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+		///
+		/// The caller needs to be an authorized Slash Origin for this service.
+		/// Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
+		/// by another entity.
 		pub fn slash(
 			origin: OriginFor<T>,
 			offender: T::AccountId,
@@ -1063,35 +1068,33 @@ pub mod module {
 		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			let service = Self::services(service_id)?;
-			// TODO: add EVM hook to query for the slashing permission.
+			// TODO(shekohex): add EVM hook to query for the slashing permission.
+			// this should be supported in the Next PR when we add the slashing precompile call.
 			ensure!(service.owner == caller, DispatchError::BadOrigin);
-			let service_operator =
-				service.operators.iter().find(|(operator, _)| operator == &offender);
-			let (operator, restake_percent) = match service_operator {
-				Some((operator, restake_percent)) => (operator, restake_percent),
-				None => return Err(Error::<T>::OffenderNotOperator.into()),
-			};
-			// sanity check
-			ensure!(operator == &offender, Error::<T>::OffenderNotOperator);
-
+			let (operator, restake_percent) =
+				match service.operators.iter().find(|(operator, _)| operator == &offender) {
+					Some((operator, restake_percent)) => (operator, restake_percent),
+					None => return Err(Error::<T>::OffenderNotOperator.into()),
+				};
 			let operator_is_active = T::OperatorDelegationManager::is_operator_active(&offender);
 			ensure!(operator_is_active, Error::<T>::OffenderNotActiveOperator);
 
-			let total_own_stake = T::OperatorDelegationManager::get_operator_stake(&offender);
+			let total_own_stake = T::OperatorDelegationManager::get_operator_stake(&operator);
 			// Only take the exposed restake percentage for this service.
 			let own_stake = restake_percent.mul_floor(total_own_stake);
-			let delegators = T::OperatorDelegationManager::get_delegators_for_operator(&offender);
-			let own_slash = percent.mul_floor(own_stake);
+			let delegators = T::OperatorDelegationManager::get_delegators_for_operator(&operator);
+			let exposed_stake = percent.mul_floor(own_stake);
 			let others_slash = delegators
 				.into_iter()
 				.map(|(delegator, stake, _asset_id)| (delegator, percent.mul_floor(stake)))
 				.collect::<Vec<_>>();
-			let total_slash = others_slash.iter().fold(own_slash, |acc, (_, slash)| acc + *slash);
+			let total_slash =
+				others_slash.iter().fold(exposed_stake, |acc, (_, slash)| acc + *slash);
 			// TODO: take into account the delegators' asset kind.
 			// for now, we treat all assets equally, which is not the case in reality.
 			let unapplied_slash = UnappliedSlash {
 				operator: offender.clone(),
-				own: own_slash,
+				own: exposed_stake,
 				others: others_slash,
 				reporters: Vec::from([caller]),
 				payout: total_slash,

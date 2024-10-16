@@ -243,8 +243,12 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 		true
 	}
 
-	fn get_operator_stake(_operator: &AccountId) -> Balance {
-		Default::default()
+	fn get_operator_stake(operator: &AccountId) -> Balance {
+		if operator == &mock_pub_key(10) {
+			Default::default()
+		} else {
+			1000
+		}
 	}
 
 	fn get_total_delegation_by_asset_id(
