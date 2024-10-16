@@ -368,6 +368,12 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 	) -> Balance {
 		Default::default()
 	}
+
+	fn get_delegators_for_operator(
+		_operator: &AccountId,
+	) -> Vec<(AccountId, Balance, Self::AssetId)> {
+		Default::default()
+	}
 }
 
 parameter_types! {
@@ -450,6 +456,10 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxAssetsPerService: u32 = 164;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const SlashDeferDuration: u32 = 7;
 }
 
 impl pallet_services::Config for Runtime {
@@ -482,6 +492,8 @@ impl pallet_services::Config for Runtime {
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MockDelegationManager;
+	type SlashDeferDuration = SlashDeferDuration;
+	type SlashOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = ();
 }
 

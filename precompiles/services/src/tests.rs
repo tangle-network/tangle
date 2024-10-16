@@ -20,7 +20,7 @@ use tangle_primitives::services::PriceTargets;
 use tangle_primitives::services::ServiceMetadata;
 use tangle_primitives::services::ServiceRegistrationHook;
 use tangle_primitives::services::ServiceRequestHook;
-use tangle_primitives::services::{ApprovalPreference, OperatorPreferences, ServiceBlueprint};
+use tangle_primitives::services::{OperatorPreferences, ServiceBlueprint};
 
 fn zero_key() -> ecdsa::Public {
 	ecdsa::Public::from([0; 33])
@@ -123,7 +123,6 @@ fn test_register_operator() {
 		// Now register operator
 		let preferences_data = OperatorPreferences {
 			key: zero_key(),
-			approval: ApprovalPreference::default(),
 			price_targets: price_targets(MachineKind::Large),
 		}
 		.encode();
@@ -165,7 +164,6 @@ fn test_request_service() {
 		// Now register operator
 		let preferences_data = OperatorPreferences {
 			key: zero_key(),
-			approval: ApprovalPreference::default(),
 			price_targets: price_targets(MachineKind::Large),
 		}
 		.encode();
@@ -201,6 +199,15 @@ fn test_request_service() {
 			)
 			.execute_returns(());
 
+		// Approve the service request by the operator(s)
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bob,
+				H160::from_low_u64_be(1),
+				PCall::approve { request_id: U256::from(0), restaking_percent: 10 },
+			)
+			.execute_returns(());
+
 		// Ensure the service instance is created
 		assert!(Instances::<Runtime>::contains_key(0));
 	});
@@ -224,7 +231,6 @@ fn test_unregister_operator() {
 
 		let preferences_data = OperatorPreferences {
 			key: zero_key(),
-			approval: ApprovalPreference::default(),
 			price_targets: price_targets(MachineKind::Large),
 		}
 		.encode();
@@ -274,7 +280,6 @@ fn test_terminate_service() {
 
 		let preferences_data = OperatorPreferences {
 			key: zero_key(),
-			approval: ApprovalPreference::default(),
 			price_targets: price_targets(MachineKind::Large),
 		}
 		.encode();
@@ -308,6 +313,17 @@ fn test_terminate_service() {
 				},
 			)
 			.execute_returns(());
+
+		// Approve the service request by the operator(s)
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bob,
+				H160::from_low_u64_be(1),
+				PCall::approve { request_id: U256::from(0), restaking_percent: 10 },
+			)
+			.execute_returns(());
+
+		assert!(Instances::<Runtime>::contains_key(0));
 
 		// Now terminate the service
 		PrecompilesValue::get()

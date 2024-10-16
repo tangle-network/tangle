@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 /// @title ServicesPrecompile Interface
 /// @dev This interface is meant to interact with the ServicesPrecompile in the Tangle network.
 interface ServicesPrecompile {
-
     /// @notice Create a new service blueprint
     /// @param blueprint_data The blueprint data encoded as bytes
     function createBlueprint(bytes calldata blueprint_data) external;
@@ -13,7 +12,8 @@ interface ServicesPrecompile {
     /// @param blueprint_id The ID of the blueprint to register for
     /// @param preferences The operator's preferences encoded as bytes
     /// @param registration_args The registration arguments encoded as bytes
-    function registerOperator(uint256 blueprint_id, bytes calldata preferences, bytes calldata registration_args) external;
+    function registerOperator(uint256 blueprint_id, bytes calldata preferences, bytes calldata registration_args)
+        external;
 
     /// @notice Unregister an operator from a specific blueprint
     /// @param blueprint_id The ID of the blueprint to unregister from
@@ -25,7 +25,13 @@ interface ServicesPrecompile {
     /// @param permitted_callers_data The permitted callers for the service encoded as bytes
     /// @param service_providers_data The service providers encoded as bytes
     /// @param request_args_data The request arguments encoded as bytes
-    function requestService(uint256 blueprint_id, uint256[] assets, bytes calldata permitted_callers_data, bytes calldata service_providers_data, bytes calldata request_args_data) external;
+    function requestService(
+        uint256 blueprint_id,
+        uint256[] calldata assets,
+        bytes calldata permitted_callers_data,
+        bytes calldata service_providers_data,
+        bytes calldata request_args_data
+    ) external;
 
     /// @notice Terminate a service
     /// @param service_id The ID of the service to terminate
@@ -33,7 +39,8 @@ interface ServicesPrecompile {
 
     /// @notice Approve a service request
     /// @param request_id The ID of the service request to approve
-    function approve(uint256 request_id) external;
+    /// @param restaking_percent The amount of your restake to be exposed to the service in percentage [0, 100]
+    function approve(uint256 request_id, uint8 restaking_percent) external;
 
     /// @notice Reject a service request
     /// @param request_id The ID of the service request to reject

@@ -16,6 +16,7 @@
 use super::*;
 use crate::types::{BalanceOf, OperatorStatus};
 use sp_runtime::traits::Zero;
+use sp_std::prelude::*;
 use tangle_primitives::{traits::MultiAssetDelegationInfo, RoundIndex};
 
 impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for crate::Pallet<T> {
@@ -48,6 +49,18 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for 
 				.iter()
 				.filter(|stake| &stake.asset_id == asset_id)
 				.fold(Zero::zero(), |acc, stake| acc + stake.amount)
+		})
+	}
+
+	fn get_delegators_for_operator(
+		operator: &T::AccountId,
+	) -> Vec<(T::AccountId, BalanceOf<T>, Self::AssetId)> {
+		Operators::<T>::get(operator).map_or(Vec::new(), |metadata| {
+			metadata
+				.delegations
+				.iter()
+				.map(|stake| (stake.delegator.clone(), stake.amount, stake.asset_id))
+				.collect()
 		})
 	}
 }
