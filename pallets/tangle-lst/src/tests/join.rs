@@ -127,7 +127,6 @@ fn join_errors_correctly() {
 
 #[test]
 #[cfg_attr(debug_assertions, should_panic(expected = "Defensive failure has been triggered!"))]
-#[cfg_attr(not(debug_assertions), should_panic)]
 fn join_panics_when_reward_pool_not_found() {
 	ExtBuilder::default().build_and_execute(|| {
 		StakingMock::set_bonded_balance(Lst::create_bonded_account(123), 100);

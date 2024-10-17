@@ -243,14 +243,24 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 		true
 	}
 
-	fn get_operator_stake(_operator: &AccountId) -> Balance {
-		Default::default()
+	fn get_operator_stake(operator: &AccountId) -> Balance {
+		if operator == &mock_pub_key(10) {
+			Default::default()
+		} else {
+			1000
+		}
 	}
 
 	fn get_total_delegation_by_asset_id(
 		_operator: &AccountId,
 		_asset_id: &Self::AssetId,
 	) -> Balance {
+		Default::default()
+	}
+
+	fn get_delegators_for_operator(
+		_operator: &AccountId,
+	) -> Vec<(AccountId, Balance, Self::AssetId)> {
 		Default::default()
 	}
 }
@@ -335,6 +345,10 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxAssetsPerService: u32 = 64;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const SlashDeferDuration: u32 = 7;
 }
 
 impl Config for Runtime {
@@ -367,6 +381,8 @@ impl Config for Runtime {
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MockDelegationManager;
+	type SlashDeferDuration = SlashDeferDuration;
+	type SlashOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = ();
 }
 

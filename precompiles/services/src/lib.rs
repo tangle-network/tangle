@@ -7,6 +7,7 @@ use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
 use sp_core::U256;
 use sp_runtime::traits::Dispatchable;
+use sp_runtime::Percent;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::services::{Field, OperatorPreferences, ServiceBlueprint};
 
@@ -118,7 +119,7 @@ where
 			Decode::decode(&mut &permitted_callers_data[..])
 				.map_err(|_| revert("Invalid permitted callers data"))?;
 
-		let service_providers: Vec<Runtime::AccountId> =
+		let operators: Vec<Runtime::AccountId> =
 			Decode::decode(&mut &service_providers_data[..])
 				.map_err(|_| revert("Invalid service providers data"))?;
 
@@ -131,7 +132,7 @@ where
 		let call = pallet_services::Call::<Runtime>::request {
 			blueprint_id,
 			permitted_callers,
-			service_providers,
+			operators,
 			ttl: 10000_u32.into(),
 			assets,
 			request_args,
@@ -158,13 +159,18 @@ where
 	}
 
 	/// Approve a request.
-	#[precompile::public("approve(uint256)")]
-	fn approve(handle: &mut impl PrecompileHandle, request_id: U256) -> EvmResult {
+	#[precompile::public("approve(uint256,uint8)")]
+	fn approve(
+		handle: &mut impl PrecompileHandle,
+		request_id: U256,
+		restaking_percent: u8,
+	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let request_id: u64 = request_id.as_u64();
+		let restaking_percent: Percent = Percent::from_percent(restaking_percent);
 
-		let call = pallet_services::Call::<Runtime>::approve { request_id };
+		let call = pallet_services::Call::<Runtime>::approve { request_id, restaking_percent };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 

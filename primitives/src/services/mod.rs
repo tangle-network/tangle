@@ -37,6 +37,7 @@ use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::{ecdsa, RuntimeDebug};
+use sp_runtime::Percent;
 
 #[cfg(not(feature = "std"))]
 use alloc::{vec, vec::Vec};
@@ -419,7 +420,7 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId>
 	pub fn is_approved(&self) -> bool {
 		self.operators_with_approval_state
 			.iter()
-			.all(|(_, state)| state == &ApprovalState::Approved)
+			.all(|(_, state)| matches!(state, ApprovalState::Approved { .. }))
 	}
 
 	/// Returns true if any the operators are [ApprovalState::Pending].
@@ -468,27 +469,14 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId> {
 	pub owner: AccountId,
 	/// The Permitted caller(s) of the service.
 	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
-	/// The Selected operators(s) for this service.
-	pub operators: BoundedVec<AccountId, C::MaxOperatorsPerService>,
+	/// The Selected operators(s) for this service with their restaking Percentage.
+	// This a Vec instead of a BTreeMap because the number of operators is expected to be small (smaller than 512)
+	// and the overhead of a BTreeMap is not worth it, plus BoundedBTreeMap is not serde compatible.
+	pub operators: BoundedVec<(AccountId, Percent), C::MaxOperatorsPerService>,
 	/// Asset(s) used to secure the service instance.
 	pub assets: BoundedVec<AssetId, C::MaxAssetsPerService>,
 	/// The Lifetime of the service.
 	pub ttl: BlockNumber,
-}
-
-/// Operator's Approval Prefrence.
-#[derive(
-	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
-)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum ApprovalPreference {
-	/// No approval is required to provide the service.
-	#[codec(index = 0)]
-	#[default]
-	None,
-	/// The approval is required to provide the service.
-	#[codec(index = 1)]
-	Required,
 }
 
 #[derive(
@@ -502,7 +490,10 @@ pub enum ApprovalState {
 	Pending,
 	/// The operator is approved to provide the service.
 	#[codec(index = 1)]
-	Approved,
+	Approved {
+		/// The restaking percentage of the operator.
+		restaking_percent: Percent,
+	},
 	/// The operator is rejected to provide the service.
 	#[codec(index = 2)]
 	Rejected,
@@ -532,8 +523,6 @@ pub struct PriceTargets {
 pub struct OperatorPreferences {
 	/// The operator ECDSA public key.
 	pub key: ecdsa::Public,
-	/// The approval prefrence of the operator.
-	pub approval: ApprovalPreference,
 	/// The pricing targets for the operator's resources.
 	pub price_targets: PriceTargets,
 }
@@ -541,10 +530,7 @@ pub struct OperatorPreferences {
 impl OperatorPreferences {
 	/// Encode the fields to ethabi bytes.
 	pub fn to_ethabi(&self) -> Vec<ethabi::Token> {
-		let tokens: Vec<ethabi::Token> = vec![
-			ethabi::Token::Bytes(self.key.0.to_vec()),
-			// TODO: Add ApprovalPreference to ethabi.
-		];
+		let tokens: Vec<ethabi::Token> = vec![ethabi::Token::Bytes(self.key.0.to_vec())];
 		tokens
 	}
 }
