@@ -618,7 +618,7 @@ pub mod module {
 				.map_err(Error::<T>::TypeCheck)?;
 
 			let (allowed, _weight) =
-				Self::check_registeration_hook(&blueprint, &preferences, &registration_args)?;
+				Self::on_register_hook(&blueprint, &preferences, &registration_args)?;
 
 			ensure!(allowed, Error::<T>::InvalidRegistrationInput);
 
@@ -740,7 +740,7 @@ pub mod module {
 
 			let service_id = Self::next_instance_id();
 			let (allowed, _weight) =
-				Self::check_request_hook(&blueprint, service_id, &preferences, &request_args)?;
+				Self::on_request_hook(&blueprint, service_id, &preferences, &request_args)?;
 
 			ensure!(allowed, Error::<T>::InvalidRequestInput);
 
@@ -986,7 +986,7 @@ pub mod module {
 			let call_id = Self::next_job_call_id();
 
 			let (allowed, _weight) =
-				Self::check_job_call_hook(&blueprint, service_id, job, call_id, &args)?;
+				Self::on_job_call_hook(&blueprint, service_id, job, call_id, &args)?;
 
 			ensure!(allowed, Error::<T>::InvalidJobCallInput);
 
@@ -1031,7 +1031,7 @@ pub mod module {
 			let job_result = JobCallResult { service_id, call_id, result: bounded_result };
 			job_result.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
 
-			let (allowed, _weight) = Self::check_job_call_result_hook(
+			let (allowed, _weight) = Self::on_job_result_hook(
 				job_def,
 				service_id,
 				job_call.job,
