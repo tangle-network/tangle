@@ -11,19 +11,29 @@ use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use sp_core::{H160, U256};
 use sp_runtime::traits::{AccountIdConversion, UniqueSaturatedInto};
 use tangle_primitives::services::{
-	Field, JobDefinition, JobResultVerifier, OperatorPreferences, ServiceBlueprint,
-	ServiceRegistrationHook, ServiceRequestHook,
+	BlueprintManager, Field, OperatorPreferences, Service, ServiceBlueprint,
 };
 
 use super::*;
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account id of the pallet.
+	///
+	/// This function retrieves the account id associated with the pallet by converting
+	/// the pallet id into an account id.
+	///
+	/// # Returns
+	/// * `T::AccountId` - The account id of the pallet.
 	pub fn account_id() -> T::AccountId {
 		T::PalletId::get().into_account_truncating()
 	}
 
 	/// Returns the address of the pallet.
+	///
+	/// This function converts the account id of the pallet to a 20-byte H160 address.
+	///
+	/// # Returns
+	/// * `H160` - The address of the pallet.
 	pub fn address() -> H160 {
 		// Convert the account id to bytes.
 		let account_id = Self::account_id().encode();
@@ -31,14 +41,26 @@ impl<T: Config> Pallet<T> {
 		H160::from_slice(&account_id[0..20])
 	}
 
-	pub fn check_registeration_hook(
+	/// Hook to be called upon a new operator registration on a blueprint.
+	///
+	/// This function is called when a service is registered. It performs an EVM call
+	/// to the `onRegister` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `prefrences` - The operator preferences.
+	/// * `registration_args` - The registration arguments.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///   whether the registration is allowed and the weight of the operation.
+	pub fn on_register_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		prefrences: &OperatorPreferences,
 		registration_args: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
-		let (allowed, weight) = match blueprint.registration_hook {
-			ServiceRegistrationHook::None => (true, Weight::zero()),
-			ServiceRegistrationHook::Evm(contract) => {
+		let (allowed, weight) = match blueprint.manager {
+			BlueprintManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onRegister"),
@@ -71,19 +93,33 @@ impl<T: Config> Pallet<T> {
 					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
 				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
+			_ => (true, Weight::zero()),
 		};
 		Ok((allowed, weight))
 	}
 
-	pub fn check_request_hook(
+	/// Hook to be called upon new service request.
+	///
+	/// This function is called when a service request is made. It performs an EVM call
+	/// to the `onRequest` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `service_id` - The service ID.
+	/// * `operators` - The operator preferences.
+	/// * `request_args` - The request arguments.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///   whether the request is allowed and the weight of the operation.
+	pub fn on_request_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		service_id: u64,
-		participants: &[OperatorPreferences],
+		operators: &[OperatorPreferences],
 		request_args: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
-		let (allowed, weight) = match blueprint.request_hook {
-			ServiceRequestHook::None => (true, Weight::zero()),
-			ServiceRequestHook::Evm(contract) => {
+		let (allowed, weight) = match blueprint.manager {
+			BlueprintManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onRequest"),
@@ -94,7 +130,7 @@ impl<T: Config> Pallet<T> {
 							internal_type: None,
 						},
 						ethabi::Param {
-							name: String::from("participants"),
+							name: String::from("operators"),
 							kind: ethabi::ParamType::Array(Box::new(ethabi::ParamType::Bytes)),
 							internal_type: None,
 						},
@@ -109,12 +145,12 @@ impl<T: Config> Pallet<T> {
 					state_mutability: ethabi::StateMutability::Payable,
 				};
 				let service_id = Token::Uint(ethabi::Uint::from(service_id));
-				let participants = Token::Array(
-					participants.iter().flat_map(OperatorPreferences::to_ethabi).collect(),
+				let operators = Token::Array(
+					operators.iter().flat_map(OperatorPreferences::to_ethabi).collect(),
 				);
 				let request_args = Token::Bytes(Field::encode_to_ethabi(request_args));
 				let data = call
-					.encode_input(&[service_id, participants, request_args])
+					.encode_input(&[service_id, operators, request_args])
 					.map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 
@@ -122,21 +158,36 @@ impl<T: Config> Pallet<T> {
 					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
 				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
+			_ => (true, Weight::zero()),
 		};
 
 		Ok((allowed, weight))
 	}
 
-	pub fn check_job_call_hook(
+	/// Hook to be called upon job call.
+	///
+	/// This function is called when a job call is made. It performs an EVM call
+	/// to the `onJobCall` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `service_id` - The service ID.
+	/// * `job` - The job index.
+	/// * `job_call_id` - The job call ID.
+	/// * `inputs` - The input fields.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///   whether the job call is allowed and the weight of the operation.
+	pub fn on_job_call_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		service_id: u64,
 		job: u8,
 		job_call_id: u64,
 		inputs: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
-		let (allowed, weight) = match blueprint.request_hook {
-			ServiceRequestHook::None => (true, Weight::zero()),
-			ServiceRequestHook::Evm(contract) => {
+		let (allowed, weight) = match blueprint.manager {
+			BlueprintManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onJobCall"),
@@ -179,12 +230,30 @@ impl<T: Config> Pallet<T> {
 					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
 				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
+			_ => (true, Weight::zero()),
 		};
 		Ok((allowed, weight))
 	}
 
-	pub fn check_job_call_result_hook(
-		job_def: &JobDefinition<T::Constraints>,
+	/// Hook to be called upon job result.
+	///
+	/// This function is called when a job result is submitted. It performs an EVM call
+	/// to the `onJobResult` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `service_id` - The service ID.
+	/// * `job` - The job index.
+	/// * `job_call_id` - The job call ID.
+	/// * `prefrences` - The operator preferences.
+	/// * `inputs` - The input fields.
+	/// * `outputs` - The output fields.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///   whether the job result is allowed and the weight of the operation.
+	pub fn on_job_result_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		service_id: u64,
 		job: u8,
 		job_call_id: u64,
@@ -192,12 +261,11 @@ impl<T: Config> Pallet<T> {
 		inputs: &[Field<T::Constraints, T::AccountId>],
 		outputs: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
-		let (allowed, weight) = match job_def.verifier {
-			JobResultVerifier::None => (true, Weight::zero()),
-			JobResultVerifier::Evm(contract) => {
+		let (allowed, weight) = match blueprint.manager {
+			BlueprintManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
-					name: String::from("onJobCallResult"),
+					name: String::from("onJobResult"),
 					inputs: vec![
 						ethabi::Param {
 							name: String::from("serviceId"),
@@ -215,7 +283,7 @@ impl<T: Config> Pallet<T> {
 							internal_type: None,
 						},
 						ethabi::Param {
-							name: String::from("participant"),
+							name: String::from("operator"),
 							kind: ethabi::ParamType::Bytes,
 							internal_type: None,
 						},
@@ -237,11 +305,11 @@ impl<T: Config> Pallet<T> {
 				let service_id = Token::Uint(ethabi::Uint::from(service_id));
 				let job = Token::Uint(ethabi::Uint::from(job));
 				let job_call_id = Token::Uint(ethabi::Uint::from(job_call_id));
-				let participant = prefrences.to_ethabi().first().unwrap().clone();
+				let operator = prefrences.to_ethabi().first().unwrap().clone();
 				let inputs = Token::Bytes(Field::encode_to_ethabi(inputs));
 				let outputs = Token::Bytes(Field::encode_to_ethabi(outputs));
 				let data = call
-					.encode_input(&[service_id, job, job_call_id, participant, inputs, outputs])
+					.encode_input(&[service_id, job, job_call_id, operator, inputs, outputs])
 					.map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 
@@ -249,97 +317,134 @@ impl<T: Config> Pallet<T> {
 					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
 				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
+			_ => (true, Weight::zero()),
 		};
 		Ok((allowed, weight))
 	}
 
-	pub fn verify_job_call_result_hook(
-		job_def: &JobDefinition<T::Constraints>,
-		service_id: u64,
-		job: u8,
-		job_call_id: u64,
-		prefrences: &OperatorPreferences,
-		inputs: &[Field<T::Constraints, T::AccountId>],
-		outputs: &[Field<T::Constraints, T::AccountId>],
-	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
-		let (allowed, weight) = match job_def.verifier {
-			JobResultVerifier::None => (true, Weight::zero()),
-			JobResultVerifier::Evm(contract) => {
-				#[allow(deprecated)]
-				let call = ethabi::Function {
-					name: String::from("verifyJobCallResult"),
-					inputs: vec![
-						ethabi::Param {
-							name: String::from("serviceId"),
-							kind: ethabi::ParamType::Uint(64),
-							internal_type: None,
-						},
-						ethabi::Param {
-							name: String::from("jobIndex"),
-							kind: ethabi::ParamType::Uint(8),
-							internal_type: None,
-						},
-						ethabi::Param {
-							name: String::from("jobCallId"),
-							kind: ethabi::ParamType::Uint(64),
-							internal_type: None,
-						},
-						ethabi::Param {
-							name: String::from("participant"),
-							kind: ethabi::ParamType::Bytes,
-							internal_type: None,
-						},
-						ethabi::Param {
-							name: String::from("inputs"),
-							kind: ethabi::ParamType::Bytes,
-							internal_type: None,
-						},
-						ethabi::Param {
-							name: String::from("outputs"),
-							kind: ethabi::ParamType::Bytes,
-							internal_type: None,
-						},
-					],
-					outputs: vec![ethabi::Param {
-						name: String::from("allowed"),
-						kind: ethabi::ParamType::Bool,
-						internal_type: None,
-					}],
-					constant: None,
-					state_mutability: ethabi::StateMutability::NonPayable,
-				};
-				let service_id = Token::Uint(ethabi::Uint::from(service_id));
-				let job = Token::Uint(ethabi::Uint::from(job));
-				let job_call_id = Token::Uint(ethabi::Uint::from(job_call_id));
-				let participant = prefrences.to_ethabi().first().unwrap().clone();
-				let inputs = Token::Bytes(Field::encode_to_ethabi(inputs));
-				let outputs = Token::Bytes(Field::encode_to_ethabi(outputs));
-				let data = call
-					.encode_input(&[service_id, job, job_call_id, participant, inputs, outputs])
-					.map_err(|_| Error::<T>::EVMAbiEncode)?;
-				let gas_limit = 300_000;
-
-				let info =
-					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
-				// decode the result
-				let allowed = match info.exit_reason.is_succeed().then_some(&info.value) {
-					Some(data) => {
-						let result =
-							call.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-						let allowed = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
-						match allowed {
-							Token::Bool(allowed) => *allowed,
-							_ => return Err(Error::<T>::EVMAbiDecode.into()),
-						}
-					},
-					None => false,
-				};
-				(allowed, Self::weight_from_call_info(&info))
-			},
+	/// Queries the slashing origin of a service.
+	///
+	/// This function performs an EVM call to the `querySlashingOrigin` function of the
+	/// service blueprint's manager contract to retrieve the slashing origin.
+	///
+	/// # Parameters
+	/// * `service` - The service.
+	///
+	/// # Returns
+	/// * `Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo>` - A tuple containing the
+	///   slashing origin account id (if any) and the weight of the operation.
+	pub fn query_slashing_origin(
+		service: &Service<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>,
+	) -> Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo> {
+		let (_, blueprint) = Self::blueprints(service.blueprint)?;
+		#[allow(deprecated)]
+		let query_call = ethabi::Function {
+			name: String::from("querySlashingOrigin"),
+			inputs: vec![ethabi::Param {
+				name: String::from("serviceId"),
+				kind: ethabi::ParamType::Uint(64),
+				internal_type: None,
+			}],
+			outputs: vec![ethabi::Param {
+				name: String::from("slashingOrigin"),
+				kind: ethabi::ParamType::Address,
+				internal_type: None,
+			}],
+			constant: None,
+			state_mutability: ethabi::StateMutability::NonPayable,
 		};
-		Ok((allowed, weight))
+		let service_id_tok = ethabi::Token::Uint(ethabi::Uint::from(service.id));
+		let blueprint_manager =
+			blueprint.manager.try_into_evm().map_err(|_| Error::<T>::EVMAbiEncode)?;
+		let info = Self::evm_call(
+			Self::address(),
+			blueprint_manager,
+			U256::from(0),
+			query_call
+				.encode_input(&[service_id_tok])
+				.map_err(|_| Error::<T>::EVMAbiEncode)?,
+			300_000,
+		)?;
+
+		// decode the result and return it
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		let slashing_origin = if let Some(data) = maybe_value {
+			let result = query_call.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+			let slashing_origin = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			if let ethabi::Token::Address(who) = slashing_origin {
+				Some(T::EvmAddressMapping::into_account_id(*who))
+			} else {
+				None
+			}
+		} else {
+			None
+		};
+
+		Ok((slashing_origin, Self::weight_from_call_info(&info)))
 	}
 
+	/// Queries the dispute origin of a service.
+	///
+	/// This function performs an EVM call to the `queryDisputeOrigin` function of the
+	/// service blueprint's manager contract to retrieve the dispute origin.
+	///
+	/// # Parameters
+	/// * `service` - The service.
+	///
+	/// # Returns
+	/// * `Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo>` - A tuple containing the
+	///   dispute origin account id (if any) and the weight of the operation.
+	pub fn query_dispute_origin(
+		service: &Service<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>,
+	) -> Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo> {
+		let (_, blueprint) = Self::blueprints(service.blueprint)?;
+		#[allow(deprecated)]
+		let query_call = ethabi::Function {
+			name: String::from("queryDisputeOrigin"),
+			inputs: vec![ethabi::Param {
+				name: String::from("serviceId"),
+				kind: ethabi::ParamType::Uint(64),
+				internal_type: None,
+			}],
+			outputs: vec![ethabi::Param {
+				name: String::from("disputeOrigin"),
+				kind: ethabi::ParamType::Address,
+				internal_type: None,
+			}],
+			constant: None,
+			state_mutability: ethabi::StateMutability::NonPayable,
+		};
+		let service_id_tok = ethabi::Token::Uint(ethabi::Uint::from(service.id));
+		let blueprint_manager =
+			blueprint.manager.try_into_evm().map_err(|_| Error::<T>::EVMAbiEncode)?;
+		let info = Self::evm_call(
+			Self::address(),
+			blueprint_manager,
+			U256::from(0),
+			query_call
+				.encode_input(&[service_id_tok])
+				.map_err(|_| Error::<T>::EVMAbiEncode)?,
+			300_000,
+		)?;
+
+		// decode the result and return it
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		let dispute_origin = if let Some(data) = maybe_value {
+			let result = query_call.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+			let slashing_origin = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			if let ethabi::Token::Address(who) = slashing_origin {
+				Some(T::EvmAddressMapping::into_account_id(*who))
+			} else {
+				None
+			}
+		} else {
+			None
+		};
+
+		Ok((dispute_origin, Self::weight_from_call_info(&info)))
+	}
+
+	/// Dispatches a call to the EVM and returns the result.
 	pub fn evm_call(
 		from: H160,
 		to: H160,

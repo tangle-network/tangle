@@ -29,7 +29,7 @@ use frame_support::{
 };
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
-use pallet_services::EvmGasWeightMapping;
+use pallet_services::{EvmAddressMapping, EvmGasWeightMapping};
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
@@ -228,6 +228,15 @@ impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
 	}
 }
 
+pub struct PalletEVMAddressMapping;
+
+impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
+	fn into_account_id(address: H160) -> AccountId {
+		use pallet_evm::AddressMapping;
+		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
+	}
+}
+
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 ];
@@ -368,6 +377,12 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 	) -> Balance {
 		Default::default()
 	}
+
+	fn get_delegators_for_operator(
+		_operator: &AccountId,
+	) -> Vec<(AccountId, Balance, Self::AssetId)> {
+		Default::default()
+	}
 }
 
 parameter_types! {
@@ -450,6 +465,10 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxAssetsPerService: u32 = 164;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const SlashDeferDuration: u32 = 7;
 }
 
 impl pallet_services::Config for Runtime {
@@ -459,6 +478,7 @@ impl pallet_services::Config for Runtime {
 	type AssetId = AssetId;
 	type PalletId = ServicesPalletId;
 	type EvmRunner = MockedEvmRunner;
+	type EvmAddressMapping = PalletEVMAddressMapping;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type MaxFields = MaxFields;
 	type MaxFieldsSize = MaxFieldsSize;
@@ -482,6 +502,8 @@ impl pallet_services::Config for Runtime {
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MockDelegationManager;
+	type SlashDeferDuration = SlashDeferDuration;
+	type SlashOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = ();
 }
 

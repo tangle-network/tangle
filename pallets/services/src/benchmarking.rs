@@ -18,11 +18,7 @@ fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
 }
 
 fn operator_preferences<T: Config>() -> OperatorPreferences {
-	OperatorPreferences {
-		key: zero_key(),
-		approval: ApprovalPreference::default(),
-		price_targets: Default::default(),
-	}
+	OperatorPreferences { key: zero_key(), price_targets: Default::default() }
 }
 
 fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<T::Constraints> {
@@ -92,20 +88,6 @@ benchmarks! {
 
 	}: _(RawOrigin::Signed(bob.clone()), 0)
 
-
-	update_approval_preference {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
-
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
-
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
-
-	}: _(RawOrigin::Signed(bob.clone()), 0, ApprovalPreference::Required)
-
-
 	update_price_targets {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
@@ -162,8 +144,6 @@ benchmarks! {
 			Default::default()
 		);
 
-		let operator_preference = OperatorPreferences { approval: ApprovalPreference::Required, ..operator_preference };
-
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
 		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
 
@@ -180,7 +160,7 @@ benchmarks! {
 			Default::default()
 		);
 
-	}: _(RawOrigin::Signed(charlie.clone()), 0)
+	}: _(RawOrigin::Signed(charlie.clone()), 0, Percent::from_percent(25))
 
 
 	reject {
@@ -196,8 +176,6 @@ benchmarks! {
 			operator_preference,
 			Default::default()
 		);
-
-		let operator_preference = OperatorPreferences { approval: ApprovalPreference::Required, ..operator_preference };
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
 		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());

@@ -79,6 +79,8 @@ pallet-staking = { workspace = true }
 sp-staking = { workspace = true }
 frame-election-provider-support = { workspace = true }
 
+ethabi = { workspace = true }
+
 [features]
 default = ["std"]
 std = [

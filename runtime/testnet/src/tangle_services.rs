@@ -57,6 +57,15 @@ impl pallet_services::EvmGasWeightMapping for PalletEVMGasWeightMapping {
 	}
 }
 
+pub struct PalletEVMAddressMapping;
+
+impl pallet_services::EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
+	fn into_account_id(address: H160) -> AccountId {
+		use pallet_evm::AddressMapping;
+		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
+	}
+}
+
 parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxFields: u32 = 256;
@@ -117,6 +126,9 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxAssetsPerService: u32 = 64;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const SlashDeferDuration: u32 = 7;
 }
 
 pub type PalletServicesConstraints = pallet_services::types::ConstraintsOf<Runtime>;
@@ -128,6 +140,7 @@ impl pallet_services::Config for Runtime {
 	type PalletId = ServicesPalletId;
 	type EvmRunner = PalletEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
+	type EvmAddressMapping = PalletEVMAddressMapping;
 	type AssetId = AssetId;
 	type MaxFields = MaxFields;
 	type MaxFieldsSize = MaxFieldsSize;
@@ -150,6 +163,8 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type Constraints = PalletServicesConstraints;
+	type SlashDeferDuration = SlashDeferDuration;
+	type SlashOrigin = EnsureRootOrHalfCouncil;
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
 	#[cfg(feature = "runtime-benchmarks")]
