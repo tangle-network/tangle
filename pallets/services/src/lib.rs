@@ -1115,10 +1115,10 @@ pub mod module {
 			let operator_is_active = T::OperatorDelegationManager::is_operator_active(&offender);
 			ensure!(operator_is_active, Error::<T>::OffenderNotActiveOperator);
 
-			let total_own_stake = T::OperatorDelegationManager::get_operator_stake(&operator);
+			let total_own_stake = T::OperatorDelegationManager::get_operator_stake(operator);
 			// Only take the exposed restake percentage for this service.
 			let own_stake = restake_percent.mul_floor(total_own_stake);
-			let delegators = T::OperatorDelegationManager::get_delegators_for_operator(&operator);
+			let delegators = T::OperatorDelegationManager::get_delegators_for_operator(operator);
 			let exposed_stake = percent.mul_floor(own_stake);
 			let others_slash = delegators
 				.into_iter()
