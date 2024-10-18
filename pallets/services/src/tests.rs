@@ -70,8 +70,10 @@ fn price_targets(kind: MachineKind) -> PriceTargets {
 }
 
 fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
+	#[allow(deprecated)]
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
+		manager: BlueprintManager::Evm(CGGMP21_BLUEPRINT),
 		jobs: bounded_vec![
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
@@ -83,6 +85,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint64, FieldType::Bytes],
 				result: bounded_vec![FieldType::Bytes],
+				#[allow(deprecated)]
 				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
 			},
 		],
@@ -791,10 +794,25 @@ fn unapplied_slash() {
 			bounded_vec![Field::Bytes(dkg.try_into().unwrap())],
 		));
 
-		// Slash the operator for the invalid result
 		let slash_percent = Percent::from_percent(50);
+		// Try to slash with an invalid origin
+		assert_err!(
+			Services::slash(
+				RuntimeOrigin::signed(eve.clone()),
+				bob.clone(),
+				service_id,
+				slash_percent
+			),
+			DispatchError::BadOrigin
+		);
+
+		let service = Services::services(service_id).unwrap();
+		let slashing_origin =
+			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+
+		// Slash the operator for the invalid result
 		assert_ok!(Services::slash(
-			RuntimeOrigin::signed(eve.clone()),
+			RuntimeOrigin::signed(slashing_origin.clone()),
 			bob.clone(),
 			service_id,
 			slash_percent
@@ -807,6 +825,95 @@ fn unapplied_slash() {
 			(slash_percent * bob_exposed_restake_percentage).mul_floor(bob_slash);
 
 		assert_events(vec![RuntimeEvent::Services(crate::Event::UnappliedSlash {
+			era: 0,
+			index: 0,
+			operator: bob.clone(),
+			blueprint_id,
+			service_id,
+			amount: expected_slash_amount,
+		})]);
+	});
+}
+
+#[test]
+fn dispute() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		let blueprint_id = Services::next_blueprint_id();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		let bob = mock_pub_key(BOB);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			blueprint_id,
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			Default::default(),
+		));
+
+		let eve = mock_pub_key(EVE);
+		let service_id = Services::next_instance_id();
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			blueprint_id,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![WETH],
+			100,
+		));
+
+		let bob_exposed_restake_percentage = Percent::from_percent(10);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			bob_exposed_restake_percentage,
+		));
+
+		assert!(Instances::<Runtime>::contains_key(service_id));
+		let slash_percent = Percent::from_percent(50);
+		let service = Services::services(service_id).unwrap();
+		let slashing_origin =
+			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+
+		// Slash the operator for the invalid result
+		assert_ok!(Services::slash(
+			RuntimeOrigin::signed(slashing_origin.clone()),
+			bob.clone(),
+			service_id,
+			slash_percent
+		));
+
+		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		let era = 0;
+		let slash_index = 0;
+
+		// Try to dispute with an invalid origin
+		assert_err!(
+			Services::dispute(RuntimeOrigin::signed(eve.clone()), era, slash_index),
+			DispatchError::BadOrigin
+		);
+
+		// Dispute the slash
+		let dispute_origin =
+			Services::query_dispute_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+
+		assert_ok!(Services::dispute(
+			RuntimeOrigin::signed(dispute_origin.clone()),
+			era,
+			slash_index
+		));
+
+		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+
+		let bob_slash = <Runtime as Config>::OperatorDelegationManager::get_operator_stake(&bob);
+		let expected_slash_amount =
+			(slash_percent * bob_exposed_restake_percentage).mul_floor(bob_slash);
+
+		assert_events(vec![RuntimeEvent::Services(crate::Event::SlashDiscarded {
+			era: 0,
+			index: 0,
 			operator: bob.clone(),
 			blueprint_id,
 			service_id,

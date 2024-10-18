@@ -5,7 +5,7 @@ use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
 use pallet_evm::AddressMapping;
 use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
-use sp_core::{H160, U256};
+use sp_core::U256;
 use sp_runtime::traits::Dispatchable;
 use sp_runtime::Percent;
 use sp_std::{marker::PhantomData, vec::Vec};
@@ -278,68 +278,24 @@ where
 		let offender: Runtime::AccountId = Decode::decode(&mut &offender_bytes[..])
 			.map_err(|_| revert("Invalid offender account id"))?;
 
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost() * 2)?;
-
-		let service = pallet_services::Pallet::<Runtime>::services(service_id)
-			.map_err(|_| revert("Service not found"))?;
-
-		let (_, blueprint) = pallet_services::Pallet::<Runtime>::blueprints(service.blueprint)
-			.map_err(|_| revert("Blueprint not found"))?;
-		// TODO(@shekohex): get the slashing origin from the blueprint struct
-		// let blueprint_manager = blueprint.manager;
-		let blueprint_manager = H160::from([0u8; 20]);
-
-		#[allow(deprecated)]
-		let query_call = ethabi::Function {
-			name: String::from("querySlashingOrigin"),
-			inputs: vec![ethabi::Param {
-				name: String::from("serviceId"),
-				kind: ethabi::ParamType::Uint(64),
-				internal_type: None,
-			}],
-			outputs: vec![ethabi::Param {
-				name: String::from("slashingOrigin"),
-				kind: ethabi::ParamType::Address,
-				internal_type: None,
-			}],
-			constant: None,
-			state_mutability: ethabi::StateMutability::NonPayable,
-		};
-		let service_id_tok = ethabi::Token::Uint(ethabi::Uint::from(service_id));
-		let data = query_call
-			.encode_input(&[service_id_tok])
-			.map_err(|_| revert("Failed to encode query call"))?;
-		let ctx = handle.context().clone();
-		let (reason, out) = handle.call(
-			blueprint_manager, // to
-			None,              // value
-			data,              // input
-			None,              // gas_limit
-			false,             // static?
-			&ctx,              // same context
-		);
-
-		// decode the result and check if the slashing is allowed
-		let allowed = match reason.is_succeed().then_some(&out) {
-			Some(data) => {
-				let result = query_call
-					.decode_output(data)
-					.map_err(|_| revert("Failed to decode query result"))?;
-				let slashing_origin = result.first().ok_or_else(|| revert("No result returned"))?;
-				match slashing_origin {
-					ethabi::Token::Address(who) if who == &caller => true,
-					_ => false,
-				}
-			},
-			None => false,
-		};
-
-		if !allowed {
-			revert("Unauthorized to slash for this service");
-		}
-
+		// inside this call, we do check if the caller is authorized to slash the offender
 		let call = pallet_services::Call::<Runtime>::slash { offender, service_id, percent };
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
+		Ok(())
+	}
+
+	/// Dispute an Unapplied Slash for a service id.
+	///
+	/// The caller needs to be an authorized Dispute Origin for this service.
+	#[precompile::public("dispute(uint32,uint32)")]
+	fn dispute(handle: &mut impl PrecompileHandle, era: u32, index: u32) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let caller = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(caller);
+
+		// inside this call, we do check if the caller is authorized to dispute the slash
+		let call = pallet_services::Call::<Runtime>::dispute { era, index };
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())

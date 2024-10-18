@@ -29,7 +29,7 @@ use frame_support::{
 };
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
-use pallet_services::EvmGasWeightMapping;
+use pallet_services::{EvmAddressMapping, EvmGasWeightMapping};
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
@@ -225,6 +225,15 @@ impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
 
 	fn weight_to_gas(weight: Weight) -> u64 {
 		pallet_evm::FixedGasWeightMapping::<Runtime>::weight_to_gas(weight)
+	}
+}
+
+pub struct PalletEVMAddressMapping;
+
+impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
+	fn into_account_id(address: H160) -> AccountId {
+		use pallet_evm::AddressMapping;
+		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
 	}
 }
 
@@ -469,6 +478,7 @@ impl pallet_services::Config for Runtime {
 	type AssetId = AssetId;
 	type PalletId = ServicesPalletId;
 	type EvmRunner = MockedEvmRunner;
+	type EvmAddressMapping = PalletEVMAddressMapping;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type MaxFields = MaxFields;
 	type MaxFieldsSize = MaxFieldsSize;

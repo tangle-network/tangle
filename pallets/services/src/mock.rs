@@ -219,6 +219,15 @@ impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
 	}
 }
 
+pub struct PalletEVMAddressMapping;
+
+impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
+	fn into_account_id(address: H160) -> AccountId {
+		use pallet_evm::AddressMapping;
+		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
+	}
+}
+
 pub type AssetId = u32;
 
 pub struct MockDelegationManager;
@@ -359,6 +368,7 @@ impl Config for Runtime {
 	type AssetId = AssetId;
 	type EvmRunner = MockedEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
+	type EvmAddressMapping = PalletEVMAddressMapping;
 	type MaxFields = MaxFields;
 	type MaxFieldsSize = MaxFieldsSize;
 	type MaxMetadataLength = MaxMetadataLength;

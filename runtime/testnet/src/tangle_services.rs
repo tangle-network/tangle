@@ -57,6 +57,15 @@ impl pallet_services::EvmGasWeightMapping for PalletEVMGasWeightMapping {
 	}
 }
 
+pub struct PalletEVMAddressMapping;
+
+impl pallet_services::EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
+	fn into_account_id(address: H160) -> AccountId {
+		use pallet_evm::AddressMapping;
+		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
+	}
+}
+
 parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxFields: u32 = 256;
@@ -131,6 +140,7 @@ impl pallet_services::Config for Runtime {
 	type PalletId = ServicesPalletId;
 	type EvmRunner = PalletEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
+	type EvmAddressMapping = PalletEVMAddressMapping;
 	type AssetId = AssetId;
 	type MaxFields = MaxFields;
 	type MaxFieldsSize = MaxFieldsSize;

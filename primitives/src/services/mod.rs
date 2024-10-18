@@ -109,6 +109,7 @@ pub struct JobDefinition<C: Constraints> {
 	/// i.e. the output.
 	pub result: BoundedVec<FieldType, C::MaxFields>,
 	/// The verifier of the job result.
+	#[deprecated(note = "Use `blueprint.manager` instead.")]
 	pub verifier: JobResultVerifier,
 }
 
@@ -300,6 +301,29 @@ pub enum ServiceRequestHook {
 	Evm(sp_core::H160),
 }
 
+/// Service Blueprint Manager is a smart contract that will manage the service lifecycle.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[non_exhaustive]
+pub enum BlueprintManager {
+	/// A Smart contract that will manage the service lifecycle.
+	Evm(sp_core::H160),
+}
+
+impl BlueprintManager {
+	pub fn try_into_evm(self) -> Result<sp_core::H160, Self> {
+		match self {
+			Self::Evm(addr) => Ok(addr),
+		}
+	}
+}
+
+impl Default for BlueprintManager {
+	fn default() -> Self {
+		Self::Evm(Default::default())
+	}
+}
+
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[educe(Default(bound()), Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
 #[scale_info(skip_type_params(C))]
@@ -344,13 +368,17 @@ pub struct ServiceBlueprint<C: Constraints> {
 	/// The job definitions that are available in this service.
 	pub jobs: BoundedVec<JobDefinition<C>, C::MaxJobsPerService>,
 	/// The registration hook that will be called before restaker registration.
+	#[deprecated(note = "Use `manager` instead.")]
 	pub registration_hook: ServiceRegistrationHook,
 	/// The parameters that are required for the service registration.
 	pub registration_params: BoundedVec<FieldType, C::MaxFields>,
 	/// The request hook that will be called before creating a service from the service blueprint.
+	#[deprecated(note = "Use `manager` instead.")]
 	pub request_hook: ServiceRequestHook,
 	/// The parameters that are required for the service request.
 	pub request_params: BoundedVec<FieldType, C::MaxFields>,
+	/// A Blueprint Manager is a smart contract that implements the `BlueprintManager` interface.
+	pub manager: BlueprintManager,
 	/// The gadget that will be executed for the service.
 	pub gadget: Gadget<C>,
 }

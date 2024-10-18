@@ -57,4 +57,21 @@ interface ServicesPrecompile {
     /// @param call_id The ID of the call
     /// @param result_data The result data encoded as bytes
     function submitResult(uint256 service_id, uint256 call_id, bytes calldata result_data) external;
+
+    /// @notice Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+    ///
+    /// The caller needs to be an authorized Slash Origin for this service.
+    /// Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
+    /// by another entity.
+    /// @param offender The operator to be slashed encoded as bytes
+    /// @param service_id The ID of the service to slash for
+    /// @param percent The percent of the offender's exposed stake to slash
+    function slash(bytes calldata offender, uint256 service_id, uint8 percent) external;
+
+    /// @notice Dispute an Unapplied Slash for a service id.
+    ///
+    /// The caller needs to be an authorized Dispute Origin for this service.
+    /// @param era The era of the unapplied slash.
+    /// @param slash_index The index of the unapplied slash in the era.
+    function dispute(uint32 era, uint32 slash_index) external;
 }
