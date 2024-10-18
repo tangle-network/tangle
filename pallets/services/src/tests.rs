@@ -70,8 +70,10 @@ fn price_targets(kind: MachineKind) -> PriceTargets {
 }
 
 fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
+	#[allow(deprecated)]
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
+		manager: BlueprintManager::Evm(CGGMP21_BLUEPRINT),
 		jobs: bounded_vec![
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
@@ -83,6 +85,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint64, FieldType::Bytes],
 				result: bounded_vec![FieldType::Bytes],
+				#[allow(deprecated)]
 				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
 			},
 		],
@@ -736,43 +739,60 @@ fn job_result() {
 	});
 }
 
+struct Deployment {
+	blueprint_id: u64,
+	service_id: u64,
+	bob_exposed_restake_percentage: Percent,
+}
+
+/// A Helper function that creates a blueprint and service instance
+fn deploy() -> Deployment {
+	let alice = mock_pub_key(ALICE);
+	let blueprint = cggmp21_blueprint();
+	let blueprint_id = Services::next_blueprint_id();
+	assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+	let bob = mock_pub_key(BOB);
+	assert_ok!(Services::register(
+		RuntimeOrigin::signed(bob.clone()),
+		blueprint_id,
+		OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+		Default::default(),
+	));
+
+	let eve = mock_pub_key(EVE);
+	let service_id = Services::next_instance_id();
+	assert_ok!(Services::request(
+		RuntimeOrigin::signed(eve.clone()),
+		blueprint_id,
+		vec![alice.clone()],
+		vec![bob.clone()],
+		Default::default(),
+		vec![WETH],
+		100,
+	));
+
+	assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+	let bob_exposed_restake_percentage = Percent::from_percent(10);
+	assert_ok!(Services::approve(
+		RuntimeOrigin::signed(bob.clone()),
+		service_id,
+		bob_exposed_restake_percentage,
+	));
+
+	assert!(Instances::<Runtime>::contains_key(service_id));
+
+	Deployment { blueprint_id, service_id, bob_exposed_restake_percentage }
+}
+
 #[test]
 fn unapplied_slash() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let alice = mock_pub_key(ALICE);
-		let blueprint = cggmp21_blueprint();
-		let blueprint_id = Services::next_blueprint_id();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			blueprint_id,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
-			Default::default(),
-		));
-
+		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
 		let eve = mock_pub_key(EVE);
-		let service_id = Services::next_instance_id();
-		assert_ok!(Services::request(
-			RuntimeOrigin::signed(eve.clone()),
-			blueprint_id,
-			vec![alice.clone()],
-			vec![bob.clone()],
-			Default::default(),
-			vec![WETH],
-			100,
-		));
-
-		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
-		let bob_exposed_restake_percentage = Percent::from_percent(10);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			service_id,
-			bob_exposed_restake_percentage,
-		));
-
-		assert!(Instances::<Runtime>::contains_key(service_id));
+		let bob = mock_pub_key(BOB);
 		// now we can call the jobs
 		let job_call_id = Services::next_job_call_id();
 		assert_ok!(Services::call(
@@ -791,10 +811,14 @@ fn unapplied_slash() {
 			bounded_vec![Field::Bytes(dkg.try_into().unwrap())],
 		));
 
-		// Slash the operator for the invalid result
 		let slash_percent = Percent::from_percent(50);
+		let service = Services::services(service_id).unwrap();
+		let slashing_origin =
+			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+
+		// Slash the operator for the invalid result
 		assert_ok!(Services::slash(
-			RuntimeOrigin::signed(eve.clone()),
+			RuntimeOrigin::signed(slashing_origin.clone()),
 			bob.clone(),
 			service_id,
 			slash_percent
@@ -807,10 +831,176 @@ fn unapplied_slash() {
 			(slash_percent * bob_exposed_restake_percentage).mul_floor(bob_slash);
 
 		assert_events(vec![RuntimeEvent::Services(crate::Event::UnappliedSlash {
+			era: 0,
+			index: 0,
 			operator: bob.clone(),
 			blueprint_id,
 			service_id,
 			amount: expected_slash_amount,
 		})]);
+	});
+}
+
+#[test]
+fn unapplied_slash_with_invalid_origin() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let Deployment { service_id, .. } = deploy();
+		let eve = mock_pub_key(EVE);
+		let bob = mock_pub_key(BOB);
+		let slash_percent = Percent::from_percent(50);
+		// Try to slash with an invalid origin
+		assert_err!(
+			Services::slash(
+				RuntimeOrigin::signed(eve.clone()),
+				bob.clone(),
+				service_id,
+				slash_percent
+			),
+			DispatchError::BadOrigin
+		);
+	});
+}
+
+#[test]
+fn slash_account_not_an_operator() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let Deployment { service_id, .. } = deploy();
+		let karen = mock_pub_key(23);
+
+		let service = Services::services(service_id).unwrap();
+		let slashing_origin =
+			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+		let slash_percent = Percent::from_percent(50);
+		// Try to slash an operator that is not active in this service
+		assert_err!(
+			Services::slash(
+				RuntimeOrigin::signed(slashing_origin.clone()),
+				karen.clone(),
+				service_id,
+				slash_percent
+			),
+			Error::<Runtime>::OffenderNotOperator
+		);
+	});
+}
+
+#[test]
+fn dispute() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let bob = mock_pub_key(BOB);
+		let slash_percent = Percent::from_percent(50);
+		let service = Services::services(service_id).unwrap();
+		let slashing_origin =
+			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+
+		// Slash the operator for the invalid result
+		assert_ok!(Services::slash(
+			RuntimeOrigin::signed(slashing_origin.clone()),
+			bob.clone(),
+			service_id,
+			slash_percent
+		));
+
+		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		let era = 0;
+		let slash_index = 0;
+
+		// Dispute the slash
+		let dispute_origin =
+			Services::query_dispute_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+
+		assert_ok!(Services::dispute(
+			RuntimeOrigin::signed(dispute_origin.clone()),
+			era,
+			slash_index
+		));
+
+		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+
+		let bob_slash = <Runtime as Config>::OperatorDelegationManager::get_operator_stake(&bob);
+		let expected_slash_amount =
+			(slash_percent * bob_exposed_restake_percentage).mul_floor(bob_slash);
+
+		assert_events(vec![RuntimeEvent::Services(crate::Event::SlashDiscarded {
+			era: 0,
+			index: 0,
+			operator: bob.clone(),
+			blueprint_id,
+			service_id,
+			amount: expected_slash_amount,
+		})]);
+	});
+}
+
+#[test]
+fn dispute_with_unauthorized_origin() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let Deployment { service_id, .. } = deploy();
+		let eve = mock_pub_key(EVE);
+		let bob = mock_pub_key(BOB);
+		let slash_percent = Percent::from_percent(50);
+		let service = Services::services(service_id).unwrap();
+		let slashing_origin =
+			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+
+		// Slash the operator for the invalid result
+		assert_ok!(Services::slash(
+			RuntimeOrigin::signed(slashing_origin.clone()),
+			bob.clone(),
+			service_id,
+			slash_percent
+		));
+
+		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		let era = 0;
+		let slash_index = 0;
+
+		// Try to dispute with an invalid origin
+		assert_err!(
+			Services::dispute(RuntimeOrigin::signed(eve.clone()), era, slash_index),
+			DispatchError::BadOrigin
+		);
+	});
+}
+
+#[test]
+fn dispute_an_already_applied_slash() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let Deployment { service_id, .. } = deploy();
+		let eve = mock_pub_key(EVE);
+		let bob = mock_pub_key(BOB);
+		let slash_percent = Percent::from_percent(50);
+		let service = Services::services(service_id).unwrap();
+		let slashing_origin =
+			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+
+		// Slash the operator for the invalid result
+		assert_ok!(Services::slash(
+			RuntimeOrigin::signed(slashing_origin.clone()),
+			bob.clone(),
+			service_id,
+			slash_percent
+		));
+
+		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		let era = 0;
+		let slash_index = 0;
+		// Simulate a slash happening
+		UnappliedSlashes::<Runtime>::remove(era, slash_index);
+
+		// Try to dispute an already applied slash
+		assert_err!(
+			Services::dispute(RuntimeOrigin::signed(eve.clone()), era, slash_index),
+			Error::<Runtime>::UnappliedSlashNotFound
+		);
 	});
 }

@@ -256,4 +256,48 @@ where
 
 		Ok(())
 	}
+
+	/// Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+	///
+	/// The caller needs to be an authorized Slash Origin for this service.
+	/// Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
+	/// by another entity.
+	#[precompile::public("slash(bytes,uint256,uint8)")]
+	fn slash(
+		handle: &mut impl PrecompileHandle,
+		offender: UnboundedBytes,
+		service_id: U256,
+		percent: u8,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let caller = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(caller);
+		let service_id: u64 = service_id.as_u64();
+		let percent: Percent = Percent::from_percent(percent);
+		let offender_bytes: Vec<_> = offender.into();
+		let offender: Runtime::AccountId = Decode::decode(&mut &offender_bytes[..])
+			.map_err(|_| revert("Invalid offender account id"))?;
+
+		// inside this call, we do check if the caller is authorized to slash the offender
+		let call = pallet_services::Call::<Runtime>::slash { offender, service_id, percent };
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	/// Dispute an Unapplied Slash for a service id.
+	///
+	/// The caller needs to be an authorized Dispute Origin for this service.
+	#[precompile::public("dispute(uint32,uint32)")]
+	fn dispute(handle: &mut impl PrecompileHandle, era: u32, index: u32) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let caller = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(caller);
+
+		// inside this call, we do check if the caller is authorized to dispute the slash
+		let call = pallet_services::Call::<Runtime>::dispute { era, index };
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
 }

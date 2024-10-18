@@ -48,6 +48,8 @@ pub struct ConstraintsOf<T>(sp_std::marker::PhantomData<T>);
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
 #[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnappliedSlash<AccountId, Balance: HasCompact> {
+	/// The Service Instance Id on which the slash is applied.
+	pub service_id: u64,
 	/// The account ID of the offending operator.
 	pub operator: AccountId,
 	/// The operator's own slash.

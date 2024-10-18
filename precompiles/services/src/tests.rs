@@ -12,6 +12,7 @@ use sp_core::ecdsa;
 use sp_core::{H160, U256};
 use sp_runtime::bounded_vec;
 use sp_runtime::AccountId32;
+use tangle_primitives::services::BlueprintManager;
 use tangle_primitives::services::FieldType;
 use tangle_primitives::services::JobDefinition;
 use tangle_primitives::services::JobMetadata;
@@ -60,8 +61,10 @@ fn price_targets(kind: MachineKind) -> PriceTargets {
 }
 
 fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
+	#[allow(deprecated)]
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
+		manager: BlueprintManager::Evm(CGGMP21_BLUEPRINT),
 		jobs: bounded_vec![
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
@@ -73,6 +76,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint64, FieldType::Bytes],
 				result: bounded_vec![FieldType::Bytes],
+				#[allow(deprecated)]
 				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
 			},
 		],

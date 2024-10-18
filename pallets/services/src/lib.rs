@@ -88,6 +88,9 @@ pub mod module {
 		/// Substrate weight and vice versa.
 		type EvmGasWeightMapping: traits::EvmGasWeightMapping;
 
+		/// A type that implements the `EvmAddressMapping` trait for the conversion of EVM address
+		type EvmAddressMapping: traits::EvmAddressMapping<Self::AccountId>;
+
 		/// The asset ID type.
 		type AssetId: AtLeast32BitUnsigned
 			+ Parameter
@@ -243,6 +246,12 @@ pub mod module {
 		OffenderNotOperator,
 		/// Offender is not an active operator.
 		OffenderNotActiveOperator,
+		/// The Service Blueprint did not return a slashing origin for this service.
+		NoSlashingOrigin,
+		/// The Service Blueprint did not return a dispute origin for this service.
+		NoDisputeOrigin,
+		/// The Unapplied Slash are not found.
+		UnappliedSlashNotFound,
 	}
 
 	#[pallet::event]
@@ -393,6 +402,8 @@ pub mod module {
 		EvmReverted { from: H160, to: H160, data: Vec<u8>, reason: Vec<u8> },
 		/// An Operator has an unapplied slash.
 		UnappliedSlash {
+			/// The index of the slash.
+			index: u32,
 			/// The account that has an unapplied slash.
 			operator: T::AccountId,
 			/// The amount of the slash.
@@ -401,6 +412,23 @@ pub mod module {
 			service_id: u64,
 			/// Blueprint ID
 			blueprint_id: u64,
+			/// Era index
+			era: u32,
+		},
+		/// An Unapplied Slash got discarded.
+		SlashDiscarded {
+			/// The index of the slash.
+			index: u32,
+			/// The account that has an unapplied slash.
+			operator: T::AccountId,
+			/// The amount of the slash.
+			amount: BalanceOf<T>,
+			/// Service ID
+			service_id: u64,
+			/// Blueprint ID
+			blueprint_id: u64,
+			/// Era index
+			era: u32,
 		},
 	}
 
@@ -428,6 +456,11 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn next_job_call_id)]
 	pub type NextJobCallId<T> = StorageValue<_, u64, ValueQuery>;
+
+	/// The next free ID for a unapplied slash.
+	#[pallet::storage]
+	#[pallet::getter(fn next_unapplied_slash_index)]
+	pub type NextUnappliedSlashIndex<T> = StorageValue<_, u32, ValueQuery>;
 
 	/// The service blueprints along with their owner.
 	#[pallet::storage]
@@ -520,16 +553,18 @@ pub mod module {
 
 	/// All unapplied slashes that are queued for later.
 	///
-	/// EraIndex -> Vec<UnappliedSlash>
+	/// EraIndex -> Index -> UnappliedSlash
 	#[pallet::storage]
 	#[pallet::unbounded]
 	#[pallet::getter(fn unapplied_slashes)]
-	pub type UnappliedSlashes<T: Config> = StorageMap<
+	pub type UnappliedSlashes<T: Config> = StorageDoubleMap<
 		_,
-		Twox64Concat,
+		Identity,
 		u32,
-		Vec<UnappliedSlash<T::AccountId, BalanceOf<T>>>,
-		ValueQuery,
+		Identity,
+		u32,
+		UnappliedSlash<T::AccountId, BalanceOf<T>>,
+		ResultQuery<Error<T>::UnappliedSlashNotFound>,
 	>;
 
 	// *** auxiliary storage and maps ***
@@ -618,7 +653,7 @@ pub mod module {
 				.map_err(Error::<T>::TypeCheck)?;
 
 			let (allowed, _weight) =
-				Self::check_registeration_hook(&blueprint, &preferences, &registration_args)?;
+				Self::on_register_hook(&blueprint, &preferences, &registration_args)?;
 
 			ensure!(allowed, Error::<T>::InvalidRegistrationInput);
 
@@ -740,7 +775,7 @@ pub mod module {
 
 			let service_id = Self::next_instance_id();
 			let (allowed, _weight) =
-				Self::check_request_hook(&blueprint, service_id, &preferences, &request_args)?;
+				Self::on_request_hook(&blueprint, service_id, &preferences, &request_args)?;
 
 			ensure!(allowed, Error::<T>::InvalidRequestInput);
 
@@ -986,7 +1021,7 @@ pub mod module {
 			let call_id = Self::next_job_call_id();
 
 			let (allowed, _weight) =
-				Self::check_job_call_hook(&blueprint, service_id, job, call_id, &args)?;
+				Self::on_job_call_hook(&blueprint, service_id, job, call_id, &args)?;
 
 			ensure!(allowed, Error::<T>::InvalidJobCallInput);
 
@@ -1031,8 +1066,8 @@ pub mod module {
 			let job_result = JobCallResult { service_id, call_id, result: bounded_result };
 			job_result.type_check(job_def).map_err(Error::<T>::TypeCheck)?;
 
-			let (allowed, _weight) = Self::check_job_call_result_hook(
-				job_def,
+			let (allowed, _weight) = Self::on_job_result_hook(
+				&blueprint,
 				service_id,
 				job_call.job,
 				call_id,
@@ -1065,12 +1100,13 @@ pub mod module {
 			offender: T::AccountId,
 			#[pallet::compact] service_id: u64,
 			#[pallet::compact] percent: Percent,
-		) -> DispatchResult {
+		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let service = Self::services(service_id)?;
-			// TODO(shekohex): add EVM hook to query for the slashing permission.
-			// this should be supported in the Next PR when we add the slashing precompile call.
-			ensure!(service.owner == caller, DispatchError::BadOrigin);
+			let (maybe_slashing_origin, _used_weight) = Self::query_slashing_origin(&service)?;
+			let slashing_origin = maybe_slashing_origin.ok_or(Error::<T>::NoSlashingOrigin)?;
+			ensure!(slashing_origin == caller, DispatchError::BadOrigin);
+
 			let (operator, restake_percent) =
 				match service.operators.iter().find(|(operator, _)| operator == &offender) {
 					Some((operator, restake_percent)) => (operator, restake_percent),
@@ -1093,6 +1129,7 @@ pub mod module {
 			// TODO: take into account the delegators' asset kind.
 			// for now, we treat all assets equally, which is not the case in reality.
 			let unapplied_slash = UnappliedSlash {
+				service_id,
 				operator: offender.clone(),
 				own: exposed_stake,
 				others: others_slash,
@@ -1100,16 +1137,50 @@ pub mod module {
 				payout: total_slash,
 			};
 
-			let current_era = T::OperatorDelegationManager::get_current_round();
-			UnappliedSlashes::<T>::mutate(current_era, |v| v.push(unapplied_slash));
+			let index = Self::next_unapplied_slash_index();
+			let era = T::OperatorDelegationManager::get_current_round();
+			UnappliedSlashes::<T>::insert(era, index, unapplied_slash);
+			NextUnappliedSlashIndex::<T>::set(index.saturating_add(1));
 
 			Self::deposit_event(Event::<T>::UnappliedSlash {
+				index,
 				operator: offender.clone(),
 				blueprint_id: service.blueprint,
 				service_id,
 				amount: total_slash,
+				era,
 			});
-			Ok(())
+
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+		}
+
+		/// Dispute an [UnappliedSlash] for a given era and index.
+		///
+		/// The caller needs to be an authorized Dispute Origin for the service in the [UnappliedSlash].
+		pub fn dispute(
+			origin: OriginFor<T>,
+			#[pallet::compact] era: u32,
+			#[pallet::compact] index: u32,
+		) -> DispatchResultWithPostInfo {
+			let caller = ensure_signed(origin)?;
+			let unapplied_slash = Self::unapplied_slashes(era, index)?;
+			let service = Self::services(unapplied_slash.service_id)?;
+			let (maybe_dispute_origin, _used_weight) = Self::query_dispute_origin(&service)?;
+			let dispute_origin = maybe_dispute_origin.ok_or(Error::<T>::NoDisputeOrigin)?;
+			ensure!(dispute_origin == caller, DispatchError::BadOrigin);
+
+			UnappliedSlashes::<T>::remove(era, index);
+
+			Self::deposit_event(Event::<T>::SlashDiscarded {
+				index,
+				operator: unapplied_slash.operator,
+				blueprint_id: service.blueprint,
+				service_id: unapplied_slash.service_id,
+				amount: unapplied_slash.payout,
+				era,
+			});
+
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 	}
 }
