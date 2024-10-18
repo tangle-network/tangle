@@ -18,11 +18,22 @@ use super::*;
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account id of the pallet.
+	///
+	/// This function retrieves the account id associated with the pallet by converting
+	/// the pallet id into an account id.
+	///
+	/// # Returns
+	/// * `T::AccountId` - The account id of the pallet.
 	pub fn account_id() -> T::AccountId {
 		T::PalletId::get().into_account_truncating()
 	}
 
 	/// Returns the address of the pallet.
+	///
+	/// This function converts the account id of the pallet to a 20-byte H160 address.
+	///
+	/// # Returns
+	/// * `H160` - The address of the pallet.
 	pub fn address() -> H160 {
 		// Convert the account id to bytes.
 		let account_id = Self::account_id().encode();
@@ -30,6 +41,19 @@ impl<T: Config> Pallet<T> {
 		H160::from_slice(&account_id[0..20])
 	}
 
+	/// Hook to be called upon a new operator registration on a blueprint.
+	///
+	/// This function is called when a service is registered. It performs an EVM call
+	/// to the `onRegister` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `prefrences` - The operator preferences.
+	/// * `registration_args` - The registration arguments.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///   whether the registration is allowed and the weight of the operation.
 	pub fn on_register_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		prefrences: &OperatorPreferences,
@@ -74,6 +98,20 @@ impl<T: Config> Pallet<T> {
 		Ok((allowed, weight))
 	}
 
+	/// Hook to be called upon new service request.
+	///
+	/// This function is called when a service request is made. It performs an EVM call
+	/// to the `onRequest` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `service_id` - The service ID.
+	/// * `operators` - The operator preferences.
+	/// * `request_args` - The request arguments.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///   whether the request is allowed and the weight of the operation.
 	pub fn on_request_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		service_id: u64,
@@ -126,6 +164,21 @@ impl<T: Config> Pallet<T> {
 		Ok((allowed, weight))
 	}
 
+	/// Hook to be called upon job call.
+	///
+	/// This function is called when a job call is made. It performs an EVM call
+	/// to the `onJobCall` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `service_id` - The service ID.
+	/// * `job` - The job index.
+	/// * `job_call_id` - The job call ID.
+	/// * `inputs` - The input fields.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///   whether the job call is allowed and the weight of the operation.
 	pub fn on_job_call_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		service_id: u64,
@@ -182,6 +235,23 @@ impl<T: Config> Pallet<T> {
 		Ok((allowed, weight))
 	}
 
+	/// Hook to be called upon job result.
+	///
+	/// This function is called when a job result is submitted. It performs an EVM call
+	/// to the `onJobResult` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `service_id` - The service ID.
+	/// * `job` - The job index.
+	/// * `job_call_id` - The job call ID.
+	/// * `prefrences` - The operator preferences.
+	/// * `inputs` - The input fields.
+	/// * `outputs` - The output fields.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///   whether the job result is allowed and the weight of the operation.
 	pub fn on_job_result_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		service_id: u64,
@@ -252,6 +322,17 @@ impl<T: Config> Pallet<T> {
 		Ok((allowed, weight))
 	}
 
+	/// Queries the slashing origin of a service.
+	///
+	/// This function performs an EVM call to the `querySlashingOrigin` function of the
+	/// service blueprint's manager contract to retrieve the slashing origin.
+	///
+	/// # Parameters
+	/// * `service` - The service.
+	///
+	/// # Returns
+	/// * `Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo>` - A tuple containing the
+	///   slashing origin account id (if any) and the weight of the operation.
 	pub fn query_slashing_origin(
 		service: &Service<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>,
 	) -> Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo> {
@@ -302,6 +383,17 @@ impl<T: Config> Pallet<T> {
 		Ok((slashing_origin, Self::weight_from_call_info(&info)))
 	}
 
+	/// Queries the dispute origin of a service.
+	///
+	/// This function performs an EVM call to the `queryDisputeOrigin` function of the
+	/// service blueprint's manager contract to retrieve the dispute origin.
+	///
+	/// # Parameters
+	/// * `service` - The service.
+	///
+	/// # Returns
+	/// * `Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo>` - A tuple containing the
+	///   dispute origin account id (if any) and the weight of the operation.
 	pub fn query_dispute_origin(
 		service: &Service<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>,
 	) -> Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo> {
@@ -352,6 +444,7 @@ impl<T: Config> Pallet<T> {
 		Ok((dispute_origin, Self::weight_from_call_info(&info)))
 	}
 
+	/// Dispatches a call to the EVM and returns the result.
 	pub fn evm_call(
 		from: H160,
 		to: H160,
