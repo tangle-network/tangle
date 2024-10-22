@@ -7,6 +7,7 @@ use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
 use sp_core::U256;
 use sp_runtime::traits::Dispatchable;
+use sp_runtime::Percent;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::services::{Field, OperatorPreferences, ServiceBlueprint};
 
@@ -118,7 +119,7 @@ where
 			Decode::decode(&mut &permitted_callers_data[..])
 				.map_err(|_| revert("Invalid permitted callers data"))?;
 
-		let service_providers: Vec<Runtime::AccountId> =
+		let operators: Vec<Runtime::AccountId> =
 			Decode::decode(&mut &service_providers_data[..])
 				.map_err(|_| revert("Invalid service providers data"))?;
 
@@ -131,7 +132,7 @@ where
 		let call = pallet_services::Call::<Runtime>::request {
 			blueprint_id,
 			permitted_callers,
-			service_providers,
+			operators,
 			ttl: 10000_u32.into(),
 			assets,
 			request_args,
@@ -158,13 +159,18 @@ where
 	}
 
 	/// Approve a request.
-	#[precompile::public("approve(uint256)")]
-	fn approve(handle: &mut impl PrecompileHandle, request_id: U256) -> EvmResult {
+	#[precompile::public("approve(uint256,uint8)")]
+	fn approve(
+		handle: &mut impl PrecompileHandle,
+		request_id: U256,
+		restaking_percent: u8,
+	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let request_id: u64 = request_id.as_u64();
+		let restaking_percent: Percent = Percent::from_percent(restaking_percent);
 
-		let call = pallet_services::Call::<Runtime>::approve { request_id };
+		let call = pallet_services::Call::<Runtime>::approve { request_id, restaking_percent };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -246,6 +252,50 @@ where
 			result: decoded_result,
 		};
 
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	/// Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+	///
+	/// The caller needs to be an authorized Slash Origin for this service.
+	/// Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
+	/// by another entity.
+	#[precompile::public("slash(bytes,uint256,uint8)")]
+	fn slash(
+		handle: &mut impl PrecompileHandle,
+		offender: UnboundedBytes,
+		service_id: U256,
+		percent: u8,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let caller = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(caller);
+		let service_id: u64 = service_id.as_u64();
+		let percent: Percent = Percent::from_percent(percent);
+		let offender_bytes: Vec<_> = offender.into();
+		let offender: Runtime::AccountId = Decode::decode(&mut &offender_bytes[..])
+			.map_err(|_| revert("Invalid offender account id"))?;
+
+		// inside this call, we do check if the caller is authorized to slash the offender
+		let call = pallet_services::Call::<Runtime>::slash { offender, service_id, percent };
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	/// Dispute an Unapplied Slash for a service id.
+	///
+	/// The caller needs to be an authorized Dispute Origin for this service.
+	#[precompile::public("dispute(uint32,uint32)")]
+	fn dispute(handle: &mut impl PrecompileHandle, era: u32, index: u32) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let caller = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(caller);
+
+		// inside this call, we do check if the caller is authorized to dispute the slash
+		let call = pallet_services::Call::<Runtime>::dispute { era, index };
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())

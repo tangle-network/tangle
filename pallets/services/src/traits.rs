@@ -31,3 +31,9 @@ pub trait EvmGasWeightMapping {
 	/// Convert Substrate weight to EVM gas
 	fn weight_to_gas(weight: Weight) -> u64;
 }
+
+/// Trait to be implemented for evm address mapping.
+pub trait EvmAddressMapping<A> {
+	/// Convert an address to an account id.
+	fn into_account_id(address: H160) -> A;
+}
