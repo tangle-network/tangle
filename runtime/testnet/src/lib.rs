@@ -1276,9 +1276,11 @@ construct_runtime!(
 		// ZkSaaS: pallet_zksaas = 43,
 
 		Proxy: pallet_proxy = 44,
-		MultiAssetDelegation: pallet_multi_asset_delegation = 45,
+		// Skip 45
 		Services: pallet_services = 51,
-		Lst: pallet_tangle_lst = 52,
+		// Skip 52
+		Lst: pallet_tangle_lst = 53,
+		MultiAssetDelegation: pallet_multi_asset_delegation = 54,
 
 		// Sygma
 		// SygmaAccessSegregator: sygma_access_segregator = 46,
