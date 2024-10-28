@@ -3955,7 +3955,7 @@ dependencies = [
 
 [[package]]
 name = "frost-core"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "byteorder",
  "debugless-unwrap",
@@ -3972,7 +3972,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed25519"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "curve25519-dalek",
  "frost-core",
@@ -3984,7 +3984,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed448"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "ed448-goldilocks-plus",
  "frost-core",
@@ -3996,7 +3996,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p256"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "frost-core",
  "p256",
@@ -4008,7 +4008,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p384"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "frost-core",
  "p384",
@@ -4020,7 +4020,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ristretto255"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "curve25519-dalek",
  "frost-core",
@@ -4032,7 +4032,7 @@ dependencies = [
 
 [[package]]
 name = "frost-secp256k1"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "frost-core",
  "k256",
@@ -4044,7 +4044,7 @@ dependencies = [
 
 [[package]]
 name = "frost-taproot"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "frost-core",
  "k256",
@@ -7260,7 +7260,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7838,6 +7838,7 @@ name = "pallet-evm-precompile-services"
 version = "0.1.0"
 dependencies = [
  "derive_more 1.0.0",
+ "ethabi",
  "ethereum",
  "ethers",
  "fp-account",
@@ -8224,7 +8225,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-multi-asset-delegation"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -8338,7 +8339,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -8394,7 +8395,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "jsonrpsee 0.23.2",
  "pallet-services-rpc-runtime-api",
@@ -8407,7 +8408,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc-runtime-api"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -8505,6 +8506,31 @@ dependencies = [
  "sp-staking",
  "sp-std",
  "sp-tracing",
+]
+
+[[package]]
+name = "pallet-tangle-lst-benchmarking"
+version = "35.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-election-provider-support",
+ "frame-support",
+ "frame-system",
+ "pallet-assets",
+ "pallet-bags-list",
+ "pallet-balances",
+ "pallet-staking",
+ "pallet-staking-reward-curve",
+ "pallet-tangle-lst",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-runtime-interface",
+ "sp-staking",
+ "sp-std",
 ]
 
 [[package]]
@@ -14038,7 +14064,7 @@ dependencies = [
 
 [[package]]
 name = "tangle"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "async-trait",
  "clap",
@@ -14128,7 +14154,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -14137,7 +14163,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -14165,7 +14191,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "evm-tracer",
  "fp-evm",
@@ -14290,7 +14316,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "2.0.0"
+version = "1.2.0"
 dependencies = [
  "evm-tracer",
  "fixed",
@@ -14371,6 +14397,7 @@ dependencies = [
  "pallet-staking-reward-curve",
  "pallet-sudo",
  "pallet-tangle-lst",
+ "pallet-tangle-lst-benchmarking",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",

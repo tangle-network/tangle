@@ -41,9 +41,9 @@ use tangle_runtime::BlockNumber;
 
 // Runtime
 #[cfg(not(feature = "testnet"))]
-use tangle_runtime::{AccountId, Balance, Hash, Index, PalletServicesConstraints};
+use tangle_runtime::{AccountId, AssetId, Balance, Hash, Index, PalletServicesConstraints};
 #[cfg(feature = "testnet")]
-use tangle_testnet_runtime::{AccountId, Balance, Hash, Index, PalletServicesConstraints};
+use tangle_testnet_runtime::{AccountId, AssetId, Balance, Hash, Index, PalletServicesConstraints};
 
 pub mod eth;
 pub mod tracing;
@@ -117,7 +117,12 @@ where
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
 	C::Api: sp_block_builder::BlockBuilder<Block>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
-	C::Api: pallet_services_rpc::ServicesRuntimeApi<Block, PalletServicesConstraints, AccountId>,
+	C::Api: pallet_services_rpc::ServicesRuntimeApi<
+		Block,
+		PalletServicesConstraints,
+		AccountId,
+		AssetId,
+	>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,

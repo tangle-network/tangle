@@ -1,12 +1,9 @@
 {
   "compilerOptions": {
+    "rootDir": "./src",
     "baseUrl": ".",
     "declaration": true,
-    "emitDeclarationOnly": true,
     "paths": {
-      "@polkadot/api/augment": ["src/interfaces/augment-api.ts"],
-      "@polkadot/types/augment": ["src/interfaces/augment-types.ts"],
-      "@polkadot/types/lookup": ["src/interfaces/types-lookup.ts"],
       "@webb-tools/tangle-substrate-types": ["./src/interfaces/index.ts"],
       "@webb-tools/tangle-substrate-types/*": ["./src/interfaces/*"]
     },
@@ -14,11 +11,20 @@
     "composite": true,
     "moduleResolution": "node",
     "module": "commonjs",
-    "target": "ES5",
+    "target": "es2020",
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "plugins": [
+      // Transform paths in output .js files
+      { "transform": "typescript-transform-paths" },
+
+      // Transform paths in output .d.ts files (Include this line if you output declarations files)
+      { "transform": "typescript-transform-paths", "afterDeclarations": true }
+    ]
   },
-  "include": ["scripts/**/*", "src/**/*", "playground.ts", "service-demo.ts"],
+  "include": ["src/**/*"],
   "exclude": [
     "build/**/*",
     "**/build/**/*",

@@ -15,6 +15,7 @@ for port in ${ports[@]}; do
 done
 
 CLEAN=${CLEAN:-false}
+ARCHIVE=${ARCHIVE:-false}
 # Parse arguments for the script
 
 while [[ $# -gt 0 ]]; do
@@ -22,6 +23,10 @@ while [[ $# -gt 0 ]]; do
     case $key in
         -c|--clean)
             CLEAN=true
+            shift # past argument
+            ;;
+        --archive)
+            ARCHIVE=true
             shift # past argument
             ;;
         *)    # unknown option
@@ -54,7 +59,8 @@ echo "*** Start Tangle Testnet ***"
   --rpc-max-response-size 3000 \
   --ethapi trace,debug \
   --auto-insert-keys \
-  --node-key 0000000000000000000000000000000000000000000000000000000000000001 &
+  --node-key 0000000000000000000000000000000000000000000000000000000000000001 \
+  $([ "$ARCHIVE" = true ] && echo "--pruning=archive") &
 # Sleep for a while to allow the node to start
 sleep 3
 # Bob

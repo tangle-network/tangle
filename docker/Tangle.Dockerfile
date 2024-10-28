@@ -19,6 +19,11 @@ COPY ../target/release/tangle /usr/local/bin/
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Tangle Network Node"
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates libc6 \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN useradd -m -u 5000 -U -s /bin/sh -d /tangle tangle && \
 	mkdir -p /data /tangle/.local/share && \
 	chown -R tangle:tangle /data && \

@@ -1,11 +1,14 @@
 {
   "name": "@webb-tools/tangle-substrate-types",
-  "version": "0.5.13",
+  "version": "0.9.1",
   "description": "Polkadot.js type definitions required for interacting with Webb's tangle network",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
-  "repository": "https://github.com/webb-tools/tangle.git",
-  "homepage": "https://github.com/webb-tools/tangle",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tangle-network/tangle.git"
+  },
+  "homepage": "https://github.com/tangle-network/tangle",
   "files": [
     "build"
   ],
@@ -25,7 +28,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "bugs": {
-    "url": "https://github.com/webb-tools/tangle/issues"
+    "url": "https://github.com/tangle-network/tangle/issues"
   },
   "scripts": {
     "build": "bunchee",
@@ -34,7 +37,8 @@
     "build:interfaces:chain": "tsx node_modules/.bin/polkadot-types-from-chain --output ./src/interfaces --package @webb-tools/tangle-substrate-types --endpoint ws://127.0.0.1:9944",
     "clean": "rm -rf build",
     "publish-types": "release-it patch",
-    "update:metadata": "tsx ./scripts/updateMetadata.ts"
+    "update:metadata": "tsx ./scripts/updateMetadata.ts",
+    "prepare": "ts-patch install -s"
   },
   "dependencies": {
     "@polkadot/api": "^13.2.1",
@@ -46,11 +50,13 @@
   "devDependencies": {
     "@types/node": "^22.6.1",
     "@types/ws": "^8.5.12",
-    "bunchee": "^5.4.0",
+    "bunchee": "^5.5.1",
     "prettier": "3.2.5",
     "release-it": "^17.6.0",
+    "ts-patch": "^3.2.1",
     "tsx": "^4.19.1",
     "typescript": "5.4.2",
+    "typescript-transform-paths": "^3.5.1",
     "ws": "^8.18.0"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
