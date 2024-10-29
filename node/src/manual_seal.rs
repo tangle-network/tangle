@@ -253,14 +253,11 @@ where
 
 	let target_gas_price = eth_config.target_gas_price;
 
-	let (import_queue, block_import) = build_import_queue(
-		client.clone(),
-		config,
-		eth_config,
-		&task_manager,
-		telemetry.as_ref().map(|x| x.handle()),
-		grandpa_block_import,
-	)?;
+	let import_queue = sc_consensus_manual_seal::import_queue(
+		Box::new(block_import.clone()),
+		&task_manager.spawn_essential_handle(),
+		config.prometheus_registry(),
+	);
 
 	Ok(sc_service::PartialComponents {
 		client,
@@ -272,7 +269,7 @@ where
 		transaction_pool,
 		other: (
 			telemetry,
-			block_import,
+			Box::new(block_import),
 			grandpa_link,
 			babe_link,
 			frontier_backend,
@@ -675,11 +672,11 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			.expect("failed to create BabeConsensusDataProvider");
 
 		let target_gas_price = eth_config.target_gas_price;
-		let create_inherent_data_providers = move |_, ()| async move {
-			let timestamp = MockTimestampInherentDataProvider;
-			let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
-			Ok((timestamp, dynamic_fee))
-		};
+		// let create_inherent_data_providers = move |_, ()| async move {
+		// 	let timestamp = MockTimestampInherentDataProvider;
+		// 	let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
+		// 	Ok((timestamp, dynamic_fee))
+		// };
 
 		let manual_seal = match sealing {
 			Sealing::Manual => future::Either::Left(sc_consensus_manual_seal::run_manual_seal(
@@ -691,7 +688,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 					commands_stream,
 					select_chain,
 					consensus_data_provider: Some(Box::new(babe_consensus_data_provider)),
-					create_inherent_data_providers,
+					create_inherent_data_providers: pending_create_inherent_data_providers,
 				},
 			)),
 			Sealing::Instant => future::Either::Right(sc_consensus_manual_seal::run_instant_seal(
@@ -702,7 +699,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 					pool: transaction_pool,
 					select_chain,
 					consensus_data_provider: Some(Box::new(babe_consensus_data_provider)),
-					create_inherent_data_providers,
+					create_inherent_data_providers: pending_create_inherent_data_providers,
 				},
 			)),
 		};
