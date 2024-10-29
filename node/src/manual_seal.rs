@@ -672,11 +672,6 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			.expect("failed to create BabeConsensusDataProvider");
 
 		let target_gas_price = eth_config.target_gas_price;
-		// let create_inherent_data_providers = move |_, ()| async move {
-		// 	let timestamp = MockTimestampInherentDataProvider;
-		// 	let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
-		// 	Ok((timestamp, dynamic_fee))
-		// };
 
 		let manual_seal = match sealing {
 			Sealing::Manual => future::Either::Left(sc_consensus_manual_seal::run_manual_seal(
@@ -758,112 +753,6 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	network_starter.start_network();
 	Ok(task_manager)
 }
-
-// fn run_manual_seal_authorship(
-// 	eth_config: &EthConfiguration,
-// 	sealing: Sealing,
-// 	client: Arc<FullClient>,
-// 	transaction_pool: Arc<FullPool<Block, FullClient>>,
-// 	select_chain: FullSelectChain,
-// 	block_import: BoxBlockImport,
-// 	task_manager: &TaskManager,
-// 	prometheus_registry: Option<&Registry>,
-// 	telemetry: Option<&Telemetry>,
-// 	commands_stream: mpsc::Receiver<
-// 		sc_consensus_manual_seal::rpc::EngineCommand<<Block as BlockT>::Hash>,
-// 	>,
-// 	keystore: Option<Arc<LocalKeystore>>,
-// 	babe_link: BabeLink,
-// ) -> Result<(), ServiceError> {
-// 	let proposer_factory = sc_basic_authorship::ProposerFactory::new(
-// 		task_manager.spawn_handle(),
-// 		client.clone(),
-// 		transaction_pool.clone(),
-// 		prometheus_registry,
-// 		telemetry.as_ref().map(|x| x.handle()),
-// 	);
-
-// 	thread_local!(static TIMESTAMP: RefCell<u64> = const { RefCell::new(0) });
-
-// 	/// Provide a mock duration starting at 0 in millisecond for timestamp inherent.
-// 	/// Each call will increment timestamp by slot_duration making Aura think time has passed.
-// 	struct MockTimestampInherentDataProvider;
-
-// 	#[async_trait::async_trait]
-// 	impl sp_inherents::InherentDataProvider for MockTimestampInherentDataProvider {
-// 		async fn provide_inherent_data(
-// 			&self,
-// 			inherent_data: &mut sp_inherents::InherentData,
-// 		) -> Result<(), sp_inherents::Error> {
-// 			TIMESTAMP.with(|x| {
-// 				*x.borrow_mut() += tangle_testnet_runtime::SLOT_DURATION;
-// 				inherent_data.put_data(sp_timestamp::INHERENT_IDENTIFIER, &*x.borrow())
-// 			})
-// 		}
-
-// 		async fn try_handle_error(
-// 			&self,
-// 			_identifier: &sp_inherents::InherentIdentifier,
-// 			_error: &[u8],
-// 		) -> Option<Result<(), sp_inherents::Error>> {
-// 			// The pallet never reports error.
-// 			None
-// 		}
-// 	}
-
-// 	let babe_consensus_data_provider =
-// 	sc_consensus_manual_seal::consensus::babe::BabeConsensusDataProvider::new(
-// 		client.clone(),
-// 		keystore,
-// 		babe_link.epoch_changes().clone(),
-// 		vec![(
-// 			sp_consensus_babe::AuthorityId::from(
-// 				sp_keyring::sr25519::Keyring::Alice.public(),
-// 			),
-// 			1000,
-// 		)],
-// 	)
-// 	.expect("failed to create BabeConsensusDataProvider");
-
-// 	let target_gas_price = eth_config.target_gas_price;
-// 	let create_inherent_data_providers = move |_, ()| async move {
-// 		let timestamp = MockTimestampInherentDataProvider;
-// 		let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
-// 		Ok((timestamp, dynamic_fee))
-// 	};
-
-// 	let manual_seal = match sealing {
-// 		Sealing::Manual => future::Either::Left(sc_consensus_manual_seal::run_manual_seal(
-// 			sc_consensus_manual_seal::ManualSealParams {
-// 				block_import,
-// 				env: proposer_factory,
-// 				client,
-// 				pool: transaction_pool,
-// 				commands_stream,
-// 				select_chain,
-// 				consensus_data_provider: Some(Box::new(babe_consensus_data_provider)),
-// 				create_inherent_data_providers,
-// 			},
-// 		)),
-// 		Sealing::Instant => future::Either::Right(sc_consensus_manual_seal::run_instant_seal(
-// 			sc_consensus_manual_seal::InstantSealParams {
-// 				block_import,
-// 				env: proposer_factory,
-// 				client,
-// 				pool: transaction_pool,
-// 				select_chain,
-// 				consensus_data_provider: Some(Box::new(babe_consensus_data_provider)),
-// 				create_inherent_data_providers,
-// 			},
-// 		)),
-// 	};
-
-// 	// we spawn the future on a background thread managed by service.
-// 	task_manager
-// 		.spawn_essential_handle()
-// 		.spawn_blocking("manual-seal", None, manual_seal);
-// 	Ok(())
-// }
 
 #[allow(clippy::type_complexity)]
 pub fn new_chain_ops(
