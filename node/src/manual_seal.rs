@@ -249,7 +249,8 @@ where
 		client.clone(),
 	)?;
 
-	let slot_duration = babe_link.config().slot_duration();
+	//let slot_duration = babe_link.config().slot_duration();
+	let slot_duration = 0; // This is important to allow continous block
 
 	let target_gas_price = eth_config.target_gas_price;
 
@@ -628,34 +629,6 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			prometheus_registry.clone().as_ref(),
 			telemetry.as_ref().map(|x| x.handle()),
 		);
-
-		thread_local!(static TIMESTAMP: RefCell<u64> = const { RefCell::new(0) });
-
-		/// Provide a mock duration starting at 0 in millisecond for timestamp inherent.
-		/// Each call will increment timestamp by slot_duration making Aura think time has passed.
-		struct MockTimestampInherentDataProvider;
-
-		#[async_trait::async_trait]
-		impl sp_inherents::InherentDataProvider for MockTimestampInherentDataProvider {
-			async fn provide_inherent_data(
-				&self,
-				inherent_data: &mut sp_inherents::InherentData,
-			) -> Result<(), sp_inherents::Error> {
-				TIMESTAMP.with(|x| {
-					*x.borrow_mut() += tangle_testnet_runtime::SLOT_DURATION;
-					inherent_data.put_data(sp_timestamp::INHERENT_IDENTIFIER, &*x.borrow())
-				})
-			}
-
-			async fn try_handle_error(
-				&self,
-				_identifier: &sp_inherents::InherentIdentifier,
-				_error: &[u8],
-			) -> Option<Result<(), sp_inherents::Error>> {
-				// The pallet never reports error.
-				None
-			}
-		}
 
 		let babe_consensus_data_provider =
 			sc_consensus_manual_seal::consensus::babe::BabeConsensusDataProvider::new(

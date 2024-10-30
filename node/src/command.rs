@@ -15,7 +15,7 @@
 use crate::{
 	chainspec,
 	cli::{Cli, Subcommand},
-	service::{self, tangle},
+	service,
 };
 use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use futures::TryFutureExt;
