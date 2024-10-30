@@ -236,7 +236,7 @@ pub fn run() -> sc_cli::Result<()> {
 						}
 
 						cmd.run_with_spec::<sp_runtime::traits::HashingFor<Block>,
-						<tangle::ExecutorDispatch as sc_executor::NativeExecutionDispatch>::ExtendHostFunctions>(Some(
+						<crate::service::tangle::ExecutorDispatch as sc_executor::NativeExecutionDispatch>::ExtendHostFunctions>(Some(
 							config.chain_spec,
 						))
 					},
