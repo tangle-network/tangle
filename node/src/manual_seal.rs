@@ -340,49 +340,6 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			),
 	} = new_partial(&config, &eth_config, build_manual_seal_import_queue)?;
 
-	if config.role.is_authority() {
-		if config.chain_spec.chain_type() == ChainType::Development
-			|| config.chain_spec.chain_type() == ChainType::Local
-		{
-			if auto_insert_keys {
-				crate::utils::insert_controller_account_keys_into_keystore(
-					&config,
-					Some(keystore_container.local_keystore()),
-				);
-			} else {
-				crate::utils::insert_dev_controller_account_keys_into_keystore(
-					&config,
-					Some(keystore_container.local_keystore()),
-				);
-			}
-		}
-
-		// finally check if keys are inserted correctly
-		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore()).is_err() {
-			if config.chain_spec.chain_type() == ChainType::Development
-				|| config.chain_spec.chain_type() == ChainType::Local
-			{
-				println!("   
-			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
-				Validator keys not found, validator keys are essential to run a validator on
-				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
-				how to generate and insert keys. OR start the node with --auto-insert-keys to automatically generate the keys in testnet.
-			++++++++++++++++++++++++++++++++++++++++++++++++
-			\n");
-				panic!("Keys not detected!")
-			} else {
-				println!("   
-			++++++++++++++++++++++++++++++++++++++++++++++++                                                                          
-				Validator keys not found, validator keys are essential to run a validator on
-				Tangle Network, refer to https://docs.webb.tools/docs/ecosystem-roles/validator/required-keys/ on
-				how to generate and insert keys.
-			++++++++++++++++++++++++++++++++++++++++++++++++
-			\n");
-				panic!("Keys not detected!")
-			}
-		}
-	}
-
 	let FrontierPartialComponents { filter_pool, fee_history_cache, fee_history_cache_limit } =
 		new_frontier_partial(&eth_config)?;
 
