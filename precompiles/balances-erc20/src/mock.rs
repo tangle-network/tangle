@@ -17,7 +17,6 @@
 //! Testing utilities.
 
 use super::*;
-
 use frame_support::derive_impl;
 use frame_support::{construct_runtime, parameter_types, weights::Weight};
 use pallet_evm::AddressMapping;
@@ -194,7 +193,7 @@ impl pallet_evm::Config for Runtime {
 	type WeightPerGas = WeightPerGas;
 	type CallOrigin = EnsureAddressRoot<AccountId>;
 	type WithdrawOrigin = EnsureAddressNever<AccountId>;
-	type AddressMapping = HashedAddressMapping;
+	type AddressMapping = AccountId;
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
