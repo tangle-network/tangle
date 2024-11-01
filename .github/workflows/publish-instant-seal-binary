@@ -1,4 +1,4 @@
-name: Publish Binary
+name: Publish Manual Seal Binary
 
 on:
   push:
@@ -7,8 +7,11 @@ on:
 
 jobs:
   build:
-    name: Publish binaries
+    name: Publish Manual Seal Binary
     runs-on: ubuntu-20.04
+    concurrency:
+      group: manual-seal-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
     - uses: actions/checkout@v3
