@@ -1,11 +1,9 @@
-name: Publish Manual Seal Binary
+name: Publish Release Binary
 
 on:
   push:
     tags:
       - '*'
-    branches:
-      - fix-manual-seal-action
 
 jobs:
   build:
