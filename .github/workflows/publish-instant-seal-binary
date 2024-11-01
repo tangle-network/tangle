@@ -2,8 +2,8 @@ name: Publish Manual Seal Binary
 
 on:
   push:
-    branches:
-      - fix-manual-seal-action
+    tags:
+      - '*'
 
 jobs:
   build:
