@@ -21,10 +21,10 @@ use crate::eth::{
 	FrontierBlockImport, FrontierPartialComponents, RpcConfig, StorageOverride,
 	StorageOverrideHandler,
 };
-use futures_timer::Delay;
 use futures::future;
 use futures::FutureExt;
 use futures::{channel::mpsc, prelude::*};
+use futures_timer::Delay;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::BabeLink;
