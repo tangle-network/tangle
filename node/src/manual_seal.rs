@@ -21,6 +21,7 @@ use crate::eth::{
 	FrontierBlockImport, FrontierPartialComponents, RpcConfig, StorageOverride,
 	StorageOverrideHandler,
 };
+use futures_timer::Delay;
 use futures::future;
 use futures::FutureExt;
 use futures::{channel::mpsc, prelude::*};
@@ -571,9 +572,6 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	};
 	let _rpc_handlers = sc_service::spawn_tasks(params)?;
 
-	// Channel for the rpc handler to communicate with the authorship task.
-	let (command_sink, commands_stream) = mpsc::channel(1000);
-
 	// if the node isn't actively participating in consensus then it doesn't
 	// need a keystore, regardless of which protocol we use below.
 	let keystore = if role.is_authority() { Some(keystore_container.keystore()) } else { None };
@@ -604,18 +602,34 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 		let target_gas_price = eth_config.target_gas_price;
 
 		let manual_seal = match sealing {
-			Sealing::Manual => future::Either::Left(sc_consensus_manual_seal::run_manual_seal(
-				sc_consensus_manual_seal::ManualSealParams {
-					block_import,
-					env: proposer_factory,
-					client,
-					pool: transaction_pool,
-					commands_stream,
-					select_chain,
-					consensus_data_provider: Some(Box::new(babe_consensus_data_provider)),
-					create_inherent_data_providers: pending_create_inherent_data_providers,
-				},
-			)),
+			Sealing::Manual => {
+				let (mut sink, commands_stream) = futures::channel::mpsc::channel(1024);
+				task_manager.spawn_handle().spawn("block_authoring", None, async move {
+					loop {
+						futures_timer::Delay::new(std::time::Duration::from_millis(1000)).await;
+						sink.try_send(sc_consensus_manual_seal::EngineCommand::SealNewBlock {
+							create_empty: true,
+							finalize: true,
+							parent_hash: None,
+							sender: None,
+						})
+						.unwrap();
+					}
+				});
+
+				future::Either::Left(sc_consensus_manual_seal::run_manual_seal(
+					sc_consensus_manual_seal::ManualSealParams {
+						block_import,
+						env: proposer_factory,
+						client,
+						pool: transaction_pool,
+						commands_stream,
+						select_chain,
+						consensus_data_provider: Some(Box::new(babe_consensus_data_provider)),
+						create_inherent_data_providers: pending_create_inherent_data_providers,
+					},
+				))
+			},
 			Sealing::Instant => future::Either::Right(sc_consensus_manual_seal::run_instant_seal(
 				sc_consensus_manual_seal::InstantSealParams {
 					block_import,
