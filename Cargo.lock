@@ -14085,6 +14085,7 @@ dependencies = [
  "frame-system",
  "frame-system-rpc-runtime-api",
  "futures 0.3.30",
+ "futures-timer",
  "hex",
  "hex-literal 0.4.1",
  "jsonrpsee 0.23.2",
@@ -14304,7 +14305,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
