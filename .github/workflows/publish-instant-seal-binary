@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Publish binaries
+    name: Publish Manual Seal Binary
     runs-on: ubuntu-20.04
 
     steps:
