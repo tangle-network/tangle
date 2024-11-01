@@ -9,6 +9,9 @@ jobs:
   build:
     name: Publish Manual Seal Binary
     runs-on: ubuntu-20.04
+    concurrency:
+      group: manual-seal-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
     - uses: actions/checkout@v3
