@@ -13,10 +13,11 @@ pub use parity_scale_codec;
 pub use scale_info;
 #[cfg(any(feature = "std", feature = "web"))]
 pub use subxt;
-pub use subxt_signer;
-// `subxt` already re-exports `subxt-core`
+#[cfg(any(feature = "std", feature = "web"))]
+pub use subxt::ext::subxt_core;
 #[cfg(not(any(feature = "std", feature = "web")))]
 pub use subxt_core;
+pub use subxt_signer;
 
 // #[cfg_attr(rustfmt, rustfmt::skip)]
 // pub mod tangle_mainnet_runtime;
