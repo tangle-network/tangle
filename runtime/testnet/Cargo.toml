@@ -159,6 +159,11 @@ xcm-builder = { workspace = true }
 xcm-executor = { workspace = true }
 polkadot-parachain-primitives = { workspace = true }
 
+# Bridgehub
+pallet-bridge-parachains = { workspace = true }
+pallet-bridge-grandpa = { workspace = true }
+pallet-bridge-messages = { workspace = true }
+
 [features]
 runtime-benchmarks = [
     "frame-benchmarking",
@@ -324,6 +329,11 @@ std = [
     "xcm-builder/std",
     "xcm-executor/std",
     "polkadot-parachain-primitives/std",
+
+    # Bridgehub
+    "pallet-bridge-parachains/std",
+    "pallet-bridge-grandpa/std",
+    "pallet-bridge-messages/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
