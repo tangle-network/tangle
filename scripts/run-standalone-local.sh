@@ -49,9 +49,17 @@ mkdir -p ./tmp
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
 cd "$PROJECT_ROOT"
 
+TARGET="${CARGO_TARGET_DIR:-./target}"
+BINARY="$TARGET"/release/tangle
+
+if [ ! -f "$BINARY" ]; then
+  echo "Binary does not exist at \`$BINARY\`. Exiting"
+  exit 1
+fi
+
 echo "*** Start Tangle Testnet ***"
 # Alice 
-./target/release/tangle -d ./tmp/alice --dev --validator -lerror --alice \
+$BINARY -d ./tmp/alice --dev --validator -lerror --alice \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[0]} \
   --rpc-port 9944 \
@@ -64,7 +72,7 @@ echo "*** Start Tangle Testnet ***"
 # Sleep for a while to allow the node to start
 sleep 3
 # Bob
-./target/release/tangle -d ./tmp/bob --dev --validator -lerror --bob \
+$BINARY -d ./tmp/bob --dev --validator -lerror --bob \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[1]} \
   --rpc-port 9945 \
@@ -72,7 +80,7 @@ sleep 3
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Charlie
-./target/release/tangle -d ./tmp/charlie --dev --validator -lerror --charlie \
+$BINARY -d ./tmp/charlie --dev --validator -lerror --charlie \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[2]} \
   --rpc-port 9946 \
@@ -80,7 +88,7 @@ sleep 3
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Dave
-./target/release/tangle -d ./tmp/dave --dev --validator -lerror --dave \
+$BINARY -d ./tmp/dave --dev --validator -lerror --dave \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[3]} \
   --rpc-port 9947 \
@@ -88,7 +96,7 @@ sleep 3
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
 # Eve
-./target/release/tangle -d ./tmp/eve --dev --validator -linfo --eve \
+$BINARY -d ./tmp/eve --dev --validator -linfo --eve \
     --rpc-cors all --rpc-methods=unsafe --rpc-external \
     --port ${ports[4]} \
     --rpc-port 9948 \
