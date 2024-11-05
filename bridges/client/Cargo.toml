@@ -1,0 +1,30 @@
+[package]
+name = "relay-tangle-client"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+codec = { package = "parity-scale-codec", version = "3.6.1", features = ["derive"] }
+scale-info = { version = "2.11.5", default-features = false, features = ["derive"] }
+subxt = { version = "0.37.0", default-features = false, features = ["native"] }
+
+# Bridge dependencies
+bp-polkadot-core = { workspace = true }
+bp-runtime = { workspace = true }
+bp-westend = { workspace = true }
+
+relay-substrate-client = { workspace = true }
+relay-utils = { workspace = true }
+
+# Substrate Dependencies
+
+sp-consensus-grandpa = { workspace = true }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+sp-session = { workspace = true }
+sp-weights = { workspace = true }
