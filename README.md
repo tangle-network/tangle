@@ -40,8 +40,8 @@ Tangle is restaking network focused around complex offchain computations, such a
 If you would like to familiarize yourself with Tangle Network check out following repo and docs:
 
 - [Tangle Gadgets](https://github.com/webb-tools/gadget)
-- [Tangle Docs](https://docs.tangle.tools/docs)
-- [Tangle Blueprints](https://docs.tangle.tools/developers/blueprints)
+- [Tangle Docs](https://docs.tangle.tools/)
+- [Tangle Blueprints](https://docs.tangle.tools/developers/blueprints/introduction)
 - [Tangle Website](https://tangle.tools/)
 
 <h2 id="prerequisites"> Prerequisites</h2>
