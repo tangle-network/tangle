@@ -85,7 +85,7 @@ If you want to use Nix for development, please follow following instructions
 
 This should start the local testnet, you can view the logs in /tmp directory for all the authorities and use [polkadotJS](https://polkadot.js.org/apps/#/explorer) to view the running testnet.
 
-3. To Start validating on the live testnet please visit [Starting a validator on Tangle docs](https://docs.tangle.tools/docs/node/validator/requirements).
+3. To Start validating on the live testnet please visit [Starting a validator on Tangle docs](https://docs.tangle.tools/operators/validator/introduction).
 
 <h2 id="troubleshooting"> Troubleshooting </h2>
 
