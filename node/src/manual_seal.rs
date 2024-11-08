@@ -737,18 +737,16 @@ fn run_manual_seal_authorship(
 	}
 
 	let babe_consensus_data_provider =
-	sc_consensus_manual_seal::consensus::babe::BabeConsensusDataProvider::new(
-		client.clone(),
-		keystore_container.keystore(),
-		babe_link.epoch_changes().clone(),
-		vec![(
-			sp_consensus_babe::AuthorityId::from(
-				sp_keyring::sr25519::Keyring::Alice.public(),
-			),
-			1000,
-		)],
-	)
-	.expect("failed to create BabeConsensusDataProvider");
+		sc_consensus_manual_seal::consensus::babe::BabeConsensusDataProvider::new(
+			client.clone(),
+			keystore_container.keystore(),
+			babe_link.epoch_changes().clone(),
+			vec![(
+				sp_consensus_babe::AuthorityId::from(sp_keyring::sr25519::Keyring::Alice.public()),
+				1000,
+			)],
+		)
+		.expect("failed to create BabeConsensusDataProvider");
 
 	let target_gas_price = eth_config.target_gas_price;
 	let create_inherent_data_providers = move |_, ()| async move {

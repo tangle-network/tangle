@@ -192,7 +192,7 @@ where
 		root: H256,
 		nominator: H256,
 		bouncer: H256,
-		name: BoundedVec<u8, <Runtime as pallet_tangle_lst::Config>::MaxNameLength>,
+		name: Vec<u8>,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -211,44 +211,7 @@ where
 			root,
 			nominator,
 			bouncer,
-			name: name.into(),
-		};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	#[precompile::public("createWithPoolId(uint256,bytes32,bytes32,bytes32,uint256)")]
-	fn create_with_pool_id(
-		handle: &mut impl PrecompileHandle,
-		amount: U256,
-		root: H256,
-		nominator: H256,
-		bouncer: H256,
-		pool_id: U256,
-		name: BoundedVec<u8, <Runtime as pallet_tangle_lst::Config>::MaxNameLength>,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
-		let root = Self::convert_to_account_id(root)?;
-		let root: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(root);
-		let nominator = Self::convert_to_account_id(nominator)?;
-		let nominator: <Runtime::Lookup as StaticLookup>::Source =
-			Runtime::Lookup::unlookup(nominator);
-		let bouncer = Self::convert_to_account_id(bouncer)?;
-		let bouncer: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(bouncer);
-		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
-
-		let call = pallet_tangle_lst::Call::<Runtime>::create_with_pool_id {
-			amount,
-			root,
-			nominator,
-			bouncer,
-			pool_id,
-			name: name.into(),
+			name: name.try_into().map_err(|_| revert("Invalid name"))?,
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;

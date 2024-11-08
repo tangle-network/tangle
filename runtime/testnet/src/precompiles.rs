@@ -29,13 +29,13 @@ use pallet_evm_precompile_services::ServicesPrecompile;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use pallet_evm_precompile_staking::StakingPrecompile;
+use pallet_evm_precompile_tangle_lst::TangleLstPrecompile;
 use pallet_evm_precompile_verify_bls381_signature::Bls381Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256k1_signature::EcdsaSecp256k1Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precompile;
 use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
 use pallet_evm_precompile_verify_schnorr_signatures::*;
 use pallet_evm_precompile_vesting::VestingPrecompile;
-use pallet_evm_precompile_tangle_lst::TangleLstPrecompile;
 use pallet_evm_precompileset_assets_erc20::Erc20AssetsPrecompileSet;
 
 use frame_support::parameter_types;
