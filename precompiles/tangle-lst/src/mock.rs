@@ -20,11 +20,7 @@ use crate::{TangleLstPrecompile, TangleLstPrecompileCall};
 use frame_support::derive_impl;
 use frame_support::traits::AsEnsureOriginWithArg;
 use frame_support::PalletId;
-use frame_support::{
-	construct_runtime, parameter_types,
-	traits::{ConstU64, Everything},
-	weights::Weight,
-};
+use frame_support::{construct_runtime, parameter_types, traits::ConstU64, weights::Weight};
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
@@ -32,7 +28,7 @@ use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
 	sr25519::{Public as sr25519Public, Signature},
-	ConstU32, H160, H256, U256,
+	ConstU32, H160, U256,
 };
 use sp_runtime::traits::Convert;
 use sp_runtime::DispatchError;
@@ -40,11 +36,13 @@ use sp_runtime::DispatchResult;
 use sp_runtime::FixedU128;
 use sp_runtime::Perbill;
 use sp_runtime::{
-	traits::{IdentifyAccount, IdentityLookup, Verify},
+	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage,
 };
 use sp_staking::EraIndex;
+use sp_staking::OnStakingUpdate;
 use sp_staking::Stake;
+use sp_std::collections::btree_map::BTreeMap;
 use tangle_primitives::ServiceManager;
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
@@ -80,7 +78,7 @@ const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 pub enum TestAccount {
 	Empty,
 	Alex,
-	Bobo,
+	Bob,
 	Dave,
 	Charlie,
 	Eve,
@@ -98,7 +96,7 @@ impl AddressMapping<AccountId32> for TestAccount {
 	fn into_account_id(h160_account: H160) -> AccountId32 {
 		match h160_account {
 			a if a == H160::repeat_byte(0x01) => TestAccount::Alex.into(),
-			a if a == H160::repeat_byte(0x02) => TestAccount::Bobo.into(),
+			a if a == H160::repeat_byte(0x02) => TestAccount::Bob.into(),
 			a if a == H160::repeat_byte(0x03) => TestAccount::Charlie.into(),
 			a if a == H160::repeat_byte(0x04) => TestAccount::Dave.into(),
 			a if a == H160::repeat_byte(0x05) => TestAccount::Eve.into(),
@@ -126,7 +124,7 @@ impl From<TestAccount> for H160 {
 	fn from(x: TestAccount) -> H160 {
 		match x {
 			TestAccount::Alex => H160::repeat_byte(0x01),
-			TestAccount::Bobo => H160::repeat_byte(0x02),
+			TestAccount::Bob => H160::repeat_byte(0x02),
 			TestAccount::Charlie => H160::repeat_byte(0x03),
 			TestAccount::Dave => H160::repeat_byte(0x04),
 			TestAccount::Eve => H160::repeat_byte(0x05),
@@ -140,7 +138,7 @@ impl From<TestAccount> for AccountId32 {
 	fn from(x: TestAccount) -> Self {
 		match x {
 			TestAccount::Alex => AccountId32::from([1u8; 32]),
-			TestAccount::Bobo => AccountId32::from([2u8; 32]),
+			TestAccount::Bob => AccountId32::from([2u8; 32]),
 			TestAccount::Charlie => AccountId32::from([3u8; 32]),
 			TestAccount::Dave => AccountId32::from([4u8; 32]),
 			TestAccount::Eve => AccountId32::from([5u8; 32]),
@@ -154,7 +152,7 @@ impl From<TestAccount> for sp_core::sr25519::Public {
 	fn from(x: TestAccount) -> Self {
 		match x {
 			TestAccount::Alex => sr25519Public::from_raw([1u8; 32]),
-			TestAccount::Bobo => sr25519Public::from_raw([2u8; 32]),
+			TestAccount::Bob => sr25519Public::from_raw([2u8; 32]),
 			TestAccount::Charlie => sr25519Public::from_raw([3u8; 32]),
 			TestAccount::Dave => sr25519Public::from_raw([4u8; 32]),
 			TestAccount::Eve => sr25519Public::from_raw([5u8; 32]),
@@ -372,6 +370,19 @@ impl StakingMock {
 	}
 }
 
+parameter_types! {
+	pub static MinJoinBondConfig: Balance = 2;
+	pub static CurrentEra: EraIndex = 0;
+	pub static BondingDuration: EraIndex = 3;
+	pub storage BondedBalanceMap: BTreeMap<AccountId, Balance> = Default::default();
+	// map from a user to a vec of eras and amounts being unlocked in each era.
+	pub storage UnbondingBalanceMap: BTreeMap<AccountId, Vec<(EraIndex, Balance)>> = Default::default();
+	#[derive(Clone, PartialEq)]
+	pub static MaxUnbonding: u32 = 8;
+	pub static StakingMinBond: Balance = 10;
+	pub storage Nominations: Option<Vec<AccountId>> = None;
+}
+
 impl sp_staking::StakingInterface for StakingMock {
 	type Balance = Balance;
 	type AccountId = AccountId;
@@ -463,12 +474,12 @@ impl sp_staking::StakingInterface for StakingMock {
 		match (UnbondingBalanceMap::get().get(who), BondedBalanceMap::get().get(who).copied()) {
 			(None, None) => Err(DispatchError::Other("balance not found")),
 			(Some(v), None) => Ok(Stake {
-				total: v.iter().fold(0u128, |acc, &x| acc.saturating_add(x.1)),
+				total: v.iter().fold(0u64, |acc, &x| acc.saturating_add(x.1)),
 				active: 0,
 			}),
 			(None, Some(v)) => Ok(Stake { total: v, active: v }),
 			(Some(a), Some(b)) => Ok(Stake {
-				total: a.iter().fold(0u128, |acc, &x| acc.saturating_add(x.1)) + b,
+				total: a.iter().fold(0u64, |acc, &x| acc.saturating_add(x.1)) + b,
 				active: b,
 			}),
 		}
@@ -523,8 +534,6 @@ parameter_types! {
 	pub static MaxMetadataLen: u32 = 2;
 	pub static CheckLevel: u8 = 255;
 	pub const PoolsPalletId: PalletId = PalletId(*b"py/nopls");
-	#[derive(Clone, PartialEq)]
-	pub static MaxUnbonding: u32 = 8;
 }
 
 impl pallet_tangle_lst::Config for Runtime {
@@ -545,7 +554,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PoolId = PoolId;
-	type ForceOrigin = frame_system::EnsureRoot<u128>;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
 }
 
@@ -570,9 +579,8 @@ impl ExtBuilder {
 				.chain(
 					[
 						(TestAccount::Alex.into(), 1_000_000),
-						(TestAccount::Bobo.into(), 1_000_000),
+						(TestAccount::Bob.into(), 1_000_000),
 						(TestAccount::Charlie.into(), 1_000_000),
-						(MultiAssetDelegation::pallet_account(), 100), // give pallet some ED so it can receive tokens
 					]
 					.iter(),
 				)

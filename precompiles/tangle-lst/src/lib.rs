@@ -58,7 +58,7 @@ pub struct TangleLstPrecompile<Runtime>(PhantomData<Runtime>);
 #[precompile_utils::precompile]
 impl<Runtime> TangleLstPrecompile<Runtime>
 where
-	Runtime: pallet_tangle_lst::Config + pallet_evm::Config + pallet_multi_asset_delegation::Config,
+	Runtime: pallet_tangle_lst::Config + pallet_evm::Config,
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_tangle_lst::Call<Runtime>>,
@@ -181,7 +181,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("create(uint256,bytes32,bytes32,bytes32)")]
+	#[precompile::public("create(uint256,bytes32,bytes32,bytes32,uint8[],uint8[])")]
 	fn create(
 		handle: &mut impl PrecompileHandle,
 		amount: U256,
@@ -262,7 +262,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("setMetadata(uint256,bytes)")]
+	#[precompile::public("setMetadata(uint256,uint8[])")]
 	fn set_metadata(
 		handle: &mut impl PrecompileHandle,
 		pool_id: U256,

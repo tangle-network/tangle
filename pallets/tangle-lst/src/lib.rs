@@ -1514,6 +1514,7 @@ impl<T: Config> Pallet<T> {
 		)
 	}
 
+	#[allow(clippy::too_many_arguments)]
 	fn do_create(
 		who: T::AccountId,
 		amount: BalanceOf<T>,
