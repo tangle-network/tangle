@@ -1,16 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.3;
-
-/// @dev The TangleLst contract's address.
-address constant TANGLE_LST = 0x0000000000000000000000000000000000000809;
-
-/// @dev The TangleLst contract's instance.
-TangleLst constant TANGLE_LST_CONTRACT = TangleLst(TANGLE_LST);
-
 /// @author The Tangle Team
 /// @title Pallet TangleLst Interface
 /// @title The interface through which solidity contracts will interact with the TangleLst pallet
-/// @custom:address 0x0000000000000000000000000000000000000809
 interface TangleLst {
     /// @dev Join a pool with a specified amount.
     /// @param amount The amount to join with.
