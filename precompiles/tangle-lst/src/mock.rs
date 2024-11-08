@@ -43,19 +43,13 @@ use sp_staking::EraIndex;
 use sp_staking::OnStakingUpdate;
 use sp_staking::Stake;
 use sp_std::collections::btree_map::BTreeMap;
-use tangle_primitives::ServiceManager;
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u64;
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
-pub type BlockNumber = u64;
 pub type RewardCounter = FixedU128;
 pub type AssetId = u32;
-// This sneaky little hack allows us to write code exactly as we would do in the pallet in the tests
-// as well, e.g. `StorageItem::<T>::get()`.
-pub type T = Runtime;
-pub type Currency = <T as pallet_tangle_lst::Config>::Currency;
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 ];
@@ -312,25 +306,6 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
-}
-
-pub struct MockServiceManager;
-
-impl ServiceManager<AccountId, Balance> for MockServiceManager {
-	fn get_active_blueprints_count(_account: &AccountId) -> usize {
-		// we dont care
-		Default::default()
-	}
-
-	fn get_active_services_count(_account: &AccountId) -> usize {
-		// we dont care
-		Default::default()
-	}
-
-	fn can_exit(_account: &AccountId) -> bool {
-		// Mock logic to determine if the given account can exit
-		true
-	}
 }
 
 pub struct BalanceToU256;

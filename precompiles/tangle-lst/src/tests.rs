@@ -1,5 +1,5 @@
 use crate::{mock::*, U256};
-use frame_support::{assert_ok, traits::Currency};
+use frame_support::assert_ok;
 use precompile_utils::testing::*;
 use sp_core::H160;
 
@@ -66,7 +66,6 @@ fn test_join() {
 fn test_bond_extra() {
 	ExtBuilder::default().build().execute_with(|| {
 		let account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let initial_balance = Balances::free_balance(account);
 
 		// First create a pool
 		let root = sp_core::sr25519::Public::from(TestAccount::Bob).into();

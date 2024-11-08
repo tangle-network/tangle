@@ -981,6 +981,7 @@ pub mod pallet {
 		/// * `pool_id` - `A valid PoolId.
 		#[pallet::call_index(7)]
 		#[pallet::weight(T::WeightInfo::create())]
+		#[allow(clippy::too_many_arguments)]
 		pub fn create_with_pool_id(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
