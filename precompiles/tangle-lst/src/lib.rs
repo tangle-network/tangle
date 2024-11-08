@@ -35,23 +35,24 @@
 mod mock;
 #[cfg(test)]
 mod tests;
-
 use fp_evm::PrecompileHandle;
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	traits::Currency,
 };
+use frame_system::RawOrigin;
 use pallet_evm::AddressMapping;
+use pallet_tangle_lst::ConfigOp;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
 use sp_runtime::traits::Dispatchable;
+use sp_runtime::traits::StaticLookup;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::types::WrappedAccountId32;
 
-type BalanceOf<Runtime> =
-	<<Runtime as pallet_multi_asset_delegation::Config>::Currency as Currency<
-		<Runtime as frame_system::Config>::AccountId,
-	>>::Balance;
+type BalanceOf<Runtime> = <<Runtime as pallet_tangle_lst::Config>::Currency as Currency<
+	<Runtime as frame_system::Config>::AccountId,
+>>::Balance;
 
 use pallet_tangle_lst::{BondExtra, PoolId, PoolState};
 use sp_runtime::Perbill;
@@ -61,7 +62,7 @@ pub struct TangleLstPrecompile<Runtime>(PhantomData<Runtime>);
 #[precompile_utils::precompile]
 impl<Runtime> TangleLstPrecompile<Runtime>
 where
-	Runtime: pallet_tangle_lst::Config + pallet_evm::Config,
+	Runtime: pallet_tangle_lst::Config + pallet_evm::Config + pallet_multi_asset_delegation::Config,
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_tangle_lst::Call<Runtime>>,
@@ -99,7 +100,6 @@ where
 
 		let extra = match extra_type {
 			0 => BondExtra::FreeBalance(extra),
-			1 => BondExtra::Rewards,
 			_ => return Err(revert("Invalid extra type")),
 		};
 
@@ -121,6 +121,8 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 
 		let member_account = Self::convert_to_account_id(member_account)?;
+		let member_account: <Runtime::Lookup as StaticLookup>::Source =
+			Runtime::Lookup::unlookup(member_account);
 		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
 		let unbonding_points: BalanceOf<Runtime> =
 			unbonding_points.try_into().map_err(|_| revert("Invalid unbonding points"))?;
@@ -168,6 +170,8 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 
 		let member_account = Self::convert_to_account_id(member_account)?;
+		let member_account: <Runtime::Lookup as StaticLookup>::Source =
+			Runtime::Lookup::unlookup(member_account);
 		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
 
 		let call = pallet_tangle_lst::Call::<Runtime>::withdraw_unbonded {
@@ -188,16 +192,27 @@ where
 		root: H256,
 		nominator: H256,
 		bouncer: H256,
+		name: BoundedVec<u8, <Runtime as pallet_tangle_lst::Config>::MaxNameLength>,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 
 		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
 		let root = Self::convert_to_account_id(root)?;
+		let root: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(root);
 		let nominator = Self::convert_to_account_id(nominator)?;
+		let nominator: <Runtime::Lookup as StaticLookup>::Source =
+			Runtime::Lookup::unlookup(nominator);
 		let bouncer = Self::convert_to_account_id(bouncer)?;
+		let bouncer: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(bouncer);
 
-		let call = pallet_tangle_lst::Call::<Runtime>::create { amount, root, nominator, bouncer };
+		let call = pallet_tangle_lst::Call::<Runtime>::create {
+			amount,
+			root,
+			nominator,
+			bouncer,
+			name: name.into(),
+		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -212,14 +227,19 @@ where
 		nominator: H256,
 		bouncer: H256,
 		pool_id: U256,
+		name: BoundedVec<u8, <Runtime as pallet_tangle_lst::Config>::MaxNameLength>,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 
 		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
 		let root = Self::convert_to_account_id(root)?;
+		let root: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(root);
 		let nominator = Self::convert_to_account_id(nominator)?;
+		let nominator: <Runtime::Lookup as StaticLookup>::Source =
+			Runtime::Lookup::unlookup(nominator);
 		let bouncer = Self::convert_to_account_id(bouncer)?;
+		let bouncer: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(bouncer);
 		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
 
 		let call = pallet_tangle_lst::Call::<Runtime>::create_with_pool_id {
@@ -228,6 +248,7 @@ where
 			nominator,
 			bouncer,
 			pool_id,
+			name: name.into(),
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
@@ -294,49 +315,48 @@ where
 
 		Ok(())
 	}
+}
 
-	#[precompile::public("setConfigs(uint256,uint256,uint32,uint32)")]
-	fn set_configs(
-		handle: &mut impl PrecompileHandle,
-		min_join_bond: U256,
-		min_create_bond: U256,
-		max_pools: u32,
-		global_max_commission: u32,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		ensure_root(handle)?;
+impl<Runtime> TangleLstPrecompile<Runtime>
+where
+	Runtime: pallet_tangle_lst::Config + pallet_evm::Config,
+	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
+	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+	Runtime::RuntimeCall: From<pallet_tangle_lst::Call<Runtime>>,
+	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+	Runtime::AccountId: From<WrappedAccountId32>,
+{
+	/// Helper method to parse SS58 address
+	fn parse_32byte_address(addr: Vec<u8>) -> EvmResult<Runtime::AccountId> {
+		let addr: Runtime::AccountId = match addr.len() {
+			// public address of the ss58 account has 32 bytes
+			32 => {
+				let mut addr_bytes = [0_u8; 32];
+				addr_bytes[..].clone_from_slice(&addr[0..32]);
 
-		let min_join_bond: Option<BalanceOf<Runtime>> = if min_join_bond == U256::zero() {
-			None
-		} else {
-			Some(min_join_bond.try_into().map_err(|_| revert("Invalid min join bond"))?)
+				WrappedAccountId32(addr_bytes).into()
+			},
+			_ => {
+				// Return err if account length is wrong
+				return Err(revert("Error while parsing staker's address"));
+			},
 		};
 
-		let min_create_bond: Option<BalanceOf<Runtime>> = if min_create_bond == U256::zero() {
-			None
-		} else {
-			Some(min_create_bond.try_into().map_err(|_| revert("Invalid min create bond"))?)
+		Ok(addr)
+	}
+
+	/// Helper for converting from u8 to RewardDestination
+	fn convert_to_account_id(payee: H256) -> EvmResult<Runtime::AccountId> {
+		let payee = match payee {
+			H256(
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
+			) => {
+				let ethereum_address = Address(H160::from_slice(&payee.0[12..]));
+				Runtime::AddressMapping::into_account_id(ethereum_address.0)
+			},
+			H256(account) => Self::parse_32byte_address(account.to_vec())?,
 		};
 
-		let max_pools = if max_pools == 0 { None } else { Some(max_pools) };
-
-		let global_max_commission = if global_max_commission == 0 {
-			None
-		} else {
-			Some(Perbill::from_percent(global_max_commission))
-		};
-
-		let call = pallet_tangle_lst::Call::<Runtime>::set_configs {
-			min_join_bond: min_join_bond.map(ConfigOp::Set).unwrap_or(ConfigOp::Noop),
-			min_create_bond: min_create_bond.map(ConfigOp::Set).unwrap_or(ConfigOp::Noop),
-			max_pools: max_pools.map(ConfigOp::Set).unwrap_or(ConfigOp::Noop),
-			global_max_commission: global_max_commission
-				.map(ConfigOp::Set)
-				.unwrap_or(ConfigOp::Noop),
-		};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, RawOrigin::Root.into(), call)?;
-
-		Ok(())
+		Ok(payee)
 	}
 }

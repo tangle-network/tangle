@@ -7941,6 +7941,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-evm-precompile-tangle-lst"
+version = "0.1.0"
+dependencies = [
+ "derive_more 1.0.0",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "pallet-assets",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-multi-asset-delegation",
+ "pallet-tangle-lst",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-evm-precompile-verify-bls381-signature"
 version = "0.1.0"
 dependencies = [
@@ -14370,6 +14397,7 @@ dependencies = [
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-evm-precompile-staking",
+ "pallet-evm-precompile-tangle-lst",
  "pallet-evm-precompile-verify-bls381-signature",
  "pallet-evm-precompile-verify-ecdsa-secp256k1-signature",
  "pallet-evm-precompile-verify-ecdsa-secp256r1-signature",

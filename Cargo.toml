@@ -40,6 +40,7 @@ members = [
     "precompiles/verify-bls381-signature",
     "precompiles/multi-asset-delegation",
     "precompiles/services",
+    "precompiles/tangle-lst",
     "tangle-subxt",
     "evm-tracer",
 ]
@@ -314,6 +315,7 @@ pallet-evm-precompile-verify-ecdsa-stark-signature = { path = "precompiles/verif
 pallet-evm-precompile-verify-schnorr-signatures = { path = "precompiles/verify-schnorr-signatures", default-features = false }
 pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls381-signature", default-features = false }
 pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
+pallet-evm-precompile-tangle-lst = { path = "precompiles/tangle-lst", default-features = false }
 
 # Precompiles utils
 postcard = { version = "1", default-features = false }
