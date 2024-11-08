@@ -531,6 +531,10 @@ declare module '@polkadot/api-base/types/consts' {
     };
     lst: {
       /**
+       * The maximum length of a pool icon.
+       **/
+      maxIconLength: u32 & AugmentedConst<ApiType>;
+      /**
        * The maximum length of a pool name.
        **/
       maxNameLength: u32 & AugmentedConst<ApiType>;
@@ -796,6 +800,13 @@ declare module '@polkadot/api-base/types/consts' {
        * `PalletId` for the services pallet.
        **/
       palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * Number of eras that slashes are deferred by, after computation.
+       * 
+       * This should be less than the bonding duration. Set to 0 if slashes
+       * should be applied immediately, without opportunity for intervention.
+       **/
+      slashDeferDuration: u32 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
