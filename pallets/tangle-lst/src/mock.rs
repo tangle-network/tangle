@@ -293,6 +293,7 @@ impl pallet_lst::Config for Runtime {
 	type MaxMetadataLen = MaxMetadataLen;
 	type MaxUnbonding = MaxUnbonding;
 	type MaxNameLength = ConstU32<50>;
+	type MaxIconLength = ConstU32<50>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PoolId = PoolId;
@@ -423,6 +424,7 @@ impl ExtBuilder {
 				900,
 				901,
 				902,
+				Default::default(),
 				Default::default()
 			));
 			assert_ok!(Lst::set_metadata(RuntimeOrigin::signed(900), 1, vec![1, 1]));

@@ -1213,6 +1213,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	type AssetId = AssetId;
 	type PoolId = AssetId;
 	type MaxNameLength = ConstU32<50>;
+	type MaxIconLength = ConstU32<500>;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
 }

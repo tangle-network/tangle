@@ -40,22 +40,18 @@ use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	traits::Currency,
 };
-use frame_system::RawOrigin;
 use pallet_evm::AddressMapping;
-use pallet_tangle_lst::ConfigOp;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
 use sp_runtime::traits::Dispatchable;
 use sp_runtime::traits::StaticLookup;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::types::WrappedAccountId32;
+use pallet_tangle_lst::{BondExtra, PoolId, PoolState};
 
 type BalanceOf<Runtime> = <<Runtime as pallet_tangle_lst::Config>::Currency as Currency<
 	<Runtime as frame_system::Config>::AccountId,
 >>::Balance;
-
-use pallet_tangle_lst::{BondExtra, PoolId, PoolState};
-use sp_runtime::Perbill;
 
 pub struct TangleLstPrecompile<Runtime>(PhantomData<Runtime>);
 
@@ -193,6 +189,7 @@ where
 		nominator: H256,
 		bouncer: H256,
 		name: Vec<u8>,
+		icon: Vec<u8>,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -206,12 +203,16 @@ where
 		let bouncer = Self::convert_to_account_id(bouncer)?;
 		let bouncer: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(bouncer);
 
+		let maybe_name = name.try_into().map_err(|_| revert("Invalid name"))?;
+		let maybe_icon = icon.try_into().map_err(|_| revert("Invalid icon"))?;
+
 		let call = pallet_tangle_lst::Call::<Runtime>::create {
 			amount,
 			root,
 			nominator,
 			bouncer,
-			name: name.try_into().map_err(|_| revert("Invalid name"))?,
+			name: Some(maybe_name),
+			icon: Some(maybe_icon),
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
