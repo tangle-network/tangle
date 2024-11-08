@@ -70,7 +70,7 @@ fn join_errors_correctly() {
 				commission: Commission::default(),
 				roles: DEFAULT_ROLES,
 				state: PoolState::Open,
-				metadata: PoolMetadata { name: BoundedVec::default() },
+				metadata: PoolMetadata { name: Default::default(), icon: Default::default() },
 			},
 		}
 		.put();
@@ -136,7 +136,7 @@ fn join_panics_when_reward_pool_not_found() {
 				commission: Commission::default(),
 				roles: DEFAULT_ROLES,
 				state: PoolState::Open,
-				metadata: PoolMetadata { name: BoundedVec::default() },
+				metadata: PoolMetadata { name: Default::default(), icon: Default::default() },
 			},
 		}
 		.put();

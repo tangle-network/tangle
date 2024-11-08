@@ -1275,6 +1275,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	// we use the same number of allowed unlocking chunks as with staking.
 	type MaxUnbonding = <Self as pallet_staking::Config>::MaxUnlockingChunks;
 	type MaxNameLength = ConstU32<50>;
+	type MaxIconLength = ConstU32<500>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PoolId = AssetId;

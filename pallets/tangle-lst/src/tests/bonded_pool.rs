@@ -65,7 +65,7 @@ fn balance_to_point_works() {
 				commission: Commission::default(),
 				roles: DEFAULT_ROLES,
 				state: PoolState::Open,
-				metadata: PoolMetadata { name: BoundedVec::default() },
+				metadata: PoolMetadata { name: Default::default(), icon: Default::default() },
 			},
 		};
 
@@ -121,7 +121,7 @@ fn points_to_balance_works() {
 				commission: Commission::default(),
 				roles: DEFAULT_ROLES,
 				state: PoolState::Open,
-				metadata: PoolMetadata { name: BoundedVec::default() },
+				metadata: PoolMetadata { name: Default::default(), icon: Default::default() },
 			},
 		};
 
@@ -170,7 +170,7 @@ fn ok_to_join_with_works() {
 				commission: Commission::default(),
 				roles: DEFAULT_ROLES,
 				state: PoolState::Open,
-				metadata: PoolMetadata { name: BoundedVec::default() },
+				metadata: PoolMetadata { name: Default::default(), icon: Default::default() },
 			},
 		};
 

@@ -1532,9 +1532,25 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NoAssetsProvided: AugmentedError<ApiType>;
       /**
+       * The Service Blueprint did not return a dispute origin for this service.
+       **/
+      NoDisputeOrigin: AugmentedError<ApiType>;
+      /**
+       * The Service Blueprint did not return a slashing origin for this service.
+       **/
+      NoSlashingOrigin: AugmentedError<ApiType>;
+      /**
        * The caller is not registered as a operator.
        **/
       NotRegistered: AugmentedError<ApiType>;
+      /**
+       * Offender is not an active operator.
+       **/
+      OffenderNotActiveOperator: AugmentedError<ApiType>;
+      /**
+       * Offender is not a registered operator.
+       **/
+      OffenderNotOperator: AugmentedError<ApiType>;
       /**
        * The operator is not active, ensure operator status is ACTIVE in multi-asset-delegation
        **/
@@ -1559,6 +1575,10 @@ declare module '@polkadot/api-base/types/errors' {
        * An error occurred while type checking the provided input input.
        **/
       TypeCheck: AugmentedError<ApiType>;
+      /**
+       * The Unapplied Slash are not found.
+       **/
+      UnappliedSlashNotFound: AugmentedError<ApiType>;
       /**
        * Generic error
        **/

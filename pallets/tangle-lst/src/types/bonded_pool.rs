@@ -20,7 +20,9 @@ pub struct BondedPoolInner<T: Config> {
 #[scale_info(skip_type_params(T))]
 pub struct PoolMetadata<T: Config> {
 	/// pool name
-	pub name: BoundedVec<u8, T::MaxNameLength>,
+	pub name: Option<BoundedVec<u8, T::MaxNameLength>>,
+	/// pool icon
+	pub icon: Option<BoundedVec<u8, T::MaxIconLength>>,
 }
 
 /// A wrapper for bonded pools, with utility functions.
@@ -54,7 +56,8 @@ impl<T: Config> BondedPool<T> {
 	pub fn new(
 		id: PoolId,
 		roles: PoolRoles<T::AccountId>,
-		name: BoundedVec<u8, T::MaxNameLength>,
+		name: Option<BoundedVec<u8, T::MaxNameLength>>,
+		icon: Option<BoundedVec<u8, T::MaxIconLength>>,
 	) -> Self {
 		Self {
 			id,
@@ -62,7 +65,7 @@ impl<T: Config> BondedPool<T> {
 				commission: Commission::default(),
 				roles,
 				state: PoolState::Open,
-				metadata: PoolMetadata { name },
+				metadata: PoolMetadata { name, icon },
 			},
 		}
 	}

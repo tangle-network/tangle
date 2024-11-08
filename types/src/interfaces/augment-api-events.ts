@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesServicesApprovalPreference, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
+import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -1090,10 +1090,6 @@ declare module '@polkadot/api-base/types/events' {
     };
     services: {
       /**
-       * The approval preference for an operator has been updated.
-       **/
-      ApprovalPreferenceUpdated: AugmentedEvent<ApiType, [operator: AccountId32, blueprintId: u64, approvalPreference: TanglePrimitivesServicesApprovalPreference], { operator: AccountId32, blueprintId: u64, approvalPreference: TanglePrimitivesServicesApprovalPreference }>;
-      /**
        * A new service blueprint has been created.
        **/
       BlueprintCreated: AugmentedEvent<ApiType, [owner: AccountId32, blueprintId: u64], { owner: AccountId32, blueprintId: u64 }>;
@@ -1128,7 +1124,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * A service has been initiated.
        **/
-      ServiceInitiated: AugmentedEvent<ApiType, [owner: AccountId32, requestId: Option<u64>, serviceId: u64, blueprintId: u64, assets: Vec<u128>], { owner: AccountId32, requestId: Option<u64>, serviceId: u64, blueprintId: u64, assets: Vec<u128> }>;
+      ServiceInitiated: AugmentedEvent<ApiType, [owner: AccountId32, requestId: u64, serviceId: u64, blueprintId: u64, assets: Vec<u128>], { owner: AccountId32, requestId: u64, serviceId: u64, blueprintId: u64, assets: Vec<u128> }>;
       /**
        * A service request has been approved.
        **/
@@ -1142,13 +1138,17 @@ declare module '@polkadot/api-base/types/events' {
        **/
       ServiceRequestRejected: AugmentedEvent<ApiType, [operator: AccountId32, requestId: u64, blueprintId: u64], { operator: AccountId32, requestId: u64, blueprintId: u64 }>;
       /**
-       * A service request has been updated or modified.
-       **/
-      ServiceRequestUpdated: AugmentedEvent<ApiType, [owner: AccountId32, requestId: u64, blueprintId: u64, pendingApprovals: Vec<AccountId32>, approved: Vec<AccountId32>], { owner: AccountId32, requestId: u64, blueprintId: u64, pendingApprovals: Vec<AccountId32>, approved: Vec<AccountId32> }>;
-      /**
        * A service has been terminated.
        **/
       ServiceTerminated: AugmentedEvent<ApiType, [owner: AccountId32, serviceId: u64, blueprintId: u64], { owner: AccountId32, serviceId: u64, blueprintId: u64 }>;
+      /**
+       * An Unapplied Slash got discarded.
+       **/
+      SlashDiscarded: AugmentedEvent<ApiType, [index: u32, operator: AccountId32, amount: u128, serviceId: u64, blueprintId: u64, era: u32], { index: u32, operator: AccountId32, amount: u128, serviceId: u64, blueprintId: u64, era: u32 }>;
+      /**
+       * An Operator has an unapplied slash.
+       **/
+      UnappliedSlash: AugmentedEvent<ApiType, [index: u32, operator: AccountId32, amount: u128, serviceId: u64, blueprintId: u64, era: u32], { index: u32, operator: AccountId32, amount: u128, serviceId: u64, blueprintId: u64, era: u32 }>;
       /**
        * An operator has been unregistered.
        **/
