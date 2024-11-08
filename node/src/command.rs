@@ -15,7 +15,7 @@
 use crate::{
 	chainspec,
 	cli::{Cli, Subcommand},
-	service::{self, tangle},
+	service,
 };
 use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use futures::TryFutureExt;
@@ -236,7 +236,7 @@ pub fn run() -> sc_cli::Result<()> {
 						}
 
 						cmd.run_with_spec::<sp_runtime::traits::HashingFor<Block>,
-						<tangle::ExecutorDispatch as sc_executor::NativeExecutionDispatch>::ExtendHostFunctions>(Some(
+						<crate::service::tangle::ExecutorDispatch as sc_executor::NativeExecutionDispatch>::ExtendHostFunctions>(Some(
 							config.chain_spec,
 						))
 					},

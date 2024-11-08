@@ -331,6 +331,7 @@ with-rocksdb-weights = []
 with-paritydb-weights = []
 evm-tracing = []
 fast-runtime = ["tangle-primitives/fast-runtime"]
+manual-seal = ["tangle-primitives/manual-seal"]
 
 # Enable the metadata hash generation.
 #

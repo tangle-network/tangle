@@ -17,7 +17,6 @@
 //! Testing utilities.
 
 use super::*;
-
 use frame_support::derive_impl;
 use frame_support::{construct_runtime, parameter_types, weights::Weight};
 use pallet_evm::AddressMapping;

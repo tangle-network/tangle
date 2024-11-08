@@ -1,4 +1,4 @@
-#[allow(dead_code, unused_imports, non_camel_case_types)]
+#[allow(dead_code, unused_imports, non_camel_case_types, unreachable_patterns)]
 #[allow(clippy::all)]
 #[allow(rustdoc::broken_intra_doc_links)]
 pub mod api {
@@ -69,13 +69,13 @@ pub mod api {
 		"TxPoolRuntimeApi",
 		"GenesisBuilder",
 	];
-	#[doc = r" The error type returned when there is a runtime issue."]
+	#[doc = r" The error type that is returned when there is a runtime issue."]
 	pub type DispatchError = runtime_types::sp_runtime::DispatchError;
 	#[doc = r" The outer event enum."]
 	pub type Event = runtime_types::tangle_testnet_runtime::RuntimeEvent;
 	#[doc = r" The outer extrinsic enum."]
 	pub type Call = runtime_types::tangle_testnet_runtime::RuntimeCall;
-	#[doc = r" The outer error enum representing the DispatchError's Module variant."]
+	#[doc = r" The outer error enum represents the DispatchError's Module variant."]
 	pub type Error = runtime_types::tangle_testnet_runtime::RuntimeError;
 	pub fn constants() -> ConstantsApi {
 		ConstantsApi
