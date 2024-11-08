@@ -42,6 +42,7 @@ parameter_types! {
 	pub static StakingMinBond: Balance = 10;
 	pub storage Nominations: Option<Vec<AccountId>> = None;
 }
+
 pub struct StakingMock;
 
 impl StakingMock {

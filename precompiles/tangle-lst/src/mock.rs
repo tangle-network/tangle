@@ -16,7 +16,7 @@
 
 //! Test utilities
 use super::*;
-use crate::{MultiAssetDelegationPrecompile, MultiAssetDelegationPrecompileCall};
+use crate::{TangleLstPrecompile, TangleLstPrecompileCall};
 use frame_support::derive_impl;
 use frame_support::traits::AsEnsureOriginWithArg;
 use frame_support::PalletId;
@@ -34,18 +34,30 @@ use sp_core::{
 	sr25519::{Public as sr25519Public, Signature},
 	ConstU32, H160, H256, U256,
 };
+use sp_runtime::traits::Convert;
+use sp_runtime::DispatchError;
+use sp_runtime::DispatchResult;
+use sp_runtime::FixedU128;
+use sp_runtime::Perbill;
 use sp_runtime::{
 	traits::{IdentifyAccount, IdentityLookup, Verify},
 	AccountId32, BuildStorage,
 };
+use sp_staking::EraIndex;
+use sp_staking::Stake;
 use tangle_primitives::ServiceManager;
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u64;
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
-type AssetId = u32;
-
+pub type BlockNumber = u64;
+pub type RewardCounter = FixedU128;
+pub type AssetId = u32;
+// This sneaky little hack allows us to write code exactly as we would do in the pallet in the tests
+// as well, e.g. `StorageItem::<T>::get()`.
+pub type T = Runtime;
+pub type Currency = <T as pallet_tangle_lst::Config>::Currency;
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 ];
@@ -160,7 +172,7 @@ construct_runtime!(
 		Evm: pallet_evm,
 		Timestamp: pallet_timestamp,
 		Assets: pallet_assets,
-		MultiAssetDelegation: pallet_multi_asset_delegation,
+		Lst: pallet_tangle_lst,
 	}
 );
 
@@ -213,9 +225,9 @@ impl pallet_balances::Config for Runtime {
 }
 
 pub type Precompiles<R> =
-	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, MultiAssetDelegationPrecompile<R>>,)>;
+	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, TangleLstPrecompile<R>>,)>;
 
-pub type PCall = MultiAssetDelegationPrecompileCall<Runtime>;
+pub type PCall = TangleLstPrecompileCall<Runtime>;
 
 pub struct EnsureAddressAlways;
 impl<OuterOrigin> EnsureAddressOrigin<OuterOrigin> for EnsureAddressAlways {
@@ -323,31 +335,218 @@ impl ServiceManager<AccountId, Balance> for MockServiceManager {
 	}
 }
 
-parameter_types! {
-	pub const BlockHashCount: u64 = 250;
-	pub const MaxLocks: u32 = 50;
-	pub const MinOperatorBondAmount: u64 = 10_000;
-	pub const BondDuration: u32 = 10;
-	pub PID: PalletId = PalletId(*b"PotStake");
+pub struct BalanceToU256;
+impl Convert<Balance, U256> for BalanceToU256 {
+	fn convert(n: Balance) -> U256 {
+		n.into()
+	}
 }
 
-impl pallet_multi_asset_delegation::Config for Runtime {
+pub struct U256ToBalance;
+impl Convert<U256, Balance> for U256ToBalance {
+	fn convert(n: U256) -> Balance {
+		n.try_into().unwrap()
+	}
+}
+
+pub struct StakingMock;
+
+impl StakingMock {
+	pub(crate) fn set_bonded_balance(who: AccountId, bonded: Balance) {
+		let mut x = BondedBalanceMap::get();
+		x.insert(who, bonded);
+		BondedBalanceMap::set(&x)
+	}
+	/// Mimics a slash towards a pool specified by `pool_id`.
+	/// This reduces the bonded balance of a pool by `amount` and calls [`Lst::on_slash`] to
+	/// enact changes in the nomination-pool pallet.
+	///
+	/// Does not modify any [`SubPools`] of the pool as [`Default::default`] is passed for
+	/// `slashed_unlocking`.
+	pub fn slash_by(pool_id: PoolId, amount: Balance) {
+		let acc = Lst::create_bonded_account(pool_id);
+		let bonded = BondedBalanceMap::get();
+		let pre_total = bonded.get(&acc).unwrap();
+		Self::set_bonded_balance(acc, pre_total - amount);
+		Lst::on_slash(&acc, pre_total - amount, &Default::default(), amount);
+	}
+}
+
+impl sp_staking::StakingInterface for StakingMock {
+	type Balance = Balance;
+	type AccountId = AccountId;
+	type CurrencyToVote = ();
+
+	fn minimum_nominator_bond() -> Self::Balance {
+		StakingMinBond::get()
+	}
+	fn minimum_validator_bond() -> Self::Balance {
+		StakingMinBond::get()
+	}
+
+	fn desired_validator_count() -> u32 {
+		unimplemented!("method currently not used in testing")
+	}
+
+	fn current_era() -> EraIndex {
+		CurrentEra::get()
+	}
+
+	fn bonding_duration() -> EraIndex {
+		BondingDuration::get()
+	}
+
+	fn status(
+		_: &Self::AccountId,
+	) -> Result<sp_staking::StakerStatus<Self::AccountId>, DispatchError> {
+		Nominations::get()
+			.map(sp_staking::StakerStatus::Nominator)
+			.ok_or(DispatchError::Other("NotStash"))
+	}
+
+	#[allow(clippy::option_map_unit_fn)]
+	fn bond_extra(who: &Self::AccountId, extra: Self::Balance) -> DispatchResult {
+		let mut x = BondedBalanceMap::get();
+		x.get_mut(who).map(|v| *v += extra);
+		BondedBalanceMap::set(&x);
+		Ok(())
+	}
+
+	fn unbond(who: &Self::AccountId, amount: Self::Balance) -> DispatchResult {
+		let mut x = BondedBalanceMap::get();
+		*x.get_mut(who).unwrap() = x.get_mut(who).unwrap().saturating_sub(amount);
+		BondedBalanceMap::set(&x);
+
+		let era = Self::current_era();
+		let unlocking_at = era + Self::bonding_duration();
+		let mut y = UnbondingBalanceMap::get();
+		y.entry(*who).or_default().push((unlocking_at, amount));
+		UnbondingBalanceMap::set(&y);
+		Ok(())
+	}
+
+	fn chill(_: &Self::AccountId) -> sp_runtime::DispatchResult {
+		Ok(())
+	}
+
+	fn withdraw_unbonded(who: Self::AccountId, _: u32) -> Result<bool, DispatchError> {
+		let mut unbonding_map = UnbondingBalanceMap::get();
+		let staker_map = unbonding_map.get_mut(&who).ok_or("Nothing to unbond")?;
+
+		let current_era = Self::current_era();
+		staker_map.retain(|(unlocking_at, _amount)| *unlocking_at > current_era);
+
+		UnbondingBalanceMap::set(&unbonding_map);
+		Ok(UnbondingBalanceMap::get().is_empty() && BondedBalanceMap::get().is_empty())
+	}
+
+	fn bond(stash: &Self::AccountId, value: Self::Balance, _: &Self::AccountId) -> DispatchResult {
+		StakingMock::set_bonded_balance(*stash, value);
+		Ok(())
+	}
+
+	fn nominate(_: &Self::AccountId, nominations: Vec<Self::AccountId>) -> DispatchResult {
+		Nominations::set(&Some(nominations));
+		Ok(())
+	}
+
+	#[cfg(feature = "runtime-benchmarks")]
+	fn nominations(_: &Self::AccountId) -> Option<Vec<Self::AccountId>> {
+		Nominations::get()
+	}
+
+	fn stash_by_ctrl(_controller: &Self::AccountId) -> Result<Self::AccountId, DispatchError> {
+		unimplemented!("method currently not used in testing")
+	}
+
+	fn stake(who: &Self::AccountId) -> Result<Stake<Balance>, DispatchError> {
+		match (UnbondingBalanceMap::get().get(who), BondedBalanceMap::get().get(who).copied()) {
+			(None, None) => Err(DispatchError::Other("balance not found")),
+			(Some(v), None) => Ok(Stake {
+				total: v.iter().fold(0u128, |acc, &x| acc.saturating_add(x.1)),
+				active: 0,
+			}),
+			(None, Some(v)) => Ok(Stake { total: v, active: v }),
+			(Some(a), Some(b)) => Ok(Stake {
+				total: a.iter().fold(0u128, |acc, &x| acc.saturating_add(x.1)) + b,
+				active: b,
+			}),
+		}
+	}
+
+	fn election_ongoing() -> bool {
+		unimplemented!("method currently not used in testing")
+	}
+
+	fn force_unstake(_who: Self::AccountId) -> sp_runtime::DispatchResult {
+		unimplemented!("method currently not used in testing")
+	}
+
+	fn is_exposed_in_era(_who: &Self::AccountId, _era: &EraIndex) -> bool {
+		unimplemented!("method currently not used in testing")
+	}
+
+	#[cfg(feature = "runtime-benchmarks")]
+	fn add_era_stakers(
+		_current_era: &EraIndex,
+		_stash: &Self::AccountId,
+		_exposures: Vec<(Self::AccountId, Self::Balance)>,
+	) {
+		unimplemented!("method currently not used in testing")
+	}
+
+	#[cfg(feature = "runtime-benchmarks")]
+	fn set_current_era(_era: EraIndex) {
+		unimplemented!("method currently not used in testing")
+	}
+
+	#[cfg(feature = "runtime-benchmarks")]
+	fn max_exposure_page_size() -> sp_staking::Page {
+		unimplemented!("method currently not used in testing")
+	}
+
+	fn update_payee(_stash: &Self::AccountId, _reward_acc: &Self::AccountId) -> DispatchResult {
+		unimplemented!("method currently not used in testing")
+	}
+
+	fn is_virtual_staker(_who: &Self::AccountId) -> bool {
+		false
+	}
+
+	fn slash_reward_fraction() -> Perbill {
+		unimplemented!("method currently not used in testing")
+	}
+}
+
+parameter_types! {
+	pub static PostUnbondingPoolsWindow: u32 = 2;
+	pub static MaxMetadataLen: u32 = 2;
+	pub static CheckLevel: u8 = 255;
+	pub const PoolsPalletId: PalletId = PalletId(*b"py/nopls");
+	#[derive(Clone, PartialEq)]
+	pub static MaxUnbonding: u32 = 8;
+}
+
+impl pallet_tangle_lst::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = ();
 	type Currency = Balances;
-	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type BondDuration = BondDuration;
-	type ServiceManager = MockServiceManager;
-	type LeaveOperatorsDelay = ConstU32<10>;
-	type OperatorBondLessDelay = ConstU32<1>;
-	type LeaveDelegatorsDelay = ConstU32<1>;
-	type DelegationBondLessDelay = ConstU32<5>;
-	type MinDelegateAmount = ConstU64<100>;
+	type RuntimeFreezeReason = RuntimeFreezeReason;
+	type RewardCounter = RewardCounter;
+	type BalanceToU256 = BalanceToU256;
+	type U256ToBalance = U256ToBalance;
+	type Staking = StakingMock;
+	type PostUnbondingPoolsWindow = PostUnbondingPoolsWindow;
+	type PalletId = PoolsPalletId;
+	type MaxMetadataLen = MaxMetadataLen;
+	type MaxUnbonding = MaxUnbonding;
+	type MaxNameLength = ConstU32<50>;
+	type MaxIconLength = ConstU32<50>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type PoolId = AssetId;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type PalletId = PID;
-	type WeightInfo = ();
+	type PoolId = PoolId;
+	type ForceOrigin = frame_system::EnsureRoot<u128>;
+	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
 }
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles

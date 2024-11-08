@@ -27,10 +27,11 @@ pallet-tangle-lst = { workspace = true }
 tangle-primitives = { workspace = true }
 
 [dev-dependencies]
-derive_more = { workspace = true }
+derive_more = { workspace = true, features = ["full"] }
 hex-literal = { workspace = true }
 serde = { workspace = true }
 sha3 = { workspace = true }
+sp-staking = { workspace = true }
 
 # Moonbeam
 precompile-utils = { workspace = true, features = ["std", "testing"] }
@@ -39,7 +40,7 @@ precompile-utils = { workspace = true, features = ["std", "testing"] }
 pallet-balances = { workspace = true, features = ["std"] }
 pallet-assets = { workspace = true, features = ["std"] }
 pallet-timestamp = { workspace = true, features = ["std"] }
-scale-info = { workspace = true, features = ["derive", "std"] }
+scale-info = { workspace = true }
 sp-io = { workspace = true, features = ["std"] }
 
 [features]
