@@ -50,6 +50,7 @@ pub mod weights;
 pub use module::*;
 pub use traits::*;
 pub use weights::WeightInfo;
+use tangle_primitives::BlueprintId;
 
 #[cfg(feature = "runtime-benchmarks")]
 pub use impls::BenchmarkingOperatorDelegationManager;
@@ -440,7 +441,7 @@ pub mod module {
 	/// The next free ID for a service blueprint.
 	#[pallet::storage]
 	#[pallet::getter(fn next_blueprint_id)]
-	pub type NextBlueprintId<T> = StorageValue<_, u64, ValueQuery>;
+	pub type NextBlueprintId<T> = StorageValue<_, BlueprintId, ValueQuery>;
 
 	/// The next free ID for a service request.
 	#[pallet::storage]

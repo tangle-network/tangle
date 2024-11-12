@@ -54,6 +54,17 @@ where
 
 		stake_by_asset.into_iter().collect()
 	}
+
+	/// Calculates the total stake for a specific asset ID and service from all delegations
+	pub fn get_stake_by_asset_and_service(&self, asset_id: AssetId, service: ServiceId) -> Balance {
+		let mut total_stake = Balance::default();
+		for stake in &self.delegations {
+			if stake.asset_id == asset_id && stake.services.contains(&service) {
+				total_stake += stake.amount;
+			}
+		}
+		total_stake
+	}
 }
 
 /// The activity status of the operator.
@@ -93,16 +104,22 @@ pub struct OperatorMetadata<AccountId, Balance, AssetId> {
 	pub status: OperatorStatus,
 }
 
-/// Represents a stake for an operator
+/// Represents a stake for an operator with service-specific delegation
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
 pub struct DelegatorBond<AccountId, Balance, AssetId> {
-	/// The account ID of the delegator.
+	/// The account ID of the delegator
 	pub delegator: AccountId,
-	/// The amount bonded.
+	/// The amount bonded
 	pub amount: Balance,
-	/// The ID of the bonded asset.
+	/// The ID of the bonded asset
 	pub asset_id: AssetId,
+	/// The set of service IDs this delegation participates in
+	pub services: BTreeSet<ServiceId>,
 }
+
+/// Represents a unique identifier for a service
+#[derive(Clone, Copy, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq, Ord, PartialOrd)]
+pub struct ServiceId(pub u32);
 
 // ------ Test for helper functions ------ //
 
@@ -137,16 +154,19 @@ mod tests {
 					delegator: MockAccountId(1),
 					amount: MockBalance(50),
 					asset_id: MockAssetId(1),
+					services: BTreeSet::new(),
 				},
 				DelegatorBond {
 					delegator: MockAccountId(2),
 					amount: MockBalance(75),
 					asset_id: MockAssetId(1),
+					services: BTreeSet::new(),
 				},
 				DelegatorBond {
 					delegator: MockAccountId(3),
 					amount: MockBalance(25),
 					asset_id: MockAssetId(2),
+					services: BTreeSet::new(),
 				},
 			],
 		};
@@ -165,21 +185,25 @@ mod tests {
 					delegator: MockAccountId(1),
 					amount: MockBalance(50),
 					asset_id: MockAssetId(1),
+					services: BTreeSet::new(),
 				},
 				DelegatorBond {
 					delegator: MockAccountId(2),
 					amount: MockBalance(75),
 					asset_id: MockAssetId(1),
+					services: BTreeSet::new(),
 				},
 				DelegatorBond {
 					delegator: MockAccountId(3),
 					amount: MockBalance(25),
 					asset_id: MockAssetId(2),
+					services: BTreeSet::new(),
 				},
 				DelegatorBond {
 					delegator: MockAccountId(4),
 					amount: MockBalance(100),
 					asset_id: MockAssetId(2),
+					services: BTreeSet::new(),
 				},
 			],
 		};
@@ -189,5 +213,53 @@ mod tests {
 			vec![(MockAssetId(1), MockBalance(125)), (MockAssetId(2), MockBalance(125))];
 
 		assert_eq!(result, expected_result);
+	}
+
+	#[test]
+	fn selective_service_delegation_should_work() {
+		let service_a = ServiceId(1);
+		let service_b = ServiceId(2);
+		let service_c = ServiceId(3);
+		let service_d = ServiceId(4);
+
+		// Bob's delegation with all services
+		let bob_services: BTreeSet<ServiceId> = vec![service_a, service_b, service_c, service_d]
+			.into_iter()
+			.collect();
+
+		// Alice's delegation excluding service D
+		let alice_services: BTreeSet<ServiceId> = vec![service_a, service_b, service_c]
+			.into_iter()
+			.collect();
+
+		let snapshot = OperatorSnapshot {
+			stake: MockBalance(100),
+			delegations: vec![
+				DelegatorBond {
+					delegator: MockAccountId(1), // Bob
+					amount: MockBalance(100),
+					asset_id: MockAssetId(1),
+					services: bob_services,
+				},
+				DelegatorBond {
+					delegator: MockAccountId(2), // Alice
+					amount: MockBalance(50),
+					asset_id: MockAssetId(1),
+					services: alice_services,
+				},
+			],
+		};
+
+		// Check total stake for service D (only Bob's stake should be counted)
+		assert_eq!(
+			snapshot.get_stake_by_asset_and_service(MockAssetId(1), service_d),
+			MockBalance(100)
+		);
+
+		// Check total stake for service A (both Bob and Alice's stakes should be counted)
+		assert_eq!(
+			snapshot.get_stake_by_asset_and_service(MockAssetId(1), service_a),
+			MockBalance(150)
+		);
 	}
 }
