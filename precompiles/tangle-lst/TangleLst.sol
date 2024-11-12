@@ -1,16 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.3;
-
-/// @dev The TangleLst contract's address.
-address constant TANGLE_LST = 0x0000000000000000000000000000000000000809;
-
-/// @dev The TangleLst contract's instance.
-TangleLst constant TANGLE_LST_CONTRACT = TangleLst(TANGLE_LST);
-
 /// @author The Tangle Team
 /// @title Pallet TangleLst Interface
 /// @title The interface through which solidity contracts will interact with the TangleLst pallet
-/// @custom:address 0x0000000000000000000000000000000000000809
 interface TangleLst {
     /// @dev Join a pool with a specified amount.
     /// @param amount The amount to join with.
@@ -45,15 +37,16 @@ interface TangleLst {
     /// @param root The root account of the pool.
     /// @param nominator The nominator account of the pool.
     /// @param bouncer The bouncer account of the pool.
-    function create(uint256 amount, bytes32 root, bytes32 nominator, bytes32 bouncer) external returns (uint8);
-
-    /// @dev Create a new pool with a specific pool ID.
-    /// @param amount The initial amount to create the pool with.
-    /// @param root The root account of the pool.
-    /// @param nominator The nominator account of the pool.
-    /// @param bouncer The bouncer account of the pool.
-    /// @param poolId The desired pool ID.
-    function createWithPoolId(uint256 amount, bytes32 root, bytes32 nominator, bytes32 bouncer, uint256 poolId) external returns (uint8);
+    /// @param name The name of the pool.
+    /// @param icon The icon of the pool.
+    function create(
+        uint256 amount, 
+        bytes32 root, 
+        bytes32 nominator, 
+        bytes32 bouncer,
+        bytes calldata name,
+        bytes calldata icon
+    ) external returns (uint8);
 
     /// @dev Nominate validators for a pool.
     /// @param poolId The ID of the pool.

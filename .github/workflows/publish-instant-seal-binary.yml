@@ -1,4 +1,4 @@
-name: Publish Release Binary
+name: Publish Manual Seal Binary
 
 on:
   push:
@@ -7,11 +7,11 @@ on:
 
 jobs:
   build:
-    name: Publish binaries
+    name: Publish Manual Seal Binary
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        features: [testnet, default, txpool]
+    concurrency:
+      group: manual-seal-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
     - uses: actions/checkout@v3
@@ -32,17 +32,17 @@ jobs:
       run: sudo apt-get install protobuf-compiler
 
     - name: Build binary
-      run: cargo build --release -p tangle --locked --features ${{ matrix.features }}
+      run: cargo build --release -p tangle --locked --features testnet,txpool,manual-seal
 
     - name: Calculate SHA256
       run: sha256sum target/release/tangle > target/release/tangle.sha256sum
 
-    - name: Upload ${{ matrix.features }} binary to release
+    - name: Upload manual-seal binary to release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: target/release/tangle
-        asset_name: tangle-${{ matrix.features }}-linux-amd64
+        asset_name: tangle-testnet-manual-seal-linux-amd64
         tag: ${{ github.ref }}
         overwrite: true
 
@@ -51,6 +51,6 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: target/release/tangle.sha256sum
-        asset_name: tangle-${{ matrix.features }}-linux-amd64.sha256sum
+        asset_name: tangle-testnet-manual-seal-linux-amd64.sha256sum
         tag: ${{ github.ref }}
         overwrite: true

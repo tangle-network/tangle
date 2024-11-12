@@ -152,8 +152,6 @@ where
 	let mut io = RpcModule::new(());
 	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa } = deps;
 
-	let Some(BabeDeps { keystore, babe_worker_handle }) = babe else { todo!() };
-
 	let GrandpaDeps {
 		shared_voter_state,
 		shared_authority_set,
@@ -166,10 +164,13 @@ where
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
 	io.merge(ServicesClient::new(client.clone()).into_rpc())?;
 
-	io.merge(
-		Babe::new(client.clone(), babe_worker_handle.clone(), keystore, select_chain, deny_unsafe)
-			.into_rpc(),
-	)?;
+	if let Some(babe) = babe {
+		let BabeDeps { babe_worker_handle, keystore } = babe;
+		io.merge(
+			Babe::new(client.clone(), babe_worker_handle, keystore, select_chain, deny_unsafe)
+				.into_rpc(),
+		)?;
+	}
 
 	io.merge(
 		Grandpa::new(

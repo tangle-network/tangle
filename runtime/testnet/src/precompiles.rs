@@ -29,6 +29,7 @@ use pallet_evm_precompile_services::ServicesPrecompile;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use pallet_evm_precompile_staking::StakingPrecompile;
+use pallet_evm_precompile_tangle_lst::TangleLstPrecompile;
 use pallet_evm_precompile_verify_bls381_signature::Bls381Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256k1_signature::EcdsaSecp256k1Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precompile;
@@ -215,6 +216,11 @@ pub type TanglePrecompilesAt<R> = (
 	PrecompileAt<
 		AddressU64<2083>,
 		ServicesPrecompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	PrecompileAt<
+		AddressU64<2084>,
+		TangleLstPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
 );

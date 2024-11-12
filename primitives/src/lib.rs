@@ -50,7 +50,10 @@ pub mod time {
 	/// slot_duration()`.
 	///
 	/// Change this to adjust the block time.
+	#[cfg(not(feature = "manual-seal"))]
 	pub const SECONDS_PER_BLOCK: Moment = 6;
+	#[cfg(feature = "manual-seal")]
+	pub const SECONDS_PER_BLOCK: Moment = 1;
 
 	pub const MILLISECS_PER_BLOCK: Moment = SECONDS_PER_BLOCK * 1000;
 	pub const SLOT_DURATION: Moment = MILLISECS_PER_BLOCK;

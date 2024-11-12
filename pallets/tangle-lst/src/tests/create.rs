@@ -22,6 +22,7 @@ fn create_works() {
 			123,
 			456,
 			789,
+			Default::default(),
 			Default::default()
 		));
 
@@ -71,7 +72,15 @@ fn create_errors_correctly() {
 
 		// Then
 		assert_noop!(
-			Lst::create(RuntimeOrigin::signed(11), 9, 123, 456, 789, Default::default()),
+			Lst::create(
+				RuntimeOrigin::signed(11),
+				9,
+				123,
+				456,
+				789,
+				Default::default(),
+				Default::default()
+			),
 			Error::<Runtime>::MinimumBondNotMet
 		);
 
@@ -80,7 +89,15 @@ fn create_errors_correctly() {
 
 		// Then
 		assert_noop!(
-			Lst::create(RuntimeOrigin::signed(11), 19, 123, 456, 789, Default::default()),
+			Lst::create(
+				RuntimeOrigin::signed(11),
+				19,
+				123,
+				456,
+				789,
+				Default::default(),
+				Default::default()
+			),
 			Error::<Runtime>::MinimumBondNotMet
 		);
 
@@ -91,7 +108,7 @@ fn create_errors_correctly() {
 				commission: Commission::default(),
 				roles: DEFAULT_ROLES,
 				state: PoolState::Open,
-				metadata: PoolMetadata { name: BoundedVec::default() },
+				metadata: PoolMetadata { name: Default::default(), icon: Default::default() },
 			},
 		}
 		.put();
@@ -100,7 +117,15 @@ fn create_errors_correctly() {
 
 		// Then
 		assert_noop!(
-			Lst::create(RuntimeOrigin::signed(11), 20, 123, 456, 789, Default::default()),
+			Lst::create(
+				RuntimeOrigin::signed(11),
+				20,
+				123,
+				456,
+				789,
+				Default::default(),
+				Default::default()
+			),
 			Error::<Runtime>::MaxPools
 		);
 	});
@@ -118,6 +143,7 @@ fn create_with_pool_id_works() {
 			123,
 			456,
 			789,
+			Default::default(),
 			Default::default()
 		));
 
@@ -132,6 +158,7 @@ fn create_with_pool_id_works() {
 				654,
 				783,
 				1,
+				Default::default(),
 				Default::default()
 			),
 			Error::<Runtime>::PoolIdInUse
@@ -145,6 +172,7 @@ fn create_with_pool_id_works() {
 				654,
 				783,
 				3,
+				Default::default(),
 				Default::default()
 			),
 			Error::<Runtime>::InvalidPoolId

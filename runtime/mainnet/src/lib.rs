@@ -163,7 +163,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle"),
 	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
-	spec_version: 1200, // v1.2.0
+	spec_version: 1203, // v1.2.3
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1275,6 +1275,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	// we use the same number of allowed unlocking chunks as with staking.
 	type MaxUnbonding = <Self as pallet_staking::Config>::MaxUnlockingChunks;
 	type MaxNameLength = ConstU32<50>;
+	type MaxIconLength = ConstU32<500>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PoolId = AssetId;

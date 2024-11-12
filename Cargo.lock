@@ -3955,7 +3955,7 @@ dependencies = [
 
 [[package]]
 name = "frost-core"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "byteorder",
  "debugless-unwrap",
@@ -3972,7 +3972,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed25519"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "curve25519-dalek",
  "frost-core",
@@ -3984,7 +3984,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed448"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "ed448-goldilocks-plus",
  "frost-core",
@@ -3996,7 +3996,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p256"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "frost-core",
  "p256",
@@ -4008,7 +4008,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p384"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "frost-core",
  "p384",
@@ -4020,7 +4020,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ristretto255"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "curve25519-dalek",
  "frost-core",
@@ -4032,7 +4032,7 @@ dependencies = [
 
 [[package]]
 name = "frost-secp256k1"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "frost-core",
  "k256",
@@ -4044,7 +4044,7 @@ dependencies = [
 
 [[package]]
 name = "frost-taproot"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "frost-core",
  "k256",
@@ -7260,7 +7260,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7941,6 +7941,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-evm-precompile-tangle-lst"
+version = "0.1.0"
+dependencies = [
+ "derive_more 1.0.0",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "pallet-assets",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-multi-asset-delegation",
+ "pallet-tangle-lst",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-staking",
+ "sp-std",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-evm-precompile-verify-bls381-signature"
 version = "0.1.0"
 dependencies = [
@@ -8225,7 +8253,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-multi-asset-delegation"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -8339,7 +8367,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -8395,7 +8423,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "jsonrpsee 0.23.2",
  "pallet-services-rpc-runtime-api",
@@ -8408,7 +8436,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc-runtime-api"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -14064,7 +14092,7 @@ dependencies = [
 
 [[package]]
 name = "tangle"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "async-trait",
  "clap",
@@ -14085,6 +14113,7 @@ dependencies = [
  "frame-system",
  "frame-system-rpc-runtime-api",
  "futures 0.3.30",
+ "futures-timer",
  "hex",
  "hex-literal 0.4.1",
  "jsonrpsee 0.23.2",
@@ -14154,7 +14183,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -14163,7 +14192,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -14191,7 +14220,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "evm-tracer",
  "fp-evm",
@@ -14304,7 +14333,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -14316,7 +14345,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "1.2.0"
+version = "1.2.3"
 dependencies = [
  "evm-tracer",
  "fixed",
@@ -14370,6 +14399,7 @@ dependencies = [
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-evm-precompile-staking",
+ "pallet-evm-precompile-tangle-lst",
  "pallet-evm-precompile-verify-bls381-signature",
  "pallet-evm-precompile-verify-ecdsa-secp256k1-signature",
  "pallet-evm-precompile-verify-ecdsa-secp256r1-signature",
