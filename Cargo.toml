@@ -41,6 +41,7 @@ members = [
     "precompiles/multi-asset-delegation",
     "precompiles/services",
     "precompiles/tangle-lst",
+    "precompiles/assets",
     "tangle-subxt",
     "evm-tracer",
 ]
