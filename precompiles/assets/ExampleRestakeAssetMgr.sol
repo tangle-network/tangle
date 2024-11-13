@@ -43,7 +43,7 @@ contract AssetManager is Ownable {
         
         // Mint native assets to the user
         require(
-            assetsPrecompile.mint(assetId, msg.sender, amount),
+            assetsPrecompile.mint(assetId, address(this), amount),
             "Asset minting failed"
         );
         
