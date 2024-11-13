@@ -145,3 +145,5 @@ txpool = ["fc-rpc/txpool"]
 fast-runtime = ["tangle-testnet-runtime/fast-runtime", "tangle-runtime/fast-runtime"]
 metadata-hash = ["tangle-testnet-runtime?/metadata-hash", "tangle-runtime/metadata-hash"]
 manual-seal = ["tangle-testnet-runtime/manual-seal"]
+try-runtime = []
+

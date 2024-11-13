@@ -127,6 +127,7 @@ k256 = { version = "0.13.3", default-features = false }
 p256 = { version = "0.13.2", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
 starknet-crypto = { version = "0.7.1", default-features = false, features = ["signature-display", "alloc"] }
+
 frost-core = { path = "frost", default-features = false }
 frost-ed25519 = { path = "frost/frost-ed25519", default-features = false }
 frost-ed448 = { path = "frost/frost-ed448", default-features = false }
