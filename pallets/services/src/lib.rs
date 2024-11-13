@@ -188,6 +188,16 @@ pub mod module {
 		type WeightInfo: WeightInfo;
 	}
 
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn integrity_test() {
+			// Ensure that the pallet's configuration is valid.
+			// 1. Make sure that pallet's associated AccountId value maps correctly to the EVM address.
+			let account_id = T::EvmAddressMapping::into_account_id(Self::address());
+			assert_eq!(account_id, Self::account_id(), "Services: AccountId mapping is incorrect.");
+		}
+	}
+
 	#[pallet::error]
 	pub enum Error<T> {
 		/// The service blueprint was not found.
@@ -637,6 +647,7 @@ pub mod module {
 			#[pallet::compact] blueprint_id: u64,
 			preferences: OperatorPreferences,
 			registration_args: Vec<Field<T::Constraints, T::AccountId>>,
+			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
@@ -652,8 +663,16 @@ pub mod module {
 				.type_check_registration(&registration_args)
 				.map_err(Error::<T>::TypeCheck)?;
 
+			// Transfer the registration value to the pallet
+			T::Currency::transfer(
+				&caller,
+				&Self::account_id(),
+				value,
+				ExistenceRequirement::KeepAlive,
+			)?;
+
 			let (allowed, _weight) =
-				Self::on_register_hook(&blueprint, &preferences, &registration_args)?;
+				Self::on_register_hook(&blueprint, &preferences, &registration_args, value)?;
 
 			ensure!(allowed, Error::<T>::InvalidRegistrationInput);
 

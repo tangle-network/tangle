@@ -558,7 +558,18 @@ pub struct OperatorPreferences {
 impl OperatorPreferences {
 	/// Encode the fields to ethabi bytes.
 	pub fn to_ethabi(&self) -> Vec<ethabi::Token> {
-		let tokens: Vec<ethabi::Token> = vec![ethabi::Token::Bytes(self.key.0.to_vec())];
+		let tokens: Vec<ethabi::Token> = vec![
+			// operator public key
+			ethabi::Token::Bytes(self.key.0.to_vec()),
+			// price targets
+			ethabi::Token::Tuple(vec![
+				ethabi::Token::Uint(self.price_targets.cpu.into()),
+				ethabi::Token::Uint(self.price_targets.mem.into()),
+				ethabi::Token::Uint(self.price_targets.storage_hdd.into()),
+				ethabi::Token::Uint(self.price_targets.storage_ssd.into()),
+				ethabi::Token::Uint(self.price_targets.storage_nvme.into()),
+			]),
+		];
 		tokens
 	}
 }

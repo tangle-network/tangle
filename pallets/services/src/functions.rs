@@ -15,6 +15,7 @@ use tangle_primitives::services::{
 };
 
 use super::*;
+use crate::types::BalanceOf;
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account id of the pallet.
@@ -50,6 +51,7 @@ impl<T: Config> Pallet<T> {
 	/// * `blueprint` - The service blueprint.
 	/// * `prefrences` - The operator preferences.
 	/// * `registration_args` - The registration arguments.
+	/// * `value` - The value to be sent with the call.
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
@@ -58,6 +60,7 @@ impl<T: Config> Pallet<T> {
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		prefrences: &OperatorPreferences,
 		registration_args: &[Field<T::Constraints, T::AccountId>],
+		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.manager {
 			BlueprintManager::Evm(contract) => {
@@ -71,6 +74,22 @@ impl<T: Config> Pallet<T> {
 							internal_type: None,
 						},
 						ethabi::Param {
+							name: String::from("priceTargets"),
+							kind: ethabi::ParamType::Tuple(vec![
+								// Price per vCPU per hour
+								ethabi::ParamType::Uint(64),
+								// Price per MB of memory per hour
+								ethabi::ParamType::Uint(64),
+								// Price per GB of HDD storage per hour
+								ethabi::ParamType::Uint(64),
+								// Price per GB of SSD storage per hour
+								ethabi::ParamType::Uint(64),
+								// Price per GB of NVMe storage per hour
+								ethabi::ParamType::Uint(64),
+							]),
+							internal_type: Some(String::from("struct PriceTargets")),
+						},
+						ethabi::Param {
 							name: String::from("registrationInputs"),
 							kind: ethabi::ParamType::Bytes,
 							internal_type: None,
@@ -80,17 +99,18 @@ impl<T: Config> Pallet<T> {
 					constant: None,
 					state_mutability: ethabi::StateMutability::Payable,
 				};
+
 				let args = prefrences
 					.to_ethabi()
 					.into_iter()
 					.chain(iter::once(Token::Bytes(Field::encode_to_ethabi(registration_args))))
 					.collect::<Vec<_>>();
 
+				let value = value.using_encoded(|bytes| U256::from_little_endian(&bytes));
 				let data = call.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 
-				let info =
-					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
+				let info = Self::evm_call(Self::address(), contract, value, data, gas_limit)?;
 				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
 			_ => (true, Weight::zero()),
