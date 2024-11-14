@@ -23,8 +23,7 @@ extern crate alloc;
 
 use frame_support::{
 	pallet_prelude::*,
-	traits::{Currency, ReservableCurrency},
-	PalletId,
+	traits::{Currency, ExistenceRequirement, ReservableCurrency},
 };
 use frame_system::pallet_prelude::*;
 use sp_runtime::{traits::Get, DispatchResult};
@@ -76,9 +75,9 @@ pub mod module {
 		/// The currency mechanism.
 		type Currency: ReservableCurrency<Self::AccountId>;
 
-		/// `PalletId` for the services pallet.
+		/// `Pallet` EVM Address.
 		#[pallet::constant]
-		type PalletId: Get<PalletId>;
+		type PalletEVMAddress: Get<H160>;
 
 		/// A type that implements the `EvmRunner` trait for the execution of EVM
 		/// transactions.
@@ -206,6 +205,10 @@ pub mod module {
 		AlreadyRegistered,
 		/// The caller does not have the requirements to be a operator.
 		InvalidRegistrationInput,
+		/// The Operator is not allowed to unregister.
+		NotAllowedToUnregister,
+		/// The Operator is not allowed to update their price targets.
+		NotAllowedToUpdatePriceTargets,
 		/// The caller does not have the requirements to request a service.
 		InvalidRequestInput,
 		/// The caller does not have the requirements to call a job.
@@ -214,10 +217,18 @@ pub mod module {
 		InvalidJobResult,
 		/// The caller is not registered as a operator.
 		NotRegistered,
+		/// Approval Process is interrupted.
+		ApprovalInterrupted,
+		/// Rejection Process is interrupted.
+		RejectionInterrupted,
 		/// The service request was not found.
 		ServiceRequestNotFound,
+		/// Service Initialization interrupted.
+		ServiceInitializationInterrupted,
 		/// The service was not found.
 		ServiceNotFound,
+		/// The termination of the service was interrupted.
+		TerminationInterrupted,
 		/// An error occurred while type checking the provided input input.
 		TypeCheck(TypeCheckError),
 		/// The maximum number of permitted callers per service has been exceeded.
@@ -717,11 +728,12 @@ pub mod module {
 		pub fn unregister(
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: u64,
-		) -> DispatchResult {
+		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			ensure!(Blueprints::<T>::contains_key(blueprint_id), Error::<T>::BlueprintNotFound);
-			let registered = Operators::<T>::contains_key(blueprint_id, &caller);
-			ensure!(registered, Error::<T>::NotRegistered);
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
+			let preferences = Operators::<T>::get(blueprint_id, &caller)?;
+			let (allowed, _weight) = Self::on_unregister_hook(&blueprint, &preferences)?;
+			ensure!(allowed, Error::<T>::NotAllowedToUnregister);
 			// TODO: check if the caller is not providing any service for the blueprint.
 			Operators::<T>::remove(blueprint_id, &caller);
 
@@ -735,7 +747,8 @@ pub mod module {
 
 			ensure!(removed, Error::<T>::NotRegistered);
 			Self::deposit_event(Event::Unregistered { operator: caller.clone(), blueprint_id });
-			Ok(())
+			// TODO: update weight for the unregistration.
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
 		/// Update the price targets for the caller for a specific service blueprint.
@@ -746,22 +759,32 @@ pub mod module {
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: u64,
 			price_targets: PriceTargets,
-		) -> DispatchResult {
+		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			ensure!(Blueprints::<T>::contains_key(blueprint_id), Error::<T>::BlueprintNotFound);
-			Operators::<T>::try_mutate_exists(blueprint_id, &caller, |current_preferences| {
-				current_preferences
-					.as_mut()
-					.map(|v| v.price_targets = price_targets)
-					.ok_or(Error::<T>::NotRegistered)
-			})?;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
+
+			let updated_preferences =
+				Operators::<T>::try_mutate_exists(blueprint_id, &caller, |current_preferences| {
+					current_preferences
+						.as_mut()
+						.map(|v| {
+							v.price_targets = price_targets;
+							(*v).clone()
+						})
+						.ok_or(Error::<T>::NotRegistered)
+				})?;
+
+			let (allowed, _weight) =
+				Self::on_update_price_targets(&blueprint, &updated_preferences)?;
+
+			ensure!(allowed, Error::<T>::NotAllowedToUpdatePriceTargets);
 
 			Self::deposit_event(Event::PriceTargetsUpdated {
 				operator: caller.clone(),
 				blueprint_id,
 				price_targets,
 			});
-			Ok(())
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
 		/// Request a new service to be initiated using the provided blueprint with a list of
@@ -776,6 +799,7 @@ pub mod module {
 			request_args: Vec<Field<T::Constraints, T::AccountId>>,
 			assets: Vec<T::AssetId>,
 			#[pallet::compact] ttl: BlockNumberFor<T>,
+			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
@@ -792,9 +816,26 @@ pub mod module {
 				preferences.push(prefs);
 			}
 
+			// Transfer the request value to the pallet
+			T::Currency::transfer(
+				&caller,
+				&Self::account_id(),
+				value,
+				ExistenceRequirement::KeepAlive,
+			)?;
+
 			let service_id = Self::next_instance_id();
-			let (allowed, _weight) =
-				Self::on_request_hook(&blueprint, service_id, &preferences, &request_args)?;
+			let (allowed, _weight) = Self::on_request_hook(
+				&caller,
+				&blueprint,
+				service_id,
+				&preferences,
+				&request_args,
+				&permitted_callers,
+				&assets,
+				ttl,
+				value,
+			)?;
 
 			ensure!(allowed, Error::<T>::InvalidRequestInput);
 
@@ -851,7 +892,7 @@ pub mod module {
 			origin: OriginFor<T>,
 			#[pallet::compact] request_id: u64,
 			#[pallet::compact] restaking_percent: Percent,
-		) -> DispatchResult {
+		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let mut request = Self::service_requests(request_id)?;
 			let updated = request
@@ -861,6 +902,8 @@ pub mod module {
 				.map(|(_, s)| *s = ApprovalState::Approved { restaking_percent });
 			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
 
+			let (_, blueprint) = Self::blueprints(request.blueprint)?;
+			let preferences = Operators::<T>::get(request.blueprint, caller.clone())?;
 			let approved = request
 				.operators_with_approval_state
 				.iter()
@@ -880,6 +923,14 @@ pub mod module {
 				)
 				.collect::<Vec<_>>();
 
+			let (allowed, _weight) = Self::on_approve_hook(
+				&blueprint,
+				&preferences,
+				request_id,
+				restaking_percent.deconstruct(),
+			)?;
+
+			ensure!(allowed, Error::<T>::ApprovalInterrupted);
 			// we emit this event regardless of the outcome of the approval.
 			Self::deposit_event(Event::ServiceRequestApproved {
 				operator: caller.clone(),
@@ -935,6 +986,18 @@ pub mod module {
 						.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
 				})?;
 
+				let (allowed, _weight) = Self::on_service_init_hook(
+					&blueprint,
+					request_id,
+					service_id,
+					&request.owner,
+					&request.permitted_callers,
+					&request.assets,
+					request.ttl,
+				)?;
+
+				ensure!(allowed, Error::<T>::ServiceInitializationInterrupted);
+
 				Self::deposit_event(Event::ServiceInitiated {
 					owner: request.owner,
 					request_id,
@@ -946,40 +1009,45 @@ pub mod module {
 				// Update the service request.
 				ServiceRequests::<T>::insert(request_id, request);
 			}
-			Ok(())
+
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
 		/// Reject a service request.
 		/// The service will not be initiated, and the requester will need to update the service
 		/// request.
 		#[pallet::weight(T::WeightInfo::reject())]
-		pub fn reject(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
+		pub fn reject(
+			origin: OriginFor<T>,
+			#[pallet::compact] request_id: u64,
+		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let updated = ServiceRequests::<T>::try_mutate_exists(request_id, |maybe_request| {
-				maybe_request
-					.as_mut()
-					.map(|r| {
-						r.operators_with_approval_state.iter_mut().find_map(|(v, s)| {
-							if v == &caller {
-								*s = ApprovalState::Rejected;
-								Some(r.blueprint)
-							} else {
-								None
-							}
-						})
-					})
-					.ok_or(Error::<T>::ServiceRequestNotFound)
-			})?;
-			match updated {
-				Some(blueprint_id) => Self::deposit_event(Event::ServiceRequestRejected {
-					operator: caller.clone(),
-					request_id,
-					blueprint_id,
-				}),
-				None => return Err(Error::<T>::ApprovalNotRequested.into()),
-			};
+			let mut request = Self::service_requests(request_id)?;
+			let updated = request.operators_with_approval_state.iter_mut().find_map(|(v, s)| {
+				if v == &caller {
+					*s = ApprovalState::Rejected;
+					Some(())
+				} else {
+					None
+				}
+			});
 
-			Ok(())
+			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
+
+			let (_, blueprint) = Self::blueprints(request.blueprint)?;
+			let prefs = Operators::<T>::get(request.blueprint, caller.clone())?;
+
+			let (allowed, _weight) = Self::on_reject_hook(&blueprint, &prefs, request_id)?;
+
+			ensure!(allowed, Error::<T>::RejectionInterrupted);
+			Self::deposit_event(Event::ServiceRequestRejected {
+				operator: caller,
+				blueprint_id: request.blueprint,
+				request_id,
+			});
+
+			// TODO: make use of the returned weight from the hook.
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
 		/// Terminates the service by the owner of the service.
@@ -987,7 +1055,7 @@ pub mod module {
 		pub fn terminate(
 			origin: OriginFor<T>,
 			#[pallet::compact] service_id: u64,
-		) -> DispatchResult {
+		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let service = Self::services(service_id)?;
 			// TODO: allow permissioned callers to terminate the service?
@@ -997,6 +1065,11 @@ pub mod module {
 			})?;
 			ensure!(removed, Error::<T>::ServiceNotFound);
 			Instances::<T>::remove(service_id);
+			let (_, blueprint) = Self::blueprints(service.blueprint)?;
+			let (allowed, _weight) =
+				Self::on_service_termination_hook(&blueprint, service_id, &service.owner)?;
+
+			ensure!(allowed, Error::<T>::TerminationInterrupted);
 			// Remove the service from the operator's profile.
 			for (operator, _) in &service.operators {
 				OperatorsProfile::<T>::try_mutate_exists(operator, |profile| {
@@ -1012,7 +1085,7 @@ pub mod module {
 				service_id,
 				blueprint_id: service.blueprint,
 			});
-			Ok(())
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
 		/// Call a Job in the service.

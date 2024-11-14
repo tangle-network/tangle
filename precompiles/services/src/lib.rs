@@ -3,6 +3,7 @@
 use fp_evm::PrecompileHandle;
 use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
 use pallet_evm::AddressMapping;
+use pallet_services::types::BalanceOf;
 use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
 use sp_core::U256;
@@ -60,6 +61,8 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		// msg.value
+		let value = handle.context().apparent_value;
 
 		let blueprint_id: u64 = blueprint_id.as_u64();
 		let preferences: Vec<u8> = preferences.into();
@@ -71,10 +74,18 @@ where
 			Decode::decode(&mut &registration_args[..])
 				.map_err(|_| revert("Invalid registration arguments"))?;
 
+		let value_bytes = {
+			let mut value_bytes = Vec::new();
+			value.to_little_endian(&mut value_bytes);
+			value_bytes
+		};
+		let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
+			.map_err(|_| revert("Value is not a valid balance"))?;
 		let call = pallet_services::Call::<Runtime>::register {
 			blueprint_id,
 			preferences,
 			registration_args,
+			value,
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;

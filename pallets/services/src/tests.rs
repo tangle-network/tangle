@@ -136,6 +136,7 @@ fn register_on_blueprint() {
 				price_targets: price_targets(MachineKind::Large),
 			},
 			Default::default(),
+			0,
 		);
 		assert_ok!(registration_call);
 
@@ -160,6 +161,7 @@ fn register_on_blueprint() {
 				0,
 				OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 				Default::default(),
+				0,
 			),
 			crate::Error::<Runtime>::AlreadyRegistered
 		);
@@ -171,6 +173,7 @@ fn register_on_blueprint() {
 				0,
 				OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 				Default::default(),
+				0,
 			),
 			crate::Error::<Runtime>::OperatorNotActive
 		);
@@ -219,6 +222,7 @@ fn update_price_targets() {
 				price_targets: price_targets(MachineKind::Small)
 			},
 			Default::default(),
+			0,
 		));
 
 		assert_eq!(
@@ -284,6 +288,7 @@ fn unregister_from_blueprint() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		assert_ok!(Services::unregister(RuntimeOrigin::signed(bob.clone()), 0));
 		assert!(!Operators::<Runtime>::contains_key(0, &bob));
@@ -319,6 +324,7 @@ fn request_service() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
@@ -326,6 +332,7 @@ fn request_service() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
@@ -333,6 +340,7 @@ fn request_service() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -430,6 +438,7 @@ fn request_service_with_no_assets() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let eve = mock_pub_key(EVE);
 		assert_err!(
@@ -460,6 +469,7 @@ fn job_calls() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
@@ -467,6 +477,7 @@ fn job_calls() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
@@ -474,6 +485,7 @@ fn job_calls() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -547,6 +559,7 @@ fn job_calls_fails_with_invalid_input() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
@@ -554,6 +567,7 @@ fn job_calls_fails_with_invalid_input() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
@@ -561,6 +575,7 @@ fn job_calls_fails_with_invalid_input() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -631,6 +646,7 @@ fn job_result() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
@@ -638,6 +654,7 @@ fn job_result() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
@@ -645,6 +662,7 @@ fn job_result() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -758,6 +776,7 @@ fn deploy() -> Deployment {
 		blueprint_id,
 		OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 		Default::default(),
+		0,
 	));
 
 	let eve = mock_pub_key(EVE);
