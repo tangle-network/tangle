@@ -666,11 +666,7 @@ impl<T: Config> Pallet<T> {
 							kind: ethabi::ParamType::Uint(64),
 							internal_type: None,
 						},
-						ethabi::Param {
-							name: String::from("operator"),
-							kind: ethabi::ParamType::Bytes,
-							internal_type: None,
-						},
+						OperatorPreferences::to_ethabi_param(),
 						ethabi::Param {
 							name: String::from("inputs"),
 							kind: ethabi::ParamType::Bytes,

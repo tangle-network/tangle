@@ -204,7 +204,7 @@ impl pallet_staking::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ServicesEVMAddress: H160 = H160([1; 20]);
+	pub const ServicesEVMAddress: H160 = H160([0x11; 20]);
 }
 
 pub struct PalletEVMGasWeightMapping;
