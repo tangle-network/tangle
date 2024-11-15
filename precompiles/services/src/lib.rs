@@ -140,6 +140,14 @@ where
 		let assets: Vec<Runtime::AssetId> =
 			assets.into_iter().map(|asset| asset.as_u32().into()).collect();
 
+		let value_bytes = {
+			let value = handle.context().apparent_value;
+			let mut value_bytes = Vec::new();
+			value.to_little_endian(&mut value_bytes);
+			value_bytes
+		};
+		let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
+			.map_err(|_| revert("Value is not a valid balance"))?;
 		let call = pallet_services::Call::<Runtime>::request {
 			blueprint_id,
 			permitted_callers,
@@ -147,6 +155,7 @@ where
 			ttl: 10000_u32.into(),
 			assets,
 			request_args,
+			value,
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;

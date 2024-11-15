@@ -226,6 +226,14 @@ impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 		use pallet_evm::AddressMapping;
 		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
 	}
+
+	fn into_address(account_id: AccountId) -> H160 {
+		account_id.using_encoded(|b| {
+			let mut addr = [0u8; 20];
+			addr.copy_from_slice(&b[0..20]);
+			H160(addr)
+		})
+	}
 }
 
 pub type AssetId = u32;

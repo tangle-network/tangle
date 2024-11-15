@@ -40,7 +40,7 @@ use sp_core::{ecdsa, RuntimeDebug};
 use sp_runtime::Percent;
 
 #[cfg(not(feature = "std"))]
-use alloc::{vec, vec::Vec};
+use alloc::{string::String, vec, vec::Vec};
 
 pub mod field;
 pub use field::*;
@@ -568,7 +568,7 @@ impl PriceTargets {
 		ethabi::Param {
 			name: String::from("priceTargets"),
 			kind: Self::to_ethabi_param_type(),
-			internal_type: Some(String::from("struct PriceTargets")),
+			internal_type: Some(String::from("struct IBlueprintServiceManager.PriceTargets")),
 		}
 	}
 
@@ -608,7 +608,9 @@ impl OperatorPreferences {
 		ethabi::Param {
 			name: String::from("operatorPreferences"),
 			kind: Self::to_ethabi_param_type(),
-			internal_type: Some(String::from("struct OperatorPreferences")),
+			internal_type: Some(String::from(
+				"struct IBlueprintServiceManager.OperatorPreferences",
+			)),
 		}
 	}
 

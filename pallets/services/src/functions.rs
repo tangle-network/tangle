@@ -399,7 +399,7 @@ impl<T: Config> Pallet<T> {
 		Ok((allowed, weight))
 	}
 
-	/// Hook to be called when a service is initialized. This function will call the `onServiceInit`
+	/// Hook to be called when a service is initialized. This function will call the `onServiceInitialized`
 	/// function of the service blueprint manager contract.
 	///
 	/// # Arguments
@@ -427,7 +427,7 @@ impl<T: Config> Pallet<T> {
 			BlueprintManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
-					name: String::from("onServiceInit"),
+					name: String::from("onServiceInitialized"),
 					inputs: vec![
 						ethabi::Param {
 							name: String::from("requestId"),
@@ -855,6 +855,13 @@ impl<T: Config> Pallet<T> {
 				if info.exit_reason.is_revert() {
 					log::debug!(
 						target: "evm",
+						"Call to: {:?} with data: 0x{} Reverted with reason: (0x{})",
+						to,
+						hex::encode(&data),
+						hex::encode(&info.value),
+					);
+					#[cfg(test)]
+					eprintln!(
 						"Call to: {:?} with data: 0x{} Reverted with reason: (0x{})",
 						to,
 						hex::encode(&data),

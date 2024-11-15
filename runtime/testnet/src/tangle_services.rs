@@ -1,7 +1,7 @@
 use super::*;
 
 parameter_types! {
-	pub const ServicesPalletId: PalletId = PalletId(*b"py/srvcs");
+	pub const ServicesEVMAddress: H160 = H160([1; 20]);
 }
 
 pub struct PalletEvmRunner;
@@ -63,6 +63,14 @@ impl pallet_services::EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 	fn into_account_id(address: H160) -> AccountId {
 		use pallet_evm::AddressMapping;
 		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
+	}
+
+	fn into_address(account_id: AccountId) -> H160 {
+		account_id.using_encoded(|b| {
+			let mut addr = [0u8; 20];
+			addr.copy_from_slice(&b[0..20]);
+			H160(addr)
+		})
 	}
 }
 
@@ -137,7 +145,7 @@ impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
-	type PalletId = ServicesPalletId;
+	type PalletEVMAddress = ServicesEVMAddress;
 	type EvmRunner = PalletEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type EvmAddressMapping = PalletEVMAddressMapping;

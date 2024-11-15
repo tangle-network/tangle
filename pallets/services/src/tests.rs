@@ -352,6 +352,7 @@ fn request_service() {
 			Default::default(),
 			vec![USDC, WETH],
 			100,
+			0,
 		));
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
@@ -450,6 +451,7 @@ fn request_service_with_no_assets() {
 				Default::default(),
 				vec![], // no assets
 				100,
+				0,
 			),
 			Error::<Runtime>::NoAssetsProvided
 		);
@@ -497,6 +499,7 @@ fn job_calls() {
 			Default::default(),
 			vec![WETH],
 			100,
+			0,
 		));
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
@@ -587,6 +590,7 @@ fn job_calls_fails_with_invalid_input() {
 			Default::default(),
 			vec![WETH],
 			100,
+			0,
 		));
 		// this service gets immediately accepted by all providers.
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
@@ -674,6 +678,7 @@ fn job_result() {
 			Default::default(),
 			vec![WETH],
 			100,
+			0,
 		));
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
@@ -789,6 +794,7 @@ fn deploy() -> Deployment {
 		Default::default(),
 		vec![WETH],
 		100,
+		0,
 	));
 
 	assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
