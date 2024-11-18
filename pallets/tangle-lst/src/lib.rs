@@ -758,13 +758,11 @@ pub mod pallet {
 			UnbondingMembers::<T>::try_mutate(
 				member_account.clone(),
 				|member| -> DispatchResult {
-					let member = member.get_or_insert_with(|| PoolMember {
-						pool_id,
-						unbonding_eras: Default::default(),
-					});
+					let member = member
+						.get_or_insert_with(|| PoolMember { unbonding_eras: Default::default() });
 					member
 						.unbonding_eras
-						.try_insert(unbond_era, points_unbonded)
+						.try_insert(unbond_era, (pool_id, points_unbonded))
 						.map(|old| {
 							if old.is_some() {
 								defensive!("value checked to not exist in the map; qed");
@@ -847,10 +845,20 @@ pub mod pallet {
 				.ok_or(Error::<T>::PoolMemberNotFound)?;
 			let current_era = T::Staking::current_era();
 
-			let bonded_pool = BondedPool::<T>::get(member.pool_id)
+			// get the pool id from the unbonding map
+			let pool_id = member.get_by_pool_id(current_era, pool_id);
+
+			if pool_id.is_none() {
+				return Err(Error::<T>::PoolNotFound.into());
+			}
+
+			// checked above
+			let pool_id = pool_id.unwrap();
+
+			let bonded_pool = BondedPool::<T>::get(pool_id)
 				.defensive_ok_or::<Error<T>>(DefensiveError::PoolNotFound.into())?;
 			let mut sub_pools =
-				SubPoolsStorage::<T>::get(member.pool_id).ok_or(Error::<T>::SubPoolsNotFound)?;
+				SubPoolsStorage::<T>::get(pool_id).ok_or(Error::<T>::SubPoolsNotFound)?;
 
 			bonded_pool.ok_to_withdraw_unbonded_with(&caller, &member_account)?;
 
@@ -905,7 +913,7 @@ pub mod pallet {
 
 			Self::deposit_event(Event::<T>::Withdrawn {
 				member: member_account.clone(),
-				pool_id: member.pool_id,
+				pool_id,
 				points: sum_unlocked_points,
 				balance: balance_to_unbond,
 			});
@@ -922,7 +930,7 @@ pub mod pallet {
 					Pallet::<T>::dissolve_pool(bonded_pool);
 					None
 				} else {
-					SubPoolsStorage::<T>::insert(member.pool_id, sub_pools);
+					SubPoolsStorage::<T>::insert(pool_id, sub_pools);
 					Some(T::WeightInfo::withdraw_unbonded_update(num_slashing_spans))
 				}
 			} else {
