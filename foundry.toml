@@ -1,0 +1,25 @@
+[profile.default]
+src = "contracts/src"
+test = "contracts/test"
+out = "contracts/out"
+script = "contracts/script"
+cache_path = "contracts/cache"
+broadcast = "contracts/broadcast"
+libs = ["dependencies"]
+auto_detect_remappings = true
+
+[profile.ci]
+verbosity = 4
+
+[fmt]
+bracket_spacing = true
+int_types = "long"
+line_length = 132
+multiline_func_header = "all"
+number_underscore = "thousands"
+quote_style = "double"
+tab_width = 4
+wrap_comments = true
+
+[dependencies]
+forge-std = "1.9.4"

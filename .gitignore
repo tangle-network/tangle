@@ -40,3 +40,27 @@ resources/para-2076-wasm
 
 scripts/edg-balances-new.json
 *.venv
+
+# Compiler files
+**/cache
+**/node_modules
+**/out
+
+# files
+*.html
+*.log
+.DS_Store
+.pnp.*
+lcov.info
+yarn-debug.log*
+yarn-error.log*
+deployments.json
+
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
+# Soldeer
+/dependencies
