@@ -9,36 +9,33 @@ use std::{boxed::Box, string::String, vec::Vec};
 use ethabi::Token;
 use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use sp_core::{H160, U256};
-use sp_runtime::traits::{AccountIdConversion, UniqueSaturatedInto};
+use sp_runtime::traits::UniqueSaturatedInto;
 use tangle_primitives::services::{
 	BlueprintManager, Field, OperatorPreferences, Service, ServiceBlueprint,
 };
 
 use super::*;
+use crate::types::BalanceOf;
 
+#[allow(clippy::too_many_arguments)]
 impl<T: Config> Pallet<T> {
 	/// Returns the account id of the pallet.
 	///
 	/// This function retrieves the account id associated with the pallet by converting
-	/// the pallet id into an account id.
+	/// the pallet evm address to an account id.
 	///
 	/// # Returns
 	/// * `T::AccountId` - The account id of the pallet.
 	pub fn account_id() -> T::AccountId {
-		T::PalletId::get().into_account_truncating()
+		T::EvmAddressMapping::into_account_id(Self::address())
 	}
 
-	/// Returns the address of the pallet.
-	///
-	/// This function converts the account id of the pallet to a 20-byte H160 address.
+	/// Returns the EVM address of the pallet.
 	///
 	/// # Returns
 	/// * `H160` - The address of the pallet.
 	pub fn address() -> H160 {
-		// Convert the account id to bytes.
-		let account_id = Self::account_id().encode();
-		// Convert the first 20 bytes to an H160.
-		H160::from_slice(&account_id[0..20])
+		T::PalletEVMAddress::get()
 	}
 
 	/// Hook to be called upon a new operator registration on a blueprint.
@@ -50,6 +47,7 @@ impl<T: Config> Pallet<T> {
 	/// * `blueprint` - The service blueprint.
 	/// * `prefrences` - The operator preferences.
 	/// * `registration_args` - The registration arguments.
+	/// * `value` - The value to be sent with the call.
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
@@ -58,6 +56,7 @@ impl<T: Config> Pallet<T> {
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		prefrences: &OperatorPreferences,
 		registration_args: &[Field<T::Constraints, T::AccountId>],
+		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.manager {
 			BlueprintManager::Evm(contract) => {
@@ -65,11 +64,7 @@ impl<T: Config> Pallet<T> {
 				let call = ethabi::Function {
 					name: String::from("onRegister"),
 					inputs: vec![
-						ethabi::Param {
-							name: String::from("operator"),
-							kind: ethabi::ParamType::Bytes,
-							internal_type: None,
-						},
+						OperatorPreferences::to_ethabi_param(),
 						ethabi::Param {
 							name: String::from("registrationInputs"),
 							kind: ethabi::ParamType::Bytes,
@@ -80,22 +75,210 @@ impl<T: Config> Pallet<T> {
 					constant: None,
 					state_mutability: ethabi::StateMutability::Payable,
 				};
+
 				let args = prefrences
 					.to_ethabi()
 					.into_iter()
 					.chain(iter::once(Token::Bytes(Field::encode_to_ethabi(registration_args))))
 					.collect::<Vec<_>>();
 
+				let value = value.using_encoded(U256::from_little_endian);
 				let data = call.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 
-				let info =
-					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
+				let info = Self::evm_call(Self::address(), contract, value, data, gas_limit)?;
 				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
 			_ => (true, Weight::zero()),
 		};
 		Ok((allowed, weight))
+	}
+
+	/// Hook to be called upon an operator unregistration on a blueprint.
+	///
+	/// This function is called when an operator is unregistered. It performs an EVM call
+	/// to the `onUnregister` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `prefrences` - The operator preferences.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///  whether the unregistration is allowed and the weight of the operation.
+	pub fn on_unregister_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		prefrences: &OperatorPreferences,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		match blueprint.manager {
+			BlueprintManager::Evm(contract) => {
+				#[allow(deprecated)]
+				let call = ethabi::Function {
+					name: String::from("onUnregister"),
+					inputs: vec![OperatorPreferences::to_ethabi_param()],
+					outputs: Default::default(),
+					constant: None,
+					state_mutability: ethabi::StateMutability::NonPayable,
+				};
+
+				let args = prefrences.to_ethabi();
+				let data = call.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
+				let gas_limit = 300_000;
+
+				let info = Self::evm_call(Self::address(), contract, 0.into(), data, gas_limit)?;
+				Ok((info.exit_reason.is_succeed(), Self::weight_from_call_info(&info)))
+			},
+			_ => Ok((true, Weight::zero())),
+		}
+	}
+
+	/// Hook to be called upon a new price targets update on a blueprint.
+	/// This function is called when the price targets are updated. It performs an EVM call
+	/// to the `onUpdatePriceTargets` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `prefrences` - The operator preferences.
+	///
+	/// # Returns
+	///
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///  whether the price targets update is allowed and the weight of the operation.
+	pub fn on_update_price_targets(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		prefrences: &OperatorPreferences,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		match blueprint.manager {
+			BlueprintManager::Evm(contract) => {
+				#[allow(deprecated)]
+				let call = ethabi::Function {
+					name: String::from("onUpdatePriceTargets"),
+					inputs: vec![OperatorPreferences::to_ethabi_param()],
+					outputs: Default::default(),
+					constant: None,
+					state_mutability: ethabi::StateMutability::Payable,
+				};
+
+				let args = prefrences.to_ethabi();
+				let data = call.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
+				let gas_limit = 300_000;
+
+				let info = Self::evm_call(Self::address(), contract, 0.into(), data, gas_limit)?;
+				Ok((info.exit_reason.is_succeed(), Self::weight_from_call_info(&info)))
+			},
+			_ => Ok((true, Weight::zero())),
+		}
+	}
+
+	/// Hook to be called upon an operator approve a service request on a blueprint.
+	///
+	/// This function is called when an operator approve a service request. It performs an EVM call
+	/// to the `onApprove` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `prefrences` - The operator preferences.
+	/// * `request_id` - The request id.
+	/// * `restaking_percent` - The restaking percent.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	/// whether the approve is allowed and the weight of the operation.
+	pub fn on_approve_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		prefrences: &OperatorPreferences,
+		request_id: u64,
+		restaking_percent: u8,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		match blueprint.manager {
+			BlueprintManager::Evm(contract) => {
+				#[allow(deprecated)]
+				let call = ethabi::Function {
+					name: String::from("onApprove"),
+					inputs: vec![
+						OperatorPreferences::to_ethabi_param(),
+						ethabi::Param {
+							name: String::from("requestId"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("restakingPercent"),
+							kind: ethabi::ParamType::Uint(8),
+							internal_type: None,
+						},
+					],
+					outputs: Default::default(),
+					constant: None,
+					state_mutability: ethabi::StateMutability::NonPayable,
+				};
+
+				let args = prefrences
+					.to_ethabi()
+					.into_iter()
+					.chain(iter::once(Token::Uint(U256::from(request_id))))
+					.chain(iter::once(Token::Uint(U256::from(restaking_percent))))
+					.collect::<Vec<_>>();
+
+				let data = call.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
+				let gas_limit = 300_000;
+
+				let info = Self::evm_call(Self::address(), contract, 0.into(), data, gas_limit)?;
+				Ok((info.exit_reason.is_succeed(), Self::weight_from_call_info(&info)))
+			},
+			_ => Ok((true, Weight::zero())),
+		}
+	}
+
+	/// Hook to be called upon an operator reject a service request on a blueprint.
+	/// This function is called when an operator reject a service request. It performs an EVM call
+	/// to the `onReject` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `prefrences` - The operator preferences.
+	/// * `request_id` - The request id.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	/// whether the reject is allowed and the weight of the operation.
+	pub fn on_reject_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		prefrences: &OperatorPreferences,
+		request_id: u64,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		match blueprint.manager {
+			BlueprintManager::Evm(contract) => {
+				#[allow(deprecated)]
+				let call = ethabi::Function {
+					name: String::from("onReject"),
+					inputs: vec![
+						OperatorPreferences::to_ethabi_param(),
+						ethabi::Param {
+							name: String::from("requestId"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+					],
+					outputs: Default::default(),
+					constant: None,
+					state_mutability: ethabi::StateMutability::NonPayable,
+				};
+
+				let args = prefrences
+					.to_ethabi()
+					.into_iter()
+					.chain(iter::once(Token::Uint(U256::from(request_id))))
+					.collect::<Vec<_>>();
+
+				let data = call.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
+				let gas_limit = 300_000;
+
+				let info = Self::evm_call(Self::address(), contract, 0.into(), data, gas_limit)?;
+				Ok((info.exit_reason.is_succeed(), Self::weight_from_call_info(&info)))
+			},
+			_ => Ok((true, Weight::zero())),
+		}
 	}
 
 	/// Hook to be called upon new service request.
@@ -104,19 +287,29 @@ impl<T: Config> Pallet<T> {
 	/// to the `onRequest` function of the service blueprint's manager contract.
 	///
 	/// # Parameters
+	/// * `requester` - The requester of the service.
 	/// * `blueprint` - The service blueprint.
-	/// * `service_id` - The service ID.
+	/// * `request_id` - The service request ID.
 	/// * `operators` - The operator preferences.
 	/// * `request_args` - The request arguments.
+	/// * `permitted_callers` - The permitted callers.
+	/// * `assets` - The assets to be used.
+	/// * `ttl` - The time to live.
+	/// * `value` - The value to be sent with the call.
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
 	///   whether the request is allowed and the weight of the operation.
 	pub fn on_request_hook(
+		requester: &T::AccountId,
 		blueprint: &ServiceBlueprint<T::Constraints>,
-		service_id: u64,
+		request_id: u64,
 		operators: &[OperatorPreferences],
 		request_args: &[Field<T::Constraints, T::AccountId>],
+		permitted_callers: &[T::AccountId],
+		_assets: &[T::AssetId],
+		ttl: BlockNumberFor<T>,
+		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.manager {
 			BlueprintManager::Evm(contract) => {
@@ -125,18 +318,40 @@ impl<T: Config> Pallet<T> {
 					name: String::from("onRequest"),
 					inputs: vec![
 						ethabi::Param {
-							name: String::from("serviceId"),
+							name: String::from("requestId"),
 							kind: ethabi::ParamType::Uint(64),
 							internal_type: None,
 						},
 						ethabi::Param {
-							name: String::from("operators"),
-							kind: ethabi::ParamType::Array(Box::new(ethabi::ParamType::Bytes)),
+							name: String::from("requester"),
+							kind: ethabi::ParamType::Address,
 							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("operatorsWithPreferences"),
+							kind: ethabi::ParamType::Array(Box::new(
+								OperatorPreferences::to_ethabi_param_type(),
+							)),
+							internal_type: Some(String::from("OperatorPreferences[]")),
 						},
 						ethabi::Param {
 							name: String::from("requestInputs"),
 							kind: ethabi::ParamType::Bytes,
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("permittedCallers"),
+							kind: ethabi::ParamType::Array(Box::new(ethabi::ParamType::Address)),
+							internal_type: Some(String::from("address[]")),
+						},
+						// ethabi::Param {
+						// 	name: String::from("assets"),
+						// 	kind: ethabi::ParamType::Array(Box::new(ethabi::ParamType::Address)),
+						// 	internal_type: Some(String::from("address[]")),
+						// },
+						ethabi::Param {
+							name: String::from("ttl"),
+							kind: ethabi::ParamType::Uint(64),
 							internal_type: None,
 						},
 					],
@@ -144,23 +359,193 @@ impl<T: Config> Pallet<T> {
 					constant: None,
 					state_mutability: ethabi::StateMutability::Payable,
 				};
-				let service_id = Token::Uint(ethabi::Uint::from(service_id));
+				let request_id = Token::Uint(ethabi::Uint::from(request_id));
+				let requester =
+					Token::Address(T::EvmAddressMapping::into_address(requester.clone()));
 				let operators = Token::Array(
 					operators.iter().flat_map(OperatorPreferences::to_ethabi).collect(),
 				);
 				let request_args = Token::Bytes(Field::encode_to_ethabi(request_args));
+				let permitted_callers = Token::Array(
+					permitted_callers
+						.iter()
+						.map(|caller| {
+							Token::Address(T::EvmAddressMapping::into_address(caller.clone()))
+						})
+						.collect(),
+				);
+				// TODO: Implement asset mapping or when we have AssetIds as an enum.
+				// let assets = Token::Array(vec![]);
+				let ttl = Token::Uint(ethabi::Uint::from(ttl.into()));
 				let data = call
-					.encode_input(&[service_id, operators, request_args])
+					.encode_input(&[
+						request_id,
+						requester,
+						operators,
+						request_args,
+						permitted_callers,
+						// assets,
+						ttl,
+					])
 					.map_err(|_| Error::<T>::EVMAbiEncode)?;
+				let value = value.using_encoded(U256::from_little_endian);
 				let gas_limit = 300_000;
 
-				let info =
-					Self::evm_call(Self::address(), contract, U256::from(0), data, gas_limit)?;
+				let info = Self::evm_call(Self::address(), contract, value, data, gas_limit)?;
 				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
 			},
 			_ => (true, Weight::zero()),
 		};
 
+		Ok((allowed, weight))
+	}
+
+	/// Hook to be called when a service is initialized. This function will call the `onServiceInitialized`
+	/// function of the service blueprint manager contract.
+	///
+	/// # Arguments
+	/// * `blueprint` - The service blueprint.
+	/// * `request_id` - The service request ID.
+	/// * `service_id` - The service ID.
+	/// * `owner` - The owner of the service.
+	/// * `permitted_callers` - The permitted callers.
+	/// * `assets` - The assets to be used.
+	/// * `ttl` - The time to live.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	///  whether the request is allowed and the weight of the operation.
+	pub fn on_service_init_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		request_id: u64,
+		service_id: u64,
+		owner: &T::AccountId,
+		permitted_callers: &[T::AccountId],
+		_assets: &[T::AssetId],
+		ttl: BlockNumberFor<T>,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		let (allowed, weight) = match blueprint.manager {
+			BlueprintManager::Evm(contract) => {
+				#[allow(deprecated)]
+				let call = ethabi::Function {
+					name: String::from("onServiceInitialized"),
+					inputs: vec![
+						ethabi::Param {
+							name: String::from("requestId"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("serviceId"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("owner"),
+							kind: ethabi::ParamType::Address,
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("permittedCallers"),
+							kind: ethabi::ParamType::Array(Box::new(ethabi::ParamType::Address)),
+							internal_type: Some(String::from("address[]")),
+						},
+						// ethabi::Param {
+						// 	name: String::from("assets"),
+						// 	kind: ethabi::ParamType::Array(Box::new(ethabi::ParamType::Address)),
+						// 	internal_type: Some(String::from("address[]")),
+						// },
+						ethabi::Param {
+							name: String::from("ttl"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+					],
+					outputs: Default::default(),
+					constant: None,
+					state_mutability: ethabi::StateMutability::Payable,
+				};
+				let request_id = Token::Uint(ethabi::Uint::from(request_id));
+				let service_id = Token::Uint(ethabi::Uint::from(service_id));
+				let owner = Token::Address(T::EvmAddressMapping::into_address(owner.clone()));
+				let permitted_callers = Token::Array(
+					permitted_callers
+						.iter()
+						.map(|caller| {
+							Token::Address(T::EvmAddressMapping::into_address(caller.clone()))
+						})
+						.collect(),
+				);
+				let ttl = Token::Uint(ethabi::Uint::from(ttl.into()));
+				let data = call
+					.encode_input(&[
+						request_id,
+						service_id,
+						owner,
+						permitted_callers,
+						// assets,
+						ttl,
+					])
+					.map_err(|_| Error::<T>::EVMAbiEncode)?;
+				let value = U256::zero();
+				let gas_limit = 300_000;
+				let info = Self::evm_call(Self::address(), contract, value, data, gas_limit)?;
+				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
+			},
+			_ => (true, Weight::zero()),
+		};
+		Ok((allowed, weight))
+	}
+
+	/// Hook to be called when a service is terminated. This function will call the `onServiceTermination`
+	/// function of the service blueprint manager contract.
+	///
+	/// # Arguments
+	/// * `blueprint` - The service blueprint.
+	/// * `service_id` - The service ID.
+	/// * `owner` - The owner of the service.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	/// whether the request is allowed and the weight of the operation.
+	pub fn on_service_termination_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		service_id: u64,
+		owner: &T::AccountId,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		let (allowed, weight) = match blueprint.manager {
+			BlueprintManager::Evm(contract) => {
+				#[allow(deprecated)]
+				let call = ethabi::Function {
+					name: String::from("onServiceTermination"),
+					inputs: vec![
+						ethabi::Param {
+							name: String::from("serviceId"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("owner"),
+							kind: ethabi::ParamType::Address,
+							internal_type: None,
+						},
+					],
+					outputs: Default::default(),
+					constant: None,
+					state_mutability: ethabi::StateMutability::NonPayable,
+				};
+				let service_id = Token::Uint(ethabi::Uint::from(service_id));
+				let owner = Token::Address(T::EvmAddressMapping::into_address(owner.clone()));
+				let data = call
+					.encode_input(&[service_id, owner])
+					.map_err(|_| Error::<T>::EVMAbiEncode)?;
+				let value = U256::zero();
+				let gas_limit = 300_000;
+				let info = Self::evm_call(Self::address(), contract, value, data, gas_limit)?;
+				(info.exit_reason.is_succeed(), Self::weight_from_call_info(&info))
+			},
+			_ => (true, Weight::zero()),
+		};
 		Ok((allowed, weight))
 	}
 
@@ -282,11 +667,7 @@ impl<T: Config> Pallet<T> {
 							kind: ethabi::ParamType::Uint(64),
 							internal_type: None,
 						},
-						ethabi::Param {
-							name: String::from("operator"),
-							kind: ethabi::ParamType::Bytes,
-							internal_type: None,
-						},
+						OperatorPreferences::to_ethabi_param(),
 						ethabi::Param {
 							name: String::from("inputs"),
 							kind: ethabi::ParamType::Bytes,
@@ -471,6 +852,13 @@ impl<T: Config> Pallet<T> {
 				if info.exit_reason.is_revert() {
 					log::debug!(
 						target: "evm",
+						"Call to: {:?} with data: 0x{} Reverted with reason: (0x{})",
+						to,
+						hex::encode(&data),
+						hex::encode(&info.value),
+					);
+					#[cfg(test)]
+					eprintln!(
 						"Call to: {:?} with data: 0x{} Reverted with reason: (0x{})",
 						to,
 						hex::encode(&data),

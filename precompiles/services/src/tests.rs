@@ -138,7 +138,7 @@ fn test_register_operator() {
 				PCall::register_operator {
 					blueprint_id: U256::from(0), // We use the first blueprint
 					preferences: UnboundedBytes::from(preferences_data),
-					registration_args: UnboundedBytes::from(vec![0u8]),
+					registration_args: UnboundedBytes::from(Vec::new()),
 				},
 			)
 			.execute_returns(());
