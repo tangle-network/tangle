@@ -40,7 +40,7 @@ use sp_core::{ecdsa, RuntimeDebug};
 use sp_runtime::Percent;
 
 #[cfg(not(feature = "std"))]
-use alloc::{vec, vec::Vec};
+use alloc::{string::String, vec, vec::Vec};
 
 pub mod field;
 pub use field::*;
@@ -546,6 +546,44 @@ pub struct PriceTargets {
 	pub storage_nvme: u64,
 }
 
+impl PriceTargets {
+	/// Converts the struct to ethabi ParamType.
+	pub fn to_ethabi_param_type() -> ethabi::ParamType {
+		ethabi::ParamType::Tuple(vec![
+			// Price per vCPU per hour
+			ethabi::ParamType::Uint(64),
+			// Price per MB of memory per hour
+			ethabi::ParamType::Uint(64),
+			// Price per GB of HDD storage per hour
+			ethabi::ParamType::Uint(64),
+			// Price per GB of SSD storage per hour
+			ethabi::ParamType::Uint(64),
+			// Price per GB of NVMe storage per hour
+			ethabi::ParamType::Uint(64),
+		])
+	}
+
+	/// Converts the struct to ethabi Param.
+	pub fn to_ethabi_param() -> ethabi::Param {
+		ethabi::Param {
+			name: String::from("priceTargets"),
+			kind: Self::to_ethabi_param_type(),
+			internal_type: Some(String::from("struct IBlueprintServiceManager.PriceTargets")),
+		}
+	}
+
+	/// Converts the struct to ethabi Token.
+	pub fn to_ethabi(&self) -> ethabi::Token {
+		ethabi::Token::Tuple(vec![
+			ethabi::Token::Uint(self.cpu.into()),
+			ethabi::Token::Uint(self.mem.into()),
+			ethabi::Token::Uint(self.storage_hdd.into()),
+			ethabi::Token::Uint(self.storage_ssd.into()),
+			ethabi::Token::Uint(self.storage_nvme.into()),
+		])
+	}
+}
+
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct OperatorPreferences {
@@ -556,10 +594,34 @@ pub struct OperatorPreferences {
 }
 
 impl OperatorPreferences {
+	/// Returns the ethabi ParamType for OperatorPreferences.
+	pub fn to_ethabi_param_type() -> ethabi::ParamType {
+		ethabi::ParamType::Tuple(vec![
+			// Operator's ECDSA Public Key (33 bytes)
+			ethabi::ParamType::Bytes,
+			// Operator's price targets
+			PriceTargets::to_ethabi_param_type(),
+		])
+	}
+	/// Returns the ethabi Param for OperatorPreferences.
+	pub fn to_ethabi_param() -> ethabi::Param {
+		ethabi::Param {
+			name: String::from("operatorPreferences"),
+			kind: Self::to_ethabi_param_type(),
+			internal_type: Some(String::from(
+				"struct IBlueprintServiceManager.OperatorPreferences",
+			)),
+		}
+	}
+
 	/// Encode the fields to ethabi bytes.
 	pub fn to_ethabi(&self) -> Vec<ethabi::Token> {
-		let tokens: Vec<ethabi::Token> = vec![ethabi::Token::Bytes(self.key.0.to_vec())];
-		tokens
+		vec![ethabi::Token::Tuple(vec![
+			// operator public key
+			ethabi::Token::Bytes(self.key.0.to_vec()),
+			// price targets
+			self.price_targets.to_ethabi(),
+		])]
 	}
 }
 

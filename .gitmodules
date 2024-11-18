@@ -1,9 +1,0 @@
-[submodule "forge/lib/forge-std"]
-	path = forge/lib/forge-std
-	url = https://github.com/foundry-rs/forge-std
-[submodule "forge/lib/openzeppelin-contracts"]
-	path = forge/lib/openzeppelin-contracts
-	url = https://github.com/OpenZeppelin/openzeppelin-contracts
-[submodule "forge/lib/tnt-core"]
-	path = forge/lib/tnt-core
-	url = https://github.com/webb-tools/tnt-core
