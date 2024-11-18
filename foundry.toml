@@ -23,3 +23,4 @@ wrap_comments = true
 
 [dependencies]
 forge-std = "1.9.4"
+tnt-core = { version = "0.1.0", git = "https://github.com/tangle-network/tnt-core.git", rev = "b51a732e80e9f8fb9245b4e58968f2bd54a37b66" }

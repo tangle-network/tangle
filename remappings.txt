@@ -1,1 +1,2 @@
 forge-std/=dependencies/forge-std-1.9.4/src/
+tnt-core=dependencies/tnt-core-0.1.0/src/
