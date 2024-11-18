@@ -53,6 +53,7 @@ pub use weights::WeightInfo;
 #[cfg(feature = "runtime-benchmarks")]
 pub use impls::BenchmarkingOperatorDelegationManager;
 
+#[allow(clippy::too_many_arguments)]
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
@@ -769,7 +770,7 @@ pub mod module {
 						.as_mut()
 						.map(|v| {
 							v.price_targets = price_targets;
-							(*v).clone()
+							*v
 						})
 						.ok_or(Error::<T>::NotRegistered)
 				})?;

@@ -17,6 +17,7 @@ use tangle_primitives::services::{
 use super::*;
 use crate::types::BalanceOf;
 
+#[allow(clippy::too_many_arguments)]
 impl<T: Config> Pallet<T> {
 	/// Returns the account id of the pallet.
 	///
@@ -81,7 +82,7 @@ impl<T: Config> Pallet<T> {
 					.chain(iter::once(Token::Bytes(Field::encode_to_ethabi(registration_args))))
 					.collect::<Vec<_>>();
 
-				let value = value.using_encoded(|bytes| U256::from_little_endian(&bytes));
+				let value = value.using_encoded(U256::from_little_endian);
 				let data = call.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 
@@ -387,7 +388,7 @@ impl<T: Config> Pallet<T> {
 						ttl,
 					])
 					.map_err(|_| Error::<T>::EVMAbiEncode)?;
-				let value = value.using_encoded(|bytes| U256::from_little_endian(&bytes));
+				let value = value.using_encoded(U256::from_little_endian);
 				let gas_limit = 300_000;
 
 				let info = Self::evm_call(Self::address(), contract, value, data, gas_limit)?;
