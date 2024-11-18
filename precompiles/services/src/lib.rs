@@ -71,11 +71,14 @@ where
 			.map_err(|_| revert("Invalid preferences data"))?;
 
 		let registration_args: Vec<Field<Runtime::Constraints, Runtime::AccountId>> =
-			Decode::decode(&mut &registration_args[..])
-				.map_err(|_| revert("Invalid registration arguments"))?;
-
+			if registration_args.is_empty() {
+				Vec::new()
+			} else {
+				Decode::decode(&mut &registration_args[..])
+					.map_err(|_| revert("Invalid registration arguments"))?
+			};
 		let value_bytes = {
-			let mut value_bytes = Vec::new();
+			let mut value_bytes = [0u8; core::mem::size_of::<U256>()];
 			value.to_little_endian(&mut value_bytes);
 			value_bytes
 		};
@@ -142,7 +145,7 @@ where
 
 		let value_bytes = {
 			let value = handle.context().apparent_value;
-			let mut value_bytes = Vec::new();
+			let mut value_bytes = [0u8; core::mem::size_of::<U256>()];
 			value.to_little_endian(&mut value_bytes);
 			value_bytes
 		};
