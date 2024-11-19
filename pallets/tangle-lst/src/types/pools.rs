@@ -45,7 +45,7 @@ impl<T: Config> PoolMember<T> {
 				true
 			} else {
 				removed_points
-					.try_insert(*e, (p.1))
+					.try_insert(*e, p.1)
 					.expect("source map is bounded, this is a subset, will be bounded; qed");
 				false
 			}
