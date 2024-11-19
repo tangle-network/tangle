@@ -316,7 +316,7 @@ fn schedule_operator_unstake_not_an_operator() {
 #[test]
 fn execute_operator_unstake_success() {
 	new_test_ext().execute_with(|| {
-		let bond_amount = 10_000;
+		let bond_amount = 20_000;
 		let unstake_amount = 5_000;
 
 		// Join operator first
@@ -376,7 +376,7 @@ fn execute_operator_unstake_no_scheduled_unstake() {
 #[test]
 fn execute_operator_unstake_request_not_satisfied() {
 	new_test_ext().execute_with(|| {
-		let bond_amount = 10_000;
+		let bond_amount = 20_000;
 		let unstake_amount = 5_000;
 
 		// Join operator first
@@ -399,7 +399,7 @@ fn execute_operator_unstake_request_not_satisfied() {
 #[test]
 fn cancel_operator_unstake_success() {
 	new_test_ext().execute_with(|| {
-		let bond_amount = 10_000;
+		let bond_amount = 20_000;
 		let unstake_amount = 5_000;
 
 		// Join operator first

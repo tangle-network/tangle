@@ -195,6 +195,8 @@ impl<T: Config> Pallet<T> {
 			.stake
 			.checked_sub(&unstake_amount)
 			.ok_or(Error::<T>::UnstakeAmountTooLarge)?;
+		println!("remaining_stake: {:?}", remaining_stake);
+		println!("T::MinOperatorBondAmount::get(): {:?}", T::MinOperatorBondAmount::get());
 		ensure!(
 			remaining_stake >= T::MinOperatorBondAmount::get(),
 			Error::<T>::InsufficientStakeRemaining
