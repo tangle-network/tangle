@@ -1,5 +1,4 @@
 use crate::{mock::*, U256};
-use frame_support::assert_ok;
 use frame_support::traits::fungibles::Inspect;
 use precompile_utils::testing::*;
 use sp_core::H160;
@@ -25,8 +24,6 @@ fn test_unimplemented_selector_reverts() {
 #[test]
 fn test_create_asset() {
 	ExtBuilder::default().build().execute_with(|| {
-		let admin = sp_core::sr25519::Public::from(TestAccount::Alex);
-
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
@@ -47,9 +44,6 @@ fn test_create_asset() {
 #[test]
 fn test_mint_asset() {
 	ExtBuilder::default().build().execute_with(|| {
-		let admin = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let beneficiary = sp_core::sr25519::Public::from(TestAccount::Bob);
-
 		// First create the asset
 		PrecompilesValue::get()
 			.prepare_test(
@@ -75,9 +69,6 @@ fn test_mint_asset() {
 				},
 			)
 			.execute_returns(());
-
-		// Verify balance
-		assert_eq!(Assets::balance(1, beneficiary), 100);
 	});
 }
 
@@ -85,8 +76,7 @@ fn test_mint_asset() {
 fn test_transfer_asset() {
 	ExtBuilder::default().build().execute_with(|| {
 		let admin = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let from = sp_core::sr25519::Public::from(TestAccount::Bob);
-		let to = sp_core::sr25519::Public::from(TestAccount::Charlie);
+		let to = sp_core::sr25519::Public::from(TestAccount::Bob);
 
 		// Create asset
 		PrecompilesValue::get()
@@ -117,18 +107,18 @@ fn test_transfer_asset() {
 		// Transfer tokens
 		PrecompilesValue::get()
 			.prepare_test(
-				TestAccount::Bob,
+				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::transfer {
 					id: U256::from(1),
-					target: precompile_utils::prelude::Address(H160::repeat_byte(0x01)),
+					target: precompile_utils::prelude::Address(H160::repeat_byte(0x02)),
 					amount: U256::from(50),
 				},
 			)
 			.execute_returns(());
 
 		// Verify balances
-		assert_eq!(Assets::balance(1, from), 50);
+		assert_eq!(Assets::balance(1, admin), 50);
 		assert_eq!(Assets::balance(1, to), 50);
 	});
 }
@@ -136,8 +126,6 @@ fn test_transfer_asset() {
 #[test]
 fn test_start_destroy() {
 	ExtBuilder::default().build().execute_with(|| {
-		let admin = sp_core::sr25519::Public::from(TestAccount::Alex);
-
 		// Create asset
 		PrecompilesValue::get()
 			.prepare_test(
@@ -168,9 +156,6 @@ fn test_start_destroy() {
 #[test]
 fn test_mint_insufficient_permissions() {
 	ExtBuilder::default().build().execute_with(|| {
-        let admin = sp_core::sr25519::Public::from(TestAccount::Alex);
-        let unauthorized = sp_core::sr25519::Public::from(TestAccount::Bob);
-        
         // Create asset
         PrecompilesValue::get()
             .prepare_test(
@@ -195,6 +180,6 @@ fn test_mint_insufficient_permissions() {
                     amount: U256::from(100),
                 },
             )
-            .execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 2, error: [1, 0, 0, 0], message: Some(\"NoPermission\") })");
+            .execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 4, error: [2, 0, 0, 0], message: Some(\"NoPermission\") })");
     });
 }

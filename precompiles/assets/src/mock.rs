@@ -22,7 +22,6 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU64},
 	weights::Weight,
-	PalletId,
 };
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -37,7 +36,6 @@ use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage,
 };
-use tangle_primitives::ServiceManager;
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u64;
@@ -300,25 +298,6 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
-}
-
-pub struct MockServiceManager;
-
-impl ServiceManager<AccountId, Balance> for MockServiceManager {
-	fn get_active_blueprints_count(_account: &AccountId) -> usize {
-		// we dont care
-		Default::default()
-	}
-
-	fn get_active_services_count(_account: &AccountId) -> usize {
-		// we dont care
-		Default::default()
-	}
-
-	fn can_exit(_account: &AccountId) -> bool {
-		// Mock logic to determine if the given account can exit
-		true
-	}
 }
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles

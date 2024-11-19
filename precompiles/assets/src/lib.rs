@@ -2,17 +2,19 @@
 
 use fp_evm::PrecompileHandle;
 use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
-use frame_support::traits::Currency;
+use frame_support::traits::fungibles::Inspect;
 use pallet_evm::AddressMapping;
+use parity_scale_codec::MaxEncodedLen;
 use precompile_utils::{prelude::*, solidity};
-use sp_core::{H160, H256, U256};
+use sp_core::U256;
 use sp_runtime::traits::Dispatchable;
 use sp_runtime::traits::StaticLookup;
-use sp_std::{marker::PhantomData, vec::Vec};
+use sp_std::marker::PhantomData;
 
 type BalanceOf<Runtime> = <Runtime as pallet_assets::Config>::Balance;
 
 pub type AssetIdOf<Runtime> = <Runtime as pallet_assets::Config>::AssetIdParameter;
+pub type RawAssetIdOf<Runtime> = <Runtime as pallet_assets::Config>::AssetId;
 
 pub struct AssetsPrecompile<Runtime>(PhantomData<Runtime>);
 
@@ -29,10 +31,15 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_assets::Call<Runtime>>,
 	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
+	RawAssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
 {
 	/// Helper method to convert U256 to AssetId
 	fn u256_to_asset_id(asset_id: U256) -> EvmResult<AssetIdOf<Runtime>> {
+		asset_id.try_into().map_err(|_| revert("Asset ID out of bounds"))
+	}
+
+	fn u256_to_raw_asset_id(asset_id: U256) -> EvmResult<RawAssetIdOf<Runtime>> {
 		asset_id.try_into().map_err(|_| revert("Asset ID out of bounds"))
 	}
 }
@@ -46,6 +53,7 @@ where
 	Runtime::RuntimeCall: From<pallet_assets::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
 	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
+	RawAssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
 {
 	#[precompile::public("create(uint256,address,uint256)")]
 	fn create(
@@ -135,5 +143,47 @@ where
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 		Ok(())
+	}
+
+	// ----- View functions ------ //
+	#[precompile::public("totalSupply(uint256)")]
+	#[precompile::view]
+	fn total_supply(handle: &mut impl PrecompileHandle, asset_id: U256) -> EvmResult<U256> {
+		// Storage item: Asset:
+		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
+		handle.record_db_read::<Runtime>(175)?;
+		let asset_id = Self::u256_to_raw_asset_id(asset_id)?;
+		Ok(pallet_assets::Pallet::<Runtime>::total_issuance(asset_id).into())
+	}
+
+	#[precompile::public("balanceOf(uint256,address)")]
+	#[precompile::view]
+	fn balance_of(
+		handle: &mut impl PrecompileHandle,
+		asset_id: U256,
+		who: Address,
+	) -> EvmResult<U256> {
+		// Storage item: Account:
+		// Blake2_128(16) + AssetId(16) + Blake2_128(16) + AccountId(20) + AssetAccount(19 + Extra)
+		handle.record_db_read::<Runtime>(
+			87 + <Runtime as pallet_assets::Config>::Extra::max_encoded_len(),
+		)?;
+
+		let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(who.into());
+		let asset_id = Self::u256_to_raw_asset_id(asset_id)?;
+
+		// Fetch info.
+		let amount: U256 = { pallet_assets::Pallet::<Runtime>::balance(asset_id, &who).into() };
+		Ok(amount)
+	}
+
+	#[precompile::public("nextAssetId()")]
+	#[precompile::view]
+	fn next_asset_id(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
+		// Storage item: Asset:
+		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
+		handle.record_db_read::<Runtime>(175)?;
+		let next_asset_id = pallet_assets::Pallet::<Runtime>::NextAssetId::get();
+		Ok(next_asset_id.into())
 	}
 }
