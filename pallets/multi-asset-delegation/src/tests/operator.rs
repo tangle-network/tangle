@@ -225,7 +225,7 @@ fn operator_bond_more_insufficient_balance() {
 #[test]
 fn schedule_operator_unstake_success() {
 	new_test_ext().execute_with(|| {
-		let bond_amount = 10_000;
+		let bond_amount = 20_000; // Increased initial bond
 		let unstake_amount = 5_000;
 
 		// Join operator first
@@ -241,10 +241,34 @@ fn schedule_operator_unstake_success() {
 		let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
 		assert_eq!(operator_info.request.unwrap().amount, unstake_amount);
 
+		// Verify remaining stake is above minimum
+		assert!(operator_info.stake.saturating_sub(unstake_amount) >= MinOperatorBondAmount::get());
+
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(
 			Event::OperatorBondLessScheduled { who: 1, unstake_amount },
 		));
+	});
+}
+
+// Add test for minimum stake requirement
+#[test]
+fn schedule_operator_unstake_respects_minimum_stake() {
+	new_test_ext().execute_with(|| {
+		let bond_amount = 20_000;
+		let unstake_amount = 15_000; // Would leave less than minimum required
+
+		// Join operator first
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
+
+		// Attempt to schedule unstake that would leave less than minimum
+		assert_noop!(
+			MultiAssetDelegation::schedule_operator_unstake(
+				RuntimeOrigin::signed(1),
+				unstake_amount
+			),
+			Error::<Test>::InsufficientStakeRemaining
+		);
 	});
 }
 
