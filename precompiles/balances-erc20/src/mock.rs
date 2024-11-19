@@ -20,7 +20,6 @@ use super::*;
 use frame_support::derive_impl;
 use frame_support::{construct_runtime, parameter_types, weights::Weight};
 use pallet_evm::AddressMapping;
-use pallet_evm::HashedAddressMapping;
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
 use precompile_utils::testing::{Bob, CryptoAlith, CryptoBaltathar, Precompile1};
 use precompile_utils::{precompile_set::*, testing::MockAccount};

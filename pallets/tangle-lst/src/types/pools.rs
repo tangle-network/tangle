@@ -56,7 +56,7 @@ impl<T: Config> PoolMember<T> {
 	pub fn get_by_pool_id(&self, current_era: EraIndex, pool_id: PoolId) -> Option<PoolId> {
 		self.unbonding_eras
 			.get(&current_era)
-			.and_then(|(p, b)| if *p == pool_id { Some(*p) } else { None })
+			.and_then(|(p, _b)| if *p == pool_id { Some(*p) } else { None })
 	}
 }
 
