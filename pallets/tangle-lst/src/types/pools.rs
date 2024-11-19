@@ -13,11 +13,9 @@ use super::*;
 #[codec(mel_bound(T: Config))]
 #[scale_info(skip_type_params(T))]
 pub struct PoolMember<T: Config> {
-	/// The identifier of the pool to which `who` belongs.
-	pub pool_id: PoolId,
 	/// The eras in which this member is unbonding, mapped from era index to the number of
 	/// points scheduled to unbond in the given era.
-	pub unbonding_eras: BoundedBTreeMap<EraIndex, BalanceOf<T>, T::MaxUnbonding>,
+	pub unbonding_eras: BoundedBTreeMap<EraIndex, (PoolId, BalanceOf<T>), T::MaxUnbonding>,
 }
 
 impl<T: Config> PoolMember<T> {
@@ -26,7 +24,7 @@ impl<T: Config> PoolMember<T> {
 		self.unbonding_eras
 			.as_ref()
 			.iter()
-			.fold(BalanceOf::<T>::zero(), |acc, (_, v)| acc.saturating_add(*v))
+			.fold(BalanceOf::<T>::zero(), |acc, (_, v)| acc.saturating_add(v.1))
 	}
 
 	/// Withdraw any funds in [`Self::unbonding_eras`] who's deadline in reached and is fully
@@ -47,12 +45,18 @@ impl<T: Config> PoolMember<T> {
 				true
 			} else {
 				removed_points
-					.try_insert(*e, *p)
+					.try_insert(*e, p.1)
 					.expect("source map is bounded, this is a subset, will be bounded; qed");
 				false
 			}
 		});
 		removed_points
+	}
+
+	pub fn get_by_pool_id(&self, current_era: EraIndex, pool_id: PoolId) -> Option<PoolId> {
+		self.unbonding_eras
+			.get(&current_era)
+			.and_then(|(p, _b)| if *p == pool_id { Some(*p) } else { None })
 	}
 }
 
