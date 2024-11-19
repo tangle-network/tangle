@@ -279,6 +279,12 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = ();
 }
 
+impl tangle_primitives::NextAssetId<u32> for Runtime {
+	fn next_asset_id() -> Option<u32> {
+		None
+	}
+}
+
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u64;
