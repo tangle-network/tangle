@@ -177,13 +177,13 @@ where
 		Ok(amount)
 	}
 
-	#[precompile::public("nextAssetId()")]
-	#[precompile::view]
-	fn next_asset_id(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
-		// Storage item: Asset:
-		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
-		handle.record_db_read::<Runtime>(175)?;
-		let next_asset_id = pallet_assets::Pallet::<Runtime>::NextAssetId::get();
-		Ok(next_asset_id.into())
-	}
+	// #[precompile::public("nextAssetId()")]
+	// #[precompile::view]
+	// fn next_asset_id(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
+	// 	// Storage item: Asset:
+	// 	// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
+	// 	handle.record_db_read::<Runtime>(175)?;
+	// 	let next_asset_id = <Runtime as pallet_assets::Config>::AssetIdParameter::from(1u32);
+	// 	Ok(next_asset_id.into())
+	// }
 }
