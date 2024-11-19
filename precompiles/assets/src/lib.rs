@@ -10,6 +10,7 @@ use sp_core::U256;
 use sp_runtime::traits::Dispatchable;
 use sp_runtime::traits::StaticLookup;
 use sp_std::marker::PhantomData;
+use tangle_primitives::traits::assets::NextAssetId;
 
 type BalanceOf<Runtime> = <Runtime as pallet_assets::Config>::Balance;
 
@@ -177,13 +178,14 @@ where
 		Ok(amount)
 	}
 
-	// #[precompile::public("nextAssetId()")]
-	// #[precompile::view]
-	// fn next_asset_id(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
-	// 	// Storage item: Asset:
-	// 	// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
-	// 	handle.record_db_read::<Runtime>(175)?;
-	// 	let next_asset_id = <Runtime as pallet_assets::Config>::AssetIdParameter::from(1u32);
-	// 	Ok(next_asset_id.into())
-	// }
+	#[precompile::public("nextAssetId()")]
+	#[precompile::view]
+	fn next_asset_id(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
+		// Storage item: Asset:
+		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
+		handle.record_db_read::<Runtime>(175)?;
+		let next_asset_id = pallet_assets::Pallet::<Runtime>::next_asset_id()
+			.ok_or_else(|| revert("No next asset ID available"))?;
+		Ok(next_asset_id.into())
+	}
 }

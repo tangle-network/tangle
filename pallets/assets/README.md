@@ -2,6 +2,12 @@
 
 A simple, secure module for dealing with fungible assets.
 
+## Notes
+
+This module has been forked from polkadot-sdk at branch polkadot-stable-2407
+Changes made after the fork:
+ - added implementation of NextAssetId trait, update is in impl_next_asset_id.rs
+
 ## Overview
 
 The Assets module provides functionality for asset management of fungible asset classes with a fixed supply, including:

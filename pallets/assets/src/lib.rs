@@ -163,6 +163,7 @@ mod extra_mutator;
 pub use extra_mutator::*;
 mod functions;
 mod impl_fungibles;
+mod impl_next_asset_id;
 mod impl_stored_map;
 mod types;
 pub use types::*;
@@ -1186,7 +1187,7 @@ pub mod pallet {
 				ensure!(details.status == AssetStatus::Live, Error::<T, I>::AssetNotLive);
 				ensure!(origin == details.owner, Error::<T, I>::NoPermission);
 				if details.owner == owner {
-					return Ok(())
+					return Ok(());
 				}
 
 				let metadata_deposit = Metadata::<T, I>::get(&id).deposit;

@@ -20,11 +20,11 @@
 use super::*;
 use crate as pallet_assets;
 
-use codec::Encode;
 use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU32},
 };
+use parity_scale_codec::Encode;
 use sp_io::storage;
 use sp_runtime::BuildStorage;
 
