@@ -221,7 +221,7 @@ sc-sync-state-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch
 pallet-babe = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 pallet-bags-list = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 pallet-session = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
-pallet-assets = { path = "pallets/assets", default-features = false }
+pallet-assets = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 pallet-bounties = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 pallet-child-bounties = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 

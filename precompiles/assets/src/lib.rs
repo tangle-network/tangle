@@ -10,7 +10,6 @@ use sp_core::U256;
 use sp_runtime::traits::Dispatchable;
 use sp_runtime::traits::StaticLookup;
 use sp_std::marker::PhantomData;
-use tangle_primitives::traits::assets::NextAssetId;
 
 type BalanceOf<Runtime> = <Runtime as pallet_assets::Config>::Balance;
 
@@ -55,6 +54,7 @@ where
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
 	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
 	RawAssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
+	Runtime: tangle_primitives::traits::assets::NextAssetId<AssetIdOf<Runtime>>,
 {
 	#[precompile::public("create(uint256,address,uint256)")]
 	fn create(
@@ -184,8 +184,8 @@ where
 		// Storage item: Asset:
 		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
 		handle.record_db_read::<Runtime>(175)?;
-		let next_asset_id = pallet_assets::Pallet::<Runtime>::next_asset_id()
-			.ok_or_else(|| revert("No next asset ID available"))?;
+		let next_asset_id =
+			Runtime::next_asset_id().ok_or_else(|| revert("No next asset ID available"))?;
 		Ok(next_asset_id.into())
 	}
 }

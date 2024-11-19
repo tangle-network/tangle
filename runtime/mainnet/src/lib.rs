@@ -1204,6 +1204,12 @@ pub type AssetId = u128;
 #[cfg(feature = "runtime-benchmarks")]
 pub type AssetId = u32;
 
+impl tangle_primitives::NextAssetId<AssetId> for Runtime {
+	fn next_asset_id() -> Option<AssetId> {
+		pallet_assets::NextAssetId::<Runtime>::get()
+	}
+}
+
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
