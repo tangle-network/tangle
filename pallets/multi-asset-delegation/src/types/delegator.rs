@@ -213,8 +213,9 @@ pub struct BondInfoDelegator<AccountId, Balance, AssetId> {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use core::ops::Add;
 	use frame_support::{parameter_types, BoundedVec};
-	use sp_runtime::traits::{Add, Zero};
+	use sp_runtime::traits::Zero;
 
 	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Default)]
 	pub struct MockBalance(pub u32);

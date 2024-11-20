@@ -138,8 +138,9 @@ pub struct DelegatorBond<AccountId, Balance, AssetId> {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use core::ops::Add;
 	use frame_support::{parameter_types, BoundedVec};
-	use sp_runtime::traits::{Add, Zero};
+	use sp_runtime::traits::Zero;
 
 	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Default)]
 	pub struct MockBalance(pub u32);
@@ -182,38 +183,33 @@ mod tests {
 		pub const MaxBlueprints: u32 = 10;
 	}
 
-	type TestOperatorMetadata = OperatorMetadata<
-		MockAccountId,
-		MockBalance,
-		MockAssetId,
-		MaxDelegators,
-		MaxUnstakeRequests,
-		MaxBlueprints,
-	>;
+	type TestOperatorMetadata =
+		OperatorMetadata<MockAccountId, MockBalance, MockAssetId, MaxDelegators, MaxBlueprints>;
 
 	#[test]
 	fn get_stake_by_asset_id_should_work() {
-		let snapshot = OperatorSnapshot {
-			stake: MockBalance(100),
-			delegations: BoundedVec::try_from(vec![
-				DelegatorBond {
-					delegator: MockAccountId(1),
-					amount: MockBalance(50),
-					asset_id: MockAssetId(1),
-				},
-				DelegatorBond {
-					delegator: MockAccountId(2),
-					amount: MockBalance(75),
-					asset_id: MockAssetId(1),
-				},
-				DelegatorBond {
-					delegator: MockAccountId(3),
-					amount: MockBalance(25),
-					asset_id: MockAssetId(2),
-				},
-			])
-			.unwrap(),
-		};
+		let snapshot: OperatorSnapshot<MockAccountId, MockBalance, MockAssetId, MaxDelegators> =
+			OperatorSnapshot {
+				stake: MockBalance(100),
+				delegations: BoundedVec::try_from(vec![
+					DelegatorBond {
+						delegator: MockAccountId(1),
+						amount: MockBalance(50),
+						asset_id: MockAssetId(1),
+					},
+					DelegatorBond {
+						delegator: MockAccountId(2),
+						amount: MockBalance(75),
+						asset_id: MockAssetId(1),
+					},
+					DelegatorBond {
+						delegator: MockAccountId(3),
+						amount: MockBalance(25),
+						asset_id: MockAssetId(2),
+					},
+				])
+				.unwrap(),
+			};
 
 		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(1)).0, 125);
 		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(2)).0, 25);
@@ -222,32 +218,33 @@ mod tests {
 
 	#[test]
 	fn get_total_stake_by_assets_should_work() {
-		let snapshot = OperatorSnapshot {
-			stake: MockBalance(100),
-			delegations: BoundedVec::try_from(vec![
-				DelegatorBond {
-					delegator: MockAccountId(1),
-					amount: MockBalance(50),
-					asset_id: MockAssetId(1),
-				},
-				DelegatorBond {
-					delegator: MockAccountId(2),
-					amount: MockBalance(75),
-					asset_id: MockAssetId(1),
-				},
-				DelegatorBond {
-					delegator: MockAccountId(3),
-					amount: MockBalance(25),
-					asset_id: MockAssetId(2),
-				},
-				DelegatorBond {
-					delegator: MockAccountId(4),
-					amount: MockBalance(100),
-					asset_id: MockAssetId(2),
-				},
-			])
-			.unwrap(),
-		};
+		let snapshot: OperatorSnapshot<MockAccountId, MockBalance, MockAssetId, MaxDelegators> =
+			OperatorSnapshot {
+				stake: MockBalance(100),
+				delegations: BoundedVec::try_from(vec![
+					DelegatorBond {
+						delegator: MockAccountId(1),
+						amount: MockBalance(50),
+						asset_id: MockAssetId(1),
+					},
+					DelegatorBond {
+						delegator: MockAccountId(2),
+						amount: MockBalance(75),
+						asset_id: MockAssetId(1),
+					},
+					DelegatorBond {
+						delegator: MockAccountId(3),
+						amount: MockBalance(25),
+						asset_id: MockAssetId(2),
+					},
+					DelegatorBond {
+						delegator: MockAccountId(4),
+						amount: MockBalance(100),
+						asset_id: MockAssetId(2),
+					},
+				])
+				.unwrap(),
+			};
 
 		let result = snapshot.get_total_stake_by_assets();
 		let expected_result =
