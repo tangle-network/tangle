@@ -97,13 +97,13 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use scale_info::TypeInfo;
 	use sp_runtime::{
-		traits::{AccountIdConversion, AtLeast32BitUnsigned, MaybeSerializeDeserialize, Member},
+		traits::{
+			AccountIdConversion, AtLeast32BitUnsigned, MaybeSerializeDeserialize, Member, Zero,
+		},
 		Percent,
 	};
+	use sp_std::vec::Vec;
 	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
-	use tangle_primitives::{types::RoundIndex, ServiceManager};
-	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero};
-	use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 	use tangle_primitives::{traits::ServiceManager, RoundIndex};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
