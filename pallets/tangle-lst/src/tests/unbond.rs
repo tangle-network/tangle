@@ -823,3 +823,193 @@ fn depositor_permissioned_partial_unbond_slashed() {
 		);
 	});
 }
+
+#[test]
+fn multi_pool_unbonding_works() {
+    ExtBuilder::default()
+        .add_members(vec![(40, 40)])
+        .build_and_execute(|| {
+            // Create a second pool
+            assert_ok!(Lst::create(
+                RuntimeOrigin::signed(20),
+                20,
+                900,
+                901,
+                902,
+                Default::default(),
+                Default::default()
+            ));
+
+            // Join the second pool
+            assert_ok!(Lst::join(RuntimeOrigin::signed(40), 40, 2));
+
+            // Unbond from both pools
+            assert_ok!(Lst::unbond(RuntimeOrigin::signed(40), 40, 1, 20));
+            assert_ok!(Lst::unbond(RuntimeOrigin::signed(40), 40, 2, 30));
+
+            // Check that unbonding entries are correctly tracked with pool IDs
+            let member = UnbondingMembers::<Runtime>::get(40).unwrap();
+            let unbonding_eras: Vec<_> = member.unbonding_eras.iter().collect();
+            
+            assert_eq!(unbonding_eras.len(), 2);
+            assert_eq!(unbonding_eras[0].1.0, 1); // First entry should be from pool 1
+            assert_eq!(unbonding_eras[0].1.1, 20); // With 20 points
+            assert_eq!(unbonding_eras[1].1.0, 2); // Second entry should be from pool 2
+            assert_eq!(unbonding_eras[1].1.1, 30); // With 30 points
+
+            // Advance era and try to withdraw
+            CurrentEra::set(3);
+
+            // Withdraw from pool 1
+            assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(40), 40, 1, 0));
+            
+            // Check that only pool 1's unbonding was withdrawn
+            let member = UnbondingMembers::<Runtime>::get(40).unwrap();
+            let remaining_unbonding: Vec<_> = member.unbonding_eras.iter().collect();
+            assert_eq!(remaining_unbonding.len(), 1);
+            assert_eq!(remaining_unbonding[0].1.0, 2); // Only pool 2 entry should remain
+            assert_eq!(remaining_unbonding[0].1.1, 30);
+
+            // Withdraw from pool 2
+            assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(40), 40, 2, 0));
+            
+            // Check that all unbonding entries are cleared
+            let member = UnbondingMembers::<Runtime>::get(40);
+            assert!(member.is_none());
+
+            assert_eq!(
+                pool_events_since_last_call(),
+                vec![
+                    Event::Created { depositor: 10, pool_id: 1 },
+                    Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: true },
+                    Event::Bonded { member: 40, pool_id: 1, bonded: 40, joined: true },
+                    Event::Created { depositor: 20, pool_id: 2 },
+                    Event::Bonded { member: 20, pool_id: 2, bonded: 20, joined: true },
+                    Event::Bonded { member: 40, pool_id: 2, bonded: 40, joined: true },
+                    Event::Unbonded { member: 40, pool_id: 1, points: 20, balance: 20, era: 3 },
+                    Event::Unbonded { member: 40, pool_id: 2, points: 30, balance: 30, era: 3 },
+                    Event::Withdrawn { member: 40, pool_id: 1, points: 20, balance: 20 },
+                    Event::Withdrawn { member: 40, pool_id: 2, points: 30, balance: 30 },
+                    Event::MemberRemoved { pool_id: 1, member: 40 },
+                    Event::MemberRemoved { pool_id: 2, member: 40 }
+                ]
+            );
+        });
+}
+
+#[test]
+fn multi_pool_unbonding_with_slashing() {
+    ExtBuilder::default()
+        .add_members(vec![(40, 40)])
+        .build_and_execute(|| {
+            // Create a second pool
+            assert_ok!(Lst::create(
+                RuntimeOrigin::signed(20),
+                20,
+                900,
+                901,
+                902,
+                Default::default(),
+                Default::default()
+            ));
+
+            // Join the second pool
+            assert_ok!(Lst::join(RuntimeOrigin::signed(40), 40, 2));
+
+            // Unbond from both pools
+            assert_ok!(Lst::unbond(RuntimeOrigin::signed(40), 40, 1, 20));
+            assert_ok!(Lst::unbond(RuntimeOrigin::signed(40), 40, 2, 30));
+
+            // Slash pool 1
+            StakingMock::slash_by(1, 10);
+
+            // Advance era
+            CurrentEra::set(3);
+
+            // Withdraw from both pools
+            assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(40), 40, 1, 0));
+            assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(40), 40, 2, 0));
+
+            assert_eq!(
+                pool_events_since_last_call(),
+                vec![
+                    Event::Created { depositor: 10, pool_id: 1 },
+                    Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: true },
+                    Event::Bonded { member: 40, pool_id: 1, bonded: 40, joined: true },
+                    Event::Created { depositor: 20, pool_id: 2 },
+                    Event::Bonded { member: 20, pool_id: 2, bonded: 20, joined: true },
+                    Event::Bonded { member: 40, pool_id: 2, bonded: 40, joined: true },
+                    Event::Unbonded { member: 40, pool_id: 1, points: 20, balance: 20, era: 3 },
+                    Event::Unbonded { member: 40, pool_id: 2, points: 30, balance: 30, era: 3 },
+                    Event::PoolSlashed { pool_id: 1, balance: 10 },
+                    Event::Withdrawn { member: 40, pool_id: 1, points: 20, balance: 15 }, // Slashed amount
+                    Event::Withdrawn { member: 40, pool_id: 2, points: 30, balance: 30 }, // Unaffected by slash
+                    Event::MemberRemoved { pool_id: 1, member: 40 },
+                    Event::MemberRemoved { pool_id: 2, member: 40 }
+                ]
+            );
+        });
+}
+
+#[test]
+fn multi_pool_unbonding_with_destroying_pool() {
+    ExtBuilder::default()
+        .add_members(vec![(40, 40)])
+        .build_and_execute(|| {
+            // Create a second pool
+            assert_ok!(Lst::create(
+                RuntimeOrigin::signed(20),
+                20,
+                900,
+                901,
+                902,
+                Default::default(),
+                Default::default()
+            ));
+
+            // Join the second pool
+            assert_ok!(Lst::join(RuntimeOrigin::signed(40), 40, 2));
+
+            // Set pool 1 to destroying
+            unsafe_set_state(1, PoolState::Destroying);
+
+            // Unbond from both pools
+            assert_ok!(Lst::unbond(RuntimeOrigin::signed(40), 40, 1, 40)); // Full unbond from destroying pool
+            assert_ok!(Lst::unbond(RuntimeOrigin::signed(40), 40, 2, 30)); // Partial unbond from active pool
+
+            // Check that unbonding entries are correctly tracked
+            let member = UnbondingMembers::<Runtime>::get(40).unwrap();
+            let unbonding_eras: Vec<_> = member.unbonding_eras.iter().collect();
+            
+            assert_eq!(unbonding_eras.len(), 2);
+            assert_eq!(unbonding_eras[0].1.0, 1);
+            assert_eq!(unbonding_eras[0].1.1, 40); // Full amount from pool 1
+            assert_eq!(unbonding_eras[1].1.0, 2);
+            assert_eq!(unbonding_eras[1].1.1, 30); // Partial amount from pool 2
+
+            // Advance era and withdraw
+            CurrentEra::set(3);
+            assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(40), 40, 1, 0));
+            assert_ok!(Lst::withdraw_unbonded(RuntimeOrigin::signed(40), 40, 2, 0));
+
+            // Check that member is removed from pool 1 but still exists in pool 2
+            assert!(PoolMembers::<Runtime>::contains_key(40));
+            
+            assert_eq!(
+                pool_events_since_last_call(),
+                vec![
+                    Event::Created { depositor: 10, pool_id: 1 },
+                    Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: true },
+                    Event::Bonded { member: 40, pool_id: 1, bonded: 40, joined: true },
+                    Event::Created { depositor: 20, pool_id: 2 },
+                    Event::Bonded { member: 20, pool_id: 2, bonded: 20, joined: true },
+                    Event::Bonded { member: 40, pool_id: 2, bonded: 40, joined: true },
+                    Event::Unbonded { member: 40, pool_id: 1, points: 40, balance: 40, era: 3 },
+                    Event::Unbonded { member: 40, pool_id: 2, points: 30, balance: 30, era: 3 },
+                    Event::Withdrawn { member: 40, pool_id: 1, points: 40, balance: 40 },
+                    Event::MemberRemoved { pool_id: 1, member: 40 },
+                    Event::Withdrawn { member: 40, pool_id: 2, points: 30, balance: 30 }
+                ]
+            );
+        });
+}
