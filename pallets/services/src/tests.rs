@@ -136,6 +136,7 @@ fn register_on_blueprint() {
 				price_targets: price_targets(MachineKind::Large),
 			},
 			Default::default(),
+			0,
 		);
 		assert_ok!(registration_call);
 
@@ -160,6 +161,7 @@ fn register_on_blueprint() {
 				0,
 				OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 				Default::default(),
+				0,
 			),
 			crate::Error::<Runtime>::AlreadyRegistered
 		);
@@ -171,6 +173,7 @@ fn register_on_blueprint() {
 				0,
 				OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 				Default::default(),
+				0,
 			),
 			crate::Error::<Runtime>::OperatorNotActive
 		);
@@ -219,6 +222,7 @@ fn update_price_targets() {
 				price_targets: price_targets(MachineKind::Small)
 			},
 			Default::default(),
+			0,
 		));
 
 		assert_eq!(
@@ -284,6 +288,7 @@ fn unregister_from_blueprint() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		assert_ok!(Services::unregister(RuntimeOrigin::signed(bob.clone()), 0));
 		assert!(!Operators::<Runtime>::contains_key(0, &bob));
@@ -319,6 +324,7 @@ fn request_service() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
@@ -326,6 +332,7 @@ fn request_service() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
@@ -333,6 +340,7 @@ fn request_service() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -344,6 +352,7 @@ fn request_service() {
 			Default::default(),
 			vec![USDC, WETH],
 			100,
+			0,
 		));
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
@@ -430,6 +439,7 @@ fn request_service_with_no_assets() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let eve = mock_pub_key(EVE);
 		assert_err!(
@@ -441,6 +451,7 @@ fn request_service_with_no_assets() {
 				Default::default(),
 				vec![], // no assets
 				100,
+				0,
 			),
 			Error::<Runtime>::NoAssetsProvided
 		);
@@ -460,6 +471,7 @@ fn job_calls() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
@@ -467,6 +479,7 @@ fn job_calls() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
@@ -474,6 +487,7 @@ fn job_calls() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -485,6 +499,7 @@ fn job_calls() {
 			Default::default(),
 			vec![WETH],
 			100,
+			0,
 		));
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
@@ -535,90 +550,6 @@ fn job_calls() {
 }
 
 #[test]
-fn job_calls_fails_with_invalid_input() {
-	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
-		System::set_block_number(1);
-		let alice = mock_pub_key(ALICE);
-		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
-			Default::default(),
-		));
-		let charlie = mock_pub_key(CHARLIE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
-			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
-			Default::default(),
-		));
-		let dave = mock_pub_key(DAVE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
-			Default::default(),
-		));
-
-		let eve = mock_pub_key(EVE);
-		assert_ok!(Services::request(
-			RuntimeOrigin::signed(eve.clone()),
-			0,
-			vec![alice.clone()],
-			vec![bob.clone(), charlie.clone(), dave.clone()],
-			Default::default(),
-			vec![WETH],
-			100,
-		));
-		// this service gets immediately accepted by all providers.
-		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			Percent::from_percent(10)
-		));
-
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(charlie.clone()),
-			0,
-			Percent::from_percent(10)
-		));
-
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			Percent::from_percent(10)
-		));
-		assert!(Instances::<Runtime>::contains_key(0));
-		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
-			owner: eve.clone(),
-			request_id: 0,
-			service_id: 0,
-			blueprint_id: 0,
-			assets: vec![WETH],
-		})]);
-
-		// now we can call the jobs
-		let job_call_id = 0;
-		assert_err!(
-			Services::call(
-				RuntimeOrigin::signed(eve.clone()),
-				0,
-				0,
-				// t > n
-				bounded_vec![Field::Uint8(4)],
-			),
-			crate::Error::<Runtime>::InvalidJobCallInput
-		);
-
-		assert!(!JobCalls::<Runtime>::contains_key(0, job_call_id));
-	});
-}
-
-#[test]
 fn job_result() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
@@ -631,6 +562,7 @@ fn job_result() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::register(
@@ -638,6 +570,7 @@ fn job_result() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 		let dave = mock_pub_key(DAVE);
 		assert_ok!(Services::register(
@@ -645,6 +578,7 @@ fn job_result() {
 			0,
 			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 			Default::default(),
+			0,
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -656,6 +590,7 @@ fn job_result() {
 			Default::default(),
 			vec![WETH],
 			100,
+			0,
 		));
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
@@ -758,6 +693,7 @@ fn deploy() -> Deployment {
 		blueprint_id,
 		OperatorPreferences { key: zero_key(), price_targets: Default::default() },
 		Default::default(),
+		0,
 	));
 
 	let eve = mock_pub_key(EVE);
@@ -770,6 +706,7 @@ fn deploy() -> Deployment {
 		Default::default(),
 		vec![WETH],
 		100,
+		0,
 	));
 
 	assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);

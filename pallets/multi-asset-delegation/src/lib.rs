@@ -77,6 +77,7 @@ pub use functions::*;
 #[frame_support::pallet]
 pub mod pallet {
 	use crate::types::*;
+	use frame_support::traits::fungibles::Inspect;
 	use frame_support::{
 		dispatch::DispatchResult,
 		pallet_prelude::*,
@@ -84,7 +85,7 @@ pub mod pallet {
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
+	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero};
 	use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 	use tangle_primitives::{traits::ServiceManager, RoundIndex};
 
@@ -298,6 +299,8 @@ pub mod pallet {
 		NotLeavingOperator,
 		/// The round does not match the scheduled leave round.
 		NotLeavingRound,
+		/// Leaving round not reached
+		LeavingRoundNotReached,
 		/// There is no scheduled unstake request.
 		NoScheduledBondLess,
 		/// The unstake request is not satisfied.
@@ -344,6 +347,22 @@ pub mod pallet {
 		AssetNotInVault,
 		/// The reward vault does not exist
 		VaultNotFound,
+		/// Deposit amount overflow
+		DepositOverflow,
+		/// Unstake underflow
+		UnstakeAmountTooLarge,
+		/// Overflow while adding stake
+		StakeOverflow,
+		/// Underflow while reducing stake
+		InsufficientStakeRemaining,
+		/// APY exceeds maximum allowed by the extrinsic
+		APYExceedsMaximum,
+		/// Cap cannot be zero
+		CapCannotBeZero,
+		/// Cap exceeds total supply of asset
+		CapExceedsTotalSupply,
+		/// An unstake request is already pending
+		PendingUnstakeRequestExists,
 	}
 
 	/// Hooks for the pallet.
@@ -577,6 +596,11 @@ pub mod pallet {
 		}
 
 		/// Sets the APY and cap for a specific asset.
+		/// The APY is the annual percentage yield that the asset will earn.
+		/// The cap is the amount of assets required to be deposited to distribute the entire APY.
+		/// The APY is capped at 10% and will require runtime upgrade to change.
+		///
+		/// While the cap is not met, the APY distributed will be `amount_deposited / cap * APY`.
 		#[pallet::call_index(19)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn set_incentive_apy_and_cap(
@@ -587,6 +611,21 @@ pub mod pallet {
 		) -> DispatchResult {
 			// Ensure that the origin is authorized
 			T::ForceOrigin::ensure_origin(origin)?;
+
+			// Validate APY is not greater than 10%
+			ensure!(apy <= sp_runtime::Percent::from_percent(10), Error::<T>::APYExceedsMaximum);
+
+			// Validate cap is not zero
+			ensure!(!cap.is_zero(), Error::<T>::CapCannotBeZero);
+
+			// Validate the cap is not greater than the total supply
+			let asset_ids = RewardVaults::<T>::get(vault_id).ok_or(Error::<T>::VaultNotFound)?;
+			for asset_id in asset_ids.iter() {
+				ensure!(
+					T::Fungibles::total_issuance(*asset_id) >= cap,
+					Error::<T>::CapExceedsTotalSupply
+				);
+			}
 
 			// Initialize the reward config if not already initialized
 			RewardConfigStorage::<T>::mutate(|maybe_config| {

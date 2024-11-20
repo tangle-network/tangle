@@ -27,7 +27,7 @@ tangle-primitives = { workspace = true }
 pallet-services = { workspace = true }
 
 [dev-dependencies]
-derive_more = { workspace = true }
+derive_more = { workspace = true, features = ["full"] }
 hex-literal = { workspace = true }
 serde = { workspace = true }
 sha3 = { workspace = true }
