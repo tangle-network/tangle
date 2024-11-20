@@ -77,16 +77,30 @@ pub use functions::*;
 #[frame_support::pallet]
 pub mod pallet {
 	use crate::types::*;
+	use crate::types::*;
+	use crate::types::{
+		delegator::{
+			BondInfoDelegator, BondLessRequest, DelegatorBlueprintSelection, WithdrawRequest,
+		},
+		operator::{DelegatorBond, OperatorMetadata, OperatorSnapshot},
+		AssetAction,
+	};
 	use frame_support::{
-		dispatch::DispatchResult,
 		pallet_prelude::*,
-		traits::{fungibles, Currency, LockableCurrency, ReservableCurrency},
-		PalletId,
+		traits::{
+			tokens::{fungible, fungibles},
+			Currency, Get, LockableCurrency, ReservableCurrency,
+		},
+		BoundedVec, PalletId,
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
-	use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
-	use tangle_primitives::{traits::ServiceManager, RoundIndex};
+	use scale_info::TypeInfo;
+	use sp_runtime::{
+		traits::{AccountIdConversion, AtLeast32BitUnsigned, MaybeSerializeDeserialize, Member},
+		Percent,
+	};
+	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
+	use tangle_primitives::{jobs::RoundIndex, ServiceManager};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
@@ -98,6 +112,46 @@ pub mod pallet {
 		type Currency: Currency<Self::AccountId>
 			+ ReservableCurrency<Self::AccountId>
 			+ LockableCurrency<Self::AccountId>;
+
+		/// Type representing the unique ID of an asset.
+		type AssetId: Parameter
+			+ Member
+			+ Copy
+			+ MaybeSerializeDeserialize
+			+ Ord
+			+ Default
+			+ MaxEncodedLen
+			+ TypeInfo;
+
+		/// Type representing the unique ID of a vault.
+		type VaultId: Parameter
+			+ Member
+			+ Copy
+			+ MaybeSerializeDeserialize
+			+ Ord
+			+ Default
+			+ MaxEncodedLen
+			+ TypeInfo;
+
+		/// The maximum number of blueprints a delegator can have in Fixed mode.
+		#[pallet::constant]
+		type MaxDelegatorBlueprints: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
+
+		/// The maximum number of blueprints an operator can support.
+		#[pallet::constant]
+		type MaxOperatorBlueprints: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
+
+		/// The maximum number of withdraw requests a delegator can have.
+		#[pallet::constant]
+		type MaxWithdrawRequests: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
+
+		/// The maximum number of delegations a delegator can have.
+		#[pallet::constant]
+		type MaxDelegations: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
+
+		/// The maximum number of unstake requests a delegator can have.
+		#[pallet::constant]
+		type MaxUnstakeRequests: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
 
 		/// The minimum amount of stake required for an operator.
 		#[pallet::constant]
@@ -134,26 +188,6 @@ pub mod pallet {
 		type Fungibles: fungibles::Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
 			+ fungibles::Mutate<Self::AccountId, AssetId = Self::AssetId>;
 
-		/// The asset ID type.
-		type AssetId: AtLeast32BitUnsigned
-			+ Parameter
-			+ Member
-			+ MaybeSerializeDeserialize
-			+ Clone
-			+ Copy
-			+ PartialOrd
-			+ MaxEncodedLen;
-
-		/// The vault ID type.
-		type VaultId: AtLeast32BitUnsigned
-			+ Parameter
-			+ Member
-			+ MaybeSerializeDeserialize
-			+ Clone
-			+ Copy
-			+ PartialOrd
-			+ MaxEncodedLen;
-
 		/// The pallet's account ID.
 		type PalletId: Get<PalletId>;
 
@@ -172,8 +206,18 @@ pub mod pallet {
 	/// Storage for operator information.
 	#[pallet::storage]
 	#[pallet::getter(fn operator_info)]
-	pub type Operators<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, OperatorMetadataOf<T>, OptionQuery>;
+	pub type Operators<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		OperatorMetadata<
+			T::AccountId,
+			BalanceOf<T>,
+			T::AssetId,
+			T::MaxDelegations,
+			T::MaxOperatorBlueprints,
+		>,
+	>;
 
 	/// Storage for the current round.
 	#[pallet::storage]
@@ -185,9 +229,9 @@ pub mod pallet {
 	#[pallet::getter(fn at_stake)]
 	pub type AtStake<T: Config> = StorageDoubleMap<
 		_,
-		Twox64Concat,
+		Blake2_128Concat,
 		RoundIndex,
-		Twox64Concat,
+		Blake2_128Concat,
 		T::AccountId,
 		OperatorSnapshotOf<T>,
 		OptionQuery,
@@ -195,21 +239,33 @@ pub mod pallet {
 
 	/// Storage for delegator information.
 	#[pallet::storage]
-	#[pallet::getter(fn delegators)]
-	pub type Delegators<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, DelegatorMetadataOf<T>, OptionQuery>;
+	#[pallet::getter(fn delegator_info)]
+	pub type Delegators<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		DelegatorMetadata<
+			T::AccountId,
+			BalanceOf<T>,
+			T::AssetId,
+			T::MaxWithdrawRequests,
+			T::MaxDelegations,
+			T::MaxUnstakeRequests,
+			T::MaxDelegatorBlueprints,
+		>,
+	>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn reward_vaults)]
 	/// Storage for the reward vaults
 	pub type RewardVaults<T: Config> =
-		StorageMap<_, Twox64Concat, T::VaultId, Vec<T::AssetId>, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::VaultId, Vec<T::AssetId>, OptionQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn asset_reward_vault_lookup)]
 	/// Storage for the reward vaults
 	pub type AssetLookupRewardVaults<T: Config> =
-		StorageMap<_, Twox64Concat, T::AssetId, T::VaultId, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::AssetId, T::VaultId, OptionQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn reward_config)]
@@ -330,6 +386,12 @@ pub mod pallet {
 		AssetNotWhitelisted,
 		/// The origin is not authorized to perform this action
 		NotAuthorized,
+		/// The delegator does not exist
+		DelegatorDNE,
+		/// The operator does not exist
+		OperatorDNE,
+		/// Maximum number of blueprints exceeded
+		MaxBlueprintsExceeded,
 		/// The asset ID is not found
 		AssetNotFound,
 		/// The blueprint ID is already whitelisted
@@ -344,6 +406,12 @@ pub mod pallet {
 		AssetNotInVault,
 		/// The reward vault does not exist
 		VaultNotFound,
+		/// Error returned when trying to add a blueprint ID that already exists.
+		DuplicateBlueprintId,
+		/// Error returned when trying to remove a blueprint ID that doesn't exist.
+		BlueprintIdNotFound,
+		/// Error returned when trying to add/remove blueprint IDs while not in Fixed mode.
+		NotInFixedMode,
 	}
 
 	/// Hooks for the pallet.
@@ -577,7 +645,7 @@ pub mod pallet {
 		}
 
 		/// Sets the APY and cap for a specific asset.
-		#[pallet::call_index(19)]
+		#[pallet::call_index(18)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn set_incentive_apy_and_cap(
 			origin: OriginFor<T>,
@@ -607,7 +675,7 @@ pub mod pallet {
 		}
 
 		/// Whitelists a blueprint for rewards.
-		#[pallet::call_index(20)]
+		#[pallet::call_index(19)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn whitelist_blueprint_for_rewards(
 			origin: OriginFor<T>,
@@ -637,7 +705,7 @@ pub mod pallet {
 		}
 
 		/// Manage asset id to vault rewards
-		#[pallet::call_index(21)]
+		#[pallet::call_index(20)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn manage_asset_in_vault(
 			origin: OriginFor<T>,
@@ -654,6 +722,65 @@ pub mod pallet {
 
 			Self::deposit_event(Event::AssetUpdatedInVault { who, vault_id, asset_id, action });
 
+			Ok(())
+		}
+
+		/// Sets the blueprint selection for a delegator.
+		#[pallet::call_index(21)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn set_blueprint_selection(
+			origin: OriginFor<T>,
+			selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let mut metadata = Self::delegator_info(&who).unwrap_or_default();
+			metadata.blueprint_selection = selection;
+			Delegators::<T>::insert(&who, metadata);
+			Ok(())
+		}
+
+		/// Adds a blueprint ID to a delegator's selection.
+		#[pallet::call_index(22)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn add_blueprint_id(origin: OriginFor<T>, blueprint_id: u32) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let mut metadata = Self::delegator_info(&who).ok_or(Error::<T>::DelegatorDNE)?;
+
+			match metadata.blueprint_selection {
+				DelegatorBlueprintSelection::Fixed(ref mut ids) => {
+					ensure!(!ids.contains(&blueprint_id), Error::<T>::DuplicateBlueprintId);
+					ids.try_push(blueprint_id).map_err(|_| Error::<T>::MaxBlueprintsExceeded)?;
+				},
+				DelegatorBlueprintSelection::All => {
+					return Err(Error::<T>::NotInFixedMode.into());
+				},
+			}
+
+			Delegators::<T>::insert(&who, metadata);
+			Ok(())
+		}
+
+		/// Removes a blueprint ID from a delegator's selection.
+		#[pallet::call_index(23)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn remove_blueprint_id(origin: OriginFor<T>, blueprint_id: u32) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let mut metadata = Self::delegator_info(&who).ok_or(Error::<T>::DelegatorDNE)?;
+
+			match metadata.blueprint_selection {
+				DelegatorBlueprintSelection::Fixed(ref mut ids) => {
+					let pos = ids
+						.iter()
+						.position(|&id| id == blueprint_id)
+						.ok_or(Error::<T>::BlueprintIdNotFound)?;
+					ids.remove(pos);
+				},
+				DelegatorBlueprintSelection::All => {
+					return Err(Error::<T>::NotInFixedMode.into());
+				},
+			}
+
+			Delegators::<T>::insert(&who, metadata);
 			Ok(())
 		}
 	}

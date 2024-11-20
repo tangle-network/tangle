@@ -15,19 +15,21 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
+use frame_support::{pallet_prelude::Get, BoundedVec};
 
 /// A snapshot of the operator state at the start of the round.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct OperatorSnapshot<AccountId, Balance, AssetId> {
+pub struct OperatorSnapshot<AccountId, Balance, AssetId, MaxDelegations: Get<u32>> {
 	/// The total value locked by the operator.
 	pub stake: Balance,
 
 	/// The rewardable delegations. This list is a subset of total delegators, where certain
 	/// delegators are adjusted based on their scheduled status.
-	pub delegations: Vec<DelegatorBond<AccountId, Balance, AssetId>>,
+	pub delegations: BoundedVec<DelegatorBond<AccountId, Balance, AssetId>, MaxDelegations>,
 }
 
-impl<AccountId, Balance, AssetId> OperatorSnapshot<AccountId, Balance, AssetId>
+impl<AccountId, Balance, AssetId, MaxDelegations: Get<u32>>
+	OperatorSnapshot<AccountId, Balance, AssetId, MaxDelegations>
 where
 	AssetId: PartialEq + Ord + Copy,
 	Balance: Default + core::ops::AddAssign + Copy,
@@ -79,7 +81,14 @@ pub struct OperatorBondLessRequest<Balance> {
 
 /// Stores the metadata of an operator.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo, Clone, Eq, PartialEq)]
-pub struct OperatorMetadata<AccountId, Balance, AssetId> {
+pub struct OperatorMetadata<
+	AccountId,
+	Balance,
+	AssetId,
+	MaxDelegations: Get<u32>,
+	MaxUnstakeRequests: Get<u32>,
+	MaxBlueprints: Get<u32>,
+> {
 	/// The operator's self-stake amount.
 	pub stake: Balance,
 	/// The total number of delegations to this operator.
@@ -88,9 +97,35 @@ pub struct OperatorMetadata<AccountId, Balance, AssetId> {
 	/// any given time.
 	pub request: Option<OperatorBondLessRequest<Balance>>,
 	/// A list of all current delegations.
-	pub delegations: Vec<DelegatorBond<AccountId, Balance, AssetId>>,
+	pub delegations: BoundedVec<DelegatorBond<AccountId, Balance, AssetId>, MaxDelegations>,
 	/// The current status of the operator.
 	pub status: OperatorStatus,
+	/// The set of blueprint IDs this operator works with.
+	pub blueprint_ids: BoundedVec<u32, MaxBlueprints>,
+}
+
+impl<
+		AccountId,
+		Balance,
+		AssetId,
+		MaxDelegations: Get<u32>,
+		MaxUnstakeRequests: Get<u32>,
+		MaxBlueprints: Get<u32>,
+	> Default
+	for OperatorMetadata<AccountId, Balance, AssetId, MaxDelegations, MaxUnstakeRequests, MaxBlueprints>
+where
+	Balance: Default,
+{
+	fn default() -> Self {
+		Self {
+			stake: Balance::default(),
+			delegation_count: 0,
+			request: None,
+			delegations: BoundedVec::default(),
+			status: OperatorStatus::default(),
+			blueprint_ids: BoundedVec::default(),
+		}
+	}
 }
 
 /// Represents a stake for an operator
@@ -109,30 +144,54 @@ pub struct DelegatorBond<AccountId, Balance, AssetId> {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use std::ops::AddAssign;
-
-	#[derive(
-		Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, PartialOrd, Ord,
-	)]
-	pub struct MockAssetId(pub u32);
-
-	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
-	pub struct MockAccountId(pub u64);
+	use frame_support::{parameter_types, BoundedVec};
+	use sp_runtime::traits::Zero;
 
 	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Default)]
-	pub struct MockBalance(pub u64);
+	pub struct MockBalance(pub u32);
 
-	impl AddAssign for MockBalance {
-		fn add_assign(&mut self, other: Self) {
-			*self = MockBalance(self.0 + other.0);
+	impl Zero for MockBalance {
+		fn zero() -> Self {
+			MockBalance(0)
+		}
+
+		fn is_zero(&self) -> bool {
+			self.0 == 0
 		}
 	}
+
+	impl core::ops::AddAssign for MockBalance {
+		fn add_assign(&mut self, other: Self) {
+			self.0 += other.0;
+		}
+	}
+
+	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
+	pub struct MockAccountId(pub u32);
+
+	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
+	pub struct MockAssetId(pub u32);
+
+	parameter_types! {
+		pub const MaxDelegators: u32 = 10;
+		pub const MaxUnstakeRequests: u32 = 10;
+		pub const MaxBlueprints: u32 = 10;
+	}
+
+	type TestOperatorMetadata = OperatorMetadata<
+		MockAccountId,
+		MockBalance,
+		MockAssetId,
+		MaxDelegators,
+		MaxUnstakeRequests,
+		MaxBlueprints,
+	>;
 
 	#[test]
 	fn get_stake_by_asset_id_should_work() {
 		let snapshot = OperatorSnapshot {
 			stake: MockBalance(100),
-			delegations: vec![
+			delegations: BoundedVec::try_from(vec![
 				DelegatorBond {
 					delegator: MockAccountId(1),
 					amount: MockBalance(50),
@@ -148,19 +207,20 @@ mod tests {
 					amount: MockBalance(25),
 					asset_id: MockAssetId(2),
 				},
-			],
+			])
+			.unwrap(),
 		};
 
-		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(1)), MockBalance(125));
-		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(2)), MockBalance(25));
-		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(3)), MockBalance(0));
+		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(1)).0, 125);
+		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(2)).0, 25);
+		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(3)).0, 0);
 	}
 
 	#[test]
 	fn get_total_stake_by_assets_should_work() {
 		let snapshot = OperatorSnapshot {
 			stake: MockBalance(100),
-			delegations: vec![
+			delegations: BoundedVec::try_from(vec![
 				DelegatorBond {
 					delegator: MockAccountId(1),
 					amount: MockBalance(50),
@@ -181,7 +241,8 @@ mod tests {
 					amount: MockBalance(100),
 					asset_id: MockAssetId(2),
 				},
-			],
+			])
+			.unwrap(),
 		};
 
 		let result = snapshot.get_total_stake_by_assets();

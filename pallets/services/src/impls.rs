@@ -2,10 +2,10 @@ use super::*;
 use crate::types::BalanceOf;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+use sp_std::vec;
 #[cfg(feature = "std")]
 use std::vec::Vec;
 use tangle_primitives::BlueprintId;
-use sp_std::vec;
 use tangle_primitives::{services::Constraints, traits::ServiceManager};
 
 impl<T: Config> traits::EvmRunner<T> for () {

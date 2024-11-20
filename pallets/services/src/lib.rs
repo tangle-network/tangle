@@ -47,9 +47,9 @@ mod benchmarking;
 pub mod weights;
 
 pub use module::*;
+use tangle_primitives::BlueprintId;
 pub use traits::*;
 pub use weights::WeightInfo;
-use tangle_primitives::BlueprintId;
 
 #[cfg(feature = "runtime-benchmarks")]
 pub use impls::BenchmarkingOperatorDelegationManager;

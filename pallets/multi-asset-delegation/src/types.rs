@@ -33,11 +33,27 @@ pub use rewards::*;
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
-pub type OperatorMetadataOf<T> =
-	OperatorMetadata<<T as frame_system::Config>::AccountId, BalanceOf<T>, <T as Config>::AssetId>;
+pub type OperatorMetadataOf<T> = OperatorMetadata<
+	<T as frame_system::Config>::AccountId,
+	BalanceOf<T>,
+	<T as Config>::AssetId,
+	T::MaxDelegations,
+	T::MaxOperatorBlueprints,
+>;
 
-pub type OperatorSnapshotOf<T> =
-	OperatorSnapshot<<T as frame_system::Config>::AccountId, BalanceOf<T>, <T as Config>::AssetId>;
+pub type OperatorSnapshotOf<T> = OperatorSnapshot<
+	<T as frame_system::Config>::AccountId,
+	BalanceOf<T>,
+	<T as Config>::AssetId,
+	T::MaxDelegations,
+>;
 
-pub type DelegatorMetadataOf<T> =
-	DelegatorMetadata<<T as frame_system::Config>::AccountId, BalanceOf<T>, <T as Config>::AssetId>;
+pub type DelegatorMetadataOf<T> = DelegatorMetadata<
+	<T as frame_system::Config>::AccountId,
+	BalanceOf<T>,
+	<T as Config>::AssetId,
+	T::MaxWithdrawRequests,
+	T::MaxDelegations,
+	T::MaxUnstakeRequests,
+	T::MaxDelegatorBlueprints,
+>;

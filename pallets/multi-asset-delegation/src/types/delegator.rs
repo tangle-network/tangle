@@ -15,6 +15,17 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
+use frame_support::{pallet_prelude::Get, BoundedVec};
+
+/// Represents how a delegator selects which blueprints to work with.
+#[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Default)]
+pub enum DelegatorBlueprintSelection<MaxBlueprints: Get<u32>> {
+	/// The delegator works with a fixed set of blueprints.
+	Fixed(BoundedVec<u32, MaxBlueprints>),
+	/// The delegator works with all available blueprints.
+	#[default]
+	All,
+}
 
 /// Represents the status of a delegator.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Default)]
@@ -52,35 +63,79 @@ pub struct BondLessRequest<AccountId, AssetId, Balance> {
 
 /// Stores the state of a delegator, including deposits, delegations, and requests.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct DelegatorMetadata<AccountId, Balance, AssetId: Encode + Decode + TypeInfo> {
+pub struct DelegatorMetadata<
+	AccountId,
+	Balance,
+	AssetId: Encode + Decode + TypeInfo,
+	MaxWithdrawRequests: Get<u32>,
+	MaxDelegations: Get<u32>,
+	MaxUnstakeRequests: Get<u32>,
+	MaxBlueprints: Get<u32>,
+> {
 	/// A map of deposited assets and their respective amounts.
 	pub deposits: BTreeMap<AssetId, Balance>,
 	/// A vector of withdraw requests.
-	pub withdraw_requests: Vec<WithdrawRequest<AssetId, Balance>>,
+	pub withdraw_requests: BoundedVec<WithdrawRequest<AssetId, Balance>, MaxWithdrawRequests>,
 	/// A list of all current delegations.
-	pub delegations: Vec<BondInfoDelegator<AccountId, Balance, AssetId>>,
+	pub delegations: BoundedVec<BondInfoDelegator<AccountId, Balance, AssetId>, MaxDelegations>,
 	/// A vector of requests to reduce the bonded amount.
-	pub delegator_unstake_requests: Vec<BondLessRequest<AccountId, AssetId, Balance>>,
+	pub delegator_unstake_requests:
+		BoundedVec<BondLessRequest<AccountId, AssetId, Balance>, MaxUnstakeRequests>,
 	/// The current status of the delegator.
 	pub status: DelegatorStatus,
+	/// The blueprint selection mode for this delegator.
+	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
 }
 
-impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo> Default
-	for DelegatorMetadata<AccountId, Balance, AssetId>
+impl<
+		AccountId,
+		Balance,
+		AssetId: Encode + Decode + TypeInfo,
+		MaxWithdrawRequests: Get<u32>,
+		MaxDelegations: Get<u32>,
+		MaxUnstakeRequests: Get<u32>,
+		MaxBlueprints: Get<u32>,
+	> Default
+	for DelegatorMetadata<
+		AccountId,
+		Balance,
+		AssetId,
+		MaxWithdrawRequests,
+		MaxDelegations,
+		MaxUnstakeRequests,
+		MaxBlueprints,
+	>
 {
 	fn default() -> Self {
 		DelegatorMetadata {
 			deposits: BTreeMap::new(),
-			delegations: Vec::new(),
+			delegations: BoundedVec::default(),
 			status: DelegatorStatus::default(),
-			withdraw_requests: Vec::new(),
-			delegator_unstake_requests: Vec::new(),
+			withdraw_requests: BoundedVec::default(),
+			delegator_unstake_requests: BoundedVec::default(),
+			blueprint_selection: DelegatorBlueprintSelection::default(),
 		}
 	}
 }
 
-impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
-	DelegatorMetadata<AccountId, Balance, AssetId>
+impl<
+		AccountId,
+		Balance,
+		AssetId: Encode + Decode + TypeInfo,
+		MaxWithdrawRequests: Get<u32>,
+		MaxDelegations: Get<u32>,
+		MaxUnstakeRequests: Get<u32>,
+		MaxBlueprints: Get<u32>,
+	>
+	DelegatorMetadata<
+		AccountId,
+		Balance,
+		AssetId,
+		MaxWithdrawRequests,
+		MaxDelegations,
+		MaxUnstakeRequests,
+		MaxBlueprints,
+	>
 {
 	/// Returns a reference to the vector of withdraw requests.
 	pub fn get_withdraw_requests(&self) -> &Vec<WithdrawRequest<AssetId, Balance>> {
@@ -156,24 +211,50 @@ pub struct BondInfoDelegator<AccountId, Balance, AssetId> {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use std::ops::AddAssign;
-
-	#[derive(
-		Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, PartialOrd, Ord,
-	)]
-	pub struct MockAssetId(pub u32);
-
-	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
-	pub struct MockAccountId(pub u64);
+	use frame_support::{parameter_types, BoundedVec};
+	use sp_runtime::traits::Zero;
 
 	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Default)]
-	pub struct MockBalance(pub u64);
+	pub struct MockBalance(pub u32);
 
-	impl AddAssign for MockBalance {
-		fn add_assign(&mut self, other: Self) {
-			*self = MockBalance(self.0 + other.0);
+	impl Zero for MockBalance {
+		fn zero() -> Self {
+			MockBalance(0)
+		}
+
+		fn is_zero(&self) -> bool {
+			self.0 == 0
 		}
 	}
+
+	impl core::ops::AddAssign for MockBalance {
+		fn add_assign(&mut self, other: Self) {
+			self.0 += other.0;
+		}
+	}
+
+	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
+	pub struct MockAccountId(pub u32);
+
+	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
+	pub struct MockAssetId(pub u32);
+
+	parameter_types! {
+		pub const MaxWithdrawRequests: u32 = 10;
+		pub const MaxDelegations: u32 = 10;
+		pub const MaxUnstakeRequests: u32 = 10;
+		pub const MaxBlueprints: u32 = 10;
+	}
+
+	type TestDelegatorMetadata = DelegatorMetadata<
+		MockAccountId,
+		MockBalance,
+		MockAssetId,
+		MaxWithdrawRequests,
+		MaxDelegations,
+		MaxUnstakeRequests,
+		MaxBlueprints,
+	>;
 
 	#[test]
 	fn get_withdraw_requests_should_work() {
@@ -189,11 +270,10 @@ mod tests {
 				requested_round: 2,
 			},
 		];
-		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
-			DelegatorMetadata {
-				withdraw_requests: withdraw_requests.clone(),
-				..Default::default()
-			};
+		let metadata = TestDelegatorMetadata {
+			withdraw_requests: BoundedVec::try_from(withdraw_requests.clone()).unwrap(),
+			..Default::default()
+		};
 
 		assert_eq!(metadata.get_withdraw_requests(), &withdraw_requests);
 	}
@@ -212,8 +292,10 @@ mod tests {
 				asset_id: MockAssetId(2),
 			},
 		];
-		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
-			DelegatorMetadata { delegations: delegations.clone(), ..Default::default() };
+		let metadata = TestDelegatorMetadata {
+			delegations: BoundedVec::try_from(delegations.clone()).unwrap(),
+			..Default::default()
+		};
 
 		assert_eq!(metadata.get_delegations(), &delegations);
 	}
@@ -234,31 +316,27 @@ mod tests {
 				operator: MockAccountId(1),
 			},
 		];
-		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
-			DelegatorMetadata {
-				delegator_unstake_requests: unstake_requests.clone(),
-				..Default::default()
-			};
+		let metadata = TestDelegatorMetadata {
+			delegator_unstake_requests: BoundedVec::try_from(unstake_requests.clone()).unwrap(),
+			..Default::default()
+		};
 
 		assert_eq!(metadata.get_delegator_unstake_requests(), &unstake_requests);
 	}
 
 	#[test]
 	fn is_delegations_empty_should_work() {
-		let metadata_with_delegations = DelegatorMetadata {
-			delegations: vec![BondInfoDelegator {
+		let metadata_with_delegations = TestDelegatorMetadata {
+			delegations: BoundedVec::try_from(vec![BondInfoDelegator {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
 				asset_id: MockAssetId(1),
-			}],
+			}])
+			.unwrap(),
 			..Default::default()
 		};
 
-		let metadata_without_delegations: DelegatorMetadata<
-			MockAccountId,
-			MockBalance,
-			MockAssetId,
-		> = Default::default();
+		let metadata_without_delegations = TestDelegatorMetadata::default();
 
 		assert!(!metadata_with_delegations.is_delegations_empty());
 		assert!(metadata_without_delegations.is_delegations_empty());
@@ -283,7 +361,10 @@ mod tests {
 				asset_id: MockAssetId(2),
 			},
 		];
-		let metadata = DelegatorMetadata { delegations, ..Default::default() };
+		let metadata = TestDelegatorMetadata {
+			delegations: BoundedVec::try_from(delegations).unwrap(),
+			..Default::default()
+		};
 
 		assert_eq!(metadata.calculate_delegation_by_asset(MockAssetId(1)), MockBalance(125));
 		assert_eq!(metadata.calculate_delegation_by_asset(MockAssetId(2)), MockBalance(25));
@@ -309,7 +390,10 @@ mod tests {
 				asset_id: MockAssetId(1),
 			},
 		];
-		let metadata = DelegatorMetadata { delegations, ..Default::default() };
+		let metadata = TestDelegatorMetadata {
+			delegations: BoundedVec::try_from(delegations).unwrap(),
+			..Default::default()
+		};
 
 		let result = metadata.calculate_delegation_by_operator(MockAccountId(1));
 		assert_eq!(result.len(), 2);
