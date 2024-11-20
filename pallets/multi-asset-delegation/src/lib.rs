@@ -100,7 +100,7 @@ pub mod pallet {
 		Percent,
 	};
 	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
-	use tangle_primitives::{jobs::RoundIndex, ServiceManager};
+	use tangle_primitives::{types::RoundIndex, ServiceManager};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
@@ -206,18 +206,8 @@ pub mod pallet {
 	/// Storage for operator information.
 	#[pallet::storage]
 	#[pallet::getter(fn operator_info)]
-	pub type Operators<T: Config> = StorageMap<
-		_,
-		Blake2_128Concat,
-		T::AccountId,
-		OperatorMetadata<
-			T::AccountId,
-			BalanceOf<T>,
-			T::AssetId,
-			T::MaxDelegations,
-			T::MaxOperatorBlueprints,
-		>,
-	>;
+	pub type Operators<T: Config> =
+		StorageMap<_, Blake2_128Concat, T::AccountId, OperatorMetadataOf<T>>;
 
 	/// Storage for the current round.
 	#[pallet::storage]
@@ -239,21 +229,9 @@ pub mod pallet {
 
 	/// Storage for delegator information.
 	#[pallet::storage]
-	#[pallet::getter(fn delegator_info)]
-	pub type Delegators<T: Config> = StorageMap<
-		_,
-		Blake2_128Concat,
-		T::AccountId,
-		DelegatorMetadata<
-			T::AccountId,
-			BalanceOf<T>,
-			T::AssetId,
-			T::MaxWithdrawRequests,
-			T::MaxDelegations,
-			T::MaxUnstakeRequests,
-			T::MaxDelegatorBlueprints,
-		>,
-	>;
+	#[pallet::getter(fn delegator_metadata)]
+	pub type Delegators<T: Config> =
+		StorageMap<_, Blake2_128Concat, T::AccountId, DelegatorMetadataOf<T>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn reward_vaults)]
@@ -412,6 +390,12 @@ pub mod pallet {
 		BlueprintIdNotFound,
 		/// Error returned when trying to add/remove blueprint IDs while not in Fixed mode.
 		NotInFixedMode,
+		/// Error returned when the maximum number of delegations is exceeded.
+		MaxDelegationsExceeded,
+		/// Error returned when the maximum number of unstake requests is exceeded.
+		MaxUnstakeRequestsExceeded,
+		/// Error returned when the maximum number of withdraw requests is exceeded.
+		MaxWithdrawRequestsExceeded,
 	}
 
 	/// Hooks for the pallet.
@@ -733,7 +717,7 @@ pub mod pallet {
 			selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			let mut metadata = Self::delegator_info(&who).unwrap_or_default();
+			let mut metadata = Self::delegator_metadata(&who).unwrap_or_default();
 			metadata.blueprint_selection = selection;
 			Delegators::<T>::insert(&who, metadata);
 			Ok(())
@@ -744,7 +728,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn add_blueprint_id(origin: OriginFor<T>, blueprint_id: u32) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			let mut metadata = Self::delegator_info(&who).ok_or(Error::<T>::DelegatorDNE)?;
+			let mut metadata = Self::delegator_metadata(&who).ok_or(Error::<T>::DelegatorDNE)?;
 
 			match metadata.blueprint_selection {
 				DelegatorBlueprintSelection::Fixed(ref mut ids) => {
@@ -765,7 +749,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn remove_blueprint_id(origin: OriginFor<T>, blueprint_id: u32) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			let mut metadata = Self::delegator_info(&who).ok_or(Error::<T>::DelegatorDNE)?;
+			let mut metadata = Self::delegator_metadata(&who).ok_or(Error::<T>::DelegatorDNE)?;
 
 			match metadata.blueprint_selection {
 				DelegatorBlueprintSelection::Fixed(ref mut ids) => {

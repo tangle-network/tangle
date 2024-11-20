@@ -101,11 +101,11 @@ impl<T: Config> Pallet<T> {
 
 			// Create the unstake request
 			let current_round = Self::current_round();
-			metadata.withdraw_requests.push(WithdrawRequest {
-				asset_id,
-				amount,
-				requested_round: current_round,
-			});
+			let mut withdraw_requests = metadata.withdraw_requests.clone();
+			withdraw_requests
+				.try_push(WithdrawRequest { asset_id, amount, requested_round: current_round })
+				.map_err(|_| Error::<T>::MaxWithdrawRequestsExceeded)?;
+			metadata.withdraw_requests = withdraw_requests;
 
 			Ok(())
 		})
@@ -116,8 +116,6 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `who` - The account ID of the delegator.
-	/// * `asset_id` - The asset ID of the unstake request to cancel.
-	/// * `amount` - The amount of the unstake request to cancel.
 	///
 	/// # Errors
 	///

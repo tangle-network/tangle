@@ -108,27 +108,12 @@ impl tangle_primitives::ServiceManager<u64, Balance> for MockServiceManager {
 		// Mock logic to determine if the given account can exit
 		true
 	}
-
-	fn get_blueprints_by_operator(_account: &u64) -> Vec<u64> {
-		// Mock logic to retrieve blueprints by operator
-		vec![]
-	}
 }
 
 parameter_types! {
 	pub const BlockHashCount: u64 = 250;
-	pub const SS58Prefix: u8 = 42;
-	pub const MinOperatorBondAmount: Balance = 10_000;
-	pub const MinDelegateBondAmount: Balance = 50;
-	pub const MaxDelegationsPerRound: u32 = 4;
-	pub const MaxDelegatorsPerOperator: u32 = 4;
-	pub const MaxUnstakeRequestsPerRound: u32 = 4;
-	pub const MaxWithdrawRequestsPerRound: u32 = 4;
-	pub const MaxDelegatorBlueprints: u32 = 10;
-	pub const MaxOperatorBlueprints: u32 = 20;
-	pub const MaxWithdrawRequests: u32 = 10;
-	pub const MaxDelegations: u32 = 10;
-	pub const MaxUnstakeRequests: u32 = 10;
+	pub const MaxLocks: u32 = 50;
+	pub const MinOperatorBondAmount: u64 = 10_000;
 	pub const BondDuration: u32 = 10;
 	pub PID: PalletId = PalletId(*b"PotStake");
 }
@@ -136,30 +121,20 @@ parameter_types! {
 impl pallet_multi_asset_delegation::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
-	type AssetId = u32;
-	type VaultId = u32;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type MinDelegateBondAmount = MinDelegateBondAmount;
-	type MaxDelegationsPerRound = MaxDelegationsPerRound;
-	type MaxDelegatorsPerOperator = MaxDelegatorsPerOperator;
-	type MaxUnstakeRequestsPerRound = MaxUnstakeRequestsPerRound;
-	type MaxWithdrawRequestsPerRound = MaxWithdrawRequestsPerRound;
-	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
-	type MaxOperatorBlueprints = MaxOperatorBlueprints;
-	type MaxWithdrawRequests = MaxWithdrawRequests;
-	type MaxDelegations = MaxDelegations;
-	type MaxUnstakeRequests = MaxUnstakeRequests;
 	type BondDuration = BondDuration;
-	type WeightInfo = ();
 	type ServiceManager = MockServiceManager;
-	type PalletId = PID;
-	type ForceOrigin = frame_system::EnsureRoot<u64>;
-	type Fungibles = Assets;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;
 	type LeaveDelegatorsDelay = ConstU32<1>;
 	type DelegationBondLessDelay = ConstU32<5>;
 	type MinDelegateAmount = ConstU64<100>;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type VaultId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<u64>;
+	type PalletId = PID;
+	type WeightInfo = ();
 }
 
 impl pallet_assets::Config for Test {

@@ -37,23 +37,23 @@ pub type OperatorMetadataOf<T> = OperatorMetadata<
 	<T as frame_system::Config>::AccountId,
 	BalanceOf<T>,
 	<T as Config>::AssetId,
-	T::MaxDelegations,
-	T::MaxOperatorBlueprints,
+	<T as Config>::MaxDelegations,
+	<T as Config>::MaxOperatorBlueprints,
 >;
 
 pub type OperatorSnapshotOf<T> = OperatorSnapshot<
 	<T as frame_system::Config>::AccountId,
 	BalanceOf<T>,
 	<T as Config>::AssetId,
-	T::MaxDelegations,
+	<T as Config>::MaxDelegations,
 >;
 
 pub type DelegatorMetadataOf<T> = DelegatorMetadata<
 	<T as frame_system::Config>::AccountId,
 	BalanceOf<T>,
 	<T as Config>::AssetId,
-	T::MaxWithdrawRequests,
-	T::MaxDelegations,
-	T::MaxUnstakeRequests,
-	T::MaxDelegatorBlueprints,
+	<T as Config>::MaxWithdrawRequests,
+	<T as Config>::MaxDelegations,
+	<T as Config>::MaxUnstakeRequests,
+	<T as Config>::MaxDelegatorBlueprints,
 >;

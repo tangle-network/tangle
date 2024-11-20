@@ -62,40 +62,46 @@ impl<T: Config> Pallet<T> {
 			{
 				delegation.amount += amount;
 			} else {
-				metadata.delegations.push(BondInfoDelegator {
-					operator: operator.clone(),
-					amount,
-					asset_id,
-				});
+				let mut metadata = metadata;
+				// Create the new delegation
+				let new_delegation =
+					BondInfoDelegator { operator: operator.clone(), amount, asset_id };
+
+				// Create a mutable copy of delegations
+				let mut delegations = metadata.delegations.clone();
+				delegations
+					.try_push(new_delegation)
+					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+				metadata.delegations = delegations;
+
+				// Update the status
+				metadata.status = DelegatorStatus::Active;
 			}
 
-			// Update the status
-			metadata.status = DelegatorStatus::Active;
-
 			// Update the operator's metadata
-			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
-				let operator_metadata =
-					maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
+			if let Some(mut operator_metadata) = Operators::<T>::get(&operator) {
+				// Check if the operator has capacity for more delegations
+				ensure!(
+					operator_metadata.delegation_count < T::MaxDelegations::get(),
+					Error::<T>::MaxDelegationsExceeded
+				);
 
-				// Check if the delegation exists and update it, otherwise create a new delegation
-				if let Some(delegation) = operator_metadata
-					.delegations
-					.iter_mut()
-					.find(|d| d.delegator == who && d.asset_id == asset_id)
-				{
-					delegation.amount += amount;
-				} else {
-					operator_metadata.delegations.push(DelegatorBond {
-						delegator: who.clone(),
-						amount,
-						asset_id,
-					});
-					// Increase the delegation count only when a new delegation is added
-					operator_metadata.delegation_count += 1;
-				}
+				// Create and push the new delegation bond
+				let delegation = DelegatorBond { delegator: who.clone(), amount, asset_id };
 
-				Ok(())
-			})?;
+				let mut delegations = operator_metadata.delegations.clone();
+				delegations
+					.try_push(delegation)
+					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+				operator_metadata.delegations = delegations;
+				operator_metadata.delegation_count =
+					operator_metadata.delegation_count.saturating_add(1);
+
+				// Update storage
+				Operators::<T>::insert(&operator, operator_metadata);
+			} else {
+				return Err(Error::<T>::NotAnOperator.into());
+			}
 
 			Ok(())
 		})
@@ -143,12 +149,16 @@ impl<T: Config> Pallet<T> {
 
 			// Create the unstake request
 			let current_round = Self::current_round();
-			metadata.delegator_unstake_requests.push(BondLessRequest {
-				operator: operator.clone(),
-				asset_id,
-				amount,
-				requested_round: current_round,
-			});
+			let mut unstake_requests = metadata.delegator_unstake_requests.clone();
+			unstake_requests
+				.try_push(BondLessRequest {
+					operator: operator.clone(),
+					asset_id,
+					amount,
+					requested_round: current_round,
+				})
+				.map_err(|_| Error::<T>::MaxUnstakeRequestsExceeded)?;
+			metadata.delegator_unstake_requests = unstake_requests;
 
 			// Update the operator's metadata
 			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
@@ -200,11 +210,11 @@ impl<T: Config> Pallet<T> {
 			ensure!(!metadata.delegator_unstake_requests.is_empty(), Error::<T>::NoBondLessRequest);
 
 			let current_round = Self::current_round();
-			let delay = T::DelegationBondLessDelay::get();
 
 			// Process all ready unstake requests
 			let mut executed_requests = Vec::new();
 			metadata.delegator_unstake_requests.retain(|request| {
+				let delay = T::DelegationBondLessDelay::get();
 				if current_round >= delay + request.requested_round {
 					// Add the amount back to the delegator's deposits
 					metadata
@@ -262,47 +272,50 @@ impl<T: Config> Pallet<T> {
 			Operators::<T>::try_mutate(
 				&unstake_request.operator,
 				|maybe_operator_metadata| -> DispatchResult {
-					let operator_metadata =
+					let mut operator_metadata =
 						maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
 
 					// Find the matching delegation and increase its amount, or insert a new
 					// delegation if not found
-					if let Some(delegation) = operator_metadata
-						.delegations
+					let mut delegations = operator_metadata.delegations.clone();
+					if let Some(delegation) = delegations
 						.iter_mut()
 						.find(|d| d.asset_id == asset_id && d.delegator == who.clone())
 					{
 						delegation.amount += amount;
 					} else {
-						operator_metadata.delegations.push(DelegatorBond {
-							delegator: who.clone(),
-							amount,
-							asset_id,
-						});
+						delegations
+							.try_push(DelegatorBond { delegator: who.clone(), amount, asset_id })
+							.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 
-						// Increase the delegation count
+						// Increase the delegation count only when a new delegation is added
 						operator_metadata.delegation_count += 1;
 					}
+					operator_metadata.delegations = delegations;
 
 					Ok(())
 				},
 			)?;
 
+			// Update the delegator's metadata
+			let mut delegations = metadata.delegations.clone();
+
 			// If a similar delegation exists, increase the amount
-			if let Some(delegation) = metadata
-				.delegations
-				.iter_mut()
-				.find(|d| d.operator == unstake_request.operator && d.asset_id == asset_id)
-			{
-				delegation.amount += amount;
+			if let Some(delegation) = delegations.iter_mut().find(|d| {
+				d.operator == unstake_request.operator && d.asset_id == unstake_request.asset_id
+			}) {
+				delegation.amount += unstake_request.amount;
 			} else {
 				// Create a new delegation
-				metadata.delegations.push(BondInfoDelegator {
-					operator: unstake_request.operator,
-					amount,
-					asset_id,
-				});
+				delegations
+					.try_push(BondInfoDelegator {
+						operator: unstake_request.operator.clone(),
+						amount: unstake_request.amount,
+						asset_id: unstake_request.asset_id,
+					})
+					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 			}
+			metadata.delegations = delegations;
 
 			Ok(())
 		})

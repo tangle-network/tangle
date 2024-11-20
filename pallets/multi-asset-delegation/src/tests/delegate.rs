@@ -44,7 +44,7 @@ fn delegate_should_work() {
 		));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(metadata.deposits.get(&asset_id).is_none());
 		assert_eq!(metadata.delegations.len(), 1);
 		let delegation = &metadata.delegations[0];
@@ -94,7 +94,7 @@ fn schedule_delegator_unstake_should_work() {
 
 		// Assert
 		// Check the delegator metadata
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(!metadata.delegator_unstake_requests.is_empty());
 		let request = &metadata.delegator_unstake_requests[0];
 		assert_eq!(request.asset_id, asset_id);
@@ -141,7 +141,7 @@ fn execute_delegator_unstake_should_work() {
 		assert_ok!(MultiAssetDelegation::execute_delegator_unstake(RuntimeOrigin::signed(who),));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(metadata.delegator_unstake_requests.is_empty());
 		assert!(metadata.deposits.get(&asset_id).is_some());
 		assert_eq!(metadata.deposits.get(&asset_id).unwrap(), &amount);
@@ -170,27 +170,25 @@ fn cancel_delegator_unstake_should_work() {
 			amount,
 		));
 
-		// ensure the storage is correct
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegator_unstake_requests.is_empty());
-		assert!(metadata.delegations.len() == 1);
-		let delegation = metadata.delegations.first().unwrap();
-		assert_eq!(delegation.operator, operator);
-		assert_eq!(delegation.amount, amount);
-		assert_eq!(delegation.asset_id, asset_id);
-
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who),
 			operator,
 			asset_id,
 			amount,
 		));
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegations.is_empty());
 
-		// ensure the storage is correct
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		// Assert
+		// Check the delegator metadata
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(!metadata.delegator_unstake_requests.is_empty());
+		let request = &metadata.delegator_unstake_requests[0];
+		assert_eq!(request.asset_id, asset_id);
+		assert_eq!(request.amount, amount);
+
+		// Check the operator metadata
+		let operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 0);
+		assert_eq!(operator_metadata.delegations.len(), 0);
 
 		assert_ok!(MultiAssetDelegation::cancel_delegator_unstake(
 			RuntimeOrigin::signed(who),
@@ -201,7 +199,7 @@ fn cancel_delegator_unstake_should_work() {
 
 		// Assert
 		// Check the delegator metadata
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(metadata.delegator_unstake_requests.is_empty());
 
 		// Check the operator metadata
@@ -237,31 +235,29 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 			amount,
 		));
 
-		// ensure the storage is correct
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegator_unstake_requests.is_empty());
-		assert!(metadata.delegations.len() == 1);
-		let delegation = metadata.delegations.first().unwrap();
-		assert_eq!(delegation.operator, operator);
-		assert_eq!(delegation.amount, amount);
-		assert_eq!(delegation.asset_id, asset_id);
-
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who),
 			operator,
 			asset_id,
 			10,
 		));
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegations.len() == 1);
-		let delegation = metadata.delegations.first().unwrap();
-		assert_eq!(delegation.operator, operator);
-		assert_eq!(delegation.amount, amount - 10);
-		assert_eq!(delegation.asset_id, asset_id);
 
-		// ensure the storage is correct
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		// Assert
+		// Check the delegator metadata
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(!metadata.delegator_unstake_requests.is_empty());
+		let request = &metadata.delegator_unstake_requests[0];
+		assert_eq!(request.asset_id, asset_id);
+		assert_eq!(request.amount, 10);
+
+		// Check the operator metadata
+		let operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 1);
+		assert_eq!(operator_metadata.delegations.len(), 1);
+		let operator_delegation = &operator_metadata.delegations[0];
+		assert_eq!(operator_delegation.delegator, who);
+		assert_eq!(operator_delegation.amount, amount - 10);
+		assert_eq!(operator_delegation.asset_id, asset_id);
 
 		assert_ok!(MultiAssetDelegation::cancel_delegator_unstake(
 			RuntimeOrigin::signed(who),
@@ -272,7 +268,7 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 
 		// Assert
 		// Check the delegator metadata
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(metadata.delegator_unstake_requests.is_empty());
 
 		// Check the operator metadata
@@ -416,7 +412,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 		));
 
 		// Assert first delegation
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(metadata.deposits.get(&asset_id).is_some());
 		assert_eq!(metadata.delegations.len(), 1);
 		let delegation = &metadata.delegations[0];
@@ -442,7 +438,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 		));
 
 		// Assert updated delegation
-		let updated_metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let updated_metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(updated_metadata.deposits.get(&asset_id).is_none());
 		assert_eq!(updated_metadata.delegations.len(), 1);
 		let updated_delegation = &updated_metadata.delegations[0];

@@ -49,7 +49,7 @@ fn deposit_should_work_for_fungible_asset() {
 		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), VDOT, amount,));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert_eq!(metadata.deposits.get(&VDOT), Some(&amount));
 		assert_eq!(
 			System::events().last().unwrap().event,
@@ -74,7 +74,7 @@ fn multiple_deposit_should_work() {
 		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), VDOT, amount,));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert_eq!(metadata.deposits.get(&VDOT), Some(&amount));
 		assert_eq!(
 			System::events().last().unwrap().event,
@@ -88,7 +88,7 @@ fn multiple_deposit_should_work() {
 		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), VDOT, amount));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert_eq!(metadata.deposits.get(&VDOT), Some(&amount * 2).as_ref());
 		assert_eq!(
 			System::events().last().unwrap().event,
@@ -153,7 +153,7 @@ fn schedule_withdraw_should_work() {
 		));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert_eq!(metadata.deposits.get(&asset_id), None);
 		assert!(!metadata.withdraw_requests.is_empty());
 		let request = metadata.withdraw_requests.first().unwrap();
@@ -246,7 +246,7 @@ fn execute_withdraw_should_work() {
 		assert_ok!(MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who),));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegators(who);
+		let metadata = MultiAssetDelegation::delegator_metadata(who);
 		assert!(metadata.unwrap().withdraw_requests.is_empty());
 
 		// Check event
@@ -314,7 +314,7 @@ fn execute_withdraw_should_fail_if_withdraw_not_ready() {
 		// should not actually withdraw anything
 		assert_ok!(MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who),));
 
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(!metadata.withdraw_requests.is_empty());
 	});
 }
@@ -344,7 +344,7 @@ fn cancel_withdraw_should_work() {
 		));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
 		assert!(metadata.withdraw_requests.is_empty());
 		assert_eq!(metadata.deposits.get(&asset_id), Some(&amount));
 		assert_eq!(metadata.status, DelegatorStatus::Active);

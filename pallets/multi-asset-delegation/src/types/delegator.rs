@@ -15,7 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
+use core::ops::Add;
 use frame_support::{pallet_prelude::Get, BoundedVec};
+use sp_runtime::traits::Zero;
 
 /// Represents how a delegator selects which blueprints to work with.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Default)]
@@ -212,7 +214,7 @@ pub struct BondInfoDelegator<AccountId, Balance, AssetId> {
 mod tests {
 	use super::*;
 	use frame_support::{parameter_types, BoundedVec};
-	use sp_runtime::traits::Zero;
+	use sp_runtime::traits::{Add, Zero};
 
 	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Default)]
 	pub struct MockBalance(pub u32);
@@ -227,6 +229,14 @@ mod tests {
 		}
 	}
 
+	impl Add for MockBalance {
+		type Output = Self;
+
+		fn add(self, other: Self) -> Self {
+			Self(self.0 + other.0)
+		}
+	}
+
 	impl core::ops::AddAssign for MockBalance {
 		fn add_assign(&mut self, other: Self) {
 			self.0 += other.0;
@@ -236,7 +246,9 @@ mod tests {
 	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
 	pub struct MockAccountId(pub u32);
 
-	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
+	#[derive(
+		Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Ord, PartialOrd,
+	)]
 	pub struct MockAssetId(pub u32);
 
 	parameter_types! {

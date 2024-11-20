@@ -22,7 +22,10 @@ use frame_support::{
 	pallet_prelude::DispatchResult,
 	traits::{Get, ReservableCurrency},
 };
+use frame_support::{pallet_prelude::*, BoundedVec};
+use sp_runtime::traits::Zero;
 use sp_runtime::DispatchError;
+use sp_std::ops::Add;
 use tangle_primitives::ServiceManager;
 
 impl<T: Config> Pallet<T> {
@@ -45,10 +48,11 @@ impl<T: Config> Pallet<T> {
 		T::Currency::reserve(&who, bond_amount)?;
 
 		let operator_metadata = OperatorMetadata {
-			stake: bond_amount,
+			delegations: BoundedVec::default(),
 			delegation_count: 0,
+			blueprint_ids: BoundedVec::default(),
+			stake: bond_amount,
 			request: None,
-			delegations: Default::default(),
 			status: OperatorStatus::Active,
 		};
 
