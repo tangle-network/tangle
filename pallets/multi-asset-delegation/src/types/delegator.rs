@@ -20,7 +20,7 @@ use frame_support::{pallet_prelude::Get, BoundedVec};
 use sp_runtime::traits::Zero;
 
 /// Represents how a delegator selects which blueprints to work with.
-#[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Default)]
+#[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Default, Eq)]
 pub enum DelegatorBlueprintSelection<MaxBlueprints: Get<u32>> {
 	/// The delegator works with a fixed set of blueprints.
 	Fixed(BoundedVec<u32, MaxBlueprints>),
@@ -52,7 +52,7 @@ pub struct WithdrawRequest<AssetId, Balance> {
 
 /// Represents a request to reduce the bonded amount of a specific asset.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct BondLessRequest<AccountId, AssetId, Balance> {
+pub struct BondLessRequest<AccountId, AssetId, Balance, MaxBlueprints: Get<u32>> {
 	/// The account ID of the operator.
 	pub operator: AccountId,
 	/// The ID of the asset to reduce the stake of.
@@ -61,6 +61,8 @@ pub struct BondLessRequest<AccountId, AssetId, Balance> {
 	pub amount: Balance,
 	/// The round in which the stake reduction was requested.
 	pub requested_round: RoundIndex,
+	/// The blueprint selection of the delegator.
+	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
 }
 
 /// Stores the state of a delegator, including deposits, delegations, and requests.
@@ -79,14 +81,13 @@ pub struct DelegatorMetadata<
 	/// A vector of withdraw requests.
 	pub withdraw_requests: BoundedVec<WithdrawRequest<AssetId, Balance>, MaxWithdrawRequests>,
 	/// A list of all current delegations.
-	pub delegations: BoundedVec<BondInfoDelegator<AccountId, Balance, AssetId>, MaxDelegations>,
+	pub delegations:
+		BoundedVec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>, MaxDelegations>,
 	/// A vector of requests to reduce the bonded amount.
 	pub delegator_unstake_requests:
-		BoundedVec<BondLessRequest<AccountId, AssetId, Balance>, MaxUnstakeRequests>,
+		BoundedVec<BondLessRequest<AccountId, AssetId, Balance, MaxBlueprints>, MaxUnstakeRequests>,
 	/// The current status of the delegator.
 	pub status: DelegatorStatus,
-	/// The blueprint selection mode for this delegator.
-	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
 }
 
 impl<
@@ -115,7 +116,6 @@ impl<
 			status: DelegatorStatus::default(),
 			withdraw_requests: BoundedVec::default(),
 			delegator_unstake_requests: BoundedVec::default(),
-			blueprint_selection: DelegatorBlueprintSelection::default(),
 		}
 	}
 }
@@ -145,14 +145,16 @@ impl<
 	}
 
 	/// Returns a reference to the list of delegations.
-	pub fn get_delegations(&self) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId>> {
+	pub fn get_delegations(
+		&self,
+	) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>> {
 		&self.delegations
 	}
 
 	/// Returns a reference to the vector of unstake requests.
 	pub fn get_delegator_unstake_requests(
 		&self,
-	) -> &Vec<BondLessRequest<AccountId, AssetId, Balance>> {
+	) -> &Vec<BondLessRequest<AccountId, AssetId, Balance, MaxBlueprints>> {
 		&self.delegator_unstake_requests
 	}
 
@@ -180,7 +182,7 @@ impl<
 	pub fn calculate_delegation_by_operator(
 		&self,
 		operator: AccountId,
-	) -> Vec<&BondInfoDelegator<AccountId, Balance, AssetId>>
+	) -> Vec<&BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>>
 	where
 		AccountId: Eq + PartialEq,
 	{
@@ -199,13 +201,15 @@ pub struct Deposit<AssetId, Balance> {
 
 /// Represents a stake between a delegator and an operator.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct BondInfoDelegator<AccountId, Balance, AssetId> {
+pub struct BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints: Get<u32>> {
 	/// The account ID of the operator.
 	pub operator: AccountId,
 	/// The amount bonded.
 	pub amount: Balance,
 	/// The ID of the bonded asset.
 	pub asset_id: AssetId,
+	/// The blueprint selection mode for this delegator.
+	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
 }
 
 // ------ Test for helper functions ------ //
@@ -256,6 +260,9 @@ mod tests {
 		pub const MaxWithdrawRequests: u32 = 10;
 		pub const MaxDelegations: u32 = 10;
 		pub const MaxUnstakeRequests: u32 = 10;
+		#[derive(
+			Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Ord, PartialOrd,
+		)]
 		pub const MaxBlueprints: u32 = 10;
 	}
 
@@ -298,15 +305,18 @@ mod tests {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
 				asset_id: MockAssetId(1),
+				blueprint_selection: Default::default(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(2),
 				amount: MockBalance(75),
 				asset_id: MockAssetId(2),
+				blueprint_selection: Default::default(),
 			},
 		];
+
 		let metadata = TestDelegatorMetadata {
-			delegations: BoundedVec::try_from(delegations.clone()).unwrap(),
+			delegations: delegations.clone().try_into().unwrap(),
 			..Default::default()
 		};
 
@@ -321,12 +331,14 @@ mod tests {
 				amount: MockBalance(50),
 				requested_round: 1,
 				operator: MockAccountId(1),
+				blueprint_selection: Default::default(),
 			},
 			BondLessRequest {
 				asset_id: MockAssetId(2),
 				amount: MockBalance(75),
 				requested_round: 2,
 				operator: MockAccountId(1),
+				blueprint_selection: Default::default(),
 			},
 		];
 		let metadata = TestDelegatorMetadata {
@@ -344,6 +356,7 @@ mod tests {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
 				asset_id: MockAssetId(1),
+				blueprint_selection: Default::default(),
 			}])
 			.unwrap(),
 			..Default::default()
@@ -362,16 +375,19 @@ mod tests {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
 				asset_id: MockAssetId(1),
+				blueprint_selection: Default::default(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(2),
 				amount: MockBalance(75),
 				asset_id: MockAssetId(1),
+				blueprint_selection: Default::default(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(3),
 				amount: MockBalance(25),
 				asset_id: MockAssetId(2),
+				blueprint_selection: Default::default(),
 			},
 		];
 		let metadata = TestDelegatorMetadata {
@@ -391,16 +407,19 @@ mod tests {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
 				asset_id: MockAssetId(1),
+				blueprint_selection: Default::default(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(1),
 				amount: MockBalance(75),
 				asset_id: MockAssetId(2),
+				blueprint_selection: Default::default(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(2),
 				amount: MockBalance(25),
 				asset_id: MockAssetId(1),
+				blueprint_selection: Default::default(),
 			},
 		];
 		let metadata = TestDelegatorMetadata {

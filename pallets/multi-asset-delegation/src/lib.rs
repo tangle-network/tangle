@@ -370,10 +370,6 @@ pub mod pallet {
 		AssetNotWhitelisted,
 		/// The origin is not authorized to perform this action
 		NotAuthorized,
-		/// The delegator does not exist
-		DelegatorDNE,
-		/// The operator does not exist
-		OperatorDNE,
 		/// Maximum number of blueprints exceeded
 		MaxBlueprintsExceeded,
 		/// The asset ID is not found
@@ -593,9 +589,16 @@ pub mod pallet {
 			operator: T::AccountId,
 			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
+			blueprint_selection: Option<DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_delegate(who.clone(), operator.clone(), asset_id, amount)?;
+			Self::process_delegate(
+				who.clone(),
+				operator.clone(),
+				asset_id,
+				amount,
+				blueprint_selection,
+			)?;
 			Self::deposit_event(Event::Delegated { who, operator, asset_id, amount });
 			Ok(())
 		}
@@ -751,35 +754,23 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Sets the blueprint selection for a delegator.
-		#[pallet::call_index(21)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn set_blueprint_selection(
-			origin: OriginFor<T>,
-			selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			let mut metadata = Self::delegator_metadata(&who).unwrap_or_default();
-			metadata.blueprint_selection = selection;
-			Delegators::<T>::insert(&who, metadata);
-			Ok(())
-		}
-
 		/// Adds a blueprint ID to a delegator's selection.
 		#[pallet::call_index(22)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn add_blueprint_id(origin: OriginFor<T>, blueprint_id: u32) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			let mut metadata = Self::delegator_metadata(&who).ok_or(Error::<T>::DelegatorDNE)?;
+			let mut metadata = Self::delegator_metadata(&who).ok_or(Error::<T>::NotDelegator)?;
 
-			match metadata.blueprint_selection {
-				DelegatorBlueprintSelection::Fixed(ref mut ids) => {
-					ensure!(!ids.contains(&blueprint_id), Error::<T>::DuplicateBlueprintId);
-					ids.try_push(blueprint_id).map_err(|_| Error::<T>::MaxBlueprintsExceeded)?;
-				},
-				DelegatorBlueprintSelection::All => {
-					return Err(Error::<T>::NotInFixedMode.into());
-				},
+			// Update blueprint selection for all delegations
+			for delegation in metadata.delegations.iter_mut() {
+				match delegation.blueprint_selection {
+					DelegatorBlueprintSelection::Fixed(ref mut ids) => {
+						ensure!(!ids.contains(&blueprint_id), Error::<T>::DuplicateBlueprintId);
+						ids.try_push(blueprint_id)
+							.map_err(|_| Error::<T>::MaxBlueprintsExceeded)?;
+					},
+					_ => return Err(Error::<T>::NotInFixedMode.into()),
+				}
 			}
 
 			Delegators::<T>::insert(&who, metadata);
@@ -791,19 +782,20 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn remove_blueprint_id(origin: OriginFor<T>, blueprint_id: u32) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			let mut metadata = Self::delegator_metadata(&who).ok_or(Error::<T>::DelegatorDNE)?;
+			let mut metadata = Self::delegator_metadata(&who).ok_or(Error::<T>::NotDelegator)?;
 
-			match metadata.blueprint_selection {
-				DelegatorBlueprintSelection::Fixed(ref mut ids) => {
-					let pos = ids
-						.iter()
-						.position(|&id| id == blueprint_id)
-						.ok_or(Error::<T>::BlueprintIdNotFound)?;
-					ids.remove(pos);
-				},
-				DelegatorBlueprintSelection::All => {
-					return Err(Error::<T>::NotInFixedMode.into());
-				},
+			// Update blueprint selection for all delegations
+			for delegation in metadata.delegations.iter_mut() {
+				match delegation.blueprint_selection {
+					DelegatorBlueprintSelection::Fixed(ref mut ids) => {
+						let pos = ids
+							.iter()
+							.position(|&id| id == blueprint_id)
+							.ok_or(Error::<T>::BlueprintIdNotFound)?;
+						ids.remove(pos);
+					},
+					_ => return Err(Error::<T>::NotInFixedMode.into()),
+				}
 			}
 
 			Delegators::<T>::insert(&who, metadata);

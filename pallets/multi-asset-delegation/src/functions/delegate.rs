@@ -39,6 +39,7 @@ impl<T: Config> Pallet<T> {
 		operator: T::AccountId,
 		asset_id: T::AssetId,
 		amount: BalanceOf<T>,
+		blueprint_selection: Option<DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -63,9 +64,14 @@ impl<T: Config> Pallet<T> {
 				delegation.amount += amount;
 			} else {
 				let mut metadata = metadata;
+				let blueprint_selection = blueprint_selection.unwrap_or_default();
 				// Create the new delegation
-				let new_delegation =
-					BondInfoDelegator { operator: operator.clone(), amount, asset_id };
+				let new_delegation = BondInfoDelegator {
+					operator: operator.clone(),
+					amount,
+					asset_id,
+					blueprint_selection,
+				};
 
 				// Create a mutable copy of delegations
 				let mut delegations = metadata.delegations.clone();
@@ -90,12 +96,21 @@ impl<T: Config> Pallet<T> {
 				let delegation = DelegatorBond { delegator: who.clone(), amount, asset_id };
 
 				let mut delegations = operator_metadata.delegations.clone();
-				delegations
-					.try_push(delegation)
-					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+
+				// Check if delegation already exists
+				if let Some(existing_delegation) =
+					delegations.iter_mut().find(|d| d.delegator == who && d.asset_id == asset_id)
+				{
+					existing_delegation.amount += amount;
+				} else {
+					delegations
+						.try_push(delegation)
+						.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+					operator_metadata.delegation_count =
+						operator_metadata.delegation_count.saturating_add(1);
+				}
+
 				operator_metadata.delegations = delegations;
-				operator_metadata.delegation_count =
-					operator_metadata.delegation_count.saturating_add(1);
 
 				// Update storage
 				Operators::<T>::insert(&operator, operator_metadata);
@@ -136,16 +151,13 @@ impl<T: Config> Pallet<T> {
 				.position(|d| d.operator == operator && d.asset_id == asset_id)
 				.ok_or(Error::<T>::NoActiveDelegation)?;
 
-			// Ensure the amount to unstake is not greater than the current delegation amount
-			let delegation = &mut metadata.delegations[delegation_index];
+			// Get the delegation and clone necessary data
+			let blueprint_selection =
+				metadata.delegations[delegation_index].blueprint_selection.clone();
+			let mut delegation = &mut metadata.delegations[delegation_index];
 			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
 
 			delegation.amount -= amount;
-
-			// Remove the delegation if the remaining amount is zero
-			if delegation.amount.is_zero() {
-				metadata.delegations.remove(delegation_index);
-			}
 
 			// Create the unstake request
 			let current_round = Self::current_round();
@@ -156,9 +168,15 @@ impl<T: Config> Pallet<T> {
 					asset_id,
 					amount,
 					requested_round: current_round,
+					blueprint_selection,
 				})
 				.map_err(|_| Error::<T>::MaxUnstakeRequestsExceeded)?;
 			metadata.delegator_unstake_requests = unstake_requests;
+
+			// Remove the delegation if the remaining amount is zero
+			if delegation.amount.is_zero() {
+				metadata.delegations.remove(delegation_index);
+			}
 
 			// Update the operator's metadata
 			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
@@ -312,6 +330,7 @@ impl<T: Config> Pallet<T> {
 						operator: unstake_request.operator.clone(),
 						amount: unstake_request.amount,
 						asset_id: unstake_request.asset_id,
+						blueprint_selection: unstake_request.blueprint_selection,
 					})
 					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 			}
