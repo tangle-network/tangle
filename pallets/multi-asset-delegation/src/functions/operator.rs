@@ -17,16 +17,14 @@
 /// Functions for the pallet.
 use super::*;
 use crate::{types::*, Pallet};
+use frame_support::BoundedVec;
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
 	traits::{Get, ReservableCurrency},
 };
-use frame_support::{pallet_prelude::*, BoundedVec};
-use sp_runtime::traits::Zero;
 use sp_runtime::traits::{CheckedAdd, CheckedSub};
 use sp_runtime::DispatchError;
-use sp_std::ops::Add;
 use tangle_primitives::ServiceManager;
 
 impl<T: Config> Pallet<T> {

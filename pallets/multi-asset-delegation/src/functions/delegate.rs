@@ -63,7 +63,7 @@ impl<T: Config> Pallet<T> {
 			{
 				delegation.amount += amount;
 			} else {
-				let mut metadata = metadata;
+				let metadata = metadata;
 				let blueprint_selection = blueprint_selection.unwrap_or_default();
 				// Create the new delegation
 				let new_delegation = BondInfoDelegator {
@@ -154,7 +154,7 @@ impl<T: Config> Pallet<T> {
 			// Get the delegation and clone necessary data
 			let blueprint_selection =
 				metadata.delegations[delegation_index].blueprint_selection.clone();
-			let mut delegation = &mut metadata.delegations[delegation_index];
+			let delegation = &mut metadata.delegations[delegation_index];
 			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
 
 			delegation.amount -= amount;
@@ -290,7 +290,7 @@ impl<T: Config> Pallet<T> {
 			Operators::<T>::try_mutate(
 				&unstake_request.operator,
 				|maybe_operator_metadata| -> DispatchResult {
-					let mut operator_metadata =
+					let operator_metadata =
 						maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
 
 					// Find the matching delegation and increase its amount, or insert a new

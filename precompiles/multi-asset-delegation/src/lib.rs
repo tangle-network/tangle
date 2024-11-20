@@ -311,8 +311,12 @@ where
 		let asset_id: <Runtime as pallet_multi_asset_delegation::Config>::AssetId =
 			asset_id.try_into().map_err(|_| revert("Invalid asset id"))?;
 		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
-		let call =
-			pallet_multi_asset_delegation::Call::<Runtime>::delegate { operator, asset_id, amount };
+		let call = pallet_multi_asset_delegation::Call::<Runtime>::delegate {
+			operator,
+			asset_id,
+			amount,
+			blueprint_selection: None,
+		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 

@@ -77,31 +77,17 @@ pub use functions::*;
 #[frame_support::pallet]
 pub mod pallet {
 	use crate::types::*;
-	use crate::types::*;
-	use crate::types::{
-		delegator::{
-			BondInfoDelegator, BondLessRequest, DelegatorBlueprintSelection, WithdrawRequest,
-		},
-		operator::{DelegatorBond, OperatorMetadata, OperatorSnapshot},
-		AssetAction,
-	};
+
+	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction};
 	use frame_support::traits::fungibles::Inspect;
 	use frame_support::{
 		pallet_prelude::*,
-		traits::{
-			tokens::{fungible, fungibles},
-			Currency, Get, LockableCurrency, ReservableCurrency,
-		},
-		BoundedVec, PalletId,
+		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
+		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
 	use scale_info::TypeInfo;
-	use sp_runtime::{
-		traits::{
-			AccountIdConversion, AtLeast32BitUnsigned, MaybeSerializeDeserialize, Member, Zero,
-		},
-		Percent,
-	};
+	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
 	use sp_std::vec::Vec;
 	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
 	use tangle_primitives::{traits::ServiceManager, RoundIndex};
@@ -233,7 +219,7 @@ pub mod pallet {
 
 	/// Storage for delegator information.
 	#[pallet::storage]
-	#[pallet::getter(fn delegator_metadata)]
+	#[pallet::getter(fn delegators)]
 	pub type Delegators<T: Config> =
 		StorageMap<_, Blake2_128Concat, T::AccountId, DelegatorMetadataOf<T>>;
 
@@ -759,7 +745,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn add_blueprint_id(origin: OriginFor<T>, blueprint_id: u32) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			let mut metadata = Self::delegator_metadata(&who).ok_or(Error::<T>::NotDelegator)?;
+			let mut metadata = Self::delegators(&who).ok_or(Error::<T>::NotDelegator)?;
 
 			// Update blueprint selection for all delegations
 			for delegation in metadata.delegations.iter_mut() {
@@ -782,7 +768,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn remove_blueprint_id(origin: OriginFor<T>, blueprint_id: u32) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			let mut metadata = Self::delegator_metadata(&who).ok_or(Error::<T>::NotDelegator)?;
+			let mut metadata = Self::delegators(&who).ok_or(Error::<T>::NotDelegator)?;
 
 			// Update blueprint selection for all delegations
 			for delegation in metadata.delegations.iter_mut() {

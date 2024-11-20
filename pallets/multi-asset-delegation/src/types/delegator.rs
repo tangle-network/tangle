@@ -15,9 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use core::ops::Add;
 use frame_support::{pallet_prelude::Get, BoundedVec};
-use sp_runtime::traits::Zero;
 
 /// Represents how a delegator selects which blueprints to work with.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Default, Eq)]

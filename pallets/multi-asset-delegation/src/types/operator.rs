@@ -16,8 +16,6 @@
 
 use super::*;
 use frame_support::{pallet_prelude::*, BoundedVec};
-use sp_runtime::traits::Zero;
-use sp_std::ops::Add;
 
 /// A snapshot of the operator state at the start of the round.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
@@ -182,9 +180,6 @@ mod tests {
 		pub const MaxUnstakeRequests: u32 = 10;
 		pub const MaxBlueprints: u32 = 10;
 	}
-
-	type TestOperatorMetadata =
-		OperatorMetadata<MockAccountId, MockBalance, MockAssetId, MaxDelegators, MaxBlueprints>;
 
 	#[test]
 	fn get_stake_by_asset_id_should_work() {

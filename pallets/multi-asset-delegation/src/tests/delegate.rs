@@ -16,7 +16,6 @@
 #![allow(clippy::all)]
 use super::*;
 use crate::{types::*, CurrentRound, Error};
-use frame_support::BoundedVec;
 use frame_support::{assert_noop, assert_ok};
 use sp_runtime::Percent;
 use std::collections::BTreeMap;
@@ -46,7 +45,7 @@ fn delegate_should_work() {
 		));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(metadata.deposits.get(&asset_id).is_none());
 		assert_eq!(metadata.delegations.len(), 1);
 		let delegation = &metadata.delegations[0];
@@ -97,7 +96,7 @@ fn schedule_delegator_unstake_should_work() {
 
 		// Assert
 		// Check the delegator metadata
-		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(!metadata.delegator_unstake_requests.is_empty());
 		let request = &metadata.delegator_unstake_requests[0];
 		assert_eq!(request.asset_id, asset_id);
@@ -145,7 +144,7 @@ fn execute_delegator_unstake_should_work() {
 		assert_ok!(MultiAssetDelegation::execute_delegator_unstake(RuntimeOrigin::signed(who),));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(metadata.delegator_unstake_requests.is_empty());
 		assert!(metadata.deposits.get(&asset_id).is_some());
 		assert_eq!(metadata.deposits.get(&asset_id).unwrap(), &amount);
@@ -184,7 +183,7 @@ fn cancel_delegator_unstake_should_work() {
 
 		// Assert
 		// Check the delegator metadata
-		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(!metadata.delegator_unstake_requests.is_empty());
 		let request = &metadata.delegator_unstake_requests[0];
 		assert_eq!(request.asset_id, asset_id);
@@ -204,7 +203,7 @@ fn cancel_delegator_unstake_should_work() {
 
 		// Assert
 		// Check the delegator metadata
-		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(metadata.delegator_unstake_requests.is_empty());
 
 		// Check the operator metadata
@@ -250,7 +249,7 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 
 		// Assert
 		// Check the delegator metadata
-		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(!metadata.delegator_unstake_requests.is_empty());
 		let request = &metadata.delegator_unstake_requests[0];
 		assert_eq!(request.asset_id, asset_id);
@@ -274,7 +273,7 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 
 		// Assert
 		// Check the delegator metadata
-		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(metadata.delegator_unstake_requests.is_empty());
 
 		// Check the operator metadata
@@ -426,7 +425,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 		));
 
 		// Assert first delegation
-		let metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
+		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(metadata.deposits.get(&asset_id).is_some());
 		assert_eq!(metadata.delegations.len(), 1);
 		let delegation = &metadata.delegations[0];
@@ -453,7 +452,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 		));
 
 		// Assert updated delegation
-		let updated_metadata = MultiAssetDelegation::delegator_metadata(who).unwrap();
+		let updated_metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(updated_metadata.deposits.get(&asset_id).is_none());
 		assert_eq!(updated_metadata.delegations.len(), 1);
 		let updated_delegation = &updated_metadata.delegations[0];
