@@ -16,7 +16,7 @@
 use super::*;
 use crate::{types::*, Pallet};
 use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
-use sp_runtime::traits::Zero;
+use sp_runtime::traits::{CheckedSub, Zero};
 use sp_std::vec::Vec;
 
 impl<T: Config> Pallet<T> {
@@ -49,7 +49,7 @@ impl<T: Config> Pallet<T> {
 			ensure!(*balance >= amount, Error::<T>::InsufficientBalance);
 
 			// Reduce the balance in deposits
-			*balance -= amount;
+			*balance = balance.checked_sub(&amount).ok_or(Error::<T>::InsufficientBalance)?;
 			if *balance == Zero::zero() {
 				metadata.deposits.remove(&asset_id);
 			}

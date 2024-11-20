@@ -24,6 +24,7 @@ use frame_support::{
 };
 use frame_support::{pallet_prelude::*, BoundedVec};
 use sp_runtime::traits::Zero;
+use sp_runtime::traits::{CheckedAdd, CheckedSub};
 use sp_runtime::DispatchError;
 use sp_std::ops::Add;
 use tangle_primitives::ServiceManager;
@@ -129,7 +130,7 @@ impl<T: Config> Pallet<T> {
 
 		match operator.status {
 			OperatorStatus::Leaving(leaving_round) => {
-				ensure!(current_round >= leaving_round, Error::<T>::NotLeavingRound);
+				ensure!(current_round >= leaving_round, Error::<T>::LeavingRoundNotReached);
 			},
 			_ => return Err(Error::<T>::NotLeavingOperator.into()),
 		};
@@ -140,7 +141,8 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	/// Processes an additional stake for an operator.
+	/// Processes an additional TNT stake for an operator, called
+	/// by themselves.
 	///
 	/// # Arguments
 	///
@@ -155,15 +157,21 @@ impl<T: Config> Pallet<T> {
 		additional_bond: BalanceOf<T>,
 	) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
+
+		// Check for potential overflow before reserving funds
+		operator.stake =
+			operator.stake.checked_add(&additional_bond).ok_or(Error::<T>::StakeOverflow)?;
+
+		// Only reserve funds if the addition would be safe
 		T::Currency::reserve(who, additional_bond)?;
 
-		operator.stake += additional_bond;
 		Operators::<T>::insert(who, operator);
 
 		Ok(())
 	}
 
-	/// Schedules a stake reduction for an operator.
+	/// Schedules a native TNT stake reduction for an operator, called
+	/// by themselves.
 	///
 	/// # Arguments
 	///
@@ -179,6 +187,22 @@ impl<T: Config> Pallet<T> {
 	) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		ensure!(T::ServiceManager::can_exit(who), Error::<T>::CannotExit);
+
+		// Ensure there's no existing unstake request
+		ensure!(operator.request.is_none(), Error::<T>::PendingUnstakeRequestExists);
+
+		// Ensure the unstake amount doesn't exceed current stake
+		ensure!(unstake_amount <= operator.stake, Error::<T>::UnstakeAmountTooLarge);
+
+		// Ensure operator maintains minimum required stake after unstaking
+		let remaining_stake = operator
+			.stake
+			.checked_sub(&unstake_amount)
+			.ok_or(Error::<T>::UnstakeAmountTooLarge)?;
+		ensure!(
+			remaining_stake >= T::MinOperatorBondAmount::get(),
+			Error::<T>::InsufficientStakeRemaining
+		);
 
 		operator.request = Some(OperatorBondLessRequest {
 			amount: unstake_amount,
@@ -209,7 +233,11 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::BondLessRequestNotSatisfied
 		);
 
-		operator.stake -= request.amount;
+		operator.stake = operator
+			.stake
+			.checked_sub(&request.amount)
+			.ok_or(Error::<T>::UnstakeAmountTooLarge)?;
+
 		operator.request = None;
 		Operators::<T>::insert(who, operator);
 
