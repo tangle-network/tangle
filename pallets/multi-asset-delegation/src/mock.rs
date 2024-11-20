@@ -108,6 +108,11 @@ impl tangle_primitives::ServiceManager<u64, Balance> for MockServiceManager {
 		// Mock logic to determine if the given account can exit
 		true
 	}
+
+	fn get_blueprints_by_operator(_account: &u64) -> Vec<u64> {
+		// Mock logic to retrieve blueprints by operator
+		vec![]
+	}
 }
 
 parameter_types! {

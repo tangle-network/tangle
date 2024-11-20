@@ -129,36 +129,6 @@ impl<AccountId, Balance, AssetId: Encode + Decode + TypeInfo>
 	{
 		self.delegations.iter().filter(|&stake| stake.operator == operator).collect()
 	}
-
-	/// Calculates the total delegation amount for a specific asset and service
-	pub fn calculate_delegation_by_asset_and_service(&self, asset_id: AssetId, service: ServiceId) -> Balance
-	where
-		Balance: Default + core::ops::AddAssign + Clone,
-		AssetId: Eq + PartialEq,
-	{
-		let mut total = Balance::default();
-		for stake in &self.delegations {
-			if stake.asset_id == asset_id && stake.services.contains(&service) {
-				total += stake.amount.clone();
-			}
-		}
-		total
-	}
-
-	/// Returns a list of delegations to a specific operator for a specific service
-	pub fn calculate_delegation_by_operator_and_service(
-		&self,
-		operator: AccountId,
-		service: ServiceId,
-	) -> Vec<&BondInfoDelegator<AccountId, Balance, AssetId>>
-	where
-		AccountId: Eq + PartialEq,
-	{
-		self.delegations
-			.iter()
-			.filter(|&stake| stake.operator == operator && stake.services.contains(&service))
-			.collect()
-	}
 }
 
 /// Represents a deposit of a specific asset.
@@ -170,17 +140,15 @@ pub struct Deposit<AssetId, Balance> {
 	pub asset_id: AssetId,
 }
 
-/// Represents a stake between a delegator and an operator, including service participation
+/// Represents a stake between a delegator and an operator.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
 pub struct BondInfoDelegator<AccountId, Balance, AssetId> {
-	/// The account ID of the operator
+	/// The account ID of the operator.
 	pub operator: AccountId,
-	/// The amount bonded
+	/// The amount bonded.
 	pub amount: Balance,
-	/// The ID of the bonded asset
+	/// The ID of the bonded asset.
 	pub asset_id: AssetId,
-	/// The set of service IDs this delegation participates in
-	pub services: BTreeSet<ServiceId>,
 }
 
 // ------ Test for helper functions ------ //
@@ -237,13 +205,11 @@ mod tests {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
 				asset_id: MockAssetId(1),
-				services: BTreeSet::new(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(2),
 				amount: MockBalance(75),
 				asset_id: MockAssetId(2),
-				services: BTreeSet::new(),
 			},
 		];
 		let metadata: DelegatorMetadata<MockAccountId, MockBalance, MockAssetId> =
@@ -284,7 +250,6 @@ mod tests {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
 				asset_id: MockAssetId(1),
-				services: BTreeSet::new(),
 			}],
 			..Default::default()
 		};
@@ -306,19 +271,16 @@ mod tests {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
 				asset_id: MockAssetId(1),
-				services: BTreeSet::new(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(2),
 				amount: MockBalance(75),
 				asset_id: MockAssetId(1),
-				services: BTreeSet::new(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(3),
 				amount: MockBalance(25),
 				asset_id: MockAssetId(2),
-				services: BTreeSet::new(),
 			},
 		];
 		let metadata = DelegatorMetadata { delegations, ..Default::default() };
@@ -335,7 +297,6 @@ mod tests {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
 				asset_id: MockAssetId(1),
-				services: BTreeSet::new(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(1),
@@ -354,68 +315,5 @@ mod tests {
 		assert_eq!(result.len(), 2);
 		assert_eq!(result[0].operator, MockAccountId(1));
 		assert_eq!(result[1].operator, MockAccountId(1));
-	}
-
-	#[test]
-	fn service_specific_delegation_should_work() {
-		let service_a = ServiceId(1);
-		let service_b = ServiceId(2);
-		let service_c = ServiceId(3);
-		let service_d = ServiceId(4);
-
-		// Create service sets
-		let all_services: BTreeSet<ServiceId> = vec![service_a, service_b, service_c, service_d]
-			.into_iter()
-			.collect();
-		let limited_services: BTreeSet<ServiceId> = vec![service_a, service_b, service_c]
-			.into_iter()
-			.collect();
-
-		let delegations = vec![
-			BondInfoDelegator {
-				operator: MockAccountId(1), // Bob
-				amount: MockBalance(100),
-				asset_id: MockAssetId(1),
-				services: all_services.clone(),
-			},
-			BondInfoDelegator {
-				operator: MockAccountId(1), // Bob
-				amount: MockBalance(50),
-				asset_id: MockAssetId(2),
-				services: limited_services.clone(),
-			},
-		];
-
-		let metadata = DelegatorMetadata {
-			delegations,
-			..Default::default()
-		};
-
-		// Test delegation calculations for different services
-		assert_eq!(
-			metadata.calculate_delegation_by_asset_and_service(MockAssetId(1), service_d),
-			MockBalance(100)
-		);
-		assert_eq!(
-			metadata.calculate_delegation_by_asset_and_service(MockAssetId(2), service_d),
-			MockBalance(0)
-		);
-		assert_eq!(
-			metadata.calculate_delegation_by_asset_and_service(MockAssetId(1), service_a),
-			MockBalance(100)
-		);
-		assert_eq!(
-			metadata.calculate_delegation_by_asset_and_service(MockAssetId(2), service_a),
-			MockBalance(50)
-		);
-
-		// Test operator-specific service delegations
-		let service_d_delegations = metadata.calculate_delegation_by_operator_and_service(MockAccountId(1), service_d);
-		assert_eq!(service_d_delegations.len(), 1);
-		assert!(service_d_delegations[0].services.contains(&service_d));
-
-		let service_a_delegations = metadata.calculate_delegation_by_operator_and_service(MockAccountId(1), service_a);
-		assert_eq!(service_a_delegations.len(), 2);
-		assert!(service_a_delegations.iter().all(|d| d.services.contains(&service_a)));
 	}
 }
