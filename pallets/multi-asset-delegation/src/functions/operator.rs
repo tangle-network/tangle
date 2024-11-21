@@ -324,6 +324,9 @@ impl<T: Config> Pallet<T> {
 					Self::slash_delegator(&delegator.delegator, operator, blueprint_id, percentage);
 			}
 
+			// emit event
+			Self::deposit_event(Event::OperatorSlashed { who: operator.clone(), amount });
+
 			Ok(())
 		})
 	}

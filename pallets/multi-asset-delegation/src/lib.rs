@@ -304,6 +304,10 @@ pub mod pallet {
 			asset_id: T::AssetId,
 			action: AssetAction,
 		},
+		/// Operator has been slashed
+		OperatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
+		/// Delegator has been slashed
+		DelegatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
 	}
 
 	/// Errors emitted by the pallet.

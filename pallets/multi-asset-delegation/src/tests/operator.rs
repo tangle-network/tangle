@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
+use crate::types::DelegatorBlueprintSelection::Fixed;
 use crate::{types::OperatorStatus, CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
+use sp_runtime::Percent;
 
 #[test]
 fn join_operator_success() {
@@ -507,5 +509,128 @@ fn go_online_success() {
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorWentOnline {
 			who: 1,
 		}));
+	});
+}
+
+#[test]
+fn slash_operator_success() {
+	new_test_ext().execute_with(|| {
+		// Setup operator
+		let operator_stake = 10_000;
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), operator_stake));
+
+		// Setup delegators
+		let delegator_stake = 5_000;
+		let asset_id = 1;
+		let blueprint_id = 1;
+
+		create_and_mint_tokens(asset_id, 2, delegator_stake);
+		mint_tokens(1, asset_id, 3, delegator_stake);
+
+		// Setup delegator with fixed blueprint selection
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(2),
+			asset_id,
+			delegator_stake
+		));
+		assert_ok!(MultiAssetDelegation::add_blueprint_id(RuntimeOrigin::signed(2), blueprint_id));
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(2),
+			1,
+			asset_id,
+			delegator_stake,
+			None
+		));
+
+		// Setup delegator with all blueprints
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(3),
+			asset_id,
+			delegator_stake
+		));
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(3),
+			1,
+			asset_id,
+			delegator_stake,
+			None
+		));
+
+		// Slash 50% of stakes
+		let slash_percentage = Percent::from_percent(50);
+		assert_ok!(MultiAssetDelegation::slash_operator(&1, blueprint_id, slash_percentage));
+
+		// Verify operator stake was slashed
+		let operator_info = MultiAssetDelegation::operator_info(1).unwrap();
+		assert_eq!(operator_info.stake, operator_stake / 2);
+
+		// Verify fixed delegator stake was slashed
+		let delegator_2 = MultiAssetDelegation::delegators(2).unwrap();
+		let delegation_2 = delegator_2.delegations.iter().find(|d| d.operator == 1).unwrap();
+		assert_eq!(delegation_2.amount, delegator_stake / 2);
+
+		// Verify all-blueprints delegator stake was slashed
+		let delegator_3 = MultiAssetDelegation::delegators(3).unwrap();
+		let delegation_3 = delegator_3.delegations.iter().find(|d| d.operator == 1).unwrap();
+		assert_eq!(delegation_3.amount, delegator_stake / 2);
+
+		// Verify event
+		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorSlashed {
+			who: 1,
+			amount: operator_stake / 2,
+		}));
+	});
+}
+
+#[test]
+fn slash_operator_not_an_operator() {
+	new_test_ext().execute_with(|| {
+		assert_noop!(
+			MultiAssetDelegation::slash_operator(&1, 1, Percent::from_percent(50)),
+			Error::<Test>::NotAnOperator
+		);
+	});
+}
+
+#[test]
+fn slash_operator_not_active() {
+	new_test_ext().execute_with(|| {
+		// Setup and deactivate operator
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), 10_000));
+		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(1)));
+
+		assert_noop!(
+			MultiAssetDelegation::slash_operator(&1, 1, Percent::from_percent(50)),
+			Error::<Test>::NotActiveOperator
+		);
+	});
+}
+
+#[test]
+fn slash_delegator_fixed_blueprint_not_selected() {
+	new_test_ext().execute_with(|| {
+		// Setup operator
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), 10_000));
+
+		create_and_mint_tokens(1, 2, 10_000);
+
+		// Setup delegator with fixed blueprint selection
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(2), 1, 5_000));
+
+		assert_ok!(MultiAssetDelegation::add_blueprint_id(RuntimeOrigin::signed(2), 1));
+
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(2),
+			1,
+			1,
+			5_000,
+			Some(Fixed(vec![2].try_into().unwrap())),
+		));
+
+		// Try to slash with unselected blueprint
+		assert_noop!(
+			MultiAssetDelegation::slash_delegator(&2, &1, 5, Percent::from_percent(50)),
+			Error::<Test>::BlueprintNotSelected
+		);
 	});
 }
