@@ -12,11 +12,12 @@ use sp_core::ecdsa;
 use sp_core::{H160, U256};
 use sp_runtime::bounded_vec;
 use sp_runtime::AccountId32;
-use tangle_primitives::services::BlueprintManager;
+use tangle_primitives::services::BlueprintServiceManager;
 use tangle_primitives::services::FieldType;
 use tangle_primitives::services::JobDefinition;
 use tangle_primitives::services::JobMetadata;
 use tangle_primitives::services::JobResultVerifier;
+use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
 use tangle_primitives::services::PriceTargets;
 use tangle_primitives::services::ServiceMetadata;
 use tangle_primitives::services::ServiceRegistrationHook;
@@ -64,25 +65,22 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 	#[allow(deprecated)]
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
-		manager: BlueprintManager::Evm(CGGMP21_BLUEPRINT),
+		manager: BlueprintServiceManager::Evm(CGGMP21_BLUEPRINT),
+		master_manager_revision: MasterBlueprintServiceManagerRevision::Latest,
 		jobs: bounded_vec![
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint8],
 				result: bounded_vec![FieldType::Bytes],
-				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint64, FieldType::Bytes],
 				result: bounded_vec![FieldType::Bytes],
 				#[allow(deprecated)]
-				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
 			},
 		],
-		registration_hook: ServiceRegistrationHook::Evm(CGGMP21_BLUEPRINT),
 		registration_params: bounded_vec![],
-		request_hook: ServiceRequestHook::Evm(CGGMP21_BLUEPRINT),
 		request_params: bounded_vec![],
 		gadget: Default::default(),
 	}

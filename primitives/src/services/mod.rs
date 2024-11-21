@@ -108,9 +108,6 @@ pub struct JobDefinition<C: Constraints> {
 	/// These are the result, the return values of this job.
 	/// i.e. the output.
 	pub result: BoundedVec<FieldType, C::MaxFields>,
-	/// The verifier of the job result.
-	#[deprecated(note = "Use `blueprint.manager` instead.")]
-	pub verifier: JobResultVerifier,
 }
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
@@ -301,16 +298,16 @@ pub enum ServiceRequestHook {
 	Evm(sp_core::H160),
 }
 
-/// Service Blueprint Manager is a smart contract that will manage the service lifecycle.
+/// Blueprint Service Manager is a smart contract that will manage the service lifecycle.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 #[non_exhaustive]
-pub enum BlueprintManager {
+pub enum BlueprintServiceManager {
 	/// A Smart contract that will manage the service lifecycle.
 	Evm(sp_core::H160),
 }
 
-impl BlueprintManager {
+impl BlueprintServiceManager {
 	pub fn try_into_evm(self) -> Result<sp_core::H160, Self> {
 		match self {
 			Self::Evm(addr) => Ok(addr),
@@ -318,10 +315,31 @@ impl BlueprintManager {
 	}
 }
 
-impl Default for BlueprintManager {
+impl Default for BlueprintServiceManager {
 	fn default() -> Self {
 		Self::Evm(Default::default())
 	}
+}
+
+/// Master Blueprint Service Manager Revision.
+#[derive(
+	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen,
+)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[non_exhaustive]
+pub enum MasterBlueprintServiceManagerRevision {
+	/// Use Whatever the latest revision available on-chain.
+	///
+	/// This is the default value.
+	#[default]
+	#[codec(index = 0)]
+	Latest,
+
+	/// Use a specific revision number.
+	///
+	/// Note: Must be already deployed on-chain.
+	#[codec(index = 1)]
+	Specific(u32),
 }
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
@@ -367,18 +385,18 @@ pub struct ServiceBlueprint<C: Constraints> {
 	pub metadata: ServiceMetadata<C>,
 	/// The job definitions that are available in this service.
 	pub jobs: BoundedVec<JobDefinition<C>, C::MaxJobsPerService>,
-	/// The registration hook that will be called before restaker registration.
-	#[deprecated(note = "Use `manager` instead.")]
-	pub registration_hook: ServiceRegistrationHook,
 	/// The parameters that are required for the service registration.
 	pub registration_params: BoundedVec<FieldType, C::MaxFields>,
 	/// The request hook that will be called before creating a service from the service blueprint.
-	#[deprecated(note = "Use `manager` instead.")]
-	pub request_hook: ServiceRequestHook,
 	/// The parameters that are required for the service request.
 	pub request_params: BoundedVec<FieldType, C::MaxFields>,
-	/// A Blueprint Manager is a smart contract that implements the `BlueprintManager` interface.
-	pub manager: BlueprintManager,
+	/// A Blueprint Manager is a smart contract that implements the `IBlueprintServiceManager` interface.
+	pub manager: BlueprintServiceManager,
+	/// The Revision number of the Master Blueprint Service Manager.
+	///
+	/// If not sure what to use, use `MasterBlueprintServiceManagerRevision::default()` which will use
+	/// the latest revision available.
+	pub master_manager_revision: MasterBlueprintServiceManagerRevision,
 	/// The gadget that will be executed for the service.
 	pub gadget: Gadget<C>,
 }
@@ -398,6 +416,112 @@ impl<C: Constraints> ServiceBlueprint<C> {
 		args: &[Field<C, AccountId>],
 	) -> Result<(), TypeCheckError> {
 		type_checker(&self.request_params, args)
+	}
+
+	/// Converts the struct to ethabi ParamType.
+	pub fn to_ethabi_param_type() -> ethabi::ParamType {
+		ethabi::ParamType::Tuple(vec![
+			// Service Metadata
+			ethabi::ParamType::Tuple(vec![
+				// Service Name
+				ethabi::ParamType::String,
+				// Service Description
+				ethabi::ParamType::String,
+				// Service Author
+				ethabi::ParamType::String,
+				// Service Category
+				ethabi::ParamType::String,
+				// Code Repository
+				ethabi::ParamType::String,
+				// Service Logo
+				ethabi::ParamType::String,
+				// Service Website
+				ethabi::ParamType::String,
+				// Service License
+				ethabi::ParamType::String,
+			]),
+			// Job Definitions ?
+			// Registration Parameters ?
+			// Request Parameters ?
+			// Blueprint Manager
+			ethabi::ParamType::Address,
+			// Master Manager Revision
+			ethabi::ParamType::Uint(32),
+			// Gadget ?
+		])
+	}
+
+	/// Converts the struct to ethabi Param.
+	pub fn to_ethabi_param() -> ethabi::Param {
+		ethabi::Param {
+			name: String::from("blueprint"),
+			kind: Self::to_ethabi_param_type(),
+			internal_type: Some(String::from("struct MasterBlueprintServiceManager.Blueprint")),
+		}
+	}
+
+	/// Converts the struct to ethabi Token.
+	pub fn to_ethabi(&self) -> ethabi::Token {
+		ethabi::Token::Tuple(vec![
+			// Service Metadata
+			ethabi::Token::Tuple(vec![
+				// Service Name
+				ethabi::Token::String(self.metadata.name.as_str().into()),
+				// Service Description
+				ethabi::Token::String(
+					self.metadata
+						.description
+						.as_ref()
+						.map(|v| v.as_str().into())
+						.unwrap_or_default(),
+				),
+				// Service Author
+				ethabi::Token::String(
+					self.metadata.author.as_ref().map(|v| v.as_str().into()).unwrap_or_default(),
+				),
+				// Service Category
+				ethabi::Token::String(
+					self.metadata.category.as_ref().map(|v| v.as_str().into()).unwrap_or_default(),
+				),
+				// Code Repository
+				ethabi::Token::String(
+					self.metadata
+						.code_repository
+						.as_ref()
+						.map(|v| v.as_str().into())
+						.unwrap_or_default(),
+				),
+				// Service Logo
+				ethabi::Token::String(
+					self.metadata.logo.as_ref().map(|v| v.as_str().into()).unwrap_or_default(),
+				),
+				// Service Website
+				ethabi::Token::String(
+					self.metadata.website.as_ref().map(|v| v.as_str().into()).unwrap_or_default(),
+				),
+				// Service License
+				ethabi::Token::String(
+					self.metadata.license.as_ref().map(|v| v.as_str().into()).unwrap_or_default(),
+				),
+			]),
+			// Job Definitions ?
+			// Registration Parameters ?
+			// Request Parameters ?
+			// Blueprint Manager
+			match self.manager {
+				BlueprintServiceManager::Evm(addr) => ethabi::Token::Address(addr),
+			},
+			// Master Manager Revision
+			match self.master_manager_revision {
+				MasterBlueprintServiceManagerRevision::Latest => {
+					ethabi::Token::Uint(ethabi::Uint::MAX)
+				},
+				MasterBlueprintServiceManagerRevision::Specific(rev) => {
+					ethabi::Token::Uint(rev.into())
+				},
+			},
+			// Gadget ?
+		])
 	}
 }
 

@@ -11,7 +11,8 @@ use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use sp_core::{H160, U256};
 use sp_runtime::traits::UniqueSaturatedInto;
 use tangle_primitives::services::{
-	BlueprintManager, Field, OperatorPreferences, Service, ServiceBlueprint,
+	BlueprintServiceManager, Field, MasterBlueprintServiceManagerRevision, OperatorPreferences,
+	Service, ServiceBlueprint,
 };
 
 use super::*;
@@ -38,6 +39,89 @@ impl<T: Config> Pallet<T> {
 		T::PalletEVMAddress::get()
 	}
 
+	/// Get the address of the master blueprint service manager at a given revision.
+	///
+	/// # Parameters
+	/// * `revision` - The revision of the master blueprint service manager.
+	///
+	/// # Returns
+	/// * `Result<H160, Error<T>>` - The address of the master blueprint service manager.
+	/// * `Error<T>` - The error type.
+	#[doc(alias = "get_master_blueprint_service_manager_address")]
+	pub fn mbsm_address(revision: u32) -> Result<H160, Error<T>> {
+		MasterBlueprintServiceManagerRevisions::<T>::get()
+			.get(revision as usize)
+			.cloned()
+			.ok_or(Error::<T>::MasterBlueprintServiceManagerRevisionNotFound)
+	}
+
+	/// Get the latest revision of the master blueprint service manager.
+	///
+	/// # Returns
+	/// * `u32` - The latest revision of the master blueprint service manager.
+	#[doc(alias = "get_master_blueprint_service_manager_revision")]
+	pub fn mbsm_latest_revision() -> u32 {
+		MasterBlueprintServiceManagerRevisions::<T>::decode_len()
+			.map(|len| len.saturating_sub(1) as u32)
+			.unwrap_or(0)
+	}
+
+	/// Get the address of the master blueprint service manager for the given blueprint.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	///
+	/// # Returns
+	/// * `Result<H160, Error<T>>` - The address of the master blueprint service manager.
+	/// * `Error<T>` - The error type.
+	pub fn mbsm_address_of(blueprint: &ServiceBlueprint<T::Constraints>) -> Result<H160, Error<T>> {
+		match blueprint.master_manager_revision {
+			MasterBlueprintServiceManagerRevision::Latest => {
+				Self::mbsm_address(Self::mbsm_latest_revision())
+			},
+			MasterBlueprintServiceManagerRevision::Specific(rev) => Self::mbsm_address(rev),
+			other => unimplemented!("Got unexpected case for {:?}", other),
+		}
+	}
+
+	pub fn on_blueprint_created_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint_id: u64,
+		owner: &T::AccountId,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		let mbsm = Self::mbsm_address_of(blueprint)?;
+		#[allow(deprecated)]
+		let call = ethabi::Function {
+			name: String::from("onBlueprintCreated"),
+			inputs: vec![
+				ethabi::Param {
+					name: String::from("blueprintId"),
+					kind: ethabi::ParamType::Uint(64),
+					internal_type: None,
+				},
+				ethabi::Param {
+					name: String::from("owner"),
+					kind: ethabi::ParamType::Address,
+					internal_type: None,
+				},
+				ServiceBlueprint::<T::Constraints>::to_ethabi_param(),
+			],
+			outputs: Default::default(),
+			constant: None,
+			state_mutability: ethabi::StateMutability::Payable,
+		};
+
+		let blueprint_id = Token::Uint(ethabi::Uint::from(blueprint_id));
+		let owner = Token::Address(T::EvmAddressMapping::into_address(owner.clone()));
+		let blueprint = blueprint.to_ethabi();
+		let data = call
+			.encode_input(&[blueprint_id, owner, blueprint])
+			.map_err(|_| Error::<T>::EVMAbiEncode)?;
+		let gas_limit = 300_000;
+		let info = Self::evm_call(Self::address(), mbsm, 0.into(), data, gas_limit)?;
+		Ok((info.exit_reason.is_succeed(), Self::weight_from_call_info(&info)))
+	}
+
 	/// Hook to be called upon a new operator registration on a blueprint.
 	///
 	/// This function is called when a service is registered. It performs an EVM call
@@ -59,7 +143,7 @@ impl<T: Config> Pallet<T> {
 		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.manager {
-			BlueprintManager::Evm(contract) => {
+			BlueprintServiceManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onRegister"),
@@ -111,7 +195,7 @@ impl<T: Config> Pallet<T> {
 		prefrences: &OperatorPreferences,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		match blueprint.manager {
-			BlueprintManager::Evm(contract) => {
+			BlueprintServiceManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onUnregister"),
@@ -149,7 +233,7 @@ impl<T: Config> Pallet<T> {
 		prefrences: &OperatorPreferences,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		match blueprint.manager {
-			BlueprintManager::Evm(contract) => {
+			BlueprintServiceManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onUpdatePriceTargets"),
@@ -191,7 +275,7 @@ impl<T: Config> Pallet<T> {
 		restaking_percent: u8,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		match blueprint.manager {
-			BlueprintManager::Evm(contract) => {
+			BlueprintServiceManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onApprove"),
@@ -248,7 +332,7 @@ impl<T: Config> Pallet<T> {
 		request_id: u64,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		match blueprint.manager {
-			BlueprintManager::Evm(contract) => {
+			BlueprintServiceManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onReject"),
@@ -312,7 +396,7 @@ impl<T: Config> Pallet<T> {
 		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.manager {
-			BlueprintManager::Evm(contract) => {
+			BlueprintServiceManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onRequest"),
@@ -425,7 +509,7 @@ impl<T: Config> Pallet<T> {
 		ttl: BlockNumberFor<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.manager {
-			BlueprintManager::Evm(contract) => {
+			BlueprintServiceManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onServiceInitialized"),
@@ -514,7 +598,7 @@ impl<T: Config> Pallet<T> {
 		owner: &T::AccountId,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.manager {
-			BlueprintManager::Evm(contract) => {
+			BlueprintServiceManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onServiceTermination"),
@@ -572,7 +656,7 @@ impl<T: Config> Pallet<T> {
 		inputs: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.manager {
-			BlueprintManager::Evm(contract) => {
+			BlueprintServiceManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onJobCall"),
@@ -647,7 +731,7 @@ impl<T: Config> Pallet<T> {
 		outputs: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		let (allowed, weight) = match blueprint.manager {
-			BlueprintManager::Evm(contract) => {
+			BlueprintServiceManager::Evm(contract) => {
 				#[allow(deprecated)]
 				let call = ethabi::Function {
 					name: String::from("onJobResult"),

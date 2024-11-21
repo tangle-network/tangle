@@ -62,6 +62,7 @@ pub mod module {
 	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
 	use sp_runtime::Percent;
 	use sp_std::vec::Vec;
+	use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
 	use tangle_primitives::{
 		services::{PriceTargets, *},
 		MultiAssetDelegationInfo,
@@ -161,6 +162,12 @@ pub mod module {
 		/// Maximum number of assets per service.
 		#[pallet::constant]
 		type MaxAssetsPerService: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+		/// Maximum number of versions of Master Blueprint Service Manager allowed.
+		#[pallet::constant]
+		type MaxMasterBlueprintServiceManagerVersions: Get<u32>
+			+ Default
+			+ Parameter
+			+ MaybeSerializeDeserialize;
 
 		/// The constraints for the service module.
 		/// use [crate::types::ConstraintsOf] with `Self` to implement this trait.
@@ -202,6 +209,8 @@ pub mod module {
 	pub enum Error<T> {
 		/// The service blueprint was not found.
 		BlueprintNotFound,
+		/// Blueprint creation is interrupted.
+		BlueprintCreationInterrupted,
 		/// The caller is already registered as a operator.
 		AlreadyRegistered,
 		/// The caller does not have the requirements to be a operator.
@@ -274,6 +283,8 @@ pub mod module {
 		NoDisputeOrigin,
 		/// The Unapplied Slash are not found.
 		UnappliedSlashNotFound,
+		/// The Supplied Master Blueprint Service Manager Revision is not found.
+		MasterBlueprintServiceManagerRevisionNotFound,
 	}
 
 	#[pallet::event]
@@ -589,6 +600,14 @@ pub mod module {
 		ResultQuery<Error<T>::UnappliedSlashNotFound>,
 	>;
 
+	/// All the Master Blueprint Service Managers revisions.
+	///
+	/// Where the index is the revision number.
+	#[pallet::storage]
+	#[pallet::getter(fn mbsm_revisions)]
+	pub type MasterBlueprintServiceManagerRevisions<T: Config> =
+		StorageValue<_, BoundedVec<H160, T::MaxMasterBlueprintServiceManagerVersions>, ValueQuery>;
+
 	// *** auxiliary storage and maps ***
 	#[pallet::storage]
 	#[pallet::getter(fn operator_profile)]
@@ -613,15 +632,38 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::create_blueprint())]
 		pub fn create_blueprint(
 			origin: OriginFor<T>,
-			blueprint: ServiceBlueprint<T::Constraints>,
-		) -> DispatchResult {
+			mut blueprint: ServiceBlueprint<T::Constraints>,
+		) -> DispatchResultWithPostInfo {
 			let owner = ensure_signed(origin)?;
 			let blueprint_id = Self::next_blueprint_id();
+			// Ensure the master blueprint service manager exists and if it uses
+			// latest, pin it to the latest revision.
+			match blueprint.master_manager_revision {
+				MasterBlueprintServiceManagerRevision::Latest => {
+					let latest_revision = Self::mbsm_latest_revision();
+					blueprint.master_manager_revision =
+						MasterBlueprintServiceManagerRevision::Specific(latest_revision);
+				},
+				MasterBlueprintServiceManagerRevision::Specific(rev) => {
+					ensure!(
+						rev <= Self::mbsm_latest_revision(),
+						Error::<T>::MasterBlueprintServiceManagerRevisionNotFound,
+					);
+				},
+				_ => unreachable!("MasterBlueprintServiceManagerRevision case is not implemented"),
+			};
+
+			let (allowed, _weight) =
+				Self::on_blueprint_created_hook(&blueprint, blueprint_id, &owner)?;
+
+			ensure!(allowed, Error::<T>::BlueprintCreationInterrupted);
+
 			Blueprints::<T>::insert(blueprint_id, (owner.clone(), blueprint));
 			NextBlueprintId::<T>::set(blueprint_id.saturating_add(1));
 
 			Self::deposit_event(Event::BlueprintCreated { owner, blueprint_id });
-			Ok(())
+			// TODO: update weight for the creation of the blueprint.
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
 		/// Pre-register the caller as an operator for a specific blueprint.
