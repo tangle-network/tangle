@@ -16,7 +16,9 @@
 use super::*;
 use crate::types::{BalanceOf, OperatorStatus};
 use sp_runtime::traits::Zero;
+use sp_runtime::Percent;
 use sp_std::prelude::*;
+use tangle_primitives::BlueprintId;
 use tangle_primitives::{traits::MultiAssetDelegationInfo, RoundIndex};
 
 impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for crate::Pallet<T> {
@@ -62,5 +64,9 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for 
 				.map(|stake| (stake.delegator.clone(), stake.amount, stake.asset_id))
 				.collect()
 		})
+	}
+
+	fn slash_operator(operator: &T::AccountId, blueprint_id: BlueprintId, percentage: Percent) {
+		Pallet::<T>::slash_operator(operator, blueprint_id, percentage);
 	}
 }

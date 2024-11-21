@@ -390,6 +390,13 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 	) -> Vec<(AccountId, Balance, Self::AssetId)> {
 		Default::default()
 	}
+
+	fn slash_operator(
+		_operator: &AccountId,
+		_blueprint_id: tangle_primitives::BlueprintId,
+		_percentage: sp_runtime::Percent,
+	) {
+	}
 }
 
 parameter_types! {

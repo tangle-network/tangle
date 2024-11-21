@@ -23,6 +23,8 @@ use frame_support::{
 	pallet_prelude::DispatchResult,
 	traits::{Get, ReservableCurrency},
 };
+use tangle_primitives::BlueprintId;
+use sp_runtime::Percent;
 use sp_runtime::traits::{CheckedAdd, CheckedSub};
 use sp_runtime::DispatchError;
 use tangle_primitives::ServiceManager;
@@ -295,6 +297,24 @@ impl<T: Config> Pallet<T> {
 
 		operator.status = OperatorStatus::Active;
 		Operators::<T>::insert(who, operator);
+
+		Ok(())
+	}
+
+	pub fn slash_operator(
+		operator: &T::AccountId,
+		blueprint_id: BlueprintId,
+		percentage: Percent,
+	) -> Result<(), DispatchError> {
+		let mut operator = Operators::<T>::get(operator).ok_or(Error::<T>::NotAnOperator)?;
+		ensure!(operator.status == OperatorStatus::Active, Error::<T>::NotActiveOperator);
+
+		operator.stake = operator
+			.stake
+			.checked_sub(&amount)
+			.ok_or(Error::<T>::InsufficientStakeRemaining)?;
+
+		Operators::<T>::insert(operator, operator);
 
 		Ok(())
 	}
