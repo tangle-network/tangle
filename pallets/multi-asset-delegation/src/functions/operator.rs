@@ -17,6 +17,8 @@
 /// Functions for the pallet.
 use super::*;
 use crate::{types::*, Pallet};
+use frame_support::traits::Currency;
+use frame_support::traits::ExistenceRequirement;
 use frame_support::BoundedVec;
 use frame_support::{
 	ensure,
@@ -323,6 +325,15 @@ impl<T: Config> Pallet<T> {
 				let _ =
 					Self::slash_delegator(&delegator.delegator, operator, blueprint_id, percentage);
 			}
+
+			// transfer the slashed amount to the treasury
+			T::Currency::unreserve(&operator, amount);
+			let _ = T::Currency::transfer(
+				operator,
+				&T::SlashedAmountRecipient::get(),
+				amount,
+				ExistenceRequirement::AllowDeath,
+			);
 
 			// emit event
 			Self::deposit_event(Event::OperatorSlashed { who: operator.clone(), amount });

@@ -15,6 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
+use frame_support::traits::fungibles::Mutate;
+use frame_support::traits::tokens::Preservation;
 use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
 use sp_runtime::traits::{CheckedSub, Zero};
 use sp_runtime::DispatchError;
@@ -386,6 +388,15 @@ impl<T: Config> Pallet<T> {
 				.amount
 				.checked_sub(&slash_amount)
 				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
+
+			// Transfer slashed amount to the treasury
+			let _ = T::Fungibles::transfer(
+				delegation.asset_id,
+				&Self::pallet_account(),
+				&T::SlashedAmountRecipient::get(),
+				slash_amount,
+				Preservation::Expendable,
+			);
 
 			// emit event
 			Self::deposit_event(Event::DelegatorSlashed {

@@ -185,6 +185,9 @@ pub mod pallet {
 		/// The origin with privileged access
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
+		/// The address that receives slashed funds
+		type SlashedAmountRecipient: Get<Self::AccountId>;
+
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: crate::weights::WeightInfo;
 	}
