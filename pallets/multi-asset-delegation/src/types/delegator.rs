@@ -16,12 +16,13 @@
 
 use super::*;
 use frame_support::{pallet_prelude::Get, BoundedVec};
+use tangle_primitives::BlueprintId;
 
 /// Represents how a delegator selects which blueprints to work with.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Default, Eq)]
 pub enum DelegatorBlueprintSelection<MaxBlueprints: Get<u32>> {
 	/// The delegator works with a fixed set of blueprints.
-	Fixed(BoundedVec<u32, MaxBlueprints>),
+	Fixed(BoundedVec<BlueprintId, MaxBlueprints>),
 	/// The delegator works with all available blueprints.
 	#[default]
 	All,

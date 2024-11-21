@@ -90,6 +90,7 @@ pub mod pallet {
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
 	use sp_std::vec::Vec;
 	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
+	use tangle_primitives::BlueprintId;
 	use tangle_primitives::{traits::ServiceManager, RoundIndex};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -400,6 +401,8 @@ pub mod pallet {
 		CapExceedsTotalSupply,
 		/// An unstake request is already pending
 		PendingUnstakeRequestExists,
+		/// The blueprint is not selected
+		BlueprintNotSelected,
 	}
 
 	/// Hooks for the pallet.
@@ -743,7 +746,7 @@ pub mod pallet {
 		/// Adds a blueprint ID to a delegator's selection.
 		#[pallet::call_index(22)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn add_blueprint_id(origin: OriginFor<T>, blueprint_id: u32) -> DispatchResult {
+		pub fn add_blueprint_id(origin: OriginFor<T>, blueprint_id: BlueprintId) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let mut metadata = Self::delegators(&who).ok_or(Error::<T>::NotDelegator)?;
 
@@ -766,7 +769,10 @@ pub mod pallet {
 		/// Removes a blueprint ID from a delegator's selection.
 		#[pallet::call_index(23)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn remove_blueprint_id(origin: OriginFor<T>, blueprint_id: u32) -> DispatchResult {
+		pub fn remove_blueprint_id(
+			origin: OriginFor<T>,
+			blueprint_id: BlueprintId,
+		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let mut metadata = Self::delegators(&who).ok_or(Error::<T>::NotDelegator)?;
 

@@ -23,10 +23,10 @@ use frame_support::{
 	pallet_prelude::DispatchResult,
 	traits::{Get, ReservableCurrency},
 };
-use tangle_primitives::BlueprintId;
-use sp_runtime::Percent;
 use sp_runtime::traits::{CheckedAdd, CheckedSub};
 use sp_runtime::DispatchError;
+use sp_runtime::Percent;
+use tangle_primitives::BlueprintId;
 use tangle_primitives::ServiceManager;
 
 impl<T: Config> Pallet<T> {
@@ -306,16 +306,25 @@ impl<T: Config> Pallet<T> {
 		blueprint_id: BlueprintId,
 		percentage: Percent,
 	) -> Result<(), DispatchError> {
-		let mut operator = Operators::<T>::get(operator).ok_or(Error::<T>::NotAnOperator)?;
-		ensure!(operator.status == OperatorStatus::Active, Error::<T>::NotActiveOperator);
+		Operators::<T>::try_mutate(operator, |maybe_operator| {
+			let operator_data = maybe_operator.as_mut().ok_or(Error::<T>::NotAnOperator)?;
+			ensure!(operator_data.status == OperatorStatus::Active, Error::<T>::NotActiveOperator);
 
-		operator.stake = operator
-			.stake
-			.checked_sub(&amount)
-			.ok_or(Error::<T>::InsufficientStakeRemaining)?;
+			// Slash operator stake
+			let amount = percentage.mul_floor(operator_data.stake);
+			operator_data.stake = operator_data
+				.stake
+				.checked_sub(&amount)
+				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
 
-		Operators::<T>::insert(operator, operator);
+			// Slash each delegator
+			for delegator in operator_data.delegations.iter() {
+				// Ignore errors from individual delegator slashing
+				let _ =
+					Self::slash_delegator(&delegator.delegator, operator, blueprint_id, percentage);
+			}
 
-		Ok(())
+			Ok(())
+		})
 	}
 }

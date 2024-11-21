@@ -17,7 +17,10 @@ use super::*;
 use crate::{types::*, Pallet};
 use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
 use sp_runtime::traits::{CheckedSub, Zero};
+use sp_runtime::DispatchError;
+use sp_runtime::Percent;
 use sp_std::vec::Vec;
+use tangle_primitives::BlueprintId;
 
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.
@@ -334,6 +337,55 @@ impl<T: Config> Pallet<T> {
 					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 			}
 			metadata.delegations = delegations;
+
+			Ok(())
+		})
+	}
+
+	/// Slashes a delegator's stake.
+	///
+	/// # Arguments
+	///
+	/// * `delegator` - The account ID of the delegator.
+	/// * `operator` - The account ID of the operator.
+	/// * `blueprint_id` - The ID of the blueprint.
+	/// * `percentage` - The percentage of the stake to slash.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the delegator is not found, or if the delegation is not active.
+	pub fn slash_delegator(
+		delegator: &T::AccountId,
+		operator: &T::AccountId,
+		blueprint_id: BlueprintId,
+		percentage: Percent,
+	) -> Result<(), DispatchError> {
+		Delegators::<T>::try_mutate(delegator, |maybe_metadata| {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+
+			let delegation = metadata
+				.delegations
+				.iter_mut()
+				.find(|d| &d.operator == operator)
+				.ok_or(Error::<T>::NoActiveDelegation)?;
+
+			// Check delegation type and blueprint_id
+			match &delegation.blueprint_selection {
+				DelegatorBlueprintSelection::Fixed(blueprints) => {
+					// For fixed delegation, ensure the blueprint_id is in the list
+					ensure!(blueprints.contains(&blueprint_id), Error::<T>::BlueprintNotSelected);
+				},
+				DelegatorBlueprintSelection::All => {
+					// For "All" type, no need to check blueprint_id
+				},
+			}
+
+			// Calculate and apply slash
+			let slash_amount = percentage.mul_floor(delegation.amount);
+			delegation.amount = delegation
+				.amount
+				.checked_sub(&slash_amount)
+				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
 
 			Ok(())
 		})

@@ -67,6 +67,6 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for 
 	}
 
 	fn slash_operator(operator: &T::AccountId, blueprint_id: BlueprintId, percentage: Percent) {
-		Pallet::<T>::slash_operator(operator, blueprint_id, percentage);
+		let _ = Pallet::<T>::slash_operator(operator, blueprint_id, percentage);
 	}
 }
