@@ -3,6 +3,7 @@
 use fp_evm::PrecompileHandle;
 use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
 use pallet_evm::AddressMapping;
+use pallet_services::types::BalanceOf;
 use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
 use sp_core::U256;
@@ -60,6 +61,8 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		// msg.value
+		let value = handle.context().apparent_value;
 
 		let blueprint_id: u64 = blueprint_id.as_u64();
 		let preferences: Vec<u8> = preferences.into();
@@ -68,13 +71,24 @@ where
 			.map_err(|_| revert("Invalid preferences data"))?;
 
 		let registration_args: Vec<Field<Runtime::Constraints, Runtime::AccountId>> =
-			Decode::decode(&mut &registration_args[..])
-				.map_err(|_| revert("Invalid registration arguments"))?;
-
+			if registration_args.is_empty() {
+				Vec::new()
+			} else {
+				Decode::decode(&mut &registration_args[..])
+					.map_err(|_| revert("Invalid registration arguments"))?
+			};
+		let value_bytes = {
+			let mut value_bytes = [0u8; core::mem::size_of::<U256>()];
+			value.to_little_endian(&mut value_bytes);
+			value_bytes
+		};
+		let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
+			.map_err(|_| revert("Value is not a valid balance"))?;
 		let call = pallet_services::Call::<Runtime>::register {
 			blueprint_id,
 			preferences,
 			registration_args,
+			value,
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
@@ -129,6 +143,14 @@ where
 		let assets: Vec<Runtime::AssetId> =
 			assets.into_iter().map(|asset| asset.as_u32().into()).collect();
 
+		let value_bytes = {
+			let value = handle.context().apparent_value;
+			let mut value_bytes = [0u8; core::mem::size_of::<U256>()];
+			value.to_little_endian(&mut value_bytes);
+			value_bytes
+		};
+		let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
+			.map_err(|_| revert("Value is not a valid balance"))?;
 		let call = pallet_services::Call::<Runtime>::request {
 			blueprint_id,
 			permitted_callers,
@@ -136,6 +158,7 @@ where
 			ttl: 10000_u32.into(),
 			assets,
 			request_args,
+			value,
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;

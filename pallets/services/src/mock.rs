@@ -204,7 +204,7 @@ impl pallet_staking::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ServicesPalletId: PalletId = PalletId(*b"py/srvcs");
+	pub const ServicesEVMAddress: H160 = H160([0x11; 20]);
 }
 
 pub struct PalletEVMGasWeightMapping;
@@ -225,6 +225,14 @@ impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 	fn into_account_id(address: H160) -> AccountId {
 		use pallet_evm::AddressMapping;
 		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
+	}
+
+	fn into_address(account_id: AccountId) -> H160 {
+		account_id.using_encoded(|b| {
+			let mut addr = [0u8; 20];
+			addr.copy_from_slice(&b[0..20]);
+			H160(addr)
+		})
 	}
 }
 
@@ -364,7 +372,7 @@ impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
-	type PalletId = ServicesPalletId;
+	type PalletEVMAddress = ServicesEVMAddress;
 	type AssetId = AssetId;
 	type EvmRunner = MockedEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;

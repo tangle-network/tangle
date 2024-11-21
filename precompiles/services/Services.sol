@@ -12,8 +12,11 @@ interface ServicesPrecompile {
     /// @param blueprint_id The ID of the blueprint to register for
     /// @param preferences The operator's preferences encoded as bytes
     /// @param registration_args The registration arguments encoded as bytes
-    function registerOperator(uint256 blueprint_id, bytes calldata preferences, bytes calldata registration_args)
-        external;
+    function registerOperator(
+        uint256 blueprint_id,
+        bytes calldata preferences,
+        bytes calldata registration_args
+    ) external payable;
 
     /// @notice Unregister an operator from a specific blueprint
     /// @param blueprint_id The ID of the blueprint to unregister from
@@ -50,13 +53,21 @@ interface ServicesPrecompile {
     /// @param service_id The ID of the service
     /// @param job The job index (as uint8)
     /// @param args_data The arguments of the job encoded as bytes
-    function callJob(uint256 service_id, uint8 job, bytes calldata args_data) external;
+    function callJob(
+        uint256 service_id,
+        uint8 job,
+        bytes calldata args_data
+    ) external;
 
     /// @notice Submit the result of a job call
     /// @param service_id The ID of the service
     /// @param call_id The ID of the call
     /// @param result_data The result data encoded as bytes
-    function submitResult(uint256 service_id, uint256 call_id, bytes calldata result_data) external;
+    function submitResult(
+        uint256 service_id,
+        uint256 call_id,
+        bytes calldata result_data
+    ) external;
 
     /// @notice Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
     ///
@@ -66,7 +77,11 @@ interface ServicesPrecompile {
     /// @param offender The operator to be slashed encoded as bytes
     /// @param service_id The ID of the service to slash for
     /// @param percent The percent of the offender's exposed stake to slash
-    function slash(bytes calldata offender, uint256 service_id, uint8 percent) external;
+    function slash(
+        bytes calldata offender,
+        uint256 service_id,
+        uint8 percent
+    ) external;
 
     /// @notice Dispute an Unapplied Slash for a service id.
     ///

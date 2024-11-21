@@ -295,7 +295,7 @@ pub enum FieldType {
 impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 	fn eq(&self, other: &FieldType) -> bool {
 		match (self, other) {
-			(Self::None, FieldType::Optional(_)) => true,
+			(_, FieldType::Optional(ty)) => matches!(self, Self::None) || self == &**ty,
 			(Self::Bool(_), FieldType::Bool) => true,
 			(Self::Uint8(_), FieldType::Uint8) => true,
 			(Self::Int8(_), FieldType::Int8) => true,
