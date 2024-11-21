@@ -2,8 +2,10 @@ use super::*;
 use crate::types::BalanceOf;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+use sp_std::vec;
 #[cfg(feature = "std")]
 use std::vec::Vec;
+use tangle_primitives::BlueprintId;
 use tangle_primitives::{services::Constraints, traits::ServiceManager};
 
 impl<T: Config> traits::EvmRunner<T> for () {
@@ -97,6 +99,11 @@ impl<T: crate::Config> ServiceManager<T::AccountId, BalanceOf<T>> for crate::Pal
 	fn can_exit(operator: &T::AccountId) -> bool {
 		OperatorsProfile::<T>::get(operator)
 			.map_or(false, |profile| profile.services.is_empty() && profile.blueprints.is_empty())
+	}
+
+	fn get_blueprints_by_operator(operator: &T::AccountId) -> Vec<BlueprintId> {
+		OperatorsProfile::<T>::get(operator)
+			.map_or(vec![], |profile| profile.blueprints.into_iter().collect())
 	}
 }
 

@@ -1,3 +1,4 @@
+use scale_info::prelude::vec::Vec;
 /// A trait to manage and query services and blueprints for operators.
 ///
 /// This trait defines methods to retrieve information about the number of active
@@ -36,6 +37,12 @@ pub trait ServiceManager<AccountId, Balance> {
 	///
 	/// The count of active blueprints as a `usize`.
 	fn get_active_blueprints_count(operator: &AccountId) -> usize;
+
+	/// Get all blueprints for a specific operator.
+	///
+	/// This method returns a list of blueprints associated with the specified
+	/// operator.
+	fn get_blueprints_by_operator(operator: &AccountId) -> Vec<crate::BlueprintId>;
 
 	/// Check if the given account ID can exit.
 	///

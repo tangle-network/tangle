@@ -47,6 +47,7 @@ mod benchmarking;
 pub mod weights;
 
 pub use module::*;
+use tangle_primitives::BlueprintId;
 pub use traits::*;
 pub use weights::WeightInfo;
 
@@ -462,7 +463,7 @@ pub mod module {
 	/// The next free ID for a service blueprint.
 	#[pallet::storage]
 	#[pallet::getter(fn next_blueprint_id)]
-	pub type NextBlueprintId<T> = StorageValue<_, u64, ValueQuery>;
+	pub type NextBlueprintId<T> = StorageValue<_, BlueprintId, ValueQuery>;
 
 	/// The next free ID for a service request.
 	#[pallet::storage]

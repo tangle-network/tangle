@@ -17,6 +17,7 @@
 /// Functions for the pallet.
 use super::*;
 use crate::{types::*, Pallet};
+use frame_support::BoundedVec;
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
@@ -46,10 +47,11 @@ impl<T: Config> Pallet<T> {
 		T::Currency::reserve(&who, bond_amount)?;
 
 		let operator_metadata = OperatorMetadata {
-			stake: bond_amount,
+			delegations: BoundedVec::default(),
 			delegation_count: 0,
+			blueprint_ids: BoundedVec::default(),
+			stake: bond_amount,
 			request: None,
-			delegations: Default::default(),
 			status: OperatorStatus::Active,
 		};
 
