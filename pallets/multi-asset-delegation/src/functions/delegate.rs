@@ -63,7 +63,6 @@ impl<T: Config> Pallet<T> {
 			{
 				delegation.amount += amount;
 			} else {
-				let metadata = metadata;
 				let blueprint_selection = blueprint_selection.unwrap_or_default();
 				// Create the new delegation
 				let new_delegation = BondInfoDelegator {
