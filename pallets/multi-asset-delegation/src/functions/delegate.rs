@@ -387,8 +387,6 @@ impl<T: Config> Pallet<T> {
 				.checked_sub(&slash_amount)
 				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
 
-			println!("slash amount: {:?}", slash_amount);
-
 			// emit event
 			Self::deposit_event(Event::DelegatorSlashed {
 				who: delegator.clone(),
