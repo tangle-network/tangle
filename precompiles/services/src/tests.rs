@@ -16,12 +16,9 @@ use tangle_primitives::services::BlueprintServiceManager;
 use tangle_primitives::services::FieldType;
 use tangle_primitives::services::JobDefinition;
 use tangle_primitives::services::JobMetadata;
-use tangle_primitives::services::JobResultVerifier;
 use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
 use tangle_primitives::services::PriceTargets;
 use tangle_primitives::services::ServiceMetadata;
-use tangle_primitives::services::ServiceRegistrationHook;
-use tangle_primitives::services::ServiceRequestHook;
 use tangle_primitives::services::{OperatorPreferences, ServiceBlueprint};
 
 fn zero_key() -> ecdsa::Public {
@@ -77,7 +74,6 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint64, FieldType::Bytes],
 				result: bounded_vec![FieldType::Bytes],
-				#[allow(deprecated)]
 			},
 		],
 		registration_params: bounded_vec![],

@@ -269,35 +269,6 @@ impl frame_support::traits::PalletError for TypeCheckError {
 
 // -*** Service ***-
 
-/// Service Registration hook is a hook that will be called before registering the restaker as
-/// an operator for the service.
-#[derive(
-	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen,
-)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum ServiceRegistrationHook {
-	/// No hook is needed, the restaker will be registered immediately.
-	#[default]
-	None,
-	/// A Smart contract that will be called to determine if the restaker will be registered.
-	Evm(sp_core::H160),
-}
-
-/// Service Request hook is a hook that will be called before creating a service from the service
-/// blueprint.
-#[derive(
-	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen,
-)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum ServiceRequestHook {
-	/// No hook is needed, the caller will get the service created immediately.
-	#[default]
-	None,
-	/// A Smart contract that will be called to determine if the caller meets the requirements to
-	/// create a service.
-	Evm(sp_core::H160),
-}
-
 /// Blueprint Service Manager is a smart contract that will manage the service lifecycle.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, Copy, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
@@ -739,13 +710,13 @@ impl OperatorPreferences {
 	}
 
 	/// Encode the fields to ethabi bytes.
-	pub fn to_ethabi(&self) -> Vec<ethabi::Token> {
-		vec![ethabi::Token::Tuple(vec![
+	pub fn to_ethabi(&self) -> ethabi::Token {
+		ethabi::Token::Tuple(vec![
 			// operator public key
 			ethabi::Token::Bytes(self.key.0.to_vec()),
 			// price targets
 			self.price_targets.to_ethabi(),
-		])]
+		])
 	}
 }
 

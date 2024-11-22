@@ -26,6 +26,7 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, OneSessionHandler},
 };
+use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_services::{EvmAddressMapping, EvmGasWeightMapping};
@@ -522,7 +523,7 @@ impl pallet_services::Config for Runtime {
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MockDelegationManager;
 	type SlashDeferDuration = SlashDeferDuration;
-	type SlashOrigin = frame_system::EnsureRoot<AccountId>;
+	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRoot<AccountId>;
 	type WeightInfo = ();
 }
 

@@ -187,11 +187,9 @@ pub mod module {
 		#[pallet::constant]
 		type SlashDeferDuration: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 
-		/// The origin which can manage Slashing actions.
-		///
-		/// Supported actions:
-		/// 1. cancel deferred slash.
-		type SlashOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+		/// The origin which can manage Add a new Master Blueprint Service Manager revision.
+		type MasterBlueprintServiceManagerUpdateOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
 	}
@@ -286,6 +284,8 @@ pub mod module {
 		UnappliedSlashNotFound,
 		/// The Supplied Master Blueprint Service Manager Revision is not found.
 		MasterBlueprintServiceManagerRevisionNotFound,
+		/// Maximum number of Master Blueprint Service Manager revisions reached.
+		MaxMasterBlueprintServiceManagerVersionsExceeded,
 	}
 
 	#[pallet::event]
@@ -463,6 +463,14 @@ pub mod module {
 			blueprint_id: u64,
 			/// Era index
 			era: u32,
+		},
+
+		/// The Master Blueprint Service Manager has been revised.
+		MasterBlueprintServiceManagerRevised {
+			/// The revision number of the Master Blueprint Service Manager.
+			revision: u32,
+			/// The address of the Master Blueprint Service Manager.
+			address: H160,
 		},
 	}
 
@@ -726,8 +734,13 @@ pub mod module {
 				ExistenceRequirement::KeepAlive,
 			)?;
 
-			let (allowed, _weight) =
-				Self::on_register_hook(&blueprint, &preferences, &registration_args, value)?;
+			let (allowed, _weight) = Self::on_register_hook(
+				&blueprint,
+				blueprint_id,
+				&preferences,
+				&registration_args,
+				value,
+			)?;
 
 			ensure!(allowed, Error::<T>::InvalidRegistrationInput);
 
@@ -776,7 +789,8 @@ pub mod module {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 			let preferences = Operators::<T>::get(blueprint_id, &caller)?;
-			let (allowed, _weight) = Self::on_unregister_hook(&blueprint, &preferences)?;
+			let (allowed, _weight) =
+				Self::on_unregister_hook(&blueprint, blueprint_id, &preferences)?;
 			ensure!(allowed, Error::<T>::NotAllowedToUnregister);
 			// TODO: check if the caller is not providing any service for the blueprint.
 			Operators::<T>::remove(blueprint_id, &caller);
@@ -819,7 +833,7 @@ pub mod module {
 				})?;
 
 			let (allowed, _weight) =
-				Self::on_update_price_targets(&blueprint, &updated_preferences)?;
+				Self::on_update_price_targets(&blueprint, blueprint_id, &updated_preferences)?;
 
 			ensure!(allowed, Error::<T>::NotAllowedToUpdatePriceTargets);
 
@@ -870,8 +884,9 @@ pub mod module {
 
 			let service_id = Self::next_instance_id();
 			let (allowed, _weight) = Self::on_request_hook(
-				&caller,
 				&blueprint,
+				blueprint_id,
+				&caller,
 				service_id,
 				&preferences,
 				&request_args,
@@ -946,8 +961,9 @@ pub mod module {
 				.map(|(_, s)| *s = ApprovalState::Approved { restaking_percent });
 			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
 
-			let (_, blueprint) = Self::blueprints(request.blueprint)?;
-			let preferences = Operators::<T>::get(request.blueprint, caller.clone())?;
+			let blueprint_id = request.blueprint;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
+			let preferences = Operators::<T>::get(blueprint_id, caller.clone())?;
 			let approved = request
 				.operators_with_approval_state
 				.iter()
@@ -969,6 +985,7 @@ pub mod module {
 
 			let (allowed, _weight) = Self::on_approve_hook(
 				&blueprint,
+				blueprint_id,
 				&preferences,
 				request_id,
 				restaking_percent.deconstruct(),
@@ -1032,6 +1049,7 @@ pub mod module {
 
 				let (allowed, _weight) = Self::on_service_init_hook(
 					&blueprint,
+					blueprint_id,
 					request_id,
 					service_id,
 					&request.owner,
@@ -1078,10 +1096,12 @@ pub mod module {
 
 			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
 
-			let (_, blueprint) = Self::blueprints(request.blueprint)?;
-			let prefs = Operators::<T>::get(request.blueprint, caller.clone())?;
+			let blueprint_id = request.blueprint;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
+			let prefs = Operators::<T>::get(blueprint_id, caller.clone())?;
 
-			let (allowed, _weight) = Self::on_reject_hook(&blueprint, &prefs, request_id)?;
+			let (allowed, _weight) =
+				Self::on_reject_hook(&blueprint, blueprint_id, &prefs, request_id)?;
 
 			ensure!(allowed, Error::<T>::RejectionInterrupted);
 			Self::deposit_event(Event::ServiceRequestRejected {
@@ -1109,9 +1129,14 @@ pub mod module {
 			})?;
 			ensure!(removed, Error::<T>::ServiceNotFound);
 			Instances::<T>::remove(service_id);
-			let (_, blueprint) = Self::blueprints(service.blueprint)?;
-			let (allowed, _weight) =
-				Self::on_service_termination_hook(&blueprint, service_id, &service.owner)?;
+			let blueprint_id = service.blueprint;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
+			let (allowed, _weight) = Self::on_service_termination_hook(
+				&blueprint,
+				blueprint_id,
+				service_id,
+				&service.owner,
+			)?;
 
 			ensure!(allowed, Error::<T>::TerminationInterrupted);
 			// Remove the service from the operator's profile.
@@ -1127,7 +1152,7 @@ pub mod module {
 			Self::deposit_event(Event::ServiceTerminated {
 				owner: caller.clone(),
 				service_id,
-				blueprint_id: service.blueprint,
+				blueprint_id,
 			});
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
@@ -1143,7 +1168,8 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let service = Self::services(service_id)?;
-			let (_, blueprint) = Self::blueprints(service.blueprint)?;
+			let blueprint_id = service.blueprint;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 			let is_permitted_caller = service.permitted_callers.iter().any(|v| v == &caller);
 			ensure!(service.owner == caller || is_permitted_caller, DispatchError::BadOrigin);
 
@@ -1157,7 +1183,7 @@ pub mod module {
 			let call_id = Self::next_job_call_id();
 
 			let (allowed, _weight) =
-				Self::on_job_call_hook(&blueprint, service_id, job, call_id, &args)?;
+				Self::on_job_call_hook(&blueprint, blueprint_id, service_id, job, call_id, &args)?;
 
 			ensure!(allowed, Error::<T>::InvalidJobCallInput);
 
@@ -1185,11 +1211,12 @@ pub mod module {
 			let caller = ensure_signed(origin)?;
 			let job_call = Self::job_calls(service_id, call_id)?;
 			let service = Self::services(job_call.service_id)?;
-			let (_, blueprint) = Self::blueprints(service.blueprint)?;
+			let blueprint_id = service.blueprint;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 
 			let is_operator = service.operators.iter().any(|(v, _)| v == &caller);
 			ensure!(is_operator, DispatchError::BadOrigin);
-			let operator_preferences = Operators::<T>::get(service.blueprint, &caller)?;
+			let operator_preferences = Operators::<T>::get(blueprint_id, &caller)?;
 
 			let job_def = blueprint
 				.jobs
@@ -1204,6 +1231,7 @@ pub mod module {
 
 			let (allowed, _weight) = Self::on_job_result_hook(
 				&blueprint,
+				blueprint_id,
 				service_id,
 				job_call.job,
 				call_id,
@@ -1315,6 +1343,18 @@ pub mod module {
 				amount: unapplied_slash.payout,
 				era,
 			});
+
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+		}
+
+		pub fn update_master_blueprint_service_manager(
+			origin: OriginFor<T>,
+			mbsm: H160,
+		) -> DispatchResultWithPostInfo {
+			T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
+
+			MasterBlueprintServiceManagerRevisions::<T>::try_append(mbsm)
+				.map_err(|_| Error::<T>::MaxMasterBlueprintServiceManagerVersionsExceeded)?;
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
