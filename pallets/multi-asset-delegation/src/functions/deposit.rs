@@ -15,15 +15,12 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
-use frame_support::{ensure, pallet_prelude::DispatchResult};
-
 use frame_support::traits::fungibles::Mutate;
-
+use frame_support::{ensure, pallet_prelude::DispatchResult};
 use frame_support::{
-	sp_runtime::traits::AccountIdConversion,
+	sp_runtime::traits::{AccountIdConversion, CheckedAdd, Zero},
 	traits::{tokens::Preservation, Get},
 };
-use sp_runtime::traits::Zero;
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account ID of the pallet.
@@ -57,13 +54,21 @@ impl<T: Config> Pallet<T> {
 			&Self::pallet_account(),
 			amount,
 			Preservation::Expendable,
-		)?; // Transfer the assets to the pallet account
+		)?;
 
 		// Update storage
-		Delegators::<T>::mutate(&who, |maybe_metadata| {
+		Delegators::<T>::try_mutate(&who, |maybe_metadata| -> DispatchResult {
 			let metadata = maybe_metadata.get_or_insert_with(Default::default);
-			metadata.deposits.entry(asset_id).and_modify(|e| *e += amount).or_insert(amount);
-		});
+			// Handle checked addition first to avoid ? operator in closure
+			if let Some(existing) = metadata.deposits.get(&asset_id) {
+				let new_amount =
+					existing.checked_add(&amount).ok_or(Error::<T>::DepositOverflow)?;
+				metadata.deposits.insert(asset_id, new_amount);
+			} else {
+				metadata.deposits.insert(asset_id, amount);
+			}
+			Ok(())
+		})?;
 
 		Ok(())
 	}
@@ -101,11 +106,11 @@ impl<T: Config> Pallet<T> {
 
 			// Create the unstake request
 			let current_round = Self::current_round();
-			metadata.withdraw_requests.push(WithdrawRequest {
-				asset_id,
-				amount,
-				requested_round: current_round,
-			});
+			let mut withdraw_requests = metadata.withdraw_requests.clone();
+			withdraw_requests
+				.try_push(WithdrawRequest { asset_id, amount, requested_round: current_round })
+				.map_err(|_| Error::<T>::MaxWithdrawRequestsExceeded)?;
+			metadata.withdraw_requests = withdraw_requests;
 
 			Ok(())
 		})
@@ -116,8 +121,6 @@ impl<T: Config> Pallet<T> {
 	/// # Arguments
 	///
 	/// * `who` - The account ID of the delegator.
-	/// * `asset_id` - The asset ID of the unstake request to cancel.
-	/// * `amount` - The amount of the unstake request to cancel.
 	///
 	/// # Errors
 	///

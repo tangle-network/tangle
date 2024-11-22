@@ -50,6 +50,9 @@ pub type BlockNumber = u64;
 /// Round index for sessions
 pub type RoundIndex = u32;
 
+/// Blueprint ID
+pub type BlueprintId = u64;
+
 /// The address format for describing accounts.
 pub type Address = MultiAddress<AccountId, Index>;
 

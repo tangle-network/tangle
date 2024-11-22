@@ -15,9 +15,14 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
+use frame_support::traits::fungibles::Mutate;
+use frame_support::traits::tokens::Preservation;
 use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
-use sp_runtime::traits::Zero;
+use sp_runtime::traits::{CheckedSub, Zero};
+use sp_runtime::DispatchError;
+use sp_runtime::Percent;
 use sp_std::vec::Vec;
+use tangle_primitives::BlueprintId;
 
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.
@@ -39,6 +44,7 @@ impl<T: Config> Pallet<T> {
 		operator: T::AccountId,
 		asset_id: T::AssetId,
 		amount: BalanceOf<T>,
+		blueprint_selection: Option<DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -49,7 +55,7 @@ impl<T: Config> Pallet<T> {
 			ensure!(*balance >= amount, Error::<T>::InsufficientBalance);
 
 			// Reduce the balance in deposits
-			*balance -= amount;
+			*balance = balance.checked_sub(&amount).ok_or(Error::<T>::InsufficientBalance)?;
 			if *balance == Zero::zero() {
 				metadata.deposits.remove(&asset_id);
 			}
@@ -62,40 +68,59 @@ impl<T: Config> Pallet<T> {
 			{
 				delegation.amount += amount;
 			} else {
-				metadata.delegations.push(BondInfoDelegator {
+				let blueprint_selection = blueprint_selection.unwrap_or_default();
+				// Create the new delegation
+				let new_delegation = BondInfoDelegator {
 					operator: operator.clone(),
 					amount,
 					asset_id,
-				});
+					blueprint_selection,
+				};
+
+				// Create a mutable copy of delegations
+				let mut delegations = metadata.delegations.clone();
+				delegations
+					.try_push(new_delegation)
+					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+				metadata.delegations = delegations;
+
+				// Update the status
+				metadata.status = DelegatorStatus::Active;
 			}
 
-			// Update the status
-			metadata.status = DelegatorStatus::Active;
-
 			// Update the operator's metadata
-			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
-				let operator_metadata =
-					maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
+			if let Some(mut operator_metadata) = Operators::<T>::get(&operator) {
+				// Check if the operator has capacity for more delegations
+				ensure!(
+					operator_metadata.delegation_count < T::MaxDelegations::get(),
+					Error::<T>::MaxDelegationsExceeded
+				);
 
-				// Check if the delegation exists and update it, otherwise create a new delegation
-				if let Some(delegation) = operator_metadata
-					.delegations
-					.iter_mut()
-					.find(|d| d.delegator == who && d.asset_id == asset_id)
+				// Create and push the new delegation bond
+				let delegation = DelegatorBond { delegator: who.clone(), amount, asset_id };
+
+				let mut delegations = operator_metadata.delegations.clone();
+
+				// Check if delegation already exists
+				if let Some(existing_delegation) =
+					delegations.iter_mut().find(|d| d.delegator == who && d.asset_id == asset_id)
 				{
-					delegation.amount += amount;
+					existing_delegation.amount += amount;
 				} else {
-					operator_metadata.delegations.push(DelegatorBond {
-						delegator: who.clone(),
-						amount,
-						asset_id,
-					});
-					// Increase the delegation count only when a new delegation is added
-					operator_metadata.delegation_count += 1;
+					delegations
+						.try_push(delegation)
+						.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+					operator_metadata.delegation_count =
+						operator_metadata.delegation_count.saturating_add(1);
 				}
 
-				Ok(())
-			})?;
+				operator_metadata.delegations = delegations;
+
+				// Update storage
+				Operators::<T>::insert(&operator, operator_metadata);
+			} else {
+				return Err(Error::<T>::NotAnOperator.into());
+			}
 
 			Ok(())
 		})
@@ -130,25 +155,32 @@ impl<T: Config> Pallet<T> {
 				.position(|d| d.operator == operator && d.asset_id == asset_id)
 				.ok_or(Error::<T>::NoActiveDelegation)?;
 
-			// Ensure the amount to unstake is not greater than the current delegation amount
+			// Get the delegation and clone necessary data
+			let blueprint_selection =
+				metadata.delegations[delegation_index].blueprint_selection.clone();
 			let delegation = &mut metadata.delegations[delegation_index];
 			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
 
 			delegation.amount -= amount;
 
+			// Create the unstake request
+			let current_round = Self::current_round();
+			let mut unstake_requests = metadata.delegator_unstake_requests.clone();
+			unstake_requests
+				.try_push(BondLessRequest {
+					operator: operator.clone(),
+					asset_id,
+					amount,
+					requested_round: current_round,
+					blueprint_selection,
+				})
+				.map_err(|_| Error::<T>::MaxUnstakeRequestsExceeded)?;
+			metadata.delegator_unstake_requests = unstake_requests;
+
 			// Remove the delegation if the remaining amount is zero
 			if delegation.amount.is_zero() {
 				metadata.delegations.remove(delegation_index);
 			}
-
-			// Create the unstake request
-			let current_round = Self::current_round();
-			metadata.delegator_unstake_requests.push(BondLessRequest {
-				operator: operator.clone(),
-				asset_id,
-				amount,
-				requested_round: current_round,
-			});
 
 			// Update the operator's metadata
 			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
@@ -200,11 +232,11 @@ impl<T: Config> Pallet<T> {
 			ensure!(!metadata.delegator_unstake_requests.is_empty(), Error::<T>::NoBondLessRequest);
 
 			let current_round = Self::current_round();
-			let delay = T::DelegationBondLessDelay::get();
 
 			// Process all ready unstake requests
 			let mut executed_requests = Vec::new();
 			metadata.delegator_unstake_requests.retain(|request| {
+				let delay = T::DelegationBondLessDelay::get();
 				if current_round >= delay + request.requested_round {
 					// Add the amount back to the delegator's deposits
 					metadata
@@ -267,42 +299,110 @@ impl<T: Config> Pallet<T> {
 
 					// Find the matching delegation and increase its amount, or insert a new
 					// delegation if not found
-					if let Some(delegation) = operator_metadata
-						.delegations
+					let mut delegations = operator_metadata.delegations.clone();
+					if let Some(delegation) = delegations
 						.iter_mut()
 						.find(|d| d.asset_id == asset_id && d.delegator == who.clone())
 					{
 						delegation.amount += amount;
 					} else {
-						operator_metadata.delegations.push(DelegatorBond {
-							delegator: who.clone(),
-							amount,
-							asset_id,
-						});
+						delegations
+							.try_push(DelegatorBond { delegator: who.clone(), amount, asset_id })
+							.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 
-						// Increase the delegation count
+						// Increase the delegation count only when a new delegation is added
 						operator_metadata.delegation_count += 1;
 					}
+					operator_metadata.delegations = delegations;
 
 					Ok(())
 				},
 			)?;
 
+			// Update the delegator's metadata
+			let mut delegations = metadata.delegations.clone();
+
 			// If a similar delegation exists, increase the amount
-			if let Some(delegation) = metadata
-				.delegations
-				.iter_mut()
-				.find(|d| d.operator == unstake_request.operator && d.asset_id == asset_id)
-			{
-				delegation.amount += amount;
+			if let Some(delegation) = delegations.iter_mut().find(|d| {
+				d.operator == unstake_request.operator && d.asset_id == unstake_request.asset_id
+			}) {
+				delegation.amount += unstake_request.amount;
 			} else {
 				// Create a new delegation
-				metadata.delegations.push(BondInfoDelegator {
-					operator: unstake_request.operator,
-					amount,
-					asset_id,
-				});
+				delegations
+					.try_push(BondInfoDelegator {
+						operator: unstake_request.operator.clone(),
+						amount: unstake_request.amount,
+						asset_id: unstake_request.asset_id,
+						blueprint_selection: unstake_request.blueprint_selection,
+					})
+					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 			}
+			metadata.delegations = delegations;
+
+			Ok(())
+		})
+	}
+
+	/// Slashes a delegator's stake.
+	///
+	/// # Arguments
+	///
+	/// * `delegator` - The account ID of the delegator.
+	/// * `operator` - The account ID of the operator.
+	/// * `blueprint_id` - The ID of the blueprint.
+	/// * `percentage` - The percentage of the stake to slash.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the delegator is not found, or if the delegation is not active.
+	pub fn slash_delegator(
+		delegator: &T::AccountId,
+		operator: &T::AccountId,
+		blueprint_id: BlueprintId,
+		percentage: Percent,
+	) -> Result<(), DispatchError> {
+		Delegators::<T>::try_mutate(delegator, |maybe_metadata| {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+
+			let delegation = metadata
+				.delegations
+				.iter_mut()
+				.find(|d| &d.operator == operator)
+				.ok_or(Error::<T>::NoActiveDelegation)?;
+
+			// Check delegation type and blueprint_id
+			match &delegation.blueprint_selection {
+				DelegatorBlueprintSelection::Fixed(blueprints) => {
+					// For fixed delegation, ensure the blueprint_id is in the list
+					ensure!(blueprints.contains(&blueprint_id), Error::<T>::BlueprintNotSelected);
+				},
+				DelegatorBlueprintSelection::All => {
+					// For "All" type, no need to check blueprint_id
+				},
+			}
+
+			// Calculate and apply slash
+			let slash_amount = percentage.mul_floor(delegation.amount);
+			delegation.amount = delegation
+				.amount
+				.checked_sub(&slash_amount)
+				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
+
+			// Transfer slashed amount to the treasury
+			let _ = T::Fungibles::transfer(
+				delegation.asset_id,
+				&Self::pallet_account(),
+				&T::SlashedAmountRecipient::get(),
+				slash_amount,
+				Preservation::Expendable,
+			);
+
+			// emit event
+			Self::deposit_event(Event::DelegatorSlashed {
+				who: delegator.clone(),
+				amount: slash_amount,
+			});
 
 			Ok(())
 		})

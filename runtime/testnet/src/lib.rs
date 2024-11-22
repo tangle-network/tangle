@@ -1425,6 +1425,12 @@ pub type AssetId = u128;
 #[cfg(feature = "runtime-benchmarks")]
 pub type AssetId = u32;
 
+impl tangle_primitives::NextAssetId<AssetId> for Runtime {
+	fn next_asset_id() -> Option<AssetId> {
+		pallet_assets::NextAssetId::<Runtime>::get()
+	}
+}
+
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
@@ -1453,6 +1459,16 @@ parameter_types! {
 	pub const BondDuration: u32 = 10;
 	pub const MinDelegateAmount : Balance = 1000;
 	pub PID: PalletId = PalletId(*b"PotStake");
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegatorBlueprints : u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxOperatorBlueprints : u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxWithdrawRequests: u32 = 5;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxUnstakeRequests: u32 = 5;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegations: u32 = 50;
 }
 
 impl pallet_multi_asset_delegation::Config for Runtime {
@@ -1468,9 +1484,15 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
+	type SlashedAmountRecipient = TreasuryAccount;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
 	type VaultId = AssetId;
+	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
+	type MaxOperatorBlueprints = MaxOperatorBlueprints;
+	type MaxWithdrawRequests = MaxWithdrawRequests;
+	type MaxUnstakeRequests = MaxUnstakeRequests;
+	type MaxDelegations = MaxDelegations;
 	type WeightInfo = ();
 }
 
