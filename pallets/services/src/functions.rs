@@ -9,7 +9,8 @@ use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use sp_core::{H160, U256};
 use sp_runtime::traits::{UniqueSaturatedInto, Zero};
 use tangle_primitives::services::{
-	Field, MasterBlueprintServiceManagerRevision, OperatorPreferences, Service, ServiceBlueprint,
+	BlueprintServiceManager, Field, MasterBlueprintServiceManagerRevision, OperatorPreferences,
+	Service, ServiceBlueprint,
 };
 
 use super::*;
@@ -101,8 +102,51 @@ impl<T: Config> Pallet<T> {
 		blueprint_id: u64,
 		owner: &T::AccountId,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		// To the BSM
 		#[allow(deprecated)]
-		Self::dispatch_hook(
+		let (allowed0, weight0) = match blueprint.manager {
+			BlueprintServiceManager::Evm(bsm) => {
+				let mbsm = Self::mbsm_address_of(blueprint)?;
+				let f = Function {
+					name: String::from("onBlueprintCreated"),
+					inputs: vec![
+						ethabi::Param {
+							name: String::from("blueprintId"),
+							kind: ethabi::ParamType::Uint(64),
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("owner"),
+							kind: ethabi::ParamType::Address,
+							internal_type: None,
+						},
+						ethabi::Param {
+							name: String::from("mbsm"),
+							kind: ethabi::ParamType::Address,
+							internal_type: None,
+						},
+					],
+					outputs: Default::default(),
+					constant: None,
+					state_mutability: StateMutability::Payable,
+				};
+				let args = &[
+					Token::Uint(ethabi::Uint::from(blueprint_id)),
+					Token::Address(T::EvmAddressMapping::into_address(owner.clone())),
+					Token::Address(mbsm),
+				];
+				let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
+				let gas_limit = 300_000;
+				let value = U256::zero();
+				let info = Self::evm_call(Self::address(), bsm, value, data, gas_limit)?;
+				let weight = Self::weight_from_call_info(&info);
+				(info.exit_reason.is_succeed(), weight)
+			},
+			_ => unimplemented!("Got unexpected case for {:?}", blueprint.manager),
+		};
+		// To the MBSM
+		#[allow(deprecated)]
+		let (allowed1, weight1) = Self::dispatch_hook(
 			blueprint,
 			Function {
 				name: String::from("onBlueprintCreated"),
@@ -129,7 +173,8 @@ impl<T: Config> Pallet<T> {
 				blueprint.to_ethabi(),
 			],
 			Zero::zero(),
-		)
+		)?;
+		Ok((allowed0 && allowed1, weight0.saturating_add(weight1)))
 	}
 
 	/// Hook to be called upon a new operator registration on a blueprint.
@@ -418,13 +463,13 @@ impl<T: Config> Pallet<T> {
 						internal_type: None,
 					},
 					ethabi::Param {
-						name: String::from("requester"),
-						kind: ethabi::ParamType::Address,
+						name: String::from("requestId"),
+						kind: ethabi::ParamType::Uint(64),
 						internal_type: None,
 					},
 					ethabi::Param {
-						name: String::from("requestId"),
-						kind: ethabi::ParamType::Uint(64),
+						name: String::from("requester"),
+						kind: ethabi::ParamType::Address,
 						internal_type: None,
 					},
 					ethabi::Param {
@@ -461,8 +506,8 @@ impl<T: Config> Pallet<T> {
 			},
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
-				Token::Address(T::EvmAddressMapping::into_address(requester.clone())),
 				Token::Uint(ethabi::Uint::from(request_id)),
+				Token::Address(T::EvmAddressMapping::into_address(requester.clone())),
 				Token::Array(operators.iter().map(OperatorPreferences::to_ethabi).collect()),
 				Token::Bytes(Field::encode_to_ethabi(request_args)),
 				Token::Array(
@@ -928,6 +973,7 @@ impl<T: Config> Pallet<T> {
 		args: &[ethabi::Token],
 		value: BalanceOf<T>,
 	) -> Result<(fp_evm::CallInfo, Weight), DispatchErrorWithPostInfo> {
+		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(f.short_signature()), f.signature());
 		let mbsm = Self::mbsm_address_of(blueprint)?;
 		let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 		let gas_limit = 300_000;
@@ -981,14 +1027,6 @@ impl<T: Config> Pallet<T> {
 						to,
 						data,
 						reason: info.value.clone(),
-					});
-				}
-				// Emit logs from the EVM call.
-				for log in &info.logs {
-					Self::deposit_event(Event::<T>::EvmLog {
-						address: log.address,
-						topics: log.topics.clone(),
-						data: log.data.clone(),
 					});
 				}
 				Ok(info)

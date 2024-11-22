@@ -454,6 +454,7 @@ pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
 	new_test_ext_raw_authorities(mock_authorities(ids))
 }
 
+pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 
 // This function basically just builds a genesis storage key/value store according to
@@ -495,6 +496,9 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 	let cggmp21_blueprint_json: serde_json::Value =
 		serde_json::from_str(include_str!("./test-artifacts/CGGMP21Blueprint.json")).unwrap();
+	let mbsm_json: serde_json::Value =
+		serde_json::from_str(include_str!("./test-artifacts/MasterBlueprintServiceManager.json"))
+			.unwrap();
 	let cggmp21_blueprint_code = hex::decode(
 		cggmp21_blueprint_json["deployedBytecode"]["object"]
 			.as_str()
@@ -502,10 +506,22 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 			.replace("0x", ""),
 	)
 	.unwrap();
+	let mbsm_code =
+		hex::decode(mbsm_json["deployedBytecode"]["object"].as_str().unwrap().replace("0x", ""))
+			.unwrap();
 	evm_accounts.insert(
 		CGGMP21_BLUEPRINT,
 		fp_evm::GenesisAccount {
 			code: cggmp21_blueprint_code,
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Default::default(),
+		},
+	);
+	evm_accounts.insert(
+		MBSM,
+		fp_evm::GenesisAccount {
+			code: mbsm_code,
 			storage: Default::default(),
 			nonce: Default::default(),
 			balance: Default::default(),
@@ -534,7 +550,13 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 // every past RuntimeEvent.
 #[track_caller]
 pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
-	let mut actual: Vec<RuntimeEvent> = System::events().iter().map(|e| e.event.clone()).collect();
+	let mut actual: Vec<RuntimeEvent> = System::events()
+		.iter()
+		.filter_map(|e| match e.event {
+			RuntimeEvent::Services(_) => Some(e.event.clone()),
+			_ => None,
+		})
+		.collect();
 
 	expected.reverse();
 	for evt in expected {
@@ -542,7 +564,7 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 		match (&next, &evt) {
 			(left_val, right_val) => {
 				if !(*left_val == *right_val) {
-					panic!("Events don't match\nactual: {next:#?}\nexpected: {evt:#?}");
+					panic!("Events don't match\nactual: {actual:#?}\nexpected: {evt:#?}");
 				}
 			},
 		};

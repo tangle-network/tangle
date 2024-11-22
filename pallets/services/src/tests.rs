@@ -97,6 +97,8 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 fn create_service_blueprint() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
 		let alice = mock_pub_key(ALICE);
 
 		let blueprint = cggmp21_blueprint();
@@ -116,6 +118,7 @@ fn create_service_blueprint() {
 fn register_on_blueprint() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 
 		let blueprint = cggmp21_blueprint();
@@ -180,6 +183,7 @@ fn register_on_blueprint() {
 fn pre_register_on_blueprint() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 
 		let blueprint = cggmp21_blueprint();
@@ -202,6 +206,7 @@ fn pre_register_on_blueprint() {
 fn update_price_targets() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 
 		let blueprint = cggmp21_blueprint();
@@ -274,6 +279,7 @@ fn update_price_targets() {
 fn unregister_from_blueprint() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
@@ -311,6 +317,7 @@ fn unregister_from_blueprint() {
 fn request_service() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
@@ -426,6 +433,7 @@ fn request_service() {
 fn request_service_with_no_assets() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
@@ -458,6 +466,7 @@ fn request_service_with_no_assets() {
 fn job_calls() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
@@ -549,6 +558,7 @@ fn job_calls() {
 fn job_result() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
@@ -681,6 +691,7 @@ fn deploy() -> Deployment {
 	let alice = mock_pub_key(ALICE);
 	let blueprint = cggmp21_blueprint();
 	let blueprint_id = Services::next_blueprint_id();
+	assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 	assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 	let bob = mock_pub_key(BOB);

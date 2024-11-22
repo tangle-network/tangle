@@ -1,6 +1,7 @@
 use crate::mock::*;
 use crate::mock_evm::PCall;
 use crate::mock_evm::PrecompilesValue;
+use frame_support::assert_ok;
 use pallet_services::types::ConstraintsOf;
 use pallet_services::Instances;
 use pallet_services::Operators;
@@ -84,6 +85,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 #[test]
 fn test_create_blueprint() {
 	ExtBuilder.build().execute_with(|| {
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		// Create blueprint
 		let blueprint_data = cggmp21_blueprint();
 
@@ -105,6 +107,7 @@ fn test_create_blueprint() {
 #[test]
 fn test_register_operator() {
 	ExtBuilder.build().execute_with(|| {
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		// First create the blueprint
 		let blueprint_data = cggmp21_blueprint();
 
@@ -146,6 +149,7 @@ fn test_register_operator() {
 #[test]
 fn test_request_service() {
 	ExtBuilder.build().execute_with(|| {
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		// First create the blueprint
 		let blueprint_data = cggmp21_blueprint();
 
@@ -214,6 +218,7 @@ fn test_request_service() {
 #[test]
 fn test_unregister_operator() {
 	ExtBuilder.build().execute_with(|| {
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		// First register operator (after blueprint creation)
 		let blueprint_data = cggmp21_blueprint();
 
@@ -263,6 +268,7 @@ fn test_unregister_operator() {
 #[test]
 fn test_terminate_service() {
 	ExtBuilder.build().execute_with(|| {
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		// First request a service
 		let blueprint_data = cggmp21_blueprint();
 

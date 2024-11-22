@@ -59,7 +59,7 @@ pub use impls::BenchmarkingOperatorDelegationManager;
 pub mod module {
 	use super::*;
 	use frame_support::dispatch::PostDispatchInfo;
-	use sp_core::{H160, H256};
+	use sp_core::H160;
 	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
 	use sp_runtime::Percent;
 	use sp_std::vec::Vec;
@@ -421,16 +421,6 @@ pub mod module {
 			job: u8,
 			/// The result of the job.
 			result: Vec<Field<T::Constraints, T::AccountId>>,
-		},
-
-		/// An EVM log has been emitted during an execution.
-		EvmLog {
-			/// The account that emitted the log
-			address: H160,
-			/// The topics of the log
-			topics: Vec<H256>,
-			/// The data of the log
-			data: Vec<u8>,
 		},
 		/// EVM execution reverted with a reason.
 		EvmReverted { from: H160, to: H160, data: Vec<u8>, reason: Vec<u8> },
@@ -1349,12 +1339,18 @@ pub mod module {
 
 		pub fn update_master_blueprint_service_manager(
 			origin: OriginFor<T>,
-			mbsm: H160,
+			address: H160,
 		) -> DispatchResultWithPostInfo {
 			T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
 
-			MasterBlueprintServiceManagerRevisions::<T>::try_append(mbsm)
+			MasterBlueprintServiceManagerRevisions::<T>::try_append(address)
 				.map_err(|_| Error::<T>::MaxMasterBlueprintServiceManagerVersionsExceeded)?;
+
+			let revision = Self::mbsm_latest_revision();
+			Self::deposit_event(Event::<T>::MasterBlueprintServiceManagerRevised {
+				revision,
+				address,
+			});
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
