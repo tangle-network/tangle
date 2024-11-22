@@ -327,7 +327,7 @@ impl<T: Config> Pallet<T> {
 			}
 
 			// transfer the slashed amount to the treasury
-			T::Currency::unreserve(&operator, amount);
+			T::Currency::unreserve(operator, amount);
 			let _ = T::Currency::transfer(
 				operator,
 				&T::SlashedAmountRecipient::get(),
