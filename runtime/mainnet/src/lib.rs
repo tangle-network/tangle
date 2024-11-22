@@ -1267,6 +1267,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
 	type VaultId = AssetId;
+	type SlashedAmountRecipient = TreasuryAccount;
 	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
 	type MaxOperatorBlueprints = MaxOperatorBlueprints;
 	type MaxWithdrawRequests = MaxWithdrawRequests;
