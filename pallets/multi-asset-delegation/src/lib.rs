@@ -585,7 +585,7 @@ pub mod pallet {
 			operator: T::AccountId,
 			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
-			blueprint_selection: Option<DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>>,
+			blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_delegate(

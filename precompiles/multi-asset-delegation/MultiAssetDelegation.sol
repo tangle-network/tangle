@@ -67,7 +67,8 @@ interface MultiAssetDelegation {
     /// @param operator The address of the operator.
     /// @param assetId The ID of the asset.
     /// @param amount The amount to delegate.
-    function delegate(bytes32 operator, uint256 assetId, uint256 amount) external returns (uint8);
+    /// @param blueprintSelection The blueprint selection.
+    function delegate(bytes32 operator, uint256 assetId, uint256 amount, uint64[] memory blueprintSelection) external returns (uint8);
 
     /// @dev Schedule an unstake of an amount of an asset as a delegator.
     /// @param operator The address of the operator.

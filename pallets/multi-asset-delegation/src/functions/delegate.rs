@@ -44,7 +44,7 @@ impl<T: Config> Pallet<T> {
 		operator: T::AccountId,
 		asset_id: T::AssetId,
 		amount: BalanceOf<T>,
-		blueprint_selection: Option<DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>>,
+		blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -68,7 +68,6 @@ impl<T: Config> Pallet<T> {
 			{
 				delegation.amount += amount;
 			} else {
-				let blueprint_selection = blueprint_selection.unwrap_or_default();
 				// Create the new delegation
 				let new_delegation = BondInfoDelegator {
 					operator: operator.clone(),

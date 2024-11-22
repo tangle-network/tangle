@@ -89,6 +89,7 @@ fn test_delegate_assets_invalid_operator() {
 					operator: sp_core::sr25519::Public::from(TestAccount::Eve).into(),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
+					blueprint_selection: Default::default(),
 				},
 			)
 			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 5, error: [2, 0, 0, 0], message: Some(\"NotAnOperator\") })");
@@ -123,6 +124,7 @@ fn test_delegate_assets() {
 					operator: operator_account.into(),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
+					blueprint_selection: Default::default(),
 				},
 			)
 			.execute_returns(());
@@ -157,6 +159,7 @@ fn test_delegate_assets_insufficient_balance() {
 					operator: operator_account.into(),
 					asset_id: U256::from(1),
 					amount: U256::from(300),
+					blueprint_selection: Default::default(),
 				},
 			)
 			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 5, error: [15, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
@@ -199,6 +202,7 @@ fn test_schedule_withdraw() {
 					operator: operator_account.into(),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
+					blueprint_selection: Default::default(),
 				},
 			)
 			.execute_returns(());
@@ -252,6 +256,7 @@ fn test_execute_withdraw() {
 					operator: operator_account.into(),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
+					blueprint_selection: Default::default(),
 				},
 			)
 			.execute_returns(());
@@ -316,6 +321,7 @@ fn test_execute_withdraw_before_due() {
 					operator: operator_account.into(),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
+					blueprint_selection: Default::default(),
 				},
 			)
 			.execute_returns(());
@@ -375,6 +381,7 @@ fn test_cancel_withdraw() {
 					operator: operator_account.into(),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
+					blueprint_selection: Default::default(),
 				},
 			)
 			.execute_returns(());
