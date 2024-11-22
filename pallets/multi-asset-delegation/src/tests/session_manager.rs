@@ -40,7 +40,7 @@ fn handle_round_change_should_work() {
 			operator,
 			asset_id,
 			amount,
-			None
+			Default::default()
 		));
 
 		assert_ok!(Pallet::<Test>::handle_round_change());
@@ -89,7 +89,7 @@ fn handle_round_change_with_unstake_should_work() {
 			operator1,
 			asset_id,
 			amount1,
-			None
+			Default::default()
 		));
 
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -102,7 +102,7 @@ fn handle_round_change_with_unstake_should_work() {
 			operator2,
 			asset_id,
 			amount2,
-			None
+			Default::default()
 		));
 
 		// Delegator1 schedules unstake

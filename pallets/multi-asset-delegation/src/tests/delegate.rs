@@ -41,7 +41,7 @@ fn delegate_should_work() {
 			operator,
 			asset_id,
 			amount,
-			None
+			Default::default()
 		));
 
 		// Assert
@@ -84,7 +84,7 @@ fn schedule_delegator_unstake_should_work() {
 			operator,
 			asset_id,
 			amount,
-			None
+			Default::default()
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -129,7 +129,7 @@ fn execute_delegator_unstake_should_work() {
 			operator,
 			asset_id,
 			amount,
-			None
+			Default::default()
 		));
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who),
@@ -171,7 +171,7 @@ fn cancel_delegator_unstake_should_work() {
 			operator,
 			asset_id,
 			amount,
-			None
+			Default::default()
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -237,7 +237,7 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 			operator,
 			asset_id,
 			amount,
-			None
+			Default::default()
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -312,7 +312,7 @@ fn delegate_should_fail_if_not_enough_balance() {
 				operator,
 				asset_id,
 				amount,
-				None
+				Default::default()
 			),
 			Error::<Test>::InsufficientBalance
 		);
@@ -367,7 +367,7 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 			operator,
 			asset_id,
 			amount,
-			None
+			Default::default()
 		));
 
 		assert_noop!(
@@ -421,7 +421,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 			operator,
 			asset_id,
 			amount,
-			None
+			Default::default()
 		));
 
 		// Assert first delegation
@@ -448,7 +448,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 			operator,
 			asset_id,
 			additional_amount,
-			None
+			Default::default()
 		));
 
 		// Assert updated delegation
@@ -645,7 +645,7 @@ fn delegator_can_add_blueprints() {
 			operator,
 			asset_id,
 			amount,
-			Some(DelegatorBlueprintSelection::Fixed(vec![200].try_into().unwrap())),
+			DelegatorBlueprintSelection::Fixed(vec![200].try_into().unwrap()),
 		));
 
 		// Add a blueprint
@@ -695,7 +695,7 @@ fn delegator_can_remove_blueprints() {
 			operator,
 			asset_id,
 			amount,
-			Some(DelegatorBlueprintSelection::Fixed(vec![blueprint_id].try_into().unwrap())),
+			DelegatorBlueprintSelection::Fixed(vec![blueprint_id].try_into().unwrap()),
 		));
 
 		// Verify it was added

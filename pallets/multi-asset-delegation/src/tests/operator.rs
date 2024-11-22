@@ -539,7 +539,7 @@ fn slash_operator_success() {
 			1,
 			asset_id,
 			delegator_stake,
-			None
+			Fixed(vec![blueprint_id].try_into().unwrap()),
 		));
 
 		// Setup delegator with all blueprints
@@ -553,7 +553,7 @@ fn slash_operator_success() {
 			1,
 			asset_id,
 			delegator_stake,
-			None
+			Fixed(vec![blueprint_id].try_into().unwrap()),
 		));
 
 		// Slash 50% of stakes
@@ -624,7 +624,7 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 			1,
 			1,
 			5_000,
-			Some(Fixed(vec![2].try_into().unwrap())),
+			Fixed(vec![2].try_into().unwrap()),
 		));
 
 		// Try to slash with unselected blueprint
