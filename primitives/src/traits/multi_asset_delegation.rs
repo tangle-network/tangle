@@ -99,4 +99,10 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance> {
 	fn get_delegators_for_operator(
 		operator: &AccountId,
 	) -> Vec<(AccountId, Balance, Self::AssetId)>;
+
+	fn slash_operator(
+		operator: &AccountId,
+		blueprint_id: crate::BlueprintId,
+		percentage: sp_runtime::Percent,
+	);
 }

@@ -17,6 +17,9 @@
 /// Functions for the pallet.
 use super::*;
 use crate::{types::*, Pallet};
+use frame_support::traits::Currency;
+use frame_support::traits::ExistenceRequirement;
+use frame_support::BoundedVec;
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
@@ -24,6 +27,8 @@ use frame_support::{
 };
 use sp_runtime::traits::{CheckedAdd, CheckedSub};
 use sp_runtime::DispatchError;
+use sp_runtime::Percent;
+use tangle_primitives::BlueprintId;
 use tangle_primitives::ServiceManager;
 
 impl<T: Config> Pallet<T> {
@@ -46,10 +51,11 @@ impl<T: Config> Pallet<T> {
 		T::Currency::reserve(&who, bond_amount)?;
 
 		let operator_metadata = OperatorMetadata {
-			stake: bond_amount,
+			delegations: BoundedVec::default(),
 			delegation_count: 0,
+			blueprint_ids: BoundedVec::default(),
+			stake: bond_amount,
 			request: None,
-			delegations: Default::default(),
 			status: OperatorStatus::Active,
 		};
 
@@ -295,5 +301,44 @@ impl<T: Config> Pallet<T> {
 		Operators::<T>::insert(who, operator);
 
 		Ok(())
+	}
+
+	pub fn slash_operator(
+		operator: &T::AccountId,
+		blueprint_id: BlueprintId,
+		percentage: Percent,
+	) -> Result<(), DispatchError> {
+		Operators::<T>::try_mutate(operator, |maybe_operator| {
+			let operator_data = maybe_operator.as_mut().ok_or(Error::<T>::NotAnOperator)?;
+			ensure!(operator_data.status == OperatorStatus::Active, Error::<T>::NotActiveOperator);
+
+			// Slash operator stake
+			let amount = percentage.mul_floor(operator_data.stake);
+			operator_data.stake = operator_data
+				.stake
+				.checked_sub(&amount)
+				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
+
+			// Slash each delegator
+			for delegator in operator_data.delegations.iter() {
+				// Ignore errors from individual delegator slashing
+				let _ =
+					Self::slash_delegator(&delegator.delegator, operator, blueprint_id, percentage);
+			}
+
+			// transfer the slashed amount to the treasury
+			T::Currency::unreserve(operator, amount);
+			let _ = T::Currency::transfer(
+				operator,
+				&T::SlashedAmountRecipient::get(),
+				amount,
+				ExistenceRequirement::AllowDeath,
+			);
+
+			// emit event
+			Self::deposit_event(Event::OperatorSlashed { who: operator.clone(), amount });
+
+			Ok(())
+		})
 	}
 }

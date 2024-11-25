@@ -44,6 +44,7 @@ use frame_support::{
 	traits::Currency,
 };
 use pallet_evm::AddressMapping;
+use pallet_multi_asset_delegation::types::DelegatorBlueprintSelection;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
 use sp_runtime::traits::Dispatchable;
@@ -298,12 +299,13 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("delegate(bytes32,uint256,uint256)")]
+	#[precompile::public("delegate(bytes32,uint256,uint256,uint64[])")]
 	fn delegate(
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
 		asset_id: U256,
 		amount: U256,
+		blueprint_selection: Vec<u64>,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -311,8 +313,17 @@ where
 		let asset_id: <Runtime as pallet_multi_asset_delegation::Config>::AssetId =
 			asset_id.try_into().map_err(|_| revert("Invalid asset id"))?;
 		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
-		let call =
-			pallet_multi_asset_delegation::Call::<Runtime>::delegate { operator, asset_id, amount };
+		let blueprint_selection = DelegatorBlueprintSelection::Fixed(
+			blueprint_selection
+				.try_into()
+				.map_err(|_| revert("Invalid blueprint selection"))?,
+		);
+		let call = pallet_multi_asset_delegation::Call::<Runtime>::delegate {
+			operator,
+			asset_id,
+			amount,
+			blueprint_selection,
+		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 

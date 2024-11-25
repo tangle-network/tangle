@@ -19,6 +19,8 @@ use frame_support::{
 	traits::{AsEnsureOriginWithArg, ConstU16, ConstU32, ConstU64},
 	PalletId,
 };
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
@@ -108,6 +110,10 @@ impl tangle_primitives::ServiceManager<u64, Balance> for MockServiceManager {
 		// Mock logic to determine if the given account can exit
 		true
 	}
+
+	fn get_blueprints_by_operator(_account: &u64) -> Vec<u64> {
+		todo!(); // we dont care
+	}
 }
 
 parameter_types! {
@@ -116,6 +122,17 @@ parameter_types! {
 	pub const MinOperatorBondAmount: u64 = 10_000;
 	pub const BondDuration: u32 = 10;
 	pub PID: PalletId = PalletId(*b"PotStake");
+	pub const SlashedAmountRecipient : u64 = 0;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegatorBlueprints : u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxOperatorBlueprints : u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxWithdrawRequests: u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxUnstakeRequests: u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegations: u32 = 50;
 }
 
 impl pallet_multi_asset_delegation::Config for Test {
@@ -134,6 +151,12 @@ impl pallet_multi_asset_delegation::Config for Test {
 	type VaultId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<u64>;
 	type PalletId = PID;
+	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
+	type MaxOperatorBlueprints = MaxOperatorBlueprints;
+	type MaxWithdrawRequests = MaxWithdrawRequests;
+	type MaxUnstakeRequests = MaxUnstakeRequests;
+	type MaxDelegations = MaxDelegations;
+	type SlashedAmountRecipient = SlashedAmountRecipient;
 	type WeightInfo = ();
 }
 

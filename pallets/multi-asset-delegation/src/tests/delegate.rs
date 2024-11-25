@@ -41,6 +41,7 @@ fn delegate_should_work() {
 			operator,
 			asset_id,
 			amount,
+			Default::default()
 		));
 
 		// Assert
@@ -83,6 +84,7 @@ fn schedule_delegator_unstake_should_work() {
 			operator,
 			asset_id,
 			amount,
+			Default::default()
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -127,6 +129,7 @@ fn execute_delegator_unstake_should_work() {
 			operator,
 			asset_id,
 			amount,
+			Default::default()
 		));
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who),
@@ -168,16 +171,8 @@ fn cancel_delegator_unstake_should_work() {
 			operator,
 			asset_id,
 			amount,
+			Default::default()
 		));
-
-		// ensure the storage is correct
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegator_unstake_requests.is_empty());
-		assert!(metadata.delegations.len() == 1);
-		let delegation = metadata.delegations.first().unwrap();
-		assert_eq!(delegation.operator, operator);
-		assert_eq!(delegation.amount, amount);
-		assert_eq!(delegation.asset_id, asset_id);
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who),
@@ -185,12 +180,19 @@ fn cancel_delegator_unstake_should_work() {
 			asset_id,
 			amount,
 		));
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegations.is_empty());
 
-		// ensure the storage is correct
+		// Assert
+		// Check the delegator metadata
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(!metadata.delegator_unstake_requests.is_empty());
+		let request = &metadata.delegator_unstake_requests[0];
+		assert_eq!(request.asset_id, asset_id);
+		assert_eq!(request.amount, amount);
+
+		// Check the operator metadata
+		let operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 0);
+		assert_eq!(operator_metadata.delegations.len(), 0);
 
 		assert_ok!(MultiAssetDelegation::cancel_delegator_unstake(
 			RuntimeOrigin::signed(who),
@@ -235,16 +237,8 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 			operator,
 			asset_id,
 			amount,
+			Default::default()
 		));
-
-		// ensure the storage is correct
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegator_unstake_requests.is_empty());
-		assert!(metadata.delegations.len() == 1);
-		let delegation = metadata.delegations.first().unwrap();
-		assert_eq!(delegation.operator, operator);
-		assert_eq!(delegation.amount, amount);
-		assert_eq!(delegation.asset_id, asset_id);
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who),
@@ -252,16 +246,23 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 			asset_id,
 			10,
 		));
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
-		assert!(metadata.delegations.len() == 1);
-		let delegation = metadata.delegations.first().unwrap();
-		assert_eq!(delegation.operator, operator);
-		assert_eq!(delegation.amount, amount - 10);
-		assert_eq!(delegation.asset_id, asset_id);
 
-		// ensure the storage is correct
+		// Assert
+		// Check the delegator metadata
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
 		assert!(!metadata.delegator_unstake_requests.is_empty());
+		let request = &metadata.delegator_unstake_requests[0];
+		assert_eq!(request.asset_id, asset_id);
+		assert_eq!(request.amount, 10);
+
+		// Check the operator metadata
+		let operator_metadata = MultiAssetDelegation::operator_info(operator).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 1);
+		assert_eq!(operator_metadata.delegations.len(), 1);
+		let operator_delegation = &operator_metadata.delegations[0];
+		assert_eq!(operator_delegation.delegator, who);
+		assert_eq!(operator_delegation.amount, amount - 10);
+		assert_eq!(operator_delegation.asset_id, asset_id);
 
 		assert_ok!(MultiAssetDelegation::cancel_delegator_unstake(
 			RuntimeOrigin::signed(who),
@@ -306,7 +307,13 @@ fn delegate_should_fail_if_not_enough_balance() {
 		));
 
 		assert_noop!(
-			MultiAssetDelegation::delegate(RuntimeOrigin::signed(who), operator, asset_id, amount,),
+			MultiAssetDelegation::delegate(
+				RuntimeOrigin::signed(who),
+				operator,
+				asset_id,
+				amount,
+				Default::default()
+			),
 			Error::<Test>::InsufficientBalance
 		);
 	});
@@ -360,6 +367,7 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 			operator,
 			asset_id,
 			amount,
+			Default::default()
 		));
 
 		assert_noop!(
@@ -413,6 +421,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 			operator,
 			asset_id,
 			amount,
+			Default::default()
 		));
 
 		// Assert first delegation
@@ -439,6 +448,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 			operator,
 			asset_id,
 			additional_amount,
+			Default::default()
 		));
 
 		// Assert updated delegation
@@ -493,7 +503,9 @@ fn distribute_rewards_should_work() {
 			round,
 			operator,
 			OperatorSnapshot {
-				delegations: vec![DelegatorBond { delegator, amount, asset_id }],
+				delegations: vec![DelegatorBond { delegator, amount, asset_id }]
+					.try_into()
+					.unwrap(),
 				stake: amount,
 			},
 		);
@@ -564,7 +576,9 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 					delegator: delegator1,
 					amount: amount1,
 					asset_id: asset_id1,
-				}],
+				}]
+				.try_into()
+				.unwrap(),
 				stake: amount1,
 			},
 		);
@@ -577,7 +591,9 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 					delegator: delegator2,
 					amount: amount2,
 					asset_id: asset_id2,
-				}],
+				}]
+				.try_into()
+				.unwrap(),
 				stake: amount2,
 			},
 		);
@@ -602,5 +618,117 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 
 		assert_eq!(balance1 - initial_balance1, calculated_reward1);
 		assert_eq!(balance2 - initial_balance2, calculated_reward2);
+	});
+}
+
+#[test]
+fn delegator_can_add_blueprints() {
+	new_test_ext().execute_with(|| {
+		let delegator = 1;
+		let blueprint_id = 1;
+		let operator = 2;
+		let asset_id = VDOT;
+		let amount = 100;
+
+		create_and_mint_tokens(VDOT, delegator, amount);
+
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+
+		// Deposit, delegate and schedule unstake first
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(delegator),
+			asset_id,
+			amount,
+		));
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(delegator),
+			operator,
+			asset_id,
+			amount,
+			DelegatorBlueprintSelection::Fixed(vec![200].try_into().unwrap()),
+		));
+
+		// Add a blueprint
+		assert_ok!(MultiAssetDelegation::add_blueprint_id(
+			RuntimeOrigin::signed(delegator),
+			blueprint_id
+		));
+
+		// Verify the blueprint was added
+		let metadata = Delegators::<Test>::get(delegator).unwrap();
+		assert!(metadata.delegations.iter().any(|d| match d.blueprint_selection {
+			DelegatorBlueprintSelection::Fixed(ref blueprints) => {
+				blueprints.contains(&blueprint_id)
+			},
+			_ => false,
+		}));
+
+		// Try to add the same blueprint again
+		assert_noop!(
+			MultiAssetDelegation::add_blueprint_id(RuntimeOrigin::signed(delegator), blueprint_id),
+			Error::<Test>::DuplicateBlueprintId
+		);
+	});
+}
+
+#[test]
+fn delegator_can_remove_blueprints() {
+	new_test_ext().execute_with(|| {
+		let delegator = 1;
+		let blueprint_id = 1;
+		let operator = 2;
+		let asset_id = VDOT;
+		let amount = 100;
+
+		create_and_mint_tokens(VDOT, delegator, amount);
+
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+
+		// Deposit, delegate and schedule unstake first
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(delegator),
+			asset_id,
+			amount,
+		));
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(delegator),
+			operator,
+			asset_id,
+			amount,
+			DelegatorBlueprintSelection::Fixed(vec![blueprint_id].try_into().unwrap()),
+		));
+
+		// Verify it was added
+		let metadata = Delegators::<Test>::get(delegator).unwrap();
+		assert!(metadata.delegations.iter().any(|d| match d.blueprint_selection {
+			DelegatorBlueprintSelection::Fixed(ref blueprints) => {
+				blueprints.contains(&blueprint_id)
+			},
+			_ => false,
+		}));
+
+		// Remove the blueprint
+		assert_ok!(MultiAssetDelegation::remove_blueprint_id(
+			RuntimeOrigin::signed(delegator),
+			blueprint_id
+		));
+
+		// Verify it was removed
+		let metadata = Delegators::<Test>::get(delegator).unwrap();
+		assert!(metadata.delegations.iter().all(|d| match d.blueprint_selection {
+			DelegatorBlueprintSelection::Fixed(ref blueprints) => {
+				!blueprints.contains(&blueprint_id)
+			},
+			_ => true,
+		}));
+
+		// Try to remove a non-existent blueprint
+		assert_noop!(
+			MultiAssetDelegation::remove_blueprint_id(
+				RuntimeOrigin::signed(delegator),
+				blueprint_id
+			),
+			Error::<Test>::BlueprintIdNotFound
+		);
 	});
 }

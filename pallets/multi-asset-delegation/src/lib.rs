@@ -77,16 +77,20 @@ pub use functions::*;
 #[frame_support::pallet]
 pub mod pallet {
 	use crate::types::*;
+
+	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction};
 	use frame_support::traits::fungibles::Inspect;
 	use frame_support::{
-		dispatch::DispatchResult,
 		pallet_prelude::*,
-		traits::{fungibles, Currency, LockableCurrency, ReservableCurrency},
+		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero};
-	use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
+	use scale_info::TypeInfo;
+	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
+	use sp_std::vec::Vec;
+	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
+	use tangle_primitives::BlueprintId;
 	use tangle_primitives::{traits::ServiceManager, RoundIndex};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -99,6 +103,46 @@ pub mod pallet {
 		type Currency: Currency<Self::AccountId>
 			+ ReservableCurrency<Self::AccountId>
 			+ LockableCurrency<Self::AccountId>;
+
+		/// Type representing the unique ID of an asset.
+		type AssetId: Parameter
+			+ Member
+			+ Copy
+			+ MaybeSerializeDeserialize
+			+ Ord
+			+ Default
+			+ MaxEncodedLen
+			+ TypeInfo;
+
+		/// Type representing the unique ID of a vault.
+		type VaultId: Parameter
+			+ Member
+			+ Copy
+			+ MaybeSerializeDeserialize
+			+ Ord
+			+ Default
+			+ MaxEncodedLen
+			+ TypeInfo;
+
+		/// The maximum number of blueprints a delegator can have in Fixed mode.
+		#[pallet::constant]
+		type MaxDelegatorBlueprints: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
+
+		/// The maximum number of blueprints an operator can support.
+		#[pallet::constant]
+		type MaxOperatorBlueprints: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
+
+		/// The maximum number of withdraw requests a delegator can have.
+		#[pallet::constant]
+		type MaxWithdrawRequests: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
+
+		/// The maximum number of delegations a delegator can have.
+		#[pallet::constant]
+		type MaxDelegations: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
+
+		/// The maximum number of unstake requests a delegator can have.
+		#[pallet::constant]
+		type MaxUnstakeRequests: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
 
 		/// The minimum amount of stake required for an operator.
 		#[pallet::constant]
@@ -135,31 +179,14 @@ pub mod pallet {
 		type Fungibles: fungibles::Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
 			+ fungibles::Mutate<Self::AccountId, AssetId = Self::AssetId>;
 
-		/// The asset ID type.
-		type AssetId: AtLeast32BitUnsigned
-			+ Parameter
-			+ Member
-			+ MaybeSerializeDeserialize
-			+ Clone
-			+ Copy
-			+ PartialOrd
-			+ MaxEncodedLen;
-
-		/// The vault ID type.
-		type VaultId: AtLeast32BitUnsigned
-			+ Parameter
-			+ Member
-			+ MaybeSerializeDeserialize
-			+ Clone
-			+ Copy
-			+ PartialOrd
-			+ MaxEncodedLen;
-
 		/// The pallet's account ID.
 		type PalletId: Get<PalletId>;
 
 		/// The origin with privileged access
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+
+		/// The address that receives slashed funds
+		type SlashedAmountRecipient: Get<Self::AccountId>;
 
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: crate::weights::WeightInfo;
@@ -174,7 +201,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn operator_info)]
 	pub type Operators<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, OperatorMetadataOf<T>, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::AccountId, OperatorMetadataOf<T>>;
 
 	/// Storage for the current round.
 	#[pallet::storage]
@@ -186,9 +213,9 @@ pub mod pallet {
 	#[pallet::getter(fn at_stake)]
 	pub type AtStake<T: Config> = StorageDoubleMap<
 		_,
-		Twox64Concat,
+		Blake2_128Concat,
 		RoundIndex,
-		Twox64Concat,
+		Blake2_128Concat,
 		T::AccountId,
 		OperatorSnapshotOf<T>,
 		OptionQuery,
@@ -198,19 +225,19 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn delegators)]
 	pub type Delegators<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, DelegatorMetadataOf<T>, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::AccountId, DelegatorMetadataOf<T>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn reward_vaults)]
 	/// Storage for the reward vaults
 	pub type RewardVaults<T: Config> =
-		StorageMap<_, Twox64Concat, T::VaultId, Vec<T::AssetId>, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::VaultId, Vec<T::AssetId>, OptionQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn asset_reward_vault_lookup)]
 	/// Storage for the reward vaults
 	pub type AssetLookupRewardVaults<T: Config> =
-		StorageMap<_, Twox64Concat, T::AssetId, T::VaultId, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::AssetId, T::VaultId, OptionQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn reward_config)]
@@ -280,6 +307,10 @@ pub mod pallet {
 			asset_id: T::AssetId,
 			action: AssetAction,
 		},
+		/// Operator has been slashed
+		OperatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
+		/// Delegator has been slashed
+		DelegatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
 	}
 
 	/// Errors emitted by the pallet.
@@ -333,6 +364,8 @@ pub mod pallet {
 		AssetNotWhitelisted,
 		/// The origin is not authorized to perform this action
 		NotAuthorized,
+		/// Maximum number of blueprints exceeded
+		MaxBlueprintsExceeded,
 		/// The asset ID is not found
 		AssetNotFound,
 		/// The blueprint ID is already whitelisted
@@ -347,6 +380,18 @@ pub mod pallet {
 		AssetNotInVault,
 		/// The reward vault does not exist
 		VaultNotFound,
+		/// Error returned when trying to add a blueprint ID that already exists.
+		DuplicateBlueprintId,
+		/// Error returned when trying to remove a blueprint ID that doesn't exist.
+		BlueprintIdNotFound,
+		/// Error returned when trying to add/remove blueprint IDs while not in Fixed mode.
+		NotInFixedMode,
+		/// Error returned when the maximum number of delegations is exceeded.
+		MaxDelegationsExceeded,
+		/// Error returned when the maximum number of unstake requests is exceeded.
+		MaxUnstakeRequestsExceeded,
+		/// Error returned when the maximum number of withdraw requests is exceeded.
+		MaxWithdrawRequestsExceeded,
 		/// Deposit amount overflow
 		DepositOverflow,
 		/// Unstake underflow
@@ -363,6 +408,8 @@ pub mod pallet {
 		CapExceedsTotalSupply,
 		/// An unstake request is already pending
 		PendingUnstakeRequestExists,
+		/// The blueprint is not selected
+		BlueprintNotSelected,
 	}
 
 	/// Hooks for the pallet.
@@ -538,9 +585,16 @@ pub mod pallet {
 			operator: T::AccountId,
 			asset_id: T::AssetId,
 			amount: BalanceOf<T>,
+			blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_delegate(who.clone(), operator.clone(), asset_id, amount)?;
+			Self::process_delegate(
+				who.clone(),
+				operator.clone(),
+				asset_id,
+				amount,
+				blueprint_selection,
+			)?;
 			Self::deposit_event(Event::Delegated { who, operator, asset_id, amount });
 			Ok(())
 		}
@@ -601,7 +655,7 @@ pub mod pallet {
 		/// The APY is capped at 10% and will require runtime upgrade to change.
 		///
 		/// While the cap is not met, the APY distributed will be `amount_deposited / cap * APY`.
-		#[pallet::call_index(19)]
+		#[pallet::call_index(18)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn set_incentive_apy_and_cap(
 			origin: OriginFor<T>,
@@ -646,7 +700,7 @@ pub mod pallet {
 		}
 
 		/// Whitelists a blueprint for rewards.
-		#[pallet::call_index(20)]
+		#[pallet::call_index(19)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn whitelist_blueprint_for_rewards(
 			origin: OriginFor<T>,
@@ -676,7 +730,7 @@ pub mod pallet {
 		}
 
 		/// Manage asset id to vault rewards
-		#[pallet::call_index(21)]
+		#[pallet::call_index(20)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn manage_asset_in_vault(
 			origin: OriginFor<T>,
@@ -693,6 +747,57 @@ pub mod pallet {
 
 			Self::deposit_event(Event::AssetUpdatedInVault { who, vault_id, asset_id, action });
 
+			Ok(())
+		}
+
+		/// Adds a blueprint ID to a delegator's selection.
+		#[pallet::call_index(22)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn add_blueprint_id(origin: OriginFor<T>, blueprint_id: BlueprintId) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let mut metadata = Self::delegators(&who).ok_or(Error::<T>::NotDelegator)?;
+
+			// Update blueprint selection for all delegations
+			for delegation in metadata.delegations.iter_mut() {
+				match delegation.blueprint_selection {
+					DelegatorBlueprintSelection::Fixed(ref mut ids) => {
+						ensure!(!ids.contains(&blueprint_id), Error::<T>::DuplicateBlueprintId);
+						ids.try_push(blueprint_id)
+							.map_err(|_| Error::<T>::MaxBlueprintsExceeded)?;
+					},
+					_ => return Err(Error::<T>::NotInFixedMode.into()),
+				}
+			}
+
+			Delegators::<T>::insert(&who, metadata);
+			Ok(())
+		}
+
+		/// Removes a blueprint ID from a delegator's selection.
+		#[pallet::call_index(23)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn remove_blueprint_id(
+			origin: OriginFor<T>,
+			blueprint_id: BlueprintId,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let mut metadata = Self::delegators(&who).ok_or(Error::<T>::NotDelegator)?;
+
+			// Update blueprint selection for all delegations
+			for delegation in metadata.delegations.iter_mut() {
+				match delegation.blueprint_selection {
+					DelegatorBlueprintSelection::Fixed(ref mut ids) => {
+						let pos = ids
+							.iter()
+							.position(|&id| id == blueprint_id)
+							.ok_or(Error::<T>::BlueprintIdNotFound)?;
+						ids.remove(pos);
+					},
+					_ => return Err(Error::<T>::NotInFixedMode.into()),
+				}
+			}
+
+			Delegators::<T>::insert(&who, metadata);
 			Ok(())
 		}
 	}
