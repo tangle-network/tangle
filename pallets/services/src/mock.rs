@@ -456,6 +456,7 @@ pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
 
 pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
+pub const HOOKS_TEST: H160 = H160([0x22; 20]);
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -494,38 +495,24 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 	let mut evm_accounts = BTreeMap::new();
 
-	let cggmp21_blueprint_json: serde_json::Value =
-		serde_json::from_str(include_str!("./test-artifacts/CGGMP21Blueprint.json")).unwrap();
-	let mbsm_json: serde_json::Value =
-		serde_json::from_str(include_str!("./test-artifacts/MasterBlueprintServiceManager.json"))
-			.unwrap();
-	let cggmp21_blueprint_code = hex::decode(
-		cggmp21_blueprint_json["deployedBytecode"]["object"]
-			.as_str()
-			.unwrap()
-			.replace("0x", ""),
-	)
-	.unwrap();
-	let mbsm_code =
-		hex::decode(mbsm_json["deployedBytecode"]["object"].as_str().unwrap().replace("0x", ""))
-			.unwrap();
-	evm_accounts.insert(
-		CGGMP21_BLUEPRINT,
-		fp_evm::GenesisAccount {
-			code: cggmp21_blueprint_code,
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: Default::default(),
-		},
-	);
-	evm_accounts.insert(
-		MBSM,
-		fp_evm::GenesisAccount {
-			code: mbsm_code,
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: Default::default(),
-		},
+	let mut create_contract = |bytecode: &str, address: H160| {
+		let code = hex::decode(bytecode.replace("0x", "")).unwrap();
+		evm_accounts.insert(
+			address,
+			fp_evm::GenesisAccount {
+				code,
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Default::default(),
+			},
+		);
+	};
+
+	create_contract(include_str!("./test-artifacts/CGGMP21Blueprint.hex"), CGGMP21_BLUEPRINT);
+	create_contract(include_str!("./test-artifacts/MasterBlueprintServiceManager.hex"), MBSM);
+	create_contract(
+		include_str!("./test-artifacts/HookTestBlueprintServiceManager.hex"),
+		HOOKS_TEST,
 	);
 
 	let evm_config =
