@@ -496,7 +496,12 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	let mut evm_accounts = BTreeMap::new();
 
 	let mut create_contract = |bytecode: &str, address: H160| {
-		let code = hex::decode(bytecode.replace("0x", "")).unwrap();
+		let mut raw_hex = bytecode.replace("0x", "").replace("\n", "");
+		// fix odd length
+		if raw_hex.len() % 2 != 0 {
+			raw_hex = format!("0{}", raw_hex);
+		}
+		let code = hex::decode(raw_hex).unwrap();
 		evm_accounts.insert(
 			address,
 			fp_evm::GenesisAccount {
