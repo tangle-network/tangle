@@ -1001,3 +1001,110 @@ fn dispute_an_already_applied_slash() {
 		);
 	});
 }
+
+#[test]
+fn hooks() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
+		let alice = mock_pub_key(ALICE);
+		let bob = mock_pub_key(BOB);
+		let charlie = mock_pub_key(CHARLIE);
+		let blueprint = ServiceBlueprint {
+			metadata: ServiceMetadata {
+				name: "Hooks Tests".try_into().unwrap(),
+				..Default::default()
+			},
+			manager: BlueprintServiceManager::Evm(HOOKS_TEST),
+			master_manager_revision: MasterBlueprintServiceManagerRevision::Latest,
+			jobs: bounded_vec![JobDefinition {
+				metadata: JobMetadata { name: "foo".try_into().unwrap(), ..Default::default() },
+				params: bounded_vec![],
+				result: bounded_vec![],
+			},],
+			registration_params: bounded_vec![],
+			request_params: bounded_vec![],
+			gadget: Default::default(),
+		};
+
+		// OnBlueprintCreated hook should be called
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnBlueprintCreated()")]);
+
+		// OnRegister hook should be called
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnRegister()")]);
+
+		// OnUnregister hook should be called
+		assert_ok!(Services::unregister(RuntimeOrigin::signed(bob.clone()), 0));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnUnregister()")]);
+
+		// Register again to continue testing
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+
+		// OnUpdatePriceTargets hook should be called
+		assert_ok!(Services::update_price_targets(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			price_targets(MachineKind::Medium),
+		));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnUpdatePriceTargets()")]);
+
+		// OnRequest hook should be called
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![USDC, WETH],
+			100,
+			0,
+		));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnRequest()")]);
+
+		// OnReject hook should be called
+		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 0));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnReject()")]);
+
+		// OnApprove hook should be called
+		// OnServiceInitialized is also called
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+		assert_evm_logs(&[
+			evm_log!(HOOKS_TEST, b"OnApprove()"),
+			evm_log!(HOOKS_TEST, b"OnServiceInitialized()"),
+		]);
+
+		// OnJobCall hook should be called
+		assert_ok!(Services::call(RuntimeOrigin::signed(charlie.clone()), 0, 0, bounded_vec![],));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnJobCall()")]);
+
+		// OnJobResult hook should be called
+		assert_ok!(Services::submit_result(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			0,
+			bounded_vec![],
+		));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnJobResult()")]);
+		// OnServiceTermination hook should be called
+		assert_ok!(Services::terminate(RuntimeOrigin::signed(charlie.clone()), 0));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnServiceTermination()")]);
+	});
+}
