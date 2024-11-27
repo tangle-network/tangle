@@ -8,7 +8,7 @@ import '@polkadot/api-base/types/consts';
 import type { ApiTypes, AugmentedConst } from '@polkadot/api-base/types';
 import type { Bytes, Option, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { Codec } from '@polkadot/types-codec/types';
-import type { Perbill, Permill } from '@polkadot/types/interfaces/runtime';
+import type { H160, Perbill, Permill } from '@polkadot/types/interfaces/runtime';
 import type { FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, SpWeightsRuntimeDbWeight, SpWeightsWeightV2Weight } from '@polkadot/types/lookup';
 
 export type __AugmentedConst<ApiType extends ApiTypes> = AugmentedConst<ApiType>;
@@ -584,6 +584,26 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       leaveOperatorsDelay: u32 & AugmentedConst<ApiType>;
       /**
+       * The maximum number of delegations a delegator can have.
+       **/
+      maxDelegations: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum number of blueprints a delegator can have in Fixed mode.
+       **/
+      maxDelegatorBlueprints: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum number of blueprints an operator can support.
+       **/
+      maxOperatorBlueprints: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum number of unstake requests a delegator can have.
+       **/
+      maxUnstakeRequests: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum number of withdraw requests a delegator can have.
+       **/
+      maxWithdrawRequests: u32 & AugmentedConst<ApiType>;
+      /**
        * The minimum amount of stake required for a delegate.
        **/
       minDelegateAmount: u128 & AugmentedConst<ApiType>;
@@ -797,9 +817,9 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       maxSourcesPerGadget: u32 & AugmentedConst<ApiType>;
       /**
-       * `PalletId` for the services pallet.
+       * `Pallet` EVM Address.
        **/
-      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      palletEVMAddress: H160 & AugmentedConst<ApiType>;
       /**
        * Number of eras that slashes are deferred by, after computation.
        * 

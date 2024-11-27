@@ -802,6 +802,10 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Delegated: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, amount: u128, assetId: u128], { who: AccountId32, operator: AccountId32, amount: u128, assetId: u128 }>;
       /**
+       * Delegator has been slashed
+       **/
+      DelegatorSlashed: AugmentedEvent<ApiType, [who: AccountId32, amount: u128], { who: AccountId32, amount: u128 }>;
+      /**
        * A deposit has been made.
        **/
       Deposited: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, assetId: u128], { who: AccountId32, amount: u128, assetId: u128 }>;
@@ -849,6 +853,10 @@ declare module '@polkadot/api-base/types/events' {
        * An operator has scheduled to leave.
        **/
       OperatorLeavingScheduled: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
+      /**
+       * Operator has been slashed
+       **/
+      OperatorSlashed: AugmentedEvent<ApiType, [who: AccountId32, amount: u128], { who: AccountId32, amount: u128 }>;
       /**
        * An operator has gone offline.
        **/
