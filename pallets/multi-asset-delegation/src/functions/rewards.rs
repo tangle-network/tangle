@@ -24,6 +24,12 @@ use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::RoundIndex;
 
 impl<T: Config> Pallet<T> {
+    /// Convert asset amount to points. Currently returns the same value, to be updated later.
+	/// TODO : Once we have an oracle for asset price, we can use it to convert to points
+    pub fn asset_to_points(amount: BalanceOf<T>) -> BalanceOf<T> {
+        amount
+    }
+
     #[allow(clippy::type_complexity)]
     pub fn distribute_rewards(round: RoundIndex) -> DispatchResult {
         let mut delegation_info: BTreeMap<
@@ -58,8 +64,11 @@ impl<T: Config> Pallet<T> {
                                     continue;
                                 }
 
+                                // Convert asset amount to points
+                                let base_points = Self::asset_to_points(delegation.amount);
+                                
                                 // Calculate points with multipliers
-                                let mut points = stake_points.base_points;
+                                let mut points = base_points;
                                 points = points.saturating_mul(stake_points.lock_multiplier.into());
 
                                 // Apply TNT boost multiplier if the asset is TNT

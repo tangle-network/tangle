@@ -274,3 +274,30 @@ fn test_no_rewards_to_claim() {
         );
     });
 }
+
+#[test]
+fn test_asset_to_points_conversion() {
+    new_test_ext().execute_with(|| {
+        // Test basic conversion
+        assert_eq!(
+            MultiAssetDelegation::asset_to_points(1000),
+            1000,
+            "Basic point conversion should return same value for now"
+        );
+
+        // Test zero conversion
+        assert_eq!(
+            MultiAssetDelegation::asset_to_points(0),
+            0,
+            "Zero asset amount should convert to zero points"
+        );
+
+        // Test large number conversion
+        let large_amount = 1_000_000_000;
+        assert_eq!(
+            MultiAssetDelegation::asset_to_points(large_amount),
+            large_amount,
+            "Large numbers should convert correctly"
+        );
+    });
+}
