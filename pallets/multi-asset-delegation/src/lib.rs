@@ -190,6 +190,10 @@ pub mod pallet {
 
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: crate::weights::WeightInfo;
+
+		/// The number of blocks per month
+		#[pallet::constant]
+		type BlocksPerMonth: Get<Self::BlockNumber>;
 	}
 
 	/// The pallet struct.
@@ -245,6 +249,57 @@ pub mod pallet {
 	/// blueprints.
 	pub type RewardConfigStorage<T: Config> =
 		StorageValue<_, RewardConfig<T::VaultId, BalanceOf<T>>, OptionQuery>;
+
+	/// Storage for stake points.
+	#[pallet::storage]
+	pub type StakePoints<T: Config> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		Blake2_128Concat,
+		T::AssetId,
+		StakePoints<BalanceOf<T>, T::BlockNumber>,
+		OptionQuery,
+	>;
+
+	/// The default lock periods and their multipliers
+	#[pallet::storage]
+	#[pallet::getter(fn lock_periods)]
+	pub type DefaultLockPeriods<T: Config> = StorageValue<
+		_,
+		Vec<LockMultiplier>,
+		ValueQuery,
+		DefaultLockPeriodsConfig,
+	>;
+
+	/// Storage for pending rewards that can be claimed by delegators
+	#[pallet::storage]
+	#[pallet::getter(fn pending_rewards)]
+	pub type PendingRewards<T: Config> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,  // delegator
+		Blake2_128Concat,
+		T::AssetId,   // asset
+		BalanceOf<T>, // pending reward amount
+		ValueQuery
+	>;
+
+	/// Total unclaimed rewards per asset
+	#[pallet::storage]
+	#[pallet::getter(fn total_unclaimed_rewards)]
+	pub type TotalUnclaimedRewards<T: Config> =
+		StorageMap<_, Blake2_128Concat, T::AssetId, BalanceOf<T>, ValueQuery>;
+
+	#[pallet::type_value]
+	pub fn DefaultLockPeriodsConfig() -> Vec<LockMultiplier> {
+		vec![
+			LockMultiplier { lock_months: 1, multiplier: 1 },
+			LockMultiplier { lock_months: 3, multiplier: 2 },
+			LockMultiplier { lock_months: 6, multiplier: 3 },
+			LockMultiplier { lock_months: 12, multiplier: 4 },
+		]
+	}
 
 	/// Events emitted by the pallet.
 	#[pallet::event]
@@ -311,6 +366,30 @@ pub mod pallet {
 		OperatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
 		/// Delegator has been slashed
 		DelegatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
+		/// Lock period has been set
+		LockPeriodSet { who: T::AccountId, asset_id: T::AssetId, lock_months: u32 },
+		/// Auto-compounding has been toggled
+		AutoCompoundToggled { who: T::AccountId, asset_id: T::AssetId },
+		/// TNT boost multiplier has been set
+		TNTBoostMultiplierSet { vault_id: T::VaultId, multiplier: u32 },
+		/// Rewards have been distributed for an asset
+		RewardsDistributed { 
+			asset_id: T::AssetId,
+			total_reward: BalanceOf<T>,
+			round: RoundIndex,
+		},
+		/// Rewards have been claimed
+		RewardsClaimed { 
+			who: T::AccountId,
+			asset_id: T::AssetId,
+			amount: BalanceOf<T>,
+		},
+		/// Reward has been auto-compounded
+		RewardAutoCompounded {
+			who: T::AccountId,
+			asset_id: T::AssetId,
+			amount: BalanceOf<T>,
+		},
 	}
 
 	/// Errors emitted by the pallet.
@@ -410,6 +489,12 @@ pub mod pallet {
 		PendingUnstakeRequestExists,
 		/// The blueprint is not selected
 		BlueprintNotSelected,
+		/// Invalid lock period
+		InvalidLockPeriod,
+		/// Reward config not found
+		RewardConfigNotFound,
+		/// No rewards to claim
+		NoRewardsToClaim,
 	}
 
 	/// Hooks for the pallet.
@@ -750,8 +835,102 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Adds a blueprint ID to a delegator's selection.
+		/// Set lock period for a delegation
+		#[pallet::call_index(21)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn set_lock_period(
+			origin: OriginFor<T>,
+			asset_id: T::AssetId,
+			lock_months: u32,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			// Ensure the lock period exists
+			let lock_periods = Self::lock_periods();
+			let lock_multiplier = lock_periods
+				.iter()
+				.find(|l| l.lock_months == lock_months)
+				.ok_or(Error::<T>::InvalidLockPeriod)?;
+
+			// Calculate expiry block
+			let current_block = frame_system::Pallet::<T>::block_number();
+			let blocks_per_month = T::BlocksPerMonth::get();
+			let lock_duration = blocks_per_month.saturating_mul(lock_months.into());
+			let expiry = current_block.saturating_add(lock_duration);
+
+			// Update stake points
+			StakePoints::<T>::try_mutate(who.clone(), asset_id, |maybe_points| -> DispatchResult {
+				let points = maybe_points.get_or_insert_with(|| StakePoints {
+					base_points: Zero::zero(),
+					lock_multiplier: 1,
+					expiry: current_block,
+					auto_compound: false,
+				});
+
+				points.lock_multiplier = lock_multiplier.multiplier;
+				points.expiry = expiry;
+
+				Ok(())
+			})?;
+
+			Self::deposit_event(Event::LockPeriodSet { who, asset_id, lock_months });
+			Ok(())
+		}
+
+		/// Toggle auto-compounding for a delegation
 		#[pallet::call_index(22)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn toggle_auto_compound(
+			origin: OriginFor<T>,
+			asset_id: T::AssetId,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			StakePoints::<T>::try_mutate(who.clone(), asset_id, |maybe_points| -> DispatchResult {
+				let points = maybe_points.get_or_insert_with(|| StakePoints {
+					base_points: Zero::zero(),
+					lock_multiplier: 1,
+					expiry: frame_system::Pallet::<T>::block_number(),
+					auto_compound: false,
+				});
+
+				points.auto_compound = !points.auto_compound;
+
+				Ok(())
+			})?;
+
+			Self::deposit_event(Event::AutoCompoundToggled { who, asset_id });
+			Ok(())
+		}
+
+		/// Set TNT boost multiplier for a vault
+		#[pallet::call_index(23)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn set_tnt_boost_multiplier(
+			origin: OriginFor<T>,
+			vault_id: T::VaultId,
+			multiplier: u32,
+		) -> DispatchResult {
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			RewardConfigStorage::<T>::try_mutate(|maybe_config| -> DispatchResult {
+				let config = maybe_config.as_mut().ok_or(Error::<T>::RewardConfigNotFound)?;
+
+				if let Some(vault_config) = config.configs.get_mut(&vault_id) {
+					vault_config.tnt_boost_multiplier = multiplier;
+				} else {
+					return Err(Error::<T>::VaultNotFound.into());
+				}
+
+				Ok(())
+			})?;
+
+			Self::deposit_event(Event::TNTBoostMultiplierSet { vault_id, multiplier });
+			Ok(())
+		}
+
+		/// Adds a blueprint ID to a delegator's selection.
+		#[pallet::call_index(24)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn add_blueprint_id(origin: OriginFor<T>, blueprint_id: BlueprintId) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -774,7 +953,7 @@ pub mod pallet {
 		}
 
 		/// Removes a blueprint ID from a delegator's selection.
-		#[pallet::call_index(23)]
+		#[pallet::call_index(25)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn remove_blueprint_id(
 			origin: OriginFor<T>,
@@ -798,6 +977,74 @@ pub mod pallet {
 			}
 
 			Delegators::<T>::insert(&who, metadata);
+			Ok(())
+		}
+
+		/// Claim pending rewards for a specific asset
+		#[pallet::call_index(26)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(2))]
+		pub fn claim_rewards(
+			origin: OriginFor<T>,
+			asset_id: T::AssetId,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			// Get pending rewards
+			let pending = PendingRewards::<T>::take(&who, &asset_id);
+			ensure!(!pending.is_zero(), Error::<T>::NoRewardsToClaim);
+
+			// Update total unclaimed rewards
+			TotalUnclaimedRewards::<T>::mutate(&asset_id, |total| {
+				*total = total.saturating_sub(pending);
+			});
+
+			// Distribute rewards
+			let _ = T::Currency::deposit_creating(&who, pending);
+
+			// Emit event
+			Self::deposit_event(Event::RewardsClaimed { 
+				who,
+				asset_id,
+				amount: pending 
+			});
+
+			Ok(())
+		}
+
+		/// Claim all pending rewards for all assets
+		#[pallet::call_index(27)]
+		#[pallet::weight(Weight::from_parts(10_000, 0).saturating_mul(10u64))]
+		pub fn claim_all_rewards(
+			origin: OriginFor<T>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let mut total_claimed = BalanceOf::<T>::zero();
+
+			// Get all assets with pending rewards
+			for (asset_id, pending) in PendingRewards::<T>::iter_prefix(&who) {
+				if !pending.is_zero() {
+					// Remove pending rewards
+					PendingRewards::<T>::remove(&who, &asset_id);
+					
+					// Update total unclaimed rewards
+					TotalUnclaimedRewards::<T>::mutate(&asset_id, |total| {
+						*total = total.saturating_sub(pending);
+					});
+
+					// Distribute rewards
+					let _ = T::Currency::deposit_creating(&who, pending);
+					total_claimed = total_claimed.saturating_add(pending);
+
+					// Emit event for each asset
+					Self::deposit_event(Event::RewardsClaimed { 
+						who: who.clone(),
+						asset_id,
+						amount: pending 
+					});
+				}
+			}
+
+			ensure!(!total_claimed.is_zero(), Error::<T>::NoRewardsToClaim);
 			Ok(())
 		}
 	}
