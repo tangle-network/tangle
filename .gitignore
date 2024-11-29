@@ -40,3 +40,5 @@ resources/para-2076-wasm
 
 scripts/edg-balances-new.json
 *.venv
+
+._*
