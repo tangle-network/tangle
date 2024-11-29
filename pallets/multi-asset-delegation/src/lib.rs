@@ -72,12 +72,13 @@ pub mod weights;
 pub mod functions;
 pub mod traits;
 pub mod types;
+use frame_support::traits::Get;
 pub use functions::*;
+use sp_runtime::Saturating;
 
 #[frame_support::pallet]
 pub mod pallet {
 	use crate::types::*;
-
 	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction};
 	use frame_support::traits::fungibles::Inspect;
 	use frame_support::{
@@ -88,6 +89,7 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use scale_info::TypeInfo;
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
+	use sp_runtime::Saturating;
 	use sp_std::vec::Vec;
 	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
 	use tangle_primitives::BlueprintId;
@@ -123,6 +125,9 @@ pub mod pallet {
 			+ Default
 			+ MaxEncodedLen
 			+ TypeInfo;
+
+		/// The native asset ID
+		type NativeAssetId: Get<Self::AssetId>;
 
 		/// The maximum number of blueprints a delegator can have in Fixed mode.
 		#[pallet::constant]
@@ -193,7 +198,7 @@ pub mod pallet {
 
 		/// The number of blocks per month
 		#[pallet::constant]
-		type BlocksPerMonth: Get<Self::BlockNumber>;
+		type BlocksPerMonth: Get<BlockNumberFor<Self>>;
 	}
 
 	/// The pallet struct.
@@ -258,19 +263,15 @@ pub mod pallet {
 		T::AccountId,
 		Blake2_128Concat,
 		T::AssetId,
-		StakePoints<BalanceOf<T>, T::BlockNumber>,
+		crate::types::rewards::StakePoints<BalanceOf<T>, BlockNumberFor<T>>,
 		OptionQuery,
 	>;
 
 	/// The default lock periods and their multipliers
 	#[pallet::storage]
 	#[pallet::getter(fn lock_periods)]
-	pub type DefaultLockPeriods<T: Config> = StorageValue<
-		_,
-		Vec<LockMultiplier>,
-		ValueQuery,
-		DefaultLockPeriodsConfig,
-	>;
+	pub type DefaultLockPeriods<T: Config> =
+		StorageValue<_, Vec<LockMultiplier>, ValueQuery, DefaultLockPeriodsConfig>;
 
 	/// Storage for pending rewards that can be claimed by delegators
 	#[pallet::storage]
@@ -278,11 +279,11 @@ pub mod pallet {
 	pub type PendingRewards<T: Config> = StorageDoubleMap<
 		_,
 		Blake2_128Concat,
-		T::AccountId,  // delegator
+		T::AccountId, // delegator
 		Blake2_128Concat,
 		T::AssetId,   // asset
 		BalanceOf<T>, // pending reward amount
-		ValueQuery
+		ValueQuery,
 	>;
 
 	/// Total unclaimed rewards per asset
@@ -373,23 +374,11 @@ pub mod pallet {
 		/// TNT boost multiplier has been set
 		TNTBoostMultiplierSet { vault_id: T::VaultId, multiplier: u32 },
 		/// Rewards have been distributed for an asset
-		RewardsDistributed { 
-			asset_id: T::AssetId,
-			total_reward: BalanceOf<T>,
-			round: RoundIndex,
-		},
+		RewardsDistributed { asset_id: T::AssetId, total_reward: BalanceOf<T>, round: RoundIndex },
 		/// Rewards have been claimed
-		RewardsClaimed { 
-			who: T::AccountId,
-			asset_id: T::AssetId,
-			amount: BalanceOf<T>,
-		},
+		RewardsClaimed { who: T::AccountId, asset_id: T::AssetId, amount: BalanceOf<T> },
 		/// Reward has been auto-compounded
-		RewardAutoCompounded {
-			who: T::AccountId,
-			asset_id: T::AssetId,
-			amount: BalanceOf<T>,
-		},
+		RewardAutoCompounded { who: T::AccountId, asset_id: T::AssetId, amount: BalanceOf<T> },
 	}
 
 	/// Errors emitted by the pallet.
@@ -770,10 +759,14 @@ pub mod pallet {
 			RewardConfigStorage::<T>::mutate(|maybe_config| {
 				let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
 					configs: BTreeMap::new(),
+					lock_multipliers: Vec::new(),
 					whitelisted_blueprint_ids: Vec::new(),
 				});
 
-				config.configs.insert(vault_id, RewardConfigForAssetVault { apy, cap });
+				config.configs.insert(
+					vault_id,
+					RewardConfigForAssetVault { apy, cap, tnt_boost_multiplier: 1u32.into() },
+				);
 
 				*maybe_config = Some(config);
 			});
@@ -798,6 +791,7 @@ pub mod pallet {
 			RewardConfigStorage::<T>::mutate(|maybe_config| {
 				let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
 					configs: BTreeMap::new(),
+					lock_multipliers: Vec::new(),
 					whitelisted_blueprint_ids: Vec::new(),
 				});
 
@@ -859,19 +853,24 @@ pub mod pallet {
 			let expiry = current_block.saturating_add(lock_duration);
 
 			// Update stake points
-			StakePoints::<T>::try_mutate(who.clone(), asset_id, |maybe_points| -> DispatchResult {
-				let points = maybe_points.get_or_insert_with(|| StakePoints {
-					base_points: Zero::zero(),
-					lock_multiplier: 1,
-					expiry: current_block,
-					auto_compound: false,
-				});
+			StakePoints::<T>::try_mutate(
+				who.clone(),
+				asset_id,
+				|maybe_points| -> DispatchResult {
+					let points =
+						maybe_points.get_or_insert_with(|| crate::types::rewards::StakePoints {
+							base_points: Zero::zero(),
+							lock_multiplier: 1,
+							expiry: current_block,
+							auto_compound: false,
+						});
 
-				points.lock_multiplier = lock_multiplier.multiplier;
-				points.expiry = expiry;
+					points.lock_multiplier = lock_multiplier.multiplier;
+					points.expiry = expiry;
 
-				Ok(())
-			})?;
+					Ok(())
+				},
+			)?;
 
 			Self::deposit_event(Event::LockPeriodSet { who, asset_id, lock_months });
 			Ok(())
@@ -880,24 +879,26 @@ pub mod pallet {
 		/// Toggle auto-compounding for a delegation
 		#[pallet::call_index(22)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn toggle_auto_compound(
-			origin: OriginFor<T>,
-			asset_id: T::AssetId,
-		) -> DispatchResult {
+		pub fn toggle_auto_compound(origin: OriginFor<T>, asset_id: T::AssetId) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
-			StakePoints::<T>::try_mutate(who.clone(), asset_id, |maybe_points| -> DispatchResult {
-				let points = maybe_points.get_or_insert_with(|| StakePoints {
-					base_points: Zero::zero(),
-					lock_multiplier: 1,
-					expiry: frame_system::Pallet::<T>::block_number(),
-					auto_compound: false,
-				});
+			StakePoints::<T>::try_mutate(
+				who.clone(),
+				asset_id,
+				|maybe_points| -> DispatchResult {
+					let points =
+						maybe_points.get_or_insert_with(|| crate::types::rewards::StakePoints {
+							base_points: Zero::zero(),
+							lock_multiplier: 1,
+							expiry: frame_system::Pallet::<T>::block_number(),
+							auto_compound: false,
+						});
 
-				points.auto_compound = !points.auto_compound;
+					points.auto_compound = !points.auto_compound;
 
-				Ok(())
-			})?;
+					Ok(())
+				},
+			)?;
 
 			Self::deposit_event(Event::AutoCompoundToggled { who, asset_id });
 			Ok(())
@@ -983,10 +984,7 @@ pub mod pallet {
 		/// Claim pending rewards for a specific asset
 		#[pallet::call_index(26)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(2))]
-		pub fn claim_rewards(
-			origin: OriginFor<T>,
-			asset_id: T::AssetId,
-		) -> DispatchResult {
+		pub fn claim_rewards(origin: OriginFor<T>, asset_id: T::AssetId) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
 			// Get pending rewards
@@ -1002,11 +1000,7 @@ pub mod pallet {
 			let _ = T::Currency::deposit_creating(&who, pending);
 
 			// Emit event
-			Self::deposit_event(Event::RewardsClaimed { 
-				who,
-				asset_id,
-				amount: pending 
-			});
+			Self::deposit_event(Event::RewardsClaimed { who, asset_id, amount: pending });
 
 			Ok(())
 		}
@@ -1014,9 +1008,7 @@ pub mod pallet {
 		/// Claim all pending rewards for all assets
 		#[pallet::call_index(27)]
 		#[pallet::weight(Weight::from_parts(10_000, 0).saturating_mul(10u64))]
-		pub fn claim_all_rewards(
-			origin: OriginFor<T>,
-		) -> DispatchResult {
+		pub fn claim_all_rewards(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let mut total_claimed = BalanceOf::<T>::zero();
 
@@ -1025,7 +1017,7 @@ pub mod pallet {
 				if !pending.is_zero() {
 					// Remove pending rewards
 					PendingRewards::<T>::remove(&who, &asset_id);
-					
+
 					// Update total unclaimed rewards
 					TotalUnclaimedRewards::<T>::mutate(&asset_id, |total| {
 						*total = total.saturating_sub(pending);
@@ -1036,10 +1028,10 @@ pub mod pallet {
 					total_claimed = total_claimed.saturating_add(pending);
 
 					// Emit event for each asset
-					Self::deposit_event(Event::RewardsClaimed { 
+					Self::deposit_event(Event::RewardsClaimed {
 						who: who.clone(),
 						asset_id,
-						amount: pending 
+						amount: pending,
 					});
 				}
 			}

@@ -133,11 +133,16 @@ parameter_types! {
 	pub const MaxUnstakeRequests: u32 = 50;
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
+	pub const NativeAssetId: AssetId = 0;
+	pub const BlocksPerMonth: u32 = 30 * 24 * 60 * 12;
 }
 
 impl pallet_multi_asset_delegation::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
+	type AssetId = u32;
+	type NativeAssetId = NativeAssetId;
+	type BlocksPerMonth = BlocksPerMonth;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
 	type ServiceManager = MockServiceManager;
@@ -147,7 +152,6 @@ impl pallet_multi_asset_delegation::Config for Test {
 	type DelegationBondLessDelay = ConstU32<5>;
 	type MinDelegateAmount = ConstU64<100>;
 	type Fungibles = Assets;
-	type AssetId = AssetId;
 	type VaultId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<u64>;
 	type PalletId = PID;

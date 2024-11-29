@@ -488,10 +488,14 @@ fn distribute_rewards_should_work() {
 		let reward_config = RewardConfig {
 			configs: {
 				let mut map = BTreeMap::new();
-				map.insert(asset_id, RewardConfigForAssetVault { apy, cap });
+				map.insert(
+					asset_id,
+					RewardConfigForAssetVault { apy, cap, tnt_boost_multiplier: 1 },
+				);
 				map
 			},
 			whitelisted_blueprint_ids: vec![],
+			lock_multipliers: vec![],
 		};
 		RewardConfigStorage::<Test>::put(reward_config);
 
@@ -555,11 +559,18 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 		let reward_config = RewardConfig {
 			configs: {
 				let mut map = BTreeMap::new();
-				map.insert(asset_id1, RewardConfigForAssetVault { apy: apy1, cap: cap1 });
-				map.insert(asset_id2, RewardConfigForAssetVault { apy: apy2, cap: cap2 });
+				map.insert(
+					asset_id1,
+					RewardConfigForAssetVault { apy: apy1, cap: cap1, tnt_boost_multiplier: 1 },
+				);
+				map.insert(
+					asset_id2,
+					RewardConfigForAssetVault { apy: apy2, cap: cap2, tnt_boost_multiplier: 1 },
+				);
 				map
 			},
 			whitelisted_blueprint_ids: vec![],
+			lock_multipliers: vec![],
 		};
 		RewardConfigStorage::<Test>::put(reward_config);
 
