@@ -73,39 +73,79 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 	#[allow(deprecated)]
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
-		manager: BlueprintManager::Evm(CGGMP21_BLUEPRINT),
+		manager: BlueprintServiceManager::Evm(CGGMP21_BLUEPRINT),
+		master_manager_revision: MasterBlueprintServiceManagerRevision::Latest,
 		jobs: bounded_vec![
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint8],
 				result: bounded_vec![FieldType::Bytes],
-				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint64, FieldType::Bytes],
 				result: bounded_vec![FieldType::Bytes],
-				#[allow(deprecated)]
-				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
 			},
 		],
-		registration_hook: ServiceRegistrationHook::Evm(CGGMP21_BLUEPRINT),
 		registration_params: bounded_vec![],
-		request_hook: ServiceRequestHook::Evm(CGGMP21_BLUEPRINT),
 		request_params: bounded_vec![],
 		gadget: Default::default(),
 	}
 }
 
 #[test]
+fn update_mbsm() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
+		assert_eq!(Pallet::<Runtime>::mbsm_latest_revision(), 0);
+		assert_eq!(Pallet::<Runtime>::mbsm_address(0).unwrap(), MBSM);
+
+		// Add a new revision
+		let new_mbsm = {
+			let mut v = MBSM;
+			v.randomize();
+			v
+		};
+
+		assert_ok!(Services::update_master_blueprint_service_manager(
+			RuntimeOrigin::root(),
+			new_mbsm
+		));
+
+		assert_eq!(Pallet::<Runtime>::mbsm_latest_revision(), 1);
+		assert_eq!(Pallet::<Runtime>::mbsm_address(1).unwrap(), new_mbsm);
+		// Old one should still be there
+		assert_eq!(Pallet::<Runtime>::mbsm_address(0).unwrap(), MBSM);
+		// Doesn't exist
+		assert!(Pallet::<Runtime>::mbsm_address(2).is_err());
+	});
+}
+
+#[test]
+fn update_mbsm_not_root() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let alice = mock_pub_key(ALICE);
+		assert_err!(
+			Services::update_master_blueprint_service_manager(RuntimeOrigin::signed(alice), MBSM),
+			DispatchError::BadOrigin
+		);
+	});
+}
+
+#[test]
 fn create_service_blueprint() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
 		let alice = mock_pub_key(ALICE);
 
 		let blueprint = cggmp21_blueprint();
 
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint,));
 
 		let next_id = Services::next_blueprint_id();
 		assert_eq!(next_id, 1);
@@ -113,6 +153,17 @@ fn create_service_blueprint() {
 			owner: alice,
 			blueprint_id: next_id - 1,
 		})]);
+
+		let (_, blueprint) = Services::blueprints(next_id - 1).unwrap();
+
+		// The MBSM should be set on the blueprint
+		assert_eq!(Pallet::<Runtime>::mbsm_address_of(&blueprint).unwrap(), MBSM);
+		// The master manager revision should pinned to a specific revision that is equal to the
+		// latest revision of the MBSM.
+		assert_eq!(
+			blueprint.master_manager_revision,
+			MasterBlueprintServiceManagerRevision::Specific(0)
+		);
 	});
 }
 
@@ -120,6 +171,7 @@ fn create_service_blueprint() {
 fn register_on_blueprint() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 
 		let blueprint = cggmp21_blueprint();
@@ -184,6 +236,7 @@ fn register_on_blueprint() {
 fn pre_register_on_blueprint() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 
 		let blueprint = cggmp21_blueprint();
@@ -206,6 +259,7 @@ fn pre_register_on_blueprint() {
 fn update_price_targets() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 
 		let blueprint = cggmp21_blueprint();
@@ -278,6 +332,7 @@ fn update_price_targets() {
 fn unregister_from_blueprint() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
@@ -315,6 +370,7 @@ fn unregister_from_blueprint() {
 fn request_service() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
@@ -430,6 +486,7 @@ fn request_service() {
 fn request_service_with_no_assets() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
@@ -462,6 +519,7 @@ fn request_service_with_no_assets() {
 fn job_calls() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
@@ -553,6 +611,7 @@ fn job_calls() {
 fn job_result() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
@@ -685,6 +744,7 @@ fn deploy() -> Deployment {
 	let alice = mock_pub_key(ALICE);
 	let blueprint = cggmp21_blueprint();
 	let blueprint_id = Services::next_blueprint_id();
+	assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 	assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 	let bob = mock_pub_key(BOB);
@@ -939,5 +999,112 @@ fn dispute_an_already_applied_slash() {
 			Services::dispute(RuntimeOrigin::signed(eve.clone()), era, slash_index),
 			Error::<Runtime>::UnappliedSlashNotFound
 		);
+	});
+}
+
+#[test]
+fn hooks() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
+		let alice = mock_pub_key(ALICE);
+		let bob = mock_pub_key(BOB);
+		let charlie = mock_pub_key(CHARLIE);
+		let blueprint = ServiceBlueprint {
+			metadata: ServiceMetadata {
+				name: "Hooks Tests".try_into().unwrap(),
+				..Default::default()
+			},
+			manager: BlueprintServiceManager::Evm(HOOKS_TEST),
+			master_manager_revision: MasterBlueprintServiceManagerRevision::Latest,
+			jobs: bounded_vec![JobDefinition {
+				metadata: JobMetadata { name: "foo".try_into().unwrap(), ..Default::default() },
+				params: bounded_vec![],
+				result: bounded_vec![],
+			},],
+			registration_params: bounded_vec![],
+			request_params: bounded_vec![],
+			gadget: Default::default(),
+		};
+
+		// OnBlueprintCreated hook should be called
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnBlueprintCreated()")]);
+
+		// OnRegister hook should be called
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnRegister()")]);
+
+		// OnUnregister hook should be called
+		assert_ok!(Services::unregister(RuntimeOrigin::signed(bob.clone()), 0));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnUnregister()")]);
+
+		// Register again to continue testing
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+
+		// OnUpdatePriceTargets hook should be called
+		assert_ok!(Services::update_price_targets(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			price_targets(MachineKind::Medium),
+		));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnUpdatePriceTargets()")]);
+
+		// OnRequest hook should be called
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![USDC, WETH],
+			100,
+			0,
+		));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnRequest()")]);
+
+		// OnReject hook should be called
+		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 0));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnReject()")]);
+
+		// OnApprove hook should be called
+		// OnServiceInitialized is also called
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+		assert_evm_logs(&[
+			evm_log!(HOOKS_TEST, b"OnApprove()"),
+			evm_log!(HOOKS_TEST, b"OnServiceInitialized()"),
+		]);
+
+		// OnJobCall hook should be called
+		assert_ok!(Services::call(RuntimeOrigin::signed(charlie.clone()), 0, 0, bounded_vec![],));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnJobCall()")]);
+
+		// OnJobResult hook should be called
+		assert_ok!(Services::submit_result(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			0,
+			bounded_vec![],
+		));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnJobResult()")]);
+		// OnServiceTermination hook should be called
+		assert_ok!(Services::terminate(RuntimeOrigin::signed(charlie.clone()), 0));
+		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnServiceTermination()")]);
 	});
 }

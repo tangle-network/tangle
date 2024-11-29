@@ -1129,6 +1129,12 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       jobResults: AugmentedQuery<ApiType, (arg1: u64 | AnyNumber | Uint8Array, arg2: u64 | AnyNumber | Uint8Array) => Observable<Option<TanglePrimitivesServicesJobCallResult>>, [u64, u64]> & QueryableStorageEntry<ApiType, [u64, u64]>;
       /**
+       * All the Master Blueprint Service Managers revisions.
+       * 
+       * Where the index is the revision number.
+       **/
+      masterBlueprintServiceManagerRevisions: AugmentedQuery<ApiType, () => Observable<Vec<H160>>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
        * The next free ID for a service blueprint.
        **/
       nextBlueprintId: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
