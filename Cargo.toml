@@ -10,7 +10,6 @@ exclude = ["examples"]
 
 [workspace]
 members = [
-    "account-util",
     "primitives",
     "primitives/crypto",
     "primitives/rpc/*",
