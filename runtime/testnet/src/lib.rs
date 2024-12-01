@@ -33,10 +33,9 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
-use frame_support::derive_impl;
-use frame_support::genesis_builder_helper::build_state;
-use frame_support::genesis_builder_helper::get_preset;
 use frame_support::{
+	derive_impl,
+	genesis_builder_helper::{build_state, get_preset},
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
 		AsEnsureOriginWithArg, Contains, OnFinalize, WithdrawReasons,
@@ -664,8 +663,8 @@ impl Get<Option<BalancingConfig>> for OffchainRandomBalancing {
 			max => {
 				let seed = sp_io::offchain::random_seed();
 				let random = <u32>::decode(&mut TrailingZeroInput::new(&seed))
-					.expect("input is padded with zeroes; qed")
-					% max.saturating_add(1);
+					.expect("input is padded with zeroes; qed") %
+					max.saturating_add(1);
 				random as usize
 			},
 		};
@@ -1147,15 +1146,15 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
 			ProxyType::Any => true,
 			ProxyType::NonTransfer => !matches!(
 				c,
-				RuntimeCall::Balances(..)
-					| RuntimeCall::Vesting(pallet_vesting::Call::vested_transfer { .. })
+				RuntimeCall::Balances(..) |
+					RuntimeCall::Vesting(pallet_vesting::Call::vested_transfer { .. })
 			),
 			ProxyType::Governance => matches!(
 				c,
-				RuntimeCall::Democracy(..)
-					| RuntimeCall::Council(..)
-					| RuntimeCall::Elections(..)
-					| RuntimeCall::Treasury(..)
+				RuntimeCall::Democracy(..) |
+					RuntimeCall::Council(..) |
+					RuntimeCall::Elections(..) |
+					RuntimeCall::Treasury(..)
 			),
 			ProxyType::Staking => {
 				matches!(c, RuntimeCall::Staking(..))
@@ -1388,9 +1387,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		len: usize,
 	) -> Option<Result<(), TransactionValidityError>> {
 		match self {
-			RuntimeCall::Ethereum(call) => {
-				call.pre_dispatch_self_contained(info, dispatch_info, len)
-			},
+			RuntimeCall::Ethereum(call) =>
+				call.pre_dispatch_self_contained(info, dispatch_info, len),
 			_ => None,
 		}
 	}
@@ -1400,11 +1398,10 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		info: Self::SignedInfo,
 	) -> Option<sp_runtime::DispatchResultWithInfo<PostDispatchInfoOf<Self>>> {
 		match self {
-			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) => {
+			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) =>
 				Some(call.dispatch(RuntimeOrigin::from(
 					pallet_ethereum::RawOrigin::EthereumTransaction(info),
-				)))
-			},
+				))),
 			_ => None,
 		}
 	}
@@ -1618,7 +1615,8 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 // parameter_types! {
 // 	// tTNT: native asset is always a reserved asset
 // 	pub NativeLocation: Location = Location::here();
-// 	pub NativeSygmaResourceId: [u8; 32] = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
+// 	pub NativeSygmaResourceId: [u8; 32] =
+// hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000002000");
 
 // 	// SygUSD: a non-reserved asset
 // 	pub SygUSDLocation: Location = Location::new(
@@ -1632,7 +1630,8 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 // 	// SygUSDAssetId is the substrate assetID of SygUSD
 // 	pub SygUSDAssetId: AssetId = 2000;
 // 	// SygUSDResourceId is the resourceID that mapping with the foreign asset SygUSD
-// 	pub SygUSDResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001100");
+// 	pub SygUSDResourceId: ResourceId =
+// hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001100");
 
 // 	// PHA: a reserved asset
 // 	pub PHALocation: Location = Location::new(
@@ -1646,8 +1645,8 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 // 	// PHAAssetId is the substrate assetID of PHA
 // 	pub PHAAssetId: AssetId = 2001;
 // 	// PHAResourceId is the resourceID that mapping with the foreign asset PHA
-// 	pub PHAResourceId: ResourceId = hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000");
-// }
+// 	pub PHAResourceId: ResourceId =
+// hex_literal::hex!("0000000000000000000000000000000000000000000000000000000000001000"); }
 
 // fn bridge_accounts_generator() -> BTreeMap<XcmAssetId, AccountId32> {
 // 	let mut account_map: BTreeMap<XcmAssetId, AccountId32> = BTreeMap::new();
@@ -1677,7 +1676,8 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 // 	pub const SygmaBridgePalletId: PalletId = PalletId(*b"sygma/01");
 
 // 	// Tangle testnet super admin: 5D2hZnw8Z7kg5LpQiEBb6HPG4V51wYXuKhE7sVhXiUPWj8D1
-// 	pub SygmaBridgeAdminAccountKey: [u8; 32] = hex_literal::hex!("2ab4c35efb6ab82377c2325467103cf46742d288ae1f8917f1d5960f4a1e9065");
+// 	pub SygmaBridgeAdminAccountKey: [u8; 32] =
+// hex_literal::hex!("2ab4c35efb6ab82377c2325467103cf46742d288ae1f8917f1d5960f4a1e9065");
 // 	pub SygmaBridgeAdminAccount: AccountId = SygmaBridgeAdminAccountKey::get().into();
 
 // 	// SygmaBridgeFeeAccount is a substrate account and used for bridging fee collection
@@ -1687,18 +1687,22 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 // 	// BridgeAccountNative: 5EYCAe5jLbHcAAMKvLFSXgCTbPrLgBJusvPwfKcaKzuf5X5e
 // 	pub BridgeAccountNative: AccountId32 = SygmaBridgePalletId::get().into_account_truncating();
 // 	// BridgeAccountOtherToken  5EYCAe5jLbHcAAMKvLFiGhk3htXY8jQncbLTDGJQnpnPMAVp
-// 	pub BridgeAccountOtherToken: AccountId32 = SygmaBridgePalletId::get().into_sub_account_truncating(1u32);
-// 	// BridgeAccounts is a list of accounts for holding transferred asset collection
-// 	pub BridgeAccounts: BTreeMap<XcmAssetId, AccountId32> = bridge_accounts_generator();
+// 	pub BridgeAccountOtherToken: AccountId32 =
+// SygmaBridgePalletId::get().into_sub_account_truncating(1u32); 	// BridgeAccounts is a list of
+// accounts for holding transferred asset collection 	pub BridgeAccounts: BTreeMap<XcmAssetId,
+// AccountId32> = bridge_accounts_generator();
 
 // 	// EIP712ChainID is the chainID that pallet is assigned with, used in EIP712 typed data domain
 // 	// For local testing with ./scripts/sygma-setup/execute_proposal_test.js, please change it to 5
 // 	pub EIP712ChainID: ChainID = U256::from(3799);
 
-// 	// DestVerifyingContractAddress is a H160 address that is used in proposal signature verification, specifically EIP712 typed data
-// 	// When relayers signing, this address will be included in the EIP712Domain
-// 	// As long as the relayer and pallet configured with the same address, EIP712Domain should be recognized properly.
-// 	pub DestVerifyingContractAddress: VerifyingContractAddress = primitive_types::H160::from_slice(hex::decode(DEST_VERIFYING_CONTRACT_ADDRESS).ok().unwrap().as_slice());
+// 	// DestVerifyingContractAddress is a H160 address that is used in proposal signature
+// verification, specifically EIP712 typed data 	// When relayers signing, this address will be
+// included in the EIP712Domain 	// As long as the relayer and pallet configured with the same
+// address, EIP712Domain should be recognized properly. 	pub DestVerifyingContractAddress:
+// VerifyingContractAddress =
+// primitive_types::H160::from_slice(hex::decode(DEST_VERIFYING_CONTRACT_ADDRESS).ok().unwrap().
+// as_slice());
 
 // 	pub CheckingAccount: AccountId32 = AccountId32::new([102u8; 32]);
 
@@ -1710,8 +1714,8 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 // 		(PHALocation::get().into(), PHAResourceId::get()),
 // 	];
 
-// 	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8), (SygUSDLocation::get().into(), 6u8), (PHALocation::get().into(), 12u8)];
-// }
+// 	pub AssetDecimalPairs: Vec<(XcmAssetId, u8)> = vec![(NativeLocation::get().into(), 18u8),
+// (SygUSDLocation::get().into(), 6u8), (PHALocation::get().into(), 12u8)]; }
 
 // pub struct ReserveChecker;
 // impl ContainsPair<Asset, Location> for ReserveChecker {
