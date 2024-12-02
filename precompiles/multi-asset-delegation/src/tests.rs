@@ -432,8 +432,8 @@ fn test_operator_go_offline_and_online() {
 			.execute_returns(());
 
 		assert!(
-			MultiAssetDelegation::operator_info(operator_account).unwrap().status ==
-				OperatorStatus::Inactive
+			MultiAssetDelegation::operator_info(operator_account).unwrap().status
+				== OperatorStatus::Inactive
 		);
 
 		PrecompilesValue::get()
@@ -441,8 +441,8 @@ fn test_operator_go_offline_and_online() {
 			.execute_returns(());
 
 		assert!(
-			MultiAssetDelegation::operator_info(operator_account).unwrap().status ==
-				OperatorStatus::Active
+			MultiAssetDelegation::operator_info(operator_account).unwrap().status
+				== OperatorStatus::Active
 		);
 
 		assert_eq!(Balances::free_balance(operator_account), 20_000 - 10_000);

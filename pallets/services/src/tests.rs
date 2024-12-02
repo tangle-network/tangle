@@ -62,8 +62,9 @@ fn price_targets(kind: MachineKind) -> PriceTargets {
 			storage_ssd: 100,
 			storage_nvme: 150,
 		},
-		MachineKind::Small =>
-			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 },
+		MachineKind::Small => {
+			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 }
+		},
 	}
 }
 

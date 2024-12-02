@@ -485,10 +485,12 @@ impl<C: Constraints> ServiceBlueprint<C> {
 			},
 			// Master Manager Revision
 			match self.master_manager_revision {
-				MasterBlueprintServiceManagerRevision::Latest =>
-					ethabi::Token::Uint(ethabi::Uint::MAX),
-				MasterBlueprintServiceManagerRevision::Specific(rev) =>
-					ethabi::Token::Uint(rev.into()),
+				MasterBlueprintServiceManagerRevision::Latest => {
+					ethabi::Token::Uint(ethabi::Uint::MAX)
+				},
+				MasterBlueprintServiceManagerRevision::Specific(rev) => {
+					ethabi::Token::Uint(rev.into())
+				},
 			},
 			// Gadget ?
 		])

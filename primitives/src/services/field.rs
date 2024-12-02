@@ -307,16 +307,18 @@ impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 			(Self::Int64(_), FieldType::Int64) => true,
 			(Self::String(_), FieldType::String) => true,
 			(Self::Bytes(_), FieldType::Bytes) => true,
-			(Self::Array(a), FieldType::Array(len, b)) =>
-				a.len() == *len as usize && a.iter().all(|f| f.eq(b.as_ref())),
+			(Self::Array(a), FieldType::Array(len, b)) => {
+				a.len() == *len as usize && a.iter().all(|f| f.eq(b.as_ref()))
+			},
 			(Self::List(a), FieldType::List(b)) => a.iter().all(|f| f.eq(b.as_ref())),
 			(Self::AccountId(_), FieldType::AccountId) => true,
-			(Self::Struct(_, fields_a), FieldType::Struct(_, fields_b)) =>
-				fields_a.into_iter().len() == fields_b.into_iter().len() &&
-					fields_a
+			(Self::Struct(_, fields_a), FieldType::Struct(_, fields_b)) => {
+				fields_a.into_iter().len() == fields_b.into_iter().len()
+					&& fields_a
 						.into_iter()
 						.zip(fields_b)
-						.all(|((_, v_a), (_, v_b))| v_a.as_ref().eq(v_b)),
+						.all(|((_, v_a), (_, v_b))| v_a.as_ref().eq(v_b))
+			},
 			_ => false,
 		}
 	}
