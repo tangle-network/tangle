@@ -107,29 +107,34 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::Codec;
+use frame_support::traits::fungibles;
+use frame_support::traits::fungibles::Create;
+use frame_support::traits::fungibles::Inspect as FungiblesInspect;
+use frame_support::traits::fungibles::Mutate as FungiblesMutate;
+use frame_support::traits::tokens::Precision;
+use frame_support::traits::tokens::Preservation;
+use frame_support::traits::Currency;
+use frame_support::traits::ExistenceRequirement;
+use frame_support::traits::LockableCurrency;
+use frame_support::traits::ReservableCurrency;
 use frame_support::{
 	defensive, defensive_assert, ensure,
 	pallet_prelude::{MaxEncodedLen, *},
 	storage::bounded_btree_map::BoundedBTreeMap,
 	traits::{
-		fungibles,
-		fungibles::{Create, Inspect as FungiblesInspect, Mutate as FungiblesMutate},
-		tokens::{Fortitude, Precision, Preservation},
-		Currency, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating,
-		ExistenceRequirement, Get, LockableCurrency, ReservableCurrency,
+		tokens::Fortitude, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating, Get,
 	},
 	DefaultNoBound, PalletError,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::TypeInfo;
 use sp_core::U256;
-use sp_runtime::{
-	traits::{
-		AccountIdConversion, AtLeast32BitUnsigned, Bounded, CheckedAdd, Convert, Saturating,
-		StaticLookup, Zero,
-	},
-	FixedPointNumber, Perbill,
+use sp_runtime::traits::AccountIdConversion;
+use sp_runtime::traits::{
+	AtLeast32BitUnsigned, Bounded, CheckedAdd, Convert, Saturating, StaticLookup, Zero,
 };
+use sp_runtime::FixedPointNumber;
+use sp_runtime::Perbill;
 use sp_staking::{EraIndex, StakingInterface};
 use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, ops::Div, vec::Vec};
 
@@ -1534,8 +1539,7 @@ impl<T: Config> Pallet<T> {
 		let bouncer = T::Lookup::lookup(bouncer)?;
 
 		// ensure that pool token can be created
-		// if this fails, it means that the pool token already exists or the token counter needs to
-		// be incremented correctly
+		// if this fails, it means that the pool token already exists or the token counter needs to be incremented correctly
 		ensure!(
 			T::Fungibles::total_issuance(pool_id.into()) == 0_u32.into(),
 			Error::<T>::PoolTokenCreationFailed
@@ -1546,7 +1550,7 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(amount >= Pallet::<T>::depositor_min_bond(), Error::<T>::MinimumBondNotMet);
 		ensure!(
-			MaxPools::<T>::get().is_none_or(|max_pools| BondedPools::<T>::count() < max_pools),
+			MaxPools::<T>::get().map_or(true, |max_pools| BondedPools::<T>::count() < max_pools),
 			Error::<T>::MaxPools
 		);
 		let mut bonded_pool = BondedPool::<T>::new(
@@ -1614,8 +1618,9 @@ impl<T: Config> Pallet<T> {
 		bonded_pool.ok_to_join()?;
 
 		let (_points_issued, bonded) = match extra {
-			BondExtra::FreeBalance(amount) =>
-				(bonded_pool.try_bond_funds(&member_account, amount, BondType::Later)?, amount),
+			BondExtra::FreeBalance(amount) => {
+				(bonded_pool.try_bond_funds(&member_account, amount, BondType::Later)?, amount)
+			},
 		};
 
 		bonded_pool.ok_to_be_open()?;
