@@ -140,6 +140,9 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const SlashDeferDuration: u32 = 7;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxMasterBlueprintServiceManagerVersions: u32 = u32::MAX;
 }
 
 pub type PalletServicesConstraints = pallet_services::types::ConstraintsOf<Runtime>;
@@ -173,9 +176,10 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
+	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerVersions;
 	type Constraints = PalletServicesConstraints;
 	type SlashDeferDuration = SlashDeferDuration;
-	type SlashOrigin = EnsureRootOrHalfCouncil;
+	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRootOrHalfCouncil;
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
 	#[cfg(feature = "runtime-benchmarks")]

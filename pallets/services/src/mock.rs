@@ -25,6 +25,7 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, OneSessionHandler},
 };
+use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
@@ -373,6 +374,10 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const SlashDeferDuration: u32 = 7;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxMasterBlueprintServiceManagerRevisions: u32 = u32::MAX;
 }
 
 impl Config for Runtime {
@@ -404,10 +409,11 @@ impl Config for Runtime {
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
+	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerRevisions;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MockDelegationManager;
 	type SlashDeferDuration = SlashDeferDuration;
-	type SlashOrigin = frame_system::EnsureRoot<AccountId>;
+	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRoot<AccountId>;
 	type WeightInfo = ();
 }
 
@@ -448,7 +454,9 @@ pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
 	new_test_ext_raw_authorities(mock_authorities(ids))
 }
 
+pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
+pub const HOOKS_TEST: H160 = H160([0x22; 20]);
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -487,23 +495,29 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 	let mut evm_accounts = BTreeMap::new();
 
-	let cggmp21_blueprint_json: serde_json::Value =
-		serde_json::from_str(include_str!("./test-artifacts/CGGMP21Blueprint.json")).unwrap();
-	let cggmp21_blueprint_code = hex::decode(
-		cggmp21_blueprint_json["deployedBytecode"]["object"]
-			.as_str()
-			.unwrap()
-			.replace("0x", ""),
-	)
-	.unwrap();
-	evm_accounts.insert(
-		CGGMP21_BLUEPRINT,
-		fp_evm::GenesisAccount {
-			code: cggmp21_blueprint_code,
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: Default::default(),
-		},
+	let mut create_contract = |bytecode: &str, address: H160| {
+		let mut raw_hex = bytecode.replace("0x", "").replace("\n", "");
+		// fix odd length
+		if raw_hex.len() % 2 != 0 {
+			raw_hex = format!("0{}", raw_hex);
+		}
+		let code = hex::decode(raw_hex).unwrap();
+		evm_accounts.insert(
+			address,
+			fp_evm::GenesisAccount {
+				code,
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Default::default(),
+			},
+		);
+	};
+
+	create_contract(include_str!("./test-artifacts/CGGMP21Blueprint.hex"), CGGMP21_BLUEPRINT);
+	create_contract(include_str!("./test-artifacts/MasterBlueprintServiceManager.hex"), MBSM);
+	create_contract(
+		include_str!("./test-artifacts/HookTestBlueprintServiceManager.hex"),
+		HOOKS_TEST,
 	);
 
 	let evm_config =
@@ -523,12 +537,70 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	ext
 }
 
+#[macro_export]
+macro_rules! evm_log {
+	() => {
+		fp_evm::Log { address: H160::zero(), topics: vec![], data: vec![] }
+	};
+
+	($contract:expr) => {
+		fp_evm::Log { address: $contract, topics: vec![], data: vec![] }
+	};
+
+	($contract:expr, $topic:expr) => {
+		fp_evm::Log {
+			address: $contract,
+			topics: vec![sp_core::keccak_256($topic).into()],
+			data: vec![],
+		}
+	};
+}
+
+/// Asserts that the EVM logs are as expected.
+#[track_caller]
+pub fn assert_evm_logs(expected: &[fp_evm::Log]) {
+	assert_evm_events_contains(expected.iter().cloned().collect())
+}
+
+/// Asserts that the EVM events are as expected.
+#[track_caller]
+fn assert_evm_events_contains(expected: Vec<fp_evm::Log>) {
+	let actual: Vec<fp_evm::Log> = System::events()
+		.iter()
+		.filter_map(|e| match e.event {
+			RuntimeEvent::EVM(pallet_evm::Event::Log { ref log }) => Some(log.clone()),
+			_ => None,
+		})
+		.collect();
+
+	// Check if `expected` is a subset of `actual`
+	let mut any_matcher = false;
+	for evt in expected {
+		if !actual.contains(&evt) {
+			panic!("Events don't match\nactual: {actual:?}\nexpected: {evt:?}");
+		} else {
+			any_matcher = true;
+		}
+	}
+
+	// At least one event should be present
+	if !any_matcher {
+		panic!("No events found");
+	}
+}
+
 // Checks events against the latest. A contiguous set of events must be
 // provided. They must include the most recent RuntimeEvent, but do not have to include
 // every past RuntimeEvent.
 #[track_caller]
 pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
-	let mut actual: Vec<RuntimeEvent> = System::events().iter().map(|e| e.event.clone()).collect();
+	let mut actual: Vec<RuntimeEvent> = System::events()
+		.iter()
+		.filter_map(|e| match e.event {
+			RuntimeEvent::Services(_) => Some(e.event.clone()),
+			_ => None,
+		})
+		.collect();
 
 	expected.reverse();
 	for evt in expected {
@@ -536,7 +608,7 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 		match (&next, &evt) {
 			(left_val, right_val) => {
 				if !(*left_val == *right_val) {
-					panic!("Events don't match\nactual: {next:#?}\nexpected: {evt:#?}");
+					panic!("Events don't match\nactual: {actual:#?}\nexpected: {evt:#?}");
 				}
 			},
 		};

@@ -802,6 +802,10 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Delegated: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, amount: u128, assetId: u128], { who: AccountId32, operator: AccountId32, amount: u128, assetId: u128 }>;
       /**
+       * Delegator has been slashed
+       **/
+      DelegatorSlashed: AugmentedEvent<ApiType, [who: AccountId32, amount: u128], { who: AccountId32, amount: u128 }>;
+      /**
        * A deposit has been made.
        **/
       Deposited: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, assetId: u128], { who: AccountId32, amount: u128, assetId: u128 }>;
@@ -849,6 +853,10 @@ declare module '@polkadot/api-base/types/events' {
        * An operator has scheduled to leave.
        **/
       OperatorLeavingScheduled: AugmentedEvent<ApiType, [who: AccountId32], { who: AccountId32 }>;
+      /**
+       * Operator has been slashed
+       **/
+      OperatorSlashed: AugmentedEvent<ApiType, [who: AccountId32, amount: u128], { who: AccountId32, amount: u128 }>;
       /**
        * An operator has gone offline.
        **/
@@ -1094,10 +1102,6 @@ declare module '@polkadot/api-base/types/events' {
        **/
       BlueprintCreated: AugmentedEvent<ApiType, [owner: AccountId32, blueprintId: u64], { owner: AccountId32, blueprintId: u64 }>;
       /**
-       * An EVM log has been emitted during an execution.
-       **/
-      EvmLog: AugmentedEvent<ApiType, [address: H160, topics: Vec<H256>, data: Bytes], { address: H160, topics: Vec<H256>, data: Bytes }>;
-      /**
        * EVM execution reverted with a reason.
        **/
       EvmReverted: AugmentedEvent<ApiType, [from: H160, to: H160, data: Bytes, reason: Bytes], { from: H160, to: H160, data: Bytes, reason: Bytes }>;
@@ -1109,6 +1113,10 @@ declare module '@polkadot/api-base/types/events' {
        * A job result has been submitted.
        **/
       JobResultSubmitted: AugmentedEvent<ApiType, [operator: AccountId32, serviceId: u64, callId: u64, job: u8, result: Vec<TanglePrimitivesServicesField>], { operator: AccountId32, serviceId: u64, callId: u64, job: u8, result: Vec<TanglePrimitivesServicesField> }>;
+      /**
+       * The Master Blueprint Service Manager has been revised.
+       **/
+      MasterBlueprintServiceManagerRevised: AugmentedEvent<ApiType, [revision: u32, address: H160], { revision: u32, address: H160 }>;
       /**
        * An operator has pre-registered for a service blueprint.
        **/

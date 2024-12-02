@@ -16,6 +16,8 @@ import { jsonrpcFromDefs, typesAliasFromDefs, typesFromDefs } from './utils'
 
 export * as tangleLookupTypes from './interfaces/lookup'
 
+export * from './interfaces'
+
 export const tangleTypes = typesFromDefs(tangleDefs)
 export const tangleRpc = jsonrpcFromDefs(tangleDefs, {})
 export const tangleTypesAlias = typesAliasFromDefs(tangleDefs, {})

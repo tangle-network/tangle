@@ -1022,6 +1022,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       AlreadyOperator: AugmentedError<ApiType>;
       /**
+       * APY exceeds maximum allowed by the extrinsic
+       **/
+      APYExceedsMaximum: AugmentedError<ApiType>;
+      /**
        * Asset already exists in a reward vault
        **/
       AssetAlreadyInVault: AugmentedError<ApiType>;
@@ -1041,6 +1045,14 @@ declare module '@polkadot/api-base/types/errors' {
        * The blueprint ID is already whitelisted
        **/
       BlueprintAlreadyWhitelisted: AugmentedError<ApiType>;
+      /**
+       * Error returned when trying to remove a blueprint ID that doesn't exist.
+       **/
+      BlueprintIdNotFound: AugmentedError<ApiType>;
+      /**
+       * The blueprint is not selected
+       **/
+      BlueprintNotSelected: AugmentedError<ApiType>;
       /**
        * The unstake request is not ready.
        **/
@@ -1062,9 +1074,49 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       CannotExit: AugmentedError<ApiType>;
       /**
+       * Cap cannot be zero
+       **/
+      CapCannotBeZero: AugmentedError<ApiType>;
+      /**
+       * Cap exceeds total supply of asset
+       **/
+      CapExceedsTotalSupply: AugmentedError<ApiType>;
+      /**
+       * Deposit amount overflow
+       **/
+      DepositOverflow: AugmentedError<ApiType>;
+      /**
+       * Error returned when trying to add a blueprint ID that already exists.
+       **/
+      DuplicateBlueprintId: AugmentedError<ApiType>;
+      /**
        * The account has insufficient balance.
        **/
       InsufficientBalance: AugmentedError<ApiType>;
+      /**
+       * Underflow while reducing stake
+       **/
+      InsufficientStakeRemaining: AugmentedError<ApiType>;
+      /**
+       * Leaving round not reached
+       **/
+      LeavingRoundNotReached: AugmentedError<ApiType>;
+      /**
+       * Maximum number of blueprints exceeded
+       **/
+      MaxBlueprintsExceeded: AugmentedError<ApiType>;
+      /**
+       * Error returned when the maximum number of delegations is exceeded.
+       **/
+      MaxDelegationsExceeded: AugmentedError<ApiType>;
+      /**
+       * Error returned when the maximum number of unstake requests is exceeded.
+       **/
+      MaxUnstakeRequestsExceeded: AugmentedError<ApiType>;
+      /**
+       * Error returned when the maximum number of withdraw requests is exceeded.
+       **/
+      MaxWithdrawRequestsExceeded: AugmentedError<ApiType>;
       /**
        * There is not active delegation
        **/
@@ -1098,6 +1150,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NotDelegator: AugmentedError<ApiType>;
       /**
+       * Error returned when trying to add/remove blueprint IDs while not in Fixed mode.
+       **/
+      NotInFixedMode: AugmentedError<ApiType>;
+      /**
        * The account is not leaving as an operator.
        **/
       NotLeavingOperator: AugmentedError<ApiType>;
@@ -1117,6 +1173,18 @@ declare module '@polkadot/api-base/types/errors' {
        * No withdraw requests found
        **/
       NowithdrawRequests: AugmentedError<ApiType>;
+      /**
+       * An unstake request is already pending
+       **/
+      PendingUnstakeRequestExists: AugmentedError<ApiType>;
+      /**
+       * Overflow while adding stake
+       **/
+      StakeOverflow: AugmentedError<ApiType>;
+      /**
+       * Unstake underflow
+       **/
+      UnstakeAmountTooLarge: AugmentedError<ApiType>;
       /**
        * The reward vault does not exist
        **/
@@ -1462,9 +1530,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       AlreadyRegistered: AugmentedError<ApiType>;
       /**
+       * Approval Process is interrupted.
+       **/
+      ApprovalInterrupted: AugmentedError<ApiType>;
+      /**
        * The approval is not requested for the operator (the caller).
        **/
       ApprovalNotRequested: AugmentedError<ApiType>;
+      /**
+       * Blueprint creation is interrupted.
+       **/
+      BlueprintCreationInterrupted: AugmentedError<ApiType>;
       /**
        * The service blueprint was not found.
        **/
@@ -1504,6 +1580,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       JobDefinitionNotFound: AugmentedError<ApiType>;
       /**
+       * The Supplied Master Blueprint Service Manager Revision is not found.
+       **/
+      MasterBlueprintServiceManagerRevisionNotFound: AugmentedError<ApiType>;
+      /**
        * The maximum number of assets per service has been exceeded.
        **/
       MaxAssetsPerServiceExceeded: AugmentedError<ApiType>;
@@ -1511,6 +1591,10 @@ declare module '@polkadot/api-base/types/errors' {
        * The maximum number of fields per request has been exceeded.
        **/
       MaxFieldsExceeded: AugmentedError<ApiType>;
+      /**
+       * Maximum number of Master Blueprint Service Manager revisions reached.
+       **/
+      MaxMasterBlueprintServiceManagerVersionsExceeded: AugmentedError<ApiType>;
       /**
        * The maximum number of permitted callers per service has been exceeded.
        **/
@@ -1540,6 +1624,14 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NoSlashingOrigin: AugmentedError<ApiType>;
       /**
+       * The Operator is not allowed to unregister.
+       **/
+      NotAllowedToUnregister: AugmentedError<ApiType>;
+      /**
+       * The Operator is not allowed to update their price targets.
+       **/
+      NotAllowedToUpdatePriceTargets: AugmentedError<ApiType>;
+      /**
        * The caller is not registered as a operator.
        **/
       NotRegistered: AugmentedError<ApiType>;
@@ -1560,6 +1652,14 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       OperatorProfileNotFound: AugmentedError<ApiType>;
       /**
+       * Rejection Process is interrupted.
+       **/
+      RejectionInterrupted: AugmentedError<ApiType>;
+      /**
+       * Service Initialization interrupted.
+       **/
+      ServiceInitializationInterrupted: AugmentedError<ApiType>;
+      /**
        * The service was not found.
        **/
       ServiceNotFound: AugmentedError<ApiType>;
@@ -1571,6 +1671,10 @@ declare module '@polkadot/api-base/types/errors' {
        * The service request was not found.
        **/
       ServiceRequestNotFound: AugmentedError<ApiType>;
+      /**
+       * The termination of the service was interrupted.
+       **/
+      TerminationInterrupted: AugmentedError<ApiType>;
       /**
        * An error occurred while type checking the provided input input.
        **/
