@@ -116,7 +116,7 @@ impl<T: Config> Commission<T> {
 					Error::<T>::CommissionExceedsGlobalMaximum
 				);
 				ensure!(
-					self.max.map_or(true, |m| commission <= &m),
+					self.max.is_none_or(|m| commission <= &m),
 					Error::<T>::CommissionExceedsMaximum
 				);
 				if commission.is_zero() {

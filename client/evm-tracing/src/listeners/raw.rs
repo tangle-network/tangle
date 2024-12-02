@@ -243,7 +243,8 @@ impl Listener {
 										.global_storage_changes
 										.insert(context.address, context.storage_cache);
 
-									// Apply storage changes to parent, either updating its cache or map of changes.
+									// Apply storage changes to parent, either updating its cache or
+									// map of changes.
 									for (address, mut storage) in
 										context.global_storage_changes.into_iter()
 									{
@@ -276,8 +277,8 @@ impl Listener {
 					_ => (),
 				}
 			},
-			RuntimeEvent::SLoad { address: _, index, value }
-			| RuntimeEvent::SStore { address: _, index, value } => {
+			RuntimeEvent::SLoad { address: _, index, value } |
+			RuntimeEvent::SStore { address: _, index, value } => {
 				if let Some(context) = self.context_stack.last_mut() {
 					if !self.disable_storage {
 						context.storage_cache.insert(index, value);

@@ -102,13 +102,12 @@ impl Group for RistrettoGroup {
 			.map_err(|_| GroupError::MalformedElement)?
 			.decompress()
 		{
-			Some(point) => {
+			Some(point) =>
 				if point == RistrettoPoint::identity() {
 					Err(GroupError::InvalidIdentityElement)
 				} else {
 					Ok(WrappedRistrettoPoint(point))
-				}
-			},
+				},
 			None => Err(GroupError::MalformedElement),
 		}
 	}

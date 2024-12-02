@@ -17,10 +17,12 @@
 //! Test utilities
 use super::*;
 use crate::{TangleLstPrecompile, TangleLstPrecompileCall};
-use frame_support::derive_impl;
-use frame_support::traits::AsEnsureOriginWithArg;
-use frame_support::PalletId;
-use frame_support::{construct_runtime, parameter_types, traits::ConstU64, weights::Weight};
+use frame_support::{
+	construct_runtime, derive_impl, parameter_types,
+	traits::{AsEnsureOriginWithArg, ConstU64},
+	weights::Weight,
+	PalletId,
+};
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
@@ -30,18 +32,11 @@ use sp_core::{
 	sr25519::{Public as sr25519Public, Signature},
 	ConstU32, H160, U256,
 };
-use sp_runtime::traits::Convert;
-use sp_runtime::DispatchError;
-use sp_runtime::DispatchResult;
-use sp_runtime::FixedU128;
-use sp_runtime::Perbill;
 use sp_runtime::{
-	traits::{IdentifyAccount, Verify},
-	AccountId32, BuildStorage,
+	traits::{Convert, IdentifyAccount, Verify},
+	AccountId32, BuildStorage, DispatchError, DispatchResult, FixedU128, Perbill,
 };
-use sp_staking::EraIndex;
-use sp_staking::OnStakingUpdate;
-use sp_staking::Stake;
+use sp_staking::{EraIndex, OnStakingUpdate, Stake};
 use sp_std::collections::btree_map::BTreeMap;
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;

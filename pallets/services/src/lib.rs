@@ -60,12 +60,13 @@ pub mod module {
 	use super::*;
 	use frame_support::dispatch::PostDispatchInfo;
 	use sp_core::H160;
-	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
-	use sp_runtime::Percent;
+	use sp_runtime::{
+		traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize},
+		Percent,
+	};
 	use sp_std::vec::Vec;
-	use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
 	use tangle_primitives::{
-		services::{PriceTargets, *},
+		services::{MasterBlueprintServiceManagerRevision, PriceTargets, *},
 		MultiAssetDelegationInfo,
 	};
 	use types::*;
@@ -198,7 +199,8 @@ pub mod module {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn integrity_test() {
 			// Ensure that the pallet's configuration is valid.
-			// 1. Make sure that pallet's associated AccountId value maps correctly to the EVM address.
+			// 1. Make sure that pallet's associated AccountId value maps correctly to the EVM
+			//    address.
 			let account_id = T::EvmAddressMapping::into_account_id(Self::address());
 			assert_eq!(account_id, Self::account_id(), "Services: AccountId mapping is incorrect.");
 		}
@@ -1000,10 +1002,10 @@ pub mod module {
 					.operators_with_approval_state
 					.into_iter()
 					.filter_map(|(v, state)| match state {
-						ApprovalState::Approved { restaking_percent } => {
-							Some((v, restaking_percent))
-						},
-						// N.B: this should not happen, as all operators are approved and checked above.
+						ApprovalState::Approved { restaking_percent } =>
+							Some((v, restaking_percent)),
+						// N.B: this should not happen, as all operators are approved and checked
+						// above.
 						_ => None,
 					})
 					.collect::<Vec<_>>();
@@ -1244,11 +1246,12 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+		/// Slash an operator (offender) for a service id with a given percent of their exposed
+		/// stake for that service.
 		///
 		/// The caller needs to be an authorized Slash Origin for this service.
-		/// Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
-		/// by another entity.
+		/// Note that this does not apply the slash directly, but instead schedules a deferred call
+		/// to apply the slash by another entity.
 		pub fn slash(
 			origin: OriginFor<T>,
 			offender: T::AccountId,
@@ -1310,7 +1313,8 @@ pub mod module {
 
 		/// Dispute an [UnappliedSlash] for a given era and index.
 		///
-		/// The caller needs to be an authorized Dispute Origin for the service in the [UnappliedSlash].
+		/// The caller needs to be an authorized Dispute Origin for the service in the
+		/// [UnappliedSlash].
 		pub fn dispute(
 			origin: OriginFor<T>,
 			#[pallet::compact] era: u32,

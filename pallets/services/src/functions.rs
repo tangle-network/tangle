@@ -77,9 +77,8 @@ impl<T: Config> Pallet<T> {
 	pub fn mbsm_address_of(blueprint: &ServiceBlueprint<T::Constraints>) -> Result<H160, Error<T>> {
 		match blueprint.master_manager_revision {
 			MasterBlueprintServiceManagerRevision::Specific(rev) => Self::mbsm_address(rev),
-			MasterBlueprintServiceManagerRevision::Latest => {
-				Self::mbsm_address(Self::mbsm_latest_revision())
-			},
+			MasterBlueprintServiceManagerRevision::Latest =>
+				Self::mbsm_address(Self::mbsm_latest_revision()),
 			other => unimplemented!("Got unexpected case for {:?}", other),
 		}
 	}
@@ -95,8 +94,8 @@ impl<T: Config> Pallet<T> {
 	/// * `owner` - The owner of the blueprint.
 	///
 	/// # Returns
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
-	///   whether the blueprint creation is allowed and the weight of the operation.
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating whether the blueprint creation is allowed and the weight of the operation.
 	pub fn on_blueprint_created_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
@@ -190,8 +189,8 @@ impl<T: Config> Pallet<T> {
 	/// * `value` - The value to be sent with the call.
 	///
 	/// # Returns
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
-	///   whether the registration is allowed and the weight of the operation.
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating whether the registration is allowed and the weight of the operation.
 	pub fn on_register_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
@@ -241,7 +240,8 @@ impl<T: Config> Pallet<T> {
 	/// * `prefrences` - The operator preferences.
 	///
 	/// # Returns
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating
 	///  whether the unregistration is allowed and the weight of the operation.
 	pub fn on_unregister_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
@@ -281,7 +281,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Returns
 	///
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating
 	///  whether the price targets update is allowed and the weight of the operation.
 	pub fn on_update_price_targets(
 		blueprint: &ServiceBlueprint<T::Constraints>,
@@ -323,7 +324,8 @@ impl<T: Config> Pallet<T> {
 	/// * `restaking_percent` - The restaking percent.
 	///
 	/// # Returns
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating
 	/// whether the approve is allowed and the weight of the operation.
 	pub fn on_approve_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
@@ -380,7 +382,8 @@ impl<T: Config> Pallet<T> {
 	/// * `request_id` - The request id.
 	///
 	/// # Returns
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating
 	/// whether the reject is allowed and the weight of the operation.
 	pub fn on_reject_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
@@ -437,8 +440,8 @@ impl<T: Config> Pallet<T> {
 	/// * `value` - The value to be sent with the call.
 	///
 	/// # Returns
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
-	///   whether the request is allowed and the weight of the operation.
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating whether the request is allowed and the weight of the operation.
 	pub fn on_request_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
@@ -526,8 +529,8 @@ impl<T: Config> Pallet<T> {
 		)
 	}
 
-	/// Hook to be called when a service is initialized. This function will call the `onServiceInitialized`
-	/// function of the service blueprint manager contract.
+	/// Hook to be called when a service is initialized. This function will call the
+	/// `onServiceInitialized` function of the service blueprint manager contract.
 	///
 	/// # Arguments
 	/// * `blueprint` - The service blueprint.
@@ -540,7 +543,8 @@ impl<T: Config> Pallet<T> {
 	/// * `ttl` - The time to live.
 	///
 	/// # Returns
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating
 	///  whether the request is allowed and the weight of the operation.
 	pub fn on_service_init_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
@@ -618,8 +622,8 @@ impl<T: Config> Pallet<T> {
 		)
 	}
 
-	/// Hook to be called when a service is terminated. This function will call the `onServiceTermination`
-	/// function of the service blueprint manager contract.
+	/// Hook to be called when a service is terminated. This function will call the
+	/// `onServiceTermination` function of the service blueprint manager contract.
 	///
 	/// # Arguments
 	/// * `blueprint` - The service blueprint.
@@ -628,7 +632,8 @@ impl<T: Config> Pallet<T> {
 	/// * `owner` - The owner of the service.
 	///
 	/// # Returns
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating
 	/// whether the request is allowed and the weight of the operation.
 	pub fn on_service_termination_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
@@ -685,8 +690,8 @@ impl<T: Config> Pallet<T> {
 	/// * `inputs` - The input fields.
 	///
 	/// # Returns
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
-	///   whether the job call is allowed and the weight of the operation.
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating whether the job call is allowed and the weight of the operation.
 	pub fn on_job_call_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
@@ -758,8 +763,8 @@ impl<T: Config> Pallet<T> {
 	/// * `outputs` - The output fields.
 	///
 	/// # Returns
-	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean indicating
-	///   whether the job result is allowed and the weight of the operation.
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating whether the job result is allowed and the weight of the operation.
 	pub fn on_job_result_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
@@ -834,8 +839,8 @@ impl<T: Config> Pallet<T> {
 	/// * `service` - The service.
 	///
 	/// # Returns
-	/// * `Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo>` - A tuple containing the
-	///   slashing origin account id (if any) and the weight of the operation.
+	/// * `Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo>` - A tuple containing
+	///   the slashing origin account id (if any) and the weight of the operation.
 	pub fn query_slashing_origin(
 		service: &Service<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>,
 	) -> Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo> {
@@ -899,8 +904,8 @@ impl<T: Config> Pallet<T> {
 	/// * `service` - The service.
 	///
 	/// # Returns
-	/// * `Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo>` - A tuple containing the
-	///   dispute origin account id (if any) and the weight of the operation.
+	/// * `Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo>` - A tuple containing
+	///   the dispute origin account id (if any) and the weight of the operation.
 	pub fn query_dispute_origin(
 		service: &Service<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>,
 	) -> Result<(Option<T::AccountId>, Weight), DispatchErrorWithPostInfo> {

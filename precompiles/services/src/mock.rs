@@ -19,11 +19,10 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
 };
-use frame_support::derive_impl;
-use frame_support::pallet_prelude::Hooks;
-use frame_support::pallet_prelude::Weight;
 use frame_support::{
-	construct_runtime, parameter_types,
+	construct_runtime, derive_impl,
+	pallet_prelude::{Hooks, Weight},
+	parameter_types,
 	traits::{ConstU128, OneSessionHandler},
 };
 use frame_system::EnsureRoot;
@@ -33,8 +32,7 @@ use pallet_services::{EvmAddressMapping, EvmGasWeightMapping};
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-use serde::Deserialize;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sp_core::{self, sr25519, sr25519::Public as sr25519Public, ConstU32, RuntimeDebug, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{

@@ -14,20 +14,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! This file contains the implementation of the MultiAssetDelegationPrecompile struct which provides an
-//! interface between the EVM and the native MultiAssetDelegation pallet of the runtime. It allows EVM contracts
-//! to call functions of the MultiAssetDelegation pallet, in order to enable EVM accounts to interact with the delegation system.
+//! This file contains the implementation of the MultiAssetDelegationPrecompile struct which
+//! provides an interface between the EVM and the native MultiAssetDelegation pallet of the runtime.
+//! It allows EVM contracts to call functions of the MultiAssetDelegation pallet, in order to enable
+//! EVM accounts to interact with the delegation system.
 //!
-//! The MultiAssetDelegationPrecompile struct implements core methods that correspond to the functions of the
-//! MultiAssetDelegation pallet. These methods can be called from EVM contracts. They include functions to join as an operator,
-//! delegate assets, withdraw assets, etc.
+//! The MultiAssetDelegationPrecompile struct implements core methods that correspond to the
+//! functions of the MultiAssetDelegation pallet. These methods can be called from EVM contracts.
+//! They include functions to join as an operator, delegate assets, withdraw assets, etc.
 //!
 //! Each method records the gas cost for the operation, performs the requested operation, and
 //! returns the result in a format that can be used by the EVM.
 //!
-//! The MultiAssetDelegationPrecompile struct is generic over the Runtime type, which is the type of the runtime
-//! that includes the MultiAssetDelegation pallet. This allows the precompile to work with any runtime that
-//! includes the MultiAssetDelegation pallet and meets the other trait bounds required by the precompile.
+//! The MultiAssetDelegationPrecompile struct is generic over the Runtime type, which is the type of
+//! the runtime that includes the MultiAssetDelegation pallet. This allows the precompile to work
+//! with any runtime that includes the MultiAssetDelegation pallet and meets the other trait bounds
+//! required by the precompile.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -44,8 +46,7 @@ use pallet_evm::AddressMapping;
 use pallet_tangle_lst::{BondExtra, PoolId, PoolState};
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
-use sp_runtime::traits::Dispatchable;
-use sp_runtime::traits::StaticLookup;
+use sp_runtime::traits::{Dispatchable, StaticLookup};
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::types::WrappedAccountId32;
 

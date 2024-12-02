@@ -34,10 +34,10 @@ use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
 use sp_runtime::AccountId32;
-use sp_std::vec::Vec;
 use sp_std::{
 	convert::{TryFrom, TryInto},
 	marker::PhantomData,
+	vec::Vec,
 };
 
 mod eip2612;

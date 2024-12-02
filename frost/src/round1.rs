@@ -106,9 +106,9 @@ where
 
 	/// Checks if the commitments are valid.
 	pub fn is_valid(&self) -> bool {
-		element_is_valid::<C>(&self.hiding.0)
-			&& element_is_valid::<C>(&self.binding.0)
-			&& self.hiding.0 != self.binding.0
+		element_is_valid::<C>(&self.hiding.0) &&
+			element_is_valid::<C>(&self.binding.0) &&
+			self.hiding.0 != self.binding.0
 	}
 }
 
