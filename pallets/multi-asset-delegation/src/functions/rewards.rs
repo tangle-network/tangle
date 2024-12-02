@@ -15,7 +15,6 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::StakePoints;
 use super::*;
-use crate::types::rewards::StakePoints as StakePointsStruct;
 use crate::{
 	types::{DelegatorBond, *},
 	Pallet,
@@ -25,7 +24,6 @@ use frame_support::{
 	pallet_prelude::DispatchResult,
 	traits::{Currency, Get},
 };
-use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::{traits::Zero, DispatchError, Saturating};
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::RoundIndex;

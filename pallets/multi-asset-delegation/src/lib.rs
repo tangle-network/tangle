@@ -72,9 +72,7 @@ pub mod weights;
 pub mod functions;
 pub mod traits;
 pub mod types;
-use frame_support::traits::Get;
 pub use functions::*;
-use sp_runtime::Saturating;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -765,7 +763,7 @@ pub mod pallet {
 
 				config.configs.insert(
 					vault_id,
-					RewardConfigForAssetVault { apy, cap, tnt_boost_multiplier: 1u32.into() },
+					RewardConfigForAssetVault { apy, cap, tnt_boost_multiplier: 1u32 },
 				);
 
 				*maybe_config = Some(config);
@@ -988,11 +986,11 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 
 			// Get pending rewards
-			let pending = PendingRewards::<T>::take(&who, &asset_id);
+			let pending = PendingRewards::<T>::take(&who, asset_id);
 			ensure!(!pending.is_zero(), Error::<T>::NoRewardsToClaim);
 
 			// Update total unclaimed rewards
-			TotalUnclaimedRewards::<T>::mutate(&asset_id, |total| {
+			TotalUnclaimedRewards::<T>::mutate(asset_id, |total| {
 				*total = total.saturating_sub(pending);
 			});
 
@@ -1016,10 +1014,10 @@ pub mod pallet {
 			for (asset_id, pending) in PendingRewards::<T>::iter_prefix(&who) {
 				if !pending.is_zero() {
 					// Remove pending rewards
-					PendingRewards::<T>::remove(&who, &asset_id);
+					PendingRewards::<T>::remove(&who, asset_id);
 
 					// Update total unclaimed rewards
-					TotalUnclaimedRewards::<T>::mutate(&asset_id, |total| {
+					TotalUnclaimedRewards::<T>::mutate(asset_id, |total| {
 						*total = total.saturating_sub(pending);
 					});
 
