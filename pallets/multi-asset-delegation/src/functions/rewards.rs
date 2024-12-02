@@ -175,7 +175,7 @@ impl<T: Config> Pallet<T> {
 		Ok(total_reward)
 	}
 
-	fn distribute_reward_to_delegator(
+	fn _distribute_reward_to_delegator(
 		delegator: &T::AccountId,
 		reward: BalanceOf<T>,
 	) -> DispatchResult {
