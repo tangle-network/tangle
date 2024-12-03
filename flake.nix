@@ -6,9 +6,7 @@
     # Rust
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
+      inputs = { nixpkgs.follows = "nixpkgs"; };
     };
     # EVM dev tools
     foundry = {
@@ -24,13 +22,10 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) foundry.overlay ];
-        pkgs = import nixpkgs {
-          inherit system overlays;
-        };
+        pkgs = import nixpkgs { inherit system overlays; };
         lib = pkgs.lib;
         toolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-      in
-      {
+      in {
         devShells.default = pkgs.mkShell {
           name = "tangle";
           nativeBuildInputs = [
@@ -44,8 +39,10 @@
             pkgs.rustPlatform.bindgenHook
             # Mold Linker for faster builds (only on Linux)
             (lib.optionals pkgs.stdenv.isLinux pkgs.mold)
-            (lib.optionals pkgs.stdenv.isDarwin pkgs.darwin.apple_sdk.frameworks.Security)
-            (lib.optionals pkgs.stdenv.isDarwin pkgs.darwin.apple_sdk.frameworks.SystemConfiguration)
+            (lib.optionals pkgs.stdenv.isDarwin
+              pkgs.darwin.apple_sdk.frameworks.Security)
+            (lib.optionals pkgs.stdenv.isDarwin
+              pkgs.darwin.apple_sdk.frameworks.SystemConfiguration)
           ];
           buildInputs = [
             # Nodejs for test suite
@@ -56,15 +53,17 @@
             toolchain
             pkgs.foundry-bin
           ];
-          packages = [
-            pkgs.taplo
-            pkgs.cargo-nextest
-            pkgs.cargo-tarpaulin
-          ];
+          packages =
+            [ pkgs.taplo pkgs.harper pkgs.cargo-nextest pkgs.cargo-tarpaulin ];
           # Environment variables
           RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
           # Needed for running DKG Node.
-          LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.gmp pkgs.openssl pkgs.libclang pkgs.stdenv.cc.cc ];
+          LD_LIBRARY_PATH = lib.makeLibraryPath [
+            pkgs.gmp
+            pkgs.openssl
+            pkgs.libclang
+            pkgs.stdenv.cc.cc
+          ];
         };
       });
 }
