@@ -602,6 +602,7 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId> {
 	pub ttl: BlockNumber,
 }
 
+/// Operator's Approval State.
 #[derive(
 	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
 )]
@@ -620,6 +621,28 @@ pub enum ApprovalState {
 	/// The operator is rejected to provide the service.
 	#[codec(index = 2)]
 	Rejected,
+}
+
+/// Different types of assets that can be used.
+#[derive(
+	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
+)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum Aseet<AssetId> {
+	/// The Native Asset.
+	///
+	/// alias for AssetId = 0.
+	#[codec(index = 0)]
+	#[default]
+	Native,
+
+	/// Use the specified AssetId.
+	#[codec(index = 1)]
+	Custom(AssetId),
+
+	/// Use an ERC20-like token with the specified contract address.
+	#[codec(index = 2)]
+	Erc20(sp_core::H160),
 }
 
 /// Represents the pricing structure for various hardware resources.

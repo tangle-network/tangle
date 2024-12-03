@@ -836,7 +836,7 @@ pub mod module {
 		}
 
 		/// Request a new service to be initiated using the provided blueprint with a list of
-		/// operators that will run your service. Optionally, you can specifiy who is permitted
+		/// operators that will run your service. Optionally, you can customize who is permitted
 		/// caller of this service, by default only the caller is allowed to call the service.
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request(
@@ -847,6 +847,7 @@ pub mod module {
 			request_args: Vec<Field<T::Constraints, T::AccountId>>,
 			assets: Vec<T::AssetId>,
 			#[pallet::compact] ttl: BlockNumberFor<T>,
+			#[pallet::compact] payment_asset: Asset<T::AssetId>,
 			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
