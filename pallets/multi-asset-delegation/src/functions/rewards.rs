@@ -19,11 +19,7 @@ use crate::{
 	types::{DelegatorBond, *},
 	Pallet,
 };
-use frame_support::{
-	ensure,
-	pallet_prelude::DispatchResult,
-	traits::{Currency, Get},
-};
+use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
 use sp_runtime::{traits::Zero, DispatchError, Saturating};
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::RoundIndex;
@@ -173,15 +169,6 @@ impl<T: Config> Pallet<T> {
 	) -> Result<BalanceOf<T>, DispatchError> {
 		let total_reward = apy.mul_floor(total_amount);
 		Ok(total_reward)
-	}
-
-	fn _distribute_reward_to_delegator(
-		delegator: &T::AccountId,
-		reward: BalanceOf<T>,
-	) -> DispatchResult {
-		// mint rewards to delegator
-		let _ = T::Currency::deposit_creating(delegator, reward);
-		Ok(())
 	}
 
 	pub fn add_asset_to_vault(vault_id: &T::VaultId, asset_id: &T::AssetId) -> DispatchResult {

@@ -15,7 +15,13 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
 use super::*;
-use crate::{types::*, CurrentRound, Error};
+use crate::{
+	types::{
+		rewards::StakePoints, DelegatorBlueprintSelection, DelegatorBond, OperatorSnapshot,
+		RewardConfig, RewardConfigForAssetVault,
+	},
+	AssetLookupRewardVaults, AtStake, CurrentRound, Error, RewardConfigStorage,
+};
 use frame_support::{assert_noop, assert_ok};
 use sp_runtime::Percent;
 use std::collections::BTreeMap;
@@ -482,8 +488,6 @@ fn distribute_rewards_should_work() {
 		let cap = 50;
 		let apy = Percent::from_percent(10); // 10%
 
-		let initial_balance = Balances::free_balance(delegator);
-
 		// Set up reward configuration
 		let reward_config = RewardConfig {
 			configs: {
@@ -502,6 +506,18 @@ fn distribute_rewards_should_work() {
 		// Set up asset vault lookup
 		AssetLookupRewardVaults::<Test>::insert(asset_id, asset_id);
 
+		// Set up stake points for the delegator
+		crate::StakePoints::<Test>::insert(
+			delegator,
+			asset_id,
+			StakePoints {
+				base_points: amount,
+				lock_multiplier: 1,
+				expiry: 1000, // Set a future expiry
+				auto_compound: false,
+			},
+		);
+
 		// Add delegation information
 		AtStake::<Test>::insert(
 			round,
@@ -517,16 +533,16 @@ fn distribute_rewards_should_work() {
 		// Distribute rewards
 		assert_ok!(MultiAssetDelegation::distribute_rewards(round));
 
-		// Check if rewards were distributed correctly
-		let balance = Balances::free_balance(delegator);
+		// Check if rewards were stored correctly in PendingRewards
+		let pending_rewards = MultiAssetDelegation::pending_rewards(&delegator, &asset_id);
 
-		// Calculate the percentage of the cap that the user is staking
-		let staking_percentage = amount.saturating_mul(100) / cap;
-		// Calculate the expected reward based on the staking percentage
+		// Calculate expected rewards based on APY
 		let expected_reward = apy.mul_floor(amount);
-		let calculated_reward = expected_reward.saturating_mul(staking_percentage) / 100;
 
-		assert_eq!(balance - initial_balance, calculated_reward);
+		assert_eq!(pending_rewards, expected_reward);
+
+		// Also verify the total unclaimed rewards
+		assert_eq!(MultiAssetDelegation::total_unclaimed_rewards(&asset_id), expected_reward);
 	});
 }
 
@@ -552,9 +568,6 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 		let apy1 = Percent::from_percent(10); // 10%
 		let apy2 = Percent::from_percent(20); // 20%
 
-		let initial_balance1 = Balances::free_balance(delegator1);
-		let initial_balance2 = Balances::free_balance(delegator2);
-
 		// Set up reward configuration
 		let reward_config = RewardConfig {
 			configs: {
@@ -577,6 +590,29 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 		// Set up asset vault lookup
 		AssetLookupRewardVaults::<Test>::insert(asset_id1, asset_id1);
 		AssetLookupRewardVaults::<Test>::insert(asset_id2, asset_id2);
+
+		// Set up stake points for both delegators
+		crate::StakePoints::<Test>::insert(
+			delegator1,
+			asset_id1,
+			StakePoints {
+				base_points: amount1,
+				lock_multiplier: 1,
+				expiry: 1000, // Set a future expiry
+				auto_compound: false,
+			},
+		);
+
+		crate::StakePoints::<Test>::insert(
+			delegator2,
+			asset_id2,
+			StakePoints {
+				base_points: amount2,
+				lock_multiplier: 1,
+				expiry: 1000, // Set a future expiry
+				auto_compound: false,
+			},
+		);
 
 		// Add delegation information
 		AtStake::<Test>::insert(
@@ -612,23 +648,20 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 		// Distribute rewards
 		assert_ok!(MultiAssetDelegation::distribute_rewards(round));
 
-		// Check if rewards were distributed correctly
-		let balance1 = Balances::free_balance(delegator1);
-		let balance2 = Balances::free_balance(delegator2);
+		// Check if rewards were stored correctly in PendingRewards
+		let pending_rewards1 = MultiAssetDelegation::pending_rewards(&delegator1, &asset_id1);
+		let pending_rewards2 = MultiAssetDelegation::pending_rewards(&delegator2, &asset_id2);
 
-		// Calculate the percentage of the cap that each user is staking
-		let staking_percentage1 = amount1.saturating_mul(100) / cap1;
-		let staking_percentage2 = amount2.saturating_mul(100) / cap2;
+		// Calculate expected rewards based on APY
+		let expected_reward1 = apy1.mul_floor(amount1); // 10% of 100 = 10
+		let expected_reward2 = apy2.mul_floor(amount2); // 20% of 200 = 40
 
-		// Calculate the expected rewards based on the staking percentages
-		let expected_reward1 = apy1.mul_floor(amount1);
-		let calculated_reward1 = expected_reward1.saturating_mul(staking_percentage1) / 100;
+		assert_eq!(pending_rewards1, expected_reward1);
+		assert_eq!(pending_rewards2, expected_reward2);
 
-		let expected_reward2 = apy2.mul_floor(amount2);
-		let calculated_reward2 = expected_reward2.saturating_mul(staking_percentage2) / 100;
-
-		assert_eq!(balance1 - initial_balance1, calculated_reward1);
-		assert_eq!(balance2 - initial_balance2, calculated_reward2);
+		// Also verify the total unclaimed rewards
+		assert_eq!(MultiAssetDelegation::total_unclaimed_rewards(&asset_id1), expected_reward1);
+		assert_eq!(MultiAssetDelegation::total_unclaimed_rewards(&asset_id2), expected_reward2);
 	});
 }
 
