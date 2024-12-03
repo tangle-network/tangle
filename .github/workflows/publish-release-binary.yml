@@ -7,16 +7,23 @@ on:
 
 jobs:
   build:
-    name: Publish binaries
-    runs-on: ubuntu-20.04
+    name: Publish binaries (${{ matrix.os }}, ${{ matrix.features }})
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-20.04, macos-latest]
         features: [testnet, default, txpool]
+    concurrency:
+      group: release-${{ github.ref }}-${{ matrix.os }}-${{ matrix.features }}
+      cancel-in-progress: true
 
     steps:
     - uses: actions/checkout@v3
 
-    - uses: ./.github/actions/free-disk-space
+    - name: Free Disk Space (Ubuntu)
+      if: matrix.os == 'ubuntu-20.04'
+      uses: ./.github/actions/free-disk-space
+
     - name: Install toolchain
       id: toolchain
       uses: actions-rs/toolchain@master
@@ -28,29 +35,39 @@ jobs:
     - name: Rust Cache
       uses: Swatinem/rust-cache@v1.3.0
 
-    - name: Install Protobuf
+    - name: Install Protobuf (Ubuntu)
+      if: matrix.os == 'ubuntu-20.04'
       run: sudo apt-get install protobuf-compiler
+
+    - name: Install Protobuf (macOS)
+      if: matrix.os == 'macos-latest'
+      run: brew install protobuf
 
     - name: Build binary
       run: cargo build --release -p tangle --locked --features ${{ matrix.features }}
 
     - name: Calculate SHA256
-      run: sha256sum target/release/tangle > target/release/tangle.sha256sum
+      run: |
+        if [ "${{ matrix.os }}" == "macos-latest" ]; then
+          shasum -a 256 target/release/tangle > target/release/tangle.sha256sum
+        else
+          sha256sum target/release/tangle > target/release/tangle.sha256sum
+        fi
 
     - name: Upload ${{ matrix.features }} binary to release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: target/release/tangle
-        asset_name: tangle-${{ matrix.features }}-linux-amd64
+        asset_name: tangle-${{ matrix.features }}-${{ matrix.os == 'macos-latest' && 'darwin' || 'linux' }}-amd64
         tag: ${{ github.ref }}
         overwrite: true
 
-    - name: Uplaod SHA256 of the binary
+    - name: Upload SHA256 of the binary
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: target/release/tangle.sha256sum
-        asset_name: tangle-${{ matrix.features }}-linux-amd64.sha256sum
+        asset_name: tangle-${{ matrix.features }}-${{ matrix.os == 'macos-latest' && 'darwin' || 'linux' }}-amd64.sha256sum
         tag: ${{ github.ref }}
         overwrite: true

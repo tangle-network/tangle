@@ -171,3 +171,63 @@ fn test_nominate() {
 			.execute_returns(());
 	});
 }
+
+#[test]
+fn test_update_roles() {
+	ExtBuilder::default().build().execute_with(|| {
+        // First create a pool
+		let root = sp_core::sr25519::Public::from(TestAccount::Bob).into();
+		let nominator = sp_core::sr25519::Public::from(TestAccount::Charlie).into();
+		let bouncer = sp_core::sr25519::Public::from(TestAccount::Dave).into();
+		let name = b"Test Pool".to_vec();
+		let icon = b"icon_data".to_vec();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::create {
+					amount: U256::from(10_000),
+					root,
+					nominator,
+					bouncer,
+					name: name.clone(),
+					icon: icon.clone(),
+				},
+			)
+			.execute_returns(());
+
+        // New roles
+        let new_root = sp_core::sr25519::Public::from(TestAccount::Dave).into();
+        let new_nominator = sp_core::sr25519::Public::from(TestAccount::Eve).into();
+        let new_bouncer = sp_core::sr25519::Public::from(TestAccount::Charlie).into();
+
+        // Try to update roles from non-root account (should fail)
+        PrecompilesValue::get()
+            .prepare_test(
+                TestAccount::Dave, // Using nominator account
+                H160::from_low_u64_be(1),
+                PCall::update_roles {
+                    pool_id: U256::from(1),
+                    new_root,
+                    new_nominator,
+                    new_bouncer,
+                },
+            )
+			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 5, error: [16, 0, 0, 0], message: Some(\"DoesNotHavePermission\") })");
+
+        // Update roles from root account (should succeed)
+        PrecompilesValue::get()
+            .prepare_test(
+                TestAccount::Bob, // Using root account
+                H160::from_low_u64_be(1),
+                PCall::update_roles {
+                    pool_id: U256::from(1),
+                    new_root,
+                    new_nominator,
+                    new_bouncer,
+                },
+            )
+            .execute_returns(());
+    });
+}
