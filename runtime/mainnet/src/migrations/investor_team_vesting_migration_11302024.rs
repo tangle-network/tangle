@@ -1,15 +1,12 @@
-use super::*;
-use crate::{AccountId, Balance, BlockNumber, H160};
-use core::str::FromStr;
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
+#[cfg(feature = "try-runtime")]
 use pallet_airdrop_claims::MultiAddress;
-use pallet_ethereum::Block;
 use pallet_vesting::{MaxVestingSchedulesGet, Vesting, VestingInfo};
 use sp_runtime::{
-	traits::{AccountIdConversion, Convert, EnsureDiv, Header, Zero},
-	AccountId32, Percent, Saturating,
+	traits::{Convert, EnsureDiv, Header, Zero},
+	Percent, Saturating,
 };
-use sp_std::{collections::btree_map::BTreeMap, vec, vec::Vec};
+use sp_std::vec::Vec;
 
 pub const BLOCK_TIME: u128 = 6;
 pub const ONE_YEAR_BLOCKS: u64 = (365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
@@ -203,10 +200,10 @@ fn update_account_vesting<T: pallet_vesting::Config + pallet_balances::Config>(
 	reads: &mut u64,
 	writes: &mut u64,
 ) {
-	let schedules = Vesting::<T>::get(&account_id);
+	let schedules = Vesting::<T>::get(account_id);
 	*reads += 1;
 	if let Some(schedules) = schedules {
-		update_vesting_schedule::<T>(&account_id, schedules.to_vec());
+		update_vesting_schedule::<T>(account_id, schedules.to_vec());
 		*writes += 1;
 	}
 }
@@ -228,7 +225,6 @@ fn update_vesting_schedule<T: pallet_vesting::Config>(
 	// New vesting parameters
 	let one_year_blocks = BlockNumberOf::<T>::from(ONE_YEAR_BLOCKS as u32);
 	let three_year_blocks = one_year_blocks.saturating_mul(BlockNumberOf::<T>::from(3u32));
-	let four_year_blocks = one_year_blocks.saturating_mul(BlockNumberOf::<T>::from(4u32));
 
 	// At 1 year cliff, 25% unlocks
 	let quarter_percentage = Percent::from_percent(25);
