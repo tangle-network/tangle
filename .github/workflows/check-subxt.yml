@@ -1,0 +1,36 @@
+name: check tangle-subxt
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'tangle-subxt'
+
+  workflow_dispatch:
+
+jobs:
+  features:
+    timeout-minutes: 90
+    name: Test building with each feature
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          cache-on-failure: "true"
+
+      - name: Install cargo-hack
+        uses: taiki-e/install-action@cargo-hack
+
+      - name: Ensure wasm32-unknown-unknown is installed
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Test each feature
+        run: cargo hack build --each-feature --package=tangle-subxt
