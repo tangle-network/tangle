@@ -863,8 +863,9 @@ impl<T: Config> Pallet<T> {
 			constant: None,
 			state_mutability: StateMutability::NonPayable,
 		};
+		let mbsm = Self::mbsm_address_of(&blueprint)?;
 		let (info, weight) = Self::dispatch_evm_call(
-			&blueprint,
+			mbsm,
 			query.clone(),
 			&[
 				Token::Uint(ethabi::Uint::from(service.blueprint)),
@@ -928,8 +929,9 @@ impl<T: Config> Pallet<T> {
 			constant: None,
 			state_mutability: StateMutability::NonPayable,
 		};
+		let mbsm = Self::mbsm_address_of(&blueprint)?;
 		let (info, weight) = Self::dispatch_evm_call(
-			&blueprint,
+			mbsm,
 			query.clone(),
 			&[
 				Token::Uint(ethabi::Uint::from(service.blueprint)),
@@ -955,6 +957,66 @@ impl<T: Config> Pallet<T> {
 		Ok((dispute_origin, weight))
 	}
 
+	/// Moves a `value` amount of tokens from the caller's account to `to`.
+	pub fn erc20_transfer(
+		erc20: H160,
+		caller: &T::AccountId,
+		to: H160,
+		value: BalanceOf<T>,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		let from = T::EvmAddressMapping::into_address(caller.clone());
+		#[allow(deprecated)]
+		let transfer_fn = Function {
+			name: String::from("transfer"),
+			inputs: vec![
+				ethabi::Param {
+					name: String::from("to"),
+					kind: ethabi::ParamType::Address,
+					internal_type: None,
+				},
+				ethabi::Param {
+					name: String::from("value"),
+					kind: ethabi::ParamType::Uint(256),
+					internal_type: None,
+				},
+			],
+			outputs: vec![ethabi::Param {
+				name: String::from("success"),
+				kind: ethabi::ParamType::Bool,
+				internal_type: None,
+			}],
+			constant: None,
+			state_mutability: StateMutability::NonPayable,
+		};
+
+		let args = [
+			Token::Address(to),
+			Token::Uint(ethabi::Uint::from(value.using_encoded(U256::from_little_endian))),
+		];
+
+		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
+		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
+		let gas_limit = 300_000;
+		let info = Self::evm_call(from, erc20, U256::zero(), data, gas_limit)?;
+		let weight = Self::weight_from_call_info(&info);
+
+		// decode the result and return it
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		let success = if let Some(data) = maybe_value {
+			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+			let success = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			if let ethabi::Token::Bool(val) = success {
+				*val
+			} else {
+				false
+			}
+		} else {
+			false
+		};
+
+		Ok((success, weight))
+	}
+
 	/// Dispatches a hook to the EVM and returns if the call was successful with the used weight.
 	fn dispatch_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
@@ -962,23 +1024,23 @@ impl<T: Config> Pallet<T> {
 		args: &[ethabi::Token],
 		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
-		Self::dispatch_evm_call(blueprint, f, args, value)
+		let mbsm = Self::mbsm_address_of(blueprint)?;
+		Self::dispatch_evm_call(mbsm, f, args, value)
 			.map(|(info, weight)| (info.exit_reason.is_succeed(), weight))
 	}
 
 	/// Dispatches a hook to the EVM and returns if the result with the used weight.
 	fn dispatch_evm_call(
-		blueprint: &ServiceBlueprint<T::Constraints>,
+		contract: H160,
 		f: Function,
 		args: &[ethabi::Token],
 		value: BalanceOf<T>,
 	) -> Result<(fp_evm::CallInfo, Weight), DispatchErrorWithPostInfo> {
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(f.short_signature()), f.signature());
-		let mbsm = Self::mbsm_address_of(blueprint)?;
 		let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 		let gas_limit = 300_000;
 		let value = value.using_encoded(U256::from_little_endian);
-		let info = Self::evm_call(Self::address(), mbsm, value, data, gas_limit)?;
+		let info = Self::evm_call(Self::address(), contract, value, data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);
 		Ok((info, weight))
 	}

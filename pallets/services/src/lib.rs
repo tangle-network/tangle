@@ -59,15 +59,14 @@ pub use impls::BenchmarkingOperatorDelegationManager;
 pub mod module {
 	use super::*;
 	use frame_support::dispatch::PostDispatchInfo;
+	use frame_support::traits::fungibles::{Inspect, Mutate};
+	use frame_support::traits::tokens::Preservation;
 	use sp_core::H160;
-	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
+	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero};
 	use sp_runtime::Percent;
 	use sp_std::vec::Vec;
 	use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
-	use tangle_primitives::{
-		services::{PriceTargets, *},
-		MultiAssetDelegationInfo,
-	};
+	use tangle_primitives::{services::*, MultiAssetDelegationInfo};
 	use types::*;
 
 	#[pallet::config]
@@ -77,6 +76,10 @@ pub mod module {
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// The currency mechanism.
 		type Currency: ReservableCurrency<Self::AccountId>;
+
+		/// The fungibles trait used for managing fungible assets.
+		type Fungibles: Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
+			+ Mutate<Self::AccountId, AssetId = Self::AssetId>;
 
 		/// `Pallet` EVM Address.
 		#[pallet::constant]
@@ -286,6 +289,8 @@ pub mod module {
 		MasterBlueprintServiceManagerRevisionNotFound,
 		/// Maximum number of Master Blueprint Service Manager revisions reached.
 		MaxMasterBlueprintServiceManagerVersionsExceeded,
+		/// The ERC20 transfer failed.
+		ERC20TransferFailed,
 	}
 
 	#[pallet::event]
@@ -847,7 +852,7 @@ pub mod module {
 			request_args: Vec<Field<T::Constraints, T::AccountId>>,
 			assets: Vec<T::AssetId>,
 			#[pallet::compact] ttl: BlockNumberFor<T>,
-			#[pallet::compact] payment_asset: Asset<T::AssetId>,
+			payment_asset: Asset<T::AssetId>,
 			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
@@ -865,14 +870,34 @@ pub mod module {
 				preferences.push(prefs);
 			}
 
-			// Transfer the request value to the pallet
-			T::Currency::transfer(
-				&caller,
-				&Self::account_id(),
-				value,
-				ExistenceRequirement::KeepAlive,
-			)?;
+			// Payment transfer
+			match payment_asset {
+				// Handle the case of native currency.
+				Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+					T::Currency::transfer(
+						&caller,
+						&Self::account_id(),
+						value,
+						ExistenceRequirement::KeepAlive,
+					)?;
+				},
+				Asset::Custom(asset_id) => {
+					T::Fungibles::transfer(
+						asset_id,
+						&caller,
+						&Self::account_id(),
+						value,
+						Preservation::Preserve,
+					)?;
+				},
+				Asset::Erc20(token) => {
+					let (success, _weight) =
+						Self::erc20_transfer(token, &caller, Self::address(), value)?;
+					ensure!(success, Error::<T>::ERC20TransferFailed);
+				},
+			};
 
+			// Transfer the request value to the pallet
 			let service_id = Self::next_instance_id();
 			let (allowed, _weight) = Self::on_request_hook(
 				&blueprint,

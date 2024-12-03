@@ -2,6 +2,7 @@
 
 use fp_evm::PrecompileHandle;
 use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
+use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_evm::AddressMapping;
 use pallet_services::types::BalanceOf;
 use parity_scale_codec::Decode;
@@ -10,7 +11,7 @@ use sp_core::U256;
 use sp_runtime::traits::Dispatchable;
 use sp_runtime::Percent;
 use sp_std::{marker::PhantomData, vec::Vec};
-use tangle_primitives::services::{Field, OperatorPreferences, ServiceBlueprint};
+use tangle_primitives::services::{Asset, Field, OperatorPreferences, ServiceBlueprint};
 
 #[cfg(test)]
 mod mock;
@@ -112,7 +113,9 @@ where
 	}
 
 	/// Request a new service.
-	#[precompile::public("requestService(uint256,uint256[],bytes,bytes,bytes)")]
+	#[precompile::public(
+		"requestService(uint256,uint256[],bytes,bytes,bytes,uint256,address,uint256)"
+	)]
 	fn request_service(
 		handle: &mut impl PrecompileHandle,
 		blueprint_id: U256,
@@ -120,6 +123,10 @@ where
 		permitted_callers_data: UnboundedBytes,
 		service_providers_data: UnboundedBytes,
 		request_args_data: UnboundedBytes,
+		ttl: U256,
+		payment_asset_id: U256,
+		payment_token_address: Address,
+		amount: U256,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -151,14 +158,54 @@ where
 		};
 		let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
 			.map_err(|_| revert("Value is not a valid balance"))?;
+
+		let ttl_bytes = {
+			let mut ttl_bytes = [0u8; core::mem::size_of::<U256>()];
+			ttl.to_little_endian(&mut ttl_bytes);
+			ttl_bytes
+		};
+
+		let ttl = BlockNumberFor::<Runtime>::decode(&mut &ttl_bytes[..])
+			.map_err(|_| revert("Invalid ttl"))?;
+
+		let amount = {
+			let mut amount_bytes = [0u8; core::mem::size_of::<U256>()];
+			amount.to_little_endian(&mut amount_bytes);
+			BalanceOf::<Runtime>::decode(&mut &amount_bytes[..])
+				.map_err(|_| revert("Amount is not a valid balance"))?
+		};
+
+		const ZERO_ADDRESS: [u8; 20] = [0; 20];
+
+		let (payment_asset, amount) = match (payment_asset_id.as_u32(), payment_token_address.0 .0)
+		{
+			(0, ZERO_ADDRESS) => (Asset::Custom(0u32.into()), value),
+			(0, erc20_token) => {
+				if value != Default::default() {
+					return Err(revert("Value should be zero for ERC20 payment asset"));
+				}
+				(Asset::Erc20(erc20_token.into()), amount)
+			},
+			(other_asset_id, ZERO_ADDRESS) => {
+				if value != Default::default() {
+					return Err(revert("Value should be zero for custom payment asset"));
+				}
+				(Asset::Custom(other_asset_id.into()), amount)
+			},
+			(_other_asset_id, _erc20_token) => {
+				return Err(revert("Payment asset should be either custom or ERC20"));
+			},
+		};
+
 		let call = pallet_services::Call::<Runtime>::request {
 			blueprint_id,
 			permitted_callers,
 			operators,
-			ttl: 10000_u32.into(),
+			ttl,
 			assets,
 			request_args,
-			value,
+			payment_asset,
+			value: amount,
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;

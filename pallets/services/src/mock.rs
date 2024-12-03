@@ -20,11 +20,11 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
 };
-use frame_support::derive_impl;
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, OneSessionHandler},
 };
+use frame_support::{derive_impl, traits::AsEnsureOriginWithArg};
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
@@ -237,6 +237,27 @@ impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 	}
 }
 
+impl pallet_assets::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = u128;
+	type AssetId = AssetId;
+	type AssetIdParameter = u32;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<AccountId>>;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type AssetDeposit = ConstU128<1>;
+	type AssetAccountDeposit = ConstU128<10>;
+	type MetadataDepositBase = ConstU128<1>;
+	type MetadataDepositPerByte = ConstU128<1>;
+	type ApprovalDeposit = ConstU128<1>;
+	type StringLimit = ConstU32<50>;
+	type Freezer = ();
+	type WeightInfo = ();
+	type CallbackHandle = ();
+	type Extra = ();
+	type RemoveItemsLimit = ConstU32<5>;
+}
+
 pub type AssetId = u32;
 
 pub struct MockDelegationManager;
@@ -384,6 +405,7 @@ impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
+	type Fungibles = Assets;
 	type PalletEVMAddress = ServicesEVMAddress;
 	type AssetId = AssetId;
 	type EvmRunner = MockedEvmRunner;
@@ -425,6 +447,7 @@ construct_runtime!(
 		System: frame_system,
 		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
+		Assets: pallet_assets,
 		Services: pallet_services,
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
@@ -457,6 +480,10 @@ pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
 pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 pub const HOOKS_TEST: H160 = H160([0x22; 20]);
+pub const TNT: AssetId = 0;
+pub const USDC: AssetId = 1;
+pub const WETH: AssetId = 2;
+pub const WBTC: AssetId = 3;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -524,6 +551,35 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
 
 	evm_config.assimilate_storage(&mut t).unwrap();
+
+	let assets_config = pallet_assets::GenesisConfig::<Runtime> {
+		assets: vec![
+			(USDC, mock_pub_key(1), true, 100_000), // 1 cent.
+			(WETH, mock_pub_key(2), true, 100),     // 100 wei.
+			(WBTC, mock_pub_key(3), true, 100),     // 100 satoshi.
+		],
+		metadata: vec![
+			(USDC, Vec::from(b"USD Coin"), Vec::from(b"USDC"), 6),
+			(WETH, Vec::from(b"Wrapped Ether"), Vec::from(b"WETH"), 18),
+			(WBTC, Vec::from(b"Wrapped Bitcoin"), Vec::from(b"WBTC"), 18),
+		],
+		accounts: vec![
+			(USDC, mock_pub_key(1), 1_000_000 * 10u128.pow(6)),
+			(WETH, mock_pub_key(1), 100 * 10u128.pow(18)),
+			(WBTC, mock_pub_key(1), 50 * 10u128.pow(18)),
+			//
+			(USDC, mock_pub_key(2), 1_000_000 * 10u128.pow(6)),
+			(WETH, mock_pub_key(2), 100 * 10u128.pow(18)),
+			(WBTC, mock_pub_key(2), 50 * 10u128.pow(18)),
+			//
+			(USDC, mock_pub_key(3), 1_000_000 * 10u128.pow(6)),
+			(WETH, mock_pub_key(3), 100 * 10u128.pow(18)),
+			(WBTC, mock_pub_key(3), 50 * 10u128.pow(18)),
+		],
+		next_asset_id: Some(4),
+	};
+
+	assets_config.assimilate_storage(&mut t).unwrap();
 
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));

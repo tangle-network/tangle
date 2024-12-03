@@ -624,25 +624,22 @@ pub enum ApprovalState {
 }
 
 /// Different types of assets that can be used.
-#[derive(
-	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
-)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum Aseet<AssetId> {
-	/// The Native Asset.
-	///
-	/// alias for AssetId = 0.
-	#[codec(index = 0)]
-	#[default]
-	Native,
-
+pub enum Asset<AssetId> {
 	/// Use the specified AssetId.
-	#[codec(index = 1)]
+	#[codec(index = 0)]
 	Custom(AssetId),
 
 	/// Use an ERC20-like token with the specified contract address.
-	#[codec(index = 2)]
+	#[codec(index = 1)]
 	Erc20(sp_core::H160),
+}
+
+impl<AssetId: sp_runtime::traits::Zero> Default for Asset<AssetId> {
+	fn default() -> Self {
+		Asset::Custom(sp_runtime::traits::Zero::zero())
+	}
 }
 
 /// Represents the pricing structure for various hardware resources.

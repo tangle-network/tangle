@@ -29,9 +29,6 @@ const CHARLIE: u8 = 3;
 const DAVE: u8 = 4;
 const EVE: u8 = 5;
 
-const USDC: AssetId = 1;
-const WETH: AssetId = 2;
-
 const KEYGEN_JOB_ID: u8 = 0;
 const SIGN_JOB_ID: u8 = 1;
 
@@ -408,6 +405,7 @@ fn request_service() {
 			Default::default(),
 			vec![USDC, WETH],
 			100,
+			Asset::Custom(USDC),
 			0,
 		));
 
@@ -508,6 +506,7 @@ fn request_service_with_no_assets() {
 				Default::default(),
 				vec![], // no assets
 				100,
+				Asset::Custom(USDC),
 				0,
 			),
 			Error::<Runtime>::NoAssetsProvided
@@ -557,6 +556,7 @@ fn job_calls() {
 			Default::default(),
 			vec![WETH],
 			100,
+			Asset::Custom(USDC),
 			0,
 		));
 
@@ -649,6 +649,7 @@ fn job_result() {
 			Default::default(),
 			vec![WETH],
 			100,
+			Asset::Custom(USDC),
 			0,
 		));
 
@@ -766,6 +767,7 @@ fn deploy() -> Deployment {
 		Default::default(),
 		vec![WETH],
 		100,
+		Asset::Custom(USDC),
 		0,
 	));
 
@@ -1071,6 +1073,7 @@ fn hooks() {
 			Default::default(),
 			vec![USDC, WETH],
 			100,
+			Asset::Custom(USDC),
 			0,
 		));
 		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnRequest()")]);

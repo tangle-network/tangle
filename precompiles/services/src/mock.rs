@@ -19,13 +19,13 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
 };
-use frame_support::derive_impl;
 use frame_support::pallet_prelude::Hooks;
 use frame_support::pallet_prelude::Weight;
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{ConstU128, OneSessionHandler},
 };
+use frame_support::{derive_impl, traits::AsEnsureOriginWithArg};
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
@@ -243,6 +243,27 @@ impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 			H160(addr)
 		})
 	}
+}
+
+impl pallet_assets::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = u128;
+	type AssetId = AssetId;
+	type AssetIdParameter = u32;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<AccountId>>;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type AssetDeposit = ConstU128<1>;
+	type AssetAccountDeposit = ConstU128<10>;
+	type MetadataDepositBase = ConstU128<1>;
+	type MetadataDepositPerByte = ConstU128<1>;
+	type ApprovalDeposit = ConstU128<1>;
+	type StringLimit = ConstU32<50>;
+	type Freezer = ();
+	type WeightInfo = ();
+	type CallbackHandle = ();
+	type Extra = ();
+	type RemoveItemsLimit = ConstU32<5>;
 }
 
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
@@ -494,6 +515,7 @@ impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
+	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PalletEVMAddress = ServicesEVMAddress;
 	type EvmRunner = MockedEvmRunner;
@@ -535,6 +557,7 @@ construct_runtime!(
 		System: frame_system,
 		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
+		Assets: pallet_assets,
 		Services: pallet_services,
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
@@ -554,6 +577,11 @@ pub fn mock_authorities(vec: Vec<u8>) -> Vec<AccountId> {
 
 pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
+
+pub const TNT: AssetId = 0;
+pub const USDC: AssetId = 1;
+pub const WETH: AssetId = 2;
+pub const WBTC: AssetId = 3;
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles
 #[derive(Default)]

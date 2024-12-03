@@ -197,6 +197,10 @@ fn test_request_service() {
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
 					assets: [WETH].into_iter().map(Into::into).collect(),
+					ttl: U256::from(1000),
+					payment_asset_id: U256::from(0),
+					payment_token_address: Default::default(),
+					amount: U256::from(0),
 				},
 			)
 			.execute_returns(());
@@ -314,6 +318,10 @@ fn test_terminate_service() {
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
 					assets: [WETH].into_iter().map(Into::into).collect(),
+					ttl: U256::from(1000),
+					payment_asset_id: U256::from(0),
+					payment_token_address: Default::default(),
+					amount: U256::from(0),
 				},
 			)
 			.execute_returns(());
