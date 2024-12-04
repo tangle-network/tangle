@@ -9,8 +9,8 @@ use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use sp_core::{H160, U256};
 use sp_runtime::traits::{UniqueSaturatedInto, Zero};
 use tangle_primitives::services::{
-	BlueprintServiceManager, Field, MasterBlueprintServiceManagerRevision, OperatorPreferences,
-	Service, ServiceBlueprint,
+	Asset, BlueprintServiceManager, Field, MasterBlueprintServiceManagerRevision,
+	OperatorPreferences, Service, ServiceBlueprint,
 };
 
 use super::*;
@@ -449,6 +449,7 @@ impl<T: Config> Pallet<T> {
 		permitted_callers: &[T::AccountId],
 		_assets: &[T::AssetId],
 		ttl: BlockNumberFor<T>,
+		paymet_asset: Asset<T::AssetId>,
 		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
@@ -463,40 +464,27 @@ impl<T: Config> Pallet<T> {
 						internal_type: None,
 					},
 					ethabi::Param {
-						name: String::from("requestId"),
-						kind: ethabi::ParamType::Uint(64),
-						internal_type: None,
-					},
-					ethabi::Param {
-						name: String::from("requester"),
-						kind: ethabi::ParamType::Address,
-						internal_type: None,
-					},
-					ethabi::Param {
-						name: String::from("operatorsWithPreferences"),
-						kind: ethabi::ParamType::Array(Box::new(
-							OperatorPreferences::to_ethabi_param_type(),
-						)),
-						internal_type: Some(String::from("OperatorPreferences[]")),
-					},
-					ethabi::Param {
-						name: String::from("requestInputs"),
-						kind: ethabi::ParamType::Bytes,
-						internal_type: None,
-					},
-					ethabi::Param {
-						name: String::from("permittedCallers"),
-						kind: ethabi::ParamType::Array(Box::new(ethabi::ParamType::Address)),
-						internal_type: Some(String::from("address[]")),
-					},
-					// ethabi::Param {
-					// 	name: String::from("assets"),
-					// 	kind: ethabi::ParamType::Array(Box::new(ethabi::ParamType::Address)),
-					// 	internal_type: Some(String::from("address[]")),
-					// },
-					ethabi::Param {
-						name: String::from("ttl"),
-						kind: ethabi::ParamType::Uint(64),
+						name: String::from("params"),
+						kind: ethabi::ParamType::Tuple(vec![
+							// requestId
+							ethabi::ParamType::Uint(64),
+							// requester
+							ethabi::ParamType::Address,
+							// operatorsWithPreferences
+							ethabi::ParamType::Array(Box::new(
+								OperatorPreferences::to_ethabi_param_type(),
+							)),
+							// requestInputs
+							ethabi::ParamType::Bytes,
+							// permittedCallers
+							ethabi::ParamType::Array(Box::new(ethabi::ParamType::Address)),
+							// ttl
+							ethabi::ParamType::Uint(64),
+							// payment asset
+							Asset::<T::AssetId>::to_ethabi_param_type(),
+							// value
+							ethabi::ParamType::Uint(256),
+						]),
 						internal_type: None,
 					},
 				],
@@ -506,21 +494,25 @@ impl<T: Config> Pallet<T> {
 			},
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
-				Token::Uint(ethabi::Uint::from(request_id)),
-				Token::Address(T::EvmAddressMapping::into_address(requester.clone())),
-				Token::Array(operators.iter().map(OperatorPreferences::to_ethabi).collect()),
-				Token::Bytes(Field::encode_to_ethabi(request_args)),
-				Token::Array(
-					permitted_callers
-						.iter()
-						.map(|caller| {
-							Token::Address(T::EvmAddressMapping::into_address(caller.clone()))
-								.clone()
-						})
-						.collect(),
-				),
-				// Token::Array(vec![]),
-				Token::Uint(ethabi::Uint::from(ttl.into())),
+				Token::Tuple(vec![
+					Token::Uint(ethabi::Uint::from(request_id)),
+					Token::Address(T::EvmAddressMapping::into_address(requester.clone())),
+					Token::Array(operators.iter().map(OperatorPreferences::to_ethabi).collect()),
+					Token::Bytes(Field::encode_to_ethabi(request_args)),
+					Token::Array(
+						permitted_callers
+							.iter()
+							.map(|caller| {
+								Token::Address(T::EvmAddressMapping::into_address(caller.clone()))
+									.clone()
+							})
+							.collect(),
+					),
+					// Token::Array(vec![]),
+					Token::Uint(ethabi::Uint::from(ttl.into())),
+					paymet_asset.to_ethabi(),
+					Token::Uint(ethabi::Uint::from(value.using_encoded(U256::from_little_endian))),
+				]),
 			],
 			value,
 		)

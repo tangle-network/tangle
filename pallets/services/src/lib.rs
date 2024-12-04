@@ -870,34 +870,35 @@ pub mod module {
 				preferences.push(prefs);
 			}
 
-			// Payment transfer
-			match payment_asset {
-				// Handle the case of native currency.
-				Asset::Custom(asset_id) if asset_id == Zero::zero() => {
-					T::Currency::transfer(
-						&caller,
-						&Self::account_id(),
-						value,
-						ExistenceRequirement::KeepAlive,
-					)?;
-				},
-				Asset::Custom(asset_id) => {
-					T::Fungibles::transfer(
-						asset_id,
-						&caller,
-						&Self::account_id(),
-						value,
-						Preservation::Preserve,
-					)?;
-				},
-				Asset::Erc20(token) => {
-					let (success, _weight) =
-						Self::erc20_transfer(token, &caller, Self::address(), value)?;
-					ensure!(success, Error::<T>::ERC20TransferFailed);
-				},
-			};
+			if value != Zero::zero() {
+				// Payment transfer
+				match payment_asset {
+					// Handle the case of native currency.
+					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+						T::Currency::transfer(
+							&caller,
+							&Self::account_id(),
+							value,
+							ExistenceRequirement::KeepAlive,
+						)?;
+					},
+					Asset::Custom(asset_id) => {
+						T::Fungibles::transfer(
+							asset_id,
+							&caller,
+							&Self::account_id(),
+							value,
+							Preservation::Preserve,
+						)?;
+					},
+					Asset::Erc20(token) => {
+						let (success, _weight) =
+							Self::erc20_transfer(token, &caller, Self::address(), value)?;
+						ensure!(success, Error::<T>::ERC20TransferFailed);
+					},
+				};
+			}
 
-			// Transfer the request value to the pallet
 			let service_id = Self::next_instance_id();
 			let (allowed, _weight) = Self::on_request_hook(
 				&blueprint,
@@ -909,6 +910,7 @@ pub mod module {
 				&permitted_callers,
 				&assets,
 				ttl,
+				payment_asset,
 				value,
 			)?;
 

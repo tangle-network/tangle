@@ -104,6 +104,7 @@ std = [
  "pallet-ethereum/std",
  "pallet-evm/std",
  "pallet-evm-chain-id/std",
+ "pallet-assets/std",
 
  "pallet-evm-precompile-modexp/std",
  "pallet-evm-precompile-sha3fips/std",

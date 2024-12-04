@@ -642,6 +642,43 @@ impl<AssetId: sp_runtime::traits::Zero> Default for Asset<AssetId> {
 	}
 }
 
+impl<AssetId: Encode> Asset<AssetId> {
+	pub fn to_ethabi_param_type() -> ethabi::ParamType {
+		ethabi::ParamType::Tuple(vec![
+			// Kind of the Asset
+			ethabi::ParamType::Uint(8),
+			// Data of the Asset (Contract Address or AssetId)
+			ethabi::ParamType::FixedBytes(32),
+		])
+	}
+
+	pub fn to_ethabi_param() -> ethabi::Param {
+		ethabi::Param {
+			name: String::from("asset"),
+			kind: Self::to_ethabi_param_type(),
+			internal_type: Some(String::from("struct ServiceOperators.Asset")),
+		}
+	}
+
+	pub fn to_ethabi(&self) -> ethabi::Token {
+		match self {
+			Asset::Custom(asset_id) => {
+				let asset_id = asset_id.using_encoded(ethabi::Uint::from_little_endian);
+				let mut asset_id_bytes = [0u8; core::mem::size_of::<ethabi::Uint>()];
+				asset_id.to_big_endian(&mut asset_id_bytes);
+				ethabi::Token::Tuple(vec![
+					ethabi::Token::Uint(0.into()),
+					ethabi::Token::FixedBytes(asset_id_bytes.into()),
+				])
+			},
+			Asset::Erc20(addr) => ethabi::Token::Tuple(vec![
+				ethabi::Token::Uint(1.into()),
+				ethabi::Token::FixedBytes(addr.to_fixed_bytes().into()),
+			]),
+		}
+	}
+}
+
 /// Represents the pricing structure for various hardware resources.
 /// All prices are specified in USD/hr, calculated based on the average block time.
 #[derive(
@@ -683,7 +720,7 @@ impl PriceTargets {
 		ethabi::Param {
 			name: String::from("priceTargets"),
 			kind: Self::to_ethabi_param_type(),
-			internal_type: Some(String::from("struct IBlueprintServiceManager.PriceTargets")),
+			internal_type: Some(String::from("struct ServiceOperators.PriceTargets")),
 		}
 	}
 
