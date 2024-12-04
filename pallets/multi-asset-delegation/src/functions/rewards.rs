@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use super::StakePoints;
+use super::RestakeDepositScore;
 use super::*;
 use crate::{
 	types::{DelegatorBond, *},
@@ -25,9 +25,9 @@ use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::RoundIndex;
 
 impl<T: Config> Pallet<T> {
-	/// Convert asset amount to points. Currently returns the same value, to be updated later.
-	/// TODO : Once we have an oracle for asset price, we can use it to convert to points
-	pub fn asset_to_points(amount: BalanceOf<T>) -> BalanceOf<T> {
+	/// Convert asset amount to score. Currently returns the same value, to be updated later.
+	/// TODO : Once we have an oracle for asset price, we can use it to convert to score
+	pub fn asset_to_score(amount: BalanceOf<T>) -> BalanceOf<T> {
 		amount
 	}
 
@@ -52,53 +52,53 @@ impl<T: Config> Pallet<T> {
 				// We only reward asset in a reward vault
 				if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(asset_id) {
 					if let Some(config) = reward_config.configs.get(&vault_id) {
-						// Calculate total points and distribute rewards
+						// Calculate total score and distribute rewards
 						let current_block = frame_system::Pallet::<T>::block_number();
-						let mut total_points = BalanceOf::<T>::zero();
-						let mut delegation_points = Vec::new();
+						let mut total_score = BalanceOf::<T>::zero();
+						let mut delegation_score = Vec::new();
 
-						// Calculate points for each delegation
+						// Calculate score for each delegation
 						for delegation in delegations {
-							if let Some(stake_points) =
-								<StakePoints<T>>::get(&delegation.delegator, asset_id)
+							if let Some(restake_score) =
+								<RestakeDepositScore<T>>::get(&delegation.delegator, asset_id)
 							{
-								// Skip if points have expired
-								if stake_points.expiry <= current_block {
+								// Skip if score has expired
+								if restake_score.expiry <= current_block {
 									continue;
 								}
 
-								// Convert asset amount to points
-								let base_points = Self::asset_to_points(delegation.amount);
+								// Convert asset amount to score
+								let base_score = Self::asset_to_score(delegation.amount);
 
-								// Calculate points with multipliers
-								let mut points = base_points;
-								points = points.saturating_mul(stake_points.lock_multiplier.into());
+								// Calculate score with multipliers
+								let mut score = base_score;
+								score = score.saturating_mul(restake_score.lock_multiplier.into());
 
 								// Apply TNT boost multiplier if the asset is TNT
 								if asset_id == &T::NativeAssetId::get() {
-									points =
-										points.saturating_mul(config.tnt_boost_multiplier.into());
+									score =
+										score.saturating_mul(config.tnt_boost_multiplier.into());
 								}
 
-								total_points = total_points.saturating_add(points);
-								delegation_points.push((delegation.delegator.clone(), points));
+								total_score = total_score.saturating_add(score);
+								delegation_score.push((delegation.delegator.clone(), score));
 							}
 						}
 
-						if !total_points.is_zero() {
+						if !total_score.is_zero() {
 							// Calculate the total reward based on the APY
 							let total_reward =
-								Self::calculate_total_reward(config.apy, total_points)?;
+								Self::calculate_total_reward(config.apy, total_score)?;
 
 							// Store rewards for each delegator
-							for (delegator, points) in delegation_points {
-								let reward = total_reward.saturating_mul(points) / total_points;
+							for (delegator, score) in delegation_score {
+								let reward = total_reward.saturating_mul(score) / total_score;
 
 								// Handle auto-compounding if enabled
-								if let Some(stake_points) =
-									<StakePoints<T>>::get(&delegator, asset_id)
+								if let Some(restake_score) =
+									<RestakeDepositScore<T>>::get(&delegator, asset_id)
 								{
-									if stake_points.auto_compound {
+									if restake_score.auto_compound {
 										Self::auto_compound_reward(&delegator, reward, asset_id)?;
 									} else {
 										// Store reward for later claiming
@@ -140,9 +140,9 @@ impl<T: Config> Pallet<T> {
 		// If TNT, restake directly
 		if asset_id == &T::NativeAssetId::get() {
 			// Add reward to existing stake
-			if let Some(mut stake_points) = <StakePoints<T>>::get(delegator, asset_id) {
-				stake_points.base_points = stake_points.base_points.saturating_add(reward);
-				<StakePoints<T>>::insert(delegator, asset_id, stake_points);
+			if let Some(mut restake_score) = <RestakeDepositScore<T>>::get(delegator, asset_id) {
+				restake_score.base_score = restake_score.base_score.saturating_add(reward);
+				<RestakeDepositScore<T>>::insert(delegator, asset_id, restake_score);
 
 				// Emit auto-compound event
 				Self::deposit_event(Event::RewardAutoCompounded {

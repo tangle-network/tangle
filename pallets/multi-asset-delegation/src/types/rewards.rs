@@ -37,14 +37,14 @@ pub struct LockMultiplier {
 	pub multiplier: u32,
 }
 
-/// Points tracking for a delegator's stake
+/// Score tracking for a delegator's restake deposits
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct StakePoints<Balance, BlockNumber> {
-	// Base points (1:1 with staked amount)
-	pub base_points: Balance,
+pub struct RestakeDepositScore<Balance, BlockNumber> {
+	// Base score (1:1 with staked amount)
+	pub base_score: Balance,
 	// Current multiplier based on lock period
 	pub lock_multiplier: u32,
-	// Block number when points expire
+	// Block number when score expire
 	pub expiry: BlockNumber,
 	// Whether auto-compound is enabled
 	pub auto_compound: bool,

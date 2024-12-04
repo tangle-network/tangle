@@ -253,15 +253,15 @@ pub mod pallet {
 	pub type RewardConfigStorage<T: Config> =
 		StorageValue<_, RewardConfig<T::VaultId, BalanceOf<T>>, OptionQuery>;
 
-	/// Storage for stake points.
+	/// Storage for restaking deposit scores.
 	#[pallet::storage]
-	pub type StakePoints<T: Config> = StorageDoubleMap<
+	pub type RestakeDepositScore<T: Config> = StorageDoubleMap<
 		_,
 		Blake2_128Concat,
 		T::AccountId,
 		Blake2_128Concat,
 		T::AssetId,
-		crate::types::rewards::StakePoints<BalanceOf<T>, BlockNumberFor<T>>,
+		crate::types::rewards::RestakeDepositScore<BalanceOf<T>, BlockNumberFor<T>>,
 		OptionQuery,
 	>;
 
@@ -851,17 +851,18 @@ pub mod pallet {
 			let expiry = current_block.saturating_add(lock_duration);
 
 			// Update stake points
-			StakePoints::<T>::try_mutate(
+			RestakeDepositScore::<T>::try_mutate(
 				who.clone(),
 				asset_id,
 				|maybe_points| -> DispatchResult {
-					let points =
-						maybe_points.get_or_insert_with(|| crate::types::rewards::StakePoints {
-							base_points: Zero::zero(),
+					let points = maybe_points.get_or_insert_with(|| {
+						crate::types::rewards::RestakeDepositScore {
+							base_score: Zero::zero(),
 							lock_multiplier: 1,
 							expiry: current_block,
 							auto_compound: false,
-						});
+						}
+					});
 
 					points.lock_multiplier = lock_multiplier.multiplier;
 					points.expiry = expiry;
@@ -880,17 +881,18 @@ pub mod pallet {
 		pub fn toggle_auto_compound(origin: OriginFor<T>, asset_id: T::AssetId) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
-			StakePoints::<T>::try_mutate(
+			RestakeDepositScore::<T>::try_mutate(
 				who.clone(),
 				asset_id,
 				|maybe_points| -> DispatchResult {
-					let points =
-						maybe_points.get_or_insert_with(|| crate::types::rewards::StakePoints {
-							base_points: Zero::zero(),
+					let points = maybe_points.get_or_insert_with(|| {
+						crate::types::rewards::RestakeDepositScore {
+							base_score: Zero::zero(),
 							lock_multiplier: 1,
 							expiry: frame_system::Pallet::<T>::block_number(),
 							auto_compound: false,
-						});
+						}
+					});
 
 					points.auto_compound = !points.auto_compound;
 

@@ -17,7 +17,7 @@
 use super::*;
 use crate::{
 	types::{
-		rewards::StakePoints, DelegatorBlueprintSelection, DelegatorBond, OperatorSnapshot,
+		rewards::RestakeDepositScore, DelegatorBlueprintSelection, DelegatorBond, OperatorSnapshot,
 		RewardConfig, RewardConfigForAssetVault,
 	},
 	AssetLookupRewardVaults, AtStake, CurrentRound, Error, RewardConfigStorage,
@@ -507,11 +507,11 @@ fn distribute_rewards_should_work() {
 		AssetLookupRewardVaults::<Test>::insert(asset_id, asset_id);
 
 		// Set up stake points for the delegator
-		crate::StakePoints::<Test>::insert(
+		crate::RestakeDepositScore::<Test>::insert(
 			delegator,
 			asset_id,
-			StakePoints {
-				base_points: amount,
+			RestakeDepositScore {
+				base_score: amount,
 				lock_multiplier: 1,
 				expiry: 1000, // Set a future expiry
 				auto_compound: false,
@@ -592,22 +592,22 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 		AssetLookupRewardVaults::<Test>::insert(asset_id2, asset_id2);
 
 		// Set up stake points for both delegators
-		crate::StakePoints::<Test>::insert(
+		crate::RestakeDepositScore::<Test>::insert(
 			delegator1,
 			asset_id1,
-			StakePoints {
-				base_points: amount1,
+			RestakeDepositScore {
+				base_score: amount1,
 				lock_multiplier: 1,
 				expiry: 1000, // Set a future expiry
 				auto_compound: false,
 			},
 		);
 
-		crate::StakePoints::<Test>::insert(
+		crate::RestakeDepositScore::<Test>::insert(
 			delegator2,
 			asset_id2,
-			StakePoints {
-				base_points: amount2,
+			RestakeDepositScore {
+				base_score: amount2,
 				lock_multiplier: 1,
 				expiry: 1000, // Set a future expiry
 				auto_compound: false,
