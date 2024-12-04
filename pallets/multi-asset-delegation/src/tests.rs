@@ -19,6 +19,7 @@ use crate::{mock::*, tests::RuntimeEvent};
 pub mod delegate;
 pub mod deposit;
 pub mod operator;
+pub mod rewards;
 pub mod session_manager;
 
 use crate::tests::deposit::{create_and_mint_tokens, mint_tokens};

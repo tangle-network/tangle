@@ -255,6 +255,7 @@ pub mod pallet {
 
 	/// Storage for restaking deposit scores.
 	#[pallet::storage]
+	#[pallet::getter(fn restake_deposit_score)]
 	pub type RestakeDepositScore<T: Config> = StorageDoubleMap<
 		_,
 		Blake2_128Concat,
@@ -470,8 +471,6 @@ pub mod pallet {
 		APYExceedsMaximum,
 		/// Cap cannot be zero
 		CapCannotBeZero,
-		/// Cap exceeds total supply of asset
-		CapExceedsTotalSupply,
 		/// An unstake request is already pending
 		PendingUnstakeRequestExists,
 		/// The blueprint is not selected
@@ -746,12 +745,6 @@ pub mod pallet {
 
 			// Validate the cap is not greater than the total supply
 			let asset_ids = RewardVaults::<T>::get(vault_id).ok_or(Error::<T>::VaultNotFound)?;
-			for asset_id in asset_ids.iter() {
-				ensure!(
-					T::Fungibles::total_issuance(*asset_id) >= cap,
-					Error::<T>::CapExceedsTotalSupply
-				);
-			}
 
 			// Initialize the reward config if not already initialized
 			RewardConfigStorage::<T>::mutate(|maybe_config| {
