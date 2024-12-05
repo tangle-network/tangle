@@ -16,12 +16,13 @@
 #![allow(clippy::all)]
 use super::*;
 use crate::{self as pallet_services};
+use ethabi::Uint;
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
 };
 use frame_support::{
-	construct_runtime, parameter_types,
+	assert_ok, construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, OneSessionHandler},
 };
 use frame_support::{derive_impl, traits::AsEnsureOriginWithArg};
@@ -29,6 +30,7 @@ use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
+use serde_json::json;
 use sp_core::{sr25519, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
@@ -37,6 +39,7 @@ use sp_runtime::{
 	AccountId32, BuildStorage, Perbill,
 };
 
+use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
 
 pub type AccountId = AccountId32;
@@ -469,6 +472,10 @@ pub fn mock_pub_key(id: u8) -> AccountId {
 	sr25519::Public::from_raw([id; 32]).into()
 }
 
+pub fn mock_address(id: u8) -> H160 {
+	H160([id; 20])
+}
+
 pub fn mock_authorities(vec: Vec<u8>) -> Vec<AccountId> {
 	vec.into_iter().map(|id| mock_pub_key(id)).collect()
 }
@@ -480,7 +487,8 @@ pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
 pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 pub const HOOKS_TEST: H160 = H160([0x22; 20]);
-pub const TNT: AssetId = 0;
+pub const USDC_ERC20: H160 = H160([0x23; 20]);
+
 pub const USDC: AssetId = 1;
 pub const WETH: AssetId = 2;
 pub const WBTC: AssetId = 3;
@@ -546,6 +554,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		include_str!("./test-artifacts/HookTestBlueprintServiceManager.hex"),
 		HOOKS_TEST,
 	);
+	create_contract(include_str!("./test-artifacts/MockERC20.hex"), USDC_ERC20);
 
 	let evm_config =
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
@@ -554,9 +563,9 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 	let assets_config = pallet_assets::GenesisConfig::<Runtime> {
 		assets: vec![
-			(USDC, mock_pub_key(1), true, 100_000), // 1 cent.
-			(WETH, mock_pub_key(2), true, 100),     // 100 wei.
-			(WBTC, mock_pub_key(3), true, 100),     // 100 satoshi.
+			(USDC, authorities[0].clone(), true, 100_000), // 1 cent.
+			(WETH, authorities[1].clone(), true, 100),     // 100 wei.
+			(WBTC, authorities[2].clone(), true, 100),     // 100 satoshi.
 		],
 		metadata: vec![
 			(USDC, Vec::from(b"USD Coin"), Vec::from(b"USDC"), 6),
@@ -564,23 +573,22 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 			(WBTC, Vec::from(b"Wrapped Bitcoin"), Vec::from(b"WBTC"), 18),
 		],
 		accounts: vec![
-			(USDC, mock_pub_key(1), 1_000_000 * 10u128.pow(6)),
-			(WETH, mock_pub_key(1), 100 * 10u128.pow(18)),
-			(WBTC, mock_pub_key(1), 50 * 10u128.pow(18)),
+			(USDC, authorities[0].clone(), 1_000_000 * 10u128.pow(6)),
+			(WETH, authorities[0].clone(), 100 * 10u128.pow(18)),
+			(WBTC, authorities[0].clone(), 50 * 10u128.pow(18)),
 			//
-			(USDC, mock_pub_key(2), 1_000_000 * 10u128.pow(6)),
-			(WETH, mock_pub_key(2), 100 * 10u128.pow(18)),
-			(WBTC, mock_pub_key(2), 50 * 10u128.pow(18)),
+			(USDC, authorities[1].clone(), 1_000_000 * 10u128.pow(6)),
+			(WETH, authorities[1].clone(), 100 * 10u128.pow(18)),
+			(WBTC, authorities[1].clone(), 50 * 10u128.pow(18)),
 			//
-			(USDC, mock_pub_key(3), 1_000_000 * 10u128.pow(6)),
-			(WETH, mock_pub_key(3), 100 * 10u128.pow(18)),
-			(WBTC, mock_pub_key(3), 50 * 10u128.pow(18)),
+			(USDC, authorities[2].clone(), 1_000_000 * 10u128.pow(6)),
+			(WETH, authorities[2].clone(), 100 * 10u128.pow(18)),
+			(WBTC, authorities[2].clone(), 50 * 10u128.pow(18)),
 		],
 		next_asset_id: Some(4),
 	};
 
 	assets_config.assimilate_storage(&mut t).unwrap();
-
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
 	ext.execute_with(|| System::set_block_number(1));
@@ -588,6 +596,82 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		System::set_block_number(1);
 		Session::on_initialize(1);
 		<Staking as Hooks<u64>>::on_initialize(1);
+
+		let call = <Runtime as pallet_services::Config>::EvmRunner::call(
+			Services::address(),
+			USDC_ERC20,
+			serde_json::from_value::<ethabi::Function>(json!({
+				"name": "initialize",
+				"inputs": [
+					{
+						"name": "name_",
+						"type": "string",
+						"internalType": "string"
+					},
+					{
+						"name": "symbol_",
+						"type": "string",
+						"internalType": "string"
+					},
+					{
+						"name": "decimals_",
+						"type": "uint8",
+						"internalType": "uint8"
+					}
+				],
+				"outputs": [],
+				"stateMutability": "nonpayable"
+			}))
+			.unwrap()
+			.encode_input(&[
+				ethabi::Token::String("USD Coin".to_string()),
+				ethabi::Token::String("USDC".to_string()),
+				ethabi::Token::Uint(6.into()),
+			])
+			.unwrap(),
+			Default::default(),
+			30_000,
+			true,
+			false,
+		);
+
+		assert_ok!(call);
+		// Mint
+		for i in 0..authorities.len() {
+			let call = <Runtime as pallet_services::Config>::EvmRunner::call(
+				Services::address(),
+				USDC_ERC20,
+				serde_json::from_value::<ethabi::Function>(json!({
+					"name": "mint",
+					"inputs": [
+						{
+							"internalType": "address",
+							"name": "account",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "amount",
+							"type": "uint256"
+						}
+					],
+					"outputs": [],
+					"stateMutability": "nonpayable"
+				}))
+				.unwrap()
+				.encode_input(&[
+					ethabi::Token::Address(mock_address(i as u8).into()),
+					ethabi::Token::Uint(Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6)))),
+				])
+				.unwrap(),
+				Default::default(),
+				30_000,
+				true,
+				false,
+			);
+
+			assert_ok!(call);
+		}
 	});
 
 	ext

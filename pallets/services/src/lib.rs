@@ -1365,6 +1365,9 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
+		/// Adds a new Master Blueprint Service Manager to the list of revisions.
+		///
+		/// The caller needs to be an authorized Master Blueprint Service Manager Update Origin.
 		pub fn update_master_blueprint_service_manager(
 			origin: OriginFor<T>,
 			address: H160,
