@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - trigger-binary-on-release
 
 jobs:
   create-pre-release:
@@ -23,8 +22,8 @@ jobs:
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "commit_message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
 
-      # Generating a GitHub token, so that PRs and tags created by
-      # the release-plz-action can trigger actions workflows.
+      # Generating a GitHub token, so that tags created by the action
+      # triggers the other workflows
       - name: Generate GitHub token
         uses: actions/create-github-app-token@v1
         id: generate-token
