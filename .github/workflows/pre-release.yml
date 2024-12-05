@@ -28,7 +28,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.commit_info.outputs.sha_short }}
-          release_name: Pre-release ${{ steps.commit_info.outputs.sha_short }}
+          release_name: Tangle Pre-release ${{ steps.commit_info.outputs.sha_short }}
           body: |
             Commit: ${{ steps.commit_info.outputs.commit_message }}
           draft: false
