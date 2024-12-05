@@ -451,6 +451,7 @@ impl<T: Config> Pallet<T> {
 		ttl: BlockNumberFor<T>,
 		paymet_asset: Asset<T::AssetId>,
 		value: BalanceOf<T>,
+		native_value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -485,7 +486,7 @@ impl<T: Config> Pallet<T> {
 							// value
 							ethabi::ParamType::Uint(256),
 						]),
-						internal_type: None,
+						internal_type: Some(String::from("struct ServiceOperators.RequestParams")),
 					},
 				],
 				outputs: Default::default(),
@@ -514,7 +515,7 @@ impl<T: Config> Pallet<T> {
 					Token::Uint(ethabi::Uint::from(value.using_encoded(U256::from_little_endian))),
 				]),
 			],
-			value,
+			native_value,
 		)
 	}
 
@@ -1007,6 +1008,53 @@ impl<T: Config> Pallet<T> {
 		};
 
 		Ok((success, weight))
+	}
+
+	/// Get the balance of an ERC20 token for an account.
+	pub fn query_erc20_balance_of(
+		erc20: H160,
+		who: H160,
+	) -> Result<(U256, Weight), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		let transfer_fn = Function {
+			name: String::from("balanceOf"),
+			inputs: vec![ethabi::Param {
+				name: String::from("who"),
+				kind: ethabi::ParamType::Address,
+				internal_type: None,
+			}],
+			outputs: vec![ethabi::Param {
+				name: String::from("balance"),
+				kind: ethabi::ParamType::Uint(256),
+				internal_type: None,
+			}],
+			constant: None,
+			state_mutability: StateMutability::NonPayable,
+		};
+
+		let args = [Token::Address(who)];
+
+		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
+		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
+		let gas_limit = 300_000;
+		let info = Self::evm_call(Self::address(), erc20, U256::zero(), data, gas_limit)?;
+		let weight = Self::weight_from_call_info(&info);
+
+		// decode the result and return it
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		let balance = if let Some(data) = maybe_value {
+			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+			let success = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			if let ethabi::Token::Uint(val) = success {
+				*val
+			} else {
+				U256::zero()
+			}
+		} else {
+			U256::zero()
+		};
+
+		Ok((balance, weight))
 	}
 
 	/// Dispatches a hook to the EVM and returns if the call was successful with the used weight.

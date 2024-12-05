@@ -870,6 +870,8 @@ pub mod module {
 				preferences.push(prefs);
 			}
 
+			let mut native_value = Zero::zero();
+
 			if value != Zero::zero() {
 				// Payment transfer
 				match payment_asset {
@@ -881,6 +883,7 @@ pub mod module {
 							value,
 							ExistenceRequirement::KeepAlive,
 						)?;
+						native_value = value;
 					},
 					Asset::Custom(asset_id) => {
 						T::Fungibles::transfer(
@@ -912,6 +915,7 @@ pub mod module {
 				ttl,
 				payment_asset,
 				value,
+				native_value,
 			)?;
 
 			ensure!(allowed, Error::<T>::InvalidRequestInput);

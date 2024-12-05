@@ -489,6 +489,7 @@ pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 pub const HOOKS_TEST: H160 = H160([0x22; 20]);
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
 
+pub const TNT: AssetId = 0;
 pub const USDC: AssetId = 1;
 pub const WETH: AssetId = 2;
 pub const WBTC: AssetId = 3;
@@ -555,6 +556,18 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		HOOKS_TEST,
 	);
 	create_contract(include_str!("./test-artifacts/MockERC20.hex"), USDC_ERC20);
+
+	for i in 1..=authorities.len() {
+		evm_accounts.insert(
+			mock_address(i as u8),
+			fp_evm::GenesisAccount {
+				code: vec![],
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			},
+		);
+	}
 
 	let evm_config =
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
@@ -637,7 +650,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 
 		assert_ok!(call);
 		// Mint
-		for i in 0..authorities.len() {
+		for i in 1..=authorities.len() {
 			let call = <Runtime as pallet_services::Config>::EvmRunner::call(
 				Services::address(),
 				USDC_ERC20,

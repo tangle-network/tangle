@@ -18,6 +18,7 @@ use crate::types::ConstraintsOf;
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use mock::*;
+use sp_core::U256;
 use sp_core::{bounded_vec, ecdsa, ByteArray};
 use sp_runtime::{KeyTypeId, Percent};
 use tangle_primitives::services::*;
@@ -511,6 +512,57 @@ fn request_service_with_no_assets() {
 			),
 			Error::<Runtime>::NoAssetsProvided
 		);
+	});
+}
+
+#[test]
+fn request_service_with_payment_asset() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		let bob = mock_pub_key(BOB);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+
+		let charlie = mock_pub_key(CHARLIE);
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			vec![],
+			vec![bob.clone()],
+			Default::default(),
+			vec![TNT, USDC, WETH],
+			100,
+			Asset::Custom(USDC),
+			5 * 10u128.pow(6), // 5 USDC
+		));
+
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		// The Pallet account now has 5 USDC
+		assert_eq!(Assets::balance(USDC, Services::account_id()), 5 * 10u128.pow(6));
+
+		// Bob approves the request
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+
+		// The request is now fully approved
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+
+		// Now the service should be initiated
+		assert!(Instances::<Runtime>::contains_key(0));
 	});
 }
 
