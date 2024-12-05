@@ -3,7 +3,7 @@ name: Create Pre-release
 on:
   push:
     branches:
-      - master
+      - feat/release-on-merge
 
 jobs:
   create-pre-release:
