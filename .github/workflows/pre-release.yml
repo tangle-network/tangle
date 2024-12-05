@@ -1,0 +1,35 @@
+name: Create Pre-release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-pre-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get commit info
+        id: commit_info
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "commit_message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
+      - name: Create pre-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.commit_info.outputs.sha_short }}
+          release_name: Tangle Pre-release ${{ steps.commit_info.outputs.sha_short }}
+          body: |
+            Commit: ${{ steps.commit_info.outputs.commit_message }}
+          draft: false
+          prerelease: true
