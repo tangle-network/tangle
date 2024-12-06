@@ -14,11 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
-use crate::mock::{
-	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
+use crate::{
+	mock::{AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp},
+	ServicesPrecompile, ServicesPrecompileCall,
 };
-use crate::ServicesPrecompile;
-use crate::ServicesPrecompileCall;
 use fp_evm::FeeCalculator;
 use frame_support::{
 	parameter_types,

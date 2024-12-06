@@ -18,8 +18,9 @@
 
 //! Test utilities
 use crate::{ProxyPrecompile, ProxyPrecompileCall};
-use frame_support::derive_impl;
-use frame_support::{construct_runtime, parameter_types, traits::InstanceFilter, weights::Weight};
+use frame_support::{
+	construct_runtime, derive_impl, parameter_types, traits::InstanceFilter, weights::Weight,
+};
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
 use precompile_utils::{
 	precompile_set::{

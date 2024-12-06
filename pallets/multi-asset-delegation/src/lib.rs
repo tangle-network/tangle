@@ -79,19 +79,19 @@ pub mod pallet {
 	use crate::types::*;
 
 	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction};
-	use frame_support::traits::fungibles::Inspect;
 	use frame_support::{
 		pallet_prelude::*,
-		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
+		traits::{
+			fungibles::Inspect, tokens::fungibles, Currency, Get, LockableCurrency,
+			ReservableCurrency,
+		},
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
 	use scale_info::TypeInfo;
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
-	use sp_std::vec::Vec;
-	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
-	use tangle_primitives::BlueprintId;
-	use tangle_primitives::{traits::ServiceManager, RoundIndex};
+	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*, vec::Vec};
+	use tangle_primitives::{traits::ServiceManager, BlueprintId, RoundIndex};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]

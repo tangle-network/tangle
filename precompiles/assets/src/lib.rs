@@ -1,14 +1,15 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use fp_evm::PrecompileHandle;
-use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
-use frame_support::traits::fungibles::Inspect;
+use frame_support::{
+	dispatch::{GetDispatchInfo, PostDispatchInfo},
+	traits::fungibles::Inspect,
+};
 use pallet_evm::AddressMapping;
 use parity_scale_codec::MaxEncodedLen;
 use precompile_utils::{prelude::*, solidity};
 use sp_core::U256;
-use sp_runtime::traits::Dispatchable;
-use sp_runtime::traits::StaticLookup;
+use sp_runtime::traits::{Dispatchable, StaticLookup};
 use sp_std::marker::PhantomData;
 
 type BalanceOf<Runtime> = <Runtime as pallet_assets::Config>::Balance;

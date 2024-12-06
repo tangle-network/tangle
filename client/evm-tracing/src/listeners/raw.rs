@@ -243,7 +243,8 @@ impl Listener {
 										.global_storage_changes
 										.insert(context.address, context.storage_cache);
 
-									// Apply storage changes to parent, either updating its cache or map of changes.
+									// Apply storage changes to parent, either updating its cache or
+									// map of changes.
 									for (address, mut storage) in
 										context.global_storage_changes.into_iter()
 									{

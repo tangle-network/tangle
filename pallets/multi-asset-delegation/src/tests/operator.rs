@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::types::DelegatorBlueprintSelection::Fixed;
-use crate::{types::OperatorStatus, CurrentRound, Error};
+use crate::{
+	types::{DelegatorBlueprintSelection::Fixed, OperatorStatus},
+	CurrentRound, Error,
+};
 use frame_support::{assert_noop, assert_ok};
 use sp_runtime::Percent;
 

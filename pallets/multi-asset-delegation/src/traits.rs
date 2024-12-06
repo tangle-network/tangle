@@ -15,11 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::types::{BalanceOf, OperatorStatus};
-use sp_runtime::traits::Zero;
-use sp_runtime::Percent;
+use sp_runtime::{traits::Zero, Percent};
 use sp_std::prelude::*;
-use tangle_primitives::BlueprintId;
-use tangle_primitives::{traits::MultiAssetDelegationInfo, RoundIndex};
+use tangle_primitives::{traits::MultiAssetDelegationInfo, BlueprintId, RoundIndex};
 
 impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for crate::Pallet<T> {
 	type AssetId = T::AssetId;
@@ -34,7 +32,7 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for 
 
 	fn is_operator_active(operator: &T::AccountId) -> bool {
 		Operators::<T>::get(operator)
-			.map_or(false, |metadata| matches!(metadata.status, OperatorStatus::Active))
+			.is_some_and(|metadata| matches!(metadata.status, OperatorStatus::Active))
 	}
 
 	fn get_operator_stake(operator: &T::AccountId) -> BalanceOf<T> {

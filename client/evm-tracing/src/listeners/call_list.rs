@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::formatters::blockscout::BlockscoutCall as Call;
-use crate::formatters::blockscout::BlockscoutCallInner as CallInner;
-use crate::types::{single::Log, CallResult, CallType, ContextType, CreateResult};
+use crate::{
+	formatters::blockscout::{BlockscoutCall as Call, BlockscoutCallInner as CallInner},
+	types::{single::Log, CallResult, CallType, ContextType, CreateResult},
+};
 use ethereum_types::{H160, U256};
 use evm_tracing_events::{
 	runtime::{Capture, ExitError, ExitReason, ExitSucceed},
@@ -1094,7 +1095,8 @@ mod tests {
 		listener.finish_transaction();
 		assert_eq!(listener.entries.len(), 1);
 		// Each nested call contains 11 elements in the callstack (main + 10 subcalls).
-		// There are 5 main nested calls for a total of 56 elements in the callstack: 1 main + 55 nested.
+		// There are 5 main nested calls for a total of 56 elements in the callstack: 1 main + 55
+		// nested.
 		assert_eq!(listener.entries[0].len(), (depth * (subdepth + 1)) + 1);
 	}
 

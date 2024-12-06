@@ -21,9 +21,8 @@
 #![allow(clippy::all)]
 use super::*;
 use frame_election_provider_support::bounds::{ElectionBounds, ElectionBoundsBuilder};
-use frame_support::derive_impl;
 use frame_support::{
-	assert_ok, construct_runtime,
+	assert_ok, construct_runtime, derive_impl,
 	pallet_prelude::Hooks,
 	parameter_types,
 	traits::{ConstU64, OnFinalize, OnInitialize, OneSessionHandler},

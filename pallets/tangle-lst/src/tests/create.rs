@@ -1,7 +1,5 @@
 use super::*;
-use frame_support::assert_err;
-use frame_support::assert_noop;
-use frame_support::assert_ok;
+use frame_support::{assert_err, assert_noop, assert_ok};
 
 #[test]
 fn create_works() {

@@ -32,10 +32,9 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
-use frame_support::derive_impl;
-use frame_support::genesis_builder_helper::build_state;
-use frame_support::genesis_builder_helper::get_preset;
 use frame_support::{
+	derive_impl,
+	genesis_builder_helper::{build_state, get_preset},
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
 		AsEnsureOriginWithArg, Contains, OnFinalize, WithdrawReasons,
@@ -1427,7 +1426,7 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	migrations::MigrateSessionKeys<Runtime>,
+	migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
 >;
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {
