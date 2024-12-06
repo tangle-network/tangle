@@ -22,7 +22,7 @@ use frame_election_provider_support::{
 	onchain, SequentialPhragmen,
 };
 use frame_support::{
-	assert_ok, construct_runtime, parameter_types,
+	construct_runtime, parameter_types,
 	traits::{ConstU128, ConstU32, OneSessionHandler},
 };
 use frame_support::{derive_impl, traits::AsEnsureOriginWithArg};
@@ -643,12 +643,12 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 			])
 			.unwrap(),
 			Default::default(),
-			30_000,
+			300_000,
 			true,
 			false,
 		);
 
-		assert_ok!(call);
+		assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
 		// Mint
 		for i in 1..=authorities.len() {
 			let call = <Runtime as pallet_services::Config>::EvmRunner::call(
@@ -678,12 +678,12 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 				])
 				.unwrap(),
 				Default::default(),
-				30_000,
+				300_000,
 				true,
 				false,
 			);
 
-			assert_ok!(call);
+			assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
 		}
 	});
 

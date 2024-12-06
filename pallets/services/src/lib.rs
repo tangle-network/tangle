@@ -902,12 +902,12 @@ pub mod module {
 				};
 			}
 
-			let service_id = Self::next_instance_id();
+			let request_id = NextServiceRequestId::<T>::get();
 			let (allowed, _weight) = Self::on_request_hook(
 				&blueprint,
 				blueprint_id,
 				&caller,
-				service_id,
+				request_id,
 				&preferences,
 				&request_args,
 				&permitted_callers,
@@ -918,14 +918,11 @@ pub mod module {
 				native_value,
 			)?;
 
-			ensure!(allowed, Error::<T>::InvalidRequestInput);
-
 			let permitted_callers =
 				BoundedVec::<_, MaxPermittedCallersOf<T>>::try_from(permitted_callers)
 					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
 			let assets = BoundedVec::<_, MaxAssetsPerServiceOf<T>>::try_from(assets)
 				.map_err(|_| Error::<T>::MaxAssetsPerServiceExceeded)?;
-			let request_id = NextServiceRequestId::<T>::get();
 			let operators = pending_approvals
 				.iter()
 				.cloned()
@@ -948,6 +945,8 @@ pub mod module {
 				permitted_callers,
 				operators_with_approval_state,
 			};
+
+			ensure!(allowed, Error::<T>::InvalidRequestInput);
 			ServiceRequests::<T>::insert(request_id, service_request);
 			NextServiceRequestId::<T>::set(request_id.saturating_add(1));
 

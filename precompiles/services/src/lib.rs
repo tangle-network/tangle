@@ -114,7 +114,7 @@ where
 
 	/// Request a new service.
 	#[precompile::public(
-		"requestService(uint256,uint256[],bytes,bytes,bytes,uint256,address,uint256)"
+		"requestService(uint256,uint256[],bytes,bytes,bytes,uint256,uint256,address,uint256)"
 	)]
 	fn request_service(
 		handle: &mut impl PrecompileHandle,
