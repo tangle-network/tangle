@@ -345,6 +345,8 @@ parameter_types! {
 	pub const MaxUnstakeRequests: u32 = 5;
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
+	pub const NativeAssetId: AssetId = 0;
+
 }
 
 impl pallet_multi_asset_delegation::Config for Runtime {
@@ -369,6 +371,8 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MaxDelegations = MaxDelegations;
 	type SlashedAmountRecipient = SlashedAmountRecipient;
 	type PalletId = PID;
+	type NativeAssetId = NativeAssetId;
+	type BlocksPerMonth = ConstU64<100>;
 	type WeightInfo = ();
 }
 

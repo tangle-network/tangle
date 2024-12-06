@@ -63,6 +63,7 @@ use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
 use sp_genesis_builder::PresetId;
+use sp_runtime::traits::ConstU64;
 use sp_runtime::{
 	create_runtime_str,
 	curve::PiecewiseLinear,
@@ -1249,6 +1250,7 @@ parameter_types! {
 	pub const MaxUnstakeRequests: u32 = 5;
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
+	pub const NativeAssetId: AssetId = 0;
 }
 
 impl pallet_multi_asset_delegation::Config for Runtime {
@@ -1273,6 +1275,8 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MaxWithdrawRequests = MaxWithdrawRequests;
 	type MaxUnstakeRequests = MaxUnstakeRequests;
 	type MaxDelegations = MaxDelegations;
+	type NativeAssetId = NativeAssetId;
+	type BlocksPerMonth = ConstU64<30000>; // TODO : Revisit
 	type WeightInfo = ();
 }
 
