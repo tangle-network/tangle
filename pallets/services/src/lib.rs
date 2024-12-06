@@ -59,15 +59,14 @@ pub use impls::BenchmarkingOperatorDelegationManager;
 pub mod module {
 	use super::*;
 	use frame_support::dispatch::PostDispatchInfo;
+	use frame_support::traits::fungibles::{Inspect, Mutate};
+	use frame_support::traits::tokens::Preservation;
 	use sp_core::H160;
-	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize};
+	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero};
 	use sp_runtime::Percent;
 	use sp_std::vec::Vec;
 	use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
-	use tangle_primitives::{
-		services::{PriceTargets, *},
-		MultiAssetDelegationInfo,
-	};
+	use tangle_primitives::{services::*, MultiAssetDelegationInfo};
 	use types::*;
 
 	#[pallet::config]
@@ -77,6 +76,10 @@ pub mod module {
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// The currency mechanism.
 		type Currency: ReservableCurrency<Self::AccountId>;
+
+		/// The fungibles trait used for managing fungible assets.
+		type Fungibles: Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
+			+ Mutate<Self::AccountId, AssetId = Self::AssetId>;
 
 		/// `Pallet` EVM Address.
 		#[pallet::constant]
@@ -286,6 +289,8 @@ pub mod module {
 		MasterBlueprintServiceManagerRevisionNotFound,
 		/// Maximum number of Master Blueprint Service Manager revisions reached.
 		MaxMasterBlueprintServiceManagerVersionsExceeded,
+		/// The ERC20 transfer failed.
+		ERC20TransferFailed,
 	}
 
 	#[pallet::event]
@@ -836,7 +841,7 @@ pub mod module {
 		}
 
 		/// Request a new service to be initiated using the provided blueprint with a list of
-		/// operators that will run your service. Optionally, you can specifiy who is permitted
+		/// operators that will run your service. Optionally, you can customize who is permitted
 		/// caller of this service, by default only the caller is allowed to call the service.
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request(
@@ -847,6 +852,7 @@ pub mod module {
 			request_args: Vec<Field<T::Constraints, T::AccountId>>,
 			assets: Vec<T::AssetId>,
 			#[pallet::compact] ttl: BlockNumberFor<T>,
+			payment_asset: Asset<T::AssetId>,
 			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
@@ -864,36 +870,59 @@ pub mod module {
 				preferences.push(prefs);
 			}
 
-			// Transfer the request value to the pallet
-			T::Currency::transfer(
-				&caller,
-				&Self::account_id(),
-				value,
-				ExistenceRequirement::KeepAlive,
-			)?;
+			let mut native_value = Zero::zero();
 
-			let service_id = Self::next_instance_id();
+			if value != Zero::zero() {
+				// Payment transfer
+				match payment_asset {
+					// Handle the case of native currency.
+					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+						T::Currency::transfer(
+							&caller,
+							&Self::account_id(),
+							value,
+							ExistenceRequirement::KeepAlive,
+						)?;
+						native_value = value;
+					},
+					Asset::Custom(asset_id) => {
+						T::Fungibles::transfer(
+							asset_id,
+							&caller,
+							&Self::account_id(),
+							value,
+							Preservation::Preserve,
+						)?;
+					},
+					Asset::Erc20(token) => {
+						let (success, _weight) =
+							Self::erc20_transfer(token, &caller, Self::address(), value)?;
+						ensure!(success, Error::<T>::ERC20TransferFailed);
+					},
+				};
+			}
+
+			let request_id = NextServiceRequestId::<T>::get();
 			let (allowed, _weight) = Self::on_request_hook(
 				&blueprint,
 				blueprint_id,
 				&caller,
-				service_id,
+				request_id,
 				&preferences,
 				&request_args,
 				&permitted_callers,
 				&assets,
 				ttl,
+				payment_asset,
 				value,
+				native_value,
 			)?;
-
-			ensure!(allowed, Error::<T>::InvalidRequestInput);
 
 			let permitted_callers =
 				BoundedVec::<_, MaxPermittedCallersOf<T>>::try_from(permitted_callers)
 					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
 			let assets = BoundedVec::<_, MaxAssetsPerServiceOf<T>>::try_from(assets)
 				.map_err(|_| Error::<T>::MaxAssetsPerServiceExceeded)?;
-			let request_id = NextServiceRequestId::<T>::get();
 			let operators = pending_approvals
 				.iter()
 				.cloned()
@@ -916,6 +945,8 @@ pub mod module {
 				permitted_callers,
 				operators_with_approval_state,
 			};
+
+			ensure!(allowed, Error::<T>::InvalidRequestInput);
 			ServiceRequests::<T>::insert(request_id, service_request);
 			NextServiceRequestId::<T>::set(request_id.saturating_add(1));
 
@@ -1337,6 +1368,9 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
+		/// Adds a new Master Blueprint Service Manager to the list of revisions.
+		///
+		/// The caller needs to be an authorized Master Blueprint Service Manager Update Origin.
 		pub fn update_master_blueprint_service_manager(
 			origin: OriginFor<T>,
 			address: H160,

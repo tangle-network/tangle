@@ -1,7 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(clippy::too_many_arguments)]
 
-use fp_evm::PrecompileHandle;
+use fp_evm::{PrecompileFailure, PrecompileHandle};
 use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
+use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_evm::AddressMapping;
 use pallet_services::types::BalanceOf;
 use parity_scale_codec::Decode;
@@ -10,7 +12,7 @@ use sp_core::U256;
 use sp_runtime::traits::Dispatchable;
 use sp_runtime::Percent;
 use sp_std::{marker::PhantomData, vec::Vec};
-use tangle_primitives::services::{Field, OperatorPreferences, ServiceBlueprint};
+use tangle_primitives::services::{Asset, Field, OperatorPreferences, ServiceBlueprint};
 
 #[cfg(test)]
 mod mock;
@@ -30,6 +32,26 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_services::Call<Runtime>>,
 {
+	// Errors for the `Services` precompile.
+
+	/// Found an invalid permitted callers list.
+	const INVALID_PERMITTED_CALLERS: [u8; 32] = keccak256!("InvalidPermittedCallers()");
+	/// Found an invalid service providers list.
+	const INVALID_OPERATORS_LIST: [u8; 32] = keccak256!("InvalidOperatorsList()");
+	/// Found an invalid request arguments.
+	const INVALID_REQUEST_ARGUMENTS: [u8; 32] = keccak256!("InvalidRequestArguments()");
+	/// Invalid TTL.
+	const INVALID_TTL: [u8; 32] = keccak256!("InvalidTTL()");
+	/// Found an invalid amount / value.
+	const INVALID_AMOUNT: [u8; 32] = keccak256!("InvalidAmount()");
+	/// Value must be zero for ERC20 payment asset.
+	const VALUE_NOT_ZERO_FOR_ERC20: [u8; 32] = keccak256!("ValueMustBeZeroForERC20()");
+	/// Value must be zero for custom payment asset.
+	const VALUE_NOT_ZERO_FOR_CUSTOM_ASSET: [u8; 32] = keccak256!("ValueMustBeZeroForCustomAsset()");
+	/// Payment asset should be either custom or ERC20.
+	const PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20: [u8; 32] =
+		keccak256!("PaymentAssetShouldBeCustomOrERC20()");
+
 	/// Create a new blueprint.
 	#[precompile::public("createBlueprint(bytes)")]
 	fn create_blueprint(
@@ -53,6 +75,7 @@ where
 
 	/// Register as an operator for a specific blueprint.
 	#[precompile::public("registerOperator(uint256,bytes,bytes)")]
+	#[precompile::payable]
 	fn register_operator(
 		handle: &mut impl PrecompileHandle,
 		blueprint_id: U256,
@@ -112,7 +135,10 @@ where
 	}
 
 	/// Request a new service.
-	#[precompile::public("requestService(uint256,uint256[],bytes,bytes,bytes)")]
+	#[precompile::public(
+		"requestService(uint256,uint256[],bytes,bytes,bytes,uint256,uint256,address,uint256)"
+	)]
+	#[precompile::payable]
 	fn request_service(
 		handle: &mut impl PrecompileHandle,
 		blueprint_id: U256,
@@ -120,6 +146,10 @@ where
 		permitted_callers_data: UnboundedBytes,
 		service_providers_data: UnboundedBytes,
 		request_args_data: UnboundedBytes,
+		ttl: U256,
+		payment_asset_id: U256,
+		payment_token_address: Address,
+		amount: U256,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
@@ -131,15 +161,16 @@ where
 
 		let permitted_callers: Vec<Runtime::AccountId> =
 			Decode::decode(&mut &permitted_callers_data[..])
-				.map_err(|_| revert("Invalid permitted callers data"))?;
+				.map_err(|_| revert_custom_error(Self::INVALID_PERMITTED_CALLERS))?;
 
 		let operators: Vec<Runtime::AccountId> =
 			Decode::decode(&mut &service_providers_data[..])
-				.map_err(|_| revert("Invalid service providers data"))?;
+				.map_err(|_| revert_custom_error(Self::INVALID_OPERATORS_LIST))?;
 
 		let request_args: Vec<Field<Runtime::Constraints, Runtime::AccountId>> =
 			Decode::decode(&mut &request_args_data[..])
-				.map_err(|_| revert("Invalid request arguments data"))?;
+				.map_err(|_| revert_custom_error(Self::INVALID_REQUEST_ARGUMENTS))?;
+
 		let assets: Vec<Runtime::AssetId> =
 			assets.into_iter().map(|asset| asset.as_u32().into()).collect();
 
@@ -150,15 +181,55 @@ where
 			value_bytes
 		};
 		let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
-			.map_err(|_| revert("Value is not a valid balance"))?;
+			.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?;
+
+		let ttl_bytes = {
+			let mut ttl_bytes = [0u8; core::mem::size_of::<U256>()];
+			ttl.to_little_endian(&mut ttl_bytes);
+			ttl_bytes
+		};
+
+		let ttl = BlockNumberFor::<Runtime>::decode(&mut &ttl_bytes[..])
+			.map_err(|_| revert_custom_error(Self::INVALID_TTL))?;
+
+		let amount = {
+			let mut amount_bytes = [0u8; core::mem::size_of::<U256>()];
+			amount.to_little_endian(&mut amount_bytes);
+			BalanceOf::<Runtime>::decode(&mut &amount_bytes[..])
+				.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?
+		};
+
+		const ZERO_ADDRESS: [u8; 20] = [0; 20];
+
+		let (payment_asset, amount) = match (payment_asset_id.as_u32(), payment_token_address.0 .0)
+		{
+			(0, ZERO_ADDRESS) => (Asset::Custom(0u32.into()), value),
+			(0, erc20_token) => {
+				if value != Default::default() {
+					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_ERC20));
+				}
+				(Asset::Erc20(erc20_token.into()), amount)
+			},
+			(other_asset_id, ZERO_ADDRESS) => {
+				if value != Default::default() {
+					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_CUSTOM_ASSET));
+				}
+				(Asset::Custom(other_asset_id.into()), amount)
+			},
+			(_other_asset_id, _erc20_token) => {
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
+			},
+		};
+
 		let call = pallet_services::Call::<Runtime>::request {
 			blueprint_id,
 			permitted_callers,
 			operators,
-			ttl: 10000_u32.into(),
+			ttl,
 			assets,
 			request_args,
-			value,
+			payment_asset,
+			value: amount,
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
@@ -323,4 +394,12 @@ where
 
 		Ok(())
 	}
+}
+
+/// Revert with Custom Error Selector
+fn revert_custom_error(err: [u8; 32]) -> PrecompileFailure {
+	let selector = &err[0..4];
+	let mut output = sp_std::vec![0u8; 32];
+	output[0..4].copy_from_slice(selector);
+	PrecompileFailure::Revert { exit_status: fp_evm::ExitRevert::Reverted, output }
 }
