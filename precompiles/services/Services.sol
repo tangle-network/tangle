@@ -4,6 +4,23 @@ pragma solidity ^0.8.0;
 /// @title ServicesPrecompile Interface
 /// @dev This interface is meant to interact with the ServicesPrecompile in the Tangle network.
 interface ServicesPrecompile {
+	/// @dev Invalid Permitted Callers provided
+	error InvalidPermittedCallers();
+	/// @dev Invalid Service Providers provided
+	error InvalidOperatorsList();
+	/// @dev Invalid Request Arguments provided
+	error InvalidRequestArguments();
+	/// @dev Invalid TTL Value provided
+	error InvalidTTL();
+	/// @dev Invalid Payment Amount provided
+	error InvalidAmount();
+	/// @dev `msg.value` must be zero when using ERC20 token for payment
+	error ValueMustBeZeroForERC20();
+	/// @dev `msg.value` must be zero when using custom asset for payment
+	error ValueMustBeZeroForCustomAsset();
+	/// @dev Payment asset should be either custom or ERC20
+	error PaymentAssetShouldBeCustomOrERC20();
+
 	/// @notice Create a new service blueprint
 	/// @param blueprint_data The blueprint data encoded as bytes
 	function createBlueprint(bytes calldata blueprint_data) external;
@@ -42,7 +59,7 @@ interface ServicesPrecompile {
 		uint256 payment_asset_id,
 		address payment_token_address,
 		uint256 payment_amount
-	) external;
+	) external payable;
 
 	/// @notice Terminate a service
 	/// @param service_id The ID of the service to terminate
