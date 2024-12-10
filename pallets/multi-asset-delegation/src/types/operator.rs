@@ -15,6 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
+use crate::types::Asset;
 use frame_support::{pallet_prelude::*, BoundedVec};
 
 /// A snapshot of the operator state at the start of the round.
@@ -38,7 +39,7 @@ where
 	pub fn get_stake_by_asset_id(&self, asset_id: AssetId) -> Balance {
 		let mut total_stake = Balance::default();
 		for stake in &self.delegations {
-			if stake.asset_id == asset_id {
+			if stake.asset.id == asset_id {
 				total_stake += stake.amount;
 			}
 		}
@@ -50,7 +51,7 @@ where
 		let mut stake_by_asset: BTreeMap<AssetId, Balance> = BTreeMap::new();
 
 		for stake in &self.delegations {
-			let entry = stake_by_asset.entry(stake.asset_id).or_default();
+			let entry = stake_by_asset.entry(stake.asset.id).or_default();
 			*entry += stake.amount;
 		}
 
@@ -77,6 +78,17 @@ pub struct OperatorBondLessRequest<Balance> {
 	pub amount: Balance,
 	/// The round in which the request was made.
 	pub request_time: RoundIndex,
+}
+
+/// Represents a delegation from a delegator to an operator.
+#[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
+pub struct DelegatorBond<AccountId, Balance, AssetId> {
+	/// The delegator's account ID.
+	pub delegator: AccountId,
+	/// The amount bonded.
+	pub amount: Balance,
+	/// The asset bonded.
+	pub asset: Asset<AssetId>,
 }
 
 /// Stores the metadata of an operator.
@@ -118,17 +130,6 @@ where
 			blueprint_ids: BoundedVec::default(),
 		}
 	}
-}
-
-/// Represents a stake for an operator
-#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct DelegatorBond<AccountId, Balance, AssetId> {
-	/// The account ID of the delegator.
-	pub delegator: AccountId,
-	/// The amount bonded.
-	pub amount: Balance,
-	/// The ID of the bonded asset.
-	pub asset_id: AssetId,
 }
 
 // ------ Test for helper functions ------ //
@@ -190,17 +191,17 @@ mod tests {
 					DelegatorBond {
 						delegator: MockAccountId(1),
 						amount: MockBalance(50),
-						asset_id: MockAssetId(1),
+						asset: Asset { id: MockAssetId(1), ..Default::default() },
 					},
 					DelegatorBond {
 						delegator: MockAccountId(2),
 						amount: MockBalance(75),
-						asset_id: MockAssetId(1),
+						asset: Asset { id: MockAssetId(1), ..Default::default() },
 					},
 					DelegatorBond {
 						delegator: MockAccountId(3),
 						amount: MockBalance(25),
-						asset_id: MockAssetId(2),
+						asset: Asset { id: MockAssetId(2), ..Default::default() },
 					},
 				])
 				.unwrap(),
@@ -220,22 +221,22 @@ mod tests {
 					DelegatorBond {
 						delegator: MockAccountId(1),
 						amount: MockBalance(50),
-						asset_id: MockAssetId(1),
+						asset: Asset { id: MockAssetId(1), ..Default::default() },
 					},
 					DelegatorBond {
 						delegator: MockAccountId(2),
 						amount: MockBalance(75),
-						asset_id: MockAssetId(1),
+						asset: Asset { id: MockAssetId(1), ..Default::default() },
 					},
 					DelegatorBond {
 						delegator: MockAccountId(3),
 						amount: MockBalance(25),
-						asset_id: MockAssetId(2),
+						asset: Asset { id: MockAssetId(2), ..Default::default() },
 					},
 					DelegatorBond {
 						delegator: MockAccountId(4),
 						amount: MockBalance(100),
-						asset_id: MockAssetId(2),
+						asset: Asset { id: MockAssetId(2), ..Default::default() },
 					},
 				])
 				.unwrap(),

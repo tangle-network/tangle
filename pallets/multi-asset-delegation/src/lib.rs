@@ -99,97 +99,82 @@ pub mod pallet {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
-		/// The currency type used for managing balances.
-		type Currency: Currency<Self::AccountId>
-			+ ReservableCurrency<Self::AccountId>
-			+ LockableCurrency<Self::AccountId>;
+		/// The currency type for native token operations.
+		type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId> + LockableCurrency<Self::AccountId>;
 
-		/// Type representing the unique ID of an asset.
-		type AssetId: Parameter
-			+ Member
-			+ Copy
-			+ MaybeSerializeDeserialize
-			+ Ord
-			+ Default
-			+ MaxEncodedLen
-			+ TypeInfo;
-
-		/// Type representing the unique ID of a vault.
-		type VaultId: Parameter
-			+ Member
-			+ Copy
-			+ MaybeSerializeDeserialize
-			+ Ord
-			+ Default
-			+ MaxEncodedLen
-			+ TypeInfo;
-
-		/// The maximum number of blueprints a delegator can have in Fixed mode.
-		#[pallet::constant]
-		type MaxDelegatorBlueprints: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
-
-		/// The maximum number of blueprints an operator can support.
-		#[pallet::constant]
-		type MaxOperatorBlueprints: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
-
-		/// The maximum number of withdraw requests a delegator can have.
-		#[pallet::constant]
-		type MaxWithdrawRequests: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
-
-		/// The maximum number of delegations a delegator can have.
-		#[pallet::constant]
-		type MaxDelegations: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
-
-		/// The maximum number of unstake requests a delegator can have.
-		#[pallet::constant]
-		type MaxUnstakeRequests: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
-
-		/// The minimum amount of stake required for an operator.
+		/// The minimum amount that an operator must bond.
 		#[pallet::constant]
 		type MinOperatorBondAmount: Get<BalanceOf<Self>>;
 
-		/// The minimum amount of stake required for a delegate.
+		/// The duration of the bond.
+		#[pallet::constant]
+		type BondDuration: Get<u32>;
+
+		/// The service manager type.
+		type ServiceManager: ServiceManager<Self::AccountId, BalanceOf<Self>>;
+
+		/// The number of rounds that must pass before an operator can leave.
+		#[pallet::constant]
+		type LeaveOperatorsDelay: Get<u32>;
+
+		/// The number of rounds that must pass before an operator can reduce their bond.
+		#[pallet::constant]
+		type OperatorBondLessDelay: Get<u32>;
+
+		/// The number of rounds that must pass before a delegator can leave.
+		#[pallet::constant]
+		type LeaveDelegatorsDelay: Get<u32>;
+
+		/// The number of rounds that must pass before a delegator can reduce their bond.
+		#[pallet::constant]
+		type DelegationBondLessDelay: Get<u32>;
+
+		/// The minimum amount that can be delegated.
 		#[pallet::constant]
 		type MinDelegateAmount: Get<BalanceOf<Self>>;
 
-		/// The duration for which the stake is locked.
-		#[pallet::constant]
-		type BondDuration: Get<RoundIndex>;
+		/// The fungibles instance for handling multi-asset operations.
+		type Fungibles: fungibles::Inspect<Self::AccountId> + fungibles::Mutate<Self::AccountId> + fungibles::Transfer<Self::AccountId>;
 
-		/// The service manager that manages active services.
-		type ServiceManager: ServiceManager<Self::AccountId, BalanceOf<Self>>;
+		/// The base asset ID type.
+		type AssetId: Member + Parameter + Default + Copy + MaybeSerializeDeserialize + Debug + MaxEncodedLen;
 
-		/// Number of rounds that operators remain bonded before the exit request is executable.
-		#[pallet::constant]
-		type LeaveOperatorsDelay: Get<RoundIndex>;
+		/// The vault ID type.
+		type VaultId: Member + Parameter + Default + Copy + MaybeSerializeDeserialize + Debug + MaxEncodedLen;
 
-		/// Number of rounds operator requests to decrease self-stake must wait to be executable.
-		#[pallet::constant]
-		type OperatorBondLessDelay: Get<RoundIndex>;
-
-		/// Number of rounds that delegators remain bonded before the exit request is executable.
-		#[pallet::constant]
-		type LeaveDelegatorsDelay: Get<RoundIndex>;
-
-		/// Number of rounds that delegation unstake requests must wait before being executable.
-		#[pallet::constant]
-		type DelegationBondLessDelay: Get<RoundIndex>;
-
-		/// The fungibles trait used for managing fungible assets.
-		type Fungibles: fungibles::Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
-			+ fungibles::Mutate<Self::AccountId, AssetId = Self::AssetId>;
-
-		/// The pallet's account ID.
-		type PalletId: Get<PalletId>;
-
-		/// The origin with privileged access
+		/// The origin that can force certain operations.
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
-		/// The address that receives slashed funds
+		/// The pallet ID.
+		#[pallet::constant]
+		type PalletId: Get<PalletId>;
+
+		/// The maximum number of blueprints a delegator can select.
+		#[pallet::constant]
+		type MaxDelegatorBlueprints: Get<u32>;
+
+		/// The maximum number of blueprints an operator can select.
+		#[pallet::constant]
+		type MaxOperatorBlueprints: Get<u32>;
+
+		/// The maximum number of withdraw requests.
+		#[pallet::constant]
+		type MaxWithdrawRequests: Get<u32>;
+
+		/// The maximum number of unstake requests.
+		#[pallet::constant]
+		type MaxUnstakeRequests: Get<u32>;
+
+		/// The maximum number of delegations.
+		#[pallet::constant]
+		type MaxDelegations: Get<u32>;
+
+		/// The account that receives slashed amounts.
+		#[pallet::constant]
 		type SlashedAmountRecipient: Get<Self::AccountId>;
 
-		/// A type representing the weights required by the dispatchables of this pallet.
-		type WeightInfo: crate::weights::WeightInfo;
+		/// Weight information for extrinsics in this pallet.
+		type WeightInfo: WeightInfo;
 	}
 
 	/// The pallet struct.

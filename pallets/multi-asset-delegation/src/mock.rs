@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use crate as pallet_multi_asset_delegation;
+use crate::types::Asset;
 use frame_support::{
 	derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU16, ConstU32, ConstU64},
@@ -29,7 +30,7 @@ use sp_runtime::{
 
 type Block = frame_system::mocking::MockBlock<Test>;
 pub type Balance = u64;
-pub type AssetId = u32;
+pub type AssetId = Asset;
 
 pub const ALICE: u64 = 1;
 pub const BOB: u64 = 2;
@@ -37,7 +38,7 @@ pub const CHARLIE: u64 = 3;
 pub const DAVE: u64 = 4;
 pub const EVE: u64 = 5;
 
-pub const VDOT: AssetId = 1;
+pub const VDOT: Asset = Asset::Vdot;
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
@@ -93,46 +94,25 @@ impl pallet_balances::Config for Test {
 	type MaxFreezes = ();
 }
 
-pub struct MockServiceManager;
-
-impl tangle_primitives::ServiceManager<u64, Balance> for MockServiceManager {
-	fn get_active_blueprints_count(_account: &u64) -> usize {
-		// we dont care
-		Default::default()
-	}
-
-	fn get_active_services_count(_account: &u64) -> usize {
-		// we dont care
-		Default::default()
-	}
-
-	fn can_exit(_account: &u64) -> bool {
-		// Mock logic to determine if the given account can exit
-		true
-	}
-
-	fn get_blueprints_by_operator(_account: &u64) -> Vec<u64> {
-		todo!(); // we dont care
-	}
-}
-
-parameter_types! {
-	pub const BlockHashCount: u64 = 250;
-	pub const MaxLocks: u32 = 50;
-	pub const MinOperatorBondAmount: u64 = 10_000;
-	pub const BondDuration: u32 = 10;
-	pub PID: PalletId = PalletId(*b"PotStake");
-	pub const SlashedAmountRecipient : u64 = 0;
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxDelegatorBlueprints : u32 = 50;
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxOperatorBlueprints : u32 = 50;
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxWithdrawRequests: u32 = 50;
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxUnstakeRequests: u32 = 50;
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxDelegations: u32 = 50;
+impl pallet_assets::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = u64;
+	type AssetId = AssetId;
+	type AssetIdParameter = Asset;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<u64>>;
+	type ForceOrigin = frame_system::EnsureRoot<u64>;
+	type AssetDeposit = ConstU64<1>;
+	type AssetAccountDeposit = ConstU64<10>;
+	type MetadataDepositBase = ConstU64<1>;
+	type MetadataDepositPerByte = ConstU64<1>;
+	type ApprovalDeposit = ConstU64<1>;
+	type StringLimit = ConstU32<50>;
+	type Freezer = ();
+	type WeightInfo = ();
+	type CallbackHandle = ();
+	type Extra = ();
+	type RemoveItemsLimit = ConstU32<5>;
 }
 
 impl pallet_multi_asset_delegation::Config for Test {
@@ -160,25 +140,46 @@ impl pallet_multi_asset_delegation::Config for Test {
 	type WeightInfo = ();
 }
 
-impl pallet_assets::Config for Test {
-	type RuntimeEvent = RuntimeEvent;
-	type Balance = u64;
-	type AssetId = AssetId;
-	type AssetIdParameter = u32;
-	type Currency = Balances;
-	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<u64>>;
-	type ForceOrigin = frame_system::EnsureRoot<u64>;
-	type AssetDeposit = ConstU64<1>;
-	type AssetAccountDeposit = ConstU64<10>;
-	type MetadataDepositBase = ConstU64<1>;
-	type MetadataDepositPerByte = ConstU64<1>;
-	type ApprovalDeposit = ConstU64<1>;
-	type StringLimit = ConstU32<50>;
-	type Freezer = ();
-	type WeightInfo = ();
-	type CallbackHandle = ();
-	type Extra = ();
-	type RemoveItemsLimit = ConstU32<5>;
+parameter_types! {
+	pub const BlockHashCount: u64 = 250;
+	pub const MaxLocks: u32 = 50;
+	pub const MinOperatorBondAmount: u64 = 10_000;
+	pub const BondDuration: u32 = 10;
+	pub PID: PalletId = PalletId(*b"PotStake");
+	pub const SlashedAmountRecipient : u64 = 0;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegatorBlueprints : u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxOperatorBlueprints : u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxWithdrawRequests: u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxUnstakeRequests: u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegations: u32 = 50;
+}
+
+pub struct MockServiceManager;
+
+impl tangle_primitives::ServiceManager<u64, Balance> for MockServiceManager {
+	fn get_active_blueprints_count(_account: &u64) -> usize {
+		// we dont care
+		Default::default()
+	}
+
+	fn get_active_services_count(_account: &u64) -> usize {
+		// we dont care
+		Default::default()
+	}
+
+	fn can_exit(_account: &u64) -> bool {
+		// Mock logic to determine if the given account can exit
+		true
+	}
+
+	fn get_blueprints_by_operator(_account: &u64) -> Vec<u64> {
+		todo!(); // we dont care
+	}
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
