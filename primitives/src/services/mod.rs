@@ -602,6 +602,7 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId> {
 	pub ttl: BlockNumber,
 }
 
+/// Operator's Approval State.
 #[derive(
 	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
 )]
@@ -620,6 +621,62 @@ pub enum ApprovalState {
 	/// The operator is rejected to provide the service.
 	#[codec(index = 2)]
 	Rejected,
+}
+
+/// Different types of assets that can be used.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum Asset<AssetId> {
+	/// Use the specified AssetId.
+	#[codec(index = 0)]
+	Custom(AssetId),
+
+	/// Use an ERC20-like token with the specified contract address.
+	#[codec(index = 1)]
+	Erc20(sp_core::H160),
+}
+
+impl<AssetId: sp_runtime::traits::Zero> Default for Asset<AssetId> {
+	fn default() -> Self {
+		Asset::Custom(sp_runtime::traits::Zero::zero())
+	}
+}
+
+impl<AssetId: Encode> Asset<AssetId> {
+	pub fn to_ethabi_param_type() -> ethabi::ParamType {
+		ethabi::ParamType::Tuple(vec![
+			// Kind of the Asset
+			ethabi::ParamType::Uint(8),
+			// Data of the Asset (Contract Address or AssetId)
+			ethabi::ParamType::FixedBytes(32),
+		])
+	}
+
+	pub fn to_ethabi_param() -> ethabi::Param {
+		ethabi::Param {
+			name: String::from("asset"),
+			kind: Self::to_ethabi_param_type(),
+			internal_type: Some(String::from("struct ServiceOperators.Asset")),
+		}
+	}
+
+	pub fn to_ethabi(&self) -> ethabi::Token {
+		match self {
+			Asset::Custom(asset_id) => {
+				let asset_id = asset_id.using_encoded(ethabi::Uint::from_little_endian);
+				let mut asset_id_bytes = [0u8; core::mem::size_of::<ethabi::Uint>()];
+				asset_id.to_big_endian(&mut asset_id_bytes);
+				ethabi::Token::Tuple(vec![
+					ethabi::Token::Uint(0.into()),
+					ethabi::Token::FixedBytes(asset_id_bytes.into()),
+				])
+			},
+			Asset::Erc20(addr) => ethabi::Token::Tuple(vec![
+				ethabi::Token::Uint(1.into()),
+				ethabi::Token::FixedBytes(addr.to_fixed_bytes().into()),
+			]),
+		}
+	}
 }
 
 /// Represents the pricing structure for various hardware resources.
@@ -663,7 +720,7 @@ impl PriceTargets {
 		ethabi::Param {
 			name: String::from("priceTargets"),
 			kind: Self::to_ethabi_param_type(),
-			internal_type: Some(String::from("struct IBlueprintServiceManager.PriceTargets")),
+			internal_type: Some(String::from("struct ServiceOperators.PriceTargets")),
 		}
 	}
 

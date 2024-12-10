@@ -9,8 +9,8 @@ use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use sp_core::{H160, U256};
 use sp_runtime::traits::{UniqueSaturatedInto, Zero};
 use tangle_primitives::services::{
-	BlueprintServiceManager, Field, MasterBlueprintServiceManagerRevision, OperatorPreferences,
-	Service, ServiceBlueprint,
+	Asset, BlueprintServiceManager, Field, MasterBlueprintServiceManagerRevision,
+	OperatorPreferences, Service, ServiceBlueprint,
 };
 
 use super::*;
@@ -449,7 +449,9 @@ impl<T: Config> Pallet<T> {
 		permitted_callers: &[T::AccountId],
 		_assets: &[T::AssetId],
 		ttl: BlockNumberFor<T>,
+		paymet_asset: Asset<T::AssetId>,
 		value: BalanceOf<T>,
+		native_value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -463,41 +465,28 @@ impl<T: Config> Pallet<T> {
 						internal_type: None,
 					},
 					ethabi::Param {
-						name: String::from("requestId"),
-						kind: ethabi::ParamType::Uint(64),
-						internal_type: None,
-					},
-					ethabi::Param {
-						name: String::from("requester"),
-						kind: ethabi::ParamType::Address,
-						internal_type: None,
-					},
-					ethabi::Param {
-						name: String::from("operatorsWithPreferences"),
-						kind: ethabi::ParamType::Array(Box::new(
-							OperatorPreferences::to_ethabi_param_type(),
-						)),
-						internal_type: Some(String::from("OperatorPreferences[]")),
-					},
-					ethabi::Param {
-						name: String::from("requestInputs"),
-						kind: ethabi::ParamType::Bytes,
-						internal_type: None,
-					},
-					ethabi::Param {
-						name: String::from("permittedCallers"),
-						kind: ethabi::ParamType::Array(Box::new(ethabi::ParamType::Address)),
-						internal_type: Some(String::from("address[]")),
-					},
-					// ethabi::Param {
-					// 	name: String::from("assets"),
-					// 	kind: ethabi::ParamType::Array(Box::new(ethabi::ParamType::Address)),
-					// 	internal_type: Some(String::from("address[]")),
-					// },
-					ethabi::Param {
-						name: String::from("ttl"),
-						kind: ethabi::ParamType::Uint(64),
-						internal_type: None,
+						name: String::from("params"),
+						kind: ethabi::ParamType::Tuple(vec![
+							// requestId
+							ethabi::ParamType::Uint(64),
+							// requester
+							ethabi::ParamType::Address,
+							// operatorsWithPreferences
+							ethabi::ParamType::Array(Box::new(
+								OperatorPreferences::to_ethabi_param_type(),
+							)),
+							// requestInputs
+							ethabi::ParamType::Bytes,
+							// permittedCallers
+							ethabi::ParamType::Array(Box::new(ethabi::ParamType::Address)),
+							// ttl
+							ethabi::ParamType::Uint(64),
+							// payment asset
+							Asset::<T::AssetId>::to_ethabi_param_type(),
+							// value
+							ethabi::ParamType::Uint(256),
+						]),
+						internal_type: Some(String::from("struct ServiceOperators.RequestParams")),
 					},
 				],
 				outputs: Default::default(),
@@ -506,23 +495,27 @@ impl<T: Config> Pallet<T> {
 			},
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
-				Token::Uint(ethabi::Uint::from(request_id)),
-				Token::Address(T::EvmAddressMapping::into_address(requester.clone())),
-				Token::Array(operators.iter().map(OperatorPreferences::to_ethabi).collect()),
-				Token::Bytes(Field::encode_to_ethabi(request_args)),
-				Token::Array(
-					permitted_callers
-						.iter()
-						.map(|caller| {
-							Token::Address(T::EvmAddressMapping::into_address(caller.clone()))
-								.clone()
-						})
-						.collect(),
-				),
-				// Token::Array(vec![]),
-				Token::Uint(ethabi::Uint::from(ttl.into())),
+				Token::Tuple(vec![
+					Token::Uint(ethabi::Uint::from(request_id)),
+					Token::Address(T::EvmAddressMapping::into_address(requester.clone())),
+					Token::Array(operators.iter().map(OperatorPreferences::to_ethabi).collect()),
+					Token::Bytes(Field::encode_to_ethabi(request_args)),
+					Token::Array(
+						permitted_callers
+							.iter()
+							.map(|caller| {
+								Token::Address(T::EvmAddressMapping::into_address(caller.clone()))
+									.clone()
+							})
+							.collect(),
+					),
+					// Token::Array(vec![]),
+					Token::Uint(ethabi::Uint::from(ttl.into())),
+					paymet_asset.to_ethabi(),
+					Token::Uint(ethabi::Uint::from(value.using_encoded(U256::from_little_endian))),
+				]),
 			],
-			value,
+			native_value,
 		)
 	}
 
@@ -863,8 +856,9 @@ impl<T: Config> Pallet<T> {
 			constant: None,
 			state_mutability: StateMutability::NonPayable,
 		};
+		let mbsm = Self::mbsm_address_of(&blueprint)?;
 		let (info, weight) = Self::dispatch_evm_call(
-			&blueprint,
+			mbsm,
 			query.clone(),
 			&[
 				Token::Uint(ethabi::Uint::from(service.blueprint)),
@@ -928,8 +922,9 @@ impl<T: Config> Pallet<T> {
 			constant: None,
 			state_mutability: StateMutability::NonPayable,
 		};
+		let mbsm = Self::mbsm_address_of(&blueprint)?;
 		let (info, weight) = Self::dispatch_evm_call(
-			&blueprint,
+			mbsm,
 			query.clone(),
 			&[
 				Token::Uint(ethabi::Uint::from(service.blueprint)),
@@ -955,6 +950,113 @@ impl<T: Config> Pallet<T> {
 		Ok((dispute_origin, weight))
 	}
 
+	/// Moves a `value` amount of tokens from the caller's account to `to`.
+	pub fn erc20_transfer(
+		erc20: H160,
+		caller: &T::AccountId,
+		to: H160,
+		value: BalanceOf<T>,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		let from = T::EvmAddressMapping::into_address(caller.clone());
+		#[allow(deprecated)]
+		let transfer_fn = Function {
+			name: String::from("transfer"),
+			inputs: vec![
+				ethabi::Param {
+					name: String::from("to"),
+					kind: ethabi::ParamType::Address,
+					internal_type: None,
+				},
+				ethabi::Param {
+					name: String::from("value"),
+					kind: ethabi::ParamType::Uint(256),
+					internal_type: None,
+				},
+			],
+			outputs: vec![ethabi::Param {
+				name: String::from("success"),
+				kind: ethabi::ParamType::Bool,
+				internal_type: None,
+			}],
+			constant: None,
+			state_mutability: StateMutability::NonPayable,
+		};
+
+		let args = [
+			Token::Address(to),
+			Token::Uint(ethabi::Uint::from(value.using_encoded(U256::from_little_endian))),
+		];
+
+		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
+		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
+		let gas_limit = 300_000;
+		let info = Self::evm_call(from, erc20, U256::zero(), data, gas_limit)?;
+		let weight = Self::weight_from_call_info(&info);
+
+		// decode the result and return it
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		let success = if let Some(data) = maybe_value {
+			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+			let success = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			if let ethabi::Token::Bool(val) = success {
+				*val
+			} else {
+				false
+			}
+		} else {
+			false
+		};
+
+		Ok((success, weight))
+	}
+
+	/// Get the balance of an ERC20 token for an account.
+	pub fn query_erc20_balance_of(
+		erc20: H160,
+		who: H160,
+	) -> Result<(U256, Weight), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		let transfer_fn = Function {
+			name: String::from("balanceOf"),
+			inputs: vec![ethabi::Param {
+				name: String::from("who"),
+				kind: ethabi::ParamType::Address,
+				internal_type: None,
+			}],
+			outputs: vec![ethabi::Param {
+				name: String::from("balance"),
+				kind: ethabi::ParamType::Uint(256),
+				internal_type: None,
+			}],
+			constant: None,
+			state_mutability: StateMutability::NonPayable,
+		};
+
+		let args = [Token::Address(who)];
+
+		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
+		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
+		let gas_limit = 300_000;
+		let info = Self::evm_call(Self::address(), erc20, U256::zero(), data, gas_limit)?;
+		let weight = Self::weight_from_call_info(&info);
+
+		// decode the result and return it
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		let balance = if let Some(data) = maybe_value {
+			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+			let success = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			if let ethabi::Token::Uint(val) = success {
+				*val
+			} else {
+				U256::zero()
+			}
+		} else {
+			U256::zero()
+		};
+
+		Ok((balance, weight))
+	}
+
 	/// Dispatches a hook to the EVM and returns if the call was successful with the used weight.
 	fn dispatch_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
@@ -962,23 +1064,23 @@ impl<T: Config> Pallet<T> {
 		args: &[ethabi::Token],
 		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
-		Self::dispatch_evm_call(blueprint, f, args, value)
+		let mbsm = Self::mbsm_address_of(blueprint)?;
+		Self::dispatch_evm_call(mbsm, f, args, value)
 			.map(|(info, weight)| (info.exit_reason.is_succeed(), weight))
 	}
 
 	/// Dispatches a hook to the EVM and returns if the result with the used weight.
 	fn dispatch_evm_call(
-		blueprint: &ServiceBlueprint<T::Constraints>,
+		contract: H160,
 		f: Function,
 		args: &[ethabi::Token],
 		value: BalanceOf<T>,
 	) -> Result<(fp_evm::CallInfo, Weight), DispatchErrorWithPostInfo> {
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(f.short_signature()), f.signature());
-		let mbsm = Self::mbsm_address_of(blueprint)?;
 		let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 		let gas_limit = 300_000;
 		let value = value.using_encoded(U256::from_little_endian);
-		let info = Self::evm_call(Self::address(), mbsm, value, data, gas_limit)?;
+		let info = Self::evm_call(Self::address(), contract, value, data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);
 		Ok((info, weight))
 	}

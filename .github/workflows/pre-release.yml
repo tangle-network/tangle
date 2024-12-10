@@ -22,10 +22,19 @@ jobs:
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "commit_message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
 
+      # Generating a GitHub token, so that tags created by the action
+      # triggers the other workflows
+      - name: Generate GitHub token
+        uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.WEBB_SPIDER_APP_ID }}
+          private-key: ${{ secrets.WEBB_SPIDER_PRIV_KEY }}
+
       - name: Create pre-release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         with:
           tag_name: ${{ steps.commit_info.outputs.sha_short }}
           release_name: Tangle Pre-release ${{ steps.commit_info.outputs.sha_short }}

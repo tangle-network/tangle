@@ -1,3 +1,5 @@
+use core::ops::Mul;
+
 use crate::mock::*;
 use crate::mock_evm::PCall;
 use crate::mock_evm::PrecompilesValue;
@@ -25,8 +27,6 @@ use tangle_primitives::services::{OperatorPreferences, ServiceBlueprint};
 fn zero_key() -> ecdsa::Public {
 	ecdsa::Public::from([0; 33])
 }
-
-const WETH: AssetId = 1;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -197,9 +197,180 @@ fn test_request_service() {
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
 					assets: [WETH].into_iter().map(Into::into).collect(),
+					ttl: U256::from(1000),
+					payment_asset_id: U256::from(0),
+					payment_token_address: Default::default(),
+					amount: U256::from(0),
 				},
 			)
 			.execute_returns(());
+
+		// Approve the service request by the operator(s)
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bob,
+				H160::from_low_u64_be(1),
+				PCall::approve { request_id: U256::from(0), restaking_percent: 10 },
+			)
+			.execute_returns(());
+
+		// Ensure the service instance is created
+		assert!(Instances::<Runtime>::contains_key(0));
+	});
+}
+
+#[test]
+fn test_request_service_with_erc20() {
+	ExtBuilder.build().execute_with(|| {
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		// First create the blueprint
+		let blueprint_data = cggmp21_blueprint();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::create_blueprint {
+					blueprint_data: UnboundedBytes::from(blueprint_data.encode()),
+				},
+			)
+			.execute_returns(());
+
+		// Now register operator
+		let preferences_data = OperatorPreferences {
+			key: zero_key(),
+			price_targets: price_targets(MachineKind::Large),
+		}
+		.encode();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bob,
+				H160::from_low_u64_be(1),
+				PCall::register_operator {
+					blueprint_id: U256::from(0),
+					preferences: UnboundedBytes::from(preferences_data),
+					registration_args: UnboundedBytes::from(vec![0u8]),
+				},
+			)
+			.execute_returns(());
+
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, Services::address())
+				.map(|(balance, _)| balance),
+			U256::zero(),
+		);
+		// Finally, request the service
+		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
+		let service_providers_data: Vec<AccountId32> = vec![TestAccount::Bob.into()];
+		let request_args_data = vec![0u8];
+
+		let payment_amount = U256::from(5).mul(U256::from(10).pow(6.into())); // 5 USDC
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::request_service {
+					blueprint_id: U256::from(0), // Use the first blueprint
+					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
+					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
+					request_args_data: UnboundedBytes::from(request_args_data),
+					assets: [TNT, WETH].into_iter().map(Into::into).collect(),
+					ttl: U256::from(1000),
+					payment_asset_id: U256::from(0),
+					payment_token_address: USDC_ERC20.into(),
+					amount: payment_amount,
+				},
+			)
+			.execute_returns(());
+
+		// Services pallet address now should have 5 USDC
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, Services::address())
+				.map(|(balance, _)| balance),
+			payment_amount
+		);
+
+		// Approve the service request by the operator(s)
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bob,
+				H160::from_low_u64_be(1),
+				PCall::approve { request_id: U256::from(0), restaking_percent: 10 },
+			)
+			.execute_returns(());
+
+		// Ensure the service instance is created
+		assert!(Instances::<Runtime>::contains_key(0));
+	});
+}
+
+#[test]
+fn test_request_service_with_asset() {
+	ExtBuilder.build().execute_with(|| {
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		// First create the blueprint
+		let blueprint_data = cggmp21_blueprint();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::create_blueprint {
+					blueprint_data: UnboundedBytes::from(blueprint_data.encode()),
+				},
+			)
+			.execute_returns(());
+
+		// Now register operator
+		let preferences_data = OperatorPreferences {
+			key: zero_key(),
+			price_targets: price_targets(MachineKind::Large),
+		}
+		.encode();
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Bob,
+				H160::from_low_u64_be(1),
+				PCall::register_operator {
+					blueprint_id: U256::from(0),
+					preferences: UnboundedBytes::from(preferences_data),
+					registration_args: UnboundedBytes::from(vec![0u8]),
+				},
+			)
+			.execute_returns(());
+
+		assert_eq!(Assets::balance(USDC, Services::account_id()), 0);
+
+		// Finally, request the service
+		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
+		let service_providers_data: Vec<AccountId32> = vec![TestAccount::Bob.into()];
+		let request_args_data = vec![0u8];
+
+		let payment_amount = U256::from(5).mul(U256::from(10).pow(6.into())); // 5 USDC
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::request_service {
+					blueprint_id: U256::from(0), // Use the first blueprint
+					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
+					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
+					request_args_data: UnboundedBytes::from(request_args_data),
+					assets: [TNT, WETH].into_iter().map(Into::into).collect(),
+					ttl: U256::from(1000),
+					payment_asset_id: U256::from(USDC),
+					payment_token_address: Default::default(),
+					amount: payment_amount,
+				},
+			)
+			.execute_returns(());
+
+		// Services pallet address now should have 5 USDC
+		assert_eq!(Assets::balance(USDC, Services::account_id()), payment_amount.as_u128());
 
 		// Approve the service request by the operator(s)
 		PrecompilesValue::get()
@@ -314,6 +485,10 @@ fn test_terminate_service() {
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
 					assets: [WETH].into_iter().map(Into::into).collect(),
+					ttl: U256::from(1000),
+					payment_asset_id: U256::from(0),
+					payment_token_address: Default::default(),
+					amount: U256::from(0),
 				},
 			)
 			.execute_returns(());

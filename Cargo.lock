@@ -8417,6 +8417,7 @@ dependencies = [
  "libsecp256k1",
  "log",
  "num_enum",
+ "pallet-assets",
  "pallet-balances",
  "pallet-base-fee",
  "pallet-dynamic-fee",
@@ -14360,7 +14361,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
