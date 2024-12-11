@@ -50,7 +50,8 @@ impl<T: Config> Pallet<T> {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
 			// Ensure enough deposited balance
-			let balance = metadata.deposits.get_mut(&asset).ok_or(Error::<T>::InsufficientBalance)?;
+			let balance =
+				metadata.deposits.get_mut(&asset).ok_or(Error::<T>::InsufficientBalance)?;
 			ensure!(*balance >= amount, Error::<T>::InsufficientBalance);
 
 			// Reduce the balance in deposits

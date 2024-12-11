@@ -100,7 +100,9 @@ pub mod pallet {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
 		/// The currency type for native token operations.
-		type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId> + LockableCurrency<Self::AccountId>;
+		type Currency: Currency<Self::AccountId>
+			+ ReservableCurrency<Self::AccountId>
+			+ LockableCurrency<Self::AccountId>;
 
 		/// The minimum amount that an operator must bond.
 		#[pallet::constant]
@@ -134,13 +136,25 @@ pub mod pallet {
 		type MinDelegateAmount: Get<BalanceOf<Self>>;
 
 		/// The fungibles instance for handling multi-asset operations.
-		type Fungibles: fungibles::Inspect<Self::AccountId> + fungibles::Mutate<Self::AccountId> + fungibles::Transfer<Self::AccountId>;
+		type Fungibles: fungibles::Inspect<Self::AccountId> + fungibles::Mutate<Self::AccountId>;
 
 		/// The base asset ID type.
-		type AssetId: Member + Parameter + Default + Copy + MaybeSerializeDeserialize + Debug + MaxEncodedLen;
+		type AssetId: Member
+			+ Parameter
+			+ Default
+			+ Copy
+			+ MaybeSerializeDeserialize
+			+ Debug
+			+ MaxEncodedLen;
 
 		/// The vault ID type.
-		type VaultId: Member + Parameter + Default + Copy + MaybeSerializeDeserialize + Debug + MaxEncodedLen;
+		type VaultId: Member
+			+ Parameter
+			+ Default
+			+ Copy
+			+ MaybeSerializeDeserialize
+			+ Debug
+			+ MaxEncodedLen;
 
 		/// The origin that can force certain operations.
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;

@@ -47,7 +47,7 @@ use pallet_evm::AddressMapping;
 use pallet_multi_asset_delegation::types::DelegatorBlueprintSelection;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
-use sp_runtime::traits::Dispatchable;
+use sp_runtime::traits::{Dispatchable, TryConvert};
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::types::WrappedAccountId32;
 
@@ -55,6 +55,8 @@ type BalanceOf<Runtime> =
 	<<Runtime as pallet_multi_asset_delegation::Config>::Currency as Currency<
 		<Runtime as frame_system::Config>::AccountId,
 	>>::Balance;
+
+type AssetIdOf<Runtime> = <Runtime as pallet_multi_asset_delegation::Config>::AssetId;
 
 pub struct MultiAssetDelegationPrecompile<Runtime>(PhantomData<Runtime>);
 
@@ -65,6 +67,7 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_multi_asset_delegation::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
 	Runtime::AccountId: From<WrappedAccountId32>,
 {
 	/// Helper method to parse SS58 address
@@ -100,6 +103,10 @@ where
 
 		Ok(payee)
 	}
+
+	fn u256_to_amount(amount: U256) -> EvmResult<BalanceOf<Runtime>> {
+		amount.try_into().map_err(|_| revert("Invalid amount"))
+	}
 }
 
 #[precompile_utils::precompile]
@@ -110,9 +117,8 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_multi_asset_delegation::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
 	Runtime::AccountId: From<WrappedAccountId32>,
-	<Runtime as pallet_multi_asset_delegation::Config>::AssetId:
-		TryFrom<U256> + Into<U256> + solidity::Codec,
 {
 	#[precompile::public("joinOperators(uint256)")]
 	fn join_operators(handle: &mut impl PrecompileHandle, bond_amount: U256) -> EvmResult {
@@ -238,11 +244,16 @@ where
 
 	#[precompile::public("deposit(uint256,uint256)")]
 	fn deposit(handle: &mut impl PrecompileHandle, asset_id: U256, amount: U256) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let asset_id: <Runtime as pallet_multi_asset_delegation::Config>::AssetId =
-			asset_id.try_into().map_err(|_| revert("Invalid asset id"))?;
-		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
+		let amount = Self::u256_to_amount(amount)?;
+		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
+			.map_err(|_| revert("error converting to asset id"))?;
+
+		// Get origin account.
+		let msg_sender = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(msg_sender);
+
+		// Build call with origin.
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let call = pallet_multi_asset_delegation::Call::<Runtime>::deposit { asset_id, amount };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
@@ -250,17 +261,22 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("scheduleWithdraw(uint256,uint256)")]
+	#[precompile::public("schedule_withdraw(uint256,uint256)")]
 	fn schedule_withdraw(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
 		amount: U256,
 	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let asset_id: <Runtime as pallet_multi_asset_delegation::Config>::AssetId =
-			asset_id.try_into().map_err(|_| revert("Invalid asset id"))?;
-		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
+		let amount = Self::u256_to_amount(amount)?;
+		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
+			.map_err(|_| revert("error converting to asset id"))?;
+
+		// Get origin account.
+		let msg_sender = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(msg_sender);
+
+		// Build call with origin.
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let call =
 			pallet_multi_asset_delegation::Call::<Runtime>::schedule_withdraw { asset_id, amount };
 
@@ -280,17 +296,22 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("cancelWithdraw(uint256,uint256)")]
+	#[precompile::public("cancel_withdraw(uint256,uint256)")]
 	fn cancel_withdraw(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
 		amount: U256,
 	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let asset_id: <Runtime as pallet_multi_asset_delegation::Config>::AssetId =
-			asset_id.try_into().map_err(|_| revert("Invalid asset id"))?;
-		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
+		let amount = Self::u256_to_amount(amount)?;
+		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
+			.map_err(|_| revert("error converting to asset id"))?;
+
+		// Get origin account.
+		let msg_sender = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(msg_sender);
+
+		// Build call with origin.
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let call =
 			pallet_multi_asset_delegation::Call::<Runtime>::cancel_withdraw { asset_id, amount };
 
@@ -307,17 +328,23 @@ where
 		amount: U256,
 		blueprint_selection: Vec<u64>,
 	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let amount = Self::u256_to_amount(amount)?;
+		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
+			.map_err(|_| revert("error converting to asset id"))?;
+
+		// Get origin account.
+		let msg_sender = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(msg_sender);
+
+		// Parse operator address
 		let operator = Self::convert_to_account_id(operator)?;
-		let asset_id: <Runtime as pallet_multi_asset_delegation::Config>::AssetId =
-			asset_id.try_into().map_err(|_| revert("Invalid asset id"))?;
-		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
-		let blueprint_selection = DelegatorBlueprintSelection::Fixed(
-			blueprint_selection
-				.try_into()
-				.map_err(|_| revert("Invalid blueprint selection"))?,
-		);
+
+		// Parse blueprint selection
+		let blueprint_selection = DelegatorBlueprintSelection::try_from(blueprint_selection)
+			.map_err(|_| revert("error converting blueprint selection"))?;
+
+		// Build call with origin.
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let call = pallet_multi_asset_delegation::Call::<Runtime>::delegate {
 			operator,
 			asset_id,
@@ -330,19 +357,26 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("scheduleDelegatorUnstake(bytes32,uint256,uint256)")]
+	#[precompile::public("schedule_delegator_unstake(bytes32,uint256,uint256)")]
 	fn schedule_delegator_unstake(
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
 		asset_id: U256,
 		amount: U256,
 	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let amount = Self::u256_to_amount(amount)?;
+		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
+			.map_err(|_| revert("error converting to asset id"))?;
+
+		// Get origin account.
+		let msg_sender = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(msg_sender);
+
+		// Parse operator address
 		let operator = Self::convert_to_account_id(operator)?;
-		let asset_id: <Runtime as pallet_multi_asset_delegation::Config>::AssetId =
-			asset_id.try_into().map_err(|_| revert("Invalid asset id"))?;
-		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
+
+		// Build call with origin.
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let call = pallet_multi_asset_delegation::Call::<Runtime>::schedule_delegator_unstake {
 			operator,
 			asset_id,
@@ -372,12 +406,19 @@ where
 		asset_id: U256,
 		amount: U256,
 	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let amount = Self::u256_to_amount(amount)?;
+		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
+			.map_err(|_| revert("error converting to asset id"))?;
+
+		// Get origin account.
+		let msg_sender = handle.context().caller;
+		let origin = Runtime::AddressMapping::into_account_id(msg_sender);
+
+		// Parse operator address
 		let operator = Self::convert_to_account_id(operator)?;
-		let asset_id: <Runtime as pallet_multi_asset_delegation::Config>::AssetId =
-			asset_id.try_into().map_err(|_| revert("Invalid asset id"))?;
-		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
+
+		// Build call with origin.
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let call = pallet_multi_asset_delegation::Call::<Runtime>::cancel_delegator_unstake {
 			operator,
 			asset_id,

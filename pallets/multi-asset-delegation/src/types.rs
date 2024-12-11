@@ -22,15 +22,15 @@ use sp_runtime::RuntimeDebug;
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::types::RoundIndex;
 
+pub mod asset;
 pub mod delegator;
 pub mod operator;
 pub mod rewards;
-pub mod asset;
 
+pub use asset::*;
 pub use delegator::*;
 pub use operator::*;
 pub use rewards::*;
-pub use asset::*;
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;

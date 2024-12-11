@@ -22,45 +22,45 @@ use sp_runtime::RuntimeDebug;
 /// Represents an asset type that can be either a custom asset or an ERC20 token.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Eq)]
 pub enum Asset<AssetId> {
-    /// Use the specified AssetId.
-    #[codec(index = 0)]
-    Custom(AssetId),
+	/// Use the specified AssetId.
+	#[codec(index = 0)]
+	Custom(AssetId),
 
-    /// Use an ERC20-like token with the specified contract address.
-    #[codec(index = 1)]
-    Erc20(H160),
+	/// Use an ERC20-like token with the specified contract address.
+	#[codec(index = 1)]
+	Erc20(H160),
 }
 
 impl<AssetId: Default> Default for Asset<AssetId> {
-    fn default() -> Self {
-        Asset::Custom(AssetId::default())
-    }
+	fn default() -> Self {
+		Asset::Custom(AssetId::default())
+	}
 }
 
 impl<AssetId: PartialEq> Asset<AssetId> {
-    /// Returns true if the asset is an ERC20 token.
-    pub fn is_erc20(&self) -> bool {
-        matches!(self, Asset::Erc20(_))
-    }
+	/// Returns true if the asset is an ERC20 token.
+	pub fn is_erc20(&self) -> bool {
+		matches!(self, Asset::Erc20(_))
+	}
 
-    /// Returns true if the asset is a custom asset.
-    pub fn is_custom(&self) -> bool {
-        matches!(self, Asset::Custom(_))
-    }
+	/// Returns true if the asset is a custom asset.
+	pub fn is_custom(&self) -> bool {
+		matches!(self, Asset::Custom(_))
+	}
 
-    /// Returns the ERC20 address if this is an ERC20 token.
-    pub fn erc20_address(&self) -> Option<H160> {
-        match self {
-            Asset::Erc20(address) => Some(*address),
-            _ => None,
-        }
-    }
+	/// Returns the ERC20 address if this is an ERC20 token.
+	pub fn erc20_address(&self) -> Option<H160> {
+		match self {
+			Asset::Erc20(address) => Some(*address),
+			_ => None,
+		}
+	}
 
-    /// Returns the custom asset ID if this is a custom asset.
-    pub fn custom_id(&self) -> Option<&AssetId> {
-        match self {
-            Asset::Custom(id) => Some(id),
-            _ => None,
-        }
-    }
+	/// Returns the custom asset ID if this is a custom asset.
+	pub fn custom_id(&self) -> Option<&AssetId> {
+		match self {
+			Asset::Custom(id) => Some(id),
+			_ => None,
+		}
+	}
 }
