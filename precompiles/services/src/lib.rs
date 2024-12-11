@@ -9,8 +9,7 @@ use pallet_services::types::BalanceOf;
 use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
 use sp_core::U256;
-use sp_runtime::traits::Dispatchable;
-use sp_runtime::Percent;
+use sp_runtime::{traits::Dispatchable, Percent};
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::services::{Asset, Field, OperatorPreferences, ServiceBlueprint};
 
@@ -206,19 +205,18 @@ where
 			(0, ZERO_ADDRESS) => (Asset::Custom(0u32.into()), value),
 			(0, erc20_token) => {
 				if value != Default::default() {
-					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_ERC20));
+					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_ERC20))
 				}
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
 			(other_asset_id, ZERO_ADDRESS) => {
 				if value != Default::default() {
-					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_CUSTOM_ASSET));
+					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_CUSTOM_ASSET))
 				}
 				(Asset::Custom(other_asset_id.into()), amount)
 			},
-			(_other_asset_id, _erc20_token) => {
-				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
-			},
+			(_other_asset_id, _erc20_token) =>
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20)),
 		};
 
 		let call = pallet_services::Call::<Runtime>::request {
@@ -351,11 +349,12 @@ where
 		Ok(())
 	}
 
-	/// Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+	/// Slash an operator (offender) for a service id with a given percent of their exposed stake
+	/// for that service.
 	///
 	/// The caller needs to be an authorized Slash Origin for this service.
-	/// Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
-	/// by another entity.
+	/// Note that this does not apply the slash directly, but instead schedules a deferred call to
+	/// apply the slash by another entity.
 	#[precompile::public("slash(bytes,uint256,uint8)")]
 	fn slash(
 		handle: &mut impl PrecompileHandle,

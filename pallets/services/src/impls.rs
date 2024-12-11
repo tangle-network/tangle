@@ -5,8 +5,7 @@ use alloc::vec::Vec;
 use sp_std::vec;
 #[cfg(feature = "std")]
 use std::vec::Vec;
-use tangle_primitives::BlueprintId;
-use tangle_primitives::{services::Constraints, traits::ServiceManager};
+use tangle_primitives::{services::Constraints, traits::ServiceManager, BlueprintId};
 
 impl<T: Config> traits::EvmRunner<T> for () {
 	type Error = crate::Error<T>;

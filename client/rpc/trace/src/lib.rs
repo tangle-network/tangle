@@ -21,8 +21,8 @@
 //! The implementation is composed of multiple tasks :
 //! - Many calls the RPC handler `Trace::filter`, communicating with the main task.
 //! - A main `CacheTask` managing the cache and the communication between tasks.
-//! - For each traced block an async task responsible to wait for a permit, spawn a blocking
-//!   task and waiting for the result, then send it to the main `CacheTask`.
+//! - For each traced block an async task responsible to wait for a permit, spawn a blocking task
+//!   and waiting for the result, then send it to the main `CacheTask`.
 
 use futures::{select, stream::FuturesUnordered, FutureExt, StreamExt};
 use std::{collections::BTreeMap, future::Future, marker::PhantomData, sync::Arc, time::Duration};
@@ -100,9 +100,8 @@ where
 				.try_into()
 				.map_err(|_| "Block number overflow")?),
 			Some(RequestBlockId::Tag(RequestBlockTag::Earliest)) => Ok(0),
-			Some(RequestBlockId::Tag(RequestBlockTag::Pending)) => {
-				Err("'pending' is not supported")
-			},
+			Some(RequestBlockId::Tag(RequestBlockTag::Pending)) =>
+				Err("'pending' is not supported"),
 			Some(RequestBlockId::Hash(_)) => Err("Block hash not supported"),
 		}
 	}
@@ -118,14 +117,14 @@ where
 			return Err(format!(
 				"count ({}) can't be greater than maximum ({})",
 				count, self.max_count
-			));
+			))
 		}
 
 		// Build a list of all the Substrate block hashes that need to be traced.
 		let mut block_hashes = vec![];
 		for block_height in block_heights {
 			if block_height == 0 {
-				continue; // no traces for genesis block.
+				continue // no traces for genesis block.
 			}
 
 			let block_hash = self
@@ -174,18 +173,15 @@ where
 			let mut block_traces: Vec<_> = block_traces
 				.iter()
 				.filter(|trace| match trace.action {
-					block::TransactionTraceAction::Call { from, to, .. } => {
-						(from_address.is_empty() || from_address.contains(&from))
-							&& (to_address.is_empty() || to_address.contains(&to))
-					},
-					block::TransactionTraceAction::Create { from, .. } => {
-						(from_address.is_empty() || from_address.contains(&from))
-							&& to_address.is_empty()
-					},
-					block::TransactionTraceAction::Suicide { address, .. } => {
-						(from_address.is_empty() || from_address.contains(&address))
-							&& to_address.is_empty()
-					},
+					block::TransactionTraceAction::Call { from, to, .. } =>
+						(from_address.is_empty() || from_address.contains(&from)) &&
+							(to_address.is_empty() || to_address.contains(&to)),
+					block::TransactionTraceAction::Create { from, .. } =>
+						(from_address.is_empty() || from_address.contains(&from)) &&
+							to_address.is_empty(),
+					block::TransactionTraceAction::Suicide { address, .. } =>
+						(from_address.is_empty() || from_address.contains(&address)) &&
+							to_address.is_empty(),
 				})
 				.cloned()
 				.collect();
@@ -211,11 +207,11 @@ where
 							"the amount of traces goes over the maximum ({}), please use 'after' \
 							and 'count' in your request",
 							self.max_count
-						));
+						))
 					}
 
 					traces = traces.into_iter().take(count).collect();
-					break;
+					break
 				}
 			}
 		}
@@ -595,9 +591,9 @@ where
 
 	/// Handle a request to get the traces of the provided block.
 	/// - If the result is stored in the cache, it sends it immediatly.
-	/// - If the block is currently being pooled, it is added in this block cache waiting list,
-	///   and all requests concerning this block will be satisfied when the tracing for this block
-	///   is finished.
+	/// - If the block is currently being pooled, it is added in this block cache waiting list, and
+	///   all requests concerning this block will be satisfied when the tracing for this block is
+	///   finished.
 	/// - If this block is missing from the cache, it means no batch asked for it. All requested
 	///   blocks should be contained in a batch beforehand, and thus an error is returned.
 	#[instrument(skip(self))]
@@ -652,8 +648,8 @@ where
 				// We remove early the block cache if this batch is the last
 				// pooling this block.
 				if let Some(block_cache) = self.cached_blocks.get_mut(block) {
-					if block_cache.active_batch_count == 1
-						&& matches!(
+					if block_cache.active_batch_count == 1 &&
+						matches!(
 							block_cache.state,
 							CacheBlockState::Pooled { started: false, .. }
 						) {
@@ -760,12 +756,11 @@ where
 			overrides.current_transaction_statuses(substrate_hash),
 		) {
 			(Some(a), Some(b)) => (a, b),
-			_ => {
+			_ =>
 				return Err(format!(
 					"Failed to get Ethereum block data for Substrate block {}",
 					substrate_hash
-				))
-			},
+				)),
 		};
 
 		let eth_block_hash = eth_block.header.hash();
@@ -786,7 +781,7 @@ where
 		{
 			api_version
 		} else {
-			return Err("Runtime api version call failed (trace)".to_string());
+			return Err("Runtime api version call failed (trace)".to_string())
 		};
 
 		// Trace the block.
@@ -800,7 +795,7 @@ where
 				{
 					api_version
 				} else {
-					return Err("Runtime api version call failed (core)".to_string());
+					return Err("Runtime api version call failed (core)".to_string())
 				};
 
 				// Initialize block: calls the "on_initialize" hook on every pallet

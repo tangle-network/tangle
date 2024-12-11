@@ -19,8 +19,7 @@
 //! Test utilities
 use super::*;
 
-use frame_support::derive_impl;
-use frame_support::{construct_runtime, pallet_prelude::*, parameter_types};
+use frame_support::{construct_runtime, derive_impl, pallet_prelude::*, parameter_types};
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
 use precompile_utils::{mock_account, precompile_set::*, testing::MockAccount};
 use sp_runtime::{BuildStorage, Perbill};

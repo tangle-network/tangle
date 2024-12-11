@@ -15,11 +15,11 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
-use frame_support::traits::fungibles::Mutate;
-use frame_support::{ensure, pallet_prelude::DispatchResult};
 use frame_support::{
+	ensure,
+	pallet_prelude::DispatchResult,
 	sp_runtime::traits::{AccountIdConversion, CheckedAdd, Zero},
-	traits::{tokens::Preservation, Get},
+	traits::{fungibles::Mutate, tokens::Preservation, Get},
 };
 
 impl<T: Config> Pallet<T> {

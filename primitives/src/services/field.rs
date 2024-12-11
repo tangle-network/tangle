@@ -172,13 +172,13 @@ impl<C: Constraints, AccountId: PartialEq> PartialEq for Field<C, AccountId> {
 			(Self::AccountId(l0), Self::AccountId(r0)) => l0 == r0,
 			(Self::Struct(l_name, l_fields), Self::Struct(r_name, r_fields)) => {
 				if l_name != r_name || l_fields.len() != r_fields.len() {
-					return false;
+					return false
 				}
 				for ((l_field_name, l_field_value), (r_field_name, r_field_value)) in
 					l_fields.iter().zip(r_fields.iter())
 				{
 					if l_field_name != r_field_name || l_field_value != r_field_value {
-						return false;
+						return false
 					}
 				}
 				true
@@ -307,18 +307,16 @@ impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 			(Self::Int64(_), FieldType::Int64) => true,
 			(Self::String(_), FieldType::String) => true,
 			(Self::Bytes(_), FieldType::Bytes) => true,
-			(Self::Array(a), FieldType::Array(len, b)) => {
-				a.len() == *len as usize && a.iter().all(|f| f.eq(b.as_ref()))
-			},
+			(Self::Array(a), FieldType::Array(len, b)) =>
+				a.len() == *len as usize && a.iter().all(|f| f.eq(b.as_ref())),
 			(Self::List(a), FieldType::List(b)) => a.iter().all(|f| f.eq(b.as_ref())),
 			(Self::AccountId(_), FieldType::AccountId) => true,
-			(Self::Struct(_, fields_a), FieldType::Struct(_, fields_b)) => {
-				fields_a.into_iter().len() == fields_b.into_iter().len()
-					&& fields_a
+			(Self::Struct(_, fields_a), FieldType::Struct(_, fields_b)) =>
+				fields_a.into_iter().len() == fields_b.into_iter().len() &&
+					fields_a
 						.into_iter()
 						.zip(fields_b)
-						.all(|((_, v_a), (_, v_b))| v_a.as_ref().eq(v_b))
-			},
+						.all(|((_, v_a), (_, v_b))| v_a.as_ref().eq(v_b)),
 			_ => false,
 		}
 	}
@@ -422,7 +420,7 @@ impl<C: Constraints, AccountId: Clone + Encode> Field<C, AccountId> {
 	/// Encode the fields to ethabi bytes.
 	pub fn encode_to_ethabi(fields: &[Self]) -> ethabi::Bytes {
 		if fields.is_empty() {
-			return Default::default();
+			return Default::default()
 		}
 		let tokens: Vec<ethabi::Token> = fields.iter().map(Self::to_ethabi_token).collect();
 		ethabi::encode(&tokens)

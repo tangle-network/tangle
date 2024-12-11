@@ -107,34 +107,29 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::Codec;
-use frame_support::traits::fungibles;
-use frame_support::traits::fungibles::Create;
-use frame_support::traits::fungibles::Inspect as FungiblesInspect;
-use frame_support::traits::fungibles::Mutate as FungiblesMutate;
-use frame_support::traits::tokens::Precision;
-use frame_support::traits::tokens::Preservation;
-use frame_support::traits::Currency;
-use frame_support::traits::ExistenceRequirement;
-use frame_support::traits::LockableCurrency;
-use frame_support::traits::ReservableCurrency;
 use frame_support::{
 	defensive, defensive_assert, ensure,
 	pallet_prelude::{MaxEncodedLen, *},
 	storage::bounded_btree_map::BoundedBTreeMap,
 	traits::{
-		tokens::Fortitude, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating, Get,
+		fungibles,
+		fungibles::{Create, Inspect as FungiblesInspect, Mutate as FungiblesMutate},
+		tokens::{Fortitude, Precision, Preservation},
+		Currency, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating,
+		ExistenceRequirement, Get, LockableCurrency, ReservableCurrency,
 	},
 	DefaultNoBound, PalletError,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::TypeInfo;
 use sp_core::U256;
-use sp_runtime::traits::AccountIdConversion;
-use sp_runtime::traits::{
-	AtLeast32BitUnsigned, Bounded, CheckedAdd, Convert, Saturating, StaticLookup, Zero,
+use sp_runtime::{
+	traits::{
+		AccountIdConversion, AtLeast32BitUnsigned, Bounded, CheckedAdd, Convert, Saturating,
+		StaticLookup, Zero,
+	},
+	FixedPointNumber, Perbill,
 };
-use sp_runtime::FixedPointNumber;
-use sp_runtime::Perbill;
 use sp_staking::{EraIndex, StakingInterface};
 use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, ops::Div, vec::Vec};
 
@@ -849,7 +844,7 @@ pub mod pallet {
 			let pool_id = member.get_by_pool_id(current_era, pool_id);
 
 			if pool_id.is_none() {
-				return Err(Error::<T>::PoolNotFound.into());
+				return Err(Error::<T>::PoolNotFound.into())
 			}
 
 			// checked above
@@ -1511,7 +1506,7 @@ impl<T: Config> Pallet<T> {
 		let balance = T::U256ToBalance::convert;
 		if current_balance.is_zero() || current_points.is_zero() || points.is_zero() {
 			// There is nothing to unbond
-			return Zero::zero();
+			return Zero::zero()
 		}
 
 		// Equivalent of (current_balance / current_points) * points
@@ -1539,7 +1534,8 @@ impl<T: Config> Pallet<T> {
 		let bouncer = T::Lookup::lookup(bouncer)?;
 
 		// ensure that pool token can be created
-		// if this fails, it means that the pool token already exists or the token counter needs to be incremented correctly
+		// if this fails, it means that the pool token already exists or the token counter needs to
+		// be incremented correctly
 		ensure!(
 			T::Fungibles::total_issuance(pool_id.into()) == 0_u32.into(),
 			Error::<T>::PoolTokenCreationFailed
@@ -1618,9 +1614,8 @@ impl<T: Config> Pallet<T> {
 		bonded_pool.ok_to_join()?;
 
 		let (_points_issued, bonded) = match extra {
-			BondExtra::FreeBalance(amount) => {
-				(bonded_pool.try_bond_funds(&member_account, amount, BondType::Later)?, amount)
-			},
+			BondExtra::FreeBalance(amount) =>
+				(bonded_pool.try_bond_funds(&member_account, amount, BondType::Later)?, amount),
 		};
 
 		bonded_pool.ok_to_be_open()?;
@@ -1686,7 +1681,7 @@ impl<T: Config> Pallet<T> {
 		let min_balance = T::Currency::minimum_balance();
 
 		if pre_frozen_balance == min_balance {
-			return Err(Error::<T>::NothingToAdjust.into());
+			return Err(Error::<T>::NothingToAdjust.into())
 		}
 
 		// Update frozen amount with current ED.

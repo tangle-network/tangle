@@ -1,28 +1,20 @@
 use core::ops::Mul;
 
-use crate::mock::*;
-use crate::mock_evm::PCall;
-use crate::mock_evm::PrecompilesValue;
+use crate::{
+	mock::*,
+	mock_evm::{PCall, PrecompilesValue},
+};
 use frame_support::assert_ok;
-use pallet_services::types::ConstraintsOf;
-use pallet_services::Instances;
-use pallet_services::Operators;
-use pallet_services::OperatorsProfile;
+use pallet_services::{types::ConstraintsOf, Instances, Operators, OperatorsProfile};
 use parity_scale_codec::Encode;
-use precompile_utils::prelude::UnboundedBytes;
-use precompile_utils::testing::*;
-use sp_core::ecdsa;
-use sp_core::{H160, U256};
-use sp_runtime::bounded_vec;
-use sp_runtime::AccountId32;
-use tangle_primitives::services::BlueprintServiceManager;
-use tangle_primitives::services::FieldType;
-use tangle_primitives::services::JobDefinition;
-use tangle_primitives::services::JobMetadata;
-use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
-use tangle_primitives::services::PriceTargets;
-use tangle_primitives::services::ServiceMetadata;
-use tangle_primitives::services::{OperatorPreferences, ServiceBlueprint};
+use precompile_utils::{prelude::UnboundedBytes, testing::*};
+use sp_core::{ecdsa, H160, U256};
+use sp_runtime::{bounded_vec, AccountId32};
+use tangle_primitives::services::{
+	BlueprintServiceManager, FieldType, JobDefinition, JobMetadata,
+	MasterBlueprintServiceManagerRevision, OperatorPreferences, PriceTargets, ServiceBlueprint,
+	ServiceMetadata,
+};
 
 fn zero_key() -> ecdsa::Public {
 	ecdsa::Public::from([0; 33])
@@ -53,9 +45,8 @@ fn price_targets(kind: MachineKind) -> PriceTargets {
 			storage_ssd: 100,
 			storage_nvme: 150,
 		},
-		MachineKind::Small => {
-			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 }
-		},
+		MachineKind::Small =>
+			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 },
 	}
 }
 

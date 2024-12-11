@@ -22,10 +22,9 @@ use frame_election_provider_support::{
 	onchain, SequentialPhragmen,
 };
 use frame_support::{
-	construct_runtime, parameter_types,
-	traits::{ConstU128, ConstU32, OneSessionHandler},
+	construct_runtime, derive_impl, parameter_types,
+	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
 };
-use frame_support::{derive_impl, traits::AsEnsureOriginWithArg};
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
@@ -280,7 +279,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 
 	fn is_operator_active(operator: &AccountId) -> bool {
 		if operator == &mock_pub_key(10) {
-			return false;
+			return false
 		}
 		true
 	}
@@ -759,11 +758,10 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 	for evt in expected {
 		let next = actual.pop().expect("RuntimeEvent expected");
 		match (&next, &evt) {
-			(left_val, right_val) => {
+			(left_val, right_val) =>
 				if !(*left_val == *right_val) {
 					panic!("Events don't match\nactual: {actual:#?}\nexpected: {evt:#?}");
-				}
-			},
+				},
 		};
 	}
 }

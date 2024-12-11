@@ -62,25 +62,25 @@ impl<Runtime: pallet_evm::Config> EcdsaStarkPrecompile<Runtime> {
 		let r = if let Ok(x) = Scalar::from_be_bytes(r_bytes) {
 			x
 		} else {
-			return Ok(false);
+			return Ok(false)
 		};
 
 		let s = if let Ok(x) = Scalar::from_be_bytes(s_bytes) {
 			x
 		} else {
-			return Ok(false);
+			return Ok(false)
 		};
 
 		let public_key_point = if let Ok(x) = Point::from_bytes(public_bytes) {
 			x
 		} else {
-			return Ok(false);
+			return Ok(false)
 		};
 
 		let public_key_x: Scalar<Stark> = if let Some(x) = public_key_point.x() {
 			x.to_scalar()
 		} else {
-			return Ok(false);
+			return Ok(false)
 		};
 
 		let public_key = convert_stark_scalar(&public_key_x);

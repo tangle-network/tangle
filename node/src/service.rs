@@ -308,8 +308,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	} = new_partial(&config, &eth_config)?;
 
 	if config.role.is_authority() {
-		if config.chain_spec.chain_type() == ChainType::Development
-			|| config.chain_spec.chain_type() == ChainType::Local
+		if config.chain_spec.chain_type() == ChainType::Development ||
+			config.chain_spec.chain_type() == ChainType::Local
 		{
 			if auto_insert_keys {
 				crate::utils::insert_controller_account_keys_into_keystore(
@@ -326,8 +326,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 
 		// finally check if keys are inserted correctly
 		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore()).is_err() {
-			if config.chain_spec.chain_type() == ChainType::Development
-				|| config.chain_spec.chain_type() == ChainType::Local
+			if config.chain_spec.chain_type() == ChainType::Development ||
+				config.chain_spec.chain_type() == ChainType::Local
 			{
 				println!("
 			++++++++++++++++++++++++++++++++++++++++++++++++

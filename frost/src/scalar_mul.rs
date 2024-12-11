@@ -118,7 +118,7 @@ where
 				// If carry == 1 and window & 1 == 0, then bit_buf & 1 == 1 so the next carry should
 				// be 1
 				pos += 1;
-				continue;
+				continue
 			}
 
 			if window < width / 2 {
@@ -197,14 +197,14 @@ where
 			.collect::<Option<Vec<_>>>()?;
 
 		if nafs.len() != lookup_tables.len() {
-			return None;
+			return None
 		}
 
 		let mut r = <C::Group>::identity();
 
 		// All NAFs will have the same size, so get it from the first
 		if nafs.is_empty() {
-			return Some(r);
+			return Some(r)
 		}
 		let naf_length = nafs[0].len();
 

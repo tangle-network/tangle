@@ -14,11 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
-use crate::mock::{
-	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
+use crate::{
+	mock::{AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp},
+	ServicesPrecompile, ServicesPrecompileCall,
 };
-use crate::ServicesPrecompile;
-use crate::ServicesPrecompileCall;
 use fp_evm::FeeCalculator;
 use frame_support::{
 	parameter_types,
@@ -152,7 +151,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
 		// Make pallet services account free to use
 		if who == &pallet_services_address {
-			return Ok(None);
+			return Ok(None)
 		}
 		// fallback to the default implementation
 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
@@ -169,7 +168,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
 		// Make pallet services account free to use
 		if who == &pallet_services_address {
-			return already_withdrawn;
+			return already_withdrawn
 		}
 		// fallback to the default implementation
 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
@@ -255,9 +254,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		len: usize,
 	) -> Option<Result<(), TransactionValidityError>> {
 		match self {
-			RuntimeCall::Ethereum(call) => {
-				call.pre_dispatch_self_contained(info, dispatch_info, len)
-			},
+			RuntimeCall::Ethereum(call) =>
+				call.pre_dispatch_self_contained(info, dispatch_info, len),
 			_ => None,
 		}
 	}
@@ -267,9 +265,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		info: Self::SignedInfo,
 	) -> Option<sp_runtime::DispatchResultWithInfo<sp_runtime::traits::PostDispatchInfoOf<Self>>> {
 		match self {
-			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) => {
-				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info))))
-			},
+			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) =>
+				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info)))),
 			_ => None,
 		}
 	}

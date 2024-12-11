@@ -18,11 +18,9 @@ use crate::types::ConstraintsOf;
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use mock::*;
-use sp_core::U256;
-use sp_core::{bounded_vec, ecdsa, ByteArray};
+use sp_core::{bounded_vec, ecdsa, ByteArray, U256};
 use sp_runtime::{KeyTypeId, Percent};
-use tangle_primitives::services::*;
-use tangle_primitives::MultiAssetDelegationInfo;
+use tangle_primitives::{services::*, MultiAssetDelegationInfo};
 
 const ALICE: u8 = 1;
 const BOB: u8 = 2;
@@ -61,9 +59,8 @@ fn price_targets(kind: MachineKind) -> PriceTargets {
 			storage_ssd: 100,
 			storage_nvme: 150,
 		},
-		MachineKind::Small => {
-			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 }
-		},
+		MachineKind::Small =>
+			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 },
 	}
 }
 
