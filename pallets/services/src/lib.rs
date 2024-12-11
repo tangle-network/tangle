@@ -622,6 +622,15 @@ pub mod module {
 		OperatorProfile<T::Constraints>,
 		ResultQuery<Error<T>::OperatorProfileNotFound>,
 	>;
+	/// Holds the service payment information for a service request.
+	/// Once the service is initiated, the payment is transferred to the MBSM and this
+	/// information is removed.
+	///
+	/// Service Requst ID -> Service Payment
+	#[pallet::storage]
+	#[pallet::getter(fn service_payment)]
+	pub type StagingServicePayments<T: Config> =
+		StorageMap<_, Identity, u64, StagingServicePayment<T::AccountId, T::AssetId, BalanceOf<T>>>;
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -871,6 +880,7 @@ pub mod module {
 			}
 
 			let mut native_value = Zero::zero();
+			let request_id = NextServiceRequestId::<T>::get();
 
 			if value != Zero::zero() {
 				// Payment transfer
@@ -900,9 +910,18 @@ pub mod module {
 						ensure!(success, Error::<T>::ERC20TransferFailed);
 					},
 				};
+
+				// Save the payment information for the service request.
+				let payment = StagingServicePayment {
+					request_id,
+					owner: caller.clone(),
+					asset: payment_asset,
+					amount: value,
+				};
+
+				StagingServicePayments::<T>::insert(request_id, payment);
 			}
 
-			let request_id = NextServiceRequestId::<T>::get();
 			let (allowed, _weight) = Self::on_request_hook(
 				&blueprint,
 				blueprint_id,
@@ -1068,6 +1087,14 @@ pub mod module {
 						.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
 				})?;
 
+				// Payment
+				if let Some(payment) = Self::service_payment(request_id) {
+					// TODO: handle the payment to MBSM.
+
+					// Remove the payment information.
+					StagingServicePayments::<T>::remove(request_id);
+				}
+
 				let (allowed, _weight) = Self::on_service_init_hook(
 					&blueprint,
 					blueprint_id,
@@ -1130,6 +1157,40 @@ pub mod module {
 				blueprint_id: request.blueprint,
 				request_id,
 			});
+
+			// Refund the payment
+			if let Some(payment) = Self::service_payment(request_id) {
+				match payment.asset {
+					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+						T::Currency::transfer(
+							&Self::account_id(),
+							&payment.owner,
+							payment.amount,
+							ExistenceRequirement::KeepAlive,
+						)?;
+					},
+					Asset::Custom(asset_id) => {
+						T::Fungibles::transfer(
+							asset_id,
+							&Self::account_id(),
+							&payment.owner,
+							payment.amount,
+							Preservation::Preserve,
+						)?;
+					},
+					Asset::Erc20(token) => {
+						// TODO: handle the refund of the ERC20 token.
+						// let (success, _weight) = Self::erc20_transfer(
+						// 	token,
+						// 	Self::address(),
+						// 	&payment.owner,
+						// 	payment.amount,
+						// )?;
+						// ensure!(success, Error::<T>::ERC20TransferFailed);
+					},
+				}
+				StagingServicePayments::<T>::remove(request_id);
+			}
 
 			// TODO: make use of the returned weight from the hook.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
