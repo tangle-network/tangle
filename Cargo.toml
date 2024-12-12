@@ -369,19 +369,9 @@ xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-s
 polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
 
 # Subxt
-subxt = { version = "0.37.0", default-features = false }
-subxt-core = { version = "0.37.0", default-features = false }
-subxt-signer = { version = "0.37.0", default-features = false }
-
-# Sygma
-# sygma-access-segregator = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-basic-feehandler = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-traits = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-fee-handler-router = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-percentage-feehandler = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-bridge = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-runtime-api = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-rpc = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
+subxt = { version = "0.38.0", default-features = false }
+subxt-core = { version = "0.38.0", default-features = false }
+subxt-signer = { version = "0.38.0", default-features = false }
 
 [profile.release]
 panic = "unwind"
