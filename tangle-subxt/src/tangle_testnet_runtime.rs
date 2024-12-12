@@ -3373,9 +3373,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				80u8, 141u8, 11u8, 219u8, 6u8, 178u8, 239u8, 224u8, 24u8, 145u8, 113u8, 85u8, 28u8,
-				230u8, 209u8, 8u8, 141u8, 24u8, 185u8, 56u8, 183u8, 59u8, 40u8, 156u8, 46u8, 220u8,
-				13u8, 52u8, 211u8, 39u8, 99u8, 68u8,
+				141u8, 31u8, 139u8, 80u8, 196u8, 122u8, 239u8, 255u8, 203u8, 21u8, 118u8, 8u8,
+				54u8, 252u8, 83u8, 72u8, 55u8, 6u8, 138u8, 254u8, 63u8, 60u8, 64u8, 9u8, 24u8,
+				40u8, 94u8, 121u8, 216u8, 5u8, 1u8, 185u8,
 			]
 	}
 	pub mod system {
@@ -10972,7 +10972,8 @@ pub mod api {
 					&self,
 					equivocation_proof: types::report_equivocation_unsigned::EquivocationProof,
 					key_owner_proof: types::report_equivocation_unsigned::KeyOwnerProof,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::ReportEquivocationUnsigned> {
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ReportEquivocationUnsigned>
+				{
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"Babe",
 						"report_equivocation_unsigned",
@@ -11780,7 +11781,8 @@ pub mod api {
 					&self,
 					equivocation_proof: types::report_equivocation_unsigned::EquivocationProof,
 					key_owner_proof: types::report_equivocation_unsigned::KeyOwnerProof,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::ReportEquivocationUnsigned> {
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ReportEquivocationUnsigned>
+				{
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"Grandpa",
 						"report_equivocation_unsigned",
@@ -16460,7 +16462,8 @@ pub mod api {
 					&self,
 					target: types::force_remove_vesting_schedule::Target,
 					schedule_index: types::force_remove_vesting_schedule::ScheduleIndex,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::ForceRemoveVestingSchedule> {
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ForceRemoveVestingSchedule>
+				{
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"Vesting",
 						"force_remove_vesting_schedule",
@@ -17892,7 +17895,8 @@ pub mod api {
 				pub fn set_emergency_election_result(
 					&self,
 					supports: types::set_emergency_election_result::Supports,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::SetEmergencyElectionResult> {
+				) -> ::subxt_core::tx::payload::StaticPayload<types::SetEmergencyElectionResult>
+				{
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"ElectionProviderMultiPhase",
 						"set_emergency_election_result",
@@ -28840,8 +28844,10 @@ pub mod api {
 				#[doc = "Fails unless [`crate::pallet::Config::StakeAdapter`] is of strategy type:"]
 				#[doc = "[`adapter::StakeStrategyType::Delegate`]."]
 				#[doc = ""]
-				#[doc = "This call can be dispatched permissionlessly (i.e. by any account). If the member has"]
-				#[doc = "slash to be applied, caller may be rewarded with the part of the slash."]
+				#[doc = "The pending slash amount of the member must be equal or more than `ExistentialDeposit`."]
+				#[doc = "This call can be dispatched permissionlessly (i.e. by any account). If the execution"]
+				#[doc = "is successful, fee is refunded and caller may be rewarded with a part of the slash"]
+				#[doc = "based on the [`crate::pallet::Config::StakeAdapter`] configuration."]
 				pub struct ApplySlash {
 					pub member_account: apply_slash::MemberAccount,
 				}
@@ -29521,7 +29527,8 @@ pub mod api {
 					&self,
 					pool_id: types::set_commission_claim_permission::PoolId,
 					permission: types::set_commission_claim_permission::Permission,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::SetCommissionClaimPermission> {
+				) -> ::subxt_core::tx::payload::StaticPayload<types::SetCommissionClaimPermission>
+				{
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"NominationPools",
 						"set_commission_claim_permission",
@@ -29538,8 +29545,10 @@ pub mod api {
 				#[doc = "Fails unless [`crate::pallet::Config::StakeAdapter`] is of strategy type:"]
 				#[doc = "[`adapter::StakeStrategyType::Delegate`]."]
 				#[doc = ""]
-				#[doc = "This call can be dispatched permissionlessly (i.e. by any account). If the member has"]
-				#[doc = "slash to be applied, caller may be rewarded with the part of the slash."]
+				#[doc = "The pending slash amount of the member must be equal or more than `ExistentialDeposit`."]
+				#[doc = "This call can be dispatched permissionlessly (i.e. by any account). If the execution"]
+				#[doc = "is successful, fee is refunded and caller may be rewarded with a part of the slash"]
+				#[doc = "based on the [`crate::pallet::Config::StakeAdapter`] configuration."]
 				pub fn apply_slash(
 					&self,
 					member_account: types::apply_slash::MemberAccount,
@@ -29591,7 +29600,8 @@ pub mod api {
 				pub fn migrate_pool_to_delegate_stake(
 					&self,
 					pool_id: types::migrate_pool_to_delegate_stake::PoolId,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::MigratePoolToDelegateStake> {
+				) -> ::subxt_core::tx::payload::StaticPayload<types::MigratePoolToDelegateStake>
+				{
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"NominationPools",
 						"migrate_pool_to_delegate_stake",
@@ -38449,7 +38459,8 @@ pub mod api {
 				pub fn hotfix_inc_account_sufficients(
 					&self,
 					addresses: types::hotfix_inc_account_sufficients::Addresses,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::HotfixIncAccountSufficients> {
+				) -> ::subxt_core::tx::payload::StaticPayload<types::HotfixIncAccountSufficients>
+				{
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"HotfixSufficients",
 						"hotfix_inc_account_sufficients",
@@ -41182,7 +41193,8 @@ pub mod api {
 				pub fn whitelist_blueprint_for_rewards(
 					&self,
 					blueprint_id: types::whitelist_blueprint_for_rewards::BlueprintId,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::WhitelistBlueprintForRewards> {
+				) -> ::subxt_core::tx::payload::StaticPayload<types::WhitelistBlueprintForRewards>
+				{
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
 						"whitelist_blueprint_for_rewards",
@@ -44480,7 +44492,8 @@ pub mod api {
 				#[doc = " `Pallet` EVM Address."]
 				pub fn pallet_evm_address(
 					&self,
-				) -> ::subxt_core::constants::address::StaticAddress<::subxt_core::utils::H160> {
+				) -> ::subxt_core::constants::address::StaticAddress<::subxt_core::utils::H160>
+				{
 					::subxt_core::constants::address::StaticAddress::new_static(
 						"Services",
 						"PalletEVMAddress",
@@ -46158,7 +46171,8 @@ pub mod api {
 					&self,
 					pool_id: types::set_commission_claim_permission::PoolId,
 					permission: types::set_commission_claim_permission::Permission,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::SetCommissionClaimPermission> {
+				) -> ::subxt_core::tx::payload::StaticPayload<types::SetCommissionClaimPermission>
+				{
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"Lst",
 						"set_commission_claim_permission",
@@ -56294,8 +56308,10 @@ pub mod api {
 					#[doc = "Fails unless [`crate::pallet::Config::StakeAdapter`] is of strategy type:"]
 					#[doc = "[`adapter::StakeStrategyType::Delegate`]."]
 					#[doc = ""]
-					#[doc = "This call can be dispatched permissionlessly (i.e. by any account). If the member has"]
-					#[doc = "slash to be applied, caller may be rewarded with the part of the slash."]
+					#[doc = "The pending slash amount of the member must be equal or more than `ExistentialDeposit`."]
+					#[doc = "This call can be dispatched permissionlessly (i.e. by any account). If the execution"]
+					#[doc = "is successful, fee is refunded and caller may be rewarded with a part of the slash"]
+					#[doc = "based on the [`crate::pallet::Config::StakeAdapter`] configuration."]
 					apply_slash {
 						member_account: ::subxt_core::utils::MultiAddress<
 							::subxt_core::utils::AccountId32,
@@ -56482,12 +56498,15 @@ pub mod api {
 					#[doc = "No slash pending that can be applied to the member."]
 					NothingToSlash,
 					#[codec(index = 33)]
+					#[doc = "The slash amount is too low to be applied."]
+					SlashTooLow,
+					#[codec(index = 34)]
 					#[doc = "The pool or member delegation has already migrated to delegate stake."]
 					AlreadyMigrated,
-					#[codec(index = 34)]
+					#[codec(index = 35)]
 					#[doc = "The pool or member delegation has not migrated yet to delegate stake."]
 					NotMigrated,
-					#[codec(index = 35)]
+					#[codec(index = 36)]
 					#[doc = "This call is not allowed in the current state of the pallet."]
 					NotSupported,
 				}
