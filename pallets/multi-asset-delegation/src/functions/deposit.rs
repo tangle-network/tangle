@@ -15,6 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
+use tangle_primitives::services::Asset;
 use frame_support::traits::fungibles::Mutate;
 use frame_support::{ensure, pallet_prelude::DispatchResult};
 use frame_support::{
@@ -42,7 +43,7 @@ impl<T: Config> Pallet<T> {
 	/// the transfer fails.
 	pub fn process_deposit(
 		who: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		ensure!(amount >= T::MinDelegateAmount::get(), Error::<T>::BondTooLow);
@@ -87,7 +88,7 @@ impl<T: Config> Pallet<T> {
 	/// asset is not supported.
 	pub fn process_schedule_withdraw(
 		who: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
@@ -172,7 +173,7 @@ impl<T: Config> Pallet<T> {
 	/// Returns an error if the user is not a delegator or if there is no matching withdraw request.
 	pub fn process_cancel_withdraw(
 		who: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {

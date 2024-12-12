@@ -77,7 +77,7 @@ pub use functions::*;
 #[frame_support::pallet]
 pub mod pallet {
 	use crate::types::*;
-
+	use tangle_primitives::services::Asset;
 	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction};
 	use frame_support::traits::fungibles::Inspect;
 	use frame_support::{
@@ -112,6 +112,8 @@ pub mod pallet {
 			+ Ord
 			+ Default
 			+ MaxEncodedLen
+			+ Encode
+			+ Decode
 			+ TypeInfo;
 
 		/// Type representing the unique ID of a vault.
@@ -283,14 +285,14 @@ pub mod pallet {
 			who: T::AccountId,
 			operator: T::AccountId,
 			amount: BalanceOf<T>,
-			asset_id: T::AssetId,
+			asset_id: Asset<T::AssetId>,
 		},
 		/// A delegator unstake request has been scheduled.
 		ScheduledDelegatorBondLess {
 			who: T::AccountId,
 			operator: T::AccountId,
 			amount: BalanceOf<T>,
-			asset_id: T::AssetId,
+			asset_id: Asset<T::AssetId>,
 		},
 		/// A delegator unstake request has been executed.
 		ExecutedDelegatorBondLess { who: T::AccountId },
@@ -304,7 +306,7 @@ pub mod pallet {
 		AssetUpdatedInVault {
 			who: T::AccountId,
 			vault_id: T::VaultId,
-			asset_id: T::AssetId,
+			asset_id: Asset<T::AssetId>,
 			action: AssetAction,
 		},
 		/// Operator has been slashed
@@ -530,7 +532,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn deposit(
 			origin: OriginFor<T>,
-			asset_id: T::AssetId,
+			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -544,7 +546,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn schedule_withdraw(
 			origin: OriginFor<T>,
-			asset_id: T::AssetId,
+			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -568,7 +570,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn cancel_withdraw(
 			origin: OriginFor<T>,
-			asset_id: T::AssetId,
+			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -583,7 +585,7 @@ pub mod pallet {
 		pub fn delegate(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
-			asset_id: T::AssetId,
+			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 			blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 		) -> DispatchResult {
@@ -605,7 +607,7 @@ pub mod pallet {
 		pub fn schedule_delegator_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
-			asset_id: T::AssetId,
+			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -640,7 +642,7 @@ pub mod pallet {
 		pub fn cancel_delegator_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
-			asset_id: T::AssetId,
+			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -735,7 +737,7 @@ pub mod pallet {
 		pub fn manage_asset_in_vault(
 			origin: OriginFor<T>,
 			vault_id: T::VaultId,
-			asset_id: T::AssetId,
+			asset_id: Asset<T::AssetId>,
 			action: AssetAction,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;

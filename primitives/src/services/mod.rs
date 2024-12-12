@@ -626,7 +626,7 @@ pub enum ApprovalState {
 /// Different types of assets that can be used.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum Asset<AssetId> {
+pub enum Asset<AssetId : Encode + Decode> {
 	/// Use the specified AssetId.
 	#[codec(index = 0)]
 	Custom(AssetId),
@@ -636,13 +636,13 @@ pub enum Asset<AssetId> {
 	Erc20(sp_core::H160),
 }
 
-impl<AssetId: sp_runtime::traits::Zero> Default for Asset<AssetId> {
+impl<AssetId: sp_runtime::traits::Zero + Encode + Decode> Default for Asset<AssetId> {
 	fn default() -> Self {
 		Asset::Custom(sp_runtime::traits::Zero::zero())
 	}
 }
 
-impl<AssetId: Encode> Asset<AssetId> {
+impl<AssetId: Encode + Decode> Asset<AssetId> {
 	pub fn to_ethabi_param_type() -> ethabi::ParamType {
 		ethabi::ParamType::Tuple(vec![
 			// Kind of the Asset

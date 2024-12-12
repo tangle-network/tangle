@@ -15,6 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
+use tangle_primitives::services::Asset;
 use frame_support::traits::fungibles::Mutate;
 use frame_support::traits::tokens::Preservation;
 use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
@@ -42,7 +43,7 @@ impl<T: Config> Pallet<T> {
 	pub fn process_delegate(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 		blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 	) -> DispatchResult {
@@ -141,7 +142,7 @@ impl<T: Config> Pallet<T> {
 	pub fn process_schedule_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
@@ -272,7 +273,7 @@ impl<T: Config> Pallet<T> {
 	pub fn process_cancel_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
