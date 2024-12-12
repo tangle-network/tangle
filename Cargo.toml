@@ -1,6 +1,6 @@
 [workspace.package]
 version = "1.2.3"
-authors = ["Webb Technologies Inc."]
+authors = ["Tangle Foundation."]
 edition = "2021"
 license = "Unlicense"
 homepage = "https://webb.tools"

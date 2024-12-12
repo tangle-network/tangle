@@ -139,6 +139,14 @@ impl<T: Config> Pallet<T> {
 				let value = U256::zero();
 				let info = Self::evm_call(Self::address(), bsm, value, data, gas_limit)?;
 				let weight = Self::weight_from_call_info(&info);
+				log::debug!(
+					target: "evm",
+					"on_blueprint_created_hook: blueprint_id: {:?}, bsm: {:?}, info: {:?}, weight: {:?}",
+					blueprint_id,
+					bsm,
+					info,
+					weight,
+				);
 				(info.exit_reason.is_succeed(), weight)
 			},
 			_ => unimplemented!("Got unexpected case for {:?}", blueprint.manager),
@@ -173,6 +181,13 @@ impl<T: Config> Pallet<T> {
 			],
 			Zero::zero(),
 		)?;
+		log::debug!(
+			target: "evm",
+			"on_blueprint_created_hook: blueprint_id: {:?}, allowed1: {:?}, weight1: {:?}",
+			blueprint_id,
+			allowed1,
+			weight1,
+		);
 		Ok((allowed0 && allowed1, weight0.saturating_add(weight1)))
 	}
 
