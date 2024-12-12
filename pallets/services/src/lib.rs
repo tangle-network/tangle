@@ -66,7 +66,7 @@ pub mod module {
 	use sp_runtime::Percent;
 	use sp_std::vec::Vec;
 	use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
-	use tangle_primitives::{services::*, MultiAssetDelegationInfo};
+	use tangle_primitives::{services::*, Account, MultiAssetDelegationInfo};
 	use types::*;
 
 	#[pallet::config]
@@ -291,6 +291,12 @@ pub mod module {
 		MaxMasterBlueprintServiceManagerVersionsExceeded,
 		/// The ERC20 transfer failed.
 		ERC20TransferFailed,
+		/// Missing EVM Origin for the EVM execution.
+		MissingEVMOrigin,
+		/// Expected the account to be an EVM address.
+		ExpectedEVMAddress,
+		/// Expected the account to be an account ID.
+		ExpectedAccountId,
 	}
 
 	#[pallet::event]
@@ -855,6 +861,7 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request(
 			origin: OriginFor<T>,
+			evm_origin: Option<H160>,
 			#[pallet::compact] blueprint_id: u64,
 			permitted_callers: Vec<T::AccountId>,
 			operators: Vec<T::AccountId>,
@@ -884,7 +891,7 @@ pub mod module {
 
 			if value != Zero::zero() {
 				// Payment transfer
-				match payment_asset {
+				let refund_to = match payment_asset {
 					// Handle the case of native currency.
 					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
 						T::Currency::transfer(
@@ -894,6 +901,7 @@ pub mod module {
 							ExistenceRequirement::KeepAlive,
 						)?;
 						native_value = value;
+						Account::id(caller.clone())
 					},
 					Asset::Custom(asset_id) => {
 						T::Fungibles::transfer(
@@ -903,18 +911,24 @@ pub mod module {
 							value,
 							Preservation::Preserve,
 						)?;
+						Account::id(caller.clone())
 					},
 					Asset::Erc20(token) => {
+						// origin check.
+						let evm_origin = evm_origin.ok_or(Error::<T>::MissingEVMOrigin)?;
+						let mapped_origin = T::EvmAddressMapping::into_account_id(evm_origin);
+						ensure!(mapped_origin == caller, DispatchError::BadOrigin);
 						let (success, _weight) =
-							Self::erc20_transfer(token, &caller, Self::address(), value)?;
+							Self::erc20_transfer(token, evm_origin, Self::address(), value)?;
 						ensure!(success, Error::<T>::ERC20TransferFailed);
+						Account::from(evm_origin)
 					},
 				};
 
 				// Save the payment information for the service request.
 				let payment = StagingServicePayment {
 					request_id,
-					owner: caller.clone(),
+					refund_to,
 					asset: payment_asset,
 					amount: value,
 				};
@@ -1089,7 +1103,37 @@ pub mod module {
 
 				// Payment
 				if let Some(payment) = Self::service_payment(request_id) {
-					// TODO: handle the payment to MBSM.
+					// send payments to the MBSM
+					let mbsm_address = Self::mbsm_address_of(&blueprint)?;
+					let mbsm_account_id = T::EvmAddressMapping::into_account_id(mbsm_address);
+					match payment.asset {
+						Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+							T::Currency::transfer(
+								&Self::account_id(),
+								&mbsm_account_id,
+								payment.amount,
+								ExistenceRequirement::AllowDeath,
+							)?;
+						},
+						Asset::Custom(asset_id) => {
+							T::Fungibles::transfer(
+								asset_id,
+								&Self::account_id(),
+								&mbsm_account_id,
+								payment.amount,
+								Preservation::Expendable,
+							)?;
+						},
+						Asset::Erc20(token) => {
+							let (success, _weight) = Self::erc20_transfer(
+								token,
+								Self::address(),
+								mbsm_address,
+								payment.amount,
+							)?;
+							ensure!(success, Error::<T>::ERC20TransferFailed);
+						},
+					}
 
 					// Remove the payment information.
 					StagingServicePayments::<T>::remove(request_id);
@@ -1162,31 +1206,42 @@ pub mod module {
 			if let Some(payment) = Self::service_payment(request_id) {
 				match payment.asset {
 					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+						let refund_to = payment
+							.refund_to
+							.try_into_account_id()
+							.map_err(|_| Error::<T>::ExpectedAccountId)?;
 						T::Currency::transfer(
 							&Self::account_id(),
-							&payment.owner,
+							&refund_to,
 							payment.amount,
 							ExistenceRequirement::KeepAlive,
 						)?;
 					},
 					Asset::Custom(asset_id) => {
+						let refund_to = payment
+							.refund_to
+							.try_into_account_id()
+							.map_err(|_| Error::<T>::ExpectedAccountId)?;
 						T::Fungibles::transfer(
 							asset_id,
 							&Self::account_id(),
-							&payment.owner,
+							&refund_to,
 							payment.amount,
 							Preservation::Preserve,
 						)?;
 					},
 					Asset::Erc20(token) => {
-						// TODO: handle the refund of the ERC20 token.
-						// let (success, _weight) = Self::erc20_transfer(
-						// 	token,
-						// 	Self::address(),
-						// 	&payment.owner,
-						// 	payment.amount,
-						// )?;
-						// ensure!(success, Error::<T>::ERC20TransferFailed);
+						let refund_to = payment
+							.refund_to
+							.try_into_address()
+							.map_err(|_| Error::<T>::ExpectedEVMAddress)?;
+						let (success, _weight) = Self::erc20_transfer(
+							token,
+							Self::address(),
+							refund_to,
+							payment.amount,
+						)?;
+						ensure!(success, Error::<T>::ERC20TransferFailed);
 					},
 				}
 				StagingServicePayments::<T>::remove(request_id);

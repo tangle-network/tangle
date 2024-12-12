@@ -968,11 +968,10 @@ impl<T: Config> Pallet<T> {
 	/// Moves a `value` amount of tokens from the caller's account to `to`.
 	pub fn erc20_transfer(
 		erc20: H160,
-		caller: &T::AccountId,
+		from: H160,
 		to: H160,
 		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
-		let from = T::EvmAddressMapping::into_address(caller.clone());
 		#[allow(deprecated)]
 		let transfer_fn = Function {
 			name: String::from("transfer"),

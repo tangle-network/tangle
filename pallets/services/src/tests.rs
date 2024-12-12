@@ -400,6 +400,7 @@ fn request_service() {
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
@@ -501,6 +502,7 @@ fn request_service_with_no_assets() {
 		assert_err!(
 			Services::request(
 				RuntimeOrigin::signed(eve.clone()),
+				None,
 				0,
 				vec![alice.clone()],
 				vec![bob.clone()],
@@ -536,6 +538,7 @@ fn request_service_with_payment_asset() {
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(charlie.clone()),
+			None,
 			0,
 			vec![],
 			vec![bob.clone()],
@@ -586,7 +589,8 @@ fn request_service_with_payment_token() {
 
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::request(
-			RuntimeOrigin::signed(charlie.clone()),
+			RuntimeOrigin::signed(address_to_account_id(mock_address(CHARLIE))),
+			Some(account_id_to_address(charlie.clone())),
 			0,
 			vec![],
 			vec![bob.clone()],
@@ -656,6 +660,7 @@ fn job_calls() {
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
@@ -749,6 +754,7 @@ fn job_result() {
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
@@ -867,6 +873,7 @@ fn deploy() -> Deployment {
 	let service_id = Services::next_instance_id();
 	assert_ok!(Services::request(
 		RuntimeOrigin::signed(eve.clone()),
+		None,
 		blueprint_id,
 		vec![alice.clone()],
 		vec![bob.clone()],
@@ -1173,6 +1180,7 @@ fn hooks() {
 		// OnRequest hook should be called
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(charlie.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone()],

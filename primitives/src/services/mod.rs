@@ -20,7 +20,7 @@ use educe::Educe;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, RuntimeDebug};
+use sp_core::{ecdsa, ByteArray, RuntimeDebug};
 use sp_runtime::Percent;
 
 #[cfg(not(feature = "std"))]
@@ -28,6 +28,8 @@ use alloc::{string::String, vec, vec::Vec};
 
 pub mod field;
 pub use field::*;
+
+use super::Account;
 
 /// A Higher level abstraction of all the constraints.
 pub trait Constraints {
@@ -552,8 +554,8 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId>
 pub struct StagingServicePayment<AccountId, AssetId, Balance> {
 	/// The service request ID.
 	pub request_id: u64,
-	/// The requester (the payer).
-	pub owner: AccountId,
+	/// Where the refund should go.
+	pub refund_to: Account<AccountId>,
 	/// The Asset used in the payment.
 	pub asset: Asset<AssetId>,
 	/// The amount of the asset that is paid.
@@ -562,14 +564,14 @@ pub struct StagingServicePayment<AccountId, AssetId, Balance> {
 
 impl<AccountId, AssetId, Balance> Default for StagingServicePayment<AccountId, AssetId, Balance>
 where
-	AccountId: Default,
+	AccountId: ByteArray,
 	AssetId: sp_runtime::traits::Zero,
 	Balance: Default,
 {
 	fn default() -> Self {
 		Self {
 			request_id: Default::default(),
-			owner: Default::default(),
+			refund_to: Account::default(),
 			asset: Asset::default(),
 			amount: Default::default(),
 		}
