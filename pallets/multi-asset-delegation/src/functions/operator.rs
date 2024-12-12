@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,17 +17,19 @@
 /// Functions for the pallet.
 use super::*;
 use crate::{types::*, Pallet};
+use frame_support::traits::Currency;
+use frame_support::traits::ExistenceRequirement;
+use frame_support::BoundedVec;
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
-	traits::{Currency, ExistenceRequirement, Get, ReservableCurrency},
-	BoundedVec,
+	traits::{Get, ReservableCurrency},
 };
-use sp_runtime::{
-	traits::{CheckedAdd, CheckedSub},
-	DispatchError, Percent,
-};
-use tangle_primitives::{BlueprintId, ServiceManager};
+use sp_runtime::traits::{CheckedAdd, CheckedSub};
+use sp_runtime::DispatchError;
+use sp_runtime::Percent;
+use tangle_primitives::BlueprintId;
+use tangle_primitives::ServiceManager;
 
 impl<T: Config> Pallet<T> {
 	/// Handles the deposit of stake amount and creation of an operator.

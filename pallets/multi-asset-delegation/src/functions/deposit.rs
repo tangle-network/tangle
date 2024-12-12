@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,11 +15,11 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
+use frame_support::traits::fungibles::Mutate;
+use frame_support::{ensure, pallet_prelude::DispatchResult};
 use frame_support::{
-	ensure,
-	pallet_prelude::DispatchResult,
 	sp_runtime::traits::{AccountIdConversion, CheckedAdd, Zero},
-	traits::{fungibles::Mutate, tokens::Preservation, Get},
+	traits::{tokens::Preservation, Get},
 };
 
 impl<T: Config> Pallet<T> {

@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use crate::types::Asset;
 use frame_support::{pallet_prelude::Get, BoundedVec};
 use tangle_primitives::BlueprintId;
 
@@ -47,9 +46,9 @@ pub enum DelegatorStatus {
 /// Represents a request to withdraw a specific amount of an asset.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct WithdrawRequest<AssetId, Balance> {
-	/// The asset to be withdrawn.
-	pub asset: Asset<AssetId>,
-	/// The amount of the asset to be withdrawn.
+	/// The ID of the asset to be withdrawd.
+	pub asset_id: AssetId,
+	/// The amount of the asset to be withdrawd.
 	pub amount: Balance,
 	/// The round in which the withdraw was requested.
 	pub requested_round: RoundIndex,
@@ -60,8 +59,8 @@ pub struct WithdrawRequest<AssetId, Balance> {
 pub struct BondLessRequest<AccountId, AssetId, Balance, MaxBlueprints: Get<u32>> {
 	/// The account ID of the operator.
 	pub operator: AccountId,
-	/// The asset to reduce the stake of.
-	pub asset: Asset<AssetId>,
+	/// The ID of the asset to reduce the stake of.
+	pub asset_id: AssetId,
 	/// The amount by which to reduce the stake.
 	pub amount: Balance,
 	/// The round in which the stake reduction was requested.
@@ -82,7 +81,7 @@ pub struct DelegatorMetadata<
 	MaxBlueprints: Get<u32>,
 > {
 	/// A map of deposited assets and their respective amounts.
-	pub deposits: BTreeMap<Asset<AssetId>, Balance>,
+	pub deposits: BTreeMap<AssetId, Balance>,
 	/// A vector of withdraw requests.
 	pub withdraw_requests: BoundedVec<WithdrawRequest<AssetId, Balance>, MaxWithdrawRequests>,
 	/// A list of all current delegations.
@@ -169,14 +168,14 @@ impl<
 	}
 
 	/// Calculates the total delegation amount for a specific asset.
-	pub fn calculate_delegation_by_asset(&self, asset: Asset<AssetId>) -> Balance
+	pub fn calculate_delegation_by_asset(&self, asset_id: AssetId) -> Balance
 	where
 		Balance: Default + core::ops::AddAssign + Clone,
 		AssetId: Eq + PartialEq,
 	{
 		let mut total = Balance::default();
 		for stake in &self.delegations {
-			if stake.asset == asset {
+			if stake.asset_id == asset_id {
 				total += stake.amount.clone();
 			}
 		}
@@ -200,8 +199,8 @@ impl<
 pub struct Deposit<AssetId, Balance> {
 	/// The amount of the asset deposited.
 	pub amount: Balance,
-	/// The asset deposited.
-	pub asset: Asset<AssetId>,
+	/// The ID of the deposited asset.
+	pub asset_id: AssetId,
 }
 
 /// Represents a stake between a delegator and an operator.
@@ -211,8 +210,8 @@ pub struct BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints: Get<u32
 	pub operator: AccountId,
 	/// The amount bonded.
 	pub amount: Balance,
-	/// The asset bonded.
-	pub asset: Asset<AssetId>,
+	/// The ID of the bonded asset.
+	pub asset_id: AssetId,
 	/// The blueprint selection mode for this delegator.
 	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
 }
@@ -285,12 +284,12 @@ mod tests {
 	fn get_withdraw_requests_should_work() {
 		let withdraw_requests = vec![
 			WithdrawRequest {
-				asset: Asset(MockAssetId(1)),
+				asset_id: MockAssetId(1),
 				amount: MockBalance(50),
 				requested_round: 1,
 			},
 			WithdrawRequest {
-				asset: Asset(MockAssetId(2)),
+				asset_id: MockAssetId(2),
 				amount: MockBalance(75),
 				requested_round: 2,
 			},
@@ -309,13 +308,13 @@ mod tests {
 			BondInfoDelegator {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
-				asset: Asset(MockAssetId(1)),
+				asset_id: MockAssetId(1),
 				blueprint_selection: Default::default(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(2),
 				amount: MockBalance(75),
-				asset: Asset(MockAssetId(2)),
+				asset_id: MockAssetId(2),
 				blueprint_selection: Default::default(),
 			},
 		];
@@ -332,14 +331,14 @@ mod tests {
 	fn get_delegator_unstake_requests_should_work() {
 		let unstake_requests = vec![
 			BondLessRequest {
-				asset: Asset(MockAssetId(1)),
+				asset_id: MockAssetId(1),
 				amount: MockBalance(50),
 				requested_round: 1,
 				operator: MockAccountId(1),
 				blueprint_selection: Default::default(),
 			},
 			BondLessRequest {
-				asset: Asset(MockAssetId(2)),
+				asset_id: MockAssetId(2),
 				amount: MockBalance(75),
 				requested_round: 2,
 				operator: MockAccountId(1),
@@ -360,7 +359,7 @@ mod tests {
 			delegations: BoundedVec::try_from(vec![BondInfoDelegator {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
-				asset: Asset(MockAssetId(1)),
+				asset_id: MockAssetId(1),
 				blueprint_selection: Default::default(),
 			}])
 			.unwrap(),
@@ -379,19 +378,19 @@ mod tests {
 			BondInfoDelegator {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
-				asset: Asset(MockAssetId(1)),
+				asset_id: MockAssetId(1),
 				blueprint_selection: Default::default(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(2),
 				amount: MockBalance(75),
-				asset: Asset(MockAssetId(1)),
+				asset_id: MockAssetId(1),
 				blueprint_selection: Default::default(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(3),
 				amount: MockBalance(25),
-				asset: Asset(MockAssetId(2)),
+				asset_id: MockAssetId(2),
 				blueprint_selection: Default::default(),
 			},
 		];
@@ -400,9 +399,9 @@ mod tests {
 			..Default::default()
 		};
 
-		assert_eq!(metadata.calculate_delegation_by_asset(Asset(MockAssetId(1))), MockBalance(125));
-		assert_eq!(metadata.calculate_delegation_by_asset(Asset(MockAssetId(2))), MockBalance(25));
-		assert_eq!(metadata.calculate_delegation_by_asset(Asset(MockAssetId(3))), MockBalance(0));
+		assert_eq!(metadata.calculate_delegation_by_asset(MockAssetId(1)), MockBalance(125));
+		assert_eq!(metadata.calculate_delegation_by_asset(MockAssetId(2)), MockBalance(25));
+		assert_eq!(metadata.calculate_delegation_by_asset(MockAssetId(3)), MockBalance(0));
 	}
 
 	#[test]
@@ -411,19 +410,19 @@ mod tests {
 			BondInfoDelegator {
 				operator: MockAccountId(1),
 				amount: MockBalance(50),
-				asset: Asset(MockAssetId(1)),
+				asset_id: MockAssetId(1),
 				blueprint_selection: Default::default(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(1),
 				amount: MockBalance(75),
-				asset: Asset(MockAssetId(2)),
+				asset_id: MockAssetId(2),
 				blueprint_selection: Default::default(),
 			},
 			BondInfoDelegator {
 				operator: MockAccountId(2),
 				amount: MockBalance(25),
-				asset: Asset(MockAssetId(1)),
+				asset_id: MockAssetId(1),
 				blueprint_selection: Default::default(),
 			},
 		];

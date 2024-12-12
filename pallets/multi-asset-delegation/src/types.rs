@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,12 +22,10 @@ use sp_runtime::RuntimeDebug;
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::types::RoundIndex;
 
-pub mod asset;
 pub mod delegator;
 pub mod operator;
 pub mod rewards;
 
-pub use asset::*;
 pub use delegator::*;
 pub use operator::*;
 pub use rewards::*;
