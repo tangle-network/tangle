@@ -71,7 +71,7 @@ pub struct BondLessRequest<AccountId, AssetId : Encode + Decode, Balance, MaxBlu
 }
 
 /// Stores the state of a delegator, including deposits, delegations, and requests.
-#[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
+#[derive(Encode, Decode, RuntimeDebug, TypeInfo, FullCodec)]
 pub struct DelegatorMetadata<
 	AccountId,
 	Balance,
