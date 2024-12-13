@@ -7993,6 +7993,7 @@ dependencies = [
  "frame-system",
  "hex",
  "hex-literal 0.4.1",
+ "k256",
  "libsecp256k1",
  "num_enum",
  "pallet-assets",
@@ -8537,7 +8538,6 @@ version = "1.2.3"
 dependencies = [
  "ethabi",
  "ethereum",
- "ethers",
  "fp-account",
  "fp-consensus",
  "fp-dynamic-fee",
@@ -8553,6 +8553,7 @@ dependencies = [
  "hex",
  "hex-literal 0.4.1",
  "itertools 0.13.0",
+ "k256",
  "libsecp256k1",
  "log",
  "num_enum",
