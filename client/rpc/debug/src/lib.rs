@@ -751,7 +751,9 @@ where
 		};
 
 		if trace_api_version <= 5 {
-			return Err(internal_err("debug_traceCall not supported with old runtimes".to_string()));
+			return Err(internal_err(
+				"debug_traceCall not supported with old runtimes".to_string(),
+			));
 		}
 
 		let TraceCallParams {
