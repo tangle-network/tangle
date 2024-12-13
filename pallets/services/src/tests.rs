@@ -525,7 +525,10 @@ fn request_service_with_payment_asset() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(Services::create_blueprint(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint.clone()
+		));
 		let bob = mock_pub_key(BOB);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
@@ -535,6 +538,7 @@ fn request_service_with_payment_asset() {
 			0,
 		));
 
+		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(charlie.clone()),
@@ -546,13 +550,13 @@ fn request_service_with_payment_asset() {
 			vec![TNT, USDC, WETH],
 			100,
 			Asset::Custom(USDC),
-			5 * 10u128.pow(6), // 5 USDC
+			payment,
 		));
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
 		// The Pallet account now has 5 USDC
-		assert_eq!(Assets::balance(USDC, Services::account_id()), 5 * 10u128.pow(6));
+		assert_eq!(Assets::balance(USDC, Services::account_id()), payment);
 
 		// Bob approves the request
 		assert_ok!(Services::approve(
@@ -563,6 +567,13 @@ fn request_service_with_payment_asset() {
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+
+		// The Payment should be now transferred to the MBSM.
+		let mbsm_address = Pallet::<Runtime>::mbsm_address_of(&blueprint).unwrap();
+		let mbsm_account_id = address_to_account_id(mbsm_address);
+		assert_eq!(Assets::balance(USDC, mbsm_account_id), payment);
+		// Pallet account should have 0 USDC
+		assert_eq!(Assets::balance(USDC, Services::account_id()), 0);
 
 		// Now the service should be initiated
 		assert!(Instances::<Runtime>::contains_key(0));
@@ -577,7 +588,10 @@ fn request_service_with_payment_token() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(Services::create_blueprint(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint.clone()
+		));
 		let bob = mock_pub_key(BOB);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
@@ -587,6 +601,7 @@ fn request_service_with_payment_token() {
 			0,
 		));
 
+		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(address_to_account_id(mock_address(CHARLIE))),
@@ -598,7 +613,7 @@ fn request_service_with_payment_token() {
 			vec![TNT, USDC, WETH],
 			100,
 			Asset::Erc20(USDC_ERC20),
-			5 * 10u128.pow(6), // 5 USDC
+			payment,
 		));
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
@@ -606,7 +621,7 @@ fn request_service_with_payment_token() {
 		// The Pallet address now has 5 USDC
 		assert_ok!(
 			Services::query_erc20_balance_of(USDC_ERC20, Services::address()).map(|(b, _)| b),
-			U256::from(5 * 10u128.pow(6))
+			U256::from(payment)
 		);
 
 		// Bob approves the request
@@ -618,6 +633,18 @@ fn request_service_with_payment_token() {
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+
+		// The Payment should be now transferred to the MBSM.
+		let mbsm_address = Pallet::<Runtime>::mbsm_address_of(&blueprint).unwrap();
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, mbsm_address).map(|(b, _)| b),
+			U256::from(payment)
+		);
+		// Pallet account should have 0 USDC
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, Services::address()).map(|(b, _)| b),
+			U256::from(0)
+		);
 
 		// Now the service should be initiated
 		assert!(Instances::<Runtime>::contains_key(0));
