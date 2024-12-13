@@ -55,7 +55,7 @@ pub fn to_slice_32(val: &[u8]) -> Option<[u8; 32]> {
 		let mut key = [0u8; 32];
 		key[..32].copy_from_slice(val);
 
-		return Some(key)
+		return Some(key);
 	}
 	None
 }

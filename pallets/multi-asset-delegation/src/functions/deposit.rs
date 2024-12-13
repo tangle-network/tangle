@@ -22,8 +22,8 @@ use frame_support::{
 	traits::{tokens::Preservation, Get},
 };
 use sp_core::H160;
-use tangle_primitives::EvmAddressMapping;
 use tangle_primitives::services::Asset;
+use tangle_primitives::EvmAddressMapping;
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account ID of the pallet.
@@ -58,10 +58,15 @@ impl<T: Config> Pallet<T> {
 				);
 			},
 			Asset::Erc20(asset_address) => {
-				let (success, _weight) =
-				Self::erc20_transfer(asset_address, &sender, Self::pallet_evm_account(), amount).map_err(|_| Error::<T>::ERC20TransferFailed)?;
+				let (success, _weight) = Self::erc20_transfer(
+					asset_address,
+					&sender,
+					Self::pallet_evm_account(),
+					amount,
+				)
+				.map_err(|_| Error::<T>::ERC20TransferFailed)?;
 				ensure!(success, Error::<T>::ERC20TransferFailed);
-			}
+			},
 		}
 		Ok(())
 	}
@@ -158,7 +163,10 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns an error if the user is not a delegator, if there are no withdraw requests, or if
 	/// the withdraw request is not ready.
-	pub fn process_execute_withdraw(who: T::AccountId, evm_address: Option<H160>) -> DispatchResult {
+	pub fn process_execute_withdraw(
+		who: T::AccountId,
+		evm_address: Option<H160>,
+	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
@@ -184,10 +192,15 @@ impl<T: Config> Pallet<T> {
 							.expect("Transfer should not fail");
 						},
 						Asset::Erc20(asset_address) => {
-							let (success, _weight) =
-							Self::erc20_transfer(asset_address, &Self::pallet_evm_account(), evm_address.unwrap(), request.amount).map_err(|_| Error::<T>::ERC20TransferFailed)?;
+							let (success, _weight) = Self::erc20_transfer(
+								asset_address,
+								&Self::pallet_evm_account(),
+								evm_address.unwrap(),
+								request.amount,
+							)
+							.map_err(|_| Error::<T>::ERC20TransferFailed)?;
 							ensure!(success, Error::<T>::ERC20TransferFailed);
-						}
+						},
 					}
 					false // Remove this request
 				} else {

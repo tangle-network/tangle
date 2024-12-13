@@ -59,29 +59,15 @@ impl<Runtime: pallet_evm::Config> EcdsaStarkPrecompile<Runtime> {
 		// Parse Signature
 		let r_bytes = &signature_bytes[0..signature_bytes.len() / 2];
 		let s_bytes = &signature_bytes[signature_bytes.len() / 2..];
-		let r = if let Ok(x) = Scalar::from_be_bytes(r_bytes) {
-			x
-		} else {
-			return Ok(false)
-		};
+		let r = if let Ok(x) = Scalar::from_be_bytes(r_bytes) { x } else { return Ok(false) };
 
-		let s = if let Ok(x) = Scalar::from_be_bytes(s_bytes) {
-			x
-		} else {
-			return Ok(false)
-		};
+		let s = if let Ok(x) = Scalar::from_be_bytes(s_bytes) { x } else { return Ok(false) };
 
-		let public_key_point = if let Ok(x) = Point::from_bytes(public_bytes) {
-			x
-		} else {
-			return Ok(false)
-		};
+		let public_key_point =
+			if let Ok(x) = Point::from_bytes(public_bytes) { x } else { return Ok(false) };
 
-		let public_key_x: Scalar<Stark> = if let Some(x) = public_key_point.x() {
-			x.to_scalar()
-		} else {
-			return Ok(false)
-		};
+		let public_key_x: Scalar<Stark> =
+			if let Some(x) = public_key_point.x() { x.to_scalar() } else { return Ok(false) };
 
 		let public_key = convert_stark_scalar(&public_key_x);
 		let msg = convert_stark_scalar(&Scalar::<Stark>::from_be_bytes_mod_order(message));

@@ -51,28 +51,28 @@ impl super::InstanceVerifier for CircomVerifierGroth16Bn254 {
 			Ok(v) => v,
 			Err(e) => {
 				log::error!("Failed to convert public input bytes to field elements: {e:?}",);
-				return Err(e)
+				return Err(e);
 			},
 		};
 		let vk = match ArkVerifyingKey::deserialize_compressed(vk_bytes) {
 			Ok(v) => v,
 			Err(e) => {
 				log::error!("Failed to deserialize verifying key: {e:?}");
-				return Err(e.into())
+				return Err(e.into());
 			},
 		};
 		let proof = match Proof::decode(proof_bytes).and_then(|v| v.try_into()) {
 			Ok(v) => v,
 			Err(e) => {
 				log::error!("Failed to deserialize proof: {e:?}");
-				return Err(e)
+				return Err(e);
 			},
 		};
 		let res = match verify_groth16(&vk, &public_input_field_elts, &proof) {
 			Ok(v) => v,
 			Err(e) => {
 				log::error!("Failed to verify proof: {e:?}");
-				return Err(e)
+				return Err(e);
 			},
 		};
 
@@ -246,7 +246,7 @@ fn point_to_u256<F: PrimeField>(point: F) -> Result<U256, Error> {
 	let point = point.into_bigint();
 	let point_bytes = point.to_bytes_be();
 	if point_bytes.len() != 32 {
-		return Err(CircomError::InvalidProofBytes.into())
+		return Err(CircomError::InvalidProofBytes.into());
 	}
 	Ok(U256::from(&point_bytes[..]))
 }

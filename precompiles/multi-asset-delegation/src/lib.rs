@@ -82,7 +82,7 @@ where
 			},
 			_ => {
 				// Return err if account length is wrong
-				return Err(revert("Error while parsing staker's address"))
+				return Err(revert("Error while parsing staker's address"));
 			},
 		};
 

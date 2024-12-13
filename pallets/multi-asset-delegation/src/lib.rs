@@ -416,7 +416,7 @@ pub mod pallet {
 		/// The blueprint is not selected
 		BlueprintNotSelected,
 		/// Erc20 transfer failed
-		ERC20TransferFailed
+		ERC20TransferFailed,
 	}
 
 	/// Hooks for the pallet.

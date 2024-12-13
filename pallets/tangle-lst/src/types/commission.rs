@@ -55,13 +55,13 @@ impl<T: Config> Commission<T> {
 
 			// do not throttle if `to` is the same or a decrease in commission.
 			if *to <= commission_as_percent {
-				return false
+				return false;
 			}
 			// Test for `max_increase` throttling.
 			//
 			// Throttled if the attempted increase in commission is greater than `max_increase`.
 			if (*to).saturating_sub(commission_as_percent) > t.max_increase {
-				return true
+				return true;
 			}
 
 			// Test for `min_delay` throttling.
@@ -84,7 +84,7 @@ impl<T: Config> Commission<T> {
 						blocks_surpassed < t.min_delay
 					}
 				},
-			)
+			);
 		}
 		false
 	}
@@ -145,7 +145,7 @@ impl<T: Config> Commission<T> {
 		);
 		if let Some(old) = self.max.as_mut() {
 			if new_max > *old {
-				return Err(Error::<T>::MaxCommissionRestricted.into())
+				return Err(Error::<T>::MaxCommissionRestricted.into());
 			}
 			*old = new_max;
 		} else {

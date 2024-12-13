@@ -161,7 +161,7 @@ pub fn type_checker<C: Constraints, AccountId: Encode + Clone>(
 		return Err(TypeCheckError::NotEnoughArguments {
 			expected: params.len() as u8,
 			actual: args.len() as u8,
-		})
+		});
 	}
 	for i in 0..args.len() {
 		let arg = &args[i];
@@ -171,7 +171,7 @@ pub fn type_checker<C: Constraints, AccountId: Encode + Clone>(
 				index: i as u8,
 				expected: expected.clone(),
 				actual: arg.clone().into(),
-			})
+			});
 		}
 	}
 	Ok(())
@@ -485,10 +485,12 @@ impl<C: Constraints> ServiceBlueprint<C> {
 			},
 			// Master Manager Revision
 			match self.master_manager_revision {
-				MasterBlueprintServiceManagerRevision::Latest =>
-					ethabi::Token::Uint(ethabi::Uint::MAX),
-				MasterBlueprintServiceManagerRevision::Specific(rev) =>
-					ethabi::Token::Uint(rev.into()),
+				MasterBlueprintServiceManagerRevision::Latest => {
+					ethabi::Token::Uint(ethabi::Uint::MAX)
+				},
+				MasterBlueprintServiceManagerRevision::Specific(rev) => {
+					ethabi::Token::Uint(rev.into())
+				},
 			},
 			// Gadget ?
 		])
@@ -624,9 +626,21 @@ pub enum ApprovalState {
 }
 
 /// Different types of assets that can be used.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen, Ord, PartialOrd)]
+#[derive(
+	PartialEq,
+	Eq,
+	Encode,
+	Decode,
+	RuntimeDebug,
+	TypeInfo,
+	Copy,
+	Clone,
+	MaxEncodedLen,
+	Ord,
+	PartialOrd,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum Asset<AssetId : Encode + Decode> {
+pub enum Asset<AssetId: Encode + Decode> {
 	/// Use the specified AssetId.
 	#[codec(index = 0)]
 	Custom(AssetId),

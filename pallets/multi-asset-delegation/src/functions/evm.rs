@@ -1,14 +1,13 @@
 use super::*;
+use crate::types::BalanceOf;
 use ethabi::{Function, StateMutability, Token};
 use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
-use sp_core::{H160, U256};
-use crate::types::BalanceOf;
 use frame_support::pallet_prelude::Weight;
+use sp_core::{H160, U256};
 use tangle_primitives::EvmAddressMapping;
 
 impl<T: Config> Pallet<T> {
-
-    /// Moves a `value` amount of tokens from the caller's account to `to`.
+	/// Moves a `value` amount of tokens from the caller's account to `to`.
 	pub fn erc20_transfer(
 		erc20: H160,
 		caller: &T::AccountId,
@@ -67,8 +66,4 @@ impl<T: Config> Pallet<T> {
 
 		Ok((success, weight))
 	}
-
-
-
-
 }
