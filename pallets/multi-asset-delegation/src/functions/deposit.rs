@@ -158,7 +158,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns an error if the user is not a delegator, if there are no withdraw requests, or if
 	/// the withdraw request is not ready.
-	pub fn process_execute_withdraw(who: T::AccountId) -> DispatchResult {
+	pub fn process_execute_withdraw(who: T::AccountId, evm_address: Option<H160>) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
@@ -172,15 +172,23 @@ impl<T: Config> Pallet<T> {
 			metadata.withdraw_requests.retain(|request| {
 				if current_round >= delay + request.requested_round {
 					// Transfer the amount back to the delegator
-					T::Fungibles::transfer(
-						request.asset_id,
-						&Self::pallet_account(),
-						&who,
-						request.amount,
-						Preservation::Expendable,
-					)
-					.expect("Transfer should not fail");
-
+					match request.asset_id {
+						Asset::Custom(asset_id) => {
+							T::Fungibles::transfer(
+								asset_id,
+								&Self::pallet_account(),
+								&who,
+								request.amount,
+								Preservation::Expendable,
+							)
+							.expect("Transfer should not fail");
+						},
+						Asset::Erc20(asset_address) => {
+							let (success, _weight) =
+							Self::erc20_transfer(asset_address, &Self::pallet_evm_account(), evm_address.unwrap(), request.amount).map_err(|_| Error::<T>::ERC20TransferFailed)?;
+							ensure!(success, Error::<T>::ERC20TransferFailed);
+						}
+					}
 					false // Remove this request
 				} else {
 					true // Keep this request
