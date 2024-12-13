@@ -20,7 +20,8 @@ use tangle_primitives::services::Asset;
 
 /// A snapshot of the operator state at the start of the round.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct OperatorSnapshot<AccountId, Balance, AssetId : Encode + Decode, MaxDelegations: Get<u32>> {
+pub struct OperatorSnapshot<AccountId, Balance, AssetId: Encode + Decode, MaxDelegations: Get<u32>>
+{
 	/// The total value locked by the operator.
 	pub stake: Balance,
 
@@ -29,7 +30,7 @@ pub struct OperatorSnapshot<AccountId, Balance, AssetId : Encode + Decode, MaxDe
 	pub delegations: BoundedVec<DelegatorBond<AccountId, Balance, AssetId>, MaxDelegations>,
 }
 
-impl<AccountId, Balance, AssetId : Encode + Decode, MaxDelegations: Get<u32>>
+impl<AccountId, Balance, AssetId: Encode + Decode, MaxDelegations: Get<u32>>
 	OperatorSnapshot<AccountId, Balance, AssetId, MaxDelegations>
 where
 	AssetId: PartialEq + Ord + Copy,
@@ -85,7 +86,7 @@ pub struct OperatorBondLessRequest<Balance> {
 pub struct OperatorMetadata<
 	AccountId,
 	Balance,
-	AssetId : Encode + Decode,
+	AssetId: Encode + Decode,
 	MaxDelegations: Get<u32>,
 	MaxBlueprints: Get<u32>,
 > {
@@ -104,8 +105,13 @@ pub struct OperatorMetadata<
 	pub blueprint_ids: BoundedVec<u32, MaxBlueprints>,
 }
 
-impl<AccountId, Balance, AssetId : Encode + Decode, MaxDelegations: Get<u32>, MaxBlueprints: Get<u32>> Default
-	for OperatorMetadata<AccountId, Balance, AssetId, MaxDelegations, MaxBlueprints>
+impl<
+		AccountId,
+		Balance,
+		AssetId: Encode + Decode,
+		MaxDelegations: Get<u32>,
+		MaxBlueprints: Get<u32>,
+	> Default for OperatorMetadata<AccountId, Balance, AssetId, MaxDelegations, MaxBlueprints>
 where
 	Balance: Default,
 {
@@ -123,7 +129,7 @@ where
 
 /// Represents a stake for an operator
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct DelegatorBond<AccountId, Balance, AssetId : Encode + Decode> {
+pub struct DelegatorBond<AccountId, Balance, AssetId: Encode + Decode> {
 	/// The account ID of the delegator.
 	pub delegator: AccountId,
 	/// The amount bonded.

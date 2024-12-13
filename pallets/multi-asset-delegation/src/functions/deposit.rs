@@ -15,18 +15,55 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
-use tangle_primitives::services::Asset;
 use frame_support::traits::fungibles::Mutate;
 use frame_support::{ensure, pallet_prelude::DispatchResult};
 use frame_support::{
 	sp_runtime::traits::{AccountIdConversion, CheckedAdd, Zero},
 	traits::{tokens::Preservation, Get},
 };
+use sp_core::H160;
+use tangle_primitives::EvmAddressMapping;
+use tangle_primitives::services::Asset;
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account ID of the pallet.
 	pub fn pallet_account() -> T::AccountId {
 		T::PalletId::get().into_account_truncating()
+	}
+
+	/// Returns the EVM account id of the pallet.
+	///
+	/// This function retrieves the account id associated with the pallet by converting
+	/// the pallet evm address to an account id.
+	///
+	/// # Returns
+	/// * `T::AccountId` - The account id of the pallet.
+	pub fn pallet_evm_account() -> H160 {
+		T::EvmAddressMapping::into_address(Self::pallet_account())
+	}
+
+	pub fn handle_transfer_to_pallet(
+		sender: &T::AccountId,
+		asset_id: Asset<T::AssetId>,
+		amount: BalanceOf<T>,
+	) -> DispatchResult {
+		match asset_id {
+			Asset::Custom(asset_id) => {
+				T::Fungibles::transfer(
+					asset_id,
+					&sender,
+					&Self::pallet_account(),
+					amount,
+					Preservation::Expendable,
+				);
+			},
+			Asset::Erc20(asset_address) => {
+				let (success, _weight) =
+				Self::erc20_transfer(asset_address, &sender, Self::pallet_evm_account(), amount).map_err(|_| Error::<T>::ERC20TransferFailed)?;
+				ensure!(success, Error::<T>::ERC20TransferFailed);
+			}
+		}
+		Ok(())
 	}
 
 	/// Processes the deposit of assets into the pallet.
@@ -49,13 +86,7 @@ impl<T: Config> Pallet<T> {
 		ensure!(amount >= T::MinDelegateAmount::get(), Error::<T>::BondTooLow);
 
 		// Transfer the amount to the pallet account
-		T::Fungibles::transfer(
-			asset_id,
-			&who,
-			&Self::pallet_account(),
-			amount,
-			Preservation::Expendable,
-		)?;
+		Self::handle_transfer_to_pallet(&who, asset_id, amount)?;
 
 		// Update storage
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| -> DispatchResult {

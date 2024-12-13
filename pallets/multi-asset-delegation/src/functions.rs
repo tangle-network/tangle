@@ -20,3 +20,4 @@ pub mod deposit;
 pub mod operator;
 pub mod rewards;
 pub mod session_manager;
+pub mod evm;

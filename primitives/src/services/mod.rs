@@ -624,7 +624,7 @@ pub enum ApprovalState {
 }
 
 /// Different types of assets that can be used.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen, Ord, PartialOrd)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Asset<AssetId : Encode + Decode> {
 	/// Use the specified AssetId.

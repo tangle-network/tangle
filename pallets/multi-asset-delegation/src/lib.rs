@@ -77,7 +77,6 @@ pub use functions::*;
 #[frame_support::pallet]
 pub mod pallet {
 	use crate::types::*;
-	use tangle_primitives::services::Asset;
 	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction};
 	use frame_support::traits::fungibles::Inspect;
 	use frame_support::{
@@ -90,6 +89,7 @@ pub mod pallet {
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
 	use sp_std::vec::Vec;
 	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
+	use tangle_primitives::services::Asset;
 	use tangle_primitives::BlueprintId;
 	use tangle_primitives::{traits::ServiceManager, RoundIndex};
 
@@ -189,6 +189,9 @@ pub mod pallet {
 
 		/// The address that receives slashed funds
 		type SlashedAmountRecipient: Get<Self::AccountId>;
+
+		/// A type that implements the `EvmAddressMapping` trait for the conversion of EVM address
+		type EvmAddressMapping: tangle_primitives::traits::EvmAddressMapping<Self::AccountId>;
 
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: crate::weights::WeightInfo;
@@ -412,6 +415,8 @@ pub mod pallet {
 		PendingUnstakeRequestExists,
 		/// The blueprint is not selected
 		BlueprintNotSelected,
+		/// Erc20 transfer failed
+		ERC20TransferFailed
 	}
 
 	/// Hooks for the pallet.
@@ -583,11 +588,12 @@ pub mod pallet {
 		#[pallet::call_index(14)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn delegate(
-			origin: OriginFor<T>,
-			operator: T::AccountId,
-			asset_id: Asset<T::AssetId>,
+			origin: OriginFor<T>,        // 5cxssdfsd
+			operator: T::AccountId,      // xcxcv
+			asset_id: Asset<T::AssetId>, // evm(usdt)
 			amount: BalanceOf<T>,
 			blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
+			//evm_address : Option<H160>, // Some(shady_evm_address)
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_delegate(

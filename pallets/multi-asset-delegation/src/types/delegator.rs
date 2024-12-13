@@ -16,8 +16,8 @@
 
 use super::*;
 use frame_support::{pallet_prelude::Get, BoundedVec};
-use tangle_primitives::BlueprintId;
 use tangle_primitives::services::Asset;
+use tangle_primitives::BlueprintId;
 
 /// Represents how a delegator selects which blueprints to work with.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Eq)]
@@ -46,7 +46,7 @@ pub enum DelegatorStatus {
 
 /// Represents a request to withdraw a specific amount of an asset.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct WithdrawRequest<AssetId : Encode + Decode, Balance> {
+pub struct WithdrawRequest<AssetId: Encode + Decode, Balance> {
 	/// The ID of the asset to be withdrawd.
 	pub asset_id: Asset<AssetId>,
 	/// The amount of the asset to be withdrawd.
@@ -57,7 +57,7 @@ pub struct WithdrawRequest<AssetId : Encode + Decode, Balance> {
 
 /// Represents a request to reduce the bonded amount of a specific asset.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct BondLessRequest<AccountId, AssetId : Encode + Decode, Balance, MaxBlueprints: Get<u32>> {
+pub struct BondLessRequest<AccountId, AssetId: Encode + Decode, Balance, MaxBlueprints: Get<u32>> {
 	/// The account ID of the operator.
 	pub operator: AccountId,
 	/// The ID of the asset to reduce the stake of.
@@ -169,7 +169,8 @@ impl<
 	}
 
 	/// Calculates the total delegation amount for a specific asset.
-	pub fn calculate_delegation_by_asset(&self, asset_id: Asset<AssetId>) -> Balance // Asset<AssetId>) -> Balance
+	pub fn calculate_delegation_by_asset(&self, asset_id: Asset<AssetId>) -> Balance
+	// Asset<AssetId>) -> Balance
 	where
 		Balance: Default + core::ops::AddAssign + Clone,
 		AssetId: Eq + PartialEq,
@@ -197,7 +198,7 @@ impl<
 
 /// Represents a deposit of a specific asset.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct Deposit<AssetId : Encode + Decode, Balance> {
+pub struct Deposit<AssetId: Encode + Decode, Balance> {
 	/// The amount of the asset deposited.
 	pub amount: Balance,
 	/// The ID of the deposited asset.
@@ -206,7 +207,8 @@ pub struct Deposit<AssetId : Encode + Decode, Balance> {
 
 /// Represents a stake between a delegator and an operator.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct BondInfoDelegator<AccountId, Balance, AssetId : Encode + Decode, MaxBlueprints: Get<u32>> {
+pub struct BondInfoDelegator<AccountId, Balance, AssetId: Encode + Decode, MaxBlueprints: Get<u32>>
+{
 	/// The account ID of the operator.
 	pub operator: AccountId,
 	/// The amount bonded.

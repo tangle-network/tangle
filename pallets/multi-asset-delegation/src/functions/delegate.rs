@@ -15,7 +15,6 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
-use tangle_primitives::services::Asset;
 use frame_support::traits::fungibles::Mutate;
 use frame_support::traits::tokens::Preservation;
 use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
@@ -23,6 +22,7 @@ use sp_runtime::traits::{CheckedSub, Zero};
 use sp_runtime::DispatchError;
 use sp_runtime::Percent;
 use sp_std::vec::Vec;
+use tangle_primitives::services::Asset;
 use tangle_primitives::BlueprintId;
 
 impl<T: Config> Pallet<T> {
@@ -389,14 +389,24 @@ impl<T: Config> Pallet<T> {
 				.checked_sub(&slash_amount)
 				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
 
-			// Transfer slashed amount to the treasury
-			let _ = T::Fungibles::transfer(
-				delegation.asset_id,
-				&Self::pallet_account(),
-				&T::SlashedAmountRecipient::get(),
-				slash_amount,
-				Preservation::Expendable,
-			);
+			match delegation.asset_id {
+				Asset::Custom(asset_id) => {
+					// Transfer slashed amount to the treasury
+					let _ = T::Fungibles::transfer(
+						asset_id,
+						&Self::pallet_account(),
+						&T::SlashedAmountRecipient::get(),
+						slash_amount,
+						Preservation::Expendable,
+					);
+				},
+				Asset::Erc20(address) => {
+					// TODO : Handle it
+					// let (success, _weight) =
+					// 		Self::erc20_transfer(address, &caller, Self::address(), value)?;
+					// 	ensure!(success, Error::<T>::ERC20TransferFailed);
+				},
+			}
 
 			// emit event
 			Self::deposit_event(Event::DelegatorSlashed {

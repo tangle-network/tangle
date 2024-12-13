@@ -8282,9 +8282,11 @@ dependencies = [
 name = "pallet-multi-asset-delegation"
 version = "1.2.3"
 dependencies = [
+ "ethabi",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "log",
  "pallet-assets",
  "pallet-balances",
  "parity-scale-codec",
