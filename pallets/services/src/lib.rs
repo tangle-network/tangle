@@ -1214,7 +1214,7 @@ pub mod module {
 							&Self::account_id(),
 							&refund_to,
 							payment.amount,
-							ExistenceRequirement::KeepAlive,
+							ExistenceRequirement::AllowDeath,
 						)?;
 					},
 					Asset::Custom(asset_id) => {
@@ -1227,7 +1227,7 @@ pub mod module {
 							&Self::account_id(),
 							&refund_to,
 							payment.amount,
-							Preservation::Preserve,
+							Preservation::Expendable,
 						)?;
 					},
 					Asset::Erc20(token) => {
