@@ -232,11 +232,7 @@ impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 	}
 
 	fn into_address(account_id: AccountId) -> H160 {
-		account_id.using_encoded(|b| {
-			let mut addr = [0u8; 20];
-			addr.copy_from_slice(&b[0..20]);
-			H160(addr)
-		})
+		H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
 	}
 }
 
@@ -473,7 +469,16 @@ pub fn mock_pub_key(id: u8) -> AccountId {
 }
 
 pub fn mock_address(id: u8) -> H160 {
-	H160([id; 20])
+	H160::from_slice(&[id; 20])
+}
+
+pub fn account_id_to_address(account_id: AccountId) -> H160 {
+	H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
+}
+
+pub fn address_to_account_id(address: H160) -> AccountId {
+	use pallet_evm::AddressMapping;
+	<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
 }
 
 pub fn mock_authorities(vec: Vec<u8>) -> Vec<AccountId> {
@@ -560,6 +565,18 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	for i in 1..=authorities.len() {
 		evm_accounts.insert(
 			mock_address(i as u8),
+			fp_evm::GenesisAccount {
+				code: vec![],
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			},
+		);
+	}
+
+	for a in &authorities {
+		evm_accounts.insert(
+			account_id_to_address(a.clone()),
 			fp_evm::GenesisAccount {
 				code: vec![],
 				storage: Default::default(),
