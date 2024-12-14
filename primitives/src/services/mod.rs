@@ -31,13 +31,16 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Services primitives.
-
+use crate::Weight;
 use educe::Educe;
+use fp_evm::CallInfo;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::{ecdsa, RuntimeDebug};
+use sp_core::{H160, U256};
 use sp_runtime::Percent;
+use sp_std::vec::Vec;
 
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec, vec::Vec};
@@ -640,7 +643,7 @@ pub enum ApprovalState {
 	PartialOrd,
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum Asset<AssetId: Encode + Decode> {
+pub enum Asset<AssetId> {
 	/// Use the specified AssetId.
 	#[codec(index = 0)]
 	Custom(AssetId),
@@ -1115,4 +1118,42 @@ pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, Asse
 	pub blueprint: ServiceBlueprint<C>,
 	/// The services instances of that blueprint.
 	pub services: Vec<Service<C, AccountId, BlockNumber, AssetId>>,
+}
+
+#[derive(Debug)]
+pub struct RunnerError<E: Into<sp_runtime::DispatchError>> {
+	pub error: E,
+	pub weight: Weight,
+}
+
+#[allow(clippy::too_many_arguments)]
+pub trait EvmRunner<T: frame_system::Config> {
+	type Error: Into<sp_runtime::DispatchError>;
+
+	fn call(
+		source: H160,
+		target: H160,
+		input: Vec<u8>,
+		value: U256,
+		gas_limit: u64,
+		is_transactional: bool,
+		validate: bool,
+	) -> Result<CallInfo, RunnerError<Self::Error>>;
+}
+
+/// A mapping function that converts EVM gas to Substrate weight and vice versa
+pub trait EvmGasWeightMapping {
+	/// Convert EVM gas to Substrate weight
+	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight;
+	/// Convert Substrate weight to EVM gas
+	fn weight_to_gas(weight: Weight) -> u64;
+}
+
+/// Trait to be implemented for evm address mapping.
+pub trait EvmAddressMapping<A> {
+	/// Convert an address to an account id.
+	fn into_account_id(address: H160) -> A;
+
+	/// Convert an account id to an address.
+	fn into_address(account_id: A) -> H160;
 }

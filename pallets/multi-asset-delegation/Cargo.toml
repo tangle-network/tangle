@@ -22,6 +22,10 @@ ethabi = { workspace = true }
 pallet-balances = { workspace = true }
 tangle-primitives = { workspace = true }
 pallet-assets = { workspace = true, default-features = false }
+fp-evm = { workspace = true }
+itertools = { workspace = true, features = ["use_alloc"] }
+serde = { workspace = true, features = ["derive"], optional = true }
+hex = { workspace = true, features = ["alloc"] }
 
 [features]
 default = ["std"]
@@ -37,7 +41,10 @@ std = [
   "pallet-assets/std",
   "tangle-primitives/std",
   "ethabi/std",
-  "log/std"
+  "log/std",
+  "fp-evm/std",
+  "serde/std",
+  "hex/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [

@@ -37,7 +37,7 @@ where
 	Balance: Default + core::ops::AddAssign + Copy,
 {
 	/// Calculates the total stake for a specific asset ID from all delegations.
-	pub fn get_stake_by_asset_id(&self, asset_id: AssetId) -> Balance {
+	pub fn get_stake_by_asset_id(&self, asset_id: Asset<AssetId>) -> Balance {
 		let mut total_stake = Balance::default();
 		for stake in &self.delegations {
 			if stake.asset_id == asset_id {
@@ -48,8 +48,8 @@ where
 	}
 
 	/// Calculates the total stake for each asset and returns a list of (asset_id, total_stake).
-	pub fn get_total_stake_by_assets(&self) -> Vec<(AssetId, Balance)> {
-		let mut stake_by_asset: BTreeMap<AssetId, Balance> = BTreeMap::new();
+	pub fn get_total_stake_by_assets(&self) -> Vec<(Asset<AssetId>, Balance)> {
+		let mut stake_by_asset: BTreeMap<Asset<AssetId>, Balance> = BTreeMap::new();
 
 		for stake in &self.delegations {
 			let entry = stake_by_asset.entry(stake.asset_id).or_default();

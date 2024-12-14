@@ -2,8 +2,13 @@ use super::*;
 use crate::types::BalanceOf;
 use ethabi::{Function, StateMutability, Token};
 use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
+use frame_support::pallet_prelude::Pays;
 use frame_support::pallet_prelude::Weight;
+use parity_scale_codec::Encode;
 use sp_core::{H160, U256};
+use sp_runtime::traits::UniqueSaturatedInto;
+use tangle_primitives::services::EvmGasWeightMapping;
+use tangle_primitives::services::EvmRunner;
 use tangle_primitives::EvmAddressMapping;
 
 impl<T: Config> Pallet<T> {
@@ -46,7 +51,7 @@ impl<T: Config> Pallet<T> {
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
 		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 		let gas_limit = 300_000;
-		let info = Self::evm_call(from, erc20, U256::zero(), data, gas_limit)?;
+		let info = Self::evm_call(*from, erc20, U256::zero(), data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);
 
 		// decode the result and return it
@@ -64,5 +69,90 @@ impl<T: Config> Pallet<T> {
 		};
 
 		Ok((success, weight))
+	}
+
+	/// Dispatches a hook to the EVM and returns if the result with the used weight.
+	fn dispatch_evm_call(
+		contract: H160,
+		f: Function,
+		args: &[ethabi::Token],
+		value: BalanceOf<T>,
+	) -> Result<(fp_evm::CallInfo, Weight), DispatchErrorWithPostInfo> {
+		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(f.short_signature()), f.signature());
+		let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
+		let gas_limit = 300_000;
+		let value = value.using_encoded(U256::from_little_endian);
+		let info = Self::evm_call(Self::pallet_evm_account(), contract, value, data, gas_limit)?;
+		let weight = Self::weight_from_call_info(&info);
+		Ok((info, weight))
+	}
+
+	/// Dispatches a call to the EVM and returns the result.
+	fn evm_call(
+		from: H160,
+		to: H160,
+		value: U256,
+		data: Vec<u8>,
+		gas_limit: u64,
+	) -> Result<fp_evm::CallInfo, DispatchErrorWithPostInfo> {
+		let transactional = true;
+		let validate = false;
+		let result =
+			T::EvmRunner::call(from, to, data.clone(), value, gas_limit, transactional, validate);
+		match result {
+			Ok(info) => {
+				log::debug!(
+					target: "evm",
+					"Call from: {:?}, to: {:?}, data: 0x{}, gas_limit: {:?}, result: {:?}",
+					from,
+					to,
+					hex::encode(&data),
+					gas_limit,
+					info,
+				);
+				// if we have a revert reason, emit an event
+				if info.exit_reason.is_revert() {
+					log::debug!(
+						target: "evm",
+						"Call to: {:?} with data: 0x{} Reverted with reason: (0x{})",
+						to,
+						hex::encode(&data),
+						hex::encode(&info.value),
+					);
+					#[cfg(test)]
+					eprintln!(
+						"Call to: {:?} with data: 0x{} Reverted with reason: (0x{})",
+						to,
+						hex::encode(&data),
+						hex::encode(&info.value),
+					);
+					Self::deposit_event(Event::<T>::EvmReverted {
+						from,
+						to,
+						data,
+						reason: info.value.clone(),
+					});
+				}
+				Ok(info)
+			},
+			Err(e) => Err(DispatchErrorWithPostInfo {
+				post_info: PostDispatchInfo { actual_weight: Some(e.weight), pays_fee: Pays::Yes },
+				error: e.error.into(),
+			}),
+		}
+	}
+
+	/// Convert the gas used in the call info to weight.
+	pub fn weight_from_call_info(info: &fp_evm::CallInfo) -> Weight {
+		let mut gas_to_weight = T::EvmGasWeightMapping::gas_to_weight(
+			info.used_gas.standard.unique_saturated_into(),
+			true,
+		);
+		if let Some(weight_info) = info.weight_info {
+			if let Some(proof_size_usage) = weight_info.proof_size_usage {
+				*gas_to_weight.proof_size_mut() = proof_size_usage;
+			}
+		}
+		gas_to_weight
 	}
 }

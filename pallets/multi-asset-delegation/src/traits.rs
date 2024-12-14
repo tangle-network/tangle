@@ -18,6 +18,7 @@ use crate::types::{BalanceOf, OperatorStatus};
 use sp_runtime::traits::Zero;
 use sp_runtime::Percent;
 use sp_std::prelude::*;
+use tangle_primitives::services::Asset;
 use tangle_primitives::BlueprintId;
 use tangle_primitives::{traits::MultiAssetDelegationInfo, RoundIndex};
 
@@ -43,7 +44,7 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for 
 
 	fn get_total_delegation_by_asset_id(
 		operator: &T::AccountId,
-		asset_id: &T::AssetId,
+		asset_id: &Asset<T::AssetId>,
 	) -> BalanceOf<T> {
 		Operators::<T>::get(operator).map_or(Zero::zero(), |metadata| {
 			metadata
@@ -56,7 +57,7 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for 
 
 	fn get_delegators_for_operator(
 		operator: &T::AccountId,
-	) -> Vec<(T::AccountId, BalanceOf<T>, Self::AssetId)> {
+	) -> Vec<(T::AccountId, BalanceOf<T>, Asset<Self::AssetId>)> {
 		Operators::<T>::get(operator).map_or(Vec::new(), |metadata| {
 			metadata
 				.delegations

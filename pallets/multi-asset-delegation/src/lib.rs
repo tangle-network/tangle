@@ -86,6 +86,7 @@ pub mod pallet {
 	};
 	use frame_system::pallet_prelude::*;
 	use scale_info::TypeInfo;
+	use sp_core::H160;
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
 	use sp_std::vec::Vec;
 	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
@@ -190,6 +191,14 @@ pub mod pallet {
 		/// The address that receives slashed funds
 		type SlashedAmountRecipient: Get<Self::AccountId>;
 
+		/// A type that implements the `EvmRunner` trait for the execution of EVM
+		/// transactions.
+		type EvmRunner: tangle_primitives::services::EvmRunner<Self>;
+
+		/// A type that implements the `EvmGasWeightMapping` trait for the conversion of EVM gas to
+		/// Substrate weight and vice versa.
+		type EvmGasWeightMapping: tangle_primitives::services::EvmGasWeightMapping;
+
 		/// A type that implements the `EvmAddressMapping` trait for the conversion of EVM address
 		type EvmAddressMapping: tangle_primitives::traits::EvmAddressMapping<Self::AccountId>;
 
@@ -236,13 +245,13 @@ pub mod pallet {
 	#[pallet::getter(fn reward_vaults)]
 	/// Storage for the reward vaults
 	pub type RewardVaults<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::VaultId, Vec<T::AssetId>, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::VaultId, Vec<Asset<T::AssetId>>, OptionQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn asset_reward_vault_lookup)]
 	/// Storage for the reward vaults
 	pub type AssetLookupRewardVaults<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AssetId, T::VaultId, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, T::VaultId, OptionQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn reward_config)]
@@ -276,9 +285,9 @@ pub mod pallet {
 		/// An operator has gone online.
 		OperatorWentOnline { who: T::AccountId },
 		/// A deposit has been made.
-		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
+		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset_id: Asset<T::AssetId> },
 		/// An withdraw has been scheduled.
-		Scheduledwithdraw { who: T::AccountId, amount: BalanceOf<T>, asset_id: T::AssetId },
+		Scheduledwithdraw { who: T::AccountId, amount: BalanceOf<T>, asset_id: Asset<T::AssetId> },
 		/// An withdraw has been executed.
 		Executedwithdraw { who: T::AccountId },
 		/// An withdraw has been cancelled.
@@ -316,6 +325,8 @@ pub mod pallet {
 		OperatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
 		/// Delegator has been slashed
 		DelegatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
+		/// EVM execution reverted with a reason.
+		EvmReverted { from: H160, to: H160, data: Vec<u8>, reason: Vec<u8> },
 	}
 
 	/// Errors emitted by the pallet.
@@ -417,6 +428,10 @@ pub mod pallet {
 		BlueprintNotSelected,
 		/// Erc20 transfer failed
 		ERC20TransferFailed,
+		/// EVM encode error
+		EVMAbiEncode,
+		/// EVM decode error
+		EVMAbiDecode,
 	}
 
 	/// Hooks for the pallet.
@@ -539,9 +554,10 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
+			evm_address: Option<H160>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_deposit(who.clone(), asset_id, amount)?;
+			Self::process_deposit(who.clone(), asset_id, amount, evm_address)?;
 			Self::deposit_event(Event::Deposited { who, amount, asset_id });
 			Ok(())
 		}
@@ -563,9 +579,9 @@ pub mod pallet {
 		/// Executes a scheduled withdraw request.
 		#[pallet::call_index(12)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn execute_withdraw(origin: OriginFor<T>) -> DispatchResult {
+		pub fn execute_withdraw(origin: OriginFor<T>, evm_address: Option<H160>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_execute_withdraw(who.clone())?;
+			Self::process_execute_withdraw(who.clone(), evm_address)?;
 			Self::deposit_event(Event::Executedwithdraw { who });
 			Ok(())
 		}
@@ -679,15 +695,6 @@ pub mod pallet {
 
 			// Validate cap is not zero
 			ensure!(!cap.is_zero(), Error::<T>::CapCannotBeZero);
-
-			// Validate the cap is not greater than the total supply
-			let asset_ids = RewardVaults::<T>::get(vault_id).ok_or(Error::<T>::VaultNotFound)?;
-			for asset_id in asset_ids.iter() {
-				ensure!(
-					T::Fungibles::total_issuance(*asset_id) >= cap,
-					Error::<T>::CapExceedsTotalSupply
-				);
-			}
 
 			// Initialize the reward config if not already initialized
 			RewardConfigStorage::<T>::mutate(|maybe_config| {

@@ -46,6 +46,7 @@ impl<T: Config> Pallet<T> {
 		sender: &T::AccountId,
 		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
+		evm_sender: Option<H160>,
 	) -> DispatchResult {
 		match asset_id {
 			Asset::Custom(asset_id) => {
@@ -58,13 +59,14 @@ impl<T: Config> Pallet<T> {
 				);
 			},
 			Asset::Erc20(asset_address) => {
+				let sender = evm_sender.ok_or(Error::<T>::ERC20TransferFailed)?;
 				let (success, _weight) = Self::erc20_transfer(
 					asset_address,
 					&sender,
 					Self::pallet_evm_account(),
 					amount,
 				)
-				.map_err(|_| Error::<T>::ERC20TransferFailed)?;
+				.map_err(|e| Error::<T>::ERC20TransferFailed)?;
 				ensure!(success, Error::<T>::ERC20TransferFailed);
 			},
 		}
@@ -87,11 +89,12 @@ impl<T: Config> Pallet<T> {
 		who: T::AccountId,
 		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
+		evm_address: Option<H160>,
 	) -> DispatchResult {
 		ensure!(amount >= T::MinDelegateAmount::get(), Error::<T>::BondTooLow);
 
 		// Transfer the amount to the pallet account
-		Self::handle_transfer_to_pallet(&who, asset_id, amount)?;
+		Self::handle_transfer_to_pallet(&who, asset_id, amount, evm_address)?;
 
 		// Update storage
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| -> DispatchResult {
@@ -179,32 +182,34 @@ impl<T: Config> Pallet<T> {
 			// Process all ready withdraw requests
 			metadata.withdraw_requests.retain(|request| {
 				if current_round >= delay + request.requested_round {
-					// Transfer the amount back to the delegator
 					match request.asset_id {
-						Asset::Custom(asset_id) => {
-							T::Fungibles::transfer(
-								asset_id,
-								&Self::pallet_account(),
-								&who,
-								request.amount,
-								Preservation::Expendable,
-							)
-							.expect("Transfer should not fail");
-						},
+						Asset::Custom(asset_id) => T::Fungibles::transfer(
+							asset_id,
+							&Self::pallet_account(),
+							&who,
+							request.amount,
+							Preservation::Expendable,
+						)
+						.is_ok(),
 						Asset::Erc20(asset_address) => {
-							let (success, _weight) = Self::erc20_transfer(
-								asset_address,
-								&Self::pallet_evm_account(),
-								evm_address.unwrap(),
-								request.amount,
-							)
-							.map_err(|_| Error::<T>::ERC20TransferFailed)?;
-							ensure!(success, Error::<T>::ERC20TransferFailed);
+							if let Some(evm_addr) = evm_address {
+								if let Ok((success, _weight)) = Self::erc20_transfer(
+									asset_address,
+									&Self::pallet_evm_account(),
+									evm_addr,
+									request.amount,
+								) {
+									success
+								} else {
+									false
+								}
+							} else {
+								false
+							}
 						},
 					}
-					false // Remove this request
 				} else {
-					true // Keep this request
+					true
 				}
 			});
 

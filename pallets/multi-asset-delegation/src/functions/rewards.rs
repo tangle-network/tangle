@@ -21,59 +21,60 @@ use crate::{
 use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Currency};
 use sp_runtime::{traits::Zero, DispatchError, Saturating};
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
+use tangle_primitives::services::Asset;
 use tangle_primitives::RoundIndex;
 
 impl<T: Config> Pallet<T> {
 	#[allow(clippy::type_complexity)]
 	pub fn distribute_rewards(round: RoundIndex) -> DispatchResult {
-		let mut delegation_info: BTreeMap<
-			T::AssetId,
-			Vec<DelegatorBond<T::AccountId, BalanceOf<T>, T::AssetId>>,
-		> = BTreeMap::new();
+		// let mut delegation_info: BTreeMap<
+		// 	T::AssetId,
+		// 	Vec<DelegatorBond<T::AccountId, BalanceOf<T>, T::AssetId>>,
+		// > = BTreeMap::new();
 
-		// Iterate through all operator snapshots for the given round
-		// TODO: Could be dangerous with many operators
-		for (_, operator_snapshot) in AtStake::<T>::iter_prefix(round) {
-			for delegation in &operator_snapshot.delegations {
-				delegation_info.entry(delegation.asset_id).or_default().push(delegation.clone());
-			}
-		}
+		// // Iterate through all operator snapshots for the given round
+		// // TODO: Could be dangerous with many operators
+		// for (_, operator_snapshot) in AtStake::<T>::iter_prefix(round) {
+		// 	for delegation in &operator_snapshot.delegations {
+		// 		delegation_info.entry(delegation.asset_id).or_default().push(delegation.clone());
+		// 	}
+		// }
 
-		// Get the reward configuration
-		if let Some(reward_config) = RewardConfigStorage::<T>::get() {
-			// Distribute rewards for each asset
-			for (asset_id, delegations) in delegation_info.iter() {
-				// We only reward asset in a reward vault
-				if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(asset_id) {
-					if let Some(config) = reward_config.configs.get(&vault_id) {
-						// Calculate total amount and distribute rewards
-						let total_amount: BalanceOf<T> =
-							delegations.iter().fold(Zero::zero(), |acc, d| acc + d.amount);
-						let cap: BalanceOf<T> = config.cap;
+		// // Get the reward configuration
+		// if let Some(reward_config) = RewardConfigStorage::<T>::get() {
+		// 	// Distribute rewards for each asset
+		// 	for (asset_id, delegations) in delegation_info.iter() {
+		// 		// We only reward asset in a reward vault
+		// 		if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(asset_id) {
+		// 			if let Some(config) = reward_config.configs.get(&vault_id) {
+		// 				// Calculate total amount and distribute rewards
+		// 				let total_amount: BalanceOf<T> =
+		// 					delegations.iter().fold(Zero::zero(), |acc, d| acc + d.amount);
+		// 				let cap: BalanceOf<T> = config.cap;
 
-						if total_amount >= cap {
-							// Calculate the total reward based on the APY
-							let total_reward =
-								Self::calculate_total_reward(config.apy, total_amount)?;
+		// 				if total_amount >= cap {
+		// 					// Calculate the total reward based on the APY
+		// 					let total_reward =
+		// 						Self::calculate_total_reward(config.apy, total_amount)?;
 
-							for delegation in delegations {
-								// Calculate the percentage of the cap that the user is staking
-								let staking_percentage =
-									delegation.amount.saturating_mul(100u32.into()) / cap;
-								// Calculate the reward based on the staking percentage
-								let reward =
-									total_reward.saturating_mul(staking_percentage) / 100u32.into();
-								// Distribute the reward to the delegator
-								Self::distribute_reward_to_delegator(
-									&delegation.delegator,
-									reward,
-								)?;
-							}
-						}
-					}
-				}
-			}
-		}
+		// 					for delegation in delegations {
+		// 						// Calculate the percentage of the cap that the user is staking
+		// 						let staking_percentage =
+		// 							delegation.amount.saturating_mul(100u32.into()) / cap;
+		// 						// Calculate the reward based on the staking percentage
+		// 						let reward =
+		// 							total_reward.saturating_mul(staking_percentage) / 100u32.into();
+		// 						// Distribute the reward to the delegator
+		// 						Self::distribute_reward_to_delegator(
+		// 							&delegation.delegator,
+		// 							reward,
+		// 						)?;
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 
 		Ok(())
 	}
@@ -95,7 +96,10 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	pub fn add_asset_to_vault(vault_id: &T::VaultId, asset_id: &T::AssetId) -> DispatchResult {
+	pub fn add_asset_to_vault(
+		vault_id: &T::VaultId,
+		asset_id: &Asset<T::AssetId>,
+	) -> DispatchResult {
 		// Ensure the asset is not already associated with any vault
 		ensure!(
 			!AssetLookupRewardVaults::<T>::contains_key(asset_id),
@@ -120,7 +124,10 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	pub fn remove_asset_from_vault(vault_id: &T::VaultId, asset_id: &T::AssetId) -> DispatchResult {
+	pub fn remove_asset_from_vault(
+		vault_id: &T::VaultId,
+		asset_id: &Asset<T::AssetId>,
+	) -> DispatchResult {
 		// Update RewardVaults storage
 		RewardVaults::<T>::try_mutate(vault_id, |maybe_assets| -> DispatchResult {
 			let assets = maybe_assets.as_mut().ok_or(Error::<T>::VaultNotFound)?;
