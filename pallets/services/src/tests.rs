@@ -674,7 +674,7 @@ fn reject_service_with_payment_token() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -744,7 +744,7 @@ fn reject_service_with_payment_asset() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
