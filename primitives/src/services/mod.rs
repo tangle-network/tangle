@@ -14,22 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-// This file is part of Tangle.
-// Copyright (C) 2022-2024 Tangle Foundation.
-//
-// Tangle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Tangle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-
 //! Services primitives.
 use crate::Weight;
 use educe::Educe;
@@ -37,8 +21,8 @@ use fp_evm::CallInfo;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, RuntimeDebug};
 use sp_core::{H160, U256};
+use sp_core::{ecdsa, ByteArray, RuntimeDebug};
 use sp_runtime::Percent;
 use sp_std::vec::Vec;
 
@@ -47,6 +31,8 @@ use alloc::{string::String, vec, vec::Vec};
 
 pub mod field;
 pub use field::*;
+
+use super::Account;
 
 /// A Higher level abstraction of all the constraints.
 pub trait Constraints {
@@ -562,6 +548,37 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId>
 		self.operators_with_approval_state
 			.iter()
 			.any(|(_, state)| state == &ApprovalState::Rejected)
+	}
+}
+
+/// A staging service payment is a payment that is made for a service request
+/// but will be paid when the service is created or refunded if the service is rejected.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct StagingServicePayment<AccountId, AssetId, Balance> {
+	/// The service request ID.
+	pub request_id: u64,
+	/// Where the refund should go.
+	pub refund_to: Account<AccountId>,
+	/// The Asset used in the payment.
+	pub asset: Asset<AssetId>,
+	/// The amount of the asset that is paid.
+	pub amount: Balance,
+}
+
+impl<AccountId, AssetId, Balance> Default for StagingServicePayment<AccountId, AssetId, Balance>
+where
+	AccountId: ByteArray,
+	AssetId: sp_runtime::traits::Zero,
+	Balance: Default,
+{
+	fn default() -> Self {
+		Self {
+			request_id: Default::default(),
+			refund_to: Account::default(),
+			asset: Asset::default(),
+			amount: Default::default(),
+		}
 	}
 }
 

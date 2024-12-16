@@ -69,10 +69,8 @@ pub mod module {
 		Percent,
 	};
 	use sp_std::vec::Vec;
-	use tangle_primitives::{
-		services::{MasterBlueprintServiceManagerRevision, *},
-		MultiAssetDelegationInfo,
-	};
+	use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
+	use tangle_primitives::{services::*, Account, MultiAssetDelegationInfo};
 	use types::*;
 
 	#[pallet::config]
@@ -298,6 +296,12 @@ pub mod module {
 		MaxMasterBlueprintServiceManagerVersionsExceeded,
 		/// The ERC20 transfer failed.
 		ERC20TransferFailed,
+		/// Missing EVM Origin for the EVM execution.
+		MissingEVMOrigin,
+		/// Expected the account to be an EVM address.
+		ExpectedEVMAddress,
+		/// Expected the account to be an account ID.
+		ExpectedAccountId,
 	}
 
 	#[pallet::event]
@@ -629,6 +633,15 @@ pub mod module {
 		OperatorProfile<T::Constraints>,
 		ResultQuery<Error<T>::OperatorProfileNotFound>,
 	>;
+	/// Holds the service payment information for a service request.
+	/// Once the service is initiated, the payment is transferred to the MBSM and this
+	/// information is removed.
+	///
+	/// Service Requst ID -> Service Payment
+	#[pallet::storage]
+	#[pallet::getter(fn service_payment)]
+	pub type StagingServicePayments<T: Config> =
+		StorageMap<_, Identity, u64, StagingServicePayment<T::AccountId, T::AssetId, BalanceOf<T>>>;
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -853,6 +866,7 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request(
 			origin: OriginFor<T>,
+			evm_origin: Option<H160>,
 			#[pallet::compact] blueprint_id: u64,
 			permitted_callers: Vec<T::AccountId>,
 			operators: Vec<T::AccountId>,
@@ -878,10 +892,11 @@ pub mod module {
 			}
 
 			let mut native_value = Zero::zero();
+			let request_id = NextServiceRequestId::<T>::get();
 
 			if value != Zero::zero() {
 				// Payment transfer
-				match payment_asset {
+				let refund_to = match payment_asset {
 					// Handle the case of native currency.
 					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
 						T::Currency::transfer(
@@ -891,6 +906,7 @@ pub mod module {
 							ExistenceRequirement::KeepAlive,
 						)?;
 						native_value = value;
+						Account::id(caller.clone())
 					},
 					Asset::Custom(asset_id) => {
 						T::Fungibles::transfer(
@@ -900,16 +916,31 @@ pub mod module {
 							value,
 							Preservation::Preserve,
 						)?;
+						Account::id(caller.clone())
 					},
 					Asset::Erc20(token) => {
+						// origin check.
+						let evm_origin = evm_origin.ok_or(Error::<T>::MissingEVMOrigin)?;
+						let mapped_origin = T::EvmAddressMapping::into_account_id(evm_origin);
+						ensure!(mapped_origin == caller, DispatchError::BadOrigin);
 						let (success, _weight) =
-							Self::erc20_transfer(token, &caller, Self::address(), value)?;
+							Self::erc20_transfer(token, evm_origin, Self::address(), value)?;
 						ensure!(success, Error::<T>::ERC20TransferFailed);
+						Account::from(evm_origin)
 					},
 				};
+
+				// Save the payment information for the service request.
+				let payment = StagingServicePayment {
+					request_id,
+					refund_to,
+					asset: payment_asset,
+					amount: value,
+				};
+
+				StagingServicePayments::<T>::insert(request_id, payment);
 			}
 
-			let request_id = NextServiceRequestId::<T>::get();
 			let (allowed, _weight) = Self::on_request_hook(
 				&blueprint,
 				blueprint_id,
@@ -1076,6 +1107,44 @@ pub mod module {
 						.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
 				})?;
 
+				// Payment
+				if let Some(payment) = Self::service_payment(request_id) {
+					// send payments to the MBSM
+					let mbsm_address = Self::mbsm_address_of(&blueprint)?;
+					let mbsm_account_id = T::EvmAddressMapping::into_account_id(mbsm_address);
+					match payment.asset {
+						Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+							T::Currency::transfer(
+								&Self::account_id(),
+								&mbsm_account_id,
+								payment.amount,
+								ExistenceRequirement::AllowDeath,
+							)?;
+						},
+						Asset::Custom(asset_id) => {
+							T::Fungibles::transfer(
+								asset_id,
+								&Self::account_id(),
+								&mbsm_account_id,
+								payment.amount,
+								Preservation::Expendable,
+							)?;
+						},
+						Asset::Erc20(token) => {
+							let (success, _weight) = Self::erc20_transfer(
+								token,
+								Self::address(),
+								mbsm_address,
+								payment.amount,
+							)?;
+							ensure!(success, Error::<T>::ERC20TransferFailed);
+						},
+					}
+
+					// Remove the payment information.
+					StagingServicePayments::<T>::remove(request_id);
+				}
+
 				let (allowed, _weight) = Self::on_service_init_hook(
 					&blueprint,
 					blueprint_id,
@@ -1138,6 +1207,51 @@ pub mod module {
 				blueprint_id: request.blueprint,
 				request_id,
 			});
+
+			// Refund the payment
+			if let Some(payment) = Self::service_payment(request_id) {
+				match payment.asset {
+					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+						let refund_to = payment
+							.refund_to
+							.try_into_account_id()
+							.map_err(|_| Error::<T>::ExpectedAccountId)?;
+						T::Currency::transfer(
+							&Self::account_id(),
+							&refund_to,
+							payment.amount,
+							ExistenceRequirement::AllowDeath,
+						)?;
+					},
+					Asset::Custom(asset_id) => {
+						let refund_to = payment
+							.refund_to
+							.try_into_account_id()
+							.map_err(|_| Error::<T>::ExpectedAccountId)?;
+						T::Fungibles::transfer(
+							asset_id,
+							&Self::account_id(),
+							&refund_to,
+							payment.amount,
+							Preservation::Expendable,
+						)?;
+					},
+					Asset::Erc20(token) => {
+						let refund_to = payment
+							.refund_to
+							.try_into_address()
+							.map_err(|_| Error::<T>::ExpectedEVMAddress)?;
+						let (success, _weight) = Self::erc20_transfer(
+							token,
+							Self::address(),
+							refund_to,
+							payment.amount,
+						)?;
+						ensure!(success, Error::<T>::ERC20TransferFailed);
+					},
+				}
+				StagingServicePayments::<T>::remove(request_id);
+			}
 
 			// TODO: make use of the returned weight from the hook.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
