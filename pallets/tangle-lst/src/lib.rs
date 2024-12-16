@@ -844,7 +844,7 @@ pub mod pallet {
 			let pool_id = member.get_by_pool_id(current_era, pool_id);
 
 			if pool_id.is_none() {
-				return Err(Error::<T>::PoolNotFound.into());
+				return Err(Error::<T>::PoolNotFound.into())
 			}
 
 			// checked above
@@ -1506,7 +1506,7 @@ impl<T: Config> Pallet<T> {
 		let balance = T::U256ToBalance::convert;
 		if current_balance.is_zero() || current_points.is_zero() || points.is_zero() {
 			// There is nothing to unbond
-			return Zero::zero();
+			return Zero::zero()
 		}
 
 		// Equivalent of (current_balance / current_points) * points
@@ -1614,9 +1614,8 @@ impl<T: Config> Pallet<T> {
 		bonded_pool.ok_to_join()?;
 
 		let (_points_issued, bonded) = match extra {
-			BondExtra::FreeBalance(amount) => {
-				(bonded_pool.try_bond_funds(&member_account, amount, BondType::Later)?, amount)
-			},
+			BondExtra::FreeBalance(amount) =>
+				(bonded_pool.try_bond_funds(&member_account, amount, BondType::Later)?, amount),
 		};
 
 		bonded_pool.ok_to_be_open()?;
@@ -1682,7 +1681,7 @@ impl<T: Config> Pallet<T> {
 		let min_balance = T::Currency::minimum_balance();
 
 		if pre_frozen_balance == min_balance {
-			return Err(Error::<T>::NothingToAdjust.into());
+			return Err(Error::<T>::NothingToAdjust.into())
 		}
 
 		// Update frozen amount with current ED.

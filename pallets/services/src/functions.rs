@@ -77,9 +77,8 @@ impl<T: Config> Pallet<T> {
 	pub fn mbsm_address_of(blueprint: &ServiceBlueprint<T::Constraints>) -> Result<H160, Error<T>> {
 		match blueprint.master_manager_revision {
 			MasterBlueprintServiceManagerRevision::Specific(rev) => Self::mbsm_address(rev),
-			MasterBlueprintServiceManagerRevision::Latest => {
-				Self::mbsm_address(Self::mbsm_latest_revision())
-			},
+			MasterBlueprintServiceManagerRevision::Latest =>
+				Self::mbsm_address(Self::mbsm_latest_revision()),
 			other => unimplemented!("Got unexpected case for {:?}", other),
 		}
 	}

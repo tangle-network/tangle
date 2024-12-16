@@ -206,19 +206,18 @@ where
 			(0, zero_address) => (Asset::Custom(0u32.into()), value),
 			(0, erc20_token) => {
 				if value != Default::default() {
-					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_ERC20));
+					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_ERC20))
 				}
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
 			(other_asset_id, zero_address) => {
 				if value != Default::default() {
-					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_CUSTOM_ASSET));
+					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_CUSTOM_ASSET))
 				}
 				(Asset::Custom(other_asset_id.into()), amount)
 			},
-			(_other_asset_id, _erc20_token) => {
-				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
-			},
+			(_other_asset_id, _erc20_token) =>
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20)),
 		};
 
 		let call = pallet_services::Call::<Runtime>::request {

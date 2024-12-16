@@ -275,7 +275,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 
 	fn is_operator_active(operator: &AccountId) -> bool {
 		if operator == &mock_pub_key(10) {
-			return false;
+			return false
 		}
 		true
 	}
@@ -775,11 +775,10 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 	for evt in expected {
 		let next = actual.pop().expect("RuntimeEvent expected");
 		match (&next, &evt) {
-			(left_val, right_val) => {
+			(left_val, right_val) =>
 				if !(*left_val == *right_val) {
 					panic!("Events don't match\nactual: {actual:#?}\nexpected: {evt:#?}");
-				}
-			},
+				},
 		};
 	}
 }

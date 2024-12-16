@@ -82,7 +82,7 @@ where
 			},
 			_ => {
 				// Return err if account length is wrong
-				return Err(revert("Error while parsing staker's address"));
+				return Err(revert("Error while parsing staker's address"))
 			},
 		};
 
@@ -266,9 +266,8 @@ where
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
 			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
-			(_other_asset_id, _erc20_token) => {
-				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
-			},
+			(_other_asset_id, _erc20_token) =>
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20)),
 		};
 
 		// Get origin account.
@@ -307,9 +306,8 @@ where
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
 			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
-			(_other_asset_id, _erc20_token) => {
-				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
-			},
+			(_other_asset_id, _erc20_token) =>
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20)),
 		};
 
 		let call = pallet_multi_asset_delegation::Call::<Runtime>::schedule_withdraw {
@@ -351,9 +349,8 @@ where
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
 			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
-			(_other_asset_id, _erc20_token) => {
-				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
-			},
+			(_other_asset_id, _erc20_token) =>
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20)),
 		};
 
 		// Build call with origin.
@@ -396,9 +393,8 @@ where
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
 			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
-			(_other_asset_id, _erc20_token) => {
-				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
-			},
+			(_other_asset_id, _erc20_token) =>
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20)),
 		};
 
 		// Build call with origin.
@@ -435,9 +431,8 @@ where
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
 			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
-			(_other_asset_id, _erc20_token) => {
-				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
-			},
+			(_other_asset_id, _erc20_token) =>
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20)),
 		};
 
 		// Build call with origin.
@@ -484,9 +479,8 @@ where
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
 			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
-			(_other_asset_id, _erc20_token) => {
-				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
-			},
+			(_other_asset_id, _erc20_token) =>
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20)),
 		};
 
 		// Build call with origin.

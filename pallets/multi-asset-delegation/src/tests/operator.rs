@@ -19,7 +19,6 @@ use crate::{
 	CurrentRound, Error,
 };
 use frame_support::{assert_noop, assert_ok};
-use sp_keyring::AccountKeyring::Bob;
 use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve};
 use sp_runtime::Percent;
 use tangle_primitives::services::Asset;
@@ -303,8 +302,8 @@ fn schedule_operator_unstake_success() {
 
 		// Verify remaining stake is above minimum
 		assert!(
-			operator_info.stake.saturating_sub(unstake_amount)
-				>= MinOperatorBondAmount::get().into()
+			operator_info.stake.saturating_sub(unstake_amount) >=
+				MinOperatorBondAmount::get().into()
 		);
 
 		// Verify event
@@ -362,7 +361,8 @@ fn schedule_operator_unstake_not_an_operator() {
 //         let unstake_amount = 5_000;
 
 //         // Join operator first
-//         assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(Alice.to_account_id()), bond_amount));
+//         assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(Alice.
+// to_account_id()), bond_amount));
 
 //         // Manually set the operator's delegation count to simulate active services
 //         Operators::<Runtime>::mutate(1, |operator| {
@@ -373,7 +373,8 @@ fn schedule_operator_unstake_not_an_operator() {
 
 //         // Attempt to schedule unstake with active services
 //         assert_noop!(
-//             MultiAssetDelegation::schedule_operator_unstake(RuntimeOrigin::signed(Alice.to_account_id()),
+//             
+// MultiAssetDelegation::schedule_operator_unstake(RuntimeOrigin::signed(Alice.to_account_id()),
 // unstake_amount),             Error::<Runtime>::ActiveServicesUsingTNT
 //         );
 //     });

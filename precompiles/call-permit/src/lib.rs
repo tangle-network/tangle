@@ -170,7 +170,7 @@ where
 			.ok_or_else(|| revert("Call require too much gas (uint64 overflow)"))?;
 
 		if total_cost > handle.remaining_gas() {
-			return Err(revert("Gaslimit is too low to dispatch provided call"));
+			return Err(revert("Gaslimit is too low to dispatch provided call"))
 		}
 
 		// VERIFY PERMIT
@@ -216,9 +216,8 @@ where
 		match reason {
 			ExitReason::Error(exit_status) => Err(PrecompileFailure::Error { exit_status }),
 			ExitReason::Fatal(exit_status) => Err(PrecompileFailure::Fatal { exit_status }),
-			ExitReason::Revert(_) => {
-				Err(PrecompileFailure::Revert { exit_status: ExitRevert::Reverted, output })
-			},
+			ExitReason::Revert(_) =>
+				Err(PrecompileFailure::Revert { exit_status: ExitRevert::Reverted, output }),
 			ExitReason::Succeed(_) => Ok(output.into()),
 		}
 	}

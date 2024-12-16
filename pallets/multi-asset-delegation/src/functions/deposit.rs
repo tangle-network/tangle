@@ -190,7 +190,7 @@ impl<T: Config> Pallet<T> {
 							Preservation::Expendable,
 						)
 						.is_ok(),
-						Asset::Erc20(asset_address) => {
+						Asset::Erc20(asset_address) =>
 							if let Some(evm_addr) = evm_address {
 								if let Ok((success, _weight)) = Self::erc20_transfer(
 									asset_address,
@@ -204,8 +204,7 @@ impl<T: Config> Pallet<T> {
 								}
 							} else {
 								false
-							}
-						},
+							},
 					}
 				} else {
 					true

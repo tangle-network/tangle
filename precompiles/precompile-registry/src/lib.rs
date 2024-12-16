@@ -69,9 +69,8 @@ where
 			.is_active_precompile(address.0, handle.remaining_gas())
 		{
 			IsPrecompileResult::Answer { is_precompile, .. } => Ok(is_precompile),
-			IsPrecompileResult::OutOfGas => {
-				Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
-			},
+			IsPrecompileResult::OutOfGas =>
+				Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas }),
 		}
 	}
 
@@ -86,7 +85,7 @@ where
 		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
 		handle.record_db_read::<Runtime>(175)?;
 		if !is_precompile_or_fail::<Runtime>(address.0, handle.remaining_gas())? {
-			return Err(revert("provided address is not a precompile"));
+			return Err(revert("provided address is not a precompile"))
 		}
 
 		// pallet_evm::create_account read storage item pallet_evm::AccountCodes

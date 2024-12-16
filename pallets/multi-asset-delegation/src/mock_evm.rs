@@ -35,8 +35,7 @@ use sp_runtime::{
 	transaction_validity::{TransactionValidity, TransactionValidityError},
 	ConsensusEngineId,
 };
-use tangle_primitives::services::EvmRunner;
-use tangle_primitives::services::RunnerError;
+use tangle_primitives::services::{EvmRunner, RunnerError};
 
 use pallet_evm_precompile_blake2::Blake2F;
 use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
@@ -166,7 +165,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 			pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
 		// Make pallet multi_asset_delegation account free to use
 		if who == &pallet_multi_asset_delegation_address {
-			return Ok(None);
+			return Ok(None)
 		}
 		// fallback to the default implementation
 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
@@ -184,7 +183,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 			pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
 		// Make pallet multi_asset_delegation account free to use
 		if who == &pallet_multi_asset_delegation_address {
-			return already_withdrawn;
+			return already_withdrawn
 		}
 		// fallback to the default implementation
 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
@@ -270,9 +269,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		len: usize,
 	) -> Option<Result<(), TransactionValidityError>> {
 		match self {
-			RuntimeCall::Ethereum(call) => {
-				call.pre_dispatch_self_contained(info, dispatch_info, len)
-			},
+			RuntimeCall::Ethereum(call) =>
+				call.pre_dispatch_self_contained(info, dispatch_info, len),
 			_ => None,
 		}
 	}
@@ -282,9 +280,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		info: Self::SignedInfo,
 	) -> Option<sp_runtime::DispatchResultWithInfo<sp_runtime::traits::PostDispatchInfoOf<Self>>> {
 		match self {
-			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) => {
-				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info))))
-			},
+			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) =>
+				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info)))),
 			_ => None,
 		}
 	}

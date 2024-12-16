@@ -60,9 +60,8 @@ where
 	fn is_allowed(_caller: H160, selector: Option<u32>) -> bool {
 		match selector {
 			None => false,
-			Some(selector) => {
-				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector)
-			},
+			Some(selector) =>
+				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector),
 		}
 	}
 
@@ -92,12 +91,11 @@ where
 	fn is_allowed(_caller: H160, selector: Option<u32>) -> bool {
 		match selector {
 			None => false,
-			Some(selector) => {
-				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector)
-					|| ProxyPrecompileCall::<Runtime>::proxy_selectors().contains(&selector)
-					|| ProxyPrecompileCall::<Runtime>::proxy_force_type_selectors()
-						.contains(&selector)
-			},
+			Some(selector) =>
+				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector) ||
+					ProxyPrecompileCall::<Runtime>::proxy_selectors().contains(&selector) ||
+					ProxyPrecompileCall::<Runtime>::proxy_force_type_selectors()
+						.contains(&selector),
 		}
 	}
 
@@ -187,7 +185,7 @@ where
 			.iter()
 			.any(|pd| pd.delegate == delegate)
 		{
-			return Err(revert("Cannot add more than one proxy"));
+			return Err(revert("Cannot add more than one proxy"))
 		}
 
 		let delegate: <Runtime::Lookup as StaticLookup>::Source =
@@ -343,7 +341,7 @@ where
 		// Check that we only perform proxy calls on behalf of externally owned accounts
 		let AddressType::EOA = precompile_set::get_address_type::<Runtime>(handle, real.into())?
 		else {
-			return Err(revert("real address must be EOA"));
+			return Err(revert("real address must be EOA"))
 		};
 
 		// Read proxy
@@ -419,9 +417,8 @@ where
 		// Return subcall result
 		match reason {
 			ExitReason::Fatal(exit_status) => Err(PrecompileFailure::Fatal { exit_status }),
-			ExitReason::Revert(exit_status) => {
-				Err(PrecompileFailure::Revert { exit_status, output })
-			},
+			ExitReason::Revert(exit_status) =>
+				Err(PrecompileFailure::Revert { exit_status, output }),
 			ExitReason::Error(exit_status) => Err(PrecompileFailure::Error { exit_status }),
 			ExitReason::Succeed(_) => Ok(()),
 		}

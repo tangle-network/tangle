@@ -44,7 +44,7 @@ where
 			<<C::Group as Group>::Field as Field>::deserialize(&bytes).map_err(Error::from)?;
 
 		if scalar == <<C::Group as Group>::Field as Field>::zero() {
-			return Err(Error::MalformedSigningKey);
+			return Err(Error::MalformedSigningKey)
 		}
 
 		Ok(Self { scalar })

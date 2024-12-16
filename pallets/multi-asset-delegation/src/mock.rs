@@ -21,34 +21,28 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
 };
-use frame_support::pallet_prelude::Hooks;
-use frame_support::pallet_prelude::Weight;
-use frame_support::PalletId;
 use frame_support::{
-	construct_runtime, derive_impl, parameter_types,
+	construct_runtime, derive_impl,
+	pallet_prelude::{Hooks, Weight},
+	parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
+	PalletId,
 };
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
-use parity_scale_codec::Decode;
-use parity_scale_codec::Encode;
-use parity_scale_codec::MaxEncodedLen;
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde_json::json;
 use sp_core::{sr25519, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
-use sp_runtime::traits::ConstU64;
 use sp_runtime::{
 	testing::UintAuthorityId,
-	traits::{ConvertInto, IdentityLookup},
+	traits::{ConstU64, ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
-use tangle_primitives::services::EvmAddressMapping;
-use tangle_primitives::services::EvmGasWeightMapping;
-use tangle_primitives::services::EvmRunner;
-use tangle_primitives::services::RunnerError;
+use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner, RunnerError};
 
 use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
@@ -655,11 +649,10 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 	for evt in expected {
 		let next = actual.pop().expect("RuntimeEvent expected");
 		match (&next, &evt) {
-			(left_val, right_val) => {
+			(left_val, right_val) =>
 				if !(*left_val == *right_val) {
 					panic!("Events don't match\nactual: {actual:#?}\nexpected: {evt:#?}");
-				}
-			},
+				},
 		};
 	}
 }

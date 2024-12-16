@@ -66,7 +66,7 @@ pub fn random_nonzero<C: Ciphersuite, R: RngCore + CryptoRng>(rng: &mut R) -> Sc
 		let scalar = <<C::Group as Group>::Field>::random(rng);
 
 		if scalar != <<C::Group as Group>::Field>::zero() {
-			return scalar;
+			return scalar
 		}
 	}
 }
@@ -203,7 +203,7 @@ fn compute_lagrange_coefficient<C: Ciphersuite>(
 	x_i: Identifier<C>,
 ) -> Result<Scalar<C>, Error> {
 	if x_set.is_empty() {
-		return Err(Error::IncorrectNumberOfIdentifiers);
+		return Err(Error::IncorrectNumberOfIdentifiers)
 	}
 	let mut num = <<C::Group as Group>::Field>::one();
 	let mut den = <<C::Group as Group>::Field>::one();
@@ -213,7 +213,7 @@ fn compute_lagrange_coefficient<C: Ciphersuite>(
 	for x_j in x_set.iter() {
 		if x_i == *x_j {
 			x_i_found = true;
-			continue;
+			continue
 		}
 
 		if let Some(x) = x {
@@ -226,7 +226,7 @@ fn compute_lagrange_coefficient<C: Ciphersuite>(
 		}
 	}
 	if !x_i_found {
-		return Err(Error::UnknownIdentifier);
+		return Err(Error::UnknownIdentifier)
 	}
 
 	Ok(num * <<C::Group as Group>::Field>::invert(&den).map_err(|_| Error::DuplicatedIdentifier)?)
@@ -396,7 +396,7 @@ where
 		// The following check prevents a party from accidentally revealing their share.
 		// Note that the '&&' operator would be sufficient.
 		if identity == commitment.binding.0 || identity == commitment.hiding.0 {
-			return Err(Error::IdentityCommitment);
+			return Err(Error::IdentityCommitment)
 		}
 
 		let binding_factor =

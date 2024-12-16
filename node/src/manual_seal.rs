@@ -647,7 +647,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 
 		network_starter.start_network();
 		log::info!("Manual Seal Ready");
-		return Ok(task_manager);
+		return Ok(task_manager)
 	}
 
 	let grandpa_config = sc_consensus_grandpa::Config {

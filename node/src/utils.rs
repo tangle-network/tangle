@@ -142,7 +142,7 @@ pub fn ensure_all_keys_exist_in_keystore(key_store: KeystorePtr) -> Result<(), S
 		// Ensure key is present
 		if !ensure_keytype_exists_in_keystore(key_type, key_store.clone()) {
 			println!("{key_type:?} key not found!");
-			return Err("Key not found!".to_string());
+			return Err("Key not found!".to_string())
 		}
 	}
 

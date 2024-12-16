@@ -65,14 +65,14 @@ impl TypedChainId {
 	#[must_use]
 	pub const fn underlying_chain_id(&self) -> u32 {
 		match self {
-			TypedChainId::Evm(id)
-			| TypedChainId::Substrate(id)
-			| TypedChainId::PolkadotParachain(id)
-			| TypedChainId::KusamaParachain(id)
-			| TypedChainId::RococoParachain(id)
-			| TypedChainId::Cosmos(id)
-			| TypedChainId::Solana(id)
-			| TypedChainId::Ink(id) => *id,
+			TypedChainId::Evm(id) |
+			TypedChainId::Substrate(id) |
+			TypedChainId::PolkadotParachain(id) |
+			TypedChainId::KusamaParachain(id) |
+			TypedChainId::RococoParachain(id) |
+			TypedChainId::Cosmos(id) |
+			TypedChainId::Solana(id) |
+			TypedChainId::Ink(id) => *id,
 			Self::None => 0,
 		}
 	}

@@ -146,9 +146,8 @@ where
 
 			let forwarded_gas = match (remaining_gas.checked_sub(log_cost), mode) {
 				(Some(remaining), _) => remaining,
-				(None, Mode::BatchAll) => {
-					return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
-				},
+				(None, Mode::BatchAll) =>
+					return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas }),
 				(None, _) => return Ok(()),
 			};
 
@@ -163,11 +162,10 @@ where
 					log.record(handle)?;
 
 					match mode {
-						Mode::BatchAll => {
+						Mode::BatchAll =>
 							return Err(PrecompileFailure::Error {
 								exit_status: ExitError::OutOfGas,
-							})
-						},
+							}),
 						Mode::BatchSomeUntilFailure => return Ok(()),
 						Mode::BatchSome => continue,
 					}
@@ -184,11 +182,10 @@ where
 						log.record(handle)?;
 
 						match mode {
-							Mode::BatchAll => {
+							Mode::BatchAll =>
 								return Err(PrecompileFailure::Error {
 									exit_status: ExitError::OutOfGas,
-								})
-							},
+								}),
 							Mode::BatchSomeUntilFailure => return Ok(()),
 							Mode::BatchSome => continue,
 						}
@@ -219,23 +216,19 @@ where
 			// How to proceed
 			match (mode, reason) {
 				// _: Fatal is always fatal
-				(_, ExitReason::Fatal(exit_status)) => {
-					return Err(PrecompileFailure::Fatal { exit_status })
-				},
+				(_, ExitReason::Fatal(exit_status)) =>
+					return Err(PrecompileFailure::Fatal { exit_status }),
 
 				// BatchAll : Reverts and errors are immediatly forwarded.
-				(Mode::BatchAll, ExitReason::Revert(exit_status)) => {
-					return Err(PrecompileFailure::Revert { exit_status, output })
-				},
-				(Mode::BatchAll, ExitReason::Error(exit_status)) => {
-					return Err(PrecompileFailure::Error { exit_status })
-				},
+				(Mode::BatchAll, ExitReason::Revert(exit_status)) =>
+					return Err(PrecompileFailure::Revert { exit_status, output }),
+				(Mode::BatchAll, ExitReason::Error(exit_status)) =>
+					return Err(PrecompileFailure::Error { exit_status }),
 
 				// BatchSomeUntilFailure : Reverts and errors prevent subsequent subcalls to
 				// be executed but the precompile still succeed.
-				(Mode::BatchSomeUntilFailure, ExitReason::Revert(_) | ExitReason::Error(_)) => {
-					return Ok(())
-				},
+				(Mode::BatchSomeUntilFailure, ExitReason::Revert(_) | ExitReason::Error(_)) =>
+					return Ok(()),
 
 				// Success or ignored revert/error.
 				(_, _) => (),
@@ -270,9 +263,8 @@ where
 
 		match mode {
 			Mode::BatchSome => Self::batch_some { to, value, call_data, gas_limit },
-			Mode::BatchSomeUntilFailure => {
-				Self::batch_some_until_failure { to, value, call_data, gas_limit }
-			},
+			Mode::BatchSomeUntilFailure =>
+				Self::batch_some_until_failure { to, value, call_data, gas_limit },
 			Mode::BatchAll => Self::batch_all { to, value, call_data, gas_limit },
 		}
 	}

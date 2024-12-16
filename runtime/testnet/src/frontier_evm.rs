@@ -64,7 +64,7 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {
 	{
 		if let Some(author_index) = F::find_author(digests) {
 			let authority_id = Babe::authorities()[author_index as usize].clone();
-			return Some(H160::from_slice(&authority_id.0.to_raw_vec()[4..24]));
+			return Some(H160::from_slice(&authority_id.0.to_raw_vec()[4..24]))
 		}
 		None
 	}
@@ -99,7 +99,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
 		// Make pallet services account free to use
 		if who == &pallet_services_address {
-			return Ok(None);
+			return Ok(None)
 		}
 		// fallback to the default implementation
 		<pallet_evm::EVMCurrencyAdapter<Balances, impls::DealWithFees<Runtime>> as OnChargeEVMTransaction<
@@ -116,7 +116,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
 		// Make pallet services account free to use
 		if who == &pallet_services_address {
-			return already_withdrawn;
+			return already_withdrawn
 		}
 		// fallback to the default implementation
 		<pallet_evm::EVMCurrencyAdapter<Balances, impls::DealWithFees<Runtime>> as OnChargeEVMTransaction<

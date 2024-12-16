@@ -22,14 +22,14 @@ impl Contains<RuntimeCall> for MainnetCallFilter {
 		let is_core_call = matches!(call, RuntimeCall::System(_) | RuntimeCall::Timestamp(_));
 		if is_core_call {
 			// always allow core call
-			return true;
+			return true
 		}
 
 		let is_allowed_to_dispatch =
 			<pallet_tx_pause::Pallet<Runtime> as Contains<RuntimeCall>>::contains(call);
 		if !is_allowed_to_dispatch {
 			// tx is paused and not allowed to dispatch.
-			return false;
+			return false
 		}
 
 		true

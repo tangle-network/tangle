@@ -55,14 +55,14 @@ impl<Runtime: pallet_evm::Config> Bls381Precompile<Runtime> {
 		{
 			p_key
 		} else {
-			return Ok(false);
+			return Ok(false)
 		};
 
 		let signature =
 			if let Ok(sig) = snowbridge_milagro_bls::Signature::from_bytes(&signature_bytes) {
 				sig
 			} else {
-				return Ok(false);
+				return Ok(false)
 			};
 
 		let is_confirmed = signature.verify(&message, &public_key);

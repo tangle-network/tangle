@@ -94,16 +94,14 @@ impl StatementKind {
 	/// Convert this to the (English) statement it represents.
 	fn to_text(self) -> &'static [u8] {
 		match self {
-			StatementKind::Regular => {
+			StatementKind::Regular =>
 				&b"I hereby agree to the terms of the statement whose sha2256sum is \
 				5627de05cfe235cd4ffa0d6375c8a5278b89cc9b9e75622fa2039f4d1b43dadf. (This may be found at the URL: \
-				https://statement.tangle.tools/airdrop-statement.html)"[..]
-			},
-			StatementKind::Safe => {
+				https://statement.tangle.tools/airdrop-statement.html)"[..],
+			StatementKind::Safe =>
 				&b"I hereby agree to the terms of the statement whose sha2256sum is \
 				7eae145b00c1912c8b01674df5df4ad9abcf6d18ea3f33d27eb6897a762f4273. (This may be found at the URL: \
-				https://statement.tangle.tools/safe-claim-statement)"[..]
-			},
+				https://statement.tangle.tools/safe-claim-statement)"[..],
 		}
 	}
 }
@@ -641,10 +639,9 @@ impl<T: Config> Pallet<T> {
 		statement: Vec<u8>,
 	) -> Result<MultiAddress, Error<T>> {
 		let signer = match signature {
-			MultiAddressSignature::EVM(ethereum_signature) => {
+			MultiAddressSignature::EVM(ethereum_signature) =>
 				Self::eth_recover(&ethereum_signature, &data, &statement[..])
-					.ok_or(Error::<T>::InvalidEthereumSignature)?
-			},
+					.ok_or(Error::<T>::InvalidEthereumSignature)?,
 			MultiAddressSignature::Native(sr25519_signature) => {
 				ensure!(!signer.is_none(), Error::<T>::InvalidNativeAccount);
 				Self::sr25519_recover(signer.unwrap(), &sr25519_signature, &data, &statement[..])

@@ -44,7 +44,7 @@ fn read_contents_to_substrate_accounts(path_str: &str) -> BTreeMap<AccountId, f6
 		let account_id = AccountId::from_str(key).expect("Invalid account ID");
 		let balance = value.as_f64().expect("Invalid balance");
 		if balance <= 0.0 {
-			continue;
+			continue
 		}
 
 		*accounts_map.entry(account_id).or_insert(0.0) += balance;
@@ -65,7 +65,7 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 			let balance = value.as_f64().expect("Invalid balance");
 
 			if balance <= 0.0 {
-				continue;
+				continue
 			}
 
 			accounts_map.insert(MultiAddress::EVM(account_id.into()), balance);
@@ -73,7 +73,7 @@ fn read_investor_accounts_to_multiaddress(path_str: &str) -> BTreeMap<MultiAddre
 			let account_id = AccountId::from_str(key).expect("Invalid account ID");
 			let balance = value.as_f64().expect("Invalid balance");
 			if balance <= 0.0 {
-				continue;
+				continue
 			}
 			accounts_map.insert(MultiAddress::Native(account_id), balance);
 		}
@@ -633,16 +633,16 @@ fn test_distribution_shares() {
 	); // 0.95%
 
 	// Test total claims
-	let total_claims = edgeware_genesis_list.claims.len()
-		+ edgeware_snapshot_list.claims.len()
-		+ polkadot_genesis_list.claims.len()
-		+ leaderboard_genesis_list.claims.len();
+	let total_claims = edgeware_genesis_list.claims.len() +
+		edgeware_snapshot_list.claims.len() +
+		polkadot_genesis_list.claims.len() +
+		leaderboard_genesis_list.claims.len();
 	assert_eq!(total_claims, 29452);
 
-	let total_vesting = edgeware_genesis_list.vesting.len()
-		+ edgeware_snapshot_list.vesting.len()
-		+ polkadot_genesis_list.vesting.len()
-		+ leaderboard_genesis_list.vesting.len();
+	let total_vesting = edgeware_genesis_list.vesting.len() +
+		edgeware_snapshot_list.vesting.len() +
+		polkadot_genesis_list.vesting.len() +
+		leaderboard_genesis_list.vesting.len();
 	assert_eq!(total_vesting, 29452);
 
 	let unique_dist = crate::distributions::get_unique_distribution_results(vec![
@@ -674,16 +674,16 @@ fn test_distribution_shares() {
 	// 	get_initial_endowed_accounts().0.into_iter().map(|(_, amount)| amount).sum();
 	// assert_eq!(total_endowmwnent - total_treasury_amount, 8900000000000000000000); // 8900 TNT
 
-	let total_genesis_endowment = total_investor_amount
-		+ total_direct_team_amount
-		+ foundation_total_amount
-		+ total_edgeware_claims_amount
-		+ total_edgeware_snapshot_claims_amount
-		+ total_leaderboard_claims_amount
-		+ total_polkadot_claims_amount
-		+ total_treasury_amount
-		+ 5000 * UNIT
-		+ total_team_claims_amount;
+	let total_genesis_endowment = total_investor_amount +
+		total_direct_team_amount +
+		foundation_total_amount +
+		total_edgeware_claims_amount +
+		total_edgeware_snapshot_claims_amount +
+		total_leaderboard_claims_amount +
+		total_polkadot_claims_amount +
+		total_treasury_amount +
+		5000 * UNIT +
+		total_team_claims_amount;
 	//+ total_endowmwnent;
 
 	assert_eq!(total_genesis_endowment, 100000000000000006345897383); // 100000000 TNT

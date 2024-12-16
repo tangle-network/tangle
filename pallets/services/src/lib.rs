@@ -1071,9 +1071,8 @@ pub mod module {
 					.operators_with_approval_state
 					.into_iter()
 					.filter_map(|(v, state)| match state {
-						ApprovalState::Approved { restaking_percent } => {
-							Some((v, restaking_percent))
-						},
+						ApprovalState::Approved { restaking_percent } =>
+							Some((v, restaking_percent)),
 						// N.B: this should not happen, as all operators are approved and checked
 						// above.
 						_ => None,

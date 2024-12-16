@@ -160,8 +160,8 @@ impl<T: Config> BondedPool<T> {
 	}
 
 	pub fn can_nominate(&self, who: &T::AccountId) -> bool {
-		self.is_root(who)
-			|| self.roles.nominator.as_ref().map_or(false, |nominator| nominator == who)
+		self.is_root(who) ||
+			self.roles.nominator.as_ref().map_or(false, |nominator| nominator == who)
 	}
 
 	pub fn can_kick(&self, who: &T::AccountId) -> bool {
@@ -262,9 +262,9 @@ impl<T: Config> BondedPool<T> {
 
 		// any unbond must comply with the balance condition:
 		ensure!(
-			is_full_unbond
-				|| balance_after_unbond
-					>= if is_depositor {
+			is_full_unbond ||
+				balance_after_unbond >=
+					if is_depositor {
 						Pallet::<T>::depositor_min_bond()
 					} else {
 						MinJoinBond::<T>::get()
@@ -296,7 +296,7 @@ impl<T: Config> BondedPool<T> {
 			},
 			(false, true) => {
 				// the depositor can simply not be unbonded permissionlessly, period.
-				return Err(Error::<T>::DoesNotHavePermission.into());
+				return Err(Error::<T>::DoesNotHavePermission.into())
 			},
 		};
 
