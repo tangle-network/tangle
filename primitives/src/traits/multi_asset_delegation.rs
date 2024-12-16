@@ -1,5 +1,4 @@
-use crate::services::Asset;
-use crate::types::RoundIndex;
+use crate::{services::Asset, types::RoundIndex};
 use sp_std::prelude::*;
 
 /// A trait to provide information about multi-asset delegation.

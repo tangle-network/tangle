@@ -21,10 +21,8 @@ use fp_evm::CallInfo;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{H160, U256};
-use sp_core::{ecdsa, ByteArray, RuntimeDebug};
+use sp_core::{ecdsa, ByteArray, RuntimeDebug, H160, U256};
 use sp_runtime::Percent;
-use sp_std::vec::Vec;
 
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec, vec::Vec};
@@ -670,7 +668,7 @@ pub enum Asset<AssetId> {
 	Erc20(sp_core::H160),
 }
 
-impl<AssetId: sp_runtime::traits::Zero + Encode + Decode> Default for Asset<AssetId> {
+impl<AssetId: sp_runtime::traits::Zero> Default for Asset<AssetId> {
 	fn default() -> Self {
 		Asset::Custom(sp_runtime::traits::Zero::zero())
 	}

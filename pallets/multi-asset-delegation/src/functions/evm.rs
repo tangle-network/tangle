@@ -1,15 +1,16 @@
 use super::*;
 use crate::types::BalanceOf;
 use ethabi::{Function, StateMutability, Token};
-use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
-use frame_support::pallet_prelude::Pays;
-use frame_support::pallet_prelude::Weight;
+use frame_support::{
+	dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo},
+	pallet_prelude::{Pays, Weight},
+};
 use parity_scale_codec::Encode;
+use scale_info::prelude::string::String;
 use sp_core::{H160, U256};
 use sp_runtime::traits::UniqueSaturatedInto;
-use tangle_primitives::services::EvmGasWeightMapping;
-use tangle_primitives::services::EvmRunner;
-use tangle_primitives::EvmAddressMapping;
+use sp_std::{vec, vec::Vec};
+use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 
 impl<T: Config> Pallet<T> {
 	/// Moves a `value` amount of tokens from the caller's account to `to`.

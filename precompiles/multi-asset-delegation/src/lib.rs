@@ -50,8 +50,7 @@ use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
 use sp_runtime::traits::{Dispatchable, TryConvert};
 use sp_std::{marker::PhantomData, vec::Vec};
-use tangle_primitives::services::Asset;
-use tangle_primitives::types::WrappedAccountId32;
+use tangle_primitives::{services::Asset, types::WrappedAccountId32};
 
 type BalanceOf<Runtime> =
 	<<Runtime as pallet_multi_asset_delegation::Config>::Currency as Currency<
@@ -389,8 +388,11 @@ where
 		let operator = Self::convert_to_account_id(operator)?;
 
 		// Parse blueprint selection
-		let blueprint_selection = DelegatorBlueprintSelection::try_from(blueprint_selection)
-			.map_err(|_| revert("error converting blueprint selection"))?;
+		let bounded_blueprint_selection: frame_support::BoundedVec<_, _> =
+			frame_support::BoundedVec::try_from(blueprint_selection)
+				.map_err(|_| revert("error converting blueprint selection"))?;
+
+		let blueprint_selection = DelegatorBlueprintSelection::Fixed(bounded_blueprint_selection);
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),

@@ -76,23 +76,21 @@ pub use functions::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-	use crate::types::*;
-	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction};
-	use frame_support::traits::fungibles::Inspect;
+	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction, *};
 	use frame_support::{
 		pallet_prelude::*,
-		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
+		traits::{
+			fungibles::Inspect, tokens::fungibles, Currency, Get, LockableCurrency,
+			ReservableCurrency,
+		},
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
 	use scale_info::TypeInfo;
 	use sp_core::H160;
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
-	use sp_std::vec::Vec;
-	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*};
-	use tangle_primitives::services::Asset;
-	use tangle_primitives::BlueprintId;
-	use tangle_primitives::{traits::ServiceManager, RoundIndex};
+	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*, vec::Vec};
+	use tangle_primitives::{services::Asset, traits::ServiceManager, BlueprintId, RoundIndex};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
@@ -200,7 +198,7 @@ pub mod pallet {
 		type EvmGasWeightMapping: tangle_primitives::services::EvmGasWeightMapping;
 
 		/// A type that implements the `EvmAddressMapping` trait for the conversion of EVM address
-		type EvmAddressMapping: tangle_primitives::traits::EvmAddressMapping<Self::AccountId>;
+		type EvmAddressMapping: tangle_primitives::services::EvmAddressMapping<Self::AccountId>;
 
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: crate::weights::WeightInfo;

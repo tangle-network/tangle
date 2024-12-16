@@ -1492,6 +1492,9 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MaxWithdrawRequests = MaxWithdrawRequests;
 	type MaxUnstakeRequests = MaxUnstakeRequests;
 	type MaxDelegations = MaxDelegations;
+	type EvmRunner = crate::tangle_services::PalletEvmRunner;
+	type EvmGasWeightMapping = crate::tangle_services::PalletEVMGasWeightMapping;
+	type EvmAddressMapping = crate::tangle_services::PalletEVMAddressMapping;
 	type WeightInfo = ();
 }
 

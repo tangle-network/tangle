@@ -60,12 +60,3 @@ pub trait ServiceManager<AccountId, Balance> {
 	/// `true` if the operator can exit, otherwise `false`.
 	fn can_exit(operator: &AccountId) -> bool;
 }
-
-/// Trait to be implemented for evm address mapping.
-pub trait EvmAddressMapping<A> {
-	/// Convert an address to an account id.
-	fn into_account_id(address: H160) -> A;
-
-	/// Convert an account id to an address.
-	fn into_address(account_id: A) -> H160;
-}

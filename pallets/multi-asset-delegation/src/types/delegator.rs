@@ -16,8 +16,7 @@
 
 use super::*;
 use frame_support::{pallet_prelude::Get, BoundedVec};
-use tangle_primitives::services::Asset;
-use tangle_primitives::BlueprintId;
+use tangle_primitives::{services::Asset, BlueprintId};
 
 /// Represents how a delegator selects which blueprints to work with.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Eq)]

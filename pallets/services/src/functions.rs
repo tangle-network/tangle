@@ -8,12 +8,9 @@ use ethabi::{Function, StateMutability, Token};
 use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use sp_core::{H160, U256};
 use sp_runtime::traits::{UniqueSaturatedInto, Zero};
-use tangle_primitives::services::EvmAddressMapping;
-use tangle_primitives::services::EvmGasWeightMapping;
-use tangle_primitives::services::EvmRunner;
 use tangle_primitives::services::{
-	Asset, BlueprintServiceManager, Field, MasterBlueprintServiceManagerRevision,
-	OperatorPreferences, Service, ServiceBlueprint,
+	Asset, BlueprintServiceManager, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, Field,
+	MasterBlueprintServiceManagerRevision, OperatorPreferences, Service, ServiceBlueprint,
 };
 
 use super::*;

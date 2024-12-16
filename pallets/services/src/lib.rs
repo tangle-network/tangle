@@ -69,8 +69,10 @@ pub mod module {
 		Percent,
 	};
 	use sp_std::vec::Vec;
-	use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
-	use tangle_primitives::{services::*, Account, MultiAssetDelegationInfo};
+	use tangle_primitives::{
+		services::{MasterBlueprintServiceManagerRevision, *},
+		Account, MultiAssetDelegationInfo,
+	};
 	use types::*;
 
 	#[pallet::config]

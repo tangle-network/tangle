@@ -15,15 +15,17 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
-use frame_support::traits::fungibles::Mutate;
-use frame_support::traits::tokens::Preservation;
-use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
-use sp_runtime::traits::{CheckedSub, Zero};
-use sp_runtime::DispatchError;
-use sp_runtime::Percent;
+use frame_support::{
+	ensure,
+	pallet_prelude::DispatchResult,
+	traits::{fungibles::Mutate, tokens::Preservation, Get},
+};
+use sp_runtime::{
+	traits::{CheckedSub, Zero},
+	DispatchError, Percent,
+};
 use sp_std::vec::Vec;
-use tangle_primitives::services::Asset;
-use tangle_primitives::BlueprintId;
+use tangle_primitives::{services::Asset, BlueprintId};
 
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.

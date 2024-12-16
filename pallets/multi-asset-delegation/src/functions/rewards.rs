@@ -21,8 +21,7 @@ use crate::{
 use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Currency};
 use sp_runtime::{traits::Zero, DispatchError, Saturating};
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
-use tangle_primitives::services::Asset;
-use tangle_primitives::RoundIndex;
+use tangle_primitives::{services::Asset, RoundIndex};
 
 impl<T: Config> Pallet<T> {
 	#[allow(clippy::type_complexity)]
