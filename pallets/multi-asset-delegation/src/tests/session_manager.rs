@@ -30,7 +30,10 @@ fn handle_round_change_should_work() {
 
 		CurrentRound::<Runtime>::put(1);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator.clone()), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
 
 		create_and_mint_tokens(VDOT, who.clone(), amount);
 
@@ -79,8 +82,14 @@ fn handle_round_change_with_unstake_should_work() {
 
 		CurrentRound::<Runtime>::put(1);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator1.clone()), 10_000));
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator2.clone()), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator1.clone()),
+			10_000
+		));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator2.clone()),
+			10_000
+		));
 
 		create_and_mint_tokens(VDOT, delegator1.clone(), amount1);
 		mint_tokens(delegator1.clone(), VDOT, delegator2.clone(), amount2);

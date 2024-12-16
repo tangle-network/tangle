@@ -205,7 +205,11 @@ fn schedule_withdraw_should_fail_if_not_delegator() {
 		create_and_mint_tokens(VDOT, who.clone(), 100);
 
 		assert_noop!(
-			MultiAssetDelegation::schedule_withdraw(RuntimeOrigin::signed(who.clone()), asset_id, amount,),
+			MultiAssetDelegation::schedule_withdraw(
+				RuntimeOrigin::signed(who.clone()),
+				asset_id,
+				amount,
+			),
 			Error::<Runtime>::NotDelegator
 		);
 	});
@@ -230,7 +234,11 @@ fn schedule_withdraw_should_fail_for_insufficient_balance() {
 		));
 
 		assert_noop!(
-			MultiAssetDelegation::schedule_withdraw(RuntimeOrigin::signed(who.clone()), asset_id, amount,),
+			MultiAssetDelegation::schedule_withdraw(
+				RuntimeOrigin::signed(who.clone()),
+				asset_id,
+				amount,
+			),
 			Error::<Runtime>::InsufficientBalance
 		);
 	});
@@ -290,7 +298,10 @@ fn execute_withdraw_should_work() {
 		let current_round = 1;
 		<CurrentRound<Runtime>>::put(current_round);
 
-		assert_ok!(MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who.clone()), None));
+		assert_ok!(MultiAssetDelegation::execute_withdraw(
+			RuntimeOrigin::signed(who.clone()),
+			None
+		));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone());
@@ -369,7 +380,10 @@ fn execute_withdraw_should_fail_if_withdraw_not_ready() {
 		<CurrentRound<Runtime>>::put(current_round);
 
 		// should not actually withdraw anything
-		assert_ok!(MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who.clone()), None));
+		assert_ok!(MultiAssetDelegation::execute_withdraw(
+			RuntimeOrigin::signed(who.clone()),
+			None
+		));
 
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
 		assert!(!metadata.withdraw_requests.is_empty());
@@ -454,7 +468,11 @@ fn cancel_withdraw_should_fail_if_no_withdraw_request() {
 		));
 
 		assert_noop!(
-			MultiAssetDelegation::cancel_withdraw(RuntimeOrigin::signed(who.clone()), asset_id, amount),
+			MultiAssetDelegation::cancel_withdraw(
+				RuntimeOrigin::signed(who.clone()),
+				asset_id,
+				amount
+			),
 			Error::<Runtime>::NoMatchingwithdrawRequest
 		);
 	});
