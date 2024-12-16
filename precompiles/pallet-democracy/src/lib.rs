@@ -467,7 +467,7 @@ where
 		if !<<Runtime as pallet_democracy::Config>::Preimages as QueryPreimage>::is_requested(
 			&proposal_hash,
 		) {
-			return Err(revert("not imminent preimage (preimage not requested)"))
+			return Err(revert("not imminent preimage (preimage not requested)"));
 		};
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);

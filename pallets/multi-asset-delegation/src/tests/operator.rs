@@ -302,8 +302,8 @@ fn schedule_operator_unstake_success() {
 
 		// Verify remaining stake is above minimum
 		assert!(
-			operator_info.stake.saturating_sub(unstake_amount) >=
-				MinOperatorBondAmount::get().into()
+			operator_info.stake.saturating_sub(unstake_amount)
+				>= MinOperatorBondAmount::get().into()
 		);
 
 		// Verify event
@@ -373,7 +373,7 @@ fn schedule_operator_unstake_not_an_operator() {
 
 //         // Attempt to schedule unstake with active services
 //         assert_noop!(
-//             
+//
 // MultiAssetDelegation::schedule_operator_unstake(RuntimeOrigin::signed(Alice.to_account_id()),
 // unstake_amount),             Error::<Runtime>::ActiveServicesUsingTNT
 //         );

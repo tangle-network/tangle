@@ -649,10 +649,11 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 	for evt in expected {
 		let next = actual.pop().expect("RuntimeEvent expected");
 		match (&next, &evt) {
-			(left_val, right_val) =>
+			(left_val, right_val) => {
 				if !(*left_val == *right_val) {
 					panic!("Events don't match\nactual: {actual:#?}\nexpected: {evt:#?}");
-				},
+				}
+			},
 		};
 	}
 }

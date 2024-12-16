@@ -121,7 +121,7 @@ impl<T: Config> Pallet<T> {
 				// Update storage
 				Operators::<T>::insert(&operator, operator_metadata);
 			} else {
-				return Err(Error::<T>::NotAnOperator.into())
+				return Err(Error::<T>::NotAnOperator.into());
 			}
 
 			Ok(())

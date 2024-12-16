@@ -163,7 +163,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
 		// Make pallet services account free to use
 		if who == &pallet_services_address {
-			return Ok(None)
+			return Ok(None);
 		}
 		// fallback to the default implementation
 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
@@ -180,7 +180,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
 		// Make pallet services account free to use
 		if who == &pallet_services_address {
-			return already_withdrawn
+			return already_withdrawn;
 		}
 		// fallback to the default implementation
 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
@@ -266,8 +266,9 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		len: usize,
 	) -> Option<Result<(), TransactionValidityError>> {
 		match self {
-			RuntimeCall::Ethereum(call) =>
-				call.pre_dispatch_self_contained(info, dispatch_info, len),
+			RuntimeCall::Ethereum(call) => {
+				call.pre_dispatch_self_contained(info, dispatch_info, len)
+			},
 			_ => None,
 		}
 	}
@@ -277,8 +278,9 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		info: Self::SignedInfo,
 	) -> Option<sp_runtime::DispatchResultWithInfo<sp_runtime::traits::PostDispatchInfoOf<Self>>> {
 		match self {
-			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) =>
-				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info)))),
+			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) => {
+				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info))))
+			},
 			_ => None,
 		}
 	}
