@@ -111,6 +111,7 @@ std = [
   "fp-storage/std",
   "ethabi/std",
   "sp-keyring/std",
+  "pallet-ethereum/std"
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [

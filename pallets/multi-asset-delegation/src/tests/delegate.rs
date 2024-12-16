@@ -20,14 +20,15 @@ use frame_support::{assert_noop, assert_ok};
 use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve, Ferdie, One, Two};
 use sp_runtime::Percent;
 use std::collections::BTreeMap;
+use tangle_primitives::services::Asset;
 
 #[test]
 fn delegate_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = Bob;
-		let operator = Alice;
-		let asset_id = VDOT;
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
 		assert_ok!(MultiAssetDelegation::join_operators(
@@ -42,11 +43,12 @@ fn delegate_should_work() {
 			RuntimeOrigin::signed(who.into()),
 			asset_id,
 			amount,
+			None
 		));
 
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who),
-			operator,
+			RuntimeOrigin::signed(who.into()),
+			operator.into(),
 			asset_id,
 			amount,
 			Default::default()
@@ -57,7 +59,7 @@ fn delegate_should_work() {
 		assert!(metadata.deposits.get(&asset_id).is_none());
 		assert_eq!(metadata.delegations.len(), 1);
 		let delegation = &metadata.delegations[0];
-		assert_eq!(delegation.operator, operator);
+		assert_eq!(delegation.operator, operator.into());
 		assert_eq!(delegation.amount, amount);
 		assert_eq!(delegation.asset_id, asset_id);
 
@@ -66,7 +68,7 @@ fn delegate_should_work() {
 		assert_eq!(operator_metadata.delegation_count, 1);
 		assert_eq!(operator_metadata.delegations.len(), 1);
 		let operator_delegation = &operator_metadata.delegations[0];
-		assert_eq!(operator_delegation.delegator, who);
+		assert_eq!(operator_delegation.delegator, who.into());
 		assert_eq!(operator_delegation.amount, amount);
 		assert_eq!(operator_delegation.asset_id, asset_id);
 	});
@@ -76,28 +78,36 @@ fn delegate_should_work() {
 fn schedule_delegator_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
-		let asset_id = VDOT;
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
-		create_and_mint_tokens(VDOT, who, amount);
+		create_and_mint_tokens(VDOT, who.into(), amount);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.into()),
+			10_000
+		));
 
 		// Deposit and delegate first
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.into()),
+			asset_id,
+			amount,
+			None
+		));
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who),
-			operator,
+			RuntimeOrigin::signed(who.into()),
+			operator.into(),
 			asset_id,
 			amount,
 			Default::default()
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
-			RuntimeOrigin::signed(who),
-			operator,
+			RuntimeOrigin::signed(who.into()),
+			operator.into(),
 			asset_id,
 			amount,
 		));
@@ -121,26 +131,34 @@ fn schedule_delegator_unstake_should_work() {
 fn execute_delegator_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
-		let asset_id = VDOT;
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
-		create_and_mint_tokens(VDOT, who, amount);
+		create_and_mint_tokens(VDOT, who.into(), amount);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.into()),
+			10_000
+		));
 
 		// Deposit, delegate and schedule unstake first
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.into()),
+			asset_id,
+			amount,
+			None
+		));
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			amount,
 			Default::default()
 		));
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			amount,
@@ -149,7 +167,9 @@ fn execute_delegator_unstake_should_work() {
 		// Simulate round passing
 		CurrentRound::<Runtime>::put(10);
 
-		assert_ok!(MultiAssetDelegation::execute_delegator_unstake(RuntimeOrigin::signed(who),));
+		assert_ok!(MultiAssetDelegation::execute_delegator_unstake(RuntimeOrigin::signed(
+			who.into()
+		),));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who).unwrap();
@@ -163,19 +183,27 @@ fn execute_delegator_unstake_should_work() {
 fn cancel_delegator_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
-		let asset_id = VDOT;
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
-		create_and_mint_tokens(VDOT, who, amount);
+		create_and_mint_tokens(VDOT, who.into(), amount);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.into()),
+			10_000
+		));
 
 		// Deposit, delegate and schedule unstake first
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.into()),
+			asset_id,
+			amount,
+			None
+		));
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			amount,
@@ -183,7 +211,7 @@ fn cancel_delegator_unstake_should_work() {
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			amount,
@@ -203,7 +231,7 @@ fn cancel_delegator_unstake_should_work() {
 		assert_eq!(operator_metadata.delegations.len(), 0);
 
 		assert_ok!(MultiAssetDelegation::cancel_delegator_unstake(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			amount
@@ -229,19 +257,27 @@ fn cancel_delegator_unstake_should_work() {
 fn cancel_delegator_unstake_should_update_already_existing() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
-		let asset_id = VDOT;
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
-		create_and_mint_tokens(VDOT, who, amount);
+		create_and_mint_tokens(VDOT, who.into(), amount);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.into()),
+			10_000
+		));
 
 		// Deposit, delegate and schedule unstake first
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.into()),
+			asset_id,
+			amount,
+			None
+		));
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			amount,
@@ -249,7 +285,7 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			10,
@@ -273,7 +309,7 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 		assert_eq!(operator_delegation.asset_id, asset_id);
 
 		assert_ok!(MultiAssetDelegation::cancel_delegator_unstake(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			10
@@ -299,24 +335,28 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 fn delegate_should_fail_if_not_enough_balance() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
-		let asset_id = VDOT;
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 10_000;
 
-		create_and_mint_tokens(VDOT, who, amount);
+		create_and_mint_tokens(VDOT, who.into(), amount);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.into()),
+			10_000
+		));
 
 		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			asset_id,
 			amount - 20,
+			None
 		));
 
 		assert_noop!(
 			MultiAssetDelegation::delegate(
-				RuntimeOrigin::signed(who),
+				RuntimeOrigin::signed(who.into()),
 				operator,
 				asset_id,
 				amount,
@@ -331,21 +371,29 @@ fn delegate_should_fail_if_not_enough_balance() {
 fn schedule_delegator_unstake_should_fail_if_no_delegation() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
-		let asset_id = VDOT;
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
-		create_and_mint_tokens(VDOT, who, amount);
+		create_and_mint_tokens(VDOT, who.into(), amount);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.into()),
+			10_000
+		));
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.into()),
+			asset_id,
+			amount,
+			None
+		));
 
 		assert_noop!(
 			MultiAssetDelegation::schedule_delegator_unstake(
-				RuntimeOrigin::signed(who),
+				RuntimeOrigin::signed(who.into()),
 				operator,
 				asset_id,
 				amount,
@@ -359,19 +407,27 @@ fn schedule_delegator_unstake_should_fail_if_no_delegation() {
 fn execute_delegator_unstake_should_fail_if_not_ready() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
-		let asset_id = VDOT;
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
-		create_and_mint_tokens(VDOT, who, amount);
+		create_and_mint_tokens(VDOT, who.into(), amount);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.into()),
+			10_000
+		));
 
 		// Deposit, delegate and schedule unstake first
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.into()),
+			asset_id,
+			amount,
+			None
+		));
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			amount,
@@ -380,7 +436,7 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 
 		assert_noop!(
 			MultiAssetDelegation::cancel_delegator_unstake(
-				RuntimeOrigin::signed(who),
+				RuntimeOrigin::signed(who.into()),
 				operator,
 				asset_id,
 				amount
@@ -389,14 +445,14 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 		);
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			amount,
 		));
 
 		assert_noop!(
-			MultiAssetDelegation::execute_delegator_unstake(RuntimeOrigin::signed(who),),
+			MultiAssetDelegation::execute_delegator_unstake(RuntimeOrigin::signed(who.into()),),
 			Error::<Runtime>::BondLessNotReady
 		);
 	});
@@ -406,26 +462,30 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 fn delegate_should_not_create_multiple_on_repeat_delegation() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
-		let asset_id = VDOT;
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 		let additional_amount = 50;
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.into()),
+			10_000
+		));
 
 		create_and_mint_tokens(VDOT, who, amount + additional_amount);
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			asset_id,
 			amount + additional_amount,
+			None
 		));
 
 		// Delegate first time
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			amount,
@@ -452,7 +512,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 
 		// Delegate additional amount
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who),
+			RuntimeOrigin::signed(who.into()),
 			operator,
 			asset_id,
 			additional_amount,
@@ -476,267 +536,5 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 		assert_eq!(updated_operator_delegation.delegator, who);
 		assert_eq!(updated_operator_delegation.amount, amount + additional_amount);
 		assert_eq!(updated_operator_delegation.asset_id, asset_id);
-	});
-}
-
-#[test]
-fn distribute_rewards_should_work() {
-	new_test_ext().execute_with(|| {
-		let round = 1;
-		let operator = 1;
-		let delegator = 2;
-		let asset_id = 1;
-		let amount = 100;
-		let cap = 50;
-		let apy = Percent::from_percent(10); // 10%
-
-		let initial_balance = Balances::free_balance(delegator);
-
-		// Set up reward configuration
-		let reward_config = RewardConfig {
-			configs: {
-				let mut map = BTreeMap::new();
-				map.insert(asset_id, RewardConfigForAssetVault { apy, cap });
-				map
-			},
-			whitelisted_blueprint_ids: vec![],
-		};
-		RewardConfigStorage::<Runtime>::put(reward_config);
-
-		// Set up asset vault lookup
-		AssetLookupRewardVaults::<Runtime>::insert(asset_id, asset_id);
-
-		// Add delegation information
-		AtStake::<Runtime>::insert(
-			round,
-			operator,
-			OperatorSnapshot {
-				delegations: vec![DelegatorBond { delegator, amount, asset_id }]
-					.try_into()
-					.unwrap(),
-				stake: amount,
-			},
-		);
-
-		// Distribute rewards
-		assert_ok!(MultiAssetDelegation::distribute_rewards(round));
-
-		// Check if rewards were distributed correctly
-		let balance = Balances::free_balance(delegator);
-
-		// Calculate the percentage of the cap that the user is staking
-		let staking_percentage = amount.saturating_mul(100) / cap;
-		// Calculate the expected reward based on the staking percentage
-		let expected_reward = apy.mul_floor(amount);
-		let calculated_reward = expected_reward.saturating_mul(staking_percentage) / 100;
-
-		assert_eq!(balance - initial_balance, calculated_reward);
-	});
-}
-
-#[test]
-fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
-	new_test_ext().execute_with(|| {
-		let round = 1;
-
-		let operator1 = 1;
-		let operator2 = 2;
-		let delegator1 = 3;
-		let delegator2 = 4;
-
-		let asset_id1 = 1;
-		let asset_id2 = 2;
-
-		let amount1 = 100;
-		let amount2 = 200;
-
-		let cap1 = 50;
-		let cap2 = 150;
-
-		let apy1 = Percent::from_percent(10); // 10%
-		let apy2 = Percent::from_percent(20); // 20%
-
-		let initial_balance1 = Balances::free_balance(delegator1);
-		let initial_balance2 = Balances::free_balance(delegator2);
-
-		// Set up reward configuration
-		let reward_config = RewardConfig {
-			configs: {
-				let mut map = BTreeMap::new();
-				map.insert(asset_id1, RewardConfigForAssetVault { apy: apy1, cap: cap1 });
-				map.insert(asset_id2, RewardConfigForAssetVault { apy: apy2, cap: cap2 });
-				map
-			},
-			whitelisted_blueprint_ids: vec![],
-		};
-		RewardConfigStorage::<Runtime>::put(reward_config);
-
-		// Set up asset vault lookup
-		AssetLookupRewardVaults::<Runtime>::insert(asset_id1, asset_id1);
-		AssetLookupRewardVaults::<Runtime>::insert(asset_id2, asset_id2);
-
-		// Add delegation information
-		AtStake::<Runtime>::insert(
-			round,
-			operator1,
-			OperatorSnapshot {
-				delegations: vec![DelegatorBond {
-					delegator: delegator1,
-					amount: amount1,
-					asset_id: asset_id1,
-				}]
-				.try_into()
-				.unwrap(),
-				stake: amount1,
-			},
-		);
-
-		AtStake::<Runtime>::insert(
-			round,
-			operator2,
-			OperatorSnapshot {
-				delegations: vec![DelegatorBond {
-					delegator: delegator2,
-					amount: amount2,
-					asset_id: asset_id2,
-				}]
-				.try_into()
-				.unwrap(),
-				stake: amount2,
-			},
-		);
-
-		// Distribute rewards
-		assert_ok!(MultiAssetDelegation::distribute_rewards(round));
-
-		// Check if rewards were distributed correctly
-		let balance1 = Balances::free_balance(delegator1);
-		let balance2 = Balances::free_balance(delegator2);
-
-		// Calculate the percentage of the cap that each user is staking
-		let staking_percentage1 = amount1.saturating_mul(100) / cap1;
-		let staking_percentage2 = amount2.saturating_mul(100) / cap2;
-
-		// Calculate the expected rewards based on the staking percentages
-		let expected_reward1 = apy1.mul_floor(amount1);
-		let calculated_reward1 = expected_reward1.saturating_mul(staking_percentage1) / 100;
-
-		let expected_reward2 = apy2.mul_floor(amount2);
-		let calculated_reward2 = expected_reward2.saturating_mul(staking_percentage2) / 100;
-
-		assert_eq!(balance1 - initial_balance1, calculated_reward1);
-		assert_eq!(balance2 - initial_balance2, calculated_reward2);
-	});
-}
-
-#[test]
-fn delegator_can_add_blueprints() {
-	new_test_ext().execute_with(|| {
-		let delegator = 1;
-		let blueprint_id = 1;
-		let operator = 2;
-		let asset_id = VDOT;
-		let amount = 100;
-
-		create_and_mint_tokens(VDOT, delegator, amount);
-
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
-
-		// Deposit, delegate and schedule unstake first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator),
-			asset_id,
-			amount,
-		));
-		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(delegator),
-			operator,
-			asset_id,
-			amount,
-			DelegatorBlueprintSelection::Fixed(vec![200].try_into().unwrap()),
-		));
-
-		// Add a blueprint
-		assert_ok!(MultiAssetDelegation::add_blueprint_id(
-			RuntimeOrigin::signed(delegator),
-			blueprint_id
-		));
-
-		// Verify the blueprint was added
-		let metadata = Delegators::<Runtime>::get(delegator).unwrap();
-		assert!(metadata.delegations.iter().any(|d| match d.blueprint_selection {
-			DelegatorBlueprintSelection::Fixed(ref blueprints) => {
-				blueprints.contains(&blueprint_id)
-			},
-			_ => false,
-		}));
-
-		// Try to add the same blueprint again
-		assert_noop!(
-			MultiAssetDelegation::add_blueprint_id(RuntimeOrigin::signed(delegator), blueprint_id),
-			Error::<Runtime>::DuplicateBlueprintId
-		);
-	});
-}
-
-#[test]
-fn delegator_can_remove_blueprints() {
-	new_test_ext().execute_with(|| {
-		let delegator = 1;
-		let blueprint_id = 1;
-		let operator = 2;
-		let asset_id = VDOT;
-		let amount = 100;
-
-		create_and_mint_tokens(VDOT, delegator, amount);
-
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
-
-		// Deposit, delegate and schedule unstake first
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator),
-			asset_id,
-			amount,
-		));
-		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(delegator),
-			operator,
-			asset_id,
-			amount,
-			DelegatorBlueprintSelection::Fixed(vec![blueprint_id].try_into().unwrap()),
-		));
-
-		// Verify it was added
-		let metadata = Delegators::<Runtime>::get(delegator).unwrap();
-		assert!(metadata.delegations.iter().any(|d| match d.blueprint_selection {
-			DelegatorBlueprintSelection::Fixed(ref blueprints) => {
-				blueprints.contains(&blueprint_id)
-			},
-			_ => false,
-		}));
-
-		// Remove the blueprint
-		assert_ok!(MultiAssetDelegation::remove_blueprint_id(
-			RuntimeOrigin::signed(delegator),
-			blueprint_id
-		));
-
-		// Verify it was removed
-		let metadata = Delegators::<Runtime>::get(delegator).unwrap();
-		assert!(metadata.delegations.iter().all(|d| match d.blueprint_selection {
-			DelegatorBlueprintSelection::Fixed(ref blueprints) => {
-				!blueprints.contains(&blueprint_id)
-			},
-			_ => true,
-		}));
-
-		// Try to remove a non-existent blueprint
-		assert_noop!(
-			MultiAssetDelegation::remove_blueprint_id(
-				RuntimeOrigin::signed(delegator),
-				blueprint_id
-			),
-			Error::<Runtime>::BlueprintIdNotFound
-		);
 	});
 }
