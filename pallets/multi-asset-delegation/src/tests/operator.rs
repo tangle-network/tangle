@@ -49,7 +49,7 @@ fn join_operator_already_operator() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 		assert_noop!(
 			MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount),
-			Error::<Test>::AlreadyOperator
+			Error::<Runtime>::AlreadyOperator
 		);
 	});
 }
@@ -61,7 +61,7 @@ fn join_operator_insufficient_bond() {
 
 		assert_noop!(
 			MultiAssetDelegation::join_operators(RuntimeOrigin::signed(4), insufficient_bond),
-			Error::<Test>::BondTooLow
+			Error::<Runtime>::BondTooLow
 		);
 	});
 }
@@ -73,7 +73,7 @@ fn join_operator_insufficient_funds() {
 
 		assert_noop!(
 			MultiAssetDelegation::join_operators(RuntimeOrigin::signed(4), bond_amount),
-			pallet_balances::Error::<Test, _>::InsufficientBalance
+			pallet_balances::Error::<Runtime, _>::InsufficientBalance
 		);
 	});
 }
@@ -99,11 +99,11 @@ fn schedule_leave_operator_success() {
 		// Schedule leave operators without joining
 		assert_noop!(
 			MultiAssetDelegation::schedule_leave_operators(RuntimeOrigin::signed(1)),
-			Error::<Test>::NotAnOperator
+			Error::<Runtime>::NotAnOperator
 		);
 
 		// Set the current round
-		<CurrentRound<Test>>::put(5);
+		<CurrentRound<Runtime>>::put(5);
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
@@ -131,7 +131,7 @@ fn cancel_leave_operator_tests() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 
 		// Set the current round
-		<CurrentRound<Test>>::put(5);
+		<CurrentRound<Runtime>>::put(5);
 
 		// Schedule leave operators
 		assert_ok!(MultiAssetDelegation::schedule_leave_operators(RuntimeOrigin::signed(1)));
@@ -155,7 +155,7 @@ fn cancel_leave_operator_tests() {
 		// Test: Cancel leave operators without being in leaving state
 		assert_noop!(
 			MultiAssetDelegation::cancel_leave_operators(RuntimeOrigin::signed(1)),
-			Error::<Test>::NotLeavingOperator
+			Error::<Runtime>::NotLeavingOperator
 		);
 
 		// Test: Schedule leave operators again
@@ -164,7 +164,7 @@ fn cancel_leave_operator_tests() {
 		// Test: Cancel leave operators without being an operator
 		assert_noop!(
 			MultiAssetDelegation::cancel_leave_operators(RuntimeOrigin::signed(2)),
-			Error::<Test>::NotAnOperator
+			Error::<Runtime>::NotAnOperator
 		);
 	});
 }
@@ -204,7 +204,7 @@ fn operator_bond_more_not_an_operator() {
 		// Attempt to stake more without being an operator
 		assert_noop!(
 			MultiAssetDelegation::operator_bond_more(RuntimeOrigin::signed(1), additional_bond),
-			Error::<Test>::NotAnOperator
+			Error::<Runtime>::NotAnOperator
 		);
 	});
 }
@@ -221,7 +221,7 @@ fn operator_bond_more_insufficient_balance() {
 		// Attempt to stake more with insufficient balance
 		assert_noop!(
 			MultiAssetDelegation::operator_bond_more(RuntimeOrigin::signed(1), additional_bond),
-			pallet_balances::Error::<Test>::InsufficientBalance
+			pallet_balances::Error::<Runtime>::InsufficientBalance
 		);
 	});
 }
@@ -271,7 +271,7 @@ fn schedule_operator_unstake_respects_minimum_stake() {
 				RuntimeOrigin::signed(1),
 				unstake_amount
 			),
-			Error::<Test>::InsufficientStakeRemaining
+			Error::<Runtime>::InsufficientStakeRemaining
 		);
 	});
 }
@@ -287,7 +287,7 @@ fn schedule_operator_unstake_not_an_operator() {
 				RuntimeOrigin::signed(1),
 				unstake_amount
 			),
-			Error::<Test>::NotAnOperator
+			Error::<Runtime>::NotAnOperator
 		);
 	});
 }
@@ -303,7 +303,7 @@ fn schedule_operator_unstake_not_an_operator() {
 //         assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(1), bond_amount));
 
 //         // Manually set the operator's delegation count to simulate active services
-//         Operators::<Test>::mutate(1, |operator| {
+//         Operators::<Runtime>::mutate(1, |operator| {
 //             if let Some(ref mut operator) = operator {
 //                 operator.delegation_count = 1;
 //             }
@@ -312,7 +312,7 @@ fn schedule_operator_unstake_not_an_operator() {
 //         // Attempt to schedule unstake with active services
 //         assert_noop!(
 //             MultiAssetDelegation::schedule_operator_unstake(RuntimeOrigin::signed(1),
-// unstake_amount),             Error::<Test>::ActiveServicesUsingTNT
+// unstake_amount),             Error::<Runtime>::ActiveServicesUsingTNT
 //         );
 //     });
 // }
@@ -333,7 +333,7 @@ fn execute_operator_unstake_success() {
 		));
 
 		// Set the current round to simulate passage of time
-		<CurrentRound<Test>>::put(15);
+		<CurrentRound<Runtime>>::put(15);
 
 		// Execute unstake
 		assert_ok!(MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(1)));
@@ -356,7 +356,7 @@ fn execute_operator_unstake_not_an_operator() {
 		// Attempt to execute unstake without being an operator
 		assert_noop!(
 			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(1)),
-			Error::<Test>::NotAnOperator
+			Error::<Runtime>::NotAnOperator
 		);
 	});
 }
@@ -372,7 +372,7 @@ fn execute_operator_unstake_no_scheduled_unstake() {
 		// Attempt to execute unstake without scheduling it
 		assert_noop!(
 			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(1)),
-			Error::<Test>::NoScheduledBondLess
+			Error::<Runtime>::NoScheduledBondLess
 		);
 	});
 }
@@ -395,7 +395,7 @@ fn execute_operator_unstake_request_not_satisfied() {
 		// Attempt to execute unstake before request is satisfied
 		assert_noop!(
 			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(1)),
-			Error::<Test>::BondLessRequestNotSatisfied
+			Error::<Runtime>::BondLessRequestNotSatisfied
 		);
 	});
 }
@@ -435,7 +435,7 @@ fn cancel_operator_unstake_not_an_operator() {
 		// Attempt to cancel unstake without being an operator
 		assert_noop!(
 			MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(1)),
-			Error::<Test>::NotAnOperator
+			Error::<Runtime>::NotAnOperator
 		);
 	});
 }
@@ -451,7 +451,7 @@ fn cancel_operator_unstake_no_scheduled_unstake() {
 		// Attempt to cancel unstake without scheduling it
 		assert_noop!(
 			MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(1)),
-			Error::<Test>::NoScheduledBondLess
+			Error::<Runtime>::NoScheduledBondLess
 		);
 	});
 }
@@ -484,7 +484,7 @@ fn go_offline_not_an_operator() {
 		// Attempt to go offline without being an operator
 		assert_noop!(
 			MultiAssetDelegation::go_offline(RuntimeOrigin::signed(1)),
-			Error::<Test>::NotAnOperator
+			Error::<Runtime>::NotAnOperator
 		);
 	});
 }
@@ -589,7 +589,7 @@ fn slash_operator_not_an_operator() {
 	new_test_ext().execute_with(|| {
 		assert_noop!(
 			MultiAssetDelegation::slash_operator(&1, 1, Percent::from_percent(50)),
-			Error::<Test>::NotAnOperator
+			Error::<Runtime>::NotAnOperator
 		);
 	});
 }
@@ -603,7 +603,7 @@ fn slash_operator_not_active() {
 
 		assert_noop!(
 			MultiAssetDelegation::slash_operator(&1, 1, Percent::from_percent(50)),
-			Error::<Test>::NotActiveOperator
+			Error::<Runtime>::NotActiveOperator
 		);
 	});
 }
@@ -632,7 +632,7 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 		// Try to slash with unselected blueprint
 		assert_noop!(
 			MultiAssetDelegation::slash_delegator(&2, &1, 5, Percent::from_percent(50)),
-			Error::<Test>::BlueprintNotSelected
+			Error::<Runtime>::BlueprintNotSelected
 		);
 	});
 }

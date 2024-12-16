@@ -21,7 +21,7 @@ use sp_runtime::ArithmeticError;
 // helper function
 pub fn create_and_mint_tokens(
 	asset_id: AssetId,
-	recipient: <Test as frame_system::Config>::AccountId,
+	recipient: <Runtime as frame_system::Config>::AccountId,
 	amount: Balance,
 ) {
 	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset_id, 1, false, 1));
@@ -29,9 +29,9 @@ pub fn create_and_mint_tokens(
 }
 
 pub fn mint_tokens(
-	owner: <Test as frame_system::Config>::AccountId,
+	owner: <Runtime as frame_system::Config>::AccountId,
 	asset_id: AssetId,
-	recipient: <Test as frame_system::Config>::AccountId,
+	recipient: <Runtime as frame_system::Config>::AccountId,
 	amount: Balance,
 ) {
 	assert_ok!(Assets::mint(RuntimeOrigin::signed(owner), asset_id, recipient, amount));
@@ -128,7 +128,7 @@ fn deposit_should_fail_for_bond_too_low() {
 
 		assert_noop!(
 			MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), VDOT, amount,),
-			Error::<Test>::BondTooLow
+			Error::<Runtime>::BondTooLow
 		);
 	});
 }
@@ -174,7 +174,7 @@ fn schedule_withdraw_should_fail_if_not_delegator() {
 
 		assert_noop!(
 			MultiAssetDelegation::schedule_withdraw(RuntimeOrigin::signed(who), asset_id, amount,),
-			Error::<Test>::NotDelegator
+			Error::<Runtime>::NotDelegator
 		);
 	});
 }
@@ -194,7 +194,7 @@ fn schedule_withdraw_should_fail_for_insufficient_balance() {
 
 		assert_noop!(
 			MultiAssetDelegation::schedule_withdraw(RuntimeOrigin::signed(who), asset_id, amount,),
-			Error::<Test>::InsufficientBalance
+			Error::<Runtime>::InsufficientBalance
 		);
 	});
 }
@@ -241,7 +241,7 @@ fn execute_withdraw_should_work() {
 
 		// Simulate round passing
 		let current_round = 1;
-		<CurrentRound<Test>>::put(current_round);
+		<CurrentRound<Runtime>>::put(current_round);
 
 		assert_ok!(MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who),));
 
@@ -264,7 +264,7 @@ fn execute_withdraw_should_fail_if_not_delegator() {
 
 		assert_noop!(
 			MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who),),
-			Error::<Test>::NotDelegator
+			Error::<Runtime>::NotDelegator
 		);
 	});
 }
@@ -284,7 +284,7 @@ fn execute_withdraw_should_fail_if_no_withdraw_request() {
 
 		assert_noop!(
 			MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who),),
-			Error::<Test>::NowithdrawRequests
+			Error::<Runtime>::NowithdrawRequests
 		);
 	});
 }
@@ -309,7 +309,7 @@ fn execute_withdraw_should_fail_if_withdraw_not_ready() {
 
 		// Simulate round passing but not enough
 		let current_round = 0;
-		<CurrentRound<Test>>::put(current_round);
+		<CurrentRound<Runtime>>::put(current_round);
 
 		// should not actually withdraw anything
 		assert_ok!(MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who),));
@@ -364,7 +364,7 @@ fn cancel_withdraw_should_fail_if_not_delegator() {
 
 		assert_noop!(
 			MultiAssetDelegation::cancel_withdraw(RuntimeOrigin::signed(who), 1, 1),
-			Error::<Test>::NotDelegator
+			Error::<Runtime>::NotDelegator
 		);
 	});
 }
@@ -384,7 +384,7 @@ fn cancel_withdraw_should_fail_if_no_withdraw_request() {
 
 		assert_noop!(
 			MultiAssetDelegation::cancel_withdraw(RuntimeOrigin::signed(who), asset_id, amount),
-			Error::<Test>::NoMatchingwithdrawRequest
+			Error::<Runtime>::NoMatchingwithdrawRequest
 		);
 	});
 }

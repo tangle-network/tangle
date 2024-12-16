@@ -26,7 +26,7 @@ fn handle_round_change_should_work() {
 		let asset_id = VDOT;
 		let amount = 100;
 
-		CurrentRound::<Test>::put(1);
+		CurrentRound::<Runtime>::put(1);
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
 
@@ -43,7 +43,7 @@ fn handle_round_change_should_work() {
 			Default::default()
 		));
 
-		assert_ok!(Pallet::<Test>::handle_round_change());
+		assert_ok!(Pallet::<Runtime>::handle_round_change());
 
 		// Assert
 		let current_round = MultiAssetDelegation::current_round();
@@ -70,7 +70,7 @@ fn handle_round_change_with_unstake_should_work() {
 		let amount2 = 200;
 		let unstake_amount = 50;
 
-		CurrentRound::<Test>::put(1);
+		CurrentRound::<Runtime>::put(1);
 
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator1), 10_000));
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator2), 10_000));
@@ -113,7 +113,7 @@ fn handle_round_change_with_unstake_should_work() {
 			unstake_amount,
 		));
 
-		assert_ok!(Pallet::<Test>::handle_round_change());
+		assert_ok!(Pallet::<Runtime>::handle_round_change());
 
 		// Assert
 		let current_round = MultiAssetDelegation::current_round();

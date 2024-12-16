@@ -17,6 +17,7 @@
 use super::*;
 use crate::{types::*, CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
+use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve, Ferdie, One, Two};
 use sp_runtime::Percent;
 use std::collections::BTreeMap;
 
@@ -24,17 +25,24 @@ use std::collections::BTreeMap;
 fn delegate_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
+		let who = Bob;
+		let operator = Alice;
 		let asset_id = VDOT;
 		let amount = 100;
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.into()),
+			10_000
+		));
 
-		create_and_mint_tokens(VDOT, who, amount);
+		create_and_mint_tokens(VDOT, who.into(), amount);
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.into()),
+			asset_id,
+			amount,
+		));
 
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
@@ -139,7 +147,7 @@ fn execute_delegator_unstake_should_work() {
 		));
 
 		// Simulate round passing
-		CurrentRound::<Test>::put(10);
+		CurrentRound::<Runtime>::put(10);
 
 		assert_ok!(MultiAssetDelegation::execute_delegator_unstake(RuntimeOrigin::signed(who),));
 
@@ -314,7 +322,7 @@ fn delegate_should_fail_if_not_enough_balance() {
 				amount,
 				Default::default()
 			),
-			Error::<Test>::InsufficientBalance
+			Error::<Runtime>::InsufficientBalance
 		);
 	});
 }
@@ -342,7 +350,7 @@ fn schedule_delegator_unstake_should_fail_if_no_delegation() {
 				asset_id,
 				amount,
 			),
-			Error::<Test>::NoActiveDelegation
+			Error::<Runtime>::NoActiveDelegation
 		);
 	});
 }
@@ -377,7 +385,7 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 				asset_id,
 				amount
 			),
-			Error::<Test>::NoBondLessRequest
+			Error::<Runtime>::NoBondLessRequest
 		);
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -389,7 +397,7 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 
 		assert_noop!(
 			MultiAssetDelegation::execute_delegator_unstake(RuntimeOrigin::signed(who),),
-			Error::<Test>::BondLessNotReady
+			Error::<Runtime>::BondLessNotReady
 		);
 	});
 }
@@ -493,13 +501,13 @@ fn distribute_rewards_should_work() {
 			},
 			whitelisted_blueprint_ids: vec![],
 		};
-		RewardConfigStorage::<Test>::put(reward_config);
+		RewardConfigStorage::<Runtime>::put(reward_config);
 
 		// Set up asset vault lookup
-		AssetLookupRewardVaults::<Test>::insert(asset_id, asset_id);
+		AssetLookupRewardVaults::<Runtime>::insert(asset_id, asset_id);
 
 		// Add delegation information
-		AtStake::<Test>::insert(
+		AtStake::<Runtime>::insert(
 			round,
 			operator,
 			OperatorSnapshot {
@@ -561,14 +569,14 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 			},
 			whitelisted_blueprint_ids: vec![],
 		};
-		RewardConfigStorage::<Test>::put(reward_config);
+		RewardConfigStorage::<Runtime>::put(reward_config);
 
 		// Set up asset vault lookup
-		AssetLookupRewardVaults::<Test>::insert(asset_id1, asset_id1);
-		AssetLookupRewardVaults::<Test>::insert(asset_id2, asset_id2);
+		AssetLookupRewardVaults::<Runtime>::insert(asset_id1, asset_id1);
+		AssetLookupRewardVaults::<Runtime>::insert(asset_id2, asset_id2);
 
 		// Add delegation information
-		AtStake::<Test>::insert(
+		AtStake::<Runtime>::insert(
 			round,
 			operator1,
 			OperatorSnapshot {
@@ -583,7 +591,7 @@ fn distribute_rewards_with_multiple_delegators_and_operators_should_work() {
 			},
 		);
 
-		AtStake::<Test>::insert(
+		AtStake::<Runtime>::insert(
 			round,
 			operator2,
 			OperatorSnapshot {
@@ -655,7 +663,7 @@ fn delegator_can_add_blueprints() {
 		));
 
 		// Verify the blueprint was added
-		let metadata = Delegators::<Test>::get(delegator).unwrap();
+		let metadata = Delegators::<Runtime>::get(delegator).unwrap();
 		assert!(metadata.delegations.iter().any(|d| match d.blueprint_selection {
 			DelegatorBlueprintSelection::Fixed(ref blueprints) => {
 				blueprints.contains(&blueprint_id)
@@ -666,7 +674,7 @@ fn delegator_can_add_blueprints() {
 		// Try to add the same blueprint again
 		assert_noop!(
 			MultiAssetDelegation::add_blueprint_id(RuntimeOrigin::signed(delegator), blueprint_id),
-			Error::<Test>::DuplicateBlueprintId
+			Error::<Runtime>::DuplicateBlueprintId
 		);
 	});
 }
@@ -699,7 +707,7 @@ fn delegator_can_remove_blueprints() {
 		));
 
 		// Verify it was added
-		let metadata = Delegators::<Test>::get(delegator).unwrap();
+		let metadata = Delegators::<Runtime>::get(delegator).unwrap();
 		assert!(metadata.delegations.iter().any(|d| match d.blueprint_selection {
 			DelegatorBlueprintSelection::Fixed(ref blueprints) => {
 				blueprints.contains(&blueprint_id)
@@ -714,7 +722,7 @@ fn delegator_can_remove_blueprints() {
 		));
 
 		// Verify it was removed
-		let metadata = Delegators::<Test>::get(delegator).unwrap();
+		let metadata = Delegators::<Runtime>::get(delegator).unwrap();
 		assert!(metadata.delegations.iter().all(|d| match d.blueprint_selection {
 			DelegatorBlueprintSelection::Fixed(ref blueprints) => {
 				!blueprints.contains(&blueprint_id)
@@ -728,7 +736,7 @@ fn delegator_can_remove_blueprints() {
 				RuntimeOrigin::signed(delegator),
 				blueprint_id
 			),
-			Error::<Test>::BlueprintIdNotFound
+			Error::<Runtime>::BlueprintIdNotFound
 		);
 	});
 }

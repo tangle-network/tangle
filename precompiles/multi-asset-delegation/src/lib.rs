@@ -266,7 +266,7 @@ where
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
-			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
 			(_other_asset_id, _erc20_token) => {
 				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
 			},
@@ -307,7 +307,7 @@ where
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
-			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
 			(_other_asset_id, _erc20_token) => {
 				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
 			},
@@ -351,7 +351,7 @@ where
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
-			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
 			(_other_asset_id, _erc20_token) => {
 				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
 			},
@@ -396,7 +396,7 @@ where
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
-			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
 			(_other_asset_id, _erc20_token) => {
 				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
 			},
@@ -435,7 +435,7 @@ where
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
-			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
 			(_other_asset_id, _erc20_token) => {
 				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
 			},
@@ -484,7 +484,7 @@ where
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
-			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
 			(_other_asset_id, _erc20_token) => {
 				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
 			},

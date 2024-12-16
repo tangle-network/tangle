@@ -61,6 +61,9 @@ pub use pallet::*;
 mod mock;
 
 #[cfg(test)]
+mod mock_evm;
+
+#[cfg(test)]
 mod tests;
 
 pub mod weights;

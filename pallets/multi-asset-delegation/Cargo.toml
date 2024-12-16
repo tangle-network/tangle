@@ -27,6 +27,52 @@ itertools = { workspace = true, features = ["use_alloc"] }
 serde = { workspace = true, features = ["derive"], optional = true }
 hex = { workspace = true, features = ["alloc"] }
 
+[dev-dependencies]
+ethereum = { workspace = true, features = ["with-codec"] }
+ethers = "2.0"
+num_enum = { workspace = true }
+hex-literal = { workspace = true }
+libsecp256k1 = { workspace = true }
+pallet-assets = { workspace = true }
+pallet-balances = { workspace = true }
+pallet-timestamp = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+smallvec = { workspace = true }
+sp-io = { workspace = true }
+sp-keystore = { workspace = true }
+
+# Frontier Primitive
+fp-account = { workspace = true }
+fp-consensus = { workspace = true }
+fp-dynamic-fee = { workspace = true }
+fp-ethereum = { workspace = true }
+fp-rpc = { workspace = true }
+fp-self-contained = { workspace = true }
+fp-storage = { workspace = true }
+
+# Frontier FRAME
+pallet-base-fee = { workspace = true }
+pallet-dynamic-fee = { workspace = true }
+pallet-ethereum = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-evm-chain-id = { workspace = true }
+
+pallet-evm-precompile-blake2 = { workspace = true }
+pallet-evm-precompile-bn128 = { workspace = true }
+pallet-evm-precompile-curve25519 = { workspace = true }
+pallet-evm-precompile-ed25519 = { workspace = true }
+pallet-evm-precompile-modexp = { workspace = true }
+pallet-evm-precompile-sha3fips = { workspace = true }
+pallet-evm-precompile-simple = { workspace = true }
+
+precompile-utils = { workspace = true }
+sp-keyring ={ workspace = true}
+pallet-session = { workspace = true }
+pallet-staking = { workspace = true }
+sp-staking = { workspace = true }
+frame-election-provider-support = { workspace = true }
+
 [features]
 default = ["std"]
 std = [
@@ -45,6 +91,26 @@ std = [
   "fp-evm/std",
   "serde/std",
   "hex/std",
+
+  "pallet-evm-precompile-modexp/std",
+  "pallet-evm-precompile-sha3fips/std",
+  "pallet-evm-precompile-simple/std",
+  "pallet-evm-precompile-blake2/std",
+  "pallet-evm-precompile-bn128/std",
+  "pallet-evm-precompile-curve25519/std",
+  "pallet-evm-precompile-ed25519/std",
+  "precompile-utils/std",
+  "pallet-staking/std",
+  "fp-account/std",
+  "fp-consensus/std",
+  "fp-dynamic-fee/std",
+  "fp-ethereum/std",
+  "fp-evm/std",
+  "fp-rpc/std",
+  "fp-self-contained/std",
+  "fp-storage/std",
+  "ethabi/std",
+  "sp-keyring/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
