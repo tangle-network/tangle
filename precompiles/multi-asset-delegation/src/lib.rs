@@ -38,17 +38,19 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-use fp_evm::PrecompileHandle;
+use fp_evm::{PrecompileFailure, PrecompileHandle};
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	traits::Currency,
 };
 use pallet_evm::AddressMapping;
 use pallet_multi_asset_delegation::types::DelegatorBlueprintSelection;
+use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
 use sp_runtime::traits::{Dispatchable, TryConvert};
 use sp_std::{marker::PhantomData, vec::Vec};
+use tangle_primitives::services::Asset;
 use tangle_primitives::types::WrappedAccountId32;
 
 type BalanceOf<Runtime> =
@@ -117,9 +119,21 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_multi_asset_delegation::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
+	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u32>,
 	Runtime::AccountId: From<WrappedAccountId32>,
 {
+	// Errors for the `MultiAssetDelegation` precompile.
+
+	/// Found an invalid amount / value.
+	const INVALID_AMOUNT: [u8; 32] = keccak256!("InvalidAmount()");
+	/// Value must be zero for ERC20 payment asset.
+	const VALUE_NOT_ZERO_FOR_ERC20: [u8; 32] = keccak256!("ValueMustBeZeroForERC20()");
+	/// Value must be zero for custom payment asset.
+	const VALUE_NOT_ZERO_FOR_CUSTOM_ASSET: [u8; 32] = keccak256!("ValueMustBeZeroForCustomAsset()");
+	/// Payment asset should be either custom or ERC20.
+	const PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20: [u8; 32] =
+		keccak256!("PaymentAssetShouldBeCustomOrERC20()");
+
 	#[precompile::public("joinOperators(uint256)")]
 	fn join_operators(handle: &mut impl PrecompileHandle, bond_amount: U256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
@@ -243,10 +257,21 @@ where
 	}
 
 	#[precompile::public("deposit(uint256,uint256)")]
-	fn deposit(handle: &mut impl PrecompileHandle, asset_id: U256, amount: U256) -> EvmResult {
+	fn deposit(
+		handle: &mut impl PrecompileHandle,
+		asset_id: U256,
+		token_address: Address,
+		amount: U256,
+	) -> EvmResult {
 		let amount = Self::u256_to_amount(amount)?;
-		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
-			.map_err(|_| revert("error converting to asset id"))?;
+
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
+			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(_other_asset_id, _erc20_token) => {
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
+			},
+		};
 
 		// Get origin account.
 		let msg_sender = handle.context().caller;
@@ -254,7 +279,11 @@ where
 
 		// Build call with origin.
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::deposit { asset_id, amount };
+		let call = pallet_multi_asset_delegation::Call::<Runtime>::deposit {
+			asset_id: deposit_asset,
+			amount,
+			evm_address: Some(msg_sender),
+		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -265,11 +294,10 @@ where
 	fn schedule_withdraw(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
+		token_address: Address,
 		amount: U256,
 	) -> EvmResult {
 		let amount = Self::u256_to_amount(amount)?;
-		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
-			.map_err(|_| revert("error converting to asset id"))?;
 
 		// Get origin account.
 		let msg_sender = handle.context().caller;
@@ -277,8 +305,19 @@ where
 
 		// Build call with origin.
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let call =
-			pallet_multi_asset_delegation::Call::<Runtime>::schedule_withdraw { asset_id, amount };
+
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
+			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(_other_asset_id, _erc20_token) => {
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
+			},
+		};
+
+		let call = pallet_multi_asset_delegation::Call::<Runtime>::schedule_withdraw {
+			asset_id: deposit_asset,
+			amount,
+		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -289,7 +328,9 @@ where
 	fn execute_withdraw(handle: &mut impl PrecompileHandle) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::execute_withdraw {};
+		let call = pallet_multi_asset_delegation::Call::<Runtime>::execute_withdraw {
+			evm_address: Some(handle.context().caller),
+		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -300,20 +341,29 @@ where
 	fn cancel_withdraw(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
+		token_address: Address,
 		amount: U256,
 	) -> EvmResult {
 		let amount = Self::u256_to_amount(amount)?;
-		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
-			.map_err(|_| revert("error converting to asset id"))?;
 
 		// Get origin account.
 		let msg_sender = handle.context().caller;
 		let origin = Runtime::AddressMapping::into_account_id(msg_sender);
 
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
+			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(_other_asset_id, _erc20_token) => {
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
+			},
+		};
+
 		// Build call with origin.
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let call =
-			pallet_multi_asset_delegation::Call::<Runtime>::cancel_withdraw { asset_id, amount };
+		let call = pallet_multi_asset_delegation::Call::<Runtime>::cancel_withdraw {
+			asset_id: deposit_asset,
+			amount,
+		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -325,12 +375,11 @@ where
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
 		asset_id: U256,
+		token_address: Address,
 		amount: U256,
 		blueprint_selection: Vec<u64>,
 	) -> EvmResult {
 		let amount = Self::u256_to_amount(amount)?;
-		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
-			.map_err(|_| revert("error converting to asset id"))?;
 
 		// Get origin account.
 		let msg_sender = handle.context().caller;
@@ -343,11 +392,19 @@ where
 		let blueprint_selection = DelegatorBlueprintSelection::try_from(blueprint_selection)
 			.map_err(|_| revert("error converting blueprint selection"))?;
 
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
+			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(_other_asset_id, _erc20_token) => {
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
+			},
+		};
+
 		// Build call with origin.
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let call = pallet_multi_asset_delegation::Call::<Runtime>::delegate {
 			operator,
-			asset_id,
+			asset_id: deposit_asset,
 			amount,
 			blueprint_selection,
 		};
@@ -362,11 +419,10 @@ where
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
 		asset_id: U256,
+		token_address: Address,
 		amount: U256,
 	) -> EvmResult {
 		let amount = Self::u256_to_amount(amount)?;
-		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
-			.map_err(|_| revert("error converting to asset id"))?;
 
 		// Get origin account.
 		let msg_sender = handle.context().caller;
@@ -375,11 +431,19 @@ where
 		// Parse operator address
 		let operator = Self::convert_to_account_id(operator)?;
 
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
+			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(_other_asset_id, _erc20_token) => {
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
+			},
+		};
+
 		// Build call with origin.
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let call = pallet_multi_asset_delegation::Call::<Runtime>::schedule_delegator_unstake {
 			operator,
-			asset_id,
+			asset_id: deposit_asset,
 			amount,
 		};
 
@@ -404,11 +468,10 @@ where
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
 		asset_id: U256,
+		token_address: Address,
 		amount: U256,
 	) -> EvmResult {
 		let amount = Self::u256_to_amount(amount)?;
-		let asset_id = AssetIdOf::<Runtime>::try_from(asset_id)
-			.map_err(|_| revert("error converting to asset id"))?;
 
 		// Get origin account.
 		let msg_sender = handle.context().caller;
@@ -417,11 +480,19 @@ where
 		// Parse operator address
 		let operator = Self::convert_to_account_id(operator)?;
 
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
+			(other_asset_id, ZERO_ADDRESS) => (Asset::Custom(other_asset_id.into()), amount),
+			(_other_asset_id, _erc20_token) => {
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
+			},
+		};
+
 		// Build call with origin.
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 		let call = pallet_multi_asset_delegation::Call::<Runtime>::cancel_delegator_unstake {
 			operator,
-			asset_id,
+			asset_id: deposit_asset,
 			amount,
 		};
 
@@ -429,4 +500,12 @@ where
 
 		Ok(())
 	}
+}
+
+/// Revert with Custom Error Selector
+fn revert_custom_error(err: [u8; 32]) -> PrecompileFailure {
+	let selector = &err[0..4];
+	let mut output = sp_std::vec![0u8; 32];
+	output[0..4].copy_from_slice(selector);
+	PrecompileFailure::Revert { exit_status: fp_evm::ExitRevert::Reverted, output }
 }

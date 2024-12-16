@@ -1149,6 +1149,15 @@ pub trait EvmGasWeightMapping {
 	fn weight_to_gas(weight: Weight) -> u64;
 }
 
+impl EvmGasWeightMapping for () {
+	fn gas_to_weight(_gas: u64, _without_base_weight: bool) -> Weight {
+		Default::default()
+	}
+	fn weight_to_gas(_weight: Weight) -> u64 {
+		Default::default()
+	}
+}
+
 /// Trait to be implemented for evm address mapping.
 pub trait EvmAddressMapping<A> {
 	/// Convert an address to an account id.

@@ -604,12 +604,11 @@ pub mod pallet {
 		#[pallet::call_index(14)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn delegate(
-			origin: OriginFor<T>,        // 5cxssdfsd
-			operator: T::AccountId,      // xcxcv
-			asset_id: Asset<T::AssetId>, // evm(usdt)
+			origin: OriginFor<T>,
+			operator: T::AccountId,
+			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 			blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
-			//evm_address : Option<H160>, // Some(shady_evm_address)
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_delegate(

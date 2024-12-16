@@ -31,7 +31,6 @@ use sp_runtime::{traits::Get, DispatchResult};
 mod functions;
 mod impls;
 mod rpc;
-pub mod traits;
 pub mod types;
 
 #[cfg(test)]
@@ -48,7 +47,6 @@ pub mod weights;
 
 pub use module::*;
 use tangle_primitives::BlueprintId;
-pub use traits::*;
 pub use weights::WeightInfo;
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -95,14 +93,14 @@ pub mod module {
 
 		/// A type that implements the `EvmRunner` trait for the execution of EVM
 		/// transactions.
-		type EvmRunner: traits::EvmRunner<Self>;
+		type EvmRunner: tangle_primitives::services::EvmRunner<Self>;
 
 		/// A type that implements the `EvmGasWeightMapping` trait for the conversion of EVM gas to
 		/// Substrate weight and vice versa.
-		type EvmGasWeightMapping: traits::EvmGasWeightMapping;
+		type EvmGasWeightMapping: tangle_primitives::services::EvmGasWeightMapping;
 
 		/// A type that implements the `EvmAddressMapping` trait for the conversion of EVM address
-		type EvmAddressMapping: traits::EvmAddressMapping<Self::AccountId>;
+		type EvmAddressMapping: tangle_primitives::services::EvmAddressMapping<Self::AccountId>;
 
 		/// The asset ID type.
 		type AssetId: AtLeast32BitUnsigned
