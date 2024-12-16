@@ -16,7 +16,6 @@
 
 use super::*;
 use sp_runtime::Percent;
-use tangle_primitives::services::Asset;
 
 /// Configuration for rewards associated with a specific asset.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]

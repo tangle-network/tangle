@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::{
-	types::{DelegatorBond, *},
-	Pallet,
-};
+use crate::{types::*, Pallet};
 use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Currency};
-use sp_runtime::{traits::Zero, DispatchError, Saturating};
-use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
+use sp_runtime::DispatchError;
+use sp_std::vec::Vec;
 use tangle_primitives::{services::Asset, RoundIndex};
 
 impl<T: Config> Pallet<T> {

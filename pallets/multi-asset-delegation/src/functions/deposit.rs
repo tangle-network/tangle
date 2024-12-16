@@ -51,7 +51,7 @@ impl<T: Config> Pallet<T> {
 			Asset::Custom(asset_id) => {
 				T::Fungibles::transfer(
 					asset_id,
-					&sender,
+					sender,
 					&Self::pallet_account(),
 					amount,
 					Preservation::Expendable,

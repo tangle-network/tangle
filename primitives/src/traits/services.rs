@@ -1,5 +1,4 @@
 use scale_info::prelude::vec::Vec;
-use sp_core::{H160, U256};
 
 /// A trait to manage and query services and blueprints for operators.
 ///

@@ -20,7 +20,7 @@ use crate::{
 };
 use frame_support::{assert_noop, assert_ok};
 use sp_keyring::AccountKeyring::Bob;
-use sp_keyring::AccountKeyring::{Alice, Eve};
+use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve};
 use sp_runtime::Percent;
 use tangle_primitives::services::Asset;
 
@@ -626,8 +626,8 @@ fn slash_operator_success() {
 		let asset_id = Asset::Custom(1);
 		let blueprint_id = 1;
 
-		create_and_mint_tokens(asset_id, Bob.to_account_id(), delegator_stake);
-		mint_tokens(Bob.to_account_id(), asset_id, Bob.to_account_id(), delegator_stake);
+		create_and_mint_tokens(1, Bob.to_account_id(), delegator_stake);
+		mint_tokens(Bob.to_account_id(), 1, Bob.to_account_id(), delegator_stake);
 
 		// Setup delegator with fixed blueprint selection
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -660,7 +660,7 @@ fn slash_operator_success() {
 
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(Bob.to_account_id()),
-			1,
+			Alice.to_account_id(),
 			asset_id,
 			delegator_stake,
 			Fixed(vec![blueprint_id].try_into().unwrap()),
@@ -679,13 +679,21 @@ fn slash_operator_success() {
 		assert_eq!(operator_info.stake, operator_stake / 2);
 
 		// Verify fixed delegator stake was slashed
-		let delegator_2 = MultiAssetDelegation::delegators(2).unwrap();
-		let delegation_2 = delegator_2.delegations.iter().find(|d| d.operator == 1).unwrap();
+		let delegator_2 = MultiAssetDelegation::delegators(Charlie.to_account_id()).unwrap();
+		let delegation_2 = delegator_2
+			.delegations
+			.iter()
+			.find(|d| d.operator == Alice.to_account_id())
+			.unwrap();
 		assert_eq!(delegation_2.amount, delegator_stake / 2);
 
 		// Verify all-blueprints delegator stake was slashed
-		let delegator_3 = MultiAssetDelegation::delegators(3).unwrap();
-		let delegation_3 = delegator_3.delegations.iter().find(|d| d.operator == 1).unwrap();
+		let delegator_3 = MultiAssetDelegation::delegators(Charlie.to_account_id()).unwrap();
+		let delegation_3 = delegator_3
+			.delegations
+			.iter()
+			.find(|d| d.operator == Alice.to_account_id())
+			.unwrap();
 		assert_eq!(delegation_3.amount, delegator_stake / 2);
 
 		// Verify event
@@ -745,7 +753,7 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 		// Setup delegator with fixed blueprint selection
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(Bob.to_account_id()),
-			1,
+			Asset::Custom(1),
 			5_000
 		));
 
@@ -756,15 +764,20 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(Bob.to_account_id()),
-			1,
-			1,
+			Alice.to_account_id(),
+			Asset::Custom(1),
 			5_000,
 			Fixed(vec![2].try_into().unwrap()),
 		));
 
 		// Try to slash with unselected blueprint
 		assert_noop!(
-			MultiAssetDelegation::slash_delegator(&2, &1, 5, Percent::from_percent(50)),
+			MultiAssetDelegation::slash_delegator(
+				&Bob.to_account_id(),
+				&Alice.to_account_id(),
+				5,
+				Percent::from_percent(50)
+			),
 			Error::<Runtime>::BlueprintNotSelected
 		);
 	});

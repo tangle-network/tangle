@@ -10,7 +10,7 @@ use scale_info::prelude::string::String;
 use sp_core::{H160, U256};
 use sp_runtime::traits::UniqueSaturatedInto;
 use sp_std::{vec, vec::Vec};
-use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
+use tangle_primitives::services::{EvmGasWeightMapping, EvmRunner};
 
 impl<T: Config> Pallet<T> {
 	/// Moves a `value` amount of tokens from the caller's account to `to`.
@@ -59,7 +59,7 @@ impl<T: Config> Pallet<T> {
 		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
 		let success = if let Some(data) = maybe_value {
 			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-			let success = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
 			if let ethabi::Token::Bool(val) = success {
 				*val
 			} else {

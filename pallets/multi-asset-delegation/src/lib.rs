@@ -82,10 +82,7 @@ pub mod pallet {
 	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction, *};
 	use frame_support::{
 		pallet_prelude::*,
-		traits::{
-			fungibles::Inspect, tokens::fungibles, Currency, Get, LockableCurrency,
-			ReservableCurrency,
-		},
+		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;

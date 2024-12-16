@@ -16,14 +16,16 @@
 use super::*;
 use crate::CurrentRound;
 use frame_support::assert_ok;
+use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve};
+use tangle_primitives::services::Asset;
 
 #[test]
 fn handle_round_change_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
-		let asset_id = VDOT;
+		let who = Bob.to_account_id();
+		let operator = Alice.to_account_id();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
 		CurrentRound::<Runtime>::put(1);
@@ -33,7 +35,12 @@ fn handle_round_change_should_work() {
 		create_and_mint_tokens(VDOT, who, amount);
 
 		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who),
+			asset_id,
+			amount,
+			None
+		));
 
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who),
@@ -61,11 +68,11 @@ fn handle_round_change_should_work() {
 fn handle_round_change_with_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let delegator1 = 1;
-		let delegator2 = 2;
-		let operator1 = 3;
-		let operator2 = EVE;
-		let asset_id = VDOT;
+		let delegator1 = Alice.to_account_id();
+		let delegator2 = Bob.to_account_id();
+		let operator1 = Charlie.to_account_id();
+		let operator2 = Dave.to_account_id();
+		let asset_id = Asset::Custom(VDOT);
 		let amount1 = 100;
 		let amount2 = 200;
 		let unstake_amount = 50;
@@ -83,6 +90,7 @@ fn handle_round_change_with_unstake_should_work() {
 			RuntimeOrigin::signed(delegator1),
 			asset_id,
 			amount1,
+			None,
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(delegator1),
@@ -96,6 +104,7 @@ fn handle_round_change_with_unstake_should_work() {
 			RuntimeOrigin::signed(delegator2),
 			asset_id,
 			amount2,
+			None
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(delegator2),
