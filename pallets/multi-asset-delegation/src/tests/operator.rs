@@ -755,7 +755,8 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(Bob.to_account_id()),
 			Asset::Custom(1),
-			5_000
+			5_000,
+			None
 		));
 
 		assert_ok!(MultiAssetDelegation::add_blueprint_id(

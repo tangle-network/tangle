@@ -140,7 +140,7 @@ fn handle_round_change_with_unstake_should_work() {
 		let snapshot2 = MultiAssetDelegation::at_stake(current_round, operator2).unwrap();
 		assert_eq!(snapshot2.stake, 10000);
 		assert_eq!(snapshot2.delegations.len(), 1);
-		assert_eq!(snapshot2.delegations[0].delegator, delegator2);
+		assert_eq!(snapshot2.delegations[0].delegator, delegator2.clone());
 		assert_eq!(snapshot2.delegations[0].amount, amount2);
 		assert_eq!(snapshot2.delegations[0].asset_id, asset_id);
 	});

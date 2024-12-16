@@ -36,7 +36,7 @@ fn delegate_should_work() {
 			10_000
 		));
 
-		create_and_mint_tokens(VDOT, who.into(), amount);
+		create_and_mint_tokens(VDOT, who.clone().into(), amount);
 
 		// Deposit first
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -47,7 +47,7 @@ fn delegate_should_work() {
 		));
 
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who.into()),
+			RuntimeOrigin::signed(who.clone().into()),
 			operator.into(),
 			asset_id,
 			amount,
@@ -55,7 +55,7 @@ fn delegate_should_work() {
 		));
 
 		// Assert
-		let metadata = MultiAssetDelegation::delegators(who).unwrap();
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
 		assert!(metadata.deposits.get(&asset_id).is_none());
 		assert_eq!(metadata.delegations.len(), 1);
 		let delegation = &metadata.delegations[0];
@@ -83,7 +83,7 @@ fn schedule_delegator_unstake_should_work() {
 		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
-		create_and_mint_tokens(VDOT, who.into(), amount);
+		create_and_mint_tokens(VDOT, who.clone().into(), amount);
 
 		assert_ok!(MultiAssetDelegation::join_operators(
 			RuntimeOrigin::signed(operator.into()),
@@ -98,7 +98,7 @@ fn schedule_delegator_unstake_should_work() {
 			None
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who.into()),
+			RuntimeOrigin::signed(who.clone().into()),
 			operator.into(),
 			asset_id,
 			amount,
@@ -106,7 +106,7 @@ fn schedule_delegator_unstake_should_work() {
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
-			RuntimeOrigin::signed(who.into()),
+			RuntimeOrigin::signed(who.clone().into()),
 			operator.into(),
 			asset_id,
 			amount,
