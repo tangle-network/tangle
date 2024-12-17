@@ -24,8 +24,6 @@ members = [
     "pallets/services/rpc",
     "pallets/services/rpc/runtime-api",
     "pallets/tangle-lst/benchmarking",
-    "frost",
-    "frost/frost-*",
     "precompiles/pallet-democracy",
     "precompiles/batch",
     "precompiles/call-permit",
@@ -129,14 +127,12 @@ p256 = { version = "0.13.2", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
 starknet-crypto = { version = "0.7.1", default-features = false, features = ["signature-display", "alloc"] }
 
-frost-core = { path = "frost", default-features = false }
-frost-ed25519 = { path = "frost/frost-ed25519", default-features = false }
-frost-ed448 = { path = "frost/frost-ed448", default-features = false }
-frost-ristretto255 = { path = "frost/frost-ristretto255", default-features = false }
-frost-secp256k1 = { path = "frost/frost-secp256k1", default-features = false }
-frost-p256 = { path = "frost/frost-p256", default-features = false }
-frost-p384 = { path = "frost/frost-p384", default-features = false }
-frost-taproot = { path = "frost/frost-taproot", default-features = false }
+frost-core = { version = "2.0.0", default-features = false }
+frost-ed25519 = { version = "2.0.0", default-features = false }
+frost-ed448 = { version = "2.0.0", default-features = false }
+frost-ristretto255 = { version = "2.0.0", default-features = false }
+frost-secp256k1 = { version = "2.0.0", default-features = false }
+frost-p256 = { version = "2.0.0", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
