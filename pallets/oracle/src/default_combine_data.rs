@@ -1,14 +1,17 @@
 use crate::{Config, MomentOf, TimestampedValueOf};
 use frame_support::traits::{Get, Time};
-use orml_traits::CombineData;
 use sp_runtime::traits::Saturating;
 use sp_std::{marker, prelude::*};
+use tangle_primitives::CombineData;
 
 /// Sort by value and returns median timestamped value.
 /// Returns prev_value if not enough valid values.
-pub struct DefaultCombineData<T, MinimumCount, ExpiresIn, I = ()>(marker::PhantomData<(T, I, MinimumCount, ExpiresIn)>);
+pub struct DefaultCombineData<T, MinimumCount, ExpiresIn, I = ()>(
+	marker::PhantomData<(T, I, MinimumCount, ExpiresIn)>,
+);
 
-impl<T, I, MinimumCount, ExpiresIn> CombineData<<T as Config<I>>::OracleKey, TimestampedValueOf<T, I>>
+impl<T, I, MinimumCount, ExpiresIn>
+	CombineData<<T as Config<I>>::OracleKey, TimestampedValueOf<T, I>>
 	for DefaultCombineData<T, MinimumCount, ExpiresIn, I>
 where
 	T: Config<I>,
@@ -34,7 +37,8 @@ where
 
 		let mid_index = count / 2;
 		// Won't panic as `values` ensured not empty.
-		let (_, value, _) = values.select_nth_unstable_by(mid_index as usize, |a, b| a.value.cmp(&b.value));
+		let (_, value, _) =
+			values.select_nth_unstable_by(mid_index as usize, |a, b| a.value.cmp(&b.value));
 		Some(value.clone())
 	}
 }

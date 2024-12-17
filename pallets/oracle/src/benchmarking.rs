@@ -11,7 +11,9 @@ mod benchmarks {
 	use super::*;
 
 	#[benchmark]
-	fn feed_values(x: Linear<0, { T::BenchmarkHelper::get_currency_id_value_pairs().len() as u32 }>) {
+	fn feed_values(
+		x: Linear<0, { T::BenchmarkHelper::get_currency_id_value_pairs().len() as u32 }>,
+	) {
 		// Register the caller
 		let caller: T::AccountId = whitelisted_caller();
 		T::Members::add(&caller);
