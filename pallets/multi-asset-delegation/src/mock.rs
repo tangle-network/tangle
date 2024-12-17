@@ -52,13 +52,6 @@ pub type Balance = u128;
 type Nonce = u32;
 pub type AssetId = u128;
 
-// AccountIds for tests
-pub const ALICE: u8 = 1;
-pub const BOB: u8 = 2;
-pub const CHARLIE: u8 = 3;
-pub const DAVE: u8 = 4;
-pub const EVE: u8 = 5;
-
 #[frame_support::derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
 	type BaseCallFilter = frame_support::traits::Everything;
@@ -378,27 +371,19 @@ pub fn account_id_to_address(account_id: AccountId) -> H160 {
 	H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
 }
 
-pub fn address_to_account_id(address: H160) -> AccountId {
-	use pallet_evm::AddressMapping;
-	<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
-}
-
-pub fn mock_authorities(vec: Vec<u8>) -> Vec<AccountId> {
-	vec.into_iter().map(|id| mock_pub_key(id)).collect()
-}
+// pub fn address_to_account_id(address: H160) -> AccountId {
+// 	use pallet_evm::AddressMapping;
+// 	<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
+// }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	new_test_ext_raw_authorities()
 }
 
-pub const MBSM: H160 = H160([0x12; 20]);
-pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
-pub const HOOKS_TEST: H160 = H160([0x22; 20]);
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
-
-pub const USDC: AssetId = 1;
-pub const WETH: AssetId = 2;
-pub const WBTC: AssetId = 3;
+// pub const USDC: AssetId = 1;
+// pub const WETH: AssetId = 2;
+// pub const WBTC: AssetId = 3;
 pub const VDOT: AssetId = 4;
 
 // This function basically just builds a genesis storage key/value store according to
@@ -426,24 +411,6 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 		.unwrap();
 
 	let mut evm_accounts = BTreeMap::new();
-
-	let create_contract = |bytecode: &str, address: H160| {
-		let mut raw_hex = bytecode.replace("0x", "").replace("\n", "");
-		// fix odd length
-		if raw_hex.len() % 2 != 0 {
-			raw_hex = format!("0{}", raw_hex);
-		}
-		let code = hex::decode(raw_hex).unwrap();
-		evm_accounts.insert(
-			address,
-			fp_evm::GenesisAccount {
-				code,
-				storage: Default::default(),
-				nonce: Default::default(),
-				balance: Default::default(),
-			},
-		);
-	};
 
 	for i in 1..=authorities.len() {
 		evm_accounts.insert(
@@ -616,61 +583,35 @@ macro_rules! evm_log {
 	};
 }
 
-/// Asserts that the EVM logs are as expected.
-#[track_caller]
-pub fn assert_evm_logs(expected: &[fp_evm::Log]) {
-	assert_evm_events_contains(expected.iter().cloned().collect())
-}
+// /// Asserts that the EVM logs are as expected.
+// #[track_caller]
+// pub fn assert_evm_logs(expected: &[fp_evm::Log]) {
+// 	assert_evm_events_contains(expected.iter().cloned().collect())
+// }
 
-/// Asserts that the EVM events are as expected.
-#[track_caller]
-fn assert_evm_events_contains(expected: Vec<fp_evm::Log>) {
-	let actual: Vec<fp_evm::Log> = System::events()
-		.iter()
-		.filter_map(|e| match e.event {
-			RuntimeEvent::EVM(pallet_evm::Event::Log { ref log }) => Some(log.clone()),
-			_ => None,
-		})
-		.collect();
+// /// Asserts that the EVM events are as expected.
+// #[track_caller]
+// fn assert_evm_events_contains(expected: Vec<fp_evm::Log>) {
+// 	let actual: Vec<fp_evm::Log> = System::events()
+// 		.iter()
+// 		.filter_map(|e| match e.event {
+// 			RuntimeEvent::EVM(pallet_evm::Event::Log { ref log }) => Some(log.clone()),
+// 			_ => None,
+// 		})
+// 		.collect();
 
-	// Check if `expected` is a subset of `actual`
-	let mut any_matcher = false;
-	for evt in expected {
-		if !actual.contains(&evt) {
-			panic!("Events don't match\nactual: {actual:?}\nexpected: {evt:?}");
-		} else {
-			any_matcher = true;
-		}
-	}
+// 	// Check if `expected` is a subset of `actual`
+// 	let mut any_matcher = false;
+// 	for evt in expected {
+// 		if !actual.contains(&evt) {
+// 			panic!("Events don't match\nactual: {actual:?}\nexpected: {evt:?}");
+// 		} else {
+// 			any_matcher = true;
+// 		}
+// 	}
 
-	// At least one event should be present
-	if !any_matcher {
-		panic!("No events found");
-	}
-}
-
-// Checks events against the latest. A contiguous set of events must be
-// provided. They must include the most recent RuntimeEvent, but do not have to include
-// every past RuntimeEvent.
-#[track_caller]
-pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
-	let mut actual: Vec<RuntimeEvent> = System::events()
-		.iter()
-		.filter_map(|e| match e.event {
-			RuntimeEvent::MultiAssetDelegation(_) => Some(e.event.clone()),
-			_ => None,
-		})
-		.collect();
-
-	expected.reverse();
-	for evt in expected {
-		let next = actual.pop().expect("RuntimeEvent expected");
-		match (&next, &evt) {
-			(left_val, right_val) => {
-				if !(*left_val == *right_val) {
-					panic!("Events don't match\nactual: {actual:#?}\nexpected: {evt:#?}");
-				}
-			},
-		};
-	}
-}
+// 	// At least one event should be present
+// 	if !any_matcher {
+// 		panic!("No events found");
+// 	}
+// }

@@ -70,6 +70,36 @@ fn deposit_should_work_for_fungible_asset() {
 }
 
 #[test]
+fn deposit_should_work_for_evm_asset() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who: AccountId = Bob.into();
+		let amount = 200;
+
+		create_and_mint_tokens(VDOT, who.clone(), amount);
+
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.clone()),
+			Asset::Custom(VDOT),
+			amount,
+			None
+		));
+
+		// Assert
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.deposits.get(&Asset::Custom(VDOT),), Some(&amount));
+		assert_eq!(
+			System::events().last().unwrap().event,
+			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
+				who: who.clone(),
+				amount,
+				asset_id: Asset::Custom(VDOT),
+			})
+		);
+	});
+}
+
+#[test]
 fn multiple_deposit_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
